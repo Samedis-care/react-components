@@ -1,51 +1,63 @@
 {
-  "name": "components-care",
-  "version": "0.1.0",
-  "dependencies": {
-    "@testing-library/jest-dom": "^4.2.4",
-    "@testing-library/react": "^9.5.0",
-    "@testing-library/user-event": "^7.2.1",
-    "@types/jest": "^24.9.1",
-    "@types/node": "^12.12.42",
-    "@types/react": "^16.9.35",
-    "@types/react-dom": "^16.9.8",
-    "react": "^16.13.1",
-    "react-dom": "^16.13.1",
-    "react-scripts": "3.4.1",
-    "typescript": "^3.7.5"
-  },
-  "scripts": {
-    "start": "npm run storybook",
-    "build": "tsc",
-    "storybook": "start-storybook -p 9009 -s public",
-    "build-storybook": "build-storybook -s public"
-  },
-  "eslintConfig": {
-    "extends": "react-app"
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  },
-  "devDependencies": {
-    "@babel/cli": "^7.5.5",
-    "@babel/core": "^7.5.5",
-    "@babel/plugin-proposal-class-properties": "^7.5.5",
-    "@babel/preset-env": "^7.5.5",
-    "@babel/preset-react": "^7.0.0",
-    "@babel/preset-typescript": "^7.10.1",
-    "@storybook/addon-actions": "^5.3.19",
-    "@storybook/addon-links": "^5.3.19",
-    "@storybook/addons": "^5.3.19",
-    "@storybook/preset-create-react-app": "^3.0.0",
-    "@storybook/react": "^5.3.19"
-  }
+	"name": "components-care",
+	"version": "0.1.0",
+	"dependencies": {
+		"@testing-library/jest-dom": "^4.2.4",
+		"@testing-library/react": "^9.5.0",
+		"@testing-library/user-event": "^7.2.1",
+		"@types/jest": "^24.9.1",
+		"@types/node": "^12.12.42",
+		"@types/react": "^16.9.35",
+		"@types/react-dom": "^16.9.8",
+		"react": "^16.13.1",
+		"react-dom": "^16.13.1",
+		"react-scripts": "3.4.1",
+		"typescript": "^3.7.5"
+	},
+	"scripts": {
+		"start": "npm run storybook",
+		"build": "tsc",
+		"storybook": "start-storybook -p 9009 -s public",
+		"build-storybook": "build-storybook -s public",
+		"lint": "tslint -c tslint.json 'src/**/*.ts*'",
+		"lint-fix": "tslint -c tslint.json --fix 'src/**/*.ts*'"
+	},
+	"eslintConfig": {
+		"extends": "react-app"
+	},
+	"husky": {
+		"hooks": {
+			"pre-commit": "npm run lint-fix"
+		}
+	},
+	"browserslist": {
+		"production": [
+			">0.2%",
+			"not dead",
+			"not op_mini all"
+		],
+		"development": [
+			"last 1 chrome version",
+			"last 1 firefox version",
+			"last 1 safari version"
+		]
+	},
+	"devDependencies": {
+		"@babel/cli": "^7.5.5",
+		"@babel/core": "^7.5.5",
+		"@babel/plugin-proposal-class-properties": "^7.5.5",
+		"@babel/preset-env": "^7.5.5",
+		"@babel/preset-react": "^7.0.0",
+		"@babel/preset-typescript": "^7.10.1",
+		"@storybook/addon-actions": "^5.3.19",
+		"@storybook/addon-links": "^5.3.19",
+		"@storybook/addons": "^5.3.19",
+		"@storybook/preset-create-react-app": "^3.0.0",
+		"@storybook/react": "^5.3.19",
+		"husky": "^4.2.5",
+		"prettier": "^2.0.5",
+		"tslint": "^6.1.2",
+		"tslint-config-prettier": "^1.18.0",
+		"tslint-plugin-prettier": "^2.3.0"
+	}
 }
