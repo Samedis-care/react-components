@@ -21,6 +21,7 @@ Used Libraries:
 - react-i18n (Provided by the framework to easily create multi-locale applications)
 - react-router-dom (Provided by the framework to enable promatically controllable routing in your React app)
 - Redux (Provided and used by the backend integration for data handling)
+- moment.js (Used for localized time controls)
 
 ## Developer Setup
 
@@ -31,8 +32,17 @@ Used Libraries:
 
 ### Path overview
 
+- `src/standalone`: Standalone components
+- `src/framework`: Framework components
+- `src/non-standalone`: Non-standalone components
+- `src/backend-integration`: Backend-integration components
+- `src/backend`: Backend components
 - `src/stories`: Storybook Stories for previewing library components
-- TODO: Create a directory structure for the 5 types of components mentioned above
+- `src/stories/standalone`: Storybook Stories for standalone components
+- `src/stories/framework`: Storybook Stories for framework components
+- `src/stories/non-standalone`: Storybook Stories for non-standalone components
+- `src/stories/backend-integration`: Storybook Stories for backend-integration components
+- `src/stories/backend`: Storybook Stories for backend components
 
 ### Building the source code
 
