@@ -29,7 +29,7 @@
 	},
 	"husky": {
 		"hooks": {
-			"pre-commit": "npm run lint-fix"
+			"pre-commit": "[ \"$SKIP_PRECOMMITHOOK\" = \"1\" ] || npm run lint-fix && export SKIP_PRECOMMITHOOK=1 && git add src && git commit --amend --no-edit"
 		}
 	},
 	"browserslist": {

@@ -48,12 +48,23 @@ class InfiniteScroll extends Component<IProps, IState> {
 	constructor(props: IProps) {
 		super(props);
 
-		const debounceWait = this.props.callBackDebounce !== undefined ? this.props.callBackDebounce : 100;
+		const debounceWait =
+			this.props.callBackDebounce !== undefined
+				? this.props.callBackDebounce
+				: 100;
 
 		this.state = {
 			initScroll: !this.props.loadMoreTop, // we don't need to set an initial scroll if we don't need up-scrolling
-			loadMoreTop: debounceWait === 0 ? (this.props.loadMoreTop ? _.debounce(this.props.loadMoreTop, debounceWait) : undefined) : this.props.loadMoreTop,
-			loadMoreBottom: debounceWait === 0 ? this.props.loadMoreBottom : _.debounce(this.props.loadMoreBottom, debounceWait)
+			loadMoreTop:
+				debounceWait === 0
+					? this.props.loadMoreTop
+						? _.debounce(this.props.loadMoreTop, debounceWait)
+						: undefined
+					: this.props.loadMoreTop,
+			loadMoreBottom:
+				debounceWait === 0
+					? this.props.loadMoreBottom
+					: _.debounce(this.props.loadMoreBottom, debounceWait),
 		};
 	}
 
@@ -62,7 +73,11 @@ class InfiniteScroll extends Component<IProps, IState> {
 		this.handleResize();
 	}
 
-	componentDidUpdate(prevProps: Readonly<IProps>, prevState: Readonly<IState>, snapshot?: any) {
+	componentDidUpdate(
+		prevProps: Readonly<IProps>,
+		prevState: Readonly<IState>,
+		snapshot?: any
+	) {
 		if (prevProps.children !== this.props.children) {
 			this.handleResize();
 		}
@@ -74,7 +89,7 @@ class InfiniteScroll extends Component<IProps, IState> {
 
 	render() {
 		return (
-			<div className={this.props.className} ref={(ref) => this.wrapper = ref}>
+			<div className={this.props.className} ref={(ref) => (this.wrapper = ref)}>
 				{this.props.children}
 			</div>
 		);
@@ -87,7 +102,7 @@ class InfiniteScroll extends Component<IProps, IState> {
 			if (!this.state.initScroll) {
 				this.wrapper.scrollTop = 24;
 				this.setState({
-					initScroll: true
+					initScroll: true,
 				});
 			}
 		} else {
@@ -101,7 +116,10 @@ class InfiniteScroll extends Component<IProps, IState> {
 		if (this.wrapper.scrollTop === 0 && this.state.loadMoreTop) {
 			this.wrapper.scrollTop = 1;
 			this.state.loadMoreTop();
-		} else if (this.wrapper.scrollTop === this.wrapper.scrollHeight - this.wrapper.clientHeight) {
+		} else if (
+			this.wrapper.scrollTop ===
+			this.wrapper.scrollHeight - this.wrapper.clientHeight
+		) {
 			this.state.loadMoreBottom();
 		}
 	};
