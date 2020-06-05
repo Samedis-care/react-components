@@ -10,9 +10,13 @@
 		"@types/node": "^12.12.42",
 		"@types/react": "^16.9.35",
 		"@types/react-dom": "^16.9.8",
+		"i18next": "^19.4.5",
+		"i18next-resource-store-loader": "^0.1.2",
 		"lodash": "^4.17.15",
+		"moment": "^2.26.0",
 		"react": "^16.13.1",
 		"react-dom": "^16.13.1",
+		"react-i18next": "^11.5.0",
 		"react-scripts": "3.4.1",
 		"typescript": "^3.7.5"
 	},
@@ -29,8 +33,12 @@
 	},
 	"husky": {
 		"hooks": {
-			"pre-commit": "[ \"$SKIP_PRECOMMITHOOK\" = \"1\" ] || npm run lint-fix && export SKIP_PRECOMMITHOOK=1 && git add src && git commit --amend --no-edit"
+			"pre-commit": "lint-staged --allow-empty"
 		}
+	},
+	"lint-staged": {
+		"*.{js,jsx,ts,tsx}": "tslint --fix",
+		"*.{json,md}": "prettier --write"
 	},
 	"browserslist": {
 		"production": [
@@ -59,6 +67,8 @@
 		"@storybook/react": "^5.3.19",
 		"@types/lodash": "^4.14.154",
 		"husky": "^4.2.5",
+		"i18next-browser-languagedetector": "^4.2.0",
+		"lint-staged": "^10.2.8",
 		"prettier": "^2.0.5",
 		"tslint": "^6.1.2",
 		"tslint-config-prettier": "^1.18.0",

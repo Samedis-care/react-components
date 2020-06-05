@@ -5,23 +5,26 @@
 The aim of this project is to provide a solid fundation for developing complex React based web applications.
 
 There are 5 types of components you will find here:
+
 - Standalone Components
-> Standalone Components are designed to run without any further integration of the Components.care framework and can be used as an extension of your existing UI libraries.
+  > Standalone Components are designed to run without any further integration of the Components.care framework and can be used as an extension of your existing UI libraries.
 - Application Framework
-> The Application Framework provides you with a set of pre-configured common libraries to enable you rapid development of new applications
+  > The Application Framework provides you with a set of pre-configured common libraries to enable you rapid development of new applications
 - Non-standalone Components
-> UI Components based off the application framework
+  > UI Components based off the application framework
 - Backend Integration
-> Backend Integration provides automatic data management and a backend communication layer
+  > Backend Integration provides automatic data management and a backend communication layer
 - Backend Components
-> Backend Components are UI components with Backend integration
+  > Backend Components are UI components with Backend integration
 
 Used Libraries:
+
 - Material-UI (Used as base for UI components)
 - react-i18n (Provided by the framework to easily create multi-locale applications)
 - react-router-dom (Provided by the framework to enable promatically controllable routing in your React app)
 - Redux (Provided and used by the backend integration for data handling)
-- moment.js (Used for localized time controls)
+- moment.js (Used for localized date/time related components)
+- react-i18next (Used for pre-shipped translation)
 
 ## Developer Setup
 
@@ -32,6 +35,8 @@ Used Libraries:
 
 ### Path overview
 
+- `src/`: Generic configuration files
+- `src/assets`: Assets bundled by Webpack
 - `src/standalone`: Standalone components
 - `src/framework`: Framework components
 - `src/non-standalone`: Non-standalone components

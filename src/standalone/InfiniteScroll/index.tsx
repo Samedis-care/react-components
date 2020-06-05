@@ -43,7 +43,7 @@ interface IState {
  * Provides infinite scrolling to whatever is inside it
  */
 class InfiniteScroll extends Component<IProps, IState> {
-	private wrapper: HTMLElement | null = null;
+	public wrapper: HTMLElement | null = null;
 
 	constructor(props: IProps) {
 		super(props);
