@@ -5,9 +5,23 @@ import { WithTranslation, withTranslation } from "react-i18next";
 import moment, { Moment } from "moment";
 import { IDayData } from "../Common/DayContents";
 
-interface IProps extends WithTranslation {
+export interface IProps extends WithTranslation {
+	/**
+	 * The moment.js object of a day in the week that should be displayed
+	 */
 	moment: Moment;
+	/**
+	 * Callback which gets called to set the HTML element for today, used for
+	 * jumpToToday
+	 * @param elem The HTML element
+	 */
 	setTodayElement: (elem: HTMLElement | null) => void;
+	/**
+	 * Callback to load more data
+	 * @returns The day contents for this week.
+	 * 			Format: IDayData[weekday starting Monday][n]
+	 */
+	loadData: () => Promise<IDayData[][]>;
 }
 
 interface IState {
@@ -23,6 +37,19 @@ class ScrollableScheduleWeek extends Component<IProps, IState> {
 			data: null,
 			loadError: null,
 		};
+	}
+
+	async componentDidMount() {
+		try {
+			const data = await this.props.loadData();
+			this.setState({
+				data,
+			});
+		} catch (e) {
+			this.setState({
+				loadError: e,
+			});
+		}
 	}
 
 	render() {

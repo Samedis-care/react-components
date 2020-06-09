@@ -4,10 +4,10 @@ import { Button, Grid, WithStyles, withStyles } from "@material-ui/core";
 export interface IDayData {
 	id: string;
 	title: string;
-	onClick: () => void;
+	onClick?: () => void;
 }
 
-interface IProps extends WithStyles {
+export interface IProps extends WithStyles {
 	data: IDayData[];
 }
 

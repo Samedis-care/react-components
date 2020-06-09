@@ -1,7 +1,7 @@
 import React, { Component, ReactNode } from "react";
 import _ from "lodash";
 
-interface IProps {
+export interface IProps {
 	/**
 	 * The children to render
 	 */

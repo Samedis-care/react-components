@@ -3,7 +3,7 @@ import { Grid } from "@material-ui/core";
 import DayContents, { IDayData } from "../Common/DayContents";
 import { Moment } from "moment";
 
-interface IProps {
+export interface IProps {
 	refFwd?: (elem: HTMLElement | null) => void;
 	moment: Moment;
 	data: IDayData[];

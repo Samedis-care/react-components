@@ -1,21 +1,48 @@
 import React, { Component } from "react";
-import {
-	Grid,
-	WithStyles,
-	withStyles,
-	Typography,
-	Box,
-} from "@material-ui/core";
+import { Grid, WithStyles, withStyles, Box, Button } from "@material-ui/core";
 import moment, { Moment } from "moment";
 import ScrollableScheduleWeek from "./ScrollableScheduleWeek";
 import InfiniteScroll from "../../InfiniteScroll";
+import { IDayData } from "../Common/DayContents";
+import i18n from "../../../i18n";
 
-type IProps = WithStyles;
+/**
+ * Callback to load week data from a data source
+ * @param weekOffset The week relative to the current week of year
+ * 					 Example: -1 for last week, 0 for this week, 1 for next week
+ * @returns A promise containing the data for the days of the week, may throw an
+ * 			error. Format: IDayData[weekday starting Monday][n]
+ */
+export type LoadWeekCallback = (weekOffset: number) => Promise<IDayData[][]>;
+
+export interface IProps extends WithStyles {
+	/**
+	 * CSS Class which specifies the infinite scroll height
+	 * requires overflow: 'auto'
+	 */
+	wrapperClass: string;
+	/**
+	 * The callback to load data for a week
+	 */
+	loadWeekCallback: LoadWeekCallback;
+}
 
 interface IState {
+	/**
+	 * Array of ScrollableScheduleWeek components
+	 */
 	items: JSX.Element[];
+	/**
+	 * Infinite scroll top most week offset
+	 */
 	dataOffsetTop: number;
+	/**
+	 * Infinite scroll bottom most week offset
+	 */
 	dataOffsetBottom: number;
+	/**
+	 * Today as moment.js object
+	 */
 	today: Moment;
 }
 
@@ -27,6 +54,14 @@ class ScrollableSchedule extends Component<IProps, IState> {
 		super(props);
 
 		this.state = this.getDefaultState();
+	}
+
+	componentDidMount() {
+		i18n.on("languageChanged", this.onLanguageChanged);
+	}
+
+	componentWillUnmount() {
+		i18n.off("languageChanged", this.onLanguageChanged);
 	}
 
 	getDefaultState = () => ({
@@ -45,13 +80,17 @@ class ScrollableSchedule extends Component<IProps, IState> {
 					className={this.props.classes.today}
 					onClick={this.jumpToToday}
 				>
-					<Box m={2}>
-						<Typography>{this.state.today.format("ddd DD MMMM")}</Typography>
-					</Box>
+					<Button
+						className={this.props.classes.todayBtn}
+						onClick={this.jumpToToday}
+						fullWidth
+					>
+						<Box m={2}>{this.state.today.format("ddd DD MMMM")}</Box>
+					</Button>
 				</Grid>
 				<Grid item xs={12}>
 					<InfiniteScroll
-						className={this.props.classes.wrapper}
+						className={this.props.wrapperClass}
 						loadMoreTop={() => this.loadMore(true)}
 						loadMoreBottom={() => this.loadMore(false)}
 						ref={(elem) => (this.scrollElem = elem)}
@@ -67,11 +106,16 @@ class ScrollableSchedule extends Component<IProps, IState> {
 		);
 	}
 
+	/**
+	 * Loads more data in the infinite scroll
+	 * @param top load more data on top? (if false loads more data at bottom)
+	 */
 	loadMore = (top: boolean) => {
 		const page = top ? this.state.dataOffsetTop : this.state.dataOffsetBottom;
 		const item = (
 			<ScrollableScheduleWeek
 				key={page.toString()}
+				loadData={() => this.props.loadWeekCallback(page)}
 				setTodayElement={(elem: HTMLElement | null) => (this.todayElem = elem)}
 				moment={this.state.today.clone().add(page - 1, "weeks")}
 			/>
@@ -97,15 +141,19 @@ class ScrollableSchedule extends Component<IProps, IState> {
 		this.scrollElem.wrapper.scrollTop =
 			this.todayElem.offsetTop - this.todayElem.clientHeight - 20;
 	};
+
+	onLanguageChanged = () => this.setState(this.getDefaultState());
 }
 
 export default withStyles((theme) => ({
-	wrapper: {
-		height: "100%",
-		overflow: "auto",
-	},
 	today: {
 		backgroundColor: theme.palette.primary.main,
 		color: theme.palette.getContrastText(theme.palette.primary.main),
+	},
+	todayBtn: {
+		textTransform: "none",
+		textAlign: "left",
+		color: "inherit",
+		display: "block",
 	},
 }))(ScrollableSchedule);
