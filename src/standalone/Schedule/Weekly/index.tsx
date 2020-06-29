@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { PureComponent } from "react";
 import Grid from "@material-ui/core/Grid";
 import WeekViewDay from "./WeekViewDay";
 import moment, { Moment } from "moment";
@@ -40,7 +40,7 @@ interface IState {
 	loadError: Error | null;
 }
 
-class WeekView extends Component<IProps, IState> {
+class WeekView extends PureComponent<IProps, IState> {
 	constructor(props: IProps) {
 		super(props);
 

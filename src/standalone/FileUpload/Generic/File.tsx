@@ -23,6 +23,14 @@ export interface IProps {
 	 * The size of the preview
 	 */
 	size: number;
+	/**
+	 * The preview to show instead of the file icon
+	 */
+	preview?: string;
+	/**
+	 * Display grayed-out (marked as deleted)
+	 */
+	disabled: boolean;
 }
 
 const useStyles = makeStyles((theme) => ({
@@ -38,6 +46,9 @@ const useStyles = makeStyles((theme) => ({
 		width: "100%",
 		height: "auto",
 	},
+	iconDisabled: {
+		opacity: 0.5,
+	},
 }));
 
 export default (props: IProps) => {
@@ -45,10 +56,26 @@ export default (props: IProps) => {
 
 	return (
 		<Grid item style={{ width: props.size }}>
-			<Grid container spacing={2} zeroMinWidth>
+			<Grid container spacing={2}>
 				<Grid item xs={12} className={classes.iconContainer}>
-					<CancelIcon className={classes.closeIcon} onClick={props.onRemove} />
-					<FileIcon className={classes.icon} />
+					{props.onRemove && !props.disabled && (
+						<CancelIcon
+							className={classes.closeIcon}
+							onClick={props.onRemove}
+						/>
+					)}
+					{props.preview ? (
+						<img
+							src={props.preview}
+							alt={props.name}
+							className={
+								classes.icon +
+								(props.disabled ? " " + classes.iconDisabled : "")
+							}
+						/>
+					) : (
+						<FileIcon className={classes.icon} />
+					)}
 				</Grid>
 				<Grid item xs={12}>
 					<Typography align={"center"} noWrap>

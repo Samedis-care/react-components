@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { PureComponent } from "react";
 import { CircularProgress, Divider, Grid } from "@material-ui/core";
 import ScrollableScheduleDay from "./ScrollableScheduleDay";
 import { WithTranslation, withTranslation } from "react-i18next";
@@ -29,7 +29,7 @@ interface IState {
 	loadError: Error | null;
 }
 
-class ScrollableScheduleWeek extends Component<IProps, IState> {
+class ScrollableScheduleWeek extends PureComponent<IProps, IState> {
 	constructor(props: IProps) {
 		super(props);
 

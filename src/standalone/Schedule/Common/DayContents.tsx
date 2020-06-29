@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { PureComponent } from "react";
 import { Button, Grid, WithStyles, withStyles } from "@material-ui/core";
 
 export interface IDayData {
@@ -11,7 +11,7 @@ export interface IProps extends WithStyles {
 	data: IDayData[];
 }
 
-class DayContents extends Component<IProps> {
+class DayContents extends PureComponent<IProps> {
 	render() {
 		return (
 			<Grid container spacing={2}>

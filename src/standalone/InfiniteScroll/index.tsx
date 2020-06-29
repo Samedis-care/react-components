@@ -1,4 +1,4 @@
-import React, { Component, ReactNode } from "react";
+import React, { PureComponent, ReactNode } from "react";
 import _ from "lodash";
 
 export interface IProps {
@@ -42,7 +42,7 @@ interface IState {
 /**
  * Provides infinite scrolling to whatever is inside it
  */
-class InfiniteScroll extends Component<IProps, IState> {
+class InfiniteScroll extends PureComponent<IProps, IState> {
 	public wrapper: HTMLElement | null = null;
 
 	constructor(props: IProps) {

@@ -1,14 +1,90 @@
 import React from "react";
 import "../../../i18n";
 import FileUpload from "../../../standalone/FileUpload/Generic";
+import {
+	boolean,
+	files,
+	number,
+	select,
+	withKnobs,
+} from "@storybook/addon-knobs";
+import { action } from "@storybook/addon-actions";
 
 export default {
 	title: "Standalone/FileUpload",
 	component: FileUpload,
+	decorators: [withKnobs],
 };
 
 export const FileUploadStory = () => {
-	return <FileUpload maxFiles={3} previewSize={128} />;
+	const handleErrorAction = action("handleError");
+
+	return (
+		<FileUpload
+			maxFiles={number("Max files", 3, {
+				range: true,
+				min: 1,
+				max: 100,
+				step: 1,
+			})}
+			previewSize={number("Preview size (in px)", 128, {
+				range: true,
+				min: 16,
+				max: 4096,
+				step: 16,
+			})}
+			handleError={handleErrorAction}
+			previewImages={boolean("Preview images", true)}
+			acceptMime={select(
+				"Accepted Filetypes",
+				{
+					Everything: "",
+					Images: "image/*",
+				},
+				""
+			)}
+			convertImagesTo={select(
+				"Convert Images to",
+				{
+					"Don't convert": "",
+					".png": "image/png",
+					".jpg": "image/jpg",
+				},
+				""
+			)}
+			imageDownscaleOptions={
+				boolean("Enable downscaling?", false)
+					? {
+							width: number("Max width", 1920, {
+								range: true,
+								min: 16,
+								max: 4096,
+								step: 16,
+							}),
+							height: number("Max height", 1080, {
+								range: true,
+								min: 16,
+								max: 4096,
+								step: 16,
+							}),
+							keepRatio: boolean("Keep aspect ratio when scaling", true),
+					  }
+					: undefined
+			}
+			files={files("Preset files", "*").map((fileData) => ({
+				file: {
+					name: Math.random().toString(),
+					type: fileData.split(";", 2)[0].split(":")[1],
+					size: fileData.length,
+					lastModified: 0,
+					slice(start?: number, end?: number, contentType?: string): Blob {
+						throw new Error("not implemented");
+					},
+				},
+				preview: fileData,
+			}))}
+		/>
+	);
 };
 
 FileUploadStory.story = {

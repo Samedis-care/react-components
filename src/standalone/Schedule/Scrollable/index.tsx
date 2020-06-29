@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { PureComponent } from "react";
 import { Grid, WithStyles, withStyles, Box, Button } from "@material-ui/core";
 import moment, { Moment } from "moment";
 import ScrollableScheduleWeek from "./ScrollableScheduleWeek";
@@ -46,7 +46,7 @@ interface IState {
 	today: Moment;
 }
 
-class ScrollableSchedule extends Component<IProps, IState> {
+class ScrollableSchedule extends PureComponent<IProps, IState> {
 	public todayElem: HTMLElement | null = null;
 	public scrollElem: InfiniteScroll | null = null;
 

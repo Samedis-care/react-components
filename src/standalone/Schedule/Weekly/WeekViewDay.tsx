@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { PureComponent } from "react";
 import Grid from "@material-ui/core/Grid";
 import Typography from "@material-ui/core/Typography";
 import Divider from "@material-ui/core/Divider";
@@ -23,7 +23,7 @@ export interface IProps extends WithStyles {
 	data: IDayData[];
 }
 
-class WeekViewDay extends Component<IProps> {
+class WeekViewDay extends PureComponent<IProps> {
 	render() {
 		const isToday =
 			this.props.day.dayOfYear() === moment().dayOfYear() &&

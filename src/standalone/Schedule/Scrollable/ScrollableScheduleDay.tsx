@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { PureComponent } from "react";
 import { Grid } from "@material-ui/core";
 import DayContents, { IDayData } from "../Common/DayContents";
 import { Moment } from "moment";
@@ -9,7 +9,7 @@ export interface IProps {
 	data: IDayData[];
 }
 
-class ScrollableScheduleDay extends Component<IProps> {
+class ScrollableScheduleDay extends PureComponent<IProps> {
 	render() {
 		return (
 			<>
