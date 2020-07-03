@@ -2,7 +2,7 @@
 
 ## Installing
 
-> `npm install git://github.com/Components-care/react-components.git#master --save`
+> `npm install "git://github.com/Components-care/react-components.git#master" --save` > `yarn add "git://github.com/Components-care/react-components.git#master"`
 
 ## Overview
 

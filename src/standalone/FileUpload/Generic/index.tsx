@@ -43,7 +43,7 @@ export interface IProps extends WithStyles {
 	/**
 	 * Already selected files (for loading existing data)
 	 */
-	files?: FileData[];
+	files?: FileData<FileMeta>[];
 }
 
 export interface IDownscaleProps {
@@ -61,6 +61,17 @@ export interface IDownscaleProps {
 	keepRatio: boolean;
 }
 
+export interface FileMeta {
+	/**
+	 * The file name
+	 */
+	name: string;
+	/**
+	 * The file mime type
+	 */
+	type: string;
+}
+
 /**
  * On changes to this state also modify shouldComponentUpdate.
  * There is an optimization regarding the dragging handler.
@@ -69,18 +80,18 @@ interface IState {
 	/**
 	 * The uploaded files
 	 */
-	files: FileData[];
+	files: FileData<File | FileMeta>[];
 	/**
 	 * User is currently dragging stuff around?
 	 */
 	dragging: number;
 }
 
-export interface FileData {
+export interface FileData<T> {
 	/**
 	 * The file from the file upload
 	 */
-	file: File;
+	file: T;
 	/**
 	 * The processed image, if present
 	 */
@@ -165,7 +176,7 @@ class FileUpload extends Component<IProps, IState> {
 							alignItems={"flex-start"}
 						>
 							{this.state.files.map(
-								(data: FileData, index) =>
+								(data: FileData<File | FileMeta>, index) =>
 									data && (
 										<FilePreview
 											name={data.file.name}
@@ -244,7 +255,7 @@ class FileUpload extends Component<IProps, IState> {
 			return;
 		}
 
-		const newFiles: FileData[] = [];
+		const newFiles: FileData<File>[] = [];
 		// tslint:disable-next-line:prefer-for-of
 		for (let i = 0; i < files.length; i++) {
 			const file = files[i];
@@ -263,7 +274,7 @@ class FileUpload extends Component<IProps, IState> {
 		}));
 	};
 
-	removeFile = (file: FileData) => {
+	removeFile = (file: FileData<File | FileMeta>) => {
 		if (this.props.files?.includes(file)) {
 			file.disable = true;
 			this.setState((prevState) => ({

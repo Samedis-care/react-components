@@ -75,11 +75,6 @@ export const FileUploadStory = () => {
 				file: {
 					name: Math.random().toString(),
 					type: fileData.split(";", 2)[0].split(":")[1],
-					size: fileData.length,
-					lastModified: 0,
-					slice(start?: number, end?: number, contentType?: string): Blob {
-						throw new Error("not implemented");
-					},
 				},
 				preview: fileData,
 			}))}
