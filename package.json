@@ -1,6 +1,8 @@
 {
 	"name": "components-care",
 	"version": "0.1.0",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
 	"dependencies": {
 		"@material-ui/core": "^4.10.1",
 		"@material-ui/icons": "^4.9.1",
@@ -15,11 +17,13 @@
 		"i18next-resource-store-loader": "^0.1.2",
 		"lodash": "^4.17.15",
 		"moment": "^2.26.0",
-		"react": "^16.13.1",
-		"react-dom": "^16.13.1",
 		"react-i18next": "^11.5.0",
 		"react-scripts": "3.4.1",
 		"typescript": "^3.7.5"
+	},
+	"peerDependencies": {
+		"react": "^16.13.1",
+		"react-dom": "^16.13.1"
 	},
 	"scripts": {
 		"start": "npm run storybook",

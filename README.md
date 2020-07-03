@@ -1,5 +1,9 @@
 # Components.care React
 
+## Installing
+
+> `npm install git://github.com/Components-care/react-components.git#master --save`
+
 ## Overview
 
 The aim of this project is to provide a solid fundation for developing complex React based web applications.
