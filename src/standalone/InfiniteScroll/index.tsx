@@ -1,13 +1,13 @@
-import React, { PureComponent, ReactNode } from "react";
+import React, { PureComponent } from "react";
 import _ from "lodash";
 
 export interface IProps {
 	/**
-	 * The children to render
+	 * The children to render, must not change their size though internal state updates
 	 */
-	children: ReactNode;
+	children: JSX.Element[];
 	/**
-	 * The CSS class to apply
+	 * The CSS class to apply, must set a fixed height value
 	 */
 	className: string;
 	/**
