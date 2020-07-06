@@ -89,11 +89,13 @@ class InfiniteScroll extends PureComponent<IProps, IState> {
 
 	render() {
 		return (
-			<div className={this.props.className} ref={(ref) => (this.wrapper = ref)}>
+			<div className={this.props.className} ref={this.setScrollerRef}>
 				{this.props.children}
 			</div>
 		);
 	}
+
+	setScrollerRef = (ref: HTMLElement | null) => (this.wrapper = ref);
 
 	handleResize = () => {
 		if (!this.wrapper) return;

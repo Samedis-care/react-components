@@ -93,9 +93,9 @@ class ScrollableSchedule extends PureComponent<IProps, IState> {
 						<Grid container spacing={2}>
 							<InfiniteScroll
 								className={this.props.wrapperClass}
-								loadMoreTop={() => this.loadMore(true)}
-								loadMoreBottom={() => this.loadMore(false)}
-								ref={(elem) => (this.scrollElem = elem)}
+								loadMoreTop={this.loadMoreTop}
+								loadMoreBottom={this.loadMoreBottom}
+								ref={this.setScrollElemRef}
 							>
 								{this.state.items}
 							</InfiniteScroll>
@@ -105,6 +105,20 @@ class ScrollableSchedule extends PureComponent<IProps, IState> {
 			</Grid>
 		);
 	}
+
+	/**
+	 * Loads more data on top of the scroller
+	 */
+	loadMoreTop = () => this.loadMore(true);
+	/**
+	 * Loads more data at the bottom of the scroller
+	 */
+	loadMoreBottom = () => this.loadMore(false);
+	/**
+	 * Sets the scroller reference to control scrolling
+	 * @param elem The scroller element
+	 */
+	setScrollElemRef = (elem: InfiniteScroll | null) => (this.scrollElem = elem);
 
 	/**
 	 * Loads more data in the infinite scroll
