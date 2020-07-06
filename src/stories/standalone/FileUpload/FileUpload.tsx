@@ -6,6 +6,7 @@ import {
 	files,
 	number,
 	select,
+	text,
 	withKnobs,
 } from "@storybook/addon-knobs";
 import { action } from "@storybook/addon-actions";
@@ -18,6 +19,23 @@ export default {
 
 export const FileUploadStory = () => {
 	const handleErrorAction = action("handleError");
+	const handleChangeAction = action("onChange");
+	let acceptedType: string = select(
+		"Accepted Filetypes",
+		{
+			Everything: "",
+			Images: "image/*",
+			Custom: "custom",
+		},
+		""
+	);
+	console.log(acceptedType);
+	if (acceptedType === "custom") {
+		acceptedType = text(
+			"Accepted Filetypes (comma-seperated)",
+			".pdf,.docx,.xlsx,.pptx"
+		);
+	}
 
 	return (
 		<FileUpload
@@ -33,16 +51,10 @@ export const FileUploadStory = () => {
 				max: 4096,
 				step: 16,
 			})}
+			onChange={handleChangeAction}
 			handleError={handleErrorAction}
 			previewImages={boolean("Preview images", true)}
-			acceptMime={select(
-				"Accepted Filetypes",
-				{
-					Everything: "",
-					Images: "image/*",
-				},
-				""
-			)}
+			accept={acceptedType}
 			convertImagesTo={select(
 				"Convert Images to",
 				{

@@ -33,7 +33,7 @@ export const Bidirectional = () => {
 	const loadMoreBottomAction = action("load-more-bottom");
 
 	return (
-		<>
+		<Grid container>
 			<InfiniteScroll
 				className={classes.scrollWrapper}
 				loadMoreTop={() => {
@@ -56,9 +56,9 @@ export const Bidirectional = () => {
 				}}
 				callBackDebounce={number("Debounce wait", 100, debounceWaitKnobOptions)}
 			>
-				<Grid container>{items}</Grid>
+				{items}
 			</InfiniteScroll>
-		</>
+		</Grid>
 	);
 };
 

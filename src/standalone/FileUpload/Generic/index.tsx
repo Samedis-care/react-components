@@ -16,9 +16,9 @@ export interface IProps extends WithStyles {
 	 */
 	maxFiles: number;
 	/**
-	 * Filter for allowed mime types (see <input accept="VALUE">)
+	 * Filter for allowed mime types and file extensions (see <input accept="VALUE">)
 	 */
-	acceptMime?: string;
+	accept?: string;
 	/**
 	 * Optional resolution restrictions for images
 	 */
@@ -44,6 +44,11 @@ export interface IProps extends WithStyles {
 	 * Already selected files (for loading existing data)
 	 */
 	files?: FileData<FileMeta>[];
+	/**
+	 * Called on file selection update
+	 * @param files The newly selected files
+	 */
+	onChange?: (files: FileData[]) => void;
 }
 
 export interface IDownscaleProps {
@@ -80,26 +85,31 @@ interface IState {
 	/**
 	 * The uploaded files
 	 */
-	files: FileData<File | FileMeta>[];
+	files: FileData[];
 	/**
 	 * User is currently dragging stuff around?
 	 */
 	dragging: number;
 }
 
-export interface FileData<T> {
+export interface FileData<T = File | FileMeta> {
 	/**
 	 * The file from the file upload
 	 */
 	file: T;
 	/**
-	 * The processed image, if present
+	 * The file can be uploaded? (has it been selected by the user?)
+	 * If canBeUploaded is true T is File, otherwise T is FileMeta
+	 */
+	canBeUploaded?: boolean;
+	/**
+	 * The processed image, if present: should be uploaded instead of file.
 	 */
 	preview?: string;
 	/**
-	 * Set to true to gray out the image, internal field, should be undefined
+	 * Set to true if the file should be deleted from the server, only true if canBeUploaded is true
 	 */
-	disable?: boolean;
+	delete?: boolean;
 }
 
 class FileUpload extends Component<IProps, IState> {
@@ -107,7 +117,11 @@ class FileUpload extends Component<IProps, IState> {
 		super(props);
 
 		this.state = {
-			files: this.props.files || [],
+			files: (this.props.files || []).map((meta) => ({
+				...meta,
+				canBeUploaded: false,
+				delete: false,
+			})),
 			dragging: 0,
 		};
 	}
@@ -176,7 +190,7 @@ class FileUpload extends Component<IProps, IState> {
 							alignItems={"flex-start"}
 						>
 							{this.state.files.map(
-								(data: FileData<File | FileMeta>, index) =>
+								(data: FileData, index) =>
 									data && (
 										<FilePreview
 											name={data.file.name}
@@ -186,7 +200,7 @@ class FileUpload extends Component<IProps, IState> {
 											preview={
 												this.props.previewImages ? data.preview : undefined
 											}
-											disabled={data.disable || false}
+											disabled={data.delete || false}
 											onRemove={() => this.removeFile(data)}
 										/>
 									)
@@ -207,7 +221,7 @@ class FileUpload extends Component<IProps, IState> {
 
 		const elem = document.createElement("input");
 		elem.type = "file";
-		elem.accept = this.props.acceptMime || "";
+		elem.accept = this.props.accept || "";
 		elem.multiple = maxFiles > 1;
 		elem.addEventListener("change", () => this.processFiles(elem.files));
 		elem.click();
@@ -264,28 +278,45 @@ class FileUpload extends Component<IProps, IState> {
 				newFiles.push({
 					file,
 					preview: await this.processImage(file),
+					canBeUploaded: true,
+					delete: false,
 				});
 			} else {
-				newFiles.push({ file });
+				newFiles.push({ file, canBeUploaded: true, delete: false });
 			}
 		}
-		this.setState((prevState) => ({
-			files: [...prevState.files, ...newFiles],
-		}));
+		this.setState(
+			(prevState) => ({
+				files: [...prevState.files, ...newFiles],
+			}),
+			() => {
+				if (this.props.onChange) this.props.onChange(this.state.files);
+			}
+		);
 	};
 
 	removeFile = (file: FileData<File | FileMeta>) => {
 		if (this.props.files?.includes(file)) {
-			file.disable = true;
-			this.setState((prevState) => ({
-				files: [...prevState.files],
-			}));
+			file.delete = true;
+			this.setState(
+				(prevState) => ({
+					files: [...prevState.files],
+				}),
+				() => {
+					if (this.props.onChange) this.props.onChange(this.state.files);
+				}
+			);
 			return;
 		}
 
-		this.setState((prevState) => ({
-			files: prevState.files.filter((f) => f !== file),
-		}));
+		this.setState(
+			(prevState) => ({
+				files: prevState.files.filter((f) => f !== file),
+			}),
+			() => {
+				if (this.props.onChange) this.props.onChange(this.state.files);
+			}
+		);
 	};
 
 	processImage = async (file: File): Promise<string> => {

@@ -89,18 +89,18 @@ class ScrollableSchedule extends PureComponent<IProps, IState> {
 					</Button>
 				</Grid>
 				<Grid item xs={12}>
-					<InfiniteScroll
-						className={this.props.wrapperClass}
-						loadMoreTop={() => this.loadMore(true)}
-						loadMoreBottom={() => this.loadMore(false)}
-						ref={(elem) => (this.scrollElem = elem)}
-					>
-						<Box m={2}>
-							<Grid container spacing={2}>
+					<Box m={2}>
+						<Grid container spacing={2}>
+							<InfiniteScroll
+								className={this.props.wrapperClass}
+								loadMoreTop={() => this.loadMore(true)}
+								loadMoreBottom={() => this.loadMore(false)}
+								ref={(elem) => (this.scrollElem = elem)}
+							>
 								{this.state.items}
-							</Grid>
-						</Box>
-					</InfiniteScroll>
+							</InfiniteScroll>
+						</Grid>
+					</Box>
 				</Grid>
 			</Grid>
 		);

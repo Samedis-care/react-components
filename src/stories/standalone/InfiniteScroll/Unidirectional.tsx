@@ -33,7 +33,7 @@ export const InfiniteScrollSimple = () => {
 	const loadMoreBottomAction = action("load-more-bottom");
 
 	return (
-		<>
+		<Grid container>
 			<InfiniteScroll
 				className={classes.scrollWrapper}
 				loadMoreBottom={() => {
@@ -47,9 +47,9 @@ export const InfiniteScrollSimple = () => {
 				}}
 				callBackDebounce={number("Debounce wait", 100, debounceWaitKnobOptions)}
 			>
-				<Grid container>{items}</Grid>
+				{items}
 			</InfiniteScroll>
-		</>
+		</Grid>
 	);
 };
 
