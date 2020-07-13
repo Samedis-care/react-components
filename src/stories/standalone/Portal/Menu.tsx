@@ -1,5 +1,5 @@
 import React from "react";
-import { List, makeStyles, withStyles } from "@material-ui/core";
+import { List, makeStyles } from "@material-ui/core";
 import "../../../i18n";
 import {
 	JumboReactLightMenuItem,
@@ -9,10 +9,12 @@ import {
 	PortalLayout,
 } from "../../../standalone/Portal";
 import { Domain, Home } from "@material-ui/icons";
+import { select, withKnobs } from "@storybook/addon-knobs";
 
 export default {
 	title: "Standalone/Portal",
 	component: MenuBase,
+	decorators: [withKnobs],
 };
 
 const useStyles = makeStyles({
@@ -52,7 +54,17 @@ const Placeholder = (props: IPlaceHolderProps) => {
 	return <div className={classes[cssClass]}>{cssClass}</div>;
 };
 
-export const PortalLayoutStory = () => {
+export const PortalMenuStory = () => {
+	const variant = select(
+		"Variant",
+		{
+			Material: "Material",
+			JumboLight: "JumboLight",
+			JumboDark: "JumboDark",
+		},
+		"JumboDark"
+	);
+
 	const classes = usePortalStyles();
 
 	return (
@@ -68,7 +80,9 @@ export const PortalLayoutStory = () => {
 				headerContent={<Placeholder cssClass={"header"} />}
 				menuContent={
 					<MenuBase
-						className={classes.menuWrapper}
+						className={
+							variant === "JumboDark" ? classes.menuWrapper : undefined
+						}
 						definition={[
 							{
 								icon: Home,
@@ -106,8 +120,16 @@ export const PortalLayoutStory = () => {
 							},
 						]}
 						wrapper={List}
-						menuItem={JumboReactDarkMenuItem}
-						childWrapperClassName={classes.menuChildrenWrapper}
+						menuItem={
+							variant === "JumboDark"
+								? JumboReactDarkMenuItem
+								: variant === "JumboLight"
+								? JumboReactLightMenuItem
+								: MaterialMenuItem
+						}
+						childWrapperClassName={
+							variant === "JumboDark" ? classes.menuChildrenWrapper : undefined
+						}
 					/>
 				}
 				topLeft={<Placeholder cssClass={"topLeft"} />}
@@ -118,6 +140,6 @@ export const PortalLayoutStory = () => {
 	);
 };
 
-PortalLayoutStory.story = {
+PortalMenuStory.story = {
 	name: "Menu",
 };

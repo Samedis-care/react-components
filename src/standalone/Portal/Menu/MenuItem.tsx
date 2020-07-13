@@ -5,12 +5,7 @@ import React, {
 	useContext,
 	useState,
 } from "react";
-import {
-	IMenuItemDefinition,
-	IMenuItemProps,
-	IMenuProps,
-	MenuItemComponent,
-} from "./index";
+import { IMenuItemDefinition, IMenuItemProps, IMenuProps } from "./index";
 import { Collapse } from "@material-ui/core";
 
 interface IProps extends Omit<IMenuItemProps, "expanded" | "active"> {

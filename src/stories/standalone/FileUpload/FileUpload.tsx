@@ -29,7 +29,6 @@ export const FileUploadStory = () => {
 		},
 		""
 	);
-	console.log(acceptedType);
 	if (acceptedType === "custom") {
 		acceptedType = text(
 			"Accepted Filetypes (comma-seperated)",

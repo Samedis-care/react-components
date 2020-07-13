@@ -3,8 +3,14 @@ import { Menu as MenuIcon } from "@material-ui/icons";
 import React from "react";
 
 interface IProps {
+	/**
+	 * Callback to toggle the menu drawer on mobile view
+	 */
 	toggleMenu: () => void;
-	contents: JSX.Element;
+	/**
+	 * The actual user-specified contents to display
+	 */
+	contents: React.ReactNode;
 }
 
 export default (props: IProps) => {

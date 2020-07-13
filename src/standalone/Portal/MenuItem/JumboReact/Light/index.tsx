@@ -59,6 +59,8 @@ const ExpandableListItem = withStyles(expandableListItemStyles)(ListItem);
 export default (props: IMenuItemProps) => {
 	const classes = useStyles();
 
+	const Icon = props.icon;
+
 	const MyListItem = props.expandable
 		? ExpandableListItem
 		: props.active
@@ -73,7 +75,7 @@ export default (props: IMenuItemProps) => {
 				classes.item + (props.active ? " " + classes.selectedItem : "")
 			}
 		>
-			<ListItemIcon>{props.icon}</ListItemIcon>
+			<ListItemIcon>{Icon && <Icon />}</ListItemIcon>
 			<ListItemText primary={props.title} />
 			{props.expandable ? (
 				props.expanded ? (

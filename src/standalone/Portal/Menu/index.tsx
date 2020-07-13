@@ -31,7 +31,7 @@ export interface IMenuProps {
 	definition: IMenuItemDefinition[];
 	wrapper: React.ElementType<IMenuWrapperProps>;
 	menuItem: MenuItemComponent;
-	className: string;
+	className?: string;
 	childWrapperClassName?: string;
 }
 

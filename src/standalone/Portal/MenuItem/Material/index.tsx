@@ -3,18 +3,21 @@ import { IMenuItemProps } from "../../Menu";
 import { ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
 import { ExpandLess, ExpandMore } from "@material-ui/icons";
 
-export default (props: IMenuItemProps) => (
-	<ListItem button onClick={props.onClick}>
-		<ListItemIcon>{props.icon}</ListItemIcon>
-		<ListItemText primary={props.title} />
-		{props.expandable ? (
-			props.expanded ? (
-				<ExpandLess />
+export default (props: IMenuItemProps) => {
+	const Icon = props.icon;
+	return (
+		<ListItem button onClick={props.onClick} selected={props.active}>
+			<ListItemIcon>{Icon && <Icon />}</ListItemIcon>
+			<ListItemText primary={props.title} />
+			{props.expandable ? (
+				props.expanded ? (
+					<ExpandLess />
+				) : (
+					<ExpandMore />
+				)
 			) : (
-				<ExpandMore />
-			)
-		) : (
-			false
-		)}
-	</ListItem>
-);
+				false
+			)}
+		</ListItem>
+	);
+};

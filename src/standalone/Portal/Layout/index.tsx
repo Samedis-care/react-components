@@ -5,11 +5,33 @@ import { makeStyles } from "@material-ui/core/styles";
 import { Hidden } from "@material-ui/core";
 
 export interface IProps {
-	topLeft: JSX.Element;
-	headerContent: JSX.Element;
-	menuContent: JSX.Element;
-	content: JSX.Element;
+	/**
+	 * Content displayed on the top-left corner of the screen
+	 */
+	topLeft: React.ReactNode;
+	/**
+	 * Content displayed inside the header
+	 */
+	headerContent: React.ReactNode;
+	/**
+	 * Content displayed in the menu area (usually a Menu)
+	 */
+	menuContent: React.ReactNode;
+	/**
+	 * Main content
+	 */
+	content: React.ReactNode;
+	/**
+	 * The width of the menu area
+	 */
 	drawerWidth: number;
+}
+
+interface IRenderProps {
+	/**
+	 * Is mobile view?
+	 */
+	mobile?: boolean;
 }
 
 const useContainerStyles = makeStyles(() => ({
@@ -42,9 +64,12 @@ const useStyles = makeStyles(() => ({
 	main: {
 		gridArea: "main",
 	},
+	mobileTopLeft: {
+		height: 56,
+	},
 }));
 
-const RenderLayout = (props: IProps) => {
+const RenderLayout = (props: IProps & IRenderProps) => {
 	const [menuOpen, setMenuOpen] = useState(false);
 
 	const toggleMenu = useCallback(
@@ -55,7 +80,7 @@ const RenderLayout = (props: IProps) => {
 
 	return (
 		<>
-			<div className={classes.topLeft}>{props.topLeft}</div>
+			{!props.mobile && <div className={classes.topLeft}>{props.topLeft}</div>}
 			<div className={classes.header}>
 				<Header contents={props.headerContent} toggleMenu={toggleMenu} />
 			</div>
@@ -64,7 +89,14 @@ const RenderLayout = (props: IProps) => {
 					menuOpen={menuOpen}
 					drawerWidth={props.drawerWidth}
 					toggleMenu={toggleMenu}
-					items={props.menuContent}
+					items={
+						<>
+							{props.mobile && (
+								<div className={classes.mobileTopLeft}>{props.topLeft}</div>
+							)}
+							{props.menuContent}
+						</>
+					}
 				/>
 			</div>
 			<div className={classes.main}>{props.content}</div>
@@ -84,7 +116,7 @@ export default (props: IProps) => {
 			</Hidden>
 			<Hidden smUp implementation="js">
 				<div className={classes.containerMobile}>
-					<RenderLayout {...props} />
+					<RenderLayout mobile {...props} />
 				</div>
 			</Hidden>
 		</>
