@@ -3,7 +3,7 @@
 import i18n from "i18next";
 import LanguageDetector from "i18next-browser-languagedetector";
 import { initReactI18next } from "react-i18next";
-// @ts-ignore
+// @ts-ignore These are locale files, there is no typescript definition for them
 import resBundle from "i18next-resource-store-loader!./assets/i18n/index.js";
 
 i18n
