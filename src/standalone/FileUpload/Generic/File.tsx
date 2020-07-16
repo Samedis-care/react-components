@@ -1,5 +1,5 @@
 import React from "react";
-import { Grid, Typography } from "@material-ui/core";
+import { Grid, Tooltip, Typography } from "@material-ui/core";
 import {
 	InsertDriveFileOutlined as FileIcon,
 	CancelOutlined as CancelIcon,
@@ -78,9 +78,11 @@ export default React.memo((props: IProps) => {
 					)}
 				</Grid>
 				<Grid item xs={12}>
-					<Typography align={"center"} noWrap>
-						{props.name}
-					</Typography>
+					<Tooltip title={props.name}>
+						<Typography align={"center"} noWrap>
+							{props.name}
+						</Typography>
+					</Tooltip>
 				</Grid>
 			</Grid>
 		</Grid>

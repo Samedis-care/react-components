@@ -63,6 +63,7 @@ export const FileUploadStory = () => {
 				},
 				""
 			)}
+			allowDuplicates={boolean("Allow duplicate files", false)}
 			imageDownscaleOptions={
 				boolean("Enable downscaling?", false)
 					? {

@@ -36,6 +36,10 @@ export interface IProps extends WithStyles {
 	 */
 	previewImages?: boolean;
 	/**
+	 * Should file duplicates be allowed? If not files with the same file name will be replaced
+	 */
+	allowDuplicates?: boolean;
+	/**
 	 * Called if an error occurred. Should provide feedback to the user
 	 * @param err The error that occurred
 	 */
@@ -287,7 +291,18 @@ class FileUpload extends Component<IProps, IState> {
 		}
 		this.setState(
 			(prevState) => ({
-				files: [...prevState.files, ...newFiles],
+				files: this.props.allowDuplicates
+					? [...prevState.files, ...newFiles]
+					: [
+							...prevState.files.filter(
+								// check for file name duplicates and replace
+								(file) =>
+									!newFiles
+										.map((newFile) => newFile.file.name)
+										.includes(file.file.name)
+							),
+							...newFiles,
+					  ],
 			}),
 			() => {
 				if (this.props.onChange) this.props.onChange(this.state.files);
