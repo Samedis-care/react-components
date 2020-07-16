@@ -51,7 +51,7 @@ const useStyles = makeStyles((theme) => ({
 	},
 }));
 
-export default (props: IProps) => {
+export default React.memo((props: IProps) => {
 	const classes = useStyles();
 
 	return (
@@ -85,4 +85,4 @@ export default (props: IProps) => {
 			</Grid>
 		</Grid>
 	);
-};
+});

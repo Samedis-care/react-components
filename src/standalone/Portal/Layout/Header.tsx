@@ -13,7 +13,7 @@ interface IProps {
 	contents: React.ReactNode;
 }
 
-export default (props: IProps) => {
+export default React.memo((props: IProps) => {
 	return (
 		<>
 			<Hidden smUp implementation={"js"}>
@@ -33,4 +33,4 @@ export default (props: IProps) => {
 			</Hidden>
 		</>
 	);
-};
+});

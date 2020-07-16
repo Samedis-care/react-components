@@ -37,7 +37,7 @@ const useStyles = makeStyles({
 	},
 });
 
-export default (props: ILoaderProps) => {
+export default React.memo((props: ILoaderProps) => {
 	const classes = useStyles();
 
 	return (
@@ -52,4 +52,4 @@ export default (props: ILoaderProps) => {
 			</div>
 		</div>
 	);
-};
+});

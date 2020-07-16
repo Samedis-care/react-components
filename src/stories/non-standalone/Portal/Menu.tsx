@@ -8,7 +8,7 @@ import {
 	PortalLayout,
 } from "../../../standalone/Portal";
 import { Domain, Home } from "@material-ui/icons";
-import { select, withKnobs } from "@storybook/addon-knobs";
+import { button, select, withKnobs } from "@storybook/addon-knobs";
 import { RoutedMenu, Framework, FrameworkHistory } from "../../..";
 
 export default {
@@ -66,8 +66,22 @@ export const PortalMenuStory = () => {
 	);
 
 	const classes = usePortalStyles();
-	// @ts-ignore make FrameworkHistory globally accessible. Required for testing
+	// @ts-ignore make FrameworkHistory globally accessible for testing
 	window.FrameworkHistory = FrameworkHistory;
+
+	button("Navigate to Home (/)", () => FrameworkHistory.push("/"));
+	button("Navigate to Admin Item 1 (/admin/1)", () =>
+		FrameworkHistory.push("/admin/1")
+	);
+	button("Navigate to Admin Item 2 (/admin/2)", () =>
+		FrameworkHistory.push("/admin/2")
+	);
+	button("Navigate to Admin Item 3 (/admin/3)", () =>
+		FrameworkHistory.push("/admin/3")
+	);
+	button("Navigate to Admin Item 4 (/admin/4)", () =>
+		FrameworkHistory.push("/admin/4")
+	);
 
 	return (
 		<Framework>
@@ -89,7 +103,7 @@ export const PortalMenuStory = () => {
 							{
 								icon: Home,
 								title: "Home",
-								route: "/home",
+								route: "/",
 								shouldRender: true,
 							},
 							{

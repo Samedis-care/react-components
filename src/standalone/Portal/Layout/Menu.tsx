@@ -20,7 +20,7 @@ const useStyles = makeStyles(() => ({
 	}),
 }));
 
-export default (props: IProps) => {
+export default React.memo((props: IProps) => {
 	const { menuOpen, toggleMenu } = props;
 	const theme = useTheme();
 	const classes = useStyles(props);
@@ -51,4 +51,4 @@ export default (props: IProps) => {
 			</Hidden>
 		</>
 	);
-};
+});

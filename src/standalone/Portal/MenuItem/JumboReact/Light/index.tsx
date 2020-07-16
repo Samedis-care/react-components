@@ -56,7 +56,7 @@ const SelectedListItem = withStyles(selectedListItemStyles)(ListItem);
 const UnselectedListItem = withStyles(unselectedListItemStyles)(ListItem);
 const ExpandableListItem = withStyles(expandableListItemStyles)(ListItem);
 
-export default (props: IMenuItemProps) => {
+export default React.memo((props: IMenuItemProps) => {
 	const classes = useStyles();
 
 	const Icon = props.icon;
@@ -89,4 +89,4 @@ export default (props: IMenuItemProps) => {
 			{props.active && <div className={classes.dot} />}
 		</MyListItem>
 	);
-};
+});

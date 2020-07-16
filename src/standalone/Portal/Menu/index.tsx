@@ -118,7 +118,7 @@ const useStyles = makeStyles({
 	},
 });
 
-export default (props: IMenuProps) => {
+export default React.memo((props: IMenuProps) => {
 	const Wrapper = props.wrapper;
 	const state = useState("");
 	const classes = useStyles();
@@ -134,4 +134,4 @@ export default (props: IMenuProps) => {
 			</Wrapper>
 		</div>
 	);
-};
+});

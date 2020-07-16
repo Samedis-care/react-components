@@ -73,7 +73,12 @@ const resolveLocation = (
 	depth: number
 ): string | null => {
 	for (const def of definitions) {
-		if (def.route && path.startsWith(def.route)) return depth + def.title;
+		if (
+			def.route &&
+			((def.route === "/" && path === "/") ||
+				(def.route !== "/" && path.startsWith(def.route)))
+		)
+			return depth + def.title;
 		if (def.children) {
 			const nextLevel = resolveLocation(def.children, path, depth + 1);
 			if (nextLevel) return nextLevel;
@@ -82,7 +87,7 @@ const resolveLocation = (
 	return null;
 };
 
-export default (props: IRoutedMenuProps) => {
+export default React.memo((props: IRoutedMenuProps) => {
 	const controlledState = useState("");
 	const location = useLocation();
 	const path = location.pathname;
@@ -106,4 +111,4 @@ export default (props: IRoutedMenuProps) => {
 			customState={controlledState}
 		/>
 	);
-};
+});

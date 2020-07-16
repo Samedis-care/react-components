@@ -69,7 +69,7 @@ const useStyles = makeStyles(() => ({
 	},
 }));
 
-const RenderLayout = (props: IProps & IRenderProps) => {
+const RenderLayout = React.memo((props: IProps & IRenderProps) => {
 	const [menuOpen, setMenuOpen] = useState(false);
 
 	const toggleMenu = useCallback(
@@ -102,9 +102,9 @@ const RenderLayout = (props: IProps & IRenderProps) => {
 			<div className={classes.main}>{props.content}</div>
 		</>
 	);
-};
+});
 
-export default (props: IProps) => {
+export default React.memo((props: IProps) => {
 	const classes = useContainerStyles(props);
 
 	return (
@@ -121,4 +121,4 @@ export default (props: IProps) => {
 			</Hidden>
 		</>
 	);
-};
+});
