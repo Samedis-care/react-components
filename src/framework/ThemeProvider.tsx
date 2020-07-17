@@ -42,9 +42,12 @@ export default React.memo((props: IThemeProviderProps) => {
 			props.defaultTheme(matchMedia("(prefers-color-scheme: dark)").matches)
 		)
 	);
-	const setNewTheme = useCallback<SetThemeAction>((newTheme: ThemeOptions) => {
-		setTheme(createMuiTheme(newTheme));
-	}, []);
+	const setNewTheme = useCallback<SetThemeAction>(
+		(newTheme: ThemeOptions) => {
+			setTheme(createMuiTheme(newTheme));
+		},
+		[setTheme]
+	);
 
 	return (
 		<ThemeContext.Provider value={setNewTheme}>
