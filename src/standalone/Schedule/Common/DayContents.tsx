@@ -1,5 +1,11 @@
 import React, { PureComponent } from "react";
-import { Button, Grid, WithStyles, withStyles } from "@material-ui/core";
+import {
+	Button,
+	createStyles,
+	Grid,
+	WithStyles,
+	withStyles,
+} from "@material-ui/core";
 
 export interface IDayData {
 	id: string;
@@ -33,11 +39,13 @@ class DayContents extends PureComponent<IProps> {
 	}
 }
 
-export default withStyles(() => ({
+const styles = createStyles({
 	btn: {
 		textTransform: "none",
 		textAlign: "left",
 		color: "inherit",
 		display: "block",
 	},
-}))(DayContents);
+});
+
+export default withStyles(styles)(DayContents);

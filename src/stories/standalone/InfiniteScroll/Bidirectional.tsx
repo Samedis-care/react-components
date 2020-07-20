@@ -39,7 +39,7 @@ export const Bidirectional = () => {
 				loadMoreTop={() => {
 					loadMoreTopAction();
 					setItems((prevItems) => [
-						<Grid item xs={12}>
+						<Grid item xs={12} key={Math.random()}>
 							{prevItems.length}
 						</Grid>,
 						...prevItems,
@@ -49,7 +49,7 @@ export const Bidirectional = () => {
 					loadMoreBottomAction();
 					setItems((prevItems) => [
 						...prevItems,
-						<Grid item xs={12}>
+						<Grid item xs={12} key={Math.random()}>
 							{prevItems.length}
 						</Grid>,
 					]);

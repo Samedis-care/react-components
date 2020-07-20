@@ -3,9 +3,11 @@ import _ from "lodash";
 
 export interface IProps {
 	/**
-	 * The children to render, must not change their size though internal state updates
+	 * The children to render, must not change their size though internal state updates.
+	 * Should update if loadMoreTop or loadMoreBottom is called.
+	 * This means the component which manages state needs to be a parent of the infinite scroll component
 	 */
-	children: JSX.Element[];
+	children: React.ReactNode;
 	/**
 	 * The CSS class to apply, must set a fixed height value
 	 */

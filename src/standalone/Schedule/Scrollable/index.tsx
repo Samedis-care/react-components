@@ -1,5 +1,13 @@
 import React, { PureComponent } from "react";
-import { Grid, WithStyles, withStyles, Box, Button } from "@material-ui/core";
+import {
+	Grid,
+	WithStyles,
+	withStyles,
+	Box,
+	Button,
+	Theme,
+	createStyles,
+} from "@material-ui/core";
 import moment, { Moment } from "moment";
 import ScrollableScheduleWeek from "./ScrollableScheduleWeek";
 import InfiniteScroll from "../../InfiniteScroll";
@@ -89,18 +97,18 @@ class ScrollableSchedule extends PureComponent<IProps, IState> {
 					</Button>
 				</Grid>
 				<Grid item xs={12}>
-					<Box m={2}>
-						<Grid container spacing={2}>
-							<InfiniteScroll
-								className={this.props.wrapperClass}
-								loadMoreTop={this.loadMoreTop}
-								loadMoreBottom={this.loadMoreBottom}
-								ref={this.setScrollElemRef}
-							>
+					<InfiniteScroll
+						className={`${this.props.wrapperClass} ${this.props.classes.scroller}`}
+						loadMoreTop={this.loadMoreTop}
+						loadMoreBottom={this.loadMoreBottom}
+						ref={this.setScrollElemRef}
+					>
+						<Box m={2}>
+							<Grid container spacing={2}>
 								{this.state.items}
-							</InfiniteScroll>
-						</Grid>
-					</Box>
+							</Grid>
+						</Box>
+					</InfiniteScroll>
 				</Grid>
 			</Grid>
 		);
@@ -159,7 +167,7 @@ class ScrollableSchedule extends PureComponent<IProps, IState> {
 	onLanguageChanged = () => this.setState(this.getDefaultState());
 }
 
-export default withStyles((theme) => ({
+const styles = createStyles((theme: Theme) => ({
 	today: {
 		backgroundColor: theme.palette.primary.main,
 		color: theme.palette.getContrastText(theme.palette.primary.main),
@@ -170,4 +178,9 @@ export default withStyles((theme) => ({
 		color: "inherit",
 		display: "block",
 	},
-}))(ScrollableSchedule);
+	scroller: {
+		overflow: "auto",
+	},
+}));
+
+export default withStyles(styles)(ScrollableSchedule);

@@ -1,10 +1,11 @@
 import React from "react";
 import { Loader } from "../../../standalone";
-import { text } from "@storybook/addon-knobs";
+import { text, withKnobs } from "@storybook/addon-knobs";
 
 export default {
 	title: "Standalone/Loader",
 	component: Loader,
+	decorators: [withKnobs],
 };
 
 export const LoaderStory = () => {
