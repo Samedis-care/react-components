@@ -2,10 +2,12 @@ import React from "react";
 import { makeStyles } from "@material-ui/core";
 import "../../../i18n";
 import { PortalLayout } from "../../../standalone/Portal";
+import { boolean, number, withKnobs } from "@storybook/addon-knobs";
 
 export default {
 	title: "Standalone/Portal",
 	component: PortalLayout,
+	decorators: [withKnobs],
 };
 
 const useStyles = makeStyles({
@@ -57,7 +59,8 @@ export const PortalLayoutStory = () => {
 				headerContent={<Placeholder cssClass={"header"} />}
 				menuContent={<Placeholder cssClass={"menu"} />}
 				content={<Placeholder cssClass={"content"} />}
-				drawerWidth={320}
+				drawerWidth={number("Menu width", 320)}
+				collapseMenu={boolean("Collapse menu", false)}
 			/>
 		</>
 	);

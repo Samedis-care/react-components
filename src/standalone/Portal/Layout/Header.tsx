@@ -8,29 +8,32 @@ interface IProps {
 	 */
 	toggleMenu: () => void;
 	/**
+	 * Show mobile view?
+	 */
+	mobile: boolean;
+	/**
 	 * The actual user-specified contents to display
 	 */
 	contents: React.ReactNode;
 }
 
 export default React.memo((props: IProps) => {
-	return (
-		<>
-			<Hidden smUp implementation={"js"}>
-				<AppBar position={"relative"}>
-					<Toolbar>
-						<IconButton onClick={props.toggleMenu}>
-							<MenuIcon />
-						</IconButton>
-						{props.contents}
-					</Toolbar>
-				</AppBar>
-			</Hidden>
-			<Hidden xsDown implementation={"js"}>
-				<AppBar position={"relative"}>
-					<Toolbar>{props.contents}</Toolbar>
-				</AppBar>
-			</Hidden>
-		</>
-	);
+	if (props.mobile) {
+		return (
+			<AppBar position={"relative"}>
+				<Toolbar>
+					<IconButton onClick={props.toggleMenu}>
+						<MenuIcon />
+					</IconButton>
+					{props.contents}
+				</Toolbar>
+			</AppBar>
+		);
+	} else {
+		return (
+			<AppBar position={"relative"}>
+				<Toolbar>{props.contents}</Toolbar>
+			</AppBar>
+		);
+	}
 });

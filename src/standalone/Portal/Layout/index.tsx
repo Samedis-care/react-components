@@ -25,13 +25,17 @@ export interface IProps {
 	 * The width of the menu area
 	 */
 	drawerWidth: number;
+	/**
+	 * Should we collapse the menu? (forces mobile view)
+	 */
+	collapseMenu?: boolean;
 }
 
 interface IRenderProps {
 	/**
 	 * Is mobile view?
 	 */
-	mobile?: boolean;
+	mobile: boolean;
 }
 
 const useContainerStyles = makeStyles(() => ({
@@ -82,13 +86,18 @@ const RenderLayout = React.memo((props: IProps & IRenderProps) => {
 		<>
 			{!props.mobile && <div className={classes.topLeft}>{props.topLeft}</div>}
 			<div className={classes.header}>
-				<Header contents={props.headerContent} toggleMenu={toggleMenu} />
+				<Header
+					contents={props.headerContent}
+					toggleMenu={toggleMenu}
+					mobile={props.mobile}
+				/>
 			</div>
 			<div className={classes.menu}>
 				<Menu
 					menuOpen={menuOpen}
 					drawerWidth={props.drawerWidth}
 					toggleMenu={toggleMenu}
+					mobile={props.mobile}
 					items={
 						<>
 							{props.mobile && (
@@ -110,13 +119,19 @@ export default React.memo((props: IProps) => {
 	return (
 		<>
 			<Hidden xsDown implementation="js">
-				<div className={classes.containerDesktop}>
-					<RenderLayout {...props} />
+				<div
+					className={
+						props.collapseMenu
+							? classes.containerMobile
+							: classes.containerDesktop
+					}
+				>
+					<RenderLayout mobile={!!props.collapseMenu} {...props} />
 				</div>
 			</Hidden>
 			<Hidden smUp implementation="js">
 				<div className={classes.containerMobile}>
-					<RenderLayout mobile {...props} />
+					<RenderLayout mobile={true} {...props} />
 				</div>
 			</Hidden>
 		</>

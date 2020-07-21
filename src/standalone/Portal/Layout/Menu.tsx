@@ -3,10 +3,26 @@ import React, { useMemo } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 
 interface IProps {
+	/**
+	 * Is the menu open? (if non-permanent)
+	 */
 	menuOpen: boolean;
+	/**
+	 * Is mobile view?
+	 */
+	mobile: boolean;
+	/**
+	 * The width of the menu
+	 */
 	drawerWidth: number;
+	/**
+	 * Callback to toggle the menu open/closed
+	 */
 	toggleMenu: () => void;
-	items: JSX.Element;
+	/**
+	 * The menu items
+	 */
+	items: React.ReactNode;
 }
 
 const modalProps = {
@@ -32,23 +48,20 @@ export default React.memo((props: IProps) => {
 		[classes.menuPaper]
 	);
 
-	return (
-		<>
-			<Hidden smUp implementation={"js"}>
-				<Drawer
-					variant={"temporary"}
-					anchor={theme.direction === "rtl" ? "right" : "left"}
-					open={menuOpen}
-					onClose={toggleMenu}
-					PaperProps={paperProps}
-					ModalProps={modalProps}
-				>
-					{props.items}
-				</Drawer>
-			</Hidden>
-			<Hidden xsDown implementation={"js"}>
-				<Paper {...paperProps}>{props.items}</Paper>
-			</Hidden>
-		</>
-	);
+	if (!props.mobile) {
+		return <Paper {...paperProps}>{props.items}</Paper>;
+	} else {
+		return (
+			<Drawer
+				variant={"temporary"}
+				anchor={theme.direction === "rtl" ? "right" : "left"}
+				open={menuOpen}
+				onClose={toggleMenu}
+				PaperProps={paperProps}
+				ModalProps={modalProps}
+			>
+				{props.items}
+			</Drawer>
+		);
+	}
 });
