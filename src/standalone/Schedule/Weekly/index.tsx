@@ -11,12 +11,11 @@ import {
 } from "@material-ui/core";
 import Button from "@material-ui/core/Button";
 import Typography from "@material-ui/core/Typography";
-import { WithTranslation, withTranslation } from "react-i18next";
 import i18n from "../../../i18n";
 import { IDayData } from "../Common/DayContents";
 import { ArrowForwardIos, ArrowBackIos } from "@material-ui/icons";
 
-export interface IProps extends WithStyles, WithTranslation {
+export interface IProps extends WithStyles {
 	/**
 	 * Callback to load data of this week
 	 * @param weekOffset
@@ -73,7 +72,7 @@ class WeekView extends PureComponent<IProps, IState> {
 			<Grid container alignItems={"stretch"} alignContent={"space-between"}>
 				<Grid item xs={4}>
 					<Button onClick={this.today} className={this.props.classes.todayBtn}>
-						{this.props.t("standalone.schedule.today")} (
+						{i18n.t("standalone.schedule.today")} (
 						{now.toDate().toLocaleDateString()})
 					</Button>
 				</Grid>
@@ -82,7 +81,7 @@ class WeekView extends PureComponent<IProps, IState> {
 						<IconButton onClick={this.prevWeek}>
 							<ArrowBackIos />
 						</IconButton>
-						{this.props.t("standalone.schedule.week")}{" "}
+						{i18n.t("standalone.schedule.week")}{" "}
 						{now.week() + this.state.weekOffset}
 						<IconButton onClick={this.nextWeek}>
 							<ArrowForwardIos />
@@ -187,4 +186,4 @@ const styles = createStyles({
 	},
 });
 
-export default withStyles(styles)(withTranslation()(WeekView));
+export default withStyles(styles)(WeekView);

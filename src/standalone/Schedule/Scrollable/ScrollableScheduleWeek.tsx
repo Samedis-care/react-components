@@ -1,11 +1,11 @@
 import React, { PureComponent } from "react";
 import { CircularProgress, Divider, Grid } from "@material-ui/core";
 import ScrollableScheduleDay from "./ScrollableScheduleDay";
-import { WithTranslation, withTranslation } from "react-i18next";
+import i18n from "../../../i18n";
 import moment, { Moment } from "moment";
 import { IDayData } from "../Common/DayContents";
 
-export interface IProps extends WithTranslation {
+export interface IProps {
 	/**
 	 * The moment.js object of a day in the week that should be displayed
 	 */
@@ -110,7 +110,7 @@ class ScrollableScheduleWeek extends PureComponent<IProps, IState> {
 				</Grid>
 				<Grid item xs={1} />
 				<Grid item xs={11}>
-					{this.props.t("standalone.schedule.week")} {firstDay.week()},{" "}
+					{i18n.t("standalone.schedule.week")} {firstDay.week()},{" "}
 					{firstDay.format("DD MMM")} - {endOfWeek.format("DD MMM")}
 				</Grid>
 				{dayItems}
@@ -119,4 +119,4 @@ class ScrollableScheduleWeek extends PureComponent<IProps, IState> {
 	}
 }
 
-export default withTranslation()(ScrollableScheduleWeek);
+export default ScrollableScheduleWeek;

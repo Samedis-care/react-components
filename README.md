@@ -1,4 +1,4 @@
-# Components.care React
+1# Components.care React
 
 ## Installing
 
@@ -24,11 +24,10 @@ There are 5 types of components you will find here:
 Used Libraries:
 
 - Material-UI (Used as base for UI components)
-- react-i18n (Provided by the framework to easily create multi-locale applications)
-- react-router-dom (Provided by the framework to enable promatically controllable routing in your React app)
+- i18n (Used to provide pre-translated components)
+- react-router-dom (Provided by the framework to enable programmatically controllable routing in your React app)
 - Redux (Provided and used by the backend integration for data handling)
 - moment.js (Used for localized date/time related components)
-- react-i18next (Used for pre-shipped translation)
 
 ## Developer Setup
 

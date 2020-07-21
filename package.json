@@ -15,9 +15,9 @@
 		"@types/react-dom": "^16.9.8",
 		"i18next": "^19.6.0",
 		"i18next-resource-store-loader": "^0.1.2",
+		"i18next-browser-languagedetector": "^4.3.1",
 		"lodash": "^4.17.19",
 		"moment": "^2.27.0",
-		"react-i18next": "^11.7.0",
 		"react-router-dom": "^5.2.0",
 		"react-scripts": "3.4.1",
 		"typescript": "^3.9.6"
@@ -75,7 +75,6 @@
 		"@types/lodash": "^4.14.157",
 		"@types/react-router-dom": "^5.1.5",
 		"husky": "^4.2.5",
-		"i18next-browser-languagedetector": "^4.3.1",
 		"lint-staged": "^10.2.11",
 		"prettier": "^2.0.5",
 		"tslint": "^6.1.2",
