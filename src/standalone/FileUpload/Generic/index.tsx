@@ -1,7 +1,9 @@
 import React, { Component } from "react";
 import {
 	Button,
+	createStyles,
 	Grid,
+	Theme,
 	Typography,
 	WithStyles,
 	withStyles,
@@ -392,8 +394,10 @@ class FileUpload extends Component<IProps, IState> {
 	};
 }
 
-export default withStyles((theme) => ({
+const styles = createStyles((theme: Theme) => ({
 	dropzone: {
 		border: `2px solid ${theme.palette.primary.main}`,
 	},
-}))(FileUpload);
+}));
+
+export default withStyles(styles)(FileUpload);

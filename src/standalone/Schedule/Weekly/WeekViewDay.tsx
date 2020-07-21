@@ -3,7 +3,7 @@ import Grid from "@material-ui/core/Grid";
 import Typography from "@material-ui/core/Typography";
 import Divider from "@material-ui/core/Divider";
 import DayContents, { IDayData } from "../Common/DayContents";
-import { WithStyles, withStyles } from "@material-ui/core";
+import { createStyles, Theme, WithStyles, withStyles } from "@material-ui/core";
 import Paper from "@material-ui/core/Paper";
 import Box from "@material-ui/core/Box";
 import moment, { Moment } from "moment";
@@ -61,7 +61,7 @@ class WeekViewDay extends PureComponent<IProps> {
 	}
 }
 
-export default withStyles((theme) => ({
+const styles = createStyles((theme: Theme) => ({
 	paper: {
 		height: "100%",
 	},
@@ -70,4 +70,6 @@ export default withStyles((theme) => ({
 		backgroundColor: theme.palette.primary.main,
 		color: theme.palette.getContrastText(theme.palette.primary.main),
 	},
-}))(WeekViewDay);
+}));
+
+export default withStyles(styles)(WeekViewDay);

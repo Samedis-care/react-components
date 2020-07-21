@@ -4,6 +4,7 @@ import WeekViewDay from "./WeekViewDay";
 import moment, { Moment } from "moment";
 import {
 	CircularProgress,
+	createStyles,
 	IconButton,
 	WithStyles,
 	withStyles,
@@ -180,8 +181,10 @@ class WeekView extends PureComponent<IProps, IState> {
 	};
 }
 
-export default withStyles((_theme) => ({
+const styles = createStyles({
 	todayBtn: {
 		height: "100%",
 	},
-}))(withTranslation()(WeekView));
+});
+
+export default withStyles(styles)(withTranslation()(WeekView));

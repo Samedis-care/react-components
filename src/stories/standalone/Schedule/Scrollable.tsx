@@ -13,8 +13,6 @@ const useStyles = makeStyles(() => ({
 	scrollWrapper: {
 		height: "50vh",
 		width: "100%",
-		overflow: "auto",
-		border: "1px solid red",
 	},
 }));
 
