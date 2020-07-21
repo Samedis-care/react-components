@@ -26,7 +26,6 @@ export type LoadWeekCallback = (weekOffset: number) => Promise<IDayData[][]>;
 export interface IProps extends WithStyles {
 	/**
 	 * CSS Class which specifies the infinite scroll height
-	 * requires overflow: 'auto'
 	 */
 	wrapperClass: string;
 	/**
