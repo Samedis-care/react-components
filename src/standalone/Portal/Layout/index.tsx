@@ -1,4 +1,10 @@
-import React, { useCallback, useState } from "react";
+import React, {
+	createContext,
+	Dispatch,
+	SetStateAction,
+	useCallback,
+	useState,
+} from "react";
 import Header from "./Header";
 import Menu from "./Menu";
 import { makeStyles } from "@material-ui/core/styles";
@@ -73,8 +79,13 @@ const useStyles = makeStyles(() => ({
 	},
 }));
 
+export const PortalLayoutMenuContext = createContext<
+	[boolean, Dispatch<SetStateAction<boolean>>] | undefined
+>(undefined);
+
 const RenderLayout = React.memo((props: IProps & IRenderProps) => {
-	const [menuOpen, setMenuOpen] = useState(false);
+	const menuState = useState(false);
+	const [menuOpen, setMenuOpen] = menuState;
 
 	const toggleMenu = useCallback(
 		() => setMenuOpen((prevState) => !prevState),
@@ -83,7 +94,7 @@ const RenderLayout = React.memo((props: IProps & IRenderProps) => {
 	const classes = useStyles(props);
 
 	return (
-		<>
+		<PortalLayoutMenuContext.Provider value={menuState}>
 			{!props.mobile && <div className={classes.topLeft}>{props.topLeft}</div>}
 			<div className={classes.header}>
 				<Header
@@ -109,7 +120,7 @@ const RenderLayout = React.memo((props: IProps & IRenderProps) => {
 				/>
 			</div>
 			<div className={classes.main}>{props.content}</div>
-		</>
+		</PortalLayoutMenuContext.Provider>
 	);
 });
 

@@ -40,7 +40,7 @@ const selectedListItemStyles = (theme: Theme) => ({
 		},
 	},
 });
-const unselectedListItemStyles = (theme: Theme) => ({
+const unselectedListItemStyles = {
 	root: {
 		color: "#a1a1a1",
 	},
@@ -50,7 +50,7 @@ const unselectedListItemStyles = (theme: Theme) => ({
 			backgroundColor: "#1d1d1d",
 		},
 	},
-});
+};
 const expandableListItemStyles = {
 	root: {
 		color: "#a1a1a1",
