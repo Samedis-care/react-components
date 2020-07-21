@@ -12,7 +12,6 @@
 		"resolveJsonModule": true,
 		"isolatedModules": true,
 		"declaration": true,
-		"allowJs": true,
 		"jsx": "react",
 		"outDir": "dist",
 		"rootDir": "src"
