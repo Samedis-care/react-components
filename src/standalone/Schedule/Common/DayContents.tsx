@@ -8,9 +8,22 @@ import {
 } from "@material-ui/core";
 
 export interface IDayData {
+	/**
+	 * Unique identifier
+	 */
 	id: string;
+	/**
+	 * The text/title to display
+	 */
 	title: string;
+	/**
+	 * Optional left click handler
+	 */
 	onClick?: () => void;
+	/**
+	 * Optional middle click handler
+	 */
+	onAuxClick?: () => void;
 }
 
 export interface IProps extends WithStyles {
@@ -29,6 +42,8 @@ class DayContents extends PureComponent<IProps> {
 							fullWidth
 							className={this.props.classes.btn}
 							onClick={entry.onClick}
+							onAuxClick={entry.onAuxClick}
+							disabled={!entry.onClick && !entry.onAuxClick}
 						>
 							{entry.title}
 						</Button>
