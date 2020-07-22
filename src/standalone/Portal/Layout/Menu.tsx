@@ -1,4 +1,4 @@
-import { Drawer, Hidden, Paper, useTheme } from "@material-ui/core";
+import { Drawer, Paper, useTheme } from "@material-ui/core";
 import React, { useMemo } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 

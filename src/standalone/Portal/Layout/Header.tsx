@@ -1,4 +1,4 @@
-import { AppBar, Hidden, IconButton, Toolbar } from "@material-ui/core";
+import { AppBar, IconButton, Toolbar } from "@material-ui/core";
 import { Menu as MenuIcon } from "@material-ui/icons";
 import React from "react";
 

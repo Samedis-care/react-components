@@ -87,10 +87,9 @@ const RenderLayout = React.memo((props: IProps & IRenderProps) => {
 	const menuState = useState(false);
 	const [menuOpen, setMenuOpen] = menuState;
 
-	const toggleMenu = useCallback(
-		() => setMenuOpen((prevState) => !prevState),
-		[]
-	);
+	const toggleMenu = useCallback(() => setMenuOpen((prevState) => !prevState), [
+		setMenuOpen,
+	]);
 	const classes = useStyles(props);
 
 	return (
