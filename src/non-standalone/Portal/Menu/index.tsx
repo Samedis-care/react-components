@@ -72,18 +72,20 @@ const resolveLocation = (
 	path: string,
 	depth: number
 ): string | null => {
+	// first recurse to find the deepest matching link
 	for (const def of definitions) {
-		if (
-			def.route &&
-			((def.route === "/" && path === "/") ||
-				(def.route !== "/" && path.startsWith(def.route)))
-		)
-			return depth + def.title;
 		if (def.children) {
 			const nextLevel = resolveLocation(def.children, path, depth + 1);
 			if (nextLevel) return nextLevel;
 		}
 	}
+	// then try this level
+	for (const def of definitions) {
+		if (def.route && path.startsWith(def.route)) {
+			return depth + def.title;
+		}
+	}
+	// and if nothing found
 	return null;
 };
 
