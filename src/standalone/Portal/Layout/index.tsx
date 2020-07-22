@@ -8,7 +8,7 @@ import React, {
 import Header from "./Header";
 import Menu from "./Menu";
 import { makeStyles } from "@material-ui/core/styles";
-import { Hidden } from "@material-ui/core";
+import { Hidden, useMediaQuery } from "@material-ui/core";
 
 export interface IProps {
 	/**
@@ -35,6 +35,10 @@ export interface IProps {
 	 * Should we collapse the menu? (forces mobile view)
 	 */
 	collapseMenu?: boolean;
+	/**
+	 * Media query which forces mobile view if true
+	 */
+	mobileViewCondition?: string;
 }
 
 interface IRenderProps {
@@ -125,6 +129,18 @@ const RenderLayout = React.memo((props: IProps & IRenderProps) => {
 
 export default React.memo((props: IProps) => {
 	const classes = useContainerStyles(props);
+	if (props.mobileViewCondition) {
+		const mobile =
+			props.collapseMenu || useMediaQuery(props.mobileViewCondition);
+
+		return (
+			<div
+				className={mobile ? classes.containerMobile : classes.containerDesktop}
+			>
+				<RenderLayout mobile={mobile} {...props} />
+			</div>
+		);
+	}
 
 	return (
 		<>
