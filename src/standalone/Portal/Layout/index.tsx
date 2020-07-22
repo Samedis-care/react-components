@@ -129,9 +129,11 @@ const RenderLayout = React.memo((props: IProps & IRenderProps) => {
 
 export default React.memo((props: IProps) => {
 	const classes = useContainerStyles(props);
+	const mobileViewConditionMet = useMediaQuery(
+		props.mobileViewCondition || "()"
+	);
 	if (props.mobileViewCondition) {
-		const mobile =
-			props.collapseMenu || useMediaQuery(props.mobileViewCondition);
+		const mobile = props.collapseMenu || mobileViewConditionMet;
 
 		return (
 			<div
