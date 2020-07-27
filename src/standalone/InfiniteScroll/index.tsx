@@ -1,5 +1,5 @@
 import React, { PureComponent } from "react";
-import _ from "lodash";
+import { debounce } from "../../utils";
 
 export interface IProps {
 	/**
@@ -60,13 +60,13 @@ class InfiniteScroll extends PureComponent<IProps, IState> {
 			loadMoreTop:
 				debounceWait === 0
 					? this.props.loadMoreTop
-						? _.debounce(this.props.loadMoreTop, debounceWait)
+						? debounce(this.props.loadMoreTop, debounceWait)
 						: undefined
 					: this.props.loadMoreTop,
 			loadMoreBottom:
 				debounceWait === 0
 					? this.props.loadMoreBottom
-					: _.debounce(this.props.loadMoreBottom, debounceWait),
+					: debounce(this.props.loadMoreBottom, debounceWait),
 		};
 	}
 

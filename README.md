@@ -28,6 +28,7 @@ Used Libraries:
 - react-router-dom (Provided by the framework to enable programmatically controllable routing in your React app)
 - Redux (Provided and used by the backend integration for data handling)
 - moment.js (Used for localized date/time related components)
+- react-select (Used as selector component)
 
 ## Developer Setup
 
