@@ -22,6 +22,7 @@ export const SelectorMulti = () => {
 	const loadDataAction = action("onLoad");
 	const onSelectAction = action("onSelect");
 	const onAddNewAction = action("onAddNew");
+	const enableAddNew = boolean("Enable Add New", false);
 	const icons = boolean("Enable Icons", false);
 
 	const loadData = React.useCallback(
@@ -46,7 +47,7 @@ export const SelectorMulti = () => {
 			selected={selected}
 			onSelect={onSelect}
 			onLoad={loadData}
-			onAddNew={onAddNewAction}
+			onAddNew={enableAddNew ? onAddNewAction : undefined}
 			enableIcons={icons}
 		/>
 	);
