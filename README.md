@@ -1,8 +1,14 @@
-1# Components.care React
+# Components.care React
+
+[![dependencies Status](https://david-dm.org/Components-care/react-components/status.svg)](https://david-dm.org/Components-care/react-components)
+[![devDependencies Status](https://david-dm.org/Components-care/react-components/dev-status.svg)](https://david-dm.org/Components-care/react-components?type=dev)
+[![peerDependencies Status](https://david-dm.org/Components-care/react-components/peer-status.svg)](https://david-dm.org/Components-care/react-components?type=peer)
 
 ## Installing
 
-> `npm install "git://github.com/Components-care/react-components.git#master" --save` > `yarn add "git://github.com/Components-care/react-components.git#master"`
+> `npm install "git://github.com/Components-care/react-components.git#master" --save`
+
+> `yarn add "git://github.com/Components-care/react-components.git#master"`
 
 ## Overview
 
@@ -32,7 +38,7 @@ Used Libraries:
 
 ## Developer Setup
 
-### Running the developer environment
+### Running the developer environment (Storybook)
 
 1. Run `npm install`
 2. Run `npm start`
@@ -41,6 +47,7 @@ Used Libraries:
 
 - `src/`: Generic configuration files
 - `src/assets`: Assets bundled by Webpack
+- `src/utils`: Utility functions
 - `src/standalone`: Standalone components
 - `src/framework`: Framework components
 - `src/non-standalone`: Non-standalone components

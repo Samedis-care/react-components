@@ -1,9 +1,30 @@
 import React from "react";
 import AsyncSelect from "react-select/async";
+import { FormatOptionLabelMeta } from "react-select/src/Select";
+import { ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
+import { Add as AddIcon } from "@material-ui/icons";
 
 export interface SelectorData {
+	/**
+	 * A unique value
+	 */
 	value: string;
+	/**
+	 * The label to show the user
+	 */
 	label: string;
+	/**
+	 * An optional icon
+	 */
+	icon?: React.ReactNode;
+	/**
+	 * Should the entry be disabled?
+	 */
+	isDisabled?: boolean;
+	/**
+	 * Is this an add new button? (used for special handling in the renderer)
+	 */
+	isAddNewButton?: boolean;
 }
 
 /**
@@ -13,11 +34,7 @@ type SelectorLabelCallback = (obj: { inputValue: string }) => string | null;
 /**
  * Callback called when the selection changes
  */
-export type SelectorOnSelectCallback = (value: string | string[]) => void;
-/**
- * Callback called when the selection changes
- */
-export type SelectorOnSelectExCallback<Data extends SelectorData> = (
+export type SelectorOnSelectCallback<Data extends SelectorData> = (
 	value: Data | Data[]
 ) => void;
 
@@ -28,19 +45,14 @@ export interface SelectorProps<Data extends SelectorData> {
 	 */
 	onLoad: (search: string) => Promise<Data[]>;
 	/**
-	 * Simple selection change handler
-	 * @param value The selected value(s)
-	 */
-	onSelect?: SelectorOnSelectCallback;
-	/**
 	 * Extended selection change handler
 	 * @param data The selected data entry/entries
 	 */
-	onSelectEx?: SelectorOnSelectExCallback<Data>;
+	onSelect?: SelectorOnSelectCallback<Data>;
 	/**
 	 * The currently selected values
 	 */
-	selected: string | string[];
+	selected: Data | Data[];
 	/**
 	 * Is the selector disabled?
 	 */
@@ -49,6 +61,10 @@ export interface SelectorProps<Data extends SelectorData> {
 	 * Can the selector select multiple values
 	 */
 	multiSelect?: boolean;
+	/**
+	 * Enables icons in the list renderers
+	 */
+	enableIcons?: boolean;
 
 	/**
 	 * Label which is shown if no entries are selected
@@ -62,6 +78,31 @@ export interface SelectorProps<Data extends SelectorData> {
 	 * Label which is shown while loading data
 	 */
 	loadingLabel?: string | SelectorLabelCallback;
+	/**
+	 * Custom entry renderer
+	 * @param option The option to render
+	 * @param labelMeta The meta data for the option
+	 */
+	renderEntry?: (
+		option: Data,
+		labelMeta: FormatOptionLabelMeta<Data>
+	) => React.ReactNode;
+
+	/**
+	 * Refresh token used to force refreshing data.
+	 * Does not work with truthy multiSelect
+	 */
+	refreshToken?: string;
+
+	/**
+	 * Label for the "Add new" button
+	 */
+	addNewLabel?: string;
+	/**
+	 * Handler for the "Add new" button
+	 * Add new button only shows if this is set.
+	 */
+	onAddNew?: () => void;
 }
 
 /**
@@ -75,10 +116,15 @@ export default React.memo((props: SelectorProps<any>) => {
 		placeholderLabel,
 		noDataLabel,
 		loadingLabel,
+		selected,
 		disable,
+		enableIcons,
 		multiSelect,
 		onSelect,
-		onSelectEx,
+		renderEntry,
+		refreshToken,
+		addNewLabel,
+		onAddNew,
 	} = props;
 
 	const getNoOptionsLabel = React.useCallback(
@@ -99,22 +145,52 @@ export default React.memo((props: SelectorProps<any>) => {
 	);
 	const onChangeHandler = React.useCallback(
 		(data: any) => {
-			if (onSelect) onSelect(data.value);
-			if (onSelectEx) onSelectEx(data);
+			if (data.isAddNewButton) {
+				if (onAddNew) onAddNew();
+				return;
+			}
+			if (onSelect) onSelect(data);
 		},
-		[onSelect, onSelectEx]
+		[onSelect, onAddNew]
+	);
+	const defaultRenderer = React.useCallback(
+		(data: SelectorData) => (
+			<ListItem>
+				{enableIcons && <ListItemIcon>{data.icon}</ListItemIcon>}
+				<ListItemText>{data.label}</ListItemText>
+			</ListItem>
+		),
+		[enableIcons]
+	);
+	const onLoadButtonInjector = React.useCallback(
+		async (query: string) => {
+			const results = await onLoad(query);
+			if (onAddNew) {
+				results.push({
+					value: "add-new-button",
+					label: addNewLabel || "Add new",
+					icon: <AddIcon />,
+					isAddNewButton: true,
+				});
+			}
+			return results;
+		},
+		[addNewLabel, onAddNew, onLoad]
 	);
 
 	return (
 		<AsyncSelect
 			defaultOptions
-			loadOptions={onLoad}
+			loadOptions={onLoadButtonInjector}
 			placeholder={placeholderLabel}
+			value={selected}
 			onChange={onChangeHandler}
 			isDisabled={disable}
 			isMulti={multiSelect}
+			formatOptionLabel={renderEntry || defaultRenderer}
 			noOptionsMessage={getNoOptionsLabel}
 			loadingMessage={getLoadingLabel}
+			key={refreshToken}
 		/>
 	);
 });
