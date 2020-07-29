@@ -1,6 +1,10 @@
 import React, { useState } from "react";
 import "../../../i18n";
-import { MultiSelect, SelectorData } from "../../../standalone/Selector";
+import {
+	MultiSelect,
+	MultiSelectorData,
+	SelectorData,
+} from "../../../standalone/Selector";
 import { colourOptions } from "./Data";
 import { action } from "@storybook/addon-actions";
 import { boolean, withKnobs } from "@storybook/addon-knobs";
@@ -11,10 +15,19 @@ export default {
 	decorators: [withKnobs],
 };
 
-const getDefaultData = (): SelectorData[] => {
-	return ["ocean"]
+const enhanceData = (entry: SelectorData): MultiSelectorData => ({
+	...entry,
+	onClick: action("onClick: " + entry.label),
+	canUnselect: async (evtEntry: MultiSelectorData) => {
+		action("canUnselect: " + evtEntry.label)(evtEntry);
+		return true;
+	},
+});
+
+const getDefaultData = (): MultiSelectorData[] => {
+	return (["ocean"]
 		.map((entry) => colourOptions.find((color) => color.value === entry))
-		.filter((e) => e !== undefined) as SelectorData[];
+		.filter((e) => e !== undefined) as SelectorData[]).map(enhanceData);
 };
 
 export const SelectorMulti = () => {
@@ -28,9 +41,11 @@ export const SelectorMulti = () => {
 	const loadData = React.useCallback(
 		async (query: string) => {
 			loadDataAction(query);
-			return colourOptions.filter((option) =>
-				option.label.toLowerCase().includes(query.toLowerCase())
-			);
+			return colourOptions
+				.filter((option) =>
+					option.label.toLowerCase().includes(query.toLowerCase())
+				)
+				.map(enhanceData);
 		},
 		[loadDataAction]
 	);

@@ -1,8 +1,16 @@
-import React from "react";
+import React, { CSSProperties } from "react";
 import AsyncSelect from "react-select/async";
 import { FormatOptionLabelMeta } from "react-select/src/Select";
-import { ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
+import {
+	createStyles,
+	IconButton,
+	ListItem,
+	ListItemIcon,
+	ListItemText,
+	withStyles,
+} from "@material-ui/core";
 import { Add as AddIcon } from "@material-ui/icons";
+import { Styles } from "react-select";
 
 export interface SelectorData {
 	/**
@@ -103,7 +111,36 @@ export interface SelectorProps<Data extends SelectorData> {
 	 * Add new button only shows if this is set.
 	 */
 	onAddNew?: () => void;
+	/**
+	 * Custom styles for the selector
+	 */
+	customStyles?: Styles;
 }
+
+const smallListItemStyles = createStyles({
+	gutters: {
+		paddingLeft: 8,
+		paddingRight: 8,
+	},
+});
+export const SmallListItem = withStyles(smallListItemStyles)(ListItem);
+
+const smallListItemIconStyles = createStyles({
+	root: {
+		minWidth: 0,
+		paddingRight: 8,
+	},
+});
+export const SmallListItemIcon = withStyles(smallListItemIconStyles)(
+	ListItemIcon
+);
+
+const smallIconButtonStyles = createStyles({
+	root: {
+		padding: 4,
+	},
+});
+export const SmallIconButton = withStyles(smallIconButtonStyles)(IconButton);
 
 /**
  * Controlled selector (react-select) with simple API.
@@ -125,7 +162,19 @@ export default React.memo((props: SelectorProps<any>) => {
 		refreshToken,
 		addNewLabel,
 		onAddNew,
+		customStyles,
 	} = props;
+
+	const selectorStyles = React.useMemo(
+		() => ({
+			option: (base: CSSProperties): CSSProperties => ({
+				...base,
+				padding: 0,
+			}),
+			...customStyles,
+		}),
+		[customStyles]
+	);
 
 	const getNoOptionsLabel = React.useCallback(
 		noDataLabel
@@ -155,10 +204,11 @@ export default React.memo((props: SelectorProps<any>) => {
 	);
 	const defaultRenderer = React.useCallback(
 		(data: SelectorData) => (
-			<ListItem>
-				{enableIcons && <ListItemIcon>{data.icon}</ListItemIcon>}
+			// @ts-ignore: Typescript complains about the button property being "required"
+			<SmallListItem>
+				{enableIcons && <SmallListItemIcon>{data.icon}</SmallListItemIcon>}
 				<ListItemText>{data.label}</ListItemText>
-			</ListItem>
+			</SmallListItem>
 		),
 		[enableIcons]
 	);
@@ -191,6 +241,7 @@ export default React.memo((props: SelectorProps<any>) => {
 			noOptionsMessage={getNoOptionsLabel}
 			loadingMessage={getLoadingLabel}
 			key={refreshToken + (onAddNew ? "add-new" : "no-add-new")}
+			styles={selectorStyles}
 		/>
 	);
 });
