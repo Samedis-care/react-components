@@ -99,6 +99,7 @@ export default React.memo((props: MultiSelectProps<any>) => {
 				borderBottom: `1px solid ${theme.palette.divider}`,
 				boxShadow: "none",
 				backgroundColor: "transparent",
+				minHeight: 64,
 			}),
 			...customStyles,
 		}),

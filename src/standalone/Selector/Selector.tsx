@@ -7,6 +7,7 @@ import {
 	ListItem,
 	ListItemIcon,
 	ListItemText,
+	useTheme,
 	withStyles,
 } from "@material-ui/core";
 import { Add as AddIcon } from "@material-ui/icons";
@@ -165,15 +166,31 @@ export default React.memo((props: SelectorProps<any>) => {
 		customStyles,
 	} = props;
 
+	const theme = useTheme();
+
 	const selectorStyles = React.useMemo(
 		() => ({
 			option: (base: CSSProperties): CSSProperties => ({
 				...base,
 				padding: 0,
 			}),
+			control: (base: CSSProperties): CSSProperties => ({
+				...base,
+				minHeight: 64,
+			}),
+			valueContainer: (base: CSSProperties): CSSProperties => ({
+				...base,
+				padding: 0,
+			}),
+			placeholder: (base: CSSProperties): CSSProperties => ({
+				...base,
+				padding: "0 8px",
+				margin: 0,
+				...theme.typography.body1,
+			}),
 			...customStyles,
 		}),
-		[customStyles]
+		[customStyles, theme]
 	);
 
 	const getNoOptionsLabel = React.useCallback(
