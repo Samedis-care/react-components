@@ -98,6 +98,7 @@ export default React.memo((props: MultiSelectProps<any>) => {
 				border: "none",
 				borderBottom: `1px solid ${theme.palette.divider}`,
 				boxShadow: "none",
+				backgroundColor: "transparent",
 			}),
 			...customStyles,
 		}),
@@ -119,7 +120,7 @@ export default React.memo((props: MultiSelectProps<any>) => {
 					/>
 				</Grid>
 				<Grid item xs={12}>
-					{props.selected.map((data: MultiSelectorData) => (
+					{props.selected.map((data: MultiSelectorData, index: number) => (
 						<React.Fragment key={data.value}>
 							<List>
 								<SmallListItem button onClick={data.onClick}>
@@ -138,7 +139,7 @@ export default React.memo((props: MultiSelectProps<any>) => {
 									</ListItemSecondaryAction>
 								</SmallListItem>
 							</List>
-							<Divider />
+							{props.selected.length === index - 1 && <Divider />}
 						</React.Fragment>
 					))}
 				</Grid>

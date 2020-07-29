@@ -8,6 +8,7 @@ import {
 import { colourOptions } from "./Data";
 import { action } from "@storybook/addon-actions";
 import { boolean, withKnobs } from "@storybook/addon-knobs";
+import { Box, CssBaseline } from "@material-ui/core";
 
 export default {
 	title: "Standalone/Selector",
@@ -58,13 +59,18 @@ export const SelectorMulti = () => {
 	);
 
 	return (
-		<MultiSelect
-			selected={selected}
-			onSelect={onSelect}
-			onLoad={loadData}
-			onAddNew={enableAddNew ? onAddNewAction : undefined}
-			enableIcons={icons}
-		/>
+		<>
+			<CssBaseline />
+			<Box m={2}>
+				<MultiSelect
+					selected={selected}
+					onSelect={onSelect}
+					onLoad={loadData}
+					onAddNew={enableAddNew ? onAddNewAction : undefined}
+					enableIcons={icons}
+				/>
+			</Box>
+		</>
 	);
 };
 

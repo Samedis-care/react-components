@@ -4,6 +4,7 @@ import { SelectorData, SingleSelect } from "../../../standalone/Selector";
 import { colourOptions } from "./Data";
 import { action } from "@storybook/addon-actions";
 import { boolean, withKnobs } from "@storybook/addon-knobs";
+import { Box, CssBaseline } from "@material-ui/core";
 
 export default {
 	title: "Standalone/Selector",
@@ -37,13 +38,18 @@ export const SelectorSingle = () => {
 	);
 
 	return (
-		<SingleSelect
-			selected={selected}
-			onSelect={onSelect}
-			onLoad={loadData}
-			onAddNew={enableAddNew ? onAddNewAction : undefined}
-			enableIcons={icons}
-		/>
+		<>
+			<CssBaseline />
+			<Box m={2}>
+				<SingleSelect
+					selected={selected}
+					onSelect={onSelect}
+					onLoad={loadData}
+					onAddNew={enableAddNew ? onAddNewAction : undefined}
+					enableIcons={icons}
+				/>
+			</Box>
+		</>
 	);
 };
 
