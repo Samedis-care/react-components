@@ -190,7 +190,7 @@ export default React.memo((props: SelectorProps<any>) => {
 			formatOptionLabel={renderEntry || defaultRenderer}
 			noOptionsMessage={getNoOptionsLabel}
 			loadingMessage={getLoadingLabel}
-			key={refreshToken}
+			key={refreshToken + (onAddNew ? "add-new" : "no-add-new")}
 		/>
 	);
 });
