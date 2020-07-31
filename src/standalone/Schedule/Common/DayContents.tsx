@@ -40,10 +40,15 @@ class DayContents extends PureComponent<IProps> {
 							variant={"outlined"}
 							size={"small"}
 							fullWidth
-							className={this.props.classes.btn}
+							className={
+								this.props.classes.btn +
+								(!entry.onClick && !entry.onAuxClick
+									? ` ${this.props.classes.btnDisabled}`
+									: "")
+							}
 							onClick={entry.onClick}
 							onAuxClick={entry.onAuxClick}
-							disabled={!entry.onClick && !entry.onAuxClick}
+							disableRipple={!entry.onClick && !entry.onAuxClick}
 						>
 							{entry.title}
 						</Button>
@@ -60,6 +65,9 @@ const styles = createStyles({
 		textAlign: "left",
 		color: "inherit",
 		display: "block",
+	},
+	btnDisabled: {
+		cursor: "default",
 	},
 });
 

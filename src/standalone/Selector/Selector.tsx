@@ -1,17 +1,10 @@
 import React, { CSSProperties } from "react";
 import AsyncSelect from "react-select/async";
 import { FormatOptionLabelMeta } from "react-select/src/Select";
-import {
-	createStyles,
-	IconButton,
-	ListItem,
-	ListItemIcon,
-	ListItemText,
-	useTheme,
-	withStyles,
-} from "@material-ui/core";
+import { ListItemText, useTheme } from "@material-ui/core";
 import { Add as AddIcon } from "@material-ui/icons";
 import { Styles } from "react-select";
+import { SmallListItem, SmallListItemIcon } from "../..";
 
 export interface SelectorData {
 	/**
@@ -117,31 +110,6 @@ export interface SelectorProps<Data extends SelectorData> {
 	 */
 	customStyles?: Styles;
 }
-
-const smallListItemStyles = createStyles({
-	gutters: {
-		paddingLeft: 8,
-		paddingRight: 8,
-	},
-});
-export const SmallListItem = withStyles(smallListItemStyles)(ListItem);
-
-const smallListItemIconStyles = createStyles({
-	root: {
-		minWidth: 0,
-		paddingRight: 8,
-	},
-});
-export const SmallListItemIcon = withStyles(smallListItemIconStyles)(
-	ListItemIcon
-);
-
-const smallIconButtonStyles = createStyles({
-	root: {
-		padding: 4,
-	},
-});
-export const SmallIconButton = withStyles(smallIconButtonStyles)(IconButton);
 
 /**
  * Controlled selector (react-select) with simple API.

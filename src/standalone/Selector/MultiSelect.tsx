@@ -1,11 +1,6 @@
 import React, { CSSProperties } from "react";
-import Selector, {
-	SelectorData,
-	SelectorProps,
-	SmallIconButton,
-	SmallListItem,
-	SmallListItemIcon,
-} from "./Selector";
+import Selector, { SelectorData, SelectorProps } from "./Selector";
+import { SmallIconButton, SmallListItem, SmallListItemIcon } from "../..";
 import {
 	Divider,
 	Grid,
