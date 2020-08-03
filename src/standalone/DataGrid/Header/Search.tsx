@@ -1,15 +1,6 @@
 import React, { ChangeEvent, useCallback, useContext } from "react";
-import { Box, InputAdornment, TextField } from "@material-ui/core";
-import { Search as SearchIcon } from "@material-ui/icons";
 import { DataGridStateContext } from "../index";
-
-const searchInputProps = {
-	startAdornment: (
-		<InputAdornment position="start">
-			<SearchIcon />
-		</InputAdornment>
-	),
-};
+import SearchView from "./SearchView";
 
 export default React.memo(() => {
 	const [state, setState] = useContext(DataGridStateContext)!;
@@ -26,13 +17,6 @@ export default React.memo(() => {
 	);
 
 	return (
-		<Box ml={2}>
-			<TextField
-				value={state.search}
-				onChange={handleSearchChange}
-				InputProps={searchInputProps}
-				margin="dense"
-			/>
-		</Box>
+		<SearchView search={state.search} handleSearchChange={handleSearchChange} />
 	);
 });

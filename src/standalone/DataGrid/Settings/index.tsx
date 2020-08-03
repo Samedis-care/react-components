@@ -1,39 +1,23 @@
 import React, { ChangeEvent, useCallback, useContext } from "react";
-import {
-	Box,
-	Button,
-	Checkbox,
-	Collapse,
-	Divider,
-	FormControlLabel,
-	Grid,
-	Paper,
-	Theme,
-	Typography,
-} from "@material-ui/core";
+import { Collapse } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { DataGridStateContext, IDataGridColumnProps } from "../index";
+import Dialog from "./Dialog";
 
-const useStyles = makeStyles((theme: Theme) => ({
-	wrapper: {
-		padding: 16,
-		borderBottom: `1px solid ${theme.palette.divider}`,
-		borderRadius: 8,
-	},
+const useStyles = makeStyles({
 	collapse: {
 		position: "absolute",
-		zIndex: 1000,
+		zIndex: 2000,
 		width: "100%",
 		maxHeight: "100%",
 		overflow: "auto",
 	},
-}));
+});
 
 export default React.memo((props: IDataGridColumnProps) => {
 	const classes = useStyles();
 
 	const [state, setState] = useContext(DataGridStateContext)!;
-	const { columns } = props;
 
 	const closeGridSettings = useCallback(() => {
 		setState((prevState) => ({
@@ -68,54 +52,14 @@ export default React.memo((props: IDataGridColumnProps) => {
 
 	return (
 		<Collapse className={classes.collapse} in={state.showSettings}>
-			<Paper elevation={0} className={classes.wrapper}>
-				<Typography variant={"h6"}>Lock/Unlock Columns</Typography>
-				<Divider />
-				<Grid justify={"space-between"} container>
-					{columns.slice(1).map((column) => (
-						<Grid item xs={4} key={column.field}>
-							<FormControlLabel
-								control={
-									<Checkbox
-										checked={state.lockedColumns.includes(column.field)}
-										onChange={toggleColumnLock}
-										value={column.field}
-									/>
-								}
-								label={column.headerName}
-							/>
-						</Grid>
-					))}
-				</Grid>
-				<Typography variant={"h6"}>Show/Hide Columns</Typography>
-				<Divider />
-				<Grid justify={"space-between"} container>
-					{columns.slice(1).map((column) => (
-						<Grid item xs={4} key={column.field}>
-							<FormControlLabel
-								control={
-									<Checkbox
-										checked={!state.hiddenColumns.includes(column.field)}
-										onChange={toggleColumnVisibility}
-										value={column.field}
-									/>
-								}
-								label={column.headerName}
-							/>
-						</Grid>
-					))}
-				</Grid>
-				<Divider />
-				<Grid container justify={"flex-end"}>
-					<Grid item>
-						<Box m={2}>
-							<Button onClick={closeGridSettings} variant={"contained"}>
-								Close
-							</Button>
-						</Box>
-					</Grid>
-				</Grid>
-			</Paper>
+			<Dialog
+				columns={props.columns}
+				closeGridSettings={closeGridSettings}
+				toggleColumnLock={toggleColumnLock}
+				toggleColumnVisibility={toggleColumnVisibility}
+				lockedColumns={state.lockedColumns}
+				hiddenColumns={state.hiddenColumns}
+			/>
 		</Collapse>
 	);
 });

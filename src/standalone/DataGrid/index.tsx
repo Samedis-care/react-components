@@ -1,4 +1,4 @@
-import React, { Dispatch, SetStateAction, useState } from "react";
+import React, { Dispatch, SetStateAction, useMemo, useState } from "react";
 import { Grid, Theme } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import Header, { IDataGridHeaderProps } from "./Header";
@@ -17,6 +17,9 @@ export interface IDataGridColumnProps {
 export interface IDataGridColumnDef {
 	field: string;
 	headerName: string;
+
+	// internal fields, do not set
+	isLocked?: boolean;
 }
 
 export interface IDataGridState {
@@ -60,6 +63,19 @@ export default React.memo((props: IDataGridProps) => {
 		hiddenColumns: [],
 		lockedColumns: [],
 	}));
+	const [state] = statePack;
+	const { hiddenColumns, lockedColumns } = state;
+
+	const visibleColumns = useMemo(
+		() =>
+			columns
+				.filter((column) => !hiddenColumns.includes(column.field))
+				.map((column) => ({
+					...column,
+					isLocked: lockedColumns.includes(column.field),
+				})),
+		[columns, hiddenColumns, lockedColumns]
+	);
 
 	return (
 		<Grid
@@ -75,7 +91,7 @@ export default React.memo((props: IDataGridProps) => {
 				</Grid>
 				<Grid item xs className={classes.middle}>
 					<Settings columns={columns} />
-					<Content columns={columns} />
+					<Content columns={visibleColumns} rowsPerPage={state.rowsPerPage} />
 				</Grid>
 				<Grid item>
 					<Footer />
