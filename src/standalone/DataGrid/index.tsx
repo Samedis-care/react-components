@@ -70,6 +70,12 @@ export default React.memo((props: IDataGridProps) => {
 		() =>
 			columns
 				.filter((column) => !hiddenColumns.includes(column.field))
+				.filter((column) => lockedColumns.includes(column.field))
+				.concat(
+					columns
+						.filter((column) => !hiddenColumns.includes(column.field))
+						.filter((column) => !lockedColumns.includes(column.field))
+				)
 				.map((column) => ({
 					...column,
 					isLocked: lockedColumns.includes(column.field),

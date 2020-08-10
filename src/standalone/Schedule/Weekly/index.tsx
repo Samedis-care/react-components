@@ -1,5 +1,4 @@
 import React, { PureComponent } from "react";
-import Grid from "@material-ui/core/Grid";
 import WeekViewDay from "./WeekViewDay";
 import moment, { Moment } from "moment";
 import {
@@ -9,11 +8,13 @@ import {
 	WithStyles,
 	withStyles,
 } from "@material-ui/core";
-import Button from "@material-ui/core/Button";
-import Typography from "@material-ui/core/Typography";
+import { Button, Typography, Grid } from "@material-ui/core";
 import i18n from "../../../i18n";
 import { IDayData } from "../Common/DayContents";
 import { ArrowForwardIos, ArrowBackIos } from "@material-ui/icons";
+import { DatePicker, MuiPickersUtilsProvider } from "@material-ui/pickers";
+import MomentUtils from "@date-io/moment";
+import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
 
 export interface IProps extends WithStyles {
 	/**
@@ -38,6 +39,10 @@ interface IState {
 	 * The data load error that occurred (if any)
 	 */
 	loadError: Error | null;
+	/**
+	 * If the date picker is open
+	 */
+	datePickerOpen: boolean;
 }
 
 class WeekView extends PureComponent<IProps, IState> {
@@ -48,6 +53,7 @@ class WeekView extends PureComponent<IProps, IState> {
 			weekOffset: 0,
 			data: null,
 			loadError: null,
+			datePickerOpen: false,
 		};
 	}
 
@@ -77,16 +83,42 @@ class WeekView extends PureComponent<IProps, IState> {
 					</Button>
 				</Grid>
 				<Grid item xs={4}>
-					<Typography align={"center"}>
-						<IconButton onClick={this.prevWeek}>
-							<ArrowBackIos />
-						</IconButton>
-						{i18n.t("standalone.schedule.week")}{" "}
-						{now.week() + this.state.weekOffset}
-						<IconButton onClick={this.nextWeek}>
-							<ArrowForwardIos />
-						</IconButton>
-					</Typography>
+					<Grid container justify={"center"}>
+						<Grid item>
+							<IconButton onClick={this.prevWeek}>
+								<ArrowBackIos />
+							</IconButton>
+							<span
+								onClick={this.openDatePicker}
+								className={this.props.classes.week}
+							>
+								{i18n.t("standalone.schedule.week")}{" "}
+								{this.nowNormalized().add(this.state.weekOffset, "week").week()}{" "}
+								{this.nowNormalized()
+									.add(this.state.weekOffset, "week")
+									.weekYear()}
+							</span>
+							<div className={this.props.classes.picker}>
+								<MuiPickersUtilsProvider utils={MomentUtils}>
+									<DatePicker
+										variant={"dialog"}
+										format={"II RRRR"}
+										open={this.state.datePickerOpen}
+										label={i18n.t("standalone.schedule.week")}
+										value={this.nowNormalized()
+											.add(this.state.weekOffset, "week")
+											.toDate()}
+										onChange={this.setWeek}
+										// @ts-ignore
+										onDismiss={this.closeDatePicker}
+									/>
+								</MuiPickersUtilsProvider>
+							</div>
+							<IconButton onClick={this.nextWeek}>
+								<ArrowForwardIos />
+							</IconButton>
+						</Grid>
+					</Grid>
 				</Grid>
 				<Grid item xs={4} />
 				{this.state.loadError && (
@@ -166,6 +198,22 @@ class WeekView extends PureComponent<IProps, IState> {
 			this.fetchData
 		);
 
+	setWeek = (date: MaterialUiPickersDate) => {
+		const start = this.nowNormalized();
+		const end = this.momentNormalize(moment(date));
+		const week = end.diff(start, "week");
+
+		this.setState(
+			{
+				weekOffset: week,
+				data: null,
+				loadError: null,
+				datePickerOpen: false,
+			},
+			this.fetchData
+		);
+	};
+
 	fetchData = async () => {
 		try {
 			const data = await this.props.loadData(this.state.weekOffset);
@@ -178,11 +226,31 @@ class WeekView extends PureComponent<IProps, IState> {
 			});
 		}
 	};
+
+	nowNormalized = () => this.momentNormalize(moment());
+	momentNormalize = (instance: Moment) =>
+		instance.isoWeekday(0).hour(0).minute(0).second(0).millisecond(0);
+
+	openDatePicker = () =>
+		this.setState({
+			datePickerOpen: true,
+		});
+
+	closeDatePicker = () =>
+		this.setState({
+			datePickerOpen: false,
+		});
 }
 
 const styles = createStyles({
 	todayBtn: {
 		height: "100%",
+	},
+	week: {
+		cursor: "pointer",
+	},
+	picker: {
+		display: "none",
 	},
 });
 

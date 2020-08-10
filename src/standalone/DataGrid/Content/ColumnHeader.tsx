@@ -1,51 +1,17 @@
 import React, { useCallback, useEffect, useState } from "react";
-import {
-	createStyles,
-	Grid,
-	IconButton,
-	TableCell,
-	Theme,
-	useTheme,
-	withStyles,
-} from "@material-ui/core";
-import { FilterList as FilterIcon } from "@material-ui/icons";
+import { useTheme } from "@material-ui/core";
 import { measureText } from "../../../utils";
 import { IDataGridColumnDef } from "../index";
-import { makeStyles } from "@material-ui/core/styles";
+import FixedCell from "./FixedCell";
+import { StickyHeaderCell } from "./CustomCells";
+import ColumnHeaderContent from "./ColumnHeaderContent";
 
 export interface IDataGridContentColumnHeaderProps {
 	column: IDataGridColumnDef;
 }
 
-const stickyHeaderCellStyles = createStyles((theme: Theme) => ({
-	root: {
-		position: "sticky",
-		top: 0,
-		backgroundColor: theme.palette.background.paper,
-		borderBottom: `1px solid ${theme.palette.divider}`,
-		borderRight: `1px solid ${theme.palette.divider}`,
-		zIndex: 1000,
-	},
-}));
-const StickyHeaderCell = withStyles(stickyHeaderCellStyles)(TableCell);
-
-const useStyles = makeStyles({
-	filterButton: {
-		padding: 0,
-	},
-	resizer: {
-		cursor: "col-resize",
-		width: 8,
-		height: "100%",
-		right: 0,
-		top: 0,
-		position: "absolute",
-	},
-});
-
 export default React.memo((props: IDataGridContentColumnHeaderProps) => {
 	const theme = useTheme();
-	const classes = useStyles();
 	const [width, setWidth] = useState<number>(
 		() =>
 			measureText(theme.typography.body1.font!, props.column.headerName).width +
@@ -61,6 +27,7 @@ export default React.memo((props: IDataGridContentColumnHeaderProps) => {
 			evt.preventDefault();
 
 			const move = evt.movementX;
+
 			setWidth((prevState) => prevState + move);
 		},
 		[dragging, setWidth]
@@ -76,21 +43,40 @@ export default React.memo((props: IDataGridContentColumnHeaderProps) => {
 		};
 	}, [onDrag, stopDrag]);
 
-	return (
-		<StickyHeaderCell
-			style={{
-				minWidth: width,
-			}}
-		>
-			<Grid container justify={"space-between"}>
-				<Grid item>{props.column.headerName}</Grid>
-				<Grid item>
-					<IconButton className={classes.filterButton}>
-						<FilterIcon />
-					</IconButton>
-				</Grid>
-			</Grid>
-			<div className={classes.resizer} onMouseDown={startDrag} />
-		</StickyHeaderCell>
+	const content = () => (
+		<ColumnHeaderContent
+			headerName={props.column.headerName}
+			disableResize={!props.column.isLocked}
+			startDrag={startDrag}
+			// TODO: use state
+			sort={1}
+			filter={undefined}
+			onFilterChange={console.log}
+		/>
 	);
+
+	if (props.column.isLocked) {
+		return (
+			<FixedCell
+				cellComponent={StickyHeaderCell}
+				style={{
+					minWidth: width,
+					zIndex: 1002,
+				}}
+			>
+				{content()}
+			</FixedCell>
+		);
+	} else {
+		return (
+			<StickyHeaderCell
+				style={{
+					minWidth: width,
+					zIndex: 1000,
+				}}
+			>
+				{content()}
+			</StickyHeaderCell>
+		);
+	}
 });
