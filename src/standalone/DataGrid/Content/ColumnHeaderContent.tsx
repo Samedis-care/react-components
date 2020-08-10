@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { SyntheticEvent, useCallback, useState } from "react";
 import {
 	Box,
 	Grid,
@@ -19,6 +19,7 @@ export interface IDataGridContentColumnHeaderContentProps {
 	disableResize: boolean;
 	startDrag: () => void;
 	sort: -1 | 0 | 1;
+	sortOrder: number | undefined;
 	filter?: IFilterDef;
 	onFilterChange: (value: IFilterDef) => void;
 }
@@ -37,6 +38,9 @@ const useStyles = makeStyles({
 	},
 	filterPopup: {
 		width: 150,
+	},
+	sortIcon: {
+		height: 24,
 	},
 });
 
@@ -57,13 +61,19 @@ export default React.memo((props: IDataGridContentColumnHeaderContentProps) => {
 	);
 
 	const openFilter = useCallback(
-		(event: React.MouseEvent<HTMLButtonElement>) =>
-			setFilterAnchorEl(event.currentTarget),
+		(event: React.MouseEvent<HTMLButtonElement>) => {
+			event.stopPropagation();
+			setFilterAnchorEl(event.currentTarget);
+		},
 		[setFilterAnchorEl]
 	);
 	const closeFilter = useCallback(() => setFilterAnchorEl(null), [
 		setFilterAnchorEl,
 	]);
+	const preventPropagation = useCallback(
+		(evt: SyntheticEvent<{}>) => evt.stopPropagation(),
+		[]
+	);
 
 	return (
 		<>
@@ -71,10 +81,11 @@ export default React.memo((props: IDataGridContentColumnHeaderContentProps) => {
 				<Grid item>
 					<Grid container justify={"flex-start"}>
 						<Grid item>{props.headerName}</Grid>
-						<Grid item>
+						<Grid item className={classes.sortIcon}>
 							{props.sort === -1 && <ArrowDownward />}
 							{props.sort === 1 && <ArrowUpward />}
 						</Grid>
+						<Grid item>{props.sort !== 0 && props.sortOrder?.toString()}</Grid>
 					</Grid>
 				</Grid>
 				<Grid item>
@@ -92,6 +103,7 @@ export default React.memo((props: IDataGridContentColumnHeaderContentProps) => {
 				onClose={closeFilter}
 				anchorOrigin={anchorOrigin}
 				transformOrigin={transformOrigin}
+				onBackdropClick={preventPropagation}
 			>
 				<Box m={2}>
 					<Grid container className={classes.filterPopup}>

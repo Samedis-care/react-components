@@ -5,6 +5,8 @@ import Header, { IDataGridHeaderProps } from "./Header";
 import Footer, { IDataGridFooterProps } from "./Footer";
 import Settings from "./Settings";
 import Content from "./Content";
+import { IFilterDef } from "./Content/FilterEntry";
+import { IDataGridColumnsState } from "./Content/Header";
 
 export type IDataGridProps = IDataGridHeaderProps &
 	IDataGridFooterProps &
@@ -22,6 +24,12 @@ export interface IDataGridColumnDef {
 	isLocked?: boolean;
 }
 
+export interface IDataGridColumnState {
+	sort: -1 | 0 | 1;
+	sortOrder?: number;
+	filter: IFilterDef | undefined;
+}
+
 export interface IDataGridState {
 	search: string;
 	rowsPerPage: number;
@@ -30,6 +38,8 @@ export interface IDataGridState {
 	showSettings: boolean;
 	hiddenColumns: string[];
 	lockedColumns: string[];
+	selectAll: boolean;
+	selectedRows: string[];
 }
 
 export const DataGridStateContext = React.createContext<
@@ -62,6 +72,8 @@ export default React.memo((props: IDataGridProps) => {
 		showSettings: false,
 		hiddenColumns: [],
 		lockedColumns: [],
+		selectAll: false,
+		selectedRows: [],
 	}));
 	const [state] = statePack;
 	const { hiddenColumns, lockedColumns } = state;
@@ -83,6 +95,8 @@ export default React.memo((props: IDataGridProps) => {
 		[columns, hiddenColumns, lockedColumns]
 	);
 
+	const [columnsState, setColumnsState] = useState<IDataGridColumnsState>({});
+
 	return (
 		<Grid
 			container
@@ -97,7 +111,12 @@ export default React.memo((props: IDataGridProps) => {
 				</Grid>
 				<Grid item xs className={classes.middle}>
 					<Settings columns={columns} />
-					<Content columns={visibleColumns} rowsPerPage={state.rowsPerPage} />
+					<Content
+						columns={visibleColumns}
+						rowsPerPage={state.rowsPerPage}
+						columnState={columnsState}
+						setColumnState={setColumnsState}
+					/>
 				</Grid>
 				<Grid item>
 					<Footer />

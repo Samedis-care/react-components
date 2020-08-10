@@ -5,12 +5,27 @@ import { IDataGridColumnDef } from "../index";
 import FixedCell from "./FixedCell";
 import { StickyHeaderCell } from "./CustomCells";
 import ColumnHeaderContent from "./ColumnHeaderContent";
+import { IFilterDef } from "./FilterEntry";
 
 export interface IDataGridContentColumnHeaderProps {
 	column: IDataGridColumnDef;
+	filter?: IFilterDef;
+	onFilterChange: (field: string, value: IFilterDef) => void;
+	sort: -1 | 0 | 1;
+	sortOrder: number | undefined;
+	onSortChange: (field: string, newSort: -1 | 0 | 1) => void;
 }
 
 export default React.memo((props: IDataGridContentColumnHeaderProps) => {
+	const {
+		column,
+		filter,
+		onFilterChange,
+		sort,
+		onSortChange,
+		sortOrder,
+	} = props;
+	const { field } = column;
 	const theme = useTheme();
 	const [width, setWidth] = useState<number>(
 		() =>
@@ -32,6 +47,15 @@ export default React.memo((props: IDataGridContentColumnHeaderProps) => {
 		},
 		[dragging, setWidth]
 	);
+	const onColumnClick = useCallback(() => {
+		if (sort === 0) onSortChange(field, 1);
+		else if (sort === 1) onSortChange(field, -1);
+		else if (sort === -1) onSortChange(field, 0);
+	}, [field, sort, onSortChange]);
+	const internalOnFilterChange = useCallback(
+		(newFilter: IFilterDef) => onFilterChange(field, newFilter),
+		[field, onFilterChange]
+	);
 
 	useEffect(() => {
 		document.addEventListener("mousemove", onDrag);
@@ -48,10 +72,10 @@ export default React.memo((props: IDataGridContentColumnHeaderProps) => {
 			headerName={props.column.headerName}
 			disableResize={!props.column.isLocked}
 			startDrag={startDrag}
-			// TODO: use state
-			sort={1}
-			filter={undefined}
-			onFilterChange={console.log}
+			sort={sort}
+			sortOrder={sortOrder}
+			filter={filter}
+			onFilterChange={internalOnFilterChange}
 		/>
 	);
 
@@ -59,6 +83,7 @@ export default React.memo((props: IDataGridContentColumnHeaderProps) => {
 		return (
 			<FixedCell
 				cellComponent={StickyHeaderCell}
+				onClick={onColumnClick}
 				style={{
 					minWidth: width,
 					zIndex: 1002,
@@ -70,6 +95,7 @@ export default React.memo((props: IDataGridContentColumnHeaderProps) => {
 	} else {
 		return (
 			<StickyHeaderCell
+				onClick={onColumnClick}
 				style={{
 					minWidth: width,
 					zIndex: 1000,
