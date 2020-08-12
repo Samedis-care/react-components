@@ -5,6 +5,7 @@ import {
 	IconButton,
 	Popover,
 	PopoverOrigin,
+	Tooltip,
 } from "@material-ui/core";
 import {
 	ArrowDownward,
@@ -89,9 +90,11 @@ export default React.memo((props: IDataGridContentColumnHeaderContentProps) => {
 					</Grid>
 				</Grid>
 				<Grid item>
-					<IconButton className={classes.filterButton} onClick={openFilter}>
-						<FilterIcon />
-					</IconButton>
+					<Tooltip title={"Filter"}>
+						<IconButton className={classes.filterButton} onClick={openFilter}>
+							<FilterIcon />
+						</IconButton>
+					</Tooltip>
 				</Grid>
 			</Grid>
 			{props.disableResize && (

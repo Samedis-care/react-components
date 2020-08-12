@@ -29,7 +29,7 @@ export default React.memo((props: IProps) => {
 				>
 					<Grid item>AND</Grid>
 					<Grid item>
-						<Switch checked={value === "and"} onChange={handleChange} />
+						<Switch checked={value === "or"} onChange={handleChange} />
 					</Grid>
 					<Grid item>OR</Grid>
 				</Grid>

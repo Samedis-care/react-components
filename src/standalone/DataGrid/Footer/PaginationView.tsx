@@ -85,34 +85,42 @@ export default React.memo((props: IDataGridPaginationViewProps) => {
 				<Grid container>
 					<Grid item>
 						<Tooltip title={"First page"} placement={"top"}>
-							<IconButton
-								disabled={isFirstPage}
-								onClick={props.gotoFirstPage}
-								className={classes.firstPageBtn}
-							>
-								<FirstPageIcon />
-							</IconButton>
+							<span>
+								<IconButton
+									disabled={isFirstPage}
+									onClick={props.gotoFirstPage}
+									className={classes.firstPageBtn}
+								>
+									<FirstPageIcon />
+								</IconButton>
+							</span>
 						</Tooltip>
 					</Grid>
 					<Grid item>
 						<Tooltip title={"Previous page"} placement={"top"}>
-							<IconButton disabled={isFirstPage} onClick={props.gotoPrevPage}>
-								<PreviousPageIcon />
-							</IconButton>
+							<span>
+								<IconButton disabled={isFirstPage} onClick={props.gotoPrevPage}>
+									<PreviousPageIcon />
+								</IconButton>
+							</span>
 						</Tooltip>
 					</Grid>
 					<Grid item>
 						<Tooltip title={"Next page"} placement={"top"}>
-							<IconButton disabled={isLastPage} onClick={props.gotoNextPage}>
-								<NextPageIcon />
-							</IconButton>
+							<span>
+								<IconButton disabled={isLastPage} onClick={props.gotoNextPage}>
+									<NextPageIcon />
+								</IconButton>
+							</span>
 						</Tooltip>
 					</Grid>
 					<Grid item>
 						<Tooltip title={"Last page"} placement={"top"}>
-							<IconButton disabled={isLastPage} onClick={props.gotoLastPage}>
-								<LastPageIcon />
-							</IconButton>
+							<span>
+								<IconButton disabled={isLastPage} onClick={props.gotoLastPage}>
+									<LastPageIcon />
+								</IconButton>
+							</span>
 						</Tooltip>
 					</Grid>
 				</Grid>

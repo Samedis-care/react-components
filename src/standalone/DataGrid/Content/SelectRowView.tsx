@@ -19,7 +19,11 @@ export default React.memo((props: IDataGridContentSelectRowViewProps) => {
 
 	return (
 		<SelectRowCell>
-			<Checkbox className={classes.selectCheckbox} />
+			<Checkbox
+				checked={props.checked}
+				onChange={props.onSelect}
+				className={classes.selectCheckbox}
+			/>
 		</SelectRowCell>
 	);
 });

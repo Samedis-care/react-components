@@ -35,10 +35,11 @@ interface IProps {
 const FilterEntry = React.memo((props: IProps) => {
 	const { onChange } = props;
 	let filterType: FilterType =
-		props.value?.type || props.valueType === "string" ? "contains" : "equals";
+		props.value?.type || (props.valueType === "string" ? "contains" : "equals");
 	let filterValue = props.value?.value1 || "";
 	let filterValue2 = props.value?.value2 || "";
-	let subFilterComboType: FilterComboType = props.value?.nextFilterType || "or";
+	let subFilterComboType: FilterComboType =
+		props.value?.nextFilterType || "and";
 	let subFilter = props.value?.nextFilter || undefined;
 
 	const updateParent = () =>
@@ -53,6 +54,8 @@ const FilterEntry = React.memo((props: IProps) => {
 	const onFilterTypeChange = (
 		event: React.ChangeEvent<{ name?: string; value: unknown }>
 	) => {
+		event.preventDefault();
+		event.stopPropagation();
 		filterType = event.target.value as FilterType;
 		filterValue2 = "";
 		updateParent();
@@ -135,7 +138,6 @@ const FilterEntry = React.memo((props: IProps) => {
 					fullWidth
 				/>
 			</Grid>
-			{/* @ts-ignore */}
 			{filterType === "inRange" && (
 				<Grid item xs={12}>
 					<TextField
@@ -154,6 +156,7 @@ const FilterEntry = React.memo((props: IProps) => {
 					<FilterEntry
 						onChange={onSubFilterChange}
 						valueType={props.valueType}
+						value={subFilter}
 					/>
 				</>
 			)}

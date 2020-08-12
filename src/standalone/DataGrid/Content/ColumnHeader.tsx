@@ -84,6 +84,7 @@ export default React.memo((props: IDataGridContentColumnHeaderProps) => {
 			<FixedCell
 				cellComponent={StickyHeaderCell}
 				onClick={onColumnClick}
+				key={column.fixedColumnKey}
 				style={{
 					minWidth: width,
 					zIndex: 1002,

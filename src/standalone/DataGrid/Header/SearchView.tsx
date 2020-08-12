@@ -1,6 +1,7 @@
-import React, { ChangeEvent } from "react";
+import React, { ChangeEvent, useContext } from "react";
 import { Box, InputAdornment, TextField } from "@material-ui/core";
 import { Search as SearchIcon } from "@material-ui/icons";
+import { DataGridPropsContext } from "../index";
 
 const searchInputProps = {
 	startAdornment: (
@@ -16,11 +17,14 @@ export interface IDataGridSearchViewProps {
 }
 
 export default React.memo((props: IDataGridSearchViewProps) => {
+	const gridProps = useContext(DataGridPropsContext)!;
+
 	return (
 		<Box ml={2}>
 			<TextField
 				value={props.search}
 				onChange={props.handleSearchChange}
+				placeholder={gridProps.searchPlaceholder}
 				InputProps={searchInputProps}
 				margin="dense"
 			/>

@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { Dispatch, SetStateAction, useCallback } from "react";
 import { IDataGridColumnProps, IDataGridColumnState } from "../index";
 import { TableHead, TableRow } from "@material-ui/core";
 import ColumnHeader from "./ColumnHeader";
@@ -9,7 +9,7 @@ export type IDataGridColumnsState = { [field: string]: IDataGridColumnState };
 
 export interface IDataGridColumnStateProps {
 	columnState: IDataGridColumnsState;
-	setColumnState: (newColumnState: IDataGridColumnsState) => void;
+	setColumnState: Dispatch<SetStateAction<IDataGridColumnsState>>;
 }
 
 export default React.memo(
@@ -17,62 +17,63 @@ export default React.memo(
 		const { columnState, setColumnState } = props;
 		const onFilterChange = useCallback(
 			(field: string, newFilter: IFilterDef) => {
-				setColumnState({
-					...columnState,
+				setColumnState((prevState) => ({
+					...prevState,
 					[field]: {
-						...columnState[field],
+						...prevState[field],
 						filter: newFilter,
 					},
-				});
+				}));
 			},
-			[setColumnState, columnState]
+			[setColumnState]
 		);
 		const onSortChange = useCallback(
 			(field: string, newSort: -1 | 0 | 1) => {
-				let newColumnState = {
-					...columnState,
-					[field]: {
-						...columnState[field],
-						sort: newSort,
-					},
-				};
-
-				if (newSort === 0) {
-					// if disable sorting, adjust sort priority for others
-					Object.keys(columnState)
-						.filter(
-							(otherField) =>
-								columnState[otherField].sort !== 0 &&
-								columnState[field].sortOrder! <
-									columnState[otherField].sortOrder!
-						)
-						.forEach((otherField) => {
-							newColumnState = {
-								...newColumnState,
-								[otherField]: {
-									...newColumnState[otherField],
-									sortOrder: newColumnState[otherField].sortOrder! - 1,
-								},
-							};
-						});
-				} else if (newSort === 1) {
-					// if enable sorting, set to highest order
-					const order =
-						Object.keys(columnState).filter(
-							(otherField) => columnState[otherField].sort !== 0
-						).length + 1;
-					newColumnState = {
-						...newColumnState,
+				setColumnState((prevState) => {
+					let newColumnState = {
+						...prevState,
 						[field]: {
-							...newColumnState[field],
-							sortOrder: order,
+							...prevState[field],
+							sort: newSort,
 						},
 					};
-				}
 
-				setColumnState(newColumnState);
+					if (newSort === 0) {
+						// if disable sorting, adjust sort priority for others
+						Object.keys(prevState)
+							.filter(
+								(otherField) =>
+									prevState[otherField].sort !== 0 &&
+									prevState[field].sortOrder! < prevState[otherField].sortOrder!
+							)
+							.forEach((otherField) => {
+								newColumnState = {
+									...newColumnState,
+									[otherField]: {
+										...newColumnState[otherField],
+										sortOrder: newColumnState[otherField].sortOrder! - 1,
+									},
+								};
+							});
+					} else if (newSort === 1) {
+						// if enable sorting, set to highest order
+						const order =
+							Object.keys(prevState).filter(
+								(otherField) => prevState[otherField].sort !== 0
+							).length + 1;
+						newColumnState = {
+							...newColumnState,
+							[field]: {
+								...newColumnState[field],
+								sortOrder: order,
+							},
+						};
+					}
+
+					return newColumnState;
+				});
 			},
-			[setColumnState, columnState]
+			[setColumnState]
 		);
 
 		return (

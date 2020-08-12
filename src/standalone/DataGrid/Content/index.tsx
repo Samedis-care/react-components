@@ -1,6 +1,6 @@
 import React from "react";
 import { Table, TableBody, makeStyles } from "@material-ui/core";
-import { IDataGridColumnProps } from "../index";
+import { DataGridRowData, IDataGridColumnProps } from "../index";
 import Header, { IDataGridColumnStateProps } from "./Header";
 import Row from "./Row";
 
@@ -20,6 +20,7 @@ export interface IDataGridContentProps
 	extends IDataGridColumnProps,
 		IDataGridColumnStateProps {
 	rowsPerPage: number;
+	rows: DataGridRowData[];
 }
 
 export default React.memo((props: IDataGridContentProps) => {
@@ -34,8 +35,8 @@ export default React.memo((props: IDataGridContentProps) => {
 					setColumnState={props.setColumnState}
 				/>
 				<TableBody>
-					{new Array(props.rowsPerPage).fill(undefined).map((_, index) => (
-						<Row columns={props.columns} key={index} />
+					{props.rows.map((rowData, index) => (
+						<Row columns={props.columns} key={index} data={rowData} />
 					))}
 				</TableBody>
 			</Table>

@@ -6,6 +6,10 @@ export interface IDataGridContentSelectRowProps {
 	id: string;
 }
 
+const xor = (v1: boolean, v2: boolean): boolean => {
+	return v1 ? !v2 : v2;
+};
+
 export default React.memo((props: IDataGridContentSelectRowProps) => {
 	const { id } = props;
 	const [state, setState] = useContext(DataGridStateContext)!;
@@ -14,8 +18,7 @@ export default React.memo((props: IDataGridContentSelectRowProps) => {
 		(_: any, newSelected: boolean) => {
 			setState((prevState) => ({
 				...prevState,
-				selectAll: prevState.selectAll,
-				selectedRows: newSelected
+				selectedRows: xor(newSelected, prevState.selectAll)
 					? [...prevState.selectedRows, id]
 					: prevState.selectedRows.filter((s) => s !== id),
 			}));
@@ -25,11 +28,7 @@ export default React.memo((props: IDataGridContentSelectRowProps) => {
 
 	return (
 		<SelectRowView
-			checked={
-				state.selectAll
-					? !state.selectedRows.includes(props.id)
-					: state.selectedRows.includes(props.id)
-			}
+			checked={xor(state.selectAll, state.selectedRows.includes(props.id))}
 			onSelect={onSelect}
 		/>
 	);
