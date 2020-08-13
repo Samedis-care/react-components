@@ -32,7 +32,7 @@ interface IProps {
 	onChange: (def: IFilterDef) => void;
 }
 
-const FilterEntry = React.memo((props: IProps) => {
+const FilterEntry = (props: IProps) => {
 	const { onChange } = props;
 	let filterType: FilterType =
 		props.value?.type || (props.valueType === "string" ? "contains" : "equals");
@@ -54,8 +54,6 @@ const FilterEntry = React.memo((props: IProps) => {
 	const onFilterTypeChange = (
 		event: React.ChangeEvent<{ name?: string; value: unknown }>
 	) => {
-		event.preventDefault();
-		event.stopPropagation();
 		filterType = event.target.value as FilterType;
 		filterValue2 = "";
 		updateParent();
@@ -162,6 +160,6 @@ const FilterEntry = React.memo((props: IProps) => {
 			)}
 		</>
 	);
-});
+};
 
-export default FilterEntry;
+export default React.memo(FilterEntry);

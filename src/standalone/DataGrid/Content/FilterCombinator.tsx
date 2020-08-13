@@ -7,7 +7,7 @@ interface IProps {
 	onChange: (value: FilterComboType) => void;
 }
 
-export default React.memo((props: IProps) => {
+const FilterCombinator = (props: IProps) => {
 	const { value, onChange } = props;
 
 	const handleChange = useCallback(
@@ -36,4 +36,6 @@ export default React.memo((props: IProps) => {
 			</Typography>
 		</Grid>
 	);
-});
+};
+
+export default React.memo(FilterCombinator);

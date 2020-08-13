@@ -2,7 +2,7 @@ import React, { useCallback, useContext } from "react";
 import { DataGridStateContext } from "../index";
 import SelectAllView from "./SelectAllView";
 
-export default React.memo(() => {
+const SelectAll = () => {
 	const [state, setState] = useContext(DataGridStateContext)!;
 
 	const onSelect = useCallback(
@@ -16,4 +16,6 @@ export default React.memo(() => {
 	);
 
 	return <SelectAllView checked={state.selectAll} onSelect={onSelect} />;
-});
+};
+
+export default React.memo(SelectAll);

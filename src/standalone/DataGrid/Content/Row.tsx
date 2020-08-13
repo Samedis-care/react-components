@@ -9,7 +9,7 @@ export interface IDataGridRowProps extends IDataGridColumnProps {
 	data: DataGridRowData;
 }
 
-export default React.memo((props: IDataGridRowProps) => {
+const Row = (props: IDataGridRowProps) => {
 	return (
 		<TableRow>
 			<SelectRow id={props.data.id} />
@@ -26,4 +26,6 @@ export default React.memo((props: IDataGridRowProps) => {
 			)}
 		</TableRow>
 	);
-});
+};
+
+export default React.memo(Row);

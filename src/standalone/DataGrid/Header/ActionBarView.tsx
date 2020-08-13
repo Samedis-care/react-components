@@ -19,7 +19,7 @@ export interface IDataGridActionBarViewProps {
 	handleReset: () => void;
 }
 
-export default React.memo((props: IDataGridActionBarViewProps) => {
+const ActionBarView = (props: IDataGridActionBarViewProps) => {
 	const showDivider =
 		props.handleAddNew || props.handleEdit || props.handleDelete;
 
@@ -98,4 +98,6 @@ export default React.memo((props: IDataGridActionBarViewProps) => {
 			</Grid>
 		</Grid>
 	);
-});
+};
+
+export default React.memo(ActionBarView);

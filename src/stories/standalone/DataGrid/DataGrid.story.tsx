@@ -60,7 +60,7 @@ export const DataGridStory = () => {
 					fieldFilter,
 					sort
 				): Promise<DataGridRowData[]> => {
-					console.log("loadData", {
+					action("loadData")({
 						page,
 						rowsPerPage,
 						quickFilter,

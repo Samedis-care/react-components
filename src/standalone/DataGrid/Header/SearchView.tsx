@@ -16,7 +16,7 @@ export interface IDataGridSearchViewProps {
 	handleSearchChange: (evt: ChangeEvent<HTMLInputElement>) => void;
 }
 
-export default React.memo((props: IDataGridSearchViewProps) => {
+const SearchView = (props: IDataGridSearchViewProps) => {
 	const gridProps = useContext(DataGridPropsContext)!;
 
 	return (
@@ -30,4 +30,6 @@ export default React.memo((props: IDataGridSearchViewProps) => {
 			/>
 		</Box>
 	);
-});
+};
+
+export default React.memo(SearchView);

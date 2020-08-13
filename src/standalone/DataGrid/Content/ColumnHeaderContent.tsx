@@ -17,7 +17,7 @@ import FilterEntry, { IFilterDef } from "./FilterEntry";
 
 export interface IDataGridContentColumnHeaderContentProps {
 	headerName: string;
-	disableResize: boolean;
+	enableResize: boolean;
 	startDrag: () => void;
 	sort: -1 | 0 | 1;
 	sortOrder: number | undefined;
@@ -55,7 +55,9 @@ const transformOrigin: PopoverOrigin = {
 	horizontal: "center",
 };
 
-export default React.memo((props: IDataGridContentColumnHeaderContentProps) => {
+const ColumnHeaderContent = (
+	props: IDataGridContentColumnHeaderContentProps
+) => {
 	const classes = useStyles();
 	const [filterAnchorEl, setFilterAnchorEl] = useState<HTMLElement | null>(
 		null
@@ -97,8 +99,12 @@ export default React.memo((props: IDataGridContentColumnHeaderContentProps) => {
 					</Tooltip>
 				</Grid>
 			</Grid>
-			{props.disableResize && (
-				<div className={classes.resizer} onMouseDown={props.startDrag} />
+			{props.enableResize && (
+				<div
+					className={classes.resizer}
+					onMouseDown={props.startDrag}
+					onClick={preventPropagation}
+				/>
 			)}
 			<Popover
 				open={filterAnchorEl !== null}
@@ -107,6 +113,7 @@ export default React.memo((props: IDataGridContentColumnHeaderContentProps) => {
 				anchorOrigin={anchorOrigin}
 				transformOrigin={transformOrigin}
 				onBackdropClick={preventPropagation}
+				onClick={preventPropagation}
 			>
 				<Box m={2}>
 					<Grid container className={classes.filterPopup}>
@@ -120,4 +127,6 @@ export default React.memo((props: IDataGridContentColumnHeaderContentProps) => {
 			</Popover>
 		</>
 	);
-});
+};
+
+export default React.memo(ColumnHeaderContent);

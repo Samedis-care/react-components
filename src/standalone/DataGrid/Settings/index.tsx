@@ -2,7 +2,7 @@ import React, { ChangeEvent, useCallback, useContext } from "react";
 import { Collapse } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { DataGridStateContext, IDataGridColumnProps } from "../index";
-import Dialog from "./Dialog";
+import Dialog from "./SettingsDialog";
 
 const useStyles = makeStyles({
 	collapse: {
@@ -14,7 +14,7 @@ const useStyles = makeStyles({
 	},
 });
 
-export default React.memo((props: IDataGridColumnProps) => {
+const DataGridSettings = (props: IDataGridColumnProps) => {
 	const classes = useStyles();
 
 	const [state, setState] = useContext(DataGridStateContext)!;
@@ -62,4 +62,6 @@ export default React.memo((props: IDataGridColumnProps) => {
 			/>
 		</Collapse>
 	);
-});
+};
+
+export default React.memo(DataGridSettings);

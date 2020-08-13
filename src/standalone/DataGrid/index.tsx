@@ -13,7 +13,7 @@ import Footer, { IDataGridFooterProps } from "./Footer";
 import Settings from "./Settings";
 import Content from "./Content";
 import { IFilterDef } from "./Content/FilterEntry";
-import { IDataGridColumnsState } from "./Content/Header";
+import { IDataGridColumnsState } from "./Content/ContentHeader";
 import { Loader } from "../index";
 import { debounce } from "../../utils";
 
@@ -85,6 +85,7 @@ export interface IDataGridState {
 	selectedRows: string[];
 	rows: DataGridRowData[] | null;
 	dataLoadError: Error | null;
+	refreshData: boolean;
 }
 
 export const DataGridStateContext = React.createContext<
@@ -107,6 +108,7 @@ export const DataGridDefaultState: IDataGridState = {
 	selectedRows: [],
 	rows: null,
 	dataLoadError: null,
+	refreshData: true,
 };
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -123,7 +125,7 @@ const useStyles = makeStyles((theme: Theme) => ({
 	},
 }));
 
-const DataGrid = React.memo((props: IDataGridProps) => {
+const DataGrid = (props: IDataGridProps) => {
 	const { columns, loadData } = props;
 
 	const classes = useStyles();
@@ -137,6 +139,7 @@ const DataGrid = React.memo((props: IDataGridProps) => {
 		dataLoadError,
 		hiddenColumns,
 		lockedColumns,
+		refreshData,
 	} = state;
 
 	const visibleColumns = useMemo(
@@ -163,7 +166,7 @@ const DataGrid = React.memo((props: IDataGridProps) => {
 
 	// refresh data if desired
 	useEffect(() => {
-		if (rows !== null || dataLoadError !== null) return;
+		if (!refreshData) return;
 
 		let sorts = [];
 		const fieldFilter: IDataGridFieldFilter = {};
@@ -193,24 +196,25 @@ const DataGrid = React.memo((props: IDataGridProps) => {
 				setState((prevState) => ({
 					...prevState,
 					rows: newRows,
+					refreshData: false,
 				}));
 			})
 			.catch((err) => {
 				setState((prevState) => ({
 					...prevState,
 					dataLoadError: err,
+					refreshData: false,
 				}));
 			});
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [rows, dataLoadError]);
+	}, [refreshData]);
 
 	// instant refresh on pagination change
 	const refresh = useCallback(
 		() =>
 			setState((prevState) => ({
 				...prevState,
-				rows: null,
-				dataLoadError: null,
+				refreshData: true,
 			})),
 		[setState]
 	);
@@ -237,7 +241,8 @@ const DataGrid = React.memo((props: IDataGridProps) => {
 					</Grid>
 					<Grid item xs className={classes.middle}>
 						<Settings columns={columns} />
-						{rows === null && <Loader />}
+						{rows === null && dataLoadError === null && <Loader />}
+						{rows === null && dataLoadError !== null && dataLoadError.message}
 						{rows !== null && rows.length === 0 && "No Data!"}
 						{rows && (
 							<Content
@@ -256,6 +261,6 @@ const DataGrid = React.memo((props: IDataGridProps) => {
 			</DataGridPropsContext.Provider>
 		</Grid>
 	);
-});
+};
 
-export default DataGrid;
+export default React.memo(DataGrid);

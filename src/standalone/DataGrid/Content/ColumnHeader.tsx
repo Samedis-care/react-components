@@ -16,7 +16,7 @@ export interface IDataGridContentColumnHeaderProps {
 	onSortChange: (field: string, newSort: -1 | 0 | 1) => void;
 }
 
-export default React.memo((props: IDataGridContentColumnHeaderProps) => {
+const ColumnHeader = (props: IDataGridContentColumnHeaderProps) => {
 	const {
 		column,
 		filter,
@@ -70,7 +70,7 @@ export default React.memo((props: IDataGridContentColumnHeaderProps) => {
 	const content = () => (
 		<ColumnHeaderContent
 			headerName={props.column.headerName}
-			disableResize={!props.column.isLocked}
+			enableResize={!props.column.isLocked}
 			startDrag={startDrag}
 			sort={sort}
 			sortOrder={sortOrder}
@@ -106,4 +106,6 @@ export default React.memo((props: IDataGridContentColumnHeaderProps) => {
 			</StickyHeaderCell>
 		);
 	}
-});
+};
+
+export default React.memo(ColumnHeader);

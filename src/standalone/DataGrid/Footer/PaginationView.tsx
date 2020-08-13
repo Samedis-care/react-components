@@ -38,7 +38,7 @@ export interface IDataGridPaginationViewProps {
 	rowsTotal: number;
 }
 
-export default React.memo((props: IDataGridPaginationViewProps) => {
+const PaginationView = (props: IDataGridPaginationViewProps) => {
 	const classes = useStyles();
 
 	// calculate view indices
@@ -127,4 +127,6 @@ export default React.memo((props: IDataGridPaginationViewProps) => {
 			</Grid>
 		</Grid>
 	);
-});
+};
+
+export default React.memo(PaginationView);

@@ -10,7 +10,7 @@ const xor = (v1: boolean, v2: boolean): boolean => {
 	return v1 ? !v2 : v2;
 };
 
-export default React.memo((props: IDataGridContentSelectRowProps) => {
+const SelectRow = (props: IDataGridContentSelectRowProps) => {
 	const { id } = props;
 	const [state, setState] = useContext(DataGridStateContext)!;
 
@@ -32,4 +32,6 @@ export default React.memo((props: IDataGridContentSelectRowProps) => {
 			onSelect={onSelect}
 		/>
 	);
-});
+};
+
+export default React.memo(SelectRow);

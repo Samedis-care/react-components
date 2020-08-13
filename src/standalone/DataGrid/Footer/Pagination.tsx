@@ -11,7 +11,7 @@ const calcLastPage = (rowsTotal: number, rowsPerPage: number) => {
 	return lastPage;
 };
 
-export default React.memo(() => {
+const Pagination = () => {
 	const [state, setState] = useContext(DataGridStateContext)!;
 
 	// event handlers
@@ -68,4 +68,6 @@ export default React.memo(() => {
 			rowsTotal={state.rowsTotal}
 		/>
 	);
-});
+};
+
+export default React.memo(Pagination);

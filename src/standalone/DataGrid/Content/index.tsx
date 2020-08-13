@@ -1,7 +1,7 @@
 import React from "react";
-import { Table, TableBody, makeStyles } from "@material-ui/core";
+import { makeStyles, Table, TableBody } from "@material-ui/core";
 import { DataGridRowData, IDataGridColumnProps } from "../index";
-import Header, { IDataGridColumnStateProps } from "./Header";
+import Header, { IDataGridColumnStateProps } from "./ContentHeader";
 import Row from "./Row";
 
 const useStyles = makeStyles({
@@ -23,7 +23,7 @@ export interface IDataGridContentProps
 	rows: DataGridRowData[];
 }
 
-export default React.memo((props: IDataGridContentProps) => {
+const Content = (props: IDataGridContentProps) => {
 	const classes = useStyles();
 
 	return (
@@ -42,4 +42,6 @@ export default React.memo((props: IDataGridContentProps) => {
 			</Table>
 		</div>
 	);
-});
+};
+
+export default React.memo(Content);

@@ -14,7 +14,7 @@ export interface IDataGridContentSelectAllViewProps {
 	onSelect: (_: any, newChecked: boolean) => void;
 }
 
-export default React.memo((props: IDataGridContentSelectAllViewProps) => {
+const SelectAllView = (props: IDataGridContentSelectAllViewProps) => {
 	const classes = useStyles();
 
 	return (
@@ -26,4 +26,6 @@ export default React.memo((props: IDataGridContentSelectAllViewProps) => {
 			/>
 		</SelectAllCell>
 	);
-});
+};
+
+export default React.memo(SelectAllView);

@@ -14,7 +14,7 @@ const useStyles = makeStyles({
 	},
 });
 
-export default React.memo((props: IDataGridContentSelectRowViewProps) => {
+const SelectRowView = (props: IDataGridContentSelectRowViewProps) => {
 	const classes = useStyles();
 
 	return (
@@ -26,4 +26,6 @@ export default React.memo((props: IDataGridContentSelectRowViewProps) => {
 			/>
 		</SelectRowCell>
 	);
-});
+};
+
+export default React.memo(SelectRowView);

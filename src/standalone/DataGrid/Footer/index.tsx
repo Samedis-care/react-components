@@ -5,7 +5,7 @@ import StatusBar from "./StatusBar";
 
 export type IDataGridFooterProps = {};
 
-export default React.memo((props: IDataGridFooterProps) => {
+const Footer = (_props: IDataGridFooterProps) => {
 	return (
 		<Grid container justify={"space-between"}>
 			<Grid item>
@@ -16,4 +16,6 @@ export default React.memo((props: IDataGridFooterProps) => {
 			</Grid>
 		</Grid>
 	);
-});
+};
+
+export default React.memo(Footer);

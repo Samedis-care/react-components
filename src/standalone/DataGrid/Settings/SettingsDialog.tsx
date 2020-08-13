@@ -6,11 +6,11 @@ import {
 	Divider,
 	FormControlLabel,
 	Grid,
+	makeStyles,
 	Paper,
 	Theme,
 	Typography,
 } from "@material-ui/core";
-import { makeStyles } from "@material-ui/core";
 import { IDataGridColumnDef, IDataGridColumnProps } from "../index";
 
 export interface IDataGridSettingsDialogProps extends IDataGridColumnProps {
@@ -29,7 +29,7 @@ const useStyles = makeStyles((theme: Theme) => ({
 	},
 }));
 
-export default React.memo((props: IDataGridSettingsDialogProps) => {
+const SettingsDialog = (props: IDataGridSettingsDialogProps) => {
 	const classes = useStyles();
 
 	return (
@@ -82,4 +82,6 @@ export default React.memo((props: IDataGridSettingsDialogProps) => {
 			</Grid>
 		</Paper>
 	);
-});
+};
+
+export default React.memo(SettingsDialog);

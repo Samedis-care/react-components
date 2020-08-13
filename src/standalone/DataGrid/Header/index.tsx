@@ -6,7 +6,7 @@ import FilterBar from "./FilterBar";
 
 export type IDataGridHeaderProps = {};
 
-export default React.memo((props: IDataGridHeaderProps) => {
+const Header = (_props: IDataGridHeaderProps) => {
 	return (
 		<Grid container justify={"space-between"}>
 			<Grid item>
@@ -20,4 +20,6 @@ export default React.memo((props: IDataGridHeaderProps) => {
 			</Grid>
 		</Grid>
 	);
-});
+};
+
+export default React.memo(Header);

@@ -2,7 +2,7 @@ import React, { ChangeEvent, useCallback, useContext } from "react";
 import { DataGridStateContext } from "../index";
 import SearchView from "./SearchView";
 
-export default React.memo(() => {
+const Search = () => {
 	const [state, setState] = useContext(DataGridStateContext)!;
 
 	const handleSearchChange = useCallback(
@@ -19,4 +19,6 @@ export default React.memo(() => {
 	return (
 		<SearchView search={state.search} handleSearchChange={handleSearchChange} />
 	);
-});
+};
+
+export default React.memo(Search);

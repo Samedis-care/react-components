@@ -7,7 +7,7 @@ export interface IDataGridFixedCellProps extends TableCellProps {
 	cellComponent?: React.ComponentType<TableCellProps>;
 }
 
-export default React.memo((props: IDataGridFixedCellProps) => {
+const FixedCell = (props: IDataGridFixedCellProps) => {
 	const CellComponent = props.cellComponent || FixedDataGridCell;
 
 	const cellRef = useRef<typeof HTMLTableDataCellElement>();
@@ -34,4 +34,6 @@ export default React.memo((props: IDataGridFixedCellProps) => {
 	});
 
 	return <CellComponent ref={cellRef} {...props} />;
-});
+};
+
+export default React.memo(FixedCell);

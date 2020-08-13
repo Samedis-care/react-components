@@ -6,7 +6,7 @@ import {
 } from "../index";
 import ActionBarView from "./ActionBarView";
 
-export default React.memo(() => {
+const ActionBar = () => {
 	const [state, setState] = useContext(DataGridStateContext)!;
 	const { selectAll, selectedRows } = state;
 	const gridProps = useContext(DataGridPropsContext)!;
@@ -48,4 +48,6 @@ export default React.memo(() => {
 			handleReset={handleReset}
 		/>
 	);
-});
+};
+
+export default React.memo(ActionBar);

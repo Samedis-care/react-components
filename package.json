@@ -27,6 +27,7 @@
 		"react-router-dom": "^5.1.0"
 	},
 	"scripts": {
+		"docgen": "typedoc",
 		"start": "npm run storybook",
 		"prepare": "npm run build",
 		"prestart": "install-peers -f",
@@ -84,6 +85,7 @@
 		"prettier": "^2.0.5",
 		"tslint": "^6.1.2",
 		"tslint-config-prettier": "^1.18.0",
-		"tslint-plugin-prettier": "^2.3.0"
+		"tslint-plugin-prettier": "^2.3.0",
+		"typedoc": "^0.18.0"
 	}
 }
