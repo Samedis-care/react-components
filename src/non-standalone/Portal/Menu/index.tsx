@@ -89,7 +89,7 @@ const resolveLocation = (
 	return null;
 };
 
-export default React.memo((props: IRoutedMenuProps) => {
+const RoutedMenu = (props: IRoutedMenuProps) => {
 	const controlledState = useState("");
 	const location = useLocation();
 	const path = location.pathname;
@@ -113,4 +113,6 @@ export default React.memo((props: IRoutedMenuProps) => {
 			customState={controlledState}
 		/>
 	);
-});
+};
+
+export default React.memo(RoutedMenu);

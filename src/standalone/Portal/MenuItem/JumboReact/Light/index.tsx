@@ -1,6 +1,7 @@
 import React from "react";
 import { IMenuItemProps } from "../../../Menu";
 import {
+	createStyles,
 	ListItem,
 	ListItemIcon,
 	ListItemText,
@@ -29,22 +30,22 @@ const useStyles = makeStyles((theme) => ({
 	},
 }));
 
-const selectedListItemStyles = (theme: Theme) => ({
+const selectedListItemStyles = createStyles((theme: Theme) => ({
 	button: {
 		"&:hover": {
 			backgroundColor: theme.palette.primary.main,
 		},
 	},
-});
-const unselectedListItemStyles = (theme: Theme) => ({
+}));
+const unselectedListItemStyles = createStyles((theme: Theme) => ({
 	button: {
 		"&:hover": {
 			color: theme.palette.primary.main,
 			backgroundColor: "transparent",
 		},
 	},
-});
-const expandableListItemStyles = (theme: Theme) => ({
+}));
+const expandableListItemStyles = createStyles({
 	button: {
 		"&:hover": {
 			backgroundColor: "transparent",
@@ -56,7 +57,7 @@ const SelectedListItem = withStyles(selectedListItemStyles)(ListItem);
 const UnselectedListItem = withStyles(unselectedListItemStyles)(ListItem);
 const ExpandableListItem = withStyles(expandableListItemStyles)(ListItem);
 
-export default React.memo((props: IMenuItemProps) => {
+const MenuItemJumboReactLight = (props: IMenuItemProps) => {
 	const classes = useStyles();
 
 	const Icon = props.icon;
@@ -89,4 +90,6 @@ export default React.memo((props: IMenuItemProps) => {
 			{props.active && <div className={classes.dot} />}
 		</MyListItem>
 	);
-});
+};
+
+export default React.memo(MenuItemJumboReactLight);

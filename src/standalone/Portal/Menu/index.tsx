@@ -118,7 +118,7 @@ const useStyles = makeStyles({
 	},
 });
 
-export default React.memo((props: IMenuProps) => {
+const PortalMenu = (props: IMenuProps) => {
 	const Wrapper = props.wrapper;
 	const state = useState("");
 	const classes = useStyles();
@@ -134,4 +134,6 @@ export default React.memo((props: IMenuProps) => {
 			</Wrapper>
 		</div>
 	);
-});
+};
+
+export default React.memo(PortalMenu);

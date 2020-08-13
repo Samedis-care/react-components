@@ -116,7 +116,7 @@ export interface SelectorProps<Data extends SelectorData> {
  * This component shouldn't be used directly,
  * please look into SingleSelect and MultiSelect instead.
  */
-export default React.memo((props: SelectorProps<any>) => {
+const Selector = (props: SelectorProps<any>) => {
 	const {
 		onLoad,
 		placeholderLabel,
@@ -229,4 +229,6 @@ export default React.memo((props: SelectorProps<any>) => {
 			styles={selectorStyles}
 		/>
 	);
-});
+};
+
+export default React.memo(Selector);

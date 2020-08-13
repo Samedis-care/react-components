@@ -36,7 +36,7 @@ const useStyles = makeStyles(() => ({
 	}),
 }));
 
-export default React.memo((props: IProps) => {
+const PortalLayoutMenu = (props: IProps) => {
 	const { menuOpen, toggleMenu } = props;
 	const theme = useTheme();
 	const classes = useStyles(props);
@@ -64,4 +64,6 @@ export default React.memo((props: IProps) => {
 			</Drawer>
 		);
 	}
-});
+};
+
+export default React.memo(PortalLayoutMenu);

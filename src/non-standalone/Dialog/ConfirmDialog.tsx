@@ -2,7 +2,7 @@ import React from "react";
 import { IDialogConfigConfirm } from "./Types";
 import { InfoDialog } from "./InfoDialog";
 
-export const ConfirmDialog = React.memo((props: IDialogConfigConfirm) => (
+const ConfirmDialogRaw = (props: IDialogConfigConfirm) => (
 	<InfoDialog
 		title={props.title}
 		message={props.message}
@@ -20,4 +20,6 @@ export const ConfirmDialog = React.memo((props: IDialogConfigConfirm) => (
 			},
 		]}
 	/>
-));
+);
+
+export const ConfirmDialog = React.memo(ConfirmDialogRaw);

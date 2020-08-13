@@ -11,7 +11,7 @@ import {
 	TextField,
 } from "@material-ui/core";
 
-export const InputDialog = React.memo((props: IDialogConfigInput) => {
+const InputDialogRaw = (props: IDialogConfigInput) => {
 	const [, setDialog] = useContext(DialogContext)!;
 	const {
 		onClose,
@@ -27,12 +27,10 @@ export const InputDialog = React.memo((props: IDialogConfigInput) => {
 		[setValue]
 	);
 
-	const removeDialog =
-		onClose &&
-		React.useCallback(() => {
-			setDialog(null);
-			onClose();
-		}, [setDialog, onClose]);
+	const removeDialog = React.useCallback(() => {
+		setDialog(null);
+		if (onClose) onClose();
+	}, [setDialog, onClose]);
 
 	const handleNo = React.useCallback(() => {
 		setDialog(null);
@@ -74,4 +72,6 @@ export const InputDialog = React.memo((props: IDialogConfigInput) => {
 			</DialogActions>
 		</Dialog>
 	);
-});
+};
+
+export const InputDialog = React.memo(InputDialogRaw);

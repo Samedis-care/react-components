@@ -18,10 +18,12 @@ export interface SingleSelectProps<Data extends SelectorData>
 	selected: Data;
 }
 
-export default React.memo((props: SingleSelectProps<any>) => (
+const SingleSelect = (props: SingleSelectProps<any>) => (
 	<Selector
 		{...props}
 		onSelect={props.onSelect as SelectorOnSelectCallback<any>}
 		multiSelect={false}
 	/>
-));
+);
+
+export default React.memo(SingleSelect);

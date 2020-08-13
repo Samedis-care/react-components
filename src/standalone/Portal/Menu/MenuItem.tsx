@@ -34,7 +34,7 @@ export const MenuContext = React.createContext<
 	[string, Dispatch<SetStateAction<string>>] | undefined
 >(undefined);
 
-export const MenuItem = React.memo((props: IProps) => {
+const MenuItem = (props: IProps) => {
 	const { depth, title, expandable, forceExpand, onClick } = props;
 	const [expanded, setExpanded] = useState(false);
 	const [menuState, setMenuState] = useContext(MenuContext)!;
@@ -71,7 +71,9 @@ export const MenuItem = React.memo((props: IProps) => {
 			)}
 		</>
 	);
-});
+};
+
+export default React.memo(MenuItem);
 
 export const toMenuItemComponent = (
 	menuProps: IMenuProps,

@@ -46,7 +46,7 @@ const useStyles = makeStyles((theme: Theme) => ({
 	},
 }));
 
-export default React.memo((props: MultiSelectProps<any>) => {
+const MultiSelect = (props: MultiSelectProps<any>) => {
 	const { onLoad, onSelect, selected, enableIcons, customStyles } = props;
 	const classes = useStyles();
 	const theme = useTheme();
@@ -142,4 +142,6 @@ export default React.memo((props: MultiSelectProps<any>) => {
 			</Grid>
 		</Paper>
 	);
-});
+};
+
+export default React.memo(MultiSelect);

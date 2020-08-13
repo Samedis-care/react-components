@@ -17,7 +17,7 @@ interface IProps {
 	contents: React.ReactNode;
 }
 
-export default React.memo((props: IProps) => {
+const PortalLayoutHeader = (props: IProps) => {
 	if (props.mobile) {
 		return (
 			<AppBar position={"relative"}>
@@ -36,4 +36,6 @@ export default React.memo((props: IProps) => {
 			</AppBar>
 		);
 	}
-});
+};
+
+export default React.memo(PortalLayoutHeader);

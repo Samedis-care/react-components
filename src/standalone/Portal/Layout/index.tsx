@@ -65,7 +65,7 @@ const useContainerStyles = makeStyles(() => ({
 	}),
 }));
 
-const useStyles = makeStyles(() => ({
+const useStyles = makeStyles({
 	header: {
 		gridArea: "top",
 	},
@@ -81,13 +81,13 @@ const useStyles = makeStyles(() => ({
 	mobileTopLeft: {
 		height: 56,
 	},
-}));
+});
 
 export const PortalLayoutMenuContext = createContext<
 	[boolean, Dispatch<SetStateAction<boolean>>] | undefined
 >(undefined);
 
-const RenderLayout = React.memo((props: IProps & IRenderProps) => {
+const RenderLayout = (props: IProps & IRenderProps) => {
 	const menuState = useState(false);
 	const [menuOpen, setMenuOpen] = menuState;
 
@@ -125,9 +125,11 @@ const RenderLayout = React.memo((props: IProps & IRenderProps) => {
 			<div className={classes.main}>{props.content}</div>
 		</PortalLayoutMenuContext.Provider>
 	);
-});
+};
 
-export default React.memo((props: IProps) => {
+const RenderLayoutMemo = React.memo(RenderLayout);
+
+const PortalLayout = (props: IProps) => {
 	const classes = useContainerStyles(props);
 	const mobileViewConditionMet = useMediaQuery(
 		props.mobileViewCondition || "()"
@@ -139,7 +141,7 @@ export default React.memo((props: IProps) => {
 			<div
 				className={mobile ? classes.containerMobile : classes.containerDesktop}
 			>
-				<RenderLayout mobile={mobile} {...props} />
+				<RenderLayoutMemo mobile={mobile} {...props} />
 			</div>
 		);
 	}
@@ -154,14 +156,16 @@ export default React.memo((props: IProps) => {
 							: classes.containerDesktop
 					}
 				>
-					<RenderLayout mobile={!!props.collapseMenu} {...props} />
+					<RenderLayoutMemo mobile={!!props.collapseMenu} {...props} />
 				</div>
 			</Hidden>
 			<Hidden smUp implementation="js">
 				<div className={classes.containerMobile}>
-					<RenderLayout mobile={true} {...props} />
+					<RenderLayoutMemo mobile={true} {...props} />
 				</div>
 			</Hidden>
 		</>
 	);
-});
+};
+
+export default React.memo(PortalLayout);

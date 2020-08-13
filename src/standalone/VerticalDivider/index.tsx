@@ -11,8 +11,10 @@ const useStyles = makeStyles((theme: Theme) => ({
 	},
 }));
 
-export default React.memo(() => {
+const VerticalDivider = () => {
 	const classes = useStyles();
 
 	return <div className={classes.root} />;
-});
+};
+
+export default React.memo(VerticalDivider);

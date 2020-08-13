@@ -72,7 +72,7 @@ const UnselectedListItem = withStyles(unselectedListItemStyles)(ListItem);
 const ExpandableListItem = withStyles(expandableListItemStyles)(ListItem);
 const StyledListItemIcon = withStyles(listIconStyles)(ListItemIcon);
 
-export default React.memo((props: IMenuItemProps) => {
+const MenuItemJumboReactDark = (props: IMenuItemProps) => {
 	const classes = useStyles();
 
 	const Icon = props.icon;
@@ -105,4 +105,6 @@ export default React.memo((props: IMenuItemProps) => {
 			{props.active && <div className={classes.dot} />}
 		</MyListItem>
 	);
-});
+};
+
+export default React.memo(MenuItemJumboReactDark);

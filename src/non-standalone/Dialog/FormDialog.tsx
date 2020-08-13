@@ -10,16 +10,14 @@ import {
 } from "@material-ui/core";
 import { IDialogConfigForm } from "./Types";
 
-export const FormDialog = React.memo((props: IDialogConfigForm) => {
+const FormDialogRaw = (props: IDialogConfigForm) => {
 	const [, setDialog] = useContext(DialogContext)!;
 	const { onClose } = props;
 
-	const removeDialog =
-		onClose &&
-		React.useCallback(() => {
-			setDialog(null);
-			onClose();
-		}, [setDialog, onClose]);
+	const removeDialog = React.useCallback(() => {
+		setDialog(null);
+		if (onClose) onClose();
+	}, [setDialog, onClose]);
 
 	return (
 		<Dialog open={true} onClose={removeDialog}>
@@ -45,4 +43,6 @@ export const FormDialog = React.memo((props: IDialogConfigForm) => {
 			</DialogActions>
 		</Dialog>
 	);
-});
+};
+
+export const FormDialog = React.memo(FormDialogRaw);
