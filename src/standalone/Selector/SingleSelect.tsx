@@ -11,11 +11,11 @@ export interface SingleSelectProps<Data extends SelectorData>
 	 * Simple selection change handler
 	 * @param value The selected value
 	 */
-	onSelect: (value: Data) => void;
+	onSelect: (value: Data | null) => void;
 	/**
 	 * The currently selected value
 	 */
-	selected: Data;
+	selected: Data | null;
 }
 
 const SingleSelect = (props: SingleSelectProps<any>) => (

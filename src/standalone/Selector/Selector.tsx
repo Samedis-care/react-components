@@ -3,7 +3,7 @@ import AsyncSelect from "react-select/async";
 import { FormatOptionLabelMeta } from "react-select/src/Select";
 import { ListItemText, useTheme } from "@material-ui/core";
 import { Add as AddIcon } from "@material-ui/icons";
-import { Styles } from "react-select";
+import { Styles, ValueType } from "react-select";
 import { SmallListItem, SmallListItemIcon } from "../..";
 
 export interface SelectorData {
@@ -37,7 +37,7 @@ type SelectorLabelCallback = (obj: { inputValue: string }) => string | null;
  * Callback called when the selection changes
  */
 export type SelectorOnSelectCallback<Data extends SelectorData> = (
-	value: Data | Data[]
+	value: Data | Data[] | null
 ) => void;
 
 export interface SelectorProps<Data extends SelectorData> {
@@ -183,8 +183,8 @@ const Selector = (props: SelectorProps<any>) => {
 		[loadingLabel]
 	);
 	const onChangeHandler = React.useCallback(
-		(data: any | null) => {
-			if (data?.isAddNewButton) {
+		(data: ValueType<SelectorData>) => {
+			if (data && "isAddNewButton" in data && data.isAddNewButton) {
 				if (onAddNew) onAddNew();
 				return;
 			}
