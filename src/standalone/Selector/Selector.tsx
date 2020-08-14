@@ -60,6 +60,10 @@ export interface SelectorProps<Data extends SelectorData> {
 	 */
 	disable?: boolean;
 	/**
+	 * Is the selector clearable?
+	 */
+	clearable?: boolean;
+	/**
 	 * Can the selector select multiple values
 	 */
 	multiSelect?: boolean;
@@ -132,6 +136,7 @@ const Selector = (props: SelectorProps<any>) => {
 		addNewLabel,
 		onAddNew,
 		customStyles,
+		clearable,
 	} = props;
 
 	const theme = useTheme();
@@ -222,6 +227,7 @@ const Selector = (props: SelectorProps<any>) => {
 			onChange={onChangeHandler}
 			isDisabled={disable}
 			isMulti={multiSelect}
+			isClearable={clearable}
 			formatOptionLabel={renderEntry || defaultRenderer}
 			noOptionsMessage={getNoOptionsLabel}
 			loadingMessage={getLoadingLabel}

@@ -18,6 +18,7 @@ export const SelectorSingle = () => {
 	const onSelectAction = action("onSelect");
 	const onAddNewAction = action("onAddNew");
 	const enableAddNew = boolean("Enable Add New", false);
+	const clearable = boolean("Clearable?", false);
 	const icons = boolean("Enable Icons", false);
 
 	const loadData = React.useCallback(
@@ -47,6 +48,7 @@ export const SelectorSingle = () => {
 					onLoad={loadData}
 					onAddNew={enableAddNew ? onAddNewAction : undefined}
 					enableIcons={icons}
+					clearable={clearable}
 				/>
 			</Box>
 		</>

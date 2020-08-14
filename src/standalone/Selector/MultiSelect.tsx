@@ -27,7 +27,10 @@ export interface MultiSelectorData extends SelectorData {
 }
 
 export interface MultiSelectProps<Data extends MultiSelectorData>
-	extends Omit<SelectorProps<Data>, "onSelect" | "selected" | "multiSelect"> {
+	extends Omit<
+		SelectorProps<Data>,
+		"onSelect" | "selected" | "multiSelect" | "clearable"
+	> {
 	/**
 	 * Simple selection change handler
 	 * @param value The selected value
