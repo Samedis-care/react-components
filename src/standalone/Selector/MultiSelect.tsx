@@ -1,18 +1,8 @@
 import React, { CSSProperties } from "react";
 import Selector, { SelectorData, SelectorProps } from "./Selector";
-import { SmallIconButton, SmallListItem, SmallListItemIcon } from "../..";
-import {
-	Divider,
-	Grid,
-	List,
-	ListItemSecondaryAction,
-	ListItemText,
-	Paper,
-	Theme,
-	useTheme,
-} from "@material-ui/core";
-import { Delete as DeleteIcon } from "@material-ui/icons";
+import { Grid, Paper, Theme, useTheme } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import MultiSelectEntry, { IMultiSelectEntryProps } from "./MultiSelectEntry";
 
 export interface MultiSelectorData extends SelectorData {
 	/**
@@ -40,6 +30,10 @@ export interface MultiSelectProps<Data extends MultiSelectorData>
 	 * The currently selected value
 	 */
 	selected: Data[];
+	/**
+	 * Specify a custom component for displaying multi select items
+	 */
+	selectedEntryRenderer?: React.ComponentType<IMultiSelectEntryProps>;
 }
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -50,9 +44,18 @@ const useStyles = makeStyles((theme: Theme) => ({
 }));
 
 const MultiSelect = (props: MultiSelectProps<any>) => {
-	const { onLoad, onSelect, selected, enableIcons, customStyles } = props;
+	const {
+		onLoad,
+		onSelect,
+		selected,
+		enableIcons,
+		customStyles,
+		selectedEntryRenderer,
+	} = props;
 	const classes = useStyles();
 	const theme = useTheme();
+
+	const EntryRender = selectedEntryRenderer || MultiSelectEntry;
 
 	const multiSelectHandler = React.useCallback(
 		(data: any) => {
@@ -120,26 +123,13 @@ const MultiSelect = (props: MultiSelectProps<any>) => {
 				</Grid>
 				<Grid item xs={12}>
 					{props.selected.map((data: MultiSelectorData, index: number) => (
-						<React.Fragment key={data.value}>
-							<List>
-								<SmallListItem button onClick={data.onClick}>
-									{enableIcons && (
-										<SmallListItemIcon>{data.icon}</SmallListItemIcon>
-									)}
-									<ListItemText>{data.label}</ListItemText>
-									<ListItemSecondaryAction>
-										<SmallIconButton
-											edge={"end"}
-											name={data.value}
-											onClick={handleDelete}
-										>
-											<DeleteIcon />
-										</SmallIconButton>
-									</ListItemSecondaryAction>
-								</SmallListItem>
-							</List>
-							{props.selected.length === index - 1 && <Divider />}
-						</React.Fragment>
+						<EntryRender
+							key={data.value}
+							enableDivider={props.selected.length === index - 1}
+							enableIcons={enableIcons}
+							handleDelete={handleDelete}
+							data={data}
+						/>
 					))}
 				</Grid>
 			</Grid>

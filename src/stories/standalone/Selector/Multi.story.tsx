@@ -9,6 +9,7 @@ import { colourOptions } from "./Data";
 import { action } from "@storybook/addon-actions";
 import { boolean, withKnobs } from "@storybook/addon-knobs";
 import { Box, CssBaseline } from "@material-ui/core";
+import CustomMultiSelectEntry from "./CustomMultiSelectEntry";
 
 export default {
 	title: "Standalone/Selector",
@@ -38,6 +39,10 @@ export const SelectorMulti = () => {
 	const onAddNewAction = action("onAddNew");
 	const enableAddNew = boolean("Enable Add New", false);
 	const icons = boolean("Enable Icons", false);
+	const customSelectedRenderer = boolean(
+		"Enable Custom Selected Renderer",
+		false
+	);
 
 	const loadData = React.useCallback(
 		async (query: string) => {
@@ -68,6 +73,9 @@ export const SelectorMulti = () => {
 					onLoad={loadData}
 					onAddNew={enableAddNew ? onAddNewAction : undefined}
 					enableIcons={icons}
+					selectedEntryRenderer={
+						customSelectedRenderer ? CustomMultiSelectEntry : undefined
+					}
 				/>
 			</Box>
 		</>
