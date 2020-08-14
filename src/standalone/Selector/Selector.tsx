@@ -183,8 +183,8 @@ const Selector = (props: SelectorProps<any>) => {
 		[loadingLabel]
 	);
 	const onChangeHandler = React.useCallback(
-		(data: any) => {
-			if (data.isAddNewButton) {
+		(data: any | null) => {
+			if (data?.isAddNewButton) {
 				if (onAddNew) onAddNew();
 				return;
 			}
