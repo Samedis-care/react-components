@@ -8,11 +8,33 @@ import ColumnHeaderContent from "./ColumnHeaderContent";
 import { IFilterDef } from "./FilterEntry";
 
 export interface IDataGridContentColumnHeaderProps {
+	/**
+	 * The column definition
+	 */
 	column: IDataGridColumnDef;
+	/**
+	 * The currently applied filter
+	 */
 	filter?: IFilterDef;
+	/**
+	 * Updates filter
+	 * @param field The column definition field field
+	 * @param value The new filter
+	 */
 	onFilterChange: (field: string, value: IFilterDef) => void;
+	/**
+	 * The currently applied sort
+	 */
 	sort: -1 | 0 | 1;
+	/**
+	 * The current sort priority (lower = higher priority)
+	 */
 	sortOrder: number | undefined;
+	/**
+	 * Updates sort
+	 * @param field The column definition field field
+	 * @param newSort The new sort value
+	 */
 	onSortChange: (field: string, newSort: -1 | 0 | 1) => void;
 }
 

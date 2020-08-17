@@ -8,7 +8,13 @@ import SelectAll from "./SelectAll";
 export type IDataGridColumnsState = { [field: string]: IDataGridColumnState };
 
 export interface IDataGridColumnStateProps {
+	/**
+	 * Column state of all columns
+	 */
 	columnState: IDataGridColumnsState;
+	/**
+	 * Update column state callback
+	 */
 	setColumnState: Dispatch<SetStateAction<IDataGridColumnsState>>;
 }
 

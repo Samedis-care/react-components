@@ -4,7 +4,15 @@ import { SelectRowCell } from "./CustomCells";
 import { makeStyles } from "@material-ui/core/styles";
 
 export interface IDataGridContentSelectRowViewProps {
+	/**
+	 * Is currently checked?
+	 */
 	checked: boolean;
+	/**
+	 * Update the checked state
+	 * @param _ The change event, ignored
+	 * @param newChecked The new checked state
+	 */
 	onSelect: (_: any, newChecked: boolean) => void;
 }
 

@@ -4,6 +4,7 @@ import { boolean, text, withKnobs } from "@storybook/addon-knobs";
 import { DataGrid } from "../../../standalone";
 import { makeStyles } from "@material-ui/core/styles";
 import {
+	DataGridData,
 	DataGridRowData,
 	IDataGridColumnDef,
 } from "../../../standalone/DataGrid";
@@ -59,7 +60,7 @@ export const DataGridStory = () => {
 					additionalFilters,
 					fieldFilter,
 					sort
-				): Promise<DataGridRowData[]> => {
+				): Promise<DataGridData> => {
 					action("loadData")({
 						page,
 						rowsPerPage,
@@ -69,9 +70,12 @@ export const DataGridStory = () => {
 						sort,
 					});
 
-					return new Array(rowsPerPage)
-						.fill(undefined)
-						.map((_, index) => generateRow((page - 1) * rowsPerPage + index));
+					return {
+						rowsTotal: 4 * rowsPerPage,
+						rows: new Array(rowsPerPage)
+							.fill(undefined)
+							.map((_, index) => generateRow((page - 1) * rowsPerPage + index)),
+					};
 				}}
 			/>
 		</div>

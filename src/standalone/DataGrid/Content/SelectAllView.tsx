@@ -10,7 +10,15 @@ const useStyles = makeStyles({
 });
 
 export interface IDataGridContentSelectAllViewProps {
+	/**
+	 * Is currently checked
+	 */
 	checked: boolean;
+	/**
+	 * Update checked
+	 * @param _ The change event, ignored
+	 * @param newChecked New checked state
+	 */
 	onSelect: (_: any, newChecked: boolean) => void;
 }
 

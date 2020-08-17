@@ -3,6 +3,9 @@ import { DataGridStateContext } from "../index";
 import SelectRowView from "./SelectRowView";
 
 export interface IDataGridContentSelectRowProps {
+	/**
+	 * The ID of the row
+	 */
 	id: string;
 }
 

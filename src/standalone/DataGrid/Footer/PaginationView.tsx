@@ -26,15 +26,40 @@ const useStyles = makeStyles({
 });
 
 export interface IDataGridPaginationViewProps {
+	/**
+	 * Set page size callback
+	 * @param evt The change event
+	 */
 	setPageSize: (
 		evt: React.ChangeEvent<{ name?: string; value: unknown }>
 	) => void;
+	/**
+	 * Go to first page callback
+	 */
 	gotoFirstPage: () => void;
+	/**
+	 * Go to previous page callback
+	 */
 	gotoPrevPage: () => void;
+	/**
+	 * Go to next page callback
+	 */
 	gotoNextPage: () => void;
+	/**
+	 * Go to last page callback
+	 */
 	gotoLastPage: () => void;
+	/**
+	 * The current page (zero based index)
+	 */
 	pageIndex: number;
+	/**
+	 * The amount of rows per page (max)
+	 */
 	rowsPerPage: number;
+	/**
+	 * The total amount of rows
+	 */
 	rowsTotal: number;
 }
 

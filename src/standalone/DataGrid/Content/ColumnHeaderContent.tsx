@@ -16,12 +16,34 @@ import { makeStyles } from "@material-ui/core/styles";
 import FilterEntry, { IFilterDef } from "./FilterEntry";
 
 export interface IDataGridContentColumnHeaderContentProps {
+	/**
+	 * The header label
+	 */
 	headerName: string;
+	/**
+	 * Allow resizing of column (disabled for locked columns)
+	 */
 	enableResize: boolean;
+	/**
+	 * Start dragging callback
+	 */
 	startDrag: () => void;
+	/**
+	 * The currently active sort
+	 */
 	sort: -1 | 0 | 1;
+	/**
+	 * The sort priority (lower = higher priority)
+	 */
 	sortOrder: number | undefined;
+	/**
+	 * The currently active filter
+	 */
 	filter?: IFilterDef;
+	/**
+	 * Updates the filter
+	 * @param value The new filter
+	 */
 	onFilterChange: (value: IFilterDef) => void;
 }
 

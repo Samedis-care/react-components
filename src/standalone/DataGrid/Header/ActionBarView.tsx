@@ -11,11 +11,33 @@ import {
 import { VerticalDivider } from "../../index";
 
 export interface IDataGridActionBarViewProps {
+	/**
+	 * Callback to toggle the settings popover
+	 */
 	toggleSettings: () => void;
-	numSelected: number; // 0, 1 or n
+	/**
+	 * The amount of selected items
+	 * Values: 0 (none), 1 (one) or 2 (multiple)
+	 */
+	numSelected: number;
+	/**
+	 * Callback for add new button.
+	 * If not defined: Disables add new button
+	 */
 	handleAddNew?: () => void;
+	/**
+	 * Callback for edit button.
+	 * If not defined: Disables edit button
+	 */
 	handleEdit?: () => void;
+	/**
+	 * Callback for delete button.
+	 * If not defined: Disables delete button
+	 */
 	handleDelete?: () => void;
+	/**
+	 * Callback for reset button
+	 */
 	handleReset: () => void;
 }
 

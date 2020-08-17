@@ -3,7 +3,13 @@ import { FixedDataGridCell } from "./CustomCells";
 import { TableCellProps } from "@material-ui/core";
 
 export interface IDataGridFixedCellProps extends TableCellProps {
+	/**
+	 * The fixed cell contents
+	 */
 	children: React.ReactNode;
+	/**
+	 * The cell component
+	 */
 	cellComponent?: React.ComponentType<TableCellProps>;
 }
 

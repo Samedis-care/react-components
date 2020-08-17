@@ -12,7 +12,14 @@ const searchInputProps = {
 };
 
 export interface IDataGridSearchViewProps {
+	/**
+	 * The current search input
+	 */
 	search: string;
+	/**
+	 * The search input change event handler
+	 * @param evt The change event
+	 */
 	handleSearchChange: (evt: ChangeEvent<HTMLInputElement>) => void;
 }
 

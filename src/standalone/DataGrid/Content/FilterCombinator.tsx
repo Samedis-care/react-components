@@ -3,7 +3,14 @@ import { Grid, Switch, Typography } from "@material-ui/core";
 import { FilterComboType } from "./FilterEntry";
 
 interface IProps {
+	/**
+	 * The current filter combination type
+	 */
 	value: FilterComboType;
+	/**
+	 * Sets the filter combination type
+	 * @param value The new type
+	 */
 	onChange: (value: FilterComboType) => void;
 }
 

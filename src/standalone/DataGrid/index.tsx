@@ -23,6 +23,16 @@ export type IDataGridProps = IDataGridHeaderProps &
 	IDataGridCallbacks;
 
 export interface IDataGridCallbacks {
+	/**
+	 * Loads data for the grid
+	 * @param page The page to load
+	 * @param rows The amount of rows per page
+	 * @param quickFilter The search box content
+	 * @param additionalFilters Additional filters specified by you
+	 * @param fieldFilter The field filter contents
+	 * @param sort The sort settings
+	 * @returns The loaded data (resolve) or an error (reject)
+	 */
 	loadData: (
 		page: number,
 		rows: number,
@@ -30,13 +40,18 @@ export interface IDataGridCallbacks {
 		additionalFilters: { [name: string]: any },
 		fieldFilter: IDataGridFieldFilter,
 		sort: { field: string; direction: -1 | 1 }[]
-	) => Promise<DataGridRowData[]>;
+	) => Promise<DataGridData>;
 }
 
 export interface IDataGridColumnProps {
+	/**
+	 * Column definitions
+	 */
 	columns: IDataGridColumnDef[];
+	/**
+	 * Placeholder for search box
+	 */
 	searchPlaceholder?: string;
-
 	/**
 	 * Add new handler, do not specify to disable add new button
 	 */
@@ -57,34 +72,102 @@ export interface IDataGridColumnProps {
 export type IDataGridFieldFilter = { [field: string]: IFilterDef };
 
 export interface IDataGridColumnDef {
+	/**
+	 * The field name
+	 */
 	field: string;
+	/**
+	 * The field label
+	 */
 	headerName: string;
 
-	// internal fields, do not set
+	// internal fields, do not set, will be overwritten
+	/**
+	 * Is the column locked to the start
+	 */
 	isLocked?: boolean;
+	/**
+	 * Key to re-calc locked element position
+	 */
 	fixedColumnKey?: string;
 }
 
 export interface IDataGridColumnState {
+	/**
+	 * The current sort setting
+	 */
 	sort: -1 | 0 | 1;
+	/**
+	 * The sort priority (lower = higher priority)
+	 */
 	sortOrder?: number;
+	/**
+	 * The enabled filter
+	 */
 	filter: IFilterDef | undefined;
+}
+
+export interface DataGridData {
+	/**
+	 * Total amount of rows
+	 */
+	rowsTotal: number;
+	/**
+	 * Row data
+	 */
+	rows: DataGridRowData[];
 }
 
 export type DataGridRowData = { id: string } & { [key: string]: any };
 
 export interface IDataGridState {
+	/**
+	 * The current search (quick filter) string
+	 */
 	search: string;
+	/**
+	 * The rows per page
+	 */
 	rowsPerPage: number;
+	/**
+	 * The total amount of rows
+	 */
 	rowsTotal: number;
+	/**
+	 * The current page (zero based index)
+	 */
 	pageIndex: number;
+	/**
+	 * Show the settings popover
+	 */
 	showSettings: boolean;
+	/**
+	 * The hidden fields
+	 */
 	hiddenColumns: string[];
+	/**
+	 * The locked fields
+	 */
 	lockedColumns: string[];
+	/**
+	 * Is everything selected? (inverts selection)
+	 */
 	selectAll: boolean;
+	/**
+	 * The selected rows
+	 */
 	selectedRows: string[];
+	/**
+	 * The rows to be shown
+	 */
 	rows: DataGridRowData[] | null;
+	/**
+	 * Error returned by loadData
+	 */
 	dataLoadError: Error | null;
+	/**
+	 * Should loadData be called?
+	 */
 	refreshData: boolean;
 }
 
@@ -99,7 +182,7 @@ export const DataGridPropsContext = React.createContext<
 export const DataGridDefaultState: IDataGridState = {
 	search: "",
 	rowsPerPage: 25,
-	rowsTotal: 100,
+	rowsTotal: 0,
 	pageIndex: 0,
 	showSettings: false,
 	hiddenColumns: [],
@@ -192,10 +275,11 @@ const DataGrid = (props: IDataGridProps) => {
 			.map((col) => ({ field: col.field, direction: col.sort as -1 | 1 }));
 
 		loadData(pageIndex + 1, rowsPerPage, search, {}, fieldFilter, sorts)
-			.then((newRows) => {
+			.then((data) => {
 				setState((prevState) => ({
 					...prevState,
-					rows: newRows,
+					rowsTotal: data.rowsTotal,
+					rows: data.rows,
 					refreshData: false,
 				}));
 			})

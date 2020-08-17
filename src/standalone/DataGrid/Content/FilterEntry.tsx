@@ -27,8 +27,18 @@ export interface IFilterDef {
 }
 
 interface IProps {
+	/**
+	 * The type of the column value (string, number, etc). See ValueType
+	 */
 	valueType: ValueType;
+	/**
+	 * The currently active filter
+	 */
 	value?: IFilterDef;
+	/**
+	 * Update filter
+	 * @param def The new filter
+	 */
 	onChange: (def: IFilterDef) => void;
 }
 

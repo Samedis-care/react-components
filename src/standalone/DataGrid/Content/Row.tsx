@@ -6,6 +6,9 @@ import FixedCell from "./FixedCell";
 import SelectRow from "./SelectRow";
 
 export interface IDataGridRowProps extends IDataGridColumnProps {
+	/**
+	 * The data of the row
+	 */
 	data: DataGridRowData;
 }
 

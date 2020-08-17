@@ -14,10 +14,27 @@ import {
 import { IDataGridColumnDef, IDataGridColumnProps } from "../index";
 
 export interface IDataGridSettingsDialogProps extends IDataGridColumnProps {
+	/**
+	 * Callback to close settins pop-over
+	 */
 	closeGridSettings: () => void;
+	/**
+	 * Event to toggle column locked state
+	 * @param evt The change event
+	 */
 	toggleColumnLock: (evt: ChangeEvent<HTMLInputElement>) => void;
+	/**
+	 * Event to toggle column hidden state
+	 * @param evt The change event
+	 */
 	toggleColumnVisibility: (evt: ChangeEvent<HTMLInputElement>) => void;
+	/**
+	 * The currently locked columns
+	 */
 	lockedColumns: string[];
+	/**
+	 * The currently hidden columns
+	 */
 	hiddenColumns: string[];
 }
 
