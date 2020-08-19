@@ -20,6 +20,7 @@ export const SelectorSingle = () => {
 	const enableAddNew = boolean("Enable Add New", false);
 	const clearable = boolean("Clearable?", false);
 	const icons = boolean("Enable Icons", false);
+	const disable = boolean("Disable", false);
 
 	const loadData = React.useCallback(
 		async (query: string) => {
@@ -49,6 +50,7 @@ export const SelectorSingle = () => {
 					onAddNew={enableAddNew ? onAddNewAction : undefined}
 					enableIcons={icons}
 					clearable={clearable}
+					disable={disable}
 				/>
 			</Box>
 		</>

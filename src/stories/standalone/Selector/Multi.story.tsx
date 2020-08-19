@@ -39,6 +39,7 @@ export const SelectorMulti = () => {
 	const onAddNewAction = action("onAddNew");
 	const enableAddNew = boolean("Enable Add New", false);
 	const icons = boolean("Enable Icons", false);
+	const disable = boolean("Disable", false);
 	const customSelectedRenderer = boolean(
 		"Enable Custom Selected Renderer",
 		false
@@ -76,6 +77,7 @@ export const SelectorMulti = () => {
 					selectedEntryRenderer={
 						customSelectedRenderer ? CustomMultiSelectEntry : undefined
 					}
+					disable={disable}
 				/>
 			</Box>
 		</>

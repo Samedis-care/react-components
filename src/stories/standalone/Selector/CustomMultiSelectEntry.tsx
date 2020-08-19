@@ -30,6 +30,7 @@ const CustomMultiSelectEntry = (props: IMultiSelectEntryProps) => {
 						<SmallIconButton
 							edge={"end"}
 							name={data.value}
+							disabled={!handleDelete}
 							onClick={handleDelete}
 						>
 							<DeleteIcon />

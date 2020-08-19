@@ -51,6 +51,7 @@ const MultiSelect = (props: MultiSelectProps<any>) => {
 		enableIcons,
 		customStyles,
 		selectedEntryRenderer,
+		disable,
 	} = props;
 	const classes = useStyles();
 	const theme = useTheme();
@@ -127,7 +128,7 @@ const MultiSelect = (props: MultiSelectProps<any>) => {
 							key={data.value}
 							enableDivider={props.selected.length === index - 1}
 							enableIcons={enableIcons}
-							handleDelete={handleDelete}
+							handleDelete={disable ? undefined : handleDelete}
 							data={data}
 						/>
 					))}
