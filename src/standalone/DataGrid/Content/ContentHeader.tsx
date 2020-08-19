@@ -1,5 +1,14 @@
-import React, { Dispatch, SetStateAction, useCallback } from "react";
-import { IDataGridColumnProps, IDataGridColumnState } from "../index";
+import React, {
+	Dispatch,
+	SetStateAction,
+	useCallback,
+	useContext,
+} from "react";
+import {
+	DataGridColumnsStateContext,
+	IDataGridColumnProps,
+	IDataGridColumnState,
+} from "../index";
 import { TableHead, TableRow } from "@material-ui/core";
 import ColumnHeader from "./ColumnHeader";
 import { IFilterDef } from "./FilterEntry";
@@ -7,21 +16,21 @@ import SelectAll from "./SelectAll";
 
 export type IDataGridColumnsState = { [field: string]: IDataGridColumnState };
 
-export interface IDataGridColumnStateProps {
+export type DataGridColumnState = [
 	/**
 	 * Column state of all columns
 	 */
-	columnState: IDataGridColumnsState;
+	IDataGridColumnsState,
 	/**
 	 * Update column state callback
 	 */
-	setColumnState: Dispatch<SetStateAction<IDataGridColumnsState>>;
-}
+	Dispatch<SetStateAction<IDataGridColumnsState>>
+];
 
-const ContentHeader = (
-	props: IDataGridColumnProps & IDataGridColumnStateProps
-) => {
-	const { columnState, setColumnState } = props;
+const ContentHeader = (props: IDataGridColumnProps) => {
+	const [columnState, setColumnState] = useContext(
+		DataGridColumnsStateContext
+	)!;
 	const onFilterChange = useCallback(
 		(field: string, newFilter: IFilterDef) => {
 			setColumnState((prevState) => ({

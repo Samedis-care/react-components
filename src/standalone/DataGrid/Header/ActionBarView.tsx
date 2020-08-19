@@ -1,5 +1,5 @@
-import React from "react";
-import { Grid, IconButton, Tooltip } from "@material-ui/core";
+import React, { useCallback, useState } from "react";
+import { Grid, IconButton, MenuProps, Tooltip } from "@material-ui/core";
 import {
 	Add as AddIcon,
 	Delete as DeleteIcon,
@@ -9,6 +9,8 @@ import {
 	SettingsBackupRestore as ResetIcon,
 } from "@material-ui/icons";
 import { VerticalDivider } from "../../index";
+import { IDataGridExporter } from "./index";
+import ExportMenu from "./ExportMenu";
 
 export interface IDataGridActionBarViewProps {
 	/**
@@ -39,14 +41,41 @@ export interface IDataGridActionBarViewProps {
 	 * Callback for reset button
 	 */
 	handleReset: () => void;
+	/**
+	 * Does this grid have an custom filter bar?
+	 */
+	hasCustomFilterBar: boolean;
+	/**
+	 * List of available export providers
+	 */
+	exporters?: IDataGridExporter<any>[];
 }
 
 const ActionBarView = (props: IDataGridActionBarViewProps) => {
 	const showDivider =
 		props.handleAddNew || props.handleEdit || props.handleDelete;
 
+	const [exportAnchorEl, setExportAnchorEl] = useState<MenuProps["anchorEl"]>(
+		undefined
+	);
+	const openExportMenu = useCallback(
+		(evt: React.MouseEvent) => {
+			setExportAnchorEl(evt.currentTarget);
+		},
+		[setExportAnchorEl]
+	);
+
+	const closeExportMenu = useCallback(() => {
+		setExportAnchorEl(null);
+	}, [setExportAnchorEl]);
+
 	return (
 		<Grid container>
+			{props.hasCustomFilterBar && (
+				<Grid item key={"divider-1"}>
+					<VerticalDivider />
+				</Grid>
+			)}
 			{props.handleAddNew && (
 				<Grid item key={"new"}>
 					<Tooltip title={"Create new"}>
@@ -87,19 +116,26 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 				</Grid>
 			)}
 			{showDivider && (
-				<Grid item key={"divider"}>
+				<Grid item key={"divider-2"}>
 					<VerticalDivider />
 				</Grid>
 			)}
-			<Grid item key={"export"}>
-				<Tooltip title={"Export"}>
-					<span>
-						<IconButton>
-							<ExportIcon />
-						</IconButton>
-					</span>
-				</Tooltip>
-			</Grid>
+			{props.exporters && (
+				<Grid item key={"export"}>
+					<Tooltip title={"Export"}>
+						<span>
+							<IconButton onClick={openExportMenu}>
+								<ExportIcon />
+							</IconButton>
+						</span>
+					</Tooltip>
+					<ExportMenu
+						exporters={props.exporters}
+						anchorEl={exportAnchorEl}
+						onClose={closeExportMenu}
+					/>
+				</Grid>
+			)}
 			<Grid item key={"settings"}>
 				<Tooltip title={"Settings"}>
 					<span>

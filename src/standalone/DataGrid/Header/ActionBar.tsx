@@ -46,6 +46,8 @@ const ActionBar = () => {
 			handleEdit={onEdit ? handleEdit : undefined}
 			handleDelete={onDelete ? handleDelete : undefined}
 			handleReset={handleReset}
+			exporters={gridProps.exporters}
+			hasCustomFilterBar={!!gridProps.filterBar}
 		/>
 	);
 };

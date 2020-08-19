@@ -13,9 +13,13 @@ import Footer, { IDataGridFooterProps } from "./Footer";
 import Settings from "./Settings";
 import Content from "./Content";
 import { IFilterDef } from "./Content/FilterEntry";
-import { IDataGridColumnsState } from "./Content/ContentHeader";
+import {
+	DataGridColumnState,
+	IDataGridColumnsState,
+} from "./Content/ContentHeader";
 import { Loader } from "../index";
 import { debounce } from "../../utils";
+import { dataGridPrepareFiltersAndSorts } from "./CallbackUtil";
 
 export type IDataGridProps = IDataGridHeaderProps &
 	IDataGridFooterProps &
@@ -37,11 +41,19 @@ export interface IDataGridCallbacks {
 		page: number,
 		rows: number,
 		quickFilter: string,
-		additionalFilters: { [name: string]: any },
+		additionalFilters: DataGridAdditionalFilters,
 		fieldFilter: IDataGridFieldFilter,
-		sort: { field: string; direction: -1 | 1 }[]
+		sort: DataGridSortSetting[]
 	) => Promise<DataGridData>;
+	/**
+	 * Extracts additional filters from the provided custom data
+	 * @param customData The custom user-defined state-stored data
+	 */
+	getAdditionalFilters?: (customData: any) => DataGridAdditionalFilters;
 }
+
+export type DataGridAdditionalFilters = { [name: string]: any };
+export type DataGridSortSetting = { field: string; direction: -1 | 1 };
 
 export interface IDataGridColumnProps {
 	/**
@@ -169,6 +181,10 @@ export interface IDataGridState {
 	 * Should loadData be called?
 	 */
 	refreshData: boolean;
+	/**
+	 * Custom user-defined data
+	 */
+	customData: any;
 }
 
 export const DataGridStateContext = React.createContext<
@@ -177,6 +193,10 @@ export const DataGridStateContext = React.createContext<
 
 export const DataGridPropsContext = React.createContext<
 	IDataGridProps | undefined
+>(undefined);
+
+export const DataGridColumnsStateContext = React.createContext<
+	DataGridColumnState | undefined
 >(undefined);
 
 export const DataGridDefaultState: IDataGridState = {
@@ -192,6 +212,7 @@ export const DataGridDefaultState: IDataGridState = {
 	rows: null,
 	dataLoadError: null,
 	refreshData: true,
+	customData: undefined,
 };
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -209,7 +230,7 @@ const useStyles = makeStyles((theme: Theme) => ({
 }));
 
 const DataGrid = (props: IDataGridProps) => {
-	const { columns, loadData } = props;
+	const { columns, loadData, getAdditionalFilters } = props;
 
 	const classes = useStyles();
 	const statePack = useState<IDataGridState>(DataGridDefaultState);
@@ -245,36 +266,23 @@ const DataGrid = (props: IDataGridProps) => {
 		[columns, hiddenColumns, lockedColumns]
 	);
 
-	const [columnsState, setColumnsState] = useState<IDataGridColumnsState>({});
+	const columnsStatePack = useState<IDataGridColumnsState>({});
+	const [columnsState] = columnsStatePack;
 
 	// refresh data if desired
 	useEffect(() => {
 		if (!refreshData) return;
 
-		let sorts = [];
-		const fieldFilter: IDataGridFieldFilter = {};
+		const [sorts, fieldFilter] = dataGridPrepareFiltersAndSorts(columnsState);
 
-		for (const field in columnsState) {
-			if (!columnsState.hasOwnProperty(field)) continue;
-
-			if (columnsState[field].sort !== 0) {
-				sorts.push({
-					field,
-					...columnsState[field],
-				});
-			}
-
-			const filter = columnsState[field].filter;
-			if (filter && filter.value1) {
-				fieldFilter[field] = filter;
-			}
-		}
-
-		sorts = sorts
-			.sort((a, b) => a.sortOrder! - b.sortOrder!)
-			.map((col) => ({ field: col.field, direction: col.sort as -1 | 1 }));
-
-		loadData(pageIndex + 1, rowsPerPage, search, {}, fieldFilter, sorts)
+		loadData(
+			pageIndex + 1,
+			rowsPerPage,
+			search,
+			getAdditionalFilters ? getAdditionalFilters(state.customData) : {},
+			fieldFilter,
+			sorts
+		)
 			.then((data) => {
 				setState((prevState) => ({
 					...prevState,
@@ -320,27 +328,27 @@ const DataGrid = (props: IDataGridProps) => {
 		>
 			<DataGridPropsContext.Provider value={props}>
 				<DataGridStateContext.Provider value={statePack}>
-					<Grid item>
-						<Header />
-					</Grid>
-					<Grid item xs className={classes.middle}>
-						<Settings columns={columns} />
-						{rows === null && dataLoadError === null && <Loader />}
-						{rows === null && dataLoadError !== null && dataLoadError.message}
-						{rows !== null && rows.length === 0 && "No Data!"}
-						{rows && (
-							<Content
-								columns={visibleColumns}
-								rowsPerPage={state.rowsPerPage}
-								columnState={columnsState}
-								setColumnState={setColumnsState}
-								rows={rows}
-							/>
-						)}
-					</Grid>
-					<Grid item>
-						<Footer />
-					</Grid>
+					<DataGridColumnsStateContext.Provider value={columnsStatePack}>
+						<Grid item>
+							<Header />
+						</Grid>
+						<Grid item xs className={classes.middle}>
+							<Settings columns={columns} />
+							{rows === null && dataLoadError === null && <Loader />}
+							{rows === null && dataLoadError !== null && dataLoadError.message}
+							{rows !== null && rows.length === 0 && "No Data!"}
+							{rows && (
+								<Content
+									columns={visibleColumns}
+									rowsPerPage={state.rowsPerPage}
+									rows={rows}
+								/>
+							)}
+						</Grid>
+						<Grid item>
+							<Footer />
+						</Grid>
+					</DataGridColumnsStateContext.Provider>
 				</DataGridStateContext.Provider>
 			</DataGridPropsContext.Provider>
 		</Grid>

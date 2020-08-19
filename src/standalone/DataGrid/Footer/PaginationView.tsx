@@ -77,10 +77,10 @@ const PaginationView = (props: IDataGridPaginationViewProps) => {
 
 	return (
 		<Grid container spacing={2}>
-			<Grid item>
+			<Grid item key={"page-size-label"}>
 				<Typography className={classes.text}>Page size:</Typography>
 			</Grid>
-			<Grid item>
+			<Grid item key={"page-size-select"}>
 				<Select
 					variant={"standard"}
 					margin={"dense"}
@@ -95,18 +95,18 @@ const PaginationView = (props: IDataGridPaginationViewProps) => {
 					<MenuItem value={100}>100</MenuItem>
 				</Select>
 			</Grid>
-			<Grid item>
+			<Grid item key={"page-size-stats-divider"}>
 				<VerticalDivider />
 			</Grid>
-			<Grid item>
+			<Grid item key={"page-stats"}>
 				<Typography className={classes.text}>
 					{startRowIndex} - {endRowIndex} of {props.rowsTotal}
 				</Typography>
 			</Grid>
-			<Grid item>
+			<Grid item key={"page-stats-controls-divider"}>
 				<VerticalDivider />
 			</Grid>
-			<Grid item>
+			<Grid item key={"page-controls"}>
 				<Grid container>
 					<Grid item>
 						<Tooltip title={"First page"} placement={"top"}>
