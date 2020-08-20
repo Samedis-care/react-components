@@ -65,6 +65,9 @@ const useStyles = makeStyles({
 	sortIcon: {
 		height: 24,
 	},
+	disableClick: {
+		pointerEvents: "none",
+	},
 });
 
 const anchorOrigin: PopoverOrigin = {
@@ -103,7 +106,7 @@ const ColumnHeaderContent = (
 	return (
 		<>
 			<Grid container justify={"space-between"}>
-				<Grid item>
+				<Grid item className={classes.disableClick}>
 					<Grid container justify={"flex-start"}>
 						<Grid item>{props.headerName}</Grid>
 						<Grid item className={classes.sortIcon}>

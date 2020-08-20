@@ -9,6 +9,7 @@ import {
 import {
 	Description as ExportIcon,
 	Done as DoneIcon,
+	Error as ErrorIcon,
 } from "@material-ui/icons";
 import {
 	DataGridColumnsStateContext,
@@ -28,72 +29,94 @@ export enum DataGridExportStatus {
 	Idle,
 	Working,
 	Ready,
+	Error,
 }
 
-const ExportMenuEntry = (props: IDataGridExportMenuEntryProps) => {
-	const [state] = useContext(DataGridStateContext)!;
-	const [columnsState] = useContext(DataGridColumnsStateContext)!;
-	const { getAdditionalFilters } = useContext(DataGridPropsContext)!;
-	const [status, setStatus] = useState(DataGridExportStatus.Idle);
-	const [exportData, setExportData] = useState<any>(undefined);
-	const IdleIcon = props.exporter.icon || ExportIcon;
-	const { onRequest, onDownload } = props.exporter;
-	const { search, customData } = state;
+const ExportMenuEntry = React.forwardRef(
+	(props: IDataGridExportMenuEntryProps, ref) => {
+		const [state] = useContext(DataGridStateContext)!;
+		const [columnsState] = useContext(DataGridColumnsStateContext)!;
+		const { getAdditionalFilters } = useContext(DataGridPropsContext)!;
+		const [status, setStatus] = useState(DataGridExportStatus.Idle);
+		const [exportData, setExportData] = useState<any>(undefined);
+		const IdleIcon = props.exporter.icon || ExportIcon;
+		const { onRequest, onDownload } = props.exporter;
+		const { search, customData } = state;
 
-	const startExport = useCallback(async () => {
-		setStatus(DataGridExportStatus.Working);
-		const [sorts, fieldFilter] = dataGridPrepareFiltersAndSorts(columnsState);
-		const data = await onRequest(
+		const startExport = useCallback(async () => {
+			setStatus(DataGridExportStatus.Working);
+			try {
+				const [sorts, fieldFilter] = dataGridPrepareFiltersAndSorts(
+					columnsState
+				);
+				const data = await onRequest(
+					search,
+					getAdditionalFilters ? getAdditionalFilters(customData) : {},
+					fieldFilter,
+					sorts
+				);
+				setExportData(data);
+				setStatus(DataGridExportStatus.Ready);
+			} catch (e) {
+				setExportData(e);
+				setStatus(DataGridExportStatus.Error);
+			}
+		}, [
+			setStatus,
+			setExportData,
+			onRequest,
+			columnsState,
+			getAdditionalFilters,
 			search,
-			getAdditionalFilters ? getAdditionalFilters(customData) : {},
-			fieldFilter,
-			sorts
+			customData,
+		]);
+
+		const finishExport = useCallback(() => {
+			onDownload(exportData);
+			setStatus(DataGridExportStatus.Idle);
+		}, [onDownload, setStatus, exportData]);
+
+		const cancelExport = useCallback(() => {
+			setStatus(DataGridExportStatus.Idle);
+		}, [setStatus]);
+
+		return (
+			<>
+				{status === DataGridExportStatus.Idle && (
+					<MenuItem onClick={startExport} innerRef={ref}>
+						<ListItemIcon>
+							<IdleIcon />
+						</ListItemIcon>
+						<ListItemText primary={props.exporter.label} />
+					</MenuItem>
+				)}
+				{status === DataGridExportStatus.Working && (
+					<MenuItem innerRef={ref}>
+						<ListItemIcon>
+							<CircularProgress size={24} />
+						</ListItemIcon>
+						<ListItemText primary={props.exporter.workingLabel} />
+					</MenuItem>
+				)}
+				{status === DataGridExportStatus.Ready && (
+					<MenuItem onClick={finishExport} innerRef={ref}>
+						<ListItemIcon>
+							<DoneIcon />
+						</ListItemIcon>
+						<ListItemText primary={props.exporter.readyLabel} />
+					</MenuItem>
+				)}
+				{status === DataGridExportStatus.Error && (
+					<MenuItem onClick={cancelExport} innerRef={ref}>
+						<ListItemIcon>
+							<ErrorIcon />
+						</ListItemIcon>
+						<ListItemText primary={props.exporter.errorLabel} />
+					</MenuItem>
+				)}
+			</>
 		);
-		setExportData(data);
-		setStatus(DataGridExportStatus.Ready);
-	}, [
-		setStatus,
-		setExportData,
-		onRequest,
-		columnsState,
-		getAdditionalFilters,
-		search,
-		customData,
-	]);
-
-	const finishExport = useCallback(() => {
-		onDownload(exportData);
-		setStatus(DataGridExportStatus.Idle);
-	}, [onDownload, setStatus, exportData]);
-
-	return (
-		<>
-			{status === DataGridExportStatus.Idle && (
-				<MenuItem onClick={startExport}>
-					<ListItemIcon>
-						<IdleIcon />
-					</ListItemIcon>
-					<ListItemText primary={props.exporter.label} />
-				</MenuItem>
-			)}
-			{status === DataGridExportStatus.Working && (
-				<MenuItem>
-					<ListItemIcon>
-						<CircularProgress size={24} />
-					</ListItemIcon>
-					<ListItemText primary={props.exporter.workingLabel} />
-				</MenuItem>
-			)}
-			{status === DataGridExportStatus.Ready && (
-				<MenuItem onClick={finishExport}>
-					<ListItemIcon>
-						<DoneIcon />
-					</ListItemIcon>
-					<ListItemText primary={props.exporter.readyLabel} />
-				</MenuItem>
-			)}
-		</>
-	);
-};
+	}
+);
 
 export default React.memo(ExportMenuEntry);

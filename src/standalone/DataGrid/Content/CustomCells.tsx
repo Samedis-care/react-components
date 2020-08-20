@@ -4,7 +4,7 @@ const selectRowCellStyles = createStyles((theme: Theme) => ({
 	root: {
 		position: "sticky",
 		left: 0,
-		backgroundColor: theme.palette.background.paper,
+		backgroundColor: "inherit",
 		borderRight: `1px solid ${theme.palette.divider}`,
 		zIndex: 1000,
 	},
@@ -23,7 +23,7 @@ const fixedDataGridCellStyles = createStyles((theme: Theme) => ({
 		borderRight: `1px solid ${theme.palette.divider}`,
 		position: "sticky",
 		zIndex: 1001,
-		backgroundColor: theme.palette.background.paper,
+		backgroundColor: "inherit",
 	},
 }));
 export const FixedDataGridCell = withStyles(fixedDataGridCellStyles)(TableCell);
@@ -36,6 +36,9 @@ const stickyHeaderCellStyles = createStyles((theme: Theme) => ({
 		borderBottom: `1px solid ${theme.palette.divider}`,
 		borderRight: `1px solid ${theme.palette.divider}`,
 		zIndex: 1000,
+		"&:hover": {
+			backgroundColor: theme.palette.action.hover,
+		},
 	},
 }));
 export const StickyHeaderCell = withStyles(stickyHeaderCellStyles)(TableCell);

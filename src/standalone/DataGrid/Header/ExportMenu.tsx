@@ -42,6 +42,7 @@ const ExportMenu = (props: IDataGridExportMenuProps) => {
 			anchorOrigin={anchorOrigin}
 			transformOrigin={transformOrigin}
 			keepMounted
+			getContentAnchorEl={null}
 			open={!!props.anchorEl}
 			onClose={props.onClose}
 		>

@@ -52,6 +52,10 @@ export interface IDataGridExporter<T> {
 	 */
 	readyLabel: string;
 	/**
+	 * The label of the export menu entry if an error occurs in onRequest
+	 */
+	errorLabel: string;
+	/**
 	 * Requests the backend to prepare an export with the given parameters
 	 * @param quickFilter The quick filter (search field)
 	 * @param additionalFilters Additional user-defined fields

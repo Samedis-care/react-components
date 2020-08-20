@@ -4,11 +4,15 @@ import { boolean, text, withKnobs } from "@storybook/addon-knobs";
 import { DataGrid } from "../../../standalone";
 import { makeStyles } from "@material-ui/core/styles";
 import {
+	DataGridAdditionalFilters,
 	DataGridData,
 	DataGridRowData,
+	DataGridSortSetting,
 	IDataGridColumnDef,
+	IDataGridFieldFilter,
 } from "../../../standalone/DataGrid";
 import { action } from "@storybook/addon-actions";
+import { IDataGridExporter } from "../../../standalone/DataGrid/Header";
 
 export default {
 	title: "Standalone/DataGrid",
@@ -37,6 +41,34 @@ const generateRow = (id: number): DataGridRowData => {
 	});
 	return ret;
 };
+
+const exporters: IDataGridExporter<any>[] = [
+	{
+		id: "excel",
+		label: "Excel",
+		workingLabel: "Running excel export...",
+		readyLabel: "Excel spreadsheet is ready to download",
+		errorLabel: "Excel export failed",
+		onRequest: (
+			quickFilter: string,
+			additionalFilters: DataGridAdditionalFilters,
+			fieldFilter: IDataGridFieldFilter,
+			sort: DataGridSortSetting[]
+		) => {
+			action("onRequest")(quickFilter, additionalFilters, fieldFilter, sort);
+			return new Promise((resolve, reject) => {
+				window.setTimeout(() => {
+					if (Math.random() > 0.5) {
+						reject(new Error("Bad luck"));
+					} else {
+						resolve(Math.random().toString());
+					}
+				}, 5000);
+			});
+		},
+		onDownload: action("onDownload"),
+	},
+];
 
 export const DataGridStory = () => {
 	const classes = useStyles();
@@ -77,6 +109,7 @@ export const DataGridStory = () => {
 							.map((_, index) => generateRow((page - 1) * rowsPerPage + index)),
 					};
 				}}
+				exporters={exporters}
 			/>
 		</div>
 	);
