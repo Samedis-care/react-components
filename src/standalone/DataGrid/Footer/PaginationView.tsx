@@ -1,5 +1,6 @@
 import React from "react";
 import {
+	Box,
 	Grid,
 	IconButton,
 	MenuItem,
@@ -17,14 +18,23 @@ import {
 import { makeStyles } from "@material-ui/core/styles";
 import i18n from "../../../i18n";
 
-const useStyles = makeStyles({
+const useStyles = makeStyles((theme) => ({
 	text: {
 		padding: "12px 0",
 	},
 	firstPageBtn: {
 		paddingLeft: 0,
 	},
-});
+	paginationBtn: {
+		[theme.breakpoints.down("sm")]: {
+			paddingLeft: 4,
+			paddingRight: 4,
+		},
+	},
+	vertDivWrapper: {
+		height: "100%",
+	},
+}));
 
 export interface IDataGridPaginationViewProps {
 	/**
@@ -77,11 +87,13 @@ const PaginationView = (props: IDataGridPaginationViewProps) => {
 	const isLastPage = endRowIndex === props.rowsTotal;
 
 	return (
-		<Grid container spacing={2}>
+		<Grid container wrap={"nowrap"}>
 			<Grid item key={"page-size-label"}>
-				<Typography className={classes.text}>
-					{i18n.t("standalone.data-grid.footer.page-size")!}
-				</Typography>
+				<Box mx={2}>
+					<Typography className={classes.text}>
+						{i18n.t("standalone.data-grid.footer.page-size")!}
+					</Typography>
+				</Box>
 			</Grid>
 			<Grid item key={"page-size-select"}>
 				<Select
@@ -99,7 +111,9 @@ const PaginationView = (props: IDataGridPaginationViewProps) => {
 				</Select>
 			</Grid>
 			<Grid item key={"page-size-stats-divider"}>
-				<VerticalDivider />
+				<Box mx={2} className={classes.vertDivWrapper}>
+					<VerticalDivider />
+				</Box>
 			</Grid>
 			<Grid item key={"page-stats"}>
 				<Typography className={classes.text}>
@@ -108,7 +122,9 @@ const PaginationView = (props: IDataGridPaginationViewProps) => {
 				</Typography>
 			</Grid>
 			<Grid item key={"page-stats-controls-divider"}>
-				<VerticalDivider />
+				<Box mx={2} className={classes.vertDivWrapper}>
+					<VerticalDivider />
+				</Box>
 			</Grid>
 			<Grid item key={"page-controls"}>
 				<Grid container>
@@ -121,7 +137,7 @@ const PaginationView = (props: IDataGridPaginationViewProps) => {
 								<IconButton
 									disabled={isFirstPage}
 									onClick={props.gotoFirstPage}
-									className={classes.firstPageBtn}
+									className={`${classes.paginationBtn} ${classes.firstPageBtn}`}
 								>
 									<FirstPageIcon />
 								</IconButton>
@@ -134,7 +150,11 @@ const PaginationView = (props: IDataGridPaginationViewProps) => {
 							placement={"top"}
 						>
 							<span>
-								<IconButton disabled={isFirstPage} onClick={props.gotoPrevPage}>
+								<IconButton
+									disabled={isFirstPage}
+									onClick={props.gotoPrevPage}
+									className={classes.paginationBtn}
+								>
 									<PreviousPageIcon />
 								</IconButton>
 							</span>
@@ -146,7 +166,11 @@ const PaginationView = (props: IDataGridPaginationViewProps) => {
 							placement={"top"}
 						>
 							<span>
-								<IconButton disabled={isLastPage} onClick={props.gotoNextPage}>
+								<IconButton
+									disabled={isLastPage}
+									onClick={props.gotoNextPage}
+									className={classes.paginationBtn}
+								>
 									<NextPageIcon />
 								</IconButton>
 							</span>
@@ -158,7 +182,11 @@ const PaginationView = (props: IDataGridPaginationViewProps) => {
 							placement={"top"}
 						>
 							<span>
-								<IconButton disabled={isLastPage} onClick={props.gotoLastPage}>
+								<IconButton
+									disabled={isLastPage}
+									onClick={props.gotoLastPage}
+									className={classes.paginationBtn}
+								>
 									<LastPageIcon />
 								</IconButton>
 							</span>

@@ -22,7 +22,7 @@ export default {
 
 const useStyles = makeStyles({
 	wrapper: {
-		width: "75vw",
+		width: "90vw",
 		height: "90vh",
 	},
 });
