@@ -46,6 +46,10 @@ export interface IDataGridContentColumnHeaderContentProps {
 	 * @param value The new filter
 	 */
 	onFilterChange: (value: IFilterDef) => void;
+	/**
+	 * The type of the column
+	 */
+	columnType: "number" | "string";
 }
 
 const useStyles = makeStyles({
@@ -144,7 +148,7 @@ const ColumnHeaderContent = (
 				<Box m={2}>
 					<Grid container className={classes.filterPopup}>
 						<FilterEntry
-							valueType={"string"}
+							valueType={props.columnType}
 							onChange={props.onFilterChange}
 							value={props.filter}
 						/>

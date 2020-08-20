@@ -13,6 +13,8 @@ import {
 } from "../../../standalone/DataGrid";
 import { action } from "@storybook/addon-actions";
 import { IDataGridExporter } from "../../../standalone/DataGrid/Header";
+import { IFilterDef } from "../../../standalone/DataGrid/Content/FilterEntry";
+import data from "./covid-daily.json";
 
 export default {
 	title: "Standalone/DataGrid",
@@ -27,20 +29,56 @@ const useStyles = makeStyles({
 	},
 });
 
-const columnDef: IDataGridColumnDef[] = new Array(30)
-	.fill(undefined)
-	.map((_, index) => ({
-		field: "field_" + index,
-		headerName: "Field number " + index,
-	}));
-
-const generateRow = (id: number): DataGridRowData => {
-	const ret: DataGridRowData = { id: id.toString() };
-	columnDef.forEach((column, colIndex) => {
-		ret[column.field] = `Y ${id} X ${colIndex}`;
-	});
-	return ret;
-};
+const columnDef: IDataGridColumnDef[] = [
+	{ type: "number", field: "date", headerName: "Date" },
+	{ type: "number", field: "states", headerName: "States" },
+	{ type: "number", field: "positive", headerName: "Positive" },
+	{ type: "number", field: "negative", headerName: "Negative" },
+	{ type: "number", field: "pending", headerName: "Pending" },
+	{
+		type: "number",
+		field: "hospitalizedCurrently",
+		headerName: "HospitalizedCurrently",
+	},
+	{
+		type: "number",
+		field: "hospitalizedCumulative",
+		headerName: "HospitalizedCumulative",
+	},
+	{ type: "number", field: "inIcuCurrently", headerName: "InIcuCurrently" },
+	{ type: "number", field: "inIcuCumulative", headerName: "InIcuCumulative" },
+	{
+		type: "number",
+		field: "onVentilatorCurrently",
+		headerName: "OnVentilatorCurrently",
+	},
+	{
+		type: "number",
+		field: "onVentilatorCumulative",
+		headerName: "OnVentilatorCumulative",
+	},
+	{ type: "number", field: "recovered", headerName: "Recovered" },
+	{ type: "string", field: "dateChecked", headerName: "DateChecked" },
+	{ type: "number", field: "death", headerName: "Death" },
+	{ type: "number", field: "hospitalized", headerName: "Hospitalized" },
+	{ type: "string", field: "lastModified", headerName: "LastModified" },
+	{ type: "number", field: "total", headerName: "Total" },
+	{ type: "number", field: "totalTestResults", headerName: "TotalTestResults" },
+	{ type: "number", field: "posNeg", headerName: "PosNeg" },
+	{ type: "number", field: "deathIncrease", headerName: "DeathIncrease" },
+	{
+		type: "number",
+		field: "hospitalizedIncrease",
+		headerName: "HospitalizedIncrease",
+	},
+	{ type: "number", field: "negativeIncrease", headerName: "NegativeIncrease" },
+	{ type: "number", field: "positiveIncrease", headerName: "PositiveIncrease" },
+	{
+		type: "number",
+		field: "totalTestResultsIncrease",
+		headerName: "TotalTestResultsIncrease",
+	},
+];
 
 const exporters: IDataGridExporter<any>[] = [
 	{
@@ -102,11 +140,147 @@ export const DataGridStory = () => {
 						sort,
 					});
 
+					let rowData: DataGridRowData[] = data.map((entry) => ({
+						id: entry.hash,
+						...entry,
+					}));
+
+					// quickfilter
+					if (quickFilter) {
+						rowData = rowData.filter((row) => {
+							for (const key in row) {
+								if (!row.hasOwnProperty(key)) continue;
+								const value = row[key];
+								if (
+									value
+										.toString()
+										.toLowerCase()
+										.includes(quickFilter.toLowerCase())
+								) {
+									return true;
+								}
+							}
+							return false;
+						});
+					}
+
+					// field filter
+					for (const filterField in fieldFilter) {
+						if (!fieldFilter.hasOwnProperty(filterField)) continue;
+						let filter: IFilterDef | undefined = fieldFilter[filterField];
+						const filterCache: { [key: string]: IFilterDef } = {};
+						let filterIndex = 0;
+
+						let expr = "";
+						while (filter) {
+							filter.value1 = filter.value1.toLowerCase();
+							filter.value2 = filter.value2.toLowerCase();
+							filterIndex++;
+							const filterKey = filterIndex.toString();
+							filterCache[filterKey] = filter;
+							switch (filter.type) {
+								case "contains":
+									expr +=
+										'value.includes(filterCache["' + filterKey + '"].value1)';
+									break;
+								case "notContains":
+									expr +=
+										'!value.includes(filterCache["' + filterKey + '"].value1)';
+									break;
+								case "equals":
+									expr += 'value === filterCache["' + filterKey + '"].value1';
+									break;
+								case "notEqual":
+									expr += 'value !== filterCache["' + filterKey + '"].value1';
+									break;
+								case "startsWith":
+									expr +=
+										'value.startsWith(filterCache["' + filterKey + '"].value1)';
+									break;
+								case "endsWith":
+									expr +=
+										'value.endsWith(filterCache["' + filterKey + '"].value1)';
+									break;
+								case "lessThan":
+									expr +=
+										'parseInt(value) < parseInt(filterCache["' +
+										filterKey +
+										'"].value1)';
+									break;
+								case "lessThanOrEqual":
+									expr +=
+										'parseInt(value) <= parseInt(filterCache["' +
+										filterKey +
+										'"].value1)';
+									break;
+								case "greaterThan":
+									expr +=
+										'parseInt(value) > parseInt(filterCache["' +
+										filterKey +
+										'"].value1)';
+									break;
+								case "greaterThanOrEqual":
+									expr +=
+										'parseInt(value) >= parseInt(filterCache["' +
+										filterKey +
+										'"].value1)';
+									break;
+								case "inRange":
+									expr +=
+										'parseInt(value) >= parseInt(filterCache["' +
+										filterKey +
+										'"].value1) && parseInt(value) <= parseInt(filterCache["' +
+										filterKey +
+										'"].value2)';
+									break;
+							}
+
+							filter = filter.nextFilter;
+							if (filter)
+								expr += filter.nextFilterType === "and" ? " && " : " || ";
+						}
+
+						rowData = rowData.filter((row) => {
+							const value = row[filterField].toLowerCase();
+							value.includes(""); // so eslint-loader stops complaining
+
+							try {
+								// tslint:disable-next-line:no-eval
+								return !expr || eval(expr);
+							} catch (e) {
+								console.error(e);
+								return false;
+							}
+						});
+					}
+
+					// sort
+					rowData.sort((a, b) => {
+						// tslint:disable-next-line:forin
+						for (const sortKey in sort) {
+							const sorter = sort[sortKey];
+							let res = 0;
+							if (typeof a[sorter.field] === "number") {
+								res = a[sorter.field] - b[sorter.field];
+							} else {
+								const av = a[sorter.field].toString();
+								const bv = b[sorter.field].toString();
+								res = av.localeCompare(bv);
+							}
+							res *= sorter.direction;
+							if (res) return res;
+						}
+						return 0;
+					});
+
+					// pagination
+					const pageIndex = page - 1;
+					const rowsTotal = rowData.length;
+					rowData = rowData.splice(pageIndex * rowsPerPage, rowsPerPage);
+
 					return {
-						rowsTotal: 4 * rowsPerPage,
-						rows: new Array(rowsPerPage)
-							.fill(undefined)
-							.map((_, index) => generateRow((page - 1) * rowsPerPage + index)),
+						rowsTotal,
+						rows: rowData,
 					};
 				}}
 				exporters={boolean("Enable export", true) ? exporters : undefined}

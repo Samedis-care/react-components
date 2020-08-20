@@ -98,6 +98,7 @@ const ColumnHeader = (props: IDataGridContentColumnHeaderProps) => {
 			sortOrder={sortOrder}
 			filter={filter}
 			onFilterChange={internalOnFilterChange}
+			columnType={props.column.type}
 		/>
 	);
 

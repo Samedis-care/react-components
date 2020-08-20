@@ -92,6 +92,10 @@ export interface IDataGridColumnDef {
 	 * The field label
 	 */
 	headerName: string;
+	/**
+	 * The data type
+	 */
+	type: "string" | "number";
 
 	// internal fields, do not set, will be overwritten
 	/**
