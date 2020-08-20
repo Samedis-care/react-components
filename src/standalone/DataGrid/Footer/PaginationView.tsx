@@ -15,6 +15,7 @@ import {
 	LastPage as LastPageIcon,
 } from "@material-ui/icons";
 import { makeStyles } from "@material-ui/core/styles";
+import i18n from "../../../i18n";
 
 const useStyles = makeStyles({
 	text: {
@@ -78,7 +79,9 @@ const PaginationView = (props: IDataGridPaginationViewProps) => {
 	return (
 		<Grid container spacing={2}>
 			<Grid item key={"page-size-label"}>
-				<Typography className={classes.text}>Page size:</Typography>
+				<Typography className={classes.text}>
+					{i18n.t("standalone.data-grid.footer.page-size")!}
+				</Typography>
 			</Grid>
 			<Grid item key={"page-size-select"}>
 				<Select
@@ -100,7 +103,8 @@ const PaginationView = (props: IDataGridPaginationViewProps) => {
 			</Grid>
 			<Grid item key={"page-stats"}>
 				<Typography className={classes.text}>
-					{startRowIndex} - {endRowIndex} of {props.rowsTotal}
+					{startRowIndex} - {endRowIndex}{" "}
+					{i18n.t("standalone.data-grid.footer.page-of")!} {props.rowsTotal}
 				</Typography>
 			</Grid>
 			<Grid item key={"page-stats-controls-divider"}>
@@ -109,7 +113,10 @@ const PaginationView = (props: IDataGridPaginationViewProps) => {
 			<Grid item key={"page-controls"}>
 				<Grid container>
 					<Grid item>
-						<Tooltip title={"First page"} placement={"top"}>
+						<Tooltip
+							title={i18n.t("standalone.data-grid.footer.first-page")!}
+							placement={"top"}
+						>
 							<span>
 								<IconButton
 									disabled={isFirstPage}
@@ -122,7 +129,10 @@ const PaginationView = (props: IDataGridPaginationViewProps) => {
 						</Tooltip>
 					</Grid>
 					<Grid item>
-						<Tooltip title={"Previous page"} placement={"top"}>
+						<Tooltip
+							title={i18n.t("standalone.data-grid.footer.prev-page")!}
+							placement={"top"}
+						>
 							<span>
 								<IconButton disabled={isFirstPage} onClick={props.gotoPrevPage}>
 									<PreviousPageIcon />
@@ -131,7 +141,10 @@ const PaginationView = (props: IDataGridPaginationViewProps) => {
 						</Tooltip>
 					</Grid>
 					<Grid item>
-						<Tooltip title={"Next page"} placement={"top"}>
+						<Tooltip
+							title={i18n.t("standalone.data-grid.footer.next-page")!}
+							placement={"top"}
+						>
 							<span>
 								<IconButton disabled={isLastPage} onClick={props.gotoNextPage}>
 									<NextPageIcon />
@@ -140,7 +153,10 @@ const PaginationView = (props: IDataGridPaginationViewProps) => {
 						</Tooltip>
 					</Grid>
 					<Grid item>
-						<Tooltip title={"Last page"} placement={"top"}>
+						<Tooltip
+							title={i18n.t("standalone.data-grid.footer.last-page")!}
+							placement={"top"}
+						>
 							<span>
 								<IconButton disabled={isLastPage} onClick={props.gotoLastPage}>
 									<LastPageIcon />

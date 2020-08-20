@@ -11,6 +11,7 @@ import {
 import { VerticalDivider } from "../../index";
 import { IDataGridExporter } from "./index";
 import ExportMenu from "./ExportMenu";
+import i18n from "../../../i18n";
 
 export interface IDataGridActionBarViewProps {
 	/**
@@ -78,7 +79,7 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 			)}
 			{props.handleAddNew && (
 				<Grid item key={"new"}>
-					<Tooltip title={"Create new"}>
+					<Tooltip title={i18n.t("standalone.data-grid.header.new")!}>
 						<span>
 							<IconButton onClick={props.handleAddNew}>
 								<AddIcon />
@@ -89,7 +90,7 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 			)}
 			{props.handleEdit && (
 				<Grid item key={"edit"}>
-					<Tooltip title={"Edit selected"}>
+					<Tooltip title={i18n.t("standalone.data-grid.header.edit")!}>
 						<span>
 							<IconButton
 								disabled={props.numSelected !== 1}
@@ -103,7 +104,7 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 			)}
 			{props.handleDelete && (
 				<Grid item key={"delete"}>
-					<Tooltip title={"Delete selected"}>
+					<Tooltip title={i18n.t("standalone.data-grid.header.delete")!}>
 						<span>
 							<IconButton
 								disabled={props.numSelected === 0}
@@ -122,7 +123,7 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 			)}
 			{props.exporters && (
 				<Grid item key={"export"}>
-					<Tooltip title={"Export"}>
+					<Tooltip title={i18n.t("standalone.data-grid.header.export")!}>
 						<span>
 							<IconButton onClick={openExportMenu}>
 								<ExportIcon />
@@ -137,7 +138,7 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 				</Grid>
 			)}
 			<Grid item key={"settings"}>
-				<Tooltip title={"Settings"}>
+				<Tooltip title={i18n.t("standalone.data-grid.header.settings")!}>
 					<span>
 						<IconButton onClick={props.toggleSettings}>
 							<SettingsIcon />
@@ -146,7 +147,10 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 				</Tooltip>
 			</Grid>
 			<Grid item key={"reset"}>
-				<Tooltip title={"Reset"} onClick={props.handleReset}>
+				<Tooltip
+					title={i18n.t("standalone.data-grid.header.reset")!}
+					onClick={props.handleReset}
+				>
 					<span>
 						<IconButton>
 							<ResetIcon />

@@ -14,6 +14,7 @@ import {
 } from "@material-ui/icons";
 import { makeStyles } from "@material-ui/core/styles";
 import FilterEntry, { IFilterDef } from "./FilterEntry";
+import i18n from "../../../i18n";
 
 export interface IDataGridContentColumnHeaderContentProps {
 	/**
@@ -117,7 +118,7 @@ const ColumnHeaderContent = (
 					</Grid>
 				</Grid>
 				<Grid item>
-					<Tooltip title={"Filter"}>
+					<Tooltip title={i18n.t("standalone.data-grid.content.filter")!}>
 						<IconButton className={classes.filterButton} onClick={openFilter}>
 							<FilterIcon />
 						</IconButton>

@@ -12,6 +12,7 @@ import {
 	Typography,
 } from "@material-ui/core";
 import { IDataGridColumnDef, IDataGridColumnProps } from "../index";
+import i18n from "../../../i18n";
 
 export interface IDataGridSettingsDialogProps extends IDataGridColumnProps {
 	/**
@@ -51,7 +52,9 @@ const SettingsDialog = (props: IDataGridSettingsDialogProps) => {
 
 	return (
 		<Paper elevation={0} className={classes.wrapper}>
-			<Typography variant={"h6"}>Lock/Unlock Columns</Typography>
+			<Typography variant={"h6"}>
+				{i18n.t("standalone.data-grid.settings.lock")!}
+			</Typography>
 			<Divider />
 			<Grid justify={"space-between"} container>
 				{props.columns.slice(1).map((column: IDataGridColumnDef) => (
@@ -69,7 +72,9 @@ const SettingsDialog = (props: IDataGridSettingsDialogProps) => {
 					</Grid>
 				))}
 			</Grid>
-			<Typography variant={"h6"}>Show/Hide Columns</Typography>
+			<Typography variant={"h6"}>
+				{i18n.t("standalone.data-grid.settings.hide")!}
+			</Typography>
 			<Divider />
 			<Grid justify={"space-between"} container>
 				{props.columns.slice(1).map((column: IDataGridColumnDef) => (
@@ -92,7 +97,7 @@ const SettingsDialog = (props: IDataGridSettingsDialogProps) => {
 				<Grid item>
 					<Box m={2}>
 						<Button onClick={props.closeGridSettings} variant={"contained"}>
-							Close
+							{i18n.t("standalone.data-grid.settings.close")!}
 						</Button>
 					</Box>
 				</Grid>

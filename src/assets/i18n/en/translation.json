@@ -3,6 +3,32 @@
 		"schedule": {
 			"week": "Week",
 			"today": "Today"
+		},
+		"data-grid": {
+			"content": {
+				"filter": "Filter"
+			},
+			"header": {
+				"new": "Create new",
+				"edit": "Edit selected",
+				"delete": "Delete selected",
+				"export": "Export",
+				"settings": "Settings",
+				"reset": "Reset"
+			},
+			"settings": {
+				"lock": "Lock/Unlock Columns",
+				"hide": "Show/Hide Columns",
+				"close": "Close"
+			},
+			"footer": {
+				"page-size": "Page size:",
+				"page-of": "of",
+				"first-page": "First page",
+				"prev-page": "Previous page",
+				"next-page": "Next page",
+				"last-page": "Last page"
+			}
 		}
 	}
 }
