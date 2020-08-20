@@ -109,7 +109,7 @@ export const DataGridStory = () => {
 							.map((_, index) => generateRow((page - 1) * rowsPerPage + index)),
 					};
 				}}
-				exporters={exporters}
+				exporters={boolean("Enable export", true) ? exporters : undefined}
 			/>
 		</div>
 	);
