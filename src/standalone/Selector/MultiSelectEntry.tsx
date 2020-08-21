@@ -4,6 +4,9 @@ import {
 	List,
 	ListItemSecondaryAction,
 	ListItemText,
+	withStyles,
+	createStyles,
+	WithStyles,
 } from "@material-ui/core";
 import {
 	SmallIconButton,
@@ -33,12 +36,16 @@ export interface IMultiSelectEntryProps {
 	data: MultiSelectorData;
 }
 
-const MultiSelectEntry = (props: IMultiSelectEntryProps) => {
-	const { enableIcons, enableDivider, handleDelete, data } = props;
+const styles = createStyles({
+	root: {},
+});
+
+const MultiSelectEntry = (props: IMultiSelectEntryProps & WithStyles) => {
+	const { enableIcons, enableDivider, handleDelete, data, classes } = props;
 
 	return (
 		<>
-			<List>
+			<List className={classes.root}>
 				<SmallListItem button onClick={data.onClick}>
 					{enableIcons && <SmallListItemIcon>{data.icon}</SmallListItemIcon>}
 					<ListItemText>{data.label}</ListItemText>
@@ -59,4 +66,4 @@ const MultiSelectEntry = (props: IMultiSelectEntryProps) => {
 	);
 };
 
-export default React.memo(MultiSelectEntry);
+export default withStyles(styles)(React.memo(MultiSelectEntry));
