@@ -38,6 +38,7 @@ export interface IMultiSelectEntryProps {
 
 const styles = createStyles({
 	root: {},
+	divider: {},
 });
 
 const MultiSelectEntry = (props: IMultiSelectEntryProps & WithStyles) => {
@@ -61,7 +62,7 @@ const MultiSelectEntry = (props: IMultiSelectEntryProps & WithStyles) => {
 					</ListItemSecondaryAction>
 				</SmallListItem>
 			</List>
-			{enableDivider && <Divider />}
+			{enableDivider && <Divider className={classes.divider} />}
 		</>
 	);
 };
