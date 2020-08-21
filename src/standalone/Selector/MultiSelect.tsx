@@ -3,6 +3,7 @@ import Selector, { SelectorData, SelectorProps } from "./Selector";
 import { Grid, Paper, Theme, useTheme } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import MultiSelectEntry, { IMultiSelectEntryProps } from "./MultiSelectEntry";
+import { ControlProps } from "react-select/src/components/Control";
 
 export interface MultiSelectorData extends SelectorData {
 	/**
@@ -92,21 +93,30 @@ const MultiSelect = (props: MultiSelectProps<any>) => {
 		[onSelect, selected]
 	);
 
-	const selectorStyles = React.useMemo(
-		() => ({
-			control: (base: CSSProperties): CSSProperties => ({
-				...base,
-				borderRadius: 0,
-				border: "none",
-				borderBottom: `1px solid ${theme.palette.divider}`,
-				boxShadow: "none",
-				backgroundColor: "transparent",
-				minHeight: 64,
-			}),
-			...customStyles,
-		}),
-		[customStyles, theme]
-	);
+	const selectorStyles = React.useMemo(() => {
+		const { control, ...otherCustomStyles } = customStyles || {};
+		return {
+			control: (
+				base: CSSProperties,
+				selectProps: ControlProps<{}>
+			): CSSProperties => {
+				let multiSelectStyles: CSSProperties = {
+					...base,
+					borderRadius: 0,
+					border: "none",
+					borderBottom: `1px solid ${theme.palette.divider}`,
+					boxShadow: "none",
+					backgroundColor: "transparent",
+				};
+
+				if (control)
+					multiSelectStyles = control(multiSelectStyles, selectProps);
+
+				return multiSelectStyles;
+			},
+			...otherCustomStyles,
+		};
+	}, [customStyles, theme]);
 
 	return (
 		<Paper elevation={0} className={classes.paperWrapper}>

@@ -233,8 +233,7 @@ class FileUpload extends Component<IProps, IState> {
 		elem.click();
 	};
 
-	// @ts-ignore DragEvent is a template
-	handleDrop = async (evt: DragEvent<HTMLDivElement>) => {
+	handleDrop = async (evt: React.DragEvent<HTMLDivElement>) => {
 		evt.preventDefault();
 
 		this.setState({
@@ -244,8 +243,7 @@ class FileUpload extends Component<IProps, IState> {
 		return this.processFiles(evt.dataTransfer?.files);
 	};
 
-	// @ts-ignore DragEvent is a template
-	handleDragOver = (evt: DragEvent<HTMLDivElement>) => {
+	handleDragOver = (evt: React.DragEvent<HTMLDivElement>) => {
 		evt.preventDefault();
 	};
 

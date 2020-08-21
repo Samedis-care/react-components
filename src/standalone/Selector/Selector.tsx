@@ -3,7 +3,7 @@ import AsyncSelect from "react-select/async";
 import { FormatOptionLabelMeta } from "react-select/src/Select";
 import { ListItemText, useTheme } from "@material-ui/core";
 import { Add as AddIcon } from "@material-ui/icons";
-import { Styles, ValueType } from "react-select";
+import { ControlProps, Styles, ValueType } from "react-select";
 import { SmallListItem, SmallListItemIcon } from "../..";
 
 export interface SelectorData {
@@ -141,30 +141,74 @@ const Selector = (props: SelectorProps<any>) => {
 
 	const theme = useTheme();
 
-	const selectorStyles = React.useMemo(
-		() => ({
-			option: (base: CSSProperties): CSSProperties => ({
-				...base,
-				padding: 0,
-			}),
-			control: (base: CSSProperties): CSSProperties => ({
-				...base,
-				minHeight: 64,
-			}),
-			valueContainer: (base: CSSProperties): CSSProperties => ({
-				...base,
-				padding: 0,
-			}),
-			placeholder: (base: CSSProperties): CSSProperties => ({
-				...base,
-				padding: "0 8px",
-				margin: 0,
-				...theme.typography.body1,
-			}),
-			...customStyles,
-		}),
-		[customStyles, theme]
-	);
+	const selectorStyles = React.useMemo(() => {
+		const {
+			option,
+			control,
+			valueContainer,
+			placeholder,
+			...otherCustomStyles
+		} = customStyles || {};
+
+		return {
+			option: (base: CSSProperties): CSSProperties => {
+				let selectorOptionStyles: CSSProperties = {
+					...base,
+					padding: 0,
+				};
+
+				if (option)
+					selectorOptionStyles = option(selectorOptionStyles, undefined);
+
+				return selectorOptionStyles;
+			},
+			control: (
+				base: CSSProperties,
+				controlProps: ControlProps<{}>
+			): CSSProperties => {
+				let selectorControlStyles: CSSProperties = {
+					...base,
+					minHeight: 64,
+				};
+
+				if (control)
+					selectorControlStyles = control(selectorControlStyles, controlProps);
+
+				return selectorControlStyles;
+			},
+			valueContainer: (base: CSSProperties): CSSProperties => {
+				let selectorValueContainerStyles: CSSProperties = {
+					...base,
+					padding: 0,
+				};
+
+				if (valueContainer)
+					selectorValueContainerStyles = valueContainer(
+						selectorValueContainerStyles,
+						undefined
+					);
+
+				return selectorValueContainerStyles;
+			},
+			placeholder: (base: CSSProperties): CSSProperties => {
+				let selectorPlaceholderStyles: CSSProperties = {
+					...base,
+					padding: "0 8px",
+					margin: 0,
+					...theme.typography.body1,
+				};
+
+				if (placeholder)
+					selectorPlaceholderStyles = placeholder(
+						selectorPlaceholderStyles,
+						undefined
+					);
+
+				return selectorPlaceholderStyles;
+			},
+			...otherCustomStyles,
+		};
+	}, [customStyles, theme]);
 
 	const getNoOptionsLabel = React.useCallback(
 		noDataLabel
