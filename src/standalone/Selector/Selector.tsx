@@ -4,7 +4,7 @@ import { FormatOptionLabelMeta } from "react-select/src/Select";
 import { ListItemText, useTheme } from "@material-ui/core";
 import { Add as AddIcon } from "@material-ui/icons";
 import { ControlProps, Styles, ValueType } from "react-select";
-import { SmallListItem, SmallListItemIcon } from "../..";
+import { SelectorSmallListItem, SmallListItem, SmallListItemIcon } from "../..";
 
 export interface SelectorData {
 	/**
@@ -240,10 +240,10 @@ const Selector = (props: SelectorProps<any>) => {
 	const defaultRenderer = React.useCallback(
 		(data: SelectorData) => (
 			// @ts-ignore: Typescript complains about the button property being "required"
-			<SmallListItem>
+			<SelectorSmallListItem>
 				{enableIcons && <SmallListItemIcon>{data.icon}</SmallListItemIcon>}
 				<ListItemText>{data.label}</ListItemText>
-			</SmallListItem>
+			</SelectorSmallListItem>
 		),
 		[enableIcons]
 	);

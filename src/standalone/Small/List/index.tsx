@@ -14,6 +14,15 @@ const smallListItemStyles = createStyles({
 });
 export const SmallListItem = withStyles(smallListItemStyles)(ListItem);
 
+const selectorSmallListItemStyles = createStyles({
+	gutters: {
+		paddingLeft: 0,
+	},
+});
+export const SelectorSmallListItem = withStyles(selectorSmallListItemStyles)(
+	SmallListItem
+);
+
 const smallListItemIconStyles = createStyles({
 	root: {
 		minWidth: 0,
