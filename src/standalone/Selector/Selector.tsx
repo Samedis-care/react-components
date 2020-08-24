@@ -155,6 +155,7 @@ const Selector = (props: SelectorProps<any>) => {
 				let selectorOptionStyles: CSSProperties = {
 					...base,
 					padding: 0,
+					paddingLeft: 8,
 				};
 
 				if (option)

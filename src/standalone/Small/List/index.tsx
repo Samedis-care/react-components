@@ -12,7 +12,9 @@ const smallListItemStyles = createStyles({
 		paddingRight: 8,
 	},
 });
-export const SmallListItem = withStyles(smallListItemStyles)(ListItem);
+export const SmallListItem = withStyles(smallListItemStyles, {
+	name: "SmallListItem",
+})(ListItem);
 
 const selectorSmallListItemStyles = createStyles({
 	gutters: {
@@ -20,9 +22,9 @@ const selectorSmallListItemStyles = createStyles({
 		paddingRight: 8,
 	},
 });
-export const SelectorSmallListItem = withStyles(selectorSmallListItemStyles)(
-	ListItem
-);
+export const SelectorSmallListItem = withStyles(selectorSmallListItemStyles, {
+	name: "SelectorSmallListItem",
+})(ListItem);
 
 const smallListItemIconStyles = createStyles({
 	root: {
