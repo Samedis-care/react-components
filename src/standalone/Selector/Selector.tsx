@@ -4,7 +4,7 @@ import { FormatOptionLabelMeta } from "react-select/src/Select";
 import { ListItemText, useTheme } from "@material-ui/core";
 import { Add as AddIcon } from "@material-ui/icons";
 import { ControlProps, Styles, ValueType } from "react-select";
-import { SelectorSmallListItem, SmallListItem, SmallListItemIcon } from "../..";
+import { SelectorSmallListItem, SmallListItemIcon } from "../..";
 
 export interface SelectorData {
 	/**
