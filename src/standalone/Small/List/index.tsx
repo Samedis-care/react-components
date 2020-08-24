@@ -17,10 +17,11 @@ export const SmallListItem = withStyles(smallListItemStyles)(ListItem);
 const selectorSmallListItemStyles = createStyles({
 	gutters: {
 		paddingLeft: 0,
+		paddingRight: 8,
 	},
 });
 export const SelectorSmallListItem = withStyles(selectorSmallListItemStyles)(
-	SmallListItem
+	ListItem
 );
 
 const smallListItemIconStyles = createStyles({
