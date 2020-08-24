@@ -180,6 +180,7 @@ const Selector = (props: SelectorProps<any>) => {
 				let selectorValueContainerStyles: CSSProperties = {
 					...base,
 					padding: 0,
+					paddingLeft: 8,
 				};
 
 				if (valueContainer)
@@ -193,7 +194,7 @@ const Selector = (props: SelectorProps<any>) => {
 			placeholder: (base: CSSProperties): CSSProperties => {
 				let selectorPlaceholderStyles: CSSProperties = {
 					...base,
-					padding: "0 8px",
+					padding: "0 4px",
 					margin: 0,
 					...theme.typography.body1,
 				};
