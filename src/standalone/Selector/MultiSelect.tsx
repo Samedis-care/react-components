@@ -1,6 +1,6 @@
 import React, { CSSProperties } from "react";
 import Selector, { SelectorData, SelectorProps } from "./Selector";
-import { Grid, Paper, Theme, useTheme } from "@material-ui/core";
+import { Grid, Paper, Theme, useTheme, WithStyles } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import MultiSelectEntry, { IMultiSelectEntryProps } from "./MultiSelectEntry";
 import { ControlProps } from "react-select/src/components/Control";
@@ -42,9 +42,10 @@ const useStyles = makeStyles((theme: Theme) => ({
 		boxShadow: "none",
 		border: `1px solid ${theme.palette.divider}`,
 	},
+	selectedEntries: {},
 }));
 
-const MultiSelect = (props: MultiSelectProps<any>) => {
+const MultiSelect = (props: MultiSelectProps<any> & WithStyles) => {
 	const {
 		onLoad,
 		onSelect,
@@ -132,7 +133,7 @@ const MultiSelect = (props: MultiSelectProps<any>) => {
 						refreshToken={selected.length.toString()}
 					/>
 				</Grid>
-				<Grid item xs={12}>
+				<Grid item xs={12} className={classes.selectedEntries}>
 					{props.selected.map((data: MultiSelectorData, index: number) => (
 						<EntryRender
 							key={data.value}
