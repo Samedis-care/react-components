@@ -1,7 +1,14 @@
 import React, { CSSProperties } from "react";
 import Selector, { SelectorData, SelectorProps } from "./Selector";
-import { Grid, Paper, Theme, useTheme, WithStyles } from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
+import {
+	createStyles,
+	Grid,
+	Paper,
+	Theme,
+	useTheme,
+	withStyles,
+	WithStyles,
+} from "@material-ui/core";
 import MultiSelectEntry, { IMultiSelectEntryProps } from "./MultiSelectEntry";
 import { ControlProps } from "react-select/src/components/Control";
 
@@ -37,7 +44,7 @@ export interface MultiSelectProps<Data extends MultiSelectorData>
 	selectedEntryRenderer?: React.ComponentType<IMultiSelectEntryProps>;
 }
 
-const useStyles = makeStyles((theme: Theme) => ({
+const styles = createStyles((theme: Theme) => ({
 	paperWrapper: {
 		boxShadow: "none",
 		border: `1px solid ${theme.palette.divider}`,
@@ -54,8 +61,8 @@ const MultiSelect = (props: MultiSelectProps<any> & WithStyles) => {
 		customStyles,
 		selectedEntryRenderer,
 		disable,
+		classes,
 	} = props;
-	const classes = useStyles();
 	const theme = useTheme();
 
 	const EntryRender = selectedEntryRenderer || MultiSelectEntry;
@@ -149,4 +156,4 @@ const MultiSelect = (props: MultiSelectProps<any> & WithStyles) => {
 	);
 };
 
-export default React.memo(MultiSelect);
+export default withStyles(styles)(React.memo(MultiSelect));
