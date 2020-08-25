@@ -1,0 +1,9 @@
+{
+	"standalone": {
+		"data-grid": {
+			"content": {
+				"filter": "Filter"
+			}
+		}
+	}
+}

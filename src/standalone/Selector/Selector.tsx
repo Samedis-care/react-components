@@ -5,6 +5,7 @@ import { ListItemText, useTheme } from "@material-ui/core";
 import { Add as AddIcon } from "@material-ui/icons";
 import { ControlProps, Styles, ValueType } from "react-select";
 import { SelectorSmallListItem, SmallListItemIcon } from "../..";
+import i18n from "../../i18n";
 
 export interface SelectorData {
 	/**
@@ -254,7 +255,7 @@ const Selector = (props: SelectorProps<any>) => {
 			if (onAddNew) {
 				results.push({
 					value: "add-new-button",
-					label: addNewLabel || "Add new",
+					label: addNewLabel || i18n.t("standalone.selector.add-new"),
 					icon: <AddIcon />,
 					isAddNewButton: true,
 				});

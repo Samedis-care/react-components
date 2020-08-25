@@ -42,3 +42,8 @@ export default React.memo(Component);
 - The formatting is automatically set and corrected by prettier and enforced using git commit hooks.
 - Do not store non-mutable/read-only data in the component state. Use static class properties or static functions instead.
 - Use Material-UI Styles/Theme. Do not create global CSS styles. Avoid inline styles.
+
+## Translating
+
+If you wish to help us translate our library feel free to fork & clone the repository and open `src/assets/i18n` in [i18n Manager](https://www.electronjs.org/apps/i18n-manager).
+When your done simply save your work, commit, push and create a pull request.

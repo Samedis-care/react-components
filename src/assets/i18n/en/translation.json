@@ -29,6 +29,9 @@
 				"next-page": "Next page",
 				"last-page": "Last page"
 			}
+		},
+		"selector": {
+			"add-new": "Add new"
 		}
 	}
 }

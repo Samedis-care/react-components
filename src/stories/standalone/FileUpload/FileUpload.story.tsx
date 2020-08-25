@@ -31,7 +31,7 @@ export const FileUploadStory = () => {
 	);
 	if (acceptedType === "custom") {
 		acceptedType = text(
-			"Accepted Filetypes (comma-seperated)",
+			"Accepted Filetypes (comma-separated)",
 			".pdf,.docx,.xlsx,.pptx"
 		);
 	}
