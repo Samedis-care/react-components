@@ -1,10 +1,16 @@
 import React from "react";
 import { Grid, Tooltip, Typography } from "@material-ui/core";
 import {
-	InsertDriveFileOutlined as FileIcon,
+	InsertDriveFileOutlined as DefaultFileIcon,
 	CancelOutlined as CancelIcon,
 } from "@material-ui/icons";
 import { makeStyles } from "@material-ui/core/styles";
+import {
+	ExcelFileIcon,
+	PdfFileIcon,
+	PowerPointFileIcon,
+	WordFileIcon,
+} from "../FileIcons";
 
 export interface IProps {
 	/**
@@ -51,8 +57,56 @@ const useStyles = makeStyles((theme) => ({
 	},
 }));
 
+const ExcelFileExtensions = [
+	"xlsx",
+	"xlsm",
+	"xltx",
+	"xltm",
+	"xls",
+	"xlt",
+	"xlm",
+];
+
+const WordFileExtensions = [
+	"doc",
+	"dot",
+	"docx",
+	"docm",
+	"dotx",
+	"dotm",
+	"docb",
+];
+
+const PowerPointFileExtensions = [
+	"ppt",
+	"pot",
+	"pps",
+	"pptx",
+	"pptm",
+	"potx",
+	"potm",
+	"ppsx",
+	"ppsm",
+	"sldx",
+	"sldm",
+];
+
+const PdfFileExtensions = ["pdf"];
+
 const File = (props: IProps) => {
 	const classes = useStyles();
+
+	const fileSplit = props.name.split(".");
+	const fileExt = fileSplit[fileSplit.length - 1];
+	const FileIcon = ExcelFileExtensions.includes(fileExt)
+		? ExcelFileIcon
+		: WordFileExtensions.includes(fileExt)
+		? WordFileIcon
+		: PowerPointFileExtensions.includes(fileExt)
+		? PowerPointFileIcon
+		: PdfFileExtensions.includes(fileExt)
+		? PdfFileIcon
+		: DefaultFileIcon;
 
 	return (
 		<Grid item style={{ width: props.size }}>
