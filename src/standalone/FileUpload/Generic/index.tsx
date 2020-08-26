@@ -11,6 +11,7 @@ import {
 import { AttachFile } from "@material-ui/icons";
 import FilePreview from "./File";
 import { FileSelectorError } from "./Errors";
+import i18n from "../../../i18n";
 
 export interface IProps extends WithStyles {
 	/**
@@ -182,11 +183,15 @@ class FileUpload extends Component<IProps, IState> {
 							color={"primary"}
 							onClick={this.handleUpload}
 						>
-							Upload Files
+							{i18n.t("standalone.file-upload.upload")}
 						</Button>
 					</Grid>
 					<Grid item xs>
-						<Typography align={"right"}>(Formats: any)</Typography>
+						<Typography align={"right"}>
+							({i18n.t("standalone.file-upload.formats")}:{" "}
+							{this.props.accept || i18n.t("standalone.file-upload.format.any")}
+							)
+						</Typography>
 					</Grid>
 					<Grid item xs={12}>
 						<Grid

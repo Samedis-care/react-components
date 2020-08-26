@@ -32,6 +32,13 @@
 		},
 		"selector": {
 			"add-new": "Add new"
+		},
+		"file-upload": {
+			"upload": "Upload Files",
+			"formats": "Formats",
+			"format": {
+				"any": "any"
+			}
 		}
 	}
 }
