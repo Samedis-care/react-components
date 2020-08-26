@@ -36,6 +36,10 @@
 		"file-upload": {
 			"upload": "Upload Files",
 			"formats": "Formats",
+			"error": {
+				"too-many": "You selected too many files",
+				"limit-reached": "You reached the maximum amount of allowed files"
+			},
 			"format": {
 				"any": "any"
 			}

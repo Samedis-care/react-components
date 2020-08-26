@@ -45,8 +45,9 @@ export interface IProps extends WithStyles {
 	/**
 	 * Called if an error occurred. Should provide feedback to the user
 	 * @param err The error that occurred
+	 * @param message A localized, human readable message
 	 */
-	handleError: (err: FileSelectorError) => void;
+	handleError: (err: FileSelectorError, message: string) => void;
 	/**
 	 * Already selected files (for loading existing data)
 	 */
@@ -226,7 +227,10 @@ class FileUpload extends Component<IProps, IState> {
 	handleUpload = async () => {
 		const maxFiles = this.props.maxFiles - this.state.files.length;
 		if (maxFiles === 0) {
-			this.props.handleError("files.selector.limit-reached");
+			this.props.handleError(
+				"files.selector.limit-reached",
+				i18n.t("standalone.file-selector.error.limit-reached")
+			);
 			return;
 		}
 
@@ -274,7 +278,10 @@ class FileUpload extends Component<IProps, IState> {
 
 		if (!files) return;
 		if (files.length > maxFiles) {
-			this.props.handleError("files.selector.too-many");
+			this.props.handleError(
+				"files.selector.too-many",
+				i18n.t("standalone.file-selector.error.too-many")
+			);
 			return;
 		}
 
