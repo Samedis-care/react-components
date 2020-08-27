@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { Grid, Tooltip, Typography } from "@material-ui/core";
 import {
 	InsertDriveFileOutlined as DefaultFileIcon,
@@ -18,10 +18,6 @@ export interface IProps {
 	 */
 	name: string;
 	/**
-	 * The mime type of the file
-	 */
-	mimeType: string;
-	/**
 	 * Optional callback for removing the file
 	 */
 	onRemove?: () => void;
@@ -37,6 +33,10 @@ export interface IProps {
 	 * Display grayed-out (marked as deleted)
 	 */
 	disabled: boolean;
+	/**
+	 * The download link to open if the file is clicked
+	 */
+	downloadLink?: string;
 }
 
 const useStyles = makeStyles((theme) => ({
@@ -94,6 +94,7 @@ const PowerPointFileExtensions = [
 const PdfFileExtensions = ["pdf"];
 
 const File = (props: IProps) => {
+	const { downloadLink } = props;
 	const classes = useStyles();
 
 	const fileSplit = props.name.split(".");
@@ -107,6 +108,10 @@ const File = (props: IProps) => {
 		: PdfFileExtensions.includes(fileExt)
 		? PdfFileIcon
 		: DefaultFileIcon;
+
+	const openDownload = useCallback(() => {
+		if (downloadLink) window.open(downloadLink, "_blank");
+	}, [downloadLink]);
 
 	return (
 		<Grid item style={{ width: props.size }}>
@@ -126,9 +131,10 @@ const File = (props: IProps) => {
 								classes.icon +
 								(props.disabled ? " " + classes.iconDisabled : "")
 							}
+							onClick={openDownload}
 						/>
 					) : (
-						<FileIcon className={classes.icon} />
+						<FileIcon className={classes.icon} onClick={openDownload} />
 					)}
 				</Grid>
 				<Grid item xs={12}>

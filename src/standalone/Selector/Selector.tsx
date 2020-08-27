@@ -249,20 +249,23 @@ const Selector = (props: SelectorProps<any>) => {
 		),
 		[enableIcons]
 	);
+
+	const actualAddNewLabel =
+		addNewLabel || i18n.t("standalone.selector.add-new");
 	const onLoadButtonInjector = React.useCallback(
 		async (query: string) => {
 			const results = await onLoad(query);
 			if (onAddNew) {
 				results.push({
 					value: "add-new-button",
-					label: addNewLabel || i18n.t("standalone.selector.add-new"),
+					label: actualAddNewLabel,
 					icon: <AddIcon />,
 					isAddNewButton: true,
 				});
 			}
 			return results;
 		},
-		[addNewLabel, onAddNew, onLoad]
+		[actualAddNewLabel, onAddNew, onLoad]
 	);
 
 	return (
@@ -278,7 +281,9 @@ const Selector = (props: SelectorProps<any>) => {
 			formatOptionLabel={renderEntry || defaultRenderer}
 			noOptionsMessage={getNoOptionsLabel}
 			loadingMessage={getLoadingLabel}
-			key={refreshToken + (onAddNew ? "add-new" : "no-add-new")}
+			key={
+				refreshToken + (onAddNew ? "add-new" + actualAddNewLabel : "no-add-new")
+			}
 			styles={selectorStyles}
 		/>
 	);

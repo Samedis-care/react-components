@@ -17,7 +17,7 @@ export interface IProps extends WithStyles {
 	/**
 	 * Maximum amount of files allowed
 	 */
-	maxFiles: number;
+	maxFiles?: number;
 	/**
 	 * Filter for allowed mime types and file extensions (see <input accept="VALUE">)
 	 */
@@ -80,9 +80,9 @@ export interface FileMeta {
 	 */
 	name: string;
 	/**
-	 * The file mime type
+	 * The download link for the file
 	 */
-	type: string;
+	downloadLink?: string;
 }
 
 /**
@@ -206,8 +206,12 @@ class FileUpload extends Component<IProps, IState> {
 									data && (
 										<FilePreview
 											name={data.file.name}
+											downloadLink={
+												"downloadLink" in data.file
+													? data.file.downloadLink
+													: undefined
+											}
 											key={index + "-" + data.file.name}
-											mimeType={data.file.type}
 											size={this.props.previewSize}
 											preview={
 												this.props.previewImages ? data.preview : undefined
@@ -225,13 +229,16 @@ class FileUpload extends Component<IProps, IState> {
 	}
 
 	handleUpload = async () => {
-		const maxFiles = this.props.maxFiles - this.state.files.length;
-		if (maxFiles === 0) {
-			this.props.handleError(
-				"files.selector.limit-reached",
-				i18n.t("standalone.file-selector.error.limit-reached")
-			);
-			return;
+		let maxFiles = 2;
+		if (this.props.maxFiles) {
+			maxFiles = this.props.maxFiles - this.state.files.length;
+			if (maxFiles === 0) {
+				this.props.handleError(
+					"files.selector.limit-reached",
+					i18n.t("standalone.file-selector.error.limit-reached")
+				);
+				return;
+			}
 		}
 
 		const elem = document.createElement("input");
@@ -269,7 +276,6 @@ class FileUpload extends Component<IProps, IState> {
 	};
 
 	processFiles = async (files?: FileList | null) => {
-		const maxFiles = this.props.maxFiles - this.state.files.length;
 		const processImages = !!(
 			this.props.convertImagesTo ||
 			this.props.imageDownscaleOptions ||
@@ -277,12 +283,16 @@ class FileUpload extends Component<IProps, IState> {
 		);
 
 		if (!files) return;
-		if (files.length > maxFiles) {
-			this.props.handleError(
-				"files.selector.too-many",
-				i18n.t("standalone.file-selector.error.too-many")
-			);
-			return;
+
+		if (this.props.maxFiles) {
+			const maxFiles = this.props.maxFiles - this.state.files.length;
+			if (files.length > maxFiles) {
+				this.props.handleError(
+					"files.selector.too-many",
+					i18n.t("standalone.file-selector.error.too-many")
+				);
+				return;
+			}
 		}
 
 		const newFiles: FileData<File>[] = [];
