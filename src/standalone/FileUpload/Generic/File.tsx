@@ -55,6 +55,15 @@ const useStyles = makeStyles((theme) => ({
 	iconDisabled: {
 		opacity: 0.5,
 	},
+	clickable: {
+		cursor: "pointer",
+	},
+	downloadLink: {
+		cursor: "pointer",
+		"&:hover": {
+			textDecoration: "underline",
+		},
+	},
 }));
 
 const ExcelFileExtensions = [
@@ -129,17 +138,28 @@ const File = (props: IProps) => {
 							alt={props.name}
 							className={
 								classes.icon +
-								(props.disabled ? " " + classes.iconDisabled : "")
+								(props.disabled ? " " + classes.iconDisabled : "") +
+								(downloadLink ? " " + classes.clickable : "")
 							}
 							onClick={openDownload}
 						/>
 					) : (
-						<FileIcon className={classes.icon} onClick={openDownload} />
+						<FileIcon
+							className={`${classes.icon} ${
+								downloadLink ? classes.clickable : ""
+							}`}
+							onClick={openDownload}
+						/>
 					)}
 				</Grid>
 				<Grid item xs={12}>
 					<Tooltip title={props.name}>
-						<Typography align={"center"} noWrap>
+						<Typography
+							align={"center"}
+							noWrap
+							className={downloadLink ? classes.downloadLink : undefined}
+							onClick={openDownload}
+						>
 							{props.name}
 						</Typography>
 					</Tooltip>
