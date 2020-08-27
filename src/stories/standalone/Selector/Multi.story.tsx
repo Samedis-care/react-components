@@ -4,7 +4,6 @@ import {
 	MultiSelect,
 	MultiSelectorData,
 	SelectorData,
-	SingleSelect,
 } from "../../../standalone/Selector";
 import { colourOptions } from "./Data";
 import { action } from "@storybook/addon-actions";
