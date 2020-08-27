@@ -12,6 +12,7 @@ import { AttachFile } from "@material-ui/icons";
 import FilePreview from "./File";
 import { FileSelectorError } from "./Errors";
 import i18n from "../../../i18n";
+import { fileToData } from "../../../utils";
 
 export interface IProps extends WithStyles {
 	/**
@@ -361,16 +362,7 @@ class FileUpload extends Component<IProps, IState> {
 		const imageFormatTarget = this.props.convertImagesTo || file.type;
 
 		// file -> data url
-		const reader = new FileReader();
-		const imageData: string = await new Promise((resolve, reject) => {
-			reader.addEventListener("loadend", () => {
-				resolve(reader.result as string);
-			});
-			reader.addEventListener("error", () => {
-				reject(reader.error);
-			});
-			reader.readAsDataURL(file);
-		});
+		const imageData: string = await fileToData(file);
 
 		// data url -> image
 		const image = new Image();
