@@ -62,6 +62,10 @@ export interface IProps extends WithStyles {
 	 * Custom label for the upload files button
 	 */
 	uploadLabel?: string;
+	/**
+	 * Makes the file upload control read only
+	 */
+	readOnly?: boolean;
 }
 
 export interface IDownscaleProps {
@@ -188,6 +192,7 @@ class FileUpload extends Component<IProps, IState> {
 							variant={"contained"}
 							color={"primary"}
 							onClick={this.handleUpload}
+							disabled={this.props.readOnly}
 						>
 							{this.props.uploadLabel ||
 								i18n.t("standalone.file-upload.upload")}
@@ -223,7 +228,11 @@ class FileUpload extends Component<IProps, IState> {
 												this.props.previewImages ? data.preview : undefined
 											}
 											disabled={data.delete || false}
-											onRemove={() => this.removeFile(data)}
+											onRemove={
+												this.props.readOnly
+													? undefined
+													: () => this.removeFile(data)
+											}
 										/>
 									)
 							)}
