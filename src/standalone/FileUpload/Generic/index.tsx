@@ -57,6 +57,10 @@ export interface IProps extends WithStyles {
 	 * @param files The newly selected files
 	 */
 	onChange?: (files: FileData[]) => void;
+	/**
+	 * Custom label for the upload files button
+	 */
+	uploadLabel?: string;
 }
 
 export interface IDownscaleProps {
@@ -184,7 +188,8 @@ class FileUpload extends Component<IProps, IState> {
 							color={"primary"}
 							onClick={this.handleUpload}
 						>
-							{i18n.t("standalone.file-upload.upload")}
+							{this.props.uploadLabel ||
+								i18n.t("standalone.file-upload.upload")}
 						</Button>
 					</Grid>
 					<Grid item xs>
