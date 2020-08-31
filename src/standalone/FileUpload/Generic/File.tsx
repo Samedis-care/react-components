@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { Grid, Tooltip, Typography } from "@material-ui/core";
 import {
 	InsertDriveFileOutlined as DefaultFileIcon,
@@ -18,10 +18,6 @@ export interface IProps {
 	 */
 	name: string;
 	/**
-	 * The mime type of the file
-	 */
-	mimeType: string;
-	/**
 	 * Optional callback for removing the file
 	 */
 	onRemove?: () => void;
@@ -37,6 +33,10 @@ export interface IProps {
 	 * Display grayed-out (marked as deleted)
 	 */
 	disabled: boolean;
+	/**
+	 * The download link to open if the file is clicked
+	 */
+	downloadLink?: string;
 }
 
 const useStyles = makeStyles((theme) => ({
@@ -54,6 +54,15 @@ const useStyles = makeStyles((theme) => ({
 	},
 	iconDisabled: {
 		opacity: 0.5,
+	},
+	clickable: {
+		cursor: "pointer",
+	},
+	downloadLink: {
+		cursor: "pointer",
+		"&:hover": {
+			textDecoration: "underline",
+		},
 	},
 }));
 
@@ -94,6 +103,7 @@ const PowerPointFileExtensions = [
 const PdfFileExtensions = ["pdf"];
 
 const File = (props: IProps) => {
+	const { downloadLink } = props;
 	const classes = useStyles();
 
 	const fileSplit = props.name.split(".");
@@ -107,6 +117,10 @@ const File = (props: IProps) => {
 		: PdfFileExtensions.includes(fileExt)
 		? PdfFileIcon
 		: DefaultFileIcon;
+
+	const openDownload = useCallback(() => {
+		if (downloadLink) window.open(downloadLink, "_blank");
+	}, [downloadLink]);
 
 	return (
 		<Grid item style={{ width: props.size }}>
@@ -124,16 +138,28 @@ const File = (props: IProps) => {
 							alt={props.name}
 							className={
 								classes.icon +
-								(props.disabled ? " " + classes.iconDisabled : "")
+								(props.disabled ? " " + classes.iconDisabled : "") +
+								(downloadLink ? " " + classes.clickable : "")
 							}
+							onClick={openDownload}
 						/>
 					) : (
-						<FileIcon className={classes.icon} />
+						<FileIcon
+							className={`${classes.icon} ${
+								downloadLink ? classes.clickable : ""
+							}`}
+							onClick={openDownload}
+						/>
 					)}
 				</Grid>
 				<Grid item xs={12}>
 					<Tooltip title={props.name}>
-						<Typography align={"center"} noWrap>
+						<Typography
+							align={"center"}
+							noWrap
+							className={downloadLink ? classes.downloadLink : undefined}
+							onClick={openDownload}
+						>
 							{props.name}
 						</Typography>
 					</Tooltip>

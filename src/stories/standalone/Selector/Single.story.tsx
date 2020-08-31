@@ -3,7 +3,7 @@ import "../../../i18n";
 import { SelectorData, SingleSelect } from "../../../standalone/Selector";
 import { colourOptions } from "./Data";
 import { action } from "@storybook/addon-actions";
-import { boolean, withKnobs } from "@storybook/addon-knobs";
+import { boolean, text, withKnobs } from "@storybook/addon-knobs";
 import { Box, CssBaseline } from "@material-ui/core";
 
 export default {
@@ -21,6 +21,10 @@ export const SelectorSingle = () => {
 	const clearable = boolean("Clearable?", false);
 	const icons = boolean("Enable Icons", false);
 	const disable = boolean("Disable", false);
+	const addNewLabel = text("Add new label", "");
+	const loadingLabel = text("Loading Label", "");
+	const noDataLabel = text("No data Label", "");
+	const placeholderLabel = text("Placeholder Label", "");
 
 	const loadData = React.useCallback(
 		async (query: string) => {
@@ -51,6 +55,10 @@ export const SelectorSingle = () => {
 					enableIcons={icons}
 					clearable={clearable}
 					disable={disable}
+					addNewLabel={addNewLabel}
+					loadingLabel={loadingLabel}
+					noDataLabel={noDataLabel}
+					placeholderLabel={placeholderLabel}
 				/>
 			</Box>
 		</>
