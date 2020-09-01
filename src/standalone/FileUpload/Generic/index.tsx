@@ -115,6 +115,10 @@ export interface FileData<T = File | FileMeta> {
 	 */
 	file: T;
 	/**
+	 * Prevent the file from getting deleted
+	 */
+	preventDelete?: boolean;
+	/**
 	 * The file can be uploaded? (has it been selected by the user?)
 	 * If canBeUploaded is true T is File, otherwise T is FileMeta
 	 */
@@ -124,7 +128,7 @@ export interface FileData<T = File | FileMeta> {
 	 */
 	preview?: string;
 	/**
-	 * Set to true if the file should be deleted from the server, only true if canBeUploaded is true
+	 * Set to true if the file should be deleted from the server, only true if canBeUploaded is false
 	 */
 	delete?: boolean;
 }
@@ -229,7 +233,7 @@ class FileUpload extends Component<IProps, IState> {
 											}
 											disabled={data.delete || false}
 											onRemove={
-												this.props.readOnly
+												this.props.readOnly || data.preventDelete
 													? undefined
 													: () => this.removeFile(data)
 											}
