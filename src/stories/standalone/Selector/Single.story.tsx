@@ -6,11 +6,12 @@ import { action } from "@storybook/addon-actions";
 import { boolean, text, withKnobs } from "@storybook/addon-knobs";
 import { Box, CssBaseline } from "@material-ui/core";
 
-export default {
+const Settings = {
 	title: "Standalone/Selector",
 	component: SingleSelect,
 	decorators: [withKnobs],
 };
+export default Settings;
 
 export const SelectorSingle = () => {
 	const [selected, setSelected] = useState<SelectorData | null>(null);

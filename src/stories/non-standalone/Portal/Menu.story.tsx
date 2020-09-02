@@ -11,11 +11,12 @@ import { Domain, Home } from "@material-ui/icons";
 import { button, select, withKnobs } from "@storybook/addon-knobs";
 import { RoutedMenu, Framework, FrameworkHistory } from "../../..";
 
-export default {
+const Settings = {
 	title: "Non-Standalone/Portal",
 	component: RoutedMenu,
 	decorators: [withKnobs],
 };
+export default Settings;
 
 const useStyles = makeStyles({
 	header: {

@@ -3,10 +3,11 @@ import Weekly from "../../../standalone/Schedule/Weekly";
 import "../../../i18n";
 import { getWeekData } from "./dataGen";
 
-export default {
+const Settings = {
 	title: "Standalone/Schedule",
 	component: Weekly,
 };
+export default Settings;
 
 export const ScheduleWeekly = () => {
 	return <Weekly loadData={getWeekData} />;

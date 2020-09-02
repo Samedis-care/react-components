@@ -16,11 +16,12 @@ import { IDataGridExporter } from "../../../standalone/DataGrid/Header";
 import { IFilterDef } from "../../../standalone/DataGrid/Content/FilterEntry";
 import data from "./covid-daily.json";
 
-export default {
+const Settings = {
 	title: "Standalone/DataGrid",
 	component: DataGrid,
 	decorators: [withKnobs],
 };
+export default Settings;
 
 const useStyles = makeStyles({
 	wrapper: {
@@ -245,8 +246,10 @@ export const DataGridStory = () => {
 							value.includes(""); // so eslint-loader stops complaining
 
 							try {
-								// tslint:disable-next-line:no-eval
+								// tslint:disable:no-eval
+								// eslint-disable-next-line no-eval
 								return !expr || eval(expr);
+								// tslint:enable:no-eval
 							} catch (e) {
 								console.error(e);
 								return false;

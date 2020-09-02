@@ -8,11 +8,12 @@ import {
 } from "../../..";
 import { action } from "@storybook/addon-actions";
 
-export default {
+const Settings = {
 	title: "Non-Standalone/Dialog",
 	component: InputDialog,
 	decorators: [withKnobs],
 };
+export default Settings;
 
 const DialogContent = () => {
 	const ctx = useContext(DialogContext)!;
@@ -57,6 +58,7 @@ const DialogContent = () => {
 			.catch(action("openDialogAsync rejected"));
 	};
 
+	// eslint-disable-next-line react-hooks/exhaustive-deps
 	useEffect(openDialog, []);
 	button("Open Dialog (sync)", openDialog);
 	button("Open Dialog (async)", openDialogAsync);

@@ -1,3 +1,4 @@
 // root node
 
-export default "";
+const MakeItAModule = "";
+export default MakeItAModule;

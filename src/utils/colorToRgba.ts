@@ -1,6 +1,6 @@
 // credits: https://stackoverflow.com/a/19366389
 
-export default (color: string): number[] | undefined => {
+const colorToRgba = (color: string): number[] | undefined => {
 	const canvas = document.createElement("canvas");
 	const ctx = canvas.getContext("2d")!;
 	ctx.clearRect(0, 0, 1, 1);
@@ -20,3 +20,5 @@ export default (color: string): number[] | undefined => {
 	ctx.getImageData(0, 0, 1, 1).data.forEach((val) => ret.push(val));
 	return ret;
 };
+
+export default colorToRgba;

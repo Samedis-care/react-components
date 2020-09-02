@@ -4,11 +4,12 @@ import "../../../i18n";
 import { PortalLayout } from "../../../standalone/Portal";
 import { boolean, number, withKnobs } from "@storybook/addon-knobs";
 
-export default {
+const Settings = {
 	title: "Standalone/Portal",
 	component: PortalLayout,
 	decorators: [withKnobs],
 };
+export default Settings;
 
 const useStyles = makeStyles({
 	header: {

@@ -8,11 +8,12 @@ import {
 } from "../../..";
 import { action } from "@storybook/addon-actions";
 
-export default {
+const Settings = {
 	title: "Non-Standalone/Dialog",
 	component: ErrorDialog,
 	decorators: [withKnobs],
 };
+export default Settings;
 
 const DialogContent = () => {
 	const [, setDialog] = useContext(DialogContext)!;
@@ -46,6 +47,7 @@ const DialogContent = () => {
 		);
 	};
 
+	// eslint-disable-next-line react-hooks/exhaustive-deps
 	useEffect(openDialog, []);
 	button("Open Dialog", openDialog);
 

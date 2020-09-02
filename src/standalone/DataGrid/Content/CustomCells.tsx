@@ -1,4 +1,5 @@
 import { createStyles, TableCell, Theme, withStyles } from "@material-ui/core";
+import { combineColors } from "../../../utils";
 
 const selectRowCellStyles = createStyles((theme: Theme) => ({
 	root: {
@@ -37,7 +38,10 @@ const stickyHeaderCellStyles = createStyles((theme: Theme) => ({
 		borderRight: `1px solid ${theme.palette.divider}`,
 		zIndex: 1000,
 		"&:hover": {
-			backgroundColor: theme.palette.action.hover,
+			backgroundColor: `rgba(${combineColors(
+				theme.palette.background.paper,
+				theme.palette.action.hover
+			).join()})`,
 		},
 	},
 }));

@@ -4,11 +4,12 @@ import { Grid, makeStyles } from "@material-ui/core";
 import { withKnobs, number } from "@storybook/addon-knobs";
 import { action } from "@storybook/addon-actions";
 
-export default {
+const Settings = {
 	title: "Standalone/InfiniteScroll",
 	component: InfiniteScroll,
 	decorators: [withKnobs],
 };
+export default Settings;
 
 const useStyles = makeStyles(() => ({
 	scrollWrapper: {

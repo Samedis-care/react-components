@@ -1,4 +1,4 @@
-export default async (file: File): Promise<string> => {
+const fileToData = async (file: File): Promise<string> => {
 	// file -> data url
 	const reader = new FileReader();
 	return new Promise((resolve, reject) => {
@@ -11,3 +11,5 @@ export default async (file: File): Promise<string> => {
 		reader.readAsDataURL(file);
 	});
 };
+
+export default fileToData;

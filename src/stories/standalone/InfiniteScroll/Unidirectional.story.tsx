@@ -5,11 +5,12 @@ import { withKnobs, number } from "@storybook/addon-knobs";
 import { action } from "@storybook/addon-actions";
 import { NumberTypeKnobOptions } from "@storybook/addon-knobs/dist/components/types";
 
-export default {
+const Settings = {
 	title: "Standalone/InfiniteScroll",
 	component: InfiniteScroll,
 	decorators: [withKnobs],
 };
+export default Settings;
 
 const useStyles = makeStyles(() => ({
 	scrollWrapper: {

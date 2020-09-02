@@ -3,10 +3,11 @@ import { makeStyles } from "@material-ui/core";
 import ScrollableSchedule from "../../../standalone/Schedule/Scrollable";
 import { getWeekData } from "./dataGen";
 
-export default {
+const Settings = {
 	title: "Standalone/Schedule",
 	component: ScrollableSchedule,
 };
+export default Settings;
 
 const useStyles = makeStyles(() => ({
 	scrollWrapper: {

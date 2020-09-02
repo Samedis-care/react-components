@@ -10,11 +10,12 @@ import {
 import { action } from "@storybook/addon-actions";
 import { TextField } from "@material-ui/core";
 
-export default {
+const Settings = {
 	title: "Non-Standalone/Dialog",
 	component: FormDialog,
 	decorators: [withKnobs],
 };
+export default Settings;
 
 const MyCustomDialog = (props: IDialogConfigSimple) => {
 	const [v1, setV1] = useState("Prefilled");
@@ -92,6 +93,7 @@ const DialogContent = () => {
 		);
 	};
 
+	// eslint-disable-next-line react-hooks/exhaustive-deps
 	useEffect(openDialog, []);
 	button("Open Dialog", openDialog);
 

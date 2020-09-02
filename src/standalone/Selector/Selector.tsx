@@ -213,6 +213,7 @@ const Selector = (props: SelectorProps<any>) => {
 		};
 	}, [customStyles, theme]);
 
+	// eslint-disable-next-line react-hooks/exhaustive-deps
 	const getNoOptionsLabel = React.useCallback(
 		noDataLabel
 			? typeof noDataLabel === "string"
@@ -221,6 +222,7 @@ const Selector = (props: SelectorProps<any>) => {
 			: () => null,
 		[noDataLabel]
 	);
+	// eslint-disable-next-line react-hooks/exhaustive-deps
 	const getLoadingLabel = React.useCallback(
 		loadingLabel
 			? typeof loadingLabel === "string"

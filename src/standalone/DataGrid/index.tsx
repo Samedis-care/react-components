@@ -315,12 +315,12 @@ const DataGrid = (props: IDataGridProps) => {
 		[setState]
 	);
 
-	useEffect(refresh, [pageIndex, rowsPerPage]);
+	useEffect(refresh, [refresh, pageIndex, rowsPerPage]);
 
 	// debounced refresh on filter and sort changes
 	const debouncedRefresh = useMemo(() => debounce(refresh, 500), [refresh]);
 
-	useEffect(debouncedRefresh, [search, columnsState]);
+	useEffect(debouncedRefresh, [debouncedRefresh, search, columnsState]);
 
 	return (
 		<Grid

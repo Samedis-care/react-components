@@ -11,11 +11,12 @@ import {
 import { Domain, Home } from "@material-ui/icons";
 import { select, withKnobs } from "@storybook/addon-knobs";
 
-export default {
+const Settings = {
 	title: "Standalone/Portal",
 	component: MenuBase,
 	decorators: [withKnobs],
 };
+export default Settings;
 
 const useStyles = makeStyles({
 	header: {

@@ -11,11 +11,12 @@ import {
 } from "@storybook/addon-knobs";
 import { action } from "@storybook/addon-actions";
 
-export default {
+const Settings = {
 	title: "Standalone/FileUpload",
 	component: FileUpload,
 	decorators: [withKnobs],
 };
+export default Settings;
 
 export const FileUploadStory = () => {
 	const handleErrorAction = action("handleError");

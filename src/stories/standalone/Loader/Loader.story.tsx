@@ -2,11 +2,12 @@ import React from "react";
 import { Loader } from "../../../standalone";
 import { text, withKnobs } from "@storybook/addon-knobs";
 
-export default {
+const Settings = {
 	title: "Standalone/Loader",
 	component: Loader,
 	decorators: [withKnobs],
 };
+export default Settings;
 
 export const LoaderStory = () => {
 	return (

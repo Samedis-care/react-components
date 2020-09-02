@@ -11,11 +11,12 @@ import { boolean, text, withKnobs } from "@storybook/addon-knobs";
 import { Box, CssBaseline } from "@material-ui/core";
 import CustomMultiSelectEntry from "./CustomMultiSelectEntry";
 
-export default {
+const Settings = {
 	title: "Standalone/Selector",
 	component: MultiSelect,
 	decorators: [withKnobs],
 };
+export default Settings;
 
 const enhanceData = (entry: SelectorData): MultiSelectorData => ({
 	...entry,
