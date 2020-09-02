@@ -169,6 +169,8 @@ export const DataGridStory = () => {
 					for (const filterField in fieldFilter) {
 						if (!fieldFilter.hasOwnProperty(filterField)) continue;
 						let filter: IFilterDef | undefined = fieldFilter[filterField];
+						const column = columnDef.find((e) => e.field === filterField)!;
+
 						const filterCache: { [key: string]: IFilterDef } = {};
 						let filterIndex = 0;
 
@@ -189,10 +191,24 @@ export const DataGridStory = () => {
 										'!value.includes(filterCache["' + filterKey + '"].value1)';
 									break;
 								case "equals":
-									expr += 'value === filterCache["' + filterKey + '"].value1';
+									if (column.type === "number") {
+										expr +=
+											'parseInt(value) === parseInt(filterCache["' +
+											filterKey +
+											'"].value1)';
+									} else {
+										expr += 'value === filterCache["' + filterKey + '"].value1';
+									}
 									break;
 								case "notEqual":
-									expr += 'value !== filterCache["' + filterKey + '"].value1';
+									if (column.type === "number") {
+										expr +=
+											'parseInt(value) !== parseInt(filterCache["' +
+											filterKey +
+											'"].value1)';
+									} else {
+										expr += 'value !== filterCache["' + filterKey + '"].value1';
+									}
 									break;
 								case "startsWith":
 									expr +=
@@ -242,7 +258,9 @@ export const DataGridStory = () => {
 						}
 
 						rowData = rowData.filter((row) => {
-							const value = row[filterField].toLowerCase();
+							const rawValue = row[filterField];
+							if (!rawValue) return false;
+							const value = rawValue.toString().toLowerCase();
 							value.includes(""); // so eslint-loader stops complaining
 
 							try {
@@ -262,13 +280,19 @@ export const DataGridStory = () => {
 						// tslint:disable-next-line:forin
 						for (const sortKey in sort) {
 							const sorter = sort[sortKey];
+							const valA = a[sorter.field];
+							const valB = b[sorter.field];
 							let res = 0;
-							if (typeof a[sorter.field] === "number") {
-								res = a[sorter.field] - b[sorter.field];
-							} else {
-								const av = a[sorter.field].toString();
-								const bv = b[sorter.field].toString();
+							if (typeof valA === "number" && typeof valB === "number") {
+								res = valA - valB;
+							} else if (valA && valB) {
+								const av = valA.toString();
+								const bv = valB.toString();
 								res = av.localeCompare(bv);
+							} else {
+								if (!valA && !valB) res = 0;
+								else if (!valA) res = -1;
+								else if (!valB) res = 1;
 							}
 							res *= sorter.direction;
 							if (res) return res;
