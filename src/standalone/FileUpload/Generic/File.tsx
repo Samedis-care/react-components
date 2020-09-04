@@ -11,6 +11,7 @@ import {
 	PowerPointFileIcon,
 	WordFileIcon,
 } from "../FileIcons";
+import { getFileExt } from "../../../utils";
 
 export interface IProps {
 	/**
@@ -106,8 +107,7 @@ const File = (props: IProps) => {
 	const { downloadLink } = props;
 	const classes = useStyles();
 
-	const fileSplit = props.name.split(".");
-	const fileExt = fileSplit[fileSplit.length - 1];
+	const fileExt = getFileExt(props.name);
 	const FileIcon = ExcelFileExtensions.includes(fileExt)
 		? ExcelFileIcon
 		: WordFileExtensions.includes(fileExt)
