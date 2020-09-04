@@ -38,7 +38,8 @@
 			"formats": "Formats",
 			"error": {
 				"too-many": "You selected too many files",
-				"limit-reached": "You reached the maximum amount of allowed files"
+				"limit-reached": "You reached the maximum amount of allowed files",
+				"invalid-type": "You selected an unsupported file type"
 			},
 			"format": {
 				"any": "any"

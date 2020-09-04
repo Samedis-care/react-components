@@ -12,7 +12,7 @@ import { AttachFile } from "@material-ui/icons";
 import FilePreview from "./File";
 import { FileSelectorError } from "./Errors";
 import i18n from "../../../i18n";
-import { fileToData } from "../../../utils";
+import { fileToData, getFileExt } from "../../../utils";
 
 export interface IProps extends WithStyles {
 	/**
@@ -202,13 +202,6 @@ class FileUpload extends Component<IProps, IState> {
 								i18n.t("standalone.file-upload.upload")}
 						</Button>
 					</Grid>
-					<Grid item xs>
-						<Typography align={"right"}>
-							({i18n.t("standalone.file-upload.formats")}:{" "}
-							{this.props.accept || i18n.t("standalone.file-upload.format.any")}
-							)
-						</Typography>
-					</Grid>
 					<Grid item xs={12}>
 						<Grid
 							container
@@ -242,6 +235,13 @@ class FileUpload extends Component<IProps, IState> {
 							)}
 						</Grid>
 					</Grid>
+					<Grid item xs={12}>
+						<Typography align={"right"} variant={"subtitle2"}>
+							({i18n.t("standalone.file-upload.formats")}:{" "}
+							{this.props.accept || i18n.t("standalone.file-upload.format.any")}
+							)
+						</Typography>
+					</Grid>
 				</Grid>
 			</>
 		);
@@ -254,7 +254,7 @@ class FileUpload extends Component<IProps, IState> {
 			if (maxFiles === 0) {
 				this.props.handleError(
 					"files.selector.limit-reached",
-					i18n.t("standalone.file-selector.error.limit-reached")
+					i18n.t("standalone.file-upload.error.limit-reached")
 				);
 				return;
 			}
@@ -308,7 +308,7 @@ class FileUpload extends Component<IProps, IState> {
 			if (files.length > maxFiles) {
 				this.props.handleError(
 					"files.selector.too-many",
-					i18n.t("standalone.file-selector.error.too-many")
+					i18n.t("standalone.file-upload.error.too-many")
 				);
 				return;
 			}
@@ -330,6 +330,31 @@ class FileUpload extends Component<IProps, IState> {
 				newFiles.push({ file, canBeUploaded: true, delete: false });
 			}
 		}
+
+		if (this.props.accept) {
+			const allowedTypes = this.props.accept
+				.split(",")
+				.map((type) => type.trim());
+			const allowedFileExt = allowedTypes
+				.filter((type) => type.startsWith("."))
+				.map((type) => type.substring(1));
+			const allowedMimes = allowedTypes.filter((type) => type.includes("/"));
+
+			if (
+				newFiles.find(
+					(file) =>
+						!allowedMimes.includes(file.file.type) &&
+						!allowedFileExt.includes(getFileExt(file.file.name))
+				)
+			) {
+				this.props.handleError(
+					"files.type.invalid",
+					i18n.t("standalone.file-upload.error.invalid-type")
+				);
+				return;
+			}
+		}
+
 		this.setState(
 			(prevState) => ({
 				files: this.props.allowDuplicates
