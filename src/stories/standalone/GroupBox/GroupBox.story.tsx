@@ -17,8 +17,8 @@ export const GroupBoxStory = () => {
       label={text("Label Text", "Group Box")}
     >
       <ul>
-        <li>{text("List Item 1", "Item 1")}</li>
-        <li>{text("List Item 2", "Item 2")}</li>
+        <li>{"Item 1"}</li>
+        <li>{"Item 2"}</li>
       </ul>
     </GroupBox>
 	);

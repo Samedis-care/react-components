@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useRef, useEffect, memo } from "react";
 import InputLabel from "@material-ui/core/InputLabel";
 import NotchedOutline from "@material-ui/core/OutlinedInput/NotchedOutline";
 import { makeStyles } from "@material-ui/core";
@@ -36,9 +36,9 @@ export interface GroupBoxProps {
 const GroupBox = (props: GroupBoxProps) => {
   const { id, label, children } = props;
   const classes = useStyles();
-  const [labelWidth, setLabelWidth] = React.useState(0);
-  const labelRef = React.useRef(null);
-  React.useEffect(() => {
+  const [labelWidth, setLabelWidth] = useState(0);
+  const labelRef = useRef(null);
+  useEffect(() => {
     const cur = (labelRef.current as unknown) as HTMLElement;
     setLabelWidth(cur ? cur.offsetWidth : 0);
   }, [label]);
@@ -67,4 +67,4 @@ const GroupBox = (props: GroupBoxProps) => {
     </div>
   );
 };
-export default React.memo(GroupBox);
+export default memo(GroupBox);
