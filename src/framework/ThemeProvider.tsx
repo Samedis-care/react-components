@@ -34,9 +34,9 @@ export const ThemeContext = React.createContext<SetThemeAction | undefined>(
 );
 
 /**
- * Provides the application with an state to display an dialog
+ * Provides the application with an state to manage theming
  */
-export default React.memo((props: IThemeProviderProps) => {
+const ThemeProvider = (props: IThemeProviderProps) => {
 	const [theme, setTheme] = useState<Theme>(() =>
 		createMuiTheme(
 			props.defaultTheme(matchMedia("(prefers-color-scheme: dark)").matches)
@@ -57,4 +57,6 @@ export default React.memo((props: IThemeProviderProps) => {
 			</MuiThemeProvider>
 		</ThemeContext.Provider>
 	);
-});
+};
+
+export default React.memo(ThemeProvider);
