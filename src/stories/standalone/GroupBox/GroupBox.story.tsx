@@ -12,15 +12,12 @@ export default Settings;
 
 export const GroupBoxStory = () => {
 	return (
-    <GroupBox 
-      id="group-box-story"
-      label={text("Label Text", "Group Box")}
-    >
-      <ul>
-        <li>{"Item 1"}</li>
-        <li>{"Item 2"}</li>
-      </ul>
-    </GroupBox>
+		<GroupBox id="group-box-story" label={text("Label Text", "Group Box")}>
+			<ul>
+				<li>{"Item 1"}</li>
+				<li>{"Item 2"}</li>
+			</ul>
+		</GroupBox>
 	);
 };
 
