@@ -1,4 +1,4 @@
-import React, { memo } from "react";
+import React from "react";
 import { makeStyles } from "@material-ui/core";
 
 const useStyles = makeStyles({
@@ -28,4 +28,5 @@ const GroupBox = (props: GroupBoxProps) => {
 		</fieldset>
 	);
 };
-export default memo(GroupBox);
+
+export default React.memo(GroupBox);
