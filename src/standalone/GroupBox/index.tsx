@@ -1,9 +1,7 @@
 import React, { useState, useRef, useEffect, memo } from "react";
-import InputLabel from "@material-ui/core/InputLabel";
-import NotchedOutline from "@material-ui/core/OutlinedInput/NotchedOutline";
-import { makeStyles } from "@material-ui/core";
+import { makeStyles, InputLabel } from "@material-ui/core";
 
-const useStyles = makeStyles({
+const useStyles = makeStyles((theme) => ({
   root: {
     position: "relative",
   },
@@ -16,16 +14,34 @@ const useStyles = makeStyles({
   },
   inputLabel: {
     position: "absolute",
-    left: 0,
+    left: '5px',
     top: 0,
-    // slight alteration to spec spacing to match visual spec result
-    transform: "translate(0, 24px) scale(1)",
   },
-  borderColor: {
+  fieldSetRoot: {
+    textAlign: 'left',
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    top: -5,
+    left: 0,
+    margin: 0,
+    padding: '0 8px',
+    pointerEvents: 'none',
+    borderStyle: 'dotted',
     borderColor: "lightgrey",
     borderRadius: 4,
+    borderWidth: 1,
+    overflow: 'hidden',
   },
-});
+  legend: {
+    padding: 0,
+    lineHeight: '11px', // sync with `height` in `legend` styles
+    transition: theme.transitions.create('width', {
+      duration: 150,
+      easing: theme.transitions.easing.easeOut,
+    }),
+  },
+}));
 
 export interface GroupBoxProps {
   id?: string;
@@ -40,7 +56,7 @@ const GroupBox = (props: GroupBoxProps) => {
   const labelRef = useRef(null);
   useEffect(() => {
     const cur = (labelRef.current as unknown) as HTMLElement;
-    setLabelWidth(cur ? cur.offsetWidth : 0);
+    setLabelWidth(cur ? cur.offsetWidth * 0.75 + 20 : 0);
   }, [label]);
 
   return (
@@ -57,11 +73,19 @@ const GroupBox = (props: GroupBoxProps) => {
       <div className={classes.root}>
         <div id={id} className={classes.content}>
           {children}
-          <NotchedOutline
-            notched
-            labelWidth={labelWidth}
-            className={classes.borderColor}
-          />
+          <fieldset
+            aria-hidden
+            className={classes.fieldSetRoot}
+          >
+            <legend
+              className={classes.legend}
+              style={{
+                width: labelWidth,
+              }}
+            >
+              <span dangerouslySetInnerHTML={{ __html: '&#8203;' }} />
+            </legend>
+          </fieldset>
         </div>
       </div>
     </div>
