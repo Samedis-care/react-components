@@ -2,7 +2,7 @@
 	"standalone": {
 		"data-grid": {
 			"content": {
-				"filter": "Filterd"
+				"filter": "Filter"
 			},
 			"settings": {
 				"lock": "Spalten sperren/entsperren",
