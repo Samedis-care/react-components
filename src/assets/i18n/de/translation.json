@@ -1,49 +1,49 @@
 {
-  "standalone": {
-    "data-grid": {
-      "content": {
-        "filter": "Filterd"
-      },
-      "settings": {
-        "lock": "Spalten sperren/entsperren",
-        "hide": "Spalten ein-/ausblenden",
-        "close": "Schließen"
-      },
-      "header": {
-        "settings": "Einstellungen",
-        "reset": "Zurücksetzen",
-        "new": "Neu",
-        "export": "Exportieren",
-        "edit": "Bearbeiten",
-        "delete": "Lösche"
-      },
-      "footer": {
-        "prev-page": "Vorherige Seite",
-        "page-size": "Seitengröße:",
-        "page-of": "von",
-        "next-page": "Nächste Seite",
-        "last-page": "Letzte Seite",
-        "first-page": "Erste Seite"
-      }
-    },
-    "selector": {
-      "add-new": "Hinzufügen"
-    },
-    "schedule": {
-      "week": "Woche",
-      "today": "Heute"
-    },
-    "file-upload": {
-      "formats": "Dateiformante",
-      "upload": "Hochladen",
-      "error": {
-        "invalid-type": "Nicht unterstützter Dateityp ausgewählt",
-        "limit-reached": "Maximale Anzahl der erlaubten Dateien erreicht",
-        "too-many": "Zu viele Dateien ausgewählt"
-      },
-      "format": {
-        "any": "Alle"
-      }
-    }
-  }
+	"standalone": {
+		"data-grid": {
+			"content": {
+				"filter": "Filterd"
+			},
+			"settings": {
+				"lock": "Spalten sperren/entsperren",
+				"hide": "Spalten ein-/ausblenden",
+				"close": "Schließen"
+			},
+			"header": {
+				"settings": "Einstellungen",
+				"reset": "Zurücksetzen",
+				"new": "Neu",
+				"export": "Exportieren",
+				"edit": "Bearbeiten",
+				"delete": "Lösche"
+			},
+			"footer": {
+				"prev-page": "Vorherige Seite",
+				"page-size": "Seitengröße:",
+				"page-of": "von",
+				"next-page": "Nächste Seite",
+				"last-page": "Letzte Seite",
+				"first-page": "Erste Seite"
+			}
+		},
+		"selector": {
+			"add-new": "Hinzufügen"
+		},
+		"schedule": {
+			"week": "Woche",
+			"today": "Heute"
+		},
+		"file-upload": {
+			"formats": "Dateiformante",
+			"upload": "Hochladen",
+			"error": {
+				"invalid-type": "Nicht unterstützter Dateityp ausgewählt",
+				"limit-reached": "Maximale Anzahl der erlaubten Dateien erreicht",
+				"too-many": "Zu viele Dateien ausgewählt"
+			},
+			"format": {
+				"any": "Alle"
+			}
+		}
+	}
 }

@@ -1,49 +1,49 @@
 {
-  "standalone": {
-    "selector": {
-      "add-new": "Ajouter"
-    },
-    "schedule": {
-      "week": "Semaine",
-      "today": "Aujourd'hui"
-    },
-    "file-upload": {
-      "formats": "Formats de fichiers",
-      "upload": "Télécharger",
-      "error": {
-        "invalid-type": "Type de fichier non supporté sélectionné",
-        "limit-reached": "Nombre maximum de dossiers autorisés atteint",
-        "too-many": "Trop de dossiers sélectionnés"
-      },
-      "format": {
-        "any": "Tout"
-      }
-    },
-    "data-grid": {
-      "settings": {
-        "lock": "Verrouiller/Déverrouiller les colonnes",
-        "hide": "Afficher/Masquer les colonnes",
-        "close": "Fermer"
-      },
-      "header": {
-        "settings": "Paramètres",
-        "reset": "Réinitialiser",
-        "new": "Nouveau",
-        "export": "Exporter",
-        "edit": "Éditer",
-        "delete": "Supprimer"
-      },
-      "footer": {
-        "prev-page": "Page précédente",
-        "page-size": "Taille de la page :",
-        "page-of": "de",
-        "next-page": "Page suivante",
-        "last-page": "Dernière page",
-        "first-page": "Première page"
-      },
-      "content": {
-        "filter": "Filtrez"
-      }
-    }
-  }
+	"standalone": {
+		"selector": {
+			"add-new": "Ajouter"
+		},
+		"schedule": {
+			"week": "Semaine",
+			"today": "Aujourd'hui"
+		},
+		"file-upload": {
+			"formats": "Formats de fichiers",
+			"upload": "Télécharger",
+			"error": {
+				"invalid-type": "Type de fichier non supporté sélectionné",
+				"limit-reached": "Nombre maximum de dossiers autorisés atteint",
+				"too-many": "Trop de dossiers sélectionnés"
+			},
+			"format": {
+				"any": "Tout"
+			}
+		},
+		"data-grid": {
+			"settings": {
+				"lock": "Verrouiller/Déverrouiller les colonnes",
+				"hide": "Afficher/Masquer les colonnes",
+				"close": "Fermer"
+			},
+			"header": {
+				"settings": "Paramètres",
+				"reset": "Réinitialiser",
+				"new": "Nouveau",
+				"export": "Exporter",
+				"edit": "Éditer",
+				"delete": "Supprimer"
+			},
+			"footer": {
+				"prev-page": "Page précédente",
+				"page-size": "Taille de la page :",
+				"page-of": "de",
+				"next-page": "Page suivante",
+				"last-page": "Dernière page",
+				"first-page": "Première page"
+			},
+			"content": {
+				"filter": "Filtrez"
+			}
+		}
+	}
 }
