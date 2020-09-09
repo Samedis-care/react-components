@@ -9,9 +9,9 @@
 				"filter": "Filter"
 			},
 			"header": {
-				"new": "Create new",
-				"edit": "Edit selected",
-				"delete": "Delete selected",
+				"new": "New",
+				"edit": "Edit",
+				"delete": "Delete",
 				"export": "Export",
 				"settings": "Settings",
 				"reset": "Reset"
@@ -31,18 +31,18 @@
 			}
 		},
 		"selector": {
-			"add-new": "Add new"
+			"add-new": "Add"
 		},
 		"file-upload": {
-			"upload": "Upload Files",
-			"formats": "Formats",
+			"upload": "Upload",
+			"formats": "File formats",
 			"error": {
-				"too-many": "You selected too many files",
-				"limit-reached": "You reached the maximum amount of allowed files",
-				"invalid-type": "You selected an unsupported file type"
+				"too-many": "Too many files selected",
+				"limit-reached": "Maximum amount of allowed files",
+				"invalid-type": "Unsupported file type selected"
 			},
 			"format": {
-				"any": "any"
+				"any": "Any"
 			}
 		}
 	}
