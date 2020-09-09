@@ -6,6 +6,7 @@ import {
 	ListItemIcon,
 	ListItemText,
 	Theme,
+	TypographyProps,
 	withStyles,
 } from "@material-ui/core";
 import { ExpandLess, ExpandMore } from "@material-ui/icons";
@@ -57,6 +58,8 @@ const SelectedListItem = withStyles(selectedListItemStyles)(ListItem);
 const UnselectedListItem = withStyles(unselectedListItemStyles)(ListItem);
 const ExpandableListItem = withStyles(expandableListItemStyles)(ListItem);
 
+const typographyProps: TypographyProps = { variant: "body2" };
+
 const MenuItemJumboReactLight = (props: IMenuItemProps) => {
 	const classes = useStyles();
 
@@ -77,7 +80,10 @@ const MenuItemJumboReactLight = (props: IMenuItemProps) => {
 			}
 		>
 			<ListItemIcon>{Icon && <Icon />}</ListItemIcon>
-			<ListItemText primary={props.title} />
+			<ListItemText
+				primary={props.title}
+				primaryTypographyProps={typographyProps}
+			/>
 			{props.expandable ? (
 				props.expanded ? (
 					<ExpandLess />
