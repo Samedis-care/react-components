@@ -5,6 +5,7 @@ export * from "./Portal";
 export * from "./Schedule";
 export * from "./Selector";
 export * from "./Small";
+export * from "./PopupMenu";
 export { default as GroupBox } from "./GroupBox";
 export { default as DataGrid } from "./DataGrid";
 export { default as VerticalDivider } from "./VerticalDivider";

@@ -1,7 +1,8 @@
 import React from "react";
 import { IDataGridExporter } from "./index";
-import { Menu, MenuProps, PopoverOrigin, withStyles } from "@material-ui/core";
+import { MenuProps, PopoverOrigin } from "@material-ui/core";
 import ExportMenuEntry from "./ExportMenuEntry";
+import PopupMenu from "../../PopupMenu";
 
 export interface IDataGridExportMenuProps {
 	/**
@@ -18,12 +19,6 @@ export interface IDataGridExportMenuProps {
 	onClose: MenuProps["onClose"];
 }
 
-const MenuWithBorder = withStyles((theme) => ({
-	paper: {
-		border: `1px solid ${theme.palette.divider}`,
-	},
-}))(Menu);
-
 const anchorOrigin: PopoverOrigin = {
 	vertical: "bottom",
 	horizontal: "center",
@@ -36,7 +31,7 @@ const transformOrigin: PopoverOrigin = {
 
 const ExportMenu = (props: IDataGridExportMenuProps) => {
 	return (
-		<MenuWithBorder
+		<PopupMenu
 			elevation={0}
 			anchorEl={props.anchorEl}
 			anchorOrigin={anchorOrigin}
@@ -49,7 +44,7 @@ const ExportMenu = (props: IDataGridExportMenuProps) => {
 			{props.exporters.map((exporter) => (
 				<ExportMenuEntry key={exporter.id} exporter={exporter} />
 			))}
-		</MenuWithBorder>
+		</PopupMenu>
 	);
 };
 

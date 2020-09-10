@@ -124,7 +124,9 @@ const ColumnHeaderContent = (
 				<Grid item>
 					<Tooltip title={i18n.t("standalone.data-grid.content.filter")!}>
 						<IconButton className={classes.filterButton} onClick={openFilter}>
-							<FilterIcon />
+							<FilterIcon
+								color={props.filter?.value1 ? "primary" : undefined}
+							/>
 						</IconButton>
 					</Tooltip>
 				</Grid>
