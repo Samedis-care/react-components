@@ -91,6 +91,7 @@ export const FileUploadStory = () => {
 				},
 				preview: fileData,
 			}))}
+			readOnly={boolean("Read-only", false)}
 		/>
 	);
 };

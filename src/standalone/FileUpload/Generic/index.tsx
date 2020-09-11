@@ -2,9 +2,9 @@ import React, { Component } from "react";
 import {
 	Button,
 	createStyles,
+	FormHelperText,
 	Grid,
 	Theme,
-	Typography,
 	WithStyles,
 	withStyles,
 } from "@material-ui/core";
@@ -190,19 +190,20 @@ class FileUpload extends Component<IProps, IState> {
 						(this.state.dragging ? " " + this.props.classes.dropzone : "")
 					}
 				>
-					<Grid item xs>
-						<Button
-							startIcon={<AttachFile />}
-							variant={"contained"}
-							color={"primary"}
-							onClick={this.handleUpload}
-							disabled={this.props.readOnly}
-						>
-							{this.props.uploadLabel ||
-								i18n.t("standalone.file-upload.upload")}
-						</Button>
-					</Grid>
-					<Grid item xs={12}>
+					{!this.props.readOnly && (
+						<Grid item xs key={"upload"}>
+							<Button
+								startIcon={<AttachFile />}
+								variant={"contained"}
+								color={"primary"}
+								onClick={this.handleUpload}
+							>
+								{this.props.uploadLabel ||
+									i18n.t("standalone.file-upload.upload")}
+							</Button>
+						</Grid>
+					)}
+					<Grid item xs={12} key={"files"}>
 						<Grid
 							container
 							spacing={2}
@@ -235,13 +236,16 @@ class FileUpload extends Component<IProps, IState> {
 							)}
 						</Grid>
 					</Grid>
-					<Grid item xs={12}>
-						<Typography align={"right"} variant={"subtitle2"}>
-							({i18n.t("standalone.file-upload.formats")}:{" "}
-							{this.props.accept || i18n.t("standalone.file-upload.format.any")}
-							)
-						</Typography>
-					</Grid>
+					{!this.props.readOnly && (
+						<Grid item xs={12} key={"info"}>
+							<FormHelperText className={this.props.classes.formatText}>
+								({i18n.t("standalone.file-upload.formats")}:{" "}
+								{this.props.accept ||
+									i18n.t("standalone.file-upload.format.any")}
+								)
+							</FormHelperText>
+						</Grid>
+					)}
 				</Grid>
 			</>
 		);
@@ -452,6 +456,9 @@ class FileUpload extends Component<IProps, IState> {
 const styles = createStyles((theme: Theme) => ({
 	dropzone: {
 		border: `2px solid ${theme.palette.primary.main}`,
+	},
+	formatText: {
+		textAlign: "right",
 	},
 }));
 
