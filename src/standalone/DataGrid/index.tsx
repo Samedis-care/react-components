@@ -188,7 +188,7 @@ export interface IDataGridState {
 	/**
 	 * Custom user-defined data
 	 */
-	customData: any;
+	customData: { [key: string]: any };
 }
 
 export const DataGridStateContext = React.createContext<
@@ -216,7 +216,7 @@ export const DataGridDefaultState: IDataGridState = {
 	rows: null,
 	dataLoadError: null,
 	refreshData: true,
-	customData: undefined,
+	customData: {},
 };
 
 const useStyles = makeStyles((theme: Theme) => ({

@@ -77,11 +77,11 @@ export interface IDataGridExporter<T> {
 
 const Header = (_props: IDataGridHeaderProps) => {
 	return (
-		<Grid container justify={"space-between"}>
+		<Grid container justify={"space-between"} wrap={"nowrap"}>
 			<Grid item>
 				<Search />
 			</Grid>
-			<Grid item>
+			<Grid item xs>
 				<FilterBar />
 			</Grid>
 			<Grid item>

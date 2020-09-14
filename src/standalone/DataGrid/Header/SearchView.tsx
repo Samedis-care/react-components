@@ -33,7 +33,7 @@ const SearchView = (props: IDataGridSearchViewProps) => {
 				onChange={props.handleSearchChange}
 				placeholder={gridProps.searchPlaceholder}
 				InputProps={searchInputProps}
-				margin="dense"
+				margin={"dense"}
 			/>
 		</Box>
 	);

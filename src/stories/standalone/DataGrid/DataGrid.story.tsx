@@ -15,6 +15,7 @@ import { action } from "@storybook/addon-actions";
 import { IDataGridExporter } from "../../../standalone/DataGrid/Header";
 import { IFilterDef } from "../../../standalone/DataGrid/Content/FilterEntry";
 import data from "./covid-daily.json";
+import GridCustomFilters from "./GridCustomFilters";
 
 const Settings = {
 	title: "Standalone/DataGrid",
@@ -123,6 +124,11 @@ export const DataGridStory = () => {
 				onEdit={boolean("Enable edit", true) ? action("onEdit") : undefined}
 				onDelete={
 					boolean("Enable delete", true) ? action("onDelete") : undefined
+				}
+				filterBar={
+					boolean("Enable custom filters?", true)
+						? GridCustomFilters
+						: undefined
 				}
 				loadData={async (
 					page,

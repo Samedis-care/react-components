@@ -4,7 +4,7 @@ import React, {
 	useCallback,
 	useContext,
 } from "react";
-import { Grid } from "@material-ui/core";
+import { Box, Grid } from "@material-ui/core";
 import { DataGridPropsContext, DataGridStateContext } from "../index";
 
 export interface IDataGridFilterBarProps {
@@ -42,14 +42,16 @@ const FilterBar = () => {
 	const FilterBarView = props.filterBar;
 
 	return (
-		<Grid container>
-			{FilterBarView && (
-				<FilterBarView
-					customData={state.customData}
-					setCustomData={setCustomData}
-				/>
-			)}
-		</Grid>
+		<Box ml={4}>
+			<Grid container alignItems={"center"} justify={"flex-end"} spacing={2}>
+				{FilterBarView && (
+					<FilterBarView
+						customData={state.customData}
+						setCustomData={setCustomData}
+					/>
+				)}
+			</Grid>
+		</Box>
 	);
 };
 
