@@ -17,7 +17,8 @@
 			},
 			"format": {
 				"any": "Tout"
-			}
+			},
+			"no-files": "Aucune pièce jointe disponible"
 		},
 		"data-grid": {
 			"settings": {
@@ -39,7 +40,8 @@
 				"page-of": "de",
 				"next-page": "Page suivante",
 				"last-page": "Dernière page",
-				"first-page": "Première page"
+				"first-page": "Première page",
+				"page-size-tooltip": "Nombre d'entrées par page"
 			},
 			"content": {
 				"filter": "Filtrez"

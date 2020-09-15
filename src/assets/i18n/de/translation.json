@@ -23,7 +23,8 @@
 				"page-of": "von",
 				"next-page": "Nächste Seite",
 				"last-page": "Letzte Seite",
-				"first-page": "Erste Seite"
+				"first-page": "Erste Seite",
+				"page-size-tooltip": "Anzahl Einträge pro Seite"
 			}
 		},
 		"selector": {
@@ -43,7 +44,8 @@
 			},
 			"format": {
 				"any": "Alle"
-			}
+			},
+			"no-files": "Keine Anhänge verfügbar"
 		}
 	}
 }
