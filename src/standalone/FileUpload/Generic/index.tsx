@@ -5,6 +5,7 @@ import {
 	FormHelperText,
 	Grid,
 	Theme,
+	Typography,
 	WithStyles,
 	withStyles,
 } from "@material-ui/core";
@@ -233,6 +234,13 @@ class FileUpload extends Component<IProps, IState> {
 											}
 										/>
 									)
+							)}
+							{this.props.readOnly && this.state.files.length === 0 && (
+								<Grid item>
+									<Typography>
+										{i18n.t("standalone.file-upload.no-files")}
+									</Typography>
+								</Grid>
 							)}
 						</Grid>
 					</Grid>

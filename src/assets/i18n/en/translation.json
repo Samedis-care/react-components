@@ -36,6 +36,7 @@
 		},
 		"file-upload": {
 			"upload": "Upload",
+			"no-files": "No files attached",
 			"formats": "File formats",
 			"error": {
 				"too-many": "Too many files selected",

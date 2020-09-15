@@ -52,6 +52,7 @@ const useStyles = makeStyles((theme) => ({
 	icon: {
 		width: "100%",
 		height: "auto",
+		marginTop: 16,
 	},
 	iconDisabled: {
 		opacity: 0.5,
@@ -159,6 +160,7 @@ const File = (props: IProps) => {
 							noWrap
 							className={downloadLink ? classes.downloadLink : undefined}
 							onClick={openDownload}
+							variant={"body2"}
 						>
 							{props.name}
 						</Typography>
