@@ -1,51 +1,51 @@
 {
-	"standalone": {
-		"schedule": {
-			"week": "Week",
-			"today": "Today"
-		},
-		"data-grid": {
-			"content": {
-				"filter": "Filter"
-			},
-			"header": {
-				"new": "New",
-				"edit": "Edit",
-				"delete": "Delete",
-				"export": "Export",
-				"settings": "Settings",
-				"reset": "Reset"
-			},
-			"settings": {
-				"lock": "Lock/Unlock Columns",
-				"hide": "Show/Hide Columns",
-				"close": "Close"
-			},
-			"footer": {
-				"page-size": "Page size:",
-				"page-size-tooltip": "Page size",
-				"page-of": "of",
-				"first-page": "First page",
-				"prev-page": "Previous page",
-				"next-page": "Next page",
-				"last-page": "Last page"
-			}
-		},
-		"selector": {
-			"add-new": "Add"
-		},
-		"file-upload": {
-			"upload": "Upload",
-			"no-files": "No files attached",
-			"formats": "File formats",
-			"error": {
-				"too-many": "Too many files selected",
-				"limit-reached": "Maximum amount of allowed files",
-				"invalid-type": "Unsupported file type selected"
-			},
-			"format": {
-				"any": "Any"
-			}
-		}
-	}
+  "standalone": {
+    "schedule": {
+      "week": "Week",
+      "today": "Today"
+    },
+    "data-grid": {
+      "content": {
+        "filter": "Filter"
+      },
+      "header": {
+        "new": "New",
+        "edit": "Edit",
+        "delete": "Delete",
+        "export": "Export",
+        "settings": "Settings",
+        "reset": "Reset"
+      },
+      "settings": {
+        "lock": "Lock/Unlock Columns",
+        "hide": "Show/Hide Columns",
+        "close": "Close"
+      },
+      "footer": {
+        "page-size": "Page size:",
+        "page-size-tooltip": "Number of entries per page",
+        "page-of": "of",
+        "first-page": "First page",
+        "prev-page": "Previous page",
+        "next-page": "Next page",
+        "last-page": "Last page"
+      }
+    },
+    "selector": {
+      "add-new": "Add"
+    },
+    "file-upload": {
+      "upload": "Upload",
+      "no-files": "No attachments available",
+      "formats": "File formats",
+      "error": {
+        "too-many": "Too many files selected",
+        "limit-reached": "Maximum amount of allowed files",
+        "invalid-type": "Unsupported file type selected"
+      },
+      "format": {
+        "any": "Any"
+      }
+    }
+  }
 }
