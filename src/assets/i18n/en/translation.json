@@ -23,7 +23,7 @@
 			},
 			"footer": {
 				"page-size": "Page size:",
-				"page-size-tooltip": "Page size",
+				"page-size-tooltip": "Number of entries per page",
 				"page-of": "of",
 				"first-page": "First page",
 				"prev-page": "Previous page",
@@ -36,6 +36,7 @@
 		},
 		"file-upload": {
 			"upload": "Upload",
+			"no-files": "No attachments available",
 			"formats": "File formats",
 			"error": {
 				"too-many": "Too many files selected",

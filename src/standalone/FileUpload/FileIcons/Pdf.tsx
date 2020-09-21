@@ -200,8 +200,7 @@ const STYLES_7: CSSProperties = {
 
 const Pdf = (props: SvgIconProps) => {
 	return (
-		<SvgIcon {...props} viewBox="0 0 75.320129 92.604164">
-			<title id="title2682">PDF file icon</title>
+		<SvgIcon {...props} viewBox="0 0 96 96">
 			<defs id="defs2">
 				<clipPath clipPathUnits="userSpaceOnUse" id="clipPath839">
 					<rect
@@ -214,7 +213,7 @@ const Pdf = (props: SvgIconProps) => {
 					/>
 				</clipPath>
 			</defs>
-			<g id="layer1" transform="translate(36.076172,-93.731774)">
+			<g id="layer1" transform="translate(46.076172,-93.731774)">
 				<g
 					id="g899"
 					transform="matrix(1.4843054,0,0,1.4843054,17.471885,-90.243502)"
