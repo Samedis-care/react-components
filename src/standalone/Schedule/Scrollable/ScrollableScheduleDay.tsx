@@ -10,7 +10,7 @@ export interface IProps {
 }
 
 class ScrollableScheduleDay extends PureComponent<IProps> {
-	render() {
+	render(): React.ReactElement {
 		return (
 			<>
 				<Grid item xs={1} ref={this.props.refFwd}>

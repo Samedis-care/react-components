@@ -13,7 +13,7 @@ const Settings = {
 };
 export default Settings;
 
-export const SelectorSingle = () => {
+export const SelectorSingle = (): React.ReactElement => {
 	const [selected, setSelected] = useState<SelectorData | null>(null);
 	const loadDataAction = action("onLoad");
 	const onSelectAction = action("onSelect");
@@ -28,7 +28,7 @@ export const SelectorSingle = () => {
 	const placeholderLabel = text("Placeholder Label", "");
 
 	const loadData = React.useCallback(
-		async (query: string) => {
+		(query: string): SelectorData[] => {
 			loadDataAction(query);
 			return colourOptions.filter((option) =>
 				option.label.toLowerCase().includes(query.toLowerCase())

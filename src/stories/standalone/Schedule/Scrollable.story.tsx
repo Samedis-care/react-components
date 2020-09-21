@@ -16,7 +16,7 @@ const useStyles = makeStyles(() => ({
 	},
 }));
 
-export const ScheduleScrollable = () => {
+export const ScheduleScrollable = (): React.ReactElement => {
 	const classes = useStyles();
 	return (
 		<ScrollableSchedule

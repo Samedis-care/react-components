@@ -34,28 +34,47 @@ export interface SelectorData {
  * A callback used to get an label value for a specific input (search) value
  */
 type SelectorLabelCallback = (obj: { inputValue: string }) => string | null;
-/**
- * Callback called when the selection changes
- */
-export type SelectorOnSelectCallback<Data extends SelectorData> = (
-	value: Data | Data[] | null
-) => void;
 
-export interface SelectorProps<Data extends SelectorData> {
-	/**
-	 * Data load function
-	 * @param search The user search input
-	 */
-	onLoad: (search: string) => Promise<Data[]>;
+export interface SelectorPropsSingleSelect<Data extends SelectorData>
+	extends SelectorProps<Data> {
 	/**
 	 * Extended selection change handler
 	 * @param data The selected data entry/entries
 	 */
-	onSelect?: SelectorOnSelectCallback<Data>;
+	onSelect?: (value: Data | null) => void;
 	/**
 	 * The currently selected values
 	 */
-	selected: Data | Data[];
+	selected: Data | null;
+	/**
+	 * Can the selector select multiple values
+	 */
+	multiSelect?: false;
+}
+
+export interface SelectorPropsMultiSelect<Data extends SelectorData>
+	extends SelectorProps<Data> {
+	/**
+	 * Extended selection change handler
+	 * @param data The selected data entry/entries
+	 */
+	onSelect?: (value: Data[]) => void;
+	/**
+	 * The currently selected values
+	 */
+	selected: Data[];
+	/**
+	 * Can the selector select multiple values
+	 */
+	multiSelect: true;
+}
+
+interface SelectorProps<Data extends SelectorData> {
+	/**
+	 * Data load function
+	 * @param search The user search input
+	 */
+	onLoad: (search: string) => Data[] | Promise<Data[]>;
 	/**
 	 * Is the selector disabled?
 	 */
@@ -64,10 +83,6 @@ export interface SelectorProps<Data extends SelectorData> {
 	 * Is the selector clearable?
 	 */
 	clearable?: boolean;
-	/**
-	 * Can the selector select multiple values
-	 */
-	multiSelect?: boolean;
 	/**
 	 * Enables icons in the list renderers
 	 */
@@ -121,7 +136,9 @@ export interface SelectorProps<Data extends SelectorData> {
  * This component shouldn't be used directly,
  * please look into SingleSelect and MultiSelect instead.
  */
-const Selector = (props: SelectorProps<any>) => {
+const Selector = <Data extends SelectorData>(
+	props: SelectorPropsSingleSelect<Data> | SelectorPropsMultiSelect<Data>
+) => {
 	const {
 		onLoad,
 		placeholderLabel,
@@ -166,7 +183,7 @@ const Selector = (props: SelectorProps<any>) => {
 			},
 			control: (
 				base: CSSProperties,
-				controlProps: ControlProps<{}>
+				controlProps: ControlProps<Record<string, unknown>>
 			): CSSProperties => {
 				let selectorControlStyles: CSSProperties = {
 					...base,
@@ -232,17 +249,22 @@ const Selector = (props: SelectorProps<any>) => {
 		[loadingLabel]
 	);
 	const onChangeHandler = React.useCallback(
-		(data: ValueType<SelectorData>) => {
+		(data: ValueType<Data>) => {
 			if (data && "isAddNewButton" in data && data.isAddNewButton) {
 				if (onAddNew) onAddNew();
 				return;
 			}
-			if (onSelect) onSelect(data);
+			if (onSelect) {
+				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+				// @ts-ignore due to lack of templating support in react-select
+				onSelect(data);
+			}
 		},
 		[onSelect, onAddNew]
 	);
 	const defaultRenderer = React.useCallback(
 		(data: SelectorData) => (
+			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 			// @ts-ignore: Typescript complains about the button property being "required"
 			<SelectorSmallListItem>
 				{enableIcons && <SmallListItemIcon>{data.icon}</SmallListItemIcon>}
@@ -263,7 +285,7 @@ const Selector = (props: SelectorProps<any>) => {
 					label: actualAddNewLabel,
 					icon: <AddIcon />,
 					isAddNewButton: true,
-				});
+				} as Data);
 			}
 			return results;
 		},
@@ -283,12 +305,14 @@ const Selector = (props: SelectorProps<any>) => {
 			formatOptionLabel={renderEntry || defaultRenderer}
 			noOptionsMessage={getNoOptionsLabel}
 			loadingMessage={getLoadingLabel}
-			key={
-				refreshToken + (onAddNew ? "add-new" + actualAddNewLabel : "no-add-new")
-			}
+			key={`${refreshToken || "no-refresh-token"} ${
+				onAddNew
+					? `add-new${actualAddNewLabel || "no-add-new-label"}`
+					: "no-add-new"
+			}`}
 			styles={selectorStyles}
 		/>
 	);
 };
 
-export default React.memo(Selector);
+export default React.memo(Selector) as typeof Selector;

@@ -51,8 +51,10 @@ const ColumnHeader = (props: IDataGridContentColumnHeaderProps) => {
 	const theme = useTheme();
 	const [width, setWidth] = useState<number>(
 		() =>
-			measureText(theme.typography.body1.font!, props.column.headerName).width +
-			100
+			measureText(
+				theme.typography.body1.font || "16px Roboto, sans-serif",
+				props.column.headerName
+			).width + 100
 	);
 	const [dragging, setDragging] = useState(false);
 

@@ -18,7 +18,7 @@ const Settings = {
 };
 export default Settings;
 
-export const FileUploadStory = () => {
+export const FileUploadStory = (): React.ReactElement => {
 	const handleErrorAction = action("handleError");
 	const handleChangeAction = action("onChange");
 	let acceptedType: string = select(

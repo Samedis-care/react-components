@@ -21,7 +21,7 @@ export default Settings;
 const enhanceData = (entry: SelectorData): MultiSelectorData => ({
 	...entry,
 	onClick: action("onClick: " + entry.label),
-	canUnselect: async (evtEntry: MultiSelectorData) => {
+	canUnselect: (evtEntry: MultiSelectorData) => {
 		action("canUnselect: " + evtEntry.label)(evtEntry);
 		return true;
 	},
@@ -33,7 +33,7 @@ const getDefaultData = (): MultiSelectorData[] => {
 		.filter((e) => e !== undefined) as SelectorData[]).map(enhanceData);
 };
 
-export const SelectorMulti = () => {
+export const SelectorMulti = (): React.ReactElement => {
 	const [selected, setSelected] = useState<SelectorData[]>(getDefaultData);
 	const loadDataAction = action("onLoad");
 	const onSelectAction = action("onSelect");
@@ -51,7 +51,7 @@ export const SelectorMulti = () => {
 	const placeholderLabel = text("Placeholder Label", "");
 
 	const loadData = React.useCallback(
-		async (query: string) => {
+		(query: string): MultiSelectorData[] => {
 			loadDataAction(query);
 			return colourOptions
 				.filter((option) =>

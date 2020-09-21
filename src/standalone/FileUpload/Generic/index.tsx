@@ -149,8 +149,7 @@ class FileUpload extends Component<IProps, IState> {
 
 	shouldComponentUpdate(
 		nextProps: Readonly<IProps>,
-		nextState: Readonly<IState>,
-		nextContext: any
+		nextState: Readonly<IState>
 	): boolean {
 		if (!this.shallowCompare(this.props, nextProps)) return true;
 		// Compare state (except dragging)
@@ -160,10 +159,15 @@ class FileUpload extends Component<IProps, IState> {
 		return (this.state.dragging ? 1 : 0) !== (nextState.dragging ? 1 : 0);
 	}
 
-	shallowCompare = (obj1: any, obj2: any) =>
+	shallowCompare = (
+		obj1: Record<string, unknown>,
+		obj2: Record<string, unknown>
+	) =>
 		Object.keys(obj1).length === Object.keys(obj2).length &&
 		Object.keys(obj1).every(
-			(key: string) => obj2.hasOwnProperty(key) && obj1[key] === obj2[key]
+			(key: string) =>
+				Object.prototype.hasOwnProperty.call(obj2, key) &&
+				obj1[key] === obj2[key]
 		);
 
 	componentDidMount() {
@@ -220,7 +224,7 @@ class FileUpload extends Component<IProps, IState> {
 													? data.file.downloadLink
 													: undefined
 											}
-											key={index + "-" + data.file.name}
+											key={`${index}-${data.file.name}`}
 											size={this.props.previewSize}
 											preview={
 												this.props.previewImages ? data.preview : undefined
@@ -251,7 +255,7 @@ class FileUpload extends Component<IProps, IState> {
 		);
 	}
 
-	handleUpload = async () => {
+	handleUpload = () => {
 		let maxFiles = 2;
 		if (this.props.maxFiles) {
 			maxFiles = this.props.maxFiles - this.state.files.length;
@@ -268,7 +272,9 @@ class FileUpload extends Component<IProps, IState> {
 		elem.type = "file";
 		elem.accept = this.props.accept || "";
 		elem.multiple = maxFiles > 1;
-		elem.addEventListener("change", () => this.processFiles(elem.files));
+		elem.addEventListener("change", () => {
+			void this.processFiles(elem.files);
+		});
 		elem.click();
 	};
 
@@ -445,7 +451,8 @@ class FileUpload extends Component<IProps, IState> {
 		const canvas = document.createElement("canvas");
 		canvas.width = newWidth;
 		canvas.height = newHeight;
-		const ctx = canvas.getContext("2d")!;
+		const ctx = canvas.getContext("2d");
+		if (!ctx) throw new Error("Failed getting Canvas 2D Context");
 		ctx.drawImage(image, 0, 0, newWidth, newHeight);
 
 		// and export it using the specified data format

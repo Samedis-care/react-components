@@ -5,25 +5,37 @@ import React, {
 	useContext,
 } from "react";
 import { Grid } from "@material-ui/core";
-import { DataGridPropsContext, DataGridStateContext } from "../index";
+import {
+	DataGridCustomDataType,
+	DataGridPropsContext,
+	DataGridStateContext,
+} from "../index";
 
 export interface IDataGridStatusBarProps {
 	/**
 	 * The user-defined custom data
 	 */
-	customData: any;
+	customData: DataGridCustomDataType;
 	/**
 	 * A setState like interface for setting customData
 	 */
-	setCustomData: Dispatch<SetStateAction<any>>;
+	setCustomData: Dispatch<SetStateAction<DataGridCustomDataType>>;
 }
 
 const StatusBar = () => {
-	const StatusBarView = useContext(DataGridPropsContext)!.statusBar;
-	const [state, setState] = useContext(DataGridStateContext)!;
+	const props = useContext(DataGridPropsContext);
+	const stateCtx = useContext(DataGridStateContext);
+	if (!props) throw new Error("Props Context not set");
+	if (!stateCtx) throw new Error("State Context not set");
+	const StatusBarView = props.statusBar;
+	const [state, setState] = stateCtx;
 
 	const setCustomData = useCallback(
-		(newState: any | ((prevState: any) => any)) => {
+		(
+			newState:
+				| DataGridCustomDataType
+				| ((prevState: DataGridCustomDataType) => DataGridCustomDataType)
+		) => {
 			if (typeof newState === "function") {
 				setState((prevState) => ({
 					...prevState,

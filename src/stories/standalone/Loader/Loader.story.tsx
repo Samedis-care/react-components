@@ -9,7 +9,7 @@ const Settings = {
 };
 export default Settings;
 
-export const LoaderStory = () => {
+export const LoaderStory = (): React.ReactElement => {
 	return (
 		<>
 			<style

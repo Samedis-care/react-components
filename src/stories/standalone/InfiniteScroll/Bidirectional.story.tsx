@@ -27,7 +27,7 @@ const debounceWaitKnobOptions = {
 	step: 1,
 };
 
-export const Bidirectional = () => {
+export const Bidirectional = (): React.ReactElement => {
 	const classes = useStyles();
 	const [items, setItems] = useState<JSX.Element[]>([]);
 	const loadMoreTopAction = action("load-more-top");

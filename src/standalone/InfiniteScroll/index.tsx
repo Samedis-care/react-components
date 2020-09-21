@@ -70,26 +70,22 @@ class InfiniteScroll extends PureComponent<IProps, IState> {
 		};
 	}
 
-	componentDidMount() {
+	componentDidMount(): void {
 		this.wrapper?.addEventListener("scroll", this.handleScroll);
 		this.handleResize();
 	}
 
-	componentDidUpdate(
-		prevProps: Readonly<IProps>,
-		prevState: Readonly<IState>,
-		snapshot?: any
-	) {
+	componentDidUpdate(prevProps: Readonly<IProps>): void {
 		if (prevProps.children !== this.props.children) {
 			this.handleResize();
 		}
 	}
 
-	componentWillUnmount() {
+	componentWillUnmount(): void {
 		this.wrapper?.removeEventListener("scroll", this.handleScroll);
 	}
 
-	render() {
+	render(): React.ReactElement {
 		return (
 			<div className={this.props.className} ref={this.setScrollerRef}>
 				{this.props.children}
@@ -97,9 +93,11 @@ class InfiniteScroll extends PureComponent<IProps, IState> {
 		);
 	}
 
-	setScrollerRef = (ref: HTMLElement | null) => (this.wrapper = ref);
+	setScrollerRef = (ref: HTMLElement | null): void => {
+		this.wrapper = ref;
+	};
 
-	handleResize = () => {
+	handleResize = (): void => {
 		if (!this.wrapper) return;
 
 		if (this.wrapper.scrollHeight > this.wrapper.clientHeight + 24) {
@@ -114,7 +112,7 @@ class InfiniteScroll extends PureComponent<IProps, IState> {
 		}
 	};
 
-	handleScroll = () => {
+	handleScroll = (): void => {
 		if (!this.wrapper) return;
 
 		if (this.wrapper.scrollTop === 0 && this.state.loadMoreTop) {

@@ -12,7 +12,12 @@ import {
 } from "@material-ui/core";
 
 const InputDialogRaw = (props: IDialogConfigInput) => {
-	const [, setDialog] = useContext(DialogContext)!;
+	const dialogCtx = useContext(DialogContext);
+	if (!dialogCtx)
+		throw new Error(
+			"Dialog Context not set! Did you forget adding the Components-Care Framework or DialogContextProvider?"
+		);
+	const [, setDialog] = dialogCtx;
 	const {
 		onClose,
 		handlerButtonNo,

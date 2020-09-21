@@ -3,7 +3,9 @@ import { DataGridStateContext } from "../index";
 import SearchView from "./SearchView";
 
 const Search = () => {
-	const [state, setState] = useContext(DataGridStateContext)!;
+	const stateCtx = useContext(DataGridStateContext);
+	if (!stateCtx) throw new Error("State Context not set");
+	const [state, setState] = stateCtx;
 
 	const handleSearchChange = useCallback(
 		(evt: ChangeEvent<HTMLInputElement>) => {

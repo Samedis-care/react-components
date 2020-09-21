@@ -59,7 +59,7 @@ const ActionBarViewMobile = (props: IDataGridActionBarViewProps) => {
 
 	return (
 		<>
-			<Tooltip title={i18n.t("standalone.data-grid.header.openMenu")!}>
+			<Tooltip title={i18n.t("standalone.data-grid.header.openMenu") || ""}>
 				<IconButton onClick={openMainMenu}>
 					<MenuIcon />
 				</IconButton>

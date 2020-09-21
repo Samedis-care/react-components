@@ -44,15 +44,15 @@ export interface IDataGridCallbacks {
 		additionalFilters: DataGridAdditionalFilters,
 		fieldFilter: IDataGridFieldFilter,
 		sort: DataGridSortSetting[]
-	) => Promise<DataGridData>;
+	) => DataGridData | Promise<DataGridData>;
 	/**
 	 * Extracts additional filters from the provided custom data
 	 * @param customData The custom user-defined state-stored data
 	 */
-	getAdditionalFilters?: (customData: any) => DataGridAdditionalFilters;
+	getAdditionalFilters?: (customData: unknown) => DataGridAdditionalFilters;
 }
 
-export type DataGridAdditionalFilters = { [name: string]: any };
+export type DataGridAdditionalFilters = { [name: string]: unknown };
 export type DataGridSortSetting = { field: string; direction: -1 | 1 };
 
 export interface IDataGridColumnProps {
@@ -134,7 +134,11 @@ export interface DataGridData {
 	rows: DataGridRowData[];
 }
 
-export type DataGridRowData = { id: string } & { [key: string]: any };
+export type DataGridRowData = { id: string } & {
+	[key: string]: string | number | { toString: () => string } | null;
+};
+
+export type DataGridCustomDataType = { [key: string]: unknown };
 
 export interface IDataGridState {
 	/**
@@ -188,7 +192,7 @@ export interface IDataGridState {
 	/**
 	 * Custom user-defined data
 	 */
-	customData: { [key: string]: any };
+	customData: DataGridCustomDataType;
 }
 
 export const DataGridStateContext = React.createContext<
@@ -279,29 +283,30 @@ const DataGrid = (props: IDataGridProps) => {
 
 		const [sorts, fieldFilter] = dataGridPrepareFiltersAndSorts(columnsState);
 
-		loadData(
-			pageIndex + 1,
-			rowsPerPage,
-			search,
-			getAdditionalFilters ? getAdditionalFilters(state.customData) : {},
-			fieldFilter,
-			sorts
-		)
-			.then((data) => {
+		void (async () => {
+			try {
+				const data = await loadData(
+					pageIndex + 1,
+					rowsPerPage,
+					search,
+					getAdditionalFilters ? getAdditionalFilters(state.customData) : {},
+					fieldFilter,
+					sorts
+				);
 				setState((prevState) => ({
 					...prevState,
 					rowsTotal: data.rowsTotal,
 					rows: data.rows,
 					refreshData: false,
 				}));
-			})
-			.catch((err) => {
+			} catch (err) {
 				setState((prevState) => ({
 					...prevState,
-					dataLoadError: err,
+					dataLoadError: err as Error,
 					refreshData: false,
 				}));
-			});
+			}
+		})();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [refreshData]);
 

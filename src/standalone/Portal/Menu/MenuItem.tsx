@@ -37,11 +37,13 @@ export const MenuContext = React.createContext<
 const MenuItem = (props: IProps) => {
 	const { depth, title, expandable, forceExpand, onClick } = props;
 	const [expanded, setExpanded] = useState(false);
-	const [menuState, setMenuState] = useContext(MenuContext)!;
+	const menuContext = useContext(MenuContext);
+	if (!menuContext) throw new Error("MenuContext is undefined");
+	const [menuState, setMenuState] = menuContext;
 
 	const clickProxy = useCallback(() => {
 		if (expandable) setExpanded(forceExpand ? true : (prevFlag) => !prevFlag);
-		else setMenuState(depth + title);
+		else setMenuState(`${depth}${title}`);
 		onClick();
 	}, [expandable, forceExpand, onClick, setMenuState, depth, title]);
 
@@ -58,7 +60,7 @@ const MenuItem = (props: IProps) => {
 				title={title}
 				expandable={expandable}
 				expanded={expandable ? expanded : undefined}
-				active={expandable ? undefined : menuState === depth + title}
+				active={expandable ? undefined : menuState === `${depth}${title}`}
 				onClick={clickProxy}
 				depth={depth}
 			/>
@@ -82,7 +84,7 @@ export const toMenuItemComponent = (
 ): JSX.Element | false =>
 	def.shouldRender && (
 		<MenuItem
-			key={depth + def.title}
+			key={`${depth}${def.title}`}
 			icon={def.icon}
 			title={def.title}
 			expandable={!!(def.children && def.children.length > 0)}

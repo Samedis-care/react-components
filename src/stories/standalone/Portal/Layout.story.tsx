@@ -45,7 +45,7 @@ const Placeholder = (props: IPlaceHolderProps) => {
 	return <div className={classes[cssClass]}>{cssClass}</div>;
 };
 
-export const PortalLayoutStory = () => {
+export const PortalLayoutStory = (): React.ReactElement => {
 	return (
 		<>
 			<style

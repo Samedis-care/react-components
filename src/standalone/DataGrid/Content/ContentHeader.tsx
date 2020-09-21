@@ -28,9 +28,9 @@ export type DataGridColumnState = [
 ];
 
 const ContentHeader = (props: IDataGridColumnProps) => {
-	const [columnState, setColumnState] = useContext(
-		DataGridColumnsStateContext
-	)!;
+	const columnStateCtx = useContext(DataGridColumnsStateContext);
+	if (!columnStateCtx) throw new Error("Column State Context not set");
+	const [columnState, setColumnState] = columnStateCtx;
 	const onFilterChange = useCallback(
 		(field: string, newFilter: IFilterDef) => {
 			setColumnState((prevState) => ({
@@ -60,6 +60,7 @@ const ContentHeader = (props: IDataGridColumnProps) => {
 						.filter(
 							(otherField) =>
 								prevState[otherField].sort !== 0 &&
+								// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 								prevState[field].sortOrder! < prevState[otherField].sortOrder!
 						)
 						.forEach((otherField) => {
@@ -67,6 +68,7 @@ const ContentHeader = (props: IDataGridColumnProps) => {
 								...newColumnState,
 								[otherField]: {
 									...newColumnState[otherField],
+									// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 									sortOrder: newColumnState[otherField].sortOrder! - 1,
 								},
 							};

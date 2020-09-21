@@ -21,7 +21,7 @@ export interface IProps extends WithStyles {
 	 * Callback to load data of this week
 	 * @param weekOffset
 	 */
-	loadData: (weekOffset: number) => Promise<IDayData[][]>;
+	loadData: (weekOffset: number) => IDayData[][] | Promise<IDayData[][]>;
 }
 
 interface IState {
@@ -58,19 +58,22 @@ class WeekView extends PureComponent<IProps, IState> {
 	}
 
 	componentDidMount() {
-		this.fetchData().then();
-		i18n.on("languageChanged", this.fetchData);
+		void this.fetchData();
+		i18n.on("languageChanged", () => {
+			void this.fetchData();
+		});
 	}
 
 	componentWillUnmount() {
-		i18n.off("languageChanged", this.fetchData);
+		i18n.off("languageChanged", () => {
+			void this.fetchData();
+		});
 	}
 
 	render() {
 		const now = moment();
 		const weekday = now.weekday();
-		const weekdays = [0, 1, 2, 3, 4, 5, 6];
-		for (const index in weekdays) weekdays[index] -= weekday;
+		const weekdays = [0, 1, 2, 3, 4, 5, 6].map((day) => day - weekday);
 
 		let prevDate: Moment | null = null;
 
@@ -109,7 +112,8 @@ class WeekView extends PureComponent<IProps, IState> {
 											.add(this.state.weekOffset, "week")
 											.toDate()}
 										onChange={this.setWeek}
-										// @ts-ignore
+										// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+										// @ts-ignore not declared in typescript def
 										onDismiss={this.closeDatePicker}
 									/>
 								</MuiPickersUtilsProvider>
@@ -137,6 +141,9 @@ class WeekView extends PureComponent<IProps, IState> {
 				)}
 				{this.state.data &&
 					weekdays.map((day) => {
+						const data = this.state.data;
+						if (!data) return;
+
 						const date = now
 							.clone()
 							.add(this.state.weekOffset, "weeks")
@@ -147,13 +154,12 @@ class WeekView extends PureComponent<IProps, IState> {
 						prevDate = date;
 
 						let formattedDate = "";
-						if (diffYear) formattedDate += date.year() + " ";
-						if (diffMonth) formattedDate += date.format("MMMM") + " ";
+						if (diffYear) formattedDate += `${date.year()} `;
+						if (diffMonth) formattedDate += `${date.format("MMMM")} `;
 						if (diffDay) formattedDate += date.format("DD");
 
-						const dayData = this.state.data![
-							(date.weekday() + date.localeData().firstDayOfWeek()) % 7
-						];
+						const dayData =
+							data[(date.weekday() + date.localeData().firstDayOfWeek()) % 7];
 
 						return (
 							<WeekViewDay
@@ -175,7 +181,9 @@ class WeekView extends PureComponent<IProps, IState> {
 				data: null,
 				loadError: null,
 			}),
-			this.fetchData
+			() => {
+				void this.fetchData();
+			}
 		);
 
 	nextWeek = () =>
@@ -185,7 +193,9 @@ class WeekView extends PureComponent<IProps, IState> {
 				data: null,
 				loadError: null,
 			}),
-			this.fetchData
+			() => {
+				void this.fetchData();
+			}
 		);
 
 	today = () =>
@@ -195,7 +205,9 @@ class WeekView extends PureComponent<IProps, IState> {
 				data: null,
 				loadError: null,
 			},
-			this.fetchData
+			() => {
+				void this.fetchData();
+			}
 		);
 
 	setWeek = (date: MaterialUiPickersDate) => {
@@ -210,7 +222,9 @@ class WeekView extends PureComponent<IProps, IState> {
 				loadError: null,
 				datePickerOpen: false,
 			},
-			this.fetchData
+			() => {
+				void this.fetchData();
+			}
 		);
 	};
 
@@ -222,7 +236,7 @@ class WeekView extends PureComponent<IProps, IState> {
 			});
 		} catch (loadError) {
 			this.setState({
-				loadError,
+				loadError: loadError as Error,
 			});
 		}
 	};

@@ -82,7 +82,7 @@ const resolveLocation = (
 	// then try this level
 	for (const def of definitions) {
 		if (def.route && path.startsWith(def.route)) {
-			return depth + def.title;
+			return `${depth}${def.title}`;
 		}
 	}
 	// and if nothing found

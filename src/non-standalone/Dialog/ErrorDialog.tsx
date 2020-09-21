@@ -11,7 +11,12 @@ import {
 import { IDialogConfigSimple } from "./Types";
 
 const ErrorDialogRaw = (props: IDialogConfigSimple) => {
-	const [, setDialog] = useContext(DialogContext)!;
+	const dialogCtx = useContext(DialogContext);
+	if (!dialogCtx)
+		throw new Error(
+			"Dialog Context not set! Did you forget adding the Components-Care Framework or DialogContextProvider?"
+		);
+	const [, setDialog] = dialogCtx;
 	const { onClose } = props;
 
 	const removeDialog = React.useCallback(() => {

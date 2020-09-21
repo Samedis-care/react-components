@@ -93,7 +93,7 @@ const PaginationView = (props: IDataGridPaginationViewProps) => {
 				<Grid item key={"page-size-label"}>
 					<Box ml={2}>
 						<Typography className={classes.text}>
-							{i18n.t("standalone.data-grid.footer.page-size")!}
+							{i18n.t("standalone.data-grid.footer.page-size") || ""}
 						</Typography>
 					</Box>
 				</Grid>
@@ -102,7 +102,9 @@ const PaginationView = (props: IDataGridPaginationViewProps) => {
 				<Box ml={2}>
 					<Tooltip
 						disableHoverListener
-						title={i18n.t("standalone.data-grid.footer.page-size-tooltip")!}
+						title={
+							i18n.t("standalone.data-grid.footer.page-size-tooltip") || ""
+						}
 					>
 						<Select
 							variant={"standard"}
@@ -128,7 +130,8 @@ const PaginationView = (props: IDataGridPaginationViewProps) => {
 			<Grid item key={"page-stats"}>
 				<Typography className={classes.text}>
 					{startRowIndex} - {endRowIndex}{" "}
-					{i18n.t("standalone.data-grid.footer.page-of")!} {props.rowsTotal}
+					{i18n.t("standalone.data-grid.footer.page-of") || ""}{" "}
+					{props.rowsTotal}
 				</Typography>
 			</Grid>
 			<Grid item key={"page-stats-controls-divider"}>
@@ -140,7 +143,7 @@ const PaginationView = (props: IDataGridPaginationViewProps) => {
 				<Grid container>
 					<Grid item xs={6} sm={3}>
 						<Tooltip
-							title={i18n.t("standalone.data-grid.footer.first-page")!}
+							title={i18n.t("standalone.data-grid.footer.first-page") || ""}
 							placement={"top"}
 						>
 							<span>
@@ -156,7 +159,7 @@ const PaginationView = (props: IDataGridPaginationViewProps) => {
 					</Grid>
 					<Grid item xs={6} sm={3}>
 						<Tooltip
-							title={i18n.t("standalone.data-grid.footer.prev-page")!}
+							title={i18n.t("standalone.data-grid.footer.prev-page") || ""}
 							placement={"top"}
 						>
 							<span>
@@ -172,7 +175,7 @@ const PaginationView = (props: IDataGridPaginationViewProps) => {
 					</Grid>
 					<Grid item xs={6} sm={3}>
 						<Tooltip
-							title={i18n.t("standalone.data-grid.footer.next-page")!}
+							title={i18n.t("standalone.data-grid.footer.next-page") || ""}
 							placement={"top"}
 						>
 							<span>
@@ -188,7 +191,7 @@ const PaginationView = (props: IDataGridPaginationViewProps) => {
 					</Grid>
 					<Grid item xs={6} sm={3}>
 						<Tooltip
-							title={i18n.t("standalone.data-grid.footer.last-page")!}
+							title={i18n.t("standalone.data-grid.footer.last-page") || ""}
 							placement={"top"}
 						>
 							<span>

@@ -16,10 +16,10 @@ export interface IDataGridContentSelectAllViewProps {
 	checked: boolean;
 	/**
 	 * Update checked
-	 * @param _ The change event, ignored
+	 * @param evt The change event, ignored
 	 * @param newChecked New checked state
 	 */
-	onSelect: (_: any, newChecked: boolean) => void;
+	onSelect: (evt: React.ChangeEvent, newChecked: boolean) => void;
 }
 
 const SelectAllView = (props: IDataGridContentSelectAllViewProps) => {

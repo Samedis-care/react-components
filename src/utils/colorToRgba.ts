@@ -2,7 +2,8 @@
 
 const colorToRgba = (color: string): number[] | undefined => {
 	const canvas = document.createElement("canvas");
-	const ctx = canvas.getContext("2d")!;
+	const ctx = canvas.getContext("2d");
+	if (!ctx) throw new Error("Failed getting Canvas 2D context");
 	ctx.clearRect(0, 0, 1, 1);
 	// In order to detect invalid values,
 	// we can't rely on col being in the same format as what fillStyle is computed as,

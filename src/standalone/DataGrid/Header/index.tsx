@@ -18,7 +18,7 @@ export interface IDataGridHeaderProps {
 	/**
 	 * List of available export providers
 	 */
-	exporters?: IDataGridExporter<any>[];
+	exporters?: IDataGridExporter<unknown>[];
 }
 
 /**
@@ -75,7 +75,7 @@ export interface IDataGridExporter<T> {
 	onDownload: (data: T) => void;
 }
 
-const Header = (_props: IDataGridHeaderProps) => {
+const Header = () => {
 	return (
 		<Grid container justify={"space-between"} wrap={"nowrap"}>
 			<Grid item>

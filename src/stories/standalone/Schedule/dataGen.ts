@@ -1,6 +1,6 @@
 import { IDayData as Data } from "../../../standalone/Schedule/Common/DayContents";
 
-export const getWeekData = async (weekOffset: number): Promise<Data[][]> => {
+export const getWeekData = (weekOffset: number): Data[][] => {
 	const weekContents: Data[][] = [];
 	for (let weekday = 0; weekday < 7; ++weekday) {
 		const entryCount = (Math.random() * 10) | 0;

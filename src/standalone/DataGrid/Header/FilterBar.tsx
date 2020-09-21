@@ -5,25 +5,36 @@ import React, {
 	useContext,
 } from "react";
 import { Box, Grid } from "@material-ui/core";
-import { DataGridPropsContext, DataGridStateContext } from "../index";
+import {
+	DataGridCustomDataType,
+	DataGridPropsContext,
+	DataGridStateContext,
+} from "../index";
 
 export interface IDataGridFilterBarProps {
 	/**
 	 * The user-defined custom data
 	 */
-	customData: any;
+	customData: DataGridCustomDataType;
 	/**
 	 * A setState like interface for setting customData
 	 */
-	setCustomData: Dispatch<SetStateAction<any>>;
+	setCustomData: Dispatch<SetStateAction<DataGridCustomDataType>>;
 }
 
 const FilterBar = () => {
-	const props = useContext(DataGridPropsContext)!;
-	const [state, setState] = useContext(DataGridStateContext)!;
+	const props = useContext(DataGridPropsContext);
+	const stateCtx = useContext(DataGridStateContext);
+	if (!props) throw new Error("Missing Props Context");
+	if (!stateCtx) throw new Error("Missing State Context");
+	const [state, setState] = stateCtx;
 
 	const setCustomData = useCallback(
-		(newState: any | ((prevState: any) => any)) => {
+		(
+			newState:
+				| DataGridCustomDataType
+				| ((prevState: DataGridCustomDataType) => DataGridCustomDataType)
+		) => {
 			if (typeof newState === "function") {
 				setState((prevState) => ({
 					...prevState,

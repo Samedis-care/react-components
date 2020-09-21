@@ -24,7 +24,8 @@ export interface IDataGridSearchViewProps {
 }
 
 const SearchView = (props: IDataGridSearchViewProps) => {
-	const gridProps = useContext(DataGridPropsContext)!;
+	const gridProps = useContext(DataGridPropsContext);
+	if (!gridProps) throw new Error("Grid Props Context not set");
 
 	return (
 		<Box ml={2}>

@@ -10,10 +10,15 @@ import ActionBarView from "./ActionBarView";
 import ActionBarViewMobile from "./ActionBarViewMobile";
 
 const ActionBar = () => {
-	const [state, setState] = useContext(DataGridStateContext)!;
-	const [, setColumnState] = useContext(DataGridColumnsStateContext)!;
+	const stateCtx = useContext(DataGridStateContext);
+	if (!stateCtx) throw new Error("State Context not set");
+	const [state, setState] = stateCtx;
+	const columnsStateCtx = useContext(DataGridColumnsStateContext);
+	if (!columnsStateCtx) throw new Error("Columns State Context not set");
+	const [, setColumnState] = columnsStateCtx;
 	const { selectAll, selectedRows } = state;
-	const gridProps = useContext(DataGridPropsContext)!;
+	const gridProps = useContext(DataGridPropsContext);
+	if (!gridProps) throw new Error("Props Context not set");
 	const { onAddNew, onEdit, onDelete } = gridProps;
 
 	const toggleSettings = useCallback(() => {
@@ -31,7 +36,11 @@ const ActionBar = () => {
 		? state.rows?.find((row) => !selectedRows.includes(row.id))?.id
 		: selectedRows[0];
 	const handleEdit = useCallback(() => {
-		if (onEdit) onEdit(firstSelection!);
+		if (!firstSelection)
+			throw new Error(
+				"Calling handleEdit without selection? This shouldn't happen."
+			);
+		if (onEdit) onEdit(firstSelection);
 	}, [onEdit, firstSelection]);
 
 	const handleDelete = useCallback(() => {

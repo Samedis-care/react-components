@@ -28,7 +28,7 @@ const debounceWaitKnobOptions: NumberTypeKnobOptions = {
 	step: 1,
 };
 
-export const InfiniteScrollSimple = () => {
+export const InfiniteScrollSimple = (): React.ReactElement => {
 	const classes = useStyles();
 	const [items, setItems] = useState<JSX.Element[]>([]);
 	const loadMoreBottomAction = action("load-more-bottom");
@@ -41,7 +41,7 @@ export const InfiniteScrollSimple = () => {
 					loadMoreBottomAction();
 					setItems((prevItems) => [
 						...prevItems,
-						<Grid item xs={12}>
+						<Grid key={prevItems.length.toString()} item xs={12}>
 							{prevItems.length}
 						</Grid>,
 					]);

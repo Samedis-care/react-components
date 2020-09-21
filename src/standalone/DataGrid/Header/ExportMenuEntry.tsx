@@ -22,7 +22,7 @@ export interface IDataGridExportMenuEntryProps {
 	/**
 	 * The exporter for this entry
 	 */
-	exporter: IDataGridExporter<any>;
+	exporter: IDataGridExporter<unknown>;
 }
 
 export enum DataGridExportStatus {
@@ -32,13 +32,23 @@ export enum DataGridExportStatus {
 	Error,
 }
 
+// eslint-disable-next-line react/display-name
 const ExportMenuEntry = React.forwardRef(
 	(props: IDataGridExportMenuEntryProps, ref) => {
-		const [state] = useContext(DataGridStateContext)!;
-		const [columnsState] = useContext(DataGridColumnsStateContext)!;
-		const { getAdditionalFilters } = useContext(DataGridPropsContext)!;
+		const stateCtx = useContext(DataGridStateContext);
+		const columnsStateCtx = useContext(DataGridColumnsStateContext);
+		const propsCtx = useContext(DataGridPropsContext);
+
+		if (!stateCtx) throw new Error("State Context not set");
+		if (!columnsStateCtx) throw new Error("Columns State Context not set");
+		if (!propsCtx) throw new Error("Props Context not set");
+
+		const { getAdditionalFilters } = propsCtx;
+		const [columnsState] = columnsStateCtx;
+		const [state] = stateCtx;
+
 		const [status, setStatus] = useState(DataGridExportStatus.Idle);
-		const [exportData, setExportData] = useState<any>(undefined);
+		const [exportData, setExportData] = useState<unknown>(undefined);
 		const IdleIcon = props.exporter.icon || ExportIcon;
 		const { onRequest, onDownload } = props.exporter;
 		const { search, customData } = state;

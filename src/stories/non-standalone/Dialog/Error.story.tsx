@@ -15,8 +15,13 @@ const Settings = {
 };
 export default Settings;
 
-const DialogContent = () => {
-	const [, setDialog] = useContext(DialogContext)!;
+const DialogContent = (): React.ReactElement => {
+	const ctx = useContext(DialogContext);
+	if (!ctx)
+		throw new Error(
+			"DialogContext is missing, did you forget to add Components-Care Framework or DialogContextProvider?"
+		);
+	const [, setDialog] = ctx;
 
 	const title = text("Title", "Storybook");
 	const message = text("Message", "Enter your own text in Knobs!");
@@ -30,8 +35,8 @@ const DialogContent = () => {
 	});
 	for (let i = 0; i < buttonCount; ++i) {
 		buttons.push({
-			text: text("Button " + i + " text", "Btn" + i),
-			onClick: action("Button " + i + " onClick"),
+			text: text(`Button ${i} text`, `Btn${i}`),
+			onClick: action(`Button ${i} onClick`),
 			autoFocus: i === 0,
 		});
 	}
@@ -54,7 +59,7 @@ const DialogContent = () => {
 	return <></>;
 };
 
-export const ErrorDialogStory = () => {
+export const ErrorDialogStory = (): React.ReactElement => {
 	return (
 		<Framework>
 			<DialogContent />

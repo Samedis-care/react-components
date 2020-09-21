@@ -31,7 +31,8 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const Row = (props: IDataGridRowProps) => {
-	const gridProps = useContext(DataGridPropsContext)!;
+	const gridProps = useContext(DataGridPropsContext);
+	if (!gridProps) throw new Error("Props Context not set");
 	const { onEdit } = gridProps;
 	const { id } = props.data;
 	const classes = useStyles();
@@ -48,7 +49,7 @@ const Row = (props: IDataGridRowProps) => {
 				column.isLocked ? (
 					<FixedCell
 						onDoubleClick={onDoubleClick}
-						key={column.field + column.fixedColumnKey}
+						key={`${column.field}${column.fixedColumnKey || ""}`}
 					>
 						{props.data[column.field]}
 					</FixedCell>

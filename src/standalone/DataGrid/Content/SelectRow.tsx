@@ -15,10 +15,12 @@ const xor = (v1: boolean, v2: boolean): boolean => {
 
 const SelectRow = (props: IDataGridContentSelectRowProps) => {
 	const { id } = props;
-	const [state, setState] = useContext(DataGridStateContext)!;
+	const stateCtx = useContext(DataGridStateContext);
+	if (!stateCtx) throw new Error("State Context not set");
+	const [state, setState] = stateCtx;
 
 	const onSelect = useCallback(
-		(_: any, newSelected: boolean) => {
+		(_evt: React.ChangeEvent, newSelected: boolean) => {
 			setState((prevState) => ({
 				...prevState,
 				selectedRows: xor(newSelected, prevState.selectAll)

@@ -12,7 +12,9 @@ const calcLastPage = (rowsTotal: number, rowsPerPage: number) => {
 };
 
 const Pagination = () => {
-	const [state, setState] = useContext(DataGridStateContext)!;
+	const stateCtx = useContext(DataGridStateContext);
+	if (!stateCtx) throw new Error("State Context not set");
+	const [state, setState] = stateCtx;
 
 	// event handlers
 	const setPageSize = useCallback(

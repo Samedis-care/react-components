@@ -8,7 +8,7 @@ export const dataGridPrepareFiltersAndSorts = (
 	const fieldFilter: IDataGridFieldFilter = {};
 
 	for (const field in columnsState) {
-		if (!columnsState.hasOwnProperty(field)) continue;
+		if (!Object.prototype.hasOwnProperty.call(columnsState, field)) continue;
 
 		if (columnsState[field].sort !== 0) {
 			baseSorts.push({
@@ -24,6 +24,7 @@ export const dataGridPrepareFiltersAndSorts = (
 	}
 
 	const sorts: DataGridSortSetting[] = baseSorts
+		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 		.sort((a, b) => a.sortOrder! - b.sortOrder!)
 		.map((col) => ({ field: col.field, direction: col.sort as -1 | 1 }));
 

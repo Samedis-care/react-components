@@ -55,7 +55,7 @@ const Placeholder = (props: IPlaceHolderProps) => {
 	return <div className={classes[cssClass]}>{cssClass}</div>;
 };
 
-export const PortalMenuStory = () => {
+export const PortalMenuStory = (): React.ReactElement => {
 	const variant = select(
 		"Variant",
 		{
@@ -67,8 +67,6 @@ export const PortalMenuStory = () => {
 	);
 
 	const classes = usePortalStyles();
-	// @ts-ignore make FrameworkHistory globally accessible for testing
-	window.FrameworkHistory = FrameworkHistory;
 
 	button("Navigate to Home (/)", () => FrameworkHistory.push("/"));
 	button("Navigate to Admin Item 1 (/admin/1)", () =>

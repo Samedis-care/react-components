@@ -9,7 +9,7 @@ const Settings = {
 };
 export default Settings;
 
-export const ScheduleWeekly = () => {
+export const ScheduleWeekly = (): React.ReactElement => {
 	return <Weekly loadData={getWeekData} />;
 };
 

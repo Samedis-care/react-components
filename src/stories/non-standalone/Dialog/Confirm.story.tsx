@@ -15,8 +15,12 @@ const Settings = {
 };
 export default Settings;
 
-const DialogContent = () => {
-	const ctx = useContext(DialogContext)!;
+const DialogContent = (): React.ReactElement => {
+	const ctx = useContext(DialogContext);
+	if (!ctx)
+		throw new Error(
+			"DialogContext is missing, did you forget to add Components-Care Framework or DialogContextProvider?"
+		);
 	const [, setDialog] = ctx;
 
 	const title = text("Title", "Storybook");
@@ -60,7 +64,7 @@ const DialogContent = () => {
 	return <></>;
 };
 
-export const ConfirmDialogStory = () => {
+export const ConfirmDialogStory = (): React.ReactElement => {
 	return (
 		<Framework>
 			<DialogContent />

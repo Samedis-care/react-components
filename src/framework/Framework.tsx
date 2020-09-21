@@ -35,7 +35,7 @@ const loaderComponent = <Loader />;
  * - theme provider
  * - css baseline
  */
-export default React.memo((props: ICompleteFrameworkProps) => (
+const ComponentsCareFramework = (props: ICompleteFrameworkProps) => (
 	<Suspense fallback={loaderComponent}>
 		<ThemeProvider defaultTheme={props.defaultTheme || getStandardTheme}>
 			<Router history={FrameworkHistory}>
@@ -43,4 +43,6 @@ export default React.memo((props: ICompleteFrameworkProps) => (
 			</Router>
 		</ThemeProvider>
 	</Suspense>
-));
+);
+
+export default React.memo(ComponentsCareFramework);

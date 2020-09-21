@@ -21,7 +21,9 @@ import i18n from "../../../i18n";
  * @returns A promise containing the data for the days of the week, may throw an
  * 			error. Format: IDayData[weekday starting Monday][n]
  */
-export type LoadWeekCallback = (weekOffset: number) => Promise<IDayData[][]>;
+export type LoadWeekCallback = (
+	weekOffset: number
+) => IDayData[][] | Promise<IDayData[][]>;
 
 export interface IProps extends WithStyles {
 	/**

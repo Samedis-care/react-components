@@ -18,7 +18,7 @@ const FilterCombinator = (props: IProps) => {
 	const { value, onChange } = props;
 
 	const handleChange = useCallback(
-		(_: any, newValue: boolean) => {
+		(_evt: React.ChangeEvent, newValue: boolean) => {
 			onChange(newValue ? "or" : "and");
 		},
 		[onChange]

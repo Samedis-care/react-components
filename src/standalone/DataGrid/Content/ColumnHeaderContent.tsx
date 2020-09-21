@@ -104,7 +104,7 @@ const ColumnHeaderContent = (
 		setFilterAnchorEl,
 	]);
 	const preventPropagation = useCallback(
-		(evt: SyntheticEvent<{}>) => evt.stopPropagation(),
+		(evt: SyntheticEvent<unknown>) => evt.stopPropagation(),
 		[]
 	);
 
@@ -122,7 +122,7 @@ const ColumnHeaderContent = (
 					</Grid>
 				</Grid>
 				<Grid item>
-					<Tooltip title={i18n.t("standalone.data-grid.content.filter")!}>
+					<Tooltip title={i18n.t("standalone.data-grid.content.filter") || ""}>
 						<IconButton className={classes.filterButton} onClick={openFilter}>
 							<FilterIcon
 								color={props.filter?.value1 ? "primary" : undefined}

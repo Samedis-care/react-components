@@ -82,7 +82,7 @@ const columnDef: IDataGridColumnDef[] = [
 	},
 ];
 
-const exporters: IDataGridExporter<any>[] = [
+const exporters: IDataGridExporter<string>[] = [
 	{
 		id: "excel",
 		label: "Excel",
@@ -110,7 +110,7 @@ const exporters: IDataGridExporter<any>[] = [
 	},
 ];
 
-export const DataGridStory = () => {
+export const DataGridStory = (): React.ReactElement => {
 	const classes = useStyles();
 
 	return (
@@ -130,14 +130,14 @@ export const DataGridStory = () => {
 						? GridCustomFilters
 						: undefined
 				}
-				loadData={async (
+				loadData={(
 					page,
 					rowsPerPage,
 					quickFilter,
 					additionalFilters,
 					fieldFilter,
 					sort
-				): Promise<DataGridData> => {
+				): DataGridData => {
 					action("loadData")({
 						page,
 						rowsPerPage,
@@ -156,9 +156,10 @@ export const DataGridStory = () => {
 					if (quickFilter) {
 						rowData = rowData.filter((row) => {
 							for (const key in row) {
-								if (!row.hasOwnProperty(key)) continue;
+								if (!Object.prototype.hasOwnProperty.call(row, key)) continue;
 								const value = row[key];
 								if (
+									value !== null &&
 									value
 										.toString()
 										.toLowerCase()
@@ -173,9 +174,14 @@ export const DataGridStory = () => {
 
 					// field filter
 					for (const filterField in fieldFilter) {
-						if (!fieldFilter.hasOwnProperty(filterField)) continue;
+						if (
+							!Object.prototype.hasOwnProperty.call(fieldFilter, filterField)
+						) {
+							continue;
+						}
 						let filter: IFilterDef | undefined = fieldFilter[filterField];
-						const column = columnDef.find((e) => e.field === filterField)!;
+						const column = columnDef.find((e) => e.field === filterField);
+						if (!column) throw new Error("Non-null assertion failed");
 
 						const filterCache: { [key: string]: IFilterDef } = {};
 						let filterIndex = 0;
@@ -270,12 +276,11 @@ export const DataGridStory = () => {
 							value.includes(""); // so eslint-loader stops complaining
 
 							try {
-								// tslint:disable:no-eval
 								// eslint-disable-next-line no-eval
 								return !expr || eval(expr);
-								// tslint:enable:no-eval
 							} catch (e) {
-								console.error(e);
+								// eslint-disable-next-line no-console
+								console.error("[Components-Care] [DataGrid] Filter error:", e);
 								return false;
 							}
 						});
@@ -283,9 +288,7 @@ export const DataGridStory = () => {
 
 					// sort
 					rowData.sort((a, b) => {
-						// tslint:disable-next-line:forin
-						for (const sortKey in sort) {
-							const sorter = sort[sortKey];
+						for (const sorter of sort) {
 							const valA = a[sorter.field];
 							const valB = b[sorter.field];
 							let res = 0;

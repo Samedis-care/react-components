@@ -8,7 +8,7 @@ export interface IDataGridExportMenuProps {
 	/**
 	 * List of available export providers
 	 */
-	exporters: IDataGridExporter<any>[];
+	exporters: IDataGridExporter<unknown>[];
 	/**
 	 * The menu anchor
 	 */

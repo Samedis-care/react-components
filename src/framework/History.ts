@@ -10,6 +10,6 @@ export let FrameworkHistory = createBrowserHistory();
  * The history can be overwritten for compatibility with other libraries
  * @param history The history to use
  */
-export const setFrameworkHistory = (history: History) => {
+export const setFrameworkHistory = (history: History): void => {
 	FrameworkHistory = history;
 };

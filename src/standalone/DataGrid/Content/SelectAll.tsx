@@ -3,10 +3,12 @@ import { DataGridStateContext } from "../index";
 import SelectAllView from "./SelectAllView";
 
 const SelectAll = () => {
-	const [state, setState] = useContext(DataGridStateContext)!;
+	const stateCtx = useContext(DataGridStateContext);
+	if (!stateCtx) throw new Error("State Context not set");
+	const [state, setState] = stateCtx;
 
 	const onSelect = useCallback(
-		(_: any, newChecked: boolean) => {
+		(_evt: React.ChangeEvent, newChecked: boolean) => {
 			setState((prevState) => ({
 				...prevState,
 				selectAll: newChecked,

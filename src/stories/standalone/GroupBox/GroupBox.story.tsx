@@ -10,12 +10,12 @@ const Settings = {
 };
 export default Settings;
 
-export const GroupBoxStory = () => {
+export const GroupBoxStory = (): React.ReactElement => {
 	return (
-		<GroupBox id="group-box-story" label={text("Label Text", "Group Box")}>
+		<GroupBox label={text("Label Text", "Group Box")}>
 			<ul>
-				<li>{"Item 1"}</li>
-				<li>{"Item 2"}</li>
+				<li>Item 1</li>
+				<li>Item 2</li>
 			</ul>
 		</GroupBox>
 	);

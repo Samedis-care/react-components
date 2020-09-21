@@ -53,7 +53,7 @@ const SettingsDialog = (props: IDataGridSettingsDialogProps) => {
 	return (
 		<Paper elevation={0} className={classes.wrapper}>
 			<Typography variant={"h6"}>
-				{i18n.t("standalone.data-grid.settings.lock")!}
+				{i18n.t("standalone.data-grid.settings.lock") || ""}
 			</Typography>
 			<Divider />
 			<Grid justify={"space-between"} container>
@@ -73,7 +73,7 @@ const SettingsDialog = (props: IDataGridSettingsDialogProps) => {
 				))}
 			</Grid>
 			<Typography variant={"h6"}>
-				{i18n.t("standalone.data-grid.settings.hide")!}
+				{i18n.t("standalone.data-grid.settings.hide") || ""}
 			</Typography>
 			<Divider />
 			<Grid justify={"space-between"} container>
@@ -97,7 +97,7 @@ const SettingsDialog = (props: IDataGridSettingsDialogProps) => {
 				<Grid item>
 					<Box m={2}>
 						<Button onClick={props.closeGridSettings} variant={"contained"}>
-							{i18n.t("standalone.data-grid.settings.close")!}
+							{i18n.t("standalone.data-grid.settings.close") || ""}
 						</Button>
 					</Box>
 				</Grid>

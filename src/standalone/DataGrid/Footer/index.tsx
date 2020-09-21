@@ -10,7 +10,7 @@ export interface IDataGridFooterProps {
 	statusBar?: React.ComponentType<IDataGridStatusBarProps>;
 }
 
-const Footer = (_props: IDataGridFooterProps) => {
+const Footer = () => {
 	return (
 		<Grid container justify={"space-between"}>
 			<Grid item>

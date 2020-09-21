@@ -17,7 +17,7 @@ const Settings = {
 };
 export default Settings;
 
-const MyCustomDialog = (props: IDialogConfigSimple) => {
+const MyCustomDialog = (props: IDialogConfigSimple): React.ReactElement => {
 	const [v1, setV1] = useState("Prefilled");
 	const [v2, setV2] = useState("");
 	const [v3, setV3] = useState("");
@@ -61,8 +61,13 @@ const MyCustomDialog = (props: IDialogConfigSimple) => {
 	);
 };
 
-const DialogContent = () => {
-	const [, setDialog] = useContext(DialogContext)!;
+const DialogContent = (): React.ReactElement => {
+	const ctx = useContext(DialogContext);
+	if (!ctx)
+		throw new Error(
+			"DialogContext is missing, did you forget to add Components-Care Framework or DialogContextProvider?"
+		);
+	const [, setDialog] = ctx;
 
 	const title = text("Title", "Storybook");
 	const message = text("Message", "Enter your own text in Knobs!");
@@ -76,8 +81,8 @@ const DialogContent = () => {
 	});
 	for (let i = 0; i < buttonCount; ++i) {
 		buttons.push({
-			text: text("Button " + i + " text", "Btn" + i),
-			onClick: action("Button " + i + " onClick"),
+			text: text(`Button ${i} text`, `Btn${i}`),
+			onClick: action(`Button ${i} onClick`),
 			autoFocus: i === 0,
 		});
 	}
@@ -100,7 +105,7 @@ const DialogContent = () => {
 	return <></>;
 };
 
-export const FormDialogStory = () => {
+export const FormDialogStory = (): React.ReactElement => {
 	return (
 		<Framework>
 			<DialogContent />

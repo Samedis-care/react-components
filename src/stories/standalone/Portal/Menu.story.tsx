@@ -55,7 +55,7 @@ const Placeholder = (props: IPlaceHolderProps) => {
 	return <div className={classes[cssClass]}>{cssClass}</div>;
 };
 
-export const PortalMenuStory = () => {
+export const PortalMenuStory = (): React.ReactElement => {
 	const variant = select(
 		"Variant",
 		{
@@ -88,33 +88,33 @@ export const PortalMenuStory = () => {
 							{
 								icon: Home,
 								title: "Home",
-								onClick: console.log,
+								onClick: () => alert("Home"),
 								shouldRender: true,
 							},
 							{
 								icon: Domain,
 								title: "Admin",
-								onClick: console.log,
+								onClick: () => alert("Admin"),
 								shouldRender: true,
 								children: [
 									{
 										title: "Item 1",
-										onClick: console.log,
+										onClick: () => alert("Admin/Item 1"),
 										shouldRender: true,
 									},
 									{
 										title: "Item 2",
-										onClick: console.log,
+										onClick: () => alert("Admin/Item 2"),
 										shouldRender: true,
 									},
 									{
 										title: "Item 3",
-										onClick: console.log,
+										onClick: () => alert("Admin/Item 3"),
 										shouldRender: true,
 									},
 									{
 										title: "Item 4",
-										onClick: console.log,
+										onClick: () => alert("Admin/Item 4"),
 										shouldRender: false,
 									},
 								],

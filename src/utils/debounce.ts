@@ -1,9 +1,11 @@
-export type DebounceTargetFunc = (...args: any[]) => void;
+export type DebounceTargetFunc<ArgT extends Array<unknown>> = (
+	...args: ArgT
+) => void;
 
-export default function debounce(
-	func: DebounceTargetFunc,
+export default function debounce<ArgT extends Array<unknown>>(
+	func: DebounceTargetFunc<ArgT>,
 	timeout: number
-): DebounceTargetFunc {
+): DebounceTargetFunc<ArgT> {
 	let debounceState = 0;
 	return (...args) => {
 		if (debounceState !== 0) {

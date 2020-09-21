@@ -21,7 +21,7 @@ export interface IProps {
 	 * @returns The day contents for this week.
 	 * 			Format: IDayData[weekday starting Monday][n]
 	 */
-	loadData: () => Promise<IDayData[][]>;
+	loadData: () => IDayData[][] | Promise<IDayData[][]>;
 }
 
 interface IState {
@@ -39,7 +39,7 @@ class ScrollableScheduleWeek extends PureComponent<IProps, IState> {
 		};
 	}
 
-	async componentDidMount() {
+	async componentDidMount(): Promise<void> {
 		try {
 			const data = await this.props.loadData();
 			this.setState({
@@ -47,12 +47,12 @@ class ScrollableScheduleWeek extends PureComponent<IProps, IState> {
 			});
 		} catch (e) {
 			this.setState({
-				loadError: e,
+				loadError: e as Error,
 			});
 		}
 	}
 
-	render() {
+	render(): React.ReactElement {
 		if (this.state.loadError) {
 			return (
 				<Grid item xs={12}>

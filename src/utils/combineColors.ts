@@ -1,6 +1,7 @@
 const combineColors = (color1: string, color2: string): number[] => {
 	const canvas = document.createElement("canvas");
-	const ctx = canvas.getContext("2d")!;
+	const ctx = canvas.getContext("2d");
+	if (!ctx) throw new Error("Failed getting Canvas 2D context");
 	ctx.clearRect(0, 0, 1, 1);
 	ctx.fillStyle = color1;
 	ctx.fillRect(0, 0, 1, 1);

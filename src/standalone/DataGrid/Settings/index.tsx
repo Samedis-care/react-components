@@ -17,7 +17,9 @@ const useStyles = makeStyles({
 const DataGridSettings = (props: IDataGridColumnProps) => {
 	const classes = useStyles();
 
-	const [state, setState] = useContext(DataGridStateContext)!;
+	const stateCtx = useContext(DataGridStateContext);
+	if (!stateCtx) throw new Error("Missing DataGrid State Context");
+	const [state, setState] = stateCtx;
 
 	const closeGridSettings = useCallback(() => {
 		setState((prevState) => ({

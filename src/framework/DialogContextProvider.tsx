@@ -17,7 +17,7 @@ export const DialogContext = React.createContext<DialogContextType | undefined>(
 /**
  * Provides the application with an state to display an dialog
  */
-export default React.memo((props: IFrameworkProps) => {
+const DialogContextProvider = (props: IFrameworkProps) => {
 	const dialogState = useState<DialogType>(null);
 
 	return (
@@ -28,4 +28,6 @@ export default React.memo((props: IFrameworkProps) => {
 			</DialogContext.Provider>
 		</>
 	);
-});
+};
+
+export default React.memo(DialogContextProvider);

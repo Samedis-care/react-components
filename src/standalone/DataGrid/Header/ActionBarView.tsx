@@ -49,7 +49,7 @@ export interface IDataGridActionBarViewProps {
 	/**
 	 * List of available export providers
 	 */
-	exporters?: IDataGridExporter<any>[];
+	exporters?: IDataGridExporter<unknown>[];
 }
 
 const ActionBarView = (props: IDataGridActionBarViewProps) => {
@@ -79,7 +79,7 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 			)}
 			{props.handleAddNew && (
 				<Grid item key={"new"}>
-					<Tooltip title={i18n.t("standalone.data-grid.header.new")!}>
+					<Tooltip title={i18n.t("standalone.data-grid.header.new") || ""}>
 						<span>
 							<IconButton onClick={props.handleAddNew}>
 								<AddIcon />
@@ -90,7 +90,7 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 			)}
 			{props.handleEdit && (
 				<Grid item key={"edit"}>
-					<Tooltip title={i18n.t("standalone.data-grid.header.edit")!}>
+					<Tooltip title={i18n.t("standalone.data-grid.header.edit") || ""}>
 						<span>
 							<IconButton
 								disabled={props.numSelected !== 1}
@@ -104,7 +104,7 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 			)}
 			{props.handleDelete && (
 				<Grid item key={"delete"}>
-					<Tooltip title={i18n.t("standalone.data-grid.header.delete")!}>
+					<Tooltip title={i18n.t("standalone.data-grid.header.delete") || ""}>
 						<span>
 							<IconButton
 								disabled={props.numSelected === 0}
@@ -123,7 +123,7 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 			)}
 			{props.exporters && (
 				<Grid item key={"export"}>
-					<Tooltip title={i18n.t("standalone.data-grid.header.export")!}>
+					<Tooltip title={i18n.t("standalone.data-grid.header.export") || ""}>
 						<span>
 							<IconButton onClick={openExportMenu}>
 								<ExportIcon />
@@ -138,7 +138,7 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 				</Grid>
 			)}
 			<Grid item key={"settings"}>
-				<Tooltip title={i18n.t("standalone.data-grid.header.settings")!}>
+				<Tooltip title={i18n.t("standalone.data-grid.header.settings") || ""}>
 					<span>
 						<IconButton onClick={props.toggleSettings}>
 							<SettingsIcon />
@@ -148,7 +148,7 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 			</Grid>
 			<Grid item key={"reset"}>
 				<Tooltip
-					title={i18n.t("standalone.data-grid.header.reset")!}
+					title={i18n.t("standalone.data-grid.header.reset") || ""}
 					onClick={props.handleReset}
 				>
 					<span>

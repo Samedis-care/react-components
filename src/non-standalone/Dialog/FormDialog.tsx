@@ -11,7 +11,12 @@ import {
 import { IDialogConfigForm } from "./Types";
 
 const FormDialogRaw = (props: IDialogConfigForm) => {
-	const [, setDialog] = useContext(DialogContext)!;
+	const dialogCtx = useContext(DialogContext);
+	if (!dialogCtx)
+		throw new Error(
+			"Dialog Context not set! Did you forget adding the Components-Care Framework or DialogContextProvider?"
+		);
+	const [, setDialog] = dialogCtx;
 	const { onClose } = props;
 
 	const removeDialog = React.useCallback(() => {

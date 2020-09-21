@@ -1,5 +1,5 @@
 import React, { CSSProperties } from "react";
-import Selector, { SelectorData, SelectorProps } from "./Selector";
+import Selector, { SelectorData, SelectorPropsMultiSelect } from "./Selector";
 import {
 	createStyles,
 	Grid,
@@ -21,23 +21,11 @@ export interface MultiSelectorData extends SelectorData {
 	 * Can the entry be unselected?
 	 * @param data The data entry to be unselected
 	 */
-	canUnselect?: (data: any) => Promise<boolean>;
+	canUnselect?: (data: this) => boolean | Promise<boolean>;
 }
 
 export interface MultiSelectProps<Data extends MultiSelectorData>
-	extends Omit<
-		SelectorProps<Data>,
-		"onSelect" | "selected" | "multiSelect" | "clearable"
-	> {
-	/**
-	 * Simple selection change handler
-	 * @param value The selected value
-	 */
-	onSelect?: (value: Data[]) => void;
-	/**
-	 * The currently selected value
-	 */
-	selected: Data[];
+	extends Omit<SelectorPropsMultiSelect<Data>, "multiSelect" | "clearable"> {
 	/**
 	 * Specify a custom component for displaying multi select items
 	 */
@@ -52,7 +40,9 @@ const styles = createStyles((theme: Theme) => ({
 	selectedEntries: {},
 }));
 
-const MultiSelect = (props: MultiSelectProps<any> & WithStyles) => {
+const MultiSelect = <Data extends MultiSelectorData>(
+	props: MultiSelectProps<Data> & WithStyles
+) => {
 	const {
 		onLoad,
 		onSelect,
@@ -68,7 +58,8 @@ const MultiSelect = (props: MultiSelectProps<any> & WithStyles) => {
 	const EntryRender = selectedEntryRenderer || MultiSelectEntry;
 
 	const multiSelectHandler = React.useCallback(
-		(data: any) => {
+		(data: Data | null) => {
+			if (!data) return;
 			if (onSelect) onSelect([...selected, data]);
 		},
 		[onSelect, selected]
@@ -87,10 +78,15 @@ const MultiSelect = (props: MultiSelectProps<any> & WithStyles) => {
 	const handleDelete = React.useCallback(
 		(evt: React.MouseEvent<HTMLButtonElement>) => {
 			let canDelete = true;
-			const entry: MultiSelectorData = selected.find(
+			const entry: Data | null | undefined = selected.find(
 				(s) => s.value === evt.currentTarget.name
-			)!;
-			(async () => {
+			);
+			if (!entry) {
+				throw new Error(
+					"[Components-Care] [MultiSelect] Entry couldn't be found. Either entry.value is not set, or the entity renderer does not correctly set the name attribute"
+				);
+			}
+			void (async () => {
 				if (entry.canUnselect) {
 					canDelete = await entry.canUnselect(entry);
 				}
@@ -106,7 +102,7 @@ const MultiSelect = (props: MultiSelectProps<any> & WithStyles) => {
 		return {
 			control: (
 				base: CSSProperties,
-				selectProps: ControlProps<{}>
+				selectProps: ControlProps<Record<string, unknown>>
 			): CSSProperties => {
 				let multiSelectStyles: CSSProperties = {
 					...base,
@@ -130,7 +126,7 @@ const MultiSelect = (props: MultiSelectProps<any> & WithStyles) => {
 		<Paper elevation={0} className={classes.paperWrapper}>
 			<Grid container>
 				<Grid item xs={12}>
-					<Selector
+					<Selector<Data>
 						{...props}
 						onLoad={multiSelectLoadHandler}
 						selected={null}
