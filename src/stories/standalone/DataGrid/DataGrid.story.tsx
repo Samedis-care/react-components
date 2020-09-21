@@ -82,7 +82,7 @@ const columnDef: IDataGridColumnDef[] = [
 	},
 ];
 
-const exporters: IDataGridExporter<string>[] = [
+const exporters: IDataGridExporter<unknown>[] = [
 	{
 		id: "excel",
 		label: "Excel",
