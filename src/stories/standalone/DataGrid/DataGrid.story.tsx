@@ -272,8 +272,8 @@ export const DataGridStory = (): React.ReactElement => {
 						rowData = rowData.filter((row) => {
 							const rawValue = row[filterField];
 							if (!rawValue) return false;
+							// eslint-disable-next-line @typescript-eslint/no-unused-vars
 							const value = rawValue.toString().toLowerCase();
-							value.includes(""); // so eslint-loader stops complaining
 
 							try {
 								// eslint-disable-next-line no-eval
