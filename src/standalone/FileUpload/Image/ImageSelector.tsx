@@ -58,9 +58,28 @@ const useStyles = makeStyles({
 });
 
 const ImageSelector = (props: ImageSelectorProps) => {
-	const { convertImagesTo, downscale, value } = props;
+	const { convertImagesTo, downscale, value, readOnly } = props;
 	const classes = useStyles();
 	const changeRef = useRef<HTMLInputElement>(null);
+
+	const processFile = useCallback(
+		async (file: File) => {
+			if (!changeRef.current) return;
+
+			const value = await processImage(file, convertImagesTo, downscale);
+
+			// eslint-disable-next-line @typescript-eslint/unbound-method
+			const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
+				window.HTMLInputElement.prototype,
+				"value"
+			)?.set;
+			nativeInputValueSetter?.call(changeRef.current, value);
+
+			const event = new Event("input", { bubbles: true });
+			changeRef.current.dispatchEvent(event);
+		},
+		[convertImagesTo, downscale]
+	);
 
 	// upload click handler
 	const handleUpload = useCallback(() => {
@@ -73,28 +92,40 @@ const ImageSelector = (props: ImageSelectorProps) => {
 			if (!files) return;
 			const file = files[0];
 			if (!file) return;
-			void (async () => {
-				if (!changeRef.current) return;
-
-				const value = await processImage(file, convertImagesTo, downscale);
-
-				// eslint-disable-next-line @typescript-eslint/unbound-method
-				const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
-					window.HTMLInputElement.prototype,
-					"value"
-				)?.set;
-				nativeInputValueSetter?.call(changeRef.current, value);
-
-				const event = new Event("input", { bubbles: true });
-				changeRef.current.dispatchEvent(event);
-			})();
+			void processFile(file);
 		});
 		elem.click();
-	}, [convertImagesTo, downscale]);
+	}, [processFile]);
+
+	const handleDrop = useCallback(
+		async (evt: React.DragEvent<HTMLDivElement>) => {
+			if (readOnly) return;
+
+			evt.preventDefault();
+
+			await processFile(evt.dataTransfer?.files[0]);
+		},
+		[readOnly, processFile]
+	);
+
+	const handleDragOver = useCallback(
+		(evt: React.DragEvent<HTMLDivElement>) => {
+			if (readOnly) return;
+
+			evt.preventDefault();
+		},
+		[readOnly]
+	);
 
 	// render component
 	return (
-		<Grid container spacing={2} alignContent={"space-between"}>
+		<Grid
+			container
+			spacing={2}
+			alignContent={"space-between"}
+			onDrop={handleDrop}
+			onDragOver={handleDragOver}
+		>
 			{!props.readOnly && (
 				<Grid item xs key={"upload"}>
 					<Button
