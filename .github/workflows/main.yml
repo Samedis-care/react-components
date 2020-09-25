@@ -27,5 +27,6 @@ jobs:
           node-version: 14
       # Runs a single command using the runners shell
       - name: Generate Storybook
-        run: npm run deploy-storybook
-
+        run: |
+          npm i
+          npm run deploy-storybook
