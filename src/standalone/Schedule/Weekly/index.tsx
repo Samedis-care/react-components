@@ -142,7 +142,7 @@ class WeekView extends PureComponent<IProps, IState> {
 				{this.state.data &&
 					weekdays.map((day) => {
 						const data = this.state.data;
-						if (!data) return;
+						if (!data) return null;
 
 						const date = now
 							.clone()

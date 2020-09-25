@@ -13,7 +13,8 @@ import { AttachFile } from "@material-ui/icons";
 import FilePreview from "./File";
 import { FileSelectorError } from "./Errors";
 import i18n from "../../../i18n";
-import { fileToData, getFileExt } from "../../../utils";
+import { getFileExt, processImage, shallowCompare } from "../../../utils";
+import { IDownscaleProps } from "../../../utils/processImage";
 
 export interface IProps extends WithStyles {
 	/**
@@ -24,6 +25,10 @@ export interface IProps extends WithStyles {
 	 * Filter for allowed mime types and file extensions (see <input accept="VALUE">)
 	 */
 	accept?: string;
+	/**
+	 * Custom label for accepted file formats ("File formats:" prefix is prepended)
+	 */
+	acceptLabel?: string;
 	/**
 	 * Optional resolution restrictions for images
 	 */
@@ -67,21 +72,6 @@ export interface IProps extends WithStyles {
 	 * Makes the file upload control read only
 	 */
 	readOnly?: boolean;
-}
-
-export interface IDownscaleProps {
-	/**
-	 * The maximum allowed width
-	 */
-	width: number;
-	/**
-	 * The maximum allowed height
-	 */
-	height: number;
-	/**
-	 * Keep aspect ratio when scaling down?
-	 */
-	keepRatio: boolean;
 }
 
 export interface FileMeta {
@@ -152,24 +142,13 @@ class FileUpload extends Component<IProps, IState> {
 		nextProps: Readonly<IProps>,
 		nextState: Readonly<IState>
 	): boolean {
-		if (!this.shallowCompare(this.props, nextProps)) return true;
+		if (!shallowCompare(this.props, nextProps)) return true;
 		// Compare state (except dragging)
 		if (this.state.files !== nextState.files) return true;
 
 		// Check for dragging
 		return (this.state.dragging ? 1 : 0) !== (nextState.dragging ? 1 : 0);
 	}
-
-	shallowCompare = (
-		obj1: Record<string, unknown>,
-		obj2: Record<string, unknown>
-	) =>
-		Object.keys(obj1).length === Object.keys(obj2).length &&
-		Object.keys(obj1).every(
-			(key: string) =>
-				Object.prototype.hasOwnProperty.call(obj2, key) &&
-				obj1[key] === obj2[key]
-		);
 
 	componentDidMount() {
 		document.addEventListener("dragenter", this.handleDragStart);
@@ -252,7 +231,8 @@ class FileUpload extends Component<IProps, IState> {
 						<Grid item xs={12} key={"info"}>
 							<FormHelperText className={this.props.classes.formatText}>
 								({i18n.t("standalone.file-upload.formats")}:{" "}
-								{this.props.accept ||
+								{this.props.acceptLabel ||
+									this.props.accept ||
 									i18n.t("standalone.file-upload.format.any")}
 								)
 							</FormHelperText>
@@ -287,6 +267,8 @@ class FileUpload extends Component<IProps, IState> {
 	};
 
 	handleDrop = async (evt: React.DragEvent<HTMLDivElement>) => {
+		if (this.props.readOnly) return;
+
 		evt.preventDefault();
 
 		this.setState({
@@ -297,16 +279,22 @@ class FileUpload extends Component<IProps, IState> {
 	};
 
 	handleDragOver = (evt: React.DragEvent<HTMLDivElement>) => {
+		if (this.props.readOnly) return;
+
 		evt.preventDefault();
 	};
 
 	handleDragStart = () => {
+		if (this.props.readOnly) return;
+
 		this.setState((prevState) => ({
 			dragging: prevState.dragging + 1,
 		}));
 	};
 
 	handleDragStop = () => {
+		if (this.props.readOnly) return;
+
 		this.setState((prevState) => ({
 			dragging: prevState.dragging - 1,
 		}));
@@ -340,7 +328,11 @@ class FileUpload extends Component<IProps, IState> {
 			if (isImage && processImages) {
 				newFiles.push({
 					file,
-					preview: await this.processImage(file),
+					preview: await processImage(
+						file,
+						this.props.convertImagesTo,
+						this.props.imageDownscaleOptions
+					),
 					canBeUploaded: true,
 					delete: false,
 				});
@@ -416,55 +408,6 @@ class FileUpload extends Component<IProps, IState> {
 				if (this.props.onChange) this.props.onChange(this.state.files);
 			}
 		);
-	};
-
-	processImage = async (file: File): Promise<string> => {
-		const downscale = this.props.imageDownscaleOptions;
-		const imageFormatTarget = this.props.convertImagesTo || file.type;
-
-		// file -> data url
-		const imageData: string = await fileToData(file);
-
-		// data url -> image
-		const image = new Image();
-		await new Promise((resolve, reject) => {
-			image.addEventListener("load", () => resolve(image));
-			image.addEventListener("error", (evt) => reject(evt.error));
-			image.src = imageData;
-		});
-
-		// calculate new size for down-scaling
-		let newWidth = image.width;
-		let newHeight = image.height;
-		if (
-			downscale &&
-			(image.width > downscale.width || image.height > downscale.height)
-		) {
-			if (!downscale.keepRatio) {
-				newWidth =
-					image.width <= downscale.width ? image.width : downscale.width;
-				newHeight =
-					image.width <= downscale.height ? image.height : downscale.height;
-			} else {
-				const downscaleRatio = Math.max(
-					image.width / downscale.width,
-					image.height / downscale.height
-				);
-				newWidth = image.width / downscaleRatio;
-				newHeight = image.height / downscaleRatio;
-			}
-		}
-
-		// render image in canvas with new size
-		const canvas = document.createElement("canvas");
-		canvas.width = newWidth;
-		canvas.height = newHeight;
-		const ctx = canvas.getContext("2d");
-		if (!ctx) throw new Error("Failed getting Canvas 2D Context");
-		ctx.drawImage(image, 0, 0, newWidth, newHeight);
-
-		// and export it using the specified data format
-		return canvas.toDataURL(imageFormatTarget);
 	};
 }
 

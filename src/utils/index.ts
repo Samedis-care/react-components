@@ -5,3 +5,5 @@ export { default as colorToRgba } from "./colorToRgba";
 export { default as combineColors } from "./combineColors";
 export { default as fileToData } from "./fileToData";
 export { default as getFileExt } from "./getFileExt";
+export { default as processImage } from "./processImage";
+export { default as shallowCompare } from "./shallowCompare";

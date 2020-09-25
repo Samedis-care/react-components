@@ -6,6 +6,8 @@ import ThemeProvider, {
 	GetDefaultThemeCallback,
 	getStandardTheme,
 } from "./ThemeProvider";
+import { ReactQueryCacheProvider } from "react-query";
+import { ModelDataStore } from "../backend-integration";
 
 /**
  * Properties for the Framework
@@ -32,15 +34,18 @@ const loaderComponent = <Loader />;
  * Provides:
  * - react-router instance
  * - dialog context
+ * - react-query cache
  * - theme provider
  * - css baseline
  */
 const ComponentsCareFramework = (props: ICompleteFrameworkProps) => (
 	<Suspense fallback={loaderComponent}>
 		<ThemeProvider defaultTheme={props.defaultTheme || getStandardTheme}>
-			<Router history={FrameworkHistory}>
-				<DialogContextProvider>{props.children}</DialogContextProvider>
-			</Router>
+			<ReactQueryCacheProvider queryCache={ModelDataStore}>
+				<Router history={FrameworkHistory}>
+					<DialogContextProvider>{props.children}</DialogContextProvider>
+				</Router>
+			</ReactQueryCacheProvider>
 		</ThemeProvider>
 	</Suspense>
 );
