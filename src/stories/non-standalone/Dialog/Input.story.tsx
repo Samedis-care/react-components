@@ -1,28 +1,15 @@
-import React, { useContext, useEffect } from "react";
+import React, { useEffect } from "react";
 import { button, text, withKnobs } from "@storybook/addon-knobs";
 import {
 	Framework,
-	DialogContext,
 	InputDialog,
 	showInputDialog,
+	useDialogContext,
 } from "../../..";
-import { action } from "@storybook/addon-actions";
-
-const Settings = {
-	title: "Non-Standalone/Dialog",
-	component: InputDialog,
-	decorators: [withKnobs],
-};
-export default Settings;
+import { action, withActions } from "@storybook/addon-actions";
 
 const DialogContent = (): React.ReactElement => {
-	const ctx = useContext(DialogContext);
-	if (!ctx)
-		throw new Error(
-			"DialogContext is missing, did you forget to add Components-Care Framework or DialogContextProvider?"
-		);
-
-	const [, setDialog] = ctx;
+	const [pushDialog] = useDialogContext();
 
 	const title = text("Title", "Storybook");
 	const message = text("Message", "Enter your own text in Knobs!");
@@ -35,7 +22,7 @@ const DialogContent = (): React.ReactElement => {
 	const validate = () => true;
 
 	const openDialog = () => {
-		setDialog(
+		pushDialog(
 			<InputDialog
 				title={title}
 				message={message}
@@ -51,7 +38,7 @@ const DialogContent = (): React.ReactElement => {
 	};
 
 	const openDialogAsync = () => {
-		showInputDialog(ctx, {
+		showInputDialog(pushDialog, {
 			title,
 			message,
 			textButtonYes: yesLabel,
@@ -79,6 +66,5 @@ export const InputDialogStory = (): React.ReactElement => {
 	);
 };
 
-InputDialogStory.story = {
-	name: "Input",
-};
+InputDialogStory.storyName = "Input";
+InputDialogStory.decorators = [withActions, withKnobs];

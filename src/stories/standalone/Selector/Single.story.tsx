@@ -2,16 +2,9 @@ import React, { useState } from "react";
 import "../../../i18n";
 import { SelectorData, SingleSelect } from "../../../standalone/Selector";
 import { colourOptions } from "./Data";
-import { action } from "@storybook/addon-actions";
+import { action, withActions } from "@storybook/addon-actions";
 import { boolean, text, withKnobs } from "@storybook/addon-knobs";
 import { Box, CssBaseline } from "@material-ui/core";
-
-const Settings = {
-	title: "Standalone/Selector",
-	component: SingleSelect,
-	decorators: [withKnobs],
-};
-export default Settings;
 
 export const SelectorSingle = (): React.ReactElement => {
 	const [selected, setSelected] = useState<SelectorData | null>(null);
@@ -66,6 +59,5 @@ export const SelectorSingle = (): React.ReactElement => {
 	);
 };
 
-SelectorSingle.story = {
-	name: "Single",
-};
+SelectorSingle.storyName = "Single";
+SelectorSingle.decorators = [withActions, withKnobs];

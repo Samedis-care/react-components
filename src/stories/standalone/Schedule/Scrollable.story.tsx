@@ -2,12 +2,8 @@ import React from "react";
 import { makeStyles } from "@material-ui/core";
 import ScrollableSchedule from "../../../standalone/Schedule/Scrollable";
 import { getWeekData } from "./dataGen";
-
-const Settings = {
-	title: "Standalone/Schedule",
-	component: ScrollableSchedule,
-};
-export default Settings;
+import { withActions } from "@storybook/addon-actions";
+import { withKnobs } from "@storybook/addon-knobs";
 
 const useStyles = makeStyles(() => ({
 	scrollWrapper: {
@@ -26,6 +22,5 @@ export const ScheduleScrollable = (): React.ReactElement => {
 	);
 };
 
-ScheduleScrollable.story = {
-	name: "Scrollable",
-};
+ScheduleScrollable.storyName = "Scrollable";
+ScheduleScrollable.decorators = [withActions, withKnobs];

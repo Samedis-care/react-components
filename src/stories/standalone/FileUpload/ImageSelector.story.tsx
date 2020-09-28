@@ -7,15 +7,8 @@ import {
 	text,
 	withKnobs,
 } from "@storybook/addon-knobs";
-import { action } from "@storybook/addon-actions";
+import { action, withActions } from "@storybook/addon-actions";
 import ImageSelector from "../../../standalone/FileUpload/Image/ImageSelector";
-
-const Settings = {
-	title: "Standalone/FileUpload",
-	component: ImageSelector,
-	decorators: [withKnobs],
-};
-export default Settings;
 
 export const ImageSelectorStory = (): React.ReactElement => {
 	const [image, setImage] = useState("https://via.placeholder.com/128");
@@ -72,6 +65,5 @@ export const ImageSelectorStory = (): React.ReactElement => {
 	);
 };
 
-ImageSelectorStory.story = {
-	name: "ImageSelector",
-};
+ImageSelectorStory.storyName = "ImageSelector";
+ImageSelectorStory.decorators = [withActions, withKnobs];

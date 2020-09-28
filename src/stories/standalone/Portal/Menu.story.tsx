@@ -10,13 +10,7 @@ import {
 } from "../../../standalone/Portal";
 import { Domain, Home } from "@material-ui/icons";
 import { select, withKnobs } from "@storybook/addon-knobs";
-
-const Settings = {
-	title: "Standalone/Portal",
-	component: MenuBase,
-	decorators: [withKnobs],
-};
-export default Settings;
+import { withActions } from "@storybook/addon-actions";
 
 const useStyles = makeStyles({
 	header: {
@@ -141,6 +135,5 @@ export const PortalMenuStory = (): React.ReactElement => {
 	);
 };
 
-PortalMenuStory.story = {
-	name: "Menu",
-};
+PortalMenuStory.storyName = "Menu";
+PortalMenuStory.decorators = [withActions, withKnobs];

@@ -1,5 +1,5 @@
-import React, { useContext } from "react";
-import { DialogContext } from "../../framework";
+import React from "react";
+import { useDialogContext } from "../../framework";
 import {
 	Button,
 	Dialog,
@@ -11,18 +11,13 @@ import {
 import { IDialogConfigSimple } from "./Types";
 
 const ErrorDialogRaw = (props: IDialogConfigSimple) => {
-	const dialogCtx = useContext(DialogContext);
-	if (!dialogCtx)
-		throw new Error(
-			"Dialog Context not set! Did you forget adding the Components-Care Framework or DialogContextProvider?"
-		);
-	const [, setDialog] = dialogCtx;
+	const [, popDialog] = useDialogContext();
 	const { onClose } = props;
 
 	const removeDialog = React.useCallback(() => {
-		setDialog(null);
+		popDialog();
 		if (onClose) onClose();
-	}, [setDialog, onClose]);
+	}, [popDialog, onClose]);
 
 	return (
 		<Dialog open={true} onClose={removeDialog}>
@@ -35,7 +30,7 @@ const ErrorDialogRaw = (props: IDialogConfigSimple) => {
 					<Button
 						key={index}
 						onClick={() => {
-							setDialog(null);
+							popDialog();
 							if (data.onClick) data.onClick();
 						}}
 						color="primary"

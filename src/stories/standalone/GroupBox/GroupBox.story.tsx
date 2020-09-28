@@ -2,13 +2,7 @@ import React from "react";
 import "../../../i18n";
 import GroupBox from "../../../standalone/GroupBox/index";
 import { text, withKnobs } from "@storybook/addon-knobs";
-
-const Settings = {
-	title: "Standalone/GroupBox",
-	component: GroupBox,
-	decorators: [withKnobs],
-};
-export default Settings;
+import { withActions } from "@storybook/addon-actions";
 
 export const GroupBoxStory = (): React.ReactElement => {
 	return (
@@ -21,6 +15,5 @@ export const GroupBoxStory = (): React.ReactElement => {
 	);
 };
 
-GroupBoxStory.story = {
-	name: "GroupBox",
-};
+GroupBoxStory.storyName = "GroupBox";
+GroupBoxStory.decorators = [withActions, withKnobs];

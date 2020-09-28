@@ -2,14 +2,7 @@ import React, { useState } from "react";
 import InfiniteScroll from "../../../standalone/InfiniteScroll";
 import { Grid, makeStyles } from "@material-ui/core";
 import { withKnobs, number } from "@storybook/addon-knobs";
-import { action } from "@storybook/addon-actions";
-
-const Settings = {
-	title: "Standalone/InfiniteScroll",
-	component: InfiniteScroll,
-	decorators: [withKnobs],
-};
-export default Settings;
+import { action, withActions } from "@storybook/addon-actions";
 
 const useStyles = makeStyles(() => ({
 	scrollWrapper: {
@@ -63,6 +56,5 @@ export const Bidirectional = (): React.ReactElement => {
 	);
 };
 
-Bidirectional.story = {
-	name: "Bidirectional",
-};
+Bidirectional.storyName = "Bidirectional";
+Bidirectional.decorators = [withActions, withKnobs];

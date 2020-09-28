@@ -1,6 +1,6 @@
-import React, { ChangeEvent, useCallback, useContext, useState } from "react";
+import React, { ChangeEvent, useCallback, useState } from "react";
 import { IDialogConfigInput } from "./Types";
-import { DialogContext } from "../../framework";
+import { useDialogContext } from "../../framework";
 import {
 	Button,
 	Dialog,
@@ -12,12 +12,7 @@ import {
 } from "@material-ui/core";
 
 const InputDialogRaw = (props: IDialogConfigInput) => {
-	const dialogCtx = useContext(DialogContext);
-	if (!dialogCtx)
-		throw new Error(
-			"Dialog Context not set! Did you forget adding the Components-Care Framework or DialogContextProvider?"
-		);
-	const [, setDialog] = dialogCtx;
+	const [, popDialog] = useDialogContext();
 	const {
 		onClose,
 		handlerButtonNo,
@@ -33,23 +28,23 @@ const InputDialogRaw = (props: IDialogConfigInput) => {
 	);
 
 	const removeDialog = React.useCallback(() => {
-		setDialog(null);
+		popDialog();
 		if (onClose) onClose();
-	}, [setDialog, onClose]);
+	}, [popDialog, onClose]);
 
 	const handleNo = React.useCallback(() => {
-		setDialog(null);
+		popDialog();
 		handlerButtonNo();
-	}, [setDialog, handlerButtonNo]);
+	}, [popDialog, handlerButtonNo]);
 
 	const handleYes = React.useCallback(() => {
 		if (textFieldValidator(value)) {
-			setDialog(null);
+			popDialog();
 			handlerButtonYes(value);
 		} else {
 			setValid(false);
 		}
-	}, [value, handlerButtonYes, textFieldValidator, setDialog, setValid]);
+	}, [value, handlerButtonYes, textFieldValidator, popDialog, setValid]);
 
 	return (
 		<Dialog open={true} onClose={removeDialog}>

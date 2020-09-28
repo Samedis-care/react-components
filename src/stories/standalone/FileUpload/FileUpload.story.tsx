@@ -9,14 +9,7 @@ import {
 	text,
 	withKnobs,
 } from "@storybook/addon-knobs";
-import { action } from "@storybook/addon-actions";
-
-const Settings = {
-	title: "Standalone/FileUpload",
-	component: FileUpload,
-	decorators: [withKnobs],
-};
-export default Settings;
+import { action, withActions } from "@storybook/addon-actions";
 
 export const FileUploadStory = (): React.ReactElement => {
 	const handleErrorAction = action("handleError");
@@ -96,6 +89,5 @@ export const FileUploadStory = (): React.ReactElement => {
 	);
 };
 
-FileUploadStory.story = {
-	name: "FileUpload",
-};
+FileUploadStory.storyName = "FileUpload";
+FileUploadStory.decorators = [withActions, withKnobs];

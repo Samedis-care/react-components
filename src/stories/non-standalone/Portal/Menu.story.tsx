@@ -2,21 +2,15 @@ import React from "react";
 import { List, makeStyles } from "@material-ui/core";
 import "../../../i18n";
 import {
-	JumboReactLightMenuItem,
 	JumboReactDarkMenuItem,
+	JumboReactLightMenuItem,
 	MaterialMenuItem,
 	PortalLayout,
 } from "../../../standalone/Portal";
 import { Domain, Home } from "@material-ui/icons";
 import { button, select, withKnobs } from "@storybook/addon-knobs";
-import { RoutedMenu, Framework, FrameworkHistory } from "../../..";
-
-const Settings = {
-	title: "Non-Standalone/Portal",
-	component: RoutedMenu,
-	decorators: [withKnobs],
-};
-export default Settings;
+import { Framework, FrameworkHistory, RoutedMenu } from "../../..";
+import { withActions } from "@storybook/addon-actions";
 
 const useStyles = makeStyles({
 	header: {
@@ -154,6 +148,5 @@ export const PortalMenuStory = (): React.ReactElement => {
 	);
 };
 
-PortalMenuStory.story = {
-	name: "Menu",
-};
+PortalMenuStory.storyName = "Menu";
+PortalMenuStory.decorators = [withActions, withKnobs];

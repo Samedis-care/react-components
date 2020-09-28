@@ -6,17 +6,16 @@ import { InputDialog } from "./InputDialog";
 
 /**
  * Shows an awaitable confirm dialog
- * @param ctx The dialog context (useContext(DialogContext))
+ * @param pushDialog The dialog context's (useDialogContext()) pushDialog function
  * @param props The dialog properties
  * @returns Awaitable promise, resolves if user clicks Yes, rejects otherwise
  */
 export const showConfirmDialog = async (
-	ctx: DialogContextType,
+	pushDialog: DialogContextType[0],
 	props: IDialogConfigConfirmAsync
 ): Promise<void> => {
-	const [, setDialog] = ctx;
 	return new Promise((resolve, reject) => {
-		setDialog(
+		pushDialog(
 			<ConfirmDialog
 				{...props}
 				onClose={reject}
@@ -29,17 +28,16 @@ export const showConfirmDialog = async (
 
 /**
  * Shows an awaitable input dialog
- * @param ctx The dialog context (useContext(DialogContext))
+ * @param pushDialog The dialog context's (useDialogContext()) pushDialog function
  * @param props The dialog properties
  * @returns Awaitable promise, resolves if user clicks Yes, rejects otherwise
  */
 export const showInputDialog = async (
-	ctx: DialogContextType,
+	pushDialog: DialogContextType[0],
 	props: IDialogConfigInputAsync
 ): Promise<string> => {
-	const [, setDialog] = ctx;
 	return new Promise((resolve, reject) => {
-		setDialog(
+		pushDialog(
 			<InputDialog
 				{...props}
 				onClose={reject}

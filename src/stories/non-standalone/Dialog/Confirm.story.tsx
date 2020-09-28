@@ -1,27 +1,15 @@
-import React, { useContext, useEffect } from "react";
+import React, { useEffect } from "react";
 import { button, text, withKnobs } from "@storybook/addon-knobs";
 import {
 	Framework,
-	DialogContext,
 	ConfirmDialog,
 	showConfirmDialog,
+	useDialogContext,
 } from "../../..";
-import { action } from "@storybook/addon-actions";
-
-const Settings = {
-	title: "Non-Standalone/Dialog",
-	component: ConfirmDialog,
-	decorators: [withKnobs],
-};
-export default Settings;
+import { action, withActions } from "@storybook/addon-actions";
 
 const DialogContent = (): React.ReactElement => {
-	const ctx = useContext(DialogContext);
-	if (!ctx)
-		throw new Error(
-			"DialogContext is missing, did you forget to add Components-Care Framework or DialogContextProvider?"
-		);
-	const [, setDialog] = ctx;
+	const [pushDialog] = useDialogContext();
 
 	const title = text("Title", "Storybook");
 	const message = text("Message", "Enter your own text in Knobs!");
@@ -32,7 +20,7 @@ const DialogContent = (): React.ReactElement => {
 	const noAction = action("No Button onClick");
 
 	const openDialog = () => {
-		setDialog(
+		pushDialog(
 			<ConfirmDialog
 				title={title}
 				message={message}
@@ -46,7 +34,7 @@ const DialogContent = (): React.ReactElement => {
 	};
 
 	const openDialogAsync = () => {
-		showConfirmDialog(ctx, {
+		showConfirmDialog(pushDialog, {
 			title,
 			message,
 			textButtonYes: yesLabel,
@@ -72,6 +60,5 @@ export const ConfirmDialogStory = (): React.ReactElement => {
 	);
 };
 
-ConfirmDialogStory.story = {
-	name: "Confirm",
-};
+ConfirmDialogStory.storyName = "Confirm";
+ConfirmDialogStory.decorators = [withActions, withKnobs];

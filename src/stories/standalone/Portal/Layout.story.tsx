@@ -3,13 +3,7 @@ import { makeStyles } from "@material-ui/core";
 import "../../../i18n";
 import { PortalLayout } from "../../../standalone/Portal";
 import { boolean, number, withKnobs } from "@storybook/addon-knobs";
-
-const Settings = {
-	title: "Standalone/Portal",
-	component: PortalLayout,
-	decorators: [withKnobs],
-};
-export default Settings;
+import { withActions } from "@storybook/addon-actions";
 
 const useStyles = makeStyles({
 	header: {
@@ -67,6 +61,5 @@ export const PortalLayoutStory = (): React.ReactElement => {
 	);
 };
 
-PortalLayoutStory.story = {
-	name: "Layout",
-};
+PortalLayoutStory.storyName = "Layout";
+PortalLayoutStory.decorators = [withActions, withKnobs];

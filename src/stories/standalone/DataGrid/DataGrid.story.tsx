@@ -11,18 +11,11 @@ import {
 	IDataGridColumnDef,
 	IDataGridFieldFilter,
 } from "../../../standalone/DataGrid";
-import { action } from "@storybook/addon-actions";
+import { action, withActions } from "@storybook/addon-actions";
 import { IDataGridExporter } from "../../../standalone/DataGrid/Header";
 import { IFilterDef } from "../../../standalone/DataGrid/Content/FilterEntry";
 import data from "./covid-daily.json";
 import GridCustomFilters from "./GridCustomFilters";
-
-const Settings = {
-	title: "Standalone/DataGrid",
-	component: DataGrid,
-	decorators: [withKnobs],
-};
-export default Settings;
 
 const useStyles = makeStyles({
 	wrapper: {
@@ -325,6 +318,5 @@ export const DataGridStory = (): React.ReactElement => {
 	);
 };
 
-DataGridStory.story = {
-	name: "Basic",
-};
+DataGridStory.storyName = "Basic";
+DataGridStory.decorators = [withActions, withKnobs];

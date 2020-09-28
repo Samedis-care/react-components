@@ -1,28 +1,15 @@
-import React, { useContext, useEffect } from "react";
+import React, { useEffect } from "react";
 import { button, number, text, withKnobs } from "@storybook/addon-knobs";
 import {
 	Framework,
 	InfoDialog,
-	DialogContext,
 	IDialogButtonConfig,
+	useDialogContext,
 } from "../../..";
-import { action } from "@storybook/addon-actions";
-
-const Settings = {
-	title: "Non-Standalone/Dialog",
-	component: InfoDialog,
-	decorators: [withKnobs],
-};
-export default Settings;
+import { action, withActions } from "@storybook/addon-actions";
 
 const DialogContent = (): React.ReactElement => {
-	const ctx = useContext(DialogContext);
-	if (!ctx)
-		throw new Error(
-			"DialogContext is missing, did you forget to add Components-Care Framework or DialogContextProvider?"
-		);
-
-	const [, setDialog] = ctx;
+	const [pushDialog] = useDialogContext();
 
 	const title = text("Title", "Storybook");
 	const message = text("Message", "Enter your own text in Knobs!");
@@ -43,7 +30,7 @@ const DialogContent = (): React.ReactElement => {
 	}
 
 	const openDialog = () => {
-		setDialog(
+		pushDialog(
 			<InfoDialog
 				title={title}
 				message={message}
@@ -68,6 +55,5 @@ export const InfoDialogStory = (): React.ReactElement => {
 	);
 };
 
-InfoDialogStory.story = {
-	name: "Info",
-};
+InfoDialogStory.storyName = "Info";
+InfoDialogStory.decorators = [withActions, withKnobs];

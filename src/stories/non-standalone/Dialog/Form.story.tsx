@@ -1,21 +1,14 @@
-import React, { ChangeEvent, useContext, useEffect, useState } from "react";
+import React, { ChangeEvent, useEffect, useState } from "react";
 import { button, number, text, withKnobs } from "@storybook/addon-knobs";
 import {
 	Framework,
-	DialogContext,
 	IDialogButtonConfig,
 	FormDialog,
 	IDialogConfigSimple,
+	useDialogContext,
 } from "../../..";
-import { action } from "@storybook/addon-actions";
+import { action, withActions } from "@storybook/addon-actions";
 import { TextField } from "@material-ui/core";
-
-const Settings = {
-	title: "Non-Standalone/Dialog",
-	component: FormDialog,
-	decorators: [withKnobs],
-};
-export default Settings;
 
 const MyCustomDialog = (props: IDialogConfigSimple): React.ReactElement => {
 	const [v1, setV1] = useState("Prefilled");
@@ -62,12 +55,7 @@ const MyCustomDialog = (props: IDialogConfigSimple): React.ReactElement => {
 };
 
 const DialogContent = (): React.ReactElement => {
-	const ctx = useContext(DialogContext);
-	if (!ctx)
-		throw new Error(
-			"DialogContext is missing, did you forget to add Components-Care Framework or DialogContextProvider?"
-		);
-	const [, setDialog] = ctx;
+	const [pushDialog] = useDialogContext();
 
 	const title = text("Title", "Storybook");
 	const message = text("Message", "Enter your own text in Knobs!");
@@ -88,7 +76,7 @@ const DialogContent = (): React.ReactElement => {
 	}
 
 	const openDialog = () => {
-		setDialog(
+		pushDialog(
 			<MyCustomDialog
 				title={title}
 				message={message}
@@ -113,6 +101,5 @@ export const FormDialogStory = (): React.ReactElement => {
 	);
 };
 
-FormDialogStory.story = {
-	name: "Form (custom)",
-};
+FormDialogStory.storyName = "Form (custom)";
+FormDialogStory.decorators = [withActions, withKnobs];

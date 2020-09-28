@@ -6,17 +6,10 @@ import {
 	SelectorData,
 } from "../../../standalone/Selector";
 import { colourOptions } from "./Data";
-import { action } from "@storybook/addon-actions";
+import { action, withActions } from "@storybook/addon-actions";
 import { boolean, text, withKnobs } from "@storybook/addon-knobs";
 import { Box, CssBaseline } from "@material-ui/core";
 import CustomMultiSelectEntry from "./CustomMultiSelectEntry";
-
-const Settings = {
-	title: "Standalone/Selector",
-	component: MultiSelect,
-	decorators: [withKnobs],
-};
-export default Settings;
 
 const enhanceData = (entry: SelectorData): MultiSelectorData => ({
 	...entry,
@@ -93,6 +86,5 @@ export const SelectorMulti = (): React.ReactElement => {
 	);
 };
 
-SelectorMulti.story = {
-	name: "Multi",
-};
+SelectorMulti.storyName = "Multi";
+SelectorMulti.decorators = [withActions, withKnobs];
