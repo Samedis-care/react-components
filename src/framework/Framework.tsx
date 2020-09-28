@@ -8,11 +8,16 @@ import ThemeProvider, {
 } from "./ThemeProvider";
 import { ReactQueryCacheProvider } from "react-query";
 import { ModelDataStore } from "../backend-integration";
+import MuiPickerUtils from "./MuiPickerUtils";
 
 /**
  * Properties for the Framework
  */
 export interface IFrameworkProps {
+	/**
+	 * Disable the Material-UI Date Picker utils?
+	 */
+	disableMuiPickerUtils?: boolean;
 	/**
 	 * The children which have access to the framework's capabilities (usually your whole app)
 	 */
@@ -37,16 +42,19 @@ const loaderComponent = <Loader />;
  * - react-query cache
  * - theme provider
  * - css baseline
+ * - material-ui date picker utils (optional, enabled by default)
  */
 const ComponentsCareFramework = (props: ICompleteFrameworkProps) => (
 	<Suspense fallback={loaderComponent}>
-		<ThemeProvider defaultTheme={props.defaultTheme || getStandardTheme}>
-			<ReactQueryCacheProvider queryCache={ModelDataStore}>
-				<Router history={FrameworkHistory}>
-					<DialogContextProvider>{props.children}</DialogContextProvider>
-				</Router>
-			</ReactQueryCacheProvider>
-		</ThemeProvider>
+		<MuiPickerUtils disable={props.disableMuiPickerUtils}>
+			<ThemeProvider defaultTheme={props.defaultTheme || getStandardTheme}>
+				<ReactQueryCacheProvider queryCache={ModelDataStore}>
+					<Router history={FrameworkHistory}>
+						<DialogContextProvider>{props.children}</DialogContextProvider>
+					</Router>
+				</ReactQueryCacheProvider>
+			</ThemeProvider>
+		</MuiPickerUtils>
 	</Suspense>
 );
 

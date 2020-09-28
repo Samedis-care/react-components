@@ -8,37 +8,46 @@ import { Button, Grid } from "@material-ui/core";
 import Field from "../../../backend-components/Form/Field";
 import ErrorComponent from "./ErrorComponent";
 import { withActions } from "@storybook/addon-actions";
+import { Framework } from "../../../framework";
 
 export const FormStory = (): React.ReactElement => {
 	return (
-		<Form model={FormStoryModel} id={null} errorComponent={ErrorComponent}>
-			{({ isSubmitting }) => (
-				<Grid container spacing={2}>
-					<Grid item xs={12}>
-						<Field name={"username"} />
+		<Framework>
+			<Form model={FormStoryModel} id={null} errorComponent={ErrorComponent}>
+				{({ isSubmitting }) => (
+					<Grid container spacing={2}>
+						<Grid item xs={12}>
+							<Field name={"username"} />
+						</Grid>
+						<Grid item xs={4}>
+							<Field name={"first_name"} />
+						</Grid>
+						<Grid item xs={4}>
+							<Field name={"middle_name"} />
+						</Grid>
+						<Grid item xs={4}>
+							<Field name={"last_name"} />
+						</Grid>
+						<Grid item xs={12}>
+							<Field name={"birthday"} />
+						</Grid>
+						<Grid item xs={12}>
+							<Field name={"accept_tos"} />
+						</Grid>
+						<Grid item xs={12}>
+							<Button
+								type={"submit"}
+								disabled={isSubmitting}
+								variant={"outlined"}
+								fullWidth
+							>
+								Save
+							</Button>
+						</Grid>
 					</Grid>
-					<Grid item xs={4}>
-						<Field name={"first_name"} />
-					</Grid>
-					<Grid item xs={4}>
-						<Field name={"middle_name"} />
-					</Grid>
-					<Grid item xs={4}>
-						<Field name={"last_name"} />
-					</Grid>
-					<Grid item xs={12}>
-						<Button
-							type={"submit"}
-							disabled={isSubmitting}
-							variant={"outlined"}
-							fullWidth
-						>
-							Save
-						</Button>
-					</Grid>
-				</Grid>
-			)}
-		</Form>
+				)}
+			</Form>
+		</Framework>
 	);
 };
 

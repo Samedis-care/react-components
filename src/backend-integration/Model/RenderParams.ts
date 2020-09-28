@@ -22,13 +22,11 @@ interface RenderParams<T> {
 	/**
 	 * The onChange handler for editable input fields
 	 */
-	handleChange: React.ChangeEventHandler<
-		HTMLInputElement | HTMLTextAreaElement
-	>;
+	handleChange: (field: ModelFieldName, value: T) => void;
 	/**
 	 * The onBlur handler for editable input fields
 	 */
-	handleBlur: React.FocusEventHandler<HTMLInputElement | HTMLTextAreaElement>;
+	handleBlur: React.FocusEventHandler<HTMLElement>;
 	/**
 	 * The error message or null if no error
 	 */

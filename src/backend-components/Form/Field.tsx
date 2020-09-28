@@ -15,7 +15,7 @@ const Field = (props: FieldProps): React.ReactElement => {
 		values,
 		errors,
 		touched,
-		handleChange,
+		setFieldValue,
 		handleBlur,
 	} = useFormikContext<Record<string, unknown>>();
 
@@ -28,7 +28,7 @@ const Field = (props: FieldProps): React.ReactElement => {
 			"id" in values && values["id"]
 				? fieldDef.visibility.edit
 				: fieldDef.visibility.create,
-		handleChange,
+		handleChange: setFieldValue,
 		handleBlur,
 		label: fieldDef.getLabel(),
 		errorMsg: (touched[props.name] && errors[props.name]) || null,

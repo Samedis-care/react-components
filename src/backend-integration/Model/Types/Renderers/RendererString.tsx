@@ -1,4 +1,4 @@
-import React from "react";
+import React, { ChangeEvent } from "react";
 import TypeString from "../TypeString";
 import { FormHelperText, TextField, Typography } from "@material-ui/core";
 import { ModelRenderParams } from "../../index";
@@ -36,7 +36,9 @@ class RendererString extends TypeString {
 						label={label}
 						disabled={visibility.readOnly}
 						required={visibility.required}
-						onChange={handleChange}
+						onChange={(evt: React.ChangeEvent<HTMLInputElement>) => {
+							handleChange(evt.target.name, evt.target.value);
+						}}
 						onBlur={handleBlur}
 						error={!!errorMsg}
 						fullWidth

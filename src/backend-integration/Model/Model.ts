@@ -20,6 +20,7 @@ export interface ModelFieldDefinition<
 	visibility: VisibilityT;
 	getLabel: () => string;
 	defaultValue?: TypeT;
+	validate?: (value: TypeT) => string | null;
 	customData: CustomT;
 	// TODO: References
 }
@@ -28,7 +29,8 @@ export type ModelDef<
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
 	CustomT
-> = Record<KeyT, ModelFieldDefinition<unknown, VisibilityT, CustomT>>;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+> = Record<KeyT, ModelFieldDefinition<any, VisibilityT, CustomT>>;
 export type ModelFieldName = "id" | string;
 
 class Model<
@@ -91,7 +93,15 @@ class Model<
 		const errors: Record<string, string> = {};
 
 		Object.entries(values).forEach(([field, value]) => {
-			const error = this.model[field as KeyT].type.verify(value);
+			// first apply type validation
+			let error = this.model[field as KeyT].type.validate(value);
+
+			// then apply custom field validation if present
+			const fieldValidation = this.model[field as KeyT].validate;
+			if (!error && fieldValidation) {
+				error = fieldValidation(value);
+			}
+
 			if (error) errors[field] = error;
 		});
 

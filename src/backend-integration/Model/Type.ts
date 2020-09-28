@@ -4,11 +4,11 @@ import FilterType from "./FilterType";
 
 interface Type<T> {
 	/**
-	 * Verifies the given value
+	 * Validates the given value
 	 * @param value The value to verify
 	 * @returns An error string or null if no validation error occurred
 	 */
-	verify(value: T): string | null;
+	validate(value: T): string | null;
 
 	/**
 	 * Renders the value
@@ -21,6 +21,10 @@ interface Type<T> {
 	 */
 	getFilterType(): FilterType;
 
+	/**
+	 * Gets the default value for the type
+	 * @returns an empty value or null
+	 */
 	getDefaultValue(): T;
 }
 

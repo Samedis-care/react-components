@@ -47,5 +47,20 @@
 				"any": "Any"
 			}
 		}
+	},
+	"backend-integration": {
+		"model": {
+			"types": {
+				"renderers": {
+					"boolean": {
+						"true": "Yes",
+						"false": "No"
+					},
+					"date-nullable": {
+						"not-set": "Date not set"
+					}
+				}
+			}
+		}
 	}
 }

@@ -1,5 +1,9 @@
 import Model from "../../../backend-integration/Model/Model";
-import { ModelDataTypeStringRendererMUI } from "../../../backend-integration/Model/Types/Renderers";
+import {
+	ModelDataTypeBooleanRendererMUI,
+	ModelDataTypeDateNullableRendererMUI,
+	ModelDataTypeStringRendererMUI,
+} from "../../../backend-integration/Model/Types/Renderers";
 import VisibilityDisabled from "../../../backend-integration/Model/Visibilities/VisibilityDisabled";
 import VisibilityHidden from "../../../backend-integration/Model/Visibilities/VisibilityHidden";
 import FormStoryConnector from "./Connector";
@@ -58,6 +62,26 @@ const FormStoryModel = new Model(
 				create: VisibilityEditRequired,
 			},
 			getLabel: () => "Last Name",
+			customData: null,
+		},
+		birthday: {
+			type: new ModelDataTypeDateNullableRendererMUI(),
+			visibility: {
+				overview: VisibilityView,
+				edit: VisibilityEdit,
+				create: VisibilityEdit,
+			},
+			getLabel: () => "Birthday",
+			customData: null,
+		},
+		accept_tos: {
+			type: new ModelDataTypeBooleanRendererMUI(),
+			visibility: {
+				overview: VisibilityView,
+				edit: VisibilityEdit,
+				create: VisibilityEdit,
+			},
+			getLabel: () => "Accept TOS?",
 			customData: null,
 		},
 	},
