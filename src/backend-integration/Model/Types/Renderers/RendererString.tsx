@@ -1,4 +1,4 @@
-import React, { ChangeEvent } from "react";
+import React from "react";
 import TypeString from "../TypeString";
 import { FormHelperText, TextField, Typography } from "@material-ui/core";
 import { ModelRenderParams } from "../../index";
@@ -41,6 +41,8 @@ class RendererString extends TypeString {
 						}}
 						onBlur={handleBlur}
 						error={!!errorMsg}
+						multiline={this.multiline}
+						variant={this.multiline ? "outlined" : undefined}
 						fullWidth
 					/>
 					<FormHelperText error={!!errorMsg}>{errorMsg}</FormHelperText>

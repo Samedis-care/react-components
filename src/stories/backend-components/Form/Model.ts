@@ -1,7 +1,14 @@
-import Model from "../../../backend-integration/Model/Model";
+import Model, {
+	ModelDef,
+	ModelFieldDefinition,
+	PageVisibility,
+} from "../../../backend-integration/Model/Model";
 import {
 	ModelDataTypeBooleanRendererMUI,
 	ModelDataTypeDateNullableRendererMUI,
+	ModelDataTypeEnumRadioRendererMUI,
+	ModelDataTypeEnumSelectRendererMUI,
+	ModelDataTypeImageRenderer,
 	ModelDataTypeStringRendererMUI,
 } from "../../../backend-integration/Model/Types/Renderers";
 import VisibilityDisabled from "../../../backend-integration/Model/Visibilities/VisibilityDisabled";
@@ -10,6 +17,31 @@ import FormStoryConnector from "./Connector";
 import VisibilityView from "../../../backend-integration/Model/Visibilities/VisibilityView";
 import VisibilityEditRequired from "../../../backend-integration/Model/Visibilities/VisibilityEditRequired";
 import VisibilityEdit from "../../../backend-integration/Model/Visibilities/VisibilityEdit";
+
+// Performance Testing
+
+const generateTestEntry = (
+	label: string
+): ModelFieldDefinition<string, PageVisibility, null> => ({
+	type: new ModelDataTypeStringRendererMUI(),
+	visibility: {
+		overview: VisibilityView,
+		edit: VisibilityView,
+		create: VisibilityEditRequired,
+	},
+	getLabel: () => label,
+	customData: null,
+});
+
+export const performanceTestDataCount = 0;
+const testData: ModelDef<string, PageVisibility, null> = {};
+for (let i = 0; i < performanceTestDataCount; ++i) {
+	testData["perf_" + i.toString()] = generateTestEntry(
+		"Performance Test " + i.toString()
+	);
+}
+
+// End Performance Testing
 
 const FormStoryModel = new Model(
 	"form-story",
@@ -84,6 +116,56 @@ const FormStoryModel = new Model(
 			getLabel: () => "Accept TOS?",
 			customData: null,
 		},
+		notes: {
+			type: new ModelDataTypeStringRendererMUI(true),
+			visibility: {
+				overview: VisibilityView,
+				edit: VisibilityEdit,
+				create: VisibilityEdit,
+			},
+			getLabel: () => "Notes",
+			customData: null,
+		},
+		user_type: {
+			type: new ModelDataTypeEnumRadioRendererMUI(
+				[
+					{ value: "normal", getLabel: () => "Normal" },
+					{ value: "special", getLabel: () => "Special" },
+				],
+				true
+			),
+			visibility: {
+				overview: VisibilityView,
+				edit: VisibilityEdit,
+				create: VisibilityEdit,
+			},
+			getLabel: () => "User Type",
+			customData: null,
+		},
+		locale: {
+			type: new ModelDataTypeEnumSelectRendererMUI([
+				{ value: "en-US", getLabel: () => "English - United States (en-US)" },
+				{ value: "de-DE", getLabel: () => "German - Germany (de-DE)" },
+			]),
+			visibility: {
+				overview: VisibilityView,
+				edit: VisibilityEdit,
+				create: VisibilityEdit,
+			},
+			getLabel: () => "Locale",
+			customData: null,
+		},
+		profile_picture: {
+			type: new ModelDataTypeImageRenderer(),
+			visibility: {
+				overview: VisibilityView,
+				edit: VisibilityEdit,
+				create: VisibilityEdit,
+			},
+			getLabel: () => "Profile Picture",
+			customData: null,
+		},
+		...testData,
 	},
 	new FormStoryConnector()
 );

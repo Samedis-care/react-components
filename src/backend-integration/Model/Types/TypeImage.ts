@@ -3,13 +3,7 @@ import Type from "../Type";
 import { ModelRenderParams } from "../index";
 import FilterType from "../FilterType";
 
-abstract class TypeString implements Type<string> {
-	protected multiline: boolean;
-
-	constructor(multiline = false) {
-		this.multiline = multiline;
-	}
-
+abstract class TypeImage implements Type<string> {
 	abstract render(params: ModelRenderParams<string>): React.ReactElement;
 
 	validate(): string | null {
@@ -17,7 +11,7 @@ abstract class TypeString implements Type<string> {
 	}
 
 	getFilterType(): FilterType {
-		return "string";
+		return null;
 	}
 
 	getDefaultValue(): string {
@@ -25,4 +19,4 @@ abstract class TypeString implements Type<string> {
 	}
 }
 
-export default TypeString;
+export default TypeImage;

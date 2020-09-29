@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useMemo } from "react";
 import { FormContext } from "./Form";
 import { useFormikContext } from "formik";
 
@@ -21,18 +21,29 @@ const Field = (props: FieldProps): React.ReactElement => {
 
 	const fieldDef = model.model[props.name];
 
-	return fieldDef.type.render({
-		field: props.name,
-		value: values[props.name],
-		visibility:
-			"id" in values && values["id"]
-				? fieldDef.visibility.edit
-				: fieldDef.visibility.create,
-		handleChange: setFieldValue,
-		handleBlur,
-		label: fieldDef.getLabel(),
-		errorMsg: (touched[props.name] && errors[props.name]) || null,
-	});
+	if (!fieldDef) throw new Error("Invalid field name specified: " + props.name);
+
+	const { name } = props;
+	const value = values[name];
+	const hasId = "id" in values && values["id"];
+	const label = fieldDef.getLabel();
+	const errorMsg = (touched[props.name] && errors[props.name]) || null;
+
+	return useMemo(
+		() =>
+			fieldDef.type.render({
+				field: name,
+				value: value,
+				visibility: hasId
+					? fieldDef.visibility.edit
+					: fieldDef.visibility.create,
+				handleChange: setFieldValue,
+				handleBlur,
+				label: label,
+				errorMsg: errorMsg,
+			}),
+		[value, name, hasId, fieldDef, label, setFieldValue, handleBlur, errorMsg]
+	);
 };
 
 export default React.memo(Field);

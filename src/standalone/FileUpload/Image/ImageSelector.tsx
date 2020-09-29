@@ -148,7 +148,9 @@ const ImageSelector = (props: ImageSelectorProps) => {
 				</Grid>
 			)}
 			<Grid item xs={12} key={"image"}>
-				<img src={value} alt={props.alt} className={classes.preview} />
+				{value && (
+					<img src={value} alt={props.alt} className={classes.preview} />
+				)}
 			</Grid>
 		</Grid>
 	);

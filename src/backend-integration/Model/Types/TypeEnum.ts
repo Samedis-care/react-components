@@ -3,11 +3,16 @@ import Type from "../Type";
 import { ModelRenderParams } from "../index";
 import FilterType from "../FilterType";
 
-abstract class TypeString implements Type<string> {
-	protected multiline: boolean;
+export interface EnumValue {
+	value: string;
+	getLabel: () => string;
+}
 
-	constructor(multiline = false) {
-		this.multiline = multiline;
+abstract class TypeEnum implements Type<string> {
+	protected values: EnumValue[];
+
+	constructor(values: EnumValue[]) {
+		this.values = values;
 	}
 
 	abstract render(params: ModelRenderParams<string>): React.ReactElement;
@@ -21,8 +26,8 @@ abstract class TypeString implements Type<string> {
 	}
 
 	getDefaultValue(): string {
-		return "";
+		return this.values[0].value;
 	}
 }
 
-export default TypeString;
+export default TypeEnum;

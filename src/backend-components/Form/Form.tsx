@@ -1,5 +1,5 @@
-import React, { useCallback, useState } from "react";
-import { Formik } from "formik";
+import React, { useCallback, useMemo, useState } from "react";
+import { Formik, FormikHelpers } from "formik";
 import Model, {
 	ModelFieldName,
 	PageVisibility,
@@ -22,7 +22,7 @@ export interface FormProps {
 	model: Model<ModelFieldName, PageVisibility, unknown>;
 	id?: string | null;
 	errorComponent: React.ComponentType<ErrorComponentProps>;
-	children: (props: PageProps) => React.ReactNode;
+	children: React.ComponentType<PageProps>;
 }
 
 export const FormContext = React.createContext<Model<
@@ -32,7 +32,7 @@ export const FormContext = React.createContext<Model<
 > | null>(null);
 
 const Form = (props: FormProps) => {
-	const { model, id } = props;
+	const { model, id, children } = props;
 	const ErrorComponent = props.errorComponent;
 
 	const [updateError, setUpdateError] = useState<Error | null>(null);
@@ -40,6 +40,25 @@ const Form = (props: FormProps) => {
 	const [updateData] = model.createOrUpdate();
 
 	const onValidate = useCallback((values) => model.validate(values), [model]);
+	const onSubmit = useCallback(
+		async (
+			values: NonNullable<typeof data>,
+			{ setSubmitting, setValues }: FormikHelpers<NonNullable<typeof data>>
+		): Promise<void> => {
+			try {
+				const result = await updateData(values);
+				if (!result) return;
+				setValues(result, true);
+			} catch (e) {
+				setUpdateError(e as Error);
+			} finally {
+				setSubmitting(false);
+			}
+		},
+		[updateData, setUpdateError]
+	);
+
+	const Children = useMemo(() => React.memo(children), [children]);
 
 	if (isLoading) {
 		return <Loader />;
@@ -55,21 +74,7 @@ const Form = (props: FormProps) => {
 
 	return (
 		<FormContext.Provider value={model}>
-			<Formik
-				initialValues={data}
-				validate={onValidate}
-				onSubmit={async (values, { setSubmitting, setValues }) => {
-					try {
-						const result = await updateData(values);
-						if (!result) return;
-						setValues(result, true);
-					} catch (e) {
-						setUpdateError(e as Error);
-					} finally {
-						setSubmitting(false);
-					}
-				}}
-			>
+			<Formik initialValues={data} validate={onValidate} onSubmit={onSubmit}>
 				{({
 					handleSubmit,
 					isSubmitting,
@@ -77,9 +82,7 @@ const Form = (props: FormProps) => {
 				}) => (
 					<form onSubmit={handleSubmit}>
 						{updateError && <ErrorComponent error={updateError} />}
-						{props.children({
-							isSubmitting,
-						})}
+						<Children isSubmitting={isSubmitting} />
 					</form>
 				)}
 			</Formik>

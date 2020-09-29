@@ -58,6 +58,12 @@
 					},
 					"date-nullable": {
 						"not-set": "Date not set"
+					},
+					"enum": {
+						"unknown": "Unknown"
+					},
+					"image": {
+						"not-set": "No image present"
 					}
 				}
 			}
