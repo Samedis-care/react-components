@@ -64,6 +64,9 @@
 					},
 					"image": {
 						"not-set": "No image present"
+					},
+					"files": {
+						"no-file": "No files present"
 					}
 				}
 			}

@@ -6,8 +6,9 @@ import TypeFiles from "../TypeFiles";
 import FileUpload, {
 	FileData,
 } from "../../../../standalone/FileUpload/Generic";
+import GroupBox from "../../../../standalone/GroupBox";
 
-class RendererString extends TypeFiles {
+class RendererFiles extends TypeFiles {
 	render(params: ModelRenderParams<FileData[]>): React.ReactElement {
 		const {
 			visibility,
@@ -25,7 +26,7 @@ class RendererString extends TypeFiles {
 				<input
 					type="hidden"
 					name={field}
-					value={value}
+					value={value.map((entry) => entry.file.name).join(",")}
 					readOnly
 					aria-hidden={"true"}
 				/>
@@ -54,16 +55,24 @@ class RendererString extends TypeFiles {
 			);
 		}
 		return (
-			<FormControl>
-				<FormLabel>{label}</FormLabel>
-				{value ? (
-					<img src={value} alt={label} />
-				) : (
-					ccI18n.t("backend-integration.model.types.renderers.image.not-set")
-				)}
-			</FormControl>
+			<GroupBox label={label}>
+				<ul>
+					{value.map((entry, index) => (
+						<li key={index}>
+							{entry.preview && (
+								<img src={entry.preview} alt={entry.file.name} />
+							)}
+							{!entry.preview && "downloadLink" in entry.file && (
+								<a href={entry.file.downloadLink}>{entry.file.name}</a>
+							)}
+						</li>
+					))}
+				</ul>
+				{value.length === 0 &&
+					ccI18n.t("backend-integration.model.types.renderers.files.no-file")}
+			</GroupBox>
 		);
 	}
 }
 
-export default RendererString;
+export default RendererFiles;
