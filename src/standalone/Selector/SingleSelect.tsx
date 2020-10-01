@@ -7,4 +7,4 @@ const SingleSelect = <Data extends SelectorData>(
 	<Selector<Data> {...props} onSelect={props.onSelect} multiSelect={false} />
 );
 
-export default React.memo(SingleSelect);
+export default React.memo(SingleSelect) as typeof SingleSelect;

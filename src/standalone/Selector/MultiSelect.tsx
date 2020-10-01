@@ -152,4 +152,6 @@ const MultiSelect = <Data extends MultiSelectorData>(
 	);
 };
 
-export default withStyles(styles)(React.memo(MultiSelect));
+export default withStyles(styles)(
+	React.memo(MultiSelect) as typeof MultiSelect
+);
