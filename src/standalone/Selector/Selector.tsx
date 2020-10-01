@@ -3,7 +3,12 @@ import AsyncSelect from "react-select/async";
 import { FormatOptionLabelMeta } from "react-select/src/Select";
 import { ListItemText, useTheme } from "@material-ui/core";
 import { Add as AddIcon } from "@material-ui/icons";
-import { ControlProps, Styles, ValueType } from "react-select";
+import {
+	ControlProps,
+	PlaceholderProps,
+	Styles,
+	ValueType,
+} from "react-select";
 import { SelectorSmallListItem, SmallListItemIcon } from "../..";
 import i18n from "../../i18n";
 
@@ -210,7 +215,10 @@ const Selector = <Data extends SelectorData>(
 
 				return selectorValueContainerStyles;
 			},
-			placeholder: (base: CSSProperties): CSSProperties => {
+			placeholder: (
+				base: CSSProperties,
+				props: PlaceholderProps<Record<string, unknown>>
+			): CSSProperties => {
 				let selectorPlaceholderStyles: CSSProperties = {
 					...base,
 					padding: "0 4px",
@@ -221,7 +229,7 @@ const Selector = <Data extends SelectorData>(
 				if (placeholder)
 					selectorPlaceholderStyles = placeholder(
 						selectorPlaceholderStyles,
-						{}
+						props
 					);
 
 				return selectorPlaceholderStyles;
