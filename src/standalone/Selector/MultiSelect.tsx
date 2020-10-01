@@ -21,7 +21,7 @@ export interface MultiSelectorData extends SelectorData {
 	 * Can the entry be unselected?
 	 * @param data The data entry to be unselected
 	 */
-	canUnselect?: (data: this) => boolean | Promise<boolean>;
+	canUnselect?: (data: MultiSelectorData) => boolean | Promise<boolean>;
 }
 
 export interface MultiSelectProps<Data extends MultiSelectorData>
