@@ -28,6 +28,7 @@ export const ImageSelectorStory = (): React.ReactElement => {
 		<div style={{ height: previewSize, width: previewSize }}>
 			<ImageSelector
 				name={"story-input"}
+				label={text("Label", "Image Upload Label")}
 				alt={text("Alt Text", "Alt Description")}
 				value={image}
 				onChange={handleChangeAction}

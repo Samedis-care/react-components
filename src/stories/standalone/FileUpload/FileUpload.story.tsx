@@ -32,6 +32,7 @@ export const FileUploadStory = (): React.ReactElement => {
 
 	return (
 		<FileUpload
+			label={text("Upload Control Label", "Label")}
 			maxFiles={number("Max files", 3, {
 				range: true,
 				min: 1,

@@ -8,6 +8,7 @@ import {
 	ModelDataTypeDateNullableRendererMUI,
 	ModelDataTypeEnumRadioRendererMUI,
 	ModelDataTypeEnumSelectRendererMUI,
+	ModelDataTypeFilesRenderer,
 	ModelDataTypeImageRenderer,
 	ModelDataTypeStringRendererMUI,
 } from "../../../backend-integration/Model/Types/Renderers";
@@ -163,6 +164,16 @@ const FormStoryModel = new Model(
 				create: VisibilityEdit,
 			},
 			getLabel: () => "Profile Picture",
+			customData: null,
+		},
+		documents: {
+			type: new ModelDataTypeFilesRenderer(),
+			visibility: {
+				overview: VisibilityView,
+				edit: VisibilityEdit,
+				create: VisibilityEdit,
+			},
+			getLabel: () => "Documents",
 			customData: null,
 		},
 		...testData,

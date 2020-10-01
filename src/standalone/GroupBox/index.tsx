@@ -3,8 +3,8 @@ import { makeStyles } from "@material-ui/core";
 
 const useStyles = makeStyles({
 	fieldSetRoot: {
-		padding: "0 8px",
-		borderStyle: "dotted",
+		padding: "8px",
+		borderStyle: "solid",
 		borderColor: "lightgrey",
 		borderRadius: 4,
 		borderWidth: 1,

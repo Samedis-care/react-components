@@ -33,7 +33,7 @@ const ErrorDialogRaw = (props: IDialogConfigSimple) => {
 							popDialog();
 							if (data.onClick) data.onClick();
 						}}
-						color="primary"
+						color={data.color || "primary"}
 						autoFocus={data.autoFocus}
 					>
 						{data.text}

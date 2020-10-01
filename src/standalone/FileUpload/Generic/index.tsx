@@ -15,8 +15,9 @@ import { FileSelectorError } from "./Errors";
 import i18n from "../../../i18n";
 import { getFileExt, processImage, shallowCompare } from "../../../utils";
 import { IDownscaleProps } from "../../../utils/processImage";
+import GroupBox from "../../GroupBox";
 
-export interface IProps extends WithStyles {
+export interface FileUploadProps extends WithStyles {
 	/**
 	 * Maximum amount of files allowed
 	 */
@@ -65,6 +66,10 @@ export interface IProps extends WithStyles {
 	 */
 	onChange?: (files: FileData[]) => void;
 	/**
+	 * onBlur event handler
+	 */
+	onBlur?: React.FocusEventHandler<HTMLElement>;
+	/**
 	 * Custom label for the upload files button
 	 */
 	uploadLabel?: string;
@@ -72,6 +77,10 @@ export interface IProps extends WithStyles {
 	 * Makes the file upload control read only
 	 */
 	readOnly?: boolean;
+	/**
+	 * The label of the component
+	 */
+	label?: string;
 }
 
 export interface FileMeta {
@@ -124,8 +133,8 @@ export interface FileData<T = File | FileMeta> {
 	delete?: boolean;
 }
 
-class FileUpload extends Component<IProps, IState> {
-	constructor(props: IProps) {
+class FileUpload extends Component<FileUploadProps, IState> {
+	constructor(props: FileUploadProps) {
 		super(props);
 
 		this.state = {
@@ -139,7 +148,7 @@ class FileUpload extends Component<IProps, IState> {
 	}
 
 	shouldComponentUpdate(
-		nextProps: Readonly<IProps>,
+		nextProps: Readonly<FileUploadProps>,
 		nextState: Readonly<IState>
 	): boolean {
 		if (!shallowCompare(this.props, nextProps)) return true;
@@ -162,7 +171,7 @@ class FileUpload extends Component<IProps, IState> {
 
 	render() {
 		return (
-			<>
+			<GroupBox label={this.props.label}>
 				<Grid
 					container
 					spacing={2}
@@ -181,6 +190,7 @@ class FileUpload extends Component<IProps, IState> {
 								variant={"contained"}
 								color={"primary"}
 								onClick={this.handleUpload}
+								onBlur={this.props.onBlur}
 							>
 								{this.props.uploadLabel ||
 									i18n.t("standalone.file-upload.upload")}
@@ -239,7 +249,7 @@ class FileUpload extends Component<IProps, IState> {
 						</Grid>
 					)}
 				</Grid>
-			</>
+			</GroupBox>
 		);
 	}
 

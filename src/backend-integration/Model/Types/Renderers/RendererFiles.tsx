@@ -1,5 +1,5 @@
 import React from "react";
-import { FormControl, FormHelperText, FormLabel } from "@material-ui/core";
+import { FormHelperText } from "@material-ui/core";
 import { ModelRenderParams } from "../../index";
 import ccI18n from "../../../../i18n";
 import TypeFiles from "../TypeFiles";
@@ -34,24 +34,27 @@ class RendererFiles extends TypeFiles {
 		}
 		if (visibility.editable) {
 			return (
-				<FormControl
-					onBlur={handleBlur}
-					error={!!errorMsg}
-					required={visibility.required}
-					fullWidth
-				>
-					<FormLabel component={"legend"}>{label}</FormLabel>
+				<>
 					<FileUpload
+						label={label}
 						files={value}
 						readOnly={visibility.readOnly}
 						onChange={(files) => {
 							handleChange(field, files);
 						}}
-						previewSize={96}
+						onBlur={handleBlur}
 						handleError={console.error} // TODO: Error handling
+						maxFiles={this.params?.maxFiles}
+						accept={this.params?.accept}
+						acceptLabel={this.params?.acceptLabel}
+						imageDownscaleOptions={this.params?.imageDownscaleOptions}
+						convertImagesTo={this.params?.convertImagesTo}
+						previewSize={this.params?.previewSize || 96}
+						previewImages={this.params?.previewImages}
+						allowDuplicates={this.params?.allowDuplicates}
 					/>
 					<FormHelperText error={!!errorMsg}>{errorMsg}</FormHelperText>
-				</FormControl>
+				</>
 			);
 		}
 		return (

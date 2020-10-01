@@ -17,6 +17,7 @@ const ConfirmDialogRaw = (props: IDialogConfigConfirm) => (
 				text: props.textButtonNo,
 				onClick: props.handlerButtonNo,
 				autoFocus: false,
+				color: "secondary",
 			},
 		]}
 	/>

@@ -1,4 +1,5 @@
 import React from "react";
+import { PropTypes } from "@material-ui/core";
 
 /**
  * Configuration for a dialog button
@@ -16,6 +17,10 @@ export interface IDialogButtonConfig {
 	 * Should the button be initially focused?
 	 */
 	autoFocus?: boolean;
+	/**
+	 * The color of the button
+	 */
+	color?: PropTypes.Color;
 }
 
 /**

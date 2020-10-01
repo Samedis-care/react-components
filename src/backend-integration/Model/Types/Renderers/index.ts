@@ -5,3 +5,4 @@ export { default as ModelDataTypeEnumSelectRendererMUI } from "./RendererEnumSim
 export { default as ModelDataTypeDateNullableRendererMUI } from "./RendererDateNullable";
 export { default as ModelDataTypeBooleanRendererMUI } from "./RendererBoolean";
 export { default as ModelDataTypeImageRenderer } from "./RendererImage";
+export { default as ModelDataTypeFilesRenderer } from "./RendererFiles";

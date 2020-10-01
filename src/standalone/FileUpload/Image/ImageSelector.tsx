@@ -5,6 +5,7 @@ import i18n from "../../../i18n";
 import { processImage } from "../../../utils";
 import { IDownscaleProps } from "../../../utils/processImage";
 import { makeStyles } from "@material-ui/core/styles";
+import GroupBox from "../../GroupBox";
 
 export type ImageSelectorInputElement = { name: string; value: string };
 
@@ -18,6 +19,10 @@ export interface ImageSelectorProps {
 	 */
 	value: string;
 	/**
+	 * The label of the input
+	 */
+	label?: string;
+	/**
 	 * The alt text of the image
 	 */
 	alt: string;
@@ -28,7 +33,7 @@ export interface ImageSelectorProps {
 	/**
 	 * The blur event handler of the input
 	 */
-	onBlur?: React.FocusEventHandler<ImageSelectorInputElement>;
+	onBlur?: React.FocusEventHandler<HTMLElement>;
 	/**
 	 * Label overwrite for Upload label
 	 */
@@ -119,40 +124,42 @@ const ImageSelector = (props: ImageSelectorProps) => {
 
 	// render component
 	return (
-		<Grid
-			container
-			spacing={2}
-			alignContent={"space-between"}
-			onDrop={handleDrop}
-			onDragOver={handleDragOver}
-		>
-			{!props.readOnly && (
-				<Grid item xs key={"upload"}>
-					<Button
-						startIcon={<AttachFile />}
-						variant={"contained"}
-						color={"primary"}
-						name={props.name}
-						onClick={handleUpload}
-						onBlur={props.onBlur}
-					>
-						{props.uploadLabel || i18n.t("standalone.file-upload.upload")}
-					</Button>
-					<input
-						type={"text"}
-						name={props.name}
-						onChange={props.onChange}
-						ref={changeRef}
-						className={classes.changeEventHelper}
-					/>
-				</Grid>
-			)}
-			<Grid item xs={12} key={"image"}>
-				{value && (
-					<img src={value} alt={props.alt} className={classes.preview} />
+		<GroupBox label={props.label}>
+			<Grid
+				container
+				spacing={2}
+				alignContent={"space-between"}
+				onDrop={handleDrop}
+				onDragOver={handleDragOver}
+			>
+				{!props.readOnly && (
+					<Grid item xs key={"upload"}>
+						<Button
+							startIcon={<AttachFile />}
+							variant={"contained"}
+							color={"primary"}
+							name={props.name}
+							onClick={handleUpload}
+							onBlur={props.onBlur}
+						>
+							{props.uploadLabel || i18n.t("standalone.file-upload.upload")}
+						</Button>
+						<input
+							type={"text"}
+							name={props.name}
+							onChange={props.onChange}
+							ref={changeRef}
+							className={classes.changeEventHelper}
+						/>
+					</Grid>
 				)}
+				<Grid item xs={12} key={"image"}>
+					{value && (
+						<img src={value} alt={props.alt} className={classes.preview} />
+					)}
+				</Grid>
 			</Grid>
-		</Grid>
+		</GroupBox>
 	);
 };
 

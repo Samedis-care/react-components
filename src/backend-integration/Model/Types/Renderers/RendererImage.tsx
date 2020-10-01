@@ -31,24 +31,23 @@ class RendererImage extends TypeImage {
 		}
 		if (visibility.editable) {
 			return (
-				<FormControl
-					onBlur={handleBlur}
-					error={!!errorMsg}
-					required={visibility.required}
-					fullWidth
-				>
-					<FormLabel component={"legend"}>{label}</FormLabel>
+				<>
 					<ImageSelector
 						name={field}
 						value={value}
+						label={label}
 						readOnly={visibility.readOnly}
 						onChange={(evt: React.ChangeEvent<HTMLInputElement>) => {
 							handleChange(evt.target.name, evt.target.value);
 						}}
+						onBlur={handleBlur}
 						alt={label}
+						uploadLabel={this.params?.uploadLabel}
+						convertImagesTo={this.params?.convertImagesTo}
+						downscale={this.params?.downscale}
 					/>
 					<FormHelperText error={!!errorMsg}>{errorMsg}</FormHelperText>
-				</FormControl>
+				</>
 			);
 		}
 		return (
