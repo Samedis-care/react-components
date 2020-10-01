@@ -221,7 +221,7 @@ const Selector = <Data extends SelectorData>(
 				if (placeholder)
 					selectorPlaceholderStyles = placeholder(
 						selectorPlaceholderStyles,
-						undefined
+						{}
 					);
 
 				return selectorPlaceholderStyles;
