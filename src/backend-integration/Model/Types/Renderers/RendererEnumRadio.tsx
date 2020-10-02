@@ -12,6 +12,9 @@ import { ModelRenderParams } from "../../index";
 import TypeEnum, { EnumValue } from "../TypeEnum";
 import ccI18n from "../../../../i18n";
 
+/**
+ * Renders TypeEnum as radio buttons
+ */
 class RendererEnumRadio extends TypeEnum {
 	protected horizontal: boolean;
 

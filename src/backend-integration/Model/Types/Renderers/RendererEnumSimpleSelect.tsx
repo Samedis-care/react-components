@@ -11,6 +11,9 @@ import { ModelRenderParams } from "../../index";
 import TypeEnum from "../TypeEnum";
 import ccI18n from "../../../../i18n";
 
+/**
+ * Renders TypeEnum as drop-down selector (without search)
+ */
 class RendererEnumSelect extends TypeEnum {
 	render(params: ModelRenderParams<string>): React.ReactElement {
 		const {

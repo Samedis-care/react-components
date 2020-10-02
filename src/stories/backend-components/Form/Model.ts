@@ -167,7 +167,7 @@ const FormStoryModel = new Model(
 			customData: null,
 		},
 		documents: {
-			type: new ModelDataTypeFilesRenderer(),
+			type: new ModelDataTypeFilesRenderer({ maxFiles: 3 }),
 			visibility: {
 				overview: VisibilityView,
 				edit: VisibilityEdit,

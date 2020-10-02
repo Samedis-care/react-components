@@ -10,7 +10,7 @@ import Menu from "./Menu";
 import { makeStyles } from "@material-ui/core/styles";
 import { Hidden, useMediaQuery } from "@material-ui/core";
 
-export interface IProps {
+export interface PortalLayoutProps {
 	/**
 	 * Content displayed on the top-left corner of the screen
 	 */
@@ -49,14 +49,14 @@ interface IRenderProps {
 }
 
 const useContainerStyles = makeStyles(() => ({
-	containerDesktop: (props: IProps) => ({
+	containerDesktop: (props: PortalLayoutProps) => ({
 		display: "grid",
 		gridTemplateAreas: `"top-left top" "sidebar main"`,
 		gridTemplateRows: "max-content 100fr",
 		gridTemplateColumns: `${props.drawerWidth}px 100fr`,
 		height: "100%",
 	}),
-	containerMobile: (props: IProps) => ({
+	containerMobile: (props: PortalLayoutProps) => ({
 		display: "grid",
 		gridTemplateAreas: `"top top" "main main"`,
 		gridTemplateRows: "max-content 100fr",
@@ -87,7 +87,7 @@ export const PortalLayoutMenuContext = createContext<
 	[boolean, Dispatch<SetStateAction<boolean>>] | undefined
 >(undefined);
 
-const RenderLayout = (props: IProps & IRenderProps) => {
+const RenderLayout = (props: PortalLayoutProps & IRenderProps) => {
 	const menuState = useState(false);
 	const [menuOpen, setMenuOpen] = menuState;
 
@@ -129,7 +129,7 @@ const RenderLayout = (props: IProps & IRenderProps) => {
 
 const RenderLayoutMemo = React.memo(RenderLayout);
 
-const PortalLayout = (props: IProps) => {
+const PortalLayout = (props: PortalLayoutProps) => {
 	const classes = useContainerStyles(props);
 	const mobileViewConditionMet = useMediaQuery(
 		props.mobileViewCondition || "()"

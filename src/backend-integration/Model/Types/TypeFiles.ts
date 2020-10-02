@@ -7,18 +7,23 @@ import {
 	FileUploadProps,
 } from "../../../standalone/FileUpload/Generic";
 
-export type TypeFilesParams = Pick<
-	FileUploadProps,
-	| "maxFiles"
-	| "accept"
-	| "acceptLabel"
-	| "imageDownscaleOptions"
-	| "convertImagesTo"
-	| "previewSize"
-	| "previewImages"
-	| "allowDuplicates"
+export type TypeFilesParams = Partial<
+	Pick<
+		FileUploadProps,
+		| "maxFiles"
+		| "accept"
+		| "acceptLabel"
+		| "imageDownscaleOptions"
+		| "convertImagesTo"
+		| "previewSize"
+		| "previewImages"
+		| "allowDuplicates"
+	>
 >;
 
+/**
+ * A type to handle files
+ */
 abstract class TypeFiles implements Type<FileData[]> {
 	protected params?: TypeFilesParams;
 

@@ -3,6 +3,9 @@ import Type from "../Type";
 import { ModelRenderParams } from "../index";
 import FilterType from "../FilterType";
 
+/**
+ * Type to handle strings
+ */
 abstract class TypeString implements Type<string> {
 	protected multiline: boolean;
 

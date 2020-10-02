@@ -3,6 +3,9 @@ import TypeString from "../TypeString";
 import { FormHelperText, TextField, Typography } from "@material-ui/core";
 import { ModelRenderParams } from "../../index";
 
+/**
+ * Renders a text field
+ */
 class RendererString extends TypeString {
 	render(params: ModelRenderParams<string>): React.ReactElement {
 		const {

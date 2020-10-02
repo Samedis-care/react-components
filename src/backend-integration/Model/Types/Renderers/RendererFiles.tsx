@@ -8,6 +8,9 @@ import FileUpload, {
 } from "../../../../standalone/FileUpload/Generic";
 import GroupBox from "../../../../standalone/GroupBox";
 
+/**
+ * Renders a file selector
+ */
 class RendererFiles extends TypeFiles {
 	render(params: ModelRenderParams<FileData[]>): React.ReactElement {
 		const {
@@ -18,6 +21,7 @@ class RendererFiles extends TypeFiles {
 			handleChange,
 			handleBlur,
 			errorMsg,
+			setError,
 		} = params;
 
 		if (visibility.disabled) return <></>;
@@ -43,7 +47,7 @@ class RendererFiles extends TypeFiles {
 							handleChange(field, files);
 						}}
 						onBlur={handleBlur}
-						handleError={console.error} // TODO: Error handling
+						handleError={(_, msg) => setError(new Error(msg))}
 						maxFiles={this.params?.maxFiles}
 						accept={this.params?.accept}
 						acceptLabel={this.params?.acceptLabel}

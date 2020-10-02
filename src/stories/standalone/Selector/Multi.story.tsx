@@ -11,23 +11,28 @@ import { boolean, text, withKnobs } from "@storybook/addon-knobs";
 import { Box, CssBaseline } from "@material-ui/core";
 import CustomMultiSelectEntry from "./CustomMultiSelectEntry";
 
-const enhanceData = (entry: SelectorData): MultiSelectorData => ({
+interface MySelectorData extends MultiSelectorData {
+	id: string;
+}
+
+const enhanceData = (entry: SelectorData): MySelectorData => ({
 	...entry,
 	onClick: action("onClick: " + entry.label),
 	canUnselect: (evtEntry: MultiSelectorData) => {
 		action("canUnselect: " + evtEntry.label)(evtEntry);
 		return true;
 	},
+	id: entry.value,
 });
 
-const getDefaultData = (): MultiSelectorData[] => {
+const getDefaultData = (): MySelectorData[] => {
 	return (["ocean"]
 		.map((entry) => colourOptions.find((color) => color.value === entry))
 		.filter((e) => e !== undefined) as SelectorData[]).map(enhanceData);
 };
 
 export const SelectorMulti = (): React.ReactElement => {
-	const [selected, setSelected] = useState<SelectorData[]>(getDefaultData);
+	const [selected, setSelected] = useState<MySelectorData[]>(getDefaultData);
 	const loadDataAction = action("onLoad");
 	const onSelectAction = action("onSelect");
 	const onAddNewAction = action("onAddNew");
@@ -44,7 +49,7 @@ export const SelectorMulti = (): React.ReactElement => {
 	const placeholderLabel = text("Placeholder Label", "");
 
 	const loadData = React.useCallback(
-		(query: string): MultiSelectorData[] => {
+		(query: string): MySelectorData[] => {
 			loadDataAction(query);
 			return colourOptions
 				.filter((option) =>
@@ -55,7 +60,7 @@ export const SelectorMulti = (): React.ReactElement => {
 		[loadDataAction]
 	);
 	const onSelect = React.useCallback(
-		(data: SelectorData[]) => {
+		(data: MySelectorData[]) => {
 			onSelectAction(data);
 			setSelected(data);
 		},
@@ -66,7 +71,7 @@ export const SelectorMulti = (): React.ReactElement => {
 		<>
 			<CssBaseline />
 			<Box m={2}>
-				<MultiSelect
+				<MultiSelect<MySelectorData>
 					selected={selected}
 					onSelect={onSelect}
 					onLoad={loadData}

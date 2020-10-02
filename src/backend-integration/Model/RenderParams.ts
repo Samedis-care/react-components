@@ -31,6 +31,11 @@ interface RenderParams<T> {
 	 * The error message or null if no error
 	 */
 	errorMsg: string | null;
+	/**
+	 * Function to set a new global form error
+	 * @param error The error to display
+	 */
+	setError: (error: Error) => void;
 }
 
 export default RenderParams;

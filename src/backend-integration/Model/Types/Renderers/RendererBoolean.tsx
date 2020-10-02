@@ -10,6 +10,9 @@ import { ModelRenderParams } from "../../index";
 import TypeBoolean from "../TypeBoolean";
 import ccI18n from "../../../../i18n";
 
+/**
+ * Renders a TypeBoolean field as Checkbox
+ */
 class RendererBoolean extends TypeBoolean {
 	render(params: ModelRenderParams<boolean>): React.ReactElement {
 		const {

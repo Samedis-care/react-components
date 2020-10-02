@@ -7,3 +7,4 @@ export { default as fileToData } from "./fileToData";
 export { default as getFileExt } from "./getFileExt";
 export { default as processImage } from "./processImage";
 export { default as shallowCompare } from "./shallowCompare";
+export * from "./genericHOC";

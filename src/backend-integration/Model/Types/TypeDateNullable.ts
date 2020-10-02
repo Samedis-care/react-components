@@ -3,6 +3,9 @@ import Type from "../Type";
 import { ModelRenderParams } from "../index";
 import FilterType from "../FilterType";
 
+/**
+ * Type for nullable dates
+ */
 abstract class TypeDateNullable implements Type<Date | null> {
 	abstract render(params: ModelRenderParams<Date | null>): React.ReactElement;
 

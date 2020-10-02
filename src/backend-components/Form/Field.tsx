@@ -1,14 +1,21 @@
 import React, { useContext, useMemo } from "react";
 import { FormContext } from "./Form";
 import { useFormikContext } from "formik";
+import {
+	ModelFieldDefinition,
+	PageVisibility,
+} from "../../backend-integration/Model";
 
 interface FieldProps {
+	/**
+	 * The name of the field as specified in the model
+	 */
 	name: string;
 }
 
 const Field = (props: FieldProps): React.ReactElement => {
-	const model = useContext(FormContext);
-	if (!model) throw new Error("You can't use a Field without a Form");
+	const formContext = useContext(FormContext);
+	if (!formContext) throw new Error("You can't use a Field without a Form");
 
 	// eslint-disable-next-line @typescript-eslint/unbound-method
 	const {
@@ -19,7 +26,13 @@ const Field = (props: FieldProps): React.ReactElement => {
 		handleBlur,
 	} = useFormikContext<Record<string, unknown>>();
 
-	const fieldDef = model.model[props.name];
+	const fieldDef: ModelFieldDefinition<
+		unknown,
+		PageVisibility,
+		unknown | null
+	> = formContext.model.fields[props.name];
+
+	const { setError } = formContext;
 
 	if (!fieldDef) throw new Error("Invalid field name specified: " + props.name);
 
@@ -41,8 +54,19 @@ const Field = (props: FieldProps): React.ReactElement => {
 				handleBlur,
 				label: label,
 				errorMsg: errorMsg,
+				setError,
 			}),
-		[value, name, hasId, fieldDef, label, setFieldValue, handleBlur, errorMsg]
+		[
+			value,
+			name,
+			hasId,
+			fieldDef,
+			label,
+			setFieldValue,
+			handleBlur,
+			errorMsg,
+			setError,
+		]
 	);
 };
 

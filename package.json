@@ -31,14 +31,15 @@
 		"react-router-dom": "^5.1.0"
 	},
 	"scripts": {
-		"docgen": "typedoc",
+		"docgen": "typedoc --exclude 'src/stories/**/*.*'",
 		"start": "npm run storybook",
 		"prepare": "npm run build",
 		"prestart": "install-peers -f",
 		"build": "tsc && cpx 'src/assets/**/*' dist/assets",
 		"storybook": "start-storybook -p 9009 -s public",
 		"build-storybook": "build-storybook -s public",
-		"deploy-storybook": "storybook-to-ghpages -o storybook-static",
+		"build-ghpages": "bash build-ghpages.sh",
+		"deploy-storybook": "storybook-to-ghpages -o storybook-static -s build-ghpages",
 		"lint": "eslint 'src/**/*.{ts,tsx}'",
 		"lint-fix": "eslint --fix 'src/**/*.{ts,tsx}'"
 	},
@@ -47,7 +48,7 @@
 	},
 	"husky": {
 		"hooks": {
-			"pre-commit": "lint-staged --allow-empty"
+			"pre-commit": "lint-staged --allow-empty && npm run build"
 		}
 	},
 	"lint-staged": {

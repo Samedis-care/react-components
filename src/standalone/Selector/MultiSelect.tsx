@@ -11,6 +11,7 @@ import {
 } from "@material-ui/core";
 import MultiSelectEntry, { IMultiSelectEntryProps } from "./MultiSelectEntry";
 import { ControlProps } from "react-select/src/components/Control";
+import { GenericWithStyles } from "../../utils";
 
 export interface MultiSelectorData extends SelectorData {
 	/**
@@ -152,6 +153,10 @@ const MultiSelect = <Data extends MultiSelectorData>(
 	);
 };
 
-export default withStyles(styles)(
-	React.memo(MultiSelect) as typeof MultiSelect
-);
+const StylesMultiSelect = withStyles(styles)(React.memo(MultiSelect)) as <
+	Data extends MultiSelectorData
+>(
+	props: GenericWithStyles<MultiSelectProps<Data> & WithStyles>
+) => React.ReactElement;
+
+export default StylesMultiSelect;

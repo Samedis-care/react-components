@@ -6,6 +6,9 @@ import { KeyboardDatePicker } from "@material-ui/pickers";
 import ccI18n from "../../../../i18n";
 import moment from "moment";
 
+/**
+ * Renders Date with Date Selector
+ */
 class RendererDateNullable extends TypeDateNullable {
 	render(params: ModelRenderParams<Date | null>): React.ReactElement {
 		const {

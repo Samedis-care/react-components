@@ -7,6 +7,9 @@ import Model, {
 import Loader from "../../standalone/Loader";
 
 export interface ErrorComponentProps {
+	/**
+	 * The last error that happened
+	 */
 	error: Error;
 }
 
@@ -19,17 +22,40 @@ export interface PageProps {
 }
 
 export interface FormProps {
-	model: Model<ModelFieldName, PageVisibility, unknown>;
+	/**
+	 * The data model this form follows
+	 */
+	model: Model<ModelFieldName, PageVisibility, unknown | null>;
+	/**
+	 * The current data entry id
+	 */
 	id?: string | null;
+	/**
+	 * The error component that is used to display errors
+	 */
 	errorComponent: React.ComponentType<ErrorComponentProps>;
+	/**
+	 * The form contents
+	 */
 	children: React.ComponentType<PageProps>;
 }
 
-export const FormContext = React.createContext<Model<
-	ModelFieldName,
-	PageVisibility,
-	unknown
-> | null>(null);
+export interface FormContextData {
+	/**
+	 * The data model of this form
+	 */
+	model: Model<ModelFieldName, PageVisibility, unknown | null>;
+	/**
+	 * Helper function to display errors
+	 * @param error The error to display
+	 */
+	setError: (error: Error) => void;
+}
+
+/**
+ * Context which stores information about the current form so it can be used by fields
+ */
+export const FormContext = React.createContext<FormContextData | null>(null);
 
 const Form = (props: FormProps) => {
 	const { model, id, children } = props;
@@ -59,29 +85,44 @@ const Form = (props: FormProps) => {
 	);
 
 	const Children = useMemo(() => React.memo(children), [children]);
+	const setError = useCallback(
+		(error: Error) => {
+			setUpdateError(error);
+		},
+		[setUpdateError]
+	);
+	const formContextData: FormContextData = useMemo(
+		() => ({
+			model,
+			setError,
+		}),
+		[model, setError]
+	);
 
 	if (isLoading) {
 		return <Loader />;
 	}
 
-	if (error) {
-		return <ErrorComponent error={error} />;
-	}
+	const displayError: Error | null = error || updateError;
 
 	if (!data) {
 		throw new Error("Data is not present, this should never happen");
 	}
 
 	return (
-		<FormContext.Provider value={model}>
-			<Formik initialValues={data} validate={onValidate} onSubmit={onSubmit}>
+		<FormContext.Provider value={formContextData}>
+			<Formik
+				initialValues={data || {}}
+				validate={onValidate}
+				onSubmit={onSubmit}
+			>
 				{({
 					handleSubmit,
 					isSubmitting,
 					/* and other goodies */
 				}) => (
 					<form onSubmit={handleSubmit}>
-						{updateError && <ErrorComponent error={updateError} />}
+						{displayError && <ErrorComponent error={displayError} />}
 						<Children isSubmitting={isSubmitting} />
 					</form>
 				)}

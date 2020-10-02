@@ -38,8 +38,17 @@ class Model<
 	VisibilityT extends PageVisibility,
 	CustomT
 > {
+	/**
+	 * A unique model identifier, used for caching
+	 */
 	public readonly modelId: string;
-	public readonly model: ModelDef<KeyT, VisibilityT, CustomT>;
+	/**
+	 * The actual model definition
+	 */
+	public readonly fields: ModelDef<KeyT, VisibilityT, CustomT>;
+	/**
+	 * The backend connector providing a CRUD interface for the model
+	 */
 	public readonly connector: Connector<KeyT>;
 
 	/**
@@ -54,10 +63,14 @@ class Model<
 		connector: Connector<KeyT>
 	) {
 		this.modelId = name;
-		this.model = model;
+		this.fields = model;
 		this.connector = connector;
 	}
 
+	/**
+	 * Provides a react-query useQuery hook for the given data id
+	 * @param id The data entry id
+	 */
 	public get(id: string | null): QueryResult<Record<KeyT, unknown>, Error> {
 		// eslint-disable-next-line react-hooks/rules-of-hooks
 		return useQuery([this.modelId, { id: id }], () => {
@@ -66,6 +79,9 @@ class Model<
 		});
 	}
 
+	/**
+	 * Provides a react-query useMutation hook for creation or updates to an data entry
+	 */
 	public createOrUpdate<SnapshotT = unknown>(): MutationResultPair<
 		Record<KeyT, unknown>,
 		Error,
@@ -89,15 +105,19 @@ class Model<
 		);
 	}
 
+	/**
+	 * Validates the given values against the field defined validation rules
+	 * @param values The values to validate
+	 */
 	public validate(values: Record<KeyT, unknown>): Record<string, string> {
 		const errors: Record<string, string> = {};
 
 		Object.entries(values).forEach(([field, value]) => {
 			// first apply type validation
-			let error = this.model[field as KeyT].type.validate(value);
+			let error = this.fields[field as KeyT].type.validate(value);
 
 			// then apply custom field validation if present
-			const fieldValidation = this.model[field as KeyT].validate;
+			const fieldValidation = this.fields[field as KeyT].validate;
 			if (!error && fieldValidation) {
 				error = fieldValidation(value);
 			}
@@ -108,9 +128,12 @@ class Model<
 		return errors;
 	}
 
+	/**
+	 * Gets an empty/default model data entry
+	 */
 	protected getDefaultValues(): Record<KeyT, unknown> {
 		const data: Record<string, unknown> = {};
-		Object.entries(this.model).forEach((entry) => {
+		Object.entries(this.fields).forEach((entry) => {
 			const [field, def] = entry as [
 				KeyT,
 				ModelFieldDefinition<unknown, VisibilityT, CustomT>

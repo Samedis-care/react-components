@@ -10,6 +10,9 @@ import TypeEnum from "../TypeEnum";
 import ccI18n from "../../../../i18n";
 import { SelectorData, SingleSelect } from "../../../../standalone/Selector";
 
+/**
+ * Renders TypeEnum as drop-down selector (with search)
+ */
 class RendererEnumSelect extends TypeEnum {
 	render(params: ModelRenderParams<string>): React.ReactElement {
 		const {
