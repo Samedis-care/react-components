@@ -19,7 +19,7 @@ import TypeYourType from "../TypeYourType";
 /**
  * Renders YourType // TODO: Replace "YourType" with your actual type
  */
-class RendererYourType extends TypeYourType {
+class RendererYourType extends ModelDataTypeYourType {
 	render(params: ModelRenderParams<Date | null>): React.ReactElement {
 		const {
 			visibility,
