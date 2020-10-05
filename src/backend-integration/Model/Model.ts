@@ -13,14 +13,15 @@ export interface PageVisibility {
 
 export interface ModelFieldDefinition<
 	TypeT,
+	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
 	CustomT
 > {
 	type: Type<TypeT>;
 	visibility: VisibilityT;
 	getLabel: () => string;
-	defaultValue?: TypeT;
-	validate?: (value: TypeT) => string | null;
+	getDefaultValue?: () => Promise<TypeT> | TypeT;
+	validate?: (value: TypeT, values: Record<KeyT, unknown>) => string | null;
 	customData: CustomT;
 	// TODO: References
 }
@@ -30,7 +31,7 @@ export type ModelDef<
 	VisibilityT extends PageVisibility,
 	CustomT
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-> = Record<KeyT, ModelFieldDefinition<any, VisibilityT, CustomT>>;
+> = Record<KeyT, ModelFieldDefinition<any, KeyT, VisibilityT, CustomT>>;
 export type ModelFieldName = "id" | string;
 
 class Model<
@@ -119,7 +120,7 @@ class Model<
 			// then apply custom field validation if present
 			const fieldValidation = this.fields[field as KeyT].validate;
 			if (!error && fieldValidation) {
-				error = fieldValidation(value);
+				error = fieldValidation(value, values);
 			}
 
 			if (error) errors[field] = error;
@@ -131,15 +132,17 @@ class Model<
 	/**
 	 * Gets an empty/default model data entry
 	 */
-	protected getDefaultValues(): Record<KeyT, unknown> {
+	protected async getDefaultValues(): Promise<Record<KeyT, unknown>> {
 		const data: Record<string, unknown> = {};
-		Object.entries(this.fields).forEach((entry) => {
+		const promises = Object.entries(this.fields).map(async (entry) => {
 			const [field, def] = entry as [
 				KeyT,
-				ModelFieldDefinition<unknown, VisibilityT, CustomT>
+				ModelFieldDefinition<unknown, KeyT, VisibilityT, CustomT>
 			];
-			data[field] = def.defaultValue || def.type.getDefaultValue();
+			if (def.getDefaultValue) data[field] = await def.getDefaultValue();
+			else data[field] = def.type.getDefaultValue();
 		});
+		await Promise.all(promises);
 		return data as Record<KeyT, unknown>;
 	}
 }

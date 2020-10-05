@@ -28,6 +28,7 @@ const Field = (props: FieldProps): React.ReactElement => {
 
 	const fieldDef: ModelFieldDefinition<
 		unknown,
+		string,
 		PageVisibility,
 		unknown | null
 	> = formContext.model.fields[props.name];

@@ -5,8 +5,8 @@
 /.pnp
 .pnp.js
 
-# docs
-/docs
+# generated docs
+/typedoc
 
 # testing
 /coverage

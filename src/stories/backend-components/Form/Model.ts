@@ -23,7 +23,7 @@ import VisibilityEdit from "../../../backend-integration/Model/Visibilities/Visi
 
 const generateTestEntry = (
 	label: string
-): ModelFieldDefinition<string, PageVisibility, null> => ({
+): ModelFieldDefinition<string, string, PageVisibility, null> => ({
 	type: new ModelDataTypeStringRendererMUI(),
 	visibility: {
 		overview: VisibilityView,
