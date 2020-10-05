@@ -3,6 +3,7 @@ export { default as ModelDataTypeEnumRadioRendererMUI } from "./RendererEnumRadi
 export { default as ModelDataTypeEnumSelectRenderer } from "./RendererEnumSelect";
 export { default as ModelDataTypeEnumSelectRendererMUI } from "./RendererEnumSimpleSelect";
 export { default as ModelDataTypeDateNullableRendererMUI } from "./RendererDateNullable";
+export { default as ModelDataTypeDateRendererMUI } from "./RendererDate";
 export { default as ModelDataTypeBooleanCheckboxRendererMUI } from "./RendererBooleanCheckbox";
 export { default as ModelDataTypeBooleanSwitchRendererMUI } from "./RendererBooleanCheckbox";
 export { default as ModelDataTypeImageRenderer } from "./RendererImage";
