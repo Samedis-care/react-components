@@ -1,17 +1,17 @@
 import React from "react";
 import { FormHelperText, Typography } from "@material-ui/core";
 import { ModelRenderParams } from "../../index";
-import TypeDateNullable from "../TypeDateNullable";
 import { KeyboardDatePicker } from "@material-ui/pickers";
 import ccI18n from "../../../../i18n";
 import moment from "moment";
 import { normalizeDate } from "../Utils/DateUtils";
+import TypeDate from "../TypeDate";
 
 /**
  * Renders Date with Date Selector
  */
-class RendererDateNullable extends TypeDateNullable {
-	render(params: ModelRenderParams<Date | null>): React.ReactElement {
+class RendererDateNullable extends TypeDate {
+	render(params: ModelRenderParams<Date>): React.ReactElement {
 		const {
 			visibility,
 			field,
@@ -42,14 +42,14 @@ class RendererDateNullable extends TypeDateNullable {
 						value={value}
 						label={label}
 						disabled={visibility.readOnly}
-						onChange={(date) =>
-							handleChange(field, date ? normalizeDate(date.toDate()) : null)
-						}
+						onChange={(date) => {
+							if (!date) throw new Error("Date is null");
+							else handleChange(field, normalizeDate(date.toDate()));
+						}}
 						onBlur={handleBlur}
 						error={!!errorMsg}
 						format={moment.localeData().longDateFormat("L")}
 						fullWidth
-						clearable
 					/>
 					<FormHelperText error={!!errorMsg}>{errorMsg}</FormHelperText>
 				</>

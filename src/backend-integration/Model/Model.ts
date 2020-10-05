@@ -17,11 +17,31 @@ export interface ModelFieldDefinition<
 	VisibilityT extends PageVisibility,
 	CustomT
 > {
+	/**
+	 * The Renderer of the field
+	 */
 	type: Type<TypeT>;
+	/**
+	 * The visibility settings of the field
+	 */
 	visibility: VisibilityT;
+	/**
+	 * The label to display to the user
+	 */
 	getLabel: () => string;
+	/**
+	 * The default value
+	 */
 	getDefaultValue?: () => Promise<TypeT> | TypeT;
+	/**
+	 * Callback to validate field
+	 * @param value The value of this field
+	 * @param values All field values
+	 */
 	validate?: (value: TypeT, values: Record<KeyT, unknown>) => string | null;
+	/**
+	 * User-defined data
+	 */
 	customData: CustomT;
 	// TODO: References
 }

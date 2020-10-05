@@ -13,7 +13,15 @@ import ccI18n from "../../../../i18n";
 /**
  * Renders a TypeBoolean field as Checkbox
  */
-class RendererBoolean extends TypeBoolean {
+class RendererBooleanCheckbox extends TypeBoolean {
+	invert?: boolean;
+
+	constructor(invert?: boolean) {
+		super();
+
+		this.invert = invert;
+	}
+
 	render(params: ModelRenderParams<boolean>): React.ReactElement {
 		const {
 			visibility,
@@ -48,13 +56,16 @@ class RendererBoolean extends TypeBoolean {
 						control={
 							<Checkbox
 								name={field}
-								checked={value}
+								checked={this.invert ? !value : value}
 								disabled={visibility.readOnly}
 								onChange={(
 									evt: React.ChangeEvent<HTMLInputElement>,
 									checked: boolean
 								) => {
-									handleChange(evt.target.name, checked);
+									handleChange(
+										evt.target.name,
+										this.invert ? !checked : checked
+									);
 								}}
 								onBlur={handleBlur}
 							/>
@@ -76,4 +87,4 @@ class RendererBoolean extends TypeBoolean {
 	}
 }
 
-export default RendererBoolean;
+export default RendererBooleanCheckbox;

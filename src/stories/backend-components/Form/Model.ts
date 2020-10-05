@@ -4,7 +4,7 @@ import Model, {
 	PageVisibility,
 } from "../../../backend-integration/Model/Model";
 import {
-	ModelDataTypeBooleanRendererMUI,
+	ModelDataTypeBooleanCheckboxRendererMUI,
 	ModelDataTypeDateNullableRendererMUI,
 	ModelDataTypeEnumRadioRendererMUI,
 	ModelDataTypeEnumSelectRendererMUI,
@@ -108,7 +108,7 @@ const FormStoryModel = new Model(
 			customData: null,
 		},
 		accept_tos: {
-			type: new ModelDataTypeBooleanRendererMUI(),
+			type: new ModelDataTypeBooleanCheckboxRendererMUI(),
 			visibility: {
 				overview: VisibilityView,
 				edit: VisibilityEdit,
