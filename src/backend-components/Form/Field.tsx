@@ -1,4 +1,4 @@
-import React, { useContext, useMemo } from "react";
+import React, { useCallback, useContext, useMemo } from "react";
 import { FormContext } from "./Form";
 import { useFormikContext } from "formik";
 import {
@@ -26,14 +26,25 @@ const Field = (props: FieldProps): React.ReactElement => {
 		handleBlur,
 	} = useFormikContext<Record<string, unknown>>();
 
+	const { setError, model } = formContext;
+
 	const fieldDef: ModelFieldDefinition<
 		unknown,
 		string,
 		PageVisibility,
 		unknown | null
-	> = formContext.model.fields[props.name];
+	> = model.fields[props.name];
 
-	const { setError } = formContext;
+	const setFieldValueHookWrapper = useCallback(
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		(field: string, value: any, shouldValidate?: boolean) => {
+			setFieldValue(field, value, shouldValidate);
+			if (fieldDef.onChange) {
+				fieldDef.onChange(value, model, setFieldValue);
+			}
+		},
+		[setFieldValue, fieldDef, model]
+	);
 
 	if (!fieldDef) throw new Error("Invalid field name specified: " + props.name);
 
@@ -51,7 +62,7 @@ const Field = (props: FieldProps): React.ReactElement => {
 				visibility: hasId
 					? fieldDef.visibility.edit
 					: fieldDef.visibility.create,
-				handleChange: setFieldValue,
+				handleChange: setFieldValueHookWrapper,
 				handleBlur,
 				label: label,
 				errorMsg: errorMsg,

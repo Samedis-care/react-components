@@ -4,6 +4,7 @@ import Connector from "../Connector/Connector";
 import { useMutation, useQuery } from "react-query";
 import { MutationResultPair, QueryResult } from "react-query/types/core/types";
 import { ModelDataStore } from "../index";
+import { FormikContextType } from "formik/dist/types";
 
 export interface PageVisibility {
 	overview: Visibility;
@@ -43,6 +44,17 @@ export interface ModelFieldDefinition<
 	 * User-defined data
 	 */
 	customData: CustomT;
+	/**
+	 * onChange event handler, fired after changes have been saved
+	 * @param value The new value
+	 * @param model The model definition
+	 * @param setFieldValue Allows setting of other values
+	 */
+	onChange?: (
+		value: TypeT,
+		model: Model<KeyT, VisibilityT, CustomT>,
+		setFieldValue: FormikContextType<KeyT>["setFieldValue"]
+	) => void;
 	// TODO: References
 }
 
