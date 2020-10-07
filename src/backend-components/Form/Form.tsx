@@ -19,6 +19,11 @@ export interface PageProps {
 	 * All submit buttons should be disabled if "isSubmitting" is true.
 	 */
 	isSubmitting: boolean;
+	/**
+	 * The values of the form, can be used for conditional rendering.
+	 * Only present if renderConditionally is set to true in FormProps
+	 */
+	values?: Record<string, unknown>;
 }
 
 export interface FormProps {
@@ -38,6 +43,10 @@ export interface FormProps {
 	 * The form contents
 	 */
 	children: React.ComponentType<PageProps>;
+	/**
+	 * Rerender page props if values changes
+	 */
+	renderConditionally?: boolean;
 }
 
 export interface FormContextData {
@@ -119,11 +128,15 @@ const Form = (props: FormProps) => {
 				{({
 					handleSubmit,
 					isSubmitting,
+					values,
 					/* and other goodies */
 				}) => (
 					<form onSubmit={handleSubmit}>
 						{displayError && <ErrorComponent error={displayError} />}
-						<Children isSubmitting={isSubmitting} />
+						<Children
+							isSubmitting={isSubmitting}
+							values={props.renderConditionally ? values : undefined}
+						/>
 					</form>
 				)}
 			</Formik>
