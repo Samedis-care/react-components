@@ -141,6 +141,13 @@ You need to define all additional fields required for your model yourself. A fie
 +                if (value !== "valid") return "Value is not 'valid'!";
 +                return null; // no validation errors
 +            },
++            onChange: ( // optional on change hook
++                value: string,
++                model: Model<string, PageVisibility, null>,
++                setFieldValue: FormikContextType<string>["setFieldValue"]
++            ) => {
++                // you can modify the model itself in here, useful for e.g.: implementing conditional enums
++            },
 +            customData: null,
 +        },
      },
@@ -172,6 +179,9 @@ You need to define all additional fields required for your model yourself. A fie
 +            validate: (value, values) => {
 +                if (value !== "valid") return "Value is not 'valid'!";
 +                return null; // no validation errors
++            },
++            onChange: (value, model, setFieldValue) => { // optional on change hook
++                // you can modify the model itself in here, useful for e.g.: implementing conditional enums
 +            },
 +            customData: null,
 +        },
