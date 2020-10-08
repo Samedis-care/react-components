@@ -128,7 +128,7 @@ class Model<
 		// eslint-disable-next-line react-hooks/rules-of-hooks
 		return useMutation(
 			(values: Record<string, unknown>) =>
-				"id" in values
+				"id" in values && values.id
 					? this.connector.update(values)
 					: this.connector.create(values),
 			{
