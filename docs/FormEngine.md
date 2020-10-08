@@ -144,7 +144,7 @@ You need to define all additional fields required for your model yourself. A fie
 +            onChange: ( // optional on change hook
 +                value: string,
 +                model: Model<string, PageVisibility, null>,
-+                setFieldValue: FormikContextType<string>["setFieldValue"]
++                setFieldValue: (field: string, value: unknown, shouldValidate?: boolean) => void
 +            ): string => {
 +                // you can modify the model itself in here, useful for e.g.: implementing conditional enums
 +                return value;

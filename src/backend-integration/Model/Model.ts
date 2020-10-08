@@ -54,7 +54,11 @@ export interface ModelFieldDefinition<
 	onChange?: (
 		value: TypeT,
 		model: Model<KeyT, VisibilityT, CustomT>,
-		setFieldValue: FormikContextType<KeyT>["setFieldValue"]
+		setFieldValue: (
+			field: KeyT,
+			value: unknown,
+			shouldValidate?: boolean
+		) => void
 	) => TypeT;
 	// TODO: References
 }
