@@ -23,7 +23,7 @@ const GroupBox = (props: GroupBoxProps) => {
 
 	return (
 		<fieldset id={id} className={classes.fieldSetRoot}>
-			<legend>{label}</legend>
+			{label && <legend>{label}</legend>}
 			{children}
 		</fieldset>
 	);
