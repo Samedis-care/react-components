@@ -45,16 +45,17 @@ export interface ModelFieldDefinition<
 	 */
 	customData: CustomT;
 	/**
-	 * onChange event handler, fired after changes have been saved
+	 * onChange event handler, fired before changes have been saved
 	 * @param value The new value
 	 * @param model The model definition
 	 * @param setFieldValue Allows setting of other values
+	 * @returns The updated value (can be modified by this handler)
 	 */
 	onChange?: (
 		value: TypeT,
 		model: Model<KeyT, VisibilityT, CustomT>,
 		setFieldValue: FormikContextType<KeyT>["setFieldValue"]
-	) => void;
+	) => TypeT;
 	// TODO: References
 }
 

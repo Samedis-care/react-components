@@ -145,8 +145,9 @@ You need to define all additional fields required for your model yourself. A fie
 +                value: string,
 +                model: Model<string, PageVisibility, null>,
 +                setFieldValue: FormikContextType<string>["setFieldValue"]
-+            ) => {
++            ): string => {
 +                // you can modify the model itself in here, useful for e.g.: implementing conditional enums
++                return value;
 +            },
 +            customData: null,
 +        },
@@ -182,6 +183,7 @@ You need to define all additional fields required for your model yourself. A fie
 +            },
 +            onChange: (value, model, setFieldValue) => { // optional on change hook
 +                // you can modify the model itself in here, useful for e.g.: implementing conditional enums
++                return value;
 +            },
 +            customData: null,
 +        },

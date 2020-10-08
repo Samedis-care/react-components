@@ -38,10 +38,10 @@ const Field = (props: FieldProps): React.ReactElement => {
 	const setFieldValueHookWrapper = useCallback(
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		(field: string, value: any, shouldValidate?: boolean) => {
-			setFieldValue(field, value, shouldValidate);
 			if (fieldDef.onChange) {
-				fieldDef.onChange(value, model, setFieldValue);
+				value = fieldDef.onChange(value, model, setFieldValue);
 			}
+			setFieldValue(field, value, shouldValidate);
 		},
 		[setFieldValue, fieldDef, model]
 	);
