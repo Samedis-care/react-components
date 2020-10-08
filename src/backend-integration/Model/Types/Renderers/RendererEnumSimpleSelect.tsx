@@ -50,6 +50,7 @@ class RendererEnumSelect extends TypeEnum {
 					<Select
 						name={field}
 						value={value}
+						disabled={visibility.readOnly}
 						onChange={(evt) => handleChange(field, evt.target.value as string)}
 						onBlur={handleBlur}
 					>
