@@ -53,15 +53,17 @@ const Field = (props: FieldProps): React.ReactElement => {
 	const hasId = "id" in values && values["id"];
 	const label = fieldDef.getLabel();
 	const errorMsg = (touched[props.name] && errors[props.name]) || null;
+	const type = fieldDef.type;
+	const visibility = hasId
+		? fieldDef.visibility.edit
+		: fieldDef.visibility.create;
 
 	return useMemo(
 		() =>
-			fieldDef.type.render({
+			type.render({
 				field: name,
 				value: value,
-				visibility: hasId
-					? fieldDef.visibility.edit
-					: fieldDef.visibility.create,
+				visibility: visibility,
 				handleChange: setFieldValueHookWrapper,
 				handleBlur,
 				label: label,
@@ -71,10 +73,10 @@ const Field = (props: FieldProps): React.ReactElement => {
 		[
 			value,
 			name,
-			hasId,
-			fieldDef,
+			type,
 			label,
-			setFieldValue,
+			visibility,
+			setFieldValueHookWrapper,
 			handleBlur,
 			errorMsg,
 			setError,
