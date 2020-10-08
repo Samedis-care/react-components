@@ -4,7 +4,6 @@ import Connector from "../Connector/Connector";
 import { useMutation, useQuery } from "react-query";
 import { MutationResultPair, QueryResult } from "react-query/types/core/types";
 import { ModelDataStore } from "../index";
-import { FormikContextType } from "formik/dist/types";
 
 export interface PageVisibility {
 	overview: Visibility;
