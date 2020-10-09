@@ -199,3 +199,129 @@ You need to define all additional fields required for your model yourself. A fie
 Sometimes you need custom controls which aren't included in the default type library. In these cases you need to create your own Renderers or even Types.
 
 Read more about implementing [your own renderers](../src/backend-integration/Model/Types/Renderers/README.md) and [your own types](../src/backend-integration/Model/Types/README.md) by following the respective link.
+
+### Creating an error component
+
+A error component will display the errors occurring in the form and the form components. It has a single property: `error`.
+The `error` property is never null. It may be updated from time to time to display a new error.
+
+A basic error component which uses dialogs can be found below:
+
+<details>
+	<summary>TypeScript</summary>
+	
+```tsx
+import React, {useEffect} from "react";
+import {ErrorDialog, ErrorComponentProps, useDialogContext} from "components-care"
+
+const ErrorComponent = (props: ErrorComponentProps) => {
+const propError = props.error;
+
+    const [pushDialog] = useDialogContext();
+
+    useEffect(() => {
+    	pushDialog(
+    		<ErrorDialog
+    			title={"An error occurred"}
+    			message={propError.message}
+    			buttons={[
+    				{
+    					text: "Okay",
+    					autoFocus: true,
+    				},
+    			]}
+    		/>
+    	);
+    	// eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [propError]);
+
+    return <></>;
+
+};
+
+export default React.memo(ErrorComponent);
+
+````
+
+</details>
+
+
+<details>
+	<summary>JavaScript</summary>
+
+```jsx
+import React, {useEffect} from "react";
+import {ErrorDialog, ErrorComponentProps, useDialogContext} from "components-care"
+
+const ErrorComponent = (props) => {
+	const propError = props.error;
+
+	const [pushDialog] = useDialogContext();
+
+	useEffect(() => {
+		pushDialog(
+			<ErrorDialog
+				title={"An error occurred"}
+				message={propError.message}
+				buttons={[
+					{
+						text: "Okay",
+						autoFocus: true,
+					},
+				]}
+			/>
+		);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [propError]);
+
+	return <></>;
+};
+
+export default React.memo(ErrorComponent);
+````
+
+</details>
+
+### Creating the form itself
+
+To create a form you need two things:
+
+- a model
+- an error component
+
+A form has two components: `Form` and `FormField`.
+The `Form` component stores the form state and provides everything needed for validating and submitting the form.
+The `FormField` component renders the field according to the model provided to the `Form` component.
+
+A basic form looks like this:
+
+<details>
+	<summary>TypeScript/JavaScript</summary>
+
+```tsx
+<Form
+	model={NameModel}
+	id={null || "id"} // null for create new, "id" for edit existing
+	errorComponent={ErrorComponent}
+	renderConditionally
+>
+	{({ isSubmitting, values, submit }) => (
+		<>
+			<FormField name={"field-name"} />
+			<Button
+				disabled={isSubmitting}
+				onClick={async () => {
+					try {
+						await submit();
+						console.log("Submitted");
+					} catch (e) {
+						console.log("Validation errors:", e);
+					}
+				}}
+			/>
+		</>
+	)}
+</Form>
+```
+
+</details>
