@@ -5,6 +5,7 @@ import Model, {
 	PageVisibility,
 } from "../../backend-integration/Model/Model";
 import Loader from "../../standalone/Loader";
+import { FormikState } from "formik/dist/types";
 
 export interface ErrorComponentProps {
 	/**
@@ -27,11 +28,11 @@ export interface PageProps {
 	/**
 	 * Function to trigger form submit
 	 */
-	submit: () => void;
+	submit: () => Promise<void>;
 	/**
 	 * Function to trigger form reset
 	 */
-	reset: () => void;
+	reset: (nextState?: Partial<FormikState<Record<string, unknown>>>) => void;
 }
 
 export interface FormProps {
@@ -134,8 +135,9 @@ const Form = (props: FormProps) => {
 				onSubmit={onSubmit}
 			>
 				{({
+					submitForm,
+					resetForm,
 					handleSubmit,
-					handleReset,
 					isSubmitting,
 					values,
 					/* and other goodies */
@@ -145,8 +147,8 @@ const Form = (props: FormProps) => {
 						<Children
 							isSubmitting={isSubmitting}
 							values={props.renderConditionally ? values : undefined}
-							submit={handleSubmit}
-							reset={handleReset}
+							submit={submitForm}
+							reset={resetForm}
 						/>
 					</form>
 				)}
