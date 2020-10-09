@@ -13,7 +13,12 @@ import { AttachFile } from "@material-ui/icons";
 import FilePreview from "./File";
 import { FileSelectorError } from "./Errors";
 import i18n from "../../../i18n";
-import { getFileExt, processImage, shallowCompare } from "../../../utils";
+import {
+	getFileExt,
+	matchMime,
+	processImage,
+	shallowCompare,
+} from "../../../utils";
 import { IDownscaleProps } from "../../../utils/processImage";
 import GroupBox from "../../GroupBox";
 
@@ -363,7 +368,9 @@ class FileUpload extends Component<FileUploadProps, IState> {
 			if (
 				newFiles.find(
 					(file) =>
-						!allowedMimes.includes(file.file.type) &&
+						!allowedMimes
+							.map((allowed) => matchMime(allowed, file.file.type))
+							.includes(true) &&
 						!allowedFileExt.includes(getFileExt(file.file.name))
 				)
 			) {
