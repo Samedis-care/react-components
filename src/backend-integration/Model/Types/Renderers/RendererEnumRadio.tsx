@@ -12,7 +12,10 @@ import { ModelRenderParams } from "../../index";
 import TypeEnum, { EnumValue } from "../TypeEnum";
 import ccI18n from "../../../../i18n";
 
-export type WrapButtonFunc = (btn: React.ReactElement) => React.ReactElement;
+export type WrapButtonFunc = (
+	btn: React.ReactElement,
+	value: EnumValue
+) => React.ReactElement;
 
 /**
  * Renders TypeEnum as radio buttons
@@ -71,17 +74,18 @@ class RendererEnumRadio extends TypeEnum {
 						onBlur={handleBlur}
 						row={this.horizontal}
 					>
-						{this.values
-							.map((entry) => (
+						{this.values.map((entry) =>
+							this.wrapButton(
 								<FormControlLabel
 									key={entry.value}
 									value={entry.value}
 									control={<Radio />}
 									label={entry.getLabel()}
 									disabled={visibility.readOnly}
-								/>
-							))
-							.map(this.wrapButton)}
+								/>,
+								entry
+							)
+						)}
 					</RadioGroup>
 					<FormHelperText>{errorMsg}</FormHelperText>
 				</FormControl>

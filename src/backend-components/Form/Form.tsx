@@ -92,7 +92,7 @@ const Form = (props: FormProps) => {
 			try {
 				const result = await updateData(values);
 				if (!result) return;
-				setValues(result, true);
+				setValues(result);
 			} catch (e) {
 				setUpdateError(e as Error);
 			} finally {
