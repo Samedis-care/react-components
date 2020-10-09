@@ -1,31 +1,18 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { ErrorComponentProps } from "../../../backend-components/Form";
-import { debounce } from "../../../utils";
 import { ErrorDialog } from "../../../non-standalone/Dialog";
+import { useDialogContext } from "../../../framework";
 
 const ErrorComponent = (props: ErrorComponentProps) => {
 	const propError = props.error;
 
-	const [error, setError] = useState<Error | null>(props.error);
-	const unsetErrorDirectly = useCallback(() => {
-		setError(null);
-	}, [setError]);
-	// eslint-disable-next-line react-hooks/exhaustive-deps
-	const unsetError = useCallback(debounce(unsetErrorDirectly, 5000), [
-		unsetErrorDirectly,
-	]);
+	const [pushDialog] = useDialogContext();
 
 	useEffect(() => {
-		setError(propError);
-		unsetError();
-	}, [unsetError, setError, propError]);
-
-	return (
-		error && (
+		pushDialog(
 			<ErrorDialog
 				title={"An error occurred"}
-				message={error.message}
-				onClose={unsetErrorDirectly}
+				message={propError.message}
 				buttons={[
 					{
 						text: "Okay",
@@ -33,8 +20,11 @@ const ErrorComponent = (props: ErrorComponentProps) => {
 					},
 				]}
 			/>
-		)
-	);
+		);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [propError]);
+
+	return <></>;
 };
 
 export default React.memo(ErrorComponent);
