@@ -24,6 +24,14 @@ export interface PageProps {
 	 * Only present if renderConditionally is set to true in FormProps
 	 */
 	values?: Record<string, unknown>;
+	/**
+	 * Function to trigger form submit
+	 */
+	submit: () => void;
+	/**
+	 * Function to trigger form reset
+	 */
+	reset: () => void;
 }
 
 export interface FormProps {
@@ -127,6 +135,7 @@ const Form = (props: FormProps) => {
 			>
 				{({
 					handleSubmit,
+					handleReset,
 					isSubmitting,
 					values,
 					/* and other goodies */
@@ -136,6 +145,8 @@ const Form = (props: FormProps) => {
 						<Children
 							isSubmitting={isSubmitting}
 							values={props.renderConditionally ? values : undefined}
+							submit={handleSubmit}
+							reset={handleReset}
 						/>
 					</form>
 				)}
