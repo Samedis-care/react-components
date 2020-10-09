@@ -17,6 +17,8 @@ abstract class TypeMultiEnum implements Type<string[]> {
 	abstract render(params: ModelRenderParams<string[]>): React.ReactElement;
 
 	validate(values: string[]): string | null {
+		if (values.length === 0) return null;
+
 		return values.find((value) =>
 			this.values.find((entry) => entry.value === value)
 		)
