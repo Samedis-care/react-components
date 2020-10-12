@@ -1,5 +1,5 @@
 import Model, {
-	ModelDef,
+	ModelField,
 	ModelFieldDefinition,
 	PageVisibility,
 } from "../../../backend-integration/Model/Model";
@@ -35,7 +35,7 @@ const generateTestEntry = (
 });
 
 export const performanceTestDataCount = 0;
-const testData: ModelDef<string, PageVisibility, null> = {};
+const testData: ModelField<string, PageVisibility, null> = {};
 for (let i = 0; i < performanceTestDataCount; ++i) {
 	testData["perf_" + i.toString()] = generateTestEntry(
 		"Performance Test " + i.toString()

@@ -62,7 +62,7 @@ export interface ModelFieldDefinition<
 	// TODO: References
 }
 
-export type ModelDef<
+export type ModelField<
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
 	CustomT
@@ -82,7 +82,7 @@ class Model<
 	/**
 	 * The actual model definition
 	 */
-	public readonly fields: ModelDef<KeyT, VisibilityT, CustomT>;
+	public readonly fields: ModelField<KeyT, VisibilityT, CustomT>;
 	/**
 	 * The backend connector providing a CRUD interface for the model
 	 */
@@ -96,7 +96,7 @@ class Model<
 	 */
 	constructor(
 		name: string,
-		model: ModelDef<KeyT, VisibilityT, CustomT>,
+		model: ModelField<KeyT, VisibilityT, CustomT>,
 		connector: Connector<KeyT>
 	) {
 		this.modelId = name;

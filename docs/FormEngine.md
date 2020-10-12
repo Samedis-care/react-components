@@ -1,5 +1,11 @@
 # Form Engine
 
+## Overview
+
+<p align="center">
+  <img src="assets/FormEngine/Overview.svg" alt="Form Engine & Model system overview">
+</p>
+
 ## Implementing in your application
 
 The following will guide you though the required steps of implementing the form engine.
@@ -93,20 +99,20 @@ import {Model, ModelDataTypeStringRendererMUI, ModelVisibilityDisabled, ModelVis
 import BackendConnector from "./BackendConnector";
 
 const NameModel = new Model(
-"name-model-id",
-{
-id: {
-type: new ModelDataTypeStringRendererMUI(),
-visibility: {
-overview: ModelVisibilityDisabled,
-edit: ModelVisibilityHidden,
-create: ModelVisibilityDisabled,
-},
-getLabel: () => "ID",
-customData: null,
-},
-},
-new BackendConnector()
+    "name-model-id",
+    {
+        id: {
+            type: new ModelDataTypeStringRendererMUI(),
+            visibility: {
+                overview: ModelVisibilityDisabled,
+                edit: ModelVisibilityHidden,
+                create: ModelVisibilityDisabled,
+            },
+            getLabel: () => "ID",
+            customData: null,
+        },
+    },
+    new BackendConnector()
 );
 
 export default NameModel;
