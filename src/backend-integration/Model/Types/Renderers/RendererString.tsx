@@ -10,7 +10,7 @@ import { ModelRenderParams } from "../../index";
 
 export type ModelDataTypeStringRendererMUIParams = Pick<
 	TextFieldProps,
-	"inputProps" | "multiline" | "variant"
+	"inputProps" | "InputProps" | "multiline" | "variant"
 >;
 
 /**
