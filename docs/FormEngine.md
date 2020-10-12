@@ -1,5 +1,9 @@
 # Form Engine
 
+## Purpose
+
+The form engine enables you to create reusable form components and easily create large, very performant forms with built-in validations.
+
 ## Overview
 
 <p align="center">
@@ -21,9 +25,9 @@ First we have to implement our own backend connector, for this we can use the fo
 import {Connector, ModelFieldName} from "components-care";
 
 class BackendConnector<KeyT extends ModelFieldName> extends Connector<KeyT> {
-async index(): Promise<Record<KeyT, unknown>[]> {
-throw new Error("Not implemented");
-}
+    async index(): Promise<Record<KeyT, unknown>[]> {
+        throw new Error("Not implemented");
+    }
 
     async create(
         data: Record<string, unknown>
@@ -122,7 +126,7 @@ export default NameModel;
 
 </details>
 
-You need to define all additional fields required for your model yourself. A field definiion looks like this:
+You need to define all additional fields required for your model yourself. A field definition looks like this:
 
 <details>
 	<summary>TypeScript diff</summary>
@@ -208,8 +212,9 @@ Read more about implementing [your own renderers](../src/backend-integration/Mod
 
 ### Creating an error component
 
-A error component will display the errors occurring in the form and the form components. It has a single property: `error`.
-The `error` property is never null. It may be updated from time to time to display a new error.
+An error component will display the errors occurring in the form and the form components. It has a single property: `error`.
+The `error` property is never null. Its `error` property may get updated from time to time.
+Your component won't be unmounted until the form gets unmounted.
 
 A basic error component which uses dialogs can be found below:
 
