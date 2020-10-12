@@ -95,6 +95,7 @@ const Form = (props: FormProps) => {
 				setValues(result);
 			} catch (e) {
 				setUpdateError(e as Error);
+				throw e;
 			} finally {
 				setSubmitting(false);
 			}
