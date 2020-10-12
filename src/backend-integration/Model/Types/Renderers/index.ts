@@ -1,3 +1,4 @@
+export * from "./RendererString";
 export { default as ModelDataTypeStringRendererMUI } from "./RendererString";
 export { default as ModelDataTypeEnumRadioRendererMUI } from "./RendererEnumRadio";
 export { default as ModelDataTypeEnumSelectRenderer } from "./RendererEnumSelect";

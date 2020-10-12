@@ -1,12 +1,30 @@
 import React from "react";
 import TypeString from "../TypeString";
-import { FormHelperText, TextField, Typography } from "@material-ui/core";
+import {
+	FormHelperText,
+	TextField,
+	TextFieldProps,
+	Typography,
+} from "@material-ui/core";
 import { ModelRenderParams } from "../../index";
+
+export type ModelDataTypeStringRendererMUIParams = Pick<
+	TextFieldProps,
+	"inputProps" | "multiline" | "variant"
+>;
 
 /**
  * Renders a text field
  */
 class RendererString extends TypeString {
+	props?: ModelDataTypeStringRendererMUIParams;
+
+	constructor(props?: ModelDataTypeStringRendererMUIParams) {
+		super(props?.multiline);
+
+		this.props = props;
+	}
+
 	render(params: ModelRenderParams<string>): React.ReactElement {
 		const {
 			visibility,
@@ -34,6 +52,9 @@ class RendererString extends TypeString {
 			return (
 				<>
 					<TextField
+						variant={this.multiline ? "outlined" : undefined}
+						fullWidth
+						{...this.props}
 						name={field}
 						value={value}
 						label={label}
@@ -44,9 +65,6 @@ class RendererString extends TypeString {
 						}}
 						onBlur={handleBlur}
 						error={!!errorMsg}
-						multiline={this.multiline}
-						variant={this.multiline ? "outlined" : undefined}
-						fullWidth
 					/>
 					<FormHelperText error={!!errorMsg}>{errorMsg}</FormHelperText>
 				</>

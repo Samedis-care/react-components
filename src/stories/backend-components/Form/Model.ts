@@ -118,7 +118,9 @@ const FormStoryModel = new Model(
 			customData: null,
 		},
 		notes: {
-			type: new ModelDataTypeStringRendererMUI(true),
+			type: new ModelDataTypeStringRendererMUI({
+				multiline: true,
+			}),
 			visibility: {
 				overview: VisibilityView,
 				edit: VisibilityEdit,
