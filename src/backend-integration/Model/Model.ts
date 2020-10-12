@@ -138,6 +138,7 @@ class Model<
 					// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 					ModelDataStore.setQueryData([this.modelId, { id: data.id }], data);
 				},
+				throwOnError: true,
 			}
 		);
 	}
