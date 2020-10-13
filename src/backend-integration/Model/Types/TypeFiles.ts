@@ -4,8 +4,10 @@ import { ModelRenderParams } from "../index";
 import FilterType from "../FilterType";
 import {
 	FileData,
+	FileMeta,
 	FileUploadProps,
 } from "../../../standalone/FileUpload/Generic";
+import { fileToData } from "../../../utils";
 
 export type TypeFilesParams = Partial<
 	Pick<
@@ -20,6 +22,13 @@ export type TypeFilesParams = Partial<
 		| "allowDuplicates"
 	>
 >;
+
+interface FileWithData extends FileData<FileMeta> {
+	/**
+	 * The raw file data
+	 */
+	data?: string;
+}
 
 /**
  * A type to handle files
@@ -44,6 +53,21 @@ abstract class TypeFiles implements Type<FileData[]> {
 	getDefaultValue(): FileData[] {
 		return [];
 	}
+
+	serialize = async (files: FileData[]): Promise<FileWithData[]> => {
+		return await Promise.all(
+			files.map(async (file) => ({
+				...file,
+				file: {
+					name: file.file.name,
+				},
+				preview: file.preview,
+				data: file.canBeUploaded
+					? await fileToData(file.file as File)
+					: undefined,
+			}))
+		);
+	};
 }
 
 export default TypeFiles;

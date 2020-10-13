@@ -110,9 +110,12 @@ class Model<
 	 */
 	public get(id: string | null): QueryResult<Record<KeyT, unknown>, Error> {
 		// eslint-disable-next-line react-hooks/rules-of-hooks
-		return useQuery([this.modelId, { id: id }], () => {
+		return useQuery([this.modelId, { id: id }], async () => {
 			if (!id) return this.getDefaultValues();
-			return this.connector.read(id);
+			return this.applySerialization(
+				await this.connector.read(id),
+				"deserialize"
+			);
 		});
 	}
 
@@ -127,10 +130,17 @@ class Model<
 	> {
 		// eslint-disable-next-line react-hooks/rules-of-hooks
 		return useMutation(
-			(values: Record<string, unknown>) =>
-				"id" in values && values.id
-					? this.connector.update(values)
-					: this.connector.create(values),
+			async (values: Record<string, unknown>) => {
+				const serializedValues = await this.applySerialization(
+					values,
+					"serialize"
+				);
+				if ("id" in values && values.id) {
+					return this.connector.update(serializedValues);
+				} else {
+					return this.connector.create(serializedValues);
+				}
+			},
 			{
 				onSuccess: (data: Record<KeyT, unknown>) => {
 					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -181,6 +191,53 @@ class Model<
 		});
 		await Promise.all(promises);
 		return data as Record<KeyT, unknown>;
+	}
+
+	/**
+	 * Serializes the given values into a JSON string
+	 * @param values The values to serialize
+	 */
+	public async serialize(values: Record<KeyT, unknown>): Promise<string> {
+		const serializable = await this.applySerialization(values, "serialize");
+		return JSON.stringify(serializable);
+	}
+
+	/**
+	 * Deserializes the given JSON data back into a data record
+	 * @param data The JSON string
+	 */
+	public async deserialize(data: string): Promise<Record<KeyT, unknown>> {
+		const parsed = JSON.parse(data) as Record<KeyT, unknown>;
+		return await this.applySerialization(parsed, "deserialize");
+	}
+
+	/**
+	 * Applies the given serialization function to the data
+	 * @param values The data
+	 * @param func The function to apply
+	 * @returns A copy of the data (not deep-copy)
+	 * @private
+	 */
+	private async applySerialization(
+		values: Record<KeyT, unknown>,
+		func: "serialize" | "deserialize"
+	): Promise<Record<KeyT, unknown>> {
+		const copy: Record<string, unknown> = {};
+
+		for (const key in values) {
+			if (!Object.prototype.hasOwnProperty.call(values, key)) continue;
+
+			const field = this.fields[key];
+			const serializeFunc = field.type[func];
+
+			if (serializeFunc) {
+				copy[key] = await serializeFunc(values[key]);
+			} else {
+				copy[key] = values[key];
+			}
+		}
+
+		return copy as Record<KeyT, unknown>;
 	}
 }
 

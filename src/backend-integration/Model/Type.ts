@@ -26,6 +26,20 @@ interface Type<T> {
 	 * @returns an empty value or null
 	 */
 	getDefaultValue(): T;
+
+	/**
+	 * Optional serialization handler. Turns value into a JSON serializable value.
+	 * @param value The raw value
+	 * @returns The JSON serializable value
+	 */
+	serialize?: (value: T) => unknown | Promise<unknown>;
+
+	/**
+	 * Optional deserialization handler. Turns value into a raw value
+	 * @param value The JSON serialized value
+	 * @returns The raw value (of type T)
+	 */
+	deserialize?: (value: unknown) => T | Promise<T>;
 }
 
 export default Type;
