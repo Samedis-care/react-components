@@ -33,6 +33,8 @@ class RendererImage extends TypeImage {
 			);
 		}
 		if (visibility.editable) {
+			if (visibility.grid) throw new Error("Not supported");
+
 			return (
 				<>
 					<ImageSelector
@@ -53,14 +55,19 @@ class RendererImage extends TypeImage {
 				</>
 			);
 		}
-		return (
+
+		const content = value ? (
+			<img src={value} alt={label} />
+		) : (
+			<>{ccI18n.t("backend-integration.model.types.renderers.image.not-set")}</>
+		);
+
+		return visibility.grid ? (
+			content
+		) : (
 			<FormControl>
 				<FormLabel>{label}</FormLabel>
-				{value ? (
-					<img src={value} alt={label} />
-				) : (
-					ccI18n.t("backend-integration.model.types.renderers.image.not-set")
-				)}
+				{content}
 			</FormControl>
 		);
 	}

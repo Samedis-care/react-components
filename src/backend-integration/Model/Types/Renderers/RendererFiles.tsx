@@ -37,6 +37,8 @@ class RendererFiles extends TypeFiles {
 			);
 		}
 		if (visibility.editable) {
+			if (visibility.grid) throw new Error("Not supported");
+
 			return (
 				<>
 					<FileUpload
@@ -61,8 +63,9 @@ class RendererFiles extends TypeFiles {
 				</>
 			);
 		}
-		return (
-			<GroupBox label={label}>
+
+		const content = (
+			<>
 				<ul>
 					{value.map((entry, index) => (
 						<li key={index}>
@@ -77,7 +80,13 @@ class RendererFiles extends TypeFiles {
 				</ul>
 				{value.length === 0 &&
 					ccI18n.t("backend-integration.model.types.renderers.files.no-file")}
-			</GroupBox>
+			</>
+		);
+
+		return visibility.grid ? (
+			content
+		) : (
+			<GroupBox label={label}>{content}</GroupBox>
 		);
 	}
 }

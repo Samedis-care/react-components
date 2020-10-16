@@ -1,4 +1,12 @@
 import { ModelFieldName } from "../Model";
+import { IDataGridLoadDataParameters } from "../../standalone/DataGrid";
+
+export interface ResponseMeta {
+	/**
+	 * The total amount of rows
+	 */
+	totalRows: number;
+}
 
 /**
  * A generic backend connector which provides a basic CRUD interface for data
@@ -6,9 +14,14 @@ import { ModelFieldName } from "../Model";
 abstract class Connector<KeyT extends ModelFieldName> {
 	/**
 	 * Lists all available data entries
+	 * @param responseMeta Response meta data to be set by this function
+	 * @param params Filter, Sorting and Pagination parameters
 	 * @returns An array with all data entries
 	 */
-	abstract async index(): Promise<Record<KeyT, unknown>[]>;
+	abstract async index(
+		responseMeta: ResponseMeta,
+		params?: Partial<IDataGridLoadDataParameters>
+	): Promise<Record<KeyT, unknown>[]>;
 
 	/**
 	 * Creates a new data entry with the given data

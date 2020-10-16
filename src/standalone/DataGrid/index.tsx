@@ -20,30 +20,48 @@ import {
 import { Loader } from "../index";
 import { debounce } from "../../utils";
 import { dataGridPrepareFiltersAndSorts } from "./CallbackUtil";
+import { ModelFilterType } from "../../backend-integration/Model";
 
 export type IDataGridProps = IDataGridHeaderProps &
 	IDataGridFooterProps &
 	IDataGridColumnProps &
 	IDataGridCallbacks;
 
+export interface IDataGridLoadDataParameters {
+	/**
+	 * The page to load
+	 */
+	page: number;
+	/**
+	 * The amount of rows per page
+	 */
+	rows: number;
+	/**
+	 * The search box content
+	 */
+	quickFilter: string;
+	/**
+	 * Additional filters specified by you
+	 */
+	additionalFilters: DataGridAdditionalFilters;
+	/**
+	 * The field filter contents
+	 */
+	fieldFilter: IDataGridFieldFilter;
+	/**
+	 * The sort settings
+	 */
+	sort: DataGridSortSetting[];
+}
+
 export interface IDataGridCallbacks {
 	/**
 	 * Loads data for the grid
-	 * @param page The page to load
-	 * @param rows The amount of rows per page
-	 * @param quickFilter The search box content
-	 * @param additionalFilters Additional filters specified by you
-	 * @param fieldFilter The field filter contents
-	 * @param sort The sort settings
+	 * @param params The load data parameters
 	 * @returns The loaded data (resolve) or an error (reject)
 	 */
 	loadData: (
-		page: number,
-		rows: number,
-		quickFilter: string,
-		additionalFilters: DataGridAdditionalFilters,
-		fieldFilter: IDataGridFieldFilter,
-		sort: DataGridSortSetting[]
+		params: IDataGridLoadDataParameters
 	) => DataGridData | Promise<DataGridData>;
 	/**
 	 * Extracts additional filters from the provided custom data
@@ -93,9 +111,9 @@ export interface IDataGridColumnDef {
 	 */
 	headerName: string;
 	/**
-	 * The data type
+	 * The data type used for filtering
 	 */
-	type: "string" | "number";
+	type: ModelFilterType;
 
 	// internal fields, do not set, will be overwritten
 	/**
@@ -135,7 +153,12 @@ export interface DataGridData {
 }
 
 export type DataGridRowData = { id: string } & {
-	[key: string]: string | number | { toString: () => string } | null;
+	[key: string]:
+		| string
+		| number
+		| { toString: () => string }
+		| React.ReactElement
+		| null;
 };
 
 export type DataGridCustomDataType = { [key: string]: unknown };
@@ -285,14 +308,16 @@ const DataGrid = (props: IDataGridProps) => {
 
 		void (async () => {
 			try {
-				const data = await loadData(
-					pageIndex + 1,
-					rowsPerPage,
-					search,
-					getAdditionalFilters ? getAdditionalFilters(state.customData) : {},
-					fieldFilter,
-					sorts
-				);
+				const data = await loadData({
+					page: pageIndex + 1,
+					rows: rowsPerPage,
+					quickFilter: search,
+					additionalFilters: getAdditionalFilters
+						? getAdditionalFilters(state.customData)
+						: {},
+					fieldFilter: fieldFilter,
+					sort: sorts,
+				});
 				setState((prevState) => ({
 					...prevState,
 					rowsTotal: data.rowsTotal,

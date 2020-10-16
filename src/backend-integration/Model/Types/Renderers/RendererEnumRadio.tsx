@@ -59,6 +59,8 @@ class RendererEnumRadio extends TypeEnum {
 			);
 		}
 		if (visibility.editable) {
+			if (visibility.grid) throw new Error("Not supported");
+
 			return (
 				<FormControl
 					component={"fieldset"}
@@ -94,6 +96,7 @@ class RendererEnumRadio extends TypeEnum {
 		const valueInfo = this.values.find((entry) => entry.value === value);
 		return (
 			<Typography>
+				{!visibility.grid && `${label}: `}
 				{valueInfo
 					? valueInfo.getLabel()
 					: ccI18n.t("backend-integration.model.types.renderers.enum.unknown")}

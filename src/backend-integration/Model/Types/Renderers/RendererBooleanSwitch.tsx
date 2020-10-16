@@ -46,6 +46,8 @@ class RendererBooleanSwitch extends TypeBoolean {
 			);
 		}
 		if (visibility.editable) {
+			if (visibility.grid) throw new Error("Not supported");
+
 			return (
 				<FormControl
 					required={visibility.required}
@@ -78,7 +80,7 @@ class RendererBooleanSwitch extends TypeBoolean {
 		}
 		return (
 			<Typography>
-				{label}:{" "}
+				{!visibility.grid && `${label}: `}
 				{value
 					? ccI18n.t("backend-integration.model.types.renderers.boolean.true")
 					: ccI18n.t("backend-integration.model.types.renderers.boolean.false")}

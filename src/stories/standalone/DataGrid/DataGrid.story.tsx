@@ -123,14 +123,16 @@ export const DataGridStory = (): React.ReactElement => {
 						? GridCustomFilters
 						: undefined
 				}
-				loadData={(
+				loadData={({
 					page,
-					rowsPerPage,
+					rows,
 					quickFilter,
 					additionalFilters,
 					fieldFilter,
-					sort
-				): DataGridData => {
+					sort,
+				}): DataGridData => {
+					const rowsPerPage = rows;
+
 					action("loadData")({
 						page,
 						rowsPerPage,

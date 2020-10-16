@@ -47,6 +47,9 @@ class RendererYourType extends ModelDataTypeYourType {
 		}
 		// if the visibility is editable we show the edit control and an validation error message display (FormHelperText)
 		if (visibility.editable) {
+            // you can implement your own editable grid renderer here, no need to show labels in that case
+            if (visibility.grid) throw new Error("Not supported");
+
 			return (
 				<>
 					<YourEditControl
@@ -64,10 +67,11 @@ class RendererYourType extends ModelDataTypeYourType {
 			);
 		}
 
-		// if the control is not editable we show a basic read-only view
+		// if the control is not editable we show a basic read-only view. If visibility.grid is true don't show the label
 		return (
 			<Typography>
-				{label}: {value}
+				{visibility.grid && `${label} `}:
+                {value}
 			</Typography>
 		);
 	}

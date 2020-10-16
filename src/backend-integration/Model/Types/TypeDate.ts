@@ -21,6 +21,10 @@ abstract class TypeDate implements Type<Date> {
 	getDefaultValue(): Date {
 		return normalizeDate(new Date());
 	}
+
+	stringify(value: Date): string {
+		return value.toLocaleString();
+	}
 }
 
 export default TypeDate;

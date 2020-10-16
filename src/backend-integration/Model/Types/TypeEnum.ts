@@ -30,6 +30,13 @@ abstract class TypeEnum implements Type<string> {
 	getDefaultValue(): string {
 		return this.values[0].value;
 	}
+
+	stringify(value: string): string {
+		return (
+			this.values.find((entry) => entry.value === value)?.getLabel() ||
+			"Invalid Enum Value detected!"
+		);
+	}
 }
 
 export default TypeEnum;

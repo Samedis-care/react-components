@@ -2,9 +2,9 @@ import Visibility from "../Visibility";
 
 export default {
 	disabled: false,
-	hidden: true,
-	editable: false,
-	readOnly: false,
+	hidden: false,
+	editable: true,
+	readOnly: true,
 	required: false,
-	grid: false,
+	grid: true,
 } as Visibility;

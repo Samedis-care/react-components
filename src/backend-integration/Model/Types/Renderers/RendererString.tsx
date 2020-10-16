@@ -49,6 +49,8 @@ class RendererString extends TypeString {
 			);
 		}
 		if (visibility.editable) {
+			if (visibility.grid) throw new Error("Not supported");
+
 			return (
 				<>
 					<TextField
@@ -70,7 +72,12 @@ class RendererString extends TypeString {
 				</>
 			);
 		}
-		return <Typography>{value}</Typography>;
+		return (
+			<Typography>
+				{!visibility.grid && `${label}: `}
+				{value}
+			</Typography>
+		);
 	}
 }
 

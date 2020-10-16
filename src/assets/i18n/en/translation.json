@@ -68,6 +68,17 @@
 					"files": {
 						"no-file": "No files present"
 					}
+				},
+				"date-nullable": {
+					"not-set": "N/A"
+				},
+				"image": {
+					"not-set": "Image not present",
+					"set": "Image present"
+				},
+				"boolean": {
+					"true": "Yes",
+					"false": "No"
 				}
 			}
 		}

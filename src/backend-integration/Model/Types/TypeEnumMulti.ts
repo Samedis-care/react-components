@@ -33,6 +33,16 @@ abstract class TypeMultiEnum implements Type<string[]> {
 	getDefaultValue(): string[] {
 		return [];
 	}
+
+	stringify(values: string[]): string {
+		return values
+			.map(
+				(value) =>
+					this.values.find((val) => val.value === value)?.getLabel() ||
+					"Invalid Enum Value detected!"
+			)
+			.join(", ");
+	}
 }
 
 export default TypeMultiEnum;

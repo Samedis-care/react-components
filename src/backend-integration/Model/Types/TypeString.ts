@@ -26,6 +26,10 @@ abstract class TypeString implements Type<string> {
 	getDefaultValue(): string {
 		return "";
 	}
+
+	stringify(value: string): string {
+		return value;
+	}
 }
 
 export default TypeString;

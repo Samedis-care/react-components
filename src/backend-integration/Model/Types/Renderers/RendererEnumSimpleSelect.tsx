@@ -67,6 +67,7 @@ class RendererEnumSelect extends TypeEnum {
 		const valueInfo = this.values.find((entry) => entry.value === value);
 		return (
 			<Typography>
+				{!visibility.grid && `${label}: `}
 				{valueInfo
 					? valueInfo.getLabel()
 					: ccI18n.t("backend-integration.model.types.renderers.enum.unknown")}

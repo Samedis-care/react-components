@@ -23,6 +23,11 @@ interface Visibility {
 	 * Is required field?
 	 */
 	required: boolean;
+
+	/**
+	 * Is this field being rendered in a datagrid?
+	 */
+	grid: boolean;
 }
 
 export default Visibility;

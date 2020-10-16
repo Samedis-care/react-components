@@ -15,6 +15,7 @@ import {
 import { makeStyles } from "@material-ui/core/styles";
 import FilterEntry, { IFilterDef } from "./FilterEntry";
 import i18n from "../../../i18n";
+import { ModelFilterType } from "../../../backend-integration/Model";
 
 export interface IDataGridContentColumnHeaderContentProps {
 	/**
@@ -49,7 +50,7 @@ export interface IDataGridContentColumnHeaderContentProps {
 	/**
 	 * The type of the column
 	 */
-	columnType: "number" | "string";
+	columnType: ModelFilterType;
 }
 
 const useStyles = makeStyles({

@@ -28,6 +28,12 @@ interface Type<T> {
 	getDefaultValue(): T;
 
 	/**
+	 * Turns value into string
+	 * @param value The value to stringify
+	 */
+	stringify(value: T): string;
+
+	/**
 	 * Optional serialization handler. Turns value into a JSON serializable value.
 	 * @param value The raw value
 	 * @returns The JSON serializable value

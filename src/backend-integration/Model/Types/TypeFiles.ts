@@ -68,6 +68,10 @@ abstract class TypeFiles implements Type<FileData[]> {
 			}))
 		);
 	};
+
+	stringify(values: FileData[]): string {
+		return values.map((value) => value.file.name).join(", ");
+	}
 }
 
 export default TypeFiles;

@@ -6,4 +6,5 @@ export default {
 	editable: true,
 	readOnly: false,
 	required: true,
+	grid: false,
 } as Visibility;

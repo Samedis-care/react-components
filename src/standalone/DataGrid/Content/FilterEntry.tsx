@@ -1,6 +1,7 @@
 import React from "react";
 import { Grid, MenuItem, Select, TextField } from "@material-ui/core";
 import FilterCombinator from "./FilterCombinator";
+import { ModelFilterType } from "../../../backend-integration/Model";
 
 export type FilterType =
 	| "contains"
@@ -16,8 +17,6 @@ export type FilterType =
 	| "inRange";
 export type FilterComboType = "or" | "and";
 
-export type ValueType = "string" | "number";
-
 export interface IFilterDef {
 	type: FilterType;
 	value1: string;
@@ -30,7 +29,7 @@ interface IProps {
 	/**
 	 * The type of the column value (string, number, etc). See ValueType
 	 */
-	valueType: ValueType;
+	valueType: ModelFilterType;
 	/**
 	 * The currently active filter
 	 */

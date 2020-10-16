@@ -46,39 +46,37 @@ class RendererBooleanCheckbox extends TypeBoolean {
 			);
 		}
 		if (visibility.editable) {
-			return (
+			const control = (
+				<Checkbox
+					name={field}
+					checked={this.invert ? !value : value}
+					disabled={visibility.readOnly}
+					onChange={(
+						evt: React.ChangeEvent<HTMLInputElement>,
+						checked: boolean
+					) => {
+						handleChange(evt.target.name, this.invert ? !checked : checked);
+					}}
+					onBlur={handleBlur}
+				/>
+			);
+
+			return visibility.grid ? (
+				control
+			) : (
 				<FormControl
 					required={visibility.required}
 					error={!!errorMsg}
 					component={"fieldset"}
 				>
-					<FormControlLabel
-						control={
-							<Checkbox
-								name={field}
-								checked={this.invert ? !value : value}
-								disabled={visibility.readOnly}
-								onChange={(
-									evt: React.ChangeEvent<HTMLInputElement>,
-									checked: boolean
-								) => {
-									handleChange(
-										evt.target.name,
-										this.invert ? !checked : checked
-									);
-								}}
-								onBlur={handleBlur}
-							/>
-						}
-						label={label}
-					/>
+					<FormControlLabel control={control} label={label} />
 					<FormHelperText>{errorMsg}</FormHelperText>
 				</FormControl>
 			);
 		}
 		return (
 			<Typography>
-				{label}:{" "}
+				{!visibility.grid && `${label}: `}
 				{value
 					? ccI18n.t("backend-integration.model.types.renderers.boolean.true")
 					: ccI18n.t("backend-integration.model.types.renderers.boolean.false")}

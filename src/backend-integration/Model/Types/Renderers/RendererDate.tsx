@@ -35,6 +35,8 @@ class RendererDateNullable extends TypeDate {
 			);
 		}
 		if (visibility.editable) {
+			if (visibility.grid) throw new Error("Not supported");
+
 			return (
 				<>
 					<KeyboardDatePicker
@@ -57,7 +59,7 @@ class RendererDateNullable extends TypeDate {
 		}
 		return (
 			<Typography>
-				{label}:{" "}
+				{!visibility.grid && `${label}: `}
 				{value
 					? value.toLocaleString()
 					: ccI18n.t(
