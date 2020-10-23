@@ -13,6 +13,7 @@ import { TableHead, TableRow } from "@material-ui/core";
 import ColumnHeader from "./ColumnHeader";
 import { IFilterDef } from "./FilterEntry";
 import SelectAll from "./SelectAll";
+import { SpacingCell } from "./CustomCells";
 
 export type IDataGridColumnsState = { [field: string]: IDataGridColumnState };
 
@@ -109,6 +110,7 @@ const ContentHeader = (props: IDataGridColumnProps) => {
 						onSortChange={onSortChange}
 					/>
 				))}
+				<SpacingCell />
 			</TableRow>
 		</TableHead>
 	);

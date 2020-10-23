@@ -41,20 +41,20 @@ export interface IDataGridExporter<T> {
 	/**
 	 * The label of the export menu entry while waiting for the user to click it
 	 */
-	label: string;
+	getLabel: () => string;
 	/**
 	 * The label of the export menu entry while waiting for onRequest to complete
 	 */
-	workingLabel: string;
+	getWorkingLabel: () => string;
 	/**
 	 * The label of the export menu entry after onRequest completed, but before
 	 * onDownload got called
 	 */
-	readyLabel: string;
+	getReadyLabel: () => string;
 	/**
 	 * The label of the export menu entry if an error occurs in onRequest
 	 */
-	errorLabel: string;
+	getErrorLabel: () => string;
 	/**
 	 * Requests the backend to prepare an export with the given parameters
 	 * @param quickFilter The quick filter (search field)

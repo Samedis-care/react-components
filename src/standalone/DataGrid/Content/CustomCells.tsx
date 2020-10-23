@@ -8,6 +8,7 @@ const selectRowCellStyles = createStyles((theme: Theme) => ({
 		backgroundColor: "inherit",
 		borderRight: `1px solid ${theme.palette.divider}`,
 		zIndex: 1000,
+		width: 48,
 	},
 }));
 export const SelectRowCell = withStyles(selectRowCellStyles)(TableCell);
@@ -56,6 +57,15 @@ const selectAllCellStyles = createStyles((theme: Theme) => ({
 		borderBottom: `1px solid ${theme.palette.divider}`,
 		borderRight: `1px solid ${theme.palette.divider}`,
 		zIndex: 1001,
+		width: 48,
 	},
 }));
 export const SelectAllCell = withStyles(selectAllCellStyles)(TableCell);
+
+const spacingCellStyles = createStyles({
+	root: {
+		minWidth: 0,
+		padding: 0,
+	},
+});
+export const SpacingCell = withStyles(spacingCellStyles)(TableCell);

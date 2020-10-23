@@ -1,5 +1,6 @@
 import { Connector } from "../../../backend-integration/Connector";
 import { ModelFieldName } from "../../../backend-integration/Model";
+import { ResponseMeta } from "../../../backend-integration/Connector";
 
 class FormStoryConnector<KeyT extends ModelFieldName> extends Connector<KeyT> {
 	create(): Promise<Record<KeyT, unknown>> {
@@ -10,7 +11,7 @@ class FormStoryConnector<KeyT extends ModelFieldName> extends Connector<KeyT> {
 		throw new Error("Unimplemented");
 	}
 
-	index(): Promise<Record<KeyT, unknown>[]> {
+	index(): Promise<[Record<KeyT, unknown>[], ResponseMeta]> {
 		throw new Error("Unimplemented");
 	}
 

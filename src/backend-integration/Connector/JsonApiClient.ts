@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
 import ccI18n from "../../i18n";
 import AuthMode from "./AuthMode";
+import { addGetParams } from "../../utils";
 
 export type GetParams = Record<string, unknown> | null;
 /**
@@ -156,10 +157,10 @@ class JsonApiClient {
 			}
 
 			// Handle URL GET arguments
-			url = JsonApiClient.addGetParams(url, args);
+			url = addGetParams(url, args);
 			// Handle POST data
 			if (body) {
-				body = JsonApiClient.stringifyData(body);
+				body = JSON.stringify(body);
 				headers["Content-Type"] = "application/json";
 			}
 			// Perform request
@@ -220,57 +221,6 @@ class JsonApiClient {
 				void (await this.handlePostRequest(method, url, args, body, auth));
 			}
 		}
-	}
-
-	/**
-	 * Adds the given query parameters to the given url
-	 * @param url The base url
-	 * @param args The query parameters
-	 * @private
-	 * @returns The url with query parameter
-	 */
-	private static addGetParams(
-		url: string,
-		args: Record<string, unknown> | null
-	): string {
-		if (!args) {
-			return url;
-		}
-		let argString = "";
-		for (const key in args) {
-			if (!Object.prototype.hasOwnProperty.call(args, key)) {
-				continue;
-			}
-
-			if (typeof args[key] === "string") {
-				argString +=
-					"&" +
-					encodeURIComponent(key) +
-					"=" +
-					encodeURIComponent(args[key] as string);
-			} else if (typeof args[key] === "number") {
-				argString +=
-					"&" +
-					encodeURIComponent(key) +
-					"=" +
-					encodeURIComponent((args[key] as number).toString());
-			} else if (typeof args[key] === "object") {
-				argString +=
-					"&" +
-					encodeURIComponent(key) +
-					"=" +
-					encodeURIComponent(JSON.stringify(args[key]));
-			} else {
-				console.error("Unhandled type", args[key]);
-				throw new Error("Unhandled type");
-			}
-		}
-
-		return argString.length === 0 ? url : url + "?" + argString.substr(1);
-	}
-
-	private static stringifyData(body: unknown): string {
-		return JSON.stringify(body);
 	}
 }
 

@@ -88,5 +88,18 @@
 				}
 			}
 		}
+	},
+	"backend-components": {
+		"data-grid": {
+			"delete": {
+				"error-dialog": {
+					"title": "Error",
+					"message": "Failed deleting the selected entries: {ERROR}",
+					"buttons": {
+						"okay": "Okay"
+					}
+				}
+			}
+		}
 	}
 }

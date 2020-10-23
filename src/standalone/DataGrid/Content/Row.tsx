@@ -5,7 +5,7 @@ import {
 	DataGridRowData,
 	IDataGridColumnProps,
 } from "../index";
-import { DataGridCell } from "./CustomCells";
+import { DataGridCell, SpacingCell } from "./CustomCells";
 import FixedCell from "./FixedCell";
 import SelectRow from "./SelectRow";
 import { makeStyles } from "@material-ui/core/styles";
@@ -59,6 +59,7 @@ const Row = (props: IDataGridRowProps) => {
 					</DataGridCell>
 				)
 			)}
+			<SpacingCell />
 		</TableRow>
 	);
 };

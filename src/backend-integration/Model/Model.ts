@@ -1,9 +1,10 @@
 import Type from "./Type";
 import Visibility from "./Visibility";
-import Connector from "../Connector/Connector";
+import Connector, { ResponseMeta } from "../Connector/Connector";
 import { useMutation, useQuery } from "react-query";
 import { MutationResultPair, QueryResult } from "react-query/types/core/types";
 import { ModelDataStore } from "../index";
+import { IDataGridLoadDataParameters } from "../../standalone/DataGrid";
 
 export interface PageVisibility {
 	overview: Visibility;
@@ -29,6 +30,14 @@ export interface ModelFieldDefinition<
 	 * The label to display to the user
 	 */
 	getLabel: () => string;
+	/**
+	 * Enable filtering? (for BackendDataGrid)
+	 */
+	filterable?: boolean;
+	/**
+	 * Enable sorting? (for BackendDataGrid)
+	 */
+	sortable?: boolean;
 	/**
 	 * The default value
 	 */
@@ -70,6 +79,13 @@ export type ModelField<
 > = Record<KeyT, ModelFieldDefinition<any, KeyT, VisibilityT, CustomT>>;
 export type ModelFieldName = "id" | string;
 
+/**
+ * Deletion request. If invert is false only delete ids array. If invert is true delete everything except the given ids
+ * @param invert Invert the selection
+ * @param ids The selection
+ */
+export type AdvancedDeleteRequest = [invert: boolean, ids: string[]];
+
 class Model<
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
@@ -102,6 +118,22 @@ class Model<
 		this.modelId = name;
 		this.fields = model;
 		this.connector = connector;
+	}
+
+	/**
+	 * Loads a list of data entries by the given search params
+	 * @param params The search params
+	 */
+	public async index(
+		params: Partial<IDataGridLoadDataParameters> | undefined
+	): Promise<[Record<KeyT, unknown>[], ResponseMeta]> {
+		const [rawData, meta] = await this.connector.index(params);
+		return [
+			await Promise.all(
+				rawData.map((data) => this.applySerialization(data, "deserialize"))
+			),
+			meta,
+		];
 	}
 
 	/**
@@ -147,6 +179,81 @@ class Model<
 					// @ts-ignore
 					// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 					ModelDataStore.setQueryData([this.modelId, { id: data.id }], data);
+				},
+				throwOnError: true,
+			}
+		);
+	}
+
+	public delete<SnapShotT = unknown>(): MutationResultPair<
+		void,
+		Error,
+		string,
+		SnapShotT
+	> {
+		// eslint-disable-next-line react-hooks/rules-of-hooks
+		return useMutation(
+			(id: string) => {
+				return this.connector.delete(id);
+			},
+			{
+				onSuccess: (data: void, id: string) => {
+					ModelDataStore.setQueryData([this.modelId, { id: id }], undefined);
+				},
+				throwOnError: true,
+			}
+		);
+	}
+
+	public deleteMultiple<SnapShotT = unknown>(): MutationResultPair<
+		void,
+		Error,
+		string[],
+		SnapShotT
+	> {
+		// eslint-disable-next-line react-hooks/rules-of-hooks
+		return useMutation(
+			(ids: string[]) => {
+				return this.connector.deleteMultiple(ids);
+			},
+			{
+				onSuccess: (data: void, ids: string[]) => {
+					ids.forEach((id) =>
+						ModelDataStore.setQueryData([this.modelId, { id: id }], undefined)
+					);
+				},
+				throwOnError: true,
+			}
+		);
+	}
+
+	public doesSupportAdvancedDeletion(): boolean {
+		return !!this.connector.deleteAdvanced;
+	}
+
+	public deleteAdvanced<SnapShotT = unknown>(): MutationResultPair<
+		void,
+		Error,
+		AdvancedDeleteRequest,
+		SnapShotT
+	> {
+		// eslint-disable-next-line react-hooks/rules-of-hooks
+		return useMutation(
+			(req: AdvancedDeleteRequest) => {
+				if (!this.connector.deleteAdvanced) {
+					throw new Error("Connector doesn't support advanced deletion");
+				}
+				return this.connector.deleteAdvanced(req);
+			},
+			{
+				onSuccess: (data: void, req: AdvancedDeleteRequest) => {
+					if (!req[0]) {
+						req[1].forEach((id) =>
+							ModelDataStore.setQueryData([this.modelId, { id: id }], undefined)
+						);
+					} else {
+						ModelDataStore.clear();
+					}
 				},
 				throwOnError: true,
 			}
@@ -228,6 +335,14 @@ class Model<
 			if (!Object.prototype.hasOwnProperty.call(values, key)) continue;
 
 			const field = this.fields[key];
+			if (!field) {
+				console.debug(
+					"[Components-Care] [Model] Trying to deserialize data with no field definition: " +
+						key
+				);
+				continue;
+			}
+
 			const serializeFunc = field.type[func];
 
 			if (serializeFunc) {

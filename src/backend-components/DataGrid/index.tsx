@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import DataGrid, {
 	DataGridData,
 	IDataGridColumnDef,
@@ -10,13 +10,17 @@ import Model, {
 	ModelFieldName,
 	PageVisibility,
 } from "../../backend-integration/Model/Model";
+import { useDialogContext } from "../../framework";
+import { ErrorDialog } from "../../non-standalone/Dialog";
+import ccI18n from "../../i18n";
 
 export interface BackendDataGridProps<
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
 	CustomDataT
-> extends Omit<IDataGridProps, "loadData" | "columnDef"> {
+> extends Omit<IDataGridProps, "loadData" | "columns" | "exporters"> {
 	model: Model<KeyT, VisibilityT, CustomDataT>;
+	enableDelete?: boolean;
 }
 
 const BackendDataGrid = <
@@ -26,17 +30,23 @@ const BackendDataGrid = <
 >(
 	props: BackendDataGridProps<KeyT, VisibilityT, CustomDataT>
 ) => {
-	const { model } = props;
+	const { model, enableDelete, enableDeleteAll } = props;
+
+	const [pushDialog] = useDialogContext();
+	const [refreshToken, setRefreshToken] = useState("");
+
+	if (enableDeleteAll && !model.doesSupportAdvancedDeletion()) {
+		throw new Error(
+			"Delete All functionality requested, but not provided by model backend connector"
+		);
+	}
 
 	const loadData = useCallback(
 		async (params: IDataGridLoadDataParameters): Promise<DataGridData> => {
-			const meta = {
-				totalRows: 0,
-			};
-			const result = await model.connector.index(meta, params);
+			const [result, meta] = await model.index(params);
 			return {
 				rowsTotal: meta.totalRows,
-				rows: result.map((entry) =>
+				rows: result.map((entry: Record<KeyT, unknown>) =>
 					Object.fromEntries(
 						Object.entries(entry).map((kvs) => {
 							const [key, value] = kvs;
@@ -50,7 +60,9 @@ const BackendDataGrid = <
 									field: key,
 									value: value,
 									label: field.getLabel(),
-									visibility: field.visibility.overview,
+									visibility: Object.assign({}, field.visibility.overview, {
+										hidden: false,
+									}),
 									/**
 									 * The onChange handler for editable input fields
 									 */
@@ -82,8 +94,52 @@ const BackendDataGrid = <
 		[model]
 	);
 
-	const columns: IDataGridColumnDef[] = Object.entries(model.fields).map(
-		(entry) => {
+	const [deleteAdvanced] = model.deleteAdvanced();
+	const [deleteMultiple] = model.deleteMultiple();
+	const handleDelete = useCallback(
+		async (invert: boolean, ids: string[]) => {
+			try {
+				if (enableDeleteAll) {
+					await deleteAdvanced([invert, ids]);
+				} else {
+					await deleteMultiple(ids);
+				}
+				setRefreshToken(new Date().getTime().toString());
+			} catch (e) {
+				pushDialog(
+					<ErrorDialog
+						title={ccI18n.t(
+							"backend-components.data-grid.delete.error-dialog.title"
+						)}
+						message={ccI18n.t(
+							"backend-components.data-grid.delete.error-dialog.message",
+							{ ERROR: (e as Error).message }
+						)}
+						buttons={[
+							{
+								text: ccI18n.t(
+									"backend-components.data-grid.delete.error-dialog.buttons.okay"
+								),
+							},
+						]}
+					/>
+				);
+			}
+		},
+		[enableDeleteAll, deleteAdvanced, deleteMultiple, pushDialog]
+	);
+
+	const columns: IDataGridColumnDef[] = Object.entries(model.fields)
+		.filter(
+			(entry) =>
+				!(entry[1] as ModelFieldDefinition<
+					unknown,
+					KeyT,
+					VisibilityT,
+					CustomDataT
+				>).visibility.overview.disabled
+		)
+		.map((entry) => {
 			const key = entry[0];
 			const value = entry[1] as ModelFieldDefinition<
 				unknown,
@@ -95,11 +151,24 @@ const BackendDataGrid = <
 				field: key,
 				headerName: value.getLabel(),
 				type: value.type.getFilterType(),
+				hidden: value.visibility.overview.hidden,
+				filterable: value.filterable,
+				sortable: value.sortable,
 			};
-		}
-	);
+		});
 
-	return <DataGrid {...props} loadData={loadData} columns={columns} />;
+	return (
+		<DataGrid
+			{...props}
+			onDelete={enableDelete ? handleDelete : undefined}
+			loadData={loadData}
+			columns={columns}
+			forceRefreshToken={`${
+				props.forceRefreshToken || "undefined"
+			}${refreshToken}`}
+			exporters={model.connector.dataGridExporters}
+		/>
+	);
 };
 
 export default React.memo(BackendDataGrid);

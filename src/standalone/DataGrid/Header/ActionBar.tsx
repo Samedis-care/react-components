@@ -1,9 +1,9 @@
 import React, { useCallback, useContext } from "react";
 import {
 	DataGridColumnsStateContext,
-	DataGridDefaultState,
 	DataGridPropsContext,
 	DataGridStateContext,
+	getDataGridDefaultState,
 } from "../index";
 import { Hidden } from "@material-ui/core";
 import ActionBarView from "./ActionBarView";
@@ -19,7 +19,7 @@ const ActionBar = () => {
 	const { selectAll, selectedRows } = state;
 	const gridProps = useContext(DataGridPropsContext);
 	if (!gridProps) throw new Error("Props Context not set");
-	const { onAddNew, onEdit, onDelete } = gridProps;
+	const { columns, onAddNew, onEdit, onDelete } = gridProps;
 
 	const toggleSettings = useCallback(() => {
 		setState((prevState) => ({
@@ -48,9 +48,9 @@ const ActionBar = () => {
 	}, [onDelete, selectAll, selectedRows]);
 
 	const handleReset = useCallback(() => {
-		setState(DataGridDefaultState);
+		setState(getDataGridDefaultState(columns));
 		setColumnState({});
-	}, [setState, setColumnState]);
+	}, [setState, setColumnState, columns]);
 
 	return (
 		<>

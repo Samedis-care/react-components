@@ -8,4 +8,5 @@ export { default as getFileExt } from "./getFileExt";
 export { default as processImage } from "./processImage";
 export { default as shallowCompare } from "./shallowCompare";
 export { default as matchMime } from "./matchMime";
+export { default as addGetParams } from "./addGetParams";
 export * from "./genericHOC";

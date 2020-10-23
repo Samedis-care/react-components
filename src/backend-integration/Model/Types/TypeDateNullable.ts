@@ -27,6 +27,16 @@ abstract class TypeDateNullable implements Type<Date | null> {
 			? value.toLocaleString()
 			: ccI18n.t("backend-integration.model.types.date-nullable.not-set");
 	}
+
+	serialize = (value: Date | null): unknown => {
+		if (!value) return null;
+		return value.toISOString();
+	};
+
+	deserialize = (value: unknown): Date | null => {
+		if (value) return new Date(value as string);
+		return null;
+	};
 }
 
 export default TypeDateNullable;

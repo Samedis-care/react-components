@@ -22,10 +22,12 @@ First we have to implement our own backend connector, for this we can use the fo
     <summary>TypeScript</summary>
     
 ```typescript
-import {Connector, ModelFieldName} from "components-care";
+import {Connector, ModelFieldName, ResponseMeta} from "components-care";
 
 class BackendConnector<KeyT extends ModelFieldName> extends Connector<KeyT> {
-    async index(): Promise<Record<KeyT, unknown>[]> {
+    async index(
+		params: Partial<IDataGridLoadDataParameters> | undefined    
+    ): Promise<[Record<KeyT, unknown>[], ResponseMeta]> {
         throw new Error("Not implemented");
     }
 
@@ -48,7 +50,19 @@ class BackendConnector<KeyT extends ModelFieldName> extends Connector<KeyT> {
     async delete(id: string): Promise<void> {
         throw new Error("Not implemented");
     }
-
+/* Only implement if your backend can handle multiple deletes in one request
+	async deleteMultiple(ids: string[]): Promise<void> {
+		return super.deleteMultiple(ids);
+	}
+*/
+/* Only implement if your backend can handle delete all requests
+	deleteAdvanced = async (req: AdvancedDeleteRequest) => {
+        throw new Error("Not implemented");
+    };
+*/
+/* Define if your backend supports data exporters
+	dataGridExporters = undefined;
+*/
 }
 
 export default BackendConnector;
@@ -63,7 +77,7 @@ export default BackendConnector;
 import {Connector, ModelFieldName} from "components-care";
 
 class BackendConnector extends Connector {
-    async index() {
+    async index(params) {
         throw new Error("Not implemented");
     }
 
@@ -82,6 +96,19 @@ class BackendConnector extends Connector {
     async delete(id) {
         throw new Error("Not implemented");
     }
+/* Only implement if your backend can handle multiple deletes in one request
+	async deleteMultiple(ids) {
+		return super.deleteMultiple(ids);
+	}
+*/
+/* Only implement if your backend can handle delete all requests
+	deleteAdvanced = async (req) => {
+        throw new Error("Not implemented");
+    };
+*/
+/* Define if your backend supports data exporters
+	dataGridExporters = undefined;
+*/
 }
 
 export default BackendConnector;
@@ -151,6 +178,8 @@ You need to define all additional fields required for your model yourself. A fie
 +                if (value !== "valid") return "Value is not 'valid'!";
 +                return null; // no validation errors
 +            },
++            filterable: true, // optional, used for BackendDataGrid, defualts to false
++            sortable: true, // optional, used for BackendDataGrid, defualts to false
 +            onChange: ( // optional on change hook
 +                value: string,
 +                model: Model<string, PageVisibility, null>,
@@ -191,6 +220,8 @@ You need to define all additional fields required for your model yourself. A fie
 +                if (value !== "valid") return "Value is not 'valid'!";
 +                return null; // no validation errors
 +            },
++            filterable: true, // optional, used for BackendDataGrid, defualts to false
++            sortable: true, // optional, used for BackendDataGrid, defualts to false
 +            onChange: (value, model, setFieldValue) => { // optional on change hook
 +                // you can modify the model itself in here, useful for e.g.: implementing conditional enums
 +                return value;
@@ -226,7 +257,7 @@ import React, {useEffect} from "react";
 import {ErrorDialog, ErrorComponentProps, useDialogContext} from "components-care"
 
 const ErrorComponent = (props: ErrorComponentProps) => {
-const propError = props.error;
+    const propError = props.error;
 
     const [pushDialog] = useDialogContext();
 

@@ -64,13 +64,17 @@ export interface IDataGridCallbacks {
 		params: IDataGridLoadDataParameters
 	) => DataGridData | Promise<DataGridData>;
 	/**
+	 * Token to force reloading of data. Modify to force reload.
+	 */
+	forceRefreshToken?: string;
+	/**
 	 * Extracts additional filters from the provided custom data
 	 * @param customData The custom user-defined state-stored data
 	 */
 	getAdditionalFilters?: (customData: unknown) => DataGridAdditionalFilters;
 }
 
-export type DataGridAdditionalFilters = { [name: string]: unknown };
+export type DataGridAdditionalFilters = Record<string, unknown>;
 export type DataGridSortSetting = { field: string; direction: -1 | 1 };
 
 export interface IDataGridColumnProps {
@@ -97,6 +101,11 @@ export interface IDataGridColumnProps {
 	 * @param ids The list of ids to (not) delete
 	 */
 	onDelete?: (invert: boolean, ids: string[]) => void;
+	/**
+	 * Do we support and enable the delete all functionality?
+	 * If not set select all will only select all ids on the current page
+	 */
+	enableDeleteAll?: boolean;
 }
 
 export type IDataGridFieldFilter = { [field: string]: IFilterDef };
@@ -114,7 +123,18 @@ export interface IDataGridColumnDef {
 	 * The data type used for filtering
 	 */
 	type: ModelFilterType;
-
+	/**
+	 * Hidden by default?
+	 */
+	hidden?: boolean;
+	/**
+	 * Can the column be filtered?
+	 */
+	filterable?: boolean;
+	/**
+	 * Can the column be sorted?
+	 */
+	sortable?: boolean;
 	// internal fields, do not set, will be overwritten
 	/**
 	 * Is the column locked to the start
@@ -230,13 +250,15 @@ export const DataGridColumnsStateContext = React.createContext<
 	DataGridColumnState | undefined
 >(undefined);
 
-export const DataGridDefaultState: IDataGridState = {
+export const getDataGridDefaultState = (
+	columns: IDataGridColumnDef[]
+): IDataGridState => ({
 	search: "",
 	rowsPerPage: 25,
 	rowsTotal: 0,
 	pageIndex: 0,
 	showSettings: false,
-	hiddenColumns: [],
+	hiddenColumns: columns.filter((col) => col.hidden).map((col) => col.field),
 	lockedColumns: [],
 	selectAll: false,
 	selectedRows: [],
@@ -244,7 +266,7 @@ export const DataGridDefaultState: IDataGridState = {
 	dataLoadError: null,
 	refreshData: true,
 	customData: {},
-};
+});
 
 const useStyles = makeStyles((theme: Theme) => ({
 	wrapper: {
@@ -252,6 +274,7 @@ const useStyles = makeStyles((theme: Theme) => ({
 		height: "100%",
 		border: `1px solid ${theme.palette.divider}`,
 		borderRadius: 8,
+		backgroundColor: theme.palette.background.paper,
 	},
 	middle: {
 		borderTop: `1px solid ${theme.palette.divider}`,
@@ -261,10 +284,12 @@ const useStyles = makeStyles((theme: Theme) => ({
 }));
 
 const DataGrid = (props: IDataGridProps) => {
-	const { columns, loadData, getAdditionalFilters } = props;
+	const { columns, loadData, getAdditionalFilters, forceRefreshToken } = props;
 
 	const classes = useStyles();
-	const statePack = useState<IDataGridState>(DataGridDefaultState);
+	const statePack = useState<IDataGridState>(() =>
+		getDataGridDefaultState(columns)
+	);
 	const [state, setState] = statePack;
 	const {
 		search,
@@ -325,6 +350,7 @@ const DataGrid = (props: IDataGridProps) => {
 					refreshData: false,
 				}));
 			} catch (err) {
+				console.error("[Components-Care] [DataGrid] LoadData: ", err);
 				setState((prevState) => ({
 					...prevState,
 					dataLoadError: err as Error,
@@ -345,7 +371,7 @@ const DataGrid = (props: IDataGridProps) => {
 		[setState]
 	);
 
-	useEffect(refresh, [refresh, pageIndex, rowsPerPage]);
+	useEffect(refresh, [refresh, pageIndex, rowsPerPage, forceRefreshToken]);
 
 	// debounced refresh on filter and sort changes
 	const debouncedRefresh = useMemo(() => debounce(refresh, 500), [refresh]);

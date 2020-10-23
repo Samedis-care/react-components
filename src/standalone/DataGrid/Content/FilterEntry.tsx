@@ -18,10 +18,26 @@ export type FilterType =
 export type FilterComboType = "or" | "and";
 
 export interface IFilterDef {
+	/**
+	 * Type of comparison
+	 */
 	type: FilterType;
+	/**
+	 * Value for comparison, always present
+	 */
 	value1: string;
+	/**
+	 * Second value for comparison, only present in select cases:
+	 * - type == "inRange"
+	 */
 	value2: string;
+	/**
+	 * How to threat next filter entry (and or or)
+	 */
 	nextFilterType?: FilterComboType;
+	/**
+	 * The next filter to apply to the column
+	 */
 	nextFilter?: IFilterDef;
 }
 

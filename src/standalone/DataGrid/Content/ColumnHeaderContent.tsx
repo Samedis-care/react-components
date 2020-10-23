@@ -43,6 +43,10 @@ export interface IDataGridContentColumnHeaderContentProps {
 	 */
 	filter?: IFilterDef;
 	/**
+	 * Can the column be filtered?
+	 */
+	filterable: boolean;
+	/**
 	 * Updates the filter
 	 * @param value The new filter
 	 */
@@ -112,7 +116,7 @@ const ColumnHeaderContent = (
 	return (
 		<>
 			<Grid container justify={"space-between"}>
-				<Grid item className={classes.disableClick}>
+				<Grid item className={classes.disableClick} key={"title"}>
 					<Grid container justify={"flex-start"}>
 						<Grid item>{props.headerName}</Grid>
 						<Grid item className={classes.sortIcon}>
@@ -122,15 +126,19 @@ const ColumnHeaderContent = (
 						<Grid item>{props.sort !== 0 && props.sortOrder?.toString()}</Grid>
 					</Grid>
 				</Grid>
-				<Grid item>
-					<Tooltip title={i18n.t("standalone.data-grid.content.filter") || ""}>
-						<IconButton className={classes.filterButton} onClick={openFilter}>
-							<FilterIcon
-								color={props.filter?.value1 ? "primary" : undefined}
-							/>
-						</IconButton>
-					</Tooltip>
-				</Grid>
+				{props.filterable && (
+					<Grid item key={"filter"}>
+						<Tooltip
+							title={i18n.t("standalone.data-grid.content.filter") || ""}
+						>
+							<IconButton className={classes.filterButton} onClick={openFilter}>
+								<FilterIcon
+									color={props.filter?.value1 ? "primary" : undefined}
+								/>
+							</IconButton>
+						</Tooltip>
+					</Grid>
+				)}
 			</Grid>
 			{props.enableResize && (
 				<div

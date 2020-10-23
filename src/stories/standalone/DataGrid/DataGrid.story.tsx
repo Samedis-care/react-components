@@ -78,10 +78,10 @@ const columnDef: IDataGridColumnDef[] = [
 const exporters: IDataGridExporter<unknown>[] = [
 	{
 		id: "excel",
-		label: "Excel",
-		workingLabel: "Running excel export...",
-		readyLabel: "Excel spreadsheet is ready to download",
-		errorLabel: "Excel export failed",
+		getLabel: () => "Excel",
+		getWorkingLabel: () => "Running excel export...",
+		getReadyLabel: () => "Excel spreadsheet is ready to download",
+		getErrorLabel: () => "Excel export failed",
 		onRequest: (
 			quickFilter: string,
 			additionalFilters: DataGridAdditionalFilters,

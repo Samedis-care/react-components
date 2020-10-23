@@ -1,5 +1,6 @@
-import { ModelFieldName } from "../Model";
+import { AdvancedDeleteRequest, ModelFieldName } from "../Model";
 import { IDataGridLoadDataParameters } from "../../standalone/DataGrid";
+import { IDataGridExporter } from "../../standalone/DataGrid/Header";
 
 export interface ResponseMeta {
 	/**
@@ -14,14 +15,12 @@ export interface ResponseMeta {
 abstract class Connector<KeyT extends ModelFieldName> {
 	/**
 	 * Lists all available data entries
-	 * @param responseMeta Response meta data to be set by this function
 	 * @param params Filter, Sorting and Pagination parameters
-	 * @returns An array with all data entries
+	 * @returns An array with all data entries as well as some meta data
 	 */
 	abstract async index(
-		responseMeta: ResponseMeta,
 		params?: Partial<IDataGridLoadDataParameters>
-	): Promise<Record<KeyT, unknown>[]>;
+	): Promise<[Record<KeyT, unknown>[], ResponseMeta]>;
 
 	/**
 	 * Creates a new data entry with the given data
@@ -53,6 +52,26 @@ abstract class Connector<KeyT extends ModelFieldName> {
 	 * @param id The ID of the data entry to delete
 	 */
 	abstract async delete(id: string): Promise<void>;
+
+	/**
+	 * Delets multiple data entries at once. Should be overwritten if implemented by your backend.
+	 * @param ids The IDs of the data entries to delete
+	 */
+	async deleteMultiple(ids: string[]): Promise<void> {
+		void (await Promise.all(ids.map((id) => this.delete(id))));
+	}
+
+	/**
+	 * Advanced deletion handler which supports delete all
+	 * @param req The deletion request
+	 * @protected
+	 */
+	public deleteAdvanced?: (req: AdvancedDeleteRequest) => Promise<void>;
+
+	/**
+	 * DataGrid exporters supported by this backend connector
+	 */
+	public dataGridExporters?: IDataGridExporter<unknown>[];
 }
 
 export default Connector;

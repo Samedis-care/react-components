@@ -97,7 +97,7 @@ const ExportMenuEntry = React.forwardRef(
 						<ListItemIcon>
 							<IdleIcon />
 						</ListItemIcon>
-						<ListItemText primary={props.exporter.label} />
+						<ListItemText primary={props.exporter.getLabel()} />
 					</MenuItem>
 				)}
 				{status === DataGridExportStatus.Working && (
@@ -105,7 +105,7 @@ const ExportMenuEntry = React.forwardRef(
 						<ListItemIcon>
 							<CircularProgress size={24} />
 						</ListItemIcon>
-						<ListItemText primary={props.exporter.workingLabel} />
+						<ListItemText primary={props.exporter.getWorkingLabel()} />
 					</MenuItem>
 				)}
 				{status === DataGridExportStatus.Ready && (
@@ -113,7 +113,7 @@ const ExportMenuEntry = React.forwardRef(
 						<ListItemIcon>
 							<DoneIcon />
 						</ListItemIcon>
-						<ListItemText primary={props.exporter.readyLabel} />
+						<ListItemText primary={props.exporter.getReadyLabel()} />
 					</MenuItem>
 				)}
 				{status === DataGridExportStatus.Error && (
@@ -121,7 +121,7 @@ const ExportMenuEntry = React.forwardRef(
 						<ListItemIcon>
 							<ErrorIcon />
 						</ListItemIcon>
-						<ListItemText primary={props.exporter.errorLabel} />
+						<ListItemText primary={props.exporter.getErrorLabel()} />
 					</MenuItem>
 				)}
 			</>

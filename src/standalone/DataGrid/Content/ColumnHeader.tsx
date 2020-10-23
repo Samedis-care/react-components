@@ -47,7 +47,7 @@ const ColumnHeader = (props: IDataGridContentColumnHeaderProps) => {
 		onSortChange,
 		sortOrder,
 	} = props;
-	const { field } = column;
+	const { field, sortable, filterable } = column;
 	const theme = useTheme();
 	const [width, setWidth] = useState<number>(
 		() =>
@@ -72,10 +72,12 @@ const ColumnHeader = (props: IDataGridContentColumnHeaderProps) => {
 		[dragging, setWidth]
 	);
 	const onColumnClick = useCallback(() => {
+		if (!sortable) return;
+
 		if (sort === 0) onSortChange(field, 1);
 		else if (sort === 1) onSortChange(field, -1);
 		else if (sort === -1) onSortChange(field, 0);
-	}, [field, sort, onSortChange]);
+	}, [sortable, field, sort, onSortChange]);
 	const internalOnFilterChange = useCallback(
 		(newFilter: IFilterDef) => onFilterChange(field, newFilter),
 		[field, onFilterChange]
@@ -98,6 +100,7 @@ const ColumnHeader = (props: IDataGridContentColumnHeaderProps) => {
 			startDrag={startDrag}
 			sort={sort}
 			sortOrder={sortOrder}
+			filterable={!!filterable}
 			filter={filter}
 			onFilterChange={internalOnFilterChange}
 			columnType={props.column.type}
@@ -111,6 +114,7 @@ const ColumnHeader = (props: IDataGridContentColumnHeaderProps) => {
 				onClick={onColumnClick}
 				key={column.fixedColumnKey}
 				style={{
+					width: width,
 					minWidth: width,
 					zIndex: 1002,
 				}}
@@ -123,6 +127,7 @@ const ColumnHeader = (props: IDataGridContentColumnHeaderProps) => {
 			<StickyHeaderCell
 				onClick={onColumnClick}
 				style={{
+					width: width,
 					minWidth: width,
 					zIndex: 1000,
 				}}
