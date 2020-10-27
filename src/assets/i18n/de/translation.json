@@ -35,7 +35,7 @@
 			"today": "Heute"
 		},
 		"file-upload": {
-			"formats": "Dateiformante",
+			"formats": "Dateiformate",
 			"upload": "Hochladen",
 			"error": {
 				"invalid-type": "Nicht unterstützter Dateityp ausgewählt",
