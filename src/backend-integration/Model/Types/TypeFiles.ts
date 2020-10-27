@@ -9,19 +9,25 @@ import {
 } from "../../../standalone/FileUpload/Generic";
 import { fileToData } from "../../../utils";
 
-export type TypeFilesParams = Partial<
-	Pick<
-		FileUploadProps,
-		| "maxFiles"
-		| "accept"
-		| "acceptLabel"
-		| "imageDownscaleOptions"
-		| "convertImagesTo"
-		| "previewSize"
-		| "previewImages"
-		| "allowDuplicates"
-	>
->;
+export interface TypeFilesParams
+	extends Partial<
+		Pick<
+			FileUploadProps,
+			| "maxFiles"
+			| "accept"
+			| "acceptLabel"
+			| "imageDownscaleOptions"
+			| "convertImagesTo"
+			| "previewSize"
+			| "previewImages"
+			| "allowDuplicates"
+		>
+	> {
+	/**
+	 * Should we always send the raw file even if there is a preview? Defaults to false
+	 */
+	alwaysSendRawData?: boolean;
+}
 
 interface FileWithData extends FileData<FileMeta> {
 	/**
@@ -62,9 +68,11 @@ abstract class TypeFiles implements Type<FileData[]> {
 					name: file.file.name,
 				},
 				preview: file.preview,
-				data: file.canBeUploaded
-					? await fileToData(file.file as File)
-					: undefined,
+				data:
+					file.canBeUploaded &&
+					(this.params?.alwaysSendRawData || !file.preview)
+						? await fileToData(file.file as File)
+						: undefined,
 			}))
 		);
 	};

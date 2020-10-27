@@ -18,7 +18,7 @@ export const FormStory = (): React.ReactElement => {
 	return (
 		<Framework>
 			<div className={classes.wrapper}>
-				<BackendDataGrid model={TestModel} />
+				<BackendDataGrid enableDelete model={TestModel} />
 			</div>
 		</Framework>
 	);
