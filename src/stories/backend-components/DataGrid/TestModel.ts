@@ -10,18 +10,6 @@ import {
 } from "../../../backend-integration";
 import TestConnector from "./TestConnector";
 
-const getApiBase = (): string => {
-	if (!localStorage.apiBase) {
-		prompt(
-			"Please provide the API root for the DataGrid test (localStorage.apiBase)"
-		);
-	}
-	if (!localStorage.apiBase) {
-		throw new Error("Invalid API base entered");
-	}
-	return localStorage.apiBase as string;
-};
-
 class TestModel extends Model<ModelFieldName, PageVisibility, null> {
 	constructor() {
 		super(
@@ -159,7 +147,7 @@ class TestModel extends Model<ModelFieldName, PageVisibility, null> {
 					customData: null,
 				},
 			},
-			new TestConnector(getApiBase())
+			new TestConnector()
 		);
 	}
 }

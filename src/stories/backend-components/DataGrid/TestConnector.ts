@@ -45,22 +45,28 @@ interface BackendSort {
 }
 
 class TestConnector<KeyT extends ModelFieldName> extends Connector<KeyT> {
-	apiBase: string;
 	client: JsonApiClient;
 
-	constructor(apiBase: string) {
+	constructor() {
 		super();
 
-		this.apiBase = apiBase;
 		this.client = new JsonApiClient(this.handleAuth, this.processResponse);
 	}
 
+	getApiBase = (): string => {
+		if (!localStorage.apiBase) {
+			throw new Error(
+				"Please set the API endpoint for the data grid story in dev tools: 'localStorage.apiBase = \"https://url/to/your/api\"'"
+			);
+		}
+		return localStorage.apiBase as string;
+	};
+
 	handleAuth = (): string => {
 		if (!localStorage.dataGridAuth) {
-			localStorage.dataGridAuth = prompt("Enter your authentication");
-		}
-		if (!localStorage.dataGridAuth) {
-			throw new Error("Invalid Authentication!");
+			throw new Error(
+				"Please set your authentication in dev tools: 'localStorage.dataGridAuth = \"Authorization Header Value\"'"
+			);
 		}
 		return localStorage.dataGridAuth as string;
 	};
@@ -147,7 +153,7 @@ class TestConnector<KeyT extends ModelFieldName> extends Connector<KeyT> {
 		);
 
 		const resp = await this.client.get<IndexResponse>(
-			this.apiBase,
+			this.getApiBase(),
 			indexParams
 		);
 
@@ -160,13 +166,17 @@ class TestConnector<KeyT extends ModelFieldName> extends Connector<KeyT> {
 	}
 
 	async create(data: Record<string, unknown>): Promise<Record<KeyT, unknown>> {
-		const resp = await this.client.post<DataResponse>(this.apiBase, null, data);
+		const resp = await this.client.post<DataResponse>(
+			this.getApiBase(),
+			null,
+			data
+		);
 		return resp.data.attributes;
 	}
 
 	async read(id: string): Promise<Record<KeyT, unknown>> {
 		const resp = await this.client.get<DataResponse>(
-			`${this.apiBase}/${id}`,
+			`${this.getApiBase()}/${id}`,
 			null
 		);
 		return resp.data.attributes;
@@ -176,7 +186,7 @@ class TestConnector<KeyT extends ModelFieldName> extends Connector<KeyT> {
 		data: Record<ModelFieldName, unknown>
 	): Promise<Record<KeyT, unknown>> {
 		const resp = await this.client.put<DataResponse>(
-			`${this.apiBase}/${data.id as string}`,
+			`${this.getApiBase()}/${data.id as string}`,
 			null,
 			data
 		);
@@ -184,11 +194,11 @@ class TestConnector<KeyT extends ModelFieldName> extends Connector<KeyT> {
 	}
 
 	async delete(id: string): Promise<void> {
-		return this.client.delete(`${this.apiBase}/${id}`, null);
+		return this.client.delete(`${this.getApiBase()}/${id}`, null);
 	}
 
 	async deleteMultiple(ids: string[]): Promise<void> {
-		return this.client.delete(`${this.apiBase}/${ids.join(",")}`, null);
+		return this.client.delete(`${this.getApiBase()}/${ids.join(",")}`, null);
 	}
 }
 
