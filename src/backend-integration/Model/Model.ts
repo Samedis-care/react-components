@@ -130,7 +130,9 @@ class Model<
 		const [rawData, meta] = await this.connector.index(params);
 		return [
 			await Promise.all(
-				rawData.map((data) => this.applySerialization(data, "deserialize"))
+				rawData.map((data) =>
+					this.applySerialization(data, "deserialize", "overview")
+				)
 			),
 			meta,
 		];
@@ -146,7 +148,8 @@ class Model<
 			if (!id) return this.getDefaultValues();
 			return this.applySerialization(
 				await this.connector.read(id),
-				"deserialize"
+				"deserialize",
+				"edit"
 			);
 		});
 	}
@@ -163,11 +166,13 @@ class Model<
 		// eslint-disable-next-line react-hooks/rules-of-hooks
 		return useMutation(
 			async (values: Record<string, unknown>) => {
+				const update = !!("id" in values && values.id);
 				const serializedValues = await this.applySerialization(
 					values,
-					"serialize"
+					"serialize",
+					update ? "edit" : "create"
 				);
-				if ("id" in values && values.id) {
+				if (update) {
 					return this.connector.update(serializedValues);
 				} else {
 					return this.connector.create(serializedValues);
@@ -303,31 +308,45 @@ class Model<
 	/**
 	 * Serializes the given values into a JSON string
 	 * @param values The values to serialize
+	 * @param visibility The visibility of the field to check. Field will be dropped if visibility has disabled == true.
 	 */
-	public async serialize(values: Record<KeyT, unknown>): Promise<string> {
-		const serializable = await this.applySerialization(values, "serialize");
+	public async serialize(
+		values: Record<KeyT, unknown>,
+		visibility: keyof PageVisibility
+	): Promise<string> {
+		const serializable = await this.applySerialization(
+			values,
+			"serialize",
+			visibility
+		);
 		return JSON.stringify(serializable);
 	}
 
 	/**
 	 * Deserializes the given JSON data back into a data record
 	 * @param data The JSON string
+	 * @param visibility The visibility of the field to check. Field will be dropped if visibility has disabled == true.
 	 */
-	public async deserialize(data: string): Promise<Record<KeyT, unknown>> {
+	public async deserialize(
+		data: string,
+		visibility: keyof PageVisibility
+	): Promise<Record<KeyT, unknown>> {
 		const parsed = JSON.parse(data) as Record<KeyT, unknown>;
-		return await this.applySerialization(parsed, "deserialize");
+		return await this.applySerialization(parsed, "deserialize", visibility);
 	}
 
 	/**
 	 * Applies the given serialization function to the data
 	 * @param values The data
 	 * @param func The function to apply
+	 * @param visibility The visibility of the field to check. Field will be dropped if visibility has disabled == true.
 	 * @returns A copy of the data (not deep-copy)
 	 * @private
 	 */
 	private async applySerialization(
 		values: Record<KeyT, unknown>,
-		func: "serialize" | "deserialize"
+		func: "serialize" | "deserialize",
+		visibility: keyof PageVisibility
 	): Promise<Record<KeyT, unknown>> {
 		const copy: Record<string, unknown> = {};
 
@@ -337,9 +356,13 @@ class Model<
 			const field = this.fields[key];
 			if (!field) {
 				console.debug(
-					"[Components-Care] [Model] Trying to deserialize data with no field definition: " +
-						key
+					`[Components-Care] [Model] Trying to ${func} data with no field definition: ${key}`
 				);
+				continue;
+			}
+
+			// don't include disabled fields
+			if (field.visibility[visibility].disabled) {
 				continue;
 			}
 
