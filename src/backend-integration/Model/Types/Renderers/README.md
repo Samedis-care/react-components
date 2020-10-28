@@ -79,3 +79,7 @@ class RendererYourType extends ModelDataTypeYourType {
 
 export default RendererYourType;
 ```
+
+### Remarks
+
+If you implement an editable grid control you need to make sure that handleChange is only called when needed. Calling handleChange will send a update request to the backend and refresh the grid.

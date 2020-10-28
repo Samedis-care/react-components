@@ -78,10 +78,17 @@ const BackendDataGrid = <
 									) => {
 										if (!id) throw new Error("ID not set!");
 
-										await model.connector.update({
-											id: id,
-											[field]: value,
-										});
+										await model.connector.update(
+											await model.applySerialization(
+												{
+													id,
+													[field]: value,
+												},
+												"serialize",
+												"overview"
+											)
+										);
+										setRefreshToken(new Date().getTime().toString());
 									},
 									handleBlur: () => {
 										// this is unhandled in the data grid

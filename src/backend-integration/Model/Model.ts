@@ -341,20 +341,20 @@ class Model<
 	 * @param func The function to apply
 	 * @param visibility The visibility of the field to check. Field will be dropped if visibility has disabled == true.
 	 * @returns A copy of the data (not deep-copy)
-	 * @private
 	 */
-	private async applySerialization(
-		values: Record<KeyT, unknown>,
+	public async applySerialization(
+		values: Record<string, unknown>,
 		func: "serialize" | "deserialize",
 		visibility: keyof PageVisibility
-	): Promise<Record<KeyT, unknown>> {
+	): Promise<Record<string, unknown>> {
 		const copy: Record<string, unknown> = {};
 
 		for (const key in values) {
 			if (!Object.prototype.hasOwnProperty.call(values, key)) continue;
 
-			const field = this.fields[key];
+			const field = this.fields[key as KeyT];
 			if (!field) {
+				// eslint-disable-next-line no-console
 				console.debug(
 					`[Components-Care] [Model] Trying to ${func} data with no field definition: ${key}`
 				);
