@@ -12,6 +12,10 @@ interface RenderParams<T> {
 	 */
 	value: T;
 	/**
+	 * The initial value (server side value)
+	 */
+	initialValue: T;
+	/**
 	 * The label of the field
 	 */
 	label: string;

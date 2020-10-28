@@ -65,6 +65,7 @@ const BackendDataGrid = <
 								field?.type?.render({
 									field: key,
 									value: value,
+									initialValue: value,
 									label: field.getLabel(),
 									visibility: Object.assign({}, field.visibility.overview, {
 										hidden: false,

@@ -17,6 +17,7 @@ class RendererFiles extends TypeFiles {
 			visibility,
 			field,
 			value,
+			initialValue,
 			label,
 			handleChange,
 			handleBlur,
@@ -43,7 +44,7 @@ class RendererFiles extends TypeFiles {
 				<>
 					<FileUpload
 						label={label}
-						files={value}
+						files={initialValue}
 						readOnly={visibility.readOnly}
 						onChange={(files) => {
 							handleChange(field, files);

@@ -261,7 +261,7 @@ class FileUpload extends Component<FileUploadProps, IState> {
 	handleUpload = () => {
 		let maxFiles = 2;
 		if (this.props.maxFiles) {
-			maxFiles = this.props.maxFiles - this.state.files.length;
+			maxFiles = this.getRemainingFileCount();
 			if (maxFiles === 0) {
 				this.props.handleError(
 					"files.selector.limit-reached",
@@ -315,6 +315,16 @@ class FileUpload extends Component<FileUploadProps, IState> {
 		}));
 	};
 
+	getRemainingFileCount = () => {
+		if (!this.props.maxFiles)
+			throw new Error("max files isn't set, this function shouldn't be called");
+
+		return (
+			this.props.maxFiles -
+			this.state.files.filter((file) => !file.delete).length
+		);
+	};
+
 	processFiles = async (files?: FileList | null) => {
 		const processImages = !!(
 			this.props.convertImagesTo ||
@@ -325,7 +335,7 @@ class FileUpload extends Component<FileUploadProps, IState> {
 		if (!files) return;
 
 		if (this.props.maxFiles) {
-			const maxFiles = this.props.maxFiles - this.state.files.length;
+			const maxFiles = this.getRemainingFileCount();
 			if (files.length > maxFiles) {
 				this.props.handleError(
 					"files.selector.too-many",

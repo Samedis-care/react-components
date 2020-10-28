@@ -42,7 +42,7 @@ const loaderComponent = <Loader />;
  * - react-query cache
  * - theme provider
  * - css baseline
- * - material-ui date picker utils (optional, enabled by default)
+ * - material-ui date picker utils (optional, enabled by default, locale managed by i18n)
  */
 const ComponentsCareFramework = (props: ICompleteFrameworkProps) => (
 	<Suspense fallback={loaderComponent}>
