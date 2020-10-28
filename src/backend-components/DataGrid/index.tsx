@@ -50,6 +50,12 @@ const BackendDataGrid = <
 					Object.fromEntries(
 						Object.entries(entry).map((kvs) => {
 							const [key, value] = kvs;
+
+							// we cannot render the ID, this will cause issues with the selection
+							if (key === "id") {
+								return [key, value];
+							}
+
 							const field = model.fields[key as KeyT];
 							const id = "id" in entry && (entry["id"] as string);
 
