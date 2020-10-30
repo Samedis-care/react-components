@@ -49,7 +49,7 @@ class RendererDateNullable extends TypeDateNullable {
 						}
 						onBlur={handleBlur}
 						error={!!errorMsg}
-						format={moment.localeData().longDateFormat("L")}
+						format={moment.localeData(ccI18n.language).longDateFormat("L")}
 						fullWidth
 						clearable
 					/>
