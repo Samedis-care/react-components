@@ -56,6 +56,12 @@ export interface FormProps {
 	 * Rerender page props if values changes
 	 */
 	renderConditionally?: boolean;
+	/**
+	 * Called upon successful submit
+	 * Contains data from server response
+	 * @param dataFromServer The data from the server response (model data)
+	 */
+	onSubmit?: (dataFromServer: Record<ModelFieldName, unknown>) => void;
 }
 
 export interface FormContextData {
@@ -76,7 +82,7 @@ export interface FormContextData {
 export const FormContext = React.createContext<FormContextData | null>(null);
 
 const Form = (props: FormProps) => {
-	const { model, id, children } = props;
+	const { model, id, children, onSubmit } = props;
 	const ErrorComponent = props.errorComponent;
 
 	const [updateError, setUpdateError] = useState<Error | null>(null);
@@ -84,7 +90,7 @@ const Form = (props: FormProps) => {
 	const [updateData] = model.createOrUpdate();
 
 	const onValidate = useCallback((values) => model.validate(values), [model]);
-	const onSubmit = useCallback(
+	const onSubmitHandler = useCallback(
 		async (
 			values: NonNullable<typeof data>,
 			{ setSubmitting, setValues }: FormikHelpers<NonNullable<typeof data>>
@@ -93,6 +99,9 @@ const Form = (props: FormProps) => {
 				const result = await updateData(values);
 				if (!result) return;
 				setValues(result);
+				if (onSubmit) {
+					onSubmit(result);
+				}
 			} catch (e) {
 				setUpdateError(e as Error);
 				throw e;
@@ -100,7 +109,7 @@ const Form = (props: FormProps) => {
 				setSubmitting(false);
 			}
 		},
-		[updateData, setUpdateError]
+		[updateData, setUpdateError, onSubmit]
 	);
 
 	const Children = useMemo(() => React.memo(children), [children]);
@@ -133,7 +142,7 @@ const Form = (props: FormProps) => {
 			<Formik
 				initialValues={data || {}}
 				validate={onValidate}
-				onSubmit={onSubmit}
+				onSubmit={onSubmitHandler}
 			>
 				{({
 					submitForm,
