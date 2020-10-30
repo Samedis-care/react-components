@@ -44,8 +44,15 @@ const ActionBar = () => {
 	}, [onEdit, firstSelection]);
 
 	const handleDelete = useCallback(() => {
-		if (onDelete) onDelete(selectAll, selectedRows);
-	}, [onDelete, selectAll, selectedRows]);
+		if (onDelete) {
+			onDelete(selectAll, selectedRows);
+			setState((prevState) => ({
+				...prevState,
+				selectAll: false,
+				selectedRows: [],
+			}));
+		}
+	}, [onDelete, selectAll, selectedRows, setState]);
 
 	const handleReset = useCallback(() => {
 		setState(getDataGridDefaultState(columns));

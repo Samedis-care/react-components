@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Grid, MenuItem, Select, TextField } from "@material-ui/core";
 import FilterCombinator from "./FilterCombinator";
 import { ModelFilterType } from "../../../backend-integration/Model";
+import { DataGridPropsContext } from "../index";
 
 export type FilterType =
 	| "contains"
@@ -55,10 +56,17 @@ interface IProps {
 	 * @param def The new filter
 	 */
 	onChange: (def: IFilterDef) => void;
+	/**
+	 * The depth of the filter in the given filter chain
+	 */
+	depth: number;
 }
 
 const FilterEntry = (props: IProps) => {
-	const { onChange } = props;
+	const { onChange, depth } = props;
+	const gridProps = useContext(DataGridPropsContext);
+	if (!gridProps) throw new Error("DataGrid Props Context not set");
+	const maxDepth = gridProps.filterLimit;
 	let filterType: FilterType =
 		props.value?.type || (props.valueType === "string" ? "contains" : "equals");
 	let filterValue = props.value?.value1 || "";
@@ -170,7 +178,7 @@ const FilterEntry = (props: IProps) => {
 					/>
 				</Grid>
 			)}
-			{filterValue && (
+			{filterValue && (!maxDepth || depth <= maxDepth) && (
 				<>
 					<FilterCombinator
 						value={subFilterComboType}
@@ -180,6 +188,7 @@ const FilterEntry = (props: IProps) => {
 						onChange={onSubFilterChange}
 						valueType={props.valueType}
 						value={subFilter}
+						depth={depth + 1}
 					/>
 				</>
 			)}

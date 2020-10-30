@@ -162,6 +162,7 @@ const ColumnHeaderContent = (
 							valueType={props.columnType}
 							onChange={props.onFilterChange}
 							value={props.filter}
+							depth={1}
 						/>
 					</Grid>
 				</Box>

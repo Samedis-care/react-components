@@ -106,6 +106,10 @@ export interface IDataGridColumnProps {
 	 * If not set select all will only select all ids on the current page
 	 */
 	enableDeleteAll?: boolean;
+	/**
+	 * Limits the amount of chainable column filters
+	 */
+	filterLimit?: number;
 }
 
 export type IDataGridFieldFilter = { [field: string]: IFilterDef };
