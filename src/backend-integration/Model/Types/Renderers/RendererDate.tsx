@@ -64,6 +64,8 @@ class RendererDateNullable extends TypeDate {
 							"backend-integration.model.types.renderers.date.labels.today"
 						)}
 						format={"L"}
+						refuse={/([^0-9./-])/gi}
+						rifmFormatter={(str) => str.replace(/([^0-9./-])/gm, "")}
 						onBlur={handleBlur}
 						error={!!errorMsg}
 						fullWidth

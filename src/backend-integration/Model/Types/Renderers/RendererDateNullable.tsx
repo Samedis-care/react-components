@@ -64,6 +64,8 @@ class RendererDateNullable extends TypeDateNullable {
 						format={"L"}
 						onBlur={handleBlur}
 						error={!!errorMsg}
+						refuse={/([^0-9./-])/gi}
+						rifmFormatter={(str) => str.replace(/([^0-9./-])/gm, "")}
 						fullWidth
 						clearable
 					/>
