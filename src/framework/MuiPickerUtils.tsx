@@ -2,7 +2,11 @@ import React, { useEffect } from "react";
 import MomentUtils from "@date-io/moment";
 import { MuiPickersUtilsProvider } from "@material-ui/pickers";
 import ccI18n from "../i18n";
+
 import moment from "moment";
+import "moment/locale/de";
+import "moment/locale/fr";
+import "moment/locale/ru";
 
 export interface MuiPickerUtilsProps {
 	disable?: boolean;
@@ -25,7 +29,11 @@ const MuiPickerUtils = (props: MuiPickerUtilsProps): React.ReactElement => {
 	if (disable) return props.children;
 
 	return (
-		<MuiPickersUtilsProvider utils={MomentUtils}>
+		<MuiPickersUtilsProvider
+			libInstance={moment}
+			utils={MomentUtils}
+			locale={ccI18n.language}
+		>
 			{props.children}
 		</MuiPickersUtilsProvider>
 	);

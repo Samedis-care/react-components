@@ -47,5 +47,23 @@
 			},
 			"no-files": "Keine Anhänge verfügbar"
 		}
+	},
+	"backend-integration": {
+		"model": {
+			"types": {
+				"renderers": {
+					"date": {
+						"not-set": "Datum nicht gesetzt",
+						"labels": {
+							"cancel": "Abbrechen",
+							"clear": "Löschen",
+							"invalid": "Ungültig",
+							"ok": "OK",
+							"today": "Heute"
+						}
+					}
+				}
+			}
+		}
 	}
 }
