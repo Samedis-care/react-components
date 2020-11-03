@@ -48,9 +48,24 @@ class RendererDateNullable extends TypeDate {
 							if (!date) throw new Error("Date is null");
 							else handleChange(field, normalizeDate(date.toDate()));
 						}}
+						invalidLabel={ccI18n.t(
+							"backend-integration.model.types.renderers.date.labels.invalid"
+						)}
+						cancelLabel={ccI18n.t(
+							"backend-integration.model.types.renderers.date.labels.cancel"
+						)}
+						clearLabel={ccI18n.t(
+							"backend-integration.model.types.renderers.date.labels.clear"
+						)}
+						okLabel={ccI18n.t(
+							"backend-integration.model.types.renderers.date.labels.ok"
+						)}
+						todayLabel={ccI18n.t(
+							"backend-integration.model.types.renderers.date.labels.today"
+						)}
+						format={"L"}
 						onBlur={handleBlur}
 						error={!!errorMsg}
-						format={moment.localeData(ccI18n.language).longDateFormat("L")}
 						fullWidth
 					/>
 					<FormHelperText error={!!errorMsg}>{errorMsg}</FormHelperText>
@@ -62,9 +77,7 @@ class RendererDateNullable extends TypeDate {
 				{!visibility.grid && `${label}: `}
 				{value
 					? value.toLocaleString()
-					: ccI18n.t(
-							"backend-integration.model.types.renderers.date-nullable.not-set"
-					  )}
+					: ccI18n.t("backend-integration.model.types.renderers.date.not-set")}
 			</Typography>
 		);
 	}

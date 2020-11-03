@@ -17,6 +17,7 @@ void ccI18n
 	.init({
 		ns: ["translation"],
 		defaultNS: "translation",
+		supportedLngs: ["de", "en", "fr", "ru"],
 		fallbackLng: "en",
 		debug: true,
 		resources: resBundle as Resource,

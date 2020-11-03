@@ -62,7 +62,14 @@
 						"true": "Yes",
 						"false": "No"
 					},
-					"date-nullable": {
+					"date": {
+						"labels": {
+							"invalid": "unknown",
+							"cancel": "Cancel",
+							"clear": "Clear",
+							"ok": "OK",
+							"today": "Today"
+						},
 						"not-set": "Date not set"
 					},
 					"enum": {

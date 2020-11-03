@@ -4,7 +4,6 @@ import { ModelRenderParams } from "../../index";
 import TypeDateNullable from "../TypeDateNullable";
 import { KeyboardDatePicker } from "@material-ui/pickers";
 import ccI18n from "../../../../i18n";
-import moment from "moment";
 import { normalizeDate } from "../Utils/DateUtils";
 
 /**
@@ -47,9 +46,24 @@ class RendererDateNullable extends TypeDateNullable {
 						onChange={(date) =>
 							handleChange(field, date ? normalizeDate(date.toDate()) : null)
 						}
+						invalidLabel={ccI18n.t(
+							"backend-integration.model.types.renderers.date.labels.invalid"
+						)}
+						cancelLabel={ccI18n.t(
+							"backend-integration.model.types.renderers.date.labels.cancel"
+						)}
+						clearLabel={ccI18n.t(
+							"backend-integration.model.types.renderers.date.labels.clear"
+						)}
+						okLabel={ccI18n.t(
+							"backend-integration.model.types.renderers.date.labels.ok"
+						)}
+						todayLabel={ccI18n.t(
+							"backend-integration.model.types.renderers.date.labels.today"
+						)}
+						format={"L"}
 						onBlur={handleBlur}
 						error={!!errorMsg}
-						format={moment.localeData(ccI18n.language).longDateFormat("L")}
 						fullWidth
 						clearable
 					/>
@@ -62,9 +76,7 @@ class RendererDateNullable extends TypeDateNullable {
 				{!visibility.grid && `${label}: `}
 				{value
 					? value.toLocaleString()
-					: ccI18n.t(
-							"backend-integration.model.types.renderers.date-nullable.not-set"
-					  )}
+					: ccI18n.t("backend-integration.model.types.renderers.date.not-set")}
 			</Typography>
 		);
 	}
