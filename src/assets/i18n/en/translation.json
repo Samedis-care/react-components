@@ -68,7 +68,8 @@
 							"cancel": "Cancel",
 							"clear": "Clear",
 							"ok": "OK",
-							"today": "Today"
+							"today": "Today",
+							"invalid-date": "Invalid date format"
 						},
 						"not-set": "Date not set"
 					},

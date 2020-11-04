@@ -59,7 +59,8 @@
 							"clear": "Löschen",
 							"invalid": "Ungültig",
 							"ok": "OK",
-							"today": "Heute"
+							"today": "Heute",
+							"invalid-date": "Falsches Datumsformat"
 						}
 					}
 				}

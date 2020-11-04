@@ -61,6 +61,9 @@ class RendererDateNullable extends TypeDateNullable {
 						todayLabel={ccI18n.t(
 							"backend-integration.model.types.renderers.date.labels.today"
 						)}
+						invalidDateMessage={ccI18n.t(
+							"backend-integration.model.types.renderers.date.labels.invalid-date"
+						)}
 						format={"L"}
 						onBlur={handleBlur}
 						error={!!errorMsg}

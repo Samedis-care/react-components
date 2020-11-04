@@ -63,6 +63,9 @@ class RendererDateNullable extends TypeDate {
 						todayLabel={ccI18n.t(
 							"backend-integration.model.types.renderers.date.labels.today"
 						)}
+						invalidDateMessage={ccI18n.t(
+							"backend-integration.model.types.renderers.date.labels.invalid-date"
+						)}
 						format={"L"}
 						refuse={/([^0-9./-])/gi}
 						rifmFormatter={(str) => str.replace(/([^0-9./-])/gm, "")}
