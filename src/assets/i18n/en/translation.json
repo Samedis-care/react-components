@@ -100,6 +100,15 @@
 	"backend-components": {
 		"data-grid": {
 			"delete": {
+				"confirm-dialog": {
+					"title": "Delete",
+					"message": "Do you really want to delete {NUM} entries?",
+					"messageInverted": "Do you really want to delete everything except {NUM} entries?",
+					"buttons": {
+						"yes": "Yes",
+						"no": "No"
+					}
+				},
 				"error-dialog": {
 					"title": "Error",
 					"message": "Failed deleting the selected entries: {ERROR}",

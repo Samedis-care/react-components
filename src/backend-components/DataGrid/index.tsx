@@ -11,7 +11,7 @@ import Model, {
 	PageVisibility,
 } from "../../backend-integration/Model/Model";
 import { useDialogContext } from "../../framework";
-import { ErrorDialog } from "../../non-standalone/Dialog";
+import { ErrorDialog, showConfirmDialog } from "../../non-standalone/Dialog";
 import ccI18n from "../../i18n";
 
 export interface BackendDataGridProps<
@@ -112,6 +112,28 @@ const BackendDataGrid = <
 	const [deleteMultiple] = model.deleteMultiple();
 	const handleDelete = useCallback(
 		async (invert: boolean, ids: string[]) => {
+			try {
+				await showConfirmDialog(pushDialog, {
+					title: ccI18n.t(
+						"backend-components.data-grid.delete.confirm-dialog.title"
+					),
+					message: ccI18n.t(
+						"backend-components.data-grid.delete.confirm-dialog." +
+							(invert ? "messageInverted" : "message"),
+						{ NUM: ids.length }
+					),
+					textButtonYes: ccI18n.t(
+						"backend-components.data-grid.delete.confirm-dialog.buttons.yes"
+					),
+					textButtonNo: ccI18n.t(
+						"backend-components.data-grid.delete.confirm-dialog.buttons.no"
+					),
+				});
+			} catch (e) {
+				// user said no
+				return;
+			}
+
 			try {
 				if (enableDeleteAll) {
 					await deleteAdvanced([invert, ids]);
