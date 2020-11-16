@@ -4,6 +4,7 @@ import React, {
 	useCallback,
 	useEffect,
 	useMemo,
+	useRef,
 	useState,
 } from "react";
 import { Grid, Theme } from "@material-ui/core";
@@ -254,6 +255,10 @@ export const DataGridColumnsStateContext = React.createContext<
 	DataGridColumnState | undefined
 >(undefined);
 
+export const DataGridRootRefContext = React.createContext<
+	HTMLDivElement | undefined
+>(undefined);
+
 export const getDataGridDefaultState = (
 	columns: IDataGridColumnDef[]
 ): IDataGridState => ({
@@ -305,6 +310,8 @@ const DataGrid = (props: IDataGridProps) => {
 		lockedColumns,
 		refreshData,
 	} = state;
+
+	const gridRoot = useRef<HTMLDivElement>();
 
 	const visibleColumns = useMemo(
 		() =>
@@ -389,32 +396,37 @@ const DataGrid = (props: IDataGridProps) => {
 			justify={"space-between"}
 			alignItems={"stretch"}
 			className={classes.wrapper}
+			ref={(r) => (gridRoot.current = r ? r : undefined)}
 		>
-			<DataGridPropsContext.Provider value={props}>
-				<DataGridStateContext.Provider value={statePack}>
-					<DataGridColumnsStateContext.Provider value={columnsStatePack}>
-						<Grid item>
-							<Header />
-						</Grid>
-						<Grid item xs className={classes.middle}>
-							<Settings columns={columns} />
-							{rows === null && dataLoadError === null && <Loader />}
-							{rows === null && dataLoadError !== null && dataLoadError.message}
-							{rows !== null && rows.length === 0 && "No Data!"}
-							{rows && (
-								<Content
-									columns={visibleColumns}
-									rowsPerPage={state.rowsPerPage}
-									rows={rows}
-								/>
-							)}
-						</Grid>
-						<Grid item>
-							<Footer />
-						</Grid>
-					</DataGridColumnsStateContext.Provider>
-				</DataGridStateContext.Provider>
-			</DataGridPropsContext.Provider>
+			<DataGridRootRefContext.Provider value={gridRoot.current}>
+				<DataGridPropsContext.Provider value={props}>
+					<DataGridStateContext.Provider value={statePack}>
+						<DataGridColumnsStateContext.Provider value={columnsStatePack}>
+							<Grid item>
+								<Header />
+							</Grid>
+							<Grid item xs className={classes.middle}>
+								<Settings columns={columns} />
+								{rows === null && dataLoadError === null && <Loader />}
+								{rows === null &&
+									dataLoadError !== null &&
+									dataLoadError.message}
+								{rows !== null && rows.length === 0 && "No Data!"}
+								{rows && (
+									<Content
+										columns={visibleColumns}
+										rowsPerPage={state.rowsPerPage}
+										rows={rows}
+									/>
+								)}
+							</Grid>
+							<Grid item>
+								<Footer />
+							</Grid>
+						</DataGridColumnsStateContext.Provider>
+					</DataGridStateContext.Provider>
+				</DataGridPropsContext.Provider>
+			</DataGridRootRefContext.Provider>
 		</Grid>
 	);
 };

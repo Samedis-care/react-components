@@ -50,11 +50,16 @@ const Row = (props: IDataGridRowProps) => {
 					<FixedCell
 						onDoubleClick={onDoubleClick}
 						key={`${column.field}${column.fixedColumnKey || ""}`}
+						className={`column-${column.field}`}
 					>
 						{props.data[column.field]}
 					</FixedCell>
 				) : (
-					<DataGridCell onDoubleClick={onDoubleClick} key={column.field}>
+					<DataGridCell
+						onDoubleClick={onDoubleClick}
+						key={column.field}
+						className={`column-${column.field}`}
+					>
 						{props.data[column.field]}
 					</DataGridCell>
 				)

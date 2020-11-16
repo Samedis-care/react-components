@@ -31,6 +31,10 @@ export interface IDataGridContentColumnHeaderContentProps {
 	 */
 	startDrag: () => void;
 	/**
+	 * Automatic resize callback
+	 */
+	autoResize: () => void;
+	/**
 	 * The currently active sort
 	 */
 	sort: -1 | 0 | 1;
@@ -145,6 +149,7 @@ const ColumnHeaderContent = (
 					className={classes.resizer}
 					onMouseDown={props.startDrag}
 					onClick={preventPropagation}
+					onDoubleClick={props.autoResize}
 				/>
 			)}
 			<Popover

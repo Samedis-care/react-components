@@ -1,7 +1,13 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, {
+	useCallback,
+	useContext,
+	useEffect,
+	useRef,
+	useState,
+} from "react";
 import { useTheme } from "@material-ui/core";
 import { measureText } from "../../../utils";
-import { IDataGridColumnDef } from "../index";
+import { DataGridRootRefContext, IDataGridColumnDef } from "../index";
 import FixedCell from "./FixedCell";
 import { StickyHeaderCell } from "./CustomCells";
 import ColumnHeaderContent from "./ColumnHeaderContent";
@@ -38,6 +44,8 @@ export interface IDataGridContentColumnHeaderProps {
 	onSortChange: (field: string, newSort: -1 | 0 | 1) => void;
 }
 
+const HEADER_PADDING = 32; // px
+
 const ColumnHeader = (props: IDataGridContentColumnHeaderProps) => {
 	const {
 		column,
@@ -48,7 +56,10 @@ const ColumnHeader = (props: IDataGridContentColumnHeaderProps) => {
 		sortOrder,
 	} = props;
 	const { field, sortable, filterable } = column;
+	const gridRoot = useContext(DataGridRootRefContext);
+	if (!gridRoot) throw new Error("DataGrid State context missing");
 	const theme = useTheme();
+	const headerRef = useRef<HTMLTableHeaderCellElement>();
 	const [width, setWidth] = useState<number>(
 		() =>
 			measureText(
@@ -66,8 +77,13 @@ const ColumnHeader = (props: IDataGridContentColumnHeaderProps) => {
 			evt.preventDefault();
 
 			const move = evt.movementX;
+			const curWidth = headerRef.current?.clientWidth;
 
-			setWidth((prevState) => prevState + move);
+			setWidth((prevState) =>
+				move < 0 && curWidth && curWidth - HEADER_PADDING - 10 > prevState // prevent resizing beyond min width
+					? prevState
+					: prevState + move
+			);
 		},
 		[dragging, setWidth]
 	);
@@ -82,6 +98,22 @@ const ColumnHeader = (props: IDataGridContentColumnHeaderProps) => {
 		(newFilter: IFilterDef) => onFilterChange(field, newFilter),
 		[field, onFilterChange]
 	);
+	const autoResize = useCallback(() => {
+		if (!gridRoot) return;
+
+		let width = 0;
+
+		gridRoot.querySelectorAll(".column-" + field).forEach((entry) => {
+			const entryWidth =
+				measureText(
+					getComputedStyle(entry).font,
+					(entry as HTMLElement).innerText
+				).width + HEADER_PADDING;
+			width = Math.max(width, entryWidth);
+		});
+
+		setWidth(width);
+	}, [field, gridRoot, setWidth]);
 
 	useEffect(() => {
 		document.addEventListener("mousemove", onDrag);
@@ -98,6 +130,7 @@ const ColumnHeader = (props: IDataGridContentColumnHeaderProps) => {
 			headerName={props.column.headerName}
 			enableResize={!props.column.isLocked}
 			startDrag={startDrag}
+			autoResize={autoResize}
 			sort={sort}
 			sortOrder={sortOrder}
 			filterable={!!filterable}
@@ -118,6 +151,7 @@ const ColumnHeader = (props: IDataGridContentColumnHeaderProps) => {
 					minWidth: width,
 					zIndex: 1002,
 				}}
+				ref={headerRef}
 			>
 				{content()}
 			</FixedCell>
@@ -131,6 +165,7 @@ const ColumnHeader = (props: IDataGridContentColumnHeaderProps) => {
 					minWidth: width,
 					zIndex: 1000,
 				}}
+				ref={headerRef}
 			>
 				{content()}
 			</StickyHeaderCell>
