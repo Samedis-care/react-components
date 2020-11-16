@@ -3,7 +3,6 @@ import { FormHelperText, Typography } from "@material-ui/core";
 import { ModelRenderParams } from "../../index";
 import { KeyboardDatePicker } from "@material-ui/pickers";
 import ccI18n from "../../../../i18n";
-import moment from "moment";
 import { normalizeDate } from "../Utils/DateUtils";
 import TypeDate from "../TypeDate";
 
