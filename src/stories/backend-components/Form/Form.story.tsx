@@ -1,77 +1,17 @@
 import React from "react";
 import { withKnobs } from "@storybook/addon-knobs";
-// FormProps is needed because of some weird error with generics
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import Form from "../../../backend-components/Form/Form";
-import FormStoryModel, { performanceTestDataCount } from "./Model";
-import { Button, Grid } from "@material-ui/core";
-import Field from "../../../backend-components/Form/Field";
+import FormStoryModel from "./Model";
 import ErrorComponent from "./ErrorComponent";
 import { withActions } from "@storybook/addon-actions";
 import { Framework } from "../../../framework";
+import SampleForm from "./SampleForm";
 
 export const FormStory = (): React.ReactElement => {
 	return (
 		<Framework>
 			<Form model={FormStoryModel} id={null} errorComponent={ErrorComponent}>
-				{({ isSubmitting }) => (
-					<Grid item xs={12} container spacing={2}>
-						<Grid item xs={9} container spacing={2}>
-							<Grid item xs={12}>
-								<Field name={"username"} />
-							</Grid>
-							<Grid item xs={4}>
-								<Field name={"first_name"} />
-							</Grid>
-							<Grid item xs={4}>
-								<Field name={"middle_name"} />
-							</Grid>
-							<Grid item xs={4}>
-								<Field name={"last_name"} />
-							</Grid>
-							<Grid item xs={12}>
-								<Field name={"birthday"} />
-							</Grid>
-							<Grid item xs={3}>
-								<Field name={"accept_tos"} />
-							</Grid>
-							<Grid item xs={3}>
-								<Field name={"user_type"} />
-							</Grid>
-							<Grid item xs={6}>
-								<Field name={"locale"} />
-							</Grid>
-							<Grid item xs={12}>
-								<Field name={"notes"} />
-							</Grid>
-							<Grid item xs={12}>
-								<Button
-									type={"submit"}
-									disabled={isSubmitting}
-									variant={"outlined"}
-									fullWidth
-								>
-									Save
-								</Button>
-							</Grid>
-							{new Array(performanceTestDataCount)
-								.fill(null)
-								.map((_, index) => (
-									<Grid item xs={3} key={index.toString()}>
-										<Field name={"perf_" + index.toString()} />
-									</Grid>
-								))}
-						</Grid>
-						<Grid item xs={3} container spacing={2}>
-							<Grid item xs={12}>
-								<Field name={"profile_picture"} />
-							</Grid>
-							<Grid item xs={12}>
-								<Field name={"documents"} />
-							</Grid>
-						</Grid>
-					</Grid>
-				)}
+				{SampleForm}
 			</Form>
 		</Framework>
 	);

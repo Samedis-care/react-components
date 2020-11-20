@@ -1,14 +1,13 @@
 import React, { ChangeEvent, useEffect, useState } from "react";
 import { button, number, text, withKnobs } from "@storybook/addon-knobs";
-import {
-	Framework,
-	IDialogButtonConfig,
-	FormDialog,
-	IDialogConfigSimple,
-	useDialogContext,
-} from "../../..";
 import { action, withActions } from "@storybook/addon-actions";
 import { TextField } from "@material-ui/core";
+import {
+	FormDialog,
+	IDialogButtonConfig,
+	IDialogConfigSimple,
+} from "../../../non-standalone/Dialog";
+import { Framework, useDialogContext } from "../../../framework";
 
 const MyCustomDialog = (props: IDialogConfigSimple): React.ReactElement => {
 	const [v1, setV1] = useState("Prefilled");

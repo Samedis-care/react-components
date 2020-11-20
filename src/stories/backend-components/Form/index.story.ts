@@ -4,3 +4,4 @@ const Settings = {
 export default Settings;
 
 export * from "./Form.story";
+export * from "../CRUD/CRUD.story";

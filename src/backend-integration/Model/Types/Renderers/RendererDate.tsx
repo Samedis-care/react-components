@@ -67,7 +67,7 @@ class RendererDateNullable extends TypeDate {
 						)}
 						format={"L"}
 						refuse={/([^0-9./-])/gi}
-						rifmFormatter={(str) => str.replace(/([^0-9./-])/gm, "")}
+						rifmFormatter={TypeDate.format}
 						onBlur={handleBlur}
 						error={!!errorMsg}
 						fullWidth

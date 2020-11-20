@@ -9,6 +9,7 @@ import ThemeProvider, {
 import { ReactQueryCacheProvider } from "react-query";
 import { ModelDataStore } from "../backend-integration";
 import MuiPickerUtils from "./MuiPickerUtils";
+import PermissionContextProvider from "./PermissionContextProvider";
 
 /**
  * Properties for the Framework
@@ -42,6 +43,7 @@ const loaderComponent = <Loader />;
  * - react-query cache
  * - theme provider
  * - css baseline
+ * - permission context
  * - material-ui date picker utils (optional, enabled by default, locale managed by i18n)
  */
 const ComponentsCareFramework = (props: ICompleteFrameworkProps) => (
@@ -49,9 +51,11 @@ const ComponentsCareFramework = (props: ICompleteFrameworkProps) => (
 		<MuiPickerUtils disable={props.disableMuiPickerUtils}>
 			<ThemeProvider defaultTheme={props.defaultTheme || getStandardTheme}>
 				<ReactQueryCacheProvider queryCache={ModelDataStore}>
-					<Router history={FrameworkHistory}>
-						<DialogContextProvider>{props.children}</DialogContextProvider>
-					</Router>
+					<PermissionContextProvider>
+						<Router history={FrameworkHistory}>
+							<DialogContextProvider>{props.children}</DialogContextProvider>
+						</Router>
+					</PermissionContextProvider>
 				</ReactQueryCacheProvider>
 			</ThemeProvider>
 		</MuiPickerUtils>

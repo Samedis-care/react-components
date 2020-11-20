@@ -21,6 +21,7 @@ export interface BackendDataGridProps<
 > extends Omit<IDataGridProps, "loadData" | "columns" | "exporters"> {
 	model: Model<KeyT, VisibilityT, CustomDataT>;
 	enableDelete?: boolean;
+	disableExport?: boolean;
 }
 
 const BackendDataGrid = <
@@ -202,9 +203,11 @@ const BackendDataGrid = <
 			forceRefreshToken={`${
 				props.forceRefreshToken || "undefined"
 			}${refreshToken}`}
-			exporters={model.connector.dataGridExporters}
+			exporters={
+				props.disableExport ? undefined : model.connector.dataGridExporters
+			}
 		/>
 	);
 };
 
-export default React.memo(BackendDataGrid);
+export default React.memo(BackendDataGrid) as typeof BackendDataGrid;

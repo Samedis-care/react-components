@@ -5,6 +5,7 @@ import TypeDateNullable from "../TypeDateNullable";
 import { KeyboardDatePicker } from "@material-ui/pickers";
 import ccI18n from "../../../../i18n";
 import { normalizeDate } from "../Utils/DateUtils";
+import TypeDate from "../TypeDate";
 
 /**
  * Renders Date with Date Selector
@@ -68,7 +69,7 @@ class RendererDateNullable extends TypeDateNullable {
 						onBlur={handleBlur}
 						error={!!errorMsg}
 						refuse={/([^0-9./-])/gi}
-						rifmFormatter={(str) => str.replace(/([^0-9./-])/gm, "")}
+						rifmFormatter={TypeDate.format}
 						fullWidth
 						clearable
 					/>

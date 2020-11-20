@@ -1,12 +1,11 @@
 import React, { useEffect } from "react";
 import { button, number, text, withKnobs } from "@storybook/addon-knobs";
-import {
-	Framework,
-	IDialogButtonConfig,
-	ErrorDialog,
-	useDialogContext,
-} from "../../..";
 import { action, withActions } from "@storybook/addon-actions";
+import { Framework, useDialogContext } from "../../../framework";
+import {
+	ErrorDialog,
+	IDialogButtonConfig,
+} from "../../../non-standalone/Dialog";
 
 const DialogContent = (): React.ReactElement => {
 	const [pushDialog] = useDialogContext();

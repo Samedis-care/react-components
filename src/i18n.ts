@@ -1,10 +1,21 @@
-/* eslint import/no-webpack-loader-syntax: off */
-
-import i18n, { Resource } from "i18next";
+import i18n, { Resource, ResourceKey } from "i18next";
 import LanguageDetector from "i18next-browser-languagedetector";
+
+const loadLang = (lang: string): Resource =>
+	({
+		// eslint-disable-next-line @typescript-eslint/no-var-requires
+		translation: require(`./assets/i18n/${lang}/translation.json`) as ResourceKey,
+	} as Resource);
+
+const langs = ["de", "en", "fr", "ru"];
+const langVals: Record<string, Resource> = {};
+for (const lang of langs) {
+	langVals[lang] = loadLang(lang);
+}
+
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore These are locale files, there is no typescript definition for them
-import resBundle from "i18next-resource-store-loader!./assets/i18n/index.js";
+// @ts-ignore
+window.langvals = langVals;
 
 const ccI18n = i18n.createInstance();
 
@@ -17,10 +28,10 @@ void ccI18n
 	.init({
 		ns: ["translation"],
 		defaultNS: "translation",
-		supportedLngs: ["de", "en", "fr", "ru"],
+		supportedLngs: langs,
 		fallbackLng: "en",
 		debug: true,
-		resources: resBundle as Resource,
+		resources: langVals,
 
 		interpolation: {
 			escapeValue: false, // not needed for react as it escapes by default
