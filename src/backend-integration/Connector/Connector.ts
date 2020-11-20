@@ -18,7 +18,7 @@ abstract class Connector<KeyT extends ModelFieldName> {
 	 * @param params Filter, Sorting and Pagination parameters
 	 * @returns An array with all data entries as well as some meta data
 	 */
-	abstract async index(
+	abstract index(
 		params?: Partial<IDataGridLoadDataParameters>
 	): Promise<[Record<KeyT, unknown>[], ResponseMeta]>;
 
@@ -27,7 +27,7 @@ abstract class Connector<KeyT extends ModelFieldName> {
 	 * @param data The initial data for the entry
 	 * @returns The full newly created data entry
 	 */
-	abstract async create(
+	abstract create(
 		data: Record<string, unknown>
 	): Promise<Record<KeyT, unknown>>;
 
@@ -36,14 +36,14 @@ abstract class Connector<KeyT extends ModelFieldName> {
 	 * @param id The ID of the existing data entry
 	 * @returns The loaded data entry
 	 */
-	abstract async read(id: string): Promise<Record<KeyT, unknown>>;
+	abstract read(id: string): Promise<Record<KeyT, unknown>>;
 
 	/**
 	 * Updates an already existing data entry
 	 * @param data The given data including the ID of the data entry
 	 * @returns The modified data entry
 	 */
-	abstract async update(
+	abstract update(
 		data: Record<ModelFieldName, unknown>
 	): Promise<Record<KeyT, unknown>>;
 
@@ -51,7 +51,7 @@ abstract class Connector<KeyT extends ModelFieldName> {
 	 * Deletes a specific data entry
 	 * @param id The ID of the data entry to delete
 	 */
-	abstract async delete(id: string): Promise<void>;
+	abstract delete(id: string): Promise<void>;
 
 	/**
 	 * Delets multiple data entries at once. Should be overwritten if implemented by your backend.
