@@ -15,7 +15,8 @@
     "sourceType": "module",
     "tsconfigRootDir": ".",
     "project": [
-      "./tsconfig.json"
+      "./tsconfig.json",
+      "./tsconfig-test.json"
     ]
   },
   "settings": {
