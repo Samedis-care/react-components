@@ -65,6 +65,12 @@ class RendererDateNullable extends TypeDateNullable {
 						invalidDateMessage={ccI18n.t(
 							"backend-integration.model.types.renderers.date.labels.invalid-date"
 						)}
+						minDateMessage={ccI18n.t(
+							"backend-integration.model.types.renderers.date.labels.min-date"
+						)}
+						maxDateMessage={ccI18n.t(
+							"backend-integration.model.types.renderers.date.labels.max-date"
+						)}
 						format={"L"}
 						onBlur={handleBlur}
 						error={!!errorMsg}

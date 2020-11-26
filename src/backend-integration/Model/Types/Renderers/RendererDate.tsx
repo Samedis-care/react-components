@@ -65,6 +65,12 @@ class RendererDateNullable extends TypeDate {
 						invalidDateMessage={ccI18n.t(
 							"backend-integration.model.types.renderers.date.labels.invalid-date"
 						)}
+						minDateMessage={ccI18n.t(
+							"backend-integration.model.types.renderers.date.labels.min-date"
+						)}
+						maxDateMessage={ccI18n.t(
+							"backend-integration.model.types.renderers.date.labels.max-date"
+						)}
 						format={"L"}
 						refuse={/([^0-9./-])/gi}
 						rifmFormatter={TypeDate.format}
