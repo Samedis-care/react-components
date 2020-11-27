@@ -1,7 +1,7 @@
 import React, { PureComponent } from "react";
 import { debounce } from "../../utils";
 
-export interface IProps {
+export interface InfiniteScrollProps {
 	/**
 	 * The children to render, must not change their size though internal state updates.
 	 * Should update if loadMoreTop or loadMoreBottom is called.
@@ -9,7 +9,7 @@ export interface IProps {
 	 */
 	children: React.ReactNode;
 	/**
-	 * The CSS class to apply, must set a fixed height value
+	 * The CSS class to apply, must set a fixed height value and overflow: auto
 	 */
 	className: string;
 	/**
@@ -44,10 +44,10 @@ interface IState {
 /**
  * Provides infinite scrolling to whatever is inside it
  */
-class InfiniteScroll extends PureComponent<IProps, IState> {
+class InfiniteScroll extends PureComponent<InfiniteScrollProps, IState> {
 	public wrapper: HTMLElement | null = null;
 
-	constructor(props: IProps) {
+	constructor(props: InfiniteScrollProps) {
 		super(props);
 
 		const debounceWait =
@@ -75,7 +75,7 @@ class InfiniteScroll extends PureComponent<IProps, IState> {
 		this.handleResize();
 	}
 
-	componentDidUpdate(prevProps: Readonly<IProps>): void {
+	componentDidUpdate(prevProps: Readonly<InfiniteScrollProps>): void {
 		if (prevProps.children !== this.props.children) {
 			this.handleResize();
 		}
