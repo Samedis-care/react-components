@@ -1,70 +1,125 @@
 {
-	"standalone": {
-		"data-grid": {
-			"content": {
-				"filter": "Filter"
-			},
-			"settings": {
-				"lock": "Spalten sperren/entsperren",
-				"hide": "Spalten ein-/ausblenden",
-				"close": "Schließen"
-			},
-			"header": {
-				"settings": "Einstellungen",
-				"reset": "Zurücksetzen",
-				"new": "Neu",
-				"export": "Exportieren",
-				"edit": "Bearbeiten",
-				"delete": "Lösche"
-			},
-			"footer": {
-				"prev-page": "Vorherige Seite",
-				"page-size": "Seitengröße:",
-				"page-of": "von",
-				"next-page": "Nächste Seite",
-				"last-page": "Letzte Seite",
-				"first-page": "Erste Seite",
-				"page-size-tooltip": "Anzahl Einträge pro Seite"
-			}
-		},
-		"selector": {
-			"add-new": "Hinzufügen"
-		},
-		"schedule": {
-			"week": "Woche",
-			"today": "Heute"
-		},
-		"file-upload": {
-			"formats": "Dateiformate",
-			"upload": "Hochladen",
-			"error": {
-				"invalid-type": "Nicht unterstützter Dateityp ausgewählt",
-				"limit-reached": "Maximale Anzahl der erlaubten Dateien erreicht",
-				"too-many": "Zu viele Dateien ausgewählt"
-			},
-			"format": {
-				"any": "Alle"
-			},
-			"no-files": "Keine Anhänge verfügbar"
-		}
-	},
-	"backend-integration": {
-		"model": {
-			"types": {
-				"renderers": {
-					"date": {
-						"not-set": "Datum nicht gesetzt",
-						"labels": {
-							"cancel": "Abbrechen",
-							"clear": "Löschen",
-							"invalid": "Ungültig",
-							"ok": "OK",
-							"today": "Heute",
-							"invalid-date": "Falsches Datumsformat"
-						}
-					}
-				}
-			}
-		}
-	}
+  "standalone": {
+    "data-grid": {
+      "content": {
+        "filter": "Filter"
+      },
+      "settings": {
+        "lock": "Spalten sperren/entsperren",
+        "hide": "Spalten ein-/ausblenden",
+        "close": "Schließen"
+      },
+      "header": {
+        "settings": "Einstellungen",
+        "reset": "Zurücksetzen",
+        "new": "Neu",
+        "export": "Exportieren",
+        "edit": "Bearbeiten",
+        "delete": "Lösche"
+      },
+      "footer": {
+        "prev-page": "Vorherige Seite",
+        "page-size": "Seitengröße:",
+        "page-of": "von",
+        "next-page": "Nächste Seite",
+        "last-page": "Letzte Seite",
+        "first-page": "Erste Seite",
+        "page-size-tooltip": "Anzahl Einträge pro Seite"
+      }
+    },
+    "selector": {
+      "add-new": "Hinzufügen"
+    },
+    "schedule": {
+      "week": "Woche",
+      "today": "Heute"
+    },
+    "file-upload": {
+      "formats": "Dateiformate",
+      "upload": "Hochladen",
+      "error": {
+        "invalid-type": "Nicht unterstützter Dateityp ausgewählt",
+        "limit-reached": "Maximale Anzahl der erlaubten Dateien erreicht",
+        "too-many": "Zu viele Dateien ausgewählt"
+      },
+      "format": {
+        "any": "Alle"
+      },
+      "no-files": "Keine Anhänge verfügbar"
+    }
+  },
+  "backend-integration": {
+    "model": {
+      "types": {
+        "renderers": {
+          "date": {
+            "not-set": "Datum nicht gesetzt",
+            "labels": {
+              "cancel": "Abbrechen",
+              "clear": "Löschen",
+              "invalid": "Ungültig",
+              "ok": "OK",
+              "today": "Heute",
+              "invalid-date": "Ungültiges Datumsformat",
+              "min-date": "Der Termin sollte nicht vor dem Mindesttermin liegen",
+              "max-date": "Das Datum sollte nicht nach dem maximalen Datum liegen"
+            },
+            "validation-error": "Bitte geben Sie ein gültiges Datum ein"
+          },
+          "image": {
+            "not-set": "Bild nicht vorhanden"
+          },
+          "files": {
+            "no-file": "Keine Dateien vorhanden"
+          },
+          "enum": {
+            "unknown": "Unbekannt"
+          },
+          "boolean": {
+            "true": "Ja",
+            "false": "Ne"
+          }
+        },
+        "boolean": {
+          "true": "Ja",
+          "false": "Nein"
+        },
+        "date-nullable": {
+          "not-set": "N/A"
+        },
+        "image": {
+          "not-set": "Bild nicht vorhanden",
+          "set": "Bild vorhanden"
+        }
+      }
+    },
+    "connector": {
+      "json-api-client": {
+        "network-error": "Ein Netzwerkfehler ist aufgetreten.",
+        "parse-error": "Parsing-Antwort fehlgeschlagen (Ungültige JSON). Der Server gab den Status {STATUS_CODE} zurück. {STATUS_TEXT}."
+      }
+    }
+  },
+  "backend-components": {
+    "data-grid": {
+      "delete": {
+        "error-dialog": {
+          "title": "Fehler",
+          "message": "Das Löschen der ausgewählten Einträge ist fehlgeschlagen: {ERROR}",
+          "buttons": {
+            "okay": "Okay"
+          }
+        },
+        "confirm-dialog": {
+          "title": "Löschen",
+          "messageInverted": "Wollen Sie wirklich alles ausser {NUM}-Einträgen löschen?",
+          "message": "Wollen Sie wirklich {NUM}-Einträge löschen?",
+          "buttons": {
+            "yes": "Ja",
+            "no": "Nein"
+          }
+        }
+      }
+    }
+  }
 }
