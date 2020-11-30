@@ -6,6 +6,7 @@ import { KeyboardDatePicker } from "@material-ui/pickers";
 import ccI18n from "../../../../i18n";
 import { normalizeDate } from "../Utils/DateUtils";
 import TypeDate from "../TypeDate";
+import { LocalizedKeyboardDatePicker } from "../../../../standalone/LocalizedDateTimePickers";
 
 /**
  * Renders Date with Date Selector
@@ -40,7 +41,7 @@ class RendererDateNullable extends TypeDateNullable {
 
 			return (
 				<>
-					<KeyboardDatePicker
+					<LocalizedKeyboardDatePicker
 						name={field}
 						value={value}
 						label={label}
@@ -48,31 +49,6 @@ class RendererDateNullable extends TypeDateNullable {
 						onChange={(date) =>
 							handleChange(field, date ? normalizeDate(date.toDate()) : null)
 						}
-						invalidLabel={ccI18n.t(
-							"backend-integration.model.types.renderers.date.labels.invalid"
-						)}
-						cancelLabel={ccI18n.t(
-							"backend-integration.model.types.renderers.date.labels.cancel"
-						)}
-						clearLabel={ccI18n.t(
-							"backend-integration.model.types.renderers.date.labels.clear"
-						)}
-						okLabel={ccI18n.t(
-							"backend-integration.model.types.renderers.date.labels.ok"
-						)}
-						todayLabel={ccI18n.t(
-							"backend-integration.model.types.renderers.date.labels.today"
-						)}
-						invalidDateMessage={ccI18n.t(
-							"backend-integration.model.types.renderers.date.labels.invalid-date"
-						)}
-						minDateMessage={ccI18n.t(
-							"backend-integration.model.types.renderers.date.labels.min-date"
-						)}
-						maxDateMessage={ccI18n.t(
-							"backend-integration.model.types.renderers.date.labels.max-date"
-						)}
-						format={"L"}
 						onBlur={handleBlur}
 						error={!!errorMsg}
 						onError={(error: React.ReactNode) => {
@@ -83,8 +59,6 @@ class RendererDateNullable extends TypeDateNullable {
 								: "";
 							setFieldError(field, this.error);
 						}}
-						refuse={/([^0-9./-])/gi}
-						rifmFormatter={TypeDate.format}
 						fullWidth
 						clearable
 					/>

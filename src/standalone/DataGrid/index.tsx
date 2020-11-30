@@ -354,6 +354,28 @@ const DataGrid = (props: IDataGridProps) => {
 					fieldFilter: fieldFilter,
 					sort: sorts,
 				});
+				// check if we are on an invalid page
+				if (
+					pageIndex !== 0 &&
+					rowsPerPage !== 0 &&
+					data.rowsTotal !== 0 &&
+					data.rows.length === 0
+				) {
+					const hasPartialPage = data.rowsTotal % rowsPerPage !== 0;
+					const newPage =
+						((data.rowsTotal / rowsPerPage) | 0) + (hasPartialPage ? 0 : -1);
+					// eslint-disable-next-line no-console
+					console.assert(
+						newPage !== pageIndex,
+						"[Components-Care] [DataGrid] Detected invalid page, but newly calculated page equals invalid page"
+					);
+					if (newPage !== pageIndex) {
+						setState((prevState) => ({
+							...prevState,
+							pageIndex: newPage,
+						}));
+					}
+				}
 				setState((prevState) => ({
 					...prevState,
 					rowsTotal: data.rowsTotal,
@@ -361,6 +383,7 @@ const DataGrid = (props: IDataGridProps) => {
 					refreshData: false,
 				}));
 			} catch (err) {
+				// eslint-disable-next-line no-console
 				console.error("[Components-Care] [DataGrid] LoadData: ", err);
 				setState((prevState) => ({
 					...prevState,

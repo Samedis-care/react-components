@@ -3,6 +3,8 @@ import { Grid, MenuItem, Select, TextField } from "@material-ui/core";
 import FilterCombinator from "./FilterCombinator";
 import { ModelFilterType } from "../../../backend-integration/Model";
 import { DataGridPropsContext } from "../index";
+import { LocalizedKeyboardDatePicker } from "../../LocalizedDateTimePickers";
+import { DateType } from "@date-io/type";
 
 export type FilterType =
 	| "contains"
@@ -99,8 +101,22 @@ const FilterEntry = (props: IProps) => {
 		}
 		updateParent();
 	};
+	const onFilterValueChangeDate = (date: DateType | null) => {
+		if (!date) {
+			filterValue = "";
+			subFilterComboType = "and";
+			subFilter = undefined;
+		} else {
+			filterValue = date.toISOString();
+		}
+		updateParent();
+	};
 	const onFilterValue2Change = (event: React.ChangeEvent<HTMLInputElement>) => {
 		filterValue2 = event.target.value;
+		updateParent();
+	};
+	const onFilterValue2ChangeDate = (date: DateType | null) => {
+		filterValue = date ? date.toISOString() : "";
 		updateParent();
 	};
 	const onSubFilterTypeChange = (value: FilterComboType) => {
@@ -135,7 +151,7 @@ const FilterEntry = (props: IProps) => {
 				Ends with
 			</MenuItem>
 		);
-	} else if (props.valueType === "number") {
+	} else if (props.valueType === "number" || props.valueType === "date") {
 		filterTypeMenuItems.push(
 			<MenuItem key={"lessThan"} value={"lessThan"}>
 				Less than
@@ -157,41 +173,68 @@ const FilterEntry = (props: IProps) => {
 
 	return (
 		<>
-			<Grid item xs={12}>
-				<Select onChange={onFilterTypeChange} value={filterType} fullWidth>
-					{filterTypeMenuItems}
-				</Select>
-			</Grid>
-			<Grid item xs={12}>
-				<TextField
-					value={filterValue}
-					onChange={onFilterValueChange}
-					fullWidth
-				/>
-			</Grid>
-			{filterType === "inRange" && (
-				<Grid item xs={12}>
-					<TextField
-						value={filterValue2}
-						onChange={onFilterValue2Change}
-						fullWidth
-					/>
-				</Grid>
-			)}
-			{filterValue && (!maxDepth || depth <= maxDepth) && (
+			{(props.valueType === "string" ||
+				props.valueType === "number" ||
+				props.valueType === "date") && (
 				<>
-					<FilterCombinator
-						value={subFilterComboType}
-						onChange={onSubFilterTypeChange}
-					/>
-					<FilterEntry
-						onChange={onSubFilterChange}
-						valueType={props.valueType}
-						value={subFilter}
-						depth={depth + 1}
-					/>
+					<Grid item xs={12}>
+						<Select onChange={onFilterTypeChange} value={filterType} fullWidth>
+							{filterTypeMenuItems}
+						</Select>
+					</Grid>
+					<Grid item xs={12}>
+						{props.valueType === "date" ? (
+							<LocalizedKeyboardDatePicker
+								value={filterValue}
+								onChange={onFilterValueChangeDate}
+								fullWidth
+							/>
+						) : (
+							<TextField
+								value={filterValue}
+								onChange={onFilterValueChange}
+								fullWidth
+							/>
+						)}
+					</Grid>
+					{filterType === "inRange" && (
+						<Grid item xs={12}>
+							{props.valueType === "date" ? (
+								<LocalizedKeyboardDatePicker
+									value={filterValue2}
+									onChange={onFilterValue2ChangeDate}
+									fullWidth
+								/>
+							) : (
+								<TextField
+									value={filterValue2}
+									onChange={onFilterValue2Change}
+									fullWidth
+								/>
+							)}
+						</Grid>
+					)}
 				</>
 			)}
+			{
+				props.valueType === "boolean" && <></> // TODO
+			}
+			{filterValue &&
+				props.valueType !== "enum" &&
+				(!maxDepth || depth <= maxDepth) && (
+					<>
+						<FilterCombinator
+							value={subFilterComboType}
+							onChange={onSubFilterTypeChange}
+						/>
+						<FilterEntry
+							onChange={onSubFilterChange}
+							valueType={props.valueType}
+							value={subFilter}
+							depth={depth + 1}
+						/>
+					</>
+				)}
 		</>
 	);
 };
