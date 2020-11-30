@@ -73,7 +73,8 @@
 							"max-date": "Date should not be after maximal date",
 							"min-date": "Date should not be before minimal date"
 						},
-						"not-set": "Date not set"
+						"not-set": "Date not set",
+						"validation-error": "Please enter a valid date"
 					},
 					"enum": {
 						"unknown": "Unknown"

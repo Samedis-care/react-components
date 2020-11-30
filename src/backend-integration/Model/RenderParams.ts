@@ -40,6 +40,12 @@ interface RenderParams<T> {
 	 * @param error The error to display
 	 */
 	setError: (error: Error) => void;
+	/**
+	 * Sets the local validation error for a field
+	 * @param field The field to set the validation error
+	 * @param error The error
+	 */
+	setFieldError: (field: ModelFieldName, error: string) => void;
 }
 
 export default RenderParams;

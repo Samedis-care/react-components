@@ -10,10 +10,12 @@ import moment from "moment";
  * Type for non-nullable dates
  */
 abstract class TypeDate implements Type<Date> {
+	protected error = "";
+
 	abstract render(params: ModelRenderParams<Date>): React.ReactElement;
 
 	validate(): string | null {
-		return null;
+		return this.error || null;
 	}
 
 	getFilterType(): FilterType {

@@ -99,6 +99,9 @@ const BackendDataGrid = <
 									setError: () => {
 										throw new Error("Not implemented in Grid");
 									},
+									setFieldError: () => {
+										throw new Error("Not implemented in Grid");
+									},
 								}) || null,
 							];
 						})

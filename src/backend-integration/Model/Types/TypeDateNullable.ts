@@ -8,10 +8,12 @@ import ccI18n from "../../../i18n";
  * Type for nullable dates
  */
 abstract class TypeDateNullable implements Type<Date | null> {
+	protected error = "";
+
 	abstract render(params: ModelRenderParams<Date | null>): React.ReactElement;
 
 	validate(): string | null {
-		return null;
+		return this.error || null;
 	}
 
 	getFilterType(): FilterType {

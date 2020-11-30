@@ -25,6 +25,7 @@ const Field = (props: FieldProps): React.ReactElement => {
 		setFieldValue,
 		handleBlur,
 		initialValues,
+		setFieldError,
 	} = useFormikContext<Record<string, unknown>>();
 
 	const { setError, model } = formContext;
@@ -72,6 +73,7 @@ const Field = (props: FieldProps): React.ReactElement => {
 				label: label,
 				errorMsg: errorMsg,
 				setError,
+				setFieldError,
 			}),
 		[
 			value,
@@ -83,6 +85,7 @@ const Field = (props: FieldProps): React.ReactElement => {
 			handleBlur,
 			errorMsg,
 			setError,
+			setFieldError,
 			initialValue,
 		]
 	);

@@ -20,6 +20,7 @@ class RendererDateNullable extends TypeDateNullable {
 			handleChange,
 			handleBlur,
 			errorMsg,
+			setFieldError,
 		} = params;
 
 		if (visibility.disabled) return <></>;
@@ -74,6 +75,14 @@ class RendererDateNullable extends TypeDateNullable {
 						format={"L"}
 						onBlur={handleBlur}
 						error={!!errorMsg}
+						onError={(error: React.ReactNode) => {
+							this.error = error
+								? ccI18n.t(
+										"backend-integration.model.types.renderers.date.validation-error"
+								  )
+								: "";
+							setFieldError(field, this.error);
+						}}
 						refuse={/([^0-9./-])/gi}
 						rifmFormatter={TypeDate.format}
 						fullWidth
