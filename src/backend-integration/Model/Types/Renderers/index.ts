@@ -7,6 +7,6 @@ export { default as ModelDataTypeEnumMultiCheckboxRendererMUI } from "./Renderer
 export { default as ModelDataTypeDateNullableRendererMUI } from "./RendererDateNullable";
 export { default as ModelDataTypeDateRendererMUI } from "./RendererDate";
 export { default as ModelDataTypeBooleanCheckboxRendererMUI } from "./RendererBooleanCheckbox";
-export { default as ModelDataTypeBooleanSwitchRendererMUI } from "./RendererBooleanCheckbox";
+export { default as ModelDataTypeBooleanSwitchRendererMUI } from "./RendererBooleanSwitch";
 export { default as ModelDataTypeImageRenderer } from "./RendererImage";
 export { default as ModelDataTypeFilesRenderer } from "./RendererFiles";
