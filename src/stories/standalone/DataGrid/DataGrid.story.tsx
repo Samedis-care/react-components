@@ -24,8 +24,16 @@ const useStyles = makeStyles({
 	},
 });
 
-const columnDef: IDataGridColumnDef[] = [
-	{ type: "number", field: "date", headerName: "Date" },
+const columnDef: IDataGridColumnDef[] = ([
+	{
+		type: "enum",
+		filterData: new Array(10).fill(null).map((_, index) => ({
+			value: `val-${index}`,
+			getLabel: () => `Value ${index}`,
+		})),
+		field: "date",
+		headerName: "Date",
+	},
 	{ type: "number", field: "states", headerName: "States" },
 	{ type: "number", field: "positive", headerName: "Positive" },
 	{ type: "number", field: "negative", headerName: "Negative" },
@@ -73,7 +81,15 @@ const columnDef: IDataGridColumnDef[] = [
 		field: "totalTestResultsIncrease",
 		headerName: "TotalTestResultsIncrease",
 	},
-];
+] as IDataGridColumnDef[]).map((entry) => ({
+	...entry,
+	filterable:
+		entry.type === "number" ||
+		entry.type === "string" ||
+		entry.type === "enum" ||
+		entry.type === "boolean",
+	sortable: entry.type === "number" || entry.type === "string",
+}));
 
 const exporters: IDataGridExporter<unknown>[] = [
 	{

@@ -6,7 +6,18 @@
 		},
 		"data-grid": {
 			"content": {
-				"filter": "Filter"
+				"filter": "Filter",
+				"bool-filter": {
+					"true": "All truthy values",
+					"false": "All false values",
+					"any": "Any value"
+				},
+				"set-filter": {
+					"search": "Search...",
+					"select-all": "Select all",
+					"reset": "Reset",
+					"apply": "Apply"
+				}
 			},
 			"header": {
 				"new": "New",

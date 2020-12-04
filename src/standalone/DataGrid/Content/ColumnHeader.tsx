@@ -137,6 +137,7 @@ const ColumnHeader = (props: IDataGridContentColumnHeaderProps) => {
 			filter={filter}
 			onFilterChange={internalOnFilterChange}
 			columnType={props.column.type}
+			filterData={props.column.filterData}
 		/>
 	);
 

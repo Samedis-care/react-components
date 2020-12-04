@@ -16,6 +16,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import FilterEntry, { IFilterDef } from "./FilterEntry";
 import i18n from "../../../i18n";
 import { ModelFilterType } from "../../../backend-integration/Model";
+import { IDataGridColumnDef } from "../index";
 
 export interface IDataGridContentColumnHeaderContentProps {
 	/**
@@ -59,6 +60,10 @@ export interface IDataGridContentColumnHeaderContentProps {
 	 * The type of the column
 	 */
 	columnType: ModelFilterType;
+	/**
+	 * The filter data of the column
+	 */
+	filterData: IDataGridColumnDef["filterData"];
 }
 
 const useStyles = makeStyles({
@@ -167,6 +172,7 @@ const ColumnHeaderContent = (
 							valueType={props.columnType}
 							onChange={props.onFilterChange}
 							value={props.filter}
+							valueData={props.filterData}
 							depth={1}
 						/>
 					</Grid>

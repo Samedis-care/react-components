@@ -18,6 +18,10 @@ import { makeStyles } from "@material-ui/core/styles";
 
 export interface Notification {
 	/**
+	 * An unique identifier for the notification
+	 */
+	id: string;
+	/**
 	 * An optional image for the notification (URL)
 	 */
 	image?: string;
@@ -112,7 +116,11 @@ const readStyle: CSSProperties = {
 };
 
 const defaultRenderer = (notification: Notification): React.ReactElement => (
-	<Box p={2} style={notification.read ? readStyle : unreadStyle}>
+	<Box
+		p={2}
+		style={notification.read ? readStyle : unreadStyle}
+		key={notification.id}
+	>
 		<Grid container spacing={2}>
 			<Grid item xs>
 				{notification.image && (

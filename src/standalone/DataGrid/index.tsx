@@ -115,6 +115,19 @@ export interface IDataGridColumnProps {
 
 export type IDataGridFieldFilter = { [field: string]: IFilterDef };
 
+export interface DataGridSetFilterDataEntry {
+	/**
+	 * The value to pass to the backend
+	 */
+	value: string;
+	/**
+	 * The label to display
+	 */
+	getLabel: () => React.ReactNode;
+}
+
+export type DataGridSetFilterData = DataGridSetFilterDataEntry[];
+
 export interface IDataGridColumnDef {
 	/**
 	 * The field name
@@ -128,6 +141,11 @@ export interface IDataGridColumnDef {
 	 * The data type used for filtering
 	 */
 	type: ModelFilterType;
+	/**
+	 * Filter data, required for the following types:
+	 * - enum (DataGridSetFilterData)
+	 */
+	filterData?: DataGridSetFilterData;
 	/**
 	 * Hidden by default?
 	 */

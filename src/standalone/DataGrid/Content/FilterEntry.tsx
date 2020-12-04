@@ -1,10 +1,26 @@
 import React, { useContext } from "react";
-import { Grid, MenuItem, Select, TextField } from "@material-ui/core";
+import {
+	Checkbox,
+	FormControlLabel,
+	Grid,
+	List,
+	ListItem,
+	ListItemText,
+	MenuItem,
+	Select,
+	TextField,
+} from "@material-ui/core";
 import FilterCombinator from "./FilterCombinator";
 import { ModelFilterType } from "../../../backend-integration/Model";
-import { DataGridPropsContext } from "../index";
+import {
+	DataGridPropsContext,
+	DataGridSetFilterData,
+	IDataGridColumnDef,
+} from "../index";
 import { LocalizedKeyboardDatePicker } from "../../LocalizedDateTimePickers";
 import { DateType } from "@date-io/type";
+import ccI18n from "../../../i18n";
+import { makeStyles } from "@material-ui/core/styles";
 
 export type FilterType =
 	| "contains"
@@ -50,6 +66,10 @@ interface IProps {
 	 */
 	valueType: ModelFilterType;
 	/**
+	 * Metadata for the filter
+	 */
+	valueData: IDataGridColumnDef["filterData"];
+	/**
 	 * The currently active filter
 	 */
 	value?: IFilterDef;
@@ -64,10 +84,20 @@ interface IProps {
 	depth: number;
 }
 
+const useStyles = makeStyles({
+	setFilterContainer: {
+		maxHeight: "40vh",
+		overflow: "auto",
+	},
+});
+
 const FilterEntry = (props: IProps) => {
 	const { onChange, depth } = props;
 	const gridProps = useContext(DataGridPropsContext);
 	if (!gridProps) throw new Error("DataGrid Props Context not set");
+
+	const classes = useStyles();
+
 	const maxDepth = gridProps.filterLimit;
 	let filterType: FilterType =
 		props.value?.type || (props.valueType === "string" ? "contains" : "equals");
@@ -108,6 +138,17 @@ const FilterEntry = (props: IProps) => {
 			subFilter = undefined;
 		} else {
 			filterValue = date.toISOString();
+		}
+		updateParent();
+	};
+	const onFilterValueChangeBool = () => {
+		filterType = "equals";
+		if (!filterValue) {
+			filterValue = "true";
+		} else if (filterValue === "true") {
+			filterValue = "false";
+		} else {
+			filterValue = "";
 		}
 		updateParent();
 	};
@@ -216,11 +257,99 @@ const FilterEntry = (props: IProps) => {
 					)}
 				</>
 			)}
-			{
-				props.valueType === "boolean" && <></> // TODO
-			}
+			{props.valueType === "boolean" && (
+				<Grid item xs={12}>
+					<FormControlLabel
+						control={
+							<Checkbox
+								checked={filterValue === "true"}
+								onClick={onFilterValueChangeBool}
+								indeterminate={!filterValue}
+							/>
+						}
+						label={ccI18n.t(
+							"standalone.data-grid.content.bool-filter." +
+								(filterValue || "any")
+						)}
+					/>
+				</Grid>
+			)}
+			{props.valueType === "enum" && (
+				<>
+					<Grid item xs={12}>
+						<TextField
+							value={filterValue2}
+							onChange={onFilterValue2Change}
+							placeholder={ccI18n.t(
+								"standalone.data-grid.content.set-filter.search"
+							)}
+							fullWidth
+						/>
+					</Grid>
+					<Grid item xs={12} className={classes.setFilterContainer}>
+						<List>
+							<ListItem>
+								<Checkbox
+									checked={
+										filterValue ===
+										(props.valueData as DataGridSetFilterData)
+											.map((entry) => entry.value)
+											.join(",")
+									}
+									onChange={(_, checked: boolean) => {
+										if (checked) {
+											filterValue = (props.valueData as DataGridSetFilterData)
+												.map((entry) => entry.value)
+												.join(",");
+										} else {
+											filterValue = "";
+										}
+										updateParent();
+									}}
+								/>
+								<ListItemText>
+									{ccI18n.t(
+										"standalone.data-grid.content.set-filter.select-all"
+									)}
+								</ListItemText>
+							</ListItem>
+							{(props.valueData as DataGridSetFilterData).map((entry) => (
+								<ListItem key={entry.value}>
+									<Checkbox
+										checked={filterValue.split(",").includes(entry.value)}
+										onChange={(_, checked: boolean) => {
+											let currentlyChecked = filterValue.split(",");
+											if (!checked) {
+												currentlyChecked = currentlyChecked.filter(
+													(val) => val !== entry.value
+												);
+											} else {
+												currentlyChecked.push(entry.value);
+											}
+											filterValue = currentlyChecked.join(",");
+											updateParent();
+										}}
+									/>
+									<ListItemText>{entry.getLabel()}</ListItemText>
+								</ListItem>
+							))}
+						</List>
+					</Grid>
+					{/*<Grid item xs={6}>
+						<Button fullWidth>
+							{ccI18n.t("standalone.data-grid.content.set-filter.reset")}
+						</Button>
+					</Grid>
+						<Grid item xs={6}>
+						<Button fullWidth>
+					{ccI18n.t("standalone.data-grid.content.set-filter.apply")}
+						</Button>
+						</Grid>*/}
+				</>
+			)}
 			{filterValue &&
 				props.valueType !== "enum" &&
+				props.valueType !== "boolean" &&
 				(!maxDepth || depth <= maxDepth) && (
 					<>
 						<FilterCombinator
@@ -230,6 +359,7 @@ const FilterEntry = (props: IProps) => {
 						<FilterEntry
 							onChange={onSubFilterChange}
 							valueType={props.valueType}
+							valueData={props.valueData}
 							value={subFilter}
 							depth={depth + 1}
 						/>
