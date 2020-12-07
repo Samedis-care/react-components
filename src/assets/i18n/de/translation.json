@@ -61,7 +61,7 @@
 							"ok": "OK",
 							"today": "Heute",
 							"invalid-date": "Ungültiges Datumsformat",
-							"min-date": "Der Termin sollte nicht vor dem Mindesttermin liegen",
+							"min-date": "Der Termin sollte nicht vor dem Mindestdatum liegen",
 							"max-date": "Das Datum sollte nicht nach dem maximalen Datum liegen"
 						},
 						"validation-error": "Bitte geben Sie ein gültiges Datum ein"
@@ -77,7 +77,7 @@
 					},
 					"boolean": {
 						"true": "Ja",
-						"false": "Ne"
+						"false": "Nein"
 					}
 				},
 				"boolean": {
@@ -96,7 +96,7 @@
 		"connector": {
 			"json-api-client": {
 				"network-error": "Ein Netzwerkfehler ist aufgetreten.",
-				"parse-error": "Parsing-Antwort fehlgeschlagen (Ungültige JSON). Der Server gab den Status {STATUS_CODE} zurück. {STATUS_TEXT}."
+				"parse-error": "Konnte die Antwort des Servers nicht verstehen (Ungültiges JSON). Der Server gab den Status {STATUS_CODE} {STATUS_TEXT} zurück."
 			}
 		}
 	},
@@ -112,7 +112,7 @@
 				},
 				"confirm-dialog": {
 					"title": "Löschen",
-					"messageInverted": "Wollen Sie wirklich alles ausser {NUM}-Einträgen löschen?",
+					"messageInverted": "Wollen Sie wirklich alles außer {NUM}-Einträgen löschen?",
 					"message": "Wollen Sie wirklich {NUM}-Einträge löschen?",
 					"buttons": {
 						"yes": "Ja",
