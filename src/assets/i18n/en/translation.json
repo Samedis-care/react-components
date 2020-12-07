@@ -73,7 +73,7 @@
 					},
 					"date": {
 						"labels": {
-							"invalid": "unknown",
+							"invalid": "Invalid",
 							"cancel": "Cancel",
 							"clear": "Clear",
 							"ok": "OK",

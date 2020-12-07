@@ -60,8 +60,63 @@
 							"invalid": "Ungültig",
 							"ok": "OK",
 							"today": "Heute",
-							"invalid-date": "Falsches Datumsformat"
-						}
+							"invalid-date": "Ungültiges Datumsformat",
+							"min-date": "Der Termin sollte nicht vor dem Mindestdatum liegen",
+							"max-date": "Das Datum sollte nicht nach dem maximalen Datum liegen"
+						},
+						"validation-error": "Bitte geben Sie ein gültiges Datum ein"
+					},
+					"image": {
+						"not-set": "Bild nicht vorhanden"
+					},
+					"files": {
+						"no-file": "Keine Dateien vorhanden"
+					},
+					"enum": {
+						"unknown": "Unbekannt"
+					},
+					"boolean": {
+						"true": "Ja",
+						"false": "Nein"
+					}
+				},
+				"boolean": {
+					"true": "Ja",
+					"false": "Nein"
+				},
+				"date-nullable": {
+					"not-set": "N/A"
+				},
+				"image": {
+					"not-set": "Bild nicht vorhanden",
+					"set": "Bild vorhanden"
+				}
+			}
+		},
+		"connector": {
+			"json-api-client": {
+				"network-error": "Ein Netzwerkfehler ist aufgetreten.",
+				"parse-error": "Konnte die Antwort des Servers nicht verstehen (Ungültiges JSON). Der Server gab den Status {STATUS_CODE} {STATUS_TEXT} zurück."
+			}
+		}
+	},
+	"backend-components": {
+		"data-grid": {
+			"delete": {
+				"error-dialog": {
+					"title": "Fehler",
+					"message": "Das Löschen der ausgewählten Einträge ist fehlgeschlagen: {ERROR}",
+					"buttons": {
+						"okay": "Okay"
+					}
+				},
+				"confirm-dialog": {
+					"title": "Löschen",
+					"messageInverted": "Wollen Sie wirklich alles außer {NUM}-Einträgen löschen?",
+					"message": "Wollen Sie wirklich {NUM}-Einträge löschen?",
+					"buttons": {
+						"yes": "Ja",
+						"no": "Nein"
 					}
 				}
 			}

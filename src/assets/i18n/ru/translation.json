@@ -47,5 +47,79 @@
 				"filter": "Фильтр"
 			}
 		}
+	},
+	"backend-integration": {
+		"model": {
+			"types": {
+				"boolean": {
+					"true": "Да",
+					"false": "Нет"
+				},
+				"date-nullable": {
+					"not-set": "N/A"
+				},
+				"image": {
+					"not-set": "Изображение отсутствует",
+					"set": "Изображение присутствует"
+				},
+				"renderers": {
+					"image": {
+						"not-set": "Изображение отсутствует"
+					},
+					"files": {
+						"no-file": "Файлы отсутствуют"
+					},
+					"enum": {
+						"unknown": "Неизвестный"
+					},
+					"date": {
+						"not-set": "Дата не установлена",
+						"labels": {
+							"today": "Сегодня",
+							"ok": "OK",
+							"min-date": "Дата не должна быть до минимальной даты",
+							"max-date": "Дата не должна быть после максимальной даты",
+							"invalid-date": "Недействительный формат даты",
+							"invalid": "Недействительный",
+							"clear": "Чисто",
+							"cancel": "Отменить"
+						},
+						"validation-error": "Пожалуйста, введите действительную дату"
+					},
+					"boolean": {
+						"true": "Да",
+						"false": "Нет"
+					}
+				}
+			}
+		},
+		"connector": {
+			"json-api-client": {
+				"network-error": "Произошла ошибка сети.",
+				"parse-error": "Неправильный ответ на парсинг (Недействительный JSON). Сервер вернул статус {STATUS_CODE}. {STATUS_TEXT}."
+			}
+		}
+	},
+	"backend-components": {
+		"data-grid": {
+			"delete": {
+				"error-dialog": {
+					"title": "Ошибка",
+					"message": "Не удалось удалить выбранные записи: {ERROR}",
+					"buttons": {
+						"okay": "Хорошо"
+					}
+				},
+				"confirm-dialog": {
+					"title": "Удалить",
+					"messageInverted": "Вы действительно хотите удалить все, кроме {NUM} записей?",
+					"message": "Ты действительно хочешь удалить записи {NUM}?",
+					"buttons": {
+						"yes": "Да",
+						"no": "Нет"
+					}
+				}
+			}
+		}
 	}
 }
