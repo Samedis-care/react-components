@@ -1,125 +1,125 @@
 {
-  "standalone": {
-    "schedule": {
-      "week": "Week",
-      "today": "Today"
-    },
-    "data-grid": {
-      "content": {
-        "filter": "Filter"
-      },
-      "header": {
-        "new": "New",
-        "edit": "Edit",
-        "delete": "Delete",
-        "export": "Export",
-        "settings": "Settings",
-        "reset": "Reset"
-      },
-      "settings": {
-        "lock": "Lock/Unlock Columns",
-        "hide": "Show/Hide Columns",
-        "close": "Close"
-      },
-      "footer": {
-        "page-size": "Page size:",
-        "page-size-tooltip": "Number of entries per page",
-        "page-of": "of",
-        "first-page": "First page",
-        "prev-page": "Previous page",
-        "next-page": "Next page",
-        "last-page": "Last page"
-      }
-    },
-    "selector": {
-      "add-new": "Add"
-    },
-    "file-upload": {
-      "upload": "Upload",
-      "no-files": "No attachments available",
-      "formats": "File formats",
-      "error": {
-        "too-many": "Too many files selected",
-        "limit-reached": "Maximum amount of allowed files",
-        "invalid-type": "Unsupported file type selected"
-      },
-      "format": {
-        "any": "Any"
-      }
-    }
-  },
-  "backend-integration": {
-    "connector": {
-      "json-api-client": {
-        "network-error": "A network error occurred.",
-        "parse-error": "Failed parsing response (Invalid JSON). Server returned status {STATUS_CODE} {STATUS_TEXT}."
-      }
-    },
-    "model": {
-      "types": {
-        "renderers": {
-          "boolean": {
-            "true": "Yes",
-            "false": "No"
-          },
-          "date": {
-            "labels": {
-              "invalid": "Invalid",
-              "cancel": "Cancel",
-              "clear": "Clear",
-              "ok": "OK",
-              "today": "Today",
-              "invalid-date": "Invalid date format",
-              "max-date": "Date should not be after maximal date",
-              "min-date": "Date should not be before minimal date"
-            },
-            "not-set": "Date not set",
-            "validation-error": "Please enter a valid date"
-          },
-          "enum": {
-            "unknown": "Unknown"
-          },
-          "image": {
-            "not-set": "No image present"
-          },
-          "files": {
-            "no-file": "No files present"
-          }
-        },
-        "date-nullable": {
-          "not-set": "N/A"
-        },
-        "image": {
-          "not-set": "Image not present",
-          "set": "Image present"
-        },
-        "boolean": {
-          "true": "Yes",
-          "false": "No"
-        }
-      }
-    }
-  },
-  "backend-components": {
-    "data-grid": {
-      "delete": {
-        "confirm-dialog": {
-          "title": "Delete",
-          "message": "Do you really want to delete {NUM} entries?",
-          "messageInverted": "Do you really want to delete everything except {NUM} entries?",
-          "buttons": {
-            "yes": "Yes",
-            "no": "No"
-          }
-        },
-        "error-dialog": {
-          "title": "Error",
-          "message": "Failed deleting the selected entries: {ERROR}",
-          "buttons": {
-            "okay": "Okay"
-          }
-        }
-      }
-    }
-  }
+	"standalone": {
+		"schedule": {
+			"week": "Week",
+			"today": "Today"
+		},
+		"data-grid": {
+			"content": {
+				"filter": "Filter"
+			},
+			"header": {
+				"new": "New",
+				"edit": "Edit",
+				"delete": "Delete",
+				"export": "Export",
+				"settings": "Settings",
+				"reset": "Reset"
+			},
+			"settings": {
+				"lock": "Lock/Unlock Columns",
+				"hide": "Show/Hide Columns",
+				"close": "Close"
+			},
+			"footer": {
+				"page-size": "Page size:",
+				"page-size-tooltip": "Number of entries per page",
+				"page-of": "of",
+				"first-page": "First page",
+				"prev-page": "Previous page",
+				"next-page": "Next page",
+				"last-page": "Last page"
+			}
+		},
+		"selector": {
+			"add-new": "Add"
+		},
+		"file-upload": {
+			"upload": "Upload",
+			"no-files": "No attachments available",
+			"formats": "File formats",
+			"error": {
+				"too-many": "Too many files selected",
+				"limit-reached": "Maximum amount of allowed files",
+				"invalid-type": "Unsupported file type selected"
+			},
+			"format": {
+				"any": "Any"
+			}
+		}
+	},
+	"backend-integration": {
+		"connector": {
+			"json-api-client": {
+				"network-error": "A network error occurred.",
+				"parse-error": "Failed parsing response (Invalid JSON). Server returned status {STATUS_CODE} {STATUS_TEXT}."
+			}
+		},
+		"model": {
+			"types": {
+				"renderers": {
+					"boolean": {
+						"true": "Yes",
+						"false": "No"
+					},
+					"date": {
+						"labels": {
+							"invalid": "Invalid",
+							"cancel": "Cancel",
+							"clear": "Clear",
+							"ok": "OK",
+							"today": "Today",
+							"invalid-date": "Invalid date format",
+							"max-date": "Date should not be after maximal date",
+							"min-date": "Date should not be before minimal date"
+						},
+						"not-set": "Date not set",
+						"validation-error": "Please enter a valid date"
+					},
+					"enum": {
+						"unknown": "Unknown"
+					},
+					"image": {
+						"not-set": "No image present"
+					},
+					"files": {
+						"no-file": "No files present"
+					}
+				},
+				"date-nullable": {
+					"not-set": "N/A"
+				},
+				"image": {
+					"not-set": "Image not present",
+					"set": "Image present"
+				},
+				"boolean": {
+					"true": "Yes",
+					"false": "No"
+				}
+			}
+		}
+	},
+	"backend-components": {
+		"data-grid": {
+			"delete": {
+				"confirm-dialog": {
+					"title": "Delete",
+					"message": "Do you really want to delete {NUM} entries?",
+					"messageInverted": "Do you really want to delete everything except {NUM} entries?",
+					"buttons": {
+						"yes": "Yes",
+						"no": "No"
+					}
+				},
+				"error-dialog": {
+					"title": "Error",
+					"message": "Failed deleting the selected entries: {ERROR}",
+					"buttons": {
+						"okay": "Okay"
+					}
+				}
+			}
+		}
+	}
 }
