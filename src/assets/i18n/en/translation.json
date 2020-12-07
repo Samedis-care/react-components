@@ -14,9 +14,7 @@
 				},
 				"set-filter": {
 					"search": "Search...",
-					"select-all": "Select all",
-					"reset": "Reset",
-					"apply": "Apply"
+					"select-all": "Select all"
 				}
 			},
 			"header": {

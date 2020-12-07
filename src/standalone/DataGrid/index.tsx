@@ -117,13 +117,19 @@ export type IDataGridFieldFilter = { [field: string]: IFilterDef };
 
 export interface DataGridSetFilterDataEntry {
 	/**
-	 * The value to pass to the backend
+	 * The value to pass to the backend.
+	 * Must not contain comma as it is being used as separator.
 	 */
 	value: string;
 	/**
 	 * The label to display
+	 * Fallback if not set: getLabelText
 	 */
-	getLabel: () => React.ReactNode;
+	getLabel?: () => React.ReactNode;
+	/**
+	 * The label text
+	 */
+	getLabelText: () => string;
 }
 
 export type DataGridSetFilterData = DataGridSetFilterDataEntry[];

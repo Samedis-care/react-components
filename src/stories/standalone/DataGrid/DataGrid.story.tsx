@@ -28,8 +28,8 @@ const columnDef: IDataGridColumnDef[] = ([
 	{
 		type: "enum",
 		filterData: new Array(10).fill(null).map((_, index) => ({
-			value: `val-${index}`,
-			getLabel: () => `Value ${index}`,
+			value: `${20200819 - index}`,
+			getLabelText: () => `Value ${index}`,
 		})),
 		field: "date",
 		headerName: "Date",
@@ -148,7 +148,6 @@ export const DataGridStory = (): React.ReactElement => {
 					sort,
 				}): DataGridData => {
 					const rowsPerPage = rows;
-
 					action("loadData")({
 						page,
 						rowsPerPage,
@@ -273,6 +272,11 @@ export const DataGridStory = (): React.ReactElement => {
 										filterKey +
 										'"].value2)';
 									break;
+								case "inSet":
+									expr +=
+										'filterCache["' +
+										filterKey +
+										'"].value1.split(",").includes(value)';
 							}
 
 							filter = filter.nextFilter;

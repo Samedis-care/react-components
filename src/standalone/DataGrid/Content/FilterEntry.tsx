@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import {
 	Checkbox,
 	FormControlLabel,
@@ -33,7 +33,8 @@ export type FilterType =
 	| "lessThanOrEqual"
 	| "greaterThan"
 	| "greaterThanOrEqual"
-	| "inRange";
+	| "inRange"
+	| "inSet";
 export type FilterComboType = "or" | "and";
 
 export interface IFilterDef {
@@ -96,11 +97,18 @@ const FilterEntry = (props: IProps) => {
 	const gridProps = useContext(DataGridPropsContext);
 	if (!gridProps) throw new Error("DataGrid Props Context not set");
 
+	const [enumFilterSearch, setEnumFilterSearch] = useState("");
+
 	const classes = useStyles();
 
 	const maxDepth = gridProps.filterLimit;
 	let filterType: FilterType =
-		props.value?.type || (props.valueType === "string" ? "contains" : "equals");
+		props.value?.type ||
+		(props.valueType === "string"
+			? "contains"
+			: props.valueType === "enum"
+			? "inSet"
+			: "equals");
 	let filterValue = props.value?.value1 || "";
 	let filterValue2 = props.value?.value2 || "";
 	let subFilterComboType: FilterComboType =
@@ -150,6 +158,34 @@ const FilterEntry = (props: IProps) => {
 		} else {
 			filterValue = "";
 		}
+		updateParent();
+	};
+	const onFilterValueChangeEnumAll = (
+		_: React.ChangeEvent<HTMLInputElement>,
+		checked: boolean
+	) => {
+		if (checked) {
+			filterValue = (props.valueData as DataGridSetFilterData)
+				.map((entry) => entry.value)
+				.join(",");
+		} else {
+			filterValue = "";
+		}
+		updateParent();
+	};
+	const onFilterValueChangeEnum = (
+		evt: React.ChangeEvent<HTMLInputElement>,
+		checked: boolean
+	) => {
+		let currentlyChecked = filterValue.split(",");
+		if (!checked) {
+			currentlyChecked = currentlyChecked.filter(
+				(val) => val !== evt.target.value
+			);
+		} else {
+			currentlyChecked.push(evt.target.value);
+		}
+		filterValue = currentlyChecked.join(",");
 		updateParent();
 	};
 	const onFilterValue2Change = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -278,8 +314,10 @@ const FilterEntry = (props: IProps) => {
 				<>
 					<Grid item xs={12}>
 						<TextField
-							value={filterValue2}
-							onChange={onFilterValue2Change}
+							value={enumFilterSearch}
+							onChange={(evt: React.ChangeEvent<HTMLInputElement>) =>
+								setEnumFilterSearch(evt.target.value)
+							}
 							placeholder={ccI18n.t(
 								"standalone.data-grid.content.set-filter.search"
 							)}
@@ -296,16 +334,7 @@ const FilterEntry = (props: IProps) => {
 											.map((entry) => entry.value)
 											.join(",")
 									}
-									onChange={(_, checked: boolean) => {
-										if (checked) {
-											filterValue = (props.valueData as DataGridSetFilterData)
-												.map((entry) => entry.value)
-												.join(",");
-										} else {
-											filterValue = "";
-										}
-										updateParent();
-									}}
+									onChange={onFilterValueChangeEnumAll}
 								/>
 								<ListItemText>
 									{ccI18n.t(
@@ -313,38 +342,24 @@ const FilterEntry = (props: IProps) => {
 									)}
 								</ListItemText>
 							</ListItem>
-							{(props.valueData as DataGridSetFilterData).map((entry) => (
-								<ListItem key={entry.value}>
-									<Checkbox
-										checked={filterValue.split(",").includes(entry.value)}
-										onChange={(_, checked: boolean) => {
-											let currentlyChecked = filterValue.split(",");
-											if (!checked) {
-												currentlyChecked = currentlyChecked.filter(
-													(val) => val !== entry.value
-												);
-											} else {
-												currentlyChecked.push(entry.value);
-											}
-											filterValue = currentlyChecked.join(",");
-											updateParent();
-										}}
-									/>
-									<ListItemText>{entry.getLabel()}</ListItemText>
-								</ListItem>
-							))}
+							{(props.valueData as DataGridSetFilterData)
+								.filter((entry) =>
+									entry.getLabelText().toLowerCase().includes(enumFilterSearch)
+								)
+								.map((entry) => (
+									<ListItem key={entry.value}>
+										<Checkbox
+											value={entry.value}
+											checked={filterValue.split(",").includes(entry.value)}
+											onChange={onFilterValueChangeEnum}
+										/>
+										<ListItemText>
+											{(entry.getLabel || entry.getLabelText)()}
+										</ListItemText>
+									</ListItem>
+								))}
 						</List>
 					</Grid>
-					{/*<Grid item xs={6}>
-						<Button fullWidth>
-							{ccI18n.t("standalone.data-grid.content.set-filter.reset")}
-						</Button>
-					</Grid>
-						<Grid item xs={6}>
-						<Button fullWidth>
-					{ccI18n.t("standalone.data-grid.content.set-filter.apply")}
-						</Button>
-						</Grid>*/}
 				</>
 			)}
 			{filterValue &&
