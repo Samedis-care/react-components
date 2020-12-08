@@ -2,10 +2,8 @@ import React from "react";
 import { FormHelperText, Typography } from "@material-ui/core";
 import { ModelRenderParams } from "../../index";
 import TypeDateNullable from "../TypeDateNullable";
-import { KeyboardDatePicker } from "@material-ui/pickers";
 import ccI18n from "../../../../i18n";
 import { normalizeDate } from "../Utils/DateUtils";
-import TypeDate from "../TypeDate";
 import { LocalizedKeyboardDatePicker } from "../../../../standalone/LocalizedDateTimePickers";
 
 /**
