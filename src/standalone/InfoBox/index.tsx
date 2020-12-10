@@ -4,10 +4,26 @@ import {
 	makeStyles,
 	Theme,
 	Accordion,
-	AccordionSummary,
+	AccordionSummary as MuiAccordionSummary,
 	AccordionDetails,
 	Typography,
+	withStyles,
 } from "@material-ui/core";
+
+const AccordionSummary = withStyles({
+	root: {
+		minHeight: 48,
+		"&$expanded": {
+			minHeight: 48,
+		},
+	},
+	content: {
+		"&$expanded": {
+			margin: "12px 0",
+		},
+	},
+	expanded: {},
+})(MuiAccordionSummary);
 
 export const useStyles = makeStyles((theme: Theme) => ({
 	noShadow: {
@@ -32,6 +48,11 @@ export const useStyles = makeStyles((theme: Theme) => ({
 		display: "flex",
 		backgroundColor: "rgba(0,0,0,.2)",
 		width: theme.spacing(6),
+	},
+	accordion: {
+		backgroundColor: theme.palette.primary.main,
+		borderColor: theme.palette.primary.main,
+		color: theme.palette.primary.contrastText,
 	},
 }));
 
@@ -62,7 +83,8 @@ interface InfoBoxProps {
 		expanded: boolean
 	) => void;
 }
-
+// .MuiAccordionSummary-content.Mui-expanded => margin => unset
+// .MuiAccordionSummary-root.Mui-expanded => min-height => unset
 const InfoBox = (props: InfoBoxProps) => {
 	const { heading, onChange, expanded, alwaysExpanded, message } = props;
 
@@ -75,7 +97,7 @@ const InfoBox = (props: InfoBoxProps) => {
 			expanded={alwaysExpanded}
 			onChange={onChange}
 		>
-			<AccordionSummary className="gx-btn-primary">
+			<AccordionSummary className={classes.accordion}>
 				<div className={classes.root}>
 					<span className={classes.iconButton}>
 						<Info />

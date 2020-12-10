@@ -3420,7 +3420,7 @@ exports[`Storyshots Standalone/InfoBox InfoBox 1`] = `
   <div
     aria-disabled={false}
     aria-expanded={false}
-    className="MuiButtonBase-root MuiAccordionSummary-root gx-btn-primary"
+    className="MuiButtonBase-root MuiAccordionSummary-root WithStyles(ForwardRef(AccordionSummary))-root-61 makeStyles-accordion-60"
     onBlur={[Function]}
     onClick={[Function]}
     onDragLeave={[Function]}
@@ -3437,7 +3437,7 @@ exports[`Storyshots Standalone/InfoBox InfoBox 1`] = `
     tabIndex={0}
   >
     <div
-      className="MuiAccordionSummary-content"
+      className="MuiAccordionSummary-content WithStyles(ForwardRef(AccordionSummary))-content-62"
     >
       <div
         className="makeStyles-root-58"
@@ -3507,17 +3507,17 @@ Array [
     }
   />,
   <div
-    className="makeStyles-outerWrapper-63"
+    className="makeStyles-outerWrapper-67"
   >
     <div
-      className="makeStyles-innerWrapper-61"
+      className="makeStyles-innerWrapper-65"
     >
       
       <div
-        className="makeStyles-outerProgressWrapper-62"
+        className="makeStyles-outerProgressWrapper-66"
       >
         <div
-          className="makeStyles-innerProgressWrapper-60"
+          className="makeStyles-innerProgressWrapper-64"
         >
           <div
             className="MuiCircularProgress-root MuiCircularProgress-colorPrimary MuiCircularProgress-indeterminate"
@@ -3625,11 +3625,11 @@ exports[`Storyshots Standalone/Schedule Scrollable 1`] = `
   className="MuiGrid-root MuiGrid-container"
 >
   <div
-    className="MuiGrid-root ScrollableSchedule-today-76 MuiGrid-item MuiGrid-grid-xs-12"
+    className="MuiGrid-root ScrollableSchedule-today-80 MuiGrid-item MuiGrid-grid-xs-12"
     onClick={[Function]}
   >
     <button
-      className="MuiButtonBase-root MuiButton-root MuiButton-text ScrollableSchedule-todayBtn-77 MuiButton-fullWidth"
+      className="MuiButtonBase-root MuiButton-root MuiButton-text ScrollableSchedule-todayBtn-81 MuiButton-fullWidth"
       disabled={false}
       onBlur={[Function]}
       onClick={[Function]}
@@ -3650,7 +3650,7 @@ exports[`Storyshots Standalone/Schedule Scrollable 1`] = `
         className="MuiButton-label"
       >
         <div
-          className="MuiBox-root MuiBox-root-79"
+          className="MuiBox-root MuiBox-root-83"
         >
           Tue 24 November
         </div>
@@ -3661,10 +3661,10 @@ exports[`Storyshots Standalone/Schedule Scrollable 1`] = `
     className="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-12"
   >
     <div
-      className="makeStyles-scrollWrapper-75 ScrollableSchedule-scroller-78"
+      className="makeStyles-scrollWrapper-79 ScrollableSchedule-scroller-82"
     >
       <div
-        className="MuiBox-root MuiBox-root-80"
+        className="MuiBox-root MuiBox-root-84"
       >
         <div
           className="MuiGrid-root MuiGrid-container MuiGrid-spacing-xs-2"
@@ -3683,7 +3683,7 @@ exports[`Storyshots Standalone/Schedule Weekly 1`] = `
     className="MuiGrid-root MuiGrid-item MuiGrid-grid-xs-4"
   >
     <button
-      className="MuiButtonBase-root MuiButton-root MuiButton-text WeekView-todayBtn-81"
+      className="MuiButtonBase-root MuiButton-root MuiButton-text WeekView-todayBtn-85"
       disabled={false}
       onBlur={[Function]}
       onClick={[Function]}
@@ -3753,7 +3753,7 @@ exports[`Storyshots Standalone/Schedule Weekly 1`] = `
           </span>
         </button>
         <span
-          className="WeekView-week-82"
+          className="WeekView-week-86"
           onClick={[Function]}
         >
           Week
@@ -3763,7 +3763,7 @@ exports[`Storyshots Standalone/Schedule Weekly 1`] = `
           2020
         </span>
         <div
-          className="WeekView-picker-83"
+          className="WeekView-picker-87"
         >
           <div
             className="MuiFormControl-root MuiTextField-root"
@@ -3876,10 +3876,10 @@ exports[`Storyshots Standalone/Schedule Weekly 1`] = `
 
 exports[`Storyshots Standalone/Selector Multi 1`] = `
 <div
-  className="MuiBox-root MuiBox-root-84"
+  className="MuiBox-root MuiBox-root-88"
 >
   <div
-    className="MuiPaper-root memo(MultiSelect)-paperWrapper-85 MuiPaper-elevation0 MuiPaper-rounded"
+    className="MuiPaper-root memo(MultiSelect)-paperWrapper-89 MuiPaper-elevation0 MuiPaper-rounded"
   >
     <div
       className="MuiGrid-root MuiGrid-container"
@@ -4006,17 +4006,17 @@ exports[`Storyshots Standalone/Selector Multi 1`] = `
         </div>
       </div>
       <div
-        className="MuiGrid-root memo(MultiSelect)-selectedEntries-86 MuiGrid-item MuiGrid-grid-xs-12"
+        className="MuiGrid-root memo(MultiSelect)-selectedEntries-90 MuiGrid-item MuiGrid-grid-xs-12"
       >
         <ul
-          className="MuiList-root memo(MultiSelectEntry)-root-87 MuiList-padding"
+          className="MuiList-root memo(MultiSelectEntry)-root-91 MuiList-padding"
         >
           <li
             className="MuiListItem-container"
           >
             <div
               aria-disabled={false}
-              className="MuiButtonBase-root MuiListItem-root MuiListItem-gutters SmallListItem-gutters-89 MuiListItem-button MuiListItem-secondaryAction"
+              className="MuiButtonBase-root MuiListItem-root MuiListItem-gutters SmallListItem-gutters-93 MuiListItem-button MuiListItem-secondaryAction"
               onBlur={[Function]}
               onClick={[Function]}
               onDragLeave={[Function]}
@@ -4046,7 +4046,7 @@ exports[`Storyshots Standalone/Selector Multi 1`] = `
               className="MuiListItemSecondaryAction-root"
             >
               <button
-                className="MuiButtonBase-root MuiIconButton-root WithStyles(ForwardRef(IconButton))-root-90 MuiIconButton-edgeEnd"
+                className="MuiButtonBase-root MuiIconButton-root WithStyles(ForwardRef(IconButton))-root-94 MuiIconButton-edgeEnd"
                 disabled={false}
                 name="ocean"
                 onBlur={[Function]}
@@ -4090,7 +4090,7 @@ exports[`Storyshots Standalone/Selector Multi 1`] = `
 
 exports[`Storyshots Standalone/Selector Single 1`] = `
 <div
-  className="MuiBox-root MuiBox-root-91"
+  className="MuiBox-root MuiBox-root-95"
 >
   <div
     className=" css-2b097c-container"
