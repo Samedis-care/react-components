@@ -1,5 +1,5 @@
 import React, { CSSProperties } from "react";
-import Selector, { SelectorData, SelectorPropsMultiSelect } from "./Selector";
+import Selector, { SelectorData, SelectorPropsSingleSelect } from "./Selector";
 import {
 	createStyles,
 	Grid,
@@ -26,7 +26,19 @@ export interface MultiSelectorData extends SelectorData {
 }
 
 export interface MultiSelectProps<Data extends MultiSelectorData>
-	extends Omit<SelectorPropsMultiSelect<Data>, "multiSelect" | "clearable"> {
+	extends Omit<
+		SelectorPropsSingleSelect<Data>,
+		"multiSelect" | "clearable" | "onSelect" | "selected"
+	> {
+	/**
+	 * Extended selection change handler
+	 * @param data The selected data entry/entries
+	 */
+	onSelect?: (value: Data[]) => void;
+	/**
+	 * The currently selected values
+	 */
+	selected: Data[];
 	/**
 	 * Specify a custom component for displaying multi select items
 	 */
@@ -103,7 +115,8 @@ const MultiSelect = <Data extends MultiSelectorData>(
 		return {
 			control: (
 				base: CSSProperties,
-				selectProps: ControlProps<Record<string, unknown>>
+				// eslint-disable-next-line @typescript-eslint/ban-types
+				selectProps: ControlProps<object, false>
 			): CSSProperties => {
 				let multiSelectStyles: CSSProperties = {
 					...base,
@@ -127,7 +140,7 @@ const MultiSelect = <Data extends MultiSelectorData>(
 		<Paper elevation={0} className={classes.paperWrapper}>
 			<Grid container>
 				<Grid item xs={12}>
-					<Selector<Data>
+					<Selector<Data, false>
 						{...props}
 						onLoad={multiSelectLoadHandler}
 						selected={null}

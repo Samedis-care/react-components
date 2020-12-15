@@ -41,7 +41,7 @@ export interface SelectorData {
 type SelectorLabelCallback = (obj: { inputValue: string }) => string | null;
 
 export interface SelectorPropsSingleSelect<Data extends SelectorData>
-	extends SelectorProps<Data> {
+	extends SelectorProps<Data, false> {
 	/**
 	 * Extended selection change handler
 	 * @param data The selected data entry/entries
@@ -51,14 +51,10 @@ export interface SelectorPropsSingleSelect<Data extends SelectorData>
 	 * The currently selected values
 	 */
 	selected: Data | null;
-	/**
-	 * Can the selector select multiple values
-	 */
-	multiSelect?: false;
 }
 
 export interface SelectorPropsMultiSelect<Data extends SelectorData>
-	extends SelectorProps<Data> {
+	extends SelectorProps<Data, true> {
 	/**
 	 * Extended selection change handler
 	 * @param data The selected data entry/entries
@@ -68,13 +64,9 @@ export interface SelectorPropsMultiSelect<Data extends SelectorData>
 	 * The currently selected values
 	 */
 	selected: Data[];
-	/**
-	 * Can the selector select multiple values
-	 */
-	multiSelect: true;
 }
 
-interface SelectorProps<Data extends SelectorData> {
+interface SelectorProps<Data extends SelectorData, IsMulti extends boolean> {
 	/**
 	 * Data load function
 	 * @param search The user search input
@@ -88,6 +80,10 @@ interface SelectorProps<Data extends SelectorData> {
 	 * Is the selector clearable?
 	 */
 	clearable?: boolean;
+	/**
+	 * Can the selector select multiple values
+	 */
+	multiSelect: IsMulti extends true ? true : false | undefined;
 	/**
 	 * Enables icons in the list renderers
 	 */
@@ -112,7 +108,7 @@ interface SelectorProps<Data extends SelectorData> {
 	 */
 	renderEntry?: (
 		option: Data,
-		labelMeta: FormatOptionLabelMeta<Data>
+		labelMeta: FormatOptionLabelMeta<Data, IsMulti>
 	) => React.ReactNode;
 
 	/**
@@ -141,8 +137,10 @@ interface SelectorProps<Data extends SelectorData> {
  * This component shouldn't be used directly,
  * please look into SingleSelect and MultiSelect instead.
  */
-const Selector = <Data extends SelectorData>(
-	props: SelectorPropsSingleSelect<Data> | SelectorPropsMultiSelect<Data>
+const Selector = <Data extends SelectorData, IsMulti extends boolean>(
+	props: IsMulti extends false
+		? SelectorPropsSingleSelect<Data>
+		: SelectorPropsMultiSelect<Data>
 ) => {
 	const {
 		onLoad,
@@ -173,6 +171,7 @@ const Selector = <Data extends SelectorData>(
 			...otherCustomStyles
 		} = customStyles || {};
 
+		// noinspection JSUnusedGlobalSymbols
 		return {
 			option: (base: CSSProperties): CSSProperties => {
 				let selectorOptionStyles: CSSProperties = {
@@ -188,7 +187,7 @@ const Selector = <Data extends SelectorData>(
 			},
 			control: (
 				base: CSSProperties,
-				controlProps: ControlProps<Record<string, unknown>>
+				controlProps: ControlProps<Record<string, unknown>, boolean>
 			): CSSProperties => {
 				let selectorControlStyles: CSSProperties = {
 					...base,
@@ -217,7 +216,7 @@ const Selector = <Data extends SelectorData>(
 			},
 			placeholder: (
 				base: CSSProperties,
-				props: PlaceholderProps<Record<string, unknown>>
+				props: PlaceholderProps<Record<string, unknown>, IsMulti>
 			): CSSProperties => {
 				let selectorPlaceholderStyles: CSSProperties = {
 					...base,
@@ -257,8 +256,12 @@ const Selector = <Data extends SelectorData>(
 		[loadingLabel]
 	);
 	const onChangeHandler = React.useCallback(
-		(data: ValueType<Data>) => {
-			if (data && "isAddNewButton" in data && data.isAddNewButton) {
+		(data: ValueType<Data, IsMulti>) => {
+			if (
+				data &&
+				"isAddNewButton" in data &&
+				(data as SelectorData).isAddNewButton
+			) {
 				if (onAddNew) onAddNew();
 				return;
 			}
@@ -301,16 +304,21 @@ const Selector = <Data extends SelectorData>(
 	);
 
 	return (
-		<AsyncSelect
+		<AsyncSelect<Data, IsMulti>
 			defaultOptions
 			loadOptions={onLoadButtonInjector}
 			placeholder={placeholderLabel}
-			value={selected}
+			value={selected as ValueType<Data, IsMulti>}
 			onChange={onChangeHandler}
 			isDisabled={disable}
-			isMulti={multiSelect}
+			isMulti={multiSelect as IsMulti | undefined}
 			isClearable={clearable}
-			formatOptionLabel={renderEntry || defaultRenderer}
+			formatOptionLabel={
+				(renderEntry || defaultRenderer) as (
+					option: Data,
+					labelMeta: FormatOptionLabelMeta<Data, IsMulti>
+				) => React.ReactNode
+			}
 			noOptionsMessage={getNoOptionsLabel}
 			loadingMessage={getLoadingLabel}
 			key={`${refreshToken || "no-refresh-token"} ${

@@ -11,7 +11,7 @@ import Model, {
 	PageVisibility,
 } from "../../backend-integration/Model/Model";
 import { useDialogContext } from "../../framework";
-import { ErrorDialog, showConfirmDialog } from "../../non-standalone/Dialog";
+import { ErrorDialog, showConfirmDialog } from "../../non-standalone";
 import ccI18n from "../../i18n";
 
 export interface BackendDataGridProps<

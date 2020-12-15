@@ -1,11 +1,8 @@
 import React, { useEffect } from "react";
 import { button, number, text, withKnobs } from "@storybook/addon-knobs";
 import { action, withActions } from "@storybook/addon-actions";
-import { Framework, useDialogContext } from "../../../framework";
-import {
-	IDialogButtonConfig,
-	InfoDialog,
-} from "../../../non-standalone/Dialog";
+import { useDialogContext } from "../../../framework";
+import { IDialogButtonConfig, InfoDialog } from "../../../non-standalone";
 
 const DialogContent = (): React.ReactElement => {
 	const [pushDialog] = useDialogContext();
@@ -47,11 +44,7 @@ const DialogContent = (): React.ReactElement => {
 };
 
 export const InfoDialogStory = (): React.ReactElement => {
-	return (
-		<Framework>
-			<DialogContent />
-		</Framework>
-	);
+	return <DialogContent />;
 };
 
 InfoDialogStory.storyName = "Info";

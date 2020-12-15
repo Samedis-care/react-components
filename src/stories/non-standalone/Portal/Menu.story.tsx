@@ -9,7 +9,7 @@ import {
 } from "../../../standalone/Portal";
 import { Domain, Home } from "@material-ui/icons";
 import { button, select, withKnobs } from "@storybook/addon-knobs";
-import { Framework, FrameworkHistory, RoutedMenu } from "../../..";
+import { FrameworkHistory, RoutedMenu } from "../../..";
 import { withActions } from "@storybook/addon-actions";
 
 const useStyles = makeStyles({
@@ -77,7 +77,7 @@ export const PortalMenuStory = (): React.ReactElement => {
 	);
 
 	return (
-		<Framework>
+		<>
 			<style
 				dangerouslySetInnerHTML={{
 					__html: `
@@ -144,7 +144,7 @@ export const PortalMenuStory = (): React.ReactElement => {
 				content={<Placeholder cssClass={"content"} />}
 				drawerWidth={320}
 			/>
-		</Framework>
+		</>
 	);
 };
 

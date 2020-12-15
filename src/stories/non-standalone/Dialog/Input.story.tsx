@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { button, text, withKnobs } from "@storybook/addon-knobs";
 import { action, withActions } from "@storybook/addon-actions";
 import { InputDialog, showInputDialog } from "../../../non-standalone/Dialog";
-import { Framework, useDialogContext } from "../../../framework";
+import { useDialogContext } from "../../../framework";
 
 const DialogContent = (): React.ReactElement => {
 	const [pushDialog] = useDialogContext();
@@ -55,11 +55,7 @@ const DialogContent = (): React.ReactElement => {
 };
 
 export const InputDialogStory = (): React.ReactElement => {
-	return (
-		<Framework>
-			<DialogContent />
-		</Framework>
-	);
+	return <DialogContent />;
 };
 
 InputDialogStory.storyName = "Input";

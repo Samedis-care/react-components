@@ -6,8 +6,8 @@ import {
 	FormDialog,
 	IDialogButtonConfig,
 	IDialogConfigSimple,
-} from "../../../non-standalone/Dialog";
-import { Framework, useDialogContext } from "../../../framework";
+} from "../../../non-standalone";
+import { useDialogContext } from "../../../framework";
 
 const MyCustomDialog = (props: IDialogConfigSimple): React.ReactElement => {
 	const [v1, setV1] = useState("Prefilled");
@@ -93,11 +93,7 @@ const DialogContent = (): React.ReactElement => {
 };
 
 export const FormDialogStory = (): React.ReactElement => {
-	return (
-		<Framework>
-			<DialogContent />
-		</Framework>
-	);
+	return <DialogContent />;
 };
 
 FormDialogStory.storyName = "Form (custom)";

@@ -1,11 +1,8 @@
 import React, { useEffect } from "react";
 import { button, text, withKnobs } from "@storybook/addon-knobs";
 import { action, withActions } from "@storybook/addon-actions";
-import { Framework, useDialogContext } from "../../../framework";
-import {
-	ConfirmDialog,
-	showConfirmDialog,
-} from "../../../non-standalone/Dialog";
+import { useDialogContext } from "../../../framework";
+import { ConfirmDialog, showConfirmDialog } from "../../../non-standalone";
 
 const DialogContent = (): React.ReactElement => {
 	const [pushDialog] = useDialogContext();
@@ -52,11 +49,7 @@ const DialogContent = (): React.ReactElement => {
 };
 
 export const ConfirmDialogStory = (): React.ReactElement => {
-	return (
-		<Framework>
-			<DialogContent />
-		</Framework>
-	);
+	return <DialogContent />;
 };
 
 ConfirmDialogStory.storyName = "Confirm";
