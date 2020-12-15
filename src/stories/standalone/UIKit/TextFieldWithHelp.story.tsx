@@ -1,6 +1,5 @@
 import React from "react";
-import { text, withKnobs } from "@storybook/addon-knobs";
-import { withActions } from "@storybook/addon-actions";
+import { boolean, text, withKnobs } from "@storybook/addon-knobs";
 import TextFieldWithHelp from "../../../standalone/UIKit/TextFieldWithHelp";
 
 export const TextFieldWithHelpStory = (): React.ReactElement => {
@@ -8,9 +7,32 @@ export const TextFieldWithHelpStory = (): React.ReactElement => {
 		<TextFieldWithHelp
 			label={text("Label", "FieldName")}
 			placeholder={text("Placeholder", "Enter something here")}
+			fullWidth={boolean("100% Width", true)}
+			infoText={
+				<div
+					dangerouslySetInnerHTML={{
+						__html: text(
+							"Info Text",
+							"This is a pretty long info text which supports html. It really is.<br> It explains you what to write in here."
+						),
+					}}
+				/>
+			}
+			helpText={
+				<div
+					dangerouslySetInnerHTML={{
+						__html: text("Help Text", ""),
+					}}
+				/>
+			}
 		/>
 	);
 };
 
 TextFieldWithHelpStory.storyName = "TextFieldWithHelp";
-TextFieldWithHelpStory.decorators = [withActions, withKnobs];
+TextFieldWithHelpStory.decorators = [withKnobs];
+TextFieldWithHelpStory.parameters = {
+	knobs: {
+		escapeHTML: false,
+	},
+};
