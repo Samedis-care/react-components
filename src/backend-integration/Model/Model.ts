@@ -2,9 +2,12 @@ import Type from "./Type";
 import Visibility from "./Visibility";
 import Connector, { ResponseMeta } from "../Connector/Connector";
 import { useMutation, useQuery } from "react-query";
-import { MutationResultPair, QueryResult } from "react-query/types/core/types";
 import { ModelDataStore } from "../index";
 import { IDataGridLoadDataParameters } from "../../standalone/DataGrid";
+import {
+	UseMutationResult,
+	UseQueryResult,
+} from "react-query/types/react/types";
 
 export interface PageVisibility {
 	overview: Visibility;
@@ -142,7 +145,7 @@ class Model<
 	 * Provides a react-query useQuery hook for the given data id
 	 * @param id The data entry id
 	 */
-	public get(id: string | null): QueryResult<Record<KeyT, unknown>, Error> {
+	public get(id: string | null): UseQueryResult<Record<KeyT, unknown>, Error> {
 		// eslint-disable-next-line react-hooks/rules-of-hooks
 		return useQuery([this.modelId, { id: id }], async () => {
 			if (!id) return this.getDefaultValues();
@@ -157,14 +160,15 @@ class Model<
 	/**
 	 * Provides a react-query useMutation hook for creation or updates to an data entry
 	 */
-	public createOrUpdate<SnapshotT = unknown>(): MutationResultPair<
+	public createOrUpdate<TContext = unknown>(): UseMutationResult<
 		Record<KeyT, unknown>,
 		Error,
 		Record<string, unknown>,
-		SnapshotT
+		TContext
 	> {
 		// eslint-disable-next-line react-hooks/rules-of-hooks
 		return useMutation(
+			this.modelId + "-create-or-update",
 			async (values: Record<string, unknown>) => {
 				const update = !!("id" in values && values.id);
 				const serializedValues = await this.applySerialization(
@@ -185,19 +189,19 @@ class Model<
 					// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 					ModelDataStore.setQueryData([this.modelId, { id: data.id }], data);
 				},
-				throwOnError: true,
 			}
 		);
 	}
 
-	public delete<SnapShotT = unknown>(): MutationResultPair<
+	public delete<TContext = unknown>(): UseMutationResult<
 		void,
 		Error,
 		string,
-		SnapShotT
+		TContext
 	> {
 		// eslint-disable-next-line react-hooks/rules-of-hooks
 		return useMutation(
+			this.modelId + "-delete",
 			(id: string) => {
 				return this.connector.delete(id);
 			},
@@ -205,19 +209,19 @@ class Model<
 				onSuccess: (data: void, id: string) => {
 					ModelDataStore.setQueryData([this.modelId, { id: id }], undefined);
 				},
-				throwOnError: true,
 			}
 		);
 	}
 
-	public deleteMultiple<SnapShotT = unknown>(): MutationResultPair<
+	public deleteMultiple<TContext = unknown>(): UseMutationResult<
 		void,
 		Error,
 		string[],
-		SnapShotT
+		TContext
 	> {
 		// eslint-disable-next-line react-hooks/rules-of-hooks
 		return useMutation(
+			this.modelId + "-delete-multi",
 			(ids: string[]) => {
 				return this.connector.deleteMultiple(ids);
 			},
@@ -227,7 +231,6 @@ class Model<
 						ModelDataStore.setQueryData([this.modelId, { id: id }], undefined)
 					);
 				},
-				throwOnError: true,
 			}
 		);
 	}
@@ -236,14 +239,15 @@ class Model<
 		return !!this.connector.deleteAdvanced;
 	}
 
-	public deleteAdvanced<SnapShotT = unknown>(): MutationResultPair<
+	public deleteAdvanced<TContext = unknown>(): UseMutationResult<
 		void,
 		Error,
 		AdvancedDeleteRequest,
-		SnapShotT
+		TContext
 	> {
 		// eslint-disable-next-line react-hooks/rules-of-hooks
 		return useMutation(
+			this.modelId + "-delete-adv",
 			(req: AdvancedDeleteRequest) => {
 				if (!this.connector.deleteAdvanced) {
 					throw new Error("Connector doesn't support advanced deletion");
@@ -260,7 +264,6 @@ class Model<
 						ModelDataStore.clear();
 					}
 				},
-				throwOnError: true,
 			}
 		);
 	}

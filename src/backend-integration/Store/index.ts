@@ -1,8 +1,8 @@
-import { QueryCache } from "react-query";
+import { QueryClient } from "react-query";
 
 /**
  * The react-query data cache
  */
-const queryCache = new QueryCache();
+const queryCache = new QueryClient();
 
 export default queryCache;

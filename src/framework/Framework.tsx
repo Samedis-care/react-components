@@ -6,7 +6,7 @@ import ThemeProvider, {
 	GetDefaultThemeCallback,
 	getStandardTheme,
 } from "./ThemeProvider";
-import { ReactQueryCacheProvider } from "react-query";
+import { QueryClientProvider } from "react-query";
 import { ModelDataStore } from "../backend-integration";
 import MuiPickerUtils from "./MuiPickerUtils";
 import PermissionContextProvider from "./PermissionContextProvider";
@@ -50,13 +50,13 @@ const ComponentsCareFramework = (props: ICompleteFrameworkProps) => (
 	<Suspense fallback={loaderComponent}>
 		<MuiPickerUtils disable={props.disableMuiPickerUtils}>
 			<ThemeProvider defaultTheme={props.defaultTheme || getStandardTheme}>
-				<ReactQueryCacheProvider queryCache={ModelDataStore}>
+				<QueryClientProvider client={ModelDataStore}>
 					<PermissionContextProvider>
 						<Router history={FrameworkHistory}>
 							<DialogContextProvider>{props.children}</DialogContextProvider>
 						</Router>
 					</PermissionContextProvider>
-				</ReactQueryCacheProvider>
+				</QueryClientProvider>
 			</ThemeProvider>
 		</MuiPickerUtils>
 	</Suspense>

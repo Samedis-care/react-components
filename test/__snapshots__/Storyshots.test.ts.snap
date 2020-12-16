@@ -3945,40 +3945,22 @@ exports[`Storyshots Standalone/UIKit ActionButton 1`] = `
 
 exports[`Storyshots Standalone/UIKit TextFieldWithHelp 1`] = `
 <div
-  className="MuiFormControl-root-3 MuiTextField-root-2 MuiFormControl-fullWidth-6"
-  helpText={
-    <div
-      dangerouslySetInnerHTML={
-        Object {
-          "__html": "",
-        }
-      }
-    />
-  }
-  infoText={
-    <div
-      dangerouslySetInnerHTML={
-        Object {
-          "__html": "This is a pretty long info text which supports html. It really is.<br> It explains you what to write in here.",
-        }
-      }
-    />
-  }
+  className="MuiFormControl-root-4 MuiTextField-root-3 MuiFormControl-fullWidth-7"
 >
   <label
-    className="MuiFormLabel-root-19 MuiInputLabel-root-7 MuiInputLabel-formControl-13 MuiInputLabel-animated-16 MuiInputLabel-shrink-15"
+    className="MuiFormLabel-root-20 MuiInputLabel-root-8 MuiInputLabel-formControl-14 MuiInputLabel-animated-17 MuiInputLabel-shrink-16"
     data-shrink={true}
   >
     FieldName
   </label>
   <div
-    className="MuiInputBase-root-41 MuiInput-root-27 makeStyles-root-0 MuiInput-underline-32 MuiInputBase-fullWidth-51 MuiInput-fullWidth-36 MuiInputBase-formControl-42 MuiInput-formControl-28 MuiInputBase-adornedEnd-46"
+    className="MuiInputBase-root-42 MuiInput-root-28 makeStyles-root-0 MuiInput-underline-33 MuiInputBase-fullWidth-52 MuiInput-fullWidth-37 MuiInputBase-formControl-43 MuiInput-formControl-29 MuiInputBase-adornedEnd-47"
     onClick={[Function]}
   >
     <input
       aria-invalid={false}
       autoFocus={false}
-      className="MuiInputBase-input-52 MuiInput-input-37 makeStyles-input-1 MuiInputBase-inputAdornedEnd-57"
+      className="MuiInputBase-input-53 MuiInput-input-38 makeStyles-input-1 makeStyles-input-2 MuiInputBase-inputAdornedEnd-58"
       disabled={false}
       onAnimationStart={[Function]}
       onBlur={[Function]}
@@ -3991,7 +3973,7 @@ exports[`Storyshots Standalone/UIKit TextFieldWithHelp 1`] = `
     <svg
       aria-describedby={null}
       aria-hidden={true}
-      className="MuiSvgIcon-root-70 MuiSvgIcon-colorDisabled-75"
+      className="MuiSvgIcon-root-71 MuiSvgIcon-colorDisabled-76"
       focusable="false"
       onBlur={[Function]}
       onFocus={[Function]}
@@ -4004,24 +3986,6 @@ exports[`Storyshots Standalone/UIKit TextFieldWithHelp 1`] = `
     >
       <path
         d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"
-      />
-    </svg>
-    <svg
-      aria-describedby={null}
-      aria-hidden={true}
-      className="MuiSvgIcon-root-70 MuiSvgIcon-colorDisabled-75"
-      focusable="false"
-      onBlur={[Function]}
-      onFocus={[Function]}
-      onMouseLeave={[Function]}
-      onMouseOver={[Function]}
-      onTouchEnd={[Function]}
-      onTouchStart={[Function]}
-      title={null}
-      viewBox="0 0 24 24"
-    >
-      <path
-        d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"
       />
     </svg>
   </div>

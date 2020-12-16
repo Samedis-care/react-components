@@ -87,7 +87,7 @@ const Form = (props: FormProps) => {
 
 	const [updateError, setUpdateError] = useState<Error | null>(null);
 	const { isLoading, error, data } = model.get(id || null);
-	const [updateData] = model.createOrUpdate();
+	const { mutateAsync: updateData } = model.createOrUpdate();
 
 	const onValidate = useCallback((values) => model.validate(values), [model]);
 	const onSubmitHandler = useCallback(
@@ -97,7 +97,6 @@ const Form = (props: FormProps) => {
 		): Promise<void> => {
 			try {
 				const result = await updateData(values);
-				if (!result) return;
 				setValues(result);
 				if (onSubmit) {
 					onSubmit(result);

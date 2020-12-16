@@ -112,8 +112,8 @@ const BackendDataGrid = <
 		[model]
 	);
 
-	const [deleteAdvanced] = model.deleteAdvanced();
-	const [deleteMultiple] = model.deleteMultiple();
+	const { mutateAsync: deleteAdvanced } = model.deleteAdvanced();
+	const { mutateAsync: deleteMultiple } = model.deleteMultiple();
 	const handleDelete = useCallback(
 		async (invert: boolean, ids: string[]) => {
 			try {

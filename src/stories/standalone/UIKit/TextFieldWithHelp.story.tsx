@@ -8,6 +8,7 @@ export const TextFieldWithHelpStory = (): React.ReactElement => {
 			label={text("Label", "FieldName")}
 			placeholder={text("Placeholder", "Enter something here")}
 			fullWidth={boolean("100% Width", true)}
+			important={boolean("Important", false)}
 			infoText={
 				<div
 					dangerouslySetInnerHTML={{
@@ -15,13 +16,6 @@ export const TextFieldWithHelpStory = (): React.ReactElement => {
 							"Info Text",
 							"This is a pretty long info text which supports html. It really is.<br> It explains you what to write in here."
 						),
-					}}
-				/>
-			}
-			helpText={
-				<div
-					dangerouslySetInnerHTML={{
-						__html: text("Help Text", ""),
 					}}
 				/>
 			}
