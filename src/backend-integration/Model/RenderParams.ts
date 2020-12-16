@@ -20,6 +20,10 @@ interface RenderParams<T> {
 	 */
 	label: string;
 	/**
+	 * Has the field been touched before?
+	 */
+	touched: boolean;
+	/**
 	 * The visibility to render the value at
 	 */
 	visibility: Visibility;
@@ -41,11 +45,16 @@ interface RenderParams<T> {
 	 */
 	setError: (error: Error) => void;
 	/**
-	 * Sets the local validation error for a field
-	 * @param field The field to set the validation error
-	 * @param error The error
+	 * Sets a field as touched (useful for forcing revalidation)
+	 * @param field The field to set touched
+	 * @param touched The new touched state
+	 * @param validate Should revalidate?
 	 */
-	setFieldError: (field: ModelFieldName, error: string) => void;
+	setFieldTouched: (
+		field: ModelFieldName,
+		touched?: boolean,
+		validate?: boolean
+	) => void;
 }
 
 export default RenderParams;

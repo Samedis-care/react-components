@@ -66,6 +66,7 @@ const BackendDataGrid = <
 								field?.type?.render({
 									field: key,
 									value: value,
+									touched: false,
 									initialValue: value,
 									label: field.getLabel(),
 									visibility: Object.assign({}, field.visibility.overview, {
@@ -99,7 +100,7 @@ const BackendDataGrid = <
 									setError: () => {
 										throw new Error("Not implemented in Grid");
 									},
-									setFieldError: () => {
+									setFieldTouched: () => {
 										throw new Error("Not implemented in Grid");
 									},
 								}) || null,

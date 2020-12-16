@@ -25,7 +25,7 @@ const Field = (props: FieldProps): React.ReactElement => {
 		setFieldValue,
 		handleBlur,
 		initialValues,
-		setFieldError,
+		setFieldTouched,
 	} = useFormikContext<Record<string, unknown>>();
 
 	const { setError, model } = formContext;
@@ -55,7 +55,8 @@ const Field = (props: FieldProps): React.ReactElement => {
 	const initialValue = initialValues[name];
 	const hasId = "id" in values && values["id"];
 	const label = fieldDef.getLabel();
-	const errorMsg = (touched[props.name] && errors[props.name]) || null;
+	const touch = touched[props.name] || false;
+	const errorMsg = (touch && errors[props.name]) || null;
 	const type = fieldDef.type;
 	const visibility = hasId
 		? fieldDef.visibility.edit
@@ -66,6 +67,7 @@ const Field = (props: FieldProps): React.ReactElement => {
 			type.render({
 				field: name,
 				value: value,
+				touched: touch,
 				initialValue: initialValue,
 				visibility: visibility,
 				handleChange: setFieldValueHookWrapper,
@@ -73,7 +75,7 @@ const Field = (props: FieldProps): React.ReactElement => {
 				label: label,
 				errorMsg: errorMsg,
 				setError,
-				setFieldError,
+				setFieldTouched,
 			}),
 		[
 			value,
@@ -85,8 +87,9 @@ const Field = (props: FieldProps): React.ReactElement => {
 			handleBlur,
 			errorMsg,
 			setError,
-			setFieldError,
+			setFieldTouched,
 			initialValue,
+			touch,
 		]
 	);
 };

@@ -15,11 +15,12 @@ class RendererDateNullable extends TypeDateNullable {
 			visibility,
 			field,
 			value,
+			touched,
 			label,
 			handleChange,
 			handleBlur,
 			errorMsg,
-			setFieldError,
+			setFieldTouched,
 		} = params;
 
 		if (visibility.disabled) return <></>;
@@ -55,7 +56,7 @@ class RendererDateNullable extends TypeDateNullable {
 										"backend-integration.model.types.renderers.date.validation-error"
 								  )
 								: "";
-							setFieldError(field, this.error);
+							setFieldTouched(field, touched, true);
 						}}
 						fullWidth
 						clearable

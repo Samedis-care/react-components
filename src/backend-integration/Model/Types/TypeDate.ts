@@ -54,6 +54,8 @@ abstract class TypeDate implements Type<Date> {
 		// get numeric values from user input
 		const values = value.replace(/([^0-9])/gm, "");
 
+		if (values.length === 0) return "";
+
 		// replace _ in format with user input values
 		let vI = 0;
 		for (let i = 0; i < format.length && vI < values.length; ++i) {

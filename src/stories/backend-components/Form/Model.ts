@@ -101,11 +101,15 @@ const FormStoryModel = new Model(
 			type: new ModelDataTypeDateNullableRendererMUI(),
 			visibility: {
 				overview: VisibilityView,
-				edit: VisibilityEdit,
-				create: VisibilityEdit,
+				edit: VisibilityEditRequired,
+				create: VisibilityEditRequired,
 			},
 			getLabel: () => "Birthday",
 			customData: null,
+			validate: (value: Date | null): string | null => {
+				if (value === null) return "Birthday must be set";
+				return null;
+			},
 		},
 		accept_tos: {
 			type: new ModelDataTypeBooleanCheckboxRendererMUI(),
