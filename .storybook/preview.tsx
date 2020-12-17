@@ -1,6 +1,11 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Framework, ThemeContext } from "../src";
-import { StylesProvider, ThemeOptions, useTheme } from "@material-ui/core";
+import {
+	createGenerateClassName,
+	StylesProvider,
+	ThemeOptions,
+	useTheme,
+} from "@material-ui/core";
 import { Rule, StyleSheet } from "jss";
 import { StoryContext } from "@storybook/addons";
 import { button, color, select, withKnobs } from "@storybook/addon-knobs";
@@ -63,11 +68,15 @@ const ThemeSelector = (props: ThemeSelectorProps) => {
 		"Theme"
 	);
 
-	button("Reset", () => {
-		const theme = getDefaultTheme();
-		localStorage.setItem("theme", JSON.stringify(theme));
-		setTheme(theme);
-	}, "Theme");
+	button(
+		"Reset",
+		() => {
+			const theme = getDefaultTheme();
+			localStorage.setItem("theme", JSON.stringify(theme));
+			setTheme(theme);
+		},
+		"Theme"
+	);
 
 	useEffect(() => {
 		const theme = {
@@ -92,10 +101,16 @@ const ThemeSelector = (props: ThemeSelectorProps) => {
 export const decorators = [
 	withKnobs,
 	(Story: React.ComponentType, context: StoryContext) => {
+		const [cng] = useState(() =>
+			createGenerateClassName({
+				seed: context.id,
+			})
+		);
+
 		return (
 			<Framework defaultTheme={loadTheme}>
 				<ThemeSelector>
-					<StylesProvider generateClassName={CssClassNameGenerator(context.id)}>
+					<StylesProvider generateClassName={cng}>
 						<Story />
 					</StylesProvider>
 				</ThemeSelector>
