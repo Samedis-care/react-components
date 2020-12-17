@@ -1,8 +1,9 @@
-import React from "react";
-import { Framework } from "../src";
-import { StylesProvider } from "@material-ui/core";
+import React, { useContext, useEffect } from "react";
+import { Framework, ThemeContext } from "../src";
+import { StylesProvider, ThemeOptions, useTheme } from "@material-ui/core";
 import { Rule, StyleSheet } from "jss";
 import { StoryContext } from "@storybook/addons";
+import { button, color, select, withKnobs } from "@storybook/addon-knobs";
 
 // so jest won't complain about mismatching numbers anymore
 const classIds: Record<string, number> = {};
@@ -22,14 +23,83 @@ const CssClassNameGenerator = (storyName: string | undefined) => (
 	sheet?: StyleSheet<string>
 ) => `${sheet?.options?.classNamePrefix}-${rule.key}-${getClassId(storyName)}`;
 
+const getDefaultTheme = (): ThemeOptions => ({
+	palette: {
+		type: "light",
+	},
+});
+
+const loadTheme = (): ThemeOptions => {
+	const themeStr = localStorage.getItem("theme");
+	if (!themeStr) return getDefaultTheme();
+	return JSON.parse(themeStr) as ThemeOptions;
+};
+
+interface ThemeSelectorProps {
+	children: React.ReactElement;
+}
+
+const ThemeSelector = (props: ThemeSelectorProps) => {
+	const theme = useTheme();
+	const setTheme = useContext(ThemeContext)!;
+
+	const type = select(
+		"Theme Type",
+		{
+			Dark: "dark",
+			Light: "light",
+		},
+		theme.palette.type,
+		"Theme"
+	);
+	const primary = color(
+		"Theme Primary color",
+		theme.palette.primary.main,
+		"Theme"
+	);
+	const secondary = color(
+		"Theme Secondary color",
+		theme.palette.secondary.main,
+		"Theme"
+	);
+
+	button("Reset", () => {
+		const theme = getDefaultTheme();
+		localStorage.setItem("theme", JSON.stringify(theme));
+		setTheme(theme);
+	}, "Theme");
+
+	useEffect(() => {
+		const theme = {
+			palette: {
+				primary: {
+					main: primary,
+				},
+				secondary: {
+					main: secondary,
+				},
+				type,
+			},
+		};
+
+		localStorage.setItem("theme", JSON.stringify(theme));
+		setTheme(theme);
+	}, [type, primary, secondary]);
+
+	return props.children;
+};
+
 export const decorators = [
-	(Story: React.ComponentType, context: StoryContext) => (
-		<Framework>
-			<StylesProvider
-				generateClassName={CssClassNameGenerator(context.id)}
-			>
-				<Story />
-			</StylesProvider>
-		</Framework>
-	),
+	withKnobs,
+	(Story: React.ComponentType, context: StoryContext) => {
+		return (
+			<Framework defaultTheme={loadTheme}>
+				<ThemeSelector>
+					<StylesProvider generateClassName={CssClassNameGenerator(context.id)}>
+						<Story />
+					</StylesProvider>
+				</ThemeSelector>
+			</Framework>
+		);
+	},
 ];
