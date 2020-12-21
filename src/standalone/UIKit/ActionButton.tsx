@@ -38,6 +38,10 @@ export interface ActionButtonProps extends Omit<ButtonProps, "children"> {
 	 */
 	icon?: React.ReactNode;
 	/**
+	 * Adjust full width of the button
+	 */
+	fullWidth?: boolean;
+	/**
 	 * Show the compact version of the button (only icon)
 	 */
 	small?: boolean;
@@ -48,10 +52,14 @@ export interface ActionButtonProps extends Omit<ButtonProps, "children"> {
 }
 
 const ActionButton = (props: ActionButtonProps) => {
-	const { icon, small, children } = props;
+	const { icon, fullWidth, small, children } = props;
 
 	const renderButton = (): React.ReactElement => (
-		<StyledButton variant={"outlined"} fullWidth={!small} {...props}>
+		<StyledButton
+			variant={"outlined"}
+			fullWidth={!small || fullWidth}
+			{...props}
+		>
 			{icon} {!small && children}
 		</StyledButton>
 	);
