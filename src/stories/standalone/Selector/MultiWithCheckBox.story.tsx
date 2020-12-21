@@ -2,12 +2,7 @@ import React, { useState } from "react";
 import { withActions } from "@storybook/addon-actions";
 import { boolean, withKnobs } from "@storybook/addon-knobs";
 import { MultiSelectWithCheckBox } from "../../../standalone/Selector";
-
-interface MultiSelectOption {
-	value: string;
-	label: string;
-	disabled?: boolean;
-}
+import { MultiSelectOption } from "../../../standalone/Selector/TypesMultiSelect";
 
 const values: string[] = ["value1", "value2"];
 const options = [
@@ -20,8 +15,8 @@ export const MultiSelectWithCheckBoxStory = (): React.ReactElement => {
 	const [selected, setSelected] = useState<string[]>(values);
 
 	const onChange = (event: React.ChangeEvent<{ value: unknown }>) => {
-		const values: string[] = event.target.value;
-		if (values && values.length > 0) setSelected(values);
+		const values = event.target.value as string[];
+		if (values?.length > 0) setSelected(values);
 		else return;
 	};
 

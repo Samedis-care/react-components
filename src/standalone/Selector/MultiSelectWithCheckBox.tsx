@@ -12,28 +12,29 @@ import {
 	InputBase,
 } from "@material-ui/core";
 import { ExpandMore } from "@material-ui/icons";
+import { MultiSelectOption } from "./TypesMultiSelect";
 
-interface MultiSelectWithCheckBoxProps extends SelectProps {
+export interface MultiSelectWithCheckBoxProps extends SelectProps {
+	/**
+	 * Selector options
+	 */
 	options: MultiSelectOption[];
+	/**
+	 * Selected values
+	 */
 	values: string[];
 }
 
-interface MultiSelectOption {
-	value: string;
-	label: string;
-	disabled?: boolean;
-}
-
-const useStyles = makeStyles(() => ({
+const useStyles = makeStyles({
 	checkboxStyle: {
 		borderRadius: 4,
 		width: 16,
 		height: 16,
 		marginRight: 10,
 	},
-}));
+});
 
-const MenuItemCustom = withStyles(() =>
+const MenuItemCustom = withStyles(
 	createStyles({
 		selected: {
 			backgroundColor: "white !important",
@@ -44,7 +45,7 @@ const MenuItemCustom = withStyles(() =>
 	})
 )(MenuItem);
 
-const ListItemTextCustom = withStyles(() =>
+const ListItemTextCustom = withStyles(
 	createStyles({
 		primary: {
 			fontSize: 13,
