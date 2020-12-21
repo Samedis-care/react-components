@@ -26,7 +26,7 @@ const StyledButton = withStyles((theme: Theme) => ({
 		},
 		"& svg": {
 			fill: theme.palette.primary.main,
-			marginRight: props.small ? undefined : 10,
+			marginRight: props.small ? undefined : 15,
 		},
 		"&:hover svg": {
 			fill: theme.palette.text.primary,
@@ -59,7 +59,7 @@ const StyledButton = withStyles((theme: Theme) => ({
 				borderRightWidth: props.small ? 1 : undefined,
 			},
 		},
-		padding: props.small ? 5 : undefined,
+		padding: props.small ? 10 : "10px 30px",
 	}),
 	label: {
 		justifyContent: "flex-start",
