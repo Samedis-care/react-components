@@ -1,25 +1,26 @@
-import React, { useCallback, useContext } from "react";
+import React, { useCallback } from "react";
 import {
-	DataGridColumnsStateContext,
-	DataGridPropsContext,
-	DataGridStateContext,
 	getDataGridDefaultState,
+	useDataGridColumnState,
+	useDataGridProps,
+	useDataGridState,
 } from "../index";
 import { Hidden } from "@material-ui/core";
 import ActionBarView from "./ActionBarView";
 import ActionBarViewMobile from "./ActionBarViewMobile";
 
 const ActionBar = () => {
-	const stateCtx = useContext(DataGridStateContext);
-	if (!stateCtx) throw new Error("State Context not set");
-	const [state, setState] = stateCtx;
-	const columnsStateCtx = useContext(DataGridColumnsStateContext);
-	if (!columnsStateCtx) throw new Error("Columns State Context not set");
-	const [, setColumnState] = columnsStateCtx;
+	const [state, setState] = useDataGridState();
+	const [, setColumnState] = useDataGridColumnState();
 	const { selectAll, selectedRows } = state;
-	const gridProps = useContext(DataGridPropsContext);
-	if (!gridProps) throw new Error("Props Context not set");
-	const { columns, onAddNew, onEdit, onDelete } = gridProps;
+	const {
+		columns,
+		onAddNew,
+		onEdit,
+		onDelete,
+		exporters,
+		filterBar,
+	} = useDataGridProps();
 
 	const toggleSettings = useCallback(() => {
 		setState((prevState) => ({
@@ -33,7 +34,8 @@ const ActionBar = () => {
 		: selectedRows.length;
 
 	const firstSelection = selectAll
-		? state.rows?.find((row) => !selectedRows.includes(row.id))?.id
+		? Object.values(state.rows).find((row) => !selectedRows.includes(row.id))
+				?.id
 		: selectedRows[0];
 	const handleEdit = useCallback(() => {
 		if (!firstSelection)
@@ -69,8 +71,8 @@ const ActionBar = () => {
 					handleEdit={onEdit ? handleEdit : undefined}
 					handleDelete={onDelete ? handleDelete : undefined}
 					handleReset={handleReset}
-					exporters={gridProps.exporters}
-					hasCustomFilterBar={!!gridProps.filterBar}
+					exporters={exporters}
+					hasCustomFilterBar={!!filterBar}
 				/>
 			</Hidden>
 			<Hidden smUp implementation={"js"}>
@@ -81,8 +83,8 @@ const ActionBar = () => {
 					handleEdit={onEdit ? handleEdit : undefined}
 					handleDelete={onDelete ? handleDelete : undefined}
 					handleReset={handleReset}
-					exporters={gridProps.exporters}
-					hasCustomFilterBar={!!gridProps.filterBar}
+					exporters={exporters}
+					hasCustomFilterBar={!!filterBar}
 				/>
 			</Hidden>
 		</>

@@ -1,7 +1,7 @@
-import React, { ChangeEvent, useCallback, useContext } from "react";
+import React, { ChangeEvent, useCallback } from "react";
 import { Collapse } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { DataGridStateContext, IDataGridColumnProps } from "../index";
+import { IDataGridColumnProps, useDataGridState } from "../index";
 import Dialog from "./SettingsDialog";
 
 const useStyles = makeStyles({
@@ -17,9 +17,7 @@ const useStyles = makeStyles({
 const DataGridSettings = (props: IDataGridColumnProps) => {
 	const classes = useStyles();
 
-	const stateCtx = useContext(DataGridStateContext);
-	if (!stateCtx) throw new Error("Missing DataGrid State Context");
-	const [state, setState] = stateCtx;
+	const [state, setState] = useDataGridState();
 
 	const closeGridSettings = useCallback(() => {
 		setState((prevState) => ({

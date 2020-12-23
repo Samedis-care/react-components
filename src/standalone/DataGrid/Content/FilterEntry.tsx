@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useState } from "react";
 import {
 	Checkbox,
 	FormControlLabel,
@@ -13,9 +13,9 @@ import {
 import FilterCombinator from "./FilterCombinator";
 import { ModelFilterType } from "../../../backend-integration/Model";
 import {
-	DataGridPropsContext,
 	DataGridSetFilterData,
 	IDataGridColumnDef,
+	useDataGridProps,
 } from "../index";
 import { LocalizedKeyboardDatePicker } from "../../LocalizedDateTimePickers";
 import { DateType } from "@date-io/type";
@@ -94,8 +94,7 @@ const useStyles = makeStyles({
 
 const FilterEntry = (props: IProps) => {
 	const { onChange, depth } = props;
-	const gridProps = useContext(DataGridPropsContext);
-	if (!gridProps) throw new Error("DataGrid Props Context not set");
+	const gridProps = useDataGridProps();
 
 	const [enumFilterSearch, setEnumFilterSearch] = useState("");
 

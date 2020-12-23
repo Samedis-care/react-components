@@ -1,14 +1,9 @@
-import React, {
-	Dispatch,
-	SetStateAction,
-	useCallback,
-	useContext,
-} from "react";
+import React, { Dispatch, SetStateAction, useCallback } from "react";
 import { Grid } from "@material-ui/core";
 import {
 	DataGridCustomDataType,
-	DataGridPropsContext,
-	DataGridStateContext,
+	useDataGridProps,
+	useDataGridState,
 } from "../index";
 
 export interface IDataGridStatusBarProps {
@@ -23,12 +18,8 @@ export interface IDataGridStatusBarProps {
 }
 
 const StatusBar = () => {
-	const props = useContext(DataGridPropsContext);
-	const stateCtx = useContext(DataGridStateContext);
-	if (!props) throw new Error("Props Context not set");
-	if (!stateCtx) throw new Error("State Context not set");
-	const StatusBarView = props.statusBar;
-	const [state, setState] = stateCtx;
+	const { statusBar: StatusBarView } = useDataGridProps();
+	const [state, setState] = useDataGridState();
 
 	const setCustomData = useCallback(
 		(

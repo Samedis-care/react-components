@@ -9,6 +9,7 @@ import {
 import { Rule, StyleSheet } from "jss";
 import { StoryContext } from "@storybook/addons";
 import { button, color, select, withKnobs } from "@storybook/addon-knobs";
+import ccI18n, { langs } from "../src/i18n";
 
 // so jest won't complain about mismatching numbers anymore
 const classIds: Record<string, number> = {};
@@ -98,6 +99,24 @@ const ThemeSelector = (props: ThemeSelectorProps) => {
 	return props.children;
 };
 
+const LanguageSelector = () => {
+	let langOptions: Record<string, string> = {};
+	langs.forEach((lang) => (langOptions[lang] = lang));
+	const lang = select(
+		"Language",
+		langOptions,
+		localStorage.language || "en",
+		"i18n"
+	);
+
+	useEffect(() => {
+		localStorage.language = lang;
+		ccI18n.changeLanguage(lang).catch(console.error);
+	}, [lang]);
+
+	return <></>;
+};
+
 export const decorators = [
 	withKnobs,
 	(Story: React.ComponentType, context: StoryContext) => {
@@ -110,9 +129,12 @@ export const decorators = [
 		return (
 			<Framework defaultTheme={loadTheme}>
 				<ThemeSelector>
-					<StylesProvider generateClassName={cng}>
-						<Story />
-					</StylesProvider>
+					<>
+						<LanguageSelector />
+						<StylesProvider generateClassName={cng}>
+							<Story />
+						</StylesProvider>
+					</>
 				</ThemeSelector>
 			</Framework>
 		);

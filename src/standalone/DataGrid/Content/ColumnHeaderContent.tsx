@@ -7,11 +7,8 @@ import {
 	PopoverOrigin,
 	Tooltip,
 } from "@material-ui/core";
-import {
-	ArrowDownward,
-	ArrowUpward,
-	FilterList as FilterIcon,
-} from "@material-ui/icons";
+import { ArrowDownward, ArrowUpward } from "@material-ui/icons";
+import FilterIcon from "../../Icons/FilterIcon";
 import { makeStyles } from "@material-ui/core/styles";
 import FilterEntry, { IFilterDef } from "./FilterEntry";
 import i18n from "../../../i18n";
@@ -69,6 +66,7 @@ export interface IDataGridContentColumnHeaderContentProps {
 const useStyles = makeStyles({
 	filterButton: {
 		padding: 0,
+		color: "inherit",
 	},
 	resizer: {
 		cursor: "col-resize",
@@ -80,6 +78,10 @@ const useStyles = makeStyles({
 	},
 	filterPopup: {
 		width: 150,
+	},
+	filterIcon: {
+		width: 16,
+		height: "auto",
 	},
 	sortIcon: {
 		height: 24,
@@ -141,9 +143,7 @@ const ColumnHeaderContent = (
 							title={i18n.t("standalone.data-grid.content.filter") || ""}
 						>
 							<IconButton className={classes.filterButton} onClick={openFilter}>
-								<FilterIcon
-									color={props.filter?.value1 ? "primary" : undefined}
-								/>
+								<FilterIcon className={classes.filterIcon} />
 							</IconButton>
 						</Tooltip>
 					</Grid>

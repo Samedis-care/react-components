@@ -7,7 +7,7 @@ const loadLang = (lang: string): Resource =>
 		translation: require(`./assets/i18n/${lang}/translation.json`) as ResourceKey,
 	} as Resource);
 
-const langs = ["de", "en", "fr", "ru"];
+export const langs = ["de", "en", "fr", "ru"];
 const langVals: Record<string, Resource> = {};
 for (const lang of langs) {
 	langVals[lang] = loadLang(lang);

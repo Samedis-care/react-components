@@ -2,24 +2,21 @@ import React, {
 	Dispatch,
 	SetStateAction,
 	useCallback,
+	useContext,
 	useEffect,
 	useMemo,
 	useRef,
 	useState,
 } from "react";
-import { Grid, Theme } from "@material-ui/core";
+import { Grid, Theme, useTheme } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import Header, { IDataGridHeaderProps } from "./Header";
 import Footer, { IDataGridFooterProps } from "./Footer";
 import Settings from "./Settings";
 import Content from "./Content";
 import { IFilterDef } from "./Content/FilterEntry";
-import {
-	DataGridColumnState,
-	IDataGridColumnsState,
-} from "./Content/ContentHeader";
 import { Loader } from "../index";
-import { debounce } from "../../utils";
+import { debounce, measureText } from "../../utils";
 import { dataGridPrepareFiltersAndSorts } from "./CallbackUtil";
 import { ModelFilterType } from "../../backend-integration/Model";
 
@@ -65,7 +62,12 @@ export interface IDataGridCallbacks {
 		params: IDataGridLoadDataParameters
 	) => DataGridData | Promise<DataGridData>;
 	/**
-	 * Token to force reloading of data. Modify to force reload.
+	 * Specifies the amount of data entries to load at once.
+	 * Defaults to 25
+	 */
+	rowsPerPage?: number;
+	/**
+	 * Token which is used to cause a forceful refresh of data
 	 */
 	forceRefreshToken?: string;
 	/**
@@ -201,16 +203,11 @@ export interface DataGridData {
 	rows: DataGridRowData[];
 }
 
-export type DataGridRowData = { id: string } & {
-	[key: string]:
-		| string
-		| number
-		| { toString: () => string }
-		| React.ReactElement
-		| null;
-};
-
-export type DataGridCustomDataType = { [key: string]: unknown };
+export type DataGridRowData = { id: string } & Record<
+	string,
+	string | number | { toString: () => string } | React.ReactElement | null
+>;
+export type DataGridCustomDataType = Record<string, unknown>;
 
 export interface IDataGridState {
 	/**
@@ -218,17 +215,13 @@ export interface IDataGridState {
 	 */
 	search: string;
 	/**
-	 * The rows per page
+	 * The page start and end indexes
 	 */
-	rowsPerPage: number;
+	pages: [start: number, end: number];
 	/**
 	 * The total amount of rows
 	 */
 	rowsTotal: number;
-	/**
-	 * The current page (zero based index)
-	 */
-	pageIndex: number;
 	/**
 	 * Show the settings popover
 	 */
@@ -252,7 +245,7 @@ export interface IDataGridState {
 	/**
 	 * The rows to be shown
 	 */
-	rows: DataGridRowData[] | null;
+	rows: Record<number, DataGridRowData>;
 	/**
 	 * Error returned by loadData
 	 */
@@ -267,35 +260,95 @@ export interface IDataGridState {
 	customData: DataGridCustomDataType;
 }
 
-export const DataGridStateContext = React.createContext<
+const DataGridStateContext = React.createContext<
 	[IDataGridState, Dispatch<SetStateAction<IDataGridState>>] | undefined
 >(undefined);
 
-export const DataGridPropsContext = React.createContext<
-	IDataGridProps | undefined
->(undefined);
+export const useDataGridState = (): [
+	IDataGridState,
+	Dispatch<SetStateAction<IDataGridState>>
+] => {
+	const ctx = useContext(DataGridStateContext);
+	if (!ctx) throw new Error("State context not set");
+	return ctx;
+};
 
-export const DataGridColumnsStateContext = React.createContext<
+const DataGridPropsContext = React.createContext<IDataGridProps | undefined>(
+	undefined
+);
+
+export const useDataGridProps = (): IDataGridProps => {
+	const ctx = useContext(DataGridPropsContext);
+	if (!ctx) throw new Error("Props context not set");
+	return ctx;
+};
+
+export type IDataGridColumnsState = { [field: string]: IDataGridColumnState };
+
+export type DataGridColumnState = [
+	/**
+	 * Column state of all columns
+	 */
+	IDataGridColumnsState,
+	/**
+	 * Update column state callback
+	 */
+	Dispatch<SetStateAction<IDataGridColumnsState>>
+];
+
+const DataGridColumnsStateContext = React.createContext<
 	DataGridColumnState | undefined
 >(undefined);
 
-export const DataGridRootRefContext = React.createContext<
-	HTMLDivElement | undefined
+export const useDataGridColumnState = (): DataGridColumnState => {
+	const ctx = useContext(DataGridColumnsStateContext);
+	if (!ctx) throw new Error("Columns state context not set");
+	return ctx;
+};
+
+export type DataGridColumnsWidthState = [
+	/**
+	 * Field -> Width in px
+	 */
+	Record<string, number>,
+	/**
+	 * Set state function
+	 */
+	Dispatch<SetStateAction<Record<string, number>>>
+];
+
+const DataGridColumnsWidthStateContext = React.createContext<
+	DataGridColumnsWidthState | undefined
 >(undefined);
+
+export const useDataGridColumnsWidthState = (): DataGridColumnsWidthState => {
+	const ctx = useContext(DataGridColumnsWidthStateContext);
+	if (!ctx) throw new Error("Columns state width context not set");
+	return ctx;
+};
+
+const DataGridRootRefContext = React.createContext<HTMLDivElement | undefined>(
+	undefined
+);
+
+export const useDataGridRootRef = (): HTMLDivElement => {
+	const ctx = useContext(DataGridRootRefContext);
+	if (!ctx) throw new Error("RootRef context not set");
+	return ctx;
+};
 
 export const getDataGridDefaultState = (
 	columns: IDataGridColumnDef[]
 ): IDataGridState => ({
 	search: "",
-	rowsPerPage: 25,
 	rowsTotal: 0,
-	pageIndex: 0,
 	showSettings: false,
+	pages: [0, 0],
 	hiddenColumns: columns.filter((col) => col.hidden).map((col) => col.field),
 	lockedColumns: [],
 	selectAll: false,
 	selectedRows: [],
-	rows: null,
+	rows: {},
 	dataLoadError: null,
 	refreshData: true,
 	customData: {},
@@ -318,17 +371,18 @@ const useStyles = makeStyles((theme: Theme) => ({
 
 const DataGrid = (props: IDataGridProps) => {
 	const { columns, loadData, getAdditionalFilters, forceRefreshToken } = props;
+	const rowsPerPage = props.rowsPerPage || 25;
 
 	const classes = useStyles();
+	const theme = useTheme();
 	const statePack = useState<IDataGridState>(() =>
 		getDataGridDefaultState(columns)
 	);
 	const [state, setState] = statePack;
 	const {
 		search,
-		pageIndex,
-		rowsPerPage,
 		rows,
+		pages,
 		dataLoadError,
 		hiddenColumns,
 		lockedColumns,
@@ -357,8 +411,34 @@ const DataGrid = (props: IDataGridProps) => {
 		[columns, hiddenColumns, lockedColumns]
 	);
 
-	const columnsStatePack = useState<IDataGridColumnsState>({});
+	const columnsStatePack = useState<IDataGridColumnsState>(() => {
+		const data: IDataGridColumnsState = {};
+		columns.forEach((column) => {
+			data[column.field] = {
+				sort: 0,
+				filter: undefined,
+			};
+		});
+		return data;
+	});
 	const [columnsState] = columnsStatePack;
+
+	const columnWidthStatePack = useState<Record<string, number>>(() => {
+		const widthData: Record<string, number> = {};
+		columns.forEach((column) => {
+			try {
+				widthData[column.field] =
+					measureText(
+						theme.typography.body1.font || "16px Roboto, sans-serif",
+						column.headerName
+					).width + 100;
+			} catch (e) {
+				// if canvas is not available to measure text
+				widthData[column.field] = column.headerName.length * 16;
+			}
+		});
+		return widthData;
+	});
 
 	// refresh data if desired
 	useEffect(() => {
@@ -367,54 +447,71 @@ const DataGrid = (props: IDataGridProps) => {
 		const [sorts, fieldFilter] = dataGridPrepareFiltersAndSorts(columnsState);
 
 		void (async () => {
-			try {
-				const data = await loadData({
-					page: pageIndex + 1,
-					rows: rowsPerPage,
-					quickFilter: search,
-					additionalFilters: getAdditionalFilters
-						? getAdditionalFilters(state.customData)
-						: {},
-					fieldFilter: fieldFilter,
-					sort: sorts,
-				});
-				// check if we are on an invalid page
-				if (
-					pageIndex !== 0 &&
-					rowsPerPage !== 0 &&
-					data.rowsTotal !== 0 &&
-					data.rows.length === 0
-				) {
-					const hasPartialPage = data.rowsTotal % rowsPerPage !== 0;
-					const newPage =
-						((data.rowsTotal / rowsPerPage) | 0) + (hasPartialPage ? 0 : -1);
-					// eslint-disable-next-line no-console
-					console.assert(
-						newPage !== pageIndex,
-						"[Components-Care] [DataGrid] Detected invalid page, but newly calculated page equals invalid page"
-					);
-					if (newPage !== pageIndex) {
-						setState((prevState) => ({
-							...prevState,
-							pageIndex: newPage,
-						}));
-					}
+			for (let pageIndex = pages[0]; pageIndex <= pages[1]; pageIndex++) {
+				// check if page was already loaded
+				if (pageIndex * rowsPerPage in rows) {
+					continue;
 				}
-				setState((prevState) => ({
-					...prevState,
-					rowsTotal: data.rowsTotal,
-					rows: data.rows,
-					refreshData: false,
-				}));
-			} catch (err) {
-				// eslint-disable-next-line no-console
-				console.error("[Components-Care] [DataGrid] LoadData: ", err);
-				setState((prevState) => ({
-					...prevState,
-					dataLoadError: err as Error,
-					refreshData: false,
-				}));
+
+				try {
+					const data = await loadData({
+						page: pageIndex + 1,
+						rows: rowsPerPage,
+						quickFilter: search,
+						additionalFilters: getAdditionalFilters
+							? getAdditionalFilters(state.customData)
+							: {},
+						fieldFilter: fieldFilter,
+						sort: sorts,
+					});
+					// check if we are on an invalid page
+					if (
+						pageIndex !== 0 &&
+						rowsPerPage !== 0 &&
+						data.rowsTotal !== 0 &&
+						data.rows.length === 0
+					) {
+						const hasPartialPage = data.rowsTotal % rowsPerPage !== 0;
+						const newPage =
+							((data.rowsTotal / rowsPerPage) | 0) + (hasPartialPage ? 0 : -1);
+						// eslint-disable-next-line no-console
+						console.assert(
+							newPage !== pageIndex,
+							"[Components-Care] [DataGrid] Detected invalid page, but newly calculated page equals invalid page"
+						);
+						if (newPage !== pageIndex) {
+							setState((prevState) => ({
+								...prevState,
+								pageIndex: newPage,
+							}));
+						}
+					}
+
+					const rowsAsObject: Record<number, DataGridRowData> = {};
+					for (let i = 0; i < data.rows.length; i++) {
+						rowsAsObject[pageIndex * rowsPerPage + i] = data.rows[i];
+					}
+
+					setState((prevState) => ({
+						...prevState,
+						rowsTotal: data.rowsTotal,
+						dataLoadError: null,
+						rows: Object.assign({}, prevState.rows, rowsAsObject),
+					}));
+				} catch (err) {
+					// eslint-disable-next-line no-console
+					console.error("[Components-Care] [DataGrid] LoadData: ", err);
+					setState((prevState) => ({
+						...prevState,
+						dataLoadError: err as Error,
+					}));
+				}
 			}
+
+			setState((prevState) => ({
+				...prevState,
+				refreshData: false,
+			}));
 		})();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [refreshData]);
@@ -429,13 +526,22 @@ const DataGrid = (props: IDataGridProps) => {
 		[setState]
 	);
 
-	useEffect(refresh, [refresh, pageIndex, rowsPerPage, forceRefreshToken]);
+	useEffect(refresh, [refresh, pages]);
 
 	// debounced refresh on filter and sort changes
-	const debouncedRefresh = useMemo(() => debounce(refresh, 500), [refresh]);
+	const resetView = useMemo(
+		() =>
+			debounce(() => {
+				setState((prevState) => ({
+					...prevState,
+					rows: {},
+					refreshData: true,
+				}));
+			}, 500),
+		[setState]
+	);
 
-	useEffect(debouncedRefresh, [debouncedRefresh, search, columnsState]);
-
+	useEffect(resetView, [resetView, search, columnsState, forceRefreshToken]);
 	return (
 		<Grid
 			container
@@ -449,27 +555,33 @@ const DataGrid = (props: IDataGridProps) => {
 				<DataGridPropsContext.Provider value={props}>
 					<DataGridStateContext.Provider value={statePack}>
 						<DataGridColumnsStateContext.Provider value={columnsStatePack}>
-							<Grid item>
-								<Header />
-							</Grid>
-							<Grid item xs className={classes.middle}>
-								<Settings columns={columns} />
-								{rows === null && dataLoadError === null && <Loader />}
-								{rows === null &&
-									dataLoadError !== null &&
-									dataLoadError.message}
-								{rows !== null && rows.length === 0 && "No Data!"}
-								{rows && (
-									<Content
-										columns={visibleColumns}
-										rowsPerPage={state.rowsPerPage}
-										rows={rows}
-									/>
-								)}
-							</Grid>
-							<Grid item>
-								<Footer />
-							</Grid>
+							<DataGridColumnsWidthStateContext.Provider
+								value={columnWidthStatePack}
+							>
+								<Grid item>
+									<Header />
+								</Grid>
+								<Grid item xs className={classes.middle}>
+									<Settings columns={columns} />
+									{refreshData && Object.keys(rows).length === 0 && <Loader />}
+									{!refreshData &&
+										dataLoadError !== null &&
+										dataLoadError.message}
+									{!refreshData &&
+										dataLoadError === null &&
+										Object.keys(rows).length === 0 &&
+										"No Data!"}
+									{Object.keys(rows).length > 0 && (
+										<Content
+											columns={visibleColumns}
+											rowsPerPage={rowsPerPage}
+										/>
+									)}
+								</Grid>
+								<Grid item>
+									<Footer />
+								</Grid>
+							</DataGridColumnsWidthStateContext.Provider>
 						</DataGridColumnsStateContext.Provider>
 					</DataGridStateContext.Provider>
 				</DataGridPropsContext.Provider>

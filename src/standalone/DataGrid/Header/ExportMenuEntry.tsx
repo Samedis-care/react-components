@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useState } from "react";
+import React, { useCallback, useState } from "react";
 import { IDataGridExporter } from "./index";
 import {
 	CircularProgress,
@@ -11,12 +11,12 @@ import {
 	Done as DoneIcon,
 	Error as ErrorIcon,
 } from "@material-ui/icons";
-import {
-	DataGridColumnsStateContext,
-	DataGridPropsContext,
-	DataGridStateContext,
-} from "../index";
 import { dataGridPrepareFiltersAndSorts } from "../CallbackUtil";
+import {
+	useDataGridColumnState,
+	useDataGridProps,
+	useDataGridState,
+} from "../index";
 
 export interface IDataGridExportMenuEntryProps {
 	/**
@@ -35,17 +35,9 @@ export enum DataGridExportStatus {
 // eslint-disable-next-line react/display-name
 const ExportMenuEntry = React.forwardRef(
 	(props: IDataGridExportMenuEntryProps, ref) => {
-		const stateCtx = useContext(DataGridStateContext);
-		const columnsStateCtx = useContext(DataGridColumnsStateContext);
-		const propsCtx = useContext(DataGridPropsContext);
-
-		if (!stateCtx) throw new Error("State Context not set");
-		if (!columnsStateCtx) throw new Error("Columns State Context not set");
-		if (!propsCtx) throw new Error("Props Context not set");
-
-		const { getAdditionalFilters } = propsCtx;
-		const [columnsState] = columnsStateCtx;
-		const [state] = stateCtx;
+		const { getAdditionalFilters } = useDataGridProps();
+		const [columnsState] = useDataGridColumnState();
+		const [state] = useDataGridState();
 
 		const [status, setStatus] = useState(DataGridExportStatus.Idle);
 		const [exportData, setExportData] = useState<unknown>(undefined);

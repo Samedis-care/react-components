@@ -1,73 +1,108 @@
-import React, {
-	useCallback,
-	useContext,
-	useEffect,
-	useRef,
-	useState,
-} from "react";
-import { useTheme } from "@material-ui/core";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { measureText } from "../../../utils";
-import { DataGridRootRefContext, IDataGridColumnDef } from "../index";
-import FixedCell from "./FixedCell";
-import { StickyHeaderCell } from "./CustomCells";
+import {
+	IDataGridColumnDef,
+	useDataGridColumnState,
+	useDataGridColumnsWidthState,
+	useDataGridRootRef,
+} from "../index";
 import ColumnHeaderContent from "./ColumnHeaderContent";
 import { IFilterDef } from "./FilterEntry";
+import { makeStyles } from "@material-ui/core/styles";
 
 export interface IDataGridContentColumnHeaderProps {
 	/**
 	 * The column definition
 	 */
 	column: IDataGridColumnDef;
-	/**
-	 * The currently applied filter
-	 */
-	filter?: IFilterDef;
-	/**
-	 * Updates filter
-	 * @param field The column definition field field
-	 * @param value The new filter
-	 */
-	onFilterChange: (field: string, value: IFilterDef) => void;
-	/**
-	 * The currently applied sort
-	 */
-	sort: -1 | 0 | 1;
-	/**
-	 * The current sort priority (lower = higher priority)
-	 */
-	sortOrder: number | undefined;
-	/**
-	 * Updates sort
-	 * @param field The column definition field field
-	 * @param newSort The new sort value
-	 */
-	onSortChange: (field: string, newSort: -1 | 0 | 1) => void;
 }
 
-const HEADER_PADDING = 32; // px
+export const HEADER_PADDING = 32; // px
+
+const useStyles = makeStyles((theme) => ({
+	contentWrapper: {
+		width: "100%",
+		minWidth: "100%",
+		zIndex: 1000,
+	},
+	filterableStyles: {
+		color: theme.palette.primary.main,
+	},
+}));
 
 const ColumnHeader = (props: IDataGridContentColumnHeaderProps) => {
-	const {
-		column,
-		filter,
-		onFilterChange,
-		sort,
-		onSortChange,
-		sortOrder,
-	} = props;
+	const { column } = props;
 	const { field, sortable, filterable } = column;
-	const gridRoot = useContext(DataGridRootRefContext);
-	if (!gridRoot) throw new Error("DataGrid State context missing");
-	const theme = useTheme();
-	const headerRef = useRef<HTMLTableHeaderCellElement>();
-	const [width, setWidth] = useState<number>(
-		() =>
-			measureText(
-				theme.typography.body1.font || "16px Roboto, sans-serif",
-				props.column.headerName
-			).width + 100
-	);
+	const gridRoot = useDataGridRootRef();
+	const [columnState, setColumnState] = useDataGridColumnState();
+	const { sort, sortOrder, filter } = columnState[field];
+	const [, setColumnWidthState] = useDataGridColumnsWidthState();
+	const headerRef = useRef<HTMLDivElement>(null);
 	const [dragging, setDragging] = useState(false);
+	const classes = useStyles();
+
+	const onFilterChange = useCallback(
+		(field: string, newFilter: IFilterDef) => {
+			setColumnState((prevState) => ({
+				...prevState,
+				[field]: {
+					...prevState[field],
+					filter: newFilter,
+				},
+			}));
+		},
+		[setColumnState]
+	);
+	const onSortChange = useCallback(
+		(field: string, newSort: -1 | 0 | 1) => {
+			setColumnState((prevState) => {
+				let newColumnState = {
+					...prevState,
+					[field]: {
+						...prevState[field],
+						sort: newSort,
+					},
+				};
+
+				if (newSort === 0) {
+					// if disable sorting, adjust sort priority for others
+					Object.keys(prevState)
+						.filter(
+							(otherField) =>
+								prevState[otherField].sort !== 0 &&
+								// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+								prevState[field].sortOrder! < prevState[otherField].sortOrder!
+						)
+						.forEach((otherField) => {
+							newColumnState = {
+								...newColumnState,
+								[otherField]: {
+									...newColumnState[otherField],
+									// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+									sortOrder: newColumnState[otherField].sortOrder! - 1,
+								},
+							};
+						});
+				} else if (newSort === 1) {
+					// if enable sorting, set to highest order
+					const order =
+						Object.keys(prevState).filter(
+							(otherField) => prevState[otherField].sort !== 0
+						).length + 1;
+					newColumnState = {
+						...newColumnState,
+						[field]: {
+							...newColumnState[field],
+							sortOrder: order,
+						},
+					};
+				}
+
+				return newColumnState;
+			});
+		},
+		[setColumnState]
+	);
 
 	const startDrag = useCallback(() => setDragging(true), [setDragging]);
 	const stopDrag = useCallback(() => setDragging(false), [setDragging]);
@@ -79,13 +114,17 @@ const ColumnHeader = (props: IDataGridContentColumnHeaderProps) => {
 			const move = evt.movementX;
 			const curWidth = headerRef.current?.clientWidth;
 
-			setWidth((prevState) =>
-				move < 0 && curWidth && curWidth - HEADER_PADDING - 10 > prevState // prevent resizing beyond min width
-					? prevState
-					: prevState + move
-			);
+			setColumnWidthState((prevState) => ({
+				...prevState,
+				[field]:
+					move < 0 &&
+					curWidth &&
+					curWidth - HEADER_PADDING - 10 > prevState[field] // prevent resizing beyond min width
+						? prevState[field]
+						: prevState[field] + move,
+			}));
 		},
-		[dragging, setWidth]
+		[dragging, field, setColumnWidthState]
 	);
 	const onColumnClick = useCallback(() => {
 		if (!sortable) return;
@@ -111,9 +150,14 @@ const ColumnHeader = (props: IDataGridContentColumnHeaderProps) => {
 				).width + HEADER_PADDING;
 			width = Math.max(width, entryWidth);
 		});
-
-		setWidth(width);
-	}, [field, gridRoot, setWidth]);
+		setColumnState((prevState) => ({
+			...prevState,
+			[field]: {
+				...prevState[field],
+				width: width,
+			},
+		}));
+	}, [field, gridRoot, setColumnState]);
 
 	useEffect(() => {
 		document.addEventListener("mousemove", onDrag);
@@ -125,53 +169,30 @@ const ColumnHeader = (props: IDataGridContentColumnHeaderProps) => {
 		};
 	}, [onDrag, stopDrag]);
 
-	const content = () => (
-		<ColumnHeaderContent
-			headerName={props.column.headerName}
-			enableResize={!props.column.isLocked}
-			startDrag={startDrag}
-			autoResize={autoResize}
-			sort={sort}
-			sortOrder={sortOrder}
-			filterable={!!filterable}
-			filter={filter}
-			onFilterChange={internalOnFilterChange}
-			columnType={props.column.type}
-			filterData={props.column.filterData}
-		/>
+	return (
+		<div
+			onClick={onColumnClick}
+			className={
+				classes.contentWrapper +
+				(filterable ? " " + classes.filterableStyles : "")
+			}
+			ref={headerRef}
+		>
+			<ColumnHeaderContent
+				headerName={props.column.headerName}
+				enableResize={!props.column.isLocked}
+				startDrag={startDrag}
+				autoResize={autoResize}
+				sort={sort}
+				sortOrder={sortOrder}
+				filterable={!!filterable}
+				filter={filter}
+				onFilterChange={internalOnFilterChange}
+				columnType={props.column.type}
+				filterData={props.column.filterData}
+			/>
+		</div>
 	);
-
-	if (props.column.isLocked) {
-		return (
-			<FixedCell
-				cellComponent={StickyHeaderCell}
-				onClick={onColumnClick}
-				key={column.fixedColumnKey}
-				style={{
-					width: width,
-					minWidth: width,
-					zIndex: 1002,
-				}}
-				ref={headerRef}
-			>
-				{content()}
-			</FixedCell>
-		);
-	} else {
-		return (
-			<StickyHeaderCell
-				onClick={onColumnClick}
-				style={{
-					width: width,
-					minWidth: width,
-					zIndex: 1000,
-				}}
-				ref={headerRef}
-			>
-				{content()}
-			</StickyHeaderCell>
-		);
-	}
 };
 
 export default React.memo(ColumnHeader);

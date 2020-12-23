@@ -1,14 +1,9 @@
-import React, {
-	Dispatch,
-	SetStateAction,
-	useCallback,
-	useContext,
-} from "react";
+import React, { Dispatch, SetStateAction, useCallback } from "react";
 import { Box, Grid } from "@material-ui/core";
 import {
 	DataGridCustomDataType,
-	DataGridPropsContext,
-	DataGridStateContext,
+	useDataGridProps,
+	useDataGridState,
 } from "../index";
 
 export interface IDataGridFilterBarProps {
@@ -23,11 +18,8 @@ export interface IDataGridFilterBarProps {
 }
 
 const FilterBar = () => {
-	const props = useContext(DataGridPropsContext);
-	const stateCtx = useContext(DataGridStateContext);
-	if (!props) throw new Error("Missing Props Context");
-	if (!stateCtx) throw new Error("Missing State Context");
-	const [state, setState] = stateCtx;
+	const props = useDataGridProps();
+	const [state, setState] = useDataGridState();
 
 	const setCustomData = useCallback(
 		(

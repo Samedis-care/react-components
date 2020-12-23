@@ -1,5 +1,5 @@
-import React, { useCallback, useContext } from "react";
-import { DataGridPropsContext, DataGridStateContext } from "../index";
+import React, { useCallback } from "react";
+import { useDataGridProps, useDataGridState } from "../index";
 import SelectAllView from "./SelectAllView";
 
 const invertArray = (arr: string[], entries: string[]): string[] => {
@@ -21,13 +21,8 @@ const invertArray = (arr: string[], entries: string[]): string[] => {
 };
 
 const SelectAll = () => {
-	const propsCtx = useContext(DataGridPropsContext);
-	if (!propsCtx) throw new Error("Props Context not set");
-	const stateCtx = useContext(DataGridStateContext);
-	if (!stateCtx) throw new Error("State Context not set");
-
-	const { enableDeleteAll } = propsCtx;
-	const [state, setState] = stateCtx;
+	const { enableDeleteAll } = useDataGridProps();
+	const [state, setState] = useDataGridState();
 
 	const onSelect = useCallback(
 		(_evt: React.ChangeEvent, newChecked: boolean) => {
@@ -38,7 +33,7 @@ const SelectAll = () => {
 					? prevState.selectedRows
 					: invertArray(
 							prevState.selectedRows,
-							prevState.rows?.map((e) => e.id) || []
+							Object.values(prevState.rows).map((e) => e.id) || []
 					  ),
 			}));
 		},

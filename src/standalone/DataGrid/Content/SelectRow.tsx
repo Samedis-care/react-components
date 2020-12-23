@@ -1,5 +1,5 @@
-import React, { useCallback, useContext } from "react";
-import { DataGridStateContext } from "../index";
+import React, { useCallback } from "react";
+import { useDataGridState } from "../index";
 import SelectRowView from "./SelectRowView";
 
 export interface IDataGridContentSelectRowProps {
@@ -13,11 +13,17 @@ const xor = (v1: boolean, v2: boolean): boolean => {
 	return v1 ? !v2 : v2;
 };
 
+export const isSelected = (
+	selectAll: boolean,
+	selectedIds: string[],
+	id: string
+): boolean => {
+	return xor(selectAll, selectedIds.includes(id));
+};
+
 const SelectRow = (props: IDataGridContentSelectRowProps) => {
 	const { id } = props;
-	const stateCtx = useContext(DataGridStateContext);
-	if (!stateCtx) throw new Error("State Context not set");
-	const [state, setState] = stateCtx;
+	const [state, setState] = useDataGridState();
 
 	const onSelect = useCallback(
 		(_evt: React.ChangeEvent, newSelected: boolean) => {
@@ -33,7 +39,7 @@ const SelectRow = (props: IDataGridContentSelectRowProps) => {
 
 	return (
 		<SelectRowView
-			checked={xor(state.selectAll, state.selectedRows.includes(props.id))}
+			checked={isSelected(state.selectAll, state.selectedRows, props.id)}
 			onSelect={onSelect}
 		/>
 	);

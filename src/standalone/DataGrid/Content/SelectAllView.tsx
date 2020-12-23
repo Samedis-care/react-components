@@ -1,6 +1,5 @@
 import React from "react";
 import { Checkbox } from "@material-ui/core";
-import { SelectAllCell } from "./CustomCells";
 import { makeStyles } from "@material-ui/core/styles";
 
 const useStyles = makeStyles({
@@ -26,13 +25,11 @@ const SelectAllView = (props: IDataGridContentSelectAllViewProps) => {
 	const classes = useStyles();
 
 	return (
-		<SelectAllCell>
-			<Checkbox
-				className={classes.selectCheckbox}
-				checked={props.checked}
-				onChange={props.onSelect}
-			/>
-		</SelectAllCell>
+		<Checkbox
+			className={classes.selectCheckbox}
+			checked={props.checked}
+			onChange={props.onSelect}
+		/>
 	);
 };
 

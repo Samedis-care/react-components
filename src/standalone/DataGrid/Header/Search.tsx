@@ -1,11 +1,9 @@
-import React, { ChangeEvent, useCallback, useContext } from "react";
-import { DataGridStateContext } from "../index";
+import React, { ChangeEvent, useCallback } from "react";
+import { useDataGridState } from "../index";
 import SearchView from "./SearchView";
 
 const Search = () => {
-	const stateCtx = useContext(DataGridStateContext);
-	if (!stateCtx) throw new Error("State Context not set");
-	const [state, setState] = stateCtx;
+	const [state, setState] = useDataGridState();
 
 	const handleSearchChange = useCallback(
 		(evt: ChangeEvent<HTMLInputElement>) => {

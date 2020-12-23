@@ -1,14 +1,22 @@
-import { DataGridSortSetting, IDataGridFieldFilter } from "./index";
-import { IDataGridColumnsState } from "./Content/ContentHeader";
+import {
+	DataGridSortSetting,
+	IDataGridColumnsState,
+	IDataGridColumnState,
+	IDataGridFieldFilter,
+} from "./index";
+
+interface IDataGridColumnsStateArrayEntry extends IDataGridColumnState {
+	field: string;
+}
 
 export const dataGridPrepareFiltersAndSorts = (
 	columnsState: IDataGridColumnsState
 ): [DataGridSortSetting[], IDataGridFieldFilter] => {
-	const baseSorts = [];
+	const baseSorts: IDataGridColumnsStateArrayEntry[] = [];
 	const fieldFilter: IDataGridFieldFilter = {};
 
-	for (const field in columnsState) {
-		if (!Object.prototype.hasOwnProperty.call(columnsState, field)) continue;
+	Object.keys(columnsState).forEach((field) => {
+		if (!Object.prototype.hasOwnProperty.call(columnsState, field)) return;
 
 		if (columnsState[field].sort !== 0) {
 			baseSorts.push({
@@ -21,7 +29,7 @@ export const dataGridPrepareFiltersAndSorts = (
 		if (filter && filter.value1) {
 			fieldFilter[field] = filter;
 		}
-	}
+	});
 
 	const sorts: DataGridSortSetting[] = baseSorts
 		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
