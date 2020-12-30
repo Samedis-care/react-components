@@ -9,3 +9,4 @@ export * from "./FormButtons.story";
 export * from "./TextFieldWithHelp.story";
 export * from "./InputControls/NumberInteger.story";
 export * from "./InputControls/NumberDecimal.story";
+export * from "./InputControls/DateInput.story";

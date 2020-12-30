@@ -3,12 +3,12 @@ import { TextFieldProps } from "@material-ui/core";
 import TextFieldWithHelp from "../TextFieldWithHelp";
 import { UIInputProps } from "../CommonStyles";
 
-export interface NumberIntegerProps extends UIInputProps {
+export interface NumberDecimalProps extends UIInputProps {
 	infoText?: React.ReactNode;
 	important?: boolean;
 }
 
-const NumberInteger = (props: NumberIntegerProps & TextFieldProps) => {
+const NumberDecimal = (props: NumberDecimalProps & TextFieldProps) => {
 	const { infoText, important, ...muiProps } = props;
 
 	return (
@@ -23,4 +23,4 @@ const NumberInteger = (props: NumberIntegerProps & TextFieldProps) => {
 	);
 };
 
-export default React.memo(NumberInteger);
+export default React.memo(NumberDecimal);
