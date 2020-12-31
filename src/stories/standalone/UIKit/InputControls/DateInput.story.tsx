@@ -15,11 +15,8 @@ export const DateInputStory = (): React.ReactElement => {
 			value={selectedDate}
 			format={TypeDate.format(moment(selectedDate).format("DD-MM-YYYY"))}
 			onChange={(date) => {
-				if (!date) {
-					throw new Error("Date is null");
-				} else {
-					handleSelectedDate(date);
-				}
+				if (!date) throw new Error("Date is null");
+				else handleSelectedDate(date);
 			}}
 			infoText={
 				<div
