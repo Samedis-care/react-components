@@ -5,7 +5,7 @@ import { text, withKnobs } from "@storybook/addon-knobs";
 import { Grid } from "@material-ui/core";
 import IconButtonWithText, {
 	IconButtonWithTextProps,
-} from "../../../standalone/IconButtonWithText";
+} from "../../../standalone/UIKit/IconButtonWithText";
 
 const IconButtonProps: IconButtonWithTextProps["IconButtonProps"] = {
 	color: "primary",
