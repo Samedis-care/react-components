@@ -19,6 +19,7 @@ const DateInput = (props: DateInputProps & DatePickerProps) => {
 	return (
 		<DatePicker
 			{...muiProps}
+			clearable
 			openTo="date"
 			InputProps={{
 				classes: inputClasses,

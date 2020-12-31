@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { boolean, text, withKnobs } from "@storybook/addon-knobs";
-import moment from "moment";
+import moment, { Moment } from "moment";
 import TypeDate from "../../../../backend-integration/Model/Types/TypeDate";
 import DateInput from "../../../../standalone/UIKit/InputControls/DateInput";
 
@@ -15,8 +15,7 @@ export const DateInputStory = (): React.ReactElement => {
 			value={selectedDate}
 			format={TypeDate.format(moment(selectedDate).format("DD-MM-YYYY"))}
 			onChange={(date) => {
-				if (!date) throw new Error("Date is null");
-				else handleSelectedDate(date);
+				handleSelectedDate(date as Moment);
 			}}
 			infoText={
 				<div

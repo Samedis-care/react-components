@@ -20,6 +20,7 @@ const DateTimeInput = (props: DateTimeInputProps & DateTimePickerProps) => {
 		<DateTimePicker
 			{...muiProps}
 			openTo="date"
+			clearable
 			InputProps={{
 				classes: inputClasses,
 				endAdornment: (
