@@ -6,14 +6,27 @@ import { Warning, Error, Info, Alarm } from "@material-ui/icons";
 
 interface ColourOptionsDef extends SelectorData {
 	color: string;
+	type: string;
 	isFixed?: boolean;
 }
+
+export const colourTypeOptions = [
+	{
+		value: "Dark",
+		label: "Dark",
+	},
+	{
+		value: "Light",
+		label: "Light",
+	},
+];
 
 export const colourOptions: ColourOptionsDef[] = [
 	{
 		value: "ocean",
 		label: "Ocean",
 		color: "#00B8D9",
+		type: "Light",
 		isFixed: true,
 		icon: <Warning />,
 	},
@@ -21,23 +34,67 @@ export const colourOptions: ColourOptionsDef[] = [
 		value: "blue",
 		label: "Blue",
 		color: "#0052CC",
+		type: "Dark",
 		isDisabled: true,
 		icon: <Error />,
 	},
-	{ value: "purple", label: "Purple", color: "#5243AA", icon: <Info /> },
+	{
+		value: "purple",
+		label: "Purple",
+		color: "#5243AA",
+		type: "Dark",
+		icon: <Info />,
+	},
 	{
 		value: "red",
 		label: "Red",
 		color: "#FF5630",
+		type: "Dark",
 		isFixed: true,
 		icon: <Alarm />,
 	},
-	{ value: "orange", label: "Orange", color: "#FF8B00", icon: <Warning /> },
-	{ value: "yellow", label: "Yellow", color: "#FFC400", icon: <Error /> },
-	{ value: "green", label: "Green", color: "#36B37E", icon: <Info /> },
-	{ value: "forest", label: "Forest", color: "#00875A", icon: <Alarm /> },
-	{ value: "slate", label: "Slate", color: "#253858", icon: <Warning /> },
-	{ value: "silver", label: "Silver", color: "#666666", icon: <Info /> },
+	{
+		value: "orange",
+		label: "Orange",
+		color: "#FF8B00",
+		type: "Light",
+		icon: <Warning />,
+	},
+	{
+		value: "yellow",
+		label: "Yellow",
+		color: "#FFC400",
+		type: "Light",
+		icon: <Error />,
+	},
+	{
+		value: "green",
+		label: "Green",
+		color: "#36B37E",
+		type: "Light",
+		icon: <Info />,
+	},
+	{
+		value: "forest",
+		label: "Forest",
+		color: "#00875A",
+		type: "Dark",
+		icon: <Alarm />,
+	},
+	{
+		value: "slate",
+		label: "Slate",
+		color: "#253858",
+		type: "Light",
+		icon: <Warning />,
+	},
+	{
+		value: "silver",
+		label: "Silver",
+		color: "#666666",
+		type: "Light",
+		icon: <Info />,
+	},
 ];
 
 export const flavourOptions = [
