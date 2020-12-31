@@ -1,14 +1,16 @@
 import React from "react";
-import { boolean, text, withKnobs } from "@storybook/addon-knobs";
+import { boolean, text, select, withKnobs } from "@storybook/addon-knobs";
 import PhoneNumberInput from "../../../../standalone/UIKit/InputControls/PhoneNumberInput";
+import { CountryCode } from "libphonenumber-js";
 
 export const PhoneNumberInputStory = (): React.ReactElement => {
+	const countryCodes = ["US", "DE", "FR", "RU"] as CountryCode[];
 	return (
 		<PhoneNumberInput
 			label={text("Label", "Phone")}
 			placeholder={text("Placeholder", "Enter phone number")}
 			fullWidth={boolean("100% Width", true)}
-			countryCode="US"
+			countryCode={select("CountryCode", countryCodes, "US")}
 			infoText={
 				<div
 					dangerouslySetInnerHTML={{
