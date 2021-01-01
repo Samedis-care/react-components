@@ -121,5 +121,13 @@
 				}
 			}
 		}
-	}
+	},
+  "signature-pad": {
+    "dialog": {
+      "reset": "Zurücksetzen",
+      "save-changes": "Änderungen speichern",
+      "title": "Hier unterschreiben"
+    },
+    "sign-here": "Hier digital unterschrieben"
+  }
 }
