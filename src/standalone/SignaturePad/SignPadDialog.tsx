@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
 import React, { useRef } from "react";
 import {
 	Button,
@@ -20,8 +22,10 @@ export interface SignPadDialogProps {
 		HTMLCanvasElement
 	>;
 	penColor?: string;
+	imageURL: string;
 	setImageURL?: (url: string) => void;
 	handleSignPad: () => void;
+	getSignature?: (url: string) => void;
 }
 
 const useClasses = makeStyles((theme) => ({
@@ -40,6 +44,13 @@ const useClasses = makeStyles((theme) => ({
 		marginLeft: 10,
 		marginRight: 10,
 	},
+	imageDiv: {
+		width: 300,
+		height: 150,
+		display: "table-cell",
+		verticalAlign: "middle",
+		textAlign: "center",
+	},
 }));
 
 const SignPadDialog = (props: SignPadDialogProps) => {
@@ -48,26 +59,28 @@ const SignPadDialog = (props: SignPadDialogProps) => {
 		clearOnResize,
 		penColor,
 		handleSignPad,
+		getSignature,
+		imageURL,
 		setImageURL,
 		...canvasProps
 	} = props;
-	const signCanvas = useRef<HTMLCanvasElement>(null);
+	const signCanvas = useRef({}) as React.MutableRefObject<any>;
 	const classes = useClasses();
-
 	const clearCanvas = () => {
 		if (signCanvas.current) {
-			// eslint-disable-next-line @typescript-eslint/no-unsafe-call
 			signCanvas.current.clear();
-			if (setImageURL) setImageURL("");
 		}
+		if (setImageURL) setImageURL("");
+		if (getSignature) getSignature("");
 	};
 
 	const saveCanvas = () => {
 		if (signCanvas.current) {
-			// const imageURL = signCanvas.current
-			// 	.getTrimmedCanvas()
-			// 	.toDataURL("image/png") as string;
-			// if (setImageURL) setImageURL(imageURL);
+			const imageURL = signCanvas.current
+				.getTrimmedCanvas()
+				.toDataURL("image/png") as string;
+			if (setImageURL) setImageURL(imageURL);
+			if (getSignature) getSignature(imageURL);
 			handleSignPad();
 		}
 	};
@@ -100,12 +113,19 @@ const SignPadDialog = (props: SignPadDialogProps) => {
 				)}
 			</MuiDialogTitle>
 			<div className={classes.signDiv}>
-				<SignaturePad
-					ref={signCanvas as React.MutableRefObject<any>}
-					penColor={penColor || "blue"}
-					clearOnResize={clearOnResize}
-					{...canvasProps}
-				/>
+				{!imageURL && (
+					<SignaturePad
+						ref={signCanvas}
+						penColor={penColor || "blue"}
+						clearOnResize={clearOnResize}
+						{...canvasProps}
+					/>
+				)}
+				{imageURL && (
+					<div className={classes.imageDiv}>
+						<img src={imageURL} alt="Sign" />
+					</div>
+				)}
 			</div>
 			<DialogActions>
 				<Button onClick={saveCanvas} color="primary">

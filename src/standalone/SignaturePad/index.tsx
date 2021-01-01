@@ -9,6 +9,7 @@ export interface SignaturePadCanvasProps {
 	canvasProps?: React.CanvasHTMLAttributes<HTMLCanvasElement>;
 	clearOnResize?: boolean;
 	penColor?: string;
+	getSignature?: (imageURL: string) => void;
 }
 
 const useClasses = makeStyles((theme) => ({
@@ -19,20 +20,37 @@ const useClasses = makeStyles((theme) => ({
 		height: 150,
 		width: 400,
 		color: theme.palette.grey[700],
+		display: "inline-block",
 	},
 	textDiv: {
-		margin: 5,
 		position: "absolute",
+		display: "inline-block",
 		bottom: 0,
-		marginLeft: 125,
+		left: 5,
 	},
-	editIcon: {},
-	signText: {},
-	infoIcon: {},
+	imageDiv: {
+		display: "inline-block",
+		margin: "0px 20px",
+	},
+	signText: {
+		display: "inline-block",
+		marginLeft: 10,
+	},
+	infoDiv: {
+		position: "absolute",
+		right: 5,
+		bottom: 0,
+	},
 }));
 
 const SignaturePadCanvas = (props: SignaturePadCanvasProps) => {
-	const { infoText, clearOnResize, canvasProps, penColor } = props;
+	const {
+		getSignature,
+		infoText,
+		clearOnResize,
+		canvasProps,
+		penColor,
+	} = props;
 	const classes = useClasses();
 	const [imageURL, setImageURL] = useState("");
 	const [dialog, setDailog] = useState(false);
@@ -51,7 +69,7 @@ const SignaturePadCanvas = (props: SignaturePadCanvasProps) => {
 				<div className={classes.textDiv}>
 					<EditIcon color={imageURL ? "primary" : "disabled"} />
 					{imageURL ? (
-						<div style={{ border: "1px solid" }}>
+						<div className={classes.imageDiv}>
 							<img src={imageURL} />
 						</div>
 					) : (
@@ -59,8 +77,10 @@ const SignaturePadCanvas = (props: SignaturePadCanvasProps) => {
 							{ccI18n.t("signature-pad.sign-here")}
 						</span>
 					)}
+				</div>
+				<div className={classes.infoDiv}>
 					{infoText && (
-						<Tooltip title={infoText} className={classes.infoIcon}>
+						<Tooltip title={infoText}>
 							<InfoIcon color={"disabled"} />
 						</Tooltip>
 					)}
@@ -71,6 +91,8 @@ const SignaturePadCanvas = (props: SignaturePadCanvasProps) => {
 				clearOnResize={clearOnResize}
 				canvasProps={canvasProps}
 				penColor={penColor}
+				getSignature={getSignature}
+				imageURL={imageURL}
 				setImageURL={setImageURL}
 				handleSignPad={handleSignPad}
 			/>
