@@ -1,22 +1,31 @@
 import React, { useState } from "react";
 import { boolean, text, withKnobs } from "@storybook/addon-knobs";
 import moment, { Moment } from "moment";
-import TypeDate from "../../../../backend-integration/Model/Types/TypeDate";
+import { action, withActions } from "@storybook/addon-actions";
 import DateInput from "../../../../standalone/UIKit/InputControls/DateInput";
+import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
 
 export const DateInputStory = (): React.ReactElement => {
-	const [selectedDate, handleSelectedDate] = useState(moment());
+	const [selectedDate, setSelectedDate] = useState(moment());
+	const onChange = action("onChange");
+
+	const handleChange = React.useCallback(
+		(date: MaterialUiPickersDate): MaterialUiPickersDate => {
+			onChange(date);
+			setSelectedDate(date as Moment);
+			return date;
+		},
+		[onChange]
+	);
 
 	return (
 		<DateInput
-			label={text("Label", "FieldName")}
+			label={text("Label", "Date")}
 			fullWidth={boolean("100% Width", true)}
 			important={boolean("Important", false)}
+			placeholder={text("placeholder", "Please Select Date")}
 			value={selectedDate}
-			format={TypeDate.format(moment(selectedDate).format("DD-MM-YYYY"))}
-			onChange={(date) => {
-				handleSelectedDate(date as Moment);
-			}}
+			onChange={handleChange}
 			infoText={
 				<div
 					dangerouslySetInnerHTML={{
@@ -32,7 +41,7 @@ export const DateInputStory = (): React.ReactElement => {
 };
 
 DateInputStory.storyName = "DateInput";
-DateInputStory.decorators = [withKnobs];
+DateInputStory.decorators = [withActions, withKnobs];
 DateInputStory.parameters = {
 	knobs: {
 		escapeHTML: false,
