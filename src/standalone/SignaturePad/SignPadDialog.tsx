@@ -13,15 +13,36 @@ import SignaturePad from "react-signature-canvas";
 import ccI18n from "../../i18n";
 
 export interface SignPadDialogProps {
+	/**
+	 * Boolean flag to clear signature
+	 */
 	clearOnResize?: boolean;
+	/**
+	 * Boolean flag to open dialog for signature pad
+	 */
 	openDialog: boolean;
+	/**
+	 * The props used to draw HTML canvas
+	 */
 	canvasProps?: React.DetailedHTMLProps<
 		React.CanvasHTMLAttributes<HTMLCanvasElement>,
 		HTMLCanvasElement
 	>;
+	/**
+	 * Use to change signature pen color
+	 */
 	penColor?: string;
+	/**
+	 * The base64 string of signature
+	 */
 	signature: string;
+	/**
+	 * Callback function to handle signature pad
+	 */
 	handleSignPad: () => void;
+	/**
+	 * Callback method which returns signature base64 string
+	 */
 	setSignature?: (url: string) => void;
 }
 
