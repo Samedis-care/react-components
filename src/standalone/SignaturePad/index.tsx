@@ -59,9 +59,9 @@ const SignaturePadCanvas = (props: SignaturePadCanvasProps) => {
 	const [imageURL, setImageURL] = useState(setSignature || "");
 	const [dialog, setDialog] = useState(false);
 
-	const handleSignPad = () => {
+	const handleSignPad = React.useCallback(() => {
 		if (!disabled) setDialog(!dialog);
-	};
+	}, [dialog, disabled]);
 
 	return (
 		<div>
@@ -78,7 +78,7 @@ const SignaturePadCanvas = (props: SignaturePadCanvasProps) => {
 						</div>
 					) : (
 						<span className={classes.signText}>
-							{ccI18n.t("signature-pad.sign-here")}
+							{ccI18n.t("standalone.signature-pad.sign-here")}
 						</span>
 					)}
 				</div>

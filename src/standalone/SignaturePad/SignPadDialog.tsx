@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 import React, { useRef } from "react";
 import {
 	Button,
@@ -64,26 +62,26 @@ const SignPadDialog = (props: SignPadDialogProps) => {
 		setImageURL,
 		...canvasProps
 	} = props;
-	const signCanvas = useRef({}) as React.MutableRefObject<any>;
+	const signCanvas = useRef<SignaturePad>(null);
 	const classes = useClasses();
-	const clearCanvas = () => {
+	const clearCanvas = React.useCallback(() => {
 		if (signCanvas.current) {
 			signCanvas.current.clear();
 		}
 		if (setImageURL) setImageURL("");
 		if (getSignature) getSignature("");
-	};
+	}, [getSignature, setImageURL]);
 
-	const saveCanvas = () => {
+	const saveCanvas = React.useCallback(() => {
 		if (signCanvas.current) {
 			const imageURL = signCanvas.current
 				.getTrimmedCanvas()
-				.toDataURL("image/png") as string;
+				.toDataURL("image/png");
 			if (setImageURL) setImageURL(imageURL);
 			if (getSignature) getSignature(imageURL);
 			handleSignPad();
 		}
-	};
+	}, [getSignature, handleSignPad, setImageURL]);
 
 	const closeCanvas = () => handleSignPad();
 
@@ -100,7 +98,7 @@ const SignPadDialog = (props: SignPadDialogProps) => {
 				className={classes.root}
 			>
 				<Typography variant="h6">
-					{ccI18n.t("signature-pad.dialog.title")}
+					{ccI18n.t("standalone.signature-pad.dialog.title")}
 				</Typography>
 				{closeCanvas && (
 					<IconButton
@@ -129,10 +127,10 @@ const SignPadDialog = (props: SignPadDialogProps) => {
 			</div>
 			<DialogActions>
 				<Button onClick={saveCanvas} color="primary">
-					{ccI18n.t("signature-pad.dialog.save-changes")}
+					{ccI18n.t("standalone.signature-pad.dialog.save-changes")}
 				</Button>
 				<Button onClick={clearCanvas} color="secondary">
-					{ccI18n.t("signature-pad.dialog.reset")}
+					{ccI18n.t("standalone.signature-pad.dialog.reset")}
 				</Button>
 			</DialogActions>
 		</Dialog>
