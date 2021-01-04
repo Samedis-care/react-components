@@ -9,6 +9,8 @@ export interface SignaturePadCanvasProps {
 	canvasProps?: React.CanvasHTMLAttributes<HTMLCanvasElement>;
 	clearOnResize?: boolean;
 	penColor?: string;
+	disabled?: boolean;
+	setSignature?: string;
 	getSignature?: (imageURL: string) => void;
 }
 
@@ -45,18 +47,20 @@ const useClasses = makeStyles((theme) => ({
 
 const SignaturePadCanvas = (props: SignaturePadCanvasProps) => {
 	const {
+		setSignature,
 		getSignature,
+		disabled,
 		infoText,
 		clearOnResize,
 		canvasProps,
 		penColor,
 	} = props;
 	const classes = useClasses();
-	const [imageURL, setImageURL] = useState("");
-	const [dialog, setDailog] = useState(false);
+	const [imageURL, setImageURL] = useState(setSignature || "");
+	const [dialog, setDialog] = useState(false);
 
 	const handleSignPad = () => {
-		setDailog(!dialog);
+		if (!disabled) setDialog(!dialog);
 	};
 
 	return (
