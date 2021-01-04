@@ -55,6 +55,14 @@
 			"format": {
 				"any": "Any"
 			}
+		},
+		"signature-pad": {
+			"dialog": {
+				"reset": "Reset",
+				"save-changes": "Save Changes",
+				"title": "Sign Here"
+			},
+			"sign-here": "Digitally signed here"
 		}
 	},
 	"backend-integration": {
