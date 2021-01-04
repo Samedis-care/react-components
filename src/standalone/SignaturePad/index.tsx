@@ -5,13 +5,34 @@ import SignPadDialog from "./SignPadDialog";
 import ccI18n from "../../i18n";
 
 export interface SignaturePadCanvasProps {
+	/**
+	 * The text for info icon
+	 */
 	infoText?: React.ReactNode;
+	/**
+	 * The props used to draw HTML canvas
+	 */
 	canvasProps?: React.CanvasHTMLAttributes<HTMLCanvasElement>;
+	/**
+	 * Boolean flag to clear signature
+	 */
 	clearOnResize?: boolean;
+	/**
+	 * Use to change signature pen color
+	 */
 	penColor?: string;
+	/**
+	 * Boolean flag to disable edit signature
+	 */
 	disabled?: boolean;
-	setSignature?: string;
-	getSignature?: (imageURL: string) => void;
+	/**
+	 * The base64 string of signature
+	 */
+	signature: string;
+	/**
+	 * Callback method which returns signature base64 string
+	 */
+	setSignature?: (imageURL: string) => void;
 }
 
 const useClasses = makeStyles((theme) => ({
@@ -47,8 +68,8 @@ const useClasses = makeStyles((theme) => ({
 
 const SignaturePadCanvas = (props: SignaturePadCanvasProps) => {
 	const {
+		signature,
 		setSignature,
-		getSignature,
 		disabled,
 		infoText,
 		clearOnResize,
@@ -56,7 +77,6 @@ const SignaturePadCanvas = (props: SignaturePadCanvasProps) => {
 		penColor,
 	} = props;
 	const classes = useClasses();
-	const [imageURL, setImageURL] = useState(setSignature || "");
 	const [dialog, setDialog] = useState(false);
 
 	const handleSignPad = React.useCallback(() => {
@@ -68,13 +88,13 @@ const SignaturePadCanvas = (props: SignaturePadCanvasProps) => {
 			<div
 				className={classes.signPadDiv}
 				onClick={handleSignPad}
-				style={{ backgroundColor: imageURL ? "white" : "lightgray" }}
+				style={{ backgroundColor: signature ? "white" : "lightgray" }}
 			>
 				<div className={classes.textDiv}>
-					<EditIcon color={imageURL ? "primary" : "disabled"} />
-					{imageURL ? (
+					<EditIcon color={signature ? "primary" : "disabled"} />
+					{signature ? (
 						<div className={classes.imageDiv}>
-							<img src={imageURL} />
+							<img src={signature} />
 						</div>
 					) : (
 						<span className={classes.signText}>
@@ -95,9 +115,8 @@ const SignaturePadCanvas = (props: SignaturePadCanvasProps) => {
 				clearOnResize={clearOnResize}
 				canvasProps={canvasProps}
 				penColor={penColor}
-				getSignature={getSignature}
-				imageURL={imageURL}
-				setImageURL={setImageURL}
+				setSignature={setSignature}
+				signature={signature}
 				handleSignPad={handleSignPad}
 			/>
 		</div>

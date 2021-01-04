@@ -20,10 +20,9 @@ export interface SignPadDialogProps {
 		HTMLCanvasElement
 	>;
 	penColor?: string;
-	imageURL: string;
-	setImageURL?: (url: string) => void;
+	signature: string;
 	handleSignPad: () => void;
-	getSignature?: (url: string) => void;
+	setSignature?: (url: string) => void;
 }
 
 const useClasses = makeStyles((theme) => ({
@@ -57,9 +56,8 @@ const SignPadDialog = (props: SignPadDialogProps) => {
 		clearOnResize,
 		penColor,
 		handleSignPad,
-		getSignature,
-		imageURL,
-		setImageURL,
+		setSignature,
+		signature,
 		...canvasProps
 	} = props;
 	const signCanvas = useRef<SignaturePad>(null);
@@ -68,20 +66,18 @@ const SignPadDialog = (props: SignPadDialogProps) => {
 		if (signCanvas.current) {
 			signCanvas.current.clear();
 		}
-		if (setImageURL) setImageURL("");
-		if (getSignature) getSignature("");
-	}, [getSignature, setImageURL]);
+		if (setSignature) setSignature("");
+	}, [setSignature]);
 
 	const saveCanvas = React.useCallback(() => {
 		if (signCanvas.current) {
-			const imageURL = signCanvas.current
+			const signature = signCanvas.current
 				.getTrimmedCanvas()
 				.toDataURL("image/png");
-			if (setImageURL) setImageURL(imageURL);
-			if (getSignature) getSignature(imageURL);
+			if (setSignature) setSignature(signature);
 			handleSignPad();
 		}
-	}, [getSignature, handleSignPad, setImageURL]);
+	}, [setSignature, handleSignPad]);
 
 	const closeCanvas = () => handleSignPad();
 
@@ -111,7 +107,7 @@ const SignPadDialog = (props: SignPadDialogProps) => {
 				)}
 			</MuiDialogTitle>
 			<div className={classes.signDiv}>
-				{!imageURL && (
+				{!signature && (
 					<SignaturePad
 						ref={signCanvas}
 						penColor={penColor || "blue"}
@@ -119,9 +115,9 @@ const SignPadDialog = (props: SignPadDialogProps) => {
 						{...canvasProps}
 					/>
 				)}
-				{imageURL && (
+				{signature && (
 					<div className={classes.imageDiv}>
-						<img src={imageURL} alt="Sign" />
+						<img src={signature} alt="Sign" />
 					</div>
 				)}
 			</div>
