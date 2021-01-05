@@ -3,6 +3,8 @@ import { withActions } from "@storybook/addon-actions";
 import { boolean, text, withKnobs } from "@storybook/addon-knobs";
 import { FormGroup, FormControlLabel, Typography } from "@material-ui/core";
 import Checkbox from "../../../standalone/UIKit/Checkbox";
+import NotificationsIcon from "@material-ui/icons/Notifications";
+import NotificationsOffIcon from "@material-ui/icons/NotificationsOff";
 
 export const CheckboxStory = (): React.ReactElement => {
 	const [state, setState] = React.useState({
@@ -10,6 +12,7 @@ export const CheckboxStory = (): React.ReactElement => {
 		checkedB: false,
 		checkedC: false,
 		checkedD: true,
+		checkedX: true,
 	});
 
 	const handleChange = (event: {
@@ -20,6 +23,32 @@ export const CheckboxStory = (): React.ReactElement => {
 
 	return (
 		<>
+			<FormGroup row>
+				<FormControlLabel
+					labelPlacement="bottom"
+					control={
+						<Checkbox
+							size="medium"
+							icon={<NotificationsOffIcon />}
+							checkedIcon={<NotificationsIcon />}
+							checked={state.checkedX}
+							disabled={boolean("Disabled", false)}
+							onChange={handleChange}
+							name="checkedX"
+						/>
+					}
+					label={
+						<>
+							<Typography variant="caption" display="block" align="center">
+								Checkbox X
+							</Typography>
+							<Typography variant="caption" display="block" align="center">
+								Alternative Icons
+							</Typography>
+						</>
+					}
+				/>
+			</FormGroup>
 			<FormGroup row>
 				<FormControlLabel
 					control={
