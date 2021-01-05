@@ -4273,11 +4273,73 @@ Array [
     className="standalone-uikit--checkbox-story-MuiFormGroup-root standalone-uikit--checkbox-story-MuiFormGroup-row"
   >
     <label
-      className="standalone-uikit--checkbox-story-MuiFormControlLabel-root"
+      className="standalone-uikit--checkbox-story-MuiFormControlLabel-root standalone-uikit--checkbox-story-MuiFormControlLabel-labelPlacementBottom"
     >
       <span
         aria-disabled={false}
         className="standalone-uikit--checkbox-story-MuiButtonBase-root standalone-uikit--checkbox-story-MuiIconButton-root standalone-uikit--checkbox-story-PrivateSwitchBase-root-4 standalone-uikit--checkbox-story-MuiCheckbox-root standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-root-1 standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-root-3 standalone-uikit--checkbox-story-MuiCheckbox-colorPrimary standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-colorPrimary-2 standalone-uikit--checkbox-story-PrivateSwitchBase-checked-5 Mui-checked standalone-uikit--checkbox-story-MuiIconButton-colorPrimary"
+        onBlur={[Function]}
+        onDragLeave={[Function]}
+        onFocus={[Function]}
+        onKeyDown={[Function]}
+        onKeyUp={[Function]}
+        onMouseDown={[Function]}
+        onMouseLeave={[Function]}
+        onMouseUp={[Function]}
+        onTouchEnd={[Function]}
+        onTouchMove={[Function]}
+        onTouchStart={[Function]}
+        tabIndex={null}
+      >
+        <span
+          className="standalone-uikit--checkbox-story-MuiIconButton-label"
+        >
+          <input
+            checked={true}
+            className="standalone-uikit--checkbox-story-PrivateSwitchBase-input-7"
+            data-indeterminate={false}
+            disabled={false}
+            name="checkedX"
+            onChange={[Function]}
+            type="checkbox"
+          />
+          <svg
+            aria-hidden={true}
+            className="standalone-uikit--checkbox-story-MuiSvgIcon-root"
+            focusable="false"
+            viewBox="0 0 24 24"
+          >
+            <path
+              d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"
+            />
+          </svg>
+        </span>
+      </span>
+      <span
+        className="standalone-uikit--checkbox-story-MuiTypography-root standalone-uikit--checkbox-story-MuiFormControlLabel-label standalone-uikit--checkbox-story-MuiTypography-body1"
+      >
+        <span
+          className="standalone-uikit--checkbox-story-MuiTypography-root standalone-uikit--checkbox-story-MuiTypography-caption standalone-uikit--checkbox-story-MuiTypography-alignCenter standalone-uikit--checkbox-story-MuiTypography-displayBlock"
+        >
+          Checkbox X
+        </span>
+        <span
+          className="standalone-uikit--checkbox-story-MuiTypography-root standalone-uikit--checkbox-story-MuiTypography-caption standalone-uikit--checkbox-story-MuiTypography-alignCenter standalone-uikit--checkbox-story-MuiTypography-displayBlock"
+        >
+          Alternative Icons
+        </span>
+      </span>
+    </label>
+  </div>,
+  <div
+    className="standalone-uikit--checkbox-story-MuiFormGroup-root standalone-uikit--checkbox-story-MuiFormGroup-row"
+  >
+    <label
+      className="standalone-uikit--checkbox-story-MuiFormControlLabel-root"
+    >
+      <span
+        aria-disabled={false}
+        className="standalone-uikit--checkbox-story-MuiButtonBase-root standalone-uikit--checkbox-story-MuiIconButton-root standalone-uikit--checkbox-story-PrivateSwitchBase-root-4 standalone-uikit--checkbox-story-MuiCheckbox-root standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-root-1 standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-root-8 standalone-uikit--checkbox-story-MuiCheckbox-colorPrimary standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-colorPrimary-2 standalone-uikit--checkbox-story-PrivateSwitchBase-checked-5 Mui-checked standalone-uikit--checkbox-story-MuiIconButton-colorPrimary"
         onBlur={[Function]}
         onDragLeave={[Function]}
         onFocus={[Function]}
@@ -4330,7 +4392,7 @@ Array [
     >
       <span
         aria-disabled={false}
-        className="standalone-uikit--checkbox-story-MuiButtonBase-root standalone-uikit--checkbox-story-MuiIconButton-root standalone-uikit--checkbox-story-PrivateSwitchBase-root-4 standalone-uikit--checkbox-story-MuiCheckbox-root standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-root-1 standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-root-8 standalone-uikit--checkbox-story-MuiCheckbox-colorPrimary standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-colorPrimary-2 standalone-uikit--checkbox-story-MuiIconButton-colorPrimary"
+        className="standalone-uikit--checkbox-story-MuiButtonBase-root standalone-uikit--checkbox-story-MuiIconButton-root standalone-uikit--checkbox-story-PrivateSwitchBase-root-4 standalone-uikit--checkbox-story-MuiCheckbox-root standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-root-1 standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-root-9 standalone-uikit--checkbox-story-MuiCheckbox-colorPrimary standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-colorPrimary-2 standalone-uikit--checkbox-story-MuiIconButton-colorPrimary"
         onBlur={[Function]}
         onDragLeave={[Function]}
         onFocus={[Function]}
@@ -4396,7 +4458,7 @@ Array [
     >
       <span
         aria-disabled={false}
-        className="standalone-uikit--checkbox-story-MuiButtonBase-root standalone-uikit--checkbox-story-MuiIconButton-root standalone-uikit--checkbox-story-PrivateSwitchBase-root-4 standalone-uikit--checkbox-story-MuiCheckbox-root standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-root-1 standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-root-9 standalone-uikit--checkbox-story-MuiCheckbox-colorPrimary standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-colorPrimary-2 standalone-uikit--checkbox-story-MuiIconButton-colorPrimary"
+        className="standalone-uikit--checkbox-story-MuiButtonBase-root standalone-uikit--checkbox-story-MuiIconButton-root standalone-uikit--checkbox-story-PrivateSwitchBase-root-4 standalone-uikit--checkbox-story-MuiCheckbox-root standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-root-1 standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-root-10 standalone-uikit--checkbox-story-MuiCheckbox-colorPrimary standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-colorPrimary-2 standalone-uikit--checkbox-story-MuiIconButton-colorPrimary"
         onBlur={[Function]}
         onDragLeave={[Function]}
         onFocus={[Function]}
@@ -4449,7 +4511,7 @@ Array [
     >
       <span
         aria-disabled={false}
-        className="standalone-uikit--checkbox-story-MuiButtonBase-root standalone-uikit--checkbox-story-MuiIconButton-root standalone-uikit--checkbox-story-PrivateSwitchBase-root-4 standalone-uikit--checkbox-story-MuiCheckbox-root standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-root-1 standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-root-10 standalone-uikit--checkbox-story-MuiCheckbox-colorPrimary standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-colorPrimary-2 standalone-uikit--checkbox-story-PrivateSwitchBase-checked-5 Mui-checked standalone-uikit--checkbox-story-MuiIconButton-colorPrimary"
+        className="standalone-uikit--checkbox-story-MuiButtonBase-root standalone-uikit--checkbox-story-MuiIconButton-root standalone-uikit--checkbox-story-PrivateSwitchBase-root-4 standalone-uikit--checkbox-story-MuiCheckbox-root standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-root-1 standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-root-11 standalone-uikit--checkbox-story-MuiCheckbox-colorPrimary standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-colorPrimary-2 standalone-uikit--checkbox-story-PrivateSwitchBase-checked-5 Mui-checked standalone-uikit--checkbox-story-MuiIconButton-colorPrimary"
         onBlur={[Function]}
         onDragLeave={[Function]}
         onFocus={[Function]}
