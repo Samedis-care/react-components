@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useRef } from "react";
 import { SelectorData, SelectorPropsSingleSelect } from "./Selector";
 import SingleSelect from "./Selector";
 import { TextField, TextFieldProps, Tooltip } from "@material-ui/core";
@@ -81,6 +81,7 @@ const MultiSelectWithTags = <Data extends MultiSelectData>(
 	} = props;
 	const [selectedValues, setSelectedValue] = useState<Data[]>([]);
 	const [autoCompleteOptions, setautoCompleteOptions] = useState(filteredData);
+	const input = useRef<TextFieldProps>();
 	const array = [...selected, ...selectedValues].flat();
 	const allSelected: Data[] = [];
 	const map = new Map();
@@ -158,7 +159,8 @@ const MultiSelectWithTags = <Data extends MultiSelectData>(
 
 	const handleChangeAutocomplete = useCallback(
 		(selectedValue: Data) => {
-			if (!selectedValue) return;
+			if (typeof selectedValue !== "object" || !("value" in selectedValue))
+				return;
 			else {
 				setautoCompleteOptions(
 					autoCompleteOptions.filter(
@@ -167,6 +169,7 @@ const MultiSelectWithTags = <Data extends MultiSelectData>(
 				);
 				selectedValues.push(selectedValue);
 				setSelectedValue(selectedValues);
+				if (input.current) input.current.value = "";
 			}
 		},
 		[selectedValues, autoCompleteOptions]
@@ -187,16 +190,16 @@ const MultiSelectWithTags = <Data extends MultiSelectData>(
 				key={autoCompleteOptions.length}
 				freeSolo
 				id="cc-search-input"
-				disableClearable={true}
+				autoComplete
 				options={autoCompleteOptions}
 				getOptionLabel={(option) => option.label}
-				inputValue=""
 				onChange={(_event, selectedValue) =>
 					handleChangeAutocomplete(selectedValue as Data)
 				}
 				renderInput={(params: TextFieldProps) => (
 					<TextField
 						{...params}
+						inputRef={input}
 						label="Search input"
 						margin="normal"
 						InputProps={{

@@ -104,11 +104,12 @@ export const SelectorMultiWithTags = (): React.ReactElement => {
 					filteredData = filteredData.filter((d) => d.value !== record.value);
 				});
 				setData(filteredData);
-				setSelected(records);
+				const selectedValues = [selected, ...records].flat();
+				setSelected(selectedValues);
 			}
 			loadData;
 		},
-		[data, loadData, onGroupSelectAction]
+		[data, loadData, onGroupSelectAction, selected]
 	);
 
 	return (
