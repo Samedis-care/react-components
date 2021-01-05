@@ -6,7 +6,7 @@ import {
 	CheckboxProps,
 } from "@material-ui/core";
 
-import { Theme } from "@material-ui/core/styles";
+import { Theme } from "@material-ui/core";
 
 const StyledCheckbox = withStyles((theme: Theme) => ({
 	root: (props: CheckboxProps) => ({
