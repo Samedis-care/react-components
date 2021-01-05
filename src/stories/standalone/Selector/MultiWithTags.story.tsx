@@ -120,6 +120,7 @@ export const SelectorMultiWithTags = (): React.ReactElement => {
 			onGroupLoad={loadGroupData}
 			selected={selected}
 			filteredData={data}
+			setData={setData}
 			onSelect={onSelect}
 			onLoad={loadData}
 			onAddNew={enableAddNew ? onAddNewAction : undefined}
@@ -132,6 +133,7 @@ export const SelectorMultiWithTags = (): React.ReactElement => {
 			loadingLabel={loadingLabel}
 			noDataLabel={noDataLabel}
 			placeholderLabel={placeholderLabel}
+			searchInputLabel={text("Search Label", "Search")}
 		/>
 	);
 };

@@ -40,12 +40,23 @@ export interface MultiSelectWithTagsProps<Data extends MultiSelectData>
 	 * The currently selected values
 	 */
 	selected: Data[];
+	/**
+	 * The filtered data after selected dropdown value
+	 */
 	filteredData: Data[];
+	/**
+	 * Set filtered data after selected from search input
+	 */
+	setData?: (values: Data[]) => void;
 	/**
 	 * The currently selected groups
 	 */
 	selectedGroup: SelectorData | null;
 	onGroupLoad: (search: string) => Data[] | Promise<Data[]>;
+	/**
+	 * Label for search input control
+	 */
+	searchInputLabel?: string;
 }
 
 const styles = createStyles((theme: Theme) => ({
@@ -69,9 +80,11 @@ const MultiSelectWithTags = <Data extends MultiSelectData>(
 ) => {
 	const {
 		title,
+		searchInputLabel,
 		onSelect,
 		selected,
 		filteredData,
+		setData,
 		onGroupLoad,
 		onGroupSelect,
 		selectedGroup,
@@ -80,7 +93,6 @@ const MultiSelectWithTags = <Data extends MultiSelectData>(
 		classes,
 	} = props;
 	const [selectedValues, setSelectedValue] = useState<Data[]>([]);
-	const [autoCompleteOptions, setautoCompleteOptions] = useState(filteredData);
 	const input = useRef<TextFieldProps>();
 	const array = [...selected, ...selectedValues].flat();
 	const allSelected: Data[] = [];
@@ -129,12 +141,12 @@ const MultiSelectWithTags = <Data extends MultiSelectData>(
 				if (canSelectedDelete && onSelect) {
 					onSelect(selected.filter((s) => s.value !== selectedEntry?.value));
 					if (selectedEntry) {
-						const autoCompleteSelected = autoCompleteOptions.find(
+						const filteredDataSelected = filteredData.find(
 							(option) => option.value === selectedEntry.value
 						);
-						if (!autoCompleteSelected) {
-							autoCompleteOptions.push(selectedEntry);
-							setautoCompleteOptions(autoCompleteOptions);
+						if (!filteredDataSelected) {
+							filteredData.push(selectedEntry);
+							if (setData) setData(filteredData);
 						}
 					}
 				}
@@ -143,36 +155,40 @@ const MultiSelectWithTags = <Data extends MultiSelectData>(
 						selectedValues.filter((s) => s.value !== selectedValuesEntry?.value)
 					);
 					if (selectedValuesEntry) {
-						const autoCompleteSelectedValues = autoCompleteOptions.find(
+						const filteredDataSelectedValues = filteredData.find(
 							(option) => option.value === selectedValuesEntry.value
 						);
-						if (!autoCompleteSelectedValues) {
-							autoCompleteOptions.push(selectedValuesEntry);
-							setautoCompleteOptions(autoCompleteOptions);
+						if (!filteredDataSelectedValues) {
+							filteredData.push(selectedValuesEntry);
+							if (setData) setData(filteredData);
 						}
 					}
 				}
 			})();
 		},
-		[onSelect, selected, selectedValues, autoCompleteOptions]
+		[selected, selectedValues, onSelect, filteredData, setData]
 	);
 
 	const handleChangeAutocomplete = useCallback(
 		(selectedValue: Data) => {
-			if (typeof selectedValue !== "object" || !("value" in selectedValue))
+			if (
+				!selectedValue ||
+				typeof selectedValue !== "object" ||
+				!("value" in selectedValue)
+			)
 				return;
 			else {
-				setautoCompleteOptions(
-					autoCompleteOptions.filter(
-						(data) => data.value !== selectedValue.value
-					)
-				);
+				if (setData) {
+					setData(
+						filteredData.filter((data) => data.value !== selectedValue.value)
+					);
+				}
 				selectedValues.push(selectedValue);
 				setSelectedValue(selectedValues);
 				if (input.current) input.current.value = "";
 			}
 		},
-		[selectedValues, autoCompleteOptions]
+		[setData, selectedValues, filteredData]
 	);
 
 	return (
@@ -187,11 +203,12 @@ const MultiSelectWithTags = <Data extends MultiSelectData>(
 				multiSelect={false}
 			/>
 			<Autocomplete
-				key={autoCompleteOptions.length}
+				key={filteredData.length}
 				freeSolo
 				id="cc-search-input"
 				autoComplete
-				options={autoCompleteOptions}
+				disableClearable
+				options={filteredData}
 				getOptionLabel={(option) => option.label}
 				onChange={(_event, selectedValue) =>
 					handleChangeAutocomplete(selectedValue as Data)
@@ -200,7 +217,7 @@ const MultiSelectWithTags = <Data extends MultiSelectData>(
 					<TextField
 						{...params}
 						inputRef={input}
-						label="Search input"
+						label={searchInputLabel || "Search input"}
 						margin="normal"
 						InputProps={{
 							...params.InputProps,
