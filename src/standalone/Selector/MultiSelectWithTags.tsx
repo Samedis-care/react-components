@@ -1,24 +1,12 @@
-import React, { CSSProperties } from "react";
-import Selector, { SelectorData, SelectorPropsSingleSelect } from "./Selector";
+import React, { useState, useCallback } from "react";
+import { SelectorData, SelectorPropsSingleSelect } from "./Selector";
 import SingleSelect from "./Selector";
 import { TextField, TextFieldProps, Tooltip } from "@material-ui/core";
-import {
-	createStyles,
-	Grid,
-	Paper,
-	Theme,
-	useTheme,
-	withStyles,
-	WithStyles,
-} from "@material-ui/core";
+import { createStyles, Theme, withStyles, WithStyles } from "@material-ui/core";
 import { SmallIconButton, SmallListItemIcon } from "../Small/List";
-import {
-	RemoveCircle as DeleteIcon,
-	Search as SearchIcon,
-	Info as InfoIcon,
-} from "@material-ui/icons";
+import { Search as SearchIcon, Info as InfoIcon } from "@material-ui/icons";
+import RemoveIcon from "./Icons/RemoveIcon";
 import { Autocomplete } from "@material-ui/lab";
-import { ControlProps } from "react-select/src/components/Control";
 import { GenericWithStyles } from "../../utils";
 
 export interface MultiSelectData extends SelectorData {
@@ -81,7 +69,6 @@ const MultiSelectWithTags = <Data extends MultiSelectData>(
 ) => {
 	const {
 		title,
-		onLoad,
 		onSelect,
 		selected,
 		filteredData,
@@ -89,28 +76,22 @@ const MultiSelectWithTags = <Data extends MultiSelectData>(
 		onGroupSelect,
 		selectedGroup,
 		enableIcons,
-		customStyles,
 		disable,
 		classes,
 	} = props;
-	const theme = useTheme();
+	const [selectedValues, setSelectedValue] = useState<Data[]>([]);
+	const [autoCompleteOptions, setautoCompleteOptions] = useState(filteredData);
+	const array = [...selected, ...selectedValues].flat();
+	const allSelected: Data[] = [];
+	const map = new Map();
+	for (const item of array) {
+		if (!map.has(item.value)) {
+			map.set(item.value, true);
+			allSelected.push({ ...(item as Data) });
+		}
+	}
 
-	const multiSelectHandler = React.useCallback(
-		(value: string) => {
-			if (!value) return;
-			if (onSelect) {
-				onSelect([
-					...selected,
-					selected.filter((option) =>
-						option.label.toLowerCase().includes(value.toLowerCase())
-					)[0],
-				]);
-			}
-		},
-		[onSelect, selected]
-	);
-
-	const groupSelectLoadHandler = React.useCallback(
+	const groupSelectLoadHandler = useCallback(
 		async (query: string) => {
 			const results = await onGroupLoad(query);
 			return results.filter((option) =>
@@ -120,63 +101,66 @@ const MultiSelectWithTags = <Data extends MultiSelectData>(
 		[onGroupLoad]
 	);
 
-	const multiSelectLoadHandler = React.useCallback(
-		async (query: string) => {
-			const results = await onLoad(query);
-			return results.filter(
-				(val: SelectorData) => !selected.map((s) => s.value).includes(val.value)
-			);
-		},
-		[onLoad, selected]
-	);
-
-	const handleDelete = React.useCallback(
+	const handleDelete = useCallback(
 		(evt: React.MouseEvent<HTMLButtonElement>) => {
-			let canDelete = true;
-			const entry: Data | null | undefined = selected.find(
+			let canSelectedDelete = true;
+			let canSelectedValuesDelete = true;
+			const selectedEntry: Data | null | undefined = selected.find(
 				(s) => s.value === evt.currentTarget.name
 			);
-			if (!entry) {
+			const selectedValuesEntry: Data | null | undefined = selectedValues.find(
+				(s) => s.value === evt.currentTarget.name
+			);
+			if (!selectedEntry && !selectedValuesEntry) {
 				throw new Error(
 					"[Components-Care] [MultiSelect] Entry couldn't be found. Either entry.value is not set, or the entity renderer does not correctly set the name attribute"
 				);
 			}
 			void (async () => {
-				if (entry.canUnselect) {
-					canDelete = await entry.canUnselect(entry);
+				if (selectedEntry?.canUnselect) {
+					canSelectedDelete = await selectedEntry.canUnselect(selectedEntry);
 				}
-				if (canDelete && onSelect)
-					onSelect(selected.filter((s) => s.value !== entry.value));
+				if (selectedValuesEntry?.canUnselect) {
+					canSelectedValuesDelete = await selectedValuesEntry.canUnselect(
+						selectedValuesEntry
+					);
+				}
+				if (canSelectedDelete && onSelect) {
+					onSelect(selected.filter((s) => s.value !== selectedEntry?.value));
+					if (selectedEntry) {
+						autoCompleteOptions.push(selectedEntry);
+						setautoCompleteOptions(autoCompleteOptions);
+					}
+				}
+				if (canSelectedValuesDelete) {
+					setSelectedValue(
+						selectedValues.filter((s) => s.value !== selectedValuesEntry?.value)
+					);
+					if (selectedValuesEntry) {
+						autoCompleteOptions.push(selectedValuesEntry);
+						setautoCompleteOptions(autoCompleteOptions);
+					}
+				}
 			})();
 		},
-		[onSelect, selected]
+		[onSelect, selected, selectedValues, autoCompleteOptions]
 	);
 
-	const selectorStyles = React.useMemo(() => {
-		const { control, ...otherCustomStyles } = customStyles || {};
-		return {
-			control: (
-				base: CSSProperties,
-				// eslint-disable-next-line @typescript-eslint/ban-types
-				selectProps: ControlProps<object, false>
-			): CSSProperties => {
-				let multiSelectStyles: CSSProperties = {
-					...base,
-					borderRadius: 0,
-					border: "none",
-					borderBottom: `1px solid ${theme.palette.divider}`,
-					boxShadow: "none",
-					backgroundColor: "transparent",
-				};
-
-				if (control)
-					multiSelectStyles = control(multiSelectStyles, selectProps);
-
-				return multiSelectStyles;
-			},
-			...otherCustomStyles,
-		};
-	}, [customStyles, theme]);
+	const handleChangeAutocomplete = useCallback(
+		(selectedValue: Data) => {
+			if (!selectedValue) return;
+			else {
+				setautoCompleteOptions(
+					autoCompleteOptions.filter(
+						(data) => data.value !== selectedValue.value
+					)
+				);
+				selectedValues.push(selectedValue);
+				setSelectedValue(selectedValues);
+			}
+		},
+		[selectedValues, autoCompleteOptions]
+	);
 
 	return (
 		<div>
@@ -189,13 +173,17 @@ const MultiSelectWithTags = <Data extends MultiSelectData>(
 				disable={disable}
 				multiSelect={false}
 			/>
-
 			<Autocomplete
+				key={autoCompleteOptions.length}
 				freeSolo
-				id="free-solo-2-demo"
-				disableClearable
-				options={filteredData.map((option) => option.label)}
-				onChange={(_event, newValue) => multiSelectHandler(newValue)}
+				id="cc-search-input"
+				disableClearable={true}
+				options={autoCompleteOptions}
+				getOptionLabel={(option) => option.label}
+				inputValue=""
+				onChange={(_event, selectedValue) =>
+					handleChangeAutocomplete(selectedValue as Data)
+				}
 				renderInput={(params: TextFieldProps) => (
 					<TextField
 						{...params}
@@ -214,20 +202,27 @@ const MultiSelectWithTags = <Data extends MultiSelectData>(
 					/>
 				)}
 			/>
-			{selected.map((data: MultiSelectData, index: number) => (
-				<div key={index} className={classes.outlined}>
-					{enableIcons && <SmallListItemIcon>{data.icon}</SmallListItemIcon>}
-					<span>{data.label}</span>
-					<SmallIconButton
-						edge={"end"}
-						name={data.value}
-						disabled={disable}
-						onClick={disable ? undefined : handleDelete}
-					>
-						<DeleteIcon />
-					</SmallIconButton>
-				</div>
-			))}
+			{allSelected?.length > 0 &&
+				allSelected.map((data: MultiSelectData, index: number) => {
+					return (
+						<div key={index} className={classes.outlined}>
+							{enableIcons && (
+								<SmallListItemIcon>{data.icon}</SmallListItemIcon>
+							)}
+							<span>{data.label}</span>
+							{!disable && (
+								<SmallIconButton
+									edge={"end"}
+									name={data.value}
+									disabled={disable}
+									onClick={handleDelete}
+								>
+									<RemoveIcon />
+								</SmallIconButton>
+							)}
+						</div>
+					);
+				})}
 		</div>
 	);
 };

@@ -8,7 +8,6 @@ import {
 import { colourOptions, colourTypeOptions } from "./Data";
 import { action, withActions } from "@storybook/addon-actions";
 import { boolean, text, withKnobs } from "@storybook/addon-knobs";
-import { Box, CssBaseline } from "@material-ui/core";
 import CustomMultiSelectEntry from "./CustomMultiSelectEntry";
 
 interface MySelectorData extends MultiSelectorData {
@@ -66,6 +65,7 @@ export const SelectorMultiWithTags = (): React.ReactElement => {
 		},
 		[data, loadDataAction]
 	);
+
 	const onSelect = React.useCallback(
 		(data: MySelectorData[]) => {
 			onSelectAction(data);
@@ -79,55 +79,59 @@ export const SelectorMultiWithTags = (): React.ReactElement => {
 			loadGroupDataAction(query);
 			return colourTypeOptions
 				.filter((option) =>
+					// eslint-disable-next-line @typescript-eslint/no-unsafe-return
 					option.value.toLowerCase().includes(query.toLowerCase())
 				)
 				.map(enhanceData);
 		},
 		[loadGroupDataAction]
 	);
+
 	const onGroupSelect = React.useCallback(
-		(data: SelectorData | null) => {
-			onGroupSelectAction(data);
-			setGroupSelected(data);
-			if (data !== null) {
+		(selectedGroup: SelectorData | null) => {
+			onGroupSelectAction(selectedGroup);
+			setGroupSelected(selectedGroup);
+			if (selectedGroup !== null) {
 				const records = colourOptions
 					.filter(
-						(option) => option.type.toLowerCase() === data.value.toLowerCase()
+						// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+						(option) =>
+							option.type.toLowerCase() === selectedGroup.value.toLowerCase()
 					)
 					.map(enhanceData);
+				let filteredData: MySelectorData[] = data;
+				records.forEach((record) => {
+					filteredData = filteredData.filter((d) => d.value !== record.value);
+				});
+				setData(filteredData);
 				setSelected(records);
 			}
 			loadData;
 		},
-		[loadData, onGroupSelectAction]
+		[data, loadData, onGroupSelectAction]
 	);
 
 	return (
-		<>
-			<CssBaseline />
-			<Box m={2}>
-				<MultiSelectWithTags<MySelectorData>
-					title={title}
-					selectedGroup={selectedGroups}
-					onGroupSelect={onGroupSelect}
-					onGroupLoad={loadGroupData}
-					selected={selected}
-					filteredData={data}
-					onSelect={onSelect}
-					onLoad={loadData}
-					onAddNew={enableAddNew ? onAddNewAction : undefined}
-					enableIcons={icons}
-					selectedEntryRenderer={
-						customSelectedRenderer ? CustomMultiSelectEntry : undefined
-					}
-					disable={disable}
-					addNewLabel={addNewLabel}
-					loadingLabel={loadingLabel}
-					noDataLabel={noDataLabel}
-					placeholderLabel={placeholderLabel}
-				/>
-			</Box>
-		</>
+		<MultiSelectWithTags<MySelectorData>
+			title={title}
+			selectedGroup={selectedGroups}
+			onGroupSelect={onGroupSelect}
+			onGroupLoad={loadGroupData}
+			selected={selected}
+			filteredData={data}
+			onSelect={onSelect}
+			onLoad={loadData}
+			onAddNew={enableAddNew ? onAddNewAction : undefined}
+			enableIcons={icons}
+			selectedEntryRenderer={
+				customSelectedRenderer ? CustomMultiSelectEntry : undefined
+			}
+			disable={disable}
+			addNewLabel={addNewLabel}
+			loadingLabel={loadingLabel}
+			noDataLabel={noDataLabel}
+			placeholderLabel={placeholderLabel}
+		/>
 	);
 };
 
