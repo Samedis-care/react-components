@@ -4268,63 +4268,251 @@ exports[`Storyshots Standalone/UIKit ActionButton 1`] = `
 `;
 
 exports[`Storyshots Standalone/UIKit Checkbox 1`] = `
-<div
-  className="standalone-uikit--checkbox-story-MuiFormGroup-root standalone-uikit--checkbox-story-MuiFormGroup-row"
->
-  <label
-    className="standalone-uikit--checkbox-story-MuiFormControlLabel-root"
+Array [
+  <div
+    className="standalone-uikit--checkbox-story-MuiFormGroup-root standalone-uikit--checkbox-story-MuiFormGroup-row"
   >
-    <span
-      aria-disabled={false}
-      className="standalone-uikit--checkbox-story-MuiButtonBase-root standalone-uikit--checkbox-story-MuiIconButton-root standalone-uikit--checkbox-story-PrivateSwitchBase-root-4 standalone-uikit--checkbox-story-MuiCheckbox-root standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-root-1 standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-root-3 standalone-uikit--checkbox-story-MuiCheckbox-colorPrimary standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-colorPrimary-2 standalone-uikit--checkbox-story-PrivateSwitchBase-checked-5 Mui-checked standalone-uikit--checkbox-story-MuiIconButton-colorPrimary"
-      onBlur={[Function]}
-      onDragLeave={[Function]}
-      onFocus={[Function]}
-      onKeyDown={[Function]}
-      onKeyUp={[Function]}
-      onMouseDown={[Function]}
-      onMouseLeave={[Function]}
-      onMouseUp={[Function]}
-      onTouchEnd={[Function]}
-      onTouchMove={[Function]}
-      onTouchStart={[Function]}
-      tabIndex={null}
+    <label
+      className="standalone-uikit--checkbox-story-MuiFormControlLabel-root"
     >
       <span
-        className="standalone-uikit--checkbox-story-MuiIconButton-label"
+        aria-disabled={false}
+        className="standalone-uikit--checkbox-story-MuiButtonBase-root standalone-uikit--checkbox-story-MuiIconButton-root standalone-uikit--checkbox-story-PrivateSwitchBase-root-4 standalone-uikit--checkbox-story-MuiCheckbox-root standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-root-1 standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-root-3 standalone-uikit--checkbox-story-MuiCheckbox-colorPrimary standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-colorPrimary-2 standalone-uikit--checkbox-story-PrivateSwitchBase-checked-5 Mui-checked standalone-uikit--checkbox-story-MuiIconButton-colorPrimary"
+        onBlur={[Function]}
+        onDragLeave={[Function]}
+        onFocus={[Function]}
+        onKeyDown={[Function]}
+        onKeyUp={[Function]}
+        onMouseDown={[Function]}
+        onMouseLeave={[Function]}
+        onMouseUp={[Function]}
+        onTouchEnd={[Function]}
+        onTouchMove={[Function]}
+        onTouchStart={[Function]}
+        tabIndex={null}
       >
-        <input
-          checked={true}
-          className="standalone-uikit--checkbox-story-PrivateSwitchBase-input-7"
-          data-indeterminate={false}
-          disabled={false}
-          name="checkedA"
-          onChange={[Function]}
-          type="checkbox"
-        />
-        <svg
-          aria-hidden={true}
-          className="standalone-uikit--checkbox-story-MuiSvgIcon-root"
-          focusable="false"
-          viewBox="-3.5 -4.5 24 24"
+        <span
+          className="standalone-uikit--checkbox-story-MuiIconButton-label"
         >
-          <polyline
-            fill="transparent"
-            id="check"
-            points="1 7 6 12 16.5 1.5"
-            stroke="currentColor"
-            strokeWidth="3.5"
+          <input
+            checked={true}
+            className="standalone-uikit--checkbox-story-PrivateSwitchBase-input-7"
+            data-indeterminate={false}
+            disabled={false}
+            name="checkedA"
+            onChange={[Function]}
+            type="checkbox"
           />
-        </svg>
+          <svg
+            aria-hidden={true}
+            className="standalone-uikit--checkbox-story-MuiSvgIcon-root standalone-uikit--checkbox-story-MuiSvgIcon-fontSizeSmall"
+            focusable="false"
+            viewBox="-3.5 -4.5 24 24"
+          >
+            <polyline
+              fill="transparent"
+              id="check"
+              points="1 7 6 12 16.5 1.5"
+              stroke="currentColor"
+              strokeWidth="3.5"
+            />
+          </svg>
+        </span>
       </span>
-    </span>
-    <span
-      className="standalone-uikit--checkbox-story-MuiTypography-root standalone-uikit--checkbox-story-MuiFormControlLabel-label standalone-uikit--checkbox-story-MuiTypography-body1"
+      <span
+        className="standalone-uikit--checkbox-story-MuiTypography-root standalone-uikit--checkbox-story-MuiFormControlLabel-label standalone-uikit--checkbox-story-MuiTypography-body1"
+      >
+        Checkbox A (size small)
+      </span>
+    </label>
+    <label
+      className="standalone-uikit--checkbox-story-MuiFormControlLabel-root standalone-uikit--checkbox-story-MuiFormControlLabel-labelPlacementStart"
     >
-      Checkbox Label
-    </span>
-  </label>
-</div>
+      <span
+        aria-disabled={false}
+        className="standalone-uikit--checkbox-story-MuiButtonBase-root standalone-uikit--checkbox-story-MuiIconButton-root standalone-uikit--checkbox-story-PrivateSwitchBase-root-4 standalone-uikit--checkbox-story-MuiCheckbox-root standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-root-1 standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-root-8 standalone-uikit--checkbox-story-MuiCheckbox-colorPrimary standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-colorPrimary-2 standalone-uikit--checkbox-story-MuiIconButton-colorPrimary"
+        onBlur={[Function]}
+        onDragLeave={[Function]}
+        onFocus={[Function]}
+        onKeyDown={[Function]}
+        onKeyUp={[Function]}
+        onMouseDown={[Function]}
+        onMouseLeave={[Function]}
+        onMouseUp={[Function]}
+        onTouchEnd={[Function]}
+        onTouchMove={[Function]}
+        onTouchStart={[Function]}
+        tabIndex={null}
+      >
+        <span
+          className="standalone-uikit--checkbox-story-MuiIconButton-label"
+        >
+          <input
+            checked={false}
+            className="standalone-uikit--checkbox-story-PrivateSwitchBase-input-7"
+            data-indeterminate={false}
+            disabled={false}
+            name="checkedB"
+            onChange={[Function]}
+            type="checkbox"
+          />
+          <svg
+            aria-hidden={true}
+            className="standalone-uikit--checkbox-story-MuiSvgIcon-root"
+            focusable="false"
+            viewBox="-3.5 -4.5 24 24"
+          >
+            <polyline
+              fill="transparent"
+              id="check"
+              points="1 7 6 12 16.5 1.5"
+              stroke="transparent"
+              strokeWidth="3.5"
+            />
+          </svg>
+        </span>
+      </span>
+      <span
+        className="standalone-uikit--checkbox-story-MuiTypography-root standalone-uikit--checkbox-story-MuiFormControlLabel-label standalone-uikit--checkbox-story-MuiTypography-body1"
+      >
+        <span
+          className="standalone-uikit--checkbox-story-MuiTypography-root standalone-uikit--checkbox-story-MuiTypography-caption standalone-uikit--checkbox-story-MuiTypography-alignRight standalone-uikit--checkbox-story-MuiTypography-displayBlock"
+        >
+          Checkbox B
+        </span>
+        <span
+          className="standalone-uikit--checkbox-story-MuiTypography-root standalone-uikit--checkbox-story-MuiTypography-caption standalone-uikit--checkbox-story-MuiTypography-alignRight standalone-uikit--checkbox-story-MuiTypography-displayBlock"
+        >
+          Right (start) aligned label
+        </span>
+      </span>
+    </label>
+  </div>,
+  <div
+    className="standalone-uikit--checkbox-story-MuiFormGroup-root standalone-uikit--checkbox-story-MuiFormGroup-row"
+  >
+    <label
+      className="standalone-uikit--checkbox-story-MuiFormControlLabel-root standalone-uikit--checkbox-story-MuiFormControlLabel-labelPlacementTop"
+    >
+      <span
+        aria-disabled={false}
+        className="standalone-uikit--checkbox-story-MuiButtonBase-root standalone-uikit--checkbox-story-MuiIconButton-root standalone-uikit--checkbox-story-PrivateSwitchBase-root-4 standalone-uikit--checkbox-story-MuiCheckbox-root standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-root-1 standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-root-9 standalone-uikit--checkbox-story-MuiCheckbox-colorPrimary standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-colorPrimary-2 standalone-uikit--checkbox-story-MuiIconButton-colorPrimary"
+        onBlur={[Function]}
+        onDragLeave={[Function]}
+        onFocus={[Function]}
+        onKeyDown={[Function]}
+        onKeyUp={[Function]}
+        onMouseDown={[Function]}
+        onMouseLeave={[Function]}
+        onMouseUp={[Function]}
+        onTouchEnd={[Function]}
+        onTouchMove={[Function]}
+        onTouchStart={[Function]}
+        tabIndex={null}
+      >
+        <span
+          className="standalone-uikit--checkbox-story-MuiIconButton-label"
+        >
+          <input
+            checked={false}
+            className="standalone-uikit--checkbox-story-PrivateSwitchBase-input-7"
+            data-indeterminate={false}
+            disabled={false}
+            name="checkedC"
+            onChange={[Function]}
+            type="checkbox"
+          />
+          <svg
+            aria-hidden={true}
+            className="standalone-uikit--checkbox-story-MuiSvgIcon-root standalone-uikit--checkbox-story-MuiSvgIcon-fontSizeSmall"
+            focusable="false"
+            viewBox="-3.5 -4.5 24 24"
+          >
+            <polyline
+              fill="transparent"
+              id="check"
+              points="1 7 6 12 16.5 1.5"
+              stroke="transparent"
+              strokeWidth="3.5"
+            />
+          </svg>
+        </span>
+      </span>
+      <span
+        className="standalone-uikit--checkbox-story-MuiTypography-root standalone-uikit--checkbox-story-MuiFormControlLabel-label standalone-uikit--checkbox-story-MuiTypography-body1"
+      >
+        Checkbox C (size small) (top label)
+      </span>
+    </label>
+    <label
+      className="standalone-uikit--checkbox-story-MuiFormControlLabel-root standalone-uikit--checkbox-story-MuiFormControlLabel-labelPlacementBottom"
+    >
+      <span
+        aria-disabled={false}
+        className="standalone-uikit--checkbox-story-MuiButtonBase-root standalone-uikit--checkbox-story-MuiIconButton-root standalone-uikit--checkbox-story-PrivateSwitchBase-root-4 standalone-uikit--checkbox-story-MuiCheckbox-root standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-root-1 standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-root-10 standalone-uikit--checkbox-story-MuiCheckbox-colorPrimary standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-colorPrimary-2 standalone-uikit--checkbox-story-PrivateSwitchBase-checked-5 Mui-checked standalone-uikit--checkbox-story-MuiIconButton-colorPrimary"
+        onBlur={[Function]}
+        onDragLeave={[Function]}
+        onFocus={[Function]}
+        onKeyDown={[Function]}
+        onKeyUp={[Function]}
+        onMouseDown={[Function]}
+        onMouseLeave={[Function]}
+        onMouseUp={[Function]}
+        onTouchEnd={[Function]}
+        onTouchMove={[Function]}
+        onTouchStart={[Function]}
+        tabIndex={null}
+      >
+        <span
+          className="standalone-uikit--checkbox-story-MuiIconButton-label"
+        >
+          <input
+            checked={true}
+            className="standalone-uikit--checkbox-story-PrivateSwitchBase-input-7"
+            data-indeterminate={false}
+            disabled={false}
+            name="checkedD"
+            onChange={[Function]}
+            type="checkbox"
+          />
+          <svg
+            aria-hidden={true}
+            className="standalone-uikit--checkbox-story-MuiSvgIcon-root"
+            focusable="false"
+            viewBox="-3.5 -4.5 24 24"
+          >
+            <polyline
+              fill="transparent"
+              id="check"
+              points="1 7 6 12 16.5 1.5"
+              stroke="currentColor"
+              strokeWidth="3.5"
+            />
+          </svg>
+        </span>
+      </span>
+      <span
+        className="standalone-uikit--checkbox-story-MuiTypography-root standalone-uikit--checkbox-story-MuiFormControlLabel-label standalone-uikit--checkbox-story-MuiTypography-body1"
+      >
+        <span
+          className="standalone-uikit--checkbox-story-MuiTypography-root standalone-uikit--checkbox-story-MuiTypography-caption standalone-uikit--checkbox-story-MuiTypography-alignCenter standalone-uikit--checkbox-story-MuiTypography-displayBlock"
+        >
+          Checkbox D
+        </span>
+        <span
+          className="standalone-uikit--checkbox-story-MuiTypography-root standalone-uikit--checkbox-story-MuiTypography-caption standalone-uikit--checkbox-story-MuiTypography-alignCenter standalone-uikit--checkbox-story-MuiTypography-displayBlock"
+        >
+          Formatted
+        </span>
+        <span
+          className="standalone-uikit--checkbox-story-MuiTypography-root standalone-uikit--checkbox-story-MuiTypography-caption standalone-uikit--checkbox-story-MuiTypography-alignCenter standalone-uikit--checkbox-story-MuiTypography-displayBlock"
+        >
+          Bottom Label
+        </span>
+      </span>
+    </label>
+  </div>,
+]
 `;
 
 exports[`Storyshots Standalone/UIKit FormButtons 1`] = `
