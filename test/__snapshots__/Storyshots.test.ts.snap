@@ -3270,97 +3270,6 @@ exports[`Storyshots Standalone/GroupBox GroupBox 1`] = `
 </fieldset>
 `;
 
-exports[`Storyshots Standalone/IconButtonWithText IconButtonWithText 1`] = `
-<div
-  className="standalone-iconbuttonwithtext--icon-button-with-text-story-MuiGrid-root standalone-iconbuttonwithtext--icon-button-with-text-story-MuiGrid-container"
->
-  <div
-    className="standalone-iconbuttonwithtext--icon-button-with-text-story-MuiGrid-root standalone-iconbuttonwithtext--icon-button-with-text-story-MuiGrid-item"
-  >
-    Precontent
-  </div>
-  <div
-    className="standalone-iconbuttonwithtext--icon-button-with-text-story-MuiGrid-root standalone-iconbuttonwithtext--icon-button-with-text-story-MuiGrid-item"
-  >
-    <div
-      className="standalone-iconbuttonwithtext--icon-button-with-text-story-MuiGrid-root standalone-iconbuttonwithtext--icon-button-with-text-story-MuiGrid-container standalone-iconbuttonwithtext--icon-button-with-text-story-MuiGrid-direction-xs-column standalone-iconbuttonwithtext--icon-button-with-text-story-MuiGrid-align-items-xs-center"
-    >
-      <div
-        className="standalone-iconbuttonwithtext--icon-button-with-text-story-MuiGrid-root standalone-iconbuttonwithtext--icon-button-with-text-story-MuiGrid-item"
-      >
-        <button
-          className="standalone-iconbuttonwithtext--icon-button-with-text-story-MuiButtonBase-root standalone-iconbuttonwithtext--icon-button-with-text-story-MuiIconButton-root standalone-iconbuttonwithtext--icon-button-with-text-story-MuiIconButton-colorPrimary"
-          disabled={false}
-          onBlur={[Function]}
-          onClick={[Function]}
-          onDragLeave={[Function]}
-          onFocus={[Function]}
-          onKeyDown={[Function]}
-          onKeyUp={[Function]}
-          onMouseDown={[Function]}
-          onMouseLeave={[Function]}
-          onMouseUp={[Function]}
-          onTouchEnd={[Function]}
-          onTouchMove={[Function]}
-          onTouchStart={[Function]}
-          tabIndex={0}
-          type="button"
-        >
-          <span
-            className="standalone-iconbuttonwithtext--icon-button-with-text-story-MuiIconButton-label"
-          >
-            <svg
-              aria-hidden={true}
-              className="standalone-iconbuttonwithtext--icon-button-with-text-story-MuiSvgIcon-root"
-              focusable="false"
-              viewBox="0 0 512 512"
-            >
-              <g>
-                <g>
-                  <polygon
-                    points="0,0 0,128 201.143,329.143 201.143,512 310.857,475.429 310.857,329.143 512,128 512,0 		"
-                  />
-                </g>
-              </g>
-              <g />
-              <g />
-              <g />
-              <g />
-              <g />
-              <g />
-              <g />
-              <g />
-              <g />
-              <g />
-              <g />
-              <g />
-              <g />
-              <g />
-              <g />
-            </svg>
-          </span>
-        </button>
-      </div>
-      <div
-        className="standalone-iconbuttonwithtext--icon-button-with-text-story-MuiGrid-root standalone-iconbuttonwithtext--icon-button-with-text-story-MuiGrid-item"
-      >
-        <span
-          className="standalone-iconbuttonwithtext--icon-button-with-text-story-MuiTypography-root standalone-iconbuttonwithtext--icon-button-with-text-story-MuiTypography-caption standalone-iconbuttonwithtext--icon-button-with-text-story-MuiTypography-colorTextSecondary"
-          onClick={[Function]}
-        >
-          Filter
-        </span>
-      </div>
-    </div>
-  </div>
-  <div
-    className="standalone-iconbuttonwithtext--icon-button-with-text-story-MuiGrid-root standalone-iconbuttonwithtext--icon-button-with-text-story-MuiGrid-item"
-  >
-    Post content
-  </div>
-</div>
-`;
-
 exports[`Storyshots Standalone/Icons Filter 1`] = `
 <svg
   aria-hidden={true}
@@ -3705,7 +3614,7 @@ exports[`Storyshots Standalone/Schedule Weekly 1`] = `
       >
         Today
          (
-        11/24/2020
+        24.11.2020
         )
       </span>
     </button>
@@ -4358,6 +4267,66 @@ exports[`Storyshots Standalone/UIKit ActionButton 1`] = `
 </button>
 `;
 
+exports[`Storyshots Standalone/UIKit Checkbox 1`] = `
+<div
+  className="standalone-uikit--checkbox-story-MuiFormGroup-root standalone-uikit--checkbox-story-MuiFormGroup-row"
+>
+  <label
+    className="standalone-uikit--checkbox-story-MuiFormControlLabel-root"
+  >
+    <span
+      aria-disabled={false}
+      className="standalone-uikit--checkbox-story-MuiButtonBase-root standalone-uikit--checkbox-story-MuiIconButton-root standalone-uikit--checkbox-story-PrivateSwitchBase-root-4 standalone-uikit--checkbox-story-MuiCheckbox-root standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-root-1 standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-root-3 standalone-uikit--checkbox-story-MuiCheckbox-colorPrimary standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-colorPrimary-2 standalone-uikit--checkbox-story-PrivateSwitchBase-checked-5 Mui-checked standalone-uikit--checkbox-story-MuiIconButton-colorPrimary"
+      onBlur={[Function]}
+      onDragLeave={[Function]}
+      onFocus={[Function]}
+      onKeyDown={[Function]}
+      onKeyUp={[Function]}
+      onMouseDown={[Function]}
+      onMouseLeave={[Function]}
+      onMouseUp={[Function]}
+      onTouchEnd={[Function]}
+      onTouchMove={[Function]}
+      onTouchStart={[Function]}
+      tabIndex={null}
+    >
+      <span
+        className="standalone-uikit--checkbox-story-MuiIconButton-label"
+      >
+        <input
+          checked={true}
+          className="standalone-uikit--checkbox-story-PrivateSwitchBase-input-7"
+          data-indeterminate={false}
+          disabled={false}
+          name="checkedA"
+          onChange={[Function]}
+          type="checkbox"
+        />
+        <svg
+          aria-hidden={true}
+          className="standalone-uikit--checkbox-story-MuiSvgIcon-root"
+          focusable="false"
+          viewBox="-3.5 -4.5 24 24"
+        >
+          <polyline
+            fill="transparent"
+            id="check"
+            points="1 7 6 12 16.5 1.5"
+            stroke="currentColor"
+            strokeWidth="3.5"
+          />
+        </svg>
+      </span>
+    </span>
+    <span
+      className="standalone-uikit--checkbox-story-MuiTypography-root standalone-uikit--checkbox-story-MuiFormControlLabel-label standalone-uikit--checkbox-story-MuiTypography-body1"
+    >
+      Checkbox Label
+    </span>
+  </label>
+</div>
+`;
+
 exports[`Storyshots Standalone/UIKit FormButtons 1`] = `
 <div
   className="standalone-uikit--form-buttons-story-makeStyles-outlined-1"
@@ -4422,6 +4391,97 @@ exports[`Storyshots Standalone/UIKit FormButtons 1`] = `
       </span>
     </button>
   </span>
+</div>
+`;
+
+exports[`Storyshots Standalone/UIKit IconButtonWithText 1`] = `
+<div
+  className="standalone-uikit--icon-button-with-text-story-MuiGrid-root standalone-uikit--icon-button-with-text-story-MuiGrid-container"
+>
+  <div
+    className="standalone-uikit--icon-button-with-text-story-MuiGrid-root standalone-uikit--icon-button-with-text-story-MuiGrid-item"
+  >
+    Precontent
+  </div>
+  <div
+    className="standalone-uikit--icon-button-with-text-story-MuiGrid-root standalone-uikit--icon-button-with-text-story-MuiGrid-item"
+  >
+    <div
+      className="standalone-uikit--icon-button-with-text-story-MuiGrid-root standalone-uikit--icon-button-with-text-story-MuiGrid-container standalone-uikit--icon-button-with-text-story-MuiGrid-direction-xs-column standalone-uikit--icon-button-with-text-story-MuiGrid-align-items-xs-center"
+    >
+      <div
+        className="standalone-uikit--icon-button-with-text-story-MuiGrid-root standalone-uikit--icon-button-with-text-story-MuiGrid-item"
+      >
+        <button
+          className="standalone-uikit--icon-button-with-text-story-MuiButtonBase-root standalone-uikit--icon-button-with-text-story-MuiIconButton-root standalone-uikit--icon-button-with-text-story-MuiIconButton-colorPrimary"
+          disabled={false}
+          onBlur={[Function]}
+          onClick={[Function]}
+          onDragLeave={[Function]}
+          onFocus={[Function]}
+          onKeyDown={[Function]}
+          onKeyUp={[Function]}
+          onMouseDown={[Function]}
+          onMouseLeave={[Function]}
+          onMouseUp={[Function]}
+          onTouchEnd={[Function]}
+          onTouchMove={[Function]}
+          onTouchStart={[Function]}
+          tabIndex={0}
+          type="button"
+        >
+          <span
+            className="standalone-uikit--icon-button-with-text-story-MuiIconButton-label"
+          >
+            <svg
+              aria-hidden={true}
+              className="standalone-uikit--icon-button-with-text-story-MuiSvgIcon-root"
+              focusable="false"
+              viewBox="0 0 512 512"
+            >
+              <g>
+                <g>
+                  <polygon
+                    points="0,0 0,128 201.143,329.143 201.143,512 310.857,475.429 310.857,329.143 512,128 512,0 		"
+                  />
+                </g>
+              </g>
+              <g />
+              <g />
+              <g />
+              <g />
+              <g />
+              <g />
+              <g />
+              <g />
+              <g />
+              <g />
+              <g />
+              <g />
+              <g />
+              <g />
+              <g />
+            </svg>
+          </span>
+        </button>
+      </div>
+      <div
+        className="standalone-uikit--icon-button-with-text-story-MuiGrid-root standalone-uikit--icon-button-with-text-story-MuiGrid-item"
+      >
+        <span
+          className="standalone-uikit--icon-button-with-text-story-MuiTypography-root standalone-uikit--icon-button-with-text-story-MuiTypography-caption standalone-uikit--icon-button-with-text-story-MuiTypography-colorTextSecondary"
+          onClick={[Function]}
+        >
+          Filter
+        </span>
+      </div>
+    </div>
+  </div>
+  <div
+    className="standalone-uikit--icon-button-with-text-story-MuiGrid-root standalone-uikit--icon-button-with-text-story-MuiGrid-item"
+  >
+    Post content
+  </div>
 </div>
 `;
 
