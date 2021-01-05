@@ -128,8 +128,13 @@ const MultiSelectWithTags = <Data extends MultiSelectData>(
 				if (canSelectedDelete && onSelect) {
 					onSelect(selected.filter((s) => s.value !== selectedEntry?.value));
 					if (selectedEntry) {
-						autoCompleteOptions.push(selectedEntry);
-						setautoCompleteOptions(autoCompleteOptions);
+						const autoCompleteSelected = autoCompleteOptions.find(
+							(option) => option.value === selectedEntry.value
+						);
+						if (!autoCompleteSelected) {
+							autoCompleteOptions.push(selectedEntry);
+							setautoCompleteOptions(autoCompleteOptions);
+						}
 					}
 				}
 				if (canSelectedValuesDelete) {
@@ -137,8 +142,13 @@ const MultiSelectWithTags = <Data extends MultiSelectData>(
 						selectedValues.filter((s) => s.value !== selectedValuesEntry?.value)
 					);
 					if (selectedValuesEntry) {
-						autoCompleteOptions.push(selectedValuesEntry);
-						setautoCompleteOptions(autoCompleteOptions);
+						const autoCompleteSelectedValues = autoCompleteOptions.find(
+							(option) => option.value === selectedValuesEntry.value
+						);
+						if (!autoCompleteSelectedValues) {
+							autoCompleteOptions.push(selectedValuesEntry);
+							setautoCompleteOptions(autoCompleteOptions);
+						}
 					}
 				}
 			})();
