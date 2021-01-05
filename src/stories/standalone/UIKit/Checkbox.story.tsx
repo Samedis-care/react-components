@@ -1,10 +1,23 @@
 import React from "react";
 import { withActions } from "@storybook/addon-actions";
 import { boolean, text, withKnobs } from "@storybook/addon-knobs";
-import { FormGroup, FormControlLabel, Typography } from "@material-ui/core";
+import {
+	FormGroup,
+	FormControlLabel,
+	Typography,
+	IconButton,
+} from "@material-ui/core";
+
 import Checkbox from "../../../standalone/UIKit/Checkbox";
 import NotificationsIcon from "@material-ui/icons/Notifications";
 import NotificationsOffIcon from "@material-ui/icons/NotificationsOff";
+
+import ArrowBackIcon from "@material-ui/icons/ArrowBack";
+import ArrowForwardIcon from "@material-ui/icons/ArrowForward";
+import ArrowUpwardIcon from "@material-ui/icons/ArrowUpward";
+import ArrowDownwardIcon from "@material-ui/icons/ArrowDownward";
+
+import ComponentWithLabel from "../../../standalone/UIKit/ComponentWithLabel";
 
 export const CheckboxStory = (): React.ReactElement => {
 	const [state, setState] = React.useState({
@@ -21,8 +34,50 @@ export const CheckboxStory = (): React.ReactElement => {
 		setState({ ...state, [event.target.name]: event.target.checked });
 	};
 
+	const handleClick = () => {
+		//console.log("clicked");
+	};
+
 	return (
 		<>
+			<FormGroup row>
+				<ComponentWithLabel
+					labelPlacement="end"
+					control={
+						<IconButton onClick={handleClick}>
+							<ArrowForwardIcon />
+						</IconButton>
+					}
+					labelText={"Ich bin ein\nLabel am Ende"}
+				/>
+				<ComponentWithLabel
+					labelPlacement="top"
+					control={
+						<IconButton onClick={handleClick}>
+							<ArrowUpwardIcon />
+						</IconButton>
+					}
+					labelText={"Ich bin ein\nLabel oben"}
+				/>
+				<ComponentWithLabel
+					labelPlacement="start"
+					control={
+						<IconButton onClick={handleClick}>
+							<ArrowBackIcon />
+						</IconButton>
+					}
+					labelText={"Ich bin ein\nLabel am Anfang"}
+				/>
+				<ComponentWithLabel
+					labelPlacement="bottom"
+					control={
+						<IconButton onClick={handleClick}>
+							<ArrowDownwardIcon />
+						</IconButton>
+					}
+					labelText={"Ich bin ein\nLabel darunter"}
+				/>
+			</FormGroup>
 			<FormGroup row>
 				<FormControlLabel
 					labelPlacement="bottom"
