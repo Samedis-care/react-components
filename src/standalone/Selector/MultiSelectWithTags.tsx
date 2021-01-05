@@ -11,6 +11,10 @@ import { GenericWithStyles } from "../../utils";
 
 export interface MultiSelectData extends SelectorData {
 	/**
+	 * Item type value
+	 */
+	type?: string;
+	/**
 	 * Item click handler
 	 */
 	onClick?: () => void;
@@ -28,9 +32,13 @@ export interface MultiSelectWithTagsProps<Data extends MultiSelectData>
 	> {
 	/**
 	 * Extended selection change handler
-	 * @param data The selected data entry/entries
+	 * @param data The selected data entries
 	 */
 	onSelect?: (value: Data[]) => void;
+	/**
+	 * Extended group selection change handler
+	 * @param data The selected data entry
+	 */
 	onGroupSelect?: (value: SelectorData | null) => void;
 	/**
 	 * The title of control
@@ -52,6 +60,9 @@ export interface MultiSelectWithTagsProps<Data extends MultiSelectData>
 	 * The currently selected groups
 	 */
 	selectedGroup: SelectorData | null;
+	/**
+	 * Callback method on group selection load
+	 */
 	onGroupLoad: (search: string) => Data[] | Promise<Data[]>;
 	/**
 	 * Label for search input control
@@ -71,8 +82,8 @@ const styles = createStyles((theme: Theme) => ({
 		borderRadius: 20,
 		borderColor: "#cce1f6",
 		margin: "5px",
+		lineHeight: "30px",
 	},
-	selectedEntries: {},
 }));
 
 const MultiSelectWithTags = <Data extends MultiSelectData>(
@@ -103,6 +114,28 @@ const MultiSelectWithTags = <Data extends MultiSelectData>(
 			allSelected.push({ ...(item as Data) });
 		}
 	}
+
+	const handleGroupSelect = useCallback(
+		(selectedGroup: SelectorData | null) => {
+			if (onGroupSelect) onGroupSelect(selectedGroup);
+			if (selectedGroup !== null) {
+				const records = filteredData.filter(
+					(option: Data) =>
+						option.type?.toLowerCase() === selectedGroup.value.toLowerCase()
+				);
+				let filteredOptions = filteredData;
+				records.forEach((record) => {
+					filteredOptions = filteredOptions.filter(
+						(d) => d.value !== record.value
+					);
+				});
+				if (setData) setData(filteredOptions);
+				const selectedValues = [selected, ...records].flat() as Data[];
+				if (onSelect) onSelect(selectedValues);
+			}
+		},
+		[filteredData, onGroupSelect, onSelect, selected, setData]
+	);
 
 	const groupSelectLoadHandler = useCallback(
 		async (query: string) => {
@@ -184,11 +217,13 @@ const MultiSelectWithTags = <Data extends MultiSelectData>(
 					);
 				}
 				selectedValues.push(selectedValue);
+				selected.push(selectedValue);
+				if (onSelect) onSelect(selected);
 				setSelectedValue(selectedValues);
 				if (input.current) input.current.value = "";
 			}
 		},
-		[setData, selectedValues, filteredData]
+		[setData, selectedValues, onSelect, selected, filteredData]
 	);
 
 	return (
@@ -196,7 +231,7 @@ const MultiSelectWithTags = <Data extends MultiSelectData>(
 			<h3>{title}</h3>
 			<SingleSelect
 				selected={selectedGroup}
-				onSelect={onGroupSelect}
+				onSelect={handleGroupSelect}
 				onLoad={groupSelectLoadHandler}
 				clearable={true}
 				disable={disable}
@@ -208,8 +243,9 @@ const MultiSelectWithTags = <Data extends MultiSelectData>(
 				id="cc-search-input"
 				autoComplete
 				disableClearable
+				disabled={disable}
 				options={filteredData}
-				getOptionLabel={(option) => option.label}
+				getOptionLabel={(option: Data) => option.label}
 				onChange={(_event, selectedValue) =>
 					handleChangeAutocomplete(selectedValue as Data)
 				}

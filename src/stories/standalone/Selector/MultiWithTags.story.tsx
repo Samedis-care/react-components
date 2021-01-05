@@ -8,10 +8,10 @@ import {
 import { colourOptions, colourTypeOptions } from "./Data";
 import { action, withActions } from "@storybook/addon-actions";
 import { boolean, text, withKnobs } from "@storybook/addon-knobs";
-import CustomMultiSelectEntry from "./CustomMultiSelectEntry";
 
 interface MySelectorData extends MultiSelectorData {
 	id: string;
+	type?: string;
 }
 
 const enhanceData = (entry: SelectorData): MySelectorData => ({
@@ -45,10 +45,6 @@ export const SelectorMultiWithTags = (): React.ReactElement => {
 	const enableAddNew = boolean("Enable Add New", false);
 	const icons = boolean("Enable Icons", false);
 	const disable = boolean("Disable", false);
-	const customSelectedRenderer = boolean(
-		"Enable Custom Selected Renderer",
-		false
-	);
 	const addNewLabel = text("Add new label", "");
 	const loadingLabel = text("Loading Label", "");
 	const noDataLabel = text("No data Label", "");
@@ -79,7 +75,6 @@ export const SelectorMultiWithTags = (): React.ReactElement => {
 			loadGroupDataAction(query);
 			return colourTypeOptions
 				.filter((option) =>
-					// eslint-disable-next-line @typescript-eslint/no-unsafe-return
 					option.value.toLowerCase().includes(query.toLowerCase())
 				)
 				.map(enhanceData);
@@ -91,25 +86,8 @@ export const SelectorMultiWithTags = (): React.ReactElement => {
 		(selectedGroup: SelectorData | null) => {
 			onGroupSelectAction(selectedGroup);
 			setGroupSelected(selectedGroup);
-			if (selectedGroup !== null) {
-				const records = colourOptions
-					.filter(
-						// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-						(option) =>
-							option.type.toLowerCase() === selectedGroup.value.toLowerCase()
-					)
-					.map(enhanceData);
-				let filteredData: MySelectorData[] = data;
-				records.forEach((record) => {
-					filteredData = filteredData.filter((d) => d.value !== record.value);
-				});
-				setData(filteredData);
-				const selectedValues = [selected, ...records].flat();
-				setSelected(selectedValues);
-			}
-			loadData;
 		},
-		[data, loadData, onGroupSelectAction, selected]
+		[onGroupSelectAction]
 	);
 
 	return (
@@ -125,9 +103,6 @@ export const SelectorMultiWithTags = (): React.ReactElement => {
 			onLoad={loadData}
 			onAddNew={enableAddNew ? onAddNewAction : undefined}
 			enableIcons={icons}
-			selectedEntryRenderer={
-				customSelectedRenderer ? CustomMultiSelectEntry : undefined
-			}
 			disable={disable}
 			addNewLabel={addNewLabel}
 			loadingLabel={loadingLabel}
