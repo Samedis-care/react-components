@@ -16,6 +16,7 @@
 		"@types/react-router-dom": "^5.1.6",
 		"@types/react-select": "^3.0.28",
 		"@types/react-signature-canvas": "^1.0.1",
+		"cldr-data": "^36.0.0",
 		"formik": "2.0.7",
 		"globalize": "^1.6.0",
 		"i18next": "^19.8.4",

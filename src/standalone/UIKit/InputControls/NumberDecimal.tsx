@@ -2,8 +2,7 @@ import React, { useState } from "react";
 import { TextFieldProps } from "@material-ui/core";
 import TextFieldWithHelp from "../TextFieldWithHelp";
 import { UIInputProps } from "../CommonStyles";
-import ccI18n from "../../../i18n";
-import Globalize from "globalize";
+import { getGlobalized } from "../../../globalize";
 
 export interface NumberDecimalProps extends UIInputProps {
 	infoText?: React.ReactNode;
@@ -14,11 +13,11 @@ const NumberDecimal = (props: NumberDecimalProps & TextFieldProps) => {
 	const { infoText, important, ...muiProps } = props;
 	const [number, setNumber] = useState("");
 
-	const handleChange = (
+	const handleChange = async (
 		event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
 	) => {
 		const value = Number(event.target.value);
-		const newValue = Globalize.default(ccI18n.language).formatNumber(value);
+		const newValue = (await getGlobalized()).formatNumber(value);
 
 		setNumber(newValue);
 	};
