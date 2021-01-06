@@ -15,9 +15,11 @@ const PhoneNumberInput = (props: PhoneNumberInputProps & TextFieldProps) => {
 	const [number, setNumber] = useState("");
 	const [error, setError] = useState(false);
 
-	const onChange = (event: React.ChangeEvent<{ value: unknown }>) => {
+	const onChange = (
+		event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
+	) => {
 		let valid = true;
-		let phoneNumber = event.target.value as string;
+		let phoneNumber = event.target.value;
 		const newPhoneNumber = parsePhoneNumberFromString(
 			phoneNumber,
 			countryCode || "DE"

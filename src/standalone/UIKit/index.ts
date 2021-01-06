@@ -8,3 +8,4 @@ export { default as NumberDecimal } from "./InputControls/NumberDecimal";
 export { default as DateInput } from "./InputControls/DateInput";
 export { default as DateTimeInput } from "./InputControls/DateTimeInput";
 export { default as PhoneNumberInput } from "./InputControls/PhoneNumberInput";
+export { default as CurrencyInput } from "./InputControls/CurrencyInput";
