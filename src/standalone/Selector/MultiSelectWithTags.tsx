@@ -5,7 +5,7 @@ import { TextField, TextFieldProps, Tooltip } from "@material-ui/core";
 import { createStyles, Theme, withStyles, WithStyles } from "@material-ui/core";
 import { SmallIconButton, SmallListItemIcon } from "../Small/List";
 import { Search as SearchIcon, Info as InfoIcon } from "@material-ui/icons";
-import RemoveIcon from "./Icons/RemoveIcon";
+import { RemoveIcon } from "../../standalone";
 import { Autocomplete } from "@material-ui/lab";
 import { GenericWithStyles } from "../../utils";
 
