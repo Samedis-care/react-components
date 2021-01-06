@@ -1,13 +1,19 @@
 import React, { useState, useCallback, useRef } from "react";
 import { SelectorData, SelectorPropsSingleSelect } from "./Selector";
 import SingleSelect from "./Selector";
-import { TextField, TextFieldProps, Tooltip } from "@material-ui/core";
+import {
+	TextField,
+	TextFieldProps,
+	Tooltip,
+	Typography,
+} from "@material-ui/core";
 import { createStyles, Theme, withStyles, WithStyles } from "@material-ui/core";
 import { SmallIconButton, SmallListItemIcon } from "../Small/List";
 import { Search as SearchIcon, Info as InfoIcon } from "@material-ui/icons";
 import { RemoveIcon } from "../../standalone";
 import { Autocomplete } from "@material-ui/lab";
 import { GenericWithStyles } from "../../utils";
+import { uniqueArray } from "../../utils/arrayFunctions";
 
 export interface MultiSelectData extends SelectorData {
 	/**
@@ -53,7 +59,7 @@ export interface MultiSelectWithTagsProps<Data extends MultiSelectData>
 	 */
 	filteredData: Data[];
 	/**
-	 * Set filtered data after selected from search input
+	 * Callback method to return selected data
 	 */
 	setData?: (values: Data[]) => void;
 	/**
@@ -106,14 +112,10 @@ const MultiSelectWithTags = <Data extends MultiSelectData>(
 	const [selectedValues, setSelectedValue] = useState<Data[]>([]);
 	const input = useRef<TextFieldProps>();
 	const array = [...selected, ...selectedValues].flat();
-	const allSelected: Data[] = [];
-	const map = new Map();
-	for (const item of array) {
-		if (!map.has(item.value)) {
-			map.set(item.value, true);
-			allSelected.push({ ...(item as Data) });
-		}
-	}
+	const allSelected = uniqueArray(array.map((item) => item.value)).map(
+		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+		(value) => array.find((e) => e.value === value)!
+	);
 
 	const handleGroupSelect = useCallback(
 		(selectedGroup: SelectorData | null) => {
@@ -123,12 +125,10 @@ const MultiSelectWithTags = <Data extends MultiSelectData>(
 					(option: Data) =>
 						option.type?.toLowerCase() === selectedGroup.value.toLowerCase()
 				);
-				let filteredOptions = filteredData;
-				records.forEach((record) => {
-					filteredOptions = filteredOptions.filter(
-						(d) => d.value !== record.value
-					);
-				});
+				const recordValues = records.map((record) => record.value);
+				const filteredOptions = filteredData.filter(
+					(entry) => !recordValues.includes(entry.value)
+				);
 				if (setData) setData(filteredOptions);
 				const selectedValues = [selected, ...records].flat() as Data[];
 				if (onSelect) onSelect(selectedValues);
@@ -228,7 +228,7 @@ const MultiSelectWithTags = <Data extends MultiSelectData>(
 
 	return (
 		<div>
-			<h3>{title}</h3>
+			<Typography>{title}</Typography>
 			<SingleSelect
 				selected={selectedGroup}
 				onSelect={handleGroupSelect}
@@ -240,7 +240,6 @@ const MultiSelectWithTags = <Data extends MultiSelectData>(
 			<Autocomplete
 				key={filteredData.length}
 				freeSolo
-				id="cc-search-input"
 				autoComplete
 				disableClearable
 				disabled={disable}
