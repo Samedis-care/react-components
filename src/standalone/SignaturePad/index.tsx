@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { makeStyles, Tooltip } from "@material-ui/core";
 import { Info as InfoIcon } from "@material-ui/icons";
-import SignIcon from "./SignIcon";
+import { SignIcon } from "../../standalone";
 import SignPadDialog from "./SignPadDialog";
 import ccI18n from "../../i18n";
 
