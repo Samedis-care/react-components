@@ -10,4 +10,5 @@ export { default as shallowCompare } from "./shallowCompare";
 export { default as matchMime } from "./matchMime";
 export { default as addGetParams } from "./addGetParams";
 export { default as deepAssign } from "./deepAssign";
+export { default as uniqueArray } from "./uniqueArray";
 export * from "./genericHOC";
