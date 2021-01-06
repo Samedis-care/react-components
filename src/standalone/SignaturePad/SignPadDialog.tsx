@@ -91,13 +91,13 @@ const SignPadDialog = (props: SignPadDialogProps) => {
 	}, [setSignature]);
 
 	const saveCanvas = React.useCallback(() => {
-		if (signCanvas.current) {
+		if (signCanvas.current && !signCanvas.current.isEmpty()) {
 			const signature = signCanvas.current
 				.getTrimmedCanvas()
 				.toDataURL("image/png");
 			if (setSignature) setSignature(signature);
-			handleSignPad();
 		}
+		handleSignPad();
 	}, [setSignature, handleSignPad]);
 
 	const closeCanvas = () => handleSignPad();

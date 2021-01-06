@@ -4425,6 +4425,97 @@ exports[`Storyshots Standalone/UIKit FormButtons 1`] = `
 </div>
 `;
 
+exports[`Storyshots Standalone/UIKit IconButtonWithText 1`] = `
+<div
+  className="standalone-uikit--icon-button-with-text-story-MuiGrid-root standalone-uikit--icon-button-with-text-story-MuiGrid-container"
+>
+  <div
+    className="standalone-uikit--icon-button-with-text-story-MuiGrid-root standalone-uikit--icon-button-with-text-story-MuiGrid-item"
+  >
+    Precontent
+  </div>
+  <div
+    className="standalone-uikit--icon-button-with-text-story-MuiGrid-root standalone-uikit--icon-button-with-text-story-MuiGrid-item"
+  >
+    <div
+      className="standalone-uikit--icon-button-with-text-story-MuiGrid-root standalone-uikit--icon-button-with-text-story-MuiGrid-container standalone-uikit--icon-button-with-text-story-MuiGrid-direction-xs-column standalone-uikit--icon-button-with-text-story-MuiGrid-align-items-xs-center"
+    >
+      <div
+        className="standalone-uikit--icon-button-with-text-story-MuiGrid-root standalone-uikit--icon-button-with-text-story-MuiGrid-item"
+      >
+        <button
+          className="standalone-uikit--icon-button-with-text-story-MuiButtonBase-root standalone-uikit--icon-button-with-text-story-MuiIconButton-root standalone-uikit--icon-button-with-text-story-MuiIconButton-colorPrimary"
+          disabled={false}
+          onBlur={[Function]}
+          onClick={[Function]}
+          onDragLeave={[Function]}
+          onFocus={[Function]}
+          onKeyDown={[Function]}
+          onKeyUp={[Function]}
+          onMouseDown={[Function]}
+          onMouseLeave={[Function]}
+          onMouseUp={[Function]}
+          onTouchEnd={[Function]}
+          onTouchMove={[Function]}
+          onTouchStart={[Function]}
+          tabIndex={0}
+          type="button"
+        >
+          <span
+            className="standalone-uikit--icon-button-with-text-story-MuiIconButton-label"
+          >
+            <svg
+              aria-hidden={true}
+              className="standalone-uikit--icon-button-with-text-story-MuiSvgIcon-root"
+              focusable="false"
+              viewBox="0 0 512 512"
+            >
+              <g>
+                <g>
+                  <polygon
+                    points="0,0 0,128 201.143,329.143 201.143,512 310.857,475.429 310.857,329.143 512,128 512,0 		"
+                  />
+                </g>
+              </g>
+              <g />
+              <g />
+              <g />
+              <g />
+              <g />
+              <g />
+              <g />
+              <g />
+              <g />
+              <g />
+              <g />
+              <g />
+              <g />
+              <g />
+              <g />
+            </svg>
+          </span>
+        </button>
+      </div>
+      <div
+        className="standalone-uikit--icon-button-with-text-story-MuiGrid-root standalone-uikit--icon-button-with-text-story-MuiGrid-item"
+      >
+        <span
+          className="standalone-uikit--icon-button-with-text-story-MuiTypography-root standalone-uikit--icon-button-with-text-story-MuiTypography-caption standalone-uikit--icon-button-with-text-story-MuiTypography-colorTextSecondary"
+          onClick={[Function]}
+        >
+          Filter
+        </span>
+      </div>
+    </div>
+  </div>
+  <div
+    className="standalone-uikit--icon-button-with-text-story-MuiGrid-root standalone-uikit--icon-button-with-text-story-MuiGrid-item"
+  >
+    Post content
+  </div>
+</div>
+`;
+
 exports[`Storyshots Standalone/UIKit SubActionButton 1`] = `
 Array [
   <button
