@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { makeStyles, Tooltip } from "@material-ui/core";
-import { Info as InfoIcon, Edit as EditIcon } from "@material-ui/icons";
+import { Info as InfoIcon } from "@material-ui/icons";
+import { SignIcon } from "../../standalone";
 import SignPadDialog from "./SignPadDialog";
 import ccI18n from "../../i18n";
 
@@ -91,7 +92,7 @@ const SignaturePadCanvas = (props: SignaturePadCanvasProps) => {
 				style={{ backgroundColor: signature ? "white" : "lightgray" }}
 			>
 				<div className={classes.textDiv}>
-					<EditIcon color={signature ? "primary" : "disabled"} />
+					<SignIcon color={signature ? "primary" : "disabled"} />
 					{signature ? (
 						<div className={classes.imageDiv}>
 							<img src={signature} />
