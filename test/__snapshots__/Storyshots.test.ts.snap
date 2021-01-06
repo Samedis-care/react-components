@@ -4088,6 +4088,67 @@ exports[`Storyshots Standalone/Selector Multi 1`] = `
 </div>
 `;
 
+exports[`Storyshots Standalone/Selector MultiSelectWithCheckBox 1`] = `
+<div
+  className="standalone-selector--multi-select-with-check-box-story-MuiInputBase-root standalone-selector--multi-select-with-check-box-story-MuiInputBase-fullWidth"
+  onClick={[Function]}
+  options={
+    Array [
+      Object {
+        "label": "Value 1",
+        "value": "value1",
+      },
+      Object {
+        "label": "Value 2",
+        "value": "value2",
+      },
+      Object {
+        "label": "Value 3",
+        "value": "value3",
+      },
+    ]
+  }
+  values={
+    Array [
+      "value1",
+      "value2",
+    ]
+  }
+>
+  <div
+    aria-haspopup="listbox"
+    className="standalone-selector--multi-select-with-check-box-story-MuiSelect-root standalone-selector--multi-select-with-check-box-story-MuiSelect-select standalone-selector--multi-select-with-check-box-story-MuiSelect-selectMenu standalone-selector--multi-select-with-check-box-story-MuiInputBase-input standalone-selector--multi-select-with-check-box-story-WithStyles(ForwardRef(InputBase))-input-2"
+    onBlur={[Function]}
+    onFocus={[Function]}
+    onKeyDown={[Function]}
+    onMouseDown={[Function]}
+    role="button"
+    tabIndex={0}
+  >
+    Value 1,Value 2
+  </div>
+  <input
+    aria-hidden={true}
+    className="standalone-selector--multi-select-with-check-box-story-MuiSelect-nativeInput"
+    onAnimationStart={[Function]}
+    onChange={[Function]}
+    placeholder="Select.."
+    tabIndex={-1}
+    value="value1,value2"
+  />
+  <svg
+    aria-hidden={true}
+    className="standalone-selector--multi-select-with-check-box-story-MuiSvgIcon-root standalone-selector--multi-select-with-check-box-story-MuiSelect-icon"
+    focusable="false"
+    viewBox="0 0 24 24"
+  >
+    <path
+      d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z"
+    />
+  </svg>
+</div>
+`;
+
 exports[`Storyshots Standalone/Selector Single 1`] = `
 <div
   className="standalone-selector--selector-single-MuiBox-root standalone-selector--selector-single-MuiBox-root-1"
@@ -4212,6 +4273,62 @@ exports[`Storyshots Standalone/Selector Single 1`] = `
 </div>
 `;
 
+exports[`Storyshots Standalone/SignaturePad SignaturePad 1`] = `
+<div>
+  <div
+    className="standalone-signaturepad--signature-pad-story-makeStyles-signPadDiv-10"
+    onClick={[Function]}
+    style={
+      Object {
+        "backgroundColor": "lightgray",
+      }
+    }
+  >
+    <div
+      className="standalone-signaturepad--signature-pad-story-makeStyles-textDiv-11"
+    >
+      <svg
+        aria-hidden={true}
+        className="standalone-signaturepad--signature-pad-story-MuiSvgIcon-root standalone-signaturepad--signature-pad-story-MuiSvgIcon-colorDisabled"
+        focusable="false"
+        viewBox="0 0 24 24"
+      >
+        <path
+          d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34a.9959.9959 0 00-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"
+        />
+      </svg>
+      <span
+        className="standalone-signaturepad--signature-pad-story-makeStyles-signText-13"
+      >
+        Digitally signed here
+      </span>
+    </div>
+    <div
+      className="standalone-signaturepad--signature-pad-story-makeStyles-infoDiv-14"
+    >
+      <svg
+        aria-describedby={null}
+        aria-hidden={true}
+        className="standalone-signaturepad--signature-pad-story-MuiSvgIcon-root standalone-signaturepad--signature-pad-story-MuiSvgIcon-colorDisabled"
+        focusable="false"
+        onBlur={[Function]}
+        onFocus={[Function]}
+        onMouseLeave={[Function]}
+        onMouseOver={[Function]}
+        onTouchEnd={[Function]}
+        onTouchStart={[Function]}
+        title={null}
+        viewBox="0 0 24 24"
+      >
+        <path
+          d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"
+        />
+      </svg>
+    </div>
+  </div>
+</div>
+`;
+
 exports[`Storyshots Standalone/UIKit ActionButton 1`] = `
 <button
   className="standalone-uikit--action-button-story-MuiButtonBase-root standalone-uikit--action-button-story-MuiButton-root standalone-uikit--action-button-story-WithStyles(ForwardRef(Button))-root-1 standalone-uikit--action-button-story-WithStyles(ForwardRef(Button))-root-4 standalone-uikit--action-button-story-MuiButton-outlined standalone-uikit--action-button-story-WithStyles(ForwardRef(Button))-outlined-2 standalone-uikit--action-button-story-WithStyles(ForwardRef(Button))-outlined-5 standalone-uikit--action-button-story-MuiButton-fullWidth"
@@ -4239,6 +4356,164 @@ exports[`Storyshots Standalone/UIKit ActionButton 1`] = `
     Example Text
   </span>
 </button>
+`;
+
+exports[`Storyshots Standalone/UIKit FormButtons 1`] = `
+<div
+  className="standalone-uikit--form-buttons-story-makeStyles-outlined-1"
+>
+  <span
+    className="standalone-uikit--form-buttons-story-makeStyles-buttonContainer-2"
+  >
+    <button
+      className="standalone-uikit--form-buttons-story-MuiButtonBase-root standalone-uikit--form-buttons-story-MuiButton-root standalone-uikit--form-buttons-story-WithStyles(ForwardRef(Button))-root-3 standalone-uikit--form-buttons-story-WithStyles(ForwardRef(Button))-root-6 standalone-uikit--form-buttons-story-MuiButton-outlined standalone-uikit--form-buttons-story-WithStyles(ForwardRef(Button))-outlined-4 standalone-uikit--form-buttons-story-WithStyles(ForwardRef(Button))-outlined-7"
+      disabled={false}
+      onBlur={[Function]}
+      onClick={[Function]}
+      onDragLeave={[Function]}
+      onFocus={[Function]}
+      onKeyDown={[Function]}
+      onKeyUp={[Function]}
+      onMouseDown={[Function]}
+      onMouseLeave={[Function]}
+      onMouseUp={[Function]}
+      onTouchEnd={[Function]}
+      onTouchMove={[Function]}
+      onTouchStart={[Function]}
+      small={false}
+      tabIndex={0}
+      type="button"
+    >
+      <span
+        className="standalone-uikit--form-buttons-story-MuiButton-label standalone-uikit--form-buttons-story-WithStyles(ForwardRef(Button))-label-5"
+      >
+         
+        Save
+      </span>
+    </button>
+  </span>
+  <span
+    className="standalone-uikit--form-buttons-story-makeStyles-buttonContainer-2"
+  >
+    <button
+      className="standalone-uikit--form-buttons-story-MuiButtonBase-root standalone-uikit--form-buttons-story-MuiButton-root standalone-uikit--form-buttons-story-WithStyles(ForwardRef(Button))-root-3 standalone-uikit--form-buttons-story-WithStyles(ForwardRef(Button))-root-8 standalone-uikit--form-buttons-story-MuiButton-outlined standalone-uikit--form-buttons-story-WithStyles(ForwardRef(Button))-outlined-4 standalone-uikit--form-buttons-story-WithStyles(ForwardRef(Button))-outlined-9 Mui-disabled Mui-disabled"
+      disabled={true}
+      onBlur={[Function]}
+      onClick={[Function]}
+      onDragLeave={[Function]}
+      onFocus={[Function]}
+      onKeyDown={[Function]}
+      onKeyUp={[Function]}
+      onMouseDown={[Function]}
+      onMouseLeave={[Function]}
+      onMouseUp={[Function]}
+      onTouchEnd={[Function]}
+      onTouchMove={[Function]}
+      onTouchStart={[Function]}
+      small={false}
+      tabIndex={-1}
+      type="button"
+    >
+      <span
+        className="standalone-uikit--form-buttons-story-MuiButton-label standalone-uikit--form-buttons-story-WithStyles(ForwardRef(Button))-label-5"
+      >
+         
+        Cancel
+      </span>
+    </button>
+  </span>
+</div>
+`;
+
+exports[`Storyshots Standalone/UIKit IconButtonWithText 1`] = `
+<div
+  className="standalone-uikit--icon-button-with-text-story-MuiGrid-root standalone-uikit--icon-button-with-text-story-MuiGrid-container"
+>
+  <div
+    className="standalone-uikit--icon-button-with-text-story-MuiGrid-root standalone-uikit--icon-button-with-text-story-MuiGrid-item"
+  >
+    Precontent
+  </div>
+  <div
+    className="standalone-uikit--icon-button-with-text-story-MuiGrid-root standalone-uikit--icon-button-with-text-story-MuiGrid-item"
+  >
+    <div
+      className="standalone-uikit--icon-button-with-text-story-MuiGrid-root standalone-uikit--icon-button-with-text-story-MuiGrid-container standalone-uikit--icon-button-with-text-story-MuiGrid-direction-xs-column standalone-uikit--icon-button-with-text-story-MuiGrid-align-items-xs-center"
+    >
+      <div
+        className="standalone-uikit--icon-button-with-text-story-MuiGrid-root standalone-uikit--icon-button-with-text-story-MuiGrid-item"
+      >
+        <button
+          className="standalone-uikit--icon-button-with-text-story-MuiButtonBase-root standalone-uikit--icon-button-with-text-story-MuiIconButton-root standalone-uikit--icon-button-with-text-story-MuiIconButton-colorPrimary"
+          disabled={false}
+          onBlur={[Function]}
+          onClick={[Function]}
+          onDragLeave={[Function]}
+          onFocus={[Function]}
+          onKeyDown={[Function]}
+          onKeyUp={[Function]}
+          onMouseDown={[Function]}
+          onMouseLeave={[Function]}
+          onMouseUp={[Function]}
+          onTouchEnd={[Function]}
+          onTouchMove={[Function]}
+          onTouchStart={[Function]}
+          tabIndex={0}
+          type="button"
+        >
+          <span
+            className="standalone-uikit--icon-button-with-text-story-MuiIconButton-label"
+          >
+            <svg
+              aria-hidden={true}
+              className="standalone-uikit--icon-button-with-text-story-MuiSvgIcon-root"
+              focusable="false"
+              viewBox="0 0 512 512"
+            >
+              <g>
+                <g>
+                  <polygon
+                    points="0,0 0,128 201.143,329.143 201.143,512 310.857,475.429 310.857,329.143 512,128 512,0 		"
+                  />
+                </g>
+              </g>
+              <g />
+              <g />
+              <g />
+              <g />
+              <g />
+              <g />
+              <g />
+              <g />
+              <g />
+              <g />
+              <g />
+              <g />
+              <g />
+              <g />
+              <g />
+            </svg>
+          </span>
+        </button>
+      </div>
+      <div
+        className="standalone-uikit--icon-button-with-text-story-MuiGrid-root standalone-uikit--icon-button-with-text-story-MuiGrid-item"
+      >
+        <span
+          className="standalone-uikit--icon-button-with-text-story-MuiTypography-root standalone-uikit--icon-button-with-text-story-MuiTypography-caption standalone-uikit--icon-button-with-text-story-MuiTypography-colorTextSecondary"
+          onClick={[Function]}
+        >
+          Filter
+        </span>
+      </div>
+    </div>
+  </div>
+  <div
+    className="standalone-uikit--icon-button-with-text-story-MuiGrid-root standalone-uikit--icon-button-with-text-story-MuiGrid-item"
+  >
+    Post content
+  </div>
+</div>
 `;
 
 exports[`Storyshots Standalone/UIKit SubActionButton 1`] = `
