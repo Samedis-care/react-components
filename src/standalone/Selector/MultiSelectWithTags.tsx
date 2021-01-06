@@ -13,7 +13,7 @@ import { Search as SearchIcon, Info as InfoIcon } from "@material-ui/icons";
 import { RemoveIcon } from "../../standalone";
 import { Autocomplete } from "@material-ui/lab";
 import { GenericWithStyles } from "../../utils";
-import { uniqueArray } from "../../utils/arrayFunctions";
+import { uniqueArray } from "../../utils";
 
 export interface MultiSelectData extends SelectorData {
 	/**
