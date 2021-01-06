@@ -5,6 +5,7 @@ export default Settings;
 
 export * from "./ActionButton.story";
 export * from "./Checkbox.story";
+export * from "./ComponentWithLabel.story";
 export * from "./SubActionButton.story";
 export * from "./FormButtons.story";
 export * from "./TextFieldWithHelp.story";

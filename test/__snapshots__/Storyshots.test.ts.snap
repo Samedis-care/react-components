@@ -4277,7 +4277,7 @@ Array [
     >
       <span
         aria-disabled={false}
-        className="standalone-uikit--checkbox-story-MuiButtonBase-root standalone-uikit--checkbox-story-MuiIconButton-root standalone-uikit--checkbox-story-PrivateSwitchBase-root-4 standalone-uikit--checkbox-story-MuiCheckbox-root standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-root-1 standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-root-3 standalone-uikit--checkbox-story-MuiCheckbox-colorPrimary standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-colorPrimary-2 standalone-uikit--checkbox-story-PrivateSwitchBase-checked-5 Mui-checked standalone-uikit--checkbox-story-MuiIconButton-colorPrimary"
+        className="standalone-uikit--checkbox-story-MuiButtonBase-root standalone-uikit--checkbox-story-MuiIconButton-root standalone-uikit--checkbox-story-PrivateSwitchBase-root-5 standalone-uikit--checkbox-story-MuiCheckbox-root standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-root-2 standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-root-4 standalone-uikit--checkbox-story-MuiCheckbox-colorPrimary standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-colorPrimary-3 standalone-uikit--checkbox-story-PrivateSwitchBase-checked-6 Mui-checked standalone-uikit--checkbox-story-MuiIconButton-colorPrimary"
         onBlur={[Function]}
         onDragLeave={[Function]}
         onFocus={[Function]}
@@ -4296,7 +4296,7 @@ Array [
         >
           <input
             checked={true}
-            className="standalone-uikit--checkbox-story-PrivateSwitchBase-input-7"
+            className="standalone-uikit--checkbox-story-PrivateSwitchBase-input-8"
             data-indeterminate={false}
             disabled={false}
             name="checkedX"
@@ -4319,14 +4319,11 @@ Array [
         className="standalone-uikit--checkbox-story-MuiTypography-root standalone-uikit--checkbox-story-MuiFormControlLabel-label standalone-uikit--checkbox-story-MuiTypography-body1"
       >
         <span
-          className="standalone-uikit--checkbox-story-MuiTypography-root standalone-uikit--checkbox-story-MuiTypography-caption standalone-uikit--checkbox-story-MuiTypography-alignCenter standalone-uikit--checkbox-story-MuiTypography-displayBlock"
+          className="standalone-uikit--checkbox-story-MuiTypography-root standalone-uikit--checkbox-story-makeStyles-label-1 standalone-uikit--checkbox-story-MuiTypography-caption standalone-uikit--checkbox-story-MuiTypography-alignCenter standalone-uikit--checkbox-story-MuiTypography-displayBlock"
         >
           Checkbox X
-        </span>
-        <span
-          className="standalone-uikit--checkbox-story-MuiTypography-root standalone-uikit--checkbox-story-MuiTypography-caption standalone-uikit--checkbox-story-MuiTypography-alignCenter standalone-uikit--checkbox-story-MuiTypography-displayBlock"
-        >
-          Alternative Icons
+size medium
+Alternative Icons
         </span>
       </span>
     </label>
@@ -4339,7 +4336,7 @@ Array [
     >
       <span
         aria-disabled={false}
-        className="standalone-uikit--checkbox-story-MuiButtonBase-root standalone-uikit--checkbox-story-MuiIconButton-root standalone-uikit--checkbox-story-PrivateSwitchBase-root-4 standalone-uikit--checkbox-story-MuiCheckbox-root standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-root-1 standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-root-8 standalone-uikit--checkbox-story-MuiCheckbox-colorPrimary standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-colorPrimary-2 standalone-uikit--checkbox-story-PrivateSwitchBase-checked-5 Mui-checked standalone-uikit--checkbox-story-MuiIconButton-colorPrimary"
+        className="standalone-uikit--checkbox-story-MuiButtonBase-root standalone-uikit--checkbox-story-MuiIconButton-root standalone-uikit--checkbox-story-PrivateSwitchBase-root-5 standalone-uikit--checkbox-story-MuiCheckbox-root standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-root-2 standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-root-9 standalone-uikit--checkbox-story-MuiCheckbox-colorPrimary standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-colorPrimary-3 standalone-uikit--checkbox-story-PrivateSwitchBase-checked-6 Mui-checked standalone-uikit--checkbox-story-MuiIconButton-colorPrimary"
         onBlur={[Function]}
         onDragLeave={[Function]}
         onFocus={[Function]}
@@ -4358,7 +4355,7 @@ Array [
         >
           <input
             checked={true}
-            className="standalone-uikit--checkbox-story-PrivateSwitchBase-input-7"
+            className="standalone-uikit--checkbox-story-PrivateSwitchBase-input-8"
             data-indeterminate={false}
             disabled={false}
             name="checkedA"
@@ -4384,7 +4381,11 @@ Array [
       <span
         className="standalone-uikit--checkbox-story-MuiTypography-root standalone-uikit--checkbox-story-MuiFormControlLabel-label standalone-uikit--checkbox-story-MuiTypography-body1"
       >
-        Checkbox A (size small)
+        <span
+          className="standalone-uikit--checkbox-story-MuiTypography-root standalone-uikit--checkbox-story-makeStyles-label-1 standalone-uikit--checkbox-story-MuiTypography-caption standalone-uikit--checkbox-story-MuiTypography-alignLeft standalone-uikit--checkbox-story-MuiTypography-displayBlock"
+        >
+          Checkbox A (size small)
+        </span>
       </span>
     </label>
     <label
@@ -4392,7 +4393,7 @@ Array [
     >
       <span
         aria-disabled={false}
-        className="standalone-uikit--checkbox-story-MuiButtonBase-root standalone-uikit--checkbox-story-MuiIconButton-root standalone-uikit--checkbox-story-PrivateSwitchBase-root-4 standalone-uikit--checkbox-story-MuiCheckbox-root standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-root-1 standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-root-9 standalone-uikit--checkbox-story-MuiCheckbox-colorPrimary standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-colorPrimary-2 standalone-uikit--checkbox-story-MuiIconButton-colorPrimary"
+        className="standalone-uikit--checkbox-story-MuiButtonBase-root standalone-uikit--checkbox-story-MuiIconButton-root standalone-uikit--checkbox-story-PrivateSwitchBase-root-5 standalone-uikit--checkbox-story-MuiCheckbox-root standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-root-2 standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-root-10 standalone-uikit--checkbox-story-MuiCheckbox-colorPrimary standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-colorPrimary-3 standalone-uikit--checkbox-story-MuiIconButton-colorPrimary"
         onBlur={[Function]}
         onDragLeave={[Function]}
         onFocus={[Function]}
@@ -4411,7 +4412,7 @@ Array [
         >
           <input
             checked={false}
-            className="standalone-uikit--checkbox-story-PrivateSwitchBase-input-7"
+            className="standalone-uikit--checkbox-story-PrivateSwitchBase-input-8"
             data-indeterminate={false}
             disabled={false}
             name="checkedB"
@@ -4438,14 +4439,11 @@ Array [
         className="standalone-uikit--checkbox-story-MuiTypography-root standalone-uikit--checkbox-story-MuiFormControlLabel-label standalone-uikit--checkbox-story-MuiTypography-body1"
       >
         <span
-          className="standalone-uikit--checkbox-story-MuiTypography-root standalone-uikit--checkbox-story-MuiTypography-caption standalone-uikit--checkbox-story-MuiTypography-alignRight standalone-uikit--checkbox-story-MuiTypography-displayBlock"
+          className="standalone-uikit--checkbox-story-MuiTypography-root standalone-uikit--checkbox-story-makeStyles-label-1 standalone-uikit--checkbox-story-MuiTypography-caption standalone-uikit--checkbox-story-MuiTypography-alignRight standalone-uikit--checkbox-story-MuiTypography-displayBlock"
         >
           Checkbox B
-        </span>
-        <span
-          className="standalone-uikit--checkbox-story-MuiTypography-root standalone-uikit--checkbox-story-MuiTypography-caption standalone-uikit--checkbox-story-MuiTypography-alignRight standalone-uikit--checkbox-story-MuiTypography-displayBlock"
-        >
-          Right (start) aligned label
+size medium
+Right (start) aligned label
         </span>
       </span>
     </label>
@@ -4458,7 +4456,7 @@ Array [
     >
       <span
         aria-disabled={false}
-        className="standalone-uikit--checkbox-story-MuiButtonBase-root standalone-uikit--checkbox-story-MuiIconButton-root standalone-uikit--checkbox-story-PrivateSwitchBase-root-4 standalone-uikit--checkbox-story-MuiCheckbox-root standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-root-1 standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-root-10 standalone-uikit--checkbox-story-MuiCheckbox-colorPrimary standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-colorPrimary-2 standalone-uikit--checkbox-story-MuiIconButton-colorPrimary"
+        className="standalone-uikit--checkbox-story-MuiButtonBase-root standalone-uikit--checkbox-story-MuiIconButton-root standalone-uikit--checkbox-story-PrivateSwitchBase-root-5 standalone-uikit--checkbox-story-MuiCheckbox-root standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-root-2 standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-root-11 standalone-uikit--checkbox-story-MuiCheckbox-colorPrimary standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-colorPrimary-3 standalone-uikit--checkbox-story-MuiIconButton-colorPrimary"
         onBlur={[Function]}
         onDragLeave={[Function]}
         onFocus={[Function]}
@@ -4477,7 +4475,7 @@ Array [
         >
           <input
             checked={false}
-            className="standalone-uikit--checkbox-story-PrivateSwitchBase-input-7"
+            className="standalone-uikit--checkbox-story-PrivateSwitchBase-input-8"
             data-indeterminate={false}
             disabled={false}
             name="checkedC"
@@ -4503,7 +4501,11 @@ Array [
       <span
         className="standalone-uikit--checkbox-story-MuiTypography-root standalone-uikit--checkbox-story-MuiFormControlLabel-label standalone-uikit--checkbox-story-MuiTypography-body1"
       >
-        Checkbox C (size small) (top label)
+        <span
+          className="standalone-uikit--checkbox-story-MuiTypography-root standalone-uikit--checkbox-story-makeStyles-label-1 standalone-uikit--checkbox-story-MuiTypography-caption standalone-uikit--checkbox-story-MuiTypography-alignCenter standalone-uikit--checkbox-story-MuiTypography-displayBlock"
+        >
+          Checkbox C (size small) (top label)
+        </span>
       </span>
     </label>
     <label
@@ -4511,7 +4513,7 @@ Array [
     >
       <span
         aria-disabled={false}
-        className="standalone-uikit--checkbox-story-MuiButtonBase-root standalone-uikit--checkbox-story-MuiIconButton-root standalone-uikit--checkbox-story-PrivateSwitchBase-root-4 standalone-uikit--checkbox-story-MuiCheckbox-root standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-root-1 standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-root-11 standalone-uikit--checkbox-story-MuiCheckbox-colorPrimary standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-colorPrimary-2 standalone-uikit--checkbox-story-PrivateSwitchBase-checked-5 Mui-checked standalone-uikit--checkbox-story-MuiIconButton-colorPrimary"
+        className="standalone-uikit--checkbox-story-MuiButtonBase-root standalone-uikit--checkbox-story-MuiIconButton-root standalone-uikit--checkbox-story-PrivateSwitchBase-root-5 standalone-uikit--checkbox-story-MuiCheckbox-root standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-root-2 standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-root-12 standalone-uikit--checkbox-story-MuiCheckbox-colorPrimary standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-colorPrimary-3 standalone-uikit--checkbox-story-PrivateSwitchBase-checked-6 Mui-checked standalone-uikit--checkbox-story-MuiIconButton-colorPrimary"
         onBlur={[Function]}
         onDragLeave={[Function]}
         onFocus={[Function]}
@@ -4530,7 +4532,7 @@ Array [
         >
           <input
             checked={true}
-            className="standalone-uikit--checkbox-story-PrivateSwitchBase-input-7"
+            className="standalone-uikit--checkbox-story-PrivateSwitchBase-input-8"
             data-indeterminate={false}
             disabled={false}
             name="checkedD"
@@ -4557,24 +4559,250 @@ Array [
         className="standalone-uikit--checkbox-story-MuiTypography-root standalone-uikit--checkbox-story-MuiFormControlLabel-label standalone-uikit--checkbox-story-MuiTypography-body1"
       >
         <span
-          className="standalone-uikit--checkbox-story-MuiTypography-root standalone-uikit--checkbox-story-MuiTypography-caption standalone-uikit--checkbox-story-MuiTypography-alignCenter standalone-uikit--checkbox-story-MuiTypography-displayBlock"
+          className="standalone-uikit--checkbox-story-MuiTypography-root standalone-uikit--checkbox-story-makeStyles-label-1 standalone-uikit--checkbox-story-MuiTypography-caption standalone-uikit--checkbox-story-MuiTypography-alignCenter standalone-uikit--checkbox-story-MuiTypography-displayBlock"
         >
           Checkbox D
-        </span>
-        <span
-          className="standalone-uikit--checkbox-story-MuiTypography-root standalone-uikit--checkbox-story-MuiTypography-caption standalone-uikit--checkbox-story-MuiTypography-alignCenter standalone-uikit--checkbox-story-MuiTypography-displayBlock"
-        >
-          Formatted
-        </span>
-        <span
-          className="standalone-uikit--checkbox-story-MuiTypography-root standalone-uikit--checkbox-story-MuiTypography-caption standalone-uikit--checkbox-story-MuiTypography-alignCenter standalone-uikit--checkbox-story-MuiTypography-displayBlock"
-        >
-          Bottom Label
+size medium
+Bottom Label
         </span>
       </span>
     </label>
   </div>,
 ]
+`;
+
+exports[`Storyshots Standalone/UIKit ComponentWithLabel 1`] = `
+<div
+  className="standalone-uikit--component-with-label-story-MuiGrid-root standalone-uikit--component-with-label-story-MuiGrid-container standalone-uikit--component-with-label-story-MuiGrid-spacing-xs-2 standalone-uikit--component-with-label-story-MuiGrid-align-items-xs-center standalone-uikit--component-with-label-story-MuiGrid-justify-xs-center"
+>
+  <div
+    className="standalone-uikit--component-with-label-story-MuiGrid-root standalone-uikit--component-with-label-story-MuiGrid-item"
+  >
+    <label
+      className="standalone-uikit--component-with-label-story-MuiFormControlLabel-root standalone-uikit--component-with-label-story-MuiFormControlLabel-labelPlacementStart Mui-disabled"
+    >
+      <button
+        className="standalone-uikit--component-with-label-story-MuiButtonBase-root standalone-uikit--component-with-label-story-MuiIconButton-root standalone-uikit--component-with-label-story-MuiIconButton-colorPrimary Mui-disabled Mui-disabled"
+        disabled={true}
+        onBlur={[Function]}
+        onClick={[Function]}
+        onDragLeave={[Function]}
+        onFocus={[Function]}
+        onKeyDown={[Function]}
+        onKeyUp={[Function]}
+        onMouseDown={[Function]}
+        onMouseLeave={[Function]}
+        onMouseUp={[Function]}
+        onTouchEnd={[Function]}
+        onTouchMove={[Function]}
+        onTouchStart={[Function]}
+        tabIndex={-1}
+        type="button"
+      >
+        <span
+          className="standalone-uikit--component-with-label-story-MuiIconButton-label"
+        >
+          <svg
+            aria-hidden={true}
+            className="standalone-uikit--component-with-label-story-MuiSvgIcon-root"
+            focusable="false"
+            viewBox="0 0 24 24"
+          >
+            <path
+              d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"
+            />
+          </svg>
+        </span>
+      </button>
+      <span
+        className="standalone-uikit--component-with-label-story-MuiTypography-root standalone-uikit--component-with-label-story-MuiFormControlLabel-label Mui-disabled standalone-uikit--component-with-label-story-MuiTypography-body1"
+      >
+        <span
+          className="standalone-uikit--component-with-label-story-MuiTypography-root standalone-uikit--component-with-label-story-makeStyles-label-1 standalone-uikit--component-with-label-story-MuiTypography-caption standalone-uikit--component-with-label-story-MuiTypography-alignRight standalone-uikit--component-with-label-story-MuiTypography-displayBlock"
+        >
+          I am a label
+at the start
+with as many
+lines to display
+as you want
+and even
+some more
+set it to
+disabled if needed
+        </span>
+      </span>
+    </label>
+  </div>
+  <div
+    className="standalone-uikit--component-with-label-story-MuiGrid-root standalone-uikit--component-with-label-story-MuiGrid-item"
+  >
+    <div
+      className="standalone-uikit--component-with-label-story-MuiGrid-root standalone-uikit--component-with-label-story-MuiGrid-container standalone-uikit--component-with-label-story-MuiGrid-direction-xs-column standalone-uikit--component-with-label-story-MuiGrid-align-items-xs-center"
+    >
+      <div
+        className="standalone-uikit--component-with-label-story-MuiGrid-root standalone-uikit--component-with-label-story-MuiGrid-item"
+      >
+        <label
+          className="standalone-uikit--component-with-label-story-MuiFormControlLabel-root standalone-uikit--component-with-label-story-MuiFormControlLabel-labelPlacementTop"
+        >
+          <button
+            className="standalone-uikit--component-with-label-story-MuiButtonBase-root standalone-uikit--component-with-label-story-MuiIconButton-root standalone-uikit--component-with-label-story-MuiIconButton-colorSecondary"
+            disabled={false}
+            onBlur={[Function]}
+            onClick={[Function]}
+            onDragLeave={[Function]}
+            onFocus={[Function]}
+            onKeyDown={[Function]}
+            onKeyUp={[Function]}
+            onMouseDown={[Function]}
+            onMouseLeave={[Function]}
+            onMouseUp={[Function]}
+            onTouchEnd={[Function]}
+            onTouchMove={[Function]}
+            onTouchStart={[Function]}
+            tabIndex={0}
+            type="button"
+          >
+            <span
+              className="standalone-uikit--component-with-label-story-MuiIconButton-label"
+            >
+              <svg
+                aria-hidden={true}
+                className="standalone-uikit--component-with-label-story-MuiSvgIcon-root"
+                focusable="false"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8-8 8z"
+                />
+              </svg>
+            </span>
+          </button>
+          <span
+            className="standalone-uikit--component-with-label-story-MuiTypography-root standalone-uikit--component-with-label-story-MuiFormControlLabel-label standalone-uikit--component-with-label-story-MuiTypography-body1"
+          >
+            <span
+              className="standalone-uikit--component-with-label-story-MuiTypography-root standalone-uikit--component-with-label-story-makeStyles-label-1 standalone-uikit--component-with-label-story-MuiTypography-caption standalone-uikit--component-with-label-story-MuiTypography-alignCenter standalone-uikit--component-with-label-story-MuiTypography-displayBlock"
+            >
+              I am a label
+at the top
+            </span>
+          </span>
+        </label>
+      </div>
+      <div
+        className="standalone-uikit--component-with-label-story-MuiGrid-root standalone-uikit--component-with-label-story-MuiGrid-item"
+      >
+        <label
+          className="standalone-uikit--component-with-label-story-MuiFormControlLabel-root standalone-uikit--component-with-label-story-MuiFormControlLabel-labelPlacementBottom"
+        >
+          <button
+            className="standalone-uikit--component-with-label-story-MuiButtonBase-root standalone-uikit--component-with-label-story-MuiIconButton-root standalone-uikit--component-with-label-story-MuiIconButton-colorSecondary"
+            disabled={false}
+            onBlur={[Function]}
+            onClick={[Function]}
+            onDragLeave={[Function]}
+            onFocus={[Function]}
+            onKeyDown={[Function]}
+            onKeyUp={[Function]}
+            onMouseDown={[Function]}
+            onMouseLeave={[Function]}
+            onMouseUp={[Function]}
+            onTouchEnd={[Function]}
+            onTouchMove={[Function]}
+            onTouchStart={[Function]}
+            tabIndex={0}
+            type="button"
+          >
+            <span
+              className="standalone-uikit--component-with-label-story-MuiIconButton-label"
+            >
+              <svg
+                aria-hidden={true}
+                className="standalone-uikit--component-with-label-story-MuiSvgIcon-root"
+                focusable="false"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
+                />
+              </svg>
+            </span>
+          </button>
+          <span
+            className="standalone-uikit--component-with-label-story-MuiTypography-root standalone-uikit--component-with-label-story-MuiFormControlLabel-label standalone-uikit--component-with-label-story-MuiTypography-body1"
+          >
+            <span
+              className="standalone-uikit--component-with-label-story-MuiTypography-root standalone-uikit--component-with-label-story-makeStyles-label-1 standalone-uikit--component-with-label-story-MuiTypography-caption standalone-uikit--component-with-label-story-MuiTypography-alignCenter standalone-uikit--component-with-label-story-MuiTypography-displayBlock"
+            >
+              I am a label
+at the bottom
+            </span>
+          </span>
+        </label>
+      </div>
+    </div>
+  </div>
+  <br />
+  <div
+    className="standalone-uikit--component-with-label-story-MuiGrid-root standalone-uikit--component-with-label-story-MuiGrid-item"
+  >
+    <label
+      className="standalone-uikit--component-with-label-story-MuiFormControlLabel-root"
+    >
+      <button
+        className="standalone-uikit--component-with-label-story-MuiButtonBase-root standalone-uikit--component-with-label-story-MuiIconButton-root standalone-uikit--component-with-label-story-MuiIconButton-colorPrimary"
+        disabled={false}
+        onBlur={[Function]}
+        onClick={[Function]}
+        onDragLeave={[Function]}
+        onFocus={[Function]}
+        onKeyDown={[Function]}
+        onKeyUp={[Function]}
+        onMouseDown={[Function]}
+        onMouseLeave={[Function]}
+        onMouseUp={[Function]}
+        onTouchEnd={[Function]}
+        onTouchMove={[Function]}
+        onTouchStart={[Function]}
+        tabIndex={0}
+        type="button"
+      >
+        <span
+          className="standalone-uikit--component-with-label-story-MuiIconButton-label"
+        >
+          <svg
+            aria-hidden={true}
+            className="standalone-uikit--component-with-label-story-MuiSvgIcon-root"
+            focusable="false"
+            viewBox="0 0 24 24"
+          >
+            <path
+              d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"
+            />
+          </svg>
+        </span>
+      </button>
+      <span
+        className="standalone-uikit--component-with-label-story-MuiTypography-root standalone-uikit--component-with-label-story-MuiFormControlLabel-label standalone-uikit--component-with-label-story-MuiTypography-body1"
+      >
+        <span
+          className="standalone-uikit--component-with-label-story-MuiTypography-root standalone-uikit--component-with-label-story-makeStyles-label-1 standalone-uikit--component-with-label-story-MuiTypography-caption standalone-uikit--component-with-label-story-MuiTypography-alignLeft standalone-uikit--component-with-label-story-MuiTypography-displayBlock"
+        >
+          I am a label
+at the end.
+Clicking the label
+will forward the
+click to
+the control
+which can be
+any Button
+or Form element
+        </span>
+      </span>
+    </label>
+  </div>
+</div>
 `;
 
 exports[`Storyshots Standalone/UIKit FormButtons 1`] = `
