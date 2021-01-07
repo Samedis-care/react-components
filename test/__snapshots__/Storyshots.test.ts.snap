@@ -3614,7 +3614,7 @@ exports[`Storyshots Standalone/Schedule Weekly 1`] = `
       >
         Today
          (
-        24.11.2020
+        24/11/2020
         )
       </span>
     </button>
@@ -4060,9 +4060,11 @@ exports[`Storyshots Standalone/Selector MultiSelectWithCheckBox 1`] = `
 
 exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
 <div>
-  <h3>
+  <p
+    className="standalone-selector--selector-multi-with-tags-MuiTypography-root standalone-selector--selector-multi-with-tags-MuiTypography-body1"
+  >
     Multi Selector
-  </h3>
+  </p>
   <div
     className=" css-2b097c-container"
     onKeyDown={[Function]}
@@ -4195,8 +4197,8 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
       <label
         className="standalone-selector--selector-multi-with-tags-MuiFormLabel-root standalone-selector--selector-multi-with-tags-MuiInputLabel-root standalone-selector--selector-multi-with-tags-MuiInputLabel-formControl standalone-selector--selector-multi-with-tags-MuiInputLabel-animated standalone-selector--selector-multi-with-tags-MuiInputLabel-shrink"
         data-shrink={true}
-        htmlFor="cc-search-input"
-        id="cc-search-input-label"
+        htmlFor="mui-44710"
+        id="mui-44710-label"
       >
         Search
       </label>
@@ -4224,7 +4226,7 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
           autoFocus={false}
           className="standalone-selector--selector-multi-with-tags-MuiInputBase-input standalone-selector--selector-multi-with-tags-MuiInput-input standalone-selector--selector-multi-with-tags-MuiAutocomplete-input standalone-selector--selector-multi-with-tags-MuiAutocomplete-inputFocused standalone-selector--selector-multi-with-tags-MuiInputBase-inputAdornedStart standalone-selector--selector-multi-with-tags-MuiInputBase-inputAdornedEnd standalone-selector--selector-multi-with-tags-MuiInputBase-inputTypeSearch standalone-selector--selector-multi-with-tags-MuiInput-inputTypeSearch"
           disabled={false}
-          id="cc-search-input"
+          id="mui-44710"
           onAnimationStart={[Function]}
           onBlur={[Function]}
           onChange={[Function]}
@@ -4400,11 +4402,13 @@ exports[`Storyshots Standalone/SignaturePad SignaturePad 1`] = `
       <svg
         aria-hidden={true}
         className="standalone-signaturepad--signature-pad-story-MuiSvgIcon-root standalone-signaturepad--signature-pad-story-MuiSvgIcon-colorDisabled"
+        fill="#1d1d1b"
         focusable="false"
-        viewBox="0 0 24 24"
+        viewBox="0 0 36 36"
       >
         <path
-          d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34a.9959.9959 0 00-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"
+          className="cls-1"
+          d="M35.16,6.26a52.79,52.79,0,0,1-3,10.26l-7.45,3.73h5.7a33.84,33.84,0,0,1-2.11,3.3L18,27h7.1a17,17,0,0,1-9.35,4,78.53,78.53,0,0,1-8.86.49l-4,4A1.65,1.65,0,0,1,1.69,36a1.67,1.67,0,0,1-1.2-.49A1.63,1.63,0,0,1,0,34.31a1.59,1.59,0,0,1,.49-1.19L18.77,14.91a1.28,1.28,0,0,0,.29-.81,1.17,1.17,0,0,0-.32-.81,1,1,0,0,0-.77-.35,1.11,1.11,0,0,0-.81.35L4.57,25.88q.13-3.16.42-5.63.78-7.87,8-13A38.82,38.82,0,0,1,26.72,1.48,52.78,52.78,0,0,1,36,0,56.86,56.86,0,0,1,35.16,6.26Z"
         />
       </svg>
       <span
@@ -5006,6 +5010,228 @@ or Form element
 </div>
 `;
 
+exports[`Storyshots Standalone/UIKit CurrencyInput 1`] = `
+<div>
+  <div
+    className="standalone-uikit--currency-input-story-MuiFormControl-root standalone-uikit--currency-input-story-MuiTextField-root standalone-uikit--currency-input-story-MuiFormControl-fullWidth"
+  >
+    <label
+      className="standalone-uikit--currency-input-story-MuiFormLabel-root standalone-uikit--currency-input-story-MuiInputLabel-root standalone-uikit--currency-input-story-MuiInputLabel-formControl standalone-uikit--currency-input-story-MuiInputLabel-animated standalone-uikit--currency-input-story-MuiInputLabel-shrink"
+      data-shrink={true}
+    >
+      Currency
+    </label>
+    <div
+      className="standalone-uikit--currency-input-story-MuiInputBase-root standalone-uikit--currency-input-story-MuiInput-root standalone-uikit--currency-input-story-makeStyles-root-1 standalone-uikit--currency-input-story-MuiInput-underline standalone-uikit--currency-input-story-MuiInputBase-fullWidth standalone-uikit--currency-input-story-MuiInput-fullWidth standalone-uikit--currency-input-story-MuiInputBase-formControl standalone-uikit--currency-input-story-MuiInput-formControl"
+      onClick={[Function]}
+    >
+      <input
+        aria-invalid={false}
+        autoFocus={true}
+        className="standalone-uikit--currency-input-story-MuiInputBase-input standalone-uikit--currency-input-story-MuiInput-input standalone-uikit--currency-input-story-makeStyles-input-2 standalone-uikit--currency-input-story-makeStyles-input-3"
+        disabled={false}
+        onAnimationStart={[Function]}
+        onBlur={[Function]}
+        onChange={[Function]}
+        onFocus={[Function]}
+        placeholder="Enter amount"
+        required={false}
+        type="text"
+        value=""
+      />
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Storyshots Standalone/UIKit DateInput 1`] = `
+<div
+  className="standalone-uikit--date-input-story-MuiFormControl-root standalone-uikit--date-input-story-MuiTextField-root standalone-uikit--date-input-story-MuiFormControl-fullWidth"
+  format="L"
+  onClick={[Function]}
+  onKeyDown={[Function]}
+>
+  <label
+    className="standalone-uikit--date-input-story-MuiFormLabel-root standalone-uikit--date-input-story-MuiInputLabel-root standalone-uikit--date-input-story-MuiInputLabel-formControl standalone-uikit--date-input-story-MuiInputLabel-animated standalone-uikit--date-input-story-MuiInputLabel-shrink"
+    data-shrink={true}
+  >
+    Date
+  </label>
+  <div
+    className="standalone-uikit--date-input-story-MuiInputBase-root standalone-uikit--date-input-story-MuiInput-root standalone-uikit--date-input-story-makeStyles-root-4 standalone-uikit--date-input-story-MuiInput-underline standalone-uikit--date-input-story-MuiInputBase-fullWidth standalone-uikit--date-input-story-MuiInput-fullWidth standalone-uikit--date-input-story-MuiInputBase-formControl standalone-uikit--date-input-story-MuiInput-formControl standalone-uikit--date-input-story-MuiInputBase-adornedEnd"
+    onClick={[Function]}
+  >
+    <input
+      aria-invalid={false}
+      autoFocus={false}
+      className="standalone-uikit--date-input-story-MuiInputBase-input standalone-uikit--date-input-story-MuiInput-input standalone-uikit--date-input-story-makeStyles-input-5 standalone-uikit--date-input-story-makeStyles-input-6 standalone-uikit--date-input-story-MuiInputBase-inputAdornedEnd"
+      disabled={false}
+      onAnimationStart={[Function]}
+      onBlur={[Function]}
+      onChange={[Function]}
+      onFocus={[Function]}
+      placeholder="Please Select Date"
+      readOnly={true}
+      required={false}
+      type="text"
+      value="11/24/2020"
+    />
+    <div
+      className="standalone-uikit--date-input-story-MuiInputAdornment-root standalone-uikit--date-input-story-MuiInputAdornment-positionEnd"
+    >
+      <button
+        className="standalone-uikit--date-input-story-MuiButtonBase-root standalone-uikit--date-input-story-MuiIconButton-root"
+        disabled={false}
+        onBlur={[Function]}
+        onDragLeave={[Function]}
+        onFocus={[Function]}
+        onKeyDown={[Function]}
+        onKeyUp={[Function]}
+        onMouseDown={[Function]}
+        onMouseLeave={[Function]}
+        onMouseUp={[Function]}
+        onTouchEnd={[Function]}
+        onTouchMove={[Function]}
+        onTouchStart={[Function]}
+        tabIndex={0}
+        type="button"
+      >
+        <span
+          className="standalone-uikit--date-input-story-MuiIconButton-label"
+        >
+          <svg
+            aria-hidden={true}
+            className="standalone-uikit--date-input-story-MuiSvgIcon-root standalone-uikit--date-input-story-MuiSvgIcon-colorDisabled"
+            focusable="false"
+            viewBox="0 0 24 24"
+          >
+            <path
+              d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"
+            />
+          </svg>
+        </span>
+        <span
+          className="standalone-uikit--date-input-story-MuiTouchRipple-root"
+        />
+      </button>
+    </div>
+    <svg
+      aria-describedby={null}
+      aria-hidden={true}
+      className="standalone-uikit--date-input-story-MuiSvgIcon-root standalone-uikit--date-input-story-MuiSvgIcon-colorDisabled"
+      focusable="false"
+      onBlur={[Function]}
+      onFocus={[Function]}
+      onMouseLeave={[Function]}
+      onMouseOver={[Function]}
+      onTouchEnd={[Function]}
+      onTouchStart={[Function]}
+      title={null}
+      viewBox="0 0 24 24"
+    >
+      <path
+        d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"
+      />
+    </svg>
+  </div>
+  
+</div>
+`;
+
+exports[`Storyshots Standalone/UIKit DateTimeInput 1`] = `
+<div
+  className="standalone-uikit--date-time-input-story-MuiFormControl-root standalone-uikit--date-time-input-story-MuiTextField-root standalone-uikit--date-time-input-story-MuiFormControl-fullWidth"
+  format="L hh:mm A"
+  onClick={[Function]}
+  onKeyDown={[Function]}
+>
+  <label
+    className="standalone-uikit--date-time-input-story-MuiFormLabel-root standalone-uikit--date-time-input-story-MuiInputLabel-root standalone-uikit--date-time-input-story-MuiInputLabel-formControl standalone-uikit--date-time-input-story-MuiInputLabel-animated standalone-uikit--date-time-input-story-MuiInputLabel-shrink"
+    data-shrink={true}
+  >
+    DateTime Field
+  </label>
+  <div
+    className="standalone-uikit--date-time-input-story-MuiInputBase-root standalone-uikit--date-time-input-story-MuiInput-root standalone-uikit--date-time-input-story-makeStyles-root-4 standalone-uikit--date-time-input-story-MuiInput-underline standalone-uikit--date-time-input-story-MuiInputBase-fullWidth standalone-uikit--date-time-input-story-MuiInput-fullWidth standalone-uikit--date-time-input-story-MuiInputBase-formControl standalone-uikit--date-time-input-story-MuiInput-formControl standalone-uikit--date-time-input-story-MuiInputBase-adornedEnd"
+    onClick={[Function]}
+  >
+    <input
+      aria-invalid={false}
+      autoFocus={false}
+      className="standalone-uikit--date-time-input-story-MuiInputBase-input standalone-uikit--date-time-input-story-MuiInput-input standalone-uikit--date-time-input-story-makeStyles-input-5 standalone-uikit--date-time-input-story-makeStyles-input-6 standalone-uikit--date-time-input-story-MuiInputBase-inputAdornedEnd"
+      disabled={false}
+      onAnimationStart={[Function]}
+      onBlur={[Function]}
+      onChange={[Function]}
+      onFocus={[Function]}
+      placeholder="Please Select Date & Time"
+      readOnly={true}
+      required={false}
+      type="text"
+      value="11/24/2020 05:30 PM"
+    />
+    <div
+      className="standalone-uikit--date-time-input-story-MuiInputAdornment-root standalone-uikit--date-time-input-story-MuiInputAdornment-positionEnd"
+    >
+      <button
+        className="standalone-uikit--date-time-input-story-MuiButtonBase-root standalone-uikit--date-time-input-story-MuiIconButton-root"
+        disabled={false}
+        onBlur={[Function]}
+        onDragLeave={[Function]}
+        onFocus={[Function]}
+        onKeyDown={[Function]}
+        onKeyUp={[Function]}
+        onMouseDown={[Function]}
+        onMouseLeave={[Function]}
+        onMouseUp={[Function]}
+        onTouchEnd={[Function]}
+        onTouchMove={[Function]}
+        onTouchStart={[Function]}
+        tabIndex={0}
+        type="button"
+      >
+        <span
+          className="standalone-uikit--date-time-input-story-MuiIconButton-label"
+        >
+          <svg
+            aria-hidden={true}
+            className="standalone-uikit--date-time-input-story-MuiSvgIcon-root standalone-uikit--date-time-input-story-MuiSvgIcon-colorDisabled"
+            focusable="false"
+            viewBox="0 0 24 24"
+          >
+            <path
+              d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"
+            />
+          </svg>
+        </span>
+        <span
+          className="standalone-uikit--date-time-input-story-MuiTouchRipple-root"
+        />
+      </button>
+    </div>
+    <svg
+      aria-describedby={null}
+      aria-hidden={true}
+      className="standalone-uikit--date-time-input-story-MuiSvgIcon-root standalone-uikit--date-time-input-story-MuiSvgIcon-colorDisabled"
+      focusable="false"
+      onBlur={[Function]}
+      onFocus={[Function]}
+      onMouseLeave={[Function]}
+      onMouseOver={[Function]}
+      onTouchEnd={[Function]}
+      onTouchStart={[Function]}
+      title={null}
+      viewBox="0 0 24 24"
+    >
+      <path
+        d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"
+      />
+    </svg>
+  </div>
+  
+</div>
+`;
+
 exports[`Storyshots Standalone/UIKit FormButtons 1`] = `
 <div
   className="standalone-uikit--form-buttons-story-makeStyles-outlined-1"
@@ -5160,6 +5386,126 @@ exports[`Storyshots Standalone/UIKit IconButtonWithText 1`] = `
     className="standalone-uikit--icon-button-with-text-story-MuiGrid-root standalone-uikit--icon-button-with-text-story-MuiGrid-item"
   >
     Post content
+  </div>
+</div>
+`;
+
+exports[`Storyshots Standalone/UIKit NumberDecimal 1`] = `
+<div>
+  <div
+    className="standalone-uikit--number-decimal-story-MuiFormControl-root standalone-uikit--number-decimal-story-MuiTextField-root standalone-uikit--number-decimal-story-MuiFormControl-fullWidth"
+  >
+    <label
+      className="standalone-uikit--number-decimal-story-MuiFormLabel-root standalone-uikit--number-decimal-story-MuiInputLabel-root standalone-uikit--number-decimal-story-MuiInputLabel-formControl standalone-uikit--number-decimal-story-MuiInputLabel-animated standalone-uikit--number-decimal-story-MuiInputLabel-shrink"
+      data-shrink={true}
+    >
+      Number Decimal Input
+    </label>
+    <div
+      className="standalone-uikit--number-decimal-story-MuiInputBase-root standalone-uikit--number-decimal-story-MuiInput-root standalone-uikit--number-decimal-story-makeStyles-root-1 standalone-uikit--number-decimal-story-MuiInput-underline standalone-uikit--number-decimal-story-MuiInputBase-fullWidth standalone-uikit--number-decimal-story-MuiInput-fullWidth standalone-uikit--number-decimal-story-MuiInputBase-formControl standalone-uikit--number-decimal-story-MuiInput-formControl"
+      onClick={[Function]}
+    >
+      <input
+        aria-invalid={false}
+        autoFocus={true}
+        className="standalone-uikit--number-decimal-story-MuiInputBase-input standalone-uikit--number-decimal-story-MuiInput-input standalone-uikit--number-decimal-story-makeStyles-input-2 standalone-uikit--number-decimal-story-makeStyles-input-3"
+        disabled={false}
+        onAnimationStart={[Function]}
+        onBlur={[Function]}
+        onChange={[Function]}
+        onFocus={[Function]}
+        placeholder="Enter decimal number"
+        required={false}
+        type="text"
+        value=""
+      />
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Storyshots Standalone/UIKit NumberInteger 1`] = `
+<div>
+  <div
+    className="standalone-uikit--number-integer-story-MuiFormControl-root standalone-uikit--number-integer-story-MuiTextField-root standalone-uikit--number-integer-story-MuiFormControl-fullWidth"
+  >
+    <label
+      className="standalone-uikit--number-integer-story-MuiFormLabel-root standalone-uikit--number-integer-story-MuiInputLabel-root standalone-uikit--number-integer-story-MuiInputLabel-formControl standalone-uikit--number-integer-story-MuiInputLabel-animated standalone-uikit--number-integer-story-MuiInputLabel-shrink"
+      data-shrink={true}
+    >
+      Number Integer Input
+    </label>
+    <div
+      className="standalone-uikit--number-integer-story-MuiInputBase-root standalone-uikit--number-integer-story-MuiInput-root standalone-uikit--number-integer-story-makeStyles-root-1 standalone-uikit--number-integer-story-MuiInput-underline standalone-uikit--number-integer-story-MuiInputBase-fullWidth standalone-uikit--number-integer-story-MuiInput-fullWidth standalone-uikit--number-integer-story-MuiInputBase-formControl standalone-uikit--number-integer-story-MuiInput-formControl"
+      onClick={[Function]}
+    >
+      <input
+        aria-invalid={false}
+        autoFocus={true}
+        className="standalone-uikit--number-integer-story-MuiInputBase-input standalone-uikit--number-integer-story-MuiInput-input standalone-uikit--number-integer-story-makeStyles-input-2 standalone-uikit--number-integer-story-makeStyles-input-3"
+        disabled={false}
+        onAnimationStart={[Function]}
+        onBlur={[Function]}
+        onChange={[Function]}
+        onFocus={[Function]}
+        placeholder="Enter integer number"
+        required={false}
+        type="text"
+        value=""
+      />
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Storyshots Standalone/UIKit PhoneNumberInput 1`] = `
+<div>
+  <div
+    className="standalone-uikit--phone-number-input-story-MuiFormControl-root standalone-uikit--phone-number-input-story-MuiTextField-root standalone-uikit--phone-number-input-story-MuiFormControl-fullWidth"
+  >
+    <label
+      className="standalone-uikit--phone-number-input-story-MuiFormLabel-root standalone-uikit--phone-number-input-story-MuiInputLabel-root standalone-uikit--phone-number-input-story-MuiInputLabel-formControl standalone-uikit--phone-number-input-story-MuiInputLabel-animated standalone-uikit--phone-number-input-story-MuiInputLabel-shrink"
+      data-shrink={true}
+    >
+      Phone
+    </label>
+    <div
+      className="standalone-uikit--phone-number-input-story-MuiInputBase-root standalone-uikit--phone-number-input-story-MuiInput-root standalone-uikit--phone-number-input-story-makeStyles-root-4 standalone-uikit--phone-number-input-story-MuiInput-underline standalone-uikit--phone-number-input-story-MuiInputBase-fullWidth standalone-uikit--phone-number-input-story-MuiInput-fullWidth standalone-uikit--phone-number-input-story-MuiInputBase-formControl standalone-uikit--phone-number-input-story-MuiInput-formControl standalone-uikit--phone-number-input-story-MuiInputBase-adornedEnd"
+      onClick={[Function]}
+    >
+      <input
+        aria-invalid={false}
+        autoFocus={true}
+        className="standalone-uikit--phone-number-input-story-MuiInputBase-input standalone-uikit--phone-number-input-story-MuiInput-input standalone-uikit--phone-number-input-story-makeStyles-input-5 standalone-uikit--phone-number-input-story-makeStyles-input-6 standalone-uikit--phone-number-input-story-MuiInputBase-inputAdornedEnd"
+        disabled={false}
+        onAnimationStart={[Function]}
+        onBlur={[Function]}
+        onChange={[Function]}
+        onFocus={[Function]}
+        placeholder="Enter phone number"
+        required={false}
+        type="text"
+        value=""
+      />
+      <svg
+        aria-describedby={null}
+        aria-hidden={true}
+        className="standalone-uikit--phone-number-input-story-MuiSvgIcon-root standalone-uikit--phone-number-input-story-MuiSvgIcon-colorDisabled"
+        focusable="false"
+        onBlur={[Function]}
+        onFocus={[Function]}
+        onMouseLeave={[Function]}
+        onMouseOver={[Function]}
+        onTouchEnd={[Function]}
+        onTouchStart={[Function]}
+        title={null}
+        viewBox="0 0 24 24"
+      >
+        <path
+          d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"
+        />
+      </svg>
+    </div>
   </div>
 </div>
 `;
