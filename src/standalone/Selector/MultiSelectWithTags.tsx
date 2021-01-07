@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from "react";
+import React, { useCallback, useRef } from "react";
 import { SelectorData, SelectorPropsSingleSelect } from "./Selector";
 import SingleSelect from "./Selector";
 import {
@@ -6,11 +6,18 @@ import {
 	TextFieldProps,
 	Tooltip,
 	Typography,
+	Switch,
+	SwitchClassKey,
+	SwitchProps,
+	Grid,
 } from "@material-ui/core";
 import { createStyles, Theme, withStyles, WithStyles } from "@material-ui/core";
 import { SmallIconButton, SmallListItemIcon } from "../Small/List";
-import { Search as SearchIcon, Info as InfoIcon } from "@material-ui/icons";
-import { RemoveIcon } from "../../standalone";
+import {
+	Search as SearchIcon,
+	Info as InfoIcon,
+	Cancel as RemoveIcon,
+} from "@material-ui/icons";
 import { Autocomplete } from "@material-ui/lab";
 import { GenericWithStyles } from "../../utils";
 import { uniqueArray } from "../../utils";
@@ -29,6 +36,14 @@ export interface MultiSelectData extends SelectorData {
 	 * @param data The data entry to be unselected
 	 */
 	canUnselect?: (data: MultiSelectData) => boolean | Promise<boolean>;
+}
+
+export interface Styles extends Partial<Record<SwitchClassKey, string>> {
+	focusVisible?: string;
+}
+
+export interface Props extends SwitchProps {
+	classes: Styles;
 }
 
 export interface MultiSelectWithTagsProps<Data extends MultiSelectData>
@@ -55,13 +70,17 @@ export interface MultiSelectWithTagsProps<Data extends MultiSelectData>
 	 */
 	selected: Data[];
 	/**
+	 * Callback to set selected values
+	 */
+	setSelected?: (selectedValues: Data[]) => void;
+	/**
 	 * The filtered data after selected dropdown value
 	 */
 	filteredData: Data[];
 	/**
 	 * Callback method to return selected data
 	 */
-	setData?: (values: Data[]) => void;
+	setFilteredData?: (values: Data[]) => void;
 	/**
 	 * The currently selected groups
 	 */
@@ -74,6 +93,23 @@ export interface MultiSelectWithTagsProps<Data extends MultiSelectData>
 	 * Label for search input control
 	 */
 	searchInputLabel?: string;
+	/**
+	 * Display switch control
+	 */
+	displaySwitch?: boolean;
+	/**
+	 * Label for switch control
+	 */
+	switchLabel?: string;
+	/**
+	 * switch control value
+	 */
+	switchValue?: boolean;
+	/**
+	 * Callback method to set switch value
+	 */
+	handleSwitch?: (switchValue: boolean) => void;
+	handleAutoComplete?: (selectedValue: Data) => void;
 }
 
 const styles = createStyles((theme: Theme) => ({
@@ -92,6 +128,42 @@ const styles = createStyles((theme: Theme) => ({
 	},
 }));
 
+const AntSwitch = withStyles((theme: Theme) =>
+	createStyles({
+		root: {
+			width: 35,
+			height: 16,
+			padding: 0,
+			display: "flex",
+		},
+		switchBase: {
+			padding: 2,
+			color: theme.palette.grey[500],
+			"&$checked": {
+				transform: "translateX(18px)",
+				color: theme.palette.common.white,
+				"& + $track": {
+					opacity: 1,
+					backgroundColor: theme.palette.primary.main,
+					borderColor: theme.palette.primary.main,
+				},
+			},
+		},
+		thumb: {
+			width: 12,
+			height: 12,
+			boxShadow: "none",
+		},
+		track: {
+			border: `1px solid ${theme.palette.grey[500]}`,
+			borderRadius: 16 / 2,
+			opacity: 1,
+			backgroundColor: theme.palette.common.white,
+		},
+		checked: {},
+	})
+)(Switch);
+
 const MultiSelectWithTags = <Data extends MultiSelectData>(
 	props: MultiSelectWithTagsProps<Data> & WithStyles
 ) => {
@@ -101,21 +173,24 @@ const MultiSelectWithTags = <Data extends MultiSelectData>(
 		onSelect,
 		selected,
 		filteredData,
-		setData,
+		setFilteredData,
 		onGroupLoad,
 		onGroupSelect,
 		selectedGroup,
 		enableIcons,
 		disable,
 		classes,
+		displaySwitch,
+		switchLabel,
+		switchValue,
+		handleSwitch,
+		handleAutoComplete,
 	} = props;
-	const [selectedValues, setSelectedValue] = useState<Data[]>([]);
 	const input = useRef<TextFieldProps>();
-	const array = [...selected, ...selectedValues].flat();
-	const allSelected = uniqueArray(array.map((item) => item.value)).map(
+	const allSelected = uniqueArray(selected.map((item) => item.value)).map(
 		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-		(value) => array.find((e) => e.value === value)!
-	);
+		(value) => selected.find((e) => e.value === value)!
+	) as Data[];
 
 	const handleGroupSelect = useCallback(
 		(selectedGroup: SelectorData | null) => {
@@ -129,12 +204,12 @@ const MultiSelectWithTags = <Data extends MultiSelectData>(
 				const filteredOptions = filteredData.filter(
 					(entry) => !recordValues.includes(entry.value)
 				);
-				if (setData) setData(filteredOptions);
-				const selectedValues = [selected, ...records].flat() as Data[];
-				if (onSelect) onSelect(selectedValues);
+				if (setFilteredData) setFilteredData(filteredOptions);
+				const selectedDatas = [selected, ...records].flat() as Data[];
+				if (onSelect) onSelect(selectedDatas);
 			}
 		},
-		[filteredData, onGroupSelect, onSelect, selected, setData]
+		[filteredData, onGroupSelect, onSelect, selected, setFilteredData]
 	);
 
 	const groupSelectLoadHandler = useCallback(
@@ -147,59 +222,56 @@ const MultiSelectWithTags = <Data extends MultiSelectData>(
 		[onGroupLoad]
 	);
 
+	const handleChangeSwitch = useCallback(
+		(event: React.ChangeEvent<HTMLInputElement>) => {
+			if (handleSwitch) handleSwitch(event.target.checked);
+		},
+		[handleSwitch]
+	);
+
 	const handleDelete = useCallback(
 		(evt: React.MouseEvent<HTMLButtonElement>) => {
 			let canSelectedDelete = true;
-			let canSelectedValuesDelete = true;
-			const selectedEntry: Data | null | undefined = selected.find(
+			const deletedEntry: Data | null | undefined = selected.find(
 				(s) => s.value === evt.currentTarget.name
 			);
-			const selectedValuesEntry: Data | null | undefined = selectedValues.find(
-				(s) => s.value === evt.currentTarget.name
-			);
-			if (!selectedEntry && !selectedValuesEntry) {
+			if (!deletedEntry) {
 				throw new Error(
 					"[Components-Care] [MultiSelect] Entry couldn't be found. Either entry.value is not set, or the entity renderer does not correctly set the name attribute"
 				);
+			} else {
+				void (async () => {
+					if (deletedEntry.canUnselect) {
+						canSelectedDelete = await deletedEntry.canUnselect(deletedEntry);
+					}
+					if (canSelectedDelete) {
+						if (onSelect)
+							onSelect(selected.filter((s) => s.value !== deletedEntry.value));
+						if (deletedEntry) {
+							const filteredDataSelected = filteredData.find(
+								(option) => option.value === deletedEntry.value
+							);
+							if (!filteredDataSelected) {
+								if (handleSwitch && switchValue !== undefined) {
+									handleSwitch(switchValue);
+								} else {
+									filteredData.push(deletedEntry);
+									if (setFilteredData) setFilteredData(filteredData);
+								}
+							}
+						}
+					}
+				})();
 			}
-			void (async () => {
-				if (selectedEntry?.canUnselect) {
-					canSelectedDelete = await selectedEntry.canUnselect(selectedEntry);
-				}
-				if (selectedValuesEntry?.canUnselect) {
-					canSelectedValuesDelete = await selectedValuesEntry.canUnselect(
-						selectedValuesEntry
-					);
-				}
-				if (canSelectedDelete && onSelect) {
-					onSelect(selected.filter((s) => s.value !== selectedEntry?.value));
-					if (selectedEntry) {
-						const filteredDataSelected = filteredData.find(
-							(option) => option.value === selectedEntry.value
-						);
-						if (!filteredDataSelected) {
-							filteredData.push(selectedEntry);
-							if (setData) setData(filteredData);
-						}
-					}
-				}
-				if (canSelectedValuesDelete) {
-					setSelectedValue(
-						selectedValues.filter((s) => s.value !== selectedValuesEntry?.value)
-					);
-					if (selectedValuesEntry) {
-						const filteredDataSelectedValues = filteredData.find(
-							(option) => option.value === selectedValuesEntry.value
-						);
-						if (!filteredDataSelectedValues) {
-							filteredData.push(selectedValuesEntry);
-							if (setData) setData(filteredData);
-						}
-					}
-				}
-			})();
 		},
-		[selected, selectedValues, onSelect, filteredData, setData]
+		[
+			onSelect,
+			selected,
+			filteredData,
+			handleSwitch,
+			switchValue,
+			setFilteredData,
+		]
 	);
 
 	const handleChangeAutocomplete = useCallback(
@@ -211,24 +283,16 @@ const MultiSelectWithTags = <Data extends MultiSelectData>(
 			)
 				return;
 			else {
-				if (setData) {
-					setData(
-						filteredData.filter((data) => data.value !== selectedValue.value)
-					);
-				}
-				selectedValues.push(selectedValue);
-				selected.push(selectedValue);
-				if (onSelect) onSelect(selected);
-				setSelectedValue(selectedValues);
+				if (handleAutoComplete) handleAutoComplete(selectedValue);
 				if (input.current) input.current.value = "";
 			}
 		},
-		[setData, selectedValues, onSelect, selected, filteredData]
+		[handleAutoComplete]
 	);
 
 	return (
-		<div>
-			<Typography>{title}</Typography>
+		<Typography component="div">
+			<Typography component="label">{title}</Typography>
 			<SingleSelect
 				selected={selectedGroup}
 				onSelect={handleGroupSelect}
@@ -237,6 +301,19 @@ const MultiSelectWithTags = <Data extends MultiSelectData>(
 				disable={disable}
 				multiSelect={false}
 			/>
+			{displaySwitch && (
+				<Typography component="div">
+					<Grid component="label" container alignItems="center" spacing={1}>
+						<Grid item>
+							<AntSwitch
+								checked={switchValue || false}
+								onChange={handleChangeSwitch}
+							/>
+						</Grid>
+						<Grid item>{switchLabel || "All"}</Grid>
+					</Grid>
+				</Typography>
+			)}
 			<Autocomplete
 				key={filteredData.length}
 				freeSolo
@@ -288,7 +365,7 @@ const MultiSelectWithTags = <Data extends MultiSelectData>(
 						</div>
 					);
 				})}
-		</div>
+		</Typography>
 	);
 };
 
