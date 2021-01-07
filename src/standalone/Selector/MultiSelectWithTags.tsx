@@ -66,6 +66,10 @@ export interface MultiSelectWithTagsProps<Data extends MultiSelectData>
 	 */
 	title: string;
 	/**
+	 * Data for group selector
+	 */
+	defaultData: Data[];
+	/**
 	 * The currently selected values
 	 */
 	selected: Data[];
@@ -81,6 +85,10 @@ export interface MultiSelectWithTagsProps<Data extends MultiSelectData>
 	 * Callback method to return selected data
 	 */
 	setFilteredData?: (values: Data[]) => void;
+	/**
+	 * Callback method to handle data for autocomplete
+	 */
+	handleFilteredData?: (value: Data) => void;
 	/**
 	 * The currently selected groups
 	 */
@@ -172,8 +180,10 @@ const MultiSelectWithTags = <Data extends MultiSelectData>(
 		searchInputLabel,
 		onSelect,
 		selected,
+		defaultData,
 		filteredData,
 		setFilteredData,
+		handleFilteredData,
 		onGroupLoad,
 		onGroupSelect,
 		selectedGroup,
@@ -196,7 +206,7 @@ const MultiSelectWithTags = <Data extends MultiSelectData>(
 		(selectedGroup: SelectorData | null) => {
 			if (onGroupSelect) onGroupSelect(selectedGroup);
 			if (selectedGroup !== null) {
-				const records = filteredData.filter(
+				const records = defaultData.filter(
 					(option: Data) =>
 						option.type?.toLowerCase() === selectedGroup.value.toLowerCase()
 				);
@@ -209,7 +219,14 @@ const MultiSelectWithTags = <Data extends MultiSelectData>(
 				if (onSelect) onSelect(selectedDatas);
 			}
 		},
-		[filteredData, onGroupSelect, onSelect, selected, setFilteredData]
+		[
+			defaultData,
+			filteredData,
+			onGroupSelect,
+			onSelect,
+			selected,
+			setFilteredData,
+		]
 	);
 
 	const groupSelectLoadHandler = useCallback(
@@ -241,37 +258,21 @@ const MultiSelectWithTags = <Data extends MultiSelectData>(
 				);
 			} else {
 				void (async () => {
-					if (deletedEntry.canUnselect) {
+					if (deletedEntry.canUnselect)
 						canSelectedDelete = await deletedEntry.canUnselect(deletedEntry);
-					}
 					if (canSelectedDelete) {
 						if (onSelect)
 							onSelect(selected.filter((s) => s.value !== deletedEntry.value));
-						if (deletedEntry) {
-							const filteredDataSelected = filteredData.find(
-								(option) => option.value === deletedEntry.value
-							);
-							if (!filteredDataSelected) {
-								if (handleSwitch && switchValue !== undefined) {
-									handleSwitch(switchValue);
-								} else {
-									filteredData.push(deletedEntry);
-									if (setFilteredData) setFilteredData(filteredData);
-								}
-							}
-						}
+						const filteredDataSelected = filteredData.find(
+							(option) => option.value === deletedEntry.value
+						);
+						if (!filteredDataSelected && handleFilteredData)
+							handleFilteredData(deletedEntry);
 					}
 				})();
 			}
 		},
-		[
-			onSelect,
-			selected,
-			filteredData,
-			handleSwitch,
-			switchValue,
-			setFilteredData,
-		]
+		[selected, onSelect, filteredData, handleFilteredData]
 	);
 
 	const handleChangeAutocomplete = useCallback(

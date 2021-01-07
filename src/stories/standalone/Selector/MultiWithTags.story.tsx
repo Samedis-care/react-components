@@ -116,6 +116,18 @@ export const SelectorMultiWithTags = (): React.ReactElement => {
 		[selected, onSelect, filteredData]
 	);
 
+	const handleFilteredData = React.useCallback(
+		(selectorValue: MySelectorData) => {
+			if (switchValue) {
+				filteredData.push(selectorValue);
+			} else {
+				if (!selectorValue.isFixed) filteredData.push(selectorValue);
+			}
+			setFilteredData(filteredData);
+		},
+		[filteredData, switchValue]
+	);
+
 	const handleSwitch = React.useCallback(
 		(switchValue: boolean) => {
 			let switchedData = defaultData;
@@ -138,6 +150,7 @@ export const SelectorMultiWithTags = (): React.ReactElement => {
 
 	return (
 		<MultiSelectWithTags<MySelectorData>
+			key={filteredData.length}
 			title={title}
 			displaySwitch={displaySwitch}
 			switchLabel={switchLabel}
@@ -148,8 +161,10 @@ export const SelectorMultiWithTags = (): React.ReactElement => {
 			onGroupLoad={loadGroupData}
 			selected={selected}
 			setSelected={setSelected}
+			defaultData={defaultData}
 			filteredData={filteredData}
 			setFilteredData={setFilteredData}
+			handleFilteredData={handleFilteredData}
 			onSelect={onSelect}
 			onLoad={loadData}
 			handleAutoComplete={handleAutoComplete}
