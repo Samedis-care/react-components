@@ -1,7 +1,6 @@
 import React from "react";
 import { Button, ButtonProps, Tooltip, withStyles } from "@material-ui/core";
 import { Theme } from "@material-ui/core/styles";
-import { combineColors } from "../../utils";
 
 const StyledButton = withStyles((theme: Theme) => ({
 	root: (props: SubActionButtonProps) => ({
@@ -9,10 +8,10 @@ const StyledButton = withStyles((theme: Theme) => ({
 		color: theme.palette.text.primary,
 		textTransform: "unset",
 		"&:hover": {
-			backgroundColor: `rgba(${combineColors(
-				theme.palette.primary.main,
-				theme.palette.action.hover
-			).join()})`,
+			backgroundColor: props.small
+				? theme.palette.primary.light
+				: theme.palette.background.default,
+			color: theme.palette.primary.main,
 		},
 		"&.Mui-disabled": {
 			color: theme.palette.text.disabled,
@@ -21,15 +20,12 @@ const StyledButton = withStyles((theme: Theme) => ({
 		padding: props.small ? 5 : undefined,
 	}),
 	outlined: (props: SubActionButtonProps) => ({
-		"&:hover": {
-			borderColor: "transparent",
-		},
 		"& svg": {
 			fill: theme.palette.primary.main,
 			marginRight: props.small ? undefined : 15,
 		},
 		"&:hover svg": {
-			fill: theme.palette.text.primary,
+			fill: props.small ? theme.palette.background.default : undefined,
 		},
 		borderRadius: 0,
 		borderLeftWidth: 0,
