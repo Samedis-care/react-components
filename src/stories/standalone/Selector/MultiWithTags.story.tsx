@@ -51,7 +51,7 @@ export const SelectorMultiWithTags = (): React.ReactElement => {
 	const loadingLabel = text("Loading Label", "");
 	const noDataLabel = text("No data Label", "");
 	const placeholderLabel = text("Placeholder Label", "");
-	const displaySwitch = boolean("Enable Switch", true);
+	const displaySwitch = boolean("Enable Switch", false);
 	const switchLabel = text("Switch Label Text", "Select from all");
 	const searchInputLabel = text("Search Label", "Search");
 
@@ -118,14 +118,14 @@ export const SelectorMultiWithTags = (): React.ReactElement => {
 
 	const handleFilteredData = React.useCallback(
 		(selectorValue: MySelectorData) => {
-			if (switchValue) {
+			if (!displaySwitch || switchValue) {
 				filteredData.push(selectorValue);
 			} else {
 				if (!selectorValue.isFixed) filteredData.push(selectorValue);
 			}
 			setFilteredData(filteredData);
 		},
-		[filteredData, switchValue]
+		[displaySwitch, filteredData, switchValue]
 	);
 
 	const handleSwitch = React.useCallback(

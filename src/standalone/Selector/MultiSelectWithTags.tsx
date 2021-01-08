@@ -117,6 +117,9 @@ export interface MultiSelectWithTagsProps<Data extends MultiSelectData>
 	 * Callback method to set switch value
 	 */
 	handleSwitch?: (switchValue: boolean) => void;
+	/**
+	 * Callback method to handle selected value from autocomplete component
+	 */
 	handleAutoComplete?: (selectedValue: Data) => void;
 }
 
@@ -133,6 +136,17 @@ const styles = createStyles((theme: Theme) => ({
 		borderColor: "#cce1f6",
 		margin: "5px",
 		lineHeight: "30px",
+	},
+	labelWithSwitch: {
+		marginTop: 15,
+	},
+	searchLabel: {
+		lineHeight: "30px",
+		float: "left",
+	},
+	switch: {
+		lineHeight: "30px",
+		float: "right",
 	},
 }));
 
@@ -302,19 +316,26 @@ const MultiSelectWithTags = <Data extends MultiSelectData>(
 				disable={disable}
 				multiSelect={false}
 			/>
-			{displaySwitch && (
-				<Typography component="div">
-					<Grid component="label" container alignItems="center" spacing={1}>
-						<Grid item>
-							<AntSwitch
-								checked={switchValue || false}
-								onChange={handleChangeSwitch}
-							/>
+			<Typography component="div" className={classes.labelWithSwitch}>
+				{displaySwitch && (
+					<Typography component="div" className={classes.switch}>
+						<Grid component="label" container alignItems="center" spacing={1}>
+							<Grid item>
+								<AntSwitch
+									checked={switchValue || false}
+									onChange={handleChangeSwitch}
+								/>
+							</Grid>
+							<Grid item>{switchLabel || "All"}</Grid>
 						</Grid>
-						<Grid item>{switchLabel || "All"}</Grid>
-					</Grid>
+					</Typography>
+				)}
+				<Typography component="div" className={classes.searchLabel}>
+					<Typography component="label">
+						{searchInputLabel || "Search input"}
+					</Typography>
 				</Typography>
-			)}
+			</Typography>
 			<Autocomplete
 				key={filteredData.length}
 				freeSolo
@@ -330,8 +351,6 @@ const MultiSelectWithTags = <Data extends MultiSelectData>(
 					<TextField
 						{...params}
 						inputRef={input}
-						label={searchInputLabel || "Search input"}
-						margin="normal"
 						InputProps={{
 							...params.InputProps,
 							startAdornment: <SearchIcon color={"primary"} />,
