@@ -1,28 +1,29 @@
 import React, { useState } from "react";
 import { TextFieldProps } from "@material-ui/core";
-import TextFieldWithHelp from "../TextFieldWithHelp";
+import TextFieldWithHelp, {
+	TextFieldWithHelpProps,
+} from "../TextFieldWithHelp";
 import { UIInputProps } from "../CommonStyles";
 import { getGlobalized } from "../../../globalize";
 
-export interface CurrencyInputProps extends UIInputProps {
-	/**
-	 * The text for info icon
-	 */
-	infoText?: React.ReactNode;
-	/**
-	 * Boolean flag to make css important
-	 */
-	important?: boolean;
+export interface CurrencyInputProps<T> extends UIInputProps {
 	/**
 	 * The currency to be used in formatting
 	 */
 	currency: string;
+	value?: T;
+	onChange?: (newValue: T) => void;
+	onBlur?: React.FocusEventHandler;
 }
 
-const CurrencyInput = (props: CurrencyInputProps & TextFieldProps) => {
+const CurrencyInput = (
+	props: CurrencyInputProps<number | null> &
+		TextFieldWithHelpProps &
+		TextFieldProps
+) => {
 	const { currency, infoText, important, ...muiProps } = props;
 	const [number, setNumber] = useState("");
-	const onChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+	const handleChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
 		let value = event.target.value;
 		if (value != "") {
 			if (value.split(".").length > 2) {
@@ -31,7 +32,7 @@ const CurrencyInput = (props: CurrencyInputProps & TextFieldProps) => {
 			const numericValue = Number(value.replace(/[^0-9.]/g, ""));
 			const newValue = (await getGlobalized()).formatCurrency(
 				numericValue,
-				currency || "EUR"
+				currency
 			);
 			setNumber(newValue);
 		} else setNumber(value);
@@ -44,7 +45,7 @@ const CurrencyInput = (props: CurrencyInputProps & TextFieldProps) => {
 				autoFocus
 				important={important}
 				value={number}
-				onChange={onChange}
+				onChange={handleChange}
 				infoText={infoText}
 			/>
 		</div>

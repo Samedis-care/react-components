@@ -11,6 +11,16 @@ export const CurrencyInputStory = (): React.ReactElement => {
 			fullWidth={boolean("Full Width", true)}
 			currency={select("Currency", currencies, "EUR")}
 			autoFocus={true}
+			infoText={
+				<div
+					dangerouslySetInnerHTML={{
+						__html: text(
+							"Info Text",
+							"This is a pretty long info text which supports html"
+						),
+					}}
+				/>
+			}
 		/>
 	);
 };

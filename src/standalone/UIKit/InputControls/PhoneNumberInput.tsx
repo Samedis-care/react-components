@@ -1,22 +1,17 @@
 import React, { useCallback, useState } from "react";
 import parsePhoneNumberFromString, { CountryCode } from "libphonenumber-js";
 import { TextFieldProps } from "@material-ui/core";
-import TextFieldWithHelp from "../TextFieldWithHelp";
+import TextFieldWithHelp, {
+	TextFieldWithHelpProps,
+} from "../TextFieldWithHelp";
 import { UIInputProps } from "../CommonStyles";
+import ccI18n from "../../../i18n";
 
-export interface PhoneNumberInputProps extends UIInputProps {
-	/**
-	 * The text for info icon
-	 */
-	infoText?: React.ReactNode;
-	/**
-	 * The text for info icon
-	 */
-	important?: boolean;
+export interface PhoneNumberInputProps<T> extends UIInputProps {
 	/**
 	 * The CountryCode for formatting phone number
 	 */
-	countryCode?: CountryCode;
+	countryCode: CountryCode;
 	/**
 	 * Callback method to set entered value
 	 */
@@ -24,10 +19,20 @@ export interface PhoneNumberInputProps extends UIInputProps {
 	/**
 	 * Callbakc method to return formatted value
 	 */
-	getValue: (num: number) => void;
+	getValue: (num: string) => void;
+	/**
+	 * The entered/default value of textfield
+	 */
+	value?: T;
+	onChange?: (newValue: T) => void;
+	onBlur?: React.FocusEventHandler;
 }
 
-const PhoneNumberInput = (props: PhoneNumberInputProps & TextFieldProps) => {
+const PhoneNumberInput = (
+	props: PhoneNumberInputProps<string | null> &
+		TextFieldWithHelpProps &
+		TextFieldProps
+) => {
 	const {
 		value,
 		getValue,
@@ -39,14 +44,14 @@ const PhoneNumberInput = (props: PhoneNumberInputProps & TextFieldProps) => {
 	} = props;
 	const [error, setError] = useState(false);
 
-	const updateValue = useCallback(
+	const handleChange = useCallback(
 		(event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
 			let valid = true;
 			let phoneNumber = event.target.value.replace(/[^0-9]/g, "");
-			const numericValue = Number(phoneNumber);
+			getValue(phoneNumber);
 			const newPhoneNumber = parsePhoneNumberFromString(
 				phoneNumber,
-				countryCode || "DE"
+				countryCode
 			);
 			if (newPhoneNumber) {
 				valid = newPhoneNumber.isValid();
@@ -54,15 +59,8 @@ const PhoneNumberInput = (props: PhoneNumberInputProps & TextFieldProps) => {
 			}
 			setError(!valid);
 			setValue(phoneNumber);
-			getValue(numericValue);
 		},
 		[countryCode, getValue, setValue]
-	);
-	const handleChange = useCallback(
-		(event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
-			return updateValue(event);
-		},
-		[updateValue]
 	);
 
 	return (
@@ -72,10 +70,10 @@ const PhoneNumberInput = (props: PhoneNumberInputProps & TextFieldProps) => {
 				autoFocus
 				important={important}
 				value={value}
-				onFocus={updateValue}
+				onFocus={handleChange}
 				onChange={handleChange}
 				error={!!error}
-				helperText={error && "Enter correct phone number"}
+				helperText={error && ccI18n.t("standalone.phone-number.invalid")}
 				infoText={infoText}
 			/>
 		</div>

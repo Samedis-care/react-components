@@ -5,11 +5,10 @@ import { InputLabelConfig, UIInputProps, useInputStyles } from "./CommonStyles";
 
 export interface TextFieldWithHelpProps extends UIInputProps {
 	infoText?: React.ReactNode;
-	type?: string;
 }
 
 const TextFieldWithHelp = (props: TextFieldWithHelpProps & TextFieldProps) => {
-	const { infoText, important, type, ...muiProps } = props;
+	const { infoText, important, ...muiProps } = props;
 	const inputClasses = useInputStyles({ important });
 
 	return (
@@ -25,7 +24,6 @@ const TextFieldWithHelp = (props: TextFieldWithHelpProps & TextFieldProps) => {
 			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 			InputLabelProps={InputLabelConfig}
 			{...muiProps}
-			type={type}
 		/>
 	);
 };

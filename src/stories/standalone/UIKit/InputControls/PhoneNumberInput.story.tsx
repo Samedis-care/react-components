@@ -9,7 +9,7 @@ export const PhoneNumberInputStory = (): React.ReactElement => {
 	const [value, setValue] = useState(text("value", ""));
 	const onChange = action("onChange");
 
-	const getValue = React.useCallback((num: number) => onChange(num), [
+	const getValue = React.useCallback((num: string) => onChange(num), [
 		onChange,
 	]);
 	return (

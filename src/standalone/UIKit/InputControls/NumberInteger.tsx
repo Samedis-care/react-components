@@ -1,36 +1,34 @@
 import React, { useCallback } from "react";
 import { TextFieldProps } from "@material-ui/core";
-import TextFieldWithHelp from "../TextFieldWithHelp";
+import TextFieldWithHelp, {
+	TextFieldWithHelpProps,
+} from "../TextFieldWithHelp";
 import { UIInputProps } from "../CommonStyles";
 import { getGlobalized } from "../../../globalize";
 
-export interface NumberIntegerProps extends UIInputProps {
-	/**
-	 * The text for info icon
-	 */
-	infoText?: React.ReactNode;
-	/**
-	 * The text for info icon
-	 */
-	important?: boolean;
-	/**
-	 * The entered/default value of textfield
-	 */
-	value: string;
+export interface NumberIntegerProps<T> extends UIInputProps {
 	/**
 	 * Callback method to set entered value
 	 */
-	setValue: (value: string) => void;
+	setValue: (value: T) => void;
 	/**
 	 * Callbakc method to return formatted value
 	 */
 	getValue: (num: number) => void;
+	/**
+	 * The entered/default value of textfield
+	 */
+	value?: T;
+	onChange?: (newValue: T) => void;
+	onBlur?: React.FocusEventHandler;
 }
 
-const NumberInteger = (props: NumberIntegerProps & TextFieldProps) => {
-	const { value, getValue, setValue, infoText, important, ...muiProps } = props;
+const NumberInteger = (
+	props: NumberIntegerProps<string> & TextFieldWithHelpProps & TextFieldProps
+) => {
+	const { getValue, setValue, infoText, important, ...muiProps } = props;
 
-	const updateValue = useCallback(
+	const handleChange = useCallback(
 		async (
 			event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
 		) => {
@@ -44,19 +42,12 @@ const NumberInteger = (props: NumberIntegerProps & TextFieldProps) => {
 		},
 		[getValue, setValue]
 	);
-	const handleChange = useCallback(
-		(event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
-			return updateValue(event);
-		},
-		[updateValue]
-	);
 
 	return (
 		<div>
 			<TextFieldWithHelp
 				{...muiProps}
-				value={value}
-				onFocus={updateValue}
+				onFocus={handleChange}
 				onChange={handleChange}
 				infoText={infoText}
 				important={important}

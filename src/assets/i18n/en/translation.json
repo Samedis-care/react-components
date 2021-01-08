@@ -56,6 +56,9 @@
 				"any": "Any"
 			}
 		},
+		"phone-number": {
+			"invalid": "Enter correct phone number"
+		},
 		"signature-pad": {
 			"dialog": {
 				"reset": "Reset",

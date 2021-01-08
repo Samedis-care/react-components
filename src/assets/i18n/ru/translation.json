@@ -47,6 +47,9 @@
 				"filter": "Фильтр"
 			}
 		},
+		"phone-number": {
+			"invalid": "Введите правильный номер телефона"
+		},
 		"signature-pad": {
 			"dialog": {
 				"reset": "Сброс",

@@ -4197,8 +4197,8 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
       <label
         className="standalone-selector--selector-multi-with-tags-MuiFormLabel-root standalone-selector--selector-multi-with-tags-MuiInputLabel-root standalone-selector--selector-multi-with-tags-MuiInputLabel-formControl standalone-selector--selector-multi-with-tags-MuiInputLabel-animated standalone-selector--selector-multi-with-tags-MuiInputLabel-shrink"
         data-shrink={true}
-        htmlFor="mui-44710"
-        id="mui-44710-label"
+        htmlFor="mui-59669"
+        id="mui-59669-label"
       >
         Search
       </label>
@@ -4226,7 +4226,7 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
           autoFocus={false}
           className="standalone-selector--selector-multi-with-tags-MuiInputBase-input standalone-selector--selector-multi-with-tags-MuiInput-input standalone-selector--selector-multi-with-tags-MuiAutocomplete-input standalone-selector--selector-multi-with-tags-MuiAutocomplete-inputFocused standalone-selector--selector-multi-with-tags-MuiInputBase-inputAdornedStart standalone-selector--selector-multi-with-tags-MuiInputBase-inputAdornedEnd standalone-selector--selector-multi-with-tags-MuiInputBase-inputTypeSearch standalone-selector--selector-multi-with-tags-MuiInput-inputTypeSearch"
           disabled={false}
-          id="mui-44710"
+          id="mui-59669"
           onAnimationStart={[Function]}
           onBlur={[Function]}
           onChange={[Function]}
@@ -5022,13 +5022,13 @@ exports[`Storyshots Standalone/UIKit CurrencyInput 1`] = `
       Currency
     </label>
     <div
-      className="standalone-uikit--currency-input-story-MuiInputBase-root standalone-uikit--currency-input-story-MuiInput-root standalone-uikit--currency-input-story-makeStyles-root-1 standalone-uikit--currency-input-story-MuiInput-underline standalone-uikit--currency-input-story-MuiInputBase-fullWidth standalone-uikit--currency-input-story-MuiInput-fullWidth standalone-uikit--currency-input-story-MuiInputBase-formControl standalone-uikit--currency-input-story-MuiInput-formControl"
+      className="standalone-uikit--currency-input-story-MuiInputBase-root standalone-uikit--currency-input-story-MuiInput-root standalone-uikit--currency-input-story-makeStyles-root-4 standalone-uikit--currency-input-story-MuiInput-underline standalone-uikit--currency-input-story-MuiInputBase-fullWidth standalone-uikit--currency-input-story-MuiInput-fullWidth standalone-uikit--currency-input-story-MuiInputBase-formControl standalone-uikit--currency-input-story-MuiInput-formControl standalone-uikit--currency-input-story-MuiInputBase-adornedEnd"
       onClick={[Function]}
     >
       <input
         aria-invalid={false}
         autoFocus={true}
-        className="standalone-uikit--currency-input-story-MuiInputBase-input standalone-uikit--currency-input-story-MuiInput-input standalone-uikit--currency-input-story-makeStyles-input-2 standalone-uikit--currency-input-story-makeStyles-input-3"
+        className="standalone-uikit--currency-input-story-MuiInputBase-input standalone-uikit--currency-input-story-MuiInput-input standalone-uikit--currency-input-story-makeStyles-input-5 standalone-uikit--currency-input-story-makeStyles-input-6 standalone-uikit--currency-input-story-MuiInputBase-inputAdornedEnd"
         disabled={false}
         onAnimationStart={[Function]}
         onBlur={[Function]}
@@ -5039,6 +5039,24 @@ exports[`Storyshots Standalone/UIKit CurrencyInput 1`] = `
         type="text"
         value=""
       />
+      <svg
+        aria-describedby={null}
+        aria-hidden={true}
+        className="standalone-uikit--currency-input-story-MuiSvgIcon-root standalone-uikit--currency-input-story-MuiSvgIcon-colorDisabled"
+        focusable="false"
+        onBlur={[Function]}
+        onFocus={[Function]}
+        onMouseLeave={[Function]}
+        onMouseOver={[Function]}
+        onTouchEnd={[Function]}
+        onTouchStart={[Function]}
+        title={null}
+        viewBox="0 0 24 24"
+      >
+        <path
+          d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"
+        />
+      </svg>
     </div>
   </div>
 </div>
