@@ -4197,8 +4197,8 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
       <label
         className="standalone-selector--selector-multi-with-tags-MuiFormLabel-root standalone-selector--selector-multi-with-tags-MuiInputLabel-root standalone-selector--selector-multi-with-tags-MuiInputLabel-formControl standalone-selector--selector-multi-with-tags-MuiInputLabel-animated standalone-selector--selector-multi-with-tags-MuiInputLabel-shrink"
         data-shrink={true}
-        htmlFor="mui-59669"
-        id="mui-59669-label"
+        htmlFor="mui-88888"
+        id="mui-88888-label"
       >
         Search
       </label>
@@ -4226,7 +4226,7 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
           autoFocus={false}
           className="standalone-selector--selector-multi-with-tags-MuiInputBase-input standalone-selector--selector-multi-with-tags-MuiInput-input standalone-selector--selector-multi-with-tags-MuiAutocomplete-input standalone-selector--selector-multi-with-tags-MuiAutocomplete-inputFocused standalone-selector--selector-multi-with-tags-MuiInputBase-inputAdornedStart standalone-selector--selector-multi-with-tags-MuiInputBase-inputAdornedEnd standalone-selector--selector-multi-with-tags-MuiInputBase-inputTypeSearch standalone-selector--selector-multi-with-tags-MuiInput-inputTypeSearch"
           disabled={false}
-          id="mui-59669"
+          id="mui-88888"
           onAnimationStart={[Function]}
           onBlur={[Function]}
           onChange={[Function]}
