@@ -131,16 +131,11 @@ export const SelectorMultiWithTags = (): React.ReactElement => {
 	const handleSwitch = React.useCallback(
 		(switchValue: boolean) => {
 			let switchedData = defaultData;
-			if (switchValue) {
-				selected.forEach((s) => {
-					switchedData = switchedData.filter((d) => d.value !== s.value);
-				});
-			} else {
-				selected.forEach((s) => {
-					switchedData = switchedData
-						.filter((d) => d.value !== s.value)
-						.filter((option) => !option.isFixed);
-				});
+			selected.forEach((s) => {
+				switchedData = switchedData.filter((d) => d.value !== s.value);
+			});
+			if (!switchValue) {
+				switchedData = switchedData.filter((option) => !option.isFixed);
 			}
 			setSwitchValue(switchValue);
 			setFilteredData(switchedData);
@@ -176,6 +171,16 @@ export const SelectorMultiWithTags = (): React.ReactElement => {
 			noDataLabel={noDataLabel}
 			placeholderLabel={placeholderLabel}
 			searchInputLabel={searchInputLabel}
+			infoText={
+				<div
+					dangerouslySetInnerHTML={{
+						__html: text(
+							"Info Text",
+							"This is a pretty long info text which supports html. It really is."
+						),
+					}}
+				/>
+			}
 		/>
 	);
 };

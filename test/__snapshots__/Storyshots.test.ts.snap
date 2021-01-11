@@ -3614,7 +3614,7 @@ exports[`Storyshots Standalone/Schedule Weekly 1`] = `
       >
         Today
          (
-        24.11.2020
+        24/11/2020
         )
       </span>
     </button>
@@ -4059,10 +4059,14 @@ exports[`Storyshots Standalone/Selector MultiSelectWithCheckBox 1`] = `
 `;
 
 exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
-<div>
-  <h3>
+<div
+  className="standalone-selector--selector-multi-with-tags-MuiTypography-root standalone-selector--selector-multi-with-tags-MuiTypography-body1"
+>
+  <label
+    className="standalone-selector--selector-multi-with-tags-MuiTypography-root standalone-selector--selector-multi-with-tags-MuiTypography-body1"
+  >
     Multi Selector
-  </h3>
+  </label>
   <div
     className=" css-2b097c-container"
     onKeyDown={[Function]}
@@ -4181,6 +4185,19 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
     </div>
   </div>
   <div
+    className="standalone-selector--selector-multi-with-tags-MuiTypography-root standalone-selector--selector-multi-with-tags-memo(MultiSelectWithTags)-labelWithSwitch-11 standalone-selector--selector-multi-with-tags-MuiTypography-body1"
+  >
+    <div
+      className="standalone-selector--selector-multi-with-tags-MuiTypography-root standalone-selector--selector-multi-with-tags-memo(MultiSelectWithTags)-searchLabel-12 standalone-selector--selector-multi-with-tags-MuiTypography-body1"
+    >
+      <label
+        className="standalone-selector--selector-multi-with-tags-MuiTypography-root standalone-selector--selector-multi-with-tags-MuiTypography-body1"
+      >
+        Search
+      </label>
+    </div>
+  </div>
+  <div
     aria-expanded={false}
     aria-owns={null}
     className="standalone-selector--selector-multi-with-tags-MuiAutocomplete-root"
@@ -4190,16 +4207,8 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
     role="combobox"
   >
     <div
-      className="standalone-selector--selector-multi-with-tags-MuiFormControl-root standalone-selector--selector-multi-with-tags-MuiTextField-root standalone-selector--selector-multi-with-tags-MuiFormControl-marginNormal standalone-selector--selector-multi-with-tags-MuiFormControl-fullWidth"
+      className="standalone-selector--selector-multi-with-tags-MuiFormControl-root standalone-selector--selector-multi-with-tags-MuiTextField-root standalone-selector--selector-multi-with-tags-MuiFormControl-fullWidth"
     >
-      <label
-        className="standalone-selector--selector-multi-with-tags-MuiFormLabel-root standalone-selector--selector-multi-with-tags-MuiInputLabel-root standalone-selector--selector-multi-with-tags-MuiInputLabel-formControl standalone-selector--selector-multi-with-tags-MuiInputLabel-animated standalone-selector--selector-multi-with-tags-MuiInputLabel-shrink"
-        data-shrink={true}
-        htmlFor="cc-search-input"
-        id="cc-search-input-label"
-      >
-        Search
-      </label>
       <div
         className="standalone-selector--selector-multi-with-tags-MuiInputBase-root standalone-selector--selector-multi-with-tags-MuiInput-root standalone-selector--selector-multi-with-tags-MuiInput-underline standalone-selector--selector-multi-with-tags-MuiAutocomplete-inputRoot standalone-selector--selector-multi-with-tags-MuiInputBase-fullWidth standalone-selector--selector-multi-with-tags-MuiInput-fullWidth standalone-selector--selector-multi-with-tags-MuiInputBase-formControl standalone-selector--selector-multi-with-tags-MuiInput-formControl standalone-selector--selector-multi-with-tags-MuiInputBase-adornedStart standalone-selector--selector-multi-with-tags-MuiInputBase-adornedEnd"
         onClick={[Function]}
@@ -4224,7 +4233,7 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
           autoFocus={false}
           className="standalone-selector--selector-multi-with-tags-MuiInputBase-input standalone-selector--selector-multi-with-tags-MuiInput-input standalone-selector--selector-multi-with-tags-MuiAutocomplete-input standalone-selector--selector-multi-with-tags-MuiAutocomplete-inputFocused standalone-selector--selector-multi-with-tags-MuiInputBase-inputAdornedStart standalone-selector--selector-multi-with-tags-MuiInputBase-inputAdornedEnd standalone-selector--selector-multi-with-tags-MuiInputBase-inputTypeSearch standalone-selector--selector-multi-with-tags-MuiInput-inputTypeSearch"
           disabled={false}
-          id="cc-search-input"
+          id="mui-44452"
           onAnimationStart={[Function]}
           onBlur={[Function]}
           onChange={[Function]}
@@ -4246,7 +4255,7 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
           onMouseOver={[Function]}
           onTouchEnd={[Function]}
           onTouchStart={[Function]}
-          title="infoText"
+          title={null}
           viewBox="0 0 24 24"
         >
           <path
@@ -4400,11 +4409,13 @@ exports[`Storyshots Standalone/SignaturePad SignaturePad 1`] = `
       <svg
         aria-hidden={true}
         className="standalone-signaturepad--signature-pad-story-MuiSvgIcon-root standalone-signaturepad--signature-pad-story-MuiSvgIcon-colorDisabled"
+        fill="#1d1d1b"
         focusable="false"
-        viewBox="0 0 24 24"
+        viewBox="0 0 36 36"
       >
         <path
-          d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34a.9959.9959 0 00-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"
+          className="cls-1"
+          d="M35.16,6.26a52.79,52.79,0,0,1-3,10.26l-7.45,3.73h5.7a33.84,33.84,0,0,1-2.11,3.3L18,27h7.1a17,17,0,0,1-9.35,4,78.53,78.53,0,0,1-8.86.49l-4,4A1.65,1.65,0,0,1,1.69,36a1.67,1.67,0,0,1-1.2-.49A1.63,1.63,0,0,1,0,34.31a1.59,1.59,0,0,1,.49-1.19L18.77,14.91a1.28,1.28,0,0,0,.29-.81,1.17,1.17,0,0,0-.32-.81,1,1,0,0,0-.77-.35,1.11,1.11,0,0,0-.81.35L4.57,25.88q.13-3.16.42-5.63.78-7.87,8-13A38.82,38.82,0,0,1,26.72,1.48,52.78,52.78,0,0,1,36,0,56.86,56.86,0,0,1,35.16,6.26Z"
         />
       </svg>
       <span

@@ -1,24 +1,29 @@
 import React, { useCallback, useRef } from "react";
-import { SelectorData, SelectorPropsSingleSelect } from "./Selector";
-import SingleSelect from "./Selector";
 import {
-	TextField,
 	TextFieldProps,
 	Tooltip,
 	Typography,
 	Switch,
-	SwitchClassKey,
-	SwitchProps,
 	Grid,
+	createStyles,
+	Theme,
+	withStyles,
+	WithStyles,
 } from "@material-ui/core";
-import { createStyles, Theme, withStyles, WithStyles } from "@material-ui/core";
-import { SmallIconButton, SmallListItemIcon } from "../Small/List";
+import { Autocomplete } from "@material-ui/lab";
 import {
 	Search as SearchIcon,
 	Info as InfoIcon,
 	Cancel as RemoveIcon,
 } from "@material-ui/icons";
-import { Autocomplete } from "@material-ui/lab";
+import SingleSelect, {
+	SelectorData,
+	SelectorPropsSingleSelect,
+} from "./Selector";
+import TextFieldWithHelp, {
+	TextFieldWithHelpProps,
+} from "../UIKit/TextFieldWithHelp";
+import { SmallIconButton, SmallListItemIcon } from "../Small/List";
 import { GenericWithStyles } from "../../utils";
 import { uniqueArray } from "../../utils";
 
@@ -38,13 +43,32 @@ export interface MultiSelectData extends SelectorData {
 	canUnselect?: (data: MultiSelectData) => boolean | Promise<boolean>;
 }
 
-export interface Styles extends Partial<Record<SwitchClassKey, string>> {
-	focusVisible?: string;
+export interface MultiSelectWithTagsSwitchPropsOn {
+	/**
+	 * Display switch control
+	 */
+	displaySwitch?: true;
+	/**
+	 * Label for switch control
+	 */
+	switchLabel: string;
+	/**
+	 * switch control value
+	 */
+	switchValue: boolean;
+	/**
+	 * Callback method to set switch value
+	 */
+	handleSwitch: (switchValue: boolean) => void;
 }
 
-export interface Props extends SwitchProps {
-	classes: Styles;
+export interface MultiSelectWithTagsSwitchPropsOff {
+	displaySwitch?: false;
 }
+
+export type MultiSelectWithTagsSwitchProps =
+	| MultiSelectWithTagsSwitchPropsOn
+	| MultiSelectWithTagsSwitchPropsOff;
 
 export interface MultiSelectWithTagsProps<Data extends MultiSelectData>
 	extends Omit<
@@ -73,10 +97,6 @@ export interface MultiSelectWithTagsProps<Data extends MultiSelectData>
 	 * The currently selected values
 	 */
 	selected: Data[];
-	/**
-	 * Callback to set selected values
-	 */
-	setSelected?: (selectedValues: Data[]) => void;
 	/**
 	 * The filtered data after selected dropdown value
 	 */
@@ -150,44 +170,45 @@ const styles = createStyles((theme: Theme) => ({
 	},
 }));
 
-const AntSwitch = withStyles((theme: Theme) =>
-	createStyles({
-		root: {
-			width: 35,
-			height: 16,
-			padding: 0,
-			display: "flex",
-		},
-		switchBase: {
-			padding: 2,
-			color: theme.palette.grey[500],
-			"&$checked": {
-				transform: "translateX(18px)",
-				color: theme.palette.common.white,
-				"& + $track": {
-					opacity: 1,
-					backgroundColor: theme.palette.primary.main,
-					borderColor: theme.palette.primary.main,
-				},
+const AntSwitch = withStyles((theme: Theme) => ({
+	root: {
+		width: 35,
+		height: 16,
+		padding: 0,
+		display: "flex",
+	},
+	switchBase: {
+		padding: 2,
+		color: theme.palette.grey[500],
+		"&$checked": {
+			transform: "translateX(18px)",
+			color: theme.palette.common.white,
+			"& + $track": {
+				opacity: 1,
+				backgroundColor: theme.palette.primary.main,
+				borderColor: theme.palette.primary.main,
 			},
 		},
-		thumb: {
-			width: 12,
-			height: 12,
-			boxShadow: "none",
-		},
-		track: {
-			border: `1px solid ${theme.palette.grey[500]}`,
-			borderRadius: 16 / 2,
-			opacity: 1,
-			backgroundColor: theme.palette.common.white,
-		},
-		checked: {},
-	})
-)(Switch);
+	},
+	thumb: {
+		width: 12,
+		height: 12,
+		boxShadow: "none",
+	},
+	track: {
+		border: `1px solid ${theme.palette.grey[500]}`,
+		borderRadius: 16 / 2,
+		opacity: 1,
+		backgroundColor: theme.palette.common.white,
+	},
+	checked: {},
+}))(Switch);
 
 const MultiSelectWithTags = <Data extends MultiSelectData>(
-	props: MultiSelectWithTagsProps<Data> & WithStyles
+	props: MultiSelectWithTagsProps<Data> &
+		WithStyles &
+		MultiSelectWithTagsSwitchProps &
+		TextFieldWithHelpProps
 ) => {
 	const {
 		title,
@@ -209,6 +230,7 @@ const MultiSelectWithTags = <Data extends MultiSelectData>(
 		switchValue,
 		handleSwitch,
 		handleAutoComplete,
+		infoText,
 	} = props;
 	const input = useRef<TextFieldProps>();
 	const allSelected = uniqueArray(selected.map((item) => item.value)).map(
@@ -348,15 +370,15 @@ const MultiSelectWithTags = <Data extends MultiSelectData>(
 					handleChangeAutocomplete(selectedValue as Data)
 				}
 				renderInput={(params: TextFieldProps) => (
-					<TextField
+					<TextFieldWithHelp
 						{...params}
 						inputRef={input}
 						InputProps={{
 							...params.InputProps,
 							startAdornment: <SearchIcon color={"primary"} />,
 							type: "search",
-							endAdornment: (
-								<Tooltip title="infoText">
+							endAdornment: infoText && (
+								<Tooltip title={infoText}>
 									<InfoIcon color={"disabled"} />
 								</Tooltip>
 							),
