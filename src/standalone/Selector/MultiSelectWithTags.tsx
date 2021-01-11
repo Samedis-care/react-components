@@ -47,7 +47,7 @@ export interface MultiSelectWithTagsSwitchPropsOn {
 	/**
 	 * Display switch control
 	 */
-	displaySwitch?: true;
+	displaySwitch: true;
 	/**
 	 * Label for switch control
 	 */
@@ -63,6 +63,9 @@ export interface MultiSelectWithTagsSwitchPropsOn {
 }
 
 export interface MultiSelectWithTagsSwitchPropsOff {
+	/**
+	 * Display switch control
+	 */
 	displaySwitch?: false;
 }
 
@@ -121,22 +124,6 @@ export interface MultiSelectWithTagsProps<Data extends MultiSelectData>
 	 * Label for search input control
 	 */
 	searchInputLabel?: string;
-	/**
-	 * Display switch control
-	 */
-	displaySwitch?: boolean;
-	/**
-	 * Label for switch control
-	 */
-	switchLabel?: string;
-	/**
-	 * switch control value
-	 */
-	switchValue?: boolean;
-	/**
-	 * Callback method to set switch value
-	 */
-	handleSwitch?: (switchValue: boolean) => void;
 	/**
 	 * Callback method to handle selected value from autocomplete component
 	 */
@@ -226,12 +213,12 @@ const MultiSelectWithTags = <Data extends MultiSelectData>(
 		disable,
 		classes,
 		displaySwitch,
-		switchLabel,
-		switchValue,
-		handleSwitch,
 		handleAutoComplete,
 		infoText,
 	} = props;
+	const switchLabel = props.displaySwitch ? props.switchLabel : undefined;
+	const switchValue = props.displaySwitch ? props.switchValue : undefined;
+	const handleSwitch = props.displaySwitch ? props.handleSwitch : undefined;
 	const input = useRef<TextFieldProps>();
 	const allSelected = uniqueArray(selected.map((item) => item.value)).map(
 		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
