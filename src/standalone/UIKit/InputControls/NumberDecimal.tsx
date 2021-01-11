@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import { TextFieldProps } from "@material-ui/core";
 import TextFieldWithHelp, {
 	TextFieldWithHelpProps,
@@ -9,17 +9,13 @@ import ccI18n from "../../../i18n";
 
 export interface NumberDecimalProps<T> extends UIInputProps {
 	/**
-	 * Callback method to set entered value
-	 */
-	setValue: (value: T) => void;
-	/**
 	 * Callbakc method to return formatted value
 	 */
 	getValue: (num: number) => void;
 	/**
 	 * The entered/default value of textfield
 	 */
-	value?: T;
+	value: number | null;
 	onChange?: (newValue: T) => void;
 	onBlur?: React.FocusEventHandler;
 }
@@ -27,47 +23,62 @@ export interface NumberDecimalProps<T> extends UIInputProps {
 const NumberDecimal = (
 	props: NumberDecimalProps<string> & TextFieldWithHelpProps & TextFieldProps
 ) => {
-	const { getValue, setValue, infoText, important, ...muiProps } = props;
+	const { getValue, value, infoText, important, ...muiProps } = props;
+	const [formattedNumber, setFormattedNumber] = useState(
+		(value as unknown) as string
+	);
 
-	const parseNumber = (s: string) => {
-		s = s.replace(/[^\d,.-]/g, ""); // strip everything except numbers, dots, commas and negative sign
-		if (
-			ccI18n.language.substring(0, 2) !== "de" &&
-			/^-?(?:\d+|\d{1,3}(?:,\d{3})+)(?:\.\d+)?$/.test(s)
-		) {
-			// if not in German locale and matches #,###.######
-			s = s.replace(/,/g, ""); // strip out commas
-		} else if (/^-?(?:\d+|\d{1,3}(?:\.\d{3})+)(?:,\d+)?$/.test(s)) {
-			// either in German locale or not match #,###.###### and now matches #.###,########
-			s = s.replace(/\./g, ""); // strip out dots
-			s = s.replace(/,/g, "."); // replace comma with dot
-		} // try #,###.###### anyway
-		else {
-			s = s.replace(/,/g, ""); // strip out commas
-		}
-		return s;
+	const getSeparator = (separatorType: string) => {
+		const format = Intl.NumberFormat(ccI18n.language)
+			.formatToParts(1000.11)
+			.find((part) => part.type === separatorType);
+		return format === undefined ? "," : format.value;
+	};
+
+	const getDecimalSeparator = () => {
+		const numberWithDecimalSeparator = 1.1;
+
+		return numberWithDecimalSeparator
+			.toLocaleString(ccI18n.language)
+			.substring(1, 2);
 	};
 	const handleChange = useCallback(
 		async (
 			event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
 		) => {
 			const enteredValue = event.target.value;
+			const globalized = await getGlobalized();
 			if (enteredValue != "") {
-				const numericValue = Number(parseNumber(enteredValue));
-				const newValue = (await getGlobalized()).formatNumber(numericValue, {
-					minimumFractionDigits: 2,
-				});
-				setValue(newValue);
-				getValue(numericValue);
-			} else setValue(enteredValue);
+				let parsedValue = enteredValue
+					.replace(/[^0-9.,-]/g, "")
+					.split(getSeparator("group"))
+					.join("");
+				if (parsedValue) {
+					if (
+						parsedValue === getSeparator("group") ||
+						parsedValue === getDecimalSeparator()
+					)
+						parsedValue = "0";
+					else if (parsedValue.split(getDecimalSeparator()).length > 2)
+						parsedValue = (value as unknown) as string;
+
+					const numericValue = Number(globalized.parseNumber(parsedValue));
+					const newValue = globalized.formatNumber(numericValue, {
+						minimumFractionDigits: 2,
+					});
+					setFormattedNumber(newValue);
+					getValue(numericValue);
+				} else setFormattedNumber("");
+			} else setFormattedNumber(enteredValue);
 		},
-		[getValue, setValue]
+		[getValue, setFormattedNumber, value]
 	);
 
 	return (
 		<div>
 			<TextFieldWithHelp
 				{...muiProps}
+				value={formattedNumber}
 				onFocus={handleChange}
 				onChange={handleChange}
 				infoText={infoText}

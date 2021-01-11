@@ -7,7 +7,7 @@ import TextFieldWithHelp, {
 import { UIInputProps } from "../CommonStyles";
 import ccI18n from "../../../i18n";
 
-export interface PhoneNumberInputProps<T> extends UIInputProps {
+export interface PhoneNumberInputProps extends UIInputProps {
 	/**
 	 * The CountryCode for formatting phone number
 	 */
@@ -23,15 +23,13 @@ export interface PhoneNumberInputProps<T> extends UIInputProps {
 	/**
 	 * The entered/default value of textfield
 	 */
-	value?: T;
-	onChange?: (newValue: T) => void;
+	value?: string;
+	onChange?: (newValue: string) => void;
 	onBlur?: React.FocusEventHandler;
 }
 
 const PhoneNumberInput = (
-	props: PhoneNumberInputProps<string | null> &
-		TextFieldWithHelpProps &
-		TextFieldProps
+	props: PhoneNumberInputProps & TextFieldWithHelpProps & TextFieldProps
 ) => {
 	const {
 		value,

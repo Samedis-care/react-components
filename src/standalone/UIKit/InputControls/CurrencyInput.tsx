@@ -6,20 +6,18 @@ import TextFieldWithHelp, {
 import { UIInputProps } from "../CommonStyles";
 import { getGlobalized } from "../../../globalize";
 
-export interface CurrencyInputProps<T> extends UIInputProps {
+export interface CurrencyInputProps extends UIInputProps {
 	/**
 	 * The currency to be used in formatting
 	 */
 	currency: string;
-	value?: T;
-	onChange?: (newValue: T) => void;
+	value?: number | null;
+	onChange?: (newValue: number | null) => void;
 	onBlur?: React.FocusEventHandler;
 }
 
 const CurrencyInput = (
-	props: CurrencyInputProps<number | null> &
-		TextFieldWithHelpProps &
-		TextFieldProps
+	props: CurrencyInputProps & TextFieldWithHelpProps & TextFieldProps
 ) => {
 	const { currency, infoText, important, ...muiProps } = props;
 	const [number, setNumber] = useState("");

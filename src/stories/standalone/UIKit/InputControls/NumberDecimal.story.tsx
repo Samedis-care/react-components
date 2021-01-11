@@ -1,10 +1,10 @@
 import React, { useState } from "react";
-import { boolean, text, withKnobs } from "@storybook/addon-knobs";
+import { boolean, text, number, withKnobs } from "@storybook/addon-knobs";
 import NumberDecimal from "../../../../standalone/UIKit/InputControls/NumberDecimal";
 import { action, withActions } from "@storybook/addon-actions";
 
 export const NumberDecimalStory = (): React.ReactElement => {
-	const [value, setValue] = useState(text("value", ""));
+	const [value] = useState(number("value", 0.0));
 	const onChange = action("onChange");
 
 	const getValue = React.useCallback((num: number) => onChange(num), [
@@ -17,7 +17,6 @@ export const NumberDecimalStory = (): React.ReactElement => {
 			placeholder={text("Placeholder", "Enter decimal number")}
 			fullWidth={boolean("Full Width", true)}
 			value={value}
-			setValue={setValue}
 			getValue={getValue}
 			autoFocus={true}
 		/>

@@ -6,23 +6,21 @@ import TextFieldWithHelp, {
 import { UIInputProps } from "../CommonStyles";
 import { getGlobalized } from "../../../globalize";
 
-export interface NumberIntegerProps<T> extends UIInputProps {
+export interface NumberIntegerProps extends UIInputProps {
 	/**
 	 * Callbakc method to return formatted value
 	 */
-	getValue: (num: T) => void;
+	getValue: (num: number | null) => void;
 	/**
 	 * The entered/default value of textfield
 	 */
-	value?: T;
-	onChange?: (newValue: T) => void;
+	value?: number | null;
+	onChange?: (newValue: number | null) => void;
 	onBlur?: React.FocusEventHandler;
 }
 
 const NumberInteger = (
-	props: NumberIntegerProps<number | null> &
-		TextFieldWithHelpProps &
-		TextFieldProps
+	props: NumberIntegerProps & TextFieldWithHelpProps & TextFieldProps
 ) => {
 	const { getValue, value, infoText, important, ...muiProps } = props;
 	const [formattedNumber, setFormattedNumber] = useState(
