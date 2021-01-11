@@ -43,7 +43,7 @@ const LocalizedDateTimePicker = (props: LocalizedDateTimePickerProps) => (
 		maxDateMessage={ccI18n.t(
 			"backend-integration.model.types.renderers.date.labels.max-date"
 		)}
-		format={"L hh:mm A"}
+		format={"L LT"}
 		openTo="date"
 		{...props}
 	/>

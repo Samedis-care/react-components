@@ -4,10 +4,10 @@ import NumberInteger from "../../../../standalone/UIKit/InputControls/NumberInte
 import { action, withActions } from "@storybook/addon-actions";
 
 export const NumberIntegerStory = (): React.ReactElement => {
-	const [value, setValue] = useState(text("value", ""));
+	const [value] = useState(text("value", ""));
 	const onChange = action("onChange");
 
-	const getValue = React.useCallback((num: number) => onChange(num), [
+	const getValue = React.useCallback((num: number | null) => onChange(num), [
 		onChange,
 	]);
 
@@ -16,8 +16,7 @@ export const NumberIntegerStory = (): React.ReactElement => {
 			label={text("Label", "Number Integer Input")}
 			placeholder={text("Placeholder", "Enter integer number")}
 			fullWidth={boolean("Full Width", true)}
-			value={value}
-			setValue={setValue}
+			value={(value as unknown) as number}
 			getValue={getValue}
 			autoFocus={true}
 		/>
