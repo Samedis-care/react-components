@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
-import { button, number, text, withKnobs } from "@storybook/addon-knobs";
-import { action, withActions } from "@storybook/addon-actions";
+import { button, number, text } from "@storybook/addon-knobs";
+import { action } from "@storybook/addon-actions";
 import { useDialogContext } from "../../../framework";
 import { ErrorDialog, IDialogButtonConfig } from "../../../non-standalone";
 
@@ -48,4 +48,3 @@ export const ErrorDialogStory = (): React.ReactElement => {
 };
 
 ErrorDialogStory.storyName = "Error";
-ErrorDialogStory.decorators = [withActions, withKnobs];

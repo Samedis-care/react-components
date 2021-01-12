@@ -7,15 +7,12 @@ const loadLang = (lang: string): Resource =>
 		translation: require(`./assets/i18n/${lang}/translation.json`) as ResourceKey,
 	} as Resource);
 
+// edit this when adding new languages
 const langs = ["de", "en", "fr", "ru"];
 const langVals: Record<string, Resource> = {};
 for (const lang of langs) {
 	langVals[lang] = loadLang(lang);
 }
-
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-window.langvals = langVals;
 
 const ccI18n = i18n.createInstance();
 

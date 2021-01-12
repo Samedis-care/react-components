@@ -9,8 +9,7 @@ import {
 	PortalLayout,
 } from "../../../standalone/Portal";
 import { Domain, Home } from "@material-ui/icons";
-import { select, withKnobs } from "@storybook/addon-knobs";
-import { withActions } from "@storybook/addon-actions";
+import { select } from "@storybook/addon-knobs";
 
 const useStyles = makeStyles({
 	header: {
@@ -136,4 +135,3 @@ export const PortalMenuStory = (): React.ReactElement => {
 };
 
 PortalMenuStory.storyName = "Menu";
-PortalMenuStory.decorators = [withActions, withKnobs];

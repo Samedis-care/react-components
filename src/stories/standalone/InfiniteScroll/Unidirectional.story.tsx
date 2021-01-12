@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import InfiniteScroll from "../../../standalone/InfiniteScroll";
 import { Grid, makeStyles } from "@material-ui/core";
-import { withKnobs, number } from "@storybook/addon-knobs";
-import { action, withActions } from "@storybook/addon-actions";
+import { number } from "@storybook/addon-knobs";
+import { action } from "@storybook/addon-actions";
 import { NumberTypeKnobOptions } from "@storybook/addon-knobs/dist/components/types";
 
 const useStyles = makeStyles(() => ({
@@ -48,4 +48,3 @@ export const InfiniteScrollSimple = (): React.ReactElement => {
 };
 
 InfiniteScrollSimple.storyName = "Unidirectional";
-InfiniteScrollSimple.decorators = [withActions, withKnobs];

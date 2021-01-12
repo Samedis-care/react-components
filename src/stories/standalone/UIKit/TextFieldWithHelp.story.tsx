@@ -1,5 +1,5 @@
 import React from "react";
-import { boolean, text, withKnobs } from "@storybook/addon-knobs";
+import { boolean, text } from "@storybook/addon-knobs";
 import TextFieldWithHelp from "../../../standalone/UIKit/TextFieldWithHelp";
 
 export const TextFieldWithHelpStory = (): React.ReactElement => {
@@ -24,9 +24,3 @@ export const TextFieldWithHelpStory = (): React.ReactElement => {
 };
 
 TextFieldWithHelpStory.storyName = "TextFieldWithHelp";
-TextFieldWithHelpStory.decorators = [withKnobs];
-TextFieldWithHelpStory.parameters = {
-	knobs: {
-		escapeHTML: false,
-	},
-};

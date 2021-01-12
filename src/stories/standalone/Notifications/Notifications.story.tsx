@@ -1,6 +1,5 @@
 import React from "react";
-import { withKnobs } from "@storybook/addon-knobs";
-import { action, withActions } from "@storybook/addon-actions";
+import { action } from "@storybook/addon-actions";
 import Notifications from "../../../standalone/Notifications";
 
 export const NotificationsStory = (): React.ReactElement => {
@@ -70,4 +69,3 @@ export const NotificationsStory = (): React.ReactElement => {
 };
 
 NotificationsStory.storyName = "Notifications";
-NotificationsStory.decorators = [withActions, withKnobs];

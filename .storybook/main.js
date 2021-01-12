@@ -6,4 +6,12 @@ module.exports = {
     '@storybook/addon-actions',
     '@storybook/addon-links',
   ],
+  webpackFinal: async (config) => {
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      "cldr$": "cldrjs",
+      "cldr": "cldrjs/dist/cldr"
+    };
+    return config;
+  },
 };

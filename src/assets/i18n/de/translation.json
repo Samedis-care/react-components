@@ -47,6 +47,9 @@
 			},
 			"no-files": "Keine Anhänge verfügbar"
 		},
+		"phone-number": {
+			"invalid": "Korrekte Rufnummer eingeben"
+		},
 		"signature-pad": {
 			"dialog": {
 				"reset": "Zurücksetzen",
