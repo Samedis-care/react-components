@@ -1,18 +1,17 @@
 import React, { useState } from "react";
 import { boolean, text } from "@storybook/addon-knobs";
-import moment, { Moment } from "moment";
 import { action } from "@storybook/addon-actions";
 import DateTimeInput from "../../../../standalone/UIKit/InputControls/DateTimeInput";
 import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
 
 export const DateTimeInputStory = (): React.ReactElement => {
-	const [selectedDate, setSelectedDate] = useState(moment());
+	const [selectedDate, setSelectedDate] = useState<MaterialUiPickersDate>(null);
 	const onChange = action("onChange");
 
 	const handleChange = React.useCallback(
 		(date: MaterialUiPickersDate): MaterialUiPickersDate => {
 			onChange(date);
-			setSelectedDate(date as Moment);
+			setSelectedDate(date);
 			return date;
 		},
 		[onChange]
@@ -26,7 +25,6 @@ export const DateTimeInputStory = (): React.ReactElement => {
 			important={boolean("Important", false)}
 			placeholder={text("placeholder", "Please Select Date & Time")}
 			value={selectedDate}
-			// format="DD/MM/YYYY hh:mm A"
 			onChange={handleChange}
 			infoText={
 				<div

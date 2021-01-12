@@ -11,6 +11,5 @@ export { default as matchMime } from "./matchMime";
 export { default as addGetParams } from "./addGetParams";
 export { default as deepAssign } from "./deepAssign";
 export { default as uniqueArray } from "./uniqueArray";
-export { default as getSeparator } from "./getSeparator";
-export { default as getDecimalSeparator } from "./getDecimalSeparator";
+export { default as getNumberSeparator } from "./getNumberSeparator";
 export * from "./genericHOC";

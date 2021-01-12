@@ -6,12 +6,9 @@ import TextFieldWithHelp, {
 import { getGlobalized } from "../../../globalize";
 import Globalize from "globalize/dist/globalize";
 import ccI18n from "../../../i18n";
-import { getSeparator, getDecimalSeparator } from "../../../utils";
+import { getNumberSeparator } from "../../../utils";
 
 export interface NumberDecimalProps extends TextFieldWithHelpProps {
-	/**
-	 * Callbakc method to return formatted value
-	 */
 	/**
 	 * The current value or null if not set
 	 */
@@ -54,30 +51,19 @@ const NumberDecimal = (
 		(event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
 			if (!onChange) return;
 
-			const num = event.target.value;
-			if (num != "") {
-				let parsedValue = num
-					.replace(/[^0-9.,-]/g, "")
-					.split(getSeparator("group"))
-					.join("");
-				if (parsedValue) {
-					if (
-						parsedValue === getSeparator("group") ||
-						parsedValue === getDecimalSeparator()
-					)
-						parsedValue = "0";
-					else if (parsedValue.split(getDecimalSeparator()).length > 2)
-						parsedValue = String(value);
-					const numericValue = parseInt(parsedValue);
-					onChange(event, numericValue);
-				} else {
-					onChange(event, null);
-				}
+			const num = event.target.value
+				.replace(
+					new RegExp("[^0-9" + getNumberSeparator("decimal") + "]", "g"),
+					""
+				)
+				.replace(new RegExp(getNumberSeparator("decimal"), "g"), ".");
+			if (num !== "") {
+				onChange(event, parseFloat(num));
 			} else {
 				onChange(event, null);
 			}
 		},
-		[onChange, value]
+		[onChange]
 	);
 
 	return (

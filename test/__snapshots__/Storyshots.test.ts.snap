@@ -3614,7 +3614,7 @@ exports[`Storyshots Standalone/Schedule Weekly 1`] = `
       >
         Today
          (
-        11/24/2020
+        24/11/2020
         )
       </span>
     </button>
@@ -5099,7 +5099,7 @@ exports[`Storyshots Standalone/UIKit DateInput 1`] = `
       readOnly={true}
       required={false}
       type="text"
-      value="11/24/2020"
+      value=""
     />
     <div
       className="standalone-uikit--date-input-story-MuiInputAdornment-root standalone-uikit--date-input-story-MuiInputAdornment-positionEnd"
@@ -5193,7 +5193,7 @@ exports[`Storyshots Standalone/UIKit DateTimeInput 1`] = `
       readOnly={true}
       required={false}
       type="text"
-      value="11/24/2020 12:00 PM"
+      value=""
     />
     <div
       className="standalone-uikit--date-time-input-story-MuiInputAdornment-root standalone-uikit--date-time-input-story-MuiInputAdornment-positionEnd"
@@ -5421,19 +5421,19 @@ exports[`Storyshots Standalone/UIKit NumberDecimal 1`] = `
     className="standalone-uikit--number-decimal-story-MuiFormControl-root standalone-uikit--number-decimal-story-MuiTextField-root standalone-uikit--number-decimal-story-MuiFormControl-fullWidth"
   >
     <label
-      className="standalone-uikit--number-decimal-story-MuiFormLabel-root standalone-uikit--number-decimal-story-MuiInputLabel-root standalone-uikit--number-decimal-story-MuiInputLabel-formControl standalone-uikit--number-decimal-story-MuiInputLabel-animated standalone-uikit--number-decimal-story-MuiInputLabel-shrink standalone-uikit--number-decimal-story-MuiFormLabel-filled"
+      className="standalone-uikit--number-decimal-story-MuiFormLabel-root standalone-uikit--number-decimal-story-MuiInputLabel-root standalone-uikit--number-decimal-story-MuiInputLabel-formControl standalone-uikit--number-decimal-story-MuiInputLabel-animated standalone-uikit--number-decimal-story-MuiInputLabel-shrink"
       data-shrink={true}
     >
       Number Decimal Input
     </label>
     <div
-      className="standalone-uikit--number-decimal-story-MuiInputBase-root standalone-uikit--number-decimal-story-MuiInput-root standalone-uikit--number-decimal-story-makeStyles-root-1 standalone-uikit--number-decimal-story-MuiInput-underline standalone-uikit--number-decimal-story-MuiInputBase-fullWidth standalone-uikit--number-decimal-story-MuiInput-fullWidth standalone-uikit--number-decimal-story-MuiInputBase-formControl standalone-uikit--number-decimal-story-MuiInput-formControl"
+      className="standalone-uikit--number-decimal-story-MuiInputBase-root standalone-uikit--number-decimal-story-MuiInput-root standalone-uikit--number-decimal-story-makeStyles-root-4 standalone-uikit--number-decimal-story-MuiInput-underline standalone-uikit--number-decimal-story-MuiInputBase-fullWidth standalone-uikit--number-decimal-story-MuiInput-fullWidth standalone-uikit--number-decimal-story-MuiInputBase-formControl standalone-uikit--number-decimal-story-MuiInput-formControl standalone-uikit--number-decimal-story-MuiInputBase-adornedEnd"
       onClick={[Function]}
     >
       <input
         aria-invalid={false}
         autoFocus={true}
-        className="standalone-uikit--number-decimal-story-MuiInputBase-input standalone-uikit--number-decimal-story-MuiInput-input standalone-uikit--number-decimal-story-makeStyles-input-2 standalone-uikit--number-decimal-story-makeStyles-input-3"
+        className="standalone-uikit--number-decimal-story-MuiInputBase-input standalone-uikit--number-decimal-story-MuiInput-input standalone-uikit--number-decimal-story-makeStyles-input-5 standalone-uikit--number-decimal-story-makeStyles-input-6 standalone-uikit--number-decimal-story-MuiInputBase-inputAdornedEnd"
         disabled={false}
         onAnimationStart={[Function]}
         onBlur={[Function]}
@@ -5442,8 +5442,26 @@ exports[`Storyshots Standalone/UIKit NumberDecimal 1`] = `
         placeholder="Enter decimal number"
         required={false}
         type="text"
-        value={0}
+        value=""
       />
+      <svg
+        aria-describedby={null}
+        aria-hidden={true}
+        className="standalone-uikit--number-decimal-story-MuiSvgIcon-root standalone-uikit--number-decimal-story-MuiSvgIcon-colorDisabled"
+        focusable="false"
+        onBlur={[Function]}
+        onFocus={[Function]}
+        onMouseLeave={[Function]}
+        onMouseOver={[Function]}
+        onTouchEnd={[Function]}
+        onTouchStart={[Function]}
+        title={null}
+        viewBox="0 0 24 24"
+      >
+        <path
+          d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"
+        />
+      </svg>
     </div>
   </div>
 </div>
@@ -5461,13 +5479,13 @@ exports[`Storyshots Standalone/UIKit NumberInteger 1`] = `
       Number Integer Input
     </label>
     <div
-      className="standalone-uikit--number-integer-story-MuiInputBase-root standalone-uikit--number-integer-story-MuiInput-root standalone-uikit--number-integer-story-makeStyles-root-1 standalone-uikit--number-integer-story-MuiInput-underline standalone-uikit--number-integer-story-MuiInputBase-fullWidth standalone-uikit--number-integer-story-MuiInput-fullWidth standalone-uikit--number-integer-story-MuiInputBase-formControl standalone-uikit--number-integer-story-MuiInput-formControl"
+      className="standalone-uikit--number-integer-story-MuiInputBase-root standalone-uikit--number-integer-story-MuiInput-root standalone-uikit--number-integer-story-makeStyles-root-4 standalone-uikit--number-integer-story-MuiInput-underline standalone-uikit--number-integer-story-MuiInputBase-fullWidth standalone-uikit--number-integer-story-MuiInput-fullWidth standalone-uikit--number-integer-story-MuiInputBase-formControl standalone-uikit--number-integer-story-MuiInput-formControl standalone-uikit--number-integer-story-MuiInputBase-adornedEnd"
       onClick={[Function]}
     >
       <input
         aria-invalid={false}
         autoFocus={true}
-        className="standalone-uikit--number-integer-story-MuiInputBase-input standalone-uikit--number-integer-story-MuiInput-input standalone-uikit--number-integer-story-makeStyles-input-2 standalone-uikit--number-integer-story-makeStyles-input-3"
+        className="standalone-uikit--number-integer-story-MuiInputBase-input standalone-uikit--number-integer-story-MuiInput-input standalone-uikit--number-integer-story-makeStyles-input-5 standalone-uikit--number-integer-story-makeStyles-input-6 standalone-uikit--number-integer-story-MuiInputBase-inputAdornedEnd"
         disabled={false}
         onAnimationStart={[Function]}
         onBlur={[Function]}
@@ -5478,6 +5496,24 @@ exports[`Storyshots Standalone/UIKit NumberInteger 1`] = `
         type="text"
         value=""
       />
+      <svg
+        aria-describedby={null}
+        aria-hidden={true}
+        className="standalone-uikit--number-integer-story-MuiSvgIcon-root standalone-uikit--number-integer-story-MuiSvgIcon-colorDisabled"
+        focusable="false"
+        onBlur={[Function]}
+        onFocus={[Function]}
+        onMouseLeave={[Function]}
+        onMouseOver={[Function]}
+        onTouchEnd={[Function]}
+        onTouchStart={[Function]}
+        title={null}
+        viewBox="0 0 24 24"
+      >
+        <path
+          d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"
+        />
+      </svg>
     </div>
   </div>
 </div>
@@ -5500,7 +5536,7 @@ exports[`Storyshots Standalone/UIKit PhoneNumberInput 1`] = `
     >
       <input
         aria-invalid={false}
-        autoFocus={true}
+        autoFocus={false}
         className="standalone-uikit--phone-number-input-story-MuiInputBase-input standalone-uikit--phone-number-input-story-MuiInput-input standalone-uikit--phone-number-input-story-makeStyles-input-5 standalone-uikit--phone-number-input-story-makeStyles-input-6 standalone-uikit--phone-number-input-story-MuiInputBase-inputAdornedEnd"
         disabled={false}
         onAnimationStart={[Function]}

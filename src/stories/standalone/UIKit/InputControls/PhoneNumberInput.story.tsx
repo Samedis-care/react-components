@@ -5,8 +5,8 @@ import { CountryCode } from "libphonenumber-js";
 import { action } from "@storybook/addon-actions";
 
 export const PhoneNumberInputStory = (): React.ReactElement => {
-	const countryCodes = ["US", "DE", "FR", "RU"] as CountryCode[];
-	const [value, setValue] = useState<number | null>(null);
+	const countryCodes: CountryCode[] = ["US", "DE", "FR", "RU"];
+	const [value, setValue] = useState("");
 
 	return (
 		<PhoneNumberInput
@@ -16,7 +16,7 @@ export const PhoneNumberInputStory = (): React.ReactElement => {
 			disabled={boolean("Disable", false)}
 			countryCode={select("CountryCode", countryCodes, "US")}
 			value={value}
-			onChange={(evt: React.ChangeEvent, value: number | null) => {
+			onChange={(evt: React.ChangeEvent, value: string) => {
 				action("onChange")(evt, value);
 				setValue(value);
 			}}

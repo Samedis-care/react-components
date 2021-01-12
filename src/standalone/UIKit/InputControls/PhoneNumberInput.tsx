@@ -14,7 +14,7 @@ export interface PhoneNumberInputProps extends TextFieldWithHelpProps {
 	/**
 	 * The current value or null if not set
 	 */
-	value: number | null;
+	value: string;
 	/**
 	 * The change event handler
 	 * @param evt
@@ -22,7 +22,7 @@ export interface PhoneNumberInputProps extends TextFieldWithHelpProps {
 	 */
 	onChange?: (
 		evt: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>,
-		value: number | null
+		value: string
 	) => void;
 }
 
@@ -41,16 +41,15 @@ const PhoneNumberInput = (
 			let valid = true;
 			let num = event.target.value.replace(/[^0-9]/g, "");
 			if (num != "") {
-				const numericValue = parseInt(num);
+				onChange(event, num);
 				const newPhoneNumber = parsePhoneNumberFromString(num, countryCode);
 				if (newPhoneNumber) {
 					valid = newPhoneNumber.isValid();
 					if (valid) num = newPhoneNumber.number as string;
 				}
 				setError(!valid);
-				onChange(event, numericValue);
 			} else {
-				onChange(event, null);
+				onChange(event, "");
 			}
 			setPhoneNumber(num);
 		},
