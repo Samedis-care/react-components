@@ -5519,58 +5519,6 @@ exports[`Storyshots Standalone/UIKit NumberInteger 1`] = `
 </div>
 `;
 
-exports[`Storyshots Standalone/UIKit PhoneNumberInput 1`] = `
-<div>
-  <div
-    className="standalone-uikit--phone-number-input-story-MuiFormControl-root standalone-uikit--phone-number-input-story-MuiTextField-root standalone-uikit--phone-number-input-story-MuiFormControl-fullWidth"
-  >
-    <label
-      className="standalone-uikit--phone-number-input-story-MuiFormLabel-root standalone-uikit--phone-number-input-story-MuiInputLabel-root standalone-uikit--phone-number-input-story-MuiInputLabel-formControl standalone-uikit--phone-number-input-story-MuiInputLabel-animated standalone-uikit--phone-number-input-story-MuiInputLabel-shrink"
-      data-shrink={true}
-    >
-      Phone
-    </label>
-    <div
-      className="standalone-uikit--phone-number-input-story-MuiInputBase-root standalone-uikit--phone-number-input-story-MuiInput-root standalone-uikit--phone-number-input-story-makeStyles-root-4 standalone-uikit--phone-number-input-story-MuiInput-underline standalone-uikit--phone-number-input-story-MuiInputBase-fullWidth standalone-uikit--phone-number-input-story-MuiInput-fullWidth standalone-uikit--phone-number-input-story-MuiInputBase-formControl standalone-uikit--phone-number-input-story-MuiInput-formControl standalone-uikit--phone-number-input-story-MuiInputBase-adornedEnd"
-      onClick={[Function]}
-    >
-      <input
-        aria-invalid={false}
-        autoFocus={false}
-        className="standalone-uikit--phone-number-input-story-MuiInputBase-input standalone-uikit--phone-number-input-story-MuiInput-input standalone-uikit--phone-number-input-story-makeStyles-input-5 standalone-uikit--phone-number-input-story-makeStyles-input-6 standalone-uikit--phone-number-input-story-MuiInputBase-inputAdornedEnd"
-        disabled={false}
-        onAnimationStart={[Function]}
-        onBlur={[Function]}
-        onChange={[Function]}
-        onFocus={[Function]}
-        placeholder="Enter phone number"
-        required={false}
-        type="text"
-        value=""
-      />
-      <svg
-        aria-describedby={null}
-        aria-hidden={true}
-        className="standalone-uikit--phone-number-input-story-MuiSvgIcon-root standalone-uikit--phone-number-input-story-MuiSvgIcon-colorDisabled"
-        focusable="false"
-        onBlur={[Function]}
-        onFocus={[Function]}
-        onMouseLeave={[Function]}
-        onMouseOver={[Function]}
-        onTouchEnd={[Function]}
-        onTouchStart={[Function]}
-        title={null}
-        viewBox="0 0 24 24"
-      >
-        <path
-          d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"
-        />
-      </svg>
-    </div>
-  </div>
-</div>
-`;
-
 exports[`Storyshots Standalone/UIKit SubActionButton 1`] = `
 Array [
   <button
