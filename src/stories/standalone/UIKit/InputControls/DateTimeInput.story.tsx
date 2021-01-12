@@ -21,6 +21,7 @@ export const DateTimeInputStory = (): React.ReactElement => {
 	return (
 		<DateTimeInput
 			label={text("Label", "DateTime Field")}
+			disabled={boolean("Disable", false)}
 			fullWidth={boolean("100% Width", true)}
 			important={boolean("Important", false)}
 			placeholder={text("placeholder", "Please Select Date & Time")}

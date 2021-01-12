@@ -25,11 +25,13 @@ const DateTimeInput = (props: DateTimeInputProps & DateTimePickerProps) => {
 				classes: inputClasses,
 				endAdornment: (
 					<>
-						<InputAdornment position="end">
-							<IconButton>
-								<CalenderIcon color={"disabled"} />
-							</IconButton>
-						</InputAdornment>
+						{!muiProps.disabled && (
+							<InputAdornment position="end">
+								<IconButton>
+									<CalenderIcon color={"disabled"} />
+								</IconButton>
+							</InputAdornment>
+						)}
 						{infoText && (
 							<Tooltip title={infoText}>
 								<InfoIcon color={"disabled"} />

@@ -4,75 +4,69 @@ import { TextFieldProps } from "@material-ui/core";
 import TextFieldWithHelp, {
 	TextFieldWithHelpProps,
 } from "../TextFieldWithHelp";
-import { UIInputProps } from "../CommonStyles";
 import ccI18n from "../../../i18n";
 
-export interface PhoneNumberInputProps extends UIInputProps {
+export interface PhoneNumberInputProps extends TextFieldWithHelpProps {
 	/**
 	 * The CountryCode for formatting phone number
 	 */
 	countryCode: CountryCode;
 	/**
-	 * Callback method to set entered value
+	 * The current value or null if not set
 	 */
-	setValue: (value: string) => void;
+	value: number | null;
 	/**
-	 * Callbakc method to return formatted value
+	 * The change event handler
+	 * @param evt
+	 * @param value
 	 */
-	getValue: (num: string) => void;
-	/**
-	 * The entered/default value of textfield
-	 */
-	value?: string;
-	onChange?: (newValue: string) => void;
-	onBlur?: React.FocusEventHandler;
+	onChange?: (
+		evt: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>,
+		value: number | null
+	) => void;
 }
 
 const PhoneNumberInput = (
-	props: PhoneNumberInputProps & TextFieldWithHelpProps & TextFieldProps
+	props: PhoneNumberInputProps & Omit<TextFieldProps, "onChange" | "value">
 ) => {
-	const {
-		value,
-		getValue,
-		setValue,
-		infoText,
-		important,
-		countryCode,
-		...muiProps
-	} = props;
+	const { onChange, countryCode, ...muiProps } = props;
 	const [error, setError] = useState(false);
+	const [phoneNumber, setPhoneNumber] = useState("");
 
+	// on change handling
 	const handleChange = useCallback(
 		(event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
+			if (!onChange) return;
+
 			let valid = true;
-			let phoneNumber = event.target.value.replace(/[^0-9]/g, "");
-			getValue(phoneNumber);
-			const newPhoneNumber = parsePhoneNumberFromString(
-				phoneNumber,
-				countryCode
-			);
-			if (newPhoneNumber) {
-				valid = newPhoneNumber.isValid();
-				if (valid) phoneNumber = newPhoneNumber.number as string;
+			let num = event.target.value.replace(/[^0-9]/g, "");
+			if (num != "") {
+				const numericValue = parseInt(num);
+				const newPhoneNumber = parsePhoneNumberFromString(num, countryCode);
+				if (newPhoneNumber) {
+					valid = newPhoneNumber.isValid();
+					if (valid) num = newPhoneNumber.number as string;
+				}
+				setError(!valid);
+				onChange(event, numericValue);
+			} else {
+				onChange(event, null);
 			}
-			setError(!valid);
-			setValue(phoneNumber);
+			setPhoneNumber(num);
 		},
-		[countryCode, getValue, setValue]
+		[countryCode, onChange]
 	);
 
+	// component rendering
 	return (
 		<div>
 			<TextFieldWithHelp
 				{...muiProps}
-				autoFocus
-				important={important}
-				value={value}
+				value={phoneNumber}
 				onFocus={handleChange}
 				onChange={handleChange}
 				error={!!error}
 				helperText={error && ccI18n.t("standalone.phone-number.invalid")}
-				infoText={infoText}
 			/>
 		</div>
 	);

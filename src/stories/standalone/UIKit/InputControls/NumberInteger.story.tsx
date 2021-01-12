@@ -11,12 +11,23 @@ export const NumberIntegerStory = (): React.ReactElement => {
 			label={text("Label", "Number Integer Input")}
 			placeholder={text("Placeholder", "Enter integer number")}
 			fullWidth={boolean("Full Width", true)}
+			disabled={boolean("Disable", false)}
 			value={value}
 			onChange={(evt: React.ChangeEvent, value: number | null) => {
 				action("onChange")(evt, value);
 				setValue(value);
 			}}
 			autoFocus={true}
+			infoText={
+				<div
+					dangerouslySetInnerHTML={{
+						__html: text(
+							"Info Text",
+							"This is a pretty long info text which supports html"
+						),
+					}}
+				/>
+			}
 		/>
 	);
 };

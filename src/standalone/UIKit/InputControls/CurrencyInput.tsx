@@ -1,50 +1,98 @@
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { TextFieldProps } from "@material-ui/core";
 import TextFieldWithHelp, {
 	TextFieldWithHelpProps,
 } from "../TextFieldWithHelp";
-import { UIInputProps } from "../CommonStyles";
 import { getGlobalized } from "../../../globalize";
+import Globalize from "globalize/dist/globalize";
+import ccI18n from "../../../i18n";
+import { getSeparator, getDecimalSeparator } from "../../../utils";
 
-export interface CurrencyInputProps extends UIInputProps {
+export interface CurrencyInputProps extends TextFieldWithHelpProps {
 	/**
 	 * The currency to be used in formatting
 	 */
 	currency: string;
-	value?: number | null;
-	onChange?: (newValue: number | null) => void;
-	onBlur?: React.FocusEventHandler;
+	/**
+	 * The current value or null if not set
+	 */
+	value: number | null;
+	/**
+	 * The change event handler
+	 * @param evt
+	 * @param value
+	 */
+	onChange?: (
+		evt: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>,
+		value: number | null
+	) => void;
 }
 
 const CurrencyInput = (
-	props: CurrencyInputProps & TextFieldWithHelpProps & TextFieldProps
+	props: CurrencyInputProps & Omit<TextFieldProps, "onChange" | "value">
 ) => {
-	const { currency, infoText, important, ...muiProps } = props;
-	const [number, setNumber] = useState("");
-	const handleChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-		let value = event.target.value;
-		if (value != "") {
-			if (value.split(".").length > 2) {
-				value = number;
-			}
-			const numericValue = Number(value.replace(/[^0-9.]/g, ""));
-			const newValue = (await getGlobalized()).formatCurrency(
-				numericValue,
-				currency
-			);
-			setNumber(newValue);
-		} else setNumber(value);
-	};
+	const { value, onChange, currency, ...muiProps } = props;
 
+	// globalized handling
+	const [globalized, setGlobalized] = useState<Globalize | null>(null);
+	useEffect(() => {
+		const updateGlobalized = () =>
+			void (async () => {
+				setGlobalized(await getGlobalized());
+			})();
+		// initial load
+		updateGlobalized();
+
+		// listen for locale switches
+		ccI18n.on("languageChanged", updateGlobalized);
+		return () => {
+			ccI18n.off("languageChanged", updateGlobalized);
+		};
+	}, []);
+
+	// on change handling
+	const handleChange = useCallback(
+		(event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
+			if (!onChange) return;
+
+			const num = event.target.value;
+			if (num != "") {
+				let parsedValue = num
+					.replace(/[^0-9.,-]/g, "")
+					.split(getSeparator("group"))
+					.join("");
+				if (parsedValue) {
+					if (
+						parsedValue === getSeparator("group") ||
+						parsedValue === getDecimalSeparator()
+					)
+						parsedValue = "0";
+					else if (parsedValue.split(getDecimalSeparator()).length > 2)
+						parsedValue = String(value);
+					const numericValue = parseInt(parsedValue);
+					onChange(event, numericValue);
+				} else {
+					onChange(event, null);
+				}
+			} else {
+				onChange(event, null);
+			}
+		},
+		[onChange, value]
+	);
+
+	// component rendering
 	return (
 		<div>
 			<TextFieldWithHelp
 				{...muiProps}
-				autoFocus
-				important={important}
-				value={number}
+				value={
+					value !== null && globalized
+						? globalized.formatCurrency(value, currency)
+						: ""
+				}
+				onFocus={handleChange}
 				onChange={handleChange}
-				infoText={infoText}
 			/>
 		</div>
 	);

@@ -1,55 +1,62 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { TextFieldProps } from "@material-ui/core";
 import TextFieldWithHelp, {
 	TextFieldWithHelpProps,
 } from "../TextFieldWithHelp";
-import { UIInputProps } from "../CommonStyles";
 import { getGlobalized } from "../../../globalize";
+import Globalize from "globalize/dist/globalize";
 import ccI18n from "../../../i18n";
+import { getSeparator, getDecimalSeparator } from "../../../utils";
 
-export interface NumberDecimalProps<T> extends UIInputProps {
+export interface NumberDecimalProps extends TextFieldWithHelpProps {
 	/**
 	 * Callbakc method to return formatted value
 	 */
-	getValue: (num: number) => void;
 	/**
-	 * The entered/default value of textfield
+	 * The current value or null if not set
 	 */
 	value: number | null;
-	onChange?: (newValue: T) => void;
-	onBlur?: React.FocusEventHandler;
+	/**
+	 * The change event handler
+	 * @param evt
+	 * @param value
+	 */
+	onChange?: (
+		evt: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>,
+		value: number | null
+	) => void;
 }
 
 const NumberDecimal = (
-	props: NumberDecimalProps<string> & TextFieldWithHelpProps & TextFieldProps
+	props: NumberDecimalProps & Omit<TextFieldProps, "onChange" | "value">
 ) => {
-	const { getValue, value, infoText, important, ...muiProps } = props;
-	const [formattedNumber, setFormattedNumber] = useState(
-		(value as unknown) as string
-	);
+	const { value, onChange, ...muiProps } = props;
 
-	const getSeparator = (separatorType: string) => {
-		const format = Intl.NumberFormat(ccI18n.language)
-			.formatToParts(1000.11)
-			.find((part) => part.type === separatorType);
-		return format === undefined ? "," : format.value;
-	};
+	// globalized handling
+	const [globalized, setGlobalized] = useState<Globalize | null>(null);
+	useEffect(() => {
+		const updateGlobalized = () =>
+			void (async () => {
+				setGlobalized(await getGlobalized());
+			})();
+		// initial load
+		updateGlobalized();
 
-	const getDecimalSeparator = () => {
-		const numberWithDecimalSeparator = 1.1;
+		// listen for locale switches
+		ccI18n.on("languageChanged", updateGlobalized);
+		return () => {
+			ccI18n.off("languageChanged", updateGlobalized);
+		};
+	}, []);
 
-		return numberWithDecimalSeparator
-			.toLocaleString(ccI18n.language)
-			.substring(1, 2);
-	};
+	// on change handling
 	const handleChange = useCallback(
-		async (
-			event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
-		) => {
-			const enteredValue = event.target.value;
-			const globalized = await getGlobalized();
-			if (enteredValue != "") {
-				let parsedValue = enteredValue
+		(event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
+			if (!onChange) return;
+
+			const num = event.target.value;
+			if (num != "") {
+				let parsedValue = num
 					.replace(/[^0-9.,-]/g, "")
 					.split(getSeparator("group"))
 					.join("");
@@ -60,29 +67,32 @@ const NumberDecimal = (
 					)
 						parsedValue = "0";
 					else if (parsedValue.split(getDecimalSeparator()).length > 2)
-						parsedValue = (value as unknown) as string;
-
-					const numericValue = Number(globalized.parseNumber(parsedValue));
-					const newValue = globalized.formatNumber(numericValue, {
-						minimumFractionDigits: 2,
-					});
-					setFormattedNumber(newValue);
-					getValue(numericValue);
-				} else setFormattedNumber("");
-			} else setFormattedNumber(enteredValue);
+						parsedValue = String(value);
+					const numericValue = parseInt(parsedValue);
+					onChange(event, numericValue);
+				} else {
+					onChange(event, null);
+				}
+			} else {
+				onChange(event, null);
+			}
 		},
-		[getValue, setFormattedNumber, value]
+		[onChange, value]
 	);
 
 	return (
 		<div>
 			<TextFieldWithHelp
 				{...muiProps}
-				value={formattedNumber}
+				value={
+					value !== null && globalized
+						? globalized.formatNumber(value, {
+								minimumFractionDigits: 2,
+						  })
+						: ""
+				}
 				onFocus={handleChange}
 				onChange={handleChange}
-				infoText={infoText}
-				important={important}
 			/>
 		</div>
 	);

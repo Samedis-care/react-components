@@ -6,21 +6,20 @@ import { action } from "@storybook/addon-actions";
 
 export const PhoneNumberInputStory = (): React.ReactElement => {
 	const countryCodes = ["US", "DE", "FR", "RU"] as CountryCode[];
-	const [value, setValue] = useState(text("value", ""));
-	const onChange = action("onChange");
+	const [value, setValue] = useState<number | null>(null);
 
-	const getValue = React.useCallback((num: string) => onChange(num), [
-		onChange,
-	]);
 	return (
 		<PhoneNumberInput
 			label={text("Label", "Phone")}
 			placeholder={text("Placeholder", "Enter phone number")}
 			fullWidth={boolean("100% Width", true)}
+			disabled={boolean("Disable", false)}
 			countryCode={select("CountryCode", countryCodes, "US")}
 			value={value}
-			setValue={setValue}
-			getValue={getValue}
+			onChange={(evt: React.ChangeEvent, value: number | null) => {
+				action("onChange")(evt, value);
+				setValue(value);
+			}}
 			infoText={
 				<div
 					dangerouslySetInnerHTML={{

@@ -21,6 +21,7 @@ export const DateInputStory = (): React.ReactElement => {
 	return (
 		<DateInput
 			label={text("Label", "Date")}
+			disabled={boolean("Disable", false)}
 			fullWidth={boolean("100% Width", true)}
 			important={boolean("Important", false)}
 			placeholder={text("placeholder", "Please Select Date")}
