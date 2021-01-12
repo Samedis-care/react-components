@@ -128,6 +128,10 @@ export interface MultiSelectWithTagsProps<Data extends MultiSelectData>
 	 * Callback method to handle selected value from autocomplete component
 	 */
 	handleAutoComplete?: (selectedValue: Data) => void;
+	/**
+	 * String used for the Autocomplete component
+	 */
+	autocompleteId?: string;
 }
 
 const styles = createStyles((theme: Theme) => ({
@@ -347,6 +351,7 @@ const MultiSelectWithTags = <Data extends MultiSelectData>(
 			</Typography>
 			<Autocomplete
 				key={filteredData.length}
+				id={props.autocompleteId}
 				freeSolo
 				autoComplete
 				disableClearable

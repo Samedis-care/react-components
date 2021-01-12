@@ -1,6 +1,5 @@
 import React, { useState } from "react";
-import { withActions } from "@storybook/addon-actions";
-import { boolean, withKnobs } from "@storybook/addon-knobs";
+import { boolean } from "@storybook/addon-knobs";
 import { MultiSelectWithCheckBox } from "../../../standalone/Selector";
 import { MultiSelectOption } from "../../../standalone/Selector/TypesMultiSelect";
 
@@ -47,4 +46,3 @@ export const MultiSelectWithCheckBoxStory = (): React.ReactElement => {
 };
 
 MultiSelectWithCheckBoxStory.storyName = "MultiSelectWithCheckBox";
-MultiSelectWithCheckBoxStory.decorators = [withActions, withKnobs];

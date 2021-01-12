@@ -1,7 +1,7 @@
 import React from "react";
 import { FilterIcon } from "../../../standalone";
-import { action, withActions } from "@storybook/addon-actions";
-import { text, withKnobs } from "@storybook/addon-knobs";
+import { action } from "@storybook/addon-actions";
+import { text } from "@storybook/addon-knobs";
 import { Grid } from "@material-ui/core";
 import IconButtonWithText, {
 	IconButtonWithTextProps,
@@ -30,4 +30,3 @@ export const IconButtonWithTextStory = (): React.ReactElement => {
 };
 
 IconButtonWithTextStory.storyName = "IconButtonWithText";
-IconButtonWithTextStory.decorators = [withActions, withKnobs];

@@ -1,15 +1,8 @@
 import React from "react";
 import "../../../i18n";
 import FileUpload from "../../../standalone/FileUpload/Generic";
-import {
-	boolean,
-	files,
-	number,
-	select,
-	text,
-	withKnobs,
-} from "@storybook/addon-knobs";
-import { action, withActions } from "@storybook/addon-actions";
+import { boolean, files, number, select, text } from "@storybook/addon-knobs";
+import { action } from "@storybook/addon-actions";
 
 export const FileUploadStory = (): React.ReactElement => {
 	const handleErrorAction = action("handleError");
@@ -91,4 +84,3 @@ export const FileUploadStory = (): React.ReactElement => {
 };
 
 FileUploadStory.storyName = "FileUpload";
-FileUploadStory.decorators = [withActions, withKnobs];

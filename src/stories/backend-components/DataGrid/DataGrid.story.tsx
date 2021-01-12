@@ -1,6 +1,4 @@
 import React from "react";
-import { withKnobs } from "@storybook/addon-knobs";
-import { withActions } from "@storybook/addon-actions";
 import BackendDataGrid from "../../../backend-components/DataGrid";
 import TestModel from "./TestModel";
 import { makeStyles } from "@material-ui/core/styles";
@@ -22,4 +20,3 @@ export const FormStory = (): React.ReactElement => {
 };
 
 FormStory.storyName = "DataGrid";
-FormStory.decorators = [withActions, withKnobs];

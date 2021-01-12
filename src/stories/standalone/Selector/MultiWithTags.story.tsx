@@ -6,8 +6,8 @@ import {
 	SelectorData,
 } from "../../../standalone/Selector";
 import { colourOptions, colourTypeOptions } from "./Data";
-import { action, withActions } from "@storybook/addon-actions";
-import { boolean, text, withKnobs } from "@storybook/addon-knobs";
+import { action } from "@storybook/addon-actions";
+import { boolean, text } from "@storybook/addon-knobs";
 
 interface MySelectorData extends MultiSelectorData {
 	id: string;
@@ -147,6 +147,7 @@ export const SelectorMultiWithTags = (): React.ReactElement => {
 		<MultiSelectWithTags<MySelectorData>
 			key={filteredData.length}
 			title={title}
+			autocompleteId={"multi-select-with-tags"}
 			displaySwitch={displaySwitch}
 			switchLabel={switchLabel}
 			switchValue={switchValue}
@@ -186,4 +187,3 @@ export const SelectorMultiWithTags = (): React.ReactElement => {
 };
 
 SelectorMultiWithTags.storyName = "MultiWithTags";
-SelectorMultiWithTags.decorators = [withActions, withKnobs];

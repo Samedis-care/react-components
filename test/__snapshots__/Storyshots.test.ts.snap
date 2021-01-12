@@ -3614,7 +3614,7 @@ exports[`Storyshots Standalone/Schedule Weekly 1`] = `
       >
         Today
          (
-        24/11/2020
+        11/24/2020
         )
       </span>
     </button>
@@ -4233,7 +4233,7 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
           autoFocus={false}
           className="standalone-selector--selector-multi-with-tags-MuiInputBase-input standalone-selector--selector-multi-with-tags-MuiInput-input standalone-selector--selector-multi-with-tags-MuiAutocomplete-input standalone-selector--selector-multi-with-tags-MuiAutocomplete-inputFocused standalone-selector--selector-multi-with-tags-MuiInputBase-inputAdornedStart standalone-selector--selector-multi-with-tags-MuiInputBase-inputAdornedEnd standalone-selector--selector-multi-with-tags-MuiInputBase-inputTypeSearch standalone-selector--selector-multi-with-tags-MuiInput-inputTypeSearch"
           disabled={false}
-          id="mui-44452"
+          id="multi-select-with-tags"
           onAnimationStart={[Function]}
           onBlur={[Function]}
           onChange={[Function]}
@@ -5166,7 +5166,7 @@ exports[`Storyshots Standalone/UIKit DateInput 1`] = `
 exports[`Storyshots Standalone/UIKit DateTimeInput 1`] = `
 <div
   className="standalone-uikit--date-time-input-story-MuiFormControl-root standalone-uikit--date-time-input-story-MuiTextField-root standalone-uikit--date-time-input-story-MuiFormControl-fullWidth"
-  format="L hh:mm A"
+  format="L LT"
   onClick={[Function]}
   onKeyDown={[Function]}
 >
@@ -5193,7 +5193,7 @@ exports[`Storyshots Standalone/UIKit DateTimeInput 1`] = `
       readOnly={true}
       required={false}
       type="text"
-      value="11/24/2020 05:30 PM"
+      value="11/24/2020 12:00 PM"
     />
     <div
       className="standalone-uikit--date-time-input-story-MuiInputAdornment-root standalone-uikit--date-time-input-story-MuiInputAdornment-positionEnd"
@@ -5421,7 +5421,7 @@ exports[`Storyshots Standalone/UIKit NumberDecimal 1`] = `
     className="standalone-uikit--number-decimal-story-MuiFormControl-root standalone-uikit--number-decimal-story-MuiTextField-root standalone-uikit--number-decimal-story-MuiFormControl-fullWidth"
   >
     <label
-      className="standalone-uikit--number-decimal-story-MuiFormLabel-root standalone-uikit--number-decimal-story-MuiInputLabel-root standalone-uikit--number-decimal-story-MuiInputLabel-formControl standalone-uikit--number-decimal-story-MuiInputLabel-animated standalone-uikit--number-decimal-story-MuiInputLabel-shrink"
+      className="standalone-uikit--number-decimal-story-MuiFormLabel-root standalone-uikit--number-decimal-story-MuiInputLabel-root standalone-uikit--number-decimal-story-MuiInputLabel-formControl standalone-uikit--number-decimal-story-MuiInputLabel-animated standalone-uikit--number-decimal-story-MuiInputLabel-shrink standalone-uikit--number-decimal-story-MuiFormLabel-filled"
       data-shrink={true}
     >
       Number Decimal Input
@@ -5442,7 +5442,7 @@ exports[`Storyshots Standalone/UIKit NumberDecimal 1`] = `
         placeholder="Enter decimal number"
         required={false}
         type="text"
-        value=""
+        value={0}
       />
     </div>
   </div>

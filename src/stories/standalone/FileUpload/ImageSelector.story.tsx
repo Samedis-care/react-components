@@ -1,13 +1,7 @@
 import React, { useState } from "react";
 import "../../../i18n";
-import {
-	boolean,
-	number,
-	select,
-	text,
-	withKnobs,
-} from "@storybook/addon-knobs";
-import { action, withActions } from "@storybook/addon-actions";
+import { boolean, number, select, text } from "@storybook/addon-knobs";
+import { action } from "@storybook/addon-actions";
 import ImageSelector from "../../../standalone/FileUpload/Image/ImageSelector";
 
 export const ImageSelectorStory = (): React.ReactElement => {
@@ -67,4 +61,3 @@ export const ImageSelectorStory = (): React.ReactElement => {
 };
 
 ImageSelectorStory.storyName = "ImageSelector";
-ImageSelectorStory.decorators = [withActions, withKnobs];

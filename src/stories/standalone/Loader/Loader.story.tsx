@@ -1,7 +1,6 @@
 import React from "react";
 import { Loader } from "../../../standalone";
-import { text, withKnobs } from "@storybook/addon-knobs";
-import { withActions } from "@storybook/addon-actions";
+import { text } from "@storybook/addon-knobs";
 
 export const LoaderStory = (): React.ReactElement => {
 	return (
@@ -19,4 +18,3 @@ export const LoaderStory = (): React.ReactElement => {
 };
 
 LoaderStory.storyName = "Loader";
-LoaderStory.decorators = [withActions, withKnobs];

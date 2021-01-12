@@ -1,6 +1,6 @@
 import React from "react";
-import { boolean, text, withKnobs } from "@storybook/addon-knobs";
-import { action, withActions } from "@storybook/addon-actions";
+import { boolean, text } from "@storybook/addon-knobs";
+import { action } from "@storybook/addon-actions";
 import { InfoBox } from "../../../standalone";
 
 export const InfoBoxStory = (): React.ReactElement => {
@@ -20,4 +20,3 @@ export const InfoBoxStory = (): React.ReactElement => {
 };
 
 InfoBoxStory.storyName = "InfoBox";
-InfoBoxStory.decorators = [withActions, withKnobs];

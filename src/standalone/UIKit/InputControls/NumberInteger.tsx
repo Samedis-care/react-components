@@ -1,55 +1,76 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { TextFieldProps } from "@material-ui/core";
 import TextFieldWithHelp, {
 	TextFieldWithHelpProps,
 } from "../TextFieldWithHelp";
-import { UIInputProps } from "../CommonStyles";
 import { getGlobalized } from "../../../globalize";
+import Globalize from "globalize/dist/globalize";
+import ccI18n from "../../../i18n";
 
-export interface NumberIntegerProps extends UIInputProps {
+export interface NumberIntegerProps extends TextFieldWithHelpProps {
 	/**
-	 * Callbakc method to return formatted value
+	 * The current value or null if not set
 	 */
-	getValue: (num: number | null) => void;
+	value: number | null;
 	/**
-	 * The entered/default value of textfield
+	 * The change event handler
+	 * @param evt
+	 * @param value
 	 */
-	value?: number | null;
-	onChange?: (newValue: number | null) => void;
-	onBlur?: React.FocusEventHandler;
+	onChange?: (
+		evt: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>,
+		value: number | null
+	) => void;
 }
 
 const NumberInteger = (
-	props: NumberIntegerProps & TextFieldWithHelpProps & TextFieldProps
+	props: NumberIntegerProps & Omit<TextFieldProps, "onChange" | "value">
 ) => {
-	const { getValue, value, infoText, important, ...muiProps } = props;
-	const [formattedNumber, setFormattedNumber] = useState(
-		(value as unknown) as string
-	);
+	const { value, onChange, ...muiProps } = props;
 
+	// globalized handling
+	const [globalized, setGlobalized] = useState<Globalize | null>(null);
+	useEffect(() => {
+		const updateGlobalized = () =>
+			void (async () => {
+				setGlobalized(await getGlobalized());
+			})();
+		// initial load
+		updateGlobalized();
+
+		// listen for locale switches
+		ccI18n.on("languageChanged", updateGlobalized);
+		return () => {
+			ccI18n.off("languageChanged", updateGlobalized);
+		};
+	}, []);
+
+	// on change handling
 	const handleChange = useCallback(
-		async (
-			event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
-		) => {
-			const num = event.target.value;
+		(event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
+			if (!onChange) return;
+
+			const num = event.target.value.replace(/[^0-9]/g, "");
 			if (num != "") {
-				const numericValue = Number(num.replace(/[^0-9]/g, ""));
-				setFormattedNumber((await getGlobalized()).formatNumber(numericValue));
-				getValue(numericValue);
-			} else setFormattedNumber("");
+				const numericValue = parseInt(num);
+				onChange(event, numericValue);
+			} else {
+				onChange(event, null);
+			}
 		},
-		[getValue]
+		[onChange]
 	);
 
+	// component rendering
 	return (
 		<div>
 			<TextFieldWithHelp
 				{...muiProps}
-				value={formattedNumber}
+				value={
+					value !== null && globalized ? globalized.formatNumber(value) : ""
+				}
 				onFocus={handleChange}
 				onChange={handleChange}
-				infoText={infoText}
-				important={important}
 			/>
 		</div>
 	);

@@ -1,6 +1,6 @@
 import React from "react";
-import { boolean, select, text, withKnobs } from "@storybook/addon-knobs";
-import { action, withActions } from "@storybook/addon-actions";
+import { boolean, select, text } from "@storybook/addon-knobs";
+import { action } from "@storybook/addon-actions";
 import { FormButtons, ActionButton } from "../../../standalone";
 import { Save, Cancel } from "@material-ui/icons";
 
@@ -63,4 +63,3 @@ export const FormButtonsStory = (): React.ReactElement => {
 };
 
 FormButtonsStory.storyName = "FormButtons";
-FormButtonsStory.decorators = [withActions, withKnobs];

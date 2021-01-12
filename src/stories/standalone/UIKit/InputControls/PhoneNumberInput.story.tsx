@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import { boolean, text, select, withKnobs } from "@storybook/addon-knobs";
+import { boolean, text, select } from "@storybook/addon-knobs";
 import PhoneNumberInput from "../../../../standalone/UIKit/InputControls/PhoneNumberInput";
 import { CountryCode } from "libphonenumber-js";
-import { action, withActions } from "@storybook/addon-actions";
+import { action } from "@storybook/addon-actions";
 
 export const PhoneNumberInputStory = (): React.ReactElement => {
 	const countryCodes = ["US", "DE", "FR", "RU"] as CountryCode[];
@@ -36,9 +36,3 @@ export const PhoneNumberInputStory = (): React.ReactElement => {
 };
 
 PhoneNumberInputStory.storyName = "PhoneNumberInput";
-PhoneNumberInputStory.decorators = [withActions, withKnobs];
-PhoneNumberInputStory.parameters = {
-	knobs: {
-		escapeHTML: false,
-	},
-};

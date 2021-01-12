@@ -1,15 +1,10 @@
 import React, { useState } from "react";
-import { boolean, number, text, withKnobs } from "@storybook/addon-knobs";
+import { boolean, text } from "@storybook/addon-knobs";
 import NumberInteger from "../../../../standalone/UIKit/InputControls/NumberInteger";
-import { action, withActions } from "@storybook/addon-actions";
+import { action } from "@storybook/addon-actions";
 
 export const NumberIntegerStory = (): React.ReactElement => {
-	const [value] = useState(number("value", 0));
-	const onChange = action("onChange");
-
-	const getValue = React.useCallback((num: number | null) => onChange(num), [
-		onChange,
-	]);
+	const [value, setValue] = useState<number | null>(null);
 
 	return (
 		<NumberInteger
@@ -17,16 +12,13 @@ export const NumberIntegerStory = (): React.ReactElement => {
 			placeholder={text("Placeholder", "Enter integer number")}
 			fullWidth={boolean("Full Width", true)}
 			value={value}
-			getValue={getValue}
+			onChange={(evt: React.ChangeEvent, value: number | null) => {
+				action("onChange")(evt, value);
+				setValue(value);
+			}}
 			autoFocus={true}
 		/>
 	);
 };
 
 NumberIntegerStory.storyName = "NumberInteger";
-NumberIntegerStory.decorators = [withActions, withKnobs];
-NumberIntegerStory.parameters = {
-	knobs: {
-		escapeHTML: false,
-	},
-};

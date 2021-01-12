@@ -50,7 +50,7 @@
 		"deploy-storybook": "storybook-to-ghpages -o storybook-static -s build-ghpages",
 		"lint": "eslint 'src/**/*.{ts,tsx}'",
 		"lint-fix": "eslint --fix 'src/**/*.{ts,tsx}'",
-		"test": "jest"
+		"test": "TZ=UTC jest"
 	},
 	"eslintConfig": {
 		"extends": "react-app"

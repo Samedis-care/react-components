@@ -1,5 +1,5 @@
 import React from "react";
-import { boolean, text, select, withKnobs } from "@storybook/addon-knobs";
+import { boolean, text, select } from "@storybook/addon-knobs";
 import CurrencyInput from "../../../../standalone/UIKit/InputControls/CurrencyInput";
 
 export const CurrencyInputStory = (): React.ReactElement => {
@@ -26,9 +26,3 @@ export const CurrencyInputStory = (): React.ReactElement => {
 };
 
 CurrencyInputStory.storyName = "CurrencyInput";
-CurrencyInputStory.decorators = [withKnobs];
-CurrencyInputStory.parameters = {
-	knobs: {
-		escapeHTML: false,
-	},
-};

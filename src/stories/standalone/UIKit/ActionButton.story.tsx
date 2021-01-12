@@ -1,6 +1,6 @@
 import React from "react";
-import { boolean, select, text, withKnobs } from "@storybook/addon-knobs";
-import { action, withActions } from "@storybook/addon-actions";
+import { boolean, select, text } from "@storybook/addon-knobs";
+import { action } from "@storybook/addon-actions";
 import { ActionButton } from "../../../standalone";
 import { Add, ChevronRight } from "@material-ui/icons";
 
@@ -35,4 +35,3 @@ export const ActionButtonStory = (): React.ReactElement => {
 };
 
 ActionButtonStory.storyName = "ActionButton";
-ActionButtonStory.decorators = [withActions, withKnobs];

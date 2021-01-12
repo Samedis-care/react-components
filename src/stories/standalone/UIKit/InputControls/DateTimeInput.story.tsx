@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { boolean, text, withKnobs } from "@storybook/addon-knobs";
+import { boolean, text } from "@storybook/addon-knobs";
 import moment, { Moment } from "moment";
-import { action, withActions } from "@storybook/addon-actions";
+import { action } from "@storybook/addon-actions";
 import DateTimeInput from "../../../../standalone/UIKit/InputControls/DateTimeInput";
 import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
 
@@ -42,9 +42,3 @@ export const DateTimeInputStory = (): React.ReactElement => {
 };
 
 DateTimeInputStory.storyName = "DateTimeInput";
-DateTimeInputStory.decorators = [withActions, withKnobs];
-DateTimeInputStory.parameters = {
-	knobs: {
-		escapeHTML: false,
-	},
-};

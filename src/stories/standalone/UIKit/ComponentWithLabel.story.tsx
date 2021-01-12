@@ -1,15 +1,13 @@
 import React from "react";
-import { action, withActions } from "@storybook/addon-actions";
-import { select, text, boolean, withKnobs } from "@storybook/addon-knobs";
+import { action } from "@storybook/addon-actions";
+import { select, text, boolean } from "@storybook/addon-knobs";
 import { Grid, IconButton } from "@material-ui/core";
-
 import {
 	ArrowBack as ArrowBackIcon,
 	ArrowForward as ArrowForwardIcon,
 	ArrowUpward as ArrowUpwardIcon,
 	ArrowDownward as ArrowDownwardIcon,
 } from "@material-ui/icons";
-
 import ComponentWithLabel, {
 	ComponentWithLabelProps,
 } from "../../../standalone/UIKit/ComponentWithLabel";
@@ -104,4 +102,3 @@ export const ComponentWithLabelStory = (): React.ReactElement => {
 };
 
 ComponentWithLabelStory.storyName = "ComponentWithLabel";
-ComponentWithLabelStory.decorators = [withActions, withKnobs];
