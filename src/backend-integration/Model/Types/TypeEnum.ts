@@ -18,6 +18,8 @@ abstract class TypeEnum implements Type<string> {
 	abstract render(params: ModelRenderParams<string>): React.ReactElement;
 
 	validate(value: string): string | null {
+		if (value === "") return null;
+
 		return this.values.find((entry) => entry.value === value)
 			? null
 			: "Invalid Enum Value detected!"; // Developer warning
@@ -28,7 +30,7 @@ abstract class TypeEnum implements Type<string> {
 	}
 
 	getDefaultValue(): string {
-		return this.values[0].value;
+		return "";
 	}
 
 	stringify(value: string): string {
