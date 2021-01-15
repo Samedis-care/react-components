@@ -6,12 +6,13 @@ import {
 	SelectorData,
 } from "../../../standalone/Selector";
 import { colourOptions, colourTypeOptions } from "./Data";
-import { action, withActions } from "@storybook/addon-actions";
-import { boolean, text, withKnobs } from "@storybook/addon-knobs";
+import { action } from "@storybook/addon-actions";
+import { boolean, text } from "@storybook/addon-knobs";
 
 interface MySelectorData extends MultiSelectorData {
 	id: string;
 	type?: string;
+	isFixed?: boolean;
 }
 
 const enhanceData = (entry: SelectorData): MySelectorData => ({
@@ -35,7 +36,8 @@ export const SelectorMultiWithTags = (): React.ReactElement => {
 		null
 	);
 	const [selected, setSelected] = useState<MySelectorData[]>([]);
-	const [data, setData] = useState<MySelectorData[]>(getDefaultData);
+	const defaultData = getDefaultData();
+	const [switchValue, setSwitchValue] = useState<boolean>(false);
 	const loadGroupDataAction = action("onGroupLoad");
 	const loadDataAction = action("onLoad");
 	const onGroupSelectAction = action("onGroupSelect");
@@ -49,25 +51,38 @@ export const SelectorMultiWithTags = (): React.ReactElement => {
 	const loadingLabel = text("Loading Label", "");
 	const noDataLabel = text("No data Label", "");
 	const placeholderLabel = text("Placeholder Label", "");
+	const displaySwitch = boolean("Enable Switch", false);
+	const switchLabel = text("Switch Label Text", "Select from all");
+	const searchInputLabel = text("Search Label", "Search");
+
+	const loadFilteredData = React.useCallback(() => {
+		return displaySwitch && !switchValue
+			? defaultData.filter((option) => !option.isFixed)
+			: defaultData;
+	}, [defaultData, displaySwitch, switchValue]);
+
+	const [filteredData, setFilteredData] = useState<MySelectorData[]>(
+		loadFilteredData
+	);
 
 	const loadData = React.useCallback(
 		(query: string): MySelectorData[] => {
 			loadDataAction(query);
-			return data
+			return filteredData
 				.filter((option) =>
 					option.label.toLowerCase().includes(query.toLowerCase())
 				)
 				.map(enhanceData);
 		},
-		[data, loadDataAction]
+		[filteredData, loadDataAction]
 	);
 
 	const onSelect = React.useCallback(
-		(data: MySelectorData[]) => {
-			onSelectAction(data);
-			setSelected(data);
+		(selectorDatas: MySelectorData[]) => {
+			onSelectAction(selectorDatas);
+			setSelected(selectorDatas);
 		},
-		[onSelectAction, setSelected]
+		[onSelectAction]
 	);
 
 	const loadGroupData = React.useCallback(
@@ -90,17 +105,65 @@ export const SelectorMultiWithTags = (): React.ReactElement => {
 		[onGroupSelectAction]
 	);
 
+	const handleAutoComplete = React.useCallback(
+		(selectedValue: MySelectorData) => {
+			selected.push(selectedValue);
+			onSelect(selected);
+			setFilteredData(
+				filteredData.filter((d) => d.value !== selectedValue.value)
+			);
+		},
+		[selected, onSelect, filteredData]
+	);
+
+	const handleFilteredData = React.useCallback(
+		(selectorValue: MySelectorData) => {
+			if (!displaySwitch || switchValue) {
+				filteredData.push(selectorValue);
+			} else {
+				if (!selectorValue.isFixed) filteredData.push(selectorValue);
+			}
+			setFilteredData(filteredData);
+		},
+		[displaySwitch, filteredData, switchValue]
+	);
+
+	const handleSwitch = React.useCallback(
+		(switchValue: boolean) => {
+			let switchedData = defaultData;
+			selected.forEach((s) => {
+				switchedData = switchedData.filter((d) => d.value !== s.value);
+			});
+			if (!switchValue) {
+				switchedData = switchedData.filter((option) => !option.isFixed);
+			}
+			setSwitchValue(switchValue);
+			setFilteredData(switchedData);
+		},
+		[defaultData, selected]
+	);
+
 	return (
 		<MultiSelectWithTags<MySelectorData>
+			key={filteredData.length}
 			title={title}
+			autocompleteId={"multi-select-with-tags"}
+			displaySwitch={displaySwitch}
+			switchLabel={switchLabel}
+			switchValue={switchValue}
+			handleSwitch={handleSwitch}
 			selectedGroup={selectedGroups}
 			onGroupSelect={onGroupSelect}
 			onGroupLoad={loadGroupData}
 			selected={selected}
-			filteredData={data}
-			setData={setData}
+			setSelected={setSelected}
+			defaultData={defaultData}
+			filteredData={filteredData}
+			setFilteredData={setFilteredData}
+			handleFilteredData={handleFilteredData}
 			onSelect={onSelect}
 			onLoad={loadData}
+			handleAutoComplete={handleAutoComplete}
 			onAddNew={enableAddNew ? onAddNewAction : undefined}
 			enableIcons={icons}
 			disable={disable}
@@ -108,10 +171,19 @@ export const SelectorMultiWithTags = (): React.ReactElement => {
 			loadingLabel={loadingLabel}
 			noDataLabel={noDataLabel}
 			placeholderLabel={placeholderLabel}
-			searchInputLabel={text("Search Label", "Search")}
+			searchInputLabel={searchInputLabel}
+			infoText={
+				<div
+					dangerouslySetInnerHTML={{
+						__html: text(
+							"Info Text",
+							"This is a pretty long info text which supports html. It really is."
+						),
+					}}
+				/>
+			}
 		/>
 	);
 };
 
 SelectorMultiWithTags.storyName = "MultiWithTags";
-SelectorMultiWithTags.decorators = [withActions, withKnobs];

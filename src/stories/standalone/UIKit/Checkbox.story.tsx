@@ -1,14 +1,12 @@
 import React from "react";
-import { action, withActions } from "@storybook/addon-actions";
-import { boolean, text, withKnobs } from "@storybook/addon-knobs";
+import { action } from "@storybook/addon-actions";
+import { boolean, text } from "@storybook/addon-knobs";
 import { FormGroup } from "@material-ui/core";
-
 import Checkbox from "../../../standalone/UIKit/Checkbox";
 import {
 	Notifications as NotificationsIcon,
 	NotificationsOff as NotificationsOffIcon,
 } from "@material-ui/icons";
-
 import ComponentWithLabel from "../../../standalone/UIKit/ComponentWithLabel";
 
 export const CheckboxStory = (): React.ReactElement => {
@@ -109,4 +107,3 @@ export const CheckboxStory = (): React.ReactElement => {
 };
 
 CheckboxStory.storyName = "Checkbox";
-CheckboxStory.decorators = [withActions, withKnobs];

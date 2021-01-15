@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
-import { button, text, withKnobs } from "@storybook/addon-knobs";
-import { action, withActions } from "@storybook/addon-actions";
+import { button, text } from "@storybook/addon-knobs";
+import { action } from "@storybook/addon-actions";
 import { useDialogContext } from "../../../framework";
 import { ConfirmDialog, showConfirmDialog } from "../../../non-standalone";
 
@@ -53,4 +53,3 @@ export const ConfirmDialogStory = (): React.ReactElement => {
 };
 
 ConfirmDialogStory.storyName = "Confirm";
-ConfirmDialogStory.decorators = [withActions, withKnobs];

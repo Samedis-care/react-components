@@ -69,7 +69,7 @@ const SearchView = (props: IDataGridSearchViewProps) => {
 					<SearchIcon />
 				</IconButton>
 				<Popover
-					open={!!anchorEl}
+					open={anchorEl !== null}
 					anchorEl={anchorEl}
 					onClose={closePopover}
 					anchorOrigin={anchorOrigin}

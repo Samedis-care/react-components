@@ -47,6 +47,9 @@
 				"filter": "Filtrez"
 			}
 		},
+		"phone-number": {
+			"invalid": "Entrez le numéro de téléphone correct"
+		},
 		"signature-pad": {
 			"dialog": {
 				"reset": "Réinitialiser",

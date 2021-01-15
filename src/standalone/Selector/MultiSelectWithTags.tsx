@@ -1,17 +1,29 @@
-import React, { useState, useCallback, useRef } from "react";
-import { SelectorData, SelectorPropsSingleSelect } from "./Selector";
-import SingleSelect from "./Selector";
+import React, { useCallback, useRef } from "react";
 import {
-	TextField,
 	TextFieldProps,
 	Tooltip,
 	Typography,
+	Switch,
+	Grid,
+	createStyles,
+	Theme,
+	withStyles,
+	WithStyles,
 } from "@material-ui/core";
-import { createStyles, Theme, withStyles, WithStyles } from "@material-ui/core";
-import { SmallIconButton, SmallListItemIcon } from "../Small";
-import { Search as SearchIcon, Info as InfoIcon } from "@material-ui/icons";
-import { RemoveIcon } from "../../standalone";
 import { Autocomplete } from "@material-ui/lab";
+import {
+	Search as SearchIcon,
+	Info as InfoIcon,
+	Cancel as RemoveIcon,
+} from "@material-ui/icons";
+import SingleSelect, {
+	SelectorData,
+	SelectorPropsSingleSelect,
+} from "./Selector";
+import TextFieldWithHelp, {
+	TextFieldWithHelpProps,
+} from "../UIKit/TextFieldWithHelp";
+import { SmallIconButton, SmallListItemIcon } from "../Small";
 import { GenericWithStyles } from "../../utils";
 import { uniqueArray } from "../../utils";
 
@@ -30,6 +42,36 @@ export interface MultiSelectData extends SelectorData {
 	 */
 	canUnselect?: (data: MultiSelectData) => boolean | Promise<boolean>;
 }
+
+export interface MultiSelectWithTagsSwitchPropsOn {
+	/**
+	 * Display switch control
+	 */
+	displaySwitch: true;
+	/**
+	 * Label for switch control
+	 */
+	switchLabel: string;
+	/**
+	 * switch control value
+	 */
+	switchValue: boolean;
+	/**
+	 * Callback method to set switch value
+	 */
+	handleSwitch: (switchValue: boolean) => void;
+}
+
+export interface MultiSelectWithTagsSwitchPropsOff {
+	/**
+	 * Display switch control
+	 */
+	displaySwitch?: false;
+}
+
+export type MultiSelectWithTagsSwitchProps =
+	| MultiSelectWithTagsSwitchPropsOn
+	| MultiSelectWithTagsSwitchPropsOff;
 
 export interface MultiSelectWithTagsProps<Data extends MultiSelectData>
 	extends Omit<
@@ -51,6 +93,10 @@ export interface MultiSelectWithTagsProps<Data extends MultiSelectData>
 	 */
 	title: string;
 	/**
+	 * Data for group selector
+	 */
+	defaultData: Data[];
+	/**
 	 * The currently selected values
 	 */
 	selected: Data[];
@@ -61,7 +107,11 @@ export interface MultiSelectWithTagsProps<Data extends MultiSelectData>
 	/**
 	 * Callback method to return selected data
 	 */
-	setData?: (values: Data[]) => void;
+	setFilteredData?: (values: Data[]) => void;
+	/**
+	 * Callback method to handle data for autocomplete
+	 */
+	handleFilteredData?: (value: Data) => void;
 	/**
 	 * The currently selected groups
 	 */
@@ -74,6 +124,14 @@ export interface MultiSelectWithTagsProps<Data extends MultiSelectData>
 	 * Label for search input control
 	 */
 	searchInputLabel?: string;
+	/**
+	 * Callback method to handle selected value from autocomplete component
+	 */
+	handleAutoComplete?: (selectedValue: Data) => void;
+	/**
+	 * String used for the Autocomplete component
+	 */
+	autocompleteId?: string;
 }
 
 const styles = createStyles((theme: Theme) => ({
@@ -90,38 +148,92 @@ const styles = createStyles((theme: Theme) => ({
 		margin: "5px",
 		lineHeight: "30px",
 	},
+	labelWithSwitch: {
+		marginTop: 15,
+	},
+	searchLabel: {
+		lineHeight: "30px",
+		float: "left",
+	},
+	switch: {
+		lineHeight: "30px",
+		float: "right",
+	},
 }));
 
+const AntSwitch = withStyles((theme: Theme) => ({
+	root: {
+		width: 35,
+		height: 16,
+		padding: 0,
+		display: "flex",
+	},
+	switchBase: {
+		padding: 2,
+		color: theme.palette.grey[500],
+		"&$checked": {
+			transform: "translateX(18px)",
+			color: theme.palette.common.white,
+			"& + $track": {
+				opacity: 1,
+				backgroundColor: theme.palette.primary.main,
+				borderColor: theme.palette.primary.main,
+			},
+		},
+	},
+	thumb: {
+		width: 12,
+		height: 12,
+		boxShadow: "none",
+	},
+	track: {
+		border: `1px solid ${theme.palette.grey[500]}`,
+		borderRadius: 16 / 2,
+		opacity: 1,
+		backgroundColor: theme.palette.common.white,
+	},
+	checked: {},
+}))(Switch);
+
 const MultiSelectWithTags = <Data extends MultiSelectData>(
-	props: MultiSelectWithTagsProps<Data> & WithStyles
+	props: MultiSelectWithTagsProps<Data> &
+		WithStyles &
+		MultiSelectWithTagsSwitchProps &
+		TextFieldWithHelpProps
 ) => {
 	const {
 		title,
 		searchInputLabel,
 		onSelect,
 		selected,
+		defaultData,
 		filteredData,
-		setData,
+		setFilteredData,
+		handleFilteredData,
 		onGroupLoad,
 		onGroupSelect,
 		selectedGroup,
 		enableIcons,
 		disable,
 		classes,
+		displaySwitch,
+		handleAutoComplete,
+		infoText,
 	} = props;
-	const [selectedValues, setSelectedValue] = useState<Data[]>([]);
+	const switchLabel = props.displaySwitch ? props.switchLabel : undefined;
+	const switchValue = props.displaySwitch ? props.switchValue : undefined;
+	const handleSwitch = props.displaySwitch ? props.handleSwitch : undefined;
 	const input = useRef<TextFieldProps>();
-	const array = [...selected, ...selectedValues].flat();
-	const allSelected = uniqueArray(array.map((item) => item.value)).map(
+	const allSelected = uniqueArray(selected.map((item) => item.value)).map(
 		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-		(value) => array.find((e) => e.value === value)!
-	);
+		(value) => selected.find((e) => e.value === value)!
+	) as Data[];
 
 	const handleGroupSelect = useCallback(
 		(selectedGroup: SelectorData | null) => {
 			if (onGroupSelect) onGroupSelect(selectedGroup);
 			if (selectedGroup !== null) {
-				const records = filteredData.filter(
+				const records = defaultData.filter(
 					(option: Data) =>
 						option.type?.toLowerCase() === selectedGroup.value.toLowerCase()
 				);
@@ -129,12 +241,19 @@ const MultiSelectWithTags = <Data extends MultiSelectData>(
 				const filteredOptions = filteredData.filter(
 					(entry) => !recordValues.includes(entry.value)
 				);
-				if (setData) setData(filteredOptions);
-				const selectedValues = [selected, ...records].flat() as Data[];
-				if (onSelect) onSelect(selectedValues);
+				if (setFilteredData) setFilteredData(filteredOptions);
+				const selectedDatas = [selected, ...records].flat() as Data[];
+				if (onSelect) onSelect(selectedDatas);
 			}
 		},
-		[filteredData, onGroupSelect, onSelect, selected, setData]
+		[
+			defaultData,
+			filteredData,
+			onGroupSelect,
+			onSelect,
+			selected,
+			setFilteredData,
+		]
 	);
 
 	const groupSelectLoadHandler = useCallback(
@@ -147,59 +266,40 @@ const MultiSelectWithTags = <Data extends MultiSelectData>(
 		[onGroupLoad]
 	);
 
+	const handleChangeSwitch = useCallback(
+		(event: React.ChangeEvent<HTMLInputElement>) => {
+			if (handleSwitch) handleSwitch(event.target.checked);
+		},
+		[handleSwitch]
+	);
+
 	const handleDelete = useCallback(
 		(evt: React.MouseEvent<HTMLButtonElement>) => {
 			let canSelectedDelete = true;
-			let canSelectedValuesDelete = true;
-			const selectedEntry: Data | null | undefined = selected.find(
+			const deletedEntry: Data | null | undefined = selected.find(
 				(s) => s.value === evt.currentTarget.name
 			);
-			const selectedValuesEntry: Data | null | undefined = selectedValues.find(
-				(s) => s.value === evt.currentTarget.name
-			);
-			if (!selectedEntry && !selectedValuesEntry) {
+			if (!deletedEntry) {
 				throw new Error(
 					"[Components-Care] [MultiSelect] Entry couldn't be found. Either entry.value is not set, or the entity renderer does not correctly set the name attribute"
 				);
-			}
-			void (async () => {
-				if (selectedEntry?.canUnselect) {
-					canSelectedDelete = await selectedEntry.canUnselect(selectedEntry);
-				}
-				if (selectedValuesEntry?.canUnselect) {
-					canSelectedValuesDelete = await selectedValuesEntry.canUnselect(
-						selectedValuesEntry
-					);
-				}
-				if (canSelectedDelete && onSelect) {
-					onSelect(selected.filter((s) => s.value !== selectedEntry?.value));
-					if (selectedEntry) {
+			} else {
+				void (async () => {
+					if (deletedEntry.canUnselect)
+						canSelectedDelete = await deletedEntry.canUnselect(deletedEntry);
+					if (canSelectedDelete) {
+						if (onSelect)
+							onSelect(selected.filter((s) => s.value !== deletedEntry.value));
 						const filteredDataSelected = filteredData.find(
-							(option) => option.value === selectedEntry.value
+							(option) => option.value === deletedEntry.value
 						);
-						if (!filteredDataSelected) {
-							filteredData.push(selectedEntry);
-							if (setData) setData(filteredData);
-						}
+						if (!filteredDataSelected && handleFilteredData)
+							handleFilteredData(deletedEntry);
 					}
-				}
-				if (canSelectedValuesDelete) {
-					setSelectedValue(
-						selectedValues.filter((s) => s.value !== selectedValuesEntry?.value)
-					);
-					if (selectedValuesEntry) {
-						const filteredDataSelectedValues = filteredData.find(
-							(option) => option.value === selectedValuesEntry.value
-						);
-						if (!filteredDataSelectedValues) {
-							filteredData.push(selectedValuesEntry);
-							if (setData) setData(filteredData);
-						}
-					}
-				}
-			})();
+				})();
+			}
 		},
-		[selected, selectedValues, onSelect, filteredData, setData]
+		[selected, onSelect, filteredData, handleFilteredData]
 	);
 
 	const handleChangeAutocomplete = useCallback(
@@ -211,24 +311,16 @@ const MultiSelectWithTags = <Data extends MultiSelectData>(
 			)
 				return;
 			else {
-				if (setData) {
-					setData(
-						filteredData.filter((data) => data.value !== selectedValue.value)
-					);
-				}
-				selectedValues.push(selectedValue);
-				selected.push(selectedValue);
-				if (onSelect) onSelect(selected);
-				setSelectedValue(selectedValues);
+				if (handleAutoComplete) handleAutoComplete(selectedValue);
 				if (input.current) input.current.value = "";
 			}
 		},
-		[setData, selectedValues, onSelect, selected, filteredData]
+		[handleAutoComplete]
 	);
 
 	return (
-		<div>
-			<Typography>{title}</Typography>
+		<Typography component="div">
+			<Typography component="label">{title}</Typography>
 			<SingleSelect
 				selected={selectedGroup}
 				onSelect={handleGroupSelect}
@@ -237,8 +329,29 @@ const MultiSelectWithTags = <Data extends MultiSelectData>(
 				disable={disable}
 				multiSelect={false}
 			/>
+			<Typography component="div" className={classes.labelWithSwitch}>
+				{displaySwitch && (
+					<Typography component="div" className={classes.switch}>
+						<Grid component="label" container alignItems="center" spacing={1}>
+							<Grid item>
+								<AntSwitch
+									checked={switchValue || false}
+									onChange={handleChangeSwitch}
+								/>
+							</Grid>
+							<Grid item>{switchLabel || "All"}</Grid>
+						</Grid>
+					</Typography>
+				)}
+				<Typography component="div" className={classes.searchLabel}>
+					<Typography component="label">
+						{searchInputLabel || "Search input"}
+					</Typography>
+				</Typography>
+			</Typography>
 			<Autocomplete
 				key={filteredData.length}
+				id={props.autocompleteId}
 				freeSolo
 				autoComplete
 				disableClearable
@@ -249,17 +362,15 @@ const MultiSelectWithTags = <Data extends MultiSelectData>(
 					handleChangeAutocomplete(selectedValue as Data)
 				}
 				renderInput={(params: TextFieldProps) => (
-					<TextField
+					<TextFieldWithHelp
 						{...params}
 						inputRef={input}
-						label={searchInputLabel || "Search input"}
-						margin="normal"
 						InputProps={{
 							...params.InputProps,
 							startAdornment: <SearchIcon color={"primary"} />,
 							type: "search",
-							endAdornment: (
-								<Tooltip title="infoText">
+							endAdornment: infoText && (
+								<Tooltip title={infoText}>
 									<InfoIcon color={"disabled"} />
 								</Tooltip>
 							),
@@ -288,7 +399,7 @@ const MultiSelectWithTags = <Data extends MultiSelectData>(
 						</div>
 					);
 				})}
-		</div>
+		</Typography>
 	);
 };
 

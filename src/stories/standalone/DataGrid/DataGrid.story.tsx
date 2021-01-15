@@ -1,6 +1,6 @@
 import React from "react";
 import "../../../i18n";
-import { boolean, text, withKnobs } from "@storybook/addon-knobs";
+import { boolean, text } from "@storybook/addon-knobs";
 import { DataGrid } from "../../../standalone";
 import { makeStyles } from "@material-ui/core/styles";
 import {
@@ -11,7 +11,7 @@ import {
 	IDataGridColumnDef,
 	IDataGridFieldFilter,
 } from "../../../standalone/DataGrid";
-import { action, withActions } from "@storybook/addon-actions";
+import { action } from "@storybook/addon-actions";
 import { IDataGridExporter } from "../../../standalone/DataGrid/Header";
 import { IFilterDef } from "../../../standalone/DataGrid/Content/FilterEntry";
 import data from "./covid-daily.json";
@@ -343,4 +343,3 @@ export const DataGridStory = (): React.ReactElement => {
 };
 
 DataGridStory.storyName = "Basic";
-DataGridStory.decorators = [withActions, withKnobs];

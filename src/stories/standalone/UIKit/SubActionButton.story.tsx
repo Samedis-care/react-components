@@ -1,6 +1,6 @@
 import React from "react";
-import { boolean, text, withKnobs } from "@storybook/addon-knobs";
-import { action, withActions } from "@storybook/addon-actions";
+import { boolean, text } from "@storybook/addon-knobs";
+import { action } from "@storybook/addon-actions";
 import { SubActionButton } from "../../../standalone";
 import { MenuBook, Info, PeopleAlt, DeleteForever } from "@material-ui/icons";
 
@@ -44,4 +44,3 @@ export const SubActionButtonStory = (): React.ReactElement => {
 };
 
 SubActionButtonStory.storyName = "SubActionButton";
-SubActionButtonStory.decorators = [withActions, withKnobs];

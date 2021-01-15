@@ -6,8 +6,8 @@ import {
 	SelectorData,
 } from "../../../standalone/Selector";
 import { colourOptions } from "./Data";
-import { action, withActions } from "@storybook/addon-actions";
-import { boolean, text, withKnobs } from "@storybook/addon-knobs";
+import { action } from "@storybook/addon-actions";
+import { boolean, text } from "@storybook/addon-knobs";
 import { Box, CssBaseline } from "@material-ui/core";
 import CustomMultiSelectEntry from "./CustomMultiSelectEntry";
 
@@ -92,4 +92,3 @@ export const SelectorMulti = (): React.ReactElement => {
 };
 
 SelectorMulti.storyName = "Multi";
-SelectorMulti.decorators = [withActions, withKnobs];

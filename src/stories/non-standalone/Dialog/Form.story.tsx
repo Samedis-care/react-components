@@ -1,6 +1,6 @@
 import React, { ChangeEvent, useEffect, useState } from "react";
-import { button, number, text, withKnobs } from "@storybook/addon-knobs";
-import { action, withActions } from "@storybook/addon-actions";
+import { button, number, text } from "@storybook/addon-knobs";
+import { action } from "@storybook/addon-actions";
 import { TextField } from "@material-ui/core";
 import {
 	FormDialog,
@@ -97,4 +97,3 @@ export const FormDialogStory = (): React.ReactElement => {
 };
 
 FormDialogStory.storyName = "Form (custom)";
-FormDialogStory.decorators = [withActions, withKnobs];

@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import "../../../i18n";
 import SignaturePad from "../../../standalone/SignaturePad/index";
-import { select, text, boolean, withKnobs } from "@storybook/addon-knobs";
-import { action, withActions } from "@storybook/addon-actions";
+import { select, text, boolean } from "@storybook/addon-knobs";
+import { action } from "@storybook/addon-actions";
 
 export const SignaturePadStory = (): React.ReactElement => {
 	const penColor = ["blue", "black", "red", "yellow", "pink"];
@@ -37,9 +37,3 @@ export const SignaturePadStory = (): React.ReactElement => {
 };
 
 SignaturePadStory.storyName = "SignaturePad";
-SignaturePadStory.decorators = [withActions, withKnobs];
-SignaturePadStory.parameters = {
-	knobs: {
-		escapeHTML: false,
-	},
-};

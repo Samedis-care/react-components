@@ -17,10 +17,13 @@
 		"@types/react-router-dom": "^5.1.6",
 		"@types/react-select": "^3.0.28",
 		"@types/react-signature-canvas": "^1.0.1",
+		"cldr-data": "^36.0.0",
 		"formik": "2.0.7",
+		"globalize": "^1.6.0",
 		"i18next": "^19.8.4",
 		"i18next-browser-languagedetector": "^6.0.1",
 		"i18next-resource-store-loader": "^0.1.2",
+		"libphonenumber-js": "^1.9.6",
 		"moment": "^2.29.1",
 		"react-query": "^3.5.1",
 		"react-scripts": "^4.0.1",
@@ -47,7 +50,7 @@
 		"deploy-storybook": "storybook-to-ghpages -o storybook-static -s build-ghpages",
 		"lint": "eslint 'src/**/*.{ts,tsx}'",
 		"lint-fix": "eslint --fix 'src/**/*.{ts,tsx}'",
-		"test": "jest"
+		"test": "TZ=UTC jest"
 	},
 	"eslintConfig": {
 		"extends": "react-app"
@@ -111,10 +114,15 @@
 		"@testing-library/jest-dom": "^5.11.6",
 		"@testing-library/react": "^11.2.2",
 		"@testing-library/user-event": "^12.6.0",
+		"@types/enzyme": "^3.10.8",
+		"@types/globalize": "^1.5.0",
 		"@types/jest": "^26.0.19",
 		"@types/react-virtualized": "^9.21.10",
+		"@wojtekmaj/enzyme-adapter-react-17": "^0.4.1",
 		"babel-jest": "^26.6.3",
 		"cpx": "^1.5.0",
+		"enzyme": "^3.11.0",
+		"enzyme-to-json": "^3.6.1",
 		"eslint-config-prettier": "^7.1.0",
 		"eslint-plugin-prettier": "^3.3.0",
 		"husky": "^4.3.6",
