@@ -8,7 +8,7 @@ import {
 } from "@material-ui/core";
 import { Rule, StyleSheet } from "jss";
 import { StoryContext } from "@storybook/addons";
-import { button, color, select, withKnobs } from "@storybook/addon-knobs";
+import { button, color, select, text, withKnobs } from "@storybook/addon-knobs";
 import { withActions } from "@storybook/addon-actions";
 import ccI18n, { langs } from "../src/i18n";
 
@@ -100,6 +100,29 @@ const ThemeSelector = (props: ThemeSelectorProps) => {
 	return props.children;
 };
 
+const AdvThemeSelector = (props: ThemeSelectorProps) => {
+	const setTheme = useContext(ThemeContext)!;
+
+	const themeJson = text(
+		"Theme",
+		JSON.stringify(loadTheme(), undefined, 4),
+		"Theme (Advanced)"
+	);
+
+	useEffect(() => {
+		try {
+			const theme = JSON.parse(themeJson);
+
+			localStorage.setItem("theme", JSON.stringify(theme));
+			setTheme(theme);
+		} catch (e) {
+			console.warn("Theme JSON invalid!", e);
+		}
+	}, [themeJson]);
+
+	return props.children;
+};
+
 const LanguageSelector = () => {
 	let langOptions: Record<string, string> = {};
 	langs.forEach((lang) => (langOptions[lang] = lang));
@@ -131,16 +154,18 @@ export const decorators = [
 		return (
 			<Framework defaultTheme={loadTheme}>
 				<ThemeSelector>
-					<>
-						<LanguageSelector />
-						{process && process.env && process.env.JEST_WORKER_ID ? (
-							<StylesProvider generateClassName={cng}>
+					<AdvThemeSelector>
+						<>
+							<LanguageSelector />
+							{process && process.env && process.env.JEST_WORKER_ID ? (
+								<StylesProvider generateClassName={cng}>
+									<Story />
+								</StylesProvider>
+							) : (
 								<Story />
-							</StylesProvider>
-						) : (
-							<Story />
-						)}
-					</>
+							)}
+						</>
+					</AdvThemeSelector>
 				</ThemeSelector>
 			</Framework>
 		);
