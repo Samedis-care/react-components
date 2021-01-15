@@ -47,6 +47,7 @@ const BackendDataGrid = <
 			const [result, meta] = await model.index(params);
 			return {
 				rowsTotal: meta.totalRows,
+				rowsFiltered: meta.filteredRows,
 				rows: result.map((entry: Record<KeyT, unknown>) =>
 					Object.fromEntries(
 						Object.entries(entry).map((kvs) => {
@@ -116,7 +117,11 @@ const BackendDataGrid = <
 	const { mutateAsync: deleteAdvanced } = model.deleteAdvanced();
 	const { mutateAsync: deleteMultiple } = model.deleteMultiple();
 	const handleDelete = useCallback(
-		async (invert: boolean, ids: string[]) => {
+		async (
+			invert: boolean,
+			ids: string[],
+			filter?: Partial<IDataGridLoadDataParameters>
+		) => {
 			try {
 				await showConfirmDialog(pushDialog, {
 					title: ccI18n.t(
@@ -141,7 +146,7 @@ const BackendDataGrid = <
 
 			try {
 				if (enableDeleteAll) {
-					await deleteAdvanced([invert, ids]);
+					await deleteAdvanced([invert, ids, filter]);
 				} else {
 					await deleteMultiple(ids);
 				}

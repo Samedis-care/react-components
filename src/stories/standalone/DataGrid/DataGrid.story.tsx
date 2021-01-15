@@ -134,6 +134,7 @@ export const DataGridStory = (): React.ReactElement => {
 				onDelete={
 					boolean("Enable delete", true) ? action("onDelete") : undefined
 				}
+				enableDeleteAll={boolean("Enable select all", true)}
 				filterBar={
 					boolean("Enable custom filters?", true)
 						? GridCustomFilters
@@ -330,7 +331,8 @@ export const DataGridStory = (): React.ReactElement => {
 					rowData = rowData.splice(pageIndex * rowsPerPage, rowsPerPage);
 
 					return {
-						rowsTotal,
+						rowsTotal: data.length,
+						rowsFiltered: rowsTotal,
 						rows: rowData,
 					};
 				}}

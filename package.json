@@ -16,6 +16,7 @@
 		"@types/react-dom": "^17.0.0",
 		"@types/react-router-dom": "^5.1.6",
 		"@types/react-select": "^3.0.28",
+		"@types/react-signature-canvas": "^1.0.1",
 		"formik": "2.0.7",
 		"i18next": "^19.8.4",
 		"i18next-browser-languagedetector": "^6.0.1",
@@ -24,6 +25,7 @@
 		"react-query": "^3.5.1",
 		"react-scripts": "^4.0.1",
 		"react-select": "^3.1.1",
+		"react-signature-canvas": "^1.0.3",
 		"react-virtualized": "^9.22.3",
 		"typescript": "^4.1.3"
 	},

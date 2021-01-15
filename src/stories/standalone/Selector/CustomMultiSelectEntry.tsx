@@ -10,7 +10,7 @@ import {
 	SmallIconButton,
 	SmallListItem,
 	SmallListItemIcon,
-} from "../../../standalone/Small/List";
+} from "../../../standalone/Small";
 import { Delete as DeleteIcon } from "@material-ui/icons";
 import { IMultiSelectEntryProps } from "../../../standalone/Selector/MultiSelectEntry";
 

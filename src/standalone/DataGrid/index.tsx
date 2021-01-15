@@ -11,7 +11,7 @@ import React, {
 import { Grid, Theme, useTheme } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import Header, { IDataGridHeaderProps } from "./Header";
-import Footer, { IDataGridFooterProps } from "./Footer";
+import Footer from "./Footer";
 import Settings from "./Settings";
 import Content from "./Content";
 import { IFilterDef } from "./Content/FilterEntry";
@@ -21,7 +21,6 @@ import { dataGridPrepareFiltersAndSorts } from "./CallbackUtil";
 import { ModelFilterType } from "../../backend-integration/Model";
 
 export type IDataGridProps = IDataGridHeaderProps &
-	IDataGridFooterProps &
 	IDataGridColumnProps &
 	IDataGridCallbacks;
 
@@ -80,6 +79,17 @@ export interface IDataGridCallbacks {
 export type DataGridAdditionalFilters = Record<string, unknown>;
 export type DataGridSortSetting = { field: string; direction: -1 | 1 };
 
+export interface IDataGridAddButton {
+	/**
+	 * Label of the add button
+	 */
+	label: NonNullable<React.ReactNode>;
+	/**
+	 * onClick handler for the add button
+	 */
+	onClick: () => void;
+}
+
 export interface IDataGridColumnProps {
 	/**
 	 * Column definitions
@@ -90,9 +100,9 @@ export interface IDataGridColumnProps {
 	 */
 	searchPlaceholder?: string;
 	/**
-	 * Add new handler, do not specify to disable add new button
+	 * Add new handler(s), do not specify to disable add new button(s)
 	 */
-	onAddNew?: () => void;
+	onAddNew?: (() => void) | IDataGridAddButton[];
 	/**
 	 * Edit handler
 	 * @param id The id to edit
@@ -102,8 +112,13 @@ export interface IDataGridColumnProps {
 	 * Delete handler, do not specify to disable deletion
 	 * @param invert if invert is true, delete everything except ids, otherwise only delete ids
 	 * @param ids The list of ids to (not) delete
+	 * @param filter The current data grid filter (if set)
 	 */
-	onDelete?: (invert: boolean, ids: string[]) => void;
+	onDelete?: (
+		invert: boolean,
+		ids: string[],
+		filter?: Partial<IDataGridLoadDataParameters>
+	) => void;
 	/**
 	 * Do we support and enable the delete all functionality?
 	 * If not set select all will only select all ids on the current page
@@ -198,6 +213,10 @@ export interface DataGridData {
 	 */
 	rowsTotal: number;
 	/**
+	 * Amount of rows shown
+	 */
+	rowsFiltered?: number;
+	/**
 	 * Row data
 	 */
 	rows: DataGridRowData[];
@@ -222,6 +241,10 @@ export interface IDataGridState {
 	 * The total amount of rows
 	 */
 	rowsTotal: number;
+	/**
+	 * The amount of rows shown if view is filtered
+	 */
+	rowsFiltered: number | null;
 	/**
 	 * Show the settings popover
 	 */
@@ -342,6 +365,7 @@ export const getDataGridDefaultState = (
 ): IDataGridState => ({
 	search: "",
 	rowsTotal: 0,
+	rowsFiltered: null,
 	showSettings: false,
 	pages: [0, 0],
 	hiddenColumns: columns.filter((col) => col.hidden).map((col) => col.field),
@@ -353,6 +377,19 @@ export const getDataGridDefaultState = (
 	refreshData: true,
 	customData: {},
 });
+
+export const getDataGridDefaultColumnsState = (
+	columns: IDataGridColumnDef[]
+): IDataGridColumnsState => {
+	const data: IDataGridColumnsState = {};
+	columns.forEach((column) => {
+		data[column.field] = {
+			sort: 0,
+			filter: undefined,
+		};
+	});
+	return data;
+};
 
 const useStyles = makeStyles((theme: Theme) => ({
 	wrapper: {
@@ -371,7 +408,7 @@ const useStyles = makeStyles((theme: Theme) => ({
 
 const DataGrid = (props: IDataGridProps) => {
 	const { columns, loadData, getAdditionalFilters, forceRefreshToken } = props;
-	const rowsPerPage = props.rowsPerPage || 25;
+	const rowsPerPage = props.rowsPerPage || 50;
 
 	const classes = useStyles();
 	const theme = useTheme();
@@ -411,16 +448,9 @@ const DataGrid = (props: IDataGridProps) => {
 		[columns, hiddenColumns, lockedColumns]
 	);
 
-	const columnsStatePack = useState<IDataGridColumnsState>(() => {
-		const data: IDataGridColumnsState = {};
-		columns.forEach((column) => {
-			data[column.field] = {
-				sort: 0,
-				filter: undefined,
-			};
-		});
-		return data;
-	});
+	const columnsStatePack = useState<IDataGridColumnsState>(() =>
+		getDataGridDefaultColumnsState(columns)
+	);
 	const [columnsState] = columnsStatePack;
 
 	const columnWidthStatePack = useState<Record<string, number>>(() => {
@@ -465,15 +495,18 @@ const DataGrid = (props: IDataGridProps) => {
 						sort: sorts,
 					});
 					// check if we are on an invalid page
+
+					const dataRowsTotal = data.rowsFiltered ?? data.rowsTotal;
+
 					if (
 						pageIndex !== 0 &&
 						rowsPerPage !== 0 &&
-						data.rowsTotal !== 0 &&
+						dataRowsTotal !== 0 &&
 						data.rows.length === 0
 					) {
-						const hasPartialPage = data.rowsTotal % rowsPerPage !== 0;
+						const hasPartialPage = dataRowsTotal % rowsPerPage !== 0;
 						const newPage =
-							((data.rowsTotal / rowsPerPage) | 0) + (hasPartialPage ? 0 : -1);
+							((dataRowsTotal / rowsPerPage) | 0) + (hasPartialPage ? 0 : -1);
 						// eslint-disable-next-line no-console
 						console.assert(
 							newPage !== pageIndex,
@@ -495,6 +528,7 @@ const DataGrid = (props: IDataGridProps) => {
 					setState((prevState) => ({
 						...prevState,
 						rowsTotal: data.rowsTotal,
+						rowsFiltered: data.rowsFiltered ?? null,
 						dataLoadError: null,
 						rows: Object.assign({}, prevState.rows, rowsAsObject),
 					}));
@@ -548,6 +582,7 @@ const DataGrid = (props: IDataGridProps) => {
 			direction={"column"}
 			justify={"space-between"}
 			alignItems={"stretch"}
+			wrap={"nowrap"}
 			className={classes.wrapper}
 			ref={(r) => (gridRoot.current = r ? r : undefined)}
 		>

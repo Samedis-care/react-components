@@ -87,7 +87,11 @@ export type ModelFieldName = "id" | string;
  * @param invert Invert the selection
  * @param ids The selection
  */
-export type AdvancedDeleteRequest = [invert: boolean, ids: string[]];
+export type AdvancedDeleteRequest = [
+	invert: boolean,
+	ids: string[],
+	filter?: Partial<IDataGridLoadDataParameters>
+];
 
 class Model<
 	KeyT extends ModelFieldName,

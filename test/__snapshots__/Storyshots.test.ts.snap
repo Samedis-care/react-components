@@ -24,10 +24,10 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
 
 exports[`Storyshots Standalone/DataGrid Basic 1`] = `
 <div
-  className="standalone-datagrid--data-grid-story-makeStyles-wrapper-22"
+  className="standalone-datagrid--data-grid-story-makeStyles-wrapper-41"
 >
   <div
-    className="standalone-datagrid--data-grid-story-MuiGrid-root standalone-datagrid--data-grid-story-makeStyles-wrapper-23 standalone-datagrid--data-grid-story-MuiGrid-container standalone-datagrid--data-grid-story-MuiGrid-direction-xs-column standalone-datagrid--data-grid-story-MuiGrid-justify-xs-space-between"
+    className="standalone-datagrid--data-grid-story-MuiGrid-root standalone-datagrid--data-grid-story-makeStyles-wrapper-42 standalone-datagrid--data-grid-story-MuiGrid-container standalone-datagrid--data-grid-story-MuiGrid-direction-xs-column standalone-datagrid--data-grid-story-MuiGrid-justify-xs-space-between"
   >
     <div
       className="standalone-datagrid--data-grid-story-MuiGrid-root standalone-datagrid--data-grid-story-MuiGrid-item"
@@ -39,7 +39,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
           className="standalone-datagrid--data-grid-story-MuiGrid-root standalone-datagrid--data-grid-story-MuiGrid-item"
         >
           <div
-            className="standalone-datagrid--data-grid-story-MuiBox-root standalone-datagrid--data-grid-story-MuiBox-root-25"
+            className="standalone-datagrid--data-grid-story-MuiBox-root standalone-datagrid--data-grid-story-MuiBox-root-44"
           >
             <div
               className="standalone-datagrid--data-grid-story-MuiFormControl-root standalone-datagrid--data-grid-story-MuiTextField-root standalone-datagrid--data-grid-story-MuiFormControl-marginDense"
@@ -84,7 +84,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
           className="standalone-datagrid--data-grid-story-MuiGrid-root standalone-datagrid--data-grid-story-MuiGrid-item standalone-datagrid--data-grid-story-MuiGrid-grid-xs-true"
         >
           <div
-            className="standalone-datagrid--data-grid-story-MuiBox-root standalone-datagrid--data-grid-story-MuiBox-root-26"
+            className="standalone-datagrid--data-grid-story-MuiBox-root standalone-datagrid--data-grid-story-MuiBox-root-45"
           >
             <div
               className="standalone-datagrid--data-grid-story-MuiGrid-root standalone-datagrid--data-grid-story-MuiGrid-container standalone-datagrid--data-grid-story-MuiGrid-spacing-xs-2 standalone-datagrid--data-grid-story-MuiGrid-align-items-xs-center standalone-datagrid--data-grid-story-MuiGrid-justify-xs-flex-end"
@@ -97,10 +97,10 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
       </div>
     </div>
     <div
-      className="standalone-datagrid--data-grid-story-MuiGrid-root standalone-datagrid--data-grid-story-makeStyles-middle-24 standalone-datagrid--data-grid-story-MuiGrid-item standalone-datagrid--data-grid-story-MuiGrid-grid-xs-true"
+      className="standalone-datagrid--data-grid-story-MuiGrid-root standalone-datagrid--data-grid-story-makeStyles-middle-43 standalone-datagrid--data-grid-story-MuiGrid-item standalone-datagrid--data-grid-story-MuiGrid-grid-xs-true"
     >
       <div
-        className="standalone-datagrid--data-grid-story-MuiCollapse-container standalone-datagrid--data-grid-story-makeStyles-collapse-27 standalone-datagrid--data-grid-story-MuiCollapse-hidden"
+        className="standalone-datagrid--data-grid-story-MuiCollapse-container standalone-datagrid--data-grid-story-makeStyles-collapse-46 standalone-datagrid--data-grid-story-MuiCollapse-hidden"
         style={
           Object {
             "minHeight": "0px",
@@ -114,7 +114,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
             className="standalone-datagrid--data-grid-story-MuiCollapse-wrapperInner"
           >
             <div
-              className="standalone-datagrid--data-grid-story-MuiPaper-root standalone-datagrid--data-grid-story-makeStyles-wrapper-28 standalone-datagrid--data-grid-story-MuiPaper-elevation0 standalone-datagrid--data-grid-story-MuiPaper-rounded"
+              className="standalone-datagrid--data-grid-story-MuiPaper-root standalone-datagrid--data-grid-story-makeStyles-wrapper-47 standalone-datagrid--data-grid-story-MuiPaper-elevation0 standalone-datagrid--data-grid-story-MuiPaper-rounded"
             >
               <h6
                 className="standalone-datagrid--data-grid-story-MuiTypography-root standalone-datagrid--data-grid-story-MuiTypography-h6"
@@ -135,7 +135,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                   >
                     <span
                       aria-disabled={false}
-                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-29 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
+                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-48 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
                       onBlur={[Function]}
                       onDragLeave={[Function]}
                       onFocus={[Function]}
@@ -154,7 +154,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                       >
                         <input
                           checked={false}
-                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-32"
+                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-51"
                           data-indeterminate={false}
                           onChange={[Function]}
                           type="checkbox"
@@ -190,7 +190,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                   >
                     <span
                       aria-disabled={false}
-                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-29 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
+                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-48 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
                       onBlur={[Function]}
                       onDragLeave={[Function]}
                       onFocus={[Function]}
@@ -209,7 +209,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                       >
                         <input
                           checked={false}
-                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-32"
+                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-51"
                           data-indeterminate={false}
                           onChange={[Function]}
                           type="checkbox"
@@ -245,7 +245,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                   >
                     <span
                       aria-disabled={false}
-                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-29 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
+                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-48 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
                       onBlur={[Function]}
                       onDragLeave={[Function]}
                       onFocus={[Function]}
@@ -264,7 +264,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                       >
                         <input
                           checked={false}
-                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-32"
+                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-51"
                           data-indeterminate={false}
                           onChange={[Function]}
                           type="checkbox"
@@ -300,7 +300,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                   >
                     <span
                       aria-disabled={false}
-                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-29 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
+                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-48 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
                       onBlur={[Function]}
                       onDragLeave={[Function]}
                       onFocus={[Function]}
@@ -319,7 +319,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                       >
                         <input
                           checked={false}
-                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-32"
+                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-51"
                           data-indeterminate={false}
                           onChange={[Function]}
                           type="checkbox"
@@ -355,7 +355,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                   >
                     <span
                       aria-disabled={false}
-                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-29 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
+                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-48 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
                       onBlur={[Function]}
                       onDragLeave={[Function]}
                       onFocus={[Function]}
@@ -374,7 +374,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                       >
                         <input
                           checked={false}
-                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-32"
+                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-51"
                           data-indeterminate={false}
                           onChange={[Function]}
                           type="checkbox"
@@ -410,7 +410,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                   >
                     <span
                       aria-disabled={false}
-                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-29 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
+                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-48 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
                       onBlur={[Function]}
                       onDragLeave={[Function]}
                       onFocus={[Function]}
@@ -429,7 +429,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                       >
                         <input
                           checked={false}
-                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-32"
+                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-51"
                           data-indeterminate={false}
                           onChange={[Function]}
                           type="checkbox"
@@ -465,7 +465,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                   >
                     <span
                       aria-disabled={false}
-                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-29 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
+                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-48 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
                       onBlur={[Function]}
                       onDragLeave={[Function]}
                       onFocus={[Function]}
@@ -484,7 +484,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                       >
                         <input
                           checked={false}
-                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-32"
+                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-51"
                           data-indeterminate={false}
                           onChange={[Function]}
                           type="checkbox"
@@ -520,7 +520,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                   >
                     <span
                       aria-disabled={false}
-                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-29 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
+                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-48 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
                       onBlur={[Function]}
                       onDragLeave={[Function]}
                       onFocus={[Function]}
@@ -539,7 +539,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                       >
                         <input
                           checked={false}
-                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-32"
+                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-51"
                           data-indeterminate={false}
                           onChange={[Function]}
                           type="checkbox"
@@ -575,7 +575,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                   >
                     <span
                       aria-disabled={false}
-                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-29 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
+                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-48 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
                       onBlur={[Function]}
                       onDragLeave={[Function]}
                       onFocus={[Function]}
@@ -594,7 +594,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                       >
                         <input
                           checked={false}
-                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-32"
+                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-51"
                           data-indeterminate={false}
                           onChange={[Function]}
                           type="checkbox"
@@ -630,7 +630,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                   >
                     <span
                       aria-disabled={false}
-                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-29 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
+                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-48 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
                       onBlur={[Function]}
                       onDragLeave={[Function]}
                       onFocus={[Function]}
@@ -649,7 +649,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                       >
                         <input
                           checked={false}
-                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-32"
+                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-51"
                           data-indeterminate={false}
                           onChange={[Function]}
                           type="checkbox"
@@ -685,7 +685,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                   >
                     <span
                       aria-disabled={false}
-                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-29 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
+                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-48 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
                       onBlur={[Function]}
                       onDragLeave={[Function]}
                       onFocus={[Function]}
@@ -704,7 +704,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                       >
                         <input
                           checked={false}
-                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-32"
+                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-51"
                           data-indeterminate={false}
                           onChange={[Function]}
                           type="checkbox"
@@ -740,7 +740,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                   >
                     <span
                       aria-disabled={false}
-                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-29 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
+                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-48 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
                       onBlur={[Function]}
                       onDragLeave={[Function]}
                       onFocus={[Function]}
@@ -759,7 +759,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                       >
                         <input
                           checked={false}
-                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-32"
+                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-51"
                           data-indeterminate={false}
                           onChange={[Function]}
                           type="checkbox"
@@ -795,7 +795,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                   >
                     <span
                       aria-disabled={false}
-                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-29 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
+                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-48 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
                       onBlur={[Function]}
                       onDragLeave={[Function]}
                       onFocus={[Function]}
@@ -814,7 +814,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                       >
                         <input
                           checked={false}
-                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-32"
+                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-51"
                           data-indeterminate={false}
                           onChange={[Function]}
                           type="checkbox"
@@ -850,7 +850,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                   >
                     <span
                       aria-disabled={false}
-                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-29 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
+                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-48 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
                       onBlur={[Function]}
                       onDragLeave={[Function]}
                       onFocus={[Function]}
@@ -869,7 +869,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                       >
                         <input
                           checked={false}
-                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-32"
+                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-51"
                           data-indeterminate={false}
                           onChange={[Function]}
                           type="checkbox"
@@ -905,7 +905,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                   >
                     <span
                       aria-disabled={false}
-                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-29 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
+                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-48 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
                       onBlur={[Function]}
                       onDragLeave={[Function]}
                       onFocus={[Function]}
@@ -924,7 +924,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                       >
                         <input
                           checked={false}
-                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-32"
+                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-51"
                           data-indeterminate={false}
                           onChange={[Function]}
                           type="checkbox"
@@ -960,7 +960,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                   >
                     <span
                       aria-disabled={false}
-                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-29 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
+                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-48 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
                       onBlur={[Function]}
                       onDragLeave={[Function]}
                       onFocus={[Function]}
@@ -979,7 +979,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                       >
                         <input
                           checked={false}
-                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-32"
+                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-51"
                           data-indeterminate={false}
                           onChange={[Function]}
                           type="checkbox"
@@ -1015,7 +1015,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                   >
                     <span
                       aria-disabled={false}
-                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-29 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
+                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-48 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
                       onBlur={[Function]}
                       onDragLeave={[Function]}
                       onFocus={[Function]}
@@ -1034,7 +1034,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                       >
                         <input
                           checked={false}
-                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-32"
+                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-51"
                           data-indeterminate={false}
                           onChange={[Function]}
                           type="checkbox"
@@ -1070,7 +1070,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                   >
                     <span
                       aria-disabled={false}
-                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-29 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
+                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-48 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
                       onBlur={[Function]}
                       onDragLeave={[Function]}
                       onFocus={[Function]}
@@ -1089,7 +1089,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                       >
                         <input
                           checked={false}
-                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-32"
+                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-51"
                           data-indeterminate={false}
                           onChange={[Function]}
                           type="checkbox"
@@ -1125,7 +1125,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                   >
                     <span
                       aria-disabled={false}
-                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-29 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
+                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-48 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
                       onBlur={[Function]}
                       onDragLeave={[Function]}
                       onFocus={[Function]}
@@ -1144,7 +1144,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                       >
                         <input
                           checked={false}
-                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-32"
+                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-51"
                           data-indeterminate={false}
                           onChange={[Function]}
                           type="checkbox"
@@ -1180,7 +1180,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                   >
                     <span
                       aria-disabled={false}
-                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-29 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
+                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-48 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
                       onBlur={[Function]}
                       onDragLeave={[Function]}
                       onFocus={[Function]}
@@ -1199,7 +1199,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                       >
                         <input
                           checked={false}
-                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-32"
+                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-51"
                           data-indeterminate={false}
                           onChange={[Function]}
                           type="checkbox"
@@ -1235,7 +1235,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                   >
                     <span
                       aria-disabled={false}
-                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-29 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
+                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-48 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
                       onBlur={[Function]}
                       onDragLeave={[Function]}
                       onFocus={[Function]}
@@ -1254,7 +1254,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                       >
                         <input
                           checked={false}
-                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-32"
+                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-51"
                           data-indeterminate={false}
                           onChange={[Function]}
                           type="checkbox"
@@ -1290,7 +1290,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                   >
                     <span
                       aria-disabled={false}
-                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-29 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
+                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-48 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
                       onBlur={[Function]}
                       onDragLeave={[Function]}
                       onFocus={[Function]}
@@ -1309,7 +1309,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                       >
                         <input
                           checked={false}
-                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-32"
+                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-51"
                           data-indeterminate={false}
                           onChange={[Function]}
                           type="checkbox"
@@ -1345,7 +1345,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                   >
                     <span
                       aria-disabled={false}
-                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-29 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
+                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-48 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
                       onBlur={[Function]}
                       onDragLeave={[Function]}
                       onFocus={[Function]}
@@ -1364,7 +1364,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                       >
                         <input
                           checked={false}
-                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-32"
+                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-51"
                           data-indeterminate={false}
                           onChange={[Function]}
                           type="checkbox"
@@ -1412,7 +1412,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                   >
                     <span
                       aria-disabled={false}
-                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-29 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-PrivateSwitchBase-checked-30 Mui-checked standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
+                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-48 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-PrivateSwitchBase-checked-49 Mui-checked standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
                       onBlur={[Function]}
                       onDragLeave={[Function]}
                       onFocus={[Function]}
@@ -1431,7 +1431,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                       >
                         <input
                           checked={true}
-                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-32"
+                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-51"
                           data-indeterminate={false}
                           onChange={[Function]}
                           type="checkbox"
@@ -1467,7 +1467,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                   >
                     <span
                       aria-disabled={false}
-                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-29 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-PrivateSwitchBase-checked-30 Mui-checked standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
+                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-48 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-PrivateSwitchBase-checked-49 Mui-checked standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
                       onBlur={[Function]}
                       onDragLeave={[Function]}
                       onFocus={[Function]}
@@ -1486,7 +1486,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                       >
                         <input
                           checked={true}
-                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-32"
+                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-51"
                           data-indeterminate={false}
                           onChange={[Function]}
                           type="checkbox"
@@ -1522,7 +1522,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                   >
                     <span
                       aria-disabled={false}
-                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-29 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-PrivateSwitchBase-checked-30 Mui-checked standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
+                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-48 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-PrivateSwitchBase-checked-49 Mui-checked standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
                       onBlur={[Function]}
                       onDragLeave={[Function]}
                       onFocus={[Function]}
@@ -1541,7 +1541,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                       >
                         <input
                           checked={true}
-                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-32"
+                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-51"
                           data-indeterminate={false}
                           onChange={[Function]}
                           type="checkbox"
@@ -1577,7 +1577,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                   >
                     <span
                       aria-disabled={false}
-                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-29 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-PrivateSwitchBase-checked-30 Mui-checked standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
+                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-48 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-PrivateSwitchBase-checked-49 Mui-checked standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
                       onBlur={[Function]}
                       onDragLeave={[Function]}
                       onFocus={[Function]}
@@ -1596,7 +1596,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                       >
                         <input
                           checked={true}
-                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-32"
+                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-51"
                           data-indeterminate={false}
                           onChange={[Function]}
                           type="checkbox"
@@ -1632,7 +1632,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                   >
                     <span
                       aria-disabled={false}
-                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-29 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-PrivateSwitchBase-checked-30 Mui-checked standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
+                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-48 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-PrivateSwitchBase-checked-49 Mui-checked standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
                       onBlur={[Function]}
                       onDragLeave={[Function]}
                       onFocus={[Function]}
@@ -1651,7 +1651,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                       >
                         <input
                           checked={true}
-                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-32"
+                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-51"
                           data-indeterminate={false}
                           onChange={[Function]}
                           type="checkbox"
@@ -1687,7 +1687,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                   >
                     <span
                       aria-disabled={false}
-                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-29 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-PrivateSwitchBase-checked-30 Mui-checked standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
+                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-48 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-PrivateSwitchBase-checked-49 Mui-checked standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
                       onBlur={[Function]}
                       onDragLeave={[Function]}
                       onFocus={[Function]}
@@ -1706,7 +1706,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                       >
                         <input
                           checked={true}
-                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-32"
+                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-51"
                           data-indeterminate={false}
                           onChange={[Function]}
                           type="checkbox"
@@ -1742,7 +1742,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                   >
                     <span
                       aria-disabled={false}
-                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-29 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-PrivateSwitchBase-checked-30 Mui-checked standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
+                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-48 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-PrivateSwitchBase-checked-49 Mui-checked standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
                       onBlur={[Function]}
                       onDragLeave={[Function]}
                       onFocus={[Function]}
@@ -1761,7 +1761,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                       >
                         <input
                           checked={true}
-                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-32"
+                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-51"
                           data-indeterminate={false}
                           onChange={[Function]}
                           type="checkbox"
@@ -1797,7 +1797,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                   >
                     <span
                       aria-disabled={false}
-                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-29 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-PrivateSwitchBase-checked-30 Mui-checked standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
+                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-48 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-PrivateSwitchBase-checked-49 Mui-checked standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
                       onBlur={[Function]}
                       onDragLeave={[Function]}
                       onFocus={[Function]}
@@ -1816,7 +1816,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                       >
                         <input
                           checked={true}
-                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-32"
+                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-51"
                           data-indeterminate={false}
                           onChange={[Function]}
                           type="checkbox"
@@ -1852,7 +1852,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                   >
                     <span
                       aria-disabled={false}
-                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-29 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-PrivateSwitchBase-checked-30 Mui-checked standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
+                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-48 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-PrivateSwitchBase-checked-49 Mui-checked standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
                       onBlur={[Function]}
                       onDragLeave={[Function]}
                       onFocus={[Function]}
@@ -1871,7 +1871,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                       >
                         <input
                           checked={true}
-                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-32"
+                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-51"
                           data-indeterminate={false}
                           onChange={[Function]}
                           type="checkbox"
@@ -1907,7 +1907,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                   >
                     <span
                       aria-disabled={false}
-                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-29 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-PrivateSwitchBase-checked-30 Mui-checked standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
+                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-48 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-PrivateSwitchBase-checked-49 Mui-checked standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
                       onBlur={[Function]}
                       onDragLeave={[Function]}
                       onFocus={[Function]}
@@ -1926,7 +1926,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                       >
                         <input
                           checked={true}
-                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-32"
+                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-51"
                           data-indeterminate={false}
                           onChange={[Function]}
                           type="checkbox"
@@ -1962,7 +1962,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                   >
                     <span
                       aria-disabled={false}
-                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-29 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-PrivateSwitchBase-checked-30 Mui-checked standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
+                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-48 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-PrivateSwitchBase-checked-49 Mui-checked standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
                       onBlur={[Function]}
                       onDragLeave={[Function]}
                       onFocus={[Function]}
@@ -1981,7 +1981,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                       >
                         <input
                           checked={true}
-                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-32"
+                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-51"
                           data-indeterminate={false}
                           onChange={[Function]}
                           type="checkbox"
@@ -2017,7 +2017,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                   >
                     <span
                       aria-disabled={false}
-                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-29 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-PrivateSwitchBase-checked-30 Mui-checked standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
+                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-48 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-PrivateSwitchBase-checked-49 Mui-checked standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
                       onBlur={[Function]}
                       onDragLeave={[Function]}
                       onFocus={[Function]}
@@ -2036,7 +2036,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                       >
                         <input
                           checked={true}
-                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-32"
+                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-51"
                           data-indeterminate={false}
                           onChange={[Function]}
                           type="checkbox"
@@ -2072,7 +2072,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                   >
                     <span
                       aria-disabled={false}
-                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-29 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-PrivateSwitchBase-checked-30 Mui-checked standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
+                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-48 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-PrivateSwitchBase-checked-49 Mui-checked standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
                       onBlur={[Function]}
                       onDragLeave={[Function]}
                       onFocus={[Function]}
@@ -2091,7 +2091,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                       >
                         <input
                           checked={true}
-                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-32"
+                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-51"
                           data-indeterminate={false}
                           onChange={[Function]}
                           type="checkbox"
@@ -2127,7 +2127,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                   >
                     <span
                       aria-disabled={false}
-                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-29 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-PrivateSwitchBase-checked-30 Mui-checked standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
+                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-48 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-PrivateSwitchBase-checked-49 Mui-checked standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
                       onBlur={[Function]}
                       onDragLeave={[Function]}
                       onFocus={[Function]}
@@ -2146,7 +2146,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                       >
                         <input
                           checked={true}
-                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-32"
+                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-51"
                           data-indeterminate={false}
                           onChange={[Function]}
                           type="checkbox"
@@ -2182,7 +2182,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                   >
                     <span
                       aria-disabled={false}
-                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-29 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-PrivateSwitchBase-checked-30 Mui-checked standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
+                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-48 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-PrivateSwitchBase-checked-49 Mui-checked standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
                       onBlur={[Function]}
                       onDragLeave={[Function]}
                       onFocus={[Function]}
@@ -2201,7 +2201,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                       >
                         <input
                           checked={true}
-                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-32"
+                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-51"
                           data-indeterminate={false}
                           onChange={[Function]}
                           type="checkbox"
@@ -2237,7 +2237,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                   >
                     <span
                       aria-disabled={false}
-                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-29 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-PrivateSwitchBase-checked-30 Mui-checked standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
+                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-48 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-PrivateSwitchBase-checked-49 Mui-checked standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
                       onBlur={[Function]}
                       onDragLeave={[Function]}
                       onFocus={[Function]}
@@ -2256,7 +2256,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                       >
                         <input
                           checked={true}
-                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-32"
+                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-51"
                           data-indeterminate={false}
                           onChange={[Function]}
                           type="checkbox"
@@ -2292,7 +2292,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                   >
                     <span
                       aria-disabled={false}
-                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-29 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-PrivateSwitchBase-checked-30 Mui-checked standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
+                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-48 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-PrivateSwitchBase-checked-49 Mui-checked standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
                       onBlur={[Function]}
                       onDragLeave={[Function]}
                       onFocus={[Function]}
@@ -2311,7 +2311,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                       >
                         <input
                           checked={true}
-                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-32"
+                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-51"
                           data-indeterminate={false}
                           onChange={[Function]}
                           type="checkbox"
@@ -2347,7 +2347,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                   >
                     <span
                       aria-disabled={false}
-                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-29 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-PrivateSwitchBase-checked-30 Mui-checked standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
+                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-48 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-PrivateSwitchBase-checked-49 Mui-checked standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
                       onBlur={[Function]}
                       onDragLeave={[Function]}
                       onFocus={[Function]}
@@ -2366,7 +2366,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                       >
                         <input
                           checked={true}
-                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-32"
+                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-51"
                           data-indeterminate={false}
                           onChange={[Function]}
                           type="checkbox"
@@ -2402,7 +2402,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                   >
                     <span
                       aria-disabled={false}
-                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-29 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-PrivateSwitchBase-checked-30 Mui-checked standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
+                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-48 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-PrivateSwitchBase-checked-49 Mui-checked standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
                       onBlur={[Function]}
                       onDragLeave={[Function]}
                       onFocus={[Function]}
@@ -2421,7 +2421,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                       >
                         <input
                           checked={true}
-                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-32"
+                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-51"
                           data-indeterminate={false}
                           onChange={[Function]}
                           type="checkbox"
@@ -2457,7 +2457,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                   >
                     <span
                       aria-disabled={false}
-                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-29 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-PrivateSwitchBase-checked-30 Mui-checked standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
+                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-48 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-PrivateSwitchBase-checked-49 Mui-checked standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
                       onBlur={[Function]}
                       onDragLeave={[Function]}
                       onFocus={[Function]}
@@ -2476,7 +2476,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                       >
                         <input
                           checked={true}
-                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-32"
+                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-51"
                           data-indeterminate={false}
                           onChange={[Function]}
                           type="checkbox"
@@ -2512,7 +2512,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                   >
                     <span
                       aria-disabled={false}
-                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-29 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-PrivateSwitchBase-checked-30 Mui-checked standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
+                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-48 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-PrivateSwitchBase-checked-49 Mui-checked standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
                       onBlur={[Function]}
                       onDragLeave={[Function]}
                       onFocus={[Function]}
@@ -2531,7 +2531,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                       >
                         <input
                           checked={true}
-                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-32"
+                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-51"
                           data-indeterminate={false}
                           onChange={[Function]}
                           type="checkbox"
@@ -2567,7 +2567,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                   >
                     <span
                       aria-disabled={false}
-                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-29 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-PrivateSwitchBase-checked-30 Mui-checked standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
+                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-48 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-PrivateSwitchBase-checked-49 Mui-checked standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
                       onBlur={[Function]}
                       onDragLeave={[Function]}
                       onFocus={[Function]}
@@ -2586,7 +2586,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                       >
                         <input
                           checked={true}
-                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-32"
+                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-51"
                           data-indeterminate={false}
                           onChange={[Function]}
                           type="checkbox"
@@ -2622,7 +2622,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                   >
                     <span
                       aria-disabled={false}
-                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-29 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-PrivateSwitchBase-checked-30 Mui-checked standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
+                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-PrivateSwitchBase-root-48 standalone-datagrid--data-grid-story-MuiCheckbox-root standalone-datagrid--data-grid-story-MuiCheckbox-colorSecondary standalone-datagrid--data-grid-story-PrivateSwitchBase-checked-49 Mui-checked standalone-datagrid--data-grid-story-MuiIconButton-colorSecondary"
                       onBlur={[Function]}
                       onDragLeave={[Function]}
                       onFocus={[Function]}
@@ -2641,7 +2641,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                       >
                         <input
                           checked={true}
-                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-32"
+                          className="standalone-datagrid--data-grid-story-PrivateSwitchBase-input-51"
                           data-indeterminate={false}
                           onChange={[Function]}
                           type="checkbox"
@@ -2680,7 +2680,7 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
                   className="standalone-datagrid--data-grid-story-MuiGrid-root standalone-datagrid--data-grid-story-MuiGrid-item"
                 >
                   <div
-                    className="standalone-datagrid--data-grid-story-MuiBox-root standalone-datagrid--data-grid-story-MuiBox-root-33"
+                    className="standalone-datagrid--data-grid-story-MuiBox-root standalone-datagrid--data-grid-story-MuiBox-root-52"
                   >
                     <button
                       className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiButton-root standalone-datagrid--data-grid-story-MuiButton-contained"
@@ -2717,16 +2717,16 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
         </div>
       </div>
       <div
-        className="standalone-datagrid--data-grid-story-makeStyles-outerWrapper-37"
+        className="standalone-datagrid--data-grid-story-makeStyles-outerWrapper-56"
       >
         <div
-          className="standalone-datagrid--data-grid-story-makeStyles-innerWrapper-35"
+          className="standalone-datagrid--data-grid-story-makeStyles-innerWrapper-54"
         >
           <div
-            className="standalone-datagrid--data-grid-story-makeStyles-outerProgressWrapper-36"
+            className="standalone-datagrid--data-grid-story-makeStyles-outerProgressWrapper-55"
           >
             <div
-              className="standalone-datagrid--data-grid-story-makeStyles-innerProgressWrapper-34"
+              className="standalone-datagrid--data-grid-story-makeStyles-innerProgressWrapper-53"
             >
               <div
                 className="standalone-datagrid--data-grid-story-MuiCircularProgress-root standalone-datagrid--data-grid-story-MuiCircularProgress-colorPrimary standalone-datagrid--data-grid-story-MuiCircularProgress-indeterminate"
@@ -2775,15 +2775,313 @@ exports[`Storyshots Standalone/DataGrid Basic 1`] = `
           className="standalone-datagrid--data-grid-story-MuiGrid-root standalone-datagrid--data-grid-story-MuiGrid-item"
         >
           <div
-            className="standalone-datagrid--data-grid-story-MuiBox-root standalone-datagrid--data-grid-story-MuiBox-root-42"
+            className="standalone-datagrid--data-grid-story-MuiGrid-root standalone-datagrid--data-grid-story-MuiGrid-container standalone-datagrid--data-grid-story-MuiGrid-wrap-xs-nowrap"
           >
-            <p
-              className="standalone-datagrid--data-grid-story-MuiTypography-root standalone-datagrid--data-grid-story-makeStyles-text-38 standalone-datagrid--data-grid-story-MuiTypography-body1"
+            <div
+              className="standalone-datagrid--data-grid-story-PrivateHiddenCss-xsDown-63"
             >
-              Total:
-               
-              0
-            </p>
+              <div
+                className="standalone-datagrid--data-grid-story-MuiGrid-root standalone-datagrid--data-grid-story-MuiGrid-item"
+              >
+                <div
+                  className="standalone-datagrid--data-grid-story-MuiBox-root standalone-datagrid--data-grid-story-MuiBox-root-76"
+                >
+                  <p
+                    className="standalone-datagrid--data-grid-story-MuiTypography-root standalone-datagrid--data-grid-story-makeStyles-text-57 standalone-datagrid--data-grid-story-MuiTypography-body1"
+                  >
+                    Page size:
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div
+              className="standalone-datagrid--data-grid-story-MuiGrid-root standalone-datagrid--data-grid-story-MuiGrid-item"
+            >
+              <div
+                className="standalone-datagrid--data-grid-story-MuiBox-root standalone-datagrid--data-grid-story-MuiBox-root-77"
+              >
+                <div
+                  className="standalone-datagrid--data-grid-story-MuiInputBase-root standalone-datagrid--data-grid-story-MuiInput-root standalone-datagrid--data-grid-story-makeStyles-text-57 standalone-datagrid--data-grid-story-MuiInputBase-marginDense standalone-datagrid--data-grid-story-MuiInput-marginDense"
+                  onClick={[Function]}
+                  onTouchEnd={[Function]}
+                  onTouchStart={[Function]}
+                  title={null}
+                >
+                  <div
+                    aria-haspopup="listbox"
+                    className="standalone-datagrid--data-grid-story-MuiSelect-root standalone-datagrid--data-grid-story-MuiSelect-select standalone-datagrid--data-grid-story-MuiSelect-selectMenu standalone-datagrid--data-grid-story-MuiInputBase-input standalone-datagrid--data-grid-story-MuiInput-input standalone-datagrid--data-grid-story-MuiInputBase-inputMarginDense standalone-datagrid--data-grid-story-MuiInput-inputMarginDense"
+                    onBlur={[Function]}
+                    onFocus={[Function]}
+                    onKeyDown={[Function]}
+                    onMouseDown={[Function]}
+                    role="button"
+                    tabIndex={0}
+                  >
+                    25
+                  </div>
+                  <input
+                    aria-describedby={null}
+                    aria-hidden={true}
+                    className="standalone-datagrid--data-grid-story-MuiSelect-nativeInput"
+                    onAnimationStart={[Function]}
+                    onChange={[Function]}
+                    tabIndex={-1}
+                    value={25}
+                  />
+                  <svg
+                    aria-hidden={true}
+                    className="standalone-datagrid--data-grid-story-MuiSvgIcon-root standalone-datagrid--data-grid-story-MuiSelect-icon"
+                    focusable="false"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      d="M7 10l5 5 5-5z"
+                    />
+                  </svg>
+                </div>
+              </div>
+            </div>
+            <div
+              className="standalone-datagrid--data-grid-story-MuiGrid-root standalone-datagrid--data-grid-story-MuiGrid-item"
+            >
+              <div
+                className="standalone-datagrid--data-grid-story-MuiBox-root standalone-datagrid--data-grid-story-MuiBox-root-78 standalone-datagrid--data-grid-story-makeStyles-vertDivWrapper-60"
+              >
+                <div
+                  className="standalone-datagrid--data-grid-story-makeStyles-root-79"
+                />
+              </div>
+            </div>
+            <div
+              className="standalone-datagrid--data-grid-story-MuiGrid-root standalone-datagrid--data-grid-story-MuiGrid-item"
+            >
+              <p
+                className="standalone-datagrid--data-grid-story-MuiTypography-root standalone-datagrid--data-grid-story-makeStyles-text-57 standalone-datagrid--data-grid-story-MuiTypography-body1"
+              >
+                1
+                 - 
+                0
+                 
+                of
+                 
+                0
+              </p>
+            </div>
+            <div
+              className="standalone-datagrid--data-grid-story-MuiGrid-root standalone-datagrid--data-grid-story-MuiGrid-item"
+            >
+              <div
+                className="standalone-datagrid--data-grid-story-MuiBox-root standalone-datagrid--data-grid-story-MuiBox-root-80 standalone-datagrid--data-grid-story-makeStyles-vertDivWrapper-60"
+              >
+                <div
+                  className="standalone-datagrid--data-grid-story-makeStyles-root-79"
+                />
+              </div>
+            </div>
+            <div
+              className="standalone-datagrid--data-grid-story-MuiGrid-root standalone-datagrid--data-grid-story-MuiGrid-item"
+            >
+              <div
+                className="standalone-datagrid--data-grid-story-MuiGrid-root standalone-datagrid--data-grid-story-MuiGrid-container"
+              >
+                <div
+                  className="standalone-datagrid--data-grid-story-MuiGrid-root standalone-datagrid--data-grid-story-MuiGrid-item standalone-datagrid--data-grid-story-MuiGrid-grid-xs-6 standalone-datagrid--data-grid-story-MuiGrid-grid-sm-3"
+                >
+                  <span
+                    aria-describedby={null}
+                    className=""
+                    onBlur={[Function]}
+                    onFocus={[Function]}
+                    onMouseLeave={[Function]}
+                    onMouseOver={[Function]}
+                    onTouchEnd={[Function]}
+                    onTouchStart={[Function]}
+                    title="First page"
+                  >
+                    <button
+                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-makeStyles-paginationBtn-59 standalone-datagrid--data-grid-story-makeStyles-firstPageBtn-58 Mui-disabled Mui-disabled"
+                      disabled={true}
+                      onBlur={[Function]}
+                      onClick={[Function]}
+                      onDragLeave={[Function]}
+                      onFocus={[Function]}
+                      onKeyDown={[Function]}
+                      onKeyUp={[Function]}
+                      onMouseDown={[Function]}
+                      onMouseLeave={[Function]}
+                      onMouseUp={[Function]}
+                      onTouchEnd={[Function]}
+                      onTouchMove={[Function]}
+                      onTouchStart={[Function]}
+                      tabIndex={-1}
+                      type="button"
+                    >
+                      <span
+                        className="standalone-datagrid--data-grid-story-MuiIconButton-label"
+                      >
+                        <svg
+                          aria-hidden={true}
+                          className="standalone-datagrid--data-grid-story-MuiSvgIcon-root"
+                          focusable="false"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            d="M18.41 16.59L13.82 12l4.59-4.59L17 6l-6 6 6 6zM6 6h2v12H6z"
+                          />
+                        </svg>
+                      </span>
+                    </button>
+                  </span>
+                </div>
+                <div
+                  className="standalone-datagrid--data-grid-story-MuiGrid-root standalone-datagrid--data-grid-story-MuiGrid-item standalone-datagrid--data-grid-story-MuiGrid-grid-xs-6 standalone-datagrid--data-grid-story-MuiGrid-grid-sm-3"
+                >
+                  <span
+                    aria-describedby={null}
+                    className=""
+                    onBlur={[Function]}
+                    onFocus={[Function]}
+                    onMouseLeave={[Function]}
+                    onMouseOver={[Function]}
+                    onTouchEnd={[Function]}
+                    onTouchStart={[Function]}
+                    title="Previous page"
+                  >
+                    <button
+                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-makeStyles-paginationBtn-59 Mui-disabled Mui-disabled"
+                      disabled={true}
+                      onBlur={[Function]}
+                      onClick={[Function]}
+                      onDragLeave={[Function]}
+                      onFocus={[Function]}
+                      onKeyDown={[Function]}
+                      onKeyUp={[Function]}
+                      onMouseDown={[Function]}
+                      onMouseLeave={[Function]}
+                      onMouseUp={[Function]}
+                      onTouchEnd={[Function]}
+                      onTouchMove={[Function]}
+                      onTouchStart={[Function]}
+                      tabIndex={-1}
+                      type="button"
+                    >
+                      <span
+                        className="standalone-datagrid--data-grid-story-MuiIconButton-label"
+                      >
+                        <svg
+                          aria-hidden={true}
+                          className="standalone-datagrid--data-grid-story-MuiSvgIcon-root"
+                          focusable="false"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"
+                          />
+                        </svg>
+                      </span>
+                    </button>
+                  </span>
+                </div>
+                <div
+                  className="standalone-datagrid--data-grid-story-MuiGrid-root standalone-datagrid--data-grid-story-MuiGrid-item standalone-datagrid--data-grid-story-MuiGrid-grid-xs-6 standalone-datagrid--data-grid-story-MuiGrid-grid-sm-3"
+                >
+                  <span
+                    aria-describedby={null}
+                    className=""
+                    onBlur={[Function]}
+                    onFocus={[Function]}
+                    onMouseLeave={[Function]}
+                    onMouseOver={[Function]}
+                    onTouchEnd={[Function]}
+                    onTouchStart={[Function]}
+                    title="Next page"
+                  >
+                    <button
+                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-makeStyles-paginationBtn-59 Mui-disabled Mui-disabled"
+                      disabled={true}
+                      onBlur={[Function]}
+                      onClick={[Function]}
+                      onDragLeave={[Function]}
+                      onFocus={[Function]}
+                      onKeyDown={[Function]}
+                      onKeyUp={[Function]}
+                      onMouseDown={[Function]}
+                      onMouseLeave={[Function]}
+                      onMouseUp={[Function]}
+                      onTouchEnd={[Function]}
+                      onTouchMove={[Function]}
+                      onTouchStart={[Function]}
+                      tabIndex={-1}
+                      type="button"
+                    >
+                      <span
+                        className="standalone-datagrid--data-grid-story-MuiIconButton-label"
+                      >
+                        <svg
+                          aria-hidden={true}
+                          className="standalone-datagrid--data-grid-story-MuiSvgIcon-root"
+                          focusable="false"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"
+                          />
+                        </svg>
+                      </span>
+                    </button>
+                  </span>
+                </div>
+                <div
+                  className="standalone-datagrid--data-grid-story-MuiGrid-root standalone-datagrid--data-grid-story-MuiGrid-item standalone-datagrid--data-grid-story-MuiGrid-grid-xs-6 standalone-datagrid--data-grid-story-MuiGrid-grid-sm-3"
+                >
+                  <span
+                    aria-describedby={null}
+                    className=""
+                    onBlur={[Function]}
+                    onFocus={[Function]}
+                    onMouseLeave={[Function]}
+                    onMouseOver={[Function]}
+                    onTouchEnd={[Function]}
+                    onTouchStart={[Function]}
+                    title="Last page"
+                  >
+                    <button
+                      className="standalone-datagrid--data-grid-story-MuiButtonBase-root standalone-datagrid--data-grid-story-MuiIconButton-root standalone-datagrid--data-grid-story-makeStyles-paginationBtn-59 Mui-disabled Mui-disabled"
+                      disabled={true}
+                      onBlur={[Function]}
+                      onClick={[Function]}
+                      onDragLeave={[Function]}
+                      onFocus={[Function]}
+                      onKeyDown={[Function]}
+                      onKeyUp={[Function]}
+                      onMouseDown={[Function]}
+                      onMouseLeave={[Function]}
+                      onMouseUp={[Function]}
+                      onTouchEnd={[Function]}
+                      onTouchMove={[Function]}
+                      onTouchStart={[Function]}
+                      tabIndex={-1}
+                      type="button"
+                    >
+                      <span
+                        className="standalone-datagrid--data-grid-story-MuiIconButton-label"
+                      >
+                        <svg
+                          aria-hidden={true}
+                          className="standalone-datagrid--data-grid-story-MuiSvgIcon-root"
+                          focusable="false"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            d="M5.59 7.41L10.18 12l-4.59 4.59L7 18l6-6-6-6zM16 6h2v12h-2z"
+                          />
+                        </svg>
+                      </span>
+                    </button>
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -2972,126 +3270,16 @@ exports[`Storyshots Standalone/GroupBox GroupBox 1`] = `
 </fieldset>
 `;
 
-exports[`Storyshots Standalone/IconButtonWithText IconButtonWithText 1`] = `
-<div
-  className="standalone-iconbuttonwithtext--icon-button-with-text-story-MuiGrid-root standalone-iconbuttonwithtext--icon-button-with-text-story-MuiGrid-container"
->
-  <div
-    className="standalone-iconbuttonwithtext--icon-button-with-text-story-MuiGrid-root standalone-iconbuttonwithtext--icon-button-with-text-story-MuiGrid-item"
-  >
-    Precontent
-  </div>
-  <div
-    className="standalone-iconbuttonwithtext--icon-button-with-text-story-MuiGrid-root standalone-iconbuttonwithtext--icon-button-with-text-story-MuiGrid-item"
-  >
-    <div
-      className="standalone-iconbuttonwithtext--icon-button-with-text-story-MuiGrid-root standalone-iconbuttonwithtext--icon-button-with-text-story-MuiGrid-container standalone-iconbuttonwithtext--icon-button-with-text-story-MuiGrid-direction-xs-column standalone-iconbuttonwithtext--icon-button-with-text-story-MuiGrid-align-items-xs-center"
-    >
-      <div
-        className="standalone-iconbuttonwithtext--icon-button-with-text-story-MuiGrid-root standalone-iconbuttonwithtext--icon-button-with-text-story-MuiGrid-item"
-      >
-        <button
-          className="standalone-iconbuttonwithtext--icon-button-with-text-story-MuiButtonBase-root standalone-iconbuttonwithtext--icon-button-with-text-story-MuiIconButton-root standalone-iconbuttonwithtext--icon-button-with-text-story-MuiIconButton-colorPrimary"
-          disabled={false}
-          onBlur={[Function]}
-          onClick={[Function]}
-          onDragLeave={[Function]}
-          onFocus={[Function]}
-          onKeyDown={[Function]}
-          onKeyUp={[Function]}
-          onMouseDown={[Function]}
-          onMouseLeave={[Function]}
-          onMouseUp={[Function]}
-          onTouchEnd={[Function]}
-          onTouchMove={[Function]}
-          onTouchStart={[Function]}
-          tabIndex={0}
-          type="button"
-        >
-          <span
-            className="standalone-iconbuttonwithtext--icon-button-with-text-story-MuiIconButton-label"
-          >
-            <svg
-              aria-hidden={true}
-              className="standalone-iconbuttonwithtext--icon-button-with-text-story-MuiSvgIcon-root"
-              focusable="false"
-              viewBox="0 0 512 512"
-            >
-              <g>
-                <g>
-                  <polygon
-                    points="0,0 0,128 201.143,329.143 201.143,512 310.857,475.429 310.857,329.143 512,128 512,0 		"
-                  />
-                </g>
-              </g>
-              <g />
-              <g />
-              <g />
-              <g />
-              <g />
-              <g />
-              <g />
-              <g />
-              <g />
-              <g />
-              <g />
-              <g />
-              <g />
-              <g />
-              <g />
-            </svg>
-          </span>
-        </button>
-      </div>
-      <div
-        className="standalone-iconbuttonwithtext--icon-button-with-text-story-MuiGrid-root standalone-iconbuttonwithtext--icon-button-with-text-story-MuiGrid-item"
-      >
-        <span
-          className="standalone-iconbuttonwithtext--icon-button-with-text-story-MuiTypography-root standalone-iconbuttonwithtext--icon-button-with-text-story-MuiTypography-caption standalone-iconbuttonwithtext--icon-button-with-text-story-MuiTypography-colorTextSecondary"
-          onClick={[Function]}
-        >
-          Filter
-        </span>
-      </div>
-    </div>
-  </div>
-  <div
-    className="standalone-iconbuttonwithtext--icon-button-with-text-story-MuiGrid-root standalone-iconbuttonwithtext--icon-button-with-text-story-MuiGrid-item"
-  >
-    Post content
-  </div>
-</div>
-`;
-
 exports[`Storyshots Standalone/Icons Filter 1`] = `
 <svg
   aria-hidden={true}
   className="standalone-icons--filter-icon-story-MuiSvgIcon-root"
   focusable="false"
-  viewBox="0 0 512 512"
+  viewBox="0 0 26 26.02"
 >
-  <g>
-    <g>
-      <polygon
-        points="0,0 0,128 201.143,329.143 201.143,512 310.857,475.429 310.857,329.143 512,128 512,0 		"
-      />
-    </g>
-  </g>
-  <g />
-  <g />
-  <g />
-  <g />
-  <g />
-  <g />
-  <g />
-  <g />
-  <g />
-  <g />
-  <g />
-  <g />
-  <g />
-  <g />
-  <g />
+  <path
+    d="M25.64.36a1.15,1.15,0,0,1,.36.86,1.15,1.15,0,0,1-.36.86l-9.39,9.4v13.3a1.13,1.13,0,0,1-.66,1.09,1.19,1.19,0,0,1-1.27-.07L10.26,23a1.25,1.25,0,0,1-.51-1V11.48L.36,2.08A1.15,1.15,0,0,1,0,1.22,1.15,1.15,0,0,1,.36.36,1.15,1.15,0,0,1,1.22,0H24.78A1.15,1.15,0,0,1,25.64.36Z"
+  />
 </svg>
 `;
 
@@ -3851,6 +4039,209 @@ exports[`Storyshots Standalone/Selector MultiSelectWithCheckBox 1`] = `
 </div>
 `;
 
+exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
+<div>
+  <p
+    className="standalone-selector--selector-multi-with-tags-MuiTypography-root standalone-selector--selector-multi-with-tags-MuiTypography-body1"
+  >
+    Multi Selector
+  </p>
+  <div
+    className=" css-2b097c-container"
+    onKeyDown={[Function]}
+  >
+    <div
+      className=" css-ru9qn0-control"
+      onMouseDown={[Function]}
+      onTouchEnd={[Function]}
+    >
+      <div
+        className=" css-1xignni-ValueContainer"
+      >
+        <div
+          className=" css-nhnqqz-placeholder"
+        >
+          Select...
+        </div>
+        <div
+          className="css-b8ldur-Input"
+        >
+          <div
+            className=""
+            style={
+              Object {
+                "display": "inline-block",
+              }
+            }
+          >
+            <input
+              aria-autocomplete="list"
+              autoCapitalize="none"
+              autoComplete="off"
+              autoCorrect="off"
+              disabled={false}
+              id="react-select-4-input"
+              onBlur={[Function]}
+              onChange={[Function]}
+              onFocus={[Function]}
+              spellCheck="false"
+              style={
+                Object {
+                  "background": 0,
+                  "border": 0,
+                  "boxSizing": "content-box",
+                  "color": "inherit",
+                  "fontSize": "inherit",
+                  "label": "input",
+                  "opacity": 1,
+                  "outline": 0,
+                  "padding": 0,
+                  "width": "1px",
+                }
+              }
+              tabIndex="0"
+              type="text"
+              value=""
+            />
+            <div
+              style={
+                Object {
+                  "height": 0,
+                  "left": 0,
+                  "overflow": "scroll",
+                  "position": "absolute",
+                  "top": 0,
+                  "visibility": "hidden",
+                  "whiteSpace": "pre",
+                }
+              }
+            >
+              
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        className=" css-1hb7zxy-IndicatorsContainer"
+      >
+        <div
+          aria-hidden="true"
+          className=" css-at12u2-loadingIndicator"
+        >
+          <span
+            className="css-1yvy2vo-LoadingDot"
+          />
+          <span
+            className="css-zoievk-LoadingDot"
+          />
+          <span
+            className="css-x748d8-LoadingDot"
+          />
+        </div>
+        <span
+          className=" css-1okebmr-indicatorSeparator"
+        />
+        <div
+          aria-hidden="true"
+          className=" css-tlfecz-indicatorContainer"
+          onMouseDown={[Function]}
+          onTouchEnd={[Function]}
+        >
+          <svg
+            aria-hidden="true"
+            className="css-6q0nyr-Svg"
+            focusable="false"
+            height={20}
+            viewBox="0 0 20 20"
+            width={20}
+          >
+            <path
+              d="M4.516 7.548c0.436-0.446 1.043-0.481 1.576 0l3.908 3.747 3.908-3.747c0.533-0.481 1.141-0.446 1.574 0 0.436 0.445 0.408 1.197 0 1.615-0.406 0.418-4.695 4.502-4.695 4.502-0.217 0.223-0.502 0.335-0.787 0.335s-0.57-0.112-0.789-0.335c0 0-4.287-4.084-4.695-4.502s-0.436-1.17 0-1.615z"
+            />
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    aria-expanded={false}
+    aria-owns={null}
+    className="standalone-selector--selector-multi-with-tags-MuiAutocomplete-root"
+    onClick={[Function]}
+    onKeyDown={[Function]}
+    onMouseDown={[Function]}
+    role="combobox"
+  >
+    <div
+      className="standalone-selector--selector-multi-with-tags-MuiFormControl-root standalone-selector--selector-multi-with-tags-MuiTextField-root standalone-selector--selector-multi-with-tags-MuiFormControl-marginNormal standalone-selector--selector-multi-with-tags-MuiFormControl-fullWidth"
+    >
+      <label
+        className="standalone-selector--selector-multi-with-tags-MuiFormLabel-root standalone-selector--selector-multi-with-tags-MuiInputLabel-root standalone-selector--selector-multi-with-tags-MuiInputLabel-formControl standalone-selector--selector-multi-with-tags-MuiInputLabel-animated standalone-selector--selector-multi-with-tags-MuiInputLabel-shrink"
+        data-shrink={true}
+        htmlFor="mui-35281"
+        id="mui-35281-label"
+      >
+        Search
+      </label>
+      <div
+        className="standalone-selector--selector-multi-with-tags-MuiInputBase-root standalone-selector--selector-multi-with-tags-MuiInput-root standalone-selector--selector-multi-with-tags-MuiInput-underline standalone-selector--selector-multi-with-tags-MuiAutocomplete-inputRoot standalone-selector--selector-multi-with-tags-MuiInputBase-fullWidth standalone-selector--selector-multi-with-tags-MuiInput-fullWidth standalone-selector--selector-multi-with-tags-MuiInputBase-formControl standalone-selector--selector-multi-with-tags-MuiInput-formControl standalone-selector--selector-multi-with-tags-MuiInputBase-adornedStart standalone-selector--selector-multi-with-tags-MuiInputBase-adornedEnd"
+        onClick={[Function]}
+      >
+        <svg
+          aria-hidden={true}
+          className="standalone-selector--selector-multi-with-tags-MuiSvgIcon-root standalone-selector--selector-multi-with-tags-MuiSvgIcon-colorPrimary"
+          focusable="false"
+          viewBox="0 0 24 24"
+        >
+          <path
+            d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"
+          />
+        </svg>
+        <input
+          aria-activedescendant={null}
+          aria-autocomplete="both"
+          aria-controls={null}
+          aria-invalid={false}
+          autoCapitalize="none"
+          autoComplete="off"
+          autoFocus={false}
+          className="standalone-selector--selector-multi-with-tags-MuiInputBase-input standalone-selector--selector-multi-with-tags-MuiInput-input standalone-selector--selector-multi-with-tags-MuiAutocomplete-input standalone-selector--selector-multi-with-tags-MuiAutocomplete-inputFocused standalone-selector--selector-multi-with-tags-MuiInputBase-inputAdornedStart standalone-selector--selector-multi-with-tags-MuiInputBase-inputAdornedEnd standalone-selector--selector-multi-with-tags-MuiInputBase-inputTypeSearch standalone-selector--selector-multi-with-tags-MuiInput-inputTypeSearch"
+          disabled={false}
+          id="mui-35281"
+          onAnimationStart={[Function]}
+          onBlur={[Function]}
+          onChange={[Function]}
+          onFocus={[Function]}
+          onMouseDown={[Function]}
+          required={false}
+          spellCheck="false"
+          type="search"
+          value=""
+        />
+        <svg
+          aria-describedby={null}
+          aria-hidden={true}
+          className="standalone-selector--selector-multi-with-tags-MuiSvgIcon-root standalone-selector--selector-multi-with-tags-MuiSvgIcon-colorDisabled"
+          focusable="false"
+          onBlur={[Function]}
+          onFocus={[Function]}
+          onMouseLeave={[Function]}
+          onMouseOver={[Function]}
+          onTouchEnd={[Function]}
+          onTouchStart={[Function]}
+          title="infoText"
+          viewBox="0 0 24 24"
+        >
+          <path
+            d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"
+          />
+        </svg>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
 exports[`Storyshots Standalone/Selector Single 1`] = `
 <div
   className="standalone-selector--selector-single-MuiBox-root standalone-selector--selector-single-MuiBox-root-1"
@@ -3975,6 +4366,63 @@ exports[`Storyshots Standalone/Selector Single 1`] = `
 </div>
 `;
 
+exports[`Storyshots Standalone/SignaturePad SignaturePad 1`] = `
+<div>
+  <div
+    className="standalone-signaturepad--signature-pad-story-makeStyles-signPadDiv-10"
+    onClick={[Function]}
+    style={
+      Object {
+        "backgroundColor": "lightgray",
+      }
+    }
+  >
+    <div
+      className="standalone-signaturepad--signature-pad-story-makeStyles-textDiv-11"
+    >
+      <svg
+        aria-hidden={true}
+        className="standalone-signaturepad--signature-pad-story-MuiSvgIcon-root standalone-signaturepad--signature-pad-story-MuiSvgIcon-colorDisabled"
+        fill="#1d1d1b"
+        focusable="false"
+        viewBox="0 0 36 36"
+      >
+        <path
+          d="M35.16,6.26a52.79,52.79,0,0,1-3,10.26l-7.45,3.73h5.7a33.84,33.84,0,0,1-2.11,3.3L18,27h7.1a17,17,0,0,1-9.35,4,78.53,78.53,0,0,1-8.86.49l-4,4A1.65,1.65,0,0,1,1.69,36a1.67,1.67,0,0,1-1.2-.49A1.63,1.63,0,0,1,0,34.31a1.59,1.59,0,0,1,.49-1.19L18.77,14.91a1.28,1.28,0,0,0,.29-.81,1.17,1.17,0,0,0-.32-.81,1,1,0,0,0-.77-.35,1.11,1.11,0,0,0-.81.35L4.57,25.88q.13-3.16.42-5.63.78-7.87,8-13A38.82,38.82,0,0,1,26.72,1.48,52.78,52.78,0,0,1,36,0,56.86,56.86,0,0,1,35.16,6.26Z"
+        />
+      </svg>
+      <span
+        className="standalone-signaturepad--signature-pad-story-makeStyles-signText-13"
+      >
+        Digitally signed here
+      </span>
+    </div>
+    <div
+      className="standalone-signaturepad--signature-pad-story-makeStyles-infoDiv-14"
+    >
+      <svg
+        aria-describedby={null}
+        aria-hidden={true}
+        className="standalone-signaturepad--signature-pad-story-MuiSvgIcon-root standalone-signaturepad--signature-pad-story-MuiSvgIcon-colorDisabled"
+        focusable="false"
+        onBlur={[Function]}
+        onFocus={[Function]}
+        onMouseLeave={[Function]}
+        onMouseOver={[Function]}
+        onTouchEnd={[Function]}
+        onTouchStart={[Function]}
+        title={null}
+        viewBox="0 0 24 24"
+      >
+        <path
+          d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"
+        />
+      </svg>
+    </div>
+  </div>
+</div>
+`;
+
 exports[`Storyshots Standalone/UIKit ActionButton 1`] = `
 <button
   className="standalone-uikit--action-button-story-MuiButtonBase-root standalone-uikit--action-button-story-MuiButton-root standalone-uikit--action-button-story-WithStyles(ForwardRef(Button))-root-1 standalone-uikit--action-button-story-WithStyles(ForwardRef(Button))-root-4 standalone-uikit--action-button-story-MuiButton-outlined standalone-uikit--action-button-story-WithStyles(ForwardRef(Button))-outlined-2 standalone-uikit--action-button-story-WithStyles(ForwardRef(Button))-outlined-5 standalone-uikit--action-button-story-MuiButton-fullWidth"
@@ -3991,7 +4439,6 @@ exports[`Storyshots Standalone/UIKit ActionButton 1`] = `
   onTouchEnd={[Function]}
   onTouchMove={[Function]}
   onTouchStart={[Function]}
-  small={false}
   tabIndex={0}
   type="button"
 >
@@ -3999,9 +4446,551 @@ exports[`Storyshots Standalone/UIKit ActionButton 1`] = `
     className="standalone-uikit--action-button-story-MuiButton-label standalone-uikit--action-button-story-WithStyles(ForwardRef(Button))-label-3"
   >
      
-    Example Text
+    <div
+      className="standalone-uikit--action-button-story-MuiBox-root standalone-uikit--action-button-story-MuiBox-root-6"
+    >
+      Example Text
+    </div>
   </span>
 </button>
+`;
+
+exports[`Storyshots Standalone/UIKit Checkbox 1`] = `
+Array [
+  <div
+    className="standalone-uikit--checkbox-story-MuiFormGroup-root standalone-uikit--checkbox-story-MuiFormGroup-row"
+  >
+    <label
+      className="standalone-uikit--checkbox-story-MuiFormControlLabel-root standalone-uikit--checkbox-story-MuiFormControlLabel-labelPlacementBottom"
+    >
+      <span
+        aria-disabled={false}
+        className="standalone-uikit--checkbox-story-MuiButtonBase-root standalone-uikit--checkbox-story-MuiIconButton-root standalone-uikit--checkbox-story-PrivateSwitchBase-root-4 standalone-uikit--checkbox-story-MuiCheckbox-root standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-root-2 standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-root-3 standalone-uikit--checkbox-story-MuiCheckbox-colorPrimary standalone-uikit--checkbox-story-PrivateSwitchBase-checked-5 Mui-checked standalone-uikit--checkbox-story-MuiIconButton-colorPrimary"
+        onBlur={[Function]}
+        onDragLeave={[Function]}
+        onFocus={[Function]}
+        onKeyDown={[Function]}
+        onKeyUp={[Function]}
+        onMouseDown={[Function]}
+        onMouseLeave={[Function]}
+        onMouseUp={[Function]}
+        onTouchEnd={[Function]}
+        onTouchMove={[Function]}
+        onTouchStart={[Function]}
+        tabIndex={null}
+      >
+        <span
+          className="standalone-uikit--checkbox-story-MuiIconButton-label"
+        >
+          <input
+            checked={true}
+            className="standalone-uikit--checkbox-story-PrivateSwitchBase-input-7"
+            data-indeterminate={false}
+            disabled={false}
+            name="checkedX"
+            onChange={[Function]}
+            type="checkbox"
+          />
+          <svg
+            aria-hidden={true}
+            className="standalone-uikit--checkbox-story-MuiSvgIcon-root"
+            focusable="false"
+            viewBox="0 0 24 24"
+          >
+            <path
+              d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"
+            />
+          </svg>
+        </span>
+      </span>
+      <span
+        className="standalone-uikit--checkbox-story-MuiTypography-root standalone-uikit--checkbox-story-MuiFormControlLabel-label standalone-uikit--checkbox-story-MuiTypography-body1"
+      >
+        <span
+          className="standalone-uikit--checkbox-story-MuiTypography-root standalone-uikit--checkbox-story-makeStyles-label-1 standalone-uikit--checkbox-story-MuiTypography-caption standalone-uikit--checkbox-story-MuiTypography-alignCenter standalone-uikit--checkbox-story-MuiTypography-displayBlock"
+        >
+          Checkbox X
+size medium
+Alternative Icons
+        </span>
+      </span>
+    </label>
+  </div>,
+  <div
+    className="standalone-uikit--checkbox-story-MuiFormGroup-root standalone-uikit--checkbox-story-MuiFormGroup-row"
+  >
+    <label
+      className="standalone-uikit--checkbox-story-MuiFormControlLabel-root"
+    >
+      <span
+        aria-disabled={false}
+        className="standalone-uikit--checkbox-story-MuiButtonBase-root standalone-uikit--checkbox-story-MuiIconButton-root standalone-uikit--checkbox-story-PrivateSwitchBase-root-4 standalone-uikit--checkbox-story-MuiCheckbox-root standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-root-2 standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-root-8 standalone-uikit--checkbox-story-MuiCheckbox-colorPrimary standalone-uikit--checkbox-story-PrivateSwitchBase-checked-5 Mui-checked standalone-uikit--checkbox-story-MuiIconButton-colorPrimary"
+        onBlur={[Function]}
+        onDragLeave={[Function]}
+        onFocus={[Function]}
+        onKeyDown={[Function]}
+        onKeyUp={[Function]}
+        onMouseDown={[Function]}
+        onMouseLeave={[Function]}
+        onMouseUp={[Function]}
+        onTouchEnd={[Function]}
+        onTouchMove={[Function]}
+        onTouchStart={[Function]}
+        tabIndex={null}
+      >
+        <span
+          className="standalone-uikit--checkbox-story-MuiIconButton-label"
+        >
+          <input
+            checked={true}
+            className="standalone-uikit--checkbox-story-PrivateSwitchBase-input-7"
+            data-indeterminate={false}
+            disabled={false}
+            name="checkedA"
+            onChange={[Function]}
+            type="checkbox"
+          />
+          <svg
+            aria-hidden={true}
+            className="standalone-uikit--checkbox-story-MuiSvgIcon-root standalone-uikit--checkbox-story-MuiSvgIcon-fontSizeSmall"
+            focusable="false"
+            viewBox="-3.5 -4.5 24 24"
+          >
+            <polyline
+              fill="transparent"
+              id="check"
+              points="1 7 6 12 16.5 1.5"
+              stroke="currentColor"
+              strokeWidth="3.5"
+            />
+          </svg>
+        </span>
+      </span>
+      <span
+        className="standalone-uikit--checkbox-story-MuiTypography-root standalone-uikit--checkbox-story-MuiFormControlLabel-label standalone-uikit--checkbox-story-MuiTypography-body1"
+      >
+        <span
+          className="standalone-uikit--checkbox-story-MuiTypography-root standalone-uikit--checkbox-story-makeStyles-label-1 standalone-uikit--checkbox-story-MuiTypography-caption standalone-uikit--checkbox-story-MuiTypography-alignLeft standalone-uikit--checkbox-story-MuiTypography-displayBlock"
+        >
+          Checkbox A (size small)
+        </span>
+      </span>
+    </label>
+    <label
+      className="standalone-uikit--checkbox-story-MuiFormControlLabel-root standalone-uikit--checkbox-story-MuiFormControlLabel-labelPlacementStart"
+    >
+      <span
+        aria-disabled={false}
+        className="standalone-uikit--checkbox-story-MuiButtonBase-root standalone-uikit--checkbox-story-MuiIconButton-root standalone-uikit--checkbox-story-PrivateSwitchBase-root-4 standalone-uikit--checkbox-story-MuiCheckbox-root standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-root-2 standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-root-9 standalone-uikit--checkbox-story-MuiCheckbox-colorPrimary standalone-uikit--checkbox-story-MuiIconButton-colorPrimary"
+        onBlur={[Function]}
+        onDragLeave={[Function]}
+        onFocus={[Function]}
+        onKeyDown={[Function]}
+        onKeyUp={[Function]}
+        onMouseDown={[Function]}
+        onMouseLeave={[Function]}
+        onMouseUp={[Function]}
+        onTouchEnd={[Function]}
+        onTouchMove={[Function]}
+        onTouchStart={[Function]}
+        tabIndex={null}
+      >
+        <span
+          className="standalone-uikit--checkbox-story-MuiIconButton-label"
+        >
+          <input
+            checked={false}
+            className="standalone-uikit--checkbox-story-PrivateSwitchBase-input-7"
+            data-indeterminate={false}
+            disabled={false}
+            name="checkedB"
+            onChange={[Function]}
+            type="checkbox"
+          />
+          <svg
+            aria-hidden={true}
+            className="standalone-uikit--checkbox-story-MuiSvgIcon-root"
+            focusable="false"
+            viewBox="-3.5 -4.5 24 24"
+          >
+            <polyline
+              fill="transparent"
+              id="check"
+              points="1 7 6 12 16.5 1.5"
+              stroke="transparent"
+              strokeWidth="3.5"
+            />
+          </svg>
+        </span>
+      </span>
+      <span
+        className="standalone-uikit--checkbox-story-MuiTypography-root standalone-uikit--checkbox-story-MuiFormControlLabel-label standalone-uikit--checkbox-story-MuiTypography-body1"
+      >
+        <span
+          className="standalone-uikit--checkbox-story-MuiTypography-root standalone-uikit--checkbox-story-makeStyles-label-1 standalone-uikit--checkbox-story-MuiTypography-caption standalone-uikit--checkbox-story-MuiTypography-alignRight standalone-uikit--checkbox-story-MuiTypography-displayBlock"
+        >
+          Checkbox B
+size medium
+Right (start) aligned label
+        </span>
+      </span>
+    </label>
+  </div>,
+  <div
+    className="standalone-uikit--checkbox-story-MuiFormGroup-root standalone-uikit--checkbox-story-MuiFormGroup-row"
+  >
+    <label
+      className="standalone-uikit--checkbox-story-MuiFormControlLabel-root standalone-uikit--checkbox-story-MuiFormControlLabel-labelPlacementTop"
+    >
+      <span
+        aria-disabled={false}
+        className="standalone-uikit--checkbox-story-MuiButtonBase-root standalone-uikit--checkbox-story-MuiIconButton-root standalone-uikit--checkbox-story-PrivateSwitchBase-root-4 standalone-uikit--checkbox-story-MuiCheckbox-root standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-root-2 standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-root-10 standalone-uikit--checkbox-story-MuiCheckbox-colorPrimary standalone-uikit--checkbox-story-MuiIconButton-colorPrimary"
+        onBlur={[Function]}
+        onDragLeave={[Function]}
+        onFocus={[Function]}
+        onKeyDown={[Function]}
+        onKeyUp={[Function]}
+        onMouseDown={[Function]}
+        onMouseLeave={[Function]}
+        onMouseUp={[Function]}
+        onTouchEnd={[Function]}
+        onTouchMove={[Function]}
+        onTouchStart={[Function]}
+        tabIndex={null}
+      >
+        <span
+          className="standalone-uikit--checkbox-story-MuiIconButton-label"
+        >
+          <input
+            checked={false}
+            className="standalone-uikit--checkbox-story-PrivateSwitchBase-input-7"
+            data-indeterminate={false}
+            disabled={false}
+            name="checkedC"
+            onChange={[Function]}
+            type="checkbox"
+          />
+          <svg
+            aria-hidden={true}
+            className="standalone-uikit--checkbox-story-MuiSvgIcon-root standalone-uikit--checkbox-story-MuiSvgIcon-fontSizeSmall"
+            focusable="false"
+            viewBox="-3.5 -4.5 24 24"
+          >
+            <polyline
+              fill="transparent"
+              id="check"
+              points="1 7 6 12 16.5 1.5"
+              stroke="transparent"
+              strokeWidth="3.5"
+            />
+          </svg>
+        </span>
+      </span>
+      <span
+        className="standalone-uikit--checkbox-story-MuiTypography-root standalone-uikit--checkbox-story-MuiFormControlLabel-label standalone-uikit--checkbox-story-MuiTypography-body1"
+      >
+        <span
+          className="standalone-uikit--checkbox-story-MuiTypography-root standalone-uikit--checkbox-story-makeStyles-label-1 standalone-uikit--checkbox-story-MuiTypography-caption standalone-uikit--checkbox-story-MuiTypography-alignCenter standalone-uikit--checkbox-story-MuiTypography-displayBlock"
+        >
+          Checkbox C (size small) (top label)
+        </span>
+      </span>
+    </label>
+    <label
+      className="standalone-uikit--checkbox-story-MuiFormControlLabel-root standalone-uikit--checkbox-story-MuiFormControlLabel-labelPlacementBottom"
+    >
+      <span
+        aria-disabled={false}
+        className="standalone-uikit--checkbox-story-MuiButtonBase-root standalone-uikit--checkbox-story-MuiIconButton-root standalone-uikit--checkbox-story-PrivateSwitchBase-root-4 standalone-uikit--checkbox-story-MuiCheckbox-root standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-root-2 standalone-uikit--checkbox-story-WithStyles(ForwardRef(Checkbox))-root-11 standalone-uikit--checkbox-story-MuiCheckbox-colorPrimary standalone-uikit--checkbox-story-PrivateSwitchBase-checked-5 Mui-checked standalone-uikit--checkbox-story-MuiIconButton-colorPrimary"
+        onBlur={[Function]}
+        onDragLeave={[Function]}
+        onFocus={[Function]}
+        onKeyDown={[Function]}
+        onKeyUp={[Function]}
+        onMouseDown={[Function]}
+        onMouseLeave={[Function]}
+        onMouseUp={[Function]}
+        onTouchEnd={[Function]}
+        onTouchMove={[Function]}
+        onTouchStart={[Function]}
+        tabIndex={null}
+      >
+        <span
+          className="standalone-uikit--checkbox-story-MuiIconButton-label"
+        >
+          <input
+            checked={true}
+            className="standalone-uikit--checkbox-story-PrivateSwitchBase-input-7"
+            data-indeterminate={false}
+            disabled={false}
+            name="checkedD"
+            onChange={[Function]}
+            type="checkbox"
+          />
+          <svg
+            aria-hidden={true}
+            className="standalone-uikit--checkbox-story-MuiSvgIcon-root"
+            focusable="false"
+            viewBox="-3.5 -4.5 24 24"
+          >
+            <polyline
+              fill="transparent"
+              id="check"
+              points="1 7 6 12 16.5 1.5"
+              stroke="currentColor"
+              strokeWidth="3.5"
+            />
+          </svg>
+        </span>
+      </span>
+      <span
+        className="standalone-uikit--checkbox-story-MuiTypography-root standalone-uikit--checkbox-story-MuiFormControlLabel-label standalone-uikit--checkbox-story-MuiTypography-body1"
+      >
+        <span
+          className="standalone-uikit--checkbox-story-MuiTypography-root standalone-uikit--checkbox-story-makeStyles-label-1 standalone-uikit--checkbox-story-MuiTypography-caption standalone-uikit--checkbox-story-MuiTypography-alignCenter standalone-uikit--checkbox-story-MuiTypography-displayBlock"
+        >
+          Checkbox D
+size medium
+Bottom Label
+        </span>
+      </span>
+    </label>
+  </div>,
+]
+`;
+
+exports[`Storyshots Standalone/UIKit ComponentWithLabel 1`] = `
+<div
+  className="standalone-uikit--component-with-label-story-MuiGrid-root standalone-uikit--component-with-label-story-MuiGrid-container standalone-uikit--component-with-label-story-MuiGrid-spacing-xs-2 standalone-uikit--component-with-label-story-MuiGrid-align-items-xs-center standalone-uikit--component-with-label-story-MuiGrid-justify-xs-center"
+>
+  <div
+    className="standalone-uikit--component-with-label-story-MuiGrid-root standalone-uikit--component-with-label-story-MuiGrid-item"
+  >
+    <label
+      className="standalone-uikit--component-with-label-story-MuiFormControlLabel-root standalone-uikit--component-with-label-story-MuiFormControlLabel-labelPlacementStart Mui-disabled"
+    >
+      <button
+        className="standalone-uikit--component-with-label-story-MuiButtonBase-root standalone-uikit--component-with-label-story-MuiIconButton-root standalone-uikit--component-with-label-story-MuiIconButton-colorPrimary Mui-disabled Mui-disabled"
+        disabled={true}
+        onBlur={[Function]}
+        onClick={[Function]}
+        onDragLeave={[Function]}
+        onFocus={[Function]}
+        onKeyDown={[Function]}
+        onKeyUp={[Function]}
+        onMouseDown={[Function]}
+        onMouseLeave={[Function]}
+        onMouseUp={[Function]}
+        onTouchEnd={[Function]}
+        onTouchMove={[Function]}
+        onTouchStart={[Function]}
+        tabIndex={-1}
+        type="button"
+      >
+        <span
+          className="standalone-uikit--component-with-label-story-MuiIconButton-label"
+        >
+          <svg
+            aria-hidden={true}
+            className="standalone-uikit--component-with-label-story-MuiSvgIcon-root"
+            focusable="false"
+            viewBox="0 0 24 24"
+          >
+            <path
+              d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"
+            />
+          </svg>
+        </span>
+      </button>
+      <span
+        className="standalone-uikit--component-with-label-story-MuiTypography-root standalone-uikit--component-with-label-story-MuiFormControlLabel-label Mui-disabled standalone-uikit--component-with-label-story-MuiTypography-body1"
+      >
+        <span
+          className="standalone-uikit--component-with-label-story-MuiTypography-root standalone-uikit--component-with-label-story-makeStyles-label-1 standalone-uikit--component-with-label-story-MuiTypography-caption standalone-uikit--component-with-label-story-MuiTypography-alignRight standalone-uikit--component-with-label-story-MuiTypography-displayBlock"
+        >
+          I am a label
+at the start
+with as many
+lines to display
+as you want
+and even
+some more
+set it to
+disabled if needed
+        </span>
+      </span>
+    </label>
+  </div>
+  <div
+    className="standalone-uikit--component-with-label-story-MuiGrid-root standalone-uikit--component-with-label-story-MuiGrid-item"
+  >
+    <div
+      className="standalone-uikit--component-with-label-story-MuiGrid-root standalone-uikit--component-with-label-story-MuiGrid-container standalone-uikit--component-with-label-story-MuiGrid-direction-xs-column standalone-uikit--component-with-label-story-MuiGrid-align-items-xs-center"
+    >
+      <div
+        className="standalone-uikit--component-with-label-story-MuiGrid-root standalone-uikit--component-with-label-story-MuiGrid-item"
+      >
+        <label
+          className="standalone-uikit--component-with-label-story-MuiFormControlLabel-root standalone-uikit--component-with-label-story-MuiFormControlLabel-labelPlacementTop"
+        >
+          <button
+            className="standalone-uikit--component-with-label-story-MuiButtonBase-root standalone-uikit--component-with-label-story-MuiIconButton-root standalone-uikit--component-with-label-story-MuiIconButton-colorSecondary"
+            disabled={false}
+            onBlur={[Function]}
+            onClick={[Function]}
+            onDragLeave={[Function]}
+            onFocus={[Function]}
+            onKeyDown={[Function]}
+            onKeyUp={[Function]}
+            onMouseDown={[Function]}
+            onMouseLeave={[Function]}
+            onMouseUp={[Function]}
+            onTouchEnd={[Function]}
+            onTouchMove={[Function]}
+            onTouchStart={[Function]}
+            tabIndex={0}
+            type="button"
+          >
+            <span
+              className="standalone-uikit--component-with-label-story-MuiIconButton-label"
+            >
+              <svg
+                aria-hidden={true}
+                className="standalone-uikit--component-with-label-story-MuiSvgIcon-root"
+                focusable="false"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8-8 8z"
+                />
+              </svg>
+            </span>
+          </button>
+          <span
+            className="standalone-uikit--component-with-label-story-MuiTypography-root standalone-uikit--component-with-label-story-MuiFormControlLabel-label standalone-uikit--component-with-label-story-MuiTypography-body1"
+          >
+            <span
+              className="standalone-uikit--component-with-label-story-MuiTypography-root standalone-uikit--component-with-label-story-makeStyles-label-1 standalone-uikit--component-with-label-story-MuiTypography-caption standalone-uikit--component-with-label-story-MuiTypography-alignCenter standalone-uikit--component-with-label-story-MuiTypography-displayBlock"
+            >
+              I am a label
+at the top
+            </span>
+          </span>
+        </label>
+      </div>
+      <div
+        className="standalone-uikit--component-with-label-story-MuiGrid-root standalone-uikit--component-with-label-story-MuiGrid-item"
+      >
+        <label
+          className="standalone-uikit--component-with-label-story-MuiFormControlLabel-root standalone-uikit--component-with-label-story-MuiFormControlLabel-labelPlacementBottom"
+        >
+          <button
+            className="standalone-uikit--component-with-label-story-MuiButtonBase-root standalone-uikit--component-with-label-story-MuiIconButton-root standalone-uikit--component-with-label-story-MuiIconButton-colorSecondary"
+            disabled={false}
+            onBlur={[Function]}
+            onClick={[Function]}
+            onDragLeave={[Function]}
+            onFocus={[Function]}
+            onKeyDown={[Function]}
+            onKeyUp={[Function]}
+            onMouseDown={[Function]}
+            onMouseLeave={[Function]}
+            onMouseUp={[Function]}
+            onTouchEnd={[Function]}
+            onTouchMove={[Function]}
+            onTouchStart={[Function]}
+            tabIndex={0}
+            type="button"
+          >
+            <span
+              className="standalone-uikit--component-with-label-story-MuiIconButton-label"
+            >
+              <svg
+                aria-hidden={true}
+                className="standalone-uikit--component-with-label-story-MuiSvgIcon-root"
+                focusable="false"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"
+                />
+              </svg>
+            </span>
+          </button>
+          <span
+            className="standalone-uikit--component-with-label-story-MuiTypography-root standalone-uikit--component-with-label-story-MuiFormControlLabel-label standalone-uikit--component-with-label-story-MuiTypography-body1"
+          >
+            <span
+              className="standalone-uikit--component-with-label-story-MuiTypography-root standalone-uikit--component-with-label-story-makeStyles-label-1 standalone-uikit--component-with-label-story-MuiTypography-caption standalone-uikit--component-with-label-story-MuiTypography-alignCenter standalone-uikit--component-with-label-story-MuiTypography-displayBlock"
+            >
+              I am a label
+at the bottom
+            </span>
+          </span>
+        </label>
+      </div>
+    </div>
+  </div>
+  <br />
+  <div
+    className="standalone-uikit--component-with-label-story-MuiGrid-root standalone-uikit--component-with-label-story-MuiGrid-item"
+  >
+    <label
+      className="standalone-uikit--component-with-label-story-MuiFormControlLabel-root"
+    >
+      <button
+        className="standalone-uikit--component-with-label-story-MuiButtonBase-root standalone-uikit--component-with-label-story-MuiIconButton-root standalone-uikit--component-with-label-story-MuiIconButton-colorPrimary"
+        disabled={false}
+        onBlur={[Function]}
+        onClick={[Function]}
+        onDragLeave={[Function]}
+        onFocus={[Function]}
+        onKeyDown={[Function]}
+        onKeyUp={[Function]}
+        onMouseDown={[Function]}
+        onMouseLeave={[Function]}
+        onMouseUp={[Function]}
+        onTouchEnd={[Function]}
+        onTouchMove={[Function]}
+        onTouchStart={[Function]}
+        tabIndex={0}
+        type="button"
+      >
+        <span
+          className="standalone-uikit--component-with-label-story-MuiIconButton-label"
+        >
+          <svg
+            aria-hidden={true}
+            className="standalone-uikit--component-with-label-story-MuiSvgIcon-root"
+            focusable="false"
+            viewBox="0 0 24 24"
+          >
+            <path
+              d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"
+            />
+          </svg>
+        </span>
+      </button>
+      <span
+        className="standalone-uikit--component-with-label-story-MuiTypography-root standalone-uikit--component-with-label-story-MuiFormControlLabel-label standalone-uikit--component-with-label-story-MuiTypography-body1"
+      >
+        <span
+          className="standalone-uikit--component-with-label-story-MuiTypography-root standalone-uikit--component-with-label-story-makeStyles-label-1 standalone-uikit--component-with-label-story-MuiTypography-caption standalone-uikit--component-with-label-story-MuiTypography-alignLeft standalone-uikit--component-with-label-story-MuiTypography-displayBlock"
+        >
+          I am a label
+at the end.
+Clicking the label
+will forward the
+click to
+the control
+which can be
+any Button
+or Form element
+        </span>
+      </span>
+    </label>
+  </div>
+</div>
 `;
 
 exports[`Storyshots Standalone/UIKit FormButtons 1`] = `
@@ -4012,7 +5001,7 @@ exports[`Storyshots Standalone/UIKit FormButtons 1`] = `
     className="standalone-uikit--form-buttons-story-makeStyles-buttonContainer-2"
   >
     <button
-      className="standalone-uikit--form-buttons-story-MuiButtonBase-root standalone-uikit--form-buttons-story-MuiButton-root standalone-uikit--form-buttons-story-WithStyles(ForwardRef(Button))-root-3 standalone-uikit--form-buttons-story-WithStyles(ForwardRef(Button))-root-6 standalone-uikit--form-buttons-story-MuiButton-outlined standalone-uikit--form-buttons-story-WithStyles(ForwardRef(Button))-outlined-4 standalone-uikit--form-buttons-story-WithStyles(ForwardRef(Button))-outlined-7"
+      className="standalone-uikit--form-buttons-story-MuiButtonBase-root standalone-uikit--form-buttons-story-MuiButton-root standalone-uikit--form-buttons-story-WithStyles(ForwardRef(Button))-root-3 standalone-uikit--form-buttons-story-WithStyles(ForwardRef(Button))-root-6 standalone-uikit--form-buttons-story-MuiButton-outlined standalone-uikit--form-buttons-story-WithStyles(ForwardRef(Button))-outlined-4 standalone-uikit--form-buttons-story-WithStyles(ForwardRef(Button))-outlined-7 standalone-uikit--form-buttons-story-MuiButton-fullWidth"
       disabled={false}
       onBlur={[Function]}
       onClick={[Function]}
@@ -4026,7 +5015,6 @@ exports[`Storyshots Standalone/UIKit FormButtons 1`] = `
       onTouchEnd={[Function]}
       onTouchMove={[Function]}
       onTouchStart={[Function]}
-      small={false}
       tabIndex={0}
       type="button"
     >
@@ -4034,7 +5022,11 @@ exports[`Storyshots Standalone/UIKit FormButtons 1`] = `
         className="standalone-uikit--form-buttons-story-MuiButton-label standalone-uikit--form-buttons-story-WithStyles(ForwardRef(Button))-label-5"
       >
          
-        Save
+        <div
+          className="standalone-uikit--form-buttons-story-MuiBox-root standalone-uikit--form-buttons-story-MuiBox-root-8"
+        >
+          Save
+        </div>
       </span>
     </button>
   </span>
@@ -4042,7 +5034,7 @@ exports[`Storyshots Standalone/UIKit FormButtons 1`] = `
     className="standalone-uikit--form-buttons-story-makeStyles-buttonContainer-2"
   >
     <button
-      className="standalone-uikit--form-buttons-story-MuiButtonBase-root standalone-uikit--form-buttons-story-MuiButton-root standalone-uikit--form-buttons-story-WithStyles(ForwardRef(Button))-root-3 standalone-uikit--form-buttons-story-WithStyles(ForwardRef(Button))-root-8 standalone-uikit--form-buttons-story-MuiButton-outlined standalone-uikit--form-buttons-story-WithStyles(ForwardRef(Button))-outlined-4 standalone-uikit--form-buttons-story-WithStyles(ForwardRef(Button))-outlined-9 Mui-disabled Mui-disabled"
+      className="standalone-uikit--form-buttons-story-MuiButtonBase-root standalone-uikit--form-buttons-story-MuiButton-root standalone-uikit--form-buttons-story-WithStyles(ForwardRef(Button))-root-3 standalone-uikit--form-buttons-story-WithStyles(ForwardRef(Button))-root-9 standalone-uikit--form-buttons-story-MuiButton-outlined standalone-uikit--form-buttons-story-WithStyles(ForwardRef(Button))-outlined-4 standalone-uikit--form-buttons-story-WithStyles(ForwardRef(Button))-outlined-10 Mui-disabled standalone-uikit--form-buttons-story-MuiButton-fullWidth Mui-disabled"
       disabled={true}
       onBlur={[Function]}
       onClick={[Function]}
@@ -4056,7 +5048,6 @@ exports[`Storyshots Standalone/UIKit FormButtons 1`] = `
       onTouchEnd={[Function]}
       onTouchMove={[Function]}
       onTouchStart={[Function]}
-      small={false}
       tabIndex={-1}
       type="button"
     >
@@ -4064,10 +5055,86 @@ exports[`Storyshots Standalone/UIKit FormButtons 1`] = `
         className="standalone-uikit--form-buttons-story-MuiButton-label standalone-uikit--form-buttons-story-WithStyles(ForwardRef(Button))-label-5"
       >
          
-        Cancel
+        <div
+          className="standalone-uikit--form-buttons-story-MuiBox-root standalone-uikit--form-buttons-story-MuiBox-root-11"
+        >
+          Cancel
+        </div>
       </span>
     </button>
   </span>
+</div>
+`;
+
+exports[`Storyshots Standalone/UIKit IconButtonWithText 1`] = `
+<div
+  className="standalone-uikit--icon-button-with-text-story-MuiGrid-root standalone-uikit--icon-button-with-text-story-MuiGrid-container"
+>
+  <div
+    className="standalone-uikit--icon-button-with-text-story-MuiGrid-root standalone-uikit--icon-button-with-text-story-MuiGrid-item"
+  >
+    Precontent
+  </div>
+  <div
+    className="standalone-uikit--icon-button-with-text-story-MuiGrid-root standalone-uikit--icon-button-with-text-story-MuiGrid-item"
+  >
+    <div
+      className="standalone-uikit--icon-button-with-text-story-MuiGrid-root standalone-uikit--icon-button-with-text-story-MuiGrid-container standalone-uikit--icon-button-with-text-story-MuiGrid-direction-xs-column standalone-uikit--icon-button-with-text-story-MuiGrid-align-items-xs-center"
+    >
+      <div
+        className="standalone-uikit--icon-button-with-text-story-MuiGrid-root standalone-uikit--icon-button-with-text-story-MuiGrid-item"
+      >
+        <button
+          className="standalone-uikit--icon-button-with-text-story-MuiButtonBase-root standalone-uikit--icon-button-with-text-story-MuiIconButton-root standalone-uikit--icon-button-with-text-story-MuiIconButton-colorPrimary"
+          disabled={false}
+          onBlur={[Function]}
+          onClick={[Function]}
+          onDragLeave={[Function]}
+          onFocus={[Function]}
+          onKeyDown={[Function]}
+          onKeyUp={[Function]}
+          onMouseDown={[Function]}
+          onMouseLeave={[Function]}
+          onMouseUp={[Function]}
+          onTouchEnd={[Function]}
+          onTouchMove={[Function]}
+          onTouchStart={[Function]}
+          tabIndex={0}
+          type="button"
+        >
+          <span
+            className="standalone-uikit--icon-button-with-text-story-MuiIconButton-label"
+          >
+            <svg
+              aria-hidden={true}
+              className="standalone-uikit--icon-button-with-text-story-MuiSvgIcon-root"
+              focusable="false"
+              viewBox="0 0 26 26.02"
+            >
+              <path
+                d="M25.64.36a1.15,1.15,0,0,1,.36.86,1.15,1.15,0,0,1-.36.86l-9.39,9.4v13.3a1.13,1.13,0,0,1-.66,1.09,1.19,1.19,0,0,1-1.27-.07L10.26,23a1.25,1.25,0,0,1-.51-1V11.48L.36,2.08A1.15,1.15,0,0,1,0,1.22,1.15,1.15,0,0,1,.36.36,1.15,1.15,0,0,1,1.22,0H24.78A1.15,1.15,0,0,1,25.64.36Z"
+              />
+            </svg>
+          </span>
+        </button>
+      </div>
+      <div
+        className="standalone-uikit--icon-button-with-text-story-MuiGrid-root standalone-uikit--icon-button-with-text-story-MuiGrid-item"
+      >
+        <span
+          className="standalone-uikit--icon-button-with-text-story-MuiTypography-root standalone-uikit--icon-button-with-text-story-MuiTypography-caption standalone-uikit--icon-button-with-text-story-MuiTypography-colorTextSecondary"
+          onClick={[Function]}
+        >
+          Filter
+        </span>
+      </div>
+    </div>
+  </div>
+  <div
+    className="standalone-uikit--icon-button-with-text-story-MuiGrid-root standalone-uikit--icon-button-with-text-story-MuiGrid-item"
+  >
+    Post content
+  </div>
 </div>
 `;
 

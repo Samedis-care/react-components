@@ -26,6 +26,10 @@ export interface IDataGridPaginationViewProps {
 	 * The total amount of rows
 	 */
 	rowsTotal: number;
+	/**
+	 * The amount of rows shown
+	 */
+	rowsFiltered: number | null;
 }
 
 const PaginationView = (props: IDataGridPaginationViewProps) => {
@@ -34,6 +38,11 @@ const PaginationView = (props: IDataGridPaginationViewProps) => {
 	return (
 		<Box mx={2}>
 			<Typography className={classes.text}>
+				{props.rowsFiltered !== null &&
+					props.rowsFiltered !== props.rowsTotal &&
+					`${i18n.t("standalone.data-grid.footer.filtered")} ${
+						props.rowsFiltered
+					}`}{" "}
 				{i18n.t("standalone.data-grid.footer.total") || ""} {props.rowsTotal}
 			</Typography>
 		</Box>

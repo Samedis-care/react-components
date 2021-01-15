@@ -46,6 +46,14 @@
 			"content": {
 				"filter": "Filtrez"
 			}
+		},
+		"signature-pad": {
+			"dialog": {
+				"reset": "Réinitialiser",
+				"save-changes": "Enregistrer les changements",
+				"title": "Signez ici"
+			},
+			"sign-here": "Signé numériquement ici"
 		}
 	},
 	"backend-integration": {

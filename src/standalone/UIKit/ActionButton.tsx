@@ -1,5 +1,11 @@
 import React from "react";
-import { Button, ButtonProps, Tooltip, withStyles } from "@material-ui/core";
+import {
+	Box,
+	Button,
+	ButtonProps,
+	Tooltip,
+	withStyles,
+} from "@material-ui/core";
 import { Theme } from "@material-ui/core/styles";
 import { combineColors } from "../../utils";
 
@@ -52,15 +58,15 @@ export interface ActionButtonProps extends Omit<ButtonProps, "children"> {
 }
 
 const ActionButton = (props: ActionButtonProps) => {
-	const { icon, fullWidth, small, children } = props;
+	const { icon, fullWidth, small, children, ...otherProps } = props;
 
 	const renderButton = (): React.ReactElement => (
 		<StyledButton
 			variant={"outlined"}
 			fullWidth={!small || fullWidth}
-			{...props}
+			{...otherProps}
 		>
-			{icon} {!small && children}
+			{icon} {!small && <Box pl={1}>{children}</Box>}
 		</StyledButton>
 	);
 

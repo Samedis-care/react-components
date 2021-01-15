@@ -13,3 +13,4 @@ export * from "./LocalizedDateTimePickers";
 export { default as InfoBox } from "./InfoBox";
 export * from "./Icons";
 export * from "./UIKit";
+export { default as SignaturePad } from "./SignaturePad";

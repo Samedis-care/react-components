@@ -1,6 +1,9 @@
 // credits: https://stackoverflow.com/a/19366389
 
 const colorToRgba = (color: string): number[] | undefined => {
+	// Jest patch, not used in prod
+	if (process && process.env && process.env.JEST_WORKER_ID) return [1, 1, 1, 1];
+
 	const canvas = document.createElement("canvas");
 	const ctx = canvas.getContext("2d");
 	if (!ctx) throw new Error("Failed getting Canvas 2D context");

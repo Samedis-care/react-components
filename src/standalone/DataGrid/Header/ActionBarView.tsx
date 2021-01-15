@@ -1,17 +1,26 @@
 import React, { useCallback, useState } from "react";
-import { Grid, IconButton, MenuProps, Tooltip } from "@material-ui/core";
 import {
-	Add as AddIcon,
-	Delete as DeleteIcon,
-	Description as ExportIcon,
-	Edit as EditIcon,
-	Settings as SettingsIcon,
-	SettingsBackupRestore as ResetIcon,
-} from "@material-ui/icons";
-import { VerticalDivider } from "../../index";
+	Grid,
+	IconButton,
+	MenuProps,
+	Tooltip,
+	useMediaQuery,
+	useTheme,
+} from "@material-ui/core";
+import { Add as AddIcon } from "@material-ui/icons";
+import {
+	ActionButton,
+	ExportIcon,
+	ResetIcon,
+	SmallIconButton,
+	TuneIcon,
+	VerticalDivider,
+} from "../../index";
 import { IDataGridExporter } from "./index";
 import ExportMenu from "./ExportMenu";
 import i18n from "../../../i18n";
+import ComponentWithLabel from "../../UIKit/ComponentWithLabel";
+import { IDataGridAddButton } from "../index";
 
 export interface IDataGridActionBarViewProps {
 	/**
@@ -19,25 +28,10 @@ export interface IDataGridActionBarViewProps {
 	 */
 	toggleSettings: () => void;
 	/**
-	 * The amount of selected items
-	 * Values: 0 (none), 1 (one) or 2 (multiple)
-	 */
-	numSelected: number;
-	/**
 	 * Callback for add new button.
 	 * If not defined: Disables add new button
 	 */
-	handleAddNew?: () => void;
-	/**
-	 * Callback for edit button.
-	 * If not defined: Disables edit button
-	 */
-	handleEdit?: () => void;
-	/**
-	 * Callback for delete button.
-	 * If not defined: Disables delete button
-	 */
-	handleDelete?: () => void;
+	handleAddNew?: (() => void) | IDataGridAddButton[];
 	/**
 	 * Callback for reset button
 	 */
@@ -53,8 +47,9 @@ export interface IDataGridActionBarViewProps {
 }
 
 const ActionBarView = (props: IDataGridActionBarViewProps) => {
-	const showDivider =
-		props.handleAddNew || props.handleEdit || props.handleDelete;
+	const theme = useTheme();
+	const bpMdUp = useMediaQuery(theme.breakpoints.up("md"), { noSsr: true });
+	const bpSmUp = useMediaQuery(theme.breakpoints.up("sm"), { noSsr: true });
 
 	const [exportAnchorEl, setExportAnchorEl] = useState<MenuProps["anchorEl"]>(
 		undefined
@@ -71,93 +66,127 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 	}, [setExportAnchorEl]);
 
 	return (
-		<Grid container>
+		<Grid container alignItems={"stretch"} wrap={"nowrap"}>
 			{props.hasCustomFilterBar && (
 				<Grid item key={"divider-1"}>
 					<VerticalDivider />
 				</Grid>
 			)}
-			{props.handleAddNew && (
-				<Grid item key={"new"}>
-					<Tooltip title={i18n.t("standalone.data-grid.header.new") || ""}>
-						<span>
-							<IconButton onClick={props.handleAddNew}>
-								<AddIcon />
-							</IconButton>
-						</span>
-					</Tooltip>
-				</Grid>
-			)}
-			{props.handleEdit && (
-				<Grid item key={"edit"}>
-					<Tooltip title={i18n.t("standalone.data-grid.header.edit") || ""}>
-						<span>
-							<IconButton
-								disabled={props.numSelected !== 1}
-								onClick={props.handleEdit}
-							>
-								<EditIcon />
-							</IconButton>
-						</span>
-					</Tooltip>
-				</Grid>
-			)}
-			{props.handleDelete && (
-				<Grid item key={"delete"}>
-					<Tooltip title={i18n.t("standalone.data-grid.header.delete") || ""}>
-						<span>
-							<IconButton
-								disabled={props.numSelected === 0}
-								onClick={props.handleDelete}
-							>
-								<DeleteIcon />
-							</IconButton>
-						</span>
-					</Tooltip>
-				</Grid>
-			)}
-			{showDivider && (
-				<Grid item key={"divider-2"}>
-					<VerticalDivider />
-				</Grid>
-			)}
-			{props.exporters && (
-				<Grid item key={"export"}>
-					<Tooltip title={i18n.t("standalone.data-grid.header.export") || ""}>
-						<span>
-							<IconButton onClick={openExportMenu}>
-								<ExportIcon />
-							</IconButton>
-						</span>
-					</Tooltip>
-					<ExportMenu
-						exporters={props.exporters}
-						anchorEl={exportAnchorEl}
-						onClose={closeExportMenu}
-					/>
-				</Grid>
-			)}
 			<Grid item key={"settings"}>
-				<Tooltip title={i18n.t("standalone.data-grid.header.settings") || ""}>
-					<span>
-						<IconButton onClick={props.toggleSettings}>
-							<SettingsIcon />
+				{bpMdUp ? (
+					<ComponentWithLabel
+						control={
+							<SmallIconButton color={"primary"}>
+								<TuneIcon />
+							</SmallIconButton>
+						}
+						labelText={i18n.t("standalone.data-grid.header.settings")}
+						onClick={props.toggleSettings}
+						labelPlacement={"bottom"}
+					/>
+				) : (
+					<Tooltip title={i18n.t("standalone.data-grid.header.settings") ?? ""}>
+						<IconButton color={"primary"} onClick={props.toggleSettings}>
+							<TuneIcon />
 						</IconButton>
-					</span>
-				</Tooltip>
+					</Tooltip>
+				)}
+			</Grid>
+			<Grid item key={"divider-4"}>
+				<VerticalDivider />
 			</Grid>
 			<Grid item key={"reset"}>
-				<Tooltip
-					title={i18n.t("standalone.data-grid.header.reset") || ""}
-					onClick={props.handleReset}
-				>
-					<span>
-						<IconButton>
+				{bpMdUp ? (
+					<ComponentWithLabel
+						control={
+							<SmallIconButton color={"primary"}>
+								<ResetIcon />
+							</SmallIconButton>
+						}
+						labelText={i18n.t("standalone.data-grid.header.reset")}
+						onClick={props.handleReset}
+						labelPlacement={"bottom"}
+					/>
+				) : (
+					<Tooltip title={i18n.t("standalone.data-grid.header.reset") ?? ""}>
+						<IconButton color={"primary"} onClick={props.handleReset}>
 							<ResetIcon />
 						</IconButton>
-					</span>
-				</Tooltip>
+					</Tooltip>
+				)}
 			</Grid>
+			{props.exporters && (
+				<>
+					<Grid item key={"divider-3"}>
+						<VerticalDivider />
+					</Grid>
+					<Grid item key={"export"}>
+						{bpMdUp ? (
+							<ComponentWithLabel
+								control={
+									<SmallIconButton color={"primary"}>
+										<ExportIcon />
+									</SmallIconButton>
+								}
+								labelText={i18n.t("standalone.data-grid.header.export")}
+								onClick={openExportMenu}
+								labelPlacement={"bottom"}
+							/>
+						) : (
+							<Tooltip
+								title={i18n.t("standalone.data-grid.header.export") ?? ""}
+							>
+								<IconButton color={"primary"} onClick={openExportMenu}>
+									<ExportIcon />
+								</IconButton>
+							</Tooltip>
+						)}
+						<ExportMenu
+							exporters={props.exporters}
+							anchorEl={exportAnchorEl}
+							onClose={closeExportMenu}
+						/>
+					</Grid>
+				</>
+			)}
+			{props.handleAddNew && (
+				<>
+					<Grid item xs key={"divider-2"} />
+					<Grid
+						item
+						container
+						key={"new"}
+						justify={"flex-end"}
+						alignItems={"center"}
+						spacing={2}
+						wrap={"nowrap"}
+					>
+						{typeof props.handleAddNew === "function" ? (
+							<Grid item>
+								<ActionButton
+									small={!bpSmUp}
+									icon={<AddIcon />}
+									onClick={props.handleAddNew}
+								>
+									{i18n.t("standalone.data-grid.header.new") ?? ""}
+								</ActionButton>
+							</Grid>
+						) : (
+							props.handleAddNew.map((entry, index) => (
+								<Grid item key={index.toString()}>
+									<ActionButton
+										small={!bpSmUp}
+										icon={<AddIcon />}
+										onClick={entry.onClick}
+									>
+										{entry.label}
+									</ActionButton>
+								</Grid>
+							))
+						)}
+					</Grid>
+				</>
+			)}
 		</Grid>
 	);
 };

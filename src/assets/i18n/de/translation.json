@@ -46,6 +46,14 @@
 				"any": "Alle"
 			},
 			"no-files": "Keine Anhänge verfügbar"
+		},
+		"signature-pad": {
+			"dialog": {
+				"reset": "Zurücksetzen",
+				"save-changes": "Änderungen speichern",
+				"title": "Hier unterschreiben"
+			},
+			"sign-here": "Hier digital unterschrieben"
 		}
 	},
 	"backend-integration": {

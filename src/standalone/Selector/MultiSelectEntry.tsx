@@ -8,11 +8,7 @@ import {
 	createStyles,
 	WithStyles,
 } from "@material-ui/core";
-import {
-	SmallIconButton,
-	SmallListItem,
-	SmallListItemIcon,
-} from "../Small/List";
+import { SmallIconButton, SmallListItem, SmallListItemIcon } from "../Small";
 import { Delete as DeleteIcon } from "@material-ui/icons";
 import { MultiSelectorData } from "./MultiSelect";
 

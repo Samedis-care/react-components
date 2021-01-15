@@ -86,8 +86,15 @@ const useStyles = makeStyles({
 	sortIcon: {
 		height: 24,
 	},
+	label: {
+		textOverflow: "ellipsis",
+		overflow: "hidden",
+		"&:hover": {
+			pointerEvents: "auto",
+		},
+	},
 	disableClick: {
-		pointerEvents: "none",
+		userSelect: "none",
 	},
 });
 
@@ -126,16 +133,22 @@ const ColumnHeaderContent = (
 
 	return (
 		<>
-			<Grid container justify={"space-between"}>
-				<Grid item className={classes.disableClick} key={"title"}>
-					<Grid container justify={"flex-start"}>
-						<Grid item>{props.headerName}</Grid>
-						<Grid item className={classes.sortIcon}>
-							{props.sort === -1 && <ArrowDownward />}
-							{props.sort === 1 && <ArrowUpward />}
-						</Grid>
-						<Grid item>{props.sort !== 0 && props.sortOrder?.toString()}</Grid>
-					</Grid>
+			<Grid container justify={"flex-start"} wrap={"nowrap"}>
+				<Grid
+					item
+					className={`${classes.disableClick} ${classes.label}`}
+					key={"header"}
+				>
+					<Tooltip title={props.headerName}>
+						<span>{props.headerName}</span>
+					</Tooltip>
+				</Grid>
+				<Grid item className={classes.sortIcon}>
+					{props.sort === -1 && <ArrowDownward />}
+					{props.sort === 1 && <ArrowUpward />}
+				</Grid>
+				<Grid item xs>
+					{props.sort !== 0 && props.sortOrder?.toString()}
 				</Grid>
 				{props.filterable && (
 					<Grid item key={"filter"}>

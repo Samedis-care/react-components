@@ -19,11 +19,10 @@
 			},
 			"header": {
 				"new": "New",
-				"edit": "Edit",
-				"delete": "Delete",
 				"export": "Export",
 				"settings": "Settings",
-				"reset": "Reset"
+				"reset": "Reset",
+				"custom-filter-button": "Selection"
 			},
 			"settings": {
 				"lock": "Lock/Unlock Columns",
@@ -31,7 +30,11 @@
 				"close": "Close"
 			},
 			"footer": {
-				"total": "Total:"
+				"total": "Total:",
+				"filtered": "Filtered:",
+				"edit": "Edit",
+				"delete": "Delete",
+				"select-all": "All"
 			}
 		},
 		"selector": {
@@ -49,6 +52,14 @@
 			"format": {
 				"any": "Any"
 			}
+		},
+		"signature-pad": {
+			"dialog": {
+				"reset": "Reset",
+				"save-changes": "Save Changes",
+				"title": "Sign Here"
+			},
+			"sign-here": "Digitally signed here"
 		}
 	},
 	"backend-integration": {

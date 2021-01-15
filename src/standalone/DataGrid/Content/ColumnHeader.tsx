@@ -119,6 +119,7 @@ const ColumnHeader = (props: IDataGridContentColumnHeaderProps) => {
 				[field]:
 					move < 0 &&
 					curWidth &&
+					curWidth > HEADER_PADDING &&
 					curWidth - HEADER_PADDING - 10 > prevState[field] // prevent resizing beyond min width
 						? prevState[field]
 						: prevState[field] + move,
@@ -150,14 +151,11 @@ const ColumnHeader = (props: IDataGridContentColumnHeaderProps) => {
 				).width + HEADER_PADDING;
 			width = Math.max(width, entryWidth);
 		});
-		setColumnState((prevState) => ({
+		setColumnWidthState((prevState) => ({
 			...prevState,
-			[field]: {
-				...prevState[field],
-				width: width,
-			},
+			[field]: width,
 		}));
-	}, [field, gridRoot, setColumnState]);
+	}, [field, gridRoot, setColumnWidthState]);
 
 	useEffect(() => {
 		document.addEventListener("mousemove", onDrag);
@@ -165,7 +163,7 @@ const ColumnHeader = (props: IDataGridContentColumnHeaderProps) => {
 
 		return () => {
 			document.removeEventListener("mousemove", onDrag);
-			document.addEventListener("mouseup", stopDrag);
+			document.removeEventListener("mouseup", stopDrag);
 		};
 	}, [onDrag, stopDrag]);
 

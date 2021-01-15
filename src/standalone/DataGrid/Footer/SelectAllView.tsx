@@ -1,10 +1,10 @@
 import React from "react";
-import { Checkbox } from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
+import { makeStyles } from "@material-ui/core";
+import Checkbox from "../../UIKit/Checkbox";
 
 const useStyles = makeStyles({
 	selectCheckbox: {
-		padding: 0,
+		padding: "4px 0",
 	},
 });
 
@@ -13,6 +13,10 @@ export interface IDataGridContentSelectAllViewProps {
 	 * Is currently checked
 	 */
 	checked: boolean;
+	/**
+	 * Is the select all button disabled?
+	 */
+	disabled: boolean;
 	/**
 	 * Update checked
 	 * @param evt The change event, ignored
@@ -29,6 +33,7 @@ const SelectAllView = (props: IDataGridContentSelectAllViewProps) => {
 			className={classes.selectCheckbox}
 			checked={props.checked}
 			onChange={props.onSelect}
+			disabled={props.disabled}
 		/>
 	);
 };

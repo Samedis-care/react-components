@@ -10,6 +10,7 @@ import {
 	Paper,
 	Theme,
 	Typography,
+	withStyles,
 } from "@material-ui/core";
 import { IDataGridColumnDef, IDataGridColumnProps } from "../index";
 import i18n from "../../../i18n";
@@ -47,6 +48,17 @@ const useStyles = makeStyles((theme: Theme) => ({
 	},
 }));
 
+const EllipsisFormControlLabel = withStyles({
+	root: {
+		maxWidth: "100%",
+	},
+	label: {
+		overflow: "hidden",
+		textOverflow: "ellipsis",
+		whiteSpace: "nowrap",
+	},
+})(FormControlLabel);
+
 const SettingsDialog = (props: IDataGridSettingsDialogProps) => {
 	const classes = useStyles();
 
@@ -58,8 +70,8 @@ const SettingsDialog = (props: IDataGridSettingsDialogProps) => {
 			<Divider />
 			<Grid justify={"space-between"} container>
 				{props.columns.slice(1).map((column: IDataGridColumnDef) => (
-					<Grid item xs={4} key={column.field}>
-						<FormControlLabel
+					<Grid item xs={4} key={column.field} zeroMinWidth>
+						<EllipsisFormControlLabel
 							control={
 								<Checkbox
 									checked={props.lockedColumns.includes(column.field)}
@@ -78,8 +90,8 @@ const SettingsDialog = (props: IDataGridSettingsDialogProps) => {
 			<Divider />
 			<Grid justify={"space-between"} container>
 				{props.columns.slice(1).map((column: IDataGridColumnDef) => (
-					<Grid item xs={4} key={column.field}>
-						<FormControlLabel
+					<Grid item xs={4} key={column.field} zeroMinWidth>
+						<EllipsisFormControlLabel
 							control={
 								<Checkbox
 									checked={!props.hiddenColumns.includes(column.field)}

@@ -1,6 +1,5 @@
 import {
 	createStyles,
-	IconButton,
 	ListItem,
 	ListItemIcon,
 	withStyles,
@@ -35,10 +34,3 @@ const smallListItemIconStyles = createStyles({
 export const SmallListItemIcon = withStyles(smallListItemIconStyles)(
 	ListItemIcon
 );
-
-const smallIconButtonStyles = createStyles({
-	root: {
-		padding: 4,
-	},
-});
-export const SmallIconButton = withStyles(smallIconButtonStyles)(IconButton);

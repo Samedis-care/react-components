@@ -7,6 +7,10 @@ export interface ResponseMeta {
 	 * The total amount of rows
 	 */
 	totalRows: number;
+	/**
+	 * The amount of rows being shown (if a filter is set)
+	 */
+	filteredRows?: number;
 }
 
 /**

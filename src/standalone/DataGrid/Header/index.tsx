@@ -1,5 +1,5 @@
 import React from "react";
-import { Grid } from "@material-ui/core";
+import { Box, Grid } from "@material-ui/core";
 import Search from "./Search";
 import ActionBar from "./ActionBar";
 import FilterBar, { IDataGridFilterBarProps } from "./FilterBar";
@@ -77,17 +77,25 @@ export interface IDataGridExporter<T> {
 
 const Header = () => {
 	return (
-		<Grid container justify={"space-between"} wrap={"nowrap"}>
-			<Grid item>
-				<Search />
+		<Box mx={1}>
+			<Grid
+				item
+				container
+				justify={"space-between"}
+				alignItems={"center"}
+				wrap={"nowrap"}
+			>
+				<Grid item>
+					<Search />
+				</Grid>
+				<Grid item xs>
+					<FilterBar />
+				</Grid>
+				<Grid item>
+					<ActionBar />
+				</Grid>
 			</Grid>
-			<Grid item xs>
-				<FilterBar />
-			</Grid>
-			<Grid item>
-				<ActionBar />
-			</Grid>
-		</Grid>
+		</Box>
 	);
 };
 

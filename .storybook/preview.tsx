@@ -131,9 +131,13 @@ export const decorators = [
 				<ThemeSelector>
 					<>
 						<LanguageSelector />
-						<StylesProvider generateClassName={cng}>
+						{process && process.env && process.env.JEST_WORKER_ID ? (
+							<StylesProvider generateClassName={cng}>
+								<Story />
+							</StylesProvider>
+						) : (
 							<Story />
-						</StylesProvider>
+						)}
 					</>
 				</ThemeSelector>
 			</Framework>

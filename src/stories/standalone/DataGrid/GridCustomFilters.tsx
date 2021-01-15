@@ -4,14 +4,13 @@ import {
 	Box,
 	Grid,
 	Hidden,
-	IconButton,
 	List,
 	ListItem,
 	MenuItem,
 	Select,
 } from "@material-ui/core";
-import { FilterList as FilterIcon } from "@material-ui/icons";
 import PopupMenu from "../../../standalone/PopupMenu";
+import CustomFiltersButton from "../../../standalone/DataGrid/Header/CustomFiltersButton";
 
 interface CustomData {
 	filter1?: string;
@@ -59,9 +58,7 @@ const GridCustomFilters = (props: IDataGridFilterBarProps) => {
 		<>
 			<Hidden mdUp>
 				<Grid item>
-					<IconButton onClick={openMenu}>
-						<FilterIcon />
-					</IconButton>
+					<CustomFiltersButton onClick={openMenu} />
 				</Grid>
 				<PopupMenu
 					elevation={0}

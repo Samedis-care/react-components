@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
 	IDataGridColumnProps,
 	useDataGridColumnsWidthState,
@@ -15,6 +15,8 @@ const Content = (props: IDataGridContentProps) => {
 	const { rowsPerPage } = props;
 	const [state, setState] = useDataGridState();
 	const columnWidth = useDataGridColumnsWidthState()[0];
+	const hoverState = useState<number | null>(null);
+	const dataViewRef = useRef<MultiGrid>(null);
 	const { pages } = state;
 
 	const onSectionRendered = useCallback(
@@ -31,20 +33,30 @@ const Content = (props: IDataGridContentProps) => {
 		[rowsPerPage, setState, pages]
 	);
 
+	useEffect(() => {
+		if (!dataViewRef.current) return;
+		dataViewRef.current.recomputeGridSize();
+	}, [columnWidth]);
+
 	return (
 		<AutoSizer>
 			{({ width, height }) => (
 				<MultiGrid
+					ref={dataViewRef}
 					columnCount={props.columns.length}
 					columnWidth={({ index }) =>
 						index === 0 ? 57 : columnWidth[props.columns[index - 1].field]
 					}
-					rowCount={state.rowsTotal}
+					rowCount={state.rowsFiltered ?? state.rowsTotal}
 					rowHeight={({ index }) => (index === 0 ? 24 : 57)}
 					width={width}
 					height={height}
 					cellRenderer={(gridProps) => (
-						<Cell columns={props.columns} {...gridProps} />
+						<Cell
+							columns={props.columns}
+							hoverState={hoverState}
+							{...gridProps}
+						/>
 					)}
 					enableFixedColumnScroll
 					enableFixedRowScroll
