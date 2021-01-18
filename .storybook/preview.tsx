@@ -6,29 +6,10 @@ import {
 	ThemeOptions,
 	useTheme,
 } from "@material-ui/core";
-import { Rule, StyleSheet } from "jss";
 import { StoryContext } from "@storybook/addons";
 import { button, color, select, text, withKnobs } from "@storybook/addon-knobs";
 import { withActions } from "@storybook/addon-actions";
 import ccI18n, { langs } from "../src/i18n";
-
-// so jest won't complain about mismatching numbers anymore
-const classIds: Record<string, number> = {};
-const getClassId = (name: string | undefined): number => {
-	const filledName = name === undefined ? "undefined-displayName" : name;
-
-	if (!(filledName in classIds)) {
-		classIds[filledName] = 0;
-	} else {
-		classIds[filledName]++;
-	}
-	return classIds[filledName];
-};
-
-const CssClassNameGenerator = (storyName: string | undefined) => (
-	rule: Rule,
-	sheet?: StyleSheet<string>
-) => `${sheet?.options?.classNamePrefix}-${rule.key}-${getClassId(storyName)}`;
 
 const getDefaultTheme = (): ThemeOptions => ({
 	palette: {
