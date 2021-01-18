@@ -34,6 +34,10 @@ export interface SignaturePadCanvasProps {
 	 * Callback method which returns signature base64 string
 	 */
 	setSignature?: (imageURL: string) => void;
+	/**
+	 * Blur event
+	 */
+	onBlur?: React.FocusEventHandler<HTMLDivElement>;
 }
 
 const useClasses = makeStyles((theme) => ({
@@ -76,6 +80,7 @@ const SignaturePadCanvas = (props: SignaturePadCanvasProps) => {
 		clearOnResize,
 		canvasProps,
 		penColor,
+		onBlur,
 	} = props;
 	const classes = useClasses();
 	const [dialog, setDialog] = useState(false);
@@ -85,7 +90,7 @@ const SignaturePadCanvas = (props: SignaturePadCanvasProps) => {
 	}, [dialog, disabled]);
 
 	return (
-		<div>
+		<div onBlur={onBlur}>
 			<div
 				className={classes.signPadDiv}
 				onClick={handleSignPad}

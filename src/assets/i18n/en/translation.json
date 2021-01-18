@@ -99,6 +99,9 @@
 					"image": {
 						"not-set": "No image present"
 					},
+					"signature": {
+						"not-set": "Not signed"
+					},
 					"files": {
 						"no-file": "No files present"
 					}

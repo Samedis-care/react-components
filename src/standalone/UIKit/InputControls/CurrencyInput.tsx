@@ -1,12 +1,9 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback } from "react";
 import { TextFieldProps } from "@material-ui/core";
 import TextFieldWithHelp, {
 	TextFieldWithHelpProps,
 } from "../TextFieldWithHelp";
-import { getGlobalized } from "../../../globalize";
-import Globalize from "globalize/dist/globalize";
-import ccI18n from "../../../i18n";
-import { getNumberSeparator } from "../../../utils";
+import { delocalizeNumber, useGlobalized } from "../../../utils";
 
 export interface CurrencyInputProps extends TextFieldWithHelpProps {
 	/**
@@ -32,35 +29,14 @@ const CurrencyInput = (
 	props: CurrencyInputProps & Omit<TextFieldProps, "onChange" | "value">
 ) => {
 	const { value, onChange, currency, ...muiProps } = props;
-
-	// globalized handling
-	const [globalized, setGlobalized] = useState<Globalize | null>(null);
-	useEffect(() => {
-		const updateGlobalized = () =>
-			void (async () => {
-				setGlobalized(await getGlobalized());
-			})();
-		// initial load
-		updateGlobalized();
-
-		// listen for locale switches
-		ccI18n.on("languageChanged", updateGlobalized);
-		return () => {
-			ccI18n.off("languageChanged", updateGlobalized);
-		};
-	}, []);
+	const globalized = useGlobalized();
 
 	// on change handling
 	const handleChange = useCallback(
 		(event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
 			if (!onChange) return;
 
-			const num = event.target.value
-				.replace(
-					new RegExp("[^0-9" + getNumberSeparator("decimal") + "]", "g"),
-					""
-				)
-				.replace(new RegExp(getNumberSeparator("decimal"), "g"), ".");
+			const num = delocalizeNumber(event.target.value);
 			if (num !== "") {
 				onChange(event, parseFloat(num));
 			} else {
