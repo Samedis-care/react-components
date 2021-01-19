@@ -1,0 +1,72 @@
+import { Drawer, Paper, useTheme, Theme } from "@material-ui/core";
+import React, { useMemo } from "react";
+import { makeStyles } from "@material-ui/core/styles";
+
+interface IProps {
+	/**
+	 * Is the menu open? (if non-permanent)
+	 */
+	menuOpen: boolean;
+	/**
+	 * Is mobile view?
+	 */
+	mobile: boolean;
+	/**
+	 * The width of the menu
+	 */
+	drawerWidth: number;
+	/**
+	 * Callback to toggle the menu open/closed
+	 */
+	toggleMenu: () => void;
+	/**
+	 * The menu items
+	 */
+	items: React.ReactNode;
+}
+
+const modalProps = {
+	keepMounted: true, // Better open performance on mobile.
+};
+
+const useStyles = makeStyles((theme: Theme) => ({
+	menuPaper: (props: IProps) => ({
+		borderRadius: undefined,
+		padding: theme.componentsCare?.portal?.menu?.padding,
+		backgroundColor: theme.componentsCare?.portal?.menu?.backgroundColor,
+		width: props.drawerWidth,
+		height: "100%",
+	}),
+}));
+
+const PortalLayoutMenu = (props: IProps) => {
+	const { menuOpen, toggleMenu } = props;
+	const theme = useTheme();
+	const classes = useStyles(props);
+
+	const paperProps = useMemo(
+		() => ({
+			className: classes.menuPaper,
+		}),
+		[classes.menuPaper]
+	);
+
+	if (!props.mobile) {
+		return <Paper {...paperProps}>{props.items}</Paper>;
+	} else {
+		return (
+			<Drawer
+				variant={"temporary"}
+				anchor={theme.direction === "rtl" ? "right" : "left"}
+				open={menuOpen}
+				onClose={toggleMenu}
+				PaperProps={paperProps}
+				ModalProps={modalProps}
+			>
+				{props.items}
+			</Drawer>
+		);
+	}
+};
+
+export default React.memo(PortalLayoutMenu);

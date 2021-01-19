@@ -34,6 +34,50 @@ const getDefaultTheme = (): ThemeOptions => ({
 	},
 });
 
+/* re-usable colors for our theme */
+const customColors = {
+	white: "rgb(255, 255, 255)",
+	primary: {
+		main: "rgb(8, 105, 179)",
+		light: "rgb(57, 135, 194)"
+	},
+	secondary: {
+		main: "rgb(185, 215, 240)",
+	},
+};
+/* example for a customized theme per client requirements */
+const getCustomTheme = (): ThemeOptions => ({
+	palette: {
+		type: "light",
+		primary: {
+			main: customColors.primary.main,
+			light: customColors.primary.light,
+		},
+		secondary: {
+			main: customColors.secondary.main,
+		},
+	},
+	componentsCare: {
+		portal: {
+			header: {
+				height: 40,
+				backgroundColor: customColors.secondary.main,
+			},
+			menu: {
+				width: "600px",
+				widthCollapsed: "50px",
+				padding: "0 35px 0 0",
+				color: customColors.white,
+				backgroundColor: customColors.primary.main,
+				selected: {
+					borderRadius: "0 50px 50px 0",
+					backgroundColor: customColors.primary.light,
+				}
+			}
+		},
+	},
+});
+
 const loadTheme = (): ThemeOptions => {
 	const themeStr = localStorage.getItem("theme");
 	if (!themeStr) return getDefaultTheme();
@@ -72,6 +116,16 @@ const ThemeSelector = (props: ThemeSelectorProps) => {
 		"Reset",
 		() => {
 			const theme = getDefaultTheme();
+			localStorage.setItem("theme", JSON.stringify(theme));
+			setTheme(theme);
+		},
+		"Theme"
+	);
+
+	button(
+		"Set Custom",
+		() => {
+			const theme = getCustomTheme();
 			localStorage.setItem("theme", JSON.stringify(theme));
 			setTheme(theme);
 		},
