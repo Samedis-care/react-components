@@ -14,4 +14,6 @@ export { default as uniqueArray } from "./uniqueArray";
 export { default as getNumberSeparator } from "./getNumberSeparator";
 export { default as useGlobalized } from "./useGlobalized";
 export { default as delocalizeNumber } from "./delocalizeNumber";
+export { default as parseLocalizedNumber } from "./parseLocalizedNumber";
+export { default as useInputCursorFix } from "./useInputCursorFix";
 export * from "./genericHOC";

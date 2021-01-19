@@ -3,7 +3,7 @@ import { TextFieldProps } from "@material-ui/core";
 import TextFieldWithHelp, {
 	TextFieldWithHelpProps,
 } from "../TextFieldWithHelp";
-import { useGlobalized } from "../../../utils";
+import { useGlobalized, useInputCursorFix } from "../../../utils";
 
 export interface IntegerInputFieldProps extends TextFieldWithHelpProps {
 	/**
@@ -25,12 +25,17 @@ const IntegerInputField = (
 	props: IntegerInputFieldProps & Omit<TextFieldProps, "onChange" | "value">
 ) => {
 	const { value, onChange, ...muiProps } = props;
-
 	const globalized = useGlobalized();
+	const valueFormatted =
+		value !== null && globalized ? globalized.formatNumber(value) : "";
+	const { handleCursorChange, cursorInputRef } = useInputCursorFix(
+		valueFormatted
+	);
 
 	// on change handling
 	const handleChange = useCallback(
 		(event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
+			handleCursorChange(event);
 			if (!onChange) return;
 
 			const num = event.target.value.replace(/[^0-9]/g, "");
@@ -41,7 +46,7 @@ const IntegerInputField = (
 				onChange(event, null);
 			}
 		},
-		[onChange]
+		[onChange, handleCursorChange]
 	);
 
 	// component rendering
@@ -49,11 +54,12 @@ const IntegerInputField = (
 		<div>
 			<TextFieldWithHelp
 				{...muiProps}
-				value={
-					value !== null && globalized ? globalized.formatNumber(value) : ""
-				}
-				onFocus={handleChange}
+				value={valueFormatted}
 				onChange={handleChange}
+				inputProps={{
+					...muiProps.inputProps,
+					ref: cursorInputRef,
+				}}
 			/>
 		</div>
 	);
