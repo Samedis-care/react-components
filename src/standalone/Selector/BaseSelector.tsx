@@ -116,8 +116,10 @@ const BaseSelector = (props: BaseSelectorProps) => {
 		disableClearable,
 	} = props;
 	const [open, setOpen] = React.useState(false);
+	const actualAddNewLabel =
+		addNewLabel || i18n.t("standalone.selector.add-new");
 	const [selectorOptions, setSelectorOptions] = React.useState(
-		defaultOptions || []
+		[] as BaseSelectorData[]
 	);
 	const loading = open && selectorOptions.length === 0;
 
@@ -135,24 +137,6 @@ const BaseSelector = (props: BaseSelectorProps) => {
 		[enableIcons]
 	);
 
-	// eslint-disable-next-line react-hooks/exhaustive-deps
-	const getNoOptionsText = React.useCallback(() => {
-		return noOptionsText
-			? typeof noOptionsText === "string"
-				? () => noOptionsText
-				: noOptionsText
-			: () => null;
-	}, [noOptionsText]);
-
-	// eslint-disable-next-line react-hooks/exhaustive-deps
-	const getLoadingText = React.useCallback(() => {
-		return loadingText
-			? typeof loadingText === "string"
-				? () => loadingText
-				: loadingText
-			: () => null;
-	}, [loadingText]);
-
 	const onChangeHandler = React.useCallback(
 		(data) => {
 			if (
@@ -162,18 +146,12 @@ const BaseSelector = (props: BaseSelectorProps) => {
 			) {
 				if (onAddNew) onAddNew();
 				return;
-			}
-			if (onSelect) {
-				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-				// @ts-ignore due to lack of templating support in react-select
-				onSelect(data);
+			} else {
+				if (onSelect) onSelect(data);
 			}
 		},
 		[onSelect, onAddNew]
 	);
-
-	const actualAddNewLabel =
-		addNewLabel || i18n.t("standalone.selector.add-new");
 
 	const onSearchHandler = React.useCallback(
 		async (query: string) => {
@@ -192,11 +170,28 @@ const BaseSelector = (props: BaseSelectorProps) => {
 		[actualAddNewLabel, onAddNew, onLoad]
 	);
 
-	React.useEffect(() => {
-		if (!open) {
-			setSelectorOptions(defaultOptions || []);
+	const setDefaultOptions = React.useCallback(() => {
+		let options = defaultOptions || [];
+		if (onAddNew) {
+			options.push({
+				value: "add-new-button",
+				label: actualAddNewLabel,
+				icon: <AddIcon />,
+				isAddNewButton: true,
+			} as BaseSelectorData);
+		} else {
+			options = options.filter((option) => !option.isAddNewButton);
 		}
-	}, [open, defaultOptions]);
+		return options;
+	}, [actualAddNewLabel, defaultOptions, onAddNew]);
+
+	React.useEffect(() => {
+		if (open) {
+			setSelectorOptions(setDefaultOptions);
+		} else {
+			setSelectorOptions([]);
+		}
+	}, [open, defaultOptions, setDefaultOptions]);
 
 	return (
 		<div>
@@ -211,14 +206,14 @@ const BaseSelector = (props: BaseSelectorProps) => {
 				}}
 				disableClearable={disableClearable}
 				loading={loading}
-				loadingText={getLoadingText}
+				loadingText={loadingText}
 				placeholder={placeholder}
 				autoComplete
 				disabled={disabled}
 				options={selectorOptions}
 				value={selected}
 				popupIcon={<ExpandMore />}
-				noOptionsText={getNoOptionsText}
+				noOptionsText={noOptionsText}
 				getOptionLabel={(option: BaseSelectorData) => option.label}
 				renderOption={(option: BaseSelectorData) => defaultRenderer(option)}
 				getOptionDisabled={(option: BaseSelectorData) =>
@@ -246,4 +241,4 @@ const BaseSelector = (props: BaseSelectorProps) => {
 	);
 };
 
-export default React.memo(BaseSelector);
+export default React.memo(BaseSelector) as typeof BaseSelector;

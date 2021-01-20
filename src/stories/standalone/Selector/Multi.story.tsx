@@ -3,6 +3,7 @@ import "../../../i18n";
 import {
 	MultiSelect,
 	MultiSelectorData,
+	BaseSelectorData,
 	SelectorData,
 } from "../../../standalone/Selector";
 import { colourOptions } from "./Data";
@@ -32,21 +33,21 @@ const getDefaultData = (): MySelectorData[] => {
 };
 
 export const SelectorMulti = (): React.ReactElement => {
-	const [selected, setSelected] = useState<MySelectorData[]>(getDefaultData);
+	const [selected, setSelected] = useState<BaseSelectorData[]>(getDefaultData);
 	const loadDataAction = action("onLoad");
 	const onSelectAction = action("onSelect");
 	const onAddNewAction = action("onAddNew");
 	const enableAddNew = boolean("Enable Add New", false);
 	const icons = boolean("Enable Icons", false);
-	const disable = boolean("Disable", false);
+	const disabled = boolean("Disable", false);
 	const customSelectedRenderer = boolean(
 		"Enable Custom Selected Renderer",
 		false
 	);
-	const addNewLabel = text("Add new label", "");
-	const loadingLabel = text("Loading Label", "");
-	const noDataLabel = text("No data Label", "");
-	const placeholderLabel = text("Placeholder Label", "");
+	const addNewLabel = text("Add new label", "Add");
+	const loadingText = text("Loading Text", "Loading..");
+	const noOptionsText = text("No data Label", "No option");
+	const placeholderLabel = text("Placeholder Label", "Select..");
 
 	const loadData = React.useCallback(
 		(query: string): MySelectorData[] => {
@@ -59,8 +60,9 @@ export const SelectorMulti = (): React.ReactElement => {
 		},
 		[loadDataAction]
 	);
+
 	const onSelect = React.useCallback(
-		(data: MySelectorData[]) => {
+		(data: BaseSelectorData[]) => {
 			onSelectAction(data);
 			setSelected(data);
 		},
@@ -71,7 +73,7 @@ export const SelectorMulti = (): React.ReactElement => {
 		<>
 			<CssBaseline />
 			<Box m={2}>
-				<MultiSelect<MySelectorData>
+				<MultiSelect
 					selected={selected}
 					onSelect={onSelect}
 					onLoad={loadData}
@@ -80,11 +82,12 @@ export const SelectorMulti = (): React.ReactElement => {
 					selectedEntryRenderer={
 						customSelectedRenderer ? CustomMultiSelectEntry : undefined
 					}
-					disable={disable}
+					disabled={disabled}
 					addNewLabel={addNewLabel}
-					loadingLabel={loadingLabel}
-					noDataLabel={noDataLabel}
+					loadingText={loadingText}
+					noOptionsText={noOptionsText}
 					placeholderLabel={placeholderLabel}
+					defaultOptions={colourOptions}
 				/>
 			</Box>
 		</>

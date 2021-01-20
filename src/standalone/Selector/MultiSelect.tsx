@@ -1,19 +1,20 @@
-import React, { CSSProperties } from "react";
-import Selector, { SelectorData, SelectorPropsSingleSelect } from "./Selector";
+import React from "react";
+import BaseSelector, {
+	BaseSelectorData,
+	BaseSelectorProps,
+} from "./BaseSelector";
 import {
 	createStyles,
 	Grid,
 	Paper,
 	Theme,
-	useTheme,
 	withStyles,
 	WithStyles,
 } from "@material-ui/core";
 import MultiSelectEntry, { IMultiSelectEntryProps } from "./MultiSelectEntry";
-import { ControlProps } from "react-select/src/components/Control";
 import { GenericWithStyles } from "../../utils";
 
-export interface MultiSelectorData extends SelectorData {
+export interface MultiSelectorData extends BaseSelectorData {
 	/**
 	 * Item click handler
 	 */
@@ -25,20 +26,20 @@ export interface MultiSelectorData extends SelectorData {
 	canUnselect?: (data: MultiSelectorData) => boolean | Promise<boolean>;
 }
 
-export interface MultiSelectProps<Data extends MultiSelectorData>
+export interface MultiSelectProps
 	extends Omit<
-		SelectorPropsSingleSelect<Data>,
+		BaseSelectorProps,
 		"multiSelect" | "clearable" | "onSelect" | "selected"
 	> {
 	/**
 	 * Extended selection change handler
 	 * @param data The selected data entry/entries
 	 */
-	onSelect?: (value: Data[]) => void;
+	onSelect?: (value: MultiSelectorData[]) => void;
 	/**
 	 * The currently selected values
 	 */
-	selected: Data[];
+	selected: MultiSelectorData[];
 	/**
 	 * Specify a custom component for displaying multi select items
 	 */
@@ -53,25 +54,22 @@ const styles = createStyles((theme: Theme) => ({
 	selectedEntries: {},
 }));
 
-const MultiSelect = <Data extends MultiSelectorData>(
-	props: MultiSelectProps<Data> & WithStyles
-) => {
+const MultiSelect = (props: MultiSelectProps & WithStyles) => {
 	const {
 		onLoad,
 		onSelect,
 		selected,
 		enableIcons,
-		customStyles,
 		selectedEntryRenderer,
-		disable,
+		disabled,
 		classes,
+		defaultOptions,
 	} = props;
-	const theme = useTheme();
 
 	const EntryRender = selectedEntryRenderer || MultiSelectEntry;
 
 	const multiSelectHandler = React.useCallback(
-		(data: Data | null) => {
+		(data: MultiSelectorData | null) => {
 			if (!data) return;
 			if (onSelect) onSelect([...selected, data]);
 		},
@@ -82,7 +80,8 @@ const MultiSelect = <Data extends MultiSelectorData>(
 		async (query: string) => {
 			const results = await onLoad(query);
 			return results.filter(
-				(val: SelectorData) => !selected.map((s) => s.value).includes(val.value)
+				(val: BaseSelectorData) =>
+					!selected.map((s) => s.value).includes(val.value)
 			);
 		},
 		[onLoad, selected]
@@ -91,7 +90,7 @@ const MultiSelect = <Data extends MultiSelectorData>(
 	const handleDelete = React.useCallback(
 		(evt: React.MouseEvent<HTMLButtonElement>) => {
 			let canDelete = true;
-			const entry: Data | null | undefined = selected.find(
+			const entry: MultiSelectorData | null | undefined = selected.find(
 				(s) => s.value === evt.currentTarget.name
 			);
 			if (!entry) {
@@ -110,44 +109,17 @@ const MultiSelect = <Data extends MultiSelectorData>(
 		[onSelect, selected]
 	);
 
-	const selectorStyles = React.useMemo(() => {
-		const { control, ...otherCustomStyles } = customStyles || {};
-		return {
-			control: (
-				base: CSSProperties,
-				// eslint-disable-next-line @typescript-eslint/ban-types
-				selectProps: ControlProps<object, false>
-			): CSSProperties => {
-				let multiSelectStyles: CSSProperties = {
-					...base,
-					borderRadius: 0,
-					border: "none",
-					borderBottom: `1px solid ${theme.palette.divider}`,
-					boxShadow: "none",
-					backgroundColor: "transparent",
-				};
-
-				if (control)
-					multiSelectStyles = control(multiSelectStyles, selectProps);
-
-				return multiSelectStyles;
-			},
-			...otherCustomStyles,
-		};
-	}, [customStyles, theme]);
-
 	return (
 		<Paper elevation={0} className={classes.paperWrapper}>
 			<Grid container>
 				<Grid item xs={12}>
-					<Selector<Data, false>
+					<BaseSelector
 						{...props}
 						onLoad={multiSelectLoadHandler}
 						selected={null}
 						onSelect={multiSelectHandler}
-						multiSelect={false}
-						customStyles={selectorStyles}
 						refreshToken={selected.length.toString()}
+						defaultOptions={defaultOptions}
 					/>
 				</Grid>
 				<Grid item xs={12} className={classes.selectedEntries}>
@@ -156,7 +128,7 @@ const MultiSelect = <Data extends MultiSelectorData>(
 							key={data.value}
 							enableDivider={props.selected.length === index - 1}
 							enableIcons={enableIcons}
-							handleDelete={disable ? undefined : handleDelete}
+							handleDelete={disabled ? undefined : handleDelete}
 							data={data}
 						/>
 					))}
@@ -166,10 +138,8 @@ const MultiSelect = <Data extends MultiSelectorData>(
 	);
 };
 
-const StylesMultiSelect = withStyles(styles)(React.memo(MultiSelect)) as <
-	Data extends MultiSelectorData
->(
-	props: GenericWithStyles<MultiSelectProps<Data> & WithStyles>
+const StylesMultiSelect = withStyles(styles)(React.memo(MultiSelect)) as (
+	props: GenericWithStyles<MultiSelectProps & WithStyles>
 ) => React.ReactElement;
 
 export default StylesMultiSelect;
