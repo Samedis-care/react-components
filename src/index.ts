@@ -1,4 +1,6 @@
 import { DataGridTheme } from "./standalone/DataGrid";
+import { ActionButtonTheme } from "./standalone/UIKit/ActionButton";
+import { FormButtonTheme } from "./standalone/UIKit/FormButtons";
 
 export * from "./standalone";
 
@@ -16,6 +18,10 @@ export * from "./utils";
 
 interface ComponentsCareTheme {
 	dataGrid?: DataGridTheme;
+	uiKit: {
+		actionButton?: ActionButtonTheme;
+		formButtons?: FormButtonTheme;
+	};
 }
 
 declare module "@material-ui/core/styles/createMuiTheme" {

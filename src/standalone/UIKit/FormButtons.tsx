@@ -1,18 +1,53 @@
-import React from "react";
-import { makeStyles } from "@material-ui/core";
+import React, { CSSProperties } from "react";
+import { makeStyles, Theme } from "@material-ui/core";
+import { fade } from "@material-ui/core/styles/colorManipulator";
 
-const useStyles = makeStyles({
-	outlined: {
-		float: "left",
-		backgroundColor: "#cce1f6",
-		padding: 20,
-		borderRadius: 40,
-		borderColor: "#cce1f6",
+export interface FormButtonTheme {
+	buttonWrapper?: {
+		float?: CSSProperties["float"];
+		margin?: CSSProperties["margin"];
+	};
+	container?: {
+		float?: CSSProperties["float"];
+		width?: CSSProperties["width"];
+		padding?: CSSProperties["padding"];
+		margin?: CSSProperties["margin"];
+		border?: CSSProperties["border"];
+		borderRadius?: CSSProperties["borderRadius"];
+		backgroundColor?: CSSProperties["backgroundColor"];
+		backgroundColorOpacity?: CSSProperties["opacity"];
+	};
+}
+
+const useStyles = makeStyles((theme: Theme) => ({
+	container: {
+		width: theme.componentsCare?.uiKit?.formButtons?.container?.width,
+		float: theme.componentsCare?.uiKit?.formButtons?.container?.float || "left",
+		margin: theme.componentsCare?.uiKit?.formButtons?.container?.margin,
+		padding: theme.componentsCare?.uiKit?.formButtons?.container?.padding,
+		border:
+			theme.componentsCare?.uiKit?.formButtons?.container?.border || undefined,
+		borderRadius:
+			theme.componentsCare?.uiKit?.formButtons?.container?.borderRadius,
+		backgroundColor: fade(
+			theme.componentsCare?.uiKit?.formButtons?.container?.backgroundColor ||
+				"#FFF",
+			theme.componentsCare?.uiKit?.formButtons?.container
+				?.backgroundColorOpacity || 1
+		),
 	},
-	buttonContainer: {
-		margin: "0px 10px",
+	buttonWrapper: {
+		float:
+			theme.componentsCare?.uiKit?.formButtons?.buttonWrapper?.float || "left",
+		margin: theme.componentsCare?.uiKit?.formButtons?.buttonWrapper?.margin,
+		"&:first-child": {
+			marginLeft: 0,
+		},
+		"&:last-child": {
+			marginRight: 0,
+		},
 	},
-});
+}));
 
 export interface FormButtonsProps {
 	/**
@@ -29,10 +64,10 @@ const FormButtons = (props: FormButtonsProps) => {
 	if (!children) throw new Error("Atleast one button required");
 
 	return (
-		<div className={classes.outlined}>
+		<div className={classes.container}>
 			{children.map((child: React.ReactNode, index: number) => {
 				return (
-					<span className={classes.buttonContainer} key={index}>
+					<span className={classes.buttonWrapper} key={index}>
 						{child}
 					</span>
 				);

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { CSSProperties } from "react";
 import {
 	Box,
 	Button,
@@ -9,10 +9,27 @@ import {
 import { Theme } from "@material-ui/core/styles";
 import { combineColors } from "../../utils";
 
+export interface ActionButtonTheme {
+	padding?: CSSProperties["padding"];
+	border?: CSSProperties["border"];
+	backgroundColor?: CSSProperties["backgroundColor"];
+	color?: CSSProperties["color"];
+	fontSize?: CSSProperties["fontSize"];
+	disabled: {
+		backgroundColor?: CSSProperties["backgroundColor"];
+	};
+}
+
 const StyledButton = withStyles((theme: Theme) => ({
 	root: (props: ActionButtonProps) => ({
-		backgroundColor: theme.palette.primary.main,
-		color: theme.palette.primary.contrastText,
+		border: theme.componentsCare?.uiKit?.actionButton?.border,
+		backgroundColor:
+			theme.componentsCare?.uiKit?.actionButton?.backgroundColor ||
+			theme.palette.primary.main,
+		color:
+			theme.componentsCare?.uiKit?.actionButton?.color ||
+			theme.palette.primary.contrastText,
+		fontSize: theme.componentsCare?.uiKit?.actionButton?.fontSize,
 		textTransform: "unset",
 		"&:hover": {
 			backgroundColor: `rgba(${combineColors(
@@ -24,16 +41,24 @@ const StyledButton = withStyles((theme: Theme) => ({
 			backgroundColor: theme.palette.action.disabled,
 		},
 		minWidth: props.small ? "unset" : undefined,
-		padding: props.small ? 5 : undefined,
+		padding: props.small
+			? 5
+			: theme.componentsCare?.uiKit?.actionButton?.padding,
 	}),
 	outlined: (props: ActionButtonProps) => ({
 		borderRadius: 25,
 		"&.Mui-disabled": {
+			border: theme.componentsCare?.uiKit?.actionButton?.border,
 			color: theme.palette.background.paper,
+			backgroundColor:
+				theme.componentsCare?.uiKit?.actionButton?.disabled?.backgroundColor,
 		},
-		padding: props.small ? 5 : undefined,
+		padding: props.small
+			? 5
+			: theme.componentsCare?.uiKit?.actionButton?.padding,
 	}),
 	label: {
+		padding: 0,
 		justifyContent: "flex-start",
 	},
 }))(Button);
@@ -65,8 +90,9 @@ const ActionButton = (props: ActionButtonProps) => {
 			variant={"outlined"}
 			fullWidth={!small || fullWidth}
 			{...otherProps}
+			startIcon={icon}
 		>
-			{icon} {!small && <Box pl={1}>{children}</Box>}
+			{!small && <Box>{children}</Box>}
 		</StyledButton>
 	);
 

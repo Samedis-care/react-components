@@ -17,6 +17,58 @@ const getDefaultTheme = (): ThemeOptions => ({
 	},
 });
 
+/* re-usable colors for our theme */
+const customColors = {
+	white: "rgb(255, 255, 255)",
+	primary: {
+		main: "rgb(8, 105, 179)",
+		light: "rgb(57, 135, 194)"
+	},
+	secondary: {
+		main: "rgb(185, 215, 240)",
+	},
+};
+/* example for a customized theme per client requirements */
+const getCustomTheme = (): ThemeOptions => ({
+	palette: {
+		type: "light",
+		primary: {
+			main: customColors.primary.main,
+			light: customColors.primary.light,
+		},
+		secondary: {
+			main: customColors.secondary.main,
+		},
+	},
+	componentsCare: {
+		uiKit: {
+			actionButton: {
+				padding: "7px 25px",
+				border: "none",
+				fontSize: "0.75rem",
+				disabled: {
+					backgroundColor: "#bcbdbf",
+				},
+			},
+			formButtons: {
+				buttonWrapper: {
+					margin: "0 1rem 0 0",
+				},
+				container: {
+					float: "left",
+					width: "auto",
+					border: "none",
+					borderRadius: "32px",
+					padding: "20px",
+					margin: "20px",
+					backgroundColor: customColors.secondary.main,
+					backgroundColorOpacity: .7, 
+				},
+			},
+		},
+	},
+});
+
 const loadTheme = (): ThemeOptions => {
 	const themeStr = localStorage.getItem("theme");
 	if (!themeStr) return getDefaultTheme();
@@ -61,6 +113,16 @@ const ThemeSelector = (props: ThemeSelectorProps) => {
 		"Theme"
 	);
 
+	button(
+		"Set Custom",
+		() => {
+			const theme = getCustomTheme();
+			localStorage.setItem("theme", JSON.stringify(theme));
+			setTheme(theme);
+		},
+		"Theme"
+	);
+
 	useEffect(() => {
 		const theme = {
 			palette: {
@@ -84,9 +146,13 @@ const ThemeSelector = (props: ThemeSelectorProps) => {
 const AdvThemeSelector = (props: ThemeSelectorProps) => {
 	const setTheme = useContext(ThemeContext)!;
 
+	const theme = getCustomTheme();
+	localStorage.setItem("theme", JSON.stringify(theme));
+	setTheme(theme);
+
 	const themeJson = text(
 		"Theme",
-		JSON.stringify(loadTheme(), undefined, 4),
+		JSON.stringify(theme, undefined, 4),
 		"Theme (Advanced)"
 	);
 
