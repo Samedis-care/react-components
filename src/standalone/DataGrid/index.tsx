@@ -1,4 +1,5 @@
 import React, {
+	CSSProperties,
 	Dispatch,
 	SetStateAction,
 	useCallback,
@@ -23,6 +24,16 @@ import { ModelFilterType } from "../../backend-integration/Model";
 export type IDataGridProps = IDataGridHeaderProps &
 	IDataGridColumnProps &
 	IDataGridCallbacks;
+
+export interface DataGridTheme {
+	content?: {
+		headerBackgroundColor?: CSSProperties["backgroundColor"];
+		columnDividerColor?: CSSProperties["borderColor"];
+		backgroundColor?: CSSProperties["backgroundColor"];
+		dividerColor?: CSSProperties["borderColor"];
+		hoverBackgroundColor?: CSSProperties["backgroundColor"];
+	};
+}
 
 export interface IDataGridLoadDataParameters {
 	/**
