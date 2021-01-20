@@ -14,15 +14,15 @@ export { default as ComponentsCareI18n } from "./i18n";
 
 export * from "./utils";
 
+interface ComponentsCareTheme {
+	dataGrid?: DataGridTheme;
+}
+
 declare module "@material-ui/core/styles/createMuiTheme" {
 	interface Theme {
-		componentsCare?: {
-			dataGrid?: DataGridTheme;
-		};
+		componentsCare?: ComponentsCareTheme;
 	}
 	interface ThemeOptions {
-		componentsCare?: {
-			dataGrid?: DataGridTheme;
-		};
+		componentsCare?: ComponentsCareTheme;
 	}
 }
