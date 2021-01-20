@@ -1,36 +1,38 @@
-import React, { useState } from "react";
+import React from "react";
 import "../../../i18n";
-import { SelectorData, SingleSelect } from "../../../standalone/Selector";
+import { BaseSelectorData, SingleSelect } from "../../../standalone/Selector";
 import { colourOptions } from "./Data";
 import { action } from "@storybook/addon-actions";
 import { boolean, text } from "@storybook/addon-knobs";
 import { Box, CssBaseline } from "@material-ui/core";
 
 export const SelectorSingle = (): React.ReactElement => {
-	const [selected, setSelected] = useState<SelectorData | null>(null);
+	const [selected, setSelected] = React.useState<BaseSelectorData | null>(null);
 	const loadDataAction = action("onLoad");
 	const onSelectAction = action("onSelect");
 	const onAddNewAction = action("onAddNew");
 	const enableAddNew = boolean("Enable Add New", false);
-	const clearable = boolean("Clearable?", false);
+	const disableClearable = boolean("Disable clearable?", false);
 	const icons = boolean("Enable Icons", false);
-	const disable = boolean("Disable", false);
-	const addNewLabel = text("Add new label", "");
-	const loadingLabel = text("Loading Label", "");
-	const noDataLabel = text("No data Label", "");
-	const placeholderLabel = text("Placeholder Label", "");
+	const disabled = boolean("Disable", false);
+	const addNewLabel = text("Add new label", "Add");
+	const loadingText = text("Loading Text", "Loading..");
+	const noOptionsText = text("No options Label", "No Option");
+	const placeholderLabel = text("Placeholder Label", "Select..");
 
 	const loadData = React.useCallback(
-		(query: string): SelectorData[] => {
+		(query: string): BaseSelectorData[] => {
 			loadDataAction(query);
-			return colourOptions.filter((option) =>
-				option.label.toLowerCase().includes(query.toLowerCase())
-			);
+			if (query) {
+				return colourOptions.filter((option) =>
+					option.label.toLowerCase().includes(query.toLowerCase())
+				);
+			} else return [];
 		},
 		[loadDataAction]
 	);
 	const onSelect = React.useCallback(
-		(data: SelectorData | null) => {
+		(data: BaseSelectorData | null) => {
 			onSelectAction(data);
 			setSelected(data);
 		},
@@ -47,12 +49,13 @@ export const SelectorSingle = (): React.ReactElement => {
 					onLoad={loadData}
 					onAddNew={enableAddNew ? onAddNewAction : undefined}
 					enableIcons={icons}
-					clearable={clearable}
-					disable={disable}
+					disableClearable={disableClearable}
+					disabled={disabled}
 					addNewLabel={addNewLabel}
-					loadingLabel={loadingLabel}
-					noDataLabel={noDataLabel}
-					placeholderLabel={placeholderLabel}
+					loadingText={loadingText}
+					noOptionsText={noOptionsText}
+					placeholder={placeholderLabel}
+					defaultOptions={colourOptions}
 				/>
 			</Box>
 		</>

@@ -1,14 +1,8 @@
 import React from "react";
-import Selector, { SelectorData, SelectorPropsSingleSelect } from "./Selector";
+import BaseSelector, { BaseSelectorProps } from "./BaseSelector";
 
-const SingleSelect = <Data extends SelectorData>(
-	props: Omit<SelectorPropsSingleSelect<Data>, "multiSelect">
-) => (
-	<Selector<Data, false>
-		{...props}
-		onSelect={props.onSelect}
-		multiSelect={false}
-	/>
-);
+const SingleSelect = (props: BaseSelectorProps) => {
+	return <BaseSelector {...props} />;
+};
 
 export default React.memo(SingleSelect) as typeof SingleSelect;
