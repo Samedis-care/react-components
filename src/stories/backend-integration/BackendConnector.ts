@@ -1,16 +1,16 @@
-import { Connector } from "../../../backend-integration/Connector";
-import { ModelFieldName } from "../../../backend-integration/Model";
-import { ResponseMeta } from "../../../backend-integration/Connector/Connector";
+import { Connector } from "../../backend-integration/Connector";
+import { ModelFieldName } from "../../backend-integration/Model";
+import { ResponseMeta } from "../../backend-integration/Connector/Connector";
 import {
 	DataGridAdditionalFilters,
 	DataGridSortSetting,
 	IDataGridFieldFilter,
 	IDataGridLoadDataParameters,
-} from "../../../standalone/DataGrid";
+} from "../../standalone/DataGrid";
 import JsonApiClient, {
 	GetParams,
-} from "../../../backend-integration/Connector/JsonApiClient";
-import AuthMode from "../../../backend-integration/Connector/AuthMode";
+} from "../../backend-integration/Connector/JsonApiClient";
+import AuthMode from "../../backend-integration/Connector/AuthMode";
 
 interface PotentialErrorResponse {
 	meta?: {
@@ -44,7 +44,7 @@ interface BackendSort {
 	direction: "ASC" | "DESC";
 }
 
-class TestConnector<KeyT extends ModelFieldName> extends Connector<KeyT> {
+class BackendConnector<KeyT extends ModelFieldName> extends Connector<KeyT> {
 	client: JsonApiClient;
 
 	constructor() {
@@ -202,4 +202,4 @@ class TestConnector<KeyT extends ModelFieldName> extends Connector<KeyT> {
 	}
 }
 
-export default TestConnector;
+export default BackendConnector;

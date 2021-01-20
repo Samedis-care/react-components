@@ -16,4 +16,5 @@ export { default as useGlobalized } from "./useGlobalized";
 export { default as delocalizeNumber } from "./delocalizeNumber";
 export { default as parseLocalizedNumber } from "./parseLocalizedNumber";
 export { default as useInputCursorFix } from "./useInputCursorFix";
+export { default as filterSortPaginate } from "./filterSortPaginate";
 export * from "./genericHOC";

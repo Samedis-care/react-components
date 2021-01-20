@@ -128,7 +128,10 @@ export interface IDataGridColumnProps {
 	onDelete?: (
 		invert: boolean,
 		ids: string[],
-		filter?: Partial<IDataGridLoadDataParameters>
+		filter?: Pick<
+			IDataGridLoadDataParameters,
+			"quickFilter" | "additionalFilters" | "fieldFilter"
+		>
 	) => void;
 	/**
 	 * Do we support and enable the delete all functionality?

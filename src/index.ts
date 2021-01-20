@@ -14,7 +14,7 @@ export { default as ComponentsCareI18n } from "./i18n";
 
 export * from "./utils";
 
-interface ComponentsCareTheme {
+export interface ComponentsCareTheme {
 	dataGrid?: DataGridTheme;
 }
 

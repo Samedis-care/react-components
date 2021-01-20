@@ -3,7 +3,10 @@ import Visibility from "./Visibility";
 import Connector, { ResponseMeta } from "../Connector/Connector";
 import { useMutation, useQuery } from "react-query";
 import { ModelDataStore } from "../index";
-import { IDataGridLoadDataParameters } from "../../standalone/DataGrid";
+import {
+	IDataGridColumnDef,
+	IDataGridLoadDataParameters,
+} from "../../standalone/DataGrid";
 import {
 	UseMutationResult,
 	UseQueryResult,
@@ -90,7 +93,10 @@ export type ModelFieldName = "id" | string;
 export type AdvancedDeleteRequest = [
 	invert: boolean,
 	ids: string[],
-	filter?: Partial<IDataGridLoadDataParameters>
+	filter?: Pick<
+		IDataGridLoadDataParameters,
+		"quickFilter" | "additionalFilters" | "fieldFilter"
+	>
 ];
 
 class Model<
@@ -134,7 +140,7 @@ class Model<
 	public async index(
 		params: Partial<IDataGridLoadDataParameters> | undefined
 	): Promise<[Record<KeyT, unknown>[], ResponseMeta]> {
-		const [rawData, meta] = await this.connector.index(params);
+		const [rawData, meta] = await this.connector.index(params, this);
 		return [
 			await Promise.all(
 				rawData.map((data) =>
@@ -154,7 +160,7 @@ class Model<
 		return useQuery([this.modelId, { id: id }], async () => {
 			if (!id) return this.getDefaultValues();
 			return this.applySerialization(
-				await this.connector.read(id),
+				await this.connector.read(id, this),
 				"deserialize",
 				"edit"
 			);
@@ -181,9 +187,9 @@ class Model<
 					update ? "edit" : "create"
 				);
 				if (update) {
-					return this.connector.update(serializedValues);
+					return this.connector.update(serializedValues, this);
 				} else {
-					return this.connector.create(serializedValues);
+					return this.connector.create(serializedValues, this);
 				}
 			},
 			{
@@ -197,6 +203,9 @@ class Model<
 		);
 	}
 
+	/**
+	 * Provides a react hook to delete a given record id
+	 */
 	public delete<TContext = unknown>(): UseMutationResult<
 		void,
 		Error,
@@ -207,7 +216,7 @@ class Model<
 		return useMutation(
 			this.modelId + "-delete",
 			(id: string) => {
-				return this.connector.delete(id);
+				return this.connector.delete(id, this);
 			},
 			{
 				onSuccess: (data: void, id: string) => {
@@ -217,6 +226,9 @@ class Model<
 		);
 	}
 
+	/**
+	 * Provides a react hook to delete multiple records at once
+	 */
 	public deleteMultiple<TContext = unknown>(): UseMutationResult<
 		void,
 		Error,
@@ -227,7 +239,7 @@ class Model<
 		return useMutation(
 			this.modelId + "-delete-multi",
 			(ids: string[]) => {
-				return this.connector.deleteMultiple(ids);
+				return this.connector.deleteMultiple(ids, this);
 			},
 			{
 				onSuccess: (data: void, ids: string[]) => {
@@ -239,10 +251,16 @@ class Model<
 		);
 	}
 
+	/**
+	 * Does the connector support delete all functionality?
+	 */
 	public doesSupportAdvancedDeletion(): boolean {
 		return !!this.connector.deleteAdvanced;
 	}
 
+	/**
+	 * Provides a react hook to mass delete data
+	 */
 	public deleteAdvanced<TContext = unknown>(): UseMutationResult<
 		void,
 		Error,
@@ -256,7 +274,7 @@ class Model<
 				if (!this.connector.deleteAdvanced) {
 					throw new Error("Connector doesn't support advanced deletion");
 				}
-				return this.connector.deleteAdvanced(req);
+				return this.connector.deleteAdvanced(req, this);
 			},
 			{
 				onSuccess: (data: void, req: AdvancedDeleteRequest) => {
@@ -270,6 +288,39 @@ class Model<
 				},
 			}
 		);
+	}
+
+	/**
+	 * Returns a data grid compatible column definition
+	 */
+	public toDataGridColumnDefinition(): IDataGridColumnDef[] {
+		return Object.entries(this.fields)
+			.filter(
+				(entry) =>
+					!(entry[1] as ModelFieldDefinition<
+						unknown,
+						KeyT,
+						VisibilityT,
+						CustomT
+					>).visibility.overview.disabled
+			)
+			.map((entry) => {
+				const key = entry[0];
+				const value = entry[1] as ModelFieldDefinition<
+					unknown,
+					KeyT,
+					VisibilityT,
+					CustomT
+				>;
+				return {
+					field: key,
+					headerName: value.getLabel(),
+					type: value.type.getFilterType(),
+					hidden: value.visibility.overview.hidden,
+					filterable: value.filterable,
+					sortable: value.sortable,
+				};
+			});
 	}
 
 	/**
