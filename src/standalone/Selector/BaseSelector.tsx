@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from "react";
-import { TextFieldProps, ListItemText } from "@material-ui/core";
+import { TextFieldProps, ListItemText, WithStyles } from "@material-ui/core";
 import { Autocomplete } from "@material-ui/lab";
 import { Add as AddIcon, ExpandMore } from "@material-ui/icons";
 import TextFieldWithHelp, {
@@ -98,8 +98,9 @@ export interface BaseSelectorProps extends TextFieldWithHelpProps {
 	disableClearable?: boolean;
 }
 
-const BaseSelector = (props: BaseSelectorProps) => {
+const BaseSelector = (props: BaseSelectorProps & WithStyles) => {
 	const {
+		classes,
 		defaultOptions,
 		refreshToken,
 		onSelect,
@@ -192,6 +193,7 @@ const BaseSelector = (props: BaseSelectorProps) => {
 		<div>
 			<Autocomplete
 				id={autocompleteId}
+				classes={classes}
 				open={open}
 				onOpen={() => {
 					setOpen(true);

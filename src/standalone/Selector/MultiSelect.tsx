@@ -7,7 +7,6 @@ import {
 	createStyles,
 	Grid,
 	Paper,
-	Theme,
 	withStyles,
 	WithStyles,
 } from "@material-ui/core";
@@ -46,13 +45,19 @@ export interface MultiSelectProps
 	selectedEntryRenderer?: React.ComponentType<IMultiSelectEntryProps>;
 }
 
-const styles = createStyles((theme: Theme) => ({
+const styles = createStyles({
 	paperWrapper: {
 		boxShadow: "none",
-		border: `1px solid ${theme.palette.divider}`,
 	},
-	selectedEntries: {},
-}));
+	inputRoot: {
+		borderRadius: "4px 4px 0px 0px",
+	},
+	selectedEntries: {
+		border: `1px solid rgba(0, 0, 0, 0.23)`,
+		borderTop: 0,
+		borderRadius: "0px 0px 4px 4px",
+	},
+});
 
 const MultiSelect = (props: MultiSelectProps & WithStyles) => {
 	const {
@@ -137,6 +142,7 @@ const MultiSelect = (props: MultiSelectProps & WithStyles) => {
 				<Grid item xs={12}>
 					<BaseSelector
 						{...props}
+						classes={classes}
 						onLoad={multiSelectLoadHandler}
 						selected={null}
 						onSelect={multiSelectHandler}
