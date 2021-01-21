@@ -3,15 +3,8 @@ import BaseSelector, {
 	BaseSelectorData,
 	BaseSelectorProps,
 } from "./BaseSelector";
-import {
-	createStyles,
-	Grid,
-	Paper,
-	withStyles,
-	WithStyles,
-} from "@material-ui/core";
+import { makeStyles, Grid, Paper } from "@material-ui/core";
 import MultiSelectEntry, { IMultiSelectEntryProps } from "./MultiSelectEntry";
-import { GenericWithStyles } from "../../utils";
 
 export interface MultiSelectorData extends BaseSelectorData {
 	/**
@@ -45,7 +38,7 @@ export interface MultiSelectProps
 	selectedEntryRenderer?: React.ComponentType<IMultiSelectEntryProps>;
 }
 
-const styles = createStyles({
+const useStyles = makeStyles({
 	paperWrapper: {
 		boxShadow: "none",
 	},
@@ -59,7 +52,7 @@ const styles = createStyles({
 	},
 });
 
-const MultiSelect = (props: MultiSelectProps & WithStyles) => {
+const MultiSelect = (props: MultiSelectProps) => {
 	const {
 		onLoad,
 		onSelect,
@@ -67,9 +60,9 @@ const MultiSelect = (props: MultiSelectProps & WithStyles) => {
 		enableIcons,
 		selectedEntryRenderer,
 		disabled,
-		classes,
 		defaultOptions,
 	} = props;
+	const classes = useStyles();
 	const getFilteredOptions = useCallback(
 		(selectedOptions: MultiSelectorData[]) => {
 			let options = defaultOptions || [];
@@ -166,8 +159,4 @@ const MultiSelect = (props: MultiSelectProps & WithStyles) => {
 	);
 };
 
-const StylesMultiSelect = withStyles(styles)(React.memo(MultiSelect)) as (
-	props: GenericWithStyles<MultiSelectProps & WithStyles>
-) => React.ReactElement;
-
-export default StylesMultiSelect;
+export default React.memo(MultiSelect);

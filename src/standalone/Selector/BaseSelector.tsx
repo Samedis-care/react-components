@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect } from "react";
-import { TextFieldProps, ListItemText, WithStyles } from "@material-ui/core";
-import { Autocomplete } from "@material-ui/lab";
+import { TextFieldProps, ListItemText } from "@material-ui/core";
+import { Autocomplete, AutocompleteProps } from "@material-ui/lab";
 import { Add as AddIcon, ExpandMore } from "@material-ui/icons";
 import TextFieldWithHelp, {
 	TextFieldWithHelpProps,
@@ -96,9 +96,18 @@ export interface BaseSelectorProps extends TextFieldWithHelpProps {
 	 * Is the selector clearable?
 	 */
 	disableClearable?: boolean;
+	/**
+	 * Classes to be used for selector
+	 */
+	classes?: AutocompleteProps<
+		unknown,
+		undefined,
+		undefined,
+		undefined
+	>["classes"];
 }
 
-const BaseSelector = (props: BaseSelectorProps & WithStyles) => {
+const BaseSelector = (props: BaseSelectorProps) => {
 	const {
 		classes,
 		defaultOptions,
@@ -236,4 +245,4 @@ const BaseSelector = (props: BaseSelectorProps & WithStyles) => {
 	);
 };
 
-export default React.memo(BaseSelector) as typeof BaseSelector;
+export default React.memo(BaseSelector);
