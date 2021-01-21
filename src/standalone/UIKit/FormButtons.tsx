@@ -1,11 +1,12 @@
 import React, { CSSProperties } from "react";
-import { makeStyles, Theme } from "@material-ui/core";
+import { makeStyles, Theme, Grid } from "@material-ui/core";
 import { fade } from "@material-ui/core/styles/colorManipulator";
 
 export interface FormButtonTheme {
 	buttonWrapper?: {
 		float?: CSSProperties["float"];
 		margin?: CSSProperties["margin"];
+		style?: CSSProperties;
 	};
 	container?: {
 		float?: CSSProperties["float"];
@@ -16,30 +17,38 @@ export interface FormButtonTheme {
 		borderRadius?: CSSProperties["borderRadius"];
 		backgroundColor?: CSSProperties["backgroundColor"];
 		backgroundColorOpacity?: CSSProperties["opacity"];
+		style?: CSSProperties;
 	};
 }
 
 const useStyles = makeStyles((theme: Theme) => ({
 	container: {
+		// display: "grid",
+		// gap: theme.spacing(1),
 		width: theme.componentsCare?.uiKit?.formButtons?.container?.width,
-		float: theme.componentsCare?.uiKit?.formButtons?.container?.float || "left",
+		// float: theme.componentsCare?.uiKit?.formButtons?.container?.float || "left",
 		margin: theme.componentsCare?.uiKit?.formButtons?.container?.margin,
-		padding: theme.componentsCare?.uiKit?.formButtons?.container?.padding,
+		padding:
+			theme.componentsCare?.uiKit?.formButtons?.container?.padding ||
+			theme.spacing(3),
 		border:
 			theme.componentsCare?.uiKit?.formButtons?.container?.border || undefined,
 		borderRadius:
 			theme.componentsCare?.uiKit?.formButtons?.container?.borderRadius,
 		backgroundColor: fade(
 			theme.componentsCare?.uiKit?.formButtons?.container?.backgroundColor ||
-				"#FFF",
+				theme.palette.background.paper,
 			theme.componentsCare?.uiKit?.formButtons?.container
 				?.backgroundColorOpacity || 1
 		),
+		...theme.componentsCare?.uiKit?.formButtons?.container?.style,
 	},
 	buttonWrapper: {
-		float:
-			theme.componentsCare?.uiKit?.formButtons?.buttonWrapper?.float || "left",
-		margin: theme.componentsCare?.uiKit?.formButtons?.buttonWrapper?.margin,
+		// float:
+		// 	theme.componentsCare?.uiKit?.formButtons?.buttonWrapper?.float || "left",
+		margin:
+			theme.componentsCare?.uiKit?.formButtons?.buttonWrapper?.margin ||
+			theme.spacing(0, 1, 0, 0),
 		"&:first-child": {
 			marginLeft: 0,
 		},
@@ -64,15 +73,15 @@ const FormButtons = (props: FormButtonsProps) => {
 	if (!children) throw new Error("Atleast one button required");
 
 	return (
-		<div className={classes.container}>
+		<Grid container direction="row" spacing={2} className={classes.container}>
 			{children.map((child: React.ReactNode, index: number) => {
 				return (
-					<span className={classes.buttonWrapper} key={index}>
+					<Grid item className={classes.buttonWrapper} key={index}>
 						{child}
-					</span>
+					</Grid>
 				);
 			})}
-		</div>
+		</Grid>
 	);
 };
 

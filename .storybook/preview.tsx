@@ -20,6 +20,9 @@ const getDefaultTheme = (): ThemeOptions => ({
 /* re-usable colors for our theme */
 const customColors = {
 	white: "rgb(255, 255, 255)",
+};
+
+const customPalette = {
 	primary: {
 		main: "rgb(8, 105, 179)",
 		light: "rgb(57, 135, 194)"
@@ -27,24 +30,35 @@ const customColors = {
 	secondary: {
 		main: "rgb(185, 215, 240)",
 	},
+	action: {
+		hover: "rgba(0,0,0, .2)"
+	},
+	error: {
+		main: "rgb(255, 99, 71)",
+		contrastText: "#CCC",
+	},
 };
 /* example for a customized theme per client requirements */
 const getCustomTheme = (): ThemeOptions => ({
+	spacing: [0, 5, 7, 10, 15, 21, 25],
 	palette: {
 		type: "light",
-		primary: {
-			main: customColors.primary.main,
-			light: customColors.primary.light,
-		},
-		secondary: {
-			main: customColors.secondary.main,
-		},
+		...customPalette
 	},
 	componentsCare: {
 		uiKit: {
+			input: {
+				style: { border: "5px dotted pink" },
+				placeholder: {
+					important: {
+						color: customPalette.error.main,
+					}
+				}
+			},
 			actionButton: {
 				padding: "7px 25px",
 				border: "none",
+				borderRadius: 25,
 				fontSize: "0.75rem",
 				disabled: {
 					backgroundColor: "#bcbdbf",
@@ -61,7 +75,7 @@ const getCustomTheme = (): ThemeOptions => ({
 					borderRadius: "32px",
 					padding: "20px",
 					margin: "20px",
-					backgroundColor: customColors.secondary.main,
+					backgroundColor: customPalette.secondary.main,
 					backgroundColorOpacity: .7, 
 				},
 			},
@@ -146,13 +160,9 @@ const ThemeSelector = (props: ThemeSelectorProps) => {
 const AdvThemeSelector = (props: ThemeSelectorProps) => {
 	const setTheme = useContext(ThemeContext)!;
 
-	const theme = getCustomTheme();
-	localStorage.setItem("theme", JSON.stringify(theme));
-	setTheme(theme);
-
 	const themeJson = text(
 		"Theme",
-		JSON.stringify(theme, undefined, 4),
+		JSON.stringify(loadTheme(), undefined, 4),
 		"Theme (Advanced)"
 	);
 
