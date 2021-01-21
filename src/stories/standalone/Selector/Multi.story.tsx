@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import "../../../i18n";
 import {
 	MultiSelect,
@@ -49,7 +49,7 @@ export const SelectorMulti = (): React.ReactElement => {
 	const noOptionsText = text("No data Label", "No option");
 	const placeholderLabel = text("Placeholder Label", "Select..");
 
-	const loadData = React.useCallback(
+	const loadData = useCallback(
 		(query: string): MySelectorData[] => {
 			loadDataAction(query);
 			return colourOptions
@@ -61,7 +61,7 @@ export const SelectorMulti = (): React.ReactElement => {
 		[loadDataAction]
 	);
 
-	const onSelect = React.useCallback(
+	const onSelect = useCallback(
 		(data: BaseSelectorData[]) => {
 			onSelectAction(data);
 			setSelected(data);

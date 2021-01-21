@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useCallback } from "react";
 import BaseSelector, {
 	BaseSelectorData,
 	BaseSelectorProps,
@@ -65,18 +65,35 @@ const MultiSelect = (props: MultiSelectProps & WithStyles) => {
 		classes,
 		defaultOptions,
 	} = props;
+	const getFilteredOptions = useCallback(
+		(selectedOptions: MultiSelectorData[]) => {
+			let options = defaultOptions || [];
+			if (selectedOptions && selectedOptions.length > 0) {
+				selectedOptions.forEach((s) => {
+					options = options.filter((option) => option.value !== s.value);
+				});
+			}
+			return options;
+		},
+		[defaultOptions]
+	);
+	const [filteredOptions, setFilteredOptions] = useState(
+		getFilteredOptions(selected)
+	);
 
 	const EntryRender = selectedEntryRenderer || MultiSelectEntry;
 
-	const multiSelectHandler = React.useCallback(
+	const multiSelectHandler = useCallback(
 		(data: MultiSelectorData | null) => {
 			if (!data) return;
-			if (onSelect) onSelect([...selected, data]);
+			const selectedOptions = [...selected, data];
+			if (onSelect) onSelect(selectedOptions);
+			setFilteredOptions(getFilteredOptions(selectedOptions));
 		},
-		[onSelect, selected]
+		[getFilteredOptions, onSelect, selected]
 	);
 
-	const multiSelectLoadHandler = React.useCallback(
+	const multiSelectLoadHandler = useCallback(
 		async (query: string) => {
 			const results = await onLoad(query);
 			return results.filter(
@@ -87,7 +104,7 @@ const MultiSelect = (props: MultiSelectProps & WithStyles) => {
 		[onLoad, selected]
 	);
 
-	const handleDelete = React.useCallback(
+	const handleDelete = useCallback(
 		(evt: React.MouseEvent<HTMLButtonElement>) => {
 			let canDelete = true;
 			const entry: MultiSelectorData | null | undefined = selected.find(
@@ -102,11 +119,16 @@ const MultiSelect = (props: MultiSelectProps & WithStyles) => {
 				if (entry.canUnselect) {
 					canDelete = await entry.canUnselect(entry);
 				}
-				if (canDelete && onSelect)
-					onSelect(selected.filter((s) => s.value !== entry.value));
+				if (canDelete && onSelect) {
+					const selectedOptions = selected.filter(
+						(s) => s.value !== entry.value
+					);
+					onSelect(selectedOptions);
+					setFilteredOptions(getFilteredOptions(selectedOptions));
+				}
 			})();
 		},
-		[onSelect, selected]
+		[onSelect, selected, getFilteredOptions]
 	);
 
 	return (
@@ -119,7 +141,7 @@ const MultiSelect = (props: MultiSelectProps & WithStyles) => {
 						selected={null}
 						onSelect={multiSelectHandler}
 						refreshToken={selected.length.toString()}
-						defaultOptions={defaultOptions}
+						defaultOptions={filteredOptions}
 					/>
 				</Grid>
 				<Grid item xs={12} className={classes.selectedEntries}>

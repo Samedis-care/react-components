@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useCallback } from "react";
 import "../../../i18n";
 import { BaseSelectorData, SingleSelect } from "../../../standalone/Selector";
 import { colourOptions } from "./Data";
@@ -7,7 +7,7 @@ import { boolean, text } from "@storybook/addon-knobs";
 import { Box, CssBaseline } from "@material-ui/core";
 
 export const SelectorSingle = (): React.ReactElement => {
-	const [selected, setSelected] = React.useState<BaseSelectorData | null>(null);
+	const [selected, setSelected] = useState<BaseSelectorData | null>(null);
 	const loadDataAction = action("onLoad");
 	const onSelectAction = action("onSelect");
 	const onAddNewAction = action("onAddNew");
@@ -20,7 +20,7 @@ export const SelectorSingle = (): React.ReactElement => {
 	const noOptionsText = text("No options Label", "No Option");
 	const placeholderLabel = text("Placeholder Label", "Select..");
 
-	const loadData = React.useCallback(
+	const loadData = useCallback(
 		(query: string): BaseSelectorData[] => {
 			loadDataAction(query);
 			if (query) {
@@ -31,7 +31,7 @@ export const SelectorSingle = (): React.ReactElement => {
 		},
 		[loadDataAction]
 	);
-	const onSelect = React.useCallback(
+	const onSelect = useCallback(
 		(data: BaseSelectorData | null) => {
 			onSelectAction(data);
 			setSelected(data);

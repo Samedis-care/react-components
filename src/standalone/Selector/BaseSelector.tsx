@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { TextFieldProps, ListItemText } from "@material-ui/core";
 import { Autocomplete } from "@material-ui/lab";
 import { Add as AddIcon, ExpandMore } from "@material-ui/icons";
@@ -115,17 +115,15 @@ const BaseSelector = (props: BaseSelectorProps) => {
 		loadingText,
 		disableClearable,
 	} = props;
-	const [open, setOpen] = React.useState(false);
+	const [open, setOpen] = useState(false);
 	const actualAddNewLabel =
 		addNewLabel || i18n.t("standalone.selector.add-new");
-	const [selectorOptions, setSelectorOptions] = React.useState(
+	const [selectorOptions, setSelectorOptions] = useState(
 		[] as BaseSelectorData[]
 	);
 	const loading = open && selectorOptions.length === 0;
 
-	const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
-
-	const defaultRenderer = React.useCallback(
+	const defaultRenderer = useCallback(
 		(data: BaseSelectorData) => (
 			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 			// @ts-ignore: Typescript complains about the button property being "required"
@@ -137,7 +135,7 @@ const BaseSelector = (props: BaseSelectorProps) => {
 		[enableIcons]
 	);
 
-	const onChangeHandler = React.useCallback(
+	const onChangeHandler = useCallback(
 		(data) => {
 			if (
 				data &&
@@ -153,10 +151,9 @@ const BaseSelector = (props: BaseSelectorProps) => {
 		[onSelect, onAddNew]
 	);
 
-	const onSearchHandler = React.useCallback(
+	const onSearchHandler = useCallback(
 		async (query: string) => {
 			const results = await onLoad(query);
-			await delay(2000);
 			if (onAddNew) {
 				results.push({
 					value: "add-new-button",
@@ -170,7 +167,7 @@ const BaseSelector = (props: BaseSelectorProps) => {
 		[actualAddNewLabel, onAddNew, onLoad]
 	);
 
-	const setDefaultOptions = React.useCallback(() => {
+	const setDefaultOptions = useCallback(() => {
 		let options = defaultOptions || [];
 		if (onAddNew) {
 			options.push({
@@ -185,13 +182,11 @@ const BaseSelector = (props: BaseSelectorProps) => {
 		return options;
 	}, [actualAddNewLabel, defaultOptions, onAddNew]);
 
-	React.useEffect(() => {
-		if (open) {
+	useEffect(() => {
+		if (!open) {
 			setSelectorOptions(setDefaultOptions);
-		} else {
-			setSelectorOptions([]);
 		}
-	}, [open, defaultOptions, setDefaultOptions]);
+	}, [open, setDefaultOptions]);
 
 	return (
 		<div>
@@ -216,9 +211,7 @@ const BaseSelector = (props: BaseSelectorProps) => {
 				noOptionsText={noOptionsText}
 				getOptionLabel={(option: BaseSelectorData) => option.label}
 				renderOption={(option: BaseSelectorData) => defaultRenderer(option)}
-				getOptionDisabled={(option: BaseSelectorData) =>
-					option.isDisabled as boolean
-				}
+				getOptionDisabled={(option: BaseSelectorData) => !!option.isDisabled}
 				onChange={(_event, selectedValue) => onChangeHandler(selectedValue)}
 				renderInput={(params: TextFieldProps) => (
 					<TextFieldWithHelp
