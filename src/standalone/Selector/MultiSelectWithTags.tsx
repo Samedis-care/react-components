@@ -326,6 +326,11 @@ const MultiSelectWithTags = <Data extends MultiSelectData>(
 		<Typography component="div">
 			<Typography component="label">{title}</Typography>
 			<SingleSelect
+				autocompleteId={
+					props.autocompleteId
+						? props.autocompleteId + "-single-select"
+						: undefined
+				}
 				selected={selectedGroup}
 				onSelect={handleGroupSelect}
 				onLoad={groupSelectLoadHandler}

@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { TextFieldProps, ListItemText } from "@material-ui/core";
-import { Autocomplete } from "@material-ui/lab";
+import { Autocomplete, AutocompleteProps } from "@material-ui/lab";
 import { Add as AddIcon, ExpandMore } from "@material-ui/icons";
 import TextFieldWithHelp, {
 	TextFieldWithHelpProps,
@@ -99,12 +99,17 @@ export interface BaseSelectorProps extends TextFieldWithHelpProps {
 	/**
 	 * Custom styles to be used for selector
 	 */
-	customStyles?: Record<string, string>;
+	classes?: AutocompleteProps<
+		unknown,
+		undefined,
+		undefined,
+		undefined
+	>["classes"];
 }
 
 const BaseSelector = (props: BaseSelectorProps) => {
 	const {
-		customStyles,
+		classes,
 		defaultOptions,
 		refreshToken,
 		onSelect,
@@ -197,7 +202,7 @@ const BaseSelector = (props: BaseSelectorProps) => {
 		<div>
 			<Autocomplete
 				id={autocompleteId}
-				classes={customStyles}
+				classes={classes}
 				open={open}
 				onOpen={() => {
 					setOpen(true);

@@ -56,6 +56,7 @@ export const SelectorSingle = (): React.ReactElement => {
 					noOptionsText={noOptionsText}
 					placeholder={placeholderLabel}
 					defaultOptions={colourOptions}
+					autocompleteId={"single-select"}
 				/>
 			</Box>
 		</>

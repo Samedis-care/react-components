@@ -6,6 +6,7 @@ import BaseSelector, {
 import { makeStyles, Grid, Paper } from "@material-ui/core";
 import MultiSelectEntry, { IMultiSelectEntryProps } from "./MultiSelectEntry";
 import { combineClassMaps } from "../../utils";
+import { AutocompleteClassKey } from "@material-ui/lab/Autocomplete/Autocomplete";
 
 export interface MultiSelectorData extends BaseSelectorData {
 	/**
@@ -36,12 +37,15 @@ export interface MultiSelectProps
 	selectedEntryRenderer?: React.ComponentType<IMultiSelectEntryProps>;
 }
 
-const styles = makeStyles({
-	paperWrapper: {
-		boxShadow: "none",
-	},
+const useSelectorStyles = makeStyles({
 	inputRoot: {
 		borderRadius: "4px 4px 0px 0px",
+	},
+});
+
+const useStyles = makeStyles({
+	paperWrapper: {
+		boxShadow: "none",
 	},
 	selectedEntries: {
 		border: `1px solid rgba(0, 0, 0, 0.23)`,
@@ -59,11 +63,13 @@ const MultiSelect = (props: MultiSelectProps) => {
 		selectedEntryRenderer,
 		disabled,
 		defaultOptions,
-		customStyles,
+		classes,
 	} = props;
-	const multiSelectStyles = customStyles
-		? combineClassMaps(styles(), customStyles)
-		: styles();
+	const multiSelectClasses = useStyles();
+	const defaultMultiSelectClasses = useSelectorStyles();
+	const multiSelectStyles = classes
+		? combineClassMaps<AutocompleteClassKey>(defaultMultiSelectClasses, classes)
+		: defaultMultiSelectClasses;
 	const getFilteredOptions = useCallback(
 		(selectedOptions: MultiSelectorData[]) => {
 			let options = defaultOptions || [];
@@ -131,12 +137,12 @@ const MultiSelect = (props: MultiSelectProps) => {
 	);
 
 	return (
-		<Paper elevation={0} className={multiSelectStyles.paperWrapper}>
+		<Paper elevation={0} className={multiSelectClasses.paperWrapper}>
 			<Grid container>
 				<Grid item xs={12}>
 					<BaseSelector
 						{...props}
-						customStyles={multiSelectStyles}
+						classes={multiSelectStyles}
 						onLoad={multiSelectLoadHandler}
 						selected={null}
 						onSelect={multiSelectHandler}
@@ -144,7 +150,7 @@ const MultiSelect = (props: MultiSelectProps) => {
 						defaultOptions={filteredOptions}
 					/>
 				</Grid>
-				<Grid item xs={12} className={multiSelectStyles.selectedEntries}>
+				<Grid item xs={12} className={multiSelectClasses.selectedEntries}>
 					{props.selected.map((data: MultiSelectorData, index: number) => (
 						<EntryRender
 							key={data.value}
