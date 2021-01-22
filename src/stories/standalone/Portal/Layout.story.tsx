@@ -49,6 +49,7 @@ export const PortalLayoutStory = (): React.ReactElement => {
 				}}
 			/>
 			<PortalLayout
+				variant={"basic"}
 				topLeft={<Placeholder cssClass={"topLeft"} />}
 				headerContent={<Placeholder cssClass={"header"} />}
 				menuContent={<Placeholder cssClass={"menu"} />}
