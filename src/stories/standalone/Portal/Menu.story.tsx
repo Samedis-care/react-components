@@ -17,17 +17,17 @@ const useStyles = makeStyles({
 	header: {
 		width: "100%",
 		height: "100%",
-		//backgroundColor: "red",
+		backgroundColor: "red",
 	},
 	content: {
 		width: "100%",
 		height: "100%",
-		//backgroundColor: "green",
+		backgroundColor: "green",
 	},
 	topLeft: {
 		width: "100%",
 		height: "100%",
-		//backgroundColor: "yellow",
+		backgroundColor: "yellow",
 	},
 });
 
