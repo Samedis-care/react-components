@@ -1,8 +1,13 @@
 import React from "react";
 import { DialogContextType } from "../../framework";
-import { IDialogConfigConfirmAsync, IDialogConfigInputAsync } from "./Types";
+import {
+	IDialogConfigConfirmAsync,
+	IDialogConfigInputAsync,
+	IDialogConfigSimple,
+} from "./Types";
 import { ConfirmDialog } from "./ConfirmDialog";
 import { InputDialog } from "./InputDialog";
+import { InfoDialog } from "./InfoDialog";
 
 /**
  * Shows an awaitable confirm dialog
@@ -44,6 +49,23 @@ export const showInputDialog = async (
 				handlerButtonYes={resolve}
 				handlerButtonNo={reject}
 			/>
+		);
+	});
+};
+
+/**
+ * Shows an awaitable info dialog
+ * @param pushDialog The dialog context's (useDialogContext()) pushDialog function
+ * @param props The dialog properties
+ */
+export const showInfoDialog = async (
+	pushDialog: DialogContextType[0],
+	props: IDialogConfigSimple
+): Promise<void> => {
+	const { title, message, buttons } = props;
+	return new Promise(() => {
+		pushDialog(
+			<InfoDialog title={title} message={message} buttons={buttons} />
 		);
 	});
 };

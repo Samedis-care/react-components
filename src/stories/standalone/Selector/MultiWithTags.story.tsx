@@ -8,6 +8,8 @@ import {
 import { colourOptions, colourTypeOptions } from "./Data";
 import { action } from "@storybook/addon-actions";
 import { boolean, text } from "@storybook/addon-knobs";
+import { useDialogContext } from "../../../framework";
+import { showInfoDialog } from "../../../non-standalone/Dialog";
 
 interface MySelectorData extends MultiSelectorData {
 	id: string;
@@ -61,6 +63,7 @@ export const SelectorMultiWithTags = (): React.ReactElement => {
 	const displaySwitch = boolean("Enable Switch", false);
 	const switchLabel = text("Switch Label Text", "Select from all");
 	const searchInputLabel = text("Search Label", "Search");
+	const [pushDialog] = useDialogContext();
 
 	const loadFilteredData = React.useCallback(() => {
 		return displaySwitch && !switchValue
@@ -180,15 +183,28 @@ export const SelectorMultiWithTags = (): React.ReactElement => {
 			noDataLabel={noDataLabel}
 			placeholderLabel={placeholderLabel}
 			searchInputLabel={searchInputLabel}
-			infoText={
-				<div
-					dangerouslySetInnerHTML={{
-						__html: text(
-							"Info Text",
-							"This is a pretty long info text which supports html. It really is."
-						),
-					}}
-				/>
+			openInfo={() =>
+				showInfoDialog(pushDialog, {
+					title: text("Dialog title", "Sample title"),
+					message: (
+						<div
+							dangerouslySetInnerHTML={{
+								__html: text(
+									"Info Text",
+									"This is a pretty long info text which supports html. It really is.<br> It explains you what to write in here."
+								),
+							}}
+						/>
+					),
+					buttons: [
+						{
+							text: text("Dialog button label", "Ok"),
+							onClick: action("onClose"),
+							autoFocus: true,
+							color: "primary",
+						},
+					],
+				})
 			}
 		/>
 	);

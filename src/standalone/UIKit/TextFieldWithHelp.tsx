@@ -1,24 +1,24 @@
 import React from "react";
-import { TextField, TextFieldProps, Tooltip } from "@material-ui/core";
+import { TextField, TextFieldProps, IconButton } from "@material-ui/core";
 import { Info as InfoIcon } from "@material-ui/icons";
 import { InputLabelConfig, UIInputProps, useInputStyles } from "./CommonStyles";
 
 export interface TextFieldWithHelpProps extends UIInputProps {
-	infoText?: React.ReactNode;
+	openInfo?: () => void;
 }
 
 const TextFieldWithHelp = (props: TextFieldWithHelpProps & TextFieldProps) => {
-	const { infoText, important, ...muiProps } = props;
+	const { openInfo, important, ...muiProps } = props;
 	const inputClasses = useInputStyles({ important });
 
 	return (
 		<TextField
 			InputProps={{
 				classes: inputClasses,
-				endAdornment: infoText && (
-					<Tooltip title={infoText}>
+				endAdornment: openInfo && (
+					<IconButton onClick={openInfo}>
 						<InfoIcon color={"disabled"} />
-					</Tooltip>
+					</IconButton>
 				),
 			}}
 			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
