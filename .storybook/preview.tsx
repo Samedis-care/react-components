@@ -61,16 +61,15 @@ const getCustomTheme = (): ThemeOptions => ({
 				border: "none",
 				borderRadius: 25,
 				fontSize: "0.75rem",
-				disabled: {
-					backgroundColor: "#bcbdbf",
-				},
 				/* example */
 				style: {
 					border: "1px solid rgba(0,0,0, .15)",
 					boxShadow: "rgba(0, 0, 0, 0.25) 0px 0px 5px 0px",
 				},
-				hover: {
+				disabled: {
+					backgroundColor: "#bcbdbf",
 					style: {
+						boxShadow: "rgba(255, 255, 255, 0.25) 0px 0px 2px 0px",
 					},
 				},
 			},
