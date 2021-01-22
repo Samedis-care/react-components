@@ -23,10 +23,7 @@ export interface FormButtonTheme {
 
 const useStyles = makeStyles((theme: Theme) => ({
 	container: {
-		// display: "grid",
-		// gap: theme.spacing(1),
 		width: theme.componentsCare?.uiKit?.formButtons?.container?.width,
-		// float: theme.componentsCare?.uiKit?.formButtons?.container?.float || "left",
 		margin: theme.componentsCare?.uiKit?.formButtons?.container?.margin,
 		padding:
 			theme.componentsCare?.uiKit?.formButtons?.container?.padding ||
@@ -44,8 +41,6 @@ const useStyles = makeStyles((theme: Theme) => ({
 		...theme.componentsCare?.uiKit?.formButtons?.container?.style,
 	},
 	buttonWrapper: {
-		// float:
-		// 	theme.componentsCare?.uiKit?.formButtons?.buttonWrapper?.float || "left",
 		margin:
 			theme.componentsCare?.uiKit?.formButtons?.buttonWrapper?.margin ||
 			theme.spacing(0, 1, 0, 0),

@@ -21,11 +21,11 @@ export interface ActionButtonTheme {
 		border?: CSSProperties["border"];
 		style?: CSSProperties;
 	};
-	disabled: {
+	disabled?: {
 		backgroundColor?: CSSProperties["backgroundColor"];
 		style?: CSSProperties;
 	};
-	label: {
+	label?: {
 		style?: CSSProperties;
 	};
 }
@@ -55,9 +55,17 @@ const StyledButton = withStyles((theme: Theme) => ({
 						props.backgroundColor || theme.palette.primary.main,
 						theme.palette.action.hover
 				  ).join()})`,
+			...{
+				...theme.componentsCare?.uiKit?.actionButton?.style,
+				...theme.componentsCare?.uiKit?.actionButton?.hover?.style,
+			},
 		},
 		"&.Mui-disabled": {
 			backgroundColor: theme.palette.action.disabled,
+			...{
+				...theme.componentsCare?.uiKit?.actionButton?.style,
+				...theme.componentsCare?.uiKit?.actionButton?.disabled?.style,
+			},
 		},
 		minWidth: props.small ? 0 : undefined,
 		padding: theme.componentsCare?.uiKit?.actionButton?.padding,

@@ -42,13 +42,14 @@ const customPalette = {
 const getCustomTheme = (): ThemeOptions => ({
 	spacing: [0, 5, 7, 10, 15, 21, 25],
 	palette: {
-		type: "light",
+		type: "dark",
 		...customPalette
 	},
 	componentsCare: {
 		uiKit: {
+			label: {
+			},
 			input: {
-				style: { border: "5px dotted pink" },
 				placeholder: {
 					important: {
 						color: customPalette.error.main,
@@ -63,10 +64,19 @@ const getCustomTheme = (): ThemeOptions => ({
 				disabled: {
 					backgroundColor: "#bcbdbf",
 				},
+				/* example */
+				style: {
+					border: "1px solid rgba(0,0,0, .15)",
+					boxShadow: "rgba(0, 0, 0, 0.25) 0px 0px 5px 0px",
+				},
+				hover: {
+					style: {
+					},
+				},
 			},
 			formButtons: {
 				buttonWrapper: {
-					margin: "0 1rem 0 0",
+					margin: "0 5px 0 0",
 				},
 				container: {
 					float: "left",
@@ -77,6 +87,11 @@ const getCustomTheme = (): ThemeOptions => ({
 					margin: "20px",
 					backgroundColor: customPalette.secondary.main,
 					backgroundColorOpacity: .7, 
+					/* example */
+					style: {
+						background: "linear-gradient(345deg, rgba(238,174,202,1) 0%, rgba(148,187,233,1) 100%)",
+						boxShadow: "0 0 10px 0 rgba(0,0,0, .35)",
+					},
 				},
 			},
 		},
