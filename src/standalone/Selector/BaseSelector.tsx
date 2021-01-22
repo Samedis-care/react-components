@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { TextFieldProps, ListItemText } from "@material-ui/core";
-import { Autocomplete, AutocompleteProps } from "@material-ui/lab";
+import { Autocomplete } from "@material-ui/lab";
 import { Add as AddIcon, ExpandMore } from "@material-ui/icons";
 import TextFieldWithHelp, {
 	TextFieldWithHelpProps,
@@ -97,19 +97,14 @@ export interface BaseSelectorProps extends TextFieldWithHelpProps {
 	 */
 	disableClearable?: boolean;
 	/**
-	 * Classes to be used for selector
+	 * Custom styles to be used for selector
 	 */
-	classes?: AutocompleteProps<
-		unknown,
-		undefined,
-		undefined,
-		undefined
-	>["classes"];
+	customStyles?: Record<string, string>;
 }
 
 const BaseSelector = (props: BaseSelectorProps) => {
 	const {
-		classes,
+		customStyles,
 		defaultOptions,
 		refreshToken,
 		onSelect,
@@ -202,7 +197,7 @@ const BaseSelector = (props: BaseSelectorProps) => {
 		<div>
 			<Autocomplete
 				id={autocompleteId}
-				classes={classes}
+				classes={customStyles}
 				open={open}
 				onOpen={() => {
 					setOpen(true);
@@ -213,7 +208,6 @@ const BaseSelector = (props: BaseSelectorProps) => {
 				disableClearable={disableClearable}
 				loading={loading}
 				loadingText={loadingText}
-				placeholder={placeholder}
 				autoComplete
 				disabled={disabled}
 				options={selectorOptions}
@@ -228,6 +222,7 @@ const BaseSelector = (props: BaseSelectorProps) => {
 					<TextFieldWithHelp
 						{...params}
 						variant="outlined"
+						placeholder={placeholder}
 						onChange={(event) => {
 							if (event.target.value !== "" || event.target.value !== null) {
 								void onSearchHandler(event.target.value);

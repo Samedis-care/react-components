@@ -4,7 +4,6 @@ import {
 	MultiSelect,
 	MultiSelectorData,
 	BaseSelectorData,
-	SelectorData,
 } from "../../../standalone/Selector";
 import { colourOptions } from "./Data";
 import { action } from "@storybook/addon-actions";
@@ -16,7 +15,7 @@ interface MySelectorData extends MultiSelectorData {
 	id: string;
 }
 
-const enhanceData = (entry: SelectorData): MySelectorData => ({
+const enhanceData = (entry: BaseSelectorData): MySelectorData => ({
 	...entry,
 	onClick: action("onClick: " + entry.label),
 	canUnselect: (evtEntry: MultiSelectorData) => {
@@ -29,7 +28,7 @@ const enhanceData = (entry: SelectorData): MySelectorData => ({
 const getDefaultData = (): MySelectorData[] => {
 	return (["ocean"]
 		.map((entry) => colourOptions.find((color) => color.value === entry))
-		.filter((e) => e !== undefined) as SelectorData[]).map(enhanceData);
+		.filter((e) => e !== undefined) as BaseSelectorData[]).map(enhanceData);
 };
 
 export const SelectorMulti = (): React.ReactElement => {
@@ -86,7 +85,7 @@ export const SelectorMulti = (): React.ReactElement => {
 					addNewLabel={addNewLabel}
 					loadingText={loadingText}
 					noOptionsText={noOptionsText}
-					placeholderLabel={placeholderLabel}
+					placeholder={placeholderLabel}
 					defaultOptions={colourOptions}
 				/>
 			</Box>

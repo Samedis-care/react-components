@@ -5,6 +5,7 @@ import BaseSelector, {
 } from "./BaseSelector";
 import { makeStyles, Grid, Paper } from "@material-ui/core";
 import MultiSelectEntry, { IMultiSelectEntryProps } from "./MultiSelectEntry";
+import { combineClassMaps } from "../../utils";
 
 export interface MultiSelectorData extends BaseSelectorData {
 	/**
@@ -19,10 +20,7 @@ export interface MultiSelectorData extends BaseSelectorData {
 }
 
 export interface MultiSelectProps
-	extends Omit<
-		BaseSelectorProps,
-		"multiSelect" | "clearable" | "onSelect" | "selected"
-	> {
+	extends Omit<BaseSelectorProps, "onSelect" | "selected"> {
 	/**
 	 * Extended selection change handler
 	 * @param data The selected data entry/entries
@@ -38,7 +36,7 @@ export interface MultiSelectProps
 	selectedEntryRenderer?: React.ComponentType<IMultiSelectEntryProps>;
 }
 
-const useStyles = makeStyles({
+const styles = makeStyles({
 	paperWrapper: {
 		boxShadow: "none",
 	},
@@ -61,8 +59,11 @@ const MultiSelect = (props: MultiSelectProps) => {
 		selectedEntryRenderer,
 		disabled,
 		defaultOptions,
+		customStyles,
 	} = props;
-	const classes = useStyles();
+	const multiSelectStyles = customStyles
+		? combineClassMaps(styles(), customStyles)
+		: styles();
 	const getFilteredOptions = useCallback(
 		(selectedOptions: MultiSelectorData[]) => {
 			let options = defaultOptions || [];
@@ -130,12 +131,12 @@ const MultiSelect = (props: MultiSelectProps) => {
 	);
 
 	return (
-		<Paper elevation={0} className={classes.paperWrapper}>
+		<Paper elevation={0} className={multiSelectStyles.paperWrapper}>
 			<Grid container>
 				<Grid item xs={12}>
 					<BaseSelector
 						{...props}
-						classes={classes}
+						customStyles={multiSelectStyles}
 						onLoad={multiSelectLoadHandler}
 						selected={null}
 						onSelect={multiSelectHandler}
@@ -143,7 +144,7 @@ const MultiSelect = (props: MultiSelectProps) => {
 						defaultOptions={filteredOptions}
 					/>
 				</Grid>
-				<Grid item xs={12} className={classes.selectedEntries}>
+				<Grid item xs={12} className={multiSelectStyles.selectedEntries}>
 					{props.selected.map((data: MultiSelectorData, index: number) => (
 						<EntryRender
 							key={data.value}
