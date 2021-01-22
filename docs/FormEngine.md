@@ -26,37 +26,52 @@ import {Connector, ModelFieldName, ResponseMeta} from "components-care";
 
 class BackendConnector<KeyT extends ModelFieldName> extends Connector<KeyT> {
     async index(
-		params: Partial<IDataGridLoadDataParameters> | undefined    
+		params?: Partial<IDataGridLoadDataParameters>,
+        model?: Model<KeyT, PageVisibility, unknown>    
     ): Promise<[Record<KeyT, unknown>[], ResponseMeta]> {
         throw new Error("Not implemented");
     }
 
     async create(
-        data: Record<string, unknown>
+        data: Record<string, unknown>,
+        model?: Model<KeyT, PageVisibility, unknown>
     ): Promise<Record<KeyT, unknown>> {
         throw new Error("Not implemented");
     }
 
-    async read(id: string): Promise<Record<KeyT, unknown>> {
+    async read(
+      id: string,
+      model?: Model<KeyT, PageVisibility, unknown>
+    ): Promise<Record<KeyT, unknown>> {
         throw new Error("Not implemented");
     }
 
     async update(
-        data: Record<ModelFieldName, unknown>
+        data: Record<ModelFieldName, unknown>,
+        model?: Model<KeyT, PageVisibility, unknown>
     ): Promise<Record<KeyT, unknown>> {
         throw new Error("Not implemented");
     }
 
-    async delete(id: string): Promise<void> {
+    async delete(
+      id: string,
+      model?: Model<KeyT, PageVisibility, unknown>
+    ): Promise<void> {
         throw new Error("Not implemented");
     }
 /* Only implement if your backend can handle multiple deletes in one request
-	async deleteMultiple(ids: string[]): Promise<void> {
+	async deleteMultiple(
+	  ids: string[],
+	  model?: Model<KeyT, PageVisibility, unknown>
+    ): Promise<void> {
 		return super.deleteMultiple(ids);
 	}
 */
 /* Only implement if your backend can handle delete all requests
-	deleteAdvanced = async (req: AdvancedDeleteRequest) => {
+	deleteAdvanced = async (
+	  req: AdvancedDeleteRequest,
+	  model?: Model<KeyT, PageVisibility, unknown>
+	) => {
         throw new Error("Not implemented");
     };
 */
@@ -77,32 +92,32 @@ export default BackendConnector;
 import {Connector, ModelFieldName} from "components-care";
 
 class BackendConnector extends Connector {
-    async index(params) {
+    async index(params, model) {
         throw new Error("Not implemented");
     }
 
-    async create(data) {
+    async create(data, model) {
         throw new Error("Not implemented");
     }
 
-    async read(id) {
+    async read(id, model) {
         throw new Error("Not implemented");
     }
 
-    async update(data) {
+    async update(data, model) {
         throw new Error("Not implemented");
     }
 
-    async delete(id) {
+    async delete(id, model) {
         throw new Error("Not implemented");
     }
 /* Only implement if your backend can handle multiple deletes in one request
-	async deleteMultiple(ids) {
+	async deleteMultiple(ids, model) {
 		return super.deleteMultiple(ids);
 	}
 */
 /* Only implement if your backend can handle delete all requests
-	deleteAdvanced = async (req) => {
+	deleteAdvanced = async (req, model) => {
         throw new Error("Not implemented");
     };
 */

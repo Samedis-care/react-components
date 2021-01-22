@@ -3,7 +3,11 @@ import { TextFieldProps } from "@material-ui/core";
 import TextFieldWithHelp, {
 	TextFieldWithHelpProps,
 } from "../TextFieldWithHelp";
-import { delocalizeNumber, useGlobalized } from "../../../utils";
+import {
+	parseLocalizedNumber,
+	useGlobalized,
+	useInputCursorFix,
+} from "../../../utils";
 
 export interface CurrencyInputProps extends TextFieldWithHelpProps {
 	/**
@@ -30,20 +34,23 @@ const CurrencyInput = (
 ) => {
 	const { value, onChange, currency, ...muiProps } = props;
 	const globalized = useGlobalized();
+	const valueFormatted =
+		value !== null && globalized
+			? globalized.formatCurrency(value, currency)
+			: "";
+	const { handleCursorChange, cursorInputRef } = useInputCursorFix(
+		valueFormatted
+	);
 
 	// on change handling
 	const handleChange = useCallback(
 		(event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
+			handleCursorChange(event);
 			if (!onChange) return;
 
-			const num = delocalizeNumber(event.target.value);
-			if (num !== "") {
-				onChange(event, parseFloat(num));
-			} else {
-				onChange(event, null);
-			}
+			onChange(event, parseLocalizedNumber(event.target.value));
 		},
-		[onChange]
+		[onChange, handleCursorChange]
 	);
 
 	// component rendering
@@ -51,13 +58,12 @@ const CurrencyInput = (
 		<div>
 			<TextFieldWithHelp
 				{...muiProps}
-				value={
-					value !== null && globalized
-						? globalized.formatCurrency(value, currency)
-						: ""
-				}
-				onFocus={handleChange}
+				value={valueFormatted}
 				onChange={handleChange}
+				inputProps={{
+					...muiProps.inputProps,
+					ref: cursorInputRef,
+				}}
 			/>
 		</div>
 	);

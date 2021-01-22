@@ -1,4 +1,9 @@
-import { AdvancedDeleteRequest, ModelFieldName } from "../Model";
+import {
+	Model,
+	AdvancedDeleteRequest,
+	ModelFieldName,
+	PageVisibility,
+} from "../Model";
 import { IDataGridLoadDataParameters } from "../../standalone/DataGrid";
 import { IDataGridExporter } from "../../standalone/DataGrid/Header";
 
@@ -20,49 +25,67 @@ abstract class Connector<KeyT extends ModelFieldName> {
 	/**
 	 * Lists all available data entries
 	 * @param params Filter, Sorting and Pagination parameters
+	 * @param model The model requesting the data (if any)
 	 * @returns An array with all data entries as well as some meta data
 	 */
 	abstract index(
-		params?: Partial<IDataGridLoadDataParameters>
+		params?: Partial<IDataGridLoadDataParameters>,
+		model?: Model<KeyT, PageVisibility, unknown>
 	): Promise<[Record<KeyT, unknown>[], ResponseMeta]>;
 
 	/**
 	 * Creates a new data entry with the given data
 	 * @param data The initial data for the entry
+	 * @param model The model performing the request
 	 * @returns The full newly created data entry
 	 */
 	abstract create(
-		data: Record<string, unknown>
+		data: Record<string, unknown>,
+		model?: Model<KeyT, PageVisibility, unknown>
 	): Promise<Record<KeyT, unknown>>;
 
 	/**
 	 * Loads an existing data entry
 	 * @param id The ID of the existing data entry
+	 * @param model The model performing the request
 	 * @returns The loaded data entry
 	 */
-	abstract read(id: string): Promise<Record<KeyT, unknown>>;
+	abstract read(
+		id: string,
+		model?: Model<KeyT, PageVisibility, unknown>
+	): Promise<Record<KeyT, unknown>>;
 
 	/**
 	 * Updates an already existing data entry
 	 * @param data The given data including the ID of the data entry
+	 * @param model The model performing the request
 	 * @returns The modified data entry
 	 */
 	abstract update(
-		data: Record<ModelFieldName, unknown>
+		data: Record<ModelFieldName, unknown>,
+		model?: Model<KeyT, PageVisibility, unknown>
 	): Promise<Record<KeyT, unknown>>;
 
 	/**
 	 * Deletes a specific data entry
 	 * @param id The ID of the data entry to delete
+	 * @param model The model performing the request
 	 */
-	abstract delete(id: string): Promise<void>;
+	abstract delete(
+		id: string,
+		model?: Model<KeyT, PageVisibility, unknown>
+	): Promise<void>;
 
 	/**
 	 * Delets multiple data entries at once. Should be overwritten if implemented by your backend.
 	 * @param ids The IDs of the data entries to delete
+	 * @param model The model performing the request
 	 */
-	async deleteMultiple(ids: string[]): Promise<void> {
-		void (await Promise.all(ids.map((id) => this.delete(id))));
+	async deleteMultiple(
+		ids: string[],
+		model?: Model<KeyT, PageVisibility, unknown>
+	): Promise<void> {
+		void (await Promise.all(ids.map((id) => this.delete(id, model))));
 	}
 
 	/**
@@ -70,7 +93,10 @@ abstract class Connector<KeyT extends ModelFieldName> {
 	 * @param req The deletion request
 	 * @protected
 	 */
-	public deleteAdvanced?: (req: AdvancedDeleteRequest) => Promise<void>;
+	public deleteAdvanced?: (
+		req: AdvancedDeleteRequest,
+		model?: Model<KeyT, PageVisibility, unknown>
+	) => Promise<void>;
 
 	/**
 	 * DataGrid exporters supported by this backend connector

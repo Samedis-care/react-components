@@ -3,7 +3,11 @@ import { TextFieldProps } from "@material-ui/core";
 import TextFieldWithHelp, {
 	TextFieldWithHelpProps,
 } from "../TextFieldWithHelp";
-import { delocalizeNumber, useGlobalized } from "../../../utils";
+import {
+	parseLocalizedNumber,
+	useGlobalized,
+	useInputCursorFix,
+} from "../../../utils";
 
 export interface DecimalInputFieldProps extends TextFieldWithHelpProps {
 	/**
@@ -26,33 +30,33 @@ const DecimalInputField = (
 ) => {
 	const { value, onChange, ...muiProps } = props;
 	const globalized = useGlobalized();
+	const valueFormatted =
+		value !== null && globalized ? globalized.formatNumber(value) : "";
+	const { handleCursorChange, cursorInputRef } = useInputCursorFix(
+		valueFormatted
+	);
 
 	// on change handling
 	const handleChange = useCallback(
 		(event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
+			handleCursorChange(event);
 			if (!onChange) return;
 
-			const num = delocalizeNumber(event.target.value);
-			if (num !== "") {
-				onChange(event, parseFloat(num));
-			} else {
-				onChange(event, null);
-			}
+			onChange(event, parseLocalizedNumber(event.target.value));
 		},
-		[onChange]
+		[onChange, handleCursorChange]
 	);
 
 	return (
-		<div>
-			<TextFieldWithHelp
-				{...muiProps}
-				value={
-					value !== null && globalized ? globalized.formatNumber(value) : ""
-				}
-				onFocus={handleChange}
-				onChange={handleChange}
-			/>
-		</div>
+		<TextFieldWithHelp
+			{...muiProps}
+			value={valueFormatted}
+			onChange={handleChange}
+			inputProps={{
+				...muiProps.inputProps,
+				ref: cursorInputRef,
+			}}
+		/>
 	);
 };
 

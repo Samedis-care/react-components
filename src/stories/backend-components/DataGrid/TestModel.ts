@@ -8,7 +8,7 @@ import {
 	ModelVisibilityGridViewHidden,
 	PageVisibility,
 } from "../../../backend-integration";
-import TestConnector from "./TestConnector";
+import BackendConnector from "../../backend-integration/BackendConnector";
 
 class TestModel extends Model<ModelFieldName, PageVisibility, null> {
 	constructor() {
@@ -147,7 +147,7 @@ class TestModel extends Model<ModelFieldName, PageVisibility, null> {
 					customData: null,
 				},
 			},
-			new TestConnector()
+			new BackendConnector()
 		);
 	}
 }

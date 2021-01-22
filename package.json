@@ -38,7 +38,7 @@
 		"react-router-dom": "^5.1.0"
 	},
 	"scripts": {
-		"docgen": "typedoc --exclude 'src/stories/**/*.*' --out typedoc",
+		"docgen": "typedoc --exclude 'src/stories/**/*.*' --exclude 'node_modules/**/*.*' --out typedoc",
 		"start": "npm run storybook",
 		"prepare": "npm run build",
 		"prestart": "install-peers -f",

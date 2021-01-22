@@ -1,4 +1,4 @@
-import { CSSProperties } from "react";
+import { DataGridTheme } from "./standalone/DataGrid";
 
 export * from "./standalone";
 
@@ -14,31 +14,15 @@ export { default as ComponentsCareI18n } from "./i18n";
 
 export * from "./utils";
 
+export interface ComponentsCareTheme {
+	dataGrid?: DataGridTheme;
+}
+
 declare module "@material-ui/core/styles/createMuiTheme" {
 	interface Theme {
-		componentsCare?: {
-			dataGrid?: {
-				content?: {
-					headerBackgroundColor?: CSSProperties["backgroundColor"];
-					columnDividerColor?: CSSProperties["borderColor"];
-					backgroundColor?: CSSProperties["backgroundColor"];
-					dividerColor?: CSSProperties["borderColor"];
-					hoverBackgroundColor?: CSSProperties["backgroundColor"];
-				};
-			};
-		};
+		componentsCare?: ComponentsCareTheme;
 	}
 	interface ThemeOptions {
-		componentsCare?: {
-			dataGrid?: {
-				content?: {
-					headerBackgroundColor?: CSSProperties["backgroundColor"];
-					columnDividerColor?: CSSProperties["borderColor"];
-					backgroundColor?: CSSProperties["backgroundColor"];
-					dividerColor?: CSSProperties["borderColor"];
-					hoverBackgroundColor?: CSSProperties["backgroundColor"];
-				};
-			};
-		};
+		componentsCare?: ComponentsCareTheme;
 	}
 }
