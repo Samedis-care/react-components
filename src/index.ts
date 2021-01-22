@@ -1,5 +1,6 @@
 import { DataGridTheme } from "./standalone/DataGrid";
 import { ActionButtonTheme } from "./standalone/UIKit/ActionButton";
+import { CheckboxTheme } from "./standalone/UIKit/Checkbox";
 import { InputTheme } from "./standalone/UIKit/CommonStyles";
 import { FormButtonTheme } from "./standalone/UIKit/FormButtons";
 
@@ -20,6 +21,7 @@ export * from "./utils";
 interface ComponentsCareTheme {
 	dataGrid?: DataGridTheme;
 	uiKit?: {
+		checkbox?: CheckboxTheme;
 		input?: InputTheme;
 		actionButton?: ActionButtonTheme;
 		formButtons?: FormButtonTheme;
