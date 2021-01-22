@@ -13,8 +13,10 @@ import {
 } from "../../standalone/DataGrid";
 
 class LocalStorageConnector<
-	KeyT extends ModelFieldName
-> extends Connector<KeyT> {
+	KeyT extends ModelFieldName,
+	VisibilityT extends PageVisibility,
+	CustomT
+> extends Connector<KeyT, VisibilityT, CustomT> {
 	key: string;
 
 	/**
@@ -30,7 +32,7 @@ class LocalStorageConnector<
 	// eslint-disable-next-line @typescript-eslint/require-await
 	async index(
 		params?: Partial<IDataGridLoadDataParameters>,
-		model?: Model<KeyT, PageVisibility, unknown>
+		model?: Model<KeyT, VisibilityT, CustomT>
 	): Promise<[Record<KeyT, unknown>[], ResponseMeta]> {
 		if (!model) {
 			throw new Error("Can't index: No model specified");
@@ -114,7 +116,7 @@ class LocalStorageConnector<
 
 	deleteAdvanced = async (
 		req: AdvancedDeleteRequest,
-		model?: Model<KeyT, PageVisibility, unknown>
+		model?: Model<KeyT, VisibilityT, CustomT>
 	): Promise<void> => {
 		const [invert, ids, filter] = req;
 		if (!invert) {

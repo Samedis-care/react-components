@@ -24,45 +24,49 @@ First we have to implement our own backend connector, for this we can use the fo
 ```typescript
 import {Connector, ModelFieldName, ResponseMeta} from "components-care";
 
-class BackendConnector<KeyT extends ModelFieldName> extends Connector<KeyT> {
+class BackendConnector<
+  KeyT extends ModelFieldName,
+  VisibilityT extends PageVisibility,
+  CustomT
+  > extends Connector<KeyT, VisibilityT, CustomT> {
     async index(
 		params?: Partial<IDataGridLoadDataParameters>,
-        model?: Model<KeyT, PageVisibility, unknown>    
+        model?: Model<KeyT, VisibilityT, CustomT>    
     ): Promise<[Record<KeyT, unknown>[], ResponseMeta]> {
         throw new Error("Not implemented");
     }
 
     async create(
         data: Record<string, unknown>,
-        model?: Model<KeyT, PageVisibility, unknown>
+        model?: Model<KeyT, VisibilityT, CustomT>
     ): Promise<Record<KeyT, unknown>> {
         throw new Error("Not implemented");
     }
 
     async read(
       id: string,
-      model?: Model<KeyT, PageVisibility, unknown>
+      model?: Model<KeyT, VisibilityT, CustomT>
     ): Promise<Record<KeyT, unknown>> {
         throw new Error("Not implemented");
     }
 
     async update(
         data: Record<ModelFieldName, unknown>,
-        model?: Model<KeyT, PageVisibility, unknown>
+        model?: Model<KeyT, VisibilityT, CustomT>
     ): Promise<Record<KeyT, unknown>> {
         throw new Error("Not implemented");
     }
 
     async delete(
       id: string,
-      model?: Model<KeyT, PageVisibility, unknown>
+      model?: Model<KeyT, VisibilityT, CustomT>
     ): Promise<void> {
         throw new Error("Not implemented");
     }
 /* Only implement if your backend can handle multiple deletes in one request
 	async deleteMultiple(
 	  ids: string[],
-	  model?: Model<KeyT, PageVisibility, unknown>
+	  model?: Model<KeyT, VisibilityT, CustomT>
     ): Promise<void> {
 		return super.deleteMultiple(ids);
 	}
@@ -70,7 +74,7 @@ class BackendConnector<KeyT extends ModelFieldName> extends Connector<KeyT> {
 /* Only implement if your backend can handle delete all requests
 	deleteAdvanced = async (
 	  req: AdvancedDeleteRequest,
-	  model?: Model<KeyT, PageVisibility, unknown>
+	  model?: Model<KeyT, VisibilityT, CustomT>
 	) => {
         throw new Error("Not implemented");
     };
