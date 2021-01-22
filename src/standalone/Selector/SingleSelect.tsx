@@ -1,14 +1,13 @@
+import { Paper } from "@material-ui/core";
 import React from "react";
-import Selector, { SelectorData, SelectorPropsSingleSelect } from "./Selector";
+import BaseSelector, { BaseSelectorProps } from "./BaseSelector";
 
-const SingleSelect = <Data extends SelectorData>(
-	props: Omit<SelectorPropsSingleSelect<Data>, "multiSelect">
-) => (
-	<Selector<Data, false>
-		{...props}
-		onSelect={props.onSelect}
-		multiSelect={false}
-	/>
-);
+const SingleSelect = (props: BaseSelectorProps) => {
+	return (
+		<Paper elevation={0}>
+			<BaseSelector {...props} />
+		</Paper>
+	);
+};
 
-export default React.memo(SingleSelect) as typeof SingleSelect;
+export default React.memo(SingleSelect);
