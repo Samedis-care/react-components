@@ -82,7 +82,7 @@ class WeekView extends PureComponent<IProps, IState> {
 				<Grid item xs={4}>
 					<Button onClick={this.today} className={this.props.classes.todayBtn}>
 						{i18n.t("standalone.schedule.today")} (
-						{now.toDate().toLocaleDateString()})
+						{now.toDate().toLocaleDateString(i18n.language)})
 					</Button>
 				</Grid>
 				<Grid item xs={4}>

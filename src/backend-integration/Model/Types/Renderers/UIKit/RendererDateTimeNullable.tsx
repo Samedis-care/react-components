@@ -4,6 +4,7 @@ import { ModelRenderParams } from "../../../index";
 import TypeDateNullable from "../../TypeDateNullable";
 import ccI18n from "../../../../../i18n";
 import { DateTimeInput } from "../../../../../standalone";
+import i18n from "../../../../../i18n";
 
 /**
  * Renders Date with Date Selector
@@ -68,7 +69,7 @@ class RendererDateTimeNullable extends TypeDateNullable {
 			<Typography>
 				{!visibility.grid && `${label}: `}
 				{value
-					? value.toLocaleString()
+					? value.toLocaleString(i18n.language)
 					: ccI18n.t("backend-integration.model.types.renderers.date.not-set")}
 			</Typography>
 		);

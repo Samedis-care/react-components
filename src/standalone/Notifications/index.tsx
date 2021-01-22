@@ -15,6 +15,7 @@ import {
 } from "@material-ui/core";
 import InfiniteScroll, { InfiniteScrollProps } from "../InfiniteScroll";
 import { makeStyles } from "@material-ui/core/styles";
+import i18n from "../../i18n";
 
 export interface Notification {
 	/**
@@ -138,7 +139,9 @@ const defaultRenderer = (notification: Notification): React.ReactElement => (
 								<React.Fragment>
 									{notification.origin && <>{notification.origin} </>}
 								</React.Fragment>
-								<Tooltip title={notification.created.toLocaleString()}>
+								<Tooltip
+									title={notification.created.toLocaleString(i18n.language)}
+								>
 									<span>{ageParser(notification.created)}</span>
 								</Tooltip>
 							</Typography>
