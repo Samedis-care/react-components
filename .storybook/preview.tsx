@@ -17,6 +17,26 @@ const getDefaultTheme = (): ThemeOptions => ({
 	},
 });
 
+/* re-usable colors for our theme */
+const customColors = {
+	white: "#ffffff",
+	primary: {
+		main: "#0869b3",
+		light: "#3987c2",
+	},
+	secondary: {
+		main: "#b9d7f0",
+	},
+};
+/* example for a customized theme per client requirements */
+const getCustomTheme = (): ThemeOptions => ({
+	palette: {
+		type: "light",
+		...customColors,
+	},
+	componentsCare: {},
+});
+
 const loadTheme = (): ThemeOptions => {
 	const themeStr = localStorage.getItem("theme");
 	if (!themeStr) return getDefaultTheme();
@@ -55,6 +75,16 @@ const ThemeSelector = (props: ThemeSelectorProps) => {
 		"Reset",
 		() => {
 			const theme = getDefaultTheme();
+			localStorage.setItem("theme", JSON.stringify(theme));
+			setTheme(theme);
+		},
+		"Theme"
+	);
+
+	button(
+		"Set Custom",
+		() => {
+			const theme = getCustomTheme();
 			localStorage.setItem("theme", JSON.stringify(theme));
 			setTheme(theme);
 		},
