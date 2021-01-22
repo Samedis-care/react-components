@@ -1,5 +1,10 @@
 import React from "react";
-import { TextField, TextFieldProps, IconButton } from "@material-ui/core";
+import {
+	TextField,
+	TextFieldProps,
+	IconButton,
+	InputAdornment,
+} from "@material-ui/core";
 import { Info as InfoIcon } from "@material-ui/icons";
 import { InputLabelConfig, UIInputProps, useInputStyles } from "./CommonStyles";
 
@@ -16,9 +21,11 @@ const TextFieldWithHelp = (props: TextFieldWithHelpProps & TextFieldProps) => {
 			InputProps={{
 				classes: inputClasses,
 				endAdornment: openInfo && (
-					<IconButton onClick={openInfo}>
-						<InfoIcon color={"disabled"} />
-					</IconButton>
+					<InputAdornment position={"end"}>
+						<IconButton onClick={openInfo}>
+							<InfoIcon color={"disabled"} />
+						</IconButton>
+					</InputAdornment>
 				),
 			}}
 			// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment

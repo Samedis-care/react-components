@@ -8,6 +8,7 @@ import {
 import { ConfirmDialog } from "./ConfirmDialog";
 import { InputDialog } from "./InputDialog";
 import { InfoDialog } from "./InfoDialog";
+import i18n from "../../i18n";
 
 /**
  * Shows an awaitable confirm dialog
@@ -54,18 +55,28 @@ export const showInputDialog = async (
 };
 
 /**
- * Shows an awaitable info dialog
+ * Shows an info dialog
  * @param pushDialog The dialog context's (useDialogContext()) pushDialog function
- * @param props The dialog properties
+ * @param props The dialog properties (with buttons optional, defaults to an Okay button)
  */
-export const showInfoDialog = async (
+export const showInfoDialog = (
 	pushDialog: DialogContextType[0],
-	props: IDialogConfigSimple
-): Promise<void> => {
+	props: Omit<IDialogConfigSimple, "buttons"> &
+		Partial<Pick<IDialogConfigSimple, "buttons">>
+): void => {
 	const { title, message, buttons } = props;
-	return new Promise(() => {
-		pushDialog(
-			<InfoDialog title={title} message={message} buttons={buttons} />
-		);
-	});
+	pushDialog(
+		<InfoDialog
+			title={title}
+			message={message}
+			buttons={
+				buttons ?? [
+					{
+						text: i18n.t("non-standalone.dialog.okay"),
+						autoFocus: true,
+					},
+				]
+			}
+		/>
+	);
 };
