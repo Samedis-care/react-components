@@ -20,10 +20,16 @@ import { Loader } from "../index";
 import { debounce, measureText } from "../../utils";
 import { dataGridPrepareFiltersAndSorts } from "./CallbackUtil";
 import { ModelFilterType } from "../../backend-integration/Model";
+import { HEADER_PADDING } from "./Content/ColumnHeader";
 
 export type IDataGridProps = IDataGridHeaderProps &
 	IDataGridColumnProps &
-	IDataGridCallbacks;
+	IDataGridCallbacks & {
+		/**
+		 * Custom styles
+		 */
+		classes?: Partial<ReturnType<typeof useStyles>>;
+	};
 
 export interface DataGridTheme {
 	content?: {
@@ -418,13 +424,128 @@ const useStyles = makeStyles((theme: Theme) => ({
 		borderBottom: `1px solid ${theme.palette.divider}`,
 		position: "relative",
 	},
+	cell: {
+		//borderRight: `1px ${theme.palette.divider} solid`,
+		borderBottom: `1px ${
+			theme.componentsCare?.dataGrid?.content?.dividerColor ??
+			theme.palette.divider
+		} solid`,
+		padding: `0 ${HEADER_PADDING / 2}px`,
+	},
+	headerCell: {
+		borderRight: `1px ${
+			theme.componentsCare?.dataGrid?.content?.columnDividerColor ??
+			theme.palette.divider
+		} solid`,
+		backgroundColor:
+			theme.componentsCare?.dataGrid?.content?.headerBackgroundColor ??
+			theme.palette.background.paper,
+		color: theme.palette.getContrastText(
+			theme.componentsCare?.dataGrid?.content?.headerBackgroundColor ??
+				theme.palette.background.paper
+		),
+	},
+	dataCell: {
+		padding: HEADER_PADDING / 2,
+		backgroundColor:
+			theme.componentsCare?.dataGrid?.content?.backgroundColor ??
+			theme.palette.background.paper,
+		color: theme.palette.getContrastText(
+			theme.componentsCare?.dataGrid?.content?.backgroundColor ??
+				theme.palette.background.paper
+		),
+	},
+	dataCellSelected: {
+		backgroundColor:
+			theme.componentsCare?.dataGrid?.content?.hoverBackgroundColor ??
+			theme.palette.action.hover,
+		color: theme.palette.getContrastText(
+			theme.componentsCare?.dataGrid?.content?.hoverBackgroundColor ??
+				theme.componentsCare?.dataGrid?.content?.backgroundColor ??
+				theme.palette.background.paper
+		),
+	},
+	columnHeaderContentWrapper: {
+		width: "100%",
+		minWidth: "100%",
+		zIndex: 1000,
+	},
+	columnHeaderFilterable: {
+		color: theme.palette.primary.main,
+	},
+	columnHeaderFilterButton: {
+		padding: 0,
+		color: "inherit",
+	},
+	columnHeaderResizer: {
+		cursor: "col-resize",
+		width: 8,
+		height: "100%",
+		right: 0,
+		top: 0,
+		position: "absolute",
+	},
+	columnHeaderFilterPopup: {
+		width: 150,
+	},
+	columnHeaderFilterIcon: {
+		width: 16,
+		height: "auto",
+	},
+	columnHeaderSortIcon: {
+		height: 24,
+	},
+	columnHeaderLabel: {
+		textOverflow: "ellipsis",
+		overflow: "hidden",
+		"&:hover": {
+			pointerEvents: "auto",
+		},
+	},
+	disableClick: {
+		userSelect: "none",
+	},
+	filterBarBox: {
+		height: "100%",
+	},
+	filterBarGrid: {
+		height: `calc(100% + ${theme.spacing(2)}px)`,
+	},
+	setFilterContainer: {
+		maxHeight: "40vh",
+		overflow: "auto",
+	},
+	settingsCollapse: {
+		position: "absolute",
+		zIndex: 2000,
+		width: "100%",
+		maxHeight: "100%",
+		overflow: "auto",
+	},
+	paginationText: {
+		padding: "12px 0",
+	},
+	selectAllCheckbox: {
+		padding: "4px 0",
+	},
+	selectCheckbox: {
+		padding: 0,
+	},
+	settingsPaper: {
+		padding: 16,
+		borderBottom: `1px solid ${theme.palette.divider}`,
+		borderRadius: 8,
+	},
 }));
+export const useDataGridStyles = (): ReturnType<typeof useStyles> => {
+	return useStyles(useDataGridProps());
+};
 
 const DataGrid = (props: IDataGridProps) => {
 	const { columns, loadData, getAdditionalFilters, forceRefreshToken } = props;
 	const rowsPerPage = props.rowsPerPage || 50;
 
-	const classes = useStyles();
+	const classes = useStyles(props);
 	const theme = useTheme();
 	const statePack = useState<IDataGridState>(() =>
 		getDataGridDefaultState(columns)

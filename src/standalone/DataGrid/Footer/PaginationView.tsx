@@ -1,25 +1,7 @@
 import React from "react";
 import { Box, Typography } from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
 import i18n from "../../../i18n";
-
-const useStyles = makeStyles((theme) => ({
-	text: {
-		padding: "12px 0",
-	},
-	firstPageBtn: {
-		paddingLeft: 0,
-	},
-	paginationBtn: {
-		[theme.breakpoints.down("sm")]: {
-			paddingLeft: 4,
-			paddingRight: 4,
-		},
-	},
-	vertDivWrapper: {
-		height: "100%",
-	},
-}));
+import { useDataGridStyles } from "../index";
 
 export interface IDataGridPaginationViewProps {
 	/**
@@ -33,11 +15,11 @@ export interface IDataGridPaginationViewProps {
 }
 
 const PaginationView = (props: IDataGridPaginationViewProps) => {
-	const classes = useStyles();
+	const classes = useDataGridStyles();
 
 	return (
 		<Box mx={2}>
-			<Typography className={classes.text}>
+			<Typography className={classes.paginationText}>
 				{props.rowsFiltered !== null &&
 					props.rowsFiltered !== props.rowsTotal &&
 					`${i18n.t("standalone.data-grid.footer.filtered")} ${

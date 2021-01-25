@@ -65,7 +65,7 @@ const MultiSelect = (props: MultiSelectProps) => {
 		defaultOptions,
 		classes,
 	} = props;
-	const multiSelectClasses = useStyles();
+	const multiSelectClasses = useStyles(props);
 	const defaultMultiSelectClasses = useSelectorStyles();
 	const multiSelectStyles = classes
 		? combineClassMaps<AutocompleteClassKey>(defaultMultiSelectClasses, classes)

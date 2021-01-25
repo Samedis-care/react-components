@@ -5,10 +5,10 @@ import {
 	useDataGridColumnState,
 	useDataGridColumnsWidthState,
 	useDataGridRootRef,
+	useDataGridStyles,
 } from "../index";
 import ColumnHeaderContent from "./ColumnHeaderContent";
 import { IFilterDef } from "./FilterEntry";
-import { makeStyles } from "@material-ui/core/styles";
 
 export interface IDataGridContentColumnHeaderProps {
 	/**
@@ -19,17 +19,6 @@ export interface IDataGridContentColumnHeaderProps {
 
 export const HEADER_PADDING = 32; // px
 
-const useStyles = makeStyles((theme) => ({
-	contentWrapper: {
-		width: "100%",
-		minWidth: "100%",
-		zIndex: 1000,
-	},
-	filterableStyles: {
-		color: theme.palette.primary.main,
-	},
-}));
-
 const ColumnHeader = (props: IDataGridContentColumnHeaderProps) => {
 	const { column } = props;
 	const { field, sortable, filterable } = column;
@@ -39,7 +28,7 @@ const ColumnHeader = (props: IDataGridContentColumnHeaderProps) => {
 	const [, setColumnWidthState] = useDataGridColumnsWidthState();
 	const headerRef = useRef<HTMLDivElement>(null);
 	const [dragging, setDragging] = useState(false);
-	const classes = useStyles();
+	const classes = useDataGridStyles();
 
 	const onFilterChange = useCallback(
 		(field: string, newFilter: IFilterDef) => {
@@ -171,8 +160,8 @@ const ColumnHeader = (props: IDataGridContentColumnHeaderProps) => {
 		<div
 			onClick={onColumnClick}
 			className={
-				classes.contentWrapper +
-				(filterable ? " " + classes.filterableStyles : "")
+				classes.columnHeaderContentWrapper +
+				(filterable ? " " + classes.columnHeaderFilterable : "")
 			}
 			ref={headerRef}
 		>

@@ -1,21 +1,14 @@
 import React, { ChangeEvent, useCallback } from "react";
 import { Collapse } from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
-import { IDataGridColumnProps, useDataGridState } from "../index";
+import {
+	IDataGridColumnProps,
+	useDataGridState,
+	useDataGridStyles,
+} from "../index";
 import Dialog from "./SettingsDialog";
 
-const useStyles = makeStyles({
-	collapse: {
-		position: "absolute",
-		zIndex: 2000,
-		width: "100%",
-		maxHeight: "100%",
-		overflow: "auto",
-	},
-});
-
 const DataGridSettings = (props: IDataGridColumnProps) => {
-	const classes = useStyles();
+	const classes = useDataGridStyles();
 
 	const [state, setState] = useDataGridState();
 
@@ -51,7 +44,7 @@ const DataGridSettings = (props: IDataGridColumnProps) => {
 	);
 
 	return (
-		<Collapse className={classes.collapse} in={state.showSettings}>
+		<Collapse className={classes.settingsCollapse} in={state.showSettings}>
 			<Dialog
 				columns={props.columns}
 				closeGridSettings={closeGridSettings}

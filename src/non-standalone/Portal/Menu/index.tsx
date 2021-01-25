@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { MenuBase } from "../../..";
 import {
 	IMenuItemDefinition,
-	IMenuProps,
+	MenuProps,
 } from "../../../standalone/Portal/Menu";
 import { FrameworkHistory } from "../../../framework";
 import { useLocation } from "react-router-dom";
@@ -24,7 +24,7 @@ export interface IRoutedMenuItemDefinition
 }
 
 export interface IRoutedMenuProps
-	extends Omit<IMenuProps, "definition" | "customState"> {
+	extends Omit<MenuProps, "definition" | "customState"> {
 	/**
 	 * The menu definition (with routing support)
 	 */

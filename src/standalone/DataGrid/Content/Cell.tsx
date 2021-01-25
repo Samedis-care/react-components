@@ -1,9 +1,12 @@
-import { IDataGridColumnDef, useDataGridState } from "../index";
+import {
+	IDataGridColumnDef,
+	useDataGridState,
+	useDataGridStyles,
+} from "../index";
 import React, { Dispatch, SetStateAction, useCallback } from "react";
 import { GridCellProps } from "react-virtualized/dist/es/Grid";
-import ColumnHeader, { HEADER_PADDING } from "./ColumnHeader";
+import ColumnHeader from "./ColumnHeader";
 import SelectRow, { isSelected } from "./SelectRow";
-import { makeStyles } from "@material-ui/core/styles";
 import { Skeleton } from "@material-ui/lab";
 
 export interface CellProps extends GridCellProps {
@@ -17,52 +20,8 @@ export interface CellProps extends GridCellProps {
 	hoverState: [number | null, Dispatch<SetStateAction<number | null>>];
 }
 
-const useStyles = makeStyles((theme) => ({
-	cell: {
-		//borderRight: `1px ${theme.palette.divider} solid`,
-		borderBottom: `1px ${
-			theme.componentsCare?.dataGrid?.content?.dividerColor ??
-			theme.palette.divider
-		} solid`,
-		padding: `0 ${HEADER_PADDING / 2}px`,
-	},
-	headerCell: {
-		borderRight: `1px ${
-			theme.componentsCare?.dataGrid?.content?.columnDividerColor ??
-			theme.palette.divider
-		} solid`,
-		backgroundColor:
-			theme.componentsCare?.dataGrid?.content?.headerBackgroundColor ??
-			theme.palette.background.paper,
-		color: theme.palette.getContrastText(
-			theme.componentsCare?.dataGrid?.content?.headerBackgroundColor ??
-				theme.palette.background.paper
-		),
-	},
-	dataCell: {
-		padding: HEADER_PADDING / 2,
-		backgroundColor:
-			theme.componentsCare?.dataGrid?.content?.backgroundColor ??
-			theme.palette.background.paper,
-		color: theme.palette.getContrastText(
-			theme.componentsCare?.dataGrid?.content?.backgroundColor ??
-				theme.palette.background.paper
-		),
-	},
-	dataCellSelected: {
-		backgroundColor:
-			theme.componentsCare?.dataGrid?.content?.hoverBackgroundColor ??
-			theme.palette.action.hover,
-		color: theme.palette.getContrastText(
-			theme.componentsCare?.dataGrid?.content?.hoverBackgroundColor ??
-				theme.componentsCare?.dataGrid?.content?.backgroundColor ??
-				theme.palette.background.paper
-		),
-	},
-}));
-
 const Cell = (props: CellProps): React.ReactElement => {
-	const classes = useStyles();
+	const classes = useDataGridStyles();
 	const { columns, columnIndex, rowIndex } = props;
 	const [state, setState] = useDataGridState();
 	const [hover, setHover] = props.hoverState;

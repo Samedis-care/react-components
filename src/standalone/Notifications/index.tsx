@@ -74,6 +74,10 @@ export interface NotificationsProps {
 	 * Event handler which fires when the user opens the notifications
 	 */
 	onOpen?: React.EventHandler<React.MouseEvent<HTMLButtonElement>>;
+	/**
+	 * Custom styles
+	 */
+	classes?: Partial<ReturnType<typeof useStyles>>;
 }
 
 const anchorOrigin: PopoverOrigin = {
@@ -164,7 +168,7 @@ const useStyles = makeStyles({
 });
 
 const Notifications = (props: NotificationsProps) => {
-	const classes = useStyles();
+	const classes = useStyles(props);
 
 	const [anchor, setAnchor] = useState<HTMLElement | null>(null);
 	const { onOpen } = props;

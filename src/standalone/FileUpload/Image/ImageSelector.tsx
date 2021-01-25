@@ -50,6 +50,10 @@ export interface ImageSelectorProps {
 	 * Settings to downscale an image
 	 */
 	downscale?: IDownscaleProps;
+	/**
+	 * Custom styles
+	 */
+	classes?: Partial<ReturnType<typeof useStyles>>;
 }
 
 const useStyles = makeStyles({
@@ -64,7 +68,7 @@ const useStyles = makeStyles({
 
 const ImageSelector = (props: ImageSelectorProps) => {
 	const { convertImagesTo, downscale, value, readOnly } = props;
-	const classes = useStyles();
+	const classes = useStyles(props);
 	const changeRef = useRef<HTMLInputElement>(null);
 
 	const processFile = useCallback(

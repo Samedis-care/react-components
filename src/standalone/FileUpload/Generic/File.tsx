@@ -13,7 +13,7 @@ import {
 } from "../FileIcons";
 import { getFileExt } from "../../../utils";
 
-export interface IProps {
+export interface FileProps {
 	/**
 	 * The file name, including extension
 	 */
@@ -38,6 +38,10 @@ export interface IProps {
 	 * The download link to open if the file is clicked
 	 */
 	downloadLink?: string;
+	/**
+	 * Custom styles
+	 */
+	classes?: Partial<ReturnType<typeof useStyles>>;
 }
 
 const useStyles = makeStyles((theme) => ({
@@ -104,9 +108,9 @@ const PowerPointFileExtensions = [
 
 const PdfFileExtensions = ["pdf"];
 
-const File = (props: IProps) => {
+const File = (props: FileProps) => {
 	const { downloadLink } = props;
-	const classes = useStyles();
+	const classes = useStyles(props);
 
 	const fileExt = getFileExt(props.name);
 	const FileIcon = ExcelFileExtensions.includes(fileExt)

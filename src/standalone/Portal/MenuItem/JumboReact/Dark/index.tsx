@@ -1,5 +1,5 @@
 import React from "react";
-import { IMenuItemProps } from "../../../Menu";
+import { MenuItemProps } from "../../../Menu";
 import {
 	ListItem,
 	ListItemIcon,
@@ -75,7 +75,7 @@ const StyledListItemIcon = withStyles(listIconStyles)(ListItemIcon);
 
 const typographyProps: TypographyProps = { variant: "body2" };
 
-const MenuItemJumboReactDark = (props: IMenuItemProps) => {
+const MenuItemJumboReactDark = (props: MenuItemProps) => {
 	const classes = useStyles();
 
 	const Icon = props.icon;

@@ -16,7 +16,7 @@ export interface FormButtonTheme {
 		border?: CSSProperties["border"];
 		borderRadius?: CSSProperties["borderRadius"];
 		backgroundColor?: CSSProperties["backgroundColor"];
-		backgroundColorOpacity?: CSSProperties["opacity"];
+		backgroundColorOpacity?: number;
 		style?: CSSProperties;
 	};
 }
@@ -58,10 +58,14 @@ export interface FormButtonsProps {
 	 * Action buttons (used on form)
 	 */
 	children: NonNullable<React.ReactNode[]>;
+	/**
+	 * Custom styles
+	 */
+	classes?: Partial<ReturnType<typeof useStyles>>;
 }
 
 const FormButtons = (props: FormButtonsProps) => {
-	const classes = useStyles();
+	const classes = useStyles(props);
 	const children =
 		"length" in props.children ? props.children : [props.children];
 

@@ -4,8 +4,8 @@ import {
 	DataGridCustomDataType,
 	useDataGridProps,
 	useDataGridState,
+	useDataGridStyles,
 } from "../index";
-import { makeStyles } from "@material-ui/core/styles";
 
 export interface IDataGridFilterBarProps {
 	/**
@@ -18,19 +18,10 @@ export interface IDataGridFilterBarProps {
 	setCustomData: Dispatch<SetStateAction<DataGridCustomDataType>>;
 }
 
-const useStyles = makeStyles((theme) => ({
-	box: {
-		height: "100%",
-	},
-	grid: {
-		height: `calc(100% + ${theme.spacing(2)}px)`,
-	},
-}));
-
 const FilterBar = () => {
 	const props = useDataGridProps();
 	const [state, setState] = useDataGridState();
-	const classes = useStyles();
+	const classes = useDataGridStyles();
 
 	const setCustomData = useCallback(
 		(
@@ -56,13 +47,13 @@ const FilterBar = () => {
 	const FilterBarView = props.filterBar;
 
 	return (
-		<Box ml={4} className={classes.box}>
+		<Box ml={4} className={classes.filterBarBox}>
 			<Grid
 				container
 				alignItems={"center"}
 				justify={"flex-end"}
 				spacing={2}
-				className={classes.grid}
+				className={classes.filterBarGrid}
 			>
 				{FilterBarView && (
 					<FilterBarView

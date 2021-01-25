@@ -9,15 +9,14 @@ import {
 } from "@material-ui/core";
 import { ArrowDownward, ArrowUpward } from "@material-ui/icons";
 import FilterIcon from "../../Icons/FilterIcon";
-import { makeStyles } from "@material-ui/core/styles";
 import FilterEntry, { IFilterDef } from "./FilterEntry";
 import i18n from "../../../i18n";
 import { ModelFilterType } from "../../../backend-integration/Model";
-import { IDataGridColumnDef } from "../index";
+import { IDataGridColumnDef, useDataGridStyles } from "../index";
 
 export interface IDataGridContentColumnHeaderContentProps {
 	/**
-	 * The header label
+	 * The header columnHeaderLabel
 	 */
 	headerName: string;
 	/**
@@ -63,41 +62,6 @@ export interface IDataGridContentColumnHeaderContentProps {
 	filterData: IDataGridColumnDef["filterData"];
 }
 
-const useStyles = makeStyles({
-	filterButton: {
-		padding: 0,
-		color: "inherit",
-	},
-	resizer: {
-		cursor: "col-resize",
-		width: 8,
-		height: "100%",
-		right: 0,
-		top: 0,
-		position: "absolute",
-	},
-	filterPopup: {
-		width: 150,
-	},
-	filterIcon: {
-		width: 16,
-		height: "auto",
-	},
-	sortIcon: {
-		height: 24,
-	},
-	label: {
-		textOverflow: "ellipsis",
-		overflow: "hidden",
-		"&:hover": {
-			pointerEvents: "auto",
-		},
-	},
-	disableClick: {
-		userSelect: "none",
-	},
-});
-
 const anchorOrigin: PopoverOrigin = {
 	vertical: "bottom",
 	horizontal: "center",
@@ -111,7 +75,7 @@ const transformOrigin: PopoverOrigin = {
 const ColumnHeaderContent = (
 	props: IDataGridContentColumnHeaderContentProps
 ) => {
-	const classes = useStyles();
+	const classes = useDataGridStyles();
 	const [filterAnchorEl, setFilterAnchorEl] = useState<HTMLElement | null>(
 		null
 	);
@@ -136,14 +100,14 @@ const ColumnHeaderContent = (
 			<Grid container justify={"flex-start"} wrap={"nowrap"}>
 				<Grid
 					item
-					className={`${classes.disableClick} ${classes.label}`}
+					className={`${classes.disableClick} ${classes.columnHeaderLabel}`}
 					key={"header"}
 				>
 					<Tooltip title={props.headerName}>
 						<span>{props.headerName}</span>
 					</Tooltip>
 				</Grid>
-				<Grid item className={classes.sortIcon}>
+				<Grid item className={classes.columnHeaderSortIcon}>
 					{props.sort === -1 && <ArrowDownward />}
 					{props.sort === 1 && <ArrowUpward />}
 				</Grid>
@@ -155,8 +119,11 @@ const ColumnHeaderContent = (
 						<Tooltip
 							title={i18n.t("standalone.data-grid.content.filter") || ""}
 						>
-							<IconButton className={classes.filterButton} onClick={openFilter}>
-								<FilterIcon className={classes.filterIcon} />
+							<IconButton
+								className={classes.columnHeaderFilterButton}
+								onClick={openFilter}
+							>
+								<FilterIcon className={classes.columnHeaderFilterIcon} />
 							</IconButton>
 						</Tooltip>
 					</Grid>
@@ -164,7 +131,7 @@ const ColumnHeaderContent = (
 			</Grid>
 			{props.enableResize && (
 				<div
-					className={classes.resizer}
+					className={classes.columnHeaderResizer}
 					onMouseDown={props.startDrag}
 					onClick={preventPropagation}
 					onDoubleClick={props.autoResize}
@@ -180,7 +147,7 @@ const ColumnHeaderContent = (
 				onClick={preventPropagation}
 			>
 				<Box m={2}>
-					<Grid container className={classes.filterPopup}>
+					<Grid container className={classes.columnHeaderFilterPopup}>
 						<FilterEntry
 							valueType={props.columnType}
 							onChange={props.onFilterChange}

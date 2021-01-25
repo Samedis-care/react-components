@@ -58,8 +58,8 @@ interface PortalLayoutPropsBase {
 	/**
 	 * CSS Styles to apply
 	 */
-	classes?: {
-		header?: PortalLayoutHeaderProps["classes"];
+	customClasses?: {
+		header?: PortalLayoutHeaderProps["customClasses"];
 	};
 }
 
@@ -159,7 +159,7 @@ const RenderLayout = (props: PortalLayoutProps & IRenderProps) => {
 					contents={headerContent}
 					toggleMenu={toggleMenu}
 					mobile={mobile}
-					classes={props.classes?.header}
+					customClasses={props.customClasses?.header}
 				/>
 			</div>
 			<div className={classes.menu}>

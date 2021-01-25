@@ -82,13 +82,17 @@ interface InfoBoxProps {
 		event: React.ChangeEvent<Record<string, unknown>>,
 		expanded: boolean
 	) => void;
+	/**
+	 * Custom styles
+	 */
+	classes?: Partial<ReturnType<typeof useStyles>>;
 }
 // .MuiAccordionSummary-content.Mui-expanded => margin => unset
 // .MuiAccordionSummary-root.Mui-expanded => min-height => unset
 const InfoBox = (props: InfoBoxProps) => {
 	const { heading, onChange, expanded, alwaysExpanded, message } = props;
 
-	const classes = useStyles();
+	const classes = useStyles(props);
 
 	return (
 		<Accordion
