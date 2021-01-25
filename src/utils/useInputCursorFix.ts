@@ -34,7 +34,7 @@ const useInputCursorFix = (newValue: string): InputCursorFixHook => {
 		if (inputRef.current && cursor) {
 			const { current } = inputRef;
 			const lenDiff = newValue.length - prevValue.length;
-			const curOffset = lenDiff - 1;
+			const curOffset = lenDiff - 1 < 0 ? 0 : lenDiff - 1;
 			current.selectionStart =
 				cursor[0] === null ? null : cursor[0] + curOffset;
 			current.selectionEnd = cursor[1] === null ? null : cursor[1] + curOffset;
