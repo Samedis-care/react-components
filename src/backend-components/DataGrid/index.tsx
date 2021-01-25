@@ -1,12 +1,10 @@
 import React, { useCallback, useState } from "react";
 import DataGrid, {
 	DataGridData,
-	IDataGridColumnDef,
 	IDataGridLoadDataParameters,
 	IDataGridProps,
 } from "../../standalone/DataGrid";
 import Model, {
-	ModelFieldDefinition,
 	ModelFieldName,
 	PageVisibility,
 } from "../../backend-integration/Model/Model";
@@ -120,7 +118,10 @@ const BackendDataGrid = <
 		async (
 			invert: boolean,
 			ids: string[],
-			filter?: Partial<IDataGridLoadDataParameters>
+			filter?: Pick<
+				IDataGridLoadDataParameters,
+				"quickFilter" | "additionalFilters" | "fieldFilter"
+			>
 		) => {
 			try {
 				await showConfirmDialog(pushDialog, {
@@ -175,40 +176,12 @@ const BackendDataGrid = <
 		[enableDeleteAll, deleteAdvanced, deleteMultiple, pushDialog]
 	);
 
-	const columns: IDataGridColumnDef[] = Object.entries(model.fields)
-		.filter(
-			(entry) =>
-				!(entry[1] as ModelFieldDefinition<
-					unknown,
-					KeyT,
-					VisibilityT,
-					CustomDataT
-				>).visibility.overview.disabled
-		)
-		.map((entry) => {
-			const key = entry[0];
-			const value = entry[1] as ModelFieldDefinition<
-				unknown,
-				KeyT,
-				VisibilityT,
-				CustomDataT
-			>;
-			return {
-				field: key,
-				headerName: value.getLabel(),
-				type: value.type.getFilterType(),
-				hidden: value.visibility.overview.hidden,
-				filterable: value.filterable,
-				sortable: value.sortable,
-			};
-		});
-
 	return (
 		<DataGrid
 			{...props}
 			onDelete={enableDelete ? handleDelete : undefined}
 			loadData={loadData}
-			columns={columns}
+			columns={model.toDataGridColumnDefinition()}
 			forceRefreshToken={`${
 				props.forceRefreshToken || "undefined"
 			}${refreshToken}`}

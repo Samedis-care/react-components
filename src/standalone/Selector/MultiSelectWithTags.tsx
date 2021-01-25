@@ -16,10 +16,9 @@ import {
 	Info as InfoIcon,
 	Cancel as RemoveIcon,
 } from "@material-ui/icons";
-import SingleSelect, {
-	SelectorData,
-	SelectorPropsSingleSelect,
-} from "./Selector";
+import { SingleSelect } from "../../standalone/Selector";
+import { BaseSelectorData, BaseSelectorProps } from "./BaseSelector";
+
 import TextFieldWithHelp, {
 	TextFieldWithHelpProps,
 } from "../UIKit/TextFieldWithHelp";
@@ -27,7 +26,7 @@ import { SmallIconButton, SmallListItemIcon } from "../Small";
 import { GenericWithStyles } from "../../utils";
 import { uniqueArray } from "../../utils";
 
-export interface MultiSelectData extends SelectorData {
+export interface MultiSelectData extends BaseSelectorData {
 	/**
 	 * Item type value
 	 */
@@ -75,7 +74,7 @@ export type MultiSelectWithTagsSwitchProps =
 
 export interface MultiSelectWithTagsProps<Data extends MultiSelectData>
 	extends Omit<
-		SelectorPropsSingleSelect<Data>,
+		BaseSelectorProps,
 		"multiSelect" | "clearable" | "onSelect" | "selected"
 	> {
 	/**
@@ -87,13 +86,17 @@ export interface MultiSelectWithTagsProps<Data extends MultiSelectData>
 	 * Extended group selection change handler
 	 * @param data The selected data entry
 	 */
-	onGroupSelect?: (value: SelectorData | null) => void;
+	onGroupSelect?: (value: BaseSelectorData | null) => void;
 	/**
 	 * The title of control
 	 */
 	title: string;
 	/**
 	 * Data for group selector
+	 */
+	defaultGroups: Data[];
+	/**
+	 * Data for autocomplete selector
 	 */
 	defaultData: Data[];
 	/**
@@ -115,7 +118,7 @@ export interface MultiSelectWithTagsProps<Data extends MultiSelectData>
 	/**
 	 * The currently selected groups
 	 */
-	selectedGroup: SelectorData | null;
+	selectedGroup: BaseSelectorData | null;
 	/**
 	 * Callback method on group selection load
 	 */
@@ -206,6 +209,7 @@ const MultiSelectWithTags = <Data extends MultiSelectData>(
 		searchInputLabel,
 		onSelect,
 		selected,
+		defaultGroups,
 		defaultData,
 		filteredData,
 		setFilteredData,
@@ -214,7 +218,7 @@ const MultiSelectWithTags = <Data extends MultiSelectData>(
 		onGroupSelect,
 		selectedGroup,
 		enableIcons,
-		disable,
+		disabled,
 		classes,
 		displaySwitch,
 		handleAutoComplete,
@@ -230,7 +234,7 @@ const MultiSelectWithTags = <Data extends MultiSelectData>(
 	) as Data[];
 
 	const handleGroupSelect = useCallback(
-		(selectedGroup: SelectorData | null) => {
+		(selectedGroup: BaseSelectorData | null) => {
 			if (onGroupSelect) onGroupSelect(selectedGroup);
 			if (selectedGroup !== null) {
 				const records = defaultData.filter(
@@ -322,12 +326,16 @@ const MultiSelectWithTags = <Data extends MultiSelectData>(
 		<Typography component="div">
 			<Typography component="label">{title}</Typography>
 			<SingleSelect
+				autocompleteId={
+					props.autocompleteId
+						? props.autocompleteId + "-single-select"
+						: undefined
+				}
 				selected={selectedGroup}
 				onSelect={handleGroupSelect}
 				onLoad={groupSelectLoadHandler}
-				clearable={true}
-				disable={disable}
-				multiSelect={false}
+				defaultOptions={defaultGroups}
+				disabled={disabled}
 			/>
 			<Typography component="div" className={classes.labelWithSwitch}>
 				{displaySwitch && (
@@ -355,7 +363,7 @@ const MultiSelectWithTags = <Data extends MultiSelectData>(
 				freeSolo
 				autoComplete
 				disableClearable
-				disabled={disable}
+				disabled={disabled}
 				options={filteredData}
 				getOptionLabel={(option: Data) => option.label}
 				onChange={(_event, selectedValue) =>
@@ -386,11 +394,11 @@ const MultiSelectWithTags = <Data extends MultiSelectData>(
 								<SmallListItemIcon>{data.icon}</SmallListItemIcon>
 							)}
 							<span>{data.label}</span>
-							{!disable && (
+							{!disabled && (
 								<SmallIconButton
 									edge={"end"}
 									name={data.value}
-									disabled={disable}
+									disabled={disabled}
 									onClick={handleDelete}
 								>
 									<RemoveIcon />

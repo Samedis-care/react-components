@@ -3,18 +3,34 @@ import React, {
 	Dispatch,
 	SetStateAction,
 	useCallback,
+	useContext,
+	useMemo,
 	useState,
 } from "react";
-import Header from "./Header";
+import Header, { PortalLayoutHeaderProps } from "./Header";
 import Menu from "./Menu";
 import { makeStyles } from "@material-ui/core/styles";
 import { Hidden, useMediaQuery } from "@material-ui/core";
 
-export interface PortalLayoutProps {
+interface PortalLayoutBasic {
+	/**
+	 * Basic Layout
+	 */
+	variant: "basic";
 	/**
 	 * Content displayed on the top-left corner of the screen
 	 */
 	topLeft: React.ReactNode;
+}
+
+interface PortalLayoutNoTopLeft {
+	/**
+	 * Layout with only Header, Menu and Content
+	 */
+	variant: "no-top-left";
+}
+
+interface PortalLayoutPropsBase {
 	/**
 	 * Content displayed inside the header
 	 */
@@ -30,7 +46,7 @@ export interface PortalLayoutProps {
 	/**
 	 * The width of the menu area
 	 */
-	drawerWidth: number;
+	drawerWidth?: number;
 	/**
 	 * Should we collapse the menu? (forces mobile view)
 	 */
@@ -39,6 +55,12 @@ export interface PortalLayoutProps {
 	 * Media query which forces mobile view if true
 	 */
 	mobileViewCondition?: string;
+	/**
+	 * CSS Styles to apply
+	 */
+	classes?: {
+		header?: PortalLayoutHeaderProps["classes"];
+	};
 }
 
 interface IRenderProps {
@@ -48,19 +70,29 @@ interface IRenderProps {
 	mobile: boolean;
 }
 
+export type PortalLayoutProps = PortalLayoutPropsBase &
+	(PortalLayoutBasic | PortalLayoutNoTopLeft);
+
 const useContainerStyles = makeStyles(() => ({
 	containerDesktop: (props: PortalLayoutProps) => ({
 		display: "grid",
-		gridTemplateAreas: `"top-left top" "sidebar main"`,
+		gridTemplateAreas:
+			props.variant === "basic"
+				? `"top-left top" "sidebar main"`
+				: `"top top" "sidebar main"`,
 		gridTemplateRows: "max-content 100fr",
-		gridTemplateColumns: `${props.drawerWidth}px 100fr`,
+		gridTemplateColumns: `${
+			props.drawerWidth ? `${props.drawerWidth}px` : "max-content"
+		} 100fr`,
 		height: "100%",
 	}),
 	containerMobile: (props: PortalLayoutProps) => ({
 		display: "grid",
 		gridTemplateAreas: `"top top" "main main"`,
 		gridTemplateRows: "max-content 100fr",
-		gridTemplateColumns: `${props.drawerWidth}px 100fr`,
+		gridTemplateColumns: `${
+			props.drawerWidth ? `${props.drawerWidth}px` : "max-content"
+		} 100fr`,
 		height: "100%",
 	}),
 }));
@@ -83,47 +115,71 @@ const useStyles = makeStyles({
 	},
 });
 
-export const PortalLayoutMenuContext = createContext<
-	[boolean, Dispatch<SetStateAction<boolean>>] | undefined
+export interface PortalLayoutContextType {
+	mobile: boolean;
+	menuOpen: boolean;
+	setMenuOpen: Dispatch<SetStateAction<boolean>>;
+}
+
+export const PortalLayoutContext = createContext<
+	PortalLayoutContextType | undefined
 >(undefined);
 
+export const usePortalLayoutContext = (): PortalLayoutContextType => {
+	const ctx = useContext(PortalLayoutContext);
+	if (!ctx) throw new Error("PortalLayoutContext not set");
+	return ctx;
+};
+
 const RenderLayout = (props: PortalLayoutProps & IRenderProps) => {
-	const menuState = useState(false);
-	const [menuOpen, setMenuOpen] = menuState;
+	const { mobile, headerContent, drawerWidth, menuContent, content } = props;
+	const [menuOpen, setMenuOpen] = useState(false);
 
 	const toggleMenu = useCallback(() => setMenuOpen((prevState) => !prevState), [
 		setMenuOpen,
 	]);
 	const classes = useStyles(props);
 
+	const portalContext = useMemo(
+		() => ({
+			mobile,
+			menuOpen,
+			setMenuOpen,
+		}),
+		[mobile, menuOpen, setMenuOpen]
+	);
+
 	return (
-		<PortalLayoutMenuContext.Provider value={menuState}>
-			{!props.mobile && <div className={classes.topLeft}>{props.topLeft}</div>}
+		<PortalLayoutContext.Provider value={portalContext}>
+			{!props.mobile && props.variant === "basic" && (
+				<div className={classes.topLeft}>{props.topLeft}</div>
+			)}
 			<div className={classes.header}>
 				<Header
-					contents={props.headerContent}
+					contents={headerContent}
 					toggleMenu={toggleMenu}
-					mobile={props.mobile}
+					mobile={mobile}
+					classes={props.classes?.header}
 				/>
 			</div>
 			<div className={classes.menu}>
 				<Menu
 					menuOpen={menuOpen}
-					drawerWidth={props.drawerWidth}
+					drawerWidth={drawerWidth}
 					toggleMenu={toggleMenu}
-					mobile={props.mobile}
+					mobile={mobile}
 					items={
 						<>
-							{props.mobile && (
+							{mobile && props.variant === "basic" && (
 								<div className={classes.mobileTopLeft}>{props.topLeft}</div>
 							)}
-							{props.menuContent}
+							{menuContent}
 						</>
 					}
 				/>
 			</div>
-			<div className={classes.main}>{props.content}</div>
-		</PortalLayoutMenuContext.Provider>
+			<div className={classes.main}>{content}</div>
+		</PortalLayoutContext.Provider>
 	);
 };
 

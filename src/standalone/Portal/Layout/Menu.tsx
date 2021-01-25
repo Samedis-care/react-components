@@ -14,7 +14,7 @@ interface IProps {
 	/**
 	 * The width of the menu
 	 */
-	drawerWidth: number;
+	drawerWidth?: number;
 	/**
 	 * Callback to toggle the menu open/closed
 	 */

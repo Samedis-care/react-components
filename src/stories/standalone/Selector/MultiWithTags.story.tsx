@@ -31,19 +31,26 @@ const getDefaultData = (): MySelectorData[] => {
 	);
 };
 
+const getDefaultGroups = (): MySelectorData[] => {
+	return (colourTypeOptions.filter(
+		(e) => e !== undefined
+	) as SelectorData[]).map(enhanceData);
+};
+
 export const SelectorMultiWithTags = (): React.ReactElement => {
 	const [selectedGroups, setGroupSelected] = useState<SelectorData | null>(
 		null
 	);
 	const [selected, setSelected] = useState<MySelectorData[]>([]);
 	const defaultData = getDefaultData();
+	const defaultGroups = getDefaultGroups();
 	const [switchValue, setSwitchValue] = useState<boolean>(false);
 	const loadGroupDataAction = action("onGroupLoad");
 	const loadDataAction = action("onLoad");
 	const onGroupSelectAction = action("onGroupSelect");
 	const onSelectAction = action("onSelect");
 	const onAddNewAction = action("onAddNew");
-	const title = text("Title", "Multi Selector");
+	const title = text("Title", "Multi Selector With Tags");
 	const enableAddNew = boolean("Enable Add New", false);
 	const icons = boolean("Enable Icons", false);
 	const disable = boolean("Disable", false);
@@ -153,6 +160,7 @@ export const SelectorMultiWithTags = (): React.ReactElement => {
 			switchValue={switchValue}
 			handleSwitch={handleSwitch}
 			selectedGroup={selectedGroups}
+			defaultGroups={defaultGroups}
 			onGroupSelect={onGroupSelect}
 			onGroupLoad={loadGroupData}
 			selected={selected}

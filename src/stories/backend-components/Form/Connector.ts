@@ -1,8 +1,15 @@
 import { Connector } from "../../../backend-integration/Connector";
-import { ModelFieldName } from "../../../backend-integration/Model";
-import { ResponseMeta } from "../../../backend-integration/Connector";
+import {
+	ModelFieldName,
+	PageVisibility,
+	ResponseMeta,
+} from "../../../backend-integration";
 
-class FormStoryConnector<KeyT extends ModelFieldName> extends Connector<KeyT> {
+class FormStoryConnector<
+	KeyT extends ModelFieldName,
+	VisibilityT extends PageVisibility,
+	CustomT
+> extends Connector<KeyT, VisibilityT, CustomT> {
 	create(): Promise<Record<KeyT, unknown>> {
 		throw new Error("Unimplemented");
 	}

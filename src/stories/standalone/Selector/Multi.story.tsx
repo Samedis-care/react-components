@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import "../../../i18n";
 import {
 	MultiSelect,
 	MultiSelectorData,
-	SelectorData,
+	BaseSelectorData,
 } from "../../../standalone/Selector";
 import { colourOptions } from "./Data";
 import { action } from "@storybook/addon-actions";
@@ -15,7 +15,7 @@ interface MySelectorData extends MultiSelectorData {
 	id: string;
 }
 
-const enhanceData = (entry: SelectorData): MySelectorData => ({
+const enhanceData = (entry: BaseSelectorData): MySelectorData => ({
 	...entry,
 	onClick: action("onClick: " + entry.label),
 	canUnselect: (evtEntry: MultiSelectorData) => {
@@ -28,27 +28,27 @@ const enhanceData = (entry: SelectorData): MySelectorData => ({
 const getDefaultData = (): MySelectorData[] => {
 	return (["ocean"]
 		.map((entry) => colourOptions.find((color) => color.value === entry))
-		.filter((e) => e !== undefined) as SelectorData[]).map(enhanceData);
+		.filter((e) => e !== undefined) as BaseSelectorData[]).map(enhanceData);
 };
 
 export const SelectorMulti = (): React.ReactElement => {
-	const [selected, setSelected] = useState<MySelectorData[]>(getDefaultData);
+	const [selected, setSelected] = useState<BaseSelectorData[]>(getDefaultData);
 	const loadDataAction = action("onLoad");
 	const onSelectAction = action("onSelect");
 	const onAddNewAction = action("onAddNew");
 	const enableAddNew = boolean("Enable Add New", false);
 	const icons = boolean("Enable Icons", false);
-	const disable = boolean("Disable", false);
+	const disabled = boolean("Disable", false);
 	const customSelectedRenderer = boolean(
 		"Enable Custom Selected Renderer",
 		false
 	);
-	const addNewLabel = text("Add new label", "");
-	const loadingLabel = text("Loading Label", "");
-	const noDataLabel = text("No data Label", "");
-	const placeholderLabel = text("Placeholder Label", "");
+	const addNewLabel = text("Add new label", "Add");
+	const loadingText = text("Loading Text", "Loading..");
+	const noOptionsText = text("No data Label", "No option");
+	const placeholderLabel = text("Placeholder Label", "Select..");
 
-	const loadData = React.useCallback(
+	const loadData = useCallback(
 		(query: string): MySelectorData[] => {
 			loadDataAction(query);
 			return colourOptions
@@ -59,8 +59,9 @@ export const SelectorMulti = (): React.ReactElement => {
 		},
 		[loadDataAction]
 	);
-	const onSelect = React.useCallback(
-		(data: MySelectorData[]) => {
+
+	const onSelect = useCallback(
+		(data: BaseSelectorData[]) => {
 			onSelectAction(data);
 			setSelected(data);
 		},
@@ -71,7 +72,7 @@ export const SelectorMulti = (): React.ReactElement => {
 		<>
 			<CssBaseline />
 			<Box m={2}>
-				<MultiSelect<MySelectorData>
+				<MultiSelect
 					selected={selected}
 					onSelect={onSelect}
 					onLoad={loadData}
@@ -80,11 +81,13 @@ export const SelectorMulti = (): React.ReactElement => {
 					selectedEntryRenderer={
 						customSelectedRenderer ? CustomMultiSelectEntry : undefined
 					}
-					disable={disable}
+					disabled={disabled}
 					addNewLabel={addNewLabel}
-					loadingLabel={loadingLabel}
-					noDataLabel={noDataLabel}
-					placeholderLabel={placeholderLabel}
+					loadingText={loadingText}
+					noOptionsText={noOptionsText}
+					placeholder={placeholderLabel}
+					defaultOptions={colourOptions}
+					autocompleteId={"multi-select"}
 				/>
 			</Box>
 		</>
