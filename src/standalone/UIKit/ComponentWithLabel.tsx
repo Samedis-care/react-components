@@ -10,10 +10,26 @@ import {
 
 export interface ComponentWithLabelProps
 	extends Omit<FormControlLabelProps, "label"> {
+	/**
+	 * The text of the label
+	 */
 	labelText: string;
+	/**
+	 * Label variant
+	 */
 	labelVariant?: TypographyProps["variant"];
+	/**
+	 * Label location
+	 */
 	labelDisplay?: TypographyProps["display"];
+	/**
+	 * Label alignment
+	 */
 	labelAlign?: TypographyProps["align"];
+	/**
+	 * Custom styles
+	 */
+	classes?: Partial<ReturnType<typeof useStyles>>;
 }
 
 export interface ComponentWithLabelTheme {
@@ -47,7 +63,7 @@ const useStyles = makeStyles((theme: Theme) => ({
 const ComponentWithLabel = (
 	props: ComponentWithLabelProps | FormControlLabelProps
 ) => {
-	const classes = useStyles();
+	const classes = useStyles(props);
 
 	let label: FormControlLabelProps["label"];
 

@@ -1,9 +1,9 @@
 import React from "react";
-import { IMenuItemProps } from "../../Menu";
+import { MenuItemProps } from "../../Menu";
 import { ListItem, ListItemIcon, ListItemText } from "@material-ui/core";
 import { ExpandLess, ExpandMore } from "@material-ui/icons";
 
-const MenuItemMaterial = (props: IMenuItemProps) => {
+const MenuItemMaterial = (props: MenuItemProps) => {
 	const Icon = props.icon;
 	return (
 		<ListItem button onClick={props.onClick} selected={props.active}>

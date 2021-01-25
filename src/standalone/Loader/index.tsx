@@ -2,11 +2,15 @@ import React from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import { CircularProgress, Typography } from "@material-ui/core";
 
-export interface ILoaderProps {
+export interface LoaderProps {
 	/**
 	 * Optional status message to show
 	 */
 	text?: string;
+	/**
+	 * Custom styles
+	 */
+	classes?: Partial<ReturnType<typeof useStyles>>;
 }
 
 const useStyles = makeStyles({
@@ -37,8 +41,8 @@ const useStyles = makeStyles({
 	},
 });
 
-const Loader = (props: ILoaderProps) => {
-	const classes = useStyles();
+const Loader = (props: LoaderProps) => {
+	const classes = useStyles(props);
 
 	return (
 		<div className={classes.outerWrapper}>

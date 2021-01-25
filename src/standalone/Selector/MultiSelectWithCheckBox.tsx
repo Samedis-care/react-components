@@ -6,13 +6,14 @@ import {
 	MenuItem,
 	Checkbox,
 	ListItemText,
-	createStyles,
 	makeStyles,
 	Theme,
 	InputBase,
+	SelectClassKey,
 } from "@material-ui/core";
 import { ExpandMore } from "@material-ui/icons";
 import { MultiSelectOption } from "./TypesMultiSelect";
+import { ClassNameMap } from "@material-ui/styles/withStyles";
 
 export interface MultiSelectWithCheckBoxProps extends SelectProps {
 	/**
@@ -23,6 +24,12 @@ export interface MultiSelectWithCheckBoxProps extends SelectProps {
 	 * Selected values
 	 */
 	values: string[];
+	/**
+	 * Custom styles
+	 */
+	classes?: Partial<
+		ClassNameMap<keyof ReturnType<typeof useStyles> | SelectClassKey>
+	>;
 }
 
 const useStyles = makeStyles({
@@ -34,45 +41,39 @@ const useStyles = makeStyles({
 	},
 });
 
-const MenuItemCustom = withStyles(
-	createStyles({
-		selected: {
-			backgroundColor: "white !important",
-			"&:hover": {
-				backgroundColor: "rgba(0, 0, 0, 0.04) !important",
-			},
+const MenuItemCustom = withStyles({
+	selected: {
+		backgroundColor: "white !important",
+		"&:hover": {
+			backgroundColor: "rgba(0, 0, 0, 0.04) !important",
 		},
-	})
-)(MenuItem);
+	},
+})(MenuItem);
 
-const ListItemTextCustom = withStyles(
-	createStyles({
-		primary: {
-			fontSize: 13,
-		},
-	})
-)(ListItemText);
+const ListItemTextCustom = withStyles({
+	primary: {
+		fontSize: 13,
+	},
+})(ListItemText);
 
-const InputCustom = withStyles((theme: Theme) =>
-	createStyles({
-		input: {
+const InputCustom = withStyles((theme: Theme) => ({
+	input: {
+		borderRadius: 4,
+		position: "relative",
+		backgroundColor: theme.palette.background.paper,
+		border: "1px solid #ced4da",
+		fontSize: 13,
+		padding: 9,
+		transition: theme.transitions.create(["border-color", "box-shadow"]),
+		"&:focus": {
 			borderRadius: 4,
-			position: "relative",
-			backgroundColor: theme.palette.background.paper,
-			border: "1px solid #ced4da",
-			fontSize: 13,
-			padding: 9,
-			transition: theme.transitions.create(["border-color", "box-shadow"]),
-			"&:focus": {
-				borderRadius: 4,
-				borderColor: theme.palette.primary.main,
-			},
+			borderColor: theme.palette.primary.main,
 		},
-	})
-)(InputBase);
+	},
+}))(InputBase);
 
 const MultiSelectWithCheckBox = (props: MultiSelectWithCheckBoxProps) => {
-	const classes = useStyles();
+	const classes = useStyles(props);
 	return (
 		<Select
 			{...props}

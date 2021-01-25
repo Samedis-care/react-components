@@ -16,11 +16,11 @@ import {
 	DataGridSetFilterData,
 	IDataGridColumnDef,
 	useDataGridProps,
+	useDataGridStyles,
 } from "../index";
 import { LocalizedKeyboardDatePicker } from "../../LocalizedDateTimePickers";
 import { DateType } from "@date-io/type";
 import ccI18n from "../../../i18n";
-import { makeStyles } from "@material-ui/core/styles";
 
 export type FilterType =
 	| "contains"
@@ -61,7 +61,7 @@ export interface IFilterDef {
 	nextFilter?: IFilterDef;
 }
 
-interface IProps {
+export interface DataGridContentFilterEntryProps {
 	/**
 	 * The type of the column value (string, number, etc). See ValueType
 	 */
@@ -85,20 +85,13 @@ interface IProps {
 	depth: number;
 }
 
-const useStyles = makeStyles({
-	setFilterContainer: {
-		maxHeight: "40vh",
-		overflow: "auto",
-	},
-});
-
-const FilterEntry = (props: IProps) => {
+const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 	const { onChange, depth } = props;
 	const gridProps = useDataGridProps();
 
 	const [enumFilterSearch, setEnumFilterSearch] = useState("");
 
-	const classes = useStyles();
+	const classes = useDataGridStyles();
 
 	const maxDepth = gridProps.filterLimit;
 	let filterType: FilterType =

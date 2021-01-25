@@ -44,9 +44,13 @@ export interface SignPadDialogProps {
 	 * Callback method which returns signature base64 string
 	 */
 	setSignature?: (url: string) => void;
+	/**
+	 * Custom styles
+	 */
+	classes?: Partial<ReturnType<typeof useStyles>>;
 }
 
-const useClasses = makeStyles((theme) => ({
+const useStyles = makeStyles((theme) => ({
 	root: {
 		margin: 0,
 		padding: theme.spacing(2),
@@ -82,7 +86,7 @@ const SignPadDialog = (props: SignPadDialogProps) => {
 		...canvasProps
 	} = props;
 	const signCanvas = useRef<SignaturePad>(null);
-	const classes = useClasses();
+	const classes = useStyles(props);
 	const clearCanvas = React.useCallback(() => {
 		if (signCanvas.current) {
 			signCanvas.current.clear();

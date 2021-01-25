@@ -1,5 +1,5 @@
 import React from "react";
-import { IMenuItemProps } from "../../../Menu";
+import { MenuItemProps } from "../../../Menu";
 import {
 	createStyles,
 	ListItem,
@@ -60,7 +60,7 @@ const ExpandableListItem = withStyles(expandableListItemStyles)(ListItem);
 
 const typographyProps: TypographyProps = { variant: "body2" };
 
-const MenuItemJumboReactLight = (props: IMenuItemProps) => {
+const MenuItemJumboReactLight = (props: MenuItemProps) => {
 	const classes = useStyles();
 
 	const Icon = props.icon;

@@ -11,8 +11,15 @@ const useStyles = makeStyles((theme: Theme) => ({
 	},
 }));
 
-const VerticalDivider = () => {
-	const classes = useStyles();
+export interface VerticalDividerProps {
+	/**
+	 * Custom styles to apply
+	 */
+	classes?: Partial<ReturnType<typeof useStyles>>;
+}
+
+const VerticalDivider = (props: VerticalDividerProps) => {
+	const classes = useStyles(props);
 
 	return <div className={classes.root} />;
 };

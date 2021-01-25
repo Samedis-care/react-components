@@ -1,6 +1,6 @@
 import React from "react";
-import { makeStyles } from "@material-ui/core";
 import Checkbox from "../../UIKit/Checkbox";
+import { useDataGridStyles } from "../index";
 
 export interface IDataGridContentSelectRowViewProps {
 	/**
@@ -9,14 +9,8 @@ export interface IDataGridContentSelectRowViewProps {
 	checked: boolean;
 }
 
-const useStyles = makeStyles({
-	selectCheckbox: {
-		padding: 0,
-	},
-});
-
 const SelectRowView = (props: IDataGridContentSelectRowViewProps) => {
-	const classes = useStyles();
+	const classes = useDataGridStyles();
 
 	return (
 		<Checkbox checked={props.checked} className={classes.selectCheckbox} />

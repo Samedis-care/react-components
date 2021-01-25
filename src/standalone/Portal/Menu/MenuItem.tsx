@@ -5,14 +5,14 @@ import React, {
 	useContext,
 	useState,
 } from "react";
-import { IMenuItemDefinition, IMenuItemProps, IMenuProps } from "./index";
+import { IMenuItemDefinition, MenuItemProps, MenuProps } from "./index";
 import { Collapse } from "@material-ui/core";
 
-interface IProps extends Omit<IMenuItemProps, "expanded" | "active"> {
+interface IProps extends Omit<MenuItemProps, "expanded" | "active"> {
 	/**
 	 * The menu item renderer properties
 	 */
-	menuProps: IMenuProps;
+	menuProps: MenuProps;
 	/**
 	 * The menu item children definitions
 	 */
@@ -78,7 +78,7 @@ const MenuItem = (props: IProps) => {
 export default React.memo(MenuItem);
 
 export const toMenuItemComponent = (
-	menuProps: IMenuProps,
+	menuProps: MenuProps,
 	def: IMenuItemDefinition,
 	depth: number
 ): JSX.Element | false =>

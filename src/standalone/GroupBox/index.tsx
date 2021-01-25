@@ -12,14 +12,27 @@ const useStyles = makeStyles({
 });
 
 export interface GroupBoxProps {
+	/**
+	 * The HTML id of the fieldset
+	 */
 	id?: string;
+	/**
+	 * The label of the box
+	 */
 	label: React.ReactNode;
+	/**
+	 * Box contents
+	 */
 	children?: React.ReactNode;
+	/**
+	 * Custom styles
+	 */
+	classes?: Partial<ReturnType<typeof useStyles>>;
 }
 
 const GroupBox = (props: GroupBoxProps) => {
 	const { id, label, children } = props;
-	const classes = useStyles();
+	const classes = useStyles(props);
 
 	return (
 		<fieldset id={id} className={classes.fieldSetRoot}>

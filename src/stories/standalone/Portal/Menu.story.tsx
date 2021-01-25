@@ -138,7 +138,7 @@ export const PortalMenuStory = (): React.ReactElement => {
 				menuContent={
 					collapsible ? (
 						<CollapsibleMenu
-							classes={
+							customClasses={
 								variant === "JumboDark"
 									? {
 											root: classes.menuWrapper,
@@ -157,7 +157,7 @@ export const PortalMenuStory = (): React.ReactElement => {
 				topLeft={<Placeholder cssClass={"topLeft"} />}
 				content={<Placeholder cssClass={"content"} />}
 				drawerWidth={collapsible ? undefined : 320}
-				classes={{
+				customClasses={{
 					header: {
 						toolbar: {
 							regular: classes.toolbar,

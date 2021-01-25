@@ -38,9 +38,13 @@ export interface SignaturePadCanvasProps {
 	 * Blur event
 	 */
 	onBlur?: React.FocusEventHandler<HTMLDivElement>;
+	/**
+	 * Custom styles
+	 */
+	classes?: Partial<ReturnType<typeof useStyles>>;
 }
 
-const useClasses = makeStyles((theme) => ({
+const useStyles = makeStyles((theme) => ({
 	signPadDiv: {
 		position: "relative",
 		cursor: "pointer",
@@ -82,7 +86,7 @@ const SignaturePadCanvas = (props: SignaturePadCanvasProps) => {
 		penColor,
 		onBlur,
 	} = props;
-	const classes = useClasses();
+	const classes = useStyles(props);
 	const [dialog, setDialog] = useState(false);
 
 	const handleSignPad = React.useCallback(() => {

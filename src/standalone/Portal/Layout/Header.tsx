@@ -24,19 +24,19 @@ export interface PortalLayoutHeaderProps {
 	/**
 	 * CSS styles to apply
 	 */
-	classes?: {
+	customClasses?: {
 		appBar?: AppBarProps["classes"];
 		toolbar?: ToolbarProps["classes"];
 	};
 }
 
 const PortalLayoutHeader = (props: PortalLayoutHeaderProps) => {
-	const { mobile, classes, toggleMenu, contents } = props;
+	const { mobile, customClasses, toggleMenu, contents } = props;
 
 	if (mobile) {
 		return (
-			<AppBar position={"relative"} classes={classes?.appBar}>
-				<Toolbar classes={classes?.toolbar}>
+			<AppBar position={"relative"} classes={customClasses?.appBar}>
+				<Toolbar classes={customClasses?.toolbar}>
 					<IconButton onClick={toggleMenu}>
 						<MenuIcon />
 					</IconButton>
@@ -46,8 +46,8 @@ const PortalLayoutHeader = (props: PortalLayoutHeaderProps) => {
 		);
 	} else {
 		return (
-			<AppBar position={"relative"} classes={classes?.appBar}>
-				<Toolbar classes={classes?.toolbar}>{contents}</Toolbar>
+			<AppBar position={"relative"} classes={customClasses?.appBar}>
+				<Toolbar classes={customClasses?.toolbar}>{contents}</Toolbar>
 			</AppBar>
 		);
 	}

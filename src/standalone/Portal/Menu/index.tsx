@@ -16,7 +16,7 @@ export interface IMenuWrapperProps {
 /**
  * Properties of a menu item component
  */
-export interface IMenuItemProps {
+export interface MenuItemProps {
 	/**
 	 * An optional icon
 	 */
@@ -77,12 +77,12 @@ export interface IMenuItemDefinition {
 	children?: IMenuItemDefinition[];
 }
 
-export type MenuItemComponent = React.ComponentType<IMenuItemProps>;
+export type MenuItemComponent = React.ComponentType<MenuItemProps>;
 
 /**
  * The menu properties
  */
-export interface IMenuProps {
+export interface MenuProps {
 	/**
 	 * The definition of the menu items
 	 */
@@ -108,6 +108,10 @@ export interface IMenuProps {
 	 * Contains a string concatenated from menu item depth (zero based) and the menu item title
 	 */
 	customState?: [string, Dispatch<SetStateAction<string>>];
+	/**
+	 * Custom styles
+	 */
+	classes?: Partial<ReturnType<typeof useStyles>>;
 }
 
 const useStyles = makeStyles({
@@ -118,10 +122,10 @@ const useStyles = makeStyles({
 	},
 });
 
-const PortalMenu = (props: IMenuProps) => {
+const PortalMenu = (props: MenuProps) => {
 	const Wrapper = props.wrapper;
 	const state = useState("");
-	const classes = useStyles();
+	const classes = useStyles(props);
 
 	return (
 		<div className={`${classes.root} ${props.className || ""}`}>

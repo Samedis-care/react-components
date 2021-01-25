@@ -6,13 +6,15 @@ import {
 	Divider,
 	FormControlLabel,
 	Grid,
-	makeStyles,
 	Paper,
-	Theme,
 	Typography,
 	withStyles,
 } from "@material-ui/core";
-import { IDataGridColumnDef, IDataGridColumnProps } from "../index";
+import {
+	IDataGridColumnDef,
+	IDataGridColumnProps,
+	useDataGridStyles,
+} from "../index";
 import i18n from "../../../i18n";
 
 export interface IDataGridSettingsDialogProps extends IDataGridColumnProps {
@@ -40,14 +42,6 @@ export interface IDataGridSettingsDialogProps extends IDataGridColumnProps {
 	hiddenColumns: string[];
 }
 
-const useStyles = makeStyles((theme: Theme) => ({
-	wrapper: {
-		padding: 16,
-		borderBottom: `1px solid ${theme.palette.divider}`,
-		borderRadius: 8,
-	},
-}));
-
 const EllipsisFormControlLabel = withStyles({
 	root: {
 		maxWidth: "100%",
@@ -60,10 +54,10 @@ const EllipsisFormControlLabel = withStyles({
 })(FormControlLabel);
 
 const SettingsDialog = (props: IDataGridSettingsDialogProps) => {
-	const classes = useStyles();
+	const classes = useDataGridStyles();
 
 	return (
-		<Paper elevation={0} className={classes.wrapper}>
+		<Paper elevation={0} className={classes.settingsPaper}>
 			<Typography variant={"h6"}>
 				{i18n.t("standalone.data-grid.settings.lock") || ""}
 			</Typography>
