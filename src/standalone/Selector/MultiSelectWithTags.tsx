@@ -1,7 +1,6 @@
 import React, { useCallback, useRef } from "react";
 import {
 	TextFieldProps,
-	Tooltip,
 	Typography,
 	Switch,
 	Grid,
@@ -9,6 +8,7 @@ import {
 	Theme,
 	withStyles,
 	WithStyles,
+	IconButton,
 } from "@material-ui/core";
 import { Autocomplete } from "@material-ui/lab";
 import {
@@ -222,7 +222,7 @@ const MultiSelectWithTags = <Data extends MultiSelectData>(
 		classes,
 		displaySwitch,
 		handleAutoComplete,
-		infoText,
+		openInfo,
 	} = props;
 	const switchLabel = props.displaySwitch ? props.switchLabel : undefined;
 	const switchValue = props.displaySwitch ? props.switchValue : undefined;
@@ -377,10 +377,10 @@ const MultiSelectWithTags = <Data extends MultiSelectData>(
 							...params.InputProps,
 							startAdornment: <SearchIcon color={"primary"} />,
 							type: "search",
-							endAdornment: infoText && (
-								<Tooltip title={infoText}>
+							endAdornment: openInfo && (
+								<IconButton onClick={openInfo}>
 									<InfoIcon color={"disabled"} />
-								</Tooltip>
+								</IconButton>
 							),
 						}}
 					/>

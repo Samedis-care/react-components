@@ -29,7 +29,7 @@ beforeAll(async () => {
 	console.debug = jest.fn();
 
 	// set fixed locale
-	await ccI18n.changeLanguage("en");
+	await ccI18n.changeLanguage("en-GB");
 	advanceTo(1606219200000);
 });
 afterAll(() => clear());

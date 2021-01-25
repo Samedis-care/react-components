@@ -1,8 +1,14 @@
 import React from "react";
 import { DialogContextType } from "../../framework";
-import { IDialogConfigConfirmAsync, IDialogConfigInputAsync } from "./Types";
+import {
+	IDialogConfigConfirmAsync,
+	IDialogConfigInputAsync,
+	IDialogConfigSimple,
+} from "./Types";
 import { ConfirmDialog } from "./ConfirmDialog";
 import { InputDialog } from "./InputDialog";
+import { InfoDialog } from "./InfoDialog";
+import i18n from "../../i18n";
 
 /**
  * Shows an awaitable confirm dialog
@@ -46,4 +52,31 @@ export const showInputDialog = async (
 			/>
 		);
 	});
+};
+
+/**
+ * Shows an info dialog
+ * @param pushDialog The dialog context's (useDialogContext()) pushDialog function
+ * @param props The dialog properties (with buttons optional, defaults to an Okay button)
+ */
+export const showInfoDialog = (
+	pushDialog: DialogContextType[0],
+	props: Omit<IDialogConfigSimple, "buttons"> &
+		Partial<Pick<IDialogConfigSimple, "buttons">>
+): void => {
+	const { title, message, buttons } = props;
+	pushDialog(
+		<InfoDialog
+			title={title}
+			message={message}
+			buttons={
+				buttons ?? [
+					{
+						text: i18n.t("non-standalone.dialog.okay"),
+						autoFocus: true,
+					},
+				]
+			}
+		/>
+	);
 };

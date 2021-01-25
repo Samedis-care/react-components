@@ -65,6 +65,11 @@
 			"sign-here": "Digitally signed here"
 		}
 	},
+	"non-standalone": {
+		"dialog": {
+			"okay": "Okay"
+		}
+	},
 	"backend-integration": {
 		"connector": {
 			"json-api-client": {
