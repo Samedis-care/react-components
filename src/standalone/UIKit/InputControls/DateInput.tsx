@@ -1,5 +1,5 @@
 import React from "react";
-import { IconButton, InputAdornment, Tooltip } from "@material-ui/core";
+import { IconButton, InputAdornment } from "@material-ui/core";
 import { DatePickerProps } from "@material-ui/pickers";
 import { Info as InfoIcon, Event as CalenderIcon } from "@material-ui/icons";
 import {
@@ -10,11 +10,11 @@ import {
 import { LocalizedDatePicker } from "../../../standalone/LocalizedDateTimePickers";
 
 export interface DateInputProps extends UIInputProps {
-	infoText?: React.ReactNode;
+	openInfo?: () => void;
 }
 
 const DateInput = (props: DateInputProps & DatePickerProps) => {
-	const { infoText, important, ...muiProps } = props;
+	const { openInfo, important, ...muiProps } = props;
 	const inputClasses = useInputStyles({ important });
 
 	return (
@@ -24,20 +24,18 @@ const DateInput = (props: DateInputProps & DatePickerProps) => {
 			InputProps={{
 				classes: inputClasses,
 				endAdornment: (
-					<>
+					<InputAdornment position="end">
 						{!muiProps.disabled && (
-							<InputAdornment position="end">
-								<IconButton>
-									<CalenderIcon color={"disabled"} />
-								</IconButton>
-							</InputAdornment>
+							<IconButton>
+								<CalenderIcon color={"disabled"} />
+							</IconButton>
 						)}
-						{infoText && (
-							<Tooltip title={infoText}>
+						{openInfo && (
+							<IconButton onClick={openInfo}>
 								<InfoIcon color={"disabled"} />
-							</Tooltip>
+							</IconButton>
 						)}
-					</>
+					</InputAdornment>
 				),
 			}}
 			InputLabelProps={InputLabelConfig}

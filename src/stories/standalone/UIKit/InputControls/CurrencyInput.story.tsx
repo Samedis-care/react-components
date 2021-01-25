@@ -9,6 +9,13 @@ export const CurrencyInputStory = (): React.ReactElement => {
 	const currencies = ["USD", "EUR", "INR"];
 	const [value, setValue] = useState<number | null>(null);
 	const [pushDialog] = useDialogContext();
+	const dialogTitle = text("Dialog title", "Sample title");
+	const infoText = text(
+		"Info Text",
+		"This is a pretty long info text which supports html. It really is.<br> It explains you what to write in here."
+	);
+	const dialogButtonLabel = text("Dialog button label", "Ok");
+	const dialogButtonClick = action("onClose");
 
 	return (
 		<CurrencyInput
@@ -25,21 +32,18 @@ export const CurrencyInputStory = (): React.ReactElement => {
 			autoFocus={true}
 			openInfo={() =>
 				showInfoDialog(pushDialog, {
-					title: text("Dialog title", "Sample title"),
+					title: dialogTitle,
 					message: (
 						<div
 							dangerouslySetInnerHTML={{
-								__html: text(
-									"Info Text",
-									"This is a pretty long info text which supports html. It really is.<br> It explains you what to write in here."
-								),
+								__html: infoText,
 							}}
 						/>
 					),
 					buttons: [
 						{
-							text: text("Dialog button label", "Ok"),
-							onClick: action("onClose"),
+							text: dialogButtonLabel,
+							onClick: dialogButtonClick,
 							autoFocus: true,
 							color: "primary",
 						},
