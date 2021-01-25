@@ -37,9 +37,20 @@ export const usePermissionContext = (): [
 /**
  * Pattern matching permission checking
  * @param perms A list of permissions, usually taken from PermissionContext (usePermissionContext)
- * @param perm A permission to check
+ * @param perm Permission(s) to check
  */
-export const hasPermission = (perms: string[], perm: string): boolean => {
+export const hasPermission = (
+	perms: string[],
+	perm: string | string[] | null
+): boolean => {
+	if (perm === null) return true;
+	if (typeof perm !== "string") {
+		return (
+			perm.map((cando) => hasPermission(perms, cando)).filter((res) => !res)
+				.length > 0
+		);
+	}
+
 	const parts = perm.split(".");
 	for (const presentPerm of perms) {
 		const presentParts = presentPerm.split(".");
