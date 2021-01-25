@@ -1,10 +1,11 @@
-import React from "react";
+import React, { CSSProperties } from "react";
 import {
 	FormControlLabel,
 	FormControlLabelProps,
 	Typography,
 	TypographyProps,
 	makeStyles,
+	Theme,
 } from "@material-ui/core";
 
 export interface ComponentWithLabelProps
@@ -15,11 +16,33 @@ export interface ComponentWithLabelProps
 	labelAlign?: TypographyProps["align"];
 }
 
-const useStyles = makeStyles({
+export interface ComponentWithLabelTheme {
+	whiteSpace?: CSSProperties["whiteSpace"];
+	padding?: CSSProperties["padding"];
+	margin?: CSSProperties["margin"];
+	border?: CSSProperties["border"];
+	borderRadius?: CSSProperties["borderRadius"];
+	backgroundColor?: CSSProperties["backgroundColor"];
+	color?: CSSProperties["color"];
+	fontSize?: CSSProperties["fontSize"];
+	fontWeight?: CSSProperties["fontWeight"];
+	style?: CSSProperties;
+}
+
+const useStyles = makeStyles((theme: Theme) => ({
 	label: {
-		whiteSpace: "pre",
+		whiteSpace: theme.componentsCare?.uiKit?.label?.whiteSpace || "pre",
+		padding: theme.componentsCare?.uiKit?.label?.padding,
+		margin: theme.componentsCare?.uiKit?.label?.margin,
+		border: theme.componentsCare?.uiKit?.label?.border,
+		borderRadius: theme.componentsCare?.uiKit?.label?.borderRadius,
+		backgroundColor: theme.componentsCare?.uiKit?.label?.backgroundColor,
+		color: theme.componentsCare?.uiKit?.label?.color,
+		fontSize: theme.componentsCare?.uiKit?.label?.fontSize,
+		fontWeight: theme.componentsCare?.uiKit?.label?.fontWeight,
+		...theme.componentsCare?.uiKit?.label?.style,
 	},
-});
+}));
 
 const ComponentWithLabel = (
 	props: ComponentWithLabelProps | FormControlLabelProps

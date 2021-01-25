@@ -115,7 +115,7 @@ class Model<
 	/**
 	 * The backend connector providing a CRUD interface for the model
 	 */
-	public readonly connector: Connector<KeyT>;
+	public readonly connector: Connector<KeyT, VisibilityT, CustomT>;
 
 	/**
 	 * Creates a new model
@@ -126,7 +126,7 @@ class Model<
 	constructor(
 		name: string,
 		model: ModelField<KeyT, VisibilityT, CustomT>,
-		connector: Connector<KeyT>
+		connector: Connector<KeyT, VisibilityT, CustomT>
 	) {
 		this.modelId = name;
 		this.fields = model;

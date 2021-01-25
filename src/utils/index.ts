@@ -18,4 +18,5 @@ export { default as parseLocalizedNumber } from "./parseLocalizedNumber";
 export { default as useInputCursorFix } from "./useInputCursorFix";
 export { default as filterSortPaginate } from "./filterSortPaginate";
 export { default as combineClassMaps } from "./combineClassMaps";
+export * from "./useDate";
 export * from "./genericHOC";

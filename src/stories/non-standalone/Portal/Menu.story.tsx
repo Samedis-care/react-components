@@ -85,6 +85,7 @@ export const PortalMenuStory = (): React.ReactElement => {
 				}}
 			/>
 			<PortalLayout
+				variant={"basic"}
 				headerContent={<Placeholder cssClass={"header"} />}
 				menuContent={
 					<RoutedMenu

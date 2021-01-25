@@ -1,5 +1,8 @@
 import { Connector } from "../../backend-integration/Connector";
-import { ModelFieldName } from "../../backend-integration/Model";
+import {
+	ModelFieldName,
+	PageVisibility,
+} from "../../backend-integration/Model";
 import { ResponseMeta } from "../../backend-integration/Connector/Connector";
 import {
 	DataGridAdditionalFilters,
@@ -44,7 +47,11 @@ interface BackendSort {
 	direction: "ASC" | "DESC";
 }
 
-class BackendConnector<KeyT extends ModelFieldName> extends Connector<KeyT> {
+class BackendConnector<
+	KeyT extends ModelFieldName,
+	VisibilityT extends PageVisibility,
+	CustomT
+> extends Connector<KeyT, VisibilityT, CustomT> {
 	client: JsonApiClient;
 
 	constructor() {

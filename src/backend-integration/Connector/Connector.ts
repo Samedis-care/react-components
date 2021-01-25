@@ -21,7 +21,11 @@ export interface ResponseMeta {
 /**
  * A generic backend connector which provides a basic CRUD interface for data
  */
-abstract class Connector<KeyT extends ModelFieldName> {
+abstract class Connector<
+	KeyT extends ModelFieldName,
+	VisibilityT extends PageVisibility,
+	CustomT
+> {
 	/**
 	 * Lists all available data entries
 	 * @param params Filter, Sorting and Pagination parameters
@@ -30,7 +34,7 @@ abstract class Connector<KeyT extends ModelFieldName> {
 	 */
 	abstract index(
 		params?: Partial<IDataGridLoadDataParameters>,
-		model?: Model<KeyT, PageVisibility, unknown>
+		model?: Model<KeyT, VisibilityT, CustomT>
 	): Promise<[Record<KeyT, unknown>[], ResponseMeta]>;
 
 	/**
@@ -41,7 +45,7 @@ abstract class Connector<KeyT extends ModelFieldName> {
 	 */
 	abstract create(
 		data: Record<string, unknown>,
-		model?: Model<KeyT, PageVisibility, unknown>
+		model?: Model<KeyT, VisibilityT, CustomT>
 	): Promise<Record<KeyT, unknown>>;
 
 	/**
@@ -52,7 +56,7 @@ abstract class Connector<KeyT extends ModelFieldName> {
 	 */
 	abstract read(
 		id: string,
-		model?: Model<KeyT, PageVisibility, unknown>
+		model?: Model<KeyT, VisibilityT, CustomT>
 	): Promise<Record<KeyT, unknown>>;
 
 	/**
@@ -63,7 +67,7 @@ abstract class Connector<KeyT extends ModelFieldName> {
 	 */
 	abstract update(
 		data: Record<ModelFieldName, unknown>,
-		model?: Model<KeyT, PageVisibility, unknown>
+		model?: Model<KeyT, VisibilityT, CustomT>
 	): Promise<Record<KeyT, unknown>>;
 
 	/**
@@ -73,7 +77,7 @@ abstract class Connector<KeyT extends ModelFieldName> {
 	 */
 	abstract delete(
 		id: string,
-		model?: Model<KeyT, PageVisibility, unknown>
+		model?: Model<KeyT, VisibilityT, CustomT>
 	): Promise<void>;
 
 	/**
@@ -83,7 +87,7 @@ abstract class Connector<KeyT extends ModelFieldName> {
 	 */
 	async deleteMultiple(
 		ids: string[],
-		model?: Model<KeyT, PageVisibility, unknown>
+		model?: Model<KeyT, VisibilityT, CustomT>
 	): Promise<void> {
 		void (await Promise.all(ids.map((id) => this.delete(id, model))));
 	}
@@ -95,7 +99,7 @@ abstract class Connector<KeyT extends ModelFieldName> {
 	 */
 	public deleteAdvanced?: (
 		req: AdvancedDeleteRequest,
-		model?: Model<KeyT, PageVisibility, unknown>
+		model?: Model<KeyT, VisibilityT, CustomT>
 	) => Promise<void>;
 
 	/**
