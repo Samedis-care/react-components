@@ -1,4 +1,9 @@
 import { DataGridTheme } from "./standalone/DataGrid";
+import { ActionButtonTheme } from "./standalone/UIKit/ActionButton";
+import { CheckboxTheme } from "./standalone/UIKit/Checkbox";
+import { InputTheme } from "./standalone/UIKit/CommonStyles";
+import { ComponentWithLabelTheme } from "./standalone/UIKit/ComponentWithLabel";
+import { FormButtonTheme } from "./standalone/UIKit/FormButtons";
 
 export * from "./standalone";
 
@@ -16,6 +21,13 @@ export * from "./utils";
 
 export interface ComponentsCareTheme {
 	dataGrid?: DataGridTheme;
+	uiKit?: {
+		label?: ComponentWithLabelTheme;
+		checkbox?: CheckboxTheme;
+		input?: InputTheme;
+		actionButton?: ActionButtonTheme;
+		formButtons?: FormButtonTheme;
+	};
 }
 
 declare module "@material-ui/core/styles/createMuiTheme" {

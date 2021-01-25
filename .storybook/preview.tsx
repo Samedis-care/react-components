@@ -19,22 +19,82 @@ const getDefaultTheme = (): ThemeOptions => ({
 
 /* re-usable colors for our theme */
 const customColors = {
-	white: "#ffffff",
+	white: "rgb(255, 255, 255)",
+};
+
+const customPalette = {
 	primary: {
-		main: "#0869b3",
-		light: "#3987c2",
+		main: "rgb(8, 105, 179)",
+		light: "rgb(57, 135, 194)"
 	},
 	secondary: {
-		main: "#b9d7f0",
+		main: "rgb(185, 215, 240)",
+	},
+	action: {
+		hover: "rgba(0,0,0, .2)"
+	},
+	error: {
+		main: "rgb(255, 99, 71)",
+		contrastText: "#CCC",
 	},
 };
 /* example for a customized theme per client requirements */
 const getCustomTheme = (): ThemeOptions => ({
+	spacing: [0, 5, 7, 10, 15, 21, 25],
 	palette: {
-		type: "light",
-		...customColors,
+		type: "dark",
+		...customPalette
 	},
-	componentsCare: {},
+	componentsCare: {
+		uiKit: {
+			label: {
+			},
+			input: {
+				placeholder: {
+					important: {
+						color: customPalette.error.main,
+					}
+				}
+			},
+			actionButton: {
+				padding: "7px 25px",
+				border: "none",
+				borderRadius: 25,
+				fontSize: "0.75rem",
+				/* example */
+				style: {
+					border: "1px solid rgba(0,0,0, .15)",
+					boxShadow: "rgba(0, 0, 0, 0.25) 0px 0px 5px 0px",
+				},
+				disabled: {
+					backgroundColor: "#bcbdbf",
+					style: {
+						boxShadow: "rgba(255, 255, 255, 0.25) 0px 0px 2px 0px",
+					},
+				},
+			},
+			formButtons: {
+				buttonWrapper: {
+					margin: "0 5px 0 0",
+				},
+				container: {
+					float: "left",
+					width: "auto",
+					border: "none",
+					borderRadius: "32px",
+					padding: "20px",
+					margin: "20px",
+					backgroundColor: customPalette.secondary.main,
+					backgroundColorOpacity: .7, 
+					/* example */
+					style: {
+						background: "linear-gradient(345deg, rgba(238,174,202,1) 0%, rgba(148,187,233,1) 100%)",
+						boxShadow: "0 0 10px 0 rgba(0,0,0, .35)",
+					},
+				},
+			},
+		},
+	},
 });
 
 const loadTheme = (): ThemeOptions => {
