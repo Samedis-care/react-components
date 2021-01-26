@@ -7,38 +7,71 @@ import { MenuBook, Info, PeopleAlt, DeleteForever } from "@material-ui/icons";
 export const SubActionButtonStory = (): React.ReactElement => {
 	return (
 		<>
-			<SubActionButton
-				onClick={action("onClick")}
-				disabled={boolean("Disabled", false)}
-				small={boolean("Small button", false)}
-				icon={<MenuBook />}
-			>
-				{text("SubAction 1 Button Text", "Open Book")}
-			</SubActionButton>
-			<SubActionButton
-				onClick={action("onClick")}
-				disabled={boolean("Disabled", false)}
-				small={boolean("Small button", false)}
-				icon={<Info />}
-			>
-				{text("SubAction 2 Button Text", "View Information")}
-			</SubActionButton>
-			<SubActionButton
-				onClick={action("onClick")}
-				disabled={boolean("Disabled", false)}
-				small={boolean("Small button", false)}
-				icon={<PeopleAlt />}
-			>
-				{text("SubAction 3 Button Text", "List Persons")}
-			</SubActionButton>
-			<SubActionButton
-				onClick={action("onClick")}
-				disabled={boolean("Disabled", false)}
-				small={boolean("Small button", false)}
-				icon={<DeleteForever />}
-			>
-				{text("SubAction 4 Button Text", "Delete Device")}
-			</SubActionButton>
+			<div>
+				<SubActionButton
+					onClick={action("onClick")}
+					disabled={boolean("Disabled", false)}
+					small={true}
+					icon={<Info />}
+				>
+					{text("Small SubAction 2 Button Text", "View Information")}
+				</SubActionButton>
+				<SubActionButton
+					onClick={action("onClick")}
+					disabled={boolean("Disabled", false)}
+					small={true}
+					icon={<MenuBook />}
+				>
+					{text("Small SubAction 1 Button Text", "Open Book")}
+				</SubActionButton>
+				<SubActionButton
+					onClick={action("onClick")}
+					disabled={boolean("Disabled", false)}
+					small={true}
+					icon={<PeopleAlt />}
+				>
+					{text("Small SubAction 3 Button Text", "List Persons")}
+				</SubActionButton>
+				<SubActionButton
+					onClick={action("onClick")}
+					disabled={boolean("Disabled", false)}
+					small={true}
+					icon={<DeleteForever />}
+				>
+					{text("Small SubAction 4 Button Text", "Delete Device")}
+				</SubActionButton>
+			</div>
+			<br />
+			<div>
+				<SubActionButton
+					onClick={action("onClick")}
+					disabled={boolean("Disabled", false)}
+					icon={<MenuBook />}
+				>
+					{text("SubAction 1 Button Text", "Open Book")}
+				</SubActionButton>
+				<SubActionButton
+					onClick={action("onClick")}
+					disabled={boolean("Disabled", false)}
+					icon={<Info />}
+				>
+					{text("SubAction 2 Button Text", "View Information")}
+				</SubActionButton>
+				<SubActionButton
+					onClick={action("onClick")}
+					disabled={boolean("Disabled", false)}
+					icon={<PeopleAlt />}
+				>
+					{text("SubAction 3 Button Text", "List Persons")}
+				</SubActionButton>
+				<SubActionButton
+					onClick={action("onClick")}
+					disabled={boolean("Disabled", false)}
+					icon={<DeleteForever />}
+				>
+					{text("SubAction 4 Button Text", "Delete Device")}
+				</SubActionButton>
+			</div>
 		</>
 	);
 };

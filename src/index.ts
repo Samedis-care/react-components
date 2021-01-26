@@ -4,6 +4,7 @@ import { CheckboxTheme } from "./standalone/UIKit/Checkbox";
 import { InputTheme } from "./standalone/UIKit/CommonStyles";
 import { ComponentWithLabelTheme } from "./standalone/UIKit/ComponentWithLabel";
 import { FormButtonTheme } from "./standalone/UIKit/FormButtons";
+import { SubActionButtonTheme } from "./standalone/UIKit/SubActionButton";
 
 export * from "./standalone";
 
@@ -26,6 +27,7 @@ export interface ComponentsCareTheme {
 		checkbox?: CheckboxTheme;
 		input?: InputTheme;
 		actionButton?: ActionButtonTheme;
+		subActionButton?: SubActionButtonTheme;
 		formButtons?: FormButtonTheme;
 	};
 }

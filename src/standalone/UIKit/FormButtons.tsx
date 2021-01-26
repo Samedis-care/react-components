@@ -7,6 +7,12 @@ export interface FormButtonTheme {
 		float?: CSSProperties["float"];
 		margin?: CSSProperties["margin"];
 		style?: CSSProperties;
+		firstChild?: {
+			style?: CSSProperties;
+		};
+		lastChild?: {
+			style?: CSSProperties;
+		};
 	};
 	container?: {
 		float?: CSSProperties["float"];
@@ -46,10 +52,15 @@ const useStyles = makeStyles((theme: Theme) => ({
 			theme.spacing(0, 1, 0, 0),
 		"&:first-child": {
 			marginLeft: 0,
+			...theme.componentsCare?.uiKit?.formButtons?.buttonWrapper?.firstChild
+				?.style,
 		},
 		"&:last-child": {
 			marginRight: 0,
+			...theme.componentsCare?.uiKit?.formButtons?.buttonWrapper?.lastChild
+				?.style,
 		},
+		...theme.componentsCare?.uiKit?.formButtons?.buttonWrapper?.style,
 	},
 }));
 

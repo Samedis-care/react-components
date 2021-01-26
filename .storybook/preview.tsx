@@ -73,6 +73,22 @@ const getCustomTheme = (): ThemeOptions => ({
 					},
 				},
 			},
+			subActionButton: {
+				small: {
+					borderRadius: 5,
+					backgroundColor: "rgba(238,174,202,.15)",
+					color: "rgba(148,187,233,1)",
+					style: {
+						backgroundImage: "none",
+					},
+					hover: {
+						style: {
+							backgroundColor: "rgba(238,174,202,.25)",
+							backgroundImage: "linear-gradient(345deg, rgba(238,174,202,1) 0%, rgba(148,187,233,1) 100%)",
+						},
+					},
+				},
+			},
 			formButtons: {
 				buttonWrapper: {
 					margin: "0 5px 0 0",
@@ -85,7 +101,7 @@ const getCustomTheme = (): ThemeOptions => ({
 					padding: "20px",
 					margin: "20px",
 					backgroundColor: customPalette.secondary.main,
-					backgroundColorOpacity: .7, 
+					backgroundColorOpacity: 0.7, 
 					/* example */
 					style: {
 						background: "linear-gradient(345deg, rgba(238,174,202,1) 0%, rgba(148,187,233,1) 100%)",
