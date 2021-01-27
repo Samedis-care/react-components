@@ -1,15 +1,11 @@
-import React, { useState } from "react";
-import { makeStyles, Tooltip } from "@material-ui/core";
+import React, { useState, useCallback } from "react";
+import { makeStyles, InputAdornment, IconButton } from "@material-ui/core";
 import { Info as InfoIcon } from "@material-ui/icons";
 import { SignIcon } from "../../standalone";
 import SignPadDialog from "./SignPadDialog";
 import ccI18n from "../../i18n";
 
 export interface SignaturePadCanvasProps {
-	/**
-	 * The text for info icon
-	 */
-	infoText?: React.ReactNode;
 	/**
 	 * The props used to draw HTML canvas
 	 */
@@ -42,6 +38,10 @@ export interface SignaturePadCanvasProps {
 	 * Custom styles
 	 */
 	classes?: Partial<ReturnType<typeof useStyles>>;
+	/**
+	 * Open info dialog
+	 */
+	openInfo?: () => void;
 }
 
 const useStyles = makeStyles((theme) => ({
@@ -74,7 +74,7 @@ const useStyles = makeStyles((theme) => ({
 	infoDiv: {
 		position: "absolute",
 		right: 5,
-		bottom: 0,
+		bottom: 20,
 	},
 }));
 
@@ -83,7 +83,7 @@ const SignaturePadCanvas = (props: SignaturePadCanvasProps) => {
 		signature,
 		setSignature,
 		disabled,
-		infoText,
+		openInfo,
 		clearOnResize,
 		canvasProps,
 		penColor,
@@ -95,6 +95,13 @@ const SignaturePadCanvas = (props: SignaturePadCanvasProps) => {
 	const handleSignPad = React.useCallback(() => {
 		if (!disabled) setDialog(!dialog);
 	}, [dialog, disabled]);
+	const handelOpenInfo = useCallback(
+		(event: React.MouseEvent<HTMLButtonElement>) => {
+			event.stopPropagation();
+			if (openInfo) openInfo();
+		},
+		[openInfo]
+	);
 
 	return (
 		<div onBlur={onBlur}>
@@ -112,10 +119,12 @@ const SignaturePadCanvas = (props: SignaturePadCanvasProps) => {
 					)}
 				</div>
 				<div className={classes.infoDiv}>
-					{infoText && (
-						<Tooltip title={infoText}>
-							<InfoIcon color={"disabled"} />
-						</Tooltip>
+					{openInfo && (
+						<InputAdornment position={"end"}>
+							<IconButton onClick={handelOpenInfo}>
+								<InfoIcon color={"disabled"} />
+							</IconButton>
+						</InputAdornment>
 					)}
 				</div>
 			</div>
