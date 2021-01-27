@@ -34,44 +34,52 @@ const DataActionBarView = (props: DataActionBarViewProps) => {
 					labelPlacement={"bottom"}
 				/>
 			</Grid>
-			<Grid item key={"divider-1"}>
-				<VerticalDivider />
-			</Grid>
-			<Grid item key={"edit"}>
-				<ComponentWithLabel
-					control={
-						<SmallIconButton
-							color={"primary"}
+			{props.handleEdit && (
+				<>
+					<Grid item key={"divider-1"}>
+						<VerticalDivider />
+					</Grid>
+					<Grid item key={"edit"}>
+						<ComponentWithLabel
+							control={
+								<SmallIconButton
+									color={"primary"}
+									disabled={props.numSelected !== 1}
+								>
+									<EditIcon />
+								</SmallIconButton>
+							}
+							labelText={i18n.t("standalone.data-grid.footer.edit")}
+							onClick={props.handleEdit}
+							labelPlacement={"bottom"}
 							disabled={props.numSelected !== 1}
-						>
-							<EditIcon />
-						</SmallIconButton>
-					}
-					labelText={i18n.t("standalone.data-grid.footer.edit")}
-					onClick={props.handleEdit}
-					labelPlacement={"bottom"}
-					disabled={props.numSelected !== 1}
-				/>
-			</Grid>
-			<Grid item key={"divider-2"}>
-				<VerticalDivider />
-			</Grid>
-			<Grid item key={"delete"}>
-				<ComponentWithLabel
-					control={
-						<SmallIconButton
-							color={"primary"}
+						/>
+					</Grid>
+				</>
+			)}
+			{props.handleDelete && (
+				<>
+					<Grid item key={"divider-2"}>
+						<VerticalDivider />
+					</Grid>
+					<Grid item key={"delete"}>
+						<ComponentWithLabel
+							control={
+								<SmallIconButton
+									color={"primary"}
+									disabled={props.numSelected === 0}
+								>
+									<DeleteIcon />
+								</SmallIconButton>
+							}
+							labelText={i18n.t("standalone.data-grid.footer.delete")}
+							onClick={props.handleDelete}
+							labelPlacement={"bottom"}
 							disabled={props.numSelected === 0}
-						>
-							<DeleteIcon />
-						</SmallIconButton>
-					}
-					labelText={i18n.t("standalone.data-grid.footer.delete")}
-					onClick={props.handleDelete}
-					labelPlacement={"bottom"}
-					disabled={props.numSelected === 0}
-				/>
-			</Grid>
+						/>
+					</Grid>
+				</>
+			)}
 		</Grid>
 	);
 };
