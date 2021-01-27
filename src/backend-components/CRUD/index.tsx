@@ -33,9 +33,12 @@ export interface CrudProps<
 		"id" | "model" | "children"
 	>;
 	/**
-	 * The form
+	 * The renderer function which returns the form component
+	 * @param goBack Closes the form page
 	 */
-	children: FormProps<KeyT, VisibilityT, CustomT>["children"];
+	children: (
+		goBack: () => void
+	) => FormProps<KeyT, VisibilityT, CustomT>["children"];
 	/**
 	 * The properties to pass to grid
 	 */
@@ -72,8 +75,13 @@ export interface CrudProps<
 const useStyles = makeStyles({
 	hide: {
 		display: "none",
+		width: "100%",
+		height: "100%",
 	},
-	show: {},
+	show: {
+		width: "100%",
+		height: "100%",
+	},
 });
 
 const CRUD = <
@@ -110,6 +118,14 @@ const CRUD = <
 		}
 	}, [history, path, disableRouting]);
 
+	const showOverview = useCallback(() => {
+		if (disableRouting) {
+			setId(null);
+		} else {
+			history.push(path);
+		}
+	}, [history, path, disableRouting]);
+
 	const grid = () => (
 		<BackendDataGrid
 			model={props.model}
@@ -131,7 +147,7 @@ const CRUD = <
 			model={props.model}
 			{...props.formProps}
 		>
-			{props.children}
+			{props.children(showOverview)}
 		</Form>
 	);
 

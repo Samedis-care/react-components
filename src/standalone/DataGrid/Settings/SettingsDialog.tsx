@@ -63,7 +63,7 @@ const SettingsDialog = (props: IDataGridSettingsDialogProps) => {
 			</Typography>
 			<Divider />
 			<Grid justify={"space-between"} container>
-				{props.columns.slice(1).map((column: IDataGridColumnDef) => (
+				{props.columns.map((column: IDataGridColumnDef) => (
 					<Grid item xs={4} key={column.field} zeroMinWidth>
 						<EllipsisFormControlLabel
 							control={
@@ -83,7 +83,7 @@ const SettingsDialog = (props: IDataGridSettingsDialogProps) => {
 			</Typography>
 			<Divider />
 			<Grid justify={"space-between"} container>
-				{props.columns.slice(1).map((column: IDataGridColumnDef) => (
+				{props.columns.map((column: IDataGridColumnDef) => (
 					<Grid item xs={4} key={column.field} zeroMinWidth>
 						<EllipsisFormControlLabel
 							control={

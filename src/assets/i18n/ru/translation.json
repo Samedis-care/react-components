@@ -107,7 +107,7 @@
 		"connector": {
 			"json-api-client": {
 				"network-error": "Произошла ошибка сети.",
-				"parse-error": "Неправильный ответ на парсинг (Недействительный JSON). Сервер вернул статус {STATUS_CODE}. {STATUS_TEXT}."
+				"parse-error": "Неправильный ответ на парсинг (Недействительный JSON). Сервер вернул статус {{STATUS_CODE}}. {{STATUS_TEXT}}."
 			}
 		}
 	},

@@ -4,11 +4,13 @@ import {
 	ModelDataTypeStringRendererMUI,
 	ModelFieldName,
 	ModelVisibilityDisabled,
+	ModelVisibilityEdit,
+	ModelVisibilityEditRequired,
 	ModelVisibilityGridView,
 	ModelVisibilityGridViewHidden,
 	PageVisibility,
 } from "../../../backend-integration";
-import BackendConnector from "../../backend-integration/BackendConnector";
+import LocalStorageConnector from "../../backend-integration/LocalStorageConnector";
 
 class TestModel extends Model<ModelFieldName, PageVisibility, null> {
 	constructor() {
@@ -33,8 +35,8 @@ class TestModel extends Model<ModelFieldName, PageVisibility, null> {
 					getLabel: () => "Last Name",
 					visibility: {
 						overview: ModelVisibilityGridView,
-						create: ModelVisibilityDisabled,
-						edit: ModelVisibilityDisabled,
+						create: ModelVisibilityEditRequired,
+						edit: ModelVisibilityEditRequired,
 					},
 					customData: null,
 				},
@@ -45,8 +47,8 @@ class TestModel extends Model<ModelFieldName, PageVisibility, null> {
 					getLabel: () => "First Name",
 					visibility: {
 						overview: ModelVisibilityGridView,
-						create: ModelVisibilityDisabled,
-						edit: ModelVisibilityDisabled,
+						create: ModelVisibilityEditRequired,
+						edit: ModelVisibilityEditRequired,
 					},
 					customData: null,
 				},
@@ -57,8 +59,8 @@ class TestModel extends Model<ModelFieldName, PageVisibility, null> {
 					getLabel: () => "Employee No.",
 					visibility: {
 						overview: ModelVisibilityGridView,
-						create: ModelVisibilityDisabled,
-						edit: ModelVisibilityDisabled,
+						create: ModelVisibilityEdit,
+						edit: ModelVisibilityEdit,
 					},
 					customData: null,
 				},
@@ -69,8 +71,8 @@ class TestModel extends Model<ModelFieldName, PageVisibility, null> {
 					getLabel: () => "Account",
 					visibility: {
 						overview: ModelVisibilityGridViewHidden,
-						create: ModelVisibilityDisabled,
-						edit: ModelVisibilityDisabled,
+						create: ModelVisibilityEdit,
+						edit: ModelVisibilityEdit,
 					},
 					customData: null,
 				},
@@ -81,8 +83,8 @@ class TestModel extends Model<ModelFieldName, PageVisibility, null> {
 					getLabel: () => "Joined at",
 					visibility: {
 						overview: ModelVisibilityGridViewHidden,
-						create: ModelVisibilityDisabled,
-						edit: ModelVisibilityDisabled,
+						create: ModelVisibilityEdit,
+						edit: ModelVisibilityEdit,
 					},
 					customData: null,
 				},
@@ -93,8 +95,8 @@ class TestModel extends Model<ModelFieldName, PageVisibility, null> {
 					getLabel: () => "Left at",
 					visibility: {
 						overview: ModelVisibilityGridViewHidden,
-						create: ModelVisibilityDisabled,
-						edit: ModelVisibilityDisabled,
+						create: ModelVisibilityEdit,
+						edit: ModelVisibilityEdit,
 					},
 					customData: null,
 				},
@@ -105,8 +107,8 @@ class TestModel extends Model<ModelFieldName, PageVisibility, null> {
 					getLabel: () => "E-Mail",
 					visibility: {
 						overview: ModelVisibilityDisabled,
-						create: ModelVisibilityDisabled,
-						edit: ModelVisibilityDisabled,
+						create: ModelVisibilityEdit,
+						edit: ModelVisibilityEdit,
 					},
 					customData: null,
 				},
@@ -117,8 +119,8 @@ class TestModel extends Model<ModelFieldName, PageVisibility, null> {
 					getLabel: () => "Title",
 					visibility: {
 						overview: ModelVisibilityGridViewHidden,
-						create: ModelVisibilityDisabled,
-						edit: ModelVisibilityDisabled,
+						create: ModelVisibilityEdit,
+						edit: ModelVisibilityEdit,
 					},
 					customData: null,
 				},
@@ -129,8 +131,8 @@ class TestModel extends Model<ModelFieldName, PageVisibility, null> {
 					getLabel: () => "Notes",
 					visibility: {
 						overview: ModelVisibilityGridViewHidden,
-						create: ModelVisibilityDisabled,
-						edit: ModelVisibilityDisabled,
+						create: ModelVisibilityEdit,
+						edit: ModelVisibilityEdit,
 					},
 					customData: null,
 				},
@@ -141,13 +143,13 @@ class TestModel extends Model<ModelFieldName, PageVisibility, null> {
 					getLabel: () => "Mobile Number",
 					visibility: {
 						overview: ModelVisibilityGridViewHidden,
-						create: ModelVisibilityDisabled,
-						edit: ModelVisibilityDisabled,
+						create: ModelVisibilityEdit,
+						edit: ModelVisibilityEdit,
 					},
 					customData: null,
 				},
 			},
-			new BackendConnector()
+			new LocalStorageConnector("crud-story-model")
 		);
 	}
 }

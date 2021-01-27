@@ -154,7 +154,6 @@ const ActionButton = (props: ActionButtonProps) => {
 			disableElevation={true}
 			fullWidth={!small || fullWidth}
 			startIcon={icon}
-			small={small}
 			{...otherProps}
 		>
 			{small ? <StyledIconBox>&nbsp;</StyledIconBox> : <Box>{children}</Box>}
