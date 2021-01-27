@@ -43,6 +43,7 @@ const BackendDataGrid = <
 	const loadData = useCallback(
 		async (params: IDataGridLoadDataParameters): Promise<DataGridData> => {
 			const [result, meta] = await model.index(params);
+			// eslint-disable-next-line no-debugger
 			return {
 				rowsTotal: meta.totalRows,
 				rowsFiltered: meta.filteredRows,
@@ -53,7 +54,7 @@ const BackendDataGrid = <
 
 							// we cannot render the ID, this will cause issues with the selection
 							if (key === "id") {
-								return [key, value];
+								return kvs;
 							}
 
 							const field = model.fields[key as KeyT];

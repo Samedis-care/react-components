@@ -51,10 +51,15 @@ export const CrudStory = (): React.ReactElement => {
 				) => (
 					<Grid container spacing={2}>
 						<Grid item xs={6}>
-							<Field name={"first_name"} />
+							<Field name={"avatar"} />
 						</Grid>
-						<Grid item xs={6}>
-							<Field name={"last_name"} />
+						<Grid item xs={6} container spacing={2}>
+							<Grid item xs={12}>
+								<Field name={"first_name"} />
+							</Grid>
+							<Grid item xs={12}>
+								<Field name={"last_name"} />
+							</Grid>
 						</Grid>
 						<Grid item xs={3}>
 							<Field name={"employee_no"} />

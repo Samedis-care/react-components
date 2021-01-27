@@ -1,6 +1,7 @@
 import {
 	Model,
 	ModelDataTypeDateNullableRendererMUI,
+	ModelDataTypeImageRenderer,
 	ModelDataTypeStringRendererMUI,
 	ModelFieldName,
 	ModelVisibilityDisabled,
@@ -8,6 +9,7 @@ import {
 	ModelVisibilityEditRequired,
 	ModelVisibilityGridView,
 	ModelVisibilityGridViewHidden,
+	ModelVisibilityHidden,
 	PageVisibility,
 } from "../../../backend-integration";
 import LocalStorageConnector from "../../backend-integration/LocalStorageConnector";
@@ -24,7 +26,17 @@ class TestModel extends Model<ModelFieldName, PageVisibility, null> {
 					visibility: {
 						overview: ModelVisibilityDisabled,
 						create: ModelVisibilityDisabled,
-						edit: ModelVisibilityDisabled,
+						edit: ModelVisibilityHidden,
+					},
+					customData: null,
+				},
+				avatar: {
+					type: new ModelDataTypeImageRenderer(),
+					getLabel: () => "Avatar",
+					visibility: {
+						overview: ModelVisibilityGridView,
+						create: ModelVisibilityEdit,
+						edit: ModelVisibilityEdit,
 					},
 					customData: null,
 				},
