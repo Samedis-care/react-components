@@ -136,7 +136,7 @@ export interface ActionButtonProps extends Omit<ButtonProps, "children"> {
 	/**
 	 * The text of the button (used for tooltip if small is true)
 	 */
-	children: NonNullable<React.ReactNode>;
+	children: React.ReactNode;
 	/**
 	 * Custom colored buttons
 	 */
@@ -162,7 +162,7 @@ const ActionButton = (props: ActionButtonProps) => {
 
 	if (props.disabled || !small) return renderButton();
 
-	return <Tooltip title={children}>{renderButton()}</Tooltip>;
+	return <Tooltip title={<span>{children}</span>}>{renderButton()}</Tooltip>;
 };
 
 export default React.memo(ActionButton);

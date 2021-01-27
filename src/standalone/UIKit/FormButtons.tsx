@@ -57,7 +57,7 @@ export interface FormButtonsProps {
 	/**
 	 * Action buttons (used on form)
 	 */
-	children: NonNullable<React.ReactNode[]>;
+	children: NonNullable<React.ReactNode | React.ReactNode[]>;
 	/**
 	 * Custom styles
 	 */
@@ -66,8 +66,9 @@ export interface FormButtonsProps {
 
 const FormButtons = (props: FormButtonsProps) => {
 	const classes = useStyles(props);
-	const children =
-		"length" in props.children ? props.children : [props.children];
+	const children = Array.isArray(props.children)
+		? props.children
+		: [props.children];
 
 	if (!children) throw new Error("Atleast one button required");
 
