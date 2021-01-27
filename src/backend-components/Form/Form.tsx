@@ -21,6 +21,10 @@ export interface PageProps<KeyT extends ModelFieldName> {
 	 */
 	isSubmitting: boolean;
 	/**
+	 * Is the form dirty?
+	 */
+	dirty: boolean;
+	/**
 	 * The values of the form, can be used for conditional rendering.
 	 * Only present if renderConditionally is set to true in FormProps
 	 */
@@ -159,6 +163,7 @@ const Form = <
 					handleSubmit,
 					isSubmitting,
 					values,
+					dirty,
 					/* and other goodies */
 				}) => (
 					<form onSubmit={handleSubmit}>
@@ -168,6 +173,7 @@ const Form = <
 							values={props.renderConditionally ? values : undefined}
 							submit={submitForm}
 							reset={resetForm}
+							dirty={dirty}
 						/>
 					</form>
 				)}
