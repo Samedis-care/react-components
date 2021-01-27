@@ -53,6 +53,7 @@ const useStyles = makeStyles((theme) => ({
 		width: 400,
 		color: theme.palette.grey[700],
 		display: "inline-block",
+		backgroundColor: theme.palette.background.paper,
 	},
 	textDiv: {
 		position: "absolute",
@@ -67,6 +68,8 @@ const useStyles = makeStyles((theme) => ({
 	signText: {
 		display: "inline-block",
 		marginLeft: 10,
+		position: "fixed",
+		color: theme.palette.text.secondary,
 	},
 	infoDiv: {
 		position: "absolute",
@@ -95,13 +98,9 @@ const SignaturePadCanvas = (props: SignaturePadCanvasProps) => {
 
 	return (
 		<div onBlur={onBlur}>
-			<div
-				className={classes.signPadDiv}
-				onClick={handleSignPad}
-				style={{ backgroundColor: signature ? "white" : "lightgray" }}
-			>
+			<div className={classes.signPadDiv} onClick={handleSignPad}>
 				<div className={classes.textDiv}>
-					<SignIcon color={signature ? "primary" : "disabled"} />
+					<SignIcon color={disabled ? "disabled" : "primary"} />
 					{signature ? (
 						<div className={classes.imageDiv}>
 							<img src={signature} />
