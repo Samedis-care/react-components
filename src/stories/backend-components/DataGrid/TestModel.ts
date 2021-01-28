@@ -38,6 +38,7 @@ class TestModel extends Model<ModelFieldName, PageVisibility, null> {
 						create: ModelVisibilityEdit,
 						edit: ModelVisibilityEdit,
 					},
+					columnWidth: [150, 150],
 					customData: null,
 				},
 				last_name: {

@@ -1,5 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import { measureText } from "../../../utils";
+import React, { useCallback, useEffect, useState } from "react";
 import {
 	IDataGridColumnDef,
 	useDataGridColumnState,
@@ -19,6 +18,19 @@ export interface IDataGridContentColumnHeaderProps {
 
 export const HEADER_PADDING = 32; // px
 
+export const applyColumnWidthLimits = (
+	column: IDataGridColumnDef,
+	targetWidth: number
+): number => {
+	const { width } = column;
+	const absMinWidth = HEADER_PADDING * (column.filterable ? 3 : 2);
+	const wishMinWidth = (width && width[0]) || 0;
+	const wishMaxWidth = (width && width[1]) || Number.MAX_SAFE_INTEGER;
+	targetWidth = Math.max(targetWidth, absMinWidth, wishMinWidth);
+	targetWidth = Math.min(targetWidth, wishMaxWidth);
+	return targetWidth;
+};
+
 const ColumnHeader = (props: IDataGridContentColumnHeaderProps) => {
 	const { column } = props;
 	const { field, sortable, filterable } = column;
@@ -26,7 +38,6 @@ const ColumnHeader = (props: IDataGridContentColumnHeaderProps) => {
 	const [columnState, setColumnState] = useDataGridColumnState();
 	const { sort, sortOrder, filter } = columnState[field];
 	const [, setColumnWidthState] = useDataGridColumnsWidthState();
-	const headerRef = useRef<HTMLDivElement>(null);
 	const [dragging, setDragging] = useState(false);
 	const classes = useDataGridStyles();
 
@@ -101,20 +112,13 @@ const ColumnHeader = (props: IDataGridContentColumnHeaderProps) => {
 			evt.preventDefault();
 
 			const move = evt.movementX;
-			const curWidth = headerRef.current?.clientWidth;
 
 			setColumnWidthState((prevState) => ({
 				...prevState,
-				[field]:
-					move < 0 &&
-					curWidth &&
-					curWidth > HEADER_PADDING &&
-					curWidth - HEADER_PADDING - 10 > prevState[field] // prevent resizing beyond min width
-						? prevState[field]
-						: prevState[field] + move,
+				[field]: applyColumnWidthLimits(column, prevState[field] + move),
 			}));
 		},
-		[dragging, field, setColumnWidthState]
+		[column, dragging, field, setColumnWidthState]
 	);
 	const onColumnClick = useCallback(() => {
 		if (!sortable) return;
@@ -133,18 +137,22 @@ const ColumnHeader = (props: IDataGridContentColumnHeaderProps) => {
 		let width = 0;
 
 		gridRoot.querySelectorAll(".column-" + field).forEach((entry) => {
-			const entryWidth =
-				measureText(
-					getComputedStyle(entry).font,
-					(entry as HTMLElement).innerText
-				).width + HEADER_PADDING;
+			const widthMeasurement = document.createElement("div");
+			widthMeasurement.style.display = "inline";
+			widthMeasurement.style.position = "absolute";
+			widthMeasurement.style.left = "-99999px";
+			widthMeasurement.style.height = getComputedStyle(entry).height;
+			widthMeasurement.innerHTML = entry.innerHTML;
+			document.body.appendChild(widthMeasurement);
+			const entryWidth = widthMeasurement.clientWidth + HEADER_PADDING;
+			document.body.removeChild(widthMeasurement);
 			width = Math.max(width, entryWidth);
 		});
 		setColumnWidthState((prevState) => ({
 			...prevState,
-			[field]: width,
+			[field]: applyColumnWidthLimits(column, width),
 		}));
-	}, [field, gridRoot, setColumnWidthState]);
+	}, [column, field, gridRoot, setColumnWidthState]);
 
 	useEffect(() => {
 		document.addEventListener("mousemove", onDrag);
@@ -163,7 +171,6 @@ const ColumnHeader = (props: IDataGridContentColumnHeaderProps) => {
 				classes.columnHeaderContentWrapper +
 				(filterable ? " " + classes.columnHeaderFilterable : "")
 			}
-			ref={headerRef}
 		>
 			<ColumnHeaderContent
 				headerName={props.column.headerName}

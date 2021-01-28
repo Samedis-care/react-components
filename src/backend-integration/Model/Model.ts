@@ -45,6 +45,10 @@ export interface ModelFieldDefinition<
 	 */
 	sortable?: boolean;
 	/**
+	 * Column width settings (for BackendDataGrid)
+	 */
+	columnWidth?: IDataGridColumnDef["width"];
+	/**
 	 * The default value
 	 */
 	getDefaultValue?: () => Promise<TypeT> | TypeT;
@@ -320,6 +324,7 @@ class Model<
 					hidden: value.visibility.overview.hidden,
 					filterable: value.filterable,
 					sortable: value.sortable,
+					width: value.columnWidth,
 				};
 			});
 	}
