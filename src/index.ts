@@ -1,4 +1,6 @@
 import { DataGridTheme } from "./standalone/DataGrid";
+import { MenuTheme } from "./standalone/Portal/Menu";
+import { MenuItemTheme } from "./standalone/Portal/MenuItem/Material";
 import { ActionButtonTheme } from "./standalone/UIKit/ActionButton";
 import { CheckboxTheme } from "./standalone/UIKit/Checkbox";
 import { InputTheme } from "./standalone/UIKit/CommonStyles";
@@ -22,6 +24,10 @@ export * from "./utils";
 
 export interface ComponentsCareTheme {
 	dataGrid?: DataGridTheme;
+	portal?: {
+		menu?: MenuTheme;
+		menuItem?: MenuItemTheme;
+	};
 	uiKit?: {
 		label?: ComponentWithLabelTheme;
 		checkbox?: CheckboxTheme;

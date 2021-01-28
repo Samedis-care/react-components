@@ -46,6 +46,22 @@ const getCustomTheme = (): ThemeOptions => ({
 		...customPalette
 	},
 	componentsCare: {
+        portal: {
+            menu: {
+                container: {
+					width: "300px",
+					overflow: "hidden",
+                }
+			},
+			menuItem: {
+				borderRadius: "0 25px 25px 0",
+				backgroundColor: "green",
+				color: "pink",
+				style: {
+					border: "1px dotted red",
+				}
+			}
+        },
 		uiKit: {
 			label: {
 			},

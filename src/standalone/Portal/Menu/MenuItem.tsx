@@ -7,7 +7,6 @@ import React, {
 } from "react";
 import { IMenuItemDefinition, MenuItemProps, MenuProps } from "./index";
 import { Collapse } from "@material-ui/core";
-
 interface IProps extends Omit<MenuItemProps, "expanded" | "active"> {
 	/**
 	 * The menu item renderer properties
