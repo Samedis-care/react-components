@@ -2,7 +2,7 @@ import React, { useState, useCallback } from "react";
 import { makeStyles, InputAdornment, IconButton } from "@material-ui/core";
 import { Info as InfoIcon } from "@material-ui/icons";
 import { SignIcon } from "../../standalone";
-import SignPadDialog from "./SignPadDialog";
+import SignPadDialog from "../Dialog/SignPadDialog";
 import ccI18n from "../../i18n";
 
 export interface SignaturePadCanvasProps {

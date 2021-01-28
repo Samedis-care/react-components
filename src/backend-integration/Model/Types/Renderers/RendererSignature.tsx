@@ -3,7 +3,7 @@ import { FormControl, FormHelperText, FormLabel } from "@material-ui/core";
 import { ModelRenderParams } from "../../index";
 import ccI18n from "../../../../i18n";
 import TypeImage from "../TypeImage";
-import { SignaturePad } from "../../../../standalone";
+import { SignaturePad } from "../../../../non-standalone";
 
 /**
  * Renders an signature field (for electronic signing)
