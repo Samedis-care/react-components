@@ -14,17 +14,21 @@ export interface ErrorComponentProps {
 	error: Error;
 }
 
-export interface PageProps {
+export interface PageProps<KeyT extends ModelFieldName> {
 	/**
 	 * Indicates if the form is currently being submitted.
 	 * All submit buttons should be disabled if "isSubmitting" is true.
 	 */
 	isSubmitting: boolean;
 	/**
+	 * Is the form dirty?
+	 */
+	dirty: boolean;
+	/**
 	 * The values of the form, can be used for conditional rendering.
 	 * Only present if renderConditionally is set to true in FormProps
 	 */
-	values?: Record<string, unknown>;
+	values?: Record<KeyT, unknown>;
 	/**
 	 * Function to trigger form submit
 	 */
@@ -32,14 +36,18 @@ export interface PageProps {
 	/**
 	 * Function to trigger form reset
 	 */
-	reset: (nextState?: Partial<FormikState<Record<string, unknown>>>) => void;
+	reset: (nextState?: Partial<FormikState<Record<KeyT, unknown>>>) => void;
 }
 
-export interface FormProps {
+export interface FormProps<
+	KeyT extends ModelFieldName,
+	VisibilityT extends PageVisibility,
+	CustomT
+> {
 	/**
 	 * The data model this form follows
 	 */
-	model: Model<ModelFieldName, PageVisibility, unknown | null>;
+	model: Model<KeyT, VisibilityT, CustomT>;
 	/**
 	 * The current data entry id
 	 */
@@ -51,7 +59,7 @@ export interface FormProps {
 	/**
 	 * The form contents
 	 */
-	children: React.ComponentType<PageProps>;
+	children: React.ComponentType<PageProps<KeyT>>;
 	/**
 	 * Rerender page props if values changes
 	 */
@@ -61,14 +69,14 @@ export interface FormProps {
 	 * Contains data from server response
 	 * @param dataFromServer The data from the server response (model data)
 	 */
-	onSubmit?: (dataFromServer: Record<ModelFieldName, unknown>) => void;
+	onSubmit?: (dataFromServer: Record<KeyT, unknown>) => void;
 }
 
 export interface FormContextData {
 	/**
 	 * The data model of this form
 	 */
-	model: Model<ModelFieldName, PageVisibility, unknown | null>;
+	model: Model<ModelFieldName, PageVisibility, never>;
 	/**
 	 * Helper function to display errors
 	 * @param error The error to display
@@ -81,7 +89,13 @@ export interface FormContextData {
  */
 export const FormContext = React.createContext<FormContextData | null>(null);
 
-const Form = (props: FormProps) => {
+const Form = <
+	KeyT extends ModelFieldName,
+	VisibilityT extends PageVisibility,
+	CustomT
+>(
+	props: FormProps<KeyT, VisibilityT, CustomT>
+) => {
 	const { model, id, children, onSubmit } = props;
 	const ErrorComponent = props.errorComponent;
 
@@ -120,7 +134,7 @@ const Form = (props: FormProps) => {
 	);
 	const formContextData: FormContextData = useMemo(
 		() => ({
-			model,
+			model: (model as unknown) as Model<ModelFieldName, PageVisibility, never>,
 			setError,
 		}),
 		[model, setError]
@@ -149,6 +163,7 @@ const Form = (props: FormProps) => {
 					handleSubmit,
 					isSubmitting,
 					values,
+					dirty,
 					/* and other goodies */
 				}) => (
 					<form onSubmit={handleSubmit}>
@@ -158,6 +173,7 @@ const Form = (props: FormProps) => {
 							values={props.renderConditionally ? values : undefined}
 							submit={submitForm}
 							reset={resetForm}
+							dirty={dirty}
 						/>
 					</form>
 				)}
@@ -166,4 +182,4 @@ const Form = (props: FormProps) => {
 	);
 };
 
-export default React.memo(Form);
+export default React.memo(Form) as typeof Form;

@@ -43,11 +43,11 @@ const Content = (props: IDataGridContentProps) => {
 			{({ width, height }) => (
 				<MultiGrid
 					ref={dataViewRef}
-					columnCount={props.columns.length}
+					columnCount={props.columns.length + 1}
 					columnWidth={({ index }) =>
 						index === 0 ? 57 : columnWidth[props.columns[index - 1].field]
 					}
-					rowCount={state.rowsFiltered ?? state.rowsTotal}
+					rowCount={(state.rowsFiltered ?? state.rowsTotal) + 1}
 					rowHeight={({ index }) => (index === 0 ? 24 : 57)}
 					width={width}
 					height={height}

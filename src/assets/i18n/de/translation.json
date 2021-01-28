@@ -107,7 +107,7 @@
 		"connector": {
 			"json-api-client": {
 				"network-error": "Ein Netzwerkfehler ist aufgetreten.",
-				"parse-error": "Konnte die Antwort des Servers nicht verstehen (Ungültiges JSON). Der Server gab den Status {STATUS_CODE} {STATUS_TEXT} zurück."
+				"parse-error": "Konnte die Antwort des Servers nicht verstehen (Ungültiges JSON). Der Server gab den Status {{STATUS_CODE}} {{STATUS_TEXT}} zurück."
 			}
 		}
 	},

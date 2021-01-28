@@ -57,7 +57,11 @@ class RendererImage extends TypeImage {
 		}
 
 		const content = value ? (
-			<img src={value} alt={label} />
+			<img
+				src={value}
+				alt={label}
+				style={{ width: "100%", height: "100%", objectFit: "contain" }}
+			/>
 		) : (
 			<>{ccI18n.t("backend-integration.model.types.renderers.image.not-set")}</>
 		);

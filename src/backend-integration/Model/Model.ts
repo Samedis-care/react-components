@@ -141,6 +141,7 @@ class Model<
 		params: Partial<IDataGridLoadDataParameters> | undefined
 	): Promise<[Record<KeyT, unknown>[], ResponseMeta]> {
 		const [rawData, meta] = await this.connector.index(params, this);
+		// eslint-disable-next-line no-debugger
 		return [
 			await Promise.all(
 				rawData.map((data) =>
@@ -419,8 +420,8 @@ class Model<
 				continue;
 			}
 
-			// don't include disabled fields
-			if (field.visibility[visibility].disabled) {
+			// don't include disabled fields (except ID)
+			if (field.visibility[visibility].disabled && key !== "id") {
 				continue;
 			}
 

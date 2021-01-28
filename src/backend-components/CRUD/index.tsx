@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import Model, {
 	ModelFieldName,
 	PageVisibility,
@@ -9,28 +9,80 @@ import {
 	Switch,
 	useRouteMatch,
 	useHistory,
+	useLocation,
 } from "react-router-dom";
 import BackendDataGrid, { BackendDataGridProps } from "../DataGrid";
 import { Form, FormProps } from "../Form";
 import { hasPermission, usePermissionContext } from "../../framework";
+import { makeStyles } from "@material-ui/core/styles";
 
 export interface CrudProps<
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
 	CustomT
 > {
+	/**
+	 * The model to use
+	 */
 	model: Model<KeyT, VisibilityT, CustomT>;
-	formProps: Omit<FormProps, "id" | "model" | "children">;
-	children: FormProps["children"];
+	/**
+	 * The properties to pass to form
+	 */
+	formProps: Omit<
+		FormProps<KeyT, VisibilityT, CustomT>,
+		"id" | "model" | "children"
+	>;
+	/**
+	 * The renderer function which returns the form component
+	 * @param goBack Closes the form page
+	 */
+	children: (
+		goBack: () => void
+	) => FormProps<KeyT, VisibilityT, CustomT>["children"];
+	/**
+	 * The properties to pass to grid
+	 */
 	gridProps: Omit<
 		BackendDataGridProps<KeyT, VisibilityT, CustomT>,
 		"model" | "enableDelete" | "disableExport" | "onEdit" | "onAddNew"
 	>;
+	/**
+	 * The delete record permission
+	 */
 	deletePermission: string;
+	/**
+	 * The edit record permission
+	 */
 	editPermission: string;
+	/**
+	 * The create new record permission
+	 */
 	newPermission: string;
+	/**
+	 * The export records permission
+	 */
 	exportPermission: string;
+	/**
+	 * Disables routing and uses an internal state instead (useful for dialogs)
+	 */
+	disableRouting?: boolean;
+	/**
+	 * If routing is disabled: set the initial view (id, "new" or null), defaults to null
+	 */
+	initialView?: string | null;
 }
+
+const useStyles = makeStyles({
+	hide: {
+		display: "none",
+		width: "100%",
+		height: "100%",
+	},
+	show: {
+		width: "100%",
+		height: "100%",
+	},
+});
 
 const CRUD = <
 	KeyT extends ModelFieldName,
@@ -41,53 +93,82 @@ const CRUD = <
 ) => {
 	const history = useHistory();
 	const { path } = useRouteMatch();
+	const location = useLocation();
 	const [perms] = usePermissionContext();
+	const { disableRouting } = props;
+	const [id, setId] = useState<string | null>(props.initialView ?? null);
+	const classes = useStyles();
 
 	const showEditPage = useCallback(
 		(id: string) => {
-			history.push(`${path}/${id}`);
+			if (disableRouting) {
+				setId(id);
+			} else {
+				history.push(`${path}/${id}`);
+			}
 		},
-		[history, path]
+		[history, path, disableRouting]
 	);
 
 	const showNewPage = useCallback(() => {
-		history.push(`${path}/new`);
-	}, [history, path]);
+		if (disableRouting) {
+			setId("new");
+		} else {
+			history.push(`${path}/new`);
+		}
+	}, [history, path, disableRouting]);
 
-	return (
-		<Switch>
-			<Route path={`${path}`} exact>
-				<BackendDataGrid
-					model={props.model}
-					enableDelete={hasPermission(perms, props.deletePermission)}
-					disableExport={!hasPermission(perms, props.exportPermission)}
-					onEdit={
-						hasPermission(perms, props.editPermission)
-							? showEditPage
-							: undefined
+	const showOverview = useCallback(() => {
+		if (disableRouting) {
+			setId(null);
+		} else {
+			history.push(path);
+		}
+	}, [history, path, disableRouting]);
+
+	const grid = () => (
+		<BackendDataGrid
+			model={props.model}
+			enableDelete={hasPermission(perms, props.deletePermission)}
+			disableExport={!hasPermission(perms, props.exportPermission)}
+			onEdit={
+				hasPermission(perms, props.editPermission) ? showEditPage : undefined
+			}
+			onAddNew={
+				hasPermission(perms, props.editPermission) ? showNewPage : undefined
+			}
+			{...props.gridProps}
+		/>
+	);
+
+	const form = (id: string) => (
+		<Form
+			id={id === "new" ? null : id}
+			model={props.model}
+			{...props.formProps}
+		>
+			{props.children(showOverview)}
+		</Form>
+	);
+
+	return disableRouting ? (
+		<>
+			<div className={id !== null ? classes.hide : classes.show}>{grid()}</div>
+			{id !== null && form(id)}
+		</>
+	) : (
+		<>
+			<div className={location.pathname === path ? classes.show : classes.hide}>
+				{grid()}
+			</div>
+			<Switch>
+				<Route path={`${path}/:id`} exact>
+					{(routeProps: RouteChildrenProps<{ id: string }>) =>
+						form(routeProps.match?.params.id ?? "")
 					}
-					onAddNew={
-						hasPermission(perms, props.editPermission) ? showNewPage : undefined
-					}
-					{...props.gridProps}
-				/>
-			</Route>
-			<Route path={`${path}/:id`} exact>
-				{(routeProps: RouteChildrenProps<{ id: string }>) => (
-					<Form
-						id={
-							routeProps.match?.params.id === "new"
-								? null
-								: routeProps.match?.params.id
-						}
-						model={props.model}
-						{...props.formProps}
-					>
-						{props.children}
-					</Form>
-				)}
-			</Route>
-		</Switch>
+				</Route>
+			</Switch>
+		</>
 	);
 };
 

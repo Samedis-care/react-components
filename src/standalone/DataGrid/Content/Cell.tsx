@@ -1,5 +1,6 @@
 import {
 	IDataGridColumnDef,
+	useDataGridProps,
 	useDataGridState,
 	useDataGridStyles,
 } from "../index";
@@ -23,6 +24,7 @@ export interface CellProps extends GridCellProps {
 const Cell = (props: CellProps): React.ReactElement => {
 	const classes = useDataGridStyles();
 	const { columns, columnIndex, rowIndex } = props;
+	const { onEdit } = useDataGridProps();
 	const [state, setState] = useDataGridState();
 	const [hover, setHover] = props.hoverState;
 	const id = state.rows[props.rowIndex - 1]?.id || "undefined";
@@ -37,21 +39,24 @@ const Cell = (props: CellProps): React.ReactElement => {
 		}));
 	}, [setState, id]);
 
+	const editRecord = useCallback(() => {
+		if (onEdit) onEdit(id);
+	}, [id, onEdit]);
+
+	const column: IDataGridColumnDef | undefined = columns[columnIndex - 1];
+
 	let content: React.ReactNode = null;
 	if (rowIndex === 0 && columnIndex === 0) {
 		// empty
 	} else if (rowIndex === 0) {
 		// header
-		content = <ColumnHeader column={columns[columnIndex - 1]} />;
+		content = <ColumnHeader column={column} />;
 	} else if (columnIndex === 0) {
 		content = <SelectRow id={id} />;
 	} else {
-		const columnName = columns[columnIndex - 1].field;
 		content =
 			rowIndex - 1 in state.rows ? (
-				<div className={`column-${columnName}`}>
-					{state.rows[rowIndex - 1][columnName]}
-				</div>
+				state.rows[rowIndex - 1][column.field]
 			) : (
 				<Skeleton variant={"text"} />
 			);
@@ -72,11 +77,13 @@ const Cell = (props: CellProps): React.ReactElement => {
 			onMouseEnter={startHover}
 			onMouseLeave={endHover}
 			onClick={toggleSelection}
+			onDoubleClick={editRecord}
 			className={
 				classes.cell +
 				" " +
 				(props.rowIndex !== 0 ? classes.dataCell : classes.headerCell) +
 				" " +
+				(props.rowIndex !== 0 && column ? `column-${column.field} ` : "") +
 				(isSelected(state.selectAll, state.selectedRows, id) ||
 				hover == rowIndex
 					? classes.dataCellSelected

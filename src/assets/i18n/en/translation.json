@@ -74,7 +74,7 @@
 		"connector": {
 			"json-api-client": {
 				"network-error": "A network error occurred.",
-				"parse-error": "Failed parsing response (Invalid JSON). Server returned status {STATUS_CODE} {STATUS_TEXT}."
+				"parse-error": "Failed parsing response (Invalid JSON). Server returned status {{STATUS_CODE}} {{STATUS_TEXT}}."
 			}
 		},
 		"model": {

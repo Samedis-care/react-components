@@ -107,7 +107,7 @@
 		"connector": {
 			"json-api-client": {
 				"network-error": "Une erreur de réseau s'est produite.",
-				"parse-error": "Echec de l'analyse de la réponse (JSON invalide). Le serveur a renvoyé l'état {STATUS_CODE} {STATUS_TEXT}."
+				"parse-error": "Echec de l'analyse de la réponse (JSON invalide). Le serveur a renvoyé l'état {{STATUS_CODE}} {{STATUS_TEXT}}."
 			}
 		}
 	},
