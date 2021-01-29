@@ -58,7 +58,7 @@
 	"husky": {
 		"hooks": {
 			"pre-commit": "lint-staged --allow-empty",
-			"pre-push": "npm run build && npm test"
+			"pre-push": "tsc && TZ=UTC jest"
 		}
 	},
 	"lint-staged": {
