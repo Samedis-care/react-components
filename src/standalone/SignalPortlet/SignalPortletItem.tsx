@@ -18,7 +18,7 @@ export interface SignalPortletItemDef {
 	/**
 	 * The text of the portlet item
 	 */
-	text: NonNullable<React.ReactNode>;
+	text: React.ReactNode;
 	/**
 	 * The url the portlet item links to onClick
 	 */

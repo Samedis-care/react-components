@@ -19,7 +19,7 @@ export interface SignalPortletProps extends SignalPortletColorConfig {
 	/**
 	 * The title of the portlet
 	 */
-	title: NonNullable<React.ReactNode>;
+	title: React.ReactNode;
 	/**
 	 * The portlet items
 	 */
