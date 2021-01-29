@@ -57,7 +57,8 @@
 	},
 	"husky": {
 		"hooks": {
-			"pre-commit": "lint-staged --allow-empty && npm run build && npm test"
+			"pre-commit": "lint-staged --allow-empty",
+			"pre-push": "npm run build && npm test"
 		}
 	},
 	"lint-staged": {
