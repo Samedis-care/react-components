@@ -207,9 +207,9 @@ export interface IDataGridColumnDef {
 	 */
 	isLocked?: boolean;
 	/**
-	 * Key to re-calc locked element position
+	 * Column width configuration
 	 */
-	fixedColumnKey?: string;
+	width?: [minWidth: number, maxWidth: number, initialWidth?: number];
 }
 
 export interface IDataGridColumnState {
@@ -446,6 +446,9 @@ const useStyles = makeStyles((theme: Theme) => ({
 		),
 	},
 	dataCell: {
+		overflow: "hidden",
+		whiteSpace: "nowrap",
+		textOverflow: "ellipsis",
 		padding: HEADER_PADDING / 2,
 		backgroundColor:
 			theme.componentsCare?.dataGrid?.content?.backgroundColor ??
@@ -576,9 +579,6 @@ const DataGrid = (props: IDataGridProps) => {
 				.map((column) => ({
 					...column,
 					isLocked: lockedColumns.includes(column.field),
-					fixedColumnKey: lockedColumns.includes(column.field)
-						? Math.random().toString()
-						: "",
 				})),
 		[columns, hiddenColumns, lockedColumns]
 	);
@@ -600,6 +600,22 @@ const DataGrid = (props: IDataGridProps) => {
 			} catch (e) {
 				// if canvas is not available to measure text
 				widthData[column.field] = column.headerName.length * 16;
+			}
+			if (column.width) {
+				// initial width
+				if (column.width[2] !== undefined) {
+					widthData[column.field] = column.width[2];
+				}
+				// min width
+				widthData[column.field] = Math.max(
+					column.width[0],
+					widthData[column.field]
+				);
+				// max width
+				widthData[column.field] = Math.min(
+					column.width[1],
+					widthData[column.field]
+				);
 			}
 		});
 		return widthData;

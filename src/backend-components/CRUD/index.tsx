@@ -44,7 +44,12 @@ export interface CrudProps<
 	 */
 	gridProps: Omit<
 		BackendDataGridProps<KeyT, VisibilityT, CustomT>,
-		"model" | "enableDelete" | "disableExport" | "onEdit" | "onAddNew"
+		| "model"
+		| "enableDelete"
+		| "disableExport"
+		| "onEdit"
+		| "onAddNew"
+		| "forceRefreshToken"
 	>;
 	/**
 	 * The delete record permission
@@ -97,6 +102,9 @@ const CRUD = <
 	const [perms] = usePermissionContext();
 	const { disableRouting } = props;
 	const [id, setId] = useState<string | null>(props.initialView ?? null);
+	const [gridRefreshToken, setGridRefreshToken] = useState<string>(
+		new Date().getTime().toString()
+	);
 	const classes = useStyles();
 
 	const showEditPage = useCallback(
@@ -126,18 +134,29 @@ const CRUD = <
 		}
 	}, [history, path, disableRouting]);
 
+	const handleSubmit = useCallback(
+		(data: Record<KeyT, unknown>) => {
+			if (props.formProps.onSubmit) {
+				props.formProps.onSubmit(data);
+			}
+			setGridRefreshToken(new Date().getTime().toString());
+		},
+		[props.formProps]
+	);
+
 	const grid = () => (
 		<BackendDataGrid
-			model={props.model}
 			enableDelete={hasPermission(perms, props.deletePermission)}
 			disableExport={!hasPermission(perms, props.exportPermission)}
+			{...props.gridProps}
+			model={props.model}
+			forceRefreshToken={gridRefreshToken}
 			onEdit={
 				hasPermission(perms, props.editPermission) ? showEditPage : undefined
 			}
 			onAddNew={
 				hasPermission(perms, props.editPermission) ? showNewPage : undefined
 			}
-			{...props.gridProps}
 		/>
 	);
 
@@ -146,6 +165,7 @@ const CRUD = <
 			id={id === "new" ? null : id}
 			model={props.model}
 			{...props.formProps}
+			onSubmit={handleSubmit}
 		>
 			{props.children(showOverview)}
 		</Form>

@@ -13,4 +13,5 @@ export * from "./LocalizedDateTimePickers";
 export { default as InfoBox } from "./InfoBox";
 export * from "./Icons";
 export * from "./UIKit";
+export { default as SignalPortlet } from "./SignalPortlet";
 export { default as Notifications } from "./Notifications";

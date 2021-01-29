@@ -40,6 +40,7 @@ const Cell = (props: CellProps): React.ReactElement => {
 	}, [setState, id]);
 
 	const editRecord = useCallback(() => {
+		if (id === "undefined") return;
 		if (onEdit) onEdit(id);
 	}, [id, onEdit]);
 
