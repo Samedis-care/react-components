@@ -1,12 +1,22 @@
 import React, { useState, useCallback, useEffect } from "react";
-import { TextFieldProps, ListItemText } from "@material-ui/core";
-import { Autocomplete, AutocompleteProps } from "@material-ui/lab";
+import {
+	TextFieldProps,
+	ListItemText,
+	makeStyles,
+	Theme,
+} from "@material-ui/core";
+import {
+	Autocomplete,
+	AutocompleteClassKey,
+	AutocompleteProps,
+} from "@material-ui/lab";
 import { Add as AddIcon, ExpandMore } from "@material-ui/icons";
 import TextFieldWithHelp, {
 	TextFieldWithHelpProps,
 } from "../UIKit/TextFieldWithHelp";
 import i18n from "../../i18n";
 import { SelectorSmallListItem, SmallListItemIcon } from "../..";
+import { combineClassMaps } from "../../utils";
 
 export interface BaseSelectorData {
 	/**
@@ -107,6 +117,29 @@ export interface BaseSelectorProps extends TextFieldWithHelpProps {
 	>["classes"];
 }
 
+const themingStyles = makeStyles((theme: Theme) => ({
+	root: {
+		backgroundColor: theme.componentsCare?.selector?.backgroundColor,
+		"& fieldset": {
+			border: theme.componentsCare?.selector?.border,
+			borderRadius: theme.componentsCare?.selector?.borderRadius,
+			borderWidth: theme.componentsCare?.selector?.borderWidth,
+			borderStyle: theme.componentsCare?.selector?.borderStyle,
+			borderColor: theme.componentsCare?.selector?.borderColor,
+		},
+		...theme.componentsCare?.selector?.style,
+	},
+	focused: {
+		"& fieldset": {
+			border: theme.componentsCare?.selector?.border,
+			borderRadius: theme.componentsCare?.selector?.borderRadius,
+			borderStyle: theme.componentsCare?.selector?.borderStyle,
+			borderColor: theme.componentsCare?.selector?.active?.borderColor,
+		},
+		...theme.componentsCare?.selector?.active?.style,
+	},
+}));
+
 const BaseSelector = (props: BaseSelectorProps) => {
 	const {
 		classes,
@@ -198,11 +231,17 @@ const BaseSelector = (props: BaseSelectorProps) => {
 		}
 	}, [open, setDefaultOptions]);
 
+	const themingClasses = themingStyles(props);
+
+	const combinedClasses = classes
+		? combineClassMaps<AutocompleteClassKey>(themingClasses, classes)
+		: themingClasses;
+
 	return (
 		<div>
 			<Autocomplete
 				id={autocompleteId}
-				classes={classes}
+				classes={combinedClasses}
 				open={open}
 				onOpen={() => {
 					setOpen(true);

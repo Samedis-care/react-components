@@ -20,6 +20,7 @@ const getDefaultTheme = (): ThemeOptions => ({
 /* re-usable colors for our theme */
 const customColors = {
 	white: "rgb(255, 255, 255)",
+	grey: "rgb(127, 127, 127)"
 };
 
 const customPalette = {
@@ -42,10 +43,26 @@ const customPalette = {
 const getCustomTheme = (): ThemeOptions => ({
 	spacing: [0, 5, 7, 10, 15, 21, 25],
 	palette: {
-		type: "dark",
+		type: "light",
 		...customPalette
 	},
 	componentsCare: {
+		selector: {
+			backgroundColor: "#FFF",
+			borderWidth: "1px",
+			borderStyle: "dotted",
+			borderColor: "red", //customColors.grey,
+			borderRadius: "48px",
+			active: {
+				borderColor: "#C0C", //customColors.grey,
+			},
+			label: {
+				color: customColors.grey,
+				fontWeight: "bold",
+				fontSize: "0.7rem",
+				margin: "5px 0",
+			}
+		},
         portal: {
             menu: {
                 container: {
@@ -130,6 +147,7 @@ const getCustomTheme = (): ThemeOptions => ({
 });
 
 const loadTheme = (): ThemeOptions => {
+	return getCustomTheme();
 	const themeStr = localStorage.getItem("theme");
 	if (!themeStr) return getDefaultTheme();
 	return JSON.parse(themeStr) as ThemeOptions;

@@ -3,7 +3,7 @@ import BaseSelector, {
 	BaseSelectorData,
 	BaseSelectorProps,
 } from "./BaseSelector";
-import { makeStyles, Grid, Paper } from "@material-ui/core";
+import { makeStyles, Grid, Paper, Theme } from "@material-ui/core";
 import MultiSelectEntry, { IMultiSelectEntryProps } from "./MultiSelectEntry";
 import { combineClassMaps } from "../../utils";
 import { AutocompleteClassKey } from "@material-ui/lab/Autocomplete/Autocomplete";
@@ -37,11 +37,13 @@ export interface MultiSelectProps
 	selectedEntryRenderer?: React.ComponentType<IMultiSelectEntryProps>;
 }
 
-const useSelectorStyles = makeStyles({
+const useSelectorStyles = makeStyles((theme: Theme) => ({
 	inputRoot: {
-		borderRadius: "4px 4px 0px 0px",
+		borderRadius:
+			theme.componentsCare?.selector?.borderRadius || "4px 4px 0px 0px",
+		...theme.componentsCare?.selector?.style,
 	},
-});
+}));
 
 const useStyles = makeStyles({
 	paperWrapper: {

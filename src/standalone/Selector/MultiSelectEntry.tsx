@@ -7,6 +7,8 @@ import {
 	withStyles,
 	createStyles,
 	WithStyles,
+	makeStyles,
+	Theme,
 } from "@material-ui/core";
 import { SmallIconButton, SmallListItem, SmallListItemIcon } from "../Small";
 import { Delete as DeleteIcon } from "@material-ui/icons";
@@ -32,28 +34,69 @@ export interface IMultiSelectEntryProps {
 	data: MultiSelectorData;
 }
 
-const styles = createStyles({
+const styles = createStyles(() => ({
 	root: {},
 	divider: {},
-});
+}));
+
+const useStyles = makeStyles((theme: Theme) => ({
+	container: {
+		border: theme.componentsCare?.selector?.selected?.container?.border,
+		borderRadius:
+			theme.componentsCare?.selector?.selected?.container?.borderRadius,
+		margin: theme.componentsCare?.selector?.selected?.container?.margin,
+		padding: theme.componentsCare?.selector?.selected?.container?.padding,
+		backgroundColor:
+			theme.componentsCare?.selector?.selected?.container?.backgroundColor,
+		style: theme.componentsCare?.selector?.selected?.container?.style,
+	},
+	selected: {
+		border: theme.componentsCare?.selector?.selected?.border,
+		borderRadius: theme.componentsCare?.selector?.selected?.borderRadius,
+		margin: theme.componentsCare?.selector?.selected?.margin,
+		padding: theme.componentsCare?.selector?.selected?.padding,
+		backgroundColor: theme.componentsCare?.selector?.selected?.backgroundColor,
+		style: theme.componentsCare?.selector?.selected?.style,
+	},
+	label: {
+		margin: theme.componentsCare?.selector?.selected?.label?.margin,
+		padding: theme.componentsCare?.selector?.selected?.label?.padding,
+		color: theme.componentsCare?.selector?.selected?.label?.color,
+		...theme.componentsCare?.selector?.selected?.label?.style,
+	},
+	icon: {
+		...theme.componentsCare?.selector?.selected?.icon?.style,
+	},
+	iconSvg: {
+		fill: theme.componentsCare?.selector?.selected?.icon?.color,
+	},
+}));
 
 const MultiSelectEntry = (props: IMultiSelectEntryProps & WithStyles) => {
 	const { enableIcons, enableDivider, handleDelete, data, classes } = props;
+	const styleClasses = useStyles(props);
 
 	return (
 		<>
-			<List className={classes.root}>
-				<SmallListItem button onClick={data.onClick}>
+			<List className={[classes.root, styleClasses.container].join(" ")}>
+				<SmallListItem
+					button
+					onClick={data.onClick}
+					className={styleClasses.selected}
+				>
 					{enableIcons && <SmallListItemIcon>{data.icon}</SmallListItemIcon>}
-					<ListItemText>{data.label}</ListItemText>
+					<ListItemText className={styleClasses.label}>
+						{data.label}
+					</ListItemText>
 					<ListItemSecondaryAction>
 						<SmallIconButton
+							className={styleClasses.icon}
 							edge={"end"}
 							name={data.value}
 							disabled={!handleDelete}
 							onClick={handleDelete}
 						>
-							<DeleteIcon />
+							<DeleteIcon className={styleClasses.iconSvg} />
 						</SmallIconButton>
 					</ListItemSecondaryAction>
 				</SmallListItem>

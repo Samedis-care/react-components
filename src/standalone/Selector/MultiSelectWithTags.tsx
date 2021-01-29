@@ -5,6 +5,7 @@ import {
 	Switch,
 	Grid,
 	createStyles,
+	makeStyles,
 	Theme,
 	withStyles,
 	WithStyles,
@@ -137,6 +138,17 @@ export interface MultiSelectWithTagsProps<Data extends MultiSelectData>
 	autocompleteId?: string;
 }
 
+const themingStyles = makeStyles((theme: Theme) => ({
+	selectorLabel: {
+		display: theme.componentsCare?.selector?.label?.display || "inline-block",
+		color: theme.componentsCare?.selector?.label?.color,
+		fontWeight: theme.componentsCare?.selector?.label?.fontWeight,
+		fontSize: theme.componentsCare?.selector?.label?.fontSize,
+		margin: theme.componentsCare?.selector?.label?.margin,
+		...theme.componentsCare?.selector?.label?.style,
+	},
+}));
+
 const styles = createStyles((theme: Theme) => ({
 	paperWrapper: {
 		boxShadow: "none",
@@ -157,6 +169,7 @@ const styles = createStyles((theme: Theme) => ({
 	searchLabel: {
 		lineHeight: "30px",
 		float: "left",
+		fontStyle: "italic",
 	},
 	switch: {
 		lineHeight: "30px",
@@ -180,7 +193,7 @@ const AntSwitch = withStyles((theme: Theme) => ({
 			"& + $track": {
 				opacity: 1,
 				backgroundColor: theme.palette.primary.main,
-				borderColor: theme.palette.primary.main,
+				borderColor: "5px dotted blue", //theme.palette.primary.main,
 			},
 		},
 	},
@@ -322,9 +335,13 @@ const MultiSelectWithTags = <Data extends MultiSelectData>(
 		[handleAutoComplete]
 	);
 
+	const themingClasses = themingStyles();
+
 	return (
 		<Typography component="div">
-			<Typography component="label">{title}</Typography>
+			<Typography component="label" className={themingClasses.selectorLabel}>
+				{title}
+			</Typography>
 			<SingleSelect
 				autocompleteId={
 					props.autocompleteId
