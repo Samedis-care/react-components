@@ -7,7 +7,7 @@ export interface SignPadProps {
 	/**
 	 * Boolean flag to disable edit signature
 	 */
-	disabled?: boolean;
+	disabled: boolean;
 	/**
 	 * The base64 string of signature
 	 */
@@ -23,7 +23,7 @@ export interface SignPadProps {
 	/**
 	 * Open sign pad
 	 */
-	openSignPad: () => void;
+	openSignPad?: () => void;
 }
 
 const useStyles = makeStyles((theme) => ({

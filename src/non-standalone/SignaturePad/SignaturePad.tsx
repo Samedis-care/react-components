@@ -1,8 +1,9 @@
-import React, { useState } from "react";
-import SignPad from "../../standalone/SignPad/index";
-import SignPadDialog from "../Dialog/SignPadDialog";
+import React from "react";
+import SignPad, { SignPadProps } from "../../standalone/SignPad/index";
+import { useDialogContext } from "../../framework";
+import { showSignPadDialog } from "../../non-standalone/Dialog";
 
-export interface SignaturePadCanvasProps {
+export interface SignaturePadCanvasProps extends SignPadProps {
 	/**
 	 * The props used to draw HTML canvas
 	 */
@@ -16,14 +17,6 @@ export interface SignaturePadCanvasProps {
 	 */
 	penColor?: string;
 	/**
-	 * Boolean flag to disable edit signature
-	 */
-	disabled?: boolean;
-	/**
-	 * The base64 string of signature
-	 */
-	signature: string;
-	/**
 	 * Callback method which returns signature base64 string
 	 */
 	setSignature?: (imageURL: string) => void;
@@ -31,45 +24,23 @@ export interface SignaturePadCanvasProps {
 	 * Blur event
 	 */
 	onBlur?: React.FocusEventHandler<HTMLDivElement>;
-	/**
-	 * Open info dialog
-	 */
-	openInfo?: () => void;
 }
 
-const SignaturePadCanvas = (props: SignaturePadCanvasProps) => {
-	const {
-		signature,
-		setSignature,
-		disabled,
-		clearOnResize,
-		canvasProps,
-		penColor,
-		onBlur,
-		openInfo,
-	} = props;
-
-	const [dialog, setDialog] = useState(false);
-	const handleSignPad = React.useCallback(() => {
-		if (!disabled) setDialog(!dialog);
-	}, [dialog, disabled]);
+const SignaturePadCanvas = (
+	props: SignaturePadCanvasProps & Omit<SignPadProps, "classes" | "openSignPad">
+) => {
+	const { signature, disabled, onBlur, openInfo, ...dialogProps } = props;
+	const [pushDialog] = useDialogContext();
 
 	return (
 		<div onBlur={onBlur}>
 			<SignPad
-				openSignPad={handleSignPad}
+				openSignPad={() =>
+					showSignPadDialog(pushDialog, { disabled, signature, ...dialogProps })
+				}
 				signature={signature}
 				disabled={disabled}
 				openInfo={openInfo}
-			/>
-			<SignPadDialog
-				openDialog={dialog}
-				clearOnResize={clearOnResize}
-				canvasProps={canvasProps}
-				penColor={penColor}
-				setSignature={setSignature}
-				signature={signature}
-				handleSignPad={handleSignPad}
 			/>
 		</div>
 	);

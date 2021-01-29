@@ -137,3 +137,36 @@ export interface IDialogConfigForm extends IDialogConfigSimple {
 	 */
 	inputs: JSX.Element[];
 }
+
+/**
+ * Props which will be provided in sign pad dialog
+ */
+export interface IDialogConfigSign {
+	/**
+	 * Boolean flag to disable dialog
+	 */
+	disabled: boolean;
+	/**
+	 * Boolean flag to clear signature
+	 */
+	clearOnResize?: boolean;
+	/**
+	 * The props used to draw HTML canvas
+	 */
+	canvasProps?: React.DetailedHTMLProps<
+		React.CanvasHTMLAttributes<HTMLCanvasElement>,
+		HTMLCanvasElement
+	>;
+	/**
+	 * Use to change signature pen color
+	 */
+	penColor?: string;
+	/**
+	 * The base64 string of signature
+	 */
+	signature: string;
+	/**
+	 * Callback method which returns signature base64 string
+	 */
+	setSignature?: (url: string) => void;
+}
