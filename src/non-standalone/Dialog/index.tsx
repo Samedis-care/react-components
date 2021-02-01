@@ -5,3 +5,4 @@ export * from "./ConfirmDialog";
 export * from "./InputDialog";
 export * from "./FormDialog";
 export * from "./Utils";
+export * from "./SignPadDialog";
