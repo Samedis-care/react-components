@@ -31,13 +31,13 @@ const SignaturePadCanvas = (
 ) => {
 	const { signature, disabled, onBlur, openInfo, ...dialogProps } = props;
 	const [pushDialog] = useDialogContext();
-
+	const showSignDialog = React.useCallback(() => {
+		showSignPadDialog(pushDialog, { disabled, signature, ...dialogProps });
+	}, [pushDialog, disabled, signature, dialogProps]);
 	return (
 		<div onBlur={onBlur}>
 			<SignPad
-				openSignPad={() =>
-					showSignPadDialog(pushDialog, { disabled, signature, ...dialogProps })
-				}
+				openSignPad={showSignDialog}
 				signature={signature}
 				disabled={disabled}
 				openInfo={openInfo}
