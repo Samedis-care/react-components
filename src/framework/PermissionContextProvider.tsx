@@ -35,14 +35,16 @@ export const usePermissionContext = (): [
 };
 
 /**
+ * A single permission, multiple permissions or no permission required (null)
+ */
+export type Permission = string | string[] | null;
+
+/**
  * Pattern matching permission checking
  * @param perms A list of permissions, usually taken from PermissionContext (usePermissionContext)
  * @param perm Permission(s) to check
  */
-export const hasPermission = (
-	perms: string[],
-	perm: string | string[] | null
-): boolean => {
+export const hasPermission = (perms: string[], perm: Permission): boolean => {
 	if (perm === null) return true;
 	if (typeof perm !== "string") {
 		return (

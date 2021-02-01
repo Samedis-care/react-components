@@ -17,8 +17,17 @@ export interface BackendDataGridProps<
 	VisibilityT extends PageVisibility,
 	CustomDataT
 > extends Omit<IDataGridProps, "loadData" | "columns" | "exporters"> {
+	/**
+	 * The model to use
+	 */
 	model: Model<KeyT, VisibilityT, CustomDataT>;
+	/**
+	 * Enable deletion?
+	 */
 	enableDelete?: boolean;
+	/**
+	 * Disable export?
+	 */
 	disableExport?: boolean;
 }
 

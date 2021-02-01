@@ -13,7 +13,11 @@ import {
 } from "react-router-dom";
 import BackendDataGrid, { BackendDataGridProps } from "../DataGrid";
 import { Form, FormProps } from "../Form";
-import { hasPermission, usePermissionContext } from "../../framework";
+import {
+	hasPermission,
+	Permission,
+	usePermissionContext,
+} from "../../framework";
 import { makeStyles } from "@material-ui/core/styles";
 
 export interface CrudProps<
@@ -54,19 +58,19 @@ export interface CrudProps<
 	/**
 	 * The delete record permission
 	 */
-	deletePermission: string;
+	deletePermission: Permission;
 	/**
 	 * The edit record permission
 	 */
-	editPermission: string;
+	editPermission: Permission;
 	/**
 	 * The create new record permission
 	 */
-	newPermission: string;
+	newPermission: Permission;
 	/**
 	 * The export records permission
 	 */
-	exportPermission: string;
+	exportPermission: Permission;
 	/**
 	 * Disables routing and uses an internal state instead (useful for dialogs)
 	 */
