@@ -72,7 +72,7 @@ interface InfoBoxProps {
 	/**
 	 * The message inside the info box
 	 */
-	message: string;
+	message: React.ReactNode;
 	/**
 	 * Change event fired upon expansion/retraction of the info box
 	 * @param event The change event
