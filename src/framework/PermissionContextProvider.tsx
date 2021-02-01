@@ -6,15 +6,15 @@ export interface PermissionContextProviderProps {
 
 /**
  * General information regarding permission format:
- * Each permission is specified as path using . (dot) as seperation character, ex:
- * - module.submodule.function.subfunction
+ * Each permission is specified as path using . (dot) as separation character, ex:
+ * - module.submodule.function.sub-function
  * - module.submodule.function
  * - module.function
  * - module
  *
  * Permissions support the * (asterisk) character als wildcard matching character, ex:
- * - module.* => matches module.submodule.function.subfunction, module.submodul.function and module.function, but not module
- * - module.submodule.* => matches module.submodule.function.subfunction, module.submodul.function
+ * - module.* => matches module.submodule.function.sub-function, module.submodule.function and module.function, but not module
+ * - module.submodule.* => matches module.submodule.function.sub-function, module.submodule.function
  * - * => matches everything
  */
 export const PermissionContext = React.createContext<
@@ -48,7 +48,7 @@ export const hasPermission = (perms: string[], perm: Permission): boolean => {
 	if (perm === null) return true;
 	if (typeof perm !== "string") {
 		return (
-			perm.map((cando) => hasPermission(perms, cando)).filter((res) => !res)
+			perm.map((canDo) => hasPermission(perms, canDo)).filter((res) => !res)
 				.length > 0
 		);
 	}
