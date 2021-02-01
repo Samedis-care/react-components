@@ -90,7 +90,9 @@ export interface IDataGridCallbacks {
 	 * Extracts additional filters from the provided custom data
 	 * @param customData The custom user-defined state-stored data
 	 */
-	getAdditionalFilters?: (customData: unknown) => DataGridAdditionalFilters;
+	getAdditionalFilters?: (
+		customData: DataGridCustomDataType
+	) => DataGridAdditionalFilters;
 }
 
 export type DataGridAdditionalFilters = Record<string, unknown>;
