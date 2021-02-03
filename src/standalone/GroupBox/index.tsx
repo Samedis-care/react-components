@@ -8,6 +8,7 @@ const useStyles = makeStyles({
 		borderColor: "lightgrey",
 		borderRadius: 4,
 		borderWidth: 1,
+		position: "relative",
 	},
 });
 
