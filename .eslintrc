@@ -30,6 +30,7 @@
 	},
 	"rules": {
 		"no-console": "warn",
+		"no-debugger": "warn",
 		"no-eval": "error",
 		"import/first": "error",
 		"prettier/prettier": "warn",

@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from "react";
 import "../../../i18n";
-import { BaseSelectorData, MultiSelectorData } from "../../../standalone";
+import { MultiSelectorData } from "../../../standalone";
 import { action } from "@storybook/addon-actions";
 import { boolean, number, text } from "@storybook/addon-knobs";
 import { Box } from "@material-ui/core";
