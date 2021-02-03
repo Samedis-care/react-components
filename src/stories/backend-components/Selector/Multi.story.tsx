@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from "react";
 import "../../../i18n";
-import { BaseSelectorData } from "../../../standalone";
+import { BaseSelectorData, MultiSelectorData } from "../../../standalone";
 import { action } from "@storybook/addon-actions";
 import { boolean, number, text } from "@storybook/addon-knobs";
 import { Box } from "@material-ui/core";
@@ -36,7 +36,7 @@ export const SelectorMulti = (): React.ReactElement => {
 	const modelToSelectorData = useCallback(
 		(
 			data: Record<keyof typeof TestModelInstance.fields, unknown>
-		): BaseSelectorData => ({
+		): MultiSelectorData => ({
 			value: data.id as string,
 			label: `${data.first_name as string} ${data.last_name as string}`,
 			icon: data.avatar ? (

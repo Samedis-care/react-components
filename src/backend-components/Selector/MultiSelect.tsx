@@ -26,7 +26,7 @@ export interface BackendMultiSelectProps<
 	 */
 	modelToSelectorData: (
 		modelData: Record<KeyT, unknown>
-	) => Promise<BaseSelectorData> | BaseSelectorData;
+	) => Promise<MultiSelectorData> | MultiSelectorData;
 	/**
 	 * The amount of search results to load (defaults to 25)
 	 */
