@@ -16,11 +16,11 @@ const useStyles = makeStyles({
 	},
 	avatar: {
 		"& img": {
-			maxHeight: "80px",
+			maxHeight: "160px",
 			width: "auto",
-			position: "absolute",
-			left: "150px",
-			top: "20%",
+			marginLeft: "auto",
+			marginRight: "auto",
+			display: "block",
 		},
 		"& fieldset": {
 			height: "100%",
@@ -65,7 +65,13 @@ export const CrudStory = (): React.ReactElement => {
 						<Grid item xs={6} className={classes.avatar}>
 							<Field name={"avatar"} />
 						</Grid>
-						<Grid item xs={6} container spacing={2}>
+						<Grid
+							item
+							xs={6}
+							container
+							spacing={2}
+							style={{ alignContent: "flex-start" }}
+						>
 							<Grid item xs={12}>
 								<Field name={"first_name"} />
 							</Grid>
