@@ -1,12 +1,6 @@
 import React from "react";
-import {
-	FormControl,
-	FormHelperText,
-	FormLabel,
-	Typography,
-} from "@material-ui/core";
+import { FormControl, FormHelperText, FormLabel } from "@material-ui/core";
 import { ModelFieldName, ModelRenderParams, PageVisibility } from "../../index";
-import ccI18n from "../../../../i18n";
 import TypeStringArray from "../TypeStringArray";
 import BackendMultiSelect, {
 	BackendMultiSelectProps,
