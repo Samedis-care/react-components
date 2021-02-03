@@ -4,7 +4,7 @@ import { BaseSelectorData, SingleSelect } from "../../../standalone/Selector";
 import { colourOptions } from "./Data";
 import { action } from "@storybook/addon-actions";
 import { boolean, text } from "@storybook/addon-knobs";
-import { Box, CssBaseline } from "@material-ui/core";
+import { Box } from "@material-ui/core";
 
 export const SelectorSingle = (): React.ReactElement => {
 	const [selected, setSelected] = useState<BaseSelectorData | null>(null);
@@ -40,26 +40,23 @@ export const SelectorSingle = (): React.ReactElement => {
 	);
 
 	return (
-		<>
-			<CssBaseline />
-			<Box m={2}>
-				<SingleSelect
-					selected={selected}
-					onSelect={onSelect}
-					onLoad={loadData}
-					onAddNew={enableAddNew ? onAddNewAction : undefined}
-					enableIcons={icons}
-					disableClearable={disableClearable}
-					disabled={disabled}
-					addNewLabel={addNewLabel}
-					loadingText={loadingText}
-					noOptionsText={noOptionsText}
-					placeholder={placeholderLabel}
-					defaultOptions={colourOptions}
-					autocompleteId={"single-select"}
-				/>
-			</Box>
-		</>
+		<Box m={2}>
+			<SingleSelect
+				selected={selected}
+				onSelect={onSelect}
+				onLoad={loadData}
+				onAddNew={enableAddNew ? onAddNewAction : undefined}
+				enableIcons={icons}
+				disableClearable={disableClearable}
+				disabled={disabled}
+				addNewLabel={addNewLabel}
+				loadingText={loadingText}
+				noOptionsText={noOptionsText}
+				placeholder={placeholderLabel}
+				defaultOptions={colourOptions}
+				autocompleteId={"single-select"}
+			/>
+		</Box>
 	);
 };
 

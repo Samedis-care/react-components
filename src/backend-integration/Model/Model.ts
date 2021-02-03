@@ -158,18 +158,24 @@ class Model<
 
 	/**
 	 * Provides a react-query useQuery hook for the given data id
-	 * @param id The data entry id
+	 * @param id The data record id
 	 */
 	public get(id: string | null): UseQueryResult<Record<KeyT, unknown>, Error> {
 		// eslint-disable-next-line react-hooks/rules-of-hooks
-		return useQuery([this.modelId, { id: id }], async () => {
-			if (!id) return this.getDefaultValues();
-			return this.applySerialization(
-				await this.connector.read(id, this),
-				"deserialize",
-				"edit"
-			);
-		});
+		return useQuery([this.modelId, { id: id }], () => this.getRaw(id));
+	}
+
+	/**
+	 * Provides uncached access for the given data id
+	 * @param id The data record id or null to obtain the default values
+	 */
+	public async getRaw(id: string | null): Promise<Record<KeyT, unknown>> {
+		if (!id) return this.getDefaultValues();
+		return this.applySerialization(
+			await this.connector.read(id, this),
+			"deserialize",
+			"edit"
+		);
 	}
 
 	/**
@@ -194,6 +200,7 @@ class Model<
 				if (update) {
 					return this.connector.update(serializedValues, this);
 				} else {
+					delete serializedValues["id"];
 					return this.connector.create(serializedValues, this);
 				}
 			},

@@ -145,6 +145,10 @@
 					}
 				}
 			}
+		},
+		"selector": {
+			"loading": "Loading...",
+			"loading-error": "Error while fetching data"
 		}
 	}
 }
