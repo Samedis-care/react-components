@@ -546,6 +546,25 @@ export const useDataGridStyles = (): ReturnType<typeof useStyles> => {
 	return useStyles(useDataGridProps());
 };
 
+export const getActiveDataGridColumns = (
+	columns: IDataGridColumnDef[],
+	hiddenColumns: string[],
+	lockedColumns: string[]
+): IDataGridColumnDef[] => {
+	return columns
+		.filter((column) => !hiddenColumns.includes(column.field))
+		.filter((column) => lockedColumns.includes(column.field))
+		.concat(
+			columns
+				.filter((column) => !hiddenColumns.includes(column.field))
+				.filter((column) => !lockedColumns.includes(column.field))
+		)
+		.map((column) => ({
+			...column,
+			isLocked: lockedColumns.includes(column.field),
+		}));
+};
+
 const DataGrid = (props: IDataGridProps) => {
 	const { columns, loadData, getAdditionalFilters, forceRefreshToken } = props;
 	const rowsPerPage = props.rowsPerPage || 50;
@@ -569,19 +588,7 @@ const DataGrid = (props: IDataGridProps) => {
 	const gridRoot = useRef<HTMLDivElement>();
 
 	const visibleColumns = useMemo(
-		() =>
-			columns
-				.filter((column) => !hiddenColumns.includes(column.field))
-				.filter((column) => lockedColumns.includes(column.field))
-				.concat(
-					columns
-						.filter((column) => !hiddenColumns.includes(column.field))
-						.filter((column) => !lockedColumns.includes(column.field))
-				)
-				.map((column) => ({
-					...column,
-					isLocked: lockedColumns.includes(column.field),
-				})),
+		() => getActiveDataGridColumns(columns, hiddenColumns, lockedColumns),
 		[columns, hiddenColumns, lockedColumns]
 	);
 
@@ -728,7 +735,13 @@ const DataGrid = (props: IDataGridProps) => {
 		[setState]
 	);
 
-	useEffect(resetView, [resetView, search, columnsState, forceRefreshToken]);
+	useEffect(() => {
+		// make sure we don't refresh data twice on initial render
+		if (refreshData && Object.keys(rows).length === 0) return;
+
+		resetView();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [resetView, search, columnsState, forceRefreshToken]);
 	return (
 		<Grid
 			container

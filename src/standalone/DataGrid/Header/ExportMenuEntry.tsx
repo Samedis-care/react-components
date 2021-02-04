@@ -13,6 +13,7 @@ import {
 } from "@material-ui/icons";
 import { dataGridPrepareFiltersAndSorts } from "../CallbackUtil";
 import {
+	getActiveDataGridColumns,
 	useDataGridColumnState,
 	useDataGridProps,
 	useDataGridState,
@@ -35,7 +36,7 @@ export enum DataGridExportStatus {
 // eslint-disable-next-line react/display-name
 const ExportMenuEntry = React.forwardRef(
 	(props: IDataGridExportMenuEntryProps, ref) => {
-		const { getAdditionalFilters } = useDataGridProps();
+		const { getAdditionalFilters, columns } = useDataGridProps();
 		const [columnsState] = useDataGridColumnState();
 		const [state] = useDataGridState();
 
@@ -43,7 +44,7 @@ const ExportMenuEntry = React.forwardRef(
 		const [exportData, setExportData] = useState<unknown>(undefined);
 		const IdleIcon = props.exporter.icon || ExportIcon;
 		const { onRequest, onDownload } = props.exporter;
-		const { search, customData } = state;
+		const { search, customData, lockedColumns, hiddenColumns } = state;
 
 		const startExport = useCallback(async () => {
 			setStatus(DataGridExportStatus.Working);
@@ -55,7 +56,8 @@ const ExportMenuEntry = React.forwardRef(
 					search,
 					getAdditionalFilters ? getAdditionalFilters(customData) : {},
 					fieldFilter,
-					sorts
+					sorts,
+					getActiveDataGridColumns(columns, hiddenColumns, lockedColumns)
 				);
 				setExportData(data);
 				setStatus(DataGridExportStatus.Ready);
@@ -64,13 +66,14 @@ const ExportMenuEntry = React.forwardRef(
 				setStatus(DataGridExportStatus.Error);
 			}
 		}, [
-			setStatus,
-			setExportData,
-			onRequest,
 			columnsState,
-			getAdditionalFilters,
+			onRequest,
 			search,
+			getAdditionalFilters,
 			customData,
+			columns,
+			hiddenColumns,
+			lockedColumns,
 		]);
 
 		const finishExport = useCallback(() => {

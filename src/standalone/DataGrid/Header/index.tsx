@@ -6,6 +6,7 @@ import FilterBar, { IDataGridFilterBarProps } from "./FilterBar";
 import {
 	DataGridAdditionalFilters,
 	DataGridSortSetting,
+	IDataGridColumnDef,
 	IDataGridFieldFilter,
 } from "../index";
 import { SvgIconComponent } from "@material-ui/icons";
@@ -61,12 +62,14 @@ export interface IDataGridExporter<T> {
 	 * @param additionalFilters Additional user-defined fields
 	 * @param fieldFilter Field specific filters
 	 * @param sort The sort settings
+	 * @param column The currently visible columns in correct order
 	 */
 	onRequest: (
 		quickFilter: string,
 		additionalFilters: DataGridAdditionalFilters,
 		fieldFilter: IDataGridFieldFilter,
-		sort: DataGridSortSetting[]
+		sort: DataGridSortSetting[],
+		columns: IDataGridColumnDef[]
 	) => Promise<T>;
 	/**
 	 * Frontend handler to download data based off metadata supplied by backend
