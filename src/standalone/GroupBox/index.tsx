@@ -9,6 +9,8 @@ const useStyles = makeStyles({
 		borderRadius: 4,
 		borderWidth: 1,
 		position: "relative",
+		maxHeight: "inherit",
+		height: "inherit",
 	},
 });
 

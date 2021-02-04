@@ -56,19 +56,24 @@ export interface ImageSelectorProps {
 	classes?: Partial<ReturnType<typeof useStyles>>;
 }
 
-const useStyles = makeStyles({
-	preview: {
+const useStyles = makeStyles((theme) => ({
+	root: {
 		width: "100%",
 		height: "100%",
+	},
+	imgWrapper: {
+		maxHeight: "100%",
+	},
+	preview: {
 		objectFit: "contain",
-		marginLeft: "auto",
-		marginRight: "auto",
 		display: "block",
+		width: `calc(100% - ${theme.spacing(2)}px)`,
+		height: `calc(100% - ${theme.spacing(2)}px)`,
 	},
 	changeEventHelper: {
 		display: "none",
 	},
-});
+}));
 
 const ImageSelector = (props: ImageSelectorProps) => {
 	const { convertImagesTo, downscale, value, readOnly } = props;
@@ -136,12 +141,17 @@ const ImageSelector = (props: ImageSelectorProps) => {
 			<Grid
 				container
 				spacing={2}
-				alignContent={"space-between"}
+				direction={"column"}
+				alignContent={"flex-start"}
+				alignItems={"stretch"}
+				justify={"center"}
+				wrap={"nowrap"}
+				className={classes.root}
 				onDrop={handleDrop}
 				onDragOver={handleDragOver}
 			>
 				{!props.readOnly && (
-					<Grid item xs key={"upload"}>
+					<Grid item key={"upload"}>
 						<Button
 							startIcon={<AttachFile />}
 							variant={"contained"}
@@ -161,7 +171,7 @@ const ImageSelector = (props: ImageSelectorProps) => {
 						/>
 					</Grid>
 				)}
-				<Grid item xs={12} key={"image"}>
+				<Grid item xs key={"image"} className={classes.imgWrapper}>
 					{value && (
 						<img src={value} alt={props.alt} className={classes.preview} />
 					)}

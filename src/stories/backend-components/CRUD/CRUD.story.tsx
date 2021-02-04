@@ -50,16 +50,10 @@ export const CrudStory = (): React.ReactElement => {
 					formProps: PageProps<keyof typeof TestModelInstance.fields>
 				) => (
 					<Grid container spacing={2}>
-						<Grid item xs={6}>
+						<Grid item xs={6} style={{ height: 120 }}>
 							<Field name={"avatar"} />
 						</Grid>
-						<Grid
-							item
-							xs={6}
-							container
-							spacing={2}
-							style={{ alignContent: "flex-start" }}
-						>
+						<Grid item xs={6} container spacing={2}>
 							<Grid item xs={12}>
 								<Field name={"first_name"} />
 							</Grid>
