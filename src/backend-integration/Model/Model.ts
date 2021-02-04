@@ -81,7 +81,11 @@ export interface ModelFieldDefinition<
 	/**
 	 * The referenced model for backend connected data types.
 	 */
-	getRelationModel?: () => Model<ModelFieldName, PageVisibility, unknown>;
+	getRelationModel?: <
+		SubKeyT extends ModelFieldName,
+		SubVisibilityT extends PageVisibility,
+		SubCustomT
+	>() => Model<SubKeyT, SubVisibilityT, SubCustomT>;
 }
 
 export type ModelField<
