@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
 import {
-	BaseSelectorData,
 	MultiSelect,
 	MultiSelectorData,
 	MultiSelectProps,
@@ -10,6 +9,7 @@ import Model, {
 	PageVisibility,
 } from "../../backend-integration/Model/Model";
 import ccI18n from "../../i18n";
+import { isObjectEmpty } from "../../utils";
 
 export interface BackendMultiSelectProps<
 	KeyT extends ModelFieldName,
@@ -40,6 +40,10 @@ export interface BackendMultiSelectProps<
 	 * The currently selected values
 	 */
 	selected: string[];
+	/**
+	 * Initial data (model format) used for selected cache
+	 */
+	initialData?: Record<KeyT, unknown>[];
 }
 
 const BackendMultiSelect = <
@@ -55,6 +59,7 @@ const BackendMultiSelect = <
 		searchResultLimit,
 		onSelect,
 		selected,
+		initialData,
 		...otherProps
 	} = props;
 
@@ -92,13 +97,24 @@ const BackendMultiSelect = <
 	useEffect(() => {
 		void (async () => {
 			const newCache: Record<string, MultiSelectorData> = {};
+			if (initialData && isObjectEmpty(selectedCache)) {
+				// process initial data
+				await Promise.all(
+					initialData.map(
+						async (record) =>
+							(newCache[
+								record["id" as keyof typeof record] as string
+							] = await modelToSelectorData(record))
+					)
+				);
+			}
 			await Promise.all(
 				selected
-					.filter((value) => !(value in selectedCache))
+					.filter((value) => !(value in selectedCache) && !(value in newCache))
 					.map(async (value) => {
 						try {
 							const data = await model.getRaw(value);
-							newCache[value] = await modelToSelectorData(data);
+							newCache[value] = await modelToSelectorData(data[0]);
 						} catch (e) {
 							newCache[value] = {
 								value,

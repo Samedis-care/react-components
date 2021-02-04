@@ -17,7 +17,7 @@ import Settings from "./Settings";
 import Content from "./Content";
 import { IFilterDef } from "./Content/FilterEntry";
 import { Loader } from "../index";
-import { debounce, measureText } from "../../utils";
+import { debounce, isObjectEmpty, measureText } from "../../utils";
 import { dataGridPrepareFiltersAndSorts } from "./CallbackUtil";
 import { ModelFilterType } from "../../backend-integration/Model";
 import { HEADER_PADDING } from "./Content/ColumnHeader";
@@ -737,7 +737,7 @@ const DataGrid = (props: IDataGridProps) => {
 
 	useEffect(() => {
 		// make sure we don't refresh data twice on initial render
-		if (refreshData && Object.keys(rows).length === 0) return;
+		if (refreshData && isObjectEmpty(rows)) return;
 
 		resetView();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -764,13 +764,13 @@ const DataGrid = (props: IDataGridProps) => {
 								</Grid>
 								<Grid item xs className={classes.middle}>
 									<Settings columns={columns} />
-									{refreshData && Object.keys(rows).length === 0 && <Loader />}
+									{refreshData && isObjectEmpty(rows) && <Loader />}
 									{!refreshData &&
 										dataLoadError !== null &&
 										dataLoadError.message}
 									{!refreshData &&
 										dataLoadError === null &&
-										Object.keys(rows).length === 0 &&
+										isObjectEmpty(rows) &&
 										"No Data!"}
 									{Object.keys(rows).length > 0 && (
 										<Content

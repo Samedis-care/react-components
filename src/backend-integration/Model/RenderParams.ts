@@ -1,6 +1,7 @@
-import { ModelFieldName } from "./Model";
+import { ModelFieldName, PageVisibility } from "./Model";
 import Visibility from "./Visibility";
 import React from "react";
+import { Model } from "./index";
 
 interface RenderParams<T> {
 	/**
@@ -55,6 +56,14 @@ interface RenderParams<T> {
 		touched?: boolean,
 		validate?: boolean
 	) => void;
+	/**
+	 * If the given field has a relation and relation data was fetched while loading the form it can be accessed using this field
+	 */
+	relationData?: Record<ModelFieldName, unknown>[];
+	/**
+	 * The reference model from the model field definition
+	 */
+	relationModel?: Model<ModelFieldName, PageVisibility, unknown>;
 }
 
 export default RenderParams;

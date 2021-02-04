@@ -4,6 +4,7 @@ import {
 	filterSortPaginate,
 	Model,
 	ModelFieldName,
+	ModelGetResponse,
 	PageVisibility,
 	ResponseMeta,
 } from "../..";
@@ -84,13 +85,12 @@ class LocalStorageConnector<
 		return data;
 	}
 
-	// eslint-disable-next-line @typescript-eslint/require-await
-	async read(id: string): Promise<Record<KeyT, unknown>> {
+	read(id: string): ModelGetResponse<KeyT> {
 		const db = this.getDB();
 		if (!(id in db)) {
 			throw new Error("Can't read: Record not found");
 		}
-		return db[id];
+		return [db[id], {}];
 	}
 
 	// eslint-disable-next-line @typescript-eslint/require-await

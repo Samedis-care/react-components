@@ -1,7 +1,9 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React, { CSSProperties, useCallback, useMemo, useState } from "react";
 import { Formik, FormikHelpers } from "formik";
 import Model, {
+	ModelData,
 	ModelFieldName,
+	ModelGetResponseRelations,
 	PageVisibility,
 } from "../../backend-integration/Model/Model";
 import Loader from "../../standalone/Loader";
@@ -78,6 +80,10 @@ export interface FormContextData {
 	 */
 	model: Model<ModelFieldName, PageVisibility, never>;
 	/**
+	 * Relations of the model
+	 */
+	relations: ModelGetResponseRelations<ModelFieldName>;
+	/**
 	 * Helper function to display errors
 	 * @param error The error to display
 	 */
@@ -88,6 +94,12 @@ export interface FormContextData {
  * Context which stores information about the current form so it can be used by fields
  */
 export const FormContext = React.createContext<FormContextData | null>(null);
+
+const loaderContainerStyles: CSSProperties = {
+	height: 320,
+	width: 320,
+	margin: "auto",
+};
 
 const Form = <
 	KeyT extends ModelFieldName,
@@ -106,8 +118,8 @@ const Form = <
 	const onValidate = useCallback((values) => model.validate(values), [model]);
 	const onSubmitHandler = useCallback(
 		async (
-			values: NonNullable<typeof data>,
-			{ setSubmitting, setValues }: FormikHelpers<NonNullable<typeof data>>
+			values: ModelData<KeyT>,
+			{ setSubmitting, setValues }: FormikHelpers<ModelData<KeyT>>
 		): Promise<void> => {
 			try {
 				const result = await updateData(values);
@@ -135,9 +147,10 @@ const Form = <
 	const formContextData: FormContextData = useMemo(
 		() => ({
 			model: (model as unknown) as Model<ModelFieldName, PageVisibility, never>,
+			relations: data ? data[1] : {},
 			setError,
 		}),
-		[model, setError]
+		[model, setError, data]
 	);
 
 	if (isLoading) {
@@ -153,7 +166,7 @@ const Form = <
 	return (
 		<FormContext.Provider value={formContextData}>
 			<Formik
-				initialValues={data || {}}
+				initialValues={data[0] || {}}
 				validate={onValidate}
 				onSubmit={onSubmitHandler}
 			>
@@ -168,13 +181,19 @@ const Form = <
 				}) => (
 					<form onSubmit={handleSubmit}>
 						{displayError && <ErrorComponent error={displayError} />}
-						<Children
-							isSubmitting={isSubmitting}
-							values={props.renderConditionally ? values : undefined}
-							submit={submitForm}
-							reset={resetForm}
-							dirty={dirty}
-						/>
+						{isLoading ? (
+							<div style={loaderContainerStyles}>
+								<Loader />
+							</div>
+						) : (
+							<Children
+								isSubmitting={isSubmitting}
+								values={props.renderConditionally ? values : undefined}
+								submit={submitForm}
+								reset={resetForm}
+								dirty={dirty}
+							/>
+						)}
 					</form>
 				)}
 			</Formik>

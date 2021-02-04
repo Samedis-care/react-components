@@ -4,7 +4,7 @@ import { useFormikContext } from "formik";
 import {
 	ModelFieldDefinition,
 	PageVisibility,
-} from "../../backend-integration/Model";
+} from "../../backend-integration";
 
 interface FieldProps {
 	/**
@@ -37,18 +37,25 @@ const Field = (props: FieldProps): React.ReactElement => {
 		unknown | null
 	> = model.fields[props.name];
 
+	if (!fieldDef) throw new Error("Invalid field name specified: " + props.name);
+
+	const { onChange, type, getRelationModel } = fieldDef;
+
 	const setFieldValueHookWrapper = useCallback(
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		(field: string, value: any, shouldValidate?: boolean) => {
-			if (fieldDef.onChange) {
-				value = fieldDef.onChange(value, model, setFieldValue);
+			if (onChange) {
+				value = onChange(value, model, setFieldValue);
 			}
 			setFieldValue(field, value, shouldValidate);
 		},
-		[setFieldValue, fieldDef, model]
+		[setFieldValue, onChange, model]
 	);
 
-	if (!fieldDef) throw new Error("Invalid field name specified: " + props.name);
+	const relationModel = useMemo(
+		() => (getRelationModel ? getRelationModel() : undefined),
+		[getRelationModel]
+	);
 
 	const { name } = props;
 	const value = values[name];
@@ -57,7 +64,7 @@ const Field = (props: FieldProps): React.ReactElement => {
 	const label = fieldDef.getLabel();
 	const touch = touched[props.name] || false;
 	const errorMsg = (touch && errors[props.name]) || null;
-	const type = fieldDef.type;
+	const relationData = formContext.relations[props.name];
 	const visibility = hasId
 		? fieldDef.visibility.edit
 		: fieldDef.visibility.create;
@@ -76,6 +83,8 @@ const Field = (props: FieldProps): React.ReactElement => {
 				errorMsg: errorMsg,
 				setError,
 				setFieldTouched,
+				relationModel,
+				relationData,
 			}),
 		[
 			value,
@@ -90,6 +99,8 @@ const Field = (props: FieldProps): React.ReactElement => {
 			setFieldTouched,
 			initialValue,
 			touch,
+			relationModel,
+			relationData,
 		]
 	);
 };

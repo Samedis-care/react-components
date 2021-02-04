@@ -78,7 +78,10 @@ export interface ModelFieldDefinition<
 			shouldValidate?: boolean
 		) => void
 	) => TypeT;
-	// TODO: References
+	/**
+	 * The referenced model for backend connected data types.
+	 */
+	getRelationModel?: () => Model<ModelFieldName, PageVisibility, unknown>;
 }
 
 export type ModelField<
@@ -88,6 +91,20 @@ export type ModelField<
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 > = Record<KeyT, ModelFieldDefinition<any, KeyT, VisibilityT, CustomT>>;
 export type ModelFieldName = "id" | string;
+
+export type ModelGetResponseRelations<KeyT extends ModelFieldName> = Partial<
+	Record<KeyT, Record<ModelFieldName, unknown>[]>
+>;
+
+export type ModelData<KeyT extends ModelFieldName> = Record<KeyT, unknown>;
+
+/**
+ * Response for GET single data entry
+ */
+export type ModelGetResponse<KeyT extends ModelFieldName> = [
+	ModelData<KeyT>, // the main data entry
+	ModelGetResponseRelations<KeyT> // data in relations
+];
 
 /**
  * Deletion request. If invert is false only delete ids array. If invert is true delete everything except the given ids
@@ -160,7 +177,7 @@ class Model<
 	 * Provides a react-query useQuery hook for the given data id
 	 * @param id The data record id
 	 */
-	public get(id: string | null): UseQueryResult<Record<KeyT, unknown>, Error> {
+	public get(id: string | null): UseQueryResult<ModelGetResponse<KeyT>, Error> {
 		// eslint-disable-next-line react-hooks/rules-of-hooks
 		return useQuery([this.modelId, { id: id }], () => this.getRaw(id));
 	}
@@ -169,13 +186,41 @@ class Model<
 	 * Provides uncached access for the given data id
 	 * @param id The data record id or null to obtain the default values
 	 */
-	public async getRaw(id: string | null): Promise<Record<KeyT, unknown>> {
-		if (!id) return this.getDefaultValues();
-		return this.applySerialization(
-			await this.connector.read(id, this),
-			"deserialize",
-			"edit"
-		);
+	public async getRaw(id: string | null): Promise<ModelGetResponse<KeyT>> {
+		if (!id) return [await this.getDefaultValues(), {}];
+
+		const rawData = await this.connector.read(id, this);
+
+		return [
+			await this.applySerialization(rawData[0], "deserialize", "edit"),
+			Object.fromEntries(
+				await Promise.all(
+					Object.entries(rawData[1]).map(async ([k, v]) => {
+						const refModel = this.fields[k as KeyT]?.getRelationModel;
+
+						if (!refModel) {
+							// eslint-disable-next-line no-console
+							console.warn(
+								"[Components-Care] [Model] Backend connector supplied related data, but no model is defined for this relationship (relationship name = ",
+								k,
+								"). Data will be ignored."
+							);
+						}
+
+						return [
+							k,
+							refModel
+								? await refModel().applySerialization(
+										v as Record<string, unknown>,
+										"deserialize",
+										"edit"
+								  )
+								: null,
+						];
+					})
+				)
+			),
+		];
 	}
 
 	/**

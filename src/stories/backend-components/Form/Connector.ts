@@ -1,6 +1,7 @@
 import { Connector } from "../../../backend-integration/Connector";
 import {
 	ModelFieldName,
+	ModelGetResponse,
 	PageVisibility,
 	ResponseMeta,
 } from "../../../backend-integration";
@@ -22,7 +23,7 @@ class FormStoryConnector<
 		throw new Error("Unimplemented");
 	}
 
-	read(): Promise<Record<KeyT, unknown>> {
+	read(): Promise<ModelGetResponse<KeyT>> {
 		throw new Error("Unimplemented");
 	}
 

@@ -5,6 +5,14 @@ import TypeStringArray from "../TypeStringArray";
 import BackendMultiSelect, {
 	BackendMultiSelectProps,
 } from "../../../../backend-components/Selector/MultiSelect";
+import Model from "../../Model";
+
+type OmitProperties =
+	| "selected"
+	| "onSelect"
+	| "disabled"
+	| "model"
+	| "initialData";
 
 /**
  * Renders TypeEnum as drop-down selector (with search)
@@ -14,15 +22,15 @@ class RendererBackendMultiSelect<
 	VisibilityT extends PageVisibility,
 	CustomT
 > extends TypeStringArray {
-	private props: Omit<
+	private readonly props: Omit<
 		BackendMultiSelectProps<KeyT, VisibilityT, CustomT>,
-		"selected" | "onSelect" | "disabled"
+		OmitProperties
 	>;
 
 	constructor(
 		props: Omit<
 			BackendMultiSelectProps<KeyT, VisibilityT, CustomT>,
-			"selected" | "onSelect" | "disabled"
+			OmitProperties
 		>
 	) {
 		super();
@@ -38,6 +46,8 @@ class RendererBackendMultiSelect<
 			handleChange,
 			handleBlur,
 			errorMsg,
+			relationData,
+			relationModel,
 		} = params;
 
 		if (visibility.disabled) return <></>;
@@ -55,6 +65,11 @@ class RendererBackendMultiSelect<
 		if (visibility.editable) {
 			if (visibility.grid) throw new Error("Not supported");
 
+			if (!relationModel)
+				throw new Error(
+					"Type BackendMultiSelect requires relation model: " + field
+				);
+
 			return (
 				<FormControl
 					component={"fieldset"}
@@ -68,6 +83,8 @@ class RendererBackendMultiSelect<
 						selected={value}
 						onSelect={(value) => handleChange(field, value)}
 						disabled={visibility.readOnly}
+						model={relationModel as Model<KeyT, VisibilityT, CustomT>}
+						initialData={relationData}
 						{...this.props}
 					/>
 					<FormHelperText>{errorMsg}</FormHelperText>
