@@ -1,5 +1,3 @@
-export * from "./Selector";
-export { default as Selector } from "./Selector";
 export * from "./BaseSelector";
 export { default as BaseSelector } from "./BaseSelector";
 export * from "./SingleSelect";

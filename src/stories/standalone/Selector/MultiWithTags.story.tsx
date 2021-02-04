@@ -3,13 +3,13 @@ import "../../../i18n";
 import {
 	MultiSelectWithTags,
 	MultiSelectorData,
-	SelectorData,
+	BaseSelectorData,
 } from "../../../standalone/Selector";
 import { colourOptions, colourTypeOptions } from "./Data";
 import { action } from "@storybook/addon-actions";
 import { boolean, text } from "@storybook/addon-knobs";
 import { useDialogContext } from "../../../framework";
-import { showInfoDialog } from "../../../non-standalone/Dialog";
+import { showInfoDialog } from "../../../non-standalone";
 
 interface MySelectorData extends MultiSelectorData {
 	id: string;
@@ -17,7 +17,7 @@ interface MySelectorData extends MultiSelectorData {
 	isFixed?: boolean;
 }
 
-const enhanceData = (entry: SelectorData): MySelectorData => ({
+const enhanceData = (entry: BaseSelectorData): MySelectorData => ({
 	...entry,
 	onClick: action("onClick: " + entry.label),
 	canUnselect: (evtEntry: MultiSelectorData) => {
@@ -28,19 +28,19 @@ const enhanceData = (entry: SelectorData): MySelectorData => ({
 });
 
 const getDefaultData = (): MySelectorData[] => {
-	return (colourOptions.filter((e) => e !== undefined) as SelectorData[]).map(
-		enhanceData
-	);
+	return (colourOptions.filter(
+		(e) => e !== undefined
+	) as BaseSelectorData[]).map(enhanceData);
 };
 
 const getDefaultGroups = (): MySelectorData[] => {
 	return (colourTypeOptions.filter(
 		(e) => e !== undefined
-	) as SelectorData[]).map(enhanceData);
+	) as BaseSelectorData[]).map(enhanceData);
 };
 
 export const SelectorMultiWithTags = (): React.ReactElement => {
-	const [selectedGroups, setGroupSelected] = useState<SelectorData | null>(
+	const [selectedGroups, setGroupSelected] = useState<BaseSelectorData | null>(
 		null
 	);
 	const [selected, setSelected] = useState<MySelectorData[]>([]);
@@ -115,7 +115,7 @@ export const SelectorMultiWithTags = (): React.ReactElement => {
 	);
 
 	const onGroupSelect = React.useCallback(
-		(selectedGroup: SelectorData | null) => {
+		(selectedGroup: BaseSelectorData | null) => {
 			onGroupSelectAction(selectedGroup);
 			setGroupSelected(selectedGroup);
 		},

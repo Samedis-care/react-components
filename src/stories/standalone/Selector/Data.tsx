@@ -1,10 +1,10 @@
 // source: https://codesandbox.io/s/ug4oh?module=/docs/data.js, modified for additional features
 
 import React from "react";
-import { SelectorData } from "../../../standalone/Selector";
+import { BaseSelectorData } from "../../../standalone";
 import { Warning, Error, Info, Alarm } from "@material-ui/icons";
 
-interface ColourOptionsDef extends SelectorData {
+interface ColourOptionsDef extends BaseSelectorData {
 	color: string;
 	type: string;
 	isFixed?: boolean;

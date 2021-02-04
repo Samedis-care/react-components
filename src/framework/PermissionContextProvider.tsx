@@ -53,14 +53,15 @@ export const hasPermission = (perms: string[], perm: Permission): boolean => {
 		);
 	}
 
-	const parts = perm.split(".");
-	for (const presentPerm of perms) {
-		const presentParts = presentPerm.split(".");
+	const checkParts = perm.split(".");
+	for (const presentPermission of perms) {
+		const presentParts = presentPermission.split(".");
 
 		let okay = false;
-		for (let i = 0; i < parts.length; ++i) {
+		for (let i = 0; i < checkParts.length; ++i) {
+			okay = false;
 			if (presentParts[i] === undefined) break;
-			if (presentParts[i] !== "*" && presentParts[i] !== parts[i]) break;
+			if (presentParts[i] !== "*" && presentParts[i] !== checkParts[i]) break;
 			okay = true;
 			if (presentParts[i] === "*") break;
 		}
