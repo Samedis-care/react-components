@@ -34,6 +34,9 @@ class LocalStorageConnector<
 		params?: Partial<IDataGridLoadDataParameters>,
 		model?: Model<KeyT, VisibilityT, CustomT>
 	): Promise<[Record<KeyT, unknown>[], ResponseMeta]> {
+		// eslint-disable-next-line no-console
+		console.log("[CC] [LocalStorageConnector] index(", params, model, ")");
+
 		if (!model) {
 			throw new Error("Can't index: No model specified");
 		}
