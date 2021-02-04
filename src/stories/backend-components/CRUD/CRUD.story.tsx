@@ -14,18 +14,6 @@ const useStyles = makeStyles({
 		width: "95vw",
 		height: "95vh",
 	},
-	avatar: {
-		"& img": {
-			maxHeight: "160px",
-			width: "auto",
-			marginLeft: "auto",
-			marginRight: "auto",
-			display: "block",
-		},
-		"& fieldset": {
-			height: "100%",
-		},
-	},
 });
 
 export const CrudStory = (): React.ReactElement => {
@@ -62,7 +50,7 @@ export const CrudStory = (): React.ReactElement => {
 					formProps: PageProps<keyof typeof TestModelInstance.fields>
 				) => (
 					<Grid container spacing={2}>
-						<Grid item xs={6} className={classes.avatar}>
+						<Grid item xs={6}>
 							<Field name={"avatar"} />
 						</Grid>
 						<Grid

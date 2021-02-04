@@ -60,6 +60,10 @@ const useStyles = makeStyles({
 	preview: {
 		width: "100%",
 		height: "100%",
+		objectFit: "contain",
+		marginLeft: "auto",
+		marginRight: "auto",
+		display: "block",
 	},
 	changeEventHelper: {
 		display: "none",
