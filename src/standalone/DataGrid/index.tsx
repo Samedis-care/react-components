@@ -728,7 +728,13 @@ const DataGrid = (props: IDataGridProps) => {
 		[setState]
 	);
 
-	useEffect(resetView, [resetView, search, columnsState, forceRefreshToken]);
+	useEffect(() => {
+		// make sure we don't refresh data twice on initial render
+		if (refreshData && Object.keys(rows).length === 0) return;
+
+		resetView();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [resetView, search, columnsState, forceRefreshToken]);
 	return (
 		<Grid
 			container
