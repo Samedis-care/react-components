@@ -772,7 +772,7 @@ const DataGrid = (props: IDataGridProps) => {
 										dataLoadError === null &&
 										isObjectEmpty(rows) &&
 										"No Data!"}
-									{Object.keys(rows).length > 0 && (
+									{!isObjectEmpty(rows) && (
 										<Content
 											columns={visibleColumns}
 											rowsPerPage={rowsPerPage}
