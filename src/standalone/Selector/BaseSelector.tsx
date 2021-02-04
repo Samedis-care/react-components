@@ -131,7 +131,7 @@ const BaseSelector = (props: BaseSelectorProps) => {
 	const [selectorOptions, setSelectorOptions] = useState(
 		[] as BaseSelectorData[]
 	);
-	const loading = open && selectorOptions.length === 0;
+	const [loading, setLoading] = useState(false);
 
 	const defaultRenderer = useCallback(
 		(data: BaseSelectorData) => (
@@ -163,6 +163,7 @@ const BaseSelector = (props: BaseSelectorProps) => {
 
 	const onSearchHandler = useCallback(
 		async (query: string) => {
+			setLoading(true);
 			const results = await onLoad(query);
 			if (onAddNew) {
 				results.push({
@@ -173,8 +174,9 @@ const BaseSelector = (props: BaseSelectorProps) => {
 				} as BaseSelectorData);
 			}
 			setSelectorOptions(results);
+			setLoading(false);
 		},
-		[actualAddNewLabel, onAddNew, onLoad]
+		[actualAddNewLabel, onAddNew, onLoad, setLoading]
 	);
 
 	const setDefaultOptions = useCallback(() => {
