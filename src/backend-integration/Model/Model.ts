@@ -80,12 +80,15 @@ export interface ModelFieldDefinition<
 	) => TypeT;
 	/**
 	 * The referenced model for backend connected data types.
+	 * If TypeScript complains cast the return value to `Model<ModelFieldName, PageVisibility, unknown>`
 	 */
-	getRelationModel?: <
-		SubKeyT extends ModelFieldName,
-		SubVisibilityT extends PageVisibility,
-		SubCustomT
-	>() => Model<SubKeyT, SubVisibilityT, SubCustomT>;
+	getRelationModel?: () => Model<ModelFieldName, PageVisibility, unknown>;
+	// TypeScript doesn't like the following definition (it would save you the cast):
+	//getRelationModel?: <
+	//	SubKeyT extends ModelFieldName,
+	//	SubVisibilityT extends PageVisibility,
+	//	SubCustomT
+	//>() => Model<SubKeyT, SubVisibilityT, SubCustomT>;
 }
 
 export type ModelField<
