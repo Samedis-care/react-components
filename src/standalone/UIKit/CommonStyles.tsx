@@ -108,5 +108,4 @@ export const useInputStyles = makeStyles((theme) => ({
 
 export const InputLabelConfig: InputLabelProps = {
 	shrink: true,
-	focused: false,
 };
