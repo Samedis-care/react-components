@@ -57,7 +57,7 @@ export interface FormButtonsProps {
 	/**
 	 * Action buttons (used on form)
 	 */
-	children: NonNullable<React.ReactNode | React.ReactNode[]>;
+	children: React.ReactNode | React.ReactNode[];
 	/**
 	 * Custom styles
 	 */
@@ -70,17 +70,21 @@ const FormButtons = (props: FormButtonsProps) => {
 		? props.children
 		: [props.children];
 
-	if (!children) throw new Error("Atleast one button required");
+	if (!children) return <></>;
 
 	return (
 		<Grid container direction="row" spacing={2} className={classes.container}>
-			{children.map((child: React.ReactNode, index: number) => {
-				return (
-					<Grid item className={classes.buttonWrapper} key={index}>
-						{child}
-					</Grid>
-				);
-			})}
+			{children
+				.filter(
+					(child) => child !== undefined && child !== null && child !== false
+				)
+				.map((child: React.ReactNode, index: number) => {
+					return (
+						<Grid item className={classes.buttonWrapper} key={index}>
+							{child}
+						</Grid>
+					);
+				})}
 		</Grid>
 	);
 };
