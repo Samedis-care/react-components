@@ -4,7 +4,7 @@ import { BaseSelectorData, SingleSelect } from "../../../standalone/Selector";
 import { colourOptions } from "./Data";
 import { action } from "@storybook/addon-actions";
 import { boolean, text } from "@storybook/addon-knobs";
-import { Box } from "@material-ui/core";
+import { Box, FormControl, InputLabel } from "@material-ui/core";
 import { showInfoDialog } from "../../../non-standalone";
 import { useDialogContext } from "../../../framework";
 
@@ -51,41 +51,44 @@ export const SelectorSingle = (): React.ReactElement => {
 
 	return (
 		<Box m={2}>
-			<SingleSelect
-				selected={selected}
-				onSelect={onSelect}
-				onLoad={loadData}
-				onAddNew={enableAddNew ? onAddNewAction : undefined}
-				enableIcons={icons}
-				disableClearable={disableClearable}
-				disabled={disabled}
-				addNewLabel={addNewLabel}
-				loadingText={loadingText}
-				noOptionsText={noOptionsText}
-				placeholder={placeholderLabel}
-				defaultOptions={colourOptions}
-				autocompleteId={"single-select"}
-				openInfo={() =>
-					showInfoDialog(pushDialog, {
-						title: dialogTitle,
-						message: (
-							<div
-								dangerouslySetInnerHTML={{
-									__html: infoText,
-								}}
-							/>
-						),
-						buttons: [
-							{
-								text: dialogButtonLabel,
-								onClick: dialogButtonClick,
-								autoFocus: true,
-								color: "primary",
-							},
-						],
-					})
-				}
-			/>
+			<FormControl component={"fieldset"} fullWidth>
+				<InputLabel shrink>Example selector</InputLabel>
+				<SingleSelect
+					selected={selected}
+					onSelect={onSelect}
+					onLoad={loadData}
+					onAddNew={enableAddNew ? onAddNewAction : undefined}
+					enableIcons={icons}
+					disableClearable={disableClearable}
+					disabled={disabled}
+					addNewLabel={addNewLabel}
+					loadingText={loadingText}
+					noOptionsText={noOptionsText}
+					placeholder={placeholderLabel}
+					defaultOptions={colourOptions}
+					autocompleteId={"single-select"}
+					openInfo={() =>
+						showInfoDialog(pushDialog, {
+							title: dialogTitle,
+							message: (
+								<div
+									dangerouslySetInnerHTML={{
+										__html: infoText,
+									}}
+								/>
+							),
+							buttons: [
+								{
+									text: dialogButtonLabel,
+									onClick: dialogButtonClick,
+									autoFocus: true,
+									color: "primary",
+								},
+							],
+						})
+					}
+				/>
+			</FormControl>
 		</Box>
 	);
 };

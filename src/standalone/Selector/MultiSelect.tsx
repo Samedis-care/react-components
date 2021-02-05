@@ -46,6 +46,7 @@ const useSelectorStyles = makeStyles({
 const useStyles = makeStyles({
 	paperWrapper: {
 		boxShadow: "none",
+		marginTop: 16, // to accommodate InputLabel
 	},
 	selectedEntries: {
 		border: `1px solid rgba(0, 0, 0, 0.23)`,

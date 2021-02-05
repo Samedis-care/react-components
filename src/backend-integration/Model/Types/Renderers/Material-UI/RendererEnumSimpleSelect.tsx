@@ -2,7 +2,7 @@ import React from "react";
 import {
 	FormControl,
 	FormHelperText,
-	FormLabel,
+	InputLabel,
 	MenuItem,
 	Select,
 	Typography,
@@ -46,7 +46,7 @@ class RendererEnumSelect extends TypeEnum {
 					fullWidth
 					error={!!errorMsg}
 				>
-					<FormLabel component={"legend"}>{label}</FormLabel>
+					<InputLabel shrink>{label}</InputLabel>
 					<Select
 						name={field}
 						value={value}

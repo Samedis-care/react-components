@@ -1,5 +1,5 @@
 import React from "react";
-import { FormControl, FormHelperText, FormLabel } from "@material-ui/core";
+import { FormControl, FormHelperText, InputLabel } from "@material-ui/core";
 import { ModelFieldName, ModelRenderParams, PageVisibility } from "../../index";
 import Model from "../../Model";
 import TypeId from "../TypeId";
@@ -77,7 +77,7 @@ class RendererBackendSingleSelect<
 					error={!!errorMsg}
 					onBlur={handleBlur}
 				>
-					<FormLabel component={"legend"}>{label}</FormLabel>
+					<InputLabel shrink>{label}</InputLabel>
 					<BackendSingleSelect
 						selected={value}
 						onSelect={(value) => handleChange(field, value)}

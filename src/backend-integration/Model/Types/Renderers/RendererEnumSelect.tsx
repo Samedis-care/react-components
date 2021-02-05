@@ -2,7 +2,7 @@ import React from "react";
 import {
 	FormControl,
 	FormHelperText,
-	FormLabel,
+	InputLabel,
 	Typography,
 } from "@material-ui/core";
 import { ModelRenderParams } from "../../index";
@@ -62,7 +62,7 @@ class RendererEnumSelect extends TypeEnum {
 					error={!!errorMsg}
 					onBlur={handleBlur}
 				>
-					<FormLabel component={"legend"}>{label}</FormLabel>
+					<InputLabel shrink>{label}</InputLabel>
 					<SingleSelect
 						selected={selected}
 						onLoad={onLoad}

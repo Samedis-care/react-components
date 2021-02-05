@@ -6,22 +6,24 @@ import React, {
 	PropsWithChildren,
 	ReactNodeArray,
 } from "react";
-import { TextFieldProps, ListItemText, IconButton } from "@material-ui/core";
+import { ListItemText, IconButton } from "@material-ui/core";
 import { Autocomplete, AutocompleteProps } from "@material-ui/lab";
 import {
 	Add as AddIcon,
 	ExpandMore,
 	Info as InfoIcon,
 } from "@material-ui/icons";
-import TextFieldWithHelp, {
-	TextFieldWithHelpProps,
-} from "../UIKit/TextFieldWithHelp";
+import { TextFieldWithHelpProps } from "../UIKit/TextFieldWithHelp";
 import i18n from "../../i18n";
 import { SelectorSmallListItem, SmallListItemIcon } from "../..";
 import { makeStyles, Theme } from "@material-ui/core/styles";
 import { Styles } from "@material-ui/core/styles/withStyles";
 import { StyleRulesCallback } from "@material-ui/styles/withStyles/withStyles";
-import { AutocompleteClassKey } from "@material-ui/lab/Autocomplete/Autocomplete";
+import {
+	AutocompleteClassKey,
+	AutocompleteRenderInputParams,
+} from "@material-ui/lab/Autocomplete/Autocomplete";
+import OutlinedInputWithHelp from "../UIKit/OutlinedInputWithHelp";
 
 export interface BaseSelectorData {
 	/**
@@ -266,12 +268,12 @@ const BaseSelector = (props: BaseSelectorProps) => {
 				renderOption={(option: BaseSelectorData) => defaultRenderer(option)}
 				getOptionDisabled={(option: BaseSelectorData) => !!option.isDisabled}
 				onChange={(_event, selectedValue) => onChangeHandler(selectedValue)}
-				renderInput={(params: TextFieldProps) => (
-					<TextFieldWithHelp
+				renderInput={(params: AutocompleteRenderInputParams) => (
+					<OutlinedInputWithHelp
+						{...params.InputProps}
 						{...params}
-						InputProps={{
-							...params.InputProps,
-							endAdornment: openInfo
+						endAdornment={
+							openInfo
 								? React.cloneElement(
 										params.InputProps?.endAdornment as ReactElement,
 										{},
@@ -285,9 +287,8 @@ const BaseSelector = (props: BaseSelectorProps) => {
 											<InfoIcon color={"disabled"} />
 										</IconButton>
 								  )
-								: params.InputProps?.endAdornment,
-						}}
-						variant="outlined"
+								: params.InputProps?.endAdornment
+						}
 						placeholder={placeholder}
 						onChange={(event) => {
 							if (event.target.value !== "" || event.target.value !== null) {
