@@ -25,13 +25,13 @@ const customColors = {
 const customPalette = {
 	primary: {
 		main: "rgb(8, 105, 179)",
-		light: "rgb(57, 135, 194)"
+		light: "rgb(57, 135, 194)",
 	},
 	secondary: {
 		main: "rgb(185, 215, 240)",
 	},
 	action: {
-		hover: "rgba(0,0,0, .2)"
+		hover: "rgba(0,0,0, .2)",
 	},
 	error: {
 		main: "rgb(255, 99, 71)",
@@ -43,18 +43,17 @@ const getCustomTheme = (): ThemeOptions => ({
 	spacing: [0, 5, 7, 10, 15, 21, 25],
 	palette: {
 		type: "dark",
-		...customPalette
+		...customPalette,
 	},
 	componentsCare: {
 		uiKit: {
-			label: {
-			},
+			label: {},
 			input: {
 				placeholder: {
 					important: {
 						color: customPalette.error.main,
-					}
-				}
+					},
+				},
 			},
 			actionButton: {
 				padding: "7px 25px",
@@ -85,11 +84,20 @@ const getCustomTheme = (): ThemeOptions => ({
 					padding: "20px",
 					margin: "20px",
 					backgroundColor: customPalette.secondary.main,
-					backgroundColorOpacity: .7, 
+					backgroundColorOpacity: 0.7,
 					/* example */
 					style: {
-						background: "linear-gradient(345deg, rgba(238,174,202,1) 0%, rgba(148,187,233,1) 100%)",
+						background:
+							"linear-gradient(345deg, rgba(238,174,202,1) 0%, rgba(148,187,233,1) 100%)",
 						boxShadow: "0 0 10px 0 rgba(0,0,0, .35)",
+					},
+				},
+			},
+			selector: {
+				inputRoot: {
+					'&[class*="MuiOutlinedInput-root"]': {
+						paddingTop: 0,
+						paddingBottom: 0,
 					},
 				},
 			},

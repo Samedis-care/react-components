@@ -7,6 +7,10 @@ import TextFieldWithHelp, {
 } from "../UIKit/TextFieldWithHelp";
 import i18n from "../../i18n";
 import { SelectorSmallListItem, SmallListItemIcon } from "../..";
+import { makeStyles, Theme } from "@material-ui/core/styles";
+import { Styles } from "@material-ui/core/styles/withStyles";
+import { StyleRulesCallback } from "@material-ui/styles/withStyles/withStyles";
+import { AutocompleteClassKey } from "@material-ui/lab/Autocomplete/Autocomplete";
 
 export interface BaseSelectorData {
 	/**
@@ -64,7 +68,7 @@ export interface BaseSelectorProps extends TextFieldWithHelpProps {
 	 */
 	autocompleteId?: string;
 	/**
-	 * String used to set place holded of the Autocomplete component
+	 * String used to set placeholder of the Autocomplete component
 	 */
 	placeholder?: string;
 	/**
@@ -107,9 +111,25 @@ export interface BaseSelectorProps extends TextFieldWithHelpProps {
 	>["classes"];
 }
 
+export type SelectorTheme = Partial<
+	Styles<Theme, BaseSelectorProps, AutocompleteClassKey>
+>;
+
+const useStyles = makeStyles((theme) => {
+	const styleProvider = theme.componentsCare?.uiKit?.selector ?? {};
+	if (typeof styleProvider === "function") {
+		return (styleProvider as StyleRulesCallback<
+			Theme,
+			BaseSelectorProps,
+			AutocompleteClassKey
+		>)(theme);
+	} else {
+		return styleProvider;
+	}
+});
+
 const BaseSelector = (props: BaseSelectorProps) => {
 	const {
-		classes,
 		defaultOptions,
 		refreshToken,
 		onSelect,
@@ -125,6 +145,7 @@ const BaseSelector = (props: BaseSelectorProps) => {
 		loadingText,
 		disableClearable,
 	} = props;
+	const classes = useStyles(props);
 	const [open, setOpen] = useState(false);
 	const actualAddNewLabel =
 		addNewLabel || i18n.t("standalone.selector.add-new");
