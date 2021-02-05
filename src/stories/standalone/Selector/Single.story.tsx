@@ -5,9 +5,19 @@ import { colourOptions } from "./Data";
 import { action } from "@storybook/addon-actions";
 import { boolean, text } from "@storybook/addon-knobs";
 import { Box } from "@material-ui/core";
+import { showInfoDialog } from "../../../non-standalone";
+import { useDialogContext } from "../../../framework";
 
 export const SelectorSingle = (): React.ReactElement => {
 	const [selected, setSelected] = useState<BaseSelectorData | null>(null);
+	const [pushDialog] = useDialogContext();
+	const dialogTitle = text("Dialog title", "Sample title");
+	const infoText = text(
+		"Info Text",
+		"This is a pretty long info text which supports html. It really is.<br> It explains you what to write in here."
+	);
+	const dialogButtonLabel = text("Dialog button label", "Ok");
+	const dialogButtonClick = action("onClose");
 	const loadDataAction = action("onLoad");
 	const onSelectAction = action("onSelect");
 	const onAddNewAction = action("onAddNew");
@@ -55,6 +65,26 @@ export const SelectorSingle = (): React.ReactElement => {
 				placeholder={placeholderLabel}
 				defaultOptions={colourOptions}
 				autocompleteId={"single-select"}
+				openInfo={() =>
+					showInfoDialog(pushDialog, {
+						title: dialogTitle,
+						message: (
+							<div
+								dangerouslySetInnerHTML={{
+									__html: infoText,
+								}}
+							/>
+						),
+						buttons: [
+							{
+								text: dialogButtonLabel,
+								onClick: dialogButtonClick,
+								autoFocus: true,
+								color: "primary",
+							},
+						],
+					})
+				}
 			/>
 		</Box>
 	);

@@ -10,6 +10,7 @@ import { StoryContext } from "@storybook/addons";
 import { button, color, select, text, withKnobs } from "@storybook/addon-knobs";
 import { withActions } from "@storybook/addon-actions";
 import ccI18n, { langs } from "../src/i18n";
+import { SpacingOptions } from "@material-ui/core/styles/createSpacing";
 
 const getDefaultTheme = (): ThemeOptions => ({
 	palette: {
@@ -38,6 +39,7 @@ const customPalette = {
 		contrastText: "#CCC",
 	},
 };
+
 /* example for a customized theme per client requirements */
 const getCustomTheme = (): ThemeOptions => ({
 	spacing: [0, 5, 7, 10, 15, 21, 25],
@@ -96,8 +98,12 @@ const getCustomTheme = (): ThemeOptions => ({
 			selector: {
 				inputRoot: {
 					'&[class*="MuiOutlinedInput-root"]': {
+						paddingLeft: 16,
 						paddingTop: 0,
 						paddingBottom: 0,
+						'& [class*="MuiAutocomplete-endAdornment"]': {
+							right: 28,
+						},
 					},
 				},
 			},

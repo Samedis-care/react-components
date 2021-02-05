@@ -1,7 +1,18 @@
-import React, { useState, useCallback, useEffect } from "react";
-import { TextFieldProps, ListItemText } from "@material-ui/core";
+import React, {
+	useState,
+	useCallback,
+	useEffect,
+	ReactElement,
+	PropsWithChildren,
+	ReactNodeArray,
+} from "react";
+import { TextFieldProps, ListItemText, IconButton } from "@material-ui/core";
 import { Autocomplete, AutocompleteProps } from "@material-ui/lab";
-import { Add as AddIcon, ExpandMore } from "@material-ui/icons";
+import {
+	Add as AddIcon,
+	ExpandMore,
+	Info as InfoIcon,
+} from "@material-ui/icons";
 import TextFieldWithHelp, {
 	TextFieldWithHelpProps,
 } from "../UIKit/TextFieldWithHelp";
@@ -128,6 +139,13 @@ const useStyles = makeStyles((theme) => {
 	}
 });
 
+const useCustomStyles = makeStyles({
+	infoBtn: {
+		padding: 2,
+		marginRight: -2,
+	},
+});
+
 const BaseSelector = (props: BaseSelectorProps) => {
 	const {
 		defaultOptions,
@@ -144,8 +162,10 @@ const BaseSelector = (props: BaseSelectorProps) => {
 		noOptionsText,
 		loadingText,
 		disableClearable,
+		openInfo,
 	} = props;
 	const classes = useStyles(props);
+	const customClasses = useCustomStyles();
 	const [open, setOpen] = useState(false);
 	const actualAddNewLabel =
 		addNewLabel || i18n.t("standalone.selector.add-new");
@@ -249,6 +269,24 @@ const BaseSelector = (props: BaseSelectorProps) => {
 				renderInput={(params: TextFieldProps) => (
 					<TextFieldWithHelp
 						{...params}
+						InputProps={{
+							...params.InputProps,
+							endAdornment: openInfo
+								? React.cloneElement(
+										params.InputProps?.endAdornment as ReactElement,
+										{},
+										...((params.InputProps?.endAdornment as ReactElement<
+											PropsWithChildren<unknown>
+										>).props.children as ReactNodeArray),
+										<IconButton
+											onClick={openInfo}
+											className={customClasses.infoBtn}
+										>
+											<InfoIcon color={"disabled"} />
+										</IconButton>
+								  )
+								: params.InputProps?.endAdornment,
+						}}
 						variant="outlined"
 						placeholder={placeholder}
 						onChange={(event) => {
