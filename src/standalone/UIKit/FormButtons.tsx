@@ -66,25 +66,22 @@ export interface FormButtonsProps {
 
 const FormButtons = (props: FormButtonsProps) => {
 	const classes = useStyles(props);
-	const children = Array.isArray(props.children)
+	const children = (Array.isArray(props.children)
 		? props.children
-		: [props.children];
+		: [props.children]
+	).filter((child) => child !== undefined && child !== null && child !== false);
 
-	if (!children) return <></>;
+	if (children.length === 0) return <></>;
 
 	return (
 		<Grid container direction="row" spacing={2} className={classes.container}>
-			{children
-				.filter(
-					(child) => child !== undefined && child !== null && child !== false
-				)
-				.map((child: React.ReactNode, index: number) => {
-					return (
-						<Grid item className={classes.buttonWrapper} key={index}>
-							{child}
-						</Grid>
-					);
-				})}
+			{children.map((child: React.ReactNode, index: number) => {
+				return (
+					<Grid item className={classes.buttonWrapper} key={index}>
+						{child}
+					</Grid>
+				);
+			})}
 		</Grid>
 	);
 };
