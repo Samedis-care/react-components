@@ -10,7 +10,8 @@ import React, {
 import Header, { PortalLayoutHeaderProps } from "./Header";
 import Menu from "./Menu";
 import { makeStyles } from "@material-ui/core/styles";
-import { Hidden, useMediaQuery } from "@material-ui/core";
+import { useMediaQuery, useTheme } from "@material-ui/core";
+import { Breakpoint } from "@material-ui/core/styles/createBreakpoints";
 
 interface PortalLayoutBasic {
 	/**
@@ -55,6 +56,10 @@ interface PortalLayoutPropsBase {
 	 * Media query which forces mobile view if true
 	 */
 	mobileViewCondition?: string;
+	/**
+	 * Menu collapse breakpoint (defaults to sm)
+	 */
+	collapseBreakpoint?: Breakpoint;
 	/**
 	 * CSS Styles to apply
 	 */
@@ -187,40 +192,25 @@ const RenderLayoutMemo = React.memo(RenderLayout);
 
 const PortalLayout = (props: PortalLayoutProps) => {
 	const classes = useContainerStyles(props);
+	const theme = useTheme();
 	const mobileViewConditionMet = useMediaQuery(
 		props.mobileViewCondition || "()"
 	);
-	if (props.mobileViewCondition) {
-		const mobile = props.collapseMenu || mobileViewConditionMet;
-
-		return (
-			<div
-				className={mobile ? classes.containerMobile : classes.containerDesktop}
-			>
-				<RenderLayoutMemo mobile={mobile} {...props} />
-			</div>
-		);
-	}
+	const shouldCollapse = useMediaQuery(
+		theme.breakpoints.down(props.collapseBreakpoint ?? "sm")
+	);
+	const mobile = !!(
+		shouldCollapse ||
+		props.collapseMenu ||
+		(props.mobileViewCondition && mobileViewConditionMet)
+	);
 
 	return (
-		<>
-			<Hidden xsDown implementation="js">
-				<div
-					className={
-						props.collapseMenu
-							? classes.containerMobile
-							: classes.containerDesktop
-					}
-				>
-					<RenderLayoutMemo mobile={!!props.collapseMenu} {...props} />
-				</div>
-			</Hidden>
-			<Hidden smUp implementation="js">
-				<div className={classes.containerMobile}>
-					<RenderLayoutMemo mobile={true} {...props} />
-				</div>
-			</Hidden>
-		</>
+		<div
+			className={mobile ? classes.containerMobile : classes.containerDesktop}
+		>
+			<RenderLayoutMemo mobile={mobile} {...props} />
+		</div>
 	);
 };
 
