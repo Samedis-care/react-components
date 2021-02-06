@@ -268,35 +268,39 @@ const BaseSelector = (props: BaseSelectorProps) => {
 				renderOption={(option: BaseSelectorData) => defaultRenderer(option)}
 				getOptionDisabled={(option: BaseSelectorData) => !!option.isDisabled}
 				onChange={(_event, selectedValue) => onChangeHandler(selectedValue)}
-				renderInput={(params: AutocompleteRenderInputParams) => (
-					<OutlinedInputWithHelp
-						{...params.InputProps}
-						{...params}
-						endAdornment={
-							openInfo
-								? React.cloneElement(
-										params.InputProps?.endAdornment as ReactElement,
-										{},
-										...((params.InputProps?.endAdornment as ReactElement<
-											PropsWithChildren<unknown>
-										>).props.children as ReactNodeArray),
-										<IconButton
-											onClick={openInfo}
-											className={customClasses.infoBtn}
-										>
-											<InfoIcon color={"disabled"} />
-										</IconButton>
-								  )
-								: params.InputProps?.endAdornment
-						}
-						placeholder={placeholder}
-						onChange={(event) => {
-							if (event.target.value !== "" || event.target.value !== null) {
-								void onSearchHandler(event.target.value);
+				renderInput={(params: AutocompleteRenderInputParams) => {
+					// eslint-disable-next-line @typescript-eslint/no-unused-vars
+					const { InputProps, InputLabelProps, ...otherParams } = params;
+					return (
+						<OutlinedInputWithHelp
+							{...InputProps}
+							{...otherParams}
+							endAdornment={
+								openInfo
+									? React.cloneElement(
+											params.InputProps?.endAdornment as ReactElement,
+											{},
+											...((params.InputProps?.endAdornment as ReactElement<
+												PropsWithChildren<unknown>
+											>).props.children as ReactNodeArray),
+											<IconButton
+												onClick={openInfo}
+												className={customClasses.infoBtn}
+											>
+												<InfoIcon color={"disabled"} />
+											</IconButton>
+									  )
+									: params.InputProps?.endAdornment
 							}
-						}}
-					/>
-				)}
+							placeholder={placeholder}
+							onChange={(event) => {
+								if (event.target.value !== "" || event.target.value !== null) {
+									void onSearchHandler(event.target.value);
+								}
+							}}
+						/>
+					);
+				}}
 				key={`${refreshToken || "no-refresh-token"} ${
 					onAddNew
 						? `add-new${actualAddNewLabel || "no-add-new-label"}`
