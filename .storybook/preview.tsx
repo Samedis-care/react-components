@@ -101,6 +101,9 @@ const getCustomTheme = (): ThemeOptions => ({
 						paddingLeft: 16,
 						paddingTop: 0,
 						paddingBottom: 0,
+						"& .MuiAutocomplete-input": {
+							padding: "6.5px 4px",
+						},
 						'& [class*="MuiAutocomplete-endAdornment"]': {
 							right: 28,
 						},
