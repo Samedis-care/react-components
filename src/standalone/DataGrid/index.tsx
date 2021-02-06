@@ -423,8 +423,11 @@ const useStyles = makeStyles((theme: Theme) => ({
 	},
 	middle: {
 		borderTop: `1px solid ${theme.palette.divider}`,
-		borderBottom: `1px solid ${theme.palette.divider}`,
 		position: "relative",
+	},
+	footer: {
+		borderTop: `1px solid ${theme.palette.divider}`,
+		marginTop: 1,
 	},
 	cell: {
 		//borderRight: `1px ${theme.palette.divider} solid`,
@@ -779,7 +782,7 @@ const DataGrid = (props: IDataGridProps) => {
 										/>
 									)}
 								</Grid>
-								<Grid item>
+								<Grid item className={classes.footer}>
 									<Footer />
 								</Grid>
 							</DataGridColumnsWidthStateContext.Provider>
