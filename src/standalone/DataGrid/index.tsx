@@ -1,5 +1,4 @@
 import React, {
-	CSSProperties,
 	Dispatch,
 	SetStateAction,
 	useCallback,
@@ -21,8 +20,10 @@ import { debounce, isObjectEmpty, measureText } from "../../utils";
 import { dataGridPrepareFiltersAndSorts } from "./CallbackUtil";
 import { ModelFilterType } from "../../backend-integration/Model";
 import { HEADER_PADDING } from "./Content/ColumnHeader";
+import { Styles } from "@material-ui/core/styles/withStyles";
+import { StyleRulesCallback } from "@material-ui/styles/withStyles/withStyles";
 
-export type IDataGridProps = IDataGridHeaderProps &
+export type DataGridProps = IDataGridHeaderProps &
 	IDataGridColumnProps &
 	IDataGridCallbacks & {
 		/**
@@ -30,16 +31,6 @@ export type IDataGridProps = IDataGridHeaderProps &
 		 */
 		classes?: Partial<ReturnType<typeof useStyles>>;
 	};
-
-export interface DataGridTheme {
-	content?: {
-		headerBackgroundColor?: CSSProperties["backgroundColor"];
-		columnDividerColor?: CSSProperties["borderColor"];
-		backgroundColor?: CSSProperties["backgroundColor"];
-		dividerColor?: CSSProperties["borderColor"];
-		hoverBackgroundColor?: CSSProperties["backgroundColor"];
-	};
-}
 
 export interface IDataGridLoadDataParameters {
 	/**
@@ -318,11 +309,11 @@ export const useDataGridState = (): [
 	return ctx;
 };
 
-const DataGridPropsContext = React.createContext<IDataGridProps | undefined>(
+const DataGridPropsContext = React.createContext<DataGridProps | undefined>(
 	undefined
 );
 
-export const useDataGridProps = (): IDataGridProps => {
+export const useDataGridProps = (): DataGridProps => {
 	const ctx = useContext(DataGridPropsContext);
 	if (!ctx) throw new Error("Props context not set");
 	return ctx;
@@ -431,47 +422,25 @@ const useStyles = makeStyles((theme: Theme) => ({
 	},
 	cell: {
 		//borderRight: `1px ${theme.palette.divider} solid`,
-		borderBottom: `1px ${
-			theme.componentsCare?.dataGrid?.content?.dividerColor ??
-			theme.palette.divider
-		} solid`,
+		borderBottom: `1px ${theme.palette.divider} solid`,
 		padding: `0 ${HEADER_PADDING / 2}px`,
 	},
 	headerCell: {
-		borderRight: `1px ${
-			theme.componentsCare?.dataGrid?.content?.columnDividerColor ??
-			theme.palette.divider
-		} solid`,
-		backgroundColor:
-			theme.componentsCare?.dataGrid?.content?.headerBackgroundColor ??
-			theme.palette.background.paper,
-		color: theme.palette.getContrastText(
-			theme.componentsCare?.dataGrid?.content?.headerBackgroundColor ??
-				theme.palette.background.paper
-		),
+		borderRight: `1px ${theme.palette.divider} solid`,
+		backgroundColor: theme.palette.background.paper,
+		color: theme.palette.getContrastText(theme.palette.background.paper),
 	},
 	dataCell: {
 		overflow: "hidden",
 		whiteSpace: "nowrap",
 		textOverflow: "ellipsis",
 		padding: HEADER_PADDING / 2,
-		backgroundColor:
-			theme.componentsCare?.dataGrid?.content?.backgroundColor ??
-			theme.palette.background.paper,
-		color: theme.palette.getContrastText(
-			theme.componentsCare?.dataGrid?.content?.backgroundColor ??
-				theme.palette.background.paper
-		),
+		backgroundColor: theme.palette.background.paper,
+		color: theme.palette.getContrastText(theme.palette.background.paper),
 	},
 	dataCellSelected: {
-		backgroundColor:
-			theme.componentsCare?.dataGrid?.content?.hoverBackgroundColor ??
-			theme.palette.action.hover,
-		color: theme.palette.getContrastText(
-			theme.componentsCare?.dataGrid?.content?.hoverBackgroundColor ??
-				theme.componentsCare?.dataGrid?.content?.backgroundColor ??
-				theme.palette.background.paper
-		),
+		backgroundColor: theme.palette.action.hover,
+		color: theme.palette.getContrastText(theme.palette.background.paper),
 	},
 	columnHeaderContentWrapper: {
 		width: "100%",
@@ -545,8 +514,35 @@ const useStyles = makeStyles((theme: Theme) => ({
 		borderRadius: 8,
 	},
 }));
+
+export type DataGridClassKey = keyof ReturnType<typeof useStyles>;
+
+export type DataGridTheme = Partial<
+	Styles<Theme, DataGridProps, DataGridClassKey>
+>;
+
 export const useDataGridStyles = (): ReturnType<typeof useStyles> => {
-	return useStyles(useDataGridProps());
+	return useDataGridStylesInternal(useDataGridProps());
+};
+
+const useThemeStyles = makeStyles((theme) => {
+	const styleProvider = theme.componentsCare?.dataGrid ?? {};
+	if (typeof styleProvider === "function") {
+		return (styleProvider as StyleRulesCallback<
+			Theme,
+			DataGridProps,
+			DataGridClassKey
+		>)(theme);
+	} else {
+		return styleProvider;
+	}
+});
+
+const useDataGridStylesInternal = (
+	props: DataGridProps
+): ReturnType<typeof useStyles> => {
+	const themeClasses = useThemeStyles(props);
+	return useStyles({ ...props, classes: themeClasses });
 };
 
 export const getActiveDataGridColumns = (
@@ -568,11 +564,11 @@ export const getActiveDataGridColumns = (
 		}));
 };
 
-const DataGrid = (props: IDataGridProps) => {
+const DataGrid = (props: DataGridProps) => {
 	const { columns, loadData, getAdditionalFilters, forceRefreshToken } = props;
 	const rowsPerPage = props.rowsPerPage || 50;
 
-	const classes = useStyles(props);
+	const classes = useDataGridStylesInternal(props);
 	const theme = useTheme();
 	const statePack = useState<IDataGridState>(() =>
 		getDataGridDefaultState(columns)
