@@ -502,6 +502,7 @@ const useStyles = makeStyles((theme: Theme) => ({
 	paginationText: {
 		padding: "12px 0",
 	},
+	selectAllWrapper: {},
 	selectAllCheckbox: {
 		padding: "4px 0",
 	},
