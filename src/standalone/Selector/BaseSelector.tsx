@@ -65,10 +65,6 @@ export interface BaseSelectorProps extends TextFieldWithHelpProps {
 	 */
 	onLoad: (search: string) => BaseSelectorData[] | Promise<BaseSelectorData[]>;
 	/**
-	 * Selector default options
-	 */
-	defaultOptions?: BaseSelectorData[];
-	/**
 	 * Callback for autocomplete change
 	 */
 	onSelect: (selected: BaseSelectorData | null) => void;
@@ -150,7 +146,6 @@ const useCustomStyles = makeStyles({
 
 const BaseSelector = (props: BaseSelectorProps) => {
 	const {
-		defaultOptions,
 		refreshToken,
 		onSelect,
 		selected,
@@ -222,26 +217,11 @@ const BaseSelector = (props: BaseSelectorProps) => {
 		[actualAddNewLabel, onAddNew, onLoad, setLoading]
 	);
 
-	const setDefaultOptions = useCallback(() => {
-		let options = defaultOptions || [];
-		if (onAddNew) {
-			options.push({
-				value: "add-new-button",
-				label: actualAddNewLabel,
-				icon: <AddIcon />,
-				isAddNewButton: true,
-			} as BaseSelectorData);
-		} else {
-			options = options.filter((option) => !option.isAddNewButton);
-		}
-		return options;
-	}, [actualAddNewLabel, defaultOptions, onAddNew]);
-
+	// initial option load
 	useEffect(() => {
-		if (!open) {
-			setSelectorOptions(setDefaultOptions);
-		}
-	}, [open, setDefaultOptions]);
+		void onSearchHandler("");
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []);
 
 	return (
 		<div>

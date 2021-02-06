@@ -33,11 +33,9 @@ export const SelectorSingle = (): React.ReactElement => {
 	const loadData = useCallback(
 		(query: string): BaseSelectorData[] => {
 			loadDataAction(query);
-			if (query) {
-				return colourOptions.filter((option) =>
-					option.label.toLowerCase().includes(query.toLowerCase())
-				);
-			} else return [];
+			return colourOptions.filter((option) =>
+				option.label.toLowerCase().includes(query.toLowerCase())
+			);
 		},
 		[loadDataAction]
 	);
@@ -65,7 +63,6 @@ export const SelectorSingle = (): React.ReactElement => {
 					loadingText={loadingText}
 					noOptionsText={noOptionsText}
 					placeholder={placeholderLabel}
-					defaultOptions={colourOptions}
 					autocompleteId={"single-select"}
 					openInfo={() =>
 						showInfoDialog(pushDialog, {

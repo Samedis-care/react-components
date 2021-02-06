@@ -84,7 +84,6 @@ export const SelectorMulti = (): React.ReactElement => {
 				loadingText={loadingText}
 				noOptionsText={noOptionsText}
 				placeholder={placeholderLabel}
-				defaultOptions={colourOptions}
 				autocompleteId={"multi-select"}
 			/>
 		</Box>

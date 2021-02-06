@@ -92,10 +92,6 @@ export interface MultiSelectWithTagsProps<Data extends MultiSelectData>
 	 */
 	title: string;
 	/**
-	 * Data for group selector
-	 */
-	defaultGroups: Data[];
-	/**
 	 * Data for autocomplete selector
 	 */
 	defaultData: Data[];
@@ -209,7 +205,6 @@ const MultiSelectWithTags = <Data extends MultiSelectData>(
 		searchInputLabel,
 		onSelect,
 		selected,
-		defaultGroups,
 		defaultData,
 		filteredData,
 		setFilteredData,
@@ -334,7 +329,6 @@ const MultiSelectWithTags = <Data extends MultiSelectData>(
 				selected={selectedGroup}
 				onSelect={handleGroupSelect}
 				onLoad={groupSelectLoadHandler}
-				defaultOptions={defaultGroups}
 				disabled={disabled}
 			/>
 			<Typography component="div" className={classes.labelWithSwitch}>
