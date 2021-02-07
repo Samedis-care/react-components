@@ -116,15 +116,15 @@
 			"delete": {
 				"error-dialog": {
 					"title": "Erreur",
-					"message": "Echec de la suppression des entrées sélectionnées : {ERROR}",
+					"message": "Echec de la suppression des entrées sélectionnées : {{ERROR}}",
 					"buttons": {
 						"okay": "Ok"
 					}
 				},
 				"confirm-dialog": {
 					"title": "Supprimer",
-					"messageInverted": "Voulez-vous vraiment tout supprimer sauf les entrées {NUM} ?",
-					"message": "Souhaitez-vous vraiment supprimer les entrées {NUM} ?",
+					"messageInverted": "Voulez-vous vraiment tout supprimer sauf les entrées {{NUM}} ?",
+					"message": "Souhaitez-vous vraiment supprimer les entrées {{NUM}} ?",
 					"buttons": {
 						"yes": "Qui",
 						"no": "Non"

@@ -130,8 +130,8 @@
 			"delete": {
 				"confirm-dialog": {
 					"title": "Delete",
-					"message": "Do you really want to delete {NUM} entries?",
-					"messageInverted": "Do you really want to delete everything except {NUM} entries?",
+					"message": "Do you really want to delete {{NUM}} entries?",
+					"messageInverted": "Do you really want to delete everything except {{NUM}} entries?",
 					"buttons": {
 						"yes": "Yes",
 						"no": "No"
@@ -139,7 +139,7 @@
 				},
 				"error-dialog": {
 					"title": "Error",
-					"message": "Failed deleting the selected entries: {ERROR}",
+					"message": "Failed deleting the selected entries: {{ERROR}}",
 					"buttons": {
 						"okay": "Okay"
 					}
