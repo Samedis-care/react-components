@@ -4,7 +4,7 @@ import { ModelFieldName, ModelRenderParams, PageVisibility } from "../../index";
 import TypeStringArray from "../TypeStringArray";
 import BackendMultiSelect, {
 	BackendMultiSelectProps,
-} from "../../../../backend-components/Selector/MultiSelect";
+} from "../../../../backend-components/Selector/BackendMultiSelect";
 import Model from "../../Model";
 
 type OmitProperties =

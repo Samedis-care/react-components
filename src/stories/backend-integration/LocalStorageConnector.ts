@@ -38,8 +38,8 @@ class LocalStorageConnector<
 		// eslint-disable-next-line no-console
 		console.log("[CC] [LocalStorageConnector] index(", params, model, ")");
 
-		if (!model) {
-			throw new Error("Can't index: No model specified");
+		if (!model && params?.fieldFilter) {
+			throw new Error("Can't index with field filter: No model specified");
 		}
 
 		const db = this.getDB();
@@ -56,7 +56,7 @@ class LocalStorageConnector<
 				},
 				params
 			),
-			model.toDataGridColumnDefinition()
+			model?.toDataGridColumnDefinition() ?? []
 		);
 		return [
 			processed[0],
@@ -69,7 +69,7 @@ class LocalStorageConnector<
 
 	// eslint-disable-next-line @typescript-eslint/require-await
 	async create(data: Record<string, unknown>): Promise<Record<KeyT, unknown>> {
-		if ("id" in data) {
+		if ("id" in data && data.id) {
 			throw new Error("Can't create: Creation request contains ID");
 		}
 		const db = this.getDB();

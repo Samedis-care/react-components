@@ -5,7 +5,7 @@ import { action } from "@storybook/addon-actions";
 import { boolean, number, text } from "@storybook/addon-knobs";
 import { Box } from "@material-ui/core";
 import CustomMultiSelectEntry from "../../standalone/Selector/CustomMultiSelectEntry";
-import BackendMultiSelect from "../../../backend-components/Selector/MultiSelect";
+import BackendMultiSelect from "../../../backend-components/Selector/BackendMultiSelect";
 import TestModelInstance from "../DataGrid/TestModel";
 
 export const SelectorMulti = (): React.ReactElement => {

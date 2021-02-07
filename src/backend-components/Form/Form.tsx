@@ -147,7 +147,7 @@ const Form = <
 	const formContextData: FormContextData = useMemo(
 		() => ({
 			model: (model as unknown) as Model<ModelFieldName, PageVisibility, never>,
-			relations: data ? data[1] : {},
+			relations: data && data[1] ? data[1] : {},
 			setError,
 		}),
 		[model, setError, data]

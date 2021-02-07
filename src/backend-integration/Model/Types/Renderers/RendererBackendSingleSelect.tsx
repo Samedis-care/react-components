@@ -3,7 +3,7 @@ import { FormControl, FormHelperText, InputLabel } from "@material-ui/core";
 import { ModelFieldName, ModelRenderParams, PageVisibility } from "../../index";
 import Model from "../../Model";
 import TypeId from "../TypeId";
-import { BackendSingleSelectProps } from "../../../../backend-components/Selector/SingleSelect";
+import { BackendSingleSelectProps } from "../../../../backend-components/Selector/BackendSingleSelect";
 import { BackendSingleSelect } from "../../../../backend-components";
 
 type OmitProperties =

@@ -71,7 +71,7 @@ export const FileUploadStory = (): React.ReactElement => {
 					  }
 					: undefined
 			}
-			files={files("Preset files", "*").map((fileData) => ({
+			defaultFiles={files("Preset files", "*").map((fileData) => ({
 				file: {
 					name: Math.random().toString(),
 					type: fileData.split(";", 2)[0].split(":")[1],

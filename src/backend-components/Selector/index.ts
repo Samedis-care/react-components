@@ -1,2 +1,2 @@
-export { default as BackendMultiSelect } from "./MultiSelect";
-export { default as BackendSingleSelect } from "./SingleSelect";
+export { default as BackendMultiSelect } from "./BackendMultiSelect";
+export { default as BackendSingleSelect } from "./BackendSingleSelect";

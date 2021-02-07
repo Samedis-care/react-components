@@ -62,9 +62,13 @@ export interface FileUploadProps extends WithStyles {
 	 */
 	handleError: (err: FileSelectorError, message: string) => void;
 	/**
-	 * Already selected files (for loading existing data)
+	 * Currently displayed files (for controlled input. for uncontrolled use defaultFiles)
 	 */
 	files?: FileData<FileMeta>[];
+	/**
+	 * Already selected files (for loading existing data)
+	 */
+	defaultFiles?: FileData<FileMeta>[];
 	/**
 	 * Called on file selection update
 	 * @param files The newly selected files
@@ -143,14 +147,18 @@ class FileUpload extends Component<FileUploadProps, IState> {
 		super(props);
 
 		this.state = {
-			files: (this.props.files || []).map((meta) => ({
-				...meta,
-				canBeUploaded: false,
-				delete: false,
-			})),
+			files: this.loadInitialFiles(),
 			dragging: 0,
 		};
 	}
+
+	loadInitialFiles = () => {
+		return (this.props.files || this.props.defaultFiles || []).map((meta) => ({
+			canBeUploaded: false,
+			delete: false,
+			...meta,
+		}));
+	};
 
 	shouldComponentUpdate(
 		nextProps: Readonly<FileUploadProps>,
@@ -162,6 +170,13 @@ class FileUpload extends Component<FileUploadProps, IState> {
 
 		// Check for dragging
 		return (this.state.dragging ? 1 : 0) !== (nextState.dragging ? 1 : 0);
+	}
+
+	componentDidUpdate(prevProps: Readonly<FileUploadProps>) {
+		// update files if necessary
+		if (prevProps.files !== this.props.files) {
+			this.setState({ files: this.loadInitialFiles() });
+		}
 	}
 
 	componentDidMount() {
@@ -346,7 +361,6 @@ class FileUpload extends Component<FileUploadProps, IState> {
 		}
 
 		const newFiles: FileData<File>[] = [];
-		// tslint:disable-next-line:prefer-for-of
 		for (let i = 0; i < files.length; i++) {
 			const file = files[i];
 			const isImage = file.type.startsWith("image/");
