@@ -396,6 +396,9 @@ class Model<
 		const errors: Record<string, string> = {};
 
 		Object.entries(values).forEach(([field, value]) => {
+			// skip validations for fields which aren't defined in the model
+			if (!(field in this.fields)) return;
+
 			// first apply type validation
 			let error = this.fields[field as KeyT].type.validate(value);
 
