@@ -67,8 +67,7 @@ class LocalStorageConnector<
 		];
 	}
 
-	// eslint-disable-next-line @typescript-eslint/require-await
-	async create(data: Record<string, unknown>): Promise<Record<KeyT, unknown>> {
+	create(data: Record<string, unknown>): ModelGetResponse<KeyT> {
 		if ("id" in data && data.id) {
 			throw new Error("Can't create: Creation request contains ID");
 		}
@@ -82,7 +81,7 @@ class LocalStorageConnector<
 		db[id] = data;
 		this.setDB(db);
 
-		return data;
+		return [data, {}];
 	}
 
 	read(id: string): ModelGetResponse<KeyT> {
@@ -93,10 +92,7 @@ class LocalStorageConnector<
 		return [db[id], {}];
 	}
 
-	// eslint-disable-next-line @typescript-eslint/require-await
-	async update(
-		data: Record<ModelFieldName, unknown>
-	): Promise<Record<KeyT, unknown>> {
+	update(data: Record<ModelFieldName, unknown>): ModelGetResponse<KeyT> {
 		const db = this.getDB();
 		const id = data["id"] as string;
 		if (!(id in db)) {
@@ -104,7 +100,7 @@ class LocalStorageConnector<
 		}
 		db[id] = data;
 		this.setDB(db);
-		return data;
+		return [data, {}];
 	}
 
 	// eslint-disable-next-line @typescript-eslint/require-await

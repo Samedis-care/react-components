@@ -84,7 +84,7 @@ const CrudFileUpload = (props: CrudFileUploadProps) => {
 							await serialize(file as FileData<File>, null)
 						);
 					})
-					.map(async (request) => deserialize(await request))
+					.map(async (request) => deserialize((await request)[0]))
 			);
 			// delete deleted files
 			const deletePromise = connector.deleteMultiple(

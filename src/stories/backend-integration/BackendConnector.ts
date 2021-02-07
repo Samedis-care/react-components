@@ -171,13 +171,13 @@ class BackendConnector<
 		];
 	}
 
-	async create(data: Record<string, unknown>): Promise<Record<KeyT, unknown>> {
+	async create(data: Record<string, unknown>): Promise<ModelGetResponse<KeyT>> {
 		const resp = await this.client.post<DataResponse>(
 			this.getApiBase(),
 			null,
 			data
 		);
-		return resp.data.attributes;
+		return [resp.data.attributes, {}];
 	}
 
 	async read(id: string): Promise<ModelGetResponse<KeyT>> {
@@ -190,13 +190,13 @@ class BackendConnector<
 
 	async update(
 		data: Record<ModelFieldName, unknown>
-	): Promise<Record<KeyT, unknown>> {
+	): Promise<ModelGetResponse<KeyT>> {
 		const resp = await this.client.put<DataResponse>(
 			`${this.getApiBase()}/${data.id as string}`,
 			null,
 			data
 		);
-		return resp.data.attributes;
+		return [resp.data.attributes, {}];
 	}
 
 	async delete(id: string): Promise<void> {

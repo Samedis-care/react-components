@@ -8,6 +8,7 @@ import Model, {
 } from "../../backend-integration/Model/Model";
 import Loader from "../../standalone/Loader";
 import { FormikState } from "formik/dist/types";
+import { isObjectEmpty } from "../../utils";
 
 export interface ErrorComponentProps {
 	/**
@@ -123,9 +124,9 @@ const Form = <
 		): Promise<void> => {
 			try {
 				const result = await updateData(values);
-				setValues(result);
+				setValues(result[0]);
 				if (onSubmit) {
-					onSubmit(result);
+					onSubmit(result[0]);
 				}
 			} catch (e) {
 				setUpdateError(e as Error);
@@ -159,14 +160,19 @@ const Form = <
 
 	const displayError: Error | null = error || updateError;
 
-	if (!data) {
+	if (!data || data.length !== 2 || isObjectEmpty(data[0])) {
+		// eslint-disable-next-line no-console
+		console.error(
+			"[Components-Care] [FormEngine] Data is faulty",
+			data ? JSON.stringify(data, undefined, 4) : null
+		);
 		throw new Error("Data is not present, this should never happen");
 	}
 
 	return (
 		<FormContext.Provider value={formContextData}>
 			<Formik
-				initialValues={data[0] || {}}
+				initialValues={data[0]}
 				validate={onValidate}
 				onSubmit={onSubmitHandler}
 			>

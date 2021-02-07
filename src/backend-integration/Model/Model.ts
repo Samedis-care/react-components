@@ -234,7 +234,7 @@ class Model<
 	 * Provides a react-query useMutation hook for creation or updates to an data entry
 	 */
 	public createOrUpdate<TContext = unknown>(): UseMutationResult<
-		Record<KeyT, unknown>,
+		ModelGetResponse<KeyT>,
 		Error,
 		Record<string, unknown>,
 		TContext
@@ -257,7 +257,7 @@ class Model<
 				}
 			},
 			{
-				onSuccess: (data: Record<KeyT, unknown>) => {
+				onSuccess: (data: ModelGetResponse<KeyT>) => {
 					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 					// @ts-ignore
 					// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
