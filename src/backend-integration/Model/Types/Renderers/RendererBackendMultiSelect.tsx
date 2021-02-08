@@ -41,7 +41,6 @@ class RendererBackendMultiSelect<
 		const {
 			visibility,
 			field,
-			value,
 			label,
 			handleChange,
 			handleBlur,
@@ -49,6 +48,13 @@ class RendererBackendMultiSelect<
 			relationData,
 			relationModel,
 		} = params;
+
+		let { value } = params;
+
+		// Workaround for https://github.com/formium/formik/issues/2098
+		if (value === undefined) {
+			value = [];
+		}
 
 		if (visibility.disabled) return <></>;
 		if (visibility.hidden) {
