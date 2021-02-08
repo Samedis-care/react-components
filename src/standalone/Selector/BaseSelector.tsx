@@ -16,9 +16,9 @@ import {
 import { TextFieldWithHelpProps } from "../UIKit/TextFieldWithHelp";
 import i18n from "../../i18n";
 import { SelectorSmallListItem, SmallListItemIcon } from "../..";
+import { makeThemeStyles } from "../../utils";
 import { makeStyles, Theme } from "@material-ui/core/styles";
 import { Styles } from "@material-ui/core/styles/withStyles";
-import { StyleRulesCallback } from "@material-ui/styles/withStyles/withStyles";
 import {
 	AutocompleteClassKey,
 	AutocompleteRenderInputParams,
@@ -124,18 +124,9 @@ export type SelectorTheme = Partial<
 	Styles<Theme, BaseSelectorProps, AutocompleteClassKey>
 >;
 
-const useStyles = makeStyles((theme) => {
-	const styleProvider = theme.componentsCare?.uiKit?.selector ?? {};
-	if (typeof styleProvider === "function") {
-		return (styleProvider as StyleRulesCallback<
-			Theme,
-			BaseSelectorProps,
-			AutocompleteClassKey
-		>)(theme);
-	} else {
-		return styleProvider;
-	}
-});
+const useThemeStyles = makeThemeStyles<BaseSelectorProps, AutocompleteClassKey>(
+	(theme) => theme.componentsCare?.uiKit?.selector
+);
 
 const useCustomStyles = makeStyles({
 	infoBtn: {
@@ -161,7 +152,7 @@ const BaseSelector = (props: BaseSelectorProps) => {
 		disableClearable,
 		openInfo,
 	} = props;
-	const classes = useStyles(props);
+	const classes = useThemeStyles(props);
 	const customClasses = useCustomStyles();
 	const [open, setOpen] = useState(false);
 	const actualAddNewLabel =

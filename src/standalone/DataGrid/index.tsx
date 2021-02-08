@@ -16,12 +16,16 @@ import Settings from "./Settings";
 import Content from "./Content";
 import { IFilterDef } from "./Content/FilterEntry";
 import { Loader } from "../index";
-import { debounce, isObjectEmpty, measureText } from "../../utils";
+import {
+	debounce,
+	isObjectEmpty,
+	measureText,
+	makeThemeStyles,
+} from "../../utils";
 import { dataGridPrepareFiltersAndSorts } from "./CallbackUtil";
 import { ModelFilterType } from "../../backend-integration/Model";
 import { HEADER_PADDING } from "./Content/ColumnHeader";
 import { Styles } from "@material-ui/core/styles/withStyles";
-import { StyleRulesCallback } from "@material-ui/styles/withStyles/withStyles";
 
 export type DataGridProps = IDataGridHeaderProps &
 	IDataGridColumnProps &
@@ -522,22 +526,13 @@ export type DataGridTheme = Partial<
 	Styles<Theme, DataGridProps, DataGridClassKey>
 >;
 
+const useThemeStyles = makeThemeStyles<DataGridProps, DataGridClassKey>(
+	(theme) => theme.componentsCare?.dataGrid
+);
+
 export const useDataGridStyles = (): ReturnType<typeof useStyles> => {
 	return useDataGridStylesInternal(useDataGridProps());
 };
-
-const useThemeStyles = makeStyles((theme) => {
-	const styleProvider = theme.componentsCare?.dataGrid ?? {};
-	if (typeof styleProvider === "function") {
-		return (styleProvider as StyleRulesCallback<
-			Theme,
-			DataGridProps,
-			DataGridClassKey
-		>)(theme);
-	} else {
-		return styleProvider;
-	}
-});
 
 const useDataGridStylesInternal = (
 	props: DataGridProps
