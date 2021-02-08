@@ -46,7 +46,7 @@ export const CrudStory = (): React.ReactElement => {
 				disableRouting
 			>
 				{/* eslint-disable-next-line react/display-name */}
-				{(goBack) => (
+				{({ goBack }) => (
 					formProps: PageProps<keyof typeof TestModelInstance.fields>
 				) => (
 					<Grid container spacing={2}>

@@ -20,6 +20,17 @@ import {
 } from "../../framework";
 import { makeStyles } from "@material-ui/core/styles";
 
+export interface CrudFormProps {
+	/**
+	 * Callback for closing the form page
+	 */
+	goBack: () => void;
+	/**
+	 * The id of the current record or NULL if create new
+	 */
+	id: string | null;
+}
+
 export interface CrudProps<
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
@@ -38,10 +49,9 @@ export interface CrudProps<
 	>;
 	/**
 	 * The renderer function which returns the form component
-	 * @param goBack Closes the form page
 	 */
 	children: (
-		goBack: () => void
+		props: CrudFormProps
 	) => FormProps<KeyT, VisibilityT, CustomT>["children"];
 	/**
 	 * The properties to pass to grid
@@ -171,7 +181,10 @@ const CRUD = <
 			{...props.formProps}
 			onSubmit={handleSubmit}
 		>
-			{props.children(showOverview)}
+			{props.children({
+				goBack: showOverview,
+				id: id === "new" ? null : id,
+			})}
 		</Form>
 	);
 
