@@ -487,8 +487,12 @@ class Model<
 				continue;
 			}
 
-			// don't include disabled fields (except ID)
-			if (field.visibility[visibility].disabled && key !== "id") {
+			// don't include disabled fields (except ID and disabled readonly fields when serializing)
+			if (
+				field.visibility[visibility].disabled &&
+				(func === "serialize" || !field.visibility[visibility].readOnly) &&
+				key !== "id"
+			) {
 				continue;
 			}
 
