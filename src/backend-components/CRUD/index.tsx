@@ -153,9 +153,19 @@ const CRUD = <
 			if (props.formProps.onSubmit) {
 				props.formProps.onSubmit(data);
 			}
+
+			// redirect to edit page
+			const { id } = data as Record<"id", string>;
+			if (disableRouting) {
+				setId((oldId) => (oldId === null ? null : id));
+			} else if (location.pathname.endsWith("/new")) {
+				history.push(`${path}/${id}`);
+			}
+
+			// cause grid refresh
 			setGridRefreshToken(new Date().getTime().toString());
 		},
-		[props.formProps]
+		[props.formProps, disableRouting, location.pathname, history, path]
 	);
 
 	const grid = () => (
