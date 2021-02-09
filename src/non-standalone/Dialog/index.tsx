@@ -6,3 +6,4 @@ export * from "./InputDialog";
 export * from "./FormDialog";
 export * from "./Utils";
 export * from "./SignPadDialog";
+export * from "./ImageDialog";
