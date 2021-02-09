@@ -30,12 +30,8 @@ const Field = (props: FieldProps): React.ReactElement => {
 
 	const { setError, model } = formContext;
 
-	const fieldDef: ModelFieldDefinition<
-		unknown,
-		string,
-		PageVisibility,
-		unknown | null
-	> = model.fields[props.name];
+	const fieldDef: ModelFieldDefinition<unknown, string, PageVisibility, never> =
+		model.fields[props.name];
 
 	if (!fieldDef) throw new Error("Invalid field name specified: " + props.name);
 
