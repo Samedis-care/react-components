@@ -12,6 +12,7 @@ import { processImage } from "../../utils";
 import { useDialogContext } from "../../framework";
 import { IDialogConfigImageBox } from "./Types";
 import GroupBox from "../../standalone/GroupBox/index";
+import ccI18n from "../../i18n";
 const useStyles = makeStyles((theme) => ({
 	closeButton: {
 		position: "absolute",
@@ -19,30 +20,32 @@ const useStyles = makeStyles((theme) => ({
 		top: theme.spacing(1),
 		color: theme.palette.grey[500],
 	},
-	iconContainer: {
-		position: "relative",
-	},
 	closeIcon: {
 		position: "absolute",
 		cursor: "pointer",
 		color: theme.palette.action.active,
-	},
-	icon: {
-		width: "100%",
-		height: "auto",
-		marginTop: 16,
-	},
-	iconDisabled: {
-		opacity: 0.5,
-	},
-	clickable: {
-		cursor: "pointer",
+		right: 0,
 	},
 	layout: {
-		padding: "5px",
+		position: "relative",
 		margin: "30px",
-		backgroundColor: theme.palette.grey[500],
+		height: "275px",
+		backgroundColor: theme.palette.background.default,
 		borderRadius: "10px",
+		width: "275px",
+	},
+	layoutAdd: {
+		position: "relative",
+		margin: "30px",
+		height: "275px",
+		borderRadius: "10px",
+		width: "275px",
+	},
+	groupBoxlayout: {
+		margin: "30px",
+		borderRadius: "10px",
+		height: "275px",
+		width: "275px",
 	},
 	changeEventHelper: {
 		display: "none",
@@ -51,13 +54,14 @@ const useStyles = makeStyles((theme) => ({
 		color: theme.palette.action.active,
 	},
 	addPhotoContainer: {
-		height: "200px",
-		width: "200px",
+		height: "275px",
+		width: "275px",
+		objectFit: "contain",
 		textAlign: "center",
 		display: "table-cell",
 		verticalAlign: "middle",
 		borderRadius: "10px",
-		backgroundColor: theme.palette.grey[500],
+		backgroundColor: theme.palette.action.hover,
 	},
 }));
 export interface allImages {
@@ -70,7 +74,6 @@ const ImageDialog = (props: IDialogConfigImageBox) => {
 	const {
 		readOnly,
 		downscale,
-		groupBoxLabel,
 		convertImagesTo,
 		uploadedImages,
 		onChange,
@@ -164,7 +167,7 @@ const ImageDialog = (props: IDialogConfigImageBox) => {
 	return (
 		<Dialog
 			onClose={closeDialog}
-			maxWidth="md"
+			maxWidth="lg"
 			fullWidth
 			disableBackdropClick
 			open={true}
@@ -182,8 +185,8 @@ const ImageDialog = (props: IDialogConfigImageBox) => {
 				<Grid item>
 					<Grid container spacing={2}>
 						{localuploadedImages.map((image, i) => (
-							<Grid key={i} className={classes.layout}>
-								<Grid item xs className={classes.iconContainer}>
+							<Grid key={i}>
+								<Grid item xs className={classes.layout}>
 									{!image.setPrimary && (
 										<Cancel
 											onClick={() => removeImageHandler(i)}
@@ -191,37 +194,32 @@ const ImageDialog = (props: IDialogConfigImageBox) => {
 										/>
 									)}
 									<img
-										style={{
-											maxWidth: "200px",
-											maxHeight: "200px",
-											height: "200px",
-										}}
 										src={image.src}
 										alt="img"
-										className={classes.icon + classes.iconDisabled}
+										className={classes.addPhotoContainer}
 									/>
-									<Grid container alignItems="center">
-										<Star
-											color={image.setPrimary ? "primary" : "disabled"}
-											onClick={() => changePrimaryImage(i)}
-										/>
-										Primary
-									</Grid>
+								</Grid>
+								<Grid container alignItems="center" style={{ margin: "30px" }}>
+									<Star
+										color={image.setPrimary ? "primary" : "disabled"}
+										onClick={() => changePrimaryImage(i)}
+									/>
+									{ccI18n.t(
+										"standalone.image-box-control.dialog.primary-button"
+									)}
 								</Grid>
 							</Grid>
 						))}
 						{!readOnly && (
-							<Grid className={classes.layout}>
-								<Grid
-									item
-									xs
-									className={classes.iconContainer}
-									onDrop={handleDrop}
-									onDragOver={handleDragOver}
-								>
+							<Grid className={classes.layoutAdd}>
+								<Grid item xs onDrop={handleDrop} onDragOver={handleDragOver}>
 									<div className={classes.addPhotoContainer}>
 										<AddAPhoto
-											style={{ height: "50px", width: "50px" }}
+											style={{
+												height: "50px",
+												width: "50px",
+												cursor: "pointer",
+											}}
 											className={classes.addPhoto}
 											onClick={handleUpload}
 										/>
@@ -235,16 +233,33 @@ const ImageDialog = (props: IDialogConfigImageBox) => {
 								</Grid>
 							</Grid>
 						)}
-					</Grid>
+						<Grid className={classes.groupBoxlayout}>
+							<GroupBox
+								label={ccI18n.t(
+									"standalone.image-box-control.dialog.group-label"
+								)}
+							>
+								<ul>
+									<li>
+										{ccI18n.t(
+											"standalone.image-box-control.dialog.group-first"
+										)}
+									</li>
+									<li>
+										{ccI18n.t(
+											"standalone.image-box-control.dialog.group-second"
+										)}
+									</li>
 
-					<GroupBox label={groupBoxLabel}>
-						<ul>
-							<li>
-								Click on the icon or Drag and Drop the image onto gray field.
-							</li>
-							<li>Select a gallery image</li>
-						</ul>
-					</GroupBox>
+									<li>
+										{ccI18n.t(
+											"standalone.image-box-control.dialog.group-third"
+										)}
+									</li>
+								</ul>
+							</GroupBox>
+						</Grid>
+					</Grid>
 				</Grid>
 			</DialogContent>
 		</Dialog>

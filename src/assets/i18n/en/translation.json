@@ -63,6 +63,16 @@
 				"title": "Sign Here"
 			},
 			"sign-here": "Digitally signed here"
+		},
+		"image-box-control": {
+			"dialog": {
+				"primary-button": "Gallery Picture",
+				"group-label": "THATS HOW IT WORKS",
+				"group-first": "Click on the icon or drag and drop your picture Drag&Orop your image onto the grey field...",
+				"group-second": "Select a gallery picture. This will then be displayed in all lists and overviews.",
+				"group-third": "Your pictures look particularly good when..."
+			},
+			"edit-link": "Edit"
 		}
 	},
 	"non-standalone": {

@@ -57,6 +57,16 @@
 				"title": "Signez ici"
 			},
 			"sign-here": "Signé numériquement ici"
+		},
+		"image-box-control": {
+			"dialog": {
+				"primary-button": "galerie photo",
+				"group-label": "VOICI COMMENT CELA FONCTIONNE",
+				"group-first": "Cliquez sur l'icône ou glissez-déposez votre photo glissez-déposez votre image sur le champ gris...",
+				"group-second": "Choisissez une image de la galerie. Celui-ci sera alors affiché affichées dans toutes les listes et aperçus.",
+				"group-third": "Vos images sont particulièrement belles quand..."
+			},
+			"edit-link": "Edit"
 		}
 	},
 	"backend-integration": {

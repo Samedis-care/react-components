@@ -97,7 +97,6 @@ export const ImageBoxStory = (): React.ReactElement => {
 						: undefined
 				}
 				readOnly={boolean("Read-only", false)}
-				groupBoxLabel={text("Group Label Text", "THATS HOW IT WORKS")}
 			/>
 		</div>
 	);

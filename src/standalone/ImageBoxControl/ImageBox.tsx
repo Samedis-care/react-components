@@ -6,6 +6,7 @@ import GroupBox from "../GroupBox";
 
 import { useDialogContext } from "../../framework";
 import { showImageDialog } from "../../non-standalone/Dialog";
+import ccI18n from "../../i18n";
 export type ImageBoxInputElement = { name: string; value: string };
 
 /**
@@ -34,10 +35,6 @@ export interface ImageBoxProps {
 	 * The label of the input
 	 */
 	label?: string;
-	/**
-	 * The label of the group box
-	 */
-	groupBoxLabel?: string;
 	/**
 	 * The alt text of the image
 	 */
@@ -96,6 +93,10 @@ const useStyles = makeStyles((theme) => ({
 	changeEventHelper: {
 		display: "none",
 	},
+	link: {
+		textAlign: "end",
+		marginRight: "10px",
+	},
 }));
 
 const ImageBox = (props: ImageBoxProps) => {
@@ -129,7 +130,11 @@ const ImageBox = (props: ImageBoxProps) => {
 					)}
 				</Grid>
 
-				{!readOnly && <Link onClick={showImageBoxDialog}>To edit</Link>}
+				{!readOnly && (
+					<Link className={classes.link} onClick={showImageBoxDialog}>
+						{ccI18n.t("standalone.image-box-control.edit-link")}
+					</Link>
+				)}
 			</Grid>
 		</GroupBox>
 	);

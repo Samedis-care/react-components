@@ -57,6 +57,16 @@
 				"title": "Hier unterschreiben"
 			},
 			"sign-here": "Hier digital unterschrieben"
+		},
+		"image-box-control": {
+			"dialog": {
+				"primary-button": "Galeriebild",
+				"group-label": "SO FUNKTIONIERT ES",
+				"group-first": "Klicke auf das Icon oder ziehe dein Bild per Drag&Orop auf das graue Feld.",
+				"group-second": "Wahle ein Galeriebild aus. Dieses wird dir dann in allen Listen und Obersichten angezeigt",
+				"group-third": "Besonders gut sehen deine Bilder aus, wenn..."
+			},
+			"edit-link": "Bearbeiten"
 		}
 	},
 	"backend-integration": {
