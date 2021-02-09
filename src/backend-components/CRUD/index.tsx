@@ -25,10 +25,6 @@ export interface CrudFormProps {
 	 * Callback for closing the form page
 	 */
 	goBack: () => void;
-	/**
-	 * The id of the current record or NULL if create new
-	 */
-	id: string | null;
 }
 
 export interface CrudProps<
@@ -44,15 +40,13 @@ export interface CrudProps<
 	 * The properties to pass to form
 	 */
 	formProps: Omit<
-		FormProps<KeyT, VisibilityT, CustomT>,
-		"id" | "model" | "children"
+		FormProps<KeyT, VisibilityT, CustomT, CrudFormProps>,
+		"id" | "model" | "children" | "customProps"
 	>;
 	/**
 	 * The renderer function which returns the form component
 	 */
-	children: (
-		props: CrudFormProps
-	) => FormProps<KeyT, VisibilityT, CustomT>["children"];
+	children: FormProps<KeyT, VisibilityT, CustomT, CrudFormProps>["children"];
 	/**
 	 * The properties to pass to grid
 	 */
@@ -149,9 +143,9 @@ const CRUD = <
 	}, [history, path, disableRouting]);
 
 	const handleSubmit = useCallback(
-		(data: Record<KeyT, unknown>) => {
+		async (data: Record<KeyT, unknown>) => {
 			if (props.formProps.onSubmit) {
-				props.formProps.onSubmit(data);
+				await props.formProps.onSubmit(data);
 			}
 
 			// redirect to edit page
@@ -190,11 +184,11 @@ const CRUD = <
 			model={props.model}
 			{...props.formProps}
 			onSubmit={handleSubmit}
-		>
-			{props.children({
+			customProps={{
 				goBack: showOverview,
-				id: id === "new" ? null : id,
-			})}
+			}}
+		>
+			{props.children}
 		</Form>
 	);
 

@@ -18,7 +18,7 @@ export interface ErrorComponentProps {
 	error: Error;
 }
 
-export interface PageProps<KeyT extends ModelFieldName> {
+export interface PageProps<KeyT extends ModelFieldName, CustomPropsT> {
 	/**
 	 * Indicates if the form is currently being submitted.
 	 * All submit buttons should be disabled if "isSubmitting" is true.
@@ -41,12 +41,21 @@ export interface PageProps<KeyT extends ModelFieldName> {
 	 * Function to trigger form reset
 	 */
 	reset: (nextState?: Partial<FormikState<Record<KeyT, unknown>>>) => void;
+	/**
+	 * The current record id OR null if create new
+	 */
+	id: string | null;
+	/**
+	 * Custom props supplied by the parent for the children
+	 */
+	customProps: CustomPropsT;
 }
 
 export interface FormProps<
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
-	CustomT
+	CustomT,
+	CustomPropsT
 > {
 	/**
 	 * The data model this form follows
@@ -55,7 +64,7 @@ export interface FormProps<
 	/**
 	 * The current data entry id
 	 */
-	id?: string | null;
+	id: string | null;
 	/**
 	 * The error component that is used to display errors
 	 */
@@ -63,7 +72,7 @@ export interface FormProps<
 	/**
 	 * The form contents
 	 */
-	children: React.ComponentType<PageProps<KeyT>>;
+	children: React.ComponentType<PageProps<KeyT, CustomPropsT>>;
 	/**
 	 * Rerender page props if values changes
 	 */
@@ -73,7 +82,11 @@ export interface FormProps<
 	 * Contains data from server response
 	 * @param dataFromServer The data from the server response (model data)
 	 */
-	onSubmit?: (dataFromServer: Record<KeyT, unknown>) => void;
+	onSubmit?: (dataFromServer: Record<KeyT, unknown>) => Promise<void> | void;
+	/**
+	 * Custom props supplied by the parent for the children
+	 */
+	customProps: CustomPropsT;
 }
 
 export interface FormContextData {
@@ -106,11 +119,12 @@ const loaderContainerStyles: CSSProperties = {
 const Form = <
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
-	CustomT
+	CustomT,
+	CustomPropsT
 >(
-	props: FormProps<KeyT, VisibilityT, CustomT>
+	props: FormProps<KeyT, VisibilityT, CustomT, CustomPropsT>
 ) => {
-	const { model, id, children, onSubmit } = props;
+	const { model, id, children, onSubmit, customProps } = props;
 	const ErrorComponent = props.errorComponent;
 
 	const [updateError, setUpdateError] = useState<Error | null>(null);
@@ -127,7 +141,7 @@ const Form = <
 				const result = await updateData(values);
 				setValues(result[0]);
 				if (onSubmit) {
-					onSubmit(result[0]);
+					await onSubmit(result[0]);
 				}
 			} catch (e) {
 				setUpdateError(e as Error);
@@ -200,6 +214,8 @@ const Form = <
 								submit={submitForm}
 								reset={resetForm}
 								dirty={dirty}
+								id={id}
+								customProps={customProps}
 							/>
 						)}
 					</form>
