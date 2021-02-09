@@ -428,7 +428,7 @@ class FileUpload extends Component<FileUploadProps, IState> {
 	};
 
 	removeFile = (file: FileData<File | FileMeta>) => {
-		if (this.props.files?.includes(file)) {
+		if ("downloadLink" in file.file) {
 			file.delete = true;
 			this.setState(
 				(prevState) => ({
