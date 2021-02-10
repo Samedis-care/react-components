@@ -28,6 +28,10 @@ export const ImageBoxStory = (): React.ReactElement => {
 		max: 4096,
 		step: 16,
 	});
+	const infoText = text(
+		"Info Text",
+		"<ul><li>Click on the icon or drag and drop your picture Drag&Drop your image onto the grey field...</li><li>Select a gallery picture. This will then be displayed in all lists and overviews.</li><li>Your pictures look particularly good when...</li></ul>"
+	);
 	const handleChangeAction = (evt: React.ChangeEvent<HTMLInputElement>) => {
 		const newUploadedImages = [
 			...uploadedImages,
@@ -45,22 +49,25 @@ export const ImageBoxStory = (): React.ReactElement => {
 			availableImages.map((image) => {
 				if (image.setPrimary) {
 					setImage(image.src);
-					action("onPrimarySelected")("", image.src);
+					action("onPrimarySelected")("set-primary", image.src);
 				}
 			});
 		} else {
 			setImage("https://via.placeholder.com/128");
-			action("onPrimarySelected")("", "https://via.placeholder.com/128");
+			action("onPrimarySelected")(
+				"set-primary",
+				"https://via.placeholder.com/128"
+			);
 		}
 	};
 	const updateImages = (availableImages: ImageSelectorBoxProps[]) => {
 		setUploadedImages(availableImages);
-		action("onUpdatedImage")("", availableImages);
+		action("onUpdatedImage")("update-images", availableImages);
 	};
 	return (
 		<div style={{ height: previewSize, width: previewSize }}>
 			<ImageBox
-				name={"story-input"}
+				name={"story-image-box"}
 				label={text("Label", "Image Box Control")}
 				alt={text("Alt Text", "Alt Description")}
 				value={image}
@@ -97,6 +104,16 @@ export const ImageBoxStory = (): React.ReactElement => {
 						: undefined
 				}
 				readOnly={boolean("Read-only", false)}
+				editLink={text("Edit Link Text", "Edit")}
+				infoText={
+					<div
+						dangerouslySetInnerHTML={{
+							__html: infoText,
+						}}
+					/>
+				}
+				groupBoxLabel={text("Group box label", "Thats how it work")}
+				setPrimaryLabel={text("Primary image label", "Gallery picture")}
 			/>
 		</div>
 	);

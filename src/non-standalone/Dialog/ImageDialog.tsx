@@ -12,7 +12,6 @@ import { processImage } from "../../utils";
 import { useDialogContext } from "../../framework";
 import { IDialogConfigImageBox } from "./Types";
 import GroupBox from "../../standalone/GroupBox/index";
-import ccI18n from "../../i18n";
 const useStyles = makeStyles((theme) => ({
 	closeButton: {
 		position: "absolute",
@@ -72,6 +71,9 @@ const ImageDialog = (props: IDialogConfigImageBox) => {
 	const [, popDialog] = useDialogContext();
 	const classes = useStyles(props);
 	const {
+		setPrimaryLabel,
+		groupBoxLabel,
+		infoText,
 		readOnly,
 		downscale,
 		convertImagesTo,
@@ -124,7 +126,7 @@ const ImageDialog = (props: IDialogConfigImageBox) => {
 	}, [processFile]);
 	const changePrimaryImage = useCallback(
 		(index) => {
-			const newImageArr = localuploadedImages.map((ele, ind) => {
+			const newUpdatedImages = localuploadedImages.map((ele, ind) => {
 				if (index === ind) {
 					ele.setPrimary = !ele.setPrimary;
 				} else {
@@ -132,8 +134,8 @@ const ImageDialog = (props: IDialogConfigImageBox) => {
 				}
 				return ele;
 			});
-			setImages(newImageArr);
-			onPrimarySelected(newImageArr);
+			setImages(newUpdatedImages);
+			onPrimarySelected(newUpdatedImages);
 		},
 		[localuploadedImages, onPrimarySelected]
 	);
@@ -195,7 +197,7 @@ const ImageDialog = (props: IDialogConfigImageBox) => {
 									)}
 									<img
 										src={image.src}
-										alt="img"
+										alt={props.name}
 										className={classes.addPhotoContainer}
 									/>
 								</Grid>
@@ -204,9 +206,7 @@ const ImageDialog = (props: IDialogConfigImageBox) => {
 										color={image.setPrimary ? "primary" : "disabled"}
 										onClick={() => changePrimaryImage(i)}
 									/>
-									{ccI18n.t(
-										"standalone.image-box-control.dialog.primary-button"
-									)}
+									{setPrimaryLabel}
 								</Grid>
 							</Grid>
 						))}
@@ -226,6 +226,7 @@ const ImageDialog = (props: IDialogConfigImageBox) => {
 									</div>
 									<input
 										type={"text"}
+										name={props.name}
 										ref={changeRef}
 										className={classes.changeEventHelper}
 										onChange={onChange}
@@ -234,30 +235,7 @@ const ImageDialog = (props: IDialogConfigImageBox) => {
 							</Grid>
 						)}
 						<Grid className={classes.groupBoxlayout}>
-							<GroupBox
-								label={ccI18n.t(
-									"standalone.image-box-control.dialog.group-label"
-								)}
-							>
-								<ul>
-									<li>
-										{ccI18n.t(
-											"standalone.image-box-control.dialog.group-first"
-										)}
-									</li>
-									<li>
-										{ccI18n.t(
-											"standalone.image-box-control.dialog.group-second"
-										)}
-									</li>
-
-									<li>
-										{ccI18n.t(
-											"standalone.image-box-control.dialog.group-third"
-										)}
-									</li>
-								</ul>
-							</GroupBox>
+							<GroupBox label={groupBoxLabel}>{infoText}</GroupBox>
 						</Grid>
 					</Grid>
 				</Grid>

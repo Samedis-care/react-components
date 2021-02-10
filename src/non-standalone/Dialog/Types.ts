@@ -190,6 +190,18 @@ export interface ImageSelectorBoxProps {
  */
 export interface IDialogConfigImageBox {
 	/**
+	 * The name of the input
+	 */
+	name: string;
+	/**
+	 * The html for group box
+	 */
+	infoText?: React.ReactNode;
+	/**
+	 * The label for primary button
+	 */
+	setPrimaryLabel?: string;
+	/**
 	 * The label of the group box
 	 */
 	groupBoxLabel?: string;

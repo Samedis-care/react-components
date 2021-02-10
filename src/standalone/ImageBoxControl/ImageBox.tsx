@@ -6,7 +6,6 @@ import GroupBox from "../GroupBox";
 
 import { useDialogContext } from "../../framework";
 import { showImageDialog } from "../../non-standalone/Dialog";
-import ccI18n from "../../i18n";
 export type ImageBoxInputElement = { name: string; value: string };
 
 /**
@@ -35,6 +34,22 @@ export interface ImageBoxProps {
 	 * The label of the input
 	 */
 	label?: string;
+	/**
+	 * The text of the edit link
+	 */
+	editLink?: string;
+	/**
+	 * The html for group box
+	 */
+	infoText?: React.ReactNode;
+	/**
+	 * The label for group box
+	 */
+	groupBoxLabel?: string;
+	/**
+	 * The label for primary button
+	 */
+	setPrimaryLabel?: string;
 	/**
 	 * The alt text of the image
 	 */
@@ -132,7 +147,7 @@ const ImageBox = (props: ImageBoxProps) => {
 
 				{!readOnly && (
 					<Link className={classes.link} onClick={showImageBoxDialog}>
-						{ccI18n.t("standalone.image-box-control.edit-link")}
+						{props.editLink}
 					</Link>
 				)}
 			</Grid>
