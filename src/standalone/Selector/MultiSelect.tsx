@@ -21,7 +21,7 @@ export interface MultiSelectorData extends BaseSelectorData {
 }
 
 export interface MultiSelectProps
-	extends Omit<BaseSelectorProps, "onSelect" | "selected"> {
+	extends Omit<BaseSelectorProps<MultiSelectorData>, "onSelect" | "selected"> {
 	/**
 	 * Extended selection change handler
 	 * @param data The selected data entry/entries

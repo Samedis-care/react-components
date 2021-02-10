@@ -14,7 +14,10 @@ export interface BackendSingleSelectProps<
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
 	CustomT
-> extends Omit<BaseSelectorProps, "onLoad" | "selected" | "onSelect"> {
+> extends Omit<
+		BaseSelectorProps<BaseSelectorData>,
+		"onLoad" | "selected" | "onSelect"
+	> {
 	/**
 	 * The model to use
 	 */
