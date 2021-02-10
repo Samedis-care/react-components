@@ -56,8 +56,13 @@ export interface ModelFieldDefinition<
 	 * Callback to validate field
 	 * @param value The value of this field
 	 * @param values All field values
+	 * @param field This field
 	 */
-	validate?: (value: TypeT, values: Record<KeyT, unknown>) => string | null;
+	validate?: (
+		value: TypeT,
+		values: Record<KeyT, unknown>,
+		field: ModelFieldDefinition<TypeT, KeyT, VisibilityT, CustomT>
+	) => string | null;
 	/**
 	 * User-defined data
 	 */
@@ -398,14 +403,15 @@ class Model<
 		Object.entries(values).forEach(([field, value]) => {
 			// skip validations for fields which aren't defined in the model
 			if (!(field in this.fields)) return;
+			const fieldDef = this.fields[field as KeyT];
 
 			// first apply type validation
-			let error = this.fields[field as KeyT].type.validate(value);
+			let error = fieldDef.type.validate(value);
 
 			// then apply custom field validation if present
-			const fieldValidation = this.fields[field as KeyT].validate;
+			const fieldValidation = fieldDef.validate;
 			if (!error && fieldValidation) {
-				error = fieldValidation(value, values);
+				error = fieldValidation(value, values, fieldDef);
 			}
 
 			if (error) errors[field] = error;
