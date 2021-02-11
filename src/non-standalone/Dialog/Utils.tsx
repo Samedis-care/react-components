@@ -5,13 +5,12 @@ import {
 	IDialogConfigInputAsync,
 	IDialogConfigSimple,
 	IDialogConfigSign,
-	IDialogConfigImageBox,
 } from "./Types";
 import { ConfirmDialog } from "./ConfirmDialog";
 import { InputDialog } from "./InputDialog";
 import { InfoDialog } from "./InfoDialog";
 import { SignDialog } from "./SignPadDialog";
-import { ImageBoxDialog } from "./ImageDialog";
+import { ImageBoxDialog, ImageBoxDialogProps } from "./ImageDialog";
 import i18n from "../../i18n";
 
 /**
@@ -103,7 +102,7 @@ export const showSignPadDialog = (
  */
 export const showImageDialog = (
 	pushDialog: DialogContextType[0],
-	props: IDialogConfigImageBox
+	props: ImageBoxDialogProps
 ): void => {
 	pushDialog(<ImageBoxDialog {...props} />);
 };

@@ -1,6 +1,5 @@
 import React from "react";
 import { PropTypes } from "@material-ui/core";
-import { IDownscaleProps } from "../../utils/processImage";
 
 /**
  * Configuration for a dialog button
@@ -170,67 +169,4 @@ export interface IDialogConfigSign {
 	 * Callback method which returns signature base64 string
 	 */
 	setSignature?: (url: string) => void;
-}
-
-/**
- * Object properties for image
- */
-export interface ImageSelectorBoxProps {
-	/**
-	 * The base64 string of signature
-	 */
-	src: string;
-	/**
-	 * Boolean flag to set primary image
-	 */
-	setPrimary: boolean;
-}
-/**
- * Props which will be provided in image box dialog
- */
-export interface IDialogConfigImageBox {
-	/**
-	 * The name of the input
-	 */
-	name: string;
-	/**
-	 * The html for group box
-	 */
-	infoText?: React.ReactNode;
-	/**
-	 * The label for primary button
-	 */
-	setPrimaryLabel?: string;
-	/**
-	 * The label of the group box
-	 */
-	groupBoxLabel?: string;
-	/**
-	 * Callback for change in file upload
-	 */
-	onChange: React.ChangeEventHandler<{ name: string; value: string }>;
-	/**
-	 * Callback method to set primary image
-	 */
-	onPrimarySelected: (values: ImageSelectorBoxProps[]) => void;
-	/**
-	 * Callback method to update list of images
-	 */
-	onUpdateImages: (values: ImageSelectorBoxProps[]) => void;
-	/**
-	 * List of images in image box
-	 */
-	uploadedImages: ImageSelectorBoxProps[];
-	/**
-	 * Is the control read-only?
-	 */
-	readOnly: boolean;
-	/**
-	 * MimeType to convert the image to (e.g. image/png or image/jpg)
-	 */
-	convertImagesTo?: string;
-	/**
-	 * Settings to downscale an image
-	 */
-	downscale?: IDownscaleProps;
 }
