@@ -3,11 +3,11 @@ import "../../../i18n";
 import { boolean, number, select, text } from "@storybook/addon-knobs";
 import { action } from "@storybook/addon-actions";
 import ImageBoxControl from "../../../non-standalone/ImageBoxControl/ImageBoxControl";
-import { ImageControllerProps } from "../../../standalone/ImageBoxControl/index";
+import { ImageControllerEntry } from "../../../standalone/ImageBoxControl/index";
 
 export const ImageBoxStory = (): React.ReactElement => {
 	const [image, setImage] = useState("https://via.placeholder.com/128");
-	const [uploadedImages, setUploadedImages] = useState<ImageControllerProps[]>(
+	const [uploadedImages, setUploadedImages] = useState<ImageControllerEntry[]>(
 		[]
 	);
 	const previewSize = number("Preview size (in px)", 256, {
@@ -20,7 +20,7 @@ export const ImageBoxStory = (): React.ReactElement => {
 		"Info Text",
 		"<ul><li>Click on the icon or drag and drop your picture Drag&Drop your image onto the grey field...</li><li>Select a gallery picture. This will then be displayed in all lists and overviews.</li><li>Your pictures look particularly good when...</li></ul>"
 	);
-	const updateImages = (availableImages: ImageControllerProps[]) => {
+	const updateImages = (availableImages: ImageControllerEntry[]) => {
 		const filtered = availableImages.filter((image) => {
 			return image.primary;
 		});

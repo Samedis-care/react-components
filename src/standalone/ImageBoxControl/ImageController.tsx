@@ -8,7 +8,7 @@ import { processImage } from "../../utils";
 /**
  * Object properties for image
  */
-export interface ImageControllerProps {
+export interface ImageControllerEntry {
 	/**
 	 * The base64 string of signature
 	 */
@@ -18,7 +18,7 @@ export interface ImageControllerProps {
 	 */
 	primary: boolean;
 }
-export interface IDialogConfigImageBox {
+export interface ImageControllerProps {
 	/**
 	 * The name of the input
 	 */
@@ -46,11 +46,11 @@ export interface IDialogConfigImageBox {
 	/**
 	 * Callback method to set primary image
 	 */
-	handlePrimaryAction: (values: ImageControllerProps[]) => void;
+	handlePrimaryAction: (values: ImageControllerEntry[]) => void;
 	/**
 	 * List of images in image box
 	 */
-	uploadedImages: ImageControllerProps[];
+	uploadedImages: ImageControllerEntry[];
 	/**
 	 * Is the control read-only?
 	 */
@@ -121,7 +121,7 @@ const useStyles = makeStyles((theme) => ({
 	},
 }));
 
-const ImageController = (props: IDialogConfigImageBox) => {
+const ImageController = (props: ImageControllerProps) => {
 	const {
 		showInfoText,
 		setPrimaryLabel,
@@ -136,7 +136,7 @@ const ImageController = (props: IDialogConfigImageBox) => {
 	} = props;
 	const classes = useStyles(props);
 
-	const [localuploadedImages, setImages] = useState<ImageControllerProps[]>([
+	const [localuploadedImages, setImages] = useState<ImageControllerEntry[]>([
 		...uploadedImages,
 	]);
 	const changeRef = useRef<HTMLInputElement>(null);

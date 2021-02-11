@@ -8,17 +8,8 @@ import {
 import MuiDialogTitle from "@material-ui/core/DialogTitle";
 import { Close } from "@material-ui/icons";
 import { useDialogContext } from "../../framework";
-import {
-	ImageController,
-	IDialogConfigImageBox,
-} from "../../standalone/ImageBoxControl/index";
-export interface ImageBoxDialogProps
-	extends Omit<IDialogConfigImageBox, "classes"> {
-	/**
-	 * Custom styles
-	 */
-	classes?: Partial<ReturnType<typeof useStyles>>;
-}
+import { ImageController } from "../../standalone/ImageBoxControl/index";
+import { IDialogImageBox } from "./Types";
 
 const useStyles = makeStyles((theme) => ({
 	closeButton: {
@@ -28,7 +19,7 @@ const useStyles = makeStyles((theme) => ({
 		color: theme.palette.grey[500],
 	},
 }));
-const ImageDialog = (props: ImageBoxDialogProps) => {
+const ImageDialog = (props: IDialogImageBox) => {
 	const [, popDialog] = useDialogContext();
 	const classes = useStyles(props);
 	const closeDialog = () => popDialog();

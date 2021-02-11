@@ -1,5 +1,6 @@
 import React from "react";
 import { PropTypes } from "@material-ui/core";
+import { ImageControllerProps } from "../../standalone/ImageBoxControl/index";
 
 /**
  * Configuration for a dialog button
@@ -169,4 +170,15 @@ export interface IDialogConfigSign {
 	 * Callback method which returns signature base64 string
 	 */
 	setSignature?: (url: string) => void;
+}
+/**
+ * Props which will be provided in image box dialog
+ */
+export interface IDialogImageBox extends Omit<ImageControllerProps, "classes"> {
+	/**
+	 * Custom styles
+	 */
+	classes?: {
+		imageController?: ImageControllerProps["classes"];
+	};
 }

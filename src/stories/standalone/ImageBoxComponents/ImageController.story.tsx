@@ -1,0 +1,58 @@
+import React, { useState, useCallback } from "react";
+import { boolean, text } from "@storybook/addon-knobs";
+import { action } from "@storybook/addon-actions";
+import "../../../i18n";
+import ImageController, {
+	ImageControllerEntry,
+} from "../../../standalone/ImageBoxControl/ImageController";
+
+export const ImageControllerStory = (): React.ReactElement => {
+	const [uploadedImages, setUploadedImages] = useState<ImageControllerEntry[]>(
+		[]
+	);
+	const infoText = text(
+		"Info Text",
+		"<ul><li>Click on the icon or drag and drop your picture Drag&Drop your image onto the grey field...</li><li>Select a gallery picture. This will then be displayed in all lists and overviews.</li><li>Your pictures look particularly good when...</li></ul>"
+	);
+	const handleChangeAction = useCallback(
+		(evt: React.ChangeEvent<HTMLInputElement>) => {
+			const newUploadedImages = [
+				...uploadedImages,
+				{ src: evt.target.value, primary: false },
+			];
+			setUploadedImages(newUploadedImages);
+			action("OnhandleChangeAction")(evt.target.name, evt.target.value);
+		},
+		[uploadedImages, setUploadedImages]
+	);
+	const handlePrimaryAction = useCallback(
+		(availableImages: ImageControllerEntry[]) => {
+			setUploadedImages(availableImages);
+			action("OnhandlePrimaryAction")("", availableImages);
+		},
+		[setUploadedImages]
+	);
+	return (
+		<ImageController
+			name={"image-controller"}
+			infoText={
+				infoText && (
+					<div
+						dangerouslySetInnerHTML={{
+							__html: infoText,
+						}}
+					/>
+				)
+			}
+			handleChangeAction={handleChangeAction}
+			handlePrimaryAction={handlePrimaryAction}
+			uploadedImages={uploadedImages}
+			showInfoText={boolean("show-info-text", true)}
+			readOnly={boolean("Read-only", false)}
+			groupBoxLabel={text("Group box label", "Thats how it work")}
+			setPrimaryLabel={text("Primary image label", "Gallery picture")}
+		/>
+	);
+};
+
+ImageControllerStory.storyName = "ImageController";

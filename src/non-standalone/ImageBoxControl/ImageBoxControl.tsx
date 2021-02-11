@@ -6,24 +6,31 @@ import {
 import { useDialogContext } from "../../framework";
 import { showImageDialog } from "../../non-standalone/Dialog";
 import {
-	IDialogConfigImageBox,
 	ImageControllerProps,
+	ImageControllerEntry,
 } from "../../standalone/ImageBoxControl/index";
 export type ImageBoxInputElement = { name: string; value: string };
 
 export interface ImageBoxControlProps
 	extends Omit<
-			IDialogConfigImageBox,
-			"handleChangeAction" | "handlePrimaryAction"
+			ImageControllerProps,
+			"handleChangeAction" | "handlePrimaryAction" | "classes"
 		>,
 		Partial<Pick<ImageViewerProps, "value" | "label" | "alt" | "editLink">> {
 	/**
+	 * CSS styles to apply
+	 */
+	classes?: {
+		imageViewer?: ImageViewerProps["classes"];
+		imageController?: ImageControllerProps["classes"];
+	};
+	/**
 	 * Handler for update images
 	 */
-	onUpdateImages: (values: ImageControllerProps[]) => void;
+	onUpdateImages: (values: ImageControllerEntry[]) => void;
 }
 
-const ImageBoxControl = (props: Omit<ImageBoxControlProps, "classes">) => {
+const ImageBoxControl = (props: ImageBoxControlProps) => {
 	const {
 		value,
 		label,
@@ -35,7 +42,7 @@ const ImageBoxControl = (props: Omit<ImageBoxControlProps, "classes">) => {
 	} = props;
 	const [pushDialog] = useDialogContext();
 
-	const [uploadedImages, setUploadedImages] = useState<ImageControllerProps[]>(
+	const [uploadedImages, setUploadedImages] = useState<ImageControllerEntry[]>(
 		[]
 	);
 	const handleChangeAction = useCallback(
@@ -50,7 +57,7 @@ const ImageBoxControl = (props: Omit<ImageBoxControlProps, "classes">) => {
 		[uploadedImages, setUploadedImages, onUpdateImages]
 	);
 	const handlePrimaryAction = useCallback(
-		(availableImages: ImageControllerProps[]) => {
+		(availableImages: ImageControllerEntry[]) => {
 			setUploadedImages(availableImages);
 			onUpdateImages(availableImages);
 		},
@@ -81,6 +88,7 @@ const ImageBoxControl = (props: Omit<ImageBoxControlProps, "classes">) => {
 			editLink={editLink}
 			label={label}
 			alt={alt as string}
+			classes={props.classes?.imageViewer}
 		/>
 	);
 };
