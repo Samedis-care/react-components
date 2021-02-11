@@ -4,3 +4,4 @@ const Settings = {
 export default Settings;
 
 export * from "./ImageController.story";
+export * from "./ImageViewer.story";
