@@ -396,14 +396,19 @@ class Model<
 	/**
 	 * Validates the given values against the field defined validation rules
 	 * @param values The values to validate
+	 * @param view Optional view filter (only applies validations on fields present in given view)
 	 */
-	public validate(values: Record<KeyT, unknown>): Record<string, string> {
+	public validate(
+		values: Record<KeyT, unknown>,
+		view?: "edit" | "create"
+	): Record<string, string> {
 		const errors: Record<string, string> = {};
 
 		Object.entries(values).forEach(([field, value]) => {
-			// skip validations for fields which aren't defined in the model
+			// skip validations for fields which aren't defined in the model or which are disabled in the current view
 			if (!(field in this.fields)) return;
 			const fieldDef = this.fields[field as KeyT];
+			if (view && fieldDef.visibility[view].disabled) return;
 
 			// first apply type validation
 			let error = fieldDef.type.validate(value);
