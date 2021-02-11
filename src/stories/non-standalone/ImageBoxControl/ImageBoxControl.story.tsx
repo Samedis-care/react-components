@@ -6,7 +6,6 @@ import ImageBoxControl from "../../../non-standalone/ImageBoxControl/ImageBoxCon
 import { ImageControllerEntry } from "../../../standalone/ImageBoxControl/index";
 
 export const ImageBoxStory = (): React.ReactElement => {
-	const [image, setImage] = useState("https://via.placeholder.com/128");
 	const [uploadedImages, setUploadedImages] = useState<ImageControllerEntry[]>(
 		[]
 	);
@@ -21,18 +20,6 @@ export const ImageBoxStory = (): React.ReactElement => {
 		"<ul><li>Click on the icon or drag and drop your picture Drag&Drop your image onto the grey field...</li><li>Select a gallery picture. This will then be displayed in all lists and overviews.</li><li>Your pictures look particularly good when...</li></ul>"
 	);
 	const updateImages = (availableImages: ImageControllerEntry[]) => {
-		const filtered = availableImages.filter((image) => {
-			return image.primary;
-		});
-		if (filtered.length > 0) {
-			availableImages.map((image) => {
-				if (image.primary) {
-					setImage(image.src);
-				}
-			});
-		} else {
-			setImage("https://via.placeholder.com/128");
-		}
 		setUploadedImages(availableImages);
 		action("onUpdatedImage")("update-images", availableImages);
 	};
@@ -42,7 +29,6 @@ export const ImageBoxStory = (): React.ReactElement => {
 				name={"story-image-box"}
 				label={text("Label", "Image Box Control")}
 				alt={text("Alt Text", "Alt Description")}
-				value={image}
 				onUpdateImages={updateImages}
 				uploadedImages={uploadedImages}
 				convertImagesTo={select(

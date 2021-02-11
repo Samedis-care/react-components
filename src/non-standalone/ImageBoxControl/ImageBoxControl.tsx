@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import {
 	ImageViewer,
 	ImageViewerProps,
@@ -32,7 +32,6 @@ export interface ImageBoxControlProps
 
 const ImageBoxControl = (props: ImageBoxControlProps) => {
 	const {
-		value,
 		label,
 		alt,
 		readOnly,
@@ -42,9 +41,16 @@ const ImageBoxControl = (props: ImageBoxControlProps) => {
 	} = props;
 	const [pushDialog] = useDialogContext();
 
+	const [image, setImage] = useState("https://via.placeholder.com/128");
 	const [uploadedImages, setUploadedImages] = useState<ImageControllerEntry[]>(
 		[]
 	);
+	useEffect(() => {
+		const primaryImage = uploadedImages.find((img) => img.primary);
+		setImage(
+			primaryImage ? primaryImage.src : "https://via.placeholder.com/128"
+		);
+	}, [uploadedImages]);
 	const handleChangeAction = useCallback(
 		(evt: React.ChangeEvent<HTMLInputElement>) => {
 			const newUploadedImages = [
@@ -82,7 +88,7 @@ const ImageBoxControl = (props: ImageBoxControlProps) => {
 	// render component
 	return (
 		<ImageViewer
-			value={value as string}
+			value={image}
 			readOnly={readOnly}
 			showImageBoxDialog={showImageBoxDialog}
 			editLink={editLink}
