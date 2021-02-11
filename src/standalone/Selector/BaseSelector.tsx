@@ -110,6 +110,10 @@ export interface BaseSelectorProps<DataT extends BaseSelectorData>
 	 */
 	disableClearable?: boolean;
 	/**
+	 * Disable search?
+	 */
+	disableSearch?: boolean;
+	/**
 	 * Custom styles to be used for selector
 	 */
 	classes?: AutocompleteProps<
@@ -153,6 +157,7 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 		noOptionsText,
 		loadingText,
 		disableClearable,
+		// disableSearch,
 		openInfo,
 	} = props;
 	const classes = useThemeStyles(
@@ -214,12 +219,9 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 		[actualAddNewLabel, onAddNew, onLoad, setLoading]
 	);
 
-	const updateQuery = useCallback(
-		(_, newQuery: string) => {
-			setQuery(newQuery);
-		},
-		[setQuery]
-	);
+	const updateQuery = useCallback((_, newQuery: string) => {
+		setQuery(newQuery);
+	}, []);
 
 	// initial option load
 	useEffect(() => {

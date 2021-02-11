@@ -23,6 +23,7 @@ export const SelectorSingle = (): React.ReactElement => {
 	const onAddNewAction = action("onAddNew");
 	const enableAddNew = boolean("Enable Add New", false);
 	const disableClearable = boolean("Disable clearable?", false);
+	const disableSearch = boolean("Disable search?", false);
 	const icons = boolean("Enable Icons", false);
 	const disabled = boolean("Disable", false);
 	const addNewLabel = text("Add new label", "Add");
@@ -58,6 +59,7 @@ export const SelectorSingle = (): React.ReactElement => {
 					onAddNew={enableAddNew ? onAddNewAction : undefined}
 					enableIcons={icons}
 					disableClearable={disableClearable}
+					disableSearch={disableSearch}
 					disabled={disabled}
 					addNewLabel={addNewLabel}
 					loadingText={loadingText}
