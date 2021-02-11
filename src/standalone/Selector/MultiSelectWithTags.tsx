@@ -28,64 +28,7 @@ import TextFieldWithHelp, {
 import { SmallIconButton, SmallListItemIcon } from "../Small";
 import { uniqueArray } from "../../utils";
 
-export interface MultiSelectWithTagsSwitchPropsOn<
-	DataT extends MultiSelectorData,
-	GroupT extends BaseSelectorData
-> {
-	/**
-	 * Display switch control
-	 */
-	displaySwitch: true;
-	/**
-	 * Label for switch control
-	 */
-	switchLabel: string;
-	/**
-	 * Search callback which is called to load available data entries
-	 * @param query The search string
-	 */
-	loadDataOptions: (
-		query: string,
-		switchValue: boolean
-	) => DataT[] | Promise<DataT[]>;
-	/**
-	 * Search callback which is called to load available group entries
-	 * @param query The search string
-	 */
-	loadGroupOptions: (
-		query: string,
-		switchValue: boolean
-	) => GroupT[] | Promise<GroupT[]>;
-}
-
-export interface MultiSelectWithTagsSwitchPropsOff<
-	DataT extends MultiSelectorData,
-	GroupT extends BaseSelectorData
-> {
-	/**
-	 * Display switch control
-	 */
-	displaySwitch?: false;
-	/**
-	 * Search callback which is called to load available data entries
-	 * @param query The search string
-	 */
-	loadDataOptions: (query: string) => DataT[] | Promise<DataT[]>;
-	/**
-	 * Search callback which is called to load available group entries
-	 * @param query The search string
-	 */
-	loadGroupOptions: (query: string) => GroupT[] | Promise<GroupT[]>;
-}
-
-type MultiSelectWithTagsSwitchProps<
-	DataT extends MultiSelectorData,
-	GroupT extends BaseSelectorData
-> =
-	| MultiSelectWithTagsSwitchPropsOn<DataT, GroupT>
-	| MultiSelectWithTagsSwitchPropsOff<DataT, GroupT>;
-
-interface MultiSelectWithTagsCommonProps<
+export interface MultiSelectWithTagsProps<
 	DataT extends MultiSelectorData,
 	GroupT extends BaseSelectorData
 > extends Pick<
@@ -110,6 +53,18 @@ interface MultiSelectWithTagsCommonProps<
 	 * Custom styles
 	 */
 	classes?: Partial<keyof ReturnType<typeof useStyles>>;
+	/**
+	 * Display switch control?
+	 */
+	displaySwitch?: boolean;
+	/**
+	 * Label for switch control (only used if displaySwitch is truthy)
+	 */
+	switchLabel?: React.ReactNode;
+	/**
+	 * Default state of switch control (only used if displaySwitch is truthy)
+	 */
+	defaultSwitchValue?: boolean;
 	// Data management props
 	/**
 	 * The currently selected values
@@ -127,6 +82,24 @@ interface MultiSelectWithTagsCommonProps<
 	 * @returns The data entries to add for this group
 	 */
 	loadGroupEntries: (group: GroupT) => DataT[] | Promise<DataT[]>;
+	/**
+	 * Search callback which is called to load available data entries
+	 * @param query The search string
+	 * @param switchValue The value of the switch or false if switch is disabled
+	 */
+	loadDataOptions: (
+		query: string,
+		switchValue: boolean
+	) => DataT[] | Promise<DataT[]>;
+	/**
+	 * Search callback which is called to load available group entries
+	 * @param query The search string
+	 * @param switchValue The value of the switch or false if switch is disabled
+	 */
+	loadGroupOptions: (
+		query: string,
+		switchValue: boolean
+	) => GroupT[] | Promise<GroupT[]>;
 }
 
 interface SelectedGroup {
@@ -201,12 +174,6 @@ const AntSwitch = withStyles((theme: Theme) => ({
 	checked: {},
 }))(Switch);
 
-export type MultiSelectWithTagsProps<
-	DataT extends MultiSelectorData,
-	GroupT extends BaseSelectorData
-> = MultiSelectWithTagsCommonProps<DataT, GroupT> &
-	MultiSelectWithTagsSwitchProps<DataT, GroupT>;
-
 const MultiSelectWithTags = <
 	DataT extends MultiSelectorData,
 	GroupT extends BaseSelectorData
@@ -229,10 +196,18 @@ const MultiSelectWithTags = <
 		openInfo,
 	} = props;
 	const classes = useStyles(props);
+	const defaultSwitchValue = props.displaySwitch
+		? props.defaultSwitchValue ?? false
+		: false;
 	const [selectedGroups, setSelectedGroups] = useState<SelectedGroup[]>([]);
 	const [dataOptions, setDataOptions] = useState<DataT[]>([]);
-	const [switchValue, setSwitchValue] = useState(false);
+	const [switchValue, setSwitchValue] = useState(defaultSwitchValue);
 	const [dataQuery, setDataQuery] = useState("");
+
+	useEffect(() => {
+		setSwitchValue(defaultSwitchValue);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [!!props.displaySwitch]);
 
 	const handleGroupSelect = useCallback(
 		async (selectedGroup: GroupT | null) => {
