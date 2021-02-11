@@ -53,21 +53,21 @@ export interface BaseSelectorData {
  */
 type SelectorLabelCallback = (obj: { inputValue: string }) => string | null;
 
-export interface BaseSelectorProps extends TextFieldWithHelpProps {
+export interface BaseSelectorProps<DataT extends BaseSelectorData>
+	extends TextFieldWithHelpProps {
 	/**
 	 * Refresh token used to force refreshing data.
-	 * Does not work with truthy multiSelect
 	 */
 	refreshToken?: string;
 	/**
 	 * Data load function
 	 * @param search The user search input
 	 */
-	onLoad: (search: string) => BaseSelectorData[] | Promise<BaseSelectorData[]>;
+	onLoad: (search: string) => DataT[] | Promise<DataT[]>;
 	/**
 	 * Callback for autocomplete change
 	 */
-	onSelect: (selected: BaseSelectorData | null) => void;
+	onSelect: (selected: DataT | null) => void;
 	/**
 	 * Disable autocomplete control
 	 */
@@ -92,7 +92,7 @@ export interface BaseSelectorProps extends TextFieldWithHelpProps {
 	/**
 	 * The currently selected values
 	 */
-	selected: BaseSelectorData | null;
+	selected: DataT | null;
 	/**
 	 * Enables icons in the list renderers
 	 */
@@ -121,12 +121,13 @@ export interface BaseSelectorProps extends TextFieldWithHelpProps {
 }
 
 export type SelectorTheme = Partial<
-	Styles<Theme, BaseSelectorProps, AutocompleteClassKey>
+	Styles<Theme, BaseSelectorProps<BaseSelectorData>, AutocompleteClassKey>
 >;
 
-const useThemeStyles = makeThemeStyles<BaseSelectorProps, AutocompleteClassKey>(
-	(theme) => theme.componentsCare?.uiKit?.selector
-);
+const useThemeStyles = makeThemeStyles<
+	BaseSelectorProps<BaseSelectorData>,
+	AutocompleteClassKey
+>((theme) => theme.componentsCare?.uiKit?.selector);
 
 const useCustomStyles = makeStyles({
 	infoBtn: {
@@ -135,7 +136,9 @@ const useCustomStyles = makeStyles({
 	},
 });
 
-const BaseSelector = (props: BaseSelectorProps) => {
+const BaseSelector = <DataT extends BaseSelectorData>(
+	props: BaseSelectorProps<DataT>
+) => {
 	const {
 		refreshToken,
 		onSelect,
@@ -152,7 +155,9 @@ const BaseSelector = (props: BaseSelectorProps) => {
 		disableClearable,
 		openInfo,
 	} = props;
-	const classes = useThemeStyles(props);
+	const classes = useThemeStyles(
+		(props as unknown) as BaseSelectorProps<BaseSelectorData>
+	);
 	const customClasses = useCustomStyles();
 	const [open, setOpen] = useState(false);
 	const actualAddNewLabel =
@@ -161,6 +166,7 @@ const BaseSelector = (props: BaseSelectorProps) => {
 		[] as BaseSelectorData[]
 	);
 	const [loading, setLoading] = useState(false);
+	const [query, setQuery] = useState("");
 
 	const defaultRenderer = useCallback(
 		(data: BaseSelectorData) => (
@@ -200,7 +206,7 @@ const BaseSelector = (props: BaseSelectorProps) => {
 					label: actualAddNewLabel,
 					icon: <AddIcon />,
 					isAddNewButton: true,
-				} as BaseSelectorData);
+				} as DataT);
 			}
 			setSelectorOptions(results);
 			setLoading(false);
@@ -208,11 +214,18 @@ const BaseSelector = (props: BaseSelectorProps) => {
 		[actualAddNewLabel, onAddNew, onLoad, setLoading]
 	);
 
+	const updateQuery = useCallback(
+		(_, newQuery: string) => {
+			setQuery(newQuery);
+		},
+		[setQuery]
+	);
+
 	// initial option load
 	useEffect(() => {
-		void onSearchHandler("");
+		void onSearchHandler(query);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
+	}, [query, refreshToken]);
 
 	return (
 		<div>
@@ -233,11 +246,14 @@ const BaseSelector = (props: BaseSelectorProps) => {
 				disabled={disabled}
 				options={selectorOptions}
 				value={selected}
+				inputValue={query}
+				onInputChange={updateQuery}
 				popupIcon={<ExpandMore />}
 				noOptionsText={noOptionsText}
 				getOptionLabel={(option: BaseSelectorData) => option.label}
 				renderOption={(option: BaseSelectorData) => defaultRenderer(option)}
 				getOptionDisabled={(option: BaseSelectorData) => !!option.isDisabled}
+				getOptionSelected={(option, value) => option.value === value.value}
 				onChange={(_event, selectedValue) => onChangeHandler(selectedValue)}
 				renderInput={(params: AutocompleteRenderInputParams) => {
 					// eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -265,9 +281,7 @@ const BaseSelector = (props: BaseSelectorProps) => {
 							}
 							placeholder={placeholder}
 							onChange={(event) => {
-								if (event.target.value !== "" || event.target.value !== null) {
-									void onSearchHandler(event.target.value);
-								}
+								void onSearchHandler(event.target.value);
 							}}
 						/>
 					);
@@ -282,4 +296,4 @@ const BaseSelector = (props: BaseSelectorProps) => {
 	);
 };
 
-export default React.memo(BaseSelector);
+export default React.memo(BaseSelector) as typeof BaseSelector;
