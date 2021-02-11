@@ -266,7 +266,7 @@ class Model<
 					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 					// @ts-ignore
 					// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-					ModelDataStore.setQueryData([this.modelId, { id: data.id }], data);
+					ModelDataStore.setQueryData([this.modelId, { id: data[0].id }], data);
 				},
 			}
 		);
