@@ -4,8 +4,6 @@ import {
 	Typography,
 	Switch,
 	Grid,
-	createStyles,
-	makeStyles,
 	Theme,
 	IconButton,
 	withStyles,
@@ -115,18 +113,7 @@ interface SelectedGroup {
 	items: string[];
 }
 
-const themingStyles = makeStyles((theme: Theme) => ({
-	selectorLabel: {
-		display: theme.componentsCare?.selector?.label?.display || "inline-block",
-		color: theme.componentsCare?.selector?.label?.color,
-		fontWeight: theme.componentsCare?.selector?.label?.fontWeight,
-		fontSize: theme.componentsCare?.selector?.label?.fontSize,
-		margin: theme.componentsCare?.selector?.label?.margin,
-		...theme.componentsCare?.selector?.label?.style,
-	},
-}));
-
-const styles = createStyles((theme: Theme) => ({
+const useStyles = makeStyles((theme: Theme) => ({
 	paperWrapper: {
 		boxShadow: "none",
 		border: `1px solid ${theme.palette.divider}`,
@@ -146,7 +133,6 @@ const styles = createStyles((theme: Theme) => ({
 	searchLabel: {
 		lineHeight: "30px",
 		float: "left",
-		fontStyle: "italic",
 	},
 	switch: {
 		lineHeight: "30px",
@@ -170,7 +156,7 @@ const AntSwitch = withStyles((theme: Theme) => ({
 			"& + $track": {
 				opacity: 1,
 				backgroundColor: theme.palette.primary.main,
-				borderColor: "5px dotted blue", //theme.palette.primary.main,
+				borderColor: theme.palette.primary.main,
 			},
 		},
 	},
@@ -339,8 +325,6 @@ const MultiSelectWithTags = <
 		[loadDataOptions, selected, switchValue]
 	);
 
-	const themingClasses = themingStyles();
-
 	useEffect(() => {
 		void onSearchData(dataQuery);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -348,9 +332,7 @@ const MultiSelectWithTags = <
 
 	return (
 		<Typography component="div">
-			<Typography component="label" className={themingClasses.selectorLabel}>
-				{title}
-			</Typography>
+			<Typography component="label">{title}</Typography>
 			<SingleSelect
 				autocompleteId={
 					autocompleteId ? autocompleteId + "-group-select" : undefined

@@ -27,7 +27,6 @@ import {
 import { dataGridPrepareFiltersAndSorts } from "./CallbackUtil";
 import { ModelFilterType } from "../../backend-integration/Model";
 import { HEADER_PADDING } from "./Content/ColumnHeader";
-import { Styles } from "@material-ui/core/styles/withStyles";
 
 export interface DataGridTheme extends Theming.BasicElementThemeFragment {
 	/* root elements from BasicElementThemeFragment defining main grid container visuals */
@@ -45,6 +44,7 @@ export interface DataGridTheme extends Theming.BasicElementThemeFragment {
 			cell?: Theming.BasicElementThemeFragment & {
 				header?: Theming.BasicTextThemeFragment & {
 					label?: Theming.BasicTextThemeFragment;
+					resizer?: Theming.BasicElementThemeFragment;
 				};
 				data?: Theming.BasicTextThemeFragment & {
 					label?: Theming.BasicTextThemeFragment;
@@ -60,7 +60,7 @@ export interface DataGridTheme extends Theming.BasicElementThemeFragment {
 	};
 }
 
-export type IDataGridProps = IDataGridHeaderProps &
+export type DataGridProps = IDataGridHeaderProps &
 	IDataGridColumnProps &
 	IDataGridCallbacks & {
 		/**
@@ -488,16 +488,26 @@ const useStyles = makeStyles((theme: Theme) => ({
 		backgroundColor: theme.componentsCare?.dataGrid?.footer?.backgroundColor,
 		...theme.componentsCare?.dataGrid?.footer?.style,
 	},
-	footer: {
-		borderTop: `1px solid ${theme.palette.divider}`,
-		marginTop: 1,
+	rowOdd: {
+		background: theme.componentsCare?.dataGrid?.content?.row?.background,
+		backgroundColor:
+			theme.componentsCare?.dataGrid?.content?.row?.backgroundColor,
+		padding: theme.componentsCare?.dataGrid?.content?.row?.padding,
+		...theme.componentsCare?.dataGrid?.content?.row?.odd,
+	},
+	rowEven: {
+		background: theme.componentsCare?.dataGrid?.content?.row?.background,
+		backgroundColor:
+			theme.componentsCare?.dataGrid?.content?.row?.backgroundColor,
+		padding: theme.componentsCare?.dataGrid?.content?.row?.padding,
+		...theme.componentsCare?.dataGrid?.content?.row?.even,
 	},
 	cell: {
 		border:
 			theme.componentsCare?.dataGrid?.content?.row?.cell?.data?.border ||
 			theme.componentsCare?.dataGrid?.content?.row?.cell?.border ||
 			`1px solid ${
-				theme.componentsCare?.dataGrid?.content?.row?.cell?.borderColor ??
+				theme.componentsCare?.dataGrid?.content?.row?.cell?.data?.borderColor ??
 				theme.palette.divider
 			}`,
 		borderWidth:
@@ -536,9 +546,9 @@ const useStyles = makeStyles((theme: Theme) => ({
 		whiteSpace: "nowrap",
 		textOverflow: "ellipsis",
 		padding: HEADER_PADDING / 2,
-		backgroundColor:
-			theme.componentsCare?.dataGrid?.content?.backgroundColor ??
-			theme.palette.background.paper,
+		borderColor:
+			theme.componentsCare?.dataGrid?.content?.row?.cell?.data?.borderColor ||
+			theme.componentsCare?.dataGrid?.content?.row?.borderColor,
 		color: theme.palette.getContrastText(
 			theme.componentsCare?.dataGrid?.content?.backgroundColor ??
 				theme.palette.background.paper
@@ -560,6 +570,15 @@ const useStyles = makeStyles((theme: Theme) => ({
 		width: "100%",
 		minWidth: "100%",
 		zIndex: 1000,
+		fontSize:
+			theme.componentsCare?.dataGrid?.content?.row?.cell?.header?.label
+				?.fontSize,
+		fontWeight:
+			theme.componentsCare?.dataGrid?.content?.row?.cell?.header?.label
+				?.fontWeight,
+		fontStyle:
+			theme.componentsCare?.dataGrid?.content?.row?.cell?.header?.label
+				?.fontStyle,
 		border:
 			theme.componentsCare?.dataGrid?.content?.row?.cell?.header?.label
 				?.border ||
@@ -579,7 +598,7 @@ const useStyles = makeStyles((theme: Theme) => ({
 		padding:
 			theme.componentsCare?.dataGrid?.content?.row?.cell?.header?.label
 				?.padding,
-		...theme.componentsCare?.dataGrid?.content?.row?.cell?.header?.style,
+		...theme.componentsCare?.dataGrid?.content?.row?.cell?.header?.label?.style,
 	},
 	columnHeaderFilterable: {
 		color: theme.palette.primary.main,
@@ -595,6 +614,24 @@ const useStyles = makeStyles((theme: Theme) => ({
 		right: 0,
 		top: 0,
 		position: "absolute",
+		border:
+			theme.componentsCare?.dataGrid?.content?.row?.cell?.header?.resizer
+				?.border ||
+			`1px solid ${
+				theme.componentsCare?.dataGrid?.content?.row?.cell?.borderColor ??
+				theme.palette.divider
+			}`,
+		borderWidth:
+			theme.componentsCare?.dataGrid?.content?.row?.cell?.header?.resizer
+				?.borderWidth || "0 0 0 0",
+		background:
+			theme.componentsCare?.dataGrid?.content?.row?.cell?.header?.resizer
+				?.background,
+		backgroundColor:
+			theme.componentsCare?.dataGrid?.content?.row?.cell?.header?.resizer
+				?.backgroundColor,
+		...theme.componentsCare?.dataGrid?.content?.row?.cell?.header?.resizer
+			?.style,
 	},
 	columnHeaderFilterPopup: {
 		width: 150,
@@ -651,10 +688,6 @@ const useStyles = makeStyles((theme: Theme) => ({
 }));
 
 export type DataGridClassKey = keyof ReturnType<typeof useStyles>;
-
-export type DataGridTheme = Partial<
-	Styles<Theme, DataGridProps, DataGridClassKey>
->;
 
 const useThemeStyles = makeThemeStyles<DataGridProps, DataGridClassKey>(
 	(theme) => theme.componentsCare?.dataGrid

@@ -22,6 +22,8 @@ const getDefaultTheme = (): ThemeOptions => ({
 const customColors = {
 	white: "rgb(255, 255, 255)",
 	grey: "rgb(127, 127, 127)",
+	lighterBlue: "rgb(218, 236, 248)",
+	lightBlue: "rgb(182, 216, 241)",
 };
 
 const customPalette = {
@@ -57,13 +59,27 @@ const getCustomTheme = (): ThemeOptions => ({
 			},
 			content: {
 				row: {
+					borderColor: customColors.white,
+					backgroundColor: customColors.lighterBlue,
+					selected: {
+						backgroundColor: customColors.lightBlue,
+					},
+					hover: {
+						backgroundColor: customColors.lightBlue,
+					},
 					cell: {
 						header: {
-							padding: "5px 0",
-							borderWidth: "0 0 0 0",
+							borderWidth: "0 0 1px 0",
 							label: {
-								padding: "0 10px",
+								fontSize: "0.75rem",
+								fontWeight: 500,
+							},
+							resizer: {
 								borderWidth: "0 1px 0 0",
+								style: {
+									top: "2px",
+									height: "18px",
+								}
 							},
 						},
 						data: {
@@ -73,7 +89,7 @@ const getCustomTheme = (): ThemeOptions => ({
 				},
 			},
 			footer: {
-				padding: "1px 0 0 0",
+				padding: "15px 0 0 0",
 			},
 		},
 		selector: {
