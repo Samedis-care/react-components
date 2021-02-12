@@ -46,38 +46,26 @@ export interface BackendMultiSelectProps<
 	initialData?: Record<KeyT, unknown>[];
 }
 
-const BackendMultiSelect = <
+interface UseSelectedCacheResult {
+	selected: MultiSelectorData[];
+	handleSelect: (selected: MultiSelectorData[]) => void;
+}
+
+export const useSelectedCache = <
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
 	CustomT
 >(
-	props: BackendMultiSelectProps<KeyT, VisibilityT, CustomT>
-) => {
-	const {
-		model,
-		modelToSelectorData,
-		searchResultLimit,
-		onSelect,
-		selected,
-		initialData,
-		...otherProps
-	} = props;
+	props: Pick<
+		BackendMultiSelectProps<KeyT, VisibilityT, CustomT>,
+		"model" | "modelToSelectorData" | "onSelect" | "selected" | "initialData"
+	>
+): UseSelectedCacheResult => {
+	const { model, modelToSelectorData, onSelect, selected, initialData } = props;
 
 	const [selectedCache, setSelectedCache] = useState<
 		Record<string, MultiSelectorData>
 	>({});
-
-	const handleLoad = useCallback(
-		async (search: string) => {
-			const data = await model.index({
-				page: 1,
-				rows: searchResultLimit ?? 25,
-				quickFilter: search,
-			});
-			return Promise.all(data[0].map(modelToSelectorData));
-		},
-		[model, modelToSelectorData, searchResultLimit]
-	);
 
 	const handleSelect = useCallback(
 		(selected: MultiSelectorData[]) => {
@@ -130,18 +118,58 @@ const BackendMultiSelect = <
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [selected]);
 
+	return {
+		selected: selected.map(
+			(value) =>
+				selectedCache[value] ?? {
+					value,
+					label: ccI18n.t("backend-components.selector.loading"),
+				}
+		),
+		handleSelect,
+	};
+};
+
+const BackendMultiSelect = <
+	KeyT extends ModelFieldName,
+	VisibilityT extends PageVisibility,
+	CustomT
+>(
+	props: BackendMultiSelectProps<KeyT, VisibilityT, CustomT>
+) => {
+	const {
+		model,
+		modelToSelectorData,
+		searchResultLimit,
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		onSelect,
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		selected: selectedIds,
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		initialData,
+		...otherProps
+	} = props;
+
+	const { selected, handleSelect } = useSelectedCache(props);
+
+	const handleLoad = useCallback(
+		async (search: string) => {
+			const data = await model.index({
+				page: 1,
+				rows: searchResultLimit ?? 25,
+				quickFilter: search,
+			});
+			return Promise.all(data[0].map(modelToSelectorData));
+		},
+		[model, modelToSelectorData, searchResultLimit]
+	);
+
 	return (
 		<MultiSelect
 			{...otherProps}
 			onLoad={handleLoad}
 			onSelect={handleSelect}
-			selected={selected.map(
-				(value) =>
-					selectedCache[value] ?? {
-						value,
-						label: ccI18n.t("backend-components.selector.loading"),
-					}
-			)}
+			selected={selected}
 		/>
 	);
 };
