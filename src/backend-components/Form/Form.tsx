@@ -131,7 +131,10 @@ const Form = <
 	const { isLoading, error, data } = model.get(id || null);
 	const { mutateAsync: updateData } = model.createOrUpdate();
 
-	const onValidate = useCallback((values) => model.validate(values), [model]);
+	const onValidate = useCallback(
+		(values) => model.validate(values, id ? "edit" : "create"),
+		[model, id]
+	);
 	const onSubmitHandler = useCallback(
 		async (
 			values: ModelData<KeyT>,
