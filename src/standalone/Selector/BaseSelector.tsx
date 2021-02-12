@@ -148,6 +148,7 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 		onSelect,
 		selected,
 		disabled,
+		disableSearch,
 		placeholder,
 		autocompleteId,
 		addNewLabel,
@@ -262,6 +263,7 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 					const { InputProps, InputLabelProps, ...otherParams } = params;
 					return (
 						<OutlinedInputWithHelp
+							disableSearch={disableSearch}
 							{...InputProps}
 							{...otherParams}
 							endAdornment={
