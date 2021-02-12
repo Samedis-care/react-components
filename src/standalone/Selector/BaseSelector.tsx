@@ -263,7 +263,7 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 					const { InputProps, InputLabelProps, ...otherParams } = params;
 					return (
 						<OutlinedInputWithHelp
-							disableSearch={disableSearch}
+							readOnly={disableSearch}
 							{...InputProps}
 							{...otherParams}
 							endAdornment={
