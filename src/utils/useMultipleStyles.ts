@@ -1,5 +1,10 @@
 import { ClassNameMap } from "@material-ui/styles/withStyles";
 
+/**
+ * Combine multiple useStyle hooks
+ * @param props The properties to pass to the useStyle hooks
+ * @param styles The useStyle hooks
+ */
 const useMultipleStyles = <
 	// eslint-disable-next-line @typescript-eslint/ban-types
 	Props extends object,

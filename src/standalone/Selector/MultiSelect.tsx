@@ -5,8 +5,7 @@ import BaseSelector, {
 } from "./BaseSelector";
 import { makeStyles, Grid, Paper } from "@material-ui/core";
 import MultiSelectEntry, { IMultiSelectEntryProps } from "./MultiSelectEntry";
-import { combineClassMaps } from "../../utils";
-import { AutocompleteClassKey } from "@material-ui/lab/Autocomplete/Autocomplete";
+import { cleanClassMap } from "../../utils";
 
 export interface MultiSelectorData extends BaseSelectorData {
 	/**
@@ -63,13 +62,11 @@ const MultiSelect = (props: MultiSelectProps) => {
 		enableIcons,
 		selectedEntryRenderer,
 		disabled,
-		classes,
 	} = props;
-	const multiSelectClasses = useStyles(props);
-	const defaultMultiSelectClasses = useSelectorStyles();
-	const multiSelectStyles = classes
-		? combineClassMaps<AutocompleteClassKey>(defaultMultiSelectClasses, classes)
-		: defaultMultiSelectClasses;
+	const multiSelectClasses = useStyles(cleanClassMap(props, true, "inputRoot"));
+	const multiSelectStyles = useSelectorStyles(
+		cleanClassMap(props, false, "inputRoot")
+	);
 
 	const EntryRender = selectedEntryRenderer || MultiSelectEntry;
 
