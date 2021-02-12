@@ -41,12 +41,39 @@ const customPalette = {
 };
 /* example for a customized theme per client requirements */
 const getCustomTheme = (): ThemeOptions => ({
-	spacing: [0, 5, 7, 10, 15, 21, 25],
+	spacing: [0, 5, 7, 10, 15, 21],
 	palette: {
 		type: "light",
 		...customPalette
 	},
 	componentsCare: {
+		dataGrid: {
+			border: "none",
+			header: {
+				borderWidth: "0 0 0 0",
+				padding: "0 0 15px 0",
+			},
+			content: {
+				row: {
+					cell: {
+						header: {
+							padding: "5px 0",
+							borderWidth: "0 0 0 0",
+							label: {
+								padding: "0 10px",
+								borderWidth: "0 1px 0 0",
+							},
+						},
+						data: {
+							borderWidth: "0 0 1px 0",
+						},
+					},
+				},
+			},
+			footer: {
+				padding: "1px 0 0 0",
+			},
+		},
 		selector: {
 			backgroundColor: "#FFF",
 			borderWidth: "1px",

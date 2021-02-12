@@ -9,12 +9,14 @@ export interface BasicThemeFragment {
 	borderRadius?: CSSProperties["borderRadius"];
 	margin?: CSSProperties["margin"];
 	padding?: CSSProperties["padding"];
+	background?: CSSProperties["background"];
 	backgroundColor?: CSSProperties["backgroundColor"];
 	style?: CSSProperties;
 }
 
 export interface BasicColorThemeFragment {
 	borderColor?: CSSProperties["borderColor"];
+	background?: CSSProperties["background"];
 	backgroundColor?: CSSProperties["backgroundColor"];
 	color?: CSSProperties["color"];
 	style?: CSSProperties;

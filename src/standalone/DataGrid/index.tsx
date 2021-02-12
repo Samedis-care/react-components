@@ -1,5 +1,4 @@
 import React, {
-	CSSProperties,
 	Dispatch,
 	SetStateAction,
 	useCallback,
@@ -9,6 +8,8 @@ import React, {
 	useRef,
 	useState,
 } from "react";
+import type * as Theming from "../../types/theming";
+
 import { Grid, Theme, useTheme } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import Header, { IDataGridHeaderProps } from "./Header";
@@ -22,6 +23,37 @@ import { dataGridPrepareFiltersAndSorts } from "./CallbackUtil";
 import { ModelFilterType } from "../../backend-integration/Model";
 import { HEADER_PADDING } from "./Content/ColumnHeader";
 
+export interface DataGridTheme extends Theming.BasicElementThemeFragment {
+	/* root elements from BasicElementThemeFragment defining main grid container visuals */
+
+	/* the header element containing quickfilter, selectors and buttons */
+	header?: Theming.BasicElementThemeFragment;
+
+	/* the content element with rows */
+	content?: Theming.BasicElementThemeFragment & {
+		row?: Theming.BasicElementThemeFragment & {
+			odd?: Theming.BasicColorThemeFragment;
+			even?: Theming.BasicColorThemeFragment;
+			hover?: Theming.BasicColorThemeFragment;
+			selected?: Theming.BasicColorThemeFragment;
+			cell?: Theming.BasicElementThemeFragment & {
+				header?: Theming.BasicTextThemeFragment & {
+					label?: Theming.BasicTextThemeFragment;
+				};
+				data?: Theming.BasicTextThemeFragment & {
+					label?: Theming.BasicTextThemeFragment;
+				};
+			};
+		};
+	};
+
+	/* the button that allows clearing any typed text */
+	footer?: Theming.BasicElementThemeFragment & {
+		/* element showing total record counter */
+		total?: Theming.BasicElementThemeFragment;
+	};
+}
+
 export type IDataGridProps = IDataGridHeaderProps &
 	IDataGridColumnProps &
 	IDataGridCallbacks & {
@@ -30,17 +62,6 @@ export type IDataGridProps = IDataGridHeaderProps &
 		 */
 		classes?: Partial<ReturnType<typeof useStyles>>;
 	};
-
-export interface DataGridTheme {
-	content?: {
-		headerBackgroundColor?: CSSProperties["backgroundColor"];
-		columnDividerColor?: CSSProperties["borderColor"];
-		backgroundColor?: CSSProperties["backgroundColor"];
-		dividerColor?: CSSProperties["borderColor"];
-		hoverBackgroundColor?: CSSProperties["backgroundColor"];
-	};
-}
-
 export interface IDataGridLoadDataParameters {
 	/**
 	 * The page to load
@@ -413,37 +434,89 @@ export const getDataGridDefaultColumnsState = (
 
 const useStyles = makeStyles((theme: Theme) => ({
 	wrapper: {
-		width: "100%",
-		height: "100%",
-		border: `1px solid ${theme.palette.divider}`,
-		borderRadius: 8,
-		backgroundColor: theme.palette.background.paper,
+		width: theme.componentsCare?.dataGrid?.width || "100%",
+		height: theme.componentsCare?.dataGrid?.height || "100%",
+		borderRadius:
+			theme.componentsCare?.dataGrid?.borderRadius || theme.spacing(2),
+		border:
+			theme.componentsCare?.dataGrid?.border ||
+			`1px solid ${theme.palette.divider}`,
+		backgroundColor:
+			theme.componentsCare?.dataGrid?.backgroundColor ||
+			theme.palette.background.paper,
+		background: theme.componentsCare?.dataGrid?.background,
+		...theme.componentsCare?.dataGrid?.style,
 	},
-	middle: {
-		borderTop: `1px solid ${theme.palette.divider}`,
-		borderBottom: `1px solid ${theme.palette.divider}`,
+	header: {
+		border:
+			theme.componentsCare?.dataGrid?.header?.border ||
+			`1px solid ${theme.palette.divider}`,
+		borderWidth:
+			theme.componentsCare?.dataGrid?.header?.borderWidth || "0 0 1px 0",
+		padding: theme.componentsCare?.dataGrid?.header?.padding,
+		background: theme.componentsCare?.dataGrid?.header?.background,
+		backgroundColor: theme.componentsCare?.dataGrid?.header?.backgroundColor,
+		...theme.componentsCare?.dataGrid?.header?.style,
+	},
+	content: {
 		position: "relative",
+		margin: theme.componentsCare?.dataGrid?.content?.margin,
+		padding: theme.componentsCare?.dataGrid?.content?.padding,
+		border: theme.componentsCare?.dataGrid?.content?.border,
+		borderWidth: theme.componentsCare?.dataGrid?.content?.borderWidth,
+		background: theme.componentsCare?.dataGrid?.content?.background,
+		backgroundColor: theme.componentsCare?.dataGrid?.content?.backgroundColor,
+		...theme.componentsCare?.dataGrid?.content?.style,
+	},
+	footer: {
+		border:
+			theme.componentsCare?.dataGrid?.footer?.border ||
+			`1px solid ${theme.palette.divider}`,
+		borderWidth:
+			theme.componentsCare?.dataGrid?.footer?.borderWidth || "1px 0 0 0",
+		padding: theme.componentsCare?.dataGrid?.footer?.padding,
+		background: theme.componentsCare?.dataGrid?.footer?.background,
+		backgroundColor: theme.componentsCare?.dataGrid?.footer?.backgroundColor,
+		...theme.componentsCare?.dataGrid?.footer?.style,
 	},
 	cell: {
-		//borderRight: `1px ${theme.palette.divider} solid`,
-		borderBottom: `1px ${
-			theme.componentsCare?.dataGrid?.content?.dividerColor ??
-			theme.palette.divider
-		} solid`,
-		padding: `0 ${HEADER_PADDING / 2}px`,
+		border:
+			theme.componentsCare?.dataGrid?.content?.row?.cell?.data?.border ||
+			theme.componentsCare?.dataGrid?.content?.row?.cell?.border ||
+			`1px solid ${
+				theme.componentsCare?.dataGrid?.content?.row?.cell?.borderColor ??
+				theme.palette.divider
+			}`,
+		borderWidth:
+			theme.componentsCare?.dataGrid?.content?.row?.cell?.data?.borderWidth ||
+			theme.componentsCare?.dataGrid?.content?.row?.cell?.borderWidth ||
+			"0 1px 1px 0",
+		padding:
+			theme.componentsCare?.dataGrid?.content?.row?.cell?.data?.padding ||
+			theme.componentsCare?.dataGrid?.content?.row?.cell?.padding ||
+			`0 ${HEADER_PADDING / 2}px`,
+		...theme.componentsCare?.dataGrid?.content?.row?.cell?.data?.style,
 	},
 	headerCell: {
-		borderRight: `1px ${
-			theme.componentsCare?.dataGrid?.content?.columnDividerColor ??
-			theme.palette.divider
-		} solid`,
+		border:
+			theme.componentsCare?.dataGrid?.content?.row?.cell?.border ||
+			theme.componentsCare?.dataGrid?.content?.row?.cell?.header?.border,
+		borderWidth:
+			theme.componentsCare?.dataGrid?.content?.row?.cell?.borderWidth ||
+			theme.componentsCare?.dataGrid?.content?.row?.cell?.header?.borderWidth ||
+			"0 1px 1px 0",
+		padding:
+			theme.componentsCare?.dataGrid?.content?.row?.cell?.header?.padding ||
+			theme.componentsCare?.dataGrid?.content?.row?.cell?.padding ||
+			`0 ${HEADER_PADDING / 2}px`,
 		backgroundColor:
-			theme.componentsCare?.dataGrid?.content?.headerBackgroundColor ??
-			theme.palette.background.paper,
+			theme.componentsCare?.dataGrid?.content?.row?.cell?.header
+				?.backgroundColor || theme.palette.background.paper,
 		color: theme.palette.getContrastText(
-			theme.componentsCare?.dataGrid?.content?.headerBackgroundColor ??
-				theme.palette.background.paper
+			theme.componentsCare?.dataGrid?.content?.row?.cell?.header
+				?.backgroundColor ?? theme.palette.background.paper
 		),
+		...theme.componentsCare?.dataGrid?.content?.row?.cell?.header?.style,
 	},
 	dataCell: {
 		padding: HEADER_PADDING / 2,
@@ -454,21 +527,43 @@ const useStyles = makeStyles((theme: Theme) => ({
 			theme.componentsCare?.dataGrid?.content?.backgroundColor ??
 				theme.palette.background.paper
 		),
+		...theme.componentsCare?.dataGrid?.content?.row?.cell?.data?.style,
 	},
 	dataCellSelected: {
 		backgroundColor:
-			theme.componentsCare?.dataGrid?.content?.hoverBackgroundColor ??
+			theme.componentsCare?.dataGrid?.content?.row?.selected?.backgroundColor ||
 			theme.palette.action.hover,
 		color: theme.palette.getContrastText(
-			theme.componentsCare?.dataGrid?.content?.hoverBackgroundColor ??
-				theme.componentsCare?.dataGrid?.content?.backgroundColor ??
+			theme.componentsCare?.dataGrid?.content?.row?.selected?.backgroundColor ||
+				theme.componentsCare?.dataGrid?.content?.backgroundColor ||
 				theme.palette.background.paper
 		),
+		...theme.componentsCare?.dataGrid?.content?.row?.selected?.style,
 	},
 	columnHeaderContentWrapper: {
 		width: "100%",
 		minWidth: "100%",
 		zIndex: 1000,
+		border:
+			theme.componentsCare?.dataGrid?.content?.row?.cell?.header?.label
+				?.border ||
+			`1px solid ${
+				theme.componentsCare?.dataGrid?.content?.row?.cell?.borderColor ??
+				theme.palette.divider
+			}`,
+		borderWidth:
+			theme.componentsCare?.dataGrid?.content?.row?.cell?.header?.label
+				?.borderWidth || "0 0 0 0",
+		background:
+			theme.componentsCare?.dataGrid?.content?.row?.cell?.header?.label
+				?.background,
+		backgroundColor:
+			theme.componentsCare?.dataGrid?.content?.row?.cell?.header?.label
+				?.backgroundColor,
+		padding:
+			theme.componentsCare?.dataGrid?.content?.row?.cell?.header?.label
+				?.padding,
+		...theme.componentsCare?.dataGrid?.content?.row?.cell?.header?.style,
 	},
 	columnHeaderFilterable: {
 		color: theme.palette.primary.main,
@@ -728,10 +823,10 @@ const DataGrid = (props: IDataGridProps) => {
 							<DataGridColumnsWidthStateContext.Provider
 								value={columnWidthStatePack}
 							>
-								<Grid item>
+								<Grid item className={classes.header}>
 									<Header />
 								</Grid>
-								<Grid item xs className={classes.middle}>
+								<Grid item xs className={classes.content}>
 									<Settings columns={columns} />
 									{refreshData && Object.keys(rows).length === 0 && <Loader />}
 									{!refreshData &&
@@ -748,7 +843,7 @@ const DataGrid = (props: IDataGridProps) => {
 										/>
 									)}
 								</Grid>
-								<Grid item>
+								<Grid item className={classes.footer}>
 									<Footer />
 								</Grid>
 							</DataGridColumnsWidthStateContext.Provider>
