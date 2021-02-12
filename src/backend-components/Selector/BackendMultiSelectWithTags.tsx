@@ -97,7 +97,7 @@ const BackendMultiSelectWithTags = <
 
 	const loadGroupEntries = useCallback(
 		async (data: BaseSelectorData) => {
-			return getGroupDataEntries(await groupModel.getRaw(data.value));
+			return getGroupDataEntries(await groupModel.getCached(data.value));
 		},
 		[getGroupDataEntries, groupModel]
 	);

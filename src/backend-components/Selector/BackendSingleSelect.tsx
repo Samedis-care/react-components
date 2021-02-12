@@ -110,7 +110,7 @@ const BackendSingleSelect = <
 
 			if (!newCache) {
 				try {
-					const data = await model.getRaw(selected);
+					const data = await model.getCached(selected);
 					newCache = await modelToSelectorData(data[0]);
 				} catch (e) {
 					newCache = {

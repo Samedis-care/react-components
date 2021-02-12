@@ -113,7 +113,7 @@ const BackendMultiSelect = <
 					.filter((value) => !(value in selectedCache) && !(value in newCache))
 					.map(async (value) => {
 						try {
-							const data = await model.getRaw(value);
+							const data = await model.getCached(value);
 							newCache[value] = await modelToSelectorData(data[0]);
 						} catch (e) {
 							newCache[value] = {
