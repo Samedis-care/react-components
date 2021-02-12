@@ -40,10 +40,6 @@ export interface ImageControllerProps {
 	 */
 	groupBoxLabel?: string;
 	/**
-	 * Callback for change in file upload
-	 */
-	handleChangeAction: React.ChangeEventHandler<{ name: string; value: string }>;
-	/**
 	 * Callback method to set primary image
 	 */
 	handlePrimaryAction: (values: ImageControllerEntry[]) => void;
@@ -131,7 +127,6 @@ const ImageController = (props: ImageControllerProps) => {
 		downscale,
 		convertImagesTo,
 		uploadedImages,
-		handleChangeAction,
 		handlePrimaryAction,
 	} = props;
 	const classes = useStyles(props);
@@ -260,7 +255,7 @@ const ImageController = (props: ImageControllerProps) => {
 								name={props.name}
 								ref={changeRef}
 								className={classes.changeEventHelper}
-								onChange={handleChangeAction}
+								onChange={() => handlePrimaryAction(localuploadedImages)}
 							/>
 						</Grid>
 					</Grid>

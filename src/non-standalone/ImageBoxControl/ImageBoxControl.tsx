@@ -12,10 +12,7 @@ import {
 export type ImageBoxInputElement = { name: string; value: string };
 
 export interface ImageBoxControlProps
-	extends Omit<
-			ImageControllerProps,
-			"handleChangeAction" | "handlePrimaryAction" | "classes"
-		>,
+	extends Omit<ImageControllerProps, "handlePrimaryAction" | "classes">,
 		Partial<Pick<ImageViewerProps, "value" | "label" | "alt" | "editLink">> {
 	/**
 	 * CSS styles to apply
@@ -51,17 +48,7 @@ const ImageBoxControl = (props: ImageBoxControlProps) => {
 			primaryImage ? primaryImage.src : "https://via.placeholder.com/128"
 		);
 	}, [uploadedImages]);
-	const handleChangeAction = useCallback(
-		(evt: React.ChangeEvent<HTMLInputElement>) => {
-			const newUploadedImages = [
-				...uploadedImages,
-				{ src: evt.target.value, primary: false },
-			];
-			setUploadedImages(newUploadedImages);
-			onUpdateImages(newUploadedImages);
-		},
-		[uploadedImages, setUploadedImages, onUpdateImages]
-	);
+
 	const handlePrimaryAction = useCallback(
 		(availableImages: ImageControllerEntry[]) => {
 			setUploadedImages(availableImages);
@@ -73,17 +60,10 @@ const ImageBoxControl = (props: ImageBoxControlProps) => {
 		if (readOnly) return;
 		showImageDialog(pushDialog, {
 			readOnly,
-			handleChangeAction,
 			handlePrimaryAction,
 			...ImageBoxControlProps,
 		});
-	}, [
-		readOnly,
-		pushDialog,
-		handleChangeAction,
-		handlePrimaryAction,
-		ImageBoxControlProps,
-	]);
+	}, [readOnly, pushDialog, handlePrimaryAction, ImageBoxControlProps]);
 
 	// render component
 	return (
