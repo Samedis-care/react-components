@@ -188,27 +188,11 @@ const getCustomTheme = (): ThemeOptions => ({
 					},
 				},
 			},
-			selector: {
-				inputRoot: {
-					'&[class*="MuiOutlinedInput-root"]': {
-						paddingLeft: 16,
-						paddingTop: 0,
-						paddingBottom: 0,
-						"& .MuiAutocomplete-input": {
-							padding: "6.5px 4px",
-						},
-						'& [class*="MuiAutocomplete-endAdornment"]': {
-							right: 28,
-						},
-					},
-				},
-			},
 		},
 	},
 });
 
 const loadTheme = (): ThemeOptions => {
-	return getCustomTheme();
 	const themeStr = localStorage.getItem("theme");
 	if (!themeStr) return getDefaultTheme();
 	return JSON.parse(themeStr) as ThemeOptions;
