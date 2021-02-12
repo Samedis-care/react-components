@@ -1,5 +1,5 @@
 const Settings = {
-	title: "Standalone/SignaturePad",
+	title: "Non-Standalone/SignaturePad",
 };
 export default Settings;
 

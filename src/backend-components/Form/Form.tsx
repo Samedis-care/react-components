@@ -1,11 +1,15 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React, { CSSProperties, useCallback, useMemo, useState } from "react";
 import { Formik, FormikHelpers } from "formik";
 import Model, {
+	ModelData,
 	ModelFieldName,
+	ModelGetResponseRelations,
 	PageVisibility,
 } from "../../backend-integration/Model/Model";
 import Loader from "../../standalone/Loader";
 import { FormikState } from "formik/dist/types";
+import { isObjectEmpty } from "../../utils";
+import FormUpdateListener from "./FormUpdateListener";
 
 export interface ErrorComponentProps {
 	/**
@@ -14,7 +18,7 @@ export interface ErrorComponentProps {
 	error: Error;
 }
 
-export interface PageProps<KeyT extends ModelFieldName> {
+export interface PageProps<KeyT extends ModelFieldName, CustomPropsT> {
 	/**
 	 * Indicates if the form is currently being submitted.
 	 * All submit buttons should be disabled if "isSubmitting" is true.
@@ -37,12 +41,21 @@ export interface PageProps<KeyT extends ModelFieldName> {
 	 * Function to trigger form reset
 	 */
 	reset: (nextState?: Partial<FormikState<Record<KeyT, unknown>>>) => void;
+	/**
+	 * The current record id OR null if create new
+	 */
+	id: string | null;
+	/**
+	 * Custom props supplied by the parent for the children
+	 */
+	customProps: CustomPropsT;
 }
 
 export interface FormProps<
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
-	CustomT
+	CustomT,
+	CustomPropsT
 > {
 	/**
 	 * The data model this form follows
@@ -51,7 +64,7 @@ export interface FormProps<
 	/**
 	 * The current data entry id
 	 */
-	id?: string | null;
+	id: string | null;
 	/**
 	 * The error component that is used to display errors
 	 */
@@ -59,7 +72,7 @@ export interface FormProps<
 	/**
 	 * The form contents
 	 */
-	children: React.ComponentType<PageProps<KeyT>>;
+	children: React.ComponentType<PageProps<KeyT, CustomPropsT>>;
 	/**
 	 * Rerender page props if values changes
 	 */
@@ -69,7 +82,11 @@ export interface FormProps<
 	 * Contains data from server response
 	 * @param dataFromServer The data from the server response (model data)
 	 */
-	onSubmit?: (dataFromServer: Record<KeyT, unknown>) => void;
+	onSubmit?: (dataFromServer: Record<KeyT, unknown>) => Promise<void> | void;
+	/**
+	 * Custom props supplied by the parent for the children
+	 */
+	customProps: CustomPropsT;
 }
 
 export interface FormContextData {
@@ -77,6 +94,10 @@ export interface FormContextData {
 	 * The data model of this form
 	 */
 	model: Model<ModelFieldName, PageVisibility, never>;
+	/**
+	 * Relations of the model
+	 */
+	relations: ModelGetResponseRelations<ModelFieldName>;
 	/**
 	 * Helper function to display errors
 	 * @param error The error to display
@@ -89,31 +110,41 @@ export interface FormContextData {
  */
 export const FormContext = React.createContext<FormContextData | null>(null);
 
+const loaderContainerStyles: CSSProperties = {
+	height: 320,
+	width: 320,
+	margin: "auto",
+};
+
 const Form = <
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
-	CustomT
+	CustomT,
+	CustomPropsT
 >(
-	props: FormProps<KeyT, VisibilityT, CustomT>
+	props: FormProps<KeyT, VisibilityT, CustomT, CustomPropsT>
 ) => {
-	const { model, id, children, onSubmit } = props;
+	const { model, id, children, onSubmit, customProps } = props;
 	const ErrorComponent = props.errorComponent;
 
 	const [updateError, setUpdateError] = useState<Error | null>(null);
 	const { isLoading, error, data } = model.get(id || null);
 	const { mutateAsync: updateData } = model.createOrUpdate();
 
-	const onValidate = useCallback((values) => model.validate(values), [model]);
+	const onValidate = useCallback(
+		(values) => model.validate(values, id ? "edit" : "create"),
+		[model, id]
+	);
 	const onSubmitHandler = useCallback(
 		async (
-			values: NonNullable<typeof data>,
-			{ setSubmitting, setValues }: FormikHelpers<NonNullable<typeof data>>
+			values: ModelData<KeyT>,
+			{ setSubmitting, setValues }: FormikHelpers<ModelData<KeyT>>
 		): Promise<void> => {
 			try {
 				const result = await updateData(values);
-				setValues(result);
+				setValues(result[0]);
 				if (onSubmit) {
-					onSubmit(result);
+					await onSubmit(result[0]);
 				}
 			} catch (e) {
 				setUpdateError(e as Error);
@@ -135,9 +166,10 @@ const Form = <
 	const formContextData: FormContextData = useMemo(
 		() => ({
 			model: (model as unknown) as Model<ModelFieldName, PageVisibility, never>,
+			relations: data && data[1] ? data[1] : {},
 			setError,
 		}),
-		[model, setError]
+		[model, setError, data]
 	);
 
 	if (isLoading) {
@@ -146,14 +178,19 @@ const Form = <
 
 	const displayError: Error | null = error || updateError;
 
-	if (!data) {
+	if (!data || data.length !== 2 || isObjectEmpty(data[0])) {
+		// eslint-disable-next-line no-console
+		console.error(
+			"[Components-Care] [FormEngine] Data is faulty",
+			data ? JSON.stringify(data, undefined, 4) : null
+		);
 		throw new Error("Data is not present, this should never happen");
 	}
 
 	return (
 		<FormContext.Provider value={formContextData}>
 			<Formik
-				initialValues={data || {}}
+				initialValues={data[0]}
 				validate={onValidate}
 				onSubmit={onSubmitHandler}
 			>
@@ -167,14 +204,23 @@ const Form = <
 					/* and other goodies */
 				}) => (
 					<form onSubmit={handleSubmit}>
+						<FormUpdateListener backendData={data[0]} />
 						{displayError && <ErrorComponent error={displayError} />}
-						<Children
-							isSubmitting={isSubmitting}
-							values={props.renderConditionally ? values : undefined}
-							submit={submitForm}
-							reset={resetForm}
-							dirty={dirty}
-						/>
+						{isLoading ? (
+							<div style={loaderContainerStyles}>
+								<Loader />
+							</div>
+						) : (
+							<Children
+								isSubmitting={isSubmitting}
+								values={props.renderConditionally ? values : undefined}
+								submit={submitForm}
+								reset={resetForm}
+								dirty={dirty}
+								id={id}
+								customProps={customProps}
+							/>
+						)}
 					</form>
 				)}
 			</Formik>

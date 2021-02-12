@@ -22,7 +22,7 @@ First we have to implement our own backend connector, for this we can use the fo
     <summary>TypeScript</summary>
     
 ```typescript
-import {Connector, ModelFieldName, ResponseMeta} from "components-care";
+import {Connector, ModelFieldName, ResponseMeta, ModelGetResponse } from "components-care";
 
 class BackendConnector<
   KeyT extends ModelFieldName,
@@ -46,7 +46,7 @@ class BackendConnector<
     async read(
       id: string,
       model?: Model<KeyT, VisibilityT, CustomT>
-    ): Promise<Record<KeyT, unknown>> {
+    ): Promise<ModelGetResponse<KeyT>> {
         throw new Error("Not implemented");
     }
 
@@ -207,6 +207,7 @@ You need to define all additional fields required for your model yourself. A fie
 +                // you can modify the model itself in here, useful for e.g.: implementing conditional enums
 +                return value;
 +            },
++            getRelationModel: () => OtherModel, // required for backend connected data types. otherwise undefined
 +            customData: null,
 +        },
      },
@@ -245,6 +246,7 @@ You need to define all additional fields required for your model yourself. A fie
 +                // you can modify the model itself in here, useful for e.g.: implementing conditional enums
 +                return value;
 +            },
++            getRelationModel: () => OtherModel, // required for backend connected data types. otherwise undefined
 +            customData: null,
 +        },
      },

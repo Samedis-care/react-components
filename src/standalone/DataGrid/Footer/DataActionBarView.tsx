@@ -5,6 +5,7 @@ import ComponentWithLabel from "../../UIKit/ComponentWithLabel";
 import i18n from "../../../i18n";
 import { Edit as EditIcon, Delete as DeleteIcon } from "@material-ui/icons";
 import SelectAll from "./SelectAll";
+import { useDataGridStyles } from "../index";
 
 export interface DataActionBarViewProps {
 	/**
@@ -25,6 +26,8 @@ export interface DataActionBarViewProps {
 }
 
 const DataActionBarView = (props: DataActionBarViewProps) => {
+	const classes = useDataGridStyles();
+
 	return (
 		<Grid container>
 			<Grid item key={"select-all"}>
@@ -32,6 +35,7 @@ const DataActionBarView = (props: DataActionBarViewProps) => {
 					control={<SelectAll />}
 					labelText={i18n.t("standalone.data-grid.footer.select-all")}
 					labelPlacement={"bottom"}
+					className={classes.selectAllWrapper}
 				/>
 			</Grid>
 			{props.handleEdit && (

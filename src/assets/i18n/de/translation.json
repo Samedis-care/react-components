@@ -116,15 +116,15 @@
 			"delete": {
 				"error-dialog": {
 					"title": "Fehler",
-					"message": "Das Löschen der ausgewählten Einträge ist fehlgeschlagen: {ERROR}",
+					"message": "Das Löschen der ausgewählten Einträge ist fehlgeschlagen: {{ERROR}}",
 					"buttons": {
 						"okay": "Okay"
 					}
 				},
 				"confirm-dialog": {
 					"title": "Löschen",
-					"messageInverted": "Wollen Sie wirklich alles außer {NUM}-Einträgen löschen?",
-					"message": "Wollen Sie wirklich {NUM}-Einträge löschen?",
+					"messageInverted": "Wollen Sie wirklich alles außer {{NUM}}-Einträgen löschen?",
+					"message": "Wollen Sie wirklich {{NUM}}-Einträge löschen?",
 					"buttons": {
 						"yes": "Ja",
 						"no": "Nein"

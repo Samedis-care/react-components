@@ -8,6 +8,7 @@ import {
 	AccordionDetails,
 	Typography,
 	withStyles,
+	AccordionProps,
 } from "@material-ui/core";
 
 const AccordionSummary = withStyles({
@@ -72,16 +73,13 @@ interface InfoBoxProps {
 	/**
 	 * The message inside the info box
 	 */
-	message: string;
+	message: React.ReactNode;
 	/**
 	 * Change event fired upon expansion/retraction of the info box
 	 * @param event The change event
 	 * @param expanded The new expanded state
 	 */
-	onChange?: (
-		event: React.ChangeEvent<Record<string, unknown>>,
-		expanded: boolean
-	) => void;
+	onChange?: AccordionProps["onChange"];
 	/**
 	 * Custom styles
 	 */

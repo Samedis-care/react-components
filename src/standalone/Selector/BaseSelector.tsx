@@ -1,22 +1,29 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, {
+	useState,
+	useCallback,
+	useEffect,
+	ReactElement,
+	PropsWithChildren,
+	ReactNodeArray,
+} from "react";
+import { ListItemText, IconButton } from "@material-ui/core";
+import { Autocomplete, AutocompleteProps } from "@material-ui/lab";
 import {
-	TextFieldProps,
-	ListItemText,
-	makeStyles,
-	Theme,
-} from "@material-ui/core";
-import {
-	Autocomplete,
-	AutocompleteClassKey,
-	AutocompleteProps,
-} from "@material-ui/lab";
-import { Add as AddIcon, ExpandMore } from "@material-ui/icons";
-import TextFieldWithHelp, {
-	TextFieldWithHelpProps,
-} from "../UIKit/TextFieldWithHelp";
+	Add as AddIcon,
+	ExpandMore,
+	Info as InfoIcon,
+} from "@material-ui/icons";
+import { TextFieldWithHelpProps } from "../UIKit/TextFieldWithHelp";
 import i18n from "../../i18n";
 import { SelectorSmallListItem, SmallListItemIcon } from "../..";
-import { combineClassMaps } from "../../utils";
+import { makeThemeStyles } from "../../utils";
+import { makeStyles, Theme } from "@material-ui/core/styles";
+import { Styles } from "@material-ui/core/styles/withStyles";
+import {
+	AutocompleteClassKey,
+	AutocompleteRenderInputParams,
+} from "@material-ui/lab/Autocomplete/Autocomplete";
+import OutlinedInputWithHelp from "../UIKit/OutlinedInputWithHelp";
 
 export interface BaseSelectorData {
 	/**
@@ -46,25 +53,21 @@ export interface BaseSelectorData {
  */
 type SelectorLabelCallback = (obj: { inputValue: string }) => string | null;
 
-export interface BaseSelectorProps extends TextFieldWithHelpProps {
+export interface BaseSelectorProps<DataT extends BaseSelectorData>
+	extends TextFieldWithHelpProps {
 	/**
 	 * Refresh token used to force refreshing data.
-	 * Does not work with truthy multiSelect
 	 */
 	refreshToken?: string;
 	/**
 	 * Data load function
 	 * @param search The user search input
 	 */
-	onLoad: (search: string) => BaseSelectorData[] | Promise<BaseSelectorData[]>;
-	/**
-	 * Selector default options
-	 */
-	defaultOptions?: BaseSelectorData[];
+	onLoad: (search: string) => DataT[] | Promise<DataT[]>;
 	/**
 	 * Callback for autocomplete change
 	 */
-	onSelect: (selected: BaseSelectorData | null) => void;
+	onSelect: (selected: DataT | null) => void;
 	/**
 	 * Disable autocomplete control
 	 */
@@ -74,7 +77,7 @@ export interface BaseSelectorProps extends TextFieldWithHelpProps {
 	 */
 	autocompleteId?: string;
 	/**
-	 * String used to set place holded of the Autocomplete component
+	 * String used to set placeholder of the Autocomplete component
 	 */
 	placeholder?: string;
 	/**
@@ -89,7 +92,7 @@ export interface BaseSelectorProps extends TextFieldWithHelpProps {
 	/**
 	 * The currently selected values
 	 */
-	selected: BaseSelectorData | null;
+	selected: DataT | null;
 	/**
 	 * Enables icons in the list renderers
 	 */
@@ -117,33 +120,26 @@ export interface BaseSelectorProps extends TextFieldWithHelpProps {
 	>["classes"];
 }
 
-const themingStyles = makeStyles((theme: Theme) => ({
-	root: {
-		backgroundColor: theme.componentsCare?.selector?.backgroundColor,
-		"& fieldset": {
-			border: theme.componentsCare?.selector?.border,
-			borderRadius: theme.componentsCare?.selector?.borderRadius,
-			borderWidth: theme.componentsCare?.selector?.borderWidth,
-			borderStyle: theme.componentsCare?.selector?.borderStyle,
-			borderColor: theme.componentsCare?.selector?.borderColor,
-		},
-		...theme.componentsCare?.selector?.style,
-	},
-	focused: {
-		"& fieldset": {
-			border: theme.componentsCare?.selector?.border,
-			borderRadius: theme.componentsCare?.selector?.borderRadius,
-			borderStyle: theme.componentsCare?.selector?.borderStyle,
-			borderColor: theme.componentsCare?.selector?.active?.borderColor,
-		},
-		...theme.componentsCare?.selector?.active?.style,
-	},
-}));
+export type SelectorTheme = Partial<
+	Styles<Theme, BaseSelectorProps<BaseSelectorData>, AutocompleteClassKey>
+>;
 
-const BaseSelector = (props: BaseSelectorProps) => {
+const useThemeStyles = makeThemeStyles<
+	BaseSelectorProps<BaseSelectorData>,
+	AutocompleteClassKey
+>((theme) => theme.componentsCare?.uiKit?.selector);
+
+const useCustomStyles = makeStyles({
+	infoBtn: {
+		padding: 2,
+		marginRight: -2,
+	},
+});
+
+const BaseSelector = <DataT extends BaseSelectorData>(
+	props: BaseSelectorProps<DataT>
+) => {
 	const {
-		classes,
-		defaultOptions,
 		refreshToken,
 		onSelect,
 		selected,
@@ -157,14 +153,20 @@ const BaseSelector = (props: BaseSelectorProps) => {
 		noOptionsText,
 		loadingText,
 		disableClearable,
+		openInfo,
 	} = props;
+	const classes = useThemeStyles(
+		(props as unknown) as BaseSelectorProps<BaseSelectorData>
+	);
+	const customClasses = useCustomStyles();
 	const [open, setOpen] = useState(false);
 	const actualAddNewLabel =
 		addNewLabel || i18n.t("standalone.selector.add-new");
 	const [selectorOptions, setSelectorOptions] = useState(
 		[] as BaseSelectorData[]
 	);
-	const loading = open && selectorOptions.length === 0;
+	const [loading, setLoading] = useState(false);
+	const [query, setQuery] = useState("");
 
 	const defaultRenderer = useCallback(
 		(data: BaseSelectorData) => (
@@ -196,6 +198,7 @@ const BaseSelector = (props: BaseSelectorProps) => {
 
 	const onSearchHandler = useCallback(
 		async (query: string) => {
+			setLoading(true);
 			const results = await onLoad(query);
 			if (onAddNew) {
 				results.push({
@@ -203,45 +206,32 @@ const BaseSelector = (props: BaseSelectorProps) => {
 					label: actualAddNewLabel,
 					icon: <AddIcon />,
 					isAddNewButton: true,
-				} as BaseSelectorData);
+				} as DataT);
 			}
 			setSelectorOptions(results);
+			setLoading(false);
 		},
-		[actualAddNewLabel, onAddNew, onLoad]
+		[actualAddNewLabel, onAddNew, onLoad, setLoading]
 	);
 
-	const setDefaultOptions = useCallback(() => {
-		let options = defaultOptions || [];
-		if (onAddNew) {
-			options.push({
-				value: "add-new-button",
-				label: actualAddNewLabel,
-				icon: <AddIcon />,
-				isAddNewButton: true,
-			} as BaseSelectorData);
-		} else {
-			options = options.filter((option) => !option.isAddNewButton);
-		}
-		return options;
-	}, [actualAddNewLabel, defaultOptions, onAddNew]);
+	const updateQuery = useCallback(
+		(_, newQuery: string) => {
+			setQuery(newQuery);
+		},
+		[setQuery]
+	);
 
+	// initial option load
 	useEffect(() => {
-		if (!open) {
-			setSelectorOptions(setDefaultOptions);
-		}
-	}, [open, setDefaultOptions]);
-
-	const themingClasses = themingStyles(props);
-
-	const combinedClasses = classes
-		? combineClassMaps<AutocompleteClassKey>(themingClasses, classes)
-		: themingClasses;
+		void onSearchHandler(query);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [query, refreshToken]);
 
 	return (
 		<div>
 			<Autocomplete
 				id={autocompleteId}
-				classes={combinedClasses}
+				classes={classes}
 				open={open}
 				onOpen={() => {
 					setOpen(true);
@@ -256,24 +246,46 @@ const BaseSelector = (props: BaseSelectorProps) => {
 				disabled={disabled}
 				options={selectorOptions}
 				value={selected}
+				inputValue={query}
+				onInputChange={updateQuery}
 				popupIcon={<ExpandMore />}
 				noOptionsText={noOptionsText}
 				getOptionLabel={(option: BaseSelectorData) => option.label}
 				renderOption={(option: BaseSelectorData) => defaultRenderer(option)}
 				getOptionDisabled={(option: BaseSelectorData) => !!option.isDisabled}
+				getOptionSelected={(option, value) => option.value === value.value}
 				onChange={(_event, selectedValue) => onChangeHandler(selectedValue)}
-				renderInput={(params: TextFieldProps) => (
-					<TextFieldWithHelp
-						{...params}
-						variant="outlined"
-						placeholder={placeholder}
-						onChange={(event) => {
-							if (event.target.value !== "" || event.target.value !== null) {
-								void onSearchHandler(event.target.value);
+				renderInput={(params: AutocompleteRenderInputParams) => {
+					// eslint-disable-next-line @typescript-eslint/no-unused-vars
+					const { InputProps, InputLabelProps, ...otherParams } = params;
+					return (
+						<OutlinedInputWithHelp
+							{...InputProps}
+							{...otherParams}
+							endAdornment={
+								openInfo
+									? React.cloneElement(
+											params.InputProps?.endAdornment as ReactElement,
+											{},
+											...((params.InputProps?.endAdornment as ReactElement<
+												PropsWithChildren<unknown>
+											>).props.children as ReactNodeArray),
+											<IconButton
+												onClick={openInfo}
+												className={customClasses.infoBtn}
+											>
+												<InfoIcon color={"disabled"} />
+											</IconButton>
+									  )
+									: params.InputProps?.endAdornment
 							}
-						}}
-					/>
-				)}
+							placeholder={placeholder}
+							onChange={(event) => {
+								void onSearchHandler(event.target.value);
+							}}
+						/>
+					);
+				}}
 				key={`${refreshToken || "no-refresh-token"} ${
 					onAddNew
 						? `add-new${actualAddNewLabel || "no-add-new-label"}`
@@ -284,4 +296,4 @@ const BaseSelector = (props: BaseSelectorProps) => {
 	);
 };
 
-export default React.memo(BaseSelector);
+export default React.memo(BaseSelector) as typeof BaseSelector;

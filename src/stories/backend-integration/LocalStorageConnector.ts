@@ -4,6 +4,7 @@ import {
 	filterSortPaginate,
 	Model,
 	ModelFieldName,
+	ModelGetResponse,
 	PageVisibility,
 	ResponseMeta,
 } from "../..";
@@ -34,8 +35,11 @@ class LocalStorageConnector<
 		params?: Partial<IDataGridLoadDataParameters>,
 		model?: Model<KeyT, VisibilityT, CustomT>
 	): Promise<[Record<KeyT, unknown>[], ResponseMeta]> {
-		if (!model) {
-			throw new Error("Can't index: No model specified");
+		// eslint-disable-next-line no-console
+		console.log("[CC] [LocalStorageConnector] index(", params, model, ")");
+
+		if (!model && params?.fieldFilter) {
+			throw new Error("Can't index with field filter: No model specified");
 		}
 
 		const db = this.getDB();
@@ -52,7 +56,7 @@ class LocalStorageConnector<
 				},
 				params
 			),
-			model.toDataGridColumnDefinition()
+			model?.toDataGridColumnDefinition() ?? []
 		);
 		return [
 			processed[0],
@@ -63,9 +67,8 @@ class LocalStorageConnector<
 		];
 	}
 
-	// eslint-disable-next-line @typescript-eslint/require-await
-	async create(data: Record<string, unknown>): Promise<Record<KeyT, unknown>> {
-		if ("id" in data) {
+	create(data: Record<string, unknown>): ModelGetResponse<KeyT> {
+		if ("id" in data && data.id) {
 			throw new Error("Can't create: Creation request contains ID");
 		}
 		const db = this.getDB();
@@ -78,22 +81,18 @@ class LocalStorageConnector<
 		db[id] = data;
 		this.setDB(db);
 
-		return data;
+		return [data, {}];
 	}
 
-	// eslint-disable-next-line @typescript-eslint/require-await
-	async read(id: string): Promise<Record<KeyT, unknown>> {
+	read(id: string): ModelGetResponse<KeyT> {
 		const db = this.getDB();
 		if (!(id in db)) {
 			throw new Error("Can't read: Record not found");
 		}
-		return db[id];
+		return [db[id], {}];
 	}
 
-	// eslint-disable-next-line @typescript-eslint/require-await
-	async update(
-		data: Record<ModelFieldName, unknown>
-	): Promise<Record<KeyT, unknown>> {
+	update(data: Record<ModelFieldName, unknown>): ModelGetResponse<KeyT> {
 		const db = this.getDB();
 		const id = data["id"] as string;
 		if (!(id in db)) {
@@ -101,7 +100,7 @@ class LocalStorageConnector<
 		}
 		db[id] = data;
 		this.setDB(db);
-		return data;
+		return [data, {}];
 	}
 
 	// eslint-disable-next-line @typescript-eslint/require-await

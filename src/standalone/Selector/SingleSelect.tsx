@@ -1,21 +1,27 @@
-import { Paper, makeStyles, Theme } from "@material-ui/core";
+import { Paper } from "@material-ui/core";
 import React from "react";
-import BaseSelector, { BaseSelectorProps } from "./BaseSelector";
+import BaseSelector, {
+	BaseSelectorData,
+	BaseSelectorProps,
+} from "./BaseSelector";
+import { makeStyles } from "@material-ui/core/styles";
 
-const themingStyles = makeStyles((theme: Theme) => ({
-	container: {
-		backgroundColor: theme.componentsCare?.selector?.container?.backgroundColor,
+const useStyles = makeStyles({
+	wrapper: {
+		marginTop: 16, // to accommodate InputLabel
 	},
-}));
+});
 
-const SingleSelect = (props: BaseSelectorProps) => {
-	const themingClasses = themingStyles();
+const SingleSelect = <DataT extends BaseSelectorData>(
+	props: BaseSelectorProps<DataT>
+) => {
+	const classes = useStyles();
 
 	return (
-		<Paper elevation={0} className={themingClasses.container}>
+		<Paper elevation={0} className={classes.wrapper}>
 			<BaseSelector {...props} />
 		</Paper>
 	);
 };
 
-export default React.memo(SingleSelect);
+export default React.memo(SingleSelect) as typeof SingleSelect;

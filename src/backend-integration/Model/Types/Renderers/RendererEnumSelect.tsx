@@ -2,13 +2,16 @@ import React from "react";
 import {
 	FormControl,
 	FormHelperText,
-	FormLabel,
+	InputLabel,
 	Typography,
 } from "@material-ui/core";
 import { ModelRenderParams } from "../../index";
 import TypeEnum from "../TypeEnum";
 import ccI18n from "../../../../i18n";
-import { SelectorData, SingleSelect } from "../../../../standalone/Selector";
+import {
+	BaseSelectorData,
+	SingleSelect,
+} from "../../../../standalone/Selector";
 
 /**
  * Renders TypeEnum as drop-down selector (with search)
@@ -40,7 +43,7 @@ class RendererEnumSelect extends TypeEnum {
 		if (visibility.editable) {
 			if (visibility.grid) throw new Error("Not supported");
 
-			const data: SelectorData[] = this.values.map((entry) => ({
+			const data: BaseSelectorData[] = this.values.map((entry) => ({
 				value: entry.value,
 				label: entry.getLabel(),
 			}));
@@ -59,7 +62,7 @@ class RendererEnumSelect extends TypeEnum {
 					error={!!errorMsg}
 					onBlur={handleBlur}
 				>
-					<FormLabel component={"legend"}>{label}</FormLabel>
+					<InputLabel shrink>{label}</InputLabel>
 					<SingleSelect
 						selected={selected}
 						onLoad={onLoad}

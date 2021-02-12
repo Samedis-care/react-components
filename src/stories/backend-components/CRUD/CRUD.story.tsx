@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import ErrorComponent from "../Form/ErrorComponent";
-import CRUD from "../../../backend-components/CRUD";
+import CRUD, { CrudFormProps } from "../../../backend-components/CRUD";
 import TestModelInstance from "../DataGrid/TestModel";
 import { usePermissionContext } from "../../../framework";
 import { boolean } from "@storybook/addon-knobs";
@@ -45,12 +45,14 @@ export const CrudStory = (): React.ReactElement => {
 				exportPermission={"crud.export"}
 				disableRouting
 			>
-				{/* eslint-disable-next-line react/display-name */}
-				{(goBack) => (
-					formProps: PageProps<keyof typeof TestModelInstance.fields>
+				{(
+					formProps: PageProps<
+						keyof typeof TestModelInstance.fields,
+						CrudFormProps
+					>
 				) => (
 					<Grid container spacing={2}>
-						<Grid item xs={6}>
+						<Grid item xs={6} style={{ height: 120 }}>
 							<Field name={"avatar"} />
 						</Grid>
 						<Grid item xs={6} container spacing={2}>
@@ -93,7 +95,6 @@ export const CrudStory = (): React.ReactElement => {
 								onClick={async () => {
 									try {
 										await formProps.submit();
-										goBack();
 									} catch (e) {
 										alert(e);
 									}
@@ -108,7 +109,7 @@ export const CrudStory = (): React.ReactElement => {
 								disabled={formProps.isSubmitting}
 								variant={"outlined"}
 								fullWidth
-								onClick={goBack}
+								onClick={formProps.customProps.goBack}
 							>
 								Back
 							</Button>

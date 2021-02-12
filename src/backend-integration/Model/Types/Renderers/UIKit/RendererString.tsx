@@ -78,7 +78,7 @@ class RendererString extends TypeString {
 			);
 		}
 		return (
-			<Typography>
+			<Typography noWrap={visibility.grid}>
 				{!visibility.grid && `${label}: `}
 				{value}
 			</Typography>

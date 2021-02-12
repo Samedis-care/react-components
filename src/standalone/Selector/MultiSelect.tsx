@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useCallback } from "react";
 import BaseSelector, {
 	BaseSelectorData,
 	BaseSelectorProps,
@@ -21,7 +21,7 @@ export interface MultiSelectorData extends BaseSelectorData {
 }
 
 export interface MultiSelectProps
-	extends Omit<BaseSelectorProps, "onSelect" | "selected"> {
+	extends Omit<BaseSelectorProps<MultiSelectorData>, "onSelect" | "selected"> {
 	/**
 	 * Extended selection change handler
 	 * @param data The selected data entry/entries
@@ -48,6 +48,7 @@ const useSelectorStyles = makeStyles((theme: Theme) => ({
 const useStyles = makeStyles({
 	paperWrapper: {
 		boxShadow: "none",
+		marginTop: 16, // to accommodate InputLabel
 	},
 	selectedEntries: {
 		border: `1px solid rgba(0, 0, 0, 0.23)`,
@@ -64,7 +65,6 @@ const MultiSelect = (props: MultiSelectProps) => {
 		enableIcons,
 		selectedEntryRenderer,
 		disabled,
-		defaultOptions,
 		classes,
 	} = props;
 	const multiSelectClasses = useStyles(props);
@@ -72,21 +72,6 @@ const MultiSelect = (props: MultiSelectProps) => {
 	const multiSelectStyles = classes
 		? combineClassMaps<AutocompleteClassKey>(defaultMultiSelectClasses, classes)
 		: defaultMultiSelectClasses;
-	const getFilteredOptions = useCallback(
-		(selectedOptions: MultiSelectorData[]) => {
-			let options = defaultOptions || [];
-			if (selectedOptions && selectedOptions.length > 0) {
-				selectedOptions.forEach((s) => {
-					options = options.filter((option) => option.value !== s.value);
-				});
-			}
-			return options;
-		},
-		[defaultOptions]
-	);
-	const [filteredOptions, setFilteredOptions] = useState(
-		getFilteredOptions(selected)
-	);
 
 	const EntryRender = selectedEntryRenderer || MultiSelectEntry;
 
@@ -95,9 +80,8 @@ const MultiSelect = (props: MultiSelectProps) => {
 			if (!data) return;
 			const selectedOptions = [...selected, data];
 			if (onSelect) onSelect(selectedOptions);
-			setFilteredOptions(getFilteredOptions(selectedOptions));
 		},
-		[getFilteredOptions, onSelect, selected]
+		[onSelect, selected]
 	);
 
 	const multiSelectLoadHandler = useCallback(
@@ -131,11 +115,10 @@ const MultiSelect = (props: MultiSelectProps) => {
 						(s) => s.value !== entry.value
 					);
 					onSelect(selectedOptions);
-					setFilteredOptions(getFilteredOptions(selectedOptions));
 				}
 			})();
 		},
-		[onSelect, selected, getFilteredOptions]
+		[onSelect, selected]
 	);
 
 	return (
@@ -149,7 +132,6 @@ const MultiSelect = (props: MultiSelectProps) => {
 						selected={null}
 						onSelect={multiSelectHandler}
 						refreshToken={selected.length.toString()}
-						defaultOptions={filteredOptions}
 					/>
 				</Grid>
 				<Grid item xs={12} className={multiSelectClasses.selectedEntries}>

@@ -3,7 +3,7 @@ import { boolean, text } from "@storybook/addon-knobs";
 import TextFieldWithHelp from "../../../standalone/UIKit/TextFieldWithHelp";
 import { action } from "@storybook/addon-actions";
 import { useDialogContext } from "../../../framework";
-import { showInfoDialog } from "../../../non-standalone/Dialog";
+import { showInfoDialog } from "../../../non-standalone";
 
 export const TextFieldWithHelpStory = (): React.ReactElement => {
 	const [pushDialog] = useDialogContext();

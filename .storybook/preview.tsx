@@ -10,6 +10,7 @@ import { StoryContext } from "@storybook/addons";
 import { button, color, select, text, withKnobs } from "@storybook/addon-knobs";
 import { withActions } from "@storybook/addon-actions";
 import ccI18n, { langs } from "../src/i18n";
+import { SpacingOptions } from "@material-ui/core/styles/createSpacing";
 
 const getDefaultTheme = (): ThemeOptions => ({
 	palette: {
@@ -20,31 +21,32 @@ const getDefaultTheme = (): ThemeOptions => ({
 /* re-usable colors for our theme */
 const customColors = {
 	white: "rgb(255, 255, 255)",
-	grey: "rgb(127, 127, 127)"
+	grey: "rgb(127, 127, 127)",
 };
 
 const customPalette = {
 	primary: {
 		main: "rgb(8, 105, 179)",
-		light: "rgb(57, 135, 194)"
+		light: "rgb(57, 135, 194)",
 	},
 	secondary: {
 		main: "rgb(185, 215, 240)",
 	},
 	action: {
-		hover: "rgba(0,0,0, .2)"
+		hover: "rgba(0,0,0, .2)",
 	},
 	error: {
 		main: "rgb(255, 99, 71)",
 		contrastText: "#CCC",
 	},
 };
+
 /* example for a customized theme per client requirements */
 const getCustomTheme = (): ThemeOptions => ({
 	spacing: [0, 5, 7, 10, 15, 21],
 	palette: {
 		type: "light",
-		...customPalette
+		...customPalette,
 	},
 	componentsCare: {
 		dataGrid: {
@@ -88,14 +90,14 @@ const getCustomTheme = (): ThemeOptions => ({
 				fontWeight: "bold",
 				fontSize: "0.7rem",
 				margin: "5px 0",
-			}
+			},
 		},
-        portal: {
-            menu: {
-                container: {
+		portal: {
+			menu: {
+				container: {
 					width: "300px",
 					overflow: "hidden",
-                }
+				},
 			},
 			menuItem: {
 				borderRadius: "0 25px 25px 0",
@@ -103,18 +105,17 @@ const getCustomTheme = (): ThemeOptions => ({
 				color: "pink",
 				style: {
 					border: "1px dotted red",
-				}
-			}
-        },
-		uiKit: {
-			label: {
+				},
 			},
+		},
+		uiKit: {
+			label: {},
 			input: {
 				placeholder: {
 					important: {
 						color: customPalette.error.main,
-					}
-				}
+					},
+				},
 			},
 			actionButton: {
 				padding: "7px 25px",
@@ -144,7 +145,8 @@ const getCustomTheme = (): ThemeOptions => ({
 					hover: {
 						style: {
 							backgroundColor: "rgba(238,174,202,.25)",
-							backgroundImage: "linear-gradient(345deg, rgba(238,174,202,1) 0%, rgba(148,187,233,1) 100%)",
+							backgroundImage:
+								"linear-gradient(345deg, rgba(238,174,202,1) 0%, rgba(148,187,233,1) 100%)",
 						},
 					},
 				},
@@ -161,11 +163,27 @@ const getCustomTheme = (): ThemeOptions => ({
 					padding: "20px",
 					margin: "20px",
 					backgroundColor: customPalette.secondary.main,
-					backgroundColorOpacity: 0.7, 
+					backgroundColorOpacity: 0.7,
 					/* example */
 					style: {
-						background: "linear-gradient(345deg, rgba(238,174,202,1) 0%, rgba(148,187,233,1) 100%)",
+						background:
+							"linear-gradient(345deg, rgba(238,174,202,1) 0%, rgba(148,187,233,1) 100%)",
 						boxShadow: "0 0 10px 0 rgba(0,0,0, .35)",
+					},
+				},
+			},
+			selector: {
+				inputRoot: {
+					'&[class*="MuiOutlinedInput-root"]': {
+						paddingLeft: 16,
+						paddingTop: 0,
+						paddingBottom: 0,
+						"& .MuiAutocomplete-input": {
+							padding: "6.5px 4px",
+						},
+						'& [class*="MuiAutocomplete-endAdornment"]': {
+							right: 28,
+						},
 					},
 				},
 			},

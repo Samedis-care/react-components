@@ -6,7 +6,12 @@ import SampleForm from "./SampleForm";
 
 export const FormStory = (): React.ReactElement => {
 	return (
-		<Form model={FormStoryModel} id={null} errorComponent={ErrorComponent}>
+		<Form
+			model={FormStoryModel}
+			id={null}
+			errorComponent={ErrorComponent}
+			customProps={undefined}
+		>
 			{SampleForm}
 		</Form>
 	);

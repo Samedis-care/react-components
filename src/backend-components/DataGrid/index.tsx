@@ -2,7 +2,7 @@ import React, { useCallback, useState } from "react";
 import DataGrid, {
 	DataGridData,
 	IDataGridLoadDataParameters,
-	IDataGridProps,
+	DataGridProps,
 } from "../../standalone/DataGrid";
 import Model, {
 	ModelFieldName,
@@ -16,9 +16,18 @@ export interface BackendDataGridProps<
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
 	CustomDataT
-> extends Omit<IDataGridProps, "loadData" | "columns" | "exporters"> {
+> extends Omit<DataGridProps, "loadData" | "columns" | "exporters"> {
+	/**
+	 * The model to use
+	 */
 	model: Model<KeyT, VisibilityT, CustomDataT>;
+	/**
+	 * Enable deletion?
+	 */
 	enableDelete?: boolean;
+	/**
+	 * Disable export?
+	 */
 	disableExport?: boolean;
 }
 

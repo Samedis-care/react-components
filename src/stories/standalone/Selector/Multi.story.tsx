@@ -8,7 +8,7 @@ import {
 import { colourOptions } from "./Data";
 import { action } from "@storybook/addon-actions";
 import { boolean, text } from "@storybook/addon-knobs";
-import { Box, CssBaseline } from "@material-ui/core";
+import { Box } from "@material-ui/core";
 import CustomMultiSelectEntry from "./CustomMultiSelectEntry";
 
 interface MySelectorData extends MultiSelectorData {
@@ -69,28 +69,24 @@ export const SelectorMulti = (): React.ReactElement => {
 	);
 
 	return (
-		<>
-			<CssBaseline />
-			<Box m={2}>
-				<MultiSelect
-					selected={selected}
-					onSelect={onSelect}
-					onLoad={loadData}
-					onAddNew={enableAddNew ? onAddNewAction : undefined}
-					enableIcons={icons}
-					selectedEntryRenderer={
-						customSelectedRenderer ? CustomMultiSelectEntry : undefined
-					}
-					disabled={disabled}
-					addNewLabel={addNewLabel}
-					loadingText={loadingText}
-					noOptionsText={noOptionsText}
-					placeholder={placeholderLabel}
-					defaultOptions={colourOptions}
-					autocompleteId={"multi-select"}
-				/>
-			</Box>
-		</>
+		<Box m={2}>
+			<MultiSelect
+				selected={selected}
+				onSelect={onSelect}
+				onLoad={loadData}
+				onAddNew={enableAddNew ? onAddNewAction : undefined}
+				enableIcons={icons}
+				selectedEntryRenderer={
+					customSelectedRenderer ? CustomMultiSelectEntry : undefined
+				}
+				disabled={disabled}
+				addNewLabel={addNewLabel}
+				loadingText={loadingText}
+				noOptionsText={noOptionsText}
+				placeholder={placeholderLabel}
+				autocompleteId={"multi-select"}
+			/>
+		</Box>
 	);
 };
 

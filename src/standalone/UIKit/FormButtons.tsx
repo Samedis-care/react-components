@@ -68,7 +68,7 @@ export interface FormButtonsProps {
 	/**
 	 * Action buttons (used on form)
 	 */
-	children: NonNullable<React.ReactNode | React.ReactNode[]>;
+	children: React.ReactNode | React.ReactNode[];
 	/**
 	 * Custom styles
 	 */
@@ -77,11 +77,12 @@ export interface FormButtonsProps {
 
 const FormButtons = (props: FormButtonsProps) => {
 	const classes = useStyles(props);
-	const children = Array.isArray(props.children)
+	const children = (Array.isArray(props.children)
 		? props.children
-		: [props.children];
+		: [props.children]
+	).filter((child) => child !== undefined && child !== null && child !== false);
 
-	if (!children) throw new Error("Atleast one button required");
+	if (children.length === 0) return <></>;
 
 	return (
 		<Grid container direction="row" spacing={2} className={classes.container}>

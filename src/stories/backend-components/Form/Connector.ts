@@ -1,6 +1,7 @@
 import { Connector } from "../../../backend-integration/Connector";
 import {
 	ModelFieldName,
+	ModelGetResponse,
 	PageVisibility,
 	ResponseMeta,
 } from "../../../backend-integration";
@@ -10,7 +11,7 @@ class FormStoryConnector<
 	VisibilityT extends PageVisibility,
 	CustomT
 > extends Connector<KeyT, VisibilityT, CustomT> {
-	create(): Promise<Record<KeyT, unknown>> {
+	create(): ModelGetResponse<KeyT> {
 		throw new Error("Unimplemented");
 	}
 
@@ -22,11 +23,11 @@ class FormStoryConnector<
 		throw new Error("Unimplemented");
 	}
 
-	read(): Promise<Record<KeyT, unknown>> {
+	read(): ModelGetResponse<KeyT> {
 		throw new Error("Unimplemented");
 	}
 
-	update(): Promise<Record<KeyT, unknown>> {
+	update(): ModelGetResponse<KeyT> {
 		throw new Error("Unimplemented");
 	}
 }

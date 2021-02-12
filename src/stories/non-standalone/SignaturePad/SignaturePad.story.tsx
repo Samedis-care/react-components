@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import "../../../i18n";
-import SignaturePad from "../../../standalone/SignaturePad/index";
+import SignaturePad from "../../../non-standalone/SignaturePad/SignaturePad";
 import { select, text, boolean } from "@storybook/addon-knobs";
 import { action } from "@storybook/addon-actions";
 import { showInfoDialog } from "../../../non-standalone/Dialog";

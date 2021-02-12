@@ -13,8 +13,19 @@ import {
 } from "react-router-dom";
 import BackendDataGrid, { BackendDataGridProps } from "../DataGrid";
 import { Form, FormProps } from "../Form";
-import { hasPermission, usePermissionContext } from "../../framework";
+import {
+	hasPermission,
+	Permission,
+	usePermissionContext,
+} from "../../framework";
 import { makeStyles } from "@material-ui/core/styles";
+
+export interface CrudFormProps {
+	/**
+	 * Callback for closing the form page
+	 */
+	goBack: () => void;
+}
 
 export interface CrudProps<
 	KeyT extends ModelFieldName,
@@ -29,39 +40,41 @@ export interface CrudProps<
 	 * The properties to pass to form
 	 */
 	formProps: Omit<
-		FormProps<KeyT, VisibilityT, CustomT>,
-		"id" | "model" | "children"
+		FormProps<KeyT, VisibilityT, CustomT, CrudFormProps>,
+		"id" | "model" | "children" | "customProps"
 	>;
 	/**
 	 * The renderer function which returns the form component
-	 * @param goBack Closes the form page
 	 */
-	children: (
-		goBack: () => void
-	) => FormProps<KeyT, VisibilityT, CustomT>["children"];
+	children: FormProps<KeyT, VisibilityT, CustomT, CrudFormProps>["children"];
 	/**
 	 * The properties to pass to grid
 	 */
 	gridProps: Omit<
 		BackendDataGridProps<KeyT, VisibilityT, CustomT>,
-		"model" | "enableDelete" | "disableExport" | "onEdit" | "onAddNew"
+		| "model"
+		| "enableDelete"
+		| "disableExport"
+		| "onEdit"
+		| "onAddNew"
+		| "forceRefreshToken"
 	>;
 	/**
 	 * The delete record permission
 	 */
-	deletePermission: string;
+	deletePermission: Permission;
 	/**
 	 * The edit record permission
 	 */
-	editPermission: string;
+	editPermission: Permission;
 	/**
 	 * The create new record permission
 	 */
-	newPermission: string;
+	newPermission: Permission;
 	/**
 	 * The export records permission
 	 */
-	exportPermission: string;
+	exportPermission: Permission;
 	/**
 	 * Disables routing and uses an internal state instead (useful for dialogs)
 	 */
@@ -97,6 +110,9 @@ const CRUD = <
 	const [perms] = usePermissionContext();
 	const { disableRouting } = props;
 	const [id, setId] = useState<string | null>(props.initialView ?? null);
+	const [gridRefreshToken, setGridRefreshToken] = useState<string>(
+		new Date().getTime().toString()
+	);
 	const classes = useStyles();
 
 	const showEditPage = useCallback(
@@ -126,18 +142,39 @@ const CRUD = <
 		}
 	}, [history, path, disableRouting]);
 
+	const handleSubmit = useCallback(
+		async (data: Record<KeyT, unknown>) => {
+			if (props.formProps.onSubmit) {
+				await props.formProps.onSubmit(data);
+			}
+
+			// redirect to edit page
+			const { id } = data as Record<"id", string>;
+			if (disableRouting) {
+				setId((oldId) => (oldId === null ? null : id));
+			} else if (location.pathname.endsWith("/new")) {
+				history.push(`${path}/${id}`);
+			}
+
+			// cause grid refresh
+			setGridRefreshToken(new Date().getTime().toString());
+		},
+		[props.formProps, disableRouting, location.pathname, history, path]
+	);
+
 	const grid = () => (
 		<BackendDataGrid
-			model={props.model}
 			enableDelete={hasPermission(perms, props.deletePermission)}
 			disableExport={!hasPermission(perms, props.exportPermission)}
+			{...props.gridProps}
+			model={props.model}
+			forceRefreshToken={gridRefreshToken}
 			onEdit={
 				hasPermission(perms, props.editPermission) ? showEditPage : undefined
 			}
 			onAddNew={
 				hasPermission(perms, props.editPermission) ? showNewPage : undefined
 			}
-			{...props.gridProps}
 		/>
 	);
 
@@ -146,8 +183,12 @@ const CRUD = <
 			id={id === "new" ? null : id}
 			model={props.model}
 			{...props.formProps}
+			onSubmit={handleSubmit}
+			customProps={{
+				goBack: showOverview,
+			}}
 		>
-			{props.children(showOverview)}
+			{props.children}
 		</Form>
 	);
 

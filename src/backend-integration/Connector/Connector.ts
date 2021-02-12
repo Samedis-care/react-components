@@ -3,6 +3,7 @@ import {
 	AdvancedDeleteRequest,
 	ModelFieldName,
 	PageVisibility,
+	ModelGetResponse,
 } from "../Model";
 import { IDataGridLoadDataParameters } from "../../standalone/DataGrid";
 import { IDataGridExporter } from "../../standalone/DataGrid/Header";
@@ -46,7 +47,7 @@ abstract class Connector<
 	abstract create(
 		data: Record<string, unknown>,
 		model?: Model<KeyT, VisibilityT, CustomT>
-	): Promise<Record<KeyT, unknown>>;
+	): Promise<ModelGetResponse<KeyT>> | ModelGetResponse<KeyT>;
 
 	/**
 	 * Loads an existing data entry
@@ -57,7 +58,7 @@ abstract class Connector<
 	abstract read(
 		id: string,
 		model?: Model<KeyT, VisibilityT, CustomT>
-	): Promise<Record<KeyT, unknown>>;
+	): Promise<ModelGetResponse<KeyT>> | ModelGetResponse<KeyT>;
 
 	/**
 	 * Updates an already existing data entry
@@ -68,7 +69,7 @@ abstract class Connector<
 	abstract update(
 		data: Record<ModelFieldName, unknown>,
 		model?: Model<KeyT, VisibilityT, CustomT>
-	): Promise<Record<KeyT, unknown>>;
+	): Promise<ModelGetResponse<KeyT>> | ModelGetResponse<KeyT>;
 
 	/**
 	 * Deletes a specific data entry

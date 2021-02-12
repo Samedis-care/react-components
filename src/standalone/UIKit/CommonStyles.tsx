@@ -1,112 +1,50 @@
-import { CSSProperties } from "react";
-import { makeStyles } from "@material-ui/core/styles";
-import { InputLabelProps } from "@material-ui/core";
+import { makeStyles, Theme } from "@material-ui/core/styles";
+import { InputClassKey, InputLabelProps } from "@material-ui/core";
+import { Styles } from "@material-ui/core/styles/withStyles";
+import { makeThemeStyles } from "../../utils";
+import { ClassNameMap } from "@material-ui/styles/withStyles";
 
 export interface UIInputProps {
 	important?: boolean;
 }
 
-export interface InputTheme {
-	fontSize?: CSSProperties["fontSize"];
-	fontStyle?: CSSProperties["fontStyle"];
-	fontWeight?: CSSProperties["fontWeight"];
-	padding?: CSSProperties["padding"];
-	paddingTop?: CSSProperties["paddingTop"];
-	paddingRight?: CSSProperties["paddingRight"];
-	paddingBottom?: CSSProperties["paddingBottom"];
-	paddingLeft?: CSSProperties["paddingLeft"];
-
-	border?: CSSProperties["border"];
-	borderRadius?: CSSProperties["borderRadius"];
-
-	backgroundColor?: CSSProperties["backgroundColor"];
-	color?: CSSProperties["color"];
-
-	style?: CSSProperties;
-
-	disabled?: {
-		backgroundColor?: CSSProperties["backgroundColor"];
-		style?: CSSProperties;
-	};
-
-	placeholder?: {
-		fontSize?: CSSProperties["fontSize"];
-		fontStyle?: CSSProperties["fontStyle"];
-		fontWeight?: CSSProperties["fontWeight"];
-
-		backgroundColor?: CSSProperties["backgroundColor"];
-		color?: CSSProperties["color"];
-
-		style?: CSSProperties;
-
-		/* this is for required fields */
-		important?: {
-			fontSize?: CSSProperties["fontSize"];
-			fontStyle?: CSSProperties["fontStyle"];
-			fontWeight?: CSSProperties["fontWeight"];
-
-			backgroundColor?: CSSProperties["backgroundColor"];
-			color?: CSSProperties["color"];
-
-			style?: CSSProperties;
-		};
-	};
+interface UIInputPropsWithStyles extends UIInputProps {
+	/**
+	 * Custom CSS styles
+	 */
+	classes?: ClassNameMap<InputClassKey>;
 }
 
-export const useInputStyles = makeStyles((theme) => ({
+export type InputTheme = Partial<Styles<Theme, UIInputProps, InputClassKey>>;
+
+const useThemeStyles = makeThemeStyles<UIInputProps, InputClassKey>(
+	(theme) => theme.componentsCare?.uiKit?.input
+);
+
+const useRawInputStyles = makeStyles((theme) => ({
 	root: {
-		fontSize: theme.componentsCare?.uiKit?.input?.fontSize,
-		fontStyle: theme.componentsCare?.uiKit?.input?.fontStyle,
-		fontWeight: theme.componentsCare?.uiKit?.input?.fontWeight,
-
-		padding: theme.componentsCare?.uiKit?.input?.padding,
-		paddingTop: theme.componentsCare?.uiKit?.input?.paddingTop || 0,
-		paddingRight:
-			theme.componentsCare?.uiKit?.input?.paddingTop || theme.spacing(2),
-		paddingBottom: theme.componentsCare?.uiKit?.input?.paddingTop || 0,
-		paddingLeft:
-			theme.componentsCare?.uiKit?.input?.paddingTop || theme.spacing(2),
-
-		border: theme.componentsCare?.uiKit?.input?.border,
-		borderRadius: theme.componentsCare?.uiKit?.input?.borderRadius,
-
-		backgroundColor: theme.componentsCare?.uiKit?.input?.backgroundColor,
-		color: theme.componentsCare?.uiKit?.input?.color,
-		...{ ...theme.componentsCare?.uiKit?.input?.style },
+		paddingTop: 0,
+		paddingRight: theme.spacing(2),
+		paddingBottom: 0,
+		paddingLeft: theme.spacing(2),
 	},
-	input: (props: UIInputProps) => ({
+	input: (props: UIInputPropsWithStyles) => ({
 		"&::placeholder": {
-			fontSize: props.important
-				? theme.componentsCare?.uiKit?.input?.placeholder?.important
-						?.fontSize ||
-				  theme.componentsCare?.uiKit?.input?.placeholder?.fontSize
-				: theme.componentsCare?.uiKit?.input?.placeholder?.fontSize,
-			fontStyle: props.important
-				? theme.componentsCare?.uiKit?.input?.placeholder?.important?.fontStyle
-				: theme.componentsCare?.uiKit?.input?.placeholder?.fontStyle,
-			fontWeight: props.important
-				? theme.componentsCare?.uiKit?.input?.placeholder?.important?.fontWeight
-				: theme.componentsCare?.uiKit?.input?.placeholder?.fontWeight,
-
-			backgroundColor: props.important
-				? theme.componentsCare?.uiKit?.input?.placeholder?.important
-						?.backgroundColor
-				: theme.componentsCare?.uiKit?.input?.placeholder?.backgroundColor,
-			color: props.important
-				? theme.componentsCare?.uiKit?.input?.placeholder?.important?.color ||
-				  theme.palette.error.main
-				: theme.componentsCare?.uiKit?.input?.placeholder?.color,
-			...{
-				...theme.componentsCare?.uiKit?.input?.placeholder?.style,
-				...(props.important
-					? theme.componentsCare?.uiKit?.input?.placeholder?.important?.style
-					: {}),
-			},
+			color: props.important ? theme.palette.error.main : undefined,
 		},
 	}),
+	multiline: {
+		padding: theme.spacing(2),
+	},
 }));
+
+export const useInputStyles = (
+	props: UIInputProps
+): Partial<ClassNameMap<InputClassKey>> => {
+	const themeClasses = useThemeStyles(props);
+	return useRawInputStyles({ ...props, classes: themeClasses });
+};
 
 export const InputLabelConfig: InputLabelProps = {
 	shrink: true,
-	focused: false,
 };

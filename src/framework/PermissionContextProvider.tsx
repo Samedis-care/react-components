@@ -6,15 +6,15 @@ export interface PermissionContextProviderProps {
 
 /**
  * General information regarding permission format:
- * Each permission is specified as path using . (dot) as seperation character, ex:
- * - module.submodule.function.subfunction
+ * Each permission is specified as path using . (dot) as separation character, ex:
+ * - module.submodule.function.sub-function
  * - module.submodule.function
  * - module.function
  * - module
  *
  * Permissions support the * (asterisk) character als wildcard matching character, ex:
- * - module.* => matches module.submodule.function.subfunction, module.submodul.function and module.function, but not module
- * - module.submodule.* => matches module.submodule.function.subfunction, module.submodul.function
+ * - module.* => matches module.submodule.function.sub-function, module.submodule.function and module.function, but not module
+ * - module.submodule.* => matches module.submodule.function.sub-function, module.submodule.function
  * - * => matches everything
  */
 export const PermissionContext = React.createContext<
@@ -35,30 +35,33 @@ export const usePermissionContext = (): [
 };
 
 /**
+ * A single permission, multiple permissions or no permission required (null)
+ */
+export type Permission = string | string[] | null;
+
+/**
  * Pattern matching permission checking
  * @param perms A list of permissions, usually taken from PermissionContext (usePermissionContext)
  * @param perm Permission(s) to check
  */
-export const hasPermission = (
-	perms: string[],
-	perm: string | string[] | null
-): boolean => {
+export const hasPermission = (perms: string[], perm: Permission): boolean => {
 	if (perm === null) return true;
 	if (typeof perm !== "string") {
 		return (
-			perm.map((cando) => hasPermission(perms, cando)).filter((res) => !res)
+			perm.map((canDo) => hasPermission(perms, canDo)).filter((res) => !res)
 				.length > 0
 		);
 	}
 
-	const parts = perm.split(".");
-	for (const presentPerm of perms) {
-		const presentParts = presentPerm.split(".");
+	const checkParts = perm.split(".");
+	for (const presentPermission of perms) {
+		const presentParts = presentPermission.split(".");
 
 		let okay = false;
-		for (let i = 0; i < parts.length; ++i) {
+		for (let i = 0; i < checkParts.length; ++i) {
+			okay = false;
 			if (presentParts[i] === undefined) break;
-			if (presentParts[i] !== "*" && presentParts[i] !== parts[i]) break;
+			if (presentParts[i] !== "*" && presentParts[i] !== checkParts[i]) break;
 			okay = true;
 			if (presentParts[i] === "*") break;
 		}

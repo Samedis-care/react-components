@@ -1,9 +1,10 @@
 import { Connector } from "../../backend-integration/Connector";
 import {
 	ModelFieldName,
+	ModelGetResponse,
 	PageVisibility,
-} from "../../backend-integration/Model";
-import { ResponseMeta } from "../../backend-integration/Connector/Connector";
+} from "../../backend-integration";
+import { ResponseMeta } from "../../backend-integration";
 import {
 	DataGridAdditionalFilters,
 	DataGridSortSetting,
@@ -119,10 +120,8 @@ class BackendConnector<
 		quickFilter: string,
 		gridFilter: IDataGridFieldFilter,
 		additionalFilters: DataGridAdditionalFilters,
-		format?: string,
 		extraParams?: Record<string, unknown>
 	): Record<string, unknown> {
-		if (!format) format = "";
 		if (!extraParams) extraParams = {};
 
 		return Object.assign(
@@ -172,32 +171,32 @@ class BackendConnector<
 		];
 	}
 
-	async create(data: Record<string, unknown>): Promise<Record<KeyT, unknown>> {
+	async create(data: Record<string, unknown>): Promise<ModelGetResponse<KeyT>> {
 		const resp = await this.client.post<DataResponse>(
 			this.getApiBase(),
 			null,
 			data
 		);
-		return resp.data.attributes;
+		return [resp.data.attributes, {}];
 	}
 
-	async read(id: string): Promise<Record<KeyT, unknown>> {
+	async read(id: string): Promise<ModelGetResponse<KeyT>> {
 		const resp = await this.client.get<DataResponse>(
 			`${this.getApiBase()}/${id}`,
 			null
 		);
-		return resp.data.attributes;
+		return [resp.data.attributes, {}];
 	}
 
 	async update(
 		data: Record<ModelFieldName, unknown>
-	): Promise<Record<KeyT, unknown>> {
+	): Promise<ModelGetResponse<KeyT>> {
 		const resp = await this.client.put<DataResponse>(
 			`${this.getApiBase()}/${data.id as string}`,
 			null,
 			data
 		);
-		return resp.data.attributes;
+		return [resp.data.attributes, {}];
 	}
 
 	async delete(id: string): Promise<void> {

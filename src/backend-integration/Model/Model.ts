@@ -45,6 +45,10 @@ export interface ModelFieldDefinition<
 	 */
 	sortable?: boolean;
 	/**
+	 * Column width settings (for BackendDataGrid)
+	 */
+	columnWidth?: IDataGridColumnDef["width"];
+	/**
 	 * The default value
 	 */
 	getDefaultValue?: () => Promise<TypeT> | TypeT;
@@ -52,8 +56,13 @@ export interface ModelFieldDefinition<
 	 * Callback to validate field
 	 * @param value The value of this field
 	 * @param values All field values
+	 * @param field This field
 	 */
-	validate?: (value: TypeT, values: Record<KeyT, unknown>) => string | null;
+	validate?: (
+		value: TypeT,
+		values: Record<KeyT, unknown>,
+		field: ModelFieldDefinition<TypeT, KeyT, VisibilityT, CustomT>
+	) => string | null;
 	/**
 	 * User-defined data
 	 */
@@ -74,7 +83,17 @@ export interface ModelFieldDefinition<
 			shouldValidate?: boolean
 		) => void
 	) => TypeT;
-	// TODO: References
+	/**
+	 * The referenced model for backend connected data types.
+	 * If TypeScript complains cast the return value to `Model<ModelFieldName, PageVisibility, unknown>`
+	 */
+	getRelationModel?: () => Model<ModelFieldName, PageVisibility, unknown>;
+	// TypeScript doesn't like the following definition (it would save you the cast):
+	//getRelationModel?: <
+	//	SubKeyT extends ModelFieldName,
+	//	SubVisibilityT extends PageVisibility,
+	//	SubCustomT
+	//>() => Model<SubKeyT, SubVisibilityT, SubCustomT>;
 }
 
 export type ModelField<
@@ -84,6 +103,20 @@ export type ModelField<
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 > = Record<KeyT, ModelFieldDefinition<any, KeyT, VisibilityT, CustomT>>;
 export type ModelFieldName = "id" | string;
+
+export type ModelGetResponseRelations<KeyT extends ModelFieldName> = Partial<
+	Record<KeyT, Record<ModelFieldName, unknown>[]>
+>;
+
+export type ModelData<KeyT extends ModelFieldName> = Record<KeyT, unknown>;
+
+/**
+ * Response for GET single data entry
+ */
+export type ModelGetResponse<KeyT extends ModelFieldName> = [
+	ModelData<KeyT>, // the main data entry
+	ModelGetResponseRelations<KeyT> // data in relations
+];
 
 /**
  * Deletion request. If invert is false only delete ids array. If invert is true delete everything except the given ids
@@ -154,25 +187,59 @@ class Model<
 
 	/**
 	 * Provides a react-query useQuery hook for the given data id
-	 * @param id The data entry id
+	 * @param id The data record id
 	 */
-	public get(id: string | null): UseQueryResult<Record<KeyT, unknown>, Error> {
+	public get(id: string | null): UseQueryResult<ModelGetResponse<KeyT>, Error> {
 		// eslint-disable-next-line react-hooks/rules-of-hooks
-		return useQuery([this.modelId, { id: id }], async () => {
-			if (!id) return this.getDefaultValues();
-			return this.applySerialization(
-				await this.connector.read(id, this),
-				"deserialize",
-				"edit"
-			);
-		});
+		return useQuery([this.modelId, { id: id }], () => this.getRaw(id));
+	}
+
+	/**
+	 * Provides uncached access for the given data id
+	 * @param id The data record id or null to obtain the default values
+	 */
+	public async getRaw(id: string | null): Promise<ModelGetResponse<KeyT>> {
+		if (!id) return [await this.getDefaultValues(), {}];
+
+		const rawData = await this.connector.read(id, this);
+
+		return [
+			await this.applySerialization(rawData[0], "deserialize", "edit"),
+			Object.fromEntries(
+				await Promise.all(
+					Object.entries(rawData[1]).map(async ([k, v]) => {
+						const refModel = this.fields[k as KeyT]?.getRelationModel;
+
+						if (!refModel) {
+							// eslint-disable-next-line no-console
+							console.warn(
+								"[Components-Care] [Model] Backend connector supplied related data, but no model is defined for this relationship (relationship name = ",
+								k,
+								"). Data will be ignored."
+							);
+						}
+
+						return [
+							k,
+							refModel
+								? await refModel().applySerialization(
+										v as Record<string, unknown>,
+										"deserialize",
+										"edit"
+								  )
+								: null,
+						];
+					})
+				)
+			),
+		];
 	}
 
 	/**
 	 * Provides a react-query useMutation hook for creation or updates to an data entry
 	 */
 	public createOrUpdate<TContext = unknown>(): UseMutationResult<
-		Record<KeyT, unknown>,
+		ModelGetResponse<KeyT>,
 		Error,
 		Record<string, unknown>,
 		TContext
@@ -190,15 +257,16 @@ class Model<
 				if (update) {
 					return this.connector.update(serializedValues, this);
 				} else {
+					delete serializedValues["id"];
 					return this.connector.create(serializedValues, this);
 				}
 			},
 			{
-				onSuccess: (data: Record<KeyT, unknown>) => {
+				onSuccess: (data: ModelGetResponse<KeyT>) => {
 					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 					// @ts-ignore
 					// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-					ModelDataStore.setQueryData([this.modelId, { id: data.id }], data);
+					ModelDataStore.setQueryData([this.modelId, { id: data[0].id }], data);
 				},
 			}
 		);
@@ -320,6 +388,7 @@ class Model<
 					hidden: value.visibility.overview.hidden,
 					filterable: value.filterable,
 					sortable: value.sortable,
+					width: value.columnWidth,
 				};
 			});
 	}
@@ -327,18 +396,27 @@ class Model<
 	/**
 	 * Validates the given values against the field defined validation rules
 	 * @param values The values to validate
+	 * @param view Optional view filter (only applies validations on fields present in given view)
 	 */
-	public validate(values: Record<KeyT, unknown>): Record<string, string> {
+	public validate(
+		values: Record<KeyT, unknown>,
+		view?: "edit" | "create"
+	): Record<string, string> {
 		const errors: Record<string, string> = {};
 
 		Object.entries(values).forEach(([field, value]) => {
+			// skip validations for fields which aren't defined in the model or which are disabled in the current view
+			if (!(field in this.fields)) return;
+			const fieldDef = this.fields[field as KeyT];
+			if (view && fieldDef.visibility[view].disabled) return;
+
 			// first apply type validation
-			let error = this.fields[field as KeyT].type.validate(value);
+			let error = fieldDef.type.validate(value);
 
 			// then apply custom field validation if present
-			const fieldValidation = this.fields[field as KeyT].validate;
+			const fieldValidation = fieldDef.validate;
 			if (!error && fieldValidation) {
-				error = fieldValidation(value, values);
+				error = fieldValidation(value, values, fieldDef);
 			}
 
 			if (error) errors[field] = error;
@@ -420,8 +498,12 @@ class Model<
 				continue;
 			}
 
-			// don't include disabled fields (except ID)
-			if (field.visibility[visibility].disabled && key !== "id") {
+			// don't include disabled fields (except ID and disabled readonly fields when serializing)
+			if (
+				field.visibility[visibility].disabled &&
+				(func === "serialize" || !field.visibility[visibility].readOnly) &&
+				key !== "id"
+			) {
 				continue;
 			}
 

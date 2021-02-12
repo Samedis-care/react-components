@@ -18,10 +18,16 @@ import Settings from "./Settings";
 import Content from "./Content";
 import { IFilterDef } from "./Content/FilterEntry";
 import { Loader } from "../index";
-import { debounce, measureText } from "../../utils";
+import {
+	debounce,
+	isObjectEmpty,
+	measureText,
+	makeThemeStyles,
+} from "../../utils";
 import { dataGridPrepareFiltersAndSorts } from "./CallbackUtil";
 import { ModelFilterType } from "../../backend-integration/Model";
 import { HEADER_PADDING } from "./Content/ColumnHeader";
+import { Styles } from "@material-ui/core/styles/withStyles";
 
 export interface DataGridTheme extends Theming.BasicElementThemeFragment {
 	/* root elements from BasicElementThemeFragment defining main grid container visuals */
@@ -62,6 +68,7 @@ export type IDataGridProps = IDataGridHeaderProps &
 		 */
 		classes?: Partial<ReturnType<typeof useStyles>>;
 	};
+
 export interface IDataGridLoadDataParameters {
 	/**
 	 * The page to load
@@ -111,7 +118,9 @@ export interface IDataGridCallbacks {
 	 * Extracts additional filters from the provided custom data
 	 * @param customData The custom user-defined state-stored data
 	 */
-	getAdditionalFilters?: (customData: unknown) => DataGridAdditionalFilters;
+	getAdditionalFilters?: (
+		customData: DataGridCustomDataType
+	) => DataGridAdditionalFilters;
 }
 
 export type DataGridAdditionalFilters = Record<string, unknown>;
@@ -228,9 +237,9 @@ export interface IDataGridColumnDef {
 	 */
 	isLocked?: boolean;
 	/**
-	 * Key to re-calc locked element position
+	 * Column width configuration
 	 */
-	fixedColumnKey?: string;
+	width?: [minWidth: number, maxWidth: number, initialWidth?: number];
 }
 
 export interface IDataGridColumnState {
@@ -337,11 +346,11 @@ export const useDataGridState = (): [
 	return ctx;
 };
 
-const DataGridPropsContext = React.createContext<IDataGridProps | undefined>(
+const DataGridPropsContext = React.createContext<DataGridProps | undefined>(
 	undefined
 );
 
-export const useDataGridProps = (): IDataGridProps => {
+export const useDataGridProps = (): DataGridProps => {
 	const ctx = useContext(DataGridPropsContext);
 	if (!ctx) throw new Error("Props context not set");
 	return ctx;
@@ -479,6 +488,10 @@ const useStyles = makeStyles((theme: Theme) => ({
 		backgroundColor: theme.componentsCare?.dataGrid?.footer?.backgroundColor,
 		...theme.componentsCare?.dataGrid?.footer?.style,
 	},
+	footer: {
+		borderTop: `1px solid ${theme.palette.divider}`,
+		marginTop: 1,
+	},
 	cell: {
 		border:
 			theme.componentsCare?.dataGrid?.content?.row?.cell?.data?.border ||
@@ -519,6 +532,9 @@ const useStyles = makeStyles((theme: Theme) => ({
 		...theme.componentsCare?.dataGrid?.content?.row?.cell?.header?.style,
 	},
 	dataCell: {
+		overflow: "hidden",
+		whiteSpace: "nowrap",
+		textOverflow: "ellipsis",
 		padding: HEADER_PADDING / 2,
 		backgroundColor:
 			theme.componentsCare?.dataGrid?.content?.backgroundColor ??
@@ -620,6 +636,7 @@ const useStyles = makeStyles((theme: Theme) => ({
 	paginationText: {
 		padding: "12px 0",
 	},
+	selectAllWrapper: {},
 	selectAllCheckbox: {
 		padding: "4px 0",
 	},
@@ -632,15 +649,52 @@ const useStyles = makeStyles((theme: Theme) => ({
 		borderRadius: 8,
 	},
 }));
+
+export type DataGridClassKey = keyof ReturnType<typeof useStyles>;
+
+export type DataGridTheme = Partial<
+	Styles<Theme, DataGridProps, DataGridClassKey>
+>;
+
+const useThemeStyles = makeThemeStyles<DataGridProps, DataGridClassKey>(
+	(theme) => theme.componentsCare?.dataGrid
+);
+
 export const useDataGridStyles = (): ReturnType<typeof useStyles> => {
-	return useStyles(useDataGridProps());
+	return useDataGridStylesInternal(useDataGridProps());
 };
 
-const DataGrid = (props: IDataGridProps) => {
+const useDataGridStylesInternal = (
+	props: DataGridProps
+): ReturnType<typeof useStyles> => {
+	const themeClasses = useThemeStyles(props);
+	return useStyles({ ...props, classes: themeClasses });
+};
+
+export const getActiveDataGridColumns = (
+	columns: IDataGridColumnDef[],
+	hiddenColumns: string[],
+	lockedColumns: string[]
+): IDataGridColumnDef[] => {
+	return columns
+		.filter((column) => !hiddenColumns.includes(column.field))
+		.filter((column) => lockedColumns.includes(column.field))
+		.concat(
+			columns
+				.filter((column) => !hiddenColumns.includes(column.field))
+				.filter((column) => !lockedColumns.includes(column.field))
+		)
+		.map((column) => ({
+			...column,
+			isLocked: lockedColumns.includes(column.field),
+		}));
+};
+
+const DataGrid = (props: DataGridProps) => {
 	const { columns, loadData, getAdditionalFilters, forceRefreshToken } = props;
 	const rowsPerPage = props.rowsPerPage || 50;
 
-	const classes = useStyles(props);
+	const classes = useDataGridStylesInternal(props);
 	const theme = useTheme();
 	const statePack = useState<IDataGridState>(() =>
 		getDataGridDefaultState(columns)
@@ -659,22 +713,7 @@ const DataGrid = (props: IDataGridProps) => {
 	const gridRoot = useRef<HTMLDivElement>();
 
 	const visibleColumns = useMemo(
-		() =>
-			columns
-				.filter((column) => !hiddenColumns.includes(column.field))
-				.filter((column) => lockedColumns.includes(column.field))
-				.concat(
-					columns
-						.filter((column) => !hiddenColumns.includes(column.field))
-						.filter((column) => !lockedColumns.includes(column.field))
-				)
-				.map((column) => ({
-					...column,
-					isLocked: lockedColumns.includes(column.field),
-					fixedColumnKey: lockedColumns.includes(column.field)
-						? Math.random().toString()
-						: "",
-				})),
+		() => getActiveDataGridColumns(columns, hiddenColumns, lockedColumns),
 		[columns, hiddenColumns, lockedColumns]
 	);
 
@@ -695,6 +734,22 @@ const DataGrid = (props: IDataGridProps) => {
 			} catch (e) {
 				// if canvas is not available to measure text
 				widthData[column.field] = column.headerName.length * 16;
+			}
+			if (column.width) {
+				// initial width
+				if (column.width[2] !== undefined) {
+					widthData[column.field] = column.width[2];
+				}
+				// min width
+				widthData[column.field] = Math.max(
+					column.width[0],
+					widthData[column.field]
+				);
+				// max width
+				widthData[column.field] = Math.min(
+					column.width[1],
+					widthData[column.field]
+				);
 			}
 		});
 		return widthData;
@@ -805,7 +860,13 @@ const DataGrid = (props: IDataGridProps) => {
 		[setState]
 	);
 
-	useEffect(resetView, [resetView, search, columnsState, forceRefreshToken]);
+	useEffect(() => {
+		// make sure we don't refresh data twice on initial render
+		if (refreshData && isObjectEmpty(rows)) return;
+
+		resetView();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [resetView, search, columnsState, forceRefreshToken]);
 	return (
 		<Grid
 			container
@@ -828,15 +889,15 @@ const DataGrid = (props: IDataGridProps) => {
 								</Grid>
 								<Grid item xs className={classes.content}>
 									<Settings columns={columns} />
-									{refreshData && Object.keys(rows).length === 0 && <Loader />}
+									{refreshData && isObjectEmpty(rows) && <Loader />}
 									{!refreshData &&
 										dataLoadError !== null &&
 										dataLoadError.message}
 									{!refreshData &&
 										dataLoadError === null &&
-										Object.keys(rows).length === 0 &&
+										isObjectEmpty(rows) &&
 										"No Data!"}
-									{Object.keys(rows).length > 0 && (
+									{!isObjectEmpty(rows) && (
 										<Content
 											columns={visibleColumns}
 											rowsPerPage={rowsPerPage}

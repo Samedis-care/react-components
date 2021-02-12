@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import {
 	Button,
 	Dialog,
@@ -11,39 +11,9 @@ import MuiDialogTitle from "@material-ui/core/DialogTitle";
 import { Close } from "@material-ui/icons";
 import SignaturePad from "react-signature-canvas";
 import ccI18n from "../../i18n";
-
-export interface SignPadDialogProps {
-	/**
-	 * Boolean flag to clear signature
-	 */
-	clearOnResize?: boolean;
-	/**
-	 * Boolean flag to open dialog for signature pad
-	 */
-	openDialog: boolean;
-	/**
-	 * The props used to draw HTML canvas
-	 */
-	canvasProps?: React.DetailedHTMLProps<
-		React.CanvasHTMLAttributes<HTMLCanvasElement>,
-		HTMLCanvasElement
-	>;
-	/**
-	 * Use to change signature pen color
-	 */
-	penColor?: string;
-	/**
-	 * The base64 string of signature
-	 */
-	signature: string;
-	/**
-	 * Callback function to handle signature pad
-	 */
-	handleSignPad: () => void;
-	/**
-	 * Callback method which returns signature base64 string
-	 */
-	setSignature?: (url: string) => void;
+import { useDialogContext } from "../../framework";
+import { IDialogConfigSign } from "./Types";
+export interface SignPadDialogProps extends IDialogConfigSign {
 	/**
 	 * Custom styles
 	 */
@@ -76,15 +46,9 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const SignPadDialog = (props: SignPadDialogProps) => {
-	const {
-		openDialog,
-		clearOnResize,
-		penColor,
-		handleSignPad,
-		setSignature,
-		signature,
-		...canvasProps
-	} = props;
+	const { disabled, penColor, setSignature, signature, ...canvasProps } = props;
+	const [resetCanvas, setResetCanvas] = useState(!!signature);
+	const [, popDialog] = useDialogContext();
 	const signCanvas = useRef<SignaturePad>(null);
 	const classes = useStyles(props);
 	const clearCanvas = React.useCallback(() => {
@@ -92,6 +56,7 @@ const SignPadDialog = (props: SignPadDialogProps) => {
 			signCanvas.current.clear();
 		}
 		if (setSignature) setSignature("");
+		setResetCanvas(false);
 	}, [setSignature]);
 
 	const saveCanvas = React.useCallback(() => {
@@ -101,14 +66,13 @@ const SignPadDialog = (props: SignPadDialogProps) => {
 				.toDataURL("image/png");
 			if (setSignature) setSignature(signature);
 		}
-		handleSignPad();
-	}, [setSignature, handleSignPad]);
+		popDialog();
+	}, [setSignature, popDialog]);
 
-	const closeCanvas = () => handleSignPad();
-
+	const closeCanvas = () => popDialog();
 	return (
 		<Dialog
-			open={openDialog}
+			open={!disabled}
 			maxWidth="sm"
 			disableBackdropClick
 			onClose={closeCanvas}
@@ -132,15 +96,13 @@ const SignPadDialog = (props: SignPadDialogProps) => {
 				)}
 			</MuiDialogTitle>
 			<div className={classes.signDiv}>
-				{!signature && (
+				{!resetCanvas ? (
 					<SignaturePad
 						ref={signCanvas}
 						penColor={penColor || "blue"}
-						clearOnResize={clearOnResize}
 						{...canvasProps}
 					/>
-				)}
-				{signature && (
+				) : (
 					<div className={classes.imageDiv}>
 						<img src={signature} alt="Sign" />
 					</div>
@@ -158,4 +120,4 @@ const SignPadDialog = (props: SignPadDialogProps) => {
 	);
 };
 
-export default React.memo(SignPadDialog);
+export const SignDialog = React.memo(SignPadDialog);
