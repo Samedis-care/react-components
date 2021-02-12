@@ -21,6 +21,7 @@ import {
 	isObjectEmpty,
 	measureText,
 	makeThemeStyles,
+	useMultipleStyles,
 } from "../../utils";
 import { dataGridPrepareFiltersAndSorts } from "./CallbackUtil";
 import { ModelFilterType } from "../../backend-integration/Model";
@@ -537,8 +538,7 @@ export const useDataGridStyles = (): ReturnType<typeof useStyles> => {
 const useDataGridStylesInternal = (
 	props: DataGridProps
 ): ReturnType<typeof useStyles> => {
-	const themeClasses = useThemeStyles(props);
-	return useStyles({ ...props, classes: themeClasses });
+	return useMultipleStyles(props, useThemeStyles, useStyles);
 };
 
 export const getActiveDataGridColumns = (

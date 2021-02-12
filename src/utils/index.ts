@@ -17,6 +17,7 @@ export { default as makeThemeStyles } from "./makeThemeStyles";
 export { default as delocalizeNumber } from "./delocalizeNumber";
 export { default as parseLocalizedNumber } from "./parseLocalizedNumber";
 export { default as useInputCursorFix } from "./useInputCursorFix";
+export { default as useMultipleStyles } from "./useMultipleStyles";
 export { default as filterSortPaginate } from "./filterSortPaginate";
 export { default as combineClassMaps } from "./combineClassMaps";
 export { default as isObjectEmpty } from "./isObjectEmpty";

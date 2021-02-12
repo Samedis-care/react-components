@@ -1,7 +1,7 @@
 import { makeStyles, Theme } from "@material-ui/core/styles";
 import { InputClassKey, InputLabelProps } from "@material-ui/core";
 import { Styles } from "@material-ui/core/styles/withStyles";
-import { makeThemeStyles } from "../../utils";
+import { makeThemeStyles, useMultipleStyles } from "../../utils";
 import { ClassNameMap } from "@material-ui/styles/withStyles";
 
 export interface UIInputProps {
@@ -41,8 +41,7 @@ const useRawInputStyles = makeStyles((theme) => ({
 export const useInputStyles = (
 	props: UIInputProps
 ): Partial<ClassNameMap<InputClassKey>> => {
-	const themeClasses = useThemeStyles(props);
-	return useRawInputStyles({ ...props, classes: themeClasses });
+	return useMultipleStyles(props, useThemeStyles, useRawInputStyles);
 };
 
 export const InputLabelConfig: InputLabelProps = {
