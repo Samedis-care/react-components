@@ -1,10 +1,13 @@
-import { DataGridTheme } from "./standalone/DataGrid";
+import { SelectorTheme } from "./standalone";
+import { DataGridTheme, DataGridThemeExpert } from "./standalone/DataGrid";
+import { MenuTheme } from "./standalone/Portal/Menu";
+import { MenuItemTheme } from "./standalone/Portal/MenuItem/Material";
 import { ActionButtonTheme } from "./standalone/UIKit/ActionButton";
 import { CheckboxTheme } from "./standalone/UIKit/Checkbox";
 import { InputTheme } from "./standalone/UIKit/CommonStyles";
 import { ComponentWithLabelTheme } from "./standalone/UIKit/ComponentWithLabel";
 import { FormButtonTheme } from "./standalone/UIKit/FormButtons";
-import { SelectorTheme } from "./standalone";
+import { SubActionButtonTheme } from "./standalone/UIKit/SubActionButton";
 
 export * from "./standalone";
 
@@ -22,11 +25,18 @@ export * from "./utils";
 
 export interface ComponentsCareTheme {
 	dataGrid?: DataGridTheme;
+	dataGridExpert?: DataGridThemeExpert;
+	portal?: {
+		menu?: MenuTheme;
+		menuItem?: MenuItemTheme;
+	};
+	selector?: SelectorTheme;
 	uiKit?: {
 		label?: ComponentWithLabelTheme;
 		checkbox?: CheckboxTheme;
 		input?: InputTheme;
 		actionButton?: ActionButtonTheme;
+		subActionButton?: SubActionButtonTheme;
 		formButtons?: FormButtonTheme;
 		selector?: SelectorTheme;
 	};

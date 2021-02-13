@@ -21,6 +21,9 @@ const getDefaultTheme = (): ThemeOptions => ({
 /* re-usable colors for our theme */
 const customColors = {
 	white: "rgb(255, 255, 255)",
+	grey: "rgb(127, 127, 127)",
+	lighterBlue: "rgb(218, 236, 248)",
+	lightBlue: "rgb(182, 216, 241)",
 };
 
 const customPalette = {
@@ -42,12 +45,85 @@ const customPalette = {
 
 /* example for a customized theme per client requirements */
 const getCustomTheme = (): ThemeOptions => ({
-	spacing: [0, 5, 7, 10, 15, 21, 25],
+	spacing: [0, 5, 7, 10, 15, 21],
 	palette: {
-		type: "dark",
+		type: "light",
 		...customPalette,
 	},
 	componentsCare: {
+		dataGrid: {
+			border: "none",
+			header: {
+				borderWidth: "0 0 0 0",
+				padding: "0 0 15px 0",
+			},
+			content: {
+				row: {
+					borderColor: customColors.white,
+					backgroundColor: customColors.lighterBlue,
+					selected: {
+						backgroundColor: customColors.lightBlue,
+					},
+					hover: {
+						backgroundColor: customColors.lightBlue,
+					},
+					cell: {
+						header: {
+							borderWidth: "0 0 1px 0",
+							label: {
+								fontSize: "0.75rem",
+								fontWeight: 500,
+							},
+							resizer: {
+								borderWidth: "0 1px 0 0",
+								style: {
+									top: "2px",
+									height: "18px",
+								}
+							},
+						},
+						data: {
+							borderWidth: "0 0 1px 0",
+						},
+					},
+				},
+			},
+			footer: {
+				padding: "15px 0 0 0",
+			},
+		},
+		selector: {
+			backgroundColor: "#FFF",
+			borderWidth: "1px",
+			borderStyle: "dotted",
+			borderColor: "red", //customColors.grey,
+			borderRadius: "48px",
+			active: {
+				borderColor: "#C0C", //customColors.grey,
+			},
+			label: {
+				color: customColors.grey,
+				fontWeight: "bold",
+				fontSize: "0.7rem",
+				margin: "5px 0",
+			},
+		},
+		portal: {
+			menu: {
+				container: {
+					width: "300px",
+					overflow: "hidden",
+				},
+			},
+			menuItem: {
+				borderRadius: "0 25px 25px 0",
+				backgroundColor: "green",
+				color: "pink",
+				style: {
+					border: "1px dotted red",
+				},
+			},
+		},
 		uiKit: {
 			label: {},
 			input: {
@@ -74,6 +150,23 @@ const getCustomTheme = (): ThemeOptions => ({
 					},
 				},
 			},
+			subActionButton: {
+				small: {
+					borderRadius: 5,
+					backgroundColor: "rgba(238,174,202,.15)",
+					color: "rgba(148,187,233,1)",
+					style: {
+						backgroundImage: "none",
+					},
+					hover: {
+						style: {
+							backgroundColor: "rgba(238,174,202,.25)",
+							backgroundImage:
+								"linear-gradient(345deg, rgba(238,174,202,1) 0%, rgba(148,187,233,1) 100%)",
+						},
+					},
+				},
+			},
 			formButtons: {
 				buttonWrapper: {
 					margin: "0 5px 0 0",
@@ -92,21 +185,6 @@ const getCustomTheme = (): ThemeOptions => ({
 						background:
 							"linear-gradient(345deg, rgba(238,174,202,1) 0%, rgba(148,187,233,1) 100%)",
 						boxShadow: "0 0 10px 0 rgba(0,0,0, .35)",
-					},
-				},
-			},
-			selector: {
-				inputRoot: {
-					'&[class*="MuiOutlinedInput-root"]': {
-						paddingLeft: 16,
-						paddingTop: 0,
-						paddingBottom: 0,
-						"& .MuiAutocomplete-input": {
-							padding: "6.5px 4px",
-						},
-						'& [class*="MuiAutocomplete-endAdornment"]': {
-							right: 28,
-						},
 					},
 				},
 			},

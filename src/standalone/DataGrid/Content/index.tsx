@@ -122,7 +122,7 @@ const Content = (props: IDataGridContentProps) => {
 							: columnWidth[columns[index - 1].field]
 					}
 					rowCount={(state.rowsFiltered ?? state.rowsTotal) + 1}
-					rowHeight={({ index }) => (index === 0 ? 24 : 57)}
+					rowHeight={({ index }) => (index === 0 ? 32 : 57)}
 					width={width}
 					height={height}
 					cellRenderer={(gridProps) => (

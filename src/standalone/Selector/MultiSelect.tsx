@@ -3,7 +3,7 @@ import BaseSelector, {
 	BaseSelectorData,
 	BaseSelectorProps,
 } from "./BaseSelector";
-import { makeStyles, Grid, Paper } from "@material-ui/core";
+import { makeStyles, Grid, Paper, Theme } from "@material-ui/core";
 import MultiSelectEntry, { IMultiSelectEntryProps } from "./MultiSelectEntry";
 
 export interface MultiSelectorData extends BaseSelectorData {
@@ -41,11 +41,13 @@ export interface MultiSelectProps
 	};
 }
 
-const useBaseSelectorStyles = makeStyles({
+const useBaseSelectorStyles = makeStyles((theme: Theme) => ({
 	inputRoot: {
-		borderRadius: "4px 4px 0px 0px",
+		borderRadius:
+			theme.componentsCare?.selector?.borderRadius || "4px 4px 0px 0px",
+		...theme.componentsCare?.selector?.style,
 	},
-});
+}));
 
 const useMultiSelectorStyles = makeStyles({
 	paperWrapper: {
