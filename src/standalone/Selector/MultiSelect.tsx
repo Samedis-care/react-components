@@ -5,7 +5,6 @@ import BaseSelector, {
 } from "./BaseSelector";
 import { makeStyles, Grid, Paper } from "@material-ui/core";
 import MultiSelectEntry, { IMultiSelectEntryProps } from "./MultiSelectEntry";
-import { cleanClassMap } from "../../utils";
 
 export interface MultiSelectorData extends BaseSelectorData {
 	/**
@@ -34,15 +33,21 @@ export interface MultiSelectProps
 	 * Specify a custom component for displaying multi select items
 	 */
 	selectedEntryRenderer?: React.ComponentType<IMultiSelectEntryProps>;
+	/**
+	 * Custom classes passed to subcomponents
+	 */
+	subClasses?: {
+		baseSelector: BaseSelectorProps<BaseSelectorData>["classes"];
+	};
 }
 
-const useSelectorStyles = makeStyles({
+const useBaseSelectorStyles = makeStyles({
 	inputRoot: {
 		borderRadius: "4px 4px 0px 0px",
 	},
 });
 
-const useStyles = makeStyles({
+const useMultiSelectorStyles = makeStyles({
 	paperWrapper: {
 		boxShadow: "none",
 		marginTop: 16, // to accommodate InputLabel
@@ -63,10 +68,11 @@ const MultiSelect = (props: MultiSelectProps) => {
 		selectedEntryRenderer,
 		disabled,
 	} = props;
-	const multiSelectClasses = useStyles(cleanClassMap(props, true, "inputRoot"));
-	const multiSelectStyles = useSelectorStyles(
-		cleanClassMap(props, false, "inputRoot")
-	);
+	const multiSelectClasses = useMultiSelectorStyles(props);
+	const baseSelectorClasses = useBaseSelectorStyles({
+		props,
+		classes: props.subClasses?.baseSelector,
+	});
 
 	const EntryRender = selectedEntryRenderer || MultiSelectEntry;
 
@@ -122,7 +128,7 @@ const MultiSelect = (props: MultiSelectProps) => {
 				<Grid item xs={12}>
 					<BaseSelector
 						{...props}
-						classes={multiSelectStyles}
+						classes={baseSelectorClasses}
 						onLoad={multiSelectLoadHandler}
 						selected={null}
 						onSelect={multiSelectHandler}
