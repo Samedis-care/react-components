@@ -409,117 +409,120 @@ export const getDataGridDefaultColumnsState = (
 	return data;
 };
 
-const useStyles = makeStyles((theme: Theme) => ({
-	wrapper: {
-		width: "100%",
-		height: "100%",
-		border: `1px solid ${theme.palette.divider}`,
-		borderRadius: 8,
-		backgroundColor: theme.palette.background.paper,
-	},
-	middle: {
-		borderTop: `1px solid ${theme.palette.divider}`,
-		position: "relative",
-	},
-	footer: {
-		borderTop: `1px solid ${theme.palette.divider}`,
-		marginTop: 1,
-	},
-	cell: {
-		//borderRight: `1px ${theme.palette.divider} solid`,
-		borderBottom: `1px ${theme.palette.divider} solid`,
-		padding: `0 ${HEADER_PADDING / 2}px`,
-	},
-	headerCell: {
-		borderRight: `1px ${theme.palette.divider} solid`,
-		backgroundColor: theme.palette.background.paper,
-		color: theme.palette.getContrastText(theme.palette.background.paper),
-	},
-	dataCell: {
-		overflow: "hidden",
-		whiteSpace: "nowrap",
-		textOverflow: "ellipsis",
-		padding: HEADER_PADDING / 2,
-		backgroundColor: theme.palette.background.paper,
-		color: theme.palette.getContrastText(theme.palette.background.paper),
-	},
-	dataCellSelected: {
-		backgroundColor: theme.palette.action.hover,
-		color: theme.palette.getContrastText(theme.palette.background.paper),
-	},
-	columnHeaderContentWrapper: {
-		width: "100%",
-		minWidth: "100%",
-		zIndex: 1000,
-	},
-	columnHeaderFilterable: {
-		color: theme.palette.primary.main,
-	},
-	columnHeaderFilterButton: {
-		padding: 0,
-		color: "inherit",
-	},
-	columnHeaderResizer: {
-		cursor: "col-resize",
-		width: 8,
-		height: "100%",
-		right: 0,
-		top: 0,
-		position: "absolute",
-	},
-	columnHeaderFilterPopup: {
-		width: 150,
-	},
-	columnHeaderFilterIcon: {
-		width: 16,
-		height: "auto",
-	},
-	columnHeaderSortIcon: {
-		height: 24,
-	},
-	columnHeaderLabel: {
-		textOverflow: "ellipsis",
-		overflow: "hidden",
-		"&:hover": {
-			pointerEvents: "auto",
+const useStyles = makeStyles(
+	(theme: Theme) => ({
+		wrapper: {
+			width: "100%",
+			height: "100%",
+			border: `1px solid ${theme.palette.divider}`,
+			borderRadius: 8,
+			backgroundColor: theme.palette.background.paper,
 		},
-	},
-	disableClick: {
-		userSelect: "none",
-	},
-	filterBarBox: {
-		height: "100%",
-	},
-	filterBarGrid: {
-		height: `calc(100% + ${theme.spacing(2)}px)`,
-	},
-	setFilterContainer: {
-		maxHeight: "40vh",
-		overflow: "auto",
-	},
-	settingsCollapse: {
-		position: "absolute",
-		zIndex: 2000,
-		width: "100%",
-		maxHeight: "100%",
-		overflow: "auto",
-	},
-	paginationText: {
-		padding: "12px 0",
-	},
-	selectAllWrapper: {},
-	selectAllCheckbox: {
-		padding: "4px 0",
-	},
-	selectCheckbox: {
-		padding: 0,
-	},
-	settingsPaper: {
-		padding: 16,
-		borderBottom: `1px solid ${theme.palette.divider}`,
-		borderRadius: 8,
-	},
-}));
+		middle: {
+			borderTop: `1px solid ${theme.palette.divider}`,
+			position: "relative",
+		},
+		footer: {
+			borderTop: `1px solid ${theme.palette.divider}`,
+			marginTop: 1,
+		},
+		cell: {
+			//borderRight: `1px ${theme.palette.divider} solid`,
+			borderBottom: `1px ${theme.palette.divider} solid`,
+			padding: `0 ${HEADER_PADDING / 2}px`,
+		},
+		headerCell: {
+			borderRight: `1px ${theme.palette.divider} solid`,
+			backgroundColor: theme.palette.background.paper,
+			color: theme.palette.getContrastText(theme.palette.background.paper),
+		},
+		dataCell: {
+			overflow: "hidden",
+			whiteSpace: "nowrap",
+			textOverflow: "ellipsis",
+			padding: HEADER_PADDING / 2,
+			backgroundColor: theme.palette.background.paper,
+			color: theme.palette.getContrastText(theme.palette.background.paper),
+		},
+		dataCellSelected: {
+			backgroundColor: theme.palette.action.hover,
+			color: theme.palette.getContrastText(theme.palette.background.paper),
+		},
+		columnHeaderContentWrapper: {
+			width: "100%",
+			minWidth: "100%",
+			zIndex: 1000,
+		},
+		columnHeaderFilterable: {
+			color: theme.palette.primary.main,
+		},
+		columnHeaderFilterButton: {
+			padding: 0,
+			color: "inherit",
+		},
+		columnHeaderResizer: {
+			cursor: "col-resize",
+			width: 8,
+			height: "100%",
+			right: 0,
+			top: 0,
+			position: "absolute",
+		},
+		columnHeaderFilterPopup: {
+			width: 150,
+		},
+		columnHeaderFilterIcon: {
+			width: 16,
+			height: "auto",
+		},
+		columnHeaderSortIcon: {
+			height: 24,
+		},
+		columnHeaderLabel: {
+			textOverflow: "ellipsis",
+			overflow: "hidden",
+			"&:hover": {
+				pointerEvents: "auto",
+			},
+		},
+		disableClick: {
+			userSelect: "none",
+		},
+		filterBarBox: {
+			height: "100%",
+		},
+		filterBarGrid: {
+			height: `calc(100% + ${theme.spacing(2)}px)`,
+		},
+		setFilterContainer: {
+			maxHeight: "40vh",
+			overflow: "auto",
+		},
+		settingsCollapse: {
+			position: "absolute",
+			zIndex: 2000,
+			width: "100%",
+			maxHeight: "100%",
+			overflow: "auto",
+		},
+		paginationText: {
+			padding: "12px 0",
+		},
+		selectAllWrapper: {},
+		selectAllCheckbox: {
+			padding: "4px 0",
+		},
+		selectCheckbox: {
+			padding: 0,
+		},
+		settingsPaper: {
+			padding: 16,
+			borderBottom: `1px solid ${theme.palette.divider}`,
+			borderRadius: 8,
+		},
+	}),
+	{ name: "CcDataGrid" }
+);
 
 export type DataGridClassKey = keyof ReturnType<typeof useStyles>;
 
@@ -528,7 +531,8 @@ export type DataGridTheme = Partial<
 >;
 
 const useThemeStyles = makeThemeStyles<DataGridProps, DataGridClassKey>(
-	(theme) => theme.componentsCare?.dataGrid
+	(theme) => theme.componentsCare?.dataGrid,
+	"CcDataGrid"
 );
 
 export const useDataGridStyles = (): ReturnType<typeof useStyles> => {

@@ -85,17 +85,20 @@ export interface CrudProps<
 	initialView?: string | null;
 }
 
-const useStyles = makeStyles({
-	hide: {
-		display: "none",
-		width: "100%",
-		height: "100%",
+const useStyles = makeStyles(
+	{
+		hide: {
+			display: "none",
+			width: "100%",
+			height: "100%",
+		},
+		show: {
+			width: "100%",
+			height: "100%",
+		},
 	},
-	show: {
-		width: "100%",
-		height: "100%",
-	},
-});
+	{ name: "CcCrud" }
+);
 
 const CRUD = <
 	KeyT extends ModelFieldName,

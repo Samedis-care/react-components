@@ -1,18 +1,21 @@
 import React from "react";
 import { makeStyles } from "@material-ui/core";
 
-const useStyles = makeStyles({
-	fieldSetRoot: {
-		padding: "8px",
-		borderStyle: "solid",
-		borderColor: "lightgrey",
-		borderRadius: 4,
-		borderWidth: 1,
-		position: "relative",
-		maxHeight: "inherit",
-		height: "inherit",
+const useStyles = makeStyles(
+	{
+		fieldSetRoot: {
+			padding: "8px",
+			borderStyle: "solid",
+			borderColor: "lightgrey",
+			borderRadius: 4,
+			borderWidth: 1,
+			position: "relative",
+			maxHeight: "inherit",
+			height: "inherit",
+		},
 	},
-});
+	{ name: "CcGroupBox" }
+);
 
 export interface GroupBoxProps {
 	/**

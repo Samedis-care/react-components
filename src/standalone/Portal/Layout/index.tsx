@@ -78,48 +78,54 @@ interface IRenderProps {
 export type PortalLayoutProps = PortalLayoutPropsBase &
 	(PortalLayoutBasic | PortalLayoutNoTopLeft);
 
-const useContainerStyles = makeStyles(() => ({
-	containerDesktop: (props: PortalLayoutProps) => ({
-		display: "grid",
-		gridTemplateAreas:
-			props.variant === "basic"
-				? `"top-left top" "sidebar main"`
-				: `"top top" "sidebar main"`,
-		gridTemplateRows: "max-content 100fr",
-		gridTemplateColumns: `${
-			props.drawerWidth ? `${props.drawerWidth}px` : "max-content"
-		} 100fr`,
-		height: "100%",
+const useContainerStyles = makeStyles(
+	() => ({
+		containerDesktop: (props: PortalLayoutProps) => ({
+			display: "grid",
+			gridTemplateAreas:
+				props.variant === "basic"
+					? `"top-left top" "sidebar main"`
+					: `"top top" "sidebar main"`,
+			gridTemplateRows: "max-content 100fr",
+			gridTemplateColumns: `${
+				props.drawerWidth ? `${props.drawerWidth}px` : "max-content"
+			} 100fr`,
+			height: "100%",
+		}),
+		containerMobile: (props: PortalLayoutProps) => ({
+			display: "grid",
+			gridTemplateAreas: `"top top" "main main"`,
+			gridTemplateRows: "max-content 100fr",
+			gridTemplateColumns: `${
+				props.drawerWidth ? `${props.drawerWidth}px` : "max-content"
+			} 100fr`,
+			height: "100%",
+		}),
 	}),
-	containerMobile: (props: PortalLayoutProps) => ({
-		display: "grid",
-		gridTemplateAreas: `"top top" "main main"`,
-		gridTemplateRows: "max-content 100fr",
-		gridTemplateColumns: `${
-			props.drawerWidth ? `${props.drawerWidth}px` : "max-content"
-		} 100fr`,
-		height: "100%",
-	}),
-}));
+	{ name: "CcPortalLayout" }
+);
 
-const useStyles = makeStyles({
-	header: {
-		gridArea: "top",
+const useStyles = makeStyles(
+	{
+		header: {
+			gridArea: "top",
+		},
+		topLeft: {
+			gridArea: "top-left",
+		},
+		menu: {
+			gridArea: "sidebar",
+			minHeight: "100%",
+		},
+		main: {
+			gridArea: "main",
+		},
+		mobileTopLeft: {
+			height: 56,
+		},
 	},
-	topLeft: {
-		gridArea: "top-left",
-	},
-	menu: {
-		gridArea: "sidebar",
-		minHeight: "100%",
-	},
-	main: {
-		gridArea: "main",
-	},
-	mobileTopLeft: {
-		height: 56,
-	},
-});
+	{ name: "CcRenderLayout" }
+);
 
 export interface PortalLayoutContextType {
 	mobile: boolean;
