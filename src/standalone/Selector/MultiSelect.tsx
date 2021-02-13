@@ -5,8 +5,6 @@ import BaseSelector, {
 } from "./BaseSelector";
 import { makeStyles, Grid, Paper, Theme } from "@material-ui/core";
 import MultiSelectEntry, { IMultiSelectEntryProps } from "./MultiSelectEntry";
-import { combineClassMaps } from "../../utils";
-import { AutocompleteClassKey } from "@material-ui/lab/Autocomplete/Autocomplete";
 
 export interface MultiSelectorData extends BaseSelectorData {
 	/**
@@ -35,9 +33,15 @@ export interface MultiSelectProps
 	 * Specify a custom component for displaying multi select items
 	 */
 	selectedEntryRenderer?: React.ComponentType<IMultiSelectEntryProps>;
+	/**
+	 * Custom classes passed to subcomponents
+	 */
+	subClasses?: {
+		baseSelector: BaseSelectorProps<BaseSelectorData>["classes"];
+	};
 }
 
-const useSelectorStyles = makeStyles((theme: Theme) => ({
+const useBaseSelectorStyles = makeStyles((theme: Theme) => ({
 	inputRoot: {
 		borderRadius:
 			theme.componentsCare?.selector?.borderRadius || "4px 4px 0px 0px",
@@ -45,7 +49,7 @@ const useSelectorStyles = makeStyles((theme: Theme) => ({
 	},
 }));
 
-const useStyles = makeStyles({
+const useMultiSelectorStyles = makeStyles({
 	paperWrapper: {
 		boxShadow: "none",
 		marginTop: 16, // to accommodate InputLabel
@@ -65,13 +69,12 @@ const MultiSelect = (props: MultiSelectProps) => {
 		enableIcons,
 		selectedEntryRenderer,
 		disabled,
-		classes,
 	} = props;
-	const multiSelectClasses = useStyles(props);
-	const defaultMultiSelectClasses = useSelectorStyles();
-	const multiSelectStyles = classes
-		? combineClassMaps<AutocompleteClassKey>(defaultMultiSelectClasses, classes)
-		: defaultMultiSelectClasses;
+	const multiSelectClasses = useMultiSelectorStyles(props);
+	const baseSelectorClasses = useBaseSelectorStyles({
+		props,
+		classes: props.subClasses?.baseSelector,
+	});
 
 	const EntryRender = selectedEntryRenderer || MultiSelectEntry;
 
@@ -127,7 +130,7 @@ const MultiSelect = (props: MultiSelectProps) => {
 				<Grid item xs={12}>
 					<BaseSelector
 						{...props}
-						classes={multiSelectStyles}
+						classes={baseSelectorClasses}
 						onLoad={multiSelectLoadHandler}
 						selected={null}
 						onSelect={multiSelectHandler}

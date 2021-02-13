@@ -56,24 +56,27 @@ export interface ImageSelectorProps {
 	classes?: Partial<ReturnType<typeof useStyles>>;
 }
 
-const useStyles = makeStyles((theme) => ({
-	root: {
-		width: "100%",
-		height: "100%",
-	},
-	imgWrapper: {
-		maxHeight: "100%",
-	},
-	preview: {
-		objectFit: "contain",
-		display: "block",
-		width: `calc(100% - ${theme.spacing(2)}px)`,
-		height: `calc(100% - ${theme.spacing(2)}px)`,
-	},
-	changeEventHelper: {
-		display: "none",
-	},
-}));
+const useStyles = makeStyles(
+	(theme) => ({
+		root: {
+			width: "100%",
+			height: "100%",
+		},
+		imgWrapper: {
+			maxHeight: "100%",
+		},
+		preview: {
+			objectFit: "contain",
+			display: "block",
+			width: `calc(100% - ${theme.spacing(2)}px)`,
+			height: `calc(100% - ${theme.spacing(2)}px)`,
+		},
+		changeEventHelper: {
+			display: "none",
+		},
+	}),
+	{ name: "CcImageSelector" }
+);
 
 const ImageSelector = (props: ImageSelectorProps) => {
 	const { convertImagesTo, downscale, value, readOnly } = props;

@@ -7,11 +7,17 @@ import React, {
 } from "react";
 import { IMenuItemDefinition, MenuItemProps, MenuProps } from "./index";
 import { Collapse } from "@material-ui/core";
-interface IProps extends Omit<MenuItemProps, "expanded" | "active"> {
+
+interface MenuItemControllerProps
+	extends Omit<MenuItemProps, "expanded" | "active"> {
 	/**
 	 * The menu item renderer properties
 	 */
 	menuProps: MenuProps;
+	/**
+	 * The id of the menu item (used for marking active item)
+	 */
+	menuItemId: string;
 	/**
 	 * The menu item children definitions
 	 */
@@ -33,8 +39,8 @@ export const MenuContext = React.createContext<
 	[string, Dispatch<SetStateAction<string>>] | undefined
 >(undefined);
 
-const MenuItem = (props: IProps) => {
-	const { depth, title, expandable, forceExpand, onClick } = props;
+const MenuItem = (props: MenuItemControllerProps) => {
+	const { depth, title, expandable, forceExpand, onClick, menuItemId } = props;
 	const [expanded, setExpanded] = useState(false);
 	const menuContext = useContext(MenuContext);
 	if (!menuContext) throw new Error("MenuContext is undefined");
@@ -42,9 +48,9 @@ const MenuItem = (props: IProps) => {
 
 	const clickProxy = useCallback(() => {
 		if (expandable) setExpanded(forceExpand ? true : (prevFlag) => !prevFlag);
-		else setMenuState(`${depth}${title}`);
+		else setMenuState(menuItemId);
 		onClick();
-	}, [expandable, forceExpand, onClick, setMenuState, depth, title]);
+	}, [expandable, forceExpand, setMenuState, menuItemId, onClick]);
 
 	// force expand
 	if (expandable && !expanded && forceExpand) {
@@ -59,14 +65,14 @@ const MenuItem = (props: IProps) => {
 				title={title}
 				expandable={expandable}
 				expanded={expandable ? expanded : undefined}
-				active={expandable ? undefined : menuState === `${depth}${title}`}
+				active={expandable ? undefined : menuState === menuItemId}
 				onClick={clickProxy}
 				depth={depth}
 			/>
 			{expandable && (
 				<Collapse in={expanded} className={props.childWrapperClassName}>
 					{props.childDefs?.map((child) =>
-						toMenuItemComponent(props.menuProps, child, depth + 1)
+						toMenuItemComponent(props.menuProps, child, depth + 1, menuItemId)
 					)}
 				</Collapse>
 			)}
@@ -79,11 +85,13 @@ export default React.memo(MenuItem);
 export const toMenuItemComponent = (
 	menuProps: MenuProps,
 	def: IMenuItemDefinition,
-	depth: number
+	depth: number,
+	menuItemId: string | null
 ): JSX.Element | false =>
 	def.shouldRender && (
 		<MenuItem
-			key={`${depth}${def.title}`}
+			key={menuItemId ? `${menuItemId}@${def.title}` : def.title}
+			menuItemId={menuItemId ? `${menuItemId}@${def.title}` : def.title}
 			icon={def.icon}
 			title={def.title}
 			expandable={!!(def.children && def.children.length > 0)}

@@ -127,7 +127,7 @@ export type SelectorTheme = Partial<
 const useThemeStyles = makeThemeStyles<
 	BaseSelectorProps<BaseSelectorData>,
 	AutocompleteClassKey
->((theme) => theme.componentsCare?.uiKit?.selector);
+>((theme) => theme.componentsCare?.uiKit?.selector, "CcBaseSelector");
 
 const useCustomStyles = makeStyles({
 	infoBtn: {

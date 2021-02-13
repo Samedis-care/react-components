@@ -26,36 +26,39 @@ const AccordionSummary = withStyles({
 	expanded: {},
 })(MuiAccordionSummary);
 
-export const useStyles = makeStyles((theme: Theme) => ({
-	noShadow: {
-		"box-shadow": "none",
-	},
-	panelDetails: {
-		border: "1px solid grey",
-		borderRadius: "0px 0px 4px 4px",
-		padding: "8px 24px",
-	},
-	root: {
-		margin: 0,
-		paddingLeft: theme.spacing(5),
-	},
-	iconButton: {
-		position: "absolute",
-		left: 0,
-		top: 0,
-		bottom: 0,
-		alignItems: "center",
-		justifyContent: "center",
-		display: "flex",
-		backgroundColor: "rgba(0,0,0,.2)",
-		width: theme.spacing(6),
-	},
-	accordion: {
-		backgroundColor: theme.palette.primary.main,
-		borderColor: theme.palette.primary.main,
-		color: theme.palette.primary.contrastText,
-	},
-}));
+export const useStyles = makeStyles(
+	(theme: Theme) => ({
+		noShadow: {
+			"box-shadow": "none",
+		},
+		panelDetails: {
+			border: "1px solid grey",
+			borderRadius: "0px 0px 4px 4px",
+			padding: "8px 24px",
+		},
+		root: {
+			margin: 0,
+			paddingLeft: theme.spacing(5),
+		},
+		iconButton: {
+			position: "absolute",
+			left: 0,
+			top: 0,
+			bottom: 0,
+			alignItems: "center",
+			justifyContent: "center",
+			display: "flex",
+			backgroundColor: "rgba(0,0,0,.2)",
+			width: theme.spacing(6),
+		},
+		accordion: {
+			backgroundColor: theme.palette.primary.main,
+			borderColor: theme.palette.primary.main,
+			color: theme.palette.primary.contrastText,
+		},
+	}),
+	{ name: "CcInfoBox" }
+);
 
 interface InfoBoxProps {
 	/**

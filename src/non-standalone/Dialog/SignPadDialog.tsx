@@ -20,30 +20,33 @@ export interface SignPadDialogProps extends IDialogConfigSign {
 	classes?: Partial<ReturnType<typeof useStyles>>;
 }
 
-const useStyles = makeStyles((theme) => ({
-	root: {
-		margin: 0,
-		padding: theme.spacing(2),
-	},
-	closeButton: {
-		position: "absolute",
-		right: theme.spacing(1),
-		top: theme.spacing(1),
-		color: theme.palette.grey[500],
-	},
-	signDiv: {
-		border: "1px dotted",
-		marginLeft: 10,
-		marginRight: 10,
-	},
-	imageDiv: {
-		width: 300,
-		height: 150,
-		display: "table-cell",
-		verticalAlign: "middle",
-		textAlign: "center",
-	},
-}));
+const useStyles = makeStyles(
+	(theme) => ({
+		root: {
+			margin: 0,
+			padding: theme.spacing(2),
+		},
+		closeButton: {
+			position: "absolute",
+			right: theme.spacing(1),
+			top: theme.spacing(1),
+			color: theme.palette.grey[500],
+		},
+		signDiv: {
+			border: "1px dotted",
+			marginLeft: 10,
+			marginRight: 10,
+		},
+		imageDiv: {
+			width: 300,
+			height: 150,
+			display: "table-cell",
+			verticalAlign: "middle",
+			textAlign: "center",
+		},
+	}),
+	{ name: "CcSignPadDialog" }
+);
 
 const SignPadDialog = (props: SignPadDialogProps) => {
 	const { disabled, penColor, setSignature, signature, ...canvasProps } = props;

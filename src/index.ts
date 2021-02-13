@@ -1,5 +1,5 @@
-import { SelectorTheme } from "./standalone/Selector";
-import { DataGridTheme } from "./standalone/DataGrid";
+import { SelectorTheme } from "./standalone";
+import { DataGridTheme, DataGridThemeExpert } from "./standalone/DataGrid";
 import { MenuTheme } from "./standalone/Portal/Menu";
 import { MenuItemTheme } from "./standalone/Portal/MenuItem/Material";
 import { ActionButtonTheme } from "./standalone/UIKit/ActionButton";
@@ -25,6 +25,7 @@ export * from "./utils";
 
 export interface ComponentsCareTheme {
 	dataGrid?: DataGridTheme;
+	dataGridExpert?: DataGridThemeExpert;
 	portal?: {
 		menu?: MenuTheme;
 		menuItem?: MenuItemTheme;

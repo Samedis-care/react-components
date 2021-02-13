@@ -11,6 +11,7 @@ import {
 	ModelGetResponse,
 	PageVisibility,
 } from "../../backend-integration";
+import { useSelectedCache } from "./BackendMultiSelect";
 
 export interface BackendMultiSelectWithTagsProps<
 	GroupKeyT extends ModelFieldName,
@@ -25,7 +26,22 @@ export interface BackendMultiSelectWithTagsProps<
 		| "loadDataOptions"
 		| "loadGroupOptions"
 		| "displaySwitch"
+		| "selected"
+		| "onChange"
 	> {
+	/**
+	 * The selected data record IDs
+	 */
+	selected: string[];
+	/**
+	 * Change event callback
+	 * @param selected The now selected IDs
+	 */
+	onChange?: (selected: string[]) => void;
+	/**
+	 * Initial data (model format) used for selected cache
+	 */
+	initialData?: Record<DataKeyT, unknown>[];
 	/**
 	 * The data source for groups
 	 */
@@ -54,7 +70,7 @@ export interface BackendMultiSelectWithTagsProps<
 	 * Callback that converts a model entry to a multi selector entry
 	 * @param data The record data (overview)
 	 * @returns Selector data
-	 * @remarks Selector data vlaue must be set to ID
+	 * @remarks Selector data value must be set to ID
 	 */
 	convData: (data: Record<DataKeyT, unknown>) => MultiSelectorData;
 	/**
@@ -92,12 +108,23 @@ const BackendMultiSelectWithTags = <
 		convData,
 		switchFilterNameData,
 		switchFilterNameGroup,
+		initialData,
+		onChange,
+		selected: selectedIds,
 		...selectorProps
 	} = props;
 
+	const { handleSelect, selected } = useSelectedCache({
+		model: dataModel,
+		modelToSelectorData: convData,
+		initialData,
+		onSelect: onChange,
+		selected: selectedIds,
+	});
+
 	const loadGroupEntries = useCallback(
 		async (data: BaseSelectorData) => {
-			return getGroupDataEntries(await groupModel.getRaw(data.value));
+			return getGroupDataEntries(await groupModel.getCached(data.value));
 		},
 		[getGroupDataEntries, groupModel]
 	);
@@ -131,6 +158,8 @@ const BackendMultiSelectWithTags = <
 	return (
 		<MultiSelectWithTags
 			{...selectorProps}
+			onChange={handleSelect}
+			selected={selected}
 			loadGroupEntries={loadGroupEntries}
 			loadDataOptions={loadDataOptions}
 			loadGroupOptions={loadGroupOptions}

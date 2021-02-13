@@ -35,7 +35,8 @@ const Component = (props: any) => "Text";
 export default React.memo(Component);
 ```
 
-10. If you think these principles shouldn't apply to your specific component please provide a reasonable explanation when submitting a pull request.
+10. Provide a name to withStyles/makeStyles with the following scheme: `Cc<ComponentName>`. Make sure the name is unique, if not you may use a different name.
+11. If you think these principles shouldn't apply to your specific component please provide a reasonable explanation when submitting a pull request.
 
 ## Code Style
 
