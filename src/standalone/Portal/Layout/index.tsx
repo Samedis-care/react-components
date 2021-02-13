@@ -111,6 +111,7 @@ const useStyles = makeStyles({
 	},
 	menu: {
 		gridArea: "sidebar",
+		minHeight: "100%",
 	},
 	main: {
 		gridArea: "main",
