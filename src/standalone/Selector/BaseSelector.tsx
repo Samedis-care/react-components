@@ -172,7 +172,7 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 		(data: BaseSelectorData) => (
 			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 			// @ts-ignore: Typescript complains about the button property being "required"
-			<SelectorSmallListItem>
+			<SelectorSmallListItem component={"div"}>
 				{enableIcons && <SmallListItemIcon>{data.icon}</SmallListItemIcon>}
 				<ListItemText>{data.label}</ListItemText>
 			</SelectorSmallListItem>
@@ -226,6 +226,11 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 		void onSearchHandler(query);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [query, refreshToken]);
+
+	useEffect(() => {
+		void onSearchHandler("");
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [selected]);
 
 	return (
 		<div>

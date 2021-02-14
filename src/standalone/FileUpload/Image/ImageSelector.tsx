@@ -19,6 +19,11 @@ export interface ImageSelectorProps {
 	 */
 	value: string;
 	/**
+	 * Allow capture?
+	 * @see https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/capture
+	 */
+	capture: false | "false" | "user" | "environment";
+	/**
 	 * The label of the input
 	 */
 	label?: string;
@@ -59,8 +64,9 @@ export interface ImageSelectorProps {
 const useStyles = makeStyles(
 	(theme) => ({
 		root: {
-			width: "100%",
-			height: "100%",
+			width: `calc(100% - ${theme.spacing(2)}px)`,
+			height: `calc(100% - ${theme.spacing(2)}px)`,
+			marginTop: theme.spacing(2),
 		},
 		imgWrapper: {
 			maxHeight: "100%",
@@ -79,7 +85,7 @@ const useStyles = makeStyles(
 );
 
 const ImageSelector = (props: ImageSelectorProps) => {
-	const { convertImagesTo, downscale, value, readOnly } = props;
+	const { convertImagesTo, downscale, value, readOnly, capture } = props;
 	const classes = useStyles(props);
 	const changeRef = useRef<HTMLInputElement>(null);
 
@@ -107,16 +113,15 @@ const ImageSelector = (props: ImageSelectorProps) => {
 		const elem = document.createElement("input");
 		elem.type = "file";
 		elem.accept = "image/*";
+		elem.setAttribute("capture", capture || "false");
 		elem.multiple = false;
 		elem.addEventListener("change", () => {
-			const files = elem.files;
-			if (!files) return;
-			const file = files[0];
+			const file = elem.files && elem.files[0];
 			if (!file) return;
 			void processFile(file);
 		});
 		elem.click();
-	}, [processFile]);
+	}, [processFile, capture]);
 
 	const handleDrop = useCallback(
 		async (evt: React.DragEvent<HTMLDivElement>) => {

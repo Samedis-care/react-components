@@ -6,7 +6,10 @@ import { ImageSelectorProps } from "../../../standalone/FileUpload/Image/ImageSe
 import ccI18n from "../../../i18n";
 
 export type TypeImageParams = Partial<
-	Pick<ImageSelectorProps, "uploadLabel" | "convertImagesTo" | "downscale">
+	Pick<
+		ImageSelectorProps,
+		"uploadLabel" | "convertImagesTo" | "downscale" | "capture"
+	>
 >;
 
 /**

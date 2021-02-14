@@ -47,6 +47,7 @@ class RendererImage extends TypeImage {
 						}}
 						onBlur={handleBlur}
 						alt={label}
+						capture={this.params?.capture ?? false}
 						uploadLabel={this.params?.uploadLabel}
 						convertImagesTo={this.params?.convertImagesTo}
 						downscale={this.params?.downscale}
