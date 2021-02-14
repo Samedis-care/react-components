@@ -249,7 +249,11 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 				loadingText={loadingText}
 				autoComplete
 				disabled={disabled}
-				options={selectorOptions}
+				options={
+					selectorOptions.length === 0 && selected
+						? [selected]
+						: selectorOptions
+				}
 				value={selected}
 				inputValue={query}
 				onInputChange={updateQuery}
