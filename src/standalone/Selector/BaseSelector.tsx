@@ -120,14 +120,14 @@ export interface BaseSelectorProps<DataT extends BaseSelectorData>
 	>["classes"];
 }
 
-export type SelectorTheme = Partial<
+export type SelectorThemeExpert = Partial<
 	Styles<Theme, BaseSelectorProps<BaseSelectorData>, AutocompleteClassKey>
 >;
 
 const useThemeStyles = makeThemeStyles<
 	BaseSelectorProps<BaseSelectorData>,
 	AutocompleteClassKey
->((theme) => theme.componentsCare?.uiKit?.selector, "CcBaseSelector");
+>((theme) => theme.componentsCare?.uiKit?.baseSelectorExpert, "CcBaseSelector");
 
 const useCustomStyles = makeStyles({
 	infoBtn: {

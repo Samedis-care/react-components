@@ -1,4 +1,4 @@
-import { SelectorTheme } from "./standalone";
+import { SelectorTheme, SelectorThemeExpert } from "./standalone";
 import { DataGridTheme, DataGridThemeExpert } from "./standalone/DataGrid";
 import { MenuTheme } from "./standalone/Portal/Menu";
 import { MenuItemTheme } from "./standalone/Portal/MenuItem/Material";
@@ -38,7 +38,7 @@ export interface ComponentsCareTheme {
 		actionButton?: ActionButtonTheme;
 		subActionButton?: SubActionButtonTheme;
 		formButtons?: FormButtonTheme;
-		selector?: SelectorTheme;
+		baseSelectorExpert?: SelectorThemeExpert;
 	};
 }
 
