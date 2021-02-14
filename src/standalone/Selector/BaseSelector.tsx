@@ -250,8 +250,10 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 				autoComplete
 				disabled={disabled}
 				options={
-					selectorOptions.length === 0 && selected
-						? [selected]
+					// add selected to selectorOptions if not present to suppress warnings
+					selected &&
+					!selectorOptions.find((option) => option.value === selected.value)
+						? selectorOptions.concat([selected])
 						: selectorOptions
 				}
 				value={selected}
