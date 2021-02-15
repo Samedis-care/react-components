@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from "react";
-import { boolean, text } from "@storybook/addon-knobs";
+import { boolean, text, select } from "@storybook/addon-knobs";
 import { action } from "@storybook/addon-actions";
 import "../../../i18n";
 import ImageController, {
@@ -21,6 +21,15 @@ export const ImageControllerStory = (): React.ReactElement => {
 		},
 		[setUploadedImages]
 	);
+	const capture = select(
+		"Capture mode",
+		{
+			Disabled: "false",
+			User: "user",
+			Environment: "environment",
+		},
+		"false"
+	);
 	return (
 		<ImageController
 			name={"image-controller"}
@@ -35,6 +44,7 @@ export const ImageControllerStory = (): React.ReactElement => {
 			}
 			onUpdateImages={updateImages}
 			uploadedImages={uploadedImages}
+			capture={capture}
 			showInfoText={boolean("show-info-text", true)}
 			readOnly={boolean("Read-only", false)}
 			groupBoxLabel={text("Group box label", "Thats how it work")}

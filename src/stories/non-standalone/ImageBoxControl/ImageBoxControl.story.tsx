@@ -23,6 +23,15 @@ export const ImageBoxStory = (): React.ReactElement => {
 		setUploadedImages(availableImages);
 		action("onUpdatedImage")("update-images", availableImages);
 	};
+	const capture = select(
+		"Capture mode",
+		{
+			Disabled: "false",
+			User: "user",
+			Environment: "environment",
+		},
+		"false"
+	);
 	return (
 		<div style={{ height: previewSize, width: previewSize }}>
 			<ImageBoxControl
@@ -31,6 +40,7 @@ export const ImageBoxStory = (): React.ReactElement => {
 				alt={text("Alt Text", "Alt Description")}
 				onUpdateImages={updateImages}
 				uploadedImages={uploadedImages}
+				capture={capture}
 				primaryImage={text("Default Image", "https://via.placeholder.com/128")}
 				convertImagesTo={select(
 					"Convert Images to",

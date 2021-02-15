@@ -63,6 +63,11 @@ export interface ImageControllerProps {
 	 * Custom styles
 	 */
 	classes?: Partial<ReturnType<typeof useStyles>>;
+	/**
+	 * Allow capture?
+	 * @see https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/capture
+	 */
+	capture: false | "false" | "user" | "environment";
 }
 
 const useStyles = makeStyles((theme) => ({
@@ -123,6 +128,7 @@ const ImageController = (props: ImageControllerProps) => {
 		setPrimaryLabel,
 		groupBoxLabel,
 		infoText,
+		capture,
 		readOnly,
 		downscale,
 		convertImagesTo,
@@ -130,31 +136,24 @@ const ImageController = (props: ImageControllerProps) => {
 		onUpdateImages,
 	} = props;
 	const classes = useStyles(props);
-	const changeRef = useRef<HTMLInputElement>(null);
+	const fileRef = useRef<HTMLInputElement>(null);
 	const processFile = useCallback(
 		async (file: File) => {
-			if (!changeRef.current) return;
-
+			if (!onUpdateImages) return;
 			const value = await processImage(file, convertImagesTo, downscale);
 			onUpdateImages([...uploadedImages, { src: value, primary: false }]);
 		},
-		[convertImagesTo, downscale, uploadedImages, onUpdateImages]
+		[uploadedImages, onUpdateImages, convertImagesTo, downscale]
 	);
 	// upload click handler
 	const handleUpload = useCallback(() => {
-		const elem = document.createElement("input");
-		elem.type = "file";
-		elem.accept = "image/*";
-		elem.multiple = false;
-		elem.addEventListener("change", () => {
-			const files = elem.files;
-			if (!files) return;
-			const file = elem.files && elem.files[0];
-			if (!file) return;
-			void processFile(file);
-		});
+		const elem = fileRef.current;
+		if (!elem) return;
+		if (capture && capture !== "false") {
+			elem.setAttribute("capture", capture);
+		}
 		elem.click();
-	}, [processFile]);
+	}, [capture]);
 	const changePrimaryImage = useCallback(
 		(index) => {
 			onUpdateImages(
@@ -191,6 +190,15 @@ const ImageController = (props: ImageControllerProps) => {
 			evt.preventDefault();
 		},
 		[readOnly]
+	);
+	const handleFileChange = useCallback(
+		async (evt: React.ChangeEvent<HTMLInputElement>) => {
+			const elem = evt.currentTarget;
+			const file = elem.files && elem.files[0];
+			if (!file) return;
+			await processFile(file);
+		},
+		[processFile]
 	);
 	return (
 		<Grid item>
@@ -229,11 +237,11 @@ const ImageController = (props: ImageControllerProps) => {
 								/>
 							</div>
 							<input
-								type={"text"}
-								name={props.name}
-								ref={changeRef}
+								type={"file"}
+								accept={"image/*"}
+								ref={fileRef}
+								onChange={handleFileChange}
 								className={classes.changeEventHelper}
-								onChange={() => onUpdateImages(uploadedImages)}
 							/>
 						</Grid>
 					</Grid>
