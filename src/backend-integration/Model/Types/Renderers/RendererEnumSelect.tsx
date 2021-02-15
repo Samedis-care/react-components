@@ -23,9 +23,9 @@ type RendererEnumSelectProps = Omit<
  * Renders TypeEnum as drop-down selector (with search)
  */
 class RendererEnumSelect extends TypeEnum {
-	private props: RendererEnumSelectProps;
+	private props?: RendererEnumSelectProps;
 
-	constructor(values: EnumValue[], props: RendererEnumSelectProps) {
+	constructor(values: EnumValue[], props?: RendererEnumSelectProps) {
 		super(values);
 		this.props = props;
 	}
