@@ -39,38 +39,42 @@ const styles = createStyles(() => ({
 	divider: {},
 }));
 
-const useStyles = makeStyles((theme: Theme) => ({
-	container: {
-		border: theme.componentsCare?.selector?.selected?.container?.border,
-		borderRadius:
-			theme.componentsCare?.selector?.selected?.container?.borderRadius,
-		margin: theme.componentsCare?.selector?.selected?.container?.margin,
-		padding: theme.componentsCare?.selector?.selected?.container?.padding,
-		backgroundColor:
-			theme.componentsCare?.selector?.selected?.container?.backgroundColor,
-		style: theme.componentsCare?.selector?.selected?.container?.style,
-	},
-	selected: {
-		border: theme.componentsCare?.selector?.selected?.border,
-		borderRadius: theme.componentsCare?.selector?.selected?.borderRadius,
-		margin: theme.componentsCare?.selector?.selected?.margin,
-		padding: theme.componentsCare?.selector?.selected?.padding,
-		backgroundColor: theme.componentsCare?.selector?.selected?.backgroundColor,
-		style: theme.componentsCare?.selector?.selected?.style,
-	},
-	label: {
-		margin: theme.componentsCare?.selector?.selected?.label?.margin,
-		padding: theme.componentsCare?.selector?.selected?.label?.padding,
-		color: theme.componentsCare?.selector?.selected?.label?.color,
-		...theme.componentsCare?.selector?.selected?.label?.style,
-	},
-	icon: {
-		...theme.componentsCare?.selector?.selected?.icon?.style,
-	},
-	iconSvg: {
-		fill: theme.componentsCare?.selector?.selected?.icon?.color,
-	},
-}));
+const useStyles = makeStyles(
+	(theme: Theme) => ({
+		container: {
+			border: theme.componentsCare?.selector?.selected?.container?.border,
+			borderRadius:
+				theme.componentsCare?.selector?.selected?.container?.borderRadius,
+			margin: theme.componentsCare?.selector?.selected?.container?.margin,
+			padding: theme.componentsCare?.selector?.selected?.container?.padding,
+			backgroundColor:
+				theme.componentsCare?.selector?.selected?.container?.backgroundColor,
+			style: theme.componentsCare?.selector?.selected?.container?.style,
+		},
+		selected: {
+			border: theme.componentsCare?.selector?.selected?.border,
+			borderRadius: theme.componentsCare?.selector?.selected?.borderRadius,
+			margin: theme.componentsCare?.selector?.selected?.margin,
+			padding: theme.componentsCare?.selector?.selected?.padding,
+			backgroundColor:
+				theme.componentsCare?.selector?.selected?.backgroundColor,
+			style: theme.componentsCare?.selector?.selected?.style,
+		},
+		label: {
+			margin: theme.componentsCare?.selector?.selected?.label?.margin,
+			padding: theme.componentsCare?.selector?.selected?.label?.padding,
+			color: theme.componentsCare?.selector?.selected?.label?.color,
+			...theme.componentsCare?.selector?.selected?.label?.style,
+		},
+		icon: {
+			...theme.componentsCare?.selector?.selected?.icon?.style,
+		},
+		iconSvg: {
+			fill: theme.componentsCare?.selector?.selected?.icon?.color,
+		},
+	}),
+	{ name: "CcMultiSelectEntry" }
+);
 
 const MultiSelectEntry = (props: IMultiSelectEntryProps & WithStyles) => {
 	const { enableIcons, enableDivider, handleDelete, data, classes } = props;
