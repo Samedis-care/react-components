@@ -133,17 +133,20 @@ const useThemeStyles = makeThemeStyles<
 	AutocompleteClassKey
 >((theme) => theme.componentsCare?.uiKit?.baseSelectorExpert, "CcBaseSelector");
 
-const useCustomStyles = makeStyles({
-	infoBtn: {
-		padding: 2,
-		marginRight: -2,
+const useCustomStyles = makeStyles(
+	{
+		infoBtn: {
+			padding: 2,
+			marginRight: -2,
+		},
+		icon: (props: Pick<BaseSelectorProps<BaseSelectorData>, "iconSize">) => ({
+			width: props.iconSize ?? 32,
+			height: props.iconSize ?? 32,
+			objectFit: "contain",
+		}),
 	},
-	icon: (props: Pick<BaseSelectorProps<BaseSelectorData>, "iconSize">) => ({
-		width: props.iconSize ?? 32,
-		height: props.iconSize ?? 32,
-		objectFit: "contain",
-	}),
-});
+	{ name: "CcBaseSelectorCustom" }
+);
 
 const BaseSelector = <DataT extends BaseSelectorData>(
 	props: BaseSelectorProps<DataT>
