@@ -52,7 +52,9 @@ export interface BackendMultiSelectWithTagsProps<
 	 * @returns Selector data
 	 * @remarks Selector data value must be set to ID
 	 */
-	convGroup: (data: Record<GroupKeyT, unknown>) => BaseSelectorData;
+	convGroup: (
+		data: Record<GroupKeyT, unknown>
+	) => Promise<BaseSelectorData> | BaseSelectorData;
 	/**
 	 * Callback that gets the group entries for a given group record
 	 * @param data The record data (detailed)
@@ -61,7 +63,7 @@ export interface BackendMultiSelectWithTagsProps<
 	 */
 	getGroupDataEntries: (
 		data: ModelGetResponse<GroupKeyT>
-	) => MultiSelectorData[];
+	) => Promise<MultiSelectorData[]> | MultiSelectorData[];
 	/**
 	 * The data source for data entries
 	 */
@@ -72,7 +74,9 @@ export interface BackendMultiSelectWithTagsProps<
 	 * @returns Selector data
 	 * @remarks Selector data value must be set to ID
 	 */
-	convData: (data: Record<DataKeyT, unknown>) => MultiSelectorData;
+	convData: (
+		data: Record<DataKeyT, unknown>
+	) => Promise<MultiSelectorData> | MultiSelectorData;
 	/**
 	 * Name of the switch filter for groups or undefined if disabled
 	 */
@@ -137,7 +141,7 @@ const BackendMultiSelectWithTags = <
 					? { [switchFilterNameGroup]: switchValue }
 					: undefined,
 			});
-			return records.map(convGroup);
+			return Promise.all(records.map(convGroup));
 		},
 		[convGroup, groupModel, switchFilterNameGroup]
 	);
@@ -150,7 +154,7 @@ const BackendMultiSelectWithTags = <
 					? { [switchFilterNameData]: switchValue }
 					: undefined,
 			});
-			return records.map(convData);
+			return Promise.all(records.map(convData));
 		},
 		[convData, dataModel, switchFilterNameData]
 	);
