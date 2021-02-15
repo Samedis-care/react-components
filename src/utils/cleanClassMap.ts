@@ -16,6 +16,16 @@ const cleanClassMap = <
 	...classes: ClassKeys[]
 ): Props => {
 	if (!input.classes) return input;
+	if (classes.length === 0) {
+		if (invert) {
+			return {
+				...input,
+				classes: {},
+			};
+		} else {
+			return input;
+		}
+	}
 
 	input.classes = Object.fromEntries(
 		Object.entries(input.classes).filter(([key]) =>
