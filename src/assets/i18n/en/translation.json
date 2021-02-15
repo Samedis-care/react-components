@@ -15,7 +15,8 @@
 				"set-filter": {
 					"search": "Search...",
 					"select-all": "Select all"
-				}
+				},
+				"no-data": "No data!"
 			},
 			"header": {
 				"new": "New",

@@ -4,4 +4,5 @@ export { default as FormButtons } from "./FormButtons";
 export { default as IconButtonWithText } from "./IconButtonWithText";
 export { default as TextFieldWithHelp } from "./TextFieldWithHelp";
 export { default as NumberFormatter } from "./NumberFormatter";
+export { default as CenteredTypography } from "./CenteredTypography";
 export * from "./InputControls";

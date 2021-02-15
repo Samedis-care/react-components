@@ -13,6 +13,8 @@ import {
 } from "react-virtualized";
 import Cell from "./Cell";
 import { applyColumnWidthLimits } from "./ColumnHeader";
+import { CenteredTypography, Loader } from "../../index";
+import ccI18n from "../../../i18n";
 
 export interface IDataGridContentProps extends IDataGridColumnProps {
 	rowsPerPage: number;
@@ -121,7 +123,9 @@ const Content = (props: IDataGridContentProps) => {
 							? SELECT_ROW_WIDTH
 							: columnWidth[columns[index - 1].field]
 					}
-					rowCount={(state.rowsFiltered ?? state.rowsTotal) + 1}
+					rowCount={
+						state.refreshData ? 1 : (state.rowsFiltered ?? state.rowsTotal) + 1
+					}
 					rowHeight={({ index }) => (index === 0 ? 32 : 57)}
 					width={width}
 					height={height}
@@ -136,9 +140,28 @@ const Content = (props: IDataGridContentProps) => {
 					hideBottomLeftGridScrollbar
 					styleTopLeftGrid={{ overflow: "hidden" }}
 					styleTopRightGrid={{ overflow: "hidden" }}
-					styleBottomLeftGrid={{ overflow: "hidden" }}
+					styleBottomLeftGrid={{
+						overflow: "hidden",
+						display:
+							(state.rowsFiltered ?? state.rowsTotal) === 0
+								? "none"
+								: undefined,
+					}}
 					styleBottomRightGrid={{ outline: "none" }}
 					onSectionRendered={onSectionRendered}
+					noContentRenderer={() =>
+						state.refreshData ? (
+							<Loader />
+						) : state.dataLoadError ? (
+							<CenteredTypography variant={"h5"}>
+								{state.dataLoadError.message}
+							</CenteredTypography>
+						) : (
+							<CenteredTypography variant={"h4"}>
+								{ccI18n.t("standalone.data-grid.content.no-data")}
+							</CenteredTypography>
+						)
+					}
 				/>
 			)}
 		</AutoSizer>

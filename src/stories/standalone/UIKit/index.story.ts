@@ -12,3 +12,4 @@ export * from "./TextFieldWithHelp.story";
 export * from "./IconButtonWithText.story";
 export * from "./OutlinedInputWithHelp.story";
 export * from "./TextAreaWithHelp.story";
+export * from "./CenteredTypography.story";

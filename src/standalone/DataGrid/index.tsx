@@ -17,7 +17,6 @@ import Footer from "./Footer";
 import Settings from "./Settings";
 import Content from "./Content";
 import { IFilterDef } from "./Content/FilterEntry";
-import { Loader } from "../index";
 import {
 	debounce,
 	isObjectEmpty,
@@ -749,7 +748,6 @@ const DataGrid = (props: DataGridProps) => {
 		search,
 		rows,
 		pages,
-		dataLoadError,
 		hiddenColumns,
 		lockedColumns,
 		refreshData,
@@ -934,20 +932,7 @@ const DataGrid = (props: DataGridProps) => {
 								</Grid>
 								<Grid item xs className={classes.content}>
 									<Settings columns={columns} />
-									{refreshData && isObjectEmpty(rows) && <Loader />}
-									{!refreshData &&
-										dataLoadError !== null &&
-										dataLoadError.message}
-									{!refreshData &&
-										dataLoadError === null &&
-										isObjectEmpty(rows) &&
-										"No Data!"}
-									{!isObjectEmpty(rows) && (
-										<Content
-											columns={visibleColumns}
-											rowsPerPage={rowsPerPage}
-										/>
-									)}
+									<Content columns={visibleColumns} rowsPerPage={rowsPerPage} />
 								</Grid>
 								<Grid item className={classes.footer}>
 									<Footer />
