@@ -113,32 +113,35 @@ interface SelectedGroup {
 	items: string[];
 }
 
-const useStyles = makeStyles((theme: Theme) => ({
-	paperWrapper: {
-		boxShadow: "none",
-		border: `1px solid ${theme.palette.divider}`,
-	},
-	outlined: {
-		float: "left",
-		backgroundColor: "#cce1f6",
-		padding: "0px 20px",
-		borderRadius: 20,
-		borderColor: "#cce1f6",
-		margin: "5px",
-		lineHeight: "30px",
-	},
-	labelWithSwitch: {
-		marginTop: 15,
-	},
-	searchLabel: {
-		lineHeight: "30px",
-		float: "left",
-	},
-	switch: {
-		lineHeight: "30px",
-		float: "right",
-	},
-}));
+const useStyles = makeStyles(
+	(theme: Theme) => ({
+		paperWrapper: {
+			boxShadow: "none",
+			border: `1px solid ${theme.palette.divider}`,
+		},
+		outlined: {
+			float: "left",
+			backgroundColor: "#cce1f6",
+			padding: "0px 20px",
+			borderRadius: 20,
+			borderColor: "#cce1f6",
+			margin: "5px",
+			lineHeight: "30px",
+		},
+		labelWithSwitch: {
+			marginTop: 15,
+		},
+		searchLabel: {
+			lineHeight: "30px",
+			float: "left",
+		},
+		switch: {
+			lineHeight: "30px",
+			float: "right",
+		},
+	}),
+	{ name: "CcMultiSelectWithTags" }
+);
 
 const AntSwitch = withStyles((theme: Theme) => ({
 	root: {

@@ -79,21 +79,21 @@ export const colourOptions: ColourOptionsDef[] = [
 		label: "Forest",
 		color: "#00875A",
 		type: "Dark",
-		icon: <Alarm />,
+		icon: "https://via.placeholder.com/512x128",
 	},
 	{
 		value: "slate",
 		label: "Slate",
 		color: "#253858",
 		type: "Light",
-		icon: <Warning />,
+		icon: "https://via.placeholder.com/128x512",
 	},
 	{
 		value: "silver",
 		label: "Silver",
 		color: "#666666",
 		type: "Light",
-		icon: <Info />,
+		icon: "https://via.placeholder.com/512",
 	},
 ];
 

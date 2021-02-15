@@ -7,8 +7,6 @@ import { IDownscaleProps } from "../../../utils/processImage";
 import { makeStyles } from "@material-ui/core/styles";
 import GroupBox from "../../GroupBox";
 
-export type ImageSelectorInputElement = { name: string; value: string };
-
 export interface ImageSelectorProps {
 	/**
 	 * The name of the input
@@ -33,8 +31,10 @@ export interface ImageSelectorProps {
 	alt: string;
 	/**
 	 * The change handler of the input
+	 * @param name The field name
+	 * @param value The new value (data uri of selected image or empty string)
 	 */
-	onChange?: React.ChangeEventHandler<ImageSelectorInputElement>;
+	onChange?: (name: string, value: string) => void;
 	/**
 	 * The blur event handler of the input
 	 */
@@ -85,43 +85,46 @@ const useStyles = makeStyles(
 );
 
 const ImageSelector = (props: ImageSelectorProps) => {
-	const { convertImagesTo, downscale, value, readOnly, capture } = props;
+	const {
+		convertImagesTo,
+		downscale,
+		name,
+		value,
+		readOnly,
+		capture,
+		onChange,
+	} = props;
 	const classes = useStyles(props);
-	const changeRef = useRef<HTMLInputElement>(null);
+	const fileRef = useRef<HTMLInputElement>(null);
 
 	const processFile = useCallback(
 		async (file: File) => {
-			if (!changeRef.current) return;
+			if (!onChange) return;
 
-			const value = await processImage(file, convertImagesTo, downscale);
-
-			// eslint-disable-next-line @typescript-eslint/unbound-method
-			const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
-				window.HTMLInputElement.prototype,
-				"value"
-			)?.set;
-			nativeInputValueSetter?.call(changeRef.current, value);
-
-			const event = new Event("input", { bubbles: true });
-			changeRef.current.dispatchEvent(event);
+			onChange(name, await processImage(file, convertImagesTo, downscale));
 		},
-		[convertImagesTo, downscale]
+		[name, onChange, convertImagesTo, downscale]
+	);
+
+	const handleFileChange = useCallback(
+		async (evt: React.ChangeEvent<HTMLInputElement>) => {
+			const elem = evt.currentTarget;
+			const file = elem.files && elem.files[0];
+			if (!file) return;
+			await processFile(file);
+		},
+		[processFile]
 	);
 
 	// upload click handler
 	const handleUpload = useCallback(() => {
-		const elem = document.createElement("input");
-		elem.type = "file";
-		elem.accept = "image/*";
-		elem.setAttribute("capture", capture || "false");
-		elem.multiple = false;
-		elem.addEventListener("change", () => {
-			const file = elem.files && elem.files[0];
-			if (!file) return;
-			void processFile(file);
-		});
+		const elem = fileRef.current;
+		if (!elem) return;
+		if (capture && capture !== "false") {
+			elem.setAttribute("capture", capture);
+		}
 		elem.click();
-	}, [processFile, capture]);
+	}, [capture]);
 
 	const handleDrop = useCallback(
 		async (evt: React.DragEvent<HTMLDivElement>) => {
@@ -171,10 +174,10 @@ const ImageSelector = (props: ImageSelectorProps) => {
 							{props.uploadLabel || i18n.t("standalone.file-upload.upload")}
 						</Button>
 						<input
-							type={"text"}
-							name={props.name}
-							onChange={props.onChange}
-							ref={changeRef}
+							type={"file"}
+							accept={"image/*"}
+							ref={fileRef}
+							onChange={handleFileChange}
 							className={classes.changeEventHelper}
 						/>
 					</Grid>

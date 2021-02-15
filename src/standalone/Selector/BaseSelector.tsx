@@ -15,7 +15,7 @@ import {
 } from "@material-ui/icons";
 import { TextFieldWithHelpProps } from "../UIKit/TextFieldWithHelp";
 import i18n from "../../i18n";
-import { SelectorSmallListItem, SmallListItemIcon } from "../..";
+import { cleanClassMap, SelectorSmallListItem, SmallListItemIcon } from "../..";
 import { makeThemeStyles } from "../../utils";
 import { makeStyles, Theme } from "@material-ui/core/styles";
 import { Styles } from "@material-ui/core/styles/withStyles";
@@ -35,9 +35,9 @@ export interface BaseSelectorData {
 	 */
 	label: string;
 	/**
-	 * An optional icon
+	 * An optional icon or img src
 	 */
-	icon?: React.ReactNode;
+	icon?: React.ReactNode | string;
 	/**
 	 * Should the entry be disabled?
 	 */
@@ -98,6 +98,10 @@ export interface BaseSelectorProps<DataT extends BaseSelectorData>
 	 */
 	enableIcons?: boolean;
 	/**
+	 * Size of the icons (if enableIcons) in px
+	 */
+	iconSize?: number;
+	/**
 	 * Label which is shown if there is no data
 	 */
 	noOptionsText?: string | SelectorLabelCallback;
@@ -129,12 +133,20 @@ const useThemeStyles = makeThemeStyles<
 	AutocompleteClassKey
 >((theme) => theme.componentsCare?.uiKit?.baseSelectorExpert, "CcBaseSelector");
 
-const useCustomStyles = makeStyles({
-	infoBtn: {
-		padding: 2,
-		marginRight: -2,
+const useCustomStyles = makeStyles(
+	{
+		infoBtn: {
+			padding: 2,
+			marginRight: -2,
+		},
+		icon: (props: Pick<BaseSelectorProps<BaseSelectorData>, "iconSize">) => ({
+			width: props.iconSize ?? 32,
+			height: props.iconSize ?? 32,
+			objectFit: "contain",
+		}),
 	},
-});
+	{ name: "CcBaseSelectorCustom" }
+);
 
 const BaseSelector = <DataT extends BaseSelectorData>(
 	props: BaseSelectorProps<DataT>
@@ -158,7 +170,7 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 	const classes = useThemeStyles(
 		(props as unknown) as BaseSelectorProps<BaseSelectorData>
 	);
-	const customClasses = useCustomStyles();
+	const customClasses = useCustomStyles(cleanClassMap(props, true));
 	const [open, setOpen] = useState(false);
 	const actualAddNewLabel =
 		addNewLabel || i18n.t("standalone.selector.add-new");
@@ -173,11 +185,19 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 			// @ts-ignore: Typescript complains about the button property being "required"
 			<SelectorSmallListItem component={"div"}>
-				{enableIcons && <SmallListItemIcon>{data.icon}</SmallListItemIcon>}
+				{enableIcons && (
+					<SmallListItemIcon>
+						{typeof data.icon === "string" ? (
+							<img src={data.icon} alt={""} className={customClasses.icon} />
+						) : (
+							data.icon
+						)}
+					</SmallListItemIcon>
+				)}
 				<ListItemText>{data.label}</ListItemText>
 			</SelectorSmallListItem>
 		),
-		[enableIcons]
+		[customClasses.icon, enableIcons]
 	);
 
 	const onChangeHandler = useCallback(
