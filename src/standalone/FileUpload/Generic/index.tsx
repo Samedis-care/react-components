@@ -143,8 +143,12 @@ export interface FileData<T = File | FileMeta> {
 }
 
 class FileUpload extends Component<FileUploadProps, IState> {
+	private readonly inputRef: React.RefObject<HTMLInputElement>;
+
 	constructor(props: FileUploadProps) {
 		super(props);
+
+		this.inputRef = React.createRef<HTMLInputElement>();
 
 		this.state = {
 			files: this.loadInitialFiles(),
@@ -215,6 +219,16 @@ class FileUpload extends Component<FileUploadProps, IState> {
 								{this.props.uploadLabel ||
 									i18n.t("standalone.file-upload.upload")}
 							</Button>
+							<input
+								type={"file"}
+								accept={this.props.accept || undefined}
+								multiple={
+									this.props.maxFiles ? this.getRemainingFileCount() > 1 : true
+								}
+								onChange={this.handleFileChange}
+								className={this.props.classes.fileInput}
+								ref={this.inputRef}
+							/>
 						</Grid>
 					)}
 					<Grid item xs={12} key={"files"}>
@@ -274,6 +288,10 @@ class FileUpload extends Component<FileUploadProps, IState> {
 	}
 
 	handleUpload = () => {
+		const elem = this.inputRef.current;
+
+		if (!elem) return;
+
 		let maxFiles = 2;
 		if (this.props.maxFiles) {
 			maxFiles = this.getRemainingFileCount();
@@ -286,14 +304,11 @@ class FileUpload extends Component<FileUploadProps, IState> {
 			}
 		}
 
-		const elem = document.createElement("input");
-		elem.type = "file";
-		elem.accept = this.props.accept || "";
-		elem.multiple = maxFiles > 1;
-		elem.addEventListener("change", () => {
-			void this.processFiles(elem.files);
-		});
 		elem.click();
+	};
+
+	handleFileChange = async (evt: React.ChangeEvent<HTMLInputElement>) => {
+		return this.processFiles(evt.currentTarget.files);
 	};
 
 	handleDrop = async (evt: React.DragEvent<HTMLDivElement>) => {
@@ -458,6 +473,9 @@ const styles = createStyles((theme: Theme) => ({
 	},
 	formatText: {
 		textAlign: "right",
+	},
+	fileInput: {
+		display: "none",
 	},
 }));
 
