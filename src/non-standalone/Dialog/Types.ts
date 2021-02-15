@@ -178,7 +178,7 @@ export interface IDialogImageBox extends Omit<ImageControllerProps, "classes"> {
 	/**
 	 * Custom styles
 	 */
-	classes?: {
+	subClasses?: {
 		imageController?: ImageControllerProps["classes"];
 	};
 }

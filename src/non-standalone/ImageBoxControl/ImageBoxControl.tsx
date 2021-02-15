@@ -5,26 +5,23 @@ import {
 } from "../../standalone/ImageBoxControl/index";
 import { useDialogContext } from "../../framework";
 import { showImageDialog } from "../../non-standalone/Dialog";
-import {
-	ImageControllerProps,
-	ImageControllerEntry,
-} from "../../standalone/ImageBoxControl/index";
+import { ImageControllerProps } from "../../standalone/ImageBoxControl/index";
 export type ImageBoxInputElement = { name: string; value: string };
 
 export interface ImageBoxControlProps
-	extends Omit<ImageControllerProps, "handlePrimaryAction" | "classes">,
+	extends Omit<ImageControllerProps, "classes">,
 		Partial<Pick<ImageViewerProps, "value" | "label" | "alt" | "editLink">> {
 	/**
 	 * CSS styles to apply
 	 */
-	classes?: {
+	subClasses?: {
 		imageViewer?: ImageViewerProps["classes"];
 		imageController?: ImageControllerProps["classes"];
 	};
 	/**
-	 * Handler for update images
+	 * The primary image value
 	 */
-	onUpdateImages: (values: ImageControllerEntry[]) => void;
+	primaryImage?: string;
 }
 
 const ImageBoxControl = (props: ImageBoxControlProps) => {
@@ -33,48 +30,42 @@ const ImageBoxControl = (props: ImageBoxControlProps) => {
 		alt,
 		readOnly,
 		editLink,
+		primaryImage,
+		uploadedImages,
 		onUpdateImages,
 		...ImageBoxControlProps
 	} = props;
 	const [pushDialog] = useDialogContext();
-
-	const [image, setImage] = useState("https://via.placeholder.com/128");
-	const [uploadedImages, setUploadedImages] = useState<ImageControllerEntry[]>(
-		[]
-	);
+	const [image, setImage] = useState(primaryImage);
 	useEffect(() => {
-		const primaryImage = uploadedImages.find((img) => img.primary);
-		setImage(
-			primaryImage ? primaryImage.src : "https://via.placeholder.com/128"
-		);
-	}, [uploadedImages]);
+		const primaryImg = uploadedImages.find((img) => img.primary);
+		setImage(primaryImg ? primaryImg.src : primaryImage);
+	}, [uploadedImages, primaryImage]);
 
-	const handlePrimaryAction = useCallback(
-		(availableImages: ImageControllerEntry[]) => {
-			setUploadedImages(availableImages);
-			onUpdateImages(availableImages);
-		},
-		[setUploadedImages, onUpdateImages]
-	);
 	const showImageBoxDialog = useCallback(() => {
-		if (readOnly) return;
 		showImageDialog(pushDialog, {
 			readOnly,
-			handlePrimaryAction,
+			uploadedImages,
+			onUpdateImages,
 			...ImageBoxControlProps,
 		});
-	}, [readOnly, pushDialog, handlePrimaryAction, ImageBoxControlProps]);
-
+	}, [
+		readOnly,
+		uploadedImages,
+		onUpdateImages,
+		pushDialog,
+		ImageBoxControlProps,
+	]);
 	// render component
 	return (
 		<ImageViewer
-			value={image}
+			value={image as string}
 			readOnly={readOnly}
 			showImageBoxDialog={showImageBoxDialog}
 			editLink={editLink}
 			label={label}
 			alt={alt as string}
-			classes={props.classes?.imageViewer}
+			classes={props.subClasses?.imageViewer}
 		/>
 	);
 };

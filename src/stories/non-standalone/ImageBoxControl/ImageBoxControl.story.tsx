@@ -31,6 +31,7 @@ export const ImageBoxStory = (): React.ReactElement => {
 				alt={text("Alt Text", "Alt Description")}
 				onUpdateImages={updateImages}
 				uploadedImages={uploadedImages}
+				primaryImage={text("Default Image", "https://via.placeholder.com/128")}
 				convertImagesTo={select(
 					"Convert Images to",
 					{

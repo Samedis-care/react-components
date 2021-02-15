@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useCallback } from "react";
 import {
 	Dialog,
 	DialogContent,
@@ -8,7 +8,10 @@ import {
 import MuiDialogTitle from "@material-ui/core/DialogTitle";
 import { Close } from "@material-ui/icons";
 import { useDialogContext } from "../../framework";
-import { ImageController } from "../../standalone/ImageBoxControl/index";
+import {
+	ImageController,
+	ImageControllerEntry,
+} from "../../standalone/ImageBoxControl/index";
 import { IDialogImageBox } from "./Types";
 
 const useStyles = makeStyles((theme) => ({
@@ -22,11 +25,20 @@ const useStyles = makeStyles((theme) => ({
 const ImageDialog = (props: IDialogImageBox) => {
 	const [, popDialog] = useDialogContext();
 	const classes = useStyles(props);
-	const closeDialog = () => popDialog();
-
+	const { uploadedImages, onUpdateImages, ...imageControllerProps } = props;
+	const [localuploadedImages, setImages] = useState<ImageControllerEntry[]>([
+		...uploadedImages,
+	]);
+	const updateImages = useCallback(
+		(availableImages: ImageControllerEntry[]) => {
+			setImages([...availableImages]);
+			onUpdateImages(availableImages);
+		},
+		[setImages, onUpdateImages]
+	);
 	return (
 		<Dialog
-			onClose={closeDialog}
+			onClose={popDialog}
 			maxWidth="lg"
 			fullWidth
 			disableBackdropClick
@@ -36,13 +48,17 @@ const ImageDialog = (props: IDialogImageBox) => {
 				<IconButton
 					aria-label="close"
 					className={classes.closeButton}
-					onClick={closeDialog}
+					onClick={popDialog}
 				>
 					<Close />
 				</IconButton>
 			</MuiDialogTitle>
 			<DialogContent>
-				<ImageController {...props} />
+				<ImageController
+					onUpdateImages={updateImages}
+					uploadedImages={localuploadedImages}
+					{...imageControllerProps}
+				/>
 			</DialogContent>
 		</Dialog>
 	);

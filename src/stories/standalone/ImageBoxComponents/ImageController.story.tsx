@@ -14,10 +14,10 @@ export const ImageControllerStory = (): React.ReactElement => {
 		"Info Text",
 		"<ul><li>Click on the icon or drag and drop your picture Drag&Drop your image onto the grey field...</li><li>Select a gallery picture. This will then be displayed in all lists and overviews.</li><li>Your pictures look particularly good when...</li></ul>"
 	);
-	const handlePrimaryAction = useCallback(
+	const updateImages = useCallback(
 		(availableImages: ImageControllerEntry[]) => {
 			setUploadedImages(availableImages);
-			action("OnhandlePrimaryAction")("", availableImages);
+			action("onUpdatedImage")("update-images", availableImages);
 		},
 		[setUploadedImages]
 	);
@@ -33,7 +33,7 @@ export const ImageControllerStory = (): React.ReactElement => {
 					/>
 				)
 			}
-			handlePrimaryAction={handlePrimaryAction}
+			onUpdateImages={updateImages}
 			uploadedImages={uploadedImages}
 			showInfoText={boolean("show-info-text", true)}
 			readOnly={boolean("Read-only", false)}

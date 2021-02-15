@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useRef } from "react";
+import React, { useCallback, useRef } from "react";
 import { Grid } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import GroupBox from "../../standalone/GroupBox";
@@ -40,9 +40,9 @@ export interface ImageControllerProps {
 	 */
 	groupBoxLabel?: string;
 	/**
-	 * Callback method to set primary image
+	 * Handler for update images
 	 */
-	handlePrimaryAction: (values: ImageControllerEntry[]) => void;
+	onUpdateImages: (values: ImageControllerEntry[]) => void;
 	/**
 	 * List of images in image box
 	 */
@@ -127,35 +127,18 @@ const ImageController = (props: ImageControllerProps) => {
 		downscale,
 		convertImagesTo,
 		uploadedImages,
-		handlePrimaryAction,
+		onUpdateImages,
 	} = props;
 	const classes = useStyles(props);
-
-	const [localuploadedImages, setImages] = useState<ImageControllerEntry[]>([
-		...uploadedImages,
-	]);
 	const changeRef = useRef<HTMLInputElement>(null);
 	const processFile = useCallback(
 		async (file: File) => {
 			if (!changeRef.current) return;
 
 			const value = await processImage(file, convertImagesTo, downscale);
-			const newUploadedImages = [
-				...localuploadedImages,
-				{ src: value, primary: false },
-			];
-			setImages(newUploadedImages);
-			// eslint-disable-next-line @typescript-eslint/unbound-method
-			const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
-				window.HTMLInputElement.prototype,
-				"value"
-			)?.set;
-			nativeInputValueSetter?.call(changeRef.current, value);
-
-			const event = new Event("input", { bubbles: true });
-			changeRef.current.dispatchEvent(event);
+			onUpdateImages([...uploadedImages, { src: value, primary: false }]);
 		},
-		[convertImagesTo, downscale, localuploadedImages, setImages]
+		[convertImagesTo, downscale, uploadedImages, onUpdateImages]
 	);
 	// upload click handler
 	const handleUpload = useCallback(() => {
@@ -166,7 +149,7 @@ const ImageController = (props: ImageControllerProps) => {
 		elem.addEventListener("change", () => {
 			const files = elem.files;
 			if (!files) return;
-			const file = files[0];
+			const file = elem.files && elem.files[0];
 			if (!file) return;
 			void processFile(file);
 		});
@@ -174,26 +157,21 @@ const ImageController = (props: ImageControllerProps) => {
 	}, [processFile]);
 	const changePrimaryImage = useCallback(
 		(index) => {
-			const newUpdatedImages = localuploadedImages.map((ele, ind) => {
-				if (index === ind) {
-					ele.primary = !ele.primary;
-				} else {
-					ele.primary = false;
-				}
-				return ele;
-			});
-			setImages(newUpdatedImages);
-			handlePrimaryAction(newUpdatedImages);
+			onUpdateImages(
+				uploadedImages.map((img, i) => ({
+					...img,
+					primary: i === index && !img.primary,
+				}))
+			);
 		},
-		[localuploadedImages, handlePrimaryAction]
+		[uploadedImages, onUpdateImages]
 	);
 	const removeImageHandler = useCallback(
 		(index) => {
-			localuploadedImages.splice(index, 1);
-			setImages([...localuploadedImages]);
-			handlePrimaryAction([...localuploadedImages]);
+			uploadedImages.splice(index, 1);
+			onUpdateImages([...uploadedImages]);
 		},
-		[localuploadedImages, setImages, handlePrimaryAction]
+		[uploadedImages, onUpdateImages]
 	);
 	const handleDrop = useCallback(
 		async (evt: React.DragEvent<HTMLDivElement>) => {
@@ -217,7 +195,7 @@ const ImageController = (props: ImageControllerProps) => {
 	return (
 		<Grid item>
 			<Grid container spacing={2}>
-				{localuploadedImages.map((image, i) => (
+				{uploadedImages.map((image, i) => (
 					<Grid key={i}>
 						<Grid item xs className={classes.layout}>
 							{!image.primary && (
@@ -255,7 +233,7 @@ const ImageController = (props: ImageControllerProps) => {
 								name={props.name}
 								ref={changeRef}
 								className={classes.changeEventHelper}
-								onChange={() => handlePrimaryAction(localuploadedImages)}
+								onChange={() => onUpdateImages(uploadedImages)}
 							/>
 						</Grid>
 					</Grid>

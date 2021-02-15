@@ -40,11 +40,16 @@ const useStyles = makeStyles((theme) => ({
 	imgWrapperRoot: {
 		maxHeight: "100%",
 	},
+	noImageBg: {
+		width: "100%",
+		height: "100%",
+		backgroundColor: theme.palette.action.disabledBackground,
+	},
 	previewRoot: {
 		objectFit: "contain",
 		display: "block",
-		width: `calc(100% - ${theme.spacing(2)}px)`,
-		height: `calc(100% - ${theme.spacing(2)}px)`,
+		width: "100%",
+		height: "100%",
 	},
 	link: {
 		textAlign: "end",
@@ -59,7 +64,7 @@ const ImageBox = (props: ImageViewerProps) => {
 		<GroupBox label={props.label}>
 			<Grid
 				container
-				spacing={2}
+				spacing={0}
 				direction={"column"}
 				alignContent={"flex-start"}
 				alignItems={"stretch"}
@@ -67,7 +72,12 @@ const ImageBox = (props: ImageViewerProps) => {
 				wrap={"nowrap"}
 				className={classes.imageViewRoot}
 			>
-				<Grid item xs key={"image"} className={classes.imgWrapperRoot}>
+				<Grid
+					item
+					xs
+					key={"image"}
+					className={value ? classes.imgWrapperRoot : classes.noImageBg}
+				>
 					{value && (
 						<img src={value} alt={props.alt} className={classes.previewRoot} />
 					)}
