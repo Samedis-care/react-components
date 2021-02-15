@@ -5,17 +5,17 @@ import {
 	InputLabel,
 	Typography,
 } from "@material-ui/core";
-import { ModelRenderParams, PageVisibility } from "../../index";
+import { ModelRenderParams } from "../../index";
 import TypeEnum, { EnumValue } from "../TypeEnum";
 import ccI18n from "../../../../i18n";
 import {
 	BaseSelectorData,
 	SingleSelect,
+	SingleSelectorProps,
 } from "../../../../standalone/Selector";
-import { BackendSingleSelectProps } from "../../../../backend-components/Selector/BackendSingleSelect";
 
 type RendererEnumSelectProps = Omit<
-	BackendSingleSelectProps<string, PageVisibility, unknown>,
+	SingleSelectorProps<BaseSelectorData>,
 	"selected" | "onLoad" | "onSelect" | "disabled"
 >;
 
