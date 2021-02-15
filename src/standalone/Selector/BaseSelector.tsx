@@ -158,7 +158,6 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 		noOptionsText,
 		loadingText,
 		disableClearable,
-		// disableSearch,
 		openInfo,
 	} = props;
 	const classes = useThemeStyles(
