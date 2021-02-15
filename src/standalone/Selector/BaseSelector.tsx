@@ -114,6 +114,10 @@ export interface BaseSelectorProps<DataT extends BaseSelectorData>
 	 */
 	disableClearable?: boolean;
 	/**
+	 * Disable search?
+	 */
+	disableSearch?: boolean;
+	/**
 	 * Custom styles to be used for selector
 	 */
 	classes?: AutocompleteProps<
@@ -156,6 +160,7 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 		onSelect,
 		selected,
 		disabled,
+		disableSearch,
 		placeholder,
 		autocompleteId,
 		addNewLabel,
@@ -234,12 +239,9 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 		[actualAddNewLabel, onAddNew, onLoad, setLoading]
 	);
 
-	const updateQuery = useCallback(
-		(_, newQuery: string) => {
-			setQuery(newQuery);
-		},
-		[setQuery]
-	);
+	const updateQuery = useCallback((_, newQuery: string) => {
+		setQuery(newQuery);
+	}, []);
 
 	// initial option load
 	useEffect(() => {
@@ -291,6 +293,7 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 					const { InputProps, InputLabelProps, ...otherParams } = params;
 					return (
 						<OutlinedInputWithHelp
+							readOnly={disableSearch}
 							{...InputProps}
 							{...otherParams}
 							endAdornment={

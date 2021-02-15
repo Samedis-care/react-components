@@ -5,18 +5,31 @@ import {
 	InputLabel,
 	Typography,
 } from "@material-ui/core";
-import { ModelRenderParams } from "../../index";
-import TypeEnum from "../TypeEnum";
+import { ModelRenderParams, PageVisibility } from "../../index";
+import TypeEnum, { EnumValue } from "../TypeEnum";
 import ccI18n from "../../../../i18n";
 import {
 	BaseSelectorData,
 	SingleSelect,
 } from "../../../../standalone/Selector";
+import { BackendSingleSelectProps } from "../../../../backend-components/Selector/BackendSingleSelect";
+
+type RendererEnumSelectProps = Omit<
+	BackendSingleSelectProps<string, PageVisibility, unknown>,
+	"selected" | "onLoad" | "onSelect" | "disabled"
+>;
 
 /**
  * Renders TypeEnum as drop-down selector (with search)
  */
 class RendererEnumSelect extends TypeEnum {
+	private props: RendererEnumSelectProps;
+
+	constructor(values: EnumValue[], props: RendererEnumSelectProps) {
+		super(values);
+		this.props = props;
+	}
+
 	render(params: ModelRenderParams<string>): React.ReactElement {
 		const {
 			visibility,
@@ -64,6 +77,7 @@ class RendererEnumSelect extends TypeEnum {
 				>
 					<InputLabel shrink>{label}</InputLabel>
 					<SingleSelect
+						{...this.props}
 						selected={selected}
 						onLoad={onLoad}
 						onSelect={(value) => handleChange(field, value ? value.value : "")}
