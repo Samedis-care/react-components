@@ -42,8 +42,8 @@ class RendererImage extends TypeImage {
 						value={value}
 						label={label}
 						readOnly={visibility.readOnly}
-						onChange={(evt: React.ChangeEvent<HTMLInputElement>) => {
-							handleChange(evt.target.name, evt.target.value);
+						onChange={(name, value) => {
+							handleChange(name, value);
 						}}
 						onBlur={handleBlur}
 						alt={label}

@@ -13,9 +13,9 @@ export const ImageSelectorStory = (): React.ReactElement => {
 		step: 16,
 	});
 
-	const handleChangeAction = (evt: React.ChangeEvent<HTMLInputElement>) => {
-		setImage(evt.target.value);
-		action("onChange")(evt.target.name, evt.target.value);
+	const handleChangeAction = (name: string, value: string) => {
+		setImage(value);
+		action("onChange")(name, value);
 	};
 
 	const capture = select(
