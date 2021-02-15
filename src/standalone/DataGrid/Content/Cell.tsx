@@ -79,17 +79,19 @@ const Cell = (props: CellProps): React.ReactElement => {
 			onMouseLeave={endHover}
 			onClick={toggleSelection}
 			onDoubleClick={editRecord}
-			className={
-				classes.cell +
-				" " +
-				(props.rowIndex !== 0 ? classes.dataCell : classes.headerCell) +
-				" " +
-				(props.rowIndex !== 0 && column ? `column-${column.field} ` : "") +
-				(isSelected(state.selectAll, state.selectedRows, id) ||
-				hover == rowIndex
+			className={`${classes.cell} ${
+				props.rowIndex !== 0 ? classes.dataCell : classes.headerCell
+			} ${
+				props.rowIndex !== 0
+					? props.rowIndex % 2 === 0
+						? classes.rowEven
+						: classes.rowOdd
+					: ""
+			} ${props.rowIndex !== 0 && column ? `column-${column.field} ` : ""}${
+				isSelected(state.selectAll, state.selectedRows, id) || hover == rowIndex
 					? classes.dataCellSelected
-					: "")
-			}
+					: ""
+			}`}
 		>
 			{content}
 		</div>

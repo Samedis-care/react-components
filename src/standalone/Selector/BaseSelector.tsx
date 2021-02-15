@@ -120,14 +120,14 @@ export interface BaseSelectorProps<DataT extends BaseSelectorData>
 	>["classes"];
 }
 
-export type SelectorTheme = Partial<
+export type SelectorThemeExpert = Partial<
 	Styles<Theme, BaseSelectorProps<BaseSelectorData>, AutocompleteClassKey>
 >;
 
 const useThemeStyles = makeThemeStyles<
 	BaseSelectorProps<BaseSelectorData>,
 	AutocompleteClassKey
->((theme) => theme.componentsCare?.uiKit?.selector);
+>((theme) => theme.componentsCare?.uiKit?.baseSelectorExpert, "CcBaseSelector");
 
 const useCustomStyles = makeStyles({
 	infoBtn: {
@@ -172,7 +172,7 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 		(data: BaseSelectorData) => (
 			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 			// @ts-ignore: Typescript complains about the button property being "required"
-			<SelectorSmallListItem>
+			<SelectorSmallListItem component={"div"}>
 				{enableIcons && <SmallListItemIcon>{data.icon}</SmallListItemIcon>}
 				<ListItemText>{data.label}</ListItemText>
 			</SelectorSmallListItem>
@@ -227,6 +227,11 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [query, refreshToken]);
 
+	useEffect(() => {
+		void onSearchHandler("");
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [selected]);
+
 	return (
 		<div>
 			<Autocomplete
@@ -244,7 +249,13 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 				loadingText={loadingText}
 				autoComplete
 				disabled={disabled}
-				options={selectorOptions}
+				options={
+					// add selected to selectorOptions if not present to suppress warnings
+					selected &&
+					!selectorOptions.find((option) => option.value === selected.value)
+						? selectorOptions.concat([selected])
+						: selectorOptions
+				}
 				value={selected}
 				inputValue={query}
 				onInputChange={updateQuery}

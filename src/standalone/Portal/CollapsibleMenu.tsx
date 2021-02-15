@@ -59,11 +59,14 @@ const CollapsibleMenu = (props: CollapsibleMenuProps) => {
 			wrap={"nowrap"}
 			className={`${classes.container} ${props.customClasses?.root ?? ""}`}
 		>
-			{!collapsed && (
-				<Grid item xs style={{ width: props.width }} key={"content"}>
-					{props.children}
-				</Grid>
-			)}
+			<Grid
+				item
+				xs
+				style={{ width: props.width, display: collapsed ? "none" : undefined }}
+				key={"content"}
+			>
+				{props.children}
+			</Grid>
 			{!mobile && (
 				<Grid item key={"bar"}>
 					<IconButton

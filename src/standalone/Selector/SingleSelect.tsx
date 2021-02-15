@@ -5,6 +5,7 @@ import BaseSelector, {
 	BaseSelectorProps,
 } from "./BaseSelector";
 import { makeStyles } from "@material-ui/core/styles";
+import { ClassNameMap } from "@material-ui/styles/withStyles";
 
 const useStyles = makeStyles({
 	wrapper: {
@@ -12,14 +13,28 @@ const useStyles = makeStyles({
 	},
 });
 
+export interface SingleSelectorProps<DataT extends BaseSelectorData>
+	extends Omit<BaseSelectorProps<DataT>, "classes"> {
+	/**
+	 * The custom CSS classes to be applied to this component
+	 */
+	classes?: Partial<ClassNameMap<keyof ReturnType<typeof useStyles>>>;
+	/**
+	 * The custom CSS classes to be forwarded to sub components
+	 */
+	subClasses?: {
+		baseSelector: BaseSelectorProps<DataT>["classes"];
+	};
+}
+
 const SingleSelect = <DataT extends BaseSelectorData>(
-	props: BaseSelectorProps<DataT>
+	props: SingleSelectorProps<DataT>
 ) => {
-	const classes = useStyles();
+	const classes = useStyles(props);
 
 	return (
 		<Paper elevation={0} className={classes.wrapper}>
-			<BaseSelector {...props} />
+			<BaseSelector {...props} classes={props.subClasses?.baseSelector} />
 		</Paper>
 	);
 };

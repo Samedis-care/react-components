@@ -11,6 +11,7 @@ import {
 	UseMutationResult,
 	UseQueryResult,
 } from "react-query/types/react/types";
+import queryCache from "../Store";
 
 export interface PageVisibility {
 	overview: Visibility;
@@ -192,6 +193,16 @@ class Model<
 	public get(id: string | null): UseQueryResult<ModelGetResponse<KeyT>, Error> {
 		// eslint-disable-next-line react-hooks/rules-of-hooks
 		return useQuery([this.modelId, { id: id }], () => this.getRaw(id));
+	}
+
+	/**
+	 * Provices cached access for the given data id
+	 * @param id The data record id or null to obtain the default values
+	 */
+	public getCached(id: string | null): Promise<ModelGetResponse<KeyT>> {
+		return queryCache.fetchQuery([this.modelId, { id: id }], () =>
+			this.getRaw(id)
+		);
 	}
 
 	/**

@@ -44,33 +44,36 @@ export interface FileProps {
 	classes?: Partial<ReturnType<typeof useStyles>>;
 }
 
-const useStyles = makeStyles((theme) => ({
-	iconContainer: {
-		position: "relative",
-	},
-	closeIcon: {
-		position: "absolute",
-		cursor: "pointer",
-		color: theme.palette.error.main,
-	},
-	icon: {
-		width: "100%",
-		height: "auto",
-		marginTop: 16,
-	},
-	iconDisabled: {
-		opacity: 0.5,
-	},
-	clickable: {
-		cursor: "pointer",
-	},
-	downloadLink: {
-		cursor: "pointer",
-		"&:hover": {
-			textDecoration: "underline",
+const useStyles = makeStyles(
+	(theme) => ({
+		iconContainer: {
+			position: "relative",
 		},
-	},
-}));
+		closeIcon: {
+			position: "absolute",
+			cursor: "pointer",
+			color: theme.palette.error.main,
+		},
+		icon: {
+			width: "100%",
+			height: "auto",
+			marginTop: 16,
+		},
+		iconDisabled: {
+			opacity: 0.5,
+		},
+		clickable: {
+			cursor: "pointer",
+		},
+		downloadLink: {
+			cursor: "pointer",
+			"&:hover": {
+				textDecoration: "underline",
+			},
+		},
+	}),
+	{ name: "CcFile" }
+);
 
 const ExcelFileExtensions = [
 	"xlsx",

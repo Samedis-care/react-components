@@ -5,8 +5,8 @@ import BaseSelector, {
 } from "./BaseSelector";
 import { makeStyles, Grid, Paper } from "@material-ui/core";
 import MultiSelectEntry, { IMultiSelectEntryProps } from "./MultiSelectEntry";
-import { combineClassMaps } from "../../utils";
-import { AutocompleteClassKey } from "@material-ui/lab/Autocomplete/Autocomplete";
+import { cleanClassMap, combineClassMaps } from "../../utils";
+import { ClassNameMap } from "@material-ui/styles/withStyles";
 
 export interface MultiSelectorData extends BaseSelectorData {
 	/**
@@ -21,7 +21,10 @@ export interface MultiSelectorData extends BaseSelectorData {
 }
 
 export interface MultiSelectProps
-	extends Omit<BaseSelectorProps<MultiSelectorData>, "onSelect" | "selected"> {
+	extends Omit<
+		BaseSelectorProps<MultiSelectorData>,
+		"onSelect" | "selected" | "classes"
+	> {
 	/**
 	 * Extended selection change handler
 	 * @param data The selected data entry/entries
@@ -35,25 +38,43 @@ export interface MultiSelectProps
 	 * Specify a custom component for displaying multi select items
 	 */
 	selectedEntryRenderer?: React.ComponentType<IMultiSelectEntryProps>;
+	/**
+	 * CSS classes to apply
+	 */
+	classes?: Partial<
+		ClassNameMap<keyof ReturnType<typeof useMultiSelectorStyles>>
+	>;
+	/**
+	 * Custom classes passed to subcomponents
+	 */
+	subClasses?: {
+		baseSelector: BaseSelectorProps<BaseSelectorData>["classes"];
+	};
 }
 
-const useSelectorStyles = makeStyles({
-	inputRoot: {
-		borderRadius: "4px 4px 0px 0px",
+const useBaseSelectorStyles = makeStyles(
+	{
+		inputRoot: (props: MultiSelectProps) => ({
+			borderRadius: props.selected.length > 0 ? "4px 4px 0px 0px" : undefined,
+		}),
 	},
-});
+	{ name: "CcMultiSelectBase" }
+);
 
-const useStyles = makeStyles({
-	paperWrapper: {
-		boxShadow: "none",
-		marginTop: 16, // to accommodate InputLabel
+const useMultiSelectorStyles = makeStyles(
+	{
+		paperWrapper: {
+			boxShadow: "none",
+			marginTop: 16, // to accommodate InputLabel
+		},
+		selectedEntries: {
+			border: `1px solid rgba(0, 0, 0, 0.23)`,
+			borderTop: 0,
+			borderRadius: "0px 0px 4px 4px",
+		},
 	},
-	selectedEntries: {
-		border: `1px solid rgba(0, 0, 0, 0.23)`,
-		borderTop: 0,
-		borderRadius: "0px 0px 4px 4px",
-	},
-});
+	{ name: "CcMultiSelect" }
+);
 
 const MultiSelect = (props: MultiSelectProps) => {
 	const {
@@ -63,13 +84,9 @@ const MultiSelect = (props: MultiSelectProps) => {
 		enableIcons,
 		selectedEntryRenderer,
 		disabled,
-		classes,
 	} = props;
-	const multiSelectClasses = useStyles(props);
-	const defaultMultiSelectClasses = useSelectorStyles();
-	const multiSelectStyles = classes
-		? combineClassMaps<AutocompleteClassKey>(defaultMultiSelectClasses, classes)
-		: defaultMultiSelectClasses;
+	const multiSelectClasses = useMultiSelectorStyles(props);
+	const baseSelectorClasses = useBaseSelectorStyles(cleanClassMap(props, true));
 
 	const EntryRender = selectedEntryRenderer || MultiSelectEntry;
 
@@ -125,24 +142,29 @@ const MultiSelect = (props: MultiSelectProps) => {
 				<Grid item xs={12}>
 					<BaseSelector
 						{...props}
-						classes={multiSelectStyles}
+						classes={combineClassMaps(
+							baseSelectorClasses,
+							props.subClasses?.baseSelector
+						)}
 						onLoad={multiSelectLoadHandler}
 						selected={null}
 						onSelect={multiSelectHandler}
 						refreshToken={selected.length.toString()}
 					/>
 				</Grid>
-				<Grid item xs={12} className={multiSelectClasses.selectedEntries}>
-					{props.selected.map((data: MultiSelectorData, index: number) => (
-						<EntryRender
-							key={data.value}
-							enableDivider={props.selected.length === index - 1}
-							enableIcons={enableIcons}
-							handleDelete={disabled ? undefined : handleDelete}
-							data={data}
-						/>
-					))}
-				</Grid>
+				{props.selected.length > 0 && (
+					<Grid item xs={12} className={multiSelectClasses.selectedEntries}>
+						{props.selected.map((data: MultiSelectorData, index: number) => (
+							<EntryRender
+								key={data.value}
+								enableDivider={props.selected.length === index - 1}
+								enableIcons={enableIcons}
+								handleDelete={disabled ? undefined : handleDelete}
+								data={data}
+							/>
+						))}
+					</Grid>
+				)}
 			</Grid>
 		</Paper>
 	);

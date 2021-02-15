@@ -4,10 +4,12 @@
  * @return A combined class maps (combining CSS classes)
  */
 const combineClassMaps = <ClassKey extends string = string>(
-	...input: Partial<Record<ClassKey, string>>[]
+	...input: (Partial<Record<ClassKey, string>> | undefined)[]
 ): Partial<Record<ClassKey, string>> => {
 	const combinedMap: Partial<Record<ClassKey, string[]>> = {};
 	input.forEach((classMap) => {
+		if (!classMap) return;
+
 		Object.entries(classMap).forEach(([k, v]) => {
 			if (!(k in combinedMap)) {
 				(combinedMap[k as ClassKey] as string[]) = [v as string];

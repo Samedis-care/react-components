@@ -1,6 +1,11 @@
-import React, { Dispatch, SetStateAction, useState } from "react";
+import React, {
+	Dispatch,
+	SetStateAction,
+	useState,
+	CSSProperties,
+} from "react";
 import { MenuContext, toMenuItemComponent } from "./MenuItem";
-import { makeStyles } from "@material-ui/core/styles";
+import { makeStyles, Theme } from "@material-ui/core/styles";
 import { SvgIconComponent } from "@material-ui/icons";
 
 /**
@@ -114,13 +119,25 @@ export interface MenuProps {
 	classes?: Partial<ReturnType<typeof useStyles>>;
 }
 
-const useStyles = makeStyles({
+export interface MenuTheme {
+	container?: {
+		padding?: CSSProperties["padding"];
+		height?: CSSProperties["height"];
+		width?: CSSProperties["width"];
+		overflow?: CSSProperties["overflow"];
+		style?: CSSProperties;
+	};
+}
+
+const useStyles = makeStyles((theme: Theme) => ({
 	root: {
-		height: "100%",
-		width: "100%",
-		overflow: "auto",
+		padding: theme.componentsCare?.portal?.menu?.container?.padding,
+		height: theme.componentsCare?.portal?.menu?.container?.height || "100%",
+		width: theme.componentsCare?.portal?.menu?.container?.width || "320px",
+		overflow: theme.componentsCare?.portal?.menu?.container?.overflow || "auto",
+		...theme.componentsCare?.portal?.menu?.container?.style,
 	},
-});
+}));
 
 const PortalMenu = (props: MenuProps) => {
 	const Wrapper = props.wrapper;
@@ -132,7 +149,7 @@ const PortalMenu = (props: MenuProps) => {
 			<Wrapper>
 				<MenuContext.Provider value={props.customState || state}>
 					{props.definition.map((child) =>
-						toMenuItemComponent(props, child, 0)
+						toMenuItemComponent(props, child, 0, null)
 					)}
 				</MenuContext.Provider>
 			</Wrapper>

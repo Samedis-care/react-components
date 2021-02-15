@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { MenuBase } from "../../..";
 import {
 	IMenuItemDefinition,
@@ -46,7 +46,7 @@ const convertDefinition = (
 	...definition,
 	forceExpand:
 		definition.children &&
-		!!resolveLocation(definition.children, path, depth + 1),
+		!!resolveLocation(definition.children, path, depth + 1, null),
 	children: definition.children?.map((entry) =>
 		convertDefinition(entry, path, depth + 1)
 	),
@@ -65,24 +65,31 @@ const convertDefinition = (
  * @param definitions The menu item definitions
  * @param path The current location.pathname
  * @param depth The depth of the menu item
+ * @param itemId The menu item id
  * @return The menu item "identifier" used to set the menu item active or undefined if no match has been found
  */
 const resolveLocation = (
 	definitions: IRoutedMenuItemDefinition[],
 	path: string,
-	depth: number
+	depth: number,
+	itemId: string | null
 ): string | null => {
 	// first recurse to find the deepest matching link
 	for (const def of definitions) {
 		if (def.children) {
-			const nextLevel = resolveLocation(def.children, path, depth + 1);
+			const nextLevel = resolveLocation(
+				def.children,
+				path,
+				depth + 1,
+				itemId ? `${itemId}@${def.title}` : def.title
+			);
 			if (nextLevel) return nextLevel;
 		}
 	}
 	// then try this level
 	for (const def of definitions) {
 		if (def.route && path.startsWith(def.route)) {
-			return `${depth}${def.title}`;
+			return itemId ? `${itemId}@${def.title}` : def.title;
 		}
 	}
 	// and if nothing found
@@ -91,14 +98,17 @@ const resolveLocation = (
 
 const RoutedMenu = (props: IRoutedMenuProps) => {
 	const controlledState = useState("");
+	const [activeMenuItem, setActiveMenuItem] = controlledState;
 	const location = useLocation();
 	const path = location.pathname;
 
 	// set the currently active item based off location
-	const menuEntry = resolveLocation(props.definition, path, 0);
-	if (menuEntry && controlledState[0] !== menuEntry) {
-		controlledState[1](menuEntry);
-	}
+	useEffect(() => {
+		const menuEntry = resolveLocation(props.definition, path, 0, null);
+		if (menuEntry && activeMenuItem !== menuEntry) {
+			setActiveMenuItem(menuEntry);
+		}
+	}, [activeMenuItem, path, props.definition, setActiveMenuItem]);
 
 	// convert routed menu definitions to normal menu definitions
 	const rawDef = props.definition;

@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useState } from "react";
 import {
 	BaseSelectorData,
-	BaseSelectorProps,
 	SingleSelect,
+	SingleSelectorProps,
 } from "../../standalone";
 import Model, {
 	ModelFieldName,
@@ -15,7 +15,7 @@ export interface BackendSingleSelectProps<
 	VisibilityT extends PageVisibility,
 	CustomT
 > extends Omit<
-		BaseSelectorProps<BaseSelectorData>,
+		SingleSelectorProps<BaseSelectorData>,
 		"onLoad" | "selected" | "onSelect"
 	> {
 	/**
@@ -110,7 +110,7 @@ const BackendSingleSelect = <
 
 			if (!newCache) {
 				try {
-					const data = await model.getRaw(selected);
+					const data = await model.getCached(selected);
 					newCache = await modelToSelectorData(data[0]);
 				} catch (e) {
 					newCache = {

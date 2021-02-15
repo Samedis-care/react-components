@@ -64,7 +64,7 @@ export const PortalMenuStory = (): React.ReactElement => {
 			JumboLight: "JumboLight",
 			JumboDark: "JumboDark",
 		},
-		"JumboDark"
+		"Material"
 	);
 	const collapsible = boolean("Collapsible Menu", true);
 
@@ -76,7 +76,7 @@ export const PortalMenuStory = (): React.ReactElement => {
 			definition={[
 				{
 					icon: Home,
-					title: "Home",
+					title: "Home Sweet Home Sweet Home",
 					onClick: () => action("onClick: Home"),
 					shouldRender: true,
 				},
@@ -146,7 +146,7 @@ export const PortalMenuStory = (): React.ReactElement => {
 									  }
 									: undefined
 							}
-							width={320}
+							//width={320}
 						>
 							{menu()}
 						</CollapsibleMenu>
@@ -156,7 +156,7 @@ export const PortalMenuStory = (): React.ReactElement => {
 				}
 				topLeft={<Placeholder cssClass={"topLeft"} />}
 				content={<Placeholder cssClass={"content"} />}
-				drawerWidth={collapsible ? undefined : 320}
+				//drawerWidth={collapsible ? undefined : 320}
 				customClasses={{
 					header: {
 						toolbar: {

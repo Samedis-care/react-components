@@ -18,6 +18,16 @@ export const ImageSelectorStory = (): React.ReactElement => {
 		action("onChange")(evt.target.name, evt.target.value);
 	};
 
+	const capture = select(
+		"Capture mode",
+		{
+			Disabled: "false",
+			User: "user",
+			Environment: "environment",
+		},
+		"false"
+	);
+
 	return (
 		<div style={{ height: previewSize, width: previewSize }}>
 			<ImageSelector
@@ -25,6 +35,7 @@ export const ImageSelectorStory = (): React.ReactElement => {
 				label={text("Label", "Image Upload Label")}
 				alt={text("Alt Text", "Alt Description")}
 				value={image}
+				capture={capture}
 				onChange={handleChangeAction}
 				convertImagesTo={select(
 					"Convert Images to",
