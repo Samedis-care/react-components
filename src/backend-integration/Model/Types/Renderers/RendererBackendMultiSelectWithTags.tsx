@@ -1,5 +1,5 @@
 import React from "react";
-import { FormControl, FormHelperText, InputLabel } from "@material-ui/core";
+import { FormControl, FormHelperText } from "@material-ui/core";
 import { ModelFieldName, ModelRenderParams, PageVisibility } from "../../index";
 import TypeStringArray from "../TypeStringArray";
 import Model from "../../Model";
@@ -12,7 +12,8 @@ type OmitProperties =
 	| "onSelect"
 	| "disabled"
 	| "dataModel"
-	| "initialData";
+	| "initialData"
+	| "title";
 
 /**
  * Renders TypeEnum as drop-down selector (with search)
@@ -101,7 +102,6 @@ class RendererBackendMultiSelectWithTags<
 					error={!!errorMsg}
 					onBlur={handleBlur}
 				>
-					<InputLabel shrink>{label}</InputLabel>
 					<BackendMultiSelectWithTags
 						selected={value}
 						onChange={(value) => handleChange(field, value)}
@@ -110,6 +110,7 @@ class RendererBackendMultiSelectWithTags<
 							relationModel as Model<DataKeyT, DataVisibilityT, DataCustomT>
 						}
 						initialData={relationData}
+						title={label}
 						{...this.props}
 					/>
 					<FormHelperText>{errorMsg}</FormHelperText>
