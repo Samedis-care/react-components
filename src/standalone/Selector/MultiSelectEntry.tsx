@@ -49,7 +49,7 @@ const useStyles = makeStyles(
 			padding: theme.componentsCare?.selector?.selected?.container?.padding,
 			backgroundColor:
 				theme.componentsCare?.selector?.selected?.container?.backgroundColor,
-			style: theme.componentsCare?.selector?.selected?.container?.style,
+			...theme.componentsCare?.selector?.selected?.container?.style,
 		},
 		selected: {
 			border: theme.componentsCare?.selector?.selected?.border,
@@ -58,7 +58,7 @@ const useStyles = makeStyles(
 			padding: theme.componentsCare?.selector?.selected?.padding,
 			backgroundColor:
 				theme.componentsCare?.selector?.selected?.backgroundColor,
-			style: theme.componentsCare?.selector?.selected?.style,
+			...theme.componentsCare?.selector?.selected?.style,
 		},
 		label: {
 			margin: theme.componentsCare?.selector?.selected?.label?.margin,
