@@ -39,8 +39,7 @@
 		"docgen": "typedoc --exclude 'src/stories/**/*.*' --exclude 'node_modules/**/*.*' --out typedoc --entryPoints src/index.ts",
 		"start": "npm run storybook",
 		"prepare": "npm run build",
-		"prestart": "install-peers -f && husky install",
-		"pretest": "install-peers -f",
+		"prestart": "husky install",
 		"build": "tsc && cpx 'src/assets/**/*' dist/assets",
 		"storybook": "start-storybook -p 9009",
 		"build-storybook": "build-storybook",
@@ -127,5 +126,8 @@
 		"prettier": "^2.2.1",
 		"ts-jest": "^26.4.4",
 		"typedoc": "^0.20.23"
+	},
+	"engines": {
+		"npm": "7.x"
 	}
 }

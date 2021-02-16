@@ -16,6 +16,7 @@ import { IDataGridExporter } from "../../../standalone/DataGrid/Header";
 import data from "./covid-daily.json";
 import GridCustomFilters from "./GridCustomFilters";
 import { filterSortPaginate } from "../../../utils";
+import { useTheme } from "@material-ui/core";
 
 const useStyles = makeStyles({
 	wrapper: {
@@ -121,6 +122,7 @@ const exporters: IDataGridExporter<unknown>[] = [
 
 export const DataGridStory = (): React.ReactElement => {
 	const classes = useStyles();
+	const theme = useTheme();
 
 	return (
 		<div className={classes.wrapper}>
@@ -140,6 +142,7 @@ export const DataGridStory = (): React.ReactElement => {
 						? GridCustomFilters
 						: undefined
 				}
+				enableFilterDialogMediaQuery={theme.breakpoints.down("md")}
 				loadData={(params): DataGridData => {
 					action("loadData")(params);
 

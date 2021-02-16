@@ -28,6 +28,7 @@ import { dataGridPrepareFiltersAndSorts } from "./CallbackUtil";
 import { ModelFilterType } from "../../backend-integration/Model";
 import { HEADER_PADDING } from "./Content/ColumnHeader";
 import { Styles } from "@material-ui/core/styles/withStyles";
+import CustomFilterDialog from "./CustomFilterDialog";
 
 export interface DataGridTheme extends Theming.BasicElementThemeFragment {
 	/* root elements from BasicElementThemeFragment defining main grid container visuals */
@@ -301,6 +302,10 @@ export interface IDataGridState {
 	 */
 	showSettings: boolean;
 	/**
+	 * Show the custom filter dialog
+	 */
+	showFilterDialog: boolean;
+	/**
 	 * The hidden fields
 	 */
 	hiddenColumns: string[];
@@ -418,6 +423,7 @@ export const getDataGridDefaultState = (
 	rowsTotal: 0,
 	rowsFiltered: null,
 	showSettings: false,
+	showFilterDialog: false,
 	pages: [0, 0],
 	hiddenColumns: columns.filter((col) => col.hidden).map((col) => col.field),
 	lockedColumns: [],
@@ -663,14 +669,15 @@ const useStyles = makeStyles(
 		},
 		filterBarGrid: {
 			height: `calc(100% + ${theme.spacing(2)}px)`,
+			width: "100%",
 		},
 		setFilterContainer: {
 			maxHeight: "40vh",
 			overflow: "auto",
 		},
-		settingsCollapse: {
+		contentOverlayCollapse: {
 			position: "absolute",
-			zIndex: 2000,
+			zIndex: 1000,
 			width: "100%",
 			maxHeight: "100%",
 			overflow: "auto",
@@ -685,7 +692,7 @@ const useStyles = makeStyles(
 		selectCheckbox: {
 			padding: 0,
 		},
-		settingsPaper: {
+		contentOverlayPaper: {
 			padding: 16,
 			borderBottom: `1px solid ${theme.palette.divider}`,
 			borderRadius: 8,
@@ -932,6 +939,7 @@ const DataGrid = (props: DataGridProps) => {
 								</Grid>
 								<Grid item xs className={classes.content}>
 									<Settings columns={columns} />
+									<CustomFilterDialog />
 									<Content columns={visibleColumns} rowsPerPage={rowsPerPage} />
 								</Grid>
 								<Grid item className={classes.footer}>

@@ -30,6 +30,9 @@
 				"hide": "Show/Hide Columns",
 				"close": "Close"
 			},
+			"custom-filters": {
+				"title": "Filter selection"
+			},
 			"footer": {
 				"total": "Total:",
 				"filtered": "Filtered:",
