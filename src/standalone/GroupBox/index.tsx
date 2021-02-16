@@ -11,7 +11,9 @@ const useStyles = makeStyles(
 			borderWidth: 1,
 			position: "relative",
 			maxHeight: "inherit",
-			height: "inherit",
+			height: "100%",
+			marginLeft: 0,
+			marginRight: 0,
 		},
 	},
 	{ name: "CcGroupBox" }
