@@ -21,16 +21,6 @@ import TextFieldWithHelp, {
 	TextFieldWithHelpProps,
 } from "../UIKit/TextFieldWithHelp";
 import { SmallIconButton, SmallListItemIcon } from "../Small";
-export interface SelectedGroup {
-	/**
-	 * ID of the Group
-	 */
-	group: string;
-	/**
-	 * IDs of the selected items
-	 */
-	items: string[];
-}
 export interface MultiSelectWithoutGroupProps<
 	DataT extends MultiSelectorData,
 	GroupT extends BaseSelectorData
@@ -66,10 +56,6 @@ export interface MultiSelectWithoutGroupProps<
 	 */
 	displaySwitch?: boolean;
 	/**
-	 * The values of selected groups
-	 */
-	selectedGroups?: SelectedGroup[];
-	/**
 	 * Change event callback
 	 * @param data The currently selected entries. This should be feed back to selected prop
 	 */
@@ -87,10 +73,6 @@ export interface MultiSelectWithoutGroupProps<
 	 * The set options for autocomplete
 	 */
 	setDataOptions: (data: DataT[]) => void;
-	/**
-	 * The set options for selected groups
-	 */
-	setSelectedGroups?: (data: SelectedGroup[]) => void;
 }
 
 const useStyles = makeStyles(
@@ -123,13 +105,11 @@ const MultiSelectWithoutGroup = <
 		selected,
 		dataOptions,
 		displaySwitch,
-		selectedGroups,
 		defaultSwitchValue,
 		disabled,
 		autocompleteId,
 		enableIcons,
 		setDataOptions,
-		setSelectedGroups,
 		loadDataOptions,
 		onChange,
 		openInfo,
@@ -161,24 +141,8 @@ const MultiSelectWithoutGroup = <
 
 			setDataOptions([...dataOptions, entryToDelete]);
 			onChange(selected.filter((entry) => entry !== entryToDelete));
-			// remove any selected group that contained this entry so it can be selected again
-			if (!setSelectedGroups) return;
-			if (selectedGroups) {
-				setSelectedGroups(
-					selectedGroups.filter(
-						(group) => !group.items.includes(entryToDelete.value)
-					)
-				);
-			}
 		},
-		[
-			onChange,
-			setDataOptions,
-			setSelectedGroups,
-			selectedGroups,
-			dataOptions,
-			selected,
-		]
+		[onChange, setDataOptions, dataOptions, selected]
 	);
 
 	const handleOptionSelect = useCallback(

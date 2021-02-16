@@ -14,11 +14,20 @@ import {
 } from "../../standalone/Selector";
 import MultiSelectWithoutGroup, {
 	MultiSelectWithoutGroupProps,
-	SelectedGroup,
 } from "./MultiSelectWithoutGroup";
 import { BaseSelectorData } from "./BaseSelector";
 import { uniqueArray } from "../../utils";
 
+interface SelectedGroup {
+	/**
+	 * ID of the Group
+	 */
+	group: string;
+	/**
+	 * IDs of the selected items
+	 */
+	items: string[];
+}
 export interface MultiSelectWithTagsProps<
 	DataT extends MultiSelectorData,
 	GroupT extends BaseSelectorData
@@ -39,6 +48,13 @@ export interface MultiSelectWithTagsProps<
 	 * Custom styles
 	 */
 	classes?: Partial<keyof ReturnType<typeof useStyles>>;
+	/**
+	 * Custom styles for multi select without groups
+	 */
+	subClasses?: MultiSelectWithoutGroupProps<
+		MultiSelectorData,
+		BaseSelectorData
+	>["classes"];
 	/**
 	 * Label for switch control (only used if displaySwitch is truthy)
 	 */
@@ -172,6 +188,13 @@ const MultiSelectWithTags = <
 		setSwitchValue(defaultSwitchValue);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [!!props.displaySwitch]);
+	useEffect(() => {
+		dataOptions.map((option) => {
+			setSelectedGroups((selectedGroups) =>
+				selectedGroups.filter((group) => !group.items.includes(option.value))
+			);
+		});
+	}, [dataOptions]);
 
 	const handleGroupSelect = useCallback(
 		async (selectedGroup: GroupT | null) => {
@@ -249,7 +272,6 @@ const MultiSelectWithTags = <
 				<MultiSelectWithoutGroup<DataT, GroupT>
 					autocompleteId={autocompleteId}
 					selected={selected as DataT[]}
-					selectedGroups={selectedGroups}
 					dataOptions={dataOptions}
 					disabled={disabled}
 					searchInputLabel={searchInputLabel}
@@ -260,7 +282,6 @@ const MultiSelectWithTags = <
 					openInfo={openInfo}
 					onChange={onChange}
 					setDataOptions={setDataOptions}
-					setSelectedGroups={setSelectedGroups}
 				/>
 			</Typography>
 		</Typography>
