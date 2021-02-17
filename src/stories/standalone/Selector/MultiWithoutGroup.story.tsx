@@ -28,7 +28,6 @@ const options = colourOptions.map(enhanceData);
 
 export const MultiWithoutGroup = (): React.ReactElement => {
 	const [selected, setSelected] = useState<MultiWithoutGroupData[]>([]);
-	const [dataOptions, setDataOptions] = useState<MultiWithoutGroupData[]>([]);
 	const title = text("Title", "Multi Without Groups");
 	const icons = boolean("Enable Icons", false);
 	const disable = boolean("Disable", false);
@@ -44,8 +43,6 @@ export const MultiWithoutGroup = (): React.ReactElement => {
 	return (
 		<MultiSelectWithoutGroup<MultiWithoutGroupData, BaseSelectorData>
 			selected={selected}
-			dataOptions={dataOptions}
-			setDataOptions={setDataOptions}
 			onChange={setSelected}
 			searchInputLabel={title}
 			loadDataOptions={(query: string) =>

@@ -44,10 +44,6 @@ export interface MultiSelectWithoutGroupProps<
 	 */
 	selected: DataT[];
 	/**
-	 * The options for autocomplete
-	 */
-	dataOptions: DataT[];
-	/**
 	 * Default state of switch control (only used if displaySwitch is truthy)
 	 */
 	defaultSwitchValue?: boolean;
@@ -69,10 +65,6 @@ export interface MultiSelectWithoutGroupProps<
 		query: string,
 		switchValue: boolean
 	) => DataT[] | Promise<DataT[]>;
-	/**
-	 * The set options for autocomplete
-	 */
-	setDataOptions: (data: DataT[]) => void;
 }
 
 const useStyles = makeStyles(
@@ -103,20 +95,27 @@ const MultiSelectWithoutGroup = <
 	const {
 		searchInputLabel,
 		selected,
-		dataOptions,
 		displaySwitch,
 		defaultSwitchValue,
 		disabled,
 		autocompleteId,
 		enableIcons,
-		setDataOptions,
 		loadDataOptions,
 		onChange,
 		openInfo,
 	} = props;
 	const classes = useStyles(props);
 	const [dataQuery, setDataQuery] = useState("");
-
+	const [dataOptions, setDataOptions] = useState<DataT[]>([]);
+	useEffect(() => {
+		selected.map((selectedOptions) => {
+			setDataOptions((oldOptions) =>
+				oldOptions.filter(
+					(option) => !option.value.includes(selectedOptions.value)
+				)
+			);
+		});
+	}, [selected]);
 	const handleDelete = useCallback(
 		async (evt: React.MouseEvent<HTMLButtonElement>) => {
 			if (!onChange) return;

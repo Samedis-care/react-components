@@ -181,7 +181,6 @@ const MultiSelectWithTags = <
 		? props.defaultSwitchValue ?? false
 		: false;
 	const [selectedGroups, setSelectedGroups] = useState<SelectedGroup[]>([]);
-	const [dataOptions, setDataOptions] = useState<DataT[]>([]);
 	const [switchValue, setSwitchValue] = useState(defaultSwitchValue);
 
 	useEffect(() => {
@@ -189,12 +188,24 @@ const MultiSelectWithTags = <
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [!!props.displaySwitch]);
 	useEffect(() => {
-		dataOptions.map((option) => {
-			setSelectedGroups((selectedGroups) =>
-				selectedGroups.filter((group) => !group.items.includes(option.value))
-			);
+		selectedGroups.forEach((selectedGroup) => {
+			const filteredTypes = selected.filter((option) => {
+				return option.type === selectedGroup.group;
+			});
+			if (filteredTypes) {
+				if (filteredTypes.length < selectedGroup.items.length) {
+					filteredTypes.forEach((selectedOption) => {
+						setSelectedGroups((selectedGroups) =>
+							selectedGroups.filter(
+								(group) => !group.items.includes(selectedOption.value)
+							)
+						);
+					});
+				}
+			}
 		});
-	}, [dataOptions]);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [selected]);
 
 	const handleGroupSelect = useCallback(
 		async (selectedGroup: GroupT | null) => {
@@ -209,9 +220,6 @@ const MultiSelectWithTags = <
 					items: groupEntryIds,
 				},
 			]);
-			setDataOptions((prevState) =>
-				prevState.filter((entry) => !groupEntryIds.includes(entry.value))
-			);
 			onChange(
 				uniqueArray(combinedArray.map((entry) => entry.value)).map(
 					(value) =>
@@ -272,7 +280,6 @@ const MultiSelectWithTags = <
 				<MultiSelectWithoutGroup<DataT, GroupT>
 					autocompleteId={autocompleteId}
 					selected={selected as DataT[]}
-					dataOptions={dataOptions}
 					disabled={disabled}
 					searchInputLabel={searchInputLabel}
 					enableIcons={enableIcons}
@@ -281,7 +288,6 @@ const MultiSelectWithTags = <
 					loadDataOptions={loadDataOptions}
 					openInfo={openInfo}
 					onChange={onChange}
-					setDataOptions={setDataOptions}
 				/>
 			</Typography>
 		</Typography>

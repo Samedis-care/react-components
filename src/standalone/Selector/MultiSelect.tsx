@@ -10,6 +10,10 @@ import { ClassNameMap } from "@material-ui/styles/withStyles";
 
 export interface MultiSelectorData extends BaseSelectorData {
 	/**
+	 * The Type of group
+	 */
+	type?: string;
+	/**
 	 * Item click handler
 	 */
 	onClick?: () => void;
