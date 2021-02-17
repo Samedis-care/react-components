@@ -247,6 +247,7 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 
 	// initial option load
 	useEffect(() => {
+		if (!open) return;
 		void onSearchHandler(query);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [query, refreshToken]);
