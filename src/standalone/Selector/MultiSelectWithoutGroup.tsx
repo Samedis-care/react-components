@@ -21,11 +21,9 @@ import TextFieldWithHelp, {
 	TextFieldWithHelpProps,
 } from "../UIKit/TextFieldWithHelp";
 import { SmallIconButton, SmallListItemIcon } from "../Small";
-export interface MultiSelectWithoutGroupProps<
-	DataT extends MultiSelectorData,
-	GroupT extends BaseSelectorData
-> extends Pick<
-			BaseSelectorProps<GroupT>,
+export interface MultiSelectWithoutGroupProps<DataT extends MultiSelectorData>
+	extends Pick<
+			BaseSelectorProps<BaseSelectorData>,
 			"disabled" | "autocompleteId" | "enableIcons"
 		>,
 		TextFieldWithHelpProps {
@@ -68,7 +66,7 @@ export interface MultiSelectWithoutGroupProps<
 }
 
 const useStyles = makeStyles(
-	() => ({
+	{
 		outlined: {
 			float: "left",
 			backgroundColor: "#cce1f6",
@@ -82,15 +80,12 @@ const useStyles = makeStyles(
 			lineHeight: "30px",
 			float: "left",
 		},
-	}),
+	},
 	{ name: "CcMultiSelectWithoutGroup" }
 );
 
-const MultiSelectWithoutGroup = <
-	DataT extends MultiSelectorData,
-	GroupT extends BaseSelectorData
->(
-	props: MultiSelectWithoutGroupProps<DataT, GroupT>
+const MultiSelectWithoutGroup = <DataT extends MultiSelectorData>(
+	props: MultiSelectWithoutGroupProps<DataT>
 ) => {
 	const {
 		searchInputLabel,

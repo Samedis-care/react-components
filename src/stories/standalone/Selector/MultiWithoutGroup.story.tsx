@@ -3,7 +3,6 @@ import "../../../i18n";
 import {
 	MultiSelectWithoutGroup,
 	MultiSelectorData,
-	BaseSelectorData,
 } from "../../../standalone/Selector";
 import { colourOptions } from "./Data";
 import { action } from "@storybook/addon-actions";
@@ -41,7 +40,7 @@ export const MultiWithoutGroup = (): React.ReactElement => {
 	const dialogButtonClick = action("onClose");
 
 	return (
-		<MultiSelectWithoutGroup<MultiWithoutGroupData, BaseSelectorData>
+		<MultiSelectWithoutGroup<MultiWithoutGroupData>
 			selected={selected}
 			onChange={setSelected}
 			searchInputLabel={title}

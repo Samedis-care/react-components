@@ -18,16 +18,6 @@ import MultiSelectWithoutGroup, {
 import { BaseSelectorData } from "./BaseSelector";
 import { uniqueArray } from "../../utils";
 
-interface SelectedGroup {
-	/**
-	 * ID of the Group
-	 */
-	group: string;
-	/**
-	 * IDs of the selected items
-	 */
-	items: string[];
-}
 export interface MultiSelectWithTagsProps<
 	DataT extends MultiSelectorData,
 	GroupT extends BaseSelectorData
@@ -36,7 +26,7 @@ export interface MultiSelectWithTagsProps<
 			"disabled" | "noOptionsText" | "loadingText"
 		>,
 		Omit<
-			MultiSelectWithoutGroupProps<MultiSelectorData, BaseSelectorData>,
+			MultiSelectWithoutGroupProps<DataT>,
 			"classes" | "onChange" | "dataOptions" | "setDataOptions"
 		> {
 	// UI Props
@@ -51,10 +41,9 @@ export interface MultiSelectWithTagsProps<
 	/**
 	 * Custom styles for multi select without groups
 	 */
-	subClasses?: MultiSelectWithoutGroupProps<
-		MultiSelectorData,
-		BaseSelectorData
-	>["classes"];
+	subClasses?: {
+		dataSelector: MultiSelectWithoutGroupProps<DataT>["classes"];
+	};
 	/**
 	 * Label for switch control (only used if displaySwitch is truthy)
 	 */
@@ -72,15 +61,6 @@ export interface MultiSelectWithTagsProps<
 	 */
 	loadGroupEntries: (group: GroupT) => DataT[] | Promise<DataT[]>;
 	/**
-	 * Search callback which is called to load available group entries
-	 * @param query The search string
-	 * @param switchValue The value of the switch or false if switch is disabled
-	 */
-	loadGroupOptions: (
-		query: string,
-		switchValue: boolean
-	) => GroupT[] | Promise<GroupT[]>;
-	/**
 	 * Search callback which is called to load available data entries
 	 * @param query The search string
 	 * @param switchValue The value of the switch or false if switch is disabled
@@ -89,6 +69,26 @@ export interface MultiSelectWithTagsProps<
 		query: string,
 		switchValue: boolean
 	) => DataT[] | Promise<DataT[]>;
+	/**
+	 * Search callback which is called to load available group entries
+	 * @param query The search string
+	 * @param switchValue The value of the switch or false if switch is disabled
+	 */
+	loadGroupOptions: (
+		query: string,
+		switchValue: boolean
+	) => GroupT[] | Promise<GroupT[]>;
+}
+
+interface SelectedGroup {
+	/**
+	 * ID of the Group
+	 */
+	group: string;
+	/**
+	 * IDs of the selected items
+	 */
+	items: string[];
 }
 
 const useStyles = makeStyles(
@@ -183,27 +183,20 @@ const MultiSelectWithTags = <
 	const [selectedGroups, setSelectedGroups] = useState<SelectedGroup[]>([]);
 	const [switchValue, setSwitchValue] = useState(defaultSwitchValue);
 
+	// set switch value if switch visibility is toggled
 	useEffect(() => {
 		setSwitchValue(defaultSwitchValue);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [!!props.displaySwitch]);
+
+	// remove selected groups if an item has been unselected
 	useEffect(() => {
-		selectedGroups.forEach((selectedGroup) => {
-			const filteredTypes = selected.filter((option) => {
-				return option.type === selectedGroup.group;
-			});
-			if (filteredTypes) {
-				if (filteredTypes.length < selectedGroup.items.length) {
-					filteredTypes.forEach((selectedOption) => {
-						setSelectedGroups((selectedGroups) =>
-							selectedGroups.filter(
-								(group) => !group.items.includes(selectedOption.value)
-							)
-						);
-					});
-				}
-			}
-		});
+		const selectedIds = selected.map((entry) => entry.value);
+		setSelectedGroups((oldSelectedGroups) =>
+			oldSelectedGroups.filter(
+				(group) => !group.items.find((item) => !selectedIds.includes(item))
+			)
+		);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [selected]);
 
@@ -277,9 +270,9 @@ const MultiSelectWithTags = <
 						</Grid>
 					</Typography>
 				)}
-				<MultiSelectWithoutGroup<DataT, GroupT>
+				<MultiSelectWithoutGroup<DataT>
 					autocompleteId={autocompleteId}
-					selected={selected as DataT[]}
+					selected={selected}
 					disabled={disabled}
 					searchInputLabel={searchInputLabel}
 					enableIcons={enableIcons}
