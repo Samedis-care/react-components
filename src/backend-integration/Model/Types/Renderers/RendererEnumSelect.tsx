@@ -19,13 +19,16 @@ type RendererEnumSelectProps = Omit<
 	"selected" | "onLoad" | "onSelect" | "disabled"
 >;
 
+export type AdvancedEnumValue = Omit<BaseSelectorData, "label"> &
+	Pick<EnumValue, "getLabel">;
+
 /**
  * Renders TypeEnum as drop-down selector (with search)
  */
 class RendererEnumSelect extends TypeEnum {
 	private props?: RendererEnumSelectProps;
 
-	constructor(values: EnumValue[], props?: RendererEnumSelectProps) {
+	constructor(values: AdvancedEnumValue[], props?: RendererEnumSelectProps) {
 		super(values);
 		this.props = props;
 	}
@@ -56,10 +59,12 @@ class RendererEnumSelect extends TypeEnum {
 		if (visibility.editable) {
 			if (visibility.grid) throw new Error("Not supported");
 
-			const data: BaseSelectorData[] = this.values.map((entry) => ({
-				value: entry.value,
-				label: entry.getLabel(),
-			}));
+			const data: BaseSelectorData[] = (this.values as AdvancedEnumValue[]).map(
+				(entry) => ({
+					...entry,
+					label: entry.getLabel(),
+				})
+			);
 			const selected = data.find((entry) => entry.value === value) || null;
 
 			const onLoad = (query: string) =>
