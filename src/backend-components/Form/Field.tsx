@@ -11,6 +11,14 @@ interface FieldProps {
 	 * The name of the field as specified in the model
 	 */
 	name: string;
+	/**
+	 * Overrides for the model information
+	 */
+	overrides?:
+		| Partial<ModelFieldDefinition<unknown, string, PageVisibility, never>>
+		| ((
+				original: ModelFieldDefinition<unknown, string, PageVisibility, never>
+		  ) => ModelFieldDefinition<unknown, string, PageVisibility, never>);
 }
 
 const Field = (props: FieldProps): React.ReactElement => {
@@ -30,10 +38,17 @@ const Field = (props: FieldProps): React.ReactElement => {
 
 	const { setError, model } = formContext;
 
-	const fieldDef: ModelFieldDefinition<unknown, string, PageVisibility, never> =
+	let fieldDef: ModelFieldDefinition<unknown, string, PageVisibility, never> =
 		model.fields[props.name];
 
 	if (!fieldDef) throw new Error("Invalid field name specified: " + props.name);
+	if (props.overrides) {
+		if (typeof props.overrides === "function") {
+			fieldDef = props.overrides(fieldDef);
+		} else if (typeof props.overrides === "object") {
+			Object.assign(fieldDef, props.overrides);
+		}
+	}
 
 	const { onChange, type, getRelationModel } = fieldDef;
 

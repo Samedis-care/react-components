@@ -13,9 +13,13 @@ import { SvgIconComponent } from "@material-ui/icons";
 
 export interface IDataGridHeaderProps {
 	/**
-	 * The filter bar component for rendering custom filters
+	 * The filter bar component for rendering custom filters (also used in custom filter dialog)
 	 */
 	filterBar?: React.ComponentType<IDataGridFilterBarProps>;
+	/**
+	 * Media query that enables the custom filter dialog mode (if matches)
+	 */
+	enableFilterDialogMediaQuery?: string;
 	/**
 	 * List of available export providers
 	 */

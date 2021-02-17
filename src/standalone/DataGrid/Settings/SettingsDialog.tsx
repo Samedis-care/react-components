@@ -19,7 +19,7 @@ import i18n from "../../../i18n";
 
 export interface IDataGridSettingsDialogProps extends IDataGridColumnProps {
 	/**
-	 * Callback to close settins pop-over
+	 * Callback to close settings pop-over
 	 */
 	closeGridSettings: () => void;
 	/**
@@ -57,7 +57,7 @@ const SettingsDialog = (props: IDataGridSettingsDialogProps) => {
 	const classes = useDataGridStyles();
 
 	return (
-		<Paper elevation={0} className={classes.settingsPaper}>
+		<Paper elevation={0} className={classes.contentOverlayPaper}>
 			<Typography variant={"h6"}>
 				{i18n.t("standalone.data-grid.settings.lock") || ""}
 			</Typography>

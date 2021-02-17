@@ -44,7 +44,10 @@ const DataGridSettings = (props: IDataGridColumnProps) => {
 	);
 
 	return (
-		<Collapse className={classes.settingsCollapse} in={state.showSettings}>
+		<Collapse
+			className={classes.contentOverlayCollapse}
+			in={state.showSettings}
+		>
 			<Dialog
 				columns={props.columns}
 				closeGridSettings={closeGridSettings}
