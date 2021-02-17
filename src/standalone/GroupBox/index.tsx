@@ -15,6 +15,10 @@ const useStyles = makeStyles(
 			marginLeft: 0,
 			marginRight: 0,
 		},
+		legend: {
+			paddingInlineStart: 5,
+			paddingInlineEnd: 5,
+		},
 	},
 	{ name: "CcGroupBox" }
 );
@@ -44,7 +48,7 @@ const GroupBox = (props: GroupBoxProps) => {
 
 	return (
 		<fieldset id={id} className={classes.fieldSetRoot}>
-			{label && <legend>{label}</legend>}
+			{label && <legend className={classes.legend}>{label}</legend>}
 			{children}
 		</fieldset>
 	);
