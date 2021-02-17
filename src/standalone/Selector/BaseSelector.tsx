@@ -179,9 +179,7 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 	const [open, setOpen] = useState(false);
 	const actualAddNewLabel =
 		addNewLabel || i18n.t("standalone.selector.add-new");
-	const [selectorOptions, setSelectorOptions] = useState(
-		[] as BaseSelectorData[]
-	);
+	const [selectorOptions, setSelectorOptions] = useState<DataT[]>([]);
 	const [loading, setLoading] = useState(false);
 	const [query, setQuery] = useState("");
 
@@ -258,6 +256,8 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [selected]);
 
+	const filterOptions = useCallback((options: DataT[]) => options, []);
+
 	return (
 		<div>
 			<Autocomplete
@@ -282,6 +282,7 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 						? selectorOptions.concat([selected])
 						: selectorOptions
 				}
+				filterOptions={filterOptions}
 				value={selected}
 				inputValue={query}
 				onInputChange={updateQuery}
