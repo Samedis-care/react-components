@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import { boolean } from "@storybook/addon-knobs";
-import { MultiSelectWithCheckBox } from "../../../standalone/Selector";
-import { MultiSelectOption } from "../../../standalone/Selector/TypesMultiSelect";
+import {
+	MultiSelectorData,
+	MultiSelectWithCheckBox,
+} from "../../../standalone/Selector";
 
 const values: string[] = ["value1", "value2"];
-const options = [
+const options: MultiSelectorData[] = [
 	{ label: "Value 1", value: "value1" },
 	{ label: "Value 2", value: "value2" },
 	{ label: "Value 3", value: "value3" },
@@ -15,22 +17,16 @@ export const MultiSelectWithCheckBoxStory = (): React.ReactElement => {
 
 	const onChange = (event: React.ChangeEvent<{ value: unknown }>) => {
 		const values = event.target.value as string[];
-		if (values?.length > 0) setSelected(values);
-		else return;
+		setSelected(values);
 	};
 
-	const getSelected = (values: string[]) => {
-		if (values?.length > 0) {
-			const selectedOptions: string[] = [];
-			values.forEach((selectedValue: string) => {
-				let selectedOption: string | undefined = "";
-				selectedOption = options.find(
-					(option: MultiSelectOption) => option.value === selectedValue
-				)?.label;
-				if (selectedOption) selectedOptions.push(selectedOption);
-			});
-			return selectedOptions.join(",");
-		} else return;
+	const getSelected = (values: string[]): string => {
+		return values
+			.map(
+				(selected) => options.find((option) => option.value === selected)?.label
+			)
+			.filter((selected) => selected)
+			.join(", ");
 	};
 
 	return (
