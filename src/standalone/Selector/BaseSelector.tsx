@@ -286,6 +286,7 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 				filterOptions={filterOptions}
 				value={selected}
 				inputValue={query}
+				blurOnSelect={true}
 				onInputChange={updateQuery}
 				popupIcon={<ExpandMore />}
 				noOptionsText={noOptionsText}
