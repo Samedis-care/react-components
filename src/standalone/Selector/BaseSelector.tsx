@@ -245,17 +245,18 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 		setQuery(newQuery);
 	}, []);
 
-	// initial option load
+	// search handler
 	useEffect(() => {
 		if (!open) return;
 		void onSearchHandler(query);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [query, refreshToken]);
+	}, [query]);
 
+	// initial option load and reset options upon selection
 	useEffect(() => {
 		void onSearchHandler("");
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [selected]);
+	}, [selected, refreshToken]);
 
 	const filterOptions = useCallback((options: DataT[]) => options, []);
 
