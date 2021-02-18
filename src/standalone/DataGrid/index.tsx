@@ -758,6 +758,7 @@ const DataGrid = (props: DataGridProps) => {
 		hiddenColumns,
 		lockedColumns,
 		refreshData,
+		customData,
 	} = state;
 
 	const gridRoot = useRef<HTMLDivElement>();
@@ -916,7 +917,7 @@ const DataGrid = (props: DataGridProps) => {
 
 		resetView();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [resetView, search, columnsState, forceRefreshToken]);
+	}, [resetView, search, columnsState, customData, forceRefreshToken]);
 	return (
 		<Grid
 			container
