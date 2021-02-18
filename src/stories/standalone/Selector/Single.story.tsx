@@ -26,6 +26,8 @@ export const SelectorSingle = (): React.ReactElement => {
 	const disableSearch = boolean("Disable search?", false);
 	const icons = boolean("Enable Icons", false);
 	const disabled = boolean("Disable", false);
+	const grouped = boolean("Grouped", false);
+	const noGroupLabel = grouped ? text("No Group label", "No group") : "";
 	const addNewLabel = text("Add new label", "Add");
 	const loadingText = text("Loading Text", "Loading..");
 	const noOptionsText = text("No options Label", "No Option");
@@ -34,9 +36,11 @@ export const SelectorSingle = (): React.ReactElement => {
 	const loadData = useCallback(
 		(query: string): BaseSelectorData[] => {
 			loadDataAction(query);
-			return colourOptions.filter((option) =>
-				option.label.toLowerCase().includes(query.toLowerCase())
-			);
+			return colourOptions
+				.map((entry) => ({ ...entry, group: entry.type }))
+				.filter((option) =>
+					option.label.toLowerCase().includes(query.toLowerCase())
+				);
 		},
 		[loadDataAction]
 	);
@@ -66,6 +70,8 @@ export const SelectorSingle = (): React.ReactElement => {
 					noOptionsText={noOptionsText}
 					placeholder={placeholderLabel}
 					autocompleteId={"single-select"}
+					grouped={grouped}
+					noGroupLabel={noGroupLabel}
 					openInfo={() =>
 						showInfoDialog(pushDialog, {
 							title: dialogTitle,

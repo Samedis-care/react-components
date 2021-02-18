@@ -35,6 +35,10 @@ export interface BaseSelectorData {
 	 */
 	label: string;
 	/**
+	 * The group of this item
+	 */
+	group?: string;
+	/**
 	 * An optional icon or img src
 	 */
 	icon?: React.ReactNode | string;
@@ -118,6 +122,23 @@ export interface BaseSelectorProps<DataT extends BaseSelectorData>
 	 */
 	disableSearch?: boolean;
 	/**
+	 * Enable grouping
+	 */
+	grouped?: boolean;
+	/**
+	 * Label used if no group is set
+	 */
+	noGroupLabel?: string;
+	/**
+	 * Disable group sorting
+	 */
+	disableGroupSorting?: boolean;
+	/**
+	 * Group sorting algorithm
+	 * @see Array.sort
+	 */
+	groupSorter?: (a: DataT, b: DataT) => number;
+	/**
 	 * Custom styles to be used for selector
 	 */
 	classes?: AutocompleteProps<
@@ -171,6 +192,10 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 		loadingText,
 		disableClearable,
 		openInfo,
+		grouped,
+		noGroupLabel,
+		disableGroupSorting,
+		groupSorter,
 	} = props;
 	const classes = useThemeStyles(
 		(props as unknown) as BaseSelectorProps<BaseSelectorData>
@@ -235,10 +260,30 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 					isAddNewButton: true,
 				} as DataT);
 			}
-			setSelectorOptions(results);
+			if (grouped && !disableGroupSorting) {
+				setSelectorOptions(
+					results.sort(
+						groupSorter ??
+							((a, b) =>
+								-(b.group ?? noGroupLabel ?? "").localeCompare(
+									a.group ?? noGroupLabel ?? ""
+								))
+					)
+				);
+			} else {
+				setSelectorOptions(results);
+			}
 			setLoading(false);
 		},
-		[actualAddNewLabel, onAddNew, onLoad, setLoading]
+		[
+			onLoad,
+			onAddNew,
+			grouped,
+			disableGroupSorting,
+			actualAddNewLabel,
+			groupSorter,
+			noGroupLabel,
+		]
 	);
 
 	const updateQuery = useCallback((_, newQuery: string) => {
@@ -283,6 +328,11 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 					!selectorOptions.find((option) => option.value === selected.value)
 						? selectorOptions.concat([selected])
 						: selectorOptions
+				}
+				groupBy={
+					grouped
+						? (option: DataT) => option.group ?? noGroupLabel ?? ""
+						: undefined
 				}
 				filterOptions={filterOptions}
 				value={selected}
