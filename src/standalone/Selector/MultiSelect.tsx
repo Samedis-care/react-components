@@ -20,24 +20,21 @@ export interface MultiSelectorData extends BaseSelectorData {
 	canUnselect?: (data: MultiSelectorData) => boolean | Promise<boolean>;
 }
 
-export interface MultiSelectProps
-	extends Omit<
-		BaseSelectorProps<MultiSelectorData>,
-		"onSelect" | "selected" | "classes"
-	> {
+export interface MultiSelectProps<DataT extends MultiSelectorData>
+	extends Omit<BaseSelectorProps<DataT>, "onSelect" | "selected" | "classes"> {
 	/**
 	 * Extended selection change handler
 	 * @param data The selected data entry/entries
 	 */
-	onSelect?: (value: MultiSelectorData[]) => void;
+	onSelect?: (value: DataT[]) => void;
 	/**
 	 * The currently selected values
 	 */
-	selected: MultiSelectorData[];
+	selected: DataT[];
 	/**
 	 * Specify a custom component for displaying multi select items
 	 */
-	selectedEntryRenderer?: React.ComponentType<IMultiSelectEntryProps>;
+	selectedEntryRenderer?: React.ComponentType<IMultiSelectEntryProps<DataT>>;
 	/**
 	 * CSS classes to apply
 	 */
@@ -54,7 +51,7 @@ export interface MultiSelectProps
 
 const useBaseSelectorStyles = makeStyles(
 	{
-		inputRoot: (props: MultiSelectProps) => ({
+		inputRoot: (props: MultiSelectProps<MultiSelectorData>) => ({
 			borderRadius: props.selected.length > 0 ? "4px 4px 0px 0px" : undefined,
 		}),
 	},
@@ -76,7 +73,9 @@ const useMultiSelectorStyles = makeStyles(
 	{ name: "CcMultiSelect" }
 );
 
-const MultiSelect = (props: MultiSelectProps) => {
+const MultiSelect = <DataT extends MultiSelectorData>(
+	props: MultiSelectProps<DataT>
+) => {
 	const {
 		onLoad,
 		onSelect,
@@ -86,12 +85,18 @@ const MultiSelect = (props: MultiSelectProps) => {
 		disabled,
 	} = props;
 	const multiSelectClasses = useMultiSelectorStyles(props);
-	const baseSelectorClasses = useBaseSelectorStyles(cleanClassMap(props, true));
+	const baseSelectorClasses = useBaseSelectorStyles(
+		cleanClassMap(
+			(props as unknown) as MultiSelectProps<MultiSelectorData>,
+			true
+		)
+	);
 
-	const EntryRender = selectedEntryRenderer || MultiSelectEntry;
+	const EntryRender: React.ComponentType<IMultiSelectEntryProps<DataT>> =
+		selectedEntryRenderer || MultiSelectEntry;
 
 	const multiSelectHandler = useCallback(
-		(data: MultiSelectorData | null) => {
+		(data: DataT | null) => {
 			if (!data) return;
 			const selectedOptions = [...selected, data];
 			if (onSelect) onSelect(selectedOptions);
@@ -136,6 +141,18 @@ const MultiSelect = (props: MultiSelectProps) => {
 		[onSelect, selected]
 	);
 
+	const handleSetData = useCallback(
+		(newValue: DataT) => {
+			if (!onSelect) return;
+			onSelect(
+				selected.map((entry) =>
+					entry.value === newValue.value ? newValue : entry
+				)
+			);
+		},
+		[onSelect, selected]
+	);
+
 	return (
 		<Paper elevation={0} className={multiSelectClasses.paperWrapper}>
 			<Grid container>
@@ -154,13 +171,14 @@ const MultiSelect = (props: MultiSelectProps) => {
 				</Grid>
 				{props.selected.length > 0 && (
 					<Grid item xs={12} className={multiSelectClasses.selectedEntries}>
-						{props.selected.map((data: MultiSelectorData, index: number) => (
+						{props.selected.map((data: DataT, index: number) => (
 							<EntryRender
 								key={data.value}
 								enableDivider={props.selected.length === index - 1}
 								enableIcons={enableIcons}
 								handleDelete={disabled ? undefined : handleDelete}
 								data={data}
+								setData={handleSetData}
 							/>
 						))}
 					</Grid>
@@ -170,4 +188,4 @@ const MultiSelect = (props: MultiSelectProps) => {
 	);
 };
 
-export default React.memo(MultiSelect);
+export default React.memo(MultiSelect) as typeof MultiSelect;

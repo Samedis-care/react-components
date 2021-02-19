@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useState } from "react";
 import {
 	MultiSelect,
-	MultiSelectorData,
 	MultiSelectProps,
+	MultiSelectorData,
 } from "../../standalone";
 import Model, {
 	ModelFieldName,
@@ -14,8 +14,9 @@ import { isObjectEmpty } from "../../utils";
 export interface BackendMultiSelectProps<
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
-	CustomT
-> extends Omit<MultiSelectProps, "onLoad" | "selected" | "onSelect"> {
+	CustomT,
+	DataT extends MultiSelectorData
+> extends Omit<MultiSelectProps<DataT>, "onLoad" | "selected" | "onSelect"> {
 	/**
 	 * The model to use
 	 */
@@ -26,7 +27,7 @@ export interface BackendMultiSelectProps<
 	 */
 	modelToSelectorData: (
 		modelData: Record<KeyT, unknown>
-	) => Promise<MultiSelectorData> | MultiSelectorData;
+	) => Promise<DataT> | DataT;
 	/**
 	 * The amount of search results to load (defaults to 25)
 	 */
@@ -34,8 +35,9 @@ export interface BackendMultiSelectProps<
 	/**
 	 * Selection change handler
 	 * @param data The selected data entry/entries values
+	 * @param raw The selected data entry/entries
 	 */
-	onSelect?: (value: string[]) => void;
+	onSelect?: (value: string[], raw: DataT[]) => void;
 	/**
 	 * The currently selected values
 	 */
@@ -46,36 +48,44 @@ export interface BackendMultiSelectProps<
 	initialData?: Record<KeyT, unknown>[];
 }
 
-interface UseSelectedCacheResult {
-	selected: MultiSelectorData[];
-	handleSelect: (selected: MultiSelectorData[]) => void;
+interface UseSelectedCacheResult<DataT extends MultiSelectorData> {
+	/**
+	 * The currently selected entries
+	 */
+	selected: DataT[];
+	/**
+	 * Event handler for the selection event
+	 */
+	handleSelect: (selected: DataT[]) => void;
 }
 
 export const useSelectedCache = <
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
-	CustomT
+	CustomT,
+	DataT extends MultiSelectorData
 >(
 	props: Pick<
-		BackendMultiSelectProps<KeyT, VisibilityT, CustomT>,
+		BackendMultiSelectProps<KeyT, VisibilityT, CustomT, DataT>,
 		"model" | "modelToSelectorData" | "onSelect" | "selected" | "initialData"
 	>
-): UseSelectedCacheResult => {
+): UseSelectedCacheResult<DataT> => {
 	const { model, modelToSelectorData, onSelect, selected, initialData } = props;
 
-	const [selectedCache, setSelectedCache] = useState<
-		Record<string, MultiSelectorData>
-	>({});
+	const [selectedCache, setSelectedCache] = useState<Record<string, DataT>>({});
 
 	const handleSelect = useCallback(
-		(selected: MultiSelectorData[]) => {
+		(selected: DataT[]) => {
 			setSelectedCache((cache) => {
 				const newCache = { ...cache };
 				selected.forEach((entry) => (newCache[entry.value] = entry));
 				return newCache;
 			});
 			if (onSelect) {
-				onSelect(selected.map((entry) => entry.value));
+				onSelect(
+					selected.map((entry) => entry.value),
+					selected
+				);
 			}
 		},
 		[onSelect]
@@ -84,7 +94,7 @@ export const useSelectedCache = <
 	// fetch missing data entries
 	useEffect(() => {
 		void (async () => {
-			const newCache: Record<string, MultiSelectorData> = {};
+			const newCache: Record<string, DataT | MultiSelectorData> = {};
 			if (initialData && isObjectEmpty(selectedCache)) {
 				// process initial data
 				await Promise.all(
@@ -130,12 +140,18 @@ export const useSelectedCache = <
 	};
 };
 
+/**
+ * Backend connected MultiSelect
+ * @remarks Doesn't support custom data
+ * @constructor
+ */
 const BackendMultiSelect = <
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
-	CustomT
+	CustomT,
+	DataT extends MultiSelectorData
 >(
-	props: BackendMultiSelectProps<KeyT, VisibilityT, CustomT>
+	props: BackendMultiSelectProps<KeyT, VisibilityT, CustomT, DataT>
 ) => {
 	const {
 		model,

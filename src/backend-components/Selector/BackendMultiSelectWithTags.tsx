@@ -87,6 +87,11 @@ export interface BackendMultiSelectWithTagsProps<
 	switchFilterNameData?: string;
 }
 
+/**
+ * Backend connected MultiSelectWithTags
+ * @remarks Doesn't support custom data
+ * @constructor
+ */
 const BackendMultiSelectWithTags = <
 	GroupKeyT extends ModelFieldName,
 	DataKeyT extends ModelFieldName,

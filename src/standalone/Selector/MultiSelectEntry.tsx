@@ -4,17 +4,15 @@ import {
 	List,
 	ListItemSecondaryAction,
 	ListItemText,
-	withStyles,
-	createStyles,
-	WithStyles,
 	makeStyles,
 	Theme,
 } from "@material-ui/core";
 import { SmallIconButton, SmallListItem, SmallListItemIcon } from "../Small";
 import { Delete as DeleteIcon } from "@material-ui/icons";
 import { MultiSelectorData } from "./MultiSelect";
+import { ClassNameMap } from "@material-ui/styles/withStyles";
 
-export interface IMultiSelectEntryProps {
+export interface IMultiSelectEntryProps<DataT extends MultiSelectorData> {
 	/**
 	 * Should we show icons?
 	 */
@@ -31,16 +29,18 @@ export interface IMultiSelectEntryProps {
 	/**
 	 * The data entry to render
 	 */
-	data: MultiSelectorData;
+	data: DataT;
+	/**
+	 * Sets the data for this entry
+	 * @remarks The data.value identifies the entry to be changed
+	 */
+	setData: (newValue: DataT) => void;
 }
-
-const styles = createStyles(() => ({
-	root: {},
-	divider: {},
-}));
 
 const useStyles = makeStyles(
 	(theme: Theme) => ({
+		root: {},
+		divider: {},
 		container: {
 			border: theme.componentsCare?.selector?.selected?.container?.border,
 			borderRadius:
@@ -76,31 +76,33 @@ const useStyles = makeStyles(
 	{ name: "CcMultiSelectEntry" }
 );
 
-const MultiSelectEntry = (props: IMultiSelectEntryProps & WithStyles) => {
-	const { enableIcons, enableDivider, handleDelete, data, classes } = props;
-	const styleClasses = useStyles(props);
+const MultiSelectEntry = <DataT extends MultiSelectorData>(
+	props: IMultiSelectEntryProps<DataT> & {
+		classes?: ClassNameMap<keyof ReturnType<typeof useStyles>>;
+	}
+) => {
+	const { enableIcons, enableDivider, handleDelete, data } = props;
+	const classes = useStyles(props);
 
 	return (
 		<>
-			<List className={[classes.root, styleClasses.container].join(" ")}>
+			<List className={[classes.root, classes.container].join(" ")}>
 				<SmallListItem
 					button
 					onClick={data.onClick}
-					className={styleClasses.selected}
+					className={classes.selected}
 				>
 					{enableIcons && <SmallListItemIcon>{data.icon}</SmallListItemIcon>}
-					<ListItemText className={styleClasses.label}>
-						{data.label}
-					</ListItemText>
+					<ListItemText className={classes.label}>{data.label}</ListItemText>
 					<ListItemSecondaryAction>
 						<SmallIconButton
-							className={styleClasses.icon}
+							className={classes.icon}
 							edge={"end"}
 							name={data.value}
 							disabled={!handleDelete}
 							onClick={handleDelete}
 						>
-							<DeleteIcon className={styleClasses.iconSvg} />
+							<DeleteIcon className={classes.iconSvg} />
 						</SmallIconButton>
 					</ListItemSecondaryAction>
 				</SmallListItem>
@@ -110,4 +112,4 @@ const MultiSelectEntry = (props: IMultiSelectEntryProps & WithStyles) => {
 	);
 };
 
-export default withStyles(styles)(React.memo(MultiSelectEntry));
+export default React.memo(MultiSelectEntry) as typeof MultiSelectEntry;

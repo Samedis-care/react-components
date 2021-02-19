@@ -6,6 +6,7 @@ import BackendMultiSelect, {
 	BackendMultiSelectProps,
 } from "../../../../backend-components/Selector/BackendMultiSelect";
 import Model from "../../Model";
+import { MultiSelectorData } from "../../../../standalone";
 
 type OmitProperties =
 	| "selected"
@@ -23,13 +24,13 @@ class RendererBackendMultiSelect<
 	CustomT
 > extends TypeStringArray {
 	private readonly props: Omit<
-		BackendMultiSelectProps<KeyT, VisibilityT, CustomT>,
+		BackendMultiSelectProps<KeyT, VisibilityT, CustomT, MultiSelectorData>,
 		OmitProperties
 	>;
 
 	constructor(
 		props: Omit<
-			BackendMultiSelectProps<KeyT, VisibilityT, CustomT>,
+			BackendMultiSelectProps<KeyT, VisibilityT, CustomT, MultiSelectorData>,
 			OmitProperties
 		>
 	) {
