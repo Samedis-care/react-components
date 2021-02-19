@@ -28,7 +28,7 @@ void ccI18n
 		supportedLngs: langs,
 		nonExplicitSupportedLngs: true,
 		fallbackLng: "en",
-		debug: true,
+		debug: process.env.NODE_ENV !== "production",
 		resources: langVals,
 
 		interpolation: {
