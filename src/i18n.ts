@@ -26,6 +26,7 @@ void ccI18n
 		ns: ["translation"],
 		defaultNS: "translation",
 		supportedLngs: langs,
+		nonExplicitSupportedLngs: true,
 		fallbackLng: "en",
 		debug: true,
 		resources: langVals,
