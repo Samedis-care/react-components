@@ -166,4 +166,4 @@ const CrudMultiSelect = <
 	);
 };
 
-export default React.memo(CrudMultiSelect);
+export default React.memo(CrudMultiSelect) as typeof CrudMultiSelect;
