@@ -166,7 +166,11 @@ const CrudMultiSelect = <
 				{...props}
 				selected={selected.map((entry) => entry.value)}
 				onSelect={handleSelect}
-				modelToSelectorData={deserializeModel}
+				modelToSelectorData={(data: Record<KeyT, unknown>) =>
+					initialRawData.includes(data)
+						? deserialize(data)
+						: deserializeModel(data)
+				}
 				initialData={initialRawData}
 			/>
 		</>
