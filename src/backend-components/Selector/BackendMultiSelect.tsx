@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
 	MultiSelect,
 	MultiSelectProps,
@@ -9,7 +9,7 @@ import Model, {
 	PageVisibility,
 } from "../../backend-integration/Model/Model";
 import ccI18n from "../../i18n";
-import { isObjectEmpty } from "../../utils";
+import { debouncePromise, isObjectEmpty } from "../../utils";
 
 export interface BackendMultiSelectProps<
 	KeyT extends ModelFieldName,
@@ -21,6 +21,11 @@ export interface BackendMultiSelectProps<
 	 * The model to use
 	 */
 	model: Model<KeyT, VisibilityT, CustomT>;
+	/**
+	 * The debounce time for search in ms
+	 * @default 500
+	 */
+	searchDebounceTime?: number;
 	/**
 	 * Callback that converts the model data to the actual data displayed in the selector
 	 * @param modelData The model data
@@ -163,6 +168,7 @@ const BackendMultiSelect = <
 		selected: selectedIds,
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		initialData,
+		searchDebounceTime,
 		...otherProps
 	} = props;
 
@@ -180,10 +186,15 @@ const BackendMultiSelect = <
 		[model, modelToSelectorData, searchResultLimit]
 	);
 
+	const debouncedLoad = useMemo(
+		() => debouncePromise(handleLoad, searchDebounceTime ?? 500),
+		[searchDebounceTime, handleLoad]
+	);
+
 	return (
 		<MultiSelect
 			{...otherProps}
-			onLoad={handleLoad}
+			onLoad={debouncedLoad}
 			onSelect={handleSelect}
 			selected={selected}
 		/>

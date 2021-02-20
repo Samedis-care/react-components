@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
 	BaseSelectorData,
 	SingleSelect,
@@ -9,6 +9,7 @@ import Model, {
 	PageVisibility,
 } from "../../backend-integration/Model/Model";
 import ccI18n from "../../i18n";
+import { debouncePromise } from "../../utils";
 
 export interface BackendSingleSelectProps<
 	KeyT extends ModelFieldName,
@@ -22,6 +23,11 @@ export interface BackendSingleSelectProps<
 	 * The model to use
 	 */
 	model: Model<KeyT, VisibilityT, CustomT>;
+	/**
+	 * The debounce time for search in ms
+	 * @default 500
+	 */
+	searchDebounceTime?: number;
 	/**
 	 * Callback that converts the model data to the actual data displayed in the selector
 	 * @param modelData The model data
@@ -62,6 +68,7 @@ const BackendSingleSelect = <
 		onSelect,
 		selected,
 		initialData,
+		searchDebounceTime,
 		...otherProps
 	} = props;
 
@@ -126,10 +133,15 @@ const BackendSingleSelect = <
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [selected]);
 
+	const debouncedLoad = useMemo(
+		() => debouncePromise(handleLoad, searchDebounceTime ?? 500),
+		[handleLoad, searchDebounceTime]
+	);
+
 	return (
 		<SingleSelect
 			{...otherProps}
-			onLoad={handleLoad}
+			onLoad={debouncedLoad}
 			onSelect={handleSelect}
 			selected={
 				selected

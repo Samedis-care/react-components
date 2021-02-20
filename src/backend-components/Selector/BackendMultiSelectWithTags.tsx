@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useMemo } from "react";
 import {
 	BaseSelectorData,
 	MultiSelectorData,
@@ -12,6 +12,7 @@ import {
 	PageVisibility,
 } from "../../backend-integration";
 import { useSelectedCache } from "./BackendMultiSelect";
+import { debouncePromise } from "../../utils";
 
 export interface BackendMultiSelectWithTagsProps<
 	GroupKeyT extends ModelFieldName,
@@ -85,6 +86,16 @@ export interface BackendMultiSelectWithTagsProps<
 	 * Name of the switch filter for data or undefined if disabled
 	 */
 	switchFilterNameData?: string;
+	/**
+	 * The debounce time in ms to wait for group searches
+	 * @default 500
+	 */
+	groupSearchDebounceTime?: number;
+	/**
+	 * The debounce time in ms to wait for data searches
+	 * @default 500
+	 */
+	dataSearchDebounceTime?: number;
 }
 
 /**
@@ -119,6 +130,8 @@ const BackendMultiSelectWithTags = <
 		switchFilterNameGroup,
 		initialData,
 		onChange,
+		groupSearchDebounceTime,
+		dataSearchDebounceTime,
 		selected: selectedIds,
 		...selectorProps
 	} = props;
@@ -164,14 +177,23 @@ const BackendMultiSelectWithTags = <
 		[convData, dataModel, switchFilterNameData]
 	);
 
+	const debouncedGroupLoad = useMemo(
+		() => debouncePromise(loadGroupOptions, groupSearchDebounceTime ?? 500),
+		[groupSearchDebounceTime, loadGroupOptions]
+	);
+	const debouncedDataLoad = useMemo(
+		() => debouncePromise(loadDataOptions, dataSearchDebounceTime ?? 500),
+		[dataSearchDebounceTime, loadDataOptions]
+	);
+
 	return (
 		<MultiSelectWithTags
 			{...selectorProps}
 			onChange={handleSelect}
 			selected={selected}
 			loadGroupEntries={loadGroupEntries}
-			loadDataOptions={loadDataOptions}
-			loadGroupOptions={loadGroupOptions}
+			loadDataOptions={debouncedDataLoad}
+			loadGroupOptions={debouncedGroupLoad}
 			displaySwitch={!!(switchFilterNameGroup || switchFilterNameData)}
 		/>
 	);
