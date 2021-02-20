@@ -46,7 +46,9 @@ export interface CrudMultiSelectProps<
 	 * @param data The data from the backend connector (index function)
 	 * @returns The selector data which can be used by the control
 	 */
-	deserializeModel: (data: Record<KeyT, unknown>) => Promise<DataT> | DataT;
+	deserializeModel: (
+		data: Record<KeyT, unknown>
+	) => Promise<Omit<DataT, "value">> | Omit<DataT, "value">;
 }
 
 const CrudMultiSelect = <
@@ -78,6 +80,11 @@ const CrudMultiSelect = <
 			const newEntries = newSelected.filter(
 				(entry) => !selected.find((selEntry) => selEntry.value === entry.value)
 			);
+			// remove new entries from array
+			newSelected = newSelected.filter((entry) =>
+				selected.find((selEntry) => selEntry.value === entry.value)
+			);
+
 			const changedEntries = newSelected.filter((entry) => {
 				const oldEntry = selected.find(
 					(selEntry) => selEntry.value === entry.value
@@ -118,17 +125,21 @@ const CrudMultiSelect = <
 
 			try {
 				// wait for response
-				await createPromise;
+				const created = await createPromise;
 				await updatePromise;
 				await deletePromise;
 
 				// reflect changes
-				setSelected(newSelected);
+				setSelected(
+					newSelected.concat(
+						await Promise.all(created.map((entry) => deserialize(entry[0])))
+					)
+				);
 			} catch (e) {
 				setError(e);
 			}
 		},
-		[connector, selected, serialize]
+		[connector, deserialize, selected, serialize]
 	);
 
 	// initial load
@@ -166,10 +177,15 @@ const CrudMultiSelect = <
 				{...props}
 				selected={selected.map((entry) => entry.value)}
 				onSelect={handleSelect}
-				modelToSelectorData={(data: Record<KeyT, unknown>) =>
+				modelToSelectorData={async (
+					data: Record<KeyT, unknown>
+				): Promise<DataT> =>
 					initialRawData.includes(data)
 						? deserialize(data)
-						: deserializeModel(data)
+						: ({
+								...(await deserializeModel(data)),
+								value: "to-create-" + Math.random().toString(),
+						  } as DataT)
 				}
 				initialData={initialRawData}
 			/>
