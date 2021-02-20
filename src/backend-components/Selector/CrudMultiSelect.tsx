@@ -17,7 +17,7 @@ export interface CrudMultiSelectProps<
 	DataT extends MultiSelectorData
 > extends Omit<
 		BackendMultiSelectProps<KeyT, VisibilityT, CustomT, DataT>,
-		"modelToSelectorData" | "initialData"
+		"modelToSelectorData" | "initialData" | "selected" | "onSelect"
 	> {
 	/**
 	 * The backend connector used as CRUD interface
