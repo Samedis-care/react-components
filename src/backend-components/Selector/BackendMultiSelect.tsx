@@ -9,7 +9,7 @@ import Model, {
 	PageVisibility,
 } from "../../backend-integration/Model/Model";
 import ccI18n from "../../i18n";
-import { debouncePromise, isObjectEmpty } from "../../utils";
+import { debouncePromise } from "../../utils";
 
 export interface BackendMultiSelectProps<
 	KeyT extends ModelFieldName,
@@ -100,15 +100,20 @@ export const useSelectedCache = <
 	useEffect(() => {
 		void (async () => {
 			const newCache: Record<string, DataT | MultiSelectorData> = {};
-			if (initialData && isObjectEmpty(selectedCache)) {
+			if (initialData) {
 				// process initial data
 				await Promise.all(
-					initialData.map(
-						async (record) =>
-							(newCache[
-								record["id" as keyof typeof record] as string
-							] = await modelToSelectorData(record))
-					)
+					initialData
+						.filter(
+							(record) =>
+								!((record as Record<"id", string>).id in selectedCache)
+						)
+						.map(
+							async (record) =>
+								(newCache[
+									(record as Record<"id", string>).id
+								] = await modelToSelectorData(record))
+						)
 				);
 			}
 			await Promise.all(
