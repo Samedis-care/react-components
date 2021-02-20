@@ -327,10 +327,10 @@ export interface SubActionButtonProps extends Omit<ButtonProps, "children"> {
 }
 
 const SubActionButton = (props: SubActionButtonProps) => {
-	const { icon, small, children } = props;
+	const { icon, small, children, ...otherProps } = props;
 
 	const renderButton = (): React.ReactElement => (
-		<StyledButton variant={"outlined"} fullWidth={!small} {...props}>
+		<StyledButton variant={"outlined"} fullWidth={!small} {...otherProps}>
 			{icon} {!small && children}
 		</StyledButton>
 	);
