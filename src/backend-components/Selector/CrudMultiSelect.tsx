@@ -41,6 +41,12 @@ export interface CrudMultiSelectProps<
 	 * @returns The selector data which can be used by the control
 	 */
 	deserialize: (data: Record<string, unknown>) => Promise<DataT> | DataT;
+	/**
+	 * Callback for deserializing data from the model
+	 * @param data The data from the backend connector (index function)
+	 * @returns The selector data which can be used by the control
+	 */
+	deserializeModel: (data: Record<KeyT, unknown>) => Promise<DataT> | DataT;
 }
 
 const CrudMultiSelect = <
@@ -56,6 +62,7 @@ const CrudMultiSelect = <
 		errorComponent: ErrorComponent,
 		serialize,
 		deserialize,
+		deserializeModel,
 	} = props;
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<Error | null>(null);
@@ -159,7 +166,7 @@ const CrudMultiSelect = <
 				{...props}
 				selected={selected.map((entry) => entry.value)}
 				onSelect={handleSelect}
-				modelToSelectorData={deserialize}
+				modelToSelectorData={deserializeModel}
 				initialData={initialRawData}
 			/>
 		</>
