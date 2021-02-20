@@ -8,15 +8,19 @@ import {
 	Theme,
 } from "@material-ui/core";
 import { SmallIconButton, SmallListItem, SmallListItemIcon } from "../Small";
-import { Delete as DeleteIcon } from "@material-ui/icons";
 import { MultiSelectorData } from "./MultiSelect";
 import { ClassNameMap } from "@material-ui/styles/withStyles";
+import { RemoveIcon } from "../Icons";
 
 export interface IMultiSelectEntryProps<DataT extends MultiSelectorData> {
 	/**
 	 * Should we show icons?
 	 */
 	enableIcons?: boolean;
+	/**
+	 * The size of the icons
+	 */
+	iconSize?: number;
 	/**
 	 * Should we render a divider below
 	 */
@@ -66,6 +70,11 @@ const useStyles = makeStyles(
 			color: theme.componentsCare?.selector?.selected?.label?.color,
 			...theme.componentsCare?.selector?.selected?.label?.style,
 		},
+		image: (props: { iconSize?: number }) => ({
+			height: props.iconSize ?? 24,
+			width: props.iconSize ?? 24,
+			objectFit: "contain",
+		}),
 		icon: {
 			...theme.componentsCare?.selector?.selected?.icon?.style,
 		},
@@ -92,7 +101,15 @@ const MultiSelectEntry = <DataT extends MultiSelectorData>(
 					onClick={data.onClick}
 					className={classes.selected}
 				>
-					{enableIcons && <SmallListItemIcon>{data.icon}</SmallListItemIcon>}
+					{enableIcons && (
+						<SmallListItemIcon>
+							{typeof data.icon === "string" ? (
+								<img src={data.icon} alt={""} className={classes.image} />
+							) : (
+								data.icon
+							)}
+						</SmallListItemIcon>
+					)}
 					<ListItemText className={classes.label}>{data.label}</ListItemText>
 					<ListItemSecondaryAction>
 						<SmallIconButton
@@ -102,7 +119,7 @@ const MultiSelectEntry = <DataT extends MultiSelectorData>(
 							disabled={!handleDelete}
 							onClick={handleDelete}
 						>
-							<DeleteIcon className={classes.iconSvg} />
+							<RemoveIcon className={classes.iconSvg} />
 						</SmallIconButton>
 					</ListItemSecondaryAction>
 				</SmallListItem>

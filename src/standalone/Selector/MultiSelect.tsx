@@ -179,6 +179,7 @@ const MultiSelect = <DataT extends MultiSelectorData>(
 								handleDelete={disabled ? undefined : handleDelete}
 								data={data}
 								setData={handleSetData}
+								iconSize={props.iconSize}
 							/>
 						))}
 					</Grid>
