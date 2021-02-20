@@ -125,14 +125,15 @@ const CrudMultiSelect = <
 
 			try {
 				// wait for response
-				const created = await createPromise;
+				const created = (await createPromise).map((e) => e[0]);
 				await updatePromise;
 				await deletePromise;
 
 				// reflect changes
+				setInitialRawData((oldRawData) => [...oldRawData, ...created]);
 				setSelected(
 					newSelected.concat(
-						await Promise.all(created.map((entry) => deserialize(entry[0])))
+						await Promise.all(created.map((entry) => deserialize(entry)))
 					)
 				);
 			} catch (e) {
