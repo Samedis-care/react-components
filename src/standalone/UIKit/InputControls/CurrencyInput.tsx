@@ -3,11 +3,8 @@ import { TextFieldProps } from "@material-ui/core";
 import TextFieldWithHelp, {
 	TextFieldWithHelpProps,
 } from "../TextFieldWithHelp";
-import {
-	parseLocalizedNumber,
-	useGlobalized,
-	useInputCursorFix,
-} from "../../../utils";
+import { parseLocalizedNumber, useInputCursorFix } from "../../../utils";
+import ccI18n from "../../../i18n";
 
 export interface CurrencyInputProps extends TextFieldWithHelpProps {
 	/**
@@ -33,10 +30,13 @@ const CurrencyInput = (
 	props: CurrencyInputProps & Omit<TextFieldProps, "onChange" | "value">
 ) => {
 	const { value, onChange, currency, ...muiProps } = props;
-	const globalized = useGlobalized();
 	const valueFormatted =
-		value !== null && globalized
-			? globalized.formatCurrency(value, currency)
+		value !== null
+			? value.toLocaleString(ccI18n.language, {
+					currency,
+					minimumFractionDigits: 2,
+					maximumFractionDigits: 2,
+			  })
 			: "";
 	const { handleCursorChange, cursorInputRef } = useInputCursorFix(
 		valueFormatted

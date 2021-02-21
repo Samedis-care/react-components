@@ -12,26 +12,6 @@ Take a look at our [Storybook](https://components-care.github.io/react-component
 
 > `yarn add "git://github.com/Components-care/react-components.git#master"`
 
-### Webpack configuration
-
-The following resolve aliases need to be configured in webpack:
-- `cldr$` -> `cldrjs`
-- `cldr` -> `cldrjs/dist/cldr`
-
-If you're using create-react-app and don't want to eject take a look at [react-app-rewired](https://www.npmjs.com/package/react-app-rewired).
-```js
-/* config-overrides.js */
-
-module.exports = function override(config, env) {
-  config.resolve.alias = {
-    ...config.resolve.alias,
-    cldr$: "cldrjs",
-    cldr: "cldrjs/dist/cldr",
-  };
-  return config;
-};
-```
-
 ## Overview
 
 The aim of this project is to provide a solid fundation for developing complex React based web applications.
@@ -64,7 +44,7 @@ Used Libraries:
 
 ### Running the developer environment (Storybook)
 
-1. Run `npm install`
+1. Run `npx --no-install npm@7.x install`
 2. Run `npm start`
 
 ### Path overview

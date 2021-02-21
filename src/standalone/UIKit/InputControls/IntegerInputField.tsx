@@ -3,7 +3,8 @@ import { TextFieldProps } from "@material-ui/core";
 import TextFieldWithHelp, {
 	TextFieldWithHelpProps,
 } from "../TextFieldWithHelp";
-import { useGlobalized, useInputCursorFix } from "../../../utils";
+import { useInputCursorFix } from "../../../utils";
+import ccI18n from "../../../i18n";
 
 export interface IntegerInputFieldProps extends TextFieldWithHelpProps {
 	/**
@@ -25,9 +26,8 @@ const IntegerInputField = (
 	props: IntegerInputFieldProps & Omit<TextFieldProps, "onChange" | "value">
 ) => {
 	const { value, onChange, ...muiProps } = props;
-	const globalized = useGlobalized();
 	const valueFormatted =
-		value !== null && globalized ? globalized.formatNumber(value) : "";
+		value !== null ? value.toLocaleString(ccI18n.language) : "";
 	const { handleCursorChange, cursorInputRef } = useInputCursorFix(
 		valueFormatted
 	);
