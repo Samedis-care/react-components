@@ -1,4 +1,8 @@
-import { SelectorTheme, SelectorThemeExpert } from "./standalone";
+import {
+	MultiSelectWithCheckBoxTheme,
+	SelectorTheme,
+	SelectorThemeExpert,
+} from "./standalone";
 import { DataGridTheme, DataGridThemeExpert } from "./standalone/DataGrid";
 import { MenuTheme } from "./standalone/Portal/Menu";
 import { MenuItemTheme } from "./standalone/Portal/MenuItem/Material";
@@ -31,6 +35,7 @@ export interface ComponentsCareTheme {
 		menuItem?: MenuItemTheme;
 	};
 	selector?: SelectorTheme;
+	selectorWithCheckbox?: MultiSelectWithCheckBoxTheme;
 	uiKit?: {
 		label?: ComponentWithLabelTheme;
 		checkbox?: CheckboxTheme;

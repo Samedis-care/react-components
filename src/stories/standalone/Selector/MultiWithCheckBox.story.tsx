@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { boolean } from "@storybook/addon-knobs";
+import { boolean, text } from "@storybook/addon-knobs";
 import {
 	MultiSelectorData,
 	MultiSelectWithCheckBox,
@@ -32,7 +32,8 @@ export const MultiSelectWithCheckBoxStory = (): React.ReactElement => {
 	return (
 		<MultiSelectWithCheckBox
 			values={selected}
-			placeholder={"Select.."}
+			label={text("Label", "Example label")}
+			placeholder={text("Placeholder", "Select..")}
 			fullWidth={boolean("100% Width", true)}
 			options={options}
 			onChange={onChange}
