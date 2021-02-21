@@ -123,6 +123,10 @@ export interface IDataGridCallbacks {
 	getAdditionalFilters?: (
 		customData: DataGridCustomDataType
 	) => DataGridAdditionalFilters;
+	/**
+	 * Optional initial values for customData
+	 */
+	initialCustomData?: Record<string, unknown>;
 }
 
 export type DataGridAdditionalFilters = Record<string, unknown>;
@@ -746,14 +750,21 @@ export const getActiveDataGridColumns = (
 };
 
 const DataGrid = (props: DataGridProps) => {
-	const { columns, loadData, getAdditionalFilters, forceRefreshToken } = props;
+	const {
+		columns,
+		loadData,
+		getAdditionalFilters,
+		forceRefreshToken,
+		initialCustomData,
+	} = props;
 	const rowsPerPage = props.rowsPerPage || 50;
 
 	const classes = useDataGridStylesInternal(props);
 	const theme = useTheme();
-	const statePack = useState<IDataGridState>(() =>
-		getDataGridDefaultState(columns)
-	);
+	const statePack = useState<IDataGridState>(() => ({
+		...getDataGridDefaultState(columns),
+		customData: initialCustomData ?? {},
+	}));
 	const [state, setState] = statePack;
 	const {
 		search,
