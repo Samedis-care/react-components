@@ -1,136 +1,167 @@
 {
-	"standalone": {
-		"selector": {
-			"add-new": "Ajouter"
-		},
-		"schedule": {
-			"week": "Semaine",
-			"today": "Aujourd'hui"
-		},
-		"file-upload": {
-			"formats": "Formats de fichiers",
-			"upload": "Télécharger",
-			"error": {
-				"invalid-type": "Type de fichier non supporté sélectionné",
-				"limit-reached": "Nombre maximum de dossiers autorisés atteint",
-				"too-many": "Trop de dossiers sélectionnés"
-			},
-			"format": {
-				"any": "Tout"
-			},
-			"no-files": "Aucune pièce jointe disponible"
-		},
-		"data-grid": {
-			"settings": {
-				"lock": "Verrouiller/Déverrouiller les colonnes",
-				"hide": "Afficher/Masquer les colonnes",
-				"close": "Fermer"
-			},
-			"header": {
-				"settings": "Paramètres",
-				"reset": "Réinitialiser",
-				"new": "Nouveau",
-				"export": "Exporter",
-				"edit": "Éditer",
-				"delete": "Supprimer"
-			},
-			"footer": {
-				"prev-page": "Page précédente",
-				"page-size": "Taille de la page :",
-				"page-of": "de",
-				"next-page": "Page suivante",
-				"last-page": "Dernière page",
-				"first-page": "Première page",
-				"page-size-tooltip": "Nombre d'entrées par page"
-			},
-			"content": {
-				"filter": "Filtrez"
-			}
-		},
-		"phone-number": {
-			"invalid": "Entrez le numéro de téléphone correct"
-		},
-		"signature-pad": {
-			"dialog": {
-				"reset": "Réinitialiser",
-				"save-changes": "Enregistrer les changements",
-				"title": "Signez ici"
-			},
-			"sign-here": "Signé numériquement ici"
-		}
-	},
-	"backend-integration": {
-		"model": {
-			"types": {
-				"boolean": {
-					"true": "Oui",
-					"false": "Non"
-				},
-				"date-nullable": {
-					"not-set": "N/A"
-				},
-				"image": {
-					"not-set": "Image non présente",
-					"set": "Image présente"
-				},
-				"renderers": {
-					"image": {
-						"not-set": "Image non présente"
-					},
-					"files": {
-						"no-file": "Aucun dossier présent"
-					},
-					"enum": {
-						"unknown": "Inconnu"
-					},
-					"date": {
-						"not-set": "Date non fixée",
-						"labels": {
-							"today": "Aujourd'hui",
-							"ok": "OK",
-							"min-date": "La date ne doit pas être antérieure à la date minimale",
-							"max-date": "La date ne doit pas être postérieure à la date maximale",
-							"invalid-date": "Format de date non valide",
-							"invalid": "Invalide",
-							"clear": "Clair",
-							"cancel": "Annuler"
-						},
-						"validation-error": "Veuillez entrer une date valide"
-					},
-					"boolean": {
-						"true": "Qui",
-						"false": "Non"
-					}
-				}
-			}
-		},
-		"connector": {
-			"json-api-client": {
-				"network-error": "Une erreur de réseau s'est produite.",
-				"parse-error": "Echec de l'analyse de la réponse (JSON invalide). Le serveur a renvoyé l'état {{STATUS_CODE}} {{STATUS_TEXT}}."
-			}
-		}
-	},
-	"backend-components": {
-		"data-grid": {
-			"delete": {
-				"error-dialog": {
-					"title": "Erreur",
-					"message": "Echec de la suppression des entrées sélectionnées : {{ERROR}}",
-					"buttons": {
-						"okay": "Ok"
-					}
-				},
-				"confirm-dialog": {
-					"title": "Supprimer",
-					"messageInverted": "Voulez-vous vraiment tout supprimer sauf les entrées {{NUM}} ?",
-					"message": "Souhaitez-vous vraiment supprimer les entrées {{NUM}} ?",
-					"buttons": {
-						"yes": "Qui",
-						"no": "Non"
-					}
-				}
-			}
-		}
-	}
+  "standalone": {
+    "selector": {
+      "add-new": "Ajouter"
+    },
+    "schedule": {
+      "week": "Semaine",
+      "today": "Aujourd'hui"
+    },
+    "file-upload": {
+      "formats": "Formats de fichiers",
+      "upload": "Télécharger",
+      "error": {
+        "invalid-type": "Type de fichier non supporté sélectionné",
+        "limit-reached": "Nombre maximum de dossiers autorisés atteint",
+        "too-many": "Trop de dossiers sélectionnés"
+      },
+      "format": {
+        "any": "Tout"
+      },
+      "no-files": "Aucune pièce jointe disponible"
+    },
+    "data-grid": {
+      "settings": {
+        "lock": "Verrouiller/Déverrouiller les colonnes",
+        "hide": "Afficher/Masquer les colonnes",
+        "close": "Fermer"
+      },
+      "header": {
+        "settings": "Paramètres",
+        "reset": "Réinitialiser",
+        "new": "Nouveau",
+        "export": "Exporter",
+        "edit": "Éditer",
+        "delete": "Supprimer",
+        "custom-filter-button": "Filtre"
+      },
+      "footer": {
+        "prev-page": "Page précédente",
+        "page-size": "Taille de la page :",
+        "page-of": "de",
+        "next-page": "Page suivante",
+        "last-page": "Dernière page",
+        "first-page": "Première page",
+        "page-size-tooltip": "Nombre d'entrées par page",
+        "delete": "Effacer",
+        "edit": "Éditer",
+        "filtered": "Filtré:",
+        "select-all": "Tout",
+        "total": "Total:"
+      },
+      "content": {
+        "filter": "Filtrez",
+        "bool-filter": {
+          "any": "De n'importe quelle valeur",
+          "false": "Toutes les fausses valeurs",
+          "true": "Toutes les valeurs de vérité"
+        },
+        "no-data": "Pas de données!",
+        "set-filter": {
+          "search": "Chercher...",
+          "select-all": "Tout sélectionner"
+        }
+      },
+      "custom-filters": {
+        "title": "Sélection de filtre"
+      }
+    },
+    "phone-number": {
+      "invalid": "Entrez le numéro de téléphone correct"
+    },
+    "signature-pad": {
+      "dialog": {
+        "reset": "Réinitialiser",
+        "save-changes": "Enregistrer les changements",
+        "title": "Signez ici"
+      },
+      "sign-here": "Signé numériquement ici"
+    }
+  },
+  "backend-integration": {
+    "model": {
+      "types": {
+        "boolean": {
+          "true": "Oui",
+          "false": "Non"
+        },
+        "date-nullable": {
+          "not-set": "N/A"
+        },
+        "image": {
+          "not-set": "Image non présente",
+          "set": "Image présente"
+        },
+        "renderers": {
+          "image": {
+            "not-set": "Image non présente"
+          },
+          "files": {
+            "no-file": "Aucun dossier présent"
+          },
+          "enum": {
+            "unknown": "Inconnu"
+          },
+          "date": {
+            "not-set": "Date non fixée",
+            "labels": {
+              "today": "Aujourd'hui",
+              "ok": "OK",
+              "min-date": "La date ne doit pas être antérieure à la date minimale",
+              "max-date": "La date ne doit pas être postérieure à la date maximale",
+              "invalid-date": "Format de date non valide",
+              "invalid": "Invalide",
+              "clear": "Clair",
+              "cancel": "Annuler"
+            },
+            "validation-error": "Veuillez entrer une date valide"
+          },
+          "boolean": {
+            "true": "Qui",
+            "false": "Non"
+          },
+          "signature": {
+            "not-set": "Pas signé"
+          }
+        }
+      }
+    },
+    "connector": {
+      "json-api-client": {
+        "network-error": "Une erreur de réseau s'est produite.",
+        "parse-error": "Echec de l'analyse de la réponse (JSON invalide). Le serveur a renvoyé l'état {{STATUS_CODE}} {{STATUS_TEXT}}."
+      }
+    }
+  },
+  "backend-components": {
+    "data-grid": {
+      "delete": {
+        "error-dialog": {
+          "title": "Erreur",
+          "message": "Echec de la suppression des entrées sélectionnées : {{ERROR}}",
+          "buttons": {
+            "okay": "Ok"
+          }
+        },
+        "confirm-dialog": {
+          "title": "Supprimer",
+          "messageInverted": "Voulez-vous vraiment tout supprimer sauf les entrées {{NUM}} ?",
+          "message": "Souhaitez-vous vraiment supprimer les entrées {{NUM}} ?",
+          "buttons": {
+            "yes": "Qui",
+            "no": "Non"
+          }
+        }
+      }
+    },
+    "selector": {
+      "loading": "Chargement...",
+      "loading-error": "Erreur lors de la récupération des données"
+    }
+  },
+  "non-standalone": {
+    "dialog": {
+      "okay": "D'accord"
+    }
+  }
 }
