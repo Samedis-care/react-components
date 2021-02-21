@@ -4,7 +4,7 @@ import { BaseSelectorData, SingleSelect } from "../../../standalone/Selector";
 import { colourOptions } from "./Data";
 import { action } from "@storybook/addon-actions";
 import { boolean, text } from "@storybook/addon-knobs";
-import { Box, FormControl, InputLabel } from "@material-ui/core";
+import { Box, FormControl } from "@material-ui/core";
 import { showInfoDialog } from "../../../non-standalone";
 import { useDialogContext } from "../../../framework";
 
@@ -21,6 +21,7 @@ export const SelectorSingle = (): React.ReactElement => {
 	const loadDataAction = action("onLoad");
 	const onSelectAction = action("onSelect");
 	const onAddNewAction = action("onAddNew");
+	const label = text("Label", "Example selector");
 	const enableAddNew = boolean("Enable Add New", false);
 	const disableClearable = boolean("Disable clearable?", false);
 	const disableSearch = boolean("Disable search?", false);
@@ -55,8 +56,8 @@ export const SelectorSingle = (): React.ReactElement => {
 	return (
 		<Box m={2}>
 			<FormControl component={"fieldset"} fullWidth>
-				<InputLabel shrink>Example selector</InputLabel>
 				<SingleSelect
+					label={label}
 					selected={selected}
 					onSelect={onSelect}
 					onLoad={loadData}

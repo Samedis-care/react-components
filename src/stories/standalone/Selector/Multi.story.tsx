@@ -8,7 +8,7 @@ import {
 import { colourOptions } from "./Data";
 import { action } from "@storybook/addon-actions";
 import { boolean, text } from "@storybook/addon-knobs";
-import { Box } from "@material-ui/core";
+import { Box, FormControl } from "@material-ui/core";
 import CustomMultiSelectEntry from "./CustomMultiSelectEntry";
 
 interface MySelectorData extends MultiSelectorData {
@@ -36,6 +36,7 @@ export const SelectorMulti = (): React.ReactElement => {
 	const loadDataAction = action("onLoad");
 	const onSelectAction = action("onSelect");
 	const onAddNewAction = action("onAddNew");
+	const label = text("Label", "Example multi select");
 	const enableAddNew = boolean("Enable Add New", false);
 	const icons = boolean("Enable Icons", false);
 	const disabled = boolean("Disable", false);
@@ -70,22 +71,26 @@ export const SelectorMulti = (): React.ReactElement => {
 
 	return (
 		<Box m={2}>
-			<MultiSelect
-				selected={selected}
-				onSelect={onSelect}
-				onLoad={loadData}
-				onAddNew={enableAddNew ? onAddNewAction : undefined}
-				enableIcons={icons}
-				selectedEntryRenderer={
-					customSelectedRenderer ? CustomMultiSelectEntry : undefined
-				}
-				disabled={disabled}
-				addNewLabel={addNewLabel}
-				loadingText={loadingText}
-				noOptionsText={noOptionsText}
-				placeholder={placeholderLabel}
-				autocompleteId={"multi-select"}
-			/>
+			{/* form control is required to correctly position label */}
+			<FormControl component={"fieldset"} fullWidth>
+				<MultiSelect
+					label={label}
+					selected={selected}
+					onSelect={onSelect}
+					onLoad={loadData}
+					onAddNew={enableAddNew ? onAddNewAction : undefined}
+					enableIcons={icons}
+					selectedEntryRenderer={
+						customSelectedRenderer ? CustomMultiSelectEntry : undefined
+					}
+					disabled={disabled}
+					addNewLabel={addNewLabel}
+					loadingText={loadingText}
+					noOptionsText={noOptionsText}
+					placeholder={placeholderLabel}
+					autocompleteId={"multi-select"}
+				/>
+			</FormControl>
 		</Box>
 	);
 };

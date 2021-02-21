@@ -1,21 +1,16 @@
 import React from "react";
-import {
-	FormControl,
-	FormHelperText,
-	InputLabel,
-	Typography,
-} from "@material-ui/core";
+import { FormControl, FormHelperText, Typography } from "@material-ui/core";
 import { ModelRenderParams } from "../../index";
 import TypeEnum, { EnumValue } from "../TypeEnum";
 import ccI18n from "../../../../i18n";
 import {
 	BaseSelectorData,
+	BaseSelectorProps,
 	SingleSelect,
-	SingleSelectorProps,
 } from "../../../../standalone/Selector";
 
 type RendererEnumSelectProps = Omit<
-	SingleSelectorProps<BaseSelectorData>,
+	BaseSelectorProps<BaseSelectorData>,
 	"selected" | "onLoad" | "onSelect" | "disabled"
 >;
 
@@ -80,9 +75,9 @@ class RendererEnumSelect extends TypeEnum {
 					error={!!errorMsg}
 					onBlur={handleBlur}
 				>
-					<InputLabel shrink>{label}</InputLabel>
 					<SingleSelect
 						{...this.props}
+						label={label}
 						selected={selected}
 						onLoad={onLoad}
 						onSelect={(value) => handleChange(field, value ? value.value : "")}

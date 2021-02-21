@@ -6,7 +6,7 @@ import React, {
 	PropsWithChildren,
 	ReactNodeArray,
 } from "react";
-import { ListItemText, IconButton } from "@material-ui/core";
+import { ListItemText, IconButton, InputLabel, Paper } from "@material-ui/core";
 import { Autocomplete, AutocompleteProps } from "@material-ui/lab";
 import {
 	Add as AddIcon,
@@ -72,6 +72,10 @@ export interface BaseSelectorProps<DataT extends BaseSelectorData>
 	 * Callback for autocomplete change
 	 */
 	onSelect: (selected: DataT | null) => void;
+	/**
+	 * The label of the selector
+	 */
+	label?: string;
 	/**
 	 * Disable autocomplete control
 	 */
@@ -164,10 +168,17 @@ const useCustomStyles = makeStyles(
 			padding: 2,
 			marginRight: -2,
 		},
-		icon: (props: Pick<BaseSelectorProps<BaseSelectorData>, "iconSize">) => ({
+		icon: (
+			props: Pick<BaseSelectorProps<BaseSelectorData>, "iconSize" | "label">
+		) => ({
 			width: props.iconSize ?? 32,
 			height: props.iconSize ?? 32,
 			objectFit: "contain",
+		}),
+		wrapper: (
+			props: Pick<BaseSelectorProps<BaseSelectorData>, "iconSize" | "label">
+		) => ({
+			marginTop: props.label ? 16 : undefined,
 		}),
 	},
 	{ name: "CcBaseSelectorCustom" }
@@ -180,6 +191,7 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 		refreshToken,
 		onSelect,
 		selected,
+		label,
 		disabled,
 		disableSearch,
 		placeholder,
@@ -306,88 +318,91 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 	const filterOptions = useCallback((options: DataT[]) => options, []);
 
 	return (
-		<div>
-			<Autocomplete
-				id={autocompleteId}
-				classes={classes}
-				open={open}
-				onOpen={() => {
-					setOpen(true);
-				}}
-				onClose={() => {
-					setOpen(false);
-				}}
-				disableClearable={disableClearable}
-				loading={loading}
-				loadingText={loadingText}
-				autoComplete
-				disabled={disabled}
-				options={
-					// add selected to selectorOptions if not present to suppress warnings
-					selected &&
-					!selectorOptions.find((option) => option.value === selected.value)
-						? selectorOptions.concat([selected])
-						: selectorOptions
-				}
-				groupBy={
-					grouped
-						? (option: DataT) => option.group ?? noGroupLabel ?? ""
-						: undefined
-				}
-				filterOptions={filterOptions}
-				value={selected}
-				inputValue={query}
-				blurOnSelect={true}
-				onInputChange={updateQuery}
-				popupIcon={<ExpandMore />}
-				noOptionsText={noOptionsText}
-				getOptionLabel={(option: BaseSelectorData) => option.label}
-				renderOption={(option: BaseSelectorData) => defaultRenderer(option)}
-				getOptionDisabled={(option: BaseSelectorData) => !!option.isDisabled}
-				getOptionSelected={(option, value) => option.value === value.value}
-				onChange={(_event, selectedValue) => onChangeHandler(selectedValue)}
-				renderInput={(params: AutocompleteRenderInputParams) => {
-					// eslint-disable-next-line @typescript-eslint/no-unused-vars
-					const { InputProps, InputLabelProps, ...otherParams } = params;
-					return (
-						<OutlinedInputWithHelp
-							readOnly={disableSearch}
-							{...InputProps}
-							{...otherParams}
-							startAdornment={
-								enableIcons ? renderIcon(selected?.icon) : undefined
-							}
-							endAdornment={
-								openInfo
-									? React.cloneElement(
-											params.InputProps?.endAdornment as ReactElement,
-											{},
-											...((params.InputProps?.endAdornment as ReactElement<
-												PropsWithChildren<unknown>
-											>).props.children as ReactNodeArray),
-											<IconButton
-												onClick={openInfo}
-												className={customClasses.infoBtn}
-											>
-												<InfoIcon color={"disabled"} />
-											</IconButton>
-									  )
-									: params.InputProps?.endAdornment
-							}
-							placeholder={placeholder}
-							onChange={(event) => {
-								void onSearchHandler(event.target.value);
-							}}
-						/>
-					);
-				}}
-				key={`${refreshToken || "no-refresh-token"} ${
-					onAddNew
-						? `add-new${actualAddNewLabel || "no-add-new-label"}`
-						: "no-add-new"
-				}`}
-			/>
-		</div>
+		<>
+			{label && <InputLabel shrink>{label}</InputLabel>}
+			<Paper elevation={0} className={customClasses.wrapper}>
+				<Autocomplete
+					id={autocompleteId}
+					classes={classes}
+					open={open}
+					onOpen={() => {
+						setOpen(true);
+					}}
+					onClose={() => {
+						setOpen(false);
+					}}
+					disableClearable={disableClearable}
+					loading={loading}
+					loadingText={loadingText}
+					autoComplete
+					disabled={disabled}
+					options={
+						// add selected to selectorOptions if not present to suppress warnings
+						selected &&
+						!selectorOptions.find((option) => option.value === selected.value)
+							? selectorOptions.concat([selected])
+							: selectorOptions
+					}
+					groupBy={
+						grouped
+							? (option: DataT) => option.group ?? noGroupLabel ?? ""
+							: undefined
+					}
+					filterOptions={filterOptions}
+					value={selected}
+					inputValue={query}
+					blurOnSelect={true}
+					onInputChange={updateQuery}
+					popupIcon={<ExpandMore />}
+					noOptionsText={noOptionsText}
+					getOptionLabel={(option: BaseSelectorData) => option.label}
+					renderOption={(option: BaseSelectorData) => defaultRenderer(option)}
+					getOptionDisabled={(option: BaseSelectorData) => !!option.isDisabled}
+					getOptionSelected={(option, value) => option.value === value.value}
+					onChange={(_event, selectedValue) => onChangeHandler(selectedValue)}
+					renderInput={(params: AutocompleteRenderInputParams) => {
+						// eslint-disable-next-line @typescript-eslint/no-unused-vars
+						const { InputProps, InputLabelProps, ...otherParams } = params;
+						return (
+							<OutlinedInputWithHelp
+								readOnly={disableSearch}
+								{...InputProps}
+								{...otherParams}
+								startAdornment={
+									enableIcons ? renderIcon(selected?.icon) : undefined
+								}
+								endAdornment={
+									openInfo
+										? React.cloneElement(
+												params.InputProps?.endAdornment as ReactElement,
+												{},
+												...((params.InputProps?.endAdornment as ReactElement<
+													PropsWithChildren<unknown>
+												>).props.children as ReactNodeArray),
+												<IconButton
+													onClick={openInfo}
+													className={customClasses.infoBtn}
+												>
+													<InfoIcon color={"disabled"} />
+												</IconButton>
+										  )
+										: params.InputProps?.endAdornment
+								}
+								placeholder={placeholder}
+								onChange={(event) => {
+									void onSearchHandler(event.target.value);
+								}}
+							/>
+						);
+					}}
+					key={`${refreshToken || "no-refresh-token"} ${
+						onAddNew
+							? `add-new${actualAddNewLabel || "no-add-new-label"}`
+							: "no-add-new"
+					}`}
+				/>
+			</Paper>
+		</>
 	);
 };
 

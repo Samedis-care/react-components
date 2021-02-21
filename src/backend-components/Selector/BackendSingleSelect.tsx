@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
 	BaseSelectorData,
+	BaseSelectorProps,
 	SingleSelect,
-	SingleSelectorProps,
 } from "../../standalone";
 import Model, {
 	ModelFieldName,
@@ -16,7 +16,7 @@ export interface BackendSingleSelectProps<
 	VisibilityT extends PageVisibility,
 	CustomT
 > extends Omit<
-		SingleSelectorProps<BaseSelectorData>,
+		BaseSelectorProps<BaseSelectorData>,
 		"onLoad" | "selected" | "onSelect"
 	> {
 	/**

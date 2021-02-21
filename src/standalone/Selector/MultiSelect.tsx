@@ -60,10 +60,6 @@ const useBaseSelectorStyles = makeStyles(
 
 const useMultiSelectorStyles = makeStyles(
 	{
-		paperWrapper: {
-			boxShadow: "none",
-			marginTop: 16, // to accommodate InputLabel
-		},
 		selectedEntries: {
 			border: `1px solid rgba(0, 0, 0, 0.23)`,
 			borderTop: 0,
@@ -154,23 +150,23 @@ const MultiSelect = <DataT extends MultiSelectorData>(
 	);
 
 	return (
-		<Paper elevation={0} className={multiSelectClasses.paperWrapper}>
-			<Grid container>
-				<Grid item xs={12}>
-					<BaseSelector
-						{...props}
-						classes={combineClassMaps(
-							baseSelectorClasses,
-							props.subClasses?.baseSelector
-						)}
-						onLoad={multiSelectLoadHandler}
-						selected={null}
-						onSelect={multiSelectHandler}
-						refreshToken={selected.length.toString()}
-					/>
-				</Grid>
-				{props.selected.length > 0 && (
-					<Grid item xs={12} className={multiSelectClasses.selectedEntries}>
+		<Grid container>
+			<Grid item xs={12}>
+				<BaseSelector
+					{...props}
+					classes={combineClassMaps(
+						baseSelectorClasses,
+						props.subClasses?.baseSelector
+					)}
+					onLoad={multiSelectLoadHandler}
+					selected={null}
+					onSelect={multiSelectHandler}
+					refreshToken={selected.length.toString()}
+				/>
+			</Grid>
+			{props.selected.length > 0 && (
+				<Grid item xs={12} className={multiSelectClasses.selectedEntries}>
+					<Paper elevation={0}>
 						{props.selected.map((data: DataT, index: number) => (
 							<EntryRender
 								key={data.value}
@@ -182,10 +178,10 @@ const MultiSelect = <DataT extends MultiSelectorData>(
 								iconSize={props.iconSize}
 							/>
 						))}
-					</Grid>
-				)}
-			</Grid>
-		</Paper>
+					</Paper>
+				</Grid>
+			)}
+		</Grid>
 	);
 };
 

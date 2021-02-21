@@ -1,5 +1,5 @@
 import React from "react";
-import { FormControl, FormHelperText, InputLabel } from "@material-ui/core";
+import { FormControl, FormHelperText } from "@material-ui/core";
 import { ModelFieldName, ModelRenderParams, PageVisibility } from "../../index";
 import TypeStringArray from "../TypeStringArray";
 import BackendMultiSelect, {
@@ -85,9 +85,9 @@ class RendererBackendMultiSelect<
 					error={!!errorMsg}
 					onBlur={handleBlur}
 				>
-					<InputLabel shrink>{label}</InputLabel>
 					<BackendMultiSelect
 						selected={value}
+						label={label}
 						onSelect={(value) => handleChange(field, value)}
 						disabled={visibility.readOnly}
 						model={relationModel as Model<KeyT, VisibilityT, CustomT>}
