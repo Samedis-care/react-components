@@ -33,7 +33,12 @@ const FilterDialog = (props: DataGridCustomFilterDialogProps) => {
 				{i18n.t("standalone.data-grid.custom-filters.title") || ""}
 			</Typography>
 			<Divider />
-			<Grid justify={"space-between"} spacing={2} container>
+			<Grid
+				justify={"space-between"}
+				spacing={2}
+				container
+				className={classes.customFilterContainer}
+			>
 				<Filters
 					customData={customData}
 					setCustomData={setCustomData}

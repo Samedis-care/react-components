@@ -697,6 +697,10 @@ const useStyles = makeStyles(
 			borderBottom: `1px solid ${theme.palette.divider}`,
 			borderRadius: 8,
 		},
+		customFilterContainer: {
+			paddingTop: theme.spacing(2),
+			paddingBottom: theme.spacing(2),
+		},
 	}),
 	{ name: "CcDataGrid" }
 );
