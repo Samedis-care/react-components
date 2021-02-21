@@ -25,7 +25,7 @@
 				"new": "Neu",
 				"export": "Exportieren",
 				"edit": "Bearbeiten",
-				"delete": "Lösche",
+				"delete": "Löschen",
 				"custom-filter-button": "Filter"
 			},
 			"footer": {
@@ -161,7 +161,7 @@
 	},
 	"non-standalone": {
 		"dialog": {
-			"okay": "okay"
+			"okay": "Okay"
 		}
 	}
 }
