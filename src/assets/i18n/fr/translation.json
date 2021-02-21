@@ -32,7 +32,8 @@
 				"new": "Nouveau",
 				"export": "Exporter",
 				"edit": "Éditer",
-				"delete": "Supprimer"
+				"delete": "Supprimer",
+				"custom-filter-button": "Filtre"
 			},
 			"footer": {
 				"prev-page": "Page précédente",
@@ -41,10 +42,28 @@
 				"next-page": "Page suivante",
 				"last-page": "Dernière page",
 				"first-page": "Première page",
-				"page-size-tooltip": "Nombre d'entrées par page"
+				"page-size-tooltip": "Nombre d'entrées par page",
+				"delete": "Effacer",
+				"edit": "Éditer",
+				"filtered": "Filtré:",
+				"select-all": "Tout",
+				"total": "Total:"
 			},
 			"content": {
-				"filter": "Filtrez"
+				"filter": "Filtrez",
+				"bool-filter": {
+					"any": "De n'importe quelle valeur",
+					"false": "Toutes les fausses valeurs",
+					"true": "Toutes les valeurs de vérité"
+				},
+				"no-data": "Pas de données!",
+				"set-filter": {
+					"search": "Chercher...",
+					"select-all": "Tout sélectionner"
+				}
+			},
+			"custom-filters": {
+				"title": "Sélection de filtre"
 			}
 		},
 		"phone-number": {
@@ -100,6 +119,9 @@
 					"boolean": {
 						"true": "Qui",
 						"false": "Non"
+					},
+					"signature": {
+						"not-set": "Pas signé"
 					}
 				}
 			}
@@ -131,6 +153,15 @@
 					}
 				}
 			}
+		},
+		"selector": {
+			"loading": "Chargement...",
+			"loading-error": "Erreur lors de la récupération des données"
+		}
+	},
+	"non-standalone": {
+		"dialog": {
+			"okay": "D'accord"
 		}
 	}
 }

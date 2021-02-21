@@ -23,7 +23,9 @@
 				"export": "Export",
 				"settings": "Settings",
 				"reset": "Reset",
-				"custom-filter-button": "Selection"
+				"custom-filter-button": "Filter",
+				"delete": "Delete",
+				"edit": "Edit"
 			},
 			"settings": {
 				"lock": "Lock/Unlock Columns",
@@ -38,7 +40,14 @@
 				"filtered": "Filtered:",
 				"edit": "Edit",
 				"delete": "Delete",
-				"select-all": "All"
+				"select-all": "All",
+				"first-page": "First page",
+				"last-page": "Last page",
+				"next-page": "Next page",
+				"page-of": "from",
+				"page-size": "Pagesize:",
+				"page-size-tooltip": "Number of records per page",
+				"prev-page": "Previous page"
 			}
 		},
 		"selector": {

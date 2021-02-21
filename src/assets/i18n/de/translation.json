@@ -2,7 +2,17 @@
 	"standalone": {
 		"data-grid": {
 			"content": {
-				"filter": "Filter"
+				"filter": "Filter",
+				"bool-filter": {
+					"any": "Beliebiger Wert",
+					"false": "Alle falschen Werte",
+					"true": "Alle wahrheitsgemäßen Werte"
+				},
+				"no-data": "Keine Daten!",
+				"set-filter": {
+					"search": "Suche...",
+					"select-all": "Wählen Sie Alle"
+				}
 			},
 			"settings": {
 				"lock": "Spalten sperren/entsperren",
@@ -15,7 +25,8 @@
 				"new": "Neu",
 				"export": "Exportieren",
 				"edit": "Bearbeiten",
-				"delete": "Lösche"
+				"delete": "Löschen",
+				"custom-filter-button": "Filter"
 			},
 			"footer": {
 				"prev-page": "Vorherige Seite",
@@ -24,7 +35,15 @@
 				"next-page": "Nächste Seite",
 				"last-page": "Letzte Seite",
 				"first-page": "Erste Seite",
-				"page-size-tooltip": "Anzahl Einträge pro Seite"
+				"page-size-tooltip": "Anzahl Einträge pro Seite",
+				"delete": "Löschen",
+				"edit": "Bearbeiten",
+				"filtered": "Gefiltert:",
+				"select-all": "Alle",
+				"total": "Gesamt:"
+			},
+			"custom-filters": {
+				"title": "Filterauswahl"
 			}
 		},
 		"selector": {
@@ -89,6 +108,9 @@
 					"boolean": {
 						"true": "Ja",
 						"false": "Nein"
+					},
+					"signature": {
+						"not-set": "Nicht unterschrieben"
 					}
 				},
 				"boolean": {
@@ -131,6 +153,15 @@
 					}
 				}
 			}
+		},
+		"selector": {
+			"loading": "Wird geladen...",
+			"loading-error": "Fehler beim Abrufen der Daten"
+		}
+	},
+	"non-standalone": {
+		"dialog": {
+			"okay": "Okay"
 		}
 	}
 }
