@@ -66,7 +66,9 @@ const useStyles = makeStyles(
 		},
 		label: {
 			margin: theme.componentsCare?.selector?.selected?.label?.margin,
-			padding: theme.componentsCare?.selector?.selected?.label?.padding,
+			padding:
+				theme.componentsCare?.selector?.selected?.label?.padding ||
+				"0 32px 0 0",
 			color: theme.componentsCare?.selector?.selected?.label?.color,
 			...theme.componentsCare?.selector?.selected?.label?.style,
 		},
