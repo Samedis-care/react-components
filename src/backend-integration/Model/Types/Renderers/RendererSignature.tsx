@@ -44,6 +44,7 @@ class RendererSignature extends TypeImage {
 				>
 					<FormLabel component={"legend"}>{label}</FormLabel>
 					<SignaturePad
+						name={field}
 						signature={value}
 						setSignature={(newValue) => handleChange(field, newValue)}
 						disabled={visibility.disabled}
