@@ -41,6 +41,7 @@ export const SignaturePadStory = (): React.ReactElement => {
 	return (
 		<div style={{ height: previewHeight, width: previewWidth }}>
 			<SignaturePad
+				name={"story-signature"}
 				penColor={select("Pen Color", penColor, "blue")}
 				disabled={disabled}
 				setSignature={setSignature}

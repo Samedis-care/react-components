@@ -44,6 +44,10 @@ const useStyles = makeStyles(
 			verticalAlign: "middle",
 			textAlign: "center",
 		},
+		hiddenDiv: {
+			left: -500,
+			position: "absolute",
+		},
 	}),
 	{ name: "CcSignPadDialog" }
 );
@@ -53,6 +57,7 @@ const SignPadDialog = (props: SignPadDialogProps) => {
 	const [resetCanvas, setResetCanvas] = useState(!!signature);
 	const [, popDialog] = useDialogContext();
 	const signCanvas = useRef<SignaturePad>(null);
+	const hiddenRef = useRef<HTMLInputElement>(null);
 	const classes = useStyles(props);
 	const clearCanvas = React.useCallback(() => {
 		if (signCanvas.current) {
@@ -69,10 +74,17 @@ const SignPadDialog = (props: SignPadDialogProps) => {
 				.toDataURL("image/png");
 			if (setSignature) setSignature(signature);
 		}
+		hiddenRef.current?.focus();
+		hiddenRef.current?.blur();
 		popDialog();
 	}, [setSignature, popDialog]);
 
-	const closeCanvas = () => popDialog();
+	const closeCanvas = () => {
+		hiddenRef.current?.focus();
+		hiddenRef.current?.blur();
+		popDialog();
+	};
+
 	return (
 		<Dialog
 			open={!disabled}
@@ -110,6 +122,16 @@ const SignPadDialog = (props: SignPadDialogProps) => {
 						<img src={signature} alt="Sign" />
 					</div>
 				)}
+				<div className={classes.hiddenDiv}>
+					<input
+						type="text"
+						value={signature}
+						readOnly
+						ref={hiddenRef}
+						name={props.name}
+						onBlur={props.onBlur}
+					/>
+				</div>
 			</div>
 			<DialogActions>
 				<Button onClick={saveCanvas} color="primary">

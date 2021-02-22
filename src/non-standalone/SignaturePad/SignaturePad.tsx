@@ -5,6 +5,10 @@ import { showSignPadDialog } from "../../non-standalone/Dialog";
 
 export interface SignaturePadCanvasProps extends SignPadProps {
 	/**
+	 * The name of the input
+	 */
+	name: string;
+	/**
 	 * The props used to draw HTML canvas
 	 */
 	canvasProps?: React.CanvasHTMLAttributes<HTMLCanvasElement>;
@@ -25,7 +29,7 @@ export interface SignaturePadCanvasProps extends SignPadProps {
 const SignaturePadCanvas = (
 	props: SignaturePadCanvasProps & Omit<SignPadProps, "classes" | "openSignPad">
 ) => {
-	const { signature, disabled, onBlur, openInfo, ...dialogProps } = props;
+	const { signature, disabled, openInfo, ...dialogProps } = props;
 	const [pushDialog] = useDialogContext();
 	const showSignDialog = React.useCallback(() => {
 		showSignPadDialog(pushDialog, { disabled, signature, ...dialogProps });
@@ -36,7 +40,6 @@ const SignaturePadCanvas = (
 			signature={signature}
 			disabled={disabled}
 			openInfo={openInfo}
-			onBlur={onBlur}
 		/>
 	);
 };
