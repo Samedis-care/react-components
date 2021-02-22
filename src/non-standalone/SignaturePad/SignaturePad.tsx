@@ -20,10 +20,6 @@ export interface SignaturePadCanvasProps extends SignPadProps {
 	 * Callback method which returns signature base64 string
 	 */
 	setSignature?: (imageURL: string) => void;
-	/**
-	 * Blur event
-	 */
-	onBlur?: React.FocusEventHandler<HTMLDivElement>;
 }
 
 const SignaturePadCanvas = (
@@ -35,14 +31,13 @@ const SignaturePadCanvas = (
 		showSignPadDialog(pushDialog, { disabled, signature, ...dialogProps });
 	}, [pushDialog, disabled, signature, dialogProps]);
 	return (
-		<div onBlur={onBlur}>
-			<SignPad
-				openSignPad={showSignDialog}
-				signature={signature}
-				disabled={disabled}
-				openInfo={openInfo}
-			/>
-		</div>
+		<SignPad
+			openSignPad={showSignDialog}
+			signature={signature}
+			disabled={disabled}
+			openInfo={openInfo}
+			onBlur={onBlur}
+		/>
 	);
 };
 

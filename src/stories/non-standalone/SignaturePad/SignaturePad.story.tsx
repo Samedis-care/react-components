@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import "../../../i18n";
 import SignaturePad from "../../../non-standalone/SignaturePad/SignaturePad";
-import { select, text, boolean } from "@storybook/addon-knobs";
+import { select, text, boolean, number } from "@storybook/addon-knobs";
 import { action } from "@storybook/addon-actions";
 import { showInfoDialog } from "../../../non-standalone/Dialog";
 import { useDialogContext } from "../../../framework";
@@ -18,6 +18,18 @@ export const SignaturePadStory = (): React.ReactElement => {
 		setSignatureURL(imageUrl);
 	};
 	const [pushDialog] = useDialogContext();
+	const previewHeight = number("Preview height", 100, {
+		range: true,
+		min: 16,
+		max: 4096,
+		step: 16,
+	});
+	const previewWidth = number("Preview width", 250, {
+		range: true,
+		min: 16,
+		max: 4096,
+		step: 16,
+	});
 	const dialogTitle = text("Dialog title", "Sample title");
 	const infoText = text(
 		"Info Text",
@@ -27,32 +39,34 @@ export const SignaturePadStory = (): React.ReactElement => {
 	const dialogButtonClick = action("onClose");
 
 	return (
-		<SignaturePad
-			penColor={select("Pen Color", penColor, "blue")}
-			disabled={disabled}
-			setSignature={setSignature}
-			signature={signature}
-			openInfo={() =>
-				showInfoDialog(pushDialog, {
-					title: dialogTitle,
-					message: (
-						<div
-							dangerouslySetInnerHTML={{
-								__html: infoText,
-							}}
-						/>
-					),
-					buttons: [
-						{
-							text: dialogButtonLabel,
-							onClick: dialogButtonClick,
-							autoFocus: true,
-							color: "primary",
-						},
-					],
-				})
-			}
-		/>
+		<div style={{ height: previewHeight, width: previewWidth }}>
+			<SignaturePad
+				penColor={select("Pen Color", penColor, "blue")}
+				disabled={disabled}
+				setSignature={setSignature}
+				signature={signature}
+				openInfo={() =>
+					showInfoDialog(pushDialog, {
+						title: dialogTitle,
+						message: (
+							<div
+								dangerouslySetInnerHTML={{
+									__html: infoText,
+								}}
+							/>
+						),
+						buttons: [
+							{
+								text: dialogButtonLabel,
+								onClick: dialogButtonClick,
+								autoFocus: true,
+								color: "primary",
+							},
+						],
+					})
+				}
+			/>
+		</div>
 	);
 };
 

@@ -24,6 +24,10 @@ export interface SignPadProps {
 	 * Open sign pad
 	 */
 	openSignPad?: () => void;
+	/**
+	 * Blur event
+	 */
+	onBlur?: React.FocusEventHandler<HTMLDivElement>;
 }
 
 const useStyles = makeStyles((theme) => ({
@@ -31,26 +35,27 @@ const useStyles = makeStyles((theme) => ({
 		position: "relative",
 		cursor: "pointer",
 		borderBottom: "1px dotted",
-		height: 150,
-		width: 400,
+		height: "inherit",
+		width: "inherit",
+		minHeight: "100px",
 		color: theme.palette.grey[700],
 		display: "inline-block",
-		backgroundColor: theme.palette.background.paper,
-	},
-	textDiv: {
-		position: "absolute",
-		display: "inline-block",
-		bottom: 0,
-		left: 5,
+		backgroundColor: theme.palette.action.hover,
 	},
 	imageDiv: {
-		display: "inline-block",
-		margin: "0px 20px",
+		height: `calc(100% - ${theme.spacing(2)}px)`,
+		width: `calc(100% - ${theme.spacing(2)}px)`,
 	},
-	signText: {
-		display: "inline-block",
-		marginLeft: 10,
-		position: "fixed",
+	signPreview: {
+		height: "100%",
+		width: "100%",
+	},
+	signTextDiv: {
+		position: "absolute",
+		left: 5,
+		bottom: 5,
+		alignItems: "center",
+		display: "flex",
 		color: theme.palette.text.secondary,
 	},
 	infoDiv: {
@@ -71,17 +76,14 @@ const SignPad = (props: SignPadProps) => {
 	);
 	return (
 		<div className={classes.signPadDiv} onClick={openSignPad}>
-			<div className={classes.textDiv}>
+			<div className={classes.signTextDiv}>
 				<SignIcon color={disabled ? "disabled" : "primary"} />
-				{signature ? (
-					<div className={classes.imageDiv}>
-						<img src={signature} />
-					</div>
-				) : (
-					<span className={classes.signText}>
-						{ccI18n.t("standalone.signature-pad.sign-here")}
-					</span>
+				{!signature && (
+					<span>{ccI18n.t("standalone.signature-pad.sign-here")}</span>
 				)}
+			</div>
+			<div className={classes.imageDiv}>
+				{signature && <img className={classes.signPreview} src={signature} />}
 			</div>
 			<div className={classes.infoDiv}>
 				{openInfo && (
