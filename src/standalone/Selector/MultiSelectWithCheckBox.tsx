@@ -15,6 +15,8 @@ import {
 import { ExpandMore } from "@material-ui/icons";
 import { MultiSelectOption } from "./TypesMultiSelect";
 import { ClassNameMap } from "@material-ui/styles/withStyles";
+import { cleanClassMap, makeThemeStyles } from "../../utils";
+import { Styles } from "@material-ui/core/styles/withStyles";
 
 export interface MultiSelectWithCheckBoxProps extends SelectProps {
 	/**
@@ -40,6 +42,7 @@ export interface MultiSelectWithCheckBoxTheme {
 	itemTextPrimaryStyle?: CSSProperties;
 	inputStyle?: CSSProperties;
 	inputFocusStyle?: CSSProperties;
+	selectStyle?: MultiSelectWithCheckBoxThemeExpert;
 }
 
 const useStyles = makeStyles((theme) => ({
@@ -88,16 +91,30 @@ const InputCustom = withStyles((theme: Theme) => ({
 	},
 }))(InputBase);
 
+export type MultiSelectWithCheckBoxThemeExpert = Partial<
+	Styles<Theme, SelectProps, SelectClassKey>
+>;
+
+const useSelectStyles = makeThemeStyles(
+	(theme) => theme?.componentsCare?.selectorWithCheckbox?.selectStyle,
+	"CcMultiSelectWithCheckboxSelect"
+);
+
 const MultiSelectWithCheckBox = (props: MultiSelectWithCheckBoxProps) => {
-	const classes = useStyles(props);
+	const { label, options, values, ...selectProps } = props;
+	const classes = useStyles(cleanClassMap(props, true, "checkboxStyle"));
+	const selectClasses = useSelectStyles(
+		cleanClassMap(props, false, "checkboxStyle")
+	);
 	return (
 		<>
-			{props.label && <InputLabel shrink>{props.label}</InputLabel>}
+			{props.label && <InputLabel shrink>{label}</InputLabel>}
 			<Select
-				{...props}
+				{...selectProps}
 				multiple
 				displayEmpty
-				value={props.values}
+				classes={selectClasses}
+				value={values}
 				input={<InputCustom />}
 				IconComponent={ExpandMore}
 				MenuProps={{
@@ -118,11 +135,11 @@ const MultiSelectWithCheckBox = (props: MultiSelectWithCheckBoxProps) => {
 					},
 				}}
 			>
-				{props.options.map((option: MultiSelectOption) => {
+				{options.map((option: MultiSelectOption) => {
 					return (
 						<MenuItemCustom key={option.label} value={option.value}>
 							<Checkbox
-								checked={props.values.indexOf(option.value) > -1}
+								checked={values.indexOf(option.value) > -1}
 								className={classes.checkboxStyle}
 							/>
 							<ListItemTextCustom primary={option.label} />
