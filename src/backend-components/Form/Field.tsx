@@ -6,6 +6,13 @@ import {
 	PageVisibility,
 } from "../../backend-integration";
 
+type NonOverridableProps =
+	| "getDefaultValue"
+	| "validate"
+	| "filterable"
+	| "sortable"
+	| "columnWidth";
+
 interface FieldProps {
 	/**
 	 * The name of the field as specified in the model
@@ -15,10 +22,18 @@ interface FieldProps {
 	 * Overrides for the model information
 	 */
 	overrides?:
-		| Partial<ModelFieldDefinition<unknown, string, PageVisibility, never>>
+		| Partial<
+				Omit<
+					ModelFieldDefinition<unknown, string, PageVisibility, never>,
+					NonOverridableProps
+				>
+		  >
 		| ((
 				original: ModelFieldDefinition<unknown, string, PageVisibility, never>
-		  ) => ModelFieldDefinition<unknown, string, PageVisibility, never>);
+		  ) => Omit<
+				ModelFieldDefinition<unknown, string, PageVisibility, never>,
+				NonOverridableProps
+		  >);
 }
 
 const Field = (props: FieldProps): React.ReactElement => {
