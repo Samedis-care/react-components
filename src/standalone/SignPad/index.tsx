@@ -30,40 +30,43 @@ export interface SignPadProps {
 	onBlur?: React.FocusEventHandler<HTMLDivElement>;
 }
 
-const useStyles = makeStyles((theme) => ({
-	signPadDiv: {
-		position: "relative",
-		cursor: "pointer",
-		borderBottom: "1px dotted",
-		height: "inherit",
-		width: "inherit",
-		minHeight: "100px",
-		color: theme.palette.grey[700],
-		display: "inline-block",
-		backgroundColor: theme.palette.action.hover,
-	},
-	imageDiv: {
-		height: `calc(100% - ${theme.spacing(2)}px)`,
-		width: `calc(100% - ${theme.spacing(2)}px)`,
-	},
-	signPreview: {
-		height: "100%",
-		width: "100%",
-	},
-	signTextDiv: {
-		position: "absolute",
-		left: 5,
-		bottom: 5,
-		alignItems: "center",
-		display: "flex",
-		color: theme.palette.text.secondary,
-	},
-	infoDiv: {
-		position: "absolute",
-		right: 5,
-		bottom: 20,
-	},
-}));
+const useStyles = makeStyles(
+	(theme) => ({
+		signPadDiv: {
+			position: "relative",
+			cursor: "pointer",
+			borderBottom: "1px dotted",
+			height: "inherit",
+			width: "inherit",
+			minHeight: "100px",
+			color: theme.palette.grey[700],
+			display: "inline-block",
+			backgroundColor: theme.palette.action.hover,
+		},
+		imageDiv: {
+			height: `calc(100% - ${theme.spacing(2)}px)`,
+			width: `calc(100% - ${theme.spacing(2)}px)`,
+		},
+		signPreview: {
+			height: "100%",
+			width: "100%",
+		},
+		signTextDiv: {
+			position: "absolute",
+			left: 5,
+			bottom: 5,
+			alignItems: "center",
+			display: "flex",
+			color: theme.palette.text.secondary,
+		},
+		infoDiv: {
+			position: "absolute",
+			right: 5,
+			bottom: 20,
+		},
+	}),
+	{ name: "CcSignPad" }
+);
 const SignPad = (props: SignPadProps) => {
 	const { signature, disabled, openInfo, openSignPad } = props;
 	const classes = useStyles(props);
