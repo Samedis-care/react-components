@@ -20,9 +20,11 @@ export interface BackendMultiSelectWithTagsProps<
 	GroupVisibilityT extends PageVisibility,
 	DataVisibilityT extends PageVisibility,
 	GroupCustomT,
-	DataCustomT
+	DataCustomT,
+	GroupDataT extends BaseSelectorData,
+	DataDataT extends MultiSelectorData
 > extends Omit<
-		MultiSelectWithTagsProps<MultiSelectorData, BaseSelectorData>,
+		MultiSelectWithTagsProps<DataDataT, GroupDataT>,
 		| "loadGroupEntries"
 		| "loadDataOptions"
 		| "loadGroupOptions"
@@ -38,7 +40,7 @@ export interface BackendMultiSelectWithTagsProps<
 	 * Change event callback
 	 * @param selected The now selected IDs
 	 */
-	onChange?: (selected: string[]) => void;
+	onChange?: (selected: string[], raw: DataDataT[]) => void;
 	/**
 	 * Initial data (model format) used for selected cache
 	 */
@@ -55,7 +57,7 @@ export interface BackendMultiSelectWithTagsProps<
 	 */
 	convGroup: (
 		data: Record<GroupKeyT, unknown>
-	) => Promise<BaseSelectorData> | BaseSelectorData;
+	) => Promise<GroupDataT> | GroupDataT;
 	/**
 	 * Callback that gets the group entries for a given group record
 	 * @param data The record data (detailed)
@@ -64,7 +66,7 @@ export interface BackendMultiSelectWithTagsProps<
 	 */
 	getGroupDataEntries: (
 		data: ModelGetResponse<GroupKeyT>
-	) => Promise<MultiSelectorData[]> | MultiSelectorData[];
+	) => Promise<DataDataT[]> | DataDataT[];
 	/**
 	 * The data source for data entries
 	 */
@@ -75,9 +77,7 @@ export interface BackendMultiSelectWithTagsProps<
 	 * @returns Selector data
 	 * @remarks Selector data value must be set to ID
 	 */
-	convData: (
-		data: Record<DataKeyT, unknown>
-	) => Promise<MultiSelectorData> | MultiSelectorData;
+	convData: (data: Record<DataKeyT, unknown>) => Promise<DataDataT> | DataDataT;
 	/**
 	 * Name of the switch filter for groups or undefined if disabled
 	 */
@@ -109,7 +109,9 @@ const BackendMultiSelectWithTags = <
 	GroupVisibilityT extends PageVisibility,
 	DataVisibilityT extends PageVisibility,
 	GroupCustomT,
-	DataCustomT
+	DataCustomT,
+	GroupDataT extends BaseSelectorData,
+	DataDataT extends MultiSelectorData
 >(
 	props: BackendMultiSelectWithTagsProps<
 		GroupKeyT,
@@ -117,7 +119,9 @@ const BackendMultiSelectWithTags = <
 		GroupVisibilityT,
 		DataVisibilityT,
 		GroupCustomT,
-		DataCustomT
+		DataCustomT,
+		GroupDataT,
+		DataDataT
 	>
 ) => {
 	const {
