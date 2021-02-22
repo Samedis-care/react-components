@@ -24,7 +24,7 @@ export interface UseCrudSelectParams<
 	 */
 	serialize: (
 		data: DataT
-	) => Promise<Record<KeyT, unknown>> | Record<KeyT, unknown>;
+	) => Promise<Partial<Record<KeyT, unknown>>> | Partial<Record<KeyT, unknown>>;
 	/**
 	 * Callback for deserializing data after getting it from the backend connector
 	 * @param data The data from the backend connector (index function)
