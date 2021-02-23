@@ -48,6 +48,10 @@ export interface FileUploadProps extends WithStyles {
 	 */
 	previewSize: number;
 	/**
+	 * The label type of the box
+	 */
+	smallLabel?: boolean;
+	/**
 	 * Should we show images instead of file icons?
 	 */
 	previewImages?: boolean;
@@ -195,7 +199,7 @@ class FileUpload extends Component<FileUploadProps, IState> {
 
 	render() {
 		return (
-			<GroupBox label={this.props.label}>
+			<GroupBox label={this.props.label} smallLabel={this.props.smallLabel}>
 				<Grid
 					container
 					spacing={2}
