@@ -26,7 +26,7 @@ export interface CrudMultiSelectWithGroupsProps<
 				GroupDataT,
 				DataDataT
 			>,
-			"selected"
+			"selected" | "onChange" | "convData" | "initialData"
 		>,
 		UseCrudSelectParams<DataKeyT, DataVisibilityT, DataCustomT, DataDataT> {
 	/**
