@@ -218,25 +218,31 @@ class Model<
 			await this.applySerialization(rawData[0], "deserialize", "edit"),
 			Object.fromEntries(
 				await Promise.all(
-					Object.entries(rawData[1]).map(async ([k, v]) => {
-						const refModel = this.fields[k as KeyT]?.getRelationModel;
+					Object.entries(rawData[1]).map(async (keyValue) => {
+						const fieldName = keyValue[0];
+						const values = keyValue[1] as Record<string, unknown>[];
+						const refModel = this.fields[fieldName as KeyT]?.getRelationModel;
 
 						if (!refModel) {
 							// eslint-disable-next-line no-console
 							console.warn(
-								"[Components-Care] [Model] Backend connector supplied related data, but no model is defined for this relationship (relationship name = ",
-								k,
-								"). Data will be ignored."
+								"[Components-Care] [Model] Backend connector supplied related data, but no model is defined for this relationship (relationship name = " +
+									fieldName +
+									"). Data will be ignored."
 							);
 						}
 
 						return [
-							k,
+							fieldName,
 							refModel
-								? await refModel().applySerialization(
-										v as Record<string, unknown>,
-										"deserialize",
-										"edit"
+								? await Promise.all(
+										values.map((value) =>
+											refModel().applySerialization(
+												value,
+												"deserialize",
+												"edit"
+											)
+										)
 								  )
 								: null,
 						];
