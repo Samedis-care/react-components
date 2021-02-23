@@ -38,6 +38,7 @@ export const FileUploadStory = (): React.ReactElement => {
 				max: 4096,
 				step: 16,
 			})}
+			smallLabel={boolean("small label", true)}
 			onChange={handleChangeAction}
 			handleError={handleErrorAction}
 			previewImages={boolean("Preview images", true)}
