@@ -43,7 +43,7 @@ const CrudMultiSelect = <
 	} = useCrudSelect(props);
 
 	if (loading) return <Loader />;
-	if (loadError) return <span>{loadError}</span>;
+	if (loadError) return <span>{loadError.message}</span>;
 
 	return (
 		<>
