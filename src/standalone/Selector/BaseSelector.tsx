@@ -336,6 +336,7 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 					loadingText={loadingText}
 					autoComplete
 					disabled={disabled}
+					selectOnFocus={!disableSearch}
 					options={
 						// add selected to selectorOptions if not present to suppress warnings
 						selected &&
