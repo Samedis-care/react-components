@@ -5,6 +5,10 @@ import { showSignPadDialog } from "../../non-standalone/Dialog";
 
 export interface SignaturePadCanvasProps extends SignPadProps {
 	/**
+	 * The name of the input
+	 */
+	name: string;
+	/**
 	 * The props used to draw HTML canvas
 	 */
 	canvasProps?: React.CanvasHTMLAttributes<HTMLCanvasElement>;
@@ -20,29 +24,23 @@ export interface SignaturePadCanvasProps extends SignPadProps {
 	 * Callback method which returns signature base64 string
 	 */
 	setSignature?: (imageURL: string) => void;
-	/**
-	 * Blur event
-	 */
-	onBlur?: React.FocusEventHandler<HTMLDivElement>;
 }
 
 const SignaturePadCanvas = (
 	props: SignaturePadCanvasProps & Omit<SignPadProps, "classes" | "openSignPad">
 ) => {
-	const { signature, disabled, onBlur, openInfo, ...dialogProps } = props;
+	const { signature, disabled, openInfo, ...dialogProps } = props;
 	const [pushDialog] = useDialogContext();
 	const showSignDialog = React.useCallback(() => {
 		showSignPadDialog(pushDialog, { disabled, signature, ...dialogProps });
 	}, [pushDialog, disabled, signature, dialogProps]);
 	return (
-		<div onBlur={onBlur}>
-			<SignPad
-				openSignPad={showSignDialog}
-				signature={signature}
-				disabled={disabled}
-				openInfo={openInfo}
-			/>
-		</div>
+		<SignPad
+			openSignPad={showSignDialog}
+			signature={signature}
+			disabled={disabled}
+			openInfo={openInfo}
+		/>
 	);
 };
 
