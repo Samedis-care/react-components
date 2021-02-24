@@ -34,6 +34,7 @@ export const ImageSelectorStory = (): React.ReactElement => {
 				name={"story-input"}
 				label={text("Label", "Image Upload Label")}
 				alt={text("Alt Text", "Alt Description")}
+				smallLabel={boolean("small label", true)}
 				value={image}
 				capture={capture}
 				onChange={handleChangeAction}

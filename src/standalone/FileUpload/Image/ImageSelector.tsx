@@ -30,6 +30,10 @@ export interface ImageSelectorProps {
 	 */
 	alt: string;
 	/**
+	 * The label type of the box
+	 */
+	smallLabel?: boolean;
+	/**
 	 * The change handler of the input
 	 * @param name The field name
 	 * @param value The new value (data uri of selected image or empty string)
@@ -148,7 +152,7 @@ const ImageSelector = (props: ImageSelectorProps) => {
 
 	// render component
 	return (
-		<GroupBox label={props.label}>
+		<GroupBox label={props.label} smallLabel={props.smallLabel}>
 			<Grid
 				container
 				spacing={2}
