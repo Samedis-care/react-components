@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { IconButton, InputAdornment } from "@material-ui/core";
 import { DatePickerProps } from "@material-ui/pickers";
 import { Info as InfoIcon, Event as CalenderIcon } from "@material-ui/icons";
@@ -9,14 +9,20 @@ import {
 } from "../CommonStyles";
 import { LocalizedDatePicker } from "../../../standalone/LocalizedDateTimePickers";
 import TextFieldWithHelp from "../TextFieldWithHelp";
-import ccI18n from "../../../i18n";
 import moment from "moment";
 import { useInputCursorFix } from "../../../utils";
+import TypeDate from "../../../backend-integration/Model/Types/TypeDate";
+import ccI18n from "../../../i18n";
+import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
 export interface DateInputProps extends UIInputProps {
 	openInfo?: () => void;
+	value: Date | null;
+	onChange: (date: Date | null) => void;
 }
 
-const DateInput = (props: DateInputProps & DatePickerProps) => {
+const DateInput = (
+	props: DateInputProps & Omit<DatePickerProps, "value" | "onChange">
+) => {
 	const {
 		value,
 		openInfo,
@@ -28,12 +34,29 @@ const DateInput = (props: DateInputProps & DatePickerProps) => {
 	} = props;
 	const inputClasses = useInputStyles({ important });
 	const [isOpen, setIsOpen] = useState(false);
-	const valueFormatted = value
-		? new Date(value as Date).toLocaleDateString(ccI18n.language)
-		: "";
-	const { handleCursorChange, cursorInputRef } = useInputCursorFix(
-		valueFormatted
-	);
+	const [textValue, setTextValue] = useState("");
+
+	// update textValue based on value property
+	useEffect(() => {
+		if (value === null) {
+			setTextValue((old) => (old.includes("_") ? old : ""));
+		} else {
+			const format = moment()
+				.locale(ccI18n.language)
+				.localeData()
+				.longDateFormat("L");
+
+			const yearStr = value.getFullYear().toString();
+			const monthStr = (value.getMonth() + 1).toString();
+			const dayStr = value.getDate().toString();
+			const newTextValue = format
+				.replace("YYYY", yearStr)
+				.replace("MM", monthStr.length === 1 ? "0" + monthStr : monthStr)
+				.replace("DD", dayStr.length === 1 ? "0" + dayStr : dayStr);
+			setTextValue(newTextValue);
+		}
+	}, [value]);
+	const { handleCursorChange, cursorInputRef } = useInputCursorFix(textValue);
 	const handleOpenInfo = useCallback(
 		(event: React.MouseEvent<HTMLButtonElement>) => {
 			// Prevent calender popup open event, while clicking on info icon
@@ -47,10 +70,21 @@ const DateInput = (props: DateInputProps & DatePickerProps) => {
 			handleCursorChange(event);
 
 			if (!onChange) return;
-			const momentDate = moment(event.target.value);
-			onChange(momentDate);
+
+			const formatted = TypeDate.format(event.target.value);
+			setTextValue(formatted);
+
+			const date = new Date(formatted);
+			// TODO: if the fields of date are NaN the date is invalid, we should raise an error for this (onError prop)
+			onChange(formatted.includes("_") || isNaN(date.getMonth()) ? null : date);
 		},
 		[onChange, handleCursorChange]
+	);
+
+	const handlePickerChange = useCallback(
+		(newDate: MaterialUiPickersDate) =>
+			onChange(newDate ? newDate.toDate() : null),
+		[onChange]
 	);
 
 	return (
@@ -59,10 +93,9 @@ const DateInput = (props: DateInputProps & DatePickerProps) => {
 				fullWidth={fullWidth}
 				placeholder={placeholder}
 				type="text"
-				value={valueFormatted}
+				value={textValue}
 				onChange={handleTextFieldOnChange}
 				InputProps={{
-					ref: cursorInputRef,
 					classes: inputClasses,
 					endAdornment: (
 						<InputAdornment position="end">
@@ -79,13 +112,16 @@ const DateInput = (props: DateInputProps & DatePickerProps) => {
 						</InputAdornment>
 					),
 				}}
+				inputProps={{
+					ref: cursorInputRef,
+				}}
 				InputLabelProps={InputLabelConfig}
 			/>
 
 			<LocalizedDatePicker
 				{...muiProps}
 				value={value}
-				onChange={onChange}
+				onChange={handlePickerChange}
 				clearable
 				open={isOpen}
 				onOpen={() => setIsOpen(true)}
