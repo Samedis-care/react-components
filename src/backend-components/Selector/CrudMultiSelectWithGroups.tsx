@@ -26,13 +26,28 @@ export interface CrudMultiSelectWithGroupsProps<
 				GroupDataT,
 				DataDataT
 			>,
-			"selected" | "onChange" | "convData" | "initialData"
+			"selected" | "onChange" | "convData" | "initialData" | "getIdOfData"
 		>,
 		UseCrudSelectParams<DataKeyT, DataVisibilityT, DataCustomT, DataDataT> {
 	/**
 	 * The error component that is used to display errors
 	 */
 	errorComponent: React.ComponentType<ErrorComponentProps>;
+	/**
+	 * Get ID of data
+	 */
+	getIdOfData: NonNullable<
+		BackendMultiSelectWithTagsProps<
+			GroupKeyT,
+			DataKeyT,
+			GroupVisibilityT,
+			DataVisibilityT,
+			GroupCustomT,
+			DataCustomT,
+			GroupDataT,
+			DataDataT
+		>["getIdOfData"]
+	>;
 }
 
 const CrudMultiSelectWithGroups = <

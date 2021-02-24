@@ -13,13 +13,23 @@ export interface CrudMultiSelectProps<
 	DataT extends MultiSelectorData
 > extends Omit<
 			BackendMultiSelectProps<KeyT, VisibilityT, CustomT, DataT>,
-			"modelToSelectorData" | "initialData" | "selected" | "onSelect"
+			| "modelToSelectorData"
+			| "initialData"
+			| "selected"
+			| "onSelect"
+			| "getIdOfData"
 		>,
 		UseCrudSelectParams<KeyT, VisibilityT, CustomT, DataT> {
 	/**
 	 * The error component that is used to display errors
 	 */
 	errorComponent: React.ComponentType<ErrorComponentProps>;
+	/**
+	 * Get ID of data
+	 */
+	getIdOfData: NonNullable<
+		BackendMultiSelectProps<KeyT, VisibilityT, CustomT, DataT>["getIdOfData"]
+	>;
 }
 
 const CrudMultiSelect = <

@@ -53,6 +53,13 @@ export interface MultiSelectWithTagsProps<
 	 * @param data The currently selected entries. This should be feed back to selected prop
 	 */
 	onChange?: (data: DataT[]) => void;
+	/**
+	 * Optional callback for customizing the unique identifier of data
+	 * @param data The data struct
+	 * @returns A unique ID extracted from data
+	 * @default returns data.value
+	 */
+	getIdOfData?: (data: DataT) => string;
 	// Required callbacks
 	/**
 	 * Callback which loads the data entries for the given group
@@ -175,6 +182,7 @@ const MultiSelectWithTags = <
 		loadDataOptions,
 		onChange,
 		openInfo,
+		getIdOfData,
 	} = props;
 	const classes = useStyles(props);
 	const defaultSwitchValue = props.displaySwitch
@@ -182,6 +190,9 @@ const MultiSelectWithTags = <
 		: false;
 	const [selectedGroups, setSelectedGroups] = useState<SelectedGroup[]>([]);
 	const [switchValue, setSwitchValue] = useState(defaultSwitchValue);
+
+	const getIdDefault = useCallback((data: DataT) => data.value, []);
+	const getId = getIdOfData ?? getIdDefault;
 
 	// set switch value if switch visibility is toggled
 	useEffect(() => {
@@ -191,7 +202,7 @@ const MultiSelectWithTags = <
 
 	// remove selected groups if an item has been unselected
 	useEffect(() => {
-		const selectedIds = selected.map((entry) => entry.value);
+		const selectedIds = selected.map(getId);
 		setSelectedGroups((oldSelectedGroups) =>
 			oldSelectedGroups.filter(
 				(group) => !group.items.find((item) => !selectedIds.includes(item))
@@ -204,7 +215,7 @@ const MultiSelectWithTags = <
 		async (selectedGroup: GroupT | null) => {
 			if (!selectedGroup || !onChange) return;
 			const groupEntries = await loadGroupEntries(selectedGroup);
-			const groupEntryIds = groupEntries.map((entry) => entry.value);
+			const groupEntryIds = groupEntries.map(getId);
 			const combinedArray = [...selected, ...groupEntries];
 			setSelectedGroups((prevState) => [
 				...prevState,
@@ -214,13 +225,17 @@ const MultiSelectWithTags = <
 				},
 			]);
 			onChange(
-				uniqueArray(combinedArray.map((entry) => entry.value)).map(
-					(value) =>
-						combinedArray.find((entry) => entry.value === value) as DataT
+				uniqueArray(
+					combinedArray
+						.map(getId)
+						.map(
+							(value) =>
+								combinedArray.find((entry) => getId(entry) === value) as DataT
+						)
 				)
 			);
 		},
-		[loadGroupEntries, selected, onChange]
+		[onChange, loadGroupEntries, getId, selected]
 	);
 
 	const handleSwitchChange = useCallback(

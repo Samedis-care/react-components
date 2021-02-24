@@ -32,6 +32,13 @@ export interface MultiSelectProps<DataT extends MultiSelectorData>
 	 */
 	selected: DataT[];
 	/**
+	 * Optional callback for customizing the unique identifier of data
+	 * @param data The data struct
+	 * @returns A unique ID extracted from data
+	 * @default returns data.value
+	 */
+	getIdOfData?: (data: DataT) => string;
+	/**
 	 * Specify a custom component for displaying multi select items
 	 */
 	selectedEntryRenderer?: React.ComponentType<IMultiSelectEntryProps<DataT>>;
@@ -79,6 +86,7 @@ const MultiSelect = <DataT extends MultiSelectorData>(
 		enableIcons,
 		selectedEntryRenderer,
 		disabled,
+		getIdOfData,
 	} = props;
 	const multiSelectClasses = useMultiSelectorStyles(props);
 	const baseSelectorClasses = useBaseSelectorStyles(
@@ -87,6 +95,9 @@ const MultiSelect = <DataT extends MultiSelectorData>(
 			true
 		)
 	);
+
+	const getIdDefault = useCallback((data: DataT) => data.value, []);
+	const getId = getIdOfData ?? getIdDefault;
 
 	const EntryRender: React.ComponentType<IMultiSelectEntryProps<DataT>> =
 		selectedEntryRenderer || MultiSelectEntry;
@@ -104,11 +115,10 @@ const MultiSelect = <DataT extends MultiSelectorData>(
 		async (query: string) => {
 			const results = await onLoad(query);
 			return results.filter(
-				(val: BaseSelectorData) =>
-					!selected.map((s) => s.value).includes(val.value)
+				(val: DataT) => !selected.map((s) => getId(s)).includes(getId(val))
 			);
 		},
-		[onLoad, selected]
+		[getId, onLoad, selected]
 	);
 
 	const handleDelete = useCallback(
@@ -142,11 +152,11 @@ const MultiSelect = <DataT extends MultiSelectorData>(
 			if (!onSelect) return;
 			onSelect(
 				selected.map((entry) =>
-					entry.value === newValue.value ? newValue : entry
+					getId(entry) === getId(newValue) ? newValue : entry
 				)
 			);
 		},
-		[onSelect, selected]
+		[getId, onSelect, selected]
 	);
 
 	return (
@@ -169,7 +179,7 @@ const MultiSelect = <DataT extends MultiSelectorData>(
 					<Paper elevation={0}>
 						{props.selected.map((data: DataT, index: number) => (
 							<EntryRender
-								key={data.value}
+								key={getId(data)}
 								enableDivider={props.selected.length === index - 1}
 								enableIcons={enableIcons}
 								handleDelete={disabled ? undefined : handleDelete}
