@@ -53,13 +53,6 @@ export interface MultiSelectWithTagsProps<
 	 * @param data The currently selected entries. This should be feed back to selected prop
 	 */
 	onChange?: (data: DataT[]) => void;
-	/**
-	 * Optional callback for customizing the unique identifier of data
-	 * @param data The data struct
-	 * @returns A unique ID extracted from data
-	 * @default returns data.value
-	 */
-	getIdOfData?: (data: DataT) => string;
 	// Required callbacks
 	/**
 	 * Callback which loads the data entries for the given group
@@ -296,6 +289,7 @@ const MultiSelectWithTags = <
 					loadDataOptions={loadDataOptions}
 					openInfo={openInfo}
 					onChange={onChange}
+					refreshToken={selected.map(getId).join(",")}
 				/>
 			</Typography>
 		</Typography>

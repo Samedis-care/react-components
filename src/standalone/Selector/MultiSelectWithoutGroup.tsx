@@ -63,6 +63,17 @@ export interface MultiSelectWithoutGroupProps<DataT extends MultiSelectorData>
 		query: string,
 		switchValue: boolean
 	) => DataT[] | Promise<DataT[]>;
+	/**
+	 * Optional callback for customizing the unique identifier of data
+	 * @param data The data struct
+	 * @returns A unique ID extracted from data
+	 * @default returns data.value
+	 */
+	getIdOfData?: (data: DataT) => string;
+	/**
+	 * Token which causes data to be reloaded
+	 */
+	refreshToken?: string;
 }
 
 const useStyles = makeStyles(
@@ -98,19 +109,25 @@ const MultiSelectWithoutGroup = <DataT extends MultiSelectorData>(
 		loadDataOptions,
 		onChange,
 		openInfo,
+		getIdOfData,
+		refreshToken,
 	} = props;
 	const classes = useStyles(props);
 	const [dataQuery, setDataQuery] = useState("");
 	const [dataOptions, setDataOptions] = useState<DataT[]>([]);
+
+	const getIdDefault = useCallback((data: DataT) => data.value, []);
+	const getId = getIdOfData ?? getIdDefault;
+
 	useEffect(() => {
-		selected.map((selectedOptions) => {
+		selected.map((selectedOption) => {
 			setDataOptions((oldOptions) =>
 				oldOptions.filter(
-					(option) => !option.value.includes(selectedOptions.value)
+					(option) => !getId(option).includes(getId(selectedOption))
 				)
 			);
 		});
-	}, [selected]);
+	}, [getId, selected]);
 	const handleDelete = useCallback(
 		async (evt: React.MouseEvent<HTMLButtonElement>) => {
 			if (!onChange) return;
@@ -159,26 +176,27 @@ const MultiSelectWithoutGroup = <DataT extends MultiSelectorData>(
 
 			setDataQuery("");
 			setDataOptions(
-				dataOptions.filter((old) => old.value !== selectedValue.value)
+				dataOptions.filter((old) => getId(old) !== getId(selectedValue))
 			);
 			onChange([...selected, selectedValue]);
 		},
-		[onChange, setDataOptions, dataOptions, selected]
+		[getId, onChange, setDataOptions, dataOptions, selected]
 	);
 
 	const onSearchData = useCallback(
 		async (query: string) => {
-			const selectedIds = selected.map((item) => item.value);
+			const selectedIds = selected.map(getId);
 			setDataOptions(
 				(
 					await loadDataOptions(
 						query,
 						displaySwitch && defaultSwitchValue ? defaultSwitchValue : false
 					)
-				).filter((option) => !selectedIds.includes(option.value))
+				).filter((option) => !selectedIds.includes(getId(option)))
 			);
 		},
 		[
+			getId,
 			loadDataOptions,
 			setDataOptions,
 			selected,
@@ -190,7 +208,7 @@ const MultiSelectWithoutGroup = <DataT extends MultiSelectorData>(
 	useEffect(() => {
 		void onSearchData(dataQuery);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [dataQuery]);
+	}, [dataQuery, refreshToken]);
 
 	return (
 		<Typography component="div">

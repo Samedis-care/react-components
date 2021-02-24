@@ -171,7 +171,7 @@ const MultiSelect = <DataT extends MultiSelectorData>(
 					onLoad={multiSelectLoadHandler}
 					selected={null}
 					onSelect={multiSelectHandler}
-					refreshToken={selected.length.toString()}
+					refreshToken={selected.map(getId).join(",")}
 				/>
 			</Grid>
 			{props.selected.length > 0 && (
