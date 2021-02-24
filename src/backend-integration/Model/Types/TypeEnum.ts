@@ -6,6 +6,7 @@ import FilterType from "../FilterType";
 export interface EnumValue {
 	value: string;
 	getLabel: () => string;
+	invisible?: boolean;
 }
 
 abstract class TypeEnum implements Type<string> {
