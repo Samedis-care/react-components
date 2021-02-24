@@ -321,7 +321,7 @@ class Model<
 			},
 			{
 				onSuccess: (data: void, id: string) => {
-					ModelDataStore.setQueryData([this.modelId, { id: id }], undefined);
+					ModelDataStore.removeQueries([this.modelId, { id: id }]);
 				},
 			}
 		);
