@@ -214,6 +214,17 @@ class Model<
 
 		const rawData = await this.connector.read(id, this);
 
+		return this.deserializeResponse(rawData);
+	}
+
+	/**
+	 * Deserializes the given ModelGetResponse
+	 * @param rawData The data to deserialize
+	 * @private
+	 */
+	private async deserializeResponse(
+		rawData: ModelGetResponse<KeyT>
+	): Promise<ModelGetResponse<KeyT>> {
 		return [
 			await this.applySerialization(rawData[0], "deserialize", "edit"),
 			Object.fromEntries(
@@ -272,10 +283,14 @@ class Model<
 					update ? "edit" : "create"
 				);
 				if (update) {
-					return this.connector.update(serializedValues, this);
+					return this.deserializeResponse(
+						await this.connector.update(serializedValues, this)
+					);
 				} else {
 					delete serializedValues["id"];
-					return this.connector.create(serializedValues, this);
+					return this.deserializeResponse(
+						await this.connector.create(serializedValues, this)
+					);
 				}
 			},
 			{
