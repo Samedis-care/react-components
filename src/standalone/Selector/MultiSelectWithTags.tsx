@@ -290,6 +290,7 @@ const MultiSelectWithTags = <
 					openInfo={openInfo}
 					onChange={onChange}
 					refreshToken={selected.map(getId).join(",")}
+					getIdOfData={getId}
 				/>
 			</Typography>
 		</Typography>
