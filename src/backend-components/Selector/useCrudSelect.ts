@@ -203,12 +203,14 @@ const useCrudSelect = <
 					rows: Number.MAX_SAFE_INTEGER,
 				});
 
-				setInitialRawData(currentlySelected[0]);
-				setSelected(
-					await Promise.all(
-						currentlySelected[0].map((record) => deserialize(record))
-					)
+				const initialSelected = await Promise.all(
+					currentlySelected[0].map((record) => deserialize(record))
 				);
+
+				setInitialRawData(currentlySelected[0]);
+				setSelected(initialSelected);
+
+				if (onChange) onChange(initialSelected);
 			} catch (e) {
 				setLoadError(e);
 			} finally {
