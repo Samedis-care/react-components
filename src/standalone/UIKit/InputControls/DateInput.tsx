@@ -48,9 +48,10 @@ const DateInput = (
 				.localeData()
 				.longDateFormat("L");
 
-			const yearStr = value.getFullYear().toString();
+			let yearStr = value.getFullYear().toString();
 			const monthStr = (value.getMonth() + 1).toString();
 			const dayStr = value.getDate().toString();
+			while (yearStr.length < 4) yearStr = "0" + yearStr;
 			const newTextValue = format
 				.replace("YYYY", yearStr)
 				.replace("MM", monthStr.length === 1 ? "0" + monthStr : monthStr)
