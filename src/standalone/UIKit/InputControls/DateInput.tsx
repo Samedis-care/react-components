@@ -34,6 +34,8 @@ const DateInput = (
 	} = props;
 	const inputClasses = useInputStyles({ important });
 	const [isOpen, setIsOpen] = useState(false);
+	const [isError, setIsError] = useState(false);
+	const [errorHelperText, setErrorHelperText] = useState("");
 	const [textValue, setTextValue] = useState("");
 
 	// update textValue based on value property
@@ -75,10 +77,21 @@ const DateInput = (
 			setTextValue(formatted);
 
 			const date = new Date(formatted);
-			// TODO: if the fields of date are NaN the date is invalid, we should raise an error for this (onError prop)
+			// If the fields of date are NaN the date is invalid, we should raise an error for this (onError prop)
+			if (formatted.includes("_") || isNaN(date.getTime())) {
+				setErrorHelperText(
+					ccI18n.t(
+						"backend-integration.model.types.renderers.date.labels.invalid-date"
+					)
+				);
+				if (!isError) setIsError(true);
+			} else {
+				setErrorHelperText("");
+				setIsError(false);
+			}
 			onChange(formatted.includes("_") || isNaN(date.getMonth()) ? null : date);
 		},
-		[onChange, handleCursorChange]
+		[isError, setIsError, setErrorHelperText, onChange, handleCursorChange]
 	);
 
 	const handlePickerChange = useCallback(
@@ -86,14 +99,28 @@ const DateInput = (
 			onChange(newDate ? newDate.toDate() : null),
 		[onChange]
 	);
-
+	const handlePickerError = useCallback(
+		(error: React.ReactNode) => {
+			if (error) {
+				setErrorHelperText(error as string);
+				setIsError(true);
+			} else {
+				if (!textValue.includes("_")) {
+					setIsError(false);
+					setErrorHelperText("");
+				}
+			}
+		},
+		[textValue, setIsError, setErrorHelperText]
+	);
 	return (
 		<>
 			<TextFieldWithHelp
 				fullWidth={fullWidth}
 				placeholder={placeholder}
-				type="text"
 				value={textValue}
+				error={isError}
+				helperText={errorHelperText}
 				onChange={handleTextFieldOnChange}
 				InputProps={{
 					classes: inputClasses,
@@ -124,6 +151,7 @@ const DateInput = (
 				onChange={handlePickerChange}
 				clearable
 				open={isOpen}
+				onError={handlePickerError}
 				onOpen={() => setIsOpen(true)}
 				onClose={() => setIsOpen(false)}
 				TextFieldComponent={() => null}
