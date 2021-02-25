@@ -77,31 +77,33 @@ class RendererEnumRadio extends TypeEnumMulti {
 				>
 					<FormLabel component={"legend"}>{label}</FormLabel>
 					<FormGroup onBlur={handleBlur} row={this.horizontal}>
-						{this.values.map((entry) =>
-							this.wrapButton(
-								<FormControlLabel
-									key={entry.value}
-									value={entry.value}
-									control={
-										<Checkbox
-											checked={value.includes(entry.value)}
-											name={entry.value}
-											onChange={(evt) =>
-												handleChange(
-													field,
-													evt.target.checked
-														? value.concat([entry.value]) // add value
-														: value.filter((v) => v !== entry.value) // remove value
-												)
-											}
-										/>
-									}
-									label={entry.getLabel()}
-									disabled={visibility.readOnly}
-								/>,
-								entry
-							)
-						)}
+						{this.values
+							.filter((entry) => !entry.invisible)
+							.map((entry) =>
+								this.wrapButton(
+									<FormControlLabel
+										key={entry.value}
+										value={entry.value}
+										control={
+											<Checkbox
+												checked={value.includes(entry.value)}
+												name={entry.value}
+												onChange={(evt) =>
+													handleChange(
+														field,
+														evt.target.checked
+															? value.concat([entry.value]) // add value
+															: value.filter((v) => v !== entry.value) // remove value
+													)
+												}
+											/>
+										}
+										label={entry.getLabel()}
+										disabled={visibility.readOnly}
+									/>,
+									entry
+								)
+							)}
 					</FormGroup>
 					<FormHelperText>{errorMsg}</FormHelperText>
 				</FormControl>

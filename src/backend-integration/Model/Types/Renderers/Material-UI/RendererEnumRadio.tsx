@@ -76,18 +76,20 @@ class RendererEnumRadio extends TypeEnum {
 						onBlur={handleBlur}
 						row={this.horizontal}
 					>
-						{this.values.map((entry) =>
-							this.wrapButton(
-								<FormControlLabel
-									key={entry.value}
-									value={entry.value}
-									control={<Radio />}
-									label={entry.getLabel()}
-									disabled={visibility.readOnly}
-								/>,
-								entry
-							)
-						)}
+						{this.values
+							.filter((value) => !value.invisible)
+							.map((entry) =>
+								this.wrapButton(
+									<FormControlLabel
+										key={entry.value}
+										value={entry.value}
+										control={<Radio />}
+										label={entry.getLabel()}
+										disabled={visibility.readOnly}
+									/>,
+									entry
+								)
+							)}
 					</RadioGroup>
 					<FormHelperText>{errorMsg}</FormHelperText>
 				</FormControl>

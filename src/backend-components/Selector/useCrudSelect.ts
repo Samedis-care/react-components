@@ -39,6 +39,11 @@ export interface UseCrudSelectParams<
 	deserializeModel: (
 		data: Record<KeyT, unknown>
 	) => Promise<Omit<DataT, "value">> | Omit<DataT, "value">;
+	/**
+	 * Selection change event
+	 * @param selected The new selection
+	 */
+	onChange?: (selected: DataT[]) => void;
 }
 
 export interface UseCrudSelectResult<
@@ -86,7 +91,13 @@ const useCrudSelect = <
 >(
 	params: UseCrudSelectParams<KeyT, VisibilityT, CustomT, DataT>
 ): UseCrudSelectResult<KeyT, DataT> => {
-	const { connector, serialize, deserialize, deserializeModel } = params;
+	const {
+		connector,
+		serialize,
+		deserialize,
+		deserializeModel,
+		onChange,
+	} = params;
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<Error | null>(null);
 	const [loadError, setLoadError] = useState<Error | null>(null);
@@ -152,18 +163,23 @@ const useCrudSelect = <
 				await updatePromise;
 				await deletePromise;
 
+				// create final values
+				const finalSelected = [
+					...newSelected,
+					...(await Promise.all(created.map((entry) => deserialize(entry)))),
+				];
+
 				// reflect changes
 				setInitialRawData((oldRawData) => [...oldRawData, ...created]);
-				setSelected(
-					newSelected.concat(
-						await Promise.all(created.map((entry) => deserialize(entry)))
-					)
-				);
+				setSelected(finalSelected);
+
+				// fire events
+				if (onChange) onChange(finalSelected);
 			} catch (e) {
 				setError(e);
 			}
 		},
-		[connector, deserialize, selected, serialize]
+		[connector, deserialize, onChange, selected, serialize]
 	);
 
 	const modelToSelectorData = useCallback(
@@ -187,12 +203,14 @@ const useCrudSelect = <
 					rows: Number.MAX_SAFE_INTEGER,
 				});
 
-				setInitialRawData(currentlySelected[0]);
-				setSelected(
-					await Promise.all(
-						currentlySelected[0].map((record) => deserialize(record))
-					)
+				const initialSelected = await Promise.all(
+					currentlySelected[0].map((record) => deserialize(record))
 				);
+
+				setInitialRawData(currentlySelected[0]);
+				setSelected(initialSelected);
+
+				if (onChange) onChange(initialSelected);
 			} catch (e) {
 				setLoadError(e);
 			} finally {
