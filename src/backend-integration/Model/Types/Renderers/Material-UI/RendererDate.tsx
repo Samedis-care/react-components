@@ -70,7 +70,7 @@ class RendererDateNullable extends TypeDate {
 			<Typography>
 				{!visibility.grid && `${label}: `}
 				{value
-					? value.toLocaleString(i18n.language)
+					? value.toLocaleDateString(i18n.language)
 					: ccI18n.t("backend-integration.model.types.renderers.date.not-set")}
 			</Typography>
 		);
