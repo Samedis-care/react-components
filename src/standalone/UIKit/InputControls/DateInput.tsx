@@ -26,6 +26,7 @@ const DateInput = (
 	const {
 		value,
 		openInfo,
+		onError,
 		onChange,
 		important,
 		fullWidth,
@@ -59,6 +60,12 @@ const DateInput = (
 			setTextValue(newTextValue);
 		}
 	}, [value]);
+	useEffect(() => {
+		if (onError && isError) {
+			onError(errorHelperText, null);
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [isError]);
 	const { handleCursorChange, cursorInputRef } = useInputCursorFix(textValue);
 	const handleOpenInfo = useCallback(
 		(event: React.MouseEvent<HTMLButtonElement>) => {
