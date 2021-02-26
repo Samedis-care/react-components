@@ -9,6 +9,9 @@ import { Info as InfoIcon } from "@material-ui/icons";
 import { InputLabelConfig, UIInputProps, useInputStyles } from "./CommonStyles";
 
 export interface TextFieldWithHelpProps extends UIInputProps {
+	/**
+	 * Optional callback which opens a dialog with information about the field
+	 */
 	openInfo?: () => void;
 }
 

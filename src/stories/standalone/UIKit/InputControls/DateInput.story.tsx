@@ -8,7 +8,6 @@ import { showInfoDialog } from "../../../../non-standalone";
 export const DateInputStory = (): React.ReactElement => {
 	const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 	const onChange = action("onChange");
-	const onError = action("onError");
 	const [pushDialog] = useDialogContext();
 	const dialogTitle = text("Dialog title", "Sample title");
 	const infoText = text(
@@ -25,12 +24,6 @@ export const DateInputStory = (): React.ReactElement => {
 		},
 		[onChange]
 	);
-	const handleError = React.useCallback(
-		(error: React.ReactNode) => {
-			onError(error);
-		},
-		[onError]
-	);
 
 	return (
 		<DateInput
@@ -41,7 +34,7 @@ export const DateInputStory = (): React.ReactElement => {
 			placeholder={text("placeholder", "Please Select Date")}
 			value={selectedDate}
 			onChange={handleChange}
-			onError={handleError}
+			onError={action("onError")}
 			openInfo={() =>
 				showInfoDialog(pushDialog, {
 					title: dialogTitle,

@@ -1,24 +1,30 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { IconButton, InputAdornment } from "@material-ui/core";
 import { DatePickerProps } from "@material-ui/pickers";
 import { Info as InfoIcon, Event as CalenderIcon } from "@material-ui/icons";
-import {
-	InputLabelConfig,
-	UIInputProps,
-	useInputStyles,
-} from "../CommonStyles";
+import { InputLabelConfig, useInputStyles } from "../CommonStyles";
 import { LocalizedDatePicker } from "../../../standalone/LocalizedDateTimePickers";
-import TextFieldWithHelp from "../TextFieldWithHelp";
+import TextFieldWithHelp, {
+	TextFieldWithHelpProps,
+} from "../TextFieldWithHelp";
 import moment from "moment";
 import { useInputCursorFix } from "../../../utils";
 import TypeDate from "../../../backend-integration/Model/Types/TypeDate";
 import ccI18n from "../../../i18n";
 import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
-export interface DateInputProps extends UIInputProps {
-	openInfo?: () => void;
+export interface DateInputProps extends TextFieldWithHelpProps {
+	/**
+	 * The value of the input
+	 */
 	value: Date | null;
+	/**
+	 * Set new value of the input
+	 * @param date new value
+	 */
 	onChange: (date: Date | null) => void;
 }
+
+const renderTextFieldComponent = () => null;
 
 const DateInput = (
 	props: DateInputProps & Omit<DatePickerProps, "value" | "onChange">
@@ -31,12 +37,12 @@ const DateInput = (
 		important,
 		fullWidth,
 		placeholder,
+		invalidDateMessage,
 		...muiProps
 	} = props;
 	const inputClasses = useInputStyles({ important });
-	const [isOpen, setIsOpen] = useState(false);
-	const [isError, setIsError] = useState(false);
-	const [errorHelperText, setErrorHelperText] = useState("");
+	const [pickerOpen, setPickerOpen] = useState(false);
+	const [error, setError] = useState<React.ReactNode>(null);
 	const [textValue, setTextValue] = useState("");
 
 	// update textValue based on value property
@@ -60,13 +66,16 @@ const DateInput = (
 			setTextValue(newTextValue);
 		}
 	}, [value]);
+
+	// fire on error event
 	useEffect(() => {
-		if (onError && isError) {
-			onError(errorHelperText, null);
-		}
+		if (!onError) return;
+		onError(error, value);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [isError]);
+	}, [error]);
+
 	const { handleCursorChange, cursorInputRef } = useInputCursorFix(textValue);
+
 	const handleOpenInfo = useCallback(
 		(event: React.MouseEvent<HTMLButtonElement>) => {
 			// Prevent calender popup open event, while clicking on info icon
@@ -75,6 +84,7 @@ const DateInput = (
 		},
 		[openInfo]
 	);
+
 	const handleTextFieldOnChange = useCallback(
 		(event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
 			handleCursorChange(event);
@@ -85,21 +95,19 @@ const DateInput = (
 			setTextValue(formatted);
 
 			const date = new Date(formatted);
-			// If the fields of date are NaN the date is invalid, we should raise an error for this (onError prop)
-			if (formatted.includes("_") || isNaN(date.getTime())) {
-				setErrorHelperText(
-					ccI18n.t(
-						"backend-integration.model.types.renderers.date.labels.invalid-date"
-					)
-				);
-				if (!isError) setIsError(true);
-			} else {
-				setErrorHelperText("");
-				setIsError(false);
-			}
+			// If the fields of date are NaN the date is invalid, we raise an error for this
+			setError(
+				formatted.includes("_") || isNaN(date.getTime())
+					? invalidDateMessage ??
+							ccI18n.t(
+								"backend-integration.model.types.renderers.date.labels.invalid-date"
+							)
+					: null
+			);
+
 			onChange(formatted.includes("_") || isNaN(date.getMonth()) ? null : date);
 		},
-		[isError, setIsError, setErrorHelperText, onChange, handleCursorChange]
+		[handleCursorChange, onChange, invalidDateMessage]
 	);
 
 	const handlePickerChange = useCallback(
@@ -107,49 +115,49 @@ const DateInput = (
 			onChange(newDate ? newDate.toDate() : null),
 		[onChange]
 	);
-	const handlePickerError = useCallback(
-		(error: React.ReactNode) => {
-			if (error) {
-				setErrorHelperText(error as string);
-				setIsError(true);
-			} else {
-				if (!textValue.includes("_")) {
-					setIsError(false);
-					setErrorHelperText("");
-				}
-			}
-		},
-		[textValue, setIsError, setErrorHelperText]
+
+	const handleOpen = useCallback(() => setPickerOpen(true), [setPickerOpen]);
+	const handleClose = useCallback(() => setPickerOpen(false), [setPickerOpen]);
+
+	const InputProps = useMemo(
+		() => ({
+			classes: inputClasses,
+			endAdornment: (
+				<InputAdornment position="end">
+					{!muiProps.disabled && (
+						<IconButton onClick={handleOpen}>
+							<CalenderIcon color={"disabled"} />
+						</IconButton>
+					)}
+					{openInfo && (
+						<IconButton onClick={handleOpenInfo}>
+							<InfoIcon color={"disabled"} />
+						</IconButton>
+					)}
+				</InputAdornment>
+			),
+		}),
+		[handleOpen, handleOpenInfo, inputClasses, muiProps.disabled, openInfo]
 	);
+
+	const inputProps = useMemo(
+		() => ({
+			ref: cursorInputRef,
+		}),
+		[cursorInputRef]
+	);
+
 	return (
 		<>
 			<TextFieldWithHelp
 				fullWidth={fullWidth}
 				placeholder={placeholder}
 				value={textValue}
-				error={isError}
-				helperText={errorHelperText}
+				error={!!error}
+				helperText={error}
 				onChange={handleTextFieldOnChange}
-				InputProps={{
-					classes: inputClasses,
-					endAdornment: (
-						<InputAdornment position="end">
-							{!muiProps.disabled && (
-								<IconButton onClick={() => setIsOpen(true)}>
-									<CalenderIcon color={"disabled"} />
-								</IconButton>
-							)}
-							{openInfo && (
-								<IconButton onClick={handleOpenInfo}>
-									<InfoIcon color={"disabled"} />
-								</IconButton>
-							)}
-						</InputAdornment>
-					),
-				}}
-				inputProps={{
-					ref: cursorInputRef,
-				}}
+				InputProps={InputProps}
+				inputProps={inputProps}
 				InputLabelProps={InputLabelConfig}
 			/>
 
@@ -158,11 +166,11 @@ const DateInput = (
 				value={value}
 				onChange={handlePickerChange}
 				clearable
-				open={isOpen}
-				onError={handlePickerError}
-				onOpen={() => setIsOpen(true)}
-				onClose={() => setIsOpen(false)}
-				TextFieldComponent={() => null}
+				open={pickerOpen}
+				onError={setError}
+				onOpen={handleOpen}
+				onClose={handleClose}
+				TextFieldComponent={renderTextFieldComponent}
 				InputLabelProps={InputLabelConfig}
 			/>
 		</>
