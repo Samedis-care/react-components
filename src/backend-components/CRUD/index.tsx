@@ -176,7 +176,7 @@ const CRUD = <
 				hasPermission(perms, props.editPermission) ? showEditPage : undefined
 			}
 			onAddNew={
-				hasPermission(perms, props.editPermission) ? showNewPage : undefined
+				hasPermission(perms, props.newPermission) ? showNewPage : undefined
 			}
 		/>
 	);
