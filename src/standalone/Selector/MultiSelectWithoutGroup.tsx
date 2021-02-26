@@ -1,16 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
-import {
-	TextFieldProps,
-	Typography,
-	IconButton,
-	makeStyles,
-} from "@material-ui/core";
+import { TextFieldProps, Typography, makeStyles } from "@material-ui/core";
 import { Autocomplete } from "@material-ui/lab";
-import {
-	Search as SearchIcon,
-	Info as InfoIcon,
-	Cancel as RemoveIcon,
-} from "@material-ui/icons";
+import { Search as SearchIcon, Cancel as RemoveIcon } from "@material-ui/icons";
 import {
 	BaseSelectorProps,
 	MultiSelectorData,
@@ -237,15 +228,11 @@ const MultiSelectWithoutGroup = <DataT extends MultiSelectorData>(
 				renderInput={(params: TextFieldProps) => (
 					<TextFieldWithHelp
 						{...params}
+						openInfo={openInfo}
 						InputProps={{
 							...params.InputProps,
 							startAdornment: <SearchIcon color={"primary"} />,
 							type: "search",
-							endAdornment: openInfo && (
-								<IconButton onClick={openInfo}>
-									<InfoIcon color={"disabled"} />
-								</IconButton>
-							),
 						}}
 					/>
 				)}
