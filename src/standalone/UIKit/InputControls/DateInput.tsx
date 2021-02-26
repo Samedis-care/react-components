@@ -1,52 +1,42 @@
-import React, { useCallback } from "react";
-import { IconButton, InputAdornment } from "@material-ui/core";
-import { DatePickerProps } from "@material-ui/pickers";
-import { Info as InfoIcon, Event as CalenderIcon } from "@material-ui/icons";
-import {
-	InputLabelConfig,
-	UIInputProps,
-	useInputStyles,
-} from "../CommonStyles";
-import { LocalizedDatePicker } from "../../../standalone/LocalizedDateTimePickers";
+import React from "react";
+import { TextFieldProps } from "@material-ui/core";
+import { KeyboardDatePickerProps } from "@material-ui/pickers";
+import { InputLabelConfig } from "../CommonStyles";
+import { LocalizedKeyboardDatePicker } from "../../../standalone/LocalizedDateTimePickers";
+import TextFieldWithHelp, {
+	TextFieldWithHelpProps,
+} from "../TextFieldWithHelp";
 
-export interface DateInputProps extends UIInputProps {
-	openInfo?: () => void;
+export interface DateInputProps extends TextFieldWithHelpProps {
+	/**
+	 * The value of the input
+	 */
+	value: Date | null;
+	/**
+	 * Set new value of the input
+	 * @param date new value
+	 */
+	onChange: (date: Date | null) => void;
 }
 
-const DateInput = (props: DateInputProps & DatePickerProps) => {
-	const { openInfo, important, ...muiProps } = props;
-	const inputClasses = useInputStyles({ important });
+const CustomInput = React.forwardRef<HTMLDivElement>(
+	function DateInputCustomTextField(props: TextFieldProps, ref) {
+		return <TextFieldWithHelp {...props} ref={ref} />;
+	}
+);
 
-	const handleOpenInfo = useCallback(
-		(event: React.MouseEvent<HTMLButtonElement>) => {
-			// Prevent calender popup open event, while clicking on info icon
-			event.stopPropagation();
-			if (openInfo) openInfo();
-		},
-		[openInfo]
-	);
+const DateInput = (
+	props: DateInputProps & Omit<KeyboardDatePickerProps, "value" | "onChange">
+) => {
+	const { value, onChange, ...muiProps } = props;
 
 	return (
-		<LocalizedDatePicker
+		<LocalizedKeyboardDatePicker
 			{...muiProps}
+			value={value}
+			onChange={(date) => (date ? onChange(date.toDate()) : onChange(null))}
 			clearable
-			InputProps={{
-				classes: inputClasses,
-				endAdornment: (
-					<InputAdornment position="end">
-						{!muiProps.disabled && (
-							<IconButton>
-								<CalenderIcon color={"disabled"} />
-							</IconButton>
-						)}
-						{openInfo && (
-							<IconButton onClick={handleOpenInfo}>
-								<InfoIcon color={"disabled"} />
-							</IconButton>
-						)}
-					</InputAdornment>
-				),
-			}}
+			TextFieldComponent={CustomInput}
 			InputLabelProps={InputLabelConfig}
 		/>
 	);
