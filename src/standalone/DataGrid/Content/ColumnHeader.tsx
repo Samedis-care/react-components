@@ -3,6 +3,7 @@ import {
 	IDataGridColumnDef,
 	useDataGridColumnState,
 	useDataGridColumnsWidthState,
+	useDataGridProps,
 	useDataGridRootRef,
 	useDataGridStyles,
 } from "../index";
@@ -36,6 +37,7 @@ const ColumnHeader = (props: IDataGridContentColumnHeaderProps) => {
 	const { field, sortable, filterable } = column;
 	const gridRoot = useDataGridRootRef();
 	const [columnState, setColumnState] = useDataGridColumnState();
+	const { sortLimit } = useDataGridProps();
 	const { sort, sortOrder, filter } = columnState[field];
 	const [, setColumnWidthState] = useDataGridColumnsWidthState();
 	const [dragging, setDragging] = useState(false);
@@ -96,12 +98,17 @@ const ColumnHeader = (props: IDataGridContentColumnHeaderProps) => {
 							sortOrder: order,
 						},
 					};
+
+					// if we reached the limit of max sorts we cancel this action
+					if (typeof sortLimit === "number" && order - 1 > sortLimit) {
+						return prevState;
+					}
 				}
 
 				return newColumnState;
 			});
 		},
-		[setColumnState]
+		[sortLimit, setColumnState]
 	);
 
 	const startDrag = useCallback(() => setDragging(true), [setDragging]);

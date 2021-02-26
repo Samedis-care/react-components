@@ -1,6 +1,6 @@
 import React from "react";
 import "../../../i18n";
-import { boolean, text } from "@storybook/addon-knobs";
+import { boolean, number, text } from "@storybook/addon-knobs";
 import { DataGrid } from "../../../standalone";
 import { makeStyles } from "@material-ui/core/styles";
 import {
@@ -144,6 +144,17 @@ export const DataGridStory = (): React.ReactElement => {
 				}
 				enableFilterDialogMediaQuery={theme.breakpoints.down("md")}
 				onSelectionChange={action("onSelectionChange")}
+				prohibitMultiSelect={boolean("Prohibit multi select", false)}
+				filterLimit={
+					boolean("Enable filter limit", false)
+						? number("Filter limit", 1)
+						: undefined
+				}
+				sortLimit={
+					boolean("Enable sort limit", false)
+						? number("Sort limit", 1)
+						: undefined
+				}
 				loadData={(params): DataGridData => {
 					action("loadData")(params);
 

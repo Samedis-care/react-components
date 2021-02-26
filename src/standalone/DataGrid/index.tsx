@@ -188,8 +188,18 @@ export interface IDataGridColumnProps {
 	enableDeleteAll?: boolean;
 	/**
 	 * Limits the amount of chainable column filters
+	 * @remarks This is zero-indexed, so max 1 filter means pass 0, max 2 filter => 1, etc
 	 */
 	filterLimit?: number;
+	/**
+	 * Limits the amount of active sorts
+	 * @remarks This is zero-indexed, so max 1 sorts means pass 0, max 2 sorts => 1, etc
+	 */
+	sortLimit?: number;
+	/**
+	 * Disable selecting multiple entries (disables select all & delete all)
+	 */
+	prohibitMultiSelect?: boolean;
 }
 
 export type IDataGridFieldFilter = { [field: string]: IFilterDef };

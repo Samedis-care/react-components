@@ -24,7 +24,7 @@ export interface CellProps extends GridCellProps {
 const Cell = (props: CellProps): React.ReactElement => {
 	const classes = useDataGridStyles();
 	const { columns, columnIndex, rowIndex } = props;
-	const { onEdit } = useDataGridProps();
+	const { onEdit, prohibitMultiSelect } = useDataGridProps();
 	const [state, setState] = useDataGridState();
 	const [hover, setHover] = props.hoverState;
 	const id = state.rows[props.rowIndex - 1]?.id || "undefined";
@@ -34,10 +34,12 @@ const Cell = (props: CellProps): React.ReactElement => {
 		setState((prevState) => ({
 			...prevState,
 			selectedRows: !prevState.selectedRows.includes(id)
-				? [...prevState.selectedRows, id]
+				? prohibitMultiSelect
+					? [id]
+					: [...prevState.selectedRows, id]
 				: prevState.selectedRows.filter((s) => s !== id),
 		}));
-	}, [setState, id]);
+	}, [setState, id, prohibitMultiSelect]);
 
 	const editRecord = useCallback(() => {
 		if (id === "undefined") return;
