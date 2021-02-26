@@ -143,6 +143,7 @@ export const DataGridStory = (): React.ReactElement => {
 						: undefined
 				}
 				enableFilterDialogMediaQuery={theme.breakpoints.down("md")}
+				onSelectionChange={action("onSelectionChange")}
 				loadData={(params): DataGridData => {
 					action("loadData")(params);
 
