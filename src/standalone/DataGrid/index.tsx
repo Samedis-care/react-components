@@ -127,6 +127,12 @@ export interface IDataGridCallbacks {
 	 * Optional initial values for customData
 	 */
 	initialCustomData?: Record<string, unknown>;
+	/**
+	 * Event for selection change
+	 * @param invert Are ids inverted? If true: Everything is selected except ids. If false: Only ids are selected
+	 * @param ids The ids that are selected/not selected based on invert
+	 */
+	onSelectionChange?: (invert: boolean, ids: string[]) => void;
 }
 
 export type DataGridAdditionalFilters = Record<string, unknown>;
@@ -756,6 +762,7 @@ const DataGrid = (props: DataGridProps) => {
 		getAdditionalFilters,
 		forceRefreshToken,
 		initialCustomData,
+		onSelectionChange,
 	} = props;
 	const rowsPerPage = props.rowsPerPage || 50;
 
@@ -774,6 +781,8 @@ const DataGrid = (props: DataGridProps) => {
 		lockedColumns,
 		refreshData,
 		customData,
+		selectAll,
+		selectedRows,
 	} = state;
 
 	const gridRoot = useRef<HTMLDivElement>();
@@ -933,6 +942,15 @@ const DataGrid = (props: DataGridProps) => {
 		resetView();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [resetView, search, columnsState, customData, forceRefreshToken]);
+
+	// selection change event
+	useEffect(() => {
+		if (onSelectionChange) {
+			onSelectionChange(selectAll, selectedRows);
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [selectAll, selectedRows]);
+
 	return (
 		<Grid
 			container
