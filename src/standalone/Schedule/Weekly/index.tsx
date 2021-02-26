@@ -15,6 +15,7 @@ import { ArrowForwardIos, ArrowBackIos } from "@material-ui/icons";
 import { DatePicker, MuiPickersUtilsProvider } from "@material-ui/pickers";
 import MomentUtils from "@date-io/moment";
 import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
+import { ToDateLocaleStringOptions } from "../../../constants";
 
 export interface IProps extends WithStyles {
 	/**
@@ -82,7 +83,10 @@ class WeekView extends PureComponent<IProps, IState> {
 				<Grid item xs={4}>
 					<Button onClick={this.today} className={this.props.classes.todayBtn}>
 						{i18n.t("standalone.schedule.today")} (
-						{now.toDate().toLocaleDateString(i18n.language)})
+						{now
+							.toDate()
+							.toLocaleDateString(i18n.language, ToDateLocaleStringOptions)}
+						)
 					</Button>
 				</Grid>
 				<Grid item xs={4}>

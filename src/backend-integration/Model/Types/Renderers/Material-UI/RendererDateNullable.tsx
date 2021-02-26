@@ -6,6 +6,7 @@ import ccI18n from "../../../../../i18n";
 import { normalizeDate } from "../../Utils/DateUtils";
 import { LocalizedKeyboardDatePicker } from "../../../../../standalone/LocalizedDateTimePickers";
 import i18n from "../../../../../i18n";
+import { ToDateLocaleStringOptions } from "../../../../../constants";
 
 /**
  * Renders Date with Date Selector
@@ -70,7 +71,7 @@ class RendererDateNullable extends TypeDateNullable {
 			<Typography>
 				{!visibility.grid && `${label}: `}
 				{value
-					? value.toLocaleDateString(i18n.language)
+					? value.toLocaleDateString(i18n.language, ToDateLocaleStringOptions)
 					: ccI18n.t("backend-integration.model.types.renderers.date.not-set")}
 			</Typography>
 		);
