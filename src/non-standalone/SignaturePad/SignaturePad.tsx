@@ -1,13 +1,13 @@
 import React from "react";
 import SignPad, { SignPadProps } from "../../standalone/SignPad/index";
 import { useDialogContext } from "../../framework";
-import { showSignPadDialog } from "../../non-standalone/Dialog";
+import { showSignPadDialog } from "../Dialog";
 
 export interface SignaturePadCanvasProps extends SignPadProps {
 	/**
 	 * The name of the input
 	 */
-	name: string;
+	name?: string;
 	/**
 	 * The props used to draw HTML canvas
 	 */

@@ -145,7 +145,7 @@ export interface IDialogConfigSign {
 	/**
 	 * The name of the input
 	 */
-	name: string;
+	name?: string;
 	/**
 	 * Boolean flag to disable dialog
 	 */
