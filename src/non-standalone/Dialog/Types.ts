@@ -149,7 +149,7 @@ export interface IDialogConfigSign {
 	/**
 	 * Boolean flag to disable dialog
 	 */
-	disabled: boolean;
+	disabled?: boolean;
 	/**
 	 * Boolean flag to clear signature
 	 */
