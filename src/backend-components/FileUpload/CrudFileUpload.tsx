@@ -10,10 +10,7 @@ import ErrorComponent from "../../stories/backend-components/Form/ErrorComponent
 import { Loader } from "../../standalone";
 
 export interface CrudFileUploadProps
-	extends Omit<
-		FileUploadProps,
-		"files" | "onChange" | "handleError" | "classes"
-	> {
+	extends Omit<FileUploadProps, "files" | "handleError" | "classes"> {
 	/**
 	 * The backend connector used as CRUD interface
 	 */
@@ -54,7 +51,7 @@ export interface BackendFileMeta extends FileMeta {
 }
 
 const CrudFileUpload = (props: CrudFileUploadProps) => {
-	const { connector, serialize, deserialize, ...otherProps } = props;
+	const { connector, serialize, deserialize, onChange, ...otherProps } = props;
 	const { allowDuplicates } = otherProps;
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<Error | null>(null);
@@ -98,17 +95,18 @@ const CrudFileUpload = (props: CrudFileUploadProps) => {
 				await deletePromise;
 				const uploadedFiles = await uploadPromise;
 
+				const finalFiles = (newFiles.filter(
+					(file) => !file.delete && !file.canBeUploaded
+				) as FileData<BackendFileMeta>[]).concat(uploadedFiles);
+
 				// update state
-				setFiles(
-					(newFiles.filter(
-						(file) => !file.delete && !file.canBeUploaded
-					) as FileData<BackendFileMeta>[]).concat(uploadedFiles)
-				);
+				setFiles(finalFiles);
+				if (onChange) onChange(finalFiles);
 			} catch (e) {
 				setError(e as Error);
 			}
 		},
-		[allowDuplicates, connector, deserialize, files, serialize]
+		[allowDuplicates, connector, deserialize, files, onChange, serialize]
 	);
 
 	const handleError = useCallback((_, msg: string) => {
