@@ -101,12 +101,11 @@ const CrudFileUpload = (props: CrudFileUploadProps) => {
 
 				// update state
 				setFiles(finalFiles);
-				if (onChange) onChange(finalFiles);
 			} catch (e) {
 				setError(e as Error);
 			}
 		},
-		[allowDuplicates, connector, deserialize, files, onChange, serialize]
+		[allowDuplicates, connector, deserialize, files, serialize]
 	);
 
 	const handleError = useCallback((_, msg: string) => {
@@ -130,6 +129,10 @@ const CrudFileUpload = (props: CrudFileUploadProps) => {
 		})();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
+
+	useEffect(() => {
+		if (onChange) onChange(files);
+	}, [files, onChange]);
 
 	if (loading) return <Loader />;
 	if (loadError) return <span>{loadError.message}</span>;
