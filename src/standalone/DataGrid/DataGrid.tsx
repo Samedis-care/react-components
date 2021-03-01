@@ -29,6 +29,7 @@ import { ModelFilterType } from "../../backend-integration/Model";
 import { HEADER_PADDING } from "./Content/ColumnHeader";
 import { Styles } from "@material-ui/core/styles/withStyles";
 import CustomFilterDialog from "./CustomFilterDialog";
+import StatePersistence from "./StatePersistence";
 
 export interface DataGridTheme extends Theming.BasicElementThemeFragment {
 	/* root elements from BasicElementThemeFragment defining main grid container visuals */
@@ -978,6 +979,7 @@ const DataGrid = (props: DataGridProps) => {
 							<DataGridColumnsWidthStateContext.Provider
 								value={columnWidthStatePack}
 							>
+								<StatePersistence />
 								<Grid item className={classes.header}>
 									<Header />
 								</Grid>
