@@ -4,7 +4,7 @@ import {
 	useDataGridColumnState,
 	useDataGridProps,
 	useDataGridState,
-} from "../index";
+} from "../DataGrid";
 import DataActionBarView from "./DataActionBarView";
 import { dataGridPrepareFiltersAndSorts } from "../CallbackUtil";
 

@@ -8,7 +8,7 @@ import {
 	DataGridSortSetting,
 	IDataGridColumnDef,
 	IDataGridFieldFilter,
-} from "../index";
+} from "../DataGrid";
 import { SvgIconComponent } from "@material-ui/icons";
 
 export interface IDataGridHeaderProps {

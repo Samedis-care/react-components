@@ -10,7 +10,7 @@ import {
 	DataGridSortSetting,
 	IDataGridFieldFilter,
 	IDataGridLoadDataParameters,
-} from "../../standalone/DataGrid";
+} from "../../standalone/DataGrid/DataGrid";
 import JsonApiClient, {
 	GetParams,
 } from "../../backend-integration/Connector/JsonApiClient";

@@ -8,7 +8,7 @@ import {
 	PopoverOrigin,
 } from "@material-ui/core";
 import { Search as SearchIcon } from "@material-ui/icons";
-import { useDataGridProps } from "../index";
+import { useDataGridProps } from "../DataGrid";
 import TextFieldWithHelp from "../../UIKit/TextFieldWithHelp";
 
 const searchInputProps = {

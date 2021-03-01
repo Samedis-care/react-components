@@ -5,7 +5,7 @@ import ComponentWithLabel from "../../UIKit/ComponentWithLabel";
 import i18n from "../../../i18n";
 import { Edit as EditIcon, Delete as DeleteIcon } from "@material-ui/icons";
 import SelectAll from "./SelectAll";
-import { useDataGridStyles } from "../index";
+import { useDataGridStyles } from "../DataGrid";
 
 export interface DataActionBarViewProps {
 	/**

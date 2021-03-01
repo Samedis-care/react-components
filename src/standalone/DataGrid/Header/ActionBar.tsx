@@ -5,7 +5,7 @@ import {
 	useDataGridColumnState,
 	useDataGridProps,
 	useDataGridState,
-} from "../index";
+} from "../DataGrid";
 import ActionBarView from "./ActionBarView";
 
 const ActionBar = () => {

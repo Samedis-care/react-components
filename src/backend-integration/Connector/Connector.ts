@@ -5,7 +5,7 @@ import {
 	PageVisibility,
 	ModelGetResponse,
 } from "../Model";
-import { IDataGridLoadDataParameters } from "../../standalone/DataGrid";
+import { IDataGridLoadDataParameters } from "../../standalone/DataGrid/DataGrid";
 import { IDataGridExporter } from "../../standalone/DataGrid/Header";
 
 export interface ResponseMeta {

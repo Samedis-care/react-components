@@ -17,7 +17,7 @@ import {
 	IDataGridColumnDef,
 	useDataGridProps,
 	useDataGridStyles,
-} from "../index";
+} from "../DataGrid";
 import { LocalizedKeyboardDatePicker } from "../../LocalizedDateTimePickers";
 import { DateType } from "@date-io/type";
 import ccI18n from "../../../i18n";

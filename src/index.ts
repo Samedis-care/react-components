@@ -3,7 +3,10 @@ import {
 	SelectorTheme,
 	SelectorThemeExpert,
 } from "./standalone";
-import { DataGridTheme, DataGridThemeExpert } from "./standalone/DataGrid";
+import {
+	DataGridTheme,
+	DataGridThemeExpert,
+} from "./standalone/DataGrid/DataGrid";
 import { MenuTheme } from "./standalone/Portal/Menu";
 import { MenuItemTheme } from "./standalone/Portal/MenuItem/Material";
 import { ActionButtonTheme } from "./standalone/UIKit/ActionButton";

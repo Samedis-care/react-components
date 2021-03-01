@@ -12,7 +12,7 @@ import FilterIcon from "../../Icons/FilterIcon";
 import FilterEntry, { IFilterDef } from "./FilterEntry";
 import i18n from "../../../i18n";
 import { ModelFilterType } from "../../../backend-integration/Model";
-import { IDataGridColumnDef, useDataGridStyles } from "../index";
+import { IDataGridColumnDef, useDataGridStyles } from "../DataGrid";
 
 export interface IDataGridContentColumnHeaderContentProps {
 	/**

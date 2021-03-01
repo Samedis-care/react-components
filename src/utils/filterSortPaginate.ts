@@ -3,7 +3,7 @@ import {
 	DataGridRowData,
 	IDataGridColumnDef,
 	IDataGridLoadDataParameters,
-} from "../standalone/DataGrid";
+} from "../standalone/DataGrid/DataGrid";
 
 /**
  * Applies the given filters, sort and pagination settings to the given data

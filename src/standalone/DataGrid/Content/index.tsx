@@ -4,7 +4,7 @@ import {
 	IDataGridColumnProps,
 	useDataGridColumnsWidthState,
 	useDataGridState,
-} from "../index";
+} from "../DataGrid";
 import {
 	AutoSizer,
 	MultiGrid,

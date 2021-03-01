@@ -14,7 +14,7 @@ import {
 	IDataGridColumnDef,
 	IDataGridColumnProps,
 	useDataGridStyles,
-} from "../index";
+} from "../DataGrid";
 import i18n from "../../../i18n";
 
 export interface IDataGridSettingsDialogProps extends IDataGridColumnProps {

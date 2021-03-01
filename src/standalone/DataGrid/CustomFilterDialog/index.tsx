@@ -5,7 +5,7 @@ import {
 	useDataGridProps,
 	useDataGridState,
 	useDataGridStyles,
-} from "../index";
+} from "../DataGrid";
 import Dialog from "./FilterDialog";
 
 const DataGridCustomFilters = () => {

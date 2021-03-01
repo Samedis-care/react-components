@@ -20,7 +20,7 @@ import { IDataGridExporter } from "./index";
 import ExportMenu from "./ExportMenu";
 import i18n from "../../../i18n";
 import ComponentWithLabel from "../../UIKit/ComponentWithLabel";
-import { IDataGridAddButton } from "../index";
+import { IDataGridAddButton } from "../DataGrid";
 
 export interface IDataGridActionBarViewProps {
 	/**

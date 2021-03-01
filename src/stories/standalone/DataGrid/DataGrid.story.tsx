@@ -10,7 +10,7 @@ import {
 	DataGridSortSetting,
 	IDataGridColumnDef,
 	IDataGridFieldFilter,
-} from "../../../standalone/DataGrid";
+} from "../../../standalone/DataGrid/DataGrid";
 import { action } from "@storybook/addon-actions";
 import { IDataGridExporter } from "../../../standalone/DataGrid/Header";
 import data from "./covid-daily.json";

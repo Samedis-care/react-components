@@ -3,7 +3,7 @@ import {
 	useDataGridProps,
 	useDataGridState,
 	useDataGridStyles,
-} from "../index";
+} from "../DataGrid";
 import React, { Dispatch, SetStateAction, useCallback } from "react";
 import { GridCellProps } from "react-virtualized/dist/es/Grid";
 import ColumnHeader from "./ColumnHeader";

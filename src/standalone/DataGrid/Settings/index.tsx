@@ -4,7 +4,7 @@ import {
 	IDataGridColumnProps,
 	useDataGridState,
 	useDataGridStyles,
-} from "../index";
+} from "../DataGrid";
 import Dialog from "./SettingsDialog";
 
 const DataGridSettings = (props: IDataGridColumnProps) => {

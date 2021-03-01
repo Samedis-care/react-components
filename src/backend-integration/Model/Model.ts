@@ -6,7 +6,7 @@ import { ModelDataStore } from "../index";
 import {
 	IDataGridColumnDef,
 	IDataGridLoadDataParameters,
-} from "../../standalone/DataGrid";
+} from "../../standalone/DataGrid/DataGrid";
 import {
 	UseMutationResult,
 	UseQueryResult,

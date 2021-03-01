@@ -11,7 +11,7 @@ import {
 import {
 	DataGridRowData,
 	IDataGridLoadDataParameters,
-} from "../../standalone/DataGrid";
+} from "../../standalone/DataGrid/DataGrid";
 
 class LocalStorageConnector<
 	KeyT extends ModelFieldName,

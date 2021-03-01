@@ -7,7 +7,7 @@ import {
 	Paper,
 	Typography,
 } from "@material-ui/core";
-import { useDataGridStyles } from "../index";
+import { useDataGridStyles } from "../DataGrid";
 import i18n from "../../../i18n";
 import { IDataGridFilterBarProps } from "../Header/FilterBar";
 

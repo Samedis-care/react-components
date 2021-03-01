@@ -3,7 +3,7 @@ import DataGrid, {
 	DataGridData,
 	IDataGridLoadDataParameters,
 	DataGridProps,
-} from "../../standalone/DataGrid";
+} from "../../standalone/DataGrid/DataGrid";
 import Model, {
 	ModelFieldName,
 	PageVisibility,

@@ -1,7 +1,7 @@
 import React from "react";
 import { Box, Typography } from "@material-ui/core";
 import i18n from "../../../i18n";
-import { useDataGridStyles } from "../index";
+import { useDataGridStyles } from "../DataGrid";
 
 export interface IDataGridPaginationViewProps {
 	/**

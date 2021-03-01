@@ -6,7 +6,7 @@ import {
 	useDataGridProps,
 	useDataGridRootRef,
 	useDataGridStyles,
-} from "../index";
+} from "../DataGrid";
 import ColumnHeaderContent from "./ColumnHeaderContent";
 import { IFilterDef } from "./FilterEntry";
 

@@ -5,7 +5,7 @@ import {
 	useDataGridProps,
 	useDataGridState,
 	useDataGridStyles,
-} from "../index";
+} from "../DataGrid";
 import CustomFiltersButton from "./CustomFiltersButton";
 
 export interface IDataGridFilterBarProps {

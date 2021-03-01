@@ -1,5 +1,5 @@
 import React, { useCallback } from "react";
-import { useDataGridProps, useDataGridState } from "../index";
+import { useDataGridProps, useDataGridState } from "../DataGrid";
 import SelectAllView from "./SelectAllView";
 
 const SelectAll = () => {
