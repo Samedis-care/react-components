@@ -11,7 +11,7 @@ import {
 	IconButton,
 	InputLabel,
 	Paper,
-	TextFieldProps,
+	InputProps,
 } from "@material-ui/core";
 import { Autocomplete, AutocompleteProps } from "@material-ui/lab";
 import {
@@ -19,9 +19,7 @@ import {
 	ExpandMore,
 	Info as InfoIcon,
 } from "@material-ui/icons";
-import TextFieldWithHelp, {
-	TextFieldWithHelpProps,
-} from "../UIKit/TextFieldWithHelp";
+import { TextFieldWithHelpProps } from "../UIKit/TextFieldWithHelp";
 import i18n from "../../i18n";
 import { cleanClassMap, SelectorSmallListItem, SmallListItemIcon } from "../..";
 import { makeThemeStyles } from "../../utils";
@@ -31,6 +29,8 @@ import {
 	AutocompleteClassKey,
 	AutocompleteRenderInputParams,
 } from "@material-ui/lab/Autocomplete/Autocomplete";
+import InputWithHelp from "../UIKit/InputWithHelp";
+import OutlinedInputWithHelp from "../UIKit/OutlinedInputWithHelp";
 
 export interface BaseSelectorData {
 	/**
@@ -82,7 +82,7 @@ export interface BaseSelectorProps<DataT extends BaseSelectorData>
 	/**
 	 * The textfield type of input
 	 */
-	varient?: "outlined" | "standard";
+	variant?: "outlined" | "standard";
 	/**
 	 * The label of the selector
 	 */
@@ -198,11 +198,19 @@ const useCustomStyles = makeStyles(
 	{ name: "CcBaseSelectorCustom" }
 );
 
+const variantInput: Record<
+	NonNullable<BaseSelectorProps<BaseSelectorData>["variant"]>,
+	React.ComponentType<InputProps>
+> = {
+	outlined: OutlinedInputWithHelp,
+	standard: InputWithHelp,
+};
+
 const BaseSelector = <DataT extends BaseSelectorData>(
 	props: BaseSelectorProps<DataT>
 ) => {
 	const {
-		varient,
+		variant,
 		refreshToken,
 		onSelect,
 		selected,
@@ -332,6 +340,8 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 
 	const filterOptions = useCallback((options: DataT[]) => options, []);
 
+	const InputComponent = variantInput[variant ?? "outlined"];
+
 	return (
 		<>
 			{label && <InputLabel shrink>{label}</InputLabel>}
@@ -376,41 +386,19 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 					getOptionDisabled={(option: BaseSelectorData) => !!option.isDisabled}
 					getOptionSelected={(option, value) => option.value === value.value}
 					onChange={(_event, selectedValue) => onChangeHandler(selectedValue)}
-					renderInput={(
-						params: AutocompleteRenderInputParams &
-							Partial<Pick<TextFieldProps, "className" | "disabled">>
-					) => {
+					renderInput={(params: AutocompleteRenderInputParams) => {
 						// eslint-disable-next-line @typescript-eslint/no-unused-vars
-						const {
-							InputProps,
-							InputLabelProps,
-							disabled,
-							inputProps,
-							...otherParams
-						} = params;
+						const { InputProps, InputLabelProps, ...otherParams } = params;
 						return (
-							<TextFieldWithHelp
+							<InputComponent
+								readOnly={disableSearch}
+								{...InputProps}
 								{...otherParams}
-								disabled={disabled}
-								InputLabelProps={InputLabelProps}
-								variant={varient ? varient : "outlined"}
-								className={
-									varient
-										? varient === "standard"
-											? customClasses.textFieldStandard
-											: undefined
-										: undefined
+								startAdornment={
+									enableIcons ? renderIcon(selected?.icon) : undefined
 								}
-								inputProps={{
-									...inputProps,
-									readOnly: disableSearch,
-								}}
-								InputProps={{
-									...InputProps,
-									startAdornment: enableIcons
-										? renderIcon(selected?.icon)
-										: undefined,
-									endAdornment: openInfo
+								endAdornment={
+									openInfo
 										? React.cloneElement(
 												params.InputProps?.endAdornment as ReactElement,
 												{},
@@ -424,8 +412,8 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 													<InfoIcon color={"disabled"} />
 												</IconButton>
 										  )
-										: params.InputProps?.endAdornment,
-								}}
+										: params.InputProps?.endAdornment
+								}
 								placeholder={placeholder}
 								onChange={(event) => {
 									void onSearchHandler(event.target.value);

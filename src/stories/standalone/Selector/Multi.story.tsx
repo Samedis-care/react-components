@@ -33,7 +33,7 @@ const getDefaultData = (): MySelectorData[] => {
 
 export const SelectorMulti = (): React.ReactElement => {
 	const [selected, setSelected] = useState<BaseSelectorData[]>(getDefaultData);
-	const varientMode = select(
+	const variant = select(
 		"TextField mode",
 		{
 			outlined: "outlined",
@@ -83,7 +83,7 @@ export const SelectorMulti = (): React.ReactElement => {
 			<FormControl component={"fieldset"} fullWidth>
 				<MultiSelect
 					label={label}
-					varient={varientMode}
+					variant={variant}
 					selected={selected}
 					onSelect={onSelect}
 					onLoad={loadData}

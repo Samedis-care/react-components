@@ -11,7 +11,7 @@ import { useDialogContext } from "../../../framework";
 export const SelectorSingle = (): React.ReactElement => {
 	const [selected, setSelected] = useState<BaseSelectorData | null>(null);
 	const [pushDialog] = useDialogContext();
-	const varientMode = select(
+	const variant = select(
 		"TextField mode",
 		{
 			outlined: "outlined",
@@ -66,7 +66,7 @@ export const SelectorSingle = (): React.ReactElement => {
 			<FormControl component={"fieldset"} fullWidth>
 				<SingleSelect
 					label={label}
-					varient={varientMode}
+					variant={variant}
 					selected={selected}
 					onSelect={onSelect}
 					onLoad={loadData}
