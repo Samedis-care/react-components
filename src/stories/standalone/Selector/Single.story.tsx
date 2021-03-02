@@ -3,7 +3,7 @@ import "../../../i18n";
 import { BaseSelectorData, SingleSelect } from "../../../standalone/Selector";
 import { colourOptions } from "./Data";
 import { action } from "@storybook/addon-actions";
-import { boolean, text } from "@storybook/addon-knobs";
+import { boolean, text, select } from "@storybook/addon-knobs";
 import { Box, FormControl } from "@material-ui/core";
 import { showInfoDialog } from "../../../non-standalone";
 import { useDialogContext } from "../../../framework";
@@ -11,6 +11,14 @@ import { useDialogContext } from "../../../framework";
 export const SelectorSingle = (): React.ReactElement => {
 	const [selected, setSelected] = useState<BaseSelectorData | null>(null);
 	const [pushDialog] = useDialogContext();
+	const variant = select(
+		"TextField mode",
+		{
+			outlined: "outlined",
+			standard: "standard",
+		},
+		"outlined"
+	);
 	const dialogTitle = text("Dialog title", "Sample title");
 	const infoText = text(
 		"Info Text",
@@ -58,6 +66,7 @@ export const SelectorSingle = (): React.ReactElement => {
 			<FormControl component={"fieldset"} fullWidth>
 				<SingleSelect
 					label={label}
+					variant={variant}
 					selected={selected}
 					onSelect={onSelect}
 					onLoad={loadData}

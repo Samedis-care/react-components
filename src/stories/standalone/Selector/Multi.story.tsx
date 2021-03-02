@@ -7,7 +7,7 @@ import {
 } from "../../../standalone/Selector";
 import { colourOptions } from "./Data";
 import { action } from "@storybook/addon-actions";
-import { boolean, text } from "@storybook/addon-knobs";
+import { boolean, text, select } from "@storybook/addon-knobs";
 import { Box, FormControl } from "@material-ui/core";
 import CustomMultiSelectEntry from "./CustomMultiSelectEntry";
 
@@ -33,6 +33,14 @@ const getDefaultData = (): MySelectorData[] => {
 
 export const SelectorMulti = (): React.ReactElement => {
 	const [selected, setSelected] = useState<BaseSelectorData[]>(getDefaultData);
+	const variant = select(
+		"TextField mode",
+		{
+			outlined: "outlined",
+			standard: "standard",
+		},
+		"outlined"
+	);
 	const loadDataAction = action("onLoad");
 	const onSelectAction = action("onSelect");
 	const onAddNewAction = action("onAddNew");
@@ -75,6 +83,7 @@ export const SelectorMulti = (): React.ReactElement => {
 			<FormControl component={"fieldset"} fullWidth>
 				<MultiSelect
 					label={label}
+					variant={variant}
 					selected={selected}
 					onSelect={onSelect}
 					onLoad={loadData}

@@ -29,6 +29,9 @@ const useRawInputStyles = makeStyles(
 			paddingRight: theme.spacing(2),
 			paddingBottom: 0,
 			paddingLeft: theme.spacing(2),
+			"& .MuiAutocomplete-endAdornment": {
+				right: theme.spacing(2),
+			},
 		},
 		input: (props: UIInputPropsWithStyles) => ({
 			"&::placeholder": {

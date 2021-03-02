@@ -6,7 +6,13 @@ import React, {
 	PropsWithChildren,
 	ReactNodeArray,
 } from "react";
-import { ListItemText, IconButton, InputLabel, Paper } from "@material-ui/core";
+import {
+	ListItemText,
+	IconButton,
+	InputLabel,
+	Paper,
+	InputProps,
+} from "@material-ui/core";
 import { Autocomplete, AutocompleteProps } from "@material-ui/lab";
 import {
 	Add as AddIcon,
@@ -23,6 +29,7 @@ import {
 	AutocompleteClassKey,
 	AutocompleteRenderInputParams,
 } from "@material-ui/lab/Autocomplete/Autocomplete";
+import InputWithHelp from "../UIKit/InputWithHelp";
 import OutlinedInputWithHelp from "../UIKit/OutlinedInputWithHelp";
 
 export interface BaseSelectorData {
@@ -72,6 +79,10 @@ export interface BaseSelectorProps<DataT extends BaseSelectorData>
 	 * Callback for autocomplete change
 	 */
 	onSelect: (selected: DataT | null) => void;
+	/**
+	 * The textfield type of input
+	 */
+	variant?: "outlined" | "standard";
 	/**
 	 * The label of the selector
 	 */
@@ -168,6 +179,9 @@ const useCustomStyles = makeStyles(
 			padding: 2,
 			marginRight: -2,
 		},
+		textFieldStandard: {
+			position: "absolute",
+		},
 		icon: (
 			props: Pick<BaseSelectorProps<BaseSelectorData>, "iconSize" | "label">
 		) => ({
@@ -184,10 +198,19 @@ const useCustomStyles = makeStyles(
 	{ name: "CcBaseSelectorCustom" }
 );
 
+const variantInput: Record<
+	NonNullable<BaseSelectorProps<BaseSelectorData>["variant"]>,
+	React.ComponentType<InputProps>
+> = {
+	outlined: OutlinedInputWithHelp,
+	standard: InputWithHelp,
+};
+
 const BaseSelector = <DataT extends BaseSelectorData>(
 	props: BaseSelectorProps<DataT>
 ) => {
 	const {
+		variant,
 		refreshToken,
 		onSelect,
 		selected,
@@ -317,6 +340,8 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 
 	const filterOptions = useCallback((options: DataT[]) => options, []);
 
+	const InputComponent = variantInput[variant ?? "outlined"];
+
 	return (
 		<>
 			{label && <InputLabel shrink>{label}</InputLabel>}
@@ -365,7 +390,7 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 						// eslint-disable-next-line @typescript-eslint/no-unused-vars
 						const { InputProps, InputLabelProps, ...otherParams } = params;
 						return (
-							<OutlinedInputWithHelp
+							<InputComponent
 								readOnly={disableSearch}
 								{...InputProps}
 								{...otherParams}
