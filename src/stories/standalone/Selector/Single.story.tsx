@@ -28,7 +28,10 @@ export const SelectorSingle = (): React.ReactElement => {
 	const dialogButtonClick = action("onClose");
 	const loadDataAction = action("onLoad");
 	const onSelectAction = action("onSelect");
-	const onAddNewAction = action("onAddNew");
+	const onAddNewAction = function (...args: unknown[]) {
+		action("onAddNew")(args);
+		return null;
+	};
 	const label = text("Label", "Example selector");
 	const enableAddNew = boolean("Enable Add New", false);
 	const disableClearable = boolean("Disable clearable?", false);

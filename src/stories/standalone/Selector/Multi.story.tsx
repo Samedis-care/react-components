@@ -43,7 +43,10 @@ export const SelectorMulti = (): React.ReactElement => {
 	);
 	const loadDataAction = action("onLoad");
 	const onSelectAction = action("onSelect");
-	const onAddNewAction = action("onAddNew");
+	const onAddNewAction = function (...args: unknown[]) {
+		action("onAddNew")(args);
+		return null;
+	};
 	const label = text("Label", "Example multi select");
 	const enableAddNew = boolean("Enable Add New", false);
 	const icons = boolean("Enable Icons", false);

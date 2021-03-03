@@ -10,7 +10,10 @@ import { BackendSingleSelect } from "../../../backend-components";
 export const SelectorSingle = (): React.ReactElement => {
 	const [selected, setSelected] = useState<string | null>(null);
 	const onSelectAction = action("onSelect");
-	const onAddNewAction = action("onAddNew");
+	const onAddNewAction = function (...args: unknown[]) {
+		action("onAddNew")(args);
+		return null;
+	};
 	const enableAddNew = boolean("Enable Add New", false);
 	const icons = boolean("Enable Icons", false);
 	const disabled = boolean("Disable", false);

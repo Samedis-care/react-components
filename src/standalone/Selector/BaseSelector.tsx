@@ -102,8 +102,9 @@ export interface BaseSelectorProps<DataT extends BaseSelectorData>
 	/**
 	 * Handler for the "Add new" button
 	 * Add new button only shows if this is set.
+	 * @returns The newly created data entry which will be selected or null if user cancelled
 	 */
-	onAddNew?: () => void;
+	onAddNew?: () => DataT | null | Promise<DataT | null>;
 	/**
 	 * Label for the "Add new" button
 	 */
@@ -268,16 +269,20 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 	);
 
 	const onChangeHandler = useCallback(
-		(data) => {
+		async (data) => {
 			if (
 				data &&
 				"isAddNewButton" in data &&
 				(data as BaseSelectorData).isAddNewButton
 			) {
-				if (onAddNew) onAddNew();
-				return;
-			} else {
-				if (onSelect) onSelect(data);
+				if (!onAddNew) return;
+				const created = await onAddNew();
+				if (!created) return;
+				setSelectorOptions((old) => [created, ...old]);
+				data = created;
+			}
+			if (onSelect) {
+				onSelect(data);
 			}
 		},
 		[onSelect, onAddNew]
