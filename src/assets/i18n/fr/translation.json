@@ -56,7 +56,7 @@
 					"false": "Toutes les fausses valeurs",
 					"true": "Toutes les valeurs de vérité"
 				},
-				"no-data": "Pas de données!",
+				"no-data": "La liste ne contient aucune donnée.",
 				"set-filter": {
 					"search": "Chercher...",
 					"select-all": "Tout sélectionner"

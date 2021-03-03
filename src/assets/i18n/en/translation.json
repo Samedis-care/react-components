@@ -16,7 +16,7 @@
 					"search": "Search...",
 					"select-all": "Select all"
 				},
-				"no-data": "No data!"
+				"no-data": "The list does not contain any data."
 			},
 			"header": {
 				"new": "New",
