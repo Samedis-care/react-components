@@ -138,6 +138,7 @@ export interface IDataGridCallbacks {
 
 export type DataGridAdditionalFilters = Record<string, unknown>;
 export type DataGridSortSetting = { field: string; direction: -1 | 1 };
+export type DataGridFilterSetting = { field: string; filter: IFilterDef };
 
 export interface IDataGridAddButton {
 	/**
@@ -201,6 +202,14 @@ export interface IDataGridColumnProps {
 	 * Disable selecting multiple entries (disables select all & delete all)
 	 */
 	prohibitMultiSelect?: boolean;
+	/**
+	 * The default sort settings
+	 */
+	defaultSort?: DataGridSortSetting[];
+	/**
+	 * The default column filter settings
+	 */
+	defaultFilter?: DataGridFilterSetting[];
 }
 
 export type IDataGridFieldFilter = { [field: string]: IFilterDef };
@@ -457,13 +466,25 @@ export const getDataGridDefaultState = (
 });
 
 export const getDataGridDefaultColumnsState = (
-	columns: IDataGridColumnDef[]
+	columns: IDataGridColumnDef[],
+	defaultSort: DataGridSortSetting[] | undefined,
+	defaultFilter: DataGridFilterSetting[] | undefined
 ): IDataGridColumnsState => {
 	const data: IDataGridColumnsState = {};
 	columns.forEach((column) => {
+		const defaultSortIndex = defaultSort?.findIndex(
+			(entry) => entry.field === column.field
+		);
+		const defaultFilterSetting = defaultFilter?.find(
+			(entry) => entry.field === column.field
+		);
 		data[column.field] = {
-			sort: 0,
-			filter: undefined,
+			sort:
+				defaultSort && defaultSortIndex !== -1 && defaultSortIndex !== undefined
+					? defaultSort[defaultSortIndex].direction
+					: 0,
+			sortOrder: defaultSortIndex,
+			filter: defaultFilterSetting?.filter,
 		};
 	});
 	return data;
@@ -774,6 +795,8 @@ const DataGrid = (props: DataGridProps) => {
 		forceRefreshToken,
 		initialCustomData,
 		onSelectionChange,
+		defaultSort,
+		defaultFilter,
 	} = props;
 	const rowsPerPage = props.rowsPerPage || 50;
 
@@ -804,7 +827,7 @@ const DataGrid = (props: DataGridProps) => {
 	);
 
 	const columnsStatePack = useState<IDataGridColumnsState>(() =>
-		getDataGridDefaultColumnsState(columns)
+		getDataGridDefaultColumnsState(columns, defaultSort, defaultFilter)
 	);
 	const [columnsState] = columnsStatePack;
 

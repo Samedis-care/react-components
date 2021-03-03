@@ -11,7 +11,14 @@ import ActionBarView from "./ActionBarView";
 const ActionBar = () => {
 	const [, setState] = useDataGridState();
 	const [, setColumnState] = useDataGridColumnState();
-	const { columns, onAddNew, exporters, filterBar } = useDataGridProps();
+	const {
+		columns,
+		onAddNew,
+		exporters,
+		filterBar,
+		defaultSort,
+		defaultFilter,
+	} = useDataGridProps();
 
 	const toggleSettings = useCallback(() => {
 		setState((prevState) => ({
@@ -25,8 +32,10 @@ const ActionBar = () => {
 
 	const handleReset = useCallback(() => {
 		setState(getDataGridDefaultState(columns));
-		setColumnState(getDataGridDefaultColumnsState(columns));
-	}, [setState, setColumnState, columns]);
+		setColumnState(
+			getDataGridDefaultColumnsState(columns, defaultSort, defaultFilter)
+		);
+	}, [setState, columns, setColumnState, defaultSort, defaultFilter]);
 
 	return (
 		<ActionBarView
