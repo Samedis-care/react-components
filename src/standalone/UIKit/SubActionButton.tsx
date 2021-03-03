@@ -204,6 +204,7 @@ const StyledButton = withStyles((theme: Theme) => ({
 
 					borderLeftWidth: 0,
 					borderRightWidth: 0,
+					borderTopWidth: props.disableDivider ? 0 : undefined,
 					borderRadius: 0,
 					"&:first-child": {
 						borderLeftWidth: 1,
@@ -269,6 +270,7 @@ const StyledButton = withStyles((theme: Theme) => ({
 					borderLeftWidth: 0,
 					borderRightWidth: 0,
 					borderBottomWidth: 0,
+					borderTopWidth: props.disableDivider ? 0 : undefined,
 					"&:first-child":
 						theme.componentsCare?.uiKit?.subActionButton?.firstChild?.style,
 					"&:last-child":
@@ -324,6 +326,10 @@ export interface SubActionButtonProps extends Omit<ButtonProps, "children"> {
 	 * The text of the button (used for tooltip if small is true)
 	 */
 	children: NonNullable<React.ReactNode>;
+	/**
+	 * Flag to disable the top divider
+	 */
+	disableDivider?: boolean;
 }
 
 const SubActionButton = (props: SubActionButtonProps) => {
