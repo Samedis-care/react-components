@@ -249,8 +249,10 @@ const MultiSelectWithTags = <
 	);
 
 	return (
-		<Typography component="div">
-			<Typography component="label">{title}</Typography>
+		<div>
+			<Typography component="label" variant={"caption"} color={"textSecondary"}>
+				{title}
+			</Typography>
 			<SingleSelect
 				autocompleteId={
 					autocompleteId ? autocompleteId + "-group-select" : undefined
@@ -266,7 +268,11 @@ const MultiSelectWithTags = <
 			/>
 			<Typography component="div" className={classes.labelWithSwitch}>
 				{props.displaySwitch && (
-					<Typography component="div" className={classes.switch}>
+					<Typography
+						component="div"
+						className={classes.switch}
+						variant={"caption"}
+					>
 						<Grid component="label" container alignItems="center" spacing={1}>
 							<Grid item>
 								<AntSwitch
@@ -293,7 +299,7 @@ const MultiSelectWithTags = <
 					getIdOfData={getId}
 				/>
 			</Typography>
-		</Typography>
+		</div>
 	);
 };
 

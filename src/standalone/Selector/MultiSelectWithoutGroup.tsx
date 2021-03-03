@@ -204,7 +204,11 @@ const MultiSelectWithoutGroup = <DataT extends MultiSelectorData>(
 	return (
 		<Typography component="div">
 			<Typography component="div" className={classes.searchLabel}>
-				<Typography component="label">
+				<Typography
+					component="label"
+					variant={"caption"}
+					color={"textSecondary"}
+				>
 					{searchInputLabel || "Search input"}
 				</Typography>
 			</Typography>

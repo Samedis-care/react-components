@@ -28,14 +28,14 @@ const options = colourOptions.map(enhanceData);
 
 export const SelectorMultiWithTags = (): React.ReactElement => {
 	const [selected, setSelected] = useState<MultiWithTagsData[]>([]);
-	const title = text("Title", "Multi Selector With Tags");
+	const title = text("Title", "Select a group");
 	const icons = boolean("Enable Icons", false);
 	const disable = boolean("Disable", false);
 	const loadingLabel = text("Loading Label", "");
 	const noDataLabel = text("No data Label", "");
 	const displaySwitch = boolean("Enable Switch", false);
 	const switchLabel = text("Switch Label Text", "Select from all");
-	const searchInputLabel = text("Search Label", "Search");
+	const searchInputLabel = text("Search Label", "or search for a single item");
 	const [pushDialog] = useDialogContext();
 	const dialogTitle = text("Dialog title", "Sample title");
 	const infoText = text(
