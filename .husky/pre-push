@@ -1,4 +1,4 @@
 #!/bin/sh
 . "$(dirname "$0")/_/husky.sh"
 
-npx --no-install tsc && TZ=UTC npx --no-install jest
+npx --no-install tsc -i --tsBuildInfoFile .tscbuildcache && TZ=UTC npx --no-install jest
