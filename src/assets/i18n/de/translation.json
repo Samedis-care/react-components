@@ -8,7 +8,7 @@
 					"false": "Alle falschen Werte",
 					"true": "Alle wahrheitsgemäßen Werte"
 				},
-				"no-data": "Keine Daten!",
+				"no-data": "Die Liste enthält keine Daten.",
 				"set-filter": {
 					"search": "Suche...",
 					"select-all": "Wählen Sie Alle"
