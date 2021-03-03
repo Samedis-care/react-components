@@ -121,7 +121,7 @@ const Content = (props: IDataGridContentProps) => {
 					columnWidth={({ index }) =>
 						index === 0
 							? SELECT_ROW_WIDTH
-							: columnWidth[columns[index - 1].field]
+							: columnWidth[columns[index - 1].field] ?? 200
 					}
 					rowCount={(state.rowsFiltered ?? state.rowsTotal) + 1}
 					rowHeight={({ index }) => (index === 0 ? 32 : 57)}
