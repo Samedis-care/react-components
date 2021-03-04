@@ -35,6 +35,16 @@ const useStyles = makeStyles({
 	container: {
 		width: "100%",
 		height: "100%",
+		overflow: "auto",
+	},
+	content: {
+		"& > *": {
+			overflow: "unset",
+		},
+	},
+	bar: {
+		position: "sticky",
+		top: 0,
 	},
 	iconOpen: {},
 	iconClose: {
@@ -57,18 +67,20 @@ const CollapsibleMenu = (props: CollapsibleMenuProps) => {
 			justify={"flex-start"}
 			alignItems={"stretch"}
 			wrap={"nowrap"}
+			style={collapsed ? { overflow: "visible" } : undefined} // this is needed to force update the scrollbar, otherwise we're wasting space with a scrollbar placeholder
 			className={`${classes.container} ${props.customClasses?.root ?? ""}`}
 		>
 			<Grid
 				item
 				xs
 				style={{ width: props.width, display: collapsed ? "none" : undefined }}
+				className={classes.content}
 				key={"content"}
 			>
 				{props.children}
 			</Grid>
 			{!mobile && (
-				<Grid item key={"bar"}>
+				<Grid item key={"bar"} className={classes.bar}>
 					<IconButton
 						onClick={toggleCollapsed}
 						className={props.customClasses?.button}
