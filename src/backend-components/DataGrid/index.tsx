@@ -95,7 +95,7 @@ const BackendDataGrid = <
 												{
 													id,
 													[field]: value,
-												},
+												} as Record<KeyT, unknown>,
 												"serialize",
 												"overview"
 											)

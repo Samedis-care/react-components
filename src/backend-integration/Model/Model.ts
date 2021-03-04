@@ -287,7 +287,7 @@ class Model<
 						await this.connector.update(serializedValues, this)
 					);
 				} else {
-					delete serializedValues["id"];
+					delete serializedValues["id" as KeyT];
 					return this.deserializeResponse(
 						await this.connector.create(serializedValues, this)
 					);
@@ -512,11 +512,11 @@ class Model<
 	 * @returns A copy of the data (not deep-copy)
 	 */
 	public async applySerialization(
-		values: Record<string, unknown>,
+		values: Record<KeyT, unknown>,
 		func: "serialize" | "deserialize",
 		visibility: keyof PageVisibility
-	): Promise<Record<string, unknown>> {
-		const copy: Record<string, unknown> = {};
+	): Promise<Record<KeyT, unknown>> {
+		const copy: Partial<Record<KeyT, unknown>> = {};
 
 		for (const key in values) {
 			if (!Object.prototype.hasOwnProperty.call(values, key)) continue;
@@ -542,7 +542,7 @@ class Model<
 			const serializeFunc = field.type[func];
 
 			if (serializeFunc) {
-				copy[key] = await serializeFunc(values[key]);
+				copy[key] = (await serializeFunc(values[key])) as unknown;
 			} else {
 				copy[key] = values[key];
 			}

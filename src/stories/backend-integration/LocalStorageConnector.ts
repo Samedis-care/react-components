@@ -3,6 +3,7 @@ import {
 	Connector,
 	filterSortPaginate,
 	Model,
+	ModelData,
 	ModelFieldName,
 	ModelGetResponse,
 	PageVisibility,
@@ -81,7 +82,7 @@ class LocalStorageConnector<
 		db[id] = data;
 		this.setDB(db);
 
-		return [data, {}];
+		return [data as ModelData<KeyT>, {}];
 	}
 
 	read(id: string): ModelGetResponse<KeyT> {
@@ -100,7 +101,7 @@ class LocalStorageConnector<
 		}
 		db[id] = data;
 		this.setDB(db);
-		return [data, {}];
+		return [data as ModelData<KeyT>, {}];
 	}
 
 	// eslint-disable-next-line @typescript-eslint/require-await
