@@ -41,6 +41,7 @@ export interface MultiSelectWithCheckBoxTheme {
 	itemSelectedHoverStyle?: CSSProperties;
 	itemTextPrimaryStyle?: CSSProperties;
 	inputStyle?: CSSProperties;
+	inputRootStyle?: CSSProperties;
 	inputFocusStyle?: CSSProperties;
 	selectStyle?: MultiSelectWithCheckBoxThemeExpert;
 }
@@ -74,6 +75,9 @@ const ListItemTextCustom = withStyles((theme) => ({
 }))(ListItemText);
 
 const InputCustom = withStyles((theme: Theme) => ({
+	root: {
+		...theme.componentsCare?.selectorWithCheckbox?.inputRootStyle,
+	},
 	input: {
 		borderRadius: 4,
 		position: "relative",
