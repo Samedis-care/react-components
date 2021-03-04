@@ -35,6 +35,8 @@ const useStyles = makeStyles({
 		height: "100%",
 	},
 	list: {},
+	title: {},
+	titleWrapper: {},
 });
 
 const SignalPortlet = (props: SignalPortletProps) => {
@@ -43,8 +45,8 @@ const SignalPortlet = (props: SignalPortletProps) => {
 	return (
 		<Paper className={classes.paper}>
 			<Grid container spacing={1}>
-				<Grid item xs={12}>
-					<Typography variant={"h5"} align={"center"}>
+				<Grid item xs={12} className={classes.titleWrapper}>
+					<Typography variant={"h5"} align={"center"} className={classes.title}>
 						{props.title}
 					</Typography>
 				</Grid>
