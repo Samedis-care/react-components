@@ -7,11 +7,34 @@ import { normalizeDate } from "../../Utils/DateUtils";
 import { DateInput } from "../../../../../standalone";
 import i18n from "../../../../../i18n";
 import { ToDateLocaleStringOptions } from "../../../../../constants";
+import { DateInputProps } from "../../../../../standalone/UIKit/InputControls/DateInput";
+
+export type RendererDateNullableProps = Omit<
+	DateInputProps,
+	| "name"
+	| "value"
+	| "label"
+	| "disabled"
+	| "onChange"
+	| "onBlur"
+	| "error"
+	| "onError"
+	| "fullWidth"
+	| "clearable"
+>;
 
 /**
  * Renders Date with Date Selector
  */
 class RendererDateNullable extends TypeDateNullable {
+	props?: RendererDateNullableProps;
+
+	constructor(props?: RendererDateNullableProps) {
+		super();
+
+		this.props = props;
+	}
+
 	render(params: ModelRenderParams<Date | null>): React.ReactElement {
 		const {
 			visibility,
@@ -43,6 +66,7 @@ class RendererDateNullable extends TypeDateNullable {
 			return (
 				<>
 					<DateInput
+						{...this.props}
 						name={field}
 						value={value}
 						label={label}
