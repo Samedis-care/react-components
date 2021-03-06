@@ -30,4 +30,18 @@ interface Visibility {
 	grid: boolean;
 }
 
+export type VisibilityCallback =
+	| Visibility
+	| ((values: Record<string, unknown>) => Visibility);
+
+export const getVisibility = (
+	cb: VisibilityCallback,
+	values: Record<string, unknown>
+): Visibility => {
+	if (typeof cb === "function") {
+		return cb(values);
+	}
+	return cb;
+};
+
 export default Visibility;

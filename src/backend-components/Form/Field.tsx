@@ -5,6 +5,7 @@ import {
 	ModelFieldDefinition,
 	PageVisibility,
 } from "../../backend-integration";
+import { getVisibility } from "../../backend-integration/Model/Visibility";
 
 type NonOverridableProps =
 	| "getDefaultValue"
@@ -91,9 +92,10 @@ const Field = (props: FieldProps): React.ReactElement => {
 	const touch = touched[props.name] || false;
 	const errorMsg = (touch && errors[props.name]) || null;
 	const relationData = formContext.relations[props.name];
-	const visibility = hasId
-		? fieldDef.visibility.edit
-		: fieldDef.visibility.create;
+	const visibility = getVisibility(
+		hasId ? fieldDef.visibility.edit : fieldDef.visibility.create,
+		values
+	);
 
 	return useMemo(
 		() =>

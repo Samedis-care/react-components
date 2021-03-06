@@ -1,5 +1,5 @@
 import Type from "./Type";
-import Visibility from "./Visibility";
+import Visibility, { getVisibility, VisibilityCallback } from "./Visibility";
 import Connector, { ResponseMeta } from "../Connector/Connector";
 import { useMutation, useQuery } from "react-query";
 import { ModelDataStore } from "../index";
@@ -15,8 +15,8 @@ import queryCache from "../Store";
 
 export interface PageVisibility {
 	overview: Visibility;
-	edit: Visibility;
-	create: Visibility;
+	edit: VisibilityCallback;
+	create: VisibilityCallback;
 }
 
 export interface ModelFieldDefinition<
@@ -440,7 +440,8 @@ class Model<
 			// skip validations for fields which aren't defined in the model or which are disabled in the current view
 			if (!(field in this.fields)) return;
 			const fieldDef = this.fields[field as KeyT];
-			if (view && fieldDef.visibility[view].disabled) return;
+			if (view && getVisibility(fieldDef.visibility[view], values).disabled)
+				return;
 
 			// first apply type validation
 			let error = fieldDef.type.validate(value);
@@ -531,9 +532,10 @@ class Model<
 			}
 
 			// don't include disabled fields (except ID and disabled readonly fields when serializing)
+			const visValue = getVisibility(field.visibility[visibility], values);
 			if (
-				field.visibility[visibility].disabled &&
-				(func === "serialize" || !field.visibility[visibility].readOnly) &&
+				visValue.disabled &&
+				(func === "serialize" || !visValue.readOnly) &&
 				key !== "id"
 			) {
 				continue;
