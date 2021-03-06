@@ -143,37 +143,47 @@ class WeekView extends PureComponent<IProps, IState> {
 						</Grid>
 					</Grid>
 				)}
-				{this.state.data &&
-					weekdays.map((day) => {
-						const data = this.state.data;
-						if (!data) return null;
+				{this.state.data && (
+					<Grid
+						item
+						xs={12}
+						container
+						alignItems={"stretch"}
+						alignContent={"space-between"}
+						wrap={"nowrap"}
+					>
+						{weekdays.map((day) => {
+							const data = this.state.data;
+							if (!data) return null;
 
-						const date = now
-							.clone()
-							.add(this.state.weekOffset, "weeks")
-							.add(day, "days");
-						const diffDay = !prevDate || prevDate.day() !== date.day();
-						const diffMonth = !prevDate || prevDate.month() !== date.month();
-						const diffYear = prevDate && prevDate.year() !== date.year();
-						prevDate = date;
+							const date = now
+								.clone()
+								.add(this.state.weekOffset, "weeks")
+								.add(day, "days");
+							const diffDay = !prevDate || prevDate.day() !== date.day();
+							const diffMonth = !prevDate || prevDate.month() !== date.month();
+							const diffYear = prevDate && prevDate.year() !== date.year();
+							prevDate = date;
 
-						let formattedDate = "";
-						if (diffYear) formattedDate += `${date.year()} `;
-						if (diffMonth) formattedDate += `${date.format("MMMM")} `;
-						if (diffDay) formattedDate += date.format("DD");
+							let formattedDate = "";
+							if (diffYear) formattedDate += `${date.year()} `;
+							if (diffMonth) formattedDate += `${date.format("MMMM")} `;
+							if (diffDay) formattedDate += date.format("DD");
 
-						const dayData =
-							data[(date.weekday() + date.localeData().firstDayOfWeek()) % 7];
+							const dayData =
+								data[(date.weekday() + date.localeData().firstDayOfWeek()) % 7];
 
-						return (
-							<WeekViewDay
-								key={day}
-								day={date}
-								date={formattedDate}
-								data={dayData}
-							/>
-						);
-					})}
+							return (
+								<WeekViewDay
+									key={day}
+									day={date}
+									date={formattedDate}
+									data={dayData}
+								/>
+							);
+						})}
+					</Grid>
+				)}
 			</Grid>
 		);
 	}
