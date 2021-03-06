@@ -483,7 +483,7 @@ export const getDataGridDefaultColumnsState = (
 				defaultSort && defaultSortIndex !== -1 && defaultSortIndex !== undefined
 					? defaultSort[defaultSortIndex].direction
 					: 0,
-			sortOrder: defaultSortIndex,
+			sortOrder: defaultSortIndex ? defaultSortIndex + 1 : undefined,
 			filter: defaultFilterSetting?.filter,
 		};
 	});
