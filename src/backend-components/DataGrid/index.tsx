@@ -163,6 +163,7 @@ const BackendDataGrid = <
 				}
 				setRefreshToken(new Date().getTime().toString());
 			} catch (e) {
+				setRefreshToken(new Date().getTime().toString());
 				pushDialog(
 					<ErrorDialog
 						title={ccI18n.t(
