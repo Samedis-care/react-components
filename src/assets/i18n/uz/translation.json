@@ -1,0 +1,167 @@
+{
+	"standalone": {
+		"selector": {
+			"add-new": "Qo'shish"
+		},
+		"schedule": {
+			"week": "Hafta",
+			"today": "Bugun"
+		},
+		"file-upload": {
+			"formats": "Fayl formatlari",
+			"upload": "Yuklash",
+			"error": {
+				"invalid-type": "Qo'llab-quvvatlanmaydigan fayl turi tanlandi",
+				"limit-reached": "Ruxsat berilgan fayllarning maksimal miqdori",
+				"too-many": "Juda ko‘p fayl tanlandi"
+			},
+			"format": {
+				"any": "Har qanday"
+			},
+			"no-files": "Qo'shimchalar mavjud emas"
+		},
+		"data-grid": {
+			"settings": {
+				"lock": "Ustunlarni qulflash / ochish",
+				"hide": "Ustunlarni ko'rsatish / yashirish",
+				"close": "Yoping"
+			},
+			"header": {
+				"settings": "Sozlamalar",
+				"reset": "Qayta o'rnatish",
+				"new": "Yangi",
+				"export": "Eksport",
+				"edit": "Tahrirlash",
+				"delete": "O'chirish",
+				"custom-filter-button": "Filtr"
+			},
+			"footer": {
+				"prev-page": "Oldingi sahifa",
+				"page-size": "Sahifa hajmi:",
+				"page-of": "dan",
+				"next-page": "Keyingi sahifa",
+				"last-page": "Oxirgi sahifa",
+				"first-page": "Birinchi sahifa",
+				"page-size-tooltip": "Bir varaqdagi yozuvlar soni",
+				"delete": "O'chirish",
+				"edit": "Tahrirlash",
+				"filtered": "Filtrlangan:",
+				"select-all": "Hammasi",
+				"total": "Jami:"
+			},
+			"content": {
+				"filter": "Filtr",
+				"bool-filter": {
+					"any": "Har qanday qiymat",
+					"false": "Barcha noto'g'ri qiymatlar",
+					"true": "Barcha haqiqiy qadriyatlar"
+				},
+				"no-data": "Ro'yxatda hech qanday ma'lumot yo'q.",
+				"set-filter": {
+					"search": "Qidirmoq...",
+					"select-all": "Hammasini belgilash"
+				}
+			},
+			"custom-filters": {
+				"title": "Filtrni tanlash"
+			}
+		},
+		"phone-number": {
+			"invalid": "To'g'ri telefon raqamini kiriting"
+		},
+		"signature-pad": {
+			"dialog": {
+				"reset": "Qayta o'rnatish",
+				"save-changes": "O'zgarishlarni saqlash",
+				"title": "Bu erda ro'yxatdan o'ting"
+			},
+			"sign-here": "Bu erda raqamli imzolangan"
+		}
+	},
+	"backend-integration": {
+		"model": {
+			"types": {
+				"boolean": {
+					"true": "Ha",
+					"false": "Yo'q"
+				},
+				"date-nullable": {
+					"not-set": "Yo'q"
+				},
+				"image": {
+					"not-set": "Rasm mavjud emas",
+					"set": "Rasm mavjud"
+				},
+				"renderers": {
+					"image": {
+						"not-set": "Hech qanday rasm mavjud emas"
+					},
+					"files": {
+						"no-file": "Hech qanday fayl mavjud emas"
+					},
+					"enum": {
+						"unknown": "Noma'lum"
+					},
+					"date": {
+						"not-set": "Sana belgilanmagan",
+						"labels": {
+							"today": "Bugun",
+							"ok": "OK",
+							"min-date": "Sana minimal sanadan oldin bo'lmasligi kerak",
+							"max-date": "Sana maksimal sanadan keyin bo'lmasligi kerak",
+							"invalid-date": "Sana formati yaroqsiz",
+							"invalid": "Yaroqsiz",
+							"clear": "Aniq",
+							"cancel": "Bekor qilish"
+						},
+						"validation-error": "Iltimos, to'g'ri sanani kiriting"
+					},
+					"boolean": {
+						"true": "Ha",
+						"false": "Yo'q"
+					},
+					"signature": {
+						"not-set": "Imzo qo'yilmagan"
+					}
+				}
+			}
+		},
+		"connector": {
+			"json-api-client": {
+				"network-error": "Tarmoqda xatolik yuz berdi.",
+				"parse-error": "Sinxni bajarib bo'lmadi (JSON yaroqsiz). Server {{STATUS_CODE}} {{STATUS_TEXT}} holatini qaytardi."
+			}
+		}
+	},
+	"backend-components": {
+		"data-grid": {
+			"delete": {
+				"error-dialog": {
+					"title": "Xato",
+					"message": "Tanlangan yozuvlarni o'chirib bo'lmadi: {{ERROR}}",
+					"buttons": {
+						"okay": "xop"
+					}
+				},
+				"confirm-dialog": {
+					"title": "O'chirish",
+					"messageInverted": "Haqiqatan ham {{NUM}} ta yozuvdan boshqasini o'chirishni xohlaysizmi?",
+					"message": "Haqiqatan ham {{NUM}} ta yozuvni o'chirmoqchimisiz?",
+					"buttons": {
+						"yes": "Ha",
+						"no": "Yo'q"
+					}
+				}
+			}
+		},
+		"selector": {
+			"loading": "Yuklanmoqda ...",
+			"loading-error": "Ma'lumotlarni olishda xatolik yuz berdi"
+		}
+	},
+	"non-standalone": {
+		"dialog": {
+			"okay": "xop"
+		}
+	}
+}
