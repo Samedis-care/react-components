@@ -80,6 +80,11 @@ export interface CrudProps<
 	 */
 	disableRouting?: boolean;
 	/**
+	 * Unmounts the grid when showing form. Resets scroll in grid when coming back from form.
+	 * Useful for performance optimization or dialog handling where no Grid is shown
+	 */
+	disableBackgroundGrid?: boolean;
+	/**
 	 * If routing is disabled: set the initial view (id, "new" or null), defaults to null
 	 */
 	initialView?: string | null;
@@ -111,7 +116,7 @@ const CRUD = <
 	const { path } = useRouteMatch();
 	const location = useLocation();
 	const [perms] = usePermissionContext();
-	const { disableRouting } = props;
+	const { disableRouting, disableBackgroundGrid } = props;
 	const [id, setId] = useState<string | null>(props.initialView ?? null);
 	const [gridRefreshToken, setGridRefreshToken] = useState<string>(
 		new Date().getTime().toString()
@@ -197,14 +202,22 @@ const CRUD = <
 
 	return disableRouting ? (
 		<>
-			<div className={id !== null ? classes.hide : classes.show}>{grid()}</div>
+			{(id === null || !disableBackgroundGrid) && (
+				<div className={id !== null ? classes.hide : classes.show}>
+					{grid()}
+				</div>
+			)}
 			{id !== null && form(id)}
 		</>
 	) : (
 		<>
-			<div className={location.pathname === path ? classes.show : classes.hide}>
-				{grid()}
-			</div>
+			{(id === null || !disableBackgroundGrid) && (
+				<div
+					className={location.pathname === path ? classes.show : classes.hide}
+				>
+					{grid()}
+				</div>
+			)}
 			<Switch>
 				<Route path={`${path}/:id`} exact>
 					{(routeProps: RouteChildrenProps<{ id: string }>) =>
