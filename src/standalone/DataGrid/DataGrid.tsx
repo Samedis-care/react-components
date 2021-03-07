@@ -798,7 +798,7 @@ const DataGrid = (props: DataGridProps) => {
 		defaultSort,
 		defaultFilter,
 	} = props;
-	const rowsPerPage = props.rowsPerPage || 50;
+	const rowsPerPage = props.rowsPerPage || 25;
 
 	const classes = useDataGridStylesInternal(props);
 	const theme = useTheme();
