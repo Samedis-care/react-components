@@ -48,11 +48,10 @@ const StatePersistence = () => {
 		setState((prevState) => ({
 			...prevState,
 			...persisted.state,
-			customData: {
-				...prevState.customData,
-				...persisted.state?.customData,
-				...initialCustomData,
-			},
+			customData:
+				initialCustomData ??
+				persisted.state?.customData ??
+				prevState.customData,
 		}));
 		setColumnState((prevState) => ({ ...prevState, ...persisted.columnState }));
 		setColumnWidthState((prevState) => ({
