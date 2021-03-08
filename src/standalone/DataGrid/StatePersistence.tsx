@@ -4,6 +4,7 @@ import {
 	IDataGridState,
 	useDataGridColumnState,
 	useDataGridColumnsWidthState,
+	useDataGridProps,
 	useDataGridState,
 } from "./DataGrid";
 
@@ -31,6 +32,7 @@ export const DataGridPersistentStateContext = React.createContext<
  * @remarks Used internally in DataGrid, do not use in your code!
  */
 const StatePersistence = () => {
+	const { initialCustomData } = useDataGridProps();
 	const persistedContext = useContext(DataGridPersistentStateContext);
 	const [persisted, setPersisted] = persistedContext || [];
 	const [state, setState] = useDataGridState();
@@ -43,7 +45,15 @@ const StatePersistence = () => {
 	// initial load
 	useEffect(() => {
 		if (!persisted) return;
-		setState((prevState) => ({ ...prevState, ...persisted.state }));
+		setState((prevState) => ({
+			...prevState,
+			...persisted.state,
+			customData: {
+				...prevState.customData,
+				...persisted.state?.customData,
+				...initialCustomData,
+			},
+		}));
 		setColumnState((prevState) => ({ ...prevState, ...persisted.columnState }));
 		setColumnWidthState((prevState) => ({
 			...prevState,

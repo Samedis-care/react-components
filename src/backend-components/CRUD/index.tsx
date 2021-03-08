@@ -45,8 +45,11 @@ export interface CrudProps<
 	>;
 	/**
 	 * The renderer function which returns the form component
+	 * @remarks Can be set to undefined to only render the Grid
 	 */
-	children: FormProps<KeyT, VisibilityT, CustomT, CrudFormProps>["children"];
+	children:
+		| FormProps<KeyT, VisibilityT, CustomT, CrudFormProps>["children"]
+		| undefined;
 	/**
 	 * The properties to pass to grid
 	 */
@@ -178,15 +181,22 @@ const CRUD = <
 			model={props.model}
 			forceRefreshToken={gridRefreshToken}
 			onEdit={
-				hasPermission(perms, props.editPermission) ? showEditPage : undefined
+				hasPermission(perms, props.editPermission) && props.children
+					? showEditPage
+					: undefined
 			}
 			onAddNew={
-				hasPermission(perms, props.newPermission) ? showNewPage : undefined
+				hasPermission(perms, props.newPermission) && props.children
+					? showNewPage
+					: undefined
 			}
 		/>
 	);
 
-	const form = (id: string) => (
+	const form = (
+		id: string,
+		formComponent: NonNullable<typeof props.children>
+	) => (
 		<Form
 			id={id === "new" ? null : id}
 			model={props.model}
@@ -196,7 +206,7 @@ const CRUD = <
 				goBack: showOverview,
 			}}
 		>
-			{props.children}
+			{formComponent}
 		</Form>
 	);
 
@@ -207,7 +217,7 @@ const CRUD = <
 					{grid()}
 				</div>
 			)}
-			{id !== null && form(id)}
+			{id !== null && props.children && form(id, props.children)}
 		</>
 	) : (
 		<>
@@ -218,13 +228,16 @@ const CRUD = <
 					{grid()}
 				</div>
 			)}
-			<Switch>
-				<Route path={`${path}/:id`} exact>
-					{(routeProps: RouteChildrenProps<{ id: string }>) =>
-						form(routeProps.match?.params.id ?? "")
-					}
-				</Route>
-			</Switch>
+			{props.children && (
+				<Switch>
+					<Route path={`${path}/:id`} exact>
+						{(routeProps: RouteChildrenProps<{ id: string }>) =>
+							props.children &&
+							form(routeProps.match?.params.id ?? "", props.children)
+						}
+					</Route>
+				</Switch>
+			)}
 		</>
 	);
 };
