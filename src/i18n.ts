@@ -30,6 +30,7 @@ void ccI18n
 		fallbackLng: "en",
 		debug: process.env.NODE_ENV !== "production",
 		resources: langVals,
+		initImmediate: false,
 
 		interpolation: {
 			escapeValue: false, // not needed for react as it escapes by default
