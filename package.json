@@ -47,10 +47,7 @@
 		"lint-fix": "eslint --fix 'src/**/*.{ts,tsx}'",
 		"test": "TZ=UTC jest"
 	},
-	"sideEffects": [
-		"./dist/i18n.js",
-		"./src/i18n.ts"
-	],
+	"sideEffects": false,
 	"eslintConfig": {
 		"extends": "react-app"
 	},
