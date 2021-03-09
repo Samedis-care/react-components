@@ -12,6 +12,19 @@
 				"set-filter": {
 					"search": "Suche...",
 					"select-all": "Wählen Sie Alle"
+				},
+				"filter-type": {
+					"contains": "Enthält",
+					"ends-with": "Endet mit",
+					"eq": "Gleich",
+					"gt": "Größer als",
+					"gte": "Größer als oder gleich",
+					"in-range": "Im Bereich",
+					"lt": "Weniger als",
+					"lte": "Weniger als oder gleich",
+					"not-contains": "Enthält nicht",
+					"not-eq": "Nicht gleich",
+					"starts-with": "Beginnt mit"
 				}
 			},
 			"settings": {

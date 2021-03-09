@@ -60,6 +60,19 @@
 				"set-filter": {
 					"search": "Qidirmoq...",
 					"select-all": "Hammasini belgilash"
+				},
+				"filter-type": {
+					"contains": "O'z ichiga oladi",
+					"ends-with": "Tugaydi",
+					"eq": "Teng",
+					"gt": "Undan kattaroq",
+					"gte": "Undan kattaroq yoki tengdir",
+					"in-range": "Oralig'ida",
+					"lt": "Dan kam",
+					"lte": "Kam yoki teng",
+					"not-contains": "Tarkibida yo'q",
+					"not-eq": "Teng emas",
+					"starts-with": "Bilan boshlanadi"
 				}
 			},
 			"custom-filters": {
