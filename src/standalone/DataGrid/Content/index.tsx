@@ -5,9 +5,9 @@ import {
 	useDataGridColumnsWidthState,
 	useDataGridState,
 } from "../DataGrid";
-import { AutoSizer, Size } from "react-virtualized/dist/es/AutoSizer";
-import { MultiGrid } from "react-virtualized/dist/es/MultiGrid";
-import { SectionRenderedParams } from "react-virtualized/dist/es/Grid";
+import { AutoSizer, Size } from "react-virtualized/dist/commonjs/AutoSizer";
+import { MultiGrid } from "react-virtualized/dist/commonjs/MultiGrid";
+import { SectionRenderedParams } from "react-virtualized/dist/commonjs/Grid";
 import Cell from "./Cell";
 import { applyColumnWidthLimits } from "./ColumnHeader";
 import { CenteredTypography, Loader } from "../../index";
