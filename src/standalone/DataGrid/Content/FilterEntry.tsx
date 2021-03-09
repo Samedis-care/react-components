@@ -199,43 +199,43 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 
 	const filterTypeMenuItems = [
 		<MenuItem key={"equals"} value={"equals"}>
-			Equals
+			{ccI18n.t("standalone.data-grid.content.filter-type.eq")}
 		</MenuItem>,
 		<MenuItem key={"notEqual"} value={"notEqual"}>
-			Not equal
+			{ccI18n.t("standalone.data-grid.content.filter-type.not-eq")}
 		</MenuItem>,
 	];
 	if (props.valueType === "string") {
 		filterTypeMenuItems.push(
 			<MenuItem key={"contains"} value={"contains"}>
-				Contains
+				{ccI18n.t("standalone.data-grid.content.filter-type.contains")}
 			</MenuItem>,
 			<MenuItem key={"notContains"} value={"notContains"}>
-				Not contains
+				{ccI18n.t("standalone.data-grid.content.filter-type.not-contains")}
 			</MenuItem>,
 			<MenuItem key={"startsWith"} value={"startsWith"}>
-				Starts with
+				{ccI18n.t("standalone.data-grid.content.filter-type.starts-with")}
 			</MenuItem>,
 			<MenuItem key={"endsWith"} value={"endsWith"}>
-				Ends with
+				{ccI18n.t("standalone.data-grid.content.filter-type.ends-with")}
 			</MenuItem>
 		);
 	} else if (props.valueType === "number" || props.valueType === "date") {
 		filterTypeMenuItems.push(
 			<MenuItem key={"lessThan"} value={"lessThan"}>
-				Less than
+				{ccI18n.t("standalone.data-grid.content.filter-type.lt")}
 			</MenuItem>,
 			<MenuItem key={"lessThanOrEqual"} value={"lessThanOrEqual"}>
-				Less than or equals
+				{ccI18n.t("standalone.data-grid.content.filter-type.lte")}
 			</MenuItem>,
 			<MenuItem key={"greaterThan"} value={"greaterThan"}>
-				Greater than
+				{ccI18n.t("standalone.data-grid.content.filter-type.gt")}
 			</MenuItem>,
 			<MenuItem key={"greaterThanOrEqual"} value={"greaterThanOrEqual"}>
-				Greater than or equals
+				{ccI18n.t("standalone.data-grid.content.filter-type.gte")}
 			</MenuItem>,
 			<MenuItem key={"inRange"} value={"inRange"}>
-				In range
+				{ccI18n.t("standalone.data-grid.content.filter-type.in-range")}
 			</MenuItem>
 		);
 	}

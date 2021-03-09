@@ -16,6 +16,19 @@
 					"search": "Search...",
 					"select-all": "Select all"
 				},
+				"filter-type": {
+					"eq": "Equals",
+					"not-eq": "Not equal",
+					"contains": "Contains",
+					"not-contains": "Not contains",
+					"starts-with": "Starts with",
+					"ends-with": "Ends with",
+					"lt": "Less than",
+					"lte": "Less than or equals",
+					"gt": "Greater than",
+					"gte": "Greater than or equals",
+					"in-range": "In range"
+				},
 				"no-data": "The list does not contain any data."
 			},
 			"header": {
