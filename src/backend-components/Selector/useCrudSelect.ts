@@ -44,6 +44,10 @@ export interface UseCrudSelectParams<
 	 * @param selected The new selection
 	 */
 	onChange?: (selected: DataT[]) => void;
+	/**
+	 * The initial selection (override). If set backend isn't consulted for data
+	 */
+	initialSelected?: DataT[];
 }
 
 export interface UseCrudSelectResult<
@@ -97,6 +101,7 @@ const useCrudSelect = <
 		deserialize,
 		deserializeModel,
 		onChange,
+		initialSelected,
 	} = params;
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<Error | null>(null);
@@ -197,6 +202,13 @@ const useCrudSelect = <
 	useEffect(() => {
 		void (async () => {
 			setLoading(true);
+
+			if (initialSelected) {
+				await handleSelect(undefined, initialSelected);
+				setLoading(false);
+				return;
+			}
+
 			try {
 				const currentlySelected = await connector.index({
 					page: 1,
