@@ -60,6 +60,19 @@
 				"set-filter": {
 					"search": "Chercher...",
 					"select-all": "Tout sélectionner"
+				},
+				"filter-type": {
+					"contains": "Contient",
+					"ends-with": "Se termine par",
+					"eq": "Équivaut à",
+					"gt": "Plus grand que",
+					"gte": "Supérieur ou égal",
+					"in-range": "Dans la gamme",
+					"lt": "Moins que",
+					"lte": "Inférieur ou égal",
+					"not-contains": "Ne contient pas",
+					"not-eq": "Inégal",
+					"starts-with": "Commence avec"
 				}
 			},
 			"custom-filters": {
