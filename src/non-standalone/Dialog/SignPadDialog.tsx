@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
 	Button,
 	Dialog,
@@ -36,6 +36,8 @@ const useStyles = makeStyles(
 			border: "1px dotted",
 			marginLeft: 10,
 			marginRight: 10,
+			height: "min(calc(100vh - 192px), 300px)",
+			width: "min(calc(100vw - 64px - 20px), 580px)",
 		},
 		imageDiv: {
 			width: 300,
@@ -56,10 +58,12 @@ const SignPadDialog = (props: SignPadDialogProps) => {
 	const { disabled, penColor, setSignature, signature, ...canvasProps } = props;
 	const [resetCanvas, setResetCanvas] = useState(!!signature);
 	const [, popDialog] = useDialogContext();
+	const canvasWrapper = useRef<HTMLDivElement | null>();
 	const signCanvas = useRef<SignaturePad>(null);
 	const hiddenRef = useRef<HTMLInputElement>(null);
+	const [canvasSize, setCanvasSize] = useState<[number, number]>([0, 0]);
 	const classes = useStyles(props);
-	const clearCanvas = React.useCallback(() => {
+	const clearCanvas = useCallback(() => {
 		if (signCanvas.current) {
 			signCanvas.current.clear();
 		}
@@ -67,7 +71,7 @@ const SignPadDialog = (props: SignPadDialogProps) => {
 		setResetCanvas(false);
 	}, [setSignature]);
 
-	const saveCanvas = React.useCallback(() => {
+	const saveCanvas = useCallback(() => {
 		if (signCanvas.current && !signCanvas.current.isEmpty()) {
 			const signature = signCanvas.current
 				.getTrimmedCanvas()
@@ -79,11 +83,35 @@ const SignPadDialog = (props: SignPadDialogProps) => {
 		popDialog();
 	}, [setSignature, popDialog]);
 
-	const closeCanvas = () => {
+	const closeCanvas = useCallback(() => {
 		hiddenRef.current?.focus();
 		hiddenRef.current?.blur();
 		popDialog();
-	};
+	}, [popDialog]);
+
+	const handleResize = useCallback((wrapper: HTMLDivElement) => {
+		setCanvasSize([wrapper.clientWidth, wrapper.clientHeight]);
+	}, []);
+
+	const setCanvasWrapperRef = useCallback(
+		(node: HTMLDivElement | null) => {
+			canvasWrapper.current = node;
+
+			if (node) {
+				handleResize(node);
+			}
+		},
+		[handleResize]
+	);
+
+	useEffect(() => {
+		const resizeHandler = () =>
+			canvasWrapper.current && handleResize(canvasWrapper.current);
+
+		window.addEventListener("resize", resizeHandler);
+		return () => window.removeEventListener("resize", resizeHandler);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [canvasWrapper.current]);
 
 	return (
 		<Dialog
@@ -110,12 +138,16 @@ const SignPadDialog = (props: SignPadDialogProps) => {
 					</IconButton>
 				)}
 			</MuiDialogTitle>
-			<div className={classes.signDiv}>
+			<div className={classes.signDiv} ref={setCanvasWrapperRef}>
 				{!resetCanvas ? (
 					<SignaturePad
 						ref={signCanvas}
 						penColor={penColor || "blue"}
 						{...canvasProps}
+						canvasProps={{
+							width: canvasSize[0],
+							height: canvasSize[1],
+						}}
 					/>
 				) : (
 					<div className={classes.imageDiv}>
