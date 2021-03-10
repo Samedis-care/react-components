@@ -201,6 +201,8 @@ const MultiSelectWithoutGroup = <DataT extends MultiSelectorData>(
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [dataQuery, refreshToken]);
 
+	const filterOptions = useCallback((options: DataT[]) => options, []);
+
 	return (
 		<Typography component="div">
 			<Typography component="div" className={classes.searchLabel}>
@@ -219,6 +221,7 @@ const MultiSelectWithoutGroup = <DataT extends MultiSelectorData>(
 				disableClearable
 				disabled={disabled}
 				options={dataOptions}
+				filterOptions={filterOptions}
 				value={""}
 				getOptionSelected={(option, value) => option.value === value.value}
 				getOptionLabel={(option: string | DataT) =>
