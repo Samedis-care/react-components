@@ -871,70 +871,76 @@ const DataGrid = (props: DataGridProps) => {
 		const [sorts, fieldFilter] = dataGridPrepareFiltersAndSorts(columnsState);
 
 		void (async () => {
-			for (let pageIndex = pages[0]; pageIndex <= pages[1]; pageIndex++) {
-				// check if page was already loaded
-				if (pageIndex * rowsPerPage in rows) {
-					continue;
-				}
+			let startPage: number;
+			let endPage: number;
+			do {
+				startPage = pages[0];
+				endPage = pages[1];
+				for (let pageIndex = startPage; pageIndex <= endPage; pageIndex++) {
+					// check if page was already loaded
+					if (pageIndex * rowsPerPage in rows) {
+						continue;
+					}
 
-				try {
-					const data = await loadData({
-						page: pageIndex + 1,
-						rows: rowsPerPage,
-						quickFilter: search,
-						additionalFilters: getAdditionalFilters
-							? getAdditionalFilters(state.customData)
-							: {},
-						fieldFilter: fieldFilter,
-						sort: sorts,
-					});
-					// check if we are on an invalid page
+					try {
+						const data = await loadData({
+							page: pageIndex + 1,
+							rows: rowsPerPage,
+							quickFilter: search,
+							additionalFilters: getAdditionalFilters
+								? getAdditionalFilters(state.customData)
+								: {},
+							fieldFilter: fieldFilter,
+							sort: sorts,
+						});
+						// check if we are on an invalid page
 
-					const dataRowsTotal = data.rowsFiltered ?? data.rowsTotal;
+						const dataRowsTotal = data.rowsFiltered ?? data.rowsTotal;
 
-					if (
-						pageIndex !== 0 &&
-						rowsPerPage !== 0 &&
-						dataRowsTotal !== 0 &&
-						data.rows.length === 0
-					) {
-						const hasPartialPage = dataRowsTotal % rowsPerPage !== 0;
-						const newPage =
-							((dataRowsTotal / rowsPerPage) | 0) + (hasPartialPage ? 0 : -1);
-						// eslint-disable-next-line no-console
-						console.assert(
-							newPage !== pageIndex,
-							"[Components-Care] [DataGrid] Detected invalid page, but newly calculated page equals invalid page"
-						);
-						if (newPage !== pageIndex) {
-							setState((prevState) => ({
-								...prevState,
-								pageIndex: newPage,
-							}));
+						if (
+							pageIndex !== 0 &&
+							rowsPerPage !== 0 &&
+							dataRowsTotal !== 0 &&
+							data.rows.length === 0
+						) {
+							const hasPartialPage = dataRowsTotal % rowsPerPage !== 0;
+							const newPage =
+								((dataRowsTotal / rowsPerPage) | 0) + (hasPartialPage ? 0 : -1);
+							// eslint-disable-next-line no-console
+							console.assert(
+								newPage !== pageIndex,
+								"[Components-Care] [DataGrid] Detected invalid page, but newly calculated page equals invalid page"
+							);
+							if (newPage !== pageIndex) {
+								setState((prevState) => ({
+									...prevState,
+									pageIndex: newPage,
+								}));
+							}
 						}
-					}
 
-					const rowsAsObject: Record<number, DataGridRowData> = {};
-					for (let i = 0; i < data.rows.length; i++) {
-						rowsAsObject[pageIndex * rowsPerPage + i] = data.rows[i];
-					}
+						const rowsAsObject: Record<number, DataGridRowData> = {};
+						for (let i = 0; i < data.rows.length; i++) {
+							rowsAsObject[pageIndex * rowsPerPage + i] = data.rows[i];
+						}
 
-					setState((prevState) => ({
-						...prevState,
-						rowsTotal: data.rowsTotal,
-						rowsFiltered: data.rowsFiltered ?? null,
-						dataLoadError: null,
-						rows: Object.assign({}, prevState.rows, rowsAsObject),
-					}));
-				} catch (err) {
-					// eslint-disable-next-line no-console
-					console.error("[Components-Care] [DataGrid] LoadData: ", err);
-					setState((prevState) => ({
-						...prevState,
-						dataLoadError: err as Error,
-					}));
+						setState((prevState) => ({
+							...prevState,
+							rowsTotal: data.rowsTotal,
+							rowsFiltered: data.rowsFiltered ?? null,
+							dataLoadError: null,
+							rows: Object.assign({}, prevState.rows, rowsAsObject),
+						}));
+					} catch (err) {
+						// eslint-disable-next-line no-console
+						console.error("[Components-Care] [DataGrid] LoadData: ", err);
+						setState((prevState) => ({
+							...prevState,
+							dataLoadError: err as Error,
+						}));
+					}
 				}
-			}
+			} while (startPage !== pages[0] || endPage !== pages[1]);
 
 			setState((prevState) => ({
 				...prevState,
