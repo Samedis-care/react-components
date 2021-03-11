@@ -38,7 +38,7 @@ const useStyles = makeStyles({
 		overflow: "auto",
 	},
 	content: {
-		"& > *": {
+		"& > div": {
 			overflow: "unset",
 		},
 	},
