@@ -29,7 +29,9 @@ import { ModelFilterType } from "../../backend-integration/Model";
 import { HEADER_PADDING } from "./Content/ColumnHeader";
 import { Styles } from "@material-ui/core/styles/withStyles";
 import CustomFilterDialog from "./CustomFilterDialog";
-import StatePersistence from "./StatePersistence";
+import StatePersistence, {
+	DataGridPersistentStateContext,
+} from "./StatePersistence";
 
 export interface DataGridTheme extends Theming.BasicElementThemeFragment {
 	/* root elements from BasicElementThemeFragment defining main grid container visuals */
@@ -125,9 +127,13 @@ export interface IDataGridCallbacks {
 		customData: DataGridCustomDataType
 	) => DataGridAdditionalFilters;
 	/**
-	 * Optional initial values for customData
+	 * Default initial values for custom data (overwritten by persisted custom data)
 	 */
-	initialCustomData?: Record<string, unknown>;
+	defaultCustomData?: Record<string, unknown>;
+	/**
+	 * Forced initial values for custom data (overwrites persisted custom data)
+	 */
+	overrideCustomData?: Record<string, unknown>;
 	/**
 	 * Event for selection change
 	 * @param invert Are ids inverted? If true: Everything is selected except ids. If false: Only ids are selected
@@ -362,7 +368,7 @@ export interface IDataGridState {
 	/**
 	 * Should loadData be called?
 	 */
-	refreshData: boolean;
+	refreshData: number;
 	/**
 	 * Custom user-defined data
 	 */
@@ -461,7 +467,7 @@ export const getDataGridDefaultState = (
 	selectedRows: [],
 	rows: {},
 	dataLoadError: null,
-	refreshData: true,
+	refreshData: 1,
 	customData: {},
 });
 
@@ -793,18 +799,27 @@ const DataGrid = (props: DataGridProps) => {
 		loadData,
 		getAdditionalFilters,
 		forceRefreshToken,
-		initialCustomData,
+		defaultCustomData,
+		overrideCustomData,
 		onSelectionChange,
 		defaultSort,
 		defaultFilter,
 	} = props;
 	const rowsPerPage = props.rowsPerPage || 25;
 
+	const persistedContext = useContext(DataGridPersistentStateContext);
+	const [persisted] = persistedContext || [];
+
 	const classes = useDataGridStylesInternal(props);
 	const theme = useTheme();
 	const statePack = useState<IDataGridState>(() => ({
 		...getDataGridDefaultState(columns),
-		customData: initialCustomData ?? {},
+		...persisted?.state,
+		customData:
+			overrideCustomData ??
+			persisted?.state?.customData ??
+			defaultCustomData ??
+			{},
 	}));
 	const [state, setState] = statePack;
 	const {
@@ -826,9 +841,10 @@ const DataGrid = (props: DataGridProps) => {
 		[columns, hiddenColumns, lockedColumns]
 	);
 
-	const columnsStatePack = useState<IDataGridColumnsState>(() =>
-		getDataGridDefaultColumnsState(columns, defaultSort, defaultFilter)
-	);
+	const columnsStatePack = useState<IDataGridColumnsState>(() => ({
+		...getDataGridDefaultColumnsState(columns, defaultSort, defaultFilter),
+		...persisted?.columnState,
+	}));
 	const [columnsState] = columnsStatePack;
 
 	const columnWidthStatePack = useState<Record<string, number>>(() => {
@@ -861,90 +877,86 @@ const DataGrid = (props: DataGridProps) => {
 				);
 			}
 		});
-		return widthData;
+		return {
+			...widthData,
+			...persisted?.columnWidth,
+		};
 	});
 
 	// refresh data if desired
 	useEffect(() => {
-		if (!refreshData) return;
+		if (refreshData !== 1) return;
 
 		const [sorts, fieldFilter] = dataGridPrepareFiltersAndSorts(columnsState);
 
 		void (async () => {
-			let startPage: number;
-			let endPage: number;
-			do {
-				startPage = pages[0];
-				endPage = pages[1];
-				for (let pageIndex = startPage; pageIndex <= endPage; pageIndex++) {
-					// check if page was already loaded
-					if (pageIndex * rowsPerPage in rows) {
-						continue;
-					}
-
-					try {
-						const data = await loadData({
-							page: pageIndex + 1,
-							rows: rowsPerPage,
-							quickFilter: search,
-							additionalFilters: getAdditionalFilters
-								? getAdditionalFilters(state.customData)
-								: {},
-							fieldFilter: fieldFilter,
-							sort: sorts,
-						});
-						// check if we are on an invalid page
-
-						const dataRowsTotal = data.rowsFiltered ?? data.rowsTotal;
-
-						if (
-							pageIndex !== 0 &&
-							rowsPerPage !== 0 &&
-							dataRowsTotal !== 0 &&
-							data.rows.length === 0
-						) {
-							const hasPartialPage = dataRowsTotal % rowsPerPage !== 0;
-							const newPage =
-								((dataRowsTotal / rowsPerPage) | 0) + (hasPartialPage ? 0 : -1);
-							// eslint-disable-next-line no-console
-							console.assert(
-								newPage !== pageIndex,
-								"[Components-Care] [DataGrid] Detected invalid page, but newly calculated page equals invalid page"
-							);
-							if (newPage !== pageIndex) {
-								setState((prevState) => ({
-									...prevState,
-									pageIndex: newPage,
-								}));
-							}
-						}
-
-						const rowsAsObject: Record<number, DataGridRowData> = {};
-						for (let i = 0; i < data.rows.length; i++) {
-							rowsAsObject[pageIndex * rowsPerPage + i] = data.rows[i];
-						}
-
-						setState((prevState) => ({
-							...prevState,
-							rowsTotal: data.rowsTotal,
-							rowsFiltered: data.rowsFiltered ?? null,
-							dataLoadError: null,
-							rows: Object.assign({}, prevState.rows, rowsAsObject),
-						}));
-					} catch (err) {
-						// eslint-disable-next-line no-console
-						console.error("[Components-Care] [DataGrid] LoadData: ", err);
-						setState((prevState) => ({
-							...prevState,
-							dataLoadError: err as Error,
-						}));
-					}
+			for (let pageIndex = pages[0]; pageIndex <= pages[1]; pageIndex++) {
+				// check if page was already loaded
+				if (pageIndex * rowsPerPage in rows) {
+					continue;
 				}
-			} while (startPage !== pages[0] || endPage !== pages[1]);
+
+				try {
+					const data = await loadData({
+						page: pageIndex + 1,
+						rows: rowsPerPage,
+						quickFilter: search,
+						additionalFilters: getAdditionalFilters
+							? getAdditionalFilters(state.customData)
+							: state.customData,
+						fieldFilter: fieldFilter,
+						sort: sorts,
+					});
+					const dataRowsTotal = data.rowsFiltered ?? data.rowsTotal;
+
+					// check if we are on an invalid page
+					if (
+						pageIndex !== 0 &&
+						rowsPerPage !== 0 &&
+						dataRowsTotal !== 0 &&
+						data.rows.length === 0
+					) {
+						const hasPartialPage = dataRowsTotal % rowsPerPage !== 0;
+						const newPage =
+							((dataRowsTotal / rowsPerPage) | 0) + (hasPartialPage ? 0 : -1);
+						// eslint-disable-next-line no-console
+						console.assert(
+							newPage !== pageIndex,
+							"[Components-Care] [DataGrid] Detected invalid page, but newly calculated page equals invalid page"
+						);
+						if (newPage !== pageIndex) {
+							setState((prevState) => ({
+								...prevState,
+								pageIndex: newPage,
+							}));
+						}
+					}
+
+					const rowsAsObject: Record<number, DataGridRowData> = {};
+					for (let i = 0; i < data.rows.length; i++) {
+						rowsAsObject[pageIndex * rowsPerPage + i] = data.rows[i];
+					}
+
+					setState((prevState) => ({
+						...prevState,
+						rowsTotal: data.rowsTotal,
+						rowsFiltered: data.rowsFiltered ?? null,
+						dataLoadError: null,
+						rows: Object.assign({}, prevState.rows, rowsAsObject),
+					}));
+				} catch (err) {
+					// eslint-disable-next-line no-console
+					console.error("[Components-Care] [DataGrid] LoadData: ", err);
+					setState((prevState) => ({
+						...prevState,
+						dataLoadError: err as Error,
+					}));
+				}
+			}
 
 			setState((prevState) => ({
 				...prevState,
-				refreshData: false,
+				refreshData: prevState.refreshData - 1,
 			}));
 		})();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -955,7 +967,7 @@ const DataGrid = (props: DataGridProps) => {
 		() =>
 			setState((prevState) => ({
 				...prevState,
-				refreshData: true,
+				refreshData: Math.min(prevState.refreshData + 1, 2),
 			})),
 		[setState]
 	);
@@ -969,7 +981,7 @@ const DataGrid = (props: DataGridProps) => {
 				setState((prevState) => ({
 					...prevState,
 					rows: {},
-					refreshData: true,
+					refreshData: Math.min(prevState.refreshData + 1, 2),
 				}));
 			}, 500),
 		[setState]
