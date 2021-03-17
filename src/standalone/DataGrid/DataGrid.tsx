@@ -453,7 +453,8 @@ export const useDataGridRootRef = (): HTMLDivElement => {
 };
 
 export const getDataGridDefaultState = (
-	columns: IDataGridColumnDef[]
+	columns: IDataGridColumnDef[],
+	defaultCustomData: Record<string, unknown> | undefined
 ): IDataGridState => ({
 	search: "",
 	rowsTotal: 0,
@@ -468,7 +469,7 @@ export const getDataGridDefaultState = (
 	rows: {},
 	dataLoadError: null,
 	refreshData: 1,
-	customData: {},
+	customData: defaultCustomData ?? {},
 });
 
 export const getDataGridDefaultColumnsState = (
@@ -813,7 +814,7 @@ const DataGrid = (props: DataGridProps) => {
 	const classes = useDataGridStylesInternal(props);
 	const theme = useTheme();
 	const statePack = useState<IDataGridState>(() => ({
-		...getDataGridDefaultState(columns),
+		...getDataGridDefaultState(columns, undefined),
 		...persisted?.state,
 		customData:
 			overrideCustomData ??
