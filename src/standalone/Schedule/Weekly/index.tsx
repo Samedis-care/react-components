@@ -257,7 +257,7 @@ class WeekView extends PureComponent<IProps, IState> {
 
 	nowNormalized = () => this.momentNormalize(moment());
 	momentNormalize = (instance: Moment) =>
-		instance.isoWeekday(0).hour(0).minute(0).second(0).millisecond(0);
+		instance.weekday(0).hour(0).minute(0).second(0).millisecond(0);
 
 	openDatePicker = () =>
 		this.setState({
