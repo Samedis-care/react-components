@@ -15,7 +15,7 @@ import { action } from "@storybook/addon-actions";
 import { IDataGridExporter } from "../../../standalone/DataGrid/Header";
 import data from "./covid-daily.json";
 import GridCustomFilters from "./GridCustomFilters";
-import { filterSortPaginate, sleep } from "../../../utils";
+import { filterSortPaginate } from "../../../utils";
 import { useTheme } from "@material-ui/core";
 
 const useStyles = makeStyles({
@@ -156,10 +156,10 @@ export const DataGridStory = (): React.ReactElement => {
 							? number("Sort limit", 1)
 							: undefined
 					}
-					loadData={async (params): Promise<DataGridData> => {
+					loadData={(params): DataGridData => {
 						action("loadData")(params);
 
-						await sleep(500);
+						//await sleep(500);
 
 						const rowData: DataGridRowData[] = data.map((entry) => ({
 							id: entry.hash,
