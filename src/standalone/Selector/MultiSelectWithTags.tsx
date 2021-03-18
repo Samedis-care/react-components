@@ -301,6 +301,8 @@ const MultiSelectWithTags = <
 					onChange={onChange}
 					refreshToken={selected.map(getId).join(",")}
 					getIdOfData={getId}
+					noOptionsText={noOptionsText}
+					loadingText={loadingText}
 				/>
 			</Typography>
 		</div>
