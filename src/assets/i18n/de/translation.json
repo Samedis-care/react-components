@@ -64,8 +64,8 @@
 			"base-selector": {
 				"no-options-text": "Keine Optionen",
 				"close-icon-text": "Schließen",
-				"open-icon-text": "Öffnen Sie",
-				"loading-text": "Laden..."
+				"open-icon-text": "Öffnen",
+				"loading-text": "Lade..."
 			}
 		},
 		"schedule": {
