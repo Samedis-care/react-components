@@ -1,7 +1,13 @@
 {
 	"standalone": {
 		"selector": {
-			"add-new": "Ajouter"
+			"add-new": "Ajouter",
+			"base-selector": {
+				"no-options-text": "Aucune option",
+				"close-icon-text": "Fermer",
+				"open-icon-text": "Ouvrir",
+				"loading-text": "Chargement..."
+			}
 		},
 		"schedule": {
 			"week": "Semaine",

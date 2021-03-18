@@ -64,7 +64,13 @@
 			}
 		},
 		"selector": {
-			"add-new": "Add"
+			"add-new": "Add",
+			"base-selector": {
+				"no-options-text": "No options",
+				"close-icon-text": "Close",
+				"open-icon-text": "Open",
+				"loading-text": "Loading..."
+			}
 		},
 		"file-upload": {
 			"upload": "Upload",
