@@ -41,9 +41,15 @@ export const SelectorSingle = (): React.ReactElement => {
 	const grouped = boolean("Grouped", false);
 	const noGroupLabel = grouped ? text("No Group label", "No group") : "";
 	const addNewLabel = text("Add new label", "Add");
-	const loadingText = text("Loading Text", "Loading..");
-	const noOptionsText = text("No options Label", "No Option");
+	const useCustomLoading = boolean("Use custom loading label?", true);
+	const loadingLabel = text("Loading Label", "Loading..");
+	const useCustomNoOptionsText = boolean("Use custom no data label?", false);
+	const noOptionsText = text("No data Label", "No option");
 	const placeholderLabel = text("Placeholder Label", "Select..");
+	const useCustomOpenText = boolean("Use custom open text label?", false);
+	const openText = text("Open Text Label", "Open");
+	const useCustomCloseText = boolean("Use custom close text label?", false);
+	const closeText = text("Close Text Label", "Close");
 
 	const loadData = useCallback(
 		(query: string): BaseSelectorData[] => {
@@ -79,8 +85,10 @@ export const SelectorSingle = (): React.ReactElement => {
 					disableSearch={disableSearch}
 					disabled={disabled}
 					addNewLabel={addNewLabel}
-					loadingText={loadingText}
-					noOptionsText={noOptionsText}
+					loadingText={useCustomLoading ? loadingLabel : undefined}
+					noOptionsText={useCustomNoOptionsText ? noOptionsText : undefined}
+					openText={useCustomOpenText ? openText : undefined}
+					closeText={useCustomCloseText ? closeText : undefined}
 					placeholder={placeholderLabel}
 					autocompleteId={"single-select"}
 					grouped={grouped}

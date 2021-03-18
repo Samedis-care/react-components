@@ -31,6 +31,7 @@ import {
 } from "@material-ui/lab/Autocomplete/Autocomplete";
 import InputWithHelp from "../UIKit/InputWithHelp";
 import OutlinedInputWithHelp from "../UIKit/OutlinedInputWithHelp";
+import ccI18n from "../../i18n";
 
 export interface BaseSelectorData {
 	/**
@@ -130,6 +131,14 @@ export interface BaseSelectorProps<DataT extends BaseSelectorData>
 	 */
 	loadingText?: string | SelectorLabelCallback;
 	/**
+	 * Label which is shown for close icon button while popup is opened
+	 */
+	closeText?: string;
+	/**
+	 * Label which is shown for open icon button while popup is closed
+	 */
+	openText?: string;
+	/**
 	 * Is the selector clearable?
 	 */
 	disableClearable?: boolean;
@@ -226,6 +235,8 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 		enableIcons,
 		noOptionsText,
 		loadingText,
+		openText,
+		closeText,
 		disableClearable,
 		openInfo,
 		grouped,
@@ -363,7 +374,10 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 					}}
 					disableClearable={disableClearable}
 					loading={loading}
-					loadingText={loadingText}
+					loadingText={
+						loadingText ??
+						ccI18n.t("standalone.selector.base-selector.loading-text")
+					}
 					autoComplete
 					disabled={disabled}
 					selectOnFocus={!disableSearch}
@@ -385,7 +399,18 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 					blurOnSelect={true}
 					onInputChange={updateQuery}
 					popupIcon={<ExpandMore />}
-					noOptionsText={noOptionsText}
+					noOptionsText={
+						noOptionsText ??
+						ccI18n.t("standalone.selector.base-selector.no-options-text")
+					}
+					openText={
+						openText ??
+						ccI18n.t("standalone.selector.base-selector.open-icon-text")
+					}
+					closeText={
+						closeText ??
+						ccI18n.t("standalone.selector.base-selector.close-icon-text")
+					}
 					getOptionLabel={(option: BaseSelectorData) => option.label}
 					renderOption={(option: BaseSelectorData) => defaultRenderer(option)}
 					getOptionDisabled={(option: BaseSelectorData) => !!option.isDisabled}
