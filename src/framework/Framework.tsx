@@ -1,7 +1,7 @@
 import React, { Suspense } from "react";
 import { Loader } from "../standalone";
 import { Router } from "react-router-dom";
-import { DialogContextProvider, FrameworkHistory } from ".";
+import { DialogContextProvider, FrameworkHistory, CCI18nProvider } from ".";
 import ThemeProvider, {
 	GetDefaultThemeCallback,
 	getStandardTheme,
@@ -40,6 +40,7 @@ const loaderComponent = <Loader />;
  * Provides:
  * - react-router instance
  * - dialog context
+ * - i18n context (for components-care)
  * - react-query cache
  * - theme provider
  * - css baseline
@@ -49,15 +50,17 @@ const loaderComponent = <Loader />;
 const ComponentsCareFramework = (props: ICompleteFrameworkProps) => (
 	<Suspense fallback={loaderComponent}>
 		<MuiPickerUtils disable={props.disableMuiPickerUtils}>
-			<ThemeProvider defaultTheme={props.defaultTheme || getStandardTheme}>
-				<QueryClientProvider client={ModelDataStore}>
-					<PermissionContextProvider>
-						<Router history={FrameworkHistory}>
-							<DialogContextProvider>{props.children}</DialogContextProvider>
-						</Router>
-					</PermissionContextProvider>
-				</QueryClientProvider>
-			</ThemeProvider>
+			<CCI18nProvider>
+				<ThemeProvider defaultTheme={props.defaultTheme || getStandardTheme}>
+					<QueryClientProvider client={ModelDataStore}>
+						<PermissionContextProvider>
+							<Router history={FrameworkHistory}>
+								<DialogContextProvider>{props.children}</DialogContextProvider>
+							</Router>
+						</PermissionContextProvider>
+					</QueryClientProvider>
+				</ThemeProvider>
+			</CCI18nProvider>
 		</MuiPickerUtils>
 	</Suspense>
 );
