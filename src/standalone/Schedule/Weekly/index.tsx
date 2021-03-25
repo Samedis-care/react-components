@@ -9,15 +9,15 @@ import {
 	withStyles,
 } from "@material-ui/core";
 import { Button, Typography, Grid } from "@material-ui/core";
-import i18n from "../../../i18n";
 import { IDayData } from "../Common/DayContents";
 import { ArrowForwardIos, ArrowBackIos } from "@material-ui/icons";
 import { DatePicker, MuiPickersUtilsProvider } from "@material-ui/pickers";
 import MomentUtils from "@date-io/moment";
 import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
 import { ToDateLocaleStringOptions } from "../../../constants";
+import { WithTranslation, withTranslation } from "react-i18next";
 
-export interface IProps extends WithStyles {
+export interface IProps extends WithStyles, WithTranslation {
 	/**
 	 * Callback to load data of this week
 	 * @param weekOffset
@@ -60,13 +60,13 @@ class WeekView extends PureComponent<IProps, IState> {
 
 	componentDidMount() {
 		void this.fetchData();
-		i18n.on("languageChanged", () => {
+		this.props.i18n.on("languageChanged", () => {
 			void this.fetchData();
 		});
 	}
 
 	componentWillUnmount() {
-		i18n.off("languageChanged", () => {
+		this.props.i18n.off("languageChanged", () => {
 			void this.fetchData();
 		});
 	}
@@ -82,10 +82,13 @@ class WeekView extends PureComponent<IProps, IState> {
 			<Grid container alignItems={"stretch"} alignContent={"space-between"}>
 				<Grid item xs={4}>
 					<Button onClick={this.today} className={this.props.classes.todayBtn}>
-						{i18n.t("standalone.schedule.today")} (
+						{this.props.t("standalone.schedule.today")} (
 						{now
 							.toDate()
-							.toLocaleDateString(i18n.language, ToDateLocaleStringOptions)}
+							.toLocaleDateString(
+								this.props.i18n.language,
+								ToDateLocaleStringOptions
+							)}
 						)
 					</Button>
 				</Grid>
@@ -99,19 +102,20 @@ class WeekView extends PureComponent<IProps, IState> {
 								onClick={this.openDatePicker}
 								className={this.props.classes.week}
 							>
-								{i18n.t("standalone.schedule.week")}{" "}
+								{this.props.t("standalone.schedule.week")}{" "}
 								{this.nowNormalized().add(this.state.weekOffset, "week").week()}{" "}
 								{this.nowNormalized()
 									.add(this.state.weekOffset, "week")
 									.weekYear()}
 							</span>
 							<div className={this.props.classes.picker}>
+								qsq
 								<MuiPickersUtilsProvider utils={MomentUtils}>
 									<DatePicker
 										variant={"dialog"}
 										format={"II RRRR"}
 										open={this.state.datePickerOpen}
-										label={i18n.t("standalone.schedule.week")}
+										label={this.props.t("standalone.schedule.week")}
 										value={this.nowNormalized()
 											.add(this.state.weekOffset, "week")
 											.toDate()}
@@ -282,4 +286,4 @@ const styles = createStyles({
 	},
 });
 
-export default withStyles(styles)(WeekView);
+export default withStyles(styles)(withTranslation()(WeekView));

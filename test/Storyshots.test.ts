@@ -1,6 +1,9 @@
+/* eslint-disable no-console */
 import "./js-dom-mocks";
 // import "./crud-mocks";
-import initStoryshots from "@storybook/addon-storyshots";
+import initStoryshots, {
+	multiSnapshotWithOptions,
+} from "@storybook/addon-storyshots";
 import { advanceTo, clear } from "jest-date-mock";
 import ccI18n from "../src/i18n";
 import enzyme from "enzyme";
@@ -36,7 +39,7 @@ afterAll(() => clear());
 
 initStoryshots({
 	storyKindRegex: /^(?!.*?(Backend-Components|Backend-Integration)).*$/gm,
-	renderer: createMount(),
+	test: multiSnapshotWithOptions({ renderer: createMount() }),
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore
 	snapshotSerializers: [enzymeSerializer()],

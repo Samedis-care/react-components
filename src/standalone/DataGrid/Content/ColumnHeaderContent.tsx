@@ -13,6 +13,7 @@ import FilterEntry, { IFilterDef } from "./FilterEntry";
 import i18n from "../../../i18n";
 import { ModelFilterType } from "../../../backend-integration/Model";
 import { IDataGridColumnDef, useDataGridStyles } from "../DataGrid";
+import { useTranslation } from "react-i18next";
 
 export interface IDataGridContentColumnHeaderContentProps {
 	/**
@@ -75,6 +76,7 @@ const transformOrigin: PopoverOrigin = {
 const ColumnHeaderContent = (
 	props: IDataGridContentColumnHeaderContentProps
 ) => {
+	const { t } = useTranslation(undefined, { i18n });
 	const classes = useDataGridStyles();
 	const [filterAnchorEl, setFilterAnchorEl] = useState<HTMLElement | null>(
 		null
@@ -116,9 +118,7 @@ const ColumnHeaderContent = (
 				</Grid>
 				{props.filterable && (
 					<Grid item key={"filter"}>
-						<Tooltip
-							title={i18n.t("standalone.data-grid.content.filter") || ""}
-						>
+						<Tooltip title={t("standalone.data-grid.content.filter") || ""}>
 							<IconButton
 								className={classes.columnHeaderFilterButton}
 								onClick={openFilter}
