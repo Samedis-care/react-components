@@ -56,8 +56,14 @@ export const SelectorMulti = (): React.ReactElement => {
 		false
 	);
 	const addNewLabel = text("Add new label", "Add");
-	const loadingText = text("Loading Text", "Loading..");
+	const useCustomLoading = boolean("Use custom loading label?", true);
+	const loadingLabel = text("Loading Label", "Loading..");
+	const useCustomNoOptionsText = boolean("Use custom no data label?", false);
 	const noOptionsText = text("No data Label", "No option");
+	const useCustomOpenText = boolean("Use custom open text label?", false);
+	const openText = text("Open Text Label", "Open");
+	const useCustomCloseText = boolean("Use custom close text label?", false);
+	const closeText = text("Close Text Label", "Close");
 	const placeholderLabel = text("Placeholder Label", "Select..");
 
 	const loadData = useCallback(
@@ -97,8 +103,10 @@ export const SelectorMulti = (): React.ReactElement => {
 					}
 					disabled={disabled}
 					addNewLabel={addNewLabel}
-					loadingText={loadingText}
-					noOptionsText={noOptionsText}
+					loadingText={useCustomLoading ? loadingLabel : undefined}
+					noOptionsText={useCustomNoOptionsText ? noOptionsText : undefined}
+					openText={useCustomOpenText ? openText : undefined}
+					closeText={useCustomCloseText ? closeText : undefined}
 					placeholder={placeholderLabel}
 					autocompleteId={"multi-select"}
 				/>

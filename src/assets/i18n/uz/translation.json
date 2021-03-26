@@ -1,7 +1,13 @@
 {
 	"standalone": {
 		"selector": {
-			"add-new": "Qo'shish"
+			"add-new": "Qo'shish",
+			"base-selector": {
+				"no-options-text": "Variant yo'q",
+				"close-icon-text": "Yoping",
+				"open-icon-text": "Ochiq",
+				"loading-text": "Yuklanmoqda..."
+			}
 		},
 		"schedule": {
 			"week": "Hafta",

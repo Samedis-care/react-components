@@ -23,7 +23,7 @@ export interface MultiSelectWithTagsProps<
 	GroupT extends BaseSelectorData
 > extends Pick<
 			BaseSelectorProps<GroupT>,
-			"disabled" | "noOptionsText" | "loadingText"
+			"disabled" | "noOptionsText" | "loadingText" | "closeText" | "openText"
 		>,
 		Omit<
 			MultiSelectWithoutGroupProps<DataT>,
@@ -170,6 +170,8 @@ const MultiSelectWithTags = <
 		enableIcons,
 		noOptionsText,
 		loadingText,
+		openText,
+		closeText,
 		loadGroupEntries,
 		loadGroupOptions,
 		loadDataOptions,
@@ -265,6 +267,8 @@ const MultiSelectWithTags = <
 				enableIcons={enableIcons}
 				noOptionsText={noOptionsText}
 				loadingText={loadingText}
+				openText={openText}
+				closeText={closeText}
 			/>
 			<Typography component="div" className={classes.labelWithSwitch}>
 				{props.displaySwitch && (
@@ -297,6 +301,8 @@ const MultiSelectWithTags = <
 					onChange={onChange}
 					refreshToken={selected.map(getId).join(",")}
 					getIdOfData={getId}
+					noOptionsText={noOptionsText}
+					loadingText={loadingText}
 				/>
 			</Typography>
 		</div>

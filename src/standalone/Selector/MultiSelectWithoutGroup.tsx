@@ -12,6 +12,12 @@ import TextFieldWithHelp, {
 	TextFieldWithHelpProps,
 } from "../UIKit/TextFieldWithHelp";
 import { SmallIconButton, SmallListItemIcon } from "../Small";
+import ccI18n from "../../i18n";
+
+/**
+ * A callback used to get an label value for a specific input (search) value
+ */
+type SelectorLabelCallback = (obj: { inputValue: string }) => string | null;
 export interface MultiSelectWithoutGroupProps<DataT extends MultiSelectorData>
 	extends Pick<
 			BaseSelectorProps<BaseSelectorData>,
@@ -65,6 +71,14 @@ export interface MultiSelectWithoutGroupProps<DataT extends MultiSelectorData>
 	 * Token which causes data to be reloaded
 	 */
 	refreshToken?: string;
+	/**
+	 * Label which is shown if there is no data
+	 */
+	noOptionsText?: string | SelectorLabelCallback;
+	/**
+	 * Label which is shown while loading data
+	 */
+	loadingText?: string | SelectorLabelCallback;
 }
 
 const useStyles = makeStyles(
@@ -102,10 +116,13 @@ const MultiSelectWithoutGroup = <DataT extends MultiSelectorData>(
 		openInfo,
 		getIdOfData,
 		refreshToken,
+		noOptionsText,
+		loadingText,
 	} = props;
 	const classes = useStyles(props);
 	const [dataQuery, setDataQuery] = useState("");
 	const [dataOptions, setDataOptions] = useState<DataT[]>([]);
+	const [loading, setLoading] = useState(false);
 
 	const getIdDefault = useCallback((data: DataT) => data.value, []);
 	const getId = getIdOfData ?? getIdDefault;
@@ -164,12 +181,13 @@ const MultiSelectWithoutGroup = <DataT extends MultiSelectorData>(
 				}
 				return;
 			}
-
+			setLoading(true);
 			setDataQuery("");
 			setDataOptions(
 				dataOptions.filter((old) => getId(old) !== getId(selectedValue))
 			);
 			onChange([...selected, selectedValue]);
+			setLoading(false);
 		},
 		[getId, onChange, setDataOptions, dataOptions, selected]
 	);
@@ -232,6 +250,15 @@ const MultiSelectWithoutGroup = <DataT extends MultiSelectorData>(
 				}
 				inputValue={dataQuery}
 				onInputChange={(evt, value) => setDataQuery(value)}
+				loading={loading}
+				loadingText={
+					loadingText ??
+					ccI18n.t("standalone.selector.base-selector.loading-text")
+				}
+				noOptionsText={
+					noOptionsText ??
+					ccI18n.t("standalone.selector.base-selector.no-options-text")
+				}
 				renderInput={(params: TextFieldProps) => (
 					<TextFieldWithHelp
 						{...params}

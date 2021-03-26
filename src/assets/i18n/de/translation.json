@@ -60,7 +60,13 @@
 			}
 		},
 		"selector": {
-			"add-new": "Hinzufügen"
+			"add-new": "Hinzufügen",
+			"base-selector": {
+				"no-options-text": "Keine Optionen",
+				"close-icon-text": "Schließen",
+				"open-icon-text": "Öffnen",
+				"loading-text": "Lade..."
+			}
 		},
 		"schedule": {
 			"week": "Woche",
