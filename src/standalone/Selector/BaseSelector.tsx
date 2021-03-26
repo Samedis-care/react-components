@@ -31,6 +31,7 @@ import {
 } from "@material-ui/lab/Autocomplete/Autocomplete";
 import InputWithHelp from "../UIKit/InputWithHelp";
 import OutlinedInputWithHelp from "../UIKit/OutlinedInputWithHelp";
+import { useTranslation } from "react-i18next";
 
 export interface BaseSelectorData {
 	/**
@@ -236,10 +237,10 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 	const classes = useThemeStyles(
 		(props as unknown) as BaseSelectorProps<BaseSelectorData>
 	);
+	const { t } = useTranslation(undefined, { i18n });
 	const customClasses = useCustomStyles(cleanClassMap(props, true));
 	const [open, setOpen] = useState(false);
-	const actualAddNewLabel =
-		addNewLabel || i18n.t("standalone.selector.add-new");
+	const actualAddNewLabel = addNewLabel || t("standalone.selector.add-new");
 	const [selectorOptions, setSelectorOptions] = useState<DataT[]>([]);
 	const [loading, setLoading] = useState(false);
 	const [query, setQuery] = useState("");

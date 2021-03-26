@@ -1,6 +1,7 @@
 import React from "react";
-import ccI18n from "../../i18n";
+import i18n from "../../i18n";
 import { DatePicker, DatePickerProps } from "@material-ui/pickers";
+import { useTranslation } from "react-i18next";
 
 type LocalizedDatePickerProps = Omit<
 	DatePickerProps,
@@ -17,36 +18,37 @@ type LocalizedDatePickerProps = Omit<
 	| "rifmFormatter"
 >;
 
-const LocalizedDatePicker = (props: LocalizedDatePickerProps) => (
-	<DatePicker
-		invalidLabel={ccI18n.t(
-			"backend-integration.model.types.renderers.date.labels.invalid"
-		)}
-		cancelLabel={ccI18n.t(
-			"backend-integration.model.types.renderers.date.labels.cancel"
-		)}
-		clearLabel={ccI18n.t(
-			"backend-integration.model.types.renderers.date.labels.clear"
-		)}
-		okLabel={ccI18n.t(
-			"backend-integration.model.types.renderers.date.labels.ok"
-		)}
-		todayLabel={ccI18n.t(
-			"backend-integration.model.types.renderers.date.labels.today"
-		)}
-		invalidDateMessage={ccI18n.t(
-			"backend-integration.model.types.renderers.date.labels.invalid-date"
-		)}
-		minDateMessage={ccI18n.t(
-			"backend-integration.model.types.renderers.date.labels.min-date"
-		)}
-		maxDateMessage={ccI18n.t(
-			"backend-integration.model.types.renderers.date.labels.max-date"
-		)}
-		format={"L"}
-		openTo="date"
-		{...props}
-	/>
-);
+const LocalizedDatePicker = (props: LocalizedDatePickerProps) => {
+	const { t } = useTranslation(undefined, { i18n });
+	return (
+		<DatePicker
+			invalidLabel={t(
+				"backend-integration.model.types.renderers.date.labels.invalid"
+			)}
+			cancelLabel={t(
+				"backend-integration.model.types.renderers.date.labels.cancel"
+			)}
+			clearLabel={t(
+				"backend-integration.model.types.renderers.date.labels.clear"
+			)}
+			okLabel={t("backend-integration.model.types.renderers.date.labels.ok")}
+			todayLabel={t(
+				"backend-integration.model.types.renderers.date.labels.today"
+			)}
+			invalidDateMessage={t(
+				"backend-integration.model.types.renderers.date.labels.invalid-date"
+			)}
+			minDateMessage={t(
+				"backend-integration.model.types.renderers.date.labels.min-date"
+			)}
+			maxDateMessage={t(
+				"backend-integration.model.types.renderers.date.labels.max-date"
+			)}
+			format={"L"}
+			openTo="date"
+			{...props}
+		/>
+	);
+};
 
 export default React.memo(LocalizedDatePicker);

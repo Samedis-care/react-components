@@ -829,6 +829,7 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                 "observers": Object {
                   "languageChanged": Array [
                     [Function],
+                    [Function],
                   ],
                 },
                 "options": Object {
@@ -1612,6 +1613,11 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                   "whitelist": false,
                 },
                 "removeResourceBundle": [Function],
+                "reportNamespaces": ReportNamespaces {
+                  "usedNamespaces": Object {
+                    "translation": true,
+                  },
+                },
                 "services": Object {
                   "backendConnector": Connector {
                     "backend": null,
