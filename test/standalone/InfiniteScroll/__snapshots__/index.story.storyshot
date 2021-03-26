@@ -36758,6 +36758,7 @@ exports[`Storyshots Standalone/InfiniteScroll Bidirectional 1`] = `
                 },
               }
             }
+            key="en"
           >
             <Memo(ThemeProvider)
               defaultTheme={[Function]}
@@ -74019,6 +74020,7 @@ exports[`Storyshots Standalone/InfiniteScroll Unidirectional 1`] = `
                 },
               }
             }
+            key="en"
           >
             <Memo(ThemeProvider)
               defaultTheme={[Function]}

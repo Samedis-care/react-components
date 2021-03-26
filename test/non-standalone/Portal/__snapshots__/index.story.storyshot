@@ -36753,6 +36753,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                 },
               }
             }
+            key="en"
           >
             <Memo(ThemeProvider)
               defaultTheme={[Function]}

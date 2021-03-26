@@ -36759,6 +36759,7 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                 },
               }
             }
+            key="en"
           >
             <Memo(ThemeProvider)
               defaultTheme={[Function]}

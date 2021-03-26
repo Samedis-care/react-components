@@ -36758,6 +36758,7 @@ exports[`Storyshots Standalone/Loader Loader 1`] = `
                 },
               }
             }
+            key="en"
           >
             <Memo(ThemeProvider)
               defaultTheme={[Function]}
