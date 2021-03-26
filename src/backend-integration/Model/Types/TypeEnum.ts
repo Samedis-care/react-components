@@ -35,6 +35,8 @@ abstract class TypeEnum implements Type<string> {
 	}
 
 	stringify(value: string): string {
+		if (!value) return "";
+
 		return (
 			this.values.find((entry) => entry.value === value)?.getLabel() ||
 			"Invalid Enum Value detected!"
