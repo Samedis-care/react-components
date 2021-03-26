@@ -8,7 +8,8 @@ import Model, {
 	ModelFieldName,
 	PageVisibility,
 } from "../../backend-integration/Model/Model";
-import ccI18n from "../../i18n";
+import i18n from "../../i18n";
+import { useTranslation } from "react-i18next";
 import { debouncePromise } from "../../utils";
 
 export interface BackendMultiSelectProps<
@@ -79,6 +80,8 @@ export const useSelectedCache = <
 
 	const [selectedCache, setSelectedCache] = useState<Record<string, DataT>>({});
 
+	const { t } = useTranslation(undefined, { i18n });
+
 	const handleSelect = useCallback(
 		(selected: DataT[]) => {
 			setSelectedCache((cache) => {
@@ -128,7 +131,7 @@ export const useSelectedCache = <
 								value,
 								label:
 									(e as Error).message ??
-									ccI18n.t("backend-components.selector.loading-error"),
+									t("backend-components.selector.loading-error"),
 							};
 						}
 					})
@@ -143,7 +146,7 @@ export const useSelectedCache = <
 			(value) =>
 				selectedCache[value] ?? {
 					value,
-					label: ccI18n.t("backend-components.selector.loading"),
+					label: t("backend-components.selector.loading"),
 				}
 		),
 		handleSelect,

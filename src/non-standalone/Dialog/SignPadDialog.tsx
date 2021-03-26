@@ -10,7 +10,8 @@ import {
 import MuiDialogTitle from "@material-ui/core/DialogTitle";
 import { Close } from "@material-ui/icons";
 import SignaturePad from "react-signature-canvas";
-import ccI18n from "../../i18n";
+import i18n from "../../i18n";
+import { useTranslation } from "react-i18next";
 import { useDialogContext } from "../../framework";
 import { IDialogConfigSign } from "./Types";
 export interface SignPadDialogProps extends IDialogConfigSign {
@@ -55,6 +56,7 @@ const useStyles = makeStyles(
 );
 
 const SignPadDialog = (props: SignPadDialogProps) => {
+	const { t } = useTranslation(undefined, { i18n });
 	const { disabled, penColor, setSignature, signature, ...canvasProps } = props;
 	const [resetCanvas, setResetCanvas] = useState(!!signature);
 	const [, popDialog] = useDialogContext();
@@ -126,7 +128,7 @@ const SignPadDialog = (props: SignPadDialogProps) => {
 				className={classes.root}
 			>
 				<Typography variant="h6">
-					{ccI18n.t("standalone.signature-pad.dialog.title")}
+					{t("standalone.signature-pad.dialog.title")}
 				</Typography>
 				{closeCanvas && (
 					<IconButton
@@ -167,10 +169,10 @@ const SignPadDialog = (props: SignPadDialogProps) => {
 			</div>
 			<DialogActions>
 				<Button onClick={saveCanvas} color="primary">
-					{ccI18n.t("standalone.signature-pad.dialog.save-changes")}
+					{t("standalone.signature-pad.dialog.save-changes")}
 				</Button>
 				<Button onClick={clearCanvas} color="secondary">
-					{ccI18n.t("standalone.signature-pad.dialog.reset")}
+					{t("standalone.signature-pad.dialog.reset")}
 				</Button>
 			</DialogActions>
 		</Dialog>

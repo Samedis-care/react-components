@@ -10,7 +10,8 @@ import Model, {
 } from "../../backend-integration/Model/Model";
 import { useDialogContext } from "../../framework";
 import { ErrorDialog, showConfirmDialog } from "../../non-standalone";
-import ccI18n from "../../i18n";
+import i18n from "../../i18n";
+import { useTranslation } from "react-i18next";
 
 export interface BackendDataGridProps<
 	KeyT extends ModelFieldName,
@@ -39,6 +40,7 @@ const BackendDataGrid = <
 	props: BackendDataGridProps<KeyT, VisibilityT, CustomDataT>
 ) => {
 	const { model, enableDelete, enableDeleteAll } = props;
+	const { t } = useTranslation(undefined, { i18n });
 
 	const [pushDialog] = useDialogContext();
 	const [refreshToken, setRefreshToken] = useState("");
@@ -135,18 +137,16 @@ const BackendDataGrid = <
 		) => {
 			try {
 				await showConfirmDialog(pushDialog, {
-					title: ccI18n.t(
-						"backend-components.data-grid.delete.confirm-dialog.title"
-					),
-					message: ccI18n.t(
+					title: t("backend-components.data-grid.delete.confirm-dialog.title"),
+					message: t(
 						"backend-components.data-grid.delete.confirm-dialog." +
 							(invert ? "messageInverted" : "message"),
 						{ NUM: ids.length }
 					),
-					textButtonYes: ccI18n.t(
+					textButtonYes: t(
 						"backend-components.data-grid.delete.confirm-dialog.buttons.yes"
 					),
-					textButtonNo: ccI18n.t(
+					textButtonNo: t(
 						"backend-components.data-grid.delete.confirm-dialog.buttons.no"
 					),
 				});
@@ -166,16 +166,14 @@ const BackendDataGrid = <
 				setRefreshToken(new Date().getTime().toString());
 				pushDialog(
 					<ErrorDialog
-						title={ccI18n.t(
-							"backend-components.data-grid.delete.error-dialog.title"
-						)}
-						message={ccI18n.t(
+						title={t("backend-components.data-grid.delete.error-dialog.title")}
+						message={t(
 							"backend-components.data-grid.delete.error-dialog.message",
 							{ ERROR: (e as Error).message }
 						)}
 						buttons={[
 							{
-								text: ccI18n.t(
+								text: t(
 									"backend-components.data-grid.delete.error-dialog.buttons.okay"
 								),
 							},
@@ -184,7 +182,7 @@ const BackendDataGrid = <
 				);
 			}
 		},
-		[enableDeleteAll, deleteAdvanced, deleteMultiple, pushDialog]
+		[pushDialog, t, enableDeleteAll, deleteAdvanced, deleteMultiple]
 	);
 
 	return (

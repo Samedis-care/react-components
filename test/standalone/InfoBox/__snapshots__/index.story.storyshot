@@ -1612,6 +1612,11 @@ exports[`Storyshots Standalone/InfoBox InfoBox 1`] = `
                   "whitelist": false,
                 },
                 "removeResourceBundle": [Function],
+                "reportNamespaces": ReportNamespaces {
+                  "usedNamespaces": Object {
+                    "translation": true,
+                  },
+                },
                 "services": Object {
                   "backendConnector": Connector {
                     "backend": null,

@@ -9,6 +9,7 @@ import {
 } from "@material-ui/core";
 import { useDataGridStyles } from "../DataGrid";
 import i18n from "../../../i18n";
+import { useTranslation } from "react-i18next";
 import { IDataGridFilterBarProps } from "../Header/FilterBar";
 
 export interface DataGridCustomFilterDialogProps
@@ -25,12 +26,13 @@ export interface DataGridCustomFilterDialogProps
 
 const FilterDialog = (props: DataGridCustomFilterDialogProps) => {
 	const classes = useDataGridStyles();
+	const { t } = useTranslation(undefined, { i18n });
 	const { customFilters: Filters, customData, setCustomData } = props;
 
 	return (
 		<Paper elevation={0} className={classes.contentOverlayPaper}>
 			<Typography variant={"h6"}>
-				{i18n.t("standalone.data-grid.custom-filters.title") || ""}
+				{t("standalone.data-grid.custom-filters.title") || ""}
 			</Typography>
 			<Divider />
 			<Grid
@@ -50,7 +52,7 @@ const FilterDialog = (props: DataGridCustomFilterDialogProps) => {
 				<Grid item>
 					<Box m={2}>
 						<Button onClick={props.closeFilterDialog} variant={"contained"}>
-							{i18n.t("standalone.data-grid.settings.close") || ""}
+							{t("standalone.data-grid.settings.close") || ""}
 						</Button>
 					</Box>
 				</Grid>

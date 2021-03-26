@@ -11,7 +11,8 @@ import { SectionRenderedParams } from "react-virtualized/dist/commonjs/Grid";
 import Cell from "./Cell";
 import { applyColumnWidthLimits } from "./ColumnHeader";
 import { CenteredTypography, Loader } from "../../index";
-import ccI18n from "../../../i18n";
+import i18n from "../../../i18n";
+import { useTranslation } from "react-i18next";
 
 export interface IDataGridContentProps extends IDataGridColumnProps {
 	rowsPerPage: number;
@@ -21,6 +22,7 @@ const SELECT_ROW_WIDTH = 57;
 
 const Content = (props: IDataGridContentProps) => {
 	const { rowsPerPage, columns } = props;
+	const { t } = useTranslation(undefined, { i18n });
 	const [state, setState] = useDataGridState();
 	const [columnWidth, setColumnWidth] = useDataGridColumnsWidthState();
 	const hoverState = useState<number | null>(null);
@@ -153,7 +155,7 @@ const Content = (props: IDataGridContentProps) => {
 							</CenteredTypography>
 						) : (
 							<CenteredTypography variant={"h4"}>
-								{ccI18n.t("standalone.data-grid.content.no-data")}
+								{t("standalone.data-grid.content.no-data")}
 							</CenteredTypography>
 						)
 					}
