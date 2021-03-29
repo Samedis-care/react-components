@@ -133,6 +133,19 @@ export type AdvancedDeleteRequest = [
 	>
 ];
 
+export interface CacheOptions {
+	/**
+	 * Time to consider data valid in milliseconds
+	 * @default 30s
+	 */
+	staleTime?: number;
+	/**
+	 * Time to keep data cached after it's no longer in use
+	 * @default 5m
+	 */
+	cacheTime?: number;
+}
+
 class Model<
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
@@ -154,6 +167,10 @@ class Model<
 	 * Optional additional cache keys
 	 */
 	public readonly cacheKeys?: unknown;
+	/**
+	 * Caching options
+	 */
+	public cacheOptions?: CacheOptions;
 
 	/**
 	 * Creates a new model
@@ -161,17 +178,22 @@ class Model<
 	 * @param model The actual model definition
 	 * @param connector A backend connector
 	 * @param cacheKeys Optional cache keys
+	 * @param cacheOptions Optional cache options
 	 */
 	constructor(
 		name: string,
 		model: ModelField<KeyT, VisibilityT, CustomT>,
 		connector: Connector<KeyT, VisibilityT, CustomT>,
-		cacheKeys?: unknown
+		cacheKeys?: unknown,
+		cacheOptions?: CacheOptions
 	) {
 		this.modelId = name;
 		this.fields = model;
 		this.connector = connector;
 		this.cacheKeys = cacheKeys;
+		this.cacheOptions = cacheOptions ?? {
+			staleTime: 30000,
+		};
 	}
 
 	/**
@@ -199,19 +221,22 @@ class Model<
 	 */
 	public get(id: string | null): UseQueryResult<ModelGetResponse<KeyT>, Error> {
 		// eslint-disable-next-line react-hooks/rules-of-hooks
-		return useQuery([this.modelId, { id: id }, this.cacheKeys], () =>
-			this.getRaw(id)
+		return useQuery(
+			[this.modelId, { id: id }, this.cacheKeys],
+			() => this.getRaw(id),
+			this.cacheOptions
 		);
 	}
 
 	/**
-	 * Provices cached access for the given data id
+	 * Provides cached access for the given data id
 	 * @param id The data record id or null to obtain the default values
 	 */
 	public getCached(id: string | null): Promise<ModelGetResponse<KeyT>> {
 		return queryCache.fetchQuery(
 			[this.modelId, { id: id }, this.cacheKeys],
-			() => this.getRaw(id)
+			() => this.getRaw(id),
+			this.cacheOptions
 		);
 	}
 
