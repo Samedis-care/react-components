@@ -150,21 +150,28 @@ class Model<
 	 * The backend connector providing a CRUD interface for the model
 	 */
 	public readonly connector: Connector<KeyT, VisibilityT, CustomT>;
+	/**
+	 * Optional additional cache keys
+	 */
+	public readonly cacheKeys?: unknown;
 
 	/**
 	 * Creates a new model
 	 * @param name A unique name for the model (modelId)
 	 * @param model The actual model definition
 	 * @param connector A backend connector
+	 * @param cacheKeys Optional cache keys
 	 */
 	constructor(
 		name: string,
 		model: ModelField<KeyT, VisibilityT, CustomT>,
-		connector: Connector<KeyT, VisibilityT, CustomT>
+		connector: Connector<KeyT, VisibilityT, CustomT>,
+		cacheKeys?: unknown
 	) {
 		this.modelId = name;
 		this.fields = model;
 		this.connector = connector;
+		this.cacheKeys = cacheKeys;
 	}
 
 	/**
@@ -192,7 +199,9 @@ class Model<
 	 */
 	public get(id: string | null): UseQueryResult<ModelGetResponse<KeyT>, Error> {
 		// eslint-disable-next-line react-hooks/rules-of-hooks
-		return useQuery([this.modelId, { id: id }], () => this.getRaw(id));
+		return useQuery([this.modelId, { id: id }, this.cacheKeys], () =>
+			this.getRaw(id)
+		);
 	}
 
 	/**
@@ -200,8 +209,9 @@ class Model<
 	 * @param id The data record id or null to obtain the default values
 	 */
 	public getCached(id: string | null): Promise<ModelGetResponse<KeyT>> {
-		return queryCache.fetchQuery([this.modelId, { id: id }], () =>
-			this.getRaw(id)
+		return queryCache.fetchQuery(
+			[this.modelId, { id: id }, this.cacheKeys],
+			() => this.getRaw(id)
 		);
 	}
 
@@ -295,10 +305,14 @@ class Model<
 			},
 			{
 				onSuccess: (data: ModelGetResponse<KeyT>) => {
-					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-					// @ts-ignore
-					// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-					ModelDataStore.setQueryData([this.modelId, { id: data[0].id }], data);
+					ModelDataStore.setQueryData(
+						[
+							this.modelId,
+							{ id: (data[0] as Record<"id", string>).id },
+							this.cacheKeys,
+						],
+						data
+					);
 				},
 			}
 		);
@@ -321,7 +335,11 @@ class Model<
 			},
 			{
 				onSuccess: (data: void, id: string) => {
-					ModelDataStore.removeQueries([this.modelId, { id: id }]);
+					ModelDataStore.removeQueries([
+						this.modelId,
+						{ id: id },
+						this.cacheKeys,
+					]);
 				},
 			}
 		);
@@ -345,7 +363,10 @@ class Model<
 			{
 				onSuccess: (data: void, ids: string[]) => {
 					ids.forEach((id) =>
-						ModelDataStore.setQueryData([this.modelId, { id: id }], undefined)
+						ModelDataStore.setQueryData(
+							[this.modelId, { id: id }, this.cacheKeys],
+							undefined
+						)
 					);
 				},
 			}
@@ -381,7 +402,10 @@ class Model<
 				onSuccess: (data: void, req: AdvancedDeleteRequest) => {
 					if (!req[0]) {
 						req[1].forEach((id) =>
-							ModelDataStore.setQueryData([this.modelId, { id: id }], undefined)
+							ModelDataStore.setQueryData(
+								[this.modelId, { id: id }, this.cacheKeys],
+								undefined
+							)
 						);
 					} else {
 						ModelDataStore.clear();
