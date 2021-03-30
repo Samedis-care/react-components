@@ -15044,6 +15044,7 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
                 [Function],
                 [Function],
                 [Function],
+                [Function],
               ],
             },
             "options": Object {
@@ -23105,6 +23106,7 @@ exports[`Storyshots Standalone/Selector MultiWithoutGroup 1`] = `
             },
             "observers": Object {
               "languageChanged": Array [
+                [Function],
                 [Function],
                 [Function],
                 [Function],

@@ -101,6 +101,7 @@ exports[`Storyshots Standalone/UIKit/InputControls CurrencyInput 1`] = `
                 [Function],
                 [Function],
                 [Function],
+                [Function],
               ],
             },
             "options": Object {
@@ -21512,6 +21513,7 @@ exports[`Storyshots Standalone/UIKit/InputControls DecimalInputField 1`] = `
                 [Function],
                 [Function],
                 [Function],
+                [Function],
               ],
             },
             "options": Object {
@@ -28156,6 +28158,7 @@ exports[`Storyshots Standalone/UIKit/InputControls IntegerInputField 1`] = `
             },
             "observers": Object {
               "languageChanged": Array [
+                [Function],
                 [Function],
                 [Function],
                 [Function],

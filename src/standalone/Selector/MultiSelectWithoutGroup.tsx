@@ -12,7 +12,8 @@ import TextFieldWithHelp, {
 	TextFieldWithHelpProps,
 } from "../UIKit/TextFieldWithHelp";
 import { SmallIconButton, SmallListItemIcon } from "../Small";
-import ccI18n from "../../i18n";
+import i18n from "../../i18n";
+import { useTranslation } from "react-i18next";
 
 /**
  * A callback used to get an label value for a specific input (search) value
@@ -119,6 +120,7 @@ const MultiSelectWithoutGroup = <DataT extends MultiSelectorData>(
 		noOptionsText,
 		loadingText,
 	} = props;
+	const { t } = useTranslation(undefined, { i18n });
 	const classes = useStyles(props);
 	const [dataQuery, setDataQuery] = useState("");
 	const [dataOptions, setDataOptions] = useState<DataT[]>([]);
@@ -252,12 +254,11 @@ const MultiSelectWithoutGroup = <DataT extends MultiSelectorData>(
 				onInputChange={(evt, value) => setDataQuery(value)}
 				loading={loading}
 				loadingText={
-					loadingText ??
-					ccI18n.t("standalone.selector.base-selector.loading-text")
+					loadingText ?? t("standalone.selector.base-selector.loading-text")
 				}
 				noOptionsText={
 					noOptionsText ??
-					ccI18n.t("standalone.selector.base-selector.no-options-text")
+					t("standalone.selector.base-selector.no-options-text")
 				}
 				renderInput={(params: TextFieldProps) => (
 					<TextFieldWithHelp

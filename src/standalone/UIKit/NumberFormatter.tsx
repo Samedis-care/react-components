@@ -1,5 +1,6 @@
 import React from "react";
 import ccI18n from "../../i18n";
+import { useTranslation } from "react-i18next";
 
 export interface NumberFormatterProps {
 	/**
@@ -14,9 +15,10 @@ export interface NumberFormatterProps {
 
 const NumberFormatter = (props: NumberFormatterProps) => {
 	const { value, options } = props;
+	const { i18n } = useTranslation(undefined, { i18n: ccI18n });
 
 	return (
-		<>{value !== null ? value.toLocaleString(ccI18n.language, options) : ""}</>
+		<>{value !== null ? value.toLocaleString(i18n.language, options) : ""}</>
 	);
 };
 
