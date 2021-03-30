@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { I18nextProvider } from "react-i18next";
+import { getI18n, I18nextProvider } from "react-i18next";
 import ccI18n from "../i18n";
 import moment from "moment";
 
@@ -39,7 +39,7 @@ const CCI18nProvider = (props: CCI18nProviderProps) => {
 	}, []);
 
 	return (
-		<I18nextProvider i18n={ccI18n} key={momentLocale}>
+		<I18nextProvider i18n={getI18n() ?? ccI18n} key={momentLocale}>
 			{props.children}
 		</I18nextProvider>
 	);

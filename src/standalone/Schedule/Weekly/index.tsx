@@ -15,7 +15,8 @@ import { DatePicker, MuiPickersUtilsProvider } from "@material-ui/pickers";
 import MomentUtils from "@date-io/moment";
 import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
 import { ToDateLocaleStringOptions } from "../../../constants";
-import { WithTranslation, withTranslation } from "react-i18next";
+import { TFunction, useTranslation, WithTranslation } from "react-i18next";
+import ccI18n from "../../../i18n";
 
 export interface IProps extends WithStyles, WithTranslation {
 	/**
@@ -286,4 +287,21 @@ const styles = createStyles({
 	},
 });
 
-export default withStyles(styles)(withTranslation()(WeekView));
+const WeekViewWithoutTranslation = withStyles(styles)(WeekView);
+const WeekViewWithTranslation = (
+	props: Omit<IProps, keyof WithTranslation | keyof WithStyles>
+): React.ReactElement => {
+	const { i18n, t, ready: tReady } = useTranslation(undefined, {
+		i18n: ccI18n,
+	});
+	return (
+		<WeekViewWithoutTranslation
+			{...props}
+			i18n={i18n}
+			t={t as TFunction<"translation">}
+			tReady={tReady}
+		/>
+	);
+};
+
+export default WeekViewWithTranslation;

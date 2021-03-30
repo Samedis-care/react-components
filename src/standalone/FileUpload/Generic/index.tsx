@@ -20,7 +20,8 @@ import {
 } from "../../../utils";
 import { IDownscaleProps } from "../../../utils/processImage";
 import GroupBox from "../../GroupBox";
-import { WithTranslation, withTranslation } from "react-i18next";
+import { TFunction, useTranslation, WithTranslation } from "react-i18next";
+import ccI18n from "../../../i18n";
 
 export interface FileUploadProps extends WithStyles, WithTranslation {
 	/**
@@ -483,4 +484,21 @@ const styles = createStyles((theme: Theme) => ({
 	},
 }));
 
-export default withStyles(styles)(withTranslation()(FileUpload));
+const FileUploadWithoutTranslation = withStyles(styles)(FileUpload);
+const FileUploadWithTranslation = (
+	props: Omit<FileUploadProps, keyof WithTranslation | keyof WithStyles>
+): React.ReactElement => {
+	const { i18n, t, ready: tReady } = useTranslation(undefined, {
+		i18n: ccI18n,
+	});
+	return (
+		<FileUploadWithoutTranslation
+			{...props}
+			i18n={i18n}
+			t={t as TFunction<"translation">}
+			tReady={tReady}
+		/>
+	);
+};
+
+export default FileUploadWithTranslation;
