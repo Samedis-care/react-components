@@ -49,8 +49,8 @@ const loaderComponent = <Loader />;
  */
 const ComponentsCareFramework = (props: ICompleteFrameworkProps) => (
 	<Suspense fallback={loaderComponent}>
-		<MuiPickerUtils disable={props.disableMuiPickerUtils}>
-			<CCI18nProvider>
+		<CCI18nProvider>
+			<MuiPickerUtils disable={props.disableMuiPickerUtils}>
 				<ThemeProvider defaultTheme={props.defaultTheme || getStandardTheme}>
 					<QueryClientProvider client={ModelDataStore}>
 						<PermissionContextProvider>
@@ -60,8 +60,8 @@ const ComponentsCareFramework = (props: ICompleteFrameworkProps) => (
 						</PermissionContextProvider>
 					</QueryClientProvider>
 				</ThemeProvider>
-			</CCI18nProvider>
-		</MuiPickerUtils>
+			</MuiPickerUtils>
+		</CCI18nProvider>
 	</Suspense>
 );
 
