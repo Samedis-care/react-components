@@ -20,6 +20,8 @@ There are 5 types of components you will find here:
 
 - Standalone Components
   > Standalone Components are designed to run without any further integration of the Components.care framework and can be used as an extension of your existing UI libraries.
+  > 
+  > WARNING: If not using the Components-Care Framework you still need to add CCI18nProvider to your render tree for localization 
 - Application Framework
   > The Application Framework provides you with a set of pre-configured common libraries to enable you rapid development of new applications
 - Non-standalone Components

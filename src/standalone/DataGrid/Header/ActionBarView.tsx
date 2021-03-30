@@ -19,6 +19,7 @@ import {
 import { IDataGridExporter } from "./index";
 import ExportMenu from "./ExportMenu";
 import i18n from "../../../i18n";
+import { useTranslation } from "react-i18next";
 import ComponentWithLabel from "../../UIKit/ComponentWithLabel";
 import { IDataGridAddButton } from "../DataGrid";
 
@@ -51,6 +52,7 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 	const bpMdUp = useMediaQuery(theme.breakpoints.up("md"), { noSsr: true });
 	const bpSmUp = useMediaQuery(theme.breakpoints.up("sm"), { noSsr: true });
 
+	const { t } = useTranslation(undefined, { i18n });
 	const [exportAnchorEl, setExportAnchorEl] = useState<MenuProps["anchorEl"]>(
 		undefined
 	);
@@ -80,12 +82,12 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 								<TuneIcon />
 							</SmallIconButton>
 						}
-						labelText={i18n.t("standalone.data-grid.header.settings")}
+						labelText={t("standalone.data-grid.header.settings")}
 						onClick={props.toggleSettings}
 						labelPlacement={"bottom"}
 					/>
 				) : (
-					<Tooltip title={i18n.t("standalone.data-grid.header.settings") ?? ""}>
+					<Tooltip title={t("standalone.data-grid.header.settings") ?? ""}>
 						<IconButton color={"primary"} onClick={props.toggleSettings}>
 							<TuneIcon />
 						</IconButton>
@@ -103,12 +105,12 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 								<ResetIcon />
 							</SmallIconButton>
 						}
-						labelText={i18n.t("standalone.data-grid.header.reset")}
+						labelText={t("standalone.data-grid.header.reset")}
 						onClick={props.handleReset}
 						labelPlacement={"bottom"}
 					/>
 				) : (
-					<Tooltip title={i18n.t("standalone.data-grid.header.reset") ?? ""}>
+					<Tooltip title={t("standalone.data-grid.header.reset") ?? ""}>
 						<IconButton color={"primary"} onClick={props.handleReset}>
 							<ResetIcon />
 						</IconButton>
@@ -128,14 +130,12 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 										<ExportIcon />
 									</SmallIconButton>
 								}
-								labelText={i18n.t("standalone.data-grid.header.export")}
+								labelText={t("standalone.data-grid.header.export")}
 								onClick={openExportMenu}
 								labelPlacement={"bottom"}
 							/>
 						) : (
-							<Tooltip
-								title={i18n.t("standalone.data-grid.header.export") ?? ""}
-							>
+							<Tooltip title={t("standalone.data-grid.header.export") ?? ""}>
 								<IconButton color={"primary"} onClick={openExportMenu}>
 									<ExportIcon />
 								</IconButton>
@@ -168,7 +168,7 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 									icon={<AddIcon />}
 									onClick={props.handleAddNew}
 								>
-									{i18n.t("standalone.data-grid.header.new") ?? ""}
+									{t("standalone.data-grid.header.new") ?? ""}
 								</ActionButton>
 							</Grid>
 						) : (

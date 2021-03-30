@@ -8,7 +8,8 @@ import Model, {
 	ModelFieldName,
 	PageVisibility,
 } from "../../backend-integration/Model/Model";
-import ccI18n from "../../i18n";
+import i18n from "../../i18n";
+import { useTranslation } from "react-i18next";
 import { debouncePromise } from "../../utils";
 
 export interface BackendSingleSelectProps<
@@ -76,6 +77,8 @@ const BackendSingleSelect = <
 		null
 	);
 
+	const { t } = useTranslation(undefined, { i18n });
+
 	const handleLoad = useCallback(
 		async (search: string) => {
 			const data = await model.index({
@@ -124,7 +127,7 @@ const BackendSingleSelect = <
 						value: selected,
 						label:
 							(e as Error).message ??
-							ccI18n.t("backend-components.selector.loading-error"),
+							t("backend-components.selector.loading-error"),
 					};
 				}
 			}
@@ -147,7 +150,7 @@ const BackendSingleSelect = <
 				selected
 					? selectedCache ?? {
 							value: selected,
-							label: ccI18n.t("backend-components.selector.loading"),
+							label: t("backend-components.selector.loading"),
 					  }
 					: null
 			}

@@ -31,7 +31,7 @@ import {
 } from "@material-ui/lab/Autocomplete/Autocomplete";
 import InputWithHelp from "../UIKit/InputWithHelp";
 import OutlinedInputWithHelp from "../UIKit/OutlinedInputWithHelp";
-import ccI18n from "../../i18n";
+import { useTranslation } from "react-i18next";
 
 export interface BaseSelectorData {
 	/**
@@ -247,10 +247,10 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 	const classes = useThemeStyles(
 		(props as unknown) as BaseSelectorProps<BaseSelectorData>
 	);
+	const { t } = useTranslation(undefined, { i18n });
 	const customClasses = useCustomStyles(cleanClassMap(props, true));
 	const [open, setOpen] = useState(false);
-	const actualAddNewLabel =
-		addNewLabel || i18n.t("standalone.selector.add-new");
+	const actualAddNewLabel = addNewLabel || t("standalone.selector.add-new");
 	const [selectorOptions, setSelectorOptions] = useState<DataT[]>([]);
 	const [loading, setLoading] = useState(false);
 	const [query, setQuery] = useState("");
@@ -375,8 +375,7 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 					disableClearable={disableClearable}
 					loading={loading}
 					loadingText={
-						loadingText ??
-						ccI18n.t("standalone.selector.base-selector.loading-text")
+						loadingText ?? t("standalone.selector.base-selector.loading-text")
 					}
 					autoComplete
 					disabled={disabled}
@@ -401,15 +400,13 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 					popupIcon={<ExpandMore />}
 					noOptionsText={
 						noOptionsText ??
-						ccI18n.t("standalone.selector.base-selector.no-options-text")
+						t("standalone.selector.base-selector.no-options-text")
 					}
 					openText={
-						openText ??
-						ccI18n.t("standalone.selector.base-selector.open-icon-text")
+						openText ?? t("standalone.selector.base-selector.open-icon-text")
 					}
 					closeText={
-						closeText ??
-						ccI18n.t("standalone.selector.base-selector.close-icon-text")
+						closeText ?? t("standalone.selector.base-selector.close-icon-text")
 					}
 					getOptionLabel={(option: BaseSelectorData) => option.label}
 					renderOption={(option: BaseSelectorData) => defaultRenderer(option)}

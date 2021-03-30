@@ -1,9 +1,11 @@
 import React from "react";
 import { Button, ButtonProps, Grid } from "@material-ui/core";
 import { AppsIcon } from "../../Icons";
-import ccI18n from "../../../i18n";
+import i18n from "../../../i18n";
+import { useTranslation } from "react-i18next";
 
 const CustomFiltersButton = (props: Omit<ButtonProps, "outlined">) => {
+	const { t } = useTranslation(undefined, { i18n });
 	return (
 		<Button {...props} variant={"outlined"}>
 			<Grid
@@ -14,7 +16,7 @@ const CustomFiltersButton = (props: Omit<ButtonProps, "outlined">) => {
 				alignItems={"center"}
 			>
 				<Grid item>
-					{ccI18n.t("standalone.data-grid.header.custom-filter-button")}
+					{t("standalone.data-grid.header.custom-filter-button")}
 				</Grid>
 				<Grid item>
 					<AppsIcon color={"primary"} />

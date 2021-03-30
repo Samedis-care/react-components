@@ -2,7 +2,9 @@ import React, { useCallback } from "react";
 import { makeStyles, InputAdornment, IconButton } from "@material-ui/core";
 import { SignIcon } from "../../standalone";
 import { Info as InfoIcon } from "@material-ui/icons";
-import ccI18n from "../../i18n";
+import i18n from "../../i18n";
+import { useTranslation } from "react-i18next";
+
 export interface SignPadProps {
 	/**
 	 * Boolean flag to disable edit signature
@@ -69,6 +71,7 @@ const useStyles = makeStyles(
 );
 const SignPad = (props: SignPadProps) => {
 	const { signature, disabled, openInfo, openSignPad } = props;
+	const { t } = useTranslation(undefined, { i18n });
 	const classes = useStyles(props);
 	const handelOpenInfo = useCallback(
 		(event: React.MouseEvent<HTMLButtonElement>) => {
@@ -81,9 +84,7 @@ const SignPad = (props: SignPadProps) => {
 		<div className={classes.signPadDiv} onClick={openSignPad}>
 			<div className={classes.signTextDiv}>
 				<SignIcon color={disabled ? "disabled" : "primary"} />
-				{!signature && (
-					<span>{ccI18n.t("standalone.signature-pad.sign-here")}</span>
-				)}
+				{!signature && <span>{t("standalone.signature-pad.sign-here")}</span>}
 			</div>
 			<div className={classes.imageDiv}>
 				{signature && <img className={classes.signPreview} src={signature} />}

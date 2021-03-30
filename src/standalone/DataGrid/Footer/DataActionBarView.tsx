@@ -3,6 +3,7 @@ import { Grid } from "@material-ui/core";
 import { SmallIconButton, VerticalDivider } from "../../index";
 import ComponentWithLabel from "../../UIKit/ComponentWithLabel";
 import i18n from "../../../i18n";
+import { useTranslation } from "react-i18next";
 import { Edit as EditIcon, Delete as DeleteIcon } from "@material-ui/icons";
 import SelectAll from "./SelectAll";
 import { useDataGridStyles } from "../DataGrid";
@@ -27,13 +28,14 @@ export interface DataActionBarViewProps {
 
 const DataActionBarView = (props: DataActionBarViewProps) => {
 	const classes = useDataGridStyles();
+	const { t } = useTranslation(undefined, { i18n });
 
 	return (
 		<Grid container>
 			<Grid item key={"select-all"}>
 				<ComponentWithLabel
 					control={<SelectAll />}
-					labelText={i18n.t("standalone.data-grid.footer.select-all")}
+					labelText={t("standalone.data-grid.footer.select-all")}
 					labelPlacement={"bottom"}
 					className={classes.selectAllWrapper}
 				/>
@@ -53,7 +55,7 @@ const DataActionBarView = (props: DataActionBarViewProps) => {
 									<EditIcon />
 								</SmallIconButton>
 							}
-							labelText={i18n.t("standalone.data-grid.footer.edit")}
+							labelText={t("standalone.data-grid.footer.edit")}
 							onClick={props.handleEdit}
 							labelPlacement={"bottom"}
 							disabled={props.numSelected !== 1}
@@ -76,7 +78,7 @@ const DataActionBarView = (props: DataActionBarViewProps) => {
 									<DeleteIcon />
 								</SmallIconButton>
 							}
-							labelText={i18n.t("standalone.data-grid.footer.delete")}
+							labelText={t("standalone.data-grid.footer.delete")}
 							onClick={props.handleDelete}
 							labelPlacement={"bottom"}
 							disabled={props.numSelected === 0}

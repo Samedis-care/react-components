@@ -20,7 +20,8 @@ import {
 } from "../DataGrid";
 import { LocalizedKeyboardDatePicker } from "../../LocalizedDateTimePickers";
 import { DateType } from "@date-io/type";
-import ccI18n from "../../../i18n";
+import i18n from "../../../i18n";
+import { useTranslation } from "react-i18next";
 
 export type FilterType =
 	| "contains"
@@ -87,6 +88,7 @@ export interface DataGridContentFilterEntryProps {
 
 const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 	const { onChange, depth } = props;
+	const { t } = useTranslation(undefined, { i18n });
 	const gridProps = useDataGridProps();
 
 	const [enumFilterSearch, setEnumFilterSearch] = useState("");
@@ -199,43 +201,43 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 
 	const filterTypeMenuItems = [
 		<MenuItem key={"equals"} value={"equals"}>
-			{ccI18n.t("standalone.data-grid.content.filter-type.eq")}
+			{t("standalone.data-grid.content.filter-type.eq")}
 		</MenuItem>,
 		<MenuItem key={"notEqual"} value={"notEqual"}>
-			{ccI18n.t("standalone.data-grid.content.filter-type.not-eq")}
+			{t("standalone.data-grid.content.filter-type.not-eq")}
 		</MenuItem>,
 	];
 	if (props.valueType === "string") {
 		filterTypeMenuItems.push(
 			<MenuItem key={"contains"} value={"contains"}>
-				{ccI18n.t("standalone.data-grid.content.filter-type.contains")}
+				{t("standalone.data-grid.content.filter-type.contains")}
 			</MenuItem>,
 			<MenuItem key={"notContains"} value={"notContains"}>
-				{ccI18n.t("standalone.data-grid.content.filter-type.not-contains")}
+				{t("standalone.data-grid.content.filter-type.not-contains")}
 			</MenuItem>,
 			<MenuItem key={"startsWith"} value={"startsWith"}>
-				{ccI18n.t("standalone.data-grid.content.filter-type.starts-with")}
+				{t("standalone.data-grid.content.filter-type.starts-with")}
 			</MenuItem>,
 			<MenuItem key={"endsWith"} value={"endsWith"}>
-				{ccI18n.t("standalone.data-grid.content.filter-type.ends-with")}
+				{t("standalone.data-grid.content.filter-type.ends-with")}
 			</MenuItem>
 		);
 	} else if (props.valueType === "number" || props.valueType === "date") {
 		filterTypeMenuItems.push(
 			<MenuItem key={"lessThan"} value={"lessThan"}>
-				{ccI18n.t("standalone.data-grid.content.filter-type.lt")}
+				{t("standalone.data-grid.content.filter-type.lt")}
 			</MenuItem>,
 			<MenuItem key={"lessThanOrEqual"} value={"lessThanOrEqual"}>
-				{ccI18n.t("standalone.data-grid.content.filter-type.lte")}
+				{t("standalone.data-grid.content.filter-type.lte")}
 			</MenuItem>,
 			<MenuItem key={"greaterThan"} value={"greaterThan"}>
-				{ccI18n.t("standalone.data-grid.content.filter-type.gt")}
+				{t("standalone.data-grid.content.filter-type.gt")}
 			</MenuItem>,
 			<MenuItem key={"greaterThanOrEqual"} value={"greaterThanOrEqual"}>
-				{ccI18n.t("standalone.data-grid.content.filter-type.gte")}
+				{t("standalone.data-grid.content.filter-type.gte")}
 			</MenuItem>,
 			<MenuItem key={"inRange"} value={"inRange"}>
-				{ccI18n.t("standalone.data-grid.content.filter-type.in-range")}
+				{t("standalone.data-grid.content.filter-type.in-range")}
 			</MenuItem>
 		);
 	}
@@ -295,7 +297,7 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 								indeterminate={!filterValue}
 							/>
 						}
-						label={ccI18n.t(
+						label={t(
 							"standalone.data-grid.content.bool-filter." +
 								(filterValue || "any")
 						)}
@@ -310,9 +312,7 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 							onChange={(evt: React.ChangeEvent<HTMLInputElement>) =>
 								setEnumFilterSearch(evt.target.value)
 							}
-							placeholder={ccI18n.t(
-								"standalone.data-grid.content.set-filter.search"
-							)}
+							placeholder={t("standalone.data-grid.content.set-filter.search")}
 							fullWidth
 						/>
 					</Grid>
@@ -329,9 +329,7 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 									onChange={onFilterValueChangeEnumAll}
 								/>
 								<ListItemText>
-									{ccI18n.t(
-										"standalone.data-grid.content.set-filter.select-all"
-									)}
+									{t("standalone.data-grid.content.set-filter.select-all")}
 								</ListItemText>
 							</ListItem>
 							{(props.valueData as DataGridSetFilterData)

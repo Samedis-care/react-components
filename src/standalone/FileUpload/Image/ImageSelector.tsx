@@ -2,6 +2,7 @@ import React, { useCallback, useRef } from "react";
 import { Button, Grid } from "@material-ui/core";
 import { AttachFile } from "@material-ui/icons";
 import i18n from "../../../i18n";
+import { useTranslation } from "react-i18next";
 import { processImage } from "../../../utils";
 import { IDownscaleProps } from "../../../utils/processImage";
 import { makeStyles } from "@material-ui/core/styles";
@@ -100,6 +101,7 @@ const ImageSelector = (props: ImageSelectorProps) => {
 	} = props;
 	const classes = useStyles(props);
 	const fileRef = useRef<HTMLInputElement>(null);
+	const { t } = useTranslation(undefined, { i18n });
 
 	const processFile = useCallback(
 		async (file: File) => {
@@ -175,7 +177,7 @@ const ImageSelector = (props: ImageSelectorProps) => {
 							onClick={handleUpload}
 							onBlur={props.onBlur}
 						>
-							{props.uploadLabel || i18n.t("standalone.file-upload.upload")}
+							{props.uploadLabel || t("standalone.file-upload.upload")}
 						</Button>
 						<input
 							type={"file"}

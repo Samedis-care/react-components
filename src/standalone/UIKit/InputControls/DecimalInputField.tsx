@@ -5,6 +5,7 @@ import TextFieldWithHelp, {
 } from "../TextFieldWithHelp";
 import { parseLocalizedNumber, useInputCursorFix } from "../../../utils";
 import ccI18n from "../../../i18n";
+import { useTranslation } from "react-i18next";
 
 export interface DecimalInputFieldProps extends TextFieldWithHelpProps {
 	/**
@@ -25,9 +26,10 @@ export interface DecimalInputFieldProps extends TextFieldWithHelpProps {
 const DecimalInputField = (
 	props: DecimalInputFieldProps & Omit<TextFieldProps, "onChange" | "value">
 ) => {
+	const { i18n } = useTranslation(undefined, { i18n: ccI18n });
 	const { value, onChange, ...muiProps } = props;
 	const valueFormatted =
-		value !== null ? value.toLocaleString(ccI18n.language) : "";
+		value !== null ? value.toLocaleString(i18n.language) : "";
 	const { handleCursorChange, cursorInputRef } = useInputCursorFix(
 		valueFormatted
 	);
