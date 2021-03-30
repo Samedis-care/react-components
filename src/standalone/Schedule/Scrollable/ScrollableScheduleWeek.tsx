@@ -1,7 +1,6 @@
 import React, { PureComponent } from "react";
 import { CircularProgress, Divider, Grid } from "@material-ui/core";
 import ScrollableScheduleDay from "./ScrollableScheduleDay";
-import i18n from "../../../i18n";
 import moment, { Moment } from "moment";
 import { IDayData } from "../Common/DayContents";
 import { WithTranslation, withTranslation } from "react-i18next";

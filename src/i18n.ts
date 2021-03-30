@@ -8,7 +8,7 @@ const loadLang = (lang: string): Resource =>
 	} as Resource);
 
 // edit this when adding new languages
-export const langs = ["de", "en", "fr", "ru"];
+export const langs = ["de", "en", "fr", "ru", "uz"];
 const langVals: Record<string, Resource> = {};
 for (const lang of langs) {
 	langVals[lang] = loadLang(lang);
