@@ -1,7 +1,13 @@
 {
 	"standalone": {
 		"selector": {
-			"add-new": "добавить"
+			"add-new": "добавить",
+			"base-selector": {
+				"no-options-text": "Нет вариантов",
+				"close-icon-text": "Закрыть",
+				"open-icon-text": "Открыть",
+				"loading-text": "Загрузка..."
+			}
 		},
 		"schedule": {
 			"week": "Неделя",

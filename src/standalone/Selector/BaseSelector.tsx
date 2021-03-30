@@ -131,6 +131,14 @@ export interface BaseSelectorProps<DataT extends BaseSelectorData>
 	 */
 	loadingText?: string | SelectorLabelCallback;
 	/**
+	 * Label which is shown for close icon button while popup is opened
+	 */
+	closeText?: string;
+	/**
+	 * Label which is shown for open icon button while popup is closed
+	 */
+	openText?: string;
+	/**
 	 * Is the selector clearable?
 	 */
 	disableClearable?: boolean;
@@ -227,6 +235,8 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 		enableIcons,
 		noOptionsText,
 		loadingText,
+		openText,
+		closeText,
 		disableClearable,
 		openInfo,
 		grouped,
@@ -364,7 +374,9 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 					}}
 					disableClearable={disableClearable}
 					loading={loading}
-					loadingText={loadingText}
+					loadingText={
+						loadingText ?? t("standalone.selector.base-selector.loading-text")
+					}
 					autoComplete
 					disabled={disabled}
 					selectOnFocus={!disableSearch}
@@ -386,7 +398,16 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 					blurOnSelect={true}
 					onInputChange={updateQuery}
 					popupIcon={<ExpandMore />}
-					noOptionsText={noOptionsText}
+					noOptionsText={
+						noOptionsText ??
+						t("standalone.selector.base-selector.no-options-text")
+					}
+					openText={
+						openText ?? t("standalone.selector.base-selector.open-icon-text")
+					}
+					closeText={
+						closeText ?? t("standalone.selector.base-selector.close-icon-text")
+					}
 					getOptionLabel={(option: BaseSelectorData) => option.label}
 					renderOption={(option: BaseSelectorData) => defaultRenderer(option)}
 					getOptionDisabled={(option: BaseSelectorData) => !!option.isDisabled}

@@ -35,11 +35,22 @@ abstract class TypeEnum implements Type<string> {
 	}
 
 	stringify(value: string): string {
+		if (!value) return "";
+
 		return (
 			this.values.find((entry) => entry.value === value)?.getLabel() ||
 			"Invalid Enum Value detected!"
 		);
 	}
+
+	// handle null/undefined values
+	deserialize = (value: unknown): string => {
+		if (value === null || value === undefined) return "";
+		if (typeof value === "string") return value;
+		throw new Error("Unsupported data");
+	};
+
+	serialize = (value: string): string | null => (value === "" ? null : value);
 }
 
 export default TypeEnum;

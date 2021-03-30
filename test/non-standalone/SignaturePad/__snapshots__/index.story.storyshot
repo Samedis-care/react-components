@@ -243,6 +243,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                             },
                             "selector": Object {
                               "add-new": "Hinzufügen",
+                              "base-selector": Object {
+                                "close-icon-text": "Schließen",
+                                "loading-text": "Lade...",
+                                "no-options-text": "Keine Optionen",
+                                "open-icon-text": "Öffnen",
+                              },
                             },
                             "signature-pad": Object {
                               "dialog": Object {
@@ -425,6 +431,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                             },
                             "selector": Object {
                               "add-new": "Add",
+                              "base-selector": Object {
+                                "close-icon-text": "Close",
+                                "loading-text": "Loading...",
+                                "no-options-text": "No options",
+                                "open-icon-text": "Open",
+                              },
                             },
                             "signature-pad": Object {
                               "dialog": Object {
@@ -607,6 +619,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                             },
                             "selector": Object {
                               "add-new": "Ajouter",
+                              "base-selector": Object {
+                                "close-icon-text": "Fermer",
+                                "loading-text": "Chargement...",
+                                "no-options-text": "Aucune option",
+                                "open-icon-text": "Ouvrir",
+                              },
                             },
                             "signature-pad": Object {
                               "dialog": Object {
@@ -789,6 +807,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                             },
                             "selector": Object {
                               "add-new": "добавить",
+                              "base-selector": Object {
+                                "close-icon-text": "Закрыть",
+                                "loading-text": "Загрузка...",
+                                "no-options-text": "Нет вариантов",
+                                "open-icon-text": "Открыть",
+                              },
                             },
                             "signature-pad": Object {
                               "dialog": Object {
@@ -971,6 +995,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                             },
                             "selector": Object {
                               "add-new": "Qo'shish",
+                              "base-selector": Object {
+                                "close-icon-text": "Yoping",
+                                "loading-text": "Yuklanmoqda...",
+                                "no-options-text": "Variant yo'q",
+                                "open-icon-text": "Ochiq",
+                              },
                             },
                             "signature-pad": Object {
                               "dialog": Object {
@@ -1218,6 +1248,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                           },
                           "selector": Object {
                             "add-new": "Hinzufügen",
+                            "base-selector": Object {
+                              "close-icon-text": "Schließen",
+                              "loading-text": "Lade...",
+                              "no-options-text": "Keine Optionen",
+                              "open-icon-text": "Öffnen",
+                            },
                           },
                           "signature-pad": Object {
                             "dialog": Object {
@@ -1400,6 +1436,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                           },
                           "selector": Object {
                             "add-new": "Add",
+                            "base-selector": Object {
+                              "close-icon-text": "Close",
+                              "loading-text": "Loading...",
+                              "no-options-text": "No options",
+                              "open-icon-text": "Open",
+                            },
                           },
                           "signature-pad": Object {
                             "dialog": Object {
@@ -1582,6 +1624,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                           },
                           "selector": Object {
                             "add-new": "Ajouter",
+                            "base-selector": Object {
+                              "close-icon-text": "Fermer",
+                              "loading-text": "Chargement...",
+                              "no-options-text": "Aucune option",
+                              "open-icon-text": "Ouvrir",
+                            },
                           },
                           "signature-pad": Object {
                             "dialog": Object {
@@ -1764,6 +1812,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                           },
                           "selector": Object {
                             "add-new": "добавить",
+                            "base-selector": Object {
+                              "close-icon-text": "Закрыть",
+                              "loading-text": "Загрузка...",
+                              "no-options-text": "Нет вариантов",
+                              "open-icon-text": "Открыть",
+                            },
                           },
                           "signature-pad": Object {
                             "dialog": Object {
@@ -1946,6 +2000,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                           },
                           "selector": Object {
                             "add-new": "Qo'shish",
+                            "base-selector": Object {
+                              "close-icon-text": "Yoping",
+                              "loading-text": "Yuklanmoqda...",
+                              "no-options-text": "Variant yo'q",
+                              "open-icon-text": "Ochiq",
+                            },
                           },
                           "signature-pad": Object {
                             "dialog": Object {
@@ -2201,6 +2261,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                   },
                                   "selector": Object {
                                     "add-new": "Hinzufügen",
+                                    "base-selector": Object {
+                                      "close-icon-text": "Schließen",
+                                      "loading-text": "Lade...",
+                                      "no-options-text": "Keine Optionen",
+                                      "open-icon-text": "Öffnen",
+                                    },
                                   },
                                   "signature-pad": Object {
                                     "dialog": Object {
@@ -2383,6 +2449,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                   },
                                   "selector": Object {
                                     "add-new": "Add",
+                                    "base-selector": Object {
+                                      "close-icon-text": "Close",
+                                      "loading-text": "Loading...",
+                                      "no-options-text": "No options",
+                                      "open-icon-text": "Open",
+                                    },
                                   },
                                   "signature-pad": Object {
                                     "dialog": Object {
@@ -2565,6 +2637,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                   },
                                   "selector": Object {
                                     "add-new": "Ajouter",
+                                    "base-selector": Object {
+                                      "close-icon-text": "Fermer",
+                                      "loading-text": "Chargement...",
+                                      "no-options-text": "Aucune option",
+                                      "open-icon-text": "Ouvrir",
+                                    },
                                   },
                                   "signature-pad": Object {
                                     "dialog": Object {
@@ -2747,6 +2825,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                   },
                                   "selector": Object {
                                     "add-new": "добавить",
+                                    "base-selector": Object {
+                                      "close-icon-text": "Закрыть",
+                                      "loading-text": "Загрузка...",
+                                      "no-options-text": "Нет вариантов",
+                                      "open-icon-text": "Открыть",
+                                    },
                                   },
                                   "signature-pad": Object {
                                     "dialog": Object {
@@ -2929,6 +3013,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                   },
                                   "selector": Object {
                                     "add-new": "Qo'shish",
+                                    "base-selector": Object {
+                                      "close-icon-text": "Yoping",
+                                      "loading-text": "Yuklanmoqda...",
+                                      "no-options-text": "Variant yo'q",
+                                      "open-icon-text": "Ochiq",
+                                    },
                                   },
                                   "signature-pad": Object {
                                     "dialog": Object {
@@ -3166,6 +3256,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                 },
                                 "selector": Object {
                                   "add-new": "Hinzufügen",
+                                  "base-selector": Object {
+                                    "close-icon-text": "Schließen",
+                                    "loading-text": "Lade...",
+                                    "no-options-text": "Keine Optionen",
+                                    "open-icon-text": "Öffnen",
+                                  },
                                 },
                                 "signature-pad": Object {
                                   "dialog": Object {
@@ -3348,6 +3444,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                 },
                                 "selector": Object {
                                   "add-new": "Add",
+                                  "base-selector": Object {
+                                    "close-icon-text": "Close",
+                                    "loading-text": "Loading...",
+                                    "no-options-text": "No options",
+                                    "open-icon-text": "Open",
+                                  },
                                 },
                                 "signature-pad": Object {
                                   "dialog": Object {
@@ -3530,6 +3632,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                 },
                                 "selector": Object {
                                   "add-new": "Ajouter",
+                                  "base-selector": Object {
+                                    "close-icon-text": "Fermer",
+                                    "loading-text": "Chargement...",
+                                    "no-options-text": "Aucune option",
+                                    "open-icon-text": "Ouvrir",
+                                  },
                                 },
                                 "signature-pad": Object {
                                   "dialog": Object {
@@ -3712,6 +3820,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                 },
                                 "selector": Object {
                                   "add-new": "добавить",
+                                  "base-selector": Object {
+                                    "close-icon-text": "Закрыть",
+                                    "loading-text": "Загрузка...",
+                                    "no-options-text": "Нет вариантов",
+                                    "open-icon-text": "Открыть",
+                                  },
                                 },
                                 "signature-pad": Object {
                                   "dialog": Object {
@@ -3894,6 +4008,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                 },
                                 "selector": Object {
                                   "add-new": "Qo'shish",
+                                  "base-selector": Object {
+                                    "close-icon-text": "Yoping",
+                                    "loading-text": "Yuklanmoqda...",
+                                    "no-options-text": "Variant yo'q",
+                                    "open-icon-text": "Ochiq",
+                                  },
                                 },
                                 "signature-pad": Object {
                                   "dialog": Object {
@@ -4156,6 +4276,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                 },
                                 "selector": Object {
                                   "add-new": "Hinzufügen",
+                                  "base-selector": Object {
+                                    "close-icon-text": "Schließen",
+                                    "loading-text": "Lade...",
+                                    "no-options-text": "Keine Optionen",
+                                    "open-icon-text": "Öffnen",
+                                  },
                                 },
                                 "signature-pad": Object {
                                   "dialog": Object {
@@ -4338,6 +4464,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                 },
                                 "selector": Object {
                                   "add-new": "Add",
+                                  "base-selector": Object {
+                                    "close-icon-text": "Close",
+                                    "loading-text": "Loading...",
+                                    "no-options-text": "No options",
+                                    "open-icon-text": "Open",
+                                  },
                                 },
                                 "signature-pad": Object {
                                   "dialog": Object {
@@ -4520,6 +4652,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                 },
                                 "selector": Object {
                                   "add-new": "Ajouter",
+                                  "base-selector": Object {
+                                    "close-icon-text": "Fermer",
+                                    "loading-text": "Chargement...",
+                                    "no-options-text": "Aucune option",
+                                    "open-icon-text": "Ouvrir",
+                                  },
                                 },
                                 "signature-pad": Object {
                                   "dialog": Object {
@@ -4702,6 +4840,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                 },
                                 "selector": Object {
                                   "add-new": "добавить",
+                                  "base-selector": Object {
+                                    "close-icon-text": "Закрыть",
+                                    "loading-text": "Загрузка...",
+                                    "no-options-text": "Нет вариантов",
+                                    "open-icon-text": "Открыть",
+                                  },
                                 },
                                 "signature-pad": Object {
                                   "dialog": Object {
@@ -4884,6 +5028,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                 },
                                 "selector": Object {
                                   "add-new": "Qo'shish",
+                                  "base-selector": Object {
+                                    "close-icon-text": "Yoping",
+                                    "loading-text": "Yuklanmoqda...",
+                                    "no-options-text": "Variant yo'q",
+                                    "open-icon-text": "Ochiq",
+                                  },
                                 },
                                 "signature-pad": Object {
                                   "dialog": Object {
@@ -5126,6 +5276,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                               },
                               "selector": Object {
                                 "add-new": "Hinzufügen",
+                                "base-selector": Object {
+                                  "close-icon-text": "Schließen",
+                                  "loading-text": "Lade...",
+                                  "no-options-text": "Keine Optionen",
+                                  "open-icon-text": "Öffnen",
+                                },
                               },
                               "signature-pad": Object {
                                 "dialog": Object {
@@ -5308,6 +5464,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                               },
                               "selector": Object {
                                 "add-new": "Add",
+                                "base-selector": Object {
+                                  "close-icon-text": "Close",
+                                  "loading-text": "Loading...",
+                                  "no-options-text": "No options",
+                                  "open-icon-text": "Open",
+                                },
                               },
                               "signature-pad": Object {
                                 "dialog": Object {
@@ -5490,6 +5652,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                               },
                               "selector": Object {
                                 "add-new": "Ajouter",
+                                "base-selector": Object {
+                                  "close-icon-text": "Fermer",
+                                  "loading-text": "Chargement...",
+                                  "no-options-text": "Aucune option",
+                                  "open-icon-text": "Ouvrir",
+                                },
                               },
                               "signature-pad": Object {
                                 "dialog": Object {
@@ -5672,6 +5840,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                               },
                               "selector": Object {
                                 "add-new": "добавить",
+                                "base-selector": Object {
+                                  "close-icon-text": "Закрыть",
+                                  "loading-text": "Загрузка...",
+                                  "no-options-text": "Нет вариантов",
+                                  "open-icon-text": "Открыть",
+                                },
                               },
                               "signature-pad": Object {
                                 "dialog": Object {
@@ -5854,6 +6028,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                               },
                               "selector": Object {
                                 "add-new": "Qo'shish",
+                                "base-selector": Object {
+                                  "close-icon-text": "Yoping",
+                                  "loading-text": "Yuklanmoqda...",
+                                  "no-options-text": "Variant yo'q",
+                                  "open-icon-text": "Ochiq",
+                                },
                               },
                               "signature-pad": Object {
                                 "dialog": Object {
@@ -6060,6 +6240,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                             },
                             "selector": Object {
                               "add-new": "Hinzufügen",
+                              "base-selector": Object {
+                                "close-icon-text": "Schließen",
+                                "loading-text": "Lade...",
+                                "no-options-text": "Keine Optionen",
+                                "open-icon-text": "Öffnen",
+                              },
                             },
                             "signature-pad": Object {
                               "dialog": Object {
@@ -6242,6 +6428,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                             },
                             "selector": Object {
                               "add-new": "Add",
+                              "base-selector": Object {
+                                "close-icon-text": "Close",
+                                "loading-text": "Loading...",
+                                "no-options-text": "No options",
+                                "open-icon-text": "Open",
+                              },
                             },
                             "signature-pad": Object {
                               "dialog": Object {
@@ -6424,6 +6616,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                             },
                             "selector": Object {
                               "add-new": "Ajouter",
+                              "base-selector": Object {
+                                "close-icon-text": "Fermer",
+                                "loading-text": "Chargement...",
+                                "no-options-text": "Aucune option",
+                                "open-icon-text": "Ouvrir",
+                              },
                             },
                             "signature-pad": Object {
                               "dialog": Object {
@@ -6606,6 +6804,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                             },
                             "selector": Object {
                               "add-new": "добавить",
+                              "base-selector": Object {
+                                "close-icon-text": "Закрыть",
+                                "loading-text": "Загрузка...",
+                                "no-options-text": "Нет вариантов",
+                                "open-icon-text": "Открыть",
+                              },
                             },
                             "signature-pad": Object {
                               "dialog": Object {
@@ -6788,6 +6992,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                             },
                             "selector": Object {
                               "add-new": "Qo'shish",
+                              "base-selector": Object {
+                                "close-icon-text": "Yoping",
+                                "loading-text": "Yuklanmoqda...",
+                                "no-options-text": "Variant yo'q",
+                                "open-icon-text": "Ochiq",
+                              },
                             },
                             "signature-pad": Object {
                               "dialog": Object {
@@ -7021,6 +7231,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                 },
                                 "selector": Object {
                                   "add-new": "Hinzufügen",
+                                  "base-selector": Object {
+                                    "close-icon-text": "Schließen",
+                                    "loading-text": "Lade...",
+                                    "no-options-text": "Keine Optionen",
+                                    "open-icon-text": "Öffnen",
+                                  },
                                 },
                                 "signature-pad": Object {
                                   "dialog": Object {
@@ -7203,6 +7419,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                 },
                                 "selector": Object {
                                   "add-new": "Add",
+                                  "base-selector": Object {
+                                    "close-icon-text": "Close",
+                                    "loading-text": "Loading...",
+                                    "no-options-text": "No options",
+                                    "open-icon-text": "Open",
+                                  },
                                 },
                                 "signature-pad": Object {
                                   "dialog": Object {
@@ -7385,6 +7607,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                 },
                                 "selector": Object {
                                   "add-new": "Ajouter",
+                                  "base-selector": Object {
+                                    "close-icon-text": "Fermer",
+                                    "loading-text": "Chargement...",
+                                    "no-options-text": "Aucune option",
+                                    "open-icon-text": "Ouvrir",
+                                  },
                                 },
                                 "signature-pad": Object {
                                   "dialog": Object {
@@ -7567,6 +7795,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                 },
                                 "selector": Object {
                                   "add-new": "добавить",
+                                  "base-selector": Object {
+                                    "close-icon-text": "Закрыть",
+                                    "loading-text": "Загрузка...",
+                                    "no-options-text": "Нет вариантов",
+                                    "open-icon-text": "Открыть",
+                                  },
                                 },
                                 "signature-pad": Object {
                                   "dialog": Object {
@@ -7749,6 +7983,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                 },
                                 "selector": Object {
                                   "add-new": "Qo'shish",
+                                  "base-selector": Object {
+                                    "close-icon-text": "Yoping",
+                                    "loading-text": "Yuklanmoqda...",
+                                    "no-options-text": "Variant yo'q",
+                                    "open-icon-text": "Ochiq",
+                                  },
                                 },
                                 "signature-pad": Object {
                                   "dialog": Object {
@@ -7991,6 +8231,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                               },
                               "selector": Object {
                                 "add-new": "Hinzufügen",
+                                "base-selector": Object {
+                                  "close-icon-text": "Schließen",
+                                  "loading-text": "Lade...",
+                                  "no-options-text": "Keine Optionen",
+                                  "open-icon-text": "Öffnen",
+                                },
                               },
                               "signature-pad": Object {
                                 "dialog": Object {
@@ -8173,6 +8419,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                               },
                               "selector": Object {
                                 "add-new": "Add",
+                                "base-selector": Object {
+                                  "close-icon-text": "Close",
+                                  "loading-text": "Loading...",
+                                  "no-options-text": "No options",
+                                  "open-icon-text": "Open",
+                                },
                               },
                               "signature-pad": Object {
                                 "dialog": Object {
@@ -8355,6 +8607,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                               },
                               "selector": Object {
                                 "add-new": "Ajouter",
+                                "base-selector": Object {
+                                  "close-icon-text": "Fermer",
+                                  "loading-text": "Chargement...",
+                                  "no-options-text": "Aucune option",
+                                  "open-icon-text": "Ouvrir",
+                                },
                               },
                               "signature-pad": Object {
                                 "dialog": Object {
@@ -8537,6 +8795,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                               },
                               "selector": Object {
                                 "add-new": "добавить",
+                                "base-selector": Object {
+                                  "close-icon-text": "Закрыть",
+                                  "loading-text": "Загрузка...",
+                                  "no-options-text": "Нет вариантов",
+                                  "open-icon-text": "Открыть",
+                                },
                               },
                               "signature-pad": Object {
                                 "dialog": Object {
@@ -8719,6 +8983,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                               },
                               "selector": Object {
                                 "add-new": "Qo'shish",
+                                "base-selector": Object {
+                                  "close-icon-text": "Yoping",
+                                  "loading-text": "Yuklanmoqda...",
+                                  "no-options-text": "Variant yo'q",
+                                  "open-icon-text": "Ochiq",
+                                },
                               },
                               "signature-pad": Object {
                                 "dialog": Object {
@@ -9000,6 +9270,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                               },
                               "selector": Object {
                                 "add-new": "Hinzufügen",
+                                "base-selector": Object {
+                                  "close-icon-text": "Schließen",
+                                  "loading-text": "Lade...",
+                                  "no-options-text": "Keine Optionen",
+                                  "open-icon-text": "Öffnen",
+                                },
                               },
                               "signature-pad": Object {
                                 "dialog": Object {
@@ -9182,6 +9458,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                               },
                               "selector": Object {
                                 "add-new": "Add",
+                                "base-selector": Object {
+                                  "close-icon-text": "Close",
+                                  "loading-text": "Loading...",
+                                  "no-options-text": "No options",
+                                  "open-icon-text": "Open",
+                                },
                               },
                               "signature-pad": Object {
                                 "dialog": Object {
@@ -9364,6 +9646,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                               },
                               "selector": Object {
                                 "add-new": "Ajouter",
+                                "base-selector": Object {
+                                  "close-icon-text": "Fermer",
+                                  "loading-text": "Chargement...",
+                                  "no-options-text": "Aucune option",
+                                  "open-icon-text": "Ouvrir",
+                                },
                               },
                               "signature-pad": Object {
                                 "dialog": Object {
@@ -9546,6 +9834,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                               },
                               "selector": Object {
                                 "add-new": "добавить",
+                                "base-selector": Object {
+                                  "close-icon-text": "Закрыть",
+                                  "loading-text": "Загрузка...",
+                                  "no-options-text": "Нет вариантов",
+                                  "open-icon-text": "Открыть",
+                                },
                               },
                               "signature-pad": Object {
                                 "dialog": Object {
@@ -9728,6 +10022,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                               },
                               "selector": Object {
                                 "add-new": "Qo'shish",
+                                "base-selector": Object {
+                                  "close-icon-text": "Yoping",
+                                  "loading-text": "Yuklanmoqda...",
+                                  "no-options-text": "Variant yo'q",
+                                  "open-icon-text": "Ochiq",
+                                },
                               },
                               "signature-pad": Object {
                                 "dialog": Object {
@@ -9997,6 +10297,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                 },
                                 "selector": Object {
                                   "add-new": "Hinzufügen",
+                                  "base-selector": Object {
+                                    "close-icon-text": "Schließen",
+                                    "loading-text": "Lade...",
+                                    "no-options-text": "Keine Optionen",
+                                    "open-icon-text": "Öffnen",
+                                  },
                                 },
                                 "signature-pad": Object {
                                   "dialog": Object {
@@ -10179,6 +10485,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                 },
                                 "selector": Object {
                                   "add-new": "Add",
+                                  "base-selector": Object {
+                                    "close-icon-text": "Close",
+                                    "loading-text": "Loading...",
+                                    "no-options-text": "No options",
+                                    "open-icon-text": "Open",
+                                  },
                                 },
                                 "signature-pad": Object {
                                   "dialog": Object {
@@ -10361,6 +10673,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                 },
                                 "selector": Object {
                                   "add-new": "Ajouter",
+                                  "base-selector": Object {
+                                    "close-icon-text": "Fermer",
+                                    "loading-text": "Chargement...",
+                                    "no-options-text": "Aucune option",
+                                    "open-icon-text": "Ouvrir",
+                                  },
                                 },
                                 "signature-pad": Object {
                                   "dialog": Object {
@@ -10543,6 +10861,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                 },
                                 "selector": Object {
                                   "add-new": "добавить",
+                                  "base-selector": Object {
+                                    "close-icon-text": "Закрыть",
+                                    "loading-text": "Загрузка...",
+                                    "no-options-text": "Нет вариантов",
+                                    "open-icon-text": "Открыть",
+                                  },
                                 },
                                 "signature-pad": Object {
                                   "dialog": Object {
@@ -10725,6 +11049,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                 },
                                 "selector": Object {
                                   "add-new": "Qo'shish",
+                                  "base-selector": Object {
+                                    "close-icon-text": "Yoping",
+                                    "loading-text": "Yuklanmoqda...",
+                                    "no-options-text": "Variant yo'q",
+                                    "open-icon-text": "Ochiq",
+                                  },
                                 },
                                 "signature-pad": Object {
                                   "dialog": Object {
@@ -10962,6 +11292,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                               },
                               "selector": Object {
                                 "add-new": "Hinzufügen",
+                                "base-selector": Object {
+                                  "close-icon-text": "Schließen",
+                                  "loading-text": "Lade...",
+                                  "no-options-text": "Keine Optionen",
+                                  "open-icon-text": "Öffnen",
+                                },
                               },
                               "signature-pad": Object {
                                 "dialog": Object {
@@ -11144,6 +11480,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                               },
                               "selector": Object {
                                 "add-new": "Add",
+                                "base-selector": Object {
+                                  "close-icon-text": "Close",
+                                  "loading-text": "Loading...",
+                                  "no-options-text": "No options",
+                                  "open-icon-text": "Open",
+                                },
                               },
                               "signature-pad": Object {
                                 "dialog": Object {
@@ -11326,6 +11668,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                               },
                               "selector": Object {
                                 "add-new": "Ajouter",
+                                "base-selector": Object {
+                                  "close-icon-text": "Fermer",
+                                  "loading-text": "Chargement...",
+                                  "no-options-text": "Aucune option",
+                                  "open-icon-text": "Ouvrir",
+                                },
                               },
                               "signature-pad": Object {
                                 "dialog": Object {
@@ -11508,6 +11856,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                               },
                               "selector": Object {
                                 "add-new": "добавить",
+                                "base-selector": Object {
+                                  "close-icon-text": "Закрыть",
+                                  "loading-text": "Загрузка...",
+                                  "no-options-text": "Нет вариантов",
+                                  "open-icon-text": "Открыть",
+                                },
                               },
                               "signature-pad": Object {
                                 "dialog": Object {
@@ -11690,6 +12044,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                               },
                               "selector": Object {
                                 "add-new": "Qo'shish",
+                                "base-selector": Object {
+                                  "close-icon-text": "Yoping",
+                                  "loading-text": "Yuklanmoqda...",
+                                  "no-options-text": "Variant yo'q",
+                                  "open-icon-text": "Ochiq",
+                                },
                               },
                               "signature-pad": Object {
                                 "dialog": Object {
@@ -11951,6 +12311,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                               },
                               "selector": Object {
                                 "add-new": "Hinzufügen",
+                                "base-selector": Object {
+                                  "close-icon-text": "Schließen",
+                                  "loading-text": "Lade...",
+                                  "no-options-text": "Keine Optionen",
+                                  "open-icon-text": "Öffnen",
+                                },
                               },
                               "signature-pad": Object {
                                 "dialog": Object {
@@ -12133,6 +12499,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                               },
                               "selector": Object {
                                 "add-new": "Add",
+                                "base-selector": Object {
+                                  "close-icon-text": "Close",
+                                  "loading-text": "Loading...",
+                                  "no-options-text": "No options",
+                                  "open-icon-text": "Open",
+                                },
                               },
                               "signature-pad": Object {
                                 "dialog": Object {
@@ -12315,6 +12687,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                               },
                               "selector": Object {
                                 "add-new": "Ajouter",
+                                "base-selector": Object {
+                                  "close-icon-text": "Fermer",
+                                  "loading-text": "Chargement...",
+                                  "no-options-text": "Aucune option",
+                                  "open-icon-text": "Ouvrir",
+                                },
                               },
                               "signature-pad": Object {
                                 "dialog": Object {
@@ -12497,6 +12875,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                               },
                               "selector": Object {
                                 "add-new": "добавить",
+                                "base-selector": Object {
+                                  "close-icon-text": "Закрыть",
+                                  "loading-text": "Загрузка...",
+                                  "no-options-text": "Нет вариантов",
+                                  "open-icon-text": "Открыть",
+                                },
                               },
                               "signature-pad": Object {
                                 "dialog": Object {
@@ -12679,6 +13063,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                               },
                               "selector": Object {
                                 "add-new": "Qo'shish",
+                                "base-selector": Object {
+                                  "close-icon-text": "Yoping",
+                                  "loading-text": "Yuklanmoqda...",
+                                  "no-options-text": "Variant yo'q",
+                                  "open-icon-text": "Ochiq",
+                                },
                               },
                               "signature-pad": Object {
                                 "dialog": Object {
@@ -12928,6 +13318,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                   },
                                   "selector": Object {
                                     "add-new": "Hinzufügen",
+                                    "base-selector": Object {
+                                      "close-icon-text": "Schließen",
+                                      "loading-text": "Lade...",
+                                      "no-options-text": "Keine Optionen",
+                                      "open-icon-text": "Öffnen",
+                                    },
                                   },
                                   "signature-pad": Object {
                                     "dialog": Object {
@@ -13110,6 +13506,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                   },
                                   "selector": Object {
                                     "add-new": "Add",
+                                    "base-selector": Object {
+                                      "close-icon-text": "Close",
+                                      "loading-text": "Loading...",
+                                      "no-options-text": "No options",
+                                      "open-icon-text": "Open",
+                                    },
                                   },
                                   "signature-pad": Object {
                                     "dialog": Object {
@@ -13292,6 +13694,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                   },
                                   "selector": Object {
                                     "add-new": "Ajouter",
+                                    "base-selector": Object {
+                                      "close-icon-text": "Fermer",
+                                      "loading-text": "Chargement...",
+                                      "no-options-text": "Aucune option",
+                                      "open-icon-text": "Ouvrir",
+                                    },
                                   },
                                   "signature-pad": Object {
                                     "dialog": Object {
@@ -13474,6 +13882,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                   },
                                   "selector": Object {
                                     "add-new": "добавить",
+                                    "base-selector": Object {
+                                      "close-icon-text": "Закрыть",
+                                      "loading-text": "Загрузка...",
+                                      "no-options-text": "Нет вариантов",
+                                      "open-icon-text": "Открыть",
+                                    },
                                   },
                                   "signature-pad": Object {
                                     "dialog": Object {
@@ -13656,6 +14070,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                   },
                                   "selector": Object {
                                     "add-new": "Qo'shish",
+                                    "base-selector": Object {
+                                      "close-icon-text": "Yoping",
+                                      "loading-text": "Yuklanmoqda...",
+                                      "no-options-text": "Variant yo'q",
+                                      "open-icon-text": "Ochiq",
+                                    },
                                   },
                                   "signature-pad": Object {
                                     "dialog": Object {
@@ -13893,6 +14313,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                 },
                                 "selector": Object {
                                   "add-new": "Hinzufügen",
+                                  "base-selector": Object {
+                                    "close-icon-text": "Schließen",
+                                    "loading-text": "Lade...",
+                                    "no-options-text": "Keine Optionen",
+                                    "open-icon-text": "Öffnen",
+                                  },
                                 },
                                 "signature-pad": Object {
                                   "dialog": Object {
@@ -14075,6 +14501,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                 },
                                 "selector": Object {
                                   "add-new": "Add",
+                                  "base-selector": Object {
+                                    "close-icon-text": "Close",
+                                    "loading-text": "Loading...",
+                                    "no-options-text": "No options",
+                                    "open-icon-text": "Open",
+                                  },
                                 },
                                 "signature-pad": Object {
                                   "dialog": Object {
@@ -14257,6 +14689,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                 },
                                 "selector": Object {
                                   "add-new": "Ajouter",
+                                  "base-selector": Object {
+                                    "close-icon-text": "Fermer",
+                                    "loading-text": "Chargement...",
+                                    "no-options-text": "Aucune option",
+                                    "open-icon-text": "Ouvrir",
+                                  },
                                 },
                                 "signature-pad": Object {
                                   "dialog": Object {
@@ -14439,6 +14877,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                 },
                                 "selector": Object {
                                   "add-new": "добавить",
+                                  "base-selector": Object {
+                                    "close-icon-text": "Закрыть",
+                                    "loading-text": "Загрузка...",
+                                    "no-options-text": "Нет вариантов",
+                                    "open-icon-text": "Открыть",
+                                  },
                                 },
                                 "signature-pad": Object {
                                   "dialog": Object {
@@ -14621,6 +15065,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                 },
                                 "selector": Object {
                                   "add-new": "Qo'shish",
+                                  "base-selector": Object {
+                                    "close-icon-text": "Yoping",
+                                    "loading-text": "Yuklanmoqda...",
+                                    "no-options-text": "Variant yo'q",
+                                    "open-icon-text": "Ochiq",
+                                  },
                                 },
                                 "signature-pad": Object {
                                   "dialog": Object {
@@ -14883,6 +15333,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                 },
                                 "selector": Object {
                                   "add-new": "Hinzufügen",
+                                  "base-selector": Object {
+                                    "close-icon-text": "Schließen",
+                                    "loading-text": "Lade...",
+                                    "no-options-text": "Keine Optionen",
+                                    "open-icon-text": "Öffnen",
+                                  },
                                 },
                                 "signature-pad": Object {
                                   "dialog": Object {
@@ -15065,6 +15521,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                 },
                                 "selector": Object {
                                   "add-new": "Add",
+                                  "base-selector": Object {
+                                    "close-icon-text": "Close",
+                                    "loading-text": "Loading...",
+                                    "no-options-text": "No options",
+                                    "open-icon-text": "Open",
+                                  },
                                 },
                                 "signature-pad": Object {
                                   "dialog": Object {
@@ -15247,6 +15709,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                 },
                                 "selector": Object {
                                   "add-new": "Ajouter",
+                                  "base-selector": Object {
+                                    "close-icon-text": "Fermer",
+                                    "loading-text": "Chargement...",
+                                    "no-options-text": "Aucune option",
+                                    "open-icon-text": "Ouvrir",
+                                  },
                                 },
                                 "signature-pad": Object {
                                   "dialog": Object {
@@ -15429,6 +15897,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                 },
                                 "selector": Object {
                                   "add-new": "добавить",
+                                  "base-selector": Object {
+                                    "close-icon-text": "Закрыть",
+                                    "loading-text": "Загрузка...",
+                                    "no-options-text": "Нет вариантов",
+                                    "open-icon-text": "Открыть",
+                                  },
                                 },
                                 "signature-pad": Object {
                                   "dialog": Object {
@@ -15611,6 +16085,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                 },
                                 "selector": Object {
                                   "add-new": "Qo'shish",
+                                  "base-selector": Object {
+                                    "close-icon-text": "Yoping",
+                                    "loading-text": "Yuklanmoqda...",
+                                    "no-options-text": "Variant yo'q",
+                                    "open-icon-text": "Ochiq",
+                                  },
                                 },
                                 "signature-pad": Object {
                                   "dialog": Object {
@@ -16776,6 +17256,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                           },
                           "selector": Object {
                             "add-new": "Hinzufügen",
+                            "base-selector": Object {
+                              "close-icon-text": "Schließen",
+                              "loading-text": "Lade...",
+                              "no-options-text": "Keine Optionen",
+                              "open-icon-text": "Öffnen",
+                            },
                           },
                           "signature-pad": Object {
                             "dialog": Object {
@@ -16958,6 +17444,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                           },
                           "selector": Object {
                             "add-new": "Add",
+                            "base-selector": Object {
+                              "close-icon-text": "Close",
+                              "loading-text": "Loading...",
+                              "no-options-text": "No options",
+                              "open-icon-text": "Open",
+                            },
                           },
                           "signature-pad": Object {
                             "dialog": Object {
@@ -17140,6 +17632,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                           },
                           "selector": Object {
                             "add-new": "Ajouter",
+                            "base-selector": Object {
+                              "close-icon-text": "Fermer",
+                              "loading-text": "Chargement...",
+                              "no-options-text": "Aucune option",
+                              "open-icon-text": "Ouvrir",
+                            },
                           },
                           "signature-pad": Object {
                             "dialog": Object {
@@ -17322,6 +17820,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                           },
                           "selector": Object {
                             "add-new": "добавить",
+                            "base-selector": Object {
+                              "close-icon-text": "Закрыть",
+                              "loading-text": "Загрузка...",
+                              "no-options-text": "Нет вариантов",
+                              "open-icon-text": "Открыть",
+                            },
                           },
                           "signature-pad": Object {
                             "dialog": Object {
@@ -17504,6 +18008,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                           },
                           "selector": Object {
                             "add-new": "Qo'shish",
+                            "base-selector": Object {
+                              "close-icon-text": "Yoping",
+                              "loading-text": "Yuklanmoqda...",
+                              "no-options-text": "Variant yo'q",
+                              "open-icon-text": "Ochiq",
+                            },
                           },
                           "signature-pad": Object {
                             "dialog": Object {
@@ -17692,6 +18202,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                         },
                         "selector": Object {
                           "add-new": "Hinzufügen",
+                          "base-selector": Object {
+                            "close-icon-text": "Schließen",
+                            "loading-text": "Lade...",
+                            "no-options-text": "Keine Optionen",
+                            "open-icon-text": "Öffnen",
+                          },
                         },
                         "signature-pad": Object {
                           "dialog": Object {
@@ -17874,6 +18390,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                         },
                         "selector": Object {
                           "add-new": "Add",
+                          "base-selector": Object {
+                            "close-icon-text": "Close",
+                            "loading-text": "Loading...",
+                            "no-options-text": "No options",
+                            "open-icon-text": "Open",
+                          },
                         },
                         "signature-pad": Object {
                           "dialog": Object {
@@ -18056,6 +18578,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                         },
                         "selector": Object {
                           "add-new": "Ajouter",
+                          "base-selector": Object {
+                            "close-icon-text": "Fermer",
+                            "loading-text": "Chargement...",
+                            "no-options-text": "Aucune option",
+                            "open-icon-text": "Ouvrir",
+                          },
                         },
                         "signature-pad": Object {
                           "dialog": Object {
@@ -18238,6 +18766,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                         },
                         "selector": Object {
                           "add-new": "добавить",
+                          "base-selector": Object {
+                            "close-icon-text": "Закрыть",
+                            "loading-text": "Загрузка...",
+                            "no-options-text": "Нет вариантов",
+                            "open-icon-text": "Открыть",
+                          },
                         },
                         "signature-pad": Object {
                           "dialog": Object {
@@ -18420,6 +18954,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                         },
                         "selector": Object {
                           "add-new": "Qo'shish",
+                          "base-selector": Object {
+                            "close-icon-text": "Yoping",
+                            "loading-text": "Yuklanmoqda...",
+                            "no-options-text": "Variant yo'q",
+                            "open-icon-text": "Ochiq",
+                          },
                         },
                         "signature-pad": Object {
                           "dialog": Object {
@@ -18650,6 +19190,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                   },
                                   "selector": Object {
                                     "add-new": "Hinzufügen",
+                                    "base-selector": Object {
+                                      "close-icon-text": "Schließen",
+                                      "loading-text": "Lade...",
+                                      "no-options-text": "Keine Optionen",
+                                      "open-icon-text": "Öffnen",
+                                    },
                                   },
                                   "signature-pad": Object {
                                     "dialog": Object {
@@ -18832,6 +19378,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                   },
                                   "selector": Object {
                                     "add-new": "Add",
+                                    "base-selector": Object {
+                                      "close-icon-text": "Close",
+                                      "loading-text": "Loading...",
+                                      "no-options-text": "No options",
+                                      "open-icon-text": "Open",
+                                    },
                                   },
                                   "signature-pad": Object {
                                     "dialog": Object {
@@ -19014,6 +19566,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                   },
                                   "selector": Object {
                                     "add-new": "Ajouter",
+                                    "base-selector": Object {
+                                      "close-icon-text": "Fermer",
+                                      "loading-text": "Chargement...",
+                                      "no-options-text": "Aucune option",
+                                      "open-icon-text": "Ouvrir",
+                                    },
                                   },
                                   "signature-pad": Object {
                                     "dialog": Object {
@@ -19196,6 +19754,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                   },
                                   "selector": Object {
                                     "add-new": "добавить",
+                                    "base-selector": Object {
+                                      "close-icon-text": "Закрыть",
+                                      "loading-text": "Загрузка...",
+                                      "no-options-text": "Нет вариантов",
+                                      "open-icon-text": "Открыть",
+                                    },
                                   },
                                   "signature-pad": Object {
                                     "dialog": Object {
@@ -19378,6 +19942,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                   },
                                   "selector": Object {
                                     "add-new": "Qo'shish",
+                                    "base-selector": Object {
+                                      "close-icon-text": "Yoping",
+                                      "loading-text": "Yuklanmoqda...",
+                                      "no-options-text": "Variant yo'q",
+                                      "open-icon-text": "Ochiq",
+                                    },
                                   },
                                   "signature-pad": Object {
                                     "dialog": Object {
@@ -19615,6 +20185,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                 },
                                 "selector": Object {
                                   "add-new": "Hinzufügen",
+                                  "base-selector": Object {
+                                    "close-icon-text": "Schließen",
+                                    "loading-text": "Lade...",
+                                    "no-options-text": "Keine Optionen",
+                                    "open-icon-text": "Öffnen",
+                                  },
                                 },
                                 "signature-pad": Object {
                                   "dialog": Object {
@@ -19797,6 +20373,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                 },
                                 "selector": Object {
                                   "add-new": "Add",
+                                  "base-selector": Object {
+                                    "close-icon-text": "Close",
+                                    "loading-text": "Loading...",
+                                    "no-options-text": "No options",
+                                    "open-icon-text": "Open",
+                                  },
                                 },
                                 "signature-pad": Object {
                                   "dialog": Object {
@@ -19979,6 +20561,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                 },
                                 "selector": Object {
                                   "add-new": "Ajouter",
+                                  "base-selector": Object {
+                                    "close-icon-text": "Fermer",
+                                    "loading-text": "Chargement...",
+                                    "no-options-text": "Aucune option",
+                                    "open-icon-text": "Ouvrir",
+                                  },
                                 },
                                 "signature-pad": Object {
                                   "dialog": Object {
@@ -20161,6 +20749,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                 },
                                 "selector": Object {
                                   "add-new": "добавить",
+                                  "base-selector": Object {
+                                    "close-icon-text": "Закрыть",
+                                    "loading-text": "Загрузка...",
+                                    "no-options-text": "Нет вариантов",
+                                    "open-icon-text": "Открыть",
+                                  },
                                 },
                                 "signature-pad": Object {
                                   "dialog": Object {
@@ -20343,6 +20937,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                 },
                                 "selector": Object {
                                   "add-new": "Qo'shish",
+                                  "base-selector": Object {
+                                    "close-icon-text": "Yoping",
+                                    "loading-text": "Yuklanmoqda...",
+                                    "no-options-text": "Variant yo'q",
+                                    "open-icon-text": "Ochiq",
+                                  },
                                 },
                                 "signature-pad": Object {
                                   "dialog": Object {
@@ -20605,6 +21205,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                 },
                                 "selector": Object {
                                   "add-new": "Hinzufügen",
+                                  "base-selector": Object {
+                                    "close-icon-text": "Schließen",
+                                    "loading-text": "Lade...",
+                                    "no-options-text": "Keine Optionen",
+                                    "open-icon-text": "Öffnen",
+                                  },
                                 },
                                 "signature-pad": Object {
                                   "dialog": Object {
@@ -20787,6 +21393,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                 },
                                 "selector": Object {
                                   "add-new": "Add",
+                                  "base-selector": Object {
+                                    "close-icon-text": "Close",
+                                    "loading-text": "Loading...",
+                                    "no-options-text": "No options",
+                                    "open-icon-text": "Open",
+                                  },
                                 },
                                 "signature-pad": Object {
                                   "dialog": Object {
@@ -20969,6 +21581,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                 },
                                 "selector": Object {
                                   "add-new": "Ajouter",
+                                  "base-selector": Object {
+                                    "close-icon-text": "Fermer",
+                                    "loading-text": "Chargement...",
+                                    "no-options-text": "Aucune option",
+                                    "open-icon-text": "Ouvrir",
+                                  },
                                 },
                                 "signature-pad": Object {
                                   "dialog": Object {
@@ -21151,6 +21769,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                 },
                                 "selector": Object {
                                   "add-new": "добавить",
+                                  "base-selector": Object {
+                                    "close-icon-text": "Закрыть",
+                                    "loading-text": "Загрузка...",
+                                    "no-options-text": "Нет вариантов",
+                                    "open-icon-text": "Открыть",
+                                  },
                                 },
                                 "signature-pad": Object {
                                   "dialog": Object {
@@ -21333,6 +21957,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                 },
                                 "selector": Object {
                                   "add-new": "Qo'shish",
+                                  "base-selector": Object {
+                                    "close-icon-text": "Yoping",
+                                    "loading-text": "Yuklanmoqda...",
+                                    "no-options-text": "Variant yo'q",
+                                    "open-icon-text": "Ochiq",
+                                  },
                                 },
                                 "signature-pad": Object {
                                   "dialog": Object {
@@ -21575,6 +22205,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                               },
                               "selector": Object {
                                 "add-new": "Hinzufügen",
+                                "base-selector": Object {
+                                  "close-icon-text": "Schließen",
+                                  "loading-text": "Lade...",
+                                  "no-options-text": "Keine Optionen",
+                                  "open-icon-text": "Öffnen",
+                                },
                               },
                               "signature-pad": Object {
                                 "dialog": Object {
@@ -21757,6 +22393,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                               },
                               "selector": Object {
                                 "add-new": "Add",
+                                "base-selector": Object {
+                                  "close-icon-text": "Close",
+                                  "loading-text": "Loading...",
+                                  "no-options-text": "No options",
+                                  "open-icon-text": "Open",
+                                },
                               },
                               "signature-pad": Object {
                                 "dialog": Object {
@@ -21939,6 +22581,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                               },
                               "selector": Object {
                                 "add-new": "Ajouter",
+                                "base-selector": Object {
+                                  "close-icon-text": "Fermer",
+                                  "loading-text": "Chargement...",
+                                  "no-options-text": "Aucune option",
+                                  "open-icon-text": "Ouvrir",
+                                },
                               },
                               "signature-pad": Object {
                                 "dialog": Object {
@@ -22121,6 +22769,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                               },
                               "selector": Object {
                                 "add-new": "добавить",
+                                "base-selector": Object {
+                                  "close-icon-text": "Закрыть",
+                                  "loading-text": "Загрузка...",
+                                  "no-options-text": "Нет вариантов",
+                                  "open-icon-text": "Открыть",
+                                },
                               },
                               "signature-pad": Object {
                                 "dialog": Object {
@@ -22303,6 +22957,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                               },
                               "selector": Object {
                                 "add-new": "Qo'shish",
+                                "base-selector": Object {
+                                  "close-icon-text": "Yoping",
+                                  "loading-text": "Yuklanmoqda...",
+                                  "no-options-text": "Variant yo'q",
+                                  "open-icon-text": "Ochiq",
+                                },
                               },
                               "signature-pad": Object {
                                 "dialog": Object {
@@ -22557,6 +23217,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                     },
                                     "selector": Object {
                                       "add-new": "Hinzufügen",
+                                      "base-selector": Object {
+                                        "close-icon-text": "Schließen",
+                                        "loading-text": "Lade...",
+                                        "no-options-text": "Keine Optionen",
+                                        "open-icon-text": "Öffnen",
+                                      },
                                     },
                                     "signature-pad": Object {
                                       "dialog": Object {
@@ -22739,6 +23405,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                     },
                                     "selector": Object {
                                       "add-new": "Add",
+                                      "base-selector": Object {
+                                        "close-icon-text": "Close",
+                                        "loading-text": "Loading...",
+                                        "no-options-text": "No options",
+                                        "open-icon-text": "Open",
+                                      },
                                     },
                                     "signature-pad": Object {
                                       "dialog": Object {
@@ -22921,6 +23593,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                     },
                                     "selector": Object {
                                       "add-new": "Ajouter",
+                                      "base-selector": Object {
+                                        "close-icon-text": "Fermer",
+                                        "loading-text": "Chargement...",
+                                        "no-options-text": "Aucune option",
+                                        "open-icon-text": "Ouvrir",
+                                      },
                                     },
                                     "signature-pad": Object {
                                       "dialog": Object {
@@ -23103,6 +23781,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                     },
                                     "selector": Object {
                                       "add-new": "добавить",
+                                      "base-selector": Object {
+                                        "close-icon-text": "Закрыть",
+                                        "loading-text": "Загрузка...",
+                                        "no-options-text": "Нет вариантов",
+                                        "open-icon-text": "Открыть",
+                                      },
                                     },
                                     "signature-pad": Object {
                                       "dialog": Object {
@@ -23285,6 +23969,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                     },
                                     "selector": Object {
                                       "add-new": "Qo'shish",
+                                      "base-selector": Object {
+                                        "close-icon-text": "Yoping",
+                                        "loading-text": "Yuklanmoqda...",
+                                        "no-options-text": "Variant yo'q",
+                                        "open-icon-text": "Ochiq",
+                                      },
                                     },
                                     "signature-pad": Object {
                                       "dialog": Object {
@@ -23527,6 +24217,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                   },
                                   "selector": Object {
                                     "add-new": "Hinzufügen",
+                                    "base-selector": Object {
+                                      "close-icon-text": "Schließen",
+                                      "loading-text": "Lade...",
+                                      "no-options-text": "Keine Optionen",
+                                      "open-icon-text": "Öffnen",
+                                    },
                                   },
                                   "signature-pad": Object {
                                     "dialog": Object {
@@ -23709,6 +24405,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                   },
                                   "selector": Object {
                                     "add-new": "Add",
+                                    "base-selector": Object {
+                                      "close-icon-text": "Close",
+                                      "loading-text": "Loading...",
+                                      "no-options-text": "No options",
+                                      "open-icon-text": "Open",
+                                    },
                                   },
                                   "signature-pad": Object {
                                     "dialog": Object {
@@ -23891,6 +24593,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                   },
                                   "selector": Object {
                                     "add-new": "Ajouter",
+                                    "base-selector": Object {
+                                      "close-icon-text": "Fermer",
+                                      "loading-text": "Chargement...",
+                                      "no-options-text": "Aucune option",
+                                      "open-icon-text": "Ouvrir",
+                                    },
                                   },
                                   "signature-pad": Object {
                                     "dialog": Object {
@@ -24073,6 +24781,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                   },
                                   "selector": Object {
                                     "add-new": "добавить",
+                                    "base-selector": Object {
+                                      "close-icon-text": "Закрыть",
+                                      "loading-text": "Загрузка...",
+                                      "no-options-text": "Нет вариантов",
+                                      "open-icon-text": "Открыть",
+                                    },
                                   },
                                   "signature-pad": Object {
                                     "dialog": Object {
@@ -24255,6 +24969,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                   },
                                   "selector": Object {
                                     "add-new": "Qo'shish",
+                                    "base-selector": Object {
+                                      "close-icon-text": "Yoping",
+                                      "loading-text": "Yuklanmoqda...",
+                                      "no-options-text": "Variant yo'q",
+                                      "open-icon-text": "Ochiq",
+                                    },
                                   },
                                   "signature-pad": Object {
                                     "dialog": Object {
@@ -24536,6 +25256,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                   },
                                   "selector": Object {
                                     "add-new": "Hinzufügen",
+                                    "base-selector": Object {
+                                      "close-icon-text": "Schließen",
+                                      "loading-text": "Lade...",
+                                      "no-options-text": "Keine Optionen",
+                                      "open-icon-text": "Öffnen",
+                                    },
                                   },
                                   "signature-pad": Object {
                                     "dialog": Object {
@@ -24718,6 +25444,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                   },
                                   "selector": Object {
                                     "add-new": "Add",
+                                    "base-selector": Object {
+                                      "close-icon-text": "Close",
+                                      "loading-text": "Loading...",
+                                      "no-options-text": "No options",
+                                      "open-icon-text": "Open",
+                                    },
                                   },
                                   "signature-pad": Object {
                                     "dialog": Object {
@@ -24900,6 +25632,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                   },
                                   "selector": Object {
                                     "add-new": "Ajouter",
+                                    "base-selector": Object {
+                                      "close-icon-text": "Fermer",
+                                      "loading-text": "Chargement...",
+                                      "no-options-text": "Aucune option",
+                                      "open-icon-text": "Ouvrir",
+                                    },
                                   },
                                   "signature-pad": Object {
                                     "dialog": Object {
@@ -25082,6 +25820,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                   },
                                   "selector": Object {
                                     "add-new": "добавить",
+                                    "base-selector": Object {
+                                      "close-icon-text": "Закрыть",
+                                      "loading-text": "Загрузка...",
+                                      "no-options-text": "Нет вариантов",
+                                      "open-icon-text": "Открыть",
+                                    },
                                   },
                                   "signature-pad": Object {
                                     "dialog": Object {
@@ -25264,6 +26008,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                   },
                                   "selector": Object {
                                     "add-new": "Qo'shish",
+                                    "base-selector": Object {
+                                      "close-icon-text": "Yoping",
+                                      "loading-text": "Yuklanmoqda...",
+                                      "no-options-text": "Variant yo'q",
+                                      "open-icon-text": "Ochiq",
+                                    },
                                   },
                                   "signature-pad": Object {
                                     "dialog": Object {
@@ -25533,6 +26283,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                     },
                                     "selector": Object {
                                       "add-new": "Hinzufügen",
+                                      "base-selector": Object {
+                                        "close-icon-text": "Schließen",
+                                        "loading-text": "Lade...",
+                                        "no-options-text": "Keine Optionen",
+                                        "open-icon-text": "Öffnen",
+                                      },
                                     },
                                     "signature-pad": Object {
                                       "dialog": Object {
@@ -25715,6 +26471,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                     },
                                     "selector": Object {
                                       "add-new": "Add",
+                                      "base-selector": Object {
+                                        "close-icon-text": "Close",
+                                        "loading-text": "Loading...",
+                                        "no-options-text": "No options",
+                                        "open-icon-text": "Open",
+                                      },
                                     },
                                     "signature-pad": Object {
                                       "dialog": Object {
@@ -25897,6 +26659,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                     },
                                     "selector": Object {
                                       "add-new": "Ajouter",
+                                      "base-selector": Object {
+                                        "close-icon-text": "Fermer",
+                                        "loading-text": "Chargement...",
+                                        "no-options-text": "Aucune option",
+                                        "open-icon-text": "Ouvrir",
+                                      },
                                     },
                                     "signature-pad": Object {
                                       "dialog": Object {
@@ -26079,6 +26847,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                     },
                                     "selector": Object {
                                       "add-new": "добавить",
+                                      "base-selector": Object {
+                                        "close-icon-text": "Закрыть",
+                                        "loading-text": "Загрузка...",
+                                        "no-options-text": "Нет вариантов",
+                                        "open-icon-text": "Открыть",
+                                      },
                                     },
                                     "signature-pad": Object {
                                       "dialog": Object {
@@ -26261,6 +27035,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                     },
                                     "selector": Object {
                                       "add-new": "Qo'shish",
+                                      "base-selector": Object {
+                                        "close-icon-text": "Yoping",
+                                        "loading-text": "Yuklanmoqda...",
+                                        "no-options-text": "Variant yo'q",
+                                        "open-icon-text": "Ochiq",
+                                      },
                                     },
                                     "signature-pad": Object {
                                       "dialog": Object {
@@ -26498,6 +27278,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                   },
                                   "selector": Object {
                                     "add-new": "Hinzufügen",
+                                    "base-selector": Object {
+                                      "close-icon-text": "Schließen",
+                                      "loading-text": "Lade...",
+                                      "no-options-text": "Keine Optionen",
+                                      "open-icon-text": "Öffnen",
+                                    },
                                   },
                                   "signature-pad": Object {
                                     "dialog": Object {
@@ -26680,6 +27466,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                   },
                                   "selector": Object {
                                     "add-new": "Add",
+                                    "base-selector": Object {
+                                      "close-icon-text": "Close",
+                                      "loading-text": "Loading...",
+                                      "no-options-text": "No options",
+                                      "open-icon-text": "Open",
+                                    },
                                   },
                                   "signature-pad": Object {
                                     "dialog": Object {
@@ -26862,6 +27654,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                   },
                                   "selector": Object {
                                     "add-new": "Ajouter",
+                                    "base-selector": Object {
+                                      "close-icon-text": "Fermer",
+                                      "loading-text": "Chargement...",
+                                      "no-options-text": "Aucune option",
+                                      "open-icon-text": "Ouvrir",
+                                    },
                                   },
                                   "signature-pad": Object {
                                     "dialog": Object {
@@ -27044,6 +27842,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                   },
                                   "selector": Object {
                                     "add-new": "добавить",
+                                    "base-selector": Object {
+                                      "close-icon-text": "Закрыть",
+                                      "loading-text": "Загрузка...",
+                                      "no-options-text": "Нет вариантов",
+                                      "open-icon-text": "Открыть",
+                                    },
                                   },
                                   "signature-pad": Object {
                                     "dialog": Object {
@@ -27226,6 +28030,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                   },
                                   "selector": Object {
                                     "add-new": "Qo'shish",
+                                    "base-selector": Object {
+                                      "close-icon-text": "Yoping",
+                                      "loading-text": "Yuklanmoqda...",
+                                      "no-options-text": "Variant yo'q",
+                                      "open-icon-text": "Ochiq",
+                                    },
                                   },
                                   "signature-pad": Object {
                                     "dialog": Object {
@@ -27487,6 +28297,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                   },
                                   "selector": Object {
                                     "add-new": "Hinzufügen",
+                                    "base-selector": Object {
+                                      "close-icon-text": "Schließen",
+                                      "loading-text": "Lade...",
+                                      "no-options-text": "Keine Optionen",
+                                      "open-icon-text": "Öffnen",
+                                    },
                                   },
                                   "signature-pad": Object {
                                     "dialog": Object {
@@ -27669,6 +28485,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                   },
                                   "selector": Object {
                                     "add-new": "Add",
+                                    "base-selector": Object {
+                                      "close-icon-text": "Close",
+                                      "loading-text": "Loading...",
+                                      "no-options-text": "No options",
+                                      "open-icon-text": "Open",
+                                    },
                                   },
                                   "signature-pad": Object {
                                     "dialog": Object {
@@ -27851,6 +28673,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                   },
                                   "selector": Object {
                                     "add-new": "Ajouter",
+                                    "base-selector": Object {
+                                      "close-icon-text": "Fermer",
+                                      "loading-text": "Chargement...",
+                                      "no-options-text": "Aucune option",
+                                      "open-icon-text": "Ouvrir",
+                                    },
                                   },
                                   "signature-pad": Object {
                                     "dialog": Object {
@@ -28033,6 +28861,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                   },
                                   "selector": Object {
                                     "add-new": "добавить",
+                                    "base-selector": Object {
+                                      "close-icon-text": "Закрыть",
+                                      "loading-text": "Загрузка...",
+                                      "no-options-text": "Нет вариантов",
+                                      "open-icon-text": "Открыть",
+                                    },
                                   },
                                   "signature-pad": Object {
                                     "dialog": Object {
@@ -28215,6 +29049,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                   },
                                   "selector": Object {
                                     "add-new": "Qo'shish",
+                                    "base-selector": Object {
+                                      "close-icon-text": "Yoping",
+                                      "loading-text": "Yuklanmoqda...",
+                                      "no-options-text": "Variant yo'q",
+                                      "open-icon-text": "Ochiq",
+                                    },
                                   },
                                   "signature-pad": Object {
                                     "dialog": Object {
@@ -28464,6 +29304,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                       },
                                       "selector": Object {
                                         "add-new": "Hinzufügen",
+                                        "base-selector": Object {
+                                          "close-icon-text": "Schließen",
+                                          "loading-text": "Lade...",
+                                          "no-options-text": "Keine Optionen",
+                                          "open-icon-text": "Öffnen",
+                                        },
                                       },
                                       "signature-pad": Object {
                                         "dialog": Object {
@@ -28646,6 +29492,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                       },
                                       "selector": Object {
                                         "add-new": "Add",
+                                        "base-selector": Object {
+                                          "close-icon-text": "Close",
+                                          "loading-text": "Loading...",
+                                          "no-options-text": "No options",
+                                          "open-icon-text": "Open",
+                                        },
                                       },
                                       "signature-pad": Object {
                                         "dialog": Object {
@@ -28828,6 +29680,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                       },
                                       "selector": Object {
                                         "add-new": "Ajouter",
+                                        "base-selector": Object {
+                                          "close-icon-text": "Fermer",
+                                          "loading-text": "Chargement...",
+                                          "no-options-text": "Aucune option",
+                                          "open-icon-text": "Ouvrir",
+                                        },
                                       },
                                       "signature-pad": Object {
                                         "dialog": Object {
@@ -29010,6 +29868,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                       },
                                       "selector": Object {
                                         "add-new": "добавить",
+                                        "base-selector": Object {
+                                          "close-icon-text": "Закрыть",
+                                          "loading-text": "Загрузка...",
+                                          "no-options-text": "Нет вариантов",
+                                          "open-icon-text": "Открыть",
+                                        },
                                       },
                                       "signature-pad": Object {
                                         "dialog": Object {
@@ -29192,6 +30056,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                       },
                                       "selector": Object {
                                         "add-new": "Qo'shish",
+                                        "base-selector": Object {
+                                          "close-icon-text": "Yoping",
+                                          "loading-text": "Yuklanmoqda...",
+                                          "no-options-text": "Variant yo'q",
+                                          "open-icon-text": "Ochiq",
+                                        },
                                       },
                                       "signature-pad": Object {
                                         "dialog": Object {
@@ -29429,6 +30299,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                     },
                                     "selector": Object {
                                       "add-new": "Hinzufügen",
+                                      "base-selector": Object {
+                                        "close-icon-text": "Schließen",
+                                        "loading-text": "Lade...",
+                                        "no-options-text": "Keine Optionen",
+                                        "open-icon-text": "Öffnen",
+                                      },
                                     },
                                     "signature-pad": Object {
                                       "dialog": Object {
@@ -29611,6 +30487,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                     },
                                     "selector": Object {
                                       "add-new": "Add",
+                                      "base-selector": Object {
+                                        "close-icon-text": "Close",
+                                        "loading-text": "Loading...",
+                                        "no-options-text": "No options",
+                                        "open-icon-text": "Open",
+                                      },
                                     },
                                     "signature-pad": Object {
                                       "dialog": Object {
@@ -29793,6 +30675,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                     },
                                     "selector": Object {
                                       "add-new": "Ajouter",
+                                      "base-selector": Object {
+                                        "close-icon-text": "Fermer",
+                                        "loading-text": "Chargement...",
+                                        "no-options-text": "Aucune option",
+                                        "open-icon-text": "Ouvrir",
+                                      },
                                     },
                                     "signature-pad": Object {
                                       "dialog": Object {
@@ -29975,6 +30863,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                     },
                                     "selector": Object {
                                       "add-new": "добавить",
+                                      "base-selector": Object {
+                                        "close-icon-text": "Закрыть",
+                                        "loading-text": "Загрузка...",
+                                        "no-options-text": "Нет вариантов",
+                                        "open-icon-text": "Открыть",
+                                      },
                                     },
                                     "signature-pad": Object {
                                       "dialog": Object {
@@ -30157,6 +31051,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                     },
                                     "selector": Object {
                                       "add-new": "Qo'shish",
+                                      "base-selector": Object {
+                                        "close-icon-text": "Yoping",
+                                        "loading-text": "Yuklanmoqda...",
+                                        "no-options-text": "Variant yo'q",
+                                        "open-icon-text": "Ochiq",
+                                      },
                                     },
                                     "signature-pad": Object {
                                       "dialog": Object {
@@ -30419,6 +31319,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                     },
                                     "selector": Object {
                                       "add-new": "Hinzufügen",
+                                      "base-selector": Object {
+                                        "close-icon-text": "Schließen",
+                                        "loading-text": "Lade...",
+                                        "no-options-text": "Keine Optionen",
+                                        "open-icon-text": "Öffnen",
+                                      },
                                     },
                                     "signature-pad": Object {
                                       "dialog": Object {
@@ -30601,6 +31507,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                     },
                                     "selector": Object {
                                       "add-new": "Add",
+                                      "base-selector": Object {
+                                        "close-icon-text": "Close",
+                                        "loading-text": "Loading...",
+                                        "no-options-text": "No options",
+                                        "open-icon-text": "Open",
+                                      },
                                     },
                                     "signature-pad": Object {
                                       "dialog": Object {
@@ -30783,6 +31695,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                     },
                                     "selector": Object {
                                       "add-new": "Ajouter",
+                                      "base-selector": Object {
+                                        "close-icon-text": "Fermer",
+                                        "loading-text": "Chargement...",
+                                        "no-options-text": "Aucune option",
+                                        "open-icon-text": "Ouvrir",
+                                      },
                                     },
                                     "signature-pad": Object {
                                       "dialog": Object {
@@ -30965,6 +31883,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                     },
                                     "selector": Object {
                                       "add-new": "добавить",
+                                      "base-selector": Object {
+                                        "close-icon-text": "Закрыть",
+                                        "loading-text": "Загрузка...",
+                                        "no-options-text": "Нет вариантов",
+                                        "open-icon-text": "Открыть",
+                                      },
                                     },
                                     "signature-pad": Object {
                                       "dialog": Object {
@@ -31147,6 +32071,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                     },
                                     "selector": Object {
                                       "add-new": "Qo'shish",
+                                      "base-selector": Object {
+                                        "close-icon-text": "Yoping",
+                                        "loading-text": "Yuklanmoqda...",
+                                        "no-options-text": "Variant yo'q",
+                                        "open-icon-text": "Ochiq",
+                                      },
                                     },
                                     "signature-pad": Object {
                                       "dialog": Object {
@@ -32312,6 +33242,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                               },
                               "selector": Object {
                                 "add-new": "Hinzufügen",
+                                "base-selector": Object {
+                                  "close-icon-text": "Schließen",
+                                  "loading-text": "Lade...",
+                                  "no-options-text": "Keine Optionen",
+                                  "open-icon-text": "Öffnen",
+                                },
                               },
                               "signature-pad": Object {
                                 "dialog": Object {
@@ -32494,6 +33430,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                               },
                               "selector": Object {
                                 "add-new": "Add",
+                                "base-selector": Object {
+                                  "close-icon-text": "Close",
+                                  "loading-text": "Loading...",
+                                  "no-options-text": "No options",
+                                  "open-icon-text": "Open",
+                                },
                               },
                               "signature-pad": Object {
                                 "dialog": Object {
@@ -32676,6 +33618,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                               },
                               "selector": Object {
                                 "add-new": "Ajouter",
+                                "base-selector": Object {
+                                  "close-icon-text": "Fermer",
+                                  "loading-text": "Chargement...",
+                                  "no-options-text": "Aucune option",
+                                  "open-icon-text": "Ouvrir",
+                                },
                               },
                               "signature-pad": Object {
                                 "dialog": Object {
@@ -32858,6 +33806,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                               },
                               "selector": Object {
                                 "add-new": "добавить",
+                                "base-selector": Object {
+                                  "close-icon-text": "Закрыть",
+                                  "loading-text": "Загрузка...",
+                                  "no-options-text": "Нет вариантов",
+                                  "open-icon-text": "Открыть",
+                                },
                               },
                               "signature-pad": Object {
                                 "dialog": Object {
@@ -33040,6 +33994,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                               },
                               "selector": Object {
                                 "add-new": "Qo'shish",
+                                "base-selector": Object {
+                                  "close-icon-text": "Yoping",
+                                  "loading-text": "Yuklanmoqda...",
+                                  "no-options-text": "Variant yo'q",
+                                  "open-icon-text": "Ochiq",
+                                },
                               },
                               "signature-pad": Object {
                                 "dialog": Object {
@@ -33229,6 +34189,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                             },
                             "selector": Object {
                               "add-new": "Hinzufügen",
+                              "base-selector": Object {
+                                "close-icon-text": "Schließen",
+                                "loading-text": "Lade...",
+                                "no-options-text": "Keine Optionen",
+                                "open-icon-text": "Öffnen",
+                              },
                             },
                             "signature-pad": Object {
                               "dialog": Object {
@@ -33411,6 +34377,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                             },
                             "selector": Object {
                               "add-new": "Add",
+                              "base-selector": Object {
+                                "close-icon-text": "Close",
+                                "loading-text": "Loading...",
+                                "no-options-text": "No options",
+                                "open-icon-text": "Open",
+                              },
                             },
                             "signature-pad": Object {
                               "dialog": Object {
@@ -33593,6 +34565,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                             },
                             "selector": Object {
                               "add-new": "Ajouter",
+                              "base-selector": Object {
+                                "close-icon-text": "Fermer",
+                                "loading-text": "Chargement...",
+                                "no-options-text": "Aucune option",
+                                "open-icon-text": "Ouvrir",
+                              },
                             },
                             "signature-pad": Object {
                               "dialog": Object {
@@ -33775,6 +34753,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                             },
                             "selector": Object {
                               "add-new": "добавить",
+                              "base-selector": Object {
+                                "close-icon-text": "Закрыть",
+                                "loading-text": "Загрузка...",
+                                "no-options-text": "Нет вариантов",
+                                "open-icon-text": "Открыть",
+                              },
                             },
                             "signature-pad": Object {
                               "dialog": Object {
@@ -33957,6 +34941,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                             },
                             "selector": Object {
                               "add-new": "Qo'shish",
+                              "base-selector": Object {
+                                "close-icon-text": "Yoping",
+                                "loading-text": "Yuklanmoqda...",
+                                "no-options-text": "Variant yo'q",
+                                "open-icon-text": "Ochiq",
+                              },
                             },
                             "signature-pad": Object {
                               "dialog": Object {
@@ -34190,6 +35180,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                 },
                                 "selector": Object {
                                   "add-new": "Hinzufügen",
+                                  "base-selector": Object {
+                                    "close-icon-text": "Schließen",
+                                    "loading-text": "Lade...",
+                                    "no-options-text": "Keine Optionen",
+                                    "open-icon-text": "Öffnen",
+                                  },
                                 },
                                 "signature-pad": Object {
                                   "dialog": Object {
@@ -34372,6 +35368,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                 },
                                 "selector": Object {
                                   "add-new": "Add",
+                                  "base-selector": Object {
+                                    "close-icon-text": "Close",
+                                    "loading-text": "Loading...",
+                                    "no-options-text": "No options",
+                                    "open-icon-text": "Open",
+                                  },
                                 },
                                 "signature-pad": Object {
                                   "dialog": Object {
@@ -34554,6 +35556,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                 },
                                 "selector": Object {
                                   "add-new": "Ajouter",
+                                  "base-selector": Object {
+                                    "close-icon-text": "Fermer",
+                                    "loading-text": "Chargement...",
+                                    "no-options-text": "Aucune option",
+                                    "open-icon-text": "Ouvrir",
+                                  },
                                 },
                                 "signature-pad": Object {
                                   "dialog": Object {
@@ -34736,6 +35744,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                 },
                                 "selector": Object {
                                   "add-new": "добавить",
+                                  "base-selector": Object {
+                                    "close-icon-text": "Закрыть",
+                                    "loading-text": "Загрузка...",
+                                    "no-options-text": "Нет вариантов",
+                                    "open-icon-text": "Открыть",
+                                  },
                                 },
                                 "signature-pad": Object {
                                   "dialog": Object {
@@ -34918,6 +35932,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                 },
                                 "selector": Object {
                                   "add-new": "Qo'shish",
+                                  "base-selector": Object {
+                                    "close-icon-text": "Yoping",
+                                    "loading-text": "Yuklanmoqda...",
+                                    "no-options-text": "Variant yo'q",
+                                    "open-icon-text": "Ochiq",
+                                  },
                                 },
                                 "signature-pad": Object {
                                   "dialog": Object {
@@ -35160,6 +36180,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                               },
                               "selector": Object {
                                 "add-new": "Hinzufügen",
+                                "base-selector": Object {
+                                  "close-icon-text": "Schließen",
+                                  "loading-text": "Lade...",
+                                  "no-options-text": "Keine Optionen",
+                                  "open-icon-text": "Öffnen",
+                                },
                               },
                               "signature-pad": Object {
                                 "dialog": Object {
@@ -35342,6 +36368,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                               },
                               "selector": Object {
                                 "add-new": "Add",
+                                "base-selector": Object {
+                                  "close-icon-text": "Close",
+                                  "loading-text": "Loading...",
+                                  "no-options-text": "No options",
+                                  "open-icon-text": "Open",
+                                },
                               },
                               "signature-pad": Object {
                                 "dialog": Object {
@@ -35524,6 +36556,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                               },
                               "selector": Object {
                                 "add-new": "Ajouter",
+                                "base-selector": Object {
+                                  "close-icon-text": "Fermer",
+                                  "loading-text": "Chargement...",
+                                  "no-options-text": "Aucune option",
+                                  "open-icon-text": "Ouvrir",
+                                },
                               },
                               "signature-pad": Object {
                                 "dialog": Object {
@@ -35706,6 +36744,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                               },
                               "selector": Object {
                                 "add-new": "добавить",
+                                "base-selector": Object {
+                                  "close-icon-text": "Закрыть",
+                                  "loading-text": "Загрузка...",
+                                  "no-options-text": "Нет вариантов",
+                                  "open-icon-text": "Открыть",
+                                },
                               },
                               "signature-pad": Object {
                                 "dialog": Object {
@@ -35888,6 +36932,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                               },
                               "selector": Object {
                                 "add-new": "Qo'shish",
+                                "base-selector": Object {
+                                  "close-icon-text": "Yoping",
+                                  "loading-text": "Yuklanmoqda...",
+                                  "no-options-text": "Variant yo'q",
+                                  "open-icon-text": "Ochiq",
+                                },
                               },
                               "signature-pad": Object {
                                 "dialog": Object {
@@ -36143,6 +37193,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                 },
                                 "selector": Object {
                                   "add-new": "Hinzufügen",
+                                  "base-selector": Object {
+                                    "close-icon-text": "Schließen",
+                                    "loading-text": "Lade...",
+                                    "no-options-text": "Keine Optionen",
+                                    "open-icon-text": "Öffnen",
+                                  },
                                 },
                                 "signature-pad": Object {
                                   "dialog": Object {
@@ -36325,6 +37381,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                 },
                                 "selector": Object {
                                   "add-new": "Add",
+                                  "base-selector": Object {
+                                    "close-icon-text": "Close",
+                                    "loading-text": "Loading...",
+                                    "no-options-text": "No options",
+                                    "open-icon-text": "Open",
+                                  },
                                 },
                                 "signature-pad": Object {
                                   "dialog": Object {
@@ -36507,6 +37569,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                 },
                                 "selector": Object {
                                   "add-new": "Ajouter",
+                                  "base-selector": Object {
+                                    "close-icon-text": "Fermer",
+                                    "loading-text": "Chargement...",
+                                    "no-options-text": "Aucune option",
+                                    "open-icon-text": "Ouvrir",
+                                  },
                                 },
                                 "signature-pad": Object {
                                   "dialog": Object {
@@ -36689,6 +37757,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                 },
                                 "selector": Object {
                                   "add-new": "добавить",
+                                  "base-selector": Object {
+                                    "close-icon-text": "Закрыть",
+                                    "loading-text": "Загрузка...",
+                                    "no-options-text": "Нет вариантов",
+                                    "open-icon-text": "Открыть",
+                                  },
                                 },
                                 "signature-pad": Object {
                                   "dialog": Object {
@@ -36871,6 +37945,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                 },
                                 "selector": Object {
                                   "add-new": "Qo'shish",
+                                  "base-selector": Object {
+                                    "close-icon-text": "Yoping",
+                                    "loading-text": "Yuklanmoqda...",
+                                    "no-options-text": "Variant yo'q",
+                                    "open-icon-text": "Ochiq",
+                                  },
                                 },
                                 "signature-pad": Object {
                                   "dialog": Object {
@@ -37108,6 +38188,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                               },
                               "selector": Object {
                                 "add-new": "Hinzufügen",
+                                "base-selector": Object {
+                                  "close-icon-text": "Schließen",
+                                  "loading-text": "Lade...",
+                                  "no-options-text": "Keine Optionen",
+                                  "open-icon-text": "Öffnen",
+                                },
                               },
                               "signature-pad": Object {
                                 "dialog": Object {
@@ -37290,6 +38376,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                               },
                               "selector": Object {
                                 "add-new": "Add",
+                                "base-selector": Object {
+                                  "close-icon-text": "Close",
+                                  "loading-text": "Loading...",
+                                  "no-options-text": "No options",
+                                  "open-icon-text": "Open",
+                                },
                               },
                               "signature-pad": Object {
                                 "dialog": Object {
@@ -37472,6 +38564,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                               },
                               "selector": Object {
                                 "add-new": "Ajouter",
+                                "base-selector": Object {
+                                  "close-icon-text": "Fermer",
+                                  "loading-text": "Chargement...",
+                                  "no-options-text": "Aucune option",
+                                  "open-icon-text": "Ouvrir",
+                                },
                               },
                               "signature-pad": Object {
                                 "dialog": Object {
@@ -37654,6 +38752,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                               },
                               "selector": Object {
                                 "add-new": "добавить",
+                                "base-selector": Object {
+                                  "close-icon-text": "Закрыть",
+                                  "loading-text": "Загрузка...",
+                                  "no-options-text": "Нет вариантов",
+                                  "open-icon-text": "Открыть",
+                                },
                               },
                               "signature-pad": Object {
                                 "dialog": Object {
@@ -37836,6 +38940,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                               },
                               "selector": Object {
                                 "add-new": "Qo'shish",
+                                "base-selector": Object {
+                                  "close-icon-text": "Yoping",
+                                  "loading-text": "Yuklanmoqda...",
+                                  "no-options-text": "Variant yo'q",
+                                  "open-icon-text": "Ochiq",
+                                },
                               },
                               "signature-pad": Object {
                                 "dialog": Object {
@@ -38098,6 +39208,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                               },
                               "selector": Object {
                                 "add-new": "Hinzufügen",
+                                "base-selector": Object {
+                                  "close-icon-text": "Schließen",
+                                  "loading-text": "Lade...",
+                                  "no-options-text": "Keine Optionen",
+                                  "open-icon-text": "Öffnen",
+                                },
                               },
                               "signature-pad": Object {
                                 "dialog": Object {
@@ -38280,6 +39396,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                               },
                               "selector": Object {
                                 "add-new": "Add",
+                                "base-selector": Object {
+                                  "close-icon-text": "Close",
+                                  "loading-text": "Loading...",
+                                  "no-options-text": "No options",
+                                  "open-icon-text": "Open",
+                                },
                               },
                               "signature-pad": Object {
                                 "dialog": Object {
@@ -38462,6 +39584,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                               },
                               "selector": Object {
                                 "add-new": "Ajouter",
+                                "base-selector": Object {
+                                  "close-icon-text": "Fermer",
+                                  "loading-text": "Chargement...",
+                                  "no-options-text": "Aucune option",
+                                  "open-icon-text": "Ouvrir",
+                                },
                               },
                               "signature-pad": Object {
                                 "dialog": Object {
@@ -38644,6 +39772,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                               },
                               "selector": Object {
                                 "add-new": "добавить",
+                                "base-selector": Object {
+                                  "close-icon-text": "Закрыть",
+                                  "loading-text": "Загрузка...",
+                                  "no-options-text": "Нет вариантов",
+                                  "open-icon-text": "Открыть",
+                                },
                               },
                               "signature-pad": Object {
                                 "dialog": Object {
@@ -38826,6 +39960,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                               },
                               "selector": Object {
                                 "add-new": "Qo'shish",
+                                "base-selector": Object {
+                                  "close-icon-text": "Yoping",
+                                  "loading-text": "Yuklanmoqda...",
+                                  "no-options-text": "Variant yo'q",
+                                  "open-icon-text": "Ochiq",
+                                },
                               },
                               "signature-pad": Object {
                                 "dialog": Object {
@@ -39068,6 +40208,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                             },
                             "selector": Object {
                               "add-new": "Hinzufügen",
+                              "base-selector": Object {
+                                "close-icon-text": "Schließen",
+                                "loading-text": "Lade...",
+                                "no-options-text": "Keine Optionen",
+                                "open-icon-text": "Öffnen",
+                              },
                             },
                             "signature-pad": Object {
                               "dialog": Object {
@@ -39250,6 +40396,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                             },
                             "selector": Object {
                               "add-new": "Add",
+                              "base-selector": Object {
+                                "close-icon-text": "Close",
+                                "loading-text": "Loading...",
+                                "no-options-text": "No options",
+                                "open-icon-text": "Open",
+                              },
                             },
                             "signature-pad": Object {
                               "dialog": Object {
@@ -39432,6 +40584,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                             },
                             "selector": Object {
                               "add-new": "Ajouter",
+                              "base-selector": Object {
+                                "close-icon-text": "Fermer",
+                                "loading-text": "Chargement...",
+                                "no-options-text": "Aucune option",
+                                "open-icon-text": "Ouvrir",
+                              },
                             },
                             "signature-pad": Object {
                               "dialog": Object {
@@ -39614,6 +40772,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                             },
                             "selector": Object {
                               "add-new": "добавить",
+                              "base-selector": Object {
+                                "close-icon-text": "Закрыть",
+                                "loading-text": "Загрузка...",
+                                "no-options-text": "Нет вариантов",
+                                "open-icon-text": "Открыть",
+                              },
                             },
                             "signature-pad": Object {
                               "dialog": Object {
@@ -39796,6 +40960,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                             },
                             "selector": Object {
                               "add-new": "Qo'shish",
+                              "base-selector": Object {
+                                "close-icon-text": "Yoping",
+                                "loading-text": "Yuklanmoqda...",
+                                "no-options-text": "Variant yo'q",
+                                "open-icon-text": "Ochiq",
+                              },
                             },
                             "signature-pad": Object {
                               "dialog": Object {
@@ -40043,6 +41213,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                   },
                                   "selector": Object {
                                     "add-new": "Hinzufügen",
+                                    "base-selector": Object {
+                                      "close-icon-text": "Schließen",
+                                      "loading-text": "Lade...",
+                                      "no-options-text": "Keine Optionen",
+                                      "open-icon-text": "Öffnen",
+                                    },
                                   },
                                   "signature-pad": Object {
                                     "dialog": Object {
@@ -40225,6 +41401,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                   },
                                   "selector": Object {
                                     "add-new": "Add",
+                                    "base-selector": Object {
+                                      "close-icon-text": "Close",
+                                      "loading-text": "Loading...",
+                                      "no-options-text": "No options",
+                                      "open-icon-text": "Open",
+                                    },
                                   },
                                   "signature-pad": Object {
                                     "dialog": Object {
@@ -40407,6 +41589,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                   },
                                   "selector": Object {
                                     "add-new": "Ajouter",
+                                    "base-selector": Object {
+                                      "close-icon-text": "Fermer",
+                                      "loading-text": "Chargement...",
+                                      "no-options-text": "Aucune option",
+                                      "open-icon-text": "Ouvrir",
+                                    },
                                   },
                                   "signature-pad": Object {
                                     "dialog": Object {
@@ -40589,6 +41777,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                   },
                                   "selector": Object {
                                     "add-new": "добавить",
+                                    "base-selector": Object {
+                                      "close-icon-text": "Закрыть",
+                                      "loading-text": "Загрузка...",
+                                      "no-options-text": "Нет вариантов",
+                                      "open-icon-text": "Открыть",
+                                    },
                                   },
                                   "signature-pad": Object {
                                     "dialog": Object {
@@ -40771,6 +41965,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                   },
                                   "selector": Object {
                                     "add-new": "Qo'shish",
+                                    "base-selector": Object {
+                                      "close-icon-text": "Yoping",
+                                      "loading-text": "Yuklanmoqda...",
+                                      "no-options-text": "Variant yo'q",
+                                      "open-icon-text": "Ochiq",
+                                    },
                                   },
                                   "signature-pad": Object {
                                     "dialog": Object {
@@ -41008,6 +42208,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                 },
                                 "selector": Object {
                                   "add-new": "Hinzufügen",
+                                  "base-selector": Object {
+                                    "close-icon-text": "Schließen",
+                                    "loading-text": "Lade...",
+                                    "no-options-text": "Keine Optionen",
+                                    "open-icon-text": "Öffnen",
+                                  },
                                 },
                                 "signature-pad": Object {
                                   "dialog": Object {
@@ -41190,6 +42396,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                 },
                                 "selector": Object {
                                   "add-new": "Add",
+                                  "base-selector": Object {
+                                    "close-icon-text": "Close",
+                                    "loading-text": "Loading...",
+                                    "no-options-text": "No options",
+                                    "open-icon-text": "Open",
+                                  },
                                 },
                                 "signature-pad": Object {
                                   "dialog": Object {
@@ -41372,6 +42584,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                 },
                                 "selector": Object {
                                   "add-new": "Ajouter",
+                                  "base-selector": Object {
+                                    "close-icon-text": "Fermer",
+                                    "loading-text": "Chargement...",
+                                    "no-options-text": "Aucune option",
+                                    "open-icon-text": "Ouvrir",
+                                  },
                                 },
                                 "signature-pad": Object {
                                   "dialog": Object {
@@ -41554,6 +42772,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                 },
                                 "selector": Object {
                                   "add-new": "добавить",
+                                  "base-selector": Object {
+                                    "close-icon-text": "Закрыть",
+                                    "loading-text": "Загрузка...",
+                                    "no-options-text": "Нет вариантов",
+                                    "open-icon-text": "Открыть",
+                                  },
                                 },
                                 "signature-pad": Object {
                                   "dialog": Object {
@@ -41736,6 +42960,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                 },
                                 "selector": Object {
                                   "add-new": "Qo'shish",
+                                  "base-selector": Object {
+                                    "close-icon-text": "Yoping",
+                                    "loading-text": "Yuklanmoqda...",
+                                    "no-options-text": "Variant yo'q",
+                                    "open-icon-text": "Ochiq",
+                                  },
                                 },
                                 "signature-pad": Object {
                                   "dialog": Object {
@@ -41998,6 +43228,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                 },
                                 "selector": Object {
                                   "add-new": "Hinzufügen",
+                                  "base-selector": Object {
+                                    "close-icon-text": "Schließen",
+                                    "loading-text": "Lade...",
+                                    "no-options-text": "Keine Optionen",
+                                    "open-icon-text": "Öffnen",
+                                  },
                                 },
                                 "signature-pad": Object {
                                   "dialog": Object {
@@ -42180,6 +43416,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                 },
                                 "selector": Object {
                                   "add-new": "Add",
+                                  "base-selector": Object {
+                                    "close-icon-text": "Close",
+                                    "loading-text": "Loading...",
+                                    "no-options-text": "No options",
+                                    "open-icon-text": "Open",
+                                  },
                                 },
                                 "signature-pad": Object {
                                   "dialog": Object {
@@ -42362,6 +43604,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                 },
                                 "selector": Object {
                                   "add-new": "Ajouter",
+                                  "base-selector": Object {
+                                    "close-icon-text": "Fermer",
+                                    "loading-text": "Chargement...",
+                                    "no-options-text": "Aucune option",
+                                    "open-icon-text": "Ouvrir",
+                                  },
                                 },
                                 "signature-pad": Object {
                                   "dialog": Object {
@@ -42544,6 +43792,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                 },
                                 "selector": Object {
                                   "add-new": "добавить",
+                                  "base-selector": Object {
+                                    "close-icon-text": "Закрыть",
+                                    "loading-text": "Загрузка...",
+                                    "no-options-text": "Нет вариантов",
+                                    "open-icon-text": "Открыть",
+                                  },
                                 },
                                 "signature-pad": Object {
                                   "dialog": Object {
@@ -42726,6 +43980,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                                 },
                                 "selector": Object {
                                   "add-new": "Qo'shish",
+                                  "base-selector": Object {
+                                    "close-icon-text": "Yoping",
+                                    "loading-text": "Yuklanmoqda...",
+                                    "no-options-text": "Variant yo'q",
+                                    "open-icon-text": "Ochiq",
+                                  },
                                 },
                                 "signature-pad": Object {
                                   "dialog": Object {
@@ -43891,6 +45151,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                           },
                           "selector": Object {
                             "add-new": "Hinzufügen",
+                            "base-selector": Object {
+                              "close-icon-text": "Schließen",
+                              "loading-text": "Lade...",
+                              "no-options-text": "Keine Optionen",
+                              "open-icon-text": "Öffnen",
+                            },
                           },
                           "signature-pad": Object {
                             "dialog": Object {
@@ -44073,6 +45339,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                           },
                           "selector": Object {
                             "add-new": "Add",
+                            "base-selector": Object {
+                              "close-icon-text": "Close",
+                              "loading-text": "Loading...",
+                              "no-options-text": "No options",
+                              "open-icon-text": "Open",
+                            },
                           },
                           "signature-pad": Object {
                             "dialog": Object {
@@ -44255,6 +45527,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                           },
                           "selector": Object {
                             "add-new": "Ajouter",
+                            "base-selector": Object {
+                              "close-icon-text": "Fermer",
+                              "loading-text": "Chargement...",
+                              "no-options-text": "Aucune option",
+                              "open-icon-text": "Ouvrir",
+                            },
                           },
                           "signature-pad": Object {
                             "dialog": Object {
@@ -44437,6 +45715,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                           },
                           "selector": Object {
                             "add-new": "добавить",
+                            "base-selector": Object {
+                              "close-icon-text": "Закрыть",
+                              "loading-text": "Загрузка...",
+                              "no-options-text": "Нет вариантов",
+                              "open-icon-text": "Открыть",
+                            },
                           },
                           "signature-pad": Object {
                             "dialog": Object {
@@ -44619,6 +45903,12 @@ exports[`Storyshots Non-Standalone/SignaturePad SignaturePad 1`] = `
                           },
                           "selector": Object {
                             "add-new": "Qo'shish",
+                            "base-selector": Object {
+                              "close-icon-text": "Yoping",
+                              "loading-text": "Yuklanmoqda...",
+                              "no-options-text": "Variant yo'q",
+                              "open-icon-text": "Ochiq",
+                            },
                           },
                           "signature-pad": Object {
                             "dialog": Object {

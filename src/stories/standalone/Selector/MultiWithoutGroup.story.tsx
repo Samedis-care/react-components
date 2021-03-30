@@ -38,6 +38,10 @@ export const MultiWithoutGroup = (): React.ReactElement => {
 	);
 	const dialogButtonLabel = text("Dialog button label", "Ok");
 	const dialogButtonClick = action("onClose");
+	const useCustomLoadingLabel = boolean("Use custom loading label?", true);
+	const loadingLabel = text("Loading Label", "Loading..");
+	const useCustomNoOptionsText = boolean("Use custom no data label?", false);
+	const noOptionsText = text("No data Label", "No option");
 
 	return (
 		<MultiSelectWithoutGroup<MultiWithoutGroupData>
@@ -52,6 +56,8 @@ export const MultiWithoutGroup = (): React.ReactElement => {
 			autocompleteId={"multi-select-without-group"}
 			enableIcons={icons}
 			disabled={disable}
+			loadingText={useCustomLoadingLabel ? loadingLabel : undefined}
+			noOptionsText={useCustomNoOptionsText ? noOptionsText : undefined}
 			openInfo={() =>
 				showInfoDialog(pushDialog, {
 					title: dialogTitle,
