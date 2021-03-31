@@ -219,7 +219,7 @@ const MultiSelectWithoutGroup = <DataT extends MultiSelectorData>(
 	useEffect(() => {
 		void onSearchData(dataQuery);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [dataQuery, refreshToken]);
+	}, [dataQuery, defaultSwitchValue, refreshToken]);
 
 	const filterOptions = useCallback((options: DataT[]) => options, []);
 
