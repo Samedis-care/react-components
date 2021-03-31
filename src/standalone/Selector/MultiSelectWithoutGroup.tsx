@@ -40,13 +40,9 @@ export interface MultiSelectWithoutGroupProps<DataT extends MultiSelectorData>
 	 */
 	selected: DataT[];
 	/**
-	 * Default state of switch control (only used if displaySwitch is truthy)
+	 * State of the switch control
 	 */
-	defaultSwitchValue?: boolean;
-	/**
-	 * Display switch control?
-	 */
-	displaySwitch?: boolean;
+	switchValue?: boolean;
 	/**
 	 * Change event callback
 	 * @param data The currently selected entries. This should be feed back to selected prop
@@ -97,6 +93,13 @@ const useStyles = makeStyles(
 			lineHeight: "30px",
 			float: "left",
 		},
+		switch: {
+			lineHeight: "30px",
+			float: "right",
+		},
+		labelWithSwitch: {
+			marginTop: 15,
+		},
 	},
 	{ name: "CcMultiSelectWithoutGroup" }
 );
@@ -107,8 +110,6 @@ const MultiSelectWithoutGroup = <DataT extends MultiSelectorData>(
 	const {
 		searchInputLabel,
 		selected,
-		displaySwitch,
-		defaultSwitchValue,
 		disabled,
 		autocompleteId,
 		enableIcons,
@@ -119,6 +120,7 @@ const MultiSelectWithoutGroup = <DataT extends MultiSelectorData>(
 		refreshToken,
 		noOptionsText,
 		loadingText,
+		switchValue,
 	} = props;
 	const { t } = useTranslation(undefined, { i18n });
 	const classes = useStyles(props);
@@ -198,28 +200,18 @@ const MultiSelectWithoutGroup = <DataT extends MultiSelectorData>(
 		async (query: string) => {
 			const selectedIds = selected.map(getId);
 			setDataOptions(
-				(
-					await loadDataOptions(
-						query,
-						displaySwitch && defaultSwitchValue ? defaultSwitchValue : false
-					)
-				).filter((option) => !selectedIds.includes(getId(option)))
+				(await loadDataOptions(query, !!switchValue)).filter(
+					(option) => !selectedIds.includes(getId(option))
+				)
 			);
 		},
-		[
-			getId,
-			loadDataOptions,
-			setDataOptions,
-			selected,
-			defaultSwitchValue,
-			displaySwitch,
-		]
+		[getId, loadDataOptions, setDataOptions, selected, switchValue]
 	);
 
 	useEffect(() => {
 		void onSearchData(dataQuery);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [dataQuery, defaultSwitchValue, refreshToken]);
+	}, [dataQuery, switchValue, refreshToken]);
 
 	const filterOptions = useCallback((options: DataT[]) => options, []);
 

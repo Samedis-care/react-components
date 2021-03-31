@@ -21040,11 +21040,11 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
                                         selected={null}
                                       >
                                         <WithStyles(ForwardRef(Paper))
-                                          className="standalone-selector--selector-multi-with-tags-CcBaseSelectorCustom-wrapper-31 standalone-selector--selector-multi-with-tags-CcBaseSelectorCustom-wrapper-33"
+                                          className="standalone-selector--selector-multi-with-tags-CcBaseSelectorCustom-wrapper-27 standalone-selector--selector-multi-with-tags-CcBaseSelectorCustom-wrapper-29"
                                           elevation={0}
                                         >
                                           <ForwardRef(Paper)
-                                            className="standalone-selector--selector-multi-with-tags-CcBaseSelectorCustom-wrapper-31 standalone-selector--selector-multi-with-tags-CcBaseSelectorCustom-wrapper-33"
+                                            className="standalone-selector--selector-multi-with-tags-CcBaseSelectorCustom-wrapper-27 standalone-selector--selector-multi-with-tags-CcBaseSelectorCustom-wrapper-29"
                                             classes={
                                               Object {
                                                 "elevation0": "standalone-selector--selector-multi-with-tags-MuiPaper-elevation0",
@@ -21080,7 +21080,7 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
                                             elevation={0}
                                           >
                                             <div
-                                              className="standalone-selector--selector-multi-with-tags-MuiPaper-root standalone-selector--selector-multi-with-tags-CcBaseSelectorCustom-wrapper-31 standalone-selector--selector-multi-with-tags-CcBaseSelectorCustom-wrapper-33 standalone-selector--selector-multi-with-tags-MuiPaper-elevation0 standalone-selector--selector-multi-with-tags-MuiPaper-rounded"
+                                              className="standalone-selector--selector-multi-with-tags-MuiPaper-root standalone-selector--selector-multi-with-tags-CcBaseSelectorCustom-wrapper-27 standalone-selector--selector-multi-with-tags-CcBaseSelectorCustom-wrapper-29 standalone-selector--selector-multi-with-tags-MuiPaper-elevation0 standalone-selector--selector-multi-with-tags-MuiPaper-rounded"
                                             >
                                               <WithStyles(ForwardRef(Autocomplete))
                                                 autoComplete={true}
@@ -21226,7 +21226,7 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
                                                               aria-autocomplete="both"
                                                               autocapitalize="none"
                                                               autocomplete="off"
-                                                              class="standalone-selector--selector-multi-with-tags-MuiInputBase-input standalone-selector--selector-multi-with-tags-MuiOutlinedInput-input standalone-selector--selector-multi-with-tags-CcUIKitInput-input-35 standalone-selector--selector-multi-with-tags-CcUIKitInput-input-37 standalone-selector--selector-multi-with-tags-MuiAutocomplete-input standalone-selector--selector-multi-with-tags-MuiAutocomplete-inputFocused standalone-selector--selector-multi-with-tags-MuiInputBase-inputAdornedEnd standalone-selector--selector-multi-with-tags-MuiOutlinedInput-inputAdornedEnd"
+                                                              class="standalone-selector--selector-multi-with-tags-MuiInputBase-input standalone-selector--selector-multi-with-tags-MuiOutlinedInput-input standalone-selector--selector-multi-with-tags-CcUIKitInput-input-31 standalone-selector--selector-multi-with-tags-CcUIKitInput-input-33 standalone-selector--selector-multi-with-tags-MuiAutocomplete-input standalone-selector--selector-multi-with-tags-MuiAutocomplete-inputFocused standalone-selector--selector-multi-with-tags-MuiInputBase-inputAdornedEnd standalone-selector--selector-multi-with-tags-MuiOutlinedInput-inputAdornedEnd"
                                                               id="multi-select-with-tags-group-select"
                                                               spellcheck="false"
                                                               type="text"
@@ -21243,9 +21243,9 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
                                                         className="standalone-selector--selector-multi-with-tags-MuiAutocomplete-inputRoot"
                                                         classes={
                                                           Object {
-                                                            "input": "standalone-selector--selector-multi-with-tags-CcUIKitInput-input-35 standalone-selector--selector-multi-with-tags-CcUIKitInput-input-37",
-                                                            "multiline": "standalone-selector--selector-multi-with-tags-CcUIKitInput-multiline-36",
-                                                            "root": "standalone-selector--selector-multi-with-tags-CcUIKitInput-root-34",
+                                                            "input": "standalone-selector--selector-multi-with-tags-CcUIKitInput-input-31 standalone-selector--selector-multi-with-tags-CcUIKitInput-input-33",
+                                                            "multiline": "standalone-selector--selector-multi-with-tags-CcUIKitInput-multiline-32",
+                                                            "root": "standalone-selector--selector-multi-with-tags-CcUIKitInput-root-30",
                                                           }
                                                         }
                                                         disabled={false}
@@ -21297,7 +21297,7 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
                                                                 aria-autocomplete="both"
                                                                 autocapitalize="none"
                                                                 autocomplete="off"
-                                                                class="standalone-selector--selector-multi-with-tags-MuiInputBase-input standalone-selector--selector-multi-with-tags-MuiOutlinedInput-input standalone-selector--selector-multi-with-tags-CcUIKitInput-input-35 standalone-selector--selector-multi-with-tags-CcUIKitInput-input-37 standalone-selector--selector-multi-with-tags-MuiAutocomplete-input standalone-selector--selector-multi-with-tags-MuiAutocomplete-inputFocused standalone-selector--selector-multi-with-tags-MuiInputBase-inputAdornedEnd standalone-selector--selector-multi-with-tags-MuiOutlinedInput-inputAdornedEnd"
+                                                                class="standalone-selector--selector-multi-with-tags-MuiInputBase-input standalone-selector--selector-multi-with-tags-MuiOutlinedInput-input standalone-selector--selector-multi-with-tags-CcUIKitInput-input-31 standalone-selector--selector-multi-with-tags-CcUIKitInput-input-33 standalone-selector--selector-multi-with-tags-MuiAutocomplete-input standalone-selector--selector-multi-with-tags-MuiAutocomplete-inputFocused standalone-selector--selector-multi-with-tags-MuiInputBase-inputAdornedEnd standalone-selector--selector-multi-with-tags-MuiOutlinedInput-inputAdornedEnd"
                                                                 id="multi-select-with-tags-group-select"
                                                                 spellcheck="false"
                                                                 type="text"
@@ -21320,15 +21320,15 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
                                                               "disabled": "Mui-disabled",
                                                               "error": "Mui-error",
                                                               "focused": "Mui-focused",
-                                                              "input": "standalone-selector--selector-multi-with-tags-MuiOutlinedInput-input standalone-selector--selector-multi-with-tags-CcUIKitInput-input-35 standalone-selector--selector-multi-with-tags-CcUIKitInput-input-37",
+                                                              "input": "standalone-selector--selector-multi-with-tags-MuiOutlinedInput-input standalone-selector--selector-multi-with-tags-CcUIKitInput-input-31 standalone-selector--selector-multi-with-tags-CcUIKitInput-input-33",
                                                               "inputAdornedEnd": "standalone-selector--selector-multi-with-tags-MuiOutlinedInput-inputAdornedEnd",
                                                               "inputAdornedStart": "standalone-selector--selector-multi-with-tags-MuiOutlinedInput-inputAdornedStart",
                                                               "inputMarginDense": "standalone-selector--selector-multi-with-tags-MuiOutlinedInput-inputMarginDense",
                                                               "inputMultiline": "standalone-selector--selector-multi-with-tags-MuiOutlinedInput-inputMultiline",
                                                               "marginDense": "standalone-selector--selector-multi-with-tags-MuiOutlinedInput-marginDense",
-                                                              "multiline": "standalone-selector--selector-multi-with-tags-MuiOutlinedInput-multiline standalone-selector--selector-multi-with-tags-CcUIKitInput-multiline-36",
+                                                              "multiline": "standalone-selector--selector-multi-with-tags-MuiOutlinedInput-multiline standalone-selector--selector-multi-with-tags-CcUIKitInput-multiline-32",
                                                               "notchedOutline": "standalone-selector--selector-multi-with-tags-MuiOutlinedInput-notchedOutline",
-                                                              "root": "standalone-selector--selector-multi-with-tags-MuiOutlinedInput-root standalone-selector--selector-multi-with-tags-CcUIKitInput-root-34",
+                                                              "root": "standalone-selector--selector-multi-with-tags-MuiOutlinedInput-root standalone-selector--selector-multi-with-tags-CcUIKitInput-root-30",
                                                             }
                                                           }
                                                           disabled={false}
@@ -21380,7 +21380,7 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
                                                                   aria-autocomplete="both"
                                                                   autocapitalize="none"
                                                                   autocomplete="off"
-                                                                  class="standalone-selector--selector-multi-with-tags-MuiInputBase-input standalone-selector--selector-multi-with-tags-MuiOutlinedInput-input standalone-selector--selector-multi-with-tags-CcUIKitInput-input-35 standalone-selector--selector-multi-with-tags-CcUIKitInput-input-37 standalone-selector--selector-multi-with-tags-MuiAutocomplete-input standalone-selector--selector-multi-with-tags-MuiAutocomplete-inputFocused standalone-selector--selector-multi-with-tags-MuiInputBase-inputAdornedEnd standalone-selector--selector-multi-with-tags-MuiOutlinedInput-inputAdornedEnd"
+                                                                  class="standalone-selector--selector-multi-with-tags-MuiInputBase-input standalone-selector--selector-multi-with-tags-MuiOutlinedInput-input standalone-selector--selector-multi-with-tags-CcUIKitInput-input-31 standalone-selector--selector-multi-with-tags-CcUIKitInput-input-33 standalone-selector--selector-multi-with-tags-MuiAutocomplete-input standalone-selector--selector-multi-with-tags-MuiAutocomplete-inputFocused standalone-selector--selector-multi-with-tags-MuiInputBase-inputAdornedEnd standalone-selector--selector-multi-with-tags-MuiOutlinedInput-inputAdornedEnd"
                                                                   id="multi-select-with-tags-group-select"
                                                                   spellcheck="false"
                                                                   type="text"
@@ -21403,15 +21403,15 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
                                                                 "disabled": "Mui-disabled",
                                                                 "error": "Mui-error",
                                                                 "focused": "Mui-focused",
-                                                                "input": "standalone-selector--selector-multi-with-tags-MuiOutlinedInput-input standalone-selector--selector-multi-with-tags-CcUIKitInput-input-35 standalone-selector--selector-multi-with-tags-CcUIKitInput-input-37",
+                                                                "input": "standalone-selector--selector-multi-with-tags-MuiOutlinedInput-input standalone-selector--selector-multi-with-tags-CcUIKitInput-input-31 standalone-selector--selector-multi-with-tags-CcUIKitInput-input-33",
                                                                 "inputAdornedEnd": "standalone-selector--selector-multi-with-tags-MuiOutlinedInput-inputAdornedEnd",
                                                                 "inputAdornedStart": "standalone-selector--selector-multi-with-tags-MuiOutlinedInput-inputAdornedStart",
                                                                 "inputMarginDense": "standalone-selector--selector-multi-with-tags-MuiOutlinedInput-inputMarginDense",
                                                                 "inputMultiline": "standalone-selector--selector-multi-with-tags-MuiOutlinedInput-inputMultiline",
                                                                 "marginDense": "standalone-selector--selector-multi-with-tags-MuiOutlinedInput-marginDense",
-                                                                "multiline": "standalone-selector--selector-multi-with-tags-MuiOutlinedInput-multiline standalone-selector--selector-multi-with-tags-CcUIKitInput-multiline-36",
+                                                                "multiline": "standalone-selector--selector-multi-with-tags-MuiOutlinedInput-multiline standalone-selector--selector-multi-with-tags-CcUIKitInput-multiline-32",
                                                                 "notchedOutline": null,
-                                                                "root": "standalone-selector--selector-multi-with-tags-MuiOutlinedInput-root standalone-selector--selector-multi-with-tags-CcUIKitInput-root-34",
+                                                                "root": "standalone-selector--selector-multi-with-tags-MuiOutlinedInput-root standalone-selector--selector-multi-with-tags-CcUIKitInput-root-30",
                                                               }
                                                             }
                                                             disabled={false}
@@ -21464,7 +21464,7 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
                                                                     aria-autocomplete="both"
                                                                     autocapitalize="none"
                                                                     autocomplete="off"
-                                                                    class="standalone-selector--selector-multi-with-tags-MuiInputBase-input standalone-selector--selector-multi-with-tags-MuiOutlinedInput-input standalone-selector--selector-multi-with-tags-CcUIKitInput-input-35 standalone-selector--selector-multi-with-tags-CcUIKitInput-input-37 standalone-selector--selector-multi-with-tags-MuiAutocomplete-input standalone-selector--selector-multi-with-tags-MuiAutocomplete-inputFocused standalone-selector--selector-multi-with-tags-MuiInputBase-inputAdornedEnd standalone-selector--selector-multi-with-tags-MuiOutlinedInput-inputAdornedEnd"
+                                                                    class="standalone-selector--selector-multi-with-tags-MuiInputBase-input standalone-selector--selector-multi-with-tags-MuiOutlinedInput-input standalone-selector--selector-multi-with-tags-CcUIKitInput-input-31 standalone-selector--selector-multi-with-tags-CcUIKitInput-input-33 standalone-selector--selector-multi-with-tags-MuiAutocomplete-input standalone-selector--selector-multi-with-tags-MuiAutocomplete-inputFocused standalone-selector--selector-multi-with-tags-MuiInputBase-inputAdornedEnd standalone-selector--selector-multi-with-tags-MuiOutlinedInput-inputAdornedEnd"
                                                                     id="multi-select-with-tags-group-select"
                                                                     spellcheck="false"
                                                                     type="text"
@@ -21492,7 +21492,7 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
                                                                   "focused": "Mui-focused Mui-focused",
                                                                   "formControl": "standalone-selector--selector-multi-with-tags-MuiInputBase-formControl",
                                                                   "fullWidth": "standalone-selector--selector-multi-with-tags-MuiInputBase-fullWidth",
-                                                                  "input": "standalone-selector--selector-multi-with-tags-MuiInputBase-input standalone-selector--selector-multi-with-tags-MuiOutlinedInput-input standalone-selector--selector-multi-with-tags-CcUIKitInput-input-35 standalone-selector--selector-multi-with-tags-CcUIKitInput-input-37",
+                                                                  "input": "standalone-selector--selector-multi-with-tags-MuiInputBase-input standalone-selector--selector-multi-with-tags-MuiOutlinedInput-input standalone-selector--selector-multi-with-tags-CcUIKitInput-input-31 standalone-selector--selector-multi-with-tags-CcUIKitInput-input-33",
                                                                   "inputAdornedEnd": "standalone-selector--selector-multi-with-tags-MuiInputBase-inputAdornedEnd standalone-selector--selector-multi-with-tags-MuiOutlinedInput-inputAdornedEnd",
                                                                   "inputAdornedStart": "standalone-selector--selector-multi-with-tags-MuiInputBase-inputAdornedStart standalone-selector--selector-multi-with-tags-MuiOutlinedInput-inputAdornedStart",
                                                                   "inputHiddenLabel": "standalone-selector--selector-multi-with-tags-MuiInputBase-inputHiddenLabel",
@@ -21500,8 +21500,8 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
                                                                   "inputMultiline": "standalone-selector--selector-multi-with-tags-MuiInputBase-inputMultiline standalone-selector--selector-multi-with-tags-MuiOutlinedInput-inputMultiline",
                                                                   "inputTypeSearch": "standalone-selector--selector-multi-with-tags-MuiInputBase-inputTypeSearch",
                                                                   "marginDense": "standalone-selector--selector-multi-with-tags-MuiInputBase-marginDense standalone-selector--selector-multi-with-tags-MuiOutlinedInput-marginDense",
-                                                                  "multiline": "standalone-selector--selector-multi-with-tags-MuiInputBase-multiline standalone-selector--selector-multi-with-tags-MuiOutlinedInput-multiline standalone-selector--selector-multi-with-tags-CcUIKitInput-multiline-36",
-                                                                  "root": "standalone-selector--selector-multi-with-tags-MuiInputBase-root standalone-selector--selector-multi-with-tags-MuiOutlinedInput-root standalone-selector--selector-multi-with-tags-CcUIKitInput-root-34",
+                                                                  "multiline": "standalone-selector--selector-multi-with-tags-MuiInputBase-multiline standalone-selector--selector-multi-with-tags-MuiOutlinedInput-multiline standalone-selector--selector-multi-with-tags-CcUIKitInput-multiline-32",
+                                                                  "root": "standalone-selector--selector-multi-with-tags-MuiInputBase-root standalone-selector--selector-multi-with-tags-MuiOutlinedInput-root standalone-selector--selector-multi-with-tags-CcUIKitInput-root-30",
                                                                 }
                                                               }
                                                               disabled={false}
@@ -21554,7 +21554,7 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
                                                                       aria-autocomplete="both"
                                                                       autocapitalize="none"
                                                                       autocomplete="off"
-                                                                      class="standalone-selector--selector-multi-with-tags-MuiInputBase-input standalone-selector--selector-multi-with-tags-MuiOutlinedInput-input standalone-selector--selector-multi-with-tags-CcUIKitInput-input-35 standalone-selector--selector-multi-with-tags-CcUIKitInput-input-37 standalone-selector--selector-multi-with-tags-MuiAutocomplete-input standalone-selector--selector-multi-with-tags-MuiAutocomplete-inputFocused standalone-selector--selector-multi-with-tags-MuiInputBase-inputAdornedEnd standalone-selector--selector-multi-with-tags-MuiOutlinedInput-inputAdornedEnd"
+                                                                      class="standalone-selector--selector-multi-with-tags-MuiInputBase-input standalone-selector--selector-multi-with-tags-MuiOutlinedInput-input standalone-selector--selector-multi-with-tags-CcUIKitInput-input-31 standalone-selector--selector-multi-with-tags-CcUIKitInput-input-33 standalone-selector--selector-multi-with-tags-MuiAutocomplete-input standalone-selector--selector-multi-with-tags-MuiAutocomplete-inputFocused standalone-selector--selector-multi-with-tags-MuiInputBase-inputAdornedEnd standalone-selector--selector-multi-with-tags-MuiOutlinedInput-inputAdornedEnd"
                                                                       id="multi-select-with-tags-group-select"
                                                                       spellcheck="false"
                                                                       type="text"
@@ -21571,7 +21571,7 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
                                                               type="text"
                                                             >
                                                               <div
-                                                                className="standalone-selector--selector-multi-with-tags-MuiInputBase-root standalone-selector--selector-multi-with-tags-MuiOutlinedInput-root standalone-selector--selector-multi-with-tags-CcUIKitInput-root-34 standalone-selector--selector-multi-with-tags-MuiAutocomplete-inputRoot standalone-selector--selector-multi-with-tags-MuiInputBase-fullWidth standalone-selector--selector-multi-with-tags-MuiInputBase-adornedEnd standalone-selector--selector-multi-with-tags-MuiOutlinedInput-adornedEnd"
+                                                                className="standalone-selector--selector-multi-with-tags-MuiInputBase-root standalone-selector--selector-multi-with-tags-MuiOutlinedInput-root standalone-selector--selector-multi-with-tags-CcUIKitInput-root-30 standalone-selector--selector-multi-with-tags-MuiAutocomplete-inputRoot standalone-selector--selector-multi-with-tags-MuiInputBase-fullWidth standalone-selector--selector-multi-with-tags-MuiInputBase-adornedEnd standalone-selector--selector-multi-with-tags-MuiOutlinedInput-adornedEnd"
                                                                 onClick={[Function]}
                                                               >
                                                                 <input
@@ -21580,7 +21580,7 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
                                                                   aria-controls={null}
                                                                   autoCapitalize="none"
                                                                   autoComplete="off"
-                                                                  className="standalone-selector--selector-multi-with-tags-MuiInputBase-input standalone-selector--selector-multi-with-tags-MuiOutlinedInput-input standalone-selector--selector-multi-with-tags-CcUIKitInput-input-35 standalone-selector--selector-multi-with-tags-CcUIKitInput-input-37 standalone-selector--selector-multi-with-tags-MuiAutocomplete-input standalone-selector--selector-multi-with-tags-MuiAutocomplete-inputFocused standalone-selector--selector-multi-with-tags-MuiInputBase-inputAdornedEnd standalone-selector--selector-multi-with-tags-MuiOutlinedInput-inputAdornedEnd"
+                                                                  className="standalone-selector--selector-multi-with-tags-MuiInputBase-input standalone-selector--selector-multi-with-tags-MuiOutlinedInput-input standalone-selector--selector-multi-with-tags-CcUIKitInput-input-31 standalone-selector--selector-multi-with-tags-CcUIKitInput-input-33 standalone-selector--selector-multi-with-tags-MuiAutocomplete-input standalone-selector--selector-multi-with-tags-MuiAutocomplete-inputFocused standalone-selector--selector-multi-with-tags-MuiInputBase-inputAdornedEnd standalone-selector--selector-multi-with-tags-MuiOutlinedInput-inputAdornedEnd"
                                                                   disabled={false}
                                                                   id="multi-select-with-tags-group-select"
                                                                   onAnimationStart={[Function]}
@@ -21894,10 +21894,10 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
                                                                     className="standalone-selector--selector-multi-with-tags-MuiOutlinedInput-notchedOutline"
                                                                     classes={
                                                                       Object {
-                                                                        "legend": "standalone-selector--selector-multi-with-tags-PrivateNotchedOutline-legend-39",
-                                                                        "legendLabelled": "standalone-selector--selector-multi-with-tags-PrivateNotchedOutline-legendLabelled-40",
-                                                                        "legendNotched": "standalone-selector--selector-multi-with-tags-PrivateNotchedOutline-legendNotched-41",
-                                                                        "root": "standalone-selector--selector-multi-with-tags-PrivateNotchedOutline-root-38",
+                                                                        "legend": "standalone-selector--selector-multi-with-tags-PrivateNotchedOutline-legend-35",
+                                                                        "legendLabelled": "standalone-selector--selector-multi-with-tags-PrivateNotchedOutline-legendLabelled-36",
+                                                                        "legendNotched": "standalone-selector--selector-multi-with-tags-PrivateNotchedOutline-legendNotched-37",
+                                                                        "root": "standalone-selector--selector-multi-with-tags-PrivateNotchedOutline-root-34",
                                                                       }
                                                                     }
                                                                     labelWidth={0}
@@ -21905,7 +21905,7 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
                                                                   >
                                                                     <fieldset
                                                                       aria-hidden={true}
-                                                                      className="standalone-selector--selector-multi-with-tags-PrivateNotchedOutline-root-38 standalone-selector--selector-multi-with-tags-MuiOutlinedInput-notchedOutline"
+                                                                      className="standalone-selector--selector-multi-with-tags-PrivateNotchedOutline-root-34 standalone-selector--selector-multi-with-tags-MuiOutlinedInput-notchedOutline"
                                                                       style={
                                                                         Object {
                                                                           "paddingLeft": 8,
@@ -21913,7 +21913,7 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
                                                                       }
                                                                     >
                                                                       <legend
-                                                                        className="standalone-selector--selector-multi-with-tags-PrivateNotchedOutline-legend-39"
+                                                                        className="standalone-selector--selector-multi-with-tags-PrivateNotchedOutline-legend-35"
                                                                         style={
                                                                           Object {
                                                                             "width": 0.01,
@@ -21945,12 +21945,13 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
                                         </WithStyles(ForwardRef(Paper))>
                                       </Memo(BaseSelector)>
                                     </Memo(SingleSelect)>
+                                     
                                     <WithStyles(ForwardRef(Typography))
-                                      className="standalone-selector--selector-multi-with-tags-CcMultiSelectWithTags-labelWithSwitch-25"
+                                      className="standalone-selector--selector-multi-with-tags-CcMultiSelectWithGroup-labelWithSwitch-23"
                                       component="div"
                                     >
                                       <ForwardRef(Typography)
-                                        className="standalone-selector--selector-multi-with-tags-CcMultiSelectWithTags-labelWithSwitch-25"
+                                        className="standalone-selector--selector-multi-with-tags-CcMultiSelectWithGroup-labelWithSwitch-23"
                                         classes={
                                           Object {
                                             "alignCenter": "standalone-selector--selector-multi-with-tags-MuiTypography-alignCenter",
@@ -21988,12 +21989,11 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
                                         component="div"
                                       >
                                         <div
-                                          className="standalone-selector--selector-multi-with-tags-MuiTypography-root standalone-selector--selector-multi-with-tags-CcMultiSelectWithTags-labelWithSwitch-25 standalone-selector--selector-multi-with-tags-MuiTypography-body1"
+                                          className="standalone-selector--selector-multi-with-tags-MuiTypography-root standalone-selector--selector-multi-with-tags-CcMultiSelectWithGroup-labelWithSwitch-23 standalone-selector--selector-multi-with-tags-MuiTypography-body1"
                                         >
                                           <Memo(MultiSelectWithoutGroup)
                                             autocompleteId="multi-select-with-tags"
                                             disabled={false}
-                                            displaySwitch={false}
                                             enableIcons={false}
                                             getIdOfData={[Function]}
                                             loadDataOptions={[Function]}
@@ -22003,6 +22003,7 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
                                             refreshToken=""
                                             searchInputLabel="or search for a single item"
                                             selected={Array []}
+                                            switchValue={false}
                                           >
                                             <WithStyles(ForwardRef(Typography))
                                               component="div"
@@ -22048,11 +22049,11 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
                                                   className="standalone-selector--selector-multi-with-tags-MuiTypography-root standalone-selector--selector-multi-with-tags-MuiTypography-body1"
                                                 >
                                                   <WithStyles(ForwardRef(Typography))
-                                                    className="standalone-selector--selector-multi-with-tags-CcMultiSelectWithoutGroup-searchLabel-43"
+                                                    className="standalone-selector--selector-multi-with-tags-CcMultiSelectWithoutGroup-searchLabel-39"
                                                     component="div"
                                                   >
                                                     <ForwardRef(Typography)
-                                                      className="standalone-selector--selector-multi-with-tags-CcMultiSelectWithoutGroup-searchLabel-43"
+                                                      className="standalone-selector--selector-multi-with-tags-CcMultiSelectWithoutGroup-searchLabel-39"
                                                       classes={
                                                         Object {
                                                           "alignCenter": "standalone-selector--selector-multi-with-tags-MuiTypography-alignCenter",
@@ -22090,7 +22091,7 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
                                                       component="div"
                                                     >
                                                       <div
-                                                        className="standalone-selector--selector-multi-with-tags-MuiTypography-root standalone-selector--selector-multi-with-tags-CcMultiSelectWithoutGroup-searchLabel-43 standalone-selector--selector-multi-with-tags-MuiTypography-body1"
+                                                        className="standalone-selector--selector-multi-with-tags-MuiTypography-root standalone-selector--selector-multi-with-tags-CcMultiSelectWithoutGroup-searchLabel-39 standalone-selector--selector-multi-with-tags-MuiTypography-body1"
                                                       >
                                                         <WithStyles(ForwardRef(Typography))
                                                           color="textSecondary"
@@ -22264,7 +22265,7 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
                                                                   aria-invalid="false"
                                                                   autocapitalize="none"
                                                                   autocomplete="off"
-                                                                  class="standalone-selector--selector-multi-with-tags-MuiInputBase-input standalone-selector--selector-multi-with-tags-MuiInput-input standalone-selector--selector-multi-with-tags-CcUIKitInput-input-35 standalone-selector--selector-multi-with-tags-CcUIKitInput-input-44 standalone-selector--selector-multi-with-tags-MuiAutocomplete-input standalone-selector--selector-multi-with-tags-MuiAutocomplete-inputFocused standalone-selector--selector-multi-with-tags-MuiInputBase-inputAdornedStart standalone-selector--selector-multi-with-tags-MuiInputBase-inputAdornedEnd standalone-selector--selector-multi-with-tags-MuiInputBase-inputTypeSearch standalone-selector--selector-multi-with-tags-MuiInput-inputTypeSearch"
+                                                                  class="standalone-selector--selector-multi-with-tags-MuiInputBase-input standalone-selector--selector-multi-with-tags-MuiInput-input standalone-selector--selector-multi-with-tags-CcUIKitInput-input-31 standalone-selector--selector-multi-with-tags-CcUIKitInput-input-42 standalone-selector--selector-multi-with-tags-MuiAutocomplete-input standalone-selector--selector-multi-with-tags-MuiAutocomplete-inputFocused standalone-selector--selector-multi-with-tags-MuiInputBase-inputAdornedStart standalone-selector--selector-multi-with-tags-MuiInputBase-inputAdornedEnd standalone-selector--selector-multi-with-tags-MuiInputBase-inputTypeSearch standalone-selector--selector-multi-with-tags-MuiInput-inputTypeSearch"
                                                                   id="multi-select-with-tags"
                                                                   spellcheck="false"
                                                                   type="search"
@@ -22288,9 +22289,9 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
                                                               Object {
                                                                 "className": "standalone-selector--selector-multi-with-tags-MuiAutocomplete-inputRoot",
                                                                 "classes": Object {
-                                                                  "input": "standalone-selector--selector-multi-with-tags-CcUIKitInput-input-35 standalone-selector--selector-multi-with-tags-CcUIKitInput-input-44",
-                                                                  "multiline": "standalone-selector--selector-multi-with-tags-CcUIKitInput-multiline-36",
-                                                                  "root": "standalone-selector--selector-multi-with-tags-CcUIKitInput-root-34",
+                                                                  "input": "standalone-selector--selector-multi-with-tags-CcUIKitInput-input-31 standalone-selector--selector-multi-with-tags-CcUIKitInput-input-42",
+                                                                  "multiline": "standalone-selector--selector-multi-with-tags-CcUIKitInput-multiline-32",
+                                                                  "root": "standalone-selector--selector-multi-with-tags-CcUIKitInput-root-30",
                                                                 },
                                                                 "endAdornment": <React.Fragment>
                                                                   <WithStyles(ForwardRef(InputAdornment))
@@ -22335,7 +22336,7 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
                                                                     aria-invalid="false"
                                                                     autocapitalize="none"
                                                                     autocomplete="off"
-                                                                    class="standalone-selector--selector-multi-with-tags-MuiInputBase-input standalone-selector--selector-multi-with-tags-MuiInput-input standalone-selector--selector-multi-with-tags-CcUIKitInput-input-35 standalone-selector--selector-multi-with-tags-CcUIKitInput-input-44 standalone-selector--selector-multi-with-tags-MuiAutocomplete-input standalone-selector--selector-multi-with-tags-MuiAutocomplete-inputFocused standalone-selector--selector-multi-with-tags-MuiInputBase-inputAdornedStart standalone-selector--selector-multi-with-tags-MuiInputBase-inputAdornedEnd standalone-selector--selector-multi-with-tags-MuiInputBase-inputTypeSearch standalone-selector--selector-multi-with-tags-MuiInput-inputTypeSearch"
+                                                                    class="standalone-selector--selector-multi-with-tags-MuiInputBase-input standalone-selector--selector-multi-with-tags-MuiInput-input standalone-selector--selector-multi-with-tags-CcUIKitInput-input-31 standalone-selector--selector-multi-with-tags-CcUIKitInput-input-42 standalone-selector--selector-multi-with-tags-MuiAutocomplete-input standalone-selector--selector-multi-with-tags-MuiAutocomplete-inputFocused standalone-selector--selector-multi-with-tags-MuiInputBase-inputAdornedStart standalone-selector--selector-multi-with-tags-MuiInputBase-inputAdornedEnd standalone-selector--selector-multi-with-tags-MuiInputBase-inputTypeSearch standalone-selector--selector-multi-with-tags-MuiInput-inputTypeSearch"
                                                                     id="multi-select-with-tags"
                                                                     spellcheck="false"
                                                                     type="search"
@@ -22358,9 +22359,9 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
                                                                 Object {
                                                                   "className": "standalone-selector--selector-multi-with-tags-MuiAutocomplete-inputRoot",
                                                                   "classes": Object {
-                                                                    "input": "standalone-selector--selector-multi-with-tags-CcUIKitInput-input-35 standalone-selector--selector-multi-with-tags-CcUIKitInput-input-44",
-                                                                    "multiline": "standalone-selector--selector-multi-with-tags-CcUIKitInput-multiline-36",
-                                                                    "root": "standalone-selector--selector-multi-with-tags-CcUIKitInput-root-34",
+                                                                    "input": "standalone-selector--selector-multi-with-tags-CcUIKitInput-input-31 standalone-selector--selector-multi-with-tags-CcUIKitInput-input-42",
+                                                                    "multiline": "standalone-selector--selector-multi-with-tags-CcUIKitInput-multiline-32",
+                                                                    "root": "standalone-selector--selector-multi-with-tags-CcUIKitInput-root-30",
                                                                   },
                                                                   "endAdornment": <React.Fragment>
                                                                     <WithStyles(ForwardRef(InputAdornment))
@@ -22410,7 +22411,7 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
                                                                       aria-invalid="false"
                                                                       autocapitalize="none"
                                                                       autocomplete="off"
-                                                                      class="standalone-selector--selector-multi-with-tags-MuiInputBase-input standalone-selector--selector-multi-with-tags-MuiInput-input standalone-selector--selector-multi-with-tags-CcUIKitInput-input-35 standalone-selector--selector-multi-with-tags-CcUIKitInput-input-44 standalone-selector--selector-multi-with-tags-MuiAutocomplete-input standalone-selector--selector-multi-with-tags-MuiAutocomplete-inputFocused standalone-selector--selector-multi-with-tags-MuiInputBase-inputAdornedStart standalone-selector--selector-multi-with-tags-MuiInputBase-inputAdornedEnd standalone-selector--selector-multi-with-tags-MuiInputBase-inputTypeSearch standalone-selector--selector-multi-with-tags-MuiInput-inputTypeSearch"
+                                                                      class="standalone-selector--selector-multi-with-tags-MuiInputBase-input standalone-selector--selector-multi-with-tags-MuiInput-input standalone-selector--selector-multi-with-tags-CcUIKitInput-input-31 standalone-selector--selector-multi-with-tags-CcUIKitInput-input-42 standalone-selector--selector-multi-with-tags-MuiAutocomplete-input standalone-selector--selector-multi-with-tags-MuiAutocomplete-inputFocused standalone-selector--selector-multi-with-tags-MuiInputBase-inputAdornedStart standalone-selector--selector-multi-with-tags-MuiInputBase-inputAdornedEnd standalone-selector--selector-multi-with-tags-MuiInputBase-inputTypeSearch standalone-selector--selector-multi-with-tags-MuiInput-inputTypeSearch"
                                                                       id="multi-select-with-tags"
                                                                       spellcheck="false"
                                                                       type="search"
@@ -22456,9 +22457,9 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
                                                                       className="standalone-selector--selector-multi-with-tags-MuiAutocomplete-inputRoot"
                                                                       classes={
                                                                         Object {
-                                                                          "input": "standalone-selector--selector-multi-with-tags-CcUIKitInput-input-35 standalone-selector--selector-multi-with-tags-CcUIKitInput-input-44",
-                                                                          "multiline": "standalone-selector--selector-multi-with-tags-CcUIKitInput-multiline-36",
-                                                                          "root": "standalone-selector--selector-multi-with-tags-CcUIKitInput-root-34",
+                                                                          "input": "standalone-selector--selector-multi-with-tags-CcUIKitInput-input-31 standalone-selector--selector-multi-with-tags-CcUIKitInput-input-42",
+                                                                          "multiline": "standalone-selector--selector-multi-with-tags-CcUIKitInput-multiline-32",
+                                                                          "root": "standalone-selector--selector-multi-with-tags-CcUIKitInput-root-30",
                                                                         }
                                                                       }
                                                                       endAdornment={
@@ -22498,7 +22499,7 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
                                                                               aria-invalid="false"
                                                                               autocapitalize="none"
                                                                               autocomplete="off"
-                                                                              class="standalone-selector--selector-multi-with-tags-MuiInputBase-input standalone-selector--selector-multi-with-tags-MuiInput-input standalone-selector--selector-multi-with-tags-CcUIKitInput-input-35 standalone-selector--selector-multi-with-tags-CcUIKitInput-input-44 standalone-selector--selector-multi-with-tags-MuiAutocomplete-input standalone-selector--selector-multi-with-tags-MuiAutocomplete-inputFocused standalone-selector--selector-multi-with-tags-MuiInputBase-inputAdornedStart standalone-selector--selector-multi-with-tags-MuiInputBase-inputAdornedEnd standalone-selector--selector-multi-with-tags-MuiInputBase-inputTypeSearch standalone-selector--selector-multi-with-tags-MuiInput-inputTypeSearch"
+                                                                              class="standalone-selector--selector-multi-with-tags-MuiInputBase-input standalone-selector--selector-multi-with-tags-MuiInput-input standalone-selector--selector-multi-with-tags-CcUIKitInput-input-31 standalone-selector--selector-multi-with-tags-CcUIKitInput-input-42 standalone-selector--selector-multi-with-tags-MuiAutocomplete-input standalone-selector--selector-multi-with-tags-MuiAutocomplete-inputFocused standalone-selector--selector-multi-with-tags-MuiInputBase-inputAdornedStart standalone-selector--selector-multi-with-tags-MuiInputBase-inputAdornedEnd standalone-selector--selector-multi-with-tags-MuiInputBase-inputTypeSearch standalone-selector--selector-multi-with-tags-MuiInput-inputTypeSearch"
                                                                               id="multi-select-with-tags"
                                                                               spellcheck="false"
                                                                               type="search"
@@ -22528,13 +22529,13 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
                                                                             "focused": "Mui-focused",
                                                                             "formControl": "standalone-selector--selector-multi-with-tags-MuiInput-formControl",
                                                                             "fullWidth": "standalone-selector--selector-multi-with-tags-MuiInput-fullWidth",
-                                                                            "input": "standalone-selector--selector-multi-with-tags-MuiInput-input standalone-selector--selector-multi-with-tags-CcUIKitInput-input-35 standalone-selector--selector-multi-with-tags-CcUIKitInput-input-44",
+                                                                            "input": "standalone-selector--selector-multi-with-tags-MuiInput-input standalone-selector--selector-multi-with-tags-CcUIKitInput-input-31 standalone-selector--selector-multi-with-tags-CcUIKitInput-input-42",
                                                                             "inputMarginDense": "standalone-selector--selector-multi-with-tags-MuiInput-inputMarginDense",
                                                                             "inputMultiline": "standalone-selector--selector-multi-with-tags-MuiInput-inputMultiline",
                                                                             "inputTypeSearch": "standalone-selector--selector-multi-with-tags-MuiInput-inputTypeSearch",
                                                                             "marginDense": "standalone-selector--selector-multi-with-tags-MuiInput-marginDense",
-                                                                            "multiline": "standalone-selector--selector-multi-with-tags-MuiInput-multiline standalone-selector--selector-multi-with-tags-CcUIKitInput-multiline-36",
-                                                                            "root": "standalone-selector--selector-multi-with-tags-MuiInput-root standalone-selector--selector-multi-with-tags-CcUIKitInput-root-34",
+                                                                            "multiline": "standalone-selector--selector-multi-with-tags-MuiInput-multiline standalone-selector--selector-multi-with-tags-CcUIKitInput-multiline-32",
+                                                                            "root": "standalone-selector--selector-multi-with-tags-MuiInput-root standalone-selector--selector-multi-with-tags-CcUIKitInput-root-30",
                                                                             "underline": "standalone-selector--selector-multi-with-tags-MuiInput-underline",
                                                                           }
                                                                         }
@@ -22575,7 +22576,7 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
                                                                                 aria-invalid="false"
                                                                                 autocapitalize="none"
                                                                                 autocomplete="off"
-                                                                                class="standalone-selector--selector-multi-with-tags-MuiInputBase-input standalone-selector--selector-multi-with-tags-MuiInput-input standalone-selector--selector-multi-with-tags-CcUIKitInput-input-35 standalone-selector--selector-multi-with-tags-CcUIKitInput-input-44 standalone-selector--selector-multi-with-tags-MuiAutocomplete-input standalone-selector--selector-multi-with-tags-MuiAutocomplete-inputFocused standalone-selector--selector-multi-with-tags-MuiInputBase-inputAdornedStart standalone-selector--selector-multi-with-tags-MuiInputBase-inputAdornedEnd standalone-selector--selector-multi-with-tags-MuiInputBase-inputTypeSearch standalone-selector--selector-multi-with-tags-MuiInput-inputTypeSearch"
+                                                                                class="standalone-selector--selector-multi-with-tags-MuiInputBase-input standalone-selector--selector-multi-with-tags-MuiInput-input standalone-selector--selector-multi-with-tags-CcUIKitInput-input-31 standalone-selector--selector-multi-with-tags-CcUIKitInput-input-42 standalone-selector--selector-multi-with-tags-MuiAutocomplete-input standalone-selector--selector-multi-with-tags-MuiAutocomplete-inputFocused standalone-selector--selector-multi-with-tags-MuiInputBase-inputAdornedStart standalone-selector--selector-multi-with-tags-MuiInputBase-inputAdornedEnd standalone-selector--selector-multi-with-tags-MuiInputBase-inputTypeSearch standalone-selector--selector-multi-with-tags-MuiInput-inputTypeSearch"
                                                                                 id="multi-select-with-tags"
                                                                                 spellcheck="false"
                                                                                 type="search"
@@ -22605,13 +22606,13 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
                                                                               "focused": "Mui-focused",
                                                                               "formControl": "standalone-selector--selector-multi-with-tags-MuiInput-formControl",
                                                                               "fullWidth": "standalone-selector--selector-multi-with-tags-MuiInput-fullWidth",
-                                                                              "input": "standalone-selector--selector-multi-with-tags-MuiInput-input standalone-selector--selector-multi-with-tags-CcUIKitInput-input-35 standalone-selector--selector-multi-with-tags-CcUIKitInput-input-44",
+                                                                              "input": "standalone-selector--selector-multi-with-tags-MuiInput-input standalone-selector--selector-multi-with-tags-CcUIKitInput-input-31 standalone-selector--selector-multi-with-tags-CcUIKitInput-input-42",
                                                                               "inputMarginDense": "standalone-selector--selector-multi-with-tags-MuiInput-inputMarginDense",
                                                                               "inputMultiline": "standalone-selector--selector-multi-with-tags-MuiInput-inputMultiline",
                                                                               "inputTypeSearch": "standalone-selector--selector-multi-with-tags-MuiInput-inputTypeSearch",
                                                                               "marginDense": "standalone-selector--selector-multi-with-tags-MuiInput-marginDense",
-                                                                              "multiline": "standalone-selector--selector-multi-with-tags-MuiInput-multiline standalone-selector--selector-multi-with-tags-CcUIKitInput-multiline-36",
-                                                                              "root": "standalone-selector--selector-multi-with-tags-MuiInput-root standalone-selector--selector-multi-with-tags-CcUIKitInput-root-34 standalone-selector--selector-multi-with-tags-MuiInput-underline",
+                                                                              "multiline": "standalone-selector--selector-multi-with-tags-MuiInput-multiline standalone-selector--selector-multi-with-tags-CcUIKitInput-multiline-32",
+                                                                              "root": "standalone-selector--selector-multi-with-tags-MuiInput-root standalone-selector--selector-multi-with-tags-CcUIKitInput-root-30 standalone-selector--selector-multi-with-tags-MuiInput-underline",
                                                                               "underline": null,
                                                                             }
                                                                           }
@@ -22653,7 +22654,7 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
                                                                                   aria-invalid="false"
                                                                                   autocapitalize="none"
                                                                                   autocomplete="off"
-                                                                                  class="standalone-selector--selector-multi-with-tags-MuiInputBase-input standalone-selector--selector-multi-with-tags-MuiInput-input standalone-selector--selector-multi-with-tags-CcUIKitInput-input-35 standalone-selector--selector-multi-with-tags-CcUIKitInput-input-44 standalone-selector--selector-multi-with-tags-MuiAutocomplete-input standalone-selector--selector-multi-with-tags-MuiAutocomplete-inputFocused standalone-selector--selector-multi-with-tags-MuiInputBase-inputAdornedStart standalone-selector--selector-multi-with-tags-MuiInputBase-inputAdornedEnd standalone-selector--selector-multi-with-tags-MuiInputBase-inputTypeSearch standalone-selector--selector-multi-with-tags-MuiInput-inputTypeSearch"
+                                                                                  class="standalone-selector--selector-multi-with-tags-MuiInputBase-input standalone-selector--selector-multi-with-tags-MuiInput-input standalone-selector--selector-multi-with-tags-CcUIKitInput-input-31 standalone-selector--selector-multi-with-tags-CcUIKitInput-input-42 standalone-selector--selector-multi-with-tags-MuiAutocomplete-input standalone-selector--selector-multi-with-tags-MuiAutocomplete-inputFocused standalone-selector--selector-multi-with-tags-MuiInputBase-inputAdornedStart standalone-selector--selector-multi-with-tags-MuiInputBase-inputAdornedEnd standalone-selector--selector-multi-with-tags-MuiInputBase-inputTypeSearch standalone-selector--selector-multi-with-tags-MuiInput-inputTypeSearch"
                                                                                   id="multi-select-with-tags"
                                                                                   spellcheck="false"
                                                                                   type="search"
@@ -22685,7 +22686,7 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
                                                                                 "focused": "Mui-focused Mui-focused",
                                                                                 "formControl": "standalone-selector--selector-multi-with-tags-MuiInputBase-formControl standalone-selector--selector-multi-with-tags-MuiInput-formControl",
                                                                                 "fullWidth": "standalone-selector--selector-multi-with-tags-MuiInputBase-fullWidth standalone-selector--selector-multi-with-tags-MuiInput-fullWidth",
-                                                                                "input": "standalone-selector--selector-multi-with-tags-MuiInputBase-input standalone-selector--selector-multi-with-tags-MuiInput-input standalone-selector--selector-multi-with-tags-CcUIKitInput-input-35 standalone-selector--selector-multi-with-tags-CcUIKitInput-input-44",
+                                                                                "input": "standalone-selector--selector-multi-with-tags-MuiInputBase-input standalone-selector--selector-multi-with-tags-MuiInput-input standalone-selector--selector-multi-with-tags-CcUIKitInput-input-31 standalone-selector--selector-multi-with-tags-CcUIKitInput-input-42",
                                                                                 "inputAdornedEnd": "standalone-selector--selector-multi-with-tags-MuiInputBase-inputAdornedEnd",
                                                                                 "inputAdornedStart": "standalone-selector--selector-multi-with-tags-MuiInputBase-inputAdornedStart",
                                                                                 "inputHiddenLabel": "standalone-selector--selector-multi-with-tags-MuiInputBase-inputHiddenLabel",
@@ -22693,8 +22694,8 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
                                                                                 "inputMultiline": "standalone-selector--selector-multi-with-tags-MuiInputBase-inputMultiline standalone-selector--selector-multi-with-tags-MuiInput-inputMultiline",
                                                                                 "inputTypeSearch": "standalone-selector--selector-multi-with-tags-MuiInputBase-inputTypeSearch standalone-selector--selector-multi-with-tags-MuiInput-inputTypeSearch",
                                                                                 "marginDense": "standalone-selector--selector-multi-with-tags-MuiInputBase-marginDense standalone-selector--selector-multi-with-tags-MuiInput-marginDense",
-                                                                                "multiline": "standalone-selector--selector-multi-with-tags-MuiInputBase-multiline standalone-selector--selector-multi-with-tags-MuiInput-multiline standalone-selector--selector-multi-with-tags-CcUIKitInput-multiline-36",
-                                                                                "root": "standalone-selector--selector-multi-with-tags-MuiInputBase-root standalone-selector--selector-multi-with-tags-MuiInput-root standalone-selector--selector-multi-with-tags-CcUIKitInput-root-34 standalone-selector--selector-multi-with-tags-MuiInput-underline",
+                                                                                "multiline": "standalone-selector--selector-multi-with-tags-MuiInputBase-multiline standalone-selector--selector-multi-with-tags-MuiInput-multiline standalone-selector--selector-multi-with-tags-CcUIKitInput-multiline-32",
+                                                                                "root": "standalone-selector--selector-multi-with-tags-MuiInputBase-root standalone-selector--selector-multi-with-tags-MuiInput-root standalone-selector--selector-multi-with-tags-CcUIKitInput-root-30 standalone-selector--selector-multi-with-tags-MuiInput-underline",
                                                                               }
                                                                             }
                                                                             endAdornment={
@@ -22735,7 +22736,7 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
                                                                                     aria-invalid="false"
                                                                                     autocapitalize="none"
                                                                                     autocomplete="off"
-                                                                                    class="standalone-selector--selector-multi-with-tags-MuiInputBase-input standalone-selector--selector-multi-with-tags-MuiInput-input standalone-selector--selector-multi-with-tags-CcUIKitInput-input-35 standalone-selector--selector-multi-with-tags-CcUIKitInput-input-44 standalone-selector--selector-multi-with-tags-MuiAutocomplete-input standalone-selector--selector-multi-with-tags-MuiAutocomplete-inputFocused standalone-selector--selector-multi-with-tags-MuiInputBase-inputAdornedStart standalone-selector--selector-multi-with-tags-MuiInputBase-inputAdornedEnd standalone-selector--selector-multi-with-tags-MuiInputBase-inputTypeSearch standalone-selector--selector-multi-with-tags-MuiInput-inputTypeSearch"
+                                                                                    class="standalone-selector--selector-multi-with-tags-MuiInputBase-input standalone-selector--selector-multi-with-tags-MuiInput-input standalone-selector--selector-multi-with-tags-CcUIKitInput-input-31 standalone-selector--selector-multi-with-tags-CcUIKitInput-input-42 standalone-selector--selector-multi-with-tags-MuiAutocomplete-input standalone-selector--selector-multi-with-tags-MuiAutocomplete-inputFocused standalone-selector--selector-multi-with-tags-MuiInputBase-inputAdornedStart standalone-selector--selector-multi-with-tags-MuiInputBase-inputAdornedEnd standalone-selector--selector-multi-with-tags-MuiInputBase-inputTypeSearch standalone-selector--selector-multi-with-tags-MuiInput-inputTypeSearch"
                                                                                     id="multi-select-with-tags"
                                                                                     spellcheck="false"
                                                                                     type="search"
@@ -22755,7 +22756,7 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
                                                                             type="search"
                                                                           >
                                                                             <div
-                                                                              className="standalone-selector--selector-multi-with-tags-MuiInputBase-root standalone-selector--selector-multi-with-tags-MuiInput-root standalone-selector--selector-multi-with-tags-CcUIKitInput-root-34 standalone-selector--selector-multi-with-tags-MuiInput-underline standalone-selector--selector-multi-with-tags-MuiAutocomplete-inputRoot standalone-selector--selector-multi-with-tags-MuiInputBase-fullWidth standalone-selector--selector-multi-with-tags-MuiInput-fullWidth standalone-selector--selector-multi-with-tags-MuiInputBase-formControl standalone-selector--selector-multi-with-tags-MuiInput-formControl standalone-selector--selector-multi-with-tags-MuiInputBase-adornedStart standalone-selector--selector-multi-with-tags-MuiInputBase-adornedEnd"
+                                                                              className="standalone-selector--selector-multi-with-tags-MuiInputBase-root standalone-selector--selector-multi-with-tags-MuiInput-root standalone-selector--selector-multi-with-tags-CcUIKitInput-root-30 standalone-selector--selector-multi-with-tags-MuiInput-underline standalone-selector--selector-multi-with-tags-MuiAutocomplete-inputRoot standalone-selector--selector-multi-with-tags-MuiInputBase-fullWidth standalone-selector--selector-multi-with-tags-MuiInput-fullWidth standalone-selector--selector-multi-with-tags-MuiInputBase-formControl standalone-selector--selector-multi-with-tags-MuiInput-formControl standalone-selector--selector-multi-with-tags-MuiInputBase-adornedStart standalone-selector--selector-multi-with-tags-MuiInputBase-adornedEnd"
                                                                               onClick={[Function]}
                                                                             >
                                                                               <ForwardRef(SearchIcon)
@@ -22801,7 +22802,7 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
                                                                                 autoCapitalize="none"
                                                                                 autoComplete="off"
                                                                                 autoFocus={false}
-                                                                                className="standalone-selector--selector-multi-with-tags-MuiInputBase-input standalone-selector--selector-multi-with-tags-MuiInput-input standalone-selector--selector-multi-with-tags-CcUIKitInput-input-35 standalone-selector--selector-multi-with-tags-CcUIKitInput-input-44 standalone-selector--selector-multi-with-tags-MuiAutocomplete-input standalone-selector--selector-multi-with-tags-MuiAutocomplete-inputFocused standalone-selector--selector-multi-with-tags-MuiInputBase-inputAdornedStart standalone-selector--selector-multi-with-tags-MuiInputBase-inputAdornedEnd standalone-selector--selector-multi-with-tags-MuiInputBase-inputTypeSearch standalone-selector--selector-multi-with-tags-MuiInput-inputTypeSearch"
+                                                                                className="standalone-selector--selector-multi-with-tags-MuiInputBase-input standalone-selector--selector-multi-with-tags-MuiInput-input standalone-selector--selector-multi-with-tags-CcUIKitInput-input-31 standalone-selector--selector-multi-with-tags-CcUIKitInput-input-42 standalone-selector--selector-multi-with-tags-MuiAutocomplete-input standalone-selector--selector-multi-with-tags-MuiAutocomplete-inputFocused standalone-selector--selector-multi-with-tags-MuiInputBase-inputAdornedStart standalone-selector--selector-multi-with-tags-MuiInputBase-inputAdornedEnd standalone-selector--selector-multi-with-tags-MuiInputBase-inputTypeSearch standalone-selector--selector-multi-with-tags-MuiInput-inputTypeSearch"
                                                                                 disabled={false}
                                                                                 id="multi-select-with-tags"
                                                                                 onAnimationStart={[Function]}
@@ -29071,11 +29072,11 @@ exports[`Storyshots Standalone/Selector MultiWithoutGroup 1`] = `
                                         className="standalone-selector--multi-without-group-MuiTypography-root standalone-selector--multi-without-group-MuiTypography-body1"
                                       >
                                         <WithStyles(ForwardRef(Typography))
-                                          className="standalone-selector--multi-without-group-CcMultiSelectWithoutGroup-searchLabel-8"
+                                          className="standalone-selector--multi-without-group-CcMultiSelectWithoutGroup-searchLabel-10"
                                           component="div"
                                         >
                                           <ForwardRef(Typography)
-                                            className="standalone-selector--multi-without-group-CcMultiSelectWithoutGroup-searchLabel-8"
+                                            className="standalone-selector--multi-without-group-CcMultiSelectWithoutGroup-searchLabel-10"
                                             classes={
                                               Object {
                                                 "alignCenter": "standalone-selector--multi-without-group-MuiTypography-alignCenter",
@@ -29113,7 +29114,7 @@ exports[`Storyshots Standalone/Selector MultiWithoutGroup 1`] = `
                                             component="div"
                                           >
                                             <div
-                                              className="standalone-selector--multi-without-group-MuiTypography-root standalone-selector--multi-without-group-CcMultiSelectWithoutGroup-searchLabel-8 standalone-selector--multi-without-group-MuiTypography-body1"
+                                              className="standalone-selector--multi-without-group-MuiTypography-root standalone-selector--multi-without-group-CcMultiSelectWithoutGroup-searchLabel-10 standalone-selector--multi-without-group-MuiTypography-body1"
                                             >
                                               <WithStyles(ForwardRef(Typography))
                                                 color="textSecondary"
@@ -29287,7 +29288,7 @@ exports[`Storyshots Standalone/Selector MultiWithoutGroup 1`] = `
                                                         aria-invalid="false"
                                                         autocapitalize="none"
                                                         autocomplete="off"
-                                                        class="standalone-selector--multi-without-group-MuiInputBase-input standalone-selector--multi-without-group-MuiInput-input standalone-selector--multi-without-group-CcUIKitInput-input-10 standalone-selector--multi-without-group-CcUIKitInput-input-12 standalone-selector--multi-without-group-MuiAutocomplete-input standalone-selector--multi-without-group-MuiAutocomplete-inputFocused standalone-selector--multi-without-group-MuiInputBase-inputAdornedStart standalone-selector--multi-without-group-MuiInputBase-inputAdornedEnd standalone-selector--multi-without-group-MuiInputBase-inputTypeSearch standalone-selector--multi-without-group-MuiInput-inputTypeSearch"
+                                                        class="standalone-selector--multi-without-group-MuiInputBase-input standalone-selector--multi-without-group-MuiInput-input standalone-selector--multi-without-group-CcUIKitInput-input-14 standalone-selector--multi-without-group-CcUIKitInput-input-16 standalone-selector--multi-without-group-MuiAutocomplete-input standalone-selector--multi-without-group-MuiAutocomplete-inputFocused standalone-selector--multi-without-group-MuiInputBase-inputAdornedStart standalone-selector--multi-without-group-MuiInputBase-inputAdornedEnd standalone-selector--multi-without-group-MuiInputBase-inputTypeSearch standalone-selector--multi-without-group-MuiInput-inputTypeSearch"
                                                         id="multi-select-without-group"
                                                         spellcheck="false"
                                                         type="search"
@@ -29311,9 +29312,9 @@ exports[`Storyshots Standalone/Selector MultiWithoutGroup 1`] = `
                                                     Object {
                                                       "className": "standalone-selector--multi-without-group-MuiAutocomplete-inputRoot",
                                                       "classes": Object {
-                                                        "input": "standalone-selector--multi-without-group-CcUIKitInput-input-10 standalone-selector--multi-without-group-CcUIKitInput-input-12",
-                                                        "multiline": "standalone-selector--multi-without-group-CcUIKitInput-multiline-11",
-                                                        "root": "standalone-selector--multi-without-group-CcUIKitInput-root-9",
+                                                        "input": "standalone-selector--multi-without-group-CcUIKitInput-input-14 standalone-selector--multi-without-group-CcUIKitInput-input-16",
+                                                        "multiline": "standalone-selector--multi-without-group-CcUIKitInput-multiline-15",
+                                                        "root": "standalone-selector--multi-without-group-CcUIKitInput-root-13",
                                                       },
                                                       "endAdornment": <React.Fragment>
                                                         <WithStyles(ForwardRef(InputAdornment))
@@ -29358,7 +29359,7 @@ exports[`Storyshots Standalone/Selector MultiWithoutGroup 1`] = `
                                                           aria-invalid="false"
                                                           autocapitalize="none"
                                                           autocomplete="off"
-                                                          class="standalone-selector--multi-without-group-MuiInputBase-input standalone-selector--multi-without-group-MuiInput-input standalone-selector--multi-without-group-CcUIKitInput-input-10 standalone-selector--multi-without-group-CcUIKitInput-input-12 standalone-selector--multi-without-group-MuiAutocomplete-input standalone-selector--multi-without-group-MuiAutocomplete-inputFocused standalone-selector--multi-without-group-MuiInputBase-inputAdornedStart standalone-selector--multi-without-group-MuiInputBase-inputAdornedEnd standalone-selector--multi-without-group-MuiInputBase-inputTypeSearch standalone-selector--multi-without-group-MuiInput-inputTypeSearch"
+                                                          class="standalone-selector--multi-without-group-MuiInputBase-input standalone-selector--multi-without-group-MuiInput-input standalone-selector--multi-without-group-CcUIKitInput-input-14 standalone-selector--multi-without-group-CcUIKitInput-input-16 standalone-selector--multi-without-group-MuiAutocomplete-input standalone-selector--multi-without-group-MuiAutocomplete-inputFocused standalone-selector--multi-without-group-MuiInputBase-inputAdornedStart standalone-selector--multi-without-group-MuiInputBase-inputAdornedEnd standalone-selector--multi-without-group-MuiInputBase-inputTypeSearch standalone-selector--multi-without-group-MuiInput-inputTypeSearch"
                                                           id="multi-select-without-group"
                                                           spellcheck="false"
                                                           type="search"
@@ -29381,9 +29382,9 @@ exports[`Storyshots Standalone/Selector MultiWithoutGroup 1`] = `
                                                       Object {
                                                         "className": "standalone-selector--multi-without-group-MuiAutocomplete-inputRoot",
                                                         "classes": Object {
-                                                          "input": "standalone-selector--multi-without-group-CcUIKitInput-input-10 standalone-selector--multi-without-group-CcUIKitInput-input-12",
-                                                          "multiline": "standalone-selector--multi-without-group-CcUIKitInput-multiline-11",
-                                                          "root": "standalone-selector--multi-without-group-CcUIKitInput-root-9",
+                                                          "input": "standalone-selector--multi-without-group-CcUIKitInput-input-14 standalone-selector--multi-without-group-CcUIKitInput-input-16",
+                                                          "multiline": "standalone-selector--multi-without-group-CcUIKitInput-multiline-15",
+                                                          "root": "standalone-selector--multi-without-group-CcUIKitInput-root-13",
                                                         },
                                                         "endAdornment": <React.Fragment>
                                                           <WithStyles(ForwardRef(InputAdornment))
@@ -29433,7 +29434,7 @@ exports[`Storyshots Standalone/Selector MultiWithoutGroup 1`] = `
                                                             aria-invalid="false"
                                                             autocapitalize="none"
                                                             autocomplete="off"
-                                                            class="standalone-selector--multi-without-group-MuiInputBase-input standalone-selector--multi-without-group-MuiInput-input standalone-selector--multi-without-group-CcUIKitInput-input-10 standalone-selector--multi-without-group-CcUIKitInput-input-12 standalone-selector--multi-without-group-MuiAutocomplete-input standalone-selector--multi-without-group-MuiAutocomplete-inputFocused standalone-selector--multi-without-group-MuiInputBase-inputAdornedStart standalone-selector--multi-without-group-MuiInputBase-inputAdornedEnd standalone-selector--multi-without-group-MuiInputBase-inputTypeSearch standalone-selector--multi-without-group-MuiInput-inputTypeSearch"
+                                                            class="standalone-selector--multi-without-group-MuiInputBase-input standalone-selector--multi-without-group-MuiInput-input standalone-selector--multi-without-group-CcUIKitInput-input-14 standalone-selector--multi-without-group-CcUIKitInput-input-16 standalone-selector--multi-without-group-MuiAutocomplete-input standalone-selector--multi-without-group-MuiAutocomplete-inputFocused standalone-selector--multi-without-group-MuiInputBase-inputAdornedStart standalone-selector--multi-without-group-MuiInputBase-inputAdornedEnd standalone-selector--multi-without-group-MuiInputBase-inputTypeSearch standalone-selector--multi-without-group-MuiInput-inputTypeSearch"
                                                             id="multi-select-without-group"
                                                             spellcheck="false"
                                                             type="search"
@@ -29479,9 +29480,9 @@ exports[`Storyshots Standalone/Selector MultiWithoutGroup 1`] = `
                                                             className="standalone-selector--multi-without-group-MuiAutocomplete-inputRoot"
                                                             classes={
                                                               Object {
-                                                                "input": "standalone-selector--multi-without-group-CcUIKitInput-input-10 standalone-selector--multi-without-group-CcUIKitInput-input-12",
-                                                                "multiline": "standalone-selector--multi-without-group-CcUIKitInput-multiline-11",
-                                                                "root": "standalone-selector--multi-without-group-CcUIKitInput-root-9",
+                                                                "input": "standalone-selector--multi-without-group-CcUIKitInput-input-14 standalone-selector--multi-without-group-CcUIKitInput-input-16",
+                                                                "multiline": "standalone-selector--multi-without-group-CcUIKitInput-multiline-15",
+                                                                "root": "standalone-selector--multi-without-group-CcUIKitInput-root-13",
                                                               }
                                                             }
                                                             endAdornment={
@@ -29521,7 +29522,7 @@ exports[`Storyshots Standalone/Selector MultiWithoutGroup 1`] = `
                                                                     aria-invalid="false"
                                                                     autocapitalize="none"
                                                                     autocomplete="off"
-                                                                    class="standalone-selector--multi-without-group-MuiInputBase-input standalone-selector--multi-without-group-MuiInput-input standalone-selector--multi-without-group-CcUIKitInput-input-10 standalone-selector--multi-without-group-CcUIKitInput-input-12 standalone-selector--multi-without-group-MuiAutocomplete-input standalone-selector--multi-without-group-MuiAutocomplete-inputFocused standalone-selector--multi-without-group-MuiInputBase-inputAdornedStart standalone-selector--multi-without-group-MuiInputBase-inputAdornedEnd standalone-selector--multi-without-group-MuiInputBase-inputTypeSearch standalone-selector--multi-without-group-MuiInput-inputTypeSearch"
+                                                                    class="standalone-selector--multi-without-group-MuiInputBase-input standalone-selector--multi-without-group-MuiInput-input standalone-selector--multi-without-group-CcUIKitInput-input-14 standalone-selector--multi-without-group-CcUIKitInput-input-16 standalone-selector--multi-without-group-MuiAutocomplete-input standalone-selector--multi-without-group-MuiAutocomplete-inputFocused standalone-selector--multi-without-group-MuiInputBase-inputAdornedStart standalone-selector--multi-without-group-MuiInputBase-inputAdornedEnd standalone-selector--multi-without-group-MuiInputBase-inputTypeSearch standalone-selector--multi-without-group-MuiInput-inputTypeSearch"
                                                                     id="multi-select-without-group"
                                                                     spellcheck="false"
                                                                     type="search"
@@ -29551,13 +29552,13 @@ exports[`Storyshots Standalone/Selector MultiWithoutGroup 1`] = `
                                                                   "focused": "Mui-focused",
                                                                   "formControl": "standalone-selector--multi-without-group-MuiInput-formControl",
                                                                   "fullWidth": "standalone-selector--multi-without-group-MuiInput-fullWidth",
-                                                                  "input": "standalone-selector--multi-without-group-MuiInput-input standalone-selector--multi-without-group-CcUIKitInput-input-10 standalone-selector--multi-without-group-CcUIKitInput-input-12",
+                                                                  "input": "standalone-selector--multi-without-group-MuiInput-input standalone-selector--multi-without-group-CcUIKitInput-input-14 standalone-selector--multi-without-group-CcUIKitInput-input-16",
                                                                   "inputMarginDense": "standalone-selector--multi-without-group-MuiInput-inputMarginDense",
                                                                   "inputMultiline": "standalone-selector--multi-without-group-MuiInput-inputMultiline",
                                                                   "inputTypeSearch": "standalone-selector--multi-without-group-MuiInput-inputTypeSearch",
                                                                   "marginDense": "standalone-selector--multi-without-group-MuiInput-marginDense",
-                                                                  "multiline": "standalone-selector--multi-without-group-MuiInput-multiline standalone-selector--multi-without-group-CcUIKitInput-multiline-11",
-                                                                  "root": "standalone-selector--multi-without-group-MuiInput-root standalone-selector--multi-without-group-CcUIKitInput-root-9",
+                                                                  "multiline": "standalone-selector--multi-without-group-MuiInput-multiline standalone-selector--multi-without-group-CcUIKitInput-multiline-15",
+                                                                  "root": "standalone-selector--multi-without-group-MuiInput-root standalone-selector--multi-without-group-CcUIKitInput-root-13",
                                                                   "underline": "standalone-selector--multi-without-group-MuiInput-underline",
                                                                 }
                                                               }
@@ -29598,7 +29599,7 @@ exports[`Storyshots Standalone/Selector MultiWithoutGroup 1`] = `
                                                                       aria-invalid="false"
                                                                       autocapitalize="none"
                                                                       autocomplete="off"
-                                                                      class="standalone-selector--multi-without-group-MuiInputBase-input standalone-selector--multi-without-group-MuiInput-input standalone-selector--multi-without-group-CcUIKitInput-input-10 standalone-selector--multi-without-group-CcUIKitInput-input-12 standalone-selector--multi-without-group-MuiAutocomplete-input standalone-selector--multi-without-group-MuiAutocomplete-inputFocused standalone-selector--multi-without-group-MuiInputBase-inputAdornedStart standalone-selector--multi-without-group-MuiInputBase-inputAdornedEnd standalone-selector--multi-without-group-MuiInputBase-inputTypeSearch standalone-selector--multi-without-group-MuiInput-inputTypeSearch"
+                                                                      class="standalone-selector--multi-without-group-MuiInputBase-input standalone-selector--multi-without-group-MuiInput-input standalone-selector--multi-without-group-CcUIKitInput-input-14 standalone-selector--multi-without-group-CcUIKitInput-input-16 standalone-selector--multi-without-group-MuiAutocomplete-input standalone-selector--multi-without-group-MuiAutocomplete-inputFocused standalone-selector--multi-without-group-MuiInputBase-inputAdornedStart standalone-selector--multi-without-group-MuiInputBase-inputAdornedEnd standalone-selector--multi-without-group-MuiInputBase-inputTypeSearch standalone-selector--multi-without-group-MuiInput-inputTypeSearch"
                                                                       id="multi-select-without-group"
                                                                       spellcheck="false"
                                                                       type="search"
@@ -29628,13 +29629,13 @@ exports[`Storyshots Standalone/Selector MultiWithoutGroup 1`] = `
                                                                     "focused": "Mui-focused",
                                                                     "formControl": "standalone-selector--multi-without-group-MuiInput-formControl",
                                                                     "fullWidth": "standalone-selector--multi-without-group-MuiInput-fullWidth",
-                                                                    "input": "standalone-selector--multi-without-group-MuiInput-input standalone-selector--multi-without-group-CcUIKitInput-input-10 standalone-selector--multi-without-group-CcUIKitInput-input-12",
+                                                                    "input": "standalone-selector--multi-without-group-MuiInput-input standalone-selector--multi-without-group-CcUIKitInput-input-14 standalone-selector--multi-without-group-CcUIKitInput-input-16",
                                                                     "inputMarginDense": "standalone-selector--multi-without-group-MuiInput-inputMarginDense",
                                                                     "inputMultiline": "standalone-selector--multi-without-group-MuiInput-inputMultiline",
                                                                     "inputTypeSearch": "standalone-selector--multi-without-group-MuiInput-inputTypeSearch",
                                                                     "marginDense": "standalone-selector--multi-without-group-MuiInput-marginDense",
-                                                                    "multiline": "standalone-selector--multi-without-group-MuiInput-multiline standalone-selector--multi-without-group-CcUIKitInput-multiline-11",
-                                                                    "root": "standalone-selector--multi-without-group-MuiInput-root standalone-selector--multi-without-group-CcUIKitInput-root-9 standalone-selector--multi-without-group-MuiInput-underline",
+                                                                    "multiline": "standalone-selector--multi-without-group-MuiInput-multiline standalone-selector--multi-without-group-CcUIKitInput-multiline-15",
+                                                                    "root": "standalone-selector--multi-without-group-MuiInput-root standalone-selector--multi-without-group-CcUIKitInput-root-13 standalone-selector--multi-without-group-MuiInput-underline",
                                                                     "underline": null,
                                                                   }
                                                                 }
@@ -29676,7 +29677,7 @@ exports[`Storyshots Standalone/Selector MultiWithoutGroup 1`] = `
                                                                         aria-invalid="false"
                                                                         autocapitalize="none"
                                                                         autocomplete="off"
-                                                                        class="standalone-selector--multi-without-group-MuiInputBase-input standalone-selector--multi-without-group-MuiInput-input standalone-selector--multi-without-group-CcUIKitInput-input-10 standalone-selector--multi-without-group-CcUIKitInput-input-12 standalone-selector--multi-without-group-MuiAutocomplete-input standalone-selector--multi-without-group-MuiAutocomplete-inputFocused standalone-selector--multi-without-group-MuiInputBase-inputAdornedStart standalone-selector--multi-without-group-MuiInputBase-inputAdornedEnd standalone-selector--multi-without-group-MuiInputBase-inputTypeSearch standalone-selector--multi-without-group-MuiInput-inputTypeSearch"
+                                                                        class="standalone-selector--multi-without-group-MuiInputBase-input standalone-selector--multi-without-group-MuiInput-input standalone-selector--multi-without-group-CcUIKitInput-input-14 standalone-selector--multi-without-group-CcUIKitInput-input-16 standalone-selector--multi-without-group-MuiAutocomplete-input standalone-selector--multi-without-group-MuiAutocomplete-inputFocused standalone-selector--multi-without-group-MuiInputBase-inputAdornedStart standalone-selector--multi-without-group-MuiInputBase-inputAdornedEnd standalone-selector--multi-without-group-MuiInputBase-inputTypeSearch standalone-selector--multi-without-group-MuiInput-inputTypeSearch"
                                                                         id="multi-select-without-group"
                                                                         spellcheck="false"
                                                                         type="search"
@@ -29708,7 +29709,7 @@ exports[`Storyshots Standalone/Selector MultiWithoutGroup 1`] = `
                                                                       "focused": "Mui-focused Mui-focused",
                                                                       "formControl": "standalone-selector--multi-without-group-MuiInputBase-formControl standalone-selector--multi-without-group-MuiInput-formControl",
                                                                       "fullWidth": "standalone-selector--multi-without-group-MuiInputBase-fullWidth standalone-selector--multi-without-group-MuiInput-fullWidth",
-                                                                      "input": "standalone-selector--multi-without-group-MuiInputBase-input standalone-selector--multi-without-group-MuiInput-input standalone-selector--multi-without-group-CcUIKitInput-input-10 standalone-selector--multi-without-group-CcUIKitInput-input-12",
+                                                                      "input": "standalone-selector--multi-without-group-MuiInputBase-input standalone-selector--multi-without-group-MuiInput-input standalone-selector--multi-without-group-CcUIKitInput-input-14 standalone-selector--multi-without-group-CcUIKitInput-input-16",
                                                                       "inputAdornedEnd": "standalone-selector--multi-without-group-MuiInputBase-inputAdornedEnd",
                                                                       "inputAdornedStart": "standalone-selector--multi-without-group-MuiInputBase-inputAdornedStart",
                                                                       "inputHiddenLabel": "standalone-selector--multi-without-group-MuiInputBase-inputHiddenLabel",
@@ -29716,8 +29717,8 @@ exports[`Storyshots Standalone/Selector MultiWithoutGroup 1`] = `
                                                                       "inputMultiline": "standalone-selector--multi-without-group-MuiInputBase-inputMultiline standalone-selector--multi-without-group-MuiInput-inputMultiline",
                                                                       "inputTypeSearch": "standalone-selector--multi-without-group-MuiInputBase-inputTypeSearch standalone-selector--multi-without-group-MuiInput-inputTypeSearch",
                                                                       "marginDense": "standalone-selector--multi-without-group-MuiInputBase-marginDense standalone-selector--multi-without-group-MuiInput-marginDense",
-                                                                      "multiline": "standalone-selector--multi-without-group-MuiInputBase-multiline standalone-selector--multi-without-group-MuiInput-multiline standalone-selector--multi-without-group-CcUIKitInput-multiline-11",
-                                                                      "root": "standalone-selector--multi-without-group-MuiInputBase-root standalone-selector--multi-without-group-MuiInput-root standalone-selector--multi-without-group-CcUIKitInput-root-9 standalone-selector--multi-without-group-MuiInput-underline",
+                                                                      "multiline": "standalone-selector--multi-without-group-MuiInputBase-multiline standalone-selector--multi-without-group-MuiInput-multiline standalone-selector--multi-without-group-CcUIKitInput-multiline-15",
+                                                                      "root": "standalone-selector--multi-without-group-MuiInputBase-root standalone-selector--multi-without-group-MuiInput-root standalone-selector--multi-without-group-CcUIKitInput-root-13 standalone-selector--multi-without-group-MuiInput-underline",
                                                                     }
                                                                   }
                                                                   endAdornment={
@@ -29758,7 +29759,7 @@ exports[`Storyshots Standalone/Selector MultiWithoutGroup 1`] = `
                                                                           aria-invalid="false"
                                                                           autocapitalize="none"
                                                                           autocomplete="off"
-                                                                          class="standalone-selector--multi-without-group-MuiInputBase-input standalone-selector--multi-without-group-MuiInput-input standalone-selector--multi-without-group-CcUIKitInput-input-10 standalone-selector--multi-without-group-CcUIKitInput-input-12 standalone-selector--multi-without-group-MuiAutocomplete-input standalone-selector--multi-without-group-MuiAutocomplete-inputFocused standalone-selector--multi-without-group-MuiInputBase-inputAdornedStart standalone-selector--multi-without-group-MuiInputBase-inputAdornedEnd standalone-selector--multi-without-group-MuiInputBase-inputTypeSearch standalone-selector--multi-without-group-MuiInput-inputTypeSearch"
+                                                                          class="standalone-selector--multi-without-group-MuiInputBase-input standalone-selector--multi-without-group-MuiInput-input standalone-selector--multi-without-group-CcUIKitInput-input-14 standalone-selector--multi-without-group-CcUIKitInput-input-16 standalone-selector--multi-without-group-MuiAutocomplete-input standalone-selector--multi-without-group-MuiAutocomplete-inputFocused standalone-selector--multi-without-group-MuiInputBase-inputAdornedStart standalone-selector--multi-without-group-MuiInputBase-inputAdornedEnd standalone-selector--multi-without-group-MuiInputBase-inputTypeSearch standalone-selector--multi-without-group-MuiInput-inputTypeSearch"
                                                                           id="multi-select-without-group"
                                                                           spellcheck="false"
                                                                           type="search"
@@ -29778,7 +29779,7 @@ exports[`Storyshots Standalone/Selector MultiWithoutGroup 1`] = `
                                                                   type="search"
                                                                 >
                                                                   <div
-                                                                    className="standalone-selector--multi-without-group-MuiInputBase-root standalone-selector--multi-without-group-MuiInput-root standalone-selector--multi-without-group-CcUIKitInput-root-9 standalone-selector--multi-without-group-MuiInput-underline standalone-selector--multi-without-group-MuiAutocomplete-inputRoot standalone-selector--multi-without-group-MuiInputBase-fullWidth standalone-selector--multi-without-group-MuiInput-fullWidth standalone-selector--multi-without-group-MuiInputBase-formControl standalone-selector--multi-without-group-MuiInput-formControl standalone-selector--multi-without-group-MuiInputBase-adornedStart standalone-selector--multi-without-group-MuiInputBase-adornedEnd"
+                                                                    className="standalone-selector--multi-without-group-MuiInputBase-root standalone-selector--multi-without-group-MuiInput-root standalone-selector--multi-without-group-CcUIKitInput-root-13 standalone-selector--multi-without-group-MuiInput-underline standalone-selector--multi-without-group-MuiAutocomplete-inputRoot standalone-selector--multi-without-group-MuiInputBase-fullWidth standalone-selector--multi-without-group-MuiInput-fullWidth standalone-selector--multi-without-group-MuiInputBase-formControl standalone-selector--multi-without-group-MuiInput-formControl standalone-selector--multi-without-group-MuiInputBase-adornedStart standalone-selector--multi-without-group-MuiInputBase-adornedEnd"
                                                                     onClick={[Function]}
                                                                   >
                                                                     <ForwardRef(SearchIcon)
@@ -29824,7 +29825,7 @@ exports[`Storyshots Standalone/Selector MultiWithoutGroup 1`] = `
                                                                       autoCapitalize="none"
                                                                       autoComplete="off"
                                                                       autoFocus={false}
-                                                                      className="standalone-selector--multi-without-group-MuiInputBase-input standalone-selector--multi-without-group-MuiInput-input standalone-selector--multi-without-group-CcUIKitInput-input-10 standalone-selector--multi-without-group-CcUIKitInput-input-12 standalone-selector--multi-without-group-MuiAutocomplete-input standalone-selector--multi-without-group-MuiAutocomplete-inputFocused standalone-selector--multi-without-group-MuiInputBase-inputAdornedStart standalone-selector--multi-without-group-MuiInputBase-inputAdornedEnd standalone-selector--multi-without-group-MuiInputBase-inputTypeSearch standalone-selector--multi-without-group-MuiInput-inputTypeSearch"
+                                                                      className="standalone-selector--multi-without-group-MuiInputBase-input standalone-selector--multi-without-group-MuiInput-input standalone-selector--multi-without-group-CcUIKitInput-input-14 standalone-selector--multi-without-group-CcUIKitInput-input-16 standalone-selector--multi-without-group-MuiAutocomplete-input standalone-selector--multi-without-group-MuiAutocomplete-inputFocused standalone-selector--multi-without-group-MuiInputBase-inputAdornedStart standalone-selector--multi-without-group-MuiInputBase-inputAdornedEnd standalone-selector--multi-without-group-MuiInputBase-inputTypeSearch standalone-selector--multi-without-group-MuiInput-inputTypeSearch"
                                                                       disabled={false}
                                                                       id="multi-select-without-group"
                                                                       onAnimationStart={[Function]}

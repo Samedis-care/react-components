@@ -1,12 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import {
-	Typography,
-	Switch,
-	Grid,
-	Theme,
-	withStyles,
-	makeStyles,
-} from "@material-ui/core";
+import { Grid, Switch, Theme, Typography, withStyles } from "@material-ui/core";
 import {
 	BaseSelectorProps,
 	MultiSelectorData,
@@ -17,6 +10,7 @@ import MultiSelectWithoutGroup, {
 } from "./MultiSelectWithoutGroup";
 import { BaseSelectorData } from "./BaseSelector";
 import { uniqueArray } from "../../utils";
+import { makeStyles } from "@material-ui/core/styles";
 
 export interface MultiSelectWithTagsProps<
 	DataT extends MultiSelectorData,
@@ -35,19 +29,11 @@ export interface MultiSelectWithTagsProps<
 	 */
 	title: string;
 	/**
-	 * Custom styles
-	 */
-	classes?: Partial<keyof ReturnType<typeof useStyles>>;
-	/**
 	 * Custom styles for multi select without groups
 	 */
 	subClasses?: {
 		dataSelector: MultiSelectWithoutGroupProps<DataT>["classes"];
 	};
-	/**
-	 * Label for switch control (only used if displaySwitch is truthy)
-	 */
-	switchLabel?: React.ReactNode;
 	/**
 	 * Change event callback
 	 * @param data The currently selected entries. This should be feed back to selected prop
@@ -78,6 +64,18 @@ export interface MultiSelectWithTagsProps<
 		query: string,
 		switchValue: boolean
 	) => GroupT[] | Promise<GroupT[]>;
+	/**
+	 * Default value for switch position
+	 */
+	defaultSwitchValue?: boolean;
+	/**
+	 * Display switch control?
+	 */
+	displaySwitch?: boolean;
+	/**
+	 * Label for switch control (only used if displaySwitch is truthy)
+	 */
+	switchLabel?: React.ReactNode;
 }
 
 interface SelectedGroup {
@@ -90,36 +88,6 @@ interface SelectedGroup {
 	 */
 	items: string[];
 }
-
-const useStyles = makeStyles(
-	(theme: Theme) => ({
-		paperWrapper: {
-			boxShadow: "none",
-			border: `1px solid ${theme.palette.divider}`,
-		},
-		outlined: {
-			float: "left",
-			backgroundColor: "#cce1f6",
-			padding: "0px 20px",
-			borderRadius: 20,
-			borderColor: "#cce1f6",
-			margin: "5px",
-			lineHeight: "30px",
-		},
-		labelWithSwitch: {
-			marginTop: 15,
-		},
-		searchLabel: {
-			lineHeight: "30px",
-			float: "left",
-		},
-		switch: {
-			lineHeight: "30px",
-			float: "right",
-		},
-	}),
-	{ name: "CcMultiSelectWithTags" }
-);
 
 const AntSwitch = withStyles((theme: Theme) => ({
 	root: {
@@ -155,6 +123,19 @@ const AntSwitch = withStyles((theme: Theme) => ({
 	checked: {},
 }))(Switch);
 
+const useStyles = makeStyles(
+	{
+		switch: {
+			lineHeight: "30px",
+			float: "right",
+		},
+		labelWithSwitch: {
+			marginTop: 15,
+		},
+	},
+	{ name: "CcMultiSelectWithGroup" }
+);
+
 const MultiSelectWithTags = <
 	DataT extends MultiSelectorData,
 	GroupT extends BaseSelectorData
@@ -178,14 +159,17 @@ const MultiSelectWithTags = <
 		onChange,
 		openInfo,
 		getIdOfData,
+		switchLabel,
 	} = props;
-	const classes = useStyles(props);
+
+	const classes = useStyles();
+
 	const defaultSwitchValue = props.displaySwitch
 		? props.defaultSwitchValue ?? false
 		: false;
-	const [selectedGroups, setSelectedGroups] = useState<SelectedGroup[]>([]);
-	const [switchValue, setSwitchValue] = useState(defaultSwitchValue);
 
+	const [selectedGroups, setSelectedGroups] = useState<SelectedGroup[]>([]);
+	const [switchValue, setSwitchValue] = useState<boolean>(defaultSwitchValue);
 	const getIdDefault = useCallback((data: DataT) => data.value, []);
 	const getId = getIdOfData ?? getIdDefault;
 
@@ -233,13 +217,6 @@ const MultiSelectWithTags = <
 		[onChange, loadGroupEntries, getId, selected]
 	);
 
-	const handleSwitchChange = useCallback(
-		(event: React.ChangeEvent<HTMLInputElement>) => {
-			setSwitchValue(event.target.checked);
-		},
-		[setSwitchValue]
-	);
-
 	const loadGroupOptionsAndProcess = useCallback(
 		async (query: string) => {
 			const selectedGroupIds = selectedGroups.map((group) => group.group);
@@ -248,6 +225,13 @@ const MultiSelectWithTags = <
 			);
 		},
 		[loadGroupOptions, selectedGroups, switchValue]
+	);
+
+	const handleSwitchChange = useCallback(
+		(event: React.ChangeEvent<HTMLInputElement>) => {
+			if (setSwitchValue) setSwitchValue(event.target.checked);
+		},
+		[setSwitchValue]
 	);
 
 	return (
@@ -269,7 +253,7 @@ const MultiSelectWithTags = <
 				loadingText={loadingText}
 				openText={openText}
 				closeText={closeText}
-			/>
+			/>{" "}
 			<Typography component="div" className={classes.labelWithSwitch}>
 				{props.displaySwitch && (
 					<Typography
@@ -284,7 +268,7 @@ const MultiSelectWithTags = <
 									onChange={handleSwitchChange}
 								/>
 							</Grid>
-							<Grid item>{props.switchLabel}</Grid>
+							<Grid item>{switchLabel}</Grid>
 						</Grid>
 					</Typography>
 				)}
@@ -294,8 +278,7 @@ const MultiSelectWithTags = <
 					disabled={disabled}
 					searchInputLabel={searchInputLabel}
 					enableIcons={enableIcons}
-					defaultSwitchValue={props.defaultSwitchValue}
-					displaySwitch={props.displaySwitch}
+					switchValue={switchValue}
 					loadDataOptions={loadDataOptions}
 					openInfo={openInfo}
 					onChange={onChange}
