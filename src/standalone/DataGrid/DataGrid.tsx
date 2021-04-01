@@ -140,6 +140,12 @@ export interface IDataGridCallbacks {
 	 * @param ids The ids that are selected/not selected based on invert
 	 */
 	onSelectionChange?: (invert: boolean, ids: string[]) => void;
+	/**
+	 * Callback for row double click
+	 * @param id The ID of the row
+	 * @remarks Called additionally before edit handler
+	 */
+	onRowDoubleClick?: (id: string) => void;
 }
 
 export type DataGridAdditionalFilters = Record<string, unknown>;
