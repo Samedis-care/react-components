@@ -27,6 +27,7 @@ const useStyles = makeStyles(
 		switch: {
 			lineHeight: "30px",
 			float: "right",
+			marginTop: -30,
 		},
 		labelWithSwitch: {
 			marginTop: 15,
@@ -102,7 +103,7 @@ const InlineSwitch = (props: InlineSwitch) => {
 					</Grid>
 				</Typography>
 			)}
-			{children}
+			<Typography component="div">{children}</Typography>
 		</Typography>
 	);
 };
