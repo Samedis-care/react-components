@@ -76,7 +76,7 @@ export interface BaseSelectorProps<DataT extends BaseSelectorData>
 	 * Data load function
 	 * @param search The user search input
 	 */
-	onLoad: (search: string) => DataT[] | Promise<DataT[]>;
+	onLoad: (search: string, switchValue: boolean) => DataT[] | Promise<DataT[]>;
 	/**
 	 * Callback for autocomplete change
 	 */
@@ -320,7 +320,7 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 	const onSearchHandler = useCallback(
 		async (query: string) => {
 			setLoading(true);
-			const results = await onLoad(query);
+			const results = await onLoad(query, !!switchValue);
 			if (onAddNew) {
 				results.push({
 					value: "add-new-button",
@@ -346,6 +346,7 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 		},
 		[
 			onLoad,
+			switchValue,
 			onAddNew,
 			grouped,
 			disableGroupSorting,
