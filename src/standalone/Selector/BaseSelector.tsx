@@ -365,13 +365,13 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 		if (!open) return;
 		void onSearchHandler(query);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [query]);
+	}, [query, switchValue]);
 
 	// initial option load and reset options upon selection
 	useEffect(() => {
 		void onSearchHandler("");
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [selected, refreshToken]);
+	}, [selected, switchValue, refreshToken]);
 
 	const filterOptions = useCallback((options: DataT[]) => options, []);
 
