@@ -54,6 +54,18 @@ export interface MultiSelectProps<DataT extends MultiSelectorData>
 	subClasses?: {
 		baseSelector: BaseSelectorProps<BaseSelectorData>["classes"];
 	};
+	/**
+	 * Display switch control?
+	 */
+	displaySwitch?: boolean;
+	/**
+	 * Default value for switch position
+	 */
+	defaultSwitchValue?: boolean;
+	/**
+	 * Label for switch control (only used if displaySwitch is truthy)
+	 */
+	switchLabel?: React.ReactNode;
 }
 
 const useBaseSelectorStyles = makeStyles(
@@ -87,6 +99,9 @@ const MultiSelect = <DataT extends MultiSelectorData>(
 		selectedEntryRenderer,
 		disabled,
 		getIdOfData,
+		displaySwitch,
+		switchLabel,
+		defaultSwitchValue,
 	} = props;
 	const multiSelectClasses = useMultiSelectorStyles(props);
 	const baseSelectorClasses = useBaseSelectorStyles(
@@ -172,6 +187,9 @@ const MultiSelect = <DataT extends MultiSelectorData>(
 					selected={null}
 					onSelect={multiSelectHandler}
 					refreshToken={selected.map(getId).join(",")}
+					displaySwitch={!!displaySwitch}
+					switchLabel={switchLabel}
+					defaultSwitchValue={defaultSwitchValue}
 				/>
 			</Grid>
 			{props.selected.length > 0 && (
