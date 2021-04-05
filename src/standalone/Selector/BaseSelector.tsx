@@ -206,6 +206,9 @@ const useCustomStyles = makeStyles(
 		textFieldStandard: {
 			position: "absolute",
 		},
+		switch: {
+			marginTop: -30,
+		},
 		icon: (
 			props: Pick<BaseSelectorProps<BaseSelectorData>, "iconSize" | "label">
 		) => ({
@@ -229,12 +232,6 @@ const variantInput: Record<
 	outlined: OutlinedInputWithHelp,
 	standard: InputWithHelp,
 };
-
-const useStyles = makeStyles({
-	switch: {
-		marginTop: -30,
-	},
-});
 
 const BaseSelector = <DataT extends BaseSelectorData>(
 	props: BaseSelectorProps<DataT>
@@ -268,7 +265,6 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 	const classes = useThemeStyles(
 		(props as unknown) as BaseSelectorProps<BaseSelectorData>
 	);
-	const customClassesSwitch = useStyles();
 	const defaultSwitchValue = !!(
 		props.displaySwitch && props.defaultSwitchValue
 	);
@@ -391,7 +387,7 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 			value={switchValue}
 			onChange={setSwitchValue}
 			label={switchLabel}
-			classes={customClassesSwitch}
+			classes={customClasses}
 		>
 			<>
 				{label && <InputLabel shrink>{label}</InputLabel>}

@@ -6322,7 +6322,11 @@ exports[`Storyshots Standalone/Selector Multi 1`] = `
                                                           <Memo(InlineSwitch)
                                                             classes={
                                                               Object {
-                                                                "switch": "standalone-selector--selector-multi-makeStyles-switch-37",
+                                                                "icon": "standalone-selector--selector-multi-CcBaseSelectorCustom-icon-40 standalone-selector--selector-multi-CcBaseSelectorCustom-icon-42",
+                                                                "infoBtn": "standalone-selector--selector-multi-CcBaseSelectorCustom-infoBtn-37",
+                                                                "switch": "standalone-selector--selector-multi-CcBaseSelectorCustom-switch-39",
+                                                                "textFieldStandard": "standalone-selector--selector-multi-CcBaseSelectorCustom-textFieldStandard-38",
+                                                                "wrapper": "standalone-selector--selector-multi-CcBaseSelectorCustom-wrapper-41 standalone-selector--selector-multi-CcBaseSelectorCustom-wrapper-43",
                                                               }
                                                             }
                                                             label="All Record"
@@ -21149,7 +21153,11 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
                                         <Memo(InlineSwitch)
                                           classes={
                                             Object {
-                                              "switch": "standalone-selector--selector-multi-with-tags-makeStyles-switch-23",
+                                              "icon": "standalone-selector--selector-multi-with-tags-CcBaseSelectorCustom-icon-26 standalone-selector--selector-multi-with-tags-CcBaseSelectorCustom-icon-28",
+                                              "infoBtn": "standalone-selector--selector-multi-with-tags-CcBaseSelectorCustom-infoBtn-23",
+                                              "switch": "standalone-selector--selector-multi-with-tags-CcBaseSelectorCustom-switch-25",
+                                              "textFieldStandard": "standalone-selector--selector-multi-with-tags-CcBaseSelectorCustom-textFieldStandard-24",
+                                              "wrapper": "standalone-selector--selector-multi-with-tags-CcBaseSelectorCustom-wrapper-27 standalone-selector--selector-multi-with-tags-CcBaseSelectorCustom-wrapper-29",
                                             }
                                           }
                                           onChange={[Function]}
@@ -36364,7 +36372,11 @@ exports[`Storyshots Standalone/Selector Single 1`] = `
                                               <Memo(InlineSwitch)
                                                 classes={
                                                   Object {
-                                                    "switch": "standalone-selector--selector-single-makeStyles-switch-20",
+                                                    "icon": "standalone-selector--selector-single-CcBaseSelectorCustom-icon-23 standalone-selector--selector-single-CcBaseSelectorCustom-icon-25",
+                                                    "infoBtn": "standalone-selector--selector-single-CcBaseSelectorCustom-infoBtn-20",
+                                                    "switch": "standalone-selector--selector-single-CcBaseSelectorCustom-switch-22",
+                                                    "textFieldStandard": "standalone-selector--selector-single-CcBaseSelectorCustom-textFieldStandard-21",
+                                                    "wrapper": "standalone-selector--selector-single-CcBaseSelectorCustom-wrapper-24 standalone-selector--selector-single-CcBaseSelectorCustom-wrapper-26",
                                                   }
                                                 }
                                                 onChange={[Function]}
@@ -36687,7 +36699,7 @@ exports[`Storyshots Standalone/Selector Single 1`] = `
                                                                                 <Memo />
                                                                               </WithStyles(ForwardRef(IconButton))>
                                                                               <WithStyles(ForwardRef(IconButton))
-                                                                                className="standalone-selector--selector-single-CcBaseSelectorCustom-infoBtn-21"
+                                                                                className="standalone-selector--selector-single-CcBaseSelectorCustom-infoBtn-20"
                                                                                 onClick={[Function]}
                                                                               >
                                                                                 <Memo
@@ -36770,7 +36782,7 @@ exports[`Storyshots Standalone/Selector Single 1`] = `
                                                                                   <Memo />
                                                                                 </WithStyles(ForwardRef(IconButton))>
                                                                                 <WithStyles(ForwardRef(IconButton))
-                                                                                  className="standalone-selector--selector-single-CcBaseSelectorCustom-infoBtn-21"
+                                                                                  className="standalone-selector--selector-single-CcBaseSelectorCustom-infoBtn-20"
                                                                                   onClick={[Function]}
                                                                                 >
                                                                                   <Memo
@@ -36865,7 +36877,7 @@ exports[`Storyshots Standalone/Selector Single 1`] = `
                                                                                     <Memo />
                                                                                   </WithStyles(ForwardRef(IconButton))>
                                                                                   <WithStyles(ForwardRef(IconButton))
-                                                                                    className="standalone-selector--selector-single-CcBaseSelectorCustom-infoBtn-21"
+                                                                                    className="standalone-selector--selector-single-CcBaseSelectorCustom-infoBtn-20"
                                                                                     onClick={[Function]}
                                                                                   >
                                                                                     <Memo
@@ -36960,7 +36972,7 @@ exports[`Storyshots Standalone/Selector Single 1`] = `
                                                                                       <Memo />
                                                                                     </WithStyles(ForwardRef(IconButton))>
                                                                                     <WithStyles(ForwardRef(IconButton))
-                                                                                      className="standalone-selector--selector-single-CcBaseSelectorCustom-infoBtn-21"
+                                                                                      className="standalone-selector--selector-single-CcBaseSelectorCustom-infoBtn-20"
                                                                                       onClick={[Function]}
                                                                                     >
                                                                                       <Memo
@@ -37062,7 +37074,7 @@ exports[`Storyshots Standalone/Selector Single 1`] = `
                                                                                         <Memo />
                                                                                       </WithStyles(ForwardRef(IconButton))>
                                                                                       <WithStyles(ForwardRef(IconButton))
-                                                                                        className="standalone-selector--selector-single-CcBaseSelectorCustom-infoBtn-21"
+                                                                                        className="standalone-selector--selector-single-CcBaseSelectorCustom-infoBtn-20"
                                                                                         onClick={[Function]}
                                                                                       >
                                                                                         <Memo
@@ -37432,11 +37444,11 @@ exports[`Storyshots Standalone/Selector Single 1`] = `
                                                                                         </ForwardRef(IconButton)>
                                                                                       </WithStyles(ForwardRef(IconButton))>
                                                                                       <WithStyles(ForwardRef(IconButton))
-                                                                                        className="standalone-selector--selector-single-CcBaseSelectorCustom-infoBtn-21"
+                                                                                        className="standalone-selector--selector-single-CcBaseSelectorCustom-infoBtn-20"
                                                                                         onClick={[Function]}
                                                                                       >
                                                                                         <ForwardRef(IconButton)
-                                                                                          className="standalone-selector--selector-single-CcBaseSelectorCustom-infoBtn-21"
+                                                                                          className="standalone-selector--selector-single-CcBaseSelectorCustom-infoBtn-20"
                                                                                           classes={
                                                                                             Object {
                                                                                               "colorInherit": "standalone-selector--selector-single-MuiIconButton-colorInherit",
@@ -37454,14 +37466,14 @@ exports[`Storyshots Standalone/Selector Single 1`] = `
                                                                                         >
                                                                                           <WithStyles(ForwardRef(ButtonBase))
                                                                                             centerRipple={true}
-                                                                                            className="standalone-selector--selector-single-MuiIconButton-root standalone-selector--selector-single-CcBaseSelectorCustom-infoBtn-21"
+                                                                                            className="standalone-selector--selector-single-MuiIconButton-root standalone-selector--selector-single-CcBaseSelectorCustom-infoBtn-20"
                                                                                             disabled={false}
                                                                                             focusRipple={true}
                                                                                             onClick={[Function]}
                                                                                           >
                                                                                             <ForwardRef(ButtonBase)
                                                                                               centerRipple={true}
-                                                                                              className="standalone-selector--selector-single-MuiIconButton-root standalone-selector--selector-single-CcBaseSelectorCustom-infoBtn-21"
+                                                                                              className="standalone-selector--selector-single-MuiIconButton-root standalone-selector--selector-single-CcBaseSelectorCustom-infoBtn-20"
                                                                                               classes={
                                                                                                 Object {
                                                                                                   "disabled": "Mui-disabled",
@@ -37474,7 +37486,7 @@ exports[`Storyshots Standalone/Selector Single 1`] = `
                                                                                               onClick={[Function]}
                                                                                             >
                                                                                               <button
-                                                                                                className="standalone-selector--selector-single-MuiButtonBase-root standalone-selector--selector-single-MuiIconButton-root standalone-selector--selector-single-CcBaseSelectorCustom-infoBtn-21"
+                                                                                                className="standalone-selector--selector-single-MuiButtonBase-root standalone-selector--selector-single-MuiIconButton-root standalone-selector--selector-single-CcBaseSelectorCustom-infoBtn-20"
                                                                                                 disabled={false}
                                                                                                 onBlur={[Function]}
                                                                                                 onClick={[Function]}
