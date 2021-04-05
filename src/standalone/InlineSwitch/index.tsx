@@ -20,6 +20,10 @@ export interface InlineSwitch {
 	 */
 	switchLabel?: React.ReactNode;
 	children?: React.ReactElement;
+	/**
+	 * Apply custom margin top class to set UI
+	 */
+	customMarginTop?: boolean;
 }
 
 const useStyles = makeStyles(
@@ -27,10 +31,12 @@ const useStyles = makeStyles(
 		switch: {
 			lineHeight: "30px",
 			float: "right",
-			marginTop: -30,
 		},
 		labelWithSwitch: {
 			marginTop: 15,
+		},
+		customMarginTop: {
+			marginTop: -30,
 		},
 	},
 	{ name: "InlineSwitch" }
@@ -78,6 +84,7 @@ const InlineSwitch = (props: InlineSwitch) => {
 		setSwitchValue,
 		displaySwitch,
 		children,
+		customMarginTop,
 	} = props;
 
 	const handleSwitchChange = useCallback(
@@ -92,7 +99,9 @@ const InlineSwitch = (props: InlineSwitch) => {
 			{displaySwitch && (
 				<Typography
 					component="div"
-					className={classes.switch}
+					className={`${classes.switch} ${
+						customMarginTop ? classes.customMarginTop : ""
+					}`}
 					variant={"caption"}
 				>
 					<Grid component="label" container alignItems="center" spacing={1}>

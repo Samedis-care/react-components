@@ -383,6 +383,7 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 			switchValue={switchValue}
 			setSwitchValue={setSwitchValue}
 			switchLabel={switchLabel}
+			customMarginTop
 		>
 			<>
 				{label && <InputLabel shrink>{label}</InputLabel>}

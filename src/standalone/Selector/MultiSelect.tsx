@@ -54,18 +54,6 @@ export interface MultiSelectProps<DataT extends MultiSelectorData>
 	subClasses?: {
 		baseSelector: BaseSelectorProps<BaseSelectorData>["classes"];
 	};
-	/**
-	 * Display switch control?
-	 */
-	displaySwitch?: boolean;
-	/**
-	 * Default value for switch position
-	 */
-	defaultSwitchValue?: boolean;
-	/**
-	 * Label for switch control (only used if displaySwitch is truthy)
-	 */
-	switchLabel?: React.ReactNode;
 }
 
 const useBaseSelectorStyles = makeStyles(
