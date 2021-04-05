@@ -6320,18 +6320,22 @@ exports[`Storyshots Standalone/Selector Multi 1`] = `
                                                           variant="outlined"
                                                         >
                                                           <Memo(InlineSwitch)
-                                                            customMarginTop={true}
-                                                            displaySwitch={false}
-                                                            setSwitchValue={[Function]}
-                                                            switchLabel="All Record"
-                                                            switchValue={false}
+                                                            classes={
+                                                              Object {
+                                                                "switch": "standalone-selector--selector-multi-makeStyles-switch-37",
+                                                              }
+                                                            }
+                                                            label="All Record"
+                                                            onChange={[Function]}
+                                                            value={false}
+                                                            visible={false}
                                                           >
                                                             <WithStyles(ForwardRef(Typography))
-                                                              className="standalone-selector--selector-multi-InlineSwitch-labelWithSwitch-44"
+                                                              className="standalone-selector--selector-multi-InlineSwitch-labelWithSwitch-45"
                                                               component="div"
                                                             >
                                                               <ForwardRef(Typography)
-                                                                className="standalone-selector--selector-multi-InlineSwitch-labelWithSwitch-44"
+                                                                className="standalone-selector--selector-multi-InlineSwitch-labelWithSwitch-45"
                                                                 classes={
                                                                   Object {
                                                                     "alignCenter": "standalone-selector--selector-multi-MuiTypography-alignCenter",
@@ -6369,7 +6373,7 @@ exports[`Storyshots Standalone/Selector Multi 1`] = `
                                                                 component="div"
                                                               >
                                                                 <div
-                                                                  className="standalone-selector--selector-multi-MuiTypography-root standalone-selector--selector-multi-InlineSwitch-labelWithSwitch-44 standalone-selector--selector-multi-MuiTypography-body1"
+                                                                  className="standalone-selector--selector-multi-MuiTypography-root standalone-selector--selector-multi-InlineSwitch-labelWithSwitch-45 standalone-selector--selector-multi-MuiTypography-body1"
                                                                 >
                                                                   <WithStyles(ForwardRef(Typography))
                                                                     component="div"
@@ -6476,11 +6480,11 @@ exports[`Storyshots Standalone/Selector Multi 1`] = `
                                                                           </ForwardRef(InputLabel)>
                                                                         </WithStyles(ForwardRef(InputLabel))>
                                                                         <WithStyles(ForwardRef(Paper))
-                                                                          className="standalone-selector--selector-multi-CcBaseSelectorCustom-wrapper-40 standalone-selector--selector-multi-CcBaseSelectorCustom-wrapper-42"
+                                                                          className="standalone-selector--selector-multi-CcBaseSelectorCustom-wrapper-41 standalone-selector--selector-multi-CcBaseSelectorCustom-wrapper-43"
                                                                           elevation={0}
                                                                         >
                                                                           <ForwardRef(Paper)
-                                                                            className="standalone-selector--selector-multi-CcBaseSelectorCustom-wrapper-40 standalone-selector--selector-multi-CcBaseSelectorCustom-wrapper-42"
+                                                                            className="standalone-selector--selector-multi-CcBaseSelectorCustom-wrapper-41 standalone-selector--selector-multi-CcBaseSelectorCustom-wrapper-43"
                                                                             classes={
                                                                               Object {
                                                                                 "elevation0": "standalone-selector--selector-multi-MuiPaper-elevation0",
@@ -6516,7 +6520,7 @@ exports[`Storyshots Standalone/Selector Multi 1`] = `
                                                                             elevation={0}
                                                                           >
                                                                             <div
-                                                                              className="standalone-selector--selector-multi-MuiPaper-root standalone-selector--selector-multi-CcBaseSelectorCustom-wrapper-40 standalone-selector--selector-multi-CcBaseSelectorCustom-wrapper-42 standalone-selector--selector-multi-MuiPaper-elevation0 standalone-selector--selector-multi-MuiPaper-rounded"
+                                                                              className="standalone-selector--selector-multi-MuiPaper-root standalone-selector--selector-multi-CcBaseSelectorCustom-wrapper-41 standalone-selector--selector-multi-CcBaseSelectorCustom-wrapper-43 standalone-selector--selector-multi-MuiPaper-elevation0 standalone-selector--selector-multi-MuiPaper-rounded"
                                                                             >
                                                                               <WithStyles(ForwardRef(Autocomplete))
                                                                                 autoComplete={true}
@@ -21143,17 +21147,21 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
                                         selected={null}
                                       >
                                         <Memo(InlineSwitch)
-                                          customMarginTop={true}
-                                          displaySwitch={false}
-                                          setSwitchValue={[Function]}
-                                          switchValue={false}
+                                          classes={
+                                            Object {
+                                              "switch": "standalone-selector--selector-multi-with-tags-makeStyles-switch-23",
+                                            }
+                                          }
+                                          onChange={[Function]}
+                                          value={false}
+                                          visible={false}
                                         >
                                           <WithStyles(ForwardRef(Typography))
-                                            className="standalone-selector--selector-multi-with-tags-InlineSwitch-labelWithSwitch-30"
+                                            className="standalone-selector--selector-multi-with-tags-InlineSwitch-labelWithSwitch-31"
                                             component="div"
                                           >
                                             <ForwardRef(Typography)
-                                              className="standalone-selector--selector-multi-with-tags-InlineSwitch-labelWithSwitch-30"
+                                              className="standalone-selector--selector-multi-with-tags-InlineSwitch-labelWithSwitch-31"
                                               classes={
                                                 Object {
                                                   "alignCenter": "standalone-selector--selector-multi-with-tags-MuiTypography-alignCenter",
@@ -21191,7 +21199,7 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
                                               component="div"
                                             >
                                               <div
-                                                className="standalone-selector--selector-multi-with-tags-MuiTypography-root standalone-selector--selector-multi-with-tags-InlineSwitch-labelWithSwitch-30 standalone-selector--selector-multi-with-tags-MuiTypography-body1"
+                                                className="standalone-selector--selector-multi-with-tags-MuiTypography-root standalone-selector--selector-multi-with-tags-InlineSwitch-labelWithSwitch-31 standalone-selector--selector-multi-with-tags-MuiTypography-body1"
                                               >
                                                 <WithStyles(ForwardRef(Typography))
                                                   component="div"
@@ -21237,11 +21245,11 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
                                                       className="standalone-selector--selector-multi-with-tags-MuiTypography-root standalone-selector--selector-multi-with-tags-MuiTypography-body1"
                                                     >
                                                       <WithStyles(ForwardRef(Paper))
-                                                        className="standalone-selector--selector-multi-with-tags-CcBaseSelectorCustom-wrapper-26 standalone-selector--selector-multi-with-tags-CcBaseSelectorCustom-wrapper-28"
+                                                        className="standalone-selector--selector-multi-with-tags-CcBaseSelectorCustom-wrapper-27 standalone-selector--selector-multi-with-tags-CcBaseSelectorCustom-wrapper-29"
                                                         elevation={0}
                                                       >
                                                         <ForwardRef(Paper)
-                                                          className="standalone-selector--selector-multi-with-tags-CcBaseSelectorCustom-wrapper-26 standalone-selector--selector-multi-with-tags-CcBaseSelectorCustom-wrapper-28"
+                                                          className="standalone-selector--selector-multi-with-tags-CcBaseSelectorCustom-wrapper-27 standalone-selector--selector-multi-with-tags-CcBaseSelectorCustom-wrapper-29"
                                                           classes={
                                                             Object {
                                                               "elevation0": "standalone-selector--selector-multi-with-tags-MuiPaper-elevation0",
@@ -21277,7 +21285,7 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
                                                           elevation={0}
                                                         >
                                                           <div
-                                                            className="standalone-selector--selector-multi-with-tags-MuiPaper-root standalone-selector--selector-multi-with-tags-CcBaseSelectorCustom-wrapper-26 standalone-selector--selector-multi-with-tags-CcBaseSelectorCustom-wrapper-28 standalone-selector--selector-multi-with-tags-MuiPaper-elevation0 standalone-selector--selector-multi-with-tags-MuiPaper-rounded"
+                                                            className="standalone-selector--selector-multi-with-tags-MuiPaper-root standalone-selector--selector-multi-with-tags-CcBaseSelectorCustom-wrapper-27 standalone-selector--selector-multi-with-tags-CcBaseSelectorCustom-wrapper-29 standalone-selector--selector-multi-with-tags-MuiPaper-elevation0 standalone-selector--selector-multi-with-tags-MuiPaper-rounded"
                                                           >
                                                             <WithStyles(ForwardRef(Autocomplete))
                                                               autoComplete={true}
@@ -22151,17 +22159,17 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
                                     </Memo(SingleSelect)>
                                      
                                     <Memo(InlineSwitch)
-                                      displaySwitch={false}
-                                      setSwitchValue={[Function]}
-                                      switchLabel="Select from all"
-                                      switchValue={false}
+                                      label="Select from all"
+                                      onChange={[Function]}
+                                      value={false}
+                                      visible={false}
                                     >
                                       <WithStyles(ForwardRef(Typography))
-                                        className="standalone-selector--selector-multi-with-tags-InlineSwitch-labelWithSwitch-30"
+                                        className="standalone-selector--selector-multi-with-tags-InlineSwitch-labelWithSwitch-31"
                                         component="div"
                                       >
                                         <ForwardRef(Typography)
-                                          className="standalone-selector--selector-multi-with-tags-InlineSwitch-labelWithSwitch-30"
+                                          className="standalone-selector--selector-multi-with-tags-InlineSwitch-labelWithSwitch-31"
                                           classes={
                                             Object {
                                               "alignCenter": "standalone-selector--selector-multi-with-tags-MuiTypography-alignCenter",
@@ -22199,7 +22207,7 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
                                           component="div"
                                         >
                                           <div
-                                            className="standalone-selector--selector-multi-with-tags-MuiTypography-root standalone-selector--selector-multi-with-tags-InlineSwitch-labelWithSwitch-30 standalone-selector--selector-multi-with-tags-MuiTypography-body1"
+                                            className="standalone-selector--selector-multi-with-tags-MuiTypography-root standalone-selector--selector-multi-with-tags-InlineSwitch-labelWithSwitch-31 standalone-selector--selector-multi-with-tags-MuiTypography-body1"
                                           >
                                             <WithStyles(ForwardRef(Typography))
                                               component="div"
@@ -36354,17 +36362,21 @@ exports[`Storyshots Standalone/Selector Single 1`] = `
                                               variant="outlined"
                                             >
                                               <Memo(InlineSwitch)
-                                                customMarginTop={true}
-                                                displaySwitch={false}
-                                                setSwitchValue={[Function]}
-                                                switchValue={false}
+                                                classes={
+                                                  Object {
+                                                    "switch": "standalone-selector--selector-single-makeStyles-switch-20",
+                                                  }
+                                                }
+                                                onChange={[Function]}
+                                                value={false}
+                                                visible={false}
                                               >
                                                 <WithStyles(ForwardRef(Typography))
-                                                  className="standalone-selector--selector-single-InlineSwitch-labelWithSwitch-27"
+                                                  className="standalone-selector--selector-single-InlineSwitch-labelWithSwitch-28"
                                                   component="div"
                                                 >
                                                   <ForwardRef(Typography)
-                                                    className="standalone-selector--selector-single-InlineSwitch-labelWithSwitch-27"
+                                                    className="standalone-selector--selector-single-InlineSwitch-labelWithSwitch-28"
                                                     classes={
                                                       Object {
                                                         "alignCenter": "standalone-selector--selector-single-MuiTypography-alignCenter",
@@ -36402,7 +36414,7 @@ exports[`Storyshots Standalone/Selector Single 1`] = `
                                                     component="div"
                                                   >
                                                     <div
-                                                      className="standalone-selector--selector-single-MuiTypography-root standalone-selector--selector-single-InlineSwitch-labelWithSwitch-27 standalone-selector--selector-single-MuiTypography-body1"
+                                                      className="standalone-selector--selector-single-MuiTypography-root standalone-selector--selector-single-InlineSwitch-labelWithSwitch-28 standalone-selector--selector-single-MuiTypography-body1"
                                                     >
                                                       <WithStyles(ForwardRef(Typography))
                                                         component="div"
@@ -36509,11 +36521,11 @@ exports[`Storyshots Standalone/Selector Single 1`] = `
                                                               </ForwardRef(InputLabel)>
                                                             </WithStyles(ForwardRef(InputLabel))>
                                                             <WithStyles(ForwardRef(Paper))
-                                                              className="standalone-selector--selector-single-CcBaseSelectorCustom-wrapper-23 standalone-selector--selector-single-CcBaseSelectorCustom-wrapper-25"
+                                                              className="standalone-selector--selector-single-CcBaseSelectorCustom-wrapper-24 standalone-selector--selector-single-CcBaseSelectorCustom-wrapper-26"
                                                               elevation={0}
                                                             >
                                                               <ForwardRef(Paper)
-                                                                className="standalone-selector--selector-single-CcBaseSelectorCustom-wrapper-23 standalone-selector--selector-single-CcBaseSelectorCustom-wrapper-25"
+                                                                className="standalone-selector--selector-single-CcBaseSelectorCustom-wrapper-24 standalone-selector--selector-single-CcBaseSelectorCustom-wrapper-26"
                                                                 classes={
                                                                   Object {
                                                                     "elevation0": "standalone-selector--selector-single-MuiPaper-elevation0",
@@ -36549,7 +36561,7 @@ exports[`Storyshots Standalone/Selector Single 1`] = `
                                                                 elevation={0}
                                                               >
                                                                 <div
-                                                                  className="standalone-selector--selector-single-MuiPaper-root standalone-selector--selector-single-CcBaseSelectorCustom-wrapper-23 standalone-selector--selector-single-CcBaseSelectorCustom-wrapper-25 standalone-selector--selector-single-MuiPaper-elevation0 standalone-selector--selector-single-MuiPaper-rounded"
+                                                                  className="standalone-selector--selector-single-MuiPaper-root standalone-selector--selector-single-CcBaseSelectorCustom-wrapper-24 standalone-selector--selector-single-CcBaseSelectorCustom-wrapper-26 standalone-selector--selector-single-MuiPaper-elevation0 standalone-selector--selector-single-MuiPaper-rounded"
                                                                 >
                                                                   <WithStyles(ForwardRef(Autocomplete))
                                                                     autoComplete={true}
@@ -36675,7 +36687,7 @@ exports[`Storyshots Standalone/Selector Single 1`] = `
                                                                                 <Memo />
                                                                               </WithStyles(ForwardRef(IconButton))>
                                                                               <WithStyles(ForwardRef(IconButton))
-                                                                                className="standalone-selector--selector-single-CcBaseSelectorCustom-infoBtn-20"
+                                                                                className="standalone-selector--selector-single-CcBaseSelectorCustom-infoBtn-21"
                                                                                 onClick={[Function]}
                                                                               >
                                                                                 <Memo
@@ -36758,7 +36770,7 @@ exports[`Storyshots Standalone/Selector Single 1`] = `
                                                                                   <Memo />
                                                                                 </WithStyles(ForwardRef(IconButton))>
                                                                                 <WithStyles(ForwardRef(IconButton))
-                                                                                  className="standalone-selector--selector-single-CcBaseSelectorCustom-infoBtn-20"
+                                                                                  className="standalone-selector--selector-single-CcBaseSelectorCustom-infoBtn-21"
                                                                                   onClick={[Function]}
                                                                                 >
                                                                                   <Memo
@@ -36853,7 +36865,7 @@ exports[`Storyshots Standalone/Selector Single 1`] = `
                                                                                     <Memo />
                                                                                   </WithStyles(ForwardRef(IconButton))>
                                                                                   <WithStyles(ForwardRef(IconButton))
-                                                                                    className="standalone-selector--selector-single-CcBaseSelectorCustom-infoBtn-20"
+                                                                                    className="standalone-selector--selector-single-CcBaseSelectorCustom-infoBtn-21"
                                                                                     onClick={[Function]}
                                                                                   >
                                                                                     <Memo
@@ -36948,7 +36960,7 @@ exports[`Storyshots Standalone/Selector Single 1`] = `
                                                                                       <Memo />
                                                                                     </WithStyles(ForwardRef(IconButton))>
                                                                                     <WithStyles(ForwardRef(IconButton))
-                                                                                      className="standalone-selector--selector-single-CcBaseSelectorCustom-infoBtn-20"
+                                                                                      className="standalone-selector--selector-single-CcBaseSelectorCustom-infoBtn-21"
                                                                                       onClick={[Function]}
                                                                                     >
                                                                                       <Memo
@@ -37050,7 +37062,7 @@ exports[`Storyshots Standalone/Selector Single 1`] = `
                                                                                         <Memo />
                                                                                       </WithStyles(ForwardRef(IconButton))>
                                                                                       <WithStyles(ForwardRef(IconButton))
-                                                                                        className="standalone-selector--selector-single-CcBaseSelectorCustom-infoBtn-20"
+                                                                                        className="standalone-selector--selector-single-CcBaseSelectorCustom-infoBtn-21"
                                                                                         onClick={[Function]}
                                                                                       >
                                                                                         <Memo
@@ -37420,11 +37432,11 @@ exports[`Storyshots Standalone/Selector Single 1`] = `
                                                                                         </ForwardRef(IconButton)>
                                                                                       </WithStyles(ForwardRef(IconButton))>
                                                                                       <WithStyles(ForwardRef(IconButton))
-                                                                                        className="standalone-selector--selector-single-CcBaseSelectorCustom-infoBtn-20"
+                                                                                        className="standalone-selector--selector-single-CcBaseSelectorCustom-infoBtn-21"
                                                                                         onClick={[Function]}
                                                                                       >
                                                                                         <ForwardRef(IconButton)
-                                                                                          className="standalone-selector--selector-single-CcBaseSelectorCustom-infoBtn-20"
+                                                                                          className="standalone-selector--selector-single-CcBaseSelectorCustom-infoBtn-21"
                                                                                           classes={
                                                                                             Object {
                                                                                               "colorInherit": "standalone-selector--selector-single-MuiIconButton-colorInherit",
@@ -37442,14 +37454,14 @@ exports[`Storyshots Standalone/Selector Single 1`] = `
                                                                                         >
                                                                                           <WithStyles(ForwardRef(ButtonBase))
                                                                                             centerRipple={true}
-                                                                                            className="standalone-selector--selector-single-MuiIconButton-root standalone-selector--selector-single-CcBaseSelectorCustom-infoBtn-20"
+                                                                                            className="standalone-selector--selector-single-MuiIconButton-root standalone-selector--selector-single-CcBaseSelectorCustom-infoBtn-21"
                                                                                             disabled={false}
                                                                                             focusRipple={true}
                                                                                             onClick={[Function]}
                                                                                           >
                                                                                             <ForwardRef(ButtonBase)
                                                                                               centerRipple={true}
-                                                                                              className="standalone-selector--selector-single-MuiIconButton-root standalone-selector--selector-single-CcBaseSelectorCustom-infoBtn-20"
+                                                                                              className="standalone-selector--selector-single-MuiIconButton-root standalone-selector--selector-single-CcBaseSelectorCustom-infoBtn-21"
                                                                                               classes={
                                                                                                 Object {
                                                                                                   "disabled": "Mui-disabled",
@@ -37462,7 +37474,7 @@ exports[`Storyshots Standalone/Selector Single 1`] = `
                                                                                               onClick={[Function]}
                                                                                             >
                                                                                               <button
-                                                                                                className="standalone-selector--selector-single-MuiButtonBase-root standalone-selector--selector-single-MuiIconButton-root standalone-selector--selector-single-CcBaseSelectorCustom-infoBtn-20"
+                                                                                                className="standalone-selector--selector-single-MuiButtonBase-root standalone-selector--selector-single-MuiIconButton-root standalone-selector--selector-single-CcBaseSelectorCustom-infoBtn-21"
                                                                                                 disabled={false}
                                                                                                 onBlur={[Function]}
                                                                                                 onClick={[Function]}

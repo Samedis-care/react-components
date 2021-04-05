@@ -2,28 +2,29 @@ import React, { useCallback } from "react";
 import { Grid, Typography, withStyles, Theme, Switch } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 
-export interface InlineSwitch {
+export interface InlineSwitchProps {
 	/**
 	 * Value for switch position
 	 */
-	switchValue: boolean;
+	value: boolean;
 	/**
 	 * Set value for switch position
+	 * @param checked The value of switch input
 	 */
-	setSwitchValue: (checked: boolean) => void;
+	onChange: (checked: boolean) => void;
 	/**
 	 * Display switch control?
 	 */
-	displaySwitch: boolean;
+	visible: boolean;
 	/**
-	 * Label for switch control (only used if displaySwitch is truthy)
+	 * Label for switch control (only used if visible is truthy)
 	 */
-	switchLabel?: React.ReactNode;
+	label?: React.ReactNode;
 	children?: React.ReactElement;
 	/**
-	 * Apply custom margin top class to set UI
+	 * Custom styles
 	 */
-	customMarginTop?: boolean;
+	classes?: Partial<ReturnType<typeof useStyles>>;
 }
 
 const useStyles = makeStyles(
@@ -34,9 +35,6 @@ const useStyles = makeStyles(
 		},
 		labelWithSwitch: {
 			marginTop: 15,
-		},
-		customMarginTop: {
-			marginTop: -30,
 		},
 	},
 	{ name: "InlineSwitch" }
@@ -76,39 +74,30 @@ const AntSwitch = withStyles((theme: Theme) => ({
 	checked: {},
 }))(Switch);
 
-const InlineSwitch = (props: InlineSwitch) => {
-	const classes = useStyles();
-	const {
-		switchLabel,
-		switchValue,
-		setSwitchValue,
-		displaySwitch,
-		children,
-		customMarginTop,
-	} = props;
+const InlineSwitch = (props: InlineSwitchProps) => {
+	const classes = useStyles(props);
+	const { label, value, onChange, visible, children } = props;
 
 	const handleSwitchChange = useCallback(
 		(event: React.ChangeEvent<HTMLInputElement>) => {
-			if (setSwitchValue) setSwitchValue(event.target.checked);
+			if (onChange) onChange(event.target.checked);
 		},
-		[setSwitchValue]
+		[onChange]
 	);
 
 	return (
 		<Typography component="div" className={classes.labelWithSwitch}>
-			{displaySwitch && (
+			{visible && (
 				<Typography
 					component="div"
-					className={`${classes.switch} ${
-						customMarginTop ? classes.customMarginTop : ""
-					}`}
+					className={classes.switch}
 					variant={"caption"}
 				>
 					<Grid component="label" container alignItems="center" spacing={1}>
 						<Grid item>
-							<AntSwitch checked={switchValue} onChange={handleSwitchChange} />
+							<AntSwitch checked={value} onChange={handleSwitchChange} />
 						</Grid>
-						<Grid item>{switchLabel}</Grid>
+						<Grid item>{label}</Grid>
 					</Grid>
 				</Typography>
 			)}

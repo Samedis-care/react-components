@@ -75,6 +75,7 @@ export interface BaseSelectorProps<DataT extends BaseSelectorData>
 	/**
 	 * Data load function
 	 * @param search The user search input
+	 * @param switchValue The value of switch input
 	 */
 	onLoad: (search: string, switchValue: boolean) => DataT[] | Promise<DataT[]>;
 	/**
@@ -229,6 +230,12 @@ const variantInput: Record<
 	standard: InputWithHelp,
 };
 
+const useStyles = makeStyles({
+	switch: {
+		marginTop: -30,
+	},
+});
+
 const BaseSelector = <DataT extends BaseSelectorData>(
 	props: BaseSelectorProps<DataT>
 ) => {
@@ -261,9 +268,10 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 	const classes = useThemeStyles(
 		(props as unknown) as BaseSelectorProps<BaseSelectorData>
 	);
-	const defaultSwitchValue = props.displaySwitch
-		? props.defaultSwitchValue ?? false
-		: false;
+	const customClassesSwitch = useStyles();
+	const defaultSwitchValue = !!(
+		props.displaySwitch && props.defaultSwitchValue
+	);
 	const [switchValue, setSwitchValue] = useState<boolean>(defaultSwitchValue);
 	const { t } = useTranslation(undefined, { i18n });
 	const customClasses = useCustomStyles(cleanClassMap(props, true));
@@ -379,11 +387,11 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 
 	return (
 		<InlineSwitch
-			displaySwitch={!!props.displaySwitch}
-			switchValue={switchValue}
-			setSwitchValue={setSwitchValue}
-			switchLabel={switchLabel}
-			customMarginTop
+			visible={!!props.displaySwitch}
+			value={switchValue}
+			onChange={setSwitchValue}
+			label={switchLabel}
+			classes={customClassesSwitch}
 		>
 			<>
 				{label && <InputLabel shrink>{label}</InputLabel>}

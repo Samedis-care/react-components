@@ -194,10 +194,10 @@ const MultiSelectWithTags = <
 				closeText={closeText}
 			/>{" "}
 			<InlineSwitch
-				displaySwitch={!!props.displaySwitch}
-				switchValue={switchValue}
-				setSwitchValue={setSwitchValue}
-				switchLabel={switchLabel}
+				visible={!!props.displaySwitch}
+				value={switchValue}
+				onChange={setSwitchValue}
+				label={switchLabel}
 			>
 				<MultiSelectWithoutGroup<DataT>
 					autocompleteId={autocompleteId}
