@@ -1,5 +1,4 @@
 export { default as FilterIcon } from "./FilterIcon";
-export { default as RemoveIcon } from "./RemoveIcon";
 export { default as SignIcon } from "./SignIcon";
 export { default as TuneIcon } from "./TuneIcon";
 export { default as ResetIcon } from "./ResetIcon";
