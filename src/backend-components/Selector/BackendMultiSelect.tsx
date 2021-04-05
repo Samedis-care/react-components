@@ -52,6 +52,10 @@ export interface BackendMultiSelectProps<
 	 * Initial data (model format) used for selected cache
 	 */
 	initialData?: Record<KeyT, unknown>[];
+	/**
+	 * Name of the switch filter or undefined if disabled
+	 */
+	switchFilterName?: string;
 }
 
 interface UseSelectedCacheResult<DataT extends MultiSelectorData> {
@@ -177,21 +181,25 @@ const BackendMultiSelect = <
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		initialData,
 		searchDebounceTime,
+		switchFilterName,
 		...otherProps
 	} = props;
 
 	const { selected, handleSelect } = useSelectedCache(props);
 
 	const handleLoad = useCallback(
-		async (search: string) => {
+		async (search: string, switchValue: boolean) => {
 			const data = await model.index({
 				page: 1,
 				rows: searchResultLimit ?? 25,
 				quickFilter: search,
+				additionalFilters: switchFilterName
+					? { [switchFilterName]: switchValue }
+					: undefined,
 			});
 			return Promise.all(data[0].map(modelToSelectorData));
 		},
-		[model, modelToSelectorData, searchResultLimit]
+		[model, modelToSelectorData, searchResultLimit, switchFilterName]
 	);
 
 	const debouncedLoad = useMemo(
@@ -205,6 +213,7 @@ const BackendMultiSelect = <
 			onLoad={debouncedLoad}
 			onSelect={handleSelect}
 			selected={selected}
+			displaySwitch={!!switchFilterName}
 		/>
 	);
 };

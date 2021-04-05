@@ -10,7 +10,7 @@ import {
 import { SmallIconButton, SmallListItem, SmallListItemIcon } from "../Small";
 import { MultiSelectorData } from "./MultiSelect";
 import { ClassNameMap } from "@material-ui/styles/withStyles";
-import { RemoveIcon } from "../Icons";
+import { Cancel as RemoveIcon } from "@material-ui/icons";
 
 export interface IMultiSelectEntryProps<DataT extends MultiSelectorData> {
 	/**
