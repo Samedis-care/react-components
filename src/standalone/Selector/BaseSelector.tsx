@@ -209,6 +209,9 @@ const useCustomStyles = makeStyles(
 		switch: {
 			marginTop: -30,
 		},
+		labelWithSwitch: {
+			marginTop: 0,
+		},
 		icon: (
 			props: Pick<BaseSelectorProps<BaseSelectorData>, "iconSize" | "label">
 		) => ({
