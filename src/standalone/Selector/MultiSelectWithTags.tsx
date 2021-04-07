@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { makeStyles, Typography } from "@material-ui/core";
+import { Typography } from "@material-ui/core";
 import {
 	BaseSelectorProps,
 	MultiSelectorData,
@@ -10,7 +10,6 @@ import MultiSelectWithoutGroup, {
 } from "./MultiSelectWithoutGroup";
 import { BaseSelectorData } from "./BaseSelector";
 import { uniqueArray } from "../../utils";
-import InlineSwitch from "../InlineSwitch";
 
 export interface MultiSelectWithTagsProps<
 	DataT extends MultiSelectorData,
@@ -84,15 +83,6 @@ interface SelectedGroup {
 	items: string[];
 }
 
-const useStyles = makeStyles({
-	switch: {
-		position: "absolute",
-		marginTop: 75,
-		right: 20,
-		direction: "rtl",
-	},
-});
-
 const MultiSelectWithTags = <
 	DataT extends MultiSelectorData,
 	GroupT extends BaseSelectorData
@@ -122,7 +112,6 @@ const MultiSelectWithTags = <
 	const defaultSwitchValue = props.displaySwitch
 		? props.defaultSwitchValue ?? false
 		: false;
-	const classes = useStyles();
 	const [selectedGroups, setSelectedGroups] = useState<SelectedGroup[]>([]);
 	const [switchValue, setSwitchValue] = useState<boolean>(defaultSwitchValue);
 	const getIdDefault = useCallback((data: DataT) => data.value, []);
@@ -201,30 +190,25 @@ const MultiSelectWithTags = <
 				loadingText={loadingText}
 				openText={openText}
 				closeText={closeText}
-			/>{" "}
-			<InlineSwitch
-				visible={!!props.displaySwitch}
-				value={switchValue}
-				onChange={setSwitchValue}
-				label={switchLabel}
-				classes={classes}
-			>
-				<MultiSelectWithoutGroup<DataT>
-					autocompleteId={autocompleteId}
-					selected={selected}
-					disabled={disabled}
-					searchInputLabel={searchInputLabel}
-					enableIcons={enableIcons}
-					switchValue={switchValue}
-					loadDataOptions={loadDataOptions}
-					openInfo={openInfo}
-					onChange={onChange}
-					refreshToken={selected.map(getId).join(",")}
-					getIdOfData={getId}
-					noOptionsText={noOptionsText}
-					loadingText={loadingText}
-				/>
-			</InlineSwitch>
+			/>
+			<MultiSelectWithoutGroup<DataT>
+				autocompleteId={autocompleteId}
+				selected={selected}
+				disabled={disabled}
+				searchInputLabel={searchInputLabel}
+				enableIcons={enableIcons}
+				switchValue={switchValue}
+				setSwitchValue={setSwitchValue}
+				switchLabel={switchLabel}
+				displaySwitch={props.displaySwitch}
+				loadDataOptions={loadDataOptions}
+				openInfo={openInfo}
+				onChange={onChange}
+				refreshToken={selected.map(getId).join(",")}
+				getIdOfData={getId}
+				noOptionsText={noOptionsText}
+				loadingText={loadingText}
+			/>
 		</div>
 	);
 };

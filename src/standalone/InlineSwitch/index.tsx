@@ -11,7 +11,7 @@ export interface InlineSwitchProps {
 	 * Set value for switch position
 	 * @param checked The value of switch input
 	 */
-	onChange: (checked: boolean) => void;
+	onChange?: (checked: boolean) => void;
 	/**
 	 * Display switch control?
 	 */
