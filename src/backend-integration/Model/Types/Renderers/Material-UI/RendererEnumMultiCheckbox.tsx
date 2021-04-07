@@ -112,16 +112,18 @@ class RendererEnumRadio extends TypeEnumMulti {
 		return (
 			<Typography>
 				{!visibility.grid && `${label}: `}
-				{value.map((enumValue) => {
-					const valueInfo = this.values.find(
-						(entry) => entry.value === enumValue
-					);
-					return valueInfo
-						? valueInfo.getLabel()
-						: ccI18n.t(
-								"backend-integration.model.types.renderers.enum.unknown"
-						  );
-				})}
+				{value
+					.map((enumValue) => {
+						const valueInfo = this.values.find(
+							(entry) => entry.value === enumValue
+						);
+						return valueInfo
+							? valueInfo.getLabel()
+							: ccI18n.t(
+									"backend-integration.model.types.renderers.enum.unknown"
+							  );
+					})
+					.join(", ")}
 			</Typography>
 		);
 	}
