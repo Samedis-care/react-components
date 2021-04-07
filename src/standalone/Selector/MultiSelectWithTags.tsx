@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Typography } from "@material-ui/core";
+import { makeStyles, Typography } from "@material-ui/core";
 import {
 	BaseSelectorProps,
 	MultiSelectorData,
@@ -84,6 +84,15 @@ interface SelectedGroup {
 	items: string[];
 }
 
+const useStyles = makeStyles({
+	switch: {
+		position: "absolute",
+		marginTop: 75,
+		right: 20,
+		direction: "rtl",
+	},
+});
+
 const MultiSelectWithTags = <
 	DataT extends MultiSelectorData,
 	GroupT extends BaseSelectorData
@@ -113,7 +122,7 @@ const MultiSelectWithTags = <
 	const defaultSwitchValue = props.displaySwitch
 		? props.defaultSwitchValue ?? false
 		: false;
-
+	const classes = useStyles();
 	const [selectedGroups, setSelectedGroups] = useState<SelectedGroup[]>([]);
 	const [switchValue, setSwitchValue] = useState<boolean>(defaultSwitchValue);
 	const getIdDefault = useCallback((data: DataT) => data.value, []);
@@ -198,6 +207,7 @@ const MultiSelectWithTags = <
 				value={switchValue}
 				onChange={setSwitchValue}
 				label={switchLabel}
+				classes={classes}
 			>
 				<MultiSelectWithoutGroup<DataT>
 					autocompleteId={autocompleteId}
