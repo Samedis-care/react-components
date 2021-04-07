@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Grid, Switch, Theme, Typography, withStyles } from "@material-ui/core";
+import { Typography } from "@material-ui/core";
 import {
 	BaseSelectorProps,
 	MultiSelectorData,
@@ -10,14 +10,21 @@ import MultiSelectWithoutGroup, {
 } from "./MultiSelectWithoutGroup";
 import { BaseSelectorData } from "./BaseSelector";
 import { uniqueArray } from "../../utils";
-import { makeStyles } from "@material-ui/core/styles";
+import InlineSwitch from "../InlineSwitch";
 
 export interface MultiSelectWithTagsProps<
 	DataT extends MultiSelectorData,
 	GroupT extends BaseSelectorData
 > extends Pick<
 			BaseSelectorProps<GroupT>,
-			"disabled" | "noOptionsText" | "loadingText" | "closeText" | "openText"
+			| "disabled"
+			| "noOptionsText"
+			| "loadingText"
+			| "closeText"
+			| "openText"
+			| "displaySwitch"
+			| "defaultSwitchValue"
+			| "switchLabel"
 		>,
 		Omit<
 			MultiSelectWithoutGroupProps<DataT>,
@@ -64,18 +71,6 @@ export interface MultiSelectWithTagsProps<
 		query: string,
 		switchValue: boolean
 	) => GroupT[] | Promise<GroupT[]>;
-	/**
-	 * Default value for switch position
-	 */
-	defaultSwitchValue?: boolean;
-	/**
-	 * Display switch control?
-	 */
-	displaySwitch?: boolean;
-	/**
-	 * Label for switch control (only used if displaySwitch is truthy)
-	 */
-	switchLabel?: React.ReactNode;
 }
 
 interface SelectedGroup {
@@ -88,53 +83,6 @@ interface SelectedGroup {
 	 */
 	items: string[];
 }
-
-const AntSwitch = withStyles((theme: Theme) => ({
-	root: {
-		width: 35,
-		height: 16,
-		padding: 0,
-		display: "flex",
-	},
-	switchBase: {
-		padding: 2,
-		color: theme.palette.grey[500],
-		"&$checked": {
-			transform: "translateX(18px)",
-			color: theme.palette.common.white,
-			"& + $track": {
-				opacity: 1,
-				backgroundColor: theme.palette.primary.main,
-				borderColor: theme.palette.primary.main,
-			},
-		},
-	},
-	thumb: {
-		width: 12,
-		height: 12,
-		boxShadow: "none",
-	},
-	track: {
-		border: `1px solid ${theme.palette.grey[500]}`,
-		borderRadius: 16 / 2,
-		opacity: 1,
-		backgroundColor: theme.palette.common.white,
-	},
-	checked: {},
-}))(Switch);
-
-const useStyles = makeStyles(
-	{
-		switch: {
-			lineHeight: "30px",
-			float: "right",
-		},
-		labelWithSwitch: {
-			marginTop: 15,
-		},
-	},
-	{ name: "CcMultiSelectWithGroup" }
-);
 
 const MultiSelectWithTags = <
 	DataT extends MultiSelectorData,
@@ -161,8 +109,6 @@ const MultiSelectWithTags = <
 		getIdOfData,
 		switchLabel,
 	} = props;
-
-	const classes = useStyles();
 
 	const defaultSwitchValue = props.displaySwitch
 		? props.defaultSwitchValue ?? false
@@ -227,13 +173,6 @@ const MultiSelectWithTags = <
 		[loadGroupOptions, selectedGroups, switchValue]
 	);
 
-	const handleSwitchChange = useCallback(
-		(event: React.ChangeEvent<HTMLInputElement>) => {
-			if (setSwitchValue) setSwitchValue(event.target.checked);
-		},
-		[setSwitchValue]
-	);
-
 	return (
 		<div>
 			<Typography component="label" variant={"caption"} color={"textSecondary"}>
@@ -254,24 +193,12 @@ const MultiSelectWithTags = <
 				openText={openText}
 				closeText={closeText}
 			/>{" "}
-			<Typography component="div" className={classes.labelWithSwitch}>
-				{props.displaySwitch && (
-					<Typography
-						component="div"
-						className={classes.switch}
-						variant={"caption"}
-					>
-						<Grid component="label" container alignItems="center" spacing={1}>
-							<Grid item>
-								<AntSwitch
-									checked={switchValue}
-									onChange={handleSwitchChange}
-								/>
-							</Grid>
-							<Grid item>{switchLabel}</Grid>
-						</Grid>
-					</Typography>
-				)}
+			<InlineSwitch
+				visible={!!props.displaySwitch}
+				value={switchValue}
+				onChange={setSwitchValue}
+				label={switchLabel}
+			>
 				<MultiSelectWithoutGroup<DataT>
 					autocompleteId={autocompleteId}
 					selected={selected}
@@ -287,7 +214,7 @@ const MultiSelectWithTags = <
 					noOptionsText={noOptionsText}
 					loadingText={loadingText}
 				/>
-			</Typography>
+			</InlineSwitch>
 		</div>
 	);
 };

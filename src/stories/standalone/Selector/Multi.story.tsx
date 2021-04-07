@@ -65,6 +65,9 @@ export const SelectorMulti = (): React.ReactElement => {
 	const useCustomCloseText = boolean("Use custom close text label?", false);
 	const closeText = text("Close Text Label", "Close");
 	const placeholderLabel = text("Placeholder Label", "Select..");
+	const displaySwitch = boolean("Enable switch?", false);
+	const defaultSwitchValue = boolean("Default position for switch", false);
+	const switchLabel = text("Switch Label", "All Record");
 
 	const loadData = useCallback(
 		(query: string): MySelectorData[] => {
@@ -108,6 +111,9 @@ export const SelectorMulti = (): React.ReactElement => {
 					openText={useCustomOpenText ? openText : undefined}
 					closeText={useCustomCloseText ? closeText : undefined}
 					placeholder={placeholderLabel}
+					displaySwitch={displaySwitch}
+					defaultSwitchValue={defaultSwitchValue}
+					switchLabel={switchLabel}
 					autocompleteId={"multi-select"}
 				/>
 			</FormControl>

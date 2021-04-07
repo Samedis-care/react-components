@@ -87,6 +87,9 @@ const MultiSelect = <DataT extends MultiSelectorData>(
 		selectedEntryRenderer,
 		disabled,
 		getIdOfData,
+		displaySwitch,
+		switchLabel,
+		defaultSwitchValue,
 	} = props;
 	const multiSelectClasses = useMultiSelectorStyles(props);
 	const baseSelectorClasses = useBaseSelectorStyles(
@@ -112,8 +115,8 @@ const MultiSelect = <DataT extends MultiSelectorData>(
 	);
 
 	const multiSelectLoadHandler = useCallback(
-		async (query: string) => {
-			const results = await onLoad(query);
+		async (query: string, switchValue: boolean) => {
+			const results = await onLoad(query, switchValue);
 			return results.filter(
 				(val: DataT) => !selected.map((s) => getId(s)).includes(getId(val))
 			);
@@ -172,6 +175,9 @@ const MultiSelect = <DataT extends MultiSelectorData>(
 					selected={null}
 					onSelect={multiSelectHandler}
 					refreshToken={selected.map(getId).join(",")}
+					displaySwitch={displaySwitch}
+					switchLabel={switchLabel}
+					defaultSwitchValue={defaultSwitchValue}
 				/>
 			</Grid>
 			{props.selected.length > 0 && (
