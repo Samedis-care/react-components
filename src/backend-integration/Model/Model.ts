@@ -19,6 +19,14 @@ export interface PageVisibility {
 	create: VisibilityCallback;
 }
 
+export type ModelRecord<
+	ModelT extends Model<ModelFieldName, PageVisibility, unknown>
+> = {
+	[Field in keyof ModelT["fields"]]: ReturnType<
+		ModelT["fields"][Field]["type"]["getDefaultValue"]
+	>;
+};
+
 export interface ModelFieldDefinition<
 	TypeT,
 	KeyT extends ModelFieldName,
