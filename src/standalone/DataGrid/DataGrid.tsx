@@ -673,9 +673,6 @@ const useStyles = makeStyles(
 			padding: 0,
 			color: "inherit",
 		},
-		columnHeaderFilterActive: {
-			color: theme.palette.secondary.main,
-		},
 		columnHeaderResizer: {
 			cursor: "col-resize",
 			width: 8,

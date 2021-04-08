@@ -14,6 +14,7 @@ import i18n from "../../../i18n";
 import { ModelFilterType } from "../../../backend-integration/Model";
 import { IDataGridColumnDef, useDataGridStyles } from "../DataGrid";
 import { useTranslation } from "react-i18next";
+import { FilterActiveIcon } from "../../Icons";
 
 export interface IDataGridContentColumnHeaderContentProps {
 	/**
@@ -97,6 +98,9 @@ const ColumnHeaderContent = (
 		[]
 	);
 
+	const CurrentFilterIcon =
+		props.filter && props.filter.value1 ? FilterActiveIcon : FilterIcon;
+
 	return (
 		<>
 			<Grid container justify={"flex-start"} wrap={"nowrap"}>
@@ -120,12 +124,10 @@ const ColumnHeaderContent = (
 					<Grid item key={"filter"}>
 						<Tooltip title={t("standalone.data-grid.content.filter") || ""}>
 							<IconButton
-								className={`${classes.columnHeaderFilterButton}${
-									props.filter ? ` ${classes.columnHeaderFilterActive}` : ""
-								}`}
+								className={classes.columnHeaderFilterButton}
 								onClick={openFilter}
 							>
-								<FilterIcon className={classes.columnHeaderFilterIcon} />
+								<CurrentFilterIcon className={classes.columnHeaderFilterIcon} />
 							</IconButton>
 						</Tooltip>
 					</Grid>
