@@ -10,7 +10,6 @@ import MultiSelectWithoutGroup, {
 } from "./MultiSelectWithoutGroup";
 import { BaseSelectorData } from "./BaseSelector";
 import { uniqueArray } from "../../utils";
-import InlineSwitch from "../InlineSwitch";
 
 export interface MultiSelectWithTagsProps<
 	DataT extends MultiSelectorData,
@@ -113,7 +112,6 @@ const MultiSelectWithTags = <
 	const defaultSwitchValue = props.displaySwitch
 		? props.defaultSwitchValue ?? false
 		: false;
-
 	const [selectedGroups, setSelectedGroups] = useState<SelectedGroup[]>([]);
 	const [switchValue, setSwitchValue] = useState<boolean>(defaultSwitchValue);
 	const getIdDefault = useCallback((data: DataT) => data.value, []);
@@ -192,29 +190,25 @@ const MultiSelectWithTags = <
 				loadingText={loadingText}
 				openText={openText}
 				closeText={closeText}
-			/>{" "}
-			<InlineSwitch
-				visible={!!props.displaySwitch}
-				value={switchValue}
-				onChange={setSwitchValue}
-				label={switchLabel}
-			>
-				<MultiSelectWithoutGroup<DataT>
-					autocompleteId={autocompleteId}
-					selected={selected}
-					disabled={disabled}
-					searchInputLabel={searchInputLabel}
-					enableIcons={enableIcons}
-					switchValue={switchValue}
-					loadDataOptions={loadDataOptions}
-					openInfo={openInfo}
-					onChange={onChange}
-					refreshToken={selected.map(getId).join(",")}
-					getIdOfData={getId}
-					noOptionsText={noOptionsText}
-					loadingText={loadingText}
-				/>
-			</InlineSwitch>
+			/>
+			<MultiSelectWithoutGroup<DataT>
+				autocompleteId={autocompleteId}
+				selected={selected}
+				disabled={disabled}
+				searchInputLabel={searchInputLabel}
+				enableIcons={enableIcons}
+				switchValue={switchValue}
+				setSwitchValue={setSwitchValue}
+				switchLabel={switchLabel}
+				displaySwitch={props.displaySwitch}
+				loadDataOptions={loadDataOptions}
+				openInfo={openInfo}
+				onChange={onChange}
+				refreshToken={selected.map(getId).join(",")}
+				getIdOfData={getId}
+				noOptionsText={noOptionsText}
+				loadingText={loadingText}
+			/>
 		</div>
 	);
 };

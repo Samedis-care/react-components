@@ -14,6 +14,7 @@ import TextFieldWithHelp, {
 import { SmallIconButton, SmallListItemIcon } from "../Small";
 import i18n from "../../i18n";
 import { useTranslation } from "react-i18next";
+import InlineSwitch from "../InlineSwitch";
 
 /**
  * A callback used to get an label value for a specific input (search) value
@@ -22,7 +23,12 @@ type SelectorLabelCallback = (obj: { inputValue: string }) => string | null;
 export interface MultiSelectWithoutGroupProps<DataT extends MultiSelectorData>
 	extends Pick<
 			BaseSelectorProps<BaseSelectorData>,
-			"disabled" | "autocompleteId" | "enableIcons"
+			| "disabled"
+			| "autocompleteId"
+			| "enableIcons"
+			| "displaySwitch"
+			| "defaultSwitchValue"
+			| "switchLabel"
 		>,
 		TextFieldWithHelpProps {
 	// UI Props
@@ -43,6 +49,11 @@ export interface MultiSelectWithoutGroupProps<DataT extends MultiSelectorData>
 	 * State of the switch control
 	 */
 	switchValue?: boolean;
+	/**
+	 * Set value for switch position
+	 * @param checked The value of switch input
+	 */
+	setSwitchValue?: (checked: boolean) => void;
 	/**
 	 * Change event callback
 	 * @param data The currently selected entries. This should be feed back to selected prop
@@ -95,10 +106,11 @@ const useStyles = makeStyles(
 		},
 		switch: {
 			lineHeight: "30px",
-			float: "right",
+			width: "100%",
+			direction: "rtl",
 		},
 		labelWithSwitch: {
-			marginTop: 15,
+			marginTop: 0,
 		},
 	},
 	{ name: "CcMultiSelectWithoutGroup" }
@@ -264,24 +276,36 @@ const MultiSelectWithoutGroup = <DataT extends MultiSelectorData>(
 					/>
 				)}
 			/>
-			{selected.map((data: MultiSelectorData, index: number) => {
-				return (
-					<div key={index} className={classes.outlined}>
-						{enableIcons && <SmallListItemIcon>{data.icon}</SmallListItemIcon>}
-						<span>{data.label}</span>
-						{!disabled && (
-							<SmallIconButton
-								edge={"end"}
-								name={data.value}
-								disabled={disabled}
-								onClick={handleDelete}
-							>
-								<RemoveIcon />
-							</SmallIconButton>
-						)}
-					</div>
-				);
-			})}
+			<InlineSwitch
+				visible={!!props.displaySwitch}
+				value={!!switchValue}
+				onChange={props.setSwitchValue}
+				label={props.switchLabel}
+				classes={classes}
+			>
+				<>
+					{selected.map((data: MultiSelectorData, index: number) => {
+						return (
+							<div key={index} className={classes.outlined}>
+								{enableIcons && (
+									<SmallListItemIcon>{data.icon}</SmallListItemIcon>
+								)}
+								<span>{data.label}</span>
+								{!disabled && (
+									<SmallIconButton
+										edge={"end"}
+										name={data.value}
+										disabled={disabled}
+										onClick={handleDelete}
+									>
+										<RemoveIcon />
+									</SmallIconButton>
+								)}
+							</div>
+						);
+					})}
+				</>
+			</InlineSwitch>
 		</Typography>
 	);
 };
