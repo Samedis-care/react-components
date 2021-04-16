@@ -18329,7 +18329,7 @@ Alternative Icons"
                                           label={
                                             <WithStyles(ForwardRef(Typography))
                                               align="center"
-                                              className="standalone-uikit--checkbox-story-makeStyles-label-13"
+                                              className="standalone-uikit--checkbox-story-CcComponentWithLabel-label-13"
                                               display="block"
                                               variant="caption"
                                             >
@@ -18365,7 +18365,7 @@ Alternative Icons
                                             label={
                                               <WithStyles(ForwardRef(Typography))
                                                 align="center"
-                                                className="standalone-uikit--checkbox-story-makeStyles-label-13"
+                                                className="standalone-uikit--checkbox-story-CcComponentWithLabel-label-13"
                                                 display="block"
                                                 variant="caption"
                                               >
@@ -18682,13 +18682,13 @@ Alternative Icons
                                                   >
                                                     <WithStyles(ForwardRef(Typography))
                                                       align="center"
-                                                      className="standalone-uikit--checkbox-story-makeStyles-label-13"
+                                                      className="standalone-uikit--checkbox-story-CcComponentWithLabel-label-13"
                                                       display="block"
                                                       variant="caption"
                                                     >
                                                       <ForwardRef(Typography)
                                                         align="center"
-                                                        className="standalone-uikit--checkbox-story-makeStyles-label-13"
+                                                        className="standalone-uikit--checkbox-story-CcComponentWithLabel-label-13"
                                                         classes={
                                                           Object {
                                                             "alignCenter": "standalone-uikit--checkbox-story-MuiTypography-alignCenter",
@@ -18727,7 +18727,7 @@ Alternative Icons
                                                         variant="caption"
                                                       >
                                                         <span
-                                                          className="standalone-uikit--checkbox-story-MuiTypography-root standalone-uikit--checkbox-story-makeStyles-label-13 standalone-uikit--checkbox-story-MuiTypography-caption standalone-uikit--checkbox-story-MuiTypography-alignCenter standalone-uikit--checkbox-story-MuiTypography-displayBlock"
+                                                          className="standalone-uikit--checkbox-story-MuiTypography-root standalone-uikit--checkbox-story-CcComponentWithLabel-label-13 standalone-uikit--checkbox-story-MuiTypography-caption standalone-uikit--checkbox-story-MuiTypography-alignCenter standalone-uikit--checkbox-story-MuiTypography-displayBlock"
                                                         >
                                                           Checkbox X
 size medium
@@ -18785,7 +18785,7 @@ Alternative Icons
                                           label={
                                             <WithStyles(ForwardRef(Typography))
                                               align="left"
-                                              className="standalone-uikit--checkbox-story-makeStyles-label-13"
+                                              className="standalone-uikit--checkbox-story-CcComponentWithLabel-label-13"
                                               display="block"
                                               variant="caption"
                                             >
@@ -18816,7 +18816,7 @@ Alternative Icons
                                             label={
                                               <WithStyles(ForwardRef(Typography))
                                                 align="left"
-                                                className="standalone-uikit--checkbox-story-makeStyles-label-13"
+                                                className="standalone-uikit--checkbox-story-CcComponentWithLabel-label-13"
                                                 display="block"
                                                 variant="caption"
                                               >
@@ -19259,13 +19259,13 @@ Alternative Icons
                                                   >
                                                     <WithStyles(ForwardRef(Typography))
                                                       align="left"
-                                                      className="standalone-uikit--checkbox-story-makeStyles-label-13"
+                                                      className="standalone-uikit--checkbox-story-CcComponentWithLabel-label-13"
                                                       display="block"
                                                       variant="caption"
                                                     >
                                                       <ForwardRef(Typography)
                                                         align="left"
-                                                        className="standalone-uikit--checkbox-story-makeStyles-label-13"
+                                                        className="standalone-uikit--checkbox-story-CcComponentWithLabel-label-13"
                                                         classes={
                                                           Object {
                                                             "alignCenter": "standalone-uikit--checkbox-story-MuiTypography-alignCenter",
@@ -19304,7 +19304,7 @@ Alternative Icons
                                                         variant="caption"
                                                       >
                                                         <span
-                                                          className="standalone-uikit--checkbox-story-MuiTypography-root standalone-uikit--checkbox-story-makeStyles-label-13 standalone-uikit--checkbox-story-MuiTypography-caption standalone-uikit--checkbox-story-MuiTypography-alignLeft standalone-uikit--checkbox-story-MuiTypography-displayBlock"
+                                                          className="standalone-uikit--checkbox-story-MuiTypography-root standalone-uikit--checkbox-story-CcComponentWithLabel-label-13 standalone-uikit--checkbox-story-MuiTypography-caption standalone-uikit--checkbox-story-MuiTypography-alignLeft standalone-uikit--checkbox-story-MuiTypography-displayBlock"
                                                         >
                                                           Checkbox A (size small)
                                                         </span>
@@ -19345,7 +19345,7 @@ Right (start) aligned label"
                                           label={
                                             <WithStyles(ForwardRef(Typography))
                                               align="right"
-                                              className="standalone-uikit--checkbox-story-makeStyles-label-13"
+                                              className="standalone-uikit--checkbox-story-CcComponentWithLabel-label-13"
                                               display="block"
                                               variant="caption"
                                             >
@@ -19379,7 +19379,7 @@ Right (start) aligned label
                                             label={
                                               <WithStyles(ForwardRef(Typography))
                                                 align="right"
-                                                className="standalone-uikit--checkbox-story-makeStyles-label-13"
+                                                className="standalone-uikit--checkbox-story-CcComponentWithLabel-label-13"
                                                 display="block"
                                                 variant="caption"
                                               >
@@ -19819,13 +19819,13 @@ Right (start) aligned label
                                                   >
                                                     <WithStyles(ForwardRef(Typography))
                                                       align="right"
-                                                      className="standalone-uikit--checkbox-story-makeStyles-label-13"
+                                                      className="standalone-uikit--checkbox-story-CcComponentWithLabel-label-13"
                                                       display="block"
                                                       variant="caption"
                                                     >
                                                       <ForwardRef(Typography)
                                                         align="right"
-                                                        className="standalone-uikit--checkbox-story-makeStyles-label-13"
+                                                        className="standalone-uikit--checkbox-story-CcComponentWithLabel-label-13"
                                                         classes={
                                                           Object {
                                                             "alignCenter": "standalone-uikit--checkbox-story-MuiTypography-alignCenter",
@@ -19864,7 +19864,7 @@ Right (start) aligned label
                                                         variant="caption"
                                                       >
                                                         <span
-                                                          className="standalone-uikit--checkbox-story-MuiTypography-root standalone-uikit--checkbox-story-makeStyles-label-13 standalone-uikit--checkbox-story-MuiTypography-caption standalone-uikit--checkbox-story-MuiTypography-alignRight standalone-uikit--checkbox-story-MuiTypography-displayBlock"
+                                                          className="standalone-uikit--checkbox-story-MuiTypography-root standalone-uikit--checkbox-story-CcComponentWithLabel-label-13 standalone-uikit--checkbox-story-MuiTypography-caption standalone-uikit--checkbox-story-MuiTypography-alignRight standalone-uikit--checkbox-story-MuiTypography-displayBlock"
                                                         >
                                                           Checkbox B
 size medium
@@ -19923,7 +19923,7 @@ Right (start) aligned label
                                           label={
                                             <WithStyles(ForwardRef(Typography))
                                               align="center"
-                                              className="standalone-uikit--checkbox-story-makeStyles-label-13"
+                                              className="standalone-uikit--checkbox-story-CcComponentWithLabel-label-13"
                                               display="block"
                                               variant="caption"
                                             >
@@ -19955,7 +19955,7 @@ Right (start) aligned label
                                             label={
                                               <WithStyles(ForwardRef(Typography))
                                                 align="center"
-                                                className="standalone-uikit--checkbox-story-makeStyles-label-13"
+                                                className="standalone-uikit--checkbox-story-CcComponentWithLabel-label-13"
                                                 display="block"
                                                 variant="caption"
                                               >
@@ -20399,13 +20399,13 @@ Right (start) aligned label
                                                   >
                                                     <WithStyles(ForwardRef(Typography))
                                                       align="center"
-                                                      className="standalone-uikit--checkbox-story-makeStyles-label-13"
+                                                      className="standalone-uikit--checkbox-story-CcComponentWithLabel-label-13"
                                                       display="block"
                                                       variant="caption"
                                                     >
                                                       <ForwardRef(Typography)
                                                         align="center"
-                                                        className="standalone-uikit--checkbox-story-makeStyles-label-13"
+                                                        className="standalone-uikit--checkbox-story-CcComponentWithLabel-label-13"
                                                         classes={
                                                           Object {
                                                             "alignCenter": "standalone-uikit--checkbox-story-MuiTypography-alignCenter",
@@ -20444,7 +20444,7 @@ Right (start) aligned label
                                                         variant="caption"
                                                       >
                                                         <span
-                                                          className="standalone-uikit--checkbox-story-MuiTypography-root standalone-uikit--checkbox-story-makeStyles-label-13 standalone-uikit--checkbox-story-MuiTypography-caption standalone-uikit--checkbox-story-MuiTypography-alignCenter standalone-uikit--checkbox-story-MuiTypography-displayBlock"
+                                                          className="standalone-uikit--checkbox-story-MuiTypography-root standalone-uikit--checkbox-story-CcComponentWithLabel-label-13 standalone-uikit--checkbox-story-MuiTypography-caption standalone-uikit--checkbox-story-MuiTypography-alignCenter standalone-uikit--checkbox-story-MuiTypography-displayBlock"
                                                         >
                                                           Checkbox C (size small) (top label)
                                                         </span>
@@ -20485,7 +20485,7 @@ Bottom Label"
                                           label={
                                             <WithStyles(ForwardRef(Typography))
                                               align="center"
-                                              className="standalone-uikit--checkbox-story-makeStyles-label-13"
+                                              className="standalone-uikit--checkbox-story-CcComponentWithLabel-label-13"
                                               display="block"
                                               variant="caption"
                                             >
@@ -20519,7 +20519,7 @@ Bottom Label
                                             label={
                                               <WithStyles(ForwardRef(Typography))
                                                 align="center"
-                                                className="standalone-uikit--checkbox-story-makeStyles-label-13"
+                                                className="standalone-uikit--checkbox-story-CcComponentWithLabel-label-13"
                                                 display="block"
                                                 variant="caption"
                                               >
@@ -20959,13 +20959,13 @@ Bottom Label
                                                   >
                                                     <WithStyles(ForwardRef(Typography))
                                                       align="center"
-                                                      className="standalone-uikit--checkbox-story-makeStyles-label-13"
+                                                      className="standalone-uikit--checkbox-story-CcComponentWithLabel-label-13"
                                                       display="block"
                                                       variant="caption"
                                                     >
                                                       <ForwardRef(Typography)
                                                         align="center"
-                                                        className="standalone-uikit--checkbox-story-makeStyles-label-13"
+                                                        className="standalone-uikit--checkbox-story-CcComponentWithLabel-label-13"
                                                         classes={
                                                           Object {
                                                             "alignCenter": "standalone-uikit--checkbox-story-MuiTypography-alignCenter",
@@ -21004,7 +21004,7 @@ Bottom Label
                                                         variant="caption"
                                                       >
                                                         <span
-                                                          className="standalone-uikit--checkbox-story-MuiTypography-root standalone-uikit--checkbox-story-makeStyles-label-13 standalone-uikit--checkbox-story-MuiTypography-caption standalone-uikit--checkbox-story-MuiTypography-alignCenter standalone-uikit--checkbox-story-MuiTypography-displayBlock"
+                                                          className="standalone-uikit--checkbox-story-MuiTypography-root standalone-uikit--checkbox-story-CcComponentWithLabel-label-13 standalone-uikit--checkbox-story-MuiTypography-caption standalone-uikit--checkbox-story-MuiTypography-alignCenter standalone-uikit--checkbox-story-MuiTypography-displayBlock"
                                                         >
                                                           Checkbox D
 size medium
@@ -27319,7 +27319,7 @@ disabled if needed"
                                                 label={
                                                   <WithStyles(ForwardRef(Typography))
                                                     align="right"
-                                                    className="standalone-uikit--component-with-label-story-makeStyles-label-2"
+                                                    className="standalone-uikit--component-with-label-story-CcComponentWithLabel-label-2"
                                                     display="block"
                                                     variant="caption"
                                                   >
@@ -27359,7 +27359,7 @@ disabled if needed
                                                   label={
                                                     <WithStyles(ForwardRef(Typography))
                                                       align="right"
-                                                      className="standalone-uikit--component-with-label-story-makeStyles-label-2"
+                                                      className="standalone-uikit--component-with-label-story-CcComponentWithLabel-label-2"
                                                       display="block"
                                                       variant="caption"
                                                     >
@@ -27527,13 +27527,13 @@ disabled if needed
                                                         >
                                                           <WithStyles(ForwardRef(Typography))
                                                             align="right"
-                                                            className="standalone-uikit--component-with-label-story-makeStyles-label-2"
+                                                            className="standalone-uikit--component-with-label-story-CcComponentWithLabel-label-2"
                                                             display="block"
                                                             variant="caption"
                                                           >
                                                             <ForwardRef(Typography)
                                                               align="right"
-                                                              className="standalone-uikit--component-with-label-story-makeStyles-label-2"
+                                                              className="standalone-uikit--component-with-label-story-CcComponentWithLabel-label-2"
                                                               classes={
                                                                 Object {
                                                                   "alignCenter": "standalone-uikit--component-with-label-story-MuiTypography-alignCenter",
@@ -27572,7 +27572,7 @@ disabled if needed
                                                               variant="caption"
                                                             >
                                                               <span
-                                                                className="standalone-uikit--component-with-label-story-MuiTypography-root standalone-uikit--component-with-label-story-makeStyles-label-2 standalone-uikit--component-with-label-story-MuiTypography-caption standalone-uikit--component-with-label-story-MuiTypography-alignRight standalone-uikit--component-with-label-story-MuiTypography-displayBlock"
+                                                                className="standalone-uikit--component-with-label-story-MuiTypography-root standalone-uikit--component-with-label-story-CcComponentWithLabel-label-2 standalone-uikit--component-with-label-story-MuiTypography-caption standalone-uikit--component-with-label-story-MuiTypography-alignRight standalone-uikit--component-with-label-story-MuiTypography-displayBlock"
                                                               >
                                                                 I am a label
 at the start
@@ -27973,7 +27973,7 @@ at the top"
                                                             label={
                                                               <WithStyles(ForwardRef(Typography))
                                                                 align="center"
-                                                                className="standalone-uikit--component-with-label-story-makeStyles-label-2"
+                                                                className="standalone-uikit--component-with-label-story-CcComponentWithLabel-label-2"
                                                                 display="block"
                                                                 variant="caption"
                                                               >
@@ -28005,7 +28005,7 @@ at the top
                                                               label={
                                                                 <WithStyles(ForwardRef(Typography))
                                                                   align="center"
-                                                                  className="standalone-uikit--component-with-label-story-makeStyles-label-2"
+                                                                  className="standalone-uikit--component-with-label-story-CcComponentWithLabel-label-2"
                                                                   display="block"
                                                                   variant="caption"
                                                                 >
@@ -28192,13 +28192,13 @@ at the top
                                                                     >
                                                                       <WithStyles(ForwardRef(Typography))
                                                                         align="center"
-                                                                        className="standalone-uikit--component-with-label-story-makeStyles-label-2"
+                                                                        className="standalone-uikit--component-with-label-story-CcComponentWithLabel-label-2"
                                                                         display="block"
                                                                         variant="caption"
                                                                       >
                                                                         <ForwardRef(Typography)
                                                                           align="center"
-                                                                          className="standalone-uikit--component-with-label-story-makeStyles-label-2"
+                                                                          className="standalone-uikit--component-with-label-story-CcComponentWithLabel-label-2"
                                                                           classes={
                                                                             Object {
                                                                               "alignCenter": "standalone-uikit--component-with-label-story-MuiTypography-alignCenter",
@@ -28237,7 +28237,7 @@ at the top
                                                                           variant="caption"
                                                                         >
                                                                           <span
-                                                                            className="standalone-uikit--component-with-label-story-MuiTypography-root standalone-uikit--component-with-label-story-makeStyles-label-2 standalone-uikit--component-with-label-story-MuiTypography-caption standalone-uikit--component-with-label-story-MuiTypography-alignCenter standalone-uikit--component-with-label-story-MuiTypography-displayBlock"
+                                                                            className="standalone-uikit--component-with-label-story-MuiTypography-root standalone-uikit--component-with-label-story-CcComponentWithLabel-label-2 standalone-uikit--component-with-label-story-MuiTypography-caption standalone-uikit--component-with-label-story-MuiTypography-alignCenter standalone-uikit--component-with-label-story-MuiTypography-displayBlock"
                                                                           >
                                                                             I am a label
 at the top
@@ -28395,7 +28395,7 @@ at the bottom"
                                                             label={
                                                               <WithStyles(ForwardRef(Typography))
                                                                 align="center"
-                                                                className="standalone-uikit--component-with-label-story-makeStyles-label-2"
+                                                                className="standalone-uikit--component-with-label-story-CcComponentWithLabel-label-2"
                                                                 display="block"
                                                                 variant="caption"
                                                               >
@@ -28427,7 +28427,7 @@ at the bottom
                                                               label={
                                                                 <WithStyles(ForwardRef(Typography))
                                                                   align="center"
-                                                                  className="standalone-uikit--component-with-label-story-makeStyles-label-2"
+                                                                  className="standalone-uikit--component-with-label-story-CcComponentWithLabel-label-2"
                                                                   display="block"
                                                                   variant="caption"
                                                                 >
@@ -28614,13 +28614,13 @@ at the bottom
                                                                     >
                                                                       <WithStyles(ForwardRef(Typography))
                                                                         align="center"
-                                                                        className="standalone-uikit--component-with-label-story-makeStyles-label-2"
+                                                                        className="standalone-uikit--component-with-label-story-CcComponentWithLabel-label-2"
                                                                         display="block"
                                                                         variant="caption"
                                                                       >
                                                                         <ForwardRef(Typography)
                                                                           align="center"
-                                                                          className="standalone-uikit--component-with-label-story-makeStyles-label-2"
+                                                                          className="standalone-uikit--component-with-label-story-CcComponentWithLabel-label-2"
                                                                           classes={
                                                                             Object {
                                                                               "alignCenter": "standalone-uikit--component-with-label-story-MuiTypography-alignCenter",
@@ -28659,7 +28659,7 @@ at the bottom
                                                                           variant="caption"
                                                                         >
                                                                           <span
-                                                                            className="standalone-uikit--component-with-label-story-MuiTypography-root standalone-uikit--component-with-label-story-makeStyles-label-2 standalone-uikit--component-with-label-story-MuiTypography-caption standalone-uikit--component-with-label-story-MuiTypography-alignCenter standalone-uikit--component-with-label-story-MuiTypography-displayBlock"
+                                                                            className="standalone-uikit--component-with-label-story-MuiTypography-root standalone-uikit--component-with-label-story-CcComponentWithLabel-label-2 standalone-uikit--component-with-label-story-MuiTypography-caption standalone-uikit--component-with-label-story-MuiTypography-alignCenter standalone-uikit--component-with-label-story-MuiTypography-displayBlock"
                                                                           >
                                                                             I am a label
 at the bottom
@@ -28831,7 +28831,7 @@ or Form element"
                                                 label={
                                                   <WithStyles(ForwardRef(Typography))
                                                     align="left"
-                                                    className="standalone-uikit--component-with-label-story-makeStyles-label-2"
+                                                    className="standalone-uikit--component-with-label-story-CcComponentWithLabel-label-2"
                                                     display="block"
                                                     variant="caption"
                                                   >
@@ -28870,7 +28870,7 @@ or Form element
                                                   label={
                                                     <WithStyles(ForwardRef(Typography))
                                                       align="left"
-                                                      className="standalone-uikit--component-with-label-story-makeStyles-label-2"
+                                                      className="standalone-uikit--component-with-label-story-CcComponentWithLabel-label-2"
                                                       display="block"
                                                       variant="caption"
                                                     >
@@ -29064,13 +29064,13 @@ or Form element
                                                         >
                                                           <WithStyles(ForwardRef(Typography))
                                                             align="left"
-                                                            className="standalone-uikit--component-with-label-story-makeStyles-label-2"
+                                                            className="standalone-uikit--component-with-label-story-CcComponentWithLabel-label-2"
                                                             display="block"
                                                             variant="caption"
                                                           >
                                                             <ForwardRef(Typography)
                                                               align="left"
-                                                              className="standalone-uikit--component-with-label-story-makeStyles-label-2"
+                                                              className="standalone-uikit--component-with-label-story-CcComponentWithLabel-label-2"
                                                               classes={
                                                                 Object {
                                                                   "alignCenter": "standalone-uikit--component-with-label-story-MuiTypography-alignCenter",
@@ -29109,7 +29109,7 @@ or Form element
                                                               variant="caption"
                                                             >
                                                               <span
-                                                                className="standalone-uikit--component-with-label-story-MuiTypography-root standalone-uikit--component-with-label-story-makeStyles-label-2 standalone-uikit--component-with-label-story-MuiTypography-caption standalone-uikit--component-with-label-story-MuiTypography-alignLeft standalone-uikit--component-with-label-story-MuiTypography-displayBlock"
+                                                                className="standalone-uikit--component-with-label-story-MuiTypography-root standalone-uikit--component-with-label-story-CcComponentWithLabel-label-2 standalone-uikit--component-with-label-story-MuiTypography-caption standalone-uikit--component-with-label-story-MuiTypography-alignLeft standalone-uikit--component-with-label-story-MuiTypography-displayBlock"
                                                               >
                                                                 I am a label
 at the end.
@@ -35163,13 +35163,13 @@ exports[`Storyshots Standalone/UIKit FormButtons 1`] = `
                               <Component>
                                 <Memo(FormButtons)>
                                   <WithStyles(ForwardRef(Grid))
-                                    className="standalone-uikit--form-buttons-story-makeStyles-container-57"
+                                    className="standalone-uikit--form-buttons-story-CcFormButtons-container-57"
                                     container={true}
                                     direction="row"
                                     spacing={2}
                                   >
                                     <ForwardRef(Grid)
-                                      className="standalone-uikit--form-buttons-story-makeStyles-container-57"
+                                      className="standalone-uikit--form-buttons-story-CcFormButtons-container-57"
                                       classes={
                                         Object {
                                           "align-content-xs-center": "standalone-uikit--form-buttons-story-MuiGrid-align-content-xs-center",
@@ -35282,15 +35282,15 @@ exports[`Storyshots Standalone/UIKit FormButtons 1`] = `
                                       spacing={2}
                                     >
                                       <div
-                                        className="standalone-uikit--form-buttons-story-MuiGrid-root standalone-uikit--form-buttons-story-makeStyles-container-57 standalone-uikit--form-buttons-story-MuiGrid-container standalone-uikit--form-buttons-story-MuiGrid-spacing-xs-2"
+                                        className="standalone-uikit--form-buttons-story-MuiGrid-root standalone-uikit--form-buttons-story-CcFormButtons-container-57 standalone-uikit--form-buttons-story-MuiGrid-container standalone-uikit--form-buttons-story-MuiGrid-spacing-xs-2"
                                       >
                                         <WithStyles(ForwardRef(Grid))
-                                          className="standalone-uikit--form-buttons-story-makeStyles-buttonWrapper-58"
+                                          className="standalone-uikit--form-buttons-story-CcFormButtons-buttonWrapper-58"
                                           item={true}
                                           key="0"
                                         >
                                           <ForwardRef(Grid)
-                                            className="standalone-uikit--form-buttons-story-makeStyles-buttonWrapper-58"
+                                            className="standalone-uikit--form-buttons-story-CcFormButtons-buttonWrapper-58"
                                             classes={
                                               Object {
                                                 "align-content-xs-center": "standalone-uikit--form-buttons-story-MuiGrid-align-content-xs-center",
@@ -35401,7 +35401,7 @@ exports[`Storyshots Standalone/UIKit FormButtons 1`] = `
                                             item={true}
                                           >
                                             <div
-                                              className="standalone-uikit--form-buttons-story-MuiGrid-root standalone-uikit--form-buttons-story-makeStyles-buttonWrapper-58 standalone-uikit--form-buttons-story-MuiGrid-item"
+                                              className="standalone-uikit--form-buttons-story-MuiGrid-root standalone-uikit--form-buttons-story-CcFormButtons-buttonWrapper-58 standalone-uikit--form-buttons-story-MuiGrid-item"
                                             >
                                               <Memo(ActionButton)
                                                 disabled={false}
@@ -35565,12 +35565,12 @@ exports[`Storyshots Standalone/UIKit FormButtons 1`] = `
                                           </ForwardRef(Grid)>
                                         </WithStyles(ForwardRef(Grid))>
                                         <WithStyles(ForwardRef(Grid))
-                                          className="standalone-uikit--form-buttons-story-makeStyles-buttonWrapper-58"
+                                          className="standalone-uikit--form-buttons-story-CcFormButtons-buttonWrapper-58"
                                           item={true}
                                           key="1"
                                         >
                                           <ForwardRef(Grid)
-                                            className="standalone-uikit--form-buttons-story-makeStyles-buttonWrapper-58"
+                                            className="standalone-uikit--form-buttons-story-CcFormButtons-buttonWrapper-58"
                                             classes={
                                               Object {
                                                 "align-content-xs-center": "standalone-uikit--form-buttons-story-MuiGrid-align-content-xs-center",
@@ -35681,7 +35681,7 @@ exports[`Storyshots Standalone/UIKit FormButtons 1`] = `
                                             item={true}
                                           >
                                             <div
-                                              className="standalone-uikit--form-buttons-story-MuiGrid-root standalone-uikit--form-buttons-story-makeStyles-buttonWrapper-58 standalone-uikit--form-buttons-story-MuiGrid-item"
+                                              className="standalone-uikit--form-buttons-story-MuiGrid-root standalone-uikit--form-buttons-story-CcFormButtons-buttonWrapper-58 standalone-uikit--form-buttons-story-MuiGrid-item"
                                             >
                                               <Memo(ActionButton)
                                                 disabled={false}
@@ -35844,12 +35844,12 @@ exports[`Storyshots Standalone/UIKit FormButtons 1`] = `
                                           </ForwardRef(Grid)>
                                         </WithStyles(ForwardRef(Grid))>
                                         <WithStyles(ForwardRef(Grid))
-                                          className="standalone-uikit--form-buttons-story-makeStyles-buttonWrapper-58"
+                                          className="standalone-uikit--form-buttons-story-CcFormButtons-buttonWrapper-58"
                                           item={true}
                                           key="2"
                                         >
                                           <ForwardRef(Grid)
-                                            className="standalone-uikit--form-buttons-story-makeStyles-buttonWrapper-58"
+                                            className="standalone-uikit--form-buttons-story-CcFormButtons-buttonWrapper-58"
                                             classes={
                                               Object {
                                                 "align-content-xs-center": "standalone-uikit--form-buttons-story-MuiGrid-align-content-xs-center",
@@ -35960,7 +35960,7 @@ exports[`Storyshots Standalone/UIKit FormButtons 1`] = `
                                             item={true}
                                           >
                                             <div
-                                              className="standalone-uikit--form-buttons-story-MuiGrid-root standalone-uikit--form-buttons-story-makeStyles-buttonWrapper-58 standalone-uikit--form-buttons-story-MuiGrid-item"
+                                              className="standalone-uikit--form-buttons-story-MuiGrid-root standalone-uikit--form-buttons-story-CcFormButtons-buttonWrapper-58 standalone-uikit--form-buttons-story-MuiGrid-item"
                                             >
                                               <Memo(ActionButton)
                                                 color="primary"
@@ -36123,12 +36123,12 @@ exports[`Storyshots Standalone/UIKit FormButtons 1`] = `
                                           </ForwardRef(Grid)>
                                         </WithStyles(ForwardRef(Grid))>
                                         <WithStyles(ForwardRef(Grid))
-                                          className="standalone-uikit--form-buttons-story-makeStyles-buttonWrapper-58"
+                                          className="standalone-uikit--form-buttons-story-CcFormButtons-buttonWrapper-58"
                                           item={true}
                                           key="3"
                                         >
                                           <ForwardRef(Grid)
-                                            className="standalone-uikit--form-buttons-story-makeStyles-buttonWrapper-58"
+                                            className="standalone-uikit--form-buttons-story-CcFormButtons-buttonWrapper-58"
                                             classes={
                                               Object {
                                                 "align-content-xs-center": "standalone-uikit--form-buttons-story-MuiGrid-align-content-xs-center",
@@ -36239,7 +36239,7 @@ exports[`Storyshots Standalone/UIKit FormButtons 1`] = `
                                             item={true}
                                           >
                                             <div
-                                              className="standalone-uikit--form-buttons-story-MuiGrid-root standalone-uikit--form-buttons-story-makeStyles-buttonWrapper-58 standalone-uikit--form-buttons-story-MuiGrid-item"
+                                              className="standalone-uikit--form-buttons-story-MuiGrid-root standalone-uikit--form-buttons-story-CcFormButtons-buttonWrapper-58 standalone-uikit--form-buttons-story-MuiGrid-item"
                                             >
                                               <Memo(ActionButton)
                                                 color="secondary"
@@ -36402,12 +36402,12 @@ exports[`Storyshots Standalone/UIKit FormButtons 1`] = `
                                           </ForwardRef(Grid)>
                                         </WithStyles(ForwardRef(Grid))>
                                         <WithStyles(ForwardRef(Grid))
-                                          className="standalone-uikit--form-buttons-story-makeStyles-buttonWrapper-58"
+                                          className="standalone-uikit--form-buttons-story-CcFormButtons-buttonWrapper-58"
                                           item={true}
                                           key="4"
                                         >
                                           <ForwardRef(Grid)
-                                            className="standalone-uikit--form-buttons-story-makeStyles-buttonWrapper-58"
+                                            className="standalone-uikit--form-buttons-story-CcFormButtons-buttonWrapper-58"
                                             classes={
                                               Object {
                                                 "align-content-xs-center": "standalone-uikit--form-buttons-story-MuiGrid-align-content-xs-center",
@@ -36518,7 +36518,7 @@ exports[`Storyshots Standalone/UIKit FormButtons 1`] = `
                                             item={true}
                                           >
                                             <div
-                                              className="standalone-uikit--form-buttons-story-MuiGrid-root standalone-uikit--form-buttons-story-makeStyles-buttonWrapper-58 standalone-uikit--form-buttons-story-MuiGrid-item"
+                                              className="standalone-uikit--form-buttons-story-MuiGrid-root standalone-uikit--form-buttons-story-CcFormButtons-buttonWrapper-58 standalone-uikit--form-buttons-story-MuiGrid-item"
                                             >
                                               <Memo(ActionButton)
                                                 backgroundColor="rgba(199, 109, 199, .9)"
@@ -36729,12 +36729,12 @@ exports[`Storyshots Standalone/UIKit FormButtons 1`] = `
                                           </ForwardRef(Grid)>
                                         </WithStyles(ForwardRef(Grid))>
                                         <WithStyles(ForwardRef(Grid))
-                                          className="standalone-uikit--form-buttons-story-makeStyles-buttonWrapper-58"
+                                          className="standalone-uikit--form-buttons-story-CcFormButtons-buttonWrapper-58"
                                           item={true}
                                           key="5"
                                         >
                                           <ForwardRef(Grid)
-                                            className="standalone-uikit--form-buttons-story-makeStyles-buttonWrapper-58"
+                                            className="standalone-uikit--form-buttons-story-CcFormButtons-buttonWrapper-58"
                                             classes={
                                               Object {
                                                 "align-content-xs-center": "standalone-uikit--form-buttons-story-MuiGrid-align-content-xs-center",
@@ -36845,7 +36845,7 @@ exports[`Storyshots Standalone/UIKit FormButtons 1`] = `
                                             item={true}
                                           >
                                             <div
-                                              className="standalone-uikit--form-buttons-story-MuiGrid-root standalone-uikit--form-buttons-story-makeStyles-buttonWrapper-58 standalone-uikit--form-buttons-story-MuiGrid-item"
+                                              className="standalone-uikit--form-buttons-story-MuiGrid-root standalone-uikit--form-buttons-story-CcFormButtons-buttonWrapper-58 standalone-uikit--form-buttons-story-MuiGrid-item"
                                             >
                                               <Memo(ActionButton)
                                                 disabled={false}
@@ -37189,12 +37189,12 @@ exports[`Storyshots Standalone/UIKit FormButtons 1`] = `
                                           </ForwardRef(Grid)>
                                         </WithStyles(ForwardRef(Grid))>
                                         <WithStyles(ForwardRef(Grid))
-                                          className="standalone-uikit--form-buttons-story-makeStyles-buttonWrapper-58"
+                                          className="standalone-uikit--form-buttons-story-CcFormButtons-buttonWrapper-58"
                                           item={true}
                                           key="6"
                                         >
                                           <ForwardRef(Grid)
-                                            className="standalone-uikit--form-buttons-story-makeStyles-buttonWrapper-58"
+                                            className="standalone-uikit--form-buttons-story-CcFormButtons-buttonWrapper-58"
                                             classes={
                                               Object {
                                                 "align-content-xs-center": "standalone-uikit--form-buttons-story-MuiGrid-align-content-xs-center",
@@ -37305,7 +37305,7 @@ exports[`Storyshots Standalone/UIKit FormButtons 1`] = `
                                             item={true}
                                           >
                                             <div
-                                              className="standalone-uikit--form-buttons-story-MuiGrid-root standalone-uikit--form-buttons-story-makeStyles-buttonWrapper-58 standalone-uikit--form-buttons-story-MuiGrid-item"
+                                              className="standalone-uikit--form-buttons-story-MuiGrid-root standalone-uikit--form-buttons-story-CcFormButtons-buttonWrapper-58 standalone-uikit--form-buttons-story-MuiGrid-item"
                                             >
                                               <Memo(ActionButton)
                                                 disabled={true}
@@ -37441,12 +37441,12 @@ exports[`Storyshots Standalone/UIKit FormButtons 1`] = `
                                           </ForwardRef(Grid)>
                                         </WithStyles(ForwardRef(Grid))>
                                         <WithStyles(ForwardRef(Grid))
-                                          className="standalone-uikit--form-buttons-story-makeStyles-buttonWrapper-58"
+                                          className="standalone-uikit--form-buttons-story-CcFormButtons-buttonWrapper-58"
                                           item={true}
                                           key="7"
                                         >
                                           <ForwardRef(Grid)
-                                            className="standalone-uikit--form-buttons-story-makeStyles-buttonWrapper-58"
+                                            className="standalone-uikit--form-buttons-story-CcFormButtons-buttonWrapper-58"
                                             classes={
                                               Object {
                                                 "align-content-xs-center": "standalone-uikit--form-buttons-story-MuiGrid-align-content-xs-center",
@@ -37557,7 +37557,7 @@ exports[`Storyshots Standalone/UIKit FormButtons 1`] = `
                                             item={true}
                                           >
                                             <div
-                                              className="standalone-uikit--form-buttons-story-MuiGrid-root standalone-uikit--form-buttons-story-makeStyles-buttonWrapper-58 standalone-uikit--form-buttons-story-MuiGrid-item"
+                                              className="standalone-uikit--form-buttons-story-MuiGrid-root standalone-uikit--form-buttons-story-CcFormButtons-buttonWrapper-58 standalone-uikit--form-buttons-story-MuiGrid-item"
                                             >
                                               <Memo(ActionButton)
                                                 disabled={true}

@@ -29,12 +29,15 @@ const modalProps = {
 	keepMounted: true, // Better open performance on mobile.
 };
 
-const useStyles = makeStyles(() => ({
-	menuPaper: (props: IProps) => ({
-		width: props.drawerWidth,
-		height: "100%",
-	}),
-}));
+const useStyles = makeStyles(
+	{
+		menuPaper: (props: IProps) => ({
+			width: props.drawerWidth,
+			height: "100%",
+		}),
+	},
+	{ name: "CcPortalLayoutMenu" }
+);
 
 const PortalLayoutMenu = (props: IProps) => {
 	const { menuOpen, toggleMenu } = props;

@@ -11,6 +11,7 @@
 		"plugin:react/recommended",
 		"plugin:@typescript-eslint/recommended",
 		"plugin:@typescript-eslint/recommended-requiring-type-checking",
+		"plugin:makestyles/recommended",
 		"plugin:react-hooks/recommended"
 	],
 	"parser": "@typescript-eslint/parser",
@@ -34,6 +35,7 @@
 		"no-eval": "error",
 		"import/first": "error",
 		"prettier/prettier": "warn",
-		"react/prop-types": "off"
+		"react/prop-types": "off",
+		"makestyles/makestyles-with-name": "error"
 	}
 }

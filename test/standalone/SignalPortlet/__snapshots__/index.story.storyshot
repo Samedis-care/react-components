@@ -6042,10 +6042,10 @@ exports[`Storyshots Standalone/SignalPortlet With Links 1`] = `
                                   }
                                 >
                                   <WithStyles(ForwardRef(Paper))
-                                    className="standalone-signalportlet--signal-portlet-with-links-story-makeStyles-paper-18"
+                                    className="standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortlet-paper-18"
                                   >
                                     <ForwardRef(Paper)
-                                      className="standalone-signalportlet--signal-portlet-with-links-story-makeStyles-paper-18"
+                                      className="standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortlet-paper-18"
                                       classes={
                                         Object {
                                           "elevation0": "standalone-signalportlet--signal-portlet-with-links-story-MuiPaper-elevation0",
@@ -6080,7 +6080,7 @@ exports[`Storyshots Standalone/SignalPortlet With Links 1`] = `
                                       }
                                     >
                                       <div
-                                        className="standalone-signalportlet--signal-portlet-with-links-story-MuiPaper-root standalone-signalportlet--signal-portlet-with-links-story-makeStyles-paper-18 standalone-signalportlet--signal-portlet-with-links-story-MuiPaper-elevation1 standalone-signalportlet--signal-portlet-with-links-story-MuiPaper-rounded"
+                                        className="standalone-signalportlet--signal-portlet-with-links-story-MuiPaper-root standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortlet-paper-18 standalone-signalportlet--signal-portlet-with-links-story-MuiPaper-elevation1 standalone-signalportlet--signal-portlet-with-links-story-MuiPaper-rounded"
                                       >
                                         <WithStyles(ForwardRef(Grid))
                                           container={true}
@@ -6201,12 +6201,12 @@ exports[`Storyshots Standalone/SignalPortlet With Links 1`] = `
                                               className="standalone-signalportlet--signal-portlet-with-links-story-MuiGrid-root standalone-signalportlet--signal-portlet-with-links-story-MuiGrid-container standalone-signalportlet--signal-portlet-with-links-story-MuiGrid-spacing-xs-1"
                                             >
                                               <WithStyles(ForwardRef(Grid))
-                                                className="standalone-signalportlet--signal-portlet-with-links-story-makeStyles-titleWrapper-21"
+                                                className="standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortlet-titleWrapper-21"
                                                 item={true}
                                                 xs={12}
                                               >
                                                 <ForwardRef(Grid)
-                                                  className="standalone-signalportlet--signal-portlet-with-links-story-makeStyles-titleWrapper-21"
+                                                  className="standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortlet-titleWrapper-21"
                                                   classes={
                                                     Object {
                                                       "align-content-xs-center": "standalone-signalportlet--signal-portlet-with-links-story-MuiGrid-align-content-xs-center",
@@ -6318,16 +6318,16 @@ exports[`Storyshots Standalone/SignalPortlet With Links 1`] = `
                                                   xs={12}
                                                 >
                                                   <div
-                                                    className="standalone-signalportlet--signal-portlet-with-links-story-MuiGrid-root standalone-signalportlet--signal-portlet-with-links-story-makeStyles-titleWrapper-21 standalone-signalportlet--signal-portlet-with-links-story-MuiGrid-item standalone-signalportlet--signal-portlet-with-links-story-MuiGrid-grid-xs-12"
+                                                    className="standalone-signalportlet--signal-portlet-with-links-story-MuiGrid-root standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortlet-titleWrapper-21 standalone-signalportlet--signal-portlet-with-links-story-MuiGrid-item standalone-signalportlet--signal-portlet-with-links-story-MuiGrid-grid-xs-12"
                                                   >
                                                     <WithStyles(ForwardRef(Typography))
                                                       align="center"
-                                                      className="standalone-signalportlet--signal-portlet-with-links-story-makeStyles-title-20"
+                                                      className="standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortlet-title-20"
                                                       variant="h5"
                                                     >
                                                       <ForwardRef(Typography)
                                                         align="center"
-                                                        className="standalone-signalportlet--signal-portlet-with-links-story-makeStyles-title-20"
+                                                        className="standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortlet-title-20"
                                                         classes={
                                                           Object {
                                                             "alignCenter": "standalone-signalportlet--signal-portlet-with-links-story-MuiTypography-alignCenter",
@@ -6365,7 +6365,7 @@ exports[`Storyshots Standalone/SignalPortlet With Links 1`] = `
                                                         variant="h5"
                                                       >
                                                         <h5
-                                                          className="standalone-signalportlet--signal-portlet-with-links-story-MuiTypography-root standalone-signalportlet--signal-portlet-with-links-story-makeStyles-title-20 standalone-signalportlet--signal-portlet-with-links-story-MuiTypography-h5 standalone-signalportlet--signal-portlet-with-links-story-MuiTypography-alignCenter"
+                                                          className="standalone-signalportlet--signal-portlet-with-links-story-MuiTypography-root standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortlet-title-20 standalone-signalportlet--signal-portlet-with-links-story-MuiTypography-h5 standalone-signalportlet--signal-portlet-with-links-story-MuiTypography-alignCenter"
                                                         >
                                                           <WithStyles(ForwardRef(Typography))
                                                             variant="h5"
@@ -6679,10 +6679,10 @@ exports[`Storyshots Standalone/SignalPortlet With Links 1`] = `
                                                     className="standalone-signalportlet--signal-portlet-with-links-story-MuiGrid-root standalone-signalportlet--signal-portlet-with-links-story-MuiGrid-item standalone-signalportlet--signal-portlet-with-links-story-MuiGrid-grid-xs-12"
                                                   >
                                                     <WithStyles(ForwardRef(List))
-                                                      className="standalone-signalportlet--signal-portlet-with-links-story-makeStyles-list-19"
+                                                      className="standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortlet-list-19"
                                                     >
                                                       <ForwardRef(List)
-                                                        className="standalone-signalportlet--signal-portlet-with-links-story-makeStyles-list-19"
+                                                        className="standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortlet-list-19"
                                                         classes={
                                                           Object {
                                                             "dense": "standalone-signalportlet--signal-portlet-with-links-story-MuiList-dense",
@@ -6693,7 +6693,7 @@ exports[`Storyshots Standalone/SignalPortlet With Links 1`] = `
                                                         }
                                                       >
                                                         <ul
-                                                          className="standalone-signalportlet--signal-portlet-with-links-story-MuiList-root standalone-signalportlet--signal-portlet-with-links-story-makeStyles-list-19 standalone-signalportlet--signal-portlet-with-links-story-MuiList-padding"
+                                                          className="standalone-signalportlet--signal-portlet-with-links-story-MuiList-root standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortlet-list-19 standalone-signalportlet--signal-portlet-with-links-story-MuiList-padding"
                                                         >
                                                           <Memo(SignalPortletItem)
                                                             colorNotPresent="#9e9e9e"
@@ -6705,12 +6705,12 @@ exports[`Storyshots Standalone/SignalPortlet With Links 1`] = `
                                                           >
                                                             <WithStyles(ForwardRef(ListItem))
                                                               button={true}
-                                                              className="standalone-signalportlet--signal-portlet-with-links-story-makeStyles-root-24"
+                                                              className="standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortletItem-root-24"
                                                               onClick={[Function]}
                                                             >
                                                               <ForwardRef(ListItem)
                                                                 button={true}
-                                                                className="standalone-signalportlet--signal-portlet-with-links-story-makeStyles-root-24"
+                                                                className="standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortletItem-root-24"
                                                                 classes={
                                                                   Object {
                                                                     "alignItemsFlexStart": "standalone-signalportlet--signal-portlet-with-links-story-MuiListItem-alignItemsFlexStart",
@@ -6729,14 +6729,14 @@ exports[`Storyshots Standalone/SignalPortlet With Links 1`] = `
                                                                 onClick={[Function]}
                                                               >
                                                                 <WithStyles(ForwardRef(ButtonBase))
-                                                                  className="standalone-signalportlet--signal-portlet-with-links-story-MuiListItem-root standalone-signalportlet--signal-portlet-with-links-story-makeStyles-root-24 standalone-signalportlet--signal-portlet-with-links-story-MuiListItem-gutters standalone-signalportlet--signal-portlet-with-links-story-MuiListItem-button"
+                                                                  className="standalone-signalportlet--signal-portlet-with-links-story-MuiListItem-root standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortletItem-root-24 standalone-signalportlet--signal-portlet-with-links-story-MuiListItem-gutters standalone-signalportlet--signal-portlet-with-links-story-MuiListItem-button"
                                                                   component="div"
                                                                   disabled={false}
                                                                   focusVisibleClassName="Mui-focusVisible"
                                                                   onClick={[Function]}
                                                                 >
                                                                   <ForwardRef(ButtonBase)
-                                                                    className="standalone-signalportlet--signal-portlet-with-links-story-MuiListItem-root standalone-signalportlet--signal-portlet-with-links-story-makeStyles-root-24 standalone-signalportlet--signal-portlet-with-links-story-MuiListItem-gutters standalone-signalportlet--signal-portlet-with-links-story-MuiListItem-button"
+                                                                    className="standalone-signalportlet--signal-portlet-with-links-story-MuiListItem-root standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortletItem-root-24 standalone-signalportlet--signal-portlet-with-links-story-MuiListItem-gutters standalone-signalportlet--signal-portlet-with-links-story-MuiListItem-button"
                                                                     classes={
                                                                       Object {
                                                                         "disabled": "Mui-disabled",
@@ -6751,7 +6751,7 @@ exports[`Storyshots Standalone/SignalPortlet With Links 1`] = `
                                                                   >
                                                                     <div
                                                                       aria-disabled={false}
-                                                                      className="standalone-signalportlet--signal-portlet-with-links-story-MuiButtonBase-root standalone-signalportlet--signal-portlet-with-links-story-MuiListItem-root standalone-signalportlet--signal-portlet-with-links-story-makeStyles-root-24 standalone-signalportlet--signal-portlet-with-links-story-MuiListItem-gutters standalone-signalportlet--signal-portlet-with-links-story-MuiListItem-button"
+                                                                      className="standalone-signalportlet--signal-portlet-with-links-story-MuiButtonBase-root standalone-signalportlet--signal-portlet-with-links-story-MuiListItem-root standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortletItem-root-24 standalone-signalportlet--signal-portlet-with-links-story-MuiListItem-gutters standalone-signalportlet--signal-portlet-with-links-story-MuiListItem-button"
                                                                       onBlur={[Function]}
                                                                       onClick={[Function]}
                                                                       onDragLeave={[Function]}
@@ -6768,11 +6768,11 @@ exports[`Storyshots Standalone/SignalPortlet With Links 1`] = `
                                                                       tabIndex={0}
                                                                     >
                                                                       <WithStyles(ForwardRef(ListItemAvatar))
-                                                                        className="standalone-signalportlet--signal-portlet-with-links-story-makeStyles-listAvatar-25"
+                                                                        className="standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortletItem-listAvatar-25"
                                                                         key=".0"
                                                                       >
                                                                         <ForwardRef(ListItemAvatar)
-                                                                          className="standalone-signalportlet--signal-portlet-with-links-story-makeStyles-listAvatar-25"
+                                                                          className="standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortletItem-listAvatar-25"
                                                                           classes={
                                                                             Object {
                                                                               "alignItemsFlexStart": "standalone-signalportlet--signal-portlet-with-links-story-MuiListItemAvatar-alignItemsFlexStart",
@@ -6781,13 +6781,13 @@ exports[`Storyshots Standalone/SignalPortlet With Links 1`] = `
                                                                           }
                                                                         >
                                                                           <div
-                                                                            className="standalone-signalportlet--signal-portlet-with-links-story-MuiListItemAvatar-root standalone-signalportlet--signal-portlet-with-links-story-makeStyles-listAvatar-25"
+                                                                            className="standalone-signalportlet--signal-portlet-with-links-story-MuiListItemAvatar-root standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortletItem-listAvatar-25"
                                                                           >
                                                                             <WithStyles(ForwardRef(Avatar))
-                                                                              className="standalone-signalportlet--signal-portlet-with-links-story-makeStyles-itemColorActive-22 standalone-signalportlet--signal-portlet-with-links-story-makeStyles-itemColorActive-27"
+                                                                              className="standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortletItem-itemColorActive-22 standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortletItem-itemColorActive-27"
                                                                             >
                                                                               <ForwardRef(Avatar)
-                                                                                className="standalone-signalportlet--signal-portlet-with-links-story-makeStyles-itemColorActive-22 standalone-signalportlet--signal-portlet-with-links-story-makeStyles-itemColorActive-27"
+                                                                                className="standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortletItem-itemColorActive-22 standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortletItem-itemColorActive-27"
                                                                                 classes={
                                                                                   Object {
                                                                                     "circle": "standalone-signalportlet--signal-portlet-with-links-story-MuiAvatar-circle",
@@ -6802,7 +6802,7 @@ exports[`Storyshots Standalone/SignalPortlet With Links 1`] = `
                                                                                 }
                                                                               >
                                                                                 <div
-                                                                                  className="standalone-signalportlet--signal-portlet-with-links-story-MuiAvatar-root standalone-signalportlet--signal-portlet-with-links-story-MuiAvatar-circle standalone-signalportlet--signal-portlet-with-links-story-makeStyles-itemColorActive-22 standalone-signalportlet--signal-portlet-with-links-story-makeStyles-itemColorActive-27 standalone-signalportlet--signal-portlet-with-links-story-MuiAvatar-colorDefault"
+                                                                                  className="standalone-signalportlet--signal-portlet-with-links-story-MuiAvatar-root standalone-signalportlet--signal-portlet-with-links-story-MuiAvatar-circle standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortletItem-itemColorActive-22 standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortletItem-itemColorActive-27 standalone-signalportlet--signal-portlet-with-links-story-MuiAvatar-colorDefault"
                                                                                 >
                                                                                   123
                                                                                 </div>
@@ -6812,11 +6812,11 @@ exports[`Storyshots Standalone/SignalPortlet With Links 1`] = `
                                                                         </ForwardRef(ListItemAvatar)>
                                                                       </WithStyles(ForwardRef(ListItemAvatar))>
                                                                       <WithStyles(ForwardRef(ListItemText))
-                                                                        className="standalone-signalportlet--signal-portlet-with-links-story-makeStyles-listText-26"
+                                                                        className="standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortletItem-listText-26"
                                                                         key=".1"
                                                                       >
                                                                         <ForwardRef(ListItemText)
-                                                                          className="standalone-signalportlet--signal-portlet-with-links-story-makeStyles-listText-26"
+                                                                          className="standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortletItem-listText-26"
                                                                           classes={
                                                                             Object {
                                                                               "dense": "standalone-signalportlet--signal-portlet-with-links-story-MuiListItemText-dense",
@@ -6829,7 +6829,7 @@ exports[`Storyshots Standalone/SignalPortlet With Links 1`] = `
                                                                           }
                                                                         >
                                                                           <div
-                                                                            className="standalone-signalportlet--signal-portlet-with-links-story-MuiListItemText-root standalone-signalportlet--signal-portlet-with-links-story-makeStyles-listText-26"
+                                                                            className="standalone-signalportlet--signal-portlet-with-links-story-MuiListItemText-root standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortletItem-listText-26"
                                                                           >
                                                                             <WithStyles(ForwardRef(Typography))
                                                                               className="standalone-signalportlet--signal-portlet-with-links-story-MuiListItemText-primary"
@@ -6931,12 +6931,12 @@ exports[`Storyshots Standalone/SignalPortlet With Links 1`] = `
                                                           >
                                                             <WithStyles(ForwardRef(ListItem))
                                                               button={true}
-                                                              className="standalone-signalportlet--signal-portlet-with-links-story-makeStyles-root-24"
+                                                              className="standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortletItem-root-24"
                                                               onClick={[Function]}
                                                             >
                                                               <ForwardRef(ListItem)
                                                                 button={true}
-                                                                className="standalone-signalportlet--signal-portlet-with-links-story-makeStyles-root-24"
+                                                                className="standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortletItem-root-24"
                                                                 classes={
                                                                   Object {
                                                                     "alignItemsFlexStart": "standalone-signalportlet--signal-portlet-with-links-story-MuiListItem-alignItemsFlexStart",
@@ -6955,14 +6955,14 @@ exports[`Storyshots Standalone/SignalPortlet With Links 1`] = `
                                                                 onClick={[Function]}
                                                               >
                                                                 <WithStyles(ForwardRef(ButtonBase))
-                                                                  className="standalone-signalportlet--signal-portlet-with-links-story-MuiListItem-root standalone-signalportlet--signal-portlet-with-links-story-makeStyles-root-24 standalone-signalportlet--signal-portlet-with-links-story-MuiListItem-gutters standalone-signalportlet--signal-portlet-with-links-story-MuiListItem-button"
+                                                                  className="standalone-signalportlet--signal-portlet-with-links-story-MuiListItem-root standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortletItem-root-24 standalone-signalportlet--signal-portlet-with-links-story-MuiListItem-gutters standalone-signalportlet--signal-portlet-with-links-story-MuiListItem-button"
                                                                   component="div"
                                                                   disabled={false}
                                                                   focusVisibleClassName="Mui-focusVisible"
                                                                   onClick={[Function]}
                                                                 >
                                                                   <ForwardRef(ButtonBase)
-                                                                    className="standalone-signalportlet--signal-portlet-with-links-story-MuiListItem-root standalone-signalportlet--signal-portlet-with-links-story-makeStyles-root-24 standalone-signalportlet--signal-portlet-with-links-story-MuiListItem-gutters standalone-signalportlet--signal-portlet-with-links-story-MuiListItem-button"
+                                                                    className="standalone-signalportlet--signal-portlet-with-links-story-MuiListItem-root standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortletItem-root-24 standalone-signalportlet--signal-portlet-with-links-story-MuiListItem-gutters standalone-signalportlet--signal-portlet-with-links-story-MuiListItem-button"
                                                                     classes={
                                                                       Object {
                                                                         "disabled": "Mui-disabled",
@@ -6977,7 +6977,7 @@ exports[`Storyshots Standalone/SignalPortlet With Links 1`] = `
                                                                   >
                                                                     <div
                                                                       aria-disabled={false}
-                                                                      className="standalone-signalportlet--signal-portlet-with-links-story-MuiButtonBase-root standalone-signalportlet--signal-portlet-with-links-story-MuiListItem-root standalone-signalportlet--signal-portlet-with-links-story-makeStyles-root-24 standalone-signalportlet--signal-portlet-with-links-story-MuiListItem-gutters standalone-signalportlet--signal-portlet-with-links-story-MuiListItem-button"
+                                                                      className="standalone-signalportlet--signal-portlet-with-links-story-MuiButtonBase-root standalone-signalportlet--signal-portlet-with-links-story-MuiListItem-root standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortletItem-root-24 standalone-signalportlet--signal-portlet-with-links-story-MuiListItem-gutters standalone-signalportlet--signal-portlet-with-links-story-MuiListItem-button"
                                                                       onBlur={[Function]}
                                                                       onClick={[Function]}
                                                                       onDragLeave={[Function]}
@@ -6994,11 +6994,11 @@ exports[`Storyshots Standalone/SignalPortlet With Links 1`] = `
                                                                       tabIndex={0}
                                                                     >
                                                                       <WithStyles(ForwardRef(ListItemAvatar))
-                                                                        className="standalone-signalportlet--signal-portlet-with-links-story-makeStyles-listAvatar-25"
+                                                                        className="standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortletItem-listAvatar-25"
                                                                         key=".0"
                                                                       >
                                                                         <ForwardRef(ListItemAvatar)
-                                                                          className="standalone-signalportlet--signal-portlet-with-links-story-makeStyles-listAvatar-25"
+                                                                          className="standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortletItem-listAvatar-25"
                                                                           classes={
                                                                             Object {
                                                                               "alignItemsFlexStart": "standalone-signalportlet--signal-portlet-with-links-story-MuiListItemAvatar-alignItemsFlexStart",
@@ -7007,13 +7007,13 @@ exports[`Storyshots Standalone/SignalPortlet With Links 1`] = `
                                                                           }
                                                                         >
                                                                           <div
-                                                                            className="standalone-signalportlet--signal-portlet-with-links-story-MuiListItemAvatar-root standalone-signalportlet--signal-portlet-with-links-story-makeStyles-listAvatar-25"
+                                                                            className="standalone-signalportlet--signal-portlet-with-links-story-MuiListItemAvatar-root standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortletItem-listAvatar-25"
                                                                           >
                                                                             <WithStyles(ForwardRef(Avatar))
-                                                                              className="standalone-signalportlet--signal-portlet-with-links-story-makeStyles-itemColorInactive-23 standalone-signalportlet--signal-portlet-with-links-story-makeStyles-itemColorInactive-30"
+                                                                              className="standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortletItem-itemColorInactive-23 standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortletItem-itemColorInactive-30"
                                                                             >
                                                                               <ForwardRef(Avatar)
-                                                                                className="standalone-signalportlet--signal-portlet-with-links-story-makeStyles-itemColorInactive-23 standalone-signalportlet--signal-portlet-with-links-story-makeStyles-itemColorInactive-30"
+                                                                                className="standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortletItem-itemColorInactive-23 standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortletItem-itemColorInactive-30"
                                                                                 classes={
                                                                                   Object {
                                                                                     "circle": "standalone-signalportlet--signal-portlet-with-links-story-MuiAvatar-circle",
@@ -7028,7 +7028,7 @@ exports[`Storyshots Standalone/SignalPortlet With Links 1`] = `
                                                                                 }
                                                                               >
                                                                                 <div
-                                                                                  className="standalone-signalportlet--signal-portlet-with-links-story-MuiAvatar-root standalone-signalportlet--signal-portlet-with-links-story-MuiAvatar-circle standalone-signalportlet--signal-portlet-with-links-story-makeStyles-itemColorInactive-23 standalone-signalportlet--signal-portlet-with-links-story-makeStyles-itemColorInactive-30 standalone-signalportlet--signal-portlet-with-links-story-MuiAvatar-colorDefault"
+                                                                                  className="standalone-signalportlet--signal-portlet-with-links-story-MuiAvatar-root standalone-signalportlet--signal-portlet-with-links-story-MuiAvatar-circle standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortletItem-itemColorInactive-23 standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortletItem-itemColorInactive-30 standalone-signalportlet--signal-portlet-with-links-story-MuiAvatar-colorDefault"
                                                                                 >
                                                                                   0
                                                                                 </div>
@@ -7038,11 +7038,11 @@ exports[`Storyshots Standalone/SignalPortlet With Links 1`] = `
                                                                         </ForwardRef(ListItemAvatar)>
                                                                       </WithStyles(ForwardRef(ListItemAvatar))>
                                                                       <WithStyles(ForwardRef(ListItemText))
-                                                                        className="standalone-signalportlet--signal-portlet-with-links-story-makeStyles-listText-26"
+                                                                        className="standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortletItem-listText-26"
                                                                         key=".1"
                                                                       >
                                                                         <ForwardRef(ListItemText)
-                                                                          className="standalone-signalportlet--signal-portlet-with-links-story-makeStyles-listText-26"
+                                                                          className="standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortletItem-listText-26"
                                                                           classes={
                                                                             Object {
                                                                               "dense": "standalone-signalportlet--signal-portlet-with-links-story-MuiListItemText-dense",
@@ -7055,7 +7055,7 @@ exports[`Storyshots Standalone/SignalPortlet With Links 1`] = `
                                                                           }
                                                                         >
                                                                           <div
-                                                                            className="standalone-signalportlet--signal-portlet-with-links-story-MuiListItemText-root standalone-signalportlet--signal-portlet-with-links-story-makeStyles-listText-26"
+                                                                            className="standalone-signalportlet--signal-portlet-with-links-story-MuiListItemText-root standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortletItem-listText-26"
                                                                           >
                                                                             <WithStyles(ForwardRef(Typography))
                                                                               className="standalone-signalportlet--signal-portlet-with-links-story-MuiListItemText-primary"
@@ -7157,12 +7157,12 @@ exports[`Storyshots Standalone/SignalPortlet With Links 1`] = `
                                                           >
                                                             <WithStyles(ForwardRef(ListItem))
                                                               button={true}
-                                                              className="standalone-signalportlet--signal-portlet-with-links-story-makeStyles-root-24"
+                                                              className="standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortletItem-root-24"
                                                               onClick={[Function]}
                                                             >
                                                               <ForwardRef(ListItem)
                                                                 button={true}
-                                                                className="standalone-signalportlet--signal-portlet-with-links-story-makeStyles-root-24"
+                                                                className="standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortletItem-root-24"
                                                                 classes={
                                                                   Object {
                                                                     "alignItemsFlexStart": "standalone-signalportlet--signal-portlet-with-links-story-MuiListItem-alignItemsFlexStart",
@@ -7181,14 +7181,14 @@ exports[`Storyshots Standalone/SignalPortlet With Links 1`] = `
                                                                 onClick={[Function]}
                                                               >
                                                                 <WithStyles(ForwardRef(ButtonBase))
-                                                                  className="standalone-signalportlet--signal-portlet-with-links-story-MuiListItem-root standalone-signalportlet--signal-portlet-with-links-story-makeStyles-root-24 standalone-signalportlet--signal-portlet-with-links-story-MuiListItem-gutters standalone-signalportlet--signal-portlet-with-links-story-MuiListItem-button"
+                                                                  className="standalone-signalportlet--signal-portlet-with-links-story-MuiListItem-root standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortletItem-root-24 standalone-signalportlet--signal-portlet-with-links-story-MuiListItem-gutters standalone-signalportlet--signal-portlet-with-links-story-MuiListItem-button"
                                                                   component="div"
                                                                   disabled={false}
                                                                   focusVisibleClassName="Mui-focusVisible"
                                                                   onClick={[Function]}
                                                                 >
                                                                   <ForwardRef(ButtonBase)
-                                                                    className="standalone-signalportlet--signal-portlet-with-links-story-MuiListItem-root standalone-signalportlet--signal-portlet-with-links-story-makeStyles-root-24 standalone-signalportlet--signal-portlet-with-links-story-MuiListItem-gutters standalone-signalportlet--signal-portlet-with-links-story-MuiListItem-button"
+                                                                    className="standalone-signalportlet--signal-portlet-with-links-story-MuiListItem-root standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortletItem-root-24 standalone-signalportlet--signal-portlet-with-links-story-MuiListItem-gutters standalone-signalportlet--signal-portlet-with-links-story-MuiListItem-button"
                                                                     classes={
                                                                       Object {
                                                                         "disabled": "Mui-disabled",
@@ -7203,7 +7203,7 @@ exports[`Storyshots Standalone/SignalPortlet With Links 1`] = `
                                                                   >
                                                                     <div
                                                                       aria-disabled={false}
-                                                                      className="standalone-signalportlet--signal-portlet-with-links-story-MuiButtonBase-root standalone-signalportlet--signal-portlet-with-links-story-MuiListItem-root standalone-signalportlet--signal-portlet-with-links-story-makeStyles-root-24 standalone-signalportlet--signal-portlet-with-links-story-MuiListItem-gutters standalone-signalportlet--signal-portlet-with-links-story-MuiListItem-button"
+                                                                      className="standalone-signalportlet--signal-portlet-with-links-story-MuiButtonBase-root standalone-signalportlet--signal-portlet-with-links-story-MuiListItem-root standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortletItem-root-24 standalone-signalportlet--signal-portlet-with-links-story-MuiListItem-gutters standalone-signalportlet--signal-portlet-with-links-story-MuiListItem-button"
                                                                       onBlur={[Function]}
                                                                       onClick={[Function]}
                                                                       onDragLeave={[Function]}
@@ -7220,11 +7220,11 @@ exports[`Storyshots Standalone/SignalPortlet With Links 1`] = `
                                                                       tabIndex={0}
                                                                     >
                                                                       <WithStyles(ForwardRef(ListItemAvatar))
-                                                                        className="standalone-signalportlet--signal-portlet-with-links-story-makeStyles-listAvatar-25"
+                                                                        className="standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortletItem-listAvatar-25"
                                                                         key=".0"
                                                                       >
                                                                         <ForwardRef(ListItemAvatar)
-                                                                          className="standalone-signalportlet--signal-portlet-with-links-story-makeStyles-listAvatar-25"
+                                                                          className="standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortletItem-listAvatar-25"
                                                                           classes={
                                                                             Object {
                                                                               "alignItemsFlexStart": "standalone-signalportlet--signal-portlet-with-links-story-MuiListItemAvatar-alignItemsFlexStart",
@@ -7233,13 +7233,13 @@ exports[`Storyshots Standalone/SignalPortlet With Links 1`] = `
                                                                           }
                                                                         >
                                                                           <div
-                                                                            className="standalone-signalportlet--signal-portlet-with-links-story-MuiListItemAvatar-root standalone-signalportlet--signal-portlet-with-links-story-makeStyles-listAvatar-25"
+                                                                            className="standalone-signalportlet--signal-portlet-with-links-story-MuiListItemAvatar-root standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortletItem-listAvatar-25"
                                                                           >
                                                                             <WithStyles(ForwardRef(Avatar))
-                                                                              className="standalone-signalportlet--signal-portlet-with-links-story-makeStyles-itemColorActive-22 standalone-signalportlet--signal-portlet-with-links-story-makeStyles-itemColorActive-31"
+                                                                              className="standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortletItem-itemColorActive-22 standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortletItem-itemColorActive-31"
                                                                             >
                                                                               <ForwardRef(Avatar)
-                                                                                className="standalone-signalportlet--signal-portlet-with-links-story-makeStyles-itemColorActive-22 standalone-signalportlet--signal-portlet-with-links-story-makeStyles-itemColorActive-31"
+                                                                                className="standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortletItem-itemColorActive-22 standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortletItem-itemColorActive-31"
                                                                                 classes={
                                                                                   Object {
                                                                                     "circle": "standalone-signalportlet--signal-portlet-with-links-story-MuiAvatar-circle",
@@ -7254,7 +7254,7 @@ exports[`Storyshots Standalone/SignalPortlet With Links 1`] = `
                                                                                 }
                                                                               >
                                                                                 <div
-                                                                                  className="standalone-signalportlet--signal-portlet-with-links-story-MuiAvatar-root standalone-signalportlet--signal-portlet-with-links-story-MuiAvatar-circle standalone-signalportlet--signal-portlet-with-links-story-makeStyles-itemColorActive-22 standalone-signalportlet--signal-portlet-with-links-story-makeStyles-itemColorActive-31 standalone-signalportlet--signal-portlet-with-links-story-MuiAvatar-colorDefault"
+                                                                                  className="standalone-signalportlet--signal-portlet-with-links-story-MuiAvatar-root standalone-signalportlet--signal-portlet-with-links-story-MuiAvatar-circle standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortletItem-itemColorActive-22 standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortletItem-itemColorActive-31 standalone-signalportlet--signal-portlet-with-links-story-MuiAvatar-colorDefault"
                                                                                 >
                                                                                   3
                                                                                 </div>
@@ -7264,11 +7264,11 @@ exports[`Storyshots Standalone/SignalPortlet With Links 1`] = `
                                                                         </ForwardRef(ListItemAvatar)>
                                                                       </WithStyles(ForwardRef(ListItemAvatar))>
                                                                       <WithStyles(ForwardRef(ListItemText))
-                                                                        className="standalone-signalportlet--signal-portlet-with-links-story-makeStyles-listText-26"
+                                                                        className="standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortletItem-listText-26"
                                                                         key=".1"
                                                                       >
                                                                         <ForwardRef(ListItemText)
-                                                                          className="standalone-signalportlet--signal-portlet-with-links-story-makeStyles-listText-26"
+                                                                          className="standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortletItem-listText-26"
                                                                           classes={
                                                                             Object {
                                                                               "dense": "standalone-signalportlet--signal-portlet-with-links-story-MuiListItemText-dense",
@@ -7281,7 +7281,7 @@ exports[`Storyshots Standalone/SignalPortlet With Links 1`] = `
                                                                           }
                                                                         >
                                                                           <div
-                                                                            className="standalone-signalportlet--signal-portlet-with-links-story-MuiListItemText-root standalone-signalportlet--signal-portlet-with-links-story-makeStyles-listText-26"
+                                                                            className="standalone-signalportlet--signal-portlet-with-links-story-MuiListItemText-root standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortletItem-listText-26"
                                                                           >
                                                                             <WithStyles(ForwardRef(Typography))
                                                                               className="standalone-signalportlet--signal-portlet-with-links-story-MuiListItemText-primary"
@@ -7382,12 +7382,12 @@ exports[`Storyshots Standalone/SignalPortlet With Links 1`] = `
                                                           >
                                                             <WithStyles(ForwardRef(ListItem))
                                                               button={false}
-                                                              className="standalone-signalportlet--signal-portlet-with-links-story-makeStyles-root-24"
+                                                              className="standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortletItem-root-24"
                                                               onClick={[Function]}
                                                             >
                                                               <ForwardRef(ListItem)
                                                                 button={false}
-                                                                className="standalone-signalportlet--signal-portlet-with-links-story-makeStyles-root-24"
+                                                                className="standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortletItem-root-24"
                                                                 classes={
                                                                   Object {
                                                                     "alignItemsFlexStart": "standalone-signalportlet--signal-portlet-with-links-story-MuiListItem-alignItemsFlexStart",
@@ -7406,16 +7406,16 @@ exports[`Storyshots Standalone/SignalPortlet With Links 1`] = `
                                                                 onClick={[Function]}
                                                               >
                                                                 <li
-                                                                  className="standalone-signalportlet--signal-portlet-with-links-story-MuiListItem-root standalone-signalportlet--signal-portlet-with-links-story-makeStyles-root-24 standalone-signalportlet--signal-portlet-with-links-story-MuiListItem-gutters"
+                                                                  className="standalone-signalportlet--signal-portlet-with-links-story-MuiListItem-root standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortletItem-root-24 standalone-signalportlet--signal-portlet-with-links-story-MuiListItem-gutters"
                                                                   disabled={false}
                                                                   onClick={[Function]}
                                                                 >
                                                                   <WithStyles(ForwardRef(ListItemAvatar))
-                                                                    className="standalone-signalportlet--signal-portlet-with-links-story-makeStyles-listAvatar-25"
+                                                                    className="standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortletItem-listAvatar-25"
                                                                     key=".0"
                                                                   >
                                                                     <ForwardRef(ListItemAvatar)
-                                                                      className="standalone-signalportlet--signal-portlet-with-links-story-makeStyles-listAvatar-25"
+                                                                      className="standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortletItem-listAvatar-25"
                                                                       classes={
                                                                         Object {
                                                                           "alignItemsFlexStart": "standalone-signalportlet--signal-portlet-with-links-story-MuiListItemAvatar-alignItemsFlexStart",
@@ -7424,13 +7424,13 @@ exports[`Storyshots Standalone/SignalPortlet With Links 1`] = `
                                                                       }
                                                                     >
                                                                       <div
-                                                                        className="standalone-signalportlet--signal-portlet-with-links-story-MuiListItemAvatar-root standalone-signalportlet--signal-portlet-with-links-story-makeStyles-listAvatar-25"
+                                                                        className="standalone-signalportlet--signal-portlet-with-links-story-MuiListItemAvatar-root standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortletItem-listAvatar-25"
                                                                       >
                                                                         <WithStyles(ForwardRef(Avatar))
-                                                                          className="standalone-signalportlet--signal-portlet-with-links-story-makeStyles-itemColorActive-22 standalone-signalportlet--signal-portlet-with-links-story-makeStyles-itemColorActive-33"
+                                                                          className="standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortletItem-itemColorActive-22 standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortletItem-itemColorActive-33"
                                                                         >
                                                                           <ForwardRef(Avatar)
-                                                                            className="standalone-signalportlet--signal-portlet-with-links-story-makeStyles-itemColorActive-22 standalone-signalportlet--signal-portlet-with-links-story-makeStyles-itemColorActive-33"
+                                                                            className="standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortletItem-itemColorActive-22 standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortletItem-itemColorActive-33"
                                                                             classes={
                                                                               Object {
                                                                                 "circle": "standalone-signalportlet--signal-portlet-with-links-story-MuiAvatar-circle",
@@ -7445,7 +7445,7 @@ exports[`Storyshots Standalone/SignalPortlet With Links 1`] = `
                                                                             }
                                                                           >
                                                                             <div
-                                                                              className="standalone-signalportlet--signal-portlet-with-links-story-MuiAvatar-root standalone-signalportlet--signal-portlet-with-links-story-MuiAvatar-circle standalone-signalportlet--signal-portlet-with-links-story-makeStyles-itemColorActive-22 standalone-signalportlet--signal-portlet-with-links-story-makeStyles-itemColorActive-33 standalone-signalportlet--signal-portlet-with-links-story-MuiAvatar-colorDefault"
+                                                                              className="standalone-signalportlet--signal-portlet-with-links-story-MuiAvatar-root standalone-signalportlet--signal-portlet-with-links-story-MuiAvatar-circle standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortletItem-itemColorActive-22 standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortletItem-itemColorActive-33 standalone-signalportlet--signal-portlet-with-links-story-MuiAvatar-colorDefault"
                                                                             >
                                                                               1
                                                                             </div>
@@ -7455,11 +7455,11 @@ exports[`Storyshots Standalone/SignalPortlet With Links 1`] = `
                                                                     </ForwardRef(ListItemAvatar)>
                                                                   </WithStyles(ForwardRef(ListItemAvatar))>
                                                                   <WithStyles(ForwardRef(ListItemText))
-                                                                    className="standalone-signalportlet--signal-portlet-with-links-story-makeStyles-listText-26"
+                                                                    className="standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortletItem-listText-26"
                                                                     key=".1"
                                                                   >
                                                                     <ForwardRef(ListItemText)
-                                                                      className="standalone-signalportlet--signal-portlet-with-links-story-makeStyles-listText-26"
+                                                                      className="standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortletItem-listText-26"
                                                                       classes={
                                                                         Object {
                                                                           "dense": "standalone-signalportlet--signal-portlet-with-links-story-MuiListItemText-dense",
@@ -7472,7 +7472,7 @@ exports[`Storyshots Standalone/SignalPortlet With Links 1`] = `
                                                                       }
                                                                     >
                                                                       <div
-                                                                        className="standalone-signalportlet--signal-portlet-with-links-story-MuiListItemText-root standalone-signalportlet--signal-portlet-with-links-story-makeStyles-listText-26"
+                                                                        className="standalone-signalportlet--signal-portlet-with-links-story-MuiListItemText-root standalone-signalportlet--signal-portlet-with-links-story-CcSignalPortletItem-listText-26"
                                                                       >
                                                                         <WithStyles(ForwardRef(Typography))
                                                                           className="standalone-signalportlet--signal-portlet-with-links-story-MuiListItemText-primary"
@@ -13579,7 +13579,7 @@ exports[`Storyshots Standalone/SignalPortlet With Styles 1`] = `
                                     Array [
                                       Object {
                                         "classes": Object {
-                                          "root": "standalone-signalportlet--signal-portlet-with-styles-story-makeStyles-root-17",
+                                          "root": "standalone-signalportlet--signal-portlet-with-styles-story-CcSignalPortletWithStyleStory-root-17",
                                         },
                                         "count": 123,
                                         "text": "Many (Styled)",
@@ -13603,10 +13603,10 @@ exports[`Storyshots Standalone/SignalPortlet With Styles 1`] = `
                                   }
                                 >
                                   <WithStyles(ForwardRef(Paper))
-                                    className="standalone-signalportlet--signal-portlet-with-styles-story-makeStyles-paper-18"
+                                    className="standalone-signalportlet--signal-portlet-with-styles-story-CcSignalPortlet-paper-18"
                                   >
                                     <ForwardRef(Paper)
-                                      className="standalone-signalportlet--signal-portlet-with-styles-story-makeStyles-paper-18"
+                                      className="standalone-signalportlet--signal-portlet-with-styles-story-CcSignalPortlet-paper-18"
                                       classes={
                                         Object {
                                           "elevation0": "standalone-signalportlet--signal-portlet-with-styles-story-MuiPaper-elevation0",
@@ -13641,7 +13641,7 @@ exports[`Storyshots Standalone/SignalPortlet With Styles 1`] = `
                                       }
                                     >
                                       <div
-                                        className="standalone-signalportlet--signal-portlet-with-styles-story-MuiPaper-root standalone-signalportlet--signal-portlet-with-styles-story-makeStyles-paper-18 standalone-signalportlet--signal-portlet-with-styles-story-MuiPaper-elevation1 standalone-signalportlet--signal-portlet-with-styles-story-MuiPaper-rounded"
+                                        className="standalone-signalportlet--signal-portlet-with-styles-story-MuiPaper-root standalone-signalportlet--signal-portlet-with-styles-story-CcSignalPortlet-paper-18 standalone-signalportlet--signal-portlet-with-styles-story-MuiPaper-elevation1 standalone-signalportlet--signal-portlet-with-styles-story-MuiPaper-rounded"
                                       >
                                         <WithStyles(ForwardRef(Grid))
                                           container={true}
@@ -13762,12 +13762,12 @@ exports[`Storyshots Standalone/SignalPortlet With Styles 1`] = `
                                               className="standalone-signalportlet--signal-portlet-with-styles-story-MuiGrid-root standalone-signalportlet--signal-portlet-with-styles-story-MuiGrid-container standalone-signalportlet--signal-portlet-with-styles-story-MuiGrid-spacing-xs-1"
                                             >
                                               <WithStyles(ForwardRef(Grid))
-                                                className="standalone-signalportlet--signal-portlet-with-styles-story-makeStyles-titleWrapper-21"
+                                                className="standalone-signalportlet--signal-portlet-with-styles-story-CcSignalPortlet-titleWrapper-21"
                                                 item={true}
                                                 xs={12}
                                               >
                                                 <ForwardRef(Grid)
-                                                  className="standalone-signalportlet--signal-portlet-with-styles-story-makeStyles-titleWrapper-21"
+                                                  className="standalone-signalportlet--signal-portlet-with-styles-story-CcSignalPortlet-titleWrapper-21"
                                                   classes={
                                                     Object {
                                                       "align-content-xs-center": "standalone-signalportlet--signal-portlet-with-styles-story-MuiGrid-align-content-xs-center",
@@ -13879,16 +13879,16 @@ exports[`Storyshots Standalone/SignalPortlet With Styles 1`] = `
                                                   xs={12}
                                                 >
                                                   <div
-                                                    className="standalone-signalportlet--signal-portlet-with-styles-story-MuiGrid-root standalone-signalportlet--signal-portlet-with-styles-story-makeStyles-titleWrapper-21 standalone-signalportlet--signal-portlet-with-styles-story-MuiGrid-item standalone-signalportlet--signal-portlet-with-styles-story-MuiGrid-grid-xs-12"
+                                                    className="standalone-signalportlet--signal-portlet-with-styles-story-MuiGrid-root standalone-signalportlet--signal-portlet-with-styles-story-CcSignalPortlet-titleWrapper-21 standalone-signalportlet--signal-portlet-with-styles-story-MuiGrid-item standalone-signalportlet--signal-portlet-with-styles-story-MuiGrid-grid-xs-12"
                                                   >
                                                     <WithStyles(ForwardRef(Typography))
                                                       align="center"
-                                                      className="standalone-signalportlet--signal-portlet-with-styles-story-makeStyles-title-20"
+                                                      className="standalone-signalportlet--signal-portlet-with-styles-story-CcSignalPortlet-title-20"
                                                       variant="h5"
                                                     >
                                                       <ForwardRef(Typography)
                                                         align="center"
-                                                        className="standalone-signalportlet--signal-portlet-with-styles-story-makeStyles-title-20"
+                                                        className="standalone-signalportlet--signal-portlet-with-styles-story-CcSignalPortlet-title-20"
                                                         classes={
                                                           Object {
                                                             "alignCenter": "standalone-signalportlet--signal-portlet-with-styles-story-MuiTypography-alignCenter",
@@ -13926,7 +13926,7 @@ exports[`Storyshots Standalone/SignalPortlet With Styles 1`] = `
                                                         variant="h5"
                                                       >
                                                         <h5
-                                                          className="standalone-signalportlet--signal-portlet-with-styles-story-MuiTypography-root standalone-signalportlet--signal-portlet-with-styles-story-makeStyles-title-20 standalone-signalportlet--signal-portlet-with-styles-story-MuiTypography-h5 standalone-signalportlet--signal-portlet-with-styles-story-MuiTypography-alignCenter"
+                                                          className="standalone-signalportlet--signal-portlet-with-styles-story-MuiTypography-root standalone-signalportlet--signal-portlet-with-styles-story-CcSignalPortlet-title-20 standalone-signalportlet--signal-portlet-with-styles-story-MuiTypography-h5 standalone-signalportlet--signal-portlet-with-styles-story-MuiTypography-alignCenter"
                                                         >
                                                           <WithStyles(ForwardRef(Typography))
                                                             variant="h5"
@@ -14240,10 +14240,10 @@ exports[`Storyshots Standalone/SignalPortlet With Styles 1`] = `
                                                     className="standalone-signalportlet--signal-portlet-with-styles-story-MuiGrid-root standalone-signalportlet--signal-portlet-with-styles-story-MuiGrid-item standalone-signalportlet--signal-portlet-with-styles-story-MuiGrid-grid-xs-12"
                                                   >
                                                     <WithStyles(ForwardRef(List))
-                                                      className="standalone-signalportlet--signal-portlet-with-styles-story-makeStyles-list-19"
+                                                      className="standalone-signalportlet--signal-portlet-with-styles-story-CcSignalPortlet-list-19"
                                                     >
                                                       <ForwardRef(List)
-                                                        className="standalone-signalportlet--signal-portlet-with-styles-story-makeStyles-list-19"
+                                                        className="standalone-signalportlet--signal-portlet-with-styles-story-CcSignalPortlet-list-19"
                                                         classes={
                                                           Object {
                                                             "dense": "standalone-signalportlet--signal-portlet-with-styles-story-MuiList-dense",
@@ -14254,12 +14254,12 @@ exports[`Storyshots Standalone/SignalPortlet With Styles 1`] = `
                                                         }
                                                       >
                                                         <ul
-                                                          className="standalone-signalportlet--signal-portlet-with-styles-story-MuiList-root standalone-signalportlet--signal-portlet-with-styles-story-makeStyles-list-19 standalone-signalportlet--signal-portlet-with-styles-story-MuiList-padding"
+                                                          className="standalone-signalportlet--signal-portlet-with-styles-story-MuiList-root standalone-signalportlet--signal-portlet-with-styles-story-CcSignalPortlet-list-19 standalone-signalportlet--signal-portlet-with-styles-story-MuiList-padding"
                                                         >
                                                           <Memo(SignalPortletItem)
                                                             classes={
                                                               Object {
-                                                                "root": "standalone-signalportlet--signal-portlet-with-styles-story-makeStyles-root-17",
+                                                                "root": "standalone-signalportlet--signal-portlet-with-styles-story-CcSignalPortletWithStyleStory-root-17",
                                                               }
                                                             }
                                                             colorNotPresent="#9e9e9e"
@@ -14270,12 +14270,12 @@ exports[`Storyshots Standalone/SignalPortlet With Styles 1`] = `
                                                           >
                                                             <WithStyles(ForwardRef(ListItem))
                                                               button={false}
-                                                              className="standalone-signalportlet--signal-portlet-with-styles-story-makeStyles-root-24 standalone-signalportlet--signal-portlet-with-styles-story-makeStyles-root-17"
+                                                              className="standalone-signalportlet--signal-portlet-with-styles-story-CcSignalPortletItem-root-24 standalone-signalportlet--signal-portlet-with-styles-story-CcSignalPortletWithStyleStory-root-17"
                                                               onClick={[Function]}
                                                             >
                                                               <ForwardRef(ListItem)
                                                                 button={false}
-                                                                className="standalone-signalportlet--signal-portlet-with-styles-story-makeStyles-root-24 standalone-signalportlet--signal-portlet-with-styles-story-makeStyles-root-17"
+                                                                className="standalone-signalportlet--signal-portlet-with-styles-story-CcSignalPortletItem-root-24 standalone-signalportlet--signal-portlet-with-styles-story-CcSignalPortletWithStyleStory-root-17"
                                                                 classes={
                                                                   Object {
                                                                     "alignItemsFlexStart": "standalone-signalportlet--signal-portlet-with-styles-story-MuiListItem-alignItemsFlexStart",
@@ -14294,16 +14294,16 @@ exports[`Storyshots Standalone/SignalPortlet With Styles 1`] = `
                                                                 onClick={[Function]}
                                                               >
                                                                 <li
-                                                                  className="standalone-signalportlet--signal-portlet-with-styles-story-MuiListItem-root standalone-signalportlet--signal-portlet-with-styles-story-makeStyles-root-24 standalone-signalportlet--signal-portlet-with-styles-story-makeStyles-root-17 standalone-signalportlet--signal-portlet-with-styles-story-MuiListItem-gutters"
+                                                                  className="standalone-signalportlet--signal-portlet-with-styles-story-MuiListItem-root standalone-signalportlet--signal-portlet-with-styles-story-CcSignalPortletItem-root-24 standalone-signalportlet--signal-portlet-with-styles-story-CcSignalPortletWithStyleStory-root-17 standalone-signalportlet--signal-portlet-with-styles-story-MuiListItem-gutters"
                                                                   disabled={false}
                                                                   onClick={[Function]}
                                                                 >
                                                                   <WithStyles(ForwardRef(ListItemAvatar))
-                                                                    className="standalone-signalportlet--signal-portlet-with-styles-story-makeStyles-listAvatar-25"
+                                                                    className="standalone-signalportlet--signal-portlet-with-styles-story-CcSignalPortletItem-listAvatar-25"
                                                                     key=".0"
                                                                   >
                                                                     <ForwardRef(ListItemAvatar)
-                                                                      className="standalone-signalportlet--signal-portlet-with-styles-story-makeStyles-listAvatar-25"
+                                                                      className="standalone-signalportlet--signal-portlet-with-styles-story-CcSignalPortletItem-listAvatar-25"
                                                                       classes={
                                                                         Object {
                                                                           "alignItemsFlexStart": "standalone-signalportlet--signal-portlet-with-styles-story-MuiListItemAvatar-alignItemsFlexStart",
@@ -14312,13 +14312,13 @@ exports[`Storyshots Standalone/SignalPortlet With Styles 1`] = `
                                                                       }
                                                                     >
                                                                       <div
-                                                                        className="standalone-signalportlet--signal-portlet-with-styles-story-MuiListItemAvatar-root standalone-signalportlet--signal-portlet-with-styles-story-makeStyles-listAvatar-25"
+                                                                        className="standalone-signalportlet--signal-portlet-with-styles-story-MuiListItemAvatar-root standalone-signalportlet--signal-portlet-with-styles-story-CcSignalPortletItem-listAvatar-25"
                                                                       >
                                                                         <WithStyles(ForwardRef(Avatar))
-                                                                          className="standalone-signalportlet--signal-portlet-with-styles-story-makeStyles-itemColorActive-22 standalone-signalportlet--signal-portlet-with-styles-story-makeStyles-itemColorActive-27"
+                                                                          className="standalone-signalportlet--signal-portlet-with-styles-story-CcSignalPortletItem-itemColorActive-22 standalone-signalportlet--signal-portlet-with-styles-story-CcSignalPortletItem-itemColorActive-27"
                                                                         >
                                                                           <ForwardRef(Avatar)
-                                                                            className="standalone-signalportlet--signal-portlet-with-styles-story-makeStyles-itemColorActive-22 standalone-signalportlet--signal-portlet-with-styles-story-makeStyles-itemColorActive-27"
+                                                                            className="standalone-signalportlet--signal-portlet-with-styles-story-CcSignalPortletItem-itemColorActive-22 standalone-signalportlet--signal-portlet-with-styles-story-CcSignalPortletItem-itemColorActive-27"
                                                                             classes={
                                                                               Object {
                                                                                 "circle": "standalone-signalportlet--signal-portlet-with-styles-story-MuiAvatar-circle",
@@ -14333,7 +14333,7 @@ exports[`Storyshots Standalone/SignalPortlet With Styles 1`] = `
                                                                             }
                                                                           >
                                                                             <div
-                                                                              className="standalone-signalportlet--signal-portlet-with-styles-story-MuiAvatar-root standalone-signalportlet--signal-portlet-with-styles-story-MuiAvatar-circle standalone-signalportlet--signal-portlet-with-styles-story-makeStyles-itemColorActive-22 standalone-signalportlet--signal-portlet-with-styles-story-makeStyles-itemColorActive-27 standalone-signalportlet--signal-portlet-with-styles-story-MuiAvatar-colorDefault"
+                                                                              className="standalone-signalportlet--signal-portlet-with-styles-story-MuiAvatar-root standalone-signalportlet--signal-portlet-with-styles-story-MuiAvatar-circle standalone-signalportlet--signal-portlet-with-styles-story-CcSignalPortletItem-itemColorActive-22 standalone-signalportlet--signal-portlet-with-styles-story-CcSignalPortletItem-itemColorActive-27 standalone-signalportlet--signal-portlet-with-styles-story-MuiAvatar-colorDefault"
                                                                             >
                                                                               123
                                                                             </div>
@@ -14343,11 +14343,11 @@ exports[`Storyshots Standalone/SignalPortlet With Styles 1`] = `
                                                                     </ForwardRef(ListItemAvatar)>
                                                                   </WithStyles(ForwardRef(ListItemAvatar))>
                                                                   <WithStyles(ForwardRef(ListItemText))
-                                                                    className="standalone-signalportlet--signal-portlet-with-styles-story-makeStyles-listText-26"
+                                                                    className="standalone-signalportlet--signal-portlet-with-styles-story-CcSignalPortletItem-listText-26"
                                                                     key=".1"
                                                                   >
                                                                     <ForwardRef(ListItemText)
-                                                                      className="standalone-signalportlet--signal-portlet-with-styles-story-makeStyles-listText-26"
+                                                                      className="standalone-signalportlet--signal-portlet-with-styles-story-CcSignalPortletItem-listText-26"
                                                                       classes={
                                                                         Object {
                                                                           "dense": "standalone-signalportlet--signal-portlet-with-styles-story-MuiListItemText-dense",
@@ -14360,7 +14360,7 @@ exports[`Storyshots Standalone/SignalPortlet With Styles 1`] = `
                                                                       }
                                                                     >
                                                                       <div
-                                                                        className="standalone-signalportlet--signal-portlet-with-styles-story-MuiListItemText-root standalone-signalportlet--signal-portlet-with-styles-story-makeStyles-listText-26"
+                                                                        className="standalone-signalportlet--signal-portlet-with-styles-story-MuiListItemText-root standalone-signalportlet--signal-portlet-with-styles-story-CcSignalPortletItem-listText-26"
                                                                       >
                                                                         <WithStyles(ForwardRef(Typography))
                                                                           className="standalone-signalportlet--signal-portlet-with-styles-story-MuiListItemText-primary"
@@ -14431,12 +14431,12 @@ exports[`Storyshots Standalone/SignalPortlet With Styles 1`] = `
                                                           >
                                                             <WithStyles(ForwardRef(ListItem))
                                                               button={false}
-                                                              className="standalone-signalportlet--signal-portlet-with-styles-story-makeStyles-root-24"
+                                                              className="standalone-signalportlet--signal-portlet-with-styles-story-CcSignalPortletItem-root-24"
                                                               onClick={[Function]}
                                                             >
                                                               <ForwardRef(ListItem)
                                                                 button={false}
-                                                                className="standalone-signalportlet--signal-portlet-with-styles-story-makeStyles-root-24"
+                                                                className="standalone-signalportlet--signal-portlet-with-styles-story-CcSignalPortletItem-root-24"
                                                                 classes={
                                                                   Object {
                                                                     "alignItemsFlexStart": "standalone-signalportlet--signal-portlet-with-styles-story-MuiListItem-alignItemsFlexStart",
@@ -14455,16 +14455,16 @@ exports[`Storyshots Standalone/SignalPortlet With Styles 1`] = `
                                                                 onClick={[Function]}
                                                               >
                                                                 <li
-                                                                  className="standalone-signalportlet--signal-portlet-with-styles-story-MuiListItem-root standalone-signalportlet--signal-portlet-with-styles-story-makeStyles-root-24 standalone-signalportlet--signal-portlet-with-styles-story-MuiListItem-gutters"
+                                                                  className="standalone-signalportlet--signal-portlet-with-styles-story-MuiListItem-root standalone-signalportlet--signal-portlet-with-styles-story-CcSignalPortletItem-root-24 standalone-signalportlet--signal-portlet-with-styles-story-MuiListItem-gutters"
                                                                   disabled={false}
                                                                   onClick={[Function]}
                                                                 >
                                                                   <WithStyles(ForwardRef(ListItemAvatar))
-                                                                    className="standalone-signalportlet--signal-portlet-with-styles-story-makeStyles-listAvatar-25"
+                                                                    className="standalone-signalportlet--signal-portlet-with-styles-story-CcSignalPortletItem-listAvatar-25"
                                                                     key=".0"
                                                                   >
                                                                     <ForwardRef(ListItemAvatar)
-                                                                      className="standalone-signalportlet--signal-portlet-with-styles-story-makeStyles-listAvatar-25"
+                                                                      className="standalone-signalportlet--signal-portlet-with-styles-story-CcSignalPortletItem-listAvatar-25"
                                                                       classes={
                                                                         Object {
                                                                           "alignItemsFlexStart": "standalone-signalportlet--signal-portlet-with-styles-story-MuiListItemAvatar-alignItemsFlexStart",
@@ -14473,13 +14473,13 @@ exports[`Storyshots Standalone/SignalPortlet With Styles 1`] = `
                                                                       }
                                                                     >
                                                                       <div
-                                                                        className="standalone-signalportlet--signal-portlet-with-styles-story-MuiListItemAvatar-root standalone-signalportlet--signal-portlet-with-styles-story-makeStyles-listAvatar-25"
+                                                                        className="standalone-signalportlet--signal-portlet-with-styles-story-MuiListItemAvatar-root standalone-signalportlet--signal-portlet-with-styles-story-CcSignalPortletItem-listAvatar-25"
                                                                       >
                                                                         <WithStyles(ForwardRef(Avatar))
-                                                                          className="standalone-signalportlet--signal-portlet-with-styles-story-makeStyles-itemColorInactive-23 standalone-signalportlet--signal-portlet-with-styles-story-makeStyles-itemColorInactive-30"
+                                                                          className="standalone-signalportlet--signal-portlet-with-styles-story-CcSignalPortletItem-itemColorInactive-23 standalone-signalportlet--signal-portlet-with-styles-story-CcSignalPortletItem-itemColorInactive-30"
                                                                         >
                                                                           <ForwardRef(Avatar)
-                                                                            className="standalone-signalportlet--signal-portlet-with-styles-story-makeStyles-itemColorInactive-23 standalone-signalportlet--signal-portlet-with-styles-story-makeStyles-itemColorInactive-30"
+                                                                            className="standalone-signalportlet--signal-portlet-with-styles-story-CcSignalPortletItem-itemColorInactive-23 standalone-signalportlet--signal-portlet-with-styles-story-CcSignalPortletItem-itemColorInactive-30"
                                                                             classes={
                                                                               Object {
                                                                                 "circle": "standalone-signalportlet--signal-portlet-with-styles-story-MuiAvatar-circle",
@@ -14494,7 +14494,7 @@ exports[`Storyshots Standalone/SignalPortlet With Styles 1`] = `
                                                                             }
                                                                           >
                                                                             <div
-                                                                              className="standalone-signalportlet--signal-portlet-with-styles-story-MuiAvatar-root standalone-signalportlet--signal-portlet-with-styles-story-MuiAvatar-circle standalone-signalportlet--signal-portlet-with-styles-story-makeStyles-itemColorInactive-23 standalone-signalportlet--signal-portlet-with-styles-story-makeStyles-itemColorInactive-30 standalone-signalportlet--signal-portlet-with-styles-story-MuiAvatar-colorDefault"
+                                                                              className="standalone-signalportlet--signal-portlet-with-styles-story-MuiAvatar-root standalone-signalportlet--signal-portlet-with-styles-story-MuiAvatar-circle standalone-signalportlet--signal-portlet-with-styles-story-CcSignalPortletItem-itemColorInactive-23 standalone-signalportlet--signal-portlet-with-styles-story-CcSignalPortletItem-itemColorInactive-30 standalone-signalportlet--signal-portlet-with-styles-story-MuiAvatar-colorDefault"
                                                                             >
                                                                               0
                                                                             </div>
@@ -14504,11 +14504,11 @@ exports[`Storyshots Standalone/SignalPortlet With Styles 1`] = `
                                                                     </ForwardRef(ListItemAvatar)>
                                                                   </WithStyles(ForwardRef(ListItemAvatar))>
                                                                   <WithStyles(ForwardRef(ListItemText))
-                                                                    className="standalone-signalportlet--signal-portlet-with-styles-story-makeStyles-listText-26"
+                                                                    className="standalone-signalportlet--signal-portlet-with-styles-story-CcSignalPortletItem-listText-26"
                                                                     key=".1"
                                                                   >
                                                                     <ForwardRef(ListItemText)
-                                                                      className="standalone-signalportlet--signal-portlet-with-styles-story-makeStyles-listText-26"
+                                                                      className="standalone-signalportlet--signal-portlet-with-styles-story-CcSignalPortletItem-listText-26"
                                                                       classes={
                                                                         Object {
                                                                           "dense": "standalone-signalportlet--signal-portlet-with-styles-story-MuiListItemText-dense",
@@ -14521,7 +14521,7 @@ exports[`Storyshots Standalone/SignalPortlet With Styles 1`] = `
                                                                       }
                                                                     >
                                                                       <div
-                                                                        className="standalone-signalportlet--signal-portlet-with-styles-story-MuiListItemText-root standalone-signalportlet--signal-portlet-with-styles-story-makeStyles-listText-26"
+                                                                        className="standalone-signalportlet--signal-portlet-with-styles-story-MuiListItemText-root standalone-signalportlet--signal-portlet-with-styles-story-CcSignalPortletItem-listText-26"
                                                                       >
                                                                         <WithStyles(ForwardRef(Typography))
                                                                           className="standalone-signalportlet--signal-portlet-with-styles-story-MuiListItemText-primary"
@@ -14592,12 +14592,12 @@ exports[`Storyshots Standalone/SignalPortlet With Styles 1`] = `
                                                           >
                                                             <WithStyles(ForwardRef(ListItem))
                                                               button={false}
-                                                              className="standalone-signalportlet--signal-portlet-with-styles-story-makeStyles-root-24"
+                                                              className="standalone-signalportlet--signal-portlet-with-styles-story-CcSignalPortletItem-root-24"
                                                               onClick={[Function]}
                                                             >
                                                               <ForwardRef(ListItem)
                                                                 button={false}
-                                                                className="standalone-signalportlet--signal-portlet-with-styles-story-makeStyles-root-24"
+                                                                className="standalone-signalportlet--signal-portlet-with-styles-story-CcSignalPortletItem-root-24"
                                                                 classes={
                                                                   Object {
                                                                     "alignItemsFlexStart": "standalone-signalportlet--signal-portlet-with-styles-story-MuiListItem-alignItemsFlexStart",
@@ -14616,16 +14616,16 @@ exports[`Storyshots Standalone/SignalPortlet With Styles 1`] = `
                                                                 onClick={[Function]}
                                                               >
                                                                 <li
-                                                                  className="standalone-signalportlet--signal-portlet-with-styles-story-MuiListItem-root standalone-signalportlet--signal-portlet-with-styles-story-makeStyles-root-24 standalone-signalportlet--signal-portlet-with-styles-story-MuiListItem-gutters"
+                                                                  className="standalone-signalportlet--signal-portlet-with-styles-story-MuiListItem-root standalone-signalportlet--signal-portlet-with-styles-story-CcSignalPortletItem-root-24 standalone-signalportlet--signal-portlet-with-styles-story-MuiListItem-gutters"
                                                                   disabled={false}
                                                                   onClick={[Function]}
                                                                 >
                                                                   <WithStyles(ForwardRef(ListItemAvatar))
-                                                                    className="standalone-signalportlet--signal-portlet-with-styles-story-makeStyles-listAvatar-25"
+                                                                    className="standalone-signalportlet--signal-portlet-with-styles-story-CcSignalPortletItem-listAvatar-25"
                                                                     key=".0"
                                                                   >
                                                                     <ForwardRef(ListItemAvatar)
-                                                                      className="standalone-signalportlet--signal-portlet-with-styles-story-makeStyles-listAvatar-25"
+                                                                      className="standalone-signalportlet--signal-portlet-with-styles-story-CcSignalPortletItem-listAvatar-25"
                                                                       classes={
                                                                         Object {
                                                                           "alignItemsFlexStart": "standalone-signalportlet--signal-portlet-with-styles-story-MuiListItemAvatar-alignItemsFlexStart",
@@ -14634,13 +14634,13 @@ exports[`Storyshots Standalone/SignalPortlet With Styles 1`] = `
                                                                       }
                                                                     >
                                                                       <div
-                                                                        className="standalone-signalportlet--signal-portlet-with-styles-story-MuiListItemAvatar-root standalone-signalportlet--signal-portlet-with-styles-story-makeStyles-listAvatar-25"
+                                                                        className="standalone-signalportlet--signal-portlet-with-styles-story-MuiListItemAvatar-root standalone-signalportlet--signal-portlet-with-styles-story-CcSignalPortletItem-listAvatar-25"
                                                                       >
                                                                         <WithStyles(ForwardRef(Avatar))
-                                                                          className="standalone-signalportlet--signal-portlet-with-styles-story-makeStyles-itemColorActive-22 standalone-signalportlet--signal-portlet-with-styles-story-makeStyles-itemColorActive-31"
+                                                                          className="standalone-signalportlet--signal-portlet-with-styles-story-CcSignalPortletItem-itemColorActive-22 standalone-signalportlet--signal-portlet-with-styles-story-CcSignalPortletItem-itemColorActive-31"
                                                                         >
                                                                           <ForwardRef(Avatar)
-                                                                            className="standalone-signalportlet--signal-portlet-with-styles-story-makeStyles-itemColorActive-22 standalone-signalportlet--signal-portlet-with-styles-story-makeStyles-itemColorActive-31"
+                                                                            className="standalone-signalportlet--signal-portlet-with-styles-story-CcSignalPortletItem-itemColorActive-22 standalone-signalportlet--signal-portlet-with-styles-story-CcSignalPortletItem-itemColorActive-31"
                                                                             classes={
                                                                               Object {
                                                                                 "circle": "standalone-signalportlet--signal-portlet-with-styles-story-MuiAvatar-circle",
@@ -14655,7 +14655,7 @@ exports[`Storyshots Standalone/SignalPortlet With Styles 1`] = `
                                                                             }
                                                                           >
                                                                             <div
-                                                                              className="standalone-signalportlet--signal-portlet-with-styles-story-MuiAvatar-root standalone-signalportlet--signal-portlet-with-styles-story-MuiAvatar-circle standalone-signalportlet--signal-portlet-with-styles-story-makeStyles-itemColorActive-22 standalone-signalportlet--signal-portlet-with-styles-story-makeStyles-itemColorActive-31 standalone-signalportlet--signal-portlet-with-styles-story-MuiAvatar-colorDefault"
+                                                                              className="standalone-signalportlet--signal-portlet-with-styles-story-MuiAvatar-root standalone-signalportlet--signal-portlet-with-styles-story-MuiAvatar-circle standalone-signalportlet--signal-portlet-with-styles-story-CcSignalPortletItem-itemColorActive-22 standalone-signalportlet--signal-portlet-with-styles-story-CcSignalPortletItem-itemColorActive-31 standalone-signalportlet--signal-portlet-with-styles-story-MuiAvatar-colorDefault"
                                                                             >
                                                                               3
                                                                             </div>
@@ -14665,11 +14665,11 @@ exports[`Storyshots Standalone/SignalPortlet With Styles 1`] = `
                                                                     </ForwardRef(ListItemAvatar)>
                                                                   </WithStyles(ForwardRef(ListItemAvatar))>
                                                                   <WithStyles(ForwardRef(ListItemText))
-                                                                    className="standalone-signalportlet--signal-portlet-with-styles-story-makeStyles-listText-26"
+                                                                    className="standalone-signalportlet--signal-portlet-with-styles-story-CcSignalPortletItem-listText-26"
                                                                     key=".1"
                                                                   >
                                                                     <ForwardRef(ListItemText)
-                                                                      className="standalone-signalportlet--signal-portlet-with-styles-story-makeStyles-listText-26"
+                                                                      className="standalone-signalportlet--signal-portlet-with-styles-story-CcSignalPortletItem-listText-26"
                                                                       classes={
                                                                         Object {
                                                                           "dense": "standalone-signalportlet--signal-portlet-with-styles-story-MuiListItemText-dense",
@@ -14682,7 +14682,7 @@ exports[`Storyshots Standalone/SignalPortlet With Styles 1`] = `
                                                                       }
                                                                     >
                                                                       <div
-                                                                        className="standalone-signalportlet--signal-portlet-with-styles-story-MuiListItemText-root standalone-signalportlet--signal-portlet-with-styles-story-makeStyles-listText-26"
+                                                                        className="standalone-signalportlet--signal-portlet-with-styles-story-MuiListItemText-root standalone-signalportlet--signal-portlet-with-styles-story-CcSignalPortletItem-listText-26"
                                                                       >
                                                                         <WithStyles(ForwardRef(Typography))
                                                                           className="standalone-signalportlet--signal-portlet-with-styles-story-MuiListItemText-primary"
@@ -20810,10 +20810,10 @@ exports[`Storyshots Standalone/SignalPortlet Without Links 1`] = `
                                   }
                                 >
                                   <WithStyles(ForwardRef(Paper))
-                                    className="standalone-signalportlet--signal-portlet-without-links-story-makeStyles-paper-16"
+                                    className="standalone-signalportlet--signal-portlet-without-links-story-CcSignalPortlet-paper-16"
                                   >
                                     <ForwardRef(Paper)
-                                      className="standalone-signalportlet--signal-portlet-without-links-story-makeStyles-paper-16"
+                                      className="standalone-signalportlet--signal-portlet-without-links-story-CcSignalPortlet-paper-16"
                                       classes={
                                         Object {
                                           "elevation0": "standalone-signalportlet--signal-portlet-without-links-story-MuiPaper-elevation0",
@@ -20848,7 +20848,7 @@ exports[`Storyshots Standalone/SignalPortlet Without Links 1`] = `
                                       }
                                     >
                                       <div
-                                        className="standalone-signalportlet--signal-portlet-without-links-story-MuiPaper-root standalone-signalportlet--signal-portlet-without-links-story-makeStyles-paper-16 standalone-signalportlet--signal-portlet-without-links-story-MuiPaper-elevation1 standalone-signalportlet--signal-portlet-without-links-story-MuiPaper-rounded"
+                                        className="standalone-signalportlet--signal-portlet-without-links-story-MuiPaper-root standalone-signalportlet--signal-portlet-without-links-story-CcSignalPortlet-paper-16 standalone-signalportlet--signal-portlet-without-links-story-MuiPaper-elevation1 standalone-signalportlet--signal-portlet-without-links-story-MuiPaper-rounded"
                                       >
                                         <WithStyles(ForwardRef(Grid))
                                           container={true}
@@ -20969,12 +20969,12 @@ exports[`Storyshots Standalone/SignalPortlet Without Links 1`] = `
                                               className="standalone-signalportlet--signal-portlet-without-links-story-MuiGrid-root standalone-signalportlet--signal-portlet-without-links-story-MuiGrid-container standalone-signalportlet--signal-portlet-without-links-story-MuiGrid-spacing-xs-1"
                                             >
                                               <WithStyles(ForwardRef(Grid))
-                                                className="standalone-signalportlet--signal-portlet-without-links-story-makeStyles-titleWrapper-19"
+                                                className="standalone-signalportlet--signal-portlet-without-links-story-CcSignalPortlet-titleWrapper-19"
                                                 item={true}
                                                 xs={12}
                                               >
                                                 <ForwardRef(Grid)
-                                                  className="standalone-signalportlet--signal-portlet-without-links-story-makeStyles-titleWrapper-19"
+                                                  className="standalone-signalportlet--signal-portlet-without-links-story-CcSignalPortlet-titleWrapper-19"
                                                   classes={
                                                     Object {
                                                       "align-content-xs-center": "standalone-signalportlet--signal-portlet-without-links-story-MuiGrid-align-content-xs-center",
@@ -21086,16 +21086,16 @@ exports[`Storyshots Standalone/SignalPortlet Without Links 1`] = `
                                                   xs={12}
                                                 >
                                                   <div
-                                                    className="standalone-signalportlet--signal-portlet-without-links-story-MuiGrid-root standalone-signalportlet--signal-portlet-without-links-story-makeStyles-titleWrapper-19 standalone-signalportlet--signal-portlet-without-links-story-MuiGrid-item standalone-signalportlet--signal-portlet-without-links-story-MuiGrid-grid-xs-12"
+                                                    className="standalone-signalportlet--signal-portlet-without-links-story-MuiGrid-root standalone-signalportlet--signal-portlet-without-links-story-CcSignalPortlet-titleWrapper-19 standalone-signalportlet--signal-portlet-without-links-story-MuiGrid-item standalone-signalportlet--signal-portlet-without-links-story-MuiGrid-grid-xs-12"
                                                   >
                                                     <WithStyles(ForwardRef(Typography))
                                                       align="center"
-                                                      className="standalone-signalportlet--signal-portlet-without-links-story-makeStyles-title-18"
+                                                      className="standalone-signalportlet--signal-portlet-without-links-story-CcSignalPortlet-title-18"
                                                       variant="h5"
                                                     >
                                                       <ForwardRef(Typography)
                                                         align="center"
-                                                        className="standalone-signalportlet--signal-portlet-without-links-story-makeStyles-title-18"
+                                                        className="standalone-signalportlet--signal-portlet-without-links-story-CcSignalPortlet-title-18"
                                                         classes={
                                                           Object {
                                                             "alignCenter": "standalone-signalportlet--signal-portlet-without-links-story-MuiTypography-alignCenter",
@@ -21133,7 +21133,7 @@ exports[`Storyshots Standalone/SignalPortlet Without Links 1`] = `
                                                         variant="h5"
                                                       >
                                                         <h5
-                                                          className="standalone-signalportlet--signal-portlet-without-links-story-MuiTypography-root standalone-signalportlet--signal-portlet-without-links-story-makeStyles-title-18 standalone-signalportlet--signal-portlet-without-links-story-MuiTypography-h5 standalone-signalportlet--signal-portlet-without-links-story-MuiTypography-alignCenter"
+                                                          className="standalone-signalportlet--signal-portlet-without-links-story-MuiTypography-root standalone-signalportlet--signal-portlet-without-links-story-CcSignalPortlet-title-18 standalone-signalportlet--signal-portlet-without-links-story-MuiTypography-h5 standalone-signalportlet--signal-portlet-without-links-story-MuiTypography-alignCenter"
                                                         >
                                                           <WithStyles(ForwardRef(Typography))
                                                             variant="h5"
@@ -21447,10 +21447,10 @@ exports[`Storyshots Standalone/SignalPortlet Without Links 1`] = `
                                                     className="standalone-signalportlet--signal-portlet-without-links-story-MuiGrid-root standalone-signalportlet--signal-portlet-without-links-story-MuiGrid-item standalone-signalportlet--signal-portlet-without-links-story-MuiGrid-grid-xs-12"
                                                   >
                                                     <WithStyles(ForwardRef(List))
-                                                      className="standalone-signalportlet--signal-portlet-without-links-story-makeStyles-list-17"
+                                                      className="standalone-signalportlet--signal-portlet-without-links-story-CcSignalPortlet-list-17"
                                                     >
                                                       <ForwardRef(List)
-                                                        className="standalone-signalportlet--signal-portlet-without-links-story-makeStyles-list-17"
+                                                        className="standalone-signalportlet--signal-portlet-without-links-story-CcSignalPortlet-list-17"
                                                         classes={
                                                           Object {
                                                             "dense": "standalone-signalportlet--signal-portlet-without-links-story-MuiList-dense",
@@ -21461,7 +21461,7 @@ exports[`Storyshots Standalone/SignalPortlet Without Links 1`] = `
                                                         }
                                                       >
                                                         <ul
-                                                          className="standalone-signalportlet--signal-portlet-without-links-story-MuiList-root standalone-signalportlet--signal-portlet-without-links-story-makeStyles-list-17 standalone-signalportlet--signal-portlet-without-links-story-MuiList-padding"
+                                                          className="standalone-signalportlet--signal-portlet-without-links-story-MuiList-root standalone-signalportlet--signal-portlet-without-links-story-CcSignalPortlet-list-17 standalone-signalportlet--signal-portlet-without-links-story-MuiList-padding"
                                                         >
                                                           <Memo(SignalPortletItem)
                                                             colorNotPresent="#9e9e9e"
@@ -21472,12 +21472,12 @@ exports[`Storyshots Standalone/SignalPortlet Without Links 1`] = `
                                                           >
                                                             <WithStyles(ForwardRef(ListItem))
                                                               button={false}
-                                                              className="standalone-signalportlet--signal-portlet-without-links-story-makeStyles-root-22"
+                                                              className="standalone-signalportlet--signal-portlet-without-links-story-CcSignalPortletItem-root-22"
                                                               onClick={[Function]}
                                                             >
                                                               <ForwardRef(ListItem)
                                                                 button={false}
-                                                                className="standalone-signalportlet--signal-portlet-without-links-story-makeStyles-root-22"
+                                                                className="standalone-signalportlet--signal-portlet-without-links-story-CcSignalPortletItem-root-22"
                                                                 classes={
                                                                   Object {
                                                                     "alignItemsFlexStart": "standalone-signalportlet--signal-portlet-without-links-story-MuiListItem-alignItemsFlexStart",
@@ -21496,16 +21496,16 @@ exports[`Storyshots Standalone/SignalPortlet Without Links 1`] = `
                                                                 onClick={[Function]}
                                                               >
                                                                 <li
-                                                                  className="standalone-signalportlet--signal-portlet-without-links-story-MuiListItem-root standalone-signalportlet--signal-portlet-without-links-story-makeStyles-root-22 standalone-signalportlet--signal-portlet-without-links-story-MuiListItem-gutters"
+                                                                  className="standalone-signalportlet--signal-portlet-without-links-story-MuiListItem-root standalone-signalportlet--signal-portlet-without-links-story-CcSignalPortletItem-root-22 standalone-signalportlet--signal-portlet-without-links-story-MuiListItem-gutters"
                                                                   disabled={false}
                                                                   onClick={[Function]}
                                                                 >
                                                                   <WithStyles(ForwardRef(ListItemAvatar))
-                                                                    className="standalone-signalportlet--signal-portlet-without-links-story-makeStyles-listAvatar-23"
+                                                                    className="standalone-signalportlet--signal-portlet-without-links-story-CcSignalPortletItem-listAvatar-23"
                                                                     key=".0"
                                                                   >
                                                                     <ForwardRef(ListItemAvatar)
-                                                                      className="standalone-signalportlet--signal-portlet-without-links-story-makeStyles-listAvatar-23"
+                                                                      className="standalone-signalportlet--signal-portlet-without-links-story-CcSignalPortletItem-listAvatar-23"
                                                                       classes={
                                                                         Object {
                                                                           "alignItemsFlexStart": "standalone-signalportlet--signal-portlet-without-links-story-MuiListItemAvatar-alignItemsFlexStart",
@@ -21514,13 +21514,13 @@ exports[`Storyshots Standalone/SignalPortlet Without Links 1`] = `
                                                                       }
                                                                     >
                                                                       <div
-                                                                        className="standalone-signalportlet--signal-portlet-without-links-story-MuiListItemAvatar-root standalone-signalportlet--signal-portlet-without-links-story-makeStyles-listAvatar-23"
+                                                                        className="standalone-signalportlet--signal-portlet-without-links-story-MuiListItemAvatar-root standalone-signalportlet--signal-portlet-without-links-story-CcSignalPortletItem-listAvatar-23"
                                                                       >
                                                                         <WithStyles(ForwardRef(Avatar))
-                                                                          className="standalone-signalportlet--signal-portlet-without-links-story-makeStyles-itemColorActive-20 standalone-signalportlet--signal-portlet-without-links-story-makeStyles-itemColorActive-25"
+                                                                          className="standalone-signalportlet--signal-portlet-without-links-story-CcSignalPortletItem-itemColorActive-20 standalone-signalportlet--signal-portlet-without-links-story-CcSignalPortletItem-itemColorActive-25"
                                                                         >
                                                                           <ForwardRef(Avatar)
-                                                                            className="standalone-signalportlet--signal-portlet-without-links-story-makeStyles-itemColorActive-20 standalone-signalportlet--signal-portlet-without-links-story-makeStyles-itemColorActive-25"
+                                                                            className="standalone-signalportlet--signal-portlet-without-links-story-CcSignalPortletItem-itemColorActive-20 standalone-signalportlet--signal-portlet-without-links-story-CcSignalPortletItem-itemColorActive-25"
                                                                             classes={
                                                                               Object {
                                                                                 "circle": "standalone-signalportlet--signal-portlet-without-links-story-MuiAvatar-circle",
@@ -21535,7 +21535,7 @@ exports[`Storyshots Standalone/SignalPortlet Without Links 1`] = `
                                                                             }
                                                                           >
                                                                             <div
-                                                                              className="standalone-signalportlet--signal-portlet-without-links-story-MuiAvatar-root standalone-signalportlet--signal-portlet-without-links-story-MuiAvatar-circle standalone-signalportlet--signal-portlet-without-links-story-makeStyles-itemColorActive-20 standalone-signalportlet--signal-portlet-without-links-story-makeStyles-itemColorActive-25 standalone-signalportlet--signal-portlet-without-links-story-MuiAvatar-colorDefault"
+                                                                              className="standalone-signalportlet--signal-portlet-without-links-story-MuiAvatar-root standalone-signalportlet--signal-portlet-without-links-story-MuiAvatar-circle standalone-signalportlet--signal-portlet-without-links-story-CcSignalPortletItem-itemColorActive-20 standalone-signalportlet--signal-portlet-without-links-story-CcSignalPortletItem-itemColorActive-25 standalone-signalportlet--signal-portlet-without-links-story-MuiAvatar-colorDefault"
                                                                             >
                                                                               123
                                                                             </div>
@@ -21545,11 +21545,11 @@ exports[`Storyshots Standalone/SignalPortlet Without Links 1`] = `
                                                                     </ForwardRef(ListItemAvatar)>
                                                                   </WithStyles(ForwardRef(ListItemAvatar))>
                                                                   <WithStyles(ForwardRef(ListItemText))
-                                                                    className="standalone-signalportlet--signal-portlet-without-links-story-makeStyles-listText-24"
+                                                                    className="standalone-signalportlet--signal-portlet-without-links-story-CcSignalPortletItem-listText-24"
                                                                     key=".1"
                                                                   >
                                                                     <ForwardRef(ListItemText)
-                                                                      className="standalone-signalportlet--signal-portlet-without-links-story-makeStyles-listText-24"
+                                                                      className="standalone-signalportlet--signal-portlet-without-links-story-CcSignalPortletItem-listText-24"
                                                                       classes={
                                                                         Object {
                                                                           "dense": "standalone-signalportlet--signal-portlet-without-links-story-MuiListItemText-dense",
@@ -21562,7 +21562,7 @@ exports[`Storyshots Standalone/SignalPortlet Without Links 1`] = `
                                                                       }
                                                                     >
                                                                       <div
-                                                                        className="standalone-signalportlet--signal-portlet-without-links-story-MuiListItemText-root standalone-signalportlet--signal-portlet-without-links-story-makeStyles-listText-24"
+                                                                        className="standalone-signalportlet--signal-portlet-without-links-story-MuiListItemText-root standalone-signalportlet--signal-portlet-without-links-story-CcSignalPortletItem-listText-24"
                                                                       >
                                                                         <WithStyles(ForwardRef(Typography))
                                                                           className="standalone-signalportlet--signal-portlet-without-links-story-MuiListItemText-primary"
@@ -21633,12 +21633,12 @@ exports[`Storyshots Standalone/SignalPortlet Without Links 1`] = `
                                                           >
                                                             <WithStyles(ForwardRef(ListItem))
                                                               button={false}
-                                                              className="standalone-signalportlet--signal-portlet-without-links-story-makeStyles-root-22"
+                                                              className="standalone-signalportlet--signal-portlet-without-links-story-CcSignalPortletItem-root-22"
                                                               onClick={[Function]}
                                                             >
                                                               <ForwardRef(ListItem)
                                                                 button={false}
-                                                                className="standalone-signalportlet--signal-portlet-without-links-story-makeStyles-root-22"
+                                                                className="standalone-signalportlet--signal-portlet-without-links-story-CcSignalPortletItem-root-22"
                                                                 classes={
                                                                   Object {
                                                                     "alignItemsFlexStart": "standalone-signalportlet--signal-portlet-without-links-story-MuiListItem-alignItemsFlexStart",
@@ -21657,16 +21657,16 @@ exports[`Storyshots Standalone/SignalPortlet Without Links 1`] = `
                                                                 onClick={[Function]}
                                                               >
                                                                 <li
-                                                                  className="standalone-signalportlet--signal-portlet-without-links-story-MuiListItem-root standalone-signalportlet--signal-portlet-without-links-story-makeStyles-root-22 standalone-signalportlet--signal-portlet-without-links-story-MuiListItem-gutters"
+                                                                  className="standalone-signalportlet--signal-portlet-without-links-story-MuiListItem-root standalone-signalportlet--signal-portlet-without-links-story-CcSignalPortletItem-root-22 standalone-signalportlet--signal-portlet-without-links-story-MuiListItem-gutters"
                                                                   disabled={false}
                                                                   onClick={[Function]}
                                                                 >
                                                                   <WithStyles(ForwardRef(ListItemAvatar))
-                                                                    className="standalone-signalportlet--signal-portlet-without-links-story-makeStyles-listAvatar-23"
+                                                                    className="standalone-signalportlet--signal-portlet-without-links-story-CcSignalPortletItem-listAvatar-23"
                                                                     key=".0"
                                                                   >
                                                                     <ForwardRef(ListItemAvatar)
-                                                                      className="standalone-signalportlet--signal-portlet-without-links-story-makeStyles-listAvatar-23"
+                                                                      className="standalone-signalportlet--signal-portlet-without-links-story-CcSignalPortletItem-listAvatar-23"
                                                                       classes={
                                                                         Object {
                                                                           "alignItemsFlexStart": "standalone-signalportlet--signal-portlet-without-links-story-MuiListItemAvatar-alignItemsFlexStart",
@@ -21675,13 +21675,13 @@ exports[`Storyshots Standalone/SignalPortlet Without Links 1`] = `
                                                                       }
                                                                     >
                                                                       <div
-                                                                        className="standalone-signalportlet--signal-portlet-without-links-story-MuiListItemAvatar-root standalone-signalportlet--signal-portlet-without-links-story-makeStyles-listAvatar-23"
+                                                                        className="standalone-signalportlet--signal-portlet-without-links-story-MuiListItemAvatar-root standalone-signalportlet--signal-portlet-without-links-story-CcSignalPortletItem-listAvatar-23"
                                                                       >
                                                                         <WithStyles(ForwardRef(Avatar))
-                                                                          className="standalone-signalportlet--signal-portlet-without-links-story-makeStyles-itemColorInactive-21 standalone-signalportlet--signal-portlet-without-links-story-makeStyles-itemColorInactive-28"
+                                                                          className="standalone-signalportlet--signal-portlet-without-links-story-CcSignalPortletItem-itemColorInactive-21 standalone-signalportlet--signal-portlet-without-links-story-CcSignalPortletItem-itemColorInactive-28"
                                                                         >
                                                                           <ForwardRef(Avatar)
-                                                                            className="standalone-signalportlet--signal-portlet-without-links-story-makeStyles-itemColorInactive-21 standalone-signalportlet--signal-portlet-without-links-story-makeStyles-itemColorInactive-28"
+                                                                            className="standalone-signalportlet--signal-portlet-without-links-story-CcSignalPortletItem-itemColorInactive-21 standalone-signalportlet--signal-portlet-without-links-story-CcSignalPortletItem-itemColorInactive-28"
                                                                             classes={
                                                                               Object {
                                                                                 "circle": "standalone-signalportlet--signal-portlet-without-links-story-MuiAvatar-circle",
@@ -21696,7 +21696,7 @@ exports[`Storyshots Standalone/SignalPortlet Without Links 1`] = `
                                                                             }
                                                                           >
                                                                             <div
-                                                                              className="standalone-signalportlet--signal-portlet-without-links-story-MuiAvatar-root standalone-signalportlet--signal-portlet-without-links-story-MuiAvatar-circle standalone-signalportlet--signal-portlet-without-links-story-makeStyles-itemColorInactive-21 standalone-signalportlet--signal-portlet-without-links-story-makeStyles-itemColorInactive-28 standalone-signalportlet--signal-portlet-without-links-story-MuiAvatar-colorDefault"
+                                                                              className="standalone-signalportlet--signal-portlet-without-links-story-MuiAvatar-root standalone-signalportlet--signal-portlet-without-links-story-MuiAvatar-circle standalone-signalportlet--signal-portlet-without-links-story-CcSignalPortletItem-itemColorInactive-21 standalone-signalportlet--signal-portlet-without-links-story-CcSignalPortletItem-itemColorInactive-28 standalone-signalportlet--signal-portlet-without-links-story-MuiAvatar-colorDefault"
                                                                             >
                                                                               0
                                                                             </div>
@@ -21706,11 +21706,11 @@ exports[`Storyshots Standalone/SignalPortlet Without Links 1`] = `
                                                                     </ForwardRef(ListItemAvatar)>
                                                                   </WithStyles(ForwardRef(ListItemAvatar))>
                                                                   <WithStyles(ForwardRef(ListItemText))
-                                                                    className="standalone-signalportlet--signal-portlet-without-links-story-makeStyles-listText-24"
+                                                                    className="standalone-signalportlet--signal-portlet-without-links-story-CcSignalPortletItem-listText-24"
                                                                     key=".1"
                                                                   >
                                                                     <ForwardRef(ListItemText)
-                                                                      className="standalone-signalportlet--signal-portlet-without-links-story-makeStyles-listText-24"
+                                                                      className="standalone-signalportlet--signal-portlet-without-links-story-CcSignalPortletItem-listText-24"
                                                                       classes={
                                                                         Object {
                                                                           "dense": "standalone-signalportlet--signal-portlet-without-links-story-MuiListItemText-dense",
@@ -21723,7 +21723,7 @@ exports[`Storyshots Standalone/SignalPortlet Without Links 1`] = `
                                                                       }
                                                                     >
                                                                       <div
-                                                                        className="standalone-signalportlet--signal-portlet-without-links-story-MuiListItemText-root standalone-signalportlet--signal-portlet-without-links-story-makeStyles-listText-24"
+                                                                        className="standalone-signalportlet--signal-portlet-without-links-story-MuiListItemText-root standalone-signalportlet--signal-portlet-without-links-story-CcSignalPortletItem-listText-24"
                                                                       >
                                                                         <WithStyles(ForwardRef(Typography))
                                                                           className="standalone-signalportlet--signal-portlet-without-links-story-MuiListItemText-primary"
@@ -21794,12 +21794,12 @@ exports[`Storyshots Standalone/SignalPortlet Without Links 1`] = `
                                                           >
                                                             <WithStyles(ForwardRef(ListItem))
                                                               button={false}
-                                                              className="standalone-signalportlet--signal-portlet-without-links-story-makeStyles-root-22"
+                                                              className="standalone-signalportlet--signal-portlet-without-links-story-CcSignalPortletItem-root-22"
                                                               onClick={[Function]}
                                                             >
                                                               <ForwardRef(ListItem)
                                                                 button={false}
-                                                                className="standalone-signalportlet--signal-portlet-without-links-story-makeStyles-root-22"
+                                                                className="standalone-signalportlet--signal-portlet-without-links-story-CcSignalPortletItem-root-22"
                                                                 classes={
                                                                   Object {
                                                                     "alignItemsFlexStart": "standalone-signalportlet--signal-portlet-without-links-story-MuiListItem-alignItemsFlexStart",
@@ -21818,16 +21818,16 @@ exports[`Storyshots Standalone/SignalPortlet Without Links 1`] = `
                                                                 onClick={[Function]}
                                                               >
                                                                 <li
-                                                                  className="standalone-signalportlet--signal-portlet-without-links-story-MuiListItem-root standalone-signalportlet--signal-portlet-without-links-story-makeStyles-root-22 standalone-signalportlet--signal-portlet-without-links-story-MuiListItem-gutters"
+                                                                  className="standalone-signalportlet--signal-portlet-without-links-story-MuiListItem-root standalone-signalportlet--signal-portlet-without-links-story-CcSignalPortletItem-root-22 standalone-signalportlet--signal-portlet-without-links-story-MuiListItem-gutters"
                                                                   disabled={false}
                                                                   onClick={[Function]}
                                                                 >
                                                                   <WithStyles(ForwardRef(ListItemAvatar))
-                                                                    className="standalone-signalportlet--signal-portlet-without-links-story-makeStyles-listAvatar-23"
+                                                                    className="standalone-signalportlet--signal-portlet-without-links-story-CcSignalPortletItem-listAvatar-23"
                                                                     key=".0"
                                                                   >
                                                                     <ForwardRef(ListItemAvatar)
-                                                                      className="standalone-signalportlet--signal-portlet-without-links-story-makeStyles-listAvatar-23"
+                                                                      className="standalone-signalportlet--signal-portlet-without-links-story-CcSignalPortletItem-listAvatar-23"
                                                                       classes={
                                                                         Object {
                                                                           "alignItemsFlexStart": "standalone-signalportlet--signal-portlet-without-links-story-MuiListItemAvatar-alignItemsFlexStart",
@@ -21836,13 +21836,13 @@ exports[`Storyshots Standalone/SignalPortlet Without Links 1`] = `
                                                                       }
                                                                     >
                                                                       <div
-                                                                        className="standalone-signalportlet--signal-portlet-without-links-story-MuiListItemAvatar-root standalone-signalportlet--signal-portlet-without-links-story-makeStyles-listAvatar-23"
+                                                                        className="standalone-signalportlet--signal-portlet-without-links-story-MuiListItemAvatar-root standalone-signalportlet--signal-portlet-without-links-story-CcSignalPortletItem-listAvatar-23"
                                                                       >
                                                                         <WithStyles(ForwardRef(Avatar))
-                                                                          className="standalone-signalportlet--signal-portlet-without-links-story-makeStyles-itemColorActive-20 standalone-signalportlet--signal-portlet-without-links-story-makeStyles-itemColorActive-29"
+                                                                          className="standalone-signalportlet--signal-portlet-without-links-story-CcSignalPortletItem-itemColorActive-20 standalone-signalportlet--signal-portlet-without-links-story-CcSignalPortletItem-itemColorActive-29"
                                                                         >
                                                                           <ForwardRef(Avatar)
-                                                                            className="standalone-signalportlet--signal-portlet-without-links-story-makeStyles-itemColorActive-20 standalone-signalportlet--signal-portlet-without-links-story-makeStyles-itemColorActive-29"
+                                                                            className="standalone-signalportlet--signal-portlet-without-links-story-CcSignalPortletItem-itemColorActive-20 standalone-signalportlet--signal-portlet-without-links-story-CcSignalPortletItem-itemColorActive-29"
                                                                             classes={
                                                                               Object {
                                                                                 "circle": "standalone-signalportlet--signal-portlet-without-links-story-MuiAvatar-circle",
@@ -21857,7 +21857,7 @@ exports[`Storyshots Standalone/SignalPortlet Without Links 1`] = `
                                                                             }
                                                                           >
                                                                             <div
-                                                                              className="standalone-signalportlet--signal-portlet-without-links-story-MuiAvatar-root standalone-signalportlet--signal-portlet-without-links-story-MuiAvatar-circle standalone-signalportlet--signal-portlet-without-links-story-makeStyles-itemColorActive-20 standalone-signalportlet--signal-portlet-without-links-story-makeStyles-itemColorActive-29 standalone-signalportlet--signal-portlet-without-links-story-MuiAvatar-colorDefault"
+                                                                              className="standalone-signalportlet--signal-portlet-without-links-story-MuiAvatar-root standalone-signalportlet--signal-portlet-without-links-story-MuiAvatar-circle standalone-signalportlet--signal-portlet-without-links-story-CcSignalPortletItem-itemColorActive-20 standalone-signalportlet--signal-portlet-without-links-story-CcSignalPortletItem-itemColorActive-29 standalone-signalportlet--signal-portlet-without-links-story-MuiAvatar-colorDefault"
                                                                             >
                                                                               3
                                                                             </div>
@@ -21867,11 +21867,11 @@ exports[`Storyshots Standalone/SignalPortlet Without Links 1`] = `
                                                                     </ForwardRef(ListItemAvatar)>
                                                                   </WithStyles(ForwardRef(ListItemAvatar))>
                                                                   <WithStyles(ForwardRef(ListItemText))
-                                                                    className="standalone-signalportlet--signal-portlet-without-links-story-makeStyles-listText-24"
+                                                                    className="standalone-signalportlet--signal-portlet-without-links-story-CcSignalPortletItem-listText-24"
                                                                     key=".1"
                                                                   >
                                                                     <ForwardRef(ListItemText)
-                                                                      className="standalone-signalportlet--signal-portlet-without-links-story-makeStyles-listText-24"
+                                                                      className="standalone-signalportlet--signal-portlet-without-links-story-CcSignalPortletItem-listText-24"
                                                                       classes={
                                                                         Object {
                                                                           "dense": "standalone-signalportlet--signal-portlet-without-links-story-MuiListItemText-dense",
@@ -21884,7 +21884,7 @@ exports[`Storyshots Standalone/SignalPortlet Without Links 1`] = `
                                                                       }
                                                                     >
                                                                       <div
-                                                                        className="standalone-signalportlet--signal-portlet-without-links-story-MuiListItemText-root standalone-signalportlet--signal-portlet-without-links-story-makeStyles-listText-24"
+                                                                        className="standalone-signalportlet--signal-portlet-without-links-story-MuiListItemText-root standalone-signalportlet--signal-portlet-without-links-story-CcSignalPortletItem-listText-24"
                                                                       >
                                                                         <WithStyles(ForwardRef(Typography))
                                                                           className="standalone-signalportlet--signal-portlet-without-links-story-MuiListItemText-primary"

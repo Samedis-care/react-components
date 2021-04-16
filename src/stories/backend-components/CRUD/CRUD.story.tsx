@@ -9,12 +9,15 @@ import Field from "../../../backend-components/Form/Field";
 import { PageProps } from "../../../backend-components";
 import { makeStyles } from "@material-ui/core/styles";
 
-const useStyles = makeStyles({
-	wrapper: {
-		width: "95vw",
-		height: "95vh",
+const useStyles = makeStyles(
+	{
+		wrapper: {
+			width: "95vw",
+			height: "95vh",
+		},
 	},
-});
+	{ name: "CcCRUDStory" }
+);
 
 export const CrudStory = (): React.ReactElement => {
 	const classes = useStyles();

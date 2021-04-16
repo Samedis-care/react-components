@@ -129,15 +129,19 @@ export interface MenuTheme {
 	};
 }
 
-const useStyles = makeStyles((theme: Theme) => ({
-	root: {
-		padding: theme.componentsCare?.portal?.menu?.container?.padding,
-		height: theme.componentsCare?.portal?.menu?.container?.height || "100%",
-		width: theme.componentsCare?.portal?.menu?.container?.width || "100%",
-		overflow: theme.componentsCare?.portal?.menu?.container?.overflow || "auto",
-		...theme.componentsCare?.portal?.menu?.container?.style,
-	},
-}));
+const useStyles = makeStyles(
+	(theme: Theme) => ({
+		root: {
+			padding: theme.componentsCare?.portal?.menu?.container?.padding,
+			height: theme.componentsCare?.portal?.menu?.container?.height || "100%",
+			width: theme.componentsCare?.portal?.menu?.container?.width || "100%",
+			overflow:
+				theme.componentsCare?.portal?.menu?.container?.overflow || "auto",
+			...theme.componentsCare?.portal?.menu?.container?.style,
+		},
+	}),
+	{ name: "CcPortalMenu" }
+);
 
 const PortalMenu = (props: MenuProps) => {
 	const Wrapper = props.wrapper;

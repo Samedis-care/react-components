@@ -6029,8 +6029,8 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                   }
                                   menuContent={
                                     <Memo(RoutedMenu)
-                                      childWrapperClassName="non-standalone-portal--portal-menu-story-makeStyles-menuChildrenWrapper-27"
-                                      className="non-standalone-portal--portal-menu-story-makeStyles-menuWrapper-26"
+                                      childWrapperClassName="non-standalone-portal--portal-menu-story-CcPortalMenuStyleStory-menuChildrenWrapper-27"
+                                      className="non-standalone-portal--portal-menu-story-CcPortalMenuStyleStory-menuWrapper-26"
                                       definition={
                                         Array [
                                           Object {
@@ -6430,8 +6430,8 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                       }
                                       menuContent={
                                         <Memo(RoutedMenu)
-                                          childWrapperClassName="non-standalone-portal--portal-menu-story-makeStyles-menuChildrenWrapper-27"
-                                          className="non-standalone-portal--portal-menu-story-makeStyles-menuWrapper-26"
+                                          childWrapperClassName="non-standalone-portal--portal-menu-story-CcPortalMenuStyleStory-menuChildrenWrapper-27"
+                                          className="non-standalone-portal--portal-menu-story-CcPortalMenuStyleStory-menuWrapper-26"
                                           definition={
                                             Array [
                                               Object {
@@ -6822,7 +6822,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                           cssClass="topLeft"
                                         >
                                           <div
-                                            className="non-standalone-portal--portal-menu-story-makeStyles-topLeft-39"
+                                            className="non-standalone-portal--portal-menu-story-CcPortalMenuStory-topLeft-39"
                                           >
                                             topLeft
                                           </div>
@@ -6926,7 +6926,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                             cssClass="header"
                                                           >
                                                             <div
-                                                              className="non-standalone-portal--portal-menu-story-makeStyles-header-37"
+                                                              className="non-standalone-portal--portal-menu-story-CcPortalMenuStory-header-37"
                                                             >
                                                               header
                                                             </div>
@@ -6949,8 +6949,8 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                           items={
                                             <React.Fragment>
                                               <Memo(RoutedMenu)
-                                                childWrapperClassName="non-standalone-portal--portal-menu-story-makeStyles-menuChildrenWrapper-27"
-                                                className="non-standalone-portal--portal-menu-story-makeStyles-menuWrapper-26"
+                                                childWrapperClassName="non-standalone-portal--portal-menu-story-CcPortalMenuStyleStory-menuChildrenWrapper-27"
+                                                className="non-standalone-portal--portal-menu-story-CcPortalMenuStyleStory-menuWrapper-26"
                                                 definition={
                                                   Array [
                                                     Object {
@@ -7332,10 +7332,10 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                           toggleMenu={[Function]}
                                         >
                                           <WithStyles(ForwardRef(Paper))
-                                            className="non-standalone-portal--portal-menu-story-makeStyles-menuPaper-40 non-standalone-portal--portal-menu-story-makeStyles-menuPaper-41"
+                                            className="non-standalone-portal--portal-menu-story-CcPortalLayoutMenu-menuPaper-40 non-standalone-portal--portal-menu-story-CcPortalLayoutMenu-menuPaper-41"
                                           >
                                             <ForwardRef(Paper)
-                                              className="non-standalone-portal--portal-menu-story-makeStyles-menuPaper-40 non-standalone-portal--portal-menu-story-makeStyles-menuPaper-41"
+                                              className="non-standalone-portal--portal-menu-story-CcPortalLayoutMenu-menuPaper-40 non-standalone-portal--portal-menu-story-CcPortalLayoutMenu-menuPaper-41"
                                               classes={
                                                 Object {
                                                   "elevation0": "non-standalone-portal--portal-menu-story-MuiPaper-elevation0",
@@ -7370,11 +7370,11 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                               }
                                             >
                                               <div
-                                                className="non-standalone-portal--portal-menu-story-MuiPaper-root non-standalone-portal--portal-menu-story-makeStyles-menuPaper-40 non-standalone-portal--portal-menu-story-makeStyles-menuPaper-41 non-standalone-portal--portal-menu-story-MuiPaper-elevation1 non-standalone-portal--portal-menu-story-MuiPaper-rounded"
+                                                className="non-standalone-portal--portal-menu-story-MuiPaper-root non-standalone-portal--portal-menu-story-CcPortalLayoutMenu-menuPaper-40 non-standalone-portal--portal-menu-story-CcPortalLayoutMenu-menuPaper-41 non-standalone-portal--portal-menu-story-MuiPaper-elevation1 non-standalone-portal--portal-menu-story-MuiPaper-rounded"
                                               >
                                                 <Memo(RoutedMenu)
-                                                  childWrapperClassName="non-standalone-portal--portal-menu-story-makeStyles-menuChildrenWrapper-27"
-                                                  className="non-standalone-portal--portal-menu-story-makeStyles-menuWrapper-26"
+                                                  childWrapperClassName="non-standalone-portal--portal-menu-story-CcPortalMenuStyleStory-menuChildrenWrapper-27"
+                                                  className="non-standalone-portal--portal-menu-story-CcPortalMenuStyleStory-menuWrapper-26"
                                                   definition={
                                                     Array [
                                                       Object {
@@ -7750,8 +7750,8 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                   }
                                                 >
                                                   <Memo(PortalMenu)
-                                                    childWrapperClassName="non-standalone-portal--portal-menu-story-makeStyles-menuChildrenWrapper-27"
-                                                    className="non-standalone-portal--portal-menu-story-makeStyles-menuWrapper-26"
+                                                    childWrapperClassName="non-standalone-portal--portal-menu-story-CcPortalMenuStyleStory-menuChildrenWrapper-27"
+                                                    className="non-standalone-portal--portal-menu-story-CcPortalMenuStyleStory-menuWrapper-26"
                                                     customState={
                                                       Array [
                                                         "Home",
@@ -8150,7 +8150,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                     }
                                                   >
                                                     <div
-                                                      className="non-standalone-portal--portal-menu-story-makeStyles-root-42 non-standalone-portal--portal-menu-story-makeStyles-menuWrapper-26"
+                                                      className="non-standalone-portal--portal-menu-story-CcPortalMenu-root-42 non-standalone-portal--portal-menu-story-CcPortalMenuStyleStory-menuWrapper-26"
                                                     >
                                                       <WithStyles(ForwardRef(List))>
                                                         <ForwardRef(List)
@@ -8167,7 +8167,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                             className="non-standalone-portal--portal-menu-story-MuiList-root non-standalone-portal--portal-menu-story-MuiList-padding"
                                                           >
                                                             <MenuItem
-                                                              childWrapperClassName="non-standalone-portal--portal-menu-story-makeStyles-menuChildrenWrapper-27"
+                                                              childWrapperClassName="non-standalone-portal--portal-menu-story-CcPortalMenuStyleStory-menuChildrenWrapper-27"
                                                               depth={0}
                                                               expandable={false}
                                                               forceExpand={false}
@@ -8185,8 +8185,8 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                               menuItemId="Home"
                                                               menuProps={
                                                                 Object {
-                                                                  "childWrapperClassName": "non-standalone-portal--portal-menu-story-makeStyles-menuChildrenWrapper-27",
-                                                                  "className": "non-standalone-portal--portal-menu-story-makeStyles-menuWrapper-26",
+                                                                  "childWrapperClassName": "non-standalone-portal--portal-menu-story-CcPortalMenuStyleStory-menuChildrenWrapper-27",
+                                                                  "className": "non-standalone-portal--portal-menu-story-CcPortalMenuStyleStory-menuWrapper-26",
                                                                   "customState": Array [
                                                                     "Home",
                                                                     [Function],
@@ -8599,12 +8599,12 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                               >
                                                                 <WithStyles(WithStyles(ForwardRef(ListItem)))
                                                                   button={true}
-                                                                  className="non-standalone-portal--portal-menu-story-makeStyles-item-43 non-standalone-portal--portal-menu-story-makeStyles-selectedItem-44"
+                                                                  className="non-standalone-portal--portal-menu-story-CcPortalMenuItemDark-item-43 non-standalone-portal--portal-menu-story-CcPortalMenuItemDark-selectedItem-44"
                                                                   onClick={[Function]}
                                                                 >
                                                                   <WithStyles(ForwardRef(ListItem))
                                                                     button={true}
-                                                                    className="non-standalone-portal--portal-menu-story-makeStyles-item-43 non-standalone-portal--portal-menu-story-makeStyles-selectedItem-44"
+                                                                    className="non-standalone-portal--portal-menu-story-CcPortalMenuItemDark-item-43 non-standalone-portal--portal-menu-story-CcPortalMenuItemDark-selectedItem-44"
                                                                     classes={
                                                                       Object {
                                                                         "button": "non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-button-47",
@@ -8615,7 +8615,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                   >
                                                                     <ForwardRef(ListItem)
                                                                       button={true}
-                                                                      className="non-standalone-portal--portal-menu-story-makeStyles-item-43 non-standalone-portal--portal-menu-story-makeStyles-selectedItem-44"
+                                                                      className="non-standalone-portal--portal-menu-story-CcPortalMenuItemDark-item-43 non-standalone-portal--portal-menu-story-CcPortalMenuItemDark-selectedItem-44"
                                                                       classes={
                                                                         Object {
                                                                           "alignItemsFlexStart": "non-standalone-portal--portal-menu-story-MuiListItem-alignItemsFlexStart",
@@ -8634,14 +8634,14 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                       onClick={[Function]}
                                                                     >
                                                                       <WithStyles(ForwardRef(ButtonBase))
-                                                                        className="non-standalone-portal--portal-menu-story-MuiListItem-root non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-root-46 non-standalone-portal--portal-menu-story-makeStyles-item-43 non-standalone-portal--portal-menu-story-makeStyles-selectedItem-44 non-standalone-portal--portal-menu-story-MuiListItem-gutters non-standalone-portal--portal-menu-story-MuiListItem-button non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-button-47"
+                                                                        className="non-standalone-portal--portal-menu-story-MuiListItem-root non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-root-46 non-standalone-portal--portal-menu-story-CcPortalMenuItemDark-item-43 non-standalone-portal--portal-menu-story-CcPortalMenuItemDark-selectedItem-44 non-standalone-portal--portal-menu-story-MuiListItem-gutters non-standalone-portal--portal-menu-story-MuiListItem-button non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-button-47"
                                                                         component="div"
                                                                         disabled={false}
                                                                         focusVisibleClassName="Mui-focusVisible"
                                                                         onClick={[Function]}
                                                                       >
                                                                         <ForwardRef(ButtonBase)
-                                                                          className="non-standalone-portal--portal-menu-story-MuiListItem-root non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-root-46 non-standalone-portal--portal-menu-story-makeStyles-item-43 non-standalone-portal--portal-menu-story-makeStyles-selectedItem-44 non-standalone-portal--portal-menu-story-MuiListItem-gutters non-standalone-portal--portal-menu-story-MuiListItem-button non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-button-47"
+                                                                          className="non-standalone-portal--portal-menu-story-MuiListItem-root non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-root-46 non-standalone-portal--portal-menu-story-CcPortalMenuItemDark-item-43 non-standalone-portal--portal-menu-story-CcPortalMenuItemDark-selectedItem-44 non-standalone-portal--portal-menu-story-MuiListItem-gutters non-standalone-portal--portal-menu-story-MuiListItem-button non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-button-47"
                                                                           classes={
                                                                             Object {
                                                                               "disabled": "Mui-disabled",
@@ -8656,7 +8656,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                         >
                                                                           <div
                                                                             aria-disabled={false}
-                                                                            className="non-standalone-portal--portal-menu-story-MuiButtonBase-root non-standalone-portal--portal-menu-story-MuiListItem-root non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-root-46 non-standalone-portal--portal-menu-story-makeStyles-item-43 non-standalone-portal--portal-menu-story-makeStyles-selectedItem-44 non-standalone-portal--portal-menu-story-MuiListItem-gutters non-standalone-portal--portal-menu-story-MuiListItem-button non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-button-47"
+                                                                            className="non-standalone-portal--portal-menu-story-MuiButtonBase-root non-standalone-portal--portal-menu-story-MuiListItem-root non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-root-46 non-standalone-portal--portal-menu-story-CcPortalMenuItemDark-item-43 non-standalone-portal--portal-menu-story-CcPortalMenuItemDark-selectedItem-44 non-standalone-portal--portal-menu-story-MuiListItem-gutters non-standalone-portal--portal-menu-story-MuiListItem-button non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-button-47"
                                                                             onBlur={[Function]}
                                                                             onClick={[Function]}
                                                                             onDragLeave={[Function]}
@@ -8814,7 +8814,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                               </ForwardRef(ListItemText)>
                                                                             </WithStyles(ForwardRef(ListItemText))>
                                                                             <div
-                                                                              className="non-standalone-portal--portal-menu-story-makeStyles-dot-45"
+                                                                              className="non-standalone-portal--portal-menu-story-CcPortalMenuItemDark-dot-45"
                                                                               key=".3"
                                                                             />
                                                                             <WithStyles(memo)
@@ -8890,7 +8890,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                   },
                                                                 ]
                                                               }
-                                                              childWrapperClassName="non-standalone-portal--portal-menu-story-makeStyles-menuChildrenWrapper-27"
+                                                              childWrapperClassName="non-standalone-portal--portal-menu-story-CcPortalMenuStyleStory-menuChildrenWrapper-27"
                                                               depth={0}
                                                               expandable={true}
                                                               forceExpand={false}
@@ -8908,8 +8908,8 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                               menuItemId="Admin"
                                                               menuProps={
                                                                 Object {
-                                                                  "childWrapperClassName": "non-standalone-portal--portal-menu-story-makeStyles-menuChildrenWrapper-27",
-                                                                  "className": "non-standalone-portal--portal-menu-story-makeStyles-menuWrapper-26",
+                                                                  "childWrapperClassName": "non-standalone-portal--portal-menu-story-CcPortalMenuStyleStory-menuChildrenWrapper-27",
+                                                                  "className": "non-standalone-portal--portal-menu-story-CcPortalMenuStyleStory-menuWrapper-26",
                                                                   "customState": Array [
                                                                     "Home",
                                                                     [Function],
@@ -9322,12 +9322,12 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                               >
                                                                 <WithStyles(WithStyles(ForwardRef(ListItem)))
                                                                   button={true}
-                                                                  className="non-standalone-portal--portal-menu-story-makeStyles-item-43"
+                                                                  className="non-standalone-portal--portal-menu-story-CcPortalMenuItemDark-item-43"
                                                                   onClick={[Function]}
                                                                 >
                                                                   <WithStyles(ForwardRef(ListItem))
                                                                     button={true}
-                                                                    className="non-standalone-portal--portal-menu-story-makeStyles-item-43"
+                                                                    className="non-standalone-portal--portal-menu-story-CcPortalMenuItemDark-item-43"
                                                                     classes={
                                                                       Object {
                                                                         "button": "non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-button-50",
@@ -9338,7 +9338,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                   >
                                                                     <ForwardRef(ListItem)
                                                                       button={true}
-                                                                      className="non-standalone-portal--portal-menu-story-makeStyles-item-43"
+                                                                      className="non-standalone-portal--portal-menu-story-CcPortalMenuItemDark-item-43"
                                                                       classes={
                                                                         Object {
                                                                           "alignItemsFlexStart": "non-standalone-portal--portal-menu-story-MuiListItem-alignItemsFlexStart",
@@ -9357,14 +9357,14 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                       onClick={[Function]}
                                                                     >
                                                                       <WithStyles(ForwardRef(ButtonBase))
-                                                                        className="non-standalone-portal--portal-menu-story-MuiListItem-root non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-root-49 non-standalone-portal--portal-menu-story-makeStyles-item-43 non-standalone-portal--portal-menu-story-MuiListItem-gutters non-standalone-portal--portal-menu-story-MuiListItem-button non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-button-50"
+                                                                        className="non-standalone-portal--portal-menu-story-MuiListItem-root non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-root-49 non-standalone-portal--portal-menu-story-CcPortalMenuItemDark-item-43 non-standalone-portal--portal-menu-story-MuiListItem-gutters non-standalone-portal--portal-menu-story-MuiListItem-button non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-button-50"
                                                                         component="div"
                                                                         disabled={false}
                                                                         focusVisibleClassName="Mui-focusVisible"
                                                                         onClick={[Function]}
                                                                       >
                                                                         <ForwardRef(ButtonBase)
-                                                                          className="non-standalone-portal--portal-menu-story-MuiListItem-root non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-root-49 non-standalone-portal--portal-menu-story-makeStyles-item-43 non-standalone-portal--portal-menu-story-MuiListItem-gutters non-standalone-portal--portal-menu-story-MuiListItem-button non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-button-50"
+                                                                          className="non-standalone-portal--portal-menu-story-MuiListItem-root non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-root-49 non-standalone-portal--portal-menu-story-CcPortalMenuItemDark-item-43 non-standalone-portal--portal-menu-story-MuiListItem-gutters non-standalone-portal--portal-menu-story-MuiListItem-button non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-button-50"
                                                                           classes={
                                                                             Object {
                                                                               "disabled": "Mui-disabled",
@@ -9379,7 +9379,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                         >
                                                                           <div
                                                                             aria-disabled={false}
-                                                                            className="non-standalone-portal--portal-menu-story-MuiButtonBase-root non-standalone-portal--portal-menu-story-MuiListItem-root non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-root-49 non-standalone-portal--portal-menu-story-makeStyles-item-43 non-standalone-portal--portal-menu-story-MuiListItem-gutters non-standalone-portal--portal-menu-story-MuiListItem-button non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-button-50"
+                                                                            className="non-standalone-portal--portal-menu-story-MuiButtonBase-root non-standalone-portal--portal-menu-story-MuiListItem-root non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-root-49 non-standalone-portal--portal-menu-story-CcPortalMenuItemDark-item-43 non-standalone-portal--portal-menu-story-MuiListItem-gutters non-standalone-portal--portal-menu-story-MuiListItem-button non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-button-50"
                                                                             onBlur={[Function]}
                                                                             onClick={[Function]}
                                                                             onDragLeave={[Function]}
@@ -9604,11 +9604,11 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                 </WithStyles(WithStyles(ForwardRef(ListItem)))>
                                                               </Memo(MenuItemJumboReactDark)>
                                                               <WithStyles(ForwardRef(Collapse))
-                                                                className="non-standalone-portal--portal-menu-story-makeStyles-menuChildrenWrapper-27"
+                                                                className="non-standalone-portal--portal-menu-story-CcPortalMenuStyleStory-menuChildrenWrapper-27"
                                                                 in={false}
                                                               >
                                                                 <ForwardRef(Collapse)
-                                                                  className="non-standalone-portal--portal-menu-story-makeStyles-menuChildrenWrapper-27"
+                                                                  className="non-standalone-portal--portal-menu-story-CcPortalMenuStyleStory-menuChildrenWrapper-27"
                                                                   classes={
                                                                     Object {
                                                                       "container": "non-standalone-portal--portal-menu-story-MuiCollapse-container",
@@ -9637,7 +9637,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                     unmountOnExit={false}
                                                                   >
                                                                     <div
-                                                                      className="non-standalone-portal--portal-menu-story-MuiCollapse-container non-standalone-portal--portal-menu-story-makeStyles-menuChildrenWrapper-27 non-standalone-portal--portal-menu-story-MuiCollapse-hidden"
+                                                                      className="non-standalone-portal--portal-menu-story-MuiCollapse-container non-standalone-portal--portal-menu-story-CcPortalMenuStyleStory-menuChildrenWrapper-27 non-standalone-portal--portal-menu-story-MuiCollapse-hidden"
                                                                       style={
                                                                         Object {
                                                                           "minHeight": "0px",
@@ -9651,7 +9651,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                           className="non-standalone-portal--portal-menu-story-MuiCollapse-wrapperInner"
                                                                         >
                                                                           <MenuItem
-                                                                            childWrapperClassName="non-standalone-portal--portal-menu-story-makeStyles-menuChildrenWrapper-27"
+                                                                            childWrapperClassName="non-standalone-portal--portal-menu-story-CcPortalMenuStyleStory-menuChildrenWrapper-27"
                                                                             depth={1}
                                                                             expandable={false}
                                                                             forceExpand={false}
@@ -9659,8 +9659,8 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                             menuItemId="Admin@Item 1"
                                                                             menuProps={
                                                                               Object {
-                                                                                "childWrapperClassName": "non-standalone-portal--portal-menu-story-makeStyles-menuChildrenWrapper-27",
-                                                                                "className": "non-standalone-portal--portal-menu-story-makeStyles-menuWrapper-26",
+                                                                                "childWrapperClassName": "non-standalone-portal--portal-menu-story-CcPortalMenuStyleStory-menuChildrenWrapper-27",
+                                                                                "className": "non-standalone-portal--portal-menu-story-CcPortalMenuStyleStory-menuWrapper-26",
                                                                                 "customState": Array [
                                                                                   "Home",
                                                                                   [Function],
@@ -10063,12 +10063,12 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                             >
                                                                               <WithStyles(WithStyles(ForwardRef(ListItem)))
                                                                                 button={true}
-                                                                                className="non-standalone-portal--portal-menu-story-makeStyles-item-43"
+                                                                                className="non-standalone-portal--portal-menu-story-CcPortalMenuItemDark-item-43"
                                                                                 onClick={[Function]}
                                                                               >
                                                                                 <WithStyles(ForwardRef(ListItem))
                                                                                   button={true}
-                                                                                  className="non-standalone-portal--portal-menu-story-makeStyles-item-43"
+                                                                                  className="non-standalone-portal--portal-menu-story-CcPortalMenuItemDark-item-43"
                                                                                   classes={
                                                                                     Object {
                                                                                       "button": "non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-button-52",
@@ -10079,7 +10079,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                                 >
                                                                                   <ForwardRef(ListItem)
                                                                                     button={true}
-                                                                                    className="non-standalone-portal--portal-menu-story-makeStyles-item-43"
+                                                                                    className="non-standalone-portal--portal-menu-story-CcPortalMenuItemDark-item-43"
                                                                                     classes={
                                                                                       Object {
                                                                                         "alignItemsFlexStart": "non-standalone-portal--portal-menu-story-MuiListItem-alignItemsFlexStart",
@@ -10098,14 +10098,14 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                                     onClick={[Function]}
                                                                                   >
                                                                                     <WithStyles(ForwardRef(ButtonBase))
-                                                                                      className="non-standalone-portal--portal-menu-story-MuiListItem-root non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-root-51 non-standalone-portal--portal-menu-story-makeStyles-item-43 non-standalone-portal--portal-menu-story-MuiListItem-gutters non-standalone-portal--portal-menu-story-MuiListItem-button non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-button-52"
+                                                                                      className="non-standalone-portal--portal-menu-story-MuiListItem-root non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-root-51 non-standalone-portal--portal-menu-story-CcPortalMenuItemDark-item-43 non-standalone-portal--portal-menu-story-MuiListItem-gutters non-standalone-portal--portal-menu-story-MuiListItem-button non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-button-52"
                                                                                       component="div"
                                                                                       disabled={false}
                                                                                       focusVisibleClassName="Mui-focusVisible"
                                                                                       onClick={[Function]}
                                                                                     >
                                                                                       <ForwardRef(ButtonBase)
-                                                                                        className="non-standalone-portal--portal-menu-story-MuiListItem-root non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-root-51 non-standalone-portal--portal-menu-story-makeStyles-item-43 non-standalone-portal--portal-menu-story-MuiListItem-gutters non-standalone-portal--portal-menu-story-MuiListItem-button non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-button-52"
+                                                                                        className="non-standalone-portal--portal-menu-story-MuiListItem-root non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-root-51 non-standalone-portal--portal-menu-story-CcPortalMenuItemDark-item-43 non-standalone-portal--portal-menu-story-MuiListItem-gutters non-standalone-portal--portal-menu-story-MuiListItem-button non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-button-52"
                                                                                         classes={
                                                                                           Object {
                                                                                             "disabled": "Mui-disabled",
@@ -10120,7 +10120,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                                       >
                                                                                         <div
                                                                                           aria-disabled={false}
-                                                                                          className="non-standalone-portal--portal-menu-story-MuiButtonBase-root non-standalone-portal--portal-menu-story-MuiListItem-root non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-root-51 non-standalone-portal--portal-menu-story-makeStyles-item-43 non-standalone-portal--portal-menu-story-MuiListItem-gutters non-standalone-portal--portal-menu-story-MuiListItem-button non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-button-52"
+                                                                                          className="non-standalone-portal--portal-menu-story-MuiButtonBase-root non-standalone-portal--portal-menu-story-MuiListItem-root non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-root-51 non-standalone-portal--portal-menu-story-CcPortalMenuItemDark-item-43 non-standalone-portal--portal-menu-story-MuiListItem-gutters non-standalone-portal--portal-menu-story-MuiListItem-button non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-button-52"
                                                                                           onBlur={[Function]}
                                                                                           onClick={[Function]}
                                                                                           onDragLeave={[Function]}
@@ -10283,7 +10283,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                             </Memo(MenuItemJumboReactDark)>
                                                                           </MenuItem>
                                                                           <MenuItem
-                                                                            childWrapperClassName="non-standalone-portal--portal-menu-story-makeStyles-menuChildrenWrapper-27"
+                                                                            childWrapperClassName="non-standalone-portal--portal-menu-story-CcPortalMenuStyleStory-menuChildrenWrapper-27"
                                                                             depth={1}
                                                                             expandable={false}
                                                                             forceExpand={false}
@@ -10291,8 +10291,8 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                             menuItemId="Admin@Item 2"
                                                                             menuProps={
                                                                               Object {
-                                                                                "childWrapperClassName": "non-standalone-portal--portal-menu-story-makeStyles-menuChildrenWrapper-27",
-                                                                                "className": "non-standalone-portal--portal-menu-story-makeStyles-menuWrapper-26",
+                                                                                "childWrapperClassName": "non-standalone-portal--portal-menu-story-CcPortalMenuStyleStory-menuChildrenWrapper-27",
+                                                                                "className": "non-standalone-portal--portal-menu-story-CcPortalMenuStyleStory-menuWrapper-26",
                                                                                 "customState": Array [
                                                                                   "Home",
                                                                                   [Function],
@@ -10695,12 +10695,12 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                             >
                                                                               <WithStyles(WithStyles(ForwardRef(ListItem)))
                                                                                 button={true}
-                                                                                className="non-standalone-portal--portal-menu-story-makeStyles-item-43"
+                                                                                className="non-standalone-portal--portal-menu-story-CcPortalMenuItemDark-item-43"
                                                                                 onClick={[Function]}
                                                                               >
                                                                                 <WithStyles(ForwardRef(ListItem))
                                                                                   button={true}
-                                                                                  className="non-standalone-portal--portal-menu-story-makeStyles-item-43"
+                                                                                  className="non-standalone-portal--portal-menu-story-CcPortalMenuItemDark-item-43"
                                                                                   classes={
                                                                                     Object {
                                                                                       "button": "non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-button-52",
@@ -10711,7 +10711,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                                 >
                                                                                   <ForwardRef(ListItem)
                                                                                     button={true}
-                                                                                    className="non-standalone-portal--portal-menu-story-makeStyles-item-43"
+                                                                                    className="non-standalone-portal--portal-menu-story-CcPortalMenuItemDark-item-43"
                                                                                     classes={
                                                                                       Object {
                                                                                         "alignItemsFlexStart": "non-standalone-portal--portal-menu-story-MuiListItem-alignItemsFlexStart",
@@ -10730,14 +10730,14 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                                     onClick={[Function]}
                                                                                   >
                                                                                     <WithStyles(ForwardRef(ButtonBase))
-                                                                                      className="non-standalone-portal--portal-menu-story-MuiListItem-root non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-root-51 non-standalone-portal--portal-menu-story-makeStyles-item-43 non-standalone-portal--portal-menu-story-MuiListItem-gutters non-standalone-portal--portal-menu-story-MuiListItem-button non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-button-52"
+                                                                                      className="non-standalone-portal--portal-menu-story-MuiListItem-root non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-root-51 non-standalone-portal--portal-menu-story-CcPortalMenuItemDark-item-43 non-standalone-portal--portal-menu-story-MuiListItem-gutters non-standalone-portal--portal-menu-story-MuiListItem-button non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-button-52"
                                                                                       component="div"
                                                                                       disabled={false}
                                                                                       focusVisibleClassName="Mui-focusVisible"
                                                                                       onClick={[Function]}
                                                                                     >
                                                                                       <ForwardRef(ButtonBase)
-                                                                                        className="non-standalone-portal--portal-menu-story-MuiListItem-root non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-root-51 non-standalone-portal--portal-menu-story-makeStyles-item-43 non-standalone-portal--portal-menu-story-MuiListItem-gutters non-standalone-portal--portal-menu-story-MuiListItem-button non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-button-52"
+                                                                                        className="non-standalone-portal--portal-menu-story-MuiListItem-root non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-root-51 non-standalone-portal--portal-menu-story-CcPortalMenuItemDark-item-43 non-standalone-portal--portal-menu-story-MuiListItem-gutters non-standalone-portal--portal-menu-story-MuiListItem-button non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-button-52"
                                                                                         classes={
                                                                                           Object {
                                                                                             "disabled": "Mui-disabled",
@@ -10752,7 +10752,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                                       >
                                                                                         <div
                                                                                           aria-disabled={false}
-                                                                                          className="non-standalone-portal--portal-menu-story-MuiButtonBase-root non-standalone-portal--portal-menu-story-MuiListItem-root non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-root-51 non-standalone-portal--portal-menu-story-makeStyles-item-43 non-standalone-portal--portal-menu-story-MuiListItem-gutters non-standalone-portal--portal-menu-story-MuiListItem-button non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-button-52"
+                                                                                          className="non-standalone-portal--portal-menu-story-MuiButtonBase-root non-standalone-portal--portal-menu-story-MuiListItem-root non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-root-51 non-standalone-portal--portal-menu-story-CcPortalMenuItemDark-item-43 non-standalone-portal--portal-menu-story-MuiListItem-gutters non-standalone-portal--portal-menu-story-MuiListItem-button non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-button-52"
                                                                                           onBlur={[Function]}
                                                                                           onClick={[Function]}
                                                                                           onDragLeave={[Function]}
@@ -10915,7 +10915,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                             </Memo(MenuItemJumboReactDark)>
                                                                           </MenuItem>
                                                                           <MenuItem
-                                                                            childWrapperClassName="non-standalone-portal--portal-menu-story-makeStyles-menuChildrenWrapper-27"
+                                                                            childWrapperClassName="non-standalone-portal--portal-menu-story-CcPortalMenuStyleStory-menuChildrenWrapper-27"
                                                                             depth={1}
                                                                             expandable={false}
                                                                             forceExpand={false}
@@ -10923,8 +10923,8 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                             menuItemId="Admin@Item 3"
                                                                             menuProps={
                                                                               Object {
-                                                                                "childWrapperClassName": "non-standalone-portal--portal-menu-story-makeStyles-menuChildrenWrapper-27",
-                                                                                "className": "non-standalone-portal--portal-menu-story-makeStyles-menuWrapper-26",
+                                                                                "childWrapperClassName": "non-standalone-portal--portal-menu-story-CcPortalMenuStyleStory-menuChildrenWrapper-27",
+                                                                                "className": "non-standalone-portal--portal-menu-story-CcPortalMenuStyleStory-menuWrapper-26",
                                                                                 "customState": Array [
                                                                                   "Home",
                                                                                   [Function],
@@ -11327,12 +11327,12 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                             >
                                                                               <WithStyles(WithStyles(ForwardRef(ListItem)))
                                                                                 button={true}
-                                                                                className="non-standalone-portal--portal-menu-story-makeStyles-item-43"
+                                                                                className="non-standalone-portal--portal-menu-story-CcPortalMenuItemDark-item-43"
                                                                                 onClick={[Function]}
                                                                               >
                                                                                 <WithStyles(ForwardRef(ListItem))
                                                                                   button={true}
-                                                                                  className="non-standalone-portal--portal-menu-story-makeStyles-item-43"
+                                                                                  className="non-standalone-portal--portal-menu-story-CcPortalMenuItemDark-item-43"
                                                                                   classes={
                                                                                     Object {
                                                                                       "button": "non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-button-52",
@@ -11343,7 +11343,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                                 >
                                                                                   <ForwardRef(ListItem)
                                                                                     button={true}
-                                                                                    className="non-standalone-portal--portal-menu-story-makeStyles-item-43"
+                                                                                    className="non-standalone-portal--portal-menu-story-CcPortalMenuItemDark-item-43"
                                                                                     classes={
                                                                                       Object {
                                                                                         "alignItemsFlexStart": "non-standalone-portal--portal-menu-story-MuiListItem-alignItemsFlexStart",
@@ -11362,14 +11362,14 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                                     onClick={[Function]}
                                                                                   >
                                                                                     <WithStyles(ForwardRef(ButtonBase))
-                                                                                      className="non-standalone-portal--portal-menu-story-MuiListItem-root non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-root-51 non-standalone-portal--portal-menu-story-makeStyles-item-43 non-standalone-portal--portal-menu-story-MuiListItem-gutters non-standalone-portal--portal-menu-story-MuiListItem-button non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-button-52"
+                                                                                      className="non-standalone-portal--portal-menu-story-MuiListItem-root non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-root-51 non-standalone-portal--portal-menu-story-CcPortalMenuItemDark-item-43 non-standalone-portal--portal-menu-story-MuiListItem-gutters non-standalone-portal--portal-menu-story-MuiListItem-button non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-button-52"
                                                                                       component="div"
                                                                                       disabled={false}
                                                                                       focusVisibleClassName="Mui-focusVisible"
                                                                                       onClick={[Function]}
                                                                                     >
                                                                                       <ForwardRef(ButtonBase)
-                                                                                        className="non-standalone-portal--portal-menu-story-MuiListItem-root non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-root-51 non-standalone-portal--portal-menu-story-makeStyles-item-43 non-standalone-portal--portal-menu-story-MuiListItem-gutters non-standalone-portal--portal-menu-story-MuiListItem-button non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-button-52"
+                                                                                        className="non-standalone-portal--portal-menu-story-MuiListItem-root non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-root-51 non-standalone-portal--portal-menu-story-CcPortalMenuItemDark-item-43 non-standalone-portal--portal-menu-story-MuiListItem-gutters non-standalone-portal--portal-menu-story-MuiListItem-button non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-button-52"
                                                                                         classes={
                                                                                           Object {
                                                                                             "disabled": "Mui-disabled",
@@ -11384,7 +11384,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                                       >
                                                                                         <div
                                                                                           aria-disabled={false}
-                                                                                          className="non-standalone-portal--portal-menu-story-MuiButtonBase-root non-standalone-portal--portal-menu-story-MuiListItem-root non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-root-51 non-standalone-portal--portal-menu-story-makeStyles-item-43 non-standalone-portal--portal-menu-story-MuiListItem-gutters non-standalone-portal--portal-menu-story-MuiListItem-button non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-button-52"
+                                                                                          className="non-standalone-portal--portal-menu-story-MuiButtonBase-root non-standalone-portal--portal-menu-story-MuiListItem-root non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-root-51 non-standalone-portal--portal-menu-story-CcPortalMenuItemDark-item-43 non-standalone-portal--portal-menu-story-MuiListItem-gutters non-standalone-portal--portal-menu-story-MuiListItem-button non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-button-52"
                                                                                           onBlur={[Function]}
                                                                                           onClick={[Function]}
                                                                                           onDragLeave={[Function]}
@@ -11571,7 +11571,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                           cssClass="content"
                                         >
                                           <div
-                                            className="non-standalone-portal--portal-menu-story-makeStyles-content-38"
+                                            className="non-standalone-portal--portal-menu-story-CcPortalMenuStory-content-38"
                                           >
                                             content
                                           </div>

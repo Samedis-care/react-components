@@ -46,15 +46,18 @@ export interface MultiSelectWithCheckBoxTheme {
 	selectStyle?: MultiSelectWithCheckBoxThemeExpert;
 }
 
-const useStyles = makeStyles((theme) => ({
-	checkboxStyle: {
-		borderRadius: 4,
-		width: 16,
-		height: 16,
-		marginRight: 10,
-		...theme.componentsCare?.selectorWithCheckbox?.checkboxStyle,
-	},
-}));
+const useStyles = makeStyles(
+	(theme) => ({
+		checkboxStyle: {
+			borderRadius: 4,
+			width: 16,
+			height: 16,
+			marginRight: 10,
+			...theme.componentsCare?.selectorWithCheckbox?.checkboxStyle,
+		},
+	}),
+	{ name: "CcMultiSelectWithCheckBox" }
+);
 
 const MenuItemCustom = withStyles((theme) => ({
 	selected: {
