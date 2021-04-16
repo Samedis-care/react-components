@@ -3,12 +3,15 @@ import SignalPortlet from "../../../standalone/SignalPortlet";
 import { Typography, useTheme } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 
-const useManyStyles = makeStyles((theme) => ({
-	root: {
-		backgroundColor: theme.palette.secondary.main,
-		color: theme.palette.getContrastText(theme.palette.secondary.main),
-	},
-}));
+const useManyStyles = makeStyles(
+	(theme) => ({
+		root: {
+			backgroundColor: theme.palette.secondary.main,
+			color: theme.palette.getContrastText(theme.palette.secondary.main),
+		},
+	}),
+	{ name: "CcSignalPortletWithStyleStory" }
+);
 
 export const SignalPortletWithStylesStory = (): React.ReactElement => {
 	const theme = useTheme();

@@ -3,11 +3,14 @@ import BackendDataGrid from "../../../backend-components/DataGrid";
 import TestModel from "./TestModel";
 import { makeStyles } from "@material-ui/core/styles";
 
-const useStyles = makeStyles({
-	wrapper: {
-		height: "75vh",
+const useStyles = makeStyles(
+	{
+		wrapper: {
+			height: "75vh",
+		},
 	},
-});
+	{ name: "CcDataGridStory" }
+);
 
 export const FormStory = (): React.ReactElement => {
 	const classes = useStyles();

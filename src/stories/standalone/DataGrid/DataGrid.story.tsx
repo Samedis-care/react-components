@@ -18,12 +18,15 @@ import GridCustomFilters from "./GridCustomFilters";
 import { filterSortPaginate } from "../../../utils";
 import { useTheme } from "@material-ui/core";
 
-const useStyles = makeStyles({
-	wrapper: {
-		width: "90vw",
-		height: "90vh",
+const useStyles = makeStyles(
+	{
+		wrapper: {
+			width: "90vw",
+			height: "90vh",
+		},
 	},
-});
+	{ name: "CcDataGridStory" }
+);
 
 const columnDef: IDataGridColumnDef[] = ([
 	{
