@@ -6124,12 +6124,12 @@ exports[`Storyshots Standalone/InfiniteScroll Bidirectional 1`] = `
                                     >
                                       <InfiniteScroll
                                         callBackDebounce={100}
-                                        className="standalone-infinitescroll--bidirectional-makeStyles-scrollWrapper-2"
+                                        className="standalone-infinitescroll--bidirectional-CcBidirectionalStory-scrollWrapper-2"
                                         loadMoreBottom={[Function]}
                                         loadMoreTop={[Function]}
                                       >
                                         <div
-                                          className="standalone-infinitescroll--bidirectional-makeStyles-scrollWrapper-2"
+                                          className="standalone-infinitescroll--bidirectional-CcBidirectionalStory-scrollWrapper-2"
                                         />
                                       </InfiniteScroll>
                                     </div>
@@ -12277,11 +12277,11 @@ exports[`Storyshots Standalone/InfiniteScroll Unidirectional 1`] = `
                                     >
                                       <InfiniteScroll
                                         callBackDebounce={100}
-                                        className="standalone-infinitescroll--infinite-scroll-simple-makeStyles-scrollWrapper-2"
+                                        className="standalone-infinitescroll--infinite-scroll-simple-CcUnidirectionalStory-scrollWrapper-2"
                                         loadMoreBottom={[Function]}
                                       >
                                         <div
-                                          className="standalone-infinitescroll--infinite-scroll-simple-makeStyles-scrollWrapper-2"
+                                          className="standalone-infinitescroll--infinite-scroll-simple-CcUnidirectionalStory-scrollWrapper-2"
                                         />
                                       </InfiniteScroll>
                                     </div>

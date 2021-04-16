@@ -31,26 +31,29 @@ export interface CollapsibleMenuProps {
 	classes?: Partial<ReturnType<typeof useStyles>>;
 }
 
-const useStyles = makeStyles({
-	container: {
-		width: "100%",
-		height: "100%",
-		overflow: "auto",
-	},
-	content: {
-		"& > div": {
-			overflow: "unset",
+const useStyles = makeStyles(
+	{
+		container: {
+			width: "100%",
+			height: "100%",
+			overflow: "auto",
+		},
+		content: {
+			"& > div": {
+				overflow: "unset",
+			},
+		},
+		bar: {
+			position: "sticky",
+			top: 0,
+		},
+		iconOpen: {},
+		iconClose: {
+			transform: "rotate(180deg)",
 		},
 	},
-	bar: {
-		position: "sticky",
-		top: 0,
-	},
-	iconOpen: {},
-	iconClose: {
-		transform: "rotate(180deg)",
-	},
-});
+	{ name: "CcPortal" }
+);
 
 const CollapsibleMenu = (props: CollapsibleMenuProps) => {
 	const classes = useStyles(props);

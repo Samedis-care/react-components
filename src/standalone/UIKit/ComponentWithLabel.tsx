@@ -45,20 +45,23 @@ export interface ComponentWithLabelTheme {
 	style?: CSSProperties;
 }
 
-const useStyles = makeStyles((theme: Theme) => ({
-	label: {
-		whiteSpace: theme.componentsCare?.uiKit?.label?.whiteSpace || "pre",
-		padding: theme.componentsCare?.uiKit?.label?.padding,
-		margin: theme.componentsCare?.uiKit?.label?.margin,
-		border: theme.componentsCare?.uiKit?.label?.border,
-		borderRadius: theme.componentsCare?.uiKit?.label?.borderRadius,
-		backgroundColor: theme.componentsCare?.uiKit?.label?.backgroundColor,
-		color: theme.componentsCare?.uiKit?.label?.color,
-		fontSize: theme.componentsCare?.uiKit?.label?.fontSize,
-		fontWeight: theme.componentsCare?.uiKit?.label?.fontWeight,
-		...theme.componentsCare?.uiKit?.label?.style,
-	},
-}));
+const useStyles = makeStyles(
+	(theme: Theme) => ({
+		label: {
+			whiteSpace: theme.componentsCare?.uiKit?.label?.whiteSpace || "pre",
+			padding: theme.componentsCare?.uiKit?.label?.padding,
+			margin: theme.componentsCare?.uiKit?.label?.margin,
+			border: theme.componentsCare?.uiKit?.label?.border,
+			borderRadius: theme.componentsCare?.uiKit?.label?.borderRadius,
+			backgroundColor: theme.componentsCare?.uiKit?.label?.backgroundColor,
+			color: theme.componentsCare?.uiKit?.label?.color,
+			fontSize: theme.componentsCare?.uiKit?.label?.fontSize,
+			fontWeight: theme.componentsCare?.uiKit?.label?.fontWeight,
+			...theme.componentsCare?.uiKit?.label?.style,
+		},
+	}),
+	{ name: "CCComponentWithLabel" }
+);
 
 const ComponentWithLabel = (
 	props: ComponentWithLabelProps | FormControlLabelProps

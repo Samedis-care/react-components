@@ -32,19 +32,22 @@ export interface SignalPortletItemDef {
 export type SignalPortletItemProps = SignalPortletItemDef &
 	SignalPortletColorConfig;
 
-const useStyles = makeStyles((theme) => ({
-	itemColorActive: (props: SignalPortletItemProps) => ({
-		color: theme.palette.getContrastText(props.colorPresent),
-		backgroundColor: props.colorPresent,
+const useStyles = makeStyles(
+	(theme) => ({
+		itemColorActive: (props: SignalPortletItemProps) => ({
+			color: theme.palette.getContrastText(props.colorPresent),
+			backgroundColor: props.colorPresent,
+		}),
+		itemColorInactive: (props: SignalPortletItemProps) => ({
+			color: theme.palette.getContrastText(props.colorNotPresent),
+			backgroundColor: props.colorNotPresent,
+		}),
+		root: {},
+		listAvatar: {},
+		listText: {},
 	}),
-	itemColorInactive: (props: SignalPortletItemProps) => ({
-		color: theme.palette.getContrastText(props.colorNotPresent),
-		backgroundColor: props.colorNotPresent,
-	}),
-	root: {},
-	listAvatar: {},
-	listText: {},
-}));
+	{ name: "CCSignalPortletItem" }
+);
 
 const SignalPortletItem = (props: SignalPortletItemProps) => {
 	const { count, link, text } = props;

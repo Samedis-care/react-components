@@ -160,12 +160,15 @@ const defaultRenderer = (notification: Notification): React.ReactElement => (
 	</Box>
 );
 
-const useStyles = makeStyles({
-	notificationArea: {
-		height: "50vh",
-		overflow: "auto",
+const useStyles = makeStyles(
+	{
+		notificationArea: {
+			height: "50vh",
+			overflow: "auto",
+		},
 	},
-});
+	{ name: "CCNotifications" }
+);
 
 const Notifications = (props: NotificationsProps) => {
 	const classes = useStyles(props);

@@ -79,7 +79,7 @@ export type PortalLayoutProps = PortalLayoutPropsBase &
 	(PortalLayoutBasic | PortalLayoutNoTopLeft);
 
 const useContainerStyles = makeStyles(
-	() => ({
+	{
 		containerDesktop: (props: PortalLayoutProps) => ({
 			display: "grid",
 			gridTemplateAreas:
@@ -101,7 +101,7 @@ const useContainerStyles = makeStyles(
 			} 100fr`,
 			height: "100%",
 		}),
-	}),
+	},
 	{ name: "CcPortalLayout" }
 );
 

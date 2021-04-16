@@ -6076,7 +6076,7 @@ exports[`Storyshots Standalone/Portal Layout 1`] = `
                                           cssClass="topLeft"
                                         >
                                           <div
-                                            className="standalone-portal--portal-layout-story-makeStyles-topLeft-28"
+                                            className="standalone-portal--portal-layout-story-CcLayoutStory-topLeft-28"
                                           >
                                             topLeft
                                           </div>
@@ -6180,7 +6180,7 @@ exports[`Storyshots Standalone/Portal Layout 1`] = `
                                                             cssClass="header"
                                                           >
                                                             <div
-                                                              className="standalone-portal--portal-layout-story-makeStyles-header-25"
+                                                              className="standalone-portal--portal-layout-story-CcLayoutStory-header-25"
                                                             >
                                                               header
                                                             </div>
@@ -6212,10 +6212,10 @@ exports[`Storyshots Standalone/Portal Layout 1`] = `
                                           toggleMenu={[Function]}
                                         >
                                           <WithStyles(ForwardRef(Paper))
-                                            className="standalone-portal--portal-layout-story-makeStyles-menuPaper-29 standalone-portal--portal-layout-story-makeStyles-menuPaper-30"
+                                            className="standalone-portal--portal-layout-story-CcPortalLayout-menuPaper-29 standalone-portal--portal-layout-story-CcPortalLayout-menuPaper-30"
                                           >
                                             <ForwardRef(Paper)
-                                              className="standalone-portal--portal-layout-story-makeStyles-menuPaper-29 standalone-portal--portal-layout-story-makeStyles-menuPaper-30"
+                                              className="standalone-portal--portal-layout-story-CcPortalLayout-menuPaper-29 standalone-portal--portal-layout-story-CcPortalLayout-menuPaper-30"
                                               classes={
                                                 Object {
                                                   "elevation0": "standalone-portal--portal-layout-story-MuiPaper-elevation0",
@@ -6250,13 +6250,13 @@ exports[`Storyshots Standalone/Portal Layout 1`] = `
                                               }
                                             >
                                               <div
-                                                className="standalone-portal--portal-layout-story-MuiPaper-root standalone-portal--portal-layout-story-makeStyles-menuPaper-29 standalone-portal--portal-layout-story-makeStyles-menuPaper-30 standalone-portal--portal-layout-story-MuiPaper-elevation1 standalone-portal--portal-layout-story-MuiPaper-rounded"
+                                                className="standalone-portal--portal-layout-story-MuiPaper-root standalone-portal--portal-layout-story-CcPortalLayout-menuPaper-29 standalone-portal--portal-layout-story-CcPortalLayout-menuPaper-30 standalone-portal--portal-layout-story-MuiPaper-elevation1 standalone-portal--portal-layout-story-MuiPaper-rounded"
                                               >
                                                 <Placeholder
                                                   cssClass="menu"
                                                 >
                                                   <div
-                                                    className="standalone-portal--portal-layout-story-makeStyles-menu-26"
+                                                    className="standalone-portal--portal-layout-story-CcLayoutStory-menu-26"
                                                   >
                                                     menu
                                                   </div>
@@ -6273,7 +6273,7 @@ exports[`Storyshots Standalone/Portal Layout 1`] = `
                                           cssClass="content"
                                         >
                                           <div
-                                            className="standalone-portal--portal-layout-story-makeStyles-content-27"
+                                            className="standalone-portal--portal-layout-story-CcLayoutStory-content-27"
                                           >
                                             content
                                           </div>
@@ -12325,7 +12325,7 @@ exports[`Storyshots Standalone/Portal Menu 1`] = `
                                     Object {
                                       "header": Object {
                                         "toolbar": Object {
-                                          "regular": "standalone-portal--portal-menu-story-makeStyles-toolbar-29",
+                                          "regular": "standalone-portal--portal-menu-story-CcMenuStyleStory-toolbar-29",
                                         },
                                       },
                                     }
@@ -12735,7 +12735,7 @@ exports[`Storyshots Standalone/Portal Menu 1`] = `
                                         Object {
                                           "header": Object {
                                             "toolbar": Object {
-                                              "regular": "standalone-portal--portal-menu-story-makeStyles-toolbar-29",
+                                              "regular": "standalone-portal--portal-menu-story-CcMenuStyleStory-toolbar-29",
                                             },
                                           },
                                         }
@@ -13145,7 +13145,7 @@ exports[`Storyshots Standalone/Portal Menu 1`] = `
                                           customClasses={
                                             Object {
                                               "toolbar": Object {
-                                                "regular": "standalone-portal--portal-menu-story-makeStyles-toolbar-29",
+                                                "regular": "standalone-portal--portal-menu-story-CcMenuStyleStory-toolbar-29",
                                               },
                                             }
                                           }
@@ -13223,7 +13223,7 @@ exports[`Storyshots Standalone/Portal Menu 1`] = `
                                                     <WithStyles(ForwardRef(Toolbar))
                                                       classes={
                                                         Object {
-                                                          "regular": "standalone-portal--portal-menu-story-makeStyles-toolbar-29",
+                                                          "regular": "standalone-portal--portal-menu-story-CcMenuStyleStory-toolbar-29",
                                                         }
                                                       }
                                                     >
@@ -13232,19 +13232,19 @@ exports[`Storyshots Standalone/Portal Menu 1`] = `
                                                           Object {
                                                             "dense": "standalone-portal--portal-menu-story-MuiToolbar-dense",
                                                             "gutters": "standalone-portal--portal-menu-story-MuiToolbar-gutters",
-                                                            "regular": "standalone-portal--portal-menu-story-MuiToolbar-regular standalone-portal--portal-menu-story-makeStyles-toolbar-29",
+                                                            "regular": "standalone-portal--portal-menu-story-MuiToolbar-regular standalone-portal--portal-menu-story-CcMenuStyleStory-toolbar-29",
                                                             "root": "standalone-portal--portal-menu-story-MuiToolbar-root",
                                                           }
                                                         }
                                                       >
                                                         <div
-                                                          className="standalone-portal--portal-menu-story-MuiToolbar-root standalone-portal--portal-menu-story-MuiToolbar-regular standalone-portal--portal-menu-story-makeStyles-toolbar-29 standalone-portal--portal-menu-story-MuiToolbar-gutters"
+                                                          className="standalone-portal--portal-menu-story-MuiToolbar-root standalone-portal--portal-menu-story-MuiToolbar-regular standalone-portal--portal-menu-story-CcMenuStyleStory-toolbar-29 standalone-portal--portal-menu-story-MuiToolbar-gutters"
                                                         >
                                                           <Placeholder
                                                             cssClass="header"
                                                           >
                                                             <div
-                                                              className="standalone-portal--portal-menu-story-makeStyles-header-39"
+                                                              className="standalone-portal--portal-menu-story-CcMenuStory-header-39"
                                                             >
                                                               header
                                                             </div>
@@ -13650,10 +13650,10 @@ exports[`Storyshots Standalone/Portal Menu 1`] = `
                                           toggleMenu={[Function]}
                                         >
                                           <WithStyles(ForwardRef(Paper))
-                                            className="standalone-portal--portal-menu-story-makeStyles-menuPaper-42 standalone-portal--portal-menu-story-makeStyles-menuPaper-43"
+                                            className="standalone-portal--portal-menu-story-CcPortalLayout-menuPaper-42 standalone-portal--portal-menu-story-CcPortalLayout-menuPaper-43"
                                           >
                                             <ForwardRef(Paper)
-                                              className="standalone-portal--portal-menu-story-makeStyles-menuPaper-42 standalone-portal--portal-menu-story-makeStyles-menuPaper-43"
+                                              className="standalone-portal--portal-menu-story-CcPortalLayout-menuPaper-42 standalone-portal--portal-menu-story-CcPortalLayout-menuPaper-43"
                                               classes={
                                                 Object {
                                                   "elevation0": "standalone-portal--portal-menu-story-MuiPaper-elevation0",
@@ -13688,19 +13688,19 @@ exports[`Storyshots Standalone/Portal Menu 1`] = `
                                               }
                                             >
                                               <div
-                                                className="standalone-portal--portal-menu-story-MuiPaper-root standalone-portal--portal-menu-story-makeStyles-menuPaper-42 standalone-portal--portal-menu-story-makeStyles-menuPaper-43 standalone-portal--portal-menu-story-MuiPaper-elevation1 standalone-portal--portal-menu-story-MuiPaper-rounded"
+                                                className="standalone-portal--portal-menu-story-MuiPaper-root standalone-portal--portal-menu-story-CcPortalLayout-menuPaper-42 standalone-portal--portal-menu-story-CcPortalLayout-menuPaper-43 standalone-portal--portal-menu-story-MuiPaper-elevation1 standalone-portal--portal-menu-story-MuiPaper-rounded"
                                               >
                                                 <Memo(CollapsibleMenu)>
                                                   <WithStyles(ForwardRef(Grid))
                                                     alignItems="stretch"
-                                                    className="standalone-portal--portal-menu-story-makeStyles-container-44 "
+                                                    className="standalone-portal--portal-menu-story-CcPortal-container-44 "
                                                     container={true}
                                                     justify="flex-start"
                                                     wrap="nowrap"
                                                   >
                                                     <ForwardRef(Grid)
                                                       alignItems="stretch"
-                                                      className="standalone-portal--portal-menu-story-makeStyles-container-44 "
+                                                      className="standalone-portal--portal-menu-story-CcPortal-container-44 "
                                                       classes={
                                                         Object {
                                                           "align-content-xs-center": "standalone-portal--portal-menu-story-MuiGrid-align-content-xs-center",
@@ -13813,10 +13813,10 @@ exports[`Storyshots Standalone/Portal Menu 1`] = `
                                                       wrap="nowrap"
                                                     >
                                                       <div
-                                                        className="standalone-portal--portal-menu-story-MuiGrid-root standalone-portal--portal-menu-story-makeStyles-container-44  standalone-portal--portal-menu-story-MuiGrid-container standalone-portal--portal-menu-story-MuiGrid-wrap-xs-nowrap"
+                                                        className="standalone-portal--portal-menu-story-MuiGrid-root standalone-portal--portal-menu-story-CcPortal-container-44  standalone-portal--portal-menu-story-MuiGrid-container standalone-portal--portal-menu-story-MuiGrid-wrap-xs-nowrap"
                                                       >
                                                         <WithStyles(ForwardRef(Grid))
-                                                          className="standalone-portal--portal-menu-story-makeStyles-content-45"
+                                                          className="standalone-portal--portal-menu-story-CcPortal-content-45"
                                                           item={true}
                                                           key="content"
                                                           style={
@@ -13828,7 +13828,7 @@ exports[`Storyshots Standalone/Portal Menu 1`] = `
                                                           xs={true}
                                                         >
                                                           <ForwardRef(Grid)
-                                                            className="standalone-portal--portal-menu-story-makeStyles-content-45"
+                                                            className="standalone-portal--portal-menu-story-CcPortal-content-45"
                                                             classes={
                                                               Object {
                                                                 "align-content-xs-center": "standalone-portal--portal-menu-story-MuiGrid-align-content-xs-center",
@@ -13946,7 +13946,7 @@ exports[`Storyshots Standalone/Portal Menu 1`] = `
                                                             xs={true}
                                                           >
                                                             <div
-                                                              className="standalone-portal--portal-menu-story-MuiGrid-root standalone-portal--portal-menu-story-makeStyles-content-45 standalone-portal--portal-menu-story-MuiGrid-item standalone-portal--portal-menu-story-MuiGrid-grid-xs-true"
+                                                              className="standalone-portal--portal-menu-story-MuiGrid-root standalone-portal--portal-menu-story-CcPortal-content-45 standalone-portal--portal-menu-story-MuiGrid-item standalone-portal--portal-menu-story-MuiGrid-grid-xs-true"
                                                               style={
                                                                 Object {
                                                                   "display": undefined,
@@ -14331,7 +14331,7 @@ exports[`Storyshots Standalone/Portal Menu 1`] = `
                                                                 }
                                                               >
                                                                 <div
-                                                                  className="standalone-portal--portal-menu-story-makeStyles-root-49 "
+                                                                  className="standalone-portal--portal-menu-story-CcPortalMenu-root-49 "
                                                                 >
                                                                   <WithStyles(ForwardRef(List))>
                                                                     <ForwardRef(List)
@@ -17522,12 +17522,12 @@ exports[`Storyshots Standalone/Portal Menu 1`] = `
                                                           </ForwardRef(Grid)>
                                                         </WithStyles(ForwardRef(Grid))>
                                                         <WithStyles(ForwardRef(Grid))
-                                                          className="standalone-portal--portal-menu-story-makeStyles-bar-46"
+                                                          className="standalone-portal--portal-menu-story-CcPortal-bar-46"
                                                           item={true}
                                                           key="bar"
                                                         >
                                                           <ForwardRef(Grid)
-                                                            className="standalone-portal--portal-menu-story-makeStyles-bar-46"
+                                                            className="standalone-portal--portal-menu-story-CcPortal-bar-46"
                                                             classes={
                                                               Object {
                                                                 "align-content-xs-center": "standalone-portal--portal-menu-story-MuiGrid-align-content-xs-center",
@@ -17638,7 +17638,7 @@ exports[`Storyshots Standalone/Portal Menu 1`] = `
                                                             item={true}
                                                           >
                                                             <div
-                                                              className="standalone-portal--portal-menu-story-MuiGrid-root standalone-portal--portal-menu-story-makeStyles-bar-46 standalone-portal--portal-menu-story-MuiGrid-item"
+                                                              className="standalone-portal--portal-menu-story-MuiGrid-root standalone-portal--portal-menu-story-CcPortal-bar-46 standalone-portal--portal-menu-story-MuiGrid-item"
                                                             >
                                                               <WithStyles(ForwardRef(IconButton))
                                                                 onClick={[Function]}
@@ -17702,13 +17702,13 @@ exports[`Storyshots Standalone/Portal Menu 1`] = `
                                                                           className="standalone-portal--portal-menu-story-MuiIconButton-label"
                                                                         >
                                                                           <ForwardRef(DoubleArrowIcon)
-                                                                            className="standalone-portal--portal-menu-story-makeStyles-iconClose-48"
+                                                                            className="standalone-portal--portal-menu-story-CcPortal-iconClose-48"
                                                                           >
                                                                             <WithStyles(ForwardRef(SvgIcon))
-                                                                              className="standalone-portal--portal-menu-story-makeStyles-iconClose-48"
+                                                                              className="standalone-portal--portal-menu-story-CcPortal-iconClose-48"
                                                                             >
                                                                               <ForwardRef(SvgIcon)
-                                                                                className="standalone-portal--portal-menu-story-makeStyles-iconClose-48"
+                                                                                className="standalone-portal--portal-menu-story-CcPortal-iconClose-48"
                                                                                 classes={
                                                                                   Object {
                                                                                     "colorAction": "standalone-portal--portal-menu-story-MuiSvgIcon-colorAction",
@@ -17725,7 +17725,7 @@ exports[`Storyshots Standalone/Portal Menu 1`] = `
                                                                               >
                                                                                 <svg
                                                                                   aria-hidden={true}
-                                                                                  className="standalone-portal--portal-menu-story-MuiSvgIcon-root standalone-portal--portal-menu-story-makeStyles-iconClose-48"
+                                                                                  className="standalone-portal--portal-menu-story-MuiSvgIcon-root standalone-portal--portal-menu-story-CcPortal-iconClose-48"
                                                                                   focusable="false"
                                                                                   viewBox="0 0 24 24"
                                                                                 >
@@ -17792,7 +17792,7 @@ exports[`Storyshots Standalone/Portal Menu 1`] = `
                                           cssClass="content"
                                         >
                                           <div
-                                            className="standalone-portal--portal-menu-story-makeStyles-content-40"
+                                            className="standalone-portal--portal-menu-story-CcMenuStory-content-40"
                                           >
                                             content
                                           </div>

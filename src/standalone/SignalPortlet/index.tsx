@@ -30,14 +30,17 @@ export interface SignalPortletProps extends SignalPortletColorConfig {
 	classes?: Partial<ClassNameMap<keyof ReturnType<typeof useStyles>>>;
 }
 
-const useStyles = makeStyles({
-	paper: {
-		height: "100%",
+const useStyles = makeStyles(
+	{
+		paper: {
+			height: "100%",
+		},
+		list: {},
+		title: {},
+		titleWrapper: {},
 	},
-	list: {},
-	title: {},
-	titleWrapper: {},
-});
+	{ name: "CCSignalPortlet" }
+);
 
 const SignalPortlet = (props: SignalPortletProps) => {
 	const classes = useStyles(props);

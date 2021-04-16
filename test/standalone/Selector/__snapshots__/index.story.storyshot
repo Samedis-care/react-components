@@ -6336,11 +6336,11 @@ exports[`Storyshots Standalone/Selector Multi 1`] = `
                                                             visible={false}
                                                           >
                                                             <WithStyles(ForwardRef(Typography))
-                                                              className="standalone-selector--selector-multi-InlineSwitch-labelWithSwitch-47 standalone-selector--selector-multi-CcBaseSelectorCustom-labelWithSwitch-41"
+                                                              className="standalone-selector--selector-multi-CCInlineSwitch-labelWithSwitch-47 standalone-selector--selector-multi-CcBaseSelectorCustom-labelWithSwitch-41"
                                                               component="div"
                                                             >
                                                               <ForwardRef(Typography)
-                                                                className="standalone-selector--selector-multi-InlineSwitch-labelWithSwitch-47 standalone-selector--selector-multi-CcBaseSelectorCustom-labelWithSwitch-41"
+                                                                className="standalone-selector--selector-multi-CCInlineSwitch-labelWithSwitch-47 standalone-selector--selector-multi-CcBaseSelectorCustom-labelWithSwitch-41"
                                                                 classes={
                                                                   Object {
                                                                     "alignCenter": "standalone-selector--selector-multi-MuiTypography-alignCenter",
@@ -6378,7 +6378,7 @@ exports[`Storyshots Standalone/Selector Multi 1`] = `
                                                                 component="div"
                                                               >
                                                                 <div
-                                                                  className="standalone-selector--selector-multi-MuiTypography-root standalone-selector--selector-multi-InlineSwitch-labelWithSwitch-47 standalone-selector--selector-multi-CcBaseSelectorCustom-labelWithSwitch-41 standalone-selector--selector-multi-MuiTypography-body1"
+                                                                  className="standalone-selector--selector-multi-MuiTypography-root standalone-selector--selector-multi-CCInlineSwitch-labelWithSwitch-47 standalone-selector--selector-multi-CcBaseSelectorCustom-labelWithSwitch-41 standalone-selector--selector-multi-MuiTypography-body1"
                                                                 >
                                                                   <WithStyles(ForwardRef(Typography))
                                                                     component="div"
@@ -14290,7 +14290,7 @@ exports[`Storyshots Standalone/Selector MultiSelectWithCheckBox 1`] = `
                                               >
                                                 <WithStyles(ForwardRef(Checkbox))
                                                   checked={true}
-                                                  className="standalone-selector--multi-select-with-check-box-story-makeStyles-checkboxStyle-4"
+                                                  className="standalone-selector--multi-select-with-check-box-story-CCMultisSelectWithCheckBox-checkboxStyle-4"
                                                 />
                                                 <WithStyles(WithStyles(ForwardRef(ListItemText)))
                                                   primary="Value 1"
@@ -14301,7 +14301,7 @@ exports[`Storyshots Standalone/Selector MultiSelectWithCheckBox 1`] = `
                                               >
                                                 <WithStyles(ForwardRef(Checkbox))
                                                   checked={true}
-                                                  className="standalone-selector--multi-select-with-check-box-story-makeStyles-checkboxStyle-4"
+                                                  className="standalone-selector--multi-select-with-check-box-story-CCMultisSelectWithCheckBox-checkboxStyle-4"
                                                 />
                                                 <WithStyles(WithStyles(ForwardRef(ListItemText)))
                                                   primary="Value 2"
@@ -14312,7 +14312,7 @@ exports[`Storyshots Standalone/Selector MultiSelectWithCheckBox 1`] = `
                                               >
                                                 <WithStyles(ForwardRef(Checkbox))
                                                   checked={false}
-                                                  className="standalone-selector--multi-select-with-check-box-story-makeStyles-checkboxStyle-4"
+                                                  className="standalone-selector--multi-select-with-check-box-story-CCMultisSelectWithCheckBox-checkboxStyle-4"
                                                 />
                                                 <WithStyles(WithStyles(ForwardRef(ListItemText)))
                                                   primary="Value 3"
@@ -14433,7 +14433,7 @@ exports[`Storyshots Standalone/Selector MultiSelectWithCheckBox 1`] = `
                                                 >
                                                   <WithStyles(ForwardRef(Checkbox))
                                                     checked={true}
-                                                    className="standalone-selector--multi-select-with-check-box-story-makeStyles-checkboxStyle-4"
+                                                    className="standalone-selector--multi-select-with-check-box-story-CCMultisSelectWithCheckBox-checkboxStyle-4"
                                                   />
                                                   <WithStyles(WithStyles(ForwardRef(ListItemText)))
                                                     primary="Value 1"
@@ -14444,7 +14444,7 @@ exports[`Storyshots Standalone/Selector MultiSelectWithCheckBox 1`] = `
                                                 >
                                                   <WithStyles(ForwardRef(Checkbox))
                                                     checked={true}
-                                                    className="standalone-selector--multi-select-with-check-box-story-makeStyles-checkboxStyle-4"
+                                                    className="standalone-selector--multi-select-with-check-box-story-CCMultisSelectWithCheckBox-checkboxStyle-4"
                                                   />
                                                   <WithStyles(WithStyles(ForwardRef(ListItemText)))
                                                     primary="Value 2"
@@ -14455,7 +14455,7 @@ exports[`Storyshots Standalone/Selector MultiSelectWithCheckBox 1`] = `
                                                 >
                                                   <WithStyles(ForwardRef(Checkbox))
                                                     checked={false}
-                                                    className="standalone-selector--multi-select-with-check-box-story-makeStyles-checkboxStyle-4"
+                                                    className="standalone-selector--multi-select-with-check-box-story-CCMultisSelectWithCheckBox-checkboxStyle-4"
                                                   />
                                                   <WithStyles(WithStyles(ForwardRef(ListItemText)))
                                                     primary="Value 3"
@@ -14592,7 +14592,7 @@ exports[`Storyshots Standalone/Selector MultiSelectWithCheckBox 1`] = `
                                                   >
                                                     <WithStyles(ForwardRef(Checkbox))
                                                       checked={true}
-                                                      className="standalone-selector--multi-select-with-check-box-story-makeStyles-checkboxStyle-4"
+                                                      className="standalone-selector--multi-select-with-check-box-story-CCMultisSelectWithCheckBox-checkboxStyle-4"
                                                     />
                                                     <WithStyles(WithStyles(ForwardRef(ListItemText)))
                                                       primary="Value 1"
@@ -14603,7 +14603,7 @@ exports[`Storyshots Standalone/Selector MultiSelectWithCheckBox 1`] = `
                                                   >
                                                     <WithStyles(ForwardRef(Checkbox))
                                                       checked={true}
-                                                      className="standalone-selector--multi-select-with-check-box-story-makeStyles-checkboxStyle-4"
+                                                      className="standalone-selector--multi-select-with-check-box-story-CCMultisSelectWithCheckBox-checkboxStyle-4"
                                                     />
                                                     <WithStyles(WithStyles(ForwardRef(ListItemText)))
                                                       primary="Value 2"
@@ -14614,7 +14614,7 @@ exports[`Storyshots Standalone/Selector MultiSelectWithCheckBox 1`] = `
                                                   >
                                                     <WithStyles(ForwardRef(Checkbox))
                                                       checked={false}
-                                                      className="standalone-selector--multi-select-with-check-box-story-makeStyles-checkboxStyle-4"
+                                                      className="standalone-selector--multi-select-with-check-box-story-CCMultisSelectWithCheckBox-checkboxStyle-4"
                                                     />
                                                     <WithStyles(WithStyles(ForwardRef(ListItemText)))
                                                       primary="Value 3"
@@ -21167,11 +21167,11 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
                                           visible={false}
                                         >
                                           <WithStyles(ForwardRef(Typography))
-                                            className="standalone-selector--selector-multi-with-tags-InlineSwitch-labelWithSwitch-33 standalone-selector--selector-multi-with-tags-CcBaseSelectorCustom-labelWithSwitch-27"
+                                            className="standalone-selector--selector-multi-with-tags-CCInlineSwitch-labelWithSwitch-33 standalone-selector--selector-multi-with-tags-CcBaseSelectorCustom-labelWithSwitch-27"
                                             component="div"
                                           >
                                             <ForwardRef(Typography)
-                                              className="standalone-selector--selector-multi-with-tags-InlineSwitch-labelWithSwitch-33 standalone-selector--selector-multi-with-tags-CcBaseSelectorCustom-labelWithSwitch-27"
+                                              className="standalone-selector--selector-multi-with-tags-CCInlineSwitch-labelWithSwitch-33 standalone-selector--selector-multi-with-tags-CcBaseSelectorCustom-labelWithSwitch-27"
                                               classes={
                                                 Object {
                                                   "alignCenter": "standalone-selector--selector-multi-with-tags-MuiTypography-alignCenter",
@@ -21209,7 +21209,7 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
                                               component="div"
                                             >
                                               <div
-                                                className="standalone-selector--selector-multi-with-tags-MuiTypography-root standalone-selector--selector-multi-with-tags-InlineSwitch-labelWithSwitch-33 standalone-selector--selector-multi-with-tags-CcBaseSelectorCustom-labelWithSwitch-27 standalone-selector--selector-multi-with-tags-MuiTypography-body1"
+                                                className="standalone-selector--selector-multi-with-tags-MuiTypography-root standalone-selector--selector-multi-with-tags-CCInlineSwitch-labelWithSwitch-33 standalone-selector--selector-multi-with-tags-CcBaseSelectorCustom-labelWithSwitch-27 standalone-selector--selector-multi-with-tags-MuiTypography-body1"
                                               >
                                                 <WithStyles(ForwardRef(Typography))
                                                   component="div"
@@ -23176,11 +23176,11 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
                                               visible={false}
                                             >
                                               <WithStyles(ForwardRef(Typography))
-                                                className="standalone-selector--selector-multi-with-tags-InlineSwitch-labelWithSwitch-33 standalone-selector--selector-multi-with-tags-CcMultiSelectWithoutGroup-labelWithSwitch-45"
+                                                className="standalone-selector--selector-multi-with-tags-CCInlineSwitch-labelWithSwitch-33 standalone-selector--selector-multi-with-tags-CcMultiSelectWithoutGroup-labelWithSwitch-45"
                                                 component="div"
                                               >
                                                 <ForwardRef(Typography)
-                                                  className="standalone-selector--selector-multi-with-tags-InlineSwitch-labelWithSwitch-33 standalone-selector--selector-multi-with-tags-CcMultiSelectWithoutGroup-labelWithSwitch-45"
+                                                  className="standalone-selector--selector-multi-with-tags-CCInlineSwitch-labelWithSwitch-33 standalone-selector--selector-multi-with-tags-CcMultiSelectWithoutGroup-labelWithSwitch-45"
                                                   classes={
                                                     Object {
                                                       "alignCenter": "standalone-selector--selector-multi-with-tags-MuiTypography-alignCenter",
@@ -23218,7 +23218,7 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
                                                   component="div"
                                                 >
                                                   <div
-                                                    className="standalone-selector--selector-multi-with-tags-MuiTypography-root standalone-selector--selector-multi-with-tags-InlineSwitch-labelWithSwitch-33 standalone-selector--selector-multi-with-tags-CcMultiSelectWithoutGroup-labelWithSwitch-45 standalone-selector--selector-multi-with-tags-MuiTypography-body1"
+                                                    className="standalone-selector--selector-multi-with-tags-MuiTypography-root standalone-selector--selector-multi-with-tags-CCInlineSwitch-labelWithSwitch-33 standalone-selector--selector-multi-with-tags-CcMultiSelectWithoutGroup-labelWithSwitch-45 standalone-selector--selector-multi-with-tags-MuiTypography-body1"
                                                   >
                                                     <WithStyles(ForwardRef(Typography))
                                                       component="div"
@@ -30302,11 +30302,11 @@ exports[`Storyshots Standalone/Selector MultiWithoutGroup 1`] = `
                                           visible={false}
                                         >
                                           <WithStyles(ForwardRef(Typography))
-                                            className="standalone-selector--multi-without-group-InlineSwitch-labelWithSwitch-20 standalone-selector--multi-without-group-CcMultiSelectWithoutGroup-labelWithSwitch-14"
+                                            className="standalone-selector--multi-without-group-CCInlineSwitch-labelWithSwitch-20 standalone-selector--multi-without-group-CcMultiSelectWithoutGroup-labelWithSwitch-14"
                                             component="div"
                                           >
                                             <ForwardRef(Typography)
-                                              className="standalone-selector--multi-without-group-InlineSwitch-labelWithSwitch-20 standalone-selector--multi-without-group-CcMultiSelectWithoutGroup-labelWithSwitch-14"
+                                              className="standalone-selector--multi-without-group-CCInlineSwitch-labelWithSwitch-20 standalone-selector--multi-without-group-CcMultiSelectWithoutGroup-labelWithSwitch-14"
                                               classes={
                                                 Object {
                                                   "alignCenter": "standalone-selector--multi-without-group-MuiTypography-alignCenter",
@@ -30344,7 +30344,7 @@ exports[`Storyshots Standalone/Selector MultiWithoutGroup 1`] = `
                                               component="div"
                                             >
                                               <div
-                                                className="standalone-selector--multi-without-group-MuiTypography-root standalone-selector--multi-without-group-InlineSwitch-labelWithSwitch-20 standalone-selector--multi-without-group-CcMultiSelectWithoutGroup-labelWithSwitch-14 standalone-selector--multi-without-group-MuiTypography-body1"
+                                                className="standalone-selector--multi-without-group-MuiTypography-root standalone-selector--multi-without-group-CCInlineSwitch-labelWithSwitch-20 standalone-selector--multi-without-group-CcMultiSelectWithoutGroup-labelWithSwitch-14 standalone-selector--multi-without-group-MuiTypography-body1"
                                               >
                                                 <WithStyles(ForwardRef(Typography))
                                                   component="div"
@@ -36502,11 +36502,11 @@ exports[`Storyshots Standalone/Selector Single 1`] = `
                                                 visible={false}
                                               >
                                                 <WithStyles(ForwardRef(Typography))
-                                                  className="standalone-selector--selector-single-InlineSwitch-labelWithSwitch-30 standalone-selector--selector-single-CcBaseSelectorCustom-labelWithSwitch-24"
+                                                  className="standalone-selector--selector-single-CCInlineSwitch-labelWithSwitch-30 standalone-selector--selector-single-CcBaseSelectorCustom-labelWithSwitch-24"
                                                   component="div"
                                                 >
                                                   <ForwardRef(Typography)
-                                                    className="standalone-selector--selector-single-InlineSwitch-labelWithSwitch-30 standalone-selector--selector-single-CcBaseSelectorCustom-labelWithSwitch-24"
+                                                    className="standalone-selector--selector-single-CCInlineSwitch-labelWithSwitch-30 standalone-selector--selector-single-CcBaseSelectorCustom-labelWithSwitch-24"
                                                     classes={
                                                       Object {
                                                         "alignCenter": "standalone-selector--selector-single-MuiTypography-alignCenter",
@@ -36544,7 +36544,7 @@ exports[`Storyshots Standalone/Selector Single 1`] = `
                                                     component="div"
                                                   >
                                                     <div
-                                                      className="standalone-selector--selector-single-MuiTypography-root standalone-selector--selector-single-InlineSwitch-labelWithSwitch-30 standalone-selector--selector-single-CcBaseSelectorCustom-labelWithSwitch-24 standalone-selector--selector-single-MuiTypography-body1"
+                                                      className="standalone-selector--selector-single-MuiTypography-root standalone-selector--selector-single-CCInlineSwitch-labelWithSwitch-30 standalone-selector--selector-single-CcBaseSelectorCustom-labelWithSwitch-24 standalone-selector--selector-single-MuiTypography-body1"
                                                     >
                                                       <WithStyles(ForwardRef(Typography))
                                                         component="div"

@@ -6009,7 +6009,7 @@ exports[`Storyshots Standalone/Schedule Scrollable 1`] = `
                               <Component>
                                 <WithStyles(ScrollableSchedule)
                                   loadWeekCallback={[Function]}
-                                  wrapperClass="standalone-schedule--schedule-scrollable-makeStyles-scrollWrapper-7"
+                                  wrapperClass="standalone-schedule--schedule-scrollable-CcScrollableStory-scrollWrapper-7"
                                 >
                                   <ScrollableSchedule
                                     classes={
@@ -6020,7 +6020,7 @@ exports[`Storyshots Standalone/Schedule Scrollable 1`] = `
                                       }
                                     }
                                     loadWeekCallback={[Function]}
-                                    wrapperClass="standalone-schedule--schedule-scrollable-makeStyles-scrollWrapper-7"
+                                    wrapperClass="standalone-schedule--schedule-scrollable-CcScrollableStory-scrollWrapper-7"
                                   >
                                     <WithStyles(ForwardRef(Grid))
                                       container={true}
@@ -6515,12 +6515,12 @@ exports[`Storyshots Standalone/Schedule Scrollable 1`] = `
                                                 className="standalone-schedule--schedule-scrollable-MuiGrid-root standalone-schedule--schedule-scrollable-MuiGrid-item standalone-schedule--schedule-scrollable-MuiGrid-grid-xs-12"
                                               >
                                                 <InfiniteScroll
-                                                  className="standalone-schedule--schedule-scrollable-makeStyles-scrollWrapper-7 standalone-schedule--schedule-scrollable-ScrollableSchedule-scroller-10"
+                                                  className="standalone-schedule--schedule-scrollable-CcScrollableStory-scrollWrapper-7 standalone-schedule--schedule-scrollable-ScrollableSchedule-scroller-10"
                                                   loadMoreBottom={[Function]}
                                                   loadMoreTop={[Function]}
                                                 >
                                                   <div
-                                                    className="standalone-schedule--schedule-scrollable-makeStyles-scrollWrapper-7 standalone-schedule--schedule-scrollable-ScrollableSchedule-scroller-10"
+                                                    className="standalone-schedule--schedule-scrollable-CcScrollableStory-scrollWrapper-7 standalone-schedule--schedule-scrollable-ScrollableSchedule-scroller-10"
                                                   >
                                                     <Styled(MuiBox)
                                                       m={2}
