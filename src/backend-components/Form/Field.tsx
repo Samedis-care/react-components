@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useMemo } from "react";
+import React, { useCallback, useContext, useEffect, useMemo } from "react";
 import { FormContext } from "./Form";
 import { useFormikContext } from "formik";
 import {
@@ -52,7 +52,7 @@ const Field = (props: FieldProps): React.ReactElement => {
 		setFieldTouched,
 	} = useFormikContext<Record<string, unknown>>();
 
-	const { setError, model } = formContext;
+	const { setError, model, markFieldMounted } = formContext;
 
 	let fieldDef: ModelFieldDefinition<unknown, string, PageVisibility, never> =
 		model.fields[props.name];
@@ -83,6 +83,12 @@ const Field = (props: FieldProps): React.ReactElement => {
 		() => (getRelationModel ? getRelationModel() : undefined),
 		[getRelationModel]
 	);
+
+	// mark field as mounted
+	useEffect(() => {
+		markFieldMounted(props.name, true);
+		return () => markFieldMounted(props.name, false);
+	}, [markFieldMounted, props.name]);
 
 	const { name } = props;
 	const value = values[name];

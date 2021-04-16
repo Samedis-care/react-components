@@ -1,4 +1,12 @@
-import React, { CSSProperties, useCallback, useMemo, useState } from "react";
+import React, {
+	CSSProperties,
+	Dispatch,
+	SetStateAction,
+	useCallback,
+	useContext,
+	useMemo,
+	useState,
+} from "react";
 import { Formik, FormikHelpers } from "formik";
 import Model, {
 	ModelData,
@@ -10,6 +18,8 @@ import Loader from "../../standalone/Loader";
 import { FormikState } from "formik/dist/types";
 import { isObjectEmpty } from "../../utils";
 import FormUpdateListener from "./FormUpdateListener";
+
+export type PostSubmitHandler = (id: string) => Promise<void> | unknown;
 
 export interface ErrorComponentProps {
 	/**
@@ -87,6 +97,14 @@ export interface FormProps<
 	 * Custom props supplied by the parent for the children
 	 */
 	customProps: CustomPropsT;
+	/**
+	 * Only submit mounted fields
+	 */
+	onlySubmitMounted?: boolean;
+	/**
+	 * Only validate mounted fields
+	 */
+	onlyValidateMounted?: boolean;
 }
 
 export interface FormContextData {
@@ -103,12 +121,64 @@ export interface FormContextData {
 	 * @param error The error to display
 	 */
 	setError: (error: Error) => void;
+	/**
+	 * Marks the field as mounted
+	 * @param field The field name
+	 * @param mounted Is mounted?
+	 */
+	markFieldMounted: (field: string, mounted: boolean) => void;
+	/**
+	 * Sets the post submit handler (for custom fields)
+	 * @param field custom field name (must not be in model)
+	 */
+	setPostSubmitHandler: (field: string, handler: PostSubmitHandler) => void;
+	/**
+	 * Removes a post submit handler (for custom fields)
+	 * @param field custom field name (must not be in model)
+	 */
+	removePostSubmitHandler: (field: string) => void;
+	/**
+	 * Gets custom field state
+	 * @param field custom field name (must not be in model)
+	 */
+	getCustomState: <T>(field: string) => T | undefined;
+	/**
+	 * Sets custom field state
+	 * @param field custom field name (must not be in model)
+	 * @param data the set state action
+	 */
+	setCustomState: <T>(
+		field: string,
+		data: Dispatch<SetStateAction<T | undefined>>
+	) => void;
+	/**
+	 * Set dirty custom field count (for fields modified by post submit handlers)
+	 */
+	setCustomDirtyCounter: Dispatch<SetStateAction<number>>;
+	/**
+	 * custom fields dirty flag
+	 * combine (||) with formik dirty flag to get correct dirty state
+	 */
+	customDirty: boolean;
+	/**
+	 * @see FormProps.onlySubmitMounted
+	 */
+	onlySubmitMounted: boolean;
+	/**
+	 * @see FormProps.onlyValidateMounted
+	 */
+	onlyValidateMounted: boolean;
 }
 
 /**
  * Context which stores information about the current form so it can be used by fields
  */
 export const FormContext = React.createContext<FormContextData | null>(null);
+export const useFormContext = (): FormContextData => {
+	const ctx = useContext(FormContext);
+	if (!ctx) throw new Error("Form Context not set. Not using form engine?");
+	return ctx;
+};
 
 const loaderContainerStyles: CSSProperties = {
 	height: 320,
@@ -124,27 +194,130 @@ const Form = <
 >(
 	props: FormProps<KeyT, VisibilityT, CustomT, CustomPropsT>
 ) => {
-	const { model, id, children, onSubmit, customProps } = props;
+	const {
+		model,
+		id,
+		children,
+		onSubmit,
+		customProps,
+		onlyValidateMounted,
+		onlySubmitMounted,
+	} = props;
 	const ErrorComponent = props.errorComponent;
 
-	const [updateError, setUpdateError] = useState<Error | null>(null);
+	// custom fields - dirty state
+	const [customDirtyCounter, setCustomDirtyCounter] = useState(0);
+	const customDirty = customDirtyCounter > 0;
+
+	// custom fields - post submit handlers
+	const [postSubmitHandlers, setPostSubmitHandlers] = useState<
+		Record<string, PostSubmitHandler>
+	>({});
+	const setPostSubmitHandler = useCallback(
+		(field: string, handler: PostSubmitHandler) => {
+			setPostSubmitHandlers((prev) => ({
+				...prev,
+				[field]: handler,
+			}));
+		},
+		[setPostSubmitHandlers]
+	);
+	const removePostSubmitHandler = useCallback(
+		(field: string) => {
+			setPostSubmitHandlers((prev) => {
+				const clone = { ...prev };
+				delete clone[field];
+				return clone;
+			});
+		},
+		[setPostSubmitHandlers]
+	);
+
+	// custom fields - state
+	const [customFieldState, setCustomFieldState] = useState<
+		Record<string, unknown>
+	>({});
+	const getCustomState = useCallback(
+		<T extends unknown>(field: string): T => customFieldState[field] as T,
+		[customFieldState]
+	);
+	const setCustomState = useCallback(
+		<T extends unknown>(
+			field: string,
+			value: Dispatch<SetStateAction<T | undefined>>
+		) => {
+			setCustomFieldState((prev) => ({
+				...prev,
+				[field]:
+					typeof value === "function"
+						? value(prev[field] as T | undefined)
+						: value,
+			}));
+		},
+		[setCustomFieldState]
+	);
+
+	// main form handling
 	const { isLoading, error, data } = model.get(id || null);
 	const { mutateAsync: updateData } = model.createOrUpdate();
 
-	const onValidate = useCallback(
-		(values) => model.validate(values, id ? "edit" : "create"),
-		[model, id]
+	const [updateError, setUpdateError] = useState<Error | null>(null);
+
+	// main form handling - mounted state tracking
+	const [mountedFields, setMountedFields] = useState(
+		() =>
+			Object.fromEntries(
+				Object.keys(model.fields).map((field) => [field, false])
+			) as Record<KeyT, boolean>
 	);
+	const markFieldMounted = useCallback((field: string, mounted: boolean) => {
+		setMountedFields((prev) => ({ ...prev, [field as KeyT]: mounted }));
+	}, []);
+
+	// main form - validations
+	const onValidate = useCallback(
+		(values) =>
+			model.validate(
+				values,
+				id ? "edit" : "create",
+				onlyValidateMounted
+					? (Object.keys(mountedFields).filter(
+							(field) => mountedFields[field as KeyT]
+					  ) as KeyT[])
+					: undefined
+			),
+		[onlyValidateMounted, mountedFields, model, id]
+	);
+
+	// main form - submit handler
 	const onSubmitHandler = useCallback(
 		async (
 			values: ModelData<KeyT>,
 			{ setSubmitting, setValues }: FormikHelpers<ModelData<KeyT>>
 		): Promise<void> => {
 			try {
-				const result = await updateData(values);
-				setValues(result[0]);
+				const result = await updateData(
+					onlySubmitMounted
+						? Object.fromEntries(
+								Object.entries(values).filter(
+									([key]) => mountedFields[key as KeyT]
+								)
+						  )
+						: values
+				);
+				const newValues = onlySubmitMounted
+					? Object.assign({}, values, result[0])
+					: result[0];
+				setValues(newValues);
+
+				await Promise.all(
+					Object.values(postSubmitHandlers).map((handler) =>
+						handler((newValues as Record<"id", string>).id)
+					)
+				);
+
 				if (onSubmit) {
-					await onSubmit(result[0]);
+					await onSubmit(newValues);
 				}
 			} catch (e) {
 				setUpdateError(e as Error);
@@ -153,9 +326,10 @@ const Form = <
 				setSubmitting(false);
 			}
 		},
-		[updateData, setUpdateError, onSubmit]
+		[postSubmitHandlers, updateData, onlySubmitMounted, onSubmit, mountedFields]
 	);
 
+	// context and rendering
 	const Children = useMemo(() => React.memo(children), [children]);
 	const setError = useCallback(
 		(error: Error) => {
@@ -163,13 +337,35 @@ const Form = <
 		},
 		[setUpdateError]
 	);
+
 	const formContextData: FormContextData = useMemo(
 		() => ({
 			model: (model as unknown) as Model<ModelFieldName, PageVisibility, never>,
 			relations: data && data[1] ? data[1] : {},
 			setError,
+			markFieldMounted,
+			setCustomDirtyCounter,
+			customDirty,
+			getCustomState,
+			setCustomState,
+			setPostSubmitHandler,
+			removePostSubmitHandler,
+			onlySubmitMounted: !!onlySubmitMounted,
+			onlyValidateMounted: !!onlyValidateMounted,
 		}),
-		[model, setError, data]
+		[
+			model,
+			data,
+			setError,
+			markFieldMounted,
+			customDirty,
+			getCustomState,
+			setCustomState,
+			setPostSubmitHandler,
+			removePostSubmitHandler,
+			onlySubmitMounted,
+			onlyValidateMounted,
+		]
 	);
 
 	if (isLoading) {
@@ -216,7 +412,7 @@ const Form = <
 								values={props.renderConditionally ? values : undefined}
 								submit={submitForm}
 								reset={resetForm}
-								dirty={dirty}
+								dirty={dirty || customDirty}
 								id={id}
 								customProps={customProps}
 							/>

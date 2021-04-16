@@ -23,5 +23,6 @@ export { default as combineClassMaps } from "./combineClassMaps";
 export { default as cleanClassMap } from "./cleanClassMap";
 export { default as isObjectEmpty } from "./isObjectEmpty";
 export { default as sleep } from "./sleep";
+export { default as last } from "./last";
 export * from "./useDate";
 export * from "./genericHOC";

@@ -120,6 +120,8 @@ class LocalStorageConnector<
 	): Promise<void> => {
 		const [invert, ids, filter] = req;
 		if (!invert) {
+			// deleteMultiple may return undefined or a promise
+			// eslint-disable-next-line @typescript-eslint/await-thenable
 			await super.deleteMultiple(ids, model);
 			return;
 		}

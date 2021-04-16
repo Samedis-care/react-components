@@ -363,7 +363,7 @@ class Model<
 		// eslint-disable-next-line react-hooks/rules-of-hooks
 		return useMutation(
 			this.modelId + "-delete",
-			(id: string) => {
+			async (id: string) => {
 				return this.connector.delete(id, this);
 			},
 			{
@@ -390,7 +390,8 @@ class Model<
 		// eslint-disable-next-line react-hooks/rules-of-hooks
 		return useMutation(
 			this.modelId + "-delete-multi",
-			(ids: string[]) => {
+			// eslint-disable-next-line @typescript-eslint/require-await
+			async (ids: string[]) => {
 				return this.connector.deleteMultiple(ids, this);
 			},
 			{
@@ -425,7 +426,7 @@ class Model<
 		// eslint-disable-next-line react-hooks/rules-of-hooks
 		return useMutation(
 			this.modelId + "-delete-adv",
-			(req: AdvancedDeleteRequest) => {
+			async (req: AdvancedDeleteRequest) => {
 				if (!this.connector.deleteAdvanced) {
 					throw new Error("Connector doesn't support advanced deletion");
 				}
@@ -486,19 +487,22 @@ class Model<
 	 * Validates the given values against the field defined validation rules
 	 * @param values The values to validate
 	 * @param view Optional view filter (only applies validations on fields present in given view)
+	 * @param fieldsToValidate List of fields to validate
 	 */
 	public validate(
 		values: Record<KeyT, unknown>,
-		view?: "edit" | "create"
+		view?: "edit" | "create",
+		fieldsToValidate?: KeyT[]
 	): Record<string, string> {
 		const errors: Record<string, string> = {};
 
 		Object.entries(values).forEach(([field, value]) => {
-			// skip validations for fields which aren't defined in the model or which are disabled in the current view
+			// skip validations for fields which aren't defined in the model or which are disabled in the current view or aren't currently mounted
 			if (!(field in this.fields)) return;
 			const fieldDef = this.fields[field as KeyT];
 			if (view && getVisibility(fieldDef.visibility[view], values).disabled)
 				return;
+			if (fieldsToValidate && !fieldsToValidate.includes(field as KeyT)) return;
 
 			// first apply type validation
 			let error = fieldDef.type.validate(value);

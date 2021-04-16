@@ -1,33 +1,35 @@
 import {
 	AdvancedDeleteRequest,
-	Connector,
+	last,
 	Model,
 	ModelData,
 	ModelFieldName,
 	ModelGetResponse,
 	PageVisibility,
-	ResponseMeta,
 } from "../..";
 import { IDataGridLoadDataParameters } from "../../standalone/DataGrid/DataGrid";
+import Connector, { ResponseMeta } from "./Connector";
+import ApiConnector from "./ApiConnector";
 
 interface QueuedFunction {
 	type: "create" | "update" | "delete";
 	id: string | null; // fake id if created client side, otherwise real id or null if delete advanced
 	func: () => unknown;
+	result: ModelGetResponse<string> | null;
 }
 
 type QueueChangeHandler = (queue: QueuedFunction[]) => void;
 
 /**
  * Forwards all read calls (index, read) to the real connector directly but queues all writing calls (create, update, delete) which can be fired at once
- * @remarks Does not support relations
+ * @remarks Does not support relations, enhances read/index calls with locally updated data
  */
 class LazyConnector<
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
 	CustomT
 > extends Connector<KeyT, VisibilityT, CustomT> {
-	public realConnector: Connector<KeyT, VisibilityT, CustomT>;
+	public realConnector: ApiConnector<KeyT, VisibilityT, CustomT>;
 	public fakeReads: boolean;
 	private queue: QueuedFunction[] = [];
 	private onQueueChange?: QueueChangeHandler;
@@ -37,7 +39,7 @@ class LazyConnector<
 	private fakeIdMapping: Record<string, string> = {};
 
 	constructor(
-		connector: Connector<KeyT, VisibilityT, CustomT>,
+		connector: ApiConnector<KeyT, VisibilityT, CustomT>,
 		fakeReads: boolean,
 		onQueueChange?: QueueChangeHandler
 	) {
@@ -57,20 +59,24 @@ class LazyConnector<
 	): ModelGetResponse<KeyT> {
 		const fakeId = `${this.FAKE_ID_PREFIX}${this.fakeIdCounter++}`;
 
+		const returnData: ModelGetResponse<KeyT> = [
+			{
+				...(data as Record<KeyT, unknown>),
+				["id" as KeyT]: fakeId,
+			},
+			{},
+		];
+
 		this.queue.push({
 			type: "create",
 			id: fakeId,
 			func: this.realConnector.create.bind(this.realConnector, data, model),
+			result: returnData,
 		});
 
 		this.onAfterOperation();
 
-		const returnData = {
-			...data,
-			["id" as KeyT]: fakeId,
-		} as Record<KeyT, unknown>;
-
-		return [returnData, {}];
+		return returnData;
 	}
 
 	delete(
@@ -92,6 +98,7 @@ class LazyConnector<
 			type: "delete",
 			id: id,
 			func: this.realConnector.delete.bind(this.realConnector, id, model),
+			result: null,
 		});
 
 		this.onAfterOperation();
@@ -107,13 +114,51 @@ class LazyConnector<
 			return [fakeData, fakeMeta];
 		}
 
-		return this.realConnector.index(params, model);
+		const result = await this.realConnector.index(params, model);
+		// enhance result with local data
+		this.queue.forEach((entry) => {
+			if (entry.type === "create") {
+				result[0].push(entry.result as ModelData<KeyT>);
+				if (result[1].filteredRows) ++result[1].filteredRows;
+				++result[1].totalRows;
+			} else if (entry.type === "update") {
+				result[0] = result[0]
+					.filter(
+						(backendRecord) =>
+							(backendRecord as Record<"id", string>).id !== entry.id
+					)
+					.concat(entry.result as ModelData<KeyT>);
+			} else if (entry.type === "delete") {
+				const { id: entryId } = entry;
+				if (!entryId) return;
+				result[0].filter(
+					(backendRecord) =>
+						(backendRecord as Record<"id", string>).id !== entry.id &&
+						!entryId
+							.split(",")
+							.includes((backendRecord as Record<"id", string>).id)
+				);
+			}
+		});
+		return result;
 	}
 
 	read(
 		id: string,
 		model: Model<KeyT, VisibilityT, CustomT> | undefined
 	): Promise<ModelGetResponse<KeyT>> | ModelGetResponse<KeyT> {
+		const localData = last(
+			this.queue.filter(
+				(entry) => entry.id === id || entry.id?.split(",").includes(id)
+			)
+		);
+		if (localData) {
+			if (localData.result) {
+				return localData.result as ModelGetResponse<KeyT>;
+			} else {
+				throw new Error("data has been deleted");
+			}
+		}
 		return this.realConnector.read(id, model);
 	}
 
@@ -149,6 +194,7 @@ class LazyConnector<
 				type: "update",
 				id: data.id as string,
 				func: updateFunc,
+				result: [data as ModelData<KeyT>, {}],
 			});
 		}
 
@@ -184,6 +230,7 @@ class LazyConnector<
 				ids,
 				model
 			),
+			result: null,
 		});
 		this.onAfterOperation();
 	}
@@ -225,6 +272,7 @@ class LazyConnector<
 				req,
 				model
 			),
+			result: null,
 		});
 		this.onAfterOperation();
 	};
