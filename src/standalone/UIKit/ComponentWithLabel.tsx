@@ -60,7 +60,7 @@ const useStyles = makeStyles(
 			...theme.componentsCare?.uiKit?.label?.style,
 		},
 	}),
-	{ name: "CCComponentWithLabel" }
+	{ name: "CcComponentWithLabel" }
 );
 
 const ComponentWithLabel = (

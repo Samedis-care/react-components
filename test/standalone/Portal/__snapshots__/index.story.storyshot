@@ -6212,10 +6212,10 @@ exports[`Storyshots Standalone/Portal Layout 1`] = `
                                           toggleMenu={[Function]}
                                         >
                                           <WithStyles(ForwardRef(Paper))
-                                            className="standalone-portal--portal-layout-story-CcPortalLayout-menuPaper-29 standalone-portal--portal-layout-story-CcPortalLayout-menuPaper-30"
+                                            className="standalone-portal--portal-layout-story-CcPortalLayoutMenu-menuPaper-29 standalone-portal--portal-layout-story-CcPortalLayoutMenu-menuPaper-30"
                                           >
                                             <ForwardRef(Paper)
-                                              className="standalone-portal--portal-layout-story-CcPortalLayout-menuPaper-29 standalone-portal--portal-layout-story-CcPortalLayout-menuPaper-30"
+                                              className="standalone-portal--portal-layout-story-CcPortalLayoutMenu-menuPaper-29 standalone-portal--portal-layout-story-CcPortalLayoutMenu-menuPaper-30"
                                               classes={
                                                 Object {
                                                   "elevation0": "standalone-portal--portal-layout-story-MuiPaper-elevation0",
@@ -6250,7 +6250,7 @@ exports[`Storyshots Standalone/Portal Layout 1`] = `
                                               }
                                             >
                                               <div
-                                                className="standalone-portal--portal-layout-story-MuiPaper-root standalone-portal--portal-layout-story-CcPortalLayout-menuPaper-29 standalone-portal--portal-layout-story-CcPortalLayout-menuPaper-30 standalone-portal--portal-layout-story-MuiPaper-elevation1 standalone-portal--portal-layout-story-MuiPaper-rounded"
+                                                className="standalone-portal--portal-layout-story-MuiPaper-root standalone-portal--portal-layout-story-CcPortalLayoutMenu-menuPaper-29 standalone-portal--portal-layout-story-CcPortalLayoutMenu-menuPaper-30 standalone-portal--portal-layout-story-MuiPaper-elevation1 standalone-portal--portal-layout-story-MuiPaper-rounded"
                                               >
                                                 <Placeholder
                                                   cssClass="menu"
@@ -13650,10 +13650,10 @@ exports[`Storyshots Standalone/Portal Menu 1`] = `
                                           toggleMenu={[Function]}
                                         >
                                           <WithStyles(ForwardRef(Paper))
-                                            className="standalone-portal--portal-menu-story-CcPortalLayout-menuPaper-42 standalone-portal--portal-menu-story-CcPortalLayout-menuPaper-43"
+                                            className="standalone-portal--portal-menu-story-CcPortalLayoutMenu-menuPaper-42 standalone-portal--portal-menu-story-CcPortalLayoutMenu-menuPaper-43"
                                           >
                                             <ForwardRef(Paper)
-                                              className="standalone-portal--portal-menu-story-CcPortalLayout-menuPaper-42 standalone-portal--portal-menu-story-CcPortalLayout-menuPaper-43"
+                                              className="standalone-portal--portal-menu-story-CcPortalLayoutMenu-menuPaper-42 standalone-portal--portal-menu-story-CcPortalLayoutMenu-menuPaper-43"
                                               classes={
                                                 Object {
                                                   "elevation0": "standalone-portal--portal-menu-story-MuiPaper-elevation0",
@@ -13688,7 +13688,7 @@ exports[`Storyshots Standalone/Portal Menu 1`] = `
                                               }
                                             >
                                               <div
-                                                className="standalone-portal--portal-menu-story-MuiPaper-root standalone-portal--portal-menu-story-CcPortalLayout-menuPaper-42 standalone-portal--portal-menu-story-CcPortalLayout-menuPaper-43 standalone-portal--portal-menu-story-MuiPaper-elevation1 standalone-portal--portal-menu-story-MuiPaper-rounded"
+                                                className="standalone-portal--portal-menu-story-MuiPaper-root standalone-portal--portal-menu-story-CcPortalLayoutMenu-menuPaper-42 standalone-portal--portal-menu-story-CcPortalLayoutMenu-menuPaper-43 standalone-portal--portal-menu-story-MuiPaper-elevation1 standalone-portal--portal-menu-story-MuiPaper-rounded"
                                               >
                                                 <Memo(CollapsibleMenu)>
                                                   <WithStyles(ForwardRef(Grid))

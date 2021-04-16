@@ -11,7 +11,7 @@ const useStyles = makeStyles(
 			margin: "0 4px",
 		},
 	}),
-	{ name: "CCVerticalDivider" }
+	{ name: "CcVerticalDivider" }
 );
 
 export interface VerticalDividerProps {

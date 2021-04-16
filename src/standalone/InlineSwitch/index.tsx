@@ -37,7 +37,7 @@ const useStyles = makeStyles(
 			marginTop: 15,
 		},
 	},
-	{ name: "CCInlineSwitch" }
+	{ name: "CcInlineSwitch" }
 );
 
 const AntSwitch = withStyles((theme: Theme) => ({

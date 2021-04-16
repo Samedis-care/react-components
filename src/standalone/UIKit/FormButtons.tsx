@@ -65,7 +65,7 @@ const useStyles = makeStyles(
 			...theme.componentsCare?.uiKit?.formButtons?.buttonWrapper?.style,
 		},
 	}),
-	{ name: "CCFormButtons" }
+	{ name: "CcFormButtons" }
 );
 
 export interface FormButtonsProps {

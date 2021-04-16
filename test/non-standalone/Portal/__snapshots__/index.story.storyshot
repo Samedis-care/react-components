@@ -7332,10 +7332,10 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                           toggleMenu={[Function]}
                                         >
                                           <WithStyles(ForwardRef(Paper))
-                                            className="non-standalone-portal--portal-menu-story-CcPortalLayout-menuPaper-40 non-standalone-portal--portal-menu-story-CcPortalLayout-menuPaper-41"
+                                            className="non-standalone-portal--portal-menu-story-CcPortalLayoutMenu-menuPaper-40 non-standalone-portal--portal-menu-story-CcPortalLayoutMenu-menuPaper-41"
                                           >
                                             <ForwardRef(Paper)
-                                              className="non-standalone-portal--portal-menu-story-CcPortalLayout-menuPaper-40 non-standalone-portal--portal-menu-story-CcPortalLayout-menuPaper-41"
+                                              className="non-standalone-portal--portal-menu-story-CcPortalLayoutMenu-menuPaper-40 non-standalone-portal--portal-menu-story-CcPortalLayoutMenu-menuPaper-41"
                                               classes={
                                                 Object {
                                                   "elevation0": "non-standalone-portal--portal-menu-story-MuiPaper-elevation0",
@@ -7370,7 +7370,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                               }
                                             >
                                               <div
-                                                className="non-standalone-portal--portal-menu-story-MuiPaper-root non-standalone-portal--portal-menu-story-CcPortalLayout-menuPaper-40 non-standalone-portal--portal-menu-story-CcPortalLayout-menuPaper-41 non-standalone-portal--portal-menu-story-MuiPaper-elevation1 non-standalone-portal--portal-menu-story-MuiPaper-rounded"
+                                                className="non-standalone-portal--portal-menu-story-MuiPaper-root non-standalone-portal--portal-menu-story-CcPortalLayoutMenu-menuPaper-40 non-standalone-portal--portal-menu-story-CcPortalLayoutMenu-menuPaper-41 non-standalone-portal--portal-menu-story-MuiPaper-elevation1 non-standalone-portal--portal-menu-story-MuiPaper-rounded"
                                               >
                                                 <Memo(RoutedMenu)
                                                   childWrapperClassName="non-standalone-portal--portal-menu-story-CcPortalMenuStyleStory-menuChildrenWrapper-27"

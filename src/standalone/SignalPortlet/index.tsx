@@ -39,7 +39,7 @@ const useStyles = makeStyles(
 		title: {},
 		titleWrapper: {},
 	},
-	{ name: "CCSignalPortlet" }
+	{ name: "CcSignalPortlet" }
 );
 
 const SignalPortlet = (props: SignalPortletProps) => {

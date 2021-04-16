@@ -36,7 +36,7 @@ const useStyles = makeStyles(
 			height: "100%",
 		}),
 	},
-	{ name: "CcPortalLayout" }
+	{ name: "CcPortalLayoutMenu" }
 );
 
 const PortalLayoutMenu = (props: IProps) => {

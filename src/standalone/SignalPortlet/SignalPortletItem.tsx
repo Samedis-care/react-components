@@ -46,7 +46,7 @@ const useStyles = makeStyles(
 		listAvatar: {},
 		listText: {},
 	}),
-	{ name: "CCSignalPortletItem" }
+	{ name: "CcSignalPortletItem" }
 );
 
 const SignalPortletItem = (props: SignalPortletItemProps) => {

@@ -167,7 +167,7 @@ const useStyles = makeStyles(
 			overflow: "auto",
 		},
 	},
-	{ name: "CCNotifications" }
+	{ name: "CcNotifications" }
 );
 
 const Notifications = (props: NotificationsProps) => {

@@ -56,7 +56,7 @@ const useStyles = makeStyles(
 			...theme.componentsCare?.selectorWithCheckbox?.checkboxStyle,
 		},
 	}),
-	{ name: "CCMultisSelectWithCheckBox" }
+	{ name: "CcMultiSelectWithCheckBox" }
 );
 
 const MenuItemCustom = withStyles((theme) => ({
