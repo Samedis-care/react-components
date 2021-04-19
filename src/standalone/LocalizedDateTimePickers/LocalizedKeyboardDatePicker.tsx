@@ -6,6 +6,7 @@ import {
 	KeyboardDatePicker,
 	KeyboardDatePickerProps,
 } from "@material-ui/pickers";
+import { Event as EventIcon } from "@material-ui/icons";
 
 type LocalizedKeyboardDatePickerProps = Omit<
 	KeyboardDatePickerProps,
@@ -53,6 +54,7 @@ const LocalizedKeyboardDatePicker = (
 			format={"L"}
 			refuse={/([^0-9./-])/gi}
 			rifmFormatter={TypeDate.format}
+			keyboardIcon={props.disabled ? null : <EventIcon />}
 			{...props}
 		/>
 	);
