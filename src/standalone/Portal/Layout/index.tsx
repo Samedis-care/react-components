@@ -66,6 +66,18 @@ interface PortalLayoutPropsBase {
 	customClasses?: {
 		header?: PortalLayoutHeaderProps["customClasses"];
 	};
+	/**
+	 * ID for the header
+	 */
+	headerId?: string;
+	/**
+	 * ID for the navbar
+	 */
+	menuId?: string;
+	/**
+	 * ID for the main content
+	 */
+	mainId?: string;
 }
 
 interface IRenderProps {
@@ -167,7 +179,7 @@ const RenderLayout = (props: PortalLayoutProps & IRenderProps) => {
 			{!props.mobile && props.variant === "basic" && (
 				<div className={classes.topLeft}>{props.topLeft}</div>
 			)}
-			<div className={classes.header}>
+			<div id={props.headerId} className={classes.header}>
 				<Header
 					contents={headerContent}
 					toggleMenu={toggleMenu}
@@ -175,7 +187,7 @@ const RenderLayout = (props: PortalLayoutProps & IRenderProps) => {
 					customClasses={props.customClasses?.header}
 				/>
 			</div>
-			<div className={classes.menu}>
+			<div id={props.menuId} className={classes.menu}>
 				<Menu
 					menuOpen={menuOpen}
 					drawerWidth={drawerWidth}
@@ -191,7 +203,9 @@ const RenderLayout = (props: PortalLayoutProps & IRenderProps) => {
 					}
 				/>
 			</div>
-			<div className={classes.main}>{content}</div>
+			<div id={props.mainId} className={classes.main}>
+				{content}
+			</div>
 		</PortalLayoutContext.Provider>
 	);
 };
