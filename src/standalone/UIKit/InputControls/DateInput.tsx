@@ -17,6 +17,10 @@ export interface DateInputProps extends TextFieldWithHelpProps {
 	 * @param date new value
 	 */
 	onChange: (date: Date | null) => void;
+	/**
+	 * Boolean flag to hide Calendar Icon (only used if disabled is truthy)
+	 */
+	hideDisabledIcon?: boolean;
 }
 
 const CustomInput = React.forwardRef<HTMLDivElement>(
@@ -28,7 +32,7 @@ const CustomInput = React.forwardRef<HTMLDivElement>(
 const DateInput = (
 	props: DateInputProps & Omit<KeyboardDatePickerProps, "value" | "onChange">
 ) => {
-	const { value, onChange, ...muiProps } = props;
+	const { value, onChange, hideDisabledIcon, ...muiProps } = props;
 
 	return (
 		<LocalizedKeyboardDatePicker
@@ -36,6 +40,7 @@ const DateInput = (
 			value={value}
 			onChange={(date) => (date ? onChange(date.toDate()) : onChange(null))}
 			clearable
+			hideDisabledIcon={hideDisabledIcon}
 			TextFieldComponent={CustomInput}
 			InputLabelProps={InputLabelConfig}
 		/>

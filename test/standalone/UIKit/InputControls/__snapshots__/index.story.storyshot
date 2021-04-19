@@ -12662,6 +12662,7 @@ exports[`Storyshots Standalone/UIKit/InputControls DateInput 1`] = `
                                 <Memo(DateInput)
                                   disabled={false}
                                   fullWidth={true}
+                                  hideDisabledIcon={false}
                                   important={false}
                                   label="Date"
                                   onChange={[Function]}
@@ -12685,6 +12686,7 @@ exports[`Storyshots Standalone/UIKit/InputControls DateInput 1`] = `
                                     clearable={true}
                                     disabled={false}
                                     fullWidth={true}
+                                    hideDisabledIcon={false}
                                     important={false}
                                     label="Date"
                                     onChange={[Function]}
@@ -12712,9 +12714,11 @@ exports[`Storyshots Standalone/UIKit/InputControls DateInput 1`] = `
                                       disabled={false}
                                       format="L"
                                       fullWidth={true}
+                                      hideDisabledIcon={false}
                                       important={false}
                                       invalidDateMessage="backend-integration.model.types.renderers.date.labels.invalid-date"
                                       invalidLabel="backend-integration.model.types.renderers.date.labels.invalid"
+                                      keyboardIcon={<Memo />}
                                       label="Date"
                                       maxDate={2100-01-01T00:00:00.000Z}
                                       maxDateMessage="backend-integration.model.types.renderers.date.labels.max-date"
@@ -12765,7 +12769,9 @@ exports[`Storyshots Standalone/UIKit/InputControls DateInput 1`] = `
                                         disabled={false}
                                         format="L"
                                         fullWidth={true}
+                                        hideDisabledIcon={false}
                                         important={false}
+                                        keyboardIcon={<Memo />}
                                         label="Date"
                                         okLabel="backend-integration.model.types.renderers.date.labels.ok"
                                         onAccept={[Function]}
@@ -12808,7 +12814,9 @@ exports[`Storyshots Standalone/UIKit/InputControls DateInput 1`] = `
                                           disabled={false}
                                           format="L"
                                           fullWidth={true}
+                                          hideDisabledIcon={false}
                                           important={false}
+                                          keyboardIcon={<Memo />}
                                           label="Date"
                                           okLabel="backend-integration.model.types.renderers.date.labels.ok"
                                           onAccept={[Function]}
@@ -12839,9 +12847,10 @@ exports[`Storyshots Standalone/UIKit/InputControls DateInput 1`] = `
                                             disabled={false}
                                             format="L"
                                             fullWidth={true}
+                                            hideDisabledIcon={false}
                                             important={false}
                                             inputValue=""
-                                            keyboardIcon={<KeyboardIcon />}
+                                            keyboardIcon={<Memo />}
                                             label="Date"
                                             onChange={[Function]}
                                             onError={[Function]}
@@ -12874,7 +12883,7 @@ exports[`Storyshots Standalone/UIKit/InputControls DateInput 1`] = `
                                                         disabled={false}
                                                         onClick={[Function]}
                                                       >
-                                                        <KeyboardIcon />
+                                                        <Memo />
                                                       </WithStyles(ForwardRef(IconButton))>
                                                     </WithStyles(ForwardRef(InputAdornment))>,
                                                   }
@@ -12883,6 +12892,7 @@ exports[`Storyshots Standalone/UIKit/InputControls DateInput 1`] = `
                                                 error={false}
                                                 fullWidth={true}
                                                 helperText=""
+                                                hideDisabledIcon={false}
                                                 important={false}
                                                 label="Date"
                                                 onChange={[Function]}
@@ -12906,7 +12916,7 @@ exports[`Storyshots Standalone/UIKit/InputControls DateInput 1`] = `
                                                           disabled={false}
                                                           onClick={[Function]}
                                                         >
-                                                          <KeyboardIcon />
+                                                          <Memo />
                                                         </WithStyles(ForwardRef(IconButton))>
                                                       </WithStyles(ForwardRef(InputAdornment))>,
                                                     }
@@ -12915,6 +12925,7 @@ exports[`Storyshots Standalone/UIKit/InputControls DateInput 1`] = `
                                                   error={false}
                                                   fullWidth={true}
                                                   helperText=""
+                                                  hideDisabledIcon={false}
                                                   important={false}
                                                   label="Date"
                                                   onChange={[Function]}
@@ -12944,7 +12955,7 @@ exports[`Storyshots Standalone/UIKit/InputControls DateInput 1`] = `
                                                               disabled={false}
                                                               onClick={[Function]}
                                                             >
-                                                              <KeyboardIcon />
+                                                              <Memo />
                                                             </WithStyles(ForwardRef(IconButton))>
                                                             <WithStyles(ForwardRef(IconButton))
                                                               onClick={[Function]}
@@ -12961,6 +12972,7 @@ exports[`Storyshots Standalone/UIKit/InputControls DateInput 1`] = `
                                                     error={false}
                                                     fullWidth={true}
                                                     helperText=""
+                                                    hideDisabledIcon={false}
                                                     label="Date"
                                                     onChange={[Function]}
                                                     onError={[Function]}
@@ -12988,7 +13000,7 @@ exports[`Storyshots Standalone/UIKit/InputControls DateInput 1`] = `
                                                                 disabled={false}
                                                                 onClick={[Function]}
                                                               >
-                                                                <KeyboardIcon />
+                                                                <Memo />
                                                               </WithStyles(ForwardRef(IconButton))>
                                                               <WithStyles(ForwardRef(IconButton))
                                                                 onClick={[Function]}
@@ -13010,6 +13022,7 @@ exports[`Storyshots Standalone/UIKit/InputControls DateInput 1`] = `
                                                       error={false}
                                                       fullWidth={true}
                                                       helperText=""
+                                                      hideDisabledIcon={false}
                                                       label="Date"
                                                       onChange={[Function]}
                                                       onError={[Function]}
@@ -13022,6 +13035,7 @@ exports[`Storyshots Standalone/UIKit/InputControls DateInput 1`] = `
                                                         disabled={false}
                                                         error={false}
                                                         fullWidth={true}
+                                                        hideDisabledIcon={false}
                                                         onError={[Function]}
                                                         required={false}
                                                         variant="standard"
@@ -13040,12 +13054,14 @@ exports[`Storyshots Standalone/UIKit/InputControls DateInput 1`] = `
                                                           disabled={false}
                                                           error={false}
                                                           fullWidth={true}
+                                                          hideDisabledIcon={false}
                                                           onError={[Function]}
                                                           required={false}
                                                           variant="standard"
                                                         >
                                                           <div
                                                             className="standalone-uikit-inputcontrols--date-input-story-MuiFormControl-root standalone-uikit-inputcontrols--date-input-story-MuiTextField-root standalone-uikit-inputcontrols--date-input-story-MuiFormControl-fullWidth"
+                                                            hideDisabledIcon={false}
                                                             onError={[Function]}
                                                           >
                                                             <WithStyles(ForwardRef(InputLabel))
@@ -13127,7 +13143,7 @@ exports[`Storyshots Standalone/UIKit/InputControls DateInput 1`] = `
                                                                       disabled={false}
                                                                       onClick={[Function]}
                                                                     >
-                                                                      <KeyboardIcon />
+                                                                      <Memo />
                                                                     </WithStyles(ForwardRef(IconButton))>
                                                                     <WithStyles(ForwardRef(IconButton))
                                                                       onClick={[Function]}
@@ -13174,7 +13190,7 @@ exports[`Storyshots Standalone/UIKit/InputControls DateInput 1`] = `
                                                                         disabled={false}
                                                                         onClick={[Function]}
                                                                       >
-                                                                        <KeyboardIcon />
+                                                                        <Memo />
                                                                       </WithStyles(ForwardRef(IconButton))>
                                                                       <WithStyles(ForwardRef(IconButton))
                                                                         onClick={[Function]}
@@ -13221,7 +13237,7 @@ exports[`Storyshots Standalone/UIKit/InputControls DateInput 1`] = `
                                                                           disabled={false}
                                                                           onClick={[Function]}
                                                                         >
-                                                                          <KeyboardIcon />
+                                                                          <Memo />
                                                                         </WithStyles(ForwardRef(IconButton))>
                                                                         <WithStyles(ForwardRef(IconButton))
                                                                           onClick={[Function]}
@@ -13274,7 +13290,7 @@ exports[`Storyshots Standalone/UIKit/InputControls DateInput 1`] = `
                                                                             disabled={false}
                                                                             onClick={[Function]}
                                                                           >
-                                                                            <KeyboardIcon />
+                                                                            <Memo />
                                                                           </WithStyles(ForwardRef(IconButton))>
                                                                           <WithStyles(ForwardRef(IconButton))
                                                                             onClick={[Function]}
@@ -13395,7 +13411,7 @@ exports[`Storyshots Standalone/UIKit/InputControls DateInput 1`] = `
                                                                                       <span
                                                                                         className="standalone-uikit-inputcontrols--date-input-story-MuiIconButton-label"
                                                                                       >
-                                                                                        <KeyboardIcon>
+                                                                                        <ForwardRef(EventIcon)>
                                                                                           <WithStyles(ForwardRef(SvgIcon))>
                                                                                             <ForwardRef(SvgIcon)
                                                                                               classes={
@@ -13421,14 +13437,10 @@ exports[`Storyshots Standalone/UIKit/InputControls DateInput 1`] = `
                                                                                                 <path
                                                                                                   d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"
                                                                                                 />
-                                                                                                <path
-                                                                                                  d="M0 0h24v24H0z"
-                                                                                                  fill="none"
-                                                                                                />
                                                                                               </svg>
                                                                                             </ForwardRef(SvgIcon)>
                                                                                           </WithStyles(ForwardRef(SvgIcon))>
-                                                                                        </KeyboardIcon>
+                                                                                        </ForwardRef(EventIcon)>
                                                                                       </span>
                                                                                       <WithStyles(memo)
                                                                                         center={true}

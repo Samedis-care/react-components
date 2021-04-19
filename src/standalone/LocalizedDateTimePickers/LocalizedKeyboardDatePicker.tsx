@@ -6,21 +6,28 @@ import {
 	KeyboardDatePicker,
 	KeyboardDatePickerProps,
 } from "@material-ui/pickers";
+import { Event as CalendarIcon } from "@material-ui/icons";
 
-type LocalizedKeyboardDatePickerProps = Omit<
-	KeyboardDatePickerProps,
-	| "invalidLabel"
-	| "cancelLabel"
-	| "clearLabel"
-	| "okLabel"
-	| "todayLabel"
-	| "invalidDateMessage"
-	| "minDateMessage"
-	| "maxDateMessage"
-	| "format"
-	| "refuse"
-	| "rifmFormatter"
->;
+export interface LocalizedKeyboardDatePickerProps
+	extends Omit<
+		KeyboardDatePickerProps,
+		| "invalidLabel"
+		| "cancelLabel"
+		| "clearLabel"
+		| "okLabel"
+		| "todayLabel"
+		| "invalidDateMessage"
+		| "minDateMessage"
+		| "maxDateMessage"
+		| "format"
+		| "refuse"
+		| "rifmFormatter"
+	> {
+	/**
+	 * Boolean flag to hide Calendar Icon (only used if disabled is truthy)
+	 */
+	hideDisabledIcon?: boolean;
+}
 
 const LocalizedKeyboardDatePicker = (
 	props: LocalizedKeyboardDatePickerProps
@@ -53,6 +60,9 @@ const LocalizedKeyboardDatePicker = (
 			format={"L"}
 			refuse={/([^0-9./-])/gi}
 			rifmFormatter={TypeDate.format}
+			keyboardIcon={
+				props.hideDisabledIcon && props.disabled ? null : <CalendarIcon />
+			}
 			{...props}
 		/>
 	);
