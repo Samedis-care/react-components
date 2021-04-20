@@ -7,6 +7,7 @@ import {
 	KeyboardDatePickerProps,
 } from "@material-ui/pickers";
 import { Event as CalendarIcon } from "@material-ui/icons";
+import { useTheme } from "@material-ui/core";
 
 export interface LocalizedKeyboardDatePickerProps
 	extends Omit<
@@ -33,6 +34,10 @@ const LocalizedKeyboardDatePicker = (
 	props: LocalizedKeyboardDatePickerProps
 ) => {
 	const { t } = useTranslation(undefined, { i18n });
+	const theme = useTheme();
+	const hideDisabledIcons =
+		theme.componentsCare?.uiKit?.hideDisabledIcons ?? props.hideDisabledIcon;
+
 	return (
 		<KeyboardDatePicker
 			invalidLabel={t(
@@ -61,7 +66,7 @@ const LocalizedKeyboardDatePicker = (
 			refuse={/([^0-9./-])/gi}
 			rifmFormatter={TypeDate.format}
 			keyboardIcon={
-				props.hideDisabledIcon && props.disabled ? null : <CalendarIcon />
+				hideDisabledIcons && props.disabled ? null : <CalendarIcon />
 			}
 			{...props}
 		/>
