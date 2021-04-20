@@ -8,9 +8,11 @@ Take a look at our [Storybook](https://components-care.github.io/react-component
 
 ## Installing
 
-> `npm install "git://github.com/Components-care/react-components.git#master" --save`
+> `npm install "git://github.com/Components-care/react-components.git#master_dist" --save --legacy-peer-deps`
 
-> `yarn add "git://github.com/Components-care/react-components.git#master"`
+> `yarn add "git://github.com/Components-care/react-components.git#master_dist"`
+
+Note: Make sure to install all peer-dependencies
 
 ## Overview
 
