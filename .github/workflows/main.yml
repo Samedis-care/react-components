@@ -32,12 +32,16 @@ jobs:
         env:
           GH_TOKEN: ${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}
       - name: Build library
+        run: npm run build
+      - name: Publish dist
         run: |
+          set -x
           git config user.name "GitHub Actions Bot"
           git config user.email "<>"
-          npm run build
           git checkout --orphan master_dist
           rm -f .gitignore
-          git rm -rf .
+          git rm -rf . || echo "weird error during unstage, ignoring"
           git add package.json package-lock.json dist LICENSE
+          git status
+          git commit -m "release build"
           git push -f origin master_dist
