@@ -499,21 +499,32 @@ class Model<
 		Object.entries(values).forEach(([field, value]) => {
 			// skip validations for fields which aren't defined in the model or which are disabled in the current view or aren't currently mounted
 			if (!(field in this.fields)) return;
-			const fieldDef = this.fields[field as KeyT];
-			if (view && getVisibility(fieldDef.visibility[view], values).disabled)
-				return;
-			if (fieldsToValidate && !fieldsToValidate.includes(field as KeyT)) return;
+			try {
+				const fieldDef = this.fields[field as KeyT];
+				if (view && getVisibility(fieldDef.visibility[view], values).disabled)
+					return;
+				if (fieldsToValidate && !fieldsToValidate.includes(field as KeyT))
+					return;
 
-			// first apply type validation
-			let error = fieldDef.type.validate(value);
+				// first apply type validation
+				let error = fieldDef.type.validate(value);
 
-			// then apply custom field validation if present
-			const fieldValidation = fieldDef.validate;
-			if (!error && fieldValidation) {
-				error = fieldValidation(value, values, fieldDef);
+				// then apply custom field validation if present
+				const fieldValidation = fieldDef.validate;
+				if (!error && fieldValidation) {
+					error = fieldValidation(value, values, fieldDef);
+				}
+
+				if (error) errors[field] = error;
+			} catch (e) {
+				// eslint-disable-next-line no-console
+				console.error(
+					"[Components-Care] [Model.validate] Error during field validation:",
+					field,
+					value,
+					e
+				);
 			}
-
-			if (error) errors[field] = error;
 		});
 
 		return errors;

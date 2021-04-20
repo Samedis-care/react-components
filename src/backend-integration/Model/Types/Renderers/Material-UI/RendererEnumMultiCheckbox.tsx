@@ -44,14 +44,8 @@ class RendererEnumRadio extends TypeEnumMulti {
 			handleChange,
 			handleBlur,
 			errorMsg,
+			value,
 		} = params;
-
-		let { value } = params;
-
-		// Workaround for https://github.com/formium/formik/issues/2098
-		if (value === undefined) {
-			value = [];
-		}
 
 		if (visibility.disabled) return <></>;
 		if (visibility.hidden) {

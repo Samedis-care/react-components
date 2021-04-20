@@ -1,9 +1,13 @@
 import { Button, Grid } from "@material-ui/core";
 import Field from "../../../backend-components/Form/Field";
-import { performanceTestDataCount } from "./Model";
+import Model, { performanceTestDataCount } from "./Model";
 import React from "react";
+import { PageProps } from "../../../backend-components";
+import { action } from "@storybook/addon-actions";
 
-const SampleForm = (props: { isSubmitting: boolean }) => (
+const SampleForm = (
+	props: PageProps<keyof typeof Model["fields"], undefined>
+) => (
 	<Grid item xs={12} container spacing={2}>
 		<Grid item xs={9} container spacing={2}>
 			<Grid item xs={12}>
@@ -33,14 +37,31 @@ const SampleForm = (props: { isSubmitting: boolean }) => (
 			<Grid item xs={12}>
 				<Field name={"notes"} />
 			</Grid>
-			<Grid item xs={12}>
+			<Grid item xs={12} md={6}>
 				<Button
 					type={"submit"}
 					disabled={props.isSubmitting}
 					variant={"outlined"}
 					fullWidth
 				>
-					Save
+					Save (via submit)
+				</Button>
+			</Grid>
+			<Grid item xs={12} md={6}>
+				<Button
+					disabled={props.isSubmitting}
+					variant={"outlined"}
+					fullWidth
+					onClick={async () => {
+						try {
+							await props.submit();
+							action("submit")("Successfully submitted");
+						} catch (e) {
+							action("submit")("Error", e);
+						}
+					}}
+				>
+					Save (via code)
 				</Button>
 			</Grid>
 			{new Array(performanceTestDataCount).fill(null).map((_, index) => (

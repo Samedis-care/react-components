@@ -157,7 +157,7 @@ export interface FormContextData {
 	setCustomDirtyCounter: Dispatch<SetStateAction<number>>;
 	/**
 	 * custom fields dirty flag
-	 * combine (||) with formik dirty flag to get correct dirty state
+	 * combine (using ||) with formik dirty flag to get correct dirty state
 	 */
 	customDirty: boolean;
 	/**
@@ -397,28 +397,38 @@ const Form = <
 					isSubmitting,
 					values,
 					dirty,
+					validateForm,
 					/* and other goodies */
-				}) => (
-					<form onSubmit={handleSubmit}>
-						<FormUpdateListener backendData={data[0]} />
-						{displayError && <ErrorComponent error={displayError} />}
-						{isLoading ? (
-							<div style={loaderContainerStyles}>
-								<Loader />
-							</div>
-						) : (
-							<Children
-								isSubmitting={isSubmitting}
-								values={props.renderConditionally ? values : undefined}
-								submit={submitForm}
-								reset={resetForm}
-								dirty={dirty || customDirty}
-								id={id}
-								customProps={customProps}
-							/>
-						)}
-					</form>
-				)}
+				}) => {
+					const validatingSubmit = async () => {
+						const validationResult = await validateForm();
+						if (!isObjectEmpty(validationResult)) {
+							throw validationResult;
+						}
+						return submitForm();
+					};
+					return (
+						<form onSubmit={handleSubmit}>
+							<FormUpdateListener backendData={data[0]} />
+							{displayError && <ErrorComponent error={displayError} />}
+							{isLoading ? (
+								<div style={loaderContainerStyles}>
+									<Loader />
+								</div>
+							) : (
+								<Children
+									isSubmitting={isSubmitting}
+									values={props.renderConditionally ? values : undefined}
+									submit={validatingSubmit}
+									reset={resetForm}
+									dirty={dirty || customDirty}
+									id={id}
+									customProps={customProps}
+								/>
+							)}
+						</form>
+					);
+				}}
 			</Formik>
 		</FormContext.Provider>
 	);
