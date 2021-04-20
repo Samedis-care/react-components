@@ -40,7 +40,7 @@ jobs:
           git config user.email "<>"
           git checkout --orphan master_dist
           rm -f .gitignore
-          git rm -rf . || echo "weird error during unstage, ignoring"
+          git rm -rf --cached .
           git add package.json package-lock.json dist LICENSE
           git status
           git commit -m "release build"
