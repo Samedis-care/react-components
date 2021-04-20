@@ -47,6 +47,7 @@ export interface ComponentsCareTheme {
 		subActionButton?: SubActionButtonTheme;
 		formButtons?: FormButtonTheme;
 		baseSelectorExpert?: SelectorThemeExpert;
+		hideDisabledIcons?: boolean;
 	};
 }
 
