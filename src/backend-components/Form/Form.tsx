@@ -367,9 +367,15 @@ const Form = <
 					{ [field]: value } as Record<KeyT, unknown>,
 					id ? "edit" : "create"
 				);
-				setErrors((prev) =>
-					isObjectEmpty(errors) ? prev : { ...prev, ...errors }
-				);
+				setErrors((prev) => {
+					if (isObjectEmpty(errors)) {
+						const next = { ...prev };
+						delete next[field];
+						return next;
+					} else {
+						return { ...prev, ...errors };
+					}
+				});
 			};
 			if (value) doValidation(value);
 			else {
@@ -471,8 +477,12 @@ const Form = <
 	// main form - submit handler
 	const submitForm = useCallback(async (): Promise<void> => {
 		setSubmitting(true);
+		setTouched((prev) =>
+			Object.fromEntries(Object.keys(prev).map((field) => [field, true]))
+		);
 		try {
 			const validation = validateForm();
+			setErrors(validation);
 			if (!isObjectEmpty(validation)) {
 				// noinspection ExceptionCaughtLocallyJS
 				throw validation;
