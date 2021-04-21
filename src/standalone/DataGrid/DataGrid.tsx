@@ -184,6 +184,10 @@ export type DataGridFilterSetting = { field: string; filter: IFilterDef };
 
 export interface IDataGridAddButton {
 	/**
+	 * The icon
+	 */
+	icon?: React.ReactNode;
+	/**
 	 * Label of the add button
 	 */
 	label: NonNullable<React.ReactNode>;

@@ -176,7 +176,7 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 								<Grid item key={index.toString()}>
 									<ActionButton
 										small={!bpSmUp}
-										icon={<AddIcon />}
+										icon={entry.icon ?? <AddIcon />}
 										onClick={entry.onClick}
 									>
 										{entry.label}
