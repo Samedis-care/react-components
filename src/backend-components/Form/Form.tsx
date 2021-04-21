@@ -367,16 +367,30 @@ const Form = <
 				{ [field]: value } as Record<KeyT, unknown>,
 				id ? "edit" : "create"
 			);
-			setErrors((prev) => ({ ...prev, ...errors }));
+			setErrors((prev) =>
+				isObjectEmpty(errors) ? prev : { ...prev, ...errors }
+			);
 		},
 		[id, model, values]
 	);
+	const setFieldTouched = useCallback(
+		(field: string, newTouched = true, validate = false) => {
+			setTouched((prev) =>
+				prev[field] === newTouched
+					? prev
+					: { ...prev, [field]: newTouched as boolean }
+			);
+			if (validate) validateField(field);
+		},
+		[validateField]
+	);
 	const setFieldValue = useCallback(
 		(field: string, value: unknown, validate = true) => {
+			setFieldTouched(field, true, false);
 			setValues((prev) => ({ ...prev, [field]: value }));
 			if (validate) validateField(field, value);
 		},
-		[validateField]
+		[validateField, setFieldTouched]
 	);
 	const resetForm = useCallback(() => {
 		if (!serverData || !serverData[0]) return;
@@ -394,17 +408,6 @@ const Form = <
 					: undefined
 			),
 		[model, values, id, onlyValidateMounted, mountedFields]
-	);
-	const setFieldTouched = useCallback(
-		(field: string, newTouched = true, validate = false) => {
-			setTouched((prev) =>
-				prev[field] === newTouched
-					? prev
-					: { ...prev, [field]: newTouched as boolean }
-			);
-			if (validate) validateField(field);
-		},
-		[validateField]
 	);
 	const handleBlur = useCallback(
 		(evt: React.FocusEvent<HTMLInputElement & HTMLElement>) => {
