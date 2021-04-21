@@ -360,18 +360,34 @@ const Form = <
 	}, []);
 
 	// main form handling - dispatch
+	const validateFormInternal = useCallback(
+		(values: Record<string, unknown>) =>
+			model.validate(
+				values,
+				id ? "edit" : "create",
+				onlyValidateMounted
+					? (Object.keys(mountedFields).filter(
+							(field) => mountedFields[field as KeyT]
+					  ) as KeyT[])
+					: undefined
+			),
+		[model, id, onlyValidateMounted, mountedFields]
+	);
+	const validateForm = useCallback(() => validateFormInternal(values), [
+		values,
+		validateFormInternal,
+	]);
 	const validateField = useCallback(
 		(field: string, value?: unknown) => {
 			setValues((prev) => {
-				const errors = model.validate(
-					value === undefined ? { ...prev, [field]: value } : prev,
-					id ? "edit" : "create"
+				const errors = validateFormInternal(
+					value !== undefined ? { ...prev, [field]: value } : prev
 				);
 				setErrors(errors);
 				return prev;
 			});
 		},
-		[id, model]
+		[validateFormInternal]
 	);
 	const setFieldTouched = useCallback(
 		(field: string, newTouched = true, validate = false) => {
@@ -396,19 +412,6 @@ const Form = <
 		if (!serverData || !serverData[0]) return;
 		setValues(serverData[0]);
 	}, [serverData]);
-	const validateForm = useCallback(
-		() =>
-			model.validate(
-				values,
-				id ? "edit" : "create",
-				onlyValidateMounted
-					? (Object.keys(mountedFields).filter(
-							(field) => mountedFields[field as KeyT]
-					  ) as KeyT[])
-					: undefined
-			),
-		[model, values, id, onlyValidateMounted, mountedFields]
-	);
 	const handleBlur = useCallback(
 		(evt: React.FocusEvent<HTMLInputElement & HTMLElement>) => {
 			const fieldName =
