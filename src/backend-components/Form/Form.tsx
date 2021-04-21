@@ -362,16 +362,24 @@ const Form = <
 	// main form handling - dispatch
 	const validateField = useCallback(
 		(field: string, value?: unknown) => {
-			value = value ?? values[field];
-			const errors = model.validate(
-				{ [field]: value } as Record<KeyT, unknown>,
-				id ? "edit" : "create"
-			);
-			setErrors((prev) =>
-				isObjectEmpty(errors) ? prev : { ...prev, ...errors }
-			);
+			const doValidation = (value: unknown) => {
+				const errors = model.validate(
+					{ [field]: value } as Record<KeyT, unknown>,
+					id ? "edit" : "create"
+				);
+				setErrors((prev) =>
+					isObjectEmpty(errors) ? prev : { ...prev, ...errors }
+				);
+			};
+			if (value) doValidation(value);
+			else {
+				setValues((prev) => {
+					doValidation(prev[field]);
+					return prev;
+				});
+			}
 		},
-		[id, model, values]
+		[id, model]
 	);
 	const setFieldTouched = useCallback(
 		(field: string, newTouched = true, validate = false) => {
