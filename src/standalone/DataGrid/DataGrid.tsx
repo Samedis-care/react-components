@@ -72,6 +72,36 @@ export type DataGridProps = IDataGridHeaderProps &
 		 * Custom styles
 		 */
 		classes?: Partial<ReturnType<typeof useStyles>>;
+		/**
+		 * Custom data action buttons
+		 * Rendered next to delete.
+		 * Max 1 extra button to fit on mobile screens
+		 */
+		customDataActionButtons?: {
+			/**
+			 * The icon of the button
+			 */
+			icon: React.ReactNode;
+			/**
+			 * The label of the button
+			 * @remarks must be unique
+			 */
+			label: string;
+			/**
+			 * Is the button disabled?
+			 * @param numSelected The amount of selected rows
+			 * 										0 => none
+			 * 									  1 => one
+			 * 									  2 => multiple
+			 */
+			isDisabled: (numSelected: 0 | 1 | 2) => boolean;
+			/**
+			 * The click handler
+			 * @param invert Is the selection inverted? (if true => ids = everything except ids)
+			 * @param ids The ids
+			 */
+			onClick: (invert: boolean, ids: string[]) => void;
+		}[];
 	};
 
 export interface IDataGridLoadDataParameters {

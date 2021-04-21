@@ -6,14 +6,14 @@ import i18n from "../../../i18n";
 import { useTranslation } from "react-i18next";
 import { Edit as EditIcon, Delete as DeleteIcon } from "@material-ui/icons";
 import SelectAll from "./SelectAll";
-import { useDataGridStyles } from "../DataGrid";
+import { DataGridProps, useDataGridStyles } from "../DataGrid";
 
 export interface DataActionBarViewProps {
 	/**
 	 * The amount of selected items
 	 * Values: 0 (none), 1 (one) or 2 (multiple)
 	 */
-	numSelected: number;
+	numSelected: 0 | 1 | 2;
 	/**
 	 * Callback for edit button.
 	 * If not defined: Disables edit button
@@ -24,6 +24,15 @@ export interface DataActionBarViewProps {
 	 * If not defined: Disables delete button
 	 */
 	handleDelete?: () => void;
+	/**
+	 * @see DataGridProps.customDataActionButtons
+	 */
+	customButtons: DataGridProps["customDataActionButtons"];
+	/**
+	 * Forward click to external handler
+	 * @param label The label of the custom button
+	 */
+	handleCustomButtonClick: (label: string) => void;
 }
 
 const DataActionBarView = (props: DataActionBarViewProps) => {
@@ -86,6 +95,29 @@ const DataActionBarView = (props: DataActionBarViewProps) => {
 					</Grid>
 				</>
 			)}
+			{props.customButtons?.map((entry) => (
+				<React.Fragment key={entry.label}>
+					<Grid item>
+						<VerticalDivider />
+					</Grid>
+					<Grid item>
+						<ComponentWithLabel
+							control={
+								<SmallIconButton
+									color={"primary"}
+									disabled={entry.isDisabled(props.numSelected)}
+								>
+									{entry.icon}
+								</SmallIconButton>
+							}
+							labelText={entry.label}
+							onClick={() => props.handleCustomButtonClick(entry.label)}
+							labelPlacement={"bottom"}
+							disabled={entry.isDisabled(props.numSelected)}
+						/>
+					</Grid>
+				</React.Fragment>
+			))}
 		</Grid>
 	);
 };

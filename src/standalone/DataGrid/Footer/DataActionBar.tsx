@@ -12,7 +12,7 @@ const DataActionBar = () => {
 	const [state, setState] = useDataGridState();
 	const { search, customData } = state;
 	const [columnState] = useDataGridColumnState();
-	const { getAdditionalFilters } = useDataGridProps();
+	const { getAdditionalFilters, customDataActionButtons } = useDataGridProps();
 	const { selectAll, selectedRows } = state;
 	const { onEdit, onDelete } = useDataGridProps();
 
@@ -61,12 +61,26 @@ const DataActionBar = () => {
 		customData,
 	]);
 
+	const handleCustomButtonCLick = useCallback(
+		(label: string) => {
+			if (!customDataActionButtons) return;
+			const clickedButton = customDataActionButtons.find(
+				(entry) => entry.label === label
+			);
+			if (!clickedButton) return;
+			clickedButton.onClick(selectAll, selectedRows);
+		},
+		[customDataActionButtons, selectAll, selectedRows]
+	);
+
 	return (
 		<Grid container>
 			<DataActionBarView
-				numSelected={Math.min(numSelected, 2)}
+				numSelected={Math.min(numSelected, 2) as 0 | 1 | 2}
 				handleEdit={onEdit ? handleEdit : undefined}
 				handleDelete={onDelete ? handleDelete : undefined}
+				customButtons={customDataActionButtons}
+				handleCustomButtonClick={handleCustomButtonCLick}
 			/>
 		</Grid>
 	);
