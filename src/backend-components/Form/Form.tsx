@@ -437,11 +437,9 @@ const Form = <
 				);
 				return;
 			}
-			if (!touched[fieldName]) {
-				setFieldTouched(fieldName);
-			}
+			setFieldTouched(fieldName);
 		},
-		[setFieldTouched, touched]
+		[setFieldTouched]
 	);
 
 	// init data structs after first load
