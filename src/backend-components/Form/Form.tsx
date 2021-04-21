@@ -223,6 +223,10 @@ export interface FormContextData {
 		touched?: boolean,
 		validate?: boolean
 	) => void;
+	/**
+	 * Resets the form to server values
+	 */
+	resetForm: () => void;
 }
 
 /**
@@ -563,6 +567,7 @@ const Form = <
 			setFieldValue,
 			handleBlur,
 			setFieldTouched,
+			resetForm,
 		}),
 		[
 			model,
@@ -585,6 +590,7 @@ const Form = <
 			setFieldValue,
 			handleBlur,
 			setFieldTouched,
+			resetForm,
 		]
 	);
 
