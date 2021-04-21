@@ -514,7 +514,10 @@ const Form = <
 				await onSubmit(newValues);
 			}
 		} catch (e) {
-			setUpdateError(e as Error);
+			// don't use this for validation errors
+			if (e instanceof Error) {
+				setUpdateError(e);
+			}
 			throw e;
 		} finally {
 			setSubmitting(false);
