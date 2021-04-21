@@ -362,28 +362,14 @@ const Form = <
 	// main form handling - dispatch
 	const validateField = useCallback(
 		(field: string, value?: unknown) => {
-			const doValidation = (value: unknown) => {
+			setValues((prev) => {
 				const errors = model.validate(
-					{ [field]: value } as Record<KeyT, unknown>,
+					value === undefined ? { ...prev, [field]: value } : prev,
 					id ? "edit" : "create"
 				);
-				setErrors((prev) => {
-					if (isObjectEmpty(errors)) {
-						const next = { ...prev };
-						delete next[field];
-						return next;
-					} else {
-						return { ...prev, ...errors };
-					}
-				});
-			};
-			if (value) doValidation(value);
-			else {
-				setValues((prev) => {
-					doValidation(prev[field]);
-					return prev;
-				});
-			}
+				setErrors(errors);
+				return prev;
+			});
 		},
 		[id, model]
 	);
