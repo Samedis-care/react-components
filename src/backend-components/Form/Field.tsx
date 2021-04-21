@@ -1,6 +1,5 @@
-import React, { useCallback, useContext, useEffect, useMemo } from "react";
-import { FormContext } from "./Form";
-import { useFormikContext } from "formik";
+import React, { useCallback, useEffect, useMemo } from "react";
+import { useFormContext } from "./Form";
 import {
 	ModelFieldDefinition,
 	PageVisibility,
@@ -38,10 +37,6 @@ interface FieldProps {
 }
 
 const Field = (props: FieldProps): React.ReactElement => {
-	const formContext = useContext(FormContext);
-	if (!formContext) throw new Error("You can't use a Field without a Form");
-
-	// eslint-disable-next-line @typescript-eslint/unbound-method
 	const {
 		values,
 		errors,
@@ -50,9 +45,11 @@ const Field = (props: FieldProps): React.ReactElement => {
 		handleBlur,
 		initialValues,
 		setFieldTouched,
-	} = useFormikContext<Record<string, unknown>>();
-
-	const { setError, model, markFieldMounted } = formContext;
+		setError,
+		model,
+		markFieldMounted,
+		relations,
+	} = useFormContext();
 
 	let fieldDef: ModelFieldDefinition<unknown, string, PageVisibility, never> =
 		model.fields[props.name];
@@ -97,7 +94,7 @@ const Field = (props: FieldProps): React.ReactElement => {
 	const label = fieldDef.getLabel();
 	const touch = touched[props.name] || false;
 	const errorMsg = (touch && errors[props.name]) || null;
-	const relationData = formContext.relations[props.name];
+	const relationData = relations[props.name];
 	const visibility = getVisibility(
 		hasId ? fieldDef.visibility.edit : fieldDef.visibility.create,
 		values

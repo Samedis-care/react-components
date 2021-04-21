@@ -41,7 +41,6 @@ Used Libraries:
 - Redux (Provided and used by the backend integration for data handling)
 - moment.js (Used for localized date/time related components)
 - react-select (Used as selector component)
-- formik (Used for easy form handling)
 - react-query (Used as backend connector/caching layer)
 
 ## Developer Setup
