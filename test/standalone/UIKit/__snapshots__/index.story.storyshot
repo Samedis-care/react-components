@@ -6017,6 +6017,7 @@ exports[`Storyshots Standalone/UIKit ActionButton 1`] = `
                                     disabled={false}
                                     fullWidth={true}
                                     onClick={[Function]}
+                                    small={false}
                                     variant="contained"
                                   >
                                     <WithStyles(ForwardRef(Button))
@@ -6033,6 +6034,7 @@ exports[`Storyshots Standalone/UIKit ActionButton 1`] = `
                                       disabled={false}
                                       fullWidth={true}
                                       onClick={[Function]}
+                                      small={false}
                                       variant="contained"
                                     >
                                       <ForwardRef(Button)
@@ -6073,6 +6075,7 @@ exports[`Storyshots Standalone/UIKit ActionButton 1`] = `
                                         disabled={false}
                                         fullWidth={true}
                                         onClick={[Function]}
+                                        small={false}
                                         variant="contained"
                                       >
                                         <WithStyles(ForwardRef(ButtonBase))
@@ -6082,6 +6085,7 @@ exports[`Storyshots Standalone/UIKit ActionButton 1`] = `
                                           focusRipple={true}
                                           focusVisibleClassName="Mui-focusVisible"
                                           onClick={[Function]}
+                                          small={false}
                                           type="button"
                                         >
                                           <ForwardRef(ButtonBase)
@@ -6098,6 +6102,7 @@ exports[`Storyshots Standalone/UIKit ActionButton 1`] = `
                                             focusRipple={true}
                                             focusVisibleClassName="Mui-focusVisible"
                                             onClick={[Function]}
+                                            small={false}
                                             type="button"
                                           >
                                             <button
@@ -6115,6 +6120,7 @@ exports[`Storyshots Standalone/UIKit ActionButton 1`] = `
                                               onTouchEnd={[Function]}
                                               onTouchMove={[Function]}
                                               onTouchStart={[Function]}
+                                              small={false}
                                               tabIndex={0}
                                               type="button"
                                             >
@@ -35414,6 +35420,7 @@ exports[`Storyshots Standalone/UIKit FormButtons 1`] = `
                                                   disabled={false}
                                                   fullWidth={true}
                                                   onClick={[Function]}
+                                                  small={false}
                                                   variant="contained"
                                                 >
                                                   <WithStyles(ForwardRef(Button))
@@ -35430,6 +35437,7 @@ exports[`Storyshots Standalone/UIKit FormButtons 1`] = `
                                                     disabled={false}
                                                     fullWidth={true}
                                                     onClick={[Function]}
+                                                    small={false}
                                                     variant="contained"
                                                   >
                                                     <ForwardRef(Button)
@@ -35470,6 +35478,7 @@ exports[`Storyshots Standalone/UIKit FormButtons 1`] = `
                                                       disabled={false}
                                                       fullWidth={true}
                                                       onClick={[Function]}
+                                                      small={false}
                                                       variant="contained"
                                                     >
                                                       <WithStyles(ForwardRef(ButtonBase))
@@ -35479,6 +35488,7 @@ exports[`Storyshots Standalone/UIKit FormButtons 1`] = `
                                                         focusRipple={true}
                                                         focusVisibleClassName="Mui-focusVisible"
                                                         onClick={[Function]}
+                                                        small={false}
                                                         type="button"
                                                       >
                                                         <ForwardRef(ButtonBase)
@@ -35495,6 +35505,7 @@ exports[`Storyshots Standalone/UIKit FormButtons 1`] = `
                                                           focusRipple={true}
                                                           focusVisibleClassName="Mui-focusVisible"
                                                           onClick={[Function]}
+                                                          small={false}
                                                           type="button"
                                                         >
                                                           <button
@@ -35512,6 +35523,7 @@ exports[`Storyshots Standalone/UIKit FormButtons 1`] = `
                                                             onTouchEnd={[Function]}
                                                             onTouchMove={[Function]}
                                                             onTouchStart={[Function]}
+                                                            small={false}
                                                             tabIndex={0}
                                                             type="button"
                                                           >
@@ -36896,6 +36908,7 @@ exports[`Storyshots Standalone/UIKit FormButtons 1`] = `
                                                       onMouseOver={[Function]}
                                                       onTouchEnd={[Function]}
                                                       onTouchStart={[Function]}
+                                                      small={true}
                                                       startIcon={<Memo />}
                                                       title={null}
                                                       variant="contained"
@@ -36922,6 +36935,7 @@ exports[`Storyshots Standalone/UIKit FormButtons 1`] = `
                                                         onMouseOver={[Function]}
                                                         onTouchEnd={[Function]}
                                                         onTouchStart={[Function]}
+                                                        small={true}
                                                         startIcon={<Memo />}
                                                         title={null}
                                                         variant="contained"
@@ -36972,6 +36986,7 @@ exports[`Storyshots Standalone/UIKit FormButtons 1`] = `
                                                           onMouseOver={[Function]}
                                                           onTouchEnd={[Function]}
                                                           onTouchStart={[Function]}
+                                                          small={true}
                                                           startIcon={<Memo />}
                                                           title={null}
                                                           variant="contained"
@@ -36990,6 +37005,7 @@ exports[`Storyshots Standalone/UIKit FormButtons 1`] = `
                                                             onMouseOver={[Function]}
                                                             onTouchEnd={[Function]}
                                                             onTouchStart={[Function]}
+                                                            small={true}
                                                             title={null}
                                                             type="button"
                                                           >
@@ -37014,6 +37030,7 @@ exports[`Storyshots Standalone/UIKit FormButtons 1`] = `
                                                               onMouseOver={[Function]}
                                                               onTouchEnd={[Function]}
                                                               onTouchStart={[Function]}
+                                                              small={true}
                                                               title={null}
                                                               type="button"
                                                             >
@@ -37034,6 +37051,7 @@ exports[`Storyshots Standalone/UIKit FormButtons 1`] = `
                                                                 onTouchEnd={[Function]}
                                                                 onTouchMove={[Function]}
                                                                 onTouchStart={[Function]}
+                                                                small={true}
                                                                 tabIndex={0}
                                                                 title={null}
                                                                 type="button"
@@ -37318,6 +37336,7 @@ exports[`Storyshots Standalone/UIKit FormButtons 1`] = `
                                                   disabled={true}
                                                   fullWidth={true}
                                                   onClick={[Function]}
+                                                  small={false}
                                                   variant="contained"
                                                 >
                                                   <WithStyles(ForwardRef(Button))
@@ -37334,6 +37353,7 @@ exports[`Storyshots Standalone/UIKit FormButtons 1`] = `
                                                     disabled={true}
                                                     fullWidth={true}
                                                     onClick={[Function]}
+                                                    small={false}
                                                     variant="contained"
                                                   >
                                                     <ForwardRef(Button)
@@ -37374,6 +37394,7 @@ exports[`Storyshots Standalone/UIKit FormButtons 1`] = `
                                                       disabled={true}
                                                       fullWidth={true}
                                                       onClick={[Function]}
+                                                      small={false}
                                                       variant="contained"
                                                     >
                                                       <WithStyles(ForwardRef(ButtonBase))
@@ -37383,6 +37404,7 @@ exports[`Storyshots Standalone/UIKit FormButtons 1`] = `
                                                         focusRipple={true}
                                                         focusVisibleClassName="Mui-focusVisible"
                                                         onClick={[Function]}
+                                                        small={false}
                                                         type="button"
                                                       >
                                                         <ForwardRef(ButtonBase)
@@ -37399,6 +37421,7 @@ exports[`Storyshots Standalone/UIKit FormButtons 1`] = `
                                                           focusRipple={true}
                                                           focusVisibleClassName="Mui-focusVisible"
                                                           onClick={[Function]}
+                                                          small={false}
                                                           type="button"
                                                         >
                                                           <button
@@ -37416,6 +37439,7 @@ exports[`Storyshots Standalone/UIKit FormButtons 1`] = `
                                                             onTouchEnd={[Function]}
                                                             onTouchMove={[Function]}
                                                             onTouchStart={[Function]}
+                                                            small={false}
                                                             tabIndex={-1}
                                                             type="button"
                                                           >
@@ -37571,6 +37595,7 @@ exports[`Storyshots Standalone/UIKit FormButtons 1`] = `
                                                   disabled={true}
                                                   fullWidth={false}
                                                   onClick={[Function]}
+                                                  small={true}
                                                   startIcon={<Memo />}
                                                   variant="contained"
                                                 >
@@ -37588,6 +37613,7 @@ exports[`Storyshots Standalone/UIKit FormButtons 1`] = `
                                                     disabled={true}
                                                     fullWidth={false}
                                                     onClick={[Function]}
+                                                    small={true}
                                                     startIcon={<Memo />}
                                                     variant="contained"
                                                   >
@@ -37629,6 +37655,7 @@ exports[`Storyshots Standalone/UIKit FormButtons 1`] = `
                                                       disabled={true}
                                                       fullWidth={false}
                                                       onClick={[Function]}
+                                                      small={true}
                                                       startIcon={<Memo />}
                                                       variant="contained"
                                                     >
@@ -37639,6 +37666,7 @@ exports[`Storyshots Standalone/UIKit FormButtons 1`] = `
                                                         focusRipple={true}
                                                         focusVisibleClassName="Mui-focusVisible"
                                                         onClick={[Function]}
+                                                        small={true}
                                                         type="button"
                                                       >
                                                         <ForwardRef(ButtonBase)
@@ -37655,6 +37683,7 @@ exports[`Storyshots Standalone/UIKit FormButtons 1`] = `
                                                           focusRipple={true}
                                                           focusVisibleClassName="Mui-focusVisible"
                                                           onClick={[Function]}
+                                                          small={true}
                                                           type="button"
                                                         >
                                                           <button
@@ -37672,6 +37701,7 @@ exports[`Storyshots Standalone/UIKit FormButtons 1`] = `
                                                             onTouchEnd={[Function]}
                                                             onTouchMove={[Function]}
                                                             onTouchStart={[Function]}
+                                                            small={true}
                                                             tabIndex={-1}
                                                             type="button"
                                                           >
