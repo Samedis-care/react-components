@@ -67,6 +67,11 @@ export interface CrudProps<
 	 */
 	deletePermission: Permission;
 	/**
+	 * The view permission (shows form in read-only mode if edit permission is not present)
+	 * Set to `false` to only show the form page if edit permissions are present
+	 */
+	readPermission: Permission;
+	/**
 	 * The edit record permission
 	 */
 	editPermission: Permission;
@@ -181,7 +186,9 @@ const CRUD = <
 			model={props.model}
 			forceRefreshToken={gridRefreshToken}
 			onEdit={
-				hasPermission(perms, props.editPermission) && props.children
+				(hasPermission(perms, props.readPermission) ||
+					hasPermission(perms, props.editPermission)) &&
+				props.children
 					? showEditPage
 					: undefined
 			}
@@ -205,6 +212,7 @@ const CRUD = <
 			customProps={{
 				goBack: showOverview,
 			}}
+			readOnly={!hasPermission(perms, props.editPermission)}
 		>
 			{formComponent}
 		</Form>

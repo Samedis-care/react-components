@@ -23,6 +23,7 @@ export const CrudStory = (): React.ReactElement => {
 	const classes = useStyles();
 	const [, setPerms] = usePermissionContext();
 	const allowDelete = boolean("Allow delete", true);
+	const allowRead = boolean("Allow read", true);
 	const allowEdit = boolean("Allow edit", true);
 	const allowNew = boolean("Allow create new", true);
 	const allowExport = boolean("Allow export", true);
@@ -30,11 +31,12 @@ export const CrudStory = (): React.ReactElement => {
 	useEffect(() => {
 		const perms = [];
 		if (allowDelete) perms.push("crud.delete");
+		if (allowRead) perms.push("crud.read");
 		if (allowEdit) perms.push("crud.edit");
 		if (allowNew) perms.push("crud.new");
 		if (allowExport) perms.push("crud.export");
 		setPerms(perms);
-	}, [allowDelete, allowEdit, allowNew, allowExport, setPerms]);
+	}, [allowDelete, allowEdit, allowNew, allowExport, setPerms, allowRead]);
 
 	return (
 		<div className={classes.wrapper}>
@@ -43,6 +45,7 @@ export const CrudStory = (): React.ReactElement => {
 				formProps={{ errorComponent: ErrorComponent }}
 				gridProps={{}}
 				deletePermission={"crud.delete"}
+				readPermission={"crud.read"}
 				editPermission={"crud.edit"}
 				newPermission={"crud.new"}
 				exportPermission={"crud.export"}

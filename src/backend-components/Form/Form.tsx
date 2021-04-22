@@ -113,6 +113,10 @@ export interface FormProps<
 	 */
 	onlyValidateMounted?: boolean;
 	/**
+	 * Is the form read-only?
+	 */
+	readOnly?: boolean;
+	/**
 	 * Nested form name
 	 * Enables nested form mode if set to non-empty string
 	 * Currently supports validation and submit with main form. Stores values, touched and errors on main form state.
@@ -197,6 +201,10 @@ export interface FormContextData {
 	 * @see FormProps.onlyValidateMounted
 	 */
 	onlyValidateMounted: boolean;
+	/**
+	 * @see FormProps.readOnly
+	 */
+	readOnly: boolean;
 	/**
 	 * Is the form being submitted
 	 */
@@ -284,6 +292,7 @@ const Form = <
 		customProps,
 		onlyValidateMounted,
 		onlySubmitMounted,
+		readOnly,
 		nestedFormName,
 		nestedFormPreSubmitHandler,
 	} = props;
@@ -652,6 +661,7 @@ const Form = <
 			setFieldTouched,
 			resetForm,
 			parentFormContext: nestedFormName ? parentFormContext : null,
+			readOnly: !!readOnly,
 		}),
 		[
 			model,
@@ -677,6 +687,7 @@ const Form = <
 			resetForm,
 			parentFormContext,
 			nestedFormName,
+			readOnly,
 		]
 	);
 

@@ -35,9 +35,9 @@ export const usePermissionContext = (): [
 };
 
 /**
- * A single permission, multiple permissions or no permission required (null)
+ * A single permission, multiple permissions or no permission required (null) or never (false)
  */
-export type Permission = string | string[] | null;
+export type Permission = string | string[] | null | false;
 
 /**
  * Pattern matching permission checking
@@ -46,6 +46,8 @@ export type Permission = string | string[] | null;
  */
 export const hasPermission = (perms: string[], perm: Permission): boolean => {
 	if (perm === null) return true;
+	if (perm === false) return false;
+
 	if (typeof perm !== "string") {
 		for (const canDo of perm) {
 			if (hasPermission(perms, canDo)) {

@@ -49,6 +49,7 @@ const Field = (props: FieldProps): React.ReactElement => {
 		model,
 		markFieldMounted,
 		relations,
+		readOnly,
 	} = useFormContext();
 
 	let fieldDef: ModelFieldDefinition<unknown, string, PageVisibility, never> =
@@ -107,7 +108,7 @@ const Field = (props: FieldProps): React.ReactElement => {
 				value: value,
 				touched: touch,
 				initialValue: initialValue,
-				visibility: visibility,
+				visibility: readOnly ? { ...visibility, readOnly: true } : visibility,
 				handleChange: setFieldValueHookWrapper,
 				handleBlur,
 				label: label,
@@ -132,6 +133,7 @@ const Field = (props: FieldProps): React.ReactElement => {
 			touch,
 			relationModel,
 			relationData,
+			readOnly,
 		]
 	);
 };
