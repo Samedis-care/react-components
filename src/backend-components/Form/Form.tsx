@@ -264,6 +264,18 @@ export const useFormContext = (): FormContextData => {
 	return ctx;
 };
 
+export type FormContextDataLite = Pick<
+	FormContextData,
+	"onlySubmitMounted" | "onlyValidateMounted" | "readOnly"
+>;
+const FormContextLite = React.createContext<FormContextDataLite | null>(null);
+export const useFormContextLite = (): FormContextDataLite => {
+	const ctx = useContext(FormContextLite);
+	if (!ctx)
+		throw new Error("Form Context (Lite) not set. Not using form engine?");
+	return ctx;
+};
+
 export interface FormNestedState {
 	values: Record<string, unknown>;
 	touched: Record<string, boolean>;
@@ -691,6 +703,15 @@ const Form = <
 		]
 	);
 
+	const formContextDataLite: FormContextDataLite = useMemo(
+		() => ({
+			onlySubmitMounted: !!onlySubmitMounted,
+			onlyValidateMounted: !!onlyValidateMounted,
+			readOnly: !!readOnly,
+		}),
+		[onlySubmitMounted, onlyValidateMounted, readOnly]
+	);
+
 	if (isLoading || isObjectEmpty(values)) {
 		return <Loader />;
 	}
@@ -707,26 +728,28 @@ const Form = <
 	}
 
 	return (
-		<FormContext.Provider value={formContextData}>
-			<form onSubmit={handleSubmit}>
-				{displayError && <ErrorComponent error={displayError} />}
-				{isLoading ? (
-					<div style={loaderContainerStyles}>
-						<Loader />
-					</div>
-				) : (
-					<Children
-						isSubmitting={submitting}
-						values={props.renderConditionally ? values : undefined}
-						submit={submitForm}
-						reset={resetForm}
-						dirty={dirty}
-						id={id}
-						customProps={customProps}
-					/>
-				)}
-			</form>
-		</FormContext.Provider>
+		<FormContextLite.Provider value={formContextDataLite}>
+			<FormContext.Provider value={formContextData}>
+				<form onSubmit={handleSubmit}>
+					{displayError && <ErrorComponent error={displayError} />}
+					{isLoading ? (
+						<div style={loaderContainerStyles}>
+							<Loader />
+						</div>
+					) : (
+						<Children
+							isSubmitting={submitting}
+							values={props.renderConditionally ? values : undefined}
+							submit={submitForm}
+							reset={resetForm}
+							dirty={dirty}
+							id={id}
+							customProps={customProps}
+						/>
+					)}
+				</form>
+			</FormContext.Provider>
+		</FormContextLite.Provider>
 	);
 };
 
