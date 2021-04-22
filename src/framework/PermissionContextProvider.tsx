@@ -47,10 +47,12 @@ export type Permission = string | string[] | null;
 export const hasPermission = (perms: string[], perm: Permission): boolean => {
 	if (perm === null) return true;
 	if (typeof perm !== "string") {
-		return (
-			perm.map((canDo) => hasPermission(perms, canDo)).filter((res) => !res)
-				.length > 0
-		);
+		for (const canDo of perm) {
+			if (hasPermission(perms, canDo)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	const checkParts = perm.split(".");
