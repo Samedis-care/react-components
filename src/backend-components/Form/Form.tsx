@@ -112,6 +112,19 @@ export interface FormProps<
 	 * Only validate mounted fields
 	 */
 	onlyValidateMounted?: boolean;
+	/**
+	 * Nested form name
+	 * Enables nested form mode if set to non-empty string
+	 * Currently supports validation and submit with main form. Stores values, touched and errors on main form state.
+	 * No support for pre-/post-submit handlers and custom state yet
+	 */
+	nestedFormName?: string;
+	/**
+	 * Submit preparation handler
+	 * Called after parent form submit, before this form submit
+	 * @param id The ID of the parent form (after submit)
+	 */
+	nestedFormPreSubmitHandler?: (id: string) => Promise<void> | unknown;
 }
 
 export interface FormContextData {
@@ -227,6 +240,10 @@ export interface FormContextData {
 	 * Resets the form to server values
 	 */
 	resetForm: () => void;
+	/**
+	 * Parent form context (if present and FormProps.nestedFormName is set)
+	 */
+	parentFormContext: FormContextData | null;
 }
 
 /**
@@ -238,6 +255,12 @@ export const useFormContext = (): FormContextData => {
 	if (!ctx) throw new Error("Form Context not set. Not using form engine?");
 	return ctx;
 };
+
+export interface FormNestedState {
+	values: Record<string, unknown>;
+	touched: Record<string, boolean>;
+	errors: Record<string, string | null>;
+}
 
 const loaderContainerStyles: CSSProperties = {
 	height: 320,
@@ -261,6 +284,8 @@ const Form = <
 		customProps,
 		onlyValidateMounted,
 		onlySubmitMounted,
+		nestedFormName,
+		nestedFormPreSubmitHandler,
 	} = props;
 	const ErrorComponent = props.errorComponent;
 
@@ -534,6 +559,64 @@ const Form = <
 		[submitForm]
 	);
 
+	// nested forms
+	const parentFormContext = useContext(FormContext);
+	if (nestedFormName && !parentFormContext)
+		throw new Error("Nested form mode wanted, but no parent context found");
+
+	// nested forms - loading
+	useEffect(() => {
+		if (!parentFormContext || !nestedFormName) return;
+		const state = parentFormContext.getCustomState<FormNestedState>(
+			nestedFormName
+		);
+		if (!state) return;
+		setValues(state.values);
+		setErrors(state.errors);
+		setTouched(state.touched);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []);
+
+	// nested forms - saving
+	useEffect(() => {
+		if (!parentFormContext || !nestedFormName) return;
+		parentFormContext.setCustomState<FormNestedState>(nestedFormName, () => ({
+			values,
+			errors,
+			touched,
+		}));
+	}, [values, errors, touched, parentFormContext, nestedFormName]);
+
+	// nested forms - validation and submit hook
+	useEffect(() => {
+		if (!parentFormContext || !nestedFormName) return;
+		const enforceValidation = () => {
+			const errors = validateForm();
+			if (!isObjectEmpty(errors)) throw errors;
+		};
+		const submitNestedForm = async (id: string) => {
+			if (nestedFormPreSubmitHandler) {
+				await nestedFormPreSubmitHandler(id);
+			}
+			return submitForm();
+		};
+
+		parentFormContext.setPreSubmitHandler(nestedFormName, enforceValidation);
+		parentFormContext.setPostSubmitHandler(nestedFormName, submitNestedForm);
+		if (!parentFormContext.onlySubmitMounted) return;
+		return () => {
+			parentFormContext.removePreSubmitHandler(nestedFormName);
+			parentFormContext.removePostSubmitHandler(nestedFormName);
+		};
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [
+		parentFormContext?.setPreSubmitHandler,
+		validateForm,
+		nestedFormPreSubmitHandler,
+		submitForm,
+		nestedFormName,
+	]);
+
 	// context and rendering
 	const Children = useMemo(() => React.memo(children), [children]);
 	const setError = useCallback(
@@ -568,6 +651,7 @@ const Form = <
 			handleBlur,
 			setFieldTouched,
 			resetForm,
+			parentFormContext: nestedFormName ? parentFormContext : null,
 		}),
 		[
 			model,
@@ -591,6 +675,8 @@ const Form = <
 			handleBlur,
 			setFieldTouched,
 			resetForm,
+			parentFormContext,
+			nestedFormName,
 		]
 	);
 
