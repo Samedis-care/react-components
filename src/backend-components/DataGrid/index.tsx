@@ -1,8 +1,9 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import DataGrid, {
 	DataGridData,
 	IDataGridLoadDataParameters,
 	DataGridProps,
+	IDataGridAddButton,
 } from "../../standalone/DataGrid/DataGrid";
 import Model, {
 	ModelFieldName,
@@ -30,6 +31,10 @@ export interface BackendDataGridProps<
 	 * Disable export?
 	 */
 	disableExport?: boolean;
+	/**
+	 * Additional buttons next to new button
+	 */
+	additionalNewButtons?: IDataGridAddButton[];
 }
 
 const BackendDataGrid = <
@@ -185,9 +190,31 @@ const BackendDataGrid = <
 		[pushDialog, t, enableDeleteAll, deleteAdvanced, deleteMultiple]
 	);
 
+	const addNewButtons: DataGridProps["onAddNew"] = useMemo(() => {
+		if (!props.additionalNewButtons) return props.onAddNew;
+		if (!props.onAddNew) return props.additionalNewButtons;
+
+		let result: IDataGridAddButton[];
+		if (typeof props.onAddNew === "function") {
+			result = [
+				{
+					label: t("standalone.data-grid.header.new") ?? "",
+					onClick: props.onAddNew,
+				},
+			];
+		} else if (props.onAddNew) {
+			result = props.onAddNew;
+		} else {
+			result = [];
+		}
+		result = result.concat(props.additionalNewButtons);
+		return result;
+	}, [props.additionalNewButtons, props.onAddNew, t]);
+
 	return (
 		<DataGrid
 			{...props}
+			onAddNew={addNewButtons}
 			onDelete={enableDelete ? handleDelete : undefined}
 			loadData={loadData}
 			columns={model.toDataGridColumnDefinition()}
