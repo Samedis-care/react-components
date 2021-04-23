@@ -252,6 +252,11 @@ export interface FormContextData {
 	 */
 	resetForm: () => void;
 	/**
+	 * Validates the form and returns a list of validation errors
+	 * If the returned object is empty no validation errors occurred.
+	 */
+	validateForm: () => Record<string, string>;
+	/**
 	 * Parent form context (if present and FormProps.nestedFormName is set)
 	 */
 	parentFormContext: FormContextData | null;
@@ -667,6 +672,7 @@ const Form = <
 			handleBlur,
 			setFieldTouched,
 			resetForm,
+			validateForm,
 			parentFormContext: nestedFormName ? parentFormContext : null,
 			readOnly: !!readOnly,
 		}),
@@ -692,6 +698,7 @@ const Form = <
 			handleBlur,
 			setFieldTouched,
 			resetForm,
+			validateForm,
 			parentFormContext,
 			nestedFormName,
 			readOnly,
