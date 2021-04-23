@@ -257,7 +257,7 @@ export interface FormContextData {
 /**
  * Context which stores information about the current form so it can be used by fields
  */
-const FormContext = React.createContext<FormContextData | null>(null);
+export const FormContext = React.createContext<FormContextData | null>(null);
 export const useFormContext = (): FormContextData => {
 	const ctx = useContext(FormContext);
 	if (!ctx) throw new Error("Form Context not set. Not using form engine?");
@@ -268,7 +268,9 @@ export type FormContextDataLite = Pick<
 	FormContextData,
 	"onlySubmitMounted" | "onlyValidateMounted" | "readOnly"
 >;
-const FormContextLite = React.createContext<FormContextDataLite | null>(null);
+export const FormContextLite = React.createContext<FormContextDataLite | null>(
+	null
+);
 export const useFormContextLite = (): FormContextDataLite => {
 	const ctx = useContext(FormContextLite);
 	if (!ctx)
@@ -609,7 +611,14 @@ const Form = <
 			errors,
 			touched,
 		}));
-	}, [values, errors, touched, parentFormContext, nestedFormName]);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [
+		values,
+		errors,
+		touched,
+		parentFormContext?.setCustomState,
+		nestedFormName,
+	]);
 
 	// nested forms - validation and submit hook
 	useEffect(() => {
