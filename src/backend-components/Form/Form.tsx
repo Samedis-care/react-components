@@ -342,27 +342,23 @@ const Form = <
 	}, []);
 
 	// custom fields - state
-	const [customFieldState, setCustomFieldState] = useState<
-		Record<string, unknown>
-	>({});
+	const customFieldState = useRef<Record<string, unknown>>({});
 	const getCustomState = useCallback(
-		<T extends unknown>(field: string): T => customFieldState[field] as T,
-		[customFieldState]
+		<T extends unknown>(field: string): T =>
+			customFieldState.current[field] as T,
+		[]
 	);
 	const setCustomState = useCallback(
 		<T extends unknown>(
 			field: string,
 			value: Dispatch<SetStateAction<T | undefined>>
 		) => {
-			setCustomFieldState((prev) => ({
-				...prev,
-				[field]:
-					typeof value === "function"
-						? value(prev[field] as T | undefined)
-						: value,
-			}));
+			customFieldState.current[field] =
+				typeof value === "function"
+					? value(customFieldState.current[field] as T | undefined)
+					: value;
 		},
-		[setCustomFieldState]
+		[]
 	);
 
 	// main form handling
@@ -613,10 +609,11 @@ const Form = <
 
 		parentFormContext.setPreSubmitHandler(nestedFormName, enforceValidation);
 		parentFormContext.setPostSubmitHandler(nestedFormName, submitNestedForm);
-		if (!parentFormContext.onlySubmitMounted) return;
 		return () => {
-			parentFormContext.removePreSubmitHandler(nestedFormName);
-			parentFormContext.removePostSubmitHandler(nestedFormName);
+			if (parentFormContext.onlyValidateMounted)
+				parentFormContext.removePreSubmitHandler(nestedFormName);
+			if (parentFormContext.onlySubmitMounted)
+				parentFormContext.removePostSubmitHandler(nestedFormName);
 		};
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [
