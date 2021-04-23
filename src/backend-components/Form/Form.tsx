@@ -612,6 +612,12 @@ const Form = <
 	// nested forms - validation and submit hook
 	useEffect(() => {
 		if (!parentFormContext || !nestedFormName) return;
+		const validateNestedForm = () => {
+			setTouched((prev) =>
+				Object.fromEntries(Object.keys(prev).map((field) => [field, true]))
+			);
+			return validateForm();
+		};
 		const submitNestedForm = async (id: string) => {
 			if (nestedFormPreSubmitHandler) {
 				await nestedFormPreSubmitHandler(id);
@@ -619,7 +625,10 @@ const Form = <
 			return submitForm();
 		};
 
-		parentFormContext.setCustomValidationHandler(nestedFormName, validateForm);
+		parentFormContext.setCustomValidationHandler(
+			nestedFormName,
+			validateNestedForm
+		);
 		parentFormContext.setPostSubmitHandler(nestedFormName, submitNestedForm);
 		return () => {
 			if (parentFormContext.onlyValidateMounted)

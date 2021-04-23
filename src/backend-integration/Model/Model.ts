@@ -170,7 +170,7 @@ class Model<
 	/**
 	 * The backend connector providing a CRUD interface for the model
 	 */
-	public readonly connector: Connector<KeyT, VisibilityT, CustomT>;
+	public connector: Connector<KeyT, VisibilityT, CustomT>;
 	/**
 	 * Optional additional cache keys
 	 */
