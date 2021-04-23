@@ -7,6 +7,7 @@ import React, {
 	useContext,
 	useEffect,
 	useMemo,
+	useRef,
 	useState,
 } from "react";
 import Model, {
@@ -317,52 +318,28 @@ const Form = <
 	const customDirty = customDirtyCounter > 0;
 
 	// custom fields - pre submit handlers
-	const [preSubmitHandlers, setPreSubmitHandlers] = useState<
-		Record<string, PreSubmitHandler>
-	>({});
+	const preSubmitHandlers = useRef<Record<string, PreSubmitHandler>>({});
 	const setPreSubmitHandler = useCallback(
 		(field: string, handler: PreSubmitHandler) => {
-			setPreSubmitHandlers((prev) => ({
-				...prev,
-				[field]: handler,
-			}));
+			preSubmitHandlers.current[field] = handler;
 		},
-		[setPreSubmitHandlers]
+		[]
 	);
-	const removePreSubmitHandler = useCallback(
-		(field: string) => {
-			setPreSubmitHandlers((prev) => {
-				const clone = { ...prev };
-				delete clone[field];
-				return clone;
-			});
-		},
-		[setPreSubmitHandlers]
-	);
+	const removePreSubmitHandler = useCallback((field: string) => {
+		delete preSubmitHandlers.current[field];
+	}, []);
 
 	// custom fields - post submit handlers
-	const [postSubmitHandlers, setPostSubmitHandlers] = useState<
-		Record<string, PostSubmitHandler>
-	>({});
+	const postSubmitHandlers = useRef<Record<string, PostSubmitHandler>>({});
 	const setPostSubmitHandler = useCallback(
 		(field: string, handler: PostSubmitHandler) => {
-			setPostSubmitHandlers((prev) => ({
-				...prev,
-				[field]: handler,
-			}));
+			postSubmitHandlers.current[field] = handler;
 		},
-		[setPostSubmitHandlers]
+		[]
 	);
-	const removePostSubmitHandler = useCallback(
-		(field: string) => {
-			setPostSubmitHandlers((prev) => {
-				const clone = { ...prev };
-				delete clone[field];
-				return clone;
-			});
-		},
-		[setPostSubmitHandlers]
-	);
+	const removePostSubmitHandler = useCallback((field: string) => {
+		delete postSubmitHandlers.current[field];
+	}, []);
 
 	// custom fields - state
 	const [customFieldState, setCustomFieldState] = useState<
@@ -531,7 +508,7 @@ const Form = <
 			}
 
 			await Promise.all(
-				Object.values(preSubmitHandlers).map((handler) => handler())
+				Object.values(preSubmitHandlers.current).map((handler) => handler())
 			);
 
 			const result = await updateData(
@@ -549,7 +526,7 @@ const Form = <
 			setValues(newValues);
 
 			await Promise.all(
-				Object.values(postSubmitHandlers).map((handler) =>
+				Object.values(postSubmitHandlers.current).map((handler) =>
 					handler((newValues as Record<"id", string>).id)
 				)
 			);
