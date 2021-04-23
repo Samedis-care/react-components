@@ -23,7 +23,7 @@ import { isObjectEmpty } from "../../utils";
  * Throw to cancel submit and display error.
  * Thrown error may be a Record<string, string> (validation error) or an normal Error (other error)
  */
-export type PreSubmitHandler = () => Promise<void> | unknown;
+export type CustomValidationHandler = () => Record<string, string>;
 /**
  * Post submit handler to submit additional data for the submitted record
  */
@@ -120,8 +120,7 @@ export interface FormProps<
 	/**
 	 * Nested form name
 	 * Enables nested form mode if set to non-empty string
-	 * Currently supports validation and submit with main form. Stores values, touched and errors on main form state.
-	 * No support for pre-/post-submit handlers and custom state yet
+	 * Form is submitted with main form submit. Does not support multiple layers of nesting
 	 */
 	nestedFormName?: string;
 	/**
@@ -156,12 +155,15 @@ export interface FormContextData {
 	 * Sets the pre submit handler (for custom fields)
 	 * @param field custom field name (must not be in model)
 	 */
-	setPreSubmitHandler: (field: string, handler: PreSubmitHandler) => void;
+	setCustomValidationHandler: (
+		field: string,
+		handler: CustomValidationHandler
+	) => void;
 	/**
 	 * Removes a pre submit handler (for custom fields)
 	 * @param field custom field name (must not be in model)
 	 */
-	removePreSubmitHandler: (field: string) => void;
+	removeCustomValidationHandler: (field: string) => void;
 	/**
 	 * Sets the post submit handler (for custom fields)
 	 * @param field custom field name (must not be in model)
@@ -318,15 +320,17 @@ const Form = <
 	const customDirty = customDirtyCounter > 0;
 
 	// custom fields - pre submit handlers
-	const preSubmitHandlers = useRef<Record<string, PreSubmitHandler>>({});
-	const setPreSubmitHandler = useCallback(
-		(field: string, handler: PreSubmitHandler) => {
-			preSubmitHandlers.current[field] = handler;
+	const customValidationHandlers = useRef<
+		Record<string, CustomValidationHandler>
+	>({});
+	const setCustomValidationHandler = useCallback(
+		(field: string, handler: CustomValidationHandler) => {
+			customValidationHandlers.current[field] = handler;
 		},
 		[]
 	);
-	const removePreSubmitHandler = useCallback((field: string) => {
-		delete preSubmitHandlers.current[field];
+	const removeCustomValidationHandler = useCallback((field: string) => {
+		delete customValidationHandlers.current[field];
 	}, []);
 
 	// custom fields - post submit handlers
@@ -389,8 +393,8 @@ const Form = <
 
 	// main form handling - dispatch
 	const validateFormInternal = useCallback(
-		(values: Record<string, unknown>) =>
-			model.validate(
+		(values: Record<string, unknown>) => {
+			const errors = model.validate(
 				values,
 				id ? "edit" : "create",
 				onlyValidateMounted
@@ -398,7 +402,19 @@ const Form = <
 							(field) => mountedFields[field as KeyT]
 					  ) as KeyT[])
 					: undefined
-			),
+			);
+			Object.entries(customValidationHandlers.current).forEach(
+				([name, handler]) => {
+					const customErrors = handler();
+					for (const key in customErrors) {
+						if (!Object.prototype.hasOwnProperty.call(customErrors, key))
+							continue;
+						errors[name + "_" + key] = customErrors[key];
+					}
+				}
+			);
+			return errors;
+		},
 		[model, id, onlyValidateMounted, mountedFields]
 	);
 	const validateForm = useCallback(() => validateFormInternal(values), [
@@ -503,10 +519,6 @@ const Form = <
 				throw validation;
 			}
 
-			await Promise.all(
-				Object.values(preSubmitHandlers.current).map((handler) => handler())
-			);
-
 			const result = await updateData(
 				onlySubmitMounted
 					? Object.fromEntries(
@@ -541,7 +553,6 @@ const Form = <
 		}
 	}, [
 		validateForm,
-		preSubmitHandlers,
 		updateData,
 		onlySubmitMounted,
 		values,
@@ -596,10 +607,6 @@ const Form = <
 	// nested forms - validation and submit hook
 	useEffect(() => {
 		if (!parentFormContext || !nestedFormName) return;
-		const enforceValidation = () => {
-			const errors = validateForm();
-			if (!isObjectEmpty(errors)) throw errors;
-		};
 		const submitNestedForm = async (id: string) => {
 			if (nestedFormPreSubmitHandler) {
 				await nestedFormPreSubmitHandler(id);
@@ -607,17 +614,19 @@ const Form = <
 			return submitForm();
 		};
 
-		parentFormContext.setPreSubmitHandler(nestedFormName, enforceValidation);
+		parentFormContext.setCustomValidationHandler(nestedFormName, validateForm);
 		parentFormContext.setPostSubmitHandler(nestedFormName, submitNestedForm);
 		return () => {
 			if (parentFormContext.onlyValidateMounted)
-				parentFormContext.removePreSubmitHandler(nestedFormName);
+				parentFormContext.removeCustomValidationHandler(nestedFormName);
 			if (parentFormContext.onlySubmitMounted)
 				parentFormContext.removePostSubmitHandler(nestedFormName);
 		};
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [
-		parentFormContext?.setPreSubmitHandler,
+		parentFormContext?.setCustomValidationHandler,
+		parentFormContext?.onlyValidateMounted,
+		parentFormContext?.onlySubmitMounted,
 		validateForm,
 		nestedFormPreSubmitHandler,
 		submitForm,
@@ -645,8 +654,8 @@ const Form = <
 			setCustomState,
 			setPostSubmitHandler,
 			removePostSubmitHandler,
-			setPreSubmitHandler,
-			removePreSubmitHandler,
+			setCustomValidationHandler,
+			removeCustomValidationHandler,
 			onlySubmitMounted: !!onlySubmitMounted,
 			onlyValidateMounted: !!onlyValidateMounted,
 			submitting,
@@ -671,8 +680,8 @@ const Form = <
 			setCustomState,
 			setPostSubmitHandler,
 			removePostSubmitHandler,
-			setPreSubmitHandler,
-			removePreSubmitHandler,
+			setCustomValidationHandler,
+			removeCustomValidationHandler,
 			onlySubmitMounted,
 			onlyValidateMounted,
 			submitting,
