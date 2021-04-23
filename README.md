@@ -38,9 +38,7 @@ Used Libraries:
 - Material-UI (Used as base for UI components)
 - i18n (Used to provide pre-translated components)
 - react-router-dom (Provided by the framework to enable programmatically controllable routing in your React app)
-- Redux (Provided and used by the backend integration for data handling)
 - moment.js (Used for localized date/time related components)
-- react-select (Used as selector component)
 - react-query (Used as backend connector/caching layer)
 
 ## Developer Setup
