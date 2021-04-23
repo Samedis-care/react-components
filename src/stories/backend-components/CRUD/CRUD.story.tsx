@@ -96,7 +96,7 @@ export const CrudStory = (): React.ReactElement => {
 						<Grid item xs={6}>
 							<Button
 								type={"submit"}
-								disabled={formProps.isSubmitting}
+								disabled={formProps.isSubmitting || !formProps.dirty}
 								variant={"outlined"}
 								onClick={async () => {
 									try {

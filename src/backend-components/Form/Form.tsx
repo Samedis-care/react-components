@@ -15,7 +15,7 @@ import Model, {
 	PageVisibility,
 } from "../../backend-integration/Model/Model";
 import Loader from "../../standalone/Loader";
-import { isObjectEmpty, shallowCompare } from "../../utils";
+import { isObjectEmpty } from "../../utils";
 
 /**
  * Pre submit handler for additional validations
@@ -395,7 +395,10 @@ const Form = <
 	const [touched, setTouched] = useState<Record<string, boolean>>({});
 	const dirty =
 		useMemo(
-			() => (serverData ? shallowCompare(values, serverData[0]) : false),
+			() =>
+				serverData
+					? JSON.stringify(values) !== JSON.stringify(serverData[0])
+					: false,
 			[values, serverData]
 		) || customDirty;
 	const [errors, setErrors] = useState<Record<string, string | null>>({});
