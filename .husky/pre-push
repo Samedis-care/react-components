@@ -2,7 +2,10 @@
 . "$(dirname "$0")/_/husky.sh"
 
 if [ "$(git branch --show-current)" = "master" ]; then
-  npx --no-install tsc -i --tsBuildInfoFile .tscbuildcache && TZ=UTC npx --no-install jest
+  npx --no-install tsc -i --tsBuildInfoFile .tscbuildcache &
+  TSC_PID=$!
+  TZ=UTC npx --no-install jest
+  wait "$TSC_PID"
 else
   echo "Not on master branch, not running hooks"
 fi
