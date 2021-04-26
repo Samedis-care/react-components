@@ -375,6 +375,7 @@ const Form = <
 	const { mutateAsync: updateData } = model.createOrUpdate();
 
 	const [updateError, setUpdateError] = useState<Error | null>(null);
+	const valuesRef = useRef<Record<string, unknown>>({});
 	const [values, setValues] = useState<Record<string, unknown>>({});
 	const [touched, setTouched] = useState<Record<string, boolean>>({});
 	const dirty =
@@ -397,10 +398,10 @@ const Form = <
 	}, []);
 
 	// main form handling - dispatch
-	const validateFormInternal = useCallback(
-		(values: Record<string, unknown>) => {
+	const validateForm = useCallback(
+		(values?: Record<string, unknown>) => {
 			const errors = model.validate(
-				values,
+				values ?? valuesRef.current,
 				id ? "edit" : "create",
 				onlyValidateMounted
 					? (Object.keys(mountedFields).filter(
@@ -422,21 +423,16 @@ const Form = <
 		},
 		[model, id, onlyValidateMounted, mountedFields]
 	);
-	const validateForm = useCallback(() => validateFormInternal(values), [
-		values,
-		validateFormInternal,
-	]);
 	const validateField = useCallback(
 		(field: string, value?: unknown) => {
-			setValues((prev) => {
-				const errors = validateFormInternal(
-					value !== undefined ? { ...prev, [field]: value } : prev
-				);
-				setErrors(errors);
-				return prev;
-			});
+			const errors = validateForm(
+				value !== undefined
+					? { ...valuesRef.current, [field]: value }
+					: undefined
+			);
+			setErrors(errors);
 		},
-		[validateFormInternal]
+		[validateForm]
 	);
 	const setFieldTouched = useCallback(
 		(field: string, newTouched = true, validate = false) => {
@@ -452,6 +448,7 @@ const Form = <
 	const setFieldValue = useCallback(
 		(field: string, value: unknown, validate = true) => {
 			setFieldTouched(field, true, false);
+			valuesRef.current[field] = value;
 			setValues((prev) => ({ ...prev, [field]: value }));
 			if (validate) validateField(field, value);
 		},
@@ -459,6 +456,7 @@ const Form = <
 	);
 	const resetForm = useCallback(() => {
 		if (!serverData || !serverData[0]) return;
+		valuesRef.current = serverData[0];
 		setValues(serverData[0]);
 	}, [serverData]);
 	const handleBlur = useCallback(
@@ -484,6 +482,7 @@ const Form = <
 	useEffect(() => {
 		if (isLoading || !serverData || !serverData[0]) return;
 
+		valuesRef.current = serverData[0];
 		setValues(serverData[0]);
 		setTouched(
 			Object.fromEntries(Object.keys(serverData[0]).map((key) => [key, false]))
@@ -498,15 +497,12 @@ const Form = <
 		const untouchedFields = Object.entries(touched)
 			.filter(([, touched]) => !touched)
 			.map(([field]) => field);
-		setValues((prev) => {
-			const next = { ...prev };
-			untouchedFields
-				.filter((field) => field in serverData[0])
-				.forEach((field) => {
-					next[field] = serverData[0][field as KeyT];
-				});
-			return next;
-		});
+		untouchedFields
+			.filter((field) => field in serverData[0])
+			.forEach((field) => {
+				valuesRef.current[field] = serverData[0][field as KeyT];
+			});
+		setValues(valuesRef.current);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [serverData]);
 
@@ -527,15 +523,16 @@ const Form = <
 			const result = await updateData(
 				onlySubmitMounted
 					? Object.fromEntries(
-							Object.entries(values).filter(
+							Object.entries(valuesRef.current).filter(
 								([key]) => mountedFields[key as KeyT]
 							)
 					  )
-					: values
+					: valuesRef.current
 			);
 			const newValues = onlySubmitMounted
-				? Object.assign({}, values, result[0])
+				? Object.assign({}, valuesRef.current, result[0])
 				: result[0];
+			valuesRef.current = newValues;
 			setValues(newValues);
 
 			await Promise.all(
@@ -560,7 +557,6 @@ const Form = <
 		validateForm,
 		updateData,
 		onlySubmitMounted,
-		values,
 		postSubmitHandlers,
 		onSubmit,
 		mountedFields,
@@ -586,6 +582,7 @@ const Form = <
 			nestedFormName
 		);
 		if (!state) return;
+		valuesRef.current = state.values;
 		setValues(state.values);
 		setErrors(state.errors);
 		setTouched(state.touched);
