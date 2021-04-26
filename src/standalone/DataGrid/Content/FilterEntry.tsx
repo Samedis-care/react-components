@@ -89,13 +89,13 @@ export interface DataGridContentFilterEntryProps {
 const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 	const { onChange, depth } = props;
 	const { t } = useTranslation(undefined, { i18n });
-	const gridProps = useDataGridProps();
+	const { filterLimit, isFilterSupported } = useDataGridProps();
 
 	const [enumFilterSearch, setEnumFilterSearch] = useState("");
 
 	const classes = useDataGridStyles();
 
-	const maxDepth = gridProps.filterLimit;
+	const maxDepth = filterLimit;
 	let filterType: FilterType =
 		props.value?.type ||
 		(props.valueType === "string"
@@ -108,6 +108,14 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 	let subFilterComboType: FilterComboType =
 		props.value?.nextFilterType || "and";
 	let subFilter = props.value?.nextFilter || undefined;
+
+	const checkSupport = (
+		dataType: ModelFilterType,
+		filterType: FilterType
+	): boolean => {
+		if (!isFilterSupported) return true;
+		return isFilterSupported(dataType, filterType);
+	};
 
 	const updateParent = () =>
 		onChange({
@@ -199,48 +207,100 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 		updateParent();
 	};
 
-	const filterTypeMenuItems = [
-		<MenuItem key={"equals"} value={"equals"}>
-			{t("standalone.data-grid.content.filter-type.eq")}
-		</MenuItem>,
-		<MenuItem key={"notEqual"} value={"notEqual"}>
-			{t("standalone.data-grid.content.filter-type.not-eq")}
-		</MenuItem>,
+	let filterTypeMenuItems = [
+		checkSupport(props.valueType, "equals") && (
+			<MenuItem key={"equals"} value={"equals"}>
+				{t("standalone.data-grid.content.filter-type.eq")}
+			</MenuItem>
+		),
+		checkSupport(props.valueType, "notEqual") && (
+			<MenuItem key={"notEqual"} value={"notEqual"}>
+				{t("standalone.data-grid.content.filter-type.not-eq")}
+			</MenuItem>
+		),
 	];
 	if (props.valueType === "string") {
 		filterTypeMenuItems.push(
-			<MenuItem key={"contains"} value={"contains"}>
-				{t("standalone.data-grid.content.filter-type.contains")}
-			</MenuItem>,
-			<MenuItem key={"notContains"} value={"notContains"}>
-				{t("standalone.data-grid.content.filter-type.not-contains")}
-			</MenuItem>,
-			<MenuItem key={"startsWith"} value={"startsWith"}>
-				{t("standalone.data-grid.content.filter-type.starts-with")}
-			</MenuItem>,
-			<MenuItem key={"endsWith"} value={"endsWith"}>
-				{t("standalone.data-grid.content.filter-type.ends-with")}
-			</MenuItem>
+			checkSupport(props.valueType, "contains") && (
+				<MenuItem key={"contains"} value={"contains"}>
+					{t("standalone.data-grid.content.filter-type.contains")}
+				</MenuItem>
+			),
+			checkSupport(props.valueType, "notContains") && (
+				<MenuItem key={"notContains"} value={"notContains"}>
+					{t("standalone.data-grid.content.filter-type.not-contains")}
+				</MenuItem>
+			),
+			checkSupport(props.valueType, "startsWith") && (
+				<MenuItem key={"startsWith"} value={"startsWith"}>
+					{t("standalone.data-grid.content.filter-type.starts-with")}
+				</MenuItem>
+			),
+			checkSupport(props.valueType, "endsWith") && (
+				<MenuItem key={"endsWith"} value={"endsWith"}>
+					{t("standalone.data-grid.content.filter-type.ends-with")}
+				</MenuItem>
+			)
 		);
-	} else if (props.valueType === "number" || props.valueType === "date") {
+	} else if (props.valueType === "number") {
 		filterTypeMenuItems.push(
-			<MenuItem key={"lessThan"} value={"lessThan"}>
-				{t("standalone.data-grid.content.filter-type.lt")}
-			</MenuItem>,
-			<MenuItem key={"lessThanOrEqual"} value={"lessThanOrEqual"}>
-				{t("standalone.data-grid.content.filter-type.lte")}
-			</MenuItem>,
-			<MenuItem key={"greaterThan"} value={"greaterThan"}>
-				{t("standalone.data-grid.content.filter-type.gt")}
-			</MenuItem>,
-			<MenuItem key={"greaterThanOrEqual"} value={"greaterThanOrEqual"}>
-				{t("standalone.data-grid.content.filter-type.gte")}
-			</MenuItem>,
-			<MenuItem key={"inRange"} value={"inRange"}>
-				{t("standalone.data-grid.content.filter-type.in-range")}
-			</MenuItem>
+			checkSupport(props.valueType, "lessThan") && (
+				<MenuItem key={"lessThan"} value={"lessThan"}>
+					{t("standalone.data-grid.content.filter-type.lt")}
+				</MenuItem>
+			),
+			checkSupport(props.valueType, "lessThanOrEqual") && (
+				<MenuItem key={"lessThanOrEqual"} value={"lessThanOrEqual"}>
+					{t("standalone.data-grid.content.filter-type.lte")}
+				</MenuItem>
+			),
+			checkSupport(props.valueType, "greaterThan") && (
+				<MenuItem key={"greaterThan"} value={"greaterThan"}>
+					{t("standalone.data-grid.content.filter-type.gt")}
+				</MenuItem>
+			),
+			checkSupport(props.valueType, "greaterThanOrEqual") && (
+				<MenuItem key={"greaterThanOrEqual"} value={"greaterThanOrEqual"}>
+					{t("standalone.data-grid.content.filter-type.gte")}
+				</MenuItem>
+			),
+			checkSupport(props.valueType, "inRange") && (
+				<MenuItem key={"inRange"} value={"inRange"}>
+					{t("standalone.data-grid.content.filter-type.in-range")}
+				</MenuItem>
+			)
+		);
+	} else if (props.valueType === "date") {
+		filterTypeMenuItems.push(
+			checkSupport(props.valueType, "lessThan") && (
+				<MenuItem key={"lessThan"} value={"lessThan"}>
+					{t("standalone.data-grid.content.filter-type.lt-date")}
+				</MenuItem>
+			),
+			checkSupport(props.valueType, "lessThanOrEqual") && (
+				<MenuItem key={"lessThanOrEqual"} value={"lessThanOrEqual"}>
+					{t("standalone.data-grid.content.filter-type.lte-date")}
+				</MenuItem>
+			),
+			checkSupport(props.valueType, "greaterThan") && (
+				<MenuItem key={"greaterThan"} value={"greaterThan"}>
+					{t("standalone.data-grid.content.filter-type.gt-date")}
+				</MenuItem>
+			),
+			checkSupport(props.valueType, "greaterThanOrEqual") && (
+				<MenuItem key={"greaterThanOrEqual"} value={"greaterThanOrEqual"}>
+					{t("standalone.data-grid.content.filter-type.gte-date")}
+				</MenuItem>
+			),
+			checkSupport(props.valueType, "inRange") && (
+				<MenuItem key={"inRange"} value={"inRange"}>
+					{t("standalone.data-grid.content.filter-type.in-range-date")}
+				</MenuItem>
+			)
 		);
 	}
+
+	filterTypeMenuItems = filterTypeMenuItems.filter((e) => e);
 
 	return (
 		<>
@@ -256,7 +316,7 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 					<Grid item xs={12}>
 						{props.valueType === "date" ? (
 							<LocalizedKeyboardDatePicker
-								value={filterValue}
+								value={filterValue === "" ? null : filterValue}
 								onChange={onFilterValueChangeDate}
 								fullWidth
 							/>
@@ -272,7 +332,7 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 						<Grid item xs={12}>
 							{props.valueType === "date" ? (
 								<LocalizedKeyboardDatePicker
-									value={filterValue2}
+									value={filterValue2 === "" ? null : filterValue2}
 									onChange={onFilterValue2ChangeDate}
 									fullWidth
 								/>

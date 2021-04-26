@@ -27,7 +27,12 @@
 					"lte": "Less than or equals",
 					"gt": "Greater than",
 					"gte": "Greater than or equals",
-					"in-range": "In range"
+					"in-range": "In range",
+					"lt-date": "Before",
+					"lte-date": "Before or on",
+					"gt-date": "After",
+					"gte-date": "On or after",
+					"in-range-date": "Between dates"
 				},
 				"no-data": "The list does not contain any data."
 			},

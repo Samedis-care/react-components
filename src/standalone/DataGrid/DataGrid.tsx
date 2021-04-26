@@ -16,7 +16,7 @@ import Header, { IDataGridHeaderProps } from "./Header";
 import Footer from "./Footer";
 import Settings from "./Settings";
 import Content from "./Content";
-import { IFilterDef } from "./Content/FilterEntry";
+import { FilterType, IFilterDef } from "./Content/FilterEntry";
 import {
 	debounce,
 	isObjectEmpty,
@@ -176,6 +176,16 @@ export interface IDataGridCallbacks {
 	 * @remarks Called additionally before edit handler
 	 */
 	onRowDoubleClick?: (id: string) => void;
+	/**
+	 * Callback to check if filter is supported
+	 * @param dataType The data type
+	 * @param filterType The filter type
+	 * @returns Supported?
+	 */
+	isFilterSupported?: (
+		dataType: ModelFilterType,
+		filterType: FilterType
+	) => boolean;
 }
 
 export type DataGridAdditionalFilters = Record<string, unknown>;
