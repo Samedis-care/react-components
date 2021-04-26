@@ -8,7 +8,7 @@ const loadLang = (lang: string): Resource =>
 	} as Resource);
 
 // edit this when adding new languages
-export const langs = ["de", "en", "fr", "ru"];
+export const langs = ["de", "en", "fr", "ru", "uz"];
 const langVals: Record<string, Resource> = {};
 for (const lang of langs) {
 	langVals[lang] = loadLang(lang);
@@ -26,9 +26,11 @@ void ccI18n
 		ns: ["translation"],
 		defaultNS: "translation",
 		supportedLngs: langs,
+		nonExplicitSupportedLngs: true,
 		fallbackLng: "en",
-		debug: true,
+		debug: process.env.NODE_ENV !== "production",
 		resources: langVals,
+		initImmediate: false,
 
 		interpolation: {
 			escapeValue: false, // not needed for react as it escapes by default

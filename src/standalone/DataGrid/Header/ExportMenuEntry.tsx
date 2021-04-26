@@ -17,7 +17,7 @@ import {
 	useDataGridColumnState,
 	useDataGridProps,
 	useDataGridState,
-} from "../index";
+} from "../DataGrid";
 
 export interface IDataGridExportMenuEntryProps {
 	/**

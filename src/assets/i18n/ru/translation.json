@@ -1,7 +1,13 @@
 {
 	"standalone": {
 		"selector": {
-			"add-new": "добавить"
+			"add-new": "добавить",
+			"base-selector": {
+				"no-options-text": "Нет вариантов",
+				"close-icon-text": "Закрыть",
+				"open-icon-text": "Открыть",
+				"loading-text": "Загрузка..."
+			}
 		},
 		"schedule": {
 			"week": "Неделя",
@@ -29,10 +35,11 @@
 			"header": {
 				"settings": "Настройки",
 				"reset": "Сброс",
-				"new": "Новый сайт",
+				"new": "Новый",
 				"export": "Экспорт",
 				"edit": "Редактирование",
-				"delete": "Удалить"
+				"delete": "Удалить",
+				"custom-filter-button": "Фильтр"
 			},
 			"footer": {
 				"prev-page": "Предыдущая страница",
@@ -41,10 +48,41 @@
 				"next-page": "Следующая страница",
 				"last-page": "Последняя страница",
 				"first-page": "Первая страница",
-				"page-size-tooltip": "Количество записей на страницу"
+				"page-size-tooltip": "Количество записей на страницу",
+				"delete": "Удалить",
+				"edit": "Редактировать",
+				"filtered": "Отфильтровано:",
+				"select-all": "Все",
+				"total": "Общий:"
 			},
 			"content": {
-				"filter": "Фильтр"
+				"filter": "Фильтр",
+				"bool-filter": {
+					"any": "Любое значение",
+					"false": "Все ложные значения",
+					"true": "Все правдивые ценности"
+				},
+				"no-data": "Список не содержит никаких данных.",
+				"set-filter": {
+					"search": "Поиск...",
+					"select-all": "Выбрать все"
+				},
+				"filter-type": {
+					"contains": "Содержит",
+					"ends-with": "Заканчивается на",
+					"eq": "Равно",
+					"gt": "Лучше чем",
+					"gte": "Больше или равно",
+					"in-range": "В диапазоне",
+					"lt": "Меньше, чем",
+					"lte": "Меньше или равно",
+					"not-contains": "Не содержит",
+					"not-eq": "Не равный",
+					"starts-with": "Начинается с"
+				}
+			},
+			"custom-filters": {
+				"title": "Выбор фильтра"
 			}
 		},
 		"phone-number": {
@@ -100,6 +138,9 @@
 					"boolean": {
 						"true": "Да",
 						"false": "Нет"
+					},
+					"signature": {
+						"not-set": "Не подписан"
 					}
 				}
 			}
@@ -131,6 +172,15 @@
 					}
 				}
 			}
+		},
+		"selector": {
+			"loading": "Загружается ...",
+			"loading-error": "Ошибка при получении данных"
+		}
+	},
+	"non-standalone": {
+		"dialog": {
+			"okay": "Хорошо"
 		}
 	}
 }

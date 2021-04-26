@@ -44,14 +44,8 @@ class RendererEnumRadio extends TypeEnumMulti {
 			handleChange,
 			handleBlur,
 			errorMsg,
+			value,
 		} = params;
-
-		let { value } = params;
-
-		// Workaround for https://github.com/formium/formik/issues/2098
-		if (value === undefined) {
-			value = [];
-		}
 
 		if (visibility.disabled) return <></>;
 		if (visibility.hidden) {
@@ -77,31 +71,33 @@ class RendererEnumRadio extends TypeEnumMulti {
 				>
 					<FormLabel component={"legend"}>{label}</FormLabel>
 					<FormGroup onBlur={handleBlur} row={this.horizontal}>
-						{this.values.map((entry) =>
-							this.wrapButton(
-								<FormControlLabel
-									key={entry.value}
-									value={entry.value}
-									control={
-										<Checkbox
-											checked={value.includes(entry.value)}
-											name={entry.value}
-											onChange={(evt) =>
-												handleChange(
-													field,
-													evt.target.checked
-														? value.concat([entry.value]) // add value
-														: value.filter((v) => v !== entry.value) // remove value
-												)
-											}
-										/>
-									}
-									label={entry.getLabel()}
-									disabled={visibility.readOnly}
-								/>,
-								entry
-							)
-						)}
+						{this.values
+							.filter((entry) => !entry.invisible)
+							.map((entry) =>
+								this.wrapButton(
+									<FormControlLabel
+										key={entry.value}
+										value={entry.value}
+										control={
+											<Checkbox
+												checked={value.includes(entry.value)}
+												name={entry.value}
+												onChange={(evt) =>
+													handleChange(
+														field,
+														evt.target.checked
+															? value.concat([entry.value]) // add value
+															: value.filter((v) => v !== entry.value) // remove value
+													)
+												}
+											/>
+										}
+										label={entry.getLabel()}
+										disabled={visibility.readOnly}
+									/>,
+									entry
+								)
+							)}
 					</FormGroup>
 					<FormHelperText>{errorMsg}</FormHelperText>
 				</FormControl>
@@ -110,16 +106,18 @@ class RendererEnumRadio extends TypeEnumMulti {
 		return (
 			<Typography>
 				{!visibility.grid && `${label}: `}
-				{value.map((enumValue) => {
-					const valueInfo = this.values.find(
-						(entry) => entry.value === enumValue
-					);
-					return valueInfo
-						? valueInfo.getLabel()
-						: ccI18n.t(
-								"backend-integration.model.types.renderers.enum.unknown"
-						  );
-				})}
+				{value
+					.map((enumValue) => {
+						const valueInfo = this.values.find(
+							(entry) => entry.value === enumValue
+						);
+						return valueInfo
+							? valueInfo.getLabel()
+							: ccI18n.t(
+									"backend-integration.model.types.renderers.enum.unknown"
+							  );
+					})
+					.join(", ")}
 			</Typography>
 		);
 	}

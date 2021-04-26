@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useMemo } from "react";
 import {
 	BaseSelectorData,
 	MultiSelectorData,
@@ -12,6 +12,7 @@ import {
 	PageVisibility,
 } from "../../backend-integration";
 import { useSelectedCache } from "./BackendMultiSelect";
+import { debouncePromise } from "../../utils";
 
 export interface BackendMultiSelectWithTagsProps<
 	GroupKeyT extends ModelFieldName,
@@ -19,9 +20,11 @@ export interface BackendMultiSelectWithTagsProps<
 	GroupVisibilityT extends PageVisibility,
 	DataVisibilityT extends PageVisibility,
 	GroupCustomT,
-	DataCustomT
+	DataCustomT,
+	GroupDataT extends BaseSelectorData,
+	DataDataT extends MultiSelectorData
 > extends Omit<
-		MultiSelectWithTagsProps<MultiSelectorData, BaseSelectorData>,
+		MultiSelectWithTagsProps<DataDataT, GroupDataT>,
 		| "loadGroupEntries"
 		| "loadDataOptions"
 		| "loadGroupOptions"
@@ -37,7 +40,7 @@ export interface BackendMultiSelectWithTagsProps<
 	 * Change event callback
 	 * @param selected The now selected IDs
 	 */
-	onChange?: (selected: string[]) => void;
+	onChange?: (selected: string[], raw: DataDataT[]) => void;
 	/**
 	 * Initial data (model format) used for selected cache
 	 */
@@ -54,7 +57,7 @@ export interface BackendMultiSelectWithTagsProps<
 	 */
 	convGroup: (
 		data: Record<GroupKeyT, unknown>
-	) => Promise<BaseSelectorData> | BaseSelectorData;
+	) => Promise<GroupDataT> | GroupDataT;
 	/**
 	 * Callback that gets the group entries for a given group record
 	 * @param data The record data (detailed)
@@ -63,7 +66,7 @@ export interface BackendMultiSelectWithTagsProps<
 	 */
 	getGroupDataEntries: (
 		data: ModelGetResponse<GroupKeyT>
-	) => Promise<MultiSelectorData[]> | MultiSelectorData[];
+	) => Promise<DataDataT[]> | DataDataT[];
 	/**
 	 * The data source for data entries
 	 */
@@ -74,9 +77,7 @@ export interface BackendMultiSelectWithTagsProps<
 	 * @returns Selector data
 	 * @remarks Selector data value must be set to ID
 	 */
-	convData: (
-		data: Record<DataKeyT, unknown>
-	) => Promise<MultiSelectorData> | MultiSelectorData;
+	convData: (data: Record<DataKeyT, unknown>) => Promise<DataDataT> | DataDataT;
 	/**
 	 * Name of the switch filter for groups or undefined if disabled
 	 */
@@ -85,15 +86,32 @@ export interface BackendMultiSelectWithTagsProps<
 	 * Name of the switch filter for data or undefined if disabled
 	 */
 	switchFilterNameData?: string;
+	/**
+	 * The debounce time in ms to wait for group searches
+	 * @default 500
+	 */
+	groupSearchDebounceTime?: number;
+	/**
+	 * The debounce time in ms to wait for data searches
+	 * @default 500
+	 */
+	dataSearchDebounceTime?: number;
 }
 
+/**
+ * Backend connected MultiSelectWithTags
+ * @remarks Doesn't support custom data
+ * @constructor
+ */
 const BackendMultiSelectWithTags = <
 	GroupKeyT extends ModelFieldName,
 	DataKeyT extends ModelFieldName,
 	GroupVisibilityT extends PageVisibility,
 	DataVisibilityT extends PageVisibility,
 	GroupCustomT,
-	DataCustomT
+	DataCustomT,
+	GroupDataT extends BaseSelectorData,
+	DataDataT extends MultiSelectorData
 >(
 	props: BackendMultiSelectWithTagsProps<
 		GroupKeyT,
@@ -101,7 +119,9 @@ const BackendMultiSelectWithTags = <
 		GroupVisibilityT,
 		DataVisibilityT,
 		GroupCustomT,
-		DataCustomT
+		DataCustomT,
+		GroupDataT,
+		DataDataT
 	>
 ) => {
 	const {
@@ -114,6 +134,8 @@ const BackendMultiSelectWithTags = <
 		switchFilterNameGroup,
 		initialData,
 		onChange,
+		groupSearchDebounceTime,
+		dataSearchDebounceTime,
 		selected: selectedIds,
 		...selectorProps
 	} = props;
@@ -159,14 +181,23 @@ const BackendMultiSelectWithTags = <
 		[convData, dataModel, switchFilterNameData]
 	);
 
+	const debouncedGroupLoad = useMemo(
+		() => debouncePromise(loadGroupOptions, groupSearchDebounceTime ?? 500),
+		[groupSearchDebounceTime, loadGroupOptions]
+	);
+	const debouncedDataLoad = useMemo(
+		() => debouncePromise(loadDataOptions, dataSearchDebounceTime ?? 500),
+		[dataSearchDebounceTime, loadDataOptions]
+	);
+
 	return (
 		<MultiSelectWithTags
 			{...selectorProps}
 			onChange={handleSelect}
 			selected={selected}
 			loadGroupEntries={loadGroupEntries}
-			loadDataOptions={loadDataOptions}
-			loadGroupOptions={loadGroupOptions}
+			loadDataOptions={debouncedDataLoad}
+			loadGroupOptions={debouncedGroupLoad}
 			displaySwitch={!!(switchFilterNameGroup || switchFilterNameData)}
 		/>
 	);

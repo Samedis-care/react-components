@@ -9,14 +9,16 @@ import {
 	withStyles,
 } from "@material-ui/core";
 import { Button, Typography, Grid } from "@material-ui/core";
-import i18n from "../../../i18n";
 import { IDayData } from "../Common/DayContents";
 import { ArrowForwardIos, ArrowBackIos } from "@material-ui/icons";
 import { DatePicker, MuiPickersUtilsProvider } from "@material-ui/pickers";
 import MomentUtils from "@date-io/moment";
 import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
+import { ToDateLocaleStringOptions } from "../../../constants";
+import { TFunction, useTranslation, WithTranslation } from "react-i18next";
+import ccI18n from "../../../i18n";
 
-export interface IProps extends WithStyles {
+export interface IProps extends WithStyles, WithTranslation {
 	/**
 	 * Callback to load data of this week
 	 * @param weekOffset
@@ -59,13 +61,13 @@ class WeekView extends PureComponent<IProps, IState> {
 
 	componentDidMount() {
 		void this.fetchData();
-		i18n.on("languageChanged", () => {
+		this.props.i18n.on("languageChanged", () => {
 			void this.fetchData();
 		});
 	}
 
 	componentWillUnmount() {
-		i18n.off("languageChanged", () => {
+		this.props.i18n.off("languageChanged", () => {
 			void this.fetchData();
 		});
 	}
@@ -81,8 +83,14 @@ class WeekView extends PureComponent<IProps, IState> {
 			<Grid container alignItems={"stretch"} alignContent={"space-between"}>
 				<Grid item xs={4}>
 					<Button onClick={this.today} className={this.props.classes.todayBtn}>
-						{i18n.t("standalone.schedule.today")} (
-						{now.toDate().toLocaleDateString(i18n.language)})
+						{this.props.t("standalone.schedule.today")} (
+						{now
+							.toDate()
+							.toLocaleDateString(
+								this.props.i18n.language,
+								ToDateLocaleStringOptions
+							)}
+						)
 					</Button>
 				</Grid>
 				<Grid item xs={4}>
@@ -95,19 +103,20 @@ class WeekView extends PureComponent<IProps, IState> {
 								onClick={this.openDatePicker}
 								className={this.props.classes.week}
 							>
-								{i18n.t("standalone.schedule.week")}{" "}
+								{this.props.t("standalone.schedule.week")}{" "}
 								{this.nowNormalized().add(this.state.weekOffset, "week").week()}{" "}
 								{this.nowNormalized()
 									.add(this.state.weekOffset, "week")
 									.weekYear()}
 							</span>
 							<div className={this.props.classes.picker}>
+								qsq
 								<MuiPickersUtilsProvider utils={MomentUtils}>
 									<DatePicker
 										variant={"dialog"}
 										format={"II RRRR"}
 										open={this.state.datePickerOpen}
-										label={i18n.t("standalone.schedule.week")}
+										label={this.props.t("standalone.schedule.week")}
 										value={this.nowNormalized()
 											.add(this.state.weekOffset, "week")
 											.toDate()}
@@ -139,37 +148,47 @@ class WeekView extends PureComponent<IProps, IState> {
 						</Grid>
 					</Grid>
 				)}
-				{this.state.data &&
-					weekdays.map((day) => {
-						const data = this.state.data;
-						if (!data) return null;
+				{this.state.data && (
+					<Grid
+						item
+						xs={12}
+						container
+						alignItems={"stretch"}
+						alignContent={"space-between"}
+						wrap={"nowrap"}
+					>
+						{weekdays.map((day) => {
+							const data = this.state.data;
+							if (!data) return null;
 
-						const date = now
-							.clone()
-							.add(this.state.weekOffset, "weeks")
-							.add(day, "days");
-						const diffDay = !prevDate || prevDate.day() !== date.day();
-						const diffMonth = !prevDate || prevDate.month() !== date.month();
-						const diffYear = prevDate && prevDate.year() !== date.year();
-						prevDate = date;
+							const date = now
+								.clone()
+								.add(this.state.weekOffset, "weeks")
+								.add(day, "days");
+							const diffDay = !prevDate || prevDate.day() !== date.day();
+							const diffMonth = !prevDate || prevDate.month() !== date.month();
+							const diffYear = prevDate && prevDate.year() !== date.year();
+							prevDate = date;
 
-						let formattedDate = "";
-						if (diffYear) formattedDate += `${date.year()} `;
-						if (diffMonth) formattedDate += `${date.format("MMMM")} `;
-						if (diffDay) formattedDate += date.format("DD");
+							let formattedDate = "";
+							if (diffYear) formattedDate += `${date.year()} `;
+							if (diffMonth) formattedDate += `${date.format("MMMM")} `;
+							if (diffDay) formattedDate += date.format("DD");
 
-						const dayData =
-							data[(date.weekday() + date.localeData().firstDayOfWeek()) % 7];
+							const dayData =
+								data[(date.weekday() + date.localeData().firstDayOfWeek()) % 7];
 
-						return (
-							<WeekViewDay
-								key={day}
-								day={date}
-								date={formattedDate}
-								data={dayData}
-							/>
-						);
-					})}
+							return (
+								<WeekViewDay
+									key={day}
+									day={date}
+									date={formattedDate}
+									data={dayData}
+								/>
+							);
+						})}
+					</Grid>
+				)}
 			</Grid>
 		);
 	}
@@ -243,7 +262,7 @@ class WeekView extends PureComponent<IProps, IState> {
 
 	nowNormalized = () => this.momentNormalize(moment());
 	momentNormalize = (instance: Moment) =>
-		instance.isoWeekday(0).hour(0).minute(0).second(0).millisecond(0);
+		instance.weekday(0).hour(0).minute(0).second(0).millisecond(0);
 
 	openDatePicker = () =>
 		this.setState({
@@ -268,4 +287,21 @@ const styles = createStyles({
 	},
 });
 
-export default withStyles(styles)(WeekView);
+const WeekViewWithoutTranslation = withStyles(styles)(WeekView);
+const WeekViewWithTranslation = (
+	props: Omit<IProps, keyof WithTranslation | keyof WithStyles>
+): React.ReactElement => {
+	const { i18n, t, ready: tReady } = useTranslation(undefined, {
+		i18n: ccI18n,
+	});
+	return (
+		<WeekViewWithoutTranslation
+			{...props}
+			i18n={i18n}
+			t={t as TFunction<"translation">}
+			tReady={tReady}
+		/>
+	);
+};
+
+export default WeekViewWithTranslation;

@@ -1,5 +1,5 @@
 import React from "react";
-import { useDataGridState } from "../index";
+import { useDataGridState } from "../DataGrid";
 import PaginationView from "./PaginationView";
 
 const Pagination = () => {

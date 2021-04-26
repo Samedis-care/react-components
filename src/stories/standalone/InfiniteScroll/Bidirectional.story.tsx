@@ -4,14 +4,17 @@ import { Grid, makeStyles } from "@material-ui/core";
 import { number } from "@storybook/addon-knobs";
 import { action } from "@storybook/addon-actions";
 
-const useStyles = makeStyles(() => ({
-	scrollWrapper: {
-		height: "50vh",
-		width: "100%",
-		overflow: "auto",
-		border: "1px solid red",
+const useStyles = makeStyles(
+	{
+		scrollWrapper: {
+			height: "50vh",
+			width: "100%",
+			overflow: "auto",
+			border: "1px solid red",
+		},
 	},
-}));
+	{ name: "CcBidirectionalStory" }
+);
 
 const debounceWaitKnobOptions = {
 	range: true,

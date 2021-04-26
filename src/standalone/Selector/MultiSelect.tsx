@@ -20,24 +20,28 @@ export interface MultiSelectorData extends BaseSelectorData {
 	canUnselect?: (data: MultiSelectorData) => boolean | Promise<boolean>;
 }
 
-export interface MultiSelectProps
-	extends Omit<
-		BaseSelectorProps<MultiSelectorData>,
-		"onSelect" | "selected" | "classes"
-	> {
+export interface MultiSelectProps<DataT extends MultiSelectorData>
+	extends Omit<BaseSelectorProps<DataT>, "onSelect" | "selected" | "classes"> {
 	/**
 	 * Extended selection change handler
 	 * @param data The selected data entry/entries
 	 */
-	onSelect?: (value: MultiSelectorData[]) => void;
+	onSelect?: (value: DataT[]) => void;
 	/**
 	 * The currently selected values
 	 */
-	selected: MultiSelectorData[];
+	selected: DataT[];
+	/**
+	 * Optional callback for customizing the unique identifier of data
+	 * @param data The data struct
+	 * @returns A unique ID extracted from data
+	 * @default returns data.value
+	 */
+	getIdOfData?: (data: DataT) => string;
 	/**
 	 * Specify a custom component for displaying multi select items
 	 */
-	selectedEntryRenderer?: React.ComponentType<IMultiSelectEntryProps>;
+	selectedEntryRenderer?: React.ComponentType<IMultiSelectEntryProps<DataT>>;
 	/**
 	 * CSS classes to apply
 	 */
@@ -54,7 +58,7 @@ export interface MultiSelectProps
 
 const useBaseSelectorStyles = makeStyles(
 	{
-		inputRoot: (props: MultiSelectProps) => ({
+		inputRoot: (props: MultiSelectProps<MultiSelectorData>) => ({
 			borderRadius: props.selected.length > 0 ? "4px 4px 0px 0px" : undefined,
 		}),
 	},
@@ -63,10 +67,6 @@ const useBaseSelectorStyles = makeStyles(
 
 const useMultiSelectorStyles = makeStyles(
 	{
-		paperWrapper: {
-			boxShadow: "none",
-			marginTop: 16, // to accommodate InputLabel
-		},
 		selectedEntries: {
 			border: `1px solid rgba(0, 0, 0, 0.23)`,
 			borderTop: 0,
@@ -76,7 +76,9 @@ const useMultiSelectorStyles = makeStyles(
 	{ name: "CcMultiSelect" }
 );
 
-const MultiSelect = (props: MultiSelectProps) => {
+const MultiSelect = <DataT extends MultiSelectorData>(
+	props: MultiSelectProps<DataT>
+) => {
 	const {
 		onLoad,
 		onSelect,
@@ -84,14 +86,27 @@ const MultiSelect = (props: MultiSelectProps) => {
 		enableIcons,
 		selectedEntryRenderer,
 		disabled,
+		getIdOfData,
+		displaySwitch,
+		switchLabel,
+		defaultSwitchValue,
 	} = props;
 	const multiSelectClasses = useMultiSelectorStyles(props);
-	const baseSelectorClasses = useBaseSelectorStyles(cleanClassMap(props, true));
+	const baseSelectorClasses = useBaseSelectorStyles(
+		cleanClassMap(
+			(props as unknown) as MultiSelectProps<MultiSelectorData>,
+			true
+		)
+	);
 
-	const EntryRender = selectedEntryRenderer || MultiSelectEntry;
+	const getIdDefault = useCallback((data: DataT) => data.value, []);
+	const getId = getIdOfData ?? getIdDefault;
+
+	const EntryRender: React.ComponentType<IMultiSelectEntryProps<DataT>> =
+		selectedEntryRenderer || MultiSelectEntry;
 
 	const multiSelectHandler = useCallback(
-		(data: MultiSelectorData | null) => {
+		(data: DataT | null) => {
 			if (!data) return;
 			const selectedOptions = [...selected, data];
 			if (onSelect) onSelect(selectedOptions);
@@ -100,14 +115,13 @@ const MultiSelect = (props: MultiSelectProps) => {
 	);
 
 	const multiSelectLoadHandler = useCallback(
-		async (query: string) => {
-			const results = await onLoad(query);
+		async (query: string, switchValue: boolean) => {
+			const results = await onLoad(query, switchValue);
 			return results.filter(
-				(val: BaseSelectorData) =>
-					!selected.map((s) => s.value).includes(val.value)
+				(val: DataT) => !selected.map((s) => getId(s)).includes(getId(val))
 			);
 		},
-		[onLoad, selected]
+		[getId, onLoad, selected]
 	);
 
 	const handleDelete = useCallback(
@@ -136,38 +150,55 @@ const MultiSelect = (props: MultiSelectProps) => {
 		[onSelect, selected]
 	);
 
+	const handleSetData = useCallback(
+		(newValue: DataT) => {
+			if (!onSelect) return;
+			onSelect(
+				selected.map((entry) =>
+					getId(entry) === getId(newValue) ? newValue : entry
+				)
+			);
+		},
+		[getId, onSelect, selected]
+	);
+
 	return (
-		<Paper elevation={0} className={multiSelectClasses.paperWrapper}>
-			<Grid container>
-				<Grid item xs={12}>
-					<BaseSelector
-						{...props}
-						classes={combineClassMaps(
-							baseSelectorClasses,
-							props.subClasses?.baseSelector
-						)}
-						onLoad={multiSelectLoadHandler}
-						selected={null}
-						onSelect={multiSelectHandler}
-						refreshToken={selected.length.toString()}
-					/>
-				</Grid>
-				{props.selected.length > 0 && (
-					<Grid item xs={12} className={multiSelectClasses.selectedEntries}>
-						{props.selected.map((data: MultiSelectorData, index: number) => (
+		<Grid container>
+			<Grid item xs={12}>
+				<BaseSelector
+					{...props}
+					classes={combineClassMaps(
+						baseSelectorClasses,
+						props.subClasses?.baseSelector
+					)}
+					onLoad={multiSelectLoadHandler}
+					selected={null}
+					onSelect={multiSelectHandler}
+					refreshToken={selected.map(getId).join(",")}
+					displaySwitch={displaySwitch}
+					switchLabel={switchLabel}
+					defaultSwitchValue={defaultSwitchValue}
+				/>
+			</Grid>
+			{props.selected.length > 0 && (
+				<Grid item xs={12} className={multiSelectClasses.selectedEntries}>
+					<Paper elevation={0}>
+						{props.selected.map((data: DataT, index: number) => (
 							<EntryRender
-								key={data.value}
+								key={getId(data)}
 								enableDivider={props.selected.length === index - 1}
 								enableIcons={enableIcons}
 								handleDelete={disabled ? undefined : handleDelete}
 								data={data}
+								setData={handleSetData}
+								iconSize={props.iconSize}
 							/>
 						))}
-					</Grid>
-				)}
-			</Grid>
-		</Paper>
+					</Paper>
+				</Grid>
+			)}
+		</Grid>
 	);
 };
 
-export default React.memo(MultiSelect);
+export default React.memo(MultiSelect) as typeof MultiSelect;

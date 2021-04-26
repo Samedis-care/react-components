@@ -3,11 +3,9 @@ import { TextFieldProps } from "@material-ui/core";
 import TextFieldWithHelp, {
 	TextFieldWithHelpProps,
 } from "../TextFieldWithHelp";
-import {
-	parseLocalizedNumber,
-	useGlobalized,
-	useInputCursorFix,
-} from "../../../utils";
+import { parseLocalizedNumber, useInputCursorFix } from "../../../utils";
+import ccI18n from "../../../i18n";
+import { useTranslation } from "react-i18next";
 
 export interface DecimalInputFieldProps extends TextFieldWithHelpProps {
 	/**
@@ -28,10 +26,10 @@ export interface DecimalInputFieldProps extends TextFieldWithHelpProps {
 const DecimalInputField = (
 	props: DecimalInputFieldProps & Omit<TextFieldProps, "onChange" | "value">
 ) => {
+	const { i18n } = useTranslation(undefined, { i18n: ccI18n });
 	const { value, onChange, ...muiProps } = props;
-	const globalized = useGlobalized();
 	const valueFormatted =
-		value !== null && globalized ? globalized.formatNumber(value) : "";
+		value !== null ? value.toLocaleString(i18n.language) : "";
 	const { handleCursorChange, cursorInputRef } = useInputCursorFix(
 		valueFormatted
 	);

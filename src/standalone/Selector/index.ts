@@ -11,6 +11,8 @@ export * from "./MultiSelectWithCheckBox";
 export { default as MultiSelectWithCheckBox } from "./MultiSelectWithCheckBox";
 export * from "./MultiSelectWithTags";
 export { default as MultiSelectWithTags } from "./MultiSelectWithTags";
+export * from "./MultiSelectWithoutGroup";
+export { default as MultiSelectWithoutGroup } from "./MultiSelectWithoutGroup";
 
 export interface SelectorTheme extends Theming.BasicInputThemeFragment {
 	/* root elements from BasicInputThemeFragment defining main select (closed) visuals */

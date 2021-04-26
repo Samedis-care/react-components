@@ -1,5 +1,12 @@
-import { SelectorTheme, SelectorThemeExpert } from "./standalone";
-import { DataGridTheme, DataGridThemeExpert } from "./standalone/DataGrid";
+import {
+	MultiSelectWithCheckBoxTheme,
+	SelectorTheme,
+	SelectorThemeExpert,
+} from "./standalone";
+import {
+	DataGridTheme,
+	DataGridThemeExpert,
+} from "./standalone/DataGrid/DataGrid";
 import { MenuTheme } from "./standalone/Portal/Menu";
 import { MenuItemTheme } from "./standalone/Portal/MenuItem/Material";
 import { ActionButtonTheme } from "./standalone/UIKit/ActionButton";
@@ -31,6 +38,7 @@ export interface ComponentsCareTheme {
 		menuItem?: MenuItemTheme;
 	};
 	selector?: SelectorTheme;
+	selectorWithCheckbox?: MultiSelectWithCheckBoxTheme;
 	uiKit?: {
 		label?: ComponentWithLabelTheme;
 		checkbox?: CheckboxTheme;
@@ -39,6 +47,7 @@ export interface ComponentsCareTheme {
 		subActionButton?: SubActionButtonTheme;
 		formButtons?: FormButtonTheme;
 		baseSelectorExpert?: SelectorThemeExpert;
+		hideDisabledIcons?: boolean;
 	};
 }
 

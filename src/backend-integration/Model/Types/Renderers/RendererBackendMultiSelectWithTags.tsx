@@ -6,6 +6,7 @@ import Model from "../../Model";
 import BackendMultiSelectWithTags, {
 	BackendMultiSelectWithTagsProps,
 } from "../../../../backend-components/Selector/BackendMultiSelectWithTags";
+import { BaseSelectorData, MultiSelectorData } from "../../../../standalone";
 
 type OmitProperties =
 	| "selected"
@@ -24,7 +25,9 @@ class RendererBackendMultiSelectWithTags<
 	GroupVisibilityT extends PageVisibility,
 	DataVisibilityT extends PageVisibility,
 	GroupCustomT,
-	DataCustomT
+	DataCustomT,
+	GroupDataT extends BaseSelectorData,
+	DataDataT extends MultiSelectorData
 > extends TypeStringArray {
 	private readonly props: Omit<
 		BackendMultiSelectWithTagsProps<
@@ -33,7 +36,9 @@ class RendererBackendMultiSelectWithTags<
 			GroupVisibilityT,
 			DataVisibilityT,
 			GroupCustomT,
-			DataCustomT
+			DataCustomT,
+			GroupDataT,
+			DataDataT
 		>,
 		OmitProperties
 	>;
@@ -46,7 +51,9 @@ class RendererBackendMultiSelectWithTags<
 				GroupVisibilityT,
 				DataVisibilityT,
 				GroupCustomT,
-				DataCustomT
+				DataCustomT,
+				GroupDataT,
+				DataDataT
 			>,
 			OmitProperties
 		>
@@ -65,14 +72,8 @@ class RendererBackendMultiSelectWithTags<
 			errorMsg,
 			relationData,
 			relationModel,
+			value,
 		} = params;
-
-		let { value } = params;
-
-		// Workaround for https://github.com/formium/formik/issues/2098
-		if (value === undefined) {
-			value = [];
-		}
 
 		if (visibility.disabled) return <></>;
 		if (visibility.hidden) {

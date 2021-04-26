@@ -1,12 +1,12 @@
 import Type from "./Type";
-import Visibility from "./Visibility";
+import Visibility, { getVisibility, VisibilityCallback } from "./Visibility";
 import Connector, { ResponseMeta } from "../Connector/Connector";
 import { useMutation, useQuery } from "react-query";
 import { ModelDataStore } from "../index";
 import {
 	IDataGridColumnDef,
 	IDataGridLoadDataParameters,
-} from "../../standalone/DataGrid";
+} from "../../standalone/DataGrid/DataGrid";
 import {
 	UseMutationResult,
 	UseQueryResult,
@@ -15,9 +15,17 @@ import queryCache from "../Store";
 
 export interface PageVisibility {
 	overview: Visibility;
-	edit: Visibility;
-	create: Visibility;
+	edit: VisibilityCallback;
+	create: VisibilityCallback;
 }
+
+export type ModelRecord<
+	ModelT extends Model<ModelFieldName, PageVisibility, unknown>
+> = {
+	[Field in keyof ModelT["fields"]]: ReturnType<
+		ModelT["fields"][Field]["type"]["getDefaultValue"]
+	>;
+};
 
 export interface ModelFieldDefinition<
 	TypeT,
@@ -133,6 +141,19 @@ export type AdvancedDeleteRequest = [
 	>
 ];
 
+export interface CacheOptions {
+	/**
+	 * Time to consider data valid in milliseconds
+	 * @default 30s
+	 */
+	staleTime?: number;
+	/**
+	 * Time to keep data cached after it's no longer in use
+	 * @default 5m
+	 */
+	cacheTime?: number;
+}
+
 class Model<
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
@@ -149,22 +170,38 @@ class Model<
 	/**
 	 * The backend connector providing a CRUD interface for the model
 	 */
-	public readonly connector: Connector<KeyT, VisibilityT, CustomT>;
+	public connector: Connector<KeyT, VisibilityT, CustomT>;
+	/**
+	 * Optional additional cache keys
+	 */
+	public readonly cacheKeys?: unknown;
+	/**
+	 * Caching options
+	 */
+	public cacheOptions?: CacheOptions;
 
 	/**
 	 * Creates a new model
 	 * @param name A unique name for the model (modelId)
 	 * @param model The actual model definition
 	 * @param connector A backend connector
+	 * @param cacheKeys Optional cache keys
+	 * @param cacheOptions Optional cache options
 	 */
 	constructor(
 		name: string,
 		model: ModelField<KeyT, VisibilityT, CustomT>,
-		connector: Connector<KeyT, VisibilityT, CustomT>
+		connector: Connector<KeyT, VisibilityT, CustomT>,
+		cacheKeys?: unknown,
+		cacheOptions?: CacheOptions
 	) {
 		this.modelId = name;
 		this.fields = model;
 		this.connector = connector;
+		this.cacheKeys = cacheKeys;
+		this.cacheOptions = cacheOptions ?? {
+			staleTime: 30000,
+		};
 	}
 
 	/**
@@ -192,16 +229,22 @@ class Model<
 	 */
 	public get(id: string | null): UseQueryResult<ModelGetResponse<KeyT>, Error> {
 		// eslint-disable-next-line react-hooks/rules-of-hooks
-		return useQuery([this.modelId, { id: id }], () => this.getRaw(id));
+		return useQuery(
+			[this.modelId, { id: id }, this.cacheKeys],
+			() => this.getRaw(id),
+			this.cacheOptions
+		);
 	}
 
 	/**
-	 * Provices cached access for the given data id
+	 * Provides cached access for the given data id
 	 * @param id The data record id or null to obtain the default values
 	 */
 	public getCached(id: string | null): Promise<ModelGetResponse<KeyT>> {
-		return queryCache.fetchQuery([this.modelId, { id: id }], () =>
-			this.getRaw(id)
+		return queryCache.fetchQuery(
+			[this.modelId, { id: id }, this.cacheKeys],
+			() => this.getRaw(id),
+			this.cacheOptions
 		);
 	}
 
@@ -214,29 +257,46 @@ class Model<
 
 		const rawData = await this.connector.read(id, this);
 
+		return this.deserializeResponse(rawData);
+	}
+
+	/**
+	 * Deserializes the given ModelGetResponse
+	 * @param rawData The data to deserialize
+	 * @private
+	 */
+	private async deserializeResponse(
+		rawData: ModelGetResponse<KeyT>
+	): Promise<ModelGetResponse<KeyT>> {
 		return [
 			await this.applySerialization(rawData[0], "deserialize", "edit"),
 			Object.fromEntries(
 				await Promise.all(
-					Object.entries(rawData[1]).map(async ([k, v]) => {
-						const refModel = this.fields[k as KeyT]?.getRelationModel;
+					Object.entries(rawData[1]).map(async (keyValue) => {
+						const fieldName = keyValue[0];
+						const values = keyValue[1] as Record<string, unknown>[];
+						const refModel = this.fields[fieldName as KeyT]?.getRelationModel;
 
 						if (!refModel) {
 							// eslint-disable-next-line no-console
 							console.warn(
-								"[Components-Care] [Model] Backend connector supplied related data, but no model is defined for this relationship (relationship name = ",
-								k,
-								"). Data will be ignored."
+								"[Components-Care] [Model] Backend connector supplied related data, but no model is defined for this relationship (relationship name = " +
+									fieldName +
+									"). Data will be ignored."
 							);
 						}
 
 						return [
-							k,
+							fieldName,
 							refModel
-								? await refModel().applySerialization(
-										v as Record<string, unknown>,
-										"deserialize",
-										"edit"
+								? await Promise.all(
+										values.map((value) =>
+											refModel().applySerialization(
+												value,
+												"deserialize",
+												"edit"
+											)
+										)
 								  )
 								: null,
 						];
@@ -266,18 +326,26 @@ class Model<
 					update ? "edit" : "create"
 				);
 				if (update) {
-					return this.connector.update(serializedValues, this);
+					return this.deserializeResponse(
+						await this.connector.update(serializedValues, this)
+					);
 				} else {
-					delete serializedValues["id"];
-					return this.connector.create(serializedValues, this);
+					delete serializedValues["id" as KeyT];
+					return this.deserializeResponse(
+						await this.connector.create(serializedValues, this)
+					);
 				}
 			},
 			{
 				onSuccess: (data: ModelGetResponse<KeyT>) => {
-					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-					// @ts-ignore
-					// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-					ModelDataStore.setQueryData([this.modelId, { id: data[0].id }], data);
+					ModelDataStore.setQueryData(
+						[
+							this.modelId,
+							{ id: (data[0] as Record<"id", string>).id },
+							this.cacheKeys,
+						],
+						data
+					);
 				},
 			}
 		);
@@ -295,12 +363,16 @@ class Model<
 		// eslint-disable-next-line react-hooks/rules-of-hooks
 		return useMutation(
 			this.modelId + "-delete",
-			(id: string) => {
+			async (id: string) => {
 				return this.connector.delete(id, this);
 			},
 			{
 				onSuccess: (data: void, id: string) => {
-					ModelDataStore.setQueryData([this.modelId, { id: id }], undefined);
+					ModelDataStore.removeQueries([
+						this.modelId,
+						{ id: id },
+						this.cacheKeys,
+					]);
 				},
 			}
 		);
@@ -318,13 +390,17 @@ class Model<
 		// eslint-disable-next-line react-hooks/rules-of-hooks
 		return useMutation(
 			this.modelId + "-delete-multi",
-			(ids: string[]) => {
+			// eslint-disable-next-line @typescript-eslint/require-await
+			async (ids: string[]) => {
 				return this.connector.deleteMultiple(ids, this);
 			},
 			{
 				onSuccess: (data: void, ids: string[]) => {
 					ids.forEach((id) =>
-						ModelDataStore.setQueryData([this.modelId, { id: id }], undefined)
+						ModelDataStore.setQueryData(
+							[this.modelId, { id: id }, this.cacheKeys],
+							undefined
+						)
 					);
 				},
 			}
@@ -350,7 +426,7 @@ class Model<
 		// eslint-disable-next-line react-hooks/rules-of-hooks
 		return useMutation(
 			this.modelId + "-delete-adv",
-			(req: AdvancedDeleteRequest) => {
+			async (req: AdvancedDeleteRequest) => {
 				if (!this.connector.deleteAdvanced) {
 					throw new Error("Connector doesn't support advanced deletion");
 				}
@@ -360,7 +436,10 @@ class Model<
 				onSuccess: (data: void, req: AdvancedDeleteRequest) => {
 					if (!req[0]) {
 						req[1].forEach((id) =>
-							ModelDataStore.setQueryData([this.modelId, { id: id }], undefined)
+							ModelDataStore.setQueryData(
+								[this.modelId, { id: id }, this.cacheKeys],
+								undefined
+							)
 						);
 					} else {
 						ModelDataStore.clear();
@@ -408,29 +487,44 @@ class Model<
 	 * Validates the given values against the field defined validation rules
 	 * @param values The values to validate
 	 * @param view Optional view filter (only applies validations on fields present in given view)
+	 * @param fieldsToValidate List of fields to validate
 	 */
 	public validate(
 		values: Record<KeyT, unknown>,
-		view?: "edit" | "create"
+		view?: "edit" | "create",
+		fieldsToValidate?: KeyT[]
 	): Record<string, string> {
 		const errors: Record<string, string> = {};
 
 		Object.entries(values).forEach(([field, value]) => {
-			// skip validations for fields which aren't defined in the model or which are disabled in the current view
+			// skip validations for fields which aren't defined in the model or which are disabled in the current view or aren't currently mounted
 			if (!(field in this.fields)) return;
-			const fieldDef = this.fields[field as KeyT];
-			if (view && fieldDef.visibility[view].disabled) return;
+			try {
+				const fieldDef = this.fields[field as KeyT];
+				if (view && getVisibility(fieldDef.visibility[view], values).disabled)
+					return;
+				if (fieldsToValidate && !fieldsToValidate.includes(field as KeyT))
+					return;
 
-			// first apply type validation
-			let error = fieldDef.type.validate(value);
+				// first apply type validation
+				let error = fieldDef.type.validate(value);
 
-			// then apply custom field validation if present
-			const fieldValidation = fieldDef.validate;
-			if (!error && fieldValidation) {
-				error = fieldValidation(value, values, fieldDef);
+				// then apply custom field validation if present
+				const fieldValidation = fieldDef.validate;
+				if (!error && fieldValidation) {
+					error = fieldValidation(value, values, fieldDef);
+				}
+
+				if (error) errors[field] = error;
+			} catch (e) {
+				// eslint-disable-next-line no-console
+				console.error(
+					"[Components-Care] [Model.validate] Error during field validation:",
+					field,
+					value,
+					e
+				);
 			}
-
-			if (error) errors[field] = error;
 		});
 
 		return errors;
@@ -491,11 +585,11 @@ class Model<
 	 * @returns A copy of the data (not deep-copy)
 	 */
 	public async applySerialization(
-		values: Record<string, unknown>,
+		values: Record<KeyT, unknown>,
 		func: "serialize" | "deserialize",
 		visibility: keyof PageVisibility
-	): Promise<Record<string, unknown>> {
-		const copy: Record<string, unknown> = {};
+	): Promise<Record<KeyT, unknown>> {
+		const copy: Partial<Record<KeyT, unknown>> = {};
 
 		for (const key in values) {
 			if (!Object.prototype.hasOwnProperty.call(values, key)) continue;
@@ -510,9 +604,10 @@ class Model<
 			}
 
 			// don't include disabled fields (except ID and disabled readonly fields when serializing)
+			const visValue = getVisibility(field.visibility[visibility], values);
 			if (
-				field.visibility[visibility].disabled &&
-				(func === "serialize" || !field.visibility[visibility].readOnly) &&
+				visValue.disabled &&
+				(func === "serialize" || !visValue.readOnly) &&
 				key !== "id"
 			) {
 				continue;
@@ -521,7 +616,7 @@ class Model<
 			const serializeFunc = field.type[func];
 
 			if (serializeFunc) {
-				copy[key] = await serializeFunc(values[key]);
+				copy[key] = (await serializeFunc(values[key])) as unknown;
 			} else {
 				copy[key] = values[key];
 			}

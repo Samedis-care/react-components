@@ -1,11 +1,12 @@
 import React from "react";
-import { FormControl, FormHelperText, InputLabel } from "@material-ui/core";
+import { FormControl, FormHelperText } from "@material-ui/core";
 import { ModelFieldName, ModelRenderParams, PageVisibility } from "../../index";
 import TypeStringArray from "../TypeStringArray";
 import BackendMultiSelect, {
 	BackendMultiSelectProps,
 } from "../../../../backend-components/Selector/BackendMultiSelect";
 import Model from "../../Model";
+import { MultiSelectorData } from "../../../../standalone";
 
 type OmitProperties =
 	| "selected"
@@ -23,13 +24,13 @@ class RendererBackendMultiSelect<
 	CustomT
 > extends TypeStringArray {
 	private readonly props: Omit<
-		BackendMultiSelectProps<KeyT, VisibilityT, CustomT>,
+		BackendMultiSelectProps<KeyT, VisibilityT, CustomT, MultiSelectorData>,
 		OmitProperties
 	>;
 
 	constructor(
 		props: Omit<
-			BackendMultiSelectProps<KeyT, VisibilityT, CustomT>,
+			BackendMultiSelectProps<KeyT, VisibilityT, CustomT, MultiSelectorData>,
 			OmitProperties
 		>
 	) {
@@ -47,14 +48,8 @@ class RendererBackendMultiSelect<
 			errorMsg,
 			relationData,
 			relationModel,
+			value,
 		} = params;
-
-		let { value } = params;
-
-		// Workaround for https://github.com/formium/formik/issues/2098
-		if (value === undefined) {
-			value = [];
-		}
 
 		if (visibility.disabled) return <></>;
 		if (visibility.hidden) {
@@ -84,9 +79,9 @@ class RendererBackendMultiSelect<
 					error={!!errorMsg}
 					onBlur={handleBlur}
 				>
-					<InputLabel shrink>{label}</InputLabel>
 					<BackendMultiSelect
 						selected={value}
+						label={label}
 						onSelect={(value) => handleChange(field, value)}
 						disabled={visibility.readOnly}
 						model={relationModel as Model<KeyT, VisibilityT, CustomT>}

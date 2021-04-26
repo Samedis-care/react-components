@@ -5,25 +5,45 @@ import {
 	useDataGridColumnState,
 	useDataGridProps,
 	useDataGridState,
-} from "../index";
+} from "../DataGrid";
 import ActionBarView from "./ActionBarView";
 
 const ActionBar = () => {
 	const [, setState] = useDataGridState();
 	const [, setColumnState] = useDataGridColumnState();
-	const { columns, onAddNew, exporters, filterBar } = useDataGridProps();
+	const {
+		columns,
+		onAddNew,
+		exporters,
+		filterBar,
+		defaultSort,
+		defaultFilter,
+		defaultCustomData,
+	} = useDataGridProps();
 
 	const toggleSettings = useCallback(() => {
 		setState((prevState) => ({
 			...prevState,
 			showSettings: !prevState.showSettings,
+			showFilterDialog: prevState.showSettings
+				? prevState.showFilterDialog
+				: false,
 		}));
 	}, [setState]);
 
 	const handleReset = useCallback(() => {
-		setState(getDataGridDefaultState(columns));
-		setColumnState(getDataGridDefaultColumnsState(columns));
-	}, [setState, setColumnState, columns]);
+		setState(getDataGridDefaultState(columns, defaultCustomData));
+		setColumnState(
+			getDataGridDefaultColumnsState(columns, defaultSort, defaultFilter)
+		);
+	}, [
+		setState,
+		columns,
+		defaultCustomData,
+		setColumnState,
+		defaultSort,
+		defaultFilter,
+	]);
 
 	return (
 		<ActionBarView

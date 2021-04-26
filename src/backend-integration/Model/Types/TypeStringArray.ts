@@ -6,7 +6,7 @@ import FilterType from "../FilterType";
 /**
  * Type to handle string arrays (e.g. id arrays)
  */
-abstract class TypeString implements Type<string[]> {
+abstract class TypeStringArray implements Type<string[]> {
 	abstract render(params: ModelRenderParams<string[]>): React.ReactElement;
 
 	validate(): string | null {
@@ -26,4 +26,4 @@ abstract class TypeString implements Type<string[]> {
 	}
 }
 
-export default TypeString;
+export default TypeStringArray;

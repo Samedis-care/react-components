@@ -1,27 +1,34 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
 	BaseSelectorData,
+	BaseSelectorProps,
 	SingleSelect,
-	SingleSelectorProps,
 } from "../../standalone";
 import Model, {
 	ModelFieldName,
 	PageVisibility,
 } from "../../backend-integration/Model/Model";
-import ccI18n from "../../i18n";
+import i18n from "../../i18n";
+import { useTranslation } from "react-i18next";
+import { debouncePromise } from "../../utils";
 
 export interface BackendSingleSelectProps<
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
 	CustomT
 > extends Omit<
-		SingleSelectorProps<BaseSelectorData>,
+		BaseSelectorProps<BaseSelectorData>,
 		"onLoad" | "selected" | "onSelect"
 	> {
 	/**
 	 * The model to use
 	 */
 	model: Model<KeyT, VisibilityT, CustomT>;
+	/**
+	 * The debounce time for search in ms
+	 * @default 500
+	 */
+	searchDebounceTime?: number;
 	/**
 	 * Callback that converts the model data to the actual data displayed in the selector
 	 * @param modelData The model data
@@ -62,12 +69,15 @@ const BackendSingleSelect = <
 		onSelect,
 		selected,
 		initialData,
+		searchDebounceTime,
 		...otherProps
 	} = props;
 
 	const [selectedCache, setSelectedCache] = useState<BaseSelectorData | null>(
 		null
 	);
+
+	const { t } = useTranslation(undefined, { i18n });
 
 	const handleLoad = useCallback(
 		async (search: string) => {
@@ -117,7 +127,7 @@ const BackendSingleSelect = <
 						value: selected,
 						label:
 							(e as Error).message ??
-							ccI18n.t("backend-components.selector.loading-error"),
+							t("backend-components.selector.loading-error"),
 					};
 				}
 			}
@@ -126,16 +136,21 @@ const BackendSingleSelect = <
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [selected]);
 
+	const debouncedLoad = useMemo(
+		() => debouncePromise(handleLoad, searchDebounceTime ?? 500),
+		[handleLoad, searchDebounceTime]
+	);
+
 	return (
 		<SingleSelect
 			{...otherProps}
-			onLoad={handleLoad}
+			onLoad={debouncedLoad}
 			onSelect={handleSelect}
 			selected={
 				selected
 					? selectedCache ?? {
 							value: selected,
-							label: ccI18n.t("backend-components.selector.loading"),
+							label: t("backend-components.selector.loading"),
 					  }
 					: null
 			}

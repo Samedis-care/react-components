@@ -4,15 +4,15 @@ import {
 	IDataGridColumnProps,
 	useDataGridColumnsWidthState,
 	useDataGridState,
-} from "../index";
-import {
-	AutoSizer,
-	MultiGrid,
-	SectionRenderedParams,
-	Size,
-} from "react-virtualized";
+} from "../DataGrid";
+import { AutoSizer, Size } from "react-virtualized/dist/commonjs/AutoSizer";
+import { MultiGrid } from "react-virtualized/dist/commonjs/MultiGrid";
+import { SectionRenderedParams } from "react-virtualized/dist/commonjs/Grid";
 import Cell from "./Cell";
 import { applyColumnWidthLimits } from "./ColumnHeader";
+import { CenteredTypography, Loader } from "../../index";
+import i18n from "../../../i18n";
+import { useTranslation } from "react-i18next";
 
 export interface IDataGridContentProps extends IDataGridColumnProps {
 	rowsPerPage: number;
@@ -22,6 +22,7 @@ const SELECT_ROW_WIDTH = 57;
 
 const Content = (props: IDataGridContentProps) => {
 	const { rowsPerPage, columns } = props;
+	const { t } = useTranslation(undefined, { i18n });
 	const [state, setState] = useDataGridState();
 	const [columnWidth, setColumnWidth] = useDataGridColumnsWidthState();
 	const hoverState = useState<number | null>(null);
@@ -119,7 +120,7 @@ const Content = (props: IDataGridContentProps) => {
 					columnWidth={({ index }) =>
 						index === 0
 							? SELECT_ROW_WIDTH
-							: columnWidth[columns[index - 1].field]
+							: columnWidth[columns[index - 1].field] ?? 200
 					}
 					rowCount={(state.rowsFiltered ?? state.rowsTotal) + 1}
 					rowHeight={({ index }) => (index === 0 ? 32 : 57)}
@@ -136,9 +137,28 @@ const Content = (props: IDataGridContentProps) => {
 					hideBottomLeftGridScrollbar
 					styleTopLeftGrid={{ overflow: "hidden" }}
 					styleTopRightGrid={{ overflow: "hidden" }}
-					styleBottomLeftGrid={{ overflow: "hidden" }}
+					styleBottomLeftGrid={{
+						overflow: "hidden",
+						display:
+							(state.rowsFiltered ?? state.rowsTotal) === 0
+								? "none"
+								: undefined,
+					}}
 					styleBottomRightGrid={{ outline: "none" }}
 					onSectionRendered={onSectionRendered}
+					noContentRenderer={() =>
+						state.refreshData ? (
+							<Loader />
+						) : state.dataLoadError ? (
+							<CenteredTypography variant={"h5"}>
+								{state.dataLoadError.message}
+							</CenteredTypography>
+						) : (
+							<CenteredTypography variant={"h4"}>
+								{t("standalone.data-grid.content.no-data")}
+							</CenteredTypography>
+						)
+					}
 				/>
 			)}
 		</AutoSizer>

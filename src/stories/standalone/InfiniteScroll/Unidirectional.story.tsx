@@ -5,14 +5,17 @@ import { number } from "@storybook/addon-knobs";
 import { action } from "@storybook/addon-actions";
 import { NumberTypeKnobOptions } from "@storybook/addon-knobs/dist/components/types";
 
-const useStyles = makeStyles(() => ({
-	scrollWrapper: {
-		height: "50vh",
-		width: "100%",
-		overflow: "auto",
-		border: "1px solid red",
+const useStyles = makeStyles(
+	{
+		scrollWrapper: {
+			height: "50vh",
+			width: "100%",
+			overflow: "auto",
+			border: "1px solid red",
+		},
 	},
-}));
+	{ name: "CcUnidirectionalStory" }
+);
 
 const debounceWaitKnobOptions: NumberTypeKnobOptions = {
 	range: true,

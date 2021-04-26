@@ -45,8 +45,11 @@ export interface CrudProps<
 	>;
 	/**
 	 * The renderer function which returns the form component
+	 * @remarks Can be set to undefined to only render the Grid
 	 */
-	children: FormProps<KeyT, VisibilityT, CustomT, CrudFormProps>["children"];
+	children:
+		| FormProps<KeyT, VisibilityT, CustomT, CrudFormProps>["children"]
+		| undefined;
 	/**
 	 * The properties to pass to grid
 	 */
@@ -64,6 +67,11 @@ export interface CrudProps<
 	 */
 	deletePermission: Permission;
 	/**
+	 * The view permission (shows form in read-only mode if edit permission is not present)
+	 * Set to `false` to only show the form page if edit permissions are present
+	 */
+	readPermission: Permission;
+	/**
 	 * The edit record permission
 	 */
 	editPermission: Permission;
@@ -79,6 +87,11 @@ export interface CrudProps<
 	 * Disables routing and uses an internal state instead (useful for dialogs)
 	 */
 	disableRouting?: boolean;
+	/**
+	 * Unmounts the grid when showing form. Resets scroll in grid when coming back from form.
+	 * Useful for performance optimization or dialog handling where no Grid is shown
+	 */
+	disableBackgroundGrid?: boolean;
 	/**
 	 * If routing is disabled: set the initial view (id, "new" or null), defaults to null
 	 */
@@ -111,7 +124,7 @@ const CRUD = <
 	const { path } = useRouteMatch();
 	const location = useLocation();
 	const [perms] = usePermissionContext();
-	const { disableRouting } = props;
+	const { disableRouting, disableBackgroundGrid } = props;
 	const [id, setId] = useState<string | null>(props.initialView ?? null);
 	const [gridRefreshToken, setGridRefreshToken] = useState<string>(
 		new Date().getTime().toString()
@@ -173,15 +186,24 @@ const CRUD = <
 			model={props.model}
 			forceRefreshToken={gridRefreshToken}
 			onEdit={
-				hasPermission(perms, props.editPermission) ? showEditPage : undefined
+				(hasPermission(perms, props.readPermission) ||
+					hasPermission(perms, props.editPermission)) &&
+				props.children
+					? showEditPage
+					: undefined
 			}
 			onAddNew={
-				hasPermission(perms, props.editPermission) ? showNewPage : undefined
+				hasPermission(perms, props.newPermission) && props.children
+					? showNewPage
+					: undefined
 			}
 		/>
 	);
 
-	const form = (id: string) => (
+	const form = (
+		id: string,
+		formComponent: NonNullable<typeof props.children>
+	) => (
 		<Form
 			id={id === "new" ? null : id}
 			model={props.model}
@@ -190,28 +212,40 @@ const CRUD = <
 			customProps={{
 				goBack: showOverview,
 			}}
+			readOnly={!hasPermission(perms, props.editPermission)}
 		>
-			{props.children}
+			{formComponent}
 		</Form>
 	);
 
 	return disableRouting ? (
 		<>
-			<div className={id !== null ? classes.hide : classes.show}>{grid()}</div>
-			{id !== null && form(id)}
+			{(id === null || !disableBackgroundGrid) && (
+				<div className={id !== null ? classes.hide : classes.show}>
+					{grid()}
+				</div>
+			)}
+			{id !== null && props.children && form(id, props.children)}
 		</>
 	) : (
 		<>
-			<div className={location.pathname === path ? classes.show : classes.hide}>
-				{grid()}
-			</div>
-			<Switch>
-				<Route path={`${path}/:id`} exact>
-					{(routeProps: RouteChildrenProps<{ id: string }>) =>
-						form(routeProps.match?.params.id ?? "")
-					}
-				</Route>
-			</Switch>
+			{(id === null || !disableBackgroundGrid) && (
+				<div
+					className={location.pathname === path ? classes.show : classes.hide}
+				>
+					{grid()}
+				</div>
+			)}
+			{props.children && (
+				<Switch>
+					<Route path={`${path}/:id`} exact>
+						{(routeProps: RouteChildrenProps<{ id: string }>) =>
+							props.children &&
+							form(routeProps.match?.params.id ?? "", props.children)
+						}
+					</Route>
+				</Switch>
+			)}
 		</>
 	);
 };

@@ -5,7 +5,7 @@ import {
 	PageVisibility,
 	ModelGetResponse,
 } from "../Model";
-import { IDataGridLoadDataParameters } from "../../standalone/DataGrid";
+import { IDataGridLoadDataParameters } from "../../standalone/DataGrid/DataGrid";
 import { IDataGridExporter } from "../../standalone/DataGrid/Header";
 
 export interface ResponseMeta {
@@ -79,13 +79,17 @@ abstract class Connector<
 	abstract delete(
 		id: string,
 		model?: Model<KeyT, VisibilityT, CustomT>
-	): Promise<void>;
+	): Promise<void> | void;
 
 	/**
 	 * Delets multiple data entries at once. Should be overwritten if implemented by your backend.
 	 * @param ids The IDs of the data entries to delete
 	 * @param model The model performing the request
 	 */
+	deleteMultiple(
+		ids: string[],
+		model?: Model<KeyT, VisibilityT, CustomT>
+	): void;
 	async deleteMultiple(
 		ids: string[],
 		model?: Model<KeyT, VisibilityT, CustomT>
@@ -101,7 +105,7 @@ abstract class Connector<
 	public deleteAdvanced?: (
 		req: AdvancedDeleteRequest,
 		model?: Model<KeyT, VisibilityT, CustomT>
-	) => Promise<void>;
+	) => Promise<void> | void;
 
 	/**
 	 * DataGrid exporters supported by this backend connector

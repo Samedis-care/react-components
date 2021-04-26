@@ -95,6 +95,14 @@ export const colourOptions: ColourOptionsDef[] = [
 		type: "Light",
 		icon: "https://via.placeholder.com/512",
 	},
+	{
+		value: "long-test",
+		label:
+			"This is an extremely long label which is used for testing purposes. It may be too long to fit in a single line, but this is exactly what we want here as we want to test overflow handling",
+		color: "#666666",
+		type: "Other",
+		icon: "https://via.placeholder.com/512",
+	},
 ];
 
 export const flavourOptions = [

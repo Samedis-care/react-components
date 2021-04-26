@@ -8,11 +8,12 @@ import { Connector, PageVisibility } from "../../backend-integration";
 import { ErrorComponentProps } from "../Form";
 import ErrorComponent from "../../stories/backend-components/Form/ErrorComponent";
 import { Loader } from "../../standalone";
+import { WithTranslation } from "react-i18next";
 
 export interface CrudFileUploadProps
 	extends Omit<
 		FileUploadProps,
-		"files" | "onChange" | "handleError" | "classes"
+		"files" | "handleError" | "classes" | keyof WithTranslation
 	> {
 	/**
 	 * The backend connector used as CRUD interface
@@ -54,7 +55,7 @@ export interface BackendFileMeta extends FileMeta {
 }
 
 const CrudFileUpload = (props: CrudFileUploadProps) => {
-	const { connector, serialize, deserialize, ...otherProps } = props;
+	const { connector, serialize, deserialize, onChange, ...otherProps } = props;
 	const { allowDuplicates } = otherProps;
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<Error | null>(null);
@@ -95,15 +96,18 @@ const CrudFileUpload = (props: CrudFileUploadProps) => {
 
 			try {
 				// wait for response
+
+				// deletePromise may be undefined or a promise
+				// eslint-disable-next-line @typescript-eslint/await-thenable
 				await deletePromise;
 				const uploadedFiles = await uploadPromise;
 
+				const finalFiles = (newFiles.filter(
+					(file) => !file.delete && !file.canBeUploaded
+				) as FileData<BackendFileMeta>[]).concat(uploadedFiles);
+
 				// update state
-				setFiles(
-					(newFiles.filter(
-						(file) => !file.delete && !file.canBeUploaded
-					) as FileData<BackendFileMeta>[]).concat(uploadedFiles)
-				);
+				setFiles(finalFiles);
 			} catch (e) {
 				setError(e as Error);
 			}
@@ -132,6 +136,10 @@ const CrudFileUpload = (props: CrudFileUploadProps) => {
 		})();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
+
+	useEffect(() => {
+		if (onChange) onChange(files);
+	}, [files, onChange]);
 
 	if (loading) return <Loader />;
 	if (loadError) return <span>{loadError.message}</span>;

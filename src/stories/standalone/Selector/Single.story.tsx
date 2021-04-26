@@ -3,14 +3,22 @@ import "../../../i18n";
 import { BaseSelectorData, SingleSelect } from "../../../standalone/Selector";
 import { colourOptions } from "./Data";
 import { action } from "@storybook/addon-actions";
-import { boolean, text } from "@storybook/addon-knobs";
-import { Box, FormControl, InputLabel } from "@material-ui/core";
+import { boolean, text, select } from "@storybook/addon-knobs";
+import { Box, FormControl } from "@material-ui/core";
 import { showInfoDialog } from "../../../non-standalone";
 import { useDialogContext } from "../../../framework";
 
 export const SelectorSingle = (): React.ReactElement => {
 	const [selected, setSelected] = useState<BaseSelectorData | null>(null);
 	const [pushDialog] = useDialogContext();
+	const variant = select(
+		"TextField mode",
+		{
+			outlined: "outlined",
+			standard: "standard",
+		},
+		"outlined"
+	);
 	const dialogTitle = text("Dialog title", "Sample title");
 	const infoText = text(
 		"Info Text",
@@ -20,23 +28,37 @@ export const SelectorSingle = (): React.ReactElement => {
 	const dialogButtonClick = action("onClose");
 	const loadDataAction = action("onLoad");
 	const onSelectAction = action("onSelect");
-	const onAddNewAction = action("onAddNew");
+	const onAddNewAction = function (...args: unknown[]) {
+		action("onAddNew")(args);
+		return null;
+	};
+	const label = text("Label", "Example selector");
 	const enableAddNew = boolean("Enable Add New", false);
 	const disableClearable = boolean("Disable clearable?", false);
 	const disableSearch = boolean("Disable search?", false);
 	const icons = boolean("Enable Icons", false);
 	const disabled = boolean("Disable", false);
+	const grouped = boolean("Grouped", false);
+	const noGroupLabel = grouped ? text("No Group label", "No group") : "";
 	const addNewLabel = text("Add new label", "Add");
-	const loadingText = text("Loading Text", "Loading..");
-	const noOptionsText = text("No options Label", "No Option");
+	const useCustomLoading = boolean("Use custom loading label?", true);
+	const loadingLabel = text("Loading Label", "Loading..");
+	const useCustomNoOptionsText = boolean("Use custom no data label?", false);
+	const noOptionsText = text("No data Label", "No option");
 	const placeholderLabel = text("Placeholder Label", "Select..");
+	const useCustomOpenText = boolean("Use custom open text label?", false);
+	const openText = text("Open Text Label", "Open");
+	const useCustomCloseText = boolean("Use custom close text label?", false);
+	const closeText = text("Close Text Label", "Close");
 
 	const loadData = useCallback(
 		(query: string): BaseSelectorData[] => {
 			loadDataAction(query);
-			return colourOptions.filter((option) =>
-				option.label.toLowerCase().includes(query.toLowerCase())
-			);
+			return colourOptions
+				.map((entry) => ({ ...entry, group: entry.type }))
+				.filter((option) =>
+					option.label.toLowerCase().includes(query.toLowerCase())
+				);
 		},
 		[loadDataAction]
 	);
@@ -51,8 +73,9 @@ export const SelectorSingle = (): React.ReactElement => {
 	return (
 		<Box m={2}>
 			<FormControl component={"fieldset"} fullWidth>
-				<InputLabel shrink>Example selector</InputLabel>
 				<SingleSelect
+					label={label}
+					variant={variant}
 					selected={selected}
 					onSelect={onSelect}
 					onLoad={loadData}
@@ -62,10 +85,14 @@ export const SelectorSingle = (): React.ReactElement => {
 					disableSearch={disableSearch}
 					disabled={disabled}
 					addNewLabel={addNewLabel}
-					loadingText={loadingText}
-					noOptionsText={noOptionsText}
+					loadingText={useCustomLoading ? loadingLabel : undefined}
+					noOptionsText={useCustomNoOptionsText ? noOptionsText : undefined}
+					openText={useCustomOpenText ? openText : undefined}
+					closeText={useCustomCloseText ? closeText : undefined}
 					placeholder={placeholderLabel}
 					autocompleteId={"single-select"}
+					grouped={grouped}
+					noGroupLabel={noGroupLabel}
 					openInfo={() =>
 						showInfoDialog(pushDialog, {
 							title: dialogTitle,

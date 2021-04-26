@@ -1,8 +1,11 @@
+/* eslint-disable no-console */
 import "./js-dom-mocks";
 // import "./crud-mocks";
-import initStoryshots from "@storybook/addon-storyshots";
+import initStoryshots, {
+	multiSnapshotWithOptions,
+} from "@storybook/addon-storyshots";
 import { advanceTo, clear } from "jest-date-mock";
-import ccI18n from "../src/i18n";
+import ccI18n, { langs } from "../src/i18n";
 import enzyme from "enzyme";
 import { createSerializer as enzymeSerializer } from "enzyme-to-json";
 
@@ -28,15 +31,16 @@ beforeAll(async () => {
 	console.error = jest.fn();
 	console.debug = jest.fn();
 
-	// set fixed locale
-	await ccI18n.changeLanguage("en-GB");
+	// set fixed locale and unload locale files as they cause a massive increase in snapshot size
+	await ccI18n.changeLanguage("cimode");
+	langs.forEach((lang) => ccI18n.removeResourceBundle(lang, "translation"));
 	advanceTo(1606219200000);
 });
 afterAll(() => clear());
 
 initStoryshots({
 	storyKindRegex: /^(?!.*?(Backend-Components|Backend-Integration)).*$/gm,
-	renderer: createMount(),
+	test: multiSnapshotWithOptions({ renderer: createMount() }),
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore
 	snapshotSerializers: [enzymeSerializer()],

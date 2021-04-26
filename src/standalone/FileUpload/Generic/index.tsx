@@ -12,7 +12,6 @@ import {
 import { AttachFile } from "@material-ui/icons";
 import FilePreview from "./File";
 import { FileSelectorError } from "./Errors";
-import i18n from "../../../i18n";
 import {
 	getFileExt,
 	matchMime,
@@ -21,8 +20,10 @@ import {
 } from "../../../utils";
 import { IDownscaleProps } from "../../../utils/processImage";
 import GroupBox from "../../GroupBox";
+import { TFunction, useTranslation, WithTranslation } from "react-i18next";
+import ccI18n from "../../../i18n";
 
-export interface FileUploadProps extends WithStyles {
+export interface FileUploadProps extends WithStyles, WithTranslation {
 	/**
 	 * Maximum amount of files allowed
 	 */
@@ -47,6 +48,10 @@ export interface FileUploadProps extends WithStyles {
 	 * Properties for preview
 	 */
 	previewSize: number;
+	/**
+	 * The label type of the box
+	 */
+	smallLabel?: boolean;
 	/**
 	 * Should we show images instead of file icons?
 	 */
@@ -142,7 +147,7 @@ export interface FileData<T = File | FileMeta> {
 	delete?: boolean;
 }
 
-class FileUpload extends Component<FileUploadProps, IState> {
+class FileUpload extends Component<FileUploadProps & WithTranslation, IState> {
 	private readonly inputRef: React.RefObject<HTMLInputElement>;
 
 	constructor(props: FileUploadProps) {
@@ -195,7 +200,7 @@ class FileUpload extends Component<FileUploadProps, IState> {
 
 	render() {
 		return (
-			<GroupBox label={this.props.label}>
+			<GroupBox label={this.props.label} smallLabel={this.props.smallLabel}>
 				<Grid
 					container
 					spacing={2}
@@ -217,7 +222,7 @@ class FileUpload extends Component<FileUploadProps, IState> {
 								onBlur={this.props.onBlur}
 							>
 								{this.props.uploadLabel ||
-									i18n.t("standalone.file-upload.upload")}
+									this.props.t("standalone.file-upload.upload")}
 							</Button>
 							<input
 								type={"file"}
@@ -265,7 +270,7 @@ class FileUpload extends Component<FileUploadProps, IState> {
 							{this.props.readOnly && this.state.files.length === 0 && (
 								<Grid item>
 									<Typography>
-										{i18n.t("standalone.file-upload.no-files")}
+										{this.props.t("standalone.file-upload.no-files")}
 									</Typography>
 								</Grid>
 							)}
@@ -274,10 +279,10 @@ class FileUpload extends Component<FileUploadProps, IState> {
 					{!this.props.readOnly && (
 						<Grid item xs={12} key={"info"}>
 							<FormHelperText className={this.props.classes.formatText}>
-								({i18n.t("standalone.file-upload.formats")}:{" "}
+								({this.props.t("standalone.file-upload.formats")}:{" "}
 								{this.props.acceptLabel ||
 									this.props.accept ||
-									i18n.t("standalone.file-upload.format.any")}
+									this.props.t("standalone.file-upload.format.any")}
 								)
 							</FormHelperText>
 						</Grid>
@@ -298,7 +303,7 @@ class FileUpload extends Component<FileUploadProps, IState> {
 			if (maxFiles === 0) {
 				this.props.handleError(
 					"files.selector.limit-reached",
-					i18n.t("standalone.file-upload.error.limit-reached")
+					this.props.t("standalone.file-upload.error.limit-reached")
 				);
 				return;
 			}
@@ -369,7 +374,7 @@ class FileUpload extends Component<FileUploadProps, IState> {
 			if (files.length > maxFiles) {
 				this.props.handleError(
 					"files.selector.too-many",
-					i18n.t("standalone.file-upload.error.too-many")
+					this.props.t("standalone.file-upload.error.too-many")
 				);
 				return;
 			}
@@ -415,7 +420,7 @@ class FileUpload extends Component<FileUploadProps, IState> {
 			) {
 				this.props.handleError(
 					"files.type.invalid",
-					i18n.t("standalone.file-upload.error.invalid-type")
+					this.props.t("standalone.file-upload.error.invalid-type")
 				);
 				return;
 			}
@@ -479,4 +484,21 @@ const styles = createStyles((theme: Theme) => ({
 	},
 }));
 
-export default withStyles(styles)(FileUpload);
+const FileUploadWithoutTranslation = withStyles(styles)(FileUpload);
+const FileUploadWithTranslation = (
+	props: Omit<FileUploadProps, keyof WithTranslation | keyof WithStyles>
+): React.ReactElement => {
+	const { i18n, t, ready: tReady } = useTranslation(undefined, {
+		i18n: ccI18n,
+	});
+	return (
+		<FileUploadWithoutTranslation
+			{...props}
+			i18n={i18n}
+			t={t as TFunction<"translation">}
+			tReady={tReady}
+		/>
+	);
+};
+
+export default FileUploadWithTranslation;

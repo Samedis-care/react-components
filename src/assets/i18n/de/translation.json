@@ -2,7 +2,30 @@
 	"standalone": {
 		"data-grid": {
 			"content": {
-				"filter": "Filter"
+				"filter": "Filter",
+				"bool-filter": {
+					"any": "Beliebiger Wert",
+					"false": "Alle falschen Werte",
+					"true": "Alle wahrheitsgemäßen Werte"
+				},
+				"no-data": "Die Liste enthält keine Daten.",
+				"set-filter": {
+					"search": "Suche...",
+					"select-all": "Wählen Sie Alle"
+				},
+				"filter-type": {
+					"contains": "Enthält",
+					"ends-with": "Endet mit",
+					"eq": "Gleich",
+					"gt": "Größer als",
+					"gte": "Größer als oder gleich",
+					"in-range": "Im Bereich",
+					"lt": "Weniger als",
+					"lte": "Weniger als oder gleich",
+					"not-contains": "Enthält nicht",
+					"not-eq": "Nicht gleich",
+					"starts-with": "Beginnt mit"
+				}
 			},
 			"settings": {
 				"lock": "Spalten sperren/entsperren",
@@ -15,7 +38,8 @@
 				"new": "Neu",
 				"export": "Exportieren",
 				"edit": "Bearbeiten",
-				"delete": "Lösche"
+				"delete": "Löschen",
+				"custom-filter-button": "Filter"
 			},
 			"footer": {
 				"prev-page": "Vorherige Seite",
@@ -24,11 +48,25 @@
 				"next-page": "Nächste Seite",
 				"last-page": "Letzte Seite",
 				"first-page": "Erste Seite",
-				"page-size-tooltip": "Anzahl Einträge pro Seite"
+				"page-size-tooltip": "Anzahl Einträge pro Seite",
+				"delete": "Löschen",
+				"edit": "Bearbeiten",
+				"filtered": "Gefiltert:",
+				"select-all": "Alle",
+				"total": "Gesamt:"
+			},
+			"custom-filters": {
+				"title": "Filterauswahl"
 			}
 		},
 		"selector": {
-			"add-new": "Hinzufügen"
+			"add-new": "Hinzufügen",
+			"base-selector": {
+				"no-options-text": "Keine Optionen",
+				"close-icon-text": "Schließen",
+				"open-icon-text": "Öffnen",
+				"loading-text": "Lade..."
+			}
 		},
 		"schedule": {
 			"week": "Woche",
@@ -89,6 +127,9 @@
 					"boolean": {
 						"true": "Ja",
 						"false": "Nein"
+					},
+					"signature": {
+						"not-set": "Nicht unterschrieben"
 					}
 				},
 				"boolean": {
@@ -131,6 +172,15 @@
 					}
 				}
 			}
+		},
+		"selector": {
+			"loading": "Wird geladen...",
+			"loading-error": "Fehler beim Abrufen der Daten"
+		}
+	},
+	"non-standalone": {
+		"dialog": {
+			"okay": "Okay"
 		}
 	}
 }

@@ -1,31 +1,29 @@
 import React from "react";
-import {
-	FormControl,
-	FormHelperText,
-	InputLabel,
-	Typography,
-} from "@material-ui/core";
-import { ModelRenderParams, PageVisibility } from "../../index";
+import { FormControl, FormHelperText, Typography } from "@material-ui/core";
+import { ModelRenderParams } from "../../index";
 import TypeEnum, { EnumValue } from "../TypeEnum";
 import ccI18n from "../../../../i18n";
 import {
 	BaseSelectorData,
+	BaseSelectorProps,
 	SingleSelect,
 } from "../../../../standalone/Selector";
-import { BackendSingleSelectProps } from "../../../../backend-components/Selector/BackendSingleSelect";
 
 type RendererEnumSelectProps = Omit<
-	BackendSingleSelectProps<string, PageVisibility, unknown>,
+	BaseSelectorProps<BaseSelectorData>,
 	"selected" | "onLoad" | "onSelect" | "disabled"
 >;
+
+export type AdvancedEnumValue = Omit<BaseSelectorData, "label"> &
+	Pick<EnumValue, "getLabel" | "invisible">;
 
 /**
  * Renders TypeEnum as drop-down selector (with search)
  */
 class RendererEnumSelect extends TypeEnum {
-	private props: RendererEnumSelectProps;
+	private props?: RendererEnumSelectProps;
 
-	constructor(values: EnumValue[], props: RendererEnumSelectProps) {
+	constructor(values: AdvancedEnumValue[], props?: RendererEnumSelectProps) {
 		super(values);
 		this.props = props;
 	}
@@ -56,10 +54,12 @@ class RendererEnumSelect extends TypeEnum {
 		if (visibility.editable) {
 			if (visibility.grid) throw new Error("Not supported");
 
-			const data: BaseSelectorData[] = this.values.map((entry) => ({
-				value: entry.value,
-				label: entry.getLabel(),
-			}));
+			const data: BaseSelectorData[] = (this.values as AdvancedEnumValue[])
+				.filter((entry) => !entry.invisible)
+				.map((entry) => ({
+					...entry,
+					label: entry.getLabel(),
+				}));
 			const selected = data.find((entry) => entry.value === value) || null;
 
 			const onLoad = (query: string) =>
@@ -75,9 +75,9 @@ class RendererEnumSelect extends TypeEnum {
 					error={!!errorMsg}
 					onBlur={handleBlur}
 				>
-					<InputLabel shrink>{label}</InputLabel>
 					<SingleSelect
 						{...this.props}
+						label={label}
 						selected={selected}
 						onLoad={onLoad}
 						onSelect={(value) => handleChange(field, value ? value.value : "")}

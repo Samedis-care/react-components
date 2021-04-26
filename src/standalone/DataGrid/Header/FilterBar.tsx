@@ -1,11 +1,12 @@
-import React, { Dispatch, SetStateAction, useCallback } from "react";
-import { Box, Grid } from "@material-ui/core";
+import React, { Dispatch, SetStateAction, useCallback, useEffect } from "react";
+import { Box, Grid, useMediaQuery } from "@material-ui/core";
 import {
 	DataGridCustomDataType,
 	useDataGridProps,
 	useDataGridState,
 	useDataGridStyles,
-} from "../index";
+} from "../DataGrid";
+import CustomFiltersButton from "./CustomFiltersButton";
 
 export interface IDataGridFilterBarProps {
 	/**
@@ -16,12 +17,19 @@ export interface IDataGridFilterBarProps {
 	 * A setState like interface for setting customData
 	 */
 	setCustomData: Dispatch<SetStateAction<DataGridCustomDataType>>;
+	/**
+	 * Is rendered in Dialog?
+	 */
+	inDialog: boolean;
 }
 
 const FilterBar = () => {
 	const props = useDataGridProps();
 	const [state, setState] = useDataGridState();
 	const classes = useDataGridStyles();
+	const enableDialog = useMediaQuery(
+		props.enableFilterDialogMediaQuery ?? "(false)"
+	);
 
 	const setCustomData = useCallback(
 		(
@@ -44,6 +52,24 @@ const FilterBar = () => {
 		[setState]
 	);
 
+	const openDialog = useCallback(() => {
+		setState((prevState) => ({
+			...prevState,
+			showFilterDialog: !prevState.showFilterDialog,
+			showSettings: prevState.showFilterDialog ? prevState.showSettings : false,
+		}));
+	}, [setState]);
+
+	// hide dialog if user resizes window
+	useEffect(() => {
+		if (!enableDialog) {
+			setState((prevState) => ({
+				...prevState,
+				showFilterDialog: false,
+			}));
+		}
+	}, [enableDialog, setState]);
+
 	const FilterBarView = props.filterBar;
 
 	return (
@@ -55,12 +81,16 @@ const FilterBar = () => {
 				spacing={2}
 				className={classes.filterBarGrid}
 			>
-				{FilterBarView && (
-					<FilterBarView
-						customData={state.customData}
-						setCustomData={setCustomData}
-					/>
-				)}
+				{FilterBarView &&
+					(enableDialog ? (
+						<CustomFiltersButton onClick={openDialog} />
+					) : (
+						<FilterBarView
+							customData={state.customData}
+							setCustomData={setCustomData}
+							inDialog={false}
+						/>
+					))}
 			</Grid>
 		</Box>
 	);

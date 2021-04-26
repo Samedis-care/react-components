@@ -1,5 +1,5 @@
 import React from "react";
-import { FormControl, FormHelperText, InputLabel } from "@material-ui/core";
+import { FormControl, FormHelperText } from "@material-ui/core";
 import { ModelFieldName, ModelRenderParams, PageVisibility } from "../../index";
 import Model from "../../Model";
 import TypeId from "../TypeId";
@@ -77,9 +77,9 @@ class RendererBackendSingleSelect<
 					error={!!errorMsg}
 					onBlur={handleBlur}
 				>
-					<InputLabel shrink>{label}</InputLabel>
 					<BackendSingleSelect
 						selected={value}
+						label={label}
 						onSelect={(value) => handleChange(field, value)}
 						disabled={visibility.readOnly}
 						model={relationModel as Model<KeyT, VisibilityT, CustomT>}

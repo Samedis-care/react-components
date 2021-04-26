@@ -3,16 +3,17 @@ import { Grid } from "@material-ui/core";
 import { SmallIconButton, VerticalDivider } from "../../index";
 import ComponentWithLabel from "../../UIKit/ComponentWithLabel";
 import i18n from "../../../i18n";
+import { useTranslation } from "react-i18next";
 import { Edit as EditIcon, Delete as DeleteIcon } from "@material-ui/icons";
 import SelectAll from "./SelectAll";
-import { useDataGridStyles } from "../index";
+import { DataGridProps, useDataGridStyles } from "../DataGrid";
 
 export interface DataActionBarViewProps {
 	/**
 	 * The amount of selected items
 	 * Values: 0 (none), 1 (one) or 2 (multiple)
 	 */
-	numSelected: number;
+	numSelected: 0 | 1 | 2;
 	/**
 	 * Callback for edit button.
 	 * If not defined: Disables edit button
@@ -23,17 +24,27 @@ export interface DataActionBarViewProps {
 	 * If not defined: Disables delete button
 	 */
 	handleDelete?: () => void;
+	/**
+	 * @see DataGridProps.customDataActionButtons
+	 */
+	customButtons: DataGridProps["customDataActionButtons"];
+	/**
+	 * Forward click to external handler
+	 * @param label The label of the custom button
+	 */
+	handleCustomButtonClick: (label: string) => void;
 }
 
 const DataActionBarView = (props: DataActionBarViewProps) => {
 	const classes = useDataGridStyles();
+	const { t } = useTranslation(undefined, { i18n });
 
 	return (
 		<Grid container>
 			<Grid item key={"select-all"}>
 				<ComponentWithLabel
 					control={<SelectAll />}
-					labelText={i18n.t("standalone.data-grid.footer.select-all")}
+					labelText={t("standalone.data-grid.footer.select-all")}
 					labelPlacement={"bottom"}
 					className={classes.selectAllWrapper}
 				/>
@@ -53,7 +64,7 @@ const DataActionBarView = (props: DataActionBarViewProps) => {
 									<EditIcon />
 								</SmallIconButton>
 							}
-							labelText={i18n.t("standalone.data-grid.footer.edit")}
+							labelText={t("standalone.data-grid.footer.edit")}
 							onClick={props.handleEdit}
 							labelPlacement={"bottom"}
 							disabled={props.numSelected !== 1}
@@ -76,7 +87,7 @@ const DataActionBarView = (props: DataActionBarViewProps) => {
 									<DeleteIcon />
 								</SmallIconButton>
 							}
-							labelText={i18n.t("standalone.data-grid.footer.delete")}
+							labelText={t("standalone.data-grid.footer.delete")}
 							onClick={props.handleDelete}
 							labelPlacement={"bottom"}
 							disabled={props.numSelected === 0}
@@ -84,6 +95,29 @@ const DataActionBarView = (props: DataActionBarViewProps) => {
 					</Grid>
 				</>
 			)}
+			{props.customButtons?.map((entry) => (
+				<React.Fragment key={entry.label}>
+					<Grid item>
+						<VerticalDivider />
+					</Grid>
+					<Grid item>
+						<ComponentWithLabel
+							control={
+								<SmallIconButton
+									color={"primary"}
+									disabled={entry.isDisabled(props.numSelected)}
+								>
+									{entry.icon}
+								</SmallIconButton>
+							}
+							labelText={entry.label}
+							onClick={() => props.handleCustomButtonClick(entry.label)}
+							labelPlacement={"bottom"}
+							disabled={entry.isDisabled(props.numSelected)}
+						/>
+					</Grid>
+				</React.Fragment>
+			))}
 		</Grid>
 	);
 };

@@ -11,32 +11,38 @@ import { Domain, Home } from "@material-ui/icons";
 import { button, select } from "@storybook/addon-knobs";
 import { FrameworkHistory, RoutedMenu } from "../../..";
 
-const useStyles = makeStyles({
-	header: {
-		width: "100%",
-		height: "100%",
-		backgroundColor: "red",
+const useStyles = makeStyles(
+	{
+		header: {
+			width: "100%",
+			height: "100%",
+			backgroundColor: "red",
+		},
+		content: {
+			width: "100%",
+			height: "100%",
+			backgroundColor: "green",
+		},
+		topLeft: {
+			width: "100%",
+			height: "100%",
+			backgroundColor: "yellow",
+		},
 	},
-	content: {
-		width: "100%",
-		height: "100%",
-		backgroundColor: "green",
-	},
-	topLeft: {
-		width: "100%",
-		height: "100%",
-		backgroundColor: "yellow",
-	},
-});
+	{ name: "CcPortalMenuStory" }
+);
 
-const usePortalStyles = makeStyles({
-	menuWrapper: {
-		backgroundColor: "#252525",
+const usePortalStyles = makeStyles(
+	{
+		menuWrapper: {
+			backgroundColor: "#252525",
+		},
+		menuChildrenWrapper: {
+			backgroundColor: "#1d1d1d",
+		},
 	},
-	menuChildrenWrapper: {
-		backgroundColor: "#1d1d1d",
-	},
-});
+	{ name: "CcPortalMenuStyleStory" }
+);
 
 interface IPlaceHolderProps {
 	cssClass: "header" | "content" | "topLeft";

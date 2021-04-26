@@ -3,7 +3,7 @@ import {
 	IDataGridColumnsState,
 	IDataGridColumnState,
 	IDataGridFieldFilter,
-} from "./index";
+} from "./DataGrid";
 
 interface IDataGridColumnsStateArrayEntry extends IDataGridColumnState {
 	field: string;

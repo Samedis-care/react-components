@@ -47,7 +47,7 @@ const addGetParams = (
 const stringifyValue = (value: unknown): string => {
 	if (typeof value === "string") {
 		return value;
-	} else if (typeof value === "number") {
+	} else if (typeof value === "number" || typeof value === "boolean") {
 		return value.toString();
 	} else if (typeof value === "object") {
 		return JSON.stringify(value);

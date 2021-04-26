@@ -1,6 +1,6 @@
 import React from "react";
 import Checkbox from "../../UIKit/Checkbox";
-import { useDataGridStyles } from "../index";
+import { useDataGridStyles } from "../DataGrid";
 
 export interface IDataGridContentSelectRowViewProps {
 	/**

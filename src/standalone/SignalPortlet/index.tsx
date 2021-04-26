@@ -30,12 +30,17 @@ export interface SignalPortletProps extends SignalPortletColorConfig {
 	classes?: Partial<ClassNameMap<keyof ReturnType<typeof useStyles>>>;
 }
 
-const useStyles = makeStyles({
-	paper: {
-		height: "100%",
+const useStyles = makeStyles(
+	{
+		paper: {
+			height: "100%",
+		},
+		list: {},
+		title: {},
+		titleWrapper: {},
 	},
-	list: {},
-});
+	{ name: "CcSignalPortlet" }
+);
 
 const SignalPortlet = (props: SignalPortletProps) => {
 	const classes = useStyles(props);
@@ -43,8 +48,8 @@ const SignalPortlet = (props: SignalPortletProps) => {
 	return (
 		<Paper className={classes.paper}>
 			<Grid container spacing={1}>
-				<Grid item xs={12}>
-					<Typography variant={"h5"} align={"center"}>
+				<Grid item xs={12} className={classes.titleWrapper}>
+					<Typography variant={"h5"} align={"center"} className={classes.title}>
 						{props.title}
 					</Typography>
 				</Grid>

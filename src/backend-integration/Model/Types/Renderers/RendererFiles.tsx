@@ -41,24 +41,26 @@ class RendererFiles extends TypeFiles {
 
 			return (
 				<>
-					<FileUpload
-						label={label}
-						files={value}
-						readOnly={visibility.readOnly}
-						onChange={(files) => {
-							handleChange(field, files);
-						}}
-						onBlur={handleBlur}
-						handleError={(_, msg) => setError(new Error(msg))}
-						maxFiles={this.params?.maxFiles}
-						accept={this.params?.accept}
-						acceptLabel={this.params?.acceptLabel}
-						imageDownscaleOptions={this.params?.imageDownscaleOptions}
-						convertImagesTo={this.params?.convertImagesTo}
-						previewSize={this.params?.previewSize || 96}
-						previewImages={this.params?.previewImages}
-						allowDuplicates={this.params?.allowDuplicates}
-					/>
+					<div>
+						<FileUpload
+							label={label}
+							files={value}
+							readOnly={visibility.readOnly}
+							onChange={(files) => {
+								handleChange(field, files);
+							}}
+							onBlur={handleBlur}
+							handleError={(_, msg) => setError(new Error(msg))}
+							maxFiles={this.params?.maxFiles}
+							accept={this.params?.accept}
+							acceptLabel={this.params?.acceptLabel}
+							imageDownscaleOptions={this.params?.imageDownscaleOptions}
+							convertImagesTo={this.params?.convertImagesTo}
+							previewSize={this.params?.previewSize || 96}
+							previewImages={this.params?.previewImages}
+							allowDuplicates={this.params?.allowDuplicates}
+						/>
+					</div>
 					<FormHelperText error={!!errorMsg}>{errorMsg}</FormHelperText>
 				</>
 			);

@@ -6,7 +6,13 @@ import React, {
 	PropsWithChildren,
 	ReactNodeArray,
 } from "react";
-import { ListItemText, IconButton } from "@material-ui/core";
+import {
+	ListItemText,
+	IconButton,
+	InputLabel,
+	Paper,
+	InputProps,
+} from "@material-ui/core";
 import { Autocomplete, AutocompleteProps } from "@material-ui/lab";
 import {
 	Add as AddIcon,
@@ -23,7 +29,10 @@ import {
 	AutocompleteClassKey,
 	AutocompleteRenderInputParams,
 } from "@material-ui/lab/Autocomplete/Autocomplete";
+import InputWithHelp from "../UIKit/InputWithHelp";
 import OutlinedInputWithHelp from "../UIKit/OutlinedInputWithHelp";
+import { useTranslation } from "react-i18next";
+import InlineSwitch from "../InlineSwitch";
 
 export interface BaseSelectorData {
 	/**
@@ -34,6 +43,10 @@ export interface BaseSelectorData {
 	 * The label to show the user
 	 */
 	label: string;
+	/**
+	 * The group of this item
+	 */
+	group?: string;
 	/**
 	 * An optional icon or img src
 	 */
@@ -62,12 +75,21 @@ export interface BaseSelectorProps<DataT extends BaseSelectorData>
 	/**
 	 * Data load function
 	 * @param search The user search input
+	 * @param switchValue The value of switch input
 	 */
-	onLoad: (search: string) => DataT[] | Promise<DataT[]>;
+	onLoad: (search: string, switchValue: boolean) => DataT[] | Promise<DataT[]>;
 	/**
 	 * Callback for autocomplete change
 	 */
 	onSelect: (selected: DataT | null) => void;
+	/**
+	 * The textfield type of input
+	 */
+	variant?: "outlined" | "standard";
+	/**
+	 * The label of the selector
+	 */
+	label?: string;
 	/**
 	 * Disable autocomplete control
 	 */
@@ -83,8 +105,9 @@ export interface BaseSelectorProps<DataT extends BaseSelectorData>
 	/**
 	 * Handler for the "Add new" button
 	 * Add new button only shows if this is set.
+	 * @returns The newly created data entry which will be selected or null if user cancelled
 	 */
-	onAddNew?: () => void;
+	onAddNew?: () => DataT | null | Promise<DataT | null>;
 	/**
 	 * Label for the "Add new" button
 	 */
@@ -110,6 +133,14 @@ export interface BaseSelectorProps<DataT extends BaseSelectorData>
 	 */
 	loadingText?: string | SelectorLabelCallback;
 	/**
+	 * Label which is shown for close icon button while popup is opened
+	 */
+	closeText?: string;
+	/**
+	 * Label which is shown for open icon button while popup is closed
+	 */
+	openText?: string;
+	/**
 	 * Is the selector clearable?
 	 */
 	disableClearable?: boolean;
@@ -117,6 +148,23 @@ export interface BaseSelectorProps<DataT extends BaseSelectorData>
 	 * Disable search?
 	 */
 	disableSearch?: boolean;
+	/**
+	 * Enable grouping
+	 */
+	grouped?: boolean;
+	/**
+	 * Label used if no group is set
+	 */
+	noGroupLabel?: string;
+	/**
+	 * Disable group sorting
+	 */
+	disableGroupSorting?: boolean;
+	/**
+	 * Group sorting algorithm
+	 * @see Array.sort
+	 */
+	groupSorter?: (a: DataT, b: DataT) => number;
 	/**
 	 * Custom styles to be used for selector
 	 */
@@ -126,6 +174,18 @@ export interface BaseSelectorProps<DataT extends BaseSelectorData>
 		undefined,
 		undefined
 	>["classes"];
+	/**
+	 * Display switch control?
+	 */
+	displaySwitch?: boolean;
+	/**
+	 * Default value for switch position
+	 */
+	defaultSwitchValue?: boolean;
+	/**
+	 * Label for switch control (only used if displaySwitch is truthy)
+	 */
+	switchLabel?: React.ReactNode;
 }
 
 export type SelectorThemeExpert = Partial<
@@ -143,22 +203,48 @@ const useCustomStyles = makeStyles(
 			padding: 2,
 			marginRight: -2,
 		},
-		icon: (props: Pick<BaseSelectorProps<BaseSelectorData>, "iconSize">) => ({
+		textFieldStandard: {
+			position: "absolute",
+		},
+		switch: {
+			marginTop: -30,
+		},
+		labelWithSwitch: {
+			marginTop: 0,
+		},
+		icon: (
+			props: Pick<BaseSelectorProps<BaseSelectorData>, "iconSize" | "label">
+		) => ({
 			width: props.iconSize ?? 32,
 			height: props.iconSize ?? 32,
 			objectFit: "contain",
+		}),
+		wrapper: (
+			props: Pick<BaseSelectorProps<BaseSelectorData>, "iconSize" | "label">
+		) => ({
+			marginTop: props.label ? 16 : undefined,
 		}),
 	},
 	{ name: "CcBaseSelectorCustom" }
 );
 
+const variantInput: Record<
+	NonNullable<BaseSelectorProps<BaseSelectorData>["variant"]>,
+	React.ComponentType<InputProps>
+> = {
+	outlined: OutlinedInputWithHelp,
+	standard: InputWithHelp,
+};
+
 const BaseSelector = <DataT extends BaseSelectorData>(
 	props: BaseSelectorProps<DataT>
 ) => {
 	const {
+		variant,
 		refreshToken,
 		onSelect,
 		selected,
+		label,
 		disabled,
 		disableSearch,
 		placeholder,
@@ -169,21 +255,40 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 		enableIcons,
 		noOptionsText,
 		loadingText,
+		openText,
+		closeText,
 		disableClearable,
 		openInfo,
+		grouped,
+		noGroupLabel,
+		disableGroupSorting,
+		groupSorter,
+		switchLabel,
 	} = props;
 	const classes = useThemeStyles(
 		(props as unknown) as BaseSelectorProps<BaseSelectorData>
 	);
+	const defaultSwitchValue = !!(
+		props.displaySwitch && props.defaultSwitchValue
+	);
+	const [switchValue, setSwitchValue] = useState<boolean>(defaultSwitchValue);
+	const { t } = useTranslation(undefined, { i18n });
 	const customClasses = useCustomStyles(cleanClassMap(props, true));
 	const [open, setOpen] = useState(false);
-	const actualAddNewLabel =
-		addNewLabel || i18n.t("standalone.selector.add-new");
-	const [selectorOptions, setSelectorOptions] = useState(
-		[] as BaseSelectorData[]
-	);
+	const actualAddNewLabel = addNewLabel || t("standalone.selector.add-new");
+	const [selectorOptions, setSelectorOptions] = useState<DataT[]>([]);
 	const [loading, setLoading] = useState(false);
 	const [query, setQuery] = useState("");
+
+	const renderIcon = useCallback(
+		(icon: string | React.ReactNode) =>
+			typeof icon === "string" ? (
+				<img src={icon} alt={""} className={customClasses.icon} />
+			) : (
+				icon
+			),
+		[customClasses.icon]
+	);
 
 	const defaultRenderer = useCallback(
 		(data: BaseSelectorData) => (
@@ -191,31 +296,29 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 			// @ts-ignore: Typescript complains about the button property being "required"
 			<SelectorSmallListItem component={"div"}>
 				{enableIcons && (
-					<SmallListItemIcon>
-						{typeof data.icon === "string" ? (
-							<img src={data.icon} alt={""} className={customClasses.icon} />
-						) : (
-							data.icon
-						)}
-					</SmallListItemIcon>
+					<SmallListItemIcon>{renderIcon(data.icon)}</SmallListItemIcon>
 				)}
 				<ListItemText>{data.label}</ListItemText>
 			</SelectorSmallListItem>
 		),
-		[customClasses.icon, enableIcons]
+		[enableIcons, renderIcon]
 	);
 
 	const onChangeHandler = useCallback(
-		(data) => {
+		async (data) => {
 			if (
 				data &&
 				"isAddNewButton" in data &&
 				(data as BaseSelectorData).isAddNewButton
 			) {
-				if (onAddNew) onAddNew();
-				return;
-			} else {
-				if (onSelect) onSelect(data);
+				if (!onAddNew) return;
+				const created = await onAddNew();
+				if (!created) return;
+				setSelectorOptions((old) => [created, ...old]);
+				data = created;
+			}
+			if (onSelect) {
+				onSelect(data);
 			}
 		},
 		[onSelect, onAddNew]
@@ -224,7 +327,7 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 	const onSearchHandler = useCallback(
 		async (query: string) => {
 			setLoading(true);
-			const results = await onLoad(query);
+			const results = await onLoad(query, !!switchValue);
 			if (onAddNew) {
 				results.push({
 					value: "add-new-button",
@@ -233,100 +336,163 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 					isAddNewButton: true,
 				} as DataT);
 			}
-			setSelectorOptions(results);
+			if (grouped && !disableGroupSorting) {
+				setSelectorOptions(
+					results.sort(
+						groupSorter ??
+							((a, b) =>
+								-(b.group ?? noGroupLabel ?? "").localeCompare(
+									a.group ?? noGroupLabel ?? ""
+								))
+					)
+				);
+			} else {
+				setSelectorOptions(results);
+			}
 			setLoading(false);
 		},
-		[actualAddNewLabel, onAddNew, onLoad, setLoading]
+		[
+			onLoad,
+			switchValue,
+			onAddNew,
+			grouped,
+			disableGroupSorting,
+			actualAddNewLabel,
+			groupSorter,
+			noGroupLabel,
+		]
 	);
 
 	const updateQuery = useCallback((_, newQuery: string) => {
 		setQuery(newQuery);
 	}, []);
 
-	// initial option load
+	// search handler
 	useEffect(() => {
+		if (!open) return;
 		void onSearchHandler(query);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [query, refreshToken]);
+	}, [query, switchValue]);
 
+	// initial option load and reset options upon selection
 	useEffect(() => {
 		void onSearchHandler("");
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [selected]);
+	}, [selected, switchValue, refreshToken]);
+
+	const filterOptions = useCallback((options: DataT[]) => options, []);
+
+	const InputComponent = variantInput[variant ?? "outlined"];
 
 	return (
-		<div>
-			<Autocomplete
-				id={autocompleteId}
-				classes={classes}
-				open={open}
-				onOpen={() => {
-					setOpen(true);
-				}}
-				onClose={() => {
-					setOpen(false);
-				}}
-				disableClearable={disableClearable}
-				loading={loading}
-				loadingText={loadingText}
-				autoComplete
-				disabled={disabled}
-				options={
-					// add selected to selectorOptions if not present to suppress warnings
-					selected &&
-					!selectorOptions.find((option) => option.value === selected.value)
-						? selectorOptions.concat([selected])
-						: selectorOptions
-				}
-				value={selected}
-				inputValue={query}
-				onInputChange={updateQuery}
-				popupIcon={<ExpandMore />}
-				noOptionsText={noOptionsText}
-				getOptionLabel={(option: BaseSelectorData) => option.label}
-				renderOption={(option: BaseSelectorData) => defaultRenderer(option)}
-				getOptionDisabled={(option: BaseSelectorData) => !!option.isDisabled}
-				getOptionSelected={(option, value) => option.value === value.value}
-				onChange={(_event, selectedValue) => onChangeHandler(selectedValue)}
-				renderInput={(params: AutocompleteRenderInputParams) => {
-					// eslint-disable-next-line @typescript-eslint/no-unused-vars
-					const { InputProps, InputLabelProps, ...otherParams } = params;
-					return (
-						<OutlinedInputWithHelp
-							readOnly={disableSearch}
-							{...InputProps}
-							{...otherParams}
-							endAdornment={
-								openInfo
-									? React.cloneElement(
-											params.InputProps?.endAdornment as ReactElement,
-											{},
-											...((params.InputProps?.endAdornment as ReactElement<
-												PropsWithChildren<unknown>
-											>).props.children as ReactNodeArray),
-											<IconButton
-												onClick={openInfo}
-												className={customClasses.infoBtn}
-											>
-												<InfoIcon color={"disabled"} />
-											</IconButton>
-									  )
-									: params.InputProps?.endAdornment
-							}
-							placeholder={placeholder}
-							onChange={(event) => {
-								void onSearchHandler(event.target.value);
-							}}
-						/>
-					);
-				}}
-				key={`${refreshToken || "no-refresh-token"} ${
-					onAddNew
-						? `add-new${actualAddNewLabel || "no-add-new-label"}`
-						: "no-add-new"
-				}`}
-			/>
-		</div>
+		<InlineSwitch
+			visible={!!props.displaySwitch}
+			value={switchValue}
+			onChange={setSwitchValue}
+			label={switchLabel}
+			classes={customClasses}
+		>
+			<>
+				{label && <InputLabel shrink>{label}</InputLabel>}
+				<Paper elevation={0} className={customClasses.wrapper}>
+					<Autocomplete
+						id={autocompleteId}
+						classes={classes}
+						open={open}
+						onOpen={() => {
+							setOpen(true);
+						}}
+						onClose={() => {
+							setOpen(false);
+						}}
+						disableClearable={disableClearable}
+						loading={loading}
+						loadingText={
+							loadingText ?? t("standalone.selector.base-selector.loading-text")
+						}
+						autoComplete
+						disabled={disabled}
+						selectOnFocus={!disableSearch}
+						options={
+							// add selected to selectorOptions if not present to suppress warnings
+							selected &&
+							!selectorOptions.find((option) => option.value === selected.value)
+								? selectorOptions.concat([selected])
+								: selectorOptions
+						}
+						groupBy={
+							grouped
+								? (option: DataT) => option.group ?? noGroupLabel ?? ""
+								: undefined
+						}
+						filterOptions={filterOptions}
+						value={selected}
+						inputValue={query}
+						blurOnSelect={true}
+						onInputChange={updateQuery}
+						popupIcon={<ExpandMore />}
+						noOptionsText={
+							noOptionsText ??
+							t("standalone.selector.base-selector.no-options-text")
+						}
+						openText={
+							openText ?? t("standalone.selector.base-selector.open-icon-text")
+						}
+						closeText={
+							closeText ??
+							t("standalone.selector.base-selector.close-icon-text")
+						}
+						getOptionLabel={(option: BaseSelectorData) => option.label}
+						renderOption={(option: BaseSelectorData) => defaultRenderer(option)}
+						getOptionDisabled={(option: BaseSelectorData) =>
+							!!option.isDisabled
+						}
+						getOptionSelected={(option, value) => option.value === value.value}
+						onChange={(_event, selectedValue) => onChangeHandler(selectedValue)}
+						renderInput={(params: AutocompleteRenderInputParams) => {
+							// eslint-disable-next-line @typescript-eslint/no-unused-vars
+							const { InputProps, InputLabelProps, ...otherParams } = params;
+							return (
+								<InputComponent
+									readOnly={disableSearch}
+									{...InputProps}
+									{...otherParams}
+									startAdornment={
+										enableIcons ? renderIcon(selected?.icon) : undefined
+									}
+									endAdornment={
+										openInfo
+											? React.cloneElement(
+													params.InputProps?.endAdornment as ReactElement,
+													{},
+													...((params.InputProps?.endAdornment as ReactElement<
+														PropsWithChildren<unknown>
+													>).props.children as ReactNodeArray),
+													<IconButton
+														onClick={openInfo}
+														className={customClasses.infoBtn}
+													>
+														<InfoIcon color={"disabled"} />
+													</IconButton>
+											  )
+											: params.InputProps?.endAdornment
+									}
+									placeholder={placeholder}
+									onChange={(event) => {
+										void onSearchHandler(event.target.value);
+									}}
+								/>
+							);
+						}}
+						key={`${refreshToken || "no-refresh-token"} ${
+							onAddNew
+								? `add-new${actualAddNewLabel || "no-add-new-label"}`
+								: "no-add-new"
+						}`}
+					/>
+				</Paper>
+			</>
+		</InlineSwitch>
 	);
 };
 

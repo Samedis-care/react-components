@@ -47,6 +47,7 @@ export const SubActionButtonStory = (): React.ReactElement => {
 					onClick={action("onClick")}
 					disabled={boolean("Disabled", false)}
 					icon={<MenuBook />}
+					disableDivider
 				>
 					{text("SubAction 1 Button Text", "Open Book")}
 				</SubActionButton>

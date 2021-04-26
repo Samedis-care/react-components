@@ -15,30 +15,67 @@
 				"set-filter": {
 					"search": "Search...",
 					"select-all": "Select all"
-				}
+				},
+				"filter-type": {
+					"eq": "Equals",
+					"not-eq": "Not equal",
+					"contains": "Contains",
+					"not-contains": "Not contains",
+					"starts-with": "Starts with",
+					"ends-with": "Ends with",
+					"lt": "Less than",
+					"lte": "Less than or equals",
+					"gt": "Greater than",
+					"gte": "Greater than or equals",
+					"in-range": "In range",
+					"lt-date": "Before",
+					"lte-date": "Before or on",
+					"gt-date": "After",
+					"gte-date": "On or after",
+					"in-range-date": "Between dates"
+				},
+				"no-data": "The list does not contain any data."
 			},
 			"header": {
 				"new": "New",
 				"export": "Export",
 				"settings": "Settings",
 				"reset": "Reset",
-				"custom-filter-button": "Selection"
+				"custom-filter-button": "Filter",
+				"delete": "Delete",
+				"edit": "Edit"
 			},
 			"settings": {
 				"lock": "Lock/Unlock Columns",
 				"hide": "Show/Hide Columns",
 				"close": "Close"
 			},
+			"custom-filters": {
+				"title": "Filter selection"
+			},
 			"footer": {
 				"total": "Total:",
 				"filtered": "Filtered:",
 				"edit": "Edit",
 				"delete": "Delete",
-				"select-all": "All"
+				"select-all": "All",
+				"first-page": "First page",
+				"last-page": "Last page",
+				"next-page": "Next page",
+				"page-of": "from",
+				"page-size": "Pagesize:",
+				"page-size-tooltip": "Number of records per page",
+				"prev-page": "Previous page"
 			}
 		},
 		"selector": {
-			"add-new": "Add"
+			"add-new": "Add",
+			"base-selector": {
+				"no-options-text": "No options",
+				"close-icon-text": "Close",
+				"open-icon-text": "Open",
+				"loading-text": "Loading..."
+			}
 		},
 		"file-upload": {
 			"upload": "Upload",

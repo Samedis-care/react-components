@@ -1,31 +1,14 @@
 import React, { useCallback, useEffect, useState } from "react";
-import {
-	TextFieldProps,
-	Typography,
-	Switch,
-	Grid,
-	Theme,
-	IconButton,
-	withStyles,
-	makeStyles,
-} from "@material-ui/core";
-import { Autocomplete } from "@material-ui/lab";
-import {
-	Search as SearchIcon,
-	Info as InfoIcon,
-	Cancel as RemoveIcon,
-} from "@material-ui/icons";
+import { Typography } from "@material-ui/core";
 import {
 	BaseSelectorProps,
 	MultiSelectorData,
 	SingleSelect,
 } from "../../standalone/Selector";
+import MultiSelectWithoutGroup, {
+	MultiSelectWithoutGroupProps,
+} from "./MultiSelectWithoutGroup";
 import { BaseSelectorData } from "./BaseSelector";
-
-import TextFieldWithHelp, {
-	TextFieldWithHelpProps,
-} from "../UIKit/TextFieldWithHelp";
-import { SmallIconButton, SmallListItemIcon } from "../Small";
 import { uniqueArray } from "../../utils";
 
 export interface MultiSelectWithTagsProps<
@@ -34,42 +17,29 @@ export interface MultiSelectWithTagsProps<
 > extends Pick<
 			BaseSelectorProps<GroupT>,
 			| "disabled"
-			| "autocompleteId"
-			| "enableIcons"
 			| "noOptionsText"
 			| "loadingText"
+			| "closeText"
+			| "openText"
+			| "displaySwitch"
+			| "defaultSwitchValue"
+			| "switchLabel"
 		>,
-		TextFieldWithHelpProps {
+		Omit<
+			MultiSelectWithoutGroupProps<DataT>,
+			"classes" | "onChange" | "dataOptions" | "setDataOptions"
+		> {
 	// UI Props
 	/**
 	 * The title of control
 	 */
 	title: string;
 	/**
-	 * Label for search input control
+	 * Custom styles for multi select without groups
 	 */
-	searchInputLabel?: string;
-	/**
-	 * Custom styles
-	 */
-	classes?: Partial<keyof ReturnType<typeof useStyles>>;
-	/**
-	 * Display switch control?
-	 */
-	displaySwitch?: boolean;
-	/**
-	 * Label for switch control (only used if displaySwitch is truthy)
-	 */
-	switchLabel?: React.ReactNode;
-	/**
-	 * Default state of switch control (only used if displaySwitch is truthy)
-	 */
-	defaultSwitchValue?: boolean;
-	// Data management props
-	/**
-	 * The currently selected values
-	 */
-	selected: DataT[];
+	subClasses?: {
+		dataSelector: MultiSelectWithoutGroupProps<DataT>["classes"];
+	};
 	/**
 	 * Change event callback
 	 * @param data The currently selected entries. This should be feed back to selected prop
@@ -113,70 +83,6 @@ interface SelectedGroup {
 	items: string[];
 }
 
-const useStyles = makeStyles(
-	(theme: Theme) => ({
-		paperWrapper: {
-			boxShadow: "none",
-			border: `1px solid ${theme.palette.divider}`,
-		},
-		outlined: {
-			float: "left",
-			backgroundColor: "#cce1f6",
-			padding: "0px 20px",
-			borderRadius: 20,
-			borderColor: "#cce1f6",
-			margin: "5px",
-			lineHeight: "30px",
-		},
-		labelWithSwitch: {
-			marginTop: 15,
-		},
-		searchLabel: {
-			lineHeight: "30px",
-			float: "left",
-		},
-		switch: {
-			lineHeight: "30px",
-			float: "right",
-		},
-	}),
-	{ name: "CcMultiSelectWithTags" }
-);
-
-const AntSwitch = withStyles((theme: Theme) => ({
-	root: {
-		width: 35,
-		height: 16,
-		padding: 0,
-		display: "flex",
-	},
-	switchBase: {
-		padding: 2,
-		color: theme.palette.grey[500],
-		"&$checked": {
-			transform: "translateX(18px)",
-			color: theme.palette.common.white,
-			"& + $track": {
-				opacity: 1,
-				backgroundColor: theme.palette.primary.main,
-				borderColor: theme.palette.primary.main,
-			},
-		},
-	},
-	thumb: {
-		width: 12,
-		height: 12,
-		boxShadow: "none",
-	},
-	track: {
-		border: `1px solid ${theme.palette.grey[500]}`,
-		borderRadius: 16 / 2,
-		opacity: 1,
-		backgroundColor: theme.palette.common.white,
-	},
-	checked: {},
-}))(Switch);
-
 const MultiSelectWithTags = <
 	DataT extends MultiSelectorData,
 	GroupT extends BaseSelectorData
@@ -187,36 +93,52 @@ const MultiSelectWithTags = <
 		title,
 		searchInputLabel,
 		selected,
-		loadGroupEntries,
-		loadGroupOptions,
-		loadDataOptions,
-		onChange,
 		disabled,
 		autocompleteId,
 		enableIcons,
 		noOptionsText,
 		loadingText,
+		openText,
+		closeText,
+		loadGroupEntries,
+		loadGroupOptions,
+		loadDataOptions,
+		onChange,
 		openInfo,
+		getIdOfData,
+		switchLabel,
 	} = props;
-	const classes = useStyles(props);
+
 	const defaultSwitchValue = props.displaySwitch
 		? props.defaultSwitchValue ?? false
 		: false;
 	const [selectedGroups, setSelectedGroups] = useState<SelectedGroup[]>([]);
-	const [dataOptions, setDataOptions] = useState<DataT[]>([]);
-	const [switchValue, setSwitchValue] = useState(defaultSwitchValue);
-	const [dataQuery, setDataQuery] = useState("");
+	const [switchValue, setSwitchValue] = useState<boolean>(defaultSwitchValue);
+	const getIdDefault = useCallback((data: DataT) => data.value, []);
+	const getId = getIdOfData ?? getIdDefault;
 
+	// set switch value if switch visibility is toggled
 	useEffect(() => {
 		setSwitchValue(defaultSwitchValue);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [!!props.displaySwitch]);
 
+	// remove selected groups if an item has been unselected
+	useEffect(() => {
+		const selectedIds = selected.map(getId);
+		setSelectedGroups((oldSelectedGroups) =>
+			oldSelectedGroups.filter(
+				(group) => !group.items.find((item) => !selectedIds.includes(item))
+			)
+		);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [selected]);
+
 	const handleGroupSelect = useCallback(
 		async (selectedGroup: GroupT | null) => {
 			if (!selectedGroup || !onChange) return;
 			const groupEntries = await loadGroupEntries(selectedGroup);
-			const groupEntryIds = groupEntries.map((entry) => entry.value);
+			const groupEntryIds = groupEntries.map(getId);
 			const combinedArray = [...selected, ...groupEntries];
 			setSelectedGroups((prevState) => [
 				...prevState,
@@ -225,85 +147,18 @@ const MultiSelectWithTags = <
 					items: groupEntryIds,
 				},
 			]);
-			setDataOptions((prevState) =>
-				prevState.filter((entry) => !groupEntryIds.includes(entry.value))
-			);
 			onChange(
-				uniqueArray(combinedArray.map((entry) => entry.value)).map(
-					(value) =>
-						combinedArray.find((entry) => entry.value === value) as DataT
+				uniqueArray(
+					combinedArray
+						.map(getId)
+						.map(
+							(value) =>
+								combinedArray.find((entry) => getId(entry) === value) as DataT
+						)
 				)
 			);
 		},
-		[loadGroupEntries, selected, onChange]
-	);
-
-	const handleSwitchChange = useCallback(
-		(event: React.ChangeEvent<HTMLInputElement>) => {
-			setSwitchValue(event.target.checked);
-		},
-		[setSwitchValue]
-	);
-
-	const handleDelete = useCallback(
-		async (evt: React.MouseEvent<HTMLButtonElement>) => {
-			if (!onChange) return;
-
-			// find the item
-			const entryToDelete = selected.find(
-				(s) => s.value === evt.currentTarget.name
-			);
-			if (!entryToDelete) {
-				throw new Error(
-					"[Components-Care] [MultiSelectWithTags] Entry couldn't be found. entry.value is not set"
-				);
-			}
-
-			// check that we can delete the item
-			if (
-				entryToDelete.canUnselect &&
-				!(await entryToDelete.canUnselect(entryToDelete))
-			) {
-				return;
-			}
-
-			// remove any selected group that contained this entry so it can be selected again
-			setSelectedGroups((selectedGroups) =>
-				selectedGroups.filter(
-					(group) => !group.items.includes(entryToDelete.value)
-				)
-			);
-			setDataOptions((oldOptions) => oldOptions.concat([entryToDelete]));
-			onChange(selected.filter((entry) => entry !== entryToDelete));
-		},
-		[onChange, selected]
-	);
-
-	const handleOptionSelect = useCallback(
-		(selectedValue: DataT) => {
-			if (
-				!selectedValue ||
-				typeof selectedValue !== "object" ||
-				!("value" in selectedValue) ||
-				!onChange
-			) {
-				if (selectedValue) {
-					// eslint-disable-next-line no-console
-					console.warn(
-						"[Components-Care] [MultiSelectWithTags] Unexpected value passed to handleOptionSelect:",
-						selectedValue
-					);
-				}
-				return;
-			}
-
-			setDataQuery("");
-			setDataOptions((oldOptions) =>
-				oldOptions.filter((old) => old.value !== selectedValue.value)
-			);
-			onChange([...selected, selectedValue]);
-		},
-		[onChange, selected]
+		[onChange, loadGroupEntries, getId, selected]
 	);
 
 	const loadGroupOptionsAndProcess = useCallback(
@@ -316,26 +171,11 @@ const MultiSelectWithTags = <
 		[loadGroupOptions, selectedGroups, switchValue]
 	);
 
-	const onSearchData = useCallback(
-		async (query: string) => {
-			const selectedIds = selected.map((item) => item.value);
-			setDataOptions(
-				(await loadDataOptions(query, switchValue)).filter(
-					(option) => !selectedIds.includes(option.value)
-				)
-			);
-		},
-		[loadDataOptions, selected, switchValue]
-	);
-
-	useEffect(() => {
-		void onSearchData(dataQuery);
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [dataQuery]);
-
 	return (
-		<Typography component="div">
-			<Typography component="label">{title}</Typography>
+		<div>
+			<Typography component="label" variant={"caption"} color={"textSecondary"}>
+				{title}
+			</Typography>
 			<SingleSelect
 				autocompleteId={
 					autocompleteId ? autocompleteId + "-group-select" : undefined
@@ -348,79 +188,28 @@ const MultiSelectWithTags = <
 				enableIcons={enableIcons}
 				noOptionsText={noOptionsText}
 				loadingText={loadingText}
+				openText={openText}
+				closeText={closeText}
 			/>
-			<Typography component="div" className={classes.labelWithSwitch}>
-				{props.displaySwitch && (
-					<Typography component="div" className={classes.switch}>
-						<Grid component="label" container alignItems="center" spacing={1}>
-							<Grid item>
-								<AntSwitch
-									checked={switchValue}
-									onChange={handleSwitchChange}
-								/>
-							</Grid>
-							<Grid item>{props.switchLabel}</Grid>
-						</Grid>
-					</Typography>
-				)}
-				<Typography component="div" className={classes.searchLabel}>
-					<Typography component="label">
-						{searchInputLabel || "Search input"}
-					</Typography>
-				</Typography>
-			</Typography>
-			<Autocomplete<DataT, false, true, true>
-				id={autocompleteId}
-				freeSolo
-				autoComplete
-				disableClearable
+			<MultiSelectWithoutGroup<DataT>
+				autocompleteId={autocompleteId}
+				selected={selected}
 				disabled={disabled}
-				options={dataOptions}
-				value={""}
-				getOptionSelected={(option, value) => option.value === value.value}
-				getOptionLabel={(option: string | DataT) =>
-					typeof option === "string" ? option : option.label
-				}
-				onChange={(_event, selectedValue) =>
-					handleOptionSelect(selectedValue as DataT)
-				}
-				inputValue={dataQuery}
-				onInputChange={(evt, value) => setDataQuery(value)}
-				renderInput={(params: TextFieldProps) => (
-					<TextFieldWithHelp
-						{...params}
-						InputProps={{
-							...params.InputProps,
-							startAdornment: <SearchIcon color={"primary"} />,
-							type: "search",
-							endAdornment: openInfo && (
-								<IconButton onClick={openInfo}>
-									<InfoIcon color={"disabled"} />
-								</IconButton>
-							),
-						}}
-					/>
-				)}
+				searchInputLabel={searchInputLabel}
+				enableIcons={enableIcons}
+				switchValue={switchValue}
+				setSwitchValue={setSwitchValue}
+				switchLabel={switchLabel}
+				displaySwitch={props.displaySwitch}
+				loadDataOptions={loadDataOptions}
+				openInfo={openInfo}
+				onChange={onChange}
+				refreshToken={selected.map(getId).join(",")}
+				getIdOfData={getId}
+				noOptionsText={noOptionsText}
+				loadingText={loadingText}
 			/>
-			{selected.map((data: MultiSelectorData, index: number) => {
-				return (
-					<div key={index} className={classes.outlined}>
-						{enableIcons && <SmallListItemIcon>{data.icon}</SmallListItemIcon>}
-						<span>{data.label}</span>
-						{!disabled && (
-							<SmallIconButton
-								edge={"end"}
-								name={data.value}
-								disabled={disabled}
-								onClick={handleDelete}
-							>
-								<RemoveIcon />
-							</SmallIconButton>
-						)}
-					</div>
-				);
-			})}
-		</Typography>
+		</div>
 	);
 };
 

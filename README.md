@@ -8,29 +8,11 @@ Take a look at our [Storybook](https://components-care.github.io/react-component
 
 ## Installing
 
-> `npm install "git://github.com/Components-care/react-components.git#master" --save`
+> `npm install "git://github.com/Components-care/react-components.git#master_dist" --save --legacy-peer-deps`
 
-> `yarn add "git://github.com/Components-care/react-components.git#master"`
+> `yarn add "git://github.com/Components-care/react-components.git#master_dist"`
 
-### Webpack configuration
-
-The following resolve aliases need to be configured in webpack:
-- `cldr$` -> `cldrjs`
-- `cldr` -> `cldrjs/dist/cldr`
-
-If you're using create-react-app and don't want to eject take a look at [react-app-rewired](https://www.npmjs.com/package/react-app-rewired).
-```js
-/* config-overrides.js */
-
-module.exports = function override(config, env) {
-  config.resolve.alias = {
-    ...config.resolve.alias,
-    cldr$: "cldrjs",
-    cldr: "cldrjs/dist/cldr",
-  };
-  return config;
-};
-```
+Note: Make sure to install all peer-dependencies
 
 ## Overview
 
@@ -40,6 +22,8 @@ There are 5 types of components you will find here:
 
 - Standalone Components
   > Standalone Components are designed to run without any further integration of the Components.care framework and can be used as an extension of your existing UI libraries.
+  > 
+  > WARNING: If not using the Components-Care Framework you still need to add CCI18nProvider to your render tree for localization 
 - Application Framework
   > The Application Framework provides you with a set of pre-configured common libraries to enable you rapid development of new applications
 - Non-standalone Components
@@ -54,17 +38,14 @@ Used Libraries:
 - Material-UI (Used as base for UI components)
 - i18n (Used to provide pre-translated components)
 - react-router-dom (Provided by the framework to enable programmatically controllable routing in your React app)
-- Redux (Provided and used by the backend integration for data handling)
 - moment.js (Used for localized date/time related components)
-- react-select (Used as selector component)
-- formik (Used for easy form handling)
 - react-query (Used as backend connector/caching layer)
 
 ## Developer Setup
 
 ### Running the developer environment (Storybook)
 
-1. Run `npm install`
+1. Run `npx --no-install npm@7.x install`
 2. Run `npm start`
 
 ### Path overview

@@ -14,12 +14,13 @@ import {
 	IDataGridColumnDef,
 	IDataGridColumnProps,
 	useDataGridStyles,
-} from "../index";
+} from "../DataGrid";
 import i18n from "../../../i18n";
+import { useTranslation } from "react-i18next";
 
 export interface IDataGridSettingsDialogProps extends IDataGridColumnProps {
 	/**
-	 * Callback to close settins pop-over
+	 * Callback to close settings pop-over
 	 */
 	closeGridSettings: () => void;
 	/**
@@ -55,11 +56,12 @@ const EllipsisFormControlLabel = withStyles({
 
 const SettingsDialog = (props: IDataGridSettingsDialogProps) => {
 	const classes = useDataGridStyles();
+	const { t } = useTranslation(undefined, { i18n });
 
 	return (
-		<Paper elevation={0} className={classes.settingsPaper}>
+		<Paper elevation={0} className={classes.contentOverlayPaper}>
 			<Typography variant={"h6"}>
-				{i18n.t("standalone.data-grid.settings.lock") || ""}
+				{t("standalone.data-grid.settings.lock") || ""}
 			</Typography>
 			<Divider />
 			<Grid justify={"space-between"} container>
@@ -79,7 +81,7 @@ const SettingsDialog = (props: IDataGridSettingsDialogProps) => {
 				))}
 			</Grid>
 			<Typography variant={"h6"}>
-				{i18n.t("standalone.data-grid.settings.hide") || ""}
+				{t("standalone.data-grid.settings.hide") || ""}
 			</Typography>
 			<Divider />
 			<Grid justify={"space-between"} container>
@@ -103,7 +105,7 @@ const SettingsDialog = (props: IDataGridSettingsDialogProps) => {
 				<Grid item>
 					<Box m={2}>
 						<Button onClick={props.closeGridSettings} variant={"contained"}>
-							{i18n.t("standalone.data-grid.settings.close") || ""}
+							{t("standalone.data-grid.settings.close") || ""}
 						</Button>
 					</Box>
 				</Grid>

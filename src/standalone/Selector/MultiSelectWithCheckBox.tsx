@@ -1,4 +1,4 @@
-import React from "react";
+import React, { CSSProperties } from "react";
 import {
 	Select,
 	SelectProps,
@@ -10,10 +10,13 @@ import {
 	Theme,
 	InputBase,
 	SelectClassKey,
+	InputLabel,
 } from "@material-ui/core";
 import { ExpandMore } from "@material-ui/icons";
 import { MultiSelectOption } from "./TypesMultiSelect";
 import { ClassNameMap } from "@material-ui/styles/withStyles";
+import { cleanClassMap, makeThemeStyles } from "../../utils";
+import { Styles } from "@material-ui/core/styles/withStyles";
 
 export interface MultiSelectWithCheckBoxProps extends SelectProps {
 	/**
@@ -32,31 +35,52 @@ export interface MultiSelectWithCheckBoxProps extends SelectProps {
 	>;
 }
 
-const useStyles = makeStyles({
-	checkboxStyle: {
-		borderRadius: 4,
-		width: 16,
-		height: 16,
-		marginRight: 10,
-	},
-});
+export interface MultiSelectWithCheckBoxTheme {
+	checkboxStyle?: CSSProperties;
+	itemSelectedStyle?: CSSProperties;
+	itemSelectedHoverStyle?: CSSProperties;
+	itemTextPrimaryStyle?: CSSProperties;
+	inputStyle?: CSSProperties;
+	inputRootStyle?: CSSProperties;
+	inputFocusStyle?: CSSProperties;
+	selectStyle?: MultiSelectWithCheckBoxThemeExpert;
+}
 
-const MenuItemCustom = withStyles({
+const useStyles = makeStyles(
+	(theme) => ({
+		checkboxStyle: {
+			borderRadius: 4,
+			width: 16,
+			height: 16,
+			marginRight: 10,
+			...theme.componentsCare?.selectorWithCheckbox?.checkboxStyle,
+		},
+	}),
+	{ name: "CcMultiSelectWithCheckBox" }
+);
+
+const MenuItemCustom = withStyles((theme) => ({
 	selected: {
 		backgroundColor: "white !important",
+		...theme.componentsCare?.selectorWithCheckbox?.itemSelectedStyle,
 		"&:hover": {
 			backgroundColor: "rgba(0, 0, 0, 0.04) !important",
+			...theme.componentsCare?.selectorWithCheckbox?.itemSelectedHoverStyle,
 		},
 	},
-})(MenuItem);
+}))(MenuItem);
 
-const ListItemTextCustom = withStyles({
+const ListItemTextCustom = withStyles((theme) => ({
 	primary: {
 		fontSize: 13,
+		...theme.componentsCare?.selectorWithCheckbox?.itemTextPrimaryStyle,
 	},
-})(ListItemText);
+}))(ListItemText);
 
 const InputCustom = withStyles((theme: Theme) => ({
+	root: {
+		...theme.componentsCare?.selectorWithCheckbox?.inputRootStyle,
+	},
 	input: {
 		borderRadius: 4,
 		position: "relative",
@@ -65,53 +89,72 @@ const InputCustom = withStyles((theme: Theme) => ({
 		fontSize: 13,
 		padding: 9,
 		transition: theme.transitions.create(["border-color", "box-shadow"]),
+		...theme.componentsCare?.selectorWithCheckbox?.inputStyle,
 		"&:focus": {
 			borderRadius: 4,
 			borderColor: theme.palette.primary.main,
+			...theme.componentsCare?.selectorWithCheckbox?.inputFocusStyle,
 		},
 	},
 }))(InputBase);
 
+export type MultiSelectWithCheckBoxThemeExpert = Partial<
+	Styles<Theme, SelectProps, SelectClassKey>
+>;
+
+const useSelectStyles = makeThemeStyles(
+	(theme) => theme?.componentsCare?.selectorWithCheckbox?.selectStyle,
+	"CcMultiSelectWithCheckboxSelect"
+);
+
 const MultiSelectWithCheckBox = (props: MultiSelectWithCheckBoxProps) => {
-	const classes = useStyles(props);
+	const { label, options, values, ...selectProps } = props;
+	const classes = useStyles(cleanClassMap(props, true, "checkboxStyle"));
+	const selectClasses = useSelectStyles(
+		cleanClassMap(props, false, "checkboxStyle")
+	);
 	return (
-		<Select
-			{...props}
-			multiple
-			displayEmpty
-			value={props.values}
-			input={<InputCustom />}
-			IconComponent={ExpandMore}
-			MenuProps={{
-				anchorOrigin: {
-					vertical: "bottom",
-					horizontal: "left",
-				},
-				transformOrigin: {
-					vertical: "top",
-					horizontal: "left",
-				},
-				getContentAnchorEl: null,
-				PaperProps: {
-					style: {
-						marginTop: 5,
-						border: "1px solid #d3d4d5",
+		<>
+			{props.label && <InputLabel shrink>{label}</InputLabel>}
+			<Select
+				{...selectProps}
+				multiple
+				displayEmpty
+				classes={selectClasses}
+				value={values}
+				input={<InputCustom />}
+				IconComponent={ExpandMore}
+				MenuProps={{
+					anchorOrigin: {
+						vertical: "bottom",
+						horizontal: "left",
 					},
-				},
-			}}
-		>
-			{props.options.map((option: MultiSelectOption) => {
-				return (
-					<MenuItemCustom key={option.label} value={option.value}>
-						<Checkbox
-							checked={props.values.indexOf(option.value) > -1}
-							className={classes.checkboxStyle}
-						/>
-						<ListItemTextCustom primary={option.label} />
-					</MenuItemCustom>
-				);
-			})}
-		</Select>
+					transformOrigin: {
+						vertical: "top",
+						horizontal: "left",
+					},
+					getContentAnchorEl: null,
+					PaperProps: {
+						style: {
+							marginTop: 5,
+							border: "1px solid #d3d4d5",
+						},
+					},
+				}}
+			>
+				{options.map((option: MultiSelectOption) => {
+					return (
+						<MenuItemCustom key={option.label} value={option.value}>
+							<Checkbox
+								checked={values.indexOf(option.value) > -1}
+								className={classes.checkboxStyle}
+							/>
+							<ListItemTextCustom primary={option.label} />
+						</MenuItemCustom>
+					);
+				})}
+			</Select>
+		</>
 	);
 };
 

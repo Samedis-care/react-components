@@ -144,9 +144,13 @@ export interface IDialogConfigForm extends IDialogConfigSimple {
  */
 export interface IDialogConfigSign {
 	/**
+	 * The name of the input
+	 */
+	name?: string;
+	/**
 	 * Boolean flag to disable dialog
 	 */
-	disabled: boolean;
+	disabled?: boolean;
 	/**
 	 * Boolean flag to clear signature
 	 */
@@ -170,6 +174,10 @@ export interface IDialogConfigSign {
 	 * Callback method which returns signature base64 string
 	 */
 	setSignature?: (url: string) => void;
+	/**
+	 * Blur event
+	 */
+	onBlur?: React.FocusEventHandler<HTMLInputElement>;
 }
 /**
  * Props which will be provided in image box dialog

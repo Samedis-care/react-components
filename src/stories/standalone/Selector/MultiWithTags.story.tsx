@@ -28,14 +28,16 @@ const options = colourOptions.map(enhanceData);
 
 export const SelectorMultiWithTags = (): React.ReactElement => {
 	const [selected, setSelected] = useState<MultiWithTagsData[]>([]);
-	const title = text("Title", "Multi Selector With Tags");
+	const title = text("Title", "Select a group");
 	const icons = boolean("Enable Icons", false);
 	const disable = boolean("Disable", false);
-	const loadingLabel = text("Loading Label", "");
-	const noDataLabel = text("No data Label", "");
+	const useCustomLoading = boolean("Use custom loading label?", true);
+	const loadingLabel = text("Loading Label", "Loading..");
+	const useCustomNoOptionsText = boolean("Use custom no data label?", false);
+	const noOptionsText = text("No data Label", "No option");
 	const displaySwitch = boolean("Enable Switch", false);
 	const switchLabel = text("Switch Label Text", "Select from all");
-	const searchInputLabel = text("Search Label", "Search");
+	const searchInputLabel = text("Search Label", "or search for a single item");
 	const [pushDialog] = useDialogContext();
 	const dialogTitle = text("Dialog title", "Sample title");
 	const infoText = text(
@@ -44,6 +46,10 @@ export const SelectorMultiWithTags = (): React.ReactElement => {
 	);
 	const dialogButtonLabel = text("Dialog button label", "Ok");
 	const dialogButtonClick = action("onClose");
+	const useCustomOpenText = boolean("Use custom open text label?", false);
+	const openText = text("Open Text Label", "Open");
+	const useCustomCloseText = boolean("Use custom close text label?", false);
+	const closeText = text("Close Text Label", "Close");
 
 	return (
 		<MultiSelectWithTags<MultiWithTagsData, BaseSelectorData>
@@ -68,8 +74,10 @@ export const SelectorMultiWithTags = (): React.ReactElement => {
 			switchLabel={switchLabel}
 			enableIcons={icons}
 			disabled={disable}
-			loadingText={loadingLabel}
-			noOptionsText={noDataLabel}
+			loadingText={useCustomLoading ? loadingLabel : undefined}
+			noOptionsText={useCustomNoOptionsText ? noOptionsText : undefined}
+			openText={useCustomOpenText ? openText : undefined}
+			closeText={useCustomCloseText ? closeText : undefined}
 			searchInputLabel={searchInputLabel}
 			openInfo={() =>
 				showInfoDialog(pushDialog, {

@@ -2,12 +2,11 @@ import React, { useState } from "react";
 import { boolean, text } from "@storybook/addon-knobs";
 import { action } from "@storybook/addon-actions";
 import DateInput from "../../../../standalone/UIKit/InputControls/DateInput";
-import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
 import { useDialogContext } from "../../../../framework";
-import { showInfoDialog } from "../../../../non-standalone/Dialog";
+import { showInfoDialog } from "../../../../non-standalone";
 
 export const DateInputStory = (): React.ReactElement => {
-	const [selectedDate, setSelectedDate] = useState<MaterialUiPickersDate>(null);
+	const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 	const onChange = action("onChange");
 	const [pushDialog] = useDialogContext();
 	const dialogTitle = text("Dialog title", "Sample title");
@@ -19,10 +18,9 @@ export const DateInputStory = (): React.ReactElement => {
 	const dialogButtonClick = action("onClose");
 
 	const handleChange = React.useCallback(
-		(date: MaterialUiPickersDate): MaterialUiPickersDate => {
+		(date: Date | null) => {
 			onChange(date);
 			setSelectedDate(date);
-			return date;
 		},
 		[onChange]
 	);
@@ -31,11 +29,13 @@ export const DateInputStory = (): React.ReactElement => {
 		<DateInput
 			label={text("Label", "Date")}
 			disabled={boolean("Disable", false)}
+			hideDisabledIcon={boolean("Hide Calendar Icon (if disabled)", false)}
 			fullWidth={boolean("100% Width", true)}
 			important={boolean("Important", false)}
 			placeholder={text("placeholder", "Please Select Date")}
 			value={selectedDate}
 			onChange={handleChange}
+			onError={action("onError")}
 			openInfo={() =>
 				showInfoDialog(pushDialog, {
 					title: dialogTitle,

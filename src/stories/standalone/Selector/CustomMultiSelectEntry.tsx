@@ -10,11 +10,14 @@ import {
 	SmallIconButton,
 	SmallListItem,
 	SmallListItemIcon,
-} from "../../../standalone/Small";
+	MultiSelectorData,
+} from "../../../standalone";
 import { Delete as DeleteIcon } from "@material-ui/icons";
 import { IMultiSelectEntryProps } from "../../../standalone/Selector/MultiSelectEntry";
 
-const CustomMultiSelectEntry = (props: IMultiSelectEntryProps) => {
+const CustomMultiSelectEntry = <DataT extends MultiSelectorData>(
+	props: IMultiSelectEntryProps<DataT>
+) => {
 	const { enableIcons, enableDivider, handleDelete, data } = props;
 
 	return (
@@ -43,4 +46,6 @@ const CustomMultiSelectEntry = (props: IMultiSelectEntryProps) => {
 	);
 };
 
-export default React.memo(CustomMultiSelectEntry);
+export default React.memo(
+	CustomMultiSelectEntry
+) as typeof CustomMultiSelectEntry;

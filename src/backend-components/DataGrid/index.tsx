@@ -1,16 +1,18 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import DataGrid, {
 	DataGridData,
 	IDataGridLoadDataParameters,
 	DataGridProps,
-} from "../../standalone/DataGrid";
+	IDataGridAddButton,
+} from "../../standalone/DataGrid/DataGrid";
 import Model, {
 	ModelFieldName,
 	PageVisibility,
 } from "../../backend-integration/Model/Model";
 import { useDialogContext } from "../../framework";
 import { ErrorDialog, showConfirmDialog } from "../../non-standalone";
-import ccI18n from "../../i18n";
+import i18n from "../../i18n";
+import { useTranslation } from "react-i18next";
 
 export interface BackendDataGridProps<
 	KeyT extends ModelFieldName,
@@ -29,6 +31,10 @@ export interface BackendDataGridProps<
 	 * Disable export?
 	 */
 	disableExport?: boolean;
+	/**
+	 * Additional buttons next to new button
+	 */
+	additionalNewButtons?: IDataGridAddButton[];
 }
 
 const BackendDataGrid = <
@@ -39,6 +45,7 @@ const BackendDataGrid = <
 	props: BackendDataGridProps<KeyT, VisibilityT, CustomDataT>
 ) => {
 	const { model, enableDelete, enableDeleteAll } = props;
+	const { t } = useTranslation(undefined, { i18n });
 
 	const [pushDialog] = useDialogContext();
 	const [refreshToken, setRefreshToken] = useState("");
@@ -95,7 +102,7 @@ const BackendDataGrid = <
 												{
 													id,
 													[field]: value,
-												},
+												} as Record<KeyT, unknown>,
 												"serialize",
 												"overview"
 											)
@@ -135,18 +142,16 @@ const BackendDataGrid = <
 		) => {
 			try {
 				await showConfirmDialog(pushDialog, {
-					title: ccI18n.t(
-						"backend-components.data-grid.delete.confirm-dialog.title"
-					),
-					message: ccI18n.t(
+					title: t("backend-components.data-grid.delete.confirm-dialog.title"),
+					message: t(
 						"backend-components.data-grid.delete.confirm-dialog." +
 							(invert ? "messageInverted" : "message"),
 						{ NUM: ids.length }
 					),
-					textButtonYes: ccI18n.t(
+					textButtonYes: t(
 						"backend-components.data-grid.delete.confirm-dialog.buttons.yes"
 					),
-					textButtonNo: ccI18n.t(
+					textButtonNo: t(
 						"backend-components.data-grid.delete.confirm-dialog.buttons.no"
 					),
 				});
@@ -163,18 +168,17 @@ const BackendDataGrid = <
 				}
 				setRefreshToken(new Date().getTime().toString());
 			} catch (e) {
+				setRefreshToken(new Date().getTime().toString());
 				pushDialog(
 					<ErrorDialog
-						title={ccI18n.t(
-							"backend-components.data-grid.delete.error-dialog.title"
-						)}
-						message={ccI18n.t(
+						title={t("backend-components.data-grid.delete.error-dialog.title")}
+						message={t(
 							"backend-components.data-grid.delete.error-dialog.message",
 							{ ERROR: (e as Error).message }
 						)}
 						buttons={[
 							{
-								text: ccI18n.t(
+								text: t(
 									"backend-components.data-grid.delete.error-dialog.buttons.okay"
 								),
 							},
@@ -183,12 +187,34 @@ const BackendDataGrid = <
 				);
 			}
 		},
-		[enableDeleteAll, deleteAdvanced, deleteMultiple, pushDialog]
+		[pushDialog, t, enableDeleteAll, deleteAdvanced, deleteMultiple]
 	);
+
+	const addNewButtons: DataGridProps["onAddNew"] = useMemo(() => {
+		if (!props.additionalNewButtons) return props.onAddNew;
+		if (!props.onAddNew) return props.additionalNewButtons;
+
+		let result: IDataGridAddButton[];
+		if (typeof props.onAddNew === "function") {
+			result = [
+				{
+					label: t("standalone.data-grid.header.new") ?? "",
+					onClick: props.onAddNew,
+				},
+			];
+		} else if (props.onAddNew) {
+			result = props.onAddNew;
+		} else {
+			result = [];
+		}
+		result = result.concat(props.additionalNewButtons);
+		return result;
+	}, [props.additionalNewButtons, props.onAddNew, t]);
 
 	return (
 		<DataGrid
 			{...props}
+			onAddNew={addNewButtons}
 			onDelete={enableDelete ? handleDelete : undefined}
 			loadData={loadData}
 			columns={model.toDataGridColumnDefinition()}

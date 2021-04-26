@@ -13,38 +13,44 @@ import { Domain, Home } from "@material-ui/icons";
 import { boolean, select } from "@storybook/addon-knobs";
 import { action } from "@storybook/addon-actions";
 
-const useStyles = makeStyles({
-	header: {
-		width: "100%",
-		height: "100%",
-		backgroundColor: "red",
+const useStyles = makeStyles(
+	{
+		header: {
+			width: "100%",
+			height: "100%",
+			backgroundColor: "red",
+		},
+		content: {
+			width: "100%",
+			height: "100%",
+			backgroundColor: "green",
+		},
+		topLeft: {
+			width: "100%",
+			height: "100%",
+			backgroundColor: "yellow",
+		},
 	},
-	content: {
-		width: "100%",
-		height: "100%",
-		backgroundColor: "green",
-	},
-	topLeft: {
-		width: "100%",
-		height: "100%",
-		backgroundColor: "yellow",
-	},
-});
+	{ name: "CcMenuStory" }
+);
 
-const usePortalStyles = makeStyles({
-	menuWrapper: {
-		backgroundColor: "#252525",
+const usePortalStyles = makeStyles(
+	{
+		menuWrapper: {
+			backgroundColor: "#252525",
+		},
+		collapse: {
+			color: "#A1A1A1",
+		},
+		menuChildrenWrapper: {
+			backgroundColor: "#1d1d1d",
+		},
+		toolbar: {
+			minHeight: 32,
+		},
 	},
-	collapse: {
-		color: "#A1A1A1",
-	},
-	menuChildrenWrapper: {
-		backgroundColor: "#1d1d1d",
-	},
-	toolbar: {
-		minHeight: 32,
-	},
-});
+	{ name: "CcMenuStyleStory" }
+);
 
 interface IPlaceHolderProps {
 	cssClass: "header" | "content" | "topLeft";

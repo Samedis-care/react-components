@@ -4,29 +4,32 @@ import "../../../i18n";
 import { PortalLayout } from "../../../standalone/Portal";
 import { boolean, number } from "@storybook/addon-knobs";
 
-const useStyles = makeStyles({
-	header: {
-		width: "100%",
-		height: "100%",
-		backgroundColor: "red",
+const useStyles = makeStyles(
+	{
+		header: {
+			width: "100%",
+			height: "100%",
+			backgroundColor: "red",
+		},
+		menu: {
+			width: "100%",
+			height: "100%",
+			color: "white",
+			backgroundColor: "blue",
+		},
+		content: {
+			width: "100%",
+			height: "100%",
+			backgroundColor: "green",
+		},
+		topLeft: {
+			width: "100%",
+			height: "100%",
+			backgroundColor: "yellow",
+		},
 	},
-	menu: {
-		width: "100%",
-		height: "100%",
-		color: "white",
-		backgroundColor: "blue",
-	},
-	content: {
-		width: "100%",
-		height: "100%",
-		backgroundColor: "green",
-	},
-	topLeft: {
-		width: "100%",
-		height: "100%",
-		backgroundColor: "yellow",
-	},
-});
+	{ name: "CcLayoutStory" }
+);
 
 interface IPlaceHolderProps {
 	cssClass: "header" | "menu" | "content" | "topLeft";

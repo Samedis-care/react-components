@@ -1,5 +1,5 @@
 import React, { ChangeEvent, useCallback } from "react";
-import { useDataGridState } from "../index";
+import { useDataGridState } from "../DataGrid";
 import SearchView from "./SearchView";
 
 const Search = () => {

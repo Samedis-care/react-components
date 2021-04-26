@@ -3,6 +3,7 @@ import {
 	Connector,
 	filterSortPaginate,
 	Model,
+	ModelData,
 	ModelFieldName,
 	ModelGetResponse,
 	PageVisibility,
@@ -11,7 +12,7 @@ import {
 import {
 	DataGridRowData,
 	IDataGridLoadDataParameters,
-} from "../../standalone/DataGrid";
+} from "../../standalone/DataGrid/DataGrid";
 
 class LocalStorageConnector<
 	KeyT extends ModelFieldName,
@@ -81,7 +82,7 @@ class LocalStorageConnector<
 		db[id] = data;
 		this.setDB(db);
 
-		return [data, {}];
+		return [data as ModelData<KeyT>, {}];
 	}
 
 	read(id: string): ModelGetResponse<KeyT> {
@@ -100,7 +101,7 @@ class LocalStorageConnector<
 		}
 		db[id] = data;
 		this.setDB(db);
-		return [data, {}];
+		return [data as ModelData<KeyT>, {}];
 	}
 
 	// eslint-disable-next-line @typescript-eslint/require-await
@@ -119,6 +120,8 @@ class LocalStorageConnector<
 	): Promise<void> => {
 		const [invert, ids, filter] = req;
 		if (!invert) {
+			// deleteMultiple may return undefined or a promise
+			// eslint-disable-next-line @typescript-eslint/await-thenable
 			await super.deleteMultiple(ids, model);
 			return;
 		}

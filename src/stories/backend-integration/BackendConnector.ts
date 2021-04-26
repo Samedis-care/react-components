@@ -10,7 +10,7 @@ import {
 	DataGridSortSetting,
 	IDataGridFieldFilter,
 	IDataGridLoadDataParameters,
-} from "../../standalone/DataGrid";
+} from "../../standalone/DataGrid/DataGrid";
 import JsonApiClient, {
 	GetParams,
 } from "../../backend-integration/Connector/JsonApiClient";
@@ -26,17 +26,17 @@ interface PotentialErrorResponse {
 	};
 }
 
-interface DataResponse {
+interface DataResponse<KeyT extends ModelFieldName> {
 	data: {
-		attributes: Record<string, unknown>;
+		attributes: Record<KeyT, unknown>;
 	};
 }
 
-interface IndexResponse {
+interface IndexResponse<KeyT extends ModelFieldName> {
 	data: {
 		id: string;
 		type: string;
-		attributes: Record<string, unknown>;
+		attributes: Record<KeyT, unknown>;
 	}[];
 	meta: {
 		total: number;
@@ -158,7 +158,7 @@ class BackendConnector<
 			params.additionalFilters
 		);
 
-		const resp = await this.client.get<IndexResponse>(
+		const resp = await this.client.get<IndexResponse<KeyT>>(
 			this.getApiBase(),
 			indexParams
 		);
@@ -172,7 +172,7 @@ class BackendConnector<
 	}
 
 	async create(data: Record<string, unknown>): Promise<ModelGetResponse<KeyT>> {
-		const resp = await this.client.post<DataResponse>(
+		const resp = await this.client.post<DataResponse<KeyT>>(
 			this.getApiBase(),
 			null,
 			data
@@ -181,7 +181,7 @@ class BackendConnector<
 	}
 
 	async read(id: string): Promise<ModelGetResponse<KeyT>> {
-		const resp = await this.client.get<DataResponse>(
+		const resp = await this.client.get<DataResponse<KeyT>>(
 			`${this.getApiBase()}/${id}`,
 			null
 		);
@@ -191,7 +191,7 @@ class BackendConnector<
 	async update(
 		data: Record<ModelFieldName, unknown>
 	): Promise<ModelGetResponse<KeyT>> {
-		const resp = await this.client.put<DataResponse>(
+		const resp = await this.client.put<DataResponse<KeyT>>(
 			`${this.getApiBase()}/${data.id as string}`,
 			null,
 			data

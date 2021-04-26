@@ -1,6 +1,6 @@
 import React from "react";
-import { NumberFormatterOptions } from "globalize/dist/globalize/number";
-import { useGlobalized } from "../../utils";
+import ccI18n from "../../i18n";
+import { useTranslation } from "react-i18next";
 
 export interface NumberFormatterProps {
 	/**
@@ -10,19 +10,15 @@ export interface NumberFormatterProps {
 	/**
 	 * Formatting options
 	 */
-	options?: NumberFormatterOptions;
+	options?: Intl.NumberFormatOptions;
 }
 
 const NumberFormatter = (props: NumberFormatterProps) => {
 	const { value, options } = props;
-	const globalized = useGlobalized();
+	const { i18n } = useTranslation(undefined, { i18n: ccI18n });
 
 	return (
-		<>
-			{value !== null && globalized
-				? globalized.formatNumber(value, options)
-				: ""}
-		</>
+		<>{value !== null ? value.toLocaleString(i18n.language, options) : ""}</>
 	);
 };
 

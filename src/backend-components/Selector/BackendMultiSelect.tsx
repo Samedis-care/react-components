@@ -1,32 +1,39 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
 	MultiSelect,
-	MultiSelectorData,
 	MultiSelectProps,
+	MultiSelectorData,
 } from "../../standalone";
 import Model, {
 	ModelFieldName,
 	PageVisibility,
 } from "../../backend-integration/Model/Model";
-import ccI18n from "../../i18n";
-import { isObjectEmpty } from "../../utils";
+import i18n from "../../i18n";
+import { useTranslation } from "react-i18next";
+import { debouncePromise } from "../../utils";
 
 export interface BackendMultiSelectProps<
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
-	CustomT
-> extends Omit<MultiSelectProps, "onLoad" | "selected" | "onSelect"> {
+	CustomT,
+	DataT extends MultiSelectorData
+> extends Omit<MultiSelectProps<DataT>, "onLoad" | "selected" | "onSelect"> {
 	/**
 	 * The model to use
 	 */
 	model: Model<KeyT, VisibilityT, CustomT>;
+	/**
+	 * The debounce time for search in ms
+	 * @default 500
+	 */
+	searchDebounceTime?: number;
 	/**
 	 * Callback that converts the model data to the actual data displayed in the selector
 	 * @param modelData The model data
 	 */
 	modelToSelectorData: (
 		modelData: Record<KeyT, unknown>
-	) => Promise<MultiSelectorData> | MultiSelectorData;
+	) => Promise<DataT> | DataT;
 	/**
 	 * The amount of search results to load (defaults to 25)
 	 */
@@ -34,8 +41,9 @@ export interface BackendMultiSelectProps<
 	/**
 	 * Selection change handler
 	 * @param data The selected data entry/entries values
+	 * @param raw The selected data entry/entries
 	 */
-	onSelect?: (value: string[]) => void;
+	onSelect?: (value: string[], raw: DataT[]) => void;
 	/**
 	 * The currently selected values
 	 */
@@ -44,38 +52,52 @@ export interface BackendMultiSelectProps<
 	 * Initial data (model format) used for selected cache
 	 */
 	initialData?: Record<KeyT, unknown>[];
+	/**
+	 * Name of the switch filter or undefined if disabled
+	 */
+	switchFilterName?: string;
 }
 
-interface UseSelectedCacheResult {
-	selected: MultiSelectorData[];
-	handleSelect: (selected: MultiSelectorData[]) => void;
+interface UseSelectedCacheResult<DataT extends MultiSelectorData> {
+	/**
+	 * The currently selected entries
+	 */
+	selected: DataT[];
+	/**
+	 * Event handler for the selection event
+	 */
+	handleSelect: (selected: DataT[]) => void;
 }
 
 export const useSelectedCache = <
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
-	CustomT
+	CustomT,
+	DataT extends MultiSelectorData
 >(
 	props: Pick<
-		BackendMultiSelectProps<KeyT, VisibilityT, CustomT>,
+		BackendMultiSelectProps<KeyT, VisibilityT, CustomT, DataT>,
 		"model" | "modelToSelectorData" | "onSelect" | "selected" | "initialData"
 	>
-): UseSelectedCacheResult => {
+): UseSelectedCacheResult<DataT> => {
 	const { model, modelToSelectorData, onSelect, selected, initialData } = props;
 
-	const [selectedCache, setSelectedCache] = useState<
-		Record<string, MultiSelectorData>
-	>({});
+	const [selectedCache, setSelectedCache] = useState<Record<string, DataT>>({});
+
+	const { t } = useTranslation(undefined, { i18n });
 
 	const handleSelect = useCallback(
-		(selected: MultiSelectorData[]) => {
+		(selected: DataT[]) => {
 			setSelectedCache((cache) => {
 				const newCache = { ...cache };
 				selected.forEach((entry) => (newCache[entry.value] = entry));
 				return newCache;
 			});
 			if (onSelect) {
-				onSelect(selected.map((entry) => entry.value));
+				onSelect(
+					selected.map((entry) => entry.value),
+					selected
+				);
 			}
 		},
 		[onSelect]
@@ -84,16 +106,21 @@ export const useSelectedCache = <
 	// fetch missing data entries
 	useEffect(() => {
 		void (async () => {
-			const newCache: Record<string, MultiSelectorData> = {};
-			if (initialData && isObjectEmpty(selectedCache)) {
+			const newCache: Record<string, DataT | MultiSelectorData> = {};
+			if (initialData) {
 				// process initial data
 				await Promise.all(
-					initialData.map(
-						async (record) =>
-							(newCache[
-								record["id" as keyof typeof record] as string
-							] = await modelToSelectorData(record))
-					)
+					initialData
+						.filter(
+							(record) =>
+								!((record as Record<"id", string>).id in selectedCache)
+						)
+						.map(
+							async (record) =>
+								(newCache[
+									(record as Record<"id", string>).id
+								] = await modelToSelectorData(record))
+						)
 				);
 			}
 			await Promise.all(
@@ -108,7 +135,7 @@ export const useSelectedCache = <
 								value,
 								label:
 									(e as Error).message ??
-									ccI18n.t("backend-components.selector.loading-error"),
+									t("backend-components.selector.loading-error"),
 							};
 						}
 					})
@@ -123,19 +150,25 @@ export const useSelectedCache = <
 			(value) =>
 				selectedCache[value] ?? {
 					value,
-					label: ccI18n.t("backend-components.selector.loading"),
+					label: t("backend-components.selector.loading"),
 				}
 		),
 		handleSelect,
 	};
 };
 
+/**
+ * Backend connected MultiSelect
+ * @remarks Doesn't support custom data
+ * @constructor
+ */
 const BackendMultiSelect = <
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
-	CustomT
+	CustomT,
+	DataT extends MultiSelectorData
 >(
-	props: BackendMultiSelectProps<KeyT, VisibilityT, CustomT>
+	props: BackendMultiSelectProps<KeyT, VisibilityT, CustomT, DataT>
 ) => {
 	const {
 		model,
@@ -147,29 +180,40 @@ const BackendMultiSelect = <
 		selected: selectedIds,
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		initialData,
+		searchDebounceTime,
+		switchFilterName,
 		...otherProps
 	} = props;
 
 	const { selected, handleSelect } = useSelectedCache(props);
 
 	const handleLoad = useCallback(
-		async (search: string) => {
+		async (search: string, switchValue: boolean) => {
 			const data = await model.index({
 				page: 1,
 				rows: searchResultLimit ?? 25,
 				quickFilter: search,
+				additionalFilters: switchFilterName
+					? { [switchFilterName]: switchValue }
+					: undefined,
 			});
 			return Promise.all(data[0].map(modelToSelectorData));
 		},
-		[model, modelToSelectorData, searchResultLimit]
+		[model, modelToSelectorData, searchResultLimit, switchFilterName]
+	);
+
+	const debouncedLoad = useMemo(
+		() => debouncePromise(handleLoad, searchDebounceTime ?? 500),
+		[searchDebounceTime, handleLoad]
 	);
 
 	return (
 		<MultiSelect
 			{...otherProps}
-			onLoad={handleLoad}
+			onLoad={debouncedLoad}
 			onSelect={handleSelect}
 			selected={selected}
+			displaySwitch={!!switchFilterName}
 		/>
 	);
 };

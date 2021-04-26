@@ -1,7 +1,7 @@
 import React from "react";
 import "../../../i18n";
-import { boolean, text } from "@storybook/addon-knobs";
-import { DataGrid } from "../../../standalone";
+import { boolean, number, text } from "@storybook/addon-knobs";
+import { DataGrid, DataGridLocalStoragePersist } from "../../../standalone";
 import { makeStyles } from "@material-ui/core/styles";
 import {
 	DataGridAdditionalFilters,
@@ -10,19 +10,23 @@ import {
 	DataGridSortSetting,
 	IDataGridColumnDef,
 	IDataGridFieldFilter,
-} from "../../../standalone/DataGrid";
+} from "../../../standalone/DataGrid/DataGrid";
 import { action } from "@storybook/addon-actions";
 import { IDataGridExporter } from "../../../standalone/DataGrid/Header";
 import data from "./covid-daily.json";
 import GridCustomFilters from "./GridCustomFilters";
 import { filterSortPaginate } from "../../../utils";
+import { useTheme } from "@material-ui/core";
 
-const useStyles = makeStyles({
-	wrapper: {
-		width: "90vw",
-		height: "90vh",
+const useStyles = makeStyles(
+	{
+		wrapper: {
+			width: "90vw",
+			height: "90vh",
+		},
 	},
-});
+	{ name: "CcDataGridStory" }
+);
 
 const columnDef: IDataGridColumnDef[] = ([
 	{
@@ -121,44 +125,62 @@ const exporters: IDataGridExporter<unknown>[] = [
 
 export const DataGridStory = (): React.ReactElement => {
 	const classes = useStyles();
+	const theme = useTheme();
 
 	return (
-		<div className={classes.wrapper}>
-			<DataGrid
-				columns={columnDef}
-				searchPlaceholder={text("Search placeholder", "")}
-				onAddNew={
-					boolean("Enable add new", true) ? action("onAddNew") : undefined
-				}
-				onEdit={boolean("Enable edit", true) ? action("onEdit") : undefined}
-				onDelete={
-					boolean("Enable delete", true) ? action("onDelete") : undefined
-				}
-				enableDeleteAll={boolean("Enable select all", true)}
-				filterBar={
-					boolean("Enable custom filters?", true)
-						? GridCustomFilters
-						: undefined
-				}
-				loadData={(params): DataGridData => {
-					action("loadData")(params);
+		<DataGridLocalStoragePersist storageKey={"standalone-datagrid"}>
+			<div className={classes.wrapper}>
+				<DataGrid
+					columns={columnDef}
+					searchPlaceholder={text("Search placeholder", "")}
+					onAddNew={
+						boolean("Enable add new", true) ? action("onAddNew") : undefined
+					}
+					onEdit={boolean("Enable edit", true) ? action("onEdit") : undefined}
+					onDelete={
+						boolean("Enable delete", true) ? action("onDelete") : undefined
+					}
+					enableDeleteAll={boolean("Enable select all", true)}
+					filterBar={
+						boolean("Enable custom filters?", true)
+							? GridCustomFilters
+							: undefined
+					}
+					enableFilterDialogMediaQuery={theme.breakpoints.down("md")}
+					onSelectionChange={action("onSelectionChange")}
+					prohibitMultiSelect={boolean("Prohibit multi select", false)}
+					filterLimit={
+						boolean("Enable filter limit", false)
+							? number("Filter limit", 1)
+							: undefined
+					}
+					sortLimit={
+						boolean("Enable sort limit", false)
+							? number("Sort limit", 1)
+							: undefined
+					}
+					loadData={(params): DataGridData => {
+						action("loadData")(params);
 
-					const rowData: DataGridRowData[] = data.map((entry) => ({
-						id: entry.hash,
-						...entry,
-					}));
+						//await sleep(500);
 
-					const processed = filterSortPaginate(rowData, params, columnDef);
+						const rowData: DataGridRowData[] = data.map((entry) => ({
+							id: entry.hash,
+							...entry,
+						}));
 
-					return {
-						rowsTotal: data.length,
-						rowsFiltered: processed[1],
-						rows: processed[0],
-					};
-				}}
-				exporters={boolean("Enable export", true) ? exporters : undefined}
-			/>
-		</div>
+						const processed = filterSortPaginate(rowData, params, columnDef);
+
+						return {
+							rowsTotal: data.length,
+							rowsFiltered: processed[1],
+							rows: processed[0],
+						};
+					}}
+					exporters={boolean("Enable export", true) ? exporters : undefined}
+				/>
+			</div>
+		</DataGridLocalStoragePersist>
 	);
 };
 
