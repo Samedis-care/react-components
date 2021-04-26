@@ -203,8 +203,9 @@ export interface IDataGridAddButton {
 	label: NonNullable<React.ReactNode>;
 	/**
 	 * onClick handler for the add button
+	 * Set to undefined to disable button
 	 */
-	onClick: () => void;
+	onClick: (() => void) | undefined;
 }
 
 export interface IDataGridColumnProps {
