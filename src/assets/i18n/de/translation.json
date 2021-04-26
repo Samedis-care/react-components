@@ -24,7 +24,12 @@
 					"lte": "Weniger als oder gleich",
 					"not-contains": "Enthält nicht",
 					"not-eq": "Nicht gleich",
-					"starts-with": "Beginnt mit"
+					"starts-with": "Beginnt mit",
+					"gt-date": "Nach dem",
+					"gte-date": "Am oder nach",
+					"in-range-date": "Zwischen",
+					"lt-date": "Vor",
+					"lte-date": "Vorher oder am"
 				}
 			},
 			"settings": {

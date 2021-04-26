@@ -78,7 +78,12 @@
 					"lte": "Inférieur ou égal",
 					"not-contains": "Ne contient pas",
 					"not-eq": "Inégal",
-					"starts-with": "Commence avec"
+					"starts-with": "Commence avec",
+					"gt-date": "Après",
+					"gte-date": "Le ou après",
+					"in-range-date": "Entre",
+					"lt-date": "Avant que",
+					"lte-date": "Avant ou le"
 				}
 			},
 			"custom-filters": {
