@@ -456,8 +456,11 @@ const Form = <
 	);
 	const resetForm = useCallback(() => {
 		if (!serverData || !serverData[0]) return;
-		valuesRef.current = serverData[0];
-		setValues(serverData[0]);
+		valuesRef.current = JSON.parse(JSON.stringify(serverData[0])) as Record<
+			string,
+			unknown
+		>;
+		setValues(valuesRef.current);
 	}, [serverData]);
 	const handleBlur = useCallback(
 		(evt: React.FocusEvent<HTMLInputElement & HTMLElement>) => {
@@ -482,8 +485,11 @@ const Form = <
 	useEffect(() => {
 		if (isLoading || !serverData || !serverData[0]) return;
 
-		valuesRef.current = serverData[0];
-		setValues(serverData[0]);
+		valuesRef.current = JSON.parse(JSON.stringify(serverData[0])) as Record<
+			string,
+			unknown
+		>;
+		setValues(valuesRef.current);
 		setTouched(
 			Object.fromEntries(Object.keys(serverData[0]).map((key) => [key, false]))
 		);
