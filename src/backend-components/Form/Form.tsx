@@ -456,10 +456,7 @@ const Form = <
 	);
 	const resetForm = useCallback(() => {
 		if (!serverData || !serverData[0]) return;
-		valuesRef.current = JSON.parse(JSON.stringify(serverData[0])) as Record<
-			string,
-			unknown
-		>;
+		valuesRef.current = { ...serverData[0] };
 		setValues(valuesRef.current);
 	}, [serverData]);
 	const handleBlur = useCallback(
@@ -485,10 +482,7 @@ const Form = <
 	useEffect(() => {
 		if (isLoading || !serverData || !serverData[0]) return;
 
-		valuesRef.current = JSON.parse(JSON.stringify(serverData[0])) as Record<
-			string,
-			unknown
-		>;
+		valuesRef.current = { ...serverData[0] };
 		setValues(valuesRef.current);
 		setTouched(
 			Object.fromEntries(Object.keys(serverData[0]).map((key) => [key, false]))
