@@ -24,5 +24,6 @@ export { default as cleanClassMap } from "./cleanClassMap";
 export { default as isObjectEmpty } from "./isObjectEmpty";
 export { default as sleep } from "./sleep";
 export { default as last } from "./last";
+export { default as useDropZone } from "./useDropZone";
 export * from "./useDate";
 export * from "./genericHOC";
