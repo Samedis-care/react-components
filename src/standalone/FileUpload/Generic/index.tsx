@@ -1,13 +1,10 @@
-import React, { Component } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
 	Button,
-	createStyles,
 	FormHelperText,
 	Grid,
 	Theme,
 	Typography,
-	WithStyles,
-	withStyles,
 } from "@material-ui/core";
 import { AttachFile } from "@material-ui/icons";
 import FilePreview from "./File";
@@ -16,14 +13,16 @@ import {
 	getFileExt,
 	matchMime,
 	processImage,
-	shallowCompare,
+	useDropZone,
 } from "../../../utils";
 import { IDownscaleProps } from "../../../utils/processImage";
 import GroupBox from "../../GroupBox";
-import { TFunction, useTranslation, WithTranslation } from "react-i18next";
+import { useTranslation } from "react-i18next";
 import ccI18n from "../../../i18n";
+import { makeStyles } from "@material-ui/core/styles";
+import { ClassNameMap } from "@material-ui/styles/withStyles";
 
-export interface FileUploadProps extends WithStyles, WithTranslation {
+export interface FileUploadProps {
 	/**
 	 * Maximum amount of files allowed
 	 */
@@ -95,6 +94,10 @@ export interface FileUploadProps extends WithStyles, WithTranslation {
 	 * The label of the component
 	 */
 	label?: string;
+	/**
+	 * Custom CSS classes for styling
+	 */
+	classes?: ClassNameMap<keyof ReturnType<typeof useStyles>>;
 }
 
 export interface FileMeta {
@@ -106,21 +109,6 @@ export interface FileMeta {
 	 * The download link for the file
 	 */
 	downloadLink?: string;
-}
-
-/**
- * On changes to this state also modify shouldComponentUpdate.
- * There is an optimization regarding the dragging handler.
- */
-interface IState {
-	/**
-	 * The uploaded files
-	 */
-	files: FileData[];
-	/**
-	 * User is currently dragging stuff around?
-	 */
-	dragging: number;
 }
 
 export interface FileData<T = File | FileMeta> {
@@ -147,291 +135,127 @@ export interface FileData<T = File | FileMeta> {
 	delete?: boolean;
 }
 
-class FileUpload extends Component<FileUploadProps & WithTranslation, IState> {
-	private readonly inputRef: React.RefObject<HTMLInputElement>;
+const useStyles = makeStyles(
+	(theme: Theme) => ({
+		dropzone: {
+			border: `2px solid ${theme.palette.primary.main}`,
+		},
+		formatText: {
+			textAlign: "right",
+		},
+		fileInput: {
+			display: "none",
+		},
+	}),
+	{ name: "CcFileUpload" }
+);
 
-	constructor(props: FileUploadProps) {
-		super(props);
-
-		this.inputRef = React.createRef<HTMLInputElement>();
-
-		this.state = {
-			files: this.loadInitialFiles(),
-			dragging: 0,
-		};
-	}
-
-	loadInitialFiles = () => {
-		return (this.props.files || this.props.defaultFiles || []).map((meta) => ({
+const FileUpload = (props: FileUploadProps): React.ReactElement => {
+	const {
+		convertImagesTo,
+		imageDownscaleOptions,
+		previewImages,
+		previewSize,
+		maxFiles,
+		handleError,
+		accept,
+		acceptLabel,
+		onChange,
+		label,
+		smallLabel,
+		readOnly,
+		onBlur,
+		uploadLabel,
+		allowDuplicates,
+	} = props;
+	const classes = useStyles(props);
+	const loadInitialFiles = () =>
+		(props.files || props.defaultFiles || []).map((meta) => ({
 			canBeUploaded: false,
 			delete: false,
 			...meta,
 		}));
-	};
+	const [files, setFiles] = useState<FileData[]>(loadInitialFiles);
+	const inputRef = useRef<HTMLInputElement | null>(null);
+	const { t } = useTranslation(undefined, {
+		i18n: ccI18n,
+	});
 
-	shouldComponentUpdate(
-		nextProps: Readonly<FileUploadProps>,
-		nextState: Readonly<IState>
-	): boolean {
-		if (!shallowCompare(this.props, nextProps)) return true;
-		// Compare state (except dragging)
-		if (this.state.files !== nextState.files) return true;
-
-		// Check for dragging
-		return (this.state.dragging ? 1 : 0) !== (nextState.dragging ? 1 : 0);
-	}
-
-	componentDidUpdate(prevProps: Readonly<FileUploadProps>) {
-		// update files if necessary
-		if (prevProps.files !== this.props.files) {
-			this.setState({ files: this.loadInitialFiles() });
-		}
-	}
-
-	componentDidMount() {
-		document.addEventListener("dragenter", this.handleDragStart);
-		document.addEventListener("dragleave", this.handleDragStop);
-	}
-
-	componentWillUnmount() {
-		document.removeEventListener("dragenter", this.handleDragStart);
-		document.removeEventListener("dragleave", this.handleDragStop);
-	}
-
-	render() {
-		return (
-			<GroupBox label={this.props.label} smallLabel={this.props.smallLabel}>
-				<Grid
-					container
-					spacing={2}
-					alignContent={"space-between"}
-					onDrop={this.handleDrop}
-					onDragOver={this.handleDragOver}
-					className={
-						"components-care-dropzone" +
-						(this.state.dragging ? " " + this.props.classes.dropzone : "")
-					}
-				>
-					{!this.props.readOnly && (
-						<Grid item xs key={"upload"}>
-							<Button
-								startIcon={<AttachFile />}
-								variant={"contained"}
-								color={"primary"}
-								onClick={this.handleUpload}
-								onBlur={this.props.onBlur}
-							>
-								{this.props.uploadLabel ||
-									this.props.t("standalone.file-upload.upload")}
-							</Button>
-							<input
-								type={"file"}
-								accept={this.props.accept || undefined}
-								multiple={
-									this.props.maxFiles ? this.getRemainingFileCount() > 1 : true
-								}
-								onChange={this.handleFileChange}
-								className={this.props.classes.fileInput}
-								ref={this.inputRef}
-							/>
-						</Grid>
-					)}
-					<Grid item xs={12} key={"files"}>
-						<Grid
-							container
-							spacing={2}
-							alignContent={"flex-start"}
-							alignItems={"flex-start"}
-						>
-							{this.state.files.map(
-								(data: FileData, index) =>
-									data && (
-										<FilePreview
-											name={data.file.name}
-											downloadLink={
-												"downloadLink" in data.file
-													? data.file.downloadLink
-													: undefined
-											}
-											key={`${index}-${data.file.name}`}
-											size={this.props.previewSize}
-											preview={
-												this.props.previewImages ? data.preview : undefined
-											}
-											disabled={data.delete || false}
-											onRemove={
-												this.props.readOnly || data.preventDelete
-													? undefined
-													: () => this.removeFile(data)
-											}
-										/>
-									)
-							)}
-							{this.props.readOnly && this.state.files.length === 0 && (
-								<Grid item>
-									<Typography>
-										{this.props.t("standalone.file-upload.no-files")}
-									</Typography>
-								</Grid>
-							)}
-						</Grid>
-					</Grid>
-					{!this.props.readOnly && (
-						<Grid item xs={12} key={"info"}>
-							<FormHelperText className={this.props.classes.formatText}>
-								({this.props.t("standalone.file-upload.formats")}:{" "}
-								{this.props.acceptLabel ||
-									this.props.accept ||
-									this.props.t("standalone.file-upload.format.any")}
-								)
-							</FormHelperText>
-						</Grid>
-					)}
-				</Grid>
-			</GroupBox>
-		);
-	}
-
-	handleUpload = () => {
-		const elem = this.inputRef.current;
-
-		if (!elem) return;
-
-		let maxFiles = 2;
-		if (this.props.maxFiles) {
-			maxFiles = this.getRemainingFileCount();
-			if (maxFiles === 0) {
-				this.props.handleError(
-					"files.selector.limit-reached",
-					this.props.t("standalone.file-upload.error.limit-reached")
-				);
-				return;
-			}
-		}
-
-		elem.click();
-	};
-
-	handleFileChange = async (evt: React.ChangeEvent<HTMLInputElement>) => {
-		return this.processFiles(evt.currentTarget.files);
-	};
-
-	handleDrop = async (evt: React.DragEvent<HTMLDivElement>) => {
-		if (this.props.readOnly) return;
-
-		evt.preventDefault();
-
-		this.setState({
-			dragging: 0,
-		});
-
-		return this.processFiles(evt.dataTransfer?.files);
-	};
-
-	handleDragOver = (evt: React.DragEvent<HTMLDivElement>) => {
-		if (this.props.readOnly) return;
-
-		evt.preventDefault();
-	};
-
-	handleDragStart = () => {
-		if (this.props.readOnly) return;
-
-		this.setState((prevState) => ({
-			dragging: prevState.dragging + 1,
-		}));
-	};
-
-	handleDragStop = () => {
-		if (this.props.readOnly) return;
-
-		this.setState((prevState) => ({
-			dragging: prevState.dragging - 1,
-		}));
-	};
-
-	getRemainingFileCount = () => {
-		if (!this.props.maxFiles)
+	const getRemainingFileCount = useCallback(() => {
+		if (!maxFiles)
 			throw new Error("max files isn't set, this function shouldn't be called");
 
-		return (
-			this.props.maxFiles -
-			this.state.files.filter((file) => !file.delete).length
-		);
-	};
+		return maxFiles - files.filter((file) => !file.delete).length;
+	}, [maxFiles, files]);
 
-	processFiles = async (files?: FileList | null) => {
-		const processImages = !!(
-			this.props.convertImagesTo ||
-			this.props.imageDownscaleOptions ||
-			this.props.previewImages
-		);
+	const processFiles = useCallback(
+		async (files: FileList) => {
+			const processImages = !!(
+				convertImagesTo ||
+				imageDownscaleOptions ||
+				previewImages
+			);
 
-		if (!files) return;
-
-		if (this.props.maxFiles) {
-			const maxFiles = this.getRemainingFileCount();
-			if (files.length > maxFiles) {
-				this.props.handleError(
-					"files.selector.too-many",
-					this.props.t("standalone.file-upload.error.too-many")
-				);
-				return;
+			if (maxFiles) {
+				const maxFiles = getRemainingFileCount();
+				if (files.length > maxFiles) {
+					handleError(
+						"files.selector.too-many",
+						t("standalone.file-upload.error.too-many")
+					);
+					return;
+				}
 			}
-		}
 
-		const newFiles: FileData<File>[] = [];
-		for (let i = 0; i < files.length; i++) {
-			const file = files[i];
-			const isImage = file.type.startsWith("image/");
-			if (isImage && processImages) {
-				newFiles.push({
-					file,
-					preview: await processImage(
+			const newFiles: FileData<File>[] = [];
+			for (let i = 0; i < files.length; i++) {
+				const file = files[i];
+				const isImage = file.type.startsWith("image/");
+				if (isImage && processImages) {
+					newFiles.push({
 						file,
-						this.props.convertImagesTo,
-						this.props.imageDownscaleOptions
-					),
-					canBeUploaded: true,
-					delete: false,
-				});
-			} else {
-				newFiles.push({ file, canBeUploaded: true, delete: false });
+						preview: await processImage(
+							file,
+							convertImagesTo,
+							imageDownscaleOptions
+						),
+						canBeUploaded: true,
+						delete: false,
+					});
+				} else {
+					newFiles.push({ file, canBeUploaded: true, delete: false });
+				}
 			}
-		}
 
-		if (this.props.accept) {
-			const allowedTypes = this.props.accept
-				.split(",")
-				.map((type) => type.trim());
-			const allowedFileExt = allowedTypes
-				.filter((type) => type.startsWith("."))
-				.map((type) => type.substring(1));
-			const allowedMimes = allowedTypes.filter((type) => type.includes("/"));
+			if (accept) {
+				const allowedTypes = accept.split(",").map((type) => type.trim());
+				const allowedFileExt = allowedTypes
+					.filter((type) => type.startsWith("."))
+					.map((type) => type.substring(1));
+				const allowedMimes = allowedTypes.filter((type) => type.includes("/"));
 
-			if (
-				newFiles.find(
-					(file) =>
-						!allowedMimes
-							.map((allowed) => matchMime(allowed, file.file.type))
-							.includes(true) &&
-						!allowedFileExt.includes(getFileExt(file.file.name))
-				)
-			) {
-				this.props.handleError(
-					"files.type.invalid",
-					this.props.t("standalone.file-upload.error.invalid-type")
-				);
-				return;
+				if (
+					newFiles.find(
+						(file) =>
+							!allowedMimes
+								.map((allowed) => matchMime(allowed, file.file.type))
+								.includes(true) &&
+							!allowedFileExt.includes(getFileExt(file.file.name))
+					)
+				) {
+					handleError(
+						"files.type.invalid",
+						t("standalone.file-upload.error.invalid-type")
+					);
+					return;
+				}
 			}
-		}
 
-		this.setState(
-			(prevState) => ({
-				files: this.props.allowDuplicates
-					? [...prevState.files, ...newFiles]
+			setFiles((prev) => {
+				const newValue: FileData[] = allowDuplicates
+					? [...prev, ...newFiles]
 					: [
-							...prevState.files.filter(
+							...prev.filter(
 								// check for file name duplicates and replace
 								(file) =>
 									!newFiles
@@ -439,66 +263,164 @@ class FileUpload extends Component<FileUploadProps & WithTranslation, IState> {
 										.includes(file.file.name)
 							),
 							...newFiles,
-					  ],
-			}),
-			() => {
-				if (this.props.onChange) this.props.onChange(this.state.files);
-			}
-		);
-	};
+					  ];
+				if (onChange) onChange(newValue);
+				return newValue;
+			});
+		},
+		[
+			accept,
+			allowDuplicates,
+			convertImagesTo,
+			getRemainingFileCount,
+			handleError,
+			imageDownscaleOptions,
+			maxFiles,
+			onChange,
+			previewImages,
+			t,
+		]
+	);
+	const handleUpload = useCallback(() => {
+		const elem = inputRef.current;
 
-	removeFile = (file: FileData<File | FileMeta>) => {
-		if ("downloadLink" in file.file) {
-			file.delete = true;
-			this.setState(
-				(prevState) => ({
-					files: [...prevState.files],
-				}),
-				() => {
-					if (this.props.onChange) this.props.onChange(this.state.files);
-				}
-			);
-			return;
+		if (!elem) return;
+
+		let maxFiles = 2;
+		if (maxFiles) {
+			maxFiles = getRemainingFileCount();
+			if (maxFiles === 0) {
+				handleError(
+					"files.selector.limit-reached",
+					t("standalone.file-upload.error.limit-reached")
+				);
+				return;
+			}
 		}
 
-		this.setState(
-			(prevState) => ({
-				files: prevState.files.filter((f) => f !== file),
-			}),
-			() => {
-				if (this.props.onChange) this.props.onChange(this.state.files);
+		elem.click();
+	}, [getRemainingFileCount, handleError, t]);
+
+	const handleFileChange = useCallback(
+		async (evt: React.ChangeEvent<HTMLInputElement>) => {
+			const files = evt.currentTarget.files;
+			if (!files) return;
+			return processFiles(files);
+		},
+		[processFiles]
+	);
+
+	const removeFile = useCallback(
+		(file: FileData) => {
+			if ("downloadLink" in file.file) {
+				file.delete = true;
+				setFiles((prev) => {
+					const newValue = [...prev];
+					if (onChange) onChange(newValue);
+					return newValue;
+				});
+				return;
 			}
-		);
-	};
-}
 
-const styles = createStyles((theme: Theme) => ({
-	dropzone: {
-		border: `2px solid ${theme.palette.primary.main}`,
-	},
-	formatText: {
-		textAlign: "right",
-	},
-	fileInput: {
-		display: "none",
-	},
-}));
-
-const FileUploadWithoutTranslation = withStyles(styles)(FileUpload);
-const FileUploadWithTranslation = (
-	props: Omit<FileUploadProps, keyof WithTranslation | keyof WithStyles>
-): React.ReactElement => {
-	const { i18n, t, ready: tReady } = useTranslation(undefined, {
-		i18n: ccI18n,
+			setFiles((prev) => {
+				const newValue = prev.filter((f) => f !== file);
+				if (onChange) onChange(newValue);
+				return newValue;
+			});
+		},
+		[onChange]
+	);
+	const { handleDrop, handleDragOver, dragging } = useDropZone({
+		disabled: props.readOnly,
+		processFiles,
 	});
+
+	// update files if necessary
+	useEffect(() => {
+		setFiles(loadInitialFiles);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [props.files]);
+
 	return (
-		<FileUploadWithoutTranslation
-			{...props}
-			i18n={i18n}
-			t={t as TFunction<"translation">}
-			tReady={tReady}
-		/>
+		<GroupBox label={label} smallLabel={smallLabel}>
+			<Grid
+				container
+				spacing={2}
+				alignContent={"space-between"}
+				onDragOver={handleDragOver}
+				onDrop={handleDrop}
+				className={
+					"components-care-dropzone" + (dragging ? " " + classes.dropzone : "")
+				}
+			>
+				{!readOnly && (
+					<Grid item xs key={"upload"}>
+						<Button
+							startIcon={<AttachFile />}
+							variant={"contained"}
+							color={"primary"}
+							onClick={handleUpload}
+							onBlur={onBlur}
+						>
+							{uploadLabel || t("standalone.file-upload.upload")}
+						</Button>
+						<input
+							type={"file"}
+							accept={accept || undefined}
+							multiple={maxFiles ? getRemainingFileCount() > 1 : true}
+							onChange={handleFileChange}
+							className={classes.fileInput}
+							ref={inputRef}
+						/>
+					</Grid>
+				)}
+				<Grid item xs={12} key={"files"}>
+					<Grid
+						container
+						spacing={2}
+						alignContent={"flex-start"}
+						alignItems={"flex-start"}
+					>
+						{files.map(
+							(data: FileData, index) =>
+								data && (
+									<FilePreview
+										name={data.file.name}
+										downloadLink={
+											"downloadLink" in data.file
+												? data.file.downloadLink
+												: undefined
+										}
+										key={`${index}-${data.file.name}`}
+										size={previewSize}
+										preview={previewImages ? data.preview : undefined}
+										disabled={data.delete || false}
+										onRemove={
+											readOnly || data.preventDelete
+												? undefined
+												: () => removeFile(data)
+										}
+									/>
+								)
+						)}
+						{readOnly && files.length === 0 && (
+							<Grid item>
+								<Typography>{t("standalone.file-upload.no-files")}</Typography>
+							</Grid>
+						)}
+					</Grid>
+				</Grid>
+				{!readOnly && (
+					<Grid item xs={12} key={"info"}>
+						<FormHelperText className={classes.formatText}>
+							({t("standalone.file-upload.formats")}:{" "}
+							{acceptLabel || accept || t("standalone.file-upload.format.any")})
+						</FormHelperText>
+					</Grid>
+				)}
+			</Grid>
+		</GroupBox>
 	);
 };
 
-export default FileUploadWithTranslation;
+export default FileUpload;

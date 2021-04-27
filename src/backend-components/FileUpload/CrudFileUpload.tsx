@@ -8,13 +8,9 @@ import { Connector, PageVisibility } from "../../backend-integration";
 import { ErrorComponentProps } from "../Form";
 import ErrorComponent from "../../stories/backend-components/Form/ErrorComponent";
 import { Loader } from "../../standalone";
-import { WithTranslation } from "react-i18next";
 
 export interface CrudFileUploadProps
-	extends Omit<
-		FileUploadProps,
-		"files" | "handleError" | "classes" | keyof WithTranslation
-	> {
+	extends Omit<FileUploadProps, "files" | "handleError"> {
 	/**
 	 * The backend connector used as CRUD interface
 	 */
@@ -41,10 +37,6 @@ export interface CrudFileUploadProps
 	deserialize: (
 		data: Record<string, unknown>
 	) => Promise<FileData<BackendFileMeta>> | FileData<BackendFileMeta>;
-	/**
-	 * Custom CSS classes for styling
-	 */
-	classes?: FileUploadProps["classes"];
 }
 
 export interface BackendFileMeta extends FileMeta {
