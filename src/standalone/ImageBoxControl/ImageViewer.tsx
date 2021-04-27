@@ -33,29 +33,32 @@ export interface ImageViewerProps {
 	showImageBoxDialog: () => void;
 }
 
-const useStyles = makeStyles((theme) => ({
-	imageViewRoot: {
-		height: "100%",
-	},
-	imgWrapperRoot: {
-		maxHeight: "100%",
-	},
-	noImageBg: {
-		width: "100%",
-		height: "100%",
-		backgroundColor: theme.palette.action.disabledBackground,
-	},
-	previewRoot: {
-		objectFit: "contain",
-		display: "block",
-		width: "100%",
-		height: "100%",
-	},
-	link: {
-		textAlign: "end",
-		marginRight: "10px",
-	},
-}));
+const useStyles = makeStyles(
+	(theme) => ({
+		imageViewRoot: {
+			height: "100%",
+		},
+		imgWrapperRoot: {
+			maxHeight: "100%",
+		},
+		noImageBg: {
+			width: "100%",
+			height: "100%",
+			backgroundColor: theme.palette.action.disabledBackground,
+		},
+		previewRoot: {
+			objectFit: "contain",
+			display: "block",
+			width: "100%",
+			height: "100%",
+		},
+		link: {
+			textAlign: "end",
+			marginRight: "10px",
+		},
+	}),
+	{ name: "CcImageViewer" }
+);
 
 const ImageBox = (props: ImageViewerProps) => {
 	const { value, readOnly, showImageBoxDialog } = props;

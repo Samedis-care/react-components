@@ -14,14 +14,18 @@ import {
 } from "../../standalone/ImageBoxControl/index";
 import { IDialogImageBox } from "./Types";
 
-const useStyles = makeStyles((theme) => ({
-	closeButton: {
-		position: "absolute",
-		right: theme.spacing(1),
-		top: theme.spacing(1),
-		color: theme.palette.grey[500],
-	},
-}));
+const useStyles = makeStyles(
+	(theme) => ({
+		closeButton: {
+			position: "absolute",
+			right: theme.spacing(1),
+			top: theme.spacing(1),
+			color: theme.palette.grey[500],
+		},
+	}),
+	{ name: "CcImageDialog" }
+);
+
 const ImageDialog = (props: IDialogImageBox) => {
 	const [, popDialog] = useDialogContext();
 	const classes = useStyles(props);

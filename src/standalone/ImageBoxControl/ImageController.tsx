@@ -70,57 +70,60 @@ export interface ImageControllerProps {
 	capture: false | "false" | "user" | "environment";
 }
 
-const useStyles = makeStyles((theme) => ({
-	closeIcon: {
-		position: "absolute",
-		cursor: "pointer",
-		color: theme.palette.action.active,
-		right: 0,
-	},
-	layout: {
-		position: "relative",
-		margin: "30px",
-		height: "275px",
-		backgroundColor: theme.palette.background.default,
-		borderRadius: "10px",
-		width: "275px",
-	},
-	layoutAdd: {
-		position: "relative",
-		margin: "30px",
-		height: "275px",
-		borderRadius: "10px",
-		width: "275px",
-	},
-	groupBoxlayout: {
-		margin: "30px",
-		borderRadius: "10px",
-		height: "275px",
-		width: "275px",
-	},
-	changeEventHelper: {
-		display: "none",
-	},
-	addPhoto: {
-		height: "50px",
-		width: "50px",
-		cursor: "pointer",
-		color: theme.palette.action.active,
-	},
-	addPhotoContainer: {
-		height: "275px",
-		width: "275px",
-		objectFit: "contain",
-		textAlign: "center",
-		display: "table-cell",
-		verticalAlign: "middle",
-		borderRadius: "10px",
-		backgroundColor: theme.palette.action.hover,
-	},
-	primaryIcon: {
-		margin: "30px",
-	},
-}));
+const useStyles = makeStyles(
+	(theme) => ({
+		closeIcon: {
+			position: "absolute",
+			cursor: "pointer",
+			color: theme.palette.action.active,
+			right: 0,
+		},
+		layout: {
+			position: "relative",
+			margin: "30px",
+			height: "275px",
+			backgroundColor: theme.palette.background.default,
+			borderRadius: "10px",
+			width: "275px",
+		},
+		layoutAdd: {
+			position: "relative",
+			margin: "30px",
+			height: "275px",
+			borderRadius: "10px",
+			width: "275px",
+		},
+		groupBoxlayout: {
+			margin: "30px",
+			borderRadius: "10px",
+			height: "275px",
+			width: "275px",
+		},
+		changeEventHelper: {
+			display: "none",
+		},
+		addPhoto: {
+			height: "50px",
+			width: "50px",
+			cursor: "pointer",
+			color: theme.palette.action.active,
+		},
+		addPhotoContainer: {
+			height: "275px",
+			width: "275px",
+			objectFit: "contain",
+			textAlign: "center",
+			display: "table-cell",
+			verticalAlign: "middle",
+			borderRadius: "10px",
+			backgroundColor: theme.palette.action.hover,
+		},
+		primaryIcon: {
+			margin: "30px",
+		},
+	}),
+	{ name: "CcImageController" }
+);
 
 const ImageController = (props: ImageControllerProps) => {
 	const {
