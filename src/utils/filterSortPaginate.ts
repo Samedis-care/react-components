@@ -82,6 +82,12 @@ const filterSortPaginate = (
 						expr += 'value !== filterCache["' + filterKey + '"].value1';
 					}
 					break;
+				case "notEmpty":
+					expr += "value !== ''";
+					break;
+				case "empty":
+					expr += "value === ''";
+					break;
 				case "startsWith":
 					expr += 'value.startsWith(filterCache["' + filterKey + '"].value1)';
 					break;
@@ -128,15 +134,16 @@ const filterSortPaginate = (
 			}
 
 			filter = filter.nextFilter;
-			if (filter) expr += filter.nextFilterType === "and" ? " && " : " || ";
+			if (filter && filter.value1)
+				expr += filter.nextFilterType === "and" ? " && " : " || ";
+			else break;
 		}
 
 		rowData = rowData.filter((row) => {
-			const rawValue = row[filterField];
-			if (!rawValue) return false;
+			let rawValue = row[filterField];
+			if (!rawValue) rawValue = "";
 			// eslint-disable-next-line @typescript-eslint/no-unused-vars
 			const value = rawValue.toString().toLowerCase();
-
 			try {
 				// eslint-disable-next-line no-eval
 				return !expr || eval(expr);

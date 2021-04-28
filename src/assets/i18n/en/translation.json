@@ -19,6 +19,8 @@
 				"filter-type": {
 					"eq": "Equals",
 					"not-eq": "Not equal",
+					"empty": "Empty",
+					"not-empty": "Not empty",
 					"contains": "Contains",
 					"not-contains": "Not contains",
 					"starts-with": "Starts with",

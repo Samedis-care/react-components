@@ -28,6 +28,8 @@ export type FilterType =
 	| "notContains"
 	| "equals"
 	| "notEqual"
+	| "empty"
+	| "notEmpty"
 	| "startsWith"
 	| "endsWith"
 	| "lessThan"
@@ -129,7 +131,15 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 	const onFilterTypeChange = (
 		event: React.ChangeEvent<{ name?: string; value: unknown }>
 	) => {
+		// clear magic value
+		if (filterType === "empty" || filterType === "notEmpty") {
+			filterValue = "";
+		}
 		filterType = event.target.value as FilterType;
+		// set magic value to mark filter as active
+		if (filterType === "empty" || filterType === "notEmpty") {
+			filterValue = filterType;
+		}
 		filterValue2 = "";
 		updateParent();
 	};
@@ -216,6 +226,16 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 		checkSupport(props.valueType, "notEqual") && (
 			<MenuItem key={"notEqual"} value={"notEqual"}>
 				{t("standalone.data-grid.content.filter-type.not-eq")}
+			</MenuItem>
+		),
+		checkSupport(props.valueType, "empty") && (
+			<MenuItem key={"empty"} value={"empty"}>
+				{t("standalone.data-grid.content.filter-type.empty")}
+			</MenuItem>
+		),
+		checkSupport(props.valueType, "notEmpty") && (
+			<MenuItem key={"notEmpty"} value={"notEmpty"}>
+				{t("standalone.data-grid.content.filter-type.not-empty")}
 			</MenuItem>
 		),
 	];
@@ -313,21 +333,23 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 							{filterTypeMenuItems}
 						</Select>
 					</Grid>
-					<Grid item xs={12}>
-						{props.valueType === "date" ? (
-							<LocalizedKeyboardDatePicker
-								value={filterValue === "" ? null : filterValue}
-								onChange={onFilterValueChangeDate}
-								fullWidth
-							/>
-						) : (
-							<TextField
-								value={filterValue}
-								onChange={onFilterValueChange}
-								fullWidth
-							/>
-						)}
-					</Grid>
+					{filterType !== "empty" && filterType !== "notEmpty" && (
+						<Grid item xs={12}>
+							{props.valueType === "date" ? (
+								<LocalizedKeyboardDatePicker
+									value={filterValue === "" ? null : filterValue}
+									onChange={onFilterValueChangeDate}
+									fullWidth
+								/>
+							) : (
+								<TextField
+									value={filterValue}
+									onChange={onFilterValueChange}
+									fullWidth
+								/>
+							)}
+						</Grid>
+					)}
 					{filterType === "inRange" && (
 						<Grid item xs={12}>
 							{props.valueType === "date" ? (
