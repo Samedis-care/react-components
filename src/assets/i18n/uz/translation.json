@@ -78,7 +78,12 @@
 					"lte": "Kam yoki teng",
 					"not-contains": "Tarkibida yo'q",
 					"not-eq": "Teng emas",
-					"starts-with": "Bilan boshlanadi"
+					"starts-with": "Bilan boshlanadi",
+					"gt-date": "Keyin",
+					"gte-date": "Yoqimli yoki keyin",
+					"in-range-date": "Orasida",
+					"lt-date": "Oldin",
+					"lte-date": "Oldin yoki oldin"
 				}
 			},
 			"custom-filters": {

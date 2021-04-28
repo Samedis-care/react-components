@@ -34,7 +34,7 @@
 					"lte-date": "Before or on",
 					"gt-date": "After",
 					"gte-date": "On or after",
-					"in-range-date": "Between dates"
+					"in-range-date": "Between"
 				},
 				"no-data": "The list does not contain any data."
 			},

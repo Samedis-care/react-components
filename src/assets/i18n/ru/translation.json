@@ -78,7 +78,12 @@
 					"lte": "Меньше или равно",
 					"not-contains": "Не содержит",
 					"not-eq": "Не равный",
-					"starts-with": "Начинается с"
+					"starts-with": "Начинается с",
+					"gt-date": "После",
+					"gte-date": "На или после",
+					"in-range-date": "Между",
+					"lt-date": "Перед",
+					"lte-date": "До или после"
 				}
 			},
 			"custom-filters": {
