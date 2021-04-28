@@ -2,6 +2,8 @@ import React from "react";
 import { Grid, Link } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import GroupBox from "../../standalone/GroupBox";
+import { useDropZone } from "../../utils";
+import { UseDropZoneParams } from "../../utils/useDropZone";
 export interface ImageViewerProps {
 	/**
 	 * The current value of the input
@@ -31,6 +33,10 @@ export interface ImageViewerProps {
 	 * Open image box dialog
 	 */
 	showImageBoxDialog: () => void;
+	/**
+	 * Handler for dropped files
+	 */
+	onFilesDropped: UseDropZoneParams["processFiles"];
 }
 
 const useStyles = makeStyles(
@@ -56,13 +62,21 @@ const useStyles = makeStyles(
 			textAlign: "end",
 			marginRight: "10px",
 		},
+		dragging: {
+			border: `1px solid ${theme.palette.primary.main}`,
+		},
 	}),
 	{ name: "CcImageViewer" }
 );
 
 const ImageBox = (props: ImageViewerProps) => {
-	const { value, readOnly, showImageBoxDialog } = props;
+	const { value, readOnly, showImageBoxDialog, onFilesDropped } = props;
 	const classes = useStyles(props);
+	const { handleDragOver, handleDrop, dragging } = useDropZone({
+		disabled: readOnly,
+		processFiles: onFilesDropped,
+	});
+
 	return (
 		<GroupBox label={props.label}>
 			<Grid
@@ -74,12 +88,17 @@ const ImageBox = (props: ImageViewerProps) => {
 				justify={"center"}
 				wrap={"nowrap"}
 				className={classes.imageViewRoot}
+				onDragOver={handleDragOver}
+				onDrop={handleDrop}
 			>
 				<Grid
 					item
 					xs
 					key={"image"}
-					className={value ? classes.imgWrapperRoot : classes.noImageBg}
+					className={[
+						value ? classes.imgWrapperRoot : classes.noImageBg,
+						dragging ? classes.dragging : "",
+					].join(" ")}
 				>
 					{value && (
 						<img src={value} alt={props.alt} className={classes.previewRoot} />

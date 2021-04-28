@@ -20,6 +20,7 @@ export const ImageViewerStory = (): React.ReactElement => {
 				editLink={text("Edit Link Text", "Edit")}
 				showImageBoxDialog={action("openImageDialog")}
 				readOnly={boolean("Read-only", false)}
+				onFilesDropped={action("onFilesDropped")}
 			/>
 		</div>
 	);

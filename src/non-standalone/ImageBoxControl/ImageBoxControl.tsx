@@ -6,6 +6,7 @@ import {
 import { useDialogContext } from "../../framework";
 import { showImageDialog } from "../../non-standalone/Dialog";
 import { ImageControllerProps } from "../../standalone/ImageBoxControl/index";
+import { processImage } from "../../utils";
 export type ImageBoxInputElement = { name: string; value: string };
 
 export interface ImageBoxControlProps
@@ -56,6 +57,31 @@ const ImageBoxControl = (props: ImageBoxControlProps) => {
 		pushDialog,
 		ImageBoxControlProps,
 	]);
+
+	const updateImages = useCallback(
+		async (files: FileList) => {
+			if (files.length === 0) return;
+
+			const newImages = uploadedImages
+				.map((entry) => (entry.primary ? { ...entry, primary: false } : entry))
+				.concat(
+					await Promise.all(
+						Array.from(files).map(async (file, index) => ({
+							src: await processImage(
+								file,
+								props.convertImagesTo,
+								props.downscale
+							),
+							primary: index === 0,
+						}))
+					)
+				);
+
+			onUpdateImages(newImages);
+		},
+		[onUpdateImages, props.convertImagesTo, props.downscale, uploadedImages]
+	);
+
 	// render component
 	return (
 		<ImageViewer
@@ -66,6 +92,7 @@ const ImageBoxControl = (props: ImageBoxControlProps) => {
 			label={label}
 			alt={alt as string}
 			classes={props.subClasses?.imageViewer}
+			onFilesDropped={updateImages}
 		/>
 	);
 };
