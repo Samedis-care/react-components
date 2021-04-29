@@ -4,6 +4,9 @@
 			"week": "Week",
 			"today": "Today"
 		},
+		"how-it-works": {
+			"title": "How it works"
+		},
 		"data-grid": {
 			"content": {
 				"filter": "Filter",

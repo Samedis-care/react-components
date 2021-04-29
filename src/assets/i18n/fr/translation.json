@@ -13,6 +13,9 @@
 			"week": "Semaine",
 			"today": "Aujourd'hui"
 		},
+		"how-it-works": {
+			"title": "Comment ça fonctionne"
+		},
 		"file-upload": {
 			"formats": "Formats de fichiers",
 			"upload": "Télécharger",

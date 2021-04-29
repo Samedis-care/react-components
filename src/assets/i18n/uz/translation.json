@@ -13,6 +13,9 @@
 			"week": "Hafta",
 			"today": "Bugun"
 		},
+		"how-it-works": {
+			"title": "U qanday ishlaydi"
+		},
 		"file-upload": {
 			"formats": "Fayl formatlari",
 			"upload": "Yuklash",
