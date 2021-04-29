@@ -1,194 +1,196 @@
 {
-	"standalone": {
-		"data-grid": {
-			"content": {
-				"filter": "Filter",
-				"bool-filter": {
-					"any": "Beliebiger Wert",
-					"false": "Alle falschen Werte",
-					"true": "Alle wahrheitsgemäßen Werte"
-				},
-				"no-data": "Die Liste enthält keine Daten.",
-				"set-filter": {
-					"search": "Suche...",
-					"select-all": "Wählen Sie Alle"
-				},
-				"filter-type": {
-					"contains": "Enthält",
-					"ends-with": "Endet mit",
-					"eq": "Gleich",
-					"gt": "Größer als",
-					"gte": "Größer als oder gleich",
-					"in-range": "Im Bereich",
-					"lt": "Weniger als",
-					"lte": "Weniger als oder gleich",
-					"not-contains": "Enthält nicht",
-					"not-eq": "Nicht gleich",
-					"starts-with": "Beginnt mit",
-					"gt-date": "Nach dem",
-					"gte-date": "Am oder nach",
-					"in-range-date": "Zwischen",
-					"lt-date": "Vor",
-					"lte-date": "Vorher oder am"
-				}
-			},
-			"settings": {
-				"lock": "Spalten sperren/entsperren",
-				"hide": "Spalten ein-/ausblenden",
-				"close": "Schließen"
-			},
-			"header": {
-				"settings": "Einstellungen",
-				"reset": "Zurücksetzen",
-				"new": "Neu",
-				"export": "Exportieren",
-				"edit": "Bearbeiten",
-				"delete": "Löschen",
-				"custom-filter-button": "Filter"
-			},
-			"footer": {
-				"prev-page": "Vorherige Seite",
-				"page-size": "Seitengröße:",
-				"page-of": "von",
-				"next-page": "Nächste Seite",
-				"last-page": "Letzte Seite",
-				"first-page": "Erste Seite",
-				"page-size-tooltip": "Anzahl Einträge pro Seite",
-				"delete": "Löschen",
-				"edit": "Bearbeiten",
-				"filtered": "Gefiltert:",
-				"select-all": "Alle",
-				"total": "Gesamt:"
-			},
-			"custom-filters": {
-				"title": "Filterauswahl"
-			}
-		},
-		"selector": {
-			"add-new": "Hinzufügen",
-			"base-selector": {
-				"no-options-text": "Keine Optionen",
-				"close-icon-text": "Schließen",
-				"open-icon-text": "Öffnen",
-				"loading-text": "Lade..."
-			}
-		},
-		"schedule": {
-			"week": "Woche",
-			"today": "Heute"
-		},
-		"how-it-works": {
-			"title": "Wie es funktioniert"
-		},
-		"file-upload": {
-			"formats": "Dateiformate",
-			"upload": "Hochladen",
-			"error": {
-				"invalid-type": "Nicht unterstützter Dateityp ausgewählt",
-				"limit-reached": "Maximale Anzahl der erlaubten Dateien erreicht",
-				"too-many": "Zu viele Dateien ausgewählt"
-			},
-			"format": {
-				"any": "Alle"
-			},
-			"no-files": "Keine Anhänge verfügbar"
-		},
-		"phone-number": {
-			"invalid": "Korrekte Rufnummer eingeben"
-		},
-		"signature-pad": {
-			"dialog": {
-				"reset": "Zurücksetzen",
-				"save-changes": "Änderungen speichern",
-				"title": "Hier unterschreiben"
-			},
-			"sign-here": "Hier digital unterschrieben"
-		}
-	},
-	"backend-integration": {
-		"model": {
-			"types": {
-				"renderers": {
-					"date": {
-						"not-set": "Datum nicht gesetzt",
-						"labels": {
-							"cancel": "Abbrechen",
-							"clear": "Löschen",
-							"invalid": "Ungültig",
-							"ok": "OK",
-							"today": "Heute",
-							"invalid-date": "Ungültiges Datumsformat",
-							"min-date": "Der Termin sollte nicht vor dem Mindestdatum liegen",
-							"max-date": "Das Datum sollte nicht nach dem maximalen Datum liegen"
-						},
-						"validation-error": "Bitte geben Sie ein gültiges Datum ein"
-					},
-					"image": {
-						"not-set": "Bild nicht vorhanden"
-					},
-					"files": {
-						"no-file": "Keine Dateien vorhanden"
-					},
-					"enum": {
-						"unknown": "Unbekannt"
-					},
-					"boolean": {
-						"true": "Ja",
-						"false": "Nein"
-					},
-					"signature": {
-						"not-set": "Nicht unterschrieben"
-					}
-				},
-				"boolean": {
-					"true": "Ja",
-					"false": "Nein"
-				},
-				"date-nullable": {
-					"not-set": "N/A"
-				},
-				"image": {
-					"not-set": "Bild nicht vorhanden",
-					"set": "Bild vorhanden"
-				}
-			}
-		},
-		"connector": {
-			"json-api-client": {
-				"network-error": "Ein Netzwerkfehler ist aufgetreten.",
-				"parse-error": "Konnte die Antwort des Servers nicht verstehen (Ungültiges JSON). Der Server gab den Status {{STATUS_CODE}} {{STATUS_TEXT}} zurück."
-			}
-		}
-	},
-	"backend-components": {
-		"data-grid": {
-			"delete": {
-				"error-dialog": {
-					"title": "Fehler",
-					"message": "Das Löschen der ausgewählten Einträge ist fehlgeschlagen: {{ERROR}}",
-					"buttons": {
-						"okay": "Okay"
-					}
-				},
-				"confirm-dialog": {
-					"title": "Löschen",
-					"messageInverted": "Wollen Sie wirklich alles außer {{NUM}}-Einträgen löschen?",
-					"message": "Wollen Sie wirklich {{NUM}}-Einträge löschen?",
-					"buttons": {
-						"yes": "Ja",
-						"no": "Nein"
-					}
-				}
-			}
-		},
-		"selector": {
-			"loading": "Wird geladen...",
-			"loading-error": "Fehler beim Abrufen der Daten"
-		}
-	},
-	"non-standalone": {
-		"dialog": {
-			"okay": "Okay"
-		}
-	}
+  "standalone": {
+    "data-grid": {
+      "content": {
+        "filter": "Filter",
+        "bool-filter": {
+          "any": "Beliebiger Wert",
+          "false": "Alle falschen Werte",
+          "true": "Alle wahrheitsgemäßen Werte"
+        },
+        "no-data": "Die Liste enthält keine Daten.",
+        "set-filter": {
+          "search": "Suche...",
+          "select-all": "Wählen Sie Alle"
+        },
+        "filter-type": {
+          "contains": "Enthält",
+          "ends-with": "Endet mit",
+          "eq": "Gleich",
+          "gt": "Größer als",
+          "gte": "Größer als oder gleich",
+          "in-range": "Im Bereich",
+          "lt": "Weniger als",
+          "lte": "Weniger als oder gleich",
+          "not-contains": "Enthält nicht",
+          "not-eq": "Nicht gleich",
+          "starts-with": "Beginnt mit",
+          "gt-date": "Nach dem",
+          "gte-date": "Am oder nach",
+          "in-range-date": "Zwischen",
+          "lt-date": "Vor",
+          "lte-date": "Vorher oder am",
+          "not-empty": "Ist nicht leer",
+          "empty": "Ist leer"
+        }
+      },
+      "settings": {
+        "lock": "Spalten sperren/entsperren",
+        "hide": "Spalten ein-/ausblenden",
+        "close": "Schließen"
+      },
+      "header": {
+        "settings": "Einstellungen",
+        "reset": "Zurücksetzen",
+        "new": "Neu",
+        "export": "Exportieren",
+        "edit": "Bearbeiten",
+        "delete": "Löschen",
+        "custom-filter-button": "Filter"
+      },
+      "footer": {
+        "prev-page": "Vorherige Seite",
+        "page-size": "Seitengröße:",
+        "page-of": "von",
+        "next-page": "Nächste Seite",
+        "last-page": "Letzte Seite",
+        "first-page": "Erste Seite",
+        "page-size-tooltip": "Anzahl Einträge pro Seite",
+        "delete": "Löschen",
+        "edit": "Bearbeiten",
+        "filtered": "Gefiltert:",
+        "select-all": "Alle",
+        "total": "Gesamt:"
+      },
+      "custom-filters": {
+        "title": "Filterauswahl"
+      }
+    },
+    "selector": {
+      "add-new": "Hinzufügen",
+      "base-selector": {
+        "no-options-text": "Keine Optionen",
+        "close-icon-text": "Schließen",
+        "open-icon-text": "Öffnen",
+        "loading-text": "Lade..."
+      }
+    },
+    "schedule": {
+      "week": "Woche",
+      "today": "Heute"
+    },
+    "how-it-works": {
+      "title": "Wie es funktioniert"
+    },
+    "file-upload": {
+      "formats": "Dateiformate",
+      "upload": "Hochladen",
+      "error": {
+        "invalid-type": "Nicht unterstützter Dateityp ausgewählt",
+        "limit-reached": "Maximale Anzahl der erlaubten Dateien erreicht",
+        "too-many": "Zu viele Dateien ausgewählt"
+      },
+      "format": {
+        "any": "Alle"
+      },
+      "no-files": "Keine Anhänge verfügbar"
+    },
+    "phone-number": {
+      "invalid": "Korrekte Rufnummer eingeben"
+    },
+    "signature-pad": {
+      "dialog": {
+        "reset": "Zurücksetzen",
+        "save-changes": "Änderungen speichern",
+        "title": "Hier unterschreiben"
+      },
+      "sign-here": "Hier digital unterschrieben"
+    }
+  },
+  "backend-integration": {
+    "model": {
+      "types": {
+        "renderers": {
+          "date": {
+            "not-set": "Datum nicht gesetzt",
+            "labels": {
+              "cancel": "Abbrechen",
+              "clear": "Löschen",
+              "invalid": "Ungültig",
+              "ok": "OK",
+              "today": "Heute",
+              "invalid-date": "Ungültiges Datumsformat",
+              "min-date": "Der Termin sollte nicht vor dem Mindestdatum liegen",
+              "max-date": "Das Datum sollte nicht nach dem maximalen Datum liegen"
+            },
+            "validation-error": "Bitte geben Sie ein gültiges Datum ein"
+          },
+          "image": {
+            "not-set": "Bild nicht vorhanden"
+          },
+          "files": {
+            "no-file": "Keine Dateien vorhanden"
+          },
+          "enum": {
+            "unknown": "Unbekannt"
+          },
+          "boolean": {
+            "true": "Ja",
+            "false": "Nein"
+          },
+          "signature": {
+            "not-set": "Nicht unterschrieben"
+          }
+        },
+        "boolean": {
+          "true": "Ja",
+          "false": "Nein"
+        },
+        "date-nullable": {
+          "not-set": "N/A"
+        },
+        "image": {
+          "not-set": "Bild nicht vorhanden",
+          "set": "Bild vorhanden"
+        }
+      }
+    },
+    "connector": {
+      "json-api-client": {
+        "network-error": "Ein Netzwerkfehler ist aufgetreten.",
+        "parse-error": "Konnte die Antwort des Servers nicht verstehen (Ungültiges JSON). Der Server gab den Status {{STATUS_CODE}} {{STATUS_TEXT}} zurück."
+      }
+    }
+  },
+  "backend-components": {
+    "data-grid": {
+      "delete": {
+        "error-dialog": {
+          "title": "Fehler",
+          "message": "Das Löschen der ausgewählten Einträge ist fehlgeschlagen: {{ERROR}}",
+          "buttons": {
+            "okay": "Okay"
+          }
+        },
+        "confirm-dialog": {
+          "title": "Löschen",
+          "messageInverted": "Wollen Sie wirklich alles außer {{NUM}}-Einträgen löschen?",
+          "message": "Wollen Sie wirklich {{NUM}}-Einträge löschen?",
+          "buttons": {
+            "yes": "Ja",
+            "no": "Nein"
+          }
+        }
+      }
+    },
+    "selector": {
+      "loading": "Wird geladen...",
+      "loading-error": "Fehler beim Abrufen der Daten"
+    }
+  },
+  "non-standalone": {
+    "dialog": {
+      "okay": "Okay"
+    }
+  }
 }
