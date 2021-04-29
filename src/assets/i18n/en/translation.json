@@ -1,196 +1,196 @@
 {
-  "standalone": {
-    "schedule": {
-      "week": "Week",
-      "today": "Today"
-    },
-    "how-it-works": {
-      "title": "How it works"
-    },
-    "data-grid": {
-      "content": {
-        "filter": "Filter",
-        "bool-filter": {
-          "true": "All truthy values",
-          "false": "All false values",
-          "any": "Any value"
-        },
-        "set-filter": {
-          "search": "Search...",
-          "select-all": "Select all"
-        },
-        "filter-type": {
-          "eq": "Equals",
-          "not-eq": "Not equal",
-          "empty": "Is empty",
-          "not-empty": "Is not empty",
-          "contains": "Contains",
-          "not-contains": "Not contains",
-          "starts-with": "Starts with",
-          "ends-with": "Ends with",
-          "lt": "Less than",
-          "lte": "Less than or equals",
-          "gt": "Greater than",
-          "gte": "Greater than or equals",
-          "in-range": "In range",
-          "lt-date": "Before",
-          "lte-date": "Before or on",
-          "gt-date": "After",
-          "gte-date": "On or after",
-          "in-range-date": "Between"
-        },
-        "no-data": "The list does not contain any data."
-      },
-      "header": {
-        "new": "New",
-        "export": "Export",
-        "settings": "Settings",
-        "reset": "Reset",
-        "custom-filter-button": "Filter",
-        "delete": "Delete",
-        "edit": "Edit"
-      },
-      "settings": {
-        "lock": "Lock/Unlock Columns",
-        "hide": "Show/Hide Columns",
-        "close": "Close"
-      },
-      "custom-filters": {
-        "title": "Filter selection"
-      },
-      "footer": {
-        "total": "Total:",
-        "filtered": "Filtered:",
-        "edit": "Edit",
-        "delete": "Delete",
-        "select-all": "All",
-        "first-page": "First page",
-        "last-page": "Last page",
-        "next-page": "Next page",
-        "page-of": "from",
-        "page-size": "Pagesize:",
-        "page-size-tooltip": "Number of records per page",
-        "prev-page": "Previous page"
-      }
-    },
-    "selector": {
-      "add-new": "Add",
-      "base-selector": {
-        "no-options-text": "No options",
-        "close-icon-text": "Close",
-        "open-icon-text": "Open",
-        "loading-text": "Loading..."
-      }
-    },
-    "file-upload": {
-      "upload": "Upload",
-      "no-files": "No attachments available",
-      "formats": "File formats",
-      "error": {
-        "too-many": "Too many files selected",
-        "limit-reached": "Maximum amount of allowed files",
-        "invalid-type": "Unsupported file type selected"
-      },
-      "format": {
-        "any": "Any"
-      }
-    },
-    "phone-number": {
-      "invalid": "Enter correct phone number"
-    },
-    "signature-pad": {
-      "dialog": {
-        "reset": "Reset",
-        "save-changes": "Save Changes",
-        "title": "Sign Here"
-      },
-      "sign-here": "Digitally signed here"
-    }
-  },
-  "non-standalone": {
-    "dialog": {
-      "okay": "Okay"
-    }
-  },
-  "backend-integration": {
-    "connector": {
-      "json-api-client": {
-        "network-error": "A network error occurred.",
-        "parse-error": "Failed parsing response (Invalid JSON). Server returned status {{STATUS_CODE}} {{STATUS_TEXT}}."
-      }
-    },
-    "model": {
-      "types": {
-        "renderers": {
-          "boolean": {
-            "true": "Yes",
-            "false": "No"
-          },
-          "date": {
-            "labels": {
-              "invalid": "Invalid",
-              "cancel": "Cancel",
-              "clear": "Clear",
-              "ok": "OK",
-              "today": "Today",
-              "invalid-date": "Invalid date format",
-              "max-date": "Date should not be after maximal date",
-              "min-date": "Date should not be before minimal date"
-            },
-            "not-set": "Date not set",
-            "validation-error": "Please enter a valid date"
-          },
-          "enum": {
-            "unknown": "Unknown"
-          },
-          "image": {
-            "not-set": "No image present"
-          },
-          "signature": {
-            "not-set": "Not signed"
-          },
-          "files": {
-            "no-file": "No files present"
-          }
-        },
-        "date-nullable": {
-          "not-set": "N/A"
-        },
-        "image": {
-          "not-set": "Image not present",
-          "set": "Image present"
-        },
-        "boolean": {
-          "true": "Yes",
-          "false": "No"
-        }
-      }
-    }
-  },
-  "backend-components": {
-    "data-grid": {
-      "delete": {
-        "confirm-dialog": {
-          "title": "Delete",
-          "message": "Do you really want to delete {{NUM}} entries?",
-          "messageInverted": "Do you really want to delete everything except {{NUM}} entries?",
-          "buttons": {
-            "yes": "Yes",
-            "no": "No"
-          }
-        },
-        "error-dialog": {
-          "title": "Error",
-          "message": "Failed deleting the selected entries: {{ERROR}}",
-          "buttons": {
-            "okay": "Okay"
-          }
-        }
-      }
-    },
-    "selector": {
-      "loading": "Loading...",
-      "loading-error": "Error while fetching data"
-    }
-  }
+	"standalone": {
+		"schedule": {
+			"week": "Week",
+			"today": "Today"
+		},
+		"how-it-works": {
+			"title": "How it works"
+		},
+		"data-grid": {
+			"content": {
+				"filter": "Filter",
+				"bool-filter": {
+					"true": "All truthy values",
+					"false": "All false values",
+					"any": "Any value"
+				},
+				"set-filter": {
+					"search": "Search...",
+					"select-all": "Select all"
+				},
+				"filter-type": {
+					"eq": "Equals",
+					"not-eq": "Not equal",
+					"empty": "Is empty",
+					"not-empty": "Is not empty",
+					"contains": "Contains",
+					"not-contains": "Not contains",
+					"starts-with": "Starts with",
+					"ends-with": "Ends with",
+					"lt": "Less than",
+					"lte": "Less than or equals",
+					"gt": "Greater than",
+					"gte": "Greater than or equals",
+					"in-range": "In range",
+					"lt-date": "Before",
+					"lte-date": "Before or on",
+					"gt-date": "After",
+					"gte-date": "On or after",
+					"in-range-date": "Between"
+				},
+				"no-data": "The list does not contain any data."
+			},
+			"header": {
+				"new": "New",
+				"export": "Export",
+				"settings": "Settings",
+				"reset": "Reset",
+				"custom-filter-button": "Filter",
+				"delete": "Delete",
+				"edit": "Edit"
+			},
+			"settings": {
+				"lock": "Lock/Unlock Columns",
+				"hide": "Show/Hide Columns",
+				"close": "Close"
+			},
+			"custom-filters": {
+				"title": "Filter selection"
+			},
+			"footer": {
+				"total": "Total:",
+				"filtered": "Filtered:",
+				"edit": "Edit",
+				"delete": "Delete",
+				"select-all": "All",
+				"first-page": "First page",
+				"last-page": "Last page",
+				"next-page": "Next page",
+				"page-of": "from",
+				"page-size": "Pagesize:",
+				"page-size-tooltip": "Number of records per page",
+				"prev-page": "Previous page"
+			}
+		},
+		"selector": {
+			"add-new": "Add",
+			"base-selector": {
+				"no-options-text": "No options",
+				"close-icon-text": "Close",
+				"open-icon-text": "Open",
+				"loading-text": "Loading..."
+			}
+		},
+		"file-upload": {
+			"upload": "Upload",
+			"no-files": "No attachments available",
+			"formats": "File formats",
+			"error": {
+				"too-many": "Too many files selected",
+				"limit-reached": "Maximum amount of allowed files",
+				"invalid-type": "Unsupported file type selected"
+			},
+			"format": {
+				"any": "Any"
+			}
+		},
+		"phone-number": {
+			"invalid": "Enter correct phone number"
+		},
+		"signature-pad": {
+			"dialog": {
+				"reset": "Reset",
+				"save-changes": "Save Changes",
+				"title": "Sign Here"
+			},
+			"sign-here": "Digitally signed here"
+		}
+	},
+	"non-standalone": {
+		"dialog": {
+			"okay": "Okay"
+		}
+	},
+	"backend-integration": {
+		"connector": {
+			"json-api-client": {
+				"network-error": "A network error occurred.",
+				"parse-error": "Failed parsing response (Invalid JSON). Server returned status {{STATUS_CODE}} {{STATUS_TEXT}}."
+			}
+		},
+		"model": {
+			"types": {
+				"renderers": {
+					"boolean": {
+						"true": "Yes",
+						"false": "No"
+					},
+					"date": {
+						"labels": {
+							"invalid": "Invalid",
+							"cancel": "Cancel",
+							"clear": "Clear",
+							"ok": "OK",
+							"today": "Today",
+							"invalid-date": "Invalid date format",
+							"max-date": "Date should not be after maximal date",
+							"min-date": "Date should not be before minimal date"
+						},
+						"not-set": "Date not set",
+						"validation-error": "Please enter a valid date"
+					},
+					"enum": {
+						"unknown": "Unknown"
+					},
+					"image": {
+						"not-set": "No image present"
+					},
+					"signature": {
+						"not-set": "Not signed"
+					},
+					"files": {
+						"no-file": "No files present"
+					}
+				},
+				"date-nullable": {
+					"not-set": "N/A"
+				},
+				"image": {
+					"not-set": "Image not present",
+					"set": "Image present"
+				},
+				"boolean": {
+					"true": "Yes",
+					"false": "No"
+				}
+			}
+		}
+	},
+	"backend-components": {
+		"data-grid": {
+			"delete": {
+				"confirm-dialog": {
+					"title": "Delete",
+					"message": "Do you really want to delete {{NUM}} entries?",
+					"messageInverted": "Do you really want to delete everything except {{NUM}} entries?",
+					"buttons": {
+						"yes": "Yes",
+						"no": "No"
+					}
+				},
+				"error-dialog": {
+					"title": "Error",
+					"message": "Failed deleting the selected entries: {{ERROR}}",
+					"buttons": {
+						"okay": "Okay"
+					}
+				}
+			}
+		},
+		"selector": {
+			"loading": "Loading...",
+			"loading-error": "Error while fetching data"
+		}
+	}
 }
