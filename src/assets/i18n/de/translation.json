@@ -29,7 +29,9 @@
 					"gte-date": "Am oder nach",
 					"in-range-date": "Zwischen",
 					"lt-date": "Vor",
-					"lte-date": "Vorher oder am"
+					"lte-date": "Vorher oder am",
+					"not-empty": "Ist nicht leer",
+					"empty": "Ist leer"
 				}
 			},
 			"settings": {

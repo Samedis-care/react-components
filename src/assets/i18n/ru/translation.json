@@ -86,7 +86,9 @@
 					"gte-date": "На или после",
 					"in-range-date": "Между",
 					"lt-date": "Перед",
-					"lte-date": "До или после"
+					"lte-date": "До или после",
+					"not-empty": "Не пусто",
+					"empty": "Пустой"
 				}
 			},
 			"custom-filters": {
