@@ -330,10 +330,9 @@ const FileUpload = (props: FileUploadProps): React.ReactElement => {
 		},
 		[onChange]
 	);
-	const { handleDrop, handleDragOver, dragging } = useDropZone({
-		disabled: props.readOnly,
-		processFiles,
-	});
+	const { handleDrop, handleDragOver, dragging } = useDropZone(
+		readOnly ? undefined : processFiles
+	);
 
 	// update files if necessary
 	useEffect(() => {

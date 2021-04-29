@@ -1,9 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
-export interface UseDropZoneParams {
-	disabled?: boolean;
-	processFiles: (files: FileList) => void;
-}
+export type UseDropZoneParams = (files: FileList) => Promise<void> | unknown;
 
 export interface UseDropZoneResult {
 	handleDragOver: React.DragEventHandler;
@@ -11,15 +8,13 @@ export interface UseDropZoneResult {
 	dragging: boolean;
 }
 
-const useDropZone = (props: UseDropZoneParams): UseDropZoneResult => {
-	const { disabled, processFiles } = props;
-
+const useDropZone = (processFiles?: UseDropZoneParams): UseDropZoneResult => {
 	const dragCounter = useRef<number>(0);
 	const [dragging, setDragging] = useState(false);
 
 	const handleDrop = useCallback(
 		(evt: React.DragEvent) => {
-			if (disabled) return;
+			if (!processFiles) return;
 
 			evt.preventDefault();
 
@@ -27,37 +22,37 @@ const useDropZone = (props: UseDropZoneParams): UseDropZoneResult => {
 			setDragging(false);
 
 			const files = evt.dataTransfer?.files;
-			if (files) processFiles(files);
+			if (files) void processFiles(files);
 		},
-		[disabled, processFiles]
+		[processFiles]
 	);
 
 	const handleDragOver = useCallback(
 		(evt: React.DragEvent) => {
-			if (disabled) return;
+			if (!processFiles) return;
 
 			evt.preventDefault();
 		},
-		[disabled]
+		[processFiles]
 	);
 
 	const handleDragStart = useCallback(() => {
-		if (disabled) return;
+		if (!processFiles) return;
 
 		if (!dragCounter.current) {
 			setDragging(true);
 		}
 		dragCounter.current++;
-	}, [disabled]);
+	}, [processFiles]);
 
 	const handleDragStop = useCallback(() => {
-		if (disabled) return;
+		if (!processFiles) return;
 
 		dragCounter.current--;
 		if (!dragCounter.current) {
 			setDragging(false);
 		}
-	}, [disabled]);
+	}, [processFiles]);
 
 	useEffect(() => {
 		document.addEventListener("dragenter", handleDragStart);
