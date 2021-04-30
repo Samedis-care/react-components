@@ -185,7 +185,7 @@ const MultiSelect = <DataT extends MultiSelectorData>(
 					<Paper elevation={0}>
 						{props.selected.map((data: DataT, index: number) => (
 							<EntryRender
-								key={getId(data)}
+								key={getId(data) || index.toString(16)}
 								enableDivider={props.selected.length === index - 1}
 								enableIcons={enableIcons}
 								handleDelete={disabled ? undefined : handleDelete}

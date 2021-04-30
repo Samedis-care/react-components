@@ -96,7 +96,7 @@ export interface SubActionButtonTheme {
 }
 
 const StyledButton = withStyles((theme: Theme) => ({
-	root: (props: SubActionButtonProps) =>
+	root: (props: SubActionButtonPropsForStyles) =>
 		props.small
 			? {
 					borderRadius:
@@ -185,7 +185,7 @@ const StyledButton = withStyles((theme: Theme) => ({
 					minWidth: theme.componentsCare?.uiKit?.subActionButton?.minWidth,
 					...theme.componentsCare?.uiKit?.subActionButton?.style,
 			  },
-	outlined: (props: SubActionButtonProps) =>
+	outlined: (props: SubActionButtonPropsForStyles) =>
 		props.small
 			? {
 					"& svg": {
@@ -204,7 +204,7 @@ const StyledButton = withStyles((theme: Theme) => ({
 
 					borderLeftWidth: 0,
 					borderRightWidth: 0,
-					borderTopWidth: props.disableDivider ? 0 : undefined,
+					borderTopWidth: props.disabledivider ? 0 : undefined,
 					borderRadius: 0,
 					"&:first-child": {
 						borderLeftWidth: 1,
@@ -270,7 +270,7 @@ const StyledButton = withStyles((theme: Theme) => ({
 					borderLeftWidth: 0,
 					borderRightWidth: 0,
 					borderBottomWidth: 0,
-					borderTopWidth: props.disableDivider ? 0 : undefined,
+					borderTopWidth: props.disabledivider ? 0 : undefined,
 					"&:first-child":
 						theme.componentsCare?.uiKit?.subActionButton?.firstChild?.style,
 					"&:last-child":
@@ -332,6 +332,13 @@ export interface SubActionButtonProps extends Omit<ButtonProps, "children"> {
 	disableDivider?: boolean | "true";
 }
 
+type SubActionButtonPropsForStyles = Omit<
+	SubActionButtonProps,
+	"disableDivider"
+> & {
+	disabledivider?: "true";
+};
+
 const SubActionButton = (props: SubActionButtonProps) => {
 	const { icon, small, children, disableDivider, ...otherProps } = props;
 
@@ -340,7 +347,7 @@ const SubActionButton = (props: SubActionButtonProps) => {
 			variant={"outlined"}
 			fullWidth={!small}
 			// suppress warning
-			disableDivider={disableDivider ? "true" : undefined}
+			disabledivider={disableDivider ? "true" : undefined}
 			{...otherProps}
 		>
 			{icon} {!small && children}
