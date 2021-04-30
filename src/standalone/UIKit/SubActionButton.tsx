@@ -329,14 +329,20 @@ export interface SubActionButtonProps extends Omit<ButtonProps, "children"> {
 	/**
 	 * Flag to disable the top divider
 	 */
-	disableDivider?: boolean;
+	disableDivider?: boolean | "true";
 }
 
 const SubActionButton = (props: SubActionButtonProps) => {
-	const { icon, small, children, ...otherProps } = props;
+	const { icon, small, children, disableDivider, ...otherProps } = props;
 
 	const renderButton = (): React.ReactElement => (
-		<StyledButton variant={"outlined"} fullWidth={!small} {...otherProps}>
+		<StyledButton
+			variant={"outlined"}
+			fullWidth={!small}
+			// suppress warning
+			disableDivider={disableDivider ? "true" : undefined}
+			{...otherProps}
+		>
 			{icon} {!small && children}
 		</StyledButton>
 	);

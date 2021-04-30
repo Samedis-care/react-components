@@ -58433,7 +58433,7 @@ exports[`Storyshots Standalone/UIKit SubActionButton 1`] = `
                                     onClick={[Function]}
                                   >
                                     <WithStyles(WithStyles(ForwardRef(Button)))
-                                      disableDivider={true}
+                                      disableDivider="true"
                                       disabled={false}
                                       fullWidth={true}
                                       onClick={[Function]}
@@ -58447,7 +58447,7 @@ exports[`Storyshots Standalone/UIKit SubActionButton 1`] = `
                                             "root": "standalone-uikit--sub-action-button-story-WithStyles(ForwardRef(Button))-root-20 standalone-uikit--sub-action-button-story-WithStyles(ForwardRef(Button))-root-31",
                                           }
                                         }
-                                        disableDivider={true}
+                                        disableDivider="true"
                                         disabled={false}
                                         fullWidth={true}
                                         onClick={[Function]}
@@ -58487,7 +58487,7 @@ exports[`Storyshots Standalone/UIKit SubActionButton 1`] = `
                                               "textSizeSmall": "standalone-uikit--sub-action-button-story-MuiButton-textSizeSmall",
                                             }
                                           }
-                                          disableDivider={true}
+                                          disableDivider="true"
                                           disabled={false}
                                           fullWidth={true}
                                           onClick={[Function]}
@@ -58496,7 +58496,7 @@ exports[`Storyshots Standalone/UIKit SubActionButton 1`] = `
                                           <WithStyles(ForwardRef(ButtonBase))
                                             className="standalone-uikit--sub-action-button-story-MuiButton-root standalone-uikit--sub-action-button-story-WithStyles(ForwardRef(Button))-root-20 standalone-uikit--sub-action-button-story-WithStyles(ForwardRef(Button))-root-31 standalone-uikit--sub-action-button-story-MuiButton-outlined standalone-uikit--sub-action-button-story-WithStyles(ForwardRef(Button))-outlined-21 standalone-uikit--sub-action-button-story-WithStyles(ForwardRef(Button))-outlined-32 standalone-uikit--sub-action-button-story-MuiButton-fullWidth"
                                             component="button"
-                                            disableDivider={true}
+                                            disableDivider="true"
                                             disabled={false}
                                             focusRipple={true}
                                             focusVisibleClassName="Mui-focusVisible"
@@ -58513,7 +58513,7 @@ exports[`Storyshots Standalone/UIKit SubActionButton 1`] = `
                                                 }
                                               }
                                               component="button"
-                                              disableDivider={true}
+                                              disableDivider="true"
                                               disabled={false}
                                               focusRipple={true}
                                               focusVisibleClassName="Mui-focusVisible"
@@ -58522,7 +58522,7 @@ exports[`Storyshots Standalone/UIKit SubActionButton 1`] = `
                                             >
                                               <button
                                                 className="standalone-uikit--sub-action-button-story-MuiButtonBase-root standalone-uikit--sub-action-button-story-MuiButton-root standalone-uikit--sub-action-button-story-WithStyles(ForwardRef(Button))-root-20 standalone-uikit--sub-action-button-story-WithStyles(ForwardRef(Button))-root-31 standalone-uikit--sub-action-button-story-MuiButton-outlined standalone-uikit--sub-action-button-story-WithStyles(ForwardRef(Button))-outlined-21 standalone-uikit--sub-action-button-story-WithStyles(ForwardRef(Button))-outlined-32 standalone-uikit--sub-action-button-story-MuiButton-fullWidth"
-                                                disableDivider={true}
+                                                disableDivider="true"
                                                 disabled={false}
                                                 onBlur={[Function]}
                                                 onClick={[Function]}

@@ -33,10 +33,11 @@ export interface LocalizedKeyboardDatePickerProps
 const LocalizedKeyboardDatePicker = (
 	props: LocalizedKeyboardDatePickerProps
 ) => {
+	const { hideDisabledIcon, ...otherProps } = props;
 	const { t } = useTranslation(undefined, { i18n });
 	const theme = useTheme();
 	const hideDisabledIcons =
-		theme.componentsCare?.uiKit?.hideDisabledIcons ?? props.hideDisabledIcon;
+		theme.componentsCare?.uiKit?.hideDisabledIcons ?? hideDisabledIcon;
 
 	return (
 		<KeyboardDatePicker
@@ -68,7 +69,7 @@ const LocalizedKeyboardDatePicker = (
 			keyboardIcon={
 				hideDisabledIcons && props.disabled ? null : <CalendarIcon />
 			}
-			{...props}
+			{...otherProps}
 		/>
 	);
 };
