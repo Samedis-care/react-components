@@ -1,6 +1,7 @@
 import React, { useCallback } from "react";
 import { Grid, Typography, withStyles, Theme, Switch } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import { cleanClassMap } from "../../utils";
 
 export interface InlineSwitchProps {
 	/**
@@ -75,7 +76,9 @@ const AntSwitch = withStyles((theme: Theme) => ({
 }))(Switch);
 
 const InlineSwitch = (props: InlineSwitchProps) => {
-	const classes = useStyles(props);
+	const classes = useStyles(
+		cleanClassMap(props, false, "switch", "labelWithSwitch")
+	);
 	const { label, value, onChange, visible, children } = props;
 
 	const handleSwitchChange = useCallback(

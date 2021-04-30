@@ -93,6 +93,10 @@
 			},
 			"format": {
 				"any": "Any"
+			},
+			"multi-image": {
+				"edit": "Edit",
+				"primary": "Primary"
 			}
 		},
 		"phone-number": {

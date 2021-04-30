@@ -132,7 +132,7 @@ export interface ActionButtonProps extends Omit<ButtonProps, "children"> {
 	/**
 	 * Show the compact version of the button (only icon)
 	 */
-	small?: boolean;
+	small?: boolean | "true";
 	/**
 	 * The text of the button (used for tooltip if small is true)
 	 */
@@ -154,7 +154,8 @@ const ActionButton = (props: ActionButtonProps) => {
 			disableElevation={true}
 			fullWidth={!small || fullWidth}
 			startIcon={icon}
-			small={small}
+			// to suppress warning
+			small={small ? "true" : undefined}
 			{...otherProps}
 		>
 			{small ? <StyledIconBox>&nbsp;</StyledIconBox> : <Box>{children}</Box>}

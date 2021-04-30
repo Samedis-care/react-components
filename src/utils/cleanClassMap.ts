@@ -27,14 +27,15 @@ const cleanClassMap = <
 		}
 	}
 
-	input.classes = Object.fromEntries(
-		Object.entries(input.classes).filter(([key]) =>
-			invert
-				? !classes.includes(key as ClassKeys)
-				: classes.includes(key as ClassKeys)
-		)
-	) as Partial<ClassNameMap<ClassKeys>>;
-
-	return input;
+	return {
+		...input,
+		classes: Object.fromEntries(
+			Object.entries(input.classes).filter(([key]) =>
+				invert
+					? !classes.includes(key as ClassKeys)
+					: classes.includes(key as ClassKeys)
+			)
+		) as Partial<ClassNameMap<ClassKeys>>,
+	};
 };
 export default cleanClassMap;

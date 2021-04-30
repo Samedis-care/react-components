@@ -54,14 +54,21 @@ const useDropZone = (processFiles?: UseDropZoneParams): UseDropZoneResult => {
 		}
 	}, [processFiles]);
 
+	const handleGlobalDrop = useCallback(() => {
+		dragCounter.current = 0;
+		setDragging(false);
+	}, []);
+
 	useEffect(() => {
 		document.addEventListener("dragenter", handleDragStart);
 		document.addEventListener("dragleave", handleDragStop);
+		document.addEventListener("drop", handleGlobalDrop);
 		return () => {
 			document.removeEventListener("dragenter", handleDragStart);
 			document.removeEventListener("dragleave", handleDragStop);
+			document.removeEventListener("drop", handleGlobalDrop);
 		};
-	});
+	}, [handleDragStart, handleDragStop, handleGlobalDrop]);
 
 	return {
 		handleDrop,
