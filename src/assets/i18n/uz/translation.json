@@ -86,7 +86,9 @@
 					"gte-date": "Yoqimli yoki keyin",
 					"in-range-date": "Orasida",
 					"lt-date": "Oldin",
-					"lte-date": "Oldin yoki oldin"
+					"lte-date": "Oldin yoki oldin",
+					"not-empty": "Bo'sh emas",
+					"empty": "Bo'sh"
 				}
 			},
 			"custom-filters": {

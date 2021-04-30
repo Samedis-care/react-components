@@ -22,8 +22,8 @@
 				"filter-type": {
 					"eq": "Equals",
 					"not-eq": "Not equal",
-					"empty": "Empty",
-					"not-empty": "Not empty",
+					"empty": "Is empty",
+					"not-empty": "Is not empty",
 					"contains": "Contains",
 					"not-contains": "Not contains",
 					"starts-with": "Starts with",

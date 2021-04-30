@@ -86,7 +86,9 @@
 					"gte-date": "Le ou après",
 					"in-range-date": "Entre",
 					"lt-date": "Avant que",
-					"lte-date": "Avant ou le"
+					"lte-date": "Avant ou le",
+					"not-empty": "N'est pas vide",
+					"empty": "Est vide"
 				}
 			},
 			"custom-filters": {
