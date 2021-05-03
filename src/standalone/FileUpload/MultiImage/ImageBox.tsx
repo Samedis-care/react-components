@@ -1,14 +1,18 @@
 import React, { CSSProperties, useCallback, useState } from "react";
 import { UseDropZoneParams } from "../../../utils/useDropZone";
 import { makeStyles } from "@material-ui/core/styles";
-import { Dialog, DialogContent, IconButton } from "@material-ui/core";
+import { Dialog, DialogContent, IconButton, Theme } from "@material-ui/core";
 import {
 	Close as CloseIcon,
 	ArrowBack as PrevIcon,
 	ArrowForward as NextIcon,
 } from "@material-ui/icons";
-import { combineClassNames, useDropZone } from "../../../utils";
-import { ClassNameMap } from "@material-ui/styles/withStyles";
+import {
+	combineClassNames,
+	makeThemeStyles,
+	useDropZone,
+} from "../../../utils";
+import { ClassNameMap, Styles } from "@material-ui/styles/withStyles";
 
 export interface ImageBoxProps {
 	/**
@@ -105,6 +109,18 @@ const useStyles = makeStyles(
 	{ name: "CcImageBox" }
 );
 
+export type ImageBoxClassKey = keyof ReturnType<typeof useStyles>;
+
+export type ImageBoxTheme = Partial<
+	Styles<Theme, ImageBoxProps, ImageBoxClassKey>
+>;
+
+const useThemeStyles = makeThemeStyles<ImageBoxProps, ImageBoxClassKey>(
+	(theme) => theme.componentsCare?.fileUpload?.multiImage?.imageBox,
+	"CcImageBox",
+	useStyles
+);
+
 const ImageBox = (props: ImageBoxProps) => {
 	const {
 		image,
@@ -116,7 +132,7 @@ const ImageBox = (props: ImageBoxProps) => {
 		onNextImage,
 		onPrevImage,
 	} = props;
-	const classes = useStyles(props);
+	const classes = useThemeStyles(props);
 	const { handleDragOver, handleDrop, dragging } = useDropZone(onFilesDropped);
 	const [dialogOpen, setDialogOpen] = useState(false);
 

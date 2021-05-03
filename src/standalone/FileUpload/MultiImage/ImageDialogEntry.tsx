@@ -1,6 +1,6 @@
 import React, { useCallback } from "react";
 import ImageBox, { ImageBoxProps } from "./ImageBox";
-import { Box, Grid, Typography } from "@material-ui/core";
+import { Box, Grid, Theme, Typography } from "@material-ui/core";
 import {
 	Star as StarredIcon,
 	StarOutline as NotStarredIcon,
@@ -13,6 +13,9 @@ import {
 } from "./MultiImage";
 import { makeStyles } from "@material-ui/core/styles";
 import useCCTranslations from "../../../utils/useCCTranslations";
+import { Styles } from "@material-ui/core/styles/withStyles";
+import { makeThemeStyles } from "../../../utils";
+import { ClassNameMap } from "@material-ui/styles/withStyles";
 
 export interface ImageDialogEntryProps
 	extends Pick<MultiImageProps, "previewSize"> {
@@ -35,7 +38,13 @@ export interface ImageDialogEntryProps
 	/**
 	 * Custom CSS styles
 	 */
-	classes?: ImageBoxProps["classes"];
+	classes?: ClassNameMap<ImageDialogEntryClassKey>;
+	/**
+	 * Nested custom CSS styles
+	 */
+	subClasses?: {
+		imageBox?: ImageBoxProps["classes"];
+	};
 }
 
 const useStyles = makeStyles(
@@ -47,6 +56,21 @@ const useStyles = makeStyles(
 	{ name: "CcImageDialogEntry" }
 );
 
+export type ImageDialogEntryClassKey = keyof ReturnType<typeof useStyles>;
+
+export type ImageDialogEntryTheme = Partial<
+	Styles<Theme, ImageDialogEntryProps, ImageDialogEntryClassKey>
+>;
+
+const useThemeStyles = makeThemeStyles<
+	ImageDialogEntryProps,
+	ImageDialogEntryClassKey
+>(
+	(theme) => theme.componentsCare?.fileUpload?.multiImage?.imageDialogEntry,
+	"CcImageDialogEntry",
+	useStyles
+);
+
 const ImageDialogEntry = (props: ImageDialogEntryProps) => {
 	const {
 		previewSize,
@@ -54,10 +78,10 @@ const ImageDialogEntry = (props: ImageDialogEntryProps) => {
 		isPrimary,
 		changeImages,
 		processFile,
-		classes: imageBoxClasses,
+		subClasses,
 	} = props;
 	const { t } = useCCTranslations();
-	const classes = useStyles();
+	const classes = useThemeStyles(props);
 
 	const setPrimary = useCallback(() => {
 		changeImages((images) =>
@@ -108,7 +132,7 @@ const ImageDialogEntry = (props: ImageDialogEntryProps) => {
 					image={img.image}
 					onRemove={removeImage}
 					onFilesDropped={replaceImage}
-					classes={imageBoxClasses}
+					classes={subClasses?.imageBox}
 				/>
 			</div>
 			<Box mt={1}>

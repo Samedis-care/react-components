@@ -15,14 +15,16 @@ import {
 	Typography,
 	Dialog,
 	IconButton,
+	Theme,
 } from "@material-ui/core";
 import { Close as CloseIcon } from "@material-ui/icons";
 import { makeStyles } from "@material-ui/core/styles";
 import { IDownscaleProps } from "../../../utils/processImage";
-import { processImage } from "../../../utils";
-import ImageDialogEntry from "./ImageDialogEntry";
+import { makeThemeStyles, processImage } from "../../../utils";
+import ImageDialogEntry, { ImageDialogEntryProps } from "./ImageDialogEntry";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import { ClassNameMap } from "@material-ui/styles/withStyles";
+import { Styles } from "@material-ui/core/styles/withStyles";
 
 export interface MultiImageImage {
 	/**
@@ -108,6 +110,8 @@ export interface MultiImageProps {
 	 */
 	subClasses?: {
 		imageBox?: ImageBoxProps["classes"];
+		imageDialogEntry?: ImageDialogEntryProps["classes"];
+		imageDialogEntrySubClasses?: ImageDialogEntryProps["subClasses"];
 	};
 }
 
@@ -130,6 +134,18 @@ const useStyles = makeStyles(
 		},
 	},
 	{ name: "CcMultiImage" }
+);
+
+export type MultiImageClassKey = keyof ReturnType<typeof useStyles>;
+
+export type MultiImageTheme = Partial<
+	Styles<Theme, MultiImageProps, MultiImageClassKey>
+>;
+
+const useThemeStyles = makeThemeStyles<MultiImageProps, MultiImageClassKey>(
+	(theme) => theme.componentsCare?.fileUpload?.multiImage?.root,
+	"CcMultiImage",
+	useStyles
 );
 
 const clearPrimary = (img: MultiImageImage): MultiImageImage => ({
@@ -155,7 +171,7 @@ const MultiImage = (props: MultiImageProps) => {
 	} = props;
 	const previewSize = props.previewSize ?? 256;
 	const { t } = useCCTranslations();
-	const classes = useStyles(props);
+	const classes = useThemeStyles(props);
 
 	const primaryImg = useMemo(
 		() => images.find((img) => img.primary) ?? images[0],
@@ -331,7 +347,8 @@ const MultiImage = (props: MultiImageProps) => {
 									processFile={processFile}
 									changeImages={manipulateImages}
 									key={`img-${i}`}
-									classes={subClasses?.imageBox}
+									classes={subClasses?.imageDialogEntry}
+									subClasses={subClasses?.imageDialogEntrySubClasses}
 								/>
 							))}
 							{!readOnly && remainingFiles > 0 && (

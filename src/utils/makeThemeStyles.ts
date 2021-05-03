@@ -11,6 +11,7 @@ import { ClassNameMap } from "@material-ui/styles/withStyles";
  * Calls makeStyles based on values from theme
  * @param getSubStyles A function to extract the values from the theme which should be used in makeStyles
  * @param name The name for the styles
+ * @param useParentStyles The parent styles to override with theme styles
  */
 const makeThemeStyles = <
 	// eslint-disable-next-line @typescript-eslint/ban-types
@@ -20,11 +21,12 @@ const makeThemeStyles = <
 	getSubStyles: (
 		theme: Theme
 	) => Partial<Styles<Theme, Props, ClassKey>> | undefined,
-	name: string
+	name: string,
+	useParentStyles?: ReturnType<typeof makeStyles>
 ): keyof Props extends never // `makeStyles` where the passed `styles` do not depend on props
 	? (props?: unknown) => ClassNameMap<ClassKey> // `makeStyles` where the passed `styles` do depend on props
-	: (props: Props) => ClassNameMap<ClassKey> =>
-	makeStyles(
+	: (props: Props) => ClassNameMap<ClassKey> => {
+	const useThemeStyles = makeStyles(
 		(theme) => {
 			const styleProvider = getSubStyles(theme) ?? {};
 			if (typeof styleProvider === "function") {
@@ -37,5 +39,24 @@ const makeThemeStyles = <
 		},
 		{ name: name + "-ThemeStyles" }
 	);
+
+	if (!useParentStyles) {
+		return useThemeStyles;
+	}
+
+	const useCombinedStyles = (
+		props?: keyof Props extends never ? unknown : Props
+	): ClassNameMap<ClassKey> => {
+		const themeClasses = useThemeStyles(props as Props); // inherit from component props classes
+		return useParentStyles({
+			...(props as Props),
+			classes: themeClasses, // inherit from themeClasses
+		});
+	};
+
+	return useCombinedStyles as keyof Props extends never
+		? (props?: unknown) => ClassNameMap<ClassKey>
+		: (props: Props) => ClassNameMap<ClassKey>;
+};
 
 export default makeThemeStyles;

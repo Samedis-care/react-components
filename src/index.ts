@@ -15,6 +15,9 @@ import { InputTheme } from "./standalone/UIKit/CommonStyles";
 import { ComponentWithLabelTheme } from "./standalone/UIKit/ComponentWithLabel";
 import { FormButtonTheme } from "./standalone/UIKit/FormButtons";
 import { SubActionButtonTheme } from "./standalone/UIKit/SubActionButton";
+import { ImageBoxTheme } from "./standalone/FileUpload/MultiImage/ImageBox";
+import { ImageDialogEntryTheme } from "./standalone/FileUpload/MultiImage/ImageDialogEntry";
+import { MultiImageTheme } from "./standalone/FileUpload/MultiImage/MultiImage";
 
 export * from "./standalone";
 
@@ -36,6 +39,13 @@ export interface ComponentsCareTheme {
 	portal?: {
 		menu?: MenuTheme;
 		menuItem?: MenuItemTheme;
+	};
+	fileUpload?: {
+		multiImage?: {
+			root?: MultiImageTheme;
+			imageBox?: ImageBoxTheme;
+			imageDialogEntry?: ImageDialogEntryTheme;
+		};
 	};
 	selector?: SelectorTheme;
 	selectorWithCheckbox?: MultiSelectWithCheckBoxTheme;
