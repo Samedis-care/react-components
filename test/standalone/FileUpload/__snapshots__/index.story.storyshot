@@ -19648,14 +19648,17 @@ exports[`Storyshots Standalone/FileUpload MultiImageSelector 1`] = `
                                       Array [
                                         Object {
                                           "image": "https://via.placeholder.com/128",
+                                          "name": "128.png",
                                           "primary": true,
                                         },
                                         Object {
                                           "image": "https://via.placeholder.com/128x256",
+                                          "name": "128x256.png",
                                           "primary": false,
                                         },
                                         Object {
                                           "image": "https://via.placeholder.com/256x128",
+                                          "name": "256x128.png",
                                           "primary": false,
                                         },
                                       ]

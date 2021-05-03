@@ -35,6 +35,10 @@ export interface MultiImageImage {
 	 * The URL/Data-URI of the image
 	 */
 	image: string;
+	/**
+	 * The file name of the image
+	 */
+	name: string;
 }
 
 export type MultiImageManipulationCallback = (
@@ -217,10 +221,12 @@ const MultiImage = (props: MultiImageProps) => {
 			files: FileList,
 			markFirstPrimary: boolean
 		): Promise<MultiImageImage[]> => {
-			return (await Promise.all(Array.from(files).map(processFile))).map(
+			const fileArr = Array.from(files);
+			return (await Promise.all(fileArr.map(processFile))).map(
 				(img, index) => ({
 					image: img,
 					primary: markFirstPrimary && index === 0,
+					name: fileArr[index].name,
 				})
 			);
 		},

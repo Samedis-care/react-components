@@ -16,14 +16,17 @@ export const MultiImageStory = (): React.ReactElement => {
 		{
 			primary: true,
 			image: "https://via.placeholder.com/128",
+			name: "128.png",
 		},
 		{
 			primary: false,
 			image: "https://via.placeholder.com/128x256",
+			name: "128x256.png",
 		},
 		{
 			primary: false,
 			image: "https://via.placeholder.com/256x128",
+			name: "256x128.png",
 		},
 	]);
 	const previewSize = number("Preview size (in px)", 256, {
