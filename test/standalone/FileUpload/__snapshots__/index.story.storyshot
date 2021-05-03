@@ -20063,7 +20063,7 @@ exports[`Storyshots Standalone/FileUpload MultiImageSelector 1`] = `
                                                         </WithStyles(ForwardRef(IconButton))>
                                                         <img
                                                           alt=""
-                                                          className="standalone-fileupload--multi-image-story-CcImageBox-image-26"
+                                                          className="standalone-fileupload--multi-image-story-CcImageBox-image-27"
                                                           src="https://via.placeholder.com/128"
                                                         />
                                                       </div>

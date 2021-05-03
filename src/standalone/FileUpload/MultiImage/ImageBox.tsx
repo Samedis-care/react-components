@@ -72,16 +72,16 @@ const useStyles = makeStyles(
 		dragging: {
 			border: `1px solid ${theme.palette.primary.main}`,
 		},
+		fullScreenImageWrapper: {
+			width: "100%",
+			height: "100%",
+			position: "relative",
+		},
 		image: {
 			width: "100%",
 			height: "100%",
 			objectFit: "contain",
 			borderRadius: 8,
-		},
-		dialogClose: {
-			position: "absolute",
-			top: 16,
-			right: 16,
 		},
 		removeBtn: {
 			padding: theme.spacing(1),
@@ -180,12 +180,28 @@ const ImageBox = (props: ImageBoxProps) => {
 			{!onClick && (
 				<Dialog open={dialogOpen} fullScreen onClose={closeDialog}>
 					<DialogContent>
-						<div className={classes.dialogClose}>
-							<IconButton onClick={closeDialog}>
+						<div className={classes.fullScreenImageWrapper}>
+							<IconButton onClick={closeDialog} className={classes.removeBtn}>
 								<CloseIcon />
 							</IconButton>
+							{onPrevImage && (
+								<IconButton
+									onClick={handlePrevImage}
+									className={classes.prevBtn}
+								>
+									<PrevIcon />
+								</IconButton>
+							)}
+							{onNextImage && (
+								<IconButton
+									onClick={handleNextImage}
+									className={classes.nextBtn}
+								>
+									<NextIcon />
+								</IconButton>
+							)}
+							<img src={image} alt={""} className={classes.image} />
 						</div>
-						<img src={image} alt={""} className={classes.image} />
 					</DialogContent>
 				</Dialog>
 			)}
