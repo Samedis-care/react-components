@@ -197,8 +197,7 @@ const FileUpload = (props: FileUploadProps): React.ReactElement => {
 			);
 
 			if (maxFiles) {
-				const maxFiles = getRemainingFileCount();
-				if (files.length > maxFiles) {
+				if (files.length > getRemainingFileCount()) {
 					handleError(
 						"files.selector.too-many",
 						t("standalone.file-upload.error.too-many")
@@ -286,10 +285,8 @@ const FileUpload = (props: FileUploadProps): React.ReactElement => {
 
 		if (!elem) return;
 
-		let maxFiles = 2;
 		if (maxFiles) {
-			maxFiles = getRemainingFileCount();
-			if (maxFiles === 0) {
+			if (getRemainingFileCount() === 0) {
 				handleError(
 					"files.selector.limit-reached",
 					t("standalone.file-upload.error.limit-reached")
@@ -299,7 +296,7 @@ const FileUpload = (props: FileUploadProps): React.ReactElement => {
 		}
 
 		elem.click();
-	}, [getRemainingFileCount, handleError, t]);
+	}, [maxFiles, getRemainingFileCount, handleError, t]);
 
 	const handleFileChange = useCallback(
 		async (evt: React.ChangeEvent<HTMLInputElement>) => {
