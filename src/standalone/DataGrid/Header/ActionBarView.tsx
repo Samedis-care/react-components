@@ -22,8 +22,9 @@ import i18n from "../../../i18n";
 import { useTranslation } from "react-i18next";
 import ComponentWithLabel from "../../UIKit/ComponentWithLabel";
 import { IDataGridAddButton } from "../DataGrid";
+import ResetDialog, { ResetCallbacks } from "./ResetDialog";
 
-export interface IDataGridActionBarViewProps {
+export interface IDataGridActionBarViewProps extends ResetCallbacks {
 	/**
 	 * Callback to toggle the settings popover
 	 */
@@ -33,10 +34,6 @@ export interface IDataGridActionBarViewProps {
 	 * If not defined: Disables add new button
 	 */
 	handleAddNew?: (() => void) | IDataGridAddButton[];
-	/**
-	 * Callback for reset button
-	 */
-	handleReset: () => void;
 	/**
 	 * Does this grid have an custom filter bar?
 	 */
@@ -66,6 +63,14 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 	const closeExportMenu = useCallback(() => {
 		setExportAnchorEl(null);
 	}, [setExportAnchorEl]);
+
+	const [resetDialogOpen, setResetDialogOpen] = useState(false);
+	const openResetDialog = useCallback(() => {
+		setResetDialogOpen(true);
+	}, []);
+	const closeResetDialog = useCallback(() => {
+		setResetDialogOpen(false);
+	}, []);
 
 	return (
 		<Grid container alignItems={"stretch"} wrap={"nowrap"}>
@@ -106,12 +111,12 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 							</SmallIconButton>
 						}
 						labelText={t("standalone.data-grid.header.reset")}
-						onClick={props.handleReset}
+						onClick={openResetDialog}
 						labelPlacement={"bottom"}
 					/>
 				) : (
 					<Tooltip title={t("standalone.data-grid.header.reset") ?? ""}>
-						<IconButton color={"primary"} onClick={props.handleReset}>
+						<IconButton color={"primary"} onClick={openResetDialog}>
 							<ResetIcon />
 						</IconButton>
 					</Tooltip>
@@ -188,6 +193,15 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 					</Grid>
 				</>
 			)}
+			<ResetDialog
+				open={resetDialogOpen}
+				closeDialog={closeResetDialog}
+				resetFilter={props.resetFilter}
+				resetSort={props.resetSort}
+				resetColumn={props.resetColumn}
+				resetWidth={props.resetWidth}
+				resetAll={props.resetAll}
+			/>
 		</Grid>
 	);
 };

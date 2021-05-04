@@ -848,6 +848,42 @@ export const getActiveDataGridColumns = (
 		}));
 };
 
+export const getDefaultColumnWidths = (
+	columns: IDataGridColumnDef[],
+	theme: Theme
+): Record<string, number> => {
+	const widthData: Record<string, number> = {};
+	columns.forEach((column) => {
+		try {
+			widthData[column.field] =
+				measureText(
+					theme.typography.body1.font || "16px Roboto, sans-serif",
+					column.headerName
+				).width + 100;
+		} catch (e) {
+			// if canvas is not available to measure text
+			widthData[column.field] = column.headerName.length * 16;
+		}
+		if (column.width) {
+			// initial width
+			if (column.width[2] !== undefined) {
+				widthData[column.field] = column.width[2];
+			}
+			// min width
+			widthData[column.field] = Math.max(
+				column.width[0],
+				widthData[column.field]
+			);
+			// max width
+			widthData[column.field] = Math.min(
+				column.width[1],
+				widthData[column.field]
+			);
+		}
+	});
+	return widthData;
+};
+
 const DataGrid = (props: DataGridProps) => {
 	const {
 		columns,
@@ -862,11 +898,11 @@ const DataGrid = (props: DataGridProps) => {
 	} = props;
 	const rowsPerPage = props.rowsPerPage || 25;
 
+	const theme = useTheme();
 	const persistedContext = useContext(DataGridPersistentStateContext);
 	const [persisted] = persistedContext || [];
 
 	const classes = useDataGridStylesInternal(props);
-	const theme = useTheme();
 	const statePack = useState<IDataGridState>(() => ({
 		...getDataGridDefaultState(columns, undefined),
 		...persisted?.state,
@@ -902,41 +938,10 @@ const DataGrid = (props: DataGridProps) => {
 	}));
 	const [columnsState] = columnsStatePack;
 
-	const columnWidthStatePack = useState<Record<string, number>>(() => {
-		const widthData: Record<string, number> = {};
-		columns.forEach((column) => {
-			try {
-				widthData[column.field] =
-					measureText(
-						theme.typography.body1.font || "16px Roboto, sans-serif",
-						column.headerName
-					).width + 100;
-			} catch (e) {
-				// if canvas is not available to measure text
-				widthData[column.field] = column.headerName.length * 16;
-			}
-			if (column.width) {
-				// initial width
-				if (column.width[2] !== undefined) {
-					widthData[column.field] = column.width[2];
-				}
-				// min width
-				widthData[column.field] = Math.max(
-					column.width[0],
-					widthData[column.field]
-				);
-				// max width
-				widthData[column.field] = Math.min(
-					column.width[1],
-					widthData[column.field]
-				);
-			}
-		});
-		return {
-			...widthData,
-			...persisted?.columnWidth,
-		};
-	});
+	const columnWidthStatePack = useState<Record<string, number>>(() => ({
+		...getDefaultColumnWidths(columns, theme),
+		...persisted?.columnWidth,
+	}));
 
 	// refresh data if desired
 	useEffect(() => {

@@ -49,7 +49,14 @@
 				"reset": "Reset",
 				"custom-filter-button": "Filter",
 				"delete": "Delete",
-				"edit": "Edit"
+				"edit": "Edit",
+				"reset-options": {
+					"filter": "Reset filter",
+					"sort": "Reset sort settings",
+					"column": "Reset column settings",
+					"width": "Reset column widths",
+					"all": "Reset all"
+				}
 			},
 			"settings": {
 				"lock": "Lock/Unlock Columns",
