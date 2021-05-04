@@ -764,6 +764,9 @@ const useStyles = makeStyles(
 		disableClick: {
 			userSelect: "none",
 		},
+		filterClearBtn: {
+			padding: 4,
+		},
 		filterBarBox: {
 			height: "100%",
 		},

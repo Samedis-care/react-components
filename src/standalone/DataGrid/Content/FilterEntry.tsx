@@ -1,15 +1,18 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import {
 	Checkbox,
 	FormControlLabel,
 	Grid,
+	IconButton,
 	List,
 	ListItem,
 	ListItemText,
 	MenuItem,
 	Select,
 	TextField,
+	Tooltip,
 } from "@material-ui/core";
+import { Close as CloseIcon } from "@material-ui/icons";
 import FilterCombinator from "./FilterCombinator";
 import { ModelFilterType } from "../../../backend-integration/Model";
 import {
@@ -90,6 +93,7 @@ export interface DataGridContentFilterEntryProps {
 
 const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 	const { onChange, depth } = props;
+	const isFirstFilter = depth === 1;
 	const { t } = useTranslation(undefined, { i18n });
 	const { filterLimit, isFilterSupported } = useDataGridProps();
 
@@ -98,13 +102,13 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 	const classes = useDataGridStyles();
 
 	const maxDepth = filterLimit;
-	let filterType: FilterType =
-		props.value?.type ||
-		(props.valueType === "string"
+	const defaultFilterType =
+		props.valueType === "string"
 			? "contains"
 			: props.valueType === "enum"
 			? "inSet"
-			: "equals");
+			: "equals";
+	let filterType: FilterType = props.value?.type || defaultFilterType;
 	let filterValue = props.value?.value1 || "";
 	let filterValue2 = props.value?.value2 || "";
 	let subFilterComboType: FilterComboType =
@@ -118,6 +122,10 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 		if (!isFilterSupported) return true;
 		return isFilterSupported(dataType, filterType);
 	};
+
+	const resetFilter = useCallback(() => {
+		onChange({ type: defaultFilterType, value1: "", value2: "" });
+	}, [onChange, defaultFilterType]);
 
 	const updateParent = () =>
 		onChange({
@@ -324,6 +332,29 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 
 	return (
 		<>
+			{isFirstFilter && (
+				<Grid item xs={12}>
+					<Grid container justify={"center"} alignItems={"center"}>
+						<Grid item>
+							<Tooltip
+								title={
+									t("standalone.data-grid.content.reset-column-filter") ?? ""
+								}
+							>
+								<span>
+									<IconButton
+										disabled={!props.value?.value1}
+										className={classes.filterClearBtn}
+										onClick={resetFilter}
+									>
+										<CloseIcon />
+									</IconButton>
+								</span>
+							</Tooltip>
+						</Grid>
+					</Grid>
+				</Grid>
+			)}
 			{(props.valueType === "string" ||
 				props.valueType === "number" ||
 				props.valueType === "date") && (

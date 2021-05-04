@@ -10,6 +10,7 @@
 		"data-grid": {
 			"content": {
 				"filter": "Filter",
+				"reset-column-filter": "Clear filter",
 				"bool-filter": {
 					"true": "All truthy values",
 					"false": "All false values",
