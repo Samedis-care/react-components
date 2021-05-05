@@ -150,7 +150,7 @@ const PortalMenu = (props: MenuProps) => {
 	const classes = useStyles(props);
 
 	return (
-		<div className={combineClassNames([classes.root, props.className || ""])}>
+		<div className={combineClassNames([classes.root, props.className])}>
 			<Wrapper>
 				<MenuContext.Provider value={props.customState || state}>
 					{props.definition.map((child) =>

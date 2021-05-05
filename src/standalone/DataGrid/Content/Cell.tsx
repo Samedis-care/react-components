@@ -94,7 +94,7 @@ const Cell = (props: CellProps): React.ReactElement => {
 				props.rowIndex !== 0 && column ? `column-${column.field} ` : "",
 				isSelected(state.selectAll, state.selectedRows, id) || hover == rowIndex
 					? classes.dataCellSelected
-					: ""
+					: "",
 			])}
 		>
 			{content}

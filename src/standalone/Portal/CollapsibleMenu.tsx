@@ -74,7 +74,7 @@ const CollapsibleMenu = (props: CollapsibleMenuProps) => {
 			style={collapsed ? { overflow: "visible" } : undefined} // this is needed to force update the scrollbar, otherwise we're wasting space with a scrollbar placeholder
 			className={combineClassNames([
 				classes.container,
-				props.customClasses?.root ?? "",
+				props.customClasses?.root,
 			])}
 		>
 			<Grid

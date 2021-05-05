@@ -43,7 +43,9 @@ class DayContents extends PureComponent<IProps> {
 							fullWidth
 							className={combineClassNames([
 								this.props.classes.btn,
-								(!entry.onClick && !entry.onAuxClick && this.props.classes.btnDisabled),
+								!entry.onClick &&
+									!entry.onAuxClick &&
+									this.props.classes.btnDisabled,
 							])}
 							onClick={entry.onClick}
 							onAuxClick={entry.onAuxClick}
