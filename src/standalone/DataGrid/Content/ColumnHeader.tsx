@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
+import { combineClassNames } from "../../../utils";
 import {
 	IDataGridColumnDef,
 	useDataGridColumnState,
@@ -174,10 +175,10 @@ const ColumnHeader = (props: IDataGridContentColumnHeaderProps) => {
 	return (
 		<div
 			onClick={onColumnClick}
-			className={
-				classes.columnHeaderContentWrapper +
-				(filterable ? " " + classes.columnHeaderFilterable : "")
-			}
+			className={combineClassNames([
+				classes.columnHeaderContentWrapper,
+				filterable && classes.columnHeaderFilterable,
+			])}
 		>
 			<ColumnHeaderContent
 				headerName={props.column.headerName}

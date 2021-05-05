@@ -13,6 +13,7 @@ import { ModelFilterType } from "../../../backend-integration/Model";
 import { IDataGridColumnDef, useDataGridStyles } from "../DataGrid";
 import { FilterIcon, FilterActiveIcon } from "../../Icons";
 import useCCTranslations from "../../../utils/useCCTranslations";
+import { combineClassNames } from "../../../utils";
 
 export interface IDataGridContentColumnHeaderContentProps {
 	/**
@@ -104,7 +105,10 @@ const ColumnHeaderContent = (
 			<Grid container justify={"flex-start"} wrap={"nowrap"}>
 				<Grid
 					item
-					className={`${classes.disableClick} ${classes.columnHeaderLabel}`}
+					className={combineClassNames([
+						classes.disableClick,
+						classes.columnHeaderLabel,
+					])}
 					key={"header"}
 				>
 					<Tooltip title={props.headerName}>

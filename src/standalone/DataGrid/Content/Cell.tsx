@@ -9,6 +9,7 @@ import { GridCellProps } from "react-virtualized/dist/es/Grid";
 import ColumnHeader from "./ColumnHeader";
 import SelectRow, { isSelected } from "./SelectRow";
 import { Skeleton } from "@material-ui/lab";
+import { combineClassNames } from "../../../utils";
 
 export interface CellProps extends GridCellProps {
 	/**
@@ -82,19 +83,16 @@ const Cell = (props: CellProps): React.ReactElement => {
 			onMouseLeave={endHover}
 			onClick={toggleSelection}
 			onDoubleClick={editRecord}
-			className={`${classes.cell} ${
-				props.rowIndex !== 0 ? classes.dataCell : classes.headerCell
-			} ${
-				props.rowIndex !== 0
-					? props.rowIndex % 2 === 0
-						? classes.rowEven
-						: classes.rowOdd
-					: ""
-			} ${props.rowIndex !== 0 && column ? `column-${column.field} ` : ""}${
-				isSelected(state.selectAll, state.selectedRows, id) || hover == rowIndex
-					? classes.dataCellSelected
-					: ""
-			}`}
+			className={combineClassNames([
+				classes.cell,
+				props.rowIndex !== 0 ? classes.dataCell : classes.headerCell,
+				props.rowIndex !== 0 &&
+					(props.rowIndex % 2 === 0 ? classes.rowEven : classes.rowOdd),
+				props.rowIndex !== 0 && column && `column-${column.field}`,
+				(hover == rowIndex ||
+					isSelected(state.selectAll, state.selectedRows, id)) &&
+					classes.dataCellSelected,
+			])}
 		>
 			{content}
 		</div>

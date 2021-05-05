@@ -10,6 +10,7 @@ import { AttachFile } from "@material-ui/icons";
 import FilePreview from "./File";
 import { FileSelectorError } from "./Errors";
 import {
+	combineClassNames,
 	getFileExt,
 	matchMime,
 	processImage,
@@ -342,9 +343,10 @@ const FileUpload = (props: FileUploadProps): React.ReactElement => {
 				alignContent={"space-between"}
 				onDragOver={handleDragOver}
 				onDrop={handleDrop}
-				className={
-					"components-care-dropzone" + (dragging ? " " + classes.dropzone : "")
-				}
+				className={combineClassNames([
+					"components-care-dropzone",
+					dragging && classes.dropzone,
+				])}
 			>
 				{!readOnly && (
 					<Grid item xs key={"upload"}>
