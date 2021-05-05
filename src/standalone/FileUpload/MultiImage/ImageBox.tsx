@@ -6,6 +6,7 @@ import {
 	Close as CloseIcon,
 	ArrowBack as PrevIcon,
 	ArrowForward as NextIcon,
+	Delete as DeleteIcon,
 } from "@material-ui/icons";
 import {
 	combineClassNames,
@@ -178,7 +179,7 @@ const ImageBox = (props: ImageBoxProps) => {
 			>
 				{onRemove && (
 					<IconButton onClick={handleRemove} className={classes.removeBtn}>
-						<CloseIcon />
+						<DeleteIcon />
 					</IconButton>
 				)}
 				{onPrevImage && (

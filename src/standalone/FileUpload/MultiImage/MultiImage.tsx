@@ -77,6 +77,12 @@ export interface MultiImageProps {
 	 */
 	onChange?: (name: string | undefined, newImages: MultiImageImage[]) => void;
 	/**
+	 * Callback for delete confirmation
+	 * @param image The image that the user wants to delete
+	 * @returns Should the delete commence?
+	 */
+	onDelete?: (image: MultiImageImage) => Promise<boolean> | boolean;
+	/**
 	 * Custom edit label
 	 */
 	editLabel?: React.ReactNode;
@@ -172,6 +178,7 @@ const MultiImage = (props: MultiImageProps) => {
 		downscale,
 		onChange,
 		subClasses,
+		onDelete,
 	} = props;
 	const previewSize = props.previewSize ?? 256;
 	const { t } = useCCTranslations();
@@ -328,71 +335,74 @@ const MultiImage = (props: MultiImageProps) => {
 				className={classes.uploadInput}
 			/>
 			{!readOnly && (
-				<Dialog
-					open={dialogOpen}
-					onClose={closeDialog}
-					maxWidth={"lg"}
-					fullWidth={!previewSize}
-				>
-					<DialogTitle>
-						<Grid container justify={"flex-end"}>
-							<Grid item>
-								<IconButton onClick={closeDialog}>
-									<CloseIcon />
-								</IconButton>
+				<>
+					<Dialog
+						open={dialogOpen}
+						onClose={closeDialog}
+						maxWidth={"lg"}
+						fullWidth={!previewSize}
+					>
+						<DialogTitle>
+							<Grid container justify={"flex-end"}>
+								<Grid item>
+									<IconButton onClick={closeDialog}>
+										<CloseIcon />
+									</IconButton>
+								</Grid>
 							</Grid>
-						</Grid>
-					</DialogTitle>
-					<DialogContent>
-						<Grid container spacing={2}>
-							{images.map((img, i) => (
-								<ImageDialogEntry
-									img={img}
-									previewSize={previewSize}
-									isPrimary={img === primaryImg}
-									processFile={processFile}
-									changeImages={manipulateImages}
-									key={`img-${i}`}
-									classes={subClasses?.imageDialogEntry}
-									subClasses={subClasses?.imageDialogEntrySubClasses}
-								/>
-							))}
-							{!readOnly && remainingFiles > 0 && (
-								<Grid
-									item
-									xs={previewSize ? undefined : 12}
-									md={previewSize ? undefined : 6}
-									lg={previewSize ? undefined : 3}
-								>
-									<ImageBox
-										width={previewSize}
-										height={previewSize}
-										image={placeholderImage}
-										onClick={startUpload}
-										onFilesDropped={handleUploadViaDrop}
-										classes={subClasses?.imageBox}
+						</DialogTitle>
+						<DialogContent>
+							<Grid container spacing={2}>
+								{images.map((img, i) => (
+									<ImageDialogEntry
+										img={img}
+										previewSize={previewSize}
+										isPrimary={img === primaryImg}
+										processFile={processFile}
+										changeImages={manipulateImages}
+										onDelete={onDelete}
+										key={`img-${i}`}
+										classes={subClasses?.imageDialogEntry}
+										subClasses={subClasses?.imageDialogEntrySubClasses}
 									/>
-								</Grid>
-							)}
-							{additionalDialogContent?.map((elem, i) => (
-								<Grid
-									item
-									xs={previewSize ? undefined : 12}
-									md={previewSize ? undefined : 6}
-									lg={previewSize ? undefined : 3}
-									key={`add-${i}`}
-									style={
-										previewSize
-											? { width: previewSize, height: previewSize }
-											: undefined
-									}
-								>
-									{elem}
-								</Grid>
-							))}
-						</Grid>
-					</DialogContent>
-				</Dialog>
+								))}
+								{!readOnly && remainingFiles > 0 && (
+									<Grid
+										item
+										xs={previewSize ? undefined : 12}
+										md={previewSize ? undefined : 6}
+										lg={previewSize ? undefined : 3}
+									>
+										<ImageBox
+											width={previewSize}
+											height={previewSize}
+											image={placeholderImage}
+											onClick={startUpload}
+											onFilesDropped={handleUploadViaDrop}
+											classes={subClasses?.imageBox}
+										/>
+									</Grid>
+								)}
+								{additionalDialogContent?.map((elem, i) => (
+									<Grid
+										item
+										xs={previewSize ? undefined : 12}
+										md={previewSize ? undefined : 6}
+										lg={previewSize ? undefined : 3}
+										key={`add-${i}`}
+										style={
+											previewSize
+												? { width: previewSize, height: previewSize }
+												: undefined
+										}
+									>
+										{elem}
+									</Grid>
+								))}
+							</Grid>
+						</DialogContent>
+					</Dialog>
+				</>
 			)}
 		</>
 	);
