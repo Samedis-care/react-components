@@ -8,6 +8,7 @@ import {
 import { DoubleArrow } from "@material-ui/icons";
 import { makeStyles } from "@material-ui/core/styles";
 import { usePortalLayoutContext } from "./Layout";
+import { combineClassNames } from "../../utils";
 
 export interface CollapsibleMenuProps {
 	/**
@@ -71,7 +72,10 @@ const CollapsibleMenu = (props: CollapsibleMenuProps) => {
 			alignItems={"stretch"}
 			wrap={"nowrap"}
 			style={collapsed ? { overflow: "visible" } : undefined} // this is needed to force update the scrollbar, otherwise we're wasting space with a scrollbar placeholder
-			className={`${classes.container} ${props.customClasses?.root ?? ""}`}
+			className={combineClassNames([
+				classes.container,
+				props.customClasses?.root ?? "",
+			])}
 		>
 			<Grid
 				item

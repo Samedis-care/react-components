@@ -11,6 +11,7 @@ import {
 } from "@material-ui/core";
 import { ExpandLess, ExpandMore } from "@material-ui/icons";
 import { makeStyles } from "@material-ui/core/styles";
+import { combineClassNames } from "../../../../../utils";
 
 const useStyles = makeStyles(
 	(theme) => ({
@@ -80,9 +81,10 @@ const MenuItemJumboReactLight = (props: MenuItemProps) => {
 		<MyListItem
 			button
 			onClick={props.onClick}
-			className={
-				classes.item + (props.active ? " " + classes.selectedItem : "")
-			}
+			className={combineClassNames([
+				classes.item,
+				props.active && classes.selectedItem,
+			])}
 		>
 			<ListItemIcon>{Icon && <Icon />}</ListItemIcon>
 			<ListItemText

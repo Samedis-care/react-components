@@ -6,6 +6,7 @@ import {
 	WithStyles,
 	withStyles,
 } from "@material-ui/core";
+import { combineClassNames } from "../../../utils";
 
 export interface IDayData {
 	/**
@@ -40,12 +41,10 @@ class DayContents extends PureComponent<IProps> {
 							variant={"outlined"}
 							size={"small"}
 							fullWidth
-							className={
-								this.props.classes.btn +
-								(!entry.onClick && !entry.onAuxClick
-									? ` ${this.props.classes.btnDisabled}`
-									: "")
-							}
+							className={combineClassNames([
+								this.props.classes.btn,
+								(!entry.onClick && !entry.onAuxClick && this.props.classes.btnDisabled),
+							])}
 							onClick={entry.onClick}
 							onAuxClick={entry.onAuxClick}
 							disableRipple={!entry.onClick && !entry.onAuxClick}

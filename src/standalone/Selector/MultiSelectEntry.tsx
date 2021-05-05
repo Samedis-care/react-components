@@ -11,6 +11,7 @@ import { SmallIconButton, SmallListItem, SmallListItemIcon } from "../Small";
 import { MultiSelectorData } from "./MultiSelect";
 import { ClassNameMap } from "@material-ui/styles/withStyles";
 import { Cancel as RemoveIcon } from "@material-ui/icons";
+import { combineClassNames } from "../../utils";
 
 export interface IMultiSelectEntryProps<DataT extends MultiSelectorData> {
 	/**
@@ -97,7 +98,7 @@ const MultiSelectEntry = <DataT extends MultiSelectorData>(
 
 	return (
 		<>
-			<List className={[classes.root, classes.container].join(" ")}>
+			<List className={combineClassNames([classes.root, classes.container])}>
 				<SmallListItem
 					button
 					onClick={data.onClick}

@@ -13693,14 +13693,14 @@ exports[`Storyshots Standalone/Portal Menu 1`] = `
                                                 <Memo(CollapsibleMenu)>
                                                   <WithStyles(ForwardRef(Grid))
                                                     alignItems="stretch"
-                                                    className="standalone-portal--portal-menu-story-CcPortal-container-44 "
+                                                    className="standalone-portal--portal-menu-story-CcPortal-container-44"
                                                     container={true}
                                                     justify="flex-start"
                                                     wrap="nowrap"
                                                   >
                                                     <ForwardRef(Grid)
                                                       alignItems="stretch"
-                                                      className="standalone-portal--portal-menu-story-CcPortal-container-44 "
+                                                      className="standalone-portal--portal-menu-story-CcPortal-container-44"
                                                       classes={
                                                         Object {
                                                           "align-content-xs-center": "standalone-portal--portal-menu-story-MuiGrid-align-content-xs-center",
@@ -13813,7 +13813,7 @@ exports[`Storyshots Standalone/Portal Menu 1`] = `
                                                       wrap="nowrap"
                                                     >
                                                       <div
-                                                        className="standalone-portal--portal-menu-story-MuiGrid-root standalone-portal--portal-menu-story-CcPortal-container-44  standalone-portal--portal-menu-story-MuiGrid-container standalone-portal--portal-menu-story-MuiGrid-wrap-xs-nowrap"
+                                                        className="standalone-portal--portal-menu-story-MuiGrid-root standalone-portal--portal-menu-story-CcPortal-container-44 standalone-portal--portal-menu-story-MuiGrid-container standalone-portal--portal-menu-story-MuiGrid-wrap-xs-nowrap"
                                                       >
                                                         <WithStyles(ForwardRef(Grid))
                                                           className="standalone-portal--portal-menu-story-CcPortal-content-45"
@@ -14331,7 +14331,7 @@ exports[`Storyshots Standalone/Portal Menu 1`] = `
                                                                 }
                                                               >
                                                                 <div
-                                                                  className="standalone-portal--portal-menu-story-CcPortalMenu-root-49 "
+                                                                  className="standalone-portal--portal-menu-story-CcPortalMenu-root-49"
                                                                 >
                                                                   <WithStyles(ForwardRef(List))>
                                                                     <ForwardRef(List)

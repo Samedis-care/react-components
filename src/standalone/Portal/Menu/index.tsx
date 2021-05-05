@@ -7,6 +7,7 @@ import React, {
 import { MenuContext, toMenuItemComponent } from "./MenuItem";
 import { makeStyles, Theme } from "@material-ui/core/styles";
 import { SvgIconComponent } from "@material-ui/icons";
+import { combineClassNames } from "../../../utils";
 
 /**
  * Properties of the Wrapper
@@ -149,7 +150,7 @@ const PortalMenu = (props: MenuProps) => {
 	const classes = useStyles(props);
 
 	return (
-		<div className={`${classes.root} ${props.className || ""}`}>
+		<div className={combineClassNames([classes.root, props.className || ""])}>
 			<Wrapper>
 				<MenuContext.Provider value={props.customState || state}>
 					{props.definition.map((child) =>

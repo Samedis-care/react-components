@@ -11,7 +11,7 @@ import {
 	PowerPointFileIcon,
 	WordFileIcon,
 } from "../FileIcons";
-import { getFileExt } from "../../../utils";
+import { combineClassNames, getFileExt } from "../../../utils";
 
 export interface FileProps {
 	/**
@@ -144,18 +144,19 @@ const File = (props: FileProps) => {
 						<img
 							src={props.preview}
 							alt={props.name}
-							className={
-								classes.icon +
-								(props.disabled ? " " + classes.iconDisabled : "") +
-								(downloadLink ? " " + classes.clickable : "")
-							}
+							className={combineClassNames([
+								classes.icon,
+								props.disabled && classes.iconDisabled,
+								downloadLink && classes.clickable,
+							])}
 							onClick={openDownload}
 						/>
 					) : (
 						<FileIcon
-							className={`${classes.icon} ${
-								downloadLink ? classes.clickable : ""
-							}`}
+							className={combineClassNames([
+								classes.icon,
+								downloadLink && classes.clickable,
+							])}
 							onClick={openDownload}
 						/>
 					)}

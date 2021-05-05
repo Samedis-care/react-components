@@ -13,6 +13,7 @@ import ScrollableScheduleWeek from "./ScrollableScheduleWeek";
 import InfiniteScroll from "../../InfiniteScroll";
 import { IDayData } from "../Common/DayContents";
 import i18n from "../../../i18n";
+import { combineClassNames } from "../../../utils";
 
 /**
  * Callback to load week data from a data source
@@ -99,7 +100,10 @@ class ScrollableSchedule extends PureComponent<IProps, IState> {
 				</Grid>
 				<Grid item xs={12}>
 					<InfiniteScroll
-						className={`${this.props.wrapperClass} ${this.props.classes.scroller}`}
+						className={combineClassNames([
+							this.props.wrapperClass,
+							this.props.classes.scroller,
+						])}
 						loadMoreTop={this.loadMoreTop}
 						loadMoreBottom={this.loadMoreBottom}
 						ref={this.setScrollElemRef}
