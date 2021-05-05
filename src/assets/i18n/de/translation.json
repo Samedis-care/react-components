@@ -32,7 +32,8 @@
 					"lte-date": "Vorher oder am",
 					"not-empty": "Ist nicht leer",
 					"empty": "Ist leer"
-				}
+				},
+				"reset-column-filter": "Filter löschen"
 			},
 			"settings": {
 				"lock": "Spalten sperren/entsperren",
@@ -46,7 +47,14 @@
 				"export": "Exportieren",
 				"edit": "Bearbeiten",
 				"delete": "Löschen",
-				"custom-filter-button": "Filter"
+				"custom-filter-button": "Filter",
+				"reset-options": {
+					"all": "Alles zurücksetzen",
+					"column": "Spalteneinstellungen zurücksetzen",
+					"filter": "Filter zurücksetzen",
+					"sort": "Sortiereinstellungen zurücksetzen",
+					"width": "Spaltenbreiten zurücksetzen"
+				}
 			},
 			"footer": {
 				"prev-page": "Vorherige Seite",
@@ -93,7 +101,11 @@
 			"format": {
 				"any": "Alle"
 			},
-			"no-files": "Keine Anhänge verfügbar"
+			"no-files": "Keine Anhänge verfügbar",
+			"multi-image": {
+				"primary": "Primär",
+				"edit": "Bearbeiten"
+			}
 		},
 		"phone-number": {
 			"invalid": "Korrekte Rufnummer eingeben"
