@@ -424,6 +424,10 @@ export interface IDataGridState {
 	 * Custom user-defined data
 	 */
 	customData: DataGridCustomDataType;
+	/**
+	 * Initially resized?
+	 */
+	initialResize: boolean;
 }
 
 const DataGridStateContext = React.createContext<
@@ -521,6 +525,7 @@ export const getDataGridDefaultState = (
 	dataLoadError: null,
 	refreshData: 1,
 	customData: defaultCustomData ?? {},
+	initialResize: false,
 });
 
 export const getDataGridDefaultColumnsState = (
