@@ -18,11 +18,10 @@ import {
 } from "../../index";
 import { IDataGridExporter } from "./index";
 import ExportMenu from "./ExportMenu";
-import i18n from "../../../i18n";
-import { useTranslation } from "react-i18next";
 import ComponentWithLabel from "../../UIKit/ComponentWithLabel";
 import { IDataGridAddButton } from "../DataGrid";
 import ResetDialog, { ResetCallbacks } from "./ResetDialog";
+import useCCTranslations from "../../../utils/useCCTranslations";
 
 export interface IDataGridActionBarViewProps extends ResetCallbacks {
 	/**
@@ -49,7 +48,7 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 	const bpMdUp = useMediaQuery(theme.breakpoints.up("md"), { noSsr: true });
 	const bpSmUp = useMediaQuery(theme.breakpoints.up("sm"), { noSsr: true });
 
-	const { t } = useTranslation(undefined, { i18n });
+	const { t } = useCCTranslations();
 	const [exportAnchorEl, setExportAnchorEl] = useState<MenuProps["anchorEl"]>(
 		undefined
 	);

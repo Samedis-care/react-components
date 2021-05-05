@@ -1,8 +1,7 @@
 import React from "react";
 import { Box, Typography, useMediaQuery, useTheme } from "@material-ui/core";
-import i18n from "../../../i18n";
-import { useTranslation } from "react-i18next";
 import { useDataGridStyles } from "../DataGrid";
+import useCCTranslations from "../../../utils/useCCTranslations";
 
 export interface IDataGridPaginationViewProps {
 	/**
@@ -19,7 +18,7 @@ const PaginationView = (props: IDataGridPaginationViewProps) => {
 	const classes = useDataGridStyles();
 	const theme = useTheme();
 	const isMobile = useMediaQuery(theme.breakpoints.only("xs"));
-	const { t } = useTranslation(undefined, { i18n });
+	const { t } = useCCTranslations();
 
 	const total = props.rowsTotal;
 	const filtered = props.rowsFiltered ?? 0;

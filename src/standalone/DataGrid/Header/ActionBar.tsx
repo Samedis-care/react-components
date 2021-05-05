@@ -93,7 +93,8 @@ const ActionBar = () => {
 	}, [columns, defaultCustomData, setState]);
 	const handleResetWidth = useCallback(() => {
 		setColumnWidth(getDefaultColumnWidths(columns, theme));
-	}, [columns, setColumnWidth, theme]);
+		setState((state) => ({ ...state, initialResize: false }));
+	}, [columns, setColumnWidth, setState, theme]);
 	const handleResetAll = useCallback(() => {
 		setState(getDataGridDefaultState(columns, defaultCustomData));
 		setColumnState(

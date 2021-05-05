@@ -36,6 +36,10 @@ export interface ImageDialogEntryProps
 	 */
 	processFile: MultiImageProcessFile;
 	/**
+	 * Delete confirmation handler
+	 */
+	onDelete?: MultiImageProps["onDelete"];
+	/**
 	 * Custom CSS styles
 	 */
 	classes?: ClassNameMap<ImageDialogEntryClassKey>;
@@ -79,6 +83,7 @@ const ImageDialogEntry = (props: ImageDialogEntryProps) => {
 		changeImages,
 		processFile,
 		subClasses,
+		onDelete,
 	} = props;
 	const { t } = useCCTranslations();
 	const classes = useThemeStyles(props);
@@ -93,7 +98,14 @@ const ImageDialogEntry = (props: ImageDialogEntryProps) => {
 		);
 	}, [changeImages, img]);
 
-	const removeImage = useCallback(() => {
+	const removeImage = useCallback(async () => {
+		if (onDelete) {
+			// check for confirmation
+			if (!(await onDelete(img))) {
+				// if user doesn't confirm, abort
+				return;
+			}
+		}
 		changeImages((images) => {
 			const newImages = images.filter((image) => image !== img);
 			if (newImages.length > 0 && !newImages.find((img) => img.primary)) {
@@ -101,7 +113,7 @@ const ImageDialogEntry = (props: ImageDialogEntryProps) => {
 			}
 			return newImages;
 		});
-	}, [changeImages, img]);
+	}, [onDelete, changeImages, img]);
 
 	const replaceImage = useCallback(
 		async (files: FileList) => {

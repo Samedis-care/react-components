@@ -1,10 +1,8 @@
 import React from "react";
 import MomentUtils from "@date-io/moment";
 import { MuiPickersUtilsProvider } from "@material-ui/pickers";
-import ccI18n from "../i18n";
-
 import moment from "moment";
-import { useTranslation } from "react-i18next";
+import useCCTranslations from "../utils/useCCTranslations";
 
 export interface MuiPickerUtilsProps {
 	disable?: boolean;
@@ -13,7 +11,7 @@ export interface MuiPickerUtilsProps {
 
 const MuiPickerUtils = (props: MuiPickerUtilsProps): React.ReactElement => {
 	const { disable } = props;
-	const { i18n } = useTranslation(undefined, { i18n: ccI18n });
+	const { i18n } = useCCTranslations();
 
 	if (disable) return props.children;
 

@@ -23,8 +23,7 @@ import {
 } from "../DataGrid";
 import { LocalizedKeyboardDatePicker } from "../../LocalizedDateTimePickers";
 import { DateType } from "@date-io/type";
-import i18n from "../../../i18n";
-import { useTranslation } from "react-i18next";
+import useCCTranslations from "../../../utils/useCCTranslations";
 
 export type FilterType =
 	| "contains"
@@ -94,7 +93,7 @@ export interface DataGridContentFilterEntryProps {
 const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 	const { onChange, depth } = props;
 	const isFirstFilter = depth === 1;
-	const { t } = useTranslation(undefined, { i18n });
+	const { t } = useCCTranslations();
 	const { filterLimit, isFilterSupported } = useDataGridProps();
 
 	const [enumFilterSearch, setEnumFilterSearch] = useState("");

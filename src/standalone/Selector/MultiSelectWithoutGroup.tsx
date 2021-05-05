@@ -12,9 +12,8 @@ import TextFieldWithHelp, {
 	TextFieldWithHelpProps,
 } from "../UIKit/TextFieldWithHelp";
 import { SmallIconButton, SmallListItemIcon } from "../Small";
-import i18n from "../../i18n";
-import { useTranslation } from "react-i18next";
 import InlineSwitch from "../InlineSwitch";
+import useCCTranslations from "../../utils/useCCTranslations";
 
 /**
  * A callback used to get an label value for a specific input (search) value
@@ -134,7 +133,7 @@ const MultiSelectWithoutGroup = <DataT extends MultiSelectorData>(
 		loadingText,
 		switchValue,
 	} = props;
-	const { t } = useTranslation(undefined, { i18n });
+	const { t } = useCCTranslations();
 	const classes = useStyles(props);
 	const [dataQuery, setDataQuery] = useState("");
 	const [dataOptions, setDataOptions] = useState<DataT[]>([]);

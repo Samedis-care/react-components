@@ -8,9 +8,8 @@ import Model, {
 	ModelFieldName,
 	PageVisibility,
 } from "../../backend-integration/Model/Model";
-import i18n from "../../i18n";
-import { useTranslation } from "react-i18next";
 import { debouncePromise } from "../../utils";
+import useCCTranslations from "../../utils/useCCTranslations";
 
 export interface BackendMultiSelectProps<
 	KeyT extends ModelFieldName,
@@ -84,7 +83,7 @@ export const useSelectedCache = <
 
 	const [selectedCache, setSelectedCache] = useState<Record<string, DataT>>({});
 
-	const { t } = useTranslation(undefined, { i18n });
+	const { t } = useCCTranslations();
 
 	const handleSelect = useCallback(
 		(selected: DataT[]) => {

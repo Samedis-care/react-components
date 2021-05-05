@@ -35,6 +35,28 @@ export const showConfirmDialog = async (
 };
 
 /**
+ * Shows an awaitable confirm dialog (returns boolean)
+ * @param pushDialog The dialog context's (useDialogContext()) pushDialog function
+ * @param props The dialog properties
+ * @returns Awaitable promise, resolves to true if user clicks yes, to false if user clicks no or closes dialog
+ */
+export const showConfirmDialogBool = async (
+	pushDialog: DialogContextType[0],
+	props: IDialogConfigConfirmAsync
+): Promise<boolean> => {
+	return new Promise((resolve) => {
+		pushDialog(
+			<ConfirmDialog
+				{...props}
+				onClose={() => resolve(false)}
+				handlerButtonYes={() => resolve(true)}
+				handlerButtonNo={() => resolve(false)}
+			/>
+		);
+	});
+};
+
+/**
  * Shows an awaitable input dialog
  * @param pushDialog The dialog context's (useDialogContext()) pushDialog function
  * @param props The dialog properties

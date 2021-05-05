@@ -8,13 +8,11 @@ import {
 	Tooltip,
 } from "@material-ui/core";
 import { ArrowDownward, ArrowUpward } from "@material-ui/icons";
-import FilterIcon from "../../Icons/FilterIcon";
 import FilterEntry, { IFilterDef } from "./FilterEntry";
-import i18n from "../../../i18n";
 import { ModelFilterType } from "../../../backend-integration/Model";
 import { IDataGridColumnDef, useDataGridStyles } from "../DataGrid";
-import { useTranslation } from "react-i18next";
-import { FilterActiveIcon } from "../../Icons";
+import { FilterIcon, FilterActiveIcon } from "../../Icons";
+import useCCTranslations from "../../../utils/useCCTranslations";
 import { combineClassNames } from "../../../utils";
 
 export interface IDataGridContentColumnHeaderContentProps {
@@ -78,7 +76,7 @@ const transformOrigin: PopoverOrigin = {
 const ColumnHeaderContent = (
 	props: IDataGridContentColumnHeaderContentProps
 ) => {
-	const { t } = useTranslation(undefined, { i18n });
+	const { t } = useCCTranslations();
 	const classes = useDataGridStyles();
 	const [filterAnchorEl, setFilterAnchorEl] = useState<HTMLElement | null>(
 		null

@@ -1,7 +1,6 @@
 import React from "react";
-import i18n from "../../i18n";
 import { DatePicker, DatePickerProps } from "@material-ui/pickers";
-import { useTranslation } from "react-i18next";
+import useCCTranslations from "../../utils/useCCTranslations";
 
 type LocalizedDatePickerProps = Omit<
 	DatePickerProps,
@@ -19,7 +18,7 @@ type LocalizedDatePickerProps = Omit<
 >;
 
 const LocalizedDatePicker = (props: LocalizedDatePickerProps) => {
-	const { t } = useTranslation(undefined, { i18n });
+	const { t } = useCCTranslations();
 	return (
 		<DatePicker
 			invalidLabel={t(

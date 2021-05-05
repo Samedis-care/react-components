@@ -1,11 +1,10 @@
 import React from "react";
 import { Button, ButtonProps, Grid } from "@material-ui/core";
 import { AppsIcon } from "../../Icons";
-import i18n from "../../../i18n";
-import { useTranslation } from "react-i18next";
+import useCCTranslations from "../../../utils/useCCTranslations";
 
 const CustomFiltersButton = (props: Omit<ButtonProps, "outlined">) => {
-	const { t } = useTranslation(undefined, { i18n });
+	const { t } = useCCTranslations();
 	return (
 		<Button {...props} variant={"outlined"}>
 			<Grid
