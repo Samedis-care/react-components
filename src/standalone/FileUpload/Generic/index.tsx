@@ -17,10 +17,9 @@ import {
 } from "../../../utils";
 import { IDownscaleProps } from "../../../utils/processImage";
 import GroupBox from "../../GroupBox";
-import { useTranslation } from "react-i18next";
-import ccI18n from "../../../i18n";
 import { makeStyles } from "@material-ui/core/styles";
 import { ClassNameMap } from "@material-ui/styles/withStyles";
+import useCCTranslations from "../../../utils/useCCTranslations";
 
 export interface FileUploadProps {
 	/**
@@ -177,9 +176,7 @@ const FileUpload = (props: FileUploadProps): React.ReactElement => {
 		}));
 	const [files, setFiles] = useState<FileData[]>(loadInitialFiles);
 	const inputRef = useRef<HTMLInputElement | null>(null);
-	const { t } = useTranslation(undefined, {
-		i18n: ccI18n,
-	});
+	const { t } = useCCTranslations();
 
 	const getRemainingFileCount = useCallback(() => {
 		if (!maxFiles)

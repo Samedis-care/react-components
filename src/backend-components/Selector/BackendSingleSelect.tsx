@@ -8,9 +8,8 @@ import Model, {
 	ModelFieldName,
 	PageVisibility,
 } from "../../backend-integration/Model/Model";
-import i18n from "../../i18n";
-import { useTranslation } from "react-i18next";
 import { debouncePromise } from "../../utils";
+import useCCTranslations from "../../utils/useCCTranslations";
 
 export interface BackendSingleSelectProps<
 	KeyT extends ModelFieldName,
@@ -77,7 +76,7 @@ const BackendSingleSelect = <
 		null
 	);
 
-	const { t } = useTranslation(undefined, { i18n });
+	const { t } = useCCTranslations();
 
 	const handleLoad = useCallback(
 		async (search: string) => {

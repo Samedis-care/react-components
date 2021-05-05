@@ -2,11 +2,10 @@ import React from "react";
 import { Grid } from "@material-ui/core";
 import { SmallIconButton, VerticalDivider } from "../../index";
 import ComponentWithLabel from "../../UIKit/ComponentWithLabel";
-import i18n from "../../../i18n";
-import { useTranslation } from "react-i18next";
 import { Edit as EditIcon, Delete as DeleteIcon } from "@material-ui/icons";
 import SelectAll from "./SelectAll";
 import { DataGridProps, useDataGridStyles } from "../DataGrid";
+import useCCTranslations from "../../../utils/useCCTranslations";
 
 export interface DataActionBarViewProps {
 	/**
@@ -37,7 +36,7 @@ export interface DataActionBarViewProps {
 
 const DataActionBarView = (props: DataActionBarViewProps) => {
 	const classes = useDataGridStyles();
-	const { t } = useTranslation(undefined, { i18n });
+	const { t } = useCCTranslations();
 
 	return (
 		<Grid container>

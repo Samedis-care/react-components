@@ -8,9 +8,8 @@ import {
 	Typography,
 } from "@material-ui/core";
 import { useDataGridStyles } from "../DataGrid";
-import i18n from "../../../i18n";
-import { useTranslation } from "react-i18next";
 import { IDataGridFilterBarProps } from "../Header/FilterBar";
+import useCCTranslations from "../../../utils/useCCTranslations";
 
 export interface DataGridCustomFilterDialogProps
 	extends Omit<IDataGridFilterBarProps, "inDialog"> {
@@ -26,7 +25,7 @@ export interface DataGridCustomFilterDialogProps
 
 const FilterDialog = (props: DataGridCustomFilterDialogProps) => {
 	const classes = useDataGridStyles();
-	const { t } = useTranslation(undefined, { i18n });
+	const { t } = useCCTranslations();
 	const { customFilters: Filters, customData, setCustomData } = props;
 
 	return (

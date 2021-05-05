@@ -20,7 +20,6 @@ import {
 	Info as InfoIcon,
 } from "@material-ui/icons";
 import { TextFieldWithHelpProps } from "../UIKit/TextFieldWithHelp";
-import i18n from "../../i18n";
 import { cleanClassMap, SelectorSmallListItem, SmallListItemIcon } from "../..";
 import { makeThemeStyles } from "../../utils";
 import { makeStyles, Theme } from "@material-ui/core/styles";
@@ -31,8 +30,8 @@ import {
 } from "@material-ui/lab/Autocomplete/Autocomplete";
 import InputWithHelp from "../UIKit/InputWithHelp";
 import OutlinedInputWithHelp from "../UIKit/OutlinedInputWithHelp";
-import { useTranslation } from "react-i18next";
 import InlineSwitch from "../InlineSwitch";
+import useCCTranslations from "../../utils/useCCTranslations";
 
 export interface BaseSelectorData {
 	/**
@@ -272,7 +271,7 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 		props.displaySwitch && props.defaultSwitchValue
 	);
 	const [switchValue, setSwitchValue] = useState<boolean>(defaultSwitchValue);
-	const { t } = useTranslation(undefined, { i18n });
+	const { t } = useCCTranslations();
 	const customClasses = useCustomStyles(cleanClassMap(props, true));
 	const [open, setOpen] = useState(false);
 	const actualAddNewLabel = addNewLabel || t("standalone.selector.add-new");

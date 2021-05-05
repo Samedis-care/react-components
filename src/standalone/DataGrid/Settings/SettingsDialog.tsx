@@ -15,8 +15,7 @@ import {
 	IDataGridColumnProps,
 	useDataGridStyles,
 } from "../DataGrid";
-import i18n from "../../../i18n";
-import { useTranslation } from "react-i18next";
+import useCCTranslations from "../../../utils/useCCTranslations";
 
 export interface IDataGridSettingsDialogProps extends IDataGridColumnProps {
 	/**
@@ -56,7 +55,7 @@ const EllipsisFormControlLabel = withStyles({
 
 const SettingsDialog = (props: IDataGridSettingsDialogProps) => {
 	const classes = useDataGridStyles();
-	const { t } = useTranslation(undefined, { i18n });
+	const { t } = useCCTranslations();
 
 	return (
 		<Paper elevation={0} className={classes.contentOverlayPaper}>

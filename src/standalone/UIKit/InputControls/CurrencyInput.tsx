@@ -4,8 +4,7 @@ import TextFieldWithHelp, {
 	TextFieldWithHelpProps,
 } from "../TextFieldWithHelp";
 import { parseLocalizedNumber, useInputCursorFix } from "../../../utils";
-import ccI18n from "../../../i18n";
-import { useTranslation } from "react-i18next";
+import useCCTranslations from "../../../utils/useCCTranslations";
 
 export interface CurrencyInputProps extends TextFieldWithHelpProps {
 	/**
@@ -31,7 +30,7 @@ const CurrencyInput = (
 	props: CurrencyInputProps & Omit<TextFieldProps, "onChange" | "value">
 ) => {
 	const { value, onChange, currency, ...muiProps } = props;
-	const { i18n } = useTranslation(undefined, { i18n: ccI18n });
+	const { i18n } = useCCTranslations();
 	const valueFormatted =
 		value !== null
 			? value.toLocaleString(i18n.language, {

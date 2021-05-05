@@ -1,9 +1,8 @@
 import React from "react";
-import { useTranslation } from "react-i18next";
 import { makeStyles } from "@material-ui/core";
 import { GroupBox } from "../index";
-import i18n from "../../i18n";
 import { ClassNameMap } from "@material-ui/styles/withStyles";
+import useCCTranslations from "../../utils/useCCTranslations";
 
 export interface HowToBoxProps {
 	/**
@@ -36,7 +35,7 @@ const useStyles = makeStyles(
 
 const HowToBox = (props: HowToBoxProps) => {
 	const { titleLabel, labels } = props;
-	const { t } = useTranslation(undefined, { i18n });
+	const { t } = useCCTranslations();
 	const classes = useStyles(props);
 
 	if (!labels) return <></>;
