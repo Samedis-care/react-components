@@ -1,6 +1,4 @@
 import React from "react";
-import i18n from "../../i18n";
-import { useTranslation } from "react-i18next";
 import TypeDate from "../../backend-integration/Model/Types/TypeDate";
 import {
 	KeyboardDatePicker,
@@ -8,6 +6,7 @@ import {
 } from "@material-ui/pickers";
 import { Event as CalendarIcon } from "@material-ui/icons";
 import { useTheme } from "@material-ui/core";
+import useCCTranslations from "../../utils/useCCTranslations";
 
 export interface LocalizedKeyboardDatePickerProps
 	extends Omit<
@@ -34,7 +33,7 @@ const LocalizedKeyboardDatePicker = (
 	props: LocalizedKeyboardDatePickerProps
 ) => {
 	const { hideDisabledIcon, ...otherProps } = props;
-	const { t } = useTranslation(undefined, { i18n });
+	const { t } = useCCTranslations();
 	const theme = useTheme();
 	const hideDisabledIcons =
 		theme.componentsCare?.uiKit?.hideDisabledIcons ?? hideDisabledIcon;

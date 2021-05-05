@@ -10,10 +10,9 @@ import {
 import MuiDialogTitle from "@material-ui/core/DialogTitle";
 import { Close } from "@material-ui/icons";
 import SignaturePad from "react-signature-canvas";
-import i18n from "../../i18n";
-import { useTranslation } from "react-i18next";
 import { useDialogContext } from "../../framework";
 import { IDialogConfigSign } from "./Types";
+import useCCTranslations from "../../utils/useCCTranslations";
 export interface SignPadDialogProps extends IDialogConfigSign {
 	/**
 	 * Custom styles
@@ -56,7 +55,7 @@ const useStyles = makeStyles(
 );
 
 const SignPadDialog = (props: SignPadDialogProps) => {
-	const { t } = useTranslation(undefined, { i18n });
+	const { t } = useCCTranslations();
 	const { disabled, penColor, setSignature, signature, ...canvasProps } = props;
 	const [resetCanvas, setResetCanvas] = useState(!!signature);
 	const [, popDialog] = useDialogContext();

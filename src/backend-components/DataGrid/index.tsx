@@ -11,8 +11,7 @@ import Model, {
 } from "../../backend-integration/Model/Model";
 import { useDialogContext } from "../../framework";
 import { ErrorDialog, showConfirmDialog } from "../../non-standalone";
-import i18n from "../../i18n";
-import { useTranslation } from "react-i18next";
+import useCCTranslations from "../../utils/useCCTranslations";
 
 export interface BackendDataGridProps<
 	KeyT extends ModelFieldName,
@@ -45,7 +44,7 @@ const BackendDataGrid = <
 	props: BackendDataGridProps<KeyT, VisibilityT, CustomDataT>
 ) => {
 	const { model, enableDelete, enableDeleteAll } = props;
-	const { t } = useTranslation(undefined, { i18n });
+	const { t } = useCCTranslations();
 
 	const [pushDialog] = useDialogContext();
 	const [refreshToken, setRefreshToken] = useState("");

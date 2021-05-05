@@ -2,8 +2,7 @@ import React, { useCallback } from "react";
 import { makeStyles, InputAdornment, IconButton } from "@material-ui/core";
 import { SignIcon } from "../../standalone";
 import { Info as InfoIcon } from "@material-ui/icons";
-import i18n from "../../i18n";
-import { useTranslation } from "react-i18next";
+import useCCTranslations from "../../utils/useCCTranslations";
 
 export interface SignPadProps {
 	/**
@@ -71,7 +70,7 @@ const useStyles = makeStyles(
 );
 const SignPad = (props: SignPadProps) => {
 	const { signature, disabled, openInfo, openSignPad } = props;
-	const { t } = useTranslation(undefined, { i18n });
+	const { t } = useCCTranslations();
 	const classes = useStyles(props);
 	const handelOpenInfo = useCallback(
 		(event: React.MouseEvent<HTMLButtonElement>) => {
