@@ -86,12 +86,9 @@ const Cell = (props: CellProps): React.ReactElement => {
 			className={combineClassNames([
 				classes.cell,
 				props.rowIndex !== 0 ? classes.dataCell : classes.headerCell,
-				props.rowIndex !== 0
-					? props.rowIndex % 2 === 0
-						? classes.rowEven
-						: classes.rowOdd
-					: "",
-				props.rowIndex !== 0 && column ? `column-${column.field} ` : "",
+				props.rowIndex !== 0 &&
+					(props.rowIndex % 2 === 0 ? classes.rowEven : classes.rowOdd),
+				props.rowIndex !== 0 && column && `column-${column.field}`,
 				isSelected(state.selectAll, state.selectedRows, id) || hover == rowIndex
 					? classes.dataCellSelected
 					: "",
