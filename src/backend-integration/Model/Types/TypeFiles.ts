@@ -21,6 +21,7 @@ export interface TypeFilesParams
 			| "previewSize"
 			| "previewImages"
 			| "allowDuplicates"
+			| "smallLabel"
 		>
 	> {
 	/**

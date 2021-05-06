@@ -59,6 +59,7 @@ class RendererFiles extends TypeFiles {
 							previewSize={this.params?.previewSize || 96}
 							previewImages={this.params?.previewImages}
 							allowDuplicates={this.params?.allowDuplicates}
+							smallLabel={this.params?.smallLabel}
 						/>
 					</div>
 					<FormHelperText error={!!errorMsg}>{errorMsg}</FormHelperText>
