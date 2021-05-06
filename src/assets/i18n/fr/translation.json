@@ -27,7 +27,11 @@
 			"format": {
 				"any": "Tout"
 			},
-			"no-files": "Aucune pièce jointe disponible"
+			"no-files": "Aucune pièce jointe disponible",
+			"multi-image": {
+				"primary": "Primaire",
+				"edit": "Éditer"
+			}
 		},
 		"data-grid": {
 			"settings": {
@@ -42,7 +46,14 @@
 				"export": "Exporter",
 				"edit": "Éditer",
 				"delete": "Supprimer",
-				"custom-filter-button": "Filtre"
+				"custom-filter-button": "Filtre",
+				"reset-options": {
+					"all": "Effacer tout",
+					"column": "Réinitialiser les paramètres de la colonne",
+					"filter": "Réinitialiser le filtre",
+					"sort": "Réinitialiser les paramètres de tri",
+					"width": "Réinitialiser les largeurs de colonne"
+				}
 			},
 			"footer": {
 				"prev-page": "Page précédente",
@@ -89,7 +100,8 @@
 					"lte-date": "Avant ou le",
 					"not-empty": "N'est pas vide",
 					"empty": "Est vide"
-				}
+				},
+				"reset-column-filter": "Effacer le filtre"
 			},
 			"custom-filters": {
 				"title": "Sélection de filtre"

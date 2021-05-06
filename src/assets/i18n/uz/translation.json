@@ -27,7 +27,11 @@
 			"format": {
 				"any": "Har qanday"
 			},
-			"no-files": "Qo'shimchalar mavjud emas"
+			"no-files": "Qo'shimchalar mavjud emas",
+			"multi-image": {
+				"primary": "Birlamchi",
+				"edit": "Tahrirlash"
+			}
 		},
 		"data-grid": {
 			"settings": {
@@ -42,7 +46,14 @@
 				"export": "Eksport",
 				"edit": "Tahrirlash",
 				"delete": "O'chirish",
-				"custom-filter-button": "Filtr"
+				"custom-filter-button": "Filtr",
+				"reset-options": {
+					"all": "Barchasini tiklash",
+					"column": "Ustun sozlamalarini tiklash",
+					"filter": "Filtrni tiklash",
+					"sort": "Saralash sozlamalarini tiklash",
+					"width": "Ustun kengliklarini tiklash"
+				}
 			},
 			"footer": {
 				"prev-page": "Oldingi sahifa",
@@ -89,7 +100,8 @@
 					"lte-date": "Oldin yoki oldin",
 					"not-empty": "Bo'sh emas",
 					"empty": "Bo'sh"
-				}
+				},
+				"reset-column-filter": "Filtrni tozalash"
 			},
 			"custom-filters": {
 				"title": "Filtrni tanlash"
