@@ -138,26 +138,21 @@ const BackendDataGrid = <
 				IDataGridLoadDataParameters,
 				"quickFilter" | "additionalFilters" | "fieldFilter"
 			>
-		) => {
-			try {
-				await showConfirmDialog(pushDialog, {
-					title: t("backend-components.data-grid.delete.confirm-dialog.title"),
-					message: t(
-						"backend-components.data-grid.delete.confirm-dialog." +
-							(invert ? "messageInverted" : "message"),
-						{ NUM: ids.length }
-					),
-					textButtonYes: t(
-						"backend-components.data-grid.delete.confirm-dialog.buttons.yes"
-					),
-					textButtonNo: t(
-						"backend-components.data-grid.delete.confirm-dialog.buttons.no"
-					),
-				});
-			} catch (e) {
-				// user said no
-				return;
-			}
+		): Promise<void> => {
+			await showConfirmDialog(pushDialog, {
+				title: t("backend-components.data-grid.delete.confirm-dialog.title"),
+				message: t(
+					"backend-components.data-grid.delete.confirm-dialog." +
+						(invert ? "messageInverted" : "message"),
+					{ NUM: ids.length }
+				),
+				textButtonYes: t(
+					"backend-components.data-grid.delete.confirm-dialog.buttons.yes"
+				),
+				textButtonNo: t(
+					"backend-components.data-grid.delete.confirm-dialog.buttons.no"
+				),
+			});
 
 			try {
 				if (enableDeleteAll) {

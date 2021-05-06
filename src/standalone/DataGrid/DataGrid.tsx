@@ -231,6 +231,7 @@ export interface IDataGridColumnProps {
 	 * @param invert if invert is true, delete everything except ids, otherwise only delete ids
 	 * @param ids The list of ids to (not) delete
 	 * @param filter The current data grid filter (if set)
+	 * @return Promise Optional promise, which will cancel automatic unselect if rejected
 	 */
 	onDelete?: (
 		invert: boolean,
@@ -239,7 +240,7 @@ export interface IDataGridColumnProps {
 			IDataGridLoadDataParameters,
 			"quickFilter" | "additionalFilters" | "fieldFilter"
 		>
-	) => void;
+	) => Promise<void> | unknown;
 	/**
 	 * Do we support and enable the delete all functionality?
 	 * If not set select all will only select all ids on the current page

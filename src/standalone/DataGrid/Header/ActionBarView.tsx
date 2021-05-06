@@ -20,7 +20,7 @@ import { IDataGridExporter } from "./index";
 import ExportMenu from "./ExportMenu";
 import ComponentWithLabel from "../../UIKit/ComponentWithLabel";
 import { IDataGridAddButton } from "../DataGrid";
-import ResetDialog, { ResetCallbacks } from "./ResetDialog";
+import ResetMenu, { ResetCallbacks } from "./ResetMenu";
 import useCCTranslations from "../../../utils/useCCTranslations";
 
 export interface IDataGridActionBarViewProps extends ResetCallbacks {
@@ -63,12 +63,14 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 		setExportAnchorEl(null);
 	}, [setExportAnchorEl]);
 
-	const [resetDialogOpen, setResetDialogOpen] = useState(false);
-	const openResetDialog = useCallback(() => {
-		setResetDialogOpen(true);
+	const [resetAnchorEl, setResetAnchorEl] = useState<MenuProps["anchorEl"]>(
+		undefined
+	);
+	const openResetDialog = useCallback((evt: React.MouseEvent) => {
+		setResetAnchorEl(evt.currentTarget);
 	}, []);
-	const closeResetDialog = useCallback(() => {
-		setResetDialogOpen(false);
+	const closeResetMenu = useCallback(() => {
+		setResetAnchorEl(null);
 	}, []);
 
 	return (
@@ -192,9 +194,9 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 					</Grid>
 				</>
 			)}
-			<ResetDialog
-				open={resetDialogOpen}
-				closeDialog={closeResetDialog}
+			<ResetMenu
+				anchorEl={resetAnchorEl}
+				onClose={closeResetMenu}
 				resetFilter={props.resetFilter}
 				resetSort={props.resetSort}
 				resetColumn={props.resetColumn}

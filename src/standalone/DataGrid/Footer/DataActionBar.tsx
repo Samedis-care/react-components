@@ -33,21 +33,25 @@ const DataActionBar = () => {
 		if (onEdit) onEdit(firstSelection);
 	}, [numSelected, onEdit, firstSelection]);
 
-	const handleDelete = useCallback(() => {
+	const handleDelete = useCallback(async () => {
 		if (numSelected === 0) return;
 		if (onDelete) {
-			onDelete(selectAll, selectedRows, {
-				quickFilter: search,
-				fieldFilter: dataGridPrepareFiltersAndSorts(columnState)[1],
-				additionalFilters: getAdditionalFilters
-					? getAdditionalFilters(customData)
-					: {},
-			});
-			setState((prevState) => ({
-				...prevState,
-				selectAll: false,
-				selectedRows: [],
-			}));
+			try {
+				await onDelete(selectAll, selectedRows, {
+					quickFilter: search,
+					fieldFilter: dataGridPrepareFiltersAndSorts(columnState)[1],
+					additionalFilters: getAdditionalFilters
+						? getAdditionalFilters(customData)
+						: {},
+				});
+				setState((prevState) => ({
+					...prevState,
+					selectAll: false,
+					selectedRows: [],
+				}));
+			} catch (e) {
+				// user cancelled
+			}
 		}
 	}, [
 		numSelected,
