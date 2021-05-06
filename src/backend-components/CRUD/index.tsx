@@ -96,6 +96,11 @@ export interface CrudProps<
 	 * If routing is disabled: set the initial view (id, "new" or null), defaults to null
 	 */
 	initialView?: string | null;
+	/**
+	 * Forbidden page to show if the user navigated to a URL he has no permissions for
+	 * If not set: Shows edit form in read-only mode
+	 */
+	forbiddenPage?: React.ComponentType;
 }
 
 const useStyles = makeStyles(
@@ -124,7 +129,11 @@ const CRUD = <
 	const { path } = useRouteMatch();
 	const location = useLocation();
 	const [perms] = usePermissionContext();
-	const { disableRouting, disableBackgroundGrid } = props;
+	const {
+		disableRouting,
+		disableBackgroundGrid,
+		forbiddenPage: ForbiddenPage,
+	} = props;
 	const [id, setId] = useState<string | null>(props.initialView ?? null);
 	const [gridRefreshToken, setGridRefreshToken] = useState<string>(
 		new Date().getTime().toString()
@@ -239,10 +248,15 @@ const CRUD = <
 			{props.children && (
 				<Switch>
 					<Route path={`${path}/:id`} exact>
-						{(routeProps: RouteChildrenProps<{ id: string }>) =>
-							props.children &&
-							form(routeProps.match?.params.id ?? "", props.children)
-						}
+						{hasPermission(perms, props.readPermission) ||
+						hasPermission(perms, props.editPermission) ||
+						!ForbiddenPage ? (
+							(routeProps: RouteChildrenProps<{ id: string }>) =>
+								props.children &&
+								form(routeProps.match?.params.id ?? "", props.children)
+						) : (
+							<ForbiddenPage />
+						)}
 					</Route>
 				</Switch>
 			)}
