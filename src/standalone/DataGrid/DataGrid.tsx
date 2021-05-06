@@ -771,7 +771,7 @@ const useStyles = makeStyles(
 			userSelect: "none",
 		},
 		filterClearBtn: {
-			padding: 4,
+			padding: 0,
 		},
 		filterBarBox: {
 			height: "100%",

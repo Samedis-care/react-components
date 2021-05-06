@@ -85,13 +85,17 @@ export interface DataGridContentFilterEntryProps {
 	 */
 	onChange: (def: IFilterDef) => void;
 	/**
+	 * Callback to close filter
+	 */
+	close: () => void;
+	/**
 	 * The depth of the filter in the given filter chain
 	 */
 	depth: number;
 }
 
 const FilterEntry = (props: DataGridContentFilterEntryProps) => {
-	const { onChange, depth } = props;
+	const { onChange, depth, close } = props;
 	const isFirstFilter = depth === 1;
 	const { t } = useCCTranslations();
 	const { filterLimit, isFilterSupported } = useDataGridProps();
@@ -124,7 +128,8 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 
 	const resetFilter = useCallback(() => {
 		onChange({ type: defaultFilterType, value1: "", value2: "" });
-	}, [onChange, defaultFilterType]);
+		close();
+	}, [close, onChange, defaultFilterType]);
 
 	const updateParent = () =>
 		onChange({
@@ -331,9 +336,9 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 
 	return (
 		<>
-			{isFirstFilter && (
+			{isFirstFilter && props.value?.value1 && (
 				<Grid item xs={12}>
-					<Grid container justify={"center"} alignItems={"center"}>
+					<Grid container justify={"flex-end"} alignItems={"center"}>
 						<Grid item>
 							<Tooltip
 								title={
@@ -342,7 +347,6 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 							>
 								<span>
 									<IconButton
-										disabled={!props.value?.value1}
 										className={classes.filterClearBtn}
 										onClick={resetFilter}
 									>
@@ -478,6 +482,7 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 							valueType={props.valueType}
 							valueData={props.valueData}
 							value={subFilter}
+							close={close}
 							depth={depth + 1}
 						/>
 					</>
