@@ -310,7 +310,9 @@ const MultiImage = (props: MultiImageProps) => {
 								currentImage < images.length - 1 ? showNextImage : undefined
 							}
 							onFilesDropped={readOnly ? undefined : handlePreviewDrop}
-							onClick={images[currentImage] ? undefined : startUpload}
+							onClick={
+								images[currentImage] ? undefined : readOnly ? null : startUpload
+							}
 							classes={subClasses?.imageBox}
 						/>
 					</Grid>

@@ -31,8 +31,10 @@ export interface ImageBoxProps {
 	/**
 	 * The custom onClick handler.
 	 * If not set a fullscreen preview will be opened
+	 * If set the onClick handler will be called
+	 * If set to null explicitly no action will be performed and the cursor won't show clickable
 	 */
-	onClick?: React.MouseEventHandler;
+	onClick?: React.MouseEventHandler | null;
 	/**
 	 * File drop handler
 	 */
@@ -60,7 +62,6 @@ const useStyles = makeStyles(
 		root: {
 			backgroundColor: theme.palette.secondary.light,
 			borderRadius: 8,
-			cursor: "pointer",
 			position: "relative",
 			height: "100%",
 			"& button": {
@@ -73,6 +74,9 @@ const useStyles = makeStyles(
 				opacity: 1,
 				transition: "visibility 0s linear 0s, opacity 300ms",
 			},
+		},
+		clickable: {
+			cursor: "pointer",
 		},
 		dragging: {
 			border: `1px solid ${theme.palette.primary.main}`,
@@ -168,13 +172,14 @@ const ImageBox = (props: ImageBoxProps) => {
 	return (
 		<>
 			<div
-				onClick={onClick ?? openDialog}
+				onClick={onClick === null ? onClick ?? openDialog : undefined}
 				onDragOver={handleDragOver}
 				onDrop={handleDrop}
 				style={{ width, height }}
 				className={combineClassNames([
 					classes.root,
 					dragging && classes.dragging,
+					onClick !== null && classes.clickable,
 				])}
 			>
 				{onRemove && (
