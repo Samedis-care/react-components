@@ -93,7 +93,7 @@ const CrudMultiImage = (props: CrudMultiImageProps) => {
 				const uploadedImages = await uploadPromise;
 
 				const finalImages = (newImages.filter(
-					(img) => !("id" in img) || !images.includes(img)
+					(img) => "id" in img && images.includes(img)
 				) as BackendMultiImageImage[]).concat(uploadedImages);
 
 				// update state
