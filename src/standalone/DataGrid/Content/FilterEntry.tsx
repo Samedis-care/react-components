@@ -217,7 +217,7 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 		updateParent();
 	};
 	const onFilterValue2ChangeDate = (date: DateType | null) => {
-		filterValue = date ? date.toISOString() : "";
+		filterValue2 = date ? date.toISOString() : "";
 		updateParent();
 	};
 	const onSubFilterTypeChange = (value: FilterComboType) => {
