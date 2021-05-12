@@ -52,6 +52,7 @@ export interface CrudProps<
 		| undefined;
 	/**
 	 * The properties to pass to grid
+	 * @remarks onAddNew can be used to overwrite the new button action
 	 */
 	gridProps: Omit<
 		BackendDataGridProps<KeyT, VisibilityT, CustomT>,
@@ -59,9 +60,10 @@ export interface CrudProps<
 		| "enableDelete"
 		| "disableExport"
 		| "onEdit"
-		| "onAddNew"
 		| "forceRefreshToken"
-	>;
+		| "onAddNew"
+	> &
+		Pick<Partial<BackendDataGridProps<KeyT, VisibilityT, CustomT>>, "onAddNew">;
 	/**
 	 * The delete record permission
 	 */
@@ -203,7 +205,7 @@ const CRUD = <
 			}
 			onAddNew={
 				hasPermission(perms, props.newPermission) && props.children
-					? showNewPage
+					? props.gridProps.onAddNew ?? showNewPage
 					: undefined
 			}
 		/>
