@@ -19927,6 +19927,7 @@ exports[`Storyshots Standalone/FileUpload MultiImageSelector 1`] = `
                                                     >
                                                       <div
                                                         className="standalone-fileupload--multi-image-story-CcImageBox-root-25 standalone-fileupload--multi-image-story-CcImageBox-clickable-26"
+                                                        onClick={[Function]}
                                                         onDragOver={[Function]}
                                                         onDrop={[Function]}
                                                         style={
