@@ -164,10 +164,13 @@ const useThemeStyles = makeThemeStyles<MultiImageProps, MultiImageClassKey>(
 	useStyles
 );
 
-const clearPrimary = (img: MultiImageImage): MultiImageImage => ({
-	...img,
-	primary: false,
-});
+const clearPrimary = (img: MultiImageImage): MultiImageImage =>
+	!img.primary
+		? img
+		: {
+				...img,
+				primary: false,
+		  };
 
 const MultiImage = (props: MultiImageProps) => {
 	const {
@@ -257,15 +260,6 @@ const MultiImage = (props: MultiImageProps) => {
 		[processFiles, name, images, onChange]
 	);
 
-	const handleUpload = useCallback(
-		(evt: React.ChangeEvent<HTMLInputElement>) => {
-			if (!evt.target.files) return;
-
-			void handleUploadViaDrop(evt.target.files);
-		},
-		[handleUploadViaDrop]
-	);
-
 	const handlePreviewDrop = useCallback(
 		async (files: FileList) => {
 			if (!onChange) return;
@@ -274,6 +268,15 @@ const MultiImage = (props: MultiImageProps) => {
 			onChange(name, images.map(clearPrimary).concat(newImages));
 		},
 		[onChange, name, images, processFiles]
+	);
+
+	const handleUpload = useCallback(
+		(evt: React.ChangeEvent<HTMLInputElement>) => {
+			const files = evt.target.files;
+			if (!files) return;
+			void handlePreviewDrop(files);
+		},
+		[handlePreviewDrop]
 	);
 
 	useEffect(() => {
