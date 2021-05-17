@@ -58,7 +58,7 @@ export const MultiImageStory = (): React.ReactElement => {
 				images={boolean("No data", false) ? [] : images}
 				onChange={handleChange}
 				previewSize={previewSize}
-				placeholderImage={placeholder}
+				uploadImage={placeholder}
 				capture={capture}
 				additionalDialogContent={[
 					<div key={"howto"}>

@@ -61,10 +61,16 @@ export interface MultiImageProps {
 	 */
 	previewSize?: number;
 	/**
-	 * Placeholder image
-	 * Shown to user as "upload" placeholder
+	 * Upload image
+	 * Shown to in edit dialog
 	 */
-	placeholderImage: string;
+	uploadImage: string;
+	/**
+	 * Placeholder image
+	 * Shown in normal on page control if no image present.
+	 * Defaults to uploadImage if not set
+	 */
+	placeholderImage?: string;
 	/**
 	 * The current images
 	 * The first image is considered "primary"
@@ -171,6 +177,7 @@ const MultiImage = (props: MultiImageProps) => {
 		additionalDialogContent,
 		images,
 		placeholderImage,
+		uploadImage,
 		readOnly,
 		maxImages,
 		capture,
@@ -304,7 +311,9 @@ const MultiImage = (props: MultiImageProps) => {
 						className={readOnly ? classes.imageItemReadOnly : classes.imageItem}
 					>
 						<ImageBox
-							image={images[currentImage]?.image ?? placeholderImage}
+							image={
+								images[currentImage]?.image ?? placeholderImage ?? uploadImage
+							}
 							onPrevImage={currentImage === 0 ? undefined : showPrevImage}
 							onNextImage={
 								currentImage < images.length - 1 ? showNextImage : undefined
@@ -378,7 +387,7 @@ const MultiImage = (props: MultiImageProps) => {
 										<ImageBox
 											width={previewSize}
 											height={previewSize}
-											image={placeholderImage}
+											image={uploadImage}
 											onClick={startUpload}
 											onFilesDropped={handleUploadViaDrop}
 											classes={subClasses?.imageBox}
