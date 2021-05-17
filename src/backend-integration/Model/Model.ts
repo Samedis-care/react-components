@@ -12,6 +12,7 @@ import {
 	UseQueryResult,
 } from "react-query/types/react/types";
 import queryCache from "../Store";
+import { QueryKey } from "react-query/types/core/types";
 
 export interface PageVisibility {
 	overview: Visibility;
@@ -224,13 +225,21 @@ class Model<
 	}
 
 	/**
+	 * Gets the react-query cache key for this model
+	 * @param id The record id
+	 */
+	public getReactQueryKey(id: string | null): QueryKey {
+		return [this.modelId, { id: id }, this.cacheKeys];
+	}
+
+	/**
 	 * Provides a react-query useQuery hook for the given data id
 	 * @param id The data record id
 	 */
 	public get(id: string | null): UseQueryResult<ModelGetResponse<KeyT>, Error> {
 		// eslint-disable-next-line react-hooks/rules-of-hooks
 		return useQuery(
-			[this.modelId, { id: id }, this.cacheKeys],
+			this.getReactQueryKey(id),
 			() => this.getRaw(id),
 			this.cacheOptions
 		);
@@ -242,7 +251,7 @@ class Model<
 	 */
 	public getCached(id: string | null): Promise<ModelGetResponse<KeyT>> {
 		return queryCache.fetchQuery(
-			[this.modelId, { id: id }, this.cacheKeys],
+			this.getReactQueryKey(id),
 			() => this.getRaw(id),
 			this.cacheOptions
 		);
@@ -339,11 +348,7 @@ class Model<
 			{
 				onSuccess: (data: ModelGetResponse<KeyT>) => {
 					ModelDataStore.setQueryData(
-						[
-							this.modelId,
-							{ id: (data[0] as Record<"id", string>).id },
-							this.cacheKeys,
-						],
+						this.getReactQueryKey((data[0] as Record<"id", string>).id),
 						data
 					);
 				},
@@ -368,11 +373,7 @@ class Model<
 			},
 			{
 				onSuccess: (data: void, id: string) => {
-					ModelDataStore.removeQueries([
-						this.modelId,
-						{ id: id },
-						this.cacheKeys,
-					]);
+					ModelDataStore.removeQueries(this.getReactQueryKey(id));
 				},
 			}
 		);
@@ -397,10 +398,7 @@ class Model<
 			{
 				onSuccess: (data: void, ids: string[]) => {
 					ids.forEach((id) =>
-						ModelDataStore.setQueryData(
-							[this.modelId, { id: id }, this.cacheKeys],
-							undefined
-						)
+						ModelDataStore.setQueryData(this.getReactQueryKey(id), undefined)
 					);
 				},
 			}
@@ -436,15 +434,31 @@ class Model<
 				onSuccess: (data: void, req: AdvancedDeleteRequest) => {
 					if (!req[0]) {
 						req[1].forEach((id) =>
-							ModelDataStore.setQueryData(
-								[this.modelId, { id: id }, this.cacheKeys],
-								undefined
-							)
+							ModelDataStore.setQueryData(this.getReactQueryKey(id), undefined)
 						);
 					} else {
 						ModelDataStore.clear();
 					}
 				},
+			}
+		);
+	}
+
+	/**
+	 * Updates stored data (not relations)
+	 * @param id The id of the record to edit
+	 * @param updater The function which updates the data
+	 */
+	public updateStoredData(
+		id: string,
+		updater: (old: Record<KeyT, unknown>) => Record<KeyT, unknown>
+	): void {
+		ModelDataStore.setQueryData(
+			this.getReactQueryKey(id),
+			(data: ModelGetResponse<KeyT> | undefined): ModelGetResponse<KeyT> => {
+				if (!data) throw new Error("Data not set");
+				const [record, ...other] = data;
+				return [updater(record), ...other];
 			}
 		);
 	}
