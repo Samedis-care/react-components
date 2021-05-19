@@ -38,6 +38,7 @@ export interface CrudMultiImageProps extends Omit<MultiImageProps, "images"> {
 
 export interface BackendMultiImageImage extends MultiImageImage {
 	id: string;
+	index?: number;
 }
 
 const CrudMultiImage = (props: CrudMultiImageProps) => {
@@ -58,6 +59,7 @@ const CrudMultiImage = (props: CrudMultiImageProps) => {
 
 	const handleChange = useCallback(
 		async (_, newImages: (MultiImageImage | BackendMultiImageImage)[]) => {
+			newImages = newImages.map((img, n) => ({ ...img, index: n }));
 			// upload new/changed files
 			const uploadPromise = Promise.all(
 				newImages
@@ -67,12 +69,26 @@ const CrudMultiImage = (props: CrudMultiImageProps) => {
 						const oldImg =
 							"id" in img && images.find((oldImg) => oldImg.id === img.id);
 						if (oldImg) {
-							return connector.update(await serialize(img, oldImg.id));
+							return {
+								response: await connector.update(
+									await serialize(img, oldImg.id)
+								),
+								index: (img as BackendMultiImageImage).index,
+							};
 						}
 						// or create new
-						return connector.create(await serialize(img, null));
+						return {
+							response: await connector.create(await serialize(img, null)),
+							index: (img as BackendMultiImageImage).index,
+						};
 					})
-					.map(async (request) => deserialize((await request)[0]))
+					.map(async (request) => {
+						const result = await request;
+						return {
+							...deserialize(result.response[0]),
+							index: result.index,
+						};
+					})
 			);
 			// delete deleted files
 			const deletePromise = connector.deleteMultiple(
@@ -92,9 +108,17 @@ const CrudMultiImage = (props: CrudMultiImageProps) => {
 				await deletePromise;
 				const uploadedImages = await uploadPromise;
 
-				const finalImages = (newImages.filter(
+				const finalImages: BackendMultiImageImage[] = [];
+				(newImages.filter(
 					(img) => "id" in img && images.includes(img)
-				) as BackendMultiImageImage[]).concat(uploadedImages);
+				) as BackendMultiImageImage[]).forEach(
+					// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+					(img) => (finalImages[img.index!] = img)
+				);
+				uploadedImages.forEach(
+					// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+					(img) => (finalImages[(img as BackendMultiImageImage).index!] = img)
+				);
 
 				// update state
 				setImages(finalImages);
