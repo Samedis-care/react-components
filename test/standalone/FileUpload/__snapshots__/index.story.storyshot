@@ -19673,20 +19673,20 @@ exports[`Storyshots Standalone/FileUpload MultiImageSelector 1`] = `
                                       label="Multi Image Input"
                                     >
                                       <fieldset
-                                        className="standalone-fileupload--multi-image-story-CcGroupBox-fieldSetRoot-22"
+                                        className="standalone-fileupload--multi-image-story-CcGroupBox-fieldSetRoot-23"
                                       >
                                         <legend
-                                          className="standalone-fileupload--multi-image-story-CcGroupBox-legend-23"
+                                          className="standalone-fileupload--multi-image-story-CcGroupBox-legend-24"
                                         >
                                           Multi Image Input
                                         </legend>
                                         <WithStyles(ForwardRef(Grid))
-                                          className="standalone-fileupload--multi-image-story-CcMultiImage-rootContainer-19"
+                                          className="standalone-fileupload--multi-image-story-CcMultiImage-rootContainer-20"
                                           container={true}
                                           spacing={1}
                                         >
                                           <ForwardRef(Grid)
-                                            className="standalone-fileupload--multi-image-story-CcMultiImage-rootContainer-19"
+                                            className="standalone-fileupload--multi-image-story-CcMultiImage-rootContainer-20"
                                             classes={
                                               Object {
                                                 "align-content-xs-center": "standalone-fileupload--multi-image-story-MuiGrid-align-content-xs-center",
@@ -19798,15 +19798,15 @@ exports[`Storyshots Standalone/FileUpload MultiImageSelector 1`] = `
                                             spacing={1}
                                           >
                                             <div
-                                              className="standalone-fileupload--multi-image-story-MuiGrid-root standalone-fileupload--multi-image-story-CcMultiImage-rootContainer-19 standalone-fileupload--multi-image-story-MuiGrid-container standalone-fileupload--multi-image-story-MuiGrid-spacing-xs-1"
+                                              className="standalone-fileupload--multi-image-story-MuiGrid-root standalone-fileupload--multi-image-story-CcMultiImage-rootContainer-20 standalone-fileupload--multi-image-story-MuiGrid-container standalone-fileupload--multi-image-story-MuiGrid-spacing-xs-1"
                                             >
                                               <WithStyles(ForwardRef(Grid))
-                                                className="standalone-fileupload--multi-image-story-CcMultiImage-imageItem-20"
+                                                className="standalone-fileupload--multi-image-story-CcMultiImage-imageItem-21"
                                                 item={true}
                                                 xs={12}
                                               >
                                                 <ForwardRef(Grid)
-                                                  className="standalone-fileupload--multi-image-story-CcMultiImage-imageItem-20"
+                                                  className="standalone-fileupload--multi-image-story-CcMultiImage-imageItem-21"
                                                   classes={
                                                     Object {
                                                       "align-content-xs-center": "standalone-fileupload--multi-image-story-MuiGrid-align-content-xs-center",
@@ -19918,15 +19918,16 @@ exports[`Storyshots Standalone/FileUpload MultiImageSelector 1`] = `
                                                   xs={12}
                                                 >
                                                   <div
-                                                    className="standalone-fileupload--multi-image-story-MuiGrid-root standalone-fileupload--multi-image-story-CcMultiImage-imageItem-20 standalone-fileupload--multi-image-story-MuiGrid-item standalone-fileupload--multi-image-story-MuiGrid-grid-xs-12"
+                                                    className="standalone-fileupload--multi-image-story-MuiGrid-root standalone-fileupload--multi-image-story-CcMultiImage-imageItem-21 standalone-fileupload--multi-image-story-MuiGrid-item standalone-fileupload--multi-image-story-MuiGrid-grid-xs-12"
                                                   >
                                                     <Memo(ImageBox)
+                                                      disableBackground={true}
                                                       image="https://via.placeholder.com/128"
                                                       onFilesDropped={[Function]}
                                                       onNextImage={[Function]}
                                                     >
                                                       <div
-                                                        className="standalone-fileupload--multi-image-story-CcImageBox-root-25 standalone-fileupload--multi-image-story-CcImageBox-clickable-26"
+                                                        className="standalone-fileupload--multi-image-story-CcImageBox-root-26 standalone-fileupload--multi-image-story-CcImageBox-clickable-28"
                                                         onClick={[Function]}
                                                         onDragOver={[Function]}
                                                         onDrop={[Function]}
@@ -19938,11 +19939,11 @@ exports[`Storyshots Standalone/FileUpload MultiImageSelector 1`] = `
                                                         }
                                                       >
                                                         <WithStyles(ForwardRef(IconButton))
-                                                          className="standalone-fileupload--multi-image-story-CcImageBox-nextBtn-32"
+                                                          className="standalone-fileupload--multi-image-story-CcImageBox-nextBtn-34"
                                                           onClick={[Function]}
                                                         >
                                                           <ForwardRef(IconButton)
-                                                            className="standalone-fileupload--multi-image-story-CcImageBox-nextBtn-32"
+                                                            className="standalone-fileupload--multi-image-story-CcImageBox-nextBtn-34"
                                                             classes={
                                                               Object {
                                                                 "colorInherit": "standalone-fileupload--multi-image-story-MuiIconButton-colorInherit",
@@ -19960,14 +19961,14 @@ exports[`Storyshots Standalone/FileUpload MultiImageSelector 1`] = `
                                                           >
                                                             <WithStyles(ForwardRef(ButtonBase))
                                                               centerRipple={true}
-                                                              className="standalone-fileupload--multi-image-story-MuiIconButton-root standalone-fileupload--multi-image-story-CcImageBox-nextBtn-32"
+                                                              className="standalone-fileupload--multi-image-story-MuiIconButton-root standalone-fileupload--multi-image-story-CcImageBox-nextBtn-34"
                                                               disabled={false}
                                                               focusRipple={true}
                                                               onClick={[Function]}
                                                             >
                                                               <ForwardRef(ButtonBase)
                                                                 centerRipple={true}
-                                                                className="standalone-fileupload--multi-image-story-MuiIconButton-root standalone-fileupload--multi-image-story-CcImageBox-nextBtn-32"
+                                                                className="standalone-fileupload--multi-image-story-MuiIconButton-root standalone-fileupload--multi-image-story-CcImageBox-nextBtn-34"
                                                                 classes={
                                                                   Object {
                                                                     "disabled": "Mui-disabled",
@@ -19980,7 +19981,7 @@ exports[`Storyshots Standalone/FileUpload MultiImageSelector 1`] = `
                                                                 onClick={[Function]}
                                                               >
                                                                 <button
-                                                                  className="standalone-fileupload--multi-image-story-MuiButtonBase-root standalone-fileupload--multi-image-story-MuiIconButton-root standalone-fileupload--multi-image-story-CcImageBox-nextBtn-32"
+                                                                  className="standalone-fileupload--multi-image-story-MuiButtonBase-root standalone-fileupload--multi-image-story-MuiIconButton-root standalone-fileupload--multi-image-story-CcImageBox-nextBtn-34"
                                                                   disabled={false}
                                                                   onBlur={[Function]}
                                                                   onClick={[Function]}
@@ -20066,7 +20067,7 @@ exports[`Storyshots Standalone/FileUpload MultiImageSelector 1`] = `
                                                         </WithStyles(ForwardRef(IconButton))>
                                                         <img
                                                           alt=""
-                                                          className="standalone-fileupload--multi-image-story-CcImageBox-image-29"
+                                                          className="standalone-fileupload--multi-image-story-CcImageBox-image-31"
                                                           src="https://via.placeholder.com/128"
                                                         />
                                                       </div>
@@ -20599,11 +20600,11 @@ exports[`Storyshots Standalone/FileUpload MultiImageSelector 1`] = `
                                                           className="standalone-fileupload--multi-image-story-MuiTypography-root standalone-fileupload--multi-image-story-MuiTypography-body2 standalone-fileupload--multi-image-story-MuiTypography-alignRight"
                                                         >
                                                           <WithStyles(ForwardRef(Link))
-                                                            className="standalone-fileupload--multi-image-story-CcMultiImage-clickable-18"
+                                                            className="standalone-fileupload--multi-image-story-CcMultiImage-clickable-19"
                                                             onClick={[Function]}
                                                           >
                                                             <ForwardRef(Link)
-                                                              className="standalone-fileupload--multi-image-story-CcMultiImage-clickable-18"
+                                                              className="standalone-fileupload--multi-image-story-CcMultiImage-clickable-19"
                                                               classes={
                                                                 Object {
                                                                   "button": "standalone-fileupload--multi-image-story-MuiLink-button",
@@ -20617,7 +20618,7 @@ exports[`Storyshots Standalone/FileUpload MultiImageSelector 1`] = `
                                                               onClick={[Function]}
                                                             >
                                                               <WithStyles(ForwardRef(Typography))
-                                                                className="standalone-fileupload--multi-image-story-MuiLink-root standalone-fileupload--multi-image-story-MuiLink-underlineHover standalone-fileupload--multi-image-story-CcMultiImage-clickable-18"
+                                                                className="standalone-fileupload--multi-image-story-MuiLink-root standalone-fileupload--multi-image-story-MuiLink-underlineHover standalone-fileupload--multi-image-story-CcMultiImage-clickable-19"
                                                                 color="primary"
                                                                 component="a"
                                                                 onBlur={[Function]}
@@ -20626,7 +20627,7 @@ exports[`Storyshots Standalone/FileUpload MultiImageSelector 1`] = `
                                                                 variant="inherit"
                                                               >
                                                                 <ForwardRef(Typography)
-                                                                  className="standalone-fileupload--multi-image-story-MuiLink-root standalone-fileupload--multi-image-story-MuiLink-underlineHover standalone-fileupload--multi-image-story-CcMultiImage-clickable-18"
+                                                                  className="standalone-fileupload--multi-image-story-MuiLink-root standalone-fileupload--multi-image-story-MuiLink-underlineHover standalone-fileupload--multi-image-story-CcMultiImage-clickable-19"
                                                                   classes={
                                                                     Object {
                                                                       "alignCenter": "standalone-fileupload--multi-image-story-MuiTypography-alignCenter",
@@ -20669,7 +20670,7 @@ exports[`Storyshots Standalone/FileUpload MultiImageSelector 1`] = `
                                                                   variant="inherit"
                                                                 >
                                                                   <a
-                                                                    className="standalone-fileupload--multi-image-story-MuiTypography-root standalone-fileupload--multi-image-story-MuiLink-root standalone-fileupload--multi-image-story-MuiLink-underlineHover standalone-fileupload--multi-image-story-CcMultiImage-clickable-18 standalone-fileupload--multi-image-story-MuiTypography-colorPrimary"
+                                                                    className="standalone-fileupload--multi-image-story-MuiTypography-root standalone-fileupload--multi-image-story-MuiLink-root standalone-fileupload--multi-image-story-MuiLink-underlineHover standalone-fileupload--multi-image-story-CcMultiImage-clickable-19 standalone-fileupload--multi-image-story-MuiTypography-colorPrimary"
                                                                     onBlur={[Function]}
                                                                     onClick={[Function]}
                                                                     onFocus={[Function]}
@@ -20694,7 +20695,7 @@ exports[`Storyshots Standalone/FileUpload MultiImageSelector 1`] = `
                                     <input
                                       accept="image/*"
                                       capture="false"
-                                      className="standalone-fileupload--multi-image-story-CcMultiImage-uploadInput-17"
+                                      className="standalone-fileupload--multi-image-story-CcMultiImage-uploadInput-18"
                                       multiple={true}
                                       onChange={[Function]}
                                       type="file"

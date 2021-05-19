@@ -52,6 +52,10 @@ export interface ImageBoxProps {
 	 */
 	onPrevImage?: () => void;
 	/**
+	 * Disable background color?
+	 */
+	disableBackground?: boolean;
+	/**
 	 * Custom CSS styles
 	 */
 	classes?: ClassNameMap<keyof ReturnType<typeof useStyles>>;
@@ -60,7 +64,6 @@ export interface ImageBoxProps {
 const useStyles = makeStyles(
 	(theme) => ({
 		root: {
-			backgroundColor: theme.palette.secondary.light,
 			borderRadius: 8,
 			position: "relative",
 			height: "100%",
@@ -74,6 +77,9 @@ const useStyles = makeStyles(
 				opacity: 1,
 				transition: "visibility 0s linear 0s, opacity 300ms",
 			},
+		},
+		background: {
+			backgroundColor: theme.palette.secondary.light,
 		},
 		clickable: {
 			cursor: "pointer",
@@ -136,6 +142,7 @@ const ImageBox = (props: ImageBoxProps) => {
 		onRemove,
 		onNextImage,
 		onPrevImage,
+		disableBackground,
 	} = props;
 	const classes = useThemeStyles(props);
 	const { handleDragOver, handleDrop, dragging } = useDropZone(onFilesDropped);
@@ -178,6 +185,7 @@ const ImageBox = (props: ImageBoxProps) => {
 				style={{ width, height }}
 				className={combineClassNames([
 					classes.root,
+					!disableBackground && classes.background,
 					dragging && classes.dragging,
 					onClick !== null && classes.clickable,
 				])}

@@ -326,6 +326,7 @@ const MultiImage = (props: MultiImageProps) => {
 								images[currentImage] ? undefined : readOnly ? null : startUpload
 							}
 							classes={subClasses?.imageBox}
+							disableBackground
 						/>
 					</Grid>
 					{!readOnly && (
