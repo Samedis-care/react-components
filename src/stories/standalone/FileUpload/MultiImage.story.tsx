@@ -66,7 +66,18 @@ export const MultiImageStory = (): React.ReactElement => {
 				capture={capture}
 				additionalDialogContent={[
 					<div key={"howto"}>
-						<HowToBox labels={["Step 1", "Step 2", "Step 3", "Step 4"]} />
+						<HowToBox
+							labels={
+								boolean("Long Help Text?", false)
+									? [
+											"Vivamus ac ante scelerisque, tincidunt lacus at, porttitor neque. Nunc turpis ante, dictum eu quam a, ultricies ultricies massa. Nam eu odio vel nisi faucibus fringilla dictum non odio. Quisque ullamcorper lorem vel sem porttitor, vitae congue libero dictum. Donec vel interdum orci. Nullam sed elit commodo, condimentum arcu ac, dapibus metus. Quisque dapibus ante eget erat suscipit varius. Nulla facilisi.",
+											"Pellentesque dapibus nibh mattis massa faucibus, quis malesuada purus dictum. Sed quis posuere massa. Nunc in rhoncus ligula. Fusce eget dictum massa, a venenatis dui. Maecenas ac mauris id velit finibus condimentum. Vivamus lacinia ut augue ac posuere. Nullam accumsan lorem id pulvinar posuere. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Vivamus eget diam vitae ipsum iaculis efficitur nec sed orci. Cras ut tristique metus. In consectetur dui vitae odio tincidunt, vitae suscipit orci pretium.",
+											"Morbi tortor quam, aliquet quis porta eget, pulvinar quis turpis. Phasellus nec egestas arcu, ac auctor sapien. Aliquam facilisis vulputate tortor et rutrum. In congue arcu nec ipsum maximus, eu efficitur arcu ultrices. Aliquam id orci quis felis tempor porttitor. Nullam gravida eget purus ut cursus. Cras ornare lorem lectus, et semper nulla porta at. Quisque sed nulla et erat convallis pharetra a nec nulla. Morbi molestie enim mollis ultricies tempus.",
+											"Pellentesque feugiat neque mi, id sagittis enim accumsan sit amet. Interdum et malesuada fames ac ante ipsum primis in faucibus. Suspendisse pretium ante ut diam blandit aliquam. Vestibulum aliquet elementum quam et porttitor. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Nunc malesuada cursus gravida. Nunc id euismod diam. Sed viverra tristique felis, sed feugiat ex facilisis sit amet. Praesent sed tempus massa, ac fermentum nisl. Vestibulum vitae arcu aliquet, eleifend metus ac, mollis purus.",
+									  ]
+									: ["Step 1", "Step 2", "Step 3", "Step 4"]
+							}
+						/>
 					</div>,
 				]}
 				convertImagesTo={select(

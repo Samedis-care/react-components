@@ -405,11 +405,7 @@ const MultiImage = (props: MultiImageProps) => {
 										md={previewSize ? undefined : 6}
 										lg={previewSize ? undefined : 3}
 										key={`add-${i}`}
-										style={
-											previewSize
-												? { width: previewSize, height: previewSize }
-												: undefined
-										}
+										style={previewSize ? { width: previewSize } : undefined}
 									>
 										{elem}
 									</Grid>
