@@ -274,7 +274,7 @@ export const useFormContext = (): FormContextData => {
 
 export type FormContextDataLite = Pick<
 	FormContextData,
-	"onlySubmitMounted" | "onlyValidateMounted" | "readOnly"
+	"model" | "onlySubmitMounted" | "onlyValidateMounted" | "readOnly"
 >;
 export const FormContextLite = React.createContext<FormContextDataLite | null>(
 	null
@@ -713,11 +713,12 @@ const Form = <
 
 	const formContextDataLite: FormContextDataLite = useMemo(
 		() => ({
+			model: (model as unknown) as Model<ModelFieldName, PageVisibility, never>,
 			onlySubmitMounted: !!onlySubmitMounted,
 			onlyValidateMounted: !!onlyValidateMounted,
 			readOnly: !!readOnly,
 		}),
-		[onlySubmitMounted, onlyValidateMounted, readOnly]
+		[model, onlySubmitMounted, onlyValidateMounted, readOnly]
 	);
 
 	if (isLoading || isObjectEmpty(values)) {
