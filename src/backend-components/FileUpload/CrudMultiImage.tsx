@@ -7,7 +7,8 @@ import { Connector, PageVisibility } from "../../backend-integration";
 import { ErrorComponentProps } from "../Form";
 import { Loader, MultiImage } from "../../standalone";
 
-export interface CrudMultiImageProps extends Omit<MultiImageProps, "images"> {
+export interface CrudMultiImageProps
+	extends Omit<MultiImageProps, "images" | "onChange"> {
 	/**
 	 * The backend connector used as CRUD interface
 	 */
@@ -34,6 +35,13 @@ export interface CrudMultiImageProps extends Omit<MultiImageProps, "images"> {
 	deserialize: (
 		data: Record<string, unknown>
 	) => Promise<BackendMultiImageImage> | BackendMultiImageImage;
+	/**
+	 * @see MultiImageProps.onChange
+	 */
+	onChange?: (
+		name: string | undefined,
+		newImages: BackendMultiImageImage[]
+	) => void;
 }
 
 export interface BackendMultiImageImage extends MultiImageImage {
