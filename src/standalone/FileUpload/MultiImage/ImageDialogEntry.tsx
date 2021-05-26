@@ -142,8 +142,8 @@ const ImageDialogEntry = (props: ImageDialogEntryProps) => {
 					width={previewSize}
 					height={previewSize}
 					image={img.image}
-					onRemove={removeImage}
-					onFilesDropped={replaceImage}
+					onRemove={img.readOnly ? undefined : removeImage}
+					onFilesDropped={img.readOnly ? undefined : replaceImage}
 					classes={subClasses?.imageBox}
 				/>
 			</div>

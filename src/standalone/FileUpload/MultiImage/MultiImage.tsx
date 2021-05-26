@@ -39,6 +39,10 @@ export interface MultiImageImage {
 	 * The file name of the image
 	 */
 	name: string;
+	/**
+	 * Is the image readonly? Disables delete and replace functionality
+	 */
+	readOnly?: boolean;
 }
 
 export type MultiImageManipulationCallback = (
