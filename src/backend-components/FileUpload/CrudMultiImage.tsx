@@ -147,10 +147,6 @@ const CrudMultiImage = (props: CrudMultiImageProps) => {
 				) as BackendMultiImageImage[]).forEach((img) => {
 					// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 					finalImages[img.index!] = img;
-					if (onPrimaryChange && img.primary) {
-						// backend will assign id
-						onPrimaryChange(name, img.id);
-					}
 				});
 				uploadedImages.forEach(
 					// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -159,6 +155,11 @@ const CrudMultiImage = (props: CrudMultiImageProps) => {
 
 				// update state
 				setImages(finalImages);
+				if (onPrimaryChange)
+					onPrimaryChange(
+						name,
+						finalImages.find((img) => img.primary)?.id ?? ""
+					);
 			} catch (e) {
 				setError(e as Error);
 			}
@@ -205,7 +206,7 @@ const CrudMultiImage = (props: CrudMultiImageProps) => {
 			{error && <ErrorComponent error={error} />}
 			<MultiImage
 				{...otherProps}
-				images={additionalImages ? images.concat(additionalImages) : images}
+				images={additionalImages ? additionalImages.concat(images) : images}
 				onChange={handleChange}
 			/>
 		</>

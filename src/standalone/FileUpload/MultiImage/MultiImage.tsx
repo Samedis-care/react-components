@@ -214,7 +214,7 @@ const MultiImage = (props: MultiImageProps) => {
 	// update primary image ID if it becomes invalid
 	useEffect(() => {
 		if (!onPrimaryChange) return;
-		if (primaryImg && primaryImg.id === primary) return;
+		if (!primaryImg || primaryImg.id === primary) return;
 		onPrimaryChange(name, primaryImg.id);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [onPrimaryChange, primary, primaryImg]);
@@ -281,8 +281,8 @@ const MultiImage = (props: MultiImageProps) => {
 			if (files.length === 0) return;
 
 			const newImages: MultiImageImage[] = await processFiles(files);
-			if (onPrimaryChange) onPrimaryChange(name, newImages[0].id);
 			onChange(name, images.concat(newImages));
+			if (onPrimaryChange) onPrimaryChange(name, newImages[0].id);
 		},
 		[onChange, name, images, processFiles, onPrimaryChange]
 	);
