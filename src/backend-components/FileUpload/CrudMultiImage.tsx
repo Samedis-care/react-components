@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import {
 	MultiImageImage,
+	MultiImageNewIdPrefix,
 	MultiImageProps,
 } from "../../standalone/FileUpload/MultiImage/MultiImage";
 import { Connector, PageVisibility } from "../../backend-integration";
@@ -9,6 +10,10 @@ import { Loader, MultiImage } from "../../standalone";
 
 export interface CrudMultiImageProps
 	extends Omit<MultiImageProps, "images" | "onChange"> {
+	/**
+	 * Optional additional images to display
+	 */
+	additionalImages?: MultiImageImage[];
 	/**
 	 * The backend connector used as CRUD interface
 	 */
@@ -45,7 +50,7 @@ export interface CrudMultiImageProps
 }
 
 export interface BackendMultiImageImage extends MultiImageImage {
-	id: string;
+	primary?: boolean;
 	index?: number;
 }
 
@@ -56,9 +61,10 @@ const CrudMultiImage = (props: CrudMultiImageProps) => {
 		serialize,
 		deserialize,
 		onChange,
+		additionalImages,
 		...otherProps
 	} = props;
-	const { name } = otherProps;
+	const { name, primary, onPrimaryChange } = otherProps;
 
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<Error | null>(null);
@@ -67,27 +73,40 @@ const CrudMultiImage = (props: CrudMultiImageProps) => {
 
 	const handleChange = useCallback(
 		async (_, newImages: (MultiImageImage | BackendMultiImageImage)[]) => {
-			newImages = newImages.map((img, n) => ({ ...img, index: n }));
+			if (additionalImages)
+				newImages = newImages.filter((img) => !additionalImages.includes(img));
+
+			newImages = newImages.map((img, n) => ({
+				...img,
+				index: n,
+				primary: primary === img.id,
+			}));
 			// upload new/changed files
 			const uploadPromise = Promise.all(
 				newImages
-					.filter((img) => !("id" in img) || !images.includes(img))
+					.filter(
+						(img) =>
+							img.id.startsWith(MultiImageNewIdPrefix) || !images.includes(img)
+					)
 					.map(async (img) => {
 						// check if we have to replace a file (update)
 						const oldImg =
-							"id" in img && images.find((oldImg) => oldImg.id === img.id);
+							!img.id.startsWith(MultiImageNewIdPrefix) &&
+							images.find((oldImg) => oldImg.id === img.id);
 						if (oldImg) {
 							return {
 								response: await connector.update(
 									await serialize(img, oldImg.id)
 								),
 								index: (img as BackendMultiImageImage).index,
+								primary: (img as BackendMultiImageImage).primary,
 							};
 						}
 						// or create new
 						return {
 							response: await connector.create(await serialize(img, null)),
 							index: (img as BackendMultiImageImage).index,
+							primary: (img as BackendMultiImageImage).primary,
 						};
 					})
 					.map(async (request) => {
@@ -95,6 +114,7 @@ const CrudMultiImage = (props: CrudMultiImageProps) => {
 						return {
 							...deserialize(result.response[0]),
 							index: result.index,
+							primary: result.primary,
 						};
 					})
 			);
@@ -103,7 +123,11 @@ const CrudMultiImage = (props: CrudMultiImageProps) => {
 				images
 					.filter(
 						(img) =>
-							!newImages.find((other) => "id" in other && other.id === img.id)
+							!newImages.find(
+								(other) =>
+									!other.id.startsWith(MultiImageNewIdPrefix) &&
+									other.id === img.id
+							)
 					)
 					.map((img) => img.id)
 			);
@@ -118,11 +142,16 @@ const CrudMultiImage = (props: CrudMultiImageProps) => {
 
 				const finalImages: BackendMultiImageImage[] = [];
 				(newImages.filter(
-					(img) => "id" in img && images.includes(img)
-				) as BackendMultiImageImage[]).forEach(
+					(img) =>
+						!img.id.startsWith(MultiImageNewIdPrefix) && images.includes(img)
+				) as BackendMultiImageImage[]).forEach((img) => {
 					// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-					(img) => (finalImages[img.index!] = img)
-				);
+					finalImages[img.index!] = img;
+					if (onPrimaryChange && img.primary) {
+						// backend will assign id
+						onPrimaryChange(name, img.id);
+					}
+				});
 				uploadedImages.forEach(
 					// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 					(img) => (finalImages[(img as BackendMultiImageImage).index!] = img)
@@ -134,7 +163,16 @@ const CrudMultiImage = (props: CrudMultiImageProps) => {
 				setError(e as Error);
 			}
 		},
-		[connector, deserialize, images, serialize]
+		[
+			additionalImages,
+			connector,
+			deserialize,
+			images,
+			primary,
+			onPrimaryChange,
+			name,
+			serialize,
+		]
 	);
 
 	useEffect(() => {
@@ -165,7 +203,11 @@ const CrudMultiImage = (props: CrudMultiImageProps) => {
 	return (
 		<>
 			{error && <ErrorComponent error={error} />}
-			<MultiImage {...otherProps} images={images} onChange={handleChange} />
+			<MultiImage
+				{...otherProps}
+				images={additionalImages ? images.concat(additionalImages) : images}
+				onChange={handleChange}
+			/>
 		</>
 	);
 };

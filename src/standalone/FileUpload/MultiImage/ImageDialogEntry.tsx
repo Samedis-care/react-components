@@ -32,6 +32,11 @@ export interface ImageDialogEntryProps
 	 */
 	changeImages: (cb: MultiImageManipulationCallback) => void;
 	/**
+	 * Function to update primary image ID
+	 * @param newId The new primary image ID
+	 */
+	changePrimary: (newId: string) => void;
+	/**
 	 * Process image file
 	 */
 	processFile: MultiImageProcessFile;
@@ -81,6 +86,7 @@ const ImageDialogEntry = (props: ImageDialogEntryProps) => {
 		img,
 		isPrimary,
 		changeImages,
+		changePrimary,
 		processFile,
 		subClasses,
 		onDelete,
@@ -89,14 +95,8 @@ const ImageDialogEntry = (props: ImageDialogEntryProps) => {
 	const classes = useThemeStyles(props);
 
 	const setPrimary = useCallback(() => {
-		changeImages((images) =>
-			images.map((image) =>
-				image.primary === (img === image)
-					? image
-					: { ...image, primary: img === image }
-			)
-		);
-	}, [changeImages, img]);
+		changePrimary(img.id);
+	}, [changePrimary, img]);
 
 	const removeImage = useCallback(async () => {
 		if (onDelete) {
@@ -107,11 +107,7 @@ const ImageDialogEntry = (props: ImageDialogEntryProps) => {
 			}
 		}
 		changeImages((images) => {
-			const newImages = images.filter((image) => image !== img);
-			if (newImages.length > 0 && !newImages.find((img) => img.primary)) {
-				newImages[0] = { ...newImages[0], primary: true };
-			}
-			return newImages;
+			return images.filter((image) => image !== img);
 		});
 	}, [onDelete, changeImages, img]);
 

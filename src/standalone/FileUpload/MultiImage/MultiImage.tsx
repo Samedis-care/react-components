@@ -28,9 +28,9 @@ import { Styles } from "@material-ui/core/styles/withStyles";
 
 export interface MultiImageImage {
 	/**
-	 * Is the image primary?
+	 * A unique identifier for the image
 	 */
-	primary: boolean;
+	id: string;
 	/**
 	 * The URL/Data-URI of the image
 	 */
@@ -77,15 +77,25 @@ export interface MultiImageProps {
 	placeholderImage?: string;
 	/**
 	 * The current images
-	 * The first image is considered "primary"
+	 * The first image is considered "primary" unless primary is set
 	 */
 	images: MultiImageImage[];
+	/**
+	 * The primary image ID
+	 */
+	primary: string | null;
 	/**
 	 * Change event
 	 * @param name The name of this field
 	 * @param newImages The new images
 	 */
 	onChange?: (name: string | undefined, newImages: MultiImageImage[]) => void;
+	/**
+	 * Change event for primary image id
+	 * @param name The name of this field
+	 * @param primary The new primary image ID
+	 */
+	onPrimaryChange?: (name: string | undefined, primary: string) => void;
 	/**
 	 * Callback for delete confirmation
 	 * @param image The image that the user wants to delete
@@ -168,13 +178,7 @@ const useThemeStyles = makeThemeStyles<MultiImageProps, MultiImageClassKey>(
 	useStyles
 );
 
-const clearPrimary = (img: MultiImageImage): MultiImageImage =>
-	!img.primary
-		? img
-		: {
-				...img,
-				primary: false,
-		  };
+export const MultiImageNewIdPrefix = "MultiImage-New-";
 
 const MultiImage = (props: MultiImageProps) => {
 	const {
@@ -183,6 +187,7 @@ const MultiImage = (props: MultiImageProps) => {
 		editLabel,
 		additionalDialogContent,
 		images,
+		primary,
 		placeholderImage,
 		uploadImage,
 		readOnly,
@@ -191,6 +196,7 @@ const MultiImage = (props: MultiImageProps) => {
 		convertImagesTo,
 		downscale,
 		onChange,
+		onPrimaryChange,
 		subClasses,
 		onDelete,
 	} = props;
@@ -199,11 +205,19 @@ const MultiImage = (props: MultiImageProps) => {
 	const classes = useThemeStyles(props);
 
 	const primaryImg = useMemo(
-		() => images.find((img) => img.primary) ?? images[0],
-		[images]
+		() => images.find((img) => img.id === primary) ?? images[0],
+		[images, primary]
 	);
 	const getPrimaryImageIndex = () =>
 		images.length === 0 ? 0 : images.indexOf(primaryImg);
+
+	// update primary image ID if it becomes invalid
+	useEffect(() => {
+		if (!onPrimaryChange) return;
+		if (primaryImg && primaryImg.id === primary) return;
+		onPrimaryChange(name, primaryImg.id);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [onPrimaryChange, primary, primaryImg]);
 
 	const [dialogOpen, setDialogOpen] = useState(false);
 	const [currentImage, setCurrentImage] = useState(getPrimaryImageIndex);
@@ -238,15 +252,12 @@ const MultiImage = (props: MultiImageProps) => {
 	);
 
 	const processFiles = useCallback(
-		async (
-			files: FileList,
-			markFirstPrimary: boolean
-		): Promise<MultiImageImage[]> => {
+		async (files: FileList): Promise<MultiImageImage[]> => {
 			const fileArr = Array.from(files);
 			return (await Promise.all(fileArr.map(processFile))).map(
 				(img, index) => ({
+					id: `${MultiImageNewIdPrefix}${new Date().getTime()}-${index}`,
 					image: img,
-					primary: markFirstPrimary && index === 0,
 					name: fileArr[index].name,
 				})
 			);
@@ -257,7 +268,7 @@ const MultiImage = (props: MultiImageProps) => {
 	const handleUploadViaDrop = useCallback(
 		async (files: FileList) => {
 			if (!onChange) return;
-			const newImages = await processFiles(files, false);
+			const newImages = await processFiles(files);
 
 			onChange(name, images.concat(newImages));
 		},
@@ -267,11 +278,13 @@ const MultiImage = (props: MultiImageProps) => {
 	const handlePreviewDrop = useCallback(
 		async (files: FileList) => {
 			if (!onChange) return;
+			if (files.length === 0) return;
 
-			const newImages: MultiImageImage[] = await processFiles(files, true);
-			onChange(name, images.map(clearPrimary).concat(newImages));
+			const newImages: MultiImageImage[] = await processFiles(files);
+			if (onPrimaryChange) onPrimaryChange(name, newImages[0].id);
+			onChange(name, images.concat(newImages));
 		},
-		[onChange, name, images, processFiles]
+		[onChange, name, images, processFiles, onPrimaryChange]
 	);
 
 	const handleUpload = useCallback(
@@ -306,6 +319,14 @@ const MultiImage = (props: MultiImageProps) => {
 			onChange(name, process(images));
 		},
 		[onChange, name, images]
+	);
+
+	const changePrimary = useCallback(
+		(id: string) => {
+			if (!onPrimaryChange) return;
+			onPrimaryChange(name, id);
+		},
+		[onPrimaryChange, name]
 	);
 
 	return (
@@ -379,6 +400,7 @@ const MultiImage = (props: MultiImageProps) => {
 										isPrimary={img === primaryImg}
 										processFile={processFile}
 										changeImages={manipulateImages}
+										changePrimary={changePrimary}
 										onDelete={onDelete}
 										key={`img-${i}`}
 										classes={subClasses?.imageDialogEntry}
