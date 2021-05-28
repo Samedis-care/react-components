@@ -341,7 +341,7 @@ const MultiImage = (props: MultiImageProps) => {
 							image={
 								images[currentImage]?.image ?? placeholderImage ?? uploadImage
 							}
-							onPrevImage={currentImage === 0 ? undefined : showPrevImage}
+							onPrevImage={currentImage <= 0 ? undefined : showPrevImage}
 							onNextImage={
 								currentImage < images.length - 1 ? showNextImage : undefined
 							}
