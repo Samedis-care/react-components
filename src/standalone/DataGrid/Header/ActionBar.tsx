@@ -52,7 +52,7 @@ const ActionBar = () => {
 			Object.fromEntries(
 				Object.entries(colState).map(([field, def]) => [
 					field,
-					{ ...def, filter: defaultColumnState[field].filter },
+					{ ...def, filter: defaultColumnState[field]?.filter },
 				])
 			)
 		);
