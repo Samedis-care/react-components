@@ -208,8 +208,7 @@ const MultiImage = (props: MultiImageProps) => {
 		() => images.find((img) => img.id === primary) ?? images[0],
 		[images, primary]
 	);
-	const getPrimaryImageIndex = () =>
-		images.length === 0 ? 0 : images.indexOf(primaryImg);
+	const getPrimaryImageIndex = () => images.indexOf(primaryImg);
 
 	// update primary image ID if it becomes invalid
 	useEffect(() => {
@@ -304,7 +303,7 @@ const MultiImage = (props: MultiImageProps) => {
 	useEffect(() => {
 		setCurrentImage(getPrimaryImageIndex);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [primaryImg]);
+	}, [getPrimaryImageIndex()]);
 
 	const showPrevImage = useCallback(() => {
 		setCurrentImage((prev) => (prev === 0 ? prev : prev - 1));
