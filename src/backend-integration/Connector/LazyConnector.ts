@@ -301,6 +301,15 @@ class LazyConnector<
 		this.queue = [];
 		this.onAfterOperation();
 	};
+
+	/**
+	 * Maps a potentially fake ID to a real ID
+	 * @param id The ID
+	 * @remarks Only works after workQueue has been called
+	 */
+	public mapId(id: string): string {
+		return this.fakeIdMapping[id] ?? id;
+	}
 }
 
 export default LazyConnector;
