@@ -33,24 +33,18 @@ export interface PortalLayoutHeaderProps {
 const PortalLayoutHeader = (props: PortalLayoutHeaderProps) => {
 	const { mobile, customClasses, toggleMenu, contents } = props;
 
-	if (mobile) {
-		return (
-			<AppBar position={"relative"} classes={customClasses?.appBar}>
-				<Toolbar classes={customClasses?.toolbar}>
+	return (
+		<AppBar position={"relative"} classes={customClasses?.appBar}>
+			<Toolbar classes={customClasses?.toolbar}>
+				{mobile && (
 					<IconButton onClick={toggleMenu}>
 						<MenuIcon />
 					</IconButton>
-					{contents}
-				</Toolbar>
-			</AppBar>
-		);
-	} else {
-		return (
-			<AppBar position={"relative"} classes={customClasses?.appBar}>
-				<Toolbar classes={customClasses?.toolbar}>{contents}</Toolbar>
-			</AppBar>
-		);
-	}
+				)}
+				{contents}
+			</Toolbar>
+		</AppBar>
+	);
 };
 
 export default React.memo(PortalLayoutHeader);

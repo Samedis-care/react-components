@@ -180,28 +180,32 @@ const RenderLayout = (props: PortalLayoutProps & IRenderProps) => {
 				<div className={classes.topLeft}>{props.topLeft}</div>
 			)}
 			<div id={props.headerId} className={classes.header}>
-				<Header
-					contents={headerContent}
-					toggleMenu={toggleMenu}
-					mobile={mobile}
-					customClasses={props.customClasses?.header}
-				/>
+				{headerContent && (
+					<Header
+						contents={headerContent}
+						toggleMenu={toggleMenu}
+						mobile={mobile && !!menuContent}
+						customClasses={props.customClasses?.header}
+					/>
+				)}
 			</div>
 			<div id={props.menuId} className={classes.menu}>
-				<Menu
-					menuOpen={menuOpen}
-					drawerWidth={drawerWidth}
-					toggleMenu={toggleMenu}
-					mobile={mobile}
-					items={
-						<>
-							{mobile && props.variant === "basic" && (
-								<div className={classes.mobileTopLeft}>{props.topLeft}</div>
-							)}
-							{menuContent}
-						</>
-					}
-				/>
+				{menuContent && (
+					<Menu
+						menuOpen={menuOpen}
+						drawerWidth={drawerWidth}
+						toggleMenu={toggleMenu}
+						mobile={mobile}
+						items={
+							<>
+								{mobile && props.variant === "basic" && (
+									<div className={classes.mobileTopLeft}>{props.topLeft}</div>
+								)}
+								{menuContent}
+							</>
+						}
+					/>
+				)}
 			</div>
 			<div id={props.mainId} className={classes.main}>
 				{content}
