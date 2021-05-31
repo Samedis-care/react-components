@@ -529,11 +529,16 @@ const Form = <
 					  )
 					: valuesRef.current
 			);
+
 			const newValues = onlySubmitMounted
 				? Object.assign({}, valuesRef.current, result[0])
 				: result[0];
 			valuesRef.current = newValues;
 			setValues(newValues);
+
+			setTouched((prev) =>
+				Object.fromEntries(Object.keys(prev).map((field) => [field, false]))
+			);
 
 			await Promise.all(
 				Object.values(postSubmitHandlers.current).map((handler) =>
@@ -645,38 +650,43 @@ const Form = <
 	]);
 
 	// Debug Helper (for React Devtools)
-	useCallback(() => {
-		/* eslint-disable no-console */
-		if (!serverData) {
-			console.log("Can't determine Dirty State, No server data present");
-			return;
-		}
+	useCallback(
+		(onlyDirty?: boolean) => {
+			/* eslint-disable no-console */
+			if (!serverData) {
+				console.log("Can't determine Dirty State, No server data present");
+				return;
+			}
 
-		console.log("Form Dirty Flag State:");
-		console.log(
-			"Form Dirty State:",
-			JSON.stringify(values) !== JSON.stringify(serverData[0])
-		);
-		console.log("Custom Dirty State:", customDirty);
-		console.log("Custom Dirty Counter:", customDirtyCounter);
-
-		console.log("Server Data:", serverData[0]);
-		console.log("Form Data:", values);
-
-		Object.keys(values).forEach((key) => {
-			const server: unknown = serverData[0][key as KeyT];
-			const form = values[key];
+			console.log("Form Dirty Flag State:");
 			console.log(
-				"Dirty[",
-				key,
-				"]: ByRef:",
-				server !== form,
-				"ByJSON:",
-				JSON.stringify(server) !== JSON.stringify(form)
+				"Form Dirty State:",
+				JSON.stringify(values) !== JSON.stringify(serverData[0])
 			);
-		});
-		/* eslint-enable no-console */
-	}, [customDirty, customDirtyCounter, serverData, values]);
+			console.log("Custom Dirty State:", customDirty);
+			console.log("Custom Dirty Counter:", customDirtyCounter);
+
+			console.log("Server Data:", serverData[0]);
+			console.log("Form Data:", values);
+
+			Object.keys(values).forEach((key) => {
+				const server: unknown = serverData[0][key as KeyT];
+				const form = values[key];
+				const dirty = JSON.stringify(server) !== JSON.stringify(form);
+				if (onlyDirty && !dirty) return;
+				console.log(
+					"Dirty[",
+					key,
+					"]: ByRef:",
+					server !== form,
+					"ByJSON:",
+					dirty
+				);
+			});
+			/* eslint-enable no-console */
+		},
+		[customDirty, customDirtyCounter, serverData, values]
+	);
 
 	// context and rendering
 	const Children = useMemo(() => React.memo(children), [children]);
