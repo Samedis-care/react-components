@@ -644,6 +644,40 @@ const Form = <
 		nestedFormName,
 	]);
 
+	// Debug Helper (for React Devtools)
+	useCallback(() => {
+		/* eslint-disable no-console */
+		if (!serverData) {
+			console.log("Can't determine Dirty State, No server data present");
+			return;
+		}
+
+		console.log("Form Dirty Flag State:");
+		console.log(
+			"Form Dirty State:",
+			JSON.stringify(values) !== JSON.stringify(serverData[0])
+		);
+		console.log("Custom Dirty State:", customDirty);
+		console.log("Custom Dirty Counter:", customDirtyCounter);
+
+		console.log("Server Data:", serverData[0]);
+		console.log("Form Data:", values);
+
+		Object.keys(values).forEach((key) => {
+			const server: unknown = serverData[0][key as KeyT];
+			const form = values[key];
+			console.log(
+				"Dirty[",
+				key,
+				"]: ByRef:",
+				server !== form,
+				"ByJSON:",
+				JSON.stringify(server) !== JSON.stringify(form)
+			);
+		});
+		/* eslint-enable no-console */
+	}, [customDirty, customDirtyCounter, serverData, values]);
+
 	// context and rendering
 	const Children = useMemo(() => React.memo(children), [children]);
 	const setError = useCallback(
