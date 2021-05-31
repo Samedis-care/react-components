@@ -62,6 +62,8 @@ const ExportMenuEntry = React.forwardRef(
 				setExportData(data);
 				setStatus(DataGridExportStatus.Ready);
 			} catch (e) {
+				// eslint-disable-next-line no-console
+				console.error("[Components-Care] DataGrid Export failed", e);
 				setExportData(e);
 				setStatus(DataGridExportStatus.Error);
 			}
