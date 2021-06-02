@@ -36,7 +36,7 @@ export enum DataGridExportStatus {
 // eslint-disable-next-line react/display-name
 const ExportMenuEntry = React.forwardRef(
 	(props: IDataGridExportMenuEntryProps, ref) => {
-		const { getAdditionalFilters, columns } = useDataGridProps();
+		const { getAdditionalFilters, columns, onError } = useDataGridProps();
 		const [columnsState] = useDataGridColumnState();
 		const [state] = useDataGridState();
 
@@ -64,6 +64,7 @@ const ExportMenuEntry = React.forwardRef(
 			} catch (e) {
 				// eslint-disable-next-line no-console
 				console.error("[Components-Care] DataGrid Export failed", e);
+				if (onError) onError(e);
 				setExportData(e);
 				setStatus(DataGridExportStatus.Error);
 			}
@@ -76,6 +77,7 @@ const ExportMenuEntry = React.forwardRef(
 			columns,
 			hiddenColumns,
 			lockedColumns,
+			onError,
 		]);
 
 		const finishExport = useCallback(() => {

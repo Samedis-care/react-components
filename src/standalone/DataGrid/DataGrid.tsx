@@ -186,6 +186,11 @@ export interface IDataGridCallbacks {
 		dataType: ModelFilterType,
 		filterType: FilterType
 	) => boolean;
+	/**
+	 * Callback for unhandled JS errors
+	 * @param err The unhandled error
+	 */
+	onError?: (err: Error) => void;
 }
 
 export type DataGridAdditionalFilters = Record<string, unknown>;
