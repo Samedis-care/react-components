@@ -290,9 +290,9 @@ const MultiImage = (props: MultiImageProps) => {
 		(evt: React.ChangeEvent<HTMLInputElement>) => {
 			const files = evt.target.files;
 			if (!files) return;
-			void handlePreviewDrop(files);
+			void handleUploadViaDrop(files);
 		},
-		[handlePreviewDrop]
+		[handleUploadViaDrop]
 	);
 
 	useEffect(() => {
