@@ -32,6 +32,7 @@ import CustomFilterDialog from "./CustomFilterDialog";
 import StatePersistence, {
 	DataGridPersistentStateContext,
 } from "./StatePersistence";
+import { IDataGridContentSelectRowViewProps } from "./Content/SelectRowView";
 
 export interface DataGridTheme extends Theming.BasicElementThemeFragment {
 	/* root elements from BasicElementThemeFragment defining main grid container visuals */
@@ -102,6 +103,14 @@ export type DataGridProps = IDataGridHeaderProps &
 			 */
 			onClick: (invert: boolean, ids: string[]) => void;
 		}[];
+		/**
+		 * Hides the footer
+		 */
+		disableFooter?: boolean;
+		/**
+		 * Custom selection control (instead of default checkbox)
+		 */
+		customSelectionControl?: React.ComponentType<IDataGridContentSelectRowViewProps>;
 	};
 
 export interface IDataGridLoadDataParameters {
@@ -265,6 +274,10 @@ export interface IDataGridColumnProps {
 	 * Disable selecting multiple entries (disables select all & delete all)
 	 */
 	prohibitMultiSelect?: boolean;
+	/**
+	 * Hide checkbox column
+	 */
+	disableSelection?: boolean;
 	/**
 	 * The default sort settings
 	 */
@@ -906,6 +919,8 @@ const DataGrid = (props: DataGridProps) => {
 		onSelectionChange,
 		defaultSort,
 		defaultFilter,
+		disableFooter,
+		disableSelection,
 	} = props;
 	const rowsPerPage = props.rowsPerPage || 25;
 
@@ -1098,11 +1113,17 @@ const DataGrid = (props: DataGridProps) => {
 								<Grid item xs className={classes.content}>
 									<Settings columns={columns} />
 									<CustomFilterDialog />
-									<Content columns={visibleColumns} rowsPerPage={rowsPerPage} />
+									<Content
+										columns={visibleColumns}
+										rowsPerPage={rowsPerPage}
+										disableSelection={disableSelection}
+									/>
 								</Grid>
-								<Grid item className={classes.footer}>
-									<Footer />
-								</Grid>
+								{!disableFooter && (
+									<Grid item className={classes.footer}>
+										<Footer />
+									</Grid>
+								)}
 							</DataGridColumnsWidthStateContext.Provider>
 						</DataGridColumnsStateContext.Provider>
 					</DataGridStateContext.Provider>

@@ -32,6 +32,10 @@ export interface DataActionBarViewProps {
 	 * @param label The label of the custom button
 	 */
 	handleCustomButtonClick: (label: string) => void;
+	/**
+	 * Disable select all button
+	 */
+	disableSelection: boolean;
 }
 
 const DataActionBarView = (props: DataActionBarViewProps) => {
@@ -40,19 +44,23 @@ const DataActionBarView = (props: DataActionBarViewProps) => {
 
 	return (
 		<Grid container>
-			<Grid item key={"select-all"}>
-				<ComponentWithLabel
-					control={<SelectAll />}
-					labelText={t("standalone.data-grid.footer.select-all")}
-					labelPlacement={"bottom"}
-					className={classes.selectAllWrapper}
-				/>
-			</Grid>
+			{!props.disableSelection && (
+				<Grid item key={"select-all"}>
+					<ComponentWithLabel
+						control={<SelectAll />}
+						labelText={t("standalone.data-grid.footer.select-all")}
+						labelPlacement={"bottom"}
+						className={classes.selectAllWrapper}
+					/>
+				</Grid>
+			)}
 			{props.handleEdit && (
 				<>
-					<Grid item key={"divider-1"}>
-						<VerticalDivider />
-					</Grid>
+					{!props.disableSelection && (
+						<Grid item key={"divider-1"}>
+							<VerticalDivider />
+						</Grid>
+					)}
 					<Grid item key={"edit"}>
 						<ComponentWithLabel
 							control={

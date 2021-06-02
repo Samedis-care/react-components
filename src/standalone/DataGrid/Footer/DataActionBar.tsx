@@ -12,7 +12,11 @@ const DataActionBar = () => {
 	const [state, setState] = useDataGridState();
 	const { search, customData } = state;
 	const [columnState] = useDataGridColumnState();
-	const { getAdditionalFilters, customDataActionButtons } = useDataGridProps();
+	const {
+		getAdditionalFilters,
+		customDataActionButtons,
+		disableSelection,
+	} = useDataGridProps();
 	const { selectAll, selectedRows } = state;
 	const { onEdit, onDelete } = useDataGridProps();
 
@@ -85,6 +89,7 @@ const DataActionBar = () => {
 				handleDelete={onDelete ? handleDelete : undefined}
 				customButtons={customDataActionButtons}
 				handleCustomButtonClick={handleCustomButtonCLick}
+				disableSelection={!!disableSelection}
 			/>
 		</Grid>
 	);

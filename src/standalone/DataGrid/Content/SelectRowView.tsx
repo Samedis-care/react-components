@@ -7,6 +7,10 @@ export interface IDataGridContentSelectRowViewProps {
 	 * Is currently checked?
 	 */
 	checked: boolean;
+	/**
+	 * The row record ID
+	 */
+	id: string;
 }
 
 const SelectRowView = (props: IDataGridContentSelectRowViewProps) => {

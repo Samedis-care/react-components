@@ -1,5 +1,5 @@
 import React from "react";
-import { useDataGridState } from "../DataGrid";
+import { useDataGridProps, useDataGridState } from "../DataGrid";
 import SelectRowView from "./SelectRowView";
 
 export interface IDataGridContentSelectRowProps {
@@ -22,10 +22,13 @@ export const isSelected = (
 const SelectRow = (props: IDataGridContentSelectRowProps) => {
 	const { id } = props;
 	const [state] = useDataGridState();
+	const SelectRowControl =
+		useDataGridProps().customSelectionControl || SelectRowView;
 
 	return (
-		<SelectRowView
+		<SelectRowControl
 			checked={isSelected(state.selectAll, state.selectedRows, id)}
+			id={id}
 		/>
 	);
 };

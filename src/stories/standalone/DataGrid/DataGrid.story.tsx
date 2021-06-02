@@ -159,6 +159,8 @@ export const DataGridStory = (): React.ReactElement => {
 							? number("Sort limit", 1)
 							: undefined
 					}
+					disableFooter={boolean("Disable Footer", false)}
+					disableSelection={boolean("Disable Selection", false)}
 					loadData={(params): DataGridData => {
 						action("loadData")(params);
 

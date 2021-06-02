@@ -25,7 +25,12 @@ export interface CellProps extends GridCellProps {
 const Cell = (props: CellProps): React.ReactElement => {
 	const classes = useDataGridStyles();
 	const { columns, columnIndex, rowIndex } = props;
-	const { onEdit, prohibitMultiSelect, onRowDoubleClick } = useDataGridProps();
+	const {
+		onEdit,
+		prohibitMultiSelect,
+		onRowDoubleClick,
+		disableSelection,
+	} = useDataGridProps();
 	const [state, setState] = useDataGridState();
 	const [hover, setHover] = props.hoverState;
 	const id = state.rows[props.rowIndex - 1]?.id || "undefined";
@@ -48,15 +53,16 @@ const Cell = (props: CellProps): React.ReactElement => {
 		if (onEdit) onEdit(id);
 	}, [id, onRowDoubleClick, onEdit]);
 
-	const column: IDataGridColumnDef | undefined = columns[columnIndex - 1];
+	const column: IDataGridColumnDef | undefined =
+		columns[columnIndex - (disableSelection ? 0 : 1)];
 
 	let content: React.ReactNode = null;
-	if (rowIndex === 0 && columnIndex === 0) {
+	if (rowIndex === 0 && columnIndex === 0 && !disableSelection) {
 		// empty
 	} else if (rowIndex === 0) {
 		// header
 		content = <ColumnHeader column={column} />;
-	} else if (columnIndex === 0) {
+	} else if (columnIndex === 0 && !disableSelection) {
 		content = <SelectRow id={id} />;
 	} else {
 		content =

@@ -20,7 +20,7 @@ export interface IDataGridContentProps extends IDataGridColumnProps {
 const SELECT_ROW_WIDTH = 57;
 
 const Content = (props: IDataGridContentProps) => {
-	const { rowsPerPage, columns } = props;
+	const { rowsPerPage, columns, disableSelection } = props;
 	const { t } = useCCTranslations();
 	const [state, setState] = useDataGridState();
 	const [columnWidth, setColumnWidth] = useDataGridColumnsWidthState();
@@ -66,7 +66,8 @@ const Content = (props: IDataGridContentProps) => {
 							(col: IDataGridColumnDef) => col.field === field
 						)
 					)
-					.reduce((a, b) => a + b[1], 0) + SELECT_ROW_WIDTH;
+					.reduce((a, b) => a + b[1], 0) +
+				(disableSelection ? 0 : SELECT_ROW_WIDTH);
 			let remainingWidth = width - usedWidth;
 			if (remainingWidth <= 0) return prevState;
 
@@ -103,15 +104,16 @@ const Content = (props: IDataGridContentProps) => {
 		if (!dataViewRef.current) return;
 		dataViewRef.current.recomputeGridSize();
 	}, [columnWidth]);
-
 	return (
 		<AutoSizer onResize={onResize}>
 			{({ width, height }) => (
 				<MultiGrid
 					ref={dataViewRef}
-					columnCount={columns.length + 1}
+					columnCount={columns.length + (disableSelection ? 0 : 1)}
 					columnWidth={({ index }) =>
-						index === 0
+						disableSelection
+							? columnWidth[columns[index].field] ?? 200
+							: index === 0
 							? SELECT_ROW_WIDTH
 							: columnWidth[columns[index - 1].field] ?? 200
 					}
