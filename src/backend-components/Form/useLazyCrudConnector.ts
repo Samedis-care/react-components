@@ -60,22 +60,16 @@ const useLazyCrudConnector = <
 	const [dirty, setDirty] = useState(false);
 	const prevDirtyRef = useRef<boolean>(false);
 	const uploadConnector = useRef<LazyConnector<KeyT, VisibilityT, CustomT>>(
-		new LazyConnector<KeyT, VisibilityT, CustomT>(
-			getConnector(getEndpoint(initialId ?? "null")),
-			initialId === null,
-			(queue) => setDirty(queue.length !== 0)
-		)
+		getCustomState<LazyConnector<KeyT, VisibilityT, CustomT>>(field) ??
+			new LazyConnector<KeyT, VisibilityT, CustomT>(
+				getConnector(getEndpoint(initialId ?? "null")),
+				initialId === null,
+				(queue) => setDirty(queue.length !== 0)
+			)
 	);
 
 	// set post submit handler for lazy connector
 	useEffect(() => {
-		const prevConnector = getCustomState<
-			LazyConnector<KeyT, VisibilityT, CustomT>
-		>(field);
-		if (prevConnector) {
-			uploadConnector.current = prevConnector;
-		}
-
 		const connector = uploadConnector.current;
 		setCustomState<LazyConnector<KeyT, VisibilityT, CustomT>>(
 			field,
