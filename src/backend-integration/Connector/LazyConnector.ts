@@ -114,6 +114,13 @@ class LazyConnector<
 		}
 
 		const result = await this.realConnector.index(params, model);
+
+		// map real ids to fake ids for consistency
+		result[0] = result[0].map((entry) => ({
+			...entry,
+			id: this.unmapId((entry as Record<"id", string>).id),
+		}));
+
 		// enhance result with local data
 		this.queue.forEach((entry) => {
 			if (entry.type === "create") {
@@ -158,7 +165,7 @@ class LazyConnector<
 				throw new Error("data has been deleted");
 			}
 		}
-		return this.realConnector.read(id, model);
+		return this.realConnector.read(this.mapId(id), model);
 	}
 
 	update(
