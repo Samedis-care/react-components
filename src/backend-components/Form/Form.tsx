@@ -534,7 +534,6 @@ const Form = <
 				? Object.assign({}, valuesRef.current, result[0])
 				: result[0];
 			valuesRef.current = newValues;
-			setValues(newValues);
 
 			setTouched((prev) =>
 				Object.fromEntries(Object.keys(prev).map((field) => [field, false]))
@@ -545,6 +544,9 @@ const Form = <
 					handler((newValues as Record<"id", string>).id)
 				)
 			);
+
+			// re-render after post submit handler, this way we avoid mounting new components before the form is fully saved
+			setValues(newValues);
 
 			if (onSubmit) {
 				await onSubmit(newValues);
