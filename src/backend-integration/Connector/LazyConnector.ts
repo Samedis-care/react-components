@@ -37,6 +37,7 @@ class LazyConnector<
 	private readonly FAKE_ID_PREFIX = "fake-id-";
 	private fakeIdCounter = 0;
 	private fakeIdMapping: Record<string, string> = {};
+	private fakeIdMappingRev: Record<string, string> = {}; // reverse map
 
 	constructor(
 		connector: ApiConnector<KeyT, VisibilityT, CustomT>,
@@ -85,9 +86,7 @@ class LazyConnector<
 	): void {
 		this.queue = this.queue.filter((entry) => !entry.id || entry.id !== id);
 
-		if (id in this.fakeIdMapping) {
-			id = this.fakeIdMapping[id];
-		}
+		id = this.mapId(id);
 
 		if (id.startsWith(this.FAKE_ID_PREFIX)) {
 			this.onAfterOperation();
@@ -175,7 +174,7 @@ class LazyConnector<
 
 		const updateFunc = () =>
 			this.realConnector.update(
-				{ ...otherData, id: this.fakeIdMapping[id as string] ?? id },
+				{ ...otherData, id: this.mapId(id as string) },
 				model
 			);
 
@@ -210,9 +209,7 @@ class LazyConnector<
 		this.queue = this.queue.filter(
 			(entry) => !entry.id || !ids.includes(entry.id)
 		);
-		ids = ids.map((id) =>
-			id in this.fakeIdMapping ? this.fakeIdMapping[id] : id
-		);
+		ids = ids.map((id) => this.mapId(id));
 		ids = ids.filter(
 			(id) =>
 				!id.startsWith(this.FAKE_ID_PREFIX) ||
@@ -286,10 +283,12 @@ class LazyConnector<
 			try {
 				const res: unknown = await entry.func();
 				if (entry.type === "create") {
-					this.fakeIdMapping[entry.id as string] = (res as [
+					const realId = (res as [
 						Record<"id", string>,
 						Record<never, unknown>
 					])[0].id;
+					this.fakeIdMapping[entry.id as string] = realId;
+					this.fakeIdMappingRev[realId] = entry.id as string;
 				}
 			} catch (e) {
 				// we ignore failed deletes
@@ -309,6 +308,14 @@ class LazyConnector<
 	 */
 	public mapId(id: string): string {
 		return this.fakeIdMapping[id] ?? id;
+	}
+
+	/**
+	 * Maps a potentially real ID to a fake ID
+	 * @param id The ID
+	 */
+	public unmapId(id: string): string {
+		return this.fakeIdMappingRev[id] ?? id;
 	}
 }
 
