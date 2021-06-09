@@ -494,15 +494,18 @@ const Form = <
 	useEffect(() => {
 		if (isLoading || !serverData || !serverData[0]) return;
 
+		const newValues = { ...valuesRef.current };
+
 		const untouchedFields = Object.entries(touched)
 			.filter(([, touched]) => !touched)
 			.map(([field]) => field);
 		untouchedFields
 			.filter((field) => field in serverData[0])
 			.forEach((field) => {
-				valuesRef.current[field] = serverData[0][field as KeyT];
+				newValues[field] = serverData[0][field as KeyT];
 			});
-		setValues(valuesRef.current);
+		valuesRef.current = newValues;
+		setValues(newValues);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [serverData]);
 
@@ -532,7 +535,7 @@ const Form = <
 
 			const newValues = onlySubmitMounted
 				? Object.assign({}, valuesRef.current, result[0])
-				: result[0];
+				: Object.assign({}, result[0]);
 			valuesRef.current = newValues;
 
 			setTouched((prev) =>
