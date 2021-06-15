@@ -51,6 +51,7 @@
 				"delete": "Delete",
 				"edit": "Edit",
 				"reset-options": {
+					"refresh": "Refresh",
 					"filter": "Reset filter",
 					"sort": "Reset sort settings",
 					"column": "Reset column settings",

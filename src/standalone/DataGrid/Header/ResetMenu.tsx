@@ -7,6 +7,7 @@ import PopupMenu from "../../PopupMenu";
  * Reset button callbacks
  */
 export interface ResetCallbacks {
+	refresh: () => void;
 	resetFilter: () => void;
 	resetSort: () => void;
 	resetColumn: () => void;
@@ -40,6 +41,7 @@ const ResetMenu = (props: ResetMenuProps) => {
 	const {
 		anchorEl,
 		onClose,
+		refresh,
 		resetFilter,
 		resetSort,
 		resetColumn,
@@ -47,6 +49,10 @@ const ResetMenu = (props: ResetMenuProps) => {
 		resetAll,
 	} = props;
 
+	const refreshAndClose = useCallback(() => {
+		refresh();
+		onClose();
+	}, [refresh, onClose]);
 	const resetFilterAndClose = useCallback(() => {
 		resetFilter();
 		onClose();
@@ -79,6 +85,9 @@ const ResetMenu = (props: ResetMenuProps) => {
 			open={!!anchorEl}
 			onClose={onClose}
 		>
+			<MenuItem onClick={refreshAndClose}>
+				{t("standalone.data-grid.header.reset-options.refresh")}
+			</MenuItem>
 			<MenuItem onClick={resetFilterAndClose}>
 				{t("standalone.data-grid.header.reset-options.filter")}
 			</MenuItem>

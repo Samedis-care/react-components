@@ -197,6 +197,7 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 			<ResetMenu
 				anchorEl={resetAnchorEl}
 				onClose={closeResetMenu}
+				refresh={props.refresh}
 				resetFilter={props.resetFilter}
 				resetSort={props.resetSort}
 				resetColumn={props.resetColumn}

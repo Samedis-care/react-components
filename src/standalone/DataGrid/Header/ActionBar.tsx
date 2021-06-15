@@ -111,11 +111,18 @@ const ActionBar = () => {
 		setColumnWidth,
 		theme,
 	]);
+	const handleRefresh = useCallback(() => {
+		setState((prevState) => ({
+			...prevState,
+			refreshData: Math.min(prevState.refreshData + 1, 2),
+		}));
+	}, [setState]);
 
 	return (
 		<ActionBarView
 			toggleSettings={toggleSettings}
 			handleAddNew={onAddNew}
+			refresh={handleRefresh}
 			resetFilter={handleResetFilter}
 			resetSort={handleResetSort}
 			resetColumn={handleResetColumn}
