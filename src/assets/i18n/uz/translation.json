@@ -52,7 +52,8 @@
 					"column": "Ustun sozlamalarini tiklash",
 					"filter": "Filtrni tiklash",
 					"sort": "Saralash sozlamalarini tiklash",
-					"width": "Ustun kengliklarini tiklash"
+					"width": "Ustun kengliklarini tiklash",
+					"refresh": "Qayta yuklang"
 				}
 			},
 			"footer": {
