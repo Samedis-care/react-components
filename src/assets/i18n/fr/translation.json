@@ -52,7 +52,8 @@
 					"column": "Réinitialiser les paramètres de la colonne",
 					"filter": "Réinitialiser le filtre",
 					"sort": "Réinitialiser les paramètres de tri",
-					"width": "Réinitialiser les largeurs de colonne"
+					"width": "Réinitialiser les largeurs de colonne",
+					"refresh": "Recharger"
 				}
 			},
 			"footer": {
