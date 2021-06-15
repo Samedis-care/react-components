@@ -34,7 +34,11 @@ export interface MenuItemProps {
 	/**
 	 * The onClick handler
 	 */
-	onClick: () => void;
+	onClick: React.MouseEventHandler;
+	/**
+	 * Middle-click handler
+	 */
+	onAuxClick: React.MouseEventHandler;
 	/**
 	 * Is this menu entry expandable? (does it have children?)
 	 */
@@ -68,7 +72,11 @@ export interface IMenuItemDefinition {
 	/**
 	 * The click handler of the menu item
 	 */
-	onClick: () => void;
+	onClick: React.MouseEventHandler;
+	/**
+	 * Middle-click handler
+	 */
+	onAuxClick?: React.MouseEventHandler;
 	/**
 	 * Should this menu item be rendered? Useful for permission checks
 	 */

@@ -7771,6 +7771,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                               "render": [Function],
                                                             },
                                                           },
+                                                          "onAuxClick": [Function],
                                                           "onClick": [Function],
                                                           "route": "/",
                                                           "shouldRender": true,
@@ -7781,6 +7782,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                             Object {
                                                               "children": undefined,
                                                               "forceExpand": undefined,
+                                                              "onAuxClick": [Function],
                                                               "onClick": [Function],
                                                               "route": "/admin/1",
                                                               "shouldRender": true,
@@ -7789,6 +7791,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                             Object {
                                                               "children": undefined,
                                                               "forceExpand": undefined,
+                                                              "onAuxClick": [Function],
                                                               "onClick": [Function],
                                                               "route": "/admin/2",
                                                               "shouldRender": true,
@@ -7797,6 +7800,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                             Object {
                                                               "children": undefined,
                                                               "forceExpand": undefined,
+                                                              "onAuxClick": [Function],
                                                               "onClick": [Function],
                                                               "route": "/admin/3",
                                                               "shouldRender": true,
@@ -7805,6 +7809,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                             Object {
                                                               "children": undefined,
                                                               "forceExpand": undefined,
+                                                              "onAuxClick": [Function],
                                                               "onClick": [Function],
                                                               "route": "/admin/4",
                                                               "shouldRender": false,
@@ -7820,6 +7825,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                               "render": [Function],
                                                             },
                                                           },
+                                                          "onAuxClick": [Function],
                                                           "onClick": [Function],
                                                           "shouldRender": true,
                                                           "title": "Admin",
@@ -8203,6 +8209,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                           "render": [Function],
                                                                         },
                                                                       },
+                                                                      "onAuxClick": [Function],
                                                                       "onClick": [Function],
                                                                       "route": "/",
                                                                       "shouldRender": true,
@@ -8213,6 +8220,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                         Object {
                                                                           "children": undefined,
                                                                           "forceExpand": undefined,
+                                                                          "onAuxClick": [Function],
                                                                           "onClick": [Function],
                                                                           "route": "/admin/1",
                                                                           "shouldRender": true,
@@ -8221,6 +8229,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                         Object {
                                                                           "children": undefined,
                                                                           "forceExpand": undefined,
+                                                                          "onAuxClick": [Function],
                                                                           "onClick": [Function],
                                                                           "route": "/admin/2",
                                                                           "shouldRender": true,
@@ -8229,6 +8238,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                         Object {
                                                                           "children": undefined,
                                                                           "forceExpand": undefined,
+                                                                          "onAuxClick": [Function],
                                                                           "onClick": [Function],
                                                                           "route": "/admin/3",
                                                                           "shouldRender": true,
@@ -8237,6 +8247,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                         Object {
                                                                           "children": undefined,
                                                                           "forceExpand": undefined,
+                                                                          "onAuxClick": [Function],
                                                                           "onClick": [Function],
                                                                           "route": "/admin/4",
                                                                           "shouldRender": false,
@@ -8252,6 +8263,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                           "render": [Function],
                                                                         },
                                                                       },
+                                                                      "onAuxClick": [Function],
                                                                       "onClick": [Function],
                                                                       "shouldRender": true,
                                                                       "title": "Admin",
@@ -8577,6 +8589,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                   },
                                                                 }
                                                               }
+                                                              onAuxClick={[Function]}
                                                               onClick={[Function]}
                                                               title="Home"
                                                             >
@@ -8594,12 +8607,14 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                     },
                                                                   }
                                                                 }
+                                                                onAuxClick={[Function]}
                                                                 onClick={[Function]}
                                                                 title="Home"
                                                               >
                                                                 <WithStyles(WithStyles(ForwardRef(ListItem)))
                                                                   button={true}
                                                                   className="non-standalone-portal--portal-menu-story-CcPortalMenuItemDark-item-43 non-standalone-portal--portal-menu-story-CcPortalMenuItemDark-selectedItem-44"
+                                                                  onAuxClick={[Function]}
                                                                   onClick={[Function]}
                                                                 >
                                                                   <WithStyles(ForwardRef(ListItem))
@@ -8611,6 +8626,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                         "root": "non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-root-46",
                                                                       }
                                                                     }
+                                                                    onAuxClick={[Function]}
                                                                     onClick={[Function]}
                                                                   >
                                                                     <ForwardRef(ListItem)
@@ -8631,6 +8647,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                           "selected": "Mui-selected",
                                                                         }
                                                                       }
+                                                                      onAuxClick={[Function]}
                                                                       onClick={[Function]}
                                                                     >
                                                                       <WithStyles(ForwardRef(ButtonBase))
@@ -8638,6 +8655,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                         component="div"
                                                                         disabled={false}
                                                                         focusVisibleClassName="Mui-focusVisible"
+                                                                        onAuxClick={[Function]}
                                                                         onClick={[Function]}
                                                                       >
                                                                         <ForwardRef(ButtonBase)
@@ -8652,11 +8670,13 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                           component="div"
                                                                           disabled={false}
                                                                           focusVisibleClassName="Mui-focusVisible"
+                                                                          onAuxClick={[Function]}
                                                                           onClick={[Function]}
                                                                         >
                                                                           <div
                                                                             aria-disabled={false}
                                                                             className="non-standalone-portal--portal-menu-story-MuiButtonBase-root non-standalone-portal--portal-menu-story-MuiListItem-root non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-root-46 non-standalone-portal--portal-menu-story-CcPortalMenuItemDark-item-43 non-standalone-portal--portal-menu-story-CcPortalMenuItemDark-selectedItem-44 non-standalone-portal--portal-menu-story-MuiListItem-gutters non-standalone-portal--portal-menu-story-MuiListItem-button non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-button-47"
+                                                                            onAuxClick={[Function]}
                                                                             onBlur={[Function]}
                                                                             onClick={[Function]}
                                                                             onDragLeave={[Function]}
@@ -8859,6 +8879,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                   Object {
                                                                     "children": undefined,
                                                                     "forceExpand": undefined,
+                                                                    "onAuxClick": [Function],
                                                                     "onClick": [Function],
                                                                     "route": "/admin/1",
                                                                     "shouldRender": true,
@@ -8867,6 +8888,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                   Object {
                                                                     "children": undefined,
                                                                     "forceExpand": undefined,
+                                                                    "onAuxClick": [Function],
                                                                     "onClick": [Function],
                                                                     "route": "/admin/2",
                                                                     "shouldRender": true,
@@ -8875,6 +8897,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                   Object {
                                                                     "children": undefined,
                                                                     "forceExpand": undefined,
+                                                                    "onAuxClick": [Function],
                                                                     "onClick": [Function],
                                                                     "route": "/admin/3",
                                                                     "shouldRender": true,
@@ -8883,6 +8906,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                   Object {
                                                                     "children": undefined,
                                                                     "forceExpand": undefined,
+                                                                    "onAuxClick": [Function],
                                                                     "onClick": [Function],
                                                                     "route": "/admin/4",
                                                                     "shouldRender": false,
@@ -8926,6 +8950,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                           "render": [Function],
                                                                         },
                                                                       },
+                                                                      "onAuxClick": [Function],
                                                                       "onClick": [Function],
                                                                       "route": "/",
                                                                       "shouldRender": true,
@@ -8936,6 +8961,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                         Object {
                                                                           "children": undefined,
                                                                           "forceExpand": undefined,
+                                                                          "onAuxClick": [Function],
                                                                           "onClick": [Function],
                                                                           "route": "/admin/1",
                                                                           "shouldRender": true,
@@ -8944,6 +8970,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                         Object {
                                                                           "children": undefined,
                                                                           "forceExpand": undefined,
+                                                                          "onAuxClick": [Function],
                                                                           "onClick": [Function],
                                                                           "route": "/admin/2",
                                                                           "shouldRender": true,
@@ -8952,6 +8979,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                         Object {
                                                                           "children": undefined,
                                                                           "forceExpand": undefined,
+                                                                          "onAuxClick": [Function],
                                                                           "onClick": [Function],
                                                                           "route": "/admin/3",
                                                                           "shouldRender": true,
@@ -8960,6 +8988,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                         Object {
                                                                           "children": undefined,
                                                                           "forceExpand": undefined,
+                                                                          "onAuxClick": [Function],
                                                                           "onClick": [Function],
                                                                           "route": "/admin/4",
                                                                           "shouldRender": false,
@@ -8975,6 +9004,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                           "render": [Function],
                                                                         },
                                                                       },
+                                                                      "onAuxClick": [Function],
                                                                       "onClick": [Function],
                                                                       "shouldRender": true,
                                                                       "title": "Admin",
@@ -9300,6 +9330,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                   },
                                                                 }
                                                               }
+                                                              onAuxClick={[Function]}
                                                               onClick={[Function]}
                                                               title="Admin"
                                                             >
@@ -9317,12 +9348,14 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                     },
                                                                   }
                                                                 }
+                                                                onAuxClick={[Function]}
                                                                 onClick={[Function]}
                                                                 title="Admin"
                                                               >
                                                                 <WithStyles(WithStyles(ForwardRef(ListItem)))
                                                                   button={true}
                                                                   className="non-standalone-portal--portal-menu-story-CcPortalMenuItemDark-item-43"
+                                                                  onAuxClick={[Function]}
                                                                   onClick={[Function]}
                                                                 >
                                                                   <WithStyles(ForwardRef(ListItem))
@@ -9334,6 +9367,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                         "root": "non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-root-49",
                                                                       }
                                                                     }
+                                                                    onAuxClick={[Function]}
                                                                     onClick={[Function]}
                                                                   >
                                                                     <ForwardRef(ListItem)
@@ -9354,6 +9388,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                           "selected": "Mui-selected",
                                                                         }
                                                                       }
+                                                                      onAuxClick={[Function]}
                                                                       onClick={[Function]}
                                                                     >
                                                                       <WithStyles(ForwardRef(ButtonBase))
@@ -9361,6 +9396,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                         component="div"
                                                                         disabled={false}
                                                                         focusVisibleClassName="Mui-focusVisible"
+                                                                        onAuxClick={[Function]}
                                                                         onClick={[Function]}
                                                                       >
                                                                         <ForwardRef(ButtonBase)
@@ -9375,11 +9411,13 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                           component="div"
                                                                           disabled={false}
                                                                           focusVisibleClassName="Mui-focusVisible"
+                                                                          onAuxClick={[Function]}
                                                                           onClick={[Function]}
                                                                         >
                                                                           <div
                                                                             aria-disabled={false}
                                                                             className="non-standalone-portal--portal-menu-story-MuiButtonBase-root non-standalone-portal--portal-menu-story-MuiListItem-root non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-root-49 non-standalone-portal--portal-menu-story-CcPortalMenuItemDark-item-43 non-standalone-portal--portal-menu-story-MuiListItem-gutters non-standalone-portal--portal-menu-story-MuiListItem-button non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-button-50"
+                                                                            onAuxClick={[Function]}
                                                                             onBlur={[Function]}
                                                                             onClick={[Function]}
                                                                             onDragLeave={[Function]}
@@ -9677,6 +9715,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                                         "render": [Function],
                                                                                       },
                                                                                     },
+                                                                                    "onAuxClick": [Function],
                                                                                     "onClick": [Function],
                                                                                     "route": "/",
                                                                                     "shouldRender": true,
@@ -9687,6 +9726,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                                       Object {
                                                                                         "children": undefined,
                                                                                         "forceExpand": undefined,
+                                                                                        "onAuxClick": [Function],
                                                                                         "onClick": [Function],
                                                                                         "route": "/admin/1",
                                                                                         "shouldRender": true,
@@ -9695,6 +9735,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                                       Object {
                                                                                         "children": undefined,
                                                                                         "forceExpand": undefined,
+                                                                                        "onAuxClick": [Function],
                                                                                         "onClick": [Function],
                                                                                         "route": "/admin/2",
                                                                                         "shouldRender": true,
@@ -9703,6 +9744,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                                       Object {
                                                                                         "children": undefined,
                                                                                         "forceExpand": undefined,
+                                                                                        "onAuxClick": [Function],
                                                                                         "onClick": [Function],
                                                                                         "route": "/admin/3",
                                                                                         "shouldRender": true,
@@ -9711,6 +9753,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                                       Object {
                                                                                         "children": undefined,
                                                                                         "forceExpand": undefined,
+                                                                                        "onAuxClick": [Function],
                                                                                         "onClick": [Function],
                                                                                         "route": "/admin/4",
                                                                                         "shouldRender": false,
@@ -9726,6 +9769,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                                         "render": [Function],
                                                                                       },
                                                                                     },
+                                                                                    "onAuxClick": [Function],
                                                                                     "onClick": [Function],
                                                                                     "shouldRender": true,
                                                                                     "title": "Admin",
@@ -10051,6 +10095,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                                 },
                                                                               }
                                                                             }
+                                                                            onAuxClick={[Function]}
                                                                             onClick={[Function]}
                                                                             title="Item 1"
                                                                           >
@@ -10058,12 +10103,14 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                               active={false}
                                                                               depth={1}
                                                                               expandable={false}
+                                                                              onAuxClick={[Function]}
                                                                               onClick={[Function]}
                                                                               title="Item 1"
                                                                             >
                                                                               <WithStyles(WithStyles(ForwardRef(ListItem)))
                                                                                 button={true}
                                                                                 className="non-standalone-portal--portal-menu-story-CcPortalMenuItemDark-item-43"
+                                                                                onAuxClick={[Function]}
                                                                                 onClick={[Function]}
                                                                               >
                                                                                 <WithStyles(ForwardRef(ListItem))
@@ -10075,6 +10122,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                                       "root": "non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-root-51",
                                                                                     }
                                                                                   }
+                                                                                  onAuxClick={[Function]}
                                                                                   onClick={[Function]}
                                                                                 >
                                                                                   <ForwardRef(ListItem)
@@ -10095,6 +10143,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                                         "selected": "Mui-selected",
                                                                                       }
                                                                                     }
+                                                                                    onAuxClick={[Function]}
                                                                                     onClick={[Function]}
                                                                                   >
                                                                                     <WithStyles(ForwardRef(ButtonBase))
@@ -10102,6 +10151,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                                       component="div"
                                                                                       disabled={false}
                                                                                       focusVisibleClassName="Mui-focusVisible"
+                                                                                      onAuxClick={[Function]}
                                                                                       onClick={[Function]}
                                                                                     >
                                                                                       <ForwardRef(ButtonBase)
@@ -10116,11 +10166,13 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                                         component="div"
                                                                                         disabled={false}
                                                                                         focusVisibleClassName="Mui-focusVisible"
+                                                                                        onAuxClick={[Function]}
                                                                                         onClick={[Function]}
                                                                                       >
                                                                                         <div
                                                                                           aria-disabled={false}
                                                                                           className="non-standalone-portal--portal-menu-story-MuiButtonBase-root non-standalone-portal--portal-menu-story-MuiListItem-root non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-root-51 non-standalone-portal--portal-menu-story-CcPortalMenuItemDark-item-43 non-standalone-portal--portal-menu-story-MuiListItem-gutters non-standalone-portal--portal-menu-story-MuiListItem-button non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-button-52"
+                                                                                          onAuxClick={[Function]}
                                                                                           onBlur={[Function]}
                                                                                           onClick={[Function]}
                                                                                           onDragLeave={[Function]}
@@ -10309,6 +10361,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                                         "render": [Function],
                                                                                       },
                                                                                     },
+                                                                                    "onAuxClick": [Function],
                                                                                     "onClick": [Function],
                                                                                     "route": "/",
                                                                                     "shouldRender": true,
@@ -10319,6 +10372,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                                       Object {
                                                                                         "children": undefined,
                                                                                         "forceExpand": undefined,
+                                                                                        "onAuxClick": [Function],
                                                                                         "onClick": [Function],
                                                                                         "route": "/admin/1",
                                                                                         "shouldRender": true,
@@ -10327,6 +10381,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                                       Object {
                                                                                         "children": undefined,
                                                                                         "forceExpand": undefined,
+                                                                                        "onAuxClick": [Function],
                                                                                         "onClick": [Function],
                                                                                         "route": "/admin/2",
                                                                                         "shouldRender": true,
@@ -10335,6 +10390,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                                       Object {
                                                                                         "children": undefined,
                                                                                         "forceExpand": undefined,
+                                                                                        "onAuxClick": [Function],
                                                                                         "onClick": [Function],
                                                                                         "route": "/admin/3",
                                                                                         "shouldRender": true,
@@ -10343,6 +10399,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                                       Object {
                                                                                         "children": undefined,
                                                                                         "forceExpand": undefined,
+                                                                                        "onAuxClick": [Function],
                                                                                         "onClick": [Function],
                                                                                         "route": "/admin/4",
                                                                                         "shouldRender": false,
@@ -10358,6 +10415,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                                         "render": [Function],
                                                                                       },
                                                                                     },
+                                                                                    "onAuxClick": [Function],
                                                                                     "onClick": [Function],
                                                                                     "shouldRender": true,
                                                                                     "title": "Admin",
@@ -10683,6 +10741,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                                 },
                                                                               }
                                                                             }
+                                                                            onAuxClick={[Function]}
                                                                             onClick={[Function]}
                                                                             title="Item 2"
                                                                           >
@@ -10690,12 +10749,14 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                               active={false}
                                                                               depth={1}
                                                                               expandable={false}
+                                                                              onAuxClick={[Function]}
                                                                               onClick={[Function]}
                                                                               title="Item 2"
                                                                             >
                                                                               <WithStyles(WithStyles(ForwardRef(ListItem)))
                                                                                 button={true}
                                                                                 className="non-standalone-portal--portal-menu-story-CcPortalMenuItemDark-item-43"
+                                                                                onAuxClick={[Function]}
                                                                                 onClick={[Function]}
                                                                               >
                                                                                 <WithStyles(ForwardRef(ListItem))
@@ -10707,6 +10768,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                                       "root": "non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-root-51",
                                                                                     }
                                                                                   }
+                                                                                  onAuxClick={[Function]}
                                                                                   onClick={[Function]}
                                                                                 >
                                                                                   <ForwardRef(ListItem)
@@ -10727,6 +10789,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                                         "selected": "Mui-selected",
                                                                                       }
                                                                                     }
+                                                                                    onAuxClick={[Function]}
                                                                                     onClick={[Function]}
                                                                                   >
                                                                                     <WithStyles(ForwardRef(ButtonBase))
@@ -10734,6 +10797,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                                       component="div"
                                                                                       disabled={false}
                                                                                       focusVisibleClassName="Mui-focusVisible"
+                                                                                      onAuxClick={[Function]}
                                                                                       onClick={[Function]}
                                                                                     >
                                                                                       <ForwardRef(ButtonBase)
@@ -10748,11 +10812,13 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                                         component="div"
                                                                                         disabled={false}
                                                                                         focusVisibleClassName="Mui-focusVisible"
+                                                                                        onAuxClick={[Function]}
                                                                                         onClick={[Function]}
                                                                                       >
                                                                                         <div
                                                                                           aria-disabled={false}
                                                                                           className="non-standalone-portal--portal-menu-story-MuiButtonBase-root non-standalone-portal--portal-menu-story-MuiListItem-root non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-root-51 non-standalone-portal--portal-menu-story-CcPortalMenuItemDark-item-43 non-standalone-portal--portal-menu-story-MuiListItem-gutters non-standalone-portal--portal-menu-story-MuiListItem-button non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-button-52"
+                                                                                          onAuxClick={[Function]}
                                                                                           onBlur={[Function]}
                                                                                           onClick={[Function]}
                                                                                           onDragLeave={[Function]}
@@ -10941,6 +11007,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                                         "render": [Function],
                                                                                       },
                                                                                     },
+                                                                                    "onAuxClick": [Function],
                                                                                     "onClick": [Function],
                                                                                     "route": "/",
                                                                                     "shouldRender": true,
@@ -10951,6 +11018,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                                       Object {
                                                                                         "children": undefined,
                                                                                         "forceExpand": undefined,
+                                                                                        "onAuxClick": [Function],
                                                                                         "onClick": [Function],
                                                                                         "route": "/admin/1",
                                                                                         "shouldRender": true,
@@ -10959,6 +11027,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                                       Object {
                                                                                         "children": undefined,
                                                                                         "forceExpand": undefined,
+                                                                                        "onAuxClick": [Function],
                                                                                         "onClick": [Function],
                                                                                         "route": "/admin/2",
                                                                                         "shouldRender": true,
@@ -10967,6 +11036,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                                       Object {
                                                                                         "children": undefined,
                                                                                         "forceExpand": undefined,
+                                                                                        "onAuxClick": [Function],
                                                                                         "onClick": [Function],
                                                                                         "route": "/admin/3",
                                                                                         "shouldRender": true,
@@ -10975,6 +11045,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                                       Object {
                                                                                         "children": undefined,
                                                                                         "forceExpand": undefined,
+                                                                                        "onAuxClick": [Function],
                                                                                         "onClick": [Function],
                                                                                         "route": "/admin/4",
                                                                                         "shouldRender": false,
@@ -10990,6 +11061,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                                         "render": [Function],
                                                                                       },
                                                                                     },
+                                                                                    "onAuxClick": [Function],
                                                                                     "onClick": [Function],
                                                                                     "shouldRender": true,
                                                                                     "title": "Admin",
@@ -11315,6 +11387,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                                 },
                                                                               }
                                                                             }
+                                                                            onAuxClick={[Function]}
                                                                             onClick={[Function]}
                                                                             title="Item 3"
                                                                           >
@@ -11322,12 +11395,14 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                               active={false}
                                                                               depth={1}
                                                                               expandable={false}
+                                                                              onAuxClick={[Function]}
                                                                               onClick={[Function]}
                                                                               title="Item 3"
                                                                             >
                                                                               <WithStyles(WithStyles(ForwardRef(ListItem)))
                                                                                 button={true}
                                                                                 className="non-standalone-portal--portal-menu-story-CcPortalMenuItemDark-item-43"
+                                                                                onAuxClick={[Function]}
                                                                                 onClick={[Function]}
                                                                               >
                                                                                 <WithStyles(ForwardRef(ListItem))
@@ -11339,6 +11414,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                                       "root": "non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-root-51",
                                                                                     }
                                                                                   }
+                                                                                  onAuxClick={[Function]}
                                                                                   onClick={[Function]}
                                                                                 >
                                                                                   <ForwardRef(ListItem)
@@ -11359,6 +11435,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                                         "selected": "Mui-selected",
                                                                                       }
                                                                                     }
+                                                                                    onAuxClick={[Function]}
                                                                                     onClick={[Function]}
                                                                                   >
                                                                                     <WithStyles(ForwardRef(ButtonBase))
@@ -11366,6 +11443,7 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                                       component="div"
                                                                                       disabled={false}
                                                                                       focusVisibleClassName="Mui-focusVisible"
+                                                                                      onAuxClick={[Function]}
                                                                                       onClick={[Function]}
                                                                                     >
                                                                                       <ForwardRef(ButtonBase)
@@ -11380,11 +11458,13 @@ exports[`Storyshots Non-Standalone/Portal Menu 1`] = `
                                                                                         component="div"
                                                                                         disabled={false}
                                                                                         focusVisibleClassName="Mui-focusVisible"
+                                                                                        onAuxClick={[Function]}
                                                                                         onClick={[Function]}
                                                                                       >
                                                                                         <div
                                                                                           aria-disabled={false}
                                                                                           className="non-standalone-portal--portal-menu-story-MuiButtonBase-root non-standalone-portal--portal-menu-story-MuiListItem-root non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-root-51 non-standalone-portal--portal-menu-story-CcPortalMenuItemDark-item-43 non-standalone-portal--portal-menu-story-MuiListItem-gutters non-standalone-portal--portal-menu-story-MuiListItem-button non-standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-button-52"
+                                                                                          onAuxClick={[Function]}
                                                                                           onBlur={[Function]}
                                                                                           onClick={[Function]}
                                                                                           onDragLeave={[Function]}

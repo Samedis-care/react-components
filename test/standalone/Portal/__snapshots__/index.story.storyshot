@@ -14737,6 +14737,7 @@ exports[`Storyshots Standalone/Portal Menu 1`] = `
                                                                               },
                                                                             }
                                                                           }
+                                                                          onAuxClick={[Function]}
                                                                           onClick={[Function]}
                                                                           title="Home Sweet Home Sweet Home"
                                                                         >
@@ -14754,11 +14755,13 @@ exports[`Storyshots Standalone/Portal Menu 1`] = `
                                                                                 },
                                                                               }
                                                                             }
+                                                                            onAuxClick={[Function]}
                                                                             onClick={[Function]}
                                                                             title="Home Sweet Home Sweet Home"
                                                                           >
                                                                             <WithStyles(WithStyles(ForwardRef(ListItem)))
                                                                               button={true}
+                                                                              onAuxClick={[Function]}
                                                                               onClick={[Function]}
                                                                               selected={false}
                                                                             >
@@ -14769,6 +14772,7 @@ exports[`Storyshots Standalone/Portal Menu 1`] = `
                                                                                     "root": "standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-root-50",
                                                                                   }
                                                                                 }
+                                                                                onAuxClick={[Function]}
                                                                                 onClick={[Function]}
                                                                                 selected={false}
                                                                               >
@@ -14789,6 +14793,7 @@ exports[`Storyshots Standalone/Portal Menu 1`] = `
                                                                                       "selected": "Mui-selected",
                                                                                     }
                                                                                   }
+                                                                                  onAuxClick={[Function]}
                                                                                   onClick={[Function]}
                                                                                   selected={false}
                                                                                 >
@@ -14797,6 +14802,7 @@ exports[`Storyshots Standalone/Portal Menu 1`] = `
                                                                                     component="div"
                                                                                     disabled={false}
                                                                                     focusVisibleClassName="Mui-focusVisible"
+                                                                                    onAuxClick={[Function]}
                                                                                     onClick={[Function]}
                                                                                   >
                                                                                     <ForwardRef(ButtonBase)
@@ -14811,11 +14817,13 @@ exports[`Storyshots Standalone/Portal Menu 1`] = `
                                                                                       component="div"
                                                                                       disabled={false}
                                                                                       focusVisibleClassName="Mui-focusVisible"
+                                                                                      onAuxClick={[Function]}
                                                                                       onClick={[Function]}
                                                                                     >
                                                                                       <div
                                                                                         aria-disabled={false}
                                                                                         className="standalone-portal--portal-menu-story-MuiButtonBase-root standalone-portal--portal-menu-story-MuiListItem-root standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-root-50 standalone-portal--portal-menu-story-MuiListItem-gutters standalone-portal--portal-menu-story-MuiListItem-button"
+                                                                                        onAuxClick={[Function]}
                                                                                         onBlur={[Function]}
                                                                                         onClick={[Function]}
                                                                                         onDragLeave={[Function]}
@@ -15404,6 +15412,7 @@ exports[`Storyshots Standalone/Portal Menu 1`] = `
                                                                               },
                                                                             }
                                                                           }
+                                                                          onAuxClick={[Function]}
                                                                           onClick={[Function]}
                                                                           title="Admin"
                                                                         >
@@ -15421,11 +15430,13 @@ exports[`Storyshots Standalone/Portal Menu 1`] = `
                                                                                 },
                                                                               }
                                                                             }
+                                                                            onAuxClick={[Function]}
                                                                             onClick={[Function]}
                                                                             title="Admin"
                                                                           >
                                                                             <WithStyles(WithStyles(ForwardRef(ListItem)))
                                                                               button={true}
+                                                                              onAuxClick={[Function]}
                                                                               onClick={[Function]}
                                                                             >
                                                                               <WithStyles(ForwardRef(ListItem))
@@ -15435,6 +15446,7 @@ exports[`Storyshots Standalone/Portal Menu 1`] = `
                                                                                     "root": "standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-root-50",
                                                                                   }
                                                                                 }
+                                                                                onAuxClick={[Function]}
                                                                                 onClick={[Function]}
                                                                               >
                                                                                 <ForwardRef(ListItem)
@@ -15454,6 +15466,7 @@ exports[`Storyshots Standalone/Portal Menu 1`] = `
                                                                                       "selected": "Mui-selected",
                                                                                     }
                                                                                   }
+                                                                                  onAuxClick={[Function]}
                                                                                   onClick={[Function]}
                                                                                 >
                                                                                   <WithStyles(ForwardRef(ButtonBase))
@@ -15461,6 +15474,7 @@ exports[`Storyshots Standalone/Portal Menu 1`] = `
                                                                                     component="div"
                                                                                     disabled={false}
                                                                                     focusVisibleClassName="Mui-focusVisible"
+                                                                                    onAuxClick={[Function]}
                                                                                     onClick={[Function]}
                                                                                   >
                                                                                     <ForwardRef(ButtonBase)
@@ -15475,11 +15489,13 @@ exports[`Storyshots Standalone/Portal Menu 1`] = `
                                                                                       component="div"
                                                                                       disabled={false}
                                                                                       focusVisibleClassName="Mui-focusVisible"
+                                                                                      onAuxClick={[Function]}
                                                                                       onClick={[Function]}
                                                                                     >
                                                                                       <div
                                                                                         aria-disabled={false}
                                                                                         className="standalone-portal--portal-menu-story-MuiButtonBase-root standalone-portal--portal-menu-story-MuiListItem-root standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-root-50 standalone-portal--portal-menu-story-MuiListItem-gutters standalone-portal--portal-menu-story-MuiListItem-button"
+                                                                                        onAuxClick={[Function]}
                                                                                         onBlur={[Function]}
                                                                                         onClick={[Function]}
                                                                                         onDragLeave={[Function]}
@@ -16110,6 +16126,7 @@ exports[`Storyshots Standalone/Portal Menu 1`] = `
                                                                                             },
                                                                                           }
                                                                                         }
+                                                                                        onAuxClick={[Function]}
                                                                                         onClick={[Function]}
                                                                                         title="Item 1"
                                                                                       >
@@ -16117,11 +16134,13 @@ exports[`Storyshots Standalone/Portal Menu 1`] = `
                                                                                           active={false}
                                                                                           depth={1}
                                                                                           expandable={false}
+                                                                                          onAuxClick={[Function]}
                                                                                           onClick={[Function]}
                                                                                           title="Item 1"
                                                                                         >
                                                                                           <WithStyles(WithStyles(ForwardRef(ListItem)))
                                                                                             button={true}
+                                                                                            onAuxClick={[Function]}
                                                                                             onClick={[Function]}
                                                                                             selected={false}
                                                                                           >
@@ -16132,6 +16151,7 @@ exports[`Storyshots Standalone/Portal Menu 1`] = `
                                                                                                   "root": "standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-root-50",
                                                                                                 }
                                                                                               }
+                                                                                              onAuxClick={[Function]}
                                                                                               onClick={[Function]}
                                                                                               selected={false}
                                                                                             >
@@ -16152,6 +16172,7 @@ exports[`Storyshots Standalone/Portal Menu 1`] = `
                                                                                                     "selected": "Mui-selected",
                                                                                                   }
                                                                                                 }
+                                                                                                onAuxClick={[Function]}
                                                                                                 onClick={[Function]}
                                                                                                 selected={false}
                                                                                               >
@@ -16160,6 +16181,7 @@ exports[`Storyshots Standalone/Portal Menu 1`] = `
                                                                                                   component="div"
                                                                                                   disabled={false}
                                                                                                   focusVisibleClassName="Mui-focusVisible"
+                                                                                                  onAuxClick={[Function]}
                                                                                                   onClick={[Function]}
                                                                                                 >
                                                                                                   <ForwardRef(ButtonBase)
@@ -16174,11 +16196,13 @@ exports[`Storyshots Standalone/Portal Menu 1`] = `
                                                                                                     component="div"
                                                                                                     disabled={false}
                                                                                                     focusVisibleClassName="Mui-focusVisible"
+                                                                                                    onAuxClick={[Function]}
                                                                                                     onClick={[Function]}
                                                                                                   >
                                                                                                     <div
                                                                                                       aria-disabled={false}
                                                                                                       className="standalone-portal--portal-menu-story-MuiButtonBase-root standalone-portal--portal-menu-story-MuiListItem-root standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-root-50 standalone-portal--portal-menu-story-MuiListItem-gutters standalone-portal--portal-menu-story-MuiListItem-button"
+                                                                                                      onAuxClick={[Function]}
                                                                                                       onBlur={[Function]}
                                                                                                       onClick={[Function]}
                                                                                                       onDragLeave={[Function]}
@@ -16702,6 +16726,7 @@ exports[`Storyshots Standalone/Portal Menu 1`] = `
                                                                                             },
                                                                                           }
                                                                                         }
+                                                                                        onAuxClick={[Function]}
                                                                                         onClick={[Function]}
                                                                                         title="Item 2"
                                                                                       >
@@ -16709,11 +16734,13 @@ exports[`Storyshots Standalone/Portal Menu 1`] = `
                                                                                           active={false}
                                                                                           depth={1}
                                                                                           expandable={false}
+                                                                                          onAuxClick={[Function]}
                                                                                           onClick={[Function]}
                                                                                           title="Item 2"
                                                                                         >
                                                                                           <WithStyles(WithStyles(ForwardRef(ListItem)))
                                                                                             button={true}
+                                                                                            onAuxClick={[Function]}
                                                                                             onClick={[Function]}
                                                                                             selected={false}
                                                                                           >
@@ -16724,6 +16751,7 @@ exports[`Storyshots Standalone/Portal Menu 1`] = `
                                                                                                   "root": "standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-root-50",
                                                                                                 }
                                                                                               }
+                                                                                              onAuxClick={[Function]}
                                                                                               onClick={[Function]}
                                                                                               selected={false}
                                                                                             >
@@ -16744,6 +16772,7 @@ exports[`Storyshots Standalone/Portal Menu 1`] = `
                                                                                                     "selected": "Mui-selected",
                                                                                                   }
                                                                                                 }
+                                                                                                onAuxClick={[Function]}
                                                                                                 onClick={[Function]}
                                                                                                 selected={false}
                                                                                               >
@@ -16752,6 +16781,7 @@ exports[`Storyshots Standalone/Portal Menu 1`] = `
                                                                                                   component="div"
                                                                                                   disabled={false}
                                                                                                   focusVisibleClassName="Mui-focusVisible"
+                                                                                                  onAuxClick={[Function]}
                                                                                                   onClick={[Function]}
                                                                                                 >
                                                                                                   <ForwardRef(ButtonBase)
@@ -16766,11 +16796,13 @@ exports[`Storyshots Standalone/Portal Menu 1`] = `
                                                                                                     component="div"
                                                                                                     disabled={false}
                                                                                                     focusVisibleClassName="Mui-focusVisible"
+                                                                                                    onAuxClick={[Function]}
                                                                                                     onClick={[Function]}
                                                                                                   >
                                                                                                     <div
                                                                                                       aria-disabled={false}
                                                                                                       className="standalone-portal--portal-menu-story-MuiButtonBase-root standalone-portal--portal-menu-story-MuiListItem-root standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-root-50 standalone-portal--portal-menu-story-MuiListItem-gutters standalone-portal--portal-menu-story-MuiListItem-button"
+                                                                                                      onAuxClick={[Function]}
                                                                                                       onBlur={[Function]}
                                                                                                       onClick={[Function]}
                                                                                                       onDragLeave={[Function]}
@@ -17294,6 +17326,7 @@ exports[`Storyshots Standalone/Portal Menu 1`] = `
                                                                                             },
                                                                                           }
                                                                                         }
+                                                                                        onAuxClick={[Function]}
                                                                                         onClick={[Function]}
                                                                                         title="Item 3"
                                                                                       >
@@ -17301,11 +17334,13 @@ exports[`Storyshots Standalone/Portal Menu 1`] = `
                                                                                           active={false}
                                                                                           depth={1}
                                                                                           expandable={false}
+                                                                                          onAuxClick={[Function]}
                                                                                           onClick={[Function]}
                                                                                           title="Item 3"
                                                                                         >
                                                                                           <WithStyles(WithStyles(ForwardRef(ListItem)))
                                                                                             button={true}
+                                                                                            onAuxClick={[Function]}
                                                                                             onClick={[Function]}
                                                                                             selected={false}
                                                                                           >
@@ -17316,6 +17351,7 @@ exports[`Storyshots Standalone/Portal Menu 1`] = `
                                                                                                   "root": "standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-root-50",
                                                                                                 }
                                                                                               }
+                                                                                              onAuxClick={[Function]}
                                                                                               onClick={[Function]}
                                                                                               selected={false}
                                                                                             >
@@ -17336,6 +17372,7 @@ exports[`Storyshots Standalone/Portal Menu 1`] = `
                                                                                                     "selected": "Mui-selected",
                                                                                                   }
                                                                                                 }
+                                                                                                onAuxClick={[Function]}
                                                                                                 onClick={[Function]}
                                                                                                 selected={false}
                                                                                               >
@@ -17344,6 +17381,7 @@ exports[`Storyshots Standalone/Portal Menu 1`] = `
                                                                                                   component="div"
                                                                                                   disabled={false}
                                                                                                   focusVisibleClassName="Mui-focusVisible"
+                                                                                                  onAuxClick={[Function]}
                                                                                                   onClick={[Function]}
                                                                                                 >
                                                                                                   <ForwardRef(ButtonBase)
@@ -17358,11 +17396,13 @@ exports[`Storyshots Standalone/Portal Menu 1`] = `
                                                                                                     component="div"
                                                                                                     disabled={false}
                                                                                                     focusVisibleClassName="Mui-focusVisible"
+                                                                                                    onAuxClick={[Function]}
                                                                                                     onClick={[Function]}
                                                                                                   >
                                                                                                     <div
                                                                                                       aria-disabled={false}
                                                                                                       className="standalone-portal--portal-menu-story-MuiButtonBase-root standalone-portal--portal-menu-story-MuiListItem-root standalone-portal--portal-menu-story-WithStyles(ForwardRef(ListItem))-root-50 standalone-portal--portal-menu-story-MuiListItem-gutters standalone-portal--portal-menu-story-MuiListItem-button"
+                                                                                                      onAuxClick={[Function]}
                                                                                                       onBlur={[Function]}
                                                                                                       onClick={[Function]}
                                                                                                       onDragLeave={[Function]}

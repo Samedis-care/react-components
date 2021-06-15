@@ -40,17 +40,28 @@ export const MenuContext = React.createContext<
 >(undefined);
 
 const MenuItem = (props: MenuItemControllerProps) => {
-	const { depth, title, expandable, forceExpand, onClick, menuItemId } = props;
+	const {
+		depth,
+		title,
+		expandable,
+		forceExpand,
+		onClick,
+		onAuxClick,
+		menuItemId,
+	} = props;
 	const [expanded, setExpanded] = useState(false);
 	const menuContext = useContext(MenuContext);
 	if (!menuContext) throw new Error("MenuContext is undefined");
 	const [menuState, setMenuState] = menuContext;
 
-	const clickProxy = useCallback(() => {
-		if (expandable) setExpanded(forceExpand ? true : (prevFlag) => !prevFlag);
-		else setMenuState(menuItemId);
-		onClick();
-	}, [expandable, forceExpand, setMenuState, menuItemId, onClick]);
+	const clickProxy = useCallback(
+		(evt: React.MouseEvent) => {
+			if (expandable) setExpanded(forceExpand ? true : (prevFlag) => !prevFlag);
+			else setMenuState(menuItemId);
+			onClick(evt);
+		},
+		[expandable, forceExpand, setMenuState, menuItemId, onClick]
+	);
 
 	// force expand
 	if (expandable && !expanded && forceExpand) {
@@ -67,6 +78,7 @@ const MenuItem = (props: MenuItemControllerProps) => {
 				expanded={expandable ? expanded : undefined}
 				active={expandable ? undefined : menuState === menuItemId}
 				onClick={clickProxy}
+				onAuxClick={onAuxClick}
 				depth={depth}
 			/>
 			{expandable && (
@@ -96,6 +108,7 @@ export const toMenuItemComponent = (
 			title={def.title}
 			expandable={!!(def.children && def.children.length > 0)}
 			onClick={def.onClick}
+			onAuxClick={def.onAuxClick ?? (() => undefined)}
 			menuProps={menuProps}
 			childDefs={def.children}
 			forceExpand={!!def.forceExpand}

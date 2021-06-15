@@ -96,6 +96,7 @@ const MenuItemJumboReactDark = (props: MenuItemProps) => {
 		<MyListItem
 			button
 			onClick={props.onClick}
+			onAuxClick={props.onAuxClick}
 			className={combineClassNames([
 				classes.item,
 				props.active && classes.selectedItem,

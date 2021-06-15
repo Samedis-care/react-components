@@ -49,7 +49,12 @@ const StyledListItem = withStyles((theme: Theme) => ({
 const MenuItemMaterial = (props: MenuItemProps) => {
 	const Icon = props.icon;
 	return (
-		<StyledListItem button onClick={props.onClick} selected={props.active}>
+		<StyledListItem
+			button
+			onClick={props.onClick}
+			onAuxClick={props.onAuxClick}
+			selected={props.active}
+		>
 			<ListItemIcon>{Icon && <Icon />}</ListItemIcon>
 			<ListItemText primary={props.title} />
 			{props.expandable ? (

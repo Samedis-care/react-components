@@ -16,7 +16,7 @@ export interface IRoutedMenuItemDefinition
 	/**
 	 * An additional onClick action to be executed
 	 */
-	onClick?: () => void;
+	onClick?: React.MouseEventHandler;
 	/**
 	 * Children of this menu entry
 	 */
@@ -50,12 +50,21 @@ const convertDefinition = (
 	children: definition.children?.map((entry) =>
 		convertDefinition(entry, path, depth + 1)
 	),
-	onClick: () => {
+	onClick: (evt) => {
 		if (definition.onClick) {
-			definition.onClick();
+			definition.onClick(evt);
 		}
 		if (definition.route) {
-			FrameworkHistory.push(definition.route);
+			if (evt.ctrlKey) window.open(definition.route);
+			else FrameworkHistory.push(definition.route);
+		}
+	},
+	onAuxClick: (evt) => {
+		if (definition.onAuxClick) {
+			definition.onAuxClick(evt);
+		}
+		if (definition.route) {
+			window.open(definition.route);
 		}
 	},
 });
