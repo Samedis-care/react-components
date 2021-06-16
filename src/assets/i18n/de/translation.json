@@ -53,7 +53,8 @@
 					"column": "Spalteneinstellungen zurücksetzen",
 					"filter": "Filter zurücksetzen",
 					"sort": "Sortiereinstellungen zurücksetzen",
-					"width": "Spaltenbreiten zurücksetzen"
+					"width": "Spaltenbreiten zurücksetzen",
+					"refresh": "Neu laden"
 				}
 			},
 			"footer": {
