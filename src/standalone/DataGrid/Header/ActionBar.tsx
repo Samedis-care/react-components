@@ -114,6 +114,7 @@ const ActionBar = () => {
 	const handleRefresh = useCallback(() => {
 		setState((prevState) => ({
 			...prevState,
+			rows: {},
 			refreshData: Math.min(prevState.refreshData + 1, 2),
 		}));
 	}, [setState]);
