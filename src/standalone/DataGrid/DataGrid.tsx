@@ -821,8 +821,16 @@ const useStyles = makeStyles(
 		},
 		contentOverlayPaper: {
 			padding: 16,
-			borderBottom: `1px solid ${theme.palette.divider}`,
-			borderRadius: 8,
+			paddingBottom: 0,
+		},
+		contentOverlayClosed: {
+			position: "sticky",
+			bottom: 0,
+			left: 0,
+			right: 0,
+			backgroundColor:
+				theme.componentsCare?.dataGrid?.backgroundColor ||
+				theme.palette.background.paper,
 		},
 		customFilterContainer: {
 			paddingTop: theme.spacing(2),
