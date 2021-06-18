@@ -58,7 +58,6 @@ const useLazyCrudConnector = <
 		onlySubmitMounted,
 	} = useFormContext();
 	const [dirty, setDirty] = useState(false);
-	const prevDirtyRef = useRef<boolean>(false);
 	const uploadConnector = useRef<LazyConnector<KeyT, VisibilityT, CustomT>>(
 		getCustomState<LazyConnector<KeyT, VisibilityT, CustomT>>(field) ??
 			new LazyConnector<KeyT, VisibilityT, CustomT>(
@@ -93,10 +92,11 @@ const useLazyCrudConnector = <
 
 	// manage dirty state
 	useEffect(() => {
-		if (prevDirtyRef.current !== dirty) {
-			setCustomDirtyCounter((prevState) => prevState + (dirty ? 1 : -1));
-		}
-		prevDirtyRef.current = dirty;
+		if (!dirty) return;
+		setCustomDirtyCounter((prevState) => prevState + 1);
+		return () => {
+			setCustomDirtyCounter((prevState) => prevState - 1);
+		};
 	}, [dirty, setCustomDirtyCounter]);
 
 	return { connector: uploadConnector.current };
