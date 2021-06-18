@@ -58,6 +58,10 @@ export interface BaseSelectorData {
 	 * Is this an add new button? (used for special handling in the renderer)
 	 */
 	isAddNewButton?: boolean;
+	/**
+	 * CSS styles for options
+	 */
+	className?: string;
 }
 
 /**
@@ -185,6 +189,33 @@ export interface BaseSelectorProps<DataT extends BaseSelectorData>
 	 * Label for switch control (only used if displaySwitch is truthy)
 	 */
 	switchLabel?: React.ReactNode;
+	// Last recently used (LRU) cache options
+	// LRU shows the user the previous items he selected when no search term is entered
+	lru?: {
+		/**
+		 * The max amount of LRU cache entries
+		 */
+		count: number;
+		/**
+		 * The function to load the data associated with a LRU cache entry
+		 * @param id The ID of the data
+		 * @remarks The return value is not cached
+		 */
+		loadData: (id: string) => Promise<DataT> | DataT;
+		/**
+		 * Get ID from data record
+		 * @param data The data record
+		 */
+		getId: (data: DataT) => string;
+		/**
+		 * The LRU storage key
+		 */
+		storageKey: string;
+		/**
+		 * Do not load selector items if no search query is present
+		 */
+		forceQuery: boolean;
+	};
 }
 
 export type SelectorThemeExpert = Partial<
@@ -263,7 +294,9 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 		disableGroupSorting,
 		groupSorter,
 		switchLabel,
+		lru,
 	} = props;
+
 	const classes = useThemeStyles(
 		(props as unknown) as BaseSelectorProps<BaseSelectorData>
 	);
@@ -279,6 +312,29 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 	const [loading, setLoading] = useState(false);
 	const [query, setQuery] = useState("");
 
+	const [lruIds, setLruIds] = useState<string[]>(() => {
+		if (!lru) return [];
+		try {
+			const ret: unknown = JSON.parse(
+				localStorage.getItem(lru.storageKey) ?? "[]"
+			);
+			if (
+				!Array.isArray(ret) ||
+				(ret as unknown[]).find((entry) => typeof entry !== "string")
+			)
+				return []; // LRU != string[]
+			return (ret as string[]).slice(0, lru.count);
+		} catch (e) {
+			return []; // json parse error
+		}
+	});
+
+	// save LRU ids
+	useEffect(() => {
+		if (!lru?.storageKey) return;
+		localStorage.setItem(lru.storageKey, JSON.stringify(lruIds));
+	}, [lruIds, lru?.storageKey]);
+
 	const renderIcon = useCallback(
 		(icon: string | React.ReactNode) =>
 			typeof icon === "string" ? (
@@ -293,7 +349,7 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 		(data: BaseSelectorData) => (
 			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 			// @ts-ignore: Typescript complains about the button property being "required"
-			<SelectorSmallListItem component={"div"}>
+			<SelectorSmallListItem component={"div"} className={data.className}>
 				{enableIcons && (
 					<SmallListItemIcon>{renderIcon(data.icon)}</SmallListItemIcon>
 				)}
@@ -318,22 +374,39 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 			}
 			if (onSelect) {
 				onSelect(data);
+				if (lru) {
+					// add to LRU
+					const dataId = lru.getId(data);
+					setLruIds((prev) =>
+						[dataId, ...prev.filter((id) => id !== dataId)].slice(0, lru.count)
+					);
+				}
 			}
 		},
-		[onSelect, onAddNew]
+		[onSelect, onAddNew, lru]
 	);
 
 	const onSearchHandler = useCallback(
 		async (query: string) => {
+			const addNewEntry = {
+				value: "add-new-button",
+				label: actualAddNewLabel,
+				icon: <AddIcon />,
+				isAddNewButton: true,
+			} as DataT;
+
 			setLoading(true);
-			const results = await onLoad(query, !!switchValue);
-			if (onAddNew) {
-				results.push({
-					value: "add-new-button",
-					label: actualAddNewLabel,
-					icon: <AddIcon />,
-					isAddNewButton: true,
-				} as DataT);
+			let results: DataT[];
+			if (lru && query === "" && (lruIds.length > 0 || lru.forceQuery)) {
+				results = [
+					addNewEntry,
+					...(await Promise.all(lruIds.map(lru.loadData))),
+				];
+			} else {
+				results = await onLoad(query, switchValue);
+				if (onAddNew) {
+					results.push(addNewEntry);
+				}
 			}
 			if (grouped && !disableGroupSorting) {
 				setSelectorOptions(
@@ -351,12 +424,14 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 			setLoading(false);
 		},
 		[
+			actualAddNewLabel,
+			lru,
+			lruIds,
+			grouped,
+			disableGroupSorting,
 			onLoad,
 			switchValue,
 			onAddNew,
-			grouped,
-			disableGroupSorting,
-			actualAddNewLabel,
 			groupSorter,
 			noGroupLabel,
 		]
