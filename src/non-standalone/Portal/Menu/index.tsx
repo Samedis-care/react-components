@@ -55,7 +55,8 @@ const convertDefinition = (
 			definition.onClick(evt);
 		}
 		if (definition.route) {
-			if (evt.ctrlKey) window.open(definition.route);
+			if (evt.ctrlKey || evt.metaKey || evt.shiftKey)
+				window.open(definition.route, "_blank");
 			else FrameworkHistory.push(definition.route);
 		}
 	},
