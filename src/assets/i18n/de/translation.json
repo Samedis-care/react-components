@@ -36,7 +36,10 @@
 				"reset-column-filter": "Filter löschen"
 			},
 			"settings": {
-				"close": "Schließen"
+				"close": "Schließen",
+				"column": "Spalte",
+				"pin": "Anheften",
+				"show": "Sichtbar"
 			},
 			"header": {
 				"settings": "Einstellungen",
