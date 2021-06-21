@@ -359,7 +359,7 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 	);
 
 	const onChangeHandler = useCallback(
-		async (data: DataT) => {
+		async (data: DataT | NonNullable<DataT> | null) => {
 			if (
 				data &&
 				"isAddNewButton" in data &&
@@ -373,10 +373,11 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 			}
 			if (onSelect) {
 				onSelect(data);
-				if (lru) {
+				if (lru && data) {
+					const dataNN: DataT = data; // please Typescript
 					// add to LRU
 					setLruIds((prev) =>
-						[data.value, ...prev.filter((id) => id !== data.value)].slice(
+						[dataNN.value, ...prev.filter((id) => id !== dataNN.value)].slice(
 							0,
 							lru.count
 						)

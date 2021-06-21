@@ -60,8 +60,9 @@
 				}
 			},
 			"settings": {
-				"lock": "Lock/Unlock Columns",
-				"hide": "Show/Hide Columns",
+				"column": "Column",
+				"show": "Show",
+				"pin": "Pin",
 				"close": "Close"
 			},
 			"custom-filters": {

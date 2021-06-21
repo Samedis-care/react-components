@@ -4,11 +4,13 @@ import {
 	Button,
 	Checkbox,
 	Divider,
-	FormControlLabel,
 	Grid,
 	Paper,
-	Typography,
-	withStyles,
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableRow,
 } from "@material-ui/core";
 import {
 	IDataGridColumnDef,
@@ -42,69 +44,43 @@ export interface IDataGridSettingsDialogProps extends IDataGridColumnProps {
 	hiddenColumns: string[];
 }
 
-const EllipsisFormControlLabel = withStyles({
-	root: {
-		maxWidth: "100%",
-	},
-	label: {
-		overflow: "hidden",
-		textOverflow: "ellipsis",
-		whiteSpace: "nowrap",
-	},
-})(FormControlLabel);
-
 const SettingsDialog = (props: IDataGridSettingsDialogProps) => {
 	const classes = useDataGridStyles();
 	const { t } = useCCTranslations();
 
 	return (
 		<Paper elevation={0} className={classes.contentOverlayPaper}>
-			<Grid container>
-				<Grid item xs={12} sm={6} container>
-					<Grid item xs={12}>
-						<Typography variant={"h6"}>
-							{t("standalone.data-grid.settings.hide") || ""}
-						</Typography>
-						<Divider />
-					</Grid>
+			<Table stickyHeader>
+				<TableHead>
+					<TableRow>
+						<TableCell>{t("standalone.data-grid.settings.column")}</TableCell>
+						<TableCell>{t("standalone.data-grid.settings.show")}</TableCell>
+						<TableCell>{t("standalone.data-grid.settings.pin")}</TableCell>
+					</TableRow>
+				</TableHead>
+				<TableBody>
 					{props.columns.map((column: IDataGridColumnDef) => (
-						<Grid item xs={12} key={column.field} zeroMinWidth>
-							<EllipsisFormControlLabel
-								control={
-									<Checkbox
-										checked={!props.hiddenColumns.includes(column.field)}
-										onChange={props.toggleColumnVisibility}
-										value={column.field}
-									/>
-								}
-								label={column.headerName}
-							/>
-						</Grid>
+						<TableRow key={column.field}>
+							<TableCell>{column.headerName}</TableCell>
+							<TableCell>
+								<Checkbox
+									checked={!props.hiddenColumns.includes(column.field)}
+									onChange={props.toggleColumnVisibility}
+									value={column.field}
+								/>
+							</TableCell>
+							<TableCell>
+								<Checkbox
+									checked={props.lockedColumns.includes(column.field)}
+									disabled={props.hiddenColumns.includes(column.field)}
+									onChange={props.toggleColumnLock}
+									value={column.field}
+								/>
+							</TableCell>
+						</TableRow>
 					))}
-				</Grid>
-				<Grid item xs={12} sm={6} container>
-					<Grid item xs={12}>
-						<Typography variant={"h6"}>
-							{t("standalone.data-grid.settings.lock") || ""}
-						</Typography>
-						<Divider />
-					</Grid>
-					{props.columns.map((column: IDataGridColumnDef) => (
-						<Grid item xs={12} key={column.field} zeroMinWidth>
-							<EllipsisFormControlLabel
-								control={
-									<Checkbox
-										checked={props.lockedColumns.includes(column.field)}
-										onChange={props.toggleColumnLock}
-										value={column.field}
-									/>
-								}
-								label={column.headerName}
-							/>
-						</Grid>
-					))}
-				</Grid>
-			</Grid>
+				</TableBody>
+			</Table>
 			<div className={classes.contentOverlayClosed}>
 				<Divider />
 				<Grid container justify={"flex-end"}>

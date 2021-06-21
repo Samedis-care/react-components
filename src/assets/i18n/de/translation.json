@@ -36,8 +36,6 @@
 				"reset-column-filter": "Filter löschen"
 			},
 			"settings": {
-				"lock": "Spalten sperren/entsperren",
-				"hide": "Spalten ein-/ausblenden",
 				"close": "Schließen"
 			},
 			"header": {

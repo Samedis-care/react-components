@@ -35,8 +35,6 @@
 		},
 		"data-grid": {
 			"settings": {
-				"lock": "Verrouiller/Déverrouiller les colonnes",
-				"hide": "Afficher/Masquer les colonnes",
 				"close": "Fermer"
 			},
 			"header": {

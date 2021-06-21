@@ -35,8 +35,6 @@
 		},
 		"data-grid": {
 			"settings": {
-				"lock": "Ustunlarni qulflash / ochish",
-				"hide": "Ustunlarni ko'rsatish / yashirish",
 				"close": "Yoping"
 			},
 			"header": {
