@@ -64,6 +64,27 @@ export interface BaseSelectorData {
 	className?: string;
 }
 
+export interface SelectorLruOptions<DataT extends BaseSelectorData> {
+	/**
+	 * The max amount of LRU cache entries
+	 */
+	count: number;
+	/**
+	 * The function to load the data associated with a LRU cache entry
+	 * @param id The ID of the data (value in DataT)
+	 * @remarks The return value is not cached
+	 */
+	loadData: (id: string) => Promise<DataT> | DataT;
+	/**
+	 * The LRU storage key
+	 */
+	storageKey: string;
+	/**
+	 * Do not load selector items if no search query is present
+	 */
+	forceQuery: boolean;
+}
+
 /**
  * A callback used to get an label value for a specific input (search) value
  */
@@ -189,33 +210,11 @@ export interface BaseSelectorProps<DataT extends BaseSelectorData>
 	 * Label for switch control (only used if displaySwitch is truthy)
 	 */
 	switchLabel?: React.ReactNode;
-	// Last recently used (LRU) cache options
-	// LRU shows the user the previous items he selected when no search term is entered
-	lru?: {
-		/**
-		 * The max amount of LRU cache entries
-		 */
-		count: number;
-		/**
-		 * The function to load the data associated with a LRU cache entry
-		 * @param id The ID of the data
-		 * @remarks The return value is not cached
-		 */
-		loadData: (id: string) => Promise<DataT> | DataT;
-		/**
-		 * Get ID from data record
-		 * @param data The data record
-		 */
-		getId: (data: DataT) => string;
-		/**
-		 * The LRU storage key
-		 */
-		storageKey: string;
-		/**
-		 * Do not load selector items if no search query is present
-		 */
-		forceQuery: boolean;
-	};
+	/**
+	 * Last recently used (LRU) cache options
+	 * LRU shows the user the previous items he selected when no search term is entered
+	 */
+	lru?: SelectorLruOptions<DataT>;
 }
 
 export type SelectorThemeExpert = Partial<
@@ -360,7 +359,7 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 	);
 
 	const onChangeHandler = useCallback(
-		async (data) => {
+		async (data: DataT) => {
 			if (
 				data &&
 				"isAddNewButton" in data &&
@@ -376,9 +375,11 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 				onSelect(data);
 				if (lru) {
 					// add to LRU
-					const dataId = lru.getId(data);
 					setLruIds((prev) =>
-						[dataId, ...prev.filter((id) => id !== dataId)].slice(0, lru.count)
+						[data.value, ...prev.filter((id) => id !== data.value)].slice(
+							0,
+							lru.count
+						)
 					);
 				}
 			}
