@@ -35,7 +35,10 @@
 		},
 		"data-grid": {
 			"settings": {
-				"close": "Закрыть"
+				"close": "Закрыть",
+				"column": "Столбец",
+				"pin": "Закрепить",
+				"show": "Видимый"
 			},
 			"header": {
 				"settings": "Настройки",
