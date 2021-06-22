@@ -35,7 +35,10 @@
 		},
 		"data-grid": {
 			"settings": {
-				"close": "Fermer"
+				"close": "Fermer",
+				"column": "Colonne",
+				"pin": "Accrocher",
+				"show": "Visible"
 			},
 			"header": {
 				"settings": "Paramètres",

@@ -61,7 +61,7 @@
 			},
 			"settings": {
 				"column": "Column",
-				"show": "Show",
+				"show": "Visible",
 				"pin": "Pin",
 				"close": "Close"
 			},
