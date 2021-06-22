@@ -103,6 +103,10 @@ export interface CrudProps<
 	 * If not set: Shows edit form in read-only mode
 	 */
 	forbiddenPage?: React.ComponentType;
+	/**
+	 * Route component to use
+	 */
+	routeComponent?: typeof Route;
 }
 
 const useStyles = makeStyles(
@@ -128,7 +132,7 @@ const CRUD = <
 	props: CrudProps<KeyT, VisibilityT, CustomT>
 ) => {
 	const history = useHistory();
-	const { path } = useRouteMatch();
+	const { path, url } = useRouteMatch();
 	const location = useLocation();
 	const [perms] = usePermissionContext();
 	const {
@@ -136,6 +140,7 @@ const CRUD = <
 		disableBackgroundGrid,
 		forbiddenPage: ForbiddenPage,
 	} = props;
+	const RouteComponent = props.routeComponent ?? Route;
 	const [id, setId] = useState<string | null>(props.initialView ?? null);
 	const [gridRefreshToken, setGridRefreshToken] = useState<string>(
 		new Date().getTime().toString()
@@ -147,27 +152,27 @@ const CRUD = <
 			if (disableRouting) {
 				setId(id);
 			} else {
-				history.push(`${path}/${id}`);
+				history.push(`${url}/${id}`);
 			}
 		},
-		[history, path, disableRouting]
+		[history, url, disableRouting]
 	);
 
 	const showNewPage = useCallback(() => {
 		if (disableRouting) {
 			setId("new");
 		} else {
-			history.push(`${path}/new`);
+			history.push(`${url}/new`);
 		}
-	}, [history, path, disableRouting]);
+	}, [history, url, disableRouting]);
 
 	const showOverview = useCallback(() => {
 		if (disableRouting) {
 			setId(null);
 		} else {
-			history.push(path);
+			history.push(url);
 		}
-	}, [history, path, disableRouting]);
+	}, [history, url, disableRouting]);
 
 	const handleSubmit = useCallback(
 		async (data: Record<KeyT, unknown>) => {
@@ -180,13 +185,13 @@ const CRUD = <
 			if (disableRouting) {
 				setId((oldId) => (oldId === null ? null : id));
 			} else if (location.pathname.endsWith("/new")) {
-				history.push(`${path}/${id}`);
+				history.push(`${url}/${id}`);
 			}
 
 			// cause grid refresh
 			setGridRefreshToken(new Date().getTime().toString());
 		},
-		[props.formProps, disableRouting, location.pathname, history, path]
+		[props.formProps, disableRouting, location.pathname, history, url]
 	);
 
 	const grid = () => (
@@ -242,14 +247,14 @@ const CRUD = <
 		<>
 			{(id === null || !disableBackgroundGrid) && (
 				<div
-					className={location.pathname === path ? classes.show : classes.hide}
+					className={location.pathname === url ? classes.show : classes.hide}
 				>
 					{grid()}
 				</div>
 			)}
 			{props.children && (
 				<Switch>
-					<Route path={`${path}/:id`} exact>
+					<RouteComponent path={`${path}/:id`} exact>
 						{hasPermission(perms, props.readPermission) ||
 						hasPermission(perms, props.editPermission) ||
 						!ForbiddenPage ? (
@@ -259,7 +264,7 @@ const CRUD = <
 						) : (
 							<ForbiddenPage />
 						)}
-					</Route>
+					</RouteComponent>
 				</Switch>
 			)}
 		</>
