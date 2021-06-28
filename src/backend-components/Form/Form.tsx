@@ -190,8 +190,15 @@ export interface FormContextData {
 	) => void;
 	/**
 	 * Set dirty custom field count (for fields modified by post submit handlers)
+	 * @deprecated Use setCustomFieldDirty instead
 	 */
 	setCustomDirtyCounter: Dispatch<SetStateAction<number>>;
+	/**
+	 * Set custom field dirty state
+	 * @param field The unique field name
+	 * @param dirty The dirty state
+	 */
+	setCustomFieldDirty: (field: string, dirty: boolean) => void;
 	/**
 	 * Is the form dirty?
 	 */
@@ -298,6 +305,21 @@ const loaderContainerStyles: CSSProperties = {
 	margin: "auto",
 };
 
+/**
+ * Normalizes data for validation to ensure dirty flag matches user perception
+ * @param data The data to normalize
+ */
+const normalizeValues = <T extends unknown>(data: T): T => {
+	if (typeof data !== "object")
+		throw new Error("Only Record<string, unknown> supported");
+	const normalizedData: Record<string, unknown> = {};
+	Object.entries(data as Record<string, unknown>).forEach(([k, v]) => {
+		const shouldBeNulled = v === "" || (Array.isArray(v) && v.length === 0);
+		normalizedData[k] = shouldBeNulled ? null : v;
+	});
+	return normalizedData as T;
+};
+
 const Form = <
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
@@ -321,8 +343,21 @@ const Form = <
 	const ErrorComponent = props.errorComponent;
 
 	// custom fields - dirty state
+	// v1
 	const [customDirtyCounter, setCustomDirtyCounter] = useState(0);
-	const customDirty = customDirtyCounter > 0;
+	// v2
+	const [customDirtyFields, setCustomDirtyFields] = useState<string[]>([]);
+
+	const setCustomFieldDirty = useCallback((field: string, dirty: boolean) => {
+		setCustomDirtyFields((prev) => {
+			const prevDirty = prev.includes(field);
+			if (prevDirty == dirty) return prev; // no changes
+			if (dirty) return [...prev, field];
+			else return prev.filter((candidate) => candidate !== field);
+		});
+	}, []);
+
+	const customDirty = customDirtyCounter > 0 || customDirtyFields.length > 0;
 
 	// custom fields - pre submit handlers
 	const customValidationHandlers = useRef<
@@ -382,7 +417,8 @@ const Form = <
 		useMemo(
 			() =>
 				serverData
-					? JSON.stringify(values) !== JSON.stringify(serverData[0])
+					? JSON.stringify(normalizeValues(values)) !==
+					  JSON.stringify(normalizeValues(serverData[0]))
 					: false,
 			[values, serverData]
 		) || customDirty;
@@ -663,20 +699,25 @@ const Form = <
 				return;
 			}
 
+			// normalize data
+			const localData = normalizeValues(values);
+			const remoteData = normalizeValues(serverData[0]);
+
 			console.log("Form Dirty Flag State:");
 			console.log(
 				"Form Dirty State:",
-				JSON.stringify(values) !== JSON.stringify(serverData[0])
+				JSON.stringify(localData) !== JSON.stringify(remoteData)
 			);
 			console.log("Custom Dirty State:", customDirty);
+			console.log("Custom Dirty Fields:", customDirtyFields);
 			console.log("Custom Dirty Counter:", customDirtyCounter);
 
-			console.log("Server Data:", serverData[0]);
-			console.log("Form Data:", values);
+			console.log("Server Data:", remoteData);
+			console.log("Form Data:", localData);
 
-			Object.keys(values).forEach((key) => {
-				const server: unknown = serverData[0][key as KeyT];
-				const form = values[key];
+			Object.keys(localData).forEach((key) => {
+				const server: unknown = remoteData[key as KeyT];
+				const form = localData[key];
 				const dirty = JSON.stringify(server) !== JSON.stringify(form);
 				if (onlyDirty && !dirty) return;
 				console.log(
@@ -690,7 +731,7 @@ const Form = <
 			});
 			/* eslint-enable no-console */
 		},
-		[customDirty, customDirtyCounter, serverData, values]
+		[customDirty, customDirtyCounter, customDirtyFields, serverData, values]
 	);
 
 	// context and rendering
@@ -709,6 +750,7 @@ const Form = <
 			setError,
 			markFieldMounted,
 			setCustomDirtyCounter,
+			setCustomFieldDirty,
 			dirty,
 			getCustomState,
 			setCustomState,
@@ -739,6 +781,7 @@ const Form = <
 			dirty,
 			getCustomState,
 			setCustomState,
+			setCustomFieldDirty,
 			setPostSubmitHandler,
 			removePostSubmitHandler,
 			setCustomValidationHandler,

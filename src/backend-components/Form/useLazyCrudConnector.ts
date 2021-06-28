@@ -52,7 +52,7 @@ const useLazyCrudConnector = <
 	const {
 		setPostSubmitHandler,
 		removePostSubmitHandler,
-		setCustomDirtyCounter,
+		setCustomFieldDirty,
 		getCustomState,
 		setCustomState,
 		onlySubmitMounted,
@@ -92,12 +92,12 @@ const useLazyCrudConnector = <
 
 	// manage dirty state
 	useEffect(() => {
-		if (!dirty) return;
-		setCustomDirtyCounter((prevState) => prevState + 1);
+		setCustomFieldDirty(field, dirty);
+		if (!onlySubmitMounted) return;
 		return () => {
-			setCustomDirtyCounter((prevState) => prevState - 1);
+			setCustomFieldDirty(field, false);
 		};
-	}, [dirty, setCustomDirtyCounter]);
+	}, [field, dirty, onlySubmitMounted, setCustomFieldDirty]);
 
 	return { connector: uploadConnector.current };
 };
