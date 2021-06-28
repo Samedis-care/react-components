@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useContext, useMemo, useState } from "react";
 import Model, {
 	ModelFieldName,
 	PageVisibility,
@@ -124,6 +124,22 @@ const useStyles = makeStyles(
 	{ name: "CcCrud" }
 );
 
+export interface CrudDispatch {
+	/**
+	 * Force-refreshes the grid
+	 */
+	refreshGrid: () => void;
+}
+
+const CrudDispatchContext = React.createContext<CrudDispatch | undefined>(
+	undefined
+);
+export const useCrudDispatchContext = (): CrudDispatch => {
+	const ctx = useContext(CrudDispatchContext);
+	if (!ctx) throw new Error("CrudDispatchContext not set");
+	return ctx;
+};
+
 const CRUD = <
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
@@ -174,6 +190,10 @@ const CRUD = <
 		}
 	}, [history, url, disableRouting]);
 
+	const refreshGrid = useCallback(() => {
+		setGridRefreshToken(new Date().getTime().toString());
+	}, []);
+
 	const handleSubmit = useCallback(
 		async (data: Record<KeyT, unknown>) => {
 			if (props.formProps.onSubmit) {
@@ -188,10 +208,16 @@ const CRUD = <
 				history.push(`${url}/${id}`);
 			}
 
-			// cause grid refresh
-			setGridRefreshToken(new Date().getTime().toString());
+			refreshGrid();
 		},
-		[props.formProps, disableRouting, location.pathname, history, url]
+		[
+			props.formProps,
+			disableRouting,
+			location.pathname,
+			history,
+			url,
+			refreshGrid,
+		]
 	);
 
 	const grid = () => (
@@ -234,40 +260,53 @@ const CRUD = <
 		</Form>
 	);
 
-	return disableRouting ? (
-		<>
-			{(id === null || !disableBackgroundGrid) && (
-				<div className={id !== null ? classes.hide : classes.show}>
-					{grid()}
-				</div>
+	const dispatch = useMemo(
+		() => ({
+			refreshGrid,
+		}),
+		[refreshGrid]
+	);
+
+	return (
+		<CrudDispatchContext.Provider value={dispatch}>
+			{disableRouting ? (
+				<>
+					{(id === null || !disableBackgroundGrid) && (
+						<div className={id !== null ? classes.hide : classes.show}>
+							{grid()}
+						</div>
+					)}
+					{id !== null && props.children && form(id, props.children)}
+				</>
+			) : (
+				<>
+					{(id === null || !disableBackgroundGrid) && (
+						<div
+							className={
+								location.pathname === url ? classes.show : classes.hide
+							}
+						>
+							{grid()}
+						</div>
+					)}
+					{props.children && (
+						<Switch>
+							<RouteComponent path={`${path}/:id`} exact>
+								{hasPermission(perms, props.readPermission) ||
+								hasPermission(perms, props.editPermission) ||
+								!ForbiddenPage ? (
+									(routeProps: RouteChildrenProps<{ id: string }>) =>
+										props.children &&
+										form(routeProps.match?.params.id ?? "", props.children)
+								) : (
+									<ForbiddenPage />
+								)}
+							</RouteComponent>
+						</Switch>
+					)}
+				</>
 			)}
-			{id !== null && props.children && form(id, props.children)}
-		</>
-	) : (
-		<>
-			{(id === null || !disableBackgroundGrid) && (
-				<div
-					className={location.pathname === url ? classes.show : classes.hide}
-				>
-					{grid()}
-				</div>
-			)}
-			{props.children && (
-				<Switch>
-					<RouteComponent path={`${path}/:id`} exact>
-						{hasPermission(perms, props.readPermission) ||
-						hasPermission(perms, props.editPermission) ||
-						!ForbiddenPage ? (
-							(routeProps: RouteChildrenProps<{ id: string }>) =>
-								props.children &&
-								form(routeProps.match?.params.id ?? "", props.children)
-						) : (
-							<ForbiddenPage />
-						)}
-					</RouteComponent>
-				</Switch>
-			)}
-		</>
+		</CrudDispatchContext.Provider>
 	);
 };
 
