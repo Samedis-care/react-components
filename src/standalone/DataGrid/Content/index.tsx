@@ -127,7 +127,7 @@ const Content = (props: IDataGridContentProps) => {
 					enableFixedColumnScroll
 					enableFixedRowScroll
 					fixedColumnCount={columns.filter((col) => col.isLocked).length + 1}
-					fixedRowCount={1}
+					fixedRowCount={disableSelection ? 0 : 1}
 					hideTopRightGridScrollbar
 					hideBottomLeftGridScrollbar
 					styleTopLeftGrid={{ overflow: "hidden" }}
