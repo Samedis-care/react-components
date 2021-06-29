@@ -181,7 +181,10 @@ const filterSortPaginate = (
 	// pagination
 	const pageIndex = page - 1;
 	const filteredRows = rowData.length;
-	return [rowData.splice(pageIndex * rowsPerPage, rowsPerPage), filteredRows];
+	return [
+		[...rowData].splice(pageIndex * rowsPerPage, rowsPerPage),
+		filteredRows,
+	];
 };
 
 export default filterSortPaginate;
