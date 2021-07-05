@@ -10,6 +10,7 @@ import Model, {
 } from "../../backend-integration/Model/Model";
 import { debouncePromise } from "../../utils";
 import useCCTranslations from "../../utils/useCCTranslations";
+import { DataGridSortSetting } from "../../standalone/DataGrid/DataGrid";
 
 export interface BackendMultiSelectProps<
 	KeyT extends ModelFieldName,
@@ -51,6 +52,10 @@ export interface BackendMultiSelectProps<
 	 * Initial data (model format) used for selected cache
 	 */
 	initialData?: Record<KeyT, unknown>[];
+	/**
+	 * Sort settings
+	 */
+	sort?: DataGridSortSetting[];
 	/**
 	 * Name of the switch filter or undefined if disabled
 	 */
@@ -180,6 +185,7 @@ const BackendMultiSelect = <
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		initialData,
 		searchDebounceTime,
+		sort,
 		switchFilterName,
 		...otherProps
 	} = props;
@@ -192,13 +198,14 @@ const BackendMultiSelect = <
 				page: 1,
 				rows: searchResultLimit ?? 25,
 				quickFilter: search,
+				sort: sort,
 				additionalFilters: switchFilterName
 					? { [switchFilterName]: switchValue }
 					: undefined,
 			});
 			return Promise.all(data[0].map(modelToSelectorData));
 		},
-		[model, modelToSelectorData, searchResultLimit, switchFilterName]
+		[model, modelToSelectorData, searchResultLimit, sort, switchFilterName]
 	);
 
 	const debouncedLoad = useMemo(

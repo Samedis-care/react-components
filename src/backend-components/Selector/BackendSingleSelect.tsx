@@ -10,6 +10,7 @@ import Model, {
 } from "../../backend-integration/Model/Model";
 import { debouncePromise } from "../../utils";
 import useCCTranslations from "../../utils/useCCTranslations";
+import { DataGridSortSetting } from "../../standalone/DataGrid/DataGrid";
 
 export interface BackendSingleSelectProps<
 	KeyT extends ModelFieldName,
@@ -49,6 +50,10 @@ export interface BackendSingleSelectProps<
 	 */
 	selected: string | null;
 	/**
+	 * Sort settings
+	 */
+	sort?: DataGridSortSetting[];
+	/**
 	 * Initial data (model format) used for selected cache
 	 */
 	initialData?: Record<KeyT, unknown>[];
@@ -69,6 +74,7 @@ const BackendSingleSelect = <
 		selected,
 		initialData,
 		searchDebounceTime,
+		sort,
 		...otherProps
 	} = props;
 
@@ -83,11 +89,12 @@ const BackendSingleSelect = <
 			const data = await model.index({
 				page: 1,
 				rows: searchResultLimit ?? 25,
+				sort: sort,
 				quickFilter: search,
 			});
 			return Promise.all(data[0].map(modelToSelectorData));
 		},
-		[model, modelToSelectorData, searchResultLimit]
+		[model, modelToSelectorData, sort, searchResultLimit]
 	);
 
 	const handleSelect = useCallback(

@@ -13,6 +13,7 @@ import {
 } from "../../backend-integration";
 import { useSelectedCache } from "./BackendMultiSelect";
 import { debouncePromise } from "../../utils";
+import { DataGridSortSetting } from "../../standalone/DataGrid/DataGrid";
 
 export interface BackendMultiSelectWithTagsProps<
 	GroupKeyT extends ModelFieldName,
@@ -96,6 +97,14 @@ export interface BackendMultiSelectWithTagsProps<
 	 * @default 500
 	 */
 	dataSearchDebounceTime?: number;
+	/**
+	 * Sort settings for Groups
+	 */
+	groupSort?: DataGridSortSetting[];
+	/**
+	 * Sort settings for Data
+	 */
+	dataSort?: DataGridSortSetting[];
 }
 
 /**
@@ -137,6 +146,8 @@ const BackendMultiSelectWithTags = <
 		groupSearchDebounceTime,
 		dataSearchDebounceTime,
 		selected: selectedIds,
+		dataSort,
+		groupSort,
 		...selectorProps
 	} = props;
 
@@ -159,26 +170,28 @@ const BackendMultiSelectWithTags = <
 			const [records] = await groupModel.index({
 				page: 1,
 				quickFilter: query,
+				sort: groupSort,
 				additionalFilters: switchFilterNameGroup
 					? { [switchFilterNameGroup]: switchValue }
 					: undefined,
 			});
 			return Promise.all(records.map(convGroup));
 		},
-		[convGroup, groupModel, switchFilterNameGroup]
+		[convGroup, groupModel, groupSort, switchFilterNameGroup]
 	);
 	const loadDataOptions = useCallback(
 		async (query: string, switchValue: boolean) => {
 			const [records] = await dataModel.index({
 				page: 1,
 				quickFilter: query,
+				sort: dataSort,
 				additionalFilters: switchFilterNameData
 					? { [switchFilterNameData]: switchValue }
 					: undefined,
 			});
 			return Promise.all(records.map(convData));
 		},
-		[convData, dataModel, switchFilterNameData]
+		[convData, dataModel, dataSort, switchFilterNameData]
 	);
 
 	const debouncedGroupLoad = useMemo(
