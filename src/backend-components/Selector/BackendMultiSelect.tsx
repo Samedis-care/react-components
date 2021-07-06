@@ -3,6 +3,7 @@ import {
 	MultiSelect,
 	MultiSelectProps,
 	MultiSelectorData,
+	SelectorLruOptions,
 } from "../../standalone";
 import Model, {
 	ModelFieldName,
@@ -11,6 +12,10 @@ import Model, {
 import { debouncePromise } from "../../utils";
 import useCCTranslations from "../../utils/useCCTranslations";
 import { DataGridSortSetting } from "../../standalone/DataGrid/DataGrid";
+
+export type BackendMultiSelectLruOptions<
+	DataT extends MultiSelectorData
+> = Omit<SelectorLruOptions<DataT>, "onLoad">;
 
 export interface BackendMultiSelectProps<
 	KeyT extends ModelFieldName,
@@ -60,6 +65,10 @@ export interface BackendMultiSelectProps<
 	 * Name of the switch filter or undefined if disabled
 	 */
 	switchFilterName?: string;
+	/**
+	 * LRU config
+	 */
+	lru?: BackendMultiSelectLruOptions<DataT>;
 }
 
 interface UseSelectedCacheResult<DataT extends MultiSelectorData> {
@@ -187,6 +196,7 @@ const BackendMultiSelect = <
 		searchDebounceTime,
 		sort,
 		switchFilterName,
+		lru,
 		...otherProps
 	} = props;
 
@@ -208,6 +218,25 @@ const BackendMultiSelect = <
 		[model, modelToSelectorData, searchResultLimit, sort, switchFilterName]
 	);
 
+	const handleLoadRecord = useCallback(
+		async (id: string): Promise<DataT> => {
+			const [data] = await model.getCached(id);
+			return modelToSelectorData(data);
+		},
+		[model, modelToSelectorData]
+	);
+
+	const lruConfig: SelectorLruOptions<DataT> | undefined = useMemo(
+		() =>
+			lru
+				? {
+						...lru,
+						loadData: handleLoadRecord,
+				  }
+				: undefined,
+		[lru, handleLoadRecord]
+	);
+
 	const debouncedLoad = useMemo(
 		() => debouncePromise(handleLoad, searchDebounceTime ?? 500),
 		[searchDebounceTime, handleLoad]
@@ -220,6 +249,7 @@ const BackendMultiSelect = <
 			onSelect={handleSelect}
 			selected={selected}
 			displaySwitch={!!switchFilterName}
+			lru={lruConfig}
 		/>
 	);
 };

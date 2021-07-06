@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
 	BaseSelectorData,
 	BaseSelectorProps,
+	SelectorLruOptions,
 	SingleSelect,
 } from "../../standalone";
 import Model, {
@@ -12,13 +13,17 @@ import { debouncePromise } from "../../utils";
 import useCCTranslations from "../../utils/useCCTranslations";
 import { DataGridSortSetting } from "../../standalone/DataGrid/DataGrid";
 
+export type BackendSingleSelectLruOptions<
+	DataT extends BaseSelectorData
+> = Omit<SelectorLruOptions<DataT>, "onLoad">;
+
 export interface BackendSingleSelectProps<
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
 	CustomT
 > extends Omit<
 		BaseSelectorProps<BaseSelectorData>,
-		"onLoad" | "selected" | "onSelect"
+		"onLoad" | "selected" | "onSelect" | "lru"
 	> {
 	/**
 	 * The model to use
@@ -57,6 +62,10 @@ export interface BackendSingleSelectProps<
 	 * Initial data (model format) used for selected cache
 	 */
 	initialData?: Record<KeyT, unknown>[];
+	/**
+	 * LRU settings
+	 */
+	lru?: BackendSingleSelectLruOptions<BaseSelectorData>;
 }
 
 const BackendSingleSelect = <
@@ -75,6 +84,7 @@ const BackendSingleSelect = <
 		initialData,
 		searchDebounceTime,
 		sort,
+		lru,
 		...otherProps
 	} = props;
 
@@ -95,6 +105,25 @@ const BackendSingleSelect = <
 			return Promise.all(data[0].map(modelToSelectorData));
 		},
 		[model, modelToSelectorData, sort, searchResultLimit]
+	);
+
+	const handleLoadRecord = useCallback(
+		async (id: string): Promise<BaseSelectorData> => {
+			const [data] = await model.getCached(id);
+			return modelToSelectorData(data);
+		},
+		[model, modelToSelectorData]
+	);
+
+	const lruConfig: SelectorLruOptions<BaseSelectorData> | undefined = useMemo(
+		() =>
+			lru
+				? {
+						...lru,
+						loadData: handleLoadRecord,
+				  }
+				: undefined,
+		[lru, handleLoadRecord]
 	);
 
 	const handleSelect = useCallback(
@@ -160,6 +189,7 @@ const BackendSingleSelect = <
 					  }
 					: null
 			}
+			lru={lruConfig}
 		/>
 	);
 };

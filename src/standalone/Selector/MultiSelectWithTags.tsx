@@ -3,6 +3,7 @@ import { Typography } from "@material-ui/core";
 import {
 	BaseSelectorProps,
 	MultiSelectorData,
+	SelectorLruOptions,
 	SingleSelect,
 } from "../../standalone/Selector";
 import MultiSelectWithoutGroup, {
@@ -70,6 +71,10 @@ export interface MultiSelectWithTagsProps<
 		query: string,
 		switchValue: boolean
 	) => GroupT[] | Promise<GroupT[]>;
+	/**
+	 * LRU options for group
+	 */
+	lruGroup?: SelectorLruOptions<GroupT>;
 }
 
 interface SelectedGroup {
@@ -107,6 +112,7 @@ const MultiSelectWithTags = <
 		openInfo,
 		getIdOfData,
 		switchLabel,
+		lruGroup,
 	} = props;
 
 	const defaultSwitchValue = props.displaySwitch
@@ -190,6 +196,7 @@ const MultiSelectWithTags = <
 				loadingText={loadingText}
 				openText={openText}
 				closeText={closeText}
+				lru={lruGroup}
 			/>
 			<MultiSelectWithoutGroup<DataT>
 				autocompleteId={autocompleteId}

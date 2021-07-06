@@ -4,6 +4,7 @@ import {
 	MultiSelectorData,
 	MultiSelectWithTags,
 	MultiSelectWithTagsProps,
+	SelectorLruOptions,
 } from "../../standalone";
 import {
 	Model,
@@ -14,6 +15,7 @@ import {
 import { useSelectedCache } from "./BackendMultiSelect";
 import { debouncePromise } from "../../utils";
 import { DataGridSortSetting } from "../../standalone/DataGrid/DataGrid";
+import { BackendSingleSelectLruOptions } from "./BackendSingleSelect";
 
 export interface BackendMultiSelectWithTagsProps<
 	GroupKeyT extends ModelFieldName,
@@ -32,6 +34,7 @@ export interface BackendMultiSelectWithTagsProps<
 		| "displaySwitch"
 		| "selected"
 		| "onChange"
+		| "lruGroup"
 	> {
 	/**
 	 * The selected data record IDs
@@ -105,6 +108,10 @@ export interface BackendMultiSelectWithTagsProps<
 	 * Sort settings for Data
 	 */
 	dataSort?: DataGridSortSetting[];
+	/**
+	 * LRU options for group selector
+	 */
+	lruGroup?: BackendSingleSelectLruOptions<GroupDataT>;
 }
 
 /**
@@ -148,6 +155,7 @@ const BackendMultiSelectWithTags = <
 		selected: selectedIds,
 		dataSort,
 		groupSort,
+		lruGroup,
 		...selectorProps
 	} = props;
 
@@ -194,6 +202,25 @@ const BackendMultiSelectWithTags = <
 		[convData, dataModel, dataSort, switchFilterNameData]
 	);
 
+	const handleLoadGroupRecord = useCallback(
+		async (id: string): Promise<GroupDataT> => {
+			const [data] = await groupModel.getCached(id);
+			return convGroup(data);
+		},
+		[groupModel, convGroup]
+	);
+
+	const lruGroupConfig: SelectorLruOptions<GroupDataT> | undefined = useMemo(
+		() =>
+			lruGroup
+				? {
+						...lruGroup,
+						loadData: handleLoadGroupRecord,
+				  }
+				: undefined,
+		[lruGroup, handleLoadGroupRecord]
+	);
+
 	const debouncedGroupLoad = useMemo(
 		() => debouncePromise(loadGroupOptions, groupSearchDebounceTime ?? 500),
 		[groupSearchDebounceTime, loadGroupOptions]
@@ -212,6 +239,7 @@ const BackendMultiSelectWithTags = <
 			loadDataOptions={debouncedDataLoad}
 			loadGroupOptions={debouncedGroupLoad}
 			displaySwitch={!!(switchFilterNameGroup || switchFilterNameData)}
+			lruGroup={lruGroupConfig}
 		/>
 	);
 };
