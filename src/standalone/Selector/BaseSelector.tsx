@@ -228,29 +228,41 @@ export interface BaseSelectorProps<DataT extends BaseSelectorData>
 	lru?: SelectorLruOptions<DataT>;
 }
 
-export type SelectorThemeExpert = Partial<
-	Styles<Theme, BaseSelectorProps<BaseSelectorData>, AutocompleteClassKey>
->;
+export type SelectorThemeExpert = {
+	base?: Partial<
+		Styles<Theme, BaseSelectorProps<BaseSelectorData>, AutocompleteClassKey>
+	>;
+	extensions?: Partial<
+		Styles<
+			Theme,
+			BaseSelectorProps<BaseSelectorData>,
+			SelectorCustomStylesClassKey
+		>
+	>;
+};
 
-const useCustomDefaultSelectorStyles = makeStyles({
-	option: {
-		padding: 0,
-		'&[aria-disabled="true"]': {
-			opacity: 1,
+const useCustomDefaultSelectorStyles = makeStyles(
+	{
+		option: {
+			padding: 0,
+			'&[aria-disabled="true"]': {
+				opacity: 1,
+			},
 		},
 	},
-});
+	{ name: "CcBaseSelectorBase" }
+);
 
 const useThemeStyles = makeThemeStyles<
 	BaseSelectorProps<BaseSelectorData>,
 	AutocompleteClassKey
 >(
-	(theme) => theme.componentsCare?.uiKit?.baseSelectorExpert,
+	(theme) => theme.componentsCare?.uiKit?.baseSelectorExpert?.base,
 	"CcBaseSelector",
 	useCustomDefaultSelectorStyles
 );
 
-const useCustomStyles = makeStyles(
+const useCustomStylesBase = makeStyles(
 	(theme) => ({
 		infoBtn: {
 			padding: 2,
@@ -293,7 +305,19 @@ const useCustomStyles = makeStyles(
 			width: "100%",
 		},
 	}),
-	{ name: "CcBaseSelectorCustom" }
+	{ name: "CcBaseSelectorCustomBase" }
+);
+
+export type SelectorCustomStylesClassKey = keyof ReturnType<
+	typeof useCustomStylesBase
+>;
+const useCustomStyles = makeThemeStyles<
+	BaseSelectorProps<BaseSelectorData>,
+	SelectorCustomStylesClassKey
+>(
+	(theme) => theme.componentsCare?.uiKit?.baseSelectorExpert?.extensions,
+	"CcBaseSelectorCustom",
+	useCustomDefaultSelectorStyles
 );
 
 const variantInput: Record<
@@ -343,7 +367,12 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 	);
 	const [switchValue, setSwitchValue] = useState<boolean>(defaultSwitchValue);
 	const { t } = useCCTranslations();
-	const customClasses = useCustomStyles(cleanClassMap(props, true));
+	const customClasses = useCustomStyles(
+		cleanClassMap(
+			(props as unknown) as BaseSelectorProps<BaseSelectorData>,
+			true
+		)
+	);
 	const [open, setOpen] = useState(false);
 	const actualAddNewLabel = addNewLabel || t("standalone.selector.add-new");
 	const [selectorOptions, setSelectorOptions] = useState<DataT[]>([]);
