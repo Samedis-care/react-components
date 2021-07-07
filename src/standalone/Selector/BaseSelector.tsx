@@ -12,6 +12,7 @@ import {
 	InputLabel,
 	Paper,
 	InputProps,
+	Divider,
 } from "@material-ui/core";
 import { Autocomplete, AutocompleteProps } from "@material-ui/lab";
 import {
@@ -20,7 +21,12 @@ import {
 	Info as InfoIcon,
 } from "@material-ui/icons";
 import { TextFieldWithHelpProps } from "../UIKit/TextFieldWithHelp";
-import { cleanClassMap, SelectorSmallListItem, SmallListItemIcon } from "../..";
+import {
+	cleanClassMap,
+	combineClassNames,
+	SelectorSmallListItem,
+	SmallListItemIcon,
+} from "../..";
 import { makeThemeStyles } from "../../utils";
 import { makeStyles, Theme } from "@material-ui/core/styles";
 import { Styles } from "@material-ui/core/styles/withStyles";
@@ -58,6 +64,11 @@ export interface BaseSelectorData {
 	 * Is this an add new button? (used for special handling in the renderer)
 	 */
 	isAddNewButton?: boolean;
+	/**
+	 * Is this entry a divider?
+	 * Label and value won't be used. isDisabled will be forced to true
+	 */
+	isDivider?: boolean;
 	/**
 	 * CSS styles for options
 	 */
@@ -221,13 +232,26 @@ export type SelectorThemeExpert = Partial<
 	Styles<Theme, BaseSelectorProps<BaseSelectorData>, AutocompleteClassKey>
 >;
 
+const useCustomDefaultSelectorStyles = makeStyles({
+	option: {
+		padding: 0,
+		'&[aria-disabled="true"]': {
+			opacity: 1,
+		},
+	},
+});
+
 const useThemeStyles = makeThemeStyles<
 	BaseSelectorProps<BaseSelectorData>,
 	AutocompleteClassKey
->((theme) => theme.componentsCare?.uiKit?.baseSelectorExpert, "CcBaseSelector");
+>(
+	(theme) => theme.componentsCare?.uiKit?.baseSelectorExpert,
+	"CcBaseSelector",
+	useCustomDefaultSelectorStyles
+);
 
 const useCustomStyles = makeStyles(
-	{
+	(theme) => ({
 		infoBtn: {
 			padding: 2,
 			marginRight: -2,
@@ -253,7 +277,22 @@ const useCustomStyles = makeStyles(
 		) => ({
 			marginTop: props.label ? 16 : undefined,
 		}),
-	},
+		listItem: {
+			paddingLeft: 16,
+			paddingRight: 16,
+			paddingTop: 6,
+			paddingBottom: 6,
+		},
+		lruListItem: {
+			backgroundColor: theme.palette.background.default,
+			"&:hover": {
+				backgroundColor: theme.palette.background.paper,
+			},
+		},
+		divider: {
+			width: "100%",
+		},
+	}),
 	{ name: "CcBaseSelectorCustom" }
 );
 
@@ -345,17 +384,28 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 	);
 
 	const defaultRenderer = useCallback(
-		(data: BaseSelectorData) => (
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore: Typescript complains about the button property being "required"
-			<SelectorSmallListItem component={"div"} className={data.className}>
-				{enableIcons && (
-					<SmallListItemIcon>{renderIcon(data.icon)}</SmallListItemIcon>
-				)}
-				<ListItemText>{data.label}</ListItemText>
-			</SelectorSmallListItem>
-		),
-		[enableIcons, renderIcon]
+		(data: BaseSelectorData) => {
+			if (data.isDivider) return <Divider className={customClasses.divider} />;
+
+			return (
+				<SelectorSmallListItem
+					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+					// @ts-ignore: Typescript complains about the button property being "required"
+					component={"div"}
+					className={combineClassNames([
+						customClasses.listItem,
+						data.className,
+					])}
+					style={data.isDisabled ? { opacity: 0.38 } : undefined}
+				>
+					{enableIcons && (
+						<SmallListItemIcon>{renderIcon(data.icon)}</SmallListItemIcon>
+					)}
+					<ListItemText>{data.label}</ListItemText>
+				</SelectorSmallListItem>
+			);
+		},
+		[enableIcons, renderIcon, customClasses]
 	);
 
 	const onChangeHandler = useCallback(
@@ -401,12 +451,32 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 			let results: DataT[];
 			if (lru && query === "" && (lruIds.length > 0 || lru.forceQuery)) {
 				results = [
-					addNewEntry,
-					...(await Promise.all(lruIds.map(lru.loadData))),
-				];
+					onAddNew ? addNewEntry : undefined,
+					lruIds.length > 0 && onAddNew
+						? ({
+								label: "",
+								value: "lru-divider",
+								isDivider: true,
+						  } as DataT)
+						: undefined,
+					...(await Promise.all(lruIds.map(lru.loadData))).map((entry) => ({
+						...entry,
+						className: combineClassNames([
+							customClasses.lruListItem,
+							entry.className,
+						]),
+					})),
+				].filter((entry) => entry) as DataT[];
 			} else {
 				results = await onLoad(query, switchValue);
 				if (onAddNew) {
+					if (results.length > 0) {
+						results.push({
+							label: "",
+							value: "lru-divider",
+							isDivider: true,
+						} as DataT);
+					}
 					results.push(addNewEntry);
 				}
 			}
@@ -431,6 +501,7 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 			lruIds,
 			grouped,
 			disableGroupSorting,
+			customClasses.lruListItem,
 			onLoad,
 			switchValue,
 			onAddNew,
@@ -521,7 +592,7 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 						getOptionLabel={(option: BaseSelectorData) => option.label}
 						renderOption={(option: BaseSelectorData) => defaultRenderer(option)}
 						getOptionDisabled={(option: BaseSelectorData) =>
-							!!option.isDisabled
+							!!(option.isDisabled || option.isDivider)
 						}
 						getOptionSelected={(option, value) => option.value === value.value}
 						onChange={(_event, selectedValue) => onChangeHandler(selectedValue)}

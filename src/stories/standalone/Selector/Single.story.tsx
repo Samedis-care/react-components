@@ -1,6 +1,10 @@
 import React, { useState, useCallback } from "react";
 import "../../../i18n";
-import { BaseSelectorData, SingleSelect } from "../../../standalone/Selector";
+import {
+	BaseSelectorData,
+	SelectorLruOptions,
+	SingleSelect,
+} from "../../../standalone/Selector";
 import { colourOptions } from "./Data";
 import { action } from "@storybook/addon-actions";
 import { boolean, text, select } from "@storybook/addon-knobs";
@@ -50,6 +54,7 @@ export const SelectorSingle = (): React.ReactElement => {
 	const openText = text("Open Text Label", "Open");
 	const useCustomCloseText = boolean("Use custom close text label?", false);
 	const closeText = text("Close Text Label", "Close");
+	const lru = boolean("Use LRU?", false);
 
 	const loadData = useCallback(
 		(query: string): BaseSelectorData[] => {
@@ -93,6 +98,17 @@ export const SelectorSingle = (): React.ReactElement => {
 					autocompleteId={"single-select"}
 					grouped={grouped}
 					noGroupLabel={noGroupLabel}
+					lru={
+						lru
+							? ({
+									count: 5,
+									loadData: (id) =>
+										colourOptions.find((opt) => opt.value === id),
+									forceQuery: true,
+									storageKey: "story-single-select-lru",
+							  } as SelectorLruOptions<typeof colourOptions[0]>)
+							: undefined
+					}
 					openInfo={() =>
 						showInfoDialog(pushDialog, {
 							title: dialogTitle,
