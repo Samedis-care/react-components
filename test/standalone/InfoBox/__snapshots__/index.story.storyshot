@@ -6014,12 +6014,12 @@ exports[`Storyshots Standalone/InfoBox InfoBox 1`] = `
                                   status="info"
                                 >
                                   <WithStyles(ForwardRef(Accordion))
-                                    className="standalone-infobox--info-box-story-CcInfoBox-noShadow-10"
+                                    className="standalone-infobox--info-box-story-CcInfoBox-noShadow-12"
                                     defaultExpanded={false}
                                     onChange={[Function]}
                                   >
                                     <ForwardRef(Accordion)
-                                      className="standalone-infobox--info-box-story-CcInfoBox-noShadow-10"
+                                      className="standalone-infobox--info-box-story-CcInfoBox-noShadow-12"
                                       classes={
                                         Object {
                                           "disabled": "Mui-disabled",
@@ -6032,11 +6032,11 @@ exports[`Storyshots Standalone/InfoBox InfoBox 1`] = `
                                       onChange={[Function]}
                                     >
                                       <WithStyles(ForwardRef(Paper))
-                                        className="standalone-infobox--info-box-story-MuiAccordion-root standalone-infobox--info-box-story-CcInfoBox-noShadow-10 standalone-infobox--info-box-story-MuiAccordion-rounded"
+                                        className="standalone-infobox--info-box-story-MuiAccordion-root standalone-infobox--info-box-story-CcInfoBox-noShadow-12 standalone-infobox--info-box-story-MuiAccordion-rounded"
                                         square={false}
                                       >
                                         <ForwardRef(Paper)
-                                          className="standalone-infobox--info-box-story-MuiAccordion-root standalone-infobox--info-box-story-CcInfoBox-noShadow-10 standalone-infobox--info-box-story-MuiAccordion-rounded"
+                                          className="standalone-infobox--info-box-story-MuiAccordion-root standalone-infobox--info-box-story-CcInfoBox-noShadow-12 standalone-infobox--info-box-story-MuiAccordion-rounded"
                                           classes={
                                             Object {
                                               "elevation0": "standalone-infobox--info-box-story-MuiPaper-elevation0",
@@ -6072,38 +6072,38 @@ exports[`Storyshots Standalone/InfoBox InfoBox 1`] = `
                                           square={false}
                                         >
                                           <div
-                                            className="standalone-infobox--info-box-story-MuiPaper-root standalone-infobox--info-box-story-MuiAccordion-root standalone-infobox--info-box-story-CcInfoBox-noShadow-10 standalone-infobox--info-box-story-MuiAccordion-rounded standalone-infobox--info-box-story-MuiPaper-elevation1 standalone-infobox--info-box-story-MuiPaper-rounded"
+                                            className="standalone-infobox--info-box-story-MuiPaper-root standalone-infobox--info-box-story-MuiAccordion-root standalone-infobox--info-box-story-CcInfoBox-noShadow-12 standalone-infobox--info-box-story-MuiAccordion-rounded standalone-infobox--info-box-story-MuiPaper-elevation1 standalone-infobox--info-box-story-MuiPaper-rounded"
                                           >
                                             <WithStyles(WithStyles(ForwardRef(AccordionSummary)))
-                                              className="standalone-infobox--info-box-story-CcInfoBox-accordion-14 standalone-infobox--info-box-story-CcInfoBox-accordion-15"
+                                              className="standalone-infobox--info-box-story-CcInfoBox-accordionPrimary-16"
                                               key=".0"
                                             >
                                               <WithStyles(ForwardRef(AccordionSummary))
-                                                className="standalone-infobox--info-box-story-CcInfoBox-accordion-14 standalone-infobox--info-box-story-CcInfoBox-accordion-15"
+                                                className="standalone-infobox--info-box-story-CcInfoBox-accordionPrimary-16"
                                                 classes={
                                                   Object {
-                                                    "content": "standalone-infobox--info-box-story-WithStyles(ForwardRef(AccordionSummary))-content-17",
-                                                    "expanded": "standalone-infobox--info-box-story-WithStyles(ForwardRef(AccordionSummary))-expanded-18",
-                                                    "root": "standalone-infobox--info-box-story-WithStyles(ForwardRef(AccordionSummary))-root-16",
+                                                    "content": "standalone-infobox--info-box-story-WithStyles(ForwardRef(AccordionSummary))-content-21",
+                                                    "expanded": "standalone-infobox--info-box-story-WithStyles(ForwardRef(AccordionSummary))-expanded-22",
+                                                    "root": "standalone-infobox--info-box-story-WithStyles(ForwardRef(AccordionSummary))-root-20",
                                                   }
                                                 }
                                               >
                                                 <ForwardRef(AccordionSummary)
-                                                  className="standalone-infobox--info-box-story-CcInfoBox-accordion-14 standalone-infobox--info-box-story-CcInfoBox-accordion-15"
+                                                  className="standalone-infobox--info-box-story-CcInfoBox-accordionPrimary-16"
                                                   classes={
                                                     Object {
-                                                      "content": "standalone-infobox--info-box-story-MuiAccordionSummary-content standalone-infobox--info-box-story-WithStyles(ForwardRef(AccordionSummary))-content-17",
+                                                      "content": "standalone-infobox--info-box-story-MuiAccordionSummary-content standalone-infobox--info-box-story-WithStyles(ForwardRef(AccordionSummary))-content-21",
                                                       "disabled": "Mui-disabled",
                                                       "expandIcon": "standalone-infobox--info-box-story-MuiAccordionSummary-expandIcon",
-                                                      "expanded": "Mui-expanded standalone-infobox--info-box-story-WithStyles(ForwardRef(AccordionSummary))-expanded-18",
+                                                      "expanded": "Mui-expanded standalone-infobox--info-box-story-WithStyles(ForwardRef(AccordionSummary))-expanded-22",
                                                       "focused": "Mui-focused",
-                                                      "root": "standalone-infobox--info-box-story-MuiAccordionSummary-root standalone-infobox--info-box-story-WithStyles(ForwardRef(AccordionSummary))-root-16",
+                                                      "root": "standalone-infobox--info-box-story-MuiAccordionSummary-root standalone-infobox--info-box-story-WithStyles(ForwardRef(AccordionSummary))-root-20",
                                                     }
                                                   }
                                                 >
                                                   <WithStyles(ForwardRef(ButtonBase))
                                                     aria-expanded={false}
-                                                    className="standalone-infobox--info-box-story-MuiAccordionSummary-root standalone-infobox--info-box-story-WithStyles(ForwardRef(AccordionSummary))-root-16 standalone-infobox--info-box-story-CcInfoBox-accordion-14 standalone-infobox--info-box-story-CcInfoBox-accordion-15"
+                                                    className="standalone-infobox--info-box-story-MuiAccordionSummary-root standalone-infobox--info-box-story-WithStyles(ForwardRef(AccordionSummary))-root-20 standalone-infobox--info-box-story-CcInfoBox-accordionPrimary-16"
                                                     component="div"
                                                     disableRipple={true}
                                                     disabled={false}
@@ -6114,7 +6114,7 @@ exports[`Storyshots Standalone/InfoBox InfoBox 1`] = `
                                                   >
                                                     <ForwardRef(ButtonBase)
                                                       aria-expanded={false}
-                                                      className="standalone-infobox--info-box-story-MuiAccordionSummary-root standalone-infobox--info-box-story-WithStyles(ForwardRef(AccordionSummary))-root-16 standalone-infobox--info-box-story-CcInfoBox-accordion-14 standalone-infobox--info-box-story-CcInfoBox-accordion-15"
+                                                      className="standalone-infobox--info-box-story-MuiAccordionSummary-root standalone-infobox--info-box-story-WithStyles(ForwardRef(AccordionSummary))-root-20 standalone-infobox--info-box-story-CcInfoBox-accordionPrimary-16"
                                                       classes={
                                                         Object {
                                                           "disabled": "Mui-disabled",
@@ -6133,7 +6133,7 @@ exports[`Storyshots Standalone/InfoBox InfoBox 1`] = `
                                                       <div
                                                         aria-disabled={false}
                                                         aria-expanded={false}
-                                                        className="standalone-infobox--info-box-story-MuiButtonBase-root standalone-infobox--info-box-story-MuiAccordionSummary-root standalone-infobox--info-box-story-WithStyles(ForwardRef(AccordionSummary))-root-16 standalone-infobox--info-box-story-CcInfoBox-accordion-14 standalone-infobox--info-box-story-CcInfoBox-accordion-15"
+                                                        className="standalone-infobox--info-box-story-MuiButtonBase-root standalone-infobox--info-box-story-MuiAccordionSummary-root standalone-infobox--info-box-story-WithStyles(ForwardRef(AccordionSummary))-root-20 standalone-infobox--info-box-story-CcInfoBox-accordionPrimary-16"
                                                         onBlur={[Function]}
                                                         onClick={[Function]}
                                                         onDragLeave={[Function]}
@@ -6150,13 +6150,13 @@ exports[`Storyshots Standalone/InfoBox InfoBox 1`] = `
                                                         tabIndex={0}
                                                       >
                                                         <div
-                                                          className="standalone-infobox--info-box-story-MuiAccordionSummary-content standalone-infobox--info-box-story-WithStyles(ForwardRef(AccordionSummary))-content-17"
+                                                          className="standalone-infobox--info-box-story-MuiAccordionSummary-content standalone-infobox--info-box-story-WithStyles(ForwardRef(AccordionSummary))-content-21"
                                                         >
                                                           <div
-                                                            className="standalone-infobox--info-box-story-CcInfoBox-root-12"
+                                                            className="standalone-infobox--info-box-story-CcInfoBox-root-14"
                                                           >
                                                             <span
-                                                              className="standalone-infobox--info-box-story-CcInfoBox-iconButton-13"
+                                                              className="standalone-infobox--info-box-story-CcInfoBox-iconButton-15"
                                                             >
                                                               <ForwardRef(InfoOutlinedIcon)>
                                                                 <WithStyles(ForwardRef(SvgIcon))>
@@ -6295,11 +6295,11 @@ exports[`Storyshots Standalone/InfoBox InfoBox 1`] = `
                                                           role="region"
                                                         >
                                                           <WithStyles(ForwardRef(AccordionDetails))
-                                                            className="standalone-infobox--info-box-story-CcInfoBox-panelDetails-11"
+                                                            className="standalone-infobox--info-box-story-CcInfoBox-panelDetails-13"
                                                             key=".1"
                                                           >
                                                             <ForwardRef(AccordionDetails)
-                                                              className="standalone-infobox--info-box-story-CcInfoBox-panelDetails-11"
+                                                              className="standalone-infobox--info-box-story-CcInfoBox-panelDetails-13"
                                                               classes={
                                                                 Object {
                                                                   "root": "standalone-infobox--info-box-story-MuiAccordionDetails-root",
@@ -6307,7 +6307,7 @@ exports[`Storyshots Standalone/InfoBox InfoBox 1`] = `
                                                               }
                                                             >
                                                               <div
-                                                                className="standalone-infobox--info-box-story-MuiAccordionDetails-root standalone-infobox--info-box-story-CcInfoBox-panelDetails-11"
+                                                                className="standalone-infobox--info-box-story-MuiAccordionDetails-root standalone-infobox--info-box-story-CcInfoBox-panelDetails-13"
                                                               >
                                                                 <div>
                                                                   Message
