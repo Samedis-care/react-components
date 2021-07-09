@@ -1,5 +1,9 @@
-import React from "react";
-import { Info } from "@material-ui/icons";
+import React, { useCallback } from "react";
+import {
+	ErrorOutlined,
+	InfoOutlined,
+	ReportProblemOutlined,
+} from "@material-ui/icons";
 import {
 	makeStyles,
 	Theme,
@@ -10,6 +14,7 @@ import {
 	withStyles,
 	AccordionProps,
 } from "@material-ui/core";
+import SuccessOutlinedIcon from "../Icons/SuccessOutlinedIcon";
 
 const AccordionSummary = withStyles({
 	root: {
@@ -51,10 +56,25 @@ export const useStyles = makeStyles(
 			backgroundColor: "rgba(0,0,0,.2)",
 			width: theme.spacing(6),
 		},
-		accordion: {
+		accordionPrimary: {
 			backgroundColor: theme.palette.primary.main,
 			borderColor: theme.palette.primary.main,
-			color: theme.palette.primary.contrastText,
+			color: theme.palette.getContrastText(theme.palette.primary.main),
+		},
+		accordionWarning: {
+			backgroundColor: theme.palette.warning.main,
+			borderColor: theme.palette.warning.main,
+			color: theme.palette.getContrastText(theme.palette.warning.main),
+		},
+		accordionSuccess: {
+			backgroundColor: theme.palette.success.main,
+			borderColor: theme.palette.success.main,
+			color: theme.palette.getContrastText(theme.palette.success.main),
+		},
+		accordionError: {
+			backgroundColor: theme.palette.error.main,
+			borderColor: theme.palette.error.main,
+			color: theme.palette.getContrastText(theme.palette.error.main),
 		},
 	}),
 	{ name: "CcInfoBox" }
@@ -87,13 +107,50 @@ interface InfoBoxProps {
 	 * Custom styles
 	 */
 	classes?: Partial<ReturnType<typeof useStyles>>;
+	/**
+	 * For which status InfoBox used
+	 */
+	status?: "info" | "warning" | "success" | "error";
 }
 // .MuiAccordionSummary-content.Mui-expanded => margin => unset
 // .MuiAccordionSummary-root.Mui-expanded => min-height => unset
 const InfoBox = (props: InfoBoxProps) => {
-	const { heading, onChange, expanded, alwaysExpanded, message } = props;
+	const {
+		heading,
+		onChange,
+		expanded,
+		alwaysExpanded,
+		message,
+		status,
+	} = props;
 
 	const classes = useStyles(props);
+
+	const getIcon = useCallback(() => {
+		switch (status) {
+			case "warning":
+				return <ReportProblemOutlined />;
+			case "success":
+				return <SuccessOutlinedIcon />;
+			case "error":
+				return <ErrorOutlined />;
+			default:
+				return <InfoOutlined />;
+		}
+	}, [status]);
+
+	const getAccordionClass = useCallback(() => {
+		switch (status) {
+			case "warning":
+				return classes.accordionWarning;
+			case "success":
+				return classes.accordionSuccess;
+			case "error":
+				return classes.accordionError;
+			default:
+				return classes.accordionPrimary;
+		}
+	}, [classes, status]);
 
 	return (
 		<Accordion
@@ -102,11 +159,9 @@ const InfoBox = (props: InfoBoxProps) => {
 			expanded={alwaysExpanded}
 			onChange={onChange}
 		>
-			<AccordionSummary className={classes.accordion}>
+			<AccordionSummary className={getAccordionClass()}>
 				<div className={classes.root}>
-					<span className={classes.iconButton}>
-						<Info />
-					</span>
+					<span className={classes.iconButton}>{getIcon()}</span>
 					<Typography variant="caption">{heading}</Typography>
 				</div>
 			</AccordionSummary>

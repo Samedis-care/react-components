@@ -1,5 +1,5 @@
 import React from "react";
-import { boolean, text } from "@storybook/addon-knobs";
+import { boolean, select, text } from "@storybook/addon-knobs";
 import { action } from "@storybook/addon-actions";
 import { InfoBox } from "../../../standalone";
 
@@ -15,6 +15,11 @@ export const InfoBoxStory = (): React.ReactElement => {
 					: undefined
 			}
 			onChange={action("onChange")}
+			status={select(
+				"Select status",
+				["info", "warning", "success", "error"],
+				"info"
+			)}
 		/>
 	);
 };
