@@ -243,6 +243,26 @@ export type SelectorThemeExpert = {
 
 const useCustomDefaultSelectorStyles = makeStyles(
 	{
+		root: {},
+		focused: {},
+		tag: {},
+		tagSizeSmall: {},
+		inputRoot: {},
+		input: {},
+		inputFocused: {},
+		endAdornment: {},
+		clearIndicator: {},
+		clearIndicatorDirty: {},
+		popupIndicator: {},
+		popupIndicatorOpen: {},
+		popper: {},
+		popperDisablePortal: {},
+		paper: {},
+		listbox: {},
+		loading: {},
+		noOptions: {},
+		groupLabel: {},
+		groupUl: {},
 		option: {
 			padding: 0,
 			'&[aria-disabled="true"]': {
@@ -317,7 +337,7 @@ const useCustomStyles = makeThemeStyles<
 >(
 	(theme) => theme.componentsCare?.uiKit?.baseSelectorExpert?.extensions,
 	"CcBaseSelectorCustom",
-	useCustomDefaultSelectorStyles
+	useCustomStylesBase
 );
 
 const variantInput: Record<
