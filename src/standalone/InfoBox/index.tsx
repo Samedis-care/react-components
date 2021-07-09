@@ -59,22 +59,22 @@ export const useStyles = makeStyles(
 		accordionPrimary: {
 			backgroundColor: theme.palette.primary.main,
 			borderColor: theme.palette.primary.main,
-			color: theme.palette.getContrastText(theme.palette.primary.main),
+			color: theme.palette.primary.contrastText,
 		},
 		accordionWarning: {
 			backgroundColor: theme.palette.warning.main,
 			borderColor: theme.palette.warning.main,
-			color: theme.palette.getContrastText(theme.palette.warning.main),
+			color: theme.palette.warning.contrastText,
 		},
 		accordionSuccess: {
 			backgroundColor: theme.palette.success.main,
 			borderColor: theme.palette.success.main,
-			color: theme.palette.getContrastText(theme.palette.success.main),
+			color: theme.palette.success.contrastText,
 		},
 		accordionError: {
 			backgroundColor: theme.palette.error.main,
 			borderColor: theme.palette.error.main,
-			color: theme.palette.getContrastText(theme.palette.error.main),
+			color: theme.palette.error.contrastText,
 		},
 	}),
 	{ name: "CcInfoBox" }
