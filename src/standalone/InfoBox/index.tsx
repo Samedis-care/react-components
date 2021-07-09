@@ -1,5 +1,9 @@
-import React from "react";
-import { Info } from "@material-ui/icons";
+import React, { useCallback } from "react";
+import {
+	ErrorOutlined,
+	InfoOutlined,
+	ReportProblemOutlined,
+} from "@material-ui/icons";
 import {
 	makeStyles,
 	Theme,
@@ -10,6 +14,8 @@ import {
 	withStyles,
 	AccordionProps,
 } from "@material-ui/core";
+import { PaletteColor } from "@material-ui/core/styles/createPalette";
+import SuccessOutlinedIcon from "../Icons/SuccessOutlinedIcon";
 
 const AccordionSummary = withStyles({
 	root: {
@@ -27,36 +33,53 @@ const AccordionSummary = withStyles({
 })(MuiAccordionSummary);
 
 export const useStyles = makeStyles(
-	(theme: Theme) => ({
-		noShadow: {
-			"box-shadow": "none",
-		},
-		panelDetails: {
-			border: "1px solid grey",
-			borderRadius: "0px 0px 4px 4px",
-			padding: "8px 24px",
-		},
-		root: {
-			margin: 0,
-			paddingLeft: theme.spacing(5),
-		},
-		iconButton: {
-			position: "absolute",
-			left: 0,
-			top: 0,
-			bottom: 0,
-			alignItems: "center",
-			justifyContent: "center",
-			display: "flex",
-			backgroundColor: "rgba(0,0,0,.2)",
-			width: theme.spacing(6),
-		},
-		accordion: {
-			backgroundColor: theme.palette.primary.main,
-			borderColor: theme.palette.primary.main,
-			color: theme.palette.primary.contrastText,
-		},
-	}),
+	(theme: Theme) => {
+		const getColor = useCallback(
+			(status: string | undefined): PaletteColor => {
+				switch (status) {
+					case "warning":
+						return theme.palette.warning;
+					case "success":
+						return theme.palette.success;
+					case "error":
+						return theme.palette.error;
+					default:
+						return theme.palette.primary;
+				}
+			},
+			[theme.palette]
+		);
+		return {
+			noShadow: {
+				"box-shadow": "none",
+			},
+			panelDetails: {
+				border: "1px solid grey",
+				borderRadius: "0px 0px 4px 4px",
+				padding: "8px 24px",
+			},
+			root: {
+				margin: 0,
+				paddingLeft: theme.spacing(5),
+			},
+			iconButton: {
+				position: "absolute",
+				left: 0,
+				top: 0,
+				bottom: 0,
+				alignItems: "center",
+				justifyContent: "center",
+				display: "flex",
+				backgroundColor: "rgba(0,0,0,.2)",
+				width: theme.spacing(6),
+			},
+			accordion: (props: InfoBoxProps) => ({
+				backgroundColor: getColor(props.status).main,
+				borderColor: getColor(props.status).main,
+				color: getColor(props.status).contrastText,
+			}),
+		};
+	},
 	{ name: "CcInfoBox" }
 );
 
@@ -87,13 +110,37 @@ interface InfoBoxProps {
 	 * Custom styles
 	 */
 	classes?: Partial<ReturnType<typeof useStyles>>;
+	/**
+	 * For which status InfoBox used
+	 */
+	status?: "info" | "success" | "warning" | "error";
 }
 // .MuiAccordionSummary-content.Mui-expanded => margin => unset
 // .MuiAccordionSummary-root.Mui-expanded => min-height => unset
 const InfoBox = (props: InfoBoxProps) => {
-	const { heading, onChange, expanded, alwaysExpanded, message } = props;
+	const {
+		heading,
+		onChange,
+		expanded,
+		alwaysExpanded,
+		message,
+		status,
+	} = props;
 
 	const classes = useStyles(props);
+
+	const getIcon = useCallback(() => {
+		switch (status) {
+			case "warning":
+				return <ReportProblemOutlined />;
+			case "success":
+				return <SuccessOutlinedIcon />;
+			case "error":
+				return <ErrorOutlined />;
+			default:
+				return <InfoOutlined />;
+		}
+	}, [status]);
 
 	return (
 		<Accordion
@@ -104,9 +151,7 @@ const InfoBox = (props: InfoBoxProps) => {
 		>
 			<AccordionSummary className={classes.accordion}>
 				<div className={classes.root}>
-					<span className={classes.iconButton}>
-						<Info />
-					</span>
+					<span className={classes.iconButton}>{getIcon()}</span>
 					<Typography variant="caption">{heading}</Typography>
 				</div>
 			</AccordionSummary>
