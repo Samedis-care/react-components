@@ -71,6 +71,16 @@ const Cell = (props: CellProps): React.ReactElement => {
 			) : (
 				<Skeleton variant={"text"} />
 			);
+
+		// special handling for objects (Date, etc). use toString on them
+		if (
+			content &&
+			typeof content === "object" &&
+			!React.isValidElement(content) &&
+			"toString" in content
+		) {
+			content = content.toString();
+		}
 	}
 
 	const startHover = useCallback(() => {
