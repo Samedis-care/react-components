@@ -15,7 +15,7 @@ import { DataGridSortSetting } from "../../standalone/DataGrid/DataGrid";
 
 export type BackendSingleSelectLruOptions<
 	DataT extends BaseSelectorData
-> = Omit<SelectorLruOptions<DataT>, "onLoad">;
+> = Omit<SelectorLruOptions<DataT>, "loadData">;
 
 export interface BackendSingleSelectProps<
 	KeyT extends ModelFieldName,

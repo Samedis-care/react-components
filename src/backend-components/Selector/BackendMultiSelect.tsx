@@ -15,14 +15,17 @@ import { DataGridSortSetting } from "../../standalone/DataGrid/DataGrid";
 
 export type BackendMultiSelectLruOptions<
 	DataT extends MultiSelectorData
-> = Omit<SelectorLruOptions<DataT>, "onLoad">;
+> = Omit<SelectorLruOptions<DataT>, "loadData">;
 
 export interface BackendMultiSelectProps<
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
 	CustomT,
 	DataT extends MultiSelectorData
-> extends Omit<MultiSelectProps<DataT>, "onLoad" | "selected" | "onSelect"> {
+> extends Omit<
+		MultiSelectProps<DataT>,
+		"onLoad" | "selected" | "onSelect" | "lru"
+	> {
 	/**
 	 * The model to use
 	 */
