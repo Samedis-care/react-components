@@ -40,6 +40,7 @@ export const useStyles = makeStyles(
 			border: "1px solid grey",
 			borderRadius: "0px 0px 4px 4px",
 			padding: "8px 24px",
+			whiteSpace: "pre-line",
 		},
 		root: {
 			margin: 0,
