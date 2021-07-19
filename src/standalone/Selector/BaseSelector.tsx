@@ -226,6 +226,13 @@ export interface BaseSelectorProps<DataT extends BaseSelectorData>
 	 * LRU shows the user the previous items he selected when no search term is entered
 	 */
 	lru?: SelectorLruOptions<DataT>;
+	/**
+	 * Optional callback for customizing the unique identifier of data
+	 * @param data The data struct
+	 * @returns A unique ID extracted from data
+	 * @default returns data.value
+	 */
+	getIdOfData?: (data: DataT) => string;
 }
 
 export type SelectorThemeExpert = {
@@ -377,7 +384,11 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 		groupSorter,
 		switchLabel,
 		lru,
+		getIdOfData,
 	} = props;
+
+	const getIdDefault = useCallback((data: DataT) => data.value, []);
+	const getId = getIdOfData ?? getIdDefault;
 
 	const classes = useThemeStyles(
 		(props as unknown) as BaseSelectorProps<BaseSelectorData>
@@ -476,7 +487,7 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 					const dataNN: DataT = data; // please Typescript
 					// add to LRU
 					setLruIds((prev) =>
-						[dataNN.value, ...prev.filter((id) => id !== dataNN.value)].slice(
+						[getId(dataNN), ...prev.filter((id) => id !== getId(dataNN))].slice(
 							0,
 							lru.count
 						)
@@ -484,7 +495,7 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 				}
 			}
 		},
-		[onSelect, onAddNew, lru]
+		[onSelect, onAddNew, lru, getId]
 	);
 
 	const onSearchHandler = useCallback(
