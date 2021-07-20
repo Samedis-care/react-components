@@ -227,10 +227,6 @@ export interface BaseSelectorProps<DataT extends BaseSelectorData>
 	 */
 	lru?: SelectorLruOptions<DataT>;
 	/**
-	 * Icon when no item is selected
-	 */
-	startAdornment?: InputProps["startAdornment"];
-	/**
 	 * Enable freeSolo
 	 */
 	freeSolo?: boolean;
