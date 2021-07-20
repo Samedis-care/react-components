@@ -22281,6 +22281,7 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
                                               autocompleteId="multi-select-with-tags"
                                               displaySwitch={false}
                                               freeSolo={true}
+                                              getIdOfData={[Function]}
                                               label="or search for a single item"
                                               loadingText="Loading.."
                                               onLoad={[Function]}
@@ -37504,6 +37505,7 @@ exports[`Storyshots Standalone/Selector Single 1`] = `
                                             openInfo={[Function]}
                                             placeholder="Select.."
                                             selected={null}
+                                            startTypingToSearchText="Start typing to search"
                                             variant="outlined"
                                           >
                                             <Memo(BaseSelector)
@@ -37523,6 +37525,7 @@ exports[`Storyshots Standalone/Selector Single 1`] = `
                                               openInfo={[Function]}
                                               placeholder="Select.."
                                               selected={null}
+                                              startTypingToSearchText="Start typing to search"
                                               variant="outlined"
                                             >
                                               <Memo(InlineSwitch)
