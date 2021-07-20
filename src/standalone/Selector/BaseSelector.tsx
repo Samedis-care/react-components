@@ -234,6 +234,11 @@ export interface BaseSelectorProps<DataT extends BaseSelectorData>
 	 * Enable freeSolo
 	 */
 	freeSolo?: boolean;
+	/**
+	 * Icon when no item is selected
+	 */
+	startAdornment?: InputProps["startAdornment"];
+	/**
 	 * Optional callback for customizing the unique identifier of data
 	 * @param data The data struct
 	 * @returns A unique ID extracted from data
