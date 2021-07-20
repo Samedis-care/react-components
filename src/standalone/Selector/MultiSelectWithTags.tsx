@@ -28,13 +28,17 @@ export interface MultiSelectWithTagsProps<
 		>,
 		Omit<
 			MultiSelectWithoutGroupProps<DataT>,
-			"classes" | "onChange" | "dataOptions" | "setDataOptions"
+			"classes" | "onChange" | "dataOptions" | "setDataOptions" | "label"
 		> {
 	// UI Props
 	/**
 	 * The title of control
 	 */
 	title: string;
+	/**
+	 * Label above search bar
+	 */
+	searchInputLabel?: string;
 	/**
 	 * Custom styles for multi select without groups
 	 */
@@ -75,6 +79,10 @@ export interface MultiSelectWithTagsProps<
 	 * LRU options for group
 	 */
 	lruGroup?: SelectorLruOptions<GroupT>;
+	/**
+	 * LRU options for data
+	 */
+	lruData?: SelectorLruOptions<DataT>;
 }
 
 interface SelectedGroup {
@@ -113,6 +121,7 @@ const MultiSelectWithTags = <
 		getIdOfData,
 		switchLabel,
 		lruGroup,
+		lruData,
 	} = props;
 
 	const defaultSwitchValue = props.displaySwitch
@@ -202,7 +211,7 @@ const MultiSelectWithTags = <
 				autocompleteId={autocompleteId}
 				selected={selected}
 				disabled={disabled}
-				searchInputLabel={searchInputLabel}
+				label={searchInputLabel}
 				enableIcons={enableIcons}
 				switchValue={switchValue}
 				setSwitchValue={setSwitchValue}
@@ -210,11 +219,12 @@ const MultiSelectWithTags = <
 				displaySwitch={props.displaySwitch}
 				loadDataOptions={loadDataOptions}
 				openInfo={openInfo}
-				onChange={onChange}
+				onSelect={onChange}
 				refreshToken={selected.map(getId).join(",")}
 				getIdOfData={getId}
 				noOptionsText={noOptionsText}
 				loadingText={loadingText}
+				lru={lruData}
 			/>
 		</div>
 	);

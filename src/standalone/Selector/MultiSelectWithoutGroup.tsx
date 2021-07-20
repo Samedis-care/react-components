@@ -1,40 +1,25 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { TextFieldProps, Typography, makeStyles } from "@material-ui/core";
-import { Autocomplete } from "@material-ui/lab";
 import { Search as SearchIcon, Cancel as RemoveIcon } from "@material-ui/icons";
 import {
 	BaseSelectorProps,
 	MultiSelectorData,
 } from "../../standalone/Selector";
-import { BaseSelectorData } from "./BaseSelector";
-
-import TextFieldWithHelp, {
-	TextFieldWithHelpProps,
-} from "../UIKit/TextFieldWithHelp";
+import BaseSelector from "./BaseSelector";
 import { SmallIconButton, SmallListItemIcon } from "../Small";
 import InlineSwitch from "../InlineSwitch";
-import useCCTranslations from "../../utils/useCCTranslations";
+import { makeStyles, Typography } from "@material-ui/core";
 
-/**
- * A callback used to get an label value for a specific input (search) value
- */
-type SelectorLabelCallback = (obj: { inputValue: string }) => string | null;
 export interface MultiSelectWithoutGroupProps<DataT extends MultiSelectorData>
-	extends Pick<
-			BaseSelectorProps<BaseSelectorData>,
-			| "disabled"
-			| "autocompleteId"
-			| "enableIcons"
-			| "displaySwitch"
-			| "defaultSwitchValue"
-			| "switchLabel"
-		>,
-		TextFieldWithHelpProps {
+	extends Omit<
+		BaseSelectorProps<DataT>,
+		"onSelect" | "selected" | "classes" | "onLoad"
+	> {
 	// UI Props
 	/**
-	 * Label for search input control
+	 * Extended selection change handler
+	 * @param data The selected data entry/entries
 	 */
-	searchInputLabel?: string;
+	onSelect?: (value: DataT[]) => void;
 	/**
 	 * Custom styles
 	 */
@@ -53,11 +38,6 @@ export interface MultiSelectWithoutGroupProps<DataT extends MultiSelectorData>
 	 * @param checked The value of switch input
 	 */
 	setSwitchValue?: (checked: boolean) => void;
-	/**
-	 * Change event callback
-	 * @param data The currently selected entries. This should be feed back to selected prop
-	 */
-	onChange?: (data: DataT[]) => void;
 	/**
 	 * Search callback which is called to load available data entries
 	 * @param query The search string
@@ -78,14 +58,6 @@ export interface MultiSelectWithoutGroupProps<DataT extends MultiSelectorData>
 	 * Token which causes data to be reloaded
 	 */
 	refreshToken?: string;
-	/**
-	 * Label which is shown if there is no data
-	 */
-	noOptionsText?: string | SelectorLabelCallback;
-	/**
-	 * Label which is shown while loading data
-	 */
-	loadingText?: string | SelectorLabelCallback;
 }
 
 const useStyles = makeStyles(
@@ -119,25 +91,20 @@ const MultiSelectWithoutGroup = <DataT extends MultiSelectorData>(
 	props: MultiSelectWithoutGroupProps<DataT>
 ) => {
 	const {
-		searchInputLabel,
+		onSelect,
 		selected,
 		disabled,
-		autocompleteId,
 		enableIcons,
 		loadDataOptions,
-		onChange,
-		openInfo,
 		getIdOfData,
 		refreshToken,
-		noOptionsText,
-		loadingText,
 		switchValue,
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		classes: classProps,
+		...otherProps
 	} = props;
-	const { t } = useCCTranslations();
 	const classes = useStyles(props);
-	const [dataQuery, setDataQuery] = useState("");
 	const [dataOptions, setDataOptions] = useState<DataT[]>([]);
-	const [loading, setLoading] = useState(false);
 
 	const getIdDefault = useCallback((data: DataT) => data.value, []);
 	const getId = getIdOfData ?? getIdDefault;
@@ -151,9 +118,10 @@ const MultiSelectWithoutGroup = <DataT extends MultiSelectorData>(
 			);
 		});
 	}, [getId, selected]);
+
 	const handleDelete = useCallback(
 		async (evt: React.MouseEvent<HTMLButtonElement>) => {
-			if (!onChange) return;
+			if (!onSelect) return;
 
 			// find the item
 			const entryToDelete = selected.find(
@@ -174,106 +142,45 @@ const MultiSelectWithoutGroup = <DataT extends MultiSelectorData>(
 			}
 
 			setDataOptions([...dataOptions, entryToDelete]);
-			onChange(selected.filter((entry) => entry !== entryToDelete));
+			onSelect(selected.filter((entry) => entry !== entryToDelete));
 		},
-		[onChange, setDataOptions, dataOptions, selected]
+		[onSelect, setDataOptions, dataOptions, selected]
 	);
 
-	const handleOptionSelect = useCallback(
-		(selectedValue: DataT) => {
-			if (
-				!selectedValue ||
-				typeof selectedValue !== "object" ||
-				!("value" in selectedValue) ||
-				!onChange
-			) {
-				if (selectedValue) {
-					// eslint-disable-next-line no-console
-					console.warn(
-						"[Components-Care] [MultiSelectWithoutGroup] Unexpected value passed to handleOptionSelect:",
-						selectedValue
-					);
-				}
-				return;
-			}
-			setLoading(true);
-			setDataQuery("");
-			setDataOptions(
-				dataOptions.filter((old) => getId(old) !== getId(selectedValue))
-			);
-			onChange([...selected, selectedValue]);
-			setLoading(false);
+	const multiSelectHandler = useCallback(
+		(data: DataT | null) => {
+			if (!data) return;
+			const selectedOptions = [...selected, data];
+			if (onSelect) onSelect(selectedOptions);
 		},
-		[getId, onChange, setDataOptions, dataOptions, selected]
+		[onSelect, selected]
 	);
 
-	const onSearchData = useCallback(
+	const onLoad = useCallback(
 		async (query: string) => {
-			const selectedIds = selected.map(getId);
-			setDataOptions(
-				(await loadDataOptions(query, !!switchValue)).filter(
-					(option) => !selectedIds.includes(getId(option))
-				)
-			);
+			return (await loadDataOptions(query, !!switchValue)).filter((entry) => {
+				return !selected.map(getId).includes(getId(entry));
+			});
 		},
-		[getId, loadDataOptions, setDataOptions, selected, switchValue]
+		[loadDataOptions, switchValue, selected, getId]
 	);
-
-	useEffect(() => {
-		void onSearchData(dataQuery);
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [dataQuery, switchValue, refreshToken]);
-
-	const filterOptions = useCallback((options: DataT[]) => options, []);
 
 	return (
 		<Typography component="div">
-			<Typography component="div" className={classes.searchLabel}>
-				<Typography
-					component="label"
-					variant={"caption"}
-					color={"textSecondary"}
-				>
-					{searchInputLabel || "Search input"}
-				</Typography>
-			</Typography>
-			<Autocomplete<DataT, false, true, true>
-				id={autocompleteId}
-				freeSolo
-				autoComplete
-				disableClearable
-				disabled={disabled}
-				options={dataOptions}
-				filterOptions={filterOptions}
-				value={""}
-				getOptionSelected={(option, value) => option.value === value.value}
-				getOptionLabel={(option: string | DataT) =>
-					typeof option === "string" ? option : option.label
+			<BaseSelector
+				{...otherProps}
+				onLoad={onLoad}
+				selected={null}
+				onSelect={multiSelectHandler}
+				refreshToken={
+					(refreshToken ?? "") +
+					selected.map(getId).join(",") +
+					(switchValue ?? false).toString()
 				}
-				onChange={(_event, selectedValue) =>
-					handleOptionSelect(selectedValue as DataT)
-				}
-				inputValue={dataQuery}
-				onInputChange={(evt, value) => setDataQuery(value)}
-				loading={loading}
-				loadingText={
-					loadingText ?? t("standalone.selector.base-selector.loading-text")
-				}
-				noOptionsText={
-					noOptionsText ??
-					t("standalone.selector.base-selector.no-options-text")
-				}
-				renderInput={(params: TextFieldProps) => (
-					<TextFieldWithHelp
-						{...params}
-						openInfo={openInfo}
-						InputProps={{
-							...params.InputProps,
-							startAdornment: <SearchIcon color={"primary"} />,
-							type: "search",
-						}}
-					/>
-				)}
+				variant={"standard"}
+				startAdornment={<SearchIcon color={"primary"} />}
+				freeSolo={true}
+				displaySwitch={false}
 			/>
 			<InlineSwitch
 				visible={!!props.displaySwitch}

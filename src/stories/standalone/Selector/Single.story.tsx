@@ -11,6 +11,7 @@ import { boolean, text, select } from "@storybook/addon-knobs";
 import { Box, FormControl } from "@material-ui/core";
 import { showInfoDialog } from "../../../non-standalone";
 import { useDialogContext } from "../../../framework";
+import { Search as SearchIcon } from "@material-ui/icons";
 
 export const SelectorSingle = (): React.ReactElement => {
 	const [selected, setSelected] = useState<BaseSelectorData | null>(null);
@@ -55,6 +56,8 @@ export const SelectorSingle = (): React.ReactElement => {
 	const useCustomCloseText = boolean("Use custom close text label?", false);
 	const closeText = text("Close Text Label", "Close");
 	const lru = boolean("Use LRU?", false);
+	const startAdornment = boolean("Show start adornment?", false);
+	const freeSolo = boolean("Enable freeSolo", false);
 
 	const loadData = useCallback(
 		(query: string): BaseSelectorData[] => {
@@ -129,6 +132,10 @@ export const SelectorSingle = (): React.ReactElement => {
 							],
 						})
 					}
+					startAdornment={
+						startAdornment ? <SearchIcon color={"primary"} /> : undefined
+					}
+					freeSolo={freeSolo}
 				/>
 			</FormControl>
 		</Box>
