@@ -32,13 +32,6 @@ export interface MultiSelectProps<DataT extends MultiSelectorData>
 	 */
 	selected: DataT[];
 	/**
-	 * Optional callback for customizing the unique identifier of data
-	 * @param data The data struct
-	 * @returns A unique ID extracted from data
-	 * @default returns data.value
-	 */
-	getIdOfData?: (data: DataT) => string;
-	/**
 	 * Specify a custom component for displaying multi select items
 	 */
 	selectedEntryRenderer?: React.ComponentType<IMultiSelectEntryProps<DataT>>;
