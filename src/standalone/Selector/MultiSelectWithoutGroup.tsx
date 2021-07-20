@@ -181,6 +181,7 @@ const MultiSelectWithoutGroup = <DataT extends MultiSelectorData>(
 				startAdornment={<SearchIcon color={"primary"} />}
 				freeSolo={true}
 				displaySwitch={false}
+				getIdOfData={getIdOfData}
 			/>
 			<InlineSwitch
 				visible={!!props.displaySwitch}

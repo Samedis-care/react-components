@@ -50,6 +50,10 @@ export const SelectorSingle = (): React.ReactElement => {
 	const loadingLabel = text("Loading Label", "Loading..");
 	const useCustomNoOptionsText = boolean("Use custom no data label?", false);
 	const noOptionsText = text("No data Label", "No option");
+	const startTypingToSearchText = text(
+		"Start typing to search Label",
+		"Start typing to search"
+	);
 	const placeholderLabel = text("Placeholder Label", "Select..");
 	const useCustomOpenText = boolean("Use custom open text label?", false);
 	const openText = text("Open Text Label", "Open");
@@ -95,6 +99,7 @@ export const SelectorSingle = (): React.ReactElement => {
 					addNewLabel={addNewLabel}
 					loadingText={useCustomLoading ? loadingLabel : undefined}
 					noOptionsText={useCustomNoOptionsText ? noOptionsText : undefined}
+					startTypingToSearchText={startTypingToSearchText}
 					openText={useCustomOpenText ? openText : undefined}
 					closeText={useCustomCloseText ? closeText : undefined}
 					placeholder={placeholderLabel}

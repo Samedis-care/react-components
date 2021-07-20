@@ -168,6 +168,10 @@ export interface BaseSelectorProps<DataT extends BaseSelectorData>
 	 */
 	loadingText?: string | SelectorLabelCallback;
 	/**
+	 * Label which is shown if forceQuery == true and nothing has been typed
+	 */
+	startTypingToSearchText?: string | SelectorLabelCallback;
+	/**
 	 * Label which is shown for close icon button while popup is opened
 	 */
 	closeText?: string;
@@ -382,6 +386,7 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 		enableIcons,
 		noOptionsText,
 		loadingText,
+		startTypingToSearchText,
 		openText,
 		closeText,
 		disableClearable,
@@ -660,8 +665,13 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 						popupIcon={<ExpandMore />}
 						freeSolo={freeSolo}
 						noOptionsText={
-							noOptionsText ??
-							t("standalone.selector.base-selector.no-options-text")
+							lru && query === "" && lruIds.length == 0 && lru.forceQuery
+								? startTypingToSearchText ??
+								  t(
+										"standalone.selector.base-selector.start-typing-to-search-text"
+								  )
+								: noOptionsText ??
+								  t("standalone.selector.base-selector.no-options-text")
 						}
 						openText={
 							openText ?? t("standalone.selector.base-selector.open-icon-text")
