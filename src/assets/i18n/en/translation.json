@@ -89,7 +89,8 @@
 				"no-options-text": "No options",
 				"close-icon-text": "Close",
 				"open-icon-text": "Open",
-				"loading-text": "Loading..."
+				"loading-text": "Loading...",
+				"start-typing-to-search-text": "Start typing to search"
 			}
 		},
 		"file-upload": {
