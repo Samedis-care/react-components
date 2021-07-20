@@ -12,7 +12,10 @@ import {
 	ModelGetResponse,
 	PageVisibility,
 } from "../../backend-integration";
-import { useSelectedCache } from "./BackendMultiSelect";
+import {
+	BackendMultiSelectLruOptions,
+	useSelectedCache,
+} from "./BackendMultiSelect";
 import { debouncePromise } from "../../utils";
 import { DataGridSortSetting } from "../../standalone/DataGrid/DataGrid";
 import { BackendSingleSelectLruOptions } from "./BackendSingleSelect";
@@ -35,6 +38,7 @@ export interface BackendMultiSelectWithTagsProps<
 		| "selected"
 		| "onChange"
 		| "lruGroup"
+		| "lruData"
 	> {
 	/**
 	 * The selected data record IDs
@@ -112,6 +116,10 @@ export interface BackendMultiSelectWithTagsProps<
 	 * LRU options for group selector
 	 */
 	lruGroup?: BackendSingleSelectLruOptions<GroupDataT>;
+	/**
+	 * LRU options for data selector
+	 */
+	lruData?: BackendMultiSelectLruOptions<DataDataT>;
 }
 
 /**
@@ -156,6 +164,7 @@ const BackendMultiSelectWithTags = <
 		dataSort,
 		groupSort,
 		lruGroup,
+		lruData,
 		...selectorProps
 	} = props;
 
@@ -221,6 +230,25 @@ const BackendMultiSelectWithTags = <
 		[lruGroup, handleLoadGroupRecord]
 	);
 
+	const handleLoadDataRecord = useCallback(
+		async (id: string): Promise<DataDataT> => {
+			const [data] = await dataModel.getCached(id);
+			return convData(data);
+		},
+		[dataModel, convData]
+	);
+
+	const lruDataConfig: SelectorLruOptions<DataDataT> | undefined = useMemo(
+		() =>
+			lruData
+				? {
+						...lruData,
+						loadData: handleLoadDataRecord,
+				  }
+				: undefined,
+		[lruData, handleLoadDataRecord]
+	);
+
 	const debouncedGroupLoad = useMemo(
 		() => debouncePromise(loadGroupOptions, groupSearchDebounceTime ?? 500),
 		[groupSearchDebounceTime, loadGroupOptions]
@@ -240,6 +268,7 @@ const BackendMultiSelectWithTags = <
 			loadGroupOptions={debouncedGroupLoad}
 			displaySwitch={!!(switchFilterNameGroup || switchFilterNameData)}
 			lruGroup={lruGroupConfig}
+			lruData={lruDataConfig}
 		/>
 	);
 };

@@ -226,6 +226,14 @@ export interface BaseSelectorProps<DataT extends BaseSelectorData>
 	 * LRU shows the user the previous items he selected when no search term is entered
 	 */
 	lru?: SelectorLruOptions<DataT>;
+	/**
+	 * Icon when no item is selected
+	 */
+	startAdornment?: InputProps["startAdornment"];
+	/**
+	 * Enable freeSolo
+	 */
+	freeSolo?: boolean;
 }
 
 export type SelectorThemeExpert = {
@@ -377,6 +385,8 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 		groupSorter,
 		switchLabel,
 		lru,
+		startAdornment,
+		freeSolo,
 	} = props;
 
 	const classes = useThemeStyles(
@@ -459,6 +469,16 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 
 	const onChangeHandler = useCallback(
 		async (data: DataT | NonNullable<DataT> | null) => {
+			if (!data || typeof data !== "object" || !("value" in data)) {
+				if (data) {
+					// eslint-disable-next-line no-console
+					console.warn(
+						"[Components-Care] [BaseSelector] Unexpected value passed to handleOptionSelect:",
+						data
+					);
+				}
+				return;
+			}
 			if (
 				data &&
 				"isAddNewButton" in data &&
@@ -627,6 +647,7 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 						blurOnSelect={true}
 						onInputChange={updateQuery}
 						popupIcon={<ExpandMore />}
+						freeSolo={freeSolo}
 						noOptionsText={
 							noOptionsText ??
 							t("standalone.selector.base-selector.no-options-text")
@@ -644,7 +665,9 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 							!!(option.isDisabled || option.isDivider)
 						}
 						getOptionSelected={(option, value) => option.value === value.value}
-						onChange={(_event, selectedValue) => onChangeHandler(selectedValue)}
+						onChange={(_event, selectedValue) =>
+							onChangeHandler(selectedValue as DataT)
+						}
 						renderInput={(params: AutocompleteRenderInputParams) => {
 							// eslint-disable-next-line @typescript-eslint/no-unused-vars
 							const { InputProps, InputLabelProps, ...otherParams } = params;
@@ -654,7 +677,8 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 									{...InputProps}
 									{...otherParams}
 									startAdornment={
-										enableIcons ? renderIcon(selected?.icon) : undefined
+										(enableIcons ? renderIcon(selected?.icon) : undefined) ??
+										startAdornment
 									}
 									endAdornment={
 										openInfo
