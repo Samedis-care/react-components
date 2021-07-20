@@ -82,7 +82,8 @@
 				"no-options-text": "Keine Optionen",
 				"close-icon-text": "Schließen",
 				"open-icon-text": "Öffnen",
-				"loading-text": "Lade..."
+				"loading-text": "Lade...",
+				"start-typing-to-search-text": "Geben Sie eine Suchzeichenfolge ein, um Ergebnisse zu erhalten"
 			}
 		},
 		"schedule": {

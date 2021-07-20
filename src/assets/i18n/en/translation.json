@@ -90,7 +90,7 @@
 				"close-icon-text": "Close",
 				"open-icon-text": "Open",
 				"loading-text": "Loading...",
-				"start-typing-to-search-text": "Start typing to search"
+				"start-typing-to-search-text": "Enter a search string to get results"
 			}
 		},
 		"file-upload": {
