@@ -6,7 +6,8 @@
 				"no-options-text": "Нет вариантов",
 				"close-icon-text": "Закрыть",
 				"open-icon-text": "Открыть",
-				"loading-text": "Загрузка..."
+				"loading-text": "Загрузка...",
+				"start-typing-to-search-text": "Введите строку поиска, чтобы получить результаты"
 			}
 		},
 		"schedule": {

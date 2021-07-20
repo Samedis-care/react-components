@@ -6,7 +6,8 @@
 				"no-options-text": "Aucune option",
 				"close-icon-text": "Fermer",
 				"open-icon-text": "Ouvrir",
-				"loading-text": "Chargement..."
+				"loading-text": "Chargement...",
+				"start-typing-to-search-text": "Entrez une chaîne de recherche pour obtenir des résultats"
 			}
 		},
 		"schedule": {

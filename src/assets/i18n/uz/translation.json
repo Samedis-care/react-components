@@ -6,7 +6,8 @@
 				"no-options-text": "Variant yo'q",
 				"close-icon-text": "Yoping",
 				"open-icon-text": "Ochiq",
-				"loading-text": "Yuklanmoqda..."
+				"loading-text": "Yuklanmoqda...",
+				"start-typing-to-search-text": "Natija olish uchun qidiruv qatorini kiriting"
 			}
 		},
 		"schedule": {
