@@ -24851,7 +24851,7 @@ exports[`Storyshots Standalone/Schedule Weekly 1`] = `
                                                                     onDismiss={[Function]}
                                                                     open={false}
                                                                     openTo="date"
-                                                                    value={2020-11-21T23:00:00.000Z}
+                                                                    value={2020-11-22T00:00:00.000Z}
                                                                     variant="dialog"
                                                                     views={
                                                                       Array [
