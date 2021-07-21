@@ -22280,6 +22280,7 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
                                             <Memo(BaseSelector)
                                               autocompleteId="multi-select-with-tags"
                                               displaySwitch={false}
+                                              filterIds={Array []}
                                               freeSolo={true}
                                               getIdOfData={[Function]}
                                               label="or search for a single item"
@@ -29543,7 +29544,7 @@ exports[`Storyshots Standalone/Selector MultiWithoutGroup 1`] = `
                                   openInfo={[Function]}
                                   selected={Array []}
                                   setSwitchValue={[Function]}
-                                  switchLabel=""
+                                  switchLabel="Bright colours"
                                   switchValue={false}
                                 >
                                   <WithStyles(ForwardRef(Typography))
@@ -29592,6 +29593,7 @@ exports[`Storyshots Standalone/Selector MultiWithoutGroup 1`] = `
                                         <Memo(BaseSelector)
                                           autocompleteId="multi-select-without-group"
                                           displaySwitch={false}
+                                          filterIds={Array []}
                                           freeSolo={true}
                                           label="Multi Without Groups"
                                           loadingText="Loading.."
@@ -29606,7 +29608,7 @@ exports[`Storyshots Standalone/Selector MultiWithoutGroup 1`] = `
                                               color="primary"
                                             />
                                           }
-                                          switchLabel=""
+                                          switchLabel="Bright colours"
                                           variant="standard"
                                         >
                                           <Memo(InlineSwitch)
@@ -29623,7 +29625,7 @@ exports[`Storyshots Standalone/Selector MultiWithoutGroup 1`] = `
                                                 "wrapper": "standalone-selector--multi-without-group-CcBaseSelectorCustomBase-wrapper-82 standalone-selector--multi-without-group-CcBaseSelectorCustomBase-wrapper-87",
                                               }
                                             }
-                                            label=""
+                                            label="Bright colours"
                                             onChange={[Function]}
                                             value={false}
                                             visible={false}
@@ -30711,7 +30713,7 @@ exports[`Storyshots Standalone/Selector MultiWithoutGroup 1`] = `
                                               "switch": "standalone-selector--multi-without-group-CcMultiSelectWithoutGroup-switch-54",
                                             }
                                           }
-                                          label=""
+                                          label="Bright colours"
                                           onChange={[Function]}
                                           value={false}
                                           visible={true}
@@ -31375,7 +31377,9 @@ exports[`Storyshots Standalone/Selector MultiWithoutGroup 1`] = `
                                                               >
                                                                 <div
                                                                   className="standalone-selector--multi-without-group-MuiGrid-root standalone-selector--multi-without-group-MuiGrid-item"
-                                                                />
+                                                                >
+                                                                  Bright colours
+                                                                </div>
                                                               </ForwardRef(Grid)>
                                                             </WithStyles(ForwardRef(Grid))>
                                                           </label>

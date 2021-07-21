@@ -3,10 +3,11 @@ import "../../../i18n";
 import {
 	MultiSelectWithoutGroup,
 	MultiSelectorData,
+	SelectorLruOptions,
 } from "../../../standalone/Selector";
 import { colourOptions } from "./Data";
 import { action } from "@storybook/addon-actions";
-import { boolean, text } from "@storybook/addon-knobs";
+import { boolean, number, text } from "@storybook/addon-knobs";
 import { useDialogContext } from "../../../framework";
 import { showInfoDialog } from "../../../non-standalone";
 
@@ -49,7 +50,7 @@ export const MultiWithoutGroup = (): React.ReactElement => {
 	const useCustomNoOptionsText = boolean("Use custom no data label?", false);
 	const noOptionsText = text("No data Label", "No option");
 	const displaySwitch = boolean("Enable Switch?", true);
-	const switchLabel = text("Switch Label", "");
+	const switchLabel = text("Switch Label", "Bright colours");
 
 	const onSelect = useCallback(
 		(data: MultiWithoutGroupData[]) => {
@@ -60,6 +61,30 @@ export const MultiWithoutGroup = (): React.ReactElement => {
 	);
 
 	const brightColours = ["ocean", "yellow", "green", "silver"];
+
+	const useLru = boolean("use LRU", false);
+	const count = number("Maximum number of LRU-options", 5, {
+		range: true,
+		min: 1,
+		max: 25,
+		step: 1,
+	});
+	const forceQuery = boolean("forceQuery", false);
+
+	const lru: SelectorLruOptions<MultiWithoutGroupData> | undefined = useLru
+		? {
+				count: count,
+				loadData: (
+					id: string
+				): Promise<MultiWithoutGroupData> | MultiWithoutGroupData => {
+					return options.find((entry) => {
+						return entry.id === id;
+					}) as MultiWithoutGroupData;
+				},
+				storageKey: "test-storage-key",
+				forceQuery: forceQuery,
+		  }
+		: undefined;
 
 	return (
 		<MultiSelectWithoutGroup<MultiWithoutGroupData>
@@ -103,6 +128,7 @@ export const MultiWithoutGroup = (): React.ReactElement => {
 					],
 				})
 			}
+			lru={lru}
 		/>
 	);
 };
