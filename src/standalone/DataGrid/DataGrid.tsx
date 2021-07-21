@@ -562,11 +562,11 @@ export const getDataGridDefaultColumnsState = (
 		);
 		data[column.field] = {
 			sort:
-				defaultSort && defaultSortIndex !== -1 && defaultSortIndex !== undefined
+				defaultSort && defaultSortIndex !== -1 && defaultSortIndex != null
 					? defaultSort[defaultSortIndex].direction
 					: 0,
 			sortOrder:
-				defaultSortIndex && defaultSortIndex >= 0
+				defaultSortIndex != null && defaultSortIndex >= 0
 					? defaultSortIndex + 1
 					: undefined,
 			filter: defaultFilterSetting?.filter,
