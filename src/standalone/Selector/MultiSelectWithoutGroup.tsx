@@ -157,12 +157,8 @@ const MultiSelectWithoutGroup = <DataT extends MultiSelectorData>(
 	);
 
 	const onLoad = useCallback(
-		async (query: string) => {
-			return (await loadDataOptions(query, !!switchValue)).filter((entry) => {
-				return !selected.map(getId).includes(getId(entry));
-			});
-		},
-		[loadDataOptions, switchValue, selected, getId]
+		(query: string) => loadDataOptions(query, !!switchValue),
+		[loadDataOptions, switchValue]
 	);
 
 	return (
@@ -182,6 +178,7 @@ const MultiSelectWithoutGroup = <DataT extends MultiSelectorData>(
 				freeSolo={true}
 				displaySwitch={false}
 				getIdOfData={getIdOfData}
+				filterIds={selected.map(getId)}
 			/>
 			<InlineSwitch
 				visible={!!props.displaySwitch}

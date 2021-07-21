@@ -245,6 +245,10 @@ export interface BaseSelectorProps<DataT extends BaseSelectorData>
 	 * @default returns data.value
 	 */
 	getIdOfData?: (data: DataT) => string;
+	/**
+	 * Ids to filter from options
+	 */
+	filterIds?: string[] | undefined;
 }
 
 export type SelectorThemeExpert = {
@@ -400,6 +404,7 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 		startAdornment,
 		freeSolo,
 		getIdOfData,
+		filterIds,
 	} = props;
 
 	const getIdDefault = useCallback((data: DataT) => data.value, []);
@@ -576,7 +581,11 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 					)
 				);
 			} else {
-				setSelectorOptions(results);
+				setSelectorOptions(
+					!filterIds
+						? results
+						: results.filter((entry) => !filterIds.includes(getId(entry)))
+				);
 			}
 			setLoading(false);
 		},
@@ -592,6 +601,8 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 			onAddNew,
 			groupSorter,
 			noGroupLabel,
+			filterIds,
+			getId,
 		]
 	);
 
@@ -665,7 +676,7 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 						popupIcon={<ExpandMore />}
 						freeSolo={freeSolo}
 						noOptionsText={
-							lru && query === "" && lruIds.length == 0 && lru.forceQuery
+							lru && query === ""
 								? startTypingToSearchText ??
 								  t(
 										"standalone.selector.base-selector.start-typing-to-search-text"

@@ -108,13 +108,8 @@ const MultiSelect = <DataT extends MultiSelectorData>(
 	);
 
 	const multiSelectLoadHandler = useCallback(
-		async (query: string, switchValue: boolean) => {
-			const results = await onLoad(query, switchValue);
-			return results.filter(
-				(val: DataT) => !selected.map((s) => getId(s)).includes(getId(val))
-			);
-		},
-		[getId, onLoad, selected]
+		(query: string, switchValue: boolean) => onLoad(query, switchValue),
+		[onLoad]
 	);
 
 	const handleDelete = useCallback(
