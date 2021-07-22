@@ -15,6 +15,12 @@ export interface CrudMultiImageProps
 	 */
 	additionalImages?: MultiImageImage[];
 	/**
+	 * Optional additional images loading flag
+	 * Should be set to true while additionalImages is null to prevent
+	 * it loosing primary status
+	 */
+	additionalImagesLoading?: boolean;
+	/**
 	 * The backend connector used as CRUD interface
 	 */
 	connector: Connector<string, PageVisibility, unknown>;
@@ -62,6 +68,7 @@ const CrudMultiImage = (props: CrudMultiImageProps) => {
 		deserialize,
 		onChange,
 		additionalImages,
+		additionalImagesLoading,
 		...otherProps
 	} = props;
 	const { name, primary, onPrimaryChange } = otherProps;
@@ -198,7 +205,7 @@ const CrudMultiImage = (props: CrudMultiImageProps) => {
 		if (onChange) onChange(name, images);
 	}, [images, name, onChange]);
 
-	if (loading) return <Loader />;
+	if (loading || additionalImagesLoading) return <Loader />;
 	if (loadError) return <span>{loadError.message}</span>;
 
 	return (
