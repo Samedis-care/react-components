@@ -6558,6 +6558,7 @@ exports[`Storyshots Standalone/Selector Multi 1`] = `
                                                                                     "tagSizeSmall": "standalone-selector--selector-multi-CcBaseSelectorBase-tagSizeSmall-65",
                                                                                   }
                                                                                 }
+                                                                                clearText="standalone.selector.base-selector.clear-icon-text"
                                                                                 closeText="standalone.selector.base-selector.close-icon-text"
                                                                                 disabled={false}
                                                                                 filterOptions={[Function]}
@@ -6614,6 +6615,7 @@ exports[`Storyshots Standalone/Selector Multi 1`] = `
                                                                                       "tagSizeSmall": "standalone-selector--selector-multi-MuiAutocomplete-tagSizeSmall standalone-selector--selector-multi-CcBaseSelectorBase-tagSizeSmall-65",
                                                                                     }
                                                                                   }
+                                                                                  clearText="standalone.selector.base-selector.clear-icon-text"
                                                                                   closeText="standalone.selector.base-selector.close-icon-text"
                                                                                   disabled={false}
                                                                                   filterOptions={[Function]}
@@ -6655,11 +6657,11 @@ exports[`Storyshots Standalone/Selector Multi 1`] = `
                                                                                           className="standalone-selector--selector-multi-MuiAutocomplete-endAdornment standalone-selector--selector-multi-CcBaseSelectorBase-endAdornment-69"
                                                                                         >
                                                                                           <WithStyles(ForwardRef(IconButton))
-                                                                                            aria-label="Clear"
+                                                                                            aria-label="standalone.selector.base-selector.clear-icon-text"
                                                                                             className="standalone-selector--selector-multi-MuiAutocomplete-clearIndicator standalone-selector--selector-multi-CcBaseSelectorBase-clearIndicator-70"
                                                                                             onClick={[Function]}
                                                                                             tabIndex={-1}
-                                                                                            title="Clear"
+                                                                                            title="standalone.selector.base-selector.clear-icon-text"
                                                                                           >
                                                                                             <Memo
                                                                                               fontSize="small"
@@ -6729,11 +6731,11 @@ exports[`Storyshots Standalone/Selector Multi 1`] = `
                                                                                             className="standalone-selector--selector-multi-MuiAutocomplete-endAdornment standalone-selector--selector-multi-CcBaseSelectorBase-endAdornment-69"
                                                                                           >
                                                                                             <WithStyles(ForwardRef(IconButton))
-                                                                                              aria-label="Clear"
+                                                                                              aria-label="standalone.selector.base-selector.clear-icon-text"
                                                                                               className="standalone-selector--selector-multi-MuiAutocomplete-clearIndicator standalone-selector--selector-multi-CcBaseSelectorBase-clearIndicator-70"
                                                                                               onClick={[Function]}
                                                                                               tabIndex={-1}
-                                                                                              title="Clear"
+                                                                                              title="standalone.selector.base-selector.clear-icon-text"
                                                                                             >
                                                                                               <Memo
                                                                                                 fontSize="small"
@@ -6815,11 +6817,11 @@ exports[`Storyshots Standalone/Selector Multi 1`] = `
                                                                                               className="standalone-selector--selector-multi-MuiAutocomplete-endAdornment standalone-selector--selector-multi-CcBaseSelectorBase-endAdornment-69"
                                                                                             >
                                                                                               <WithStyles(ForwardRef(IconButton))
-                                                                                                aria-label="Clear"
+                                                                                                aria-label="standalone.selector.base-selector.clear-icon-text"
                                                                                                 className="standalone-selector--selector-multi-MuiAutocomplete-clearIndicator standalone-selector--selector-multi-CcBaseSelectorBase-clearIndicator-70"
                                                                                                 onClick={[Function]}
                                                                                                 tabIndex={-1}
-                                                                                                title="Clear"
+                                                                                                title="standalone.selector.base-selector.clear-icon-text"
                                                                                               >
                                                                                                 <Memo
                                                                                                   fontSize="small"
@@ -6901,11 +6903,11 @@ exports[`Storyshots Standalone/Selector Multi 1`] = `
                                                                                                 className="standalone-selector--selector-multi-MuiAutocomplete-endAdornment standalone-selector--selector-multi-CcBaseSelectorBase-endAdornment-69"
                                                                                               >
                                                                                                 <WithStyles(ForwardRef(IconButton))
-                                                                                                  aria-label="Clear"
+                                                                                                  aria-label="standalone.selector.base-selector.clear-icon-text"
                                                                                                   className="standalone-selector--selector-multi-MuiAutocomplete-clearIndicator standalone-selector--selector-multi-CcBaseSelectorBase-clearIndicator-70"
                                                                                                   onClick={[Function]}
                                                                                                   tabIndex={-1}
-                                                                                                  title="Clear"
+                                                                                                  title="standalone.selector.base-selector.clear-icon-text"
                                                                                                 >
                                                                                                   <Memo
                                                                                                     fontSize="small"
@@ -6994,11 +6996,11 @@ exports[`Storyshots Standalone/Selector Multi 1`] = `
                                                                                                   className="standalone-selector--selector-multi-MuiAutocomplete-endAdornment standalone-selector--selector-multi-CcBaseSelectorBase-endAdornment-69"
                                                                                                 >
                                                                                                   <WithStyles(ForwardRef(IconButton))
-                                                                                                    aria-label="Clear"
+                                                                                                    aria-label="standalone.selector.base-selector.clear-icon-text"
                                                                                                     className="standalone-selector--selector-multi-MuiAutocomplete-clearIndicator standalone-selector--selector-multi-CcBaseSelectorBase-clearIndicator-70"
                                                                                                     onClick={[Function]}
                                                                                                     tabIndex={-1}
-                                                                                                    title="Clear"
+                                                                                                    title="standalone.selector.base-selector.clear-icon-text"
                                                                                                   >
                                                                                                     <Memo
                                                                                                       fontSize="small"
@@ -7086,14 +7088,14 @@ exports[`Storyshots Standalone/Selector Multi 1`] = `
                                                                                                   className="standalone-selector--selector-multi-MuiAutocomplete-endAdornment standalone-selector--selector-multi-CcBaseSelectorBase-endAdornment-69"
                                                                                                 >
                                                                                                   <WithStyles(ForwardRef(IconButton))
-                                                                                                    aria-label="Clear"
+                                                                                                    aria-label="standalone.selector.base-selector.clear-icon-text"
                                                                                                     className="standalone-selector--selector-multi-MuiAutocomplete-clearIndicator standalone-selector--selector-multi-CcBaseSelectorBase-clearIndicator-70"
                                                                                                     onClick={[Function]}
                                                                                                     tabIndex={-1}
-                                                                                                    title="Clear"
+                                                                                                    title="standalone.selector.base-selector.clear-icon-text"
                                                                                                   >
                                                                                                     <ForwardRef(IconButton)
-                                                                                                      aria-label="Clear"
+                                                                                                      aria-label="standalone.selector.base-selector.clear-icon-text"
                                                                                                       className="standalone-selector--selector-multi-MuiAutocomplete-clearIndicator standalone-selector--selector-multi-CcBaseSelectorBase-clearIndicator-70"
                                                                                                       classes={
                                                                                                         Object {
@@ -7110,20 +7112,20 @@ exports[`Storyshots Standalone/Selector Multi 1`] = `
                                                                                                       }
                                                                                                       onClick={[Function]}
                                                                                                       tabIndex={-1}
-                                                                                                      title="Clear"
+                                                                                                      title="standalone.selector.base-selector.clear-icon-text"
                                                                                                     >
                                                                                                       <WithStyles(ForwardRef(ButtonBase))
-                                                                                                        aria-label="Clear"
+                                                                                                        aria-label="standalone.selector.base-selector.clear-icon-text"
                                                                                                         centerRipple={true}
                                                                                                         className="standalone-selector--selector-multi-MuiIconButton-root standalone-selector--selector-multi-MuiAutocomplete-clearIndicator standalone-selector--selector-multi-CcBaseSelectorBase-clearIndicator-70"
                                                                                                         disabled={false}
                                                                                                         focusRipple={true}
                                                                                                         onClick={[Function]}
                                                                                                         tabIndex={-1}
-                                                                                                        title="Clear"
+                                                                                                        title="standalone.selector.base-selector.clear-icon-text"
                                                                                                       >
                                                                                                         <ForwardRef(ButtonBase)
-                                                                                                          aria-label="Clear"
+                                                                                                          aria-label="standalone.selector.base-selector.clear-icon-text"
                                                                                                           centerRipple={true}
                                                                                                           className="standalone-selector--selector-multi-MuiIconButton-root standalone-selector--selector-multi-MuiAutocomplete-clearIndicator standalone-selector--selector-multi-CcBaseSelectorBase-clearIndicator-70"
                                                                                                           classes={
@@ -7137,10 +7139,10 @@ exports[`Storyshots Standalone/Selector Multi 1`] = `
                                                                                                           focusRipple={true}
                                                                                                           onClick={[Function]}
                                                                                                           tabIndex={-1}
-                                                                                                          title="Clear"
+                                                                                                          title="standalone.selector.base-selector.clear-icon-text"
                                                                                                         >
                                                                                                           <button
-                                                                                                            aria-label="Clear"
+                                                                                                            aria-label="standalone.selector.base-selector.clear-icon-text"
                                                                                                             className="standalone-selector--selector-multi-MuiButtonBase-root standalone-selector--selector-multi-MuiIconButton-root standalone-selector--selector-multi-MuiAutocomplete-clearIndicator standalone-selector--selector-multi-CcBaseSelectorBase-clearIndicator-70"
                                                                                                             disabled={false}
                                                                                                             onBlur={[Function]}
@@ -7156,7 +7158,7 @@ exports[`Storyshots Standalone/Selector Multi 1`] = `
                                                                                                             onTouchMove={[Function]}
                                                                                                             onTouchStart={[Function]}
                                                                                                             tabIndex={-1}
-                                                                                                            title="Clear"
+                                                                                                            title="standalone.selector.base-selector.clear-icon-text"
                                                                                                             type="button"
                                                                                                           >
                                                                                                             <span
@@ -21351,6 +21353,7 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
                                                                   "tagSizeSmall": "standalone-selector--selector-multi-with-tags-CcBaseSelectorBase-tagSizeSmall-53",
                                                                 }
                                                               }
+                                                              clearText="standalone.selector.base-selector.clear-icon-text"
                                                               closeText="standalone.selector.base-selector.close-icon-text"
                                                               disabled={false}
                                                               filterOptions={[Function]}
@@ -21407,6 +21410,7 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
                                                                     "tagSizeSmall": "standalone-selector--selector-multi-with-tags-MuiAutocomplete-tagSizeSmall standalone-selector--selector-multi-with-tags-CcBaseSelectorBase-tagSizeSmall-53",
                                                                   }
                                                                 }
+                                                                clearText="standalone.selector.base-selector.clear-icon-text"
                                                                 closeText="standalone.selector.base-selector.close-icon-text"
                                                                 disabled={false}
                                                                 filterOptions={[Function]}
@@ -21448,11 +21452,11 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
                                                                         className="standalone-selector--selector-multi-with-tags-MuiAutocomplete-endAdornment standalone-selector--selector-multi-with-tags-CcBaseSelectorBase-endAdornment-57"
                                                                       >
                                                                         <WithStyles(ForwardRef(IconButton))
-                                                                          aria-label="Clear"
+                                                                          aria-label="standalone.selector.base-selector.clear-icon-text"
                                                                           className="standalone-selector--selector-multi-with-tags-MuiAutocomplete-clearIndicator standalone-selector--selector-multi-with-tags-CcBaseSelectorBase-clearIndicator-58"
                                                                           onClick={[Function]}
                                                                           tabIndex={-1}
-                                                                          title="Clear"
+                                                                          title="standalone.selector.base-selector.clear-icon-text"
                                                                         >
                                                                           <Memo
                                                                             fontSize="small"
@@ -21519,11 +21523,11 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
                                                                           className="standalone-selector--selector-multi-with-tags-MuiAutocomplete-endAdornment standalone-selector--selector-multi-with-tags-CcBaseSelectorBase-endAdornment-57"
                                                                         >
                                                                           <WithStyles(ForwardRef(IconButton))
-                                                                            aria-label="Clear"
+                                                                            aria-label="standalone.selector.base-selector.clear-icon-text"
                                                                             className="standalone-selector--selector-multi-with-tags-MuiAutocomplete-clearIndicator standalone-selector--selector-multi-with-tags-CcBaseSelectorBase-clearIndicator-58"
                                                                             onClick={[Function]}
                                                                             tabIndex={-1}
-                                                                            title="Clear"
+                                                                            title="standalone.selector.base-selector.clear-icon-text"
                                                                           >
                                                                             <Memo
                                                                               fontSize="small"
@@ -21602,11 +21606,11 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
                                                                             className="standalone-selector--selector-multi-with-tags-MuiAutocomplete-endAdornment standalone-selector--selector-multi-with-tags-CcBaseSelectorBase-endAdornment-57"
                                                                           >
                                                                             <WithStyles(ForwardRef(IconButton))
-                                                                              aria-label="Clear"
+                                                                              aria-label="standalone.selector.base-selector.clear-icon-text"
                                                                               className="standalone-selector--selector-multi-with-tags-MuiAutocomplete-clearIndicator standalone-selector--selector-multi-with-tags-CcBaseSelectorBase-clearIndicator-58"
                                                                               onClick={[Function]}
                                                                               tabIndex={-1}
-                                                                              title="Clear"
+                                                                              title="standalone.selector.base-selector.clear-icon-text"
                                                                             >
                                                                               <Memo
                                                                                 fontSize="small"
@@ -21685,11 +21689,11 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
                                                                               className="standalone-selector--selector-multi-with-tags-MuiAutocomplete-endAdornment standalone-selector--selector-multi-with-tags-CcBaseSelectorBase-endAdornment-57"
                                                                             >
                                                                               <WithStyles(ForwardRef(IconButton))
-                                                                                aria-label="Clear"
+                                                                                aria-label="standalone.selector.base-selector.clear-icon-text"
                                                                                 className="standalone-selector--selector-multi-with-tags-MuiAutocomplete-clearIndicator standalone-selector--selector-multi-with-tags-CcBaseSelectorBase-clearIndicator-58"
                                                                                 onClick={[Function]}
                                                                                 tabIndex={-1}
-                                                                                title="Clear"
+                                                                                title="standalone.selector.base-selector.clear-icon-text"
                                                                               >
                                                                                 <Memo
                                                                                   fontSize="small"
@@ -21775,11 +21779,11 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
                                                                                 className="standalone-selector--selector-multi-with-tags-MuiAutocomplete-endAdornment standalone-selector--selector-multi-with-tags-CcBaseSelectorBase-endAdornment-57"
                                                                               >
                                                                                 <WithStyles(ForwardRef(IconButton))
-                                                                                  aria-label="Clear"
+                                                                                  aria-label="standalone.selector.base-selector.clear-icon-text"
                                                                                   className="standalone-selector--selector-multi-with-tags-MuiAutocomplete-clearIndicator standalone-selector--selector-multi-with-tags-CcBaseSelectorBase-clearIndicator-58"
                                                                                   onClick={[Function]}
                                                                                   tabIndex={-1}
-                                                                                  title="Clear"
+                                                                                  title="standalone.selector.base-selector.clear-icon-text"
                                                                                 >
                                                                                   <Memo
                                                                                     fontSize="small"
@@ -21861,14 +21865,14 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
                                                                                 className="standalone-selector--selector-multi-with-tags-MuiAutocomplete-endAdornment standalone-selector--selector-multi-with-tags-CcBaseSelectorBase-endAdornment-57"
                                                                               >
                                                                                 <WithStyles(ForwardRef(IconButton))
-                                                                                  aria-label="Clear"
+                                                                                  aria-label="standalone.selector.base-selector.clear-icon-text"
                                                                                   className="standalone-selector--selector-multi-with-tags-MuiAutocomplete-clearIndicator standalone-selector--selector-multi-with-tags-CcBaseSelectorBase-clearIndicator-58"
                                                                                   onClick={[Function]}
                                                                                   tabIndex={-1}
-                                                                                  title="Clear"
+                                                                                  title="standalone.selector.base-selector.clear-icon-text"
                                                                                 >
                                                                                   <ForwardRef(IconButton)
-                                                                                    aria-label="Clear"
+                                                                                    aria-label="standalone.selector.base-selector.clear-icon-text"
                                                                                     className="standalone-selector--selector-multi-with-tags-MuiAutocomplete-clearIndicator standalone-selector--selector-multi-with-tags-CcBaseSelectorBase-clearIndicator-58"
                                                                                     classes={
                                                                                       Object {
@@ -21885,20 +21889,20 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
                                                                                     }
                                                                                     onClick={[Function]}
                                                                                     tabIndex={-1}
-                                                                                    title="Clear"
+                                                                                    title="standalone.selector.base-selector.clear-icon-text"
                                                                                   >
                                                                                     <WithStyles(ForwardRef(ButtonBase))
-                                                                                      aria-label="Clear"
+                                                                                      aria-label="standalone.selector.base-selector.clear-icon-text"
                                                                                       centerRipple={true}
                                                                                       className="standalone-selector--selector-multi-with-tags-MuiIconButton-root standalone-selector--selector-multi-with-tags-MuiAutocomplete-clearIndicator standalone-selector--selector-multi-with-tags-CcBaseSelectorBase-clearIndicator-58"
                                                                                       disabled={false}
                                                                                       focusRipple={true}
                                                                                       onClick={[Function]}
                                                                                       tabIndex={-1}
-                                                                                      title="Clear"
+                                                                                      title="standalone.selector.base-selector.clear-icon-text"
                                                                                     >
                                                                                       <ForwardRef(ButtonBase)
-                                                                                        aria-label="Clear"
+                                                                                        aria-label="standalone.selector.base-selector.clear-icon-text"
                                                                                         centerRipple={true}
                                                                                         className="standalone-selector--selector-multi-with-tags-MuiIconButton-root standalone-selector--selector-multi-with-tags-MuiAutocomplete-clearIndicator standalone-selector--selector-multi-with-tags-CcBaseSelectorBase-clearIndicator-58"
                                                                                         classes={
@@ -21912,10 +21916,10 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
                                                                                         focusRipple={true}
                                                                                         onClick={[Function]}
                                                                                         tabIndex={-1}
-                                                                                        title="Clear"
+                                                                                        title="standalone.selector.base-selector.clear-icon-text"
                                                                                       >
                                                                                         <button
-                                                                                          aria-label="Clear"
+                                                                                          aria-label="standalone.selector.base-selector.clear-icon-text"
                                                                                           className="standalone-selector--selector-multi-with-tags-MuiButtonBase-root standalone-selector--selector-multi-with-tags-MuiIconButton-root standalone-selector--selector-multi-with-tags-MuiAutocomplete-clearIndicator standalone-selector--selector-multi-with-tags-CcBaseSelectorBase-clearIndicator-58"
                                                                                           disabled={false}
                                                                                           onBlur={[Function]}
@@ -21931,7 +21935,7 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
                                                                                           onTouchMove={[Function]}
                                                                                           onTouchStart={[Function]}
                                                                                           tabIndex={-1}
-                                                                                          title="Clear"
+                                                                                          title="standalone.selector.base-selector.clear-icon-text"
                                                                                           type="button"
                                                                                         >
                                                                                           <span
@@ -22538,6 +22542,7 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
                                                                         "tagSizeSmall": "standalone-selector--selector-multi-with-tags-CcBaseSelectorBase-tagSizeSmall-53",
                                                                       }
                                                                     }
+                                                                    clearText="standalone.selector.base-selector.clear-icon-text"
                                                                     closeText="standalone.selector.base-selector.close-icon-text"
                                                                     filterOptions={[Function]}
                                                                     freeSolo={true}
@@ -22594,6 +22599,7 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
                                                                           "tagSizeSmall": "standalone-selector--selector-multi-with-tags-MuiAutocomplete-tagSizeSmall standalone-selector--selector-multi-with-tags-CcBaseSelectorBase-tagSizeSmall-53",
                                                                         }
                                                                       }
+                                                                      clearText="standalone.selector.base-selector.clear-icon-text"
                                                                       closeText="standalone.selector.base-selector.close-icon-text"
                                                                       filterOptions={[Function]}
                                                                       freeSolo={true}
@@ -22635,11 +22641,11 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
                                                                               className="standalone-selector--selector-multi-with-tags-MuiAutocomplete-endAdornment standalone-selector--selector-multi-with-tags-CcBaseSelectorBase-endAdornment-57"
                                                                             >
                                                                               <WithStyles(ForwardRef(IconButton))
-                                                                                aria-label="Clear"
+                                                                                aria-label="standalone.selector.base-selector.clear-icon-text"
                                                                                 className="standalone-selector--selector-multi-with-tags-MuiAutocomplete-clearIndicator standalone-selector--selector-multi-with-tags-CcBaseSelectorBase-clearIndicator-58"
                                                                                 onClick={[Function]}
                                                                                 tabIndex={-1}
-                                                                                title="Clear"
+                                                                                title="standalone.selector.base-selector.clear-icon-text"
                                                                               >
                                                                                 <Memo
                                                                                   fontSize="small"
@@ -22709,11 +22715,11 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
                                                                                 className="standalone-selector--selector-multi-with-tags-MuiAutocomplete-endAdornment standalone-selector--selector-multi-with-tags-CcBaseSelectorBase-endAdornment-57"
                                                                               >
                                                                                 <WithStyles(ForwardRef(IconButton))
-                                                                                  aria-label="Clear"
+                                                                                  aria-label="standalone.selector.base-selector.clear-icon-text"
                                                                                   className="standalone-selector--selector-multi-with-tags-MuiAutocomplete-clearIndicator standalone-selector--selector-multi-with-tags-CcBaseSelectorBase-clearIndicator-58"
                                                                                   onClick={[Function]}
                                                                                   tabIndex={-1}
-                                                                                  title="Clear"
+                                                                                  title="standalone.selector.base-selector.clear-icon-text"
                                                                                 >
                                                                                   <Memo
                                                                                     fontSize="small"
@@ -22794,11 +22800,11 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
                                                                                   className="standalone-selector--selector-multi-with-tags-MuiAutocomplete-endAdornment standalone-selector--selector-multi-with-tags-CcBaseSelectorBase-endAdornment-57"
                                                                                 >
                                                                                   <WithStyles(ForwardRef(IconButton))
-                                                                                    aria-label="Clear"
+                                                                                    aria-label="standalone.selector.base-selector.clear-icon-text"
                                                                                     className="standalone-selector--selector-multi-with-tags-MuiAutocomplete-clearIndicator standalone-selector--selector-multi-with-tags-CcBaseSelectorBase-clearIndicator-58"
                                                                                     onClick={[Function]}
                                                                                     tabIndex={-1}
-                                                                                    title="Clear"
+                                                                                    title="standalone.selector.base-selector.clear-icon-text"
                                                                                   >
                                                                                     <Memo
                                                                                       fontSize="small"
@@ -22879,11 +22885,11 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
                                                                                     className="standalone-selector--selector-multi-with-tags-MuiAutocomplete-endAdornment standalone-selector--selector-multi-with-tags-CcBaseSelectorBase-endAdornment-57"
                                                                                   >
                                                                                     <WithStyles(ForwardRef(IconButton))
-                                                                                      aria-label="Clear"
+                                                                                      aria-label="standalone.selector.base-selector.clear-icon-text"
                                                                                       className="standalone-selector--selector-multi-with-tags-MuiAutocomplete-clearIndicator standalone-selector--selector-multi-with-tags-CcBaseSelectorBase-clearIndicator-58"
                                                                                       onClick={[Function]}
                                                                                       tabIndex={-1}
-                                                                                      title="Clear"
+                                                                                      title="standalone.selector.base-selector.clear-icon-text"
                                                                                     >
                                                                                       <Memo
                                                                                         fontSize="small"
@@ -22971,11 +22977,11 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
                                                                                       className="standalone-selector--selector-multi-with-tags-MuiAutocomplete-endAdornment standalone-selector--selector-multi-with-tags-CcBaseSelectorBase-endAdornment-57"
                                                                                     >
                                                                                       <WithStyles(ForwardRef(IconButton))
-                                                                                        aria-label="Clear"
+                                                                                        aria-label="standalone.selector.base-selector.clear-icon-text"
                                                                                         className="standalone-selector--selector-multi-with-tags-MuiAutocomplete-clearIndicator standalone-selector--selector-multi-with-tags-CcBaseSelectorBase-clearIndicator-58"
                                                                                         onClick={[Function]}
                                                                                         tabIndex={-1}
-                                                                                        title="Clear"
+                                                                                        title="standalone.selector.base-selector.clear-icon-text"
                                                                                       >
                                                                                         <Memo
                                                                                           fontSize="small"
@@ -23094,14 +23100,14 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
                                                                                       className="standalone-selector--selector-multi-with-tags-MuiAutocomplete-endAdornment standalone-selector--selector-multi-with-tags-CcBaseSelectorBase-endAdornment-57"
                                                                                     >
                                                                                       <WithStyles(ForwardRef(IconButton))
-                                                                                        aria-label="Clear"
+                                                                                        aria-label="standalone.selector.base-selector.clear-icon-text"
                                                                                         className="standalone-selector--selector-multi-with-tags-MuiAutocomplete-clearIndicator standalone-selector--selector-multi-with-tags-CcBaseSelectorBase-clearIndicator-58"
                                                                                         onClick={[Function]}
                                                                                         tabIndex={-1}
-                                                                                        title="Clear"
+                                                                                        title="standalone.selector.base-selector.clear-icon-text"
                                                                                       >
                                                                                         <ForwardRef(IconButton)
-                                                                                          aria-label="Clear"
+                                                                                          aria-label="standalone.selector.base-selector.clear-icon-text"
                                                                                           className="standalone-selector--selector-multi-with-tags-MuiAutocomplete-clearIndicator standalone-selector--selector-multi-with-tags-CcBaseSelectorBase-clearIndicator-58"
                                                                                           classes={
                                                                                             Object {
@@ -23118,20 +23124,20 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
                                                                                           }
                                                                                           onClick={[Function]}
                                                                                           tabIndex={-1}
-                                                                                          title="Clear"
+                                                                                          title="standalone.selector.base-selector.clear-icon-text"
                                                                                         >
                                                                                           <WithStyles(ForwardRef(ButtonBase))
-                                                                                            aria-label="Clear"
+                                                                                            aria-label="standalone.selector.base-selector.clear-icon-text"
                                                                                             centerRipple={true}
                                                                                             className="standalone-selector--selector-multi-with-tags-MuiIconButton-root standalone-selector--selector-multi-with-tags-MuiAutocomplete-clearIndicator standalone-selector--selector-multi-with-tags-CcBaseSelectorBase-clearIndicator-58"
                                                                                             disabled={false}
                                                                                             focusRipple={true}
                                                                                             onClick={[Function]}
                                                                                             tabIndex={-1}
-                                                                                            title="Clear"
+                                                                                            title="standalone.selector.base-selector.clear-icon-text"
                                                                                           >
                                                                                             <ForwardRef(ButtonBase)
-                                                                                              aria-label="Clear"
+                                                                                              aria-label="standalone.selector.base-selector.clear-icon-text"
                                                                                               centerRipple={true}
                                                                                               className="standalone-selector--selector-multi-with-tags-MuiIconButton-root standalone-selector--selector-multi-with-tags-MuiAutocomplete-clearIndicator standalone-selector--selector-multi-with-tags-CcBaseSelectorBase-clearIndicator-58"
                                                                                               classes={
@@ -23145,10 +23151,10 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
                                                                                               focusRipple={true}
                                                                                               onClick={[Function]}
                                                                                               tabIndex={-1}
-                                                                                              title="Clear"
+                                                                                              title="standalone.selector.base-selector.clear-icon-text"
                                                                                             >
                                                                                               <button
-                                                                                                aria-label="Clear"
+                                                                                                aria-label="standalone.selector.base-selector.clear-icon-text"
                                                                                                 className="standalone-selector--selector-multi-with-tags-MuiButtonBase-root standalone-selector--selector-multi-with-tags-MuiIconButton-root standalone-selector--selector-multi-with-tags-MuiAutocomplete-clearIndicator standalone-selector--selector-multi-with-tags-CcBaseSelectorBase-clearIndicator-58"
                                                                                                 disabled={false}
                                                                                                 onBlur={[Function]}
@@ -23164,7 +23170,7 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
                                                                                                 onTouchMove={[Function]}
                                                                                                 onTouchStart={[Function]}
                                                                                                 tabIndex={-1}
-                                                                                                title="Clear"
+                                                                                                title="standalone.selector.base-selector.clear-icon-text"
                                                                                                 type="button"
                                                                                               >
                                                                                                 <span
@@ -29850,6 +29856,7 @@ exports[`Storyshots Standalone/Selector MultiWithoutGroup 1`] = `
                                                                     "tagSizeSmall": "standalone-selector--multi-without-group-CcBaseSelectorBase-tagSizeSmall-59",
                                                                   }
                                                                 }
+                                                                clearText="standalone.selector.base-selector.clear-icon-text"
                                                                 closeText="standalone.selector.base-selector.close-icon-text"
                                                                 filterOptions={[Function]}
                                                                 freeSolo={true}
@@ -29906,6 +29913,7 @@ exports[`Storyshots Standalone/Selector MultiWithoutGroup 1`] = `
                                                                       "tagSizeSmall": "standalone-selector--multi-without-group-MuiAutocomplete-tagSizeSmall standalone-selector--multi-without-group-CcBaseSelectorBase-tagSizeSmall-59",
                                                                     }
                                                                   }
+                                                                  clearText="standalone.selector.base-selector.clear-icon-text"
                                                                   closeText="standalone.selector.base-selector.close-icon-text"
                                                                   filterOptions={[Function]}
                                                                   freeSolo={true}
@@ -29947,11 +29955,11 @@ exports[`Storyshots Standalone/Selector MultiWithoutGroup 1`] = `
                                                                           className="standalone-selector--multi-without-group-MuiAutocomplete-endAdornment standalone-selector--multi-without-group-CcBaseSelectorBase-endAdornment-63"
                                                                         >
                                                                           <WithStyles(ForwardRef(IconButton))
-                                                                            aria-label="Clear"
+                                                                            aria-label="standalone.selector.base-selector.clear-icon-text"
                                                                             className="standalone-selector--multi-without-group-MuiAutocomplete-clearIndicator standalone-selector--multi-without-group-CcBaseSelectorBase-clearIndicator-64"
                                                                             onClick={[Function]}
                                                                             tabIndex={-1}
-                                                                            title="Clear"
+                                                                            title="standalone.selector.base-selector.clear-icon-text"
                                                                           >
                                                                             <Memo
                                                                               fontSize="small"
@@ -30021,11 +30029,11 @@ exports[`Storyshots Standalone/Selector MultiWithoutGroup 1`] = `
                                                                             className="standalone-selector--multi-without-group-MuiAutocomplete-endAdornment standalone-selector--multi-without-group-CcBaseSelectorBase-endAdornment-63"
                                                                           >
                                                                             <WithStyles(ForwardRef(IconButton))
-                                                                              aria-label="Clear"
+                                                                              aria-label="standalone.selector.base-selector.clear-icon-text"
                                                                               className="standalone-selector--multi-without-group-MuiAutocomplete-clearIndicator standalone-selector--multi-without-group-CcBaseSelectorBase-clearIndicator-64"
                                                                               onClick={[Function]}
                                                                               tabIndex={-1}
-                                                                              title="Clear"
+                                                                              title="standalone.selector.base-selector.clear-icon-text"
                                                                             >
                                                                               <Memo
                                                                                 fontSize="small"
@@ -30106,11 +30114,11 @@ exports[`Storyshots Standalone/Selector MultiWithoutGroup 1`] = `
                                                                               className="standalone-selector--multi-without-group-MuiAutocomplete-endAdornment standalone-selector--multi-without-group-CcBaseSelectorBase-endAdornment-63"
                                                                             >
                                                                               <WithStyles(ForwardRef(IconButton))
-                                                                                aria-label="Clear"
+                                                                                aria-label="standalone.selector.base-selector.clear-icon-text"
                                                                                 className="standalone-selector--multi-without-group-MuiAutocomplete-clearIndicator standalone-selector--multi-without-group-CcBaseSelectorBase-clearIndicator-64"
                                                                                 onClick={[Function]}
                                                                                 tabIndex={-1}
-                                                                                title="Clear"
+                                                                                title="standalone.selector.base-selector.clear-icon-text"
                                                                               >
                                                                                 <Memo
                                                                                   fontSize="small"
@@ -30191,11 +30199,11 @@ exports[`Storyshots Standalone/Selector MultiWithoutGroup 1`] = `
                                                                                 className="standalone-selector--multi-without-group-MuiAutocomplete-endAdornment standalone-selector--multi-without-group-CcBaseSelectorBase-endAdornment-63"
                                                                               >
                                                                                 <WithStyles(ForwardRef(IconButton))
-                                                                                  aria-label="Clear"
+                                                                                  aria-label="standalone.selector.base-selector.clear-icon-text"
                                                                                   className="standalone-selector--multi-without-group-MuiAutocomplete-clearIndicator standalone-selector--multi-without-group-CcBaseSelectorBase-clearIndicator-64"
                                                                                   onClick={[Function]}
                                                                                   tabIndex={-1}
-                                                                                  title="Clear"
+                                                                                  title="standalone.selector.base-selector.clear-icon-text"
                                                                                 >
                                                                                   <Memo
                                                                                     fontSize="small"
@@ -30283,11 +30291,11 @@ exports[`Storyshots Standalone/Selector MultiWithoutGroup 1`] = `
                                                                                   className="standalone-selector--multi-without-group-MuiAutocomplete-endAdornment standalone-selector--multi-without-group-CcBaseSelectorBase-endAdornment-63"
                                                                                 >
                                                                                   <WithStyles(ForwardRef(IconButton))
-                                                                                    aria-label="Clear"
+                                                                                    aria-label="standalone.selector.base-selector.clear-icon-text"
                                                                                     className="standalone-selector--multi-without-group-MuiAutocomplete-clearIndicator standalone-selector--multi-without-group-CcBaseSelectorBase-clearIndicator-64"
                                                                                     onClick={[Function]}
                                                                                     tabIndex={-1}
-                                                                                    title="Clear"
+                                                                                    title="standalone.selector.base-selector.clear-icon-text"
                                                                                   >
                                                                                     <Memo
                                                                                       fontSize="small"
@@ -30406,14 +30414,14 @@ exports[`Storyshots Standalone/Selector MultiWithoutGroup 1`] = `
                                                                                   className="standalone-selector--multi-without-group-MuiAutocomplete-endAdornment standalone-selector--multi-without-group-CcBaseSelectorBase-endAdornment-63"
                                                                                 >
                                                                                   <WithStyles(ForwardRef(IconButton))
-                                                                                    aria-label="Clear"
+                                                                                    aria-label="standalone.selector.base-selector.clear-icon-text"
                                                                                     className="standalone-selector--multi-without-group-MuiAutocomplete-clearIndicator standalone-selector--multi-without-group-CcBaseSelectorBase-clearIndicator-64"
                                                                                     onClick={[Function]}
                                                                                     tabIndex={-1}
-                                                                                    title="Clear"
+                                                                                    title="standalone.selector.base-selector.clear-icon-text"
                                                                                   >
                                                                                     <ForwardRef(IconButton)
-                                                                                      aria-label="Clear"
+                                                                                      aria-label="standalone.selector.base-selector.clear-icon-text"
                                                                                       className="standalone-selector--multi-without-group-MuiAutocomplete-clearIndicator standalone-selector--multi-without-group-CcBaseSelectorBase-clearIndicator-64"
                                                                                       classes={
                                                                                         Object {
@@ -30430,20 +30438,20 @@ exports[`Storyshots Standalone/Selector MultiWithoutGroup 1`] = `
                                                                                       }
                                                                                       onClick={[Function]}
                                                                                       tabIndex={-1}
-                                                                                      title="Clear"
+                                                                                      title="standalone.selector.base-selector.clear-icon-text"
                                                                                     >
                                                                                       <WithStyles(ForwardRef(ButtonBase))
-                                                                                        aria-label="Clear"
+                                                                                        aria-label="standalone.selector.base-selector.clear-icon-text"
                                                                                         centerRipple={true}
                                                                                         className="standalone-selector--multi-without-group-MuiIconButton-root standalone-selector--multi-without-group-MuiAutocomplete-clearIndicator standalone-selector--multi-without-group-CcBaseSelectorBase-clearIndicator-64"
                                                                                         disabled={false}
                                                                                         focusRipple={true}
                                                                                         onClick={[Function]}
                                                                                         tabIndex={-1}
-                                                                                        title="Clear"
+                                                                                        title="standalone.selector.base-selector.clear-icon-text"
                                                                                       >
                                                                                         <ForwardRef(ButtonBase)
-                                                                                          aria-label="Clear"
+                                                                                          aria-label="standalone.selector.base-selector.clear-icon-text"
                                                                                           centerRipple={true}
                                                                                           className="standalone-selector--multi-without-group-MuiIconButton-root standalone-selector--multi-without-group-MuiAutocomplete-clearIndicator standalone-selector--multi-without-group-CcBaseSelectorBase-clearIndicator-64"
                                                                                           classes={
@@ -30457,10 +30465,10 @@ exports[`Storyshots Standalone/Selector MultiWithoutGroup 1`] = `
                                                                                           focusRipple={true}
                                                                                           onClick={[Function]}
                                                                                           tabIndex={-1}
-                                                                                          title="Clear"
+                                                                                          title="standalone.selector.base-selector.clear-icon-text"
                                                                                         >
                                                                                           <button
-                                                                                            aria-label="Clear"
+                                                                                            aria-label="standalone.selector.base-selector.clear-icon-text"
                                                                                             className="standalone-selector--multi-without-group-MuiButtonBase-root standalone-selector--multi-without-group-MuiIconButton-root standalone-selector--multi-without-group-MuiAutocomplete-clearIndicator standalone-selector--multi-without-group-CcBaseSelectorBase-clearIndicator-64"
                                                                                             disabled={false}
                                                                                             onBlur={[Function]}
@@ -30476,7 +30484,7 @@ exports[`Storyshots Standalone/Selector MultiWithoutGroup 1`] = `
                                                                                             onTouchMove={[Function]}
                                                                                             onTouchStart={[Function]}
                                                                                             tabIndex={-1}
-                                                                                            title="Clear"
+                                                                                            title="standalone.selector.base-selector.clear-icon-text"
                                                                                             type="button"
                                                                                           >
                                                                                             <span
@@ -37770,6 +37778,7 @@ exports[`Storyshots Standalone/Selector Single 1`] = `
                                                                         "tagSizeSmall": "standalone-selector--selector-single-CcBaseSelectorBase-tagSizeSmall-48",
                                                                       }
                                                                     }
+                                                                    clearText="standalone.selector.base-selector.clear-icon-text"
                                                                     closeText="standalone.selector.base-selector.close-icon-text"
                                                                     disableClearable={false}
                                                                     disabled={false}
@@ -37828,6 +37837,7 @@ exports[`Storyshots Standalone/Selector Single 1`] = `
                                                                           "tagSizeSmall": "standalone-selector--selector-single-MuiAutocomplete-tagSizeSmall standalone-selector--selector-single-CcBaseSelectorBase-tagSizeSmall-48",
                                                                         }
                                                                       }
+                                                                      clearText="standalone.selector.base-selector.clear-icon-text"
                                                                       closeText="standalone.selector.base-selector.close-icon-text"
                                                                       disableClearable={false}
                                                                       disabled={false}
@@ -37871,11 +37881,11 @@ exports[`Storyshots Standalone/Selector Single 1`] = `
                                                                               className="standalone-selector--selector-single-MuiAutocomplete-endAdornment standalone-selector--selector-single-CcBaseSelectorBase-endAdornment-52"
                                                                             >
                                                                               <WithStyles(ForwardRef(IconButton))
-                                                                                aria-label="Clear"
+                                                                                aria-label="standalone.selector.base-selector.clear-icon-text"
                                                                                 className="standalone-selector--selector-single-MuiAutocomplete-clearIndicator standalone-selector--selector-single-CcBaseSelectorBase-clearIndicator-53"
                                                                                 onClick={[Function]}
                                                                                 tabIndex={-1}
-                                                                                title="Clear"
+                                                                                title="standalone.selector.base-selector.clear-icon-text"
                                                                               >
                                                                                 <Memo
                                                                                   fontSize="small"
@@ -37954,11 +37964,11 @@ exports[`Storyshots Standalone/Selector Single 1`] = `
                                                                                 className="standalone-selector--selector-single-MuiAutocomplete-endAdornment standalone-selector--selector-single-CcBaseSelectorBase-endAdornment-52"
                                                                               >
                                                                                 <WithStyles(ForwardRef(IconButton))
-                                                                                  aria-label="Clear"
+                                                                                  aria-label="standalone.selector.base-selector.clear-icon-text"
                                                                                   className="standalone-selector--selector-single-MuiAutocomplete-clearIndicator standalone-selector--selector-single-CcBaseSelectorBase-clearIndicator-53"
                                                                                   onClick={[Function]}
                                                                                   tabIndex={-1}
-                                                                                  title="Clear"
+                                                                                  title="standalone.selector.base-selector.clear-icon-text"
                                                                                 >
                                                                                   <Memo
                                                                                     fontSize="small"
@@ -38049,11 +38059,11 @@ exports[`Storyshots Standalone/Selector Single 1`] = `
                                                                                   className="standalone-selector--selector-single-MuiAutocomplete-endAdornment standalone-selector--selector-single-CcBaseSelectorBase-endAdornment-52"
                                                                                 >
                                                                                   <WithStyles(ForwardRef(IconButton))
-                                                                                    aria-label="Clear"
+                                                                                    aria-label="standalone.selector.base-selector.clear-icon-text"
                                                                                     className="standalone-selector--selector-single-MuiAutocomplete-clearIndicator standalone-selector--selector-single-CcBaseSelectorBase-clearIndicator-53"
                                                                                     onClick={[Function]}
                                                                                     tabIndex={-1}
-                                                                                    title="Clear"
+                                                                                    title="standalone.selector.base-selector.clear-icon-text"
                                                                                   >
                                                                                     <Memo
                                                                                       fontSize="small"
@@ -38144,11 +38154,11 @@ exports[`Storyshots Standalone/Selector Single 1`] = `
                                                                                     className="standalone-selector--selector-single-MuiAutocomplete-endAdornment standalone-selector--selector-single-CcBaseSelectorBase-endAdornment-52"
                                                                                   >
                                                                                     <WithStyles(ForwardRef(IconButton))
-                                                                                      aria-label="Clear"
+                                                                                      aria-label="standalone.selector.base-selector.clear-icon-text"
                                                                                       className="standalone-selector--selector-single-MuiAutocomplete-clearIndicator standalone-selector--selector-single-CcBaseSelectorBase-clearIndicator-53"
                                                                                       onClick={[Function]}
                                                                                       tabIndex={-1}
-                                                                                      title="Clear"
+                                                                                      title="standalone.selector.base-selector.clear-icon-text"
                                                                                     >
                                                                                       <Memo
                                                                                         fontSize="small"
@@ -38246,11 +38256,11 @@ exports[`Storyshots Standalone/Selector Single 1`] = `
                                                                                       className="standalone-selector--selector-single-MuiAutocomplete-endAdornment standalone-selector--selector-single-CcBaseSelectorBase-endAdornment-52"
                                                                                     >
                                                                                       <WithStyles(ForwardRef(IconButton))
-                                                                                        aria-label="Clear"
+                                                                                        aria-label="standalone.selector.base-selector.clear-icon-text"
                                                                                         className="standalone-selector--selector-single-MuiAutocomplete-clearIndicator standalone-selector--selector-single-CcBaseSelectorBase-clearIndicator-53"
                                                                                         onClick={[Function]}
                                                                                         tabIndex={-1}
-                                                                                        title="Clear"
+                                                                                        title="standalone.selector.base-selector.clear-icon-text"
                                                                                       >
                                                                                         <Memo
                                                                                           fontSize="small"
@@ -38348,14 +38358,14 @@ exports[`Storyshots Standalone/Selector Single 1`] = `
                                                                                       className="standalone-selector--selector-single-MuiAutocomplete-endAdornment standalone-selector--selector-single-CcBaseSelectorBase-endAdornment-52"
                                                                                     >
                                                                                       <WithStyles(ForwardRef(IconButton))
-                                                                                        aria-label="Clear"
+                                                                                        aria-label="standalone.selector.base-selector.clear-icon-text"
                                                                                         className="standalone-selector--selector-single-MuiAutocomplete-clearIndicator standalone-selector--selector-single-CcBaseSelectorBase-clearIndicator-53"
                                                                                         onClick={[Function]}
                                                                                         tabIndex={-1}
-                                                                                        title="Clear"
+                                                                                        title="standalone.selector.base-selector.clear-icon-text"
                                                                                       >
                                                                                         <ForwardRef(IconButton)
-                                                                                          aria-label="Clear"
+                                                                                          aria-label="standalone.selector.base-selector.clear-icon-text"
                                                                                           className="standalone-selector--selector-single-MuiAutocomplete-clearIndicator standalone-selector--selector-single-CcBaseSelectorBase-clearIndicator-53"
                                                                                           classes={
                                                                                             Object {
@@ -38372,20 +38382,20 @@ exports[`Storyshots Standalone/Selector Single 1`] = `
                                                                                           }
                                                                                           onClick={[Function]}
                                                                                           tabIndex={-1}
-                                                                                          title="Clear"
+                                                                                          title="standalone.selector.base-selector.clear-icon-text"
                                                                                         >
                                                                                           <WithStyles(ForwardRef(ButtonBase))
-                                                                                            aria-label="Clear"
+                                                                                            aria-label="standalone.selector.base-selector.clear-icon-text"
                                                                                             centerRipple={true}
                                                                                             className="standalone-selector--selector-single-MuiIconButton-root standalone-selector--selector-single-MuiAutocomplete-clearIndicator standalone-selector--selector-single-CcBaseSelectorBase-clearIndicator-53"
                                                                                             disabled={false}
                                                                                             focusRipple={true}
                                                                                             onClick={[Function]}
                                                                                             tabIndex={-1}
-                                                                                            title="Clear"
+                                                                                            title="standalone.selector.base-selector.clear-icon-text"
                                                                                           >
                                                                                             <ForwardRef(ButtonBase)
-                                                                                              aria-label="Clear"
+                                                                                              aria-label="standalone.selector.base-selector.clear-icon-text"
                                                                                               centerRipple={true}
                                                                                               className="standalone-selector--selector-single-MuiIconButton-root standalone-selector--selector-single-MuiAutocomplete-clearIndicator standalone-selector--selector-single-CcBaseSelectorBase-clearIndicator-53"
                                                                                               classes={
@@ -38399,10 +38409,10 @@ exports[`Storyshots Standalone/Selector Single 1`] = `
                                                                                               focusRipple={true}
                                                                                               onClick={[Function]}
                                                                                               tabIndex={-1}
-                                                                                              title="Clear"
+                                                                                              title="standalone.selector.base-selector.clear-icon-text"
                                                                                             >
                                                                                               <button
-                                                                                                aria-label="Clear"
+                                                                                                aria-label="standalone.selector.base-selector.clear-icon-text"
                                                                                                 className="standalone-selector--selector-single-MuiButtonBase-root standalone-selector--selector-single-MuiIconButton-root standalone-selector--selector-single-MuiAutocomplete-clearIndicator standalone-selector--selector-single-CcBaseSelectorBase-clearIndicator-53"
                                                                                                 disabled={false}
                                                                                                 onBlur={[Function]}
@@ -38418,7 +38428,7 @@ exports[`Storyshots Standalone/Selector Single 1`] = `
                                                                                                 onTouchMove={[Function]}
                                                                                                 onTouchStart={[Function]}
                                                                                                 tabIndex={-1}
-                                                                                                title="Clear"
+                                                                                                title="standalone.selector.base-selector.clear-icon-text"
                                                                                                 type="button"
                                                                                               >
                                                                                                 <span

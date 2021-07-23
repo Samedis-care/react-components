@@ -180,6 +180,10 @@ export interface BaseSelectorProps<DataT extends BaseSelectorData>
 	 */
 	openText?: string;
 	/**
+	 * Label which is shown for the clear selected icon
+	 */
+	clearText?: string;
+	/**
 	 * Is the selector clearable?
 	 */
 	disableClearable?: boolean;
@@ -393,6 +397,7 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 		startTypingToSearchText,
 		openText,
 		closeText,
+		clearText,
 		disableClearable,
 		openInfo,
 		grouped,
@@ -690,6 +695,10 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 						closeText={
 							closeText ??
 							t("standalone.selector.base-selector.close-icon-text")
+						}
+						clearText={
+							clearText ??
+							t("standalone.selector.base-selector.clear-icon-text")
 						}
 						getOptionLabel={(option: BaseSelectorData) => option.label}
 						renderOption={(option: BaseSelectorData) => defaultRenderer(option)}
