@@ -83,7 +83,8 @@
 				"close-icon-text": "Schließen",
 				"open-icon-text": "Öffnen",
 				"loading-text": "Lade...",
-				"start-typing-to-search-text": "Geben Sie eine Suchzeichenfolge ein, um Ergebnisse zu erhalten"
+				"start-typing-to-search-text": "Geben Sie eine Suchzeichenfolge ein, um Ergebnisse zu erhalten",
+				"clear-icon-text": "Leeren"
 			}
 		},
 		"schedule": {
