@@ -17,12 +17,12 @@ export interface DataActionBarViewProps {
 	 * Callback for edit button.
 	 * If not defined: Disables edit button
 	 */
-	handleEdit?: () => void;
+	handleEdit?: React.MouseEventHandler;
 	/**
 	 * Callback for delete button.
 	 * If not defined: Disables delete button
 	 */
-	handleDelete?: () => void;
+	handleDelete?: React.MouseEventHandler;
 	/**
 	 * @see DataGridProps.customDataActionButtons
 	 */
@@ -118,7 +118,10 @@ const DataActionBarView = (props: DataActionBarViewProps) => {
 								</SmallIconButton>
 							}
 							labelText={entry.label}
-							onClick={() => props.handleCustomButtonClick(entry.label)}
+							onClick={(evt: React.MouseEvent) => {
+								evt.stopPropagation();
+								props.handleCustomButtonClick(entry.label);
+							}}
 							labelPlacement={"bottom"}
 							disabled={entry.isDisabled(props.numSelected)}
 						/>
