@@ -89,6 +89,7 @@
 				"no-options-text": "No options",
 				"close-icon-text": "Close",
 				"open-icon-text": "Open",
+				"clear-icon-text": "Clear",
 				"loading-text": "Loading...",
 				"start-typing-to-search-text": "Enter a search string to get results"
 			}
