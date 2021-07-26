@@ -7,7 +7,8 @@
 				"close-icon-text": "Закрыть",
 				"open-icon-text": "Открыть",
 				"loading-text": "Загрузка...",
-				"start-typing-to-search-text": "Введите строку поиска, чтобы получить результаты"
+				"start-typing-to-search-text": "Введите строку поиска, чтобы получить результаты",
+				"clear-icon-text": "Опустошать"
 			}
 		},
 		"schedule": {
