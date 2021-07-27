@@ -26,6 +26,14 @@ const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(
 	const inputClasses = useInputStyles({ important });
 	const [value, setValue] = useState(muiProps.value);
 
+	const isTouchDevice = useCallback(() => {
+		return (
+			"ontouchstart" in window ||
+			navigator.maxTouchPoints > 0 ||
+			navigator.msMaxTouchPoints > 0
+		);
+	}, []);
+
 	const handleChange = useCallback(
 		(evt: React.ChangeEvent<HTMLInputElement>) => {
 			setValue(evt.target.value);
@@ -47,7 +55,7 @@ const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(
 				...muiProps.InputProps,
 				endAdornment: (
 					<>
-						{value && (
+						{isTouchDevice() && value && (
 							<InputAdornment position={"end"}>
 								<IconButton onClick={clearValue}>
 									<ClearIcon />
