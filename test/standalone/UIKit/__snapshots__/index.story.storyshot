@@ -65221,6 +65221,7 @@ exports[`Storyshots Standalone/UIKit TextAreaWithHelp 1`] = `
                                     fullWidth={true}
                                     label="FieldName"
                                     multiline={true}
+                                    onChange={[Function]}
                                     placeholder="Enter something here"
                                     variant="outlined"
                                   >
@@ -65260,6 +65261,7 @@ exports[`Storyshots Standalone/UIKit TextAreaWithHelp 1`] = `
                                       fullWidth={true}
                                       label="FieldName"
                                       multiline={true}
+                                      onChange={[Function]}
                                       placeholder="Enter something here"
                                       variant="outlined"
                                     >
@@ -65385,6 +65387,7 @@ exports[`Storyshots Standalone/UIKit TextAreaWithHelp 1`] = `
                                               }
                                               multiline={true}
                                               notched={true}
+                                              onChange={[Function]}
                                               placeholder="Enter something here"
                                             >
                                               <ForwardRef(OutlinedInput)
@@ -65431,6 +65434,7 @@ exports[`Storyshots Standalone/UIKit TextAreaWithHelp 1`] = `
                                                 }
                                                 multiline={true}
                                                 notched={true}
+                                                onChange={[Function]}
                                                 placeholder="Enter something here"
                                               >
                                                 <WithStyles(ForwardRef(InputBase))
@@ -65472,6 +65476,7 @@ exports[`Storyshots Standalone/UIKit TextAreaWithHelp 1`] = `
                                                   fullWidth={true}
                                                   inputComponent="input"
                                                   multiline={true}
+                                                  onChange={[Function]}
                                                   placeholder="Enter something here"
                                                   renderSuffix={[Function]}
                                                   type="text"
@@ -65518,6 +65523,7 @@ exports[`Storyshots Standalone/UIKit TextAreaWithHelp 1`] = `
                                                     fullWidth={true}
                                                     inputComponent="input"
                                                     multiline={true}
+                                                    onChange={[Function]}
                                                     placeholder="Enter something here"
                                                     renderSuffix={[Function]}
                                                     type="text"
@@ -71843,6 +71849,7 @@ exports[`Storyshots Standalone/UIKit TextFieldWithHelp 1`] = `
                                     }
                                     fullWidth={true}
                                     label="FieldName"
+                                    onChange={[Function]}
                                     placeholder="Enter something here"
                                   >
                                     <ForwardRef(TextField)
@@ -71880,6 +71887,7 @@ exports[`Storyshots Standalone/UIKit TextFieldWithHelp 1`] = `
                                       }
                                       fullWidth={true}
                                       label="FieldName"
+                                      onChange={[Function]}
                                       placeholder="Enter something here"
                                     >
                                       <WithStyles(ForwardRef(FormControl))
@@ -71998,6 +72006,7 @@ exports[`Storyshots Standalone/UIKit TextFieldWithHelp 1`] = `
                                               }
                                               fullWidth={true}
                                               multiline={false}
+                                              onChange={[Function]}
                                               placeholder="Enter something here"
                                             >
                                               <ForwardRef(Input)
@@ -72037,6 +72046,7 @@ exports[`Storyshots Standalone/UIKit TextFieldWithHelp 1`] = `
                                                 }
                                                 fullWidth={true}
                                                 multiline={false}
+                                                onChange={[Function]}
                                                 placeholder="Enter something here"
                                               >
                                                 <WithStyles(ForwardRef(InputBase))
@@ -72077,6 +72087,7 @@ exports[`Storyshots Standalone/UIKit TextFieldWithHelp 1`] = `
                                                   fullWidth={true}
                                                   inputComponent="input"
                                                   multiline={false}
+                                                  onChange={[Function]}
                                                   placeholder="Enter something here"
                                                   type="text"
                                                 >
@@ -72122,6 +72133,7 @@ exports[`Storyshots Standalone/UIKit TextFieldWithHelp 1`] = `
                                                     fullWidth={true}
                                                     inputComponent="input"
                                                     multiline={false}
+                                                    onChange={[Function]}
                                                     placeholder="Enter something here"
                                                     type="text"
                                                   >

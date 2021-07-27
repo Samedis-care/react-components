@@ -6057,6 +6057,7 @@ exports[`Storyshots Standalone/UIKit/InputControls CurrencyInput 1`] = `
                                               "root": "standalone-uikit-inputcontrols--currency-input-story-CcUIKitInput-root-5",
                                             },
                                             "endAdornment": <React.Fragment>
+                                              
                                               <WithStyles(ForwardRef(InputAdornment))
                                                 position="end"
                                               >
@@ -6106,6 +6107,7 @@ exports[`Storyshots Standalone/UIKit/InputControls CurrencyInput 1`] = `
                                                 "root": "standalone-uikit-inputcontrols--currency-input-story-CcUIKitInput-root-5",
                                               },
                                               "endAdornment": <React.Fragment>
+                                                
                                                 <WithStyles(ForwardRef(InputAdornment))
                                                   position="end"
                                                 >
@@ -6247,6 +6249,7 @@ exports[`Storyshots Standalone/UIKit/InputControls CurrencyInput 1`] = `
                                                   }
                                                   endAdornment={
                                                     <React.Fragment>
+                                                      
                                                       <WithStyles(ForwardRef(InputAdornment))
                                                         position="end"
                                                       >
@@ -6301,6 +6304,7 @@ exports[`Storyshots Standalone/UIKit/InputControls CurrencyInput 1`] = `
                                                     }
                                                     endAdornment={
                                                       <React.Fragment>
+                                                        
                                                         <WithStyles(ForwardRef(InputAdornment))
                                                           position="end"
                                                         >
@@ -6355,6 +6359,7 @@ exports[`Storyshots Standalone/UIKit/InputControls CurrencyInput 1`] = `
                                                       }
                                                       endAdornment={
                                                         <React.Fragment>
+                                                          
                                                           <WithStyles(ForwardRef(InputAdornment))
                                                             position="end"
                                                           >
@@ -6415,6 +6420,7 @@ exports[`Storyshots Standalone/UIKit/InputControls CurrencyInput 1`] = `
                                                         }
                                                         endAdornment={
                                                           <React.Fragment>
+                                                            
                                                             <WithStyles(ForwardRef(InputAdornment))
                                                               position="end"
                                                             >
@@ -12942,6 +12948,7 @@ exports[`Storyshots Standalone/UIKit/InputControls DateInput 1`] = `
                                                           "root": "standalone-uikit-inputcontrols--date-input-story-CcUIKitInput-root-5",
                                                         },
                                                         "endAdornment": <React.Fragment>
+                                                          
                                                           <WithStyles(ForwardRef(InputAdornment))
                                                             position="end"
                                                           >
@@ -12951,6 +12958,10 @@ exports[`Storyshots Standalone/UIKit/InputControls DateInput 1`] = `
                                                             >
                                                               <Memo />
                                                             </WithStyles(ForwardRef(IconButton))>
+                                                          </WithStyles(ForwardRef(InputAdornment))>
+                                                          <WithStyles(ForwardRef(InputAdornment))
+                                                            position="end"
+                                                          >
                                                             <WithStyles(ForwardRef(IconButton))
                                                               onClick={[Function]}
                                                             >
@@ -12986,6 +12997,7 @@ exports[`Storyshots Standalone/UIKit/InputControls DateInput 1`] = `
                                                             "root": "standalone-uikit-inputcontrols--date-input-story-CcUIKitInput-root-5",
                                                           },
                                                           "endAdornment": <React.Fragment>
+                                                            
                                                             <WithStyles(ForwardRef(InputAdornment))
                                                               position="end"
                                                             >
@@ -12995,6 +13007,10 @@ exports[`Storyshots Standalone/UIKit/InputControls DateInput 1`] = `
                                                               >
                                                                 <Memo />
                                                               </WithStyles(ForwardRef(IconButton))>
+                                                            </WithStyles(ForwardRef(InputAdornment))>
+                                                            <WithStyles(ForwardRef(InputAdornment))
+                                                              position="end"
+                                                            >
                                                               <WithStyles(ForwardRef(IconButton))
                                                                 onClick={[Function]}
                                                               >
@@ -13125,6 +13141,7 @@ exports[`Storyshots Standalone/UIKit/InputControls DateInput 1`] = `
                                                               }
                                                               endAdornment={
                                                                 <React.Fragment>
+                                                                  
                                                                   <WithStyles(ForwardRef(InputAdornment))
                                                                     position="end"
                                                                   >
@@ -13134,6 +13151,10 @@ exports[`Storyshots Standalone/UIKit/InputControls DateInput 1`] = `
                                                                     >
                                                                       <Memo />
                                                                     </WithStyles(ForwardRef(IconButton))>
+                                                                  </WithStyles(ForwardRef(InputAdornment))>
+                                                                  <WithStyles(ForwardRef(InputAdornment))
+                                                                    position="end"
+                                                                  >
                                                                     <WithStyles(ForwardRef(IconButton))
                                                                       onClick={[Function]}
                                                                     >
@@ -13172,6 +13193,7 @@ exports[`Storyshots Standalone/UIKit/InputControls DateInput 1`] = `
                                                                 }
                                                                 endAdornment={
                                                                   <React.Fragment>
+                                                                    
                                                                     <WithStyles(ForwardRef(InputAdornment))
                                                                       position="end"
                                                                     >
@@ -13181,6 +13203,10 @@ exports[`Storyshots Standalone/UIKit/InputControls DateInput 1`] = `
                                                                       >
                                                                         <Memo />
                                                                       </WithStyles(ForwardRef(IconButton))>
+                                                                    </WithStyles(ForwardRef(InputAdornment))>
+                                                                    <WithStyles(ForwardRef(InputAdornment))
+                                                                      position="end"
+                                                                    >
                                                                       <WithStyles(ForwardRef(IconButton))
                                                                         onClick={[Function]}
                                                                       >
@@ -13219,6 +13245,7 @@ exports[`Storyshots Standalone/UIKit/InputControls DateInput 1`] = `
                                                                   }
                                                                   endAdornment={
                                                                     <React.Fragment>
+                                                                      
                                                                       <WithStyles(ForwardRef(InputAdornment))
                                                                         position="end"
                                                                       >
@@ -13228,6 +13255,10 @@ exports[`Storyshots Standalone/UIKit/InputControls DateInput 1`] = `
                                                                         >
                                                                           <Memo />
                                                                         </WithStyles(ForwardRef(IconButton))>
+                                                                      </WithStyles(ForwardRef(InputAdornment))>
+                                                                      <WithStyles(ForwardRef(InputAdornment))
+                                                                        position="end"
+                                                                      >
                                                                         <WithStyles(ForwardRef(IconButton))
                                                                           onClick={[Function]}
                                                                         >
@@ -13272,6 +13303,7 @@ exports[`Storyshots Standalone/UIKit/InputControls DateInput 1`] = `
                                                                     }
                                                                     endAdornment={
                                                                       <React.Fragment>
+                                                                        
                                                                         <WithStyles(ForwardRef(InputAdornment))
                                                                           position="end"
                                                                         >
@@ -13281,6 +13313,10 @@ exports[`Storyshots Standalone/UIKit/InputControls DateInput 1`] = `
                                                                           >
                                                                             <Memo />
                                                                           </WithStyles(ForwardRef(IconButton))>
+                                                                        </WithStyles(ForwardRef(InputAdornment))>
+                                                                        <WithStyles(ForwardRef(InputAdornment))
+                                                                          position="end"
+                                                                        >
                                                                           <WithStyles(ForwardRef(IconButton))
                                                                             onClick={[Function]}
                                                                           >
@@ -13464,6 +13500,29 @@ exports[`Storyshots Standalone/UIKit/InputControls DateInput 1`] = `
                                                                                 </WithStyles(ForwardRef(ButtonBase))>
                                                                               </ForwardRef(IconButton)>
                                                                             </WithStyles(ForwardRef(IconButton))>
+                                                                          </div>
+                                                                        </ForwardRef(InputAdornment)>
+                                                                      </WithStyles(ForwardRef(InputAdornment))>
+                                                                      <WithStyles(ForwardRef(InputAdornment))
+                                                                        position="end"
+                                                                      >
+                                                                        <ForwardRef(InputAdornment)
+                                                                          classes={
+                                                                            Object {
+                                                                              "disablePointerEvents": "standalone-uikit-inputcontrols--date-input-story-MuiInputAdornment-disablePointerEvents",
+                                                                              "filled": "standalone-uikit-inputcontrols--date-input-story-MuiInputAdornment-filled",
+                                                                              "hiddenLabel": "standalone-uikit-inputcontrols--date-input-story-MuiInputAdornment-hiddenLabel",
+                                                                              "marginDense": "standalone-uikit-inputcontrols--date-input-story-MuiInputAdornment-marginDense",
+                                                                              "positionEnd": "standalone-uikit-inputcontrols--date-input-story-MuiInputAdornment-positionEnd",
+                                                                              "positionStart": "standalone-uikit-inputcontrols--date-input-story-MuiInputAdornment-positionStart",
+                                                                              "root": "standalone-uikit-inputcontrols--date-input-story-MuiInputAdornment-root",
+                                                                            }
+                                                                          }
+                                                                          position="end"
+                                                                        >
+                                                                          <div
+                                                                            className="standalone-uikit-inputcontrols--date-input-story-MuiInputAdornment-root standalone-uikit-inputcontrols--date-input-story-MuiInputAdornment-positionEnd"
+                                                                          >
                                                                             <WithStyles(ForwardRef(IconButton))
                                                                               onClick={[Function]}
                                                                             >
@@ -27468,6 +27527,7 @@ exports[`Storyshots Standalone/UIKit/InputControls DecimalInputField 1`] = `
                                             "root": "standalone-uikit-inputcontrols--decimal-input-field-story-CcUIKitInput-root-5",
                                           },
                                           "endAdornment": <React.Fragment>
+                                            
                                             <WithStyles(ForwardRef(InputAdornment))
                                               position="end"
                                             >
@@ -27517,6 +27577,7 @@ exports[`Storyshots Standalone/UIKit/InputControls DecimalInputField 1`] = `
                                               "root": "standalone-uikit-inputcontrols--decimal-input-field-story-CcUIKitInput-root-5",
                                             },
                                             "endAdornment": <React.Fragment>
+                                              
                                               <WithStyles(ForwardRef(InputAdornment))
                                                 position="end"
                                               >
@@ -27658,6 +27719,7 @@ exports[`Storyshots Standalone/UIKit/InputControls DecimalInputField 1`] = `
                                                 }
                                                 endAdornment={
                                                   <React.Fragment>
+                                                    
                                                     <WithStyles(ForwardRef(InputAdornment))
                                                       position="end"
                                                     >
@@ -27712,6 +27774,7 @@ exports[`Storyshots Standalone/UIKit/InputControls DecimalInputField 1`] = `
                                                   }
                                                   endAdornment={
                                                     <React.Fragment>
+                                                      
                                                       <WithStyles(ForwardRef(InputAdornment))
                                                         position="end"
                                                       >
@@ -27766,6 +27829,7 @@ exports[`Storyshots Standalone/UIKit/InputControls DecimalInputField 1`] = `
                                                     }
                                                     endAdornment={
                                                       <React.Fragment>
+                                                        
                                                         <WithStyles(ForwardRef(InputAdornment))
                                                           position="end"
                                                         >
@@ -27826,6 +27890,7 @@ exports[`Storyshots Standalone/UIKit/InputControls DecimalInputField 1`] = `
                                                       }
                                                       endAdornment={
                                                         <React.Fragment>
+                                                          
                                                           <WithStyles(ForwardRef(InputAdornment))
                                                             position="end"
                                                           >
@@ -34117,6 +34182,7 @@ exports[`Storyshots Standalone/UIKit/InputControls IntegerInputField 1`] = `
                                               "root": "standalone-uikit-inputcontrols--integer-input-field-story-CcUIKitInput-root-5",
                                             },
                                             "endAdornment": <React.Fragment>
+                                              
                                               <WithStyles(ForwardRef(InputAdornment))
                                                 position="end"
                                               >
@@ -34166,6 +34232,7 @@ exports[`Storyshots Standalone/UIKit/InputControls IntegerInputField 1`] = `
                                                 "root": "standalone-uikit-inputcontrols--integer-input-field-story-CcUIKitInput-root-5",
                                               },
                                               "endAdornment": <React.Fragment>
+                                                
                                                 <WithStyles(ForwardRef(InputAdornment))
                                                   position="end"
                                                 >
@@ -34307,6 +34374,7 @@ exports[`Storyshots Standalone/UIKit/InputControls IntegerInputField 1`] = `
                                                   }
                                                   endAdornment={
                                                     <React.Fragment>
+                                                      
                                                       <WithStyles(ForwardRef(InputAdornment))
                                                         position="end"
                                                       >
@@ -34361,6 +34429,7 @@ exports[`Storyshots Standalone/UIKit/InputControls IntegerInputField 1`] = `
                                                     }
                                                     endAdornment={
                                                       <React.Fragment>
+                                                        
                                                         <WithStyles(ForwardRef(InputAdornment))
                                                           position="end"
                                                         >
@@ -34415,6 +34484,7 @@ exports[`Storyshots Standalone/UIKit/InputControls IntegerInputField 1`] = `
                                                       }
                                                       endAdornment={
                                                         <React.Fragment>
+                                                          
                                                           <WithStyles(ForwardRef(InputAdornment))
                                                             position="end"
                                                           >
@@ -34475,6 +34545,7 @@ exports[`Storyshots Standalone/UIKit/InputControls IntegerInputField 1`] = `
                                                         }
                                                         endAdornment={
                                                           <React.Fragment>
+                                                            
                                                             <WithStyles(ForwardRef(InputAdornment))
                                                               position="end"
                                                             >
