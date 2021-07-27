@@ -9,6 +9,7 @@ exports[`Storyshots Standalone/UIKit/InputControls CurrencyInput 1`] = `
   >
     <Memo(CCI18nProvider)>
       <I18nextProvider
+        defaultNS="translation"
         i18n={
           I18n {
             "addResource": [Function],
@@ -5645,7 +5646,6 @@ exports[`Storyshots Standalone/UIKit/InputControls CurrencyInput 1`] = `
             },
           }
         }
-        key="en"
       >
         <Memo(MuiPickerUtils)>
           <MuiPickersUtilsProvider
@@ -6660,6 +6660,7 @@ exports[`Storyshots Standalone/UIKit/InputControls DateInput 1`] = `
   >
     <Memo(CCI18nProvider)>
       <I18nextProvider
+        defaultNS="translation"
         i18n={
           I18n {
             "addResource": [Function],
@@ -12296,7 +12297,6 @@ exports[`Storyshots Standalone/UIKit/InputControls DateInput 1`] = `
             },
           }
         }
-        key="en"
       >
         <Memo(MuiPickerUtils)>
           <MuiPickersUtilsProvider
@@ -14046,6 +14046,7 @@ exports[`Storyshots Standalone/UIKit/InputControls DateTimeInput 1`] = `
   >
     <Memo(CCI18nProvider)>
       <I18nextProvider
+        defaultNS="translation"
         i18n={
           I18n {
             "addResource": [Function],
@@ -19682,7 +19683,6 @@ exports[`Storyshots Standalone/UIKit/InputControls DateTimeInput 1`] = `
             },
           }
         }
-        key="en"
       >
         <Memo(MuiPickerUtils)>
           <MuiPickersUtilsProvider
@@ -21422,6 +21422,7 @@ exports[`Storyshots Standalone/UIKit/InputControls DecimalInputField 1`] = `
   >
     <Memo(CCI18nProvider)>
       <I18nextProvider
+        defaultNS="translation"
         i18n={
           I18n {
             "addResource": [Function],
@@ -27058,7 +27059,6 @@ exports[`Storyshots Standalone/UIKit/InputControls DecimalInputField 1`] = `
             },
           }
         }
-        key="en"
       >
         <Memo(MuiPickerUtils)>
           <MuiPickersUtilsProvider
@@ -28070,6 +28070,7 @@ exports[`Storyshots Standalone/UIKit/InputControls IntegerInputField 1`] = `
   >
     <Memo(CCI18nProvider)>
       <I18nextProvider
+        defaultNS="translation"
         i18n={
           I18n {
             "addResource": [Function],
@@ -33706,7 +33707,6 @@ exports[`Storyshots Standalone/UIKit/InputControls IntegerInputField 1`] = `
             },
           }
         }
-        key="en"
       >
         <Memo(MuiPickerUtils)>
           <MuiPickersUtilsProvider

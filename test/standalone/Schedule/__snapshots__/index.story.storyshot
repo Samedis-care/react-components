@@ -9,6 +9,7 @@ exports[`Storyshots Standalone/Schedule Scrollable 1`] = `
   >
     <Memo(CCI18nProvider)>
       <I18nextProvider
+        defaultNS="translation"
         i18n={
           I18n {
             "addResource": [Function],
@@ -5644,7 +5645,6 @@ exports[`Storyshots Standalone/Schedule Scrollable 1`] = `
             },
           }
         }
-        key="en"
       >
         <Memo(MuiPickerUtils)>
           <MuiPickersUtilsProvider
@@ -6687,6 +6687,7 @@ exports[`Storyshots Standalone/Schedule Weekly 1`] = `
   >
     <Memo(CCI18nProvider)>
       <I18nextProvider
+        defaultNS="translation"
         i18n={
           I18n {
             "addResource": [Function],
@@ -12323,7 +12324,6 @@ exports[`Storyshots Standalone/Schedule Weekly 1`] = `
             },
           }
         }
-        key="en"
       >
         <Memo(MuiPickerUtils)>
           <MuiPickersUtilsProvider

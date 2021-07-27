@@ -9,6 +9,7 @@ exports[`Storyshots Standalone/Selector Multi 1`] = `
   >
     <Memo(CCI18nProvider)>
       <I18nextProvider
+        defaultNS="translation"
         i18n={
           I18n {
             "addResource": [Function],
@@ -5645,7 +5646,6 @@ exports[`Storyshots Standalone/Selector Multi 1`] = `
             },
           }
         }
-        key="en"
       >
         <Memo(MuiPickerUtils)>
           <MuiPickersUtilsProvider
@@ -8048,6 +8048,7 @@ exports[`Storyshots Standalone/Selector MultiSelectWithCheckBox 1`] = `
   >
     <Memo(CCI18nProvider)>
       <I18nextProvider
+        defaultNS="translation"
         i18n={
           I18n {
             "addResource": [Function],
@@ -13683,7 +13684,6 @@ exports[`Storyshots Standalone/Selector MultiSelectWithCheckBox 1`] = `
             },
           }
         }
-        key="en"
       >
         <Memo(MuiPickerUtils)>
           <MuiPickersUtilsProvider
@@ -15088,6 +15088,7 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
   >
     <Memo(CCI18nProvider)>
       <I18nextProvider
+        defaultNS="translation"
         i18n={
           I18n {
             "addResource": [Function],
@@ -20725,7 +20726,6 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
             },
           }
         }
-        key="en"
       >
         <Memo(MuiPickerUtils)>
           <MuiPickersUtilsProvider
@@ -23539,6 +23539,7 @@ exports[`Storyshots Standalone/Selector MultiWithoutGroup 1`] = `
   >
     <Memo(CCI18nProvider)>
       <I18nextProvider
+        defaultNS="translation"
         i18n={
           I18n {
             "addResource": [Function],
@@ -29175,7 +29176,6 @@ exports[`Storyshots Standalone/Selector MultiWithoutGroup 1`] = `
             },
           }
         }
-        key="en"
       >
         <Memo(MuiPickerUtils)>
           <MuiPickersUtilsProvider
@@ -31476,6 +31476,7 @@ exports[`Storyshots Standalone/Selector Single 1`] = `
   >
     <Memo(CCI18nProvider)>
       <I18nextProvider
+        defaultNS="translation"
         i18n={
           I18n {
             "addResource": [Function],
@@ -37112,7 +37113,6 @@ exports[`Storyshots Standalone/Selector Single 1`] = `
             },
           }
         }
-        key="en"
       >
         <Memo(MuiPickerUtils)>
           <MuiPickersUtilsProvider

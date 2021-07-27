@@ -11,10 +11,12 @@ export interface CCI18nProviderProps {
 }
 
 const CCI18nProvider = (props: CCI18nProviderProps) => {
-	const [momentLocale, setMomentLocale] = useState(ccI18n.language);
+	const [updating, setUpdating] = useState(false);
+	const [, setMomentLocale] = useState(ccI18n.language);
 
 	const updateLocale = () => {
 		void (async () => {
+			setUpdating(true);
 			try {
 				await import("moment/locale/" + ccI18n.language.toLowerCase());
 			} catch (e) {
@@ -28,6 +30,7 @@ const CCI18nProvider = (props: CCI18nProviderProps) => {
 			} finally {
 				moment.locale(ccI18n.language);
 				setMomentLocale(ccI18n.language);
+				setUpdating(false);
 			}
 		})();
 	};
@@ -39,7 +42,13 @@ const CCI18nProvider = (props: CCI18nProviderProps) => {
 	}, []);
 
 	return (
-		<I18nextProvider i18n={getI18n() ?? ccI18n} key={momentLocale}>
+		<I18nextProvider
+			i18n={getI18n() ?? ccI18n}
+			// defaultNS used to force refresh
+			defaultNS={
+				updating ? (getI18n() ?? ccI18n).options.defaultNS ?? "" : undefined
+			}
+		>
 			{props.children}
 		</I18nextProvider>
 	);

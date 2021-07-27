@@ -9,6 +9,7 @@ exports[`Storyshots Standalone/UIKit ActionButton 1`] = `
   >
     <Memo(CCI18nProvider)>
       <I18nextProvider
+        defaultNS="translation"
         i18n={
           I18n {
             "addResource": [Function],
@@ -5644,7 +5645,6 @@ exports[`Storyshots Standalone/UIKit ActionButton 1`] = `
             },
           }
         }
-        key="en"
       >
         <Memo(MuiPickerUtils)>
           <MuiPickersUtilsProvider
@@ -6191,6 +6191,7 @@ exports[`Storyshots Standalone/UIKit CenteredTypography 1`] = `
   >
     <Memo(CCI18nProvider)>
       <I18nextProvider
+        defaultNS="translation"
         i18n={
           I18n {
             "addResource": [Function],
@@ -11826,7 +11827,6 @@ exports[`Storyshots Standalone/UIKit CenteredTypography 1`] = `
             },
           }
         }
-        key="en"
       >
         <Memo(MuiPickerUtils)>
           <MuiPickersUtilsProvider
@@ -12284,6 +12284,7 @@ exports[`Storyshots Standalone/UIKit Checkbox 1`] = `
   >
     <Memo(CCI18nProvider)>
       <I18nextProvider
+        defaultNS="translation"
         i18n={
           I18n {
             "addResource": [Function],
@@ -17919,7 +17920,6 @@ exports[`Storyshots Standalone/UIKit Checkbox 1`] = `
             },
           }
         }
-        key="en"
       >
         <Memo(MuiPickerUtils)>
           <MuiPickersUtilsProvider
@@ -21049,6 +21049,7 @@ exports[`Storyshots Standalone/UIKit ComponentWithLabel 1`] = `
   >
     <Memo(CCI18nProvider)>
       <I18nextProvider
+        defaultNS="translation"
         i18n={
           I18n {
             "addResource": [Function],
@@ -26684,7 +26685,6 @@ exports[`Storyshots Standalone/UIKit ComponentWithLabel 1`] = `
             },
           }
         }
-        key="en"
       >
         <Memo(MuiPickerUtils)>
           <MuiPickersUtilsProvider
@@ -29163,6 +29163,7 @@ exports[`Storyshots Standalone/UIKit FormButtons 1`] = `
   >
     <Memo(CCI18nProvider)>
       <I18nextProvider
+        defaultNS="translation"
         i18n={
           I18n {
             "addResource": [Function],
@@ -34798,7 +34799,6 @@ exports[`Storyshots Standalone/UIKit FormButtons 1`] = `
             },
           }
         }
-        key="en"
       >
         <Memo(MuiPickerUtils)>
           <MuiPickersUtilsProvider
@@ -37787,6 +37787,7 @@ exports[`Storyshots Standalone/UIKit IconButtonWithText 1`] = `
   >
     <Memo(CCI18nProvider)>
       <I18nextProvider
+        defaultNS="translation"
         i18n={
           I18n {
             "addResource": [Function],
@@ -43422,7 +43423,6 @@ exports[`Storyshots Standalone/UIKit IconButtonWithText 1`] = `
             },
           }
         }
-        key="en"
       >
         <Memo(MuiPickerUtils)>
           <MuiPickersUtilsProvider
@@ -44844,6 +44844,7 @@ exports[`Storyshots Standalone/UIKit OutlinedInputWithHelp 1`] = `
   >
     <Memo(CCI18nProvider)>
       <I18nextProvider
+        defaultNS="translation"
         i18n={
           I18n {
             "addResource": [Function],
@@ -50479,7 +50480,6 @@ exports[`Storyshots Standalone/UIKit OutlinedInputWithHelp 1`] = `
             },
           }
         }
-        key="en"
       >
         <Memo(MuiPickerUtils)>
           <MuiPickersUtilsProvider
@@ -51236,6 +51236,7 @@ exports[`Storyshots Standalone/UIKit SubActionButton 1`] = `
   >
     <Memo(CCI18nProvider)>
       <I18nextProvider
+        defaultNS="translation"
         i18n={
           I18n {
             "addResource": [Function],
@@ -56871,7 +56872,6 @@ exports[`Storyshots Standalone/UIKit SubActionButton 1`] = `
             },
           }
         }
-        key="en"
       >
         <Memo(MuiPickerUtils)>
           <MuiPickersUtilsProvider
@@ -59183,6 +59183,7 @@ exports[`Storyshots Standalone/UIKit TextAreaWithHelp 1`] = `
   >
     <Memo(CCI18nProvider)>
       <I18nextProvider
+        defaultNS="translation"
         i18n={
           I18n {
             "addResource": [Function],
@@ -64818,7 +64819,6 @@ exports[`Storyshots Standalone/UIKit TextAreaWithHelp 1`] = `
             },
           }
         }
-        key="en"
       >
         <Memo(MuiPickerUtils)>
           <MuiPickersUtilsProvider
@@ -65808,6 +65808,7 @@ exports[`Storyshots Standalone/UIKit TextFieldWithHelp 1`] = `
   >
     <Memo(CCI18nProvider)>
       <I18nextProvider
+        defaultNS="translation"
         i18n={
           I18n {
             "addResource": [Function],
@@ -71443,7 +71444,6 @@ exports[`Storyshots Standalone/UIKit TextFieldWithHelp 1`] = `
             },
           }
         }
-        key="en"
       >
         <Memo(MuiPickerUtils)>
           <MuiPickersUtilsProvider
