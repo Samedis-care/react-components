@@ -7,7 +7,8 @@
 				"close-icon-text": "Yoping",
 				"open-icon-text": "Ochiq",
 				"loading-text": "Yuklanmoqda...",
-				"start-typing-to-search-text": "Natija olish uchun qidiruv qatorini kiriting"
+				"start-typing-to-search-text": "Natija olish uchun qidiruv qatorini kiriting",
+				"clear-icon-text": "Bo'shatish"
 			}
 		},
 		"schedule": {
