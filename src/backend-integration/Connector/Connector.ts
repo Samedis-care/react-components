@@ -94,7 +94,7 @@ abstract class Connector<
 		ids: string[],
 		model?: Model<KeyT, VisibilityT, CustomT>
 	): Promise<void> {
-		void (await Promise.all(ids.map((id) => this.delete(id, model))));
+		await Promise.all(ids.map((id) => this.delete(id, model)));
 	}
 
 	/**

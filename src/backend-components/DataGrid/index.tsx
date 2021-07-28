@@ -8,6 +8,8 @@ import DataGrid, {
 import Model, {
 	ModelFieldName,
 	PageVisibility,
+	useModelDeleteAdvanced,
+	useModelDeleteMultiple,
 } from "../../backend-integration/Model/Model";
 import { useDialogContext } from "../../framework";
 import { ErrorDialog, showConfirmDialog } from "../../non-standalone";
@@ -128,8 +130,8 @@ const BackendDataGrid = <
 		[model]
 	);
 
-	const { mutateAsync: deleteAdvanced } = model.deleteAdvanced();
-	const { mutateAsync: deleteMultiple } = model.deleteMultiple();
+	const { mutateAsync: deleteAdvanced } = useModelDeleteAdvanced(model);
+	const { mutateAsync: deleteMultiple } = useModelDeleteMultiple(model);
 	const handleDelete = useCallback(
 		async (
 			invert: boolean,
