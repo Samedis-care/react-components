@@ -57,7 +57,7 @@ export interface MultiSelectWithoutGroupProps<DataT extends MultiSelectorData>
 	/**
 	 * Comparison function for client side sorting
 	 */
-	sortCompareFn: (value1: DataT, value2: DataT) => number;
+	sortCompareFn?: (value1: DataT, value2: DataT) => number;
 }
 
 const useStyles = makeStyles(
