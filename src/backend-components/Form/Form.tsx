@@ -14,6 +14,8 @@ import Model, {
 	ModelFieldName,
 	ModelGetResponseRelations,
 	PageVisibility,
+	useModelGet,
+	useModelMutation,
 } from "../../backend-integration/Model/Model";
 import Loader from "../../standalone/Loader";
 import { isObjectEmpty } from "../../utils";
@@ -406,8 +408,8 @@ const Form = <
 	);
 
 	// main form handling
-	const { isLoading, error, data: serverData } = model.get(id || null);
-	const { mutateAsync: updateData } = model.createOrUpdate();
+	const { isLoading, error, data: serverData } = useModelGet(model, id || null);
+	const { mutateAsync: updateData } = useModelMutation(model);
 
 	const [updateError, setUpdateError] = useState<Error | null>(null);
 	const valuesRef = useRef<Record<string, unknown>>({});

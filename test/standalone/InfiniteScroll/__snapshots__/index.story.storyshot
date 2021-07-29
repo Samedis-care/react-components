@@ -9,6 +9,7 @@ exports[`Storyshots Standalone/InfiniteScroll Bidirectional 1`] = `
   >
     <Memo(CCI18nProvider)>
       <I18nextProvider
+        defaultNS="translation"
         i18n={
           I18n {
             "addResource": [Function],
@@ -5643,7 +5644,6 @@ exports[`Storyshots Standalone/InfiniteScroll Bidirectional 1`] = `
             },
           }
         }
-        key="en"
       >
         <Memo(MuiPickerUtils)>
           <MuiPickersUtilsProvider
@@ -6162,6 +6162,7 @@ exports[`Storyshots Standalone/InfiniteScroll Unidirectional 1`] = `
   >
     <Memo(CCI18nProvider)>
       <I18nextProvider
+        defaultNS="translation"
         i18n={
           I18n {
             "addResource": [Function],
@@ -11796,7 +11797,6 @@ exports[`Storyshots Standalone/InfiniteScroll Unidirectional 1`] = `
             },
           }
         }
-        key="en"
       >
         <Memo(MuiPickerUtils)>
           <MuiPickersUtilsProvider

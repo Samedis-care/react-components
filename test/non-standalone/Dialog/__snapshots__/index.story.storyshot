@@ -9,6 +9,7 @@ exports[`Storyshots Non-Standalone/Dialog Confirm 1`] = `
   >
     <Memo(CCI18nProvider)>
       <I18nextProvider
+        defaultNS="translation"
         i18n={
           I18n {
             "addResource": [Function],
@@ -5643,12 +5644,11 @@ exports[`Storyshots Non-Standalone/Dialog Confirm 1`] = `
             },
           }
         }
-        key="cimode"
       >
         <Memo(MuiPickerUtils)>
           <MuiPickersUtilsProvider
             libInstance={[Function]}
-            locale="cimode"
+            locale="en"
             utils={[Function]}
           >
             <Memo(ThemeProvider)
@@ -7214,6 +7214,7 @@ exports[`Storyshots Non-Standalone/Dialog Error 1`] = `
   >
     <Memo(CCI18nProvider)>
       <I18nextProvider
+        defaultNS="translation"
         i18n={
           I18n {
             "addResource": [Function],
@@ -12848,7 +12849,6 @@ exports[`Storyshots Non-Standalone/Dialog Error 1`] = `
             },
           }
         }
-        key="en"
       >
         <Memo(MuiPickerUtils)>
           <MuiPickersUtilsProvider
@@ -14240,6 +14240,7 @@ exports[`Storyshots Non-Standalone/Dialog Form (custom) 1`] = `
   >
     <Memo(CCI18nProvider)>
       <I18nextProvider
+        defaultNS="translation"
         i18n={
           I18n {
             "addResource": [Function],
@@ -19874,7 +19875,6 @@ exports[`Storyshots Non-Standalone/Dialog Form (custom) 1`] = `
             },
           }
         }
-        key="en"
       >
         <Memo(MuiPickerUtils)>
           <MuiPickersUtilsProvider
@@ -22049,6 +22049,7 @@ exports[`Storyshots Non-Standalone/Dialog Info 1`] = `
   >
     <Memo(CCI18nProvider)>
       <I18nextProvider
+        defaultNS="translation"
         i18n={
           I18n {
             "addResource": [Function],
@@ -27683,7 +27684,6 @@ exports[`Storyshots Non-Standalone/Dialog Info 1`] = `
             },
           }
         }
-        key="en"
       >
         <Memo(MuiPickerUtils)>
           <MuiPickersUtilsProvider
@@ -29090,6 +29090,7 @@ exports[`Storyshots Non-Standalone/Dialog Input 1`] = `
   >
     <Memo(CCI18nProvider)>
       <I18nextProvider
+        defaultNS="translation"
         i18n={
           I18n {
             "addResource": [Function],
@@ -34724,7 +34725,6 @@ exports[`Storyshots Non-Standalone/Dialog Input 1`] = `
             },
           }
         }
-        key="en"
       >
         <Memo(MuiPickerUtils)>
           <MuiPickersUtilsProvider

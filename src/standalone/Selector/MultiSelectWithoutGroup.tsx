@@ -55,9 +55,9 @@ export interface MultiSelectWithoutGroupProps<DataT extends MultiSelectorData>
 	 */
 	getIdOfData?: (data: DataT) => string;
 	/**
-	 * Token which causes data to be reloaded
+	 * Comparison function for client side sorting
 	 */
-	refreshToken?: string;
+	sortCompareFn?: (value1: DataT, value2: DataT) => number;
 }
 
 const useStyles = makeStyles(
@@ -99,6 +99,7 @@ const MultiSelectWithoutGroup = <DataT extends MultiSelectorData>(
 		getIdOfData,
 		refreshToken,
 		switchValue,
+		sortCompareFn,
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		classes: classProps,
 		...otherProps
@@ -188,26 +189,28 @@ const MultiSelectWithoutGroup = <DataT extends MultiSelectorData>(
 				classes={classes}
 			>
 				<>
-					{selected.map((data: MultiSelectorData, index: number) => {
-						return (
-							<div key={index} className={classes.outlined}>
-								{enableIcons && (
-									<SmallListItemIcon>{data.icon}</SmallListItemIcon>
-								)}
-								<span>{data.label}</span>
-								{!disabled && (
-									<SmallIconButton
-										edge={"end"}
-										name={data.value}
-										disabled={disabled}
-										onClick={handleDelete}
-									>
-										<RemoveIcon />
-									</SmallIconButton>
-								)}
-							</div>
-						);
-					})}
+					{(sortCompareFn ? selected.sort(sortCompareFn) : selected).map(
+						(data: MultiSelectorData, index: number) => {
+							return (
+								<div key={index} className={classes.outlined}>
+									{enableIcons && (
+										<SmallListItemIcon>{data.icon}</SmallListItemIcon>
+									)}
+									<span>{data.label}</span>
+									{!disabled && (
+										<SmallIconButton
+											edge={"end"}
+											name={data.value}
+											disabled={disabled}
+											onClick={handleDelete}
+										>
+											<RemoveIcon />
+										</SmallIconButton>
+									)}
+								</div>
+							);
+						}
+					)}
 				</>
 			</InlineSwitch>
 		</Typography>
