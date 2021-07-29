@@ -122,6 +122,7 @@ const MultiSelectWithTags = <
 		switchLabel,
 		lruGroup,
 		lruData,
+		sortCompareFn,
 	} = props;
 
 	const defaultSwitchValue = props.displaySwitch
@@ -225,6 +226,7 @@ const MultiSelectWithTags = <
 				noOptionsText={noOptionsText}
 				loadingText={loadingText}
 				lru={lruData}
+				sortCompareFn={sortCompareFn}
 			/>
 		</div>
 	);
