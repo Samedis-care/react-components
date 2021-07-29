@@ -26,5 +26,6 @@ export { default as isObjectEmpty } from "./isObjectEmpty";
 export { default as sleep } from "./sleep";
 export { default as last } from "./last";
 export { default as useDropZone } from "./useDropZone";
+export { default as isTouchDevice } from "./isTouchDevice";
 export * from "./useDate";
 export * from "./genericHOC";
