@@ -57,15 +57,7 @@ const MenuItemMaterial = (props: MenuItemProps) => {
 		>
 			<ListItemIcon>{Icon && <Icon />}</ListItemIcon>
 			<ListItemText primary={props.title} />
-			{props.expandable ? (
-				props.expanded ? (
-					<ExpandLess />
-				) : (
-					<ExpandMore />
-				)
-			) : (
-				false
-			)}
+			{props.expandable && (props.expanded ? <ExpandLess /> : <ExpandMore />)}
 		</StyledListItem>
 	);
 };

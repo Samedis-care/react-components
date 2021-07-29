@@ -155,6 +155,142 @@ export interface CacheOptions {
 	cacheTime?: number;
 }
 
+/**
+ * React-Query's useQuery for the given model and record ID
+ * @param model The model ID to load
+ * @param id The record ID (or null to get default values on create)
+ */
+export const useModelGet = <
+	KeyT extends ModelFieldName,
+	VisibilityT extends PageVisibility,
+	CustomT
+>(
+	model: Model<KeyT, VisibilityT, CustomT>,
+	id: string | null
+): UseQueryResult<ModelGetResponse<KeyT>, Error> => {
+	return useQuery(
+		model.getReactQueryKey(id),
+		() => model.getRaw(id),
+		model.cacheOptions
+	);
+};
+
+/**
+ * React-Query's useMutation to update/create a new record on backend
+ * @param model The model
+ * @see model.createOrUpdateRecordRaw
+ */
+export const useModelMutation = <
+	KeyT extends ModelFieldName,
+	VisibilityT extends PageVisibility,
+	CustomT,
+	TContext = unknown
+>(
+	model: Model<KeyT, VisibilityT, CustomT>
+): UseMutationResult<
+	ModelGetResponse<KeyT>,
+	Error,
+	Record<string, unknown>,
+	TContext
+> => {
+	return useMutation(
+		model.modelId + "-create-or-update",
+		model.createOrUpdateRecordRaw.bind(model),
+		{
+			onSuccess: (data: ModelGetResponse<KeyT>) => {
+				ModelDataStore.setQueryData(
+					model.getReactQueryKey((data[0] as Record<"id", string>).id),
+					data
+				);
+			},
+		}
+	);
+};
+
+/**
+ * React-Query's useMutation to delete a single record on backend
+ * @param model The model
+ */
+export const useModelDelete = <
+	KeyT extends ModelFieldName,
+	VisibilityT extends PageVisibility,
+	CustomT,
+	TContext = unknown
+>(
+	model: Model<KeyT, VisibilityT, CustomT>
+): UseMutationResult<void, Error, string, TContext> => {
+	return useMutation(model.modelId + "-delete", model.deleteRaw.bind(this), {
+		onSuccess: (data: void, id: string) => {
+			ModelDataStore.removeQueries(model.getReactQueryKey(id));
+		},
+	});
+};
+
+/**
+ * React-Query's useMutation to delete multiple records by ID on backend
+ * @param model The model
+ */
+export const useModelDeleteMultiple = <
+	KeyT extends ModelFieldName,
+	VisibilityT extends PageVisibility,
+	CustomT,
+	TContext = unknown
+>(
+	model: Model<KeyT, VisibilityT, CustomT>
+): UseMutationResult<void, Error, string[], TContext> => {
+	return useMutation(
+		model.modelId + "-delete-multi",
+		model.deleteMultipleRaw.bind(this),
+		{
+			onSuccess: (data: void, ids: string[]) => {
+				ids.forEach((id) =>
+					ModelDataStore.removeQueries(model.getReactQueryKey(id))
+				);
+			},
+		}
+	);
+};
+
+/**
+ * React-Query's useMutation to delete records using advanced filters on backend
+ * @param model The model
+ * @see model.deleteAdvancedRaw
+ */
+export const useModelDeleteAdvanced = <
+	KeyT extends ModelFieldName,
+	VisibilityT extends PageVisibility,
+	CustomT,
+	TContext = unknown
+>(
+	model: Model<KeyT, VisibilityT, CustomT>
+): UseMutationResult<void, Error, AdvancedDeleteRequest, TContext> => {
+	return useMutation(
+		model.modelId + "-delete-adv",
+		model.deleteAdvancedRaw.bind(this),
+		{
+			onSuccess: (data: void, req: AdvancedDeleteRequest) => {
+				// this function is likely to flush more then actually deleted
+				const [invert, ids] = req;
+				if (!invert) {
+					ids.forEach((id) =>
+						ModelDataStore.removeQueries(model.getReactQueryKey(id))
+					);
+				} else {
+					// delete everything from this model, unless ID matches
+					ModelDataStore.removeQueries(undefined, {
+						predicate: (query): boolean => {
+							return (
+								query.queryKey[0] === model.modelId &&
+								!ids.includes((query.queryKey[1] as { id: string }).id)
+							);
+						},
+					});
+				}
+			},
+		}
+	);
+};
+
 class Model<
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
@@ -235,14 +371,11 @@ class Model<
 	/**
 	 * Provides a react-query useQuery hook for the given data id
 	 * @param id The data record id
+	 * @deprecated Use useModelGet(model, id) instead
 	 */
 	public get(id: string | null): UseQueryResult<ModelGetResponse<KeyT>, Error> {
 		// eslint-disable-next-line react-hooks/rules-of-hooks
-		return useQuery(
-			this.getReactQueryKey(id),
-			() => this.getRaw(id),
-			this.cacheOptions
-		);
+		return useModelGet(this, id);
 	}
 
 	/**
@@ -317,6 +450,7 @@ class Model<
 
 	/**
 	 * Provides a react-query useMutation hook for creation or updates to an data entry
+	 * @deprecated Use useModelMutation(model) instead
 	 */
 	public createOrUpdate<TContext = unknown>(): UseMutationResult<
 		ModelGetResponse<KeyT>,
@@ -325,39 +459,37 @@ class Model<
 		TContext
 	> {
 		// eslint-disable-next-line react-hooks/rules-of-hooks
-		return useMutation(
-			this.modelId + "-create-or-update",
-			async (values: Record<string, unknown>) => {
-				const update = !!("id" in values && values.id);
-				const serializedValues = await this.applySerialization(
-					values,
-					"serialize",
-					update ? "edit" : "create"
-				);
-				if (update) {
-					return this.deserializeResponse(
-						await this.connector.update(serializedValues, this)
-					);
-				} else {
-					delete serializedValues["id" as KeyT];
-					return this.deserializeResponse(
-						await this.connector.create(serializedValues, this)
-					);
-				}
-			},
-			{
-				onSuccess: (data: ModelGetResponse<KeyT>) => {
-					ModelDataStore.setQueryData(
-						this.getReactQueryKey((data[0] as Record<"id", string>).id),
-						data
-					);
-				},
-			}
+		return useModelMutation(this);
+	}
+
+	/**
+	 * Updates a single record on backend (doesn't update local cache)
+	 * @param values The new values (set id field to update)
+	 */
+	public async createOrUpdateRecordRaw(
+		values: Record<string, unknown>
+	): Promise<ModelGetResponse<KeyT>> {
+		const update = !!("id" in values && values.id);
+		const serializedValues = await this.applySerialization(
+			values,
+			"serialize",
+			update ? "edit" : "create"
 		);
+		if (update) {
+			return this.deserializeResponse(
+				await this.connector.update(serializedValues, this)
+			);
+		} else {
+			delete serializedValues["id" as KeyT];
+			return this.deserializeResponse(
+				await this.connector.create(serializedValues, this)
+			);
+		}
 	}
 
 	/**
 	 * Provides a react hook to delete a given record id
+	 * @deprecated Use useModelDelete(model)
 	 */
 	public delete<TContext = unknown>(): UseMutationResult<
 		void,
@@ -366,21 +498,20 @@ class Model<
 		TContext
 	> {
 		// eslint-disable-next-line react-hooks/rules-of-hooks
-		return useMutation(
-			this.modelId + "-delete",
-			async (id: string) => {
-				return this.connector.delete(id, this);
-			},
-			{
-				onSuccess: (data: void, id: string) => {
-					ModelDataStore.removeQueries(this.getReactQueryKey(id));
-				},
-			}
-		);
+		return useModelDelete(this);
+	}
+
+	/**
+	 * Delete a single record in backend (does not affect local cache)
+	 * @param id The ID to delete
+	 */
+	public async deleteRaw(id: string): Promise<void> {
+		return this.connector.delete(id, this);
 	}
 
 	/**
 	 * Provides a react hook to delete multiple records at once
+	 * @deprecated Use useModelDeleteMultiple(model)
 	 */
 	public deleteMultiple<TContext = unknown>(): UseMutationResult<
 		void,
@@ -389,20 +520,16 @@ class Model<
 		TContext
 	> {
 		// eslint-disable-next-line react-hooks/rules-of-hooks
-		return useMutation(
-			this.modelId + "-delete-multi",
-			// eslint-disable-next-line @typescript-eslint/require-await
-			async (ids: string[]) => {
-				return this.connector.deleteMultiple(ids, this);
-			},
-			{
-				onSuccess: (data: void, ids: string[]) => {
-					ids.forEach((id) =>
-						ModelDataStore.setQueryData(this.getReactQueryKey(id), undefined)
-					);
-				},
-			}
-		);
+		return useModelDeleteMultiple(this);
+	}
+
+	/**
+	 * Deletes multiple record at once (does not affect local cache)
+	 * @param ids The IDs to delete
+	 */
+	// eslint-disable-next-line @typescript-eslint/require-await
+	public async deleteMultipleRaw(ids: string[]): Promise<void> {
+		return this.connector.deleteMultiple(ids, this);
 	}
 
 	/**
@@ -414,6 +541,7 @@ class Model<
 
 	/**
 	 * Provides a react hook to mass delete data
+	 * @deprecated Use useModelDeleteAdvanced(model)
 	 */
 	public deleteAdvanced<TContext = unknown>(): UseMutationResult<
 		void,
@@ -422,26 +550,18 @@ class Model<
 		TContext
 	> {
 		// eslint-disable-next-line react-hooks/rules-of-hooks
-		return useMutation(
-			this.modelId + "-delete-adv",
-			async (req: AdvancedDeleteRequest) => {
-				if (!this.connector.deleteAdvanced) {
-					throw new Error("Connector doesn't support advanced deletion");
-				}
-				return this.connector.deleteAdvanced(req, this);
-			},
-			{
-				onSuccess: (data: void, req: AdvancedDeleteRequest) => {
-					if (!req[0]) {
-						req[1].forEach((id) =>
-							ModelDataStore.setQueryData(this.getReactQueryKey(id), undefined)
-						);
-					} else {
-						ModelDataStore.clear();
-					}
-				},
-			}
-		);
+		return useModelDeleteAdvanced(this);
+	}
+
+	/**
+	 * Raw request to mass-delete data (does not affect local cache)
+	 * @param req The deletion request
+	 */
+	public async deleteAdvancedRaw(req: AdvancedDeleteRequest): Promise<void> {
+		if (!this.connector.deleteAdvanced) {
+			throw new Error("Connector doesn't support advanced deletion");
+		}
+		return this.connector.deleteAdvanced(req, this);
 	}
 
 	/**

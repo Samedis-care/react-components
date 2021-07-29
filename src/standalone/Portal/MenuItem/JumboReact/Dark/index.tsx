@@ -107,15 +107,7 @@ const MenuItemJumboReactDark = (props: MenuItemProps) => {
 				primary={props.title}
 				primaryTypographyProps={typographyProps}
 			/>
-			{props.expandable ? (
-				props.expanded ? (
-					<ExpandLess />
-				) : (
-					<ExpandMore />
-				)
-			) : (
-				false
-			)}
+			{props.expandable && (props.expanded ? <ExpandLess /> : <ExpandMore />)}
 			{props.active && <div className={classes.dot} />}
 		</MyListItem>
 	);
