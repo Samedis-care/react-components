@@ -1,9 +1,13 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import { TextFieldProps } from "@material-ui/core";
 import TextFieldWithHelp, {
 	TextFieldWithHelpProps,
 } from "../TextFieldWithHelp";
-import { parseLocalizedNumber, useInputCursorFix } from "../../../utils";
+import {
+	delocalizeNumber,
+	parseLocalizedNumber,
+	useInputCursorFix,
+} from "../../../utils";
 import useCCTranslations from "../../../utils/useCCTranslations";
 
 export interface CurrencyInputProps extends TextFieldWithHelpProps {
@@ -31,27 +35,40 @@ const CurrencyInput = (
 ) => {
 	const { value, onChange, currency, ...muiProps } = props;
 	const { i18n } = useCCTranslations();
-	const valueFormatted =
+	const [valueFormatted, setValueFormatted] = useState<string>(
 		value !== null
 			? value.toLocaleString(i18n.language, {
 					currency,
 					minimumFractionDigits: 2,
 					maximumFractionDigits: 2,
 			  })
-			: "";
+			: ""
+	);
 	const { handleCursorChange, cursorInputRef } = useInputCursorFix(
 		valueFormatted
 	);
 
+	const handleClear = useCallback(() => {
+		setValueFormatted("");
+	}, []);
+
 	// on change handling
 	const handleChange = useCallback(
 		(event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
+			if (event.target.value === "") handleClear();
+			else {
+				setValueFormatted(
+					parseFloat(delocalizeNumber(event.target.value)).toLocaleString(
+						i18n.language
+					)
+				);
+			}
 			handleCursorChange(event);
 			if (!onChange) return;
 
 			onChange(event, parseLocalizedNumber(event.target.value));
 		},
-		[onChange, handleCursorChange]
+		[handleClear, handleCursorChange, onChange, i18n.language]
 	);
 
 	// component rendering
@@ -59,8 +76,9 @@ const CurrencyInput = (
 		<div>
 			<TextFieldWithHelp
 				{...muiProps}
-				value={valueFormatted}
+				valueFormatted={valueFormatted}
 				onChange={handleChange}
+				onClear={handleClear}
 				inputProps={{
 					...muiProps.inputProps,
 					ref: cursorInputRef,

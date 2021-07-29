@@ -6039,9 +6039,10 @@ exports[`Storyshots Standalone/UIKit/InputControls CurrencyInput 1`] = `
                                       }
                                       label="Currency"
                                       onChange={[Function]}
+                                      onClear={[Function]}
                                       openInfo={[Function]}
                                       placeholder="Enter amount"
-                                      value=""
+                                      valueFormatted=""
                                     >
                                       <WithStyles(ForwardRef(TextField))
                                         InputLabelProps={
@@ -27497,9 +27498,10 @@ exports[`Storyshots Standalone/UIKit/InputControls DecimalInputField 1`] = `
                                     }
                                     label="Number Decimal Input"
                                     onChange={[Function]}
+                                    onClear={[Function]}
                                     openInfo={[Function]}
                                     placeholder="Enter decimal number"
-                                    value=""
+                                    valueFormatted=""
                                   >
                                     <WithStyles(ForwardRef(TextField))
                                       InputLabelProps={
@@ -34146,9 +34148,10 @@ exports[`Storyshots Standalone/UIKit/InputControls IntegerInputField 1`] = `
                                       }
                                       label="Number Integer Input"
                                       onChange={[Function]}
+                                      onClear={[Function]}
                                       openInfo={[Function]}
                                       placeholder="Enter integer number"
-                                      value=""
+                                      valueFormatted=""
                                     >
                                       <WithStyles(ForwardRef(TextField))
                                         InputLabelProps={

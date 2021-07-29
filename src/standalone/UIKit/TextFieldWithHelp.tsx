@@ -16,13 +16,28 @@ export interface TextFieldWithHelpProps extends UIInputProps {
 	 * Optional callback which opens a dialog with information about the field
 	 */
 	openInfo?: () => void;
+	/**
+	 * Optional parameter which has formatted value to display on the textfield
+	 */
+	valueFormatted?: string;
+	/**
+	 * Optional callback which handles the clear value event
+	 */
+	onClear?: () => void;
 }
 
 const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(
 	props: TextFieldWithHelpProps & TextFieldProps,
 	ref: ForwardedRef<HTMLDivElement>
 ) {
-	const { openInfo, important, onChange, ...muiProps } = props;
+	const {
+		openInfo,
+		important,
+		valueFormatted,
+		onClear,
+		onChange,
+		...muiProps
+	} = props;
 	const inputClasses = useInputStyles({ important });
 	const [value, setValue] = useState(muiProps.value);
 
@@ -41,14 +56,17 @@ const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(
 		},
 		[onChange]
 	);
-	const clearValue = useCallback(() => setValue(""), []);
+	const clearValue = useCallback(() => {
+		setValue("");
+		if (onClear) onClear();
+	}, [onClear]);
 
 	return (
 		<TextField
 			ref={ref}
 			InputLabelProps={InputLabelConfig}
 			{...muiProps}
-			value={value}
+			value={valueFormatted ?? value}
 			onChange={handleChange}
 			InputProps={{
 				classes: inputClasses,

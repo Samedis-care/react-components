@@ -1,9 +1,13 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import { TextFieldProps } from "@material-ui/core";
 import TextFieldWithHelp, {
 	TextFieldWithHelpProps,
 } from "../TextFieldWithHelp";
-import { parseLocalizedNumber, useInputCursorFix } from "../../../utils";
+import {
+	delocalizeNumber,
+	parseLocalizedNumber,
+	useInputCursorFix,
+} from "../../../utils";
 import useCCTranslations from "../../../utils/useCCTranslations";
 
 export interface DecimalInputFieldProps extends TextFieldWithHelpProps {
@@ -27,28 +31,42 @@ const DecimalInputField = (
 ) => {
 	const { i18n } = useCCTranslations();
 	const { value, onChange, ...muiProps } = props;
-	const valueFormatted =
-		value !== null ? value.toLocaleString(i18n.language) : "";
+	const [valueFormatted, setValueFormatted] = useState<string>(
+		value !== null ? value.toLocaleString(i18n.language) : ""
+	);
 	const { handleCursorChange, cursorInputRef } = useInputCursorFix(
 		valueFormatted
 	);
 
+	const handleClear = useCallback(() => {
+		setValueFormatted("");
+	}, []);
+
 	// on change handling
 	const handleChange = useCallback(
 		(event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
+			if (event.target.value === "") handleClear();
+			else {
+				setValueFormatted(
+					parseFloat(delocalizeNumber(event.target.value)).toLocaleString(
+						i18n.language
+					)
+				);
+			}
 			handleCursorChange(event);
 			if (!onChange) return;
 
 			onChange(event, parseLocalizedNumber(event.target.value));
 		},
-		[onChange, handleCursorChange]
+		[handleCursorChange, handleClear, i18n.language, onChange]
 	);
 
 	return (
 		<TextFieldWithHelp
 			{...muiProps}
-			value={valueFormatted}
+			valueFormatted={valueFormatted}
 			onChange={handleChange}
+			onClear={handleClear}
 			inputProps={{
 				...muiProps.inputProps,
 				ref: cursorInputRef,

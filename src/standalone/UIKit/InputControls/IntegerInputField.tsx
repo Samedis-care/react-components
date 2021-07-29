@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import { TextFieldProps } from "@material-ui/core";
 import TextFieldWithHelp, {
 	TextFieldWithHelpProps,
@@ -27,19 +27,28 @@ const IntegerInputField = (
 ) => {
 	const { i18n } = useCCTranslations();
 	const { value, onChange, ...muiProps } = props;
-	const valueFormatted =
-		value !== null ? value.toLocaleString(i18n.language) : "";
+	const [valueFormatted, setValueFormatted] = useState<string>(
+		value !== null ? value.toLocaleString(i18n.language) : ""
+	);
 	const { handleCursorChange, cursorInputRef } = useInputCursorFix(
 		valueFormatted
 	);
 
+	const handleClear = useCallback(() => {
+		setValueFormatted("");
+	}, []);
+
 	// on change handling
 	const handleChange = useCallback(
 		(event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
+			const num = event.target.value.replace(/[^0-9]/g, "");
+			if (num === "") handleClear();
+			else {
+				setValueFormatted(parseInt(num).toLocaleString(i18n.language));
+			}
 			handleCursorChange(event);
 			if (!onChange) return;
 
-			const num = event.target.value.replace(/[^0-9]/g, "");
 			if (num != "") {
 				const numericValue = parseInt(num);
 				onChange(event, numericValue);
@@ -47,7 +56,7 @@ const IntegerInputField = (
 				onChange(event, null);
 			}
 		},
-		[onChange, handleCursorChange]
+		[handleClear, handleCursorChange, onChange, i18n.language]
 	);
 
 	// component rendering
@@ -55,8 +64,9 @@ const IntegerInputField = (
 		<div>
 			<TextFieldWithHelp
 				{...muiProps}
-				value={valueFormatted}
+				valueFormatted={valueFormatted}
 				onChange={handleChange}
+				onClear={handleClear}
 				inputProps={{
 					...muiProps.inputProps,
 					ref: cursorInputRef,
