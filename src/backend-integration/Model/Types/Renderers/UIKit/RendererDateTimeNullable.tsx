@@ -45,6 +45,7 @@ class RendererDateTimeNullable extends TypeDateNullable {
 						value={value}
 						label={label}
 						disabled={visibility.readOnly}
+						required={visibility.required}
 						onChange={(date) =>
 							handleChange(field, date ? date.toDate() : null)
 						}
