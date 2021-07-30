@@ -36,14 +36,15 @@ const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(
 		!!(muiProps.value ?? muiProps.defaultValue)
 	);
 
-	const inputRef = useRef<HTMLInputElement>(null);
+	const inputRef = useRef<HTMLTextAreaElement | HTMLInputElement>(null);
 
 	const handleClear = useCallback(() => {
 		if (!inputRef.current) {
 			throw new Error("InputRef not set");
 		}
 
-		const proto = window.HTMLInputElement.prototype;
+		const proto = (muiProps.multiline ? HTMLTextAreaElement : HTMLInputElement)
+			.prototype;
 		// eslint-disable-next-line @typescript-eslint/unbound-method
 		const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
 			proto,
@@ -56,7 +57,7 @@ const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(
 
 		const event = new Event("input", { bubbles: true });
 		inputRef.current.dispatchEvent(event);
-	}, []);
+	}, [muiProps.multiline]);
 
 	// keep "hasValue" up to date
 
