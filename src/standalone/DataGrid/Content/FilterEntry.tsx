@@ -12,7 +12,7 @@ import {
 	TextField,
 	Tooltip,
 } from "@material-ui/core";
-import { Close as CloseIcon } from "@material-ui/icons";
+import { Delete as ClearIcon } from "@material-ui/icons";
 import FilterCombinator from "./FilterCombinator";
 import { ModelFilterType } from "../../../backend-integration/Model";
 import {
@@ -350,7 +350,7 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 										className={classes.filterClearBtn}
 										onClick={resetFilter}
 									>
-										<CloseIcon />
+										<ClearIcon />
 									</IconButton>
 								</span>
 							</Tooltip>
