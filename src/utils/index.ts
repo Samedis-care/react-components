@@ -12,6 +12,7 @@ export { default as shallowCompare } from "./shallowCompare";
 export { default as matchMime } from "./matchMime";
 export { default as addGetParams } from "./addGetParams";
 export { default as deepAssign } from "./deepAssign";
+export { default as isTouchDevice } from "./isTouchDevice";
 export { default as uniqueArray } from "./uniqueArray";
 export { default as getNumberSeparator } from "./getNumberSeparator";
 export { default as makeThemeStyles } from "./makeThemeStyles";
