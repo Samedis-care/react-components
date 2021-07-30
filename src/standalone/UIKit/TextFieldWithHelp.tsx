@@ -12,10 +12,7 @@ import {
 	InputAdornment,
 	InputAdornmentProps,
 } from "@material-ui/core";
-import {
-	Info as InfoIcon,
-	HighlightOff as ClearIcon,
-} from "@material-ui/icons";
+import { Info as InfoIcon, Clear as ClearIcon } from "@material-ui/icons";
 import { InputLabelConfig, UIInputProps, useInputStyles } from "./CommonStyles";
 import { isTouchDevice } from "../../utils";
 
@@ -96,7 +93,7 @@ const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(
 							}
 							{isTouchDevice() && hasValue && (
 								<IconButton onClick={handleClear}>
-									<ClearIcon />
+									<ClearIcon color={"disabled"} />
 								</IconButton>
 							)}
 							<IconButton onClick={openInfo}>
