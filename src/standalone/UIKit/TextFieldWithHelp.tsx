@@ -83,26 +83,26 @@ const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(
 			InputProps={{
 				classes: inputClasses,
 				...muiProps.InputProps,
-				endAdornment: openInfo ? (
+				endAdornment: (
 					<>
 						<InputAdornment position={"end"}>
+							{isTouchDevice() && hasValue && (
+								<IconButton onClick={handleClear}>
+									<ClearIcon />
+								</IconButton>
+							)}
 							{
 								(muiProps.InputProps
 									?.endAdornment as React.ReactElement<InputAdornmentProps>)
 									?.props?.children
 							}
-							{isTouchDevice() && hasValue && (
-								<IconButton onClick={handleClear}>
-									<ClearIcon color={"disabled"} />
+							{openInfo && (
+								<IconButton onClick={openInfo}>
+									<InfoIcon color={"disabled"} />
 								</IconButton>
 							)}
-							<IconButton onClick={openInfo}>
-								<InfoIcon color={"disabled"} />
-							</IconButton>
 						</InputAdornment>
 					</>
-				) : (
-					muiProps.InputProps?.endAdornment
 				),
 			}}
 			inputProps={{
