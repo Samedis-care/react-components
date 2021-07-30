@@ -65219,8 +65219,22 @@ exports[`Storyshots Standalone/UIKit TextAreaWithHelp 1`] = `
                                       }
                                     }
                                     fullWidth={true}
+                                    inputProps={
+                                      Object {
+                                        "ref": Object {
+                                          "current": <textarea
+                                            aria-invalid="false"
+                                            class="standalone-uikit--text-area-with-help-story-MuiInputBase-input standalone-uikit--text-area-with-help-story-MuiOutlinedInput-input standalone-uikit--text-area-with-help-story-CcUIKitInput-input-10 standalone-uikit--text-area-with-help-story-CcUIKitInput-input-12 standalone-uikit--text-area-with-help-story-MuiInputBase-inputMultiline standalone-uikit--text-area-with-help-story-MuiOutlinedInput-inputMultiline standalone-uikit--text-area-with-help-story-MuiInputBase-inputAdornedEnd standalone-uikit--text-area-with-help-story-MuiOutlinedInput-inputAdornedEnd"
+                                            placeholder="Enter something here"
+                                            rows="1"
+                                            style="height: 0px; overflow: hidden;"
+                                          />,
+                                        },
+                                      }
+                                    }
                                     label="FieldName"
                                     multiline={true}
+                                    onChange={[Function]}
                                     placeholder="Enter something here"
                                     variant="outlined"
                                   >
@@ -65258,8 +65272,22 @@ exports[`Storyshots Standalone/UIKit TextAreaWithHelp 1`] = `
                                         }
                                       }
                                       fullWidth={true}
+                                      inputProps={
+                                        Object {
+                                          "ref": Object {
+                                            "current": <textarea
+                                              aria-invalid="false"
+                                              class="standalone-uikit--text-area-with-help-story-MuiInputBase-input standalone-uikit--text-area-with-help-story-MuiOutlinedInput-input standalone-uikit--text-area-with-help-story-CcUIKitInput-input-10 standalone-uikit--text-area-with-help-story-CcUIKitInput-input-12 standalone-uikit--text-area-with-help-story-MuiInputBase-inputMultiline standalone-uikit--text-area-with-help-story-MuiOutlinedInput-inputMultiline standalone-uikit--text-area-with-help-story-MuiInputBase-inputAdornedEnd standalone-uikit--text-area-with-help-story-MuiOutlinedInput-inputAdornedEnd"
+                                              placeholder="Enter something here"
+                                              rows="1"
+                                              style="height: 0px; overflow: hidden;"
+                                            />,
+                                          },
+                                        }
+                                      }
                                       label="FieldName"
                                       multiline={true}
+                                      onChange={[Function]}
                                       placeholder="Enter something here"
                                       variant="outlined"
                                     >
@@ -65378,6 +65406,19 @@ exports[`Storyshots Standalone/UIKit TextAreaWithHelp 1`] = `
                                                 </React.Fragment>
                                               }
                                               fullWidth={true}
+                                              inputProps={
+                                                Object {
+                                                  "ref": Object {
+                                                    "current": <textarea
+                                                      aria-invalid="false"
+                                                      class="standalone-uikit--text-area-with-help-story-MuiInputBase-input standalone-uikit--text-area-with-help-story-MuiOutlinedInput-input standalone-uikit--text-area-with-help-story-CcUIKitInput-input-10 standalone-uikit--text-area-with-help-story-CcUIKitInput-input-12 standalone-uikit--text-area-with-help-story-MuiInputBase-inputMultiline standalone-uikit--text-area-with-help-story-MuiOutlinedInput-inputMultiline standalone-uikit--text-area-with-help-story-MuiInputBase-inputAdornedEnd standalone-uikit--text-area-with-help-story-MuiOutlinedInput-inputAdornedEnd"
+                                                      placeholder="Enter something here"
+                                                      rows="1"
+                                                      style="height: 0px; overflow: hidden;"
+                                                    />,
+                                                  },
+                                                }
+                                              }
                                               label={
                                                 <React.Fragment>
                                                   FieldName
@@ -65385,6 +65426,7 @@ exports[`Storyshots Standalone/UIKit TextAreaWithHelp 1`] = `
                                               }
                                               multiline={true}
                                               notched={true}
+                                              onChange={[Function]}
                                               placeholder="Enter something here"
                                             >
                                               <ForwardRef(OutlinedInput)
@@ -65424,6 +65466,19 @@ exports[`Storyshots Standalone/UIKit TextAreaWithHelp 1`] = `
                                                   </React.Fragment>
                                                 }
                                                 fullWidth={true}
+                                                inputProps={
+                                                  Object {
+                                                    "ref": Object {
+                                                      "current": <textarea
+                                                        aria-invalid="false"
+                                                        class="standalone-uikit--text-area-with-help-story-MuiInputBase-input standalone-uikit--text-area-with-help-story-MuiOutlinedInput-input standalone-uikit--text-area-with-help-story-CcUIKitInput-input-10 standalone-uikit--text-area-with-help-story-CcUIKitInput-input-12 standalone-uikit--text-area-with-help-story-MuiInputBase-inputMultiline standalone-uikit--text-area-with-help-story-MuiOutlinedInput-inputMultiline standalone-uikit--text-area-with-help-story-MuiInputBase-inputAdornedEnd standalone-uikit--text-area-with-help-story-MuiOutlinedInput-inputAdornedEnd"
+                                                        placeholder="Enter something here"
+                                                        rows="1"
+                                                        style="height: 0px; overflow: hidden;"
+                                                      />,
+                                                    },
+                                                  }
+                                                }
                                                 label={
                                                   <React.Fragment>
                                                     FieldName
@@ -65431,6 +65486,7 @@ exports[`Storyshots Standalone/UIKit TextAreaWithHelp 1`] = `
                                                 }
                                                 multiline={true}
                                                 notched={true}
+                                                onChange={[Function]}
                                                 placeholder="Enter something here"
                                               >
                                                 <WithStyles(ForwardRef(InputBase))
@@ -65471,7 +65527,21 @@ exports[`Storyshots Standalone/UIKit TextAreaWithHelp 1`] = `
                                                   }
                                                   fullWidth={true}
                                                   inputComponent="input"
+                                                  inputProps={
+                                                    Object {
+                                                      "ref": Object {
+                                                        "current": <textarea
+                                                          aria-invalid="false"
+                                                          class="standalone-uikit--text-area-with-help-story-MuiInputBase-input standalone-uikit--text-area-with-help-story-MuiOutlinedInput-input standalone-uikit--text-area-with-help-story-CcUIKitInput-input-10 standalone-uikit--text-area-with-help-story-CcUIKitInput-input-12 standalone-uikit--text-area-with-help-story-MuiInputBase-inputMultiline standalone-uikit--text-area-with-help-story-MuiOutlinedInput-inputMultiline standalone-uikit--text-area-with-help-story-MuiInputBase-inputAdornedEnd standalone-uikit--text-area-with-help-story-MuiOutlinedInput-inputAdornedEnd"
+                                                          placeholder="Enter something here"
+                                                          rows="1"
+                                                          style="height: 0px; overflow: hidden;"
+                                                        />,
+                                                      },
+                                                    }
+                                                  }
                                                   multiline={true}
+                                                  onChange={[Function]}
                                                   placeholder="Enter something here"
                                                   renderSuffix={[Function]}
                                                   type="text"
@@ -65517,7 +65587,21 @@ exports[`Storyshots Standalone/UIKit TextAreaWithHelp 1`] = `
                                                     }
                                                     fullWidth={true}
                                                     inputComponent="input"
+                                                    inputProps={
+                                                      Object {
+                                                        "ref": Object {
+                                                          "current": <textarea
+                                                            aria-invalid="false"
+                                                            class="standalone-uikit--text-area-with-help-story-MuiInputBase-input standalone-uikit--text-area-with-help-story-MuiOutlinedInput-input standalone-uikit--text-area-with-help-story-CcUIKitInput-input-10 standalone-uikit--text-area-with-help-story-CcUIKitInput-input-12 standalone-uikit--text-area-with-help-story-MuiInputBase-inputMultiline standalone-uikit--text-area-with-help-story-MuiOutlinedInput-inputMultiline standalone-uikit--text-area-with-help-story-MuiInputBase-inputAdornedEnd standalone-uikit--text-area-with-help-story-MuiOutlinedInput-inputAdornedEnd"
+                                                            placeholder="Enter something here"
+                                                            rows="1"
+                                                            style="height: 0px; overflow: hidden;"
+                                                          />,
+                                                        },
+                                                      }
+                                                    }
                                                     multiline={true}
+                                                    onChange={[Function]}
                                                     placeholder="Enter something here"
                                                     renderSuffix={[Function]}
                                                     type="text"
@@ -71842,7 +71926,21 @@ exports[`Storyshots Standalone/UIKit TextFieldWithHelp 1`] = `
                                       }
                                     }
                                     fullWidth={true}
+                                    inputProps={
+                                      Object {
+                                        "ref": Object {
+                                          "current": <input
+                                            aria-invalid="false"
+                                            class="standalone-uikit--text-field-with-help-story-MuiInputBase-input standalone-uikit--text-field-with-help-story-MuiInput-input standalone-uikit--text-field-with-help-story-CcUIKitInput-input-6 standalone-uikit--text-field-with-help-story-CcUIKitInput-input-8 standalone-uikit--text-field-with-help-story-MuiInputBase-inputAdornedEnd"
+                                            placeholder="Enter something here"
+                                            type="text"
+                                            value=""
+                                          />,
+                                        },
+                                      }
+                                    }
                                     label="FieldName"
+                                    onChange={[Function]}
                                     placeholder="Enter something here"
                                   >
                                     <ForwardRef(TextField)
@@ -71879,7 +71977,21 @@ exports[`Storyshots Standalone/UIKit TextFieldWithHelp 1`] = `
                                         }
                                       }
                                       fullWidth={true}
+                                      inputProps={
+                                        Object {
+                                          "ref": Object {
+                                            "current": <input
+                                              aria-invalid="false"
+                                              class="standalone-uikit--text-field-with-help-story-MuiInputBase-input standalone-uikit--text-field-with-help-story-MuiInput-input standalone-uikit--text-field-with-help-story-CcUIKitInput-input-6 standalone-uikit--text-field-with-help-story-CcUIKitInput-input-8 standalone-uikit--text-field-with-help-story-MuiInputBase-inputAdornedEnd"
+                                              placeholder="Enter something here"
+                                              type="text"
+                                              value=""
+                                            />,
+                                          },
+                                        }
+                                      }
                                       label="FieldName"
+                                      onChange={[Function]}
                                       placeholder="Enter something here"
                                     >
                                       <WithStyles(ForwardRef(FormControl))
@@ -71997,7 +72109,21 @@ exports[`Storyshots Standalone/UIKit TextFieldWithHelp 1`] = `
                                                 </React.Fragment>
                                               }
                                               fullWidth={true}
+                                              inputProps={
+                                                Object {
+                                                  "ref": Object {
+                                                    "current": <input
+                                                      aria-invalid="false"
+                                                      class="standalone-uikit--text-field-with-help-story-MuiInputBase-input standalone-uikit--text-field-with-help-story-MuiInput-input standalone-uikit--text-field-with-help-story-CcUIKitInput-input-6 standalone-uikit--text-field-with-help-story-CcUIKitInput-input-8 standalone-uikit--text-field-with-help-story-MuiInputBase-inputAdornedEnd"
+                                                      placeholder="Enter something here"
+                                                      type="text"
+                                                      value=""
+                                                    />,
+                                                  },
+                                                }
+                                              }
                                               multiline={false}
+                                              onChange={[Function]}
                                               placeholder="Enter something here"
                                             >
                                               <ForwardRef(Input)
@@ -72036,7 +72162,21 @@ exports[`Storyshots Standalone/UIKit TextFieldWithHelp 1`] = `
                                                   </React.Fragment>
                                                 }
                                                 fullWidth={true}
+                                                inputProps={
+                                                  Object {
+                                                    "ref": Object {
+                                                      "current": <input
+                                                        aria-invalid="false"
+                                                        class="standalone-uikit--text-field-with-help-story-MuiInputBase-input standalone-uikit--text-field-with-help-story-MuiInput-input standalone-uikit--text-field-with-help-story-CcUIKitInput-input-6 standalone-uikit--text-field-with-help-story-CcUIKitInput-input-8 standalone-uikit--text-field-with-help-story-MuiInputBase-inputAdornedEnd"
+                                                        placeholder="Enter something here"
+                                                        type="text"
+                                                        value=""
+                                                      />,
+                                                    },
+                                                  }
+                                                }
                                                 multiline={false}
+                                                onChange={[Function]}
                                                 placeholder="Enter something here"
                                               >
                                                 <WithStyles(ForwardRef(InputBase))
@@ -72076,7 +72216,21 @@ exports[`Storyshots Standalone/UIKit TextFieldWithHelp 1`] = `
                                                   }
                                                   fullWidth={true}
                                                   inputComponent="input"
+                                                  inputProps={
+                                                    Object {
+                                                      "ref": Object {
+                                                        "current": <input
+                                                          aria-invalid="false"
+                                                          class="standalone-uikit--text-field-with-help-story-MuiInputBase-input standalone-uikit--text-field-with-help-story-MuiInput-input standalone-uikit--text-field-with-help-story-CcUIKitInput-input-6 standalone-uikit--text-field-with-help-story-CcUIKitInput-input-8 standalone-uikit--text-field-with-help-story-MuiInputBase-inputAdornedEnd"
+                                                          placeholder="Enter something here"
+                                                          type="text"
+                                                          value=""
+                                                        />,
+                                                      },
+                                                    }
+                                                  }
                                                   multiline={false}
+                                                  onChange={[Function]}
                                                   placeholder="Enter something here"
                                                   type="text"
                                                 >
@@ -72121,7 +72275,21 @@ exports[`Storyshots Standalone/UIKit TextFieldWithHelp 1`] = `
                                                     }
                                                     fullWidth={true}
                                                     inputComponent="input"
+                                                    inputProps={
+                                                      Object {
+                                                        "ref": Object {
+                                                          "current": <input
+                                                            aria-invalid="false"
+                                                            class="standalone-uikit--text-field-with-help-story-MuiInputBase-input standalone-uikit--text-field-with-help-story-MuiInput-input standalone-uikit--text-field-with-help-story-CcUIKitInput-input-6 standalone-uikit--text-field-with-help-story-CcUIKitInput-input-8 standalone-uikit--text-field-with-help-story-MuiInputBase-inputAdornedEnd"
+                                                            placeholder="Enter something here"
+                                                            type="text"
+                                                            value=""
+                                                          />,
+                                                        },
+                                                      }
+                                                    }
                                                     multiline={false}
+                                                    onChange={[Function]}
                                                     placeholder="Enter something here"
                                                     type="text"
                                                   >

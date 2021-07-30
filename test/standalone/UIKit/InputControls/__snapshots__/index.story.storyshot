@@ -6027,13 +6027,7 @@ exports[`Storyshots Standalone/UIKit/InputControls CurrencyInput 1`] = `
                                       inputProps={
                                         Object {
                                           "ref": Object {
-                                            "current": <input
-                                              aria-invalid="false"
-                                              class="standalone-uikit-inputcontrols--currency-input-story-MuiInputBase-input standalone-uikit-inputcontrols--currency-input-story-MuiInput-input standalone-uikit-inputcontrols--currency-input-story-CcUIKitInput-input-6 standalone-uikit-inputcontrols--currency-input-story-CcUIKitInput-input-8 standalone-uikit-inputcontrols--currency-input-story-MuiInputBase-inputAdornedEnd"
-                                              placeholder="Enter amount"
-                                              type="text"
-                                              value=""
-                                            />,
+                                            "current": null,
                                           },
                                         }
                                       }
@@ -12966,6 +12960,19 @@ exports[`Storyshots Standalone/UIKit/InputControls DateInput 1`] = `
                                                     error={false}
                                                     fullWidth={true}
                                                     helperText=""
+                                                    inputProps={
+                                                      Object {
+                                                        "ref": Object {
+                                                          "current": <input
+                                                            aria-invalid="false"
+                                                            class="standalone-uikit-inputcontrols--date-input-story-MuiInputBase-input standalone-uikit-inputcontrols--date-input-story-MuiInput-input standalone-uikit-inputcontrols--date-input-story-CcUIKitInput-input-6 standalone-uikit-inputcontrols--date-input-story-CcUIKitInput-input-8 standalone-uikit-inputcontrols--date-input-story-MuiInputBase-inputAdornedEnd"
+                                                            placeholder="Please Select Date"
+                                                            type="text"
+                                                            value=""
+                                                          />,
+                                                        },
+                                                      }
+                                                    }
                                                     label="Date"
                                                     onChange={[Function]}
                                                     onError={[Function]}
@@ -13015,6 +13022,19 @@ exports[`Storyshots Standalone/UIKit/InputControls DateInput 1`] = `
                                                       error={false}
                                                       fullWidth={true}
                                                       helperText=""
+                                                      inputProps={
+                                                        Object {
+                                                          "ref": Object {
+                                                            "current": <input
+                                                              aria-invalid="false"
+                                                              class="standalone-uikit-inputcontrols--date-input-story-MuiInputBase-input standalone-uikit-inputcontrols--date-input-story-MuiInput-input standalone-uikit-inputcontrols--date-input-story-CcUIKitInput-input-6 standalone-uikit-inputcontrols--date-input-story-CcUIKitInput-input-8 standalone-uikit-inputcontrols--date-input-story-MuiInputBase-inputAdornedEnd"
+                                                              placeholder="Please Select Date"
+                                                              type="text"
+                                                              value=""
+                                                            />,
+                                                          },
+                                                        }
+                                                      }
                                                       label="Date"
                                                       onChange={[Function]}
                                                       onError={[Function]}
@@ -13145,6 +13165,19 @@ exports[`Storyshots Standalone/UIKit/InputControls DateInput 1`] = `
                                                                 </React.Fragment>
                                                               }
                                                               fullWidth={true}
+                                                              inputProps={
+                                                                Object {
+                                                                  "ref": Object {
+                                                                    "current": <input
+                                                                      aria-invalid="false"
+                                                                      class="standalone-uikit-inputcontrols--date-input-story-MuiInputBase-input standalone-uikit-inputcontrols--date-input-story-MuiInput-input standalone-uikit-inputcontrols--date-input-story-CcUIKitInput-input-6 standalone-uikit-inputcontrols--date-input-story-CcUIKitInput-input-8 standalone-uikit-inputcontrols--date-input-story-MuiInputBase-inputAdornedEnd"
+                                                                      placeholder="Please Select Date"
+                                                                      type="text"
+                                                                      value=""
+                                                                    />,
+                                                                  },
+                                                                }
+                                                              }
                                                               multiline={false}
                                                               onChange={[Function]}
                                                               placeholder="Please Select Date"
@@ -13192,6 +13225,19 @@ exports[`Storyshots Standalone/UIKit/InputControls DateInput 1`] = `
                                                                   </React.Fragment>
                                                                 }
                                                                 fullWidth={true}
+                                                                inputProps={
+                                                                  Object {
+                                                                    "ref": Object {
+                                                                      "current": <input
+                                                                        aria-invalid="false"
+                                                                        class="standalone-uikit-inputcontrols--date-input-story-MuiInputBase-input standalone-uikit-inputcontrols--date-input-story-MuiInput-input standalone-uikit-inputcontrols--date-input-story-CcUIKitInput-input-6 standalone-uikit-inputcontrols--date-input-story-CcUIKitInput-input-8 standalone-uikit-inputcontrols--date-input-story-MuiInputBase-inputAdornedEnd"
+                                                                        placeholder="Please Select Date"
+                                                                        type="text"
+                                                                        value=""
+                                                                      />,
+                                                                    },
+                                                                  }
+                                                                }
                                                                 multiline={false}
                                                                 onChange={[Function]}
                                                                 placeholder="Please Select Date"
@@ -13240,6 +13286,19 @@ exports[`Storyshots Standalone/UIKit/InputControls DateInput 1`] = `
                                                                   }
                                                                   fullWidth={true}
                                                                   inputComponent="input"
+                                                                  inputProps={
+                                                                    Object {
+                                                                      "ref": Object {
+                                                                        "current": <input
+                                                                          aria-invalid="false"
+                                                                          class="standalone-uikit-inputcontrols--date-input-story-MuiInputBase-input standalone-uikit-inputcontrols--date-input-story-MuiInput-input standalone-uikit-inputcontrols--date-input-story-CcUIKitInput-input-6 standalone-uikit-inputcontrols--date-input-story-CcUIKitInput-input-8 standalone-uikit-inputcontrols--date-input-story-MuiInputBase-inputAdornedEnd"
+                                                                          placeholder="Please Select Date"
+                                                                          type="text"
+                                                                          value=""
+                                                                        />,
+                                                                      },
+                                                                    }
+                                                                  }
                                                                   multiline={false}
                                                                   onChange={[Function]}
                                                                   placeholder="Please Select Date"
@@ -13293,6 +13352,19 @@ exports[`Storyshots Standalone/UIKit/InputControls DateInput 1`] = `
                                                                     }
                                                                     fullWidth={true}
                                                                     inputComponent="input"
+                                                                    inputProps={
+                                                                      Object {
+                                                                        "ref": Object {
+                                                                          "current": <input
+                                                                            aria-invalid="false"
+                                                                            class="standalone-uikit-inputcontrols--date-input-story-MuiInputBase-input standalone-uikit-inputcontrols--date-input-story-MuiInput-input standalone-uikit-inputcontrols--date-input-story-CcUIKitInput-input-6 standalone-uikit-inputcontrols--date-input-story-CcUIKitInput-input-8 standalone-uikit-inputcontrols--date-input-story-MuiInputBase-inputAdornedEnd"
+                                                                            placeholder="Please Select Date"
+                                                                            type="text"
+                                                                            value=""
+                                                                          />,
+                                                                        },
+                                                                      }
+                                                                    }
                                                                     multiline={false}
                                                                     onChange={[Function]}
                                                                     placeholder="Please Select Date"
@@ -27438,13 +27510,7 @@ exports[`Storyshots Standalone/UIKit/InputControls DecimalInputField 1`] = `
                                     inputProps={
                                       Object {
                                         "ref": Object {
-                                          "current": <input
-                                            aria-invalid="false"
-                                            class="standalone-uikit-inputcontrols--decimal-input-field-story-MuiInputBase-input standalone-uikit-inputcontrols--decimal-input-field-story-MuiInput-input standalone-uikit-inputcontrols--decimal-input-field-story-CcUIKitInput-input-6 standalone-uikit-inputcontrols--decimal-input-field-story-CcUIKitInput-input-8 standalone-uikit-inputcontrols--decimal-input-field-story-MuiInputBase-inputAdornedEnd"
-                                            placeholder="Enter decimal number"
-                                            type="text"
-                                            value=""
-                                          />,
+                                          "current": null,
                                         },
                                       }
                                     }
@@ -34087,13 +34153,7 @@ exports[`Storyshots Standalone/UIKit/InputControls IntegerInputField 1`] = `
                                       inputProps={
                                         Object {
                                           "ref": Object {
-                                            "current": <input
-                                              aria-invalid="false"
-                                              class="standalone-uikit-inputcontrols--integer-input-field-story-MuiInputBase-input standalone-uikit-inputcontrols--integer-input-field-story-MuiInput-input standalone-uikit-inputcontrols--integer-input-field-story-CcUIKitInput-input-6 standalone-uikit-inputcontrols--integer-input-field-story-CcUIKitInput-input-8 standalone-uikit-inputcontrols--integer-input-field-story-MuiInputBase-inputAdornedEnd"
-                                              placeholder="Enter integer number"
-                                              type="text"
-                                              value=""
-                                            />,
+                                            "current": null,
                                           },
                                         }
                                       }
