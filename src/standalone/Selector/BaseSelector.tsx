@@ -13,6 +13,7 @@ import {
 	Paper,
 	InputProps,
 	Divider,
+	Typography,
 } from "@material-ui/core";
 import { Autocomplete, AutocompleteProps } from "@material-ui/lab";
 import {
@@ -69,6 +70,11 @@ export interface BaseSelectorData {
 	 * Label and value won't be used. isDisabled will be forced to true
 	 */
 	isDivider?: boolean;
+	/**
+	 * Is this entry a small label?
+	 * Label will be displayed, value won't be used. isDisabled will be forced to true
+	 */
+	isSmallLabel?: boolean;
 	/**
 	 * CSS styles for options
 	 */
@@ -337,8 +343,8 @@ const useCustomStylesBase = makeStyles(
 			marginTop: props.label ? 16 : undefined,
 		}),
 		listItem: {
-			paddingLeft: 16,
-			paddingRight: 16,
+			paddingLeft: "16px !important",
+			paddingRight: "16px !important",
 			paddingTop: 6,
 			paddingBottom: 6,
 		},
@@ -347,6 +353,11 @@ const useCustomStylesBase = makeStyles(
 			"&:hover": {
 				backgroundColor: theme.palette.background.paper,
 			},
+		},
+		smallLabel: {
+			paddingLeft: 16,
+			paddingTop: 4,
+			color: theme.palette.text.disabled,
 		},
 		divider: {
 			width: "100%",
@@ -471,6 +482,12 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 	const defaultRenderer = useCallback(
 		(data: BaseSelectorData) => {
 			if (data.isDivider) return <Divider className={customClasses.divider} />;
+			if (data.isSmallLabel)
+				return (
+					<Typography variant={"caption"} className={customClasses.smallLabel}>
+						{data.label}
+					</Typography>
+				);
 
 			return (
 				<SelectorSmallListItem
@@ -554,6 +571,13 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 								isDivider: true,
 						  } as DataT)
 						: undefined,
+					lruIds.length > 0
+						? ({
+								label: t("standalone.selector.base-selector.lru-label"),
+								value: "lru-label",
+								isSmallLabel: true,
+						  } as DataT)
+						: undefined,
 					...(await Promise.all(lruIds.map(lru.loadData))).map((entry) => ({
 						...entry,
 						className: combineClassNames([
@@ -595,6 +619,7 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 			setLoading(false);
 		},
 		[
+			t,
 			actualAddNewLabel,
 			lru,
 			lruIds,
@@ -703,7 +728,7 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 						getOptionLabel={(option: BaseSelectorData) => option.label}
 						renderOption={(option: BaseSelectorData) => defaultRenderer(option)}
 						getOptionDisabled={(option: BaseSelectorData) =>
-							!!(option.isDisabled || option.isDivider)
+							!!(option.isDisabled || option.isDivider || option.isSmallLabel)
 						}
 						getOptionSelected={(option, value) => option.value === value.value}
 						onChange={(_event, selectedValue) =>

@@ -91,7 +91,8 @@
 				"open-icon-text": "Open",
 				"clear-icon-text": "Clear",
 				"loading-text": "Loading...",
-				"start-typing-to-search-text": "Enter a search string to get results"
+				"start-typing-to-search-text": "Enter a search string to get results",
+				"lru-label": "Last recently used"
 			}
 		},
 		"file-upload": {
