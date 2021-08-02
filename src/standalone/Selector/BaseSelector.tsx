@@ -578,7 +578,15 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 								isSmallLabel: true,
 						  } as DataT)
 						: undefined,
-					...(await Promise.all(lruIds.map(lru.loadData))).map((entry) => ({
+					...((
+						await Promise.all(
+							lruIds.map((id) =>
+								(async (id: string): Promise<DataT> => lru.loadData(id))(
+									id
+								).catch(() => undefined)
+							)
+						)
+					).filter((e) => !!e) as DataT[]).map((entry) => ({
 						...entry,
 						className: combineClassNames([
 							customClasses.lruListItem,
