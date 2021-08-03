@@ -219,7 +219,7 @@ export const useModelDelete = <
 >(
 	model: Model<KeyT, VisibilityT, CustomT>
 ): UseMutationResult<void, Error, string, TContext> => {
-	return useMutation(model.modelId + "-delete", model.deleteRaw.bind(this), {
+	return useMutation(model.modelId + "-delete", model.deleteRaw.bind(model), {
 		onSuccess: (data: void, id: string) => {
 			ModelDataStore.removeQueries(model.getReactQueryKey(id));
 		},
@@ -240,7 +240,7 @@ export const useModelDeleteMultiple = <
 ): UseMutationResult<void, Error, string[], TContext> => {
 	return useMutation(
 		model.modelId + "-delete-multi",
-		model.deleteMultipleRaw.bind(this),
+		model.deleteMultipleRaw.bind(model),
 		{
 			onSuccess: (data: void, ids: string[]) => {
 				ids.forEach((id) =>
@@ -266,7 +266,7 @@ export const useModelDeleteAdvanced = <
 ): UseMutationResult<void, Error, AdvancedDeleteRequest, TContext> => {
 	return useMutation(
 		model.modelId + "-delete-adv",
-		model.deleteAdvancedRaw.bind(this),
+		model.deleteAdvancedRaw.bind(model),
 		{
 			onSuccess: (data: void, req: AdvancedDeleteRequest) => {
 				// this function is likely to flush more then actually deleted
