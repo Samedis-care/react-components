@@ -72,6 +72,13 @@ export interface BackendMultiSelectProps<
 	 * LRU config
 	 */
 	lru?: BackendMultiSelectLruOptions<DataT>;
+	/**
+	 * Load error event
+	 * @param error The error that has been raised while loading
+	 * @return string Label for entry which failed loading
+	 * @return null To remove entry from selected entries
+	 */
+	onLoadError?: (error: Error) => string | null;
 }
 
 interface UseSelectedCacheResult<DataT extends MultiSelectorData> {
@@ -93,10 +100,22 @@ export const useSelectedCache = <
 >(
 	props: Pick<
 		BackendMultiSelectProps<KeyT, VisibilityT, CustomT, DataT>,
-		"model" | "modelToSelectorData" | "onSelect" | "selected" | "initialData"
+		| "model"
+		| "modelToSelectorData"
+		| "onSelect"
+		| "selected"
+		| "initialData"
+		| "onLoadError"
 	>
 ): UseSelectedCacheResult<DataT> => {
-	const { model, modelToSelectorData, onSelect, selected, initialData } = props;
+	const {
+		model,
+		modelToSelectorData,
+		onSelect,
+		selected,
+		initialData,
+		onLoadError,
+	} = props;
 
 	const [selectedCache, setSelectedCache] = useState<Record<string, DataT>>({});
 
@@ -147,15 +166,38 @@ export const useSelectedCache = <
 							const data = await model.getCached(value);
 							newCache[value] = await modelToSelectorData(data[0]);
 						} catch (e) {
+							const err = e as Error;
+							let errorMsg =
+								err.message ?? t("backend-components.selector.loading-error");
+							if (onLoadError) {
+								const result = onLoadError(err);
+								// if we should drop the record return here and don't create a record in cache
+								if (!result) {
+									return;
+								}
+								errorMsg = result;
+							}
 							newCache[value] = {
 								value,
-								label:
-									(e as Error).message ??
-									t("backend-components.selector.loading-error"),
+								label: errorMsg,
 							};
 						}
 					})
 			);
+
+			// now that everything has loaded ensure we actually drop records
+			// if we can update and we have something to drop
+			if (
+				onSelect &&
+				selected.filter((id) => !(id in selectedCache)).length > 0
+			) {
+				// call onSelect with new array
+				onSelect(
+					selected,
+					selected.map((id) => selectedCache[id])
+				);
+			}
+
 			setSelectedCache((oldCache) => Object.assign({}, oldCache, newCache));
 		})();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
