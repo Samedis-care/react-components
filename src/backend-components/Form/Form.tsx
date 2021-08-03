@@ -120,11 +120,19 @@ export interface FormProps<
 	 */
 	readOnly?: boolean;
 	/**
+	 * Disable Validations
+	 */
+	disableValidation?: boolean;
+	/**
 	 * Nested form name
 	 * Enables nested form mode if set to non-empty string
 	 * Form is submitted with main form submit. Does not support multiple layers of nesting
 	 */
 	nestedFormName?: string;
+	/**
+	 * Disables form submission
+	 */
+	disableNestedSubmit?: boolean;
 	/**
 	 * Submit preparation handler
 	 * Called after parent form submit, before this form submit
@@ -339,7 +347,9 @@ const Form = <
 		onlyValidateMounted,
 		onlySubmitMounted,
 		readOnly,
+		disableValidation,
 		nestedFormName,
+		disableNestedSubmit,
 		nestedFormPreSubmitHandler,
 	} = props;
 	const ErrorComponent = props.errorComponent;
@@ -427,6 +437,12 @@ const Form = <
 	const [errors, setErrors] = useState<Record<string, string | null>>({});
 	const [submitting, setSubmitting] = useState(false);
 
+	// main form handling - validation disable toggle
+	useEffect(() => {
+		if (!disableValidation) return;
+		setErrors({});
+	}, [disableValidation]);
+
 	// main form handling - mounted state tracking
 	const [mountedFields, setMountedFields] = useState(() =>
 		Object.fromEntries(Object.keys(model.fields).map((field) => [field, false]))
@@ -438,6 +454,8 @@ const Form = <
 	// main form handling - dispatch
 	const validateForm = useCallback(
 		(values?: Record<string, unknown>) => {
+			if (disableValidation) return {};
+
 			const errors = model.validate(
 				values ?? valuesRef.current,
 				id ? "edit" : "create",
@@ -459,7 +477,7 @@ const Form = <
 			);
 			return errors;
 		},
-		[model, id, onlyValidateMounted, mountedFields]
+		[disableValidation, model, id, onlyValidateMounted, mountedFields]
 	);
 	const validateField = useCallback(
 		(field: string, value?: unknown) => {
@@ -670,15 +688,17 @@ const Form = <
 			return submitForm();
 		};
 
-		parentFormContext.setCustomValidationHandler(
-			nestedFormName,
-			validateNestedForm
-		);
-		parentFormContext.setPostSubmitHandler(nestedFormName, submitNestedForm);
+		if (!disableNestedSubmit) {
+			parentFormContext.setCustomValidationHandler(
+				nestedFormName,
+				validateNestedForm
+			);
+			parentFormContext.setPostSubmitHandler(nestedFormName, submitNestedForm);
+		}
 		return () => {
-			if (parentFormContext.onlyValidateMounted)
+			if (parentFormContext.onlyValidateMounted && !disableValidation)
 				parentFormContext.removeCustomValidationHandler(nestedFormName);
-			if (parentFormContext.onlySubmitMounted)
+			if (parentFormContext.onlySubmitMounted && !disableNestedSubmit)
 				parentFormContext.removePostSubmitHandler(nestedFormName);
 		};
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -687,9 +707,11 @@ const Form = <
 		parentFormContext?.onlyValidateMounted,
 		parentFormContext?.onlySubmitMounted,
 		validateForm,
+		disableValidation,
 		nestedFormPreSubmitHandler,
 		submitForm,
 		nestedFormName,
+		disableNestedSubmit,
 	]);
 
 	// Debug Helper (for React Devtools)
