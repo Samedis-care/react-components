@@ -34,7 +34,7 @@ export const MultiImageStory = (): React.ReactElement => {
 					},
 			  ]
 	);
-	const [primary, setPrimary] = useState(images[0]?.id ?? null);
+	const [primary, setPrimary] = useState<string | null>(images[0]?.id ?? null);
 	const previewSize = number("Preview size (in px)", 256, {
 		range: true,
 		min: 128,
@@ -47,7 +47,7 @@ export const MultiImageStory = (): React.ReactElement => {
 		action("onChange")(name, value);
 	};
 
-	const handlePrimaryChange = (name: string | undefined, id: string) => {
+	const handlePrimaryChange = (name: string | undefined, id: string | null) => {
 		setPrimary(id);
 		action("onPrimaryChange")(name, id);
 	};

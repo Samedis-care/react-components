@@ -93,9 +93,9 @@ export interface MultiImageProps {
 	/**
 	 * Change event for primary image id
 	 * @param name The name of this field
-	 * @param primary The new primary image ID
+	 * @param primary The new primary image ID or null if no image is present
 	 */
-	onPrimaryChange?: (name: string | undefined, primary: string) => void;
+	onPrimaryChange?: (name: string | undefined, primary: string | null) => void;
 	/**
 	 * Callback for delete confirmation
 	 * @param image The image that the user wants to delete
@@ -213,7 +213,11 @@ const MultiImage = (props: MultiImageProps) => {
 	// update primary image ID if it becomes invalid
 	useEffect(() => {
 		if (!onPrimaryChange) return;
-		if (!primaryImg || primaryImg.id === primary) return;
+		if (!primaryImg) {
+			onPrimaryChange(name, null);
+			return;
+		}
+		if (primaryImg.id === primary) return;
 		onPrimaryChange(name, primaryImg.id);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [onPrimaryChange, primary, primaryImg]);
