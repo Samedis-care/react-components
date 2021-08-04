@@ -158,43 +158,41 @@ export const useSelectedCache = <
 						)
 				);
 			}
+			const isIdNotInCache = (value: string): boolean =>
+				!(value in selectedCache) && !(value in newCache);
 			await Promise.all(
-				selected
-					.filter((value) => !(value in selectedCache) && !(value in newCache))
-					.map(async (value) => {
-						try {
-							const data = await model.getCached(value);
-							newCache[value] = await modelToSelectorData(data[0]);
-						} catch (e) {
-							const err = e as Error;
-							let errorMsg =
-								err.message ?? t("backend-components.selector.loading-error");
-							if (onLoadError) {
-								const result = onLoadError(err);
-								// if we should drop the record return here and don't create a record in cache
-								if (!result) {
-									return;
-								}
-								errorMsg = result;
+				selected.filter(isIdNotInCache).map(async (value) => {
+					try {
+						const data = await model.getCached(value);
+						newCache[value] = await modelToSelectorData(data[0]);
+					} catch (e) {
+						const err = e as Error;
+						let errorMsg =
+							err.message ?? t("backend-components.selector.loading-error");
+						if (onLoadError) {
+							const result = onLoadError(err);
+							// if we should drop the record return here and don't create a record in cache
+							if (!result) {
+								return;
 							}
-							newCache[value] = {
-								value,
-								label: errorMsg,
-							};
+							errorMsg = result;
 						}
-					})
+						newCache[value] = {
+							value,
+							label: errorMsg,
+						};
+					}
+				})
 			);
 
 			// now that everything has loaded ensure we actually drop records
 			// if we can update and we have something to drop
-			if (
-				onSelect &&
-				selected.filter((id) => !(id in selectedCache)).length > 0
-			) {
+			if (onSelect && selected.filter(isIdNotInCache).length > 0) {
 				// call onSelect with new array
+				const newSelection = selected.filter((id) => !isIdNotInCache(id));
 				onSelect(
-					selected,
-					selected.map((id) => selectedCache[id])
+					newSelection,
+					newSelection.map((id) => selectedCache[id] ?? newCache[id])
 				);
 			}
 
