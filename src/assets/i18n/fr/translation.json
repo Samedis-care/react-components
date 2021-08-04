@@ -8,7 +8,8 @@
 				"open-icon-text": "Ouvrir",
 				"loading-text": "Chargement...",
 				"start-typing-to-search-text": "Entrez une chaîne de recherche pour obtenir des résultats",
-				"clear-icon-text": "À vider"
+				"clear-icon-text": "À vider",
+				"lru-label": "Dernière utilisation récente"
 			}
 		},
 		"schedule": {

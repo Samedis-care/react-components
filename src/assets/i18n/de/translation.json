@@ -84,7 +84,8 @@
 				"open-icon-text": "Öffnen",
 				"loading-text": "Lade...",
 				"start-typing-to-search-text": "Geben Sie eine Suchzeichenfolge ein, um Ergebnisse zu erhalten",
-				"clear-icon-text": "Leeren"
+				"clear-icon-text": "Leeren",
+				"lru-label": "Zuletzt verwendet"
 			}
 		},
 		"schedule": {
