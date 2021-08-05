@@ -561,17 +561,24 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 
 			setLoading(true);
 			let results: DataT[];
-			if (lru && query === "" && (lruIds.length > 0 || lru.forceQuery)) {
+			const filteredLruIds = filterIds
+				? lruIds.filter((id) => !filterIds.includes(id))
+				: lruIds;
+			if (
+				lru &&
+				query === "" &&
+				(filteredLruIds.length > 0 || lru.forceQuery)
+			) {
 				results = [
 					onAddNew ? addNewEntry : undefined,
-					lruIds.length > 0 && onAddNew
+					filteredLruIds.length > 0 && onAddNew
 						? ({
 								label: "",
 								value: "lru-divider",
 								isDivider: true,
 						  } as DataT)
 						: undefined,
-					lruIds.length > 0
+					filteredLruIds.length > 0
 						? ({
 								label: t("standalone.selector.base-selector.lru-label"),
 								value: "lru-label",
@@ -580,7 +587,7 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 						: undefined,
 					...((
 						await Promise.all(
-							lruIds.map((id) =>
+							filteredLruIds.map((id) =>
 								(async (id: string): Promise<DataT> => lru.loadData(id))(
 									id
 								).catch(() => undefined)
