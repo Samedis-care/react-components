@@ -67,12 +67,12 @@ const DataActionBarView = (props: DataActionBarViewProps) => {
 								<SmallIconButton
 									color={"primary"}
 									disabled={props.numSelected !== 1}
+									onClick={props.handleEdit}
 								>
 									<EditIcon />
 								</SmallIconButton>
 							}
 							labelText={t("standalone.data-grid.footer.edit")}
-							onClick={props.handleEdit}
 							labelPlacement={"bottom"}
 							disabled={props.numSelected !== 1}
 						/>
@@ -90,12 +90,12 @@ const DataActionBarView = (props: DataActionBarViewProps) => {
 								<SmallIconButton
 									color={"primary"}
 									disabled={props.numSelected === 0}
+									onClick={props.handleDelete}
 								>
 									<DeleteIcon />
 								</SmallIconButton>
 							}
 							labelText={t("standalone.data-grid.footer.delete")}
-							onClick={props.handleDelete}
 							labelPlacement={"bottom"}
 							disabled={props.numSelected === 0}
 						/>
@@ -113,15 +113,14 @@ const DataActionBarView = (props: DataActionBarViewProps) => {
 								<SmallIconButton
 									color={"primary"}
 									disabled={entry.isDisabled(props.numSelected)}
+									onClick={() => {
+										props.handleCustomButtonClick(entry.label);
+									}}
 								>
 									{entry.icon}
 								</SmallIconButton>
 							}
 							labelText={entry.label}
-							onClick={(evt: React.MouseEvent) => {
-								evt.stopPropagation();
-								props.handleCustomButtonClick(entry.label);
-							}}
 							labelPlacement={"bottom"}
 							disabled={entry.isDisabled(props.numSelected)}
 						/>

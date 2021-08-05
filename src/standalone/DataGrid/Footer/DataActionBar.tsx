@@ -28,54 +28,46 @@ const DataActionBar = () => {
 		? Object.values(state.rows).find((row) => !selectedRows.includes(row.id))
 				?.id
 		: selectedRows[0];
-	const handleEdit = useCallback(
-		(evt: React.MouseEvent) => {
-			evt.stopPropagation();
-			if (numSelected !== 1) return;
-			if (!firstSelection)
-				throw new Error(
-					"Calling handleEdit without selection? This shouldn't happen."
-				);
-			if (onEdit) onEdit(firstSelection);
-		},
-		[numSelected, onEdit, firstSelection]
-	);
+	const handleEdit = useCallback(() => {
+		if (numSelected !== 1) return;
+		if (!firstSelection)
+			throw new Error(
+				"Calling handleEdit without selection? This shouldn't happen."
+			);
+		if (onEdit) onEdit(firstSelection);
+	}, [numSelected, onEdit, firstSelection]);
 
-	const handleDelete = useCallback(
-		async (evt: React.MouseEvent) => {
-			evt.stopPropagation();
-			if (numSelected === 0) return;
-			if (onDelete) {
-				try {
-					await onDelete(selectAll, selectedRows, {
-						quickFilter: search,
-						fieldFilter: dataGridPrepareFiltersAndSorts(columnState)[1],
-						additionalFilters: getAdditionalFilters
-							? getAdditionalFilters(customData)
-							: {},
-					});
-					setState((prevState) => ({
-						...prevState,
-						selectAll: false,
-						selectedRows: [],
-					}));
-				} catch (e) {
-					// user cancelled
-				}
+	const handleDelete = useCallback(async () => {
+		if (numSelected === 0) return;
+		if (onDelete) {
+			try {
+				await onDelete(selectAll, selectedRows, {
+					quickFilter: search,
+					fieldFilter: dataGridPrepareFiltersAndSorts(columnState)[1],
+					additionalFilters: getAdditionalFilters
+						? getAdditionalFilters(customData)
+						: {},
+				});
+				setState((prevState) => ({
+					...prevState,
+					selectAll: false,
+					selectedRows: [],
+				}));
+			} catch (e) {
+				// user cancelled
 			}
-		},
-		[
-			numSelected,
-			onDelete,
-			selectAll,
-			selectedRows,
-			setState,
-			search,
-			columnState,
-			getAdditionalFilters,
-			customData,
-		]
-	);
+		}
+	}, [
+		numSelected,
+		onDelete,
+		selectAll,
+		selectedRows,
+		setState,
+		search,
+		columnState,
+		getAdditionalFilters,
+		customData,
+	]);
 
 	const handleCustomButtonCLick = useCallback(
 		(label: string) => {
