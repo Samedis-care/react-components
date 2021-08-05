@@ -443,7 +443,7 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 	const [open, setOpen] = useState(false);
 	const actualAddNewLabel = addNewLabel || t("standalone.selector.add-new");
 	const [selectorOptions, setSelectorOptions] = useState<DataT[]>([]);
-	const [loading, setLoading] = useState(false);
+	const [loading, setLoading] = useState<string | null>(null);
 	const [query, setQuery] = useState("");
 
 	const [lruIds, setLruIds] = useState<string[]>(() => {
@@ -559,7 +559,8 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 				isAddNewButton: true,
 			} as DataT;
 
-			setLoading(true);
+			const loadTicket = Math.random().toString();
+			setLoading(loadTicket);
 			let results: DataT[];
 			const filteredLruIds = filterIds
 				? lruIds.filter((id) => !filterIds.includes(id))
@@ -614,24 +615,25 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 					results.push(addNewEntry);
 				}
 			}
+			if (filterIds) {
+				results = results.filter((entry) => !filterIds.includes(getId(entry)));
+			}
 			if (grouped && !disableGroupSorting) {
-				setSelectorOptions(
-					results.sort(
-						groupSorter ??
-							((a, b) =>
-								-(b.group ?? noGroupLabel ?? "").localeCompare(
-									a.group ?? noGroupLabel ?? ""
-								))
-					)
-				);
-			} else {
-				setSelectorOptions(
-					!filterIds
-						? results
-						: results.filter((entry) => !filterIds.includes(getId(entry)))
+				results.sort(
+					groupSorter ??
+						((a, b) =>
+							-(b.group ?? noGroupLabel ?? "").localeCompare(
+								a.group ?? noGroupLabel ?? ""
+							))
 				);
 			}
-			setLoading(false);
+			setLoading((prev) => {
+				// if another load was started while completing this skip update
+				if (prev != loadTicket) return prev;
+				// otherwise update and finish loading
+				setSelectorOptions(results);
+				return null;
+			});
 		},
 		[
 			t,
@@ -694,7 +696,7 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 							setOpen(false);
 						}}
 						disableClearable={disableClearable}
-						loading={loading}
+						loading={!!loading}
 						loadingText={
 							loadingText ?? t("standalone.selector.base-selector.loading-text")
 						}

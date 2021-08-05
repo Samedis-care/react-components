@@ -22234,7 +22234,6 @@ exports[`Storyshots Standalone/Selector MultiWithTags 1`] = `
                                       loadingText="Loading.."
                                       onSelect={[Function]}
                                       openInfo={[Function]}
-                                      refreshToken=""
                                       selected={Array []}
                                       setSwitchValue={[Function]}
                                       switchLabel="Select from all"

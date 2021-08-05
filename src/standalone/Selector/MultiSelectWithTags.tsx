@@ -221,7 +221,6 @@ const MultiSelectWithTags = <
 				loadDataOptions={loadDataOptions}
 				openInfo={openInfo}
 				onSelect={onChange}
-				refreshToken={selected.map(getId).join(",")}
 				getIdOfData={getId}
 				noOptionsText={noOptionsText}
 				loadingText={loadingText}
