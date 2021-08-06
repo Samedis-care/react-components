@@ -16,7 +16,7 @@ export interface IDayData {
 	/**
 	 * The text/title to display
 	 */
-	title: string;
+	title: React.ReactNode;
 	/**
 	 * Optional left click handler
 	 */
