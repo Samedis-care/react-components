@@ -31,12 +31,13 @@ abstract class Connector<
 	 * Lists all available data entries
 	 * @param params Filter, Sorting and Pagination parameters
 	 * @param model The model requesting the data (if any)
-	 * @returns An array with all data entries as well as some meta data
+	 * @returns Array An array with all data entries as well as some meta data.
+	 * 								The third element in the array is user-defined
 	 */
 	abstract index(
 		params?: Partial<IDataGridLoadDataParameters>,
 		model?: Model<KeyT, VisibilityT, CustomT>
-	): Promise<[Record<KeyT, unknown>[], ResponseMeta]>;
+	): Promise<[Record<KeyT, unknown>[], ResponseMeta, unknown?]>;
 
 	/**
 	 * Creates a new data entry with the given data

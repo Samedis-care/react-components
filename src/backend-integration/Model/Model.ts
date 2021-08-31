@@ -125,7 +125,8 @@ export type ModelData<KeyT extends ModelFieldName> = Record<KeyT, unknown>;
  */
 export type ModelGetResponse<KeyT extends ModelFieldName> = [
 	ModelData<KeyT>, // the main data entry
-	ModelGetResponseRelations<KeyT> // data in relations
+	ModelGetResponseRelations<KeyT>, // data in relations
+	unknown? // optional user-defined data
 ];
 
 /**

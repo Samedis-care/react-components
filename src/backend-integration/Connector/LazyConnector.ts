@@ -106,7 +106,7 @@ class LazyConnector<
 	async index(
 		params: Partial<IDataGridLoadDataParameters> | undefined,
 		model: Model<KeyT, VisibilityT, CustomT> | undefined
-	): Promise<[Record<KeyT, unknown>[], ResponseMeta]> {
+	): Promise<[Record<KeyT, unknown>[], ResponseMeta, unknown?]> {
 		if (this.fakeReads) {
 			const fakeMeta: ResponseMeta = { totalRows: 0, filteredRows: 0 };
 			const fakeData: Record<KeyT, unknown>[] = [];

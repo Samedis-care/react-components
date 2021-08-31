@@ -139,7 +139,7 @@ class BackendConnector<
 
 	async index(
 		params: Partial<IDataGridLoadDataParameters> | undefined
-	): Promise<[Record<KeyT, unknown>[], ResponseMeta]> {
+	): Promise<[Record<KeyT, unknown>[], ResponseMeta, unknown?]> {
 		// load reasonable defaults if nothing is set
 		if (!params) params = {};
 		if (!params.page) params.page = 1;
@@ -168,6 +168,7 @@ class BackendConnector<
 			{
 				totalRows: resp.meta.total,
 			},
+			resp.meta,
 		];
 	}
 
