@@ -72,7 +72,10 @@ const SettingsDialog = (props: IDataGridSettingsDialogProps) => {
 							<TableCell>
 								<Checkbox
 									checked={props.lockedColumns.includes(column.field)}
-									disabled={props.hiddenColumns.includes(column.field)}
+									disabled={
+										props.hiddenColumns.includes(column.field) ||
+										column.forcePin
+									}
 									onChange={props.toggleColumnLock}
 									value={column.field}
 								/>

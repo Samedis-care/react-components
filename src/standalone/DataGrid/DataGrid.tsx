@@ -339,6 +339,14 @@ export interface IDataGridColumnDef {
 	 * Can the column be sorted?
 	 */
 	sortable?: boolean;
+	/**
+	 * Pinned by default?
+	 */
+	pinned?: boolean;
+	/**
+	 * Force the column to be pinned?
+	 */
+	forcePin?: boolean;
 	// internal fields, do not set, will be overwritten
 	/**
 	 * Is the column locked to the start
@@ -537,7 +545,9 @@ export const getDataGridDefaultState = (
 	showFilterDialog: false,
 	pages: [0, 0],
 	hiddenColumns: columns.filter((col) => col.hidden).map((col) => col.field),
-	lockedColumns: [],
+	lockedColumns: columns
+		.filter((col) => col.pinned || col.forcePin)
+		.map((col) => col.field),
 	selectAll: false,
 	selectedRows: [],
 	rows: {},
