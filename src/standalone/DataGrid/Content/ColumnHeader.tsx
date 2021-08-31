@@ -182,7 +182,7 @@ const ColumnHeader = (props: IDataGridContentColumnHeaderProps) => {
 		>
 			<ColumnHeaderContent
 				headerName={props.column.headerName}
-				enableResize={!props.column.isLocked}
+				enableResize
 				startDrag={startDrag}
 				autoResize={autoResize}
 				sort={sort}
