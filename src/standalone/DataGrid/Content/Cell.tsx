@@ -97,7 +97,7 @@ const Cell = (props: CellProps): React.ReactElement => {
 			style={props.style}
 			onMouseEnter={startHover}
 			onMouseLeave={endHover}
-			onClick={toggleSelection}
+			onClick={disableSelection ? undefined : toggleSelection}
 			onDoubleClick={editRecord}
 			className={combineClassNames([
 				classes.cell,

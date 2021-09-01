@@ -20,7 +20,13 @@ export interface IDataGridContentProps extends IDataGridColumnProps {
 const SELECT_ROW_WIDTH = 57;
 
 const Content = (props: IDataGridContentProps) => {
-	const { rowsPerPage, columns, disableSelection } = props;
+	const {
+		rowsPerPage,
+		columns,
+		disableSelection,
+		headerHeight: headerHeightOverride,
+	} = props;
+	const headerHeight = headerHeightOverride ?? 32;
 	const { t } = useCCTranslations();
 	const [state, setState] = useDataGridState();
 	const [columnWidth, setColumnWidth] = useDataGridColumnsWidthState();
@@ -118,7 +124,7 @@ const Content = (props: IDataGridContentProps) => {
 							: columnWidth[columns[index - 1].field] ?? 200
 					}
 					rowCount={(state.rowsFiltered ?? state.rowsTotal) + 1}
-					rowHeight={({ index }) => (index === 0 ? 32 : 57)}
+					rowHeight={({ index }) => (index === 0 ? headerHeight : 57)}
 					width={width}
 					height={height}
 					cellRenderer={(gridProps) => (

@@ -286,6 +286,11 @@ export interface IDataGridColumnProps {
 	 * The default column filter settings
 	 */
 	defaultFilter?: DataGridFilterSetting[];
+	/**
+	 * Header height override (in px)
+	 * @default 32
+	 */
+	headerHeight?: number;
 }
 
 export type IDataGridFieldFilter = { [field: string]: IFilterDef };
