@@ -946,6 +946,7 @@ const DataGrid = (props: DataGridProps) => {
 		defaultFilter,
 		disableFooter,
 		disableSelection,
+		headerHeight,
 	} = props;
 	const rowsPerPage = props.rowsPerPage || 25;
 
@@ -1142,6 +1143,7 @@ const DataGrid = (props: DataGridProps) => {
 										columns={visibleColumns}
 										rowsPerPage={rowsPerPage}
 										disableSelection={disableSelection}
+										headerHeight={headerHeight}
 									/>
 								</Grid>
 								{!disableFooter && (
