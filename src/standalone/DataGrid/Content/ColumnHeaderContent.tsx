@@ -112,7 +112,14 @@ const ColumnHeaderContent = (
 					key={"header"}
 				>
 					<Tooltip title={props.headerName}>
-						<span>{props.headerName}</span>
+						<span>
+							{props.headerName.split("\n").map((text, index, arr) => (
+								<>
+									{text}
+									{index == arr.length - 1 ? undefined : <br />}
+								</>
+							))}
+						</span>
 					</Tooltip>
 				</Grid>
 				<Grid item className={classes.columnHeaderSortIcon}>
