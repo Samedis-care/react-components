@@ -178,6 +178,7 @@ const ColumnHeader = (props: IDataGridContentColumnHeaderProps) => {
 			className={combineClassNames([
 				classes.columnHeaderContentWrapper,
 				filterable && classes.columnHeaderFilterable,
+				"column-header-" + column.field,
 			])}
 		>
 			<ColumnHeaderContent
