@@ -140,7 +140,10 @@ const Content = (props: IDataGridContentProps) => {
 					hideTopRightGridScrollbar
 					hideBottomLeftGridScrollbar
 					styleTopLeftGrid={{ overflow: "hidden" }}
-					styleTopRightGrid={{ overflow: "hidden" }}
+					styleTopRightGrid={{
+						overflow: "hidden",
+						overscrollBehavior: "contain",
+					}}
 					styleBottomLeftGrid={{
 						overflow: "hidden",
 						display:
