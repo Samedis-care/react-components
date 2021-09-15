@@ -181,20 +181,26 @@ class JsonApiClient {
 				);
 			}
 
+			// Read response
+			let responseText: string;
+			try {
+				responseText = await response.text();
+			} catch (e) {
+				console.error("[JsonApiClient] Failed reading response", e);
+				throw new Error(
+					ccI18n.t(
+						"backend-integration.connector.json-api-client.network-error"
+					)
+				);
+			}
+
 			// Parse response
 			let responseData: unknown;
 			try {
-				responseData = await response.json();
+				responseData = JSON.parse(responseText);
 			} catch (e) {
 				// JSON parse error
-				console.error("[JsonApiClient] Failed JSON parsing", e);
-
-				try {
-					const text = await response.text();
-					console.error("[JsonApiClient] Response was", text);
-				} catch (e) {
-					console.error("[JsonApiClient] Failed reading response as text", e);
-				}
+				console.error("[JsonApiClient] Failed JSON parsing", e, responseText);
 
 				throw new Error(
 					ccI18n.t(
