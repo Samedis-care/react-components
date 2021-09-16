@@ -209,5 +209,10 @@
 		"dialog": {
 			"okay": "Хорошо"
 		}
+	},
+	"utils": {
+		"validation": {
+			"required": "LeПоле {{attribute}} требуется"
+		}
 	}
 }

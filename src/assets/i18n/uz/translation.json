@@ -209,5 +209,10 @@
 		"dialog": {
 			"okay": "xop"
 		}
+	},
+	"utils": {
+		"validation": {
+			"required": "{{attribute}} maydoni talab qilinadi"
+		}
 	}
 }

@@ -209,5 +209,10 @@
 		"dialog": {
 			"okay": "D'accord"
 		}
+	},
+	"utils": {
+		"validation": {
+			"required": "Le champ {{attribute}} est obligatoire"
+		}
 	}
 }
