@@ -209,5 +209,10 @@
 			"loading": "Loading...",
 			"loading-error": "Error while fetching data"
 		}
+	},
+	"utils": {
+		"validation": {
+			"required": "The {{attribute}} field is required"
+		}
 	}
 }

@@ -40,6 +40,7 @@ Used Libraries:
 - react-router-dom (Provided by the framework to enable programmatically controllable routing in your React app)
 - moment.js (Used for localized date/time related components)
 - react-query (Used as backend connector/caching layer)
+- [Sentry](https://sentry.io) (optional integration)
 
 ## Developer Setup
 

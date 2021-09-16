@@ -16,3 +16,4 @@ export * from "./Icons";
 export * from "./UIKit";
 export { default as SignalPortlet } from "./SignalPortlet";
 export { default as Notifications } from "./Notifications";
+export { default as SentryRoute } from "./SentryRoute";
