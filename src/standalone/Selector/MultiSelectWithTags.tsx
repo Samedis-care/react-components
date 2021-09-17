@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Typography } from "@material-ui/core";
+import { Box, Typography } from "@material-ui/core";
 import {
 	BaseSelectorProps,
 	MultiSelectorData,
@@ -208,25 +208,27 @@ const MultiSelectWithTags = <
 				closeText={closeText}
 				lru={lruGroup}
 			/>
-			<MultiSelectWithoutGroup<DataT>
-				autocompleteId={autocompleteId}
-				selected={selected}
-				disabled={disabled}
-				label={searchInputLabel}
-				enableIcons={enableIcons}
-				switchValue={switchValue}
-				setSwitchValue={setSwitchValue}
-				switchLabel={switchLabel}
-				displaySwitch={props.displaySwitch}
-				loadDataOptions={loadDataOptions}
-				openInfo={openInfo}
-				onSelect={onChange}
-				getIdOfData={getId}
-				noOptionsText={noOptionsText}
-				loadingText={loadingText}
-				lru={lruData}
-				sortCompareFn={sortCompareFn}
-			/>
+			<Box pt={3}>
+				<MultiSelectWithoutGroup<DataT>
+					autocompleteId={autocompleteId}
+					selected={selected}
+					disabled={disabled}
+					label={searchInputLabel}
+					enableIcons={enableIcons}
+					switchValue={switchValue}
+					setSwitchValue={setSwitchValue}
+					switchLabel={switchLabel}
+					displaySwitch={props.displaySwitch}
+					loadDataOptions={loadDataOptions}
+					openInfo={openInfo}
+					onSelect={onChange}
+					getIdOfData={getId}
+					noOptionsText={noOptionsText}
+					loadingText={loadingText}
+					lru={lruData}
+					sortCompareFn={sortCompareFn}
+				/>
+			</Box>
 		</div>
 	);
 };
