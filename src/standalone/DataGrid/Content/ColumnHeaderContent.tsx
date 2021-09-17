@@ -114,10 +114,10 @@ const ColumnHeaderContent = (
 					<Tooltip title={props.headerName}>
 						<span>
 							{props.headerName.split("\n").map((text, index, arr) => (
-								<>
+								<React.Fragment key={text}>
 									{text}
 									{index == arr.length - 1 ? undefined : <br />}
-								</>
+								</React.Fragment>
 							))}
 						</span>
 					</Tooltip>
