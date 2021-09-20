@@ -8,34 +8,40 @@ export interface CCI18nProviderProps {
 	 * The children to render
 	 */
 	children: React.ReactNode;
+	/**
+	 * Disable setting of HTML language attribute
+	 */
+	disableHtmlLanguageAttributeSetter?: boolean;
 }
 
 const CCI18nProvider = (props: CCI18nProviderProps) => {
 	const [updating, setUpdating] = useState(false);
 	const [, setMomentLocale] = useState(ccI18n.language);
 
-	const updateLocale = () => {
-		void (async () => {
-			setUpdating(true);
-			try {
-				await import("moment/locale/" + ccI18n.language.toLowerCase());
-			} catch (e) {
-				try {
-					await import(
-						"moment/locale/" + ccI18n.language.split("-")[0].toLowerCase()
-					);
-				} catch (e) {
-					// locale not found
-				}
-			} finally {
-				moment.locale(ccI18n.language);
-				setMomentLocale(ccI18n.language);
-				setUpdating(false);
-			}
-		})();
-	};
-
 	useEffect(() => {
+		const updateLocale = () => {
+			void (async () => {
+				setUpdating(true);
+				try {
+					await import("moment/locale/" + ccI18n.language.toLowerCase());
+				} catch (e) {
+					try {
+						await import(
+							"moment/locale/" + ccI18n.language.split("-")[0].toLowerCase()
+						);
+					} catch (e) {
+						// locale not found
+					}
+				} finally {
+					moment.locale(ccI18n.language);
+					setMomentLocale(ccI18n.language);
+					const htmlTag = document.querySelector("html");
+					if (htmlTag) htmlTag.lang = ccI18n.language.split("-")[0];
+					setUpdating(false);
+				}
+			})();
+		};
+
 		updateLocale();
 		ccI18n.on("languageChanged", updateLocale);
 		return () => ccI18n.off("languageChanged", updateLocale);

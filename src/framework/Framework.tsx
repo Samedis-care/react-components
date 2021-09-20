@@ -10,6 +10,7 @@ import { QueryClientProvider } from "react-query";
 import { ModelDataStore } from "../backend-integration";
 import MuiPickerUtils from "./MuiPickerUtils";
 import PermissionContextProvider from "./PermissionContextProvider";
+import MobileScalingFix from "../standalone/MobileScalingFix/MobileScalingFix";
 
 /**
  * Properties for the Framework
@@ -19,6 +20,14 @@ export interface IFrameworkProps {
 	 * Disable the Material-UI Date Picker utils?
 	 */
 	disableMuiPickerUtils?: boolean;
+	/**
+	 * Disable setting of HTML tag language attribute
+	 */
+	disableHtmlLanguageAttributeSetter?: boolean;
+	/**
+	 * Disable mobile scaling fix
+	 */
+	disableMobileScalingFix?: boolean;
 	/**
 	 * The children which have access to the framework's capabilities (usually your whole app)
 	 */
@@ -46,23 +55,34 @@ const loaderComponent = <Loader />;
  * - css baseline
  * - permission context
  * - material-ui date picker utils (optional, enabled by default, locale managed by i18n)
+ * - html language attribute setting based on locale (optional, enabled by default)
+ * - mobile scaling fix (optional, enabled by default)
  */
-const ComponentsCareFramework = (props: ICompleteFrameworkProps) => (
-	<Suspense fallback={loaderComponent}>
-		<CCI18nProvider>
-			<MuiPickerUtils disable={props.disableMuiPickerUtils}>
-				<ThemeProvider defaultTheme={props.defaultTheme || getStandardTheme}>
-					<QueryClientProvider client={ModelDataStore}>
-						<PermissionContextProvider>
-							<Router history={FrameworkHistory}>
-								<DialogContextProvider>{props.children}</DialogContextProvider>
-							</Router>
-						</PermissionContextProvider>
-					</QueryClientProvider>
-				</ThemeProvider>
-			</MuiPickerUtils>
-		</CCI18nProvider>
-	</Suspense>
-);
+const ComponentsCareFramework = (props: ICompleteFrameworkProps) => {
+	return (
+		<Suspense fallback={loaderComponent}>
+			{!props.disableMobileScalingFix && <MobileScalingFix />}
+			<CCI18nProvider
+				disableHtmlLanguageAttributeSetter={
+					props.disableHtmlLanguageAttributeSetter
+				}
+			>
+				<MuiPickerUtils disable={props.disableMuiPickerUtils}>
+					<ThemeProvider defaultTheme={props.defaultTheme || getStandardTheme}>
+						<QueryClientProvider client={ModelDataStore}>
+							<PermissionContextProvider>
+								<Router history={FrameworkHistory}>
+									<DialogContextProvider>
+										{props.children}
+									</DialogContextProvider>
+								</Router>
+							</PermissionContextProvider>
+						</QueryClientProvider>
+					</ThemeProvider>
+				</MuiPickerUtils>
+			</CCI18nProvider>
+		</Suspense>
+	);
+};
 
 export default React.memo(ComponentsCareFramework);
