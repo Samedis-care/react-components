@@ -1,10 +1,13 @@
-import React from "react";
+import React, { ForwardedRef } from "react";
 import { ModelFieldName, PageVisibility } from "../../backend-integration";
 import { ErrorComponentProps } from "../Form";
 import { BaseSelectorData, Loader, MultiSelectorData } from "../../standalone";
 import { BackendMultiSelectWithTags } from "./index";
 import { BackendMultiSelectWithTagsProps } from "./BackendMultiSelectWithTags";
-import useCrudSelect, { UseCrudSelectParams } from "./useCrudSelect";
+import useCrudSelect, {
+	CrudSelectDispatch,
+	UseCrudSelectParams,
+} from "./useCrudSelect";
 
 export interface CrudMultiSelectWithGroupsProps<
 	GroupKeyT extends ModelFieldName,
@@ -69,7 +72,8 @@ const CrudMultiSelectWithGroups = <
 		DataCustomT,
 		GroupDataT,
 		DataDataT
-	>
+	>,
+	ref: ForwardedRef<CrudSelectDispatch<DataDataT>>
 ) => {
 	const { errorComponent: ErrorComponent } = props;
 
@@ -81,7 +85,7 @@ const CrudMultiSelectWithGroups = <
 		initialRawData,
 		handleSelect,
 		modelToSelectorData,
-	} = useCrudSelect(props);
+	} = useCrudSelect(props, ref);
 
 	if (loading) return <Loader />;
 	if (loadError) return <span>{loadError.message}</span>;
@@ -110,5 +114,5 @@ const CrudMultiSelectWithGroups = <
 };
 
 export default React.memo(
-	CrudMultiSelectWithGroups
+	React.forwardRef(CrudMultiSelectWithGroups)
 ) as typeof CrudMultiSelectWithGroups;

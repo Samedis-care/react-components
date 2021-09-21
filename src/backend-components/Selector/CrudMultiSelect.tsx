@@ -1,10 +1,13 @@
-import React from "react";
+import React, { ForwardedRef } from "react";
 import { ModelFieldName, PageVisibility } from "../../backend-integration";
 import { ErrorComponentProps } from "../Form";
 import { Loader, MultiSelectorData } from "../../standalone";
 import { BackendMultiSelectProps } from "./BackendMultiSelect";
 import { BackendMultiSelect } from "./index";
-import useCrudSelect, { UseCrudSelectParams } from "./useCrudSelect";
+import useCrudSelect, {
+	CrudSelectDispatch,
+	UseCrudSelectParams,
+} from "./useCrudSelect";
 
 export interface CrudMultiSelectProps<
 	KeyT extends ModelFieldName,
@@ -38,7 +41,8 @@ const CrudMultiSelect = <
 	CustomT,
 	DataT extends MultiSelectorData
 >(
-	props: CrudMultiSelectProps<KeyT, VisibilityT, CustomT, DataT>
+	props: CrudMultiSelectProps<KeyT, VisibilityT, CustomT, DataT>,
+	ref: ForwardedRef<CrudSelectDispatch<DataT>>
 ) => {
 	const { errorComponent: ErrorComponent } = props;
 
@@ -50,7 +54,7 @@ const CrudMultiSelect = <
 		initialRawData,
 		handleSelect,
 		modelToSelectorData,
-	} = useCrudSelect(props);
+	} = useCrudSelect(props, ref);
 
 	if (loading) return <Loader />;
 	if (loadError) return <span>{loadError.message}</span>;
@@ -69,4 +73,6 @@ const CrudMultiSelect = <
 	);
 };
 
-export default React.memo(CrudMultiSelect) as typeof CrudMultiSelect;
+export default React.memo(
+	React.forwardRef(CrudMultiSelect)
+) as typeof CrudMultiSelect;

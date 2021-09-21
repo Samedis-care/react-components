@@ -4,7 +4,13 @@ import {
 	PageVisibility,
 } from "../../backend-integration";
 import { BaseSelectorData } from "../../standalone";
-import { useCallback, useEffect, useState } from "react";
+import {
+	ForwardedRef,
+	useCallback,
+	useEffect,
+	useImperativeHandle,
+	useState,
+} from "react";
 import { shallowCompare } from "../../utils";
 
 export interface UseCrudSelectParams<
@@ -87,13 +93,23 @@ export interface UseCrudSelectResult<
 	modelToSelectorData: (data: Record<KeyT, unknown>) => Promise<DataT>;
 }
 
+export interface CrudSelectDispatch<DataT extends BaseSelectorData> {
+	/**
+	 * Adds the entry to the list of selected records
+	 * @param entry The entry to insert
+	 * @remarks Does not update existing record
+	 */
+	addToSelection: (entry: DataT) => Promise<void>;
+}
+
 const useCrudSelect = <
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
 	CustomT,
 	DataT extends BaseSelectorData
 >(
-	params: UseCrudSelectParams<KeyT, VisibilityT, CustomT, DataT>
+	params: UseCrudSelectParams<KeyT, VisibilityT, CustomT, DataT>,
+	ref: ForwardedRef<CrudSelectDispatch<DataT>>
 ): UseCrudSelectResult<KeyT, DataT> => {
 	const {
 		connector,
@@ -109,6 +125,33 @@ const useCrudSelect = <
 	const [selected, setSelected] = useState<DataT[]>([]);
 	const [initialRawData, setInitialRawData] = useState<Record<KeyT, unknown>[]>(
 		[]
+	);
+
+	useImperativeHandle<CrudSelectDispatch<DataT>, CrudSelectDispatch<DataT>>(
+		ref,
+		() => ({
+			addToSelection: async (entry) => {
+				const existing = selected.find(
+					(selEntry) => selEntry.value === entry.value
+				);
+				if (existing) return;
+
+				const modelRecord = (await connector.create(await serialize(entry)))[0];
+				entry = {
+					...(await deserializeModel(modelRecord)),
+					value: entry.value,
+				} as DataT;
+
+				const finalSelected = [...selected, entry];
+
+				// reflect changes
+				setInitialRawData((oldRawData) => [...oldRawData, modelRecord]);
+				setSelected(finalSelected);
+
+				// fire events
+				if (onChange) onChange(finalSelected);
+			},
+		})
 	);
 
 	const handleSelect = useCallback(
