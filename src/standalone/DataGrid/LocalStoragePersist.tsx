@@ -27,7 +27,7 @@ const LocalStoragePersist = (props: LocalStoragePersistProps) => {
 	const setData = useCallback(
 		(data: DataGridPersistentState) => {
 			try {
-				localStorage.setItem(storageKey, JSON.stringify(data));
+				localStorage?.setItem(storageKey, JSON.stringify(data));
 			} catch (e) {
 				// eslint-disable-next-line no-console
 				console.error(
@@ -41,7 +41,7 @@ const LocalStoragePersist = (props: LocalStoragePersistProps) => {
 	);
 
 	const persistCtx = useMemo(() => {
-		const dataStr = localStorage.getItem(storageKey);
+		const dataStr = localStorage?.getItem(storageKey);
 		let data: Partial<DataGridPersistentState> | undefined;
 		if (dataStr) {
 			try {
@@ -53,7 +53,7 @@ const LocalStoragePersist = (props: LocalStoragePersistProps) => {
 						storageKey,
 					"Removing from localStorage"
 				);
-				localStorage.removeItem(storageKey);
+				localStorage?.removeItem(storageKey);
 			}
 		}
 		return [data, setData] as DataGridPersistentStateContextType;

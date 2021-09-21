@@ -450,7 +450,7 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 		if (!lru) return [];
 		try {
 			const ret: unknown = JSON.parse(
-				localStorage.getItem(lru.storageKey) ?? "[]"
+				localStorage?.getItem(lru.storageKey) ?? "[]"
 			);
 			if (
 				!Array.isArray(ret) ||
@@ -466,7 +466,7 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 	// save LRU ids
 	useEffect(() => {
 		if (!lru?.storageKey) return;
-		localStorage.setItem(lru.storageKey, JSON.stringify(lruIds));
+		localStorage?.setItem(lru.storageKey, JSON.stringify(lruIds));
 	}, [lruIds, lru?.storageKey]);
 
 	const renderIcon = useCallback(

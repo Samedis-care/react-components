@@ -2,6 +2,7 @@
 import ccI18n from "../../i18n";
 import AuthMode from "./AuthMode";
 import { addGetParams } from "../../utils";
+import { BackendError, NetworkError } from "./index";
 
 export type GetParams = Record<string, unknown> | null;
 /**
@@ -174,7 +175,7 @@ class JsonApiClient {
 			} catch (e) {
 				// Network error
 				console.error("Failed fetch", e);
-				throw new Error(
+				throw new NetworkError(
 					ccI18n.t(
 						"backend-integration.connector.json-api-client.network-error"
 					)
@@ -187,7 +188,7 @@ class JsonApiClient {
 				responseText = await response.text();
 			} catch (e) {
 				console.error("[JsonApiClient] Failed reading response", e);
-				throw new Error(
+				throw new NetworkError(
 					ccI18n.t(
 						"backend-integration.connector.json-api-client.network-error"
 					)
@@ -202,7 +203,7 @@ class JsonApiClient {
 				// JSON parse error
 				console.error("[JsonApiClient] Failed JSON parsing", e, responseText);
 
-				throw new Error(
+				throw new BackendError(
 					ccI18n.t(
 						"backend-integration.connector.json-api-client.parse-error",
 						{
