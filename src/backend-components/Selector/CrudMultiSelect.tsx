@@ -1,4 +1,4 @@
-import React, { ForwardedRef } from "react";
+import React, { ForwardedRef, RefAttributes } from "react";
 import { ModelFieldName, PageVisibility } from "../../backend-integration";
 import { ErrorComponentProps } from "../Form";
 import { Loader, MultiSelectorData } from "../../standalone";
@@ -41,7 +41,8 @@ const CrudMultiSelect = <
 	CustomT,
 	DataT extends MultiSelectorData
 >(
-	props: CrudMultiSelectProps<KeyT, VisibilityT, CustomT, DataT>,
+	props: CrudMultiSelectProps<KeyT, VisibilityT, CustomT, DataT> &
+		RefAttributes<CrudSelectDispatch<DataT>>,
 	ref: ForwardedRef<CrudSelectDispatch<DataT>>
 ) => {
 	const { errorComponent: ErrorComponent } = props;
