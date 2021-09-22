@@ -1,4 +1,4 @@
-import React, { ForwardedRef } from "react";
+import React, { ForwardedRef, RefAttributes } from "react";
 import { ModelFieldName, PageVisibility } from "../../backend-integration";
 import { ErrorComponentProps } from "../Form";
 import { BaseSelectorData, Loader, MultiSelectorData } from "../../standalone";
@@ -53,69 +53,67 @@ export interface CrudMultiSelectWithGroupsProps<
 	>;
 }
 
-// eslint-disable-next-line react/display-name
-const CrudMultiSelectWithGroups = React.forwardRef(
-	<
-		GroupKeyT extends ModelFieldName,
-		DataKeyT extends ModelFieldName,
-		GroupVisibilityT extends PageVisibility,
-		DataVisibilityT extends PageVisibility,
+const CrudMultiSelectWithGroups = <
+	GroupKeyT extends ModelFieldName,
+	DataKeyT extends ModelFieldName,
+	GroupVisibilityT extends PageVisibility,
+	DataVisibilityT extends PageVisibility,
+	GroupCustomT,
+	DataCustomT,
+	GroupDataT extends BaseSelectorData,
+	DataDataT extends MultiSelectorData
+>(
+	props: CrudMultiSelectWithGroupsProps<
+		GroupKeyT,
+		DataKeyT,
+		GroupVisibilityT,
+		DataVisibilityT,
 		GroupCustomT,
 		DataCustomT,
-		GroupDataT extends BaseSelectorData,
-		DataDataT extends MultiSelectorData
-	>(
-		props: CrudMultiSelectWithGroupsProps<
-			GroupKeyT,
-			DataKeyT,
-			GroupVisibilityT,
-			DataVisibilityT,
-			GroupCustomT,
-			DataCustomT,
-			GroupDataT,
-			DataDataT
-		>,
-		ref: ForwardedRef<CrudSelectDispatch<DataDataT>>
-	) => {
-		const { errorComponent: ErrorComponent } = props;
+		GroupDataT,
+		DataDataT
+	> &
+		RefAttributes<CrudSelectDispatch<DataDataT>>,
+	ref: ForwardedRef<CrudSelectDispatch<DataDataT>>
+) => {
+	const { errorComponent: ErrorComponent } = props;
 
-		const {
-			loading,
-			error,
-			loadError,
-			selected,
-			initialRawData,
-			handleSelect,
-			modelToSelectorData,
-		} = useCrudSelect(props, ref);
+	const {
+		loading,
+		error,
+		loadError,
+		selected,
+		initialRawData,
+		handleSelect,
+		modelToSelectorData,
+	} = useCrudSelect(props, ref);
 
-		if (loading) return <Loader />;
-		if (loadError) return <span>{loadError.message}</span>;
+	if (loading) return <Loader />;
+	if (loadError) return <span>{loadError.message}</span>;
 
-		return (
-			<>
-				{error && <ErrorComponent error={error} />}
-				<BackendMultiSelectWithTags<
-					GroupKeyT,
-					DataKeyT,
-					GroupVisibilityT,
-					DataVisibilityT,
-					GroupCustomT,
-					DataCustomT,
-					GroupDataT,
-					DataDataT
-				>
-					{...props}
-					selected={selected.map((entry) => entry.value)}
-					onChange={handleSelect}
-					convData={modelToSelectorData}
-					initialData={initialRawData}
-				/>
-			</>
-		);
-	}
-);
+	return (
+		<>
+			{error && <ErrorComponent error={error} />}
+			<BackendMultiSelectWithTags<
+				GroupKeyT,
+				DataKeyT,
+				GroupVisibilityT,
+				DataVisibilityT,
+				GroupCustomT,
+				DataCustomT,
+				GroupDataT,
+				DataDataT
+			>
+				{...props}
+				selected={selected.map((entry) => entry.value)}
+				onChange={handleSelect}
+				convData={modelToSelectorData}
+				initialData={initialRawData}
+			/>
+		</>
+	);
+};
 
 export default React.memo(
-	CrudMultiSelectWithGroups
+	React.forwardRef(CrudMultiSelectWithGroups)
 ) as typeof CrudMultiSelectWithGroups;
