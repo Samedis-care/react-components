@@ -224,7 +224,7 @@ const useCrudSelect = <
 				// fire events
 				if (onChange) onChange(finalSelected);
 			} catch (e) {
-				setError(e);
+				setError(e as Error);
 			}
 		},
 		[connector, deserialize, onChange, selected, serialize]
@@ -267,7 +267,7 @@ const useCrudSelect = <
 
 				if (onChange) onChange(initialSelected);
 			} catch (e) {
-				setLoadError(e);
+				setLoadError(e as Error);
 			} finally {
 				setLoading(false);
 			}
