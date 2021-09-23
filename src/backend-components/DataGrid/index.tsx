@@ -75,7 +75,7 @@ const BackendDataGrid = <
 							}
 
 							const field = model.fields[key as KeyT];
-							const id = "id" in entry && (entry["id"] as string);
+							const { id } = entry as Record<"id", string>;
 
 							return [
 								key,
