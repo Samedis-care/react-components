@@ -444,7 +444,9 @@ const Form = <
 					  JSON.stringify(normalizeValues(serverData[0]))
 					: false,
 			[values, serverData]
-		) || customDirty;
+		) ||
+		customDirty ||
+		!!(id && deleteOnSubmit);
 	const [errors, setErrors] = useState<Record<string, string | null>>({});
 	const [submitting, setSubmitting] = useState(false);
 
