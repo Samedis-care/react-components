@@ -14,6 +14,7 @@ import Model, {
 	ModelFieldName,
 	ModelGetResponseRelations,
 	PageVisibility,
+	useModelDelete,
 	useModelGet,
 	useModelMutation,
 } from "../../backend-integration/Model/Model";
@@ -103,6 +104,10 @@ export interface FormProps<
 	 * @param dataFromServer The data from the server response (model data)
 	 */
 	onSubmit?: (dataFromServer: Record<KeyT, unknown>) => Promise<void> | void;
+	/**
+	 * Delete the record on submit rather then save it?
+	 */
+	deleteOnSubmit?: boolean;
 	/**
 	 * Custom props supplied by the parent for the children
 	 */
@@ -230,6 +235,10 @@ export interface FormContextData {
 	 */
 	submitting: boolean;
 	/**
+	 * Is the form record being deleted on submit
+	 */
+	deleteOnSubmit: boolean;
+	/**
 	 * The current form values
 	 */
 	values: Record<string, unknown>;
@@ -351,6 +360,7 @@ const Form = <
 		nestedFormName,
 		disableNestedSubmit,
 		nestedFormPreSubmitHandler,
+		deleteOnSubmit,
 	} = props;
 	const ErrorComponent = props.errorComponent;
 
@@ -420,6 +430,7 @@ const Form = <
 	// main form handling
 	const { isLoading, error, data: serverData } = useModelGet(model, id || null);
 	const { mutateAsync: updateData } = useModelMutation(model);
+	const { mutateAsync: deleteRecord } = useModelDelete(model);
 
 	const [updateError, setUpdateError] = useState<Error | null>(null);
 	const valuesRef = useRef<Record<string, unknown>>({});
@@ -571,6 +582,22 @@ const Form = <
 		setTouched((prev) =>
 			Object.fromEntries(Object.keys(prev).map((field) => [field, true]))
 		);
+		if (deleteOnSubmit) {
+			try {
+				const id = (valuesRef.current as Record<"id", string | null>).id;
+				if (id != null) {
+					await deleteRecord(id);
+				}
+			} catch (e) {
+				if (e instanceof Error) {
+					setUpdateError(e);
+				}
+				throw e;
+			} finally {
+				setSubmitting(false);
+			}
+			return;
+		}
 		try {
 			const validation = validateForm();
 			setErrors(validation);
@@ -626,6 +653,8 @@ const Form = <
 		postSubmitHandlers,
 		onSubmit,
 		mountedFields,
+		deleteOnSubmit,
+		deleteRecord,
 	]);
 	const handleSubmit = useCallback(
 		(evt: FormEvent<HTMLFormElement>) => {
@@ -671,6 +700,13 @@ const Form = <
 		parentFormContext?.setCustomState,
 		nestedFormName,
 	]);
+
+	// nested forms - dirty state
+	useEffect(() => {
+		if (!parentFormContext || !nestedFormName) return;
+
+		parentFormContext.setCustomFieldDirty(nestedFormName, dirty);
+	}, [dirty, nestedFormName, parentFormContext]);
 
 	// nested forms - validation and submit hook
 	useEffect(() => {
@@ -785,6 +821,7 @@ const Form = <
 			onlySubmitMounted: !!onlySubmitMounted,
 			onlyValidateMounted: !!onlyValidateMounted,
 			submitting,
+			deleteOnSubmit: !!deleteOnSubmit,
 			values,
 			initialValues: serverData ? serverData[0] : {},
 			touched,
@@ -812,6 +849,7 @@ const Form = <
 			removeCustomValidationHandler,
 			onlySubmitMounted,
 			onlyValidateMounted,
+			deleteOnSubmit,
 			submitting,
 			values,
 			touched,
