@@ -109,6 +109,12 @@ export interface FormProps<
 	 */
 	deleteOnSubmit?: boolean;
 	/**
+	 * Delete on submit finish callback
+	 * @param id The ID of the record which deleteOnSubmit was performed for.
+	 *           May be null or empty string, in which case no delete was performed as the record does not even exist
+	 */
+	onDeleted?: (id: string | null) => void;
+	/**
 	 * Custom props supplied by the parent for the children
 	 */
 	customProps: CustomPropsT;
@@ -361,6 +367,7 @@ const Form = <
 		disableNestedSubmit,
 		nestedFormPreSubmitHandler,
 		deleteOnSubmit,
+		onDeleted,
 	} = props;
 	const ErrorComponent = props.errorComponent;
 
@@ -590,6 +597,7 @@ const Form = <
 				if (id) {
 					await deleteRecord(id);
 				}
+				if (onDeleted) onDeleted(id);
 			} catch (e) {
 				if (e instanceof Error) {
 					setUpdateError(e);
@@ -656,6 +664,7 @@ const Form = <
 		onSubmit,
 		mountedFields,
 		deleteOnSubmit,
+		onDeleted,
 		deleteRecord,
 	]);
 	const handleSubmit = useCallback(
