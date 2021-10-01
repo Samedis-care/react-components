@@ -587,7 +587,7 @@ const Form = <
 		if (deleteOnSubmit) {
 			try {
 				const id = (valuesRef.current as Record<"id", string | null>).id;
-				if (id != null) {
+				if (id) {
 					await deleteRecord(id);
 				}
 			} catch (e) {
