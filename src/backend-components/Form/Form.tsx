@@ -435,7 +435,15 @@ const Form = <
 	);
 
 	// main form handling
-	const { isLoading, error, data: serverData } = useModelGet(model, id || null);
+	const [deleted, setDeleted] = useState(false);
+	useEffect(() => {
+		// clear deleted state upon id change
+		setDeleted(false);
+	}, [id]);
+	const { isLoading, error, data: serverData } = useModelGet(
+		model,
+		deleted ? null : id || null
+	);
 	const { mutateAsync: updateData } = useModelMutation(model);
 	const { mutateAsync: deleteRecord } = useModelDelete(model);
 
@@ -453,7 +461,7 @@ const Form = <
 			[values, serverData]
 		) ||
 		customDirty ||
-		!!(id && deleteOnSubmit);
+		!!(id && !deleted && deleteOnSubmit);
 	const [errors, setErrors] = useState<Record<string, string | null>>({});
 	const [submitting, setSubmitting] = useState(false);
 
@@ -580,6 +588,7 @@ const Form = <
 			.forEach((field) => {
 				newValues[field] = serverData[0][field as KeyT];
 			});
+
 		valuesRef.current = newValues;
 		setValues(newValues);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -595,10 +604,12 @@ const Form = <
 			try {
 				const id = (valuesRef.current as Record<"id", string | null>).id;
 				if (id) {
+					setDeleted(true);
 					await deleteRecord(id);
 				}
 				if (onDeleted) onDeleted(id);
 			} catch (e) {
+				setDeleted(false);
 				if (e instanceof Error) {
 					setUpdateError(e);
 				}
@@ -620,7 +631,7 @@ const Form = <
 				onlySubmitMounted
 					? Object.fromEntries(
 							Object.entries(valuesRef.current).filter(
-								([key]) => mountedFields[key as KeyT]
+								([key]) => key === "id" || mountedFields[key as KeyT]
 							)
 					  )
 					: valuesRef.current
@@ -703,6 +714,16 @@ const Form = <
 			errors,
 			touched,
 		}));
+
+		return () => {
+			// clear nested state if record was deleted
+			if (!deleted) return;
+			parentFormContext.setCustomState<FormNestedState>(
+				nestedFormName,
+				() => undefined
+			);
+		};
+
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [
 		values,
@@ -710,6 +731,7 @@ const Form = <
 		touched,
 		parentFormContext?.setCustomState,
 		nestedFormName,
+		deleted,
 	]);
 
 	// nested forms - dirty state

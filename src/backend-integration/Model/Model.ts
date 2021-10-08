@@ -199,6 +199,9 @@ export const useModelMutation = <
 		model.createOrUpdateRecordRaw.bind(model),
 		{
 			onSuccess: (data: ModelGetResponse<KeyT>) => {
+				if (!(data[0] as Record<"id", string>).id) {
+					throw new Error("Can't update null ID");
+				}
 				ModelDataStore.setQueryData(
 					model.getReactQueryKey((data[0] as Record<"id", string>).id),
 					data
