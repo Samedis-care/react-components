@@ -717,7 +717,12 @@ const Form = <
 		if (!parentFormContext || !nestedFormName) return;
 
 		parentFormContext.setCustomFieldDirty(nestedFormName, dirty);
-	}, [dirty, nestedFormName, parentFormContext]);
+		return () => {
+			if (parentFormContext.onlySubmitMounted && !disableNestedSubmit) {
+				parentFormContext.setCustomFieldDirty(nestedFormName, false);
+			}
+		};
+	}, [dirty, disableNestedSubmit, nestedFormName, parentFormContext]);
 
 	// nested forms - validation and submit hook
 	useEffect(() => {
