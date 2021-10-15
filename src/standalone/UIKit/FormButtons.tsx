@@ -89,7 +89,13 @@ const FormButtons = (props: FormButtonsProps) => {
 	if (children.length === 0) return <></>;
 
 	return (
-		<Grid container direction="row" spacing={2} className={classes.container}>
+		<Grid
+			container
+			direction="row"
+			spacing={2}
+			className={classes.container}
+			wrap={"nowrap"}
+		>
 			{children.map((child: React.ReactNode, index: number) => {
 				return (
 					<Grid item className={classes.buttonWrapper} key={index}>
