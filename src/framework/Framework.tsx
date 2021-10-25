@@ -11,6 +11,7 @@ import { ModelDataStore } from "../backend-integration";
 import MuiPickerUtils from "./MuiPickerUtils";
 import PermissionContextProvider from "./PermissionContextProvider";
 import MobileScalingFix from "../standalone/MobileScalingFix/MobileScalingFix";
+import UnsafeToLeave from "./UnsafeToLeave";
 
 /**
  * Properties for the Framework
@@ -28,6 +29,10 @@ export interface IFrameworkProps {
 	 * Disable mobile scaling fix
 	 */
 	disableMobileScalingFix?: boolean;
+	/**
+	 * Disable unsafe-to-leave handling (window.beforeunload callback)
+	 */
+	disableUnsafeToLeave?: boolean;
 	/**
 	 * The children which have access to the framework's capabilities (usually your whole app)
 	 */
@@ -71,11 +76,13 @@ const ComponentsCareFramework = (props: ICompleteFrameworkProps) => {
 					<ThemeProvider defaultTheme={props.defaultTheme || getStandardTheme}>
 						<QueryClientProvider client={ModelDataStore}>
 							<PermissionContextProvider>
-								<Router history={FrameworkHistory}>
-									<DialogContextProvider>
-										{props.children}
-									</DialogContextProvider>
-								</Router>
+								<UnsafeToLeave disable={props.disableUnsafeToLeave}>
+									<Router history={FrameworkHistory}>
+										<DialogContextProvider>
+											{props.children}
+										</DialogContextProvider>
+									</Router>
+								</UnsafeToLeave>
 							</PermissionContextProvider>
 						</QueryClientProvider>
 					</ThemeProvider>

@@ -23,8 +23,12 @@ export type AdvancedEnumValue = Omit<BaseSelectorData, "label"> &
 class RendererEnumSelect extends TypeEnum {
 	private props?: RendererEnumSelectProps;
 
-	constructor(values: AdvancedEnumValue[], props?: RendererEnumSelectProps) {
-		super(values);
+	constructor(
+		values: AdvancedEnumValue[],
+		props?: RendererEnumSelectProps,
+		numericMode = false
+	) {
+		super(values, numericMode);
 		this.props = props;
 	}
 

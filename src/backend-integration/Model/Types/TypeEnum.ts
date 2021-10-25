@@ -11,9 +11,11 @@ export interface EnumValue {
 
 abstract class TypeEnum implements Type<string> {
 	protected values: EnumValue[];
+	protected numericMode: boolean;
 
-	constructor(values: EnumValue[]) {
+	constructor(values: EnumValue[], numericMode = false) {
 		this.values = values;
+		this.numericMode = numericMode;
 	}
 
 	abstract render(params: ModelRenderParams<string>): React.ReactElement;
@@ -46,11 +48,13 @@ abstract class TypeEnum implements Type<string> {
 	// handle null/undefined values
 	deserialize = (value: unknown): string => {
 		if (value === null || value === undefined) return "";
+		if (typeof value === "number") return value.toString();
 		if (typeof value === "string") return value;
 		throw new Error("Unsupported data");
 	};
 
-	serialize = (value: string): string | null => (value === "" ? null : value);
+	serialize = (value: string): string | number | null =>
+		value === "" ? null : this.numericMode ? parseInt(value) : value;
 }
 
 export default TypeEnum;

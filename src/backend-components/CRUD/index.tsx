@@ -20,11 +20,17 @@ import {
 } from "../../framework";
 import { makeStyles } from "@material-ui/core/styles";
 
+const CrudImport = React.lazy(() => import("./Import"));
+
 export interface CrudFormProps {
 	/**
 	 * Callback for closing the form page
 	 */
 	goBack: () => void;
+	/**
+	 * Does the Form have a custom submit handler?
+	 */
+	hasCustomSubmitHandler: boolean;
 }
 
 export interface CrudProps<
@@ -95,7 +101,7 @@ export interface CrudProps<
 	 */
 	disableBackgroundGrid?: boolean;
 	/**
-	 * If routing is disabled: set the initial view (id, "new" or null), defaults to null
+	 * If routing is disabled: set the initial view (id, "new", "import" or null), defaults to null
 	 */
 	initialView?: string | null;
 	/**
@@ -242,6 +248,10 @@ const CRUD = <
 		/>
 	);
 
+	const importer = () => (
+		<CrudImport model={props.model as Model<string, PageVisibility, unknown>} />
+	);
+
 	const form = (
 		id: string,
 		formComponent: NonNullable<typeof props.children>
@@ -254,6 +264,7 @@ const CRUD = <
 			onSubmit={handleSubmit}
 			customProps={{
 				goBack: showOverview,
+				hasCustomSubmitHandler: props.formProps.onSubmit != null,
 			}}
 		>
 			{formComponent}
@@ -276,7 +287,11 @@ const CRUD = <
 							{grid()}
 						</div>
 					)}
-					{id !== null && props.children && form(id, props.children)}
+					{id === "import" && importer()}
+					{id !== null &&
+						id !== "import" &&
+						props.children &&
+						form(id, props.children)}
 				</>
 			) : (
 				<>
@@ -291,6 +306,14 @@ const CRUD = <
 					)}
 					{props.children && (
 						<Switch>
+							<RouteComponent path={`${path}/import`} exact>
+								{hasPermission(perms, props.editPermission) ||
+								!ForbiddenPage ? (
+									importer()
+								) : (
+									<ForbiddenPage />
+								)}
+							</RouteComponent>
 							<RouteComponent path={`${path}/:id`} exact>
 								{hasPermission(perms, props.readPermission) ||
 								hasPermission(perms, props.editPermission) ||

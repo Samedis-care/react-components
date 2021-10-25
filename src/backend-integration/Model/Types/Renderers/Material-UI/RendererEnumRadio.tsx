@@ -27,9 +27,10 @@ class RendererEnumRadio extends TypeEnum {
 	constructor(
 		values: EnumValue[],
 		horizontal = false,
-		wrapButton: WrapButtonFunc = (btn: React.ReactElement) => btn
+		wrapButton: WrapButtonFunc = (btn: React.ReactElement) => btn,
+		numericMode = false
 	) {
-		super(values);
+		super(values, numericMode);
 
 		this.horizontal = horizontal;
 		this.wrapButton = wrapButton;

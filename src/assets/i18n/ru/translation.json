@@ -200,6 +200,14 @@
 				}
 			}
 		},
+		"form": {
+			"back-on-dirty": {
+				"message": "Изменения потеряны",
+				"title": "Покинуть страницу формы?",
+				"no": "Нет",
+				"yes": "да"
+			}
+		},
 		"selector": {
 			"loading": "Загружается ...",
 			"loading-error": "Ошибка при получении данных"
@@ -213,6 +221,27 @@
 	"utils": {
 		"validation": {
 			"required": "LeПоле {{attribute}} требуется"
+		}
+	},
+	"common": {
+		"buttons": {
+			"next": "Следующий",
+			"finish": "Закончить",
+			"back": "Назад",
+			"cancel": "Отмена",
+			"save": "Сохранить",
+			"ok": "Окей",
+			"yes": "Да",
+			"no": "Нет",
+			"choose": "Выбирать",
+			"reset-filters": "Сбросить все фильтры"
+		},
+		"dialogs": {
+			"error-title": "Произошла ошибка",
+			"validation-error-title": "Неверная форма",
+			"info": "Информация",
+			"are-you-sure": "Ты уверен?",
+			"are-you-sure-submit": "Продолжать?"
 		}
 	}
 }

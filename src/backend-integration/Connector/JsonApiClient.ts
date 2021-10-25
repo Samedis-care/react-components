@@ -3,6 +3,7 @@ import ccI18n from "../../i18n";
 import AuthMode from "./AuthMode";
 import { addGetParams } from "../../utils";
 import { BackendError, NetworkError } from "./index";
+import { UnsafeToLeaveDispatch } from "../../framework/UnsafeToLeave";
 
 export type GetParams = Record<string, unknown> | null;
 /**
@@ -142,6 +143,9 @@ class JsonApiClient {
 		body: unknown | null,
 		auth: AuthMode
 	): Promise<T> {
+		const safeToLeave =
+			method !== "GET" ? UnsafeToLeaveDispatch.lock(method + "-request") : null;
+
 		if (this.handlePreRequest) {
 			void (await this.handlePreRequest(method, url, args, body, auth));
 		}
@@ -226,6 +230,9 @@ class JsonApiClient {
 		} finally {
 			if (this.handlePostRequest) {
 				void (await this.handlePostRequest(method, url, args, body, auth));
+			}
+			if (safeToLeave) {
+				safeToLeave();
 			}
 		}
 	}

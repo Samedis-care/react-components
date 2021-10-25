@@ -11,6 +11,7 @@ import { InputDialog } from "./InputDialog";
 import { InfoDialog } from "./InfoDialog";
 import { SignDialog } from "./SignPadDialog";
 import i18n from "../../i18n";
+import { ErrorDialog } from "./ErrorDialog";
 
 /**
  * Shows an awaitable confirm dialog
@@ -115,4 +116,43 @@ export const showSignPadDialog = (
 	props: IDialogConfigSign
 ): void => {
 	pushDialog(<SignDialog {...props} />);
+};
+
+/**
+ * Shows an error dialog
+ * @param pushDialog The dialog context's (useDialogContext()) pushDialog function
+ * @param e The error or validation error
+ */
+export const showErrorDialog = (
+	pushDialog: DialogContextType[0],
+	e: Error | Record<string, string>
+): void => {
+	// display generic errors and validation errors
+	let errorTitle = "";
+	let errorMsg: React.ReactNode = "";
+	if (e instanceof Error) {
+		errorTitle = i18n.t("dialogs.error-title");
+		errorMsg = e.message;
+	} else {
+		errorTitle = i18n.t("dialogs.validation-error-title");
+		errorMsg = (
+			<ul>
+				{Object.entries(e).map(([key, value]) => (
+					<li key={key}>{value}</li>
+				))}
+			</ul>
+		);
+	}
+	pushDialog(
+		<ErrorDialog
+			title={errorTitle}
+			message={errorMsg}
+			buttons={[
+				{
+					text: i18n.t("buttons.ok"),
+					autoFocus: true,
+				},
+			]}
+		/>
+	);
 };

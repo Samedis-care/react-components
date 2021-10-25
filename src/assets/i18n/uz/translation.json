@@ -200,6 +200,14 @@
 				}
 			}
 		},
+		"form": {
+			"back-on-dirty": {
+				"message": "O'zgarishlar yo'qoladi",
+				"title": "Shakl sahifasidan chiqasizmi?",
+				"no": "Yo'q",
+				"yes": "Ha"
+			}
+		},
 		"selector": {
 			"loading": "Yuklanmoqda ...",
 			"loading-error": "Ma'lumotlarni olishda xatolik yuz berdi"
@@ -213,6 +221,27 @@
 	"utils": {
 		"validation": {
 			"required": "{{attribute}} maydoni talab qilinadi"
+		}
+	},
+	"common": {
+		"buttons": {
+			"back": "Orqaga",
+			"cancel": "Bekor qilish",
+			"finish": "Tugatish",
+			"next": "Keyingisi",
+			"no": "Yo'q",
+			"ok": "xop",
+			"save": "Saqlash",
+			"yes": "Ha",
+			"choose": "Tanlang",
+			"reset-filters": "Barcha filtrlarni qayta o'rnating"
+		},
+		"dialogs": {
+			"are-you-sure": "Ishonchingiz komilmi?",
+			"error-title": "Xatolik yuz berdi",
+			"info": "Ma'lumot",
+			"validation-error-title": "Shakl yaroqsiz",
+			"are-you-sure-submit": "Davom etasizmi?"
 		}
 	}
 }

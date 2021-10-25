@@ -200,6 +200,14 @@
 				}
 			}
 		},
+		"form": {
+			"back-on-dirty": {
+				"message": "Les modifications sont perdues",
+				"title": "Quitter la page du formulaire ?",
+				"no": "Non",
+				"yes": "Oui"
+			}
+		},
 		"selector": {
 			"loading": "Chargement...",
 			"loading-error": "Erreur lors de la récupération des données"
@@ -213,6 +221,27 @@
 	"utils": {
 		"validation": {
 			"required": "Le champ {{attribute}} est obligatoire"
+		}
+	},
+	"common": {
+		"buttons": {
+			"next": "Suivant",
+			"finish": "Fermer",
+			"back": "Retour",
+			"cancel": "Annuler",
+			"save": "Sauvegarder",
+			"ok": "Ok",
+			"yes": "Oui",
+			"no": "Non",
+			"choose": "Choisir",
+			"reset-filters": "Réinitialiser tous les filtres"
+		},
+		"dialogs": {
+			"error-title": "Une erreur s'est produite",
+			"validation-error-title": "Forme non valide",
+			"info": "Info",
+			"are-you-sure": "Êtes-vous sûr ?",
+			"are-you-sure-submit": "Continuer?"
 		}
 	}
 }

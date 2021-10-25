@@ -200,6 +200,14 @@
 				}
 			}
 		},
+		"form": {
+			"back-on-dirty": {
+				"message": "Änderungen gehen verloren",
+				"title": "Formularseite verlassen?",
+				"no": "Nein",
+				"yes": "Ja"
+			}
+		},
 		"selector": {
 			"loading": "Wird geladen...",
 			"loading-error": "Fehler beim Abrufen der Daten"
@@ -213,6 +221,27 @@
 	"utils": {
 		"validation": {
 			"required": "Das Feld {{attribute}} ist erforderlich"
+		}
+	},
+	"common": {
+		"buttons": {
+			"next": "Nächste",
+			"finish": "Abschließen",
+			"back": "Zurück",
+			"cancel": "Abbrechen",
+			"save": "Speichern",
+			"ok": "Okay",
+			"yes": "Ja",
+			"no": "Nein",
+			"choose": "Wählen",
+			"reset-filters": "Alle Filter zurücksetzen"
+		},
+		"dialogs": {
+			"error-title": "Ein Fehler ist aufgetreten",
+			"validation-error-title": "Ungültiges Formular",
+			"info": "Info",
+			"are-you-sure": "Sind Sie sicher?",
+			"are-you-sure-submit": "Fortfahren?"
 		}
 	}
 }

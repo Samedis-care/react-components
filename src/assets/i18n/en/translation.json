@@ -205,6 +205,14 @@
 				}
 			}
 		},
+		"form": {
+			"back-on-dirty": {
+				"title": "Leave form page?",
+				"message": "Changes are lost",
+				"yes": "Yes",
+				"no": "No"
+			}
+		},
 		"selector": {
 			"loading": "Loading...",
 			"loading-error": "Error while fetching data"
@@ -212,7 +220,29 @@
 	},
 	"utils": {
 		"validation": {
-			"required": "The {{attribute}} field is required"
+			"required": "The {{attribute}} field is required",
+			"email": "The {{attribute}} field requires a valid email"
+		}
+	},
+	"common": {
+		"buttons": {
+			"save": "Save",
+			"back": "Back",
+			"ok": "Okay",
+			"next": "Next",
+			"cancel": "Cancel",
+			"finish": "Finish",
+			"choose": "Choose",
+			"yes": "Yes",
+			"no": "No",
+			"reset-filters": "Reset all filters"
+		},
+		"dialogs": {
+			"error-title": "An error occurred",
+			"validation-error-title": "Invalid form",
+			"info": "Info",
+			"are-you-sure": "Are you sure?",
+			"are-you-sure-submit": "Continue?"
 		}
 	}
 }
