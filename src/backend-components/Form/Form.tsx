@@ -21,12 +21,13 @@ import Model, {
 import Loader from "../../standalone/Loader";
 import { isObjectEmpty } from "../../utils";
 
+export type ValidationError = Record<string, string>;
 /**
  * Pre submit handler for additional validations
  * Throw to cancel submit and display error.
- * Thrown error may be a Record<string, string> (validation error) or an normal Error (other error)
+ * Thrown error may be a ValidationError or an normal Error (other error)
  */
-export type CustomValidationHandler = () => Record<string, string>;
+export type CustomValidationHandler = () => ValidationError;
 /**
  * Post submit handler to submit additional data for the submitted record
  */
@@ -36,7 +37,7 @@ export interface ErrorComponentProps {
 	/**
 	 * The last error that happened
 	 */
-	error: Error;
+	error: Error | ValidationError;
 }
 
 export interface PageProps<KeyT extends ModelFieldName, CustomPropsT> {
@@ -287,7 +288,7 @@ export interface FormContextData {
 	 * Validates the form and returns a list of validation errors
 	 * If the returned object is empty no validation errors occurred.
 	 */
-	validateForm: () => Record<string, string>;
+	validateForm: () => ValidationError;
 	/**
 	 * Parent form context (if present and FormProps.nestedFormName is set)
 	 */
@@ -447,7 +448,9 @@ const Form = <
 	const { mutateAsync: updateData } = useModelMutation(model);
 	const { mutateAsync: deleteRecord } = useModelDelete(model);
 
-	const [updateError, setUpdateError] = useState<Error | null>(null);
+	const [updateError, setUpdateError] = useState<
+		Error | ValidationError | null
+	>(null);
 	const valuesRef = useRef<Record<string, unknown>>({});
 	const [values, setValues] = useState<Record<string, unknown>>({});
 	const [touched, setTouched] = useState<Record<string, boolean>>({});
@@ -660,9 +663,7 @@ const Form = <
 			}
 		} catch (e) {
 			// don't use this for validation errors
-			if (e instanceof Error) {
-				setUpdateError(e);
-			}
+			setUpdateError(e);
 			throw e;
 		} finally {
 			setSubmitting(false);
@@ -917,7 +918,7 @@ const Form = <
 		return <Loader />;
 	}
 
-	const displayError: Error | null = error || updateError;
+	const displayError: Error | ValidationError | null = error || updateError;
 
 	if (!serverData || serverData.length !== 2 || isObjectEmpty(serverData[0])) {
 		// eslint-disable-next-line no-console

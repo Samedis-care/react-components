@@ -12,6 +12,7 @@ import { InfoDialog } from "./InfoDialog";
 import { SignDialog } from "./SignPadDialog";
 import i18n from "../../i18n";
 import { ErrorDialog } from "./ErrorDialog";
+import { ValidationError } from "../../backend-components";
 
 /**
  * Shows an awaitable confirm dialog
@@ -125,7 +126,7 @@ export const showSignPadDialog = (
  */
 export const showErrorDialog = (
 	pushDialog: DialogContextType[0],
-	e: Error | Record<string, string>
+	e: Error | ValidationError
 ): void => {
 	// display generic errors and validation errors
 	let errorTitle = "";
@@ -134,6 +135,7 @@ export const showErrorDialog = (
 		errorTitle = i18n.t("dialogs.error-title");
 		errorMsg = e.message;
 	} else {
+		// validation error
 		errorTitle = i18n.t("dialogs.validation-error-title");
 		errorMsg = (
 			<ul>

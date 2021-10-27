@@ -13,7 +13,7 @@ import {
 	useState,
 } from "react";
 import { shallowCompare } from "../../utils";
-import { FormContext } from "../Form";
+import { FormContext, ValidationError } from "../Form";
 
 export interface UseCrudSelectParams<
 	KeyT extends ModelFieldName,
@@ -62,7 +62,7 @@ export interface UseCrudSelectParams<
 	 * @returns object Validation errors (Key => Values)
 	 * @remarks Only works with FormEngine. Requires field to be set
 	 */
-	validate?: (data: DataT[]) => Record<string, string>;
+	validate?: (data: DataT[]) => ValidationError;
 	/**
 	 * The field to apply the validations for
 	 * @remarks for Form Engine
