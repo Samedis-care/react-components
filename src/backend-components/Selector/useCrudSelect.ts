@@ -7,11 +7,13 @@ import { BaseSelectorData } from "../../standalone";
 import {
 	ForwardedRef,
 	useCallback,
+	useContext,
 	useEffect,
 	useImperativeHandle,
 	useState,
 } from "react";
 import { shallowCompare } from "../../utils";
+import { FormContext } from "../Form";
 
 export interface UseCrudSelectParams<
 	KeyT extends ModelFieldName,
@@ -54,6 +56,19 @@ export interface UseCrudSelectParams<
 	 * The initial selection (override). If set backend isn't consulted for data
 	 */
 	initialSelected?: DataT[];
+	/**
+	 * Validation callback for integration with form engine
+	 * @param data The currently selected data
+	 * @returns object Validation errors (Key => Values)
+	 * @remarks Only works with FormEngine. Requires field to be set
+	 */
+	validate?: (data: DataT[]) => Record<string, string>;
+	/**
+	 * The field to apply the validations for
+	 * @remarks for Form Engine
+	 * @see validate
+	 */
+	field?: string;
 }
 
 export interface UseCrudSelectResult<
@@ -118,6 +133,8 @@ const useCrudSelect = <
 		deserializeModel,
 		onChange,
 		initialSelected,
+		validate,
+		field,
 	} = params;
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<Error | null>(null);
@@ -274,6 +291,24 @@ const useCrudSelect = <
 		})();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
+
+	// validations
+	const formCtx = useContext(FormContext);
+	useEffect(() => {
+		if (!formCtx || !validate || !field) return;
+
+		const {
+			setCustomValidationHandler,
+			removeCustomValidationHandler,
+			onlyValidateMounted,
+		} = formCtx;
+
+		setCustomValidationHandler(field, () => validate(selected));
+
+		return () => {
+			if (onlyValidateMounted) removeCustomValidationHandler(field);
+		};
+	});
 
 	return {
 		loading,
