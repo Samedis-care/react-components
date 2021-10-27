@@ -5,3 +5,4 @@ export { default as FullFormDialog } from "./FormDialog";
 export { default as BasicFormPage } from "./BasicFormPage";
 export { default as DefaultFormPage } from "./DefaultFormPage";
 export { default as DefaultFormPageButtons } from "./DefaultFormPageButtons";
+export { default as DefaultErrorComponent } from "./DefaultErrorComponent";
