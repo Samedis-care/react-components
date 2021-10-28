@@ -106,7 +106,7 @@ export interface FormProps<
 	 * Initial record to use (instead of defaults from model)
 	 * @remarks Only loaded if ID is null
 	 */
-	initialRecord?: Record<KeyT, unknown>;
+	initialRecord?: Record<string, unknown>;
 	/**
 	 * The error component that is used to display errors
 	 */
