@@ -132,11 +132,11 @@ export const showErrorDialog = (
 	let errorTitle = "";
 	let errorMsg: React.ReactNode = "";
 	if (e instanceof Error) {
-		errorTitle = i18n.t("dialogs.error-title");
+		errorTitle = i18n.t("common.dialogs.error-title");
 		errorMsg = e.message;
 	} else {
 		// validation error
-		errorTitle = i18n.t("dialogs.validation-error-title");
+		errorTitle = i18n.t("common.dialogs.validation-error-title");
 		errorMsg = (
 			<ul>
 				{Object.entries(e).map(([key, value]) => (
@@ -151,7 +151,7 @@ export const showErrorDialog = (
 			message={errorMsg}
 			buttons={[
 				{
-					text: i18n.t("buttons.ok"),
+					text: i18n.t("common.buttons.ok"),
 					autoFocus: true,
 				},
 			]}

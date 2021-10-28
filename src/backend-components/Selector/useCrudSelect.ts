@@ -295,7 +295,25 @@ const useCrudSelect = <
 	// validations
 	const formCtx = useContext(FormContext);
 	useEffect(() => {
-		if (!formCtx || !validate || !field) return;
+		if (!formCtx || !validate || !field) {
+			if (validate && process.env.NODE_ENV === "development") {
+				const reasons = [];
+				if (!formCtx)
+					reasons.push(
+						"Form context not present, validate only works inside of Components-Care Form Engine"
+					);
+				if (!field)
+					reasons.push(
+						"Field prop not passed. This is required to register the validation handler with the Form Engine. This value has to be unique to the form"
+					);
+				// eslint-disable-next-line no-console
+				console.error(
+					"[Components-Care] [useCrudSelect] Crud Select has been given validate function, but can't be activated due to the following reasons",
+					reasons
+				);
+			}
+			return;
+		}
 
 		const {
 			setCustomValidationHandler,
