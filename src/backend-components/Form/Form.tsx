@@ -33,6 +33,21 @@ export type CustomValidationHandler = () => ValidationError;
  */
 export type PostSubmitHandler = (id: string) => Promise<void> | unknown;
 
+export enum OnlySubmitMountedBehaviour {
+	/**
+	 * Omit the unmounted values from backend POST/PUT requests entirely
+	 */
+	OMIT = "omit",
+	/**
+	 * Replace the unmounted values with their default values on POST/PUT requests
+	 */
+	DEFAULT = "default",
+	/**
+	 * Replace the unmounted values with null on POST/PUT requests
+	 */
+	NULL = "null",
+}
+
 export interface ErrorComponentProps {
 	/**
 	 * The last error that happened
@@ -88,6 +103,11 @@ export interface FormProps<
 	 */
 	id: string | null;
 	/**
+	 * Initial record to use (instead of defaults from model)
+	 * @remarks Only loaded if ID is null
+	 */
+	initialRecord?: Record<string, unknown>;
+	/**
 	 * The error component that is used to display errors
 	 */
 	errorComponent: React.ComponentType<ErrorComponentProps>;
@@ -123,6 +143,11 @@ export interface FormProps<
 	 * Only submit mounted fields
 	 */
 	onlySubmitMounted?: boolean;
+	/**
+	 * Behaviour for "only submit mounted"
+	 * @default OnlySubmitMountedBehaviour.OMIT
+	 */
+	onlySubmitMountedBehaviour?: OnlySubmitMountedBehaviour;
 	/**
 	 * Only validate mounted fields
 	 */
@@ -229,6 +254,10 @@ export interface FormContextData {
 	 * @see FormProps.onlySubmitMounted
 	 */
 	onlySubmitMounted: boolean;
+	/**
+	 * @see FormProps.onlySubmitMountedBehaviour
+	 */
+	onlySubmitMountedBehaviour: OnlySubmitMountedBehaviour;
 	/**
 	 * @see FormProps.onlyValidateMounted
 	 */
@@ -369,7 +398,10 @@ const Form = <
 		nestedFormPreSubmitHandler,
 		deleteOnSubmit,
 		onDeleted,
+		initialRecord,
 	} = props;
+	const onlySubmitMountedBehaviour =
+		props.onlySubmitMountedBehaviour ?? OnlySubmitMountedBehaviour.OMIT;
 	const ErrorComponent = props.errorComponent;
 
 	// custom fields - dirty state
@@ -574,6 +606,13 @@ const Form = <
 		setTouched(
 			Object.fromEntries(Object.keys(serverData[0]).map((key) => [key, false]))
 		);
+
+		if (initialRecord) {
+			Object.entries(initialRecord).forEach(([key, value]) => {
+				setFieldValue(key, value, false);
+			});
+		}
+
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [isLoading]);
 
@@ -633,8 +672,32 @@ const Form = <
 			const result = await updateData(
 				onlySubmitMounted
 					? Object.fromEntries(
-							Object.entries(valuesRef.current).filter(
-								([key]) => key === "id" || mountedFields[key as KeyT]
+							await Promise.all(
+								Object.entries(valuesRef.current)
+									.filter(
+										([key]) =>
+											onlySubmitMountedBehaviour !==
+												OnlySubmitMountedBehaviour.OMIT ||
+											key === "id" ||
+											mountedFields[key as KeyT]
+									)
+									.map(async (data) => {
+										const [key] = data;
+										if (key === "id" || mountedFields[key as KeyT]) return data;
+										if (
+											onlySubmitMountedBehaviour ===
+											OnlySubmitMountedBehaviour.DEFAULT
+										) {
+											return [key, (await model.getRaw(null))[0][key as KeyT]];
+										} else if (
+											onlySubmitMountedBehaviour ===
+											OnlySubmitMountedBehaviour.NULL
+										) {
+											return [key, null];
+										} else {
+											return data;
+										}
+									})
 							)
 					  )
 					: valuesRef.current
@@ -669,9 +732,11 @@ const Form = <
 			setSubmitting(false);
 		}
 	}, [
+		model,
 		validateForm,
 		updateData,
 		onlySubmitMounted,
+		onlySubmitMountedBehaviour,
 		postSubmitHandlers,
 		onSubmit,
 		mountedFields,
@@ -858,6 +923,7 @@ const Form = <
 			setCustomValidationHandler,
 			removeCustomValidationHandler,
 			onlySubmitMounted: !!onlySubmitMounted,
+			onlySubmitMountedBehaviour,
 			onlyValidateMounted: !!onlyValidateMounted,
 			submitting,
 			deleteOnSubmit: !!deleteOnSubmit,
@@ -887,6 +953,7 @@ const Form = <
 			setCustomValidationHandler,
 			removeCustomValidationHandler,
 			onlySubmitMounted,
+			onlySubmitMountedBehaviour,
 			onlyValidateMounted,
 			deleteOnSubmit,
 			submitting,
