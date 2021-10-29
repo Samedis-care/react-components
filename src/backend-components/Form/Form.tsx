@@ -683,7 +683,7 @@ const Form = <
 									)
 									.map(async (data) => {
 										const [key] = data;
-										if (key === "id") return data;
+										if (key === "id" || mountedFields[key as KeyT]) return data;
 										if (
 											onlySubmitMountedBehaviour ===
 											OnlySubmitMountedBehaviour.DEFAULT
