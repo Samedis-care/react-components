@@ -201,7 +201,7 @@ const Step2ConnectData = (props: CrudImporterStepProps) => {
 							return (
 								<TableRow key={column}>
 									<TableCell className={classes.monospace}>
-										{'record["{column}"]'}
+										{`record["${column}"]`}
 									</TableCell>
 									<TableCell>{dataTypes.join(", ")}</TableCell>
 								</TableRow>
