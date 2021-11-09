@@ -124,7 +124,7 @@ class LazyConnector<
 		// enhance result with local data
 		this.queue.forEach((entry) => {
 			if (entry.type === "create") {
-				result[0].push(entry.result as ModelData<KeyT>);
+				result[0].push((entry.result as ModelGetResponse<KeyT>)[0]);
 				if (result[1].filteredRows) ++result[1].filteredRows;
 				++result[1].totalRows;
 			} else if (entry.type === "update") {
@@ -133,7 +133,7 @@ class LazyConnector<
 						(backendRecord) =>
 							(backendRecord as Record<"id", string>).id !== entry.id
 					)
-					.concat(entry.result as ModelData<KeyT>);
+					.concat((entry.result as ModelGetResponse<KeyT>)[0]);
 			} else if (entry.type === "delete") {
 				const { id: entryId } = entry;
 				if (!entryId) return;
