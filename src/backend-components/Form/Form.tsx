@@ -726,7 +726,7 @@ const Form = <
 			}
 		} catch (e) {
 			// don't use this for validation errors
-			setUpdateError(e);
+			setUpdateError(e as Error);
 			throw e;
 		} finally {
 			setSubmitting(false);
