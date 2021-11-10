@@ -32,20 +32,22 @@ export interface UseCrudSelectParams<
 	 */
 	serialize: (
 		data: DataT
-	) => Promise<Partial<Record<KeyT, unknown>>> | Partial<Record<KeyT, unknown>>;
+	) =>
+		| Promise<Partial<Record<string, unknown>>>
+		| Partial<Record<string, unknown>>;
 	/**
 	 * Callback for deserializing data after getting it from the backend connector
 	 * @param data The data from the backend connector (index function)
 	 * @returns The selector data which can be used by the control
 	 */
-	deserialize: (data: Record<KeyT, unknown>) => Promise<DataT> | DataT;
+	deserialize: (data: Record<string, unknown>) => Promise<DataT> | DataT;
 	/**
 	 * Callback for deserializing data from the model
 	 * @param data The data from the backend connector (index function)
 	 * @returns The selector data which can be used by the control
 	 */
 	deserializeModel: (
-		data: Record<KeyT, unknown>
+		data: Record<string, unknown>
 	) => Promise<Omit<DataT, "value">> | Omit<DataT, "value">;
 	/**
 	 * Selection change event
@@ -72,6 +74,7 @@ export interface UseCrudSelectParams<
 }
 
 export interface UseCrudSelectResult<
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	KeyT extends ModelFieldName,
 	DataT extends BaseSelectorData
 > {
@@ -94,7 +97,7 @@ export interface UseCrudSelectResult<
 	/**
 	 * Currently selected entries (raw data)
 	 */
-	initialRawData: Record<KeyT, unknown>[];
+	initialRawData: Record<string, unknown>[];
 	/**
 	 * Selection handler
 	 * @param ids The new selected entry ids
@@ -105,7 +108,7 @@ export interface UseCrudSelectResult<
 	 * Conversion function for model data to selection data (handles special case when data comes from CRUD controller)
 	 * @param data The model data
 	 */
-	modelToSelectorData: (data: Record<KeyT, unknown>) => Promise<DataT>;
+	modelToSelectorData: (data: Record<string, unknown>) => Promise<DataT>;
 }
 
 export interface CrudSelectDispatch<DataT extends BaseSelectorData> {
@@ -140,9 +143,9 @@ const useCrudSelect = <
 	const [error, setError] = useState<Error | null>(null);
 	const [loadError, setLoadError] = useState<Error | null>(null);
 	const [selected, setSelected] = useState<DataT[]>([]);
-	const [initialRawData, setInitialRawData] = useState<Record<KeyT, unknown>[]>(
-		[]
-	);
+	const [initialRawData, setInitialRawData] = useState<
+		Record<string, unknown>[]
+	>([]);
 
 	useImperativeHandle<CrudSelectDispatch<DataT>, CrudSelectDispatch<DataT>>(
 		ref,
@@ -248,7 +251,7 @@ const useCrudSelect = <
 	);
 
 	const modelToSelectorData = useCallback(
-		async (data: Record<KeyT, unknown>): Promise<DataT> =>
+		async (data: Record<string, unknown>): Promise<DataT> =>
 			initialRawData.includes(data)
 				? deserialize(data)
 				: ({

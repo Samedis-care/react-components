@@ -1,5 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { MenuBase } from "../../..";
+import {
+	doesRouteMatch,
+	extractRouteParameters,
+	insertRouteParameters,
+	MenuBase,
+} from "../../..";
 import {
 	IMenuItemDefinition,
 	MenuProps,
@@ -32,13 +37,32 @@ export interface IRoutedMenuProps
 }
 
 /**
+ * Extract current route params
+ * @param definitions The route definitions
+ * @param path The current location.pathname
+ */
+const getMenuRouteParams = (
+	definitions: IRoutedMenuItemDefinition[],
+	path: string
+): Record<string, string> => {
+	const match = definitions.find(
+		(entry) => entry.route && doesRouteMatch(entry.route, path, true)
+	);
+	if (!match) return {};
+	const route = match.route as string;
+	return extractRouteParameters(route, path, true);
+};
+
+/**
  * Converts the routed menu item definitions to normal menu item definitions
- * @param definition The routeed menu item definition
+ * @param definitions All menu items
+ * @param definition The routed menu item definition
  * @param path The current location.pathname
  * @param depth The depth of the menu item
  * @return a normal menu item definition
  */
 const convertDefinition = (
+	definitions: IRoutedMenuItemDefinition[],
 	definition: IRoutedMenuItemDefinition,
 	path: string,
 	depth: number
@@ -48,16 +72,21 @@ const convertDefinition = (
 		definition.children &&
 		!!resolveLocation(definition.children, path, depth + 1, null),
 	children: definition.children?.map((entry) =>
-		convertDefinition(entry, path, depth + 1)
+		convertDefinition(definitions, entry, path, depth + 1)
 	),
 	onClick: (evt) => {
 		if (definition.onClick) {
 			definition.onClick(evt);
 		}
 		if (definition.route) {
+			// keep URL parameters
+			const target = insertRouteParameters(
+				definition.route,
+				getMenuRouteParams(definitions, path)
+			);
 			if (evt.ctrlKey || evt.metaKey || evt.shiftKey)
-				window.open(definition.route, "_blank");
-			else FrameworkHistory.push(definition.route);
+				window.open(target, "_blank");
+			else FrameworkHistory.push(target);
 		}
 	},
 	onAuxClick: (evt) => {
@@ -65,7 +94,12 @@ const convertDefinition = (
 			definition.onAuxClick(evt);
 		}
 		if (definition.route) {
-			window.open(definition.route);
+			// keep URL parameters
+			const target = insertRouteParameters(
+				definition.route,
+				getMenuRouteParams(definitions, path)
+			);
+			window.open(target);
 		}
 	},
 });
@@ -98,7 +132,7 @@ const resolveLocation = (
 	}
 	// then try this level
 	for (const def of definitions) {
-		if (def.route && path.startsWith(def.route)) {
+		if (def.route && doesRouteMatch(def.route, path, true)) {
 			return itemId ? `${itemId}@${def.title}` : def.title;
 		}
 	}
@@ -123,7 +157,7 @@ const RoutedMenu = (props: IRoutedMenuProps) => {
 	// convert routed menu definitions to normal menu definitions
 	const rawDef = props.definition;
 	const definition = React.useMemo(() => {
-		return rawDef.map((entry) => convertDefinition(entry, path, 0));
+		return rawDef.map((entry) => convertDefinition(rawDef, entry, path, 0));
 	}, [rawDef, path]);
 
 	return (

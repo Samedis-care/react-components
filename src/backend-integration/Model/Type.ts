@@ -8,7 +8,7 @@ interface Type<T> {
 	 * @param value The value to verify
 	 * @returns An error string or null if no validation error occurred
 	 */
-	validate(value: T): string | null;
+	validate(value: T): Promise<string | null> | string | null;
 
 	/**
 	 * Renders the value

@@ -12,7 +12,7 @@ const validateOptional = <
 >(
 	callback: (
 		value: TypeT,
-		values: Record<KeyT, unknown>,
+		values: Record<string, unknown>,
 		fieldDef: Pick<
 			ModelFieldDefinition<TypeT, KeyT, VisibilityT, CustomT>,
 			"getLabel"
@@ -20,7 +20,7 @@ const validateOptional = <
 	) => string | null
 ) => (
 	value: TypeT,
-	values: Record<KeyT, unknown>,
+	values: Record<string, unknown>,
 	fieldDef: Pick<
 		ModelFieldDefinition<TypeT, KeyT, VisibilityT, CustomT>,
 		"getLabel"

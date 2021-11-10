@@ -1,6 +1,8 @@
-import { Box, useMediaQuery, useTheme } from "@material-ui/core";
+import { Box, Theme, useMediaQuery, useTheme } from "@material-ui/core";
 import React from "react";
 import { makeStyles } from "@material-ui/core/styles";
+import { Styles } from "@material-ui/core/styles/withStyles";
+import { makeThemeStyles } from "../../utils";
 
 export interface FormPageLayoutProps {
 	body: React.ReactNode;
@@ -18,7 +20,7 @@ const useStyles = makeStyles(
 			height: "100%",
 		},
 		body: {
-			paddingBottom: 90,
+			paddingBottom: 150,
 			height: "100%",
 		},
 		footer: {
@@ -31,10 +33,25 @@ const useStyles = makeStyles(
 	{ name: "CcFormPageLayout" }
 );
 
+export type FormPageLayoutClassKey = keyof ReturnType<typeof useStyles>;
+
+export type FormPageLayoutTheme = Partial<
+	Styles<Theme, FormPageLayoutProps, FormPageLayoutClassKey>
+>;
+
+const useThemeStyles = makeThemeStyles<
+	FormPageLayoutProps,
+	FormPageLayoutClassKey
+>(
+	(theme) => theme.componentsCare?.uiKit?.formPage?.layout,
+	"CcFormPageLayout",
+	useStyles
+);
+
 const FormPageLayout = (props: FormPageLayoutProps) => {
 	const theme = useTheme();
 	const isXs = useMediaQuery(theme.breakpoints.only("xs"));
-	const classes = useStyles();
+	const classes = useThemeStyles(props);
 
 	return (
 		<Box p={isXs ? 2 : 0} className={classes.box}>

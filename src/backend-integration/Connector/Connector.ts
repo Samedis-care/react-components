@@ -37,7 +37,7 @@ abstract class Connector<
 	abstract index(
 		params?: Partial<IDataGridLoadDataParameters>,
 		model?: Model<KeyT, VisibilityT, CustomT>
-	): Promise<[Record<KeyT, unknown>[], ResponseMeta, unknown?]>;
+	): Promise<[Record<string, unknown>[], ResponseMeta, unknown?]>;
 
 	/**
 	 * Creates a new data entry with the given data

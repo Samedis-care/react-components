@@ -84,7 +84,9 @@ class RendererBackendMultiSelect<
 						label={label}
 						onSelect={(value) => handleChange(field, value)}
 						disabled={visibility.readOnly}
-						model={relationModel as Model<KeyT, VisibilityT, CustomT>}
+						model={
+							(relationModel as unknown) as Model<KeyT, VisibilityT, CustomT>
+						}
 						initialData={relationData}
 						{...this.props}
 					/>

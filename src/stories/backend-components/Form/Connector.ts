@@ -19,15 +19,15 @@ class FormStoryConnector<
 		throw new Error("Unimplemented");
 	}
 
-	index(): Promise<[Record<KeyT, unknown>[], ResponseMeta]> {
+	index(): Promise<[Record<string, unknown>[], ResponseMeta]> {
 		throw new Error("Unimplemented");
 	}
 
-	read(): ModelGetResponse<KeyT> {
+	read(): ModelGetResponse<string> {
 		throw new Error("Unimplemented");
 	}
 
-	update(): ModelGetResponse<KeyT> {
+	update(): ModelGetResponse<string> {
 		throw new Error("Unimplemented");
 	}
 }

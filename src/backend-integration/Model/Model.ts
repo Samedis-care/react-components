@@ -13,20 +13,13 @@ import {
 } from "react-query/types/react/types";
 import queryCache from "../Store";
 import { QueryKey } from "react-query/types/core/types";
+import { deepAssign, dotToObject, getValueByDot } from "../../utils";
 
 export interface PageVisibility {
 	overview: Visibility;
 	edit: VisibilityCallback;
 	create: VisibilityCallback;
 }
-
-export type ModelRecord<
-	ModelT extends Model<ModelFieldName, PageVisibility, unknown>
-> = {
-	[Field in keyof ModelT["fields"]]: ReturnType<
-		ModelT["fields"][Field]["type"]["getDefaultValue"]
-	>;
-};
 
 export interface ModelFieldDefinition<
 	TypeT,
@@ -70,9 +63,9 @@ export interface ModelFieldDefinition<
 	 */
 	validate?: (
 		value: TypeT,
-		values: Record<KeyT, unknown>,
+		values: Record<string, unknown>,
 		field: ModelFieldDefinition<TypeT, KeyT, VisibilityT, CustomT>
-	) => string | null;
+	) => Promise<string | null> | string | null;
 	/**
 	 * User-defined data
 	 */
@@ -91,7 +84,7 @@ export interface ModelFieldDefinition<
 			field: KeyT,
 			value: unknown,
 			shouldValidate?: boolean
-		) => void
+		) => Promise<void>
 	) => TypeT;
 	/**
 	 * The referenced model for backend connected data types.
@@ -118,7 +111,8 @@ export type ModelGetResponseRelations<KeyT extends ModelFieldName> = Partial<
 	Record<KeyT, Record<ModelFieldName, unknown>[]>
 >;
 
-export type ModelData<KeyT extends ModelFieldName> = Record<KeyT, unknown>;
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export type ModelData<KeyT extends ModelFieldName> = Record<string, unknown>;
 
 /**
  * Response for GET single data entry
@@ -351,7 +345,7 @@ class Model<
 	 */
 	public async index(
 		params: Partial<IDataGridLoadDataParameters> | undefined
-	): Promise<[Record<KeyT, unknown>[], ResponseMeta]> {
+	): Promise<[Record<string, unknown>[], ResponseMeta]> {
 		const [rawData, meta] = await this.connector.index(params, this);
 		// eslint-disable-next-line no-debugger
 		return [
@@ -575,7 +569,7 @@ class Model<
 	 */
 	public updateStoredData(
 		id: string,
-		updater: (old: Record<KeyT, unknown>) => Record<KeyT, unknown>
+		updater: (old: Record<string, unknown>) => Record<string, unknown>
 	): void {
 		ModelDataStore.setQueryData(
 			this.getReactQueryKey(id),
@@ -627,43 +621,64 @@ class Model<
 	 * @param view Optional view filter (only applies validations on fields present in given view)
 	 * @param fieldsToValidate List of fields to validate
 	 */
-	public validate(
-		values: Record<KeyT, unknown>,
+	public async validate(
+		values: Record<string, unknown>,
 		view?: "edit" | "create",
 		fieldsToValidate?: KeyT[]
-	): Record<string, string> {
+	): Promise<Record<string, string>> {
 		const errors: Record<string, string> = {};
 
-		Object.entries(values).forEach(([field, value]) => {
-			// skip validations for fields which aren't defined in the model or which are disabled in the current view or aren't currently mounted
-			if (!(field in this.fields)) return;
-			try {
-				const fieldDef = this.fields[field as KeyT];
-				if (view && getVisibility(fieldDef.visibility[view], values).disabled)
-					return;
-				if (fieldsToValidate && !fieldsToValidate.includes(field as KeyT))
-					return;
+		await Promise.all(
+			Object.entries(values).map(async ([field, value]) => {
+				// skip validations for fields which aren't defined in the model or which are disabled in the current view or aren't currently mounted
+				if (!(field in this.fields)) return;
+				try {
+					const fieldDef = this.fields[field as KeyT];
+					if (view && getVisibility(fieldDef.visibility[view], values).disabled)
+						return;
+					if (fieldsToValidate && !fieldsToValidate.includes(field as KeyT))
+						return;
 
-				// first apply type validation
-				let error = fieldDef.type.validate(value);
+					// first apply type validation
+					let error: string | null;
+					try {
+						error = await fieldDef.type.validate(value);
+					} catch (e) {
+						// eslint-disable-next-line
+						console.error(
+							"[Components-Care] [Model.validate] Error during validation:",
+							e
+						);
+						error = (e as Error).message;
+					}
 
-				// then apply custom field validation if present
-				const fieldValidation = fieldDef.validate;
-				if (!error && fieldValidation) {
-					error = fieldValidation(value, values, fieldDef);
+					// then apply custom field validation if present
+					const fieldValidation = fieldDef.validate;
+					if (!error && fieldValidation) {
+						try {
+							error = await fieldValidation(value, values, fieldDef);
+						} catch (e) {
+							// eslint-disable-next-line
+							console.error(
+								"[Components-Care] [Model.validate] Error during validation:",
+								e
+							);
+							error = (e as Error).message;
+						}
+					}
+
+					if (error) errors[field] = error;
+				} catch (e) {
+					// eslint-disable-next-line no-console
+					console.error(
+						"[Components-Care] [Model.validate] Error during field validation:",
+						field,
+						value,
+						e
+					);
 				}
-
-				if (error) errors[field] = error;
-			} catch (e) {
-				// eslint-disable-next-line no-console
-				console.error(
-					"[Components-Care] [Model.validate] Error during field validation:",
-					field,
-					value,
-					e
-				);
-			}
-		});
+			})
+		);
 
 		return errors;
 	}
@@ -671,18 +686,20 @@ class Model<
 	/**
 	 * Gets an empty/default model data entry
 	 */
-	protected async getDefaultValues(): Promise<Record<KeyT, unknown>> {
+	protected async getDefaultValues(): Promise<Record<string, unknown>> {
 		const data: Record<string, unknown> = {};
 		const promises = Object.entries(this.fields).map(async (entry) => {
 			const [field, def] = entry as [
 				KeyT,
 				ModelFieldDefinition<unknown, KeyT, VisibilityT, CustomT>
 			];
-			if (def.getDefaultValue) data[field] = await def.getDefaultValue();
-			else data[field] = def.type.getDefaultValue();
+			let defaultValue: unknown;
+			if (def.getDefaultValue) defaultValue = await def.getDefaultValue();
+			else defaultValue = def.type.getDefaultValue();
+			deepAssign(data, dotToObject(field, defaultValue));
 		});
 		await Promise.all(promises);
-		return data as Record<KeyT, unknown>;
+		return data;
 	}
 
 	/**
@@ -691,7 +708,7 @@ class Model<
 	 * @param visibility The visibility of the field to check. Field will be dropped if visibility has disabled == true.
 	 */
 	public async serialize(
-		values: Record<KeyT, unknown>,
+		values: Record<string, unknown>,
 		visibility: keyof PageVisibility
 	): Promise<string> {
 		const serializable = await this.applySerialization(
@@ -710,8 +727,8 @@ class Model<
 	public async deserialize(
 		data: string,
 		visibility: keyof PageVisibility
-	): Promise<Record<KeyT, unknown>> {
-		const parsed = JSON.parse(data) as Record<KeyT, unknown>;
+	): Promise<Record<string, unknown>> {
+		const parsed = JSON.parse(data) as Record<string, unknown>;
 		return await this.applySerialization(parsed, "deserialize", visibility);
 	}
 
@@ -720,20 +737,22 @@ class Model<
 	 * @param values The data
 	 * @param func The function to apply
 	 * @param visibility The visibility of the field to check. Field will be dropped if visibility has disabled == true.
-	 * @returns A copy of the data (not deep-copy)
+	 * @returns A copy of the data
 	 */
 	public async applySerialization(
-		values: Record<KeyT, unknown>,
+		values: Record<string, unknown>,
 		func: "serialize" | "deserialize",
 		visibility: keyof PageVisibility
-	): Promise<Record<KeyT, unknown>> {
-		const copy: Partial<Record<KeyT, unknown>> = {};
+	): Promise<Record<string, unknown>> {
+		const copy: Record<string, unknown> = {};
 
-		for (const key in values) {
-			if (!Object.prototype.hasOwnProperty.call(values, key)) continue;
+		for (const key in this.fields) {
+			if (!Object.prototype.hasOwnProperty.call(this.fields, key)) continue;
 
-			const field = this.fields[key as KeyT];
-			if (!field) {
+			const field = this.fields[key];
+
+			const value = getValueByDot(key, values);
+			if (!value) {
 				continue;
 			}
 
@@ -749,14 +768,16 @@ class Model<
 
 			const serializeFunc = field.type[func];
 
+			let result: unknown;
 			if (serializeFunc) {
-				copy[key] = (await serializeFunc(values[key])) as unknown;
+				result = (await serializeFunc(value)) as unknown;
 			} else {
-				copy[key] = values[key];
+				result = value;
 			}
+			deepAssign(copy, dotToObject(key, result));
 		}
 
-		return copy as Record<KeyT, unknown>;
+		return copy;
 	}
 }
 

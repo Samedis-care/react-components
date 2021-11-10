@@ -15,12 +15,12 @@ const validatePresence = <
 	CustomT
 >(
 	value: TypeT,
-	values: Record<KeyT, unknown>,
+	values: Record<string, unknown>,
 	fieldDef: Pick<
 		ModelFieldDefinition<TypeT, KeyT, VisibilityT, CustomT>,
 		"getLabel"
 	>
-): string | null => {
+): Promise<string | null> | string | null => {
 	if (!value) {
 		return ccI18n.t("utils.validation.required", {
 			attribute: fieldDef.getLabel(),

@@ -15,7 +15,7 @@ const validateArrayNotEmpty = <
 	CustomT
 >(
 	value: TypeT,
-	values: Record<KeyT, unknown>,
+	values: Record<string, unknown>,
 	fieldDef: Pick<
 		ModelFieldDefinition<TypeT, KeyT, VisibilityT, CustomT>,
 		"getLabel"

@@ -39,7 +39,7 @@ export interface BackendSingleSelectProps<
 	 * @param modelData The model data
 	 */
 	modelToSelectorData: (
-		modelData: Record<KeyT, unknown>
+		modelData: Record<string, unknown>
 	) => Promise<BaseSelectorData> | BaseSelectorData;
 	/**
 	 * The amount of search results to load (defaults to 25)
@@ -61,7 +61,7 @@ export interface BackendSingleSelectProps<
 	/**
 	 * Initial data (model format) used for selected cache
 	 */
-	initialData?: Record<KeyT, unknown>[];
+	initialData?: Record<string, unknown>[];
 	/**
 	 * LRU settings
 	 */

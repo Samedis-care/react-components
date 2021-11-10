@@ -19,7 +19,13 @@ import Model, {
 	useModelMutation,
 } from "../../backend-integration/Model/Model";
 import Loader from "../../standalone/Loader";
-import { isObjectEmpty } from "../../utils";
+import {
+	deepAssign,
+	deepClone,
+	dotToObject,
+	getValueByDot,
+	isObjectEmpty,
+} from "../../utils";
 
 export type ValidationError = Record<string, string>;
 /**
@@ -27,7 +33,9 @@ export type ValidationError = Record<string, string>;
  * Throw to cancel submit and display error.
  * Thrown error may be a ValidationError or an normal Error (other error)
  */
-export type CustomValidationHandler = () => ValidationError;
+export type CustomValidationHandler = () =>
+	| Promise<ValidationError>
+	| ValidationError;
 /**
  * Post submit handler to submit additional data for the submitted record
  */
@@ -55,6 +63,7 @@ export interface ErrorComponentProps {
 	error: Error | ValidationError;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export interface PageProps<KeyT extends ModelFieldName, CustomPropsT> {
 	/**
 	 * Indicates if the form is currently being submitted.
@@ -69,7 +78,7 @@ export interface PageProps<KeyT extends ModelFieldName, CustomPropsT> {
 	 * The values of the form, can be used for conditional rendering.
 	 * Only present if renderConditionally is set to true in FormProps
 	 */
-	values?: Record<KeyT, unknown>;
+	values?: Record<string, unknown>;
 	/**
 	 * Function to trigger form submit
 	 */
@@ -124,7 +133,7 @@ export interface FormProps<
 	 * Contains data from server response
 	 * @param dataFromServer The data from the server response (model data)
 	 */
-	onSubmit?: (dataFromServer: Record<KeyT, unknown>) => Promise<void> | void;
+	onSubmit?: (dataFromServer: Record<string, unknown>) => Promise<void> | void;
 	/**
 	 * Delete the record on submit rather then save it?
 	 */
@@ -293,7 +302,11 @@ export interface FormContextData {
 	/**
 	 * Sets a field value
 	 */
-	setFieldValue: (field: string, value: unknown, validate?: boolean) => void;
+	setFieldValue: (
+		field: string,
+		value: unknown,
+		validate?: boolean
+	) => Promise<void>;
 	/**
 	 * Handle input blur events
 	 */
@@ -308,7 +321,7 @@ export interface FormContextData {
 		field: string,
 		touched?: boolean,
 		validate?: boolean
-	) => void;
+	) => Promise<void>;
 	/**
 	 * Resets the form to server values
 	 */
@@ -317,7 +330,7 @@ export interface FormContextData {
 	 * Validates the form and returns a list of validation errors
 	 * If the returned object is empty no validation errors occurred.
 	 */
-	validateForm: () => ValidationError;
+	validateForm: () => Promise<ValidationError> | ValidationError;
 	/**
 	 * Parent form context (if present and FormProps.nestedFormName is set)
 	 */
@@ -516,10 +529,10 @@ const Form = <
 
 	// main form handling - dispatch
 	const validateForm = useCallback(
-		(values?: Record<string, unknown>) => {
+		async (values?: Record<string, unknown>) => {
 			if (disableValidation) return {};
 
-			const errors = model.validate(
+			const errors = await model.validate(
 				values ?? valuesRef.current,
 				id ? "edit" : "create",
 				onlyValidateMounted
@@ -528,23 +541,25 @@ const Form = <
 					  ) as KeyT[])
 					: undefined
 			);
-			Object.entries(customValidationHandlers.current).forEach(
-				([name, handler]) => {
-					const customErrors = handler();
-					for (const key in customErrors) {
-						if (!Object.prototype.hasOwnProperty.call(customErrors, key))
-							continue;
-						errors[name + "_" + key] = customErrors[key];
+			await Promise.all(
+				Object.entries(customValidationHandlers.current).map(
+					async ([name, handler]) => {
+						const customErrors = await handler();
+						for (const key in customErrors) {
+							if (!Object.prototype.hasOwnProperty.call(customErrors, key))
+								continue;
+							errors[name + "_" + key] = customErrors[key];
+						}
 					}
-				}
+				)
 			);
 			return errors;
 		},
 		[disableValidation, model, id, onlyValidateMounted, mountedFields]
 	);
 	const validateField = useCallback(
-		(field: string, value?: unknown) => {
-			const errors = validateForm(
+		async (field: string, value?: unknown) => {
+			const errors = await validateForm(
 				value !== undefined
 					? { ...valuesRef.current, [field]: value }
 					: undefined
@@ -554,32 +569,37 @@ const Form = <
 		[validateForm]
 	);
 	const setFieldTouched = useCallback(
-		(field: string, newTouched = true, validate = false) => {
+		async (field: string, newTouched = true, validate = false) => {
 			setTouched((prev) =>
 				prev[field] === newTouched
 					? prev
 					: { ...prev, [field]: newTouched as boolean }
 			);
-			if (validate) validateField(field);
+			if (validate) await validateField(field);
 		},
 		[validateField]
 	);
 	const setFieldValue = useCallback(
-		(field: string, value: unknown, validate = true) => {
-			setFieldTouched(field, true, false);
-			valuesRef.current[field] = value;
-			setValues((prev) => ({ ...prev, [field]: value }));
-			if (validate) validateField(field, value);
+		async (field: string, value: unknown, validate = true) => {
+			await setFieldTouched(field, true, false);
+			value = dotToObject(field, value);
+			valuesRef.current = deepAssign(
+				{},
+				valuesRef.current,
+				value as Record<string, unknown>
+			);
+			setValues(valuesRef.current);
+			if (validate) await validateField(field, value);
 		},
 		[validateField, setFieldTouched]
 	);
 	const resetForm = useCallback(() => {
 		if (!serverData || !serverData[0]) return;
-		valuesRef.current = { ...serverData[0] };
+		valuesRef.current = deepClone(serverData[0]);
 		setValues(valuesRef.current);
 	}, [serverData]);
 	const handleBlur = useCallback(
-		(evt: React.FocusEvent<HTMLInputElement & HTMLElement>) => {
+		async (evt: React.FocusEvent<HTMLInputElement & HTMLElement>) => {
 			const fieldName =
 				evt.target.name ??
 				evt.target.getAttribute("data-name") ??
@@ -592,7 +612,7 @@ const Form = <
 				);
 				return;
 			}
-			setFieldTouched(fieldName);
+			await setFieldTouched(fieldName);
 		},
 		[setFieldTouched]
 	);
@@ -601,16 +621,18 @@ const Form = <
 	useEffect(() => {
 		if (isLoading || !serverData || !serverData[0]) return;
 
-		valuesRef.current = { ...serverData[0] };
+		valuesRef.current = deepClone(serverData[0]);
 		setValues(valuesRef.current);
 		setTouched(
-			Object.fromEntries(Object.keys(serverData[0]).map((key) => [key, false]))
+			Object.fromEntries(Object.keys(model.fields).map((key) => [key, false]))
 		);
 
 		if (initialRecord) {
-			Object.entries(initialRecord).forEach(([key, value]) => {
-				setFieldValue(key, value, false);
-			});
+			void Promise.all(
+				Object.entries(initialRecord).map(([key, value]) =>
+					setFieldValue(key, value, false)
+				)
+			);
 		}
 
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -620,15 +642,19 @@ const Form = <
 	useEffect(() => {
 		if (isLoading || !serverData || !serverData[0]) return;
 
-		const newValues = { ...valuesRef.current };
+		const newValues = deepClone(valuesRef.current);
+		const serverRecord = deepClone(serverData[0]);
 
 		const untouchedFields = Object.entries(touched)
 			.filter(([, touched]) => !touched)
 			.map(([field]) => field);
 		untouchedFields
-			.filter((field) => field in serverData[0])
+			.filter((field) => field in serverRecord)
 			.forEach((field) => {
-				newValues[field] = serverData[0][field as KeyT];
+				deepAssign(
+					newValues,
+					dotToObject(field, getValueByDot(field, serverRecord))
+				);
 			});
 
 		valuesRef.current = newValues;
@@ -662,7 +688,7 @@ const Form = <
 			return;
 		}
 		try {
-			const validation = validateForm();
+			const validation = await validateForm();
 			setErrors(validation);
 			if (!isObjectEmpty(validation)) {
 				// noinspection ExceptionCaughtLocallyJS
@@ -704,8 +730,8 @@ const Form = <
 			);
 
 			const newValues = onlySubmitMounted
-				? Object.assign({}, valuesRef.current, result[0])
-				: Object.assign({}, result[0]);
+				? deepAssign({}, valuesRef.current, result[0])
+				: deepAssign({}, result[0]);
 			valuesRef.current = newValues;
 
 			setTouched((prev) =>
@@ -869,8 +895,13 @@ const Form = <
 
 			console.log("Form Dirty Flag State:");
 			console.log(
-				"Form Dirty State:",
+				"Form Dirty State (exact):",
 				JSON.stringify(localData) !== JSON.stringify(remoteData)
+			);
+			console.log(
+				"Form Dirty State:",
+				JSON.stringify(normalizeValues(localData)) !==
+					JSON.stringify(normalizeValues(remoteData))
 			);
 			console.log("Custom Dirty State:", customDirty);
 			console.log("Custom Dirty Fields:", customDirtyFields);

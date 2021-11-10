@@ -64,7 +64,7 @@ export interface BackendMultiSelectWithTagsProps<
 	 * @remarks Selector data value must be set to ID
 	 */
 	convGroup: (
-		data: Record<GroupKeyT, unknown>
+		data: Record<string, unknown>
 	) => Promise<GroupDataT> | GroupDataT;
 	/**
 	 * Callback that gets the group entries for a given group record
@@ -85,7 +85,7 @@ export interface BackendMultiSelectWithTagsProps<
 	 * @returns Selector data
 	 * @remarks Selector data value must be set to ID
 	 */
-	convData: (data: Record<DataKeyT, unknown>) => Promise<DataDataT> | DataDataT;
+	convData: (data: Record<string, unknown>) => Promise<DataDataT> | DataDataT;
 	/**
 	 * Name of the switch filter for groups or undefined if disabled
 	 */

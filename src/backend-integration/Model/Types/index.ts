@@ -1,5 +1,6 @@
 export { default as ModelDataTypeString } from "./TypeString";
 export { default as ModelDataTypeStringArray } from "./TypeStringArray";
+export { default as ModelDataTypeColor } from "./TypeColor";
 export { default as ModelDataTypeId } from "./TypeId";
 export { default as ModelDataTypeEnum } from "./TypeEnum";
 export { default as ModelDataTypeEnumMulti } from "./TypeEnumMulti";

@@ -12,7 +12,7 @@ const validationChain = <
 >(
 	...callback: ((
 		value: TypeT,
-		values: Record<KeyT, unknown>,
+		values: Record<string, unknown>,
 		fieldDef: Pick<
 			ModelFieldDefinition<TypeT, KeyT, VisibilityT, CustomT>,
 			"getLabel"
@@ -20,7 +20,7 @@ const validationChain = <
 	) => string | null)[]
 ) => (
 	value: TypeT,
-	values: Record<KeyT, unknown>,
+	values: Record<string, unknown>,
 	fieldDef: Pick<
 		ModelFieldDefinition<TypeT, KeyT, VisibilityT, CustomT>,
 		"getLabel"

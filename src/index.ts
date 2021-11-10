@@ -18,6 +18,7 @@ import { SubActionButtonTheme } from "./standalone/UIKit/SubActionButton";
 import { ImageBoxTheme } from "./standalone/FileUpload/MultiImage/ImageBox";
 import { ImageDialogEntryTheme } from "./standalone/FileUpload/MultiImage/ImageDialogEntry";
 import { MultiImageTheme } from "./standalone/FileUpload/MultiImage/MultiImage";
+import { FormPageLayoutTheme } from "./standalone/Form/FormPageLayout";
 
 export * from "./standalone";
 
@@ -57,6 +58,9 @@ export interface ComponentsCareTheme {
 		subActionButton?: SubActionButtonTheme;
 		formButtons?: FormButtonTheme;
 		baseSelectorExpert?: SelectorThemeExpert;
+		formPage?: {
+			layout?: FormPageLayoutTheme;
+		};
 		hideDisabledIcons?: boolean;
 	};
 }
