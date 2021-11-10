@@ -5,6 +5,7 @@ import {
 	PageVisibility,
 } from "../../backend-integration";
 import { getVisibility } from "../../backend-integration/Model/Visibility";
+import { getValueByDot } from "../../utils";
 
 type NonOverridableProps =
 	| "getDefaultValue"
@@ -68,11 +69,11 @@ const Field = (props: FieldProps): React.ReactElement => {
 
 	const setFieldValueHookWrapper = useCallback(
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		(field: string, value: any, shouldValidate?: boolean) => {
+		async (field: string, value: any, shouldValidate?: boolean) => {
 			if (onChange) {
 				value = onChange(value, model, setFieldValue);
 			}
-			setFieldValue(field, value, shouldValidate);
+			await setFieldValue(field, value, shouldValidate);
 		},
 		[setFieldValue, onChange, model]
 	);
@@ -89,7 +90,7 @@ const Field = (props: FieldProps): React.ReactElement => {
 	}, [markFieldMounted, props.name]);
 
 	const { name } = props;
-	const value = values[name];
+	const value = getValueByDot(name, values);
 	const initialValue = initialValues[name];
 	const hasId = "id" in values && values["id"];
 	const label = fieldDef.getLabel();

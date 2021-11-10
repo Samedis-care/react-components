@@ -108,7 +108,11 @@ class RendererBackendMultiSelectWithTags<
 						onChange={(value) => handleChange(field, value)}
 						disabled={visibility.readOnly}
 						dataModel={
-							relationModel as Model<DataKeyT, DataVisibilityT, DataCustomT>
+							(relationModel as unknown) as Model<
+								DataKeyT,
+								DataVisibilityT,
+								DataCustomT
+							>
 						}
 						initialData={relationData}
 						title={label}

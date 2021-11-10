@@ -7,3 +7,5 @@ export { default as ModelDataTypeDecimalRendererCC } from "./RendererDecimal";
 export { default as ModelDataTypeDateNullableRendererCC } from "./RendererDateNullable";
 export { default as ModelDataTypeDateTimeNullableRendererCC } from "./RendererDateTimeNullable";
 export { default as ModelDataTypeBooleanCheckboxRendererCC } from "./RendererBooleanCheckbox";
+export * from "./RendererColor";
+export { default as ModelDataTypeColorRendererCC } from "./RendererColor";

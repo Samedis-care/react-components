@@ -26,17 +26,19 @@ interface PotentialErrorResponse {
 	};
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface DataResponse<KeyT extends ModelFieldName> {
 	data: {
-		attributes: Record<KeyT, unknown>;
+		attributes: Record<string, unknown>;
 	};
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface IndexResponse<KeyT extends ModelFieldName> {
 	data: {
 		id: string;
 		type: string;
-		attributes: Record<KeyT, unknown>;
+		attributes: Record<string, unknown>;
 	}[];
 	meta: {
 		total: number;
@@ -139,7 +141,7 @@ class BackendConnector<
 
 	async index(
 		params: Partial<IDataGridLoadDataParameters> | undefined
-	): Promise<[Record<KeyT, unknown>[], ResponseMeta, unknown?]> {
+	): Promise<[Record<string, unknown>[], ResponseMeta, unknown?]> {
 		// load reasonable defaults if nothing is set
 		if (!params) params = {};
 		if (!params.page) params.page = 1;

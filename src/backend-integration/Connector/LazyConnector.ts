@@ -62,7 +62,7 @@ class LazyConnector<
 
 		const returnData: ModelGetResponse<KeyT> = [
 			{
-				...(data as Record<KeyT, unknown>),
+				...data,
 				["id" as KeyT]: fakeId,
 			},
 			{},
@@ -106,10 +106,10 @@ class LazyConnector<
 	async index(
 		params: Partial<IDataGridLoadDataParameters> | undefined,
 		model: Model<KeyT, VisibilityT, CustomT> | undefined
-	): Promise<[Record<KeyT, unknown>[], ResponseMeta, unknown?]> {
+	): Promise<[Record<string, unknown>[], ResponseMeta, unknown?]> {
 		if (this.fakeReads) {
 			const fakeMeta: ResponseMeta = { totalRows: 0, filteredRows: 0 };
-			const fakeData: Record<KeyT, unknown>[] = [];
+			const fakeData: Record<string, unknown>[] = [];
 			return [fakeData, fakeMeta];
 		}
 
@@ -124,7 +124,7 @@ class LazyConnector<
 		// enhance result with local data
 		this.queue.forEach((entry) => {
 			if (entry.type === "create") {
-				result[0].push(entry.result as ModelData<KeyT>);
+				result[0].push((entry.result as ModelGetResponse<KeyT>)[0]);
 				if (result[1].filteredRows) ++result[1].filteredRows;
 				++result[1].totalRows;
 			} else if (entry.type === "update") {
@@ -133,7 +133,7 @@ class LazyConnector<
 						(backendRecord) =>
 							(backendRecord as Record<"id", string>).id !== entry.id
 					)
-					.concat(entry.result as ModelData<KeyT>);
+					.concat((entry.result as ModelGetResponse<KeyT>)[0]);
 			} else if (entry.type === "delete") {
 				const { id: entryId } = entry;
 				if (!entryId) return;

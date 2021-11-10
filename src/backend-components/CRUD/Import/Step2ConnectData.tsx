@@ -107,7 +107,7 @@ const Step2ConnectData = (props: CrudImporterStepProps) => {
 						}
 						if (!validation) {
 							// if type checks have passed, call field type validator
-							validation = field.type.validate(result);
+							validation = await field.type.validate(result);
 						}
 						if (validation) {
 							// eslint-disable-next-line no-console

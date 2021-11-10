@@ -35,7 +35,7 @@ class LocalStorageConnector<
 	async index(
 		params?: Partial<IDataGridLoadDataParameters>,
 		model?: Model<KeyT, VisibilityT, CustomT>
-	): Promise<[Record<KeyT, unknown>[], ResponseMeta]> {
+	): Promise<[Record<string, unknown>[], ResponseMeta]> {
 		// eslint-disable-next-line no-console
 		console.log("[CC] [LocalStorageConnector] index(", params, model, ")");
 
@@ -137,11 +137,11 @@ class LocalStorageConnector<
 		return super.deleteMultiple(matchingIds, model);
 	};
 
-	private getDB(): Record<string, Record<KeyT, unknown>> {
+	private getDB(): Record<string, Record<string, unknown>> {
 		const dataStr = localStorage.getItem(this.key);
 		if (!dataStr) return {};
 		try {
-			return JSON.parse(dataStr) as Record<string, Record<KeyT, unknown>>;
+			return JSON.parse(dataStr) as Record<string, Record<string, unknown>>;
 		} catch (e) {
 			// eslint-disable-next-line no-console
 			console.error(
@@ -152,7 +152,7 @@ class LocalStorageConnector<
 		}
 	}
 
-	private setDB(data: Record<string, Record<KeyT, unknown>>) {
+	private setDB(data: Record<string, Record<string, unknown>>) {
 		return localStorage.setItem(this.key, JSON.stringify(data));
 	}
 }

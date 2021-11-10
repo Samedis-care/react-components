@@ -14,6 +14,7 @@ import Model, {
 import { useDialogContext } from "../../framework";
 import { ErrorDialog, showConfirmDialog } from "../../non-standalone";
 import useCCTranslations from "../../utils/useCCTranslations";
+import { dotToObject, getValueByDot } from "../../utils";
 
 export interface BackendDataGridProps<
 	KeyT extends ModelFieldName,
@@ -64,14 +65,13 @@ const BackendDataGrid = <
 			return {
 				rowsTotal: meta.totalRows,
 				rowsFiltered: meta.filteredRows,
-				rows: result.map((entry: Record<KeyT, unknown>) =>
+				rows: result.map((entry: Record<string, unknown>) =>
 					Object.fromEntries(
-						Object.entries(entry).map((kvs) => {
-							const [key, value] = kvs;
-
+						Object.keys(model.fields).map((key) => {
 							// we cannot render the ID, this will cause issues with the selection
+							const value = getValueByDot(key, entry);
 							if (key === "id") {
-								return kvs;
+								return [key, value];
 							}
 
 							const field = model.fields[key as KeyT];
@@ -102,8 +102,8 @@ const BackendDataGrid = <
 											await model.applySerialization(
 												{
 													id,
-													[field]: value,
-												} as Record<KeyT, unknown>,
+													...dotToObject(field, value),
+												} as Record<string, unknown>,
 												"serialize",
 												"overview"
 											)

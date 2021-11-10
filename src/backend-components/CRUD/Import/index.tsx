@@ -65,7 +65,7 @@ export interface CrudImporterState {
 }
 
 export interface CrudImporterStepProps {
-	model: Model<string, PageVisibility, unknown>;
+	model: Model<ModelFieldName, PageVisibility, unknown>;
 	state: CrudImporterState;
 	setState: Dispatch<SetStateAction<CrudImporterState>>;
 }
@@ -134,28 +134,52 @@ const CrudImport = <
 			<Grid item xs>
 				{activeStep === 0 && (
 					<Step1LoadData
-						model={model as Model<string, PageVisibility, unknown>}
+						model={
+							(model as unknown) as Model<
+								ModelFieldName,
+								PageVisibility,
+								unknown
+							>
+						}
 						state={state}
 						setState={setState}
 					/>
 				)}
 				{activeStep === 1 && (
 					<Step2ConnectData
-						model={model as Model<string, PageVisibility, unknown>}
+						model={
+							(model as unknown) as Model<
+								ModelFieldName,
+								PageVisibility,
+								unknown
+							>
+						}
 						state={state}
 						setState={setState}
 					/>
 				)}
 				{activeStep === 2 && (
 					<Step3ValidateReview
-						model={model as Model<string, PageVisibility, unknown>}
+						model={
+							(model as unknown) as Model<
+								ModelFieldName,
+								PageVisibility,
+								unknown
+							>
+						}
 						state={state}
 						setState={setState}
 					/>
 				)}
 				{activeStep === 3 && (
 					<Step4Import
-						model={model as Model<string, PageVisibility, unknown>}
+						model={
+							(model as unknown) as Model<
+								ModelFieldName,
+								PageVisibility,
+								unknown
+							>
+						}
 						state={state}
 						setState={setState}
 					/>
@@ -191,3 +215,4 @@ const CrudImport = <
 };
 
 export default React.memo(CrudImport) as typeof CrudImport;
+export type CrudImportType = typeof CrudImport;

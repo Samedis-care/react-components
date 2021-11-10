@@ -19,7 +19,7 @@ const validateEmail = <
 	CustomT
 >(
 	value: string,
-	values: Record<KeyT, unknown>,
+	values: Record<string, unknown>,
 	fieldDef: Pick<
 		ModelFieldDefinition<string, KeyT, VisibilityT, CustomT>,
 		"getLabel"

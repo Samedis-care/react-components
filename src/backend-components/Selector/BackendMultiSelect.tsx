@@ -40,7 +40,7 @@ export interface BackendMultiSelectProps<
 	 * @param modelData The model data
 	 */
 	modelToSelectorData: (
-		modelData: Record<KeyT, unknown>
+		modelData: Record<string, unknown>
 	) => Promise<DataT> | DataT;
 	/**
 	 * The amount of search results to load (defaults to 25)
@@ -59,7 +59,7 @@ export interface BackendMultiSelectProps<
 	/**
 	 * Initial data (model format) used for selected cache
 	 */
-	initialData?: Record<KeyT, unknown>[];
+	initialData?: Record<string, unknown>[];
 	/**
 	 * Sort settings
 	 */

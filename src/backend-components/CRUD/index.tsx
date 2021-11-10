@@ -19,8 +19,9 @@ import {
 	usePermissionContext,
 } from "../../framework";
 import { makeStyles } from "@material-ui/core/styles";
+import { CrudImportType } from "./Import";
 
-const CrudImport = React.lazy(() => import("./Import"));
+const CrudImport = React.lazy(() => import("./Import")) as CrudImportType;
 
 export interface CrudFormProps {
 	/**
@@ -58,7 +59,7 @@ export interface CrudProps<
 		| undefined;
 	/**
 	 * The properties to pass to grid
-	 * @remarks onAddNew can be used to overwrite the new button action
+	 * @remarks onAddNew can be used to overCrudImportTypewrite the new button action
 	 */
 	gridProps: Omit<
 		BackendDataGridProps<KeyT, VisibilityT, CustomT>,
@@ -201,7 +202,7 @@ const CRUD = <
 	}, []);
 
 	const handleSubmit = useCallback(
-		async (data: Record<KeyT, unknown>) => {
+		async (data: Record<string, unknown>) => {
 			if (props.formProps.onSubmit) {
 				await props.formProps.onSubmit(data);
 			}
@@ -248,9 +249,7 @@ const CRUD = <
 		/>
 	);
 
-	const importer = () => (
-		<CrudImport model={props.model as Model<string, PageVisibility, unknown>} />
-	);
+	const importer = () => <CrudImport model={props.model} />;
 
 	const form = (
 		id: string,
