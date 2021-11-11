@@ -76,6 +76,7 @@ class RendererBackendSingleSelect<
 					fullWidth
 					error={!!errorMsg}
 					onBlur={handleBlur}
+					data-name={field}
 				>
 					<BackendSingleSelect
 						selected={value}

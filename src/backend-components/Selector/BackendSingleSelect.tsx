@@ -66,6 +66,13 @@ export interface BackendSingleSelectProps<
 	 * LRU settings
 	 */
 	lru?: BackendSingleSelectLruOptions<BaseSelectorData>;
+	/**
+	 * Load error event
+	 * @param error The error that has been raised while loading
+	 * @return string Label for entry which failed loading
+	 * @return null To remove entry from selected entries
+	 */
+	onLoadError?: (error: Error) => string | null;
 }
 
 const BackendSingleSelect = <
@@ -85,6 +92,7 @@ const BackendSingleSelect = <
 		searchDebounceTime,
 		sort,
 		lru,
+		onLoadError,
 		...otherProps
 	} = props;
 
@@ -158,11 +166,23 @@ const BackendSingleSelect = <
 					const data = await model.getCached(selected);
 					newCache = await modelToSelectorData(data[0]);
 				} catch (e) {
+					const err = e as Error;
+					let errorMsg =
+						err.message ?? t("backend-components.selector.loading-error");
+					if (onLoadError) {
+						const result = onLoadError(err);
+						// if we should drop the record...
+						if (!result) {
+							// unselect it
+							if (onSelect) onSelect(null);
+							newCache = null;
+							return;
+						}
+						errorMsg = result;
+					}
 					newCache = {
 						value: selected,
-						label:
-							(e as Error).message ??
-							t("backend-components.selector.loading-error"),
+						label: errorMsg,
 					};
 				}
 			}

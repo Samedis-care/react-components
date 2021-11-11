@@ -601,9 +601,12 @@ const Form = <
 	const handleBlur = useCallback(
 		async (evt: React.FocusEvent<HTMLInputElement & HTMLElement>) => {
 			const fieldName =
-				evt.target.name ??
-				evt.target.getAttribute("data-name") ??
-				evt.target.id;
+				evt.currentTarget?.name ??
+				evt.currentTarget?.getAttribute("data-name") ??
+				evt.currentTarget?.id ??
+				evt.target?.name ??
+				evt.target?.getAttribute("data-name") ??
+				evt.target?.id;
 			if (!fieldName) {
 				// eslint-disable-next-line no-console
 				console.error(
