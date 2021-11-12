@@ -1,13 +1,16 @@
 import React, { useEffect, useMemo } from "react";
 import { CrudImporterStepProps, isFieldImportable } from "./index";
 import GenericDataPreview from "./GenericDataPreview";
-import { isObjectEmpty } from "../../../utils";
+import { deepAssign, dotToObject, isObjectEmpty } from "../../../utils";
 import useAsyncMemo from "../../../utils/useAsyncMemo";
+import useCCTranslations from "../../../utils/useCCTranslations";
 
 type RecordT = [Record<string, unknown>, Record<string, string>, Error | null];
 
 const Step3ValidateReview = (props: CrudImporterStepProps) => {
 	const { model, state, setState } = props;
+
+	const { t } = useCCTranslations();
 
 	const records: RecordT[] | null = useAsyncMemo(
 		async () =>
@@ -20,9 +23,14 @@ const Step3ValidateReview = (props: CrudImporterStepProps) => {
 							Object.entries(model.fields)
 								.filter(([name, field]) => isFieldImportable(name, field))
 								.forEach(([name]) => {
-									modelRecord[name] =
-										// eslint-disable-next-line no-eval
-										eval(state.conversionScripts[name]?.script ?? "") ?? null;
+									deepAssign(
+										modelRecord,
+										dotToObject(
+											name,
+											// eslint-disable-next-line no-eval
+											eval(state.conversionScripts[name]?.script ?? "") ?? null
+										)
+									);
 								});
 							// noinspection JSUnusedAssignment
 							isModelRecordComplete = true;
@@ -68,15 +76,33 @@ const Step3ValidateReview = (props: CrudImporterStepProps) => {
 	return (
 		<GenericDataPreview
 			data={recordsNormalized}
-			existingDefinition={model
-				.toDataGridColumnDefinition()
-				.map((columnDef) => ({
+			existingDefinition={[
+				...model.toDataGridColumnDefinition().map((columnDef) => ({
 					...columnDef,
 					filterable: true,
 					sortable: true,
 					isLocked: false,
 					hidden: false,
-				}))}
+				})),
+				{
+					field: "valid",
+					type: "boolean",
+					headerName: t("backend-components.crud.import.valid"),
+					filterable: true,
+					sortable: true,
+					isLocked: false,
+					hidden: false,
+				},
+				{
+					field: "error",
+					type: "string",
+					headerName: t("backend-components.crud.import.error"),
+					filterable: true,
+					sortable: true,
+					isLocked: false,
+					hidden: false,
+				},
+			]}
 		/>
 	);
 };

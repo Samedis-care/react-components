@@ -45,6 +45,7 @@
 			"header": {
 				"new": "New",
 				"export": "Export",
+				"import": "Import",
 				"settings": "Settings",
 				"reset": "Reset",
 				"custom-filter-button": "Filter",
@@ -216,6 +217,37 @@
 		"selector": {
 			"loading": "Loading...",
 			"loading-error": "Error while fetching data"
+		},
+		"crud": {
+			"import": {
+				"step1": "Load data",
+				"step2": "Connect data",
+				"step3": "Validation & Review",
+				"step4": "Import data",
+				"source_fields": "Source fields",
+				"source_field": "Field",
+				"source_field_type": "Data types",
+				"destination_fields": "Destination fields",
+				"conv_script": "Conversion Script (JavaScript)",
+				"error": "Error",
+				"valid": "Valid",
+				"queue": "In queue: {{COUNT}}",
+				"success": "Success: {{COUNT}}",
+				"failed": "Failed: {{COUNT}}",
+				"last_error": "Last error",
+				"errors": {
+					"file_select": "Invalid file selected"
+				},
+				"validations": {
+					"string": "Result must be a string or null",
+					"number": "Result must be a number or null",
+					"currency_unsupported": "Currency cannot be imported yet",
+					"date": "Result must be a Date or null",
+					"boolean": "Result must be a boolean or null",
+					"fail": "Validation failed: {{REASON}}. For details see browser console.",
+					"unknown": "Unknown"
+				}
+			}
 		}
 	},
 	"utils": {

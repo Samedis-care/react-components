@@ -5,8 +5,10 @@ import {
 	Model,
 	ModelVisibilityHidden,
 	PageVisibility,
+	useModelMutation,
 } from "../../../backend-integration";
-import { sleep } from "../../../utils";
+import { deepAssign, dotToObject, getValueByDot, sleep } from "../../../utils";
+import useCCTranslations from "../../../utils/useCCTranslations";
 
 interface ImportCounters {
 	todo: number;
@@ -15,7 +17,9 @@ interface ImportCounters {
 }
 
 const Step4Import = (props: CrudImporterStepProps) => {
-	const { model, state, setState } = props;
+	const { model, state, setState, updateKey } = props;
+
+	const { t } = useCCTranslations();
 
 	// model which can write to all fields
 	const customModel = new Model<string, PageVisibility, unknown>(
@@ -36,7 +40,7 @@ const Step4Import = (props: CrudImporterStepProps) => {
 		model.cacheKeys,
 		model.cacheOptions
 	);
-	const { mutateAsync: createRecord } = customModel.createOrUpdate();
+	const { mutateAsync: createOrUpdateRecord } = useModelMutation(customModel);
 
 	const [importDone, setImportDone] = useState(false);
 	useEffect(() => {
@@ -73,12 +77,40 @@ const Step4Import = (props: CrudImporterStepProps) => {
 						Object.entries(model.fields)
 							.filter(([name, field]) => isFieldImportable(name, field))
 							.forEach(([name]) => {
-								modelRecord[name] =
-									// eslint-disable-next-line no-eval
-									eval(state.conversionScripts[name]?.script ?? "") ?? null;
+								deepAssign(
+									modelRecord,
+									dotToObject(
+										name,
+										// eslint-disable-next-line no-eval
+										eval(state.conversionScripts[name]?.script ?? "") ?? null
+									)
+								);
 							});
 
-						await createRecord(modelRecord);
+						if (updateKey) {
+							const filterKey = model.fields[updateKey].type.stringify(
+								getValueByDot(updateKey, modelRecord)
+							);
+							const [records, meta] = await model.index({
+								rows: 2,
+								page: 1,
+								fieldFilter: {
+									[updateKey]: {
+										type: "equals",
+										value1: filterKey,
+										value2: "",
+									},
+								},
+							});
+							const rows = meta.filteredRows ?? meta.totalRows;
+							if (rows == 1) {
+								modelRecord.id = records[0].id;
+							} else if (rows >= 2) {
+								throw new Error("Update key not unique: " + filterKey);
+							}
+						}
+
+						await createOrUpdateRecord(modelRecord);
 
 						setCounters((prev) => ({
 							...prev,
@@ -121,16 +153,31 @@ const Step4Import = (props: CrudImporterStepProps) => {
 	return (
 		<Grid container spacing={2}>
 			<Grid item xs={12}>
-				<Typography>In queue: {counters.todo}</Typography>
+				<Typography>
+					{t("backend-components.crud.import.queue", { COUNT: counters.todo })}
+				</Typography>
 			</Grid>
 			<Grid item xs={12}>
-				<Typography>Success: {counters.success}</Typography>
+				<Typography>
+					{t("backend-components.crud.import.success", {
+						COUNT: counters.success,
+					})}
+				</Typography>
 			</Grid>
 			<Grid item xs={12}>
-				<Typography>Failed: {counters.failed}</Typography>
+				<Typography>
+					{t("backend-components.crud.import.failed", {
+						COUNT: counters.failed,
+					})}
+				</Typography>
 			</Grid>
 			<Grid item xs={12}>
-				<TextField multiline fullWidth label={"Last error"} value={lastError} />
+				<TextField
+					multiline
+					fullWidth
+					label={t("backend-components.crud.import.last_error")}
+					value={lastError}
+				/>
 			</Grid>
 		</Grid>
 	);

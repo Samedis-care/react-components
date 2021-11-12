@@ -7,7 +7,7 @@ import {
 	useMediaQuery,
 	useTheme,
 } from "@material-ui/core";
-import { Add as AddIcon } from "@material-ui/icons";
+import { Add as AddIcon, Publish as ImportIcon } from "@material-ui/icons";
 import {
 	ActionButton,
 	ExportIcon,
@@ -33,6 +33,11 @@ export interface IDataGridActionBarViewProps extends ResetCallbacks {
 	 * If not defined: Disables add new button
 	 */
 	handleAddNew?: (() => void) | IDataGridAddButton[];
+	/**
+	 * Callback for import button click
+	 * If not defined: Disables import button
+	 */
+	handleImport?: () => void;
 	/**
 	 * Does this grid have an custom filter bar?
 	 */
@@ -152,6 +157,33 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 							anchorEl={exportAnchorEl}
 							onClose={closeExportMenu}
 						/>
+					</Grid>
+				</>
+			)}
+			{props.handleImport && (
+				<>
+					<Grid item>
+						<VerticalDivider />
+					</Grid>
+					<Grid item key={"import"}>
+						{bpMdUp ? (
+							<ComponentWithLabel
+								control={
+									<SmallIconButton color={"primary"}>
+										<ImportIcon />
+									</SmallIconButton>
+								}
+								labelText={t("standalone.data-grid.header.import")}
+								onClick={props.handleImport}
+								labelPlacement={"bottom"}
+							/>
+						) : (
+							<Tooltip title={t("standalone.data-grid.header.import") ?? ""}>
+								<IconButton color={"primary"} onClick={props.handleImport}>
+									<ImportIcon />
+								</IconButton>
+							</Tooltip>
+						)}
 					</Grid>
 				</>
 			)}

@@ -18,6 +18,7 @@ const ActionBar = () => {
 	const {
 		columns,
 		onAddNew,
+		onImport,
 		exporters,
 		filterBar,
 		defaultSort,
@@ -123,6 +124,7 @@ const ActionBar = () => {
 		<ActionBarView
 			toggleSettings={toggleSettings}
 			handleAddNew={onAddNew}
+			handleImport={onImport}
 			refresh={handleRefresh}
 			resetFilter={handleResetFilter}
 			resetSort={handleResetSort}

@@ -19,7 +19,7 @@ import {
 	usePermissionContext,
 } from "../../framework";
 import { makeStyles } from "@material-ui/core/styles";
-import { CrudImportType } from "./Import";
+import { CrudImportProps, CrudImportType } from "./Import";
 
 const CrudImport = React.lazy(() => import("./Import")) as CrudImportType;
 
@@ -114,6 +114,18 @@ export interface CrudProps<
 	 * Route component to use
 	 */
 	routeComponent?: typeof Route;
+	/**
+	 * Enable Import button in Grid
+	 */
+	enableUserImport?: boolean;
+	/**
+	 * Import config (should be set if enableUserImport set)
+	 */
+	importConfig?: CrudImportProps<KeyT, VisibilityT, CustomT>["importConfig"];
+	/**
+	 * Import update key (primary key substitute)
+	 */
+	importUpdateKey?: CrudImportProps<KeyT, VisibilityT, CustomT>["updateKey"];
 }
 
 const useStyles = makeStyles(
@@ -147,6 +159,8 @@ export const useCrudDispatchContext = (): CrudDispatch => {
 	return ctx;
 };
 
+export const CrudSpecialIds = ["import", "devimport", "new"];
+
 const CRUD = <
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
@@ -162,7 +176,15 @@ const CRUD = <
 		disableRouting,
 		disableBackgroundGrid,
 		forbiddenPage: ForbiddenPage,
+		enableUserImport: requestEnableUserImport,
+		importConfig,
+		importUpdateKey,
 	} = props;
+	const hasImportPermission =
+		!importUpdateKey ||
+		(hasPermission(perms, props.editPermission) &&
+			hasPermission(perms, props.newPermission));
+	const enableUserImport = requestEnableUserImport && hasImportPermission;
 	const RouteComponent = props.routeComponent ?? Route;
 	const [id, setId] = useState<string | null>(props.initialView ?? null);
 	const [gridRefreshToken, setGridRefreshToken] = useState<string>(
@@ -227,6 +249,14 @@ const CRUD = <
 		]
 	);
 
+	const handleImportButton = useCallback(() => {
+		if (disableRouting) {
+			setId("import");
+		} else {
+			history.push(`${url}/import`);
+		}
+	}, [disableRouting, history, url]);
+
 	const grid = () => (
 		<BackendDataGrid
 			enableDelete={hasPermission(perms, props.deletePermission)}
@@ -246,10 +276,17 @@ const CRUD = <
 					? props.gridProps.onAddNew ?? showNewPage
 					: undefined
 			}
+			onImport={enableUserImport ? handleImportButton : undefined}
 		/>
 	);
 
-	const importer = () => <CrudImport model={props.model} />;
+	const importer = (guided: boolean) => (
+		<CrudImport
+			model={props.model}
+			importConfig={guided ? importConfig : undefined}
+			updateKey={importUpdateKey}
+		/>
+	);
 
 	const form = (
 		id: string,
@@ -286,9 +323,11 @@ const CRUD = <
 							{grid()}
 						</div>
 					)}
-					{id === "import" && importer()}
+					{id === "import" && importer(true)}
+					{id === "devimport" && importer(false)}
 					{id !== null &&
 						id !== "import" &&
+						id !== "devimport" &&
 						props.children &&
 						form(id, props.children)}
 				</>
@@ -306,9 +345,15 @@ const CRUD = <
 					{props.children && (
 						<Switch>
 							<RouteComponent path={`${path}/import`} exact>
-								{hasPermission(perms, props.editPermission) ||
-								!ForbiddenPage ? (
-									importer()
+								{hasImportPermission || !ForbiddenPage ? (
+									importer(true)
+								) : (
+									<ForbiddenPage />
+								)}
+							</RouteComponent>
+							<RouteComponent path={`${path}/devimport`} exact>
+								{hasImportPermission || !ForbiddenPage ? (
+									importer(false)
 								) : (
 									<ForbiddenPage />
 								)}
