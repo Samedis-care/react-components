@@ -7,10 +7,12 @@ import { useDialogContext } from "../../../framework";
 import { FileData } from "../../../standalone/FileUpload/Generic";
 import { FileUploadGeneric } from "../../../standalone";
 import { showInfoDialog } from "../../../non-standalone";
+import useCCTranslations from "../../../utils/useCCTranslations";
 
 const Step1LoadData = (props: CrudImporterStepProps) => {
 	const { state, setState } = props;
 	const [pushDialog] = useDialogContext();
+	const { t } = useCCTranslations();
 
 	const handleChange = useCallback(
 		async (files: FileData[]) => {
@@ -72,11 +74,11 @@ const Step1LoadData = (props: CrudImporterStepProps) => {
 					previewSize={64}
 					handleError={(_, err) =>
 						showInfoDialog(pushDialog, {
-							title: "Invalid file selected",
+							title: t("backend-components.crud.import.errors.file_select"),
 							message: err,
 							buttons: [
 								{
-									text: "Okay",
+									text: t("common.buttons.ok"),
 									autoFocus: true,
 								},
 							],

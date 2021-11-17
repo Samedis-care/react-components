@@ -20,6 +20,7 @@ import {
 } from "../../../backend-integration";
 import { FileData } from "../../../standalone/FileUpload/Generic";
 import { FrameworkHistory } from "../../../framework";
+import useCCTranslations from "../../../utils/useCCTranslations";
 
 export interface CrudImportProps<
 	KeyT extends ModelFieldName,
@@ -30,13 +31,24 @@ export interface CrudImportProps<
 	 * The model to import for
 	 */
 	model: Model<KeyT, VisibilityT, CustomT>;
+	/**
+	 * The importer config
+	 * Record<Field, JavaScript>
+	 * @remarks Disables step 2
+	 */
+	importConfig?: Partial<Record<KeyT, string>>;
+	/**
+	 * The field used to determine an ID of an existing record for purpose of updating that existing record
+	 * instead of creating a new record.
+	 */
+	updateKey?: KeyT;
 }
 
 const IMPORT_STEPS = [
-	"Load data",
-	"Connect data",
-	"Validation & Review",
-	"Import data",
+	"backend-components.crud.import.step1",
+	"backend-components.crud.import.step2",
+	"backend-components.crud.import.step3",
+	"backend-components.crud.import.step4",
 ];
 
 const useStyles = makeStyles(
@@ -49,23 +61,24 @@ const useStyles = makeStyles(
 	{ name: "CcCrudImport" }
 );
 
+interface ConversionScript {
+	script: string;
+	status: "pending" | "okay" | "error";
+	error: Error | null;
+}
+
 export interface CrudImporterState {
 	files: FileData[];
 	data: Record<string, unknown>[];
-	conversionScripts: Record<
-		string,
-		{
-			script: string;
-			status: "pending" | "okay" | "error";
-			error: Error | null;
-		}
-	>;
+	conversionScripts: Record<string, ConversionScript>;
 	validationPassed: boolean;
 	importDone: boolean;
 }
 
 export interface CrudImporterStepProps {
 	model: Model<ModelFieldName, PageVisibility, unknown>;
+	updateKey: string | undefined;
+	hasImportConfig: boolean;
 	state: CrudImporterState;
 	setState: Dispatch<SetStateAction<CrudImporterState>>;
 }
@@ -93,20 +106,45 @@ const CrudImport = <
 >(
 	props: CrudImportProps<KeyT, VisibilityT, CustomT>
 ) => {
-	const { model } = props;
+	const { model, importConfig, updateKey } = props;
 	const classes = useStyles();
+	const { t } = useCCTranslations();
 	const { pathname } = useLocation();
+
+	if (updateKey && !model.fields[updateKey]?.filterable) {
+		throw new Error("Update key not in model or not filterable");
+	}
 
 	const [activeStep, setActiveStep] = useState(0);
 	const [state, setState] = useState<CrudImporterState>({
 		files: [],
 		data: [],
-		conversionScripts: {},
+		conversionScripts: importConfig
+			? Object.fromEntries(
+					Object.entries(importConfig).map(([field, script]) => [
+						field,
+						{
+							script,
+							status: "pending",
+							error: null,
+						} as ConversionScript,
+					])
+			  )
+			: {},
 		validationPassed: false,
 		importDone: false,
 	});
-	const next = useCallback(() => setActiveStep((prev) => prev + 1), []);
-	const prev = useCallback(() => setActiveStep((prev) => prev - 1), []);
+	const hasImportConfig = !!importConfig;
+	const next = useCallback(
+		() =>
+			setActiveStep((prev) => prev + (prev == 0 && hasImportConfig ? 2 : 1)),
+		[hasImportConfig]
+	);
+	const prev = useCallback(
+		() =>
+			setActiveStep((prev) => prev - (prev == 2 && hasImportConfig ? 2 : 1)),
+		[hasImportConfig]
+	);
 	const finish = useCallback(() => {
 		// remove /import from url
 		FrameworkHistory.push(pathname.substr(0, pathname.lastIndexOf("/")));
@@ -125,8 +163,8 @@ const CrudImport = <
 			<Grid item>
 				<Stepper activeStep={activeStep}>
 					{IMPORT_STEPS.map((label, index) => (
-						<Step key={index.toString(16)}>
-							<StepLabel>{label}</StepLabel>
+						<Step key={index.toString(16)} hidden={importConfig && index == 1}>
+							<StepLabel>{t(label)}</StepLabel>
 						</Step>
 					))}
 				</Stepper>
@@ -141,6 +179,8 @@ const CrudImport = <
 								unknown
 							>
 						}
+						updateKey={updateKey}
+						hasImportConfig={hasImportConfig}
 						state={state}
 						setState={setState}
 					/>
@@ -154,6 +194,8 @@ const CrudImport = <
 								unknown
 							>
 						}
+						updateKey={updateKey}
+						hasImportConfig={hasImportConfig}
 						state={state}
 						setState={setState}
 					/>
@@ -167,6 +209,8 @@ const CrudImport = <
 								unknown
 							>
 						}
+						updateKey={updateKey}
+						hasImportConfig={hasImportConfig}
 						state={state}
 						setState={setState}
 					/>
@@ -180,6 +224,8 @@ const CrudImport = <
 								unknown
 							>
 						}
+						updateKey={updateKey}
+						hasImportConfig={hasImportConfig}
 						state={state}
 						setState={setState}
 					/>
@@ -193,7 +239,7 @@ const CrudImport = <
 							disabled={activeStep === 0 || activeStep >= 3}
 							onClick={prev}
 						>
-							Back
+							{t("common.buttons.back")}
 						</Button>
 					</Grid>
 					<Grid item>
@@ -205,7 +251,9 @@ const CrudImport = <
 							}
 							onClick={activeStep === 3 ? finish : next}
 						>
-							{activeStep === 3 ? "Finish" : "Next"}
+							{activeStep === 3
+								? t("common.buttons.finish")
+								: t("common.buttons.next")}
 						</Button>
 					</Grid>
 				</Grid>

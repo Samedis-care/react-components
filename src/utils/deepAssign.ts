@@ -13,8 +13,10 @@ const deepAssign = (
 			if (!Object.prototype.hasOwnProperty.call(source, key)) continue;
 			if (
 				typeof source[key] === "object" &&
+				!Array.isArray(source[key]) &&
 				key in target &&
-				typeof target[key] === "object"
+				typeof target[key] === "object" &&
+				!Array.isArray(target[key])
 			) {
 				target[key] = deepAssign(
 					target[key] as Record<string, unknown>,

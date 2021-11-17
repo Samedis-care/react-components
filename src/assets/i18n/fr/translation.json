@@ -58,7 +58,8 @@
 					"sort": "Réinitialiser les paramètres de tri",
 					"width": "Réinitialiser les largeurs de colonne",
 					"refresh": "Recharger"
-				}
+				},
+				"import": "Importer"
 			},
 			"footer": {
 				"prev-page": "Page précédente",
@@ -211,6 +212,37 @@
 		"selector": {
 			"loading": "Chargement...",
 			"loading-error": "Erreur lors de la récupération des données"
+		},
+		"crud": {
+			"import": {
+				"conv_script": "Script de conversion (JavaScript)",
+				"destination_fields": "Champs de destination",
+				"error": "Erreur",
+				"failed": "Échec : {{COUNT}}",
+				"last_error": "Dernière erreur",
+				"queue": "En file d'attente : {{COUNT}}",
+				"source_field": "Champ",
+				"source_field_type": "Types de données",
+				"source_fields": "Champs sources",
+				"step1": "Télécharger des données",
+				"step2": "Connecter les données",
+				"step3": "Validation et examen",
+				"step4": "Importer des données",
+				"success": "Succès : {{COUNT}}",
+				"valid": "Valide",
+				"validations": {
+					"boolean": "Le résultat doit être un booléen ou nul",
+					"currency_unsupported": "La devise ne peut pas encore être importée",
+					"date": "Le résultat doit être une date ou nul",
+					"fail": "Échec de la validation : {{REASON}}. Pour plus de détails, voir la console du navigateur.",
+					"number": "Le résultat doit être un nombre ou nul",
+					"string": "Le résultat doit être une chaîne ou null",
+					"unknown": "Inconnu"
+				},
+				"errors": {
+					"file_select": "Fichier sélectionné non valide"
+				}
+			}
 		}
 	},
 	"non-standalone": {
@@ -220,7 +252,8 @@
 	},
 	"utils": {
 		"validation": {
-			"required": "Le champ {{attribute}} est obligatoire"
+			"required": "Le champ {{attribute}} est obligatoire",
+			"email": "Le champ {{attribute}} nécessite un email valide"
 		}
 	},
 	"common": {

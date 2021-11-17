@@ -324,6 +324,13 @@ class LazyConnector<
 	public unmapId(id: string): string {
 		return this.fakeIdMappingRev[id] ?? id;
 	}
+
+	/**
+	 * Is the work queue empty?
+	 */
+	public isQueueEmpty(): boolean {
+		return this.queue.length === 0;
+	}
 }
 
 export default LazyConnector;

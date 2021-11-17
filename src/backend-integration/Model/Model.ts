@@ -629,9 +629,11 @@ class Model<
 		const errors: Record<string, string> = {};
 
 		await Promise.all(
-			Object.entries(values).map(async ([field, value]) => {
+			Object.keys(this.fields).map(async (field) => {
 				// skip validations for fields which aren't defined in the model or which are disabled in the current view or aren't currently mounted
-				if (!(field in this.fields)) return;
+				const value = getValueByDot(field, values);
+				if (value !== undefined) return;
+
 				try {
 					const fieldDef = this.fields[field as KeyT];
 					if (view && getVisibility(fieldDef.visibility[view], values).disabled)

@@ -200,6 +200,11 @@ export interface IDataGridCallbacks {
 	 * @param err The unhandled error
 	 */
 	onError?: (err: Error) => void;
+	/**
+	 * Callback for import button click
+	 * If not defined: Import button will not show
+	 */
+	onImport?: () => void;
 }
 
 export type DataGridAdditionalFilters = Record<string, unknown>;

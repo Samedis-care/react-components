@@ -56,7 +56,8 @@
 					"sort": "Sortiereinstellungen zurücksetzen",
 					"width": "Spaltenbreiten zurücksetzen",
 					"refresh": "Neu laden"
-				}
+				},
+				"import": "Importieren"
 			},
 			"footer": {
 				"prev-page": "Vorherige Seite",
@@ -211,6 +212,37 @@
 		"selector": {
 			"loading": "Wird geladen...",
 			"loading-error": "Fehler beim Abrufen der Daten"
+		},
+		"crud": {
+			"import": {
+				"conv_script": "Konvertierungsskript (JavaScript)",
+				"destination_fields": "Zielfelder",
+				"error": "Fehler",
+				"failed": "Fehlgeschlagen: {{COUNT}}",
+				"last_error": "Letzter Fehler",
+				"queue": "In Warteschlange: {{COUNT}}",
+				"source_field": "Feld",
+				"source_field_type": "Datentypen",
+				"source_fields": "Quellfelder",
+				"step1": "Daten hochladen",
+				"step2": "Daten verbinden",
+				"step3": "Validierung & Überprüfung",
+				"step4": "Daten importieren",
+				"success": "Erfolg: {{COUNT}}",
+				"valid": "Gültig",
+				"validations": {
+					"boolean": "Ergebnis muss ein boolescher Wert oder null sein",
+					"currency_unsupported": "Währung kann noch nicht importiert werden",
+					"date": "Ergebnis muss ein Datum oder null sein",
+					"fail": "Validierung fehlgeschlagen: {{REASON}}. Für Details siehe Browser-Konsole.",
+					"number": "Ergebnis muss eine Zahl oder null sein",
+					"string": "Ergebnis muss eine Zeichenfolge oder null sein",
+					"unknown": "Unbekannt"
+				},
+				"errors": {
+					"file_select": "Ungültige Datei ausgewählt"
+				}
+			}
 		}
 	},
 	"non-standalone": {
@@ -220,7 +252,8 @@
 	},
 	"utils": {
 		"validation": {
-			"required": "Das Feld {{attribute}} ist erforderlich"
+			"required": "Das Feld {{attribute}} ist erforderlich",
+			"email": "Das Feld {{attribute}} erfordert eine gültige E-Mail-Adresse"
 		}
 	},
 	"common": {

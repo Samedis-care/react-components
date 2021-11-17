@@ -26,6 +26,7 @@ import {
 	PageVisibility,
 } from "../../../backend-integration";
 import { debouncePromise, uniqueArray } from "../../../utils";
+import useCCTranslations from "../../../utils/useCCTranslations";
 
 type ConversionScriptRunnerFunc = (
 	data: Record<string, unknown>[],
@@ -56,6 +57,7 @@ const useStyles = makeStyles(
 const Step2ConnectData = (props: CrudImporterStepProps) => {
 	const { model, state, setState } = props;
 	const classes = useStyles();
+	const { t } = useCCTranslations();
 
 	const columns = useMemo(
 		() => uniqueArray(state.data.map(Object.keys).flat()),
@@ -82,26 +84,36 @@ const Step2ConnectData = (props: CrudImporterStepProps) => {
 							case "enum":
 							case "string":
 								if (result != null && typeof result !== "string") {
-									validation = "Result must be a string or null";
+									validation = t(
+										"backend-components.crud.import.validations.string"
+									);
 								}
 								break;
 							case "number":
 								if (result != null && typeof result !== "number") {
-									validation = "Result must be a number or null";
+									validation = t(
+										"backend-components.crud.import.validations.number"
+									);
 								}
 								break;
 							case "currency":
 								if (result !== null)
-									validation = "Currency cannot be imported yet";
+									validation = t(
+										"backend-components.crud.import.validations.currency_unsupported"
+									);
 								break;
 							case "date":
 								if (result !== null && !(result instanceof Date)) {
-									validation = "Result must be a Date or null";
+									validation = t(
+										"backend-components.crud.import.validations.date"
+									);
 								}
 								break;
 							case "boolean":
 								if (result !== true && result !== false && result !== null) {
-									validation = "Result must be a boolean or null";
+									validation = t(
+										"backend-components.crud.import.validations.boolean"
+									);
 								}
 								break;
 						}
@@ -120,9 +132,9 @@ const Step2ConnectData = (props: CrudImporterStepProps) => {
 								record
 							);
 							throw new Error(
-								"Validation failed: " +
-									validation +
-									". For details see browser console."
+								t("backend-components.crud.import.validations.fail", {
+									REASON: validation,
+								})
 							);
 						}
 					}
@@ -183,13 +195,19 @@ const Step2ConnectData = (props: CrudImporterStepProps) => {
 		<Grid container spacing={2}>
 			<Grid item xs={6}>
 				<Box mb={2}>
-					<Typography variant={"h5"}>Source fields</Typography>
+					<Typography variant={"h5"}>
+						{t("backend-components.crud.import.source_fields")}
+					</Typography>
 				</Box>
 				<Table>
 					<TableHead>
 						<TableRow>
-							<TableCell>Field</TableCell>
-							<TableCell>Data Types</TableCell>
+							<TableCell>
+								{t("backend-components.crud.import.source_field")}
+							</TableCell>
+							<TableCell>
+								{t("backend-components.crud.import.source_field_type")}
+							</TableCell>
 						</TableRow>
 					</TableHead>
 					<TableBody>
@@ -212,7 +230,9 @@ const Step2ConnectData = (props: CrudImporterStepProps) => {
 			</Grid>
 			<Grid item xs={6}>
 				<Box mb={2}>
-					<Typography variant={"h5"}>Destination fields</Typography>
+					<Typography variant={"h5"}>
+						{t("backend-components.crud.import.destination_fields")}
+					</Typography>
 				</Box>
 				<Grid container spacing={2}>
 					{Object.entries(model.fields)
@@ -239,7 +259,9 @@ const Step2ConnectData = (props: CrudImporterStepProps) => {
 														title={
 															convScript
 																? convScript.error?.toString() ?? ""
-																: "Unknown (didn't run)"
+																: t(
+																		"backend-components.crud.import.validations.unknown"
+																  ) ?? ""
 														}
 													>
 														{convScript ? (
@@ -268,7 +290,9 @@ const Step2ConnectData = (props: CrudImporterStepProps) => {
 													)}
 													<TextField
 														multiline
-														label={"Conversion Script (JavaScript)"}
+														label={t(
+															"backend-components.crud.import.conv_script"
+														)}
 														name={name}
 														value={convScript?.script ?? ""}
 														onChange={handleConversionScriptChange}
