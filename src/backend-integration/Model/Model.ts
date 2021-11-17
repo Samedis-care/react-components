@@ -632,7 +632,7 @@ class Model<
 			Object.keys(this.fields).map(async (field) => {
 				// skip validations for fields which aren't defined in the model or which are disabled in the current view or aren't currently mounted
 				const value = getValueByDot(field, values);
-				if (value !== undefined) return;
+				if (value === undefined) return;
 
 				try {
 					const fieldDef = this.fields[field as KeyT];

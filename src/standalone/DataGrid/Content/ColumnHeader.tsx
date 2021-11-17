@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { combineClassNames } from "../../../utils";
 import {
 	IDataGridColumnDef,
+	IDataGridColumnState,
 	useDataGridColumnState,
 	useDataGridColumnsWidthState,
 	useDataGridProps,
@@ -33,13 +34,19 @@ export const applyColumnWidthLimits = (
 	return targetWidth;
 };
 
+const FallbackColumnState: IDataGridColumnState = {
+	sort: 0,
+	sortOrder: undefined,
+	filter: undefined,
+};
+
 const ColumnHeader = (props: IDataGridContentColumnHeaderProps) => {
 	const { column } = props;
 	const { field, sortable, filterable } = column;
 	const gridRoot = useDataGridRootRef();
 	const [columnState, setColumnState] = useDataGridColumnState();
 	const { sortLimit } = useDataGridProps();
-	const { sort, sortOrder, filter } = columnState[field];
+	const { sort, sortOrder, filter } = columnState[field] ?? FallbackColumnState;
 	const [, setColumnWidthState] = useDataGridColumnsWidthState();
 	const [dragging, setDragging] = useState(false);
 	const classes = useDataGridStyles();

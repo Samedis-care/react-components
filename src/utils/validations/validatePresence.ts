@@ -21,7 +21,10 @@ const validatePresence = <
 		"getLabel"
 	>
 ): Promise<string | null> | string | null => {
-	if (!value) {
+	if (
+		!value ||
+		(value instanceof Date && isNaN((value as unknown) as number)) // invalid date
+	) {
 		return ccI18n.t("utils.validation.required", {
 			attribute: fieldDef.getLabel(),
 		});

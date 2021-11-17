@@ -7,7 +7,10 @@ import i18n from "i18next";
 const validatePresenceCustomName = <TypeT>(name: string) => (
 	value: TypeT
 ): string | null => {
-	if (!value) {
+	if (
+		!value ||
+		(value instanceof Date && isNaN((value as unknown) as number)) // invalid date
+	) {
 		return i18n.t("utils.validation.required", {
 			attribute: i18n.t(name),
 		});

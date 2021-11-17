@@ -4,6 +4,7 @@ import GenericDataPreview from "./GenericDataPreview";
 import { deepAssign, dotToObject, isObjectEmpty } from "../../../utils";
 import useAsyncMemo from "../../../utils/useAsyncMemo";
 import useCCTranslations from "../../../utils/useCCTranslations";
+import { Loader } from "../../../standalone";
 
 type RecordT = [Record<string, unknown>, Record<string, string>, Error | null];
 
@@ -13,7 +14,7 @@ const Step3ValidateReview = (props: CrudImporterStepProps) => {
 	const { t } = useCCTranslations();
 
 	const records: RecordT[] | null = useAsyncMemo(
-		async () =>
+		() =>
 			Promise.all(
 				state.data.map(
 					async (record): Promise<RecordT> => {
@@ -34,7 +35,7 @@ const Step3ValidateReview = (props: CrudImporterStepProps) => {
 								});
 							// noinspection JSUnusedAssignment
 							isModelRecordComplete = true;
-							const validation = await model.validate(record);
+							const validation = await model.validate(modelRecord);
 							return [modelRecord, validation, null];
 						} catch (e) {
 							return [isModelRecordComplete ? modelRecord : record, {}, e];
@@ -72,6 +73,8 @@ const Step3ValidateReview = (props: CrudImporterStepProps) => {
 			validationPassed: everythingOkay,
 		}));
 	}, [setState, everythingOkay]);
+
+	if (!records) return <Loader />;
 
 	return (
 		<GenericDataPreview

@@ -5,7 +5,7 @@ import {
 	IDataGridColumnDef,
 } from "../../../standalone/DataGrid/DataGrid";
 import { filterSortPaginate, uniqueArray } from "../../../utils";
-import { DataGrid } from "../../../standalone";
+import { DataGrid, DataGridNoPersist } from "../../../standalone";
 
 export type GenericDataType = string | number | Date | null;
 
@@ -55,18 +55,20 @@ const GenericDataPreview = (props: GenericDataPreviewProps) => {
 	);
 
 	return (
-		<DataGrid
-			columns={columnDef}
-			disableSelection
-			loadData={(params): DataGridData => {
-				const processed = filterSortPaginate(rowData, params, columnDef);
-				return {
-					rowsTotal: rowData.length,
-					rowsFiltered: processed[1],
-					rows: processed[0],
-				};
-			}}
-		/>
+		<DataGridNoPersist>
+			<DataGrid
+				columns={columnDef}
+				disableSelection
+				loadData={(params): DataGridData => {
+					const processed = filterSortPaginate(rowData, params, columnDef);
+					return {
+						rowsTotal: rowData.length,
+						rowsFiltered: processed[1],
+						rows: processed[0],
+					};
+				}}
+			/>
+		</DataGridNoPersist>
 	);
 };
 
