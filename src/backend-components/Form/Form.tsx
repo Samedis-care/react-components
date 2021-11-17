@@ -582,11 +582,10 @@ const Form = <
 	const setFieldValue = useCallback(
 		async (field: string, value: unknown, validate = true) => {
 			await setFieldTouched(field, true, false);
-			value = dotToObject(field, value);
 			valuesRef.current = deepAssign(
 				{},
 				valuesRef.current,
-				value as Record<string, unknown>
+				dotToObject(field, value)
 			);
 			setValues(valuesRef.current);
 			if (validate) await validateField(field, value);

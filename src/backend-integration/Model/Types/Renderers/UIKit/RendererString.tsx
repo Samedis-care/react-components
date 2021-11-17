@@ -47,7 +47,7 @@ class RendererString extends TypeString {
 				<input
 					type="hidden"
 					name={field}
-					value={value}
+					value={value ?? ""}
 					readOnly
 					aria-hidden={"true"}
 				/>
@@ -63,7 +63,7 @@ class RendererString extends TypeString {
 						fullWidth
 						{...this.props}
 						name={field}
-						value={value}
+						value={value ?? ""}
 						label={label}
 						disabled={visibility.readOnly}
 						required={visibility.required}
