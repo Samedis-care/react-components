@@ -9,7 +9,9 @@ import { FileUploadGeneric, HowToBox } from "../../../standalone";
 import { showInfoDialog } from "../../../non-standalone";
 import useCCTranslations from "../../../utils/useCCTranslations";
 
-const Step1LoadData = (props: CrudImporterStepProps & { howTo?: string[] }) => {
+const Step1LoadData = (
+	props: CrudImporterStepProps & { howTo?: (string | React.ReactNode)[] }
+) => {
 	const { state, setState, howTo } = props;
 	const [pushDialog] = useDialogContext();
 	const { t } = useCCTranslations();

@@ -43,9 +43,9 @@ export interface CrudImportProps<
 	 */
 	updateKey?: KeyT;
 	/**
-	 * How to information
+	 * How-to information
 	 */
-	howTo?: string[];
+	howTo?: (string | React.ReactNode)[];
 }
 
 const IMPORT_STEPS = [
