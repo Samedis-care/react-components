@@ -58,7 +58,8 @@
 					"sort": "Saralash sozlamalarini tiklash",
 					"width": "Ustun kengliklarini tiklash",
 					"refresh": "Qayta yuklang"
-				}
+				},
+				"import": "Import"
 			},
 			"footer": {
 				"prev-page": "Oldingi sahifa",
@@ -211,6 +212,37 @@
 		"selector": {
 			"loading": "Yuklanmoqda ...",
 			"loading-error": "Ma'lumotlarni olishda xatolik yuz berdi"
+		},
+		"crud": {
+			"import": {
+				"conv_script": "Konvertatsiya skripti (JavaScript)",
+				"destination_fields": "Belgilangan joylar",
+				"error": "Xato",
+				"failed": "Muvaffaqiyatsiz: {{COUNT}}",
+				"last_error": "Oxirgi xato",
+				"queue": "Navbatda: {{COUNT}}",
+				"source_field": "Maydon",
+				"source_field_type": "Ma'lumotlar turlari",
+				"source_fields": "Manba maydonlari",
+				"step1": "Ma'lumotlarni yuklash",
+				"step2": "Ma'lumotlarni ulash",
+				"step3": "Tasdiqlash va ko'rib chiqish",
+				"step4": "Ma'lumotlarni import qilish",
+				"success": "Muvaffaqiyatli: {{COUNT}}",
+				"valid": "Yaroqli",
+				"validations": {
+					"boolean": "Natija mantiqiy yoki null bo'lishi kerak",
+					"currency_unsupported": "Hozircha valyutani import qilib bo‘lmaydi",
+					"date": "Natija sana yoki null bo'lishi kerak",
+					"fail": "Tasdiqlash amalga oshmadi: {{REASON}}. Tafsilotlar uchun brauzer konsoliga qarang.",
+					"number": "Natija raqam yoki null bo'lishi kerak",
+					"string": "Natija satr yoki null bo'lishi kerak",
+					"unknown": "Noma'lum"
+				},
+				"errors": {
+					"file_select": "Yaroqsiz fayl tanlandi"
+				}
+			}
 		}
 	},
 	"non-standalone": {
@@ -220,7 +252,8 @@
 	},
 	"utils": {
 		"validation": {
-			"required": "{{attribute}} maydoni talab qilinadi"
+			"required": "{{attribute}} maydoni talab qilinadi",
+			"email": "{{attribute}} maydoni toʻgʻri elektron pochta manzilini talab qiladi"
 		}
 	},
 	"common": {

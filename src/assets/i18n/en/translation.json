@@ -220,7 +220,7 @@
 		},
 		"crud": {
 			"import": {
-				"step1": "Load data",
+				"step1": "Upload data",
 				"step2": "Connect data",
 				"step3": "Validation & Review",
 				"step4": "Import data",
