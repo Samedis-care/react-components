@@ -163,6 +163,7 @@ const MultiSelect = <DataT extends MultiSelectorData>(
 					selected={null}
 					onSelect={multiSelectHandler}
 					refreshToken={selected.map(getId).join(",")}
+					filterIds={selected.map(getId)}
 					displaySwitch={displaySwitch}
 					switchLabel={switchLabel}
 					defaultSwitchValue={defaultSwitchValue}
