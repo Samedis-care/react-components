@@ -126,6 +126,10 @@ export interface CrudProps<
 	 * Import update key (primary key substitute)
 	 */
 	importUpdateKey?: CrudImportProps<KeyT, VisibilityT, CustomT>["updateKey"];
+	/**
+	 * How-to information for the import
+	 */
+	importHowTo?: CrudImportProps<KeyT, VisibilityT, CustomT>["howTo"];
 }
 
 const useStyles = makeStyles(
@@ -179,6 +183,7 @@ const CRUD = <
 		enableUserImport: requestEnableUserImport,
 		importConfig,
 		importUpdateKey,
+		importHowTo,
 	} = props;
 	const hasImportPermission =
 		!importUpdateKey ||
@@ -285,6 +290,7 @@ const CRUD = <
 			model={props.model}
 			importConfig={guided ? importConfig : undefined}
 			updateKey={importUpdateKey}
+			howTo={importHowTo}
 		/>
 	);
 
