@@ -42,6 +42,10 @@ export interface CrudImportProps<
 	 * instead of creating a new record.
 	 */
 	updateKey?: KeyT;
+	/**
+	 * How to information
+	 */
+	howTo?: string[];
 }
 
 const IMPORT_STEPS = [
@@ -106,7 +110,7 @@ const CrudImport = <
 >(
 	props: CrudImportProps<KeyT, VisibilityT, CustomT>
 ) => {
-	const { model, importConfig, updateKey } = props;
+	const { model, importConfig, updateKey, howTo } = props;
 	const classes = useStyles();
 	const { t } = useCCTranslations();
 	const { pathname } = useLocation();
@@ -179,6 +183,7 @@ const CrudImport = <
 								unknown
 							>
 						}
+						howTo={howTo}
 						updateKey={updateKey}
 						hasImportConfig={hasImportConfig}
 						state={state}

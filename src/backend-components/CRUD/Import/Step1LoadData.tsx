@@ -5,12 +5,12 @@ import GenericDataPreview from "./GenericDataPreview";
 import { CrudImporterStepProps } from "./index";
 import { useDialogContext } from "../../../framework";
 import { FileData } from "../../../standalone/FileUpload/Generic";
-import { FileUploadGeneric } from "../../../standalone";
+import { FileUploadGeneric, HowToBox } from "../../../standalone";
 import { showInfoDialog } from "../../../non-standalone";
 import useCCTranslations from "../../../utils/useCCTranslations";
 
-const Step1LoadData = (props: CrudImporterStepProps) => {
-	const { state, setState } = props;
+const Step1LoadData = (props: CrudImporterStepProps & { howTo?: string[] }) => {
+	const { state, setState, howTo } = props;
 	const [pushDialog] = useDialogContext();
 	const { t } = useCCTranslations();
 
@@ -69,6 +69,11 @@ const Step1LoadData = (props: CrudImporterStepProps) => {
 			style={{ height: "100%" }}
 			spacing={2}
 		>
+			{howTo && (
+				<Grid item>
+					<HowToBox labels={howTo} />
+				</Grid>
+			)}
 			<Grid item>
 				<FileUploadGeneric
 					previewSize={64}
