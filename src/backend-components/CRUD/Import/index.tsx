@@ -166,8 +166,10 @@ const CrudImport = <
 		>
 			<Grid item>
 				<Stepper activeStep={activeStep}>
-					{IMPORT_STEPS.map((label, index) => (
-						<Step key={index.toString(16)} hidden={importConfig && index == 1}>
+					{IMPORT_STEPS.filter(
+						(label, index) => !(importConfig && index == 1)
+					).map((label, index) => (
+						<Step key={index.toString(16)}>
 							<StepLabel>{t(label)}</StepLabel>
 						</Step>
 					))}

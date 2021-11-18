@@ -754,7 +754,7 @@ class Model<
 			const field = this.fields[key];
 
 			const value = getValueByDot(key, values);
-			if (!value) {
+			if (value === undefined) {
 				continue;
 			}
 

@@ -22,14 +22,18 @@ const Step3ValidateReview = (props: CrudImporterStepProps) => {
 						let isModelRecordComplete = false;
 						try {
 							Object.entries(model.fields)
-								.filter(([name, field]) => isFieldImportable(name, field))
+								.filter(
+									([name, field]) =>
+										isFieldImportable(name, field) &&
+										state.conversionScripts[name]?.script
+								)
 								.forEach(([name]) => {
 									deepAssign(
 										modelRecord,
 										dotToObject(
 											name,
 											// eslint-disable-next-line no-eval
-											eval(state.conversionScripts[name]?.script ?? "") ?? null
+											eval(state.conversionScripts[name].script) ?? null
 										)
 									);
 								});
