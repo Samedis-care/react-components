@@ -46,6 +46,10 @@ export interface CrudImportProps<
 	 * How-to information
 	 */
 	howTo?: (string | React.ReactNode)[];
+	/**
+	 * Guided version
+	 */
+	guided: boolean;
 }
 
 const IMPORT_STEPS = [
@@ -111,6 +115,7 @@ const CrudImport = <
 	props: CrudImportProps<KeyT, VisibilityT, CustomT>
 ) => {
 	const { model, importConfig, updateKey, howTo } = props;
+	const guided = props.guided && importConfig;
 	const classes = useStyles();
 	const { t } = useCCTranslations();
 	const { pathname } = useLocation();
@@ -140,14 +145,12 @@ const CrudImport = <
 	});
 	const hasImportConfig = !!importConfig;
 	const next = useCallback(
-		() =>
-			setActiveStep((prev) => prev + (prev == 0 && hasImportConfig ? 2 : 1)),
-		[hasImportConfig]
+		() => setActiveStep((prev) => prev + (prev == 0 && guided ? 2 : 1)),
+		[guided]
 	);
 	const prev = useCallback(
-		() =>
-			setActiveStep((prev) => prev - (prev == 2 && hasImportConfig ? 2 : 1)),
-		[hasImportConfig]
+		() => setActiveStep((prev) => prev - (prev == 2 && guided ? 2 : 1)),
+		[guided]
 	);
 	const finish = useCallback(() => {
 		// remove /import from url
@@ -166,13 +169,13 @@ const CrudImport = <
 		>
 			<Grid item>
 				<Stepper activeStep={activeStep}>
-					{IMPORT_STEPS.filter(
-						(label, index) => !(importConfig && index == 1)
-					).map((label, index) => (
-						<Step key={index.toString(16)}>
-							<StepLabel>{t(label)}</StepLabel>
-						</Step>
-					))}
+					{IMPORT_STEPS.filter((label, index) => !(guided && index == 1)).map(
+						(label, index) => (
+							<Step key={index.toString(16)}>
+								<StepLabel>{t(label)}</StepLabel>
+							</Step>
+						)
+					)}
 				</Stepper>
 			</Grid>
 			<Grid item xs>
@@ -185,7 +188,7 @@ const CrudImport = <
 								unknown
 							>
 						}
-						howTo={howTo}
+						howTo={guided ? howTo : undefined}
 						updateKey={updateKey}
 						hasImportConfig={hasImportConfig}
 						state={state}

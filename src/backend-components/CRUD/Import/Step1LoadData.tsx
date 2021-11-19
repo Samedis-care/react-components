@@ -97,7 +97,7 @@ const Step1LoadData = (
 					onChange={handleChange}
 				/>
 			</Grid>
-			{state.data.length > 0 && (
+			{state.data.length > 0 && !howTo && (
 				<Grid item xs style={{ minHeight: 500 }}>
 					<GenericDataPreview data={state.data} />
 				</Grid>

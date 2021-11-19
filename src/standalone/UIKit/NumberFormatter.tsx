@@ -5,7 +5,7 @@ export interface NumberFormatterProps {
 	/**
 	 * The number to format
 	 */
-	value: number | null;
+	value: number | null | undefined;
 	/**
 	 * Formatting options
 	 */
@@ -17,7 +17,7 @@ const NumberFormatter = (props: NumberFormatterProps) => {
 	const { i18n } = useCCTranslations();
 
 	return (
-		<>{value !== null ? value.toLocaleString(i18n.language, options) : ""}</>
+		<>{value != null ? value.toLocaleString(i18n.language, options) : ""}</>
 	);
 };
 

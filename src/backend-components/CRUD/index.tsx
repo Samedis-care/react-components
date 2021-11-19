@@ -288,9 +288,10 @@ const CRUD = <
 	const importer = (guided: boolean) => (
 		<CrudImport
 			model={props.model}
-			importConfig={guided ? importConfig : undefined}
+			importConfig={importConfig}
 			updateKey={importUpdateKey}
 			howTo={importHowTo}
+			guided={guided}
 		/>
 	);
 
