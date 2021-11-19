@@ -1,3 +1,5 @@
+import { isPlainObject } from "./index";
+
 /**
  * Like Object.assign, just with deep-copy capability
  * @param target The target object
@@ -12,11 +14,9 @@ const deepAssign = (
 		for (const key in source) {
 			if (!Object.prototype.hasOwnProperty.call(source, key)) continue;
 			if (
-				typeof source[key] === "object" &&
-				!Array.isArray(source[key]) &&
+				isPlainObject(source[key]) &&
 				key in target &&
-				typeof target[key] === "object" &&
-				!Array.isArray(target[key])
+				isPlainObject(target[key])
 			) {
 				target[key] = deepAssign(
 					target[key] as Record<string, unknown>,

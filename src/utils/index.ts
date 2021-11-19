@@ -31,6 +31,7 @@ export { default as useDropZone } from "./useDropZone";
 export { default as useMountLogging } from "./useMountLogging";
 export { default as useListenForChanges } from "./useListenForChanges";
 export { default as inlineLog } from "./inlineLog";
+export { default as isPlainObject } from "./isPlainObject";
 export * from "./dotUtils";
 export * from "./routeUtils";
 export * from "./useDate";
