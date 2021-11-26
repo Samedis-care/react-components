@@ -26,6 +26,7 @@ import {
 	getValueByDot,
 	isObjectEmpty,
 } from "../../utils";
+import { getVisibility } from "../../backend-integration/Model/Visibility";
 
 export type ValidationError = Record<string, string>;
 /**
@@ -697,6 +698,14 @@ const Form = <
 				throw validation;
 			}
 
+			const isMounted = (key: KeyT): boolean =>
+				key === "id" ||
+				mountedFields[key] ||
+				getVisibility(
+					model.fields[key].visibility[id ? "edit" : "create"],
+					valuesRef.current
+				).hidden;
+
 			const result = await updateData(
 				onlySubmitMounted
 					? Object.fromEntries(
@@ -706,12 +715,11 @@ const Form = <
 										([key]) =>
 											onlySubmitMountedBehaviour !==
 												OnlySubmitMountedBehaviour.OMIT ||
-											key === "id" ||
-											mountedFields[key as KeyT]
+											isMounted(key as KeyT)
 									)
 									.map(async (data) => {
 										const [key] = data;
-										if (key === "id" || mountedFields[key as KeyT]) return data;
+										if (isMounted(key as KeyT)) return data;
 										if (
 											onlySubmitMountedBehaviour ===
 											OnlySubmitMountedBehaviour.DEFAULT
@@ -760,6 +768,7 @@ const Form = <
 			setSubmitting(false);
 		}
 	}, [
+		id,
 		model,
 		validateForm,
 		updateData,

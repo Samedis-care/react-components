@@ -329,6 +329,10 @@ export interface IDataGridColumnDef {
 	 */
 	headerName: string;
 	/**
+	 * Optional label override for column header
+	 */
+	headerLabel?: string;
+	/**
 	 * The data type used for filtering
 	 */
 	type: ModelFilterType;

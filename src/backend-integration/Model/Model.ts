@@ -52,6 +52,12 @@ export interface ModelFieldDefinition<
 	 */
 	columnWidth?: IDataGridColumnDef["width"];
 	/**
+	 * Custom label for grid column header
+	 * @remarks Used for BackendDataGrid
+	 * @default return value of getLabel
+	 */
+	getColumnLabel?: () => string;
+	/**
 	 * The default value
 	 */
 	getDefaultValue?: () => Promise<TypeT> | TypeT;
@@ -606,6 +612,9 @@ class Model<
 				return {
 					field: key,
 					headerName: value.getLabel(),
+					headerLabel: value.getColumnLabel
+						? value.getColumnLabel()
+						: undefined,
 					type: value.type.getFilterType(),
 					hidden: value.visibility.overview.hidden,
 					filterable: value.filterable,

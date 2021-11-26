@@ -34,6 +34,10 @@ export interface CrudFormProps {
 	hasCustomSubmitHandler: boolean;
 }
 
+export interface GridWrapperProps {
+	children: React.ReactNode;
+}
+
 export interface CrudProps<
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
@@ -71,6 +75,10 @@ export interface CrudProps<
 		| "onAddNew"
 	> &
 		Pick<Partial<BackendDataGridProps<KeyT, VisibilityT, CustomT>>, "onAddNew">;
+	/**
+	 * Component wrapping the DataGrid
+	 */
+	gridWrapper?: React.ComponentType<GridWrapperProps>;
 	/**
 	 * The delete record permission
 	 */
@@ -190,6 +198,7 @@ const CRUD = <
 		(hasPermission(perms, props.editPermission) &&
 			hasPermission(perms, props.newPermission));
 	const enableUserImport = requestEnableUserImport && hasImportPermission;
+	const GridWrapper = props.gridWrapper ?? React.Fragment;
 	const RouteComponent = props.routeComponent ?? Route;
 	const [id, setId] = useState<string | null>(props.initialView ?? null);
 	const [gridRefreshToken, setGridRefreshToken] = useState<string>(
@@ -263,26 +272,28 @@ const CRUD = <
 	}, [disableRouting, history, url]);
 
 	const grid = () => (
-		<BackendDataGrid
-			enableDelete={hasPermission(perms, props.deletePermission)}
-			disableExport={!hasPermission(perms, props.exportPermission)}
-			{...props.gridProps}
-			model={props.model}
-			forceRefreshToken={gridRefreshToken}
-			onEdit={
-				(hasPermission(perms, props.readPermission) ||
-					hasPermission(perms, props.editPermission)) &&
-				props.children
-					? showEditPage
-					: undefined
-			}
-			onAddNew={
-				hasPermission(perms, props.newPermission) && props.children
-					? props.gridProps.onAddNew ?? showNewPage
-					: undefined
-			}
-			onImport={enableUserImport ? handleImportButton : undefined}
-		/>
+		<GridWrapper>
+			<BackendDataGrid
+				enableDelete={hasPermission(perms, props.deletePermission)}
+				disableExport={!hasPermission(perms, props.exportPermission)}
+				{...props.gridProps}
+				model={props.model}
+				forceRefreshToken={gridRefreshToken}
+				onEdit={
+					(hasPermission(perms, props.readPermission) ||
+						hasPermission(perms, props.editPermission)) &&
+					props.children
+						? showEditPage
+						: undefined
+				}
+				onAddNew={
+					hasPermission(perms, props.newPermission) && props.children
+						? props.gridProps.onAddNew ?? showNewPage
+						: undefined
+				}
+				onImport={enableUserImport ? handleImportButton : undefined}
+			/>
+		</GridWrapper>
 	);
 
 	const importer = (guided: boolean) => (
