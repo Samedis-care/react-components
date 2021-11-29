@@ -45,12 +45,21 @@ const getMenuRouteParams = (
 	definitions: IRoutedMenuItemDefinition[],
 	path: string
 ): Record<string, string> => {
-	const match = definitions.find(
+	// first try and find an exact match
+	let exact = true;
+	let match = definitions.find(
 		(entry) => entry.route && doesRouteMatch(entry.route, path, true)
 	);
+	if (!match) {
+		// if this fails, get the closest match we can get
+		exact = false;
+		match = definitions
+			.sort((a, b) => (b.route?.length ?? 0) - (a.route?.length ?? 0))
+			.find((entry) => entry.route && doesRouteMatch(entry.route, path));
+	}
 	if (!match) return {};
 	const route = match.route as string;
-	return extractRouteParameters(route, path, true);
+	return extractRouteParameters(route, path, exact);
 };
 
 /**
