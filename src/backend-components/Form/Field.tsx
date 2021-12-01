@@ -69,11 +69,11 @@ const Field = (props: FieldProps): React.ReactElement => {
 
 	const setFieldValueHookWrapper = useCallback(
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		async (field: string, value: any, shouldValidate?: boolean) => {
+		(field: string, value: any, shouldValidate?: boolean) => {
 			if (onChange) {
 				value = onChange(value, model, setFieldValue);
 			}
-			await setFieldValue(field, value, shouldValidate);
+			setFieldValue(field, value, shouldValidate);
 		},
 		[setFieldValue, onChange, model]
 	);

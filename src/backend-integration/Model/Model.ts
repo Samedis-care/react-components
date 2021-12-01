@@ -90,7 +90,7 @@ export interface ModelFieldDefinition<
 			field: KeyT,
 			value: unknown,
 			shouldValidate?: boolean
-		) => Promise<void>
+		) => void
 	) => TypeT;
 	/**
 	 * The referenced model for backend connected data types.

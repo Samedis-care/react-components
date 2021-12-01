@@ -303,11 +303,7 @@ export interface FormContextData {
 	/**
 	 * Sets a field value
 	 */
-	setFieldValue: (
-		field: string,
-		value: unknown,
-		validate?: boolean
-	) => Promise<void>;
+	setFieldValue: (field: string, value: unknown, validate?: boolean) => void;
 	/**
 	 * Handle input blur events
 	 */
@@ -322,7 +318,7 @@ export interface FormContextData {
 		field: string,
 		touched?: boolean,
 		validate?: boolean
-	) => Promise<void>;
+	) => void;
 	/**
 	 * Resets the form to server values
 	 */
@@ -562,7 +558,7 @@ const Form = <
 		async (field: string, value?: unknown) => {
 			const errors = await validateForm(
 				value !== undefined
-					? { ...valuesRef.current, [field]: value }
+					? deepAssign({}, valuesRef.current, dotToObject(field, value))
 					: undefined
 			);
 			setErrors(errors);
@@ -570,26 +566,26 @@ const Form = <
 		[validateForm]
 	);
 	const setFieldTouched = useCallback(
-		async (field: string, newTouched = true, validate = false) => {
+		(field: string, newTouched = true, validate = false) => {
 			setTouched((prev) =>
 				prev[field] === newTouched
 					? prev
 					: { ...prev, [field]: newTouched as boolean }
 			);
-			if (validate) await validateField(field);
+			if (validate) void validateField(field);
 		},
 		[validateField]
 	);
 	const setFieldValue = useCallback(
-		async (field: string, value: unknown, validate = true) => {
-			await setFieldTouched(field, true, false);
+		(field: string, value: unknown, validate = true) => {
+			setFieldTouched(field, true, false);
 			valuesRef.current = deepAssign(
 				{},
 				valuesRef.current,
 				dotToObject(field, value)
 			);
 			setValues(valuesRef.current);
-			if (validate) await validateField(field, value);
+			if (validate) void validateField(field, value);
 		},
 		[validateField, setFieldTouched]
 	);
@@ -599,7 +595,7 @@ const Form = <
 		setValues(valuesRef.current);
 	}, [serverData]);
 	const handleBlur = useCallback(
-		async (evt: React.FocusEvent<HTMLInputElement & HTMLElement>) => {
+		(evt: React.FocusEvent<HTMLInputElement & HTMLElement>) => {
 			const fieldName =
 				evt.currentTarget?.name ??
 				evt.currentTarget?.getAttribute("data-name") ??
@@ -615,7 +611,7 @@ const Form = <
 				);
 				return;
 			}
-			await setFieldTouched(fieldName);
+			setFieldTouched(fieldName);
 		},
 		[setFieldTouched]
 	);
