@@ -8,3 +8,4 @@ export { default as ModelDataTypeSignatureRenderer } from "./RendererSignature";
 export { default as ModelDataTypeBackendMultiSelectRenderer } from "./RendererBackendMultiSelect";
 export { default as ModelDataTypeBackendMultiSelectWithTagsRenderer } from "./RendererBackendMultiSelectWithTags";
 export { default as ModelDataTypeBackendSingleSelectRenderer } from "./RendererBackendSingleSelect";
+export { default as ModelDataTypeStringArrayBackendRenderer } from "./RendererBackendStringArray";
