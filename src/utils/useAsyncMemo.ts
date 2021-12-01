@@ -4,16 +4,18 @@ import { useEffect, useState } from "react";
  * Like useMemo, but supports async factory
  * @param factory The value factory
  * @param dependencies The dependencies of the memo
+ * @param keepPreviousResult Cache previous results
  * @returns The value from the factory OR null while the factory is still updating
  */
 const useAsyncMemo = <T>(
 	factory: () => Promise<T> | T,
-	dependencies: unknown[]
+	dependencies: unknown[],
+	keepPreviousResult = false
 ): T | null => {
 	const [value, setValue] = useState<T | null>(null);
 
 	useEffect(() => {
-		setValue(null);
+		if (!keepPreviousResult) setValue(null);
 		void (async () => {
 			setValue(await factory());
 		})();
