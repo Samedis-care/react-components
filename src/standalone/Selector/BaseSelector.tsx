@@ -249,6 +249,11 @@ export interface BaseSelectorProps<DataT extends BaseSelectorData>
 	 */
 	startAdornment?: InputProps["startAdornment"];
 	/**
+	 * Icon to show on the right of the selector
+	 * @remarks Must be IconButton with padding: 2px; margin-right: -2px applied to it
+	 */
+	endAdornment?: InputProps["endAdornment"];
+	/**
 	 * Optional callback for customizing the unique identifier of data
 	 * @param data The data struct
 	 * @returns A unique ID extracted from data
@@ -418,6 +423,7 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 		switchLabel,
 		lru,
 		startAdornment,
+		endAdornment,
 		freeSolo,
 		getIdOfData,
 		filterIds,
@@ -763,23 +769,27 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 										(enableIcons ? renderIcon(selected?.icon) : undefined) ??
 										startAdornment
 									}
-									endAdornment={
-										openInfo
+									endAdornment={(() => {
+										const hasAdditionalElements = openInfo || endAdornment;
+										return hasAdditionalElements
 											? React.cloneElement(
 													params.InputProps?.endAdornment as ReactElement,
 													{},
 													...((params.InputProps?.endAdornment as ReactElement<
 														PropsWithChildren<unknown>
 													>).props.children as ReactNodeArray),
-													<IconButton
-														onClick={openInfo}
-														className={customClasses.infoBtn}
-													>
-														<InfoIcon color={"disabled"} />
-													</IconButton>
+													openInfo && (
+														<IconButton
+															onClick={openInfo}
+															className={customClasses.infoBtn}
+														>
+															<InfoIcon color={"disabled"} />
+														</IconButton>
+													),
+													endAdornment
 											  )
-											: params.InputProps?.endAdornment
-									}
+											: params.InputProps?.endAdornment;
+									})()}
 									placeholder={placeholder}
 									onChange={(event) => {
 										void onSearchHandler(event.target.value);
