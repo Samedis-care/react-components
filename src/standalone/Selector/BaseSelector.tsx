@@ -254,6 +254,11 @@ export interface BaseSelectorProps<DataT extends BaseSelectorData>
 	 */
 	endAdornment?: InputProps["endAdornment"];
 	/**
+	 * Like endAdornment, but on the left side of the drop-down arrow
+	 * @see endAdornment
+	 */
+	endAdornmentLeft?: InputProps["endAdornment"];
+	/**
 	 * Optional callback for customizing the unique identifier of data
 	 * @param data The data struct
 	 * @returns A unique ID extracted from data
@@ -424,6 +429,7 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 		lru,
 		startAdornment,
 		endAdornment,
+		endAdornmentLeft,
 		freeSolo,
 		getIdOfData,
 		filterIds,
@@ -770,11 +776,13 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 										startAdornment
 									}
 									endAdornment={(() => {
-										const hasAdditionalElements = openInfo || endAdornment;
+										const hasAdditionalElements =
+											openInfo || endAdornment || endAdornmentLeft;
 										return hasAdditionalElements
 											? React.cloneElement(
 													params.InputProps?.endAdornment as ReactElement,
 													{},
+													endAdornmentLeft,
 													...((params.InputProps?.endAdornment as ReactElement<
 														PropsWithChildren<unknown>
 													>).props.children as ReactNodeArray),
