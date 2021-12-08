@@ -125,6 +125,11 @@
 			"sign-here": "Digitally signed here"
 		}
 	},
+	"framework": {
+		"dialogs": {
+			"navblock": "You cannot navigate away, you have open dialogs"
+		}
+	},
 	"non-standalone": {
 		"dialog": {
 			"okay": "Okay"

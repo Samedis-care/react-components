@@ -1,5 +1,13 @@
-import React, { useCallback, useContext, useMemo, useState } from "react";
+import React, {
+	useCallback,
+	useContext,
+	useEffect,
+	useMemo,
+	useState,
+} from "react";
 import { IFrameworkProps } from "./Framework";
+import { FrameworkHistory } from "./History";
+import useCCTranslations from "../utils/useCCTranslations";
 
 export type DialogType = React.ReactNode;
 export type DialogContextType = [
@@ -27,6 +35,7 @@ export const useDialogContext = (): DialogContextType => {
  * Provides the application with an state to display an dialog
  */
 const DialogContextProvider = (props: IFrameworkProps) => {
+	const { t } = useCCTranslations();
 	const [dialogs, setDialogs] = useState<DialogType[]>([]);
 
 	const pushDialog = useCallback(
@@ -46,6 +55,18 @@ const DialogContextProvider = (props: IFrameworkProps) => {
 		() => [pushDialog, popDialog],
 		[pushDialog, popDialog]
 	);
+
+	useEffect(() => {
+		if (dialogs.length === 0) return;
+
+		const unblock = FrameworkHistory.block(() => {
+			alert(t("framework.dialogs.navblock"));
+			return false;
+		});
+		return () => {
+			unblock();
+		};
+	}, [t, dialogs]);
 
 	return (
 		<>
