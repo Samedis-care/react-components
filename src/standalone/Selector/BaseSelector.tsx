@@ -615,7 +615,7 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 					})),
 				].filter((entry) => entry) as DataT[];
 			} else {
-				results = await onLoad(query, switchValue);
+				results = [...(await onLoad(query, switchValue))];
 				if (onAddNew) {
 					if (results.length > 0) {
 						results.push({
