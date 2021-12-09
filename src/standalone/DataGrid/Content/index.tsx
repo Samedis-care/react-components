@@ -10,14 +10,27 @@ import { MultiGrid } from "react-virtualized/dist/commonjs/MultiGrid";
 import { SectionRenderedParams } from "react-virtualized/dist/commonjs/Grid";
 import Cell from "./Cell";
 import { applyColumnWidthLimits } from "./ColumnHeader";
-import { CenteredTypography, Loader } from "../../index";
+import { Loader } from "../../index";
 import useCCTranslations from "../../../utils/useCCTranslations";
+import { withStyles } from "@material-ui/core";
+import CenteredTypography from "../../UIKit/CenteredTypography";
 
 export interface IDataGridContentProps extends IDataGridColumnProps {
 	rowsPerPage: number;
 }
 
+const CenteredStickyTypography = withStyles({
+	outerWrapper: {
+		position: "sticky",
+		top: 0,
+		left: 0,
+		right: 0,
+		bottom: 0,
+	},
+})(CenteredTypography);
+
 const SELECT_ROW_WIDTH = 57;
+const DEFAULT_COLUMN_WIDTH = 200;
 
 const Content = (props: IDataGridContentProps) => {
 	const {
@@ -118,10 +131,10 @@ const Content = (props: IDataGridContentProps) => {
 					columnCount={columns.length + (disableSelection ? 0 : 1)}
 					columnWidth={({ index }) =>
 						disableSelection
-							? columnWidth[columns[index].field] ?? 200
+							? columnWidth[columns[index].field] ?? DEFAULT_COLUMN_WIDTH
 							: index === 0
 							? SELECT_ROW_WIDTH
-							: columnWidth[columns[index - 1].field] ?? 200
+							: columnWidth[columns[index - 1].field] ?? DEFAULT_COLUMN_WIDTH
 					}
 					rowCount={(state.rowsFiltered ?? state.rowsTotal) + 1}
 					rowHeight={({ index }) => (index === 0 ? headerHeight : 57)}
@@ -153,19 +166,34 @@ const Content = (props: IDataGridContentProps) => {
 					}}
 					styleBottomRightGrid={{ outline: "none" }}
 					onSectionRendered={onSectionRendered}
-					noContentRenderer={() =>
-						state.refreshData ? (
-							<Loader />
-						) : state.dataLoadError ? (
-							<CenteredTypography variant={"h5"}>
-								{state.dataLoadError.message}
-							</CenteredTypography>
-						) : (
-							<CenteredTypography variant={"h4"}>
-								{t("standalone.data-grid.content.no-data")}
-							</CenteredTypography>
-						)
-					}
+					noContentRenderer={() => (
+						<>
+							<div
+								style={{
+									position: "absolute",
+									width: columns
+										.filter((entry) => !entry.isLocked)
+										.map(
+											(entry) =>
+												columnWidth[entry.field] ?? DEFAULT_COLUMN_WIDTH
+										)
+										.reduce((prev, cur) => prev + cur),
+									height: 1,
+								}}
+							/>
+							{state.refreshData ? (
+								<Loader />
+							) : state.dataLoadError ? (
+								<CenteredStickyTypography variant={"h5"}>
+									{state.dataLoadError.message}
+								</CenteredStickyTypography>
+							) : (
+								<CenteredStickyTypography variant={"h4"}>
+									{t("standalone.data-grid.content.no-data")}
+								</CenteredStickyTypography>
+							)}
+						</>
+					)}
 				/>
 			)}
 		</AutoSizer>
