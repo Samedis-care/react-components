@@ -127,7 +127,7 @@
 	},
 	"framework": {
 		"dialogs": {
-			"navblock": "You cannot navigate away, you have open dialogs"
+			"navblock": "Navigation is blocked. Please close your open dialogs first."
 		}
 	},
 	"non-standalone": {
