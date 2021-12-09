@@ -3,11 +3,13 @@ import React, {
 	useContext,
 	useEffect,
 	useMemo,
+	useRef,
 	useState,
 } from "react";
 import { IFrameworkProps } from "./Framework";
 import { FrameworkHistory } from "./History";
 import useCCTranslations from "../utils/useCCTranslations";
+import { TFunction } from "i18next";
 
 export type DialogType = React.ReactNode;
 export type DialogContextType = [
@@ -31,20 +33,38 @@ export const useDialogContext = (): DialogContextType => {
 	return ctx;
 };
 
+const navBlockFn = (t: TFunction) => (): false => {
+	alert(t("framework.dialogs.navblock"));
+	return false;
+};
 /**
  * Provides the application with an state to display an dialog
  */
 const DialogContextProvider = (props: IFrameworkProps) => {
 	const { t } = useCCTranslations();
+	const navBlock = useRef<null | (() => void)>(null);
+	const dialogCount = useRef(0);
 	const [dialogs, setDialogs] = useState<DialogType[]>([]);
 
 	const pushDialog = useCallback(
 		(dialog: React.ReactNode) => {
-			setDialogs((prevValue) => prevValue.concat([dialog]));
+			// if no dialogs were present, add callback
+			if (dialogCount.current === 0) {
+				navBlock.current = FrameworkHistory.block(navBlockFn(t));
+			}
+			dialogCount.current++;
+
+			setDialogs((prevValue) => [...prevValue, dialog]);
 		},
-		[setDialogs]
+		[setDialogs, t]
 	);
 	const popDialog = useCallback(() => {
+		// if all dialogs closed, remove callback
+		dialogCount.current--;
+		if (dialogCount.current === 0 && navBlock.current) {
+			navBlock.current();
+		}
+
 		setDialogs((prevValue) => {
 			prevValue.pop();
 			return [...prevValue];
@@ -56,17 +76,17 @@ const DialogContextProvider = (props: IFrameworkProps) => {
 		[pushDialog, popDialog]
 	);
 
+	// update callback if locale changes
 	useEffect(() => {
-		if (dialogs.length === 0) return;
+		if (!navBlock.current) return;
 
-		const unblock = FrameworkHistory.block(() => {
-			alert(t("framework.dialogs.navblock"));
-			return false;
-		});
+		navBlock.current = FrameworkHistory.block(navBlockFn(t));
 		return () => {
-			unblock();
+			if (navBlock.current) {
+				navBlock.current();
+			}
 		};
-	}, [t, dialogs]);
+	}, [t]);
 
 	return (
 		<>
