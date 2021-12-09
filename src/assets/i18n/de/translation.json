@@ -276,5 +276,10 @@
 			"are-you-sure": "Sind Sie sicher?",
 			"are-you-sure-submit": "Fortfahren?"
 		}
+	},
+	"framework": {
+		"dialogs": {
+			"navblock": "Die Navigation ist gesperrt. Bitte schließe zuerst die geöffneten Dialoge."
+		}
 	}
 }
