@@ -248,7 +248,7 @@ const CRUD = <
 			if (disableRouting) {
 				setId((oldId) => (oldId === null ? null : id));
 			} else if (location.pathname.endsWith("/new")) {
-				history.push(`${url}/${id}`);
+				history.replace(`${url}/${id}`);
 			}
 
 			refreshGrid();
