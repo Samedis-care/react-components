@@ -66,6 +66,12 @@ const useLazyCrudConnector = <
 				(queue) => setDirty(queue.length !== 0)
 			)
 	);
+	// when remounting, we need to update the onQueueChange callback in lazy connector, otherwise the bound setDirty function will update an unmounted component
+	useEffect(() => {
+		uploadConnector.current.setQueueChangeHandler((queue) =>
+			setDirty(queue.length !== 0)
+		);
+	}, []);
 
 	// set post submit handler for lazy connector
 	useEffect(() => {

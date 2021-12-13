@@ -331,6 +331,14 @@ class LazyConnector<
 	public isQueueEmpty(): boolean {
 		return this.queue.length === 0;
 	}
+
+	/**
+	 * Set a new queue change handler
+	 * @param newHandler The new handler
+	 */
+	public setQueueChangeHandler(newHandler: null | QueueChangeHandler): void {
+		this.onQueueChange = newHandler ?? undefined;
+	}
 }
 
 export default LazyConnector;
