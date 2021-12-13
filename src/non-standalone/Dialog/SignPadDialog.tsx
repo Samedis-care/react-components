@@ -68,9 +68,8 @@ const SignPadDialog = (props: SignPadDialogProps) => {
 		if (signCanvas.current) {
 			signCanvas.current.clear();
 		}
-		if (setSignature) setSignature("");
 		setResetCanvas(false);
-	}, [setSignature]);
+	}, []);
 
 	const saveCanvas = useCallback(() => {
 		if (signCanvas.current && !signCanvas.current.isEmpty()) {
@@ -78,6 +77,8 @@ const SignPadDialog = (props: SignPadDialogProps) => {
 				.getTrimmedCanvas()
 				.toDataURL("image/png");
 			if (setSignature) setSignature(signature);
+		} else {
+			if (setSignature) setSignature("");
 		}
 		hiddenRef.current?.focus();
 		hiddenRef.current?.blur();
