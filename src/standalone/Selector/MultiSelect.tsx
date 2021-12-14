@@ -47,6 +47,12 @@ export interface MultiSelectProps<DataT extends MultiSelectorData>
 	subClasses?: {
 		baseSelector: BaseSelectorProps<BaseSelectorData>["classes"];
 	};
+	/**
+	 * Sort function to perform a view-based sort on selected entries
+	 * @remarks This is a comparison function
+	 * @see Array.sort
+	 */
+	selectedSort?: (a: DataT, b: DataT) => number;
 }
 
 const useBaseSelectorStyles = makeStyles(
@@ -83,6 +89,7 @@ const MultiSelect = <DataT extends MultiSelectorData>(
 		displaySwitch,
 		switchLabel,
 		defaultSwitchValue,
+		selectedSort,
 	} = props;
 	const multiSelectClasses = useMultiSelectorStyles(props);
 	const baseSelectorClasses = useBaseSelectorStyles(
@@ -172,7 +179,10 @@ const MultiSelect = <DataT extends MultiSelectorData>(
 			{props.selected.length > 0 && (
 				<Grid item xs={12} className={multiSelectClasses.selectedEntries}>
 					<Paper elevation={0}>
-						{props.selected.map((data: DataT, index: number) => (
+						{(selectedSort
+							? props.selected.sort(selectedSort)
+							: props.selected
+						).map((data: DataT, index: number) => (
 							<EntryRender
 								key={getId(data) || index.toString(16)}
 								enableDivider={props.selected.length === index - 1}
