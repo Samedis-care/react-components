@@ -71,18 +71,18 @@ class JsonApiClient {
 	}
 
 	/**
-	 * @see http
+	 * @see request
 	 */
 	public async get<T>(
 		url: string,
 		args: GetParams,
 		auth: AuthMode = AuthMode.On
 	): Promise<T> {
-		return this.http<T>("GET", url, args, null, auth);
+		return this.request<T>("GET", url, args, null, auth);
 	}
 
 	/**
-	 * @see http
+	 * @see request
 	 */
 	public async post<T>(
 		url: string,
@@ -90,11 +90,11 @@ class JsonApiClient {
 		body: Record<string, unknown>,
 		auth: AuthMode = AuthMode.On
 	): Promise<T> {
-		return this.http<T>("POST", url, args, body, auth);
+		return this.request<T>("POST", url, args, body, auth);
 	}
 
 	/**
-	 * @see http
+	 * @see request
 	 */
 	public async put<T>(
 		url: string,
@@ -102,11 +102,11 @@ class JsonApiClient {
 		body: Record<string, unknown>,
 		auth: AuthMode = AuthMode.On
 	): Promise<T> {
-		return this.http<T>("PUT", url, args, body, auth);
+		return this.request<T>("PUT", url, args, body, auth);
 	}
 
 	/**
-	 * @see http
+	 * @see request
 	 */
 	public async patch<T>(
 		url: string,
@@ -114,18 +114,18 @@ class JsonApiClient {
 		body: Record<string, unknown>,
 		auth: AuthMode = AuthMode.On
 	): Promise<T> {
-		return this.http<T>("PATCH", url, args, body, auth);
+		return this.request<T>("PATCH", url, args, body, auth);
 	}
 
 	/**
-	 * @see http
+	 * @see request
 	 */
 	public async delete<T>(
 		url: string,
 		args: GetParams,
 		auth: AuthMode = AuthMode.On
 	): Promise<T> {
-		return this.http<T>("DELETE", url, args, null, auth);
+		return this.request<T>("DELETE", url, args, null, auth);
 	}
 
 	/**
@@ -136,7 +136,7 @@ class JsonApiClient {
 	 * @param body The JSON body to pass
 	 * @param auth The authentication mode to use
 	 */
-	public async http<T>(
+	public async request<T>(
 		method: string,
 		url: string,
 		args: GetParams,

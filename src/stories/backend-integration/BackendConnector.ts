@@ -102,7 +102,7 @@ class BackendConnector<
 				}
 				delete localStorage.dataGridAuth;
 				// retry
-				return this.client.http(method, url, args, body, auth);
+				return this.client.request(method, url, args, body, auth);
 			}
 			throw new Error(message || error || "Invalid response");
 		}
