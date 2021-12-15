@@ -71,6 +71,10 @@ const useStyles = makeStyles(
 				theme.componentsCare?.selector?.selected?.label?.padding ||
 				"0 32px 0 0",
 			color: theme.componentsCare?.selector?.selected?.label?.color,
+			"& > span": {
+				textOverflow: "ellipsis",
+				overflow: "hidden",
+			},
 			...theme.componentsCare?.selector?.selected?.label?.style,
 		},
 		image: (props: { iconSize?: number }) => ({
