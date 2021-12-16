@@ -127,6 +127,11 @@ const Content = (props: IDataGridContentProps) => {
 		<AutoSizer onResize={onResize}>
 			{({ width, height }) => (
 				<MultiGrid
+					key={
+						// workaround for Uncaught Error: Requested index X is outside of range 0..0
+						// bug happens when columns.length == 0, rowCount > 1 and grid reset all is used
+						(state.rowsFiltered ?? state.rowsTotal) === 0 ? "loading" : "ready"
+					}
 					ref={dataViewRef}
 					columnCount={columns.length + (disableSelection ? 0 : 1)}
 					columnWidth={({ index }) =>
@@ -156,6 +161,7 @@ const Content = (props: IDataGridContentProps) => {
 					styleTopRightGrid={{
 						overflow: "hidden",
 						overscrollBehavior: "contain",
+						display: columns.length === 0 ? "none" : undefined,
 					}}
 					styleBottomLeftGrid={{
 						overflow: "hidden",
@@ -177,7 +183,7 @@ const Content = (props: IDataGridContentProps) => {
 											(entry) =>
 												columnWidth[entry.field] ?? DEFAULT_COLUMN_WIDTH
 										)
-										.reduce((prev, cur) => prev + cur),
+										.reduce((prev, cur) => prev + cur, 0),
 									height: 1,
 								}}
 							/>
