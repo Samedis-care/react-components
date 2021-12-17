@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, {
+	useCallback,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
+} from "react";
 import {
 	IDataGridColumnDef,
 	IDataGridColumnProps,
@@ -66,6 +72,42 @@ const Content = (props: IDataGridContentProps) => {
 		setWidth(size.width);
 	}, []);
 
+	const scrollbarWidth = useMemo(() => {
+		const scrollDiv = document.createElement("div");
+		scrollDiv.style.width = "100px";
+		scrollDiv.style.height = "100px";
+		scrollDiv.style.overflow = "scroll";
+		scrollDiv.style.position = "absolute";
+		scrollDiv.style.top = "-101px";
+		document.body.appendChild(scrollDiv);
+		const scrollbarWidth = scrollDiv.offsetWidth - scrollDiv.clientWidth;
+		document.body.removeChild(scrollDiv);
+		return scrollbarWidth;
+	}, []);
+
+	const remainingWidth = useMemo(() => {
+		const columnsToResize: IDataGridColumnDef[] = (Object.keys(columnWidth)
+			.map((field) => columns.find((col) => col.field === field))
+			.filter((entry) => entry) as IDataGridColumnDef[])
+			.filter((entry) => !state.hiddenColumns.includes(entry.field))
+			.filter((entry) => !entry.width || !entry.width[2]);
+		const usedWidth =
+			Object.entries(columnWidth)
+				.filter(([field]) =>
+					columnsToResize.find((col: IDataGridColumnDef) => col.field === field)
+				)
+				.reduce((a, b) => a + b[1], 0) +
+			(disableSelection ? 0 : SELECT_ROW_WIDTH);
+		return Math.max(width - usedWidth - scrollbarWidth, 0);
+	}, [
+		columnWidth,
+		columns,
+		disableSelection,
+		state.hiddenColumns,
+		width,
+		scrollbarWidth,
+	]);
+
 	useEffect(() => {
 		if (width <= 0) return;
 		if (state.initialResize) return;
@@ -87,7 +129,7 @@ const Content = (props: IDataGridContentProps) => {
 					)
 					.reduce((a, b) => a + b[1], 0) +
 				(disableSelection ? 0 : SELECT_ROW_WIDTH);
-			let remainingWidth = width - usedWidth;
+			let remainingWidth = width - usedWidth - scrollbarWidth;
 			if (remainingWidth <= 0) return prevState;
 
 			// divide width over the visible columns while honoring limits
@@ -123,6 +165,7 @@ const Content = (props: IDataGridContentProps) => {
 		if (!dataViewRef.current) return;
 		dataViewRef.current.recomputeGridSize();
 	}, [columnWidth]);
+
 	return (
 		<AutoSizer onResize={onResize}>
 			{({ width, height }) => (
@@ -133,13 +176,17 @@ const Content = (props: IDataGridContentProps) => {
 						(state.rowsFiltered ?? state.rowsTotal) === 0 ? "loading" : "ready"
 					}
 					ref={dataViewRef}
-					columnCount={columns.length + (disableSelection ? 0 : 1)}
+					columnCount={columns.length + (disableSelection ? 0 : 1) + 1}
 					columnWidth={({ index }) =>
 						disableSelection
-							? columnWidth[columns[index].field] ?? DEFAULT_COLUMN_WIDTH
+							? index !== columns.length
+								? columnWidth[columns[index].field] ?? DEFAULT_COLUMN_WIDTH
+								: remainingWidth
 							: index === 0
 							? SELECT_ROW_WIDTH
-							: columnWidth[columns[index - 1].field] ?? DEFAULT_COLUMN_WIDTH
+							: index !== columns.length + 1
+							? columnWidth[columns[index - 1].field] ?? DEFAULT_COLUMN_WIDTH
+							: remainingWidth
 					}
 					rowCount={(state.rowsFiltered ?? state.rowsTotal) + 1}
 					rowHeight={({ index }) => (index === 0 ? headerHeight : 57)}

@@ -59,6 +59,8 @@ const Cell = (props: CellProps): React.ReactElement => {
 	let content: React.ReactNode = null;
 	if (rowIndex === 0 && columnIndex === 0 && !disableSelection) {
 		// empty
+	} else if (columnIndex === columns.length + (disableSelection ? 0 : 1)) {
+		content = <React.Fragment />; // remaining width filler
 	} else if (rowIndex === 0) {
 		// header
 		content = <ColumnHeader column={column} />;

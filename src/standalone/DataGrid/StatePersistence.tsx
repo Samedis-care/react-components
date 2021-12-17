@@ -13,7 +13,11 @@ export interface DataGridPersistentState {
 	state: Partial<
 		Pick<
 			IDataGridState,
-			"search" | "hiddenColumns" | "lockedColumns" | "customData"
+			| "search"
+			| "hiddenColumns"
+			| "lockedColumns"
+			| "customData"
+			| "initialResize"
 		>
 	>;
 }
@@ -49,6 +53,7 @@ const StatePersistence = () => {
 				hiddenColumns: state.hiddenColumns,
 				lockedColumns: state.lockedColumns,
 				customData: state.customData,
+				initialResize: state.initialResize,
 			},
 		});
 	}, [setPersisted, state, columnState, columnWidthState]);
