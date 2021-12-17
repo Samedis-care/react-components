@@ -176,16 +176,18 @@ const Content = (props: IDataGridContentProps) => {
 						(state.rowsFiltered ?? state.rowsTotal) === 0 ? "loading" : "ready"
 					}
 					ref={dataViewRef}
-					columnCount={columns.length + (disableSelection ? 0 : 1) + 1}
+					columnCount={
+						columns.length +
+						(disableSelection ? 0 : 1) +
+						(columns.length > 0 ? 1 : 0)
+					}
 					columnWidth={({ index }) =>
-						disableSelection
-							? index !== columns.length
-								? columnWidth[columns[index].field] ?? DEFAULT_COLUMN_WIDTH
-								: remainingWidth
-							: index === 0
+						!disableSelection && index === 0
 							? SELECT_ROW_WIDTH
-							: index !== columns.length + 1
-							? columnWidth[columns[index - 1].field] ?? DEFAULT_COLUMN_WIDTH
+							: index !== columns.length + (disableSelection ? 0 : 1)
+							? columnWidth[
+									columns[index - (disableSelection ? 0 : 1)].field
+							  ] ?? DEFAULT_COLUMN_WIDTH
 							: remainingWidth
 					}
 					rowCount={(state.rowsFiltered ?? state.rowsTotal) + 1}
