@@ -92,7 +92,7 @@ const DialogContextProvider = (props: IFrameworkProps) => {
 				navBlock.current = null;
 			}
 		};
-	});
+	}, []);
 
 	return (
 		<>
