@@ -80,13 +80,19 @@ const DialogContextProvider = (props: IFrameworkProps) => {
 	useEffect(() => {
 		if (!navBlock.current) return;
 
-		navBlock.current = FrameworkHistory.block(navBlockFn(t));
+		navBlock.current(); // unblock
+		navBlock.current = FrameworkHistory.block(navBlockFn(t)); // reblock
+	}, [t]);
+
+	// remove callback on unmount
+	useEffect(() => {
 		return () => {
 			if (navBlock.current) {
 				navBlock.current();
+				navBlock.current = null;
 			}
 		};
-	}, [t]);
+	});
 
 	return (
 		<>
