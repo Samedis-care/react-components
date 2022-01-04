@@ -201,7 +201,8 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 		evt: React.ChangeEvent<HTMLInputElement>,
 		checked: boolean
 	) => {
-		let currentlyChecked = filterValue.split(",");
+		let currentlyChecked =
+			filterValue.length === 0 ? [] : filterValue.split(",");
 		if (!checked) {
 			currentlyChecked = currentlyChecked.filter(
 				(val) => val !== evt.target.value
