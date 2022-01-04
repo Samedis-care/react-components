@@ -27,7 +27,7 @@ abstract class TypeMultiEnum implements Type<string[]> {
 	}
 
 	getFilterType(): FilterType {
-		return "string";
+		return "enum";
 	}
 
 	getDefaultValue(): string[] {
@@ -43,6 +43,8 @@ abstract class TypeMultiEnum implements Type<string[]> {
 			)
 			.join(", ");
 	}
+
+	getEnumValues = (): EnumValue[] => this.values;
 }
 
 export default TypeMultiEnum;

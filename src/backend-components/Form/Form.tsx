@@ -194,6 +194,10 @@ export interface FormContextData {
 	 */
 	model: Model<ModelFieldName, PageVisibility, never>;
 	/**
+	 * The error component of this form
+	 */
+	errorComponent: React.ComponentType<ErrorComponentProps>;
+	/**
 	 * Relations of the model
 	 */
 	relations: ModelGetResponseRelations<ModelFieldName>;
@@ -346,7 +350,11 @@ export const useFormContext = (): FormContextData => {
 
 export type FormContextDataLite = Pick<
 	FormContextData,
-	"model" | "onlySubmitMounted" | "onlyValidateMounted" | "readOnly"
+	| "model"
+	| "onlySubmitMounted"
+	| "onlyValidateMounted"
+	| "readOnly"
+	| "errorComponent"
 >;
 export const FormContextLite = React.createContext<FormContextDataLite | null>(
 	null
@@ -948,6 +956,7 @@ const Form = <
 	const formContextData: FormContextData = useMemo(
 		() => ({
 			model: (model as unknown) as Model<ModelFieldName, PageVisibility, never>,
+			errorComponent: ErrorComponent,
 			relations: serverData && serverData[1] ? serverData[1] : {},
 			setError,
 			markFieldMounted,
@@ -979,6 +988,7 @@ const Form = <
 		}),
 		[
 			model,
+			ErrorComponent,
 			serverData,
 			setError,
 			markFieldMounted,
@@ -1012,11 +1022,12 @@ const Form = <
 	const formContextDataLite: FormContextDataLite = useMemo(
 		() => ({
 			model: (model as unknown) as Model<ModelFieldName, PageVisibility, never>,
+			errorComponent: ErrorComponent,
 			onlySubmitMounted: !!onlySubmitMounted,
 			onlyValidateMounted: !!onlyValidateMounted,
 			readOnly: !!readOnly,
 		}),
-		[model, onlySubmitMounted, onlyValidateMounted, readOnly]
+		[model, ErrorComponent, onlySubmitMounted, onlyValidateMounted, readOnly]
 	);
 
 	if (isLoading || isObjectEmpty(values)) {

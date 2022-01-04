@@ -1,6 +1,7 @@
 import React from "react";
 import { ModelRenderParams } from "./index";
 import FilterType from "./FilterType";
+import { EnumValue } from "./Types/TypeEnum";
 
 interface Type<T> {
 	/**
@@ -46,6 +47,11 @@ interface Type<T> {
 	 * @returns The raw value (of type T)
 	 */
 	deserialize?: (value: unknown) => T | Promise<T>;
+
+	/**
+	 * Get enum values
+	 */
+	getEnumValues?: () => EnumValue[];
 }
 
 export default Type;

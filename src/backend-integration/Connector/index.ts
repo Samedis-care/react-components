@@ -6,3 +6,5 @@ export { default as ApiAuthMode } from "./AuthMode";
 export { default as JsonApiClient } from "./JsonApiClient";
 export { default as NetworkError } from "./NetworkError";
 export { default as BackendError } from "./BackendError";
+export * from "./DefaultConnector";
+export { default as DefaultConnector } from "./DefaultConnector";

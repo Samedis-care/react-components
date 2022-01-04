@@ -29,7 +29,7 @@ abstract class TypeEnum implements Type<string> {
 	}
 
 	getFilterType(): FilterType {
-		return "string";
+		return "enum";
 	}
 
 	getDefaultValue(): string {
@@ -55,6 +55,8 @@ abstract class TypeEnum implements Type<string> {
 
 	serialize = (value: string): string | number | null =>
 		value === "" ? null : this.numericMode ? parseInt(value) : value;
+
+	getEnumValues = (): EnumValue[] => this.values;
 }
 
 export default TypeEnum;

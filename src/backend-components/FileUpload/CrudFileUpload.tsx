@@ -13,8 +13,9 @@ export interface CrudFileUploadProps
 	extends Omit<FileUploadProps, "files" | "handleError"> {
 	/**
 	 * The backend connector used as CRUD interface
+	 * @remarks Passing null will render an readOnly control
 	 */
-	connector: Connector<string, PageVisibility, unknown>;
+	connector: Connector<string, PageVisibility, unknown> | null;
 	/**
 	 * The error component that is used to display errors
 	 */
@@ -56,6 +57,8 @@ const CrudFileUpload = (props: CrudFileUploadProps) => {
 
 	const handleChange = useCallback(
 		async (newFiles: FileData[]) => {
+			if (!connector) return;
+
 			// upload new/changed files
 			const uploadPromise = Promise.all(
 				newFiles
@@ -112,6 +115,8 @@ const CrudFileUpload = (props: CrudFileUploadProps) => {
 	}, []);
 
 	useEffect(() => {
+		if (!connector || !loading) return;
+
 		void (async () => {
 			try {
 				const initialData = await connector.index({
@@ -127,7 +132,7 @@ const CrudFileUpload = (props: CrudFileUploadProps) => {
 			}
 		})();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
+	}, [connector]);
 
 	useEffect(() => {
 		if (onChange) onChange(files);
@@ -144,6 +149,7 @@ const CrudFileUpload = (props: CrudFileUploadProps) => {
 				files={files}
 				onChange={handleChange}
 				handleError={handleError}
+				readOnly={otherProps.readOnly || connector == null}
 			/>
 		</>
 	);

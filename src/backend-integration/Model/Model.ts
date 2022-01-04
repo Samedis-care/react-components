@@ -4,6 +4,8 @@ import Connector, { ResponseMeta } from "../Connector/Connector";
 import { useMutation, useQuery } from "react-query";
 import { ModelDataStore } from "../index";
 import {
+	DataGridSetFilterData,
+	DataGridSetFilterDataEntry,
 	IDataGridColumnDef,
 	IDataGridLoadDataParameters,
 } from "../../standalone/DataGrid/DataGrid";
@@ -609,6 +611,25 @@ class Model<
 					VisibilityT,
 					CustomT
 				>;
+
+				let filterData: DataGridSetFilterData | undefined = undefined;
+				if (value.type.getFilterType() === "enum") {
+					if (!value.type.getEnumValues)
+						throw new Error(
+							"Model Type Filter Type is enum, but getEnumValues not set"
+						);
+					filterData = value.type
+						.getEnumValues()
+						.filter((value) => !value.invisible)
+						.map(
+							(value) =>
+								({
+									getLabelText: value.getLabel,
+									value: value.value,
+								} as DataGridSetFilterDataEntry)
+						);
+				}
+
 				return {
 					field: key,
 					headerName: value.getLabel(),
@@ -616,6 +637,7 @@ class Model<
 						? value.getColumnLabel()
 						: undefined,
 					type: value.type.getFilterType(),
+					filterData,
 					hidden: value.visibility.overview.hidden,
 					filterable: value.filterable,
 					sortable: value.sortable,

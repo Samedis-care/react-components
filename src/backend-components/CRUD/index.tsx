@@ -362,21 +362,21 @@ const CRUD = <
 					)}
 					{props.children && (
 						<Switch>
-							<RouteComponent path={`${path}/import`} exact>
+							<RouteComponent path={`${path}/import`}>
 								{hasImportPermission || !ForbiddenPage ? (
 									importer(true)
 								) : (
 									<ForbiddenPage />
 								)}
 							</RouteComponent>
-							<RouteComponent path={`${path}/devimport`} exact>
+							<RouteComponent path={`${path}/devimport`}>
 								{hasImportPermission || !ForbiddenPage ? (
 									importer(false)
 								) : (
 									<ForbiddenPage />
 								)}
 							</RouteComponent>
-							<RouteComponent path={`${path}/:id`} exact>
+							<RouteComponent path={`${path}/:id`}>
 								{hasPermission(perms, props.readPermission) ||
 								hasPermission(perms, props.editPermission) ||
 								!ForbiddenPage ? (

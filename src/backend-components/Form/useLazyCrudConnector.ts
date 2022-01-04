@@ -6,6 +6,7 @@ import {
 	useFormContext,
 } from "../..";
 import { ApiConnector } from "../../backend-integration";
+import DefaultConnector from "../../backend-integration/Connector/DefaultConnector";
 
 export interface UseLazyCrudConnectorParams<
 	KeyT extends ModelFieldName,
@@ -20,7 +21,7 @@ export interface UseLazyCrudConnectorParams<
 	/**
 	 * Extra parameters to be passed to the getEndpoint function
 	 */
-	extraParams: ExtraT;
+	extraParams?: ExtraT;
 	/**
 	 * The backend endpoint to use
 	 */
@@ -33,10 +34,11 @@ export interface UseLazyCrudConnectorParams<
 	/**
 	 * Creates an instance of the underlying connector
 	 * @param initialEndpoint The initial endpoint to use
+	 * @default defaults to DefaultConnector.api; will throw if not provided and this prop is not provided
 	 */
-	getConnector: (
+	getConnector?: (
 		initialEndpoint: string,
-		extraParams: ExtraT
+		extraParams: ExtraT | undefined
 	) => ApiConnector<KeyT, VisibilityT, CustomT>;
 	/**
 	 * Callback to configure the connector after it got created by getConnector
@@ -59,6 +61,45 @@ export interface UseLazyCrudConnectorResult<
 	connector: LazyConnector<KeyT, VisibilityT, CustomT>;
 }
 
+export const extractLazyCrudConnectorParams = <
+	KeyT extends ModelFieldName,
+	VisibilityT extends PageVisibility,
+	CustomT,
+	ExtraT,
+	T extends UseLazyCrudConnectorParams<KeyT, VisibilityT, CustomT, ExtraT>
+>(
+	data: T
+): [
+	UseLazyCrudConnectorParams<KeyT, VisibilityT, CustomT, ExtraT>,
+	Omit<T, keyof UseLazyCrudConnectorParams<KeyT, VisibilityT, CustomT, ExtraT>>
+] => {
+	const {
+		getEndpoint,
+		initialId,
+		getConnector,
+		configureConnector,
+		onParentIdChange,
+		extraParams,
+		field,
+		...otherProps
+	} = data;
+	const params: UseLazyCrudConnectorParams<
+		KeyT,
+		VisibilityT,
+		CustomT,
+		ExtraT
+	> = {
+		getEndpoint,
+		initialId,
+		getConnector,
+		configureConnector,
+		onParentIdChange,
+		extraParams,
+		field,
+	};
+	return [params, otherProps];
+};
+
 const useLazyCrudConnector = <
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
@@ -67,10 +108,11 @@ const useLazyCrudConnector = <
 >(
 	params: UseLazyCrudConnectorParams<KeyT, VisibilityT, CustomT, ExtraT>
 ): UseLazyCrudConnectorResult<KeyT, VisibilityT, CustomT> => {
+	// when updating params, also update extractLazyCrudConnectorParams
 	const {
 		getEndpoint,
 		initialId,
-		getConnector,
+		getConnector: getConnectorOverride,
 		configureConnector,
 		onParentIdChange,
 		extraParams,
@@ -93,8 +135,16 @@ const useLazyCrudConnector = <
 		[onParentIdChange, getEndpoint]
 	);
 
+	const getConnector = (getConnectorOverride ?? DefaultConnector.getApi) as
+		| ((
+				initialEndpoint: string,
+				extraParams: ExtraT | undefined
+		  ) => ApiConnector<KeyT, VisibilityT, CustomT>)
+		| null;
+	if (!getConnector) throw new Error("No default connector set");
+
 	const getConnectorWrap = useCallback(
-		(endpoint: string, extraParams: ExtraT) => {
+		(endpoint: string, extraParams: ExtraT | undefined) => {
 			const connector = getConnector(endpoint, extraParams);
 			if (configureConnector) configureConnector(connector);
 			return connector;
