@@ -451,7 +451,10 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 							</ListItem>
 							{(props.valueData as DataGridSetFilterData)
 								.filter((entry) =>
-									entry.getLabelText().toLowerCase().includes(enumFilterSearch)
+									entry
+										.getLabelText()
+										.toLowerCase()
+										.includes(enumFilterSearch.toLocaleLowerCase())
 								)
 								.map((entry) => (
 									<ListItem key={entry.value}>
