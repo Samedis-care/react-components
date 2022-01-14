@@ -39,6 +39,74 @@ export interface BackendDataGridProps<
 	additionalNewButtons?: IDataGridAddButton[];
 }
 
+export const renderDataGridRecordUsingModel = <
+	KeyT extends ModelFieldName,
+	VisibilityT extends PageVisibility,
+	CustomT
+>(
+	model: Model<KeyT, VisibilityT, CustomT>,
+	refreshGrid: () => void
+) => (
+	entry: Record<string, unknown>
+): { id: string } & Record<string, string | null> =>
+	Object.fromEntries(
+		Object.keys(model.fields).map((key) => {
+			// we cannot render the ID, this will cause issues with the selection
+			const value = getValueByDot(key, entry);
+			if (key === "id") {
+				return [key, value];
+			}
+
+			const field = model.fields[key as KeyT];
+			const { id } = entry as Record<"id", string>;
+
+			return [
+				key,
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-call
+				field
+					? field.type.render({
+							field: key,
+							value: value,
+							touched: false,
+							initialValue: value,
+							label: field.getLabel(),
+							visibility: Object.assign({}, field.visibility.overview, {
+								hidden: false,
+							}),
+							/**
+							 * The onChange handler for editable input fields
+							 */
+							handleChange: async (field: ModelFieldName, value: unknown) => {
+								if (!id) throw new Error("ID not set!");
+
+								await model.connector.update(
+									await model.applySerialization(
+										{
+											id,
+											...dotToObject(field, value),
+										} as Record<string, unknown>,
+										"serialize",
+										"overview"
+									)
+								);
+								refreshGrid();
+							},
+							handleBlur: () => {
+								// this is unhandled in the data grid
+							},
+							errorMsg: null,
+							setError: () => {
+								throw new Error("Not implemented in Grid");
+							},
+							setFieldTouched: () => {
+								throw new Error("Not implemented in Grid");
+							},
+					  })
+					: null,
+			];
+		})
+	) as { id: string } & Record<string, string | null>;
+
 const BackendDataGrid = <
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
@@ -58,6 +126,11 @@ const BackendDataGrid = <
 		);
 	}
 
+	const refreshGrid = useCallback(
+		() => setRefreshToken(new Date().getTime().toString()),
+		[]
+	);
+
 	const loadData = useCallback(
 		async (params: IDataGridLoadDataParameters): Promise<DataGridData> => {
 			const [result, meta] = await model.index(params);
@@ -65,69 +138,10 @@ const BackendDataGrid = <
 			return {
 				rowsTotal: meta.totalRows,
 				rowsFiltered: meta.filteredRows,
-				rows: result.map((entry: Record<string, unknown>) =>
-					Object.fromEntries(
-						Object.keys(model.fields).map((key) => {
-							// we cannot render the ID, this will cause issues with the selection
-							const value = getValueByDot(key, entry);
-							if (key === "id") {
-								return [key, value];
-							}
-
-							const field = model.fields[key as KeyT];
-							const { id } = entry as Record<"id", string>;
-
-							return [
-								key,
-								// eslint-disable-next-line @typescript-eslint/no-unsafe-call
-								field?.type?.render({
-									field: key,
-									value: value,
-									touched: false,
-									initialValue: value,
-									label: field.getLabel(),
-									visibility: Object.assign({}, field.visibility.overview, {
-										hidden: false,
-									}),
-									/**
-									 * The onChange handler for editable input fields
-									 */
-									handleChange: async (
-										field: ModelFieldName,
-										value: unknown
-									) => {
-										if (!id) throw new Error("ID not set!");
-
-										await model.connector.update(
-											await model.applySerialization(
-												{
-													id,
-													...dotToObject(field, value),
-												} as Record<string, unknown>,
-												"serialize",
-												"overview"
-											)
-										);
-										setRefreshToken(new Date().getTime().toString());
-									},
-									handleBlur: () => {
-										// this is unhandled in the data grid
-									},
-									errorMsg: null,
-									setError: () => {
-										throw new Error("Not implemented in Grid");
-									},
-									setFieldTouched: () => {
-										throw new Error("Not implemented in Grid");
-									},
-								}) || null,
-							];
-						})
-					)
-				) as ({ id: string } & Record<string, string | null>)[],
+				rows: result.map(renderDataGridRecordUsingModel(model, refreshGrid)),
 			};
 		},
-		[model]
+		[model, refreshGrid]
 	);
 
 	const { mutateAsync: deleteAdvanced } = useModelDeleteAdvanced(model);
@@ -162,9 +176,9 @@ const BackendDataGrid = <
 				} else {
 					await deleteMultiple(ids);
 				}
-				setRefreshToken(new Date().getTime().toString());
+				refreshGrid();
 			} catch (e) {
-				setRefreshToken(new Date().getTime().toString());
+				refreshGrid();
 				pushDialog(
 					<ErrorDialog
 						title={t("backend-components.data-grid.delete.error-dialog.title")}
@@ -183,7 +197,14 @@ const BackendDataGrid = <
 				);
 			}
 		},
-		[pushDialog, t, enableDeleteAll, deleteAdvanced, deleteMultiple]
+		[
+			pushDialog,
+			t,
+			enableDeleteAll,
+			deleteAdvanced,
+			deleteMultiple,
+			refreshGrid,
+		]
 	);
 
 	const addNewButtons: DataGridProps["onAddNew"] = useMemo(() => {

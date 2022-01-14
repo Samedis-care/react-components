@@ -23,6 +23,7 @@ import {
 	measureText,
 	makeThemeStyles,
 	useMultipleStyles,
+	shallowCompareArray,
 } from "../../utils";
 import { dataGridPrepareFiltersAndSorts } from "./CallbackUtil";
 import { ModelFilterType } from "../../backend-integration/Model";
@@ -173,6 +174,12 @@ export interface IDataGridCallbacks {
 	 * Forced initial values for custom data (overwrites persisted custom data)
 	 */
 	overrideCustomData?: Record<string, unknown>;
+	/**
+	 * Set the (initial) selection of the grid when provided/updated.
+	 * Content: [invert, ids].
+	 * Use together with onSelectionChange for controlled selection.
+	 */
+	selection?: [boolean, string[]];
 	/**
 	 * Event for selection change
 	 * @param invert Are ids inverted? If true: Everything is selected except ids. If false: Only ids are selected
@@ -956,6 +963,7 @@ const DataGrid = (props: DataGridProps) => {
 		disableFooter,
 		disableSelection,
 		headerHeight,
+		selection,
 	} = props;
 	const rowsPerPage = props.rowsPerPage || 25;
 
@@ -1003,6 +1011,23 @@ const DataGrid = (props: DataGridProps) => {
 		...getDefaultColumnWidths(columns, theme),
 		...persisted?.columnWidth,
 	}));
+
+	// update selection (if controlled)
+	useEffect(() => {
+		if (!selection) return;
+		setState((prev) => {
+			const stateEqual =
+				prev.selectAll === selection[0] &&
+				shallowCompareArray(prev.selectedRows, selection[1]);
+			return stateEqual
+				? prev
+				: {
+						...prev,
+						selectAll: selection[0],
+						selectedRows: selection[1],
+				  };
+		});
+	}, [setState, selection]);
 
 	// refresh data if desired
 	useEffect(() => {
@@ -1118,6 +1143,13 @@ const DataGrid = (props: DataGridProps) => {
 
 	// selection change event
 	useEffect(() => {
+		// don't trigger selection update event when triggered by prop update
+		if (
+			selection &&
+			selectAll === selection[0] &&
+			shallowCompareArray(selectedRows, selection[1])
+		)
+			return;
 		if (onSelectionChange) {
 			onSelectionChange(selectAll, selectedRows);
 		}

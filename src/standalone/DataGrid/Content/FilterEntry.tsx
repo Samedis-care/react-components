@@ -39,7 +39,8 @@ export type FilterType =
 	| "greaterThan"
 	| "greaterThanOrEqual"
 	| "inRange"
-	| "inSet";
+	| "inSet"
+	| "notInSet";
 export type FilterComboType = "or" | "and";
 
 export interface IFilterDef {

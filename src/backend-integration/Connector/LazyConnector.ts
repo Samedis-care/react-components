@@ -20,6 +20,17 @@ interface QueuedFunction {
 
 type QueueChangeHandler = (queue: QueuedFunction[]) => void;
 
+export enum IndexEnhancementLevel {
+	/**
+	 * Pass though index call to backend
+	 */
+	None,
+	/**
+	 * Pass though index call to backend, append new records and changed records in result
+	 */
+	Basic,
+}
+
 /**
  * Forwards all read calls (index, read) to the real connector directly but queues all writing calls (create, update, delete) which can be fired at once
  * @remarks Does not support relations, enhances read/index calls with locally updated data
@@ -31,6 +42,7 @@ class LazyConnector<
 > extends Connector<KeyT, VisibilityT, CustomT> {
 	public realConnector: ApiConnector<KeyT, VisibilityT, CustomT>;
 	public fakeReads: boolean;
+	public indexEnhancement = IndexEnhancementLevel.Basic;
 	private queue: QueuedFunction[] = [];
 	private onQueueChange?: QueueChangeHandler;
 	// backend emulation
@@ -114,6 +126,8 @@ class LazyConnector<
 		}
 
 		const result = await this.realConnector.index(params, model);
+
+		if (this.indexEnhancement == IndexEnhancementLevel.None) return result;
 
 		// map real ids to fake ids for consistency
 		result[0] = result[0].map((entry) => ({

@@ -10,8 +10,8 @@ import {
  * @param rowData The data to filter, sort and paginate
  * @param params The filter, sort and pagination settings
  * @param columnDef Metadata about the columns
- * @returns An array containing the filtered, sorted and paginated data in slot 0
- *          and the total amount of filtered rows before pagination in slot 2
+ * @returns An array containing the filtered, sorted and paginated data in the first slot
+ *          and the total amount of filtered rows before pagination in the second slot
  */
 const filterSortPaginate = (
 	rowData: DataGridRowData[],
@@ -131,6 +131,13 @@ const filterSortPaginate = (
 						'filterCache["' +
 						filterKey +
 						'"].value1.split(",").includes(value)';
+					break;
+				case "notInSet":
+					expr +=
+						'!filterCache["' +
+						filterKey +
+						'"].value1.split(",").includes(value)';
+					break;
 			}
 
 			filter = filter.nextFilter;

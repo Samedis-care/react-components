@@ -1,6 +1,9 @@
 import Type from "./Type";
 import Visibility, { getVisibility, VisibilityCallback } from "./Visibility";
-import Connector, { ResponseMeta } from "../Connector/Connector";
+import Connector, {
+	ConnectorIndex2Params,
+	ResponseMeta,
+} from "../Connector/Connector";
 import { useMutation, useQuery } from "react-query";
 import { ModelDataStore } from "../index";
 import {
@@ -355,7 +358,24 @@ class Model<
 		params: Partial<IDataGridLoadDataParameters> | undefined
 	): Promise<[Record<string, unknown>[], ResponseMeta]> {
 		const [rawData, meta] = await this.connector.index(params, this);
-		// eslint-disable-next-line no-debugger
+		return [
+			await Promise.all(
+				rawData.map((data) =>
+					this.applySerialization(data, "deserialize", "overview")
+				)
+			),
+			meta,
+		];
+	}
+
+	/**
+	 * Loads a list of data entries by the given search params. Works with offsets rather than pages
+	 * @param params The search params
+	 */
+	public async index2(
+		params: ConnectorIndex2Params
+	): Promise<[Record<string, unknown>[], ResponseMeta]> {
+		const [rawData, meta] = await this.connector.index2(params, this);
 		return [
 			await Promise.all(
 				rawData.map((data) =>
@@ -592,58 +612,59 @@ class Model<
 	/**
 	 * Returns a data grid compatible column definition
 	 */
-	public toDataGridColumnDefinition(): IDataGridColumnDef[] {
-		return Object.entries(this.fields)
-			.filter(
-				(entry) =>
-					!(entry[1] as ModelFieldDefinition<
-						unknown,
-						KeyT,
-						VisibilityT,
-						CustomT
-					>).visibility.overview.disabled
-			)
-			.map((entry) => {
-				const key = entry[0];
-				const value = entry[1] as ModelFieldDefinition<
-					unknown,
-					KeyT,
-					VisibilityT,
-					CustomT
-				>;
+	public toDataGridColumnDefinition(
+		includeHidden = false
+	): IDataGridColumnDef[] {
+		return (!includeHidden
+			? Object.entries(this.fields).filter(
+					(entry) =>
+						!(entry[1] as ModelFieldDefinition<
+							unknown,
+							KeyT,
+							VisibilityT,
+							CustomT
+						>).visibility.overview.disabled
+			  )
+			: Object.entries(this.fields)
+		).map((entry) => {
+			const key = entry[0];
+			const value = entry[1] as ModelFieldDefinition<
+				unknown,
+				KeyT,
+				VisibilityT,
+				CustomT
+			>;
 
-				let filterData: DataGridSetFilterData | undefined = undefined;
-				if (value.type.getFilterType() === "enum") {
-					if (!value.type.getEnumValues)
-						throw new Error(
-							"Model Type Filter Type is enum, but getEnumValues not set"
-						);
-					filterData = value.type
-						.getEnumValues()
-						.filter((value) => !value.invisible)
-						.map(
-							(value) =>
-								({
-									getLabelText: value.getLabel,
-									value: value.value,
-								} as DataGridSetFilterDataEntry)
-						);
-				}
+			let filterData: DataGridSetFilterData | undefined = undefined;
+			if (value.type.getFilterType() === "enum") {
+				if (!value.type.getEnumValues)
+					throw new Error(
+						"Model Type Filter Type is enum, but getEnumValues not set"
+					);
+				filterData = value.type
+					.getEnumValues()
+					.filter((value) => !value.invisible)
+					.map(
+						(value) =>
+							({
+								getLabelText: value.getLabel,
+								value: value.value,
+							} as DataGridSetFilterDataEntry)
+					);
+			}
 
-				return {
-					field: key,
-					headerName: value.getLabel(),
-					headerLabel: value.getColumnLabel
-						? value.getColumnLabel()
-						: undefined,
-					type: value.type.getFilterType(),
-					filterData,
-					hidden: value.visibility.overview.hidden,
-					filterable: value.filterable,
-					sortable: value.sortable,
-					width: value.columnWidth,
-				};
-			});
+			return {
+				field: key,
+				headerName: value.getLabel(),
+				headerLabel: value.getColumnLabel ? value.getColumnLabel() : undefined,
+				type: value.type.getFilterType(),
+				filterData,
+				hidden: value.visibility.overview.hidden,
+				filterable: value.filterable,
+				sortable: value.sortable,
+				width: value.columnWidth,
+			};
+		});
 	}
 
 	/**
