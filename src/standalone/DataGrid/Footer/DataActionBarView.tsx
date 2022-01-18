@@ -44,23 +44,24 @@ const DataActionBarView = (props: DataActionBarViewProps) => {
 
 	return (
 		<Grid container>
-			{!props.disableSelection && (
-				<Grid item key={"select-all"}>
-					<ComponentWithLabel
-						control={<SelectAll />}
-						labelText={t("standalone.data-grid.footer.select-all")}
-						labelPlacement={"bottom"}
-						className={classes.selectAllWrapper}
-					/>
-				</Grid>
-			)}
+			<Grid item key={"select-all"}>
+				<ComponentWithLabel
+					control={<SelectAll />}
+					labelText={t("standalone.data-grid.footer.select-all")}
+					labelPlacement={"bottom"}
+					className={classes.selectAllWrapper}
+					style={
+						props.disableSelection
+							? { opacity: 0, pointerEvents: "none" }
+							: undefined
+					}
+				/>
+			</Grid>
 			{props.handleEdit && (
 				<>
-					{!props.disableSelection && (
-						<Grid item key={"divider-1"}>
-							<VerticalDivider />
-						</Grid>
-					)}
+					<Grid item key={"divider-1"}>
+						<VerticalDivider />
+					</Grid>
 					<Grid item key={"edit"}>
 						<ComponentWithLabel
 							control={
