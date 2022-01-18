@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Box, Typography } from "@material-ui/core";
+import { Box, makeStyles, Typography } from "@material-ui/core";
 import {
 	BaseSelectorProps,
 	MultiSelectorData,
@@ -11,6 +11,7 @@ import MultiSelectWithoutGroup, {
 } from "./MultiSelectWithoutGroup";
 import { BaseSelectorData } from "./BaseSelector";
 import { uniqueArray } from "../../utils";
+import Loader from "../Loader";
 
 export interface MultiSelectWithTagsProps<
 	DataT extends MultiSelectorData,
@@ -96,6 +97,25 @@ interface SelectedGroup {
 	items: string[];
 }
 
+const useStyles = makeStyles(
+	{
+		root: {
+			position: "relative",
+		},
+		loadOverlay: {
+			position: "absolute",
+			top: 0,
+			left: 0,
+			right: 0,
+			bottom: 0,
+			zIndex: 9999,
+			backgroundColor: "rgba(255,255,255,.3)",
+			transition: "opacity 500ms cubic-bezier(0.4, 0, 0.2, 1) 500ms",
+		},
+	},
+	{ name: "CcMultiSelectWithTags" }
+);
+
 const MultiSelectWithTags = <
 	DataT extends MultiSelectorData,
 	GroupT extends BaseSelectorData
@@ -130,8 +150,10 @@ const MultiSelectWithTags = <
 		: false;
 	const [selectedGroups, setSelectedGroups] = useState<SelectedGroup[]>([]);
 	const [switchValue, setSwitchValue] = useState<boolean>(defaultSwitchValue);
+	const [loadingGroupRecords, setLoadingGroupRecords] = useState(false);
 	const getIdDefault = useCallback((data: DataT) => data.value, []);
 	const getId = getIdOfData ?? getIdDefault;
+	const classes = useStyles();
 
 	// set switch value if switch visibility is toggled
 	useEffect(() => {
@@ -153,26 +175,31 @@ const MultiSelectWithTags = <
 	const handleGroupSelect = useCallback(
 		async (selectedGroup: GroupT | null) => {
 			if (!selectedGroup || !onChange) return;
-			const groupEntries = await loadGroupEntries(selectedGroup);
-			const groupEntryIds = groupEntries.map(getId);
-			const combinedArray = [...selected, ...groupEntries];
-			setSelectedGroups((prevState) => [
-				...prevState,
-				{
-					group: selectedGroup.value,
-					items: groupEntryIds,
-				},
-			]);
-			onChange(
-				uniqueArray(
-					combinedArray
-						.map(getId)
-						.map(
-							(value) =>
-								combinedArray.find((entry) => getId(entry) === value) as DataT
-						)
-				)
-			);
+			try {
+				setLoadingGroupRecords(true);
+				const groupEntries = await loadGroupEntries(selectedGroup);
+				const groupEntryIds = groupEntries.map(getId);
+				const combinedArray = [...selected, ...groupEntries];
+				setSelectedGroups((prevState) => [
+					...prevState,
+					{
+						group: selectedGroup.value,
+						items: groupEntryIds,
+					},
+				]);
+				onChange(
+					uniqueArray(
+						combinedArray
+							.map(getId)
+							.map(
+								(value) =>
+									combinedArray.find((entry) => getId(entry) === value) as DataT
+							)
+					)
+				);
+			} finally {
+				setLoadingGroupRecords(false);
+			}
 		},
 		[onChange, loadGroupEntries, getId, selected]
 	);
@@ -188,7 +215,17 @@ const MultiSelectWithTags = <
 	);
 
 	return (
-		<div>
+		<div className={classes.root}>
+			<div
+				className={classes.loadOverlay}
+				style={
+					loadingGroupRecords
+						? { visibility: "visible", opacity: 1 }
+						: { visibility: "hidden", opacity: 0 }
+				}
+			>
+				<Loader />
+			</div>
 			<Typography component="label" variant={"caption"} color={"textSecondary"}>
 				{title}
 			</Typography>
@@ -200,7 +237,7 @@ const MultiSelectWithTags = <
 				onSelect={handleGroupSelect}
 				refreshToken={selectedGroups.length.toString()}
 				onLoad={loadGroupOptionsAndProcess}
-				disabled={disabled}
+				disabled={disabled || loadingGroupRecords}
 				enableIcons={enableIcons}
 				noOptionsText={noOptionsText}
 				loadingText={loadingText}
