@@ -65,6 +65,9 @@ const useStyles = makeStyles(
 				theme.componentsCare?.selector?.selected?.backgroundColor,
 			...theme.componentsCare?.selector?.selected?.style,
 		},
+		ignored: {
+			textDecoration: "line-through",
+		},
 		label: {
 			margin: theme.componentsCare?.selector?.selected?.label?.margin,
 			padding:
@@ -106,7 +109,10 @@ const MultiSelectEntry = <DataT extends MultiSelectorData>(
 				<SmallListItem
 					button
 					onClick={data.onClick}
-					className={classes.selected}
+					className={combineClassNames([
+						classes.selected,
+						data.ignore && classes.ignored,
+					])}
 				>
 					{enableIcons && (
 						<SmallListItemIcon>

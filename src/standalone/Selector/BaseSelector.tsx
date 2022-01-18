@@ -58,6 +58,10 @@ export interface BaseSelectorData {
 	 */
 	icon?: React.ReactNode | string;
 	/**
+	 * Should the entry be ignored?
+	 */
+	ignore?: boolean;
+	/**
 	 * Should the entry be disabled?
 	 */
 	isDisabled?: boolean;
