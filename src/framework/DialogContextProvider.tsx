@@ -63,6 +63,7 @@ const DialogContextProvider = (props: IFrameworkProps) => {
 		dialogCount.current--;
 		if (dialogCount.current === 0 && navBlock.current) {
 			navBlock.current();
+			navBlock.current = null;
 		}
 
 		setDialogs((prevValue) => {
