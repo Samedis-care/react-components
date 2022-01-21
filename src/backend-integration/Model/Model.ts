@@ -20,6 +20,13 @@ import queryCache from "../Store";
 import { QueryKey } from "react-query/types/core/types";
 import { deepAssign, dotToObject, getValueByDot } from "../../utils";
 
+// optional import
+let captureException: ((e: Error) => void) | null = null;
+import("@sentry/react")
+	.then((Sentry) => (captureException = Sentry.captureException))
+	// eslint-disable-next-line @typescript-eslint/no-empty-function
+	.catch(() => {}); // ignore
+
 export interface PageVisibility {
 	overview: Visibility;
 	edit: VisibilityCallback;
@@ -703,6 +710,7 @@ class Model<
 							"[Components-Care] [Model.validate] Error during validation:",
 							e
 						);
+						if (captureException) captureException(e);
 						error = (e as Error).message;
 					}
 
@@ -717,6 +725,7 @@ class Model<
 								"[Components-Care] [Model.validate] Error during validation:",
 								e
 							);
+							if (captureException) captureException(e);
 							error = (e as Error).message;
 						}
 					}
@@ -730,6 +739,7 @@ class Model<
 						value,
 						e
 					);
+					if (captureException) captureException(e);
 				}
 			})
 		);
