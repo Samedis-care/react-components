@@ -23,8 +23,12 @@ export interface DataGridPersistentState {
 }
 
 export type DataGridPersistentStateContextType = [
-	Partial<DataGridPersistentState> | undefined,
-	(data: DataGridPersistentState) => void
+	(
+		| Promise<Partial<DataGridPersistentState>>
+		| Partial<DataGridPersistentState>
+		| undefined
+	),
+	(data: DataGridPersistentState) => Promise<void> | void
 ];
 export const DataGridPersistentStateContext = React.createContext<
 	DataGridPersistentStateContextType | undefined
@@ -45,7 +49,7 @@ const StatePersistence = () => {
 	useEffect(() => {
 		if (!setPersisted) return;
 
-		setPersisted({
+		void setPersisted({
 			columnState,
 			columnWidth: columnWidthState,
 			state: {

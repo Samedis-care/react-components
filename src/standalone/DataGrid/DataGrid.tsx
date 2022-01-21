@@ -34,6 +34,7 @@ import StatePersistence, {
 	DataGridPersistentStateContext,
 } from "./StatePersistence";
 import { IDataGridContentSelectRowViewProps } from "./Content/SelectRowView";
+import { suspend } from "suspend-react";
 
 export interface DataGridTheme extends Theming.BasicElementThemeFragment {
 	/* root elements from BasicElementThemeFragment defining main grid container visuals */
@@ -969,7 +970,10 @@ const DataGrid = (props: DataGridProps) => {
 
 	const theme = useTheme();
 	const persistedContext = useContext(DataGridPersistentStateContext);
-	const [persisted] = persistedContext || [];
+	const [persistedPromise] = persistedContext || [];
+	const persisted = suspend(() => Promise.resolve(persistedPromise), [
+		persistedPromise,
+	]);
 
 	const classes = useDataGridStylesInternal(props);
 	const statePack = useState<IDataGridState>(() => ({
