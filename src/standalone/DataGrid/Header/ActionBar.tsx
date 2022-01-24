@@ -73,14 +73,16 @@ const ActionBar = () => {
 		);
 		setColumnState((colState) =>
 			Object.fromEntries(
-				Object.entries(colState).map(([field, def]) => [
-					field,
-					{
-						...def,
-						sort: defaultColumnState[field]?.sort,
-						sortOrder: defaultColumnState[field]?.sortOrder,
-					},
-				])
+				Object.entries(colState)
+					.filter(([field]) => field in defaultColumnState)
+					.map(([field, def]) => [
+						field,
+						{
+							...def,
+							sort: defaultColumnState[field].sort,
+							sortOrder: defaultColumnState[field].sortOrder,
+						},
+					])
 			)
 		);
 	}, [columns, defaultFilter, defaultSort, setColumnState]);

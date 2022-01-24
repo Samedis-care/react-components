@@ -191,7 +191,9 @@ export class StorageManager {
 		id: StorageKeyType,
 		keys: Record<string, string>
 	): Promise<StorageValueType> | StorageValueType {
-		const [storageProvider, keysToUse] = this.storageProviderCallback(id, keys);
+		const [storageProvider, keysToUse] = this.storageProviderCallback(id, {
+			...keys,
+		});
 		return storageProvider.getItem(this.buildStorageKey(id, keysToUse));
 	}
 
@@ -206,7 +208,9 @@ export class StorageManager {
 		keys: Record<string, string>,
 		value: StorageValueType
 	): Promise<void> | void {
-		const [storageProvider, keysToUse] = this.storageProviderCallback(id, keys);
+		const [storageProvider, keysToUse] = this.storageProviderCallback(id, {
+			...keys,
+		});
 		return storageProvider.setItem(this.buildStorageKey(id, keysToUse), value);
 	}
 
