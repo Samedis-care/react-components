@@ -77,8 +77,8 @@ const ActionBar = () => {
 					field,
 					{
 						...def,
-						sort: defaultColumnState[field].sort,
-						sortOrder: defaultColumnState[field].sortOrder,
+						sort: defaultColumnState[field]?.sort,
+						sortOrder: defaultColumnState[field]?.sortOrder,
 					},
 				])
 			)
