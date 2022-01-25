@@ -79,7 +79,7 @@ const StyledButton = withStyles((theme: Theme) => ({
 	outlined: (props: ActionButtonProps) => ({
 		borderRadius:
 			theme.componentsCare?.uiKit?.actionButton?.borderRadius ||
-			theme.spacing(1),
+			theme.shape.borderRadius,
 		"&.Mui-disabled": {
 			border: theme.componentsCare?.uiKit?.actionButton?.border,
 			color: theme.palette.background.paper,
@@ -94,7 +94,7 @@ const StyledButton = withStyles((theme: Theme) => ({
 	contained: (props: ActionButtonProps) => ({
 		borderRadius:
 			theme.componentsCare?.uiKit?.actionButton?.borderRadius ||
-			theme.spacing(1),
+			theme.shape.borderRadius,
 		"&.Mui-disabled": {
 			border: theme.componentsCare?.uiKit?.actionButton?.border,
 			color: theme.palette.background.paper,

@@ -64,7 +64,7 @@ export interface ImageBoxProps {
 const useStyles = makeStyles(
 	(theme) => ({
 		root: {
-			borderRadius: 8,
+			borderRadius: theme.shape.borderRadius,
 			position: "relative",
 			height: "100%",
 			"& button": {
@@ -96,7 +96,7 @@ const useStyles = makeStyles(
 			width: "100%",
 			height: "100%",
 			objectFit: "contain",
-			borderRadius: 8,
+			borderRadius: theme.shape.borderRadius,
 		},
 		removeBtn: {
 			padding: theme.spacing(1),

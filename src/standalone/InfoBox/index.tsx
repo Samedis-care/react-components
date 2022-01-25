@@ -38,7 +38,7 @@ export const useStyles = makeStyles(
 		},
 		panelDetails: {
 			border: "1px solid grey",
-			borderRadius: "0px 0px 4px 4px",
+			borderRadius: `0px 0px ${theme.shape.borderRadius}px ${theme.shape.borderRadius}px`,
 			padding: "8px 24px",
 			whiteSpace: "pre-line",
 		},

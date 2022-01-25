@@ -82,7 +82,7 @@ const InputCustom = withStyles((theme: Theme) => ({
 		...theme.componentsCare?.selectorWithCheckbox?.inputRootStyle,
 	},
 	input: {
-		borderRadius: 4,
+		borderRadius: theme.shape.borderRadius,
 		position: "relative",
 		backgroundColor: theme.palette.background.paper,
 		border: "1px solid #ced4da",
@@ -91,7 +91,7 @@ const InputCustom = withStyles((theme: Theme) => ({
 		transition: theme.transitions.create(["border-color", "box-shadow"]),
 		...theme.componentsCare?.selectorWithCheckbox?.inputStyle,
 		"&:focus": {
-			borderRadius: 4,
+			borderRadius: theme.shape.borderRadius,
 			borderColor: theme.palette.primary.main,
 			...theme.componentsCare?.selectorWithCheckbox?.inputFocusStyle,
 		},

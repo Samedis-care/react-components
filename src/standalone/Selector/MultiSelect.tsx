@@ -56,22 +56,25 @@ export interface MultiSelectProps<DataT extends MultiSelectorData>
 }
 
 const useBaseSelectorStyles = makeStyles(
-	{
+	(theme) => ({
 		inputRoot: (props: MultiSelectProps<MultiSelectorData>) => ({
-			borderRadius: props.selected.length > 0 ? "4px 4px 0px 0px" : undefined,
+			borderRadius:
+				props.selected.length > 0
+					? `${theme.shape.borderRadius}px ${theme.shape.borderRadius}px 0px 0px`
+					: undefined,
 		}),
-	},
+	}),
 	{ name: "CcMultiSelectBase" }
 );
 
 const useMultiSelectorStyles = makeStyles(
-	{
+	(theme) => ({
 		selectedEntries: {
 			border: `1px solid rgba(0, 0, 0, 0.23)`,
 			borderTop: 0,
-			borderRadius: "0px 0px 4px 4px",
+			borderRadius: `0px 0px ${theme.shape.borderRadius}px ${theme.shape.borderRadius}px`,
 		},
-	},
+	}),
 	{ name: "CcMultiSelect" }
 );
 

@@ -2,12 +2,12 @@ import React, { useRef, useEffect } from "react";
 import { makeStyles, InputLabel } from "@material-ui/core";
 
 const useStyles = makeStyles(
-	{
+	(theme) => ({
 		fieldSetRoot: {
 			padding: "8px",
 			borderStyle: "solid",
 			borderColor: "lightgrey",
-			borderRadius: 4,
+			borderRadius: theme.shape.borderRadius,
 			borderWidth: 1,
 			position: "relative",
 			maxHeight: "inherit",
@@ -23,7 +23,7 @@ const useStyles = makeStyles(
 			maxWidth: "100%",
 			whiteSpace: "nowrap",
 		},
-	},
+	}),
 	{ name: "CcGroupBox" }
 );
 

@@ -614,7 +614,8 @@ const useStyles = makeStyles(
 			width: theme.componentsCare?.dataGrid?.width || "100%",
 			height: theme.componentsCare?.dataGrid?.height || "100%",
 			borderRadius:
-				theme.componentsCare?.dataGrid?.borderRadius || theme.spacing(2),
+				theme.componentsCare?.dataGrid?.borderRadius ||
+				theme.shape.borderRadius,
 			border:
 				theme.componentsCare?.dataGrid?.border ||
 				`1px solid ${theme.palette.divider}`,
