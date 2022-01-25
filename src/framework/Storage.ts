@@ -83,8 +83,7 @@ export abstract class CachedServerStorageProvider extends StorageProvider {
 	 * @protected
 	 */
 	protected cacheOptions: CacheOptions = {
-		staleTime: 300,
-		cacheTime: 300,
+		staleTime: 300000,
 	};
 
 	/**
