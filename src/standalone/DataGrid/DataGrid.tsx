@@ -35,6 +35,7 @@ import StatePersistence, {
 } from "./StatePersistence";
 import { IDataGridContentSelectRowViewProps } from "./Content/SelectRowView";
 import { suspend } from "suspend-react";
+import { CustomFilterActiveContext } from "./Header/FilterBar";
 
 export interface DataGridTheme extends Theming.BasicElementThemeFragment {
 	/* root elements from BasicElementThemeFragment defining main grid container visuals */
@@ -777,6 +778,9 @@ const useStyles = makeStyles(
 			padding: 0,
 			color: "inherit",
 		},
+		columnHeaderFilterButtonActive: {
+			color: theme.palette.secondary.main,
+		},
 		columnHeaderResizer: {
 			cursor: "col-resize",
 			width: 8,
@@ -812,6 +816,21 @@ const useStyles = makeStyles(
 		},
 		columnHeaderSortIcon: {
 			height: 24,
+		},
+		quickFilterActiveIcon: {
+			color: theme.palette.secondary.main,
+		},
+		customFilterIcon: {
+			color: theme.palette.primary.main,
+		},
+		customFilterActiveIcon: {
+			color: theme.palette.secondary.main,
+		},
+		customFilterBorder: {
+			borderColor: theme.palette.secondary.main,
+			"& > fieldset": {
+				borderColor: theme.palette.secondary.main,
+			},
 		},
 		columnHeaderLabel: {
 			textOverflow: "ellipsis",
@@ -997,6 +1016,7 @@ const DataGrid = (props: DataGridProps) => {
 		selectAll,
 		selectedRows,
 	} = state;
+	const activeCustomFiltersPack = useState(0);
 
 	const gridRoot = useRef<HTMLDivElement>();
 
@@ -1177,25 +1197,29 @@ const DataGrid = (props: DataGridProps) => {
 							<DataGridColumnsWidthStateContext.Provider
 								value={columnWidthStatePack}
 							>
-								<StatePersistence />
-								<Grid item className={classes.header}>
-									<Header />
-								</Grid>
-								<Grid item xs className={classes.content}>
-									<Settings columns={columns} />
-									<CustomFilterDialog />
-									<Content
-										columns={visibleColumns}
-										rowsPerPage={rowsPerPage}
-										disableSelection={disableSelection}
-										headerHeight={headerHeight}
-									/>
-								</Grid>
-								{!disableFooter && (
-									<Grid item className={classes.footer}>
-										<Footer />
+								<CustomFilterActiveContext.Provider
+									value={activeCustomFiltersPack}
+								>
+									<StatePersistence />
+									<Grid item className={classes.header}>
+										<Header />
 									</Grid>
-								)}
+									<Grid item xs className={classes.content}>
+										<Settings columns={columns} />
+										<CustomFilterDialog />
+										<Content
+											columns={visibleColumns}
+											rowsPerPage={rowsPerPage}
+											disableSelection={disableSelection}
+											headerHeight={headerHeight}
+										/>
+									</Grid>
+									{!disableFooter && (
+										<Grid item className={classes.footer}>
+											<Footer />
+										</Grid>
+									)}
+								</CustomFilterActiveContext.Provider>
 							</DataGridColumnsWidthStateContext.Provider>
 						</DataGridColumnsStateContext.Provider>
 					</DataGridStateContext.Provider>

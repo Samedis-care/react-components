@@ -10,6 +10,7 @@ export { default as processImage } from "./processImage";
 export { default as processImageB64 } from "./processImageB64";
 export { default as shallowCompare } from "./shallowCompare";
 export { default as shallowCompareArray } from "./shallowCompareArray";
+export { default as compareArrayContent } from "./compareArrayContent";
 export { default as matchMime } from "./matchMime";
 export { default as addGetParams } from "./addGetParams";
 export { default as deepAssign } from "./deepAssign";

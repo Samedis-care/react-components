@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect } from "react";
 import { BaseSelectorData, SingleSelect } from "../..";
 import {
 	FormControl,
@@ -8,6 +8,8 @@ import {
 	RadioGroup,
 	Typography,
 } from "@material-ui/core";
+import { useCustomFilterActiveContext } from "./Header/FilterBar";
+import { useDataGridStyles } from "./DataGrid";
 
 export interface GridSingleSelectFilterProps {
 	/**
@@ -21,7 +23,7 @@ export interface GridSingleSelectFilterProps {
 	/**
 	 * The currently selected option
 	 */
-	selected: string;
+	selected: string | undefined;
 	/**
 	 * Updates the currently selected options
 	 * @param selected The selected options
@@ -35,10 +37,27 @@ export interface GridSingleSelectFilterProps {
 	 * Autocomplete ID passed to selector
 	 */
 	autocompleteId?: string;
+	/**
+	 * Default selection
+	 */
+	defaultSelection: string;
 }
 
 const GridSingleSelectFilter = (props: GridSingleSelectFilterProps) => {
-	const { label, options, selected, onSelect, dialog, autocompleteId } = props;
+	const { label, options, onSelect, dialog, autocompleteId } = props;
+	const classes = useDataGridStyles();
+	const selected = props.selected ?? props.defaultSelection;
+	const isActive = selected !== props.defaultSelection;
+
+	const [, setActiveFilter] = useCustomFilterActiveContext();
+
+	useEffect(() => {
+		if (!isActive) return;
+		setActiveFilter((prev) => prev + 1);
+		return () => {
+			setActiveFilter((prev) => prev - 1);
+		};
+	}, [setActiveFilter, isActive]);
 
 	const handleDialogRadioToggle = useCallback(
 		(_, value: string) => {
@@ -94,6 +113,9 @@ const GridSingleSelectFilter = (props: GridSingleSelectFilterProps) => {
 						}
 						onSelect={handleSelectorChange}
 						autocompleteId={autocompleteId}
+						classes={{
+							inputRoot: isActive ? classes.customFilterBorder : undefined,
+						}}
 					/>
 				</FormControl>
 			</Grid>

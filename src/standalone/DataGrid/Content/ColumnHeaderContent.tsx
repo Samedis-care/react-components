@@ -133,7 +133,11 @@ const ColumnHeaderContent = (
 					<Grid item key={"filter"}>
 						<Tooltip title={t("standalone.data-grid.content.filter") || ""}>
 							<IconButton
-								className={classes.columnHeaderFilterButton}
+								className={combineClassNames([
+									classes.columnHeaderFilterButton,
+									props.filter?.value1 &&
+										classes.columnHeaderFilterButtonActive,
+								])}
 								onClick={openFilter}
 							>
 								<CurrentFilterIcon className={classes.columnHeaderFilterIcon} />

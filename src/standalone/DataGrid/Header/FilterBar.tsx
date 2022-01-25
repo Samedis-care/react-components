@@ -1,4 +1,10 @@
-import React, { Dispatch, SetStateAction, useCallback, useEffect } from "react";
+import React, {
+	Dispatch,
+	SetStateAction,
+	useCallback,
+	useContext,
+	useEffect,
+} from "react";
 import { Box, Grid, useMediaQuery } from "@material-ui/core";
 import {
 	DataGridCustomDataType,
@@ -22,6 +28,19 @@ export interface IDataGridFilterBarProps {
 	 */
 	inDialog: boolean;
 }
+
+type CustomFilterActiveContextType = [
+	number,
+	Dispatch<React.SetStateAction<number>>
+];
+export const CustomFilterActiveContext = React.createContext<
+	CustomFilterActiveContextType | undefined
+>(undefined);
+export const useCustomFilterActiveContext = (): CustomFilterActiveContextType => {
+	const ctx = useContext(CustomFilterActiveContext);
+	if (!ctx) throw new Error("Context not set");
+	return ctx;
+};
 
 const FilterBar = () => {
 	const props = useDataGridProps();

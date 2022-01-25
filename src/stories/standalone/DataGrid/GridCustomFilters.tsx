@@ -14,7 +14,8 @@ const GridCustomFilters = (props: IDataGridFilterBarProps) => {
 					key={filterId.toString()}
 					label={`Filter ${filterId}`}
 					options={options.map((option) => ({ value: option, label: option }))}
-					selected={(customData[`filter${filterId}`] as string) ?? ""}
+					selected={customData[`filter${filterId}`] as string}
+					defaultSelection={""}
 					onSelect={(selected) => {
 						setCustomData((old) => ({
 							...old,

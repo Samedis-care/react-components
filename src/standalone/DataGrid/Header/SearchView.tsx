@@ -8,16 +8,9 @@ import {
 	PopoverOrigin,
 } from "@material-ui/core";
 import { Search as SearchIcon } from "@material-ui/icons";
-import { useDataGridProps } from "../DataGrid";
+import { useDataGridProps, useDataGridStyles } from "../DataGrid";
 import TextFieldWithHelp from "../../UIKit/TextFieldWithHelp";
-
-const searchInputProps = {
-	startAdornment: (
-		<InputAdornment position="start">
-			<SearchIcon />
-		</InputAdornment>
-	),
-};
+import { combineClassNames } from "../../../utils";
 
 export interface IDataGridSearchViewProps {
 	/**
@@ -42,6 +35,7 @@ const transformOrigin: PopoverOrigin = {
 
 const SearchView = (props: IDataGridSearchViewProps) => {
 	const { searchPlaceholder } = useDataGridProps();
+	const classes = useDataGridStyles();
 	const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 	const openPopover = useCallback(
 		(evt: React.MouseEvent<HTMLElement>) => setAnchorEl(evt.currentTarget),
@@ -54,7 +48,17 @@ const SearchView = (props: IDataGridSearchViewProps) => {
 			value={props.search}
 			onChange={props.handleSearchChange}
 			placeholder={searchPlaceholder}
-			InputProps={searchInputProps}
+			InputProps={{
+				startAdornment: (
+					<InputAdornment position="start">
+						<SearchIcon
+							className={combineClassNames([
+								props.search && classes.quickFilterActiveIcon,
+							])}
+						/>
+					</InputAdornment>
+				),
+			}}
 			margin={"dense"}
 		/>
 	);
@@ -65,7 +69,12 @@ const SearchView = (props: IDataGridSearchViewProps) => {
 				{renderTextField()}
 			</Hidden>
 			<Hidden smUp implementation={"js"}>
-				<IconButton onClick={openPopover}>
+				<IconButton
+					onClick={openPopover}
+					className={combineClassNames([
+						props.search && classes.quickFilterActiveIcon,
+					])}
+				>
 					<SearchIcon />
 				</IconButton>
 				<Popover

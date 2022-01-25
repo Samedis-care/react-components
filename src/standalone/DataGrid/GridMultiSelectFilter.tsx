@@ -1,11 +1,17 @@
-import React, { useCallback } from "react";
-import { MultiSelectorData, MultiSelectWithCheckBox } from "../..";
+import React, { useCallback, useEffect } from "react";
+import {
+	compareArrayContent,
+	MultiSelectorData,
+	MultiSelectWithCheckBox,
+} from "../..";
 import {
 	Checkbox,
 	FormControlLabel,
 	Grid,
 	Typography,
 } from "@material-ui/core";
+import { useCustomFilterActiveContext } from "./Header/FilterBar";
+import { useDataGridStyles } from "./DataGrid";
 
 export interface GridMultiSelectFilterProps {
 	/**
@@ -19,7 +25,7 @@ export interface GridMultiSelectFilterProps {
 	/**
 	 * The currently selected options
 	 */
-	selected: string[];
+	selected: string[] | undefined;
 	/**
 	 * Updates the currently selected options
 	 * @param selected The selected options
@@ -29,10 +35,26 @@ export interface GridMultiSelectFilterProps {
 	 * Is the grid filter rendered in a dialog?
 	 */
 	dialog: boolean;
+	/**
+	 * Default selection
+	 */
+	defaultSelection: string[];
 }
 
 const GridMultiSelectFilter = (props: GridMultiSelectFilterProps) => {
-	const { label, options, selected, onSelect, dialog } = props;
+	const { label, options, onSelect, dialog } = props;
+	const classes = useDataGridStyles();
+	const selected = props.selected ?? props.defaultSelection;
+	const isActive = !compareArrayContent(selected, props.defaultSelection);
+	const [, setActiveFilter] = useCustomFilterActiveContext();
+
+	useEffect(() => {
+		if (!isActive) return;
+		setActiveFilter((prev) => prev + 1);
+		return () => {
+			setActiveFilter((prev) => prev - 1);
+		};
+	}, [setActiveFilter, isActive]);
 
 	const handleDialogCheckboxToggle = useCallback(
 		(evt: React.ChangeEvent<{ name: string }>, checked: boolean) => {
@@ -99,6 +121,9 @@ const GridMultiSelectFilter = (props: GridMultiSelectFilterProps) => {
 					onChange={handleSelectorChange}
 					renderValue={(selected) => getSelected(selected as string[])}
 					fullWidth
+					classes={{
+						select: isActive ? classes.customFilterBorder : undefined,
+					}}
 				/>
 			</Grid>
 		);

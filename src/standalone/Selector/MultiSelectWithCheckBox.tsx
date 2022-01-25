@@ -103,15 +103,27 @@ export type MultiSelectWithCheckBoxThemeExpert = Partial<
 >;
 
 const useSelectStyles = makeThemeStyles(
-	(theme) => theme?.componentsCare?.selectorWithCheckbox?.selectStyle,
+	(theme) => ({
+		root: {},
+		select: {},
+		filled: {},
+		outlined: {},
+		selectMenu: {},
+		disabled: {},
+		icon: {},
+		iconOpen: {},
+		iconFilled: {},
+		iconOutlined: {},
+		...theme?.componentsCare?.selectorWithCheckbox?.selectStyle,
+	}),
 	"CcMultiSelectWithCheckboxSelect"
 );
 
 const MultiSelectWithCheckBox = (props: MultiSelectWithCheckBoxProps) => {
 	const { label, options, values, ...selectProps } = props;
-	const classes = useStyles(cleanClassMap(props, true, "checkboxStyle"));
+	const classes = useStyles(cleanClassMap(props, false, "checkboxStyle"));
 	const selectClasses = useSelectStyles(
-		cleanClassMap(props, false, "checkboxStyle")
+		cleanClassMap(props, true, "checkboxStyle")
 	);
 	return (
 		<>
