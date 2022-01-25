@@ -86,6 +86,9 @@ export abstract class CachedServerStorageProvider extends StorageProvider {
 		staleTime: 300000,
 	};
 
+	protected currentUpdates: Record<string, Promise<void>> = {};
+	protected scheduledUpdates: Record<string, () => Promise<void>> = {};
+
 	/**
 	 * Receive value of key from server
 	 * @param key The key
@@ -125,14 +128,38 @@ export abstract class CachedServerStorageProvider extends StorageProvider {
 		}
 	}
 
-	setItem(key: StorageKeyType, value: StorageValueType): Promise<void> {
-		return ModelDataStore.executeMutation({
-			mutationFn: () => this.setItemOnServer(key, value),
-			mutationKey: ["cc-css-mt", key],
-			onSuccess: () => {
-				ModelDataStore.setQueryData(["cc-css", key], () => value);
-			},
-		});
+	async setItem(key: StorageKeyType, value: StorageValueType): Promise<void> {
+		this.scheduledUpdates[key] = () =>
+			ModelDataStore.executeMutation({
+				mutationFn: () => this.setItemOnServer(key, value),
+				mutationKey: ["cc-css-mt", key],
+				onSuccess: () => {
+					ModelDataStore.setQueryData(["cc-css", key], () => value);
+				},
+			});
+
+		let promise: Promise<void>;
+
+		if (key in this.currentUpdates) {
+			try {
+				await this.currentUpdates[key];
+			} catch (e) {
+				/* ignored */
+			}
+			// if we have something in queue
+			if (key in this.scheduledUpdates) {
+				promise = this.currentUpdates[key] = this.scheduledUpdates[key]();
+				delete this.scheduledUpdates[key];
+			} else {
+				promise = this.currentUpdates[key];
+				delete this.currentUpdates[key];
+			}
+		} else {
+			promise = this.currentUpdates[key] = this.scheduledUpdates[key]();
+			delete this.scheduledUpdates[key];
+		}
+
+		return promise;
 	}
 
 	clear(): Promise<void> {
