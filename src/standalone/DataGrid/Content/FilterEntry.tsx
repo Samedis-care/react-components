@@ -424,32 +424,39 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 			)}
 			{props.valueType === "enum" && (
 				<>
-					<Grid item xs={12}>
-						<TextField
-							value={enumFilterSearch}
-							onChange={(evt: React.ChangeEvent<HTMLInputElement>) =>
-								setEnumFilterSearch(evt.target.value)
-							}
-							placeholder={t("standalone.data-grid.content.set-filter.search")}
-							fullWidth
-						/>
-					</Grid>
+					{(props.valueData as DataGridSetFilterData).length > 10 && (
+						<Grid item xs={12}>
+							<TextField
+								value={enumFilterSearch}
+								onChange={(evt: React.ChangeEvent<HTMLInputElement>) =>
+									setEnumFilterSearch(evt.target.value)
+								}
+								placeholder={t(
+									"standalone.data-grid.content.set-filter.search"
+								)}
+								fullWidth
+							/>
+						</Grid>
+					)}
 					<Grid item xs={12} className={classes.setFilterContainer}>
 						<List>
-							<ListItem>
-								<Checkbox
-									checked={
-										filterValue ===
-										(props.valueData as DataGridSetFilterData)
-											.map((entry) => entry.value)
-											.join(",")
-									}
-									onChange={onFilterValueChangeEnumAll}
-								/>
-								<ListItemText>
-									{t("standalone.data-grid.content.set-filter.select-all")}
-								</ListItemText>
-							</ListItem>
+							{(props.valueData as DataGridSetFilterData).length > 5 && (
+								<ListItem className={classes.setFilterListItem}>
+									<Checkbox
+										checked={
+											filterValue.split(",").sort().join(",") ===
+											(props.valueData as DataGridSetFilterData)
+												.map((entry) => entry.value)
+												.sort()
+												.join(",")
+										}
+										onChange={onFilterValueChangeEnumAll}
+									/>
+									<ListItemText>
+										{t("standalone.data-grid.content.set-filter.select-all")}
+									</ListItemText>
+								</ListItem>
+							)}
 							{(props.valueData as DataGridSetFilterData)
 								.filter((entry) =>
 									entry
@@ -458,7 +465,10 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 										.includes(enumFilterSearch.toLocaleLowerCase())
 								)
 								.map((entry) => (
-									<ListItem key={entry.value}>
+									<ListItem
+										key={entry.value}
+										className={classes.setFilterListItem}
+									>
 										<Checkbox
 											value={entry.value}
 											checked={filterValue.split(",").includes(entry.value)}

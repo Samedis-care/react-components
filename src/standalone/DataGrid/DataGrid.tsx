@@ -857,6 +857,10 @@ const useStyles = makeStyles(
 			maxHeight: "40vh",
 			overflow: "auto",
 		},
+		setFilterListItem: {
+			paddingLeft: 0,
+			paddingRight: 0,
+		},
 		contentOverlayCollapse: {
 			position: "absolute",
 			zIndex: 1000,
