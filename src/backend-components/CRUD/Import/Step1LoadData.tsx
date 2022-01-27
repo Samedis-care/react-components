@@ -26,7 +26,10 @@ const Step1LoadData = (
 						reader.addEventListener("load", () => {
 							try {
 								const data = reader.result as ArrayBuffer;
-								const workbook = XLSX.read(data, { type: "array" });
+								const workbook = XLSX.read(data, {
+									type: "array",
+									cellDates: true,
+								});
 
 								resolve(workbook);
 							} catch (e) {
@@ -41,14 +44,23 @@ const Step1LoadData = (
 			const json = workbooks
 				.map((book) =>
 					Object.values(book.Sheets)
-						.map((sheet) =>
-							XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, {
+						.map((sheet) => {
+							//remove prerendered values, otherwise dateNF is ignored
+							for (const cellref in sheet) {
+								const c = sheet[cellref] as Record<string, unknown>;
+								if (c.t === "d") {
+									delete c.w;
+									delete c.z;
+								}
+							}
+							return XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, {
+								dateNF: 'YYYY-MM-DD"T"hh:mm:ss',
 								raw: false,
-								rawNumbers: false, // changing this to true will output dates as numbers
+								rawNumbers: true, // changing this to true will output dates as numbers
 								defval: undefined,
 								blankrows: false,
-							})
-						)
+							});
+						})
 						.flat()
 				)
 				.flat();
