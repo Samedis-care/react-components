@@ -78,6 +78,7 @@ class RendererEnumSelect extends TypeEnum {
 					fullWidth
 					error={!!errorMsg}
 					onBlur={handleBlur}
+					name={field}
 				>
 					<SingleSelect
 						{...this.props}

@@ -43,6 +43,7 @@ class RendererFiles extends TypeFiles {
 				<>
 					<div>
 						<FileUpload
+							name={field}
 							label={label}
 							files={value}
 							readOnly={visibility.readOnly}

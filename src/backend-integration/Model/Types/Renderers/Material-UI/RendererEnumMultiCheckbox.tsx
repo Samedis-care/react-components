@@ -70,7 +70,11 @@ class RendererEnumRadio extends TypeEnumMulti {
 					error={!!errorMsg}
 				>
 					<FormLabel component={"legend"}>{label}</FormLabel>
-					<FormGroup onBlur={handleBlur} row={this.horizontal}>
+					<FormGroup
+						onBlur={handleBlur}
+						row={this.horizontal}
+						data-name={field}
+					>
 						{this.values
 							.filter((entry) => !entry.invisible)
 							.map((entry) =>

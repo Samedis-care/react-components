@@ -24,6 +24,10 @@ import useCCTranslations from "../../../utils/useCCTranslations";
 
 export interface FileUploadProps {
 	/**
+	 * The HTML name attribute on the upload button
+	 */
+	name?: string;
+	/**
 	 * Maximum amount of files allowed
 	 */
 	maxFiles?: number;
@@ -152,6 +156,7 @@ const useStyles = makeStyles(
 
 const FileUpload = (props: FileUploadProps): React.ReactElement => {
 	const {
+		name,
 		convertImagesTo,
 		imageDownscaleOptions,
 		previewImages,
@@ -355,6 +360,7 @@ const FileUpload = (props: FileUploadProps): React.ReactElement => {
 							variant={"contained"}
 							color={"primary"}
 							onClick={handleUpload}
+							name={name}
 							onBlur={onBlur}
 						>
 							{uploadLabel || t("standalone.file-upload.upload")}

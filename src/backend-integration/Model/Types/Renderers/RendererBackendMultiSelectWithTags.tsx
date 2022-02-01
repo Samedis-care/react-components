@@ -102,6 +102,7 @@ class RendererBackendMultiSelectWithTags<
 					fullWidth
 					error={!!errorMsg}
 					onBlur={handleBlur}
+					name={field}
 				>
 					<BackendMultiSelectWithTags
 						selected={value}

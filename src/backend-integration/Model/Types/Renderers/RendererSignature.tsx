@@ -41,6 +41,7 @@ class RendererSignature extends TypeImage {
 					fullWidth
 					error={!!errorMsg}
 					onBlur={handleBlur}
+					data-name={field}
 				>
 					<FormLabel component={"legend"}>{label}</FormLabel>
 					<SignaturePad

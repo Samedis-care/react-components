@@ -78,6 +78,7 @@ class RendererBackendMultiSelect<
 					fullWidth
 					error={!!errorMsg}
 					onBlur={handleBlur}
+					name={field}
 				>
 					<BackendMultiSelect
 						selected={value}
