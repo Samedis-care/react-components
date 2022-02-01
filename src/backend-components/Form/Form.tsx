@@ -181,6 +181,12 @@ export interface FormProps<
 	 */
 	disableNestedSubmit?: boolean;
 	/**
+	 * Only submit nested form if it is currently mounted
+	 * @remarks only affects nested forms
+	 * @default false
+	 */
+	onlySubmitNestedIfMounted?: boolean;
+	/**
 	 * Submit preparation handler
 	 * Called after parent form submit, before this form submit
 	 * @param id The ID of the parent form (after submit)
@@ -417,6 +423,7 @@ const Form = <
 		deleteOnSubmit,
 		onDeleted,
 		initialRecord,
+		onlySubmitNestedIfMounted,
 	} = props;
 	const onlySubmitMountedBehaviour =
 		props.onlySubmitMountedBehaviour ?? OnlySubmitMountedBehaviour.OMIT;
@@ -877,9 +884,13 @@ const Form = <
 			parentFormContext.setPostSubmitHandler(nestedFormName, submitNestedForm);
 		}
 		return () => {
-			if (parentFormContext.onlyValidateMounted && !disableValidation)
+			if (parentFormContext.onlyValidateMounted || disableValidation)
 				parentFormContext.removeCustomValidationHandler(nestedFormName);
-			if (parentFormContext.onlySubmitMounted && !disableNestedSubmit)
+			if (
+				parentFormContext.onlySubmitMounted ||
+				onlySubmitNestedIfMounted ||
+				disableNestedSubmit
+			)
 				parentFormContext.removePostSubmitHandler(nestedFormName);
 		};
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -893,6 +904,7 @@ const Form = <
 		submitForm,
 		nestedFormName,
 		disableNestedSubmit,
+		onlySubmitNestedIfMounted,
 	]);
 
 	// Debug Helper (for React Devtools)
@@ -1045,27 +1057,35 @@ const Form = <
 		throw new Error("Data is not present, this should never happen");
 	}
 
+	const innerForm = () => (
+		<>
+			{displayError && <ErrorComponent error={displayError} />}
+			{isLoading ? (
+				<div style={loaderContainerStyles}>
+					<Loader />
+				</div>
+			) : (
+				<Children
+					isSubmitting={submitting}
+					values={props.renderConditionally ? values : undefined}
+					submit={submitForm}
+					reset={resetForm}
+					dirty={dirty}
+					id={id}
+					customProps={customProps}
+				/>
+			)}
+		</>
+	);
+
 	return (
 		<FormContextLite.Provider value={formContextDataLite}>
 			<FormContext.Provider value={formContextData}>
-				<form onSubmit={handleSubmit}>
-					{displayError && <ErrorComponent error={displayError} />}
-					{isLoading ? (
-						<div style={loaderContainerStyles}>
-							<Loader />
-						</div>
-					) : (
-						<Children
-							isSubmitting={submitting}
-							values={props.renderConditionally ? values : undefined}
-							submit={submitForm}
-							reset={resetForm}
-							dirty={dirty}
-							id={id}
-							customProps={customProps}
-						/>
-					)}
-				</form>
+				{!parentFormContext ? (
+					<form onSubmit={handleSubmit}>{innerForm()}</form>
+				) : (
+					<div>{innerForm()}</div>
+				)}
 			</FormContext.Provider>
 		</FormContextLite.Provider>
 	);
