@@ -1,4 +1,10 @@
-import React, { useCallback, useContext, useMemo, useState } from "react";
+import React, {
+	Suspense,
+	useCallback,
+	useContext,
+	useMemo,
+	useState,
+} from "react";
 import Model, {
 	ModelFieldName,
 	PageVisibility,
@@ -20,6 +26,7 @@ import {
 } from "../../framework";
 import { makeStyles } from "@material-ui/core/styles";
 import { CrudImportProps, CrudImportType } from "./Import";
+import Loader from "../../standalone/Loader";
 
 const CrudImport = React.lazy(() => import("./Import")) as CrudImportType;
 
@@ -272,28 +279,30 @@ const CRUD = <
 	}, [disableRouting, history, url]);
 
 	const grid = () => (
-		<GridWrapper>
-			<BackendDataGrid
-				enableDelete={hasPermission(perms, props.deletePermission)}
-				disableExport={!hasPermission(perms, props.exportPermission)}
-				{...props.gridProps}
-				model={props.model}
-				forceRefreshToken={gridRefreshToken}
-				onEdit={
-					(hasPermission(perms, props.readPermission) ||
-						hasPermission(perms, props.editPermission)) &&
-					props.children
-						? showEditPage
-						: undefined
-				}
-				onAddNew={
-					hasPermission(perms, props.newPermission) && props.children
-						? props.gridProps.onAddNew ?? showNewPage
-						: undefined
-				}
-				onImport={enableUserImport ? handleImportButton : undefined}
-			/>
-		</GridWrapper>
+		<Suspense fallback={<Loader />}>
+			<GridWrapper>
+				<BackendDataGrid
+					enableDelete={hasPermission(perms, props.deletePermission)}
+					disableExport={!hasPermission(perms, props.exportPermission)}
+					{...props.gridProps}
+					model={props.model}
+					forceRefreshToken={gridRefreshToken}
+					onEdit={
+						(hasPermission(perms, props.readPermission) ||
+							hasPermission(perms, props.editPermission)) &&
+						props.children
+							? showEditPage
+							: undefined
+					}
+					onAddNew={
+						hasPermission(perms, props.newPermission) && props.children
+							? props.gridProps.onAddNew ?? showNewPage
+							: undefined
+					}
+					onImport={enableUserImport ? handleImportButton : undefined}
+				/>
+			</GridWrapper>
+		</Suspense>
 	);
 
 	const importer = (guided: boolean) => (
