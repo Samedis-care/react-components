@@ -5,7 +5,7 @@ import StatusBar from "./DataActionBar";
 
 const Footer = () => {
 	return (
-		<Grid container justify={"space-between"}>
+		<Grid container justify={"space-between"} wrap={"nowrap"}>
 			<Grid item>
 				<StatusBar />
 			</Grid>

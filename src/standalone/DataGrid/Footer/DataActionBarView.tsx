@@ -43,7 +43,7 @@ const DataActionBarView = (props: DataActionBarViewProps) => {
 	const { t } = useCCTranslations();
 
 	return (
-		<Grid container>
+		<Grid container wrap={"nowrap"}>
 			<Grid item key={"select-all"}>
 				<ComponentWithLabel
 					control={<SelectAll />}
