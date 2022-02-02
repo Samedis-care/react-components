@@ -173,7 +173,7 @@ const Content = (props: IDataGridContentProps) => {
 					key={
 						// workaround for Uncaught Error: Requested index X is outside of range 0..0
 						// bug happens when columns.length == 0, rowCount > 1 and grid reset all is used
-						(state.rowsFiltered ?? state.rowsTotal) === 0 ? "loading" : "ready"
+						state.initialResize ? "ready" : "loading"
 					}
 					ref={dataViewRef}
 					columnCount={
