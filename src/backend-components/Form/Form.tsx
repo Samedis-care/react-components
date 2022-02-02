@@ -392,10 +392,12 @@ const normalizeValues = <T extends unknown>(data: T): T => {
 	if (typeof data !== "object")
 		throw new Error("Only Record<string, unknown> supported");
 	const normalizedData: Record<string, unknown> = {};
-	Object.entries(data as Record<string, unknown>).forEach(([k, v]) => {
-		const shouldBeNulled = v === "" || (Array.isArray(v) && v.length === 0);
-		normalizedData[k] = shouldBeNulled ? null : v;
-	});
+	Object.entries(data as Record<string, unknown>)
+		.sort((a, b) => a[0].localeCompare(b[0]))
+		.forEach(([k, v]) => {
+			const shouldBeNulled = v === "" || (Array.isArray(v) && v.length === 0);
+			normalizedData[k] = shouldBeNulled ? null : v;
+		});
 	return normalizedData as T;
 };
 
