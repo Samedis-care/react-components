@@ -62,7 +62,8 @@ const StorageManagerPersist = (props: StorageManagerPersistProps) => {
 				),
 			]);
 		},
-		[storageKeys]
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[JSON.stringify(storageKeys)]
 	);
 
 	const persistCtx = useMemo(() => {
@@ -97,7 +98,8 @@ const StorageManagerPersist = (props: StorageManagerPersistProps) => {
 			);
 		})();
 		return [data, setData] as DataGridPersistentStateContextType;
-	}, [setData, storageKeys]);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [setData, JSON.stringify(storageKeys)]);
 
 	return (
 		<DataGridPersistentStateContext.Provider value={persistCtx}>
