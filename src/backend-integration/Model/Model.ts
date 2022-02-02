@@ -752,16 +752,27 @@ class Model<
 	 */
 	protected async getDefaultValues(): Promise<Record<string, unknown>> {
 		const data: Record<string, unknown> = {};
-		const promises = Object.entries(this.fields).map(async (entry) => {
-			const [field, def] = entry as [
-				KeyT,
-				ModelFieldDefinition<unknown, KeyT, VisibilityT, CustomT>
-			];
-			let defaultValue: unknown;
-			if (def.getDefaultValue) defaultValue = await def.getDefaultValue();
-			else defaultValue = def.type.getDefaultValue();
-			deepAssign(data, dotToObject(field, defaultValue));
-		});
+		const promises = Object.entries(this.fields)
+			.filter(([field]) => {
+				try {
+					return !getVisibility(
+						this.fields[field as KeyT].visibility.create,
+						{}
+					).disabled;
+				} catch (e) {
+					return true;
+				}
+			})
+			.map(async (entry) => {
+				const [field, def] = entry as [
+					KeyT,
+					ModelFieldDefinition<unknown, KeyT, VisibilityT, CustomT>
+				];
+				let defaultValue: unknown;
+				if (def.getDefaultValue) defaultValue = await def.getDefaultValue();
+				else defaultValue = def.type.getDefaultValue();
+				deepAssign(data, dotToObject(field, defaultValue));
+			});
 		await Promise.all(promises);
 		return data;
 	}
