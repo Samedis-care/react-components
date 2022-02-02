@@ -809,7 +809,7 @@ const useStyles = makeStyles(
 				?.style,
 		},
 		columnHeaderFilterPopup: {
-			width: 150,
+			width: 160,
 		},
 		columnHeaderFilterIcon: {
 			width: 16,
