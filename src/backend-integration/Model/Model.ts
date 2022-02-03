@@ -836,8 +836,12 @@ class Model<
 			if (visValue.disabled && key !== "id") {
 				continue;
 			}
-			// skip disabled readonly fields when serializing
-			if (func === "serialize" && visValue.readOnly) {
+			// skip disabled readonly fields when serializing on updates
+			if (
+				func === "serialize" &&
+				visValue.readOnly &&
+				visibility !== "create"
+			) {
 				continue;
 			}
 
