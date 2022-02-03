@@ -831,16 +831,12 @@ class Model<
 				continue;
 			}
 
-			// don't include disabled fields (except ID)
+			// don't include disabled fields (except ID and disabled+readonly fields when serializing)
 			const visValue = getVisibility(field.visibility[visibility], values);
-			if (visValue.disabled && key !== "id") {
-				continue;
-			}
-			// skip disabled readonly fields when serializing on updates
 			if (
-				func === "serialize" &&
-				visValue.readOnly &&
-				visibility !== "create"
+				visValue.disabled &&
+				(func === "serialize" || !visValue.readOnly) &&
+				key !== "id"
 			) {
 				continue;
 			}
