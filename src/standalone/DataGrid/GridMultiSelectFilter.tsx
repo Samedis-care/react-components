@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useMemo } from "react";
 import {
 	compareArrayContent,
 	MultiSelectorData,
@@ -12,6 +12,7 @@ import {
 } from "@material-ui/core";
 import { useCustomFilterActiveContext } from "./Header/FilterBar";
 import { useDataGridStyles } from "./DataGrid";
+import { SelectProps } from "@material-ui/core/Select/Select";
 
 export interface GridMultiSelectFilterProps {
 	/**
@@ -87,6 +88,13 @@ const GridMultiSelectFilter = (props: GridMultiSelectFilterProps) => {
 		[onSelect]
 	);
 
+	const selectorClasses = useMemo(
+		() => ({
+			select: isActive ? classes.customFilterBorder : undefined,
+		}),
+		[isActive, classes.customFilterBorder]
+	);
+
 	if (dialog) {
 		return (
 			<Grid item xs={12} md={6} lg={3} container spacing={2}>
@@ -119,11 +127,9 @@ const GridMultiSelectFilter = (props: GridMultiSelectFilterProps) => {
 					options={options}
 					values={selected}
 					onChange={handleSelectorChange}
-					renderValue={(selected) => getSelected(selected as string[])}
+					renderValue={getSelected as SelectProps["renderValue"]}
 					fullWidth
-					classes={{
-						select: isActive ? classes.customFilterBorder : undefined,
-					}}
+					classes={selectorClasses}
 				/>
 			</Grid>
 		);

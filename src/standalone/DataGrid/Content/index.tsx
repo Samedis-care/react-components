@@ -37,6 +37,8 @@ const CenteredStickyTypography = withStyles({
 
 const SELECT_ROW_WIDTH = 57;
 const DEFAULT_COLUMN_WIDTH = 200;
+const STYLE_TOP_LEFT = { overflow: "hidden" };
+const STYLE_BOTTOM_RIGHT = { outline: "none" };
 
 const Content = (props: IDataGridContentProps) => {
 	const {
@@ -166,6 +168,74 @@ const Content = (props: IDataGridContentProps) => {
 		dataViewRef.current.recomputeGridSize();
 	}, [columnWidth]);
 
+	const noContentRenderer = useCallback(
+		() => (
+			<>
+				<div
+					style={{
+						position: "absolute",
+						width: columns
+							.filter((entry) => !entry.isLocked)
+							.map((entry) => columnWidth[entry.field] ?? DEFAULT_COLUMN_WIDTH)
+							.reduce((prev, cur) => prev + cur, 0),
+						height: 1,
+					}}
+				/>
+				{state.refreshData ? (
+					<Loader />
+				) : state.dataLoadError ? (
+					<CenteredStickyTypography variant={"h5"}>
+						{state.dataLoadError.message}
+					</CenteredStickyTypography>
+				) : (
+					<CenteredStickyTypography variant={"h4"}>
+						{t("standalone.data-grid.content.no-data")}
+					</CenteredStickyTypography>
+				)}
+			</>
+		),
+		[columnWidth, columns, state.dataLoadError, state.refreshData, t]
+	);
+
+	const styleTopRightGrid = useMemo(
+		() => ({
+			overflow: "hidden",
+			overscrollBehavior: "contain",
+			display: columns.length === 0 ? "none" : undefined,
+		}),
+		[columns.length]
+	);
+
+	const styleBottomLeftGrid = useMemo(
+		() => ({
+			overflow: "hidden",
+			display:
+				(state.rowsFiltered ?? state.rowsTotal) === 0 ? "none" : undefined,
+		}),
+		[state.rowsFiltered, state.rowsTotal]
+	);
+
+	const getRowHeight = useCallback(
+		({ index }) => (index === 0 ? headerHeight : 57),
+		[headerHeight]
+	);
+	const getColumnWidth = useCallback(
+		({ index }) =>
+			!disableSelection && index === 0
+				? SELECT_ROW_WIDTH
+				: index !== columns.length + (disableSelection ? 0 : 1)
+				? columnWidth[columns[index - (disableSelection ? 0 : 1)].field] ??
+				  DEFAULT_COLUMN_WIDTH
+				: remainingWidth,
+		[columnWidth, columns, disableSelection, remainingWidth]
+	);
+	const cellRenderer = useCallback(
+		(gridProps) => (
+			<Cell columns={columns} hoverState={hoverState} {...gridProps} />
+		),
+		[columns, hoverState]
+	);
+
 	return (
 		<AutoSizer onResize={onResize}>
 			{({ width, height }) => (
@@ -181,22 +251,12 @@ const Content = (props: IDataGridContentProps) => {
 						(disableSelection ? 0 : 1) +
 						(columns.length > 0 ? 1 : 0)
 					}
-					columnWidth={({ index }) =>
-						!disableSelection && index === 0
-							? SELECT_ROW_WIDTH
-							: index !== columns.length + (disableSelection ? 0 : 1)
-							? columnWidth[
-									columns[index - (disableSelection ? 0 : 1)].field
-							  ] ?? DEFAULT_COLUMN_WIDTH
-							: remainingWidth
-					}
+					columnWidth={getColumnWidth}
 					rowCount={(state.rowsFiltered ?? state.rowsTotal) + 1}
-					rowHeight={({ index }) => (index === 0 ? headerHeight : 57)}
+					rowHeight={getRowHeight}
 					width={width}
 					height={height}
-					cellRenderer={(gridProps) => (
-						<Cell columns={columns} hoverState={hoverState} {...gridProps} />
-					)}
+					cellRenderer={cellRenderer}
 					enableFixedColumnScroll
 					enableFixedRowScroll
 					fixedColumnCount={
@@ -206,49 +266,12 @@ const Content = (props: IDataGridContentProps) => {
 					fixedRowCount={1}
 					hideTopRightGridScrollbar
 					hideBottomLeftGridScrollbar
-					styleTopLeftGrid={{ overflow: "hidden" }}
-					styleTopRightGrid={{
-						overflow: "hidden",
-						overscrollBehavior: "contain",
-						display: columns.length === 0 ? "none" : undefined,
-					}}
-					styleBottomLeftGrid={{
-						overflow: "hidden",
-						display:
-							(state.rowsFiltered ?? state.rowsTotal) === 0
-								? "none"
-								: undefined,
-					}}
-					styleBottomRightGrid={{ outline: "none" }}
+					styleTopLeftGrid={STYLE_TOP_LEFT}
+					styleTopRightGrid={styleTopRightGrid}
+					styleBottomLeftGrid={styleBottomLeftGrid}
+					styleBottomRightGrid={STYLE_BOTTOM_RIGHT}
 					onSectionRendered={onSectionRendered}
-					noContentRenderer={() => (
-						<>
-							<div
-								style={{
-									position: "absolute",
-									width: columns
-										.filter((entry) => !entry.isLocked)
-										.map(
-											(entry) =>
-												columnWidth[entry.field] ?? DEFAULT_COLUMN_WIDTH
-										)
-										.reduce((prev, cur) => prev + cur, 0),
-									height: 1,
-								}}
-							/>
-							{state.refreshData ? (
-								<Loader />
-							) : state.dataLoadError ? (
-								<CenteredStickyTypography variant={"h5"}>
-									{state.dataLoadError.message}
-								</CenteredStickyTypography>
-							) : (
-								<CenteredStickyTypography variant={"h4"}>
-									{t("standalone.data-grid.content.no-data")}
-								</CenteredStickyTypography>
-							)}
-						</>
-					)}
+					noContentRenderer={noContentRenderer}
 				/>
 			)}
 		</AutoSizer>

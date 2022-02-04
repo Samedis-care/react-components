@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useMemo } from "react";
 import { BaseSelectorData, SingleSelect } from "../..";
 import {
 	FormControl,
@@ -73,6 +73,14 @@ const GridSingleSelectFilter = (props: GridSingleSelectFilterProps) => {
 		[onSelect]
 	);
 
+	const getOptions = useCallback(() => options, [options]);
+	const selectorStyles = useMemo(
+		() => ({
+			inputRoot: isActive ? classes.customFilterBorder : undefined,
+		}),
+		[isActive, classes.customFilterBorder]
+	);
+
 	if (dialog) {
 		return (
 			<Grid item xs={12} md={6} lg={3}>
@@ -107,15 +115,13 @@ const GridSingleSelectFilter = (props: GridSingleSelectFilterProps) => {
 						label={label}
 						disableSearch
 						disableClearable
-						onLoad={() => options}
+						onLoad={getOptions}
 						selected={
 							options.find((option) => option.value === selected) ?? options[0]
 						}
 						onSelect={handleSelectorChange}
 						autocompleteId={autocompleteId}
-						classes={{
-							inputRoot: isActive ? classes.customFilterBorder : undefined,
-						}}
+						classes={selectorStyles}
 					/>
 				</FormControl>
 			</Grid>

@@ -1,5 +1,5 @@
 import React, { useCallback } from "react";
-import { Collapse } from "@material-ui/core";
+import { Collapse, useMediaQuery } from "@material-ui/core";
 import {
 	DataGridCustomDataType,
 	useDataGridProps,
@@ -11,8 +11,9 @@ import Dialog from "./FilterDialog";
 const DataGridCustomFilters = () => {
 	const classes = useDataGridStyles();
 
-	const { filterBar } = useDataGridProps();
+	const { filterBar, enableFilterDialogMediaQuery } = useDataGridProps();
 	const [state, setState] = useDataGridState();
+	const enableDialog = useMediaQuery(enableFilterDialogMediaQuery ?? "(false)");
 
 	const closeCustomFilterDialog = useCallback(() => {
 		setState((prevState) => ({
@@ -50,6 +51,7 @@ const DataGridCustomFilters = () => {
 		<Collapse
 			className={classes.contentOverlayCollapse}
 			in={state.showFilterDialog}
+			unmountOnExit={!enableDialog}
 		>
 			<Dialog
 				closeFilterDialog={closeCustomFilterDialog}
