@@ -1,4 +1,5 @@
 import { CacheOptions, ModelDataStore } from "../backend-integration";
+import { debouncePromise } from "../utils";
 
 /**
  * Simple KV Storage
@@ -86,8 +87,11 @@ export abstract class CachedServerStorageProvider extends StorageProvider {
 		staleTime: 300000,
 	};
 
-	protected currentUpdates: Record<string, Promise<void>> = {};
-	protected scheduledUpdates: Record<string, () => Promise<void>> = {};
+	protected debounceTable: Record<
+		StorageKeyType,
+		(value: StorageValueType) => Promise<void>
+	> = {};
+	protected cleanupTable: Record<StorageKeyType, number> = {};
 
 	/**
 	 * Receive value of key from server
@@ -129,37 +133,23 @@ export abstract class CachedServerStorageProvider extends StorageProvider {
 	}
 
 	async setItem(key: StorageKeyType, value: StorageValueType): Promise<void> {
-		this.scheduledUpdates[key] = () =>
-			ModelDataStore.executeMutation({
-				mutationFn: () => this.setItemOnServer(key, value),
-				mutationKey: ["cc-css-mt", key],
-				onSuccess: () => {
-					ModelDataStore.setQueryData(["cc-css", key], () => value);
-				},
-			});
-
-		let promise: Promise<void>;
-
-		if (key in this.currentUpdates) {
-			try {
-				await this.currentUpdates[key];
-			} catch (e) {
-				/* ignored */
-			}
-			// if we have something in queue
-			if (key in this.scheduledUpdates) {
-				promise = this.currentUpdates[key] = this.scheduledUpdates[key]();
-				delete this.scheduledUpdates[key];
-			} else {
-				promise = this.currentUpdates[key];
-				delete this.currentUpdates[key];
-			}
+		if (key in this.debounceTable) {
+			window.clearTimeout(this.cleanupTable[key]);
 		} else {
-			promise = this.currentUpdates[key] = this.scheduledUpdates[key]();
-			delete this.scheduledUpdates[key];
+			this.debounceTable[key] = debouncePromise(
+				(value: StorageValueType) =>
+					ModelDataStore.executeMutation({
+						mutationFn: () => this.setItemOnServer(key, value),
+						mutationKey: ["cc-css-mt", key],
+						onSuccess: () => {
+							ModelDataStore.setQueryData(["cc-css", key], () => value);
+						},
+					}),
+				1000
+			);
 		}
-
-		return promise;
+		window.setTimeout(this.cleanDebounce.bind(this), 300000, key);
+		return this.debounceTable[key](value);
 	}
 
 	clear(): Promise<void> {
@@ -173,6 +163,11 @@ export abstract class CachedServerStorageProvider extends StorageProvider {
 				});
 			},
 		});
+	}
+
+	private cleanDebounce(key: string) {
+		delete this.debounceTable[key];
+		delete this.cleanupTable[key];
 	}
 }
 
