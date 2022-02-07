@@ -752,9 +752,7 @@ const Form = <
 					: valuesRef.current
 			);
 
-			const newValues = onlySubmitMounted
-				? deepAssign({}, valuesRef.current, result[0])
-				: deepAssign({}, result[0]);
+			const newValues = deepClone(result[0]);
 			valuesRef.current = newValues;
 
 			setTouched((prev) =>
