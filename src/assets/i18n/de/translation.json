@@ -71,7 +71,8 @@
 				"edit": "Bearbeiten",
 				"filtered": "Gefiltert:",
 				"select-all": "Alle",
-				"total": "Gesamt:"
+				"total": "Gesamt:",
+				"more": "Mehr"
 			},
 			"custom-filters": {
 				"title": "Filterauswahl"

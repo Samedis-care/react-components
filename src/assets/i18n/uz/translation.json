@@ -73,7 +73,8 @@
 				"edit": "Tahrirlash",
 				"filtered": "Filtrlangan:",
 				"select-all": "Hammasi",
-				"total": "Jami:"
+				"total": "Jami:",
+				"more": "Ko'proq"
 			},
 			"content": {
 				"filter": "Filtr",
