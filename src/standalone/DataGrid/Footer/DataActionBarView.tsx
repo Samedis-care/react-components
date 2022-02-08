@@ -1,11 +1,16 @@
-import React from "react";
-import { Grid } from "@material-ui/core";
+import React, { useCallback, useState } from "react";
+import { Grid, MenuProps, useMediaQuery, useTheme } from "@material-ui/core";
 import { SmallIconButton, VerticalDivider } from "../../index";
 import ComponentWithLabel from "../../UIKit/ComponentWithLabel";
-import { Edit as EditIcon, Delete as DeleteIcon } from "@material-ui/icons";
+import {
+	Edit as EditIcon,
+	Delete as DeleteIcon,
+	Menu as MenuIcon,
+} from "@material-ui/icons";
 import SelectAll from "./SelectAll";
 import { DataGridProps, useDataGridStyles } from "../DataGrid";
 import useCCTranslations from "../../../utils/useCCTranslations";
+import DataActionBarMenu from "./DataActionBarMenu";
 
 export interface DataActionBarViewProps {
 	/**
@@ -41,6 +46,18 @@ export interface DataActionBarViewProps {
 const DataActionBarView = (props: DataActionBarViewProps) => {
 	const classes = useDataGridStyles();
 	const { t } = useCCTranslations();
+	const theme = useTheme();
+	const isXs = useMediaQuery(theme.breakpoints.only("xs"));
+
+	const [extendedMenuAnchor, setExtendedMenuAnchor] = useState<
+		MenuProps["anchorEl"]
+	>(undefined);
+	const handleExtendedMenuOpen = useCallback((evt: React.MouseEvent) => {
+		setExtendedMenuAnchor(evt.currentTarget);
+	}, []);
+	const handleExtendedMenuClose = useCallback(() => {
+		setExtendedMenuAnchor(undefined);
+	}, []);
 
 	return (
 		<Grid container wrap={"nowrap"}>
@@ -103,8 +120,8 @@ const DataActionBarView = (props: DataActionBarViewProps) => {
 					</Grid>
 				</>
 			)}
-			{props.customButtons?.map((entry) => (
-				<React.Fragment key={entry.label}>
+			{isXs && props.customButtons && props.customButtons.length > 1 ? (
+				<React.Fragment key={"custom-buttons-menu"}>
 					<Grid item>
 						<VerticalDivider />
 					</Grid>
@@ -113,21 +130,60 @@ const DataActionBarView = (props: DataActionBarViewProps) => {
 							control={
 								<SmallIconButton
 									color={"primary"}
-									disabled={entry.isDisabled(props.numSelected)}
-									onClick={() => {
-										props.handleCustomButtonClick(entry.label);
-									}}
+									disabled={
+										!props.customButtons.find(
+											(entry) => !entry.isDisabled(props.numSelected)
+										)
+									}
+									onClick={handleExtendedMenuOpen}
 								>
-									{entry.icon}
+									<MenuIcon />
 								</SmallIconButton>
 							}
-							labelText={entry.label}
+							labelText={t("standalone.data-grid.footer.more")}
 							labelPlacement={"bottom"}
-							disabled={entry.isDisabled(props.numSelected)}
+							disabled={
+								!props.customButtons.find(
+									(entry) => !entry.isDisabled(props.numSelected)
+								)
+							}
 						/>
 					</Grid>
+					<DataActionBarMenu
+						numSelected={props.numSelected}
+						anchorEl={extendedMenuAnchor}
+						onClose={handleExtendedMenuClose}
+						customButtons={props.customButtons}
+						handleCustomButtonClick={props.handleCustomButtonClick}
+					/>
 				</React.Fragment>
-			))}
+			) : (
+				props.customButtons?.map((entry) => (
+					<React.Fragment key={entry.label}>
+						<Grid item>
+							<VerticalDivider />
+						</Grid>
+						<Grid item>
+							<ComponentWithLabel
+								control={
+									<SmallIconButton
+										color={"primary"}
+										disabled={entry.isDisabled(props.numSelected)}
+										onClick={() => {
+											props.handleCustomButtonClick(entry.label);
+										}}
+									>
+										{entry.icon}
+									</SmallIconButton>
+								}
+								labelText={entry.label}
+								labelPlacement={"bottom"}
+								disabled={entry.isDisabled(props.numSelected)}
+							/>
+						</Grid>
+					</React.Fragment>
+				))
+			)}
 		</Grid>
 	);
 };

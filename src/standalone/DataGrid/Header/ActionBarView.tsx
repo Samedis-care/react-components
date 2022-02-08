@@ -7,7 +7,11 @@ import {
 	useMediaQuery,
 	useTheme,
 } from "@material-ui/core";
-import { Add as AddIcon, Publish as ImportIcon } from "@material-ui/icons";
+import {
+	Add as AddIcon,
+	Publish as ImportIcon,
+	Menu as MenuIcon,
+} from "@material-ui/icons";
 import {
 	ActionButton,
 	ExportIcon,
@@ -22,6 +26,7 @@ import ComponentWithLabel from "../../UIKit/ComponentWithLabel";
 import { IDataGridAddButton } from "../DataGrid";
 import ResetMenu, { ResetCallbacks } from "./ResetMenu";
 import useCCTranslations from "../../../utils/useCCTranslations";
+import ActionBarMenu from "./ActionBarMenu";
 
 export interface IDataGridActionBarViewProps extends ResetCallbacks {
 	/**
@@ -78,6 +83,16 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 		setResetAnchorEl(null);
 	}, []);
 
+	const [settingsAnchorEl, setSettingsAnchorEl] = useState<
+		MenuProps["anchorEl"]
+	>(undefined);
+	const openSettingsMenu = useCallback((evt: React.MouseEvent) => {
+		setSettingsAnchorEl(evt.currentTarget);
+	}, []);
+	const closeSettingsMenu = useCallback(() => {
+		setSettingsAnchorEl(undefined);
+	}, []);
+
 	return (
 		<Grid container alignItems={"stretch"} wrap={"nowrap"}>
 			{props.hasCustomFilterBar && (
@@ -85,106 +100,128 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 					<VerticalDivider />
 				</Grid>
 			)}
-			<Grid item key={"settings"}>
-				{bpMdUp ? (
-					<ComponentWithLabel
-						control={
-							<SmallIconButton color={"primary"}>
-								<TuneIcon />
-							</SmallIconButton>
-						}
-						labelText={t("standalone.data-grid.header.settings")}
-						onClick={props.toggleSettings}
-						labelPlacement={"bottom"}
-					/>
-				) : (
-					<Tooltip title={t("standalone.data-grid.header.settings") ?? ""}>
-						<IconButton color={"primary"} onClick={props.toggleSettings}>
-							<TuneIcon />
-						</IconButton>
-					</Tooltip>
-				)}
-			</Grid>
-			<Grid item key={"divider-4"}>
-				<VerticalDivider />
-			</Grid>
-			<Grid item key={"reset"}>
-				{bpMdUp ? (
-					<ComponentWithLabel
-						control={
-							<SmallIconButton color={"primary"}>
-								<ResetIcon />
-							</SmallIconButton>
-						}
-						labelText={t("standalone.data-grid.header.reset")}
-						onClick={openResetDialog}
-						labelPlacement={"bottom"}
-					/>
-				) : (
-					<Tooltip title={t("standalone.data-grid.header.reset") ?? ""}>
-						<IconButton color={"primary"} onClick={openResetDialog}>
-							<ResetIcon />
-						</IconButton>
-					</Tooltip>
-				)}
-			</Grid>
-			{props.exporters && (
+			{props.hasCustomFilterBar && !bpSmUp ? (
 				<>
-					<Grid item key={"divider-3"}>
-						<VerticalDivider />
-					</Grid>
-					<Grid item key={"export"}>
-						{bpMdUp ? (
-							<ComponentWithLabel
-								control={
-									<SmallIconButton color={"primary"}>
-										<ExportIcon />
-									</SmallIconButton>
-								}
-								labelText={t("standalone.data-grid.header.export")}
-								onClick={openExportMenu}
-								labelPlacement={"bottom"}
-							/>
-						) : (
-							<Tooltip title={t("standalone.data-grid.header.export") ?? ""}>
-								<IconButton color={"primary"} onClick={openExportMenu}>
-									<ExportIcon />
-								</IconButton>
-							</Tooltip>
-						)}
-						<ExportMenu
-							exporters={props.exporters}
-							anchorEl={exportAnchorEl}
-							onClose={closeExportMenu}
-						/>
-					</Grid>
+					<IconButton color={"primary"} onClick={openSettingsMenu}>
+						<MenuIcon />
+					</IconButton>
+					<ActionBarMenu
+						anchorEl={settingsAnchorEl}
+						toggleSettings={props.toggleSettings}
+						openResetDialog={openResetDialog}
+						openExportMenu={props.exporters ? openExportMenu : undefined}
+						handleImport={props.handleImport}
+						onClose={closeSettingsMenu}
+					/>
 				</>
-			)}
-			{props.handleImport && (
+			) : (
 				<>
-					<Grid item>
-						<VerticalDivider />
-					</Grid>
-					<Grid item key={"import"}>
+					<Grid item key={"settings"}>
 						{bpMdUp ? (
 							<ComponentWithLabel
 								control={
 									<SmallIconButton color={"primary"}>
-										<ImportIcon />
+										<TuneIcon />
 									</SmallIconButton>
 								}
-								labelText={t("standalone.data-grid.header.import")}
-								onClick={props.handleImport}
+								labelText={t("standalone.data-grid.header.settings")}
+								onClick={props.toggleSettings}
 								labelPlacement={"bottom"}
 							/>
 						) : (
-							<Tooltip title={t("standalone.data-grid.header.import") ?? ""}>
-								<IconButton color={"primary"} onClick={props.handleImport}>
-									<ImportIcon />
+							<Tooltip title={t("standalone.data-grid.header.settings") ?? ""}>
+								<IconButton color={"primary"} onClick={props.toggleSettings}>
+									<TuneIcon />
 								</IconButton>
 							</Tooltip>
 						)}
 					</Grid>
+					<Grid item key={"divider-4"}>
+						<VerticalDivider />
+					</Grid>
+					<Grid item key={"reset"}>
+						{bpMdUp ? (
+							<ComponentWithLabel
+								control={
+									<SmallIconButton color={"primary"}>
+										<ResetIcon />
+									</SmallIconButton>
+								}
+								labelText={t("standalone.data-grid.header.reset")}
+								onClick={openResetDialog}
+								labelPlacement={"bottom"}
+							/>
+						) : (
+							<Tooltip title={t("standalone.data-grid.header.reset") ?? ""}>
+								<IconButton color={"primary"} onClick={openResetDialog}>
+									<ResetIcon />
+								</IconButton>
+							</Tooltip>
+						)}
+					</Grid>
+					{props.exporters && (
+						<>
+							<Grid item key={"divider-3"}>
+								<VerticalDivider />
+							</Grid>
+							<Grid item key={"export"}>
+								{bpMdUp ? (
+									<ComponentWithLabel
+										control={
+											<SmallIconButton color={"primary"}>
+												<ExportIcon />
+											</SmallIconButton>
+										}
+										labelText={t("standalone.data-grid.header.export")}
+										onClick={openExportMenu}
+										labelPlacement={"bottom"}
+									/>
+								) : (
+									<Tooltip
+										title={t("standalone.data-grid.header.export") ?? ""}
+									>
+										<IconButton color={"primary"} onClick={openExportMenu}>
+											<ExportIcon />
+										</IconButton>
+									</Tooltip>
+								)}
+								<ExportMenu
+									exporters={props.exporters}
+									anchorEl={exportAnchorEl}
+									onClose={closeExportMenu}
+								/>
+							</Grid>
+						</>
+					)}
+					{props.handleImport && (
+						<>
+							<Grid item>
+								<VerticalDivider />
+							</Grid>
+							<Grid item key={"import"}>
+								{bpMdUp ? (
+									<ComponentWithLabel
+										control={
+											<SmallIconButton color={"primary"}>
+												<ImportIcon />
+											</SmallIconButton>
+										}
+										labelText={t("standalone.data-grid.header.import")}
+										onClick={props.handleImport}
+										labelPlacement={"bottom"}
+									/>
+								) : (
+									<Tooltip
+										title={t("standalone.data-grid.header.import") ?? ""}
+									>
+										<IconButton color={"primary"} onClick={props.handleImport}>
+											<ImportIcon />
+										</IconButton>
+									</Tooltip>
+								)}
+							</Grid>
+						</>
+					)}
 				</>
 			)}
 			{props.handleAddNew && (
