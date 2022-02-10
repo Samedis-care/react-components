@@ -34,7 +34,9 @@
 			"multi-image": {
 				"primary": "Birlamchi",
 				"edit": "Tahrirlash"
-			}
+			},
+			"formats-modern": "Ruxsat etilgan fayl formatlari:",
+			"upload-modern": "Faylni bu yerga sudrab olib tashlang yoki yuklash oynasi uchun bosing"
 		},
 		"data-grid": {
 			"settings": {

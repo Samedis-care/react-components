@@ -112,7 +112,9 @@
 			"multi-image": {
 				"primary": "Primär",
 				"edit": "Bearbeiten"
-			}
+			},
+			"formats-modern": "Erlaubte Dateiformate:",
+			"upload-modern": "Datei per Drag & Drop hier ablegen oder klicken für einen Upload Dialog"
 		},
 		"phone-number": {
 			"invalid": "Korrekte Rufnummer eingeben"
