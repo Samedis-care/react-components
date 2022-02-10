@@ -80,6 +80,11 @@ export const FileUploadStory = (): React.ReactElement => {
 				preview: fileData,
 			}))}
 			readOnly={boolean("Read-only", false)}
+			variant={select(
+				"Variant",
+				{ Classic: "classic", Modern: "modern" },
+				"classic"
+			)}
 		/>
 	);
 };

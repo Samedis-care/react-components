@@ -22,6 +22,7 @@ export interface TypeFilesParams
 			| "previewImages"
 			| "allowDuplicates"
 			| "smallLabel"
+			| "variant"
 		>
 	> {
 	/**

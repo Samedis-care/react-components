@@ -1,14 +1,22 @@
 import React, { useCallback } from "react";
-import { Grid, Tooltip, Typography } from "@material-ui/core";
+import { Grid, SvgIconProps, Tooltip, Typography } from "@material-ui/core";
 import {
-	InsertDriveFileOutlined as DefaultFileIcon,
+	InsertDriveFile as DefaultFileIcon,
 	CancelOutlined as CancelIcon,
+	Cancel as CancelIconList,
 } from "@material-ui/icons";
 import { makeStyles } from "@material-ui/core/styles";
 import {
+	ArchiveFileIcon,
+	AudioFileIcon,
+	CodeFileIcon,
+	CsvFileIcon,
 	ExcelFileIcon,
+	ImageFileIcon,
 	PdfFileIcon,
 	PowerPointFileIcon,
+	TextFileIcon,
+	VideoFileIcon,
 	WordFileIcon,
 } from "../FileIcons";
 import { combineClassNames, getFileExt } from "../../../utils";
@@ -42,6 +50,10 @@ export interface FileProps {
 	 * Custom styles
 	 */
 	classes?: Partial<ReturnType<typeof useStyles>>;
+	/**
+	 * Display file as box or as list
+	 */
+	variant: "box" | "list";
 }
 
 const useStyles = makeStyles(
@@ -54,13 +66,32 @@ const useStyles = makeStyles(
 			cursor: "pointer",
 			color: theme.palette.error.main,
 		},
+		closeIconList: {
+			width: "auto",
+			position: "static",
+			cursor: "pointer",
+			color: theme.palette.action.active,
+		},
 		icon: {
 			width: "100%",
 			height: "auto",
 			marginTop: 16,
 		},
+		iconList: {
+			height: "100%",
+			width: "auto",
+			color: theme.palette.error.main,
+		},
 		iconDisabled: {
 			opacity: 0.5,
+		},
+		listEntryText: {
+			minWidth: 0,
+			position: "relative",
+		},
+		listLabel: {
+			position: "absolute",
+			maxWidth: "100%",
 		},
 		clickable: {
 			cursor: "pointer",
@@ -75,7 +106,7 @@ const useStyles = makeStyles(
 	{ name: "CcFile" }
 );
 
-const ExcelFileExtensions = [
+export const ExcelFileExtensions = [
 	"xlsx",
 	"xlsm",
 	"xltx",
@@ -85,7 +116,7 @@ const ExcelFileExtensions = [
 	"xlm",
 ];
 
-const WordFileExtensions = [
+export const WordFileExtensions = [
 	"doc",
 	"dot",
 	"docx",
@@ -95,7 +126,7 @@ const WordFileExtensions = [
 	"docb",
 ];
 
-const PowerPointFileExtensions = [
+export const PowerPointFileExtensions = [
 	"ppt",
 	"pot",
 	"pps",
@@ -109,74 +140,189 @@ const PowerPointFileExtensions = [
 	"sldm",
 ];
 
-const PdfFileExtensions = ["pdf"];
+export const ArchiveFileExtensions = ["zip", "7z", "rar", "tar"];
+export const AudioFileExtensions = ["mp3", "wav", "ogg"];
+export const ImageFileExtensions = [
+	"jpg",
+	"jpeg",
+	"png",
+	"gif",
+	"bmp",
+	"svg",
+	"webp",
+];
+export const CodeFileExtensions = [
+	"js",
+	"jsx",
+	"ts",
+	"tsx",
+	"cs",
+	"c",
+	"cpp",
+	"cxx",
+	"h",
+	"hpp",
+	"py",
+	"pyw",
+	"rb",
+	"html",
+	"xml",
+	"css",
+	"php",
+];
+export const CsvFileExtensions = ["csv"];
+export const TextFileExtensions = ["txt"];
+export const VideoFileExtensions = ["mp4", "mkv", "avi"];
+
+export const AudioMimeType = /^audio\//;
+export const ImageMimeType = /^image\//;
+export const VideoMimeType = /^video\//;
+export const PdfFileExtensions = ["pdf"];
+
+export const getFileIcon = (
+	nameOrMime: string
+): React.ComponentType<SvgIconProps> | null => {
+	if (nameOrMime.includes("/")) {
+		if (AudioMimeType.test(nameOrMime)) return AudioFileIcon;
+		if (ImageMimeType.test(nameOrMime)) return ImageFileIcon;
+		if (VideoMimeType.test(nameOrMime)) return VideoFileIcon;
+		return null;
+	} else {
+		const fileExt = getFileExt(nameOrMime);
+		if (ArchiveFileExtensions.includes(fileExt)) return ArchiveFileIcon;
+		if (AudioFileExtensions.includes(fileExt)) return AudioFileIcon;
+		if (CodeFileExtensions.includes(fileExt)) return CodeFileIcon;
+		if (CsvFileExtensions.includes(fileExt)) return CsvFileIcon;
+		if (ExcelFileExtensions.includes(fileExt)) return ExcelFileIcon;
+		if (ImageFileExtensions.includes(fileExt)) return ImageFileIcon;
+		if (PdfFileExtensions.includes(fileExt)) return PdfFileIcon;
+		if (PowerPointFileExtensions.includes(fileExt)) return PowerPointFileIcon;
+		if (TextFileExtensions.includes(fileExt)) return TextFileIcon;
+		if (VideoFileExtensions.includes(fileExt)) return VideoFileIcon;
+		if (WordFileExtensions.includes(fileExt)) return WordFileIcon;
+		return null;
+	}
+};
+
+export const getFileIconOrDefault = (
+	nameOrMime: string
+): React.ComponentType<SvgIconProps> =>
+	getFileIcon(nameOrMime) ?? DefaultFileIcon;
 
 const File = (props: FileProps) => {
-	const { downloadLink } = props;
+	const { downloadLink, variant } = props;
 	const classes = useStyles(props);
 
-	const fileExt = getFileExt(props.name);
-	const FileIcon = ExcelFileExtensions.includes(fileExt)
-		? ExcelFileIcon
-		: WordFileExtensions.includes(fileExt)
-		? WordFileIcon
-		: PowerPointFileExtensions.includes(fileExt)
-		? PowerPointFileIcon
-		: PdfFileExtensions.includes(fileExt)
-		? PdfFileIcon
-		: DefaultFileIcon;
+	const FileIcon = getFileIconOrDefault(props.name);
 
 	const openDownload = useCallback(() => {
 		if (downloadLink) window.open(downloadLink, "_blank");
 	}, [downloadLink]);
 
-	return (
-		<Grid item style={{ width: props.size }}>
-			<Grid container spacing={2}>
-				<Grid item xs={12} className={classes.iconContainer}>
-					{props.onRemove && !props.disabled && (
-						<CancelIcon
-							className={classes.closeIcon}
-							onClick={props.onRemove}
-						/>
-					)}
-					{props.preview ? (
-						<img
-							src={props.preview}
-							alt={props.name}
-							className={combineClassNames([
-								classes.icon,
-								props.disabled && classes.iconDisabled,
-								downloadLink && classes.clickable,
-							])}
-							onClick={openDownload}
-						/>
-					) : (
-						<FileIcon
-							className={combineClassNames([
-								classes.icon,
-								downloadLink && classes.clickable,
-							])}
-							onClick={openDownload}
-						/>
-					)}
-				</Grid>
-				<Grid item xs={12}>
-					<Tooltip title={props.name}>
-						<Typography
-							align={"center"}
-							noWrap
-							className={downloadLink ? classes.downloadLink : undefined}
-							onClick={openDownload}
-							variant={"body2"}
-						>
-							{props.name}
-						</Typography>
-					</Tooltip>
+	const handleListClick = useCallback((evt: React.MouseEvent) => {
+		evt.stopPropagation();
+	}, []);
+
+	const renderIcon = () =>
+		props.preview ? (
+			<img
+				src={props.preview}
+				alt={props.name}
+				className={combineClassNames([
+					variant === "list" ? classes.iconList : classes.icon,
+					props.disabled && classes.iconDisabled,
+					downloadLink && classes.clickable,
+				])}
+				onClick={openDownload}
+				style={variant === "list" ? { height: props.size } : undefined}
+			/>
+		) : (
+			<FileIcon
+				className={combineClassNames([
+					variant === "list" ? classes.iconList : classes.icon,
+					downloadLink && classes.clickable,
+				])}
+				onClick={openDownload}
+				style={variant === "list" ? { height: props.size } : undefined}
+			/>
+		);
+
+	const renderName = () => (
+		<Tooltip
+			title={props.name}
+			disableFocusListener={variant === "list"}
+			disableHoverListener={variant === "list"}
+			disableTouchListener={variant === "list"}
+		>
+			<Typography
+				align={variant === "list" ? "left" : "center"}
+				noWrap
+				className={combineClassNames([
+					downloadLink && classes.downloadLink,
+					variant === "list" && classes.listLabel,
+				])}
+				onClick={openDownload}
+				variant={"body2"}
+				style={
+					variant === "list"
+						? {
+								lineHeight: `${props.size}px`,
+						  }
+						: undefined
+				}
+			>
+				{props.name}
+			</Typography>
+		</Tooltip>
+	);
+
+	const renderRemove = () =>
+		props.onRemove &&
+		!props.disabled &&
+		React.createElement(variant === "list" ? CancelIconList : CancelIcon, {
+			className: combineClassNames([
+				variant === "box" && classes.closeIcon,
+				variant === "list" && classes.closeIconList,
+			]),
+			onClick: props.onRemove,
+			style: variant === "list" ? { height: props.size } : undefined,
+		});
+
+	if (variant === "box") {
+		return (
+			<Grid item style={{ width: props.size }}>
+				<Grid container spacing={2}>
+					<Grid item xs={12} className={classes.iconContainer}>
+						{renderRemove()}
+						{renderIcon()}
+					</Grid>
+					<Grid item xs={12}>
+						{renderName()}
+					</Grid>
 				</Grid>
 			</Grid>
-		</Grid>
-	);
+		);
+	} else if (variant === "list") {
+		return (
+			<Grid
+				item
+				xs={12}
+				onClick={handleListClick}
+				container
+				spacing={2}
+				alignItems={"stretch"}
+				wrap={"nowrap"}
+			>
+				<Grid item>{renderIcon()}</Grid>
+				<Grid item xs className={classes.listEntryText}>
+					{renderName()}
+				</Grid>
+				<Grid item>{renderRemove()}</Grid>
+			</Grid>
+		);
+	} else {
+		throw new Error("Invalid variant passed");
+	}
 };
 
 export default React.memo(File);

@@ -99,8 +99,10 @@
 		},
 		"file-upload": {
 			"upload": "Upload",
+			"upload-modern": "Click to open dialog or Drag & Drop files here",
 			"no-files": "No attachments available",
 			"formats": "File formats",
+			"formats-modern": "Allowed file formats:",
 			"error": {
 				"too-many": "Too many files selected",
 				"limit-reached": "Maximum amount of allowed files",

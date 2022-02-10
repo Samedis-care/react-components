@@ -1,13 +1,15 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
+	Box,
 	Button,
 	FormHelperText,
 	Grid,
 	Theme,
+	Tooltip,
 	Typography,
 } from "@material-ui/core";
 import { AttachFile } from "@material-ui/icons";
-import FilePreview from "./File";
+import FilePreview, { getFileIconOrDefault } from "./File";
 import { FileSelectorError } from "./Errors";
 import {
 	combineClassNames,
@@ -102,6 +104,12 @@ export interface FileUploadProps {
 	 * Custom CSS classes for styling
 	 */
 	classes?: ClassNameMap<keyof ReturnType<typeof useStyles>>;
+	/**
+	 * Variant (design) to use
+	 * @default classic
+	 * @remarks When using 'modern' preview size should be set to 24
+	 */
+	variant?: "classic" | "modern";
 }
 
 export interface FileMeta {
@@ -147,9 +155,22 @@ const useStyles = makeStyles(
 		formatText: {
 			textAlign: "right",
 		},
+		formatTextModern: {
+			color: theme.palette.action.disabled,
+		},
+		formatIconsModern: {
+			color: theme.palette.action.disabled,
+		},
 		fileInput: {
 			display: "none",
 		},
+		modernUploadLabel: {
+			textAlign: "center",
+			color: theme.palette.action.disabled,
+			display: "block",
+			width: "100%",
+		},
+		modernUploadLabelEmpty: theme.typography.h5,
 	}),
 	{ name: "CcFileUpload" }
 );
@@ -173,6 +194,7 @@ const FileUpload = (props: FileUploadProps): React.ReactElement => {
 		uploadLabel,
 		allowDuplicates,
 	} = props;
+	const variant = props.variant ?? "classic";
 	const classes = useStyles(props);
 	const loadInitialFiles = () =>
 		(props.files || props.defaultFiles || []).map((meta) => ({
@@ -340,88 +362,214 @@ const FileUpload = (props: FileUploadProps): React.ReactElement => {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [props.files]);
 
-	return (
-		<GroupBox label={label} smallLabel={smallLabel}>
-			<Grid
-				container
-				spacing={2}
-				alignContent={"space-between"}
-				onDragOver={handleDragOver}
-				onDrop={handleDrop}
-				className={combineClassNames([
-					"components-care-dropzone",
-					dragging && classes.dropzone,
-				])}
-			>
-				{!readOnly && (
-					<Grid item xs key={"upload"}>
-						<Button
-							startIcon={<AttachFile />}
-							variant={"contained"}
-							color={"primary"}
-							onClick={handleUpload}
-							name={name}
-							onBlur={onBlur}
+	if (variant === "classic") {
+		return (
+			<GroupBox label={label} smallLabel={smallLabel}>
+				<Grid
+					container
+					spacing={2}
+					alignContent={"space-between"}
+					onDragOver={handleDragOver}
+					onDrop={handleDrop}
+					className={combineClassNames([
+						"components-care-dropzone",
+						dragging && classes.dropzone,
+					])}
+				>
+					{!readOnly && (
+						<Grid item xs key={"upload"}>
+							<Button
+								startIcon={<AttachFile />}
+								variant={"contained"}
+								color={"primary"}
+								onClick={handleUpload}
+								name={name}
+								onBlur={onBlur}
+							>
+								{uploadLabel || t("standalone.file-upload.upload")}
+							</Button>
+							<input
+								type={"file"}
+								accept={accept || undefined}
+								multiple={maxFiles ? getRemainingFileCount() > 1 : true}
+								onChange={handleFileChange}
+								className={classes.fileInput}
+								ref={inputRef}
+							/>
+						</Grid>
+					)}
+					<Grid item xs={12} key={"files"}>
+						<Grid
+							container
+							spacing={2}
+							alignContent={"flex-start"}
+							alignItems={"flex-start"}
 						>
-							{uploadLabel || t("standalone.file-upload.upload")}
-						</Button>
-						<input
-							type={"file"}
-							accept={accept || undefined}
-							multiple={maxFiles ? getRemainingFileCount() > 1 : true}
-							onChange={handleFileChange}
-							className={classes.fileInput}
-							ref={inputRef}
-						/>
+							{files.map(
+								(data: FileData, index) =>
+									data && (
+										<FilePreview
+											name={data.file.name}
+											downloadLink={
+												"downloadLink" in data.file
+													? data.file.downloadLink
+													: undefined
+											}
+											key={`${index}-${data.file.name}`}
+											size={previewSize}
+											preview={previewImages ? data.preview : undefined}
+											disabled={data.delete || false}
+											onRemove={
+												readOnly || data.preventDelete
+													? undefined
+													: () => removeFile(data)
+											}
+											variant={"box"}
+										/>
+									)
+							)}
+							{readOnly && files.length === 0 && (
+								<Grid item>
+									<Typography>
+										{t("standalone.file-upload.no-files")}
+									</Typography>
+								</Grid>
+							)}
+						</Grid>
 					</Grid>
-				)}
-				<Grid item xs={12} key={"files"}>
-					<Grid
-						container
-						spacing={2}
-						alignContent={"flex-start"}
-						alignItems={"flex-start"}
-					>
-						{files.map(
-							(data: FileData, index) =>
-								data && (
-									<FilePreview
-										name={data.file.name}
-										downloadLink={
-											"downloadLink" in data.file
-												? data.file.downloadLink
-												: undefined
-										}
-										key={`${index}-${data.file.name}`}
-										size={previewSize}
-										preview={previewImages ? data.preview : undefined}
-										disabled={data.delete || false}
-										onRemove={
-											readOnly || data.preventDelete
-												? undefined
-												: () => removeFile(data)
-										}
-									/>
+					{!readOnly && (
+						<Grid item xs={12} key={"info"}>
+							<FormHelperText className={classes.formatText}>
+								({t("standalone.file-upload.formats")}:{" "}
+								{acceptLabel ||
+									accept ||
+									t("standalone.file-upload.format.any")}
 								)
-						)}
-						{readOnly && files.length === 0 && (
-							<Grid item>
-								<Typography>{t("standalone.file-upload.no-files")}</Typography>
-							</Grid>
-						)}
-					</Grid>
+							</FormHelperText>
+						</Grid>
+					)}
 				</Grid>
-				{!readOnly && (
-					<Grid item xs={12} key={"info"}>
-						<FormHelperText className={classes.formatText}>
-							({t("standalone.file-upload.formats")}:{" "}
-							{acceptLabel || accept || t("standalone.file-upload.format.any")})
-						</FormHelperText>
-					</Grid>
-				)}
-			</Grid>
-		</GroupBox>
-	);
+			</GroupBox>
+		);
+	} else if (variant === "modern") {
+		const acceptFiles = accept ? accept.split(",") : [];
+		return (
+			<GroupBox label={label} smallLabel={smallLabel}>
+				<Grid
+					container
+					spacing={2}
+					alignContent={"space-between"}
+					onDragOver={handleDragOver}
+					onDrop={handleDrop}
+					onClick={handleUpload}
+					className={combineClassNames([
+						"components-care-dropzone",
+						dragging && classes.dropzone,
+					])}
+				>
+					{!readOnly && (
+						<Grid item xs key={"upload"}>
+							<span
+								className={combineClassNames([
+									classes.modernUploadLabel,
+									files.length === 0 && classes.modernUploadLabelEmpty,
+								])}
+							>
+								{uploadLabel || t("standalone.file-upload.upload-modern")}
+							</span>
+							<input
+								type={"file"}
+								accept={accept || undefined}
+								multiple={maxFiles ? getRemainingFileCount() > 1 : true}
+								onChange={handleFileChange}
+								className={classes.fileInput}
+								ref={inputRef}
+							/>
+						</Grid>
+					)}
+					{files.length > 0 && (
+						<Grid item xs={12} key={"files"}>
+							<Box mx={1}>
+								<Grid
+									container
+									spacing={1}
+									alignContent={"flex-start"}
+									alignItems={"flex-start"}
+								>
+									{files.map(
+										(data: FileData, index) =>
+											data && (
+												<FilePreview
+													name={data.file.name}
+													downloadLink={
+														"downloadLink" in data.file
+															? data.file.downloadLink
+															: undefined
+													}
+													key={`${index}-${data.file.name}`}
+													size={previewSize}
+													preview={previewImages ? data.preview : undefined}
+													disabled={data.delete || false}
+													onRemove={
+														readOnly || data.preventDelete
+															? undefined
+															: () => removeFile(data)
+													}
+													variant={"list"}
+												/>
+											)
+									)}
+									{readOnly && files.length === 0 && (
+										<Grid item>
+											<Typography>
+												{t("standalone.file-upload.no-files")}
+											</Typography>
+										</Grid>
+									)}
+								</Grid>
+							</Box>
+						</Grid>
+					)}
+					{!readOnly && (
+						<Grid
+							item
+							xs={12}
+							key={"info"}
+							container
+							wrap={"nowrap"}
+							spacing={1}
+						>
+							<Grid item xs>
+								<Typography
+									align={"right"}
+									className={classes.formatTextModern}
+								>
+									{t("standalone.file-upload.formats-modern")}{" "}
+									{acceptFiles.length == 0 &&
+										t("standalone.file-upload.format.any")}
+								</Typography>
+							</Grid>
+							{acceptFiles.map((entry, idx) => (
+								<Grid
+									item
+									className={classes.formatIconsModern}
+									key={idx.toString(16)}
+								>
+									<Tooltip title={acceptLabel || accept || ""}>
+										<span>
+											{React.createElement(getFileIconOrDefault(entry))}
+										</span>
+									</Tooltip>
+								</Grid>
+							))}
+						</Grid>
+					)}
+				</Grid>
+			</GroupBox>
+		);
+	} else {
+		throw new Error("Invalid variant prop passed");
+	}
 };
 
 export default FileUpload;

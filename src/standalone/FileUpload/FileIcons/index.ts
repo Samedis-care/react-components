@@ -1,4 +1,11 @@
+export { default as ArchiveFileIcon } from "./Archive";
+export { default as AudioFileIcon } from "./Audio";
+export { default as CodeFileIcon } from "./Code";
+export { default as CsvFileIcon } from "./Csv";
 export { default as ExcelFileIcon } from "./Excel";
+export { default as ImageFileIcon } from "./Image";
 export { default as PdfFileIcon } from "./Pdf";
 export { default as PowerPointFileIcon } from "./PowerPoint";
+export { default as TextFileIcon } from "./Text";
+export { default as VideoFileIcon } from "./Video";
 export { default as WordFileIcon } from "./Word";
