@@ -12,6 +12,7 @@ import MuiPickerUtils from "./MuiPickerUtils";
 import PermissionContextProvider from "./PermissionContextProvider";
 import MobileScalingFix from "../standalone/MobileScalingFix/MobileScalingFix";
 import UnsafeToLeave from "./UnsafeToLeave";
+import DragAndDropPrevention from "./DragAndDropPrevention";
 
 /**
  * Properties for the Framework
@@ -21,6 +22,10 @@ export interface IFrameworkProps {
 	 * Disable the Material-UI Date Picker utils?
 	 */
 	disableMuiPickerUtils?: boolean;
+	/**
+	 * Disable drag and drop prevention (used to prevent page unloads when dropping files)
+	 */
+	disableDragAndDropPrevention?: boolean;
 	/**
 	 * Disable setting of HTML tag language attribute
 	 */
@@ -62,11 +67,13 @@ const loaderComponent = <Loader />;
  * - material-ui date picker utils (optional, enabled by default, locale managed by i18n)
  * - html language attribute setting based on locale (optional, enabled by default)
  * - mobile scaling fix (optional, enabled by default)
+ * - drag & drop default prevention (prevents unloading page)
  */
 const ComponentsCareFramework = (props: ICompleteFrameworkProps) => {
 	return (
 		<Suspense fallback={loaderComponent}>
 			{!props.disableMobileScalingFix && <MobileScalingFix />}
+			{!props.disableDragAndDropPrevention && <DragAndDropPrevention />}
 			<CCI18nProvider
 				disableHtmlLanguageAttributeSetter={
 					props.disableHtmlLanguageAttributeSetter
