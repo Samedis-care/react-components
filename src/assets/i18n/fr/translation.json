@@ -34,7 +34,9 @@
 			"multi-image": {
 				"primary": "Primaire",
 				"edit": "Éditer"
-			}
+			},
+			"formats-modern": "Formats de fichiers autorisés :",
+			"upload-modern": "Faites glisser et déposez le fichier ici ou cliquez pour une boîte de dialogue de téléchargement"
 		},
 		"data-grid": {
 			"settings": {
