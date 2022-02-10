@@ -4,7 +4,7 @@ const cancelDragAndDrop = (evt: DragEvent) => {
 	evt.preventDefault();
 };
 
-const DragAndDropPrevention = (): React.ReactNode => {
+const DragAndDropPrevention = (): React.ReactElement => {
 	// drag and drop unload prevention
 	useEffect(() => {
 		document.addEventListener("drop", cancelDragAndDrop);
