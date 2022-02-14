@@ -53,13 +53,25 @@ const Step1LoadData = (
 									delete c.z;
 								}
 							}
-							return XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, {
-								dateNF: 'YYYY-MM-DD"T"hh:mm:ss',
-								raw: false,
-								rawNumbers: true, // changing this to true will output dates as numbers
-								defval: undefined,
-								blankrows: false,
-							});
+							return (
+								XLSX.utils
+									.sheet_to_json<Record<string, unknown>>(sheet, {
+										dateNF: 'YYYY-MM-DD"T"hh:mm:ss',
+										raw: false,
+										rawNumbers: true, // output dates as numbers and numbers as raw numbers
+										defval: undefined,
+										blankrows: false,
+									})
+									// convert numbers to string, so import always works with strings
+									.map((record) =>
+										Object.fromEntries(
+											Object.entries(record).map(([k, v]) => [
+												k,
+												typeof v === "number" ? v.toString() : v,
+											])
+										)
+									)
+							);
 						})
 						.flat()
 				)
