@@ -1,4 +1,4 @@
-import React from "react";
+import React, { ForwardedRef, RefAttributes } from "react";
 import {
 	ModelFieldName,
 	PageVisibility,
@@ -12,6 +12,7 @@ import useLazyCrudConnector, {
 } from "../useLazyCrudConnector";
 import { MultiSelectorData } from "../../../standalone";
 import { useFormContextLite } from "../Form";
+import { CrudSelectDispatch } from "../../Selector/useCrudSelect";
 
 export interface SamedisCrudMultiSelectProps<
 	KeyT extends ModelFieldName,
@@ -35,7 +36,9 @@ const FormCrudMultiSelect = <
 	CustomT,
 	DataT extends MultiSelectorData
 >(
-	props: SamedisCrudMultiSelectProps<KeyT, VisibilityT, CustomT, DataT>
+	props: SamedisCrudMultiSelectProps<KeyT, VisibilityT, CustomT, DataT> &
+		RefAttributes<CrudSelectDispatch<DataT>>,
+	ref: ForwardedRef<CrudSelectDispatch<DataT>>
 ) => {
 	const [connectorParams, otherProps] = extractLazyCrudConnectorParams<
 		KeyT,
@@ -58,9 +61,12 @@ const FormCrudMultiSelect = <
 			errorComponent={errorComponent}
 			disabled={props.disabled || readOnly}
 			field={connectorParams.field}
+			ref={ref}
 			{...otherProps}
 		/>
 	);
 };
 
-export default React.memo(FormCrudMultiSelect) as typeof FormCrudMultiSelect;
+export default React.memo(
+	React.forwardRef(FormCrudMultiSelect)
+) as typeof FormCrudMultiSelect;
