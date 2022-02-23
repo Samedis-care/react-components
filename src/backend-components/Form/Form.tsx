@@ -192,6 +192,10 @@ export interface FormProps<
 	 * @param id The ID of the parent form (after submit)
 	 */
 	nestedFormPreSubmitHandler?: (id: string) => Promise<void> | unknown;
+	/**
+	 * CSS class for form styles
+	 */
+	formClass?: string;
 }
 
 export interface FormContextData {
@@ -426,6 +430,7 @@ const Form = <
 		onDeleted,
 		initialRecord,
 		onlySubmitNestedIfMounted,
+		formClass,
 	} = props;
 	const onlySubmitMountedBehaviour =
 		props.onlySubmitMountedBehaviour ?? OnlySubmitMountedBehaviour.OMIT;
@@ -1082,9 +1087,11 @@ const Form = <
 		<FormContextLite.Provider value={formContextDataLite}>
 			<FormContext.Provider value={formContextData}>
 				{!parentFormContext ? (
-					<form onSubmit={handleSubmit}>{innerForm()}</form>
+					<form onSubmit={handleSubmit} className={formClass}>
+						{innerForm()}
+					</form>
 				) : (
-					<div>{innerForm()}</div>
+					<div className={formClass}>{innerForm()}</div>
 				)}
 			</FormContext.Provider>
 		</FormContextLite.Provider>
