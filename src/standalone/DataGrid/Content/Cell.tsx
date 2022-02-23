@@ -44,6 +44,7 @@ const Cell = (props: CellProps): React.ReactElement => {
 					? [id]
 					: [...prevState.selectedRows, id]
 				: prevState.selectedRows.filter((s) => s !== id),
+			selectionUpdatedByProps: false,
 		}));
 	}, [setState, id, prohibitMultiSelect]);
 

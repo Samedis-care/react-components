@@ -459,6 +459,10 @@ export interface IDataGridState {
 	 */
 	selectedRows: string[];
 	/**
+	 * Was the selection updated by DataGrid props
+	 */
+	selectionUpdatedByProps: boolean;
+	/**
 	 * The rows to be shown
 	 */
 	rows: Record<number, DataGridRowData>;
@@ -573,6 +577,7 @@ export const getDataGridDefaultState = (
 		.map((col) => col.field),
 	selectAll: false,
 	selectedRows: [],
+	selectionUpdatedByProps: false,
 	rows: {},
 	dataLoadError: null,
 	refreshData: 1,
@@ -1020,6 +1025,7 @@ const DataGrid = (props: DataGridProps) => {
 		customData,
 		selectAll,
 		selectedRows,
+		selectionUpdatedByProps,
 	} = state;
 	const activeCustomFiltersPack = useState(0);
 
@@ -1054,6 +1060,7 @@ const DataGrid = (props: DataGridProps) => {
 						...prev,
 						selectAll: selection[0],
 						selectedRows: selection[1],
+						selectionUpdatedByProps: true,
 				  };
 		});
 	}, [setState, selection]);
@@ -1173,12 +1180,7 @@ const DataGrid = (props: DataGridProps) => {
 	// selection change event
 	useEffect(() => {
 		// don't trigger selection update event when triggered by prop update
-		if (
-			selection &&
-			selectAll === selection[0] &&
-			shallowCompareArray(selectedRows, selection[1])
-		)
-			return;
+		if (selectionUpdatedByProps) return;
 		if (onSelectionChange) {
 			onSelectionChange(selectAll, selectedRows);
 		}

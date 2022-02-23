@@ -11,6 +11,7 @@ const SelectAll = () => {
 			setState((prevState) => ({
 				...prevState,
 				selectAll: newChecked,
+				selectionUpdatedByProps: false,
 			}));
 		},
 		[setState]
