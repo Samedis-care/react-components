@@ -1,4 +1,4 @@
-import React, { ForwardedRef, RefAttributes } from "react";
+import React, { ForwardedRef, RefAttributes, useContext } from "react";
 import { ModelFieldName, PageVisibility } from "../../backend-integration";
 import { ErrorComponentProps } from "../Form";
 import { Loader, MultiSelectorData } from "../../standalone";
@@ -7,7 +7,9 @@ import { BackendMultiSelect } from "./index";
 import useCrudSelect, {
 	CrudSelectDispatch,
 	UseCrudSelectParams,
+	UseCrudSelectResult,
 } from "./useCrudSelect";
+import { DialogContextProvider } from "../../framework";
 
 export interface CrudMultiSelectProps<
 	KeyT extends ModelFieldName,
@@ -35,6 +37,18 @@ export interface CrudMultiSelectProps<
 	>;
 }
 
+export const CrudSelectContext = React.createContext<
+	UseCrudSelectResult<ModelFieldName, MultiSelectorData> | undefined
+>(undefined);
+export const useCrudSelectContext = (): UseCrudSelectResult<
+	ModelFieldName,
+	MultiSelectorData
+> => {
+	const ctx = useContext(CrudSelectContext);
+	if (!ctx) throw new Error("CrudSelectContext not set");
+	return ctx;
+};
+
 const CrudMultiSelect = <
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
@@ -47,6 +61,7 @@ const CrudMultiSelect = <
 ) => {
 	const { errorComponent: ErrorComponent } = props;
 
+	const crudSelect = useCrudSelect(props, ref);
 	const {
 		loading,
 		error,
@@ -55,22 +70,33 @@ const CrudMultiSelect = <
 		initialRawData,
 		handleSelect,
 		modelToSelectorData,
-	} = useCrudSelect(props, ref);
+	} = crudSelect;
 
 	if (loading) return <Loader />;
 	if (loadError) return <span>{loadError.message}</span>;
 
 	return (
-		<>
-			{error && <ErrorComponent error={error} />}
-			<BackendMultiSelect
-				{...props}
-				selected={selected.map((entry) => entry.value)}
-				onSelect={handleSelect}
-				modelToSelectorData={modelToSelectorData}
-				initialData={initialRawData}
-			/>
-		</>
+		<CrudSelectContext.Provider
+			value={
+				(crudSelect as unknown) as UseCrudSelectResult<
+					ModelFieldName,
+					MultiSelectorData
+				>
+			}
+		>
+			<DialogContextProvider
+			// for creating dialogs inside end adornment of selector with access to selector data
+			>
+				{error && <ErrorComponent error={error} />}
+				<BackendMultiSelect
+					{...props}
+					selected={selected.map((entry) => entry.value)}
+					onSelect={handleSelect}
+					modelToSelectorData={modelToSelectorData}
+					initialData={initialRawData}
+				/>
+			</DialogContextProvider>
+		</CrudSelectContext.Provider>
 	);
 };
 

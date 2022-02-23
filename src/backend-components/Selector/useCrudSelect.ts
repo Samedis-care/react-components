@@ -158,18 +158,19 @@ const useCrudSelect = <
 
 				const modelRecord = (await connector.create(await serialize(entry)))[0];
 				entry = {
-					...(await deserializeModel(modelRecord)),
-					value: entry.value,
-				} as DataT;
-
-				const finalSelected = [...selected, entry];
-
-				// reflect changes
+					...(await deserialize(modelRecord)),
+				};
+				// store record in cache
 				setInitialRawData((oldRawData) => [...oldRawData, modelRecord]);
-				setSelected(finalSelected);
 
-				// fire events
-				if (onChange) onChange(finalSelected);
+				setSelected((selected) => {
+					const existing = selected.find(
+						(selEntry) => selEntry.value === entry.value
+					);
+					if (existing) return selected;
+
+					return [...selected, entry];
+				});
 			},
 		})
 	);
@@ -240,14 +241,11 @@ const useCrudSelect = <
 				// reflect changes
 				setInitialRawData((oldRawData) => [...oldRawData, ...created]);
 				setSelected(finalSelected);
-
-				// fire events
-				if (onChange) onChange(finalSelected);
 			} catch (e) {
 				setError(e as Error);
 			}
 		},
-		[connector, deserialize, onChange, selected, serialize]
+		[connector, deserialize, selected, serialize]
 	);
 
 	const modelToSelectorData = useCallback(
@@ -284,8 +282,6 @@ const useCrudSelect = <
 
 				setInitialRawData(currentlySelected[0]);
 				setSelected(initialSelected);
-
-				if (onChange) onChange(initialSelected);
 			} catch (e) {
 				setLoadError(e as Error);
 			} finally {
@@ -294,6 +290,11 @@ const useCrudSelect = <
 		})();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
+
+	// on change event
+	useEffect(() => {
+		if (onChange) onChange(selected);
+	}, [onChange, selected]);
 
 	// validations
 	const formCtx = useContext(FormContext);
