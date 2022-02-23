@@ -400,6 +400,12 @@ const variantInput: Record<
 	standard: InputWithHelp,
 };
 
+const getOptionLabel = (option: BaseSelectorData) => option.label;
+const getOptionDisabled = (option: BaseSelectorData) =>
+	!!(option.isDisabled || option.isDivider || option.isSmallLabel);
+const getOptionSelected = (option: BaseSelectorData, value: BaseSelectorData) =>
+	option.value === value.value;
+
 const BaseSelector = <DataT extends BaseSelectorData>(
 	props: BaseSelectorProps<DataT>
 ) => {
@@ -758,12 +764,10 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 							clearText ??
 							t("standalone.selector.base-selector.clear-icon-text")
 						}
-						getOptionLabel={(option: BaseSelectorData) => option.label}
-						renderOption={(option: BaseSelectorData) => defaultRenderer(option)}
-						getOptionDisabled={(option: BaseSelectorData) =>
-							!!(option.isDisabled || option.isDivider || option.isSmallLabel)
-						}
-						getOptionSelected={(option, value) => option.value === value.value}
+						getOptionLabel={getOptionLabel}
+						renderOption={defaultRenderer}
+						getOptionDisabled={getOptionDisabled}
+						getOptionSelected={getOptionSelected}
 						onChange={(_event, selectedValue) =>
 							onChangeHandler(selectedValue as DataT)
 						}
