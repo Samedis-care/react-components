@@ -648,7 +648,7 @@ const Form = <
 			Object.fromEntries(Object.keys(model.fields).map((key) => [key, false]))
 		);
 
-		if (initialRecord) {
+		if (initialRecord && id == null) {
 			void Promise.all(
 				Object.entries(initialRecord).map(([key, value]) =>
 					setFieldValue(key, value, false)
