@@ -15,6 +15,7 @@ import {
 	AccordionProps,
 } from "@material-ui/core";
 import SuccessOutlinedIcon from "../Icons/SuccessOutlinedIcon";
+import { combineClassNames } from "../../utils";
 
 const AccordionSummary = withStyles({
 	root: {
@@ -45,6 +46,12 @@ export const useStyles = makeStyles(
 		root: {
 			margin: 0,
 			paddingLeft: theme.spacing(5),
+		},
+		alwaysExpanded: {
+			cursor: "default",
+			"&:hover:not(.Mui-disabled)": {
+				cursor: "default",
+			},
 		},
 		iconButton: {
 			position: "absolute",
@@ -160,7 +167,12 @@ const InfoBox = (props: InfoBoxProps) => {
 			expanded={alwaysExpanded}
 			onChange={onChange}
 		>
-			<AccordionSummary className={getAccordionClass()}>
+			<AccordionSummary
+				className={combineClassNames([
+					getAccordionClass(),
+					alwaysExpanded && classes.alwaysExpanded,
+				])}
+			>
 				<div className={classes.root}>
 					<span className={classes.iconButton}>{getIcon()}</span>
 					<Typography variant="caption">{heading}</Typography>
