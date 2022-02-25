@@ -14,6 +14,7 @@ import {
 } from "react";
 import { shallowCompare } from "../../utils";
 import { FormContext, ValidationError } from "../Form";
+import { BackendMultiSelectProps } from "./BackendMultiSelect";
 
 export interface UseCrudSelectParams<
 	KeyT extends ModelFieldName,
@@ -71,6 +72,12 @@ export interface UseCrudSelectParams<
 	 * @see validate
 	 */
 	field?: string;
+	/**
+	 * Get ID of data
+	 */
+	getIdOfData: NonNullable<
+		BackendMultiSelectProps<KeyT, VisibilityT, CustomT, DataT>["getIdOfData"]
+	>;
 }
 
 export interface UseCrudSelectResult<
@@ -138,6 +145,7 @@ const useCrudSelect = <
 		initialSelected,
 		validate,
 		field,
+		getIdOfData,
 	} = params;
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<Error | null>(null);
@@ -152,7 +160,7 @@ const useCrudSelect = <
 		() => ({
 			addToSelection: async (entry) => {
 				const existing = selected.find(
-					(selEntry) => selEntry.value === entry.value
+					(selEntry) => getIdOfData(selEntry) === getIdOfData(entry)
 				);
 				if (existing) return;
 
@@ -165,7 +173,7 @@ const useCrudSelect = <
 
 				setSelected((selected) => {
 					const existing = selected.find(
-						(selEntry) => selEntry.value === entry.value
+						(selEntry) => getIdOfData(selEntry) === getIdOfData(entry)
 					);
 					if (existing) return selected;
 

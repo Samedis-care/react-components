@@ -29,12 +29,6 @@ export interface CrudMultiSelectProps<
 	 * The error component that is used to display errors
 	 */
 	errorComponent: React.ComponentType<ErrorComponentProps>;
-	/**
-	 * Get ID of data
-	 */
-	getIdOfData: NonNullable<
-		BackendMultiSelectProps<KeyT, VisibilityT, CustomT, DataT>["getIdOfData"]
-	>;
 }
 
 export const CrudSelectContext = React.createContext<
