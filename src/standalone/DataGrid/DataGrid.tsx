@@ -1132,6 +1132,8 @@ const DataGrid = (props: DataGridProps) => {
 					setState((prevState) => ({
 						...prevState,
 						dataLoadError: err as Error,
+						rowsFiltered: null,
+						rowsTotal: 0,
 					}));
 				}
 			}
