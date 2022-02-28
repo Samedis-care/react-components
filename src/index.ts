@@ -19,6 +19,7 @@ import { ImageBoxTheme } from "./standalone/FileUpload/MultiImage/ImageBox";
 import { ImageDialogEntryTheme } from "./standalone/FileUpload/MultiImage/ImageDialogEntry";
 import { MultiImageTheme } from "./standalone/FileUpload/MultiImage/MultiImage";
 import { FormPageLayoutTheme } from "./standalone/Form/FormPageLayout";
+import { FileUploadProps } from "./standalone/FileUpload/Generic";
 
 export * from "./standalone";
 
@@ -42,6 +43,9 @@ export interface ComponentsCareTheme {
 		menuItem?: MenuItemTheme;
 	};
 	fileUpload?: {
+		generic?: {
+			defaultVariant?: FileUploadProps["variant"];
+		};
 		multiImage?: {
 			root?: MultiImageTheme;
 			imageBox?: ImageBoxTheme;

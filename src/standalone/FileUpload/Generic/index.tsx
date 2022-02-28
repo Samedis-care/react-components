@@ -7,6 +7,7 @@ import {
 	Theme,
 	Tooltip,
 	Typography,
+	useTheme,
 } from "@material-ui/core";
 import { AttachFile } from "@material-ui/icons";
 import FilePreview, { getFileIconOrDefault } from "./File";
@@ -194,7 +195,11 @@ const FileUpload = (props: FileUploadProps): React.ReactElement => {
 		uploadLabel,
 		allowDuplicates,
 	} = props;
-	const variant = props.variant ?? "classic";
+	const theme = useTheme();
+	const variant =
+		props.variant ??
+		theme.componentsCare?.fileUpload?.generic?.defaultVariant ??
+		"classic";
 	const classes = useStyles(props);
 	const loadInitialFiles = () =>
 		(props.files || props.defaultFiles || []).map((meta) => ({
