@@ -87,7 +87,7 @@ const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(
 				endAdornment: (
 					<>
 						<InputAdornment position={"end"}>
-							{isTouchDevice() && hasValue && (
+							{isTouchDevice() && hasValue && !muiProps.disabled && (
 								<IconButton onClick={handleClear}>
 									<ClearIcon />
 								</IconButton>
