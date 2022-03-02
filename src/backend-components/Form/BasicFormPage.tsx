@@ -9,6 +9,7 @@ import { FormDialogDispatchContext } from "./FormDialog";
 import FormPageLayout from "../../standalone/Form/FormPageLayout";
 import FormLoaderOverlay from "../../standalone/Form/FormLoaderOverlay";
 import useCCTranslations from "../../utils/useCCTranslations";
+import { useRouteMatch } from "react-router-dom";
 
 export interface BasicFormPageRendererProps<CustomPropsT>
 	extends Omit<PageProps<ModelFieldName, CustomPropsT>, "submit" | "dirty"> {
@@ -71,6 +72,7 @@ const BasicFormPage = <RendererPropsT extends unknown, CustomPropsT>(
 	const [pushDialog] = useDialogContext();
 	const formDialog = useContext(FormDialogDispatchContext);
 	const unblock = useRef<UnregisterCallback | undefined>(undefined);
+	const match = useRouteMatch();
 
 	useEffect(() => {
 		// if the form isn't dirty, don't block submitting
@@ -79,8 +81,10 @@ const BasicFormPage = <RendererPropsT extends unknown, CustomPropsT>(
 		// otherwise we'd run into a data race, as dirty flag is not updated during submit, only afterwards, which would
 		// block the redirect to the edit page here
 		if (!dirty || readOnly || isSubmitting) return;
-		unblock.current = FrameworkHistory.block(() => {
-			// console.log("History.block(", location, ",", action, ")");
+		unblock.current = FrameworkHistory.block((location) => {
+			//console.log("History.block(", location, ",", action, ")", match);
+			// special handling: routing inside form page (e.g. routed tab panels, routed stepper)
+			if (location.pathname.startsWith(match.url)) return;
 			return `${t("backend-components.form.back-on-dirty.title")} ${t(
 				"backend-components.form.back-on-dirty.message"
 			)}`;
@@ -95,7 +99,7 @@ const BasicFormPage = <RendererPropsT extends unknown, CustomPropsT>(
 			}
 			if (formDialog) formDialog.unblockClosing();
 		};
-	}, [isSubmitting, readOnly, t, dirty, formDialog]);
+	}, [isSubmitting, readOnly, t, dirty, formDialog, match]);
 
 	// go back confirm dialog if form is dirty
 	const customProps: CustomPropsT & {
