@@ -1,5 +1,6 @@
-import { CacheOptions, ModelDataStore } from "../backend-integration";
-import { debouncePromise } from "../utils";
+import { CacheOptions } from "../backend-integration/Model/Model";
+import ModelDataStore from "../backend-integration/Store/index";
+import debouncePromise from "../utils/debouncePromise";
 
 /**
  * Simple KV Storage
