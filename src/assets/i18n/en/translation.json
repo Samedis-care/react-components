@@ -136,6 +136,10 @@
 	"non-standalone": {
 		"dialog": {
 			"okay": "Okay"
+		},
+		"language-switcher": {
+			"title": "Select your country and language",
+			"no-locales": "No locales match your search query"
 		}
 	},
 	"backend-integration": {

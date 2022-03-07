@@ -251,6 +251,10 @@
 	"non-standalone": {
 		"dialog": {
 			"okay": "xop"
+		},
+		"language-switcher": {
+			"title": "Mamlakatingizni va tilingizni tanlang",
+			"no-locales": "Sizning qidiruv so'rovingizga hech qanday mahalliy til mos kelmaydi"
 		}
 	},
 	"utils": {

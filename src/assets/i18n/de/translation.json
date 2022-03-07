@@ -251,6 +251,10 @@
 	"non-standalone": {
 		"dialog": {
 			"okay": "Okay"
+		},
+		"language-switcher": {
+			"title": "Wählen Sie Ihr Land und Ihre Sprache",
+			"no-locales": "Keine Gebietsschemas entsprechen Ihrer Suchanfrage"
 		}
 	},
 	"utils": {

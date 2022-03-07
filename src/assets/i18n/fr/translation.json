@@ -251,6 +251,10 @@
 	"non-standalone": {
 		"dialog": {
 			"okay": "D'accord"
+		},
+		"language-switcher": {
+			"title": "Sélectionnez votre pays et votre langue",
+			"no-locales": "Aucun paramètre régional ne correspond à votre requête de recherche"
 		}
 	},
 	"utils": {

@@ -9,4 +9,19 @@ const useCCTranslations = (): UseTranslationResponse<"translation"> =>
 		i18n: ccI18n,
 	});
 
+export const useCCLanguagesTranslations = (): UseTranslationResponse<"languages"> =>
+	useTranslation<"languages">("languages", {
+		i18n: ccI18n,
+	});
+
+export const useCCLocaleSwitcherTranslations = (): UseTranslationResponse<"locale-switcher"> =>
+	useTranslation<"locale-switcher">("locale-switcher", {
+		i18n: ccI18n,
+	});
+
+export const useCCCountryTranslations = (): UseTranslationResponse<"countries"> =>
+	useTranslation<"countries">("countries", {
+		i18n: ccI18n,
+	});
+
 export default useCCTranslations;
