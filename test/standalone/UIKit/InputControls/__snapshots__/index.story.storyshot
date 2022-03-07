@@ -59,3 +59,15 @@ exports[`Storyshots Standalone/UIKit/InputControls IntegerInputField 1`] = `
   </Suspense>
 </Memo(ComponentsCareFramework)>
 `;
+
+exports[`Storyshots Standalone/UIKit/InputControls MultiLanguageInput 1`] = `
+<Memo(ComponentsCareFramework)
+  defaultTheme={[Function]}
+>
+  <Suspense
+    fallback={<Memo(Loader) />}
+  >
+    <Memo(MobileScalingFix) />
+  </Suspense>
+</Memo(ComponentsCareFramework)>
+`;
