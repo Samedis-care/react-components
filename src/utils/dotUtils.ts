@@ -93,3 +93,19 @@ export const dotsToObject = (
 
 	return result;
 };
+
+export const dotSet = (
+	field: string,
+	value: Record<string, unknown>,
+	data: unknown
+): Record<string, unknown> => {
+	const fieldParts = field.split(".");
+	value = { ...value };
+	const ret = value;
+	for (let i = 0; i < fieldParts.length - 1; ++i) {
+		if (typeof value[fieldParts[i]] !== "object") throw new Error("invalid");
+		value = { ...(value[fieldParts[i]] as Record<string, unknown>) };
+	}
+	value[fieldParts[fieldParts.length - 1]] = data;
+	return ret;
+};

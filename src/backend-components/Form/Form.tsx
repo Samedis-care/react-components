@@ -22,6 +22,7 @@ import Loader from "../../standalone/Loader";
 import {
 	deepAssign,
 	deepClone,
+	dotSet,
 	dotToObject,
 	getValueByDot,
 	isObjectEmpty,
@@ -601,11 +602,7 @@ const Form = <
 	const setFieldValue = useCallback(
 		(field: string, value: unknown, validate = true) => {
 			setFieldTouched(field, true, false);
-			valuesRef.current = deepAssign(
-				{},
-				valuesRef.current,
-				dotToObject(field, value)
-			);
+			valuesRef.current = dotSet(field, valuesRef.current, value);
 			setValues(valuesRef.current);
 			if (validate) void validateField(field, value);
 		},
