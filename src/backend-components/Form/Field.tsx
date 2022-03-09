@@ -61,7 +61,7 @@ const Field = (props: FieldProps): React.ReactElement => {
 		if (typeof props.overrides === "function") {
 			fieldDef = props.overrides(fieldDef);
 		} else if (typeof props.overrides === "object") {
-			Object.assign(fieldDef, props.overrides);
+			fieldDef = Object.assign({}, fieldDef, props.overrides);
 		}
 	}
 
