@@ -236,6 +236,11 @@ const Content = (props: IDataGridContentProps) => {
 		[columns, hoverState]
 	);
 
+	// workaround for grid not re-rendering when cellRenderer changes
+	useEffect(() => {
+		dataViewRef.current?.forceUpdateGrids();
+	}, [hoverState]);
+
 	return (
 		<AutoSizer onResize={onResize}>
 			{({ width, height }) => (
