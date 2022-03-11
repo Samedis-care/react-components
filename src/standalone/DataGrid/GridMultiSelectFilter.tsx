@@ -13,6 +13,8 @@ import {
 import { useCustomFilterActiveContext } from "./Header/FilterBar";
 import { useDataGridStyles } from "./DataGrid";
 import { SelectProps } from "@material-ui/core/Select/Select";
+import { Breakpoint } from "@material-ui/core/styles/createBreakpoints";
+import { GridSize } from "@material-ui/core/Grid/Grid";
 
 export interface GridMultiSelectFilterProps {
 	/**
@@ -40,10 +42,25 @@ export interface GridMultiSelectFilterProps {
 	 * Default selection
 	 */
 	defaultSelection: string[];
+	/**
+	 * Breakpoints used in dialog
+	 */
+	dialogBreakpoints?: Partial<Record<Breakpoint, boolean | GridSize>>;
+	/**
+	 * Breakpoints used in filter bar
+	 */
+	barBreakpoints?: Partial<Record<Breakpoint, boolean | GridSize>>;
 }
 
 const GridMultiSelectFilter = (props: GridMultiSelectFilterProps) => {
-	const { label, options, onSelect, dialog } = props;
+	const {
+		label,
+		options,
+		onSelect,
+		dialog,
+		dialogBreakpoints,
+		barBreakpoints,
+	} = props;
 	const classes = useDataGridStyles();
 	const selected = props.selected ?? props.defaultSelection;
 	const isActive = !compareArrayContent(selected, props.defaultSelection);
@@ -97,7 +114,15 @@ const GridMultiSelectFilter = (props: GridMultiSelectFilterProps) => {
 
 	if (dialog) {
 		return (
-			<Grid item xs={12} md={6} lg={3} container spacing={2}>
+			<Grid
+				item
+				xs={12}
+				md={6}
+				lg={3}
+				{...dialogBreakpoints}
+				container
+				spacing={2}
+			>
 				{label && (
 					<Grid item xs={12}>
 						<Typography>{label}</Typography>
@@ -121,7 +146,7 @@ const GridMultiSelectFilter = (props: GridMultiSelectFilterProps) => {
 		);
 	} else {
 		return (
-			<Grid item xs={4}>
+			<Grid item xs={4} {...barBreakpoints}>
 				<MultiSelectWithCheckBox
 					label={label}
 					options={options}

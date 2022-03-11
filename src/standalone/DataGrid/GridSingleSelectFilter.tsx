@@ -10,6 +10,8 @@ import {
 } from "@material-ui/core";
 import { useCustomFilterActiveContext } from "./Header/FilterBar";
 import { useDataGridStyles } from "./DataGrid";
+import { Breakpoint } from "@material-ui/core/styles/createBreakpoints";
+import { GridSize } from "@material-ui/core/Grid/Grid";
 
 export interface GridSingleSelectFilterProps {
 	/**
@@ -41,10 +43,26 @@ export interface GridSingleSelectFilterProps {
 	 * Default selection
 	 */
 	defaultSelection: string;
+	/**
+	 * Breakpoints used in dialog
+	 */
+	dialogBreakpoints?: Partial<Record<Breakpoint, boolean | GridSize>>;
+	/**
+	 * Breakpoints used in filter bar
+	 */
+	barBreakpoints?: Partial<Record<Breakpoint, boolean | GridSize>>;
 }
 
 const GridSingleSelectFilter = (props: GridSingleSelectFilterProps) => {
-	const { label, options, onSelect, dialog, autocompleteId } = props;
+	const {
+		label,
+		options,
+		onSelect,
+		dialog,
+		autocompleteId,
+		dialogBreakpoints,
+		barBreakpoints,
+	} = props;
 	const classes = useDataGridStyles();
 	const selected = props.selected ?? props.defaultSelection;
 	const isActive = selected !== props.defaultSelection;
@@ -83,7 +101,7 @@ const GridSingleSelectFilter = (props: GridSingleSelectFilterProps) => {
 
 	if (dialog) {
 		return (
-			<Grid item xs={12} md={6} lg={3}>
+			<Grid item xs={12} md={6} lg={3} {...dialogBreakpoints}>
 				<FormControl component={"fieldset"}>
 					<RadioGroup value={selected} onChange={handleDialogRadioToggle}>
 						<Grid item xs={12} container spacing={2}>
@@ -109,7 +127,7 @@ const GridSingleSelectFilter = (props: GridSingleSelectFilterProps) => {
 		);
 	} else {
 		return (
-			<Grid item xs={4}>
+			<Grid item xs={4} {...barBreakpoints}>
 				<FormControl component={"fieldset"} fullWidth>
 					<SingleSelect
 						label={label}
