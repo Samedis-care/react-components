@@ -142,6 +142,14 @@ export interface CrudProps<
 	 */
 	importUpdateKey?: CrudImportProps<KeyT, VisibilityT, CustomT>["updateKey"];
 	/**
+	 * Additional filters to be sent when doing update key index requests
+	 */
+	importUpdateKeyAdditionalFilters?: CrudImportProps<
+		KeyT,
+		VisibilityT,
+		CustomT
+	>["updateKeyAdditionalFilters"];
+	/**
 	 * How-to information for the import
 	 */
 	importHowTo?: CrudImportProps<KeyT, VisibilityT, CustomT>["howTo"];
@@ -199,6 +207,7 @@ const CRUD = <
 		importConfig,
 		importUpdateKey,
 		importHowTo,
+		importUpdateKeyAdditionalFilters,
 	} = props;
 	const hasImportPermission =
 		!importUpdateKey ||
@@ -254,7 +263,10 @@ const CRUD = <
 			const { id } = data as Record<"id", string>;
 			if (disableRouting) {
 				setId((oldId) => (oldId === null ? null : id));
-			} else if (location.pathname.endsWith("/new")) {
+			} else if (
+				location.pathname.startsWith(url + "/new") ||
+				location.pathname.startsWith(url + "/new/")
+			) {
 				history.replace(`${url}/${id}`);
 			}
 
@@ -310,6 +322,7 @@ const CRUD = <
 			model={props.model}
 			importConfig={importConfig}
 			updateKey={importUpdateKey}
+			updateKeyAdditionalFilters={importUpdateKeyAdditionalFilters}
 			howTo={importHowTo}
 			guided={guided}
 		/>

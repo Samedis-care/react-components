@@ -17,7 +17,13 @@ interface ImportCounters {
 }
 
 const Step4Import = (props: CrudImporterStepProps) => {
-	const { model, state, setState, updateKey } = props;
+	const {
+		model,
+		state,
+		setState,
+		updateKey,
+		additionalUpdateKeyFilters,
+	} = props;
 
 	const { t } = useCCTranslations();
 
@@ -101,6 +107,7 @@ const Step4Import = (props: CrudImporterStepProps) => {
 										value2: "",
 									},
 								},
+								additionalFilters: additionalUpdateKeyFilters,
 							});
 							const rows = meta.filteredRows ?? meta.totalRows;
 							if (rows == 1) {

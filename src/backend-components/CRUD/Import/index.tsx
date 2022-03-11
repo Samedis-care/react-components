@@ -43,6 +43,10 @@ export interface CrudImportProps<
 	 */
 	updateKey?: KeyT;
 	/**
+	 * Additional filter parameter for backend index calls
+	 */
+	updateKeyAdditionalFilters?: Record<string, unknown>;
+	/**
 	 * How-to information
 	 */
 	howTo?: (string | React.ReactNode)[];
@@ -86,6 +90,7 @@ export interface CrudImporterState {
 export interface CrudImporterStepProps {
 	model: Model<ModelFieldName, PageVisibility, unknown>;
 	updateKey: string | undefined;
+	additionalUpdateKeyFilters: Record<string, unknown> | undefined;
 	hasImportConfig: boolean;
 	state: CrudImporterState;
 	setState: Dispatch<SetStateAction<CrudImporterState>>;
@@ -114,7 +119,13 @@ const CrudImport = <
 >(
 	props: CrudImportProps<KeyT, VisibilityT, CustomT>
 ) => {
-	const { model, importConfig, updateKey, howTo } = props;
+	const {
+		model,
+		importConfig,
+		updateKey,
+		updateKeyAdditionalFilters,
+		howTo,
+	} = props;
 	const guided = props.guided && importConfig;
 	const classes = useStyles();
 	const { t } = useCCTranslations();
@@ -190,6 +201,7 @@ const CrudImport = <
 						}
 						howTo={guided ? howTo : undefined}
 						updateKey={updateKey}
+						additionalUpdateKeyFilters={updateKeyAdditionalFilters}
 						hasImportConfig={hasImportConfig}
 						state={state}
 						setState={setState}
@@ -205,6 +217,7 @@ const CrudImport = <
 							>
 						}
 						updateKey={updateKey}
+						additionalUpdateKeyFilters={updateKeyAdditionalFilters}
 						hasImportConfig={hasImportConfig}
 						state={state}
 						setState={setState}
@@ -220,6 +233,7 @@ const CrudImport = <
 							>
 						}
 						updateKey={updateKey}
+						additionalUpdateKeyFilters={updateKeyAdditionalFilters}
 						hasImportConfig={hasImportConfig}
 						state={state}
 						setState={setState}
@@ -235,6 +249,7 @@ const CrudImport = <
 							>
 						}
 						updateKey={updateKey}
+						additionalUpdateKeyFilters={updateKeyAdditionalFilters}
 						hasImportConfig={hasImportConfig}
 						state={state}
 						setState={setState}
