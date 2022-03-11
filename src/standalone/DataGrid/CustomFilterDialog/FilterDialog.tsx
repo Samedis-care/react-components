@@ -46,16 +46,18 @@ const FilterDialog = (props: DataGridCustomFilterDialogProps) => {
 					inDialog
 				/>
 			</Grid>
-			<Divider />
-			<Grid container justify={"flex-end"}>
-				<Grid item>
-					<Box m={2}>
-						<Button onClick={props.closeFilterDialog} variant={"contained"}>
-							{t("standalone.data-grid.settings.close") || ""}
-						</Button>
-					</Box>
+			<div className={classes.contentOverlayClosed}>
+				<Divider />
+				<Grid container justify={"flex-end"}>
+					<Grid item>
+						<Box m={2}>
+							<Button onClick={props.closeFilterDialog} variant={"contained"}>
+								{t("standalone.data-grid.settings.close") || ""}
+							</Button>
+						</Box>
+					</Grid>
 				</Grid>
-			</Grid>
+			</div>
 		</Paper>
 	);
 };
