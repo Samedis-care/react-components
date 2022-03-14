@@ -51,6 +51,7 @@ class RendererImage extends TypeImage {
 						uploadLabel={this.params?.uploadLabel}
 						convertImagesTo={this.params?.convertImagesTo}
 						downscale={this.params?.downscale}
+						variant={this.params?.variant}
 					/>
 					<FormHelperText error={!!errorMsg}>{errorMsg}</FormHelperText>
 				</>

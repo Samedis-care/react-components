@@ -8,7 +8,7 @@ import ccI18n from "../../../i18n";
 export type TypeImageParams = Partial<
 	Pick<
 		ImageSelectorProps,
-		"uploadLabel" | "convertImagesTo" | "downscale" | "capture"
+		"uploadLabel" | "convertImagesTo" | "downscale" | "capture" | "variant"
 	>
 >;
 
@@ -20,6 +20,10 @@ abstract class TypeImage implements Type<string> {
 
 	constructor(params?: TypeImageParams) {
 		this.params = params;
+	}
+
+	public getParams(): TypeImageParams {
+		return this.params ?? {};
 	}
 
 	abstract render(params: ModelRenderParams<string>): React.ReactElement;
