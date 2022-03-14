@@ -118,24 +118,16 @@ class LazyConnector<
 		params: Partial<IDataGridLoadDataParameters> | undefined,
 		model: Model<KeyT, VisibilityT, CustomT> | undefined
 	): Promise<[Record<string, unknown>[], ResponseMeta, unknown?]> {
-		if (this.fakeReads) {
-			const fakeMeta: ResponseMeta = { totalRows: 0, filteredRows: 0 };
-			const fakeData: Record<string, unknown>[] = [];
-			const result: [Record<string, unknown>[], ResponseMeta, unknown?] = [
-				fakeData,
-				fakeMeta,
-			];
-			this.queue.forEach((entry) => {
-				result[0].push((entry.result as ModelGetResponse<KeyT>)[0]);
-				if (result[1].filteredRows) ++result[1].filteredRows;
-				++result[1].totalRows;
-			});
-			return result;
+		let result: [Record<string, unknown>[], ResponseMeta, unknown?] = [
+			[],
+			{ totalRows: 0, filteredRows: 0 },
+		];
+
+		if (!this.fakeReads) {
+			result = await this.realConnector.index(params, model);
 		}
 
-		const result = await this.realConnector.index(params, model);
-
-		if (this.indexEnhancement == IndexEnhancementLevel.None) return result;
+		if (this.indexEnhancement === IndexEnhancementLevel.None) return result;
 
 		// map real ids to fake ids for consistency
 		result[0] = result[0].map((entry) => ({
