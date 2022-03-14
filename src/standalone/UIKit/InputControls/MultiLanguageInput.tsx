@@ -4,6 +4,7 @@ import {
 	IconButton,
 	InputAdornment,
 	TextField,
+	TextFieldProps,
 	Tooltip,
 	Typography,
 } from "@material-ui/core";
@@ -197,7 +198,17 @@ export type MultiLanguageInputSupportedLanguages =
 	| "zh"
 	| "zu";
 
-export interface MultiLanguageInputProps {
+export type MultiLanguageInputProps = Omit<
+	TextFieldProps,
+	| "value"
+	| "onChange"
+	| "onBlur"
+	| "InputProps"
+	| "label"
+	| "name"
+	| "required"
+	| "fullWidth"
+> & {
 	/**
 	 * The languages shown
 	 * First entry is fallback default language
@@ -223,10 +234,6 @@ export interface MultiLanguageInputProps {
 	 */
 	label?: string;
 	/**
-	 * Disable control?
-	 */
-	disabled?: boolean;
-	/**
 	 * Disable red translate icon if translation is incomplete
 	 */
 	disableIncompleteMarker?: boolean;
@@ -234,10 +241,6 @@ export interface MultiLanguageInputProps {
 	 * Name of the control (used for form engine)
 	 */
 	name?: string;
-	/**
-	 * Multi line mode
-	 */
-	multiline?: boolean;
 	/**
 	 * Is the default language required
 	 */
@@ -250,7 +253,7 @@ export interface MultiLanguageInputProps {
 	 * Display error
 	 */
 	error?: boolean;
-}
+};
 
 const MultiLanguageInput = (props: MultiLanguageInputProps) => {
 	const {
@@ -260,18 +263,17 @@ const MultiLanguageInput = (props: MultiLanguageInputProps) => {
 		name,
 		onBlur,
 		label,
-		multiline,
-		disabled,
 		disableIncompleteMarker,
 		required,
 		ignoreI18nLocale,
+		...textFieldProps
 	} = props;
 	const { t, i18n } = useCCLanguagesTranslations();
 	const [expanded, setExpanded] = useState(false);
 	const toggleExpanded = useCallback(() => setExpanded((prev) => !prev), []);
 
 	const incomplete =
-		!disabled &&
+		!textFieldProps.disabled &&
 		!disableIncompleteMarker &&
 		enabledLanguages.map((lng) => (values[lng] ?? "").trim()).find((e) => !e) !=
 			null;
@@ -316,13 +318,12 @@ const MultiLanguageInput = (props: MultiLanguageInputProps) => {
 		<Grid container spacing={2} data-name={name} onBlur={onBlur}>
 			<Grid item xs={12}>
 				<TextField
+					{...textFieldProps}
 					fullWidth
 					label={label}
 					value={values[defaultLanguage] ?? ""}
 					name={`${name ?? "mli"}-${defaultLanguage}`}
 					onChange={handleChange}
-					disabled={disabled}
-					multiline={multiline}
 					required={required}
 					InputProps={{
 						startAdornment: expanded && (
@@ -354,12 +355,11 @@ const MultiLanguageInput = (props: MultiLanguageInputProps) => {
 					.map((lang) => (
 						<Grid item xs={12} key={lang}>
 							<TextField
+								{...textFieldProps}
 								fullWidth
 								value={values[lang] ?? ""}
 								onChange={handleChange}
 								name={`${name ?? "mli"}-${lang}`}
-								disabled={disabled}
-								multiline={multiline}
 								InputProps={{
 									startAdornment: (
 										<InputAdornment position={"start"}>
