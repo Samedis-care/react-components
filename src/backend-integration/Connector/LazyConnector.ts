@@ -71,7 +71,6 @@ class LazyConnector<
 		model: Model<KeyT, VisibilityT, CustomT> | undefined
 	): ModelGetResponse<KeyT> {
 		const fakeId = `${this.FAKE_ID_PREFIX}${this.fakeIdCounter++}`;
-
 		const returnData: ModelGetResponse<KeyT> = [
 			{
 				...data,
@@ -122,7 +121,16 @@ class LazyConnector<
 		if (this.fakeReads) {
 			const fakeMeta: ResponseMeta = { totalRows: 0, filteredRows: 0 };
 			const fakeData: Record<string, unknown>[] = [];
-			return [fakeData, fakeMeta];
+			const result: [Record<string, unknown>[], ResponseMeta, unknown?] = [
+				fakeData,
+				fakeMeta,
+			];
+			this.queue.forEach((entry) => {
+				result[0].push((entry.result as ModelGetResponse<KeyT>)[0]);
+				if (result[1].filteredRows) ++result[1].filteredRows;
+				++result[1].totalRows;
+			});
+			return result;
 		}
 
 		const result = await this.realConnector.index(params, model);
