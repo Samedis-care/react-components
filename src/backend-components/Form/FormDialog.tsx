@@ -103,7 +103,7 @@ const FormDialog = (props: FormDialogProps) => {
 			fullWidth
 			disableBackdropClick
 		>
-			<DialogTitle onClose={handleClose}>
+			<DialogTitle onClose={handleClose} noTitle={!dialogTitle}>
 				{dialogTitle}
 				{openInNewLink && (
 					<OpenInNew

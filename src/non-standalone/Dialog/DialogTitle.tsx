@@ -3,11 +3,17 @@ import MuiDialogTitle from "@material-ui/core/DialogTitle";
 import { makeStyles } from "@material-ui/core/styles";
 import { Close } from "@material-ui/icons";
 import { Grid, IconButton, Typography } from "@material-ui/core";
+import { combineClassNames } from "../../utils";
 
 const useClasses = makeStyles((theme) => ({
 	root: {
 		margin: 0,
 		padding: theme.spacing(2),
+	},
+	noTitle: {
+		padding: theme.spacing(1),
+		position: "absolute",
+		right: 0,
 	},
 	closeButton: {
 		color: theme.palette.grey[500],
@@ -26,14 +32,22 @@ export interface DialogTitleProps {
 	id?: string;
 	children: React.ReactNode;
 	onClose?: () => void;
+	/**
+	 * special CSS which puts buttons on the right floating
+	 */
+	noTitle?: boolean;
 }
 
 const DialogTitleRaw = (props: DialogTitleProps) => {
-	const { id, children, onClose } = props;
+	const { id, children, onClose, noTitle } = props;
 
 	const classes = useClasses();
 	return (
-		<MuiDialogTitle id={id} disableTypography className={classes.root}>
+		<MuiDialogTitle
+			id={id}
+			disableTypography
+			className={combineClassNames([classes.root, noTitle && classes.noTitle])}
+		>
 			<Grid container wrap={"nowrap"}>
 				<Grid item className={classes.textWrapper}>
 					<Typography variant="h6" noWrap className={classes.text}>
