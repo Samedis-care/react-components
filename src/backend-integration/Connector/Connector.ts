@@ -140,7 +140,7 @@ abstract class Connector<
 	): Promise<void> | void;
 
 	/**
-	 * Delets multiple data entries at once. Should be overwritten if implemented by your backend.
+	 * Deletes multiple data entries at once. Should be overwritten if implemented by your backend.
 	 * @param ids The IDs of the data entries to delete
 	 * @param model The model performing the request
 	 */
