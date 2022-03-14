@@ -71,7 +71,6 @@ class LazyConnector<
 		model: Model<KeyT, VisibilityT, CustomT> | undefined
 	): ModelGetResponse<KeyT> {
 		const fakeId = `${this.FAKE_ID_PREFIX}${this.fakeIdCounter++}`;
-
 		const returnData: ModelGetResponse<KeyT> = [
 			{
 				...data,
@@ -119,15 +118,16 @@ class LazyConnector<
 		params: Partial<IDataGridLoadDataParameters> | undefined,
 		model: Model<KeyT, VisibilityT, CustomT> | undefined
 	): Promise<[Record<string, unknown>[], ResponseMeta, unknown?]> {
-		if (this.fakeReads) {
-			const fakeMeta: ResponseMeta = { totalRows: 0, filteredRows: 0 };
-			const fakeData: Record<string, unknown>[] = [];
-			return [fakeData, fakeMeta];
+		let result: [Record<string, unknown>[], ResponseMeta, unknown?] = [
+			[],
+			{ totalRows: 0, filteredRows: 0 },
+		];
+
+		if (!this.fakeReads) {
+			result = await this.realConnector.index(params, model);
 		}
 
-		const result = await this.realConnector.index(params, model);
-
-		if (this.indexEnhancement == IndexEnhancementLevel.None) return result;
+		if (this.indexEnhancement === IndexEnhancementLevel.None) return result;
 
 		// map real ids to fake ids for consistency
 		result[0] = result[0].map((entry) => ({
