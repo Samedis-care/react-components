@@ -111,6 +111,10 @@ export interface IDialogConfigInput
 	 */
 	textFieldLabel: string;
 	/**
+	 * The input field placeholder
+	 */
+	textFieldPlaceholder?: string;
+	/**
 	 * The validator for the input field.
 	 * Called when user presses "yes"
 	 * @param value The current input

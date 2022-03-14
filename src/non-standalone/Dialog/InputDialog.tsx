@@ -23,8 +23,11 @@ const InputDialogRaw = (props: IDialogConfigInput) => {
 	const [value, setValue] = useState("");
 
 	const updateValue = useCallback(
-		(evt: ChangeEvent<HTMLInputElement>) => setValue(evt.target.value),
-		[setValue]
+		(evt: ChangeEvent<HTMLInputElement>) => {
+			setValue(evt.target.value);
+			setValid(textFieldValidator(evt.target.value));
+		},
+		[textFieldValidator]
 	);
 
 	const removeDialog = React.useCallback(() => {
@@ -55,6 +58,7 @@ const InputDialogRaw = (props: IDialogConfigInput) => {
 					autoFocus
 					margin="dense"
 					label={props.textFieldLabel}
+					placeholder={props.textFieldPlaceholder}
 					type="text"
 					value={value}
 					onChange={updateValue}
