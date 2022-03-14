@@ -84,8 +84,12 @@
 		"transform": {
 			".(ts|tsx)": "ts-jest"
 		},
+		"moduleNameMapper": {
+			"\\.svg$": "<rootDir>/test/svg-stub.js"
+		},
 		"testPathIgnorePatterns": [
 			"/node_modules/",
+			"/src/assets/",
 			"/docs/",
 			"/dist/"
 		],
