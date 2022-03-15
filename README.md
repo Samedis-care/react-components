@@ -1,16 +1,16 @@
-# [Components.care React](https://components-care.github.io/react-components/)
+# [Components.care React](https://samedis-care.github.io/react-components/)
 
-[![dependencies Status](https://david-dm.org/Components-care/react-components/status.svg)](https://david-dm.org/Components-care/react-components)
-[![devDependencies Status](https://david-dm.org/Components-care/react-components/dev-status.svg)](https://david-dm.org/Components-care/react-components?type=dev)
-[![peerDependencies Status](https://david-dm.org/Components-care/react-components/peer-status.svg)](https://david-dm.org/Components-care/react-components?type=peer)
+[![dependencies Status](https://david-dm.org/Samedis-care/react-components/status.svg)](https://david-dm.org/Samedis-care/react-components)
+[![devDependencies Status](https://david-dm.org/Samedis-care/react-components/dev-status.svg)](https://david-dm.org/Samedis-care/react-components?type=dev)
+[![peerDependencies Status](https://david-dm.org/Samedis-care/react-components/peer-status.svg)](https://david-dm.org/Samedis-care/react-components?type=peer)
 
-Take a look at our [Storybook](https://components-care.github.io/react-components/storybook/)
+Take a look at our [Storybook](https://samedis-care.github.io/react-components/storybook/)
 
 ## Installing
 
-> `npm install "git://github.com/Components-care/react-components.git#master_dist" --save --legacy-peer-deps`
+> `npm install "git://github.com/Samedis-care/react-components.git#master_dist" --save --legacy-peer-deps`
 
-> `yarn add "git://github.com/Components-care/react-components.git#master_dist"`
+> `yarn add "git://github.com/Samedis-care/react-components.git#master_dist"`
 
 Note: Make sure to install all peer-dependencies
 
