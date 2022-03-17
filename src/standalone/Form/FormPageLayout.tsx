@@ -13,15 +13,20 @@ export interface FormPageLayoutProps {
 const useStyles = makeStyles(
 	{
 		wrapper: {
-			minHeight: "100%",
-			height: "100%",
+			flexGrow: 1,
+			display: "flex",
+			flexDirection: "column",
 		},
 		box: {
-			height: "100%",
+			flexGrow: 1,
+			display: "flex",
+			flexDirection: "column",
 		},
 		body: {
 			paddingBottom: 150,
-			height: "100%",
+			flexGrow: 1,
+			display: "flex",
+			flexDirection: "column",
 		},
 		footer: {
 			position: "absolute",

@@ -618,6 +618,7 @@ const useStyles = makeStyles(
 		wrapper: {
 			width: theme.componentsCare?.dataGrid?.width || "100%",
 			height: theme.componentsCare?.dataGrid?.height || "100%",
+			flexGrow: 1,
 			borderRadius:
 				theme.componentsCare?.dataGrid?.borderRadius ||
 				theme.shape.borderRadius,
