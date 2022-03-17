@@ -99,13 +99,16 @@ export const dotSet = (
 	value: Record<string, unknown>,
 	data: unknown
 ): Record<string, unknown> => {
+	if (typeof value !== "object") throw new Error("invalid");
 	const fieldParts = field.split(".");
-	value = { ...value };
-	const ret = value;
-	for (let i = 0; i < fieldParts.length - 1; ++i) {
-		if (typeof value[fieldParts[i]] !== "object") throw new Error("invalid");
-		value = { ...(value[fieldParts[i]] as Record<string, unknown>) };
-	}
-	value[fieldParts[fieldParts.length - 1]] = data;
+	const ret = { ...value };
+	ret[fieldParts[0]] =
+		fieldParts.length > 1
+			? dotSet(
+					fieldParts.slice(1).join("."),
+					ret[fieldParts[0]] as Record<string, unknown>,
+					data
+			  )
+			: data;
 	return ret;
 };
