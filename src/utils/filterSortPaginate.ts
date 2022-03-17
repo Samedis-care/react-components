@@ -6,19 +6,22 @@ import {
 } from "../standalone/DataGrid/DataGrid";
 
 /**
- * Applies the given filters, sort and pagination settings to the given data
+ * Applies the given filters, sort and offset-based pagination settings to the given data.
  * @param rowData The data to filter, sort and paginate
  * @param params The filter, sort and pagination settings
  * @param columnDef Metadata about the columns
  * @returns An array containing the filtered, sorted and paginated data in the first slot
  *          and the total amount of filtered rows before pagination in the second slot
  */
-const filterSortPaginate = (
+export const filterSortPaginate2 = (
 	rowData: DataGridRowData[],
-	params: IDataGridLoadDataParameters,
+	params: Omit<IDataGridLoadDataParameters, "page" | "rows"> & {
+		offset: number;
+		rows: number;
+	},
 	columnDef: IDataGridColumnDef[]
 ): [DataGridRowData[], number] => {
-	const { page, rows: rowsPerPage, quickFilter, fieldFilter, sort } = params;
+	const { offset, rows: amountRows, quickFilter, fieldFilter, sort } = params;
 	// quickfilter
 	if (quickFilter) {
 		rowData = rowData.filter((row) => {
@@ -186,12 +189,25 @@ const filterSortPaginate = (
 	});
 
 	// pagination
-	const pageIndex = page - 1;
 	const filteredRows = rowData.length;
-	return [
-		[...rowData].splice(pageIndex * rowsPerPage, rowsPerPage),
-		filteredRows,
-	];
+	return [[...rowData].splice(offset, amountRows), filteredRows];
+};
+
+/**
+ * Applies the given filters, sort and pagination settings to the given data
+ * @param rowData The data to filter, sort and paginate
+ * @param params The filter, sort and pagination settings
+ * @param columnDef Metadata about the columns
+ * @returns An array containing the filtered, sorted and paginated data in the first slot
+ *          and the total amount of filtered rows before pagination in the second slot
+ */
+const filterSortPaginate = (
+	rowData: DataGridRowData[],
+	params: IDataGridLoadDataParameters,
+	columnDef: IDataGridColumnDef[]
+): [DataGridRowData[], number] => {
+	const offset = (params.page - 1) * params.rows;
+	return filterSortPaginate2(rowData, { ...params, offset }, columnDef);
 };
 
 export default filterSortPaginate;
