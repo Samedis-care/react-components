@@ -1,81 +1,88 @@
 {
 	"standalone": {
+		"schedule": {
+			"week": "Woche",
+			"today": "Heute"
+		},
+		"how-it-works": {
+			"title": "Wie es funktioniert"
+		},
 		"data-grid": {
 			"content": {
 				"filter": "Filter",
+				"reset-column-filter": "Filter löschen",
 				"bool-filter": {
-					"any": "Beliebiger Wert",
+					"true": "Alle wahrheitsgemäßen Werte",
 					"false": "Alle falschen Werte",
-					"true": "Alle wahrheitsgemäßen Werte"
+					"any": "Beliebiger Wert"
 				},
-				"no-data": "Die Liste enthält keine Daten.",
 				"set-filter": {
 					"search": "Suche...",
 					"select-all": "Wählen Sie Alle"
 				},
 				"filter-type": {
-					"contains": "Enthält",
-					"ends-with": "Endet mit",
 					"eq": "Gleich",
+					"not-eq": "Nicht gleich",
+					"empty": "Ist leer",
+					"not-empty": "Ist nicht leer",
+					"contains": "Enthält",
+					"not-contains": "Enthält nicht",
+					"starts-with": "Beginnt mit",
+					"ends-with": "Endet mit",
+					"lt": "Weniger als",
+					"lte": "Weniger als oder gleich",
 					"gt": "Größer als",
 					"gte": "Größer als oder gleich",
 					"in-range": "Im Bereich",
-					"lt": "Weniger als",
-					"lte": "Weniger als oder gleich",
-					"not-contains": "Enthält nicht",
-					"not-eq": "Nicht gleich",
-					"starts-with": "Beginnt mit",
-					"gt-date": "Nach dem",
-					"gte-date": "Am oder nach",
-					"in-range-date": "Zwischen",
 					"lt-date": "Vor",
 					"lte-date": "Vorher oder am",
-					"not-empty": "Ist nicht leer",
-					"empty": "Ist leer"
+					"gt-date": "Nach dem",
+					"gte-date": "Am oder nach",
+					"in-range-date": "Zwischen"
 				},
-				"reset-column-filter": "Filter löschen"
-			},
-			"settings": {
-				"close": "Schließen",
-				"column": "Spalte",
-				"pin": "Anheften",
-				"show": "Sichtbar"
+				"no-data": "Die Liste enthält keine Daten."
 			},
 			"header": {
-				"settings": "Einstellungen",
-				"reset": "Zurücksetzen",
 				"new": "Neu",
 				"export": "Exportieren",
-				"edit": "Bearbeiten",
-				"delete": "Löschen",
+				"import": "Importieren",
+				"settings": "Einstellungen",
+				"reset": "Zurücksetzen",
 				"custom-filter-button": "Filter",
+				"delete": "Löschen",
+				"edit": "Bearbeiten",
 				"reset-options": {
-					"all": "Alles zurücksetzen",
-					"column": "Spalteneinstellungen zurücksetzen",
+					"refresh": "Neu laden",
 					"filter": "Filter zurücksetzen",
 					"sort": "Sortiereinstellungen zurücksetzen",
+					"column": "Spalteneinstellungen zurücksetzen",
 					"width": "Spaltenbreiten zurücksetzen",
-					"refresh": "Neu laden"
-				},
-				"import": "Importieren"
+					"all": "Alles zurücksetzen"
+				}
 			},
-			"footer": {
-				"prev-page": "Vorherige Seite",
-				"page-size": "Seitengröße:",
-				"page-of": "von",
-				"next-page": "Nächste Seite",
-				"last-page": "Letzte Seite",
-				"first-page": "Erste Seite",
-				"page-size-tooltip": "Anzahl Einträge pro Seite",
-				"delete": "Löschen",
-				"edit": "Bearbeiten",
-				"filtered": "Gefiltert:",
-				"select-all": "Alle",
-				"total": "Gesamt:",
-				"more": "Mehr"
+			"settings": {
+				"column": "Spalte",
+				"show": "Sichtbar",
+				"pin": "Anheften",
+				"close": "Schließen"
 			},
 			"custom-filters": {
 				"title": "Filterauswahl"
+			},
+			"footer": {
+				"total": "Gesamt:",
+				"filtered": "Gefiltert:",
+				"edit": "Bearbeiten",
+				"delete": "Löschen",
+				"more": "Mehr",
+				"select-all": "Alle",
+				"first-page": "Erste Seite",
+				"last-page": "Letzte Seite",
+				"next-page": "Nächste Seite",
+				"page-of": "von",
+				"page-size": "Seitengröße:",
+				"page-size-tooltip": "Anzahl Einträge pro Seite",
+				"prev-page": "Vorherige Seite"
 			}
 		},
 		"selector": {
@@ -84,37 +91,30 @@
 				"no-options-text": "Keine Optionen",
 				"close-icon-text": "Schließen",
 				"open-icon-text": "Öffnen",
+				"clear-icon-text": "Leeren",
 				"loading-text": "Lade...",
 				"start-typing-to-search-text": "Geben Sie eine Suchzeichenfolge ein, um Ergebnisse zu erhalten",
-				"clear-icon-text": "Leeren",
 				"lru-label": "Zuletzt verwendet"
 			}
 		},
-		"schedule": {
-			"week": "Woche",
-			"today": "Heute"
-		},
-		"how-it-works": {
-			"title": "Wie es funktioniert"
-		},
 		"file-upload": {
-			"formats": "Dateiformate",
 			"upload": "Hochladen",
+			"upload-modern": "Datei per Drag & Drop hier ablegen oder klicken für einen Upload Dialog",
+			"no-files": "Keine Anhänge verfügbar",
+			"formats": "Dateiformate",
+			"formats-modern": "Erlaubte Dateiformate:",
 			"error": {
-				"invalid-type": "Nicht unterstützter Dateityp ausgewählt",
+				"too-many": "Zu viele Dateien ausgewählt",
 				"limit-reached": "Maximale Anzahl der erlaubten Dateien erreicht",
-				"too-many": "Zu viele Dateien ausgewählt"
+				"invalid-type": "Nicht unterstützter Dateityp ausgewählt"
 			},
 			"format": {
 				"any": "Alle"
 			},
-			"no-files": "Keine Anhänge verfügbar",
 			"multi-image": {
-				"primary": "Primär",
-				"edit": "Bearbeiten"
-			},
-			"formats-modern": "Erlaubte Dateiformate:",
-			"upload-modern": "Datei per Drag & Drop hier ablegen oder klicken für einen Upload Dialog"
+				"edit": "Bearbeiten",
+				"primary": "Primär"
+			}
 		},
 		"phone-number": {
 			"invalid": "Korrekte Rufnummer eingeben"
@@ -128,124 +128,9 @@
 			"sign-here": "Hier digital unterschrieben"
 		}
 	},
-	"backend-integration": {
-		"model": {
-			"types": {
-				"renderers": {
-					"date": {
-						"not-set": "Datum nicht gesetzt",
-						"labels": {
-							"cancel": "Abbrechen",
-							"clear": "Löschen",
-							"invalid": "Ungültig",
-							"ok": "OK",
-							"today": "Heute",
-							"invalid-date": "Ungültiges Datumsformat",
-							"min-date": "Der Termin sollte nicht vor dem Mindestdatum liegen",
-							"max-date": "Das Datum sollte nicht nach dem maximalen Datum liegen"
-						},
-						"validation-error": "Bitte geben Sie ein gültiges Datum ein"
-					},
-					"image": {
-						"not-set": "Bild nicht vorhanden"
-					},
-					"files": {
-						"no-file": "Keine Dateien vorhanden"
-					},
-					"enum": {
-						"unknown": "Unbekannt"
-					},
-					"boolean": {
-						"true": "Ja",
-						"false": "Nein"
-					},
-					"signature": {
-						"not-set": "Nicht unterschrieben"
-					}
-				},
-				"boolean": {
-					"true": "Ja",
-					"false": "Nein"
-				},
-				"date-nullable": {
-					"not-set": "N/A"
-				},
-				"image": {
-					"not-set": "Bild nicht vorhanden",
-					"set": "Bild vorhanden"
-				}
-			}
-		},
-		"connector": {
-			"json-api-client": {
-				"network-error": "Ein Netzwerkfehler ist aufgetreten.",
-				"parse-error": "Konnte die Antwort des Servers nicht verstehen (Ungültiges JSON). Der Server gab den Status {{STATUS_CODE}} {{STATUS_TEXT}} zurück."
-			}
-		}
-	},
-	"backend-components": {
-		"data-grid": {
-			"delete": {
-				"error-dialog": {
-					"title": "Fehler",
-					"message": "Das Löschen der ausgewählten Einträge ist fehlgeschlagen: {{ERROR}}",
-					"buttons": {
-						"okay": "Okay"
-					}
-				},
-				"confirm-dialog": {
-					"title": "Löschen",
-					"messageInverted": "Wollen Sie wirklich alles außer {{NUM}}-Einträgen löschen?",
-					"message": "Wollen Sie wirklich {{NUM}}-Einträge löschen?",
-					"buttons": {
-						"yes": "Ja",
-						"no": "Nein"
-					}
-				}
-			}
-		},
-		"form": {
-			"back-on-dirty": {
-				"message": "Änderungen gehen verloren",
-				"title": "Formularseite verlassen?",
-				"no": "Nein",
-				"yes": "Ja"
-			}
-		},
-		"selector": {
-			"loading": "Wird geladen...",
-			"loading-error": "Fehler beim Abrufen der Daten"
-		},
-		"crud": {
-			"import": {
-				"conv_script": "Konvertierungsskript (JavaScript)",
-				"destination_fields": "Zielfelder",
-				"error": "Fehler",
-				"failed": "Fehlgeschlagen: {{COUNT}}",
-				"last_error": "Letzter Fehler",
-				"queue": "In Warteschlange: {{COUNT}}",
-				"source_field": "Feld",
-				"source_field_type": "Datentypen",
-				"source_fields": "Quellfelder",
-				"step1": "Daten hochladen",
-				"step2": "Daten verbinden",
-				"step3": "Validierung & Überprüfung",
-				"step4": "Daten importieren",
-				"success": "Erfolg: {{COUNT}}",
-				"valid": "Gültig",
-				"validations": {
-					"boolean": "Ergebnis muss ein boolescher Wert oder null sein",
-					"currency_unsupported": "Währung kann noch nicht importiert werden",
-					"date": "Ergebnis muss ein Datum oder null sein",
-					"fail": "Validierung fehlgeschlagen: {{REASON}}. Für Details siehe Browser-Konsole.",
-					"number": "Ergebnis muss eine Zahl oder null sein",
-					"string": "Ergebnis muss eine Zeichenfolge oder null sein",
-					"unknown": "Unbekannt"
-				},
-				"errors": {
-					"file_select": "Ungültige Datei ausgewählt"
-				}
-			}
+	"framework": {
+		"dialogs": {
+			"navblock": "Die Navigation ist gesperrt. Bitte schließe zuerst die geöffneten Dialoge."
 		}
 	},
 	"non-standalone": {
@@ -257,6 +142,126 @@
 			"no-locales": "Keine Gebietsschemas entsprechen Ihrer Suchanfrage"
 		}
 	},
+	"backend-integration": {
+		"connector": {
+			"json-api-client": {
+				"network-error": "Ein Netzwerkfehler ist aufgetreten.",
+				"parse-error": "Konnte die Antwort des Servers nicht verstehen (Ungültiges JSON). Der Server gab den Status {{STATUS_CODE}} {{STATUS_TEXT}} zurück."
+			}
+		},
+		"model": {
+			"types": {
+				"renderers": {
+					"boolean": {
+						"true": "Ja",
+						"false": "Nein"
+					},
+					"date": {
+						"labels": {
+							"invalid": "Ungültig",
+							"cancel": "Abbrechen",
+							"clear": "Löschen",
+							"ok": "OK",
+							"today": "Heute",
+							"invalid-date": "Ungültiges Datumsformat",
+							"max-date": "Das Datum sollte nicht nach dem maximalen Datum liegen",
+							"min-date": "Der Termin sollte nicht vor dem Mindestdatum liegen"
+						},
+						"not-set": "Datum nicht gesetzt",
+						"validation-error": "Bitte geben Sie ein gültiges Datum ein"
+					},
+					"enum": {
+						"unknown": "Unbekannt"
+					},
+					"image": {
+						"not-set": "Bild nicht vorhanden"
+					},
+					"signature": {
+						"not-set": "Nicht unterschrieben"
+					},
+					"files": {
+						"no-file": "Keine Dateien vorhanden"
+					}
+				},
+				"date-nullable": {
+					"not-set": "N/A"
+				},
+				"image": {
+					"not-set": "Bild nicht vorhanden",
+					"set": "Bild vorhanden"
+				},
+				"boolean": {
+					"true": "Ja",
+					"false": "Nein"
+				}
+			}
+		}
+	},
+	"backend-components": {
+		"data-grid": {
+			"delete": {
+				"confirm-dialog": {
+					"title": "Löschen",
+					"message": "Wollen Sie wirklich {{NUM}}-Einträge löschen?",
+					"messageInverted": "Wollen Sie wirklich alles außer {{NUM}}-Einträgen löschen?",
+					"buttons": {
+						"yes": "Ja",
+						"no": "Nein"
+					}
+				},
+				"error-dialog": {
+					"title": "Fehler",
+					"message": "Das Löschen der ausgewählten Einträge ist fehlgeschlagen: {{ERROR}}",
+					"buttons": {
+						"okay": "Okay"
+					}
+				}
+			}
+		},
+		"form": {
+			"back-on-dirty": {
+				"title": "Formularseite verlassen?",
+				"message": "Änderungen gehen verloren",
+				"yes": "Ja",
+				"no": "Nein"
+			}
+		},
+		"selector": {
+			"loading": "Wird geladen...",
+			"loading-error": "Fehler beim Abrufen der Daten"
+		},
+		"crud": {
+			"import": {
+				"step1": "Daten hochladen",
+				"step2": "Daten verbinden",
+				"step3": "Validierung & Überprüfung",
+				"step4": "Daten importieren",
+				"source_fields": "Quellfelder",
+				"source_field": "Feld",
+				"source_field_type": "Datentypen",
+				"destination_fields": "Zielfelder",
+				"conv_script": "Konvertierungsskript (JavaScript)",
+				"error": "Fehler",
+				"valid": "Gültig",
+				"queue": "In Warteschlange: {{COUNT}}",
+				"success": "Erfolg: {{COUNT}}",
+				"failed": "Fehlgeschlagen: {{COUNT}}",
+				"last_error": "Letzter Fehler",
+				"errors": {
+					"file_select": "Ungültige Datei ausgewählt"
+				},
+				"validations": {
+					"string": "Ergebnis muss eine Zeichenfolge oder null sein",
+					"number": "Ergebnis muss eine Zahl oder null sein",
+					"currency_unsupported": "Währung kann noch nicht importiert werden",
+					"date": "Ergebnis muss ein Datum oder null sein",
+					"boolean": "Ergebnis muss ein boolescher Wert oder null sein",
+					"fail": "Validierung fehlgeschlagen: {{REASON}}. Für Details siehe Browser-Konsole.",
+					"unknown": "Unbekannt"
+				}
+			}
+		}
+	},
 	"utils": {
 		"validation": {
 			"required": "Das Feld {{attribute}} ist erforderlich",
@@ -265,15 +270,15 @@
 	},
 	"common": {
 		"buttons": {
-			"next": "Weiter",
-			"finish": "Abschließen",
-			"back": "Zurück",
-			"cancel": "Abbrechen",
 			"save": "Speichern",
+			"back": "Zurück",
 			"ok": "Okay",
+			"next": "Weiter",
+			"cancel": "Abbrechen",
+			"finish": "Abschließen",
+			"choose": "Wählen",
 			"yes": "Ja",
 			"no": "Nein",
-			"choose": "Wählen",
 			"reset-filters": "Alle Filter zurücksetzen"
 		},
 		"dialogs": {
@@ -282,11 +287,6 @@
 			"info": "Info",
 			"are-you-sure": "Sind Sie sicher?",
 			"are-you-sure-submit": "Fortfahren?"
-		}
-	},
-	"framework": {
-		"dialogs": {
-			"navblock": "Die Navigation ist gesperrt. Bitte schließe zuerst die geöffneten Dialoge."
 		}
 	}
 }
