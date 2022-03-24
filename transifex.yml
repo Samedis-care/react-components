@@ -2,6 +2,6 @@ git:
   filters:
   - filter_type: file
     file_format: KEYVALUEJSON
-    source_file: src/assets/i18n/en/translations.json
+    source_file: src/assets/i18n/en/translation.json
     source_language: en
-    translation_files_expression: 'src/assets/i18n/<lang>/translations.json'
+    translation_files_expression: 'src/assets/i18n/<lang>/translation.json'
