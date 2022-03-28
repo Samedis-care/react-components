@@ -132,6 +132,8 @@ const useStyles = makeStyles(
 		main: {
 			gridArea: "main",
 			overflow: "auto",
+			display: "flex",
+			flexDirection: "column",
 		},
 		mobileTopLeft: {
 			height: 56,
