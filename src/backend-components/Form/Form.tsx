@@ -201,6 +201,10 @@ export interface FormProps<
 
 export interface FormContextData {
 	/**
+	 * The ID of the currently opened record
+	 */
+	id: string | null;
+	/**
 	 * The data model of this form
 	 */
 	model: Model<ModelFieldName, PageVisibility, never>;
@@ -361,6 +365,7 @@ export const useFormContext = (): FormContextData => {
 
 export type FormContextDataLite = Pick<
 	FormContextData,
+	| "id"
 	| "model"
 	| "onlySubmitMounted"
 	| "onlyValidateMounted"
@@ -969,6 +974,7 @@ const Form = <
 
 	const formContextData: FormContextData = useMemo(
 		() => ({
+			id,
 			model: (model as unknown) as Model<ModelFieldName, PageVisibility, never>,
 			errorComponent: ErrorComponent,
 			relations: serverData && serverData[1] ? serverData[1] : {},
@@ -1001,6 +1007,7 @@ const Form = <
 			readOnly: !!readOnly,
 		}),
 		[
+			id,
 			model,
 			ErrorComponent,
 			serverData,
@@ -1035,13 +1042,21 @@ const Form = <
 
 	const formContextDataLite: FormContextDataLite = useMemo(
 		() => ({
+			id,
 			model: (model as unknown) as Model<ModelFieldName, PageVisibility, never>,
 			errorComponent: ErrorComponent,
 			onlySubmitMounted: !!onlySubmitMounted,
 			onlyValidateMounted: !!onlyValidateMounted,
 			readOnly: !!readOnly,
 		}),
-		[model, ErrorComponent, onlySubmitMounted, onlyValidateMounted, readOnly]
+		[
+			id,
+			model,
+			ErrorComponent,
+			onlySubmitMounted,
+			onlyValidateMounted,
+			readOnly,
+		]
 	);
 
 	if (isLoading || isObjectEmpty(values)) {
