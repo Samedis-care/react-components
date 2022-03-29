@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import {
 	LazyConnector,
 	ModelFieldName,
@@ -152,23 +152,24 @@ const useLazyCrudConnector = <
 		[getConnector, configureConnector]
 	);
 
-	const [dirty, setDirty] = useState(false);
 	const uploadConnector = useRef<LazyConnector<KeyT, VisibilityT, CustomT>>(
 		getCustomState<LazyConnector<KeyT, VisibilityT, CustomT>>(field) ??
 			((): LazyConnector<KeyT, VisibilityT, CustomT> => {
 				return new LazyConnector<KeyT, VisibilityT, CustomT>(
 					getConnectorWrap(getEndpointWrap(initialId ?? "null"), extraParams),
 					initialId === null,
-					(queue) => setDirty(queue.length !== 0)
+					(queue) => {
+						setCustomFieldDirty(field, queue.length !== 0);
+					}
 				);
 			})()
 	);
-	// when remounting, we need to update the onQueueChange callback in lazy connector, otherwise the bound setDirty function will update an unmounted component
+	// we need to update thee QueueChangeHandler if params changed
 	useEffect(() => {
-		uploadConnector.current.setQueueChangeHandler((queue) =>
-			setDirty(queue.length !== 0)
-		);
-	}, []);
+		uploadConnector.current.setQueueChangeHandler((queue) => {
+			setCustomFieldDirty(field, queue.length !== 0);
+		});
+	}, [setCustomFieldDirty, field]);
 
 	// set post submit handler for lazy connector
 	useEffect(() => {
@@ -193,14 +194,13 @@ const useLazyCrudConnector = <
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [setPostSubmitHandler, onlySubmitMounted]);
 
-	// manage dirty state
+	// mark not dirty when unmounted and onlySubmitMounted
 	useEffect(() => {
-		setCustomFieldDirty(field, dirty);
 		if (!onlySubmitMounted) return;
 		return () => {
 			setCustomFieldDirty(field, false);
 		};
-	}, [field, dirty, onlySubmitMounted, setCustomFieldDirty]);
+	}, [field, onlySubmitMounted, setCustomFieldDirty]);
 
 	return { connector: uploadConnector.current };
 };
