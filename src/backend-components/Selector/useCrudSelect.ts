@@ -10,6 +10,7 @@ import {
 	useContext,
 	useEffect,
 	useImperativeHandle,
+	useRef,
 	useState,
 } from "react";
 import { shallowCompare } from "../../utils";
@@ -154,34 +155,72 @@ const useCrudSelect = <
 	const [initialRawData, setInitialRawData] = useState<
 		Record<string, unknown>[]
 	>([]);
+	// async processing of add to selection
+	const addToSelectionResults = useRef<
+		Record<string, [resolve: () => void, reject: (err: Error) => void]>
+	>({});
+	const addToSelectionInputs = useRef<Record<string, DataT>>({});
+	const [addToSelectionQueue, setAddToSelectionQueue] = useState<string[]>([]);
 
 	useImperativeHandle<CrudSelectDispatch<DataT>, CrudSelectDispatch<DataT>>(
 		ref,
 		() => ({
 			addToSelection: async (entry) => {
-				const existing = selected.find(
-					(selEntry) => getIdOfData(selEntry) === getIdOfData(entry)
-				);
-				if (existing) return;
-
-				const modelRecord = (await connector.create(await serialize(entry)))[0];
-				entry = {
-					...(await deserialize(modelRecord)),
-				};
-				// store record in cache
-				setInitialRawData((oldRawData) => [...oldRawData, modelRecord]);
-
-				setSelected((selected) => {
-					const existing = selected.find(
-						(selEntry) => getIdOfData(selEntry) === getIdOfData(entry)
-					);
-					if (existing) return selected;
-
-					return [...selected, entry];
+				// create ticket and add for async processing
+				const ticket =
+					Math.random().toString() + new Date().getTime().toString();
+				const result = new Promise<void>((resolve, reject) => {
+					addToSelectionResults.current[ticket] = [resolve, reject];
 				});
+				addToSelectionInputs.current[ticket] = entry;
+				setAddToSelectionQueue((prev) => [...prev, ticket]);
+				return result;
 			},
 		})
 	);
+
+	// async processing of add to selection
+	useEffect(() => {
+		if (loading) return;
+		if (addToSelectionQueue.length === 0) return;
+		const ticket = addToSelectionQueue[0];
+		let entry = addToSelectionInputs.current[ticket];
+		if (entry === undefined) return; // if entry is undefined here we already started working on this, thus just wait
+		delete addToSelectionInputs.current[ticket];
+		const [resolve, reject] = addToSelectionResults.current[ticket];
+		delete addToSelectionResults.current[ticket];
+		(async () => {
+			if (loadError) throw new Error("CrudSelect loading failed");
+			const existing = selected.find(
+				(selEntry) => getIdOfData(selEntry) === getIdOfData(entry)
+			);
+			if (existing) return;
+
+			const modelRecord = (await connector.create(await serialize(entry)))[0];
+			entry = {
+				...(await deserialize(modelRecord)),
+			};
+			// store record in cache
+			setInitialRawData((oldRawData) => [...oldRawData, modelRecord]);
+
+			setSelected((selected) => {
+				const existing = selected.find(
+					(selEntry) => getIdOfData(selEntry) === getIdOfData(entry)
+				);
+				if (existing) return selected;
+
+				return [...selected, entry];
+			});
+		})()
+			.then(resolve)
+			.catch(reject)
+			.finally(() =>
+				setAddToSelectionQueue((prev) =>
+					prev.filter((queueTicket) => queueTicket !== ticket)
+				)
+			);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [loading, addToSelectionQueue]);
 
 	const handleSelect = useCallback(
 		async (_, newSelected: DataT[]) => {
