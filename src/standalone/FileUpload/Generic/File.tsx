@@ -188,7 +188,7 @@ export const getFileIcon = (
 		if (VideoMimeType.test(nameOrMime)) return VideoFileIcon;
 		return null;
 	} else {
-		const fileExt = getFileExt(nameOrMime);
+		const fileExt = getFileExt(nameOrMime).toLowerCase();
 		if (ArchiveFileExtensions.includes(fileExt)) return ArchiveFileIcon;
 		if (AudioFileExtensions.includes(fileExt)) return AudioFileIcon;
 		if (CodeFileExtensions.includes(fileExt)) return CodeFileIcon;
