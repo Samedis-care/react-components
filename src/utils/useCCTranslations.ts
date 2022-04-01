@@ -24,4 +24,9 @@ export const useCCCountryTranslations = (): UseTranslationResponse<"countries"> 
 		i18n: ccI18n,
 	});
 
+export const useCCCurrencyTranslations = (): UseTranslationResponse<"currencies"> =>
+	useTranslation<"currencies">("currencies", {
+		i18n: ccI18n,
+	});
+
 export default useCCTranslations;

@@ -72,9 +72,69 @@ def locale_relevance() -> dict[str, int]:
             ret[lang + "-" + country] = int(speaker_count)
     return ret
 
+# list of all currencies
+def get_currencies() -> list[str]:
+    with open("../node_modules/cldr-data/main/en/currencies.json") as f:
+        data = json.load(f)["main"]["en"]["numbers"]["currencies"]
+    return list(data.keys())
+
+# locale -> currency -> { displayName: string, displayName-count-one: string, displayName-count-other: string, symbol: string, symbol-alt-narrow?: string }
+def get_currency_locales() -> dict[str, dict[str, dict[str, str]]]:
+    ret = {}
+    locales = os.listdir("../node_modules/cldr-data/main/")
+    for locale in locales:
+        with open("../node_modules/cldr-data/main/" + locale + "/currencies.json", "r") as f:
+            ret[locale] = json.load(f)["main"][locale]["numbers"]["currencies"]
+    return ret
+
+# list of alive currencies (currently in use)
+def get_currencies_alive() -> list[str]:
+    alive_currencies = set()
+    with open("../node_modules/cldr-data/supplemental/currencyData.json", "r") as f:
+        data = json.load(f)["supplemental"]["currencyData"]["region"]
+    for region, currencies in data.items():
+        for subCurrencies in currencies:
+            for currency, currencyData in subCurrencies.items():
+                if "_tender" in currencyData and currencyData["_tender"] == "false":
+                    continue
+                if "_to" not in currencyData:
+                    alive_currencies.add(currency)
+    return list(alive_currencies)
+
+# currency formatting data. currency OR "DEFAULT" -> {_rounding: string, _digits: string, _cashRounding?: string, _cashDigits?: string}
+def get_currency_formatting() -> dict[str, dict[str, str]]:
+    with open("../node_modules/cldr-data/supplemental/currencyData.json", "r") as f:
+        return json.load(f)["supplemental"]["currencyData"]["fractions"]
+
+# currency -> number of people using it
+def get_currency_users() -> dict[str, int]:
+    currency_users = {}
+    with open("../node_modules/cldr-data/supplemental/territoryInfo.json", "r") as f:
+        territory_info = json.load(f)["supplemental"]["territoryInfo"]
+    with open("../node_modules/cldr-data/supplemental/currencyData.json", "r") as f:
+        currency_data = json.load(f)["supplemental"]["currencyData"]["region"]
+    for region, currencies in currency_data.items():
+        for subCurrencies in currencies:
+            for currency, currencyData in subCurrencies.items():
+                if "_tender" in currencyData and currencyData["_tender"] == "false":
+                    continue
+                if "_to" not in currencyData: # only alive currencies
+                    if currency not in currency_users:
+                        currency_users[currency] = 0
+                    if region not in territory_info:
+                        # no population info
+                        continue
+                    currency_users[currency] += int(territory_info[region]["_population"])
+    currency_users = dict(sorted(currency_users.items(), key=lambda item: item[1]))
+    return currency_users
+
 
 def get_country_list() -> [str]:
     return list(requests.get("https://raw.githubusercontent.com/esosedi/3166/master/i18n/dispute/UN/en.json").json().keys())
+
+# currency (lower case) -> {code: str, alphaCode: str, numericCode: str, name: str, rate: float, data: str, inverseRate: float }
+def get_currency_exchange_rates():
+    return requests.get("https://www.floatrates.com/daily/usd.json").json()
 
 if __name__ == "__main__":
     supported_languages = os.listdir("../src/assets/i18n/")
@@ -87,6 +147,46 @@ if __name__ == "__main__":
     download_flags(country_list)
     relevance = locale_relevance()
     supported_locales = set()
+    currencies = get_currencies()
+    currency_locales = get_currency_locales()
+    currencies_alive = get_currencies_alive()
+    currency_formatting = get_currency_formatting()
+    currency_users = get_currency_users()
+    currency_exchange_rates = get_currency_exchange_rates()
+    with open("../src/assets/data/currencies.json", "w") as f:
+        json.dump(currencies, f, indent=2, ensure_ascii=False)
+    with open("../src/assets/data/currencies-alive.json", "w") as f:
+        json.dump(currencies_alive, f, indent=2, ensure_ascii=False)
+    with open("../src/assets/data/currency-formatting.json", "w") as f:
+        currency_format = {}
+        for currency in currencies:
+            if currency in currency_formatting:
+                formatting_options = currency_formatting[currency]
+            else:
+                formatting_options = currency_formatting["DEFAULT"]
+            currency_format[currency] = {
+                "rounding": int(formatting_options["_rounding"]),
+                "digits": int(formatting_options["_digits"])
+            }
+        json.dump(currency_format, f, indent=2, ensure_ascii=False)
+    with open("../src/assets/data/currencies-users.json", "w") as f:
+        for currency in currencies:
+            if currency not in currency_users:
+                currency_users[currency] = 0
+        json.dump(currency_users, f, indent=2, ensure_ascii=False)
+    with open("../src/assets/data/currency-relevance.json", "w") as f:
+        def get_currency_exchange_rate(currency: str) -> float:
+            currency = currency.lower()
+            if currency == "usd":
+                return 1.0 # base
+            if currency in currency_exchange_rates:
+                return currency_exchange_rates[currency]["inverseRate"]
+            return 0.0
+        currency_relevance = {}
+        for currency, users in currency_users.items():
+            currency_relevance[currency] = int(users * get_currency_exchange_rate(currency))
+        currency_relevance = dict(sorted(currency_relevance.items(), key=lambda item: item[1]))
+        json.dump(currency_relevance, f, indent=2, ensure_ascii=False)
     with open("../src/assets/data/countries.json", "w") as f:
         json.dump(country_list, f, indent=2, ensure_ascii=False)
     with open("../src/standalone/CountryFlags/index.ts", "w") as f:
@@ -121,6 +221,8 @@ if __name__ == "__main__":
         language_keys.sort()
         json.dump(language_keys, f, indent=2, ensure_ascii=False)
     for lang in supported_languages:
+        with open("../src/assets/i18n/" + lang + "/currencies.json", "w") as f:
+            json.dump(currency_locales[lang], f, indent=2, ensure_ascii=False)
         with open("../src/assets/i18n/" + lang + "/countries.json", "w") as f:
             json.dump(countries[lang], f, indent=2, ensure_ascii=False)
         with open("../src/assets/i18n/" + lang + "/languages.json", "w") as f:
