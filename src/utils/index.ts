@@ -42,3 +42,4 @@ export * from "./routeUtils";
 export * from "./useDate";
 export * from "./genericHOC";
 export * from "./validations";
+export { default as localDateToUtcDate } from "./localDateToUtcDate";
