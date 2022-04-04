@@ -24,6 +24,7 @@ import {
 import { LocalizedKeyboardDatePicker } from "../../LocalizedDateTimePickers";
 import { DateType } from "@date-io/type";
 import useCCTranslations from "../../../utils/useCCTranslations";
+import localDateToUtcDate from "../../../utils/localDateToUtcDate";
 
 export type FilterType =
 	| "contains"
@@ -170,7 +171,7 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 			subFilterComboType = "and";
 			subFilter = undefined;
 		} else {
-			filterValue = date.toISOString();
+			filterValue = localDateToUtcDate(date.toDate()).toISOString();
 		}
 		updateParent();
 	};
@@ -219,7 +220,7 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 		updateParent();
 	};
 	const onFilterValue2ChangeDate = (date: DateType | null) => {
-		filterValue2 = date ? date.toISOString() : "";
+		filterValue2 = date ? localDateToUtcDate(date.toDate()).toISOString() : "";
 		updateParent();
 	};
 	const onSubFilterTypeChange = (value: FilterComboType) => {
