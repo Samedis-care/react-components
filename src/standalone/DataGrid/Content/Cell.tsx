@@ -1,4 +1,5 @@
 import {
+	DataGridRowData,
 	IDataGridColumnDef,
 	useDataGridProps,
 	useDataGridState,
@@ -30,10 +31,13 @@ const Cell = (props: CellProps): React.ReactElement => {
 		prohibitMultiSelect,
 		onRowDoubleClick,
 		disableSelection,
+		isSelected: isSelectedHook,
+		canSelectRow,
 	} = useDataGridProps();
 	const [state, setState] = useDataGridState();
 	const [hover, setHover] = props.hoverState;
-	const id = state.rows[props.rowIndex - 1]?.id || "undefined";
+	const record: DataGridRowData | undefined = state.rows[props.rowIndex - 1];
+	const id = record?.id || "undefined";
 
 	const toggleSelection = useCallback(() => {
 		if (id === "undefined") return;
@@ -66,14 +70,13 @@ const Cell = (props: CellProps): React.ReactElement => {
 		// header
 		content = <ColumnHeader column={column} />;
 	} else if (columnIndex === 0 && !disableSelection) {
-		content = <SelectRow id={id} />;
+		content = record ? (
+			<SelectRow record={record} />
+		) : (
+			<Skeleton variant={"rect"} />
+		);
 	} else {
-		content =
-			rowIndex - 1 in state.rows ? (
-				state.rows[rowIndex - 1][column.field]
-			) : (
-				<Skeleton variant={"text"} />
-			);
+		content = record ? record[column.field] : <Skeleton variant={"text"} />;
 
 		// special handling for objects (Date, etc). use toString on them
 		if (
@@ -100,7 +103,11 @@ const Cell = (props: CellProps): React.ReactElement => {
 			style={props.style}
 			onMouseEnter={startHover}
 			onMouseLeave={endHover}
-			onClick={disableSelection ? undefined : toggleSelection}
+			onClick={
+				disableSelection || !record || (canSelectRow && !canSelectRow(record))
+					? undefined
+					: toggleSelection
+			}
 			onDoubleClick={editRecord}
 			className={combineClassNames([
 				classes.cell,
@@ -109,7 +116,12 @@ const Cell = (props: CellProps): React.ReactElement => {
 					(props.rowIndex % 2 === 0 ? classes.rowEven : classes.rowOdd),
 				props.rowIndex !== 0 && column && `column-${column.field}`,
 				(hover == rowIndex ||
-					isSelected(state.selectAll, state.selectedRows, id)) &&
+					isSelected(
+						state.selectAll,
+						state.selectedRows,
+						record,
+						isSelectedHook
+					)) &&
 					classes.dataCellSelected,
 			])}
 		>

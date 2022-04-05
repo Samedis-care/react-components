@@ -214,6 +214,21 @@ export interface IDataGridCallbacks {
 	 * If not defined: Import button will not show
 	 */
 	onImport?: () => void;
+	/**
+	 * Callback to show a row as selected/unselected based on the data record it contains.
+	 * Defaults to return selected. Use in conjunction with canSelectRow.
+	 * @param selected The current selected state (as determined by data grid)
+	 * @param record The data record
+	 * @return Should the DataGrid display the record as selected?
+	 */
+	isSelected?: (selected: boolean, record: Record<string, unknown>) => boolean;
+	/**
+	 * Can toggle selection callback. Can be used to disable selection for select rows.
+	 * Defaults to return true. Use in conjunction with isSelected.
+	 * @param record The data record
+	 * @return Can the row be selected
+	 */
+	canSelectRow?: (record: Record<string, unknown>) => boolean;
 }
 
 export type DataGridAdditionalFilters = Record<string, unknown>;

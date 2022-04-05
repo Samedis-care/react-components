@@ -11,13 +11,21 @@ export interface IDataGridContentSelectRowViewProps {
 	 * The row record ID
 	 */
 	id: string;
+	/**
+	 * Is the control disabled?
+	 */
+	disabled: boolean;
 }
 
 const SelectRowView = (props: IDataGridContentSelectRowViewProps) => {
 	const classes = useDataGridStyles();
 
 	return (
-		<Checkbox checked={props.checked} className={classes.selectCheckbox} />
+		<Checkbox
+			disabled={props.disabled}
+			checked={props.checked}
+			className={classes.selectCheckbox}
+		/>
 	);
 };
 

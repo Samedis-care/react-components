@@ -1,34 +1,55 @@
 import React from "react";
-import { useDataGridProps, useDataGridState } from "../DataGrid";
+import {
+	DataGridProps,
+	DataGridRowData,
+	useDataGridProps,
+	useDataGridState,
+} from "../DataGrid";
 import SelectRowView from "./SelectRowView";
 
 export interface IDataGridContentSelectRowProps {
 	/**
-	 * The ID of the row
+	 * The row record
 	 */
-	id: string;
+	record: DataGridRowData;
 }
 
 const xor = (v1: boolean, v2: boolean): boolean => {
 	return v1 ? !v2 : v2;
 };
 
+const isSelectedHookDefault = (selected: boolean): boolean => selected;
 export const isSelected = (
 	selectAll: boolean,
 	selectedIds: string[],
-	id: string
-): boolean => xor(selectAll, selectedIds.includes(id));
+	record?: Record<string, unknown>,
+	isSelectedHook?: DataGridProps["isSelected"]
+): boolean => {
+	if (!record) return false;
+	const result = xor(selectAll, selectedIds.includes(record.id as string));
+	return (isSelectedHook ?? isSelectedHookDefault)(result, record);
+};
 
 const SelectRow = (props: IDataGridContentSelectRowProps) => {
-	const { id } = props;
+	const { record } = props;
 	const [state] = useDataGridState();
-	const SelectRowControl =
-		useDataGridProps().customSelectionControl || SelectRowView;
+	const {
+		isSelected: isSelectedHook,
+		canSelectRow,
+		customSelectionControl,
+	} = useDataGridProps();
+	const SelectRowControl = customSelectionControl || SelectRowView;
 
 	return (
 		<SelectRowControl
-			checked={isSelected(state.selectAll, state.selectedRows, id)}
-			id={id}
+			checked={isSelected(
+				state.selectAll,
+				state.selectedRows,
+				record,
+				isSelectedHook
+			)}
+			disabled={canSelectRow ? !canSelectRow(record) : false}
+			id={record.id}
 		/>
 	);
 };
