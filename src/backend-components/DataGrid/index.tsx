@@ -50,61 +50,80 @@ export const renderDataGridRecordUsingModel = <
 	entry: Record<string, unknown>
 ): { id: string } & Record<string, string | null> =>
 	Object.fromEntries(
-		Object.keys(model.fields).map((key) => {
-			// we cannot render the ID, this will cause issues with the selection
-			const value = getValueByDot(key, entry);
-			if (key === "id") {
-				return [key, value];
-			}
+		Object.keys(model.fields)
+			.map((key) => {
+				// we cannot render the ID, this will cause issues with the selection
+				const value = getValueByDot(key, entry);
+				if (key === "id") {
+					return [
+						[key, value],
+						[key + "_raw", value],
+					];
+				}
 
-			const field = model.fields[key as KeyT];
-			const { id } = entry as Record<"id", string>;
+				const field = model.fields[key as KeyT];
+				const { id } = entry as Record<"id", string>;
 
-			return [
-				key,
-				// eslint-disable-next-line @typescript-eslint/no-unsafe-call
-				field
-					? field.type.render({
-							field: key,
-							value: value,
-							touched: false,
-							initialValue: value,
-							label: field.getLabel(),
-							visibility: Object.assign({}, field.visibility.overview, {
-								hidden: false,
-							}),
-							/**
-							 * The onChange handler for editable input fields
-							 */
-							handleChange: async (field: ModelFieldName, value: unknown) => {
-								if (!id) throw new Error("ID not set!");
+				// no need to render disabled fields
+				if (field.visibility.overview.disabled) {
+					return [
+						[key, value],
+						[key + "_raw", value],
+					];
+				}
 
-								await model.connector.update(
-									await model.applySerialization(
-										{
-											id,
-											...dotToObject(field, value),
-										} as Record<string, unknown>,
-										"serialize",
-										"overview"
-									)
-								);
-								refreshGrid();
-							},
-							handleBlur: () => {
-								// this is unhandled in the data grid
-							},
-							errorMsg: null,
-							setError: () => {
-								throw new Error("Not implemented in Grid");
-							},
-							setFieldTouched: () => {
-								throw new Error("Not implemented in Grid");
-							},
-					  })
-					: null,
-			];
-		})
+				return [
+					[
+						key,
+						// eslint-disable-next-line @typescript-eslint/no-unsafe-call
+						field
+							? field.type.render({
+									field: key,
+									value: value,
+									touched: false,
+									initialValue: value,
+									label: field.getLabel(),
+									visibility: Object.assign({}, field.visibility.overview, {
+										hidden: false,
+									}),
+									/**
+									 * The onChange handler for editable input fields
+									 */
+									handleChange: async (
+										field: ModelFieldName,
+										value: unknown
+									) => {
+										if (!id) throw new Error("ID not set!");
+
+										await model.connector.update(
+											await model.applySerialization(
+												{
+													id,
+													...dotToObject(field, value),
+												} as Record<string, unknown>,
+												"serialize",
+												"overview"
+											)
+										);
+										refreshGrid();
+									},
+									handleBlur: () => {
+										// this is unhandled in the data grid
+									},
+									errorMsg: null,
+									setError: () => {
+										throw new Error("Not implemented in Grid");
+									},
+									setFieldTouched: () => {
+										throw new Error("Not implemented in Grid");
+									},
+							  })
+							: null,
+					],
+					[key + "_raw", value],
+				];
+			})
+			.flat()
 	) as { id: string } & Record<string, string | null>;
 
 const BackendDataGrid = <
