@@ -29,6 +29,13 @@ import {
 } from "../../utils";
 import { getVisibility } from "../../backend-integration/Model/Visibility";
 
+// optional import
+let captureException: ((e: Error) => void) | null = null;
+import("@sentry/react")
+	.then((Sentry) => (captureException = Sentry.captureException))
+	// eslint-disable-next-line @typescript-eslint/no-empty-function
+	.catch(() => {}); // ignore
+
 export type ValidationError = Record<string, string>;
 /**
  * Pre submit handler for additional validations
@@ -56,6 +63,19 @@ export enum OnlySubmitMountedBehaviour {
 	 * Replace the unmounted values with null on POST/PUT requests
 	 */
 	NULL = "null",
+}
+
+export interface PreSubmitParams {
+	/**
+	 * The remote data
+	 */
+	serverData: Record<string, unknown>;
+	/**
+	 * The local data
+	 */
+	formData: Record<string, unknown>;
+	// select form props follow, @see docs in interface FormProps
+	deleteOnSubmit: boolean;
 }
 
 export interface ErrorComponentProps {
@@ -130,6 +150,12 @@ export interface FormProps<
 	 * Rerender page props if values changes
 	 */
 	renderConditionally?: boolean;
+	/**
+	 * Pre-submit callback to cancel submission
+	 * @param params The params provded
+	 * @return should cancel? false for continue, true for cancel
+	 */
+	preSubmit?: (params: PreSubmitParams) => Promise<boolean> | boolean;
 	/**
 	 * Called upon successful submit
 	 * Contains data from server response
@@ -437,6 +463,7 @@ const Form = <
 		initialRecord,
 		onlySubmitNestedIfMounted,
 		formClass,
+		preSubmit,
 	} = props;
 	const onlySubmitMountedBehaviour =
 		props.onlySubmitMountedBehaviour ?? OnlySubmitMountedBehaviour.OMIT;
@@ -688,6 +715,28 @@ const Form = <
 	// main form - submit handler
 	const submitForm = useCallback(async (): Promise<void> => {
 		setSubmitting(true);
+		if (preSubmit) {
+			let cancelSubmit: boolean;
+			try {
+				cancelSubmit = await preSubmit({
+					serverData: (serverData && serverData[0]) ?? valuesRef.current,
+					formData: valuesRef.current,
+					deleteOnSubmit: !!deleteOnSubmit,
+				});
+			} catch (e) {
+				if (captureException) captureException(e);
+				// eslint-disable-next-line no-console
+				console.error(
+					"[Components-Care] [FormEngine] Pre-submit handler threw exception",
+					e
+				);
+				cancelSubmit = true;
+			}
+			if (cancelSubmit) {
+				setSubmitting(false);
+				return;
+			}
+		}
 		setTouched((prev) =>
 			Object.fromEntries(Object.keys(prev).map((field) => [field, true]))
 		);
@@ -798,6 +847,8 @@ const Form = <
 		deleteOnSubmit,
 		onDeleted,
 		deleteRecord,
+		preSubmit,
+		serverData,
 	]);
 	const handleSubmit = useCallback(
 		(evt: FormEvent<HTMLFormElement>) => {
