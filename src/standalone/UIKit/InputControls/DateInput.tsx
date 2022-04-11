@@ -6,6 +6,7 @@ import { LocalizedKeyboardDatePicker } from "../../../standalone/LocalizedDateTi
 import TextFieldWithHelp, {
 	TextFieldWithHelpProps,
 } from "../TextFieldWithHelp";
+import { localDateToUtcDate } from "../../../utils";
 
 export interface DateInputProps extends TextFieldWithHelpProps {
 	/**
@@ -38,7 +39,9 @@ const DateInput = (
 		<LocalizedKeyboardDatePicker
 			{...muiProps}
 			value={value}
-			onChange={(date) => (date ? onChange(date.toDate()) : onChange(null))}
+			onChange={(date) =>
+				date ? onChange(localDateToUtcDate(date.toDate())) : onChange(null)
+			}
 			clearable
 			hideDisabledIcon={hideDisabledIcon}
 			TextFieldComponent={CustomInput}
