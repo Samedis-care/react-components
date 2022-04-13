@@ -69,13 +69,15 @@ export interface PreSubmitParams {
 	/**
 	 * The remote data
 	 */
-	serverData: Record<string, unknown>;
+	readonly serverData: Record<string, unknown>;
 	/**
 	 * The local data
 	 */
-	formData: Record<string, unknown>;
+	readonly formData: Record<string, unknown>;
 	// select form props follow, @see docs in interface FormProps
-	deleteOnSubmit: boolean;
+	readonly deleteOnSubmit: boolean;
+	// select helpers follow, @see docs in interface FormContextData
+	readonly setFieldValue: FormContextData["setFieldValue"];
 }
 
 export interface ErrorComponentProps {
@@ -714,7 +716,6 @@ const Form = <
 
 	// main form - submit handler
 	const submitForm = useCallback(async (): Promise<void> => {
-		setSubmitting(true);
 		if (preSubmit) {
 			let cancelSubmit: boolean;
 			try {
@@ -722,6 +723,7 @@ const Form = <
 					serverData: (serverData && serverData[0]) ?? valuesRef.current,
 					formData: valuesRef.current,
 					deleteOnSubmit: !!deleteOnSubmit,
+					setFieldValue,
 				});
 			} catch (e) {
 				if (captureException) captureException(e);
@@ -733,10 +735,10 @@ const Form = <
 				cancelSubmit = true;
 			}
 			if (cancelSubmit) {
-				setSubmitting(false);
 				return;
 			}
 		}
+		setSubmitting(true);
 		setTouched((prev) =>
 			Object.fromEntries(Object.keys(prev).map((field) => [field, true]))
 		);
@@ -849,6 +851,7 @@ const Form = <
 		deleteRecord,
 		preSubmit,
 		serverData,
+		setFieldValue,
 	]);
 	const handleSubmit = useCallback(
 		(evt: FormEvent<HTMLFormElement>) => {
