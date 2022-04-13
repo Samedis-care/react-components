@@ -140,13 +140,14 @@ const resolveLocation = (
 		}
 	}
 	// then try this level
-	for (const def of definitions) {
-		if (def.route && doesRouteMatch(def.route, path, true)) {
-			return itemId ? `${itemId}@${def.title}` : def.title;
-		}
-	}
-	// and if nothing found
-	return null;
+	const matchDef = definitions
+		.sort((a, b) => (b.route?.length ?? 0) - (a.route?.length ?? 0))
+		.find((def) => def.route && doesRouteMatch(def.route, path, false));
+	return matchDef
+		? itemId
+			? `${itemId}@${matchDef.title}`
+			: matchDef.title
+		: null;
 };
 
 const RoutedMenu = (props: IRoutedMenuProps) => {
