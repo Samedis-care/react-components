@@ -14,7 +14,7 @@ import { MultiSelectorData } from "../../../standalone";
 import { useFormContextLite } from "../Form";
 import { CrudSelectDispatch } from "../../Selector/useCrudSelect";
 
-export interface SamedisCrudMultiSelectProps<
+export interface FormCrudMultiSelectProps<
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
 	CustomT,
@@ -36,7 +36,7 @@ const FormCrudMultiSelect = <
 	CustomT,
 	DataT extends MultiSelectorData
 >(
-	props: SamedisCrudMultiSelectProps<KeyT, VisibilityT, CustomT, DataT> &
+	props: FormCrudMultiSelectProps<KeyT, VisibilityT, CustomT, DataT> &
 		RefAttributes<CrudSelectDispatch<DataT>>,
 	ref: ForwardedRef<CrudSelectDispatch<DataT>>
 ) => {
