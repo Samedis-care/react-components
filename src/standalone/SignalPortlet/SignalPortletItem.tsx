@@ -1,5 +1,5 @@
 import React, { useCallback } from "react";
-import { useHistory } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { makeStyles } from "@material-ui/core/styles";
 import { ClassNameMap } from "@material-ui/styles/withStyles";
 import {
@@ -52,13 +52,13 @@ const useStyles = makeStyles(
 const SignalPortletItem = (props: SignalPortletItemProps) => {
 	const { count, link, text } = props;
 	const classes = useStyles(props);
-	const history = useHistory();
+	const navigate = useNavigate();
 
 	const handleClick = useCallback(() => {
 		if (link) {
-			history.push(link);
+			navigate(link);
 		}
-	}, [history, link]);
+	}, [navigate, link]);
 
 	const counterClass = count
 		? classes.itemColorActive

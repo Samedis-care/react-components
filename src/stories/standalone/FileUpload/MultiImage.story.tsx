@@ -72,7 +72,7 @@ export const MultiImageStory = (): React.ReactElement => {
 				onPrimaryChange={handlePrimaryChange}
 				previewSize={previewSize}
 				uploadImage={placeholder}
-				capture={capture}
+				capture={capture === "false" ? false : capture}
 				additionalDialogContent={[
 					<div key={"howto"}>
 						<HowToBox

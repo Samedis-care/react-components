@@ -9,8 +9,8 @@ import {
 	IMenuItemDefinition,
 	MenuProps,
 } from "../../../standalone/Portal/Menu";
-import { FrameworkHistory } from "../../../framework";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import { NavigateFunction } from "react-router/lib/hooks";
 
 export interface IRoutedMenuItemDefinition
 	extends Omit<IMenuItemDefinition, "onClick" | "children"> {
@@ -68,20 +68,22 @@ const getMenuRouteParams = (
  * @param definition The routed menu item definition
  * @param path The current location.pathname
  * @param depth The depth of the menu item
+ * @param navigate The react-router navigate function
  * @return a normal menu item definition
  */
 const convertDefinition = (
 	definitions: IRoutedMenuItemDefinition[],
 	definition: IRoutedMenuItemDefinition,
 	path: string,
-	depth: number
+	depth: number,
+	navigate: NavigateFunction
 ): IMenuItemDefinition => ({
 	...definition,
 	forceExpand:
 		definition.children &&
 		!!resolveLocation(definition.children, path, depth + 1, null),
 	children: definition.children?.map((entry) =>
-		convertDefinition(definitions, entry, path, depth + 1)
+		convertDefinition(definitions, entry, path, depth + 1, navigate)
 	),
 	onClick: (evt) => {
 		if (definition.onClick) {
@@ -95,7 +97,7 @@ const convertDefinition = (
 			);
 			if (evt.ctrlKey || evt.metaKey || evt.shiftKey)
 				window.open(target, "_blank");
-			else FrameworkHistory.push(target);
+			else navigate(target);
 		}
 	},
 	onAuxClick: (evt) => {
@@ -155,6 +157,7 @@ const RoutedMenu = (props: IRoutedMenuProps) => {
 	const [activeMenuItem, setActiveMenuItem] = controlledState;
 	const location = useLocation();
 	const path = location.pathname;
+	const navigate = useNavigate();
 
 	// set the currently active item based off location
 	useEffect(() => {
@@ -167,8 +170,10 @@ const RoutedMenu = (props: IRoutedMenuProps) => {
 	// convert routed menu definitions to normal menu definitions
 	const rawDef = props.definition;
 	const definition = React.useMemo(() => {
-		return rawDef.map((entry) => convertDefinition(rawDef, entry, path, 0));
-	}, [rawDef, path]);
+		return rawDef.map((entry) =>
+			convertDefinition(rawDef, entry, path, 0, navigate)
+		);
+	}, [rawDef, path, navigate]);
 
 	return (
 		<MenuBase

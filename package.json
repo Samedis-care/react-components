@@ -21,22 +21,22 @@
 		"react-color": "^2.19.3",
 		"react-i18next": "^11.8.11",
 		"react-query": "^3.5.1",
-		"react-scripts": "^4.0.1",
+		"react-scripts": "^5.0.1",
 		"react-signature-canvas": "^1.0.5",
 		"react-virtualized": "^9.22.3",
 		"suspend-react": "^0.0.8",
-		"typescript": "^4.2.2",
+		"typescript": "^4.6.3",
 		"xlsx": "^0.17.3"
 	},
 	"peerDependencies": {
-		"@sentry/react": "^6.12.0",
-		"@sentry/tracing": "^6.12.0",
-		"@types/react": "^17.0.1",
-		"@types/react-dom": "^17.0.1",
-		"@types/react-router-dom": "^5.1.0",
+		"@sentry/react": "^6.19.6",
+		"@sentry/tracing": "^6.19.6",
+		"@types/react": "^17.0.44",
+		"@types/react-dom": "^17.0.15",
+		"@types/react-router-dom": "^6.3.0",
 		"react": "^17.0.1",
 		"react-dom": "^17.0.1",
-		"react-router-dom": "^5.1.0"
+		"react-router-dom": "^6.3.0"
 	},
 	"peerDependenciesMeta": {
 		"@types/react": {
@@ -113,20 +113,22 @@
 		]
 	},
 	"devDependencies": {
-		"@babel/cli": "^7.12.10",
-		"@babel/core": "^7.12.10",
-		"@babel/plugin-proposal-class-properties": "^7.12.1",
-		"@babel/preset-env": "^7.12.11",
-		"@babel/preset-react": "^7.12.10",
-		"@babel/preset-typescript": "^7.12.7",
-		"@storybook/addon-actions": "^6.1.11",
+		"@babel/cli": "^7.17.6",
+		"@babel/core": "^7.17.9",
+		"@babel/plugin-proposal-class-properties": "^7.16.7",
+		"@babel/preset-env": "^7.16.11",
+		"@babel/preset-react": "^7.16.7",
+		"@babel/preset-typescript": "^7.16.7",
+		"@storybook/addon-actions": "^6.4.22",
 		"@storybook/addon-knobs": "^6.1.11",
-		"@storybook/addon-links": "^6.1.11",
-		"@storybook/addon-storyshots": "^6.1.11",
-		"@storybook/addons": "^6.1.11",
-		"@storybook/preset-create-react-app": "^3.1.5",
-		"@storybook/react": "^6.1.11",
-		"@storybook/storybook-deployer": "^2.8.7",
+		"@storybook/addon-links": "^6.4.22",
+		"@storybook/addon-storyshots": "^6.4.22",
+		"@storybook/addons": "^6.4.22",
+		"@storybook/builder-webpack5": "^6.4.22",
+		"@storybook/manager-webpack5": "^6.4.22",
+		"@storybook/preset-create-react-app": "^4.1.0",
+		"@storybook/react": "^6.4.22",
+		"@storybook/storybook-deployer": "^2.8.11",
 		"@testing-library/jest-dom": "^5.11.6",
 		"@testing-library/react": "^11.2.2",
 		"@testing-library/user-event": "^12.6.0",
@@ -150,7 +152,8 @@
 		"lint-staged": "^10.5.3",
 		"prettier": "^2.2.1",
 		"ts-jest": "^26.4.4",
-		"typedoc": "^0.20.29"
+		"typedoc": "^0.22.15",
+		"webpack": "^5.72.0"
 	},
 	"engines": {
 		"npm": ">=7.x"

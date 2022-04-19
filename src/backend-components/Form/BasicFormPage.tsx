@@ -1,15 +1,19 @@
 import React, { useCallback, useContext, useEffect, useRef } from "react";
-import { PageProps, useFormContextLite } from "..";
-import { UnregisterCallback } from "history";
+import { PageProps, useFormContextLite, ValidationError } from "..";
 import { UnsafeToLeaveDispatch } from "../../framework/UnsafeToLeave";
 import { FrameworkHistory, useDialogContext } from "../../framework";
 import { ModelFieldName } from "../../backend-integration";
-import { showConfirmDialog, showErrorDialog } from "../../non-standalone";
+import {
+	showConfirmDialog,
+	showConfirmDialogBool,
+	showErrorDialog,
+} from "../../non-standalone";
 import { FormDialogDispatchContext } from "./FormDialog";
 import FormPageLayout from "../../standalone/Form/FormPageLayout";
 import FormLoaderOverlay from "../../standalone/Form/FormLoaderOverlay";
 import useCCTranslations from "../../utils/useCCTranslations";
-import { useRouteMatch } from "react-router-dom";
+import { useRouteInfo } from "../../utils";
+import { Transition } from "history";
 
 export interface BasicFormPageRendererProps<CustomPropsT>
 	extends Omit<PageProps<ModelFieldName, CustomPropsT>, "submit" | "dirty"> {
@@ -53,7 +57,7 @@ export interface BasicFormPageProps<RendererPropsT, CustomPropsT>
 	form: React.ReactNode;
 }
 
-const BasicFormPage = <RendererPropsT extends unknown, CustomPropsT>(
+const BasicFormPage = <RendererPropsT, CustomPropsT>(
 	props: BasicFormPageProps<RendererPropsT, CustomPropsT>
 ) => {
 	const {
@@ -71,8 +75,8 @@ const BasicFormPage = <RendererPropsT extends unknown, CustomPropsT>(
 	const { readOnly } = useFormContextLite();
 	const [pushDialog] = useDialogContext();
 	const formDialog = useContext(FormDialogDispatchContext);
-	const unblock = useRef<UnregisterCallback | undefined>(undefined);
-	const match = useRouteMatch();
+	const unblock = useRef<(() => void) | undefined>(undefined);
+	const { url: routeUrl } = useRouteInfo();
 
 	useEffect(() => {
 		// if the form isn't dirty, don't block submitting
@@ -81,14 +85,34 @@ const BasicFormPage = <RendererPropsT extends unknown, CustomPropsT>(
 		// otherwise we'd run into a data race, as dirty flag is not updated during submit, only afterwards, which would
 		// block the redirect to the edit page here
 		if (!dirty || readOnly || isSubmitting) return;
-		unblock.current = FrameworkHistory.block((location) => {
+		const blocker = (transition: Transition) => {
+			const allowTransition = () => {
+				// temp unblock to retry transaction
+				if (unblock.current) {
+					unblock.current();
+					unblock.current = undefined;
+				}
+				transition.retry();
+				unblock.current = FrameworkHistory.block(blocker);
+			};
 			//console.log("History.block(", location, ",", action, ")", match);
 			// special handling: routing inside form page (e.g. routed tab panels, routed stepper)
-			if (location.pathname.startsWith(match.url)) return;
-			return `${t("backend-components.form.back-on-dirty.title")} ${t(
-				"backend-components.form.back-on-dirty.message"
-			)}`;
-		});
+			if (transition.location.pathname.startsWith(routeUrl)) {
+				allowTransition();
+				return;
+			}
+			// otherwise: ask user for confirmation
+			void (async () => {
+				const leave = await showConfirmDialogBool(pushDialog, {
+					title: t("backend-components.form.back-on-dirty.title"),
+					message: t("backend-components.form.back-on-dirty.message"),
+					textButtonYes: t("backend-components.form.back-on-dirty.yes"),
+					textButtonNo: t("backend-components.form.back-on-dirty.no"),
+				});
+				if (leave) allowTransition();
+			})();
+		};
+		unblock.current = FrameworkHistory.block(blocker);
 		const safeToLeave = UnsafeToLeaveDispatch.lock("form-dirty");
 		if (formDialog) formDialog.blockClosing();
 		return () => {
@@ -99,7 +123,7 @@ const BasicFormPage = <RendererPropsT extends unknown, CustomPropsT>(
 			}
 			if (formDialog) formDialog.unblockClosing();
 		};
-	}, [isSubmitting, readOnly, t, dirty, formDialog, match]);
+	}, [isSubmitting, readOnly, t, dirty, formDialog, routeUrl, pushDialog]);
 
 	// go back confirm dialog if form is dirty
 	const customProps: CustomPropsT & {
@@ -142,7 +166,7 @@ const BasicFormPage = <RendererPropsT extends unknown, CustomPropsT>(
 			try {
 				await postSubmitHandler();
 			} catch (e) {
-				showErrorDialog(pushDialog, e);
+				showErrorDialog(pushDialog, e as Error | ValidationError);
 			}
 		}
 	}, [submit, postSubmitHandler, pushDialog]);

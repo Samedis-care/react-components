@@ -11,11 +11,10 @@ import Model, {
 } from "../../backend-integration/Model/Model";
 import {
 	Route,
-	RouteChildrenProps,
-	Switch,
-	useRouteMatch,
-	useHistory,
+	Routes,
 	useLocation,
+	useNavigate,
+	useParams,
 } from "react-router-dom";
 import BackendDataGrid, { BackendDataGridProps } from "../DataGrid";
 import { Form, FormProps } from "../Form";
@@ -27,6 +26,7 @@ import {
 import { makeStyles } from "@material-ui/core/styles";
 import { CrudImportProps, CrudImportType } from "./Import";
 import Loader from "../../standalone/Loader";
+import { useRouteInfo } from "../../utils";
 
 const CrudImport = React.lazy(() => import("./Import")) as CrudImportType;
 
@@ -188,6 +188,21 @@ export const useCrudDispatchContext = (): CrudDispatch => {
 
 export const CrudSpecialIds = ["import", "devimport", "new"];
 
+interface FormPageWrapperProps {
+	children: CrudProps<ModelFieldName, PageVisibility, unknown>["children"];
+	form: (
+		id: string,
+		children: NonNullable<
+			CrudProps<ModelFieldName, PageVisibility, unknown>["children"]
+		>
+	) => React.ReactElement;
+}
+const FormPageWrapper = (props: FormPageWrapperProps) => {
+	const params = useParams();
+	if (!props.children) return <></>;
+	return props.form(params.id ?? "", props.children);
+};
+
 const CRUD = <
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
@@ -195,8 +210,8 @@ const CRUD = <
 >(
 	props: CrudProps<KeyT, VisibilityT, CustomT>
 ) => {
-	const history = useHistory();
-	const { path, url } = useRouteMatch();
+	const navigate = useNavigate();
+	const { url: routeUrl } = useRouteInfo();
 	const location = useLocation();
 	const [perms] = usePermissionContext();
 	const {
@@ -227,27 +242,27 @@ const CRUD = <
 			if (disableRouting) {
 				setId(id);
 			} else {
-				history.push(`${url}/${id}`);
+				navigate(`${routeUrl}/${id}`);
 			}
 		},
-		[history, url, disableRouting]
+		[navigate, routeUrl, disableRouting]
 	);
 
 	const showNewPage = useCallback(() => {
 		if (disableRouting) {
 			setId("new");
 		} else {
-			history.push(`${url}/new`);
+			navigate(`${routeUrl}/new`);
 		}
-	}, [history, url, disableRouting]);
+	}, [navigate, routeUrl, disableRouting]);
 
 	const showOverview = useCallback(() => {
 		if (disableRouting) {
 			setId(null);
 		} else {
-			history.push(url);
+			navigate(routeUrl);
 		}
-	}, [history, url, disableRouting]);
+	}, [navigate, routeUrl, disableRouting]);
 
 	const refreshGrid = useCallback(() => {
 		setGridRefreshToken(new Date().getTime().toString());
@@ -264,10 +279,10 @@ const CRUD = <
 			if (disableRouting) {
 				setId((oldId) => (oldId === null ? null : id));
 			} else if (
-				location.pathname.startsWith(url + "/new") ||
-				location.pathname.startsWith(url + "/new/")
+				location.pathname.startsWith(routeUrl + "/new") ||
+				location.pathname.startsWith(routeUrl + "/new/")
 			) {
-				history.replace(`${url}/${id}`);
+				navigate(`${routeUrl}/${id}`, { replace: true });
 			}
 
 			refreshGrid();
@@ -276,8 +291,8 @@ const CRUD = <
 			props.formProps,
 			disableRouting,
 			location.pathname,
-			history,
-			url,
+			navigate,
+			routeUrl,
 			refreshGrid,
 		]
 	);
@@ -286,9 +301,9 @@ const CRUD = <
 		if (disableRouting) {
 			setId("import");
 		} else {
-			history.push(`${url}/import`);
+			navigate(`${routeUrl}/import`);
 		}
-	}, [disableRouting, history, url]);
+	}, [disableRouting, navigate, routeUrl]);
 
 	const grid = () => (
 		<Suspense fallback={<Loader />}>
@@ -376,40 +391,49 @@ const CRUD = <
 					{(id === null || !disableBackgroundGrid) && (
 						<div
 							className={
-								location.pathname === url ? classes.show : classes.hide
+								location.pathname === routeUrl ? classes.show : classes.hide
 							}
 						>
 							{grid()}
 						</div>
 					)}
 					{props.children && (
-						<Switch>
-							<RouteComponent path={`${path}/import`}>
-								{hasImportPermission || !ForbiddenPage ? (
-									importer(true)
-								) : (
-									<ForbiddenPage />
-								)}
-							</RouteComponent>
-							<RouteComponent path={`${path}/devimport`}>
-								{hasImportPermission || !ForbiddenPage ? (
-									importer(false)
-								) : (
-									<ForbiddenPage />
-								)}
-							</RouteComponent>
-							<RouteComponent path={`${path}/:id`}>
-								{hasPermission(perms, props.readPermission) ||
-								hasPermission(perms, props.editPermission) ||
-								!ForbiddenPage ? (
-									(routeProps: RouteChildrenProps<{ id: string }>) =>
-										props.children &&
-										form(routeProps.match?.params.id ?? "", props.children)
-								) : (
-									<ForbiddenPage />
-								)}
-							</RouteComponent>
-						</Switch>
+						<Routes>
+							<RouteComponent
+								path={`import/*`}
+								element={
+									hasImportPermission || !ForbiddenPage ? (
+										importer(true)
+									) : (
+										<ForbiddenPage />
+									)
+								}
+							/>
+							<RouteComponent
+								path={`devimport/*`}
+								element={
+									hasImportPermission || !ForbiddenPage ? (
+										importer(false)
+									) : (
+										<ForbiddenPage />
+									)
+								}
+							/>
+							<RouteComponent
+								path={`:id/*`}
+								element={
+									hasPermission(perms, props.readPermission) ||
+									hasPermission(perms, props.editPermission) ||
+									!ForbiddenPage ? (
+										<FormPageWrapper form={form}>
+											{props.children}
+										</FormPageWrapper>
+									) : (
+										<ForbiddenPage />
+									)
+								}
+							/>
+						</Routes>
 					)}
 				</>
 			)}

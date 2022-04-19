@@ -89,23 +89,22 @@ export const renderDataGridRecordUsingModel = <
 									/**
 									 * The onChange handler for editable input fields
 									 */
-									handleChange: async (
-										field: ModelFieldName,
-										value: unknown
-									) => {
+									handleChange: (field: ModelFieldName, value: unknown) => {
 										if (!id) throw new Error("ID not set!");
 
-										await model.connector.update(
-											await model.applySerialization(
-												{
-													id,
-													...dotToObject(field, value),
-												} as Record<string, unknown>,
-												"serialize",
-												"overview"
-											)
-										);
-										refreshGrid();
+										void (async () => {
+											await model.connector.update(
+												await model.applySerialization(
+													{
+														id,
+														...dotToObject(field, value),
+													} as Record<string, unknown>,
+													"serialize",
+													"overview"
+												)
+											);
+											refreshGrid();
+										})();
 									},
 									handleBlur: () => {
 										// this is unhandled in the data grid

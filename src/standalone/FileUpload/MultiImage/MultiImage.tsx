@@ -114,7 +114,7 @@ export interface MultiImageProps {
 	 * Allow capture?
 	 * @see https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/capture
 	 */
-	capture?: false | "false" | "user" | "environment";
+	capture?: false | "user" | "environment";
 	/**
 	 * Is the control read-only?
 	 */

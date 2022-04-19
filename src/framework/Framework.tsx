@@ -1,6 +1,6 @@
 import React, { Suspense } from "react";
 import { Loader } from "../standalone";
-import { Router } from "react-router-dom";
+import { unstable_HistoryRouter as HistoryRouter } from "react-router-dom";
 import { DialogContextProvider, FrameworkHistory, CCI18nProvider } from ".";
 import ThemeProvider, {
 	GetDefaultThemeCallback,
@@ -84,11 +84,11 @@ const ComponentsCareFramework = (props: ICompleteFrameworkProps) => {
 						<QueryClientProvider client={ModelDataStore}>
 							<PermissionContextProvider>
 								<UnsafeToLeave disable={props.disableUnsafeToLeave}>
-									<Router history={FrameworkHistory}>
+									<HistoryRouter history={FrameworkHistory}>
 										<DialogContextProvider>
 											{props.children}
 										</DialogContextProvider>
-									</Router>
+									</HistoryRouter>
 								</UnsafeToLeave>
 							</PermissionContextProvider>
 						</QueryClientProvider>

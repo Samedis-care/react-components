@@ -710,7 +710,7 @@ class Model<
 							"[Components-Care] [Model.validate] Error during validation:",
 							e
 						);
-						if (captureException) captureException(e);
+						if (captureException) captureException(e as Error);
 						error = (e as Error).message;
 					}
 
@@ -725,7 +725,7 @@ class Model<
 								"[Components-Care] [Model.validate] Error during validation:",
 								e
 							);
-							if (captureException) captureException(e);
+							if (captureException) captureException(e as Error);
 							error = (e as Error).message;
 						}
 					}
@@ -739,7 +739,7 @@ class Model<
 						value,
 						e
 					);
-					if (captureException) captureException(e);
+					if (captureException) captureException(e as Error);
 				}
 			})
 		);

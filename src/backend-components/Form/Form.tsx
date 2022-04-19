@@ -426,7 +426,7 @@ const loaderContainerStyles: CSSProperties = {
  * Normalizes data for validation to ensure dirty flag matches user perception
  * @param data The data to normalize
  */
-const normalizeValues = <T extends unknown>(data: T): T => {
+const normalizeValues = <T,>(data: T): T => {
 	if (typeof data !== "object")
 		throw new Error("Only Record<string, unknown> supported");
 	const normalizedData: Record<string, unknown> = {};
@@ -517,15 +517,11 @@ const Form = <
 	// custom fields - state
 	const customFieldState = useRef<Record<string, unknown>>({});
 	const getCustomState = useCallback(
-		<T extends unknown>(field: string): T =>
-			customFieldState.current[field] as T,
+		<T,>(field: string): T => customFieldState.current[field] as T,
 		[]
 	);
 	const setCustomState = useCallback(
-		<T extends unknown>(
-			field: string,
-			value: Dispatch<SetStateAction<T | undefined>>
-		) => {
+		<T,>(field: string, value: Dispatch<SetStateAction<T | undefined>>) => {
 			customFieldState.current[field] =
 				typeof value === "function"
 					? value(customFieldState.current[field] as T | undefined)
@@ -726,7 +722,7 @@ const Form = <
 					setFieldValue,
 				});
 			} catch (e) {
-				if (captureException) captureException(e);
+				if (captureException) captureException(e as Error);
 				// eslint-disable-next-line no-console
 				console.error(
 					"[Components-Care] [FormEngine] Pre-submit handler threw exception",
@@ -779,7 +775,7 @@ const Form = <
 
 			const result = await updateData(
 				onlySubmitMounted
-					? Object.fromEntries(
+					? (Object.fromEntries(
 							await Promise.all(
 								Object.entries(valuesRef.current)
 									.filter(
@@ -806,7 +802,7 @@ const Form = <
 										}
 									})
 							)
-					  )
+					  ) as Record<string, unknown>)
 					: valuesRef.current
 			);
 
