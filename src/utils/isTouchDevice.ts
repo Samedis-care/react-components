@@ -6,6 +6,8 @@ const isTouchDevice = (): boolean => {
 	return (
 		"ontouchstart" in window ||
 		navigator.maxTouchPoints > 0 ||
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-ignore - microsoft specific extension
 		navigator.msMaxTouchPoints > 0
 	);
 };

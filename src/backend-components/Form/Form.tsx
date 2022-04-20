@@ -726,7 +726,7 @@ const Form = <
 					setFieldValue,
 				});
 			} catch (e) {
-				if (captureException) captureException(e);
+				if (captureException) captureException(e as Error);
 				// eslint-disable-next-line no-console
 				console.error(
 					"[Components-Care] [FormEngine] Pre-submit handler threw exception",

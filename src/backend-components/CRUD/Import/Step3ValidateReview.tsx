@@ -42,7 +42,11 @@ const Step3ValidateReview = (props: CrudImporterStepProps) => {
 							const validation = await model.validate(modelRecord);
 							return [modelRecord, validation, null];
 						} catch (e) {
-							return [isModelRecordComplete ? modelRecord : record, {}, e];
+							return [
+								isModelRecordComplete ? modelRecord : record,
+								{},
+								e as Error,
+							];
 						}
 					}
 				)

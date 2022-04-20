@@ -299,10 +299,10 @@ const useCrudSelect = <
 		async (data: Record<string, unknown>): Promise<DataT> =>
 			initialRawData.includes(data)
 				? deserialize(data)
-				: ({
+				: (({
 						...(await deserializeModel(data)),
 						value: "to-create-" + Math.random().toString(),
-				  } as DataT),
+				  } as unknown) as DataT),
 		[deserialize, deserializeModel, initialRawData]
 	);
 
