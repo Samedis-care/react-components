@@ -12,6 +12,8 @@ const loadLang = (lang: string): Resource =>
 		"locale-switcher": require(`./assets/i18n/${lang}/locale-switcher.json`) as ResourceKey,
 		// eslint-disable-next-line @typescript-eslint/no-var-requires
 		countries: require(`./assets/i18n/${lang}/countries.json`) as ResourceKey,
+		// eslint-disable-next-line @typescript-eslint/no-var-requires
+		currencies: require(`./assets/i18n/${lang}/currencies.json`) as ResourceKey,
 	} as Resource);
 
 export const langs = supportedLanguages;
