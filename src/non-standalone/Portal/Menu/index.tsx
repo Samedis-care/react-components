@@ -140,7 +140,7 @@ const resolveLocation = (
 		}
 	}
 	// then try this level
-	const matchDef = definitions
+	const matchDef = [...definitions]
 		.sort((a, b) => (b.route?.length ?? 0) - (a.route?.length ?? 0))
 		.find((def) => def.route && doesRouteMatch(def.route, path, false));
 	return matchDef
