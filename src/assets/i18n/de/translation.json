@@ -220,8 +220,8 @@
 		},
 		"form": {
 			"back-on-dirty": {
-				"title": "Formularseite verlassen?",
-				"message": "Änderungen gehen verloren",
+				"title": "Seite verlassen?",
+				"message": "Alle nicht gespeicherten Änderungen gehen verloren!",
 				"yes": "Ja",
 				"no": "Nein"
 			}
