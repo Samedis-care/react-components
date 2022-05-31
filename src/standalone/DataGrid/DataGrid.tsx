@@ -190,10 +190,10 @@ export interface IDataGridCallbacks {
 	onSelectionChange?: (invert: boolean, ids: string[]) => void;
 	/**
 	 * Callback for row double click
-	 * @param id The ID of the row
+	 * @param record The data of the row to choose field for double click
 	 * @remarks Called additionally before edit handler
 	 */
-	onRowDoubleClick?: (id: string) => void;
+	onRowDoubleClick?: (record: Record<string, unknown>) => void;
 	/**
 	 * Callback to check if filter is supported
 	 * @param dataType The data type
