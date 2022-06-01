@@ -56,16 +56,34 @@ const Step3ValidateReview = (props: CrudImporterStepProps) => {
 
 	const recordsNormalized = useMemo(
 		() =>
-			(records ?? []).map((record) => ({
-				valid: isObjectEmpty(record[1])
-					? "true"
-					: Object.entries(record[1])
-							.map(([name, error]) => name + ": " + error)
-							.join("; "),
-				error: record[2]?.toString() ?? "none",
-				...record[0],
-			})),
-		[records]
+			(records ?? []).map((record) => {
+				const [data, validation, error] = record;
+				// verify that update key is unique in our import data set, otherwise we might create multiple records with the same update key
+				const updateKey = props.updateKey;
+				if (updateKey && !(updateKey in validation) && data[updateKey]) {
+					const recordsWithUpdateKey = (records ?? []).filter(
+						(r) => r[0][updateKey] === data[updateKey]
+					);
+					if (recordsWithUpdateKey.length > 1) {
+						validation[updateKey] = t(
+							"backend-components.crud.import.errors.update-key-not-uniq",
+							{
+								UPDATE_KEY: model.fields[updateKey].getLabel(),
+							}
+						);
+					}
+				}
+				return {
+					valid: isObjectEmpty(validation)
+						? "true"
+						: Object.entries(validation)
+								.map(([name, error]) => name + ": " + error)
+								.join("; "),
+					error: error?.toString() ?? "none",
+					...data,
+				};
+			}),
+		[model.fields, props.updateKey, records, t]
 	);
 
 	const everythingOkay = useMemo(

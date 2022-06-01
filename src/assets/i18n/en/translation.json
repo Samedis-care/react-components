@@ -248,7 +248,8 @@
 				"failed": "Failed: {{COUNT}}",
 				"last_error": "Last error",
 				"errors": {
-					"file_select": "Invalid file selected"
+					"file_select": "Invalid file selected",
+					"update-key-not-uniq": "{{UPDATE_KEY}} is not unique in import dataset"
 				},
 				"validations": {
 					"string": "Result must be a string or null",
