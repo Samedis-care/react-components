@@ -18,7 +18,7 @@
 				},
 				"set-filter": {
 					"search": "Suche...",
-					"select-all": "Wählen Sie Alle"
+					"select-all": "Alle auswählen"
 				},
 				"filter-type": {
 					"eq": "Gleich",
@@ -93,7 +93,7 @@
 				"open-icon-text": "Öffnen",
 				"clear-icon-text": "Leeren",
 				"loading-text": "Lade...",
-				"start-typing-to-search-text": "Geben Sie eine Suchzeichenfolge ein, um Ergebnisse zu erhalten",
+				"start-typing-to-search-text": "Gib eine Suchzeichenfolge ein, um Ergebnisse zu erhalten",
 				"lru-label": "Zuletzt verwendet"
 			}
 		},
@@ -138,7 +138,7 @@
 			"okay": "Okay"
 		},
 		"language-switcher": {
-			"title": "Wählen Sie Ihr Land und Ihre Sprache",
+			"title": "Wähle das Land und die Sprache",
 			"no-locales": "Keine Gebietsschemas entsprechen Ihrer Suchanfrage"
 		}
 	},
@@ -168,7 +168,7 @@
 							"min-date": "Der Termin sollte nicht vor dem Mindestdatum liegen"
 						},
 						"not-set": "Datum nicht gesetzt",
-						"validation-error": "Bitte geben Sie ein gültiges Datum ein"
+						"validation-error": "Gib ein gültiges Datum ein"
 					},
 					"enum": {
 						"unknown": "Unbekannt"
@@ -202,8 +202,8 @@
 			"delete": {
 				"confirm-dialog": {
 					"title": "Löschen",
-					"message": "Wollen Sie wirklich {{NUM}}-Einträge löschen?",
-					"messageInverted": "Wollen Sie wirklich alles außer {{NUM}}-Einträgen löschen?",
+					"message": "Wirklich {{NUM}}-Einträge löschen?",
+					"messageInverted": "Wirklich alles außer {{NUM}}-Einträge löschen?",
 					"buttons": {
 						"yes": "Ja",
 						"no": "Nein"
@@ -220,8 +220,8 @@
 		},
 		"form": {
 			"back-on-dirty": {
-				"title": "Formularseite verlassen?",
-				"message": "Änderungen gehen verloren",
+				"title": "Seite verlassen?",
+				"message": "Alle nicht gespeicherten Änderungen gehen verloren!",
 				"yes": "Ja",
 				"no": "Nein"
 			}
@@ -285,7 +285,7 @@
 			"error-title": "Ein Fehler ist aufgetreten",
 			"validation-error-title": "Ungültiges Formular",
 			"info": "Info",
-			"are-you-sure": "Sind Sie sicher?",
+			"are-you-sure": "Bist Du sicher?",
 			"are-you-sure-submit": "Fortfahren?"
 		}
 	}

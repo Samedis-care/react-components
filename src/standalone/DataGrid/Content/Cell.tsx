@@ -53,10 +53,11 @@ const Cell = (props: CellProps): React.ReactElement => {
 	}, [setState, id, prohibitMultiSelect]);
 
 	const editRecord = useCallback(() => {
-		if (id === "undefined") return;
-		if (onRowDoubleClick) onRowDoubleClick(id);
+		if (id === "undefined" || !record) return;
+		// Pass record on double click of row to supprt/choose any other field as ID
+		if (onRowDoubleClick) onRowDoubleClick(record);
 		if (onEdit) onEdit(id);
-	}, [id, onRowDoubleClick, onEdit]);
+	}, [id, onRowDoubleClick, onEdit, record]);
 
 	const column: IDataGridColumnDef | undefined =
 		columns[columnIndex - (disableSelection ? 0 : 1)];

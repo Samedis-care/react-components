@@ -166,11 +166,11 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 		updateParent();
 	};
 	const onFilterValueChangeDate = (date: DateType | null) => {
+		filterValue = "";
 		if (!date) {
-			filterValue = "";
 			subFilterComboType = "and";
 			subFilter = undefined;
-		} else {
+		} else if (date.isValid()) {
 			filterValue = localDateToUtcDate(date.toDate()).toISOString();
 		}
 		updateParent();
