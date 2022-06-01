@@ -1125,7 +1125,7 @@ const DataGrid = (props: DataGridProps) => {
 						if (newPage !== pageIndex) {
 							setState((prevState) => ({
 								...prevState,
-								pageIndex: newPage,
+								pages: [newPage, newPage],
 							}));
 						}
 					}
