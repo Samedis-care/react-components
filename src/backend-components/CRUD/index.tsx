@@ -9,13 +9,7 @@ import Model, {
 	ModelFieldName,
 	PageVisibility,
 } from "../../backend-integration/Model/Model";
-import {
-	Route,
-	Routes,
-	useLocation,
-	useNavigate,
-	useParams,
-} from "react-router-dom";
+import { Route, useLocation, useNavigate, useParams } from "react-router-dom";
 import BackendDataGrid, { BackendDataGridProps } from "../DataGrid";
 import { Form, FormProps } from "../Form";
 import {
@@ -27,6 +21,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import { CrudImportProps, CrudImportType } from "./Import";
 import Loader from "../../standalone/Loader";
 import { useRouteInfo } from "../../utils";
+import { SentryRoutes } from "../../standalone/SentryRoute";
 
 const CrudImport = React.lazy(() => import("./Import")) as CrudImportType;
 
@@ -398,7 +393,7 @@ const CRUD = <
 						</div>
 					)}
 					{props.children && (
-						<Routes>
+						<SentryRoutes>
 							<RouteComponent
 								path={`import/*`}
 								element={
@@ -433,7 +428,7 @@ const CRUD = <
 									)
 								}
 							/>
-						</Routes>
+						</SentryRoutes>
 					)}
 				</>
 			)}

@@ -17,5 +17,6 @@ export * from "./UIKit";
 export { default as SignalPortlet } from "./SignalPortlet";
 export { default as Notifications } from "./Notifications";
 export { default as SentryRoute } from "./SentryRoute";
+export * from "./SentryRoute";
 export * from "./CountryFlags";
 export { default as CountryFlags } from "./CountryFlags";
