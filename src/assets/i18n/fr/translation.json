@@ -248,7 +248,8 @@
 				"failed": "Échec : {{COUNT}}",
 				"last_error": "Dernière erreur",
 				"errors": {
-					"file_select": "Fichier sélectionné non valide"
+					"file_select": "Fichier sélectionné non valide",
+					"update-key-not-uniq": "{{UPDATE_KEY}} n'est pas unique dans l'ensemble de données d'importation"
 				},
 				"validations": {
 					"string": "Le résultat doit être une chaîne ou null",
