@@ -56,7 +56,7 @@ const useStyles = makeStyles(
 
 const SignPadDialog = (props: SignPadDialogProps) => {
 	const { t } = useCCTranslations();
-	const { disabled, penColor, setSignature, signature, ...canvasProps } = props;
+	const { penColor, setSignature, signature, ...canvasProps } = props;
 	const [resetCanvas, setResetCanvas] = useState(!!signature);
 	const [, popDialog] = useDialogContext();
 	const canvasWrapper = useRef<HTMLDivElement | null>();
@@ -117,7 +117,7 @@ const SignPadDialog = (props: SignPadDialogProps) => {
 
 	return (
 		<Dialog
-			open={!disabled}
+			open={true}
 			maxWidth="sm"
 			disableBackdropClick
 			onClose={closeCanvas}

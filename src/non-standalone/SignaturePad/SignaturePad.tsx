@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import SignPad, { SignPadProps } from "../../standalone/SignPad/index";
 import { useDialogContext } from "../../framework";
 import { showSignPadDialog } from "../Dialog";
@@ -31,8 +31,9 @@ const SignaturePadCanvas = (
 ) => {
 	const { signature, disabled, openInfo, ...dialogProps } = props;
 	const [pushDialog] = useDialogContext();
-	const showSignDialog = React.useCallback(() => {
-		showSignPadDialog(pushDialog, { disabled, signature, ...dialogProps });
+	const showSignDialog = useCallback(() => {
+		if (disabled) return;
+		showSignPadDialog(pushDialog, { signature, ...dialogProps });
 	}, [pushDialog, disabled, signature, dialogProps]);
 	return (
 		<SignPad

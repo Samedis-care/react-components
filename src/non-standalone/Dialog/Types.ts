@@ -151,10 +151,6 @@ export interface IDialogConfigSign {
 	 */
 	name?: string;
 	/**
-	 * Boolean flag to disable dialog
-	 */
-	disabled?: boolean;
-	/**
 	 * Boolean flag to clear signature
 	 */
 	clearOnResize?: boolean;
