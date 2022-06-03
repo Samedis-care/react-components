@@ -84,27 +84,31 @@ export const showInputDialog = async (
  * Shows an info dialog
  * @param pushDialog The dialog context's (useDialogContext()) pushDialog function
  * @param props The dialog properties (with buttons optional, defaults to an Okay button)
+ * @return A promise which resolves when the dialog is closed
  */
 export const showInfoDialog = (
 	pushDialog: DialogContextType[0],
 	props: Omit<IDialogConfigSimple, "buttons"> &
 		Partial<Pick<IDialogConfigSimple, "buttons">>
-): void => {
+): Promise<void> => {
 	const { title, message, buttons } = props;
-	pushDialog(
-		<InfoDialog
-			title={title}
-			message={message}
-			buttons={
-				buttons ?? [
-					{
-						text: i18n.t("non-standalone.dialog.okay"),
-						autoFocus: true,
-					},
-				]
-			}
-		/>
-	);
+	return new Promise((resolve) => {
+		pushDialog(
+			<InfoDialog
+				title={title}
+				message={message}
+				buttons={
+					buttons ?? [
+						{
+							text: i18n.t("non-standalone.dialog.okay"),
+							autoFocus: true,
+						},
+					]
+				}
+				onClose={resolve}
+			/>
+		);
+	});
 };
 
 /**
@@ -123,11 +127,12 @@ export const showSignPadDialog = (
  * Shows an error dialog
  * @param pushDialog The dialog context's (useDialogContext()) pushDialog function
  * @param e The error or validation error
+ * @return A promise which resolves when the dialog is closed
  */
 export const showErrorDialog = (
 	pushDialog: DialogContextType[0],
 	e: Error | ValidationError
-): void => {
+): Promise<void> => {
 	// display generic errors and validation errors
 	let errorTitle = "";
 	let errorMsg: React.ReactNode = "";
@@ -145,16 +150,19 @@ export const showErrorDialog = (
 			</ul>
 		);
 	}
-	pushDialog(
-		<ErrorDialog
-			title={errorTitle}
-			message={errorMsg}
-			buttons={[
-				{
-					text: i18n.t("common.buttons.ok"),
-					autoFocus: true,
-				},
-			]}
-		/>
-	);
+	return new Promise((resolve) => {
+		pushDialog(
+			<ErrorDialog
+				title={errorTitle}
+				message={errorMsg}
+				buttons={[
+					{
+						text: i18n.t("common.buttons.ok"),
+						autoFocus: true,
+					},
+				]}
+				onClose={resolve}
+			/>
+		);
+	});
 };

@@ -30,7 +30,7 @@ const ErrorDialogRaw = (props: IDialogConfigSimple) => {
 					<Button
 						key={index}
 						onClick={() => {
-							popDialog();
+							removeDialog();
 							if (data.onClick) data.onClick();
 						}}
 						color={data.color || "primary"}
