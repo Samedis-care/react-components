@@ -51,6 +51,7 @@ const useStyles = makeStyles(
 		signPreview: {
 			height: "100%",
 			width: "100%",
+			objectFit: "contain",
 		},
 		signTextDiv: {
 			position: "absolute",
@@ -86,7 +87,9 @@ const SignPad = (props: SignPadProps) => {
 				{!signature && <span>{t("standalone.signature-pad.sign-here")}</span>}
 			</div>
 			<div className={classes.imageDiv}>
-				{signature && <img className={classes.signPreview} src={signature} />}
+				{signature && (
+					<img className={classes.signPreview} src={signature} alt={""} />
+				)}
 			</div>
 			<div className={classes.infoDiv}>
 				{openInfo && (
