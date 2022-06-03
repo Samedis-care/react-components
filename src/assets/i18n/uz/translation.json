@@ -248,7 +248,8 @@
 				"failed": "Muvaffaqiyatsiz: {{COUNT}}",
 				"last_error": "Oxirgi xato",
 				"errors": {
-					"file_select": "Yaroqsiz fayl tanlandi"
+					"file_select": "Yaroqsiz fayl tanlandi",
+					"update-key-not-uniq": "{{UPDATE_KEY}} import maʼlumotlar toʻplamida yagona emas"
 				},
 				"validations": {
 					"string": "Natija satr yoki null bo'lishi kerak",

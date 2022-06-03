@@ -248,7 +248,8 @@
 				"failed": "Fehlgeschlagen: {{COUNT}}",
 				"last_error": "Letzter Fehler",
 				"errors": {
-					"file_select": "Ungültige Datei ausgewählt"
+					"file_select": "Ungültige Datei ausgewählt",
+					"update-key-not-uniq": "{{UPDATE_KEY}} ist im Importdatensatz nicht eindeutig"
 				},
 				"validations": {
 					"string": "Ergebnis muss eine Zeichenfolge oder null sein",
