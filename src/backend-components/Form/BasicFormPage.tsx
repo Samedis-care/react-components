@@ -166,7 +166,7 @@ const BasicFormPage = <RendererPropsT, CustomPropsT>(
 			try {
 				await postSubmitHandler();
 			} catch (e) {
-				showErrorDialog(pushDialog, e as Error | ValidationError);
+				await showErrorDialog(pushDialog, e as Error | ValidationError);
 			}
 		}
 	}, [submit, postSubmitHandler, pushDialog]);

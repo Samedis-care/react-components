@@ -11,7 +11,7 @@ const DefaultErrorComponent = (props: ErrorComponentProps) => {
 		// eslint-disable-next-line no-console
 		console.error(propError);
 
-		showErrorDialog(pushDialog, propError);
+		void showErrorDialog(pushDialog, propError);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [propError]);
 
