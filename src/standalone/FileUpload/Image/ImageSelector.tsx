@@ -1,7 +1,7 @@
 import React, { useCallback, useRef } from "react";
-import { Button, Grid, IconButton } from "@material-ui/core";
+import { Button, Grid, IconButton, useTheme } from "@material-ui/core";
 import { AttachFile, Person } from "@material-ui/icons";
-import { processImage } from "../../../utils";
+import { combineClassNames, processImage } from "../../../utils";
 import { IDownscaleProps } from "../../../utils/processImage";
 import { makeStyles } from "@material-ui/core/styles";
 import GroupBox from "../../GroupBox";
@@ -65,9 +65,9 @@ export interface ImageSelectorProps {
 	classes?: Partial<ReturnType<typeof useStyles>>;
 	/**
 	 * The display variant
-	 * @default normal
+	 * @default normal (overridable by theme)
 	 */
-	variant?: "normal" | "profile_picture";
+	variant?: "normal" | "modern" | "profile_picture";
 }
 
 const useStyles = makeStyles(
@@ -85,6 +85,9 @@ const useStyles = makeStyles(
 			display: "block",
 			width: `calc(100% - ${theme.spacing(2)}px)`,
 			height: `calc(100% - ${theme.spacing(2)}px)`,
+		},
+		clickablePreview: {
+			cursor: "pointer",
 		},
 		changeEventHelper: {
 			display: "none",
@@ -126,7 +129,11 @@ const ImageSelector = (props: ImageSelectorProps) => {
 		capture,
 		onChange,
 	} = props;
-	const variant = props.variant ?? "normal";
+	const theme = useTheme();
+	const variant =
+		props.variant ??
+		theme.componentsCare?.fileUpload?.image?.defaultVariant ??
+		"normal";
 	const classes = useStyles(props);
 	const fileRef = useRef<HTMLInputElement>(null);
 	const { t } = useCCTranslations();
@@ -220,6 +227,48 @@ const ImageSelector = (props: ImageSelectorProps) => {
 					<Grid item xs key={"image"} className={classes.imgWrapper}>
 						{value && (
 							<img src={value} alt={props.alt} className={classes.preview} />
+						)}
+					</Grid>
+				</Grid>
+			</GroupBox>
+		);
+	} else if (variant === "modern") {
+		return (
+			<GroupBox label={props.label} smallLabel={props.smallLabel}>
+				<Grid
+					container
+					spacing={2}
+					direction={"column"}
+					alignContent={"flex-start"}
+					alignItems={"stretch"}
+					justify={"center"}
+					wrap={"nowrap"}
+					className={classes.root}
+					onDrop={handleDrop}
+					onDragOver={handleDragOver}
+				>
+					{!props.readOnly && (
+						<input
+							type={"file"}
+							accept={"image/*"}
+							ref={fileRef}
+							onChange={handleFileChange}
+							className={classes.changeEventHelper}
+						/>
+					)}
+					<Grid item xs key={"image"} className={classes.imgWrapper}>
+						{value && (
+							<img
+								src={value}
+								alt={props.alt}
+								onClick={handleUpload}
+								onBlur={props.onBlur}
+								data-name={props.name}
+								className={combineClassNames([
+									classes.preview,
+									classes.clickablePreview,
+								])}
+							/>
 						)}
 					</Grid>
 				</Grid>

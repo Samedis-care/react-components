@@ -20,6 +20,7 @@ import { ImageDialogEntryTheme } from "./standalone/FileUpload/MultiImage/ImageD
 import { MultiImageTheme } from "./standalone/FileUpload/MultiImage/MultiImage";
 import { FormPageLayoutTheme } from "./standalone/Form/FormPageLayout";
 import { FileUploadProps } from "./standalone/FileUpload/Generic";
+import { ImageSelectorProps } from "./standalone/FileUpload/Image/ImageSelector";
 
 export * from "./standalone";
 
@@ -45,6 +46,9 @@ export interface ComponentsCareTheme {
 	fileUpload?: {
 		generic?: {
 			defaultVariant?: FileUploadProps["variant"];
+		};
+		image?: {
+			defaultVariant?: ImageSelectorProps["variant"];
 		};
 		multiImage?: {
 			root?: MultiImageTheme;
