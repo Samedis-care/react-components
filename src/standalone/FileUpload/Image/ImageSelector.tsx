@@ -1,6 +1,11 @@
 import React, { useCallback, useRef } from "react";
-import { Button, Grid, IconButton, useTheme } from "@material-ui/core";
-import { AttachFile, Person } from "@material-ui/icons";
+import { Button, Grid, IconButton, Tooltip, useTheme } from "@material-ui/core";
+import {
+	AttachFile,
+	Person,
+	SvgIconComponent,
+	CloudUploadOutlined,
+} from "@material-ui/icons";
 import { combineClassNames, processImage } from "../../../utils";
 import { IDownscaleProps } from "../../../utils/processImage";
 import { makeStyles } from "@material-ui/core/styles";
@@ -68,6 +73,12 @@ export interface ImageSelectorProps {
 	 * @default normal (overridable by theme)
 	 */
 	variant?: "normal" | "modern" | "profile_picture";
+	/**
+	 * Upload button for modern variant when no image present
+	 * Optional, only used by modern variant. Falls back to CloudUploadOutlined by Material-UI
+	 * Can be overwritten via theme
+	 */
+	placeholderIcon?: SvgIconComponent;
 }
 
 const useStyles = makeStyles(
@@ -233,6 +244,11 @@ const ImageSelector = (props: ImageSelectorProps) => {
 			</GroupBox>
 		);
 	} else if (variant === "modern") {
+		const Placeholder: SvgIconComponent =
+			theme.componentsCare?.fileUpload?.image?.placeholderIcon ??
+			props.placeholderIcon ??
+			CloudUploadOutlined;
+
 		return (
 			<GroupBox label={props.label} smallLabel={props.smallLabel}>
 				<Grid
@@ -256,19 +272,38 @@ const ImageSelector = (props: ImageSelectorProps) => {
 							className={classes.changeEventHelper}
 						/>
 					)}
-					<Grid item xs key={"image"} className={classes.imgWrapper}>
-						{value && (
+					<Grid
+						item
+						xs
+						key={"image"}
+						className={classes.imgWrapper}
+						onBlur={props.onBlur}
+						data-name={props.name}
+					>
+						{value ? (
 							<img
 								src={value}
 								alt={props.alt}
 								onClick={handleUpload}
-								onBlur={props.onBlur}
-								data-name={props.name}
 								className={combineClassNames([
 									classes.preview,
 									classes.clickablePreview,
 								])}
 							/>
+						) : (
+							<Tooltip
+								title={
+									props.uploadLabel ?? t("standalone.file-upload.upload") ?? ""
+								}
+							>
+								<Placeholder
+									onClick={handleUpload}
+									className={combineClassNames([
+										classes.preview,
+										classes.clickablePreview,
+									])}
+								/>
+							</Tooltip>
 						)}
 					</Grid>
 				</Grid>

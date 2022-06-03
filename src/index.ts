@@ -49,6 +49,7 @@ export interface ComponentsCareTheme {
 		};
 		image?: {
 			defaultVariant?: ImageSelectorProps["variant"];
+			placeholderIcon?: ImageSelectorProps["placeholderIcon"];
 		};
 		multiImage?: {
 			root?: MultiImageTheme;
