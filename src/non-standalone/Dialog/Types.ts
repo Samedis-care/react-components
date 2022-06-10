@@ -21,6 +21,10 @@ export interface IDialogButtonConfig {
 	 * The color of the button
 	 */
 	color?: PropTypes.Color;
+	/**
+	 * Set to true to prevent closing the dialog
+	 */
+	dontClose?: boolean;
 }
 
 /**
