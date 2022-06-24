@@ -181,12 +181,6 @@ export function withSentryReactRouterV6Routing<
 	P extends Record<string, unknown>,
 	R extends React.FC<P>
 >(Routes: R): R {
-	if (!_customStartTransaction) {
-		throw new Error(
-			"reactRouterV6Instrumentation was unable to wrap Routes because of one or more missing parameters."
-		);
-	}
-
 	const SentryRoutes: React.FC<P> = (props: P) => {
 		const location = useLocation();
 		const routeContext = useContext(SentryRouteContext);
