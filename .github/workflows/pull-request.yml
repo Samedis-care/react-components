@@ -33,7 +33,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
       - name: Install Dependencies
-        run: npm install
+        run: npm ci --legacy-peer-deps
       - name: Running Tests
         run: npm run test
       - name: Building Library
