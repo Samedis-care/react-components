@@ -64,7 +64,7 @@ const ColumnHeader = (props: IDataGridContentColumnHeaderProps) => {
 		[setColumnState]
 	);
 	const onSortChange = useCallback(
-		(field: string, newSort: -1 | 0 | 1) => {
+		(field: string, newSort: -1 | 0 | 1, additional: boolean) => {
 			setColumnState((prevState) => {
 				let newColumnState = {
 					...prevState,
@@ -74,41 +74,55 @@ const ColumnHeader = (props: IDataGridContentColumnHeaderProps) => {
 					},
 				};
 
-				if (newSort === 0) {
-					// if disable sorting, adjust sort priority for others
-					Object.keys(prevState)
-						.filter(
-							(otherField) =>
-								prevState[otherField].sort !== 0 &&
-								// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-								prevState[field].sortOrder! < prevState[otherField].sortOrder!
-						)
-						.forEach((otherField) => {
-							newColumnState = {
-								...newColumnState,
-								[otherField]: {
-									...newColumnState[otherField],
+				if (additional) {
+					if (newSort === 0) {
+						// if disable sorting, adjust sort priority for others
+						Object.keys(prevState)
+							.filter(
+								(otherField) =>
+									prevState[otherField].sort !== 0 &&
 									// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-									sortOrder: newColumnState[otherField].sortOrder! - 1,
-								},
-							};
-						});
-				} else if (newSort === 1) {
-					// if enable sorting, set to highest order
-					const order =
-						Object.keys(prevState).filter(
-							(otherField) => prevState[otherField].sort !== 0
-						).length + 1;
-					newColumnState = {
-						...newColumnState,
-						[field]: {
-							...newColumnState[field],
-							sortOrder: order,
-						},
-					};
+									prevState[field].sortOrder! < prevState[otherField].sortOrder!
+							)
+							.forEach((otherField) => {
+								newColumnState = {
+									...newColumnState,
+									[otherField]: {
+										...newColumnState[otherField],
+										// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+										sortOrder: newColumnState[otherField].sortOrder! - 1,
+									},
+								};
+							});
+					} else if (newSort === 1) {
+						// if enable sorting, set to highest order
+						const order =
+							Object.keys(prevState).filter(
+								(otherField) => prevState[otherField].sort !== 0
+							).length + 1;
+						newColumnState = {
+							...newColumnState,
+							[field]: {
+								...newColumnState[field],
+								sortOrder: order,
+							},
+						};
 
-					// if we reached the limit of max sorts we cancel this action
-					if (typeof sortLimit === "number" && order - 1 > sortLimit) {
+						// if we reached the limit of max sorts we cancel this action
+						if (typeof sortLimit === "number" && order - 1 > sortLimit) {
+							return prevState;
+						}
+					}
+				} else {
+					for (const key in newColumnState) {
+						if (key === field) continue;
+						newColumnState[key].sort = 0;
+						newColumnState[key].sortOrder = undefined;
+					}
+					newColumnState[field].sortOrder = 1;
+
+					// if sortLimit is null we cancel the operation
+					if (typeof sortLimit === "number" && sortLimit === 0) {
 						return prevState;
 					}
 				}
@@ -135,13 +149,19 @@ const ColumnHeader = (props: IDataGridContentColumnHeaderProps) => {
 		},
 		[column, dragging, field, setColumnWidthState]
 	);
-	const onColumnClick = useCallback(() => {
-		if (!sortable) return;
+	const onColumnClick = useCallback(
+		(evt: React.MouseEvent) => {
+			if (!sortable) return;
 
-		if (sort === 0) onSortChange(field, 1);
-		else if (sort === 1) onSortChange(field, -1);
-		else if (sort === -1) onSortChange(field, 0);
-	}, [sortable, field, sort, onSortChange]);
+			// add additional sort instead of removing all currently active
+			const additional = evt.ctrlKey;
+
+			if (sort === 0) onSortChange(field, 1, additional);
+			else if (sort === 1) onSortChange(field, -1, additional);
+			else if (sort === -1) onSortChange(field, 0, additional);
+		},
+		[sortable, field, sort, onSortChange]
+	);
 	const internalOnFilterChange = useCallback(
 		(newFilter: IFilterDef) => onFilterChange(field, newFilter),
 		[field, onFilterChange]
