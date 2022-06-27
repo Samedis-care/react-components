@@ -115,7 +115,7 @@ const Step3ValidateReview = (props: CrudImporterStepProps) => {
 				})),
 				{
 					field: "valid",
-					type: "boolean",
+					type: "string",
 					headerName: t("backend-components.crud.import.valid"),
 					filterable: true,
 					sortable: true,
@@ -132,6 +132,20 @@ const Step3ValidateReview = (props: CrudImporterStepProps) => {
 					hidden: false,
 				},
 			]}
+			defaultFilter={
+				everythingOkay
+					? []
+					: [
+							{
+								field: "valid",
+								filter: {
+									type: "notEqual",
+									value1: "true",
+									value2: "",
+								},
+							},
+					  ]
+			}
 		/>
 	);
 };

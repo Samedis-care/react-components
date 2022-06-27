@@ -1,6 +1,7 @@
 import React, { useMemo } from "react";
 import {
 	DataGridData,
+	DataGridProps,
 	DataGridRowData,
 	IDataGridColumnDef,
 } from "../../../standalone/DataGrid/DataGrid";
@@ -18,10 +19,14 @@ export interface GenericDataPreviewProps {
 	 * Existing (partial) column definition
 	 */
 	existingDefinition?: IDataGridColumnDef[];
+	/**
+	 * Default filter settings
+	 */
+	defaultFilter?: DataGridProps["defaultFilter"];
 }
 
 const GenericDataPreview = (props: GenericDataPreviewProps) => {
-	const { data, existingDefinition } = props;
+	const { data, existingDefinition, defaultFilter } = props;
 
 	const columns: string[] = useMemo(
 		() => uniqueArray(data.map(Object.keys).flat()),
@@ -67,6 +72,7 @@ const GenericDataPreview = (props: GenericDataPreviewProps) => {
 						rows: processed[0],
 					};
 				}}
+				defaultFilter={defaultFilter}
 			/>
 		</DataGridNoPersist>
 	);
