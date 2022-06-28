@@ -8,7 +8,7 @@ import { Loader } from "../../../standalone";
 
 type RecordT = [Record<string, unknown>, Record<string, string>, Error | null];
 
-const Step3ValidateReview = (props: CrudImporterStepProps) => {
+export const useImportStep3Logic = (props: CrudImporterStepProps) => {
 	const { model, state, setState } = props;
 
 	const { t } = useCCTranslations();
@@ -99,6 +99,21 @@ const Step3ValidateReview = (props: CrudImporterStepProps) => {
 			validationPassed: everythingOkay,
 		}));
 	}, [setState, everythingOkay]);
+
+	return {
+		records,
+		recordsNormalized,
+		everythingOkay,
+	};
+};
+
+const Step3ValidateReview = (props: CrudImporterStepProps) => {
+	const { model } = props;
+	const { records, recordsNormalized, everythingOkay } = useImportStep3Logic(
+		props
+	);
+
+	const { t } = useCCTranslations();
 
 	if (!records) return <Loader />;
 

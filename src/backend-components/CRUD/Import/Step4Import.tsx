@@ -16,7 +16,7 @@ interface ImportCounters {
 	failed: number;
 }
 
-const Step4Import = (props: CrudImporterStepProps) => {
+export const useImportStep4Logic = (props: CrudImporterStepProps) => {
 	const {
 		model,
 		state,
@@ -24,8 +24,6 @@ const Step4Import = (props: CrudImporterStepProps) => {
 		updateKey,
 		additionalUpdateKeyFilters,
 	} = props;
-
-	const { t } = useCCTranslations();
 
 	// model which can write to all fields
 	const customModel = new Model<string, PageVisibility, unknown>(
@@ -156,6 +154,13 @@ const Step4Import = (props: CrudImporterStepProps) => {
 		})();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
+
+	return { counters, lastError };
+};
+
+const Step4Import = (props: CrudImporterStepProps) => {
+	const { counters, lastError } = useImportStep4Logic(props);
+	const { t } = useCCTranslations();
 
 	return (
 		<Grid container spacing={2}>

@@ -54,9 +54,8 @@ const useStyles = makeStyles(
 	{ name: "CcCrudImportStep2" }
 );
 
-const Step2ConnectData = (props: CrudImporterStepProps) => {
+export const useImportStep2Logic = (props: CrudImporterStepProps) => {
 	const { model, state, setState } = props;
-	const classes = useStyles();
 	const { t } = useCCTranslations();
 
 	const columns = useMemo(
@@ -190,6 +189,15 @@ const Step2ConnectData = (props: CrudImporterStepProps) => {
 		},
 		[model.fields, setState, state.data]
 	);
+
+	return { columns, conversionScriptUpdates, handleConversionScriptChange };
+};
+
+const Step2ConnectData = (props: CrudImporterStepProps) => {
+	const { model, state } = props;
+	const classes = useStyles();
+	const { t } = useCCTranslations();
+	const { columns, handleConversionScriptChange } = useImportStep2Logic(props);
 
 	return (
 		<Grid container spacing={2}>

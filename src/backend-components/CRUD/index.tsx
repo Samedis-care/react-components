@@ -148,6 +148,10 @@ export interface CrudProps<
 	 * How-to information for the import
 	 */
 	importHowTo?: CrudImportProps<KeyT, VisibilityT, CustomT>["howTo"];
+	/**
+	 * Custom Import UI
+	 */
+	importUI?: React.ComponentType<CrudImportProps<KeyT, VisibilityT, CustomT>>;
 }
 
 const useStyles = makeStyles(
@@ -226,6 +230,7 @@ const CRUD = <
 	const enableUserImport = requestEnableUserImport && hasImportPermission;
 	const GridWrapper = props.gridWrapper ?? React.Fragment;
 	const RouteComponent = props.routeComponent ?? Route;
+	const ImportUI = props.importUI ?? CrudImport;
 	const [id, setId] = useState<string | null>(props.initialView ?? null);
 	const [gridRefreshToken, setGridRefreshToken] = useState<string>(
 		new Date().getTime().toString()
@@ -328,7 +333,7 @@ const CRUD = <
 	);
 
 	const importer = (guided: boolean) => (
-		<CrudImport
+		<ImportUI
 			model={props.model}
 			importConfig={importConfig}
 			updateKey={importUpdateKey}

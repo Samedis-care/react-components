@@ -56,7 +56,7 @@ export interface CrudImportProps<
 	guided: boolean;
 }
 
-const IMPORT_STEPS = [
+export const IMPORT_STEPS = [
 	"backend-components.crud.import.step1",
 	"backend-components.crud.import.step2",
 	"backend-components.crud.import.step3",
@@ -112,23 +112,15 @@ export const isFieldImportable = (
 	return name !== "id" && visibilityOkay && typeOkay;
 };
 
-const CrudImport = <
+export const useCrudImportLogic = <
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
 	CustomT
 >(
 	props: CrudImportProps<KeyT, VisibilityT, CustomT>
 ) => {
-	const {
-		model,
-		importConfig,
-		updateKey,
-		updateKeyAdditionalFilters,
-		howTo,
-	} = props;
+	const { model, importConfig, updateKey } = props;
 	const guided = props.guided && importConfig;
-	const classes = useStyles();
-	const { t } = useCCTranslations();
 	const { pathname } = useLocation();
 
 	if (updateKey && !model.fields[updateKey]?.filterable) {
@@ -168,6 +160,39 @@ const CrudImport = <
 		FrameworkHistory.push(pathname.substr(0, pathname.lastIndexOf("/")));
 	}, [pathname]);
 
+	return {
+		guided,
+		activeStep,
+		state,
+		setState,
+		hasImportConfig,
+		next,
+		prev,
+		finish,
+	};
+};
+
+const CrudImport = <
+	KeyT extends ModelFieldName,
+	VisibilityT extends PageVisibility,
+	CustomT
+>(
+	props: CrudImportProps<KeyT, VisibilityT, CustomT>
+) => {
+	const classes = useStyles();
+	const { t } = useCCTranslations();
+	const { updateKeyAdditionalFilters, howTo, model, updateKey } = props;
+	const {
+		guided,
+		activeStep,
+		state,
+		setState,
+		hasImportConfig,
+		next,
+		prev,
+		finish,
+	} = useCrudImportLogic(props);
+
 	return (
 		<Grid
 			container
@@ -179,9 +204,11 @@ const CrudImport = <
 			className={classes.wrapper}
 		>
 			<Grid item>
-				<Stepper activeStep={activeStep}>
-					{IMPORT_STEPS.filter((label, index) => !(guided && index == 1)).map(
-						(label, index) => (
+				<Stepper
+					activeStep={guided && activeStep > 1 ? activeStep - 1 : activeStep}
+				>
+					{IMPORT_STEPS.filter((label, index) => !(guided && index === 1)).map(
+						(label: string, index: number) => (
 							<Step key={index.toString(16)}>
 								<StepLabel>{t(label)}</StepLabel>
 							</Step>
