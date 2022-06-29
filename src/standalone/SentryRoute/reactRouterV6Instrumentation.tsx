@@ -200,6 +200,7 @@ export function withSentryReactRouterV6Routing<
 					);
 				let basePath: string = routeContext.route.path ?? "";
 				if (basePath) {
+					if (basePath.startsWith("*")) basePath = basePath.slice(1);
 					if (basePath.endsWith("/*")) basePath = basePath.slice(0, -1);
 					childRoutes = childRoutes.map((route) => {
 						if (route.path == null) return route;
