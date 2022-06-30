@@ -1,16 +1,20 @@
 import React, { useCallback, useRef } from "react";
-import { Button, Grid, IconButton, Tooltip, useTheme } from "@material-ui/core";
 import {
-	AttachFile,
-	Person,
-	SvgIconComponent,
-	CloudUploadOutlined,
-} from "@material-ui/icons";
+	Box,
+	Button,
+	Grid,
+	IconButton,
+	Tooltip,
+	Typography,
+	useTheme,
+} from "@material-ui/core";
+import { AttachFile, Person } from "@material-ui/icons";
 import { combineClassNames, processImage } from "../../../utils";
 import { IDownscaleProps } from "../../../utils/processImage";
 import { makeStyles } from "@material-ui/core/styles";
 import GroupBox from "../../GroupBox";
 import useCCTranslations from "../../../utils/useCCTranslations";
+import { ImageFileIcon } from "../FileIcons";
 
 export interface ImageSelectorProps {
 	/**
@@ -53,6 +57,11 @@ export interface ImageSelectorProps {
 	 */
 	uploadLabel?: string;
 	/**
+	 * Label overwrite for Allowed file formats label
+	 * Modern variant only
+	 */
+	formatsLabel?: string;
+	/**
 	 * Is the control read-only?
 	 */
 	readOnly: boolean;
@@ -73,12 +82,6 @@ export interface ImageSelectorProps {
 	 * @default normal (overridable by theme)
 	 */
 	variant?: "normal" | "modern" | "profile_picture";
-	/**
-	 * Upload button for modern variant when no image present
-	 * Optional, only used by modern variant. Falls back to CloudUploadOutlined by Material-UI
-	 * Can be overwritten via theme
-	 */
-	placeholderIcon?: SvgIconComponent;
 }
 
 const useStyles = makeStyles(
@@ -88,6 +91,10 @@ const useStyles = makeStyles(
 			height: `calc(100% - ${theme.spacing(2)}px)`,
 			marginTop: theme.spacing(2),
 		},
+		rootModern: {
+			cursor: "pointer",
+			height: "100%",
+		},
 		imgWrapper: {
 			maxHeight: "100%",
 		},
@@ -96,6 +103,24 @@ const useStyles = makeStyles(
 			display: "block",
 			width: `calc(100% - ${theme.spacing(2)}px)`,
 			height: `calc(100% - ${theme.spacing(2)}px)`,
+		},
+		previewModern: {
+			objectFit: "contain",
+			display: "block",
+			width: "100%",
+			height: "100%",
+		},
+		modernUploadLabel: {
+			color: theme.palette.action.disabled,
+		},
+		modernFormatsLabel: {
+			color: theme.palette.action.disabled,
+		},
+		modernFormatIcon: {
+			color: theme.palette.action.disabled,
+		},
+		modernFullHeight: {
+			height: "100%",
 		},
 		clickablePreview: {
 			cursor: "pointer",
@@ -244,22 +269,17 @@ const ImageSelector = (props: ImageSelectorProps) => {
 			</GroupBox>
 		);
 	} else if (variant === "modern") {
-		const Placeholder: SvgIconComponent =
-			theme.componentsCare?.fileUpload?.image?.placeholderIcon ??
-			props.placeholderIcon ??
-			CloudUploadOutlined;
-
 		return (
 			<GroupBox label={props.label} smallLabel={props.smallLabel}>
 				<Grid
 					container
-					spacing={2}
+					spacing={0}
 					direction={"column"}
 					alignContent={"flex-start"}
 					alignItems={"stretch"}
 					justify={"center"}
 					wrap={"nowrap"}
-					className={classes.root}
+					className={classes.rootModern}
 					onDrop={handleDrop}
 					onDragOver={handleDragOver}
 				>
@@ -281,29 +301,74 @@ const ImageSelector = (props: ImageSelectorProps) => {
 						data-name={props.name}
 					>
 						{value ? (
-							<img
-								src={value}
-								alt={props.alt}
-								onClick={handleUpload}
-								className={combineClassNames([
-									classes.preview,
-									classes.clickablePreview,
-								])}
-							/>
-						) : (
 							<Tooltip
 								title={
-									props.uploadLabel ?? t("standalone.file-upload.upload") ?? ""
+									props.uploadLabel ??
+									t("standalone.file-upload.upload-modern") ??
+									""
 								}
 							>
-								<Placeholder
+								<img
+									src={value}
+									alt={props.alt}
 									onClick={handleUpload}
 									className={combineClassNames([
-										classes.preview,
+										classes.previewModern,
 										classes.clickablePreview,
 									])}
 								/>
 							</Tooltip>
+						) : (
+							<Box px={2} className={classes.modernFullHeight}>
+								<Grid
+									container
+									onClick={handleUpload}
+									direction={"column"}
+									spacing={0}
+									className={classes.modernFullHeight}
+								>
+									<Grid
+										item
+										xs
+										container
+										direction={"column"}
+										justify={"space-around"}
+										wrap={"nowrap"}
+									>
+										<Grid item>
+											<Typography
+												component={"h1"}
+												variant={"h5"}
+												className={classes.modernUploadLabel}
+												align={"center"}
+											>
+												{props.uploadLabel ??
+													t("standalone.file-upload.upload-modern") ??
+													""}
+											</Typography>
+										</Grid>
+									</Grid>
+									<Grid item>
+										<Grid
+											container
+											wrap={"nowrap"}
+											spacing={0}
+											justify={"space-between"}
+										>
+											<Grid item>
+												<Typography className={classes.modernFormatsLabel}>
+													{props.formatsLabel ??
+														t("standalone.file-upload.formats-modern") ??
+														""}
+												</Typography>
+											</Grid>
+											<Grid item>
+												<ImageFileIcon className={classes.modernFormatIcon} />
+											</Grid>
+										</Grid>
+									</Grid>
+								</Grid>
+							</Box>
 						)}
 					</Grid>
 				</Grid>
