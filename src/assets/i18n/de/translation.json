@@ -109,7 +109,8 @@
 				"invalid-type": "Nicht unterstützter Dateityp ausgewählt"
 			},
 			"format": {
-				"any": "Alle"
+				"any": "Alle",
+				"image": "Bilder"
 			},
 			"multi-image": {
 				"edit": "Bearbeiten",
