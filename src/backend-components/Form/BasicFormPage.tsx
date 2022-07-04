@@ -93,12 +93,12 @@ const BasicFormPage = <RendererPropsT, CustomPropsT>(
 					unblock.current = undefined;
 				}
 				transition.retry();
-				unblock.current = FrameworkHistory.block(blocker);
 			};
 			//console.log("History.block(", location, ",", action, ")", match);
 			// special handling: routing inside form page (e.g. routed tab panels, routed stepper)
 			if (transition.location.pathname.startsWith(routeUrl)) {
 				allowTransition();
+				unblock.current = FrameworkHistory.block(blocker);
 				return;
 			}
 			// otherwise: ask user for confirmation
@@ -109,7 +109,9 @@ const BasicFormPage = <RendererPropsT, CustomPropsT>(
 					textButtonYes: t("backend-components.form.back-on-dirty.yes"),
 					textButtonNo: t("backend-components.form.back-on-dirty.no"),
 				});
-				if (leave) allowTransition();
+				if (leave) {
+					allowTransition();
+				}
 			})();
 		};
 		unblock.current = FrameworkHistory.block(blocker);
