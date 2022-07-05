@@ -656,6 +656,8 @@ class Model<
 							({
 								getLabelText: value.getLabel,
 								value: value.value,
+								disabled: value.disabled,
+								isDivider: value.isDivider,
 							} as DataGridSetFilterDataEntry)
 					);
 			}

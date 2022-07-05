@@ -316,6 +316,10 @@ export interface IDataGridColumnProps {
 	 */
 	defaultFilter?: DataGridFilterSetting[];
 	/**
+	 * The column filter settings override (disables all filters if set)
+	 */
+	overrideFilter?: DataGridFilterSetting[];
+	/**
 	 * Header height override (in px)
 	 * @default 32
 	 */
@@ -339,6 +343,14 @@ export interface DataGridSetFilterDataEntry {
 	 * The label text
 	 */
 	getLabelText: () => string;
+	/**
+	 * Is the value disabled
+	 */
+	disabled?: boolean;
+	/**
+	 * Is the value a divider
+	 */
+	isDivider?: boolean;
 }
 
 export type DataGridSetFilterData = DataGridSetFilterDataEntry[];
@@ -882,6 +894,12 @@ const useStyles = makeStyles(
 			paddingLeft: 0,
 			paddingRight: 0,
 		},
+		setFilterListItemDivider: {
+			padding: 0,
+		},
+		setFilterListDivider: {
+			width: "100%",
+		},
 		contentOverlayCollapse: {
 			position: "absolute",
 			zIndex: 1000,
@@ -1010,6 +1028,7 @@ const DataGrid = (props: DataGridProps) => {
 		disableSelection,
 		headerHeight,
 		selection,
+		overrideFilter,
 	} = props;
 	const rowsPerPage = props.rowsPerPage || 25;
 
@@ -1052,10 +1071,23 @@ const DataGrid = (props: DataGridProps) => {
 		[columns, hiddenColumns, lockedColumns]
 	);
 
-	const columnsStatePack = useState<IDataGridColumnsState>(() => ({
-		...getDataGridDefaultColumnsState(columns, defaultSort, defaultFilter),
-		...persisted?.columnState,
-	}));
+	const columnsStatePack = useState<IDataGridColumnsState>(() => {
+		const ret = {
+			...getDataGridDefaultColumnsState(columns, defaultSort, defaultFilter),
+			...persisted?.columnState,
+		};
+		if (overrideFilter) {
+			for (const field in ret) {
+				ret[field].filter = undefined;
+			}
+			overrideFilter.forEach((override) => {
+				if (override.field in ret) {
+					ret[override.field].filter = override.filter;
+				}
+			});
+		}
+		return ret;
+	});
 	const [columnsState] = columnsStatePack;
 
 	const columnWidthStatePack = useState<Record<string, number>>(() => ({

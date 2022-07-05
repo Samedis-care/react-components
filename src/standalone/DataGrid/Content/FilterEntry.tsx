@@ -1,6 +1,7 @@
 import React, { useCallback, useState } from "react";
 import {
 	Checkbox,
+	Divider,
 	FormControlLabel,
 	Grid,
 	IconButton,
@@ -192,6 +193,7 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 	) => {
 		if (checked) {
 			filterValue = (props.valueData as DataGridSetFilterData)
+				.filter((entry) => !entry.isDivider)
 				.map((entry) => entry.value)
 				.join(",");
 		} else {
@@ -447,6 +449,7 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 										checked={
 											filterValue.split(",").sort().join(",") ===
 											(props.valueData as DataGridSetFilterData)
+												.filter((entry) => !entry.isDivider)
 												.map((entry) => entry.value)
 												.sort()
 												.join(",")
@@ -468,16 +471,28 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 								.map((entry) => (
 									<ListItem
 										key={entry.value}
-										className={classes.setFilterListItem}
+										className={
+											entry.isDivider
+												? classes.setFilterListItemDivider
+												: classes.setFilterListItem
+										}
+										disabled={entry.disabled || entry.isDivider}
 									>
-										<Checkbox
-											value={entry.value}
-											checked={filterValue.split(",").includes(entry.value)}
-											onChange={onFilterValueChangeEnum}
-										/>
-										<ListItemText>
-											{(entry.getLabel || entry.getLabelText)()}
-										</ListItemText>
+										{entry.isDivider ? (
+											<Divider className={classes.setFilterListDivider} />
+										) : (
+											<>
+												<Checkbox
+													value={entry.value}
+													checked={filterValue.split(",").includes(entry.value)}
+													onChange={onFilterValueChangeEnum}
+													disabled={entry.disabled}
+												/>
+												<ListItemText>
+													{(entry.getLabel || entry.getLabelText)()}
+												</ListItemText>
+											</>
+										)}
 									</ListItem>
 								))}
 						</List>

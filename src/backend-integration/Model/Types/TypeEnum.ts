@@ -7,6 +7,8 @@ export interface EnumValue {
 	value: string;
 	getLabel: () => string;
 	invisible?: boolean;
+	disabled?: boolean;
+	isDivider?: boolean;
 }
 
 abstract class TypeEnum implements Type<string> {
