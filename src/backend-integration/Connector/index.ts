@@ -4,6 +4,7 @@ export { default as ApiConnector } from "./ApiConnector";
 export { default as LazyConnector } from "./LazyConnector";
 export { default as ApiAuthMode } from "./AuthMode";
 export { default as JsonApiClient } from "./JsonApiClient";
+export { default as RailsApiClient } from "./RailsApiClient";
 export { default as NetworkError } from "./NetworkError";
 export { default as BackendError } from "./BackendError";
 export * from "./DefaultConnector";

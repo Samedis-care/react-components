@@ -129,6 +129,22 @@ class JsonApiClient {
 	}
 
 	/**
+	 * Convert request body
+	 * @param body The body data
+	 * @param headers The headers (can be modified to add/remove headers)
+	 * @return The body data passed to fetch
+	 * @protected
+	 */
+	protected convertBody(
+		body: unknown | null,
+		headers: Record<string, string>
+	): string | FormData | null {
+		if (!body) return null;
+		headers["Content-Type"] = "application/json";
+		return JSON.stringify(body);
+	}
+
+	/**
 	 * Performs an HTTP request with automatic authorization if desired
 	 * @param method The HTTP Verb
 	 * @param url The url of the request
@@ -164,15 +180,12 @@ class JsonApiClient {
 			// Handle URL GET arguments
 			url = addGetParams(url, args);
 			// Handle POST data
-			if (body) {
-				body = JSON.stringify(body);
-				headers["Content-Type"] = "application/json";
-			}
+			body = this.convertBody(body, headers);
 			// Perform request
 			let response: Response;
 			try {
 				response = await fetch(url, {
-					body: body as string,
+					body: body as FormData | string,
 					headers,
 					method,
 				});

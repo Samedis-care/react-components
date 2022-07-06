@@ -47,3 +47,4 @@ export { default as throwError } from "./throwError";
 export { default as copyText } from "./copyText";
 export { default as generateLocalizedExcelImportTemplate } from "./generateLocalizedExcelImportTemplate";
 export { default as useFrontendDownload } from "./useFrontendDownload";
+export { default as dataToFile } from "./dataToFile";
