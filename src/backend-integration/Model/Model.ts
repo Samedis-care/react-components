@@ -660,6 +660,14 @@ class Model<
 								isDivider: value.isDivider,
 							} as DataGridSetFilterDataEntry)
 					);
+			} else if (value.type.getFilterType() === "boolean") {
+				filterData = [true, false].map(
+					(boolVal) =>
+						({
+							getLabelText: value.type.stringify.bind(value.type, boolVal),
+							value: boolVal ? "true" : "false",
+						} as DataGridSetFilterDataEntry)
+				);
 			}
 
 			return {

@@ -418,10 +418,18 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 								indeterminate={!filterValue}
 							/>
 						}
-						label={t(
-							"standalone.data-grid.content.bool-filter." +
-								(filterValue || "any")
-						)}
+						label={(() => {
+							if (!filterValue)
+								return t("standalone.data-grid.content.bool-filter.any");
+							const entry = props.valueData?.find(
+								(entry) => entry.value === filterValue
+							);
+							if (!entry)
+								return t(
+									"standalone.data-grid.content.bool-filter." + filterValue
+								);
+							return (entry.getLabel ?? entry.getLabelText)();
+						})()}
 					/>
 				</Grid>
 			)}
