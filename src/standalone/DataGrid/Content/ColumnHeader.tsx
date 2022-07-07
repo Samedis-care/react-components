@@ -154,11 +154,12 @@ const ColumnHeader = (props: IDataGridContentColumnHeaderProps) => {
 			if (!sortable) return;
 
 			// add additional sort instead of removing all currently active
-			const additional = evt.ctrlKey;
+			const modKey = evt.shiftKey;
 
-			if (sort === 0) onSortChange(field, 1, additional);
-			else if (sort === 1) onSortChange(field, -1, additional);
-			else if (sort === -1) onSortChange(field, 0, additional);
+			if (sort !== 0 && modKey) onSortChange(field, 0, true);
+			else if (sort === 0) onSortChange(field, 1, modKey);
+			else if (sort === 1) onSortChange(field, -1, true);
+			else if (sort === -1) onSortChange(field, 0, true);
 		},
 		[sortable, field, sort, onSortChange]
 	);
