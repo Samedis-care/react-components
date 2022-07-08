@@ -48,7 +48,15 @@ const objectToRails = (
 		} else if (typeof value === "object") {
 			const dots = objectToRails(value as Record<string, unknown>);
 			dots.forEach(([dot, nestedValue]) => {
-				ret.push([key + "[" + dot + "]", nestedValue]);
+				const [dotKey, ...suffix] = dot.split("[");
+				ret.push([
+					key +
+						"[" +
+						dotKey +
+						"]" +
+						(suffix.length > 0 ? "[" + suffix.join("[") : ""),
+					nestedValue,
+				]);
 			});
 		} else if (value !== undefined) {
 			ret.push([key, convertDataToFormData(value)]);
