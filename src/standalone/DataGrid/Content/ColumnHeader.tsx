@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { combineClassNames } from "../../../utils";
+import { combineClassNames, isTouchDevice } from "../../../utils";
 import {
 	IDataGridColumnDef,
 	IDataGridColumnState,
@@ -149,13 +149,9 @@ const ColumnHeader = (props: IDataGridContentColumnHeaderProps) => {
 		},
 		[column, dragging, field, setColumnWidthState]
 	);
-	const onColumnClick = useCallback(
-		(evt: React.MouseEvent) => {
+	const onColumnSortChange = useCallback(
+		(modKey: boolean) => {
 			if (!sortable) return;
-
-			// add additional sort instead of removing all currently active
-			const modKey = evt.shiftKey;
-
 			if (sort !== 0 && modKey) onSortChange(field, 0, true);
 			else if (sort === 0) onSortChange(field, 1, modKey);
 			else if (sort === 1) onSortChange(field, -1, true);
@@ -163,6 +159,20 @@ const ColumnHeader = (props: IDataGridContentColumnHeaderProps) => {
 		},
 		[sortable, field, sort, onSortChange]
 	);
+	const onColumnClick = useCallback(
+		(evt: React.MouseEvent) => {
+			onColumnSortChange(evt.shiftKey);
+		},
+		[onColumnSortChange]
+	);
+	const onColumnLongClick = useCallback(
+		(evt: React.MouseEvent) => {
+			evt.preventDefault();
+			onColumnSortChange(true);
+		},
+		[onColumnSortChange]
+	);
+
 	const internalOnFilterChange = useCallback(
 		(newFilter: IFilterDef) => onFilterChange(field, newFilter),
 		[field, onFilterChange]
@@ -203,6 +213,7 @@ const ColumnHeader = (props: IDataGridContentColumnHeaderProps) => {
 	return (
 		<div
 			onClick={onColumnClick}
+			onContextMenu={isTouchDevice() ? onColumnLongClick : undefined}
 			className={combineClassNames([
 				classes.columnHeaderContentWrapper,
 				filterable && classes.columnHeaderFilterable,
