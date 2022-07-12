@@ -748,6 +748,11 @@ const useStyles = makeStyles(
 			overflow: "hidden",
 			whiteSpace: "nowrap",
 			textOverflow: "ellipsis",
+			"& > *": {
+				overflow: "hidden",
+				whiteSpace: "nowrap",
+				textOverflow: "ellipsis",
+			},
 			padding: HEADER_PADDING / 2,
 			borderColor:
 				theme.componentsCare?.dataGrid?.content?.row?.cell?.data?.borderColor ||
