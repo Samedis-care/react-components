@@ -2,6 +2,7 @@ import React from "react";
 import { ModelRenderParams } from "./index";
 import FilterType from "./FilterType";
 import { EnumValue } from "./Types/TypeEnum";
+import { IDataGridColumnDef } from "../../standalone/DataGrid/DataGrid";
 
 interface Type<T> {
 	/**
@@ -52,6 +53,13 @@ interface Type<T> {
 	 * Get enum values
 	 */
 	getEnumValues?: () => EnumValue[];
+
+	/**
+	 * Initial size info for data grid
+	 */
+	dataGridColumnSizingHint?:
+		| IDataGridColumnDef["width"]
+		| (() => IDataGridColumnDef["width"]);
 }
 
 export default Type;

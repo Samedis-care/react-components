@@ -62,7 +62,9 @@ export interface ModelFieldDefinition<
 	/**
 	 * Column width settings (for BackendDataGrid)
 	 */
-	columnWidth?: IDataGridColumnDef["width"];
+	columnWidth?:
+		| IDataGridColumnDef["width"]
+		| (() => IDataGridColumnDef["width"]);
 	/**
 	 * Custom label for grid column header
 	 * @remarks Used for BackendDataGrid
@@ -679,7 +681,13 @@ class Model<
 				hidden: value.visibility.overview.hidden,
 				filterable: value.filterable,
 				sortable: value.sortable,
-				width: value.columnWidth,
+				width:
+					(typeof value.columnWidth === "function"
+						? value.columnWidth()
+						: value.columnWidth) ??
+					(typeof value.type.dataGridColumnSizingHint === "function"
+						? value.type.dataGridColumnSizingHint()
+						: value.type.dataGridColumnSizingHint),
 			};
 		});
 	}

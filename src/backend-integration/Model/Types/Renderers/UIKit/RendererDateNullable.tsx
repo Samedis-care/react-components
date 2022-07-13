@@ -8,6 +8,7 @@ import { DateInput } from "../../../../../standalone";
 import i18n from "../../../../../i18n";
 import { ToDateLocaleStringOptions } from "../../../../../constants";
 import { DateInputProps } from "../../../../../standalone/UIKit/InputControls/DateInput";
+import { IDataGridColumnDef } from "../../../../../standalone/DataGrid/DataGrid";
 
 export type RendererDateNullableProps = Omit<
 	DateInputProps,
@@ -101,6 +102,16 @@ class RendererDateNullable extends TypeDateNullable {
 			</Typography>
 		);
 	}
+
+	dataGridColumnSizingHint = (): IDataGridColumnDef["width"] => {
+		const def =
+			Math.max(
+				ccI18n.t("backend-integration.model.types.renderers.date.not-set")
+					.length,
+				10 // date length
+			) * 10;
+		return [0, Number.MAX_SAFE_INTEGER, def];
+	};
 }
 
 export default RendererDateNullable;

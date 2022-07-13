@@ -7,11 +7,12 @@ import TypeDate from "../../TypeDate";
 import { LocalizedKeyboardDatePicker } from "../../../../../standalone/LocalizedDateTimePickers";
 import i18n from "../../../../../i18n";
 import { ToDateLocaleStringOptions } from "../../../../../constants";
+import { IDataGridColumnDef } from "../../../../../standalone/DataGrid/DataGrid";
 
 /**
  * Renders Date with Date Selector
  */
-class RendererDateNullable extends TypeDate {
+class RendererDate extends TypeDate {
 	render(params: ModelRenderParams<Date>): React.ReactElement {
 		const {
 			visibility,
@@ -77,6 +78,16 @@ class RendererDateNullable extends TypeDate {
 			</Typography>
 		);
 	}
+
+	dataGridColumnSizingHint = (): IDataGridColumnDef["width"] => {
+		const def =
+			Math.max(
+				ccI18n.t("backend-integration.model.types.renderers.date.not-set")
+					.length,
+				10 // date length
+			) * 10;
+		return [0, Number.MAX_SAFE_INTEGER, def];
+	};
 }
 
-export default RendererDateNullable;
+export default RendererDate;
