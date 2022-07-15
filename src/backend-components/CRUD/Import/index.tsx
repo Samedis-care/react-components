@@ -285,15 +285,17 @@ const CrudImport = <
 			</Grid>
 			<Grid item>
 				<Grid container spacing={2}>
-					<Grid item>
-						<Button
-							variant={"contained"}
-							disabled={activeStep === 0 || activeStep >= 3}
-							onClick={prev}
-						>
-							{t("common.buttons.back")}
-						</Button>
-					</Grid>
+					{activeStep != 3 && (
+						<Grid item>
+							<Button
+								variant={"contained"}
+								disabled={activeStep === 0 || activeStep >= 3}
+								onClick={prev}
+							>
+								{t("common.buttons.back")}
+							</Button>
+						</Grid>
+					)}
 					<Grid item>
 						<Button
 							variant={"contained"}
