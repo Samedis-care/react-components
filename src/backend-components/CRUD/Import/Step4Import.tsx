@@ -95,23 +95,25 @@ export const useImportStep4Logic = (props: CrudImporterStepProps) => {
 							const filterKey = model.fields[updateKey].type.stringify(
 								getValueByDot(updateKey, modelRecord)
 							);
-							const [records, meta] = await model.index({
-								rows: 2,
-								page: 1,
-								fieldFilter: {
-									[updateKey]: {
-										type: "equals",
-										value1: filterKey,
-										value2: "",
+							if (filterKey) {
+								const [records, meta] = await model.index({
+									rows: 2,
+									page: 1,
+									fieldFilter: {
+										[updateKey]: {
+											type: "equals",
+											value1: filterKey,
+											value2: "",
+										},
 									},
-								},
-								additionalFilters: additionalUpdateKeyFilters,
-							});
-							const rows = meta.filteredRows ?? meta.totalRows;
-							if (rows == 1) {
-								modelRecord.id = records[0].id;
-							} else if (rows >= 2) {
-								throw new Error("Update key not unique: " + filterKey);
+									additionalFilters: additionalUpdateKeyFilters,
+								});
+								const rows = meta.filteredRows ?? meta.totalRows;
+								if (rows == 1) {
+									modelRecord.id = records[0].id;
+								} else if (rows >= 2) {
+									throw new Error("Update key not unique: " + filterKey);
+								}
 							}
 						}
 
