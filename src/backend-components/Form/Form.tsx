@@ -28,6 +28,7 @@ import {
 	isObjectEmpty,
 } from "../../utils";
 import { getVisibility } from "../../backend-integration/Model/Visibility";
+import { QueryObserverBaseResult } from "react-query/types/core/types";
 
 // optional import
 let captureException: ((e: Error) => void) | null = null;
@@ -219,8 +220,12 @@ export interface FormProps<
 	 * Submit preparation handler
 	 * Called after parent form submit, before this form submit
 	 * @param id The ID of the parent form (after submit)
+	 * @param model The model currently in use (can be used to modify connector endpoints)
 	 */
-	nestedFormPreSubmitHandler?: (id: string) => Promise<void> | unknown;
+	nestedFormPreSubmitHandler?: (
+		id: string,
+		model: Model<ModelFieldName, PageVisibility, unknown>
+	) => Promise<void> | unknown;
 	/**
 	 * CSS class for form styles
 	 */
@@ -370,6 +375,10 @@ export interface FormContextData {
 	 * Resets the form to server values
 	 */
 	resetForm: () => void;
+	/**
+	 * Refetches data from server
+	 */
+	refetchForm: QueryObserverBaseResult["refetch"];
 	/**
 	 * Validates the form and returns a list of validation errors
 	 * If the returned object is empty no validation errors occurred.
@@ -536,7 +545,7 @@ const Form = <
 		// clear deleted state upon id change
 		setDeleted(false);
 	}, [id]);
-	const { isLoading, error, data: serverData } = useModelGet(
+	const { isLoading, error, data: serverData, refetch } = useModelGet(
 		model,
 		deleted ? null : id || null
 	);
@@ -928,7 +937,10 @@ const Form = <
 		};
 		const submitNestedForm = async (id: string) => {
 			if (nestedFormPreSubmitHandler) {
-				await nestedFormPreSubmitHandler(id);
+				await nestedFormPreSubmitHandler(
+					id,
+					(model as unknown) as Model<ModelFieldName, PageVisibility, unknown>
+				);
 			}
 			return submitForm();
 		};
@@ -1052,6 +1064,7 @@ const Form = <
 			handleBlur,
 			setFieldTouched,
 			resetForm,
+			refetchForm: refetch,
 			validateForm,
 			parentFormContext: nestedFormName ? parentFormContext : null,
 			readOnly: !!readOnly,
@@ -1083,6 +1096,7 @@ const Form = <
 			handleBlur,
 			setFieldTouched,
 			resetForm,
+			refetch,
 			validateForm,
 			parentFormContext,
 			nestedFormName,
@@ -1126,7 +1140,9 @@ const Form = <
 
 	const innerForm = () => (
 		<>
-			{displayError && <ErrorComponent error={displayError} />}
+			{displayError && !nestedFormName && (
+				<ErrorComponent error={displayError} />
+			)}
 			{isLoading ? (
 				<div style={loaderContainerStyles}>
 					<Loader />
