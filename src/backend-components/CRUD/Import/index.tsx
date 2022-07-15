@@ -285,7 +285,7 @@ const CrudImport = <
 			</Grid>
 			<Grid item>
 				<Grid container spacing={2}>
-					{activeStep != 3 && (
+					{activeStep !== 3 && (
 						<Grid item>
 							<Button
 								variant={"contained"}
