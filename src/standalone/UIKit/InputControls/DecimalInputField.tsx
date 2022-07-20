@@ -1,9 +1,13 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import { TextFieldProps } from "@material-ui/core";
 import TextFieldWithHelp, {
 	TextFieldWithHelpProps,
 } from "../TextFieldWithHelp";
-import { parseLocalizedNumber, useInputCursorFix } from "../../../utils";
+import {
+	getNumberSeparator,
+	parseLocalizedNumber,
+	useInputCursorFix,
+} from "../../../utils";
 import useCCTranslations from "../../../utils/useCCTranslations";
 
 export interface DecimalInputFieldProps extends TextFieldWithHelpProps {
@@ -27,8 +31,15 @@ const DecimalInputField = (
 ) => {
 	const { i18n } = useCCTranslations();
 	const { value, onChange, ...muiProps } = props;
+	const decimalSeparator = getNumberSeparator("decimal");
+	const [danglingDecimalSeparator, setDanglingDecimalSeparator] = useState(
+		false
+	);
 	const valueFormatted =
-		value !== null ? value.toLocaleString(i18n.language) : "";
+		value !== null
+			? value.toLocaleString(i18n.language) +
+			  (danglingDecimalSeparator && !muiProps.disabled ? decimalSeparator : "")
+			: "";
 	const { handleCursorChange, cursorInputRef } = useInputCursorFix(
 		valueFormatted
 	);
@@ -39,9 +50,12 @@ const DecimalInputField = (
 			handleCursorChange(event);
 			if (!onChange) return;
 
+			setDanglingDecimalSeparator(
+				event.target.value.endsWith(decimalSeparator)
+			);
 			onChange(event, parseLocalizedNumber(event.target.value));
 		},
-		[onChange, handleCursorChange]
+		[onChange, handleCursorChange, decimalSeparator]
 	);
 
 	return (
