@@ -37,6 +37,9 @@ export const useStyles = makeStyles(
 		noShadow: {
 			"box-shadow": "none",
 		},
+		rounded: {
+			overflow: "hidden",
+		},
 		panelDetails: {
 			border: "1px solid grey",
 			borderRadius: `0px 0px ${theme.shape.borderRadius}px ${theme.shape.borderRadius}px`,
@@ -163,6 +166,7 @@ const InfoBox = (props: InfoBoxProps) => {
 	return (
 		<Accordion
 			className={classes.noShadow}
+			classes={{ rounded: classes.rounded }}
 			defaultExpanded={expanded}
 			expanded={alwaysExpanded}
 			onChange={onChange}
