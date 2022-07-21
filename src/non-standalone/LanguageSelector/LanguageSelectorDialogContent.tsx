@@ -4,7 +4,6 @@ import { AutoSizer } from "react-virtualized/dist/commonjs/AutoSizer";
 import { List } from "react-virtualized/dist/commonjs/List";
 import supportedLanguages from "../../assets/data/supported-languages.json";
 import countryLanguages from "../../assets/data/country-languages.json";
-import localeRelevance from "../../assets/data/locale-relevance.json";
 import LanguageSelectorEntry from "./LanguageSelectorEntry";
 import { Search as SearchIcon } from "@material-ui/icons";
 import { ListRowProps } from "react-virtualized/dist/es/List";
@@ -12,6 +11,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import useCCTranslations, {
 	useCCLocaleSwitcherTranslations,
 } from "../../utils/useCCTranslations";
+import sortByLocaleRelevance from "../../utils/sortByLocaleRelevance";
 import TextFieldWithHelp from "../../standalone/UIKit/TextFieldWithHelp";
 import Loader from "../../standalone/Loader";
 
@@ -113,26 +113,7 @@ const LanguageSelectorDialogContent = (
 							native_language_lower: entry.native_language.toLowerCase(),
 						} as LanguageSelectorEntryFilterData)
 				)
-				.sort((a, b) => {
-					const languages = navigator.languages; // example: [ "de", "en-US", "en", "fr" ]
-					// languages index (locale or lang)
-					const getMatchScore = (locale: string) => {
-						let index = languages.indexOf(locale);
-						if (index === -1) index = languages.indexOf(locale.split("-")[0]);
-						if (index !== -1) index = languages.length - index;
-						else index = 0;
-						return index;
-					};
-					const aScore = getMatchScore(a.locale);
-					const bScore = getMatchScore(b.locale);
-					if (aScore != bScore) return bScore - aScore;
-					// score is equal, check relevance
-					const getRelevance = (locale: string) =>
-						(localeRelevance as Record<string, number>)[locale] ?? 0;
-					const aRelevance = getRelevance(a.locale);
-					const bRelevance = getRelevance(b.locale);
-					return bRelevance - aRelevance;
-				}),
+				.sort((a, b) => sortByLocaleRelevance(a.locale, b.locale)),
 		[countryLanguageMapping, supportedLangs, tLocale]
 	);
 
