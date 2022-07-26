@@ -248,12 +248,7 @@ const File = (props: FileProps) => {
 		);
 
 	const renderName = () => (
-		<Tooltip
-			title={props.name}
-			disableFocusListener={variant === "list"}
-			disableHoverListener={variant === "list"}
-			disableTouchListener={variant === "list"}
-		>
+		<Tooltip title={props.name}>
 			<Typography
 				align={variant === "list" ? "left" : "center"}
 				noWrap

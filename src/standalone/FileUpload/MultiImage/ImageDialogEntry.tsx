@@ -135,6 +135,7 @@ const ImageDialogEntry = (props: ImageDialogEntryProps) => {
 		>
 			<div>
 				<ImageBox
+					fileName={img.name}
 					width={previewSize}
 					height={previewSize}
 					image={img.image}

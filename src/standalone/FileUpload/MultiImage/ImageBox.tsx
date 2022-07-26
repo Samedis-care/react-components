@@ -1,7 +1,13 @@
 import React, { CSSProperties, useCallback, useState } from "react";
 import { UseDropZoneParams } from "../../../utils/useDropZone";
 import { makeStyles } from "@material-ui/core/styles";
-import { Dialog, DialogContent, IconButton, Theme } from "@material-ui/core";
+import {
+	Dialog,
+	DialogContent,
+	IconButton,
+	Theme,
+	Tooltip,
+} from "@material-ui/core";
 import {
 	Close as CloseIcon,
 	ArrowBack as PrevIcon,
@@ -20,6 +26,10 @@ export interface ImageBoxProps {
 	 * The Image to display (URL/Data-URI)
 	 */
 	image: string;
+	/**
+	 * The image file name
+	 */
+	fileName?: string | null;
 	/**
 	 * The width of the preview
 	 */
@@ -143,6 +153,7 @@ const ImageBox = (props: ImageBoxProps) => {
 		onNextImage,
 		onPrevImage,
 		disableBackground,
+		fileName,
 	} = props;
 	const classes = useThemeStyles(props);
 	const { handleDragOver, handleDrop, dragging } = useDropZone(onFilesDropped);
@@ -205,7 +216,14 @@ const ImageBox = (props: ImageBoxProps) => {
 						<NextIcon />
 					</IconButton>
 				)}
-				<img src={image} alt={""} className={classes.image} />
+				<Tooltip
+					title={fileName ?? ""}
+					disableTouchListener={!fileName}
+					disableHoverListener={!fileName}
+					disableFocusListener={!fileName}
+				>
+					<img src={image} alt={""} className={classes.image} />
+				</Tooltip>
 			</div>
 			{!onClick && (
 				<Dialog open={dialogOpen} fullScreen onClose={closeDialog}>
