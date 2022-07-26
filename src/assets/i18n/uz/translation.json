@@ -109,7 +109,8 @@
 				"invalid-type": "Qo'llab-quvvatlanmaydigan fayl turi tanlandi"
 			},
 			"format": {
-				"any": "Har qanday"
+				"any": "Har qanday",
+				"image": "Tasvirlar"
 			},
 			"multi-image": {
 				"edit": "Tahrirlash",
