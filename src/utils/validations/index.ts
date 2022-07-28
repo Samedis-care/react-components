@@ -4,3 +4,4 @@ export { default as validatePresenceCustomName } from "./validatePresenceCustomN
 export { default as validationChain } from "./validationChain";
 export { default as validateOptional } from "./validateOptional";
 export { default as validateEmail } from "./validateEmail";
+export * from "./validateEmail";
