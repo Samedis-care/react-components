@@ -131,7 +131,7 @@ export const showSignPadDialog = (
  */
 export const showErrorDialog = (
 	pushDialog: DialogContextType[0],
-	e: Error | ValidationError
+	e: Error | ValidationError | string
 ): Promise<void> => {
 	// display generic errors and validation errors
 	let errorTitle = "";
@@ -139,6 +139,9 @@ export const showErrorDialog = (
 	if (e instanceof Error) {
 		errorTitle = i18n.t("common.dialogs.error-title");
 		errorMsg = e.message;
+	} else if (typeof e === "string") {
+		errorTitle = i18n.t("common.dialogs.error-title");
+		errorMsg = e;
 	} else {
 		// validation error
 		errorTitle = i18n.t("common.dialogs.validation-error-title");
