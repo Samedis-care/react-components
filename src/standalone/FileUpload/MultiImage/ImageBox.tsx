@@ -113,6 +113,9 @@ const useStyles = makeStyles(
 			objectFit: "contain",
 			borderRadius: theme.shape.borderRadius,
 		},
+		imageWithDots: {
+			height: "calc(100% - 48px)",
+		},
 		removeBtn: {
 			padding: theme.spacing(1),
 			position: "absolute",
@@ -265,7 +268,14 @@ const ImageBox = (props: ImageBoxProps) => {
 									<NextIcon />
 								</IconButton>
 							)}
-							<img src={image} alt={""} className={classes.image} />
+							<img
+								src={image}
+								alt={""}
+								className={combineClassNames([
+									classes.image,
+									imageDots && classes.imageWithDots,
+								])}
+							/>
 							{imageDots && (
 								<div className={classes.imageDotsWrapper}>
 									<ImageDots
