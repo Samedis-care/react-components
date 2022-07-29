@@ -21,6 +21,7 @@ import { MultiImageTheme } from "./standalone/FileUpload/MultiImage/MultiImage";
 import { FormPageLayoutTheme } from "./standalone/Form/FormPageLayout";
 import { FileUploadProps } from "./standalone/FileUpload/Generic";
 import { ImageSelectorProps } from "./standalone/FileUpload/Image/ImageSelector";
+import { ImageDotsTheme } from "./standalone/FileUpload/MultiImage/ImageDots";
 
 export * from "./standalone";
 
@@ -54,6 +55,7 @@ export interface ComponentsCareTheme {
 			root?: MultiImageTheme;
 			imageBox?: ImageBoxTheme;
 			imageDialogEntry?: ImageDialogEntryTheme;
+			dots?: ImageDotsTheme;
 		};
 	};
 	selector?: SelectorTheme;

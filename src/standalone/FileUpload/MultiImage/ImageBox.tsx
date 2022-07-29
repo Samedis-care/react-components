@@ -20,6 +20,7 @@ import {
 	useDropZone,
 } from "../../../utils";
 import { ClassNameMap, Styles } from "@material-ui/styles/withStyles";
+import ImageDots, { ImageDotsProps } from "./ImageDots";
 
 export interface ImageBoxProps {
 	/**
@@ -69,6 +70,10 @@ export interface ImageBoxProps {
 	 * Custom CSS styles
 	 */
 	classes?: ClassNameMap<keyof ReturnType<typeof useStyles>>;
+	/**
+	 * Image dots props (set to enable image props)
+	 */
+	imageDots?: ImageDotsProps;
 }
 
 const useStyles = makeStyles(
@@ -126,6 +131,17 @@ const useStyles = makeStyles(
 			right: 0,
 			transform: "translateY(-50%)",
 		},
+		imageDotsWrapper: {
+			position: "absolute",
+			bottom: 16,
+			left: "50%",
+			height: 16,
+			transform: "translateX(-50%)",
+		},
+		imageDotsContainer: {
+			position: "unset",
+			overflow: "unset",
+		},
 	}),
 	{ name: "CcImageBox" }
 );
@@ -154,6 +170,7 @@ const ImageBox = (props: ImageBoxProps) => {
 		onPrevImage,
 		disableBackground,
 		fileName,
+		imageDots,
 	} = props;
 	const classes = useThemeStyles(props);
 	const { handleDragOver, handleDrop, dragging } = useDropZone(onFilesDropped);
@@ -249,6 +266,17 @@ const ImageBox = (props: ImageBoxProps) => {
 								</IconButton>
 							)}
 							<img src={image} alt={""} className={classes.image} />
+							{imageDots && (
+								<div className={classes.imageDotsWrapper}>
+									<ImageDots
+										{...imageDots}
+										classes={{
+											imageDotContainer: classes.imageDotsContainer,
+											imageDotContainerContainer: classes.imageDotsContainer,
+										}}
+									/>
+								</div>
+							)}
 						</div>
 					</DialogContent>
 				</Dialog>

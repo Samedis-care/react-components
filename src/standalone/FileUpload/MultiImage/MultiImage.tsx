@@ -25,6 +25,7 @@ import ImageDialogEntry, { ImageDialogEntryProps } from "./ImageDialogEntry";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import { ClassNameMap } from "@material-ui/styles/withStyles";
 import { Styles } from "@material-ui/core/styles/withStyles";
+import ImageDots from "./ImageDots";
 
 export interface MultiImageImage {
 	/**
@@ -359,18 +360,39 @@ const MultiImage = (props: MultiImageProps) => {
 								images[currentImage] ? undefined : readOnly ? null : startUpload
 							}
 							classes={subClasses?.imageBox}
+							imageDots={{
+								total: images.length,
+								active: currentImage,
+								setActive: setCurrentImage,
+							}}
 							disableBackground
 						/>
 					</Grid>
-					{!readOnly && (
-						<Grid item xs={12}>
-							<Typography variant={"body2"} align={"right"}>
-								<Link onClick={openDialog} className={classes.clickable}>
-									{editLabel ?? t("standalone.file-upload.multi-image.edit")}
-								</Link>
-							</Typography>
+					<Grid
+						item
+						xs={12}
+						container
+						alignContent={"space-between"}
+						wrap={"nowrap"}
+						spacing={1}
+					>
+						<Grid item xs>
+							<ImageDots
+								total={images.length}
+								active={currentImage}
+								setActive={setCurrentImage}
+							/>
 						</Grid>
-					)}
+						{!readOnly && (
+							<Grid item>
+								<Typography variant={"body2"}>
+									<Link onClick={openDialog} className={classes.clickable}>
+										{editLabel ?? t("standalone.file-upload.multi-image.edit")}
+									</Link>
+								</Typography>
+							</Grid>
+						)}
+					</Grid>
 				</Grid>
 			</GroupBox>
 			<input
