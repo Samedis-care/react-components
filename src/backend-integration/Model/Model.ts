@@ -95,6 +95,7 @@ export interface ModelFieldDefinition<
 	 * @param value The new value
 	 * @param model The model definition
 	 * @param setFieldValue Allows setting of other values
+	 * @param getFieldValue Allow getting another field value
 	 * @returns The updated value (can be modified by this handler)
 	 */
 	onChange?: (
@@ -104,7 +105,8 @@ export interface ModelFieldDefinition<
 			field: KeyT,
 			value: unknown,
 			shouldValidate?: boolean
-		) => void
+		) => void,
+		getFieldValue: (field: KeyT) => unknown
 	) => TypeT;
 	/**
 	 * The referenced model for backend connected data types.

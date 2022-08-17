@@ -357,6 +357,11 @@ export interface FormContextData {
 	 */
 	setFieldValue: (field: string, value: unknown, validate?: boolean) => void;
 	/**
+	 * Get a field value
+	 * @param field The field name
+	 */
+	getFieldValue: (field: string) => unknown;
+	/**
 	 * Handle input blur events
 	 */
 	handleBlur: React.FocusEventHandler<HTMLInputElement & HTMLElement>;
@@ -408,6 +413,7 @@ export type FormContextDataLite = Pick<
 	| "onlyValidateMounted"
 	| "readOnly"
 	| "errorComponent"
+	| "getFieldValue"
 >;
 export const FormContextLite = React.createContext<FormContextDataLite | null>(
 	null
@@ -647,6 +653,9 @@ const Form = <
 		},
 		[validateField, setFieldTouched]
 	);
+	const getFieldValue = useCallback((field: string): unknown => {
+		return getValueByDot(field, valuesRef.current);
+	}, []);
 	const resetForm = useCallback(() => {
 		if (!serverData || !serverData[0]) return;
 		valuesRef.current = deepClone(serverData[0]);
@@ -1061,6 +1070,7 @@ const Form = <
 			touched,
 			errors,
 			setFieldValue,
+			getFieldValue,
 			handleBlur,
 			setFieldTouched,
 			resetForm,
@@ -1093,6 +1103,7 @@ const Form = <
 			touched,
 			errors,
 			setFieldValue,
+			getFieldValue,
 			handleBlur,
 			setFieldTouched,
 			resetForm,
@@ -1112,6 +1123,7 @@ const Form = <
 			onlySubmitMounted: !!onlySubmitMounted,
 			onlyValidateMounted: !!onlyValidateMounted,
 			readOnly: !!readOnly,
+			getFieldValue,
 		}),
 		[
 			id,
@@ -1120,6 +1132,7 @@ const Form = <
 			onlySubmitMounted,
 			onlyValidateMounted,
 			readOnly,
+			getFieldValue,
 		]
 	);
 

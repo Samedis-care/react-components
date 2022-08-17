@@ -43,6 +43,7 @@ const Field = (props: FieldProps): React.ReactElement => {
 		errors,
 		touched,
 		setFieldValue,
+		getFieldValue,
 		handleBlur,
 		initialValues,
 		setFieldTouched,
@@ -71,11 +72,11 @@ const Field = (props: FieldProps): React.ReactElement => {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		(field: string, value: any, shouldValidate?: boolean) => {
 			if (onChange) {
-				value = onChange(value, model, setFieldValue);
+				value = onChange(value, model, setFieldValue, getFieldValue);
 			}
 			setFieldValue(field, value, shouldValidate);
 		},
-		[setFieldValue, onChange, model]
+		[setFieldValue, getFieldValue, onChange, model]
 	);
 
 	const relationModel = useMemo(
