@@ -73,6 +73,11 @@ export interface BackendSingleSelectProps<
 	 * @return null To remove entry from selected entries
 	 */
 	onLoadError?: (error: Error) => string | null;
+	/**
+	 * Additional options to choose from (not provided by backend).
+	 * @remarks Has no effect if LRU. Will be shown at the top of the list
+	 */
+	additionalOptions?: BaseSelectorData[];
 }
 
 const BackendSingleSelect = <
@@ -93,6 +98,7 @@ const BackendSingleSelect = <
 		sort,
 		lru,
 		onLoadError,
+		additionalOptions,
 		...otherProps
 	} = props;
 
@@ -110,9 +116,14 @@ const BackendSingleSelect = <
 				sort: sort,
 				quickFilter: search,
 			});
-			return Promise.all(data[0].map(modelToSelectorData));
+			return [
+				...(additionalOptions ?? []).filter((x) =>
+					x.label.toLowerCase().includes(search.toLowerCase())
+				),
+				...(await Promise.all(data[0].map(modelToSelectorData))),
+			];
 		},
-		[model, modelToSelectorData, sort, searchResultLimit]
+		[model, searchResultLimit, sort, additionalOptions, modelToSelectorData]
 	);
 
 	const handleLoadRecord = useCallback(
@@ -148,6 +159,7 @@ const BackendSingleSelect = <
 	useEffect(() => {
 		if (!selected) return;
 		if (selectedCache?.value === selected) return;
+		if (additionalOptions?.find((opt) => opt.value === selected)) return; // no need to fetch these
 
 		void (async () => {
 			let newCache: BaseSelectorData | null = null;
