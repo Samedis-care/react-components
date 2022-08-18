@@ -159,7 +159,15 @@ const BackendSingleSelect = <
 	useEffect(() => {
 		if (!selected) return;
 		if (selectedCache?.value === selected) return;
-		if (additionalOptions?.find((opt) => opt.value === selected)) return; // no need to fetch these
+
+		// no need to fetch additional options
+		const additionalOption = additionalOptions?.find(
+			(opt) => opt.value === selected
+		);
+		if (additionalOption) {
+			setSelectedCache(additionalOption);
+			return;
+		}
 
 		void (async () => {
 			let newCache: BaseSelectorData | null = null;
