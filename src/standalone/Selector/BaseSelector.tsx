@@ -541,8 +541,8 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 						"[Components-Care] [BaseSelector] Unexpected value passed to handleOptionSelect:",
 						data
 					);
+					return;
 				}
-				return;
 			}
 			if (
 				data &&
