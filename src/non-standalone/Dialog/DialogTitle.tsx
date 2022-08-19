@@ -5,28 +5,32 @@ import { Close } from "@material-ui/icons";
 import { Grid, IconButton, Typography } from "@material-ui/core";
 import { combineClassNames } from "../../utils";
 
-const useClasses = makeStyles((theme) => ({
-	root: {
-		margin: 0,
-		padding: theme.spacing(2),
-	},
-	noTitle: {
-		padding: theme.spacing(1),
-		position: "absolute",
-		right: 0,
-	},
-	closeButton: {
-		color: theme.palette.grey[500],
-		padding: theme.spacing(1) / 2,
-	},
-	text: {
-		textOverflow: "ellipsis",
-		overflow: "hidden",
-	},
-	textWrapper: {
-		maxWidth: "75%",
-	},
-}));
+const useClasses = makeStyles(
+	(theme) => ({
+		root: {
+			margin: 0,
+			padding: theme.spacing(2),
+		},
+		noTitle: {
+			padding: theme.spacing(1),
+			position: "absolute",
+			right: 0,
+		},
+		closeButton: {
+			color: theme.palette.grey[500],
+			padding: theme.spacing(1) / 2,
+			zIndex: 1,
+		},
+		text: {
+			textOverflow: "ellipsis",
+			overflow: "hidden",
+		},
+		textWrapper: {
+			maxWidth: "75%",
+		},
+	}),
+	{ name: "CcDialogTitle" }
+);
 
 export interface DialogTitleProps {
 	id?: string;
