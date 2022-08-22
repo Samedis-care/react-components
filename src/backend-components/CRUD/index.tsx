@@ -210,7 +210,7 @@ const CRUD = <
 	props: CrudProps<KeyT, VisibilityT, CustomT>
 ) => {
 	const navigate = useNavigate();
-	const { url: routeUrl } = useRouteInfo();
+	const { url: routeUrl } = useRouteInfo(props.disableRouting);
 	const location = useLocation();
 	const [perms] = usePermissionContext();
 	const {

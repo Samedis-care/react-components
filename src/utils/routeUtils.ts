@@ -55,8 +55,9 @@ const findLastNode = (node: RouteContextObject): RouteContextObject =>
 		? findLastNode((node.outlet.props as { value: RouteContextObject }).value)
 		: node;
 
-export const useRouteInfo = () => {
+export const useRouteInfo = (optional = false) => {
 	const routeInfo = findLastNode(React.useContext(UNSAFE_RouteContext));
+	if (optional && routeInfo.matches.length === 0) return { route: "", url: "" };
 	return {
 		route: reconstructPath(routeInfo.matches),
 		url: routeInfo.matches[routeInfo.matches.length - 1].pathnameBase,
