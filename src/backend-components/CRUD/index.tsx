@@ -424,6 +424,7 @@ const CRUD = <
 								element={
 									hasPermission(perms, props.readPermission) ||
 									hasPermission(perms, props.editPermission) ||
+									hasPermission(perms, props.newPermission) ||
 									!ForbiddenPage ? (
 										<FormPageWrapper form={form}>
 											{props.children}
