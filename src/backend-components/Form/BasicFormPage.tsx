@@ -63,6 +63,7 @@ const BasicFormPage = <RendererPropsT, CustomPropsT>(
 	const {
 		submit,
 		dirty,
+		disableRouting,
 		postSubmitHandler,
 		isSubmitting,
 		children: FormButtons,
@@ -76,7 +77,7 @@ const BasicFormPage = <RendererPropsT, CustomPropsT>(
 	const [pushDialog] = useDialogContext();
 	const formDialog = useContext(FormDialogDispatchContext);
 	const unblock = useRef<(() => void) | undefined>(undefined);
-	const { url: routeUrl } = useRouteInfo();
+	const { url: routeUrl } = useRouteInfo(disableRouting);
 
 	useEffect(() => {
 		// if the form isn't dirty, don't block submitting
@@ -96,7 +97,10 @@ const BasicFormPage = <RendererPropsT, CustomPropsT>(
 			};
 			//console.log("History.block(", location, ",", action, ")", match);
 			// special handling: routing inside form page (e.g. routed tab panels, routed stepper)
-			if (transition.location.pathname.startsWith(routeUrl)) {
+			if (
+				!disableRouting &&
+				transition.location.pathname.startsWith(routeUrl)
+			) {
 				allowTransition();
 				unblock.current = FrameworkHistory.block(blocker);
 				return;
@@ -125,7 +129,16 @@ const BasicFormPage = <RendererPropsT, CustomPropsT>(
 			}
 			if (formDialog) formDialog.unblockClosing();
 		};
-	}, [isSubmitting, readOnly, t, dirty, formDialog, routeUrl, pushDialog]);
+	}, [
+		isSubmitting,
+		readOnly,
+		t,
+		dirty,
+		formDialog,
+		routeUrl,
+		pushDialog,
+		disableRouting,
+	]);
 
 	// go back confirm dialog if form is dirty
 	const customProps: CustomPropsT & {
@@ -182,6 +195,7 @@ const BasicFormPage = <RendererPropsT, CustomPropsT>(
 					{...otherProps}
 					isSubmitting={isSubmitting}
 					dirty={dirty}
+					disableRouting={disableRouting}
 					submit={handleSubmit}
 					customProps={customProps}
 				/>

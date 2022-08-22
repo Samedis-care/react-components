@@ -100,6 +100,11 @@ export interface PageProps<KeyT extends ModelFieldName, CustomPropsT> {
 	 */
 	dirty: boolean;
 	/**
+	 * Has the form disableRouting flag?
+	 * @see FormProps disableRouting
+	 */
+	disableRouting: boolean;
+	/**
 	 * The values of the form, can be used for conditional rendering.
 	 * Only present if renderConditionally is set to true in FormProps
 	 */
@@ -230,6 +235,11 @@ export interface FormProps<
 	 * CSS class for form styles
 	 */
 	formClass?: string;
+	/**
+	 * Disable routing for form
+	 * @remarks This is used to prevent errors when using forms in dialogs which don't support routing
+	 */
+	disableRouting?: boolean;
 }
 
 export interface FormContextData {
@@ -1169,6 +1179,7 @@ const Form = <
 					dirty={dirty}
 					id={id}
 					customProps={customProps}
+					disableRouting={!!props.disableRouting}
 				/>
 			)}
 		</>

@@ -54,7 +54,7 @@ export interface CrudProps<
 	 */
 	formProps: Omit<
 		FormProps<KeyT, VisibilityT, CustomT, CrudFormProps>,
-		"id" | "model" | "children" | "customProps"
+		"id" | "model" | "children" | "customProps" | "disableRouting"
 	>;
 	/**
 	 * The renderer function which returns the form component
@@ -353,6 +353,7 @@ const CRUD = <
 			readOnly={!hasPermission(perms, props.editPermission)}
 			{...props.formProps}
 			onSubmit={handleSubmit}
+			disableRouting={disableRouting}
 			customProps={{
 				goBack: showOverview,
 				hasCustomSubmitHandler: props.formProps.onSubmit != null,
