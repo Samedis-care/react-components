@@ -24,6 +24,7 @@ import GroupBox from "../../GroupBox";
 import { makeStyles } from "@material-ui/core/styles";
 import { ClassNameMap } from "@material-ui/styles/withStyles";
 import useCCTranslations from "../../../utils/useCCTranslations";
+import isTouchDevice from "../../../utils/isTouchDevice";
 
 export interface FileUploadProps {
 	/**
@@ -238,7 +239,23 @@ const FileUpload = (props: FileUploadProps): React.ReactElement => {
 
 			const newFiles: FileData<File>[] = [];
 			for (let i = 0; i < files.length; i++) {
-				const file = files[i];
+				let file = files[i];
+
+				// fix for mobile safari image capture. name is always image.jpg
+				if (!allowDuplicates && isTouchDevice() && file.name === "image.jpg") {
+					file = new File(
+						[file],
+						`image-${new Date()
+							.toISOString()
+							.replace(/[:.T]/g, "-")
+							.replace(/Z/g, "")}.jpg`,
+						{
+							type: file.type,
+							lastModified: file.lastModified,
+						}
+					);
+				}
+
 				const isImage = file.type.startsWith("image/");
 				if (isImage && processImages) {
 					newFiles.push({
