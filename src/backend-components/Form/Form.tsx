@@ -49,7 +49,7 @@ export type CustomValidationHandler = () =>
 /**
  * Pre submit handler to perform final changes (bypassing validation)
  */
-export type PreSubmitHandler = (id: string) => Promise<void> | unknown;
+export type PreSubmitHandler = (id: string | null) => Promise<void> | unknown;
 /**
  * Post submit handler to submit additional data for the submitted record
  */
@@ -291,7 +291,7 @@ export interface FormContextData {
 	 * Sets the pre submit handler (for custom fields)
 	 * @param field custom field name (must not be in model)
 	 */
-	setPreSubmitHandler: (field: string, handler: PostSubmitHandler) => void;
+	setPreSubmitHandler: (field: string, handler: PreSubmitHandler) => void;
 	/**
 	 * Removes a pre submit handler (for custom fields)
 	 * @param field custom field name (must not be in model)
@@ -530,7 +530,7 @@ const Form = <
 	// custom fields - pre submit handlers
 	const preSubmitHandlers = useRef<Record<string, PreSubmitHandler>>({});
 	const setPreSubmitHandler = useCallback(
-		(field: string, handler: PostSubmitHandler) => {
+		(field: string, handler: PreSubmitHandler) => {
 			preSubmitHandlers.current[field] = handler;
 		},
 		[]
@@ -827,9 +827,7 @@ const Form = <
 				).hidden;
 
 			await Promise.all(
-				Object.values(preSubmitHandlers.current).map((handler) =>
-					handler((newValues as Record<"id", string>).id)
-				)
+				Object.values(preSubmitHandlers.current).map((handler) => handler(id))
 			);
 
 			const result = await updateData(
