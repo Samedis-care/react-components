@@ -47,6 +47,10 @@ export type CustomValidationHandler = () =>
 	| Promise<ValidationError>
 	| ValidationError;
 /**
+ * Pre submit handler to perform final changes (bypassing validation)
+ */
+export type PreSubmitHandler = (id: string) => Promise<void> | unknown;
+/**
  * Post submit handler to submit additional data for the submitted record
  */
 export type PostSubmitHandler = (id: string) => Promise<void> | unknown;
@@ -284,6 +288,16 @@ export interface FormContextData {
 	 */
 	removeCustomValidationHandler: (field: string) => void;
 	/**
+	 * Sets the pre submit handler (for custom fields)
+	 * @param field custom field name (must not be in model)
+	 */
+	setPreSubmitHandler: (field: string, handler: PostSubmitHandler) => void;
+	/**
+	 * Removes a pre submit handler (for custom fields)
+	 * @param field custom field name (must not be in model)
+	 */
+	removePreSubmitHandler: (field: string) => void;
+	/**
 	 * Sets the post submit handler (for custom fields)
 	 * @param field custom field name (must not be in model)
 	 */
@@ -514,6 +528,17 @@ const Form = <
 	const customDirty = customDirtyCounter > 0 || customDirtyFields.length > 0;
 
 	// custom fields - pre submit handlers
+	const preSubmitHandlers = useRef<Record<string, PreSubmitHandler>>({});
+	const setPreSubmitHandler = useCallback(
+		(field: string, handler: PostSubmitHandler) => {
+			preSubmitHandlers.current[field] = handler;
+		},
+		[]
+	);
+	const removePreSubmitHandler = useCallback((field: string) => {
+		delete preSubmitHandlers.current[field];
+	}, []);
+	// custom fields - custom validation handlers
 	const customValidationHandlers = useRef<
 		Record<string, CustomValidationHandler>
 	>({});
@@ -801,6 +826,12 @@ const Form = <
 					valuesRef.current
 				).hidden;
 
+			await Promise.all(
+				Object.values(preSubmitHandlers.current).map((handler) =>
+					handler((newValues as Record<"id", string>).id)
+				)
+			);
+
 			const result = await updateData(
 				onlySubmitMounted
 					? (Object.fromEntries(
@@ -1066,6 +1097,8 @@ const Form = <
 			dirty,
 			getCustomState,
 			setCustomState,
+			setPreSubmitHandler,
+			removePreSubmitHandler,
 			setPostSubmitHandler,
 			removePostSubmitHandler,
 			setCustomValidationHandler,
@@ -1100,6 +1133,8 @@ const Form = <
 			getCustomState,
 			setCustomState,
 			setCustomFieldDirty,
+			setPreSubmitHandler,
+			removePreSubmitHandler,
 			setPostSubmitHandler,
 			removePostSubmitHandler,
 			setCustomValidationHandler,
