@@ -350,7 +350,12 @@ const CRUD = <
 		<Form
 			id={id === "new" ? null : id}
 			model={props.model}
-			readOnly={!hasPermission(perms, props.editPermission)}
+			readOnly={
+				!hasPermission(
+					perms,
+					id === "new" ? props.newPermission : props.editPermission
+				)
+			}
 			{...props.formProps}
 			onSubmit={handleSubmit}
 			disableRouting={disableRouting}
