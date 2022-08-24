@@ -46,7 +46,7 @@ Used Libraries:
 
 ### Running the developer environment (Storybook)
 
-1. Run `npx --no-install npm@7.x install`
+1. Run `npx --no-install npm@8.1.2 install --force`
 2. Run `npm start`
 
 ### Path overview
