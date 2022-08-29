@@ -20,7 +20,10 @@ export interface BackendDataGridProps<
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
 	CustomDataT
-> extends Omit<DataGridProps, "loadData" | "columns" | "exporters"> {
+> extends Omit<
+		DataGridProps,
+		"loadData" | "columns" | "exporters" | "onDelete"
+	> {
 	/**
 	 * The model to use
 	 */
@@ -33,6 +36,21 @@ export interface BackendDataGridProps<
 	 * Disable export?
 	 */
 	disableExport?: boolean;
+	/**
+	 * Callback for custom confirmation dialog
+	 * @param inverted IDs inverted? (all except ids)
+	 * @param ids The IDs to delete (or not to delete)
+	 * @param filter Complex filter (see DataGridProps.onDelete)
+	 * @throws Error to cancel delete
+	 */
+	customDeleteConfirm?: (
+		inverted: boolean,
+		ids: string[],
+		filter?: Pick<
+			IDataGridLoadDataParameters,
+			"quickFilter" | "additionalFilters" | "fieldFilter"
+		>
+	) => Promise<void> | unknown;
 	/**
 	 * Additional buttons next to new button
 	 */
@@ -132,7 +150,7 @@ const BackendDataGrid = <
 >(
 	props: BackendDataGridProps<KeyT, VisibilityT, CustomDataT>
 ) => {
-	const { model, enableDelete, enableDeleteAll } = props;
+	const { model, enableDelete, enableDeleteAll, customDeleteConfirm } = props;
 	const { t } = useCCTranslations();
 
 	const [pushDialog] = useDialogContext();
@@ -173,20 +191,24 @@ const BackendDataGrid = <
 				"quickFilter" | "additionalFilters" | "fieldFilter"
 			>
 		): Promise<void> => {
-			await showConfirmDialog(pushDialog, {
-				title: t("backend-components.data-grid.delete.confirm-dialog.title"),
-				message: t(
-					"backend-components.data-grid.delete.confirm-dialog." +
-						(invert ? "messageInverted" : "message"),
-					{ NUM: ids.length }
-				),
-				textButtonYes: t(
-					"backend-components.data-grid.delete.confirm-dialog.buttons.yes"
-				),
-				textButtonNo: t(
-					"backend-components.data-grid.delete.confirm-dialog.buttons.no"
-				),
-			});
+			if (customDeleteConfirm) {
+				await customDeleteConfirm(invert, ids, filter);
+			} else {
+				await showConfirmDialog(pushDialog, {
+					title: t("backend-components.data-grid.delete.confirm-dialog.title"),
+					message: t(
+						"backend-components.data-grid.delete.confirm-dialog." +
+							(invert ? "messageInverted" : "message"),
+						{ NUM: ids.length }
+					),
+					textButtonYes: t(
+						"backend-components.data-grid.delete.confirm-dialog.buttons.yes"
+					),
+					textButtonNo: t(
+						"backend-components.data-grid.delete.confirm-dialog.buttons.no"
+					),
+				});
+			}
 
 			try {
 				if (enableDeleteAll) {
@@ -216,12 +238,13 @@ const BackendDataGrid = <
 			}
 		},
 		[
+			customDeleteConfirm,
 			pushDialog,
 			t,
 			enableDeleteAll,
+			refreshGrid,
 			deleteAdvanced,
 			deleteMultiple,
-			refreshGrid,
 		]
 	);
 
