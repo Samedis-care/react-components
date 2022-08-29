@@ -269,11 +269,11 @@ const CRUD = <
 	}, []);
 
 	const handleSubmit = useCallback(
-		async (data: Record<string, unknown>) => {
-			if (props.formProps.onSubmit) {
-				await props.formProps.onSubmit(data);
-			}
-
+		async (
+			data: Record<string, unknown>,
+			submit: Record<string, unknown>,
+			old: Record<string, unknown>
+		) => {
 			// redirect to edit page
 			const { id } = data as Record<"id", string>;
 			if (disableRouting) {
@@ -286,6 +286,10 @@ const CRUD = <
 			}
 
 			refreshGrid();
+
+			if (props.formProps.onSubmit) {
+				await props.formProps.onSubmit(data, submit, old);
+			}
 		},
 		[
 			props.formProps,

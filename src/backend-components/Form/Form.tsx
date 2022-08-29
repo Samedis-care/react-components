@@ -172,8 +172,14 @@ export interface FormProps<
 	 * Called upon successful submit
 	 * Contains data from server response
 	 * @param dataFromServer The data from the server response (model data)
+	 * @param submittedData The data submitted by the form
+	 * @param previousData The data previously provided by the server
 	 */
-	onSubmit?: (dataFromServer: Record<string, unknown>) => Promise<void> | void;
+	onSubmit?: (
+		dataFromServer: Record<string, unknown>,
+		submittedData: Record<string, unknown>,
+		previousData: Record<string, unknown>
+	) => Promise<void> | void;
 	/**
 	 * Delete the record on submit rather then save it?
 	 */
@@ -765,6 +771,8 @@ const Form = <
 
 	// main form - submit handler
 	const submitForm = useCallback(async (): Promise<void> => {
+		if (!serverData) throw new Error("serverData is null"); // should never happen
+
 		if (preSubmit) {
 			let cancelSubmit: boolean;
 			try {
@@ -830,6 +838,9 @@ const Form = <
 				Object.values(preSubmitHandlers.current).map((handler) => handler(id))
 			);
 
+			const submitValues = valuesRef.current;
+			const oldValues = serverData[0];
+
 			const result = await updateData(
 				onlySubmitMounted
 					? (Object.fromEntries(
@@ -880,7 +891,7 @@ const Form = <
 			setValues(newValues);
 
 			if (onSubmit) {
-				await onSubmit(newValues);
+				await onSubmit(newValues, submitValues, oldValues);
 			}
 		} catch (e) {
 			// don't use this for validation errors
