@@ -218,6 +218,9 @@ export const useModelMutation = <
 				if (!(data[0] as Record<"id", string>).id) {
 					throw new Error("Can't update null ID");
 				}
+				if (model.hooks.onCreateOrUpdate) {
+					model.hooks.onCreateOrUpdate(data);
+				}
 				ModelDataStore.setQueryData(
 					model.getReactQueryKey((data[0] as Record<"id", string>).id),
 					data
@@ -311,6 +314,14 @@ export const useModelDeleteAdvanced = <
 	);
 };
 
+export interface ModelHooks<KeyT extends ModelFieldName> {
+	/**
+	 * Hook fired on useModelMutation success
+	 * @param data The updated record
+	 */
+	onCreateOrUpdate?: (data: ModelGetResponse<KeyT>) => void;
+}
+
 class Model<
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
@@ -336,6 +347,10 @@ class Model<
 	 * Caching options
 	 */
 	public cacheOptions?: CacheOptions;
+	/**
+	 * Hooks
+	 */
+	public readonly hooks: ModelHooks<KeyT>;
 
 	/**
 	 * Creates a new model
@@ -344,13 +359,15 @@ class Model<
 	 * @param connector A backend connector
 	 * @param cacheKeys Optional cache keys
 	 * @param cacheOptions Optional cache options
+	 * @param hooks Optional: Model hooks
 	 */
 	constructor(
 		name: string,
 		model: ModelField<KeyT, VisibilityT, CustomT>,
 		connector: Connector<KeyT, VisibilityT, CustomT>,
 		cacheKeys?: unknown,
-		cacheOptions?: CacheOptions
+		cacheOptions?: CacheOptions,
+		hooks?: ModelHooks<KeyT>
 	) {
 		this.modelId = name;
 		this.fields = model;
@@ -359,6 +376,7 @@ class Model<
 		this.cacheOptions = cacheOptions ?? {
 			staleTime: 30000,
 		};
+		this.hooks = hooks ?? {};
 	}
 
 	/**
