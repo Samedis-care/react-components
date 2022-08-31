@@ -62,6 +62,10 @@ export interface BaseSelectorData {
 	 */
 	ignore?: boolean;
 	/**
+	 * Should this entry be hidden from selection?
+	 */
+	hidden?: boolean;
+	/**
 	 * Should the entry be disabled?
 	 */
 	isDisabled?: boolean;
@@ -637,6 +641,9 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 					results.push(addNewEntry);
 				}
 			}
+			// remove hidden
+			results = results.filter((result) => !result.hidden);
+
 			if (filterIds) {
 				results = results.filter((entry) => !filterIds.includes(getId(entry)));
 			}
