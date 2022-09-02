@@ -176,6 +176,7 @@ const styles = createStyles((theme: Theme) => ({
 	today: {
 		backgroundColor: theme.palette.primary.main,
 		color: theme.palette.getContrastText(theme.palette.primary.main),
+		borderRadius: `${theme.shape.borderRadius}px ${theme.shape.borderRadius}px 0 0`,
 	},
 	todayBtn: {
 		textTransform: "none",
@@ -185,6 +186,7 @@ const styles = createStyles((theme: Theme) => ({
 	},
 	scroller: {
 		overflow: "auto",
+		borderRadius: `0 0 ${theme.shape.borderRadius}px ${theme.shape.borderRadius}px`,
 	},
 }));
 

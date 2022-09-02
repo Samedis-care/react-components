@@ -7,8 +7,13 @@ import { createStyles, Theme, WithStyles, withStyles } from "@material-ui/core";
 import Paper from "@material-ui/core/Paper";
 import Box from "@material-ui/core/Box";
 import moment, { Moment } from "moment";
+import { combineClassNames } from "../../../utils";
 
 export interface IProps extends WithStyles {
+	/**
+	 * The day offset
+	 */
+	dayIdx: number; // 0 - 6
 	/**
 	 * The day this component represents
 	 */
@@ -25,6 +30,8 @@ export interface IProps extends WithStyles {
 
 class WeekViewDay extends PureComponent<IProps> {
 	render() {
+		const isFirst = this.props.dayIdx === 0;
+		const isLast = this.props.dayIdx === 6;
 		const isToday =
 			this.props.day.dayOfYear() === moment().dayOfYear() &&
 			this.props.day.year() === moment().year();
@@ -34,9 +41,12 @@ class WeekViewDay extends PureComponent<IProps> {
 				<Paper
 					square
 					elevation={0}
-					className={
-						isToday ? this.props.classes.paperToday : this.props.classes.paper
-					}
+					className={combineClassNames([
+						isToday && this.props.classes.today,
+						this.props.classes.paper,
+						isFirst && this.props.classes.first,
+						isLast && this.props.classes.last,
+					])}
 				>
 					<Grid container>
 						<Grid item xs={12}>
@@ -66,10 +76,15 @@ const styles = createStyles((theme: Theme) => ({
 	paper: {
 		height: "100%",
 	},
-	paperToday: {
-		height: "100%",
+	today: {
 		backgroundColor: theme.palette.primary.main,
 		color: theme.palette.getContrastText(theme.palette.primary.main),
+	},
+	first: {
+		borderRadius: `${theme.shape.borderRadius}px 0 0 ${theme.shape.borderRadius}px`,
+	},
+	last: {
+		borderRadius: `0 ${theme.shape.borderRadius}px ${theme.shape.borderRadius}px 0`,
 	},
 }));
 

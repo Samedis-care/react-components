@@ -156,8 +156,9 @@ class WeekView extends PureComponent<IProps, IState> {
 						alignItems={"stretch"}
 						alignContent={"space-between"}
 						wrap={"nowrap"}
+						className={this.props.classes.content}
 					>
-						{weekdays.map((day) => {
+						{weekdays.map((day, dayIdx) => {
 							const data = this.state.data;
 							if (!data) return null;
 
@@ -181,6 +182,7 @@ class WeekView extends PureComponent<IProps, IState> {
 							return (
 								<WeekViewDay
 									key={day}
+									dayIdx={dayIdx}
 									day={date}
 									date={formattedDate}
 									data={dayData}
