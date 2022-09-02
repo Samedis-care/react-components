@@ -33,6 +33,7 @@ class WeekViewDay extends PureComponent<IProps> {
 			<Grid item xs>
 				<Paper
 					square
+					elevation={0}
 					className={
 						isToday ? this.props.classes.paperToday : this.props.classes.paper
 					}
