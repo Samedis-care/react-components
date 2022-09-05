@@ -354,13 +354,13 @@ const CRUD = <
 		<Form
 			id={id === "new" ? null : id}
 			model={props.model}
+			{...props.formProps}
 			readOnly={
 				!hasPermission(
 					perms,
 					id === "new" ? props.newPermission : props.editPermission
-				)
+				) || props.formProps.readOnly
 			}
-			{...props.formProps}
 			onSubmit={handleSubmit}
 			disableRouting={disableRouting}
 			customProps={{

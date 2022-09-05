@@ -55,6 +55,10 @@ export interface BasicFormPageProps<RendererPropsT, CustomPropsT>
 	 * Actual form
 	 */
 	form: React.ReactNode;
+	/**
+	 * read only mode?
+	 */
+	showBackButtonOnly?: boolean;
 }
 
 const BasicFormPage = <RendererPropsT, CustomPropsT>(
@@ -193,6 +197,7 @@ const BasicFormPage = <RendererPropsT, CustomPropsT>(
 				<FormButtons
 					{...childrenProps}
 					{...otherProps}
+					showBackButtonOnly={otherProps.showBackButtonOnly || readOnly}
 					isSubmitting={isSubmitting}
 					dirty={dirty}
 					disableRouting={disableRouting}
