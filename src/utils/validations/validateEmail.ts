@@ -13,7 +13,7 @@ const emailRegex = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@
  * @return valid?
  */
 export const validateEmailRaw = (value: string): boolean =>
-	emailRegex.test(value.toLowerCase());
+	!!value && emailRegex.test(value.toLowerCase());
 
 /**
  * Validate email
