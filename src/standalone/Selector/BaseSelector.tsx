@@ -803,6 +803,7 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 									readOnly={disableSearch}
 									{...InputProps}
 									{...otherParams}
+									inputProps={{ ...params.inputProps, title: selected?.label }}
 									startAdornment={
 										(enableIcons ? renderIcon(selected?.icon) : undefined) ??
 										startAdornment
