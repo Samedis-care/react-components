@@ -5,6 +5,7 @@ import React, {
 	ReactElement,
 	PropsWithChildren,
 	ReactNodeArray,
+	ForwardedRef,
 } from "react";
 import {
 	ListItemText,
@@ -14,6 +15,7 @@ import {
 	InputProps,
 	Divider,
 	Typography,
+	Popper,
 } from "@material-ui/core";
 import { Autocomplete, AutocompleteProps } from "@material-ui/lab";
 import {
@@ -39,6 +41,7 @@ import InputWithHelp from "../UIKit/InputWithHelp";
 import OutlinedInputWithHelp from "../UIKit/OutlinedInputWithHelp";
 import InlineSwitch from "../InlineSwitch";
 import useCCTranslations from "../../utils/useCCTranslations";
+import { PopperProps } from "@material-ui/core/Popper/Popper";
 
 export interface BaseSelectorData {
 	/**
@@ -410,6 +413,19 @@ const getOptionDisabled = (option: BaseSelectorData) =>
 const getOptionSelected = (option: BaseSelectorData, value: BaseSelectorData) =>
 	option.value === value.value;
 
+const GrowPopper = React.forwardRef(function GrowPopperImpl(
+	props: PopperProps,
+	ref: ForwardedRef<HTMLDivElement>
+) {
+	return (
+		<Popper
+			{...props}
+			ref={ref}
+			style={{ ...props.style, width: "unset", minWidth: props.style?.width }}
+		/>
+	);
+});
+
 const BaseSelector = <DataT extends BaseSelectorData>(
 	props: BaseSelectorProps<DataT>
 ) => {
@@ -744,6 +760,7 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 								? (option: DataT) => option.group ?? noGroupLabel ?? ""
 								: undefined
 						}
+						PopperComponent={GrowPopper}
 						filterOptions={filterOptions}
 						value={selected}
 						inputValue={query}
