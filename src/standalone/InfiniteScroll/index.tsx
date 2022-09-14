@@ -50,12 +50,14 @@ interface IState {
  */
 class InfiniteScroll extends PureComponent<InfiniteScrollProps, IState> {
 	public wrapper: HTMLElement | null = null;
+	public resizeObserver: ResizeObserver;
 
 	constructor(props: InfiniteScrollProps) {
 		super(props);
 
 		const debounceWait = this.props.callBackDebounce ?? 100;
 
+		this.resizeObserver = new ResizeObserver(this.handleResize);
 		this.state = {
 			initScroll: !this.props.loadMoreTop, // we don't need to set an initial scroll if we don't need up-scrolling
 			loadMoreTop:
@@ -72,10 +74,12 @@ class InfiniteScroll extends PureComponent<InfiniteScrollProps, IState> {
 	}
 
 	componentDidMount(): void {
-		this.wrapper?.addEventListener("scroll", this.handleScroll);
+		if (!this.wrapper) throw new Error("Ref is null");
+
+		this.wrapper.addEventListener("scroll", this.handleScroll);
 		this.handleResize();
 		if (this.props.dynamicallySized) {
-			window.addEventListener("resize", this.handleResize);
+			this.resizeObserver.observe(this.wrapper);
 		}
 	}
 
@@ -84,16 +88,19 @@ class InfiniteScroll extends PureComponent<InfiniteScrollProps, IState> {
 			this.handleResize();
 		}
 		if (!!prevProps.dynamicallySized !== !!this.props.dynamicallySized) {
+			if (!this.wrapper) return;
 			if (prevProps.dynamicallySized)
-				window.removeEventListener("resize", this.handleResize);
-			else window.addEventListener("resize", this.handleResize);
+				this.resizeObserver.unobserve(this.wrapper);
+			else this.resizeObserver.observe(this.wrapper);
 		}
 	}
 
 	componentWillUnmount(): void {
-		this.wrapper?.removeEventListener("scroll", this.handleScroll);
-		if (this.props.dynamicallySized)
-			window.removeEventListener("resize", this.handleResize);
+		if (!this.wrapper) throw new Error("Ref is null");
+		this.wrapper.removeEventListener("scroll", this.handleScroll);
+		if (this.props.dynamicallySized) {
+			this.resizeObserver.unobserve(this.wrapper);
+		}
 	}
 
 	render(): React.ReactElement {
