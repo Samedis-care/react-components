@@ -9,7 +9,7 @@ export interface InfiniteScrollProps {
 	 */
 	children: React.ReactNode;
 	/**
-	 * The CSS class to apply, must set a fixed height value and overflow: auto
+	 * The CSS class to apply, must set a height value and overflow: auto
 	 */
 	className: string;
 	/**
@@ -24,6 +24,10 @@ export interface InfiniteScrollProps {
 	 * Debounce wait (in ms) for loadMoreTop and loadMoreBottom. Defaults to 100ms
 	 */
 	callBackDebounce?: number;
+	/**
+	 * Dynamic size mode (enables resize listener)
+	 */
+	dynamicallySized?: boolean;
 }
 
 interface IState {
@@ -50,10 +54,7 @@ class InfiniteScroll extends PureComponent<InfiniteScrollProps, IState> {
 	constructor(props: InfiniteScrollProps) {
 		super(props);
 
-		const debounceWait =
-			this.props.callBackDebounce !== undefined
-				? this.props.callBackDebounce
-				: 100;
+		const debounceWait = this.props.callBackDebounce ?? 100;
 
 		this.state = {
 			initScroll: !this.props.loadMoreTop, // we don't need to set an initial scroll if we don't need up-scrolling
@@ -73,16 +74,26 @@ class InfiniteScroll extends PureComponent<InfiniteScrollProps, IState> {
 	componentDidMount(): void {
 		this.wrapper?.addEventListener("scroll", this.handleScroll);
 		this.handleResize();
+		if (this.props.dynamicallySized) {
+			window.addEventListener("resize", this.handleResize);
+		}
 	}
 
 	componentDidUpdate(prevProps: Readonly<InfiniteScrollProps>): void {
 		if (prevProps.children !== this.props.children) {
 			this.handleResize();
 		}
+		if (!!prevProps.dynamicallySized !== !!this.props.dynamicallySized) {
+			if (prevProps.dynamicallySized)
+				window.removeEventListener("resize", this.handleResize);
+			else window.addEventListener("resize", this.handleResize);
+		}
 	}
 
 	componentWillUnmount(): void {
 		this.wrapper?.removeEventListener("scroll", this.handleScroll);
+		if (this.props.dynamicallySized)
+			window.removeEventListener("resize", this.handleResize);
 	}
 
 	render(): React.ReactElement {
