@@ -50,14 +50,16 @@ interface IState {
  */
 class InfiniteScroll extends PureComponent<InfiniteScrollProps, IState> {
 	public wrapper: HTMLElement | null = null;
-	public resizeObserver: ResizeObserver;
+	public resizeObserver: ResizeObserver | null;
 
 	constructor(props: InfiniteScrollProps) {
 		super(props);
 
 		const debounceWait = this.props.callBackDebounce ?? 100;
 
-		this.resizeObserver = new ResizeObserver(this.handleResize);
+		this.resizeObserver = window.ResizeObserver
+			? new ResizeObserver(this.handleResize)
+			: null;
 		this.state = {
 			initScroll: !this.props.loadMoreTop, // we don't need to set an initial scroll if we don't need up-scrolling
 			loadMoreTop:
@@ -79,7 +81,11 @@ class InfiniteScroll extends PureComponent<InfiniteScrollProps, IState> {
 		this.wrapper.addEventListener("scroll", this.handleScroll);
 		this.handleResize();
 		if (this.props.dynamicallySized) {
-			this.resizeObserver.observe(this.wrapper);
+			if (this.resizeObserver) {
+				this.resizeObserver.observe(this.wrapper);
+			} else {
+				window.addEventListener("resize", this.handleResize);
+			}
 		}
 	}
 
@@ -89,9 +95,19 @@ class InfiniteScroll extends PureComponent<InfiniteScrollProps, IState> {
 		}
 		if (!!prevProps.dynamicallySized !== !!this.props.dynamicallySized) {
 			if (!this.wrapper) return;
-			if (prevProps.dynamicallySized)
-				this.resizeObserver.unobserve(this.wrapper);
-			else this.resizeObserver.observe(this.wrapper);
+			if (prevProps.dynamicallySized) {
+				if (this.resizeObserver) {
+					this.resizeObserver.unobserve(this.wrapper);
+				} else {
+					window.removeEventListener("resize", this.handleResize);
+				}
+			} else {
+				if (this.resizeObserver) {
+					this.resizeObserver.observe(this.wrapper);
+				} else {
+					window.addEventListener("resize", this.handleResize);
+				}
+			}
 		}
 	}
 
@@ -99,7 +115,11 @@ class InfiniteScroll extends PureComponent<InfiniteScrollProps, IState> {
 		if (!this.wrapper) throw new Error("Ref is null");
 		this.wrapper.removeEventListener("scroll", this.handleScroll);
 		if (this.props.dynamicallySized) {
-			this.resizeObserver.unobserve(this.wrapper);
+			if (this.resizeObserver) {
+				this.resizeObserver.unobserve(this.wrapper);
+			} else {
+				window.removeEventListener("resize", this.handleResize);
+			}
 		}
 	}
 
