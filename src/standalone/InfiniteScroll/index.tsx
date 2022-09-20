@@ -93,6 +93,32 @@ class InfiniteScroll extends PureComponent<InfiniteScrollProps, IState> {
 		if (prevProps.children !== this.props.children) {
 			this.handleResize();
 		}
+		const debounceWait = this.props.callBackDebounce ?? 100;
+		const prevDebounceWait = prevProps.callBackDebounce ?? 100;
+		if (
+			prevProps.loadMoreTop !== this.props.loadMoreTop ||
+			debounceWait !== prevDebounceWait
+		) {
+			this.setState({
+				loadMoreTop:
+					debounceWait === 0
+						? this.props.loadMoreTop
+							? debounce(this.props.loadMoreTop, debounceWait)
+							: undefined
+						: this.props.loadMoreTop,
+			});
+		}
+		if (
+			prevProps.loadMoreBottom !== this.props.loadMoreBottom ||
+			debounceWait !== prevDebounceWait
+		) {
+			this.setState({
+				loadMoreBottom:
+					debounceWait === 0
+						? debounce(this.props.loadMoreBottom, debounceWait)
+						: this.props.loadMoreBottom,
+			});
+		}
 		if (!!prevProps.dynamicallySized !== !!this.props.dynamicallySized) {
 			if (!this.wrapper) return;
 			if (prevProps.dynamicallySized) {
