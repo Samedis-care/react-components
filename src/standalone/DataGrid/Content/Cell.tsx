@@ -5,14 +5,19 @@ import {
 	useDataGridState,
 	useDataGridStyles,
 } from "../DataGrid";
-import React, { Dispatch, SetStateAction, useCallback } from "react";
-import { GridCellProps } from "react-virtualized/dist/es/Grid";
+import React, {
+	Dispatch,
+	SetStateAction,
+	useCallback,
+	useContext,
+} from "react";
+import { GridChildComponentProps } from "react-window";
 import ColumnHeader from "./ColumnHeader";
 import SelectRow, { isSelected } from "./SelectRow";
 import { Skeleton } from "@material-ui/lab";
 import { combineClassNames } from "../../../utils";
 
-export interface CellProps extends GridCellProps {
+export interface CellContextType {
 	/**
 	 * The grid columns
 	 */
@@ -22,10 +27,19 @@ export interface CellProps extends GridCellProps {
 	 */
 	hoverState: [number | null, Dispatch<SetStateAction<number | null>>];
 }
+export const CellContext = React.createContext<CellContextType | undefined>(
+	undefined
+);
+export const useCellContext = () => {
+	const ctx = useContext(CellContext);
+	if (!ctx) throw new Error("CellContext not set");
+	return ctx;
+};
 
-const Cell = (props: CellProps): React.ReactElement => {
+const Cell = (props: GridChildComponentProps): React.ReactElement => {
 	const classes = useDataGridStyles();
-	const { columns, columnIndex, rowIndex } = props;
+	const { columnIndex, rowIndex } = props;
+	const { columns, hoverState } = useCellContext();
 	const {
 		onEdit,
 		prohibitMultiSelect,
@@ -35,7 +49,7 @@ const Cell = (props: CellProps): React.ReactElement => {
 		canSelectRow,
 	} = useDataGridProps();
 	const [state, setState] = useDataGridState();
-	const [hover, setHover] = props.hoverState;
+	const [hover, setHover] = hoverState;
 	const record: DataGridRowData | undefined = state.rows[props.rowIndex - 1];
 	const id = record?.id || "undefined";
 

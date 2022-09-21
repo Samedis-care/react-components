@@ -1,12 +1,11 @@
-import React, { Suspense, useCallback, useState } from "react";
+import React, { Suspense, useCallback, useMemo, useState } from "react";
 import { Box, Grid, InputAdornment } from "@material-ui/core";
-import { AutoSizer } from "react-virtualized/dist/commonjs/AutoSizer";
-import { List } from "react-virtualized/dist/commonjs/List";
+import AutoSizer from "react-virtualized-auto-sizer";
+import { FixedSizeList, ListChildComponentProps } from "react-window";
 import supportedLanguages from "../../assets/data/supported-languages.json";
 import countryLanguages from "../../assets/data/country-languages.json";
 import LanguageSelectorEntry from "./LanguageSelectorEntry";
 import { Search as SearchIcon } from "@material-ui/icons";
-import { ListRowProps } from "react-virtualized/dist/es/List";
 import { makeStyles } from "@material-ui/core/styles";
 import useCCTranslations, {
 	useCCLocaleSwitcherTranslations,
@@ -78,7 +77,7 @@ const LanguageSelectorDialogContent = (
 	const supportedLangs = supportedLanguages;
 	const countryLanguageMapping = countryLanguages as Record<string, string[]>;
 
-	const data: LanguageSelectorEntryFilterData[] = React.useMemo(
+	const data: LanguageSelectorEntryFilterData[] = useMemo(
 		() =>
 			Object.entries(countryLanguageMapping)
 				.map(
@@ -117,39 +116,38 @@ const LanguageSelectorDialogContent = (
 		[countryLanguageMapping, supportedLangs, tLocale]
 	);
 
-	const noLocalesRenderer = useCallback(() => {
-		return (
-			<div className={classes.noLocalesMessage}>
-				{t("non-standalone.language-switcher.no-locales")}
-			</div>
-		);
-	}, [t, classes.noLocalesMessage]);
-
-	const filteredData = data.filter(
-		(entry) =>
-			entry.locale_lower.includes(lowercaseFilter) ||
-			entry.country_lower.includes(lowercaseFilter) ||
-			entry.language_lower.includes(lowercaseFilter) ||
-			entry.native_country_lower.includes(lowercaseFilter) ||
-			entry.native_language_lower.includes(lowercaseFilter)
+	const filteredData = useMemo(
+		() =>
+			data.filter(
+				(entry) =>
+					entry.locale_lower.includes(lowercaseFilter) ||
+					entry.country_lower.includes(lowercaseFilter) ||
+					entry.language_lower.includes(lowercaseFilter) ||
+					entry.native_country_lower.includes(lowercaseFilter) ||
+					entry.native_language_lower.includes(lowercaseFilter)
+			),
+		[data, lowercaseFilter]
 	);
 
-	const localeEntryRenderer = (entryProps: ListRowProps) => {
-		const locale = filteredData[entryProps.index];
+	const LocaleEntryRenderer = useCallback(
+		(entryProps: ListChildComponentProps) => {
+			const locale = filteredData[entryProps.index];
 
-		return (
-			<div style={entryProps.style}>
-				<Suspense fallback={<Loader />}>
-					<LanguageSelectorEntry
-						locale={locale}
-						currentLanguage={currentLang}
-						close={props.close}
-						key={locale.locale}
-					/>
-				</Suspense>
-			</div>
-		);
-	};
+			return (
+				<div style={entryProps.style}>
+					<Suspense fallback={<Loader />}>
+						<LanguageSelectorEntry
+							locale={locale}
+							currentLanguage={currentLang}
+							close={props.close}
+							key={locale.locale}
+						/>
+					</Suspense>
+				</div>
+			);
+		},
+		[currentLang, filteredData, props.close]
+	);
 
 	return (
 		<Grid container>
@@ -164,19 +162,25 @@ const LanguageSelectorDialogContent = (
 				</Box>
 			</Grid>
 			<Grid item xs={12} className={classes.localeList}>
-				<AutoSizer>
-					{({ width, height }) => (
-						<List
-							width={width}
-							height={height}
-							overscanRowCount={2}
-							noRowsRenderer={noLocalesRenderer}
-							rowCount={filteredData.length}
-							rowHeight={70}
-							rowRenderer={localeEntryRenderer}
-						/>
-					)}
-				</AutoSizer>
+				{filteredData.length === 0 ? (
+					<div className={classes.noLocalesMessage}>
+						{t("non-standalone.language-switcher.no-locales")}
+					</div>
+				) : (
+					<AutoSizer>
+						{({ width, height }) => (
+							<FixedSizeList
+								width={width}
+								height={height}
+								overscanCount={2}
+								itemCount={filteredData.length}
+								itemSize={70}
+							>
+								{LocaleEntryRenderer}
+							</FixedSizeList>
+						)}
+					</AutoSizer>
+				)}
 			</Grid>
 		</Grid>
 	);

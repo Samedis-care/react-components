@@ -1,9 +1,5 @@
 # [Components.care React](https://samedis-care.github.io/react-components/)
 
-[![dependencies Status](https://david-dm.org/Samedis-care/react-components/status.svg)](https://david-dm.org/Samedis-care/react-components)
-[![devDependencies Status](https://david-dm.org/Samedis-care/react-components/dev-status.svg)](https://david-dm.org/Samedis-care/react-components?type=dev)
-[![peerDependencies Status](https://david-dm.org/Samedis-care/react-components/peer-status.svg)](https://david-dm.org/Samedis-care/react-components?type=peer)
-
 Take a look at our [Storybook](https://samedis-care.github.io/react-components/storybook/)
 
 ## Installing
@@ -40,6 +36,7 @@ Used Libraries:
 - react-router-dom (Provided by the framework to enable programmatically controllable routing in your React app)
 - moment.js (Used for localized date/time related components)
 - react-query (Used as backend connector/caching layer)
+- react-window (Used for DOM virtualization)
 - [Sentry](https://sentry.io) (optional integration)
 
 ## Developer Setup

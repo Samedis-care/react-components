@@ -100,5 +100,5 @@ const LanguageSelectorEntry = (
 	);
 };
 
-// react-virtualized remounts the component every time, so no need for memo here
+// virtualization remounts the component every time, so no need for memo here
 export default LanguageSelectorEntry;

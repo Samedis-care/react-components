@@ -1,25 +1,19 @@
-import React, {
-	useCallback,
-	useEffect,
-	useMemo,
-	useRef,
-	useState,
-} from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
 	IDataGridColumnDef,
 	IDataGridColumnProps,
 	useDataGridColumnsWidthState,
 	useDataGridState,
 } from "../DataGrid";
-import { AutoSizer, Size } from "react-virtualized/dist/commonjs/AutoSizer";
-import { MultiGrid } from "react-virtualized/dist/commonjs/MultiGrid";
-import { SectionRenderedParams } from "react-virtualized/dist/commonjs/Grid";
-import Cell from "./Cell";
+import AutoSizer, { Size } from "react-virtualized-auto-sizer";
+import { GridOnItemsRenderedProps } from "react-window";
+import Cell, { CellContext } from "./Cell";
 import { applyColumnWidthLimits } from "./ColumnHeader";
 import { Loader } from "../../index";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import { withStyles } from "@material-ui/core";
 import CenteredTypography from "../../UIKit/CenteredTypography";
+import MultiGrid from "../../Virtualized/MultiGrid";
 
 export interface IDataGridContentProps extends IDataGridColumnProps {
 	rowsPerPage: number;
@@ -53,13 +47,12 @@ const Content = (props: IDataGridContentProps) => {
 	const [columnWidth, setColumnWidth] = useDataGridColumnsWidthState();
 	const [width, setWidth] = useState(0);
 	const hoverState = useState<number | null>(null);
-	const dataViewRef = useRef<MultiGrid>(null);
 	const { pages } = state;
 
 	const onSectionRendered = useCallback(
-		(props: SectionRenderedParams) => {
-			const pageStart = (props.rowStartIndex / rowsPerPage) | 0;
-			const pageEnd = (props.rowStopIndex / rowsPerPage) | 0;
+		(props: GridOnItemsRenderedProps) => {
+			const pageStart = (props.visibleRowStartIndex / rowsPerPage) | 0;
+			const pageEnd = (props.visibleRowStopIndex / rowsPerPage) | 0;
 			if (pageStart !== pages[0] || pageEnd !== pages[1]) {
 				setState((prevState) => ({
 					...prevState,
@@ -163,24 +156,9 @@ const Content = (props: IDataGridContentProps) => {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [state.initialResize, width]);
 
-	useEffect(() => {
-		if (!dataViewRef.current) return;
-		dataViewRef.current.recomputeGridSize();
-	}, [columnWidth]);
-
 	const noContentRenderer = useCallback(
 		() => (
 			<>
-				<div
-					style={{
-						position: "absolute",
-						width: columns
-							.filter((entry) => !entry.isLocked)
-							.map((entry) => columnWidth[entry.field] ?? DEFAULT_COLUMN_WIDTH)
-							.reduce((prev, cur) => prev + cur, 0),
-						height: 1,
-					}}
-				/>
 				{state.refreshData ? (
 					<Loader />
 				) : state.dataLoadError ? (
@@ -194,7 +172,7 @@ const Content = (props: IDataGridContentProps) => {
 				)}
 			</>
 		),
-		[columnWidth, columns, state.dataLoadError, state.refreshData, t]
+		[state.dataLoadError, state.refreshData, t]
 	);
 
 	const styleTopRightGrid = useMemo(
@@ -216,11 +194,11 @@ const Content = (props: IDataGridContentProps) => {
 	);
 
 	const getRowHeight = useCallback(
-		({ index }) => (index === 0 ? headerHeight : 57),
+		(index: number) => (index === 0 ? headerHeight : 57),
 		[headerHeight]
 	);
 	const getColumnWidth = useCallback(
-		({ index }) =>
+		(index: number) =>
 			!disableSelection && index === 0
 				? SELECT_ROW_WIDTH
 				: index !== columns.length + (disableSelection ? 0 : 1)
@@ -229,55 +207,37 @@ const Content = (props: IDataGridContentProps) => {
 				: remainingWidth,
 		[columnWidth, columns, disableSelection, remainingWidth]
 	);
-	const cellRenderer = useCallback(
-		(gridProps) => (
-			<Cell columns={columns} hoverState={hoverState} {...gridProps} />
-		),
-		[columns, hoverState]
-	);
-
-	// workaround for grid not re-rendering when cellRenderer changes
-	useEffect(() => {
-		dataViewRef.current?.forceUpdateGrids();
-	}, [hoverState]);
 
 	return (
 		<AutoSizer onResize={onResize}>
 			{({ width, height }) => (
-				<MultiGrid
-					key={
-						// workaround for Uncaught Error: Requested index X is outside of range 0..0
-						// bug happens when columns.length == 0, rowCount > 1 and grid reset all is used
-						state.initialResize ? "ready" : "loading"
-					}
-					ref={dataViewRef}
-					columnCount={
-						columns.length +
-						(disableSelection ? 0 : 1) +
-						(columns.length > 0 ? 1 : 0)
-					}
-					columnWidth={getColumnWidth}
-					rowCount={(state.rowsFiltered ?? state.rowsTotal) + 1}
-					rowHeight={getRowHeight}
-					width={width}
-					height={height}
-					cellRenderer={cellRenderer}
-					enableFixedColumnScroll
-					enableFixedRowScroll
-					fixedColumnCount={
-						columns.filter((col) => col.isLocked).length +
-						(disableSelection ? 0 : 1)
-					}
-					fixedRowCount={1}
-					hideTopRightGridScrollbar
-					hideBottomLeftGridScrollbar
-					styleTopLeftGrid={STYLE_TOP_LEFT}
-					styleTopRightGrid={styleTopRightGrid}
-					styleBottomLeftGrid={styleBottomLeftGrid}
-					styleBottomRightGrid={STYLE_BOTTOM_RIGHT}
-					onSectionRendered={onSectionRendered}
-					noContentRenderer={noContentRenderer}
-				/>
+				<CellContext.Provider value={{ columns, hoverState }}>
+					<MultiGrid
+						columnCount={
+							columns.length +
+							(disableSelection ? 0 : 1) +
+							(columns.length > 0 ? 1 : 0)
+						}
+						columnWidth={getColumnWidth}
+						rowCount={(state.rowsFiltered ?? state.rowsTotal) + 1}
+						rowHeight={getRowHeight}
+						width={width}
+						height={height}
+						onItemsRendered={onSectionRendered}
+						fixedColumnCount={
+							columns.filter((col) => col.isLocked).length +
+							(disableSelection ? 0 : 1)
+						}
+						fixedRowCount={1}
+						styleTopLeftGrid={STYLE_TOP_LEFT}
+						styleTopRightGrid={styleTopRightGrid}
+						styleBottomLeftGrid={styleBottomLeftGrid}
+						styleBottomRightGrid={STYLE_BOTTOM_RIGHT}
+						noContentRenderer={noContentRenderer}
+					>
+						{Cell}
+					</MultiGrid>
+				</CellContext.Provider>
 			)}
 		</AutoSizer>
 	);
