@@ -3,6 +3,7 @@ import React, {
 	useCallback,
 	useContext,
 	useMemo,
+	useRef,
 	useState,
 } from "react";
 import Model, {
@@ -347,30 +348,43 @@ const CRUD = <
 		/>
 	);
 
+	const lastFormId = useRef<string | null>(null);
+	const formKey = useRef(Date.now().toString(16));
 	const form = (
 		id: string,
 		formComponent: NonNullable<typeof props.children>
-	) => (
-		<Form
-			id={id === "new" ? null : id}
-			model={props.model}
-			{...props.formProps}
-			readOnly={
-				!hasPermission(
-					perms,
-					id === "new" ? props.newPermission : props.editPermission
-				) || props.formProps.readOnly
+	) => {
+		// when we switch IDs (everything except from new -> id) we reset form fully
+		if (lastFormId.current == null) lastFormId.current = id;
+		if (lastFormId.current !== id) {
+			if (lastFormId.current !== "new") {
+				formKey.current = Date.now().toString(16);
 			}
-			onSubmit={handleSubmit}
-			disableRouting={disableRouting}
-			customProps={{
-				goBack: showOverview,
-				hasCustomSubmitHandler: props.formProps.onSubmit != null,
-			}}
-		>
-			{formComponent}
-		</Form>
-	);
+			lastFormId.current = id;
+		}
+		return (
+			<Form
+				id={id === "new" ? null : id}
+				key={formKey.current}
+				model={props.model}
+				{...props.formProps}
+				readOnly={
+					!hasPermission(
+						perms,
+						id === "new" ? props.newPermission : props.editPermission
+					) || props.formProps.readOnly
+				}
+				onSubmit={handleSubmit}
+				disableRouting={disableRouting}
+				customProps={{
+					goBack: showOverview,
+					hasCustomSubmitHandler: props.formProps.onSubmit != null,
+				}}
+			>
+				{formComponent}
+			</Form>
+		);
+	};
 
 	const dispatch = useMemo(
 		() => ({
