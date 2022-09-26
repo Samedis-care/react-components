@@ -18,6 +18,10 @@ export interface MultiSelectorData extends BaseSelectorData {
 	 * @param data The data entry to be unselected
 	 */
 	canUnselect?: (data: MultiSelectorData) => boolean | Promise<boolean>;
+	/**
+	 * Disable delete button
+	 */
+	noDelete?: boolean;
 }
 
 export interface MultiSelectProps<DataT extends MultiSelectorData>
@@ -190,7 +194,9 @@ const MultiSelect = <DataT extends MultiSelectorData>(
 								key={getId(data) || index.toString(16)}
 								enableDivider={props.selected.length === index - 1}
 								enableIcons={enableIcons}
-								handleDelete={disabled ? undefined : handleDelete}
+								handleDelete={
+									disabled || data.noDelete ? undefined : handleDelete
+								}
 								data={data}
 								setData={handleSetData}
 								iconSize={props.iconSize}

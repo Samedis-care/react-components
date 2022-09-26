@@ -124,17 +124,19 @@ const MultiSelectEntry = <DataT extends MultiSelectorData>(
 						</SmallListItemIcon>
 					)}
 					<ListItemText className={classes.label}>{data.label}</ListItemText>
-					<ListItemSecondaryAction>
-						<SmallIconButton
-							className={classes.icon}
-							edge={"end"}
-							name={data.value}
-							disabled={!handleDelete}
-							onClick={handleDelete}
-						>
-							<RemoveIcon className={classes.iconSvg} />
-						</SmallIconButton>
-					</ListItemSecondaryAction>
+					{handleDelete && (
+						<ListItemSecondaryAction>
+							<SmallIconButton
+								className={classes.icon}
+								edge={"end"}
+								name={data.value}
+								disabled={!handleDelete}
+								onClick={handleDelete}
+							>
+								<RemoveIcon className={classes.iconSvg} />
+							</SmallIconButton>
+						</ListItemSecondaryAction>
+					)}
 				</SmallListItem>
 			</List>
 			{enableDivider && <Divider className={classes.divider} />}
