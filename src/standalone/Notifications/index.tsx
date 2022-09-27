@@ -1,4 +1,4 @@
-import React, { CSSProperties, useCallback, useState } from "react";
+import React, { CSSProperties, useCallback, useEffect, useState } from "react";
 import { Notifications as NotificationsIcon } from "@material-ui/icons";
 import {
 	Badge,
@@ -17,6 +17,7 @@ import InfiniteScroll, { InfiniteScrollProps } from "../InfiniteScroll";
 import { makeStyles } from "@material-ui/core/styles";
 import i18n from "../../i18n";
 import timestampToAge from "../../utils/timestampToAge";
+import useCCTranslations from "../../utils/useCCTranslations";
 
 export interface Notification {
 	/**
@@ -62,6 +63,16 @@ export interface NotificationsProps {
 	 * Callback which is fired by the infinite scroll to load old notifications
 	 */
 	loadMore: InfiniteScrollProps["loadMoreBottom"];
+	/**
+	 * Load the latest notifications
+	 * called at refreshInterval or on page focus
+	 */
+	loadLatest: () => void;
+	/**
+	 * Refresh interval (delay between loadLatest calls) in ms
+	 * @default 1 minute
+	 */
+	refreshInterval?: number;
 	/**
 	 * A custom notification renderer (optional)
 	 * @param notification The notification to render
@@ -156,9 +167,10 @@ const useStyles = makeStyles(
 
 const Notifications = (props: NotificationsProps) => {
 	const classes = useStyles(props);
+	const { t } = useCCTranslations();
 
 	const [anchor, setAnchor] = useState<HTMLElement | null>(null);
-	const { onOpen } = props;
+	const { onOpen, loadLatest, refreshInterval } = props;
 
 	const onIconClick = useCallback(
 		(evt: React.MouseEvent<HTMLButtonElement>) => {
@@ -171,6 +183,27 @@ const Notifications = (props: NotificationsProps) => {
 	const onClose = useCallback(() => {
 		setAnchor(null);
 	}, [setAnchor]);
+
+	const handleLoadLatest = useCallback(() => {
+		loadLatest();
+	}, [loadLatest]);
+
+	useEffect(() => {
+		window.addEventListener("focus", handleLoadLatest);
+		const intervalHandle = window.setInterval(
+			handleLoadLatest,
+			refreshInterval ?? 60000
+		);
+		return () => {
+			window.removeEventListener("focus", handleLoadLatest);
+			window.clearInterval(intervalHandle);
+		};
+	}, [handleLoadLatest, refreshInterval]);
+	useEffect(() => {
+		// initial load
+		handleLoadLatest();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []);
 
 	const Renderer = props.notificationRenderer || defaultRenderer;
 	const notifications = props.notifications.filter(
@@ -200,7 +233,9 @@ const Notifications = (props: NotificationsProps) => {
 				<Box p={2}>
 					<Grid container spacing={2}>
 						<Grid item xs={12}>
-							<Typography variant={"h6"}>Notifications</Typography>
+							<Typography variant={"h6"}>
+								{t("standalone.notifications.title")}
+							</Typography>
 						</Grid>
 						<Grid item xs={12}>
 							<Divider />

@@ -6,6 +6,7 @@ export const NotificationsStory = (): React.ReactElement => {
 	return (
 		<Notifications
 			loadMore={action("loadMore")}
+			loadLatest={action("loadLatest")}
 			onOpen={action("onOpen")}
 			notifications={[
 				{

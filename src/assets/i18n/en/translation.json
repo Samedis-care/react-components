@@ -4,6 +4,9 @@
 			"week": "Week",
 			"today": "Today"
 		},
+		"notifications": {
+			"title": "Notifications"
+		},
 		"how-it-works": {
 			"title": "How it works"
 		},
