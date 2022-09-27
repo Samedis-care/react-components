@@ -35,7 +35,7 @@ export const usePermissionContext = (): [
 };
 
 /**
- * A single permission, multiple permissions or no permission required (null) or never (false)
+ * A single permission, multiple permissions (logical OR) or no permission required (null) or never (false)
  */
 export type Permission = string | string[] | null | false;
 
