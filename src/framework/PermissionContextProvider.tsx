@@ -76,6 +76,17 @@ export const hasPermission = (perms: string[], perm: Permission): boolean => {
 	return false;
 };
 
+/**
+ * Check if the permission is set in the current context
+ * @param perm The permission to check
+ * @returns Permission present?
+ * @remarks React hook version of hasPermission
+ */
+export const useHasPermission = (perm: Permission) => {
+	const [perms] = usePermissionContext();
+	return hasPermission(perms, perm);
+};
+
 const PermissionContextProvider = (props: PermissionContextProviderProps) => {
 	const state = useState<string[]>([]);
 
