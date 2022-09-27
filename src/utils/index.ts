@@ -49,3 +49,4 @@ export { default as generateLocalizedExcelImportTemplate } from "./generateLocal
 export { default as useFrontendDownload } from "./useFrontendDownload";
 export { default as dataToFile } from "./dataToFile";
 export { default as sortByLocaleRelevance } from "./sortByLocaleRelevance";
+export { default as timestampToAge } from "./timestampToAge";

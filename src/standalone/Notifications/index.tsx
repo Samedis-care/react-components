@@ -16,6 +16,7 @@ import {
 import InfiniteScroll, { InfiniteScrollProps } from "../InfiniteScroll";
 import { makeStyles } from "@material-ui/core/styles";
 import i18n from "../../i18n";
+import timestampToAge from "../../utils/timestampToAge";
 
 export interface Notification {
 	/**
@@ -65,7 +66,7 @@ export interface NotificationsProps {
 	 * A custom notification renderer (optional)
 	 * @param notification The notification to render
 	 */
-	notificationRenderer?: (notification: Notification) => React.ReactElement;
+	notificationRenderer?: React.ComponentType<Notification>;
 	/**
 	 * The notifications to display (should be updated by loadMore)
 	 */
@@ -88,23 +89,6 @@ const anchorOrigin: PopoverOrigin = {
 const transformOrigin: PopoverOrigin = {
 	vertical: "top",
 	horizontal: "right",
-};
-
-const ageParser = (timestamp: Date): string => {
-	const delta = new Date().getTime() - timestamp.getTime();
-
-	if (delta < 5000 /* 5s */) return "just now";
-	if (delta < 60000 /* 1m */) return "less than a minute ago";
-	if (delta < 3600000 /* 1h */) {
-		const minutes = delta / 60000;
-		return `${minutes.toFixed(0)} ${minutes > 1 ? "minutes" : "minute"} ago`;
-	}
-	if (delta < 86400000 /* 1d */) {
-		const hours = delta / 3600000;
-		return `${hours.toFixed(0)} ${hours > 1 ? "hours" : "hour"} ago`;
-	}
-	const days = delta / 86400000;
-	return `${days.toFixed(0)} ${days > 1 ? "days" : "day"} ago`;
 };
 
 const defaultImageStyle: CSSProperties = {
@@ -146,7 +130,7 @@ const defaultRenderer = (notification: Notification): React.ReactElement => (
 								<Tooltip
 									title={notification.created.toLocaleString(i18n.language)}
 								>
-									<span>{ageParser(notification.created)}</span>
+									<span>{timestampToAge(notification.created)}</span>
 								</Tooltip>
 							</Typography>
 						</Grid>
@@ -188,7 +172,7 @@ const Notifications = (props: NotificationsProps) => {
 		setAnchor(null);
 	}, [setAnchor]);
 
-	const renderer = props.notificationRenderer || defaultRenderer;
+	const Renderer = props.notificationRenderer || defaultRenderer;
 	const notifications = props.notifications.filter(
 		(not) => !not.expires || not.expires > new Date()
 	);
@@ -226,7 +210,9 @@ const Notifications = (props: NotificationsProps) => {
 								className={classes.notificationArea}
 								loadMoreBottom={props.loadMore}
 							>
-								{notifications.map(renderer)}
+								{notifications.map((notification) => (
+									<Renderer key={notification.id} {...notification} />
+								))}
 							</InfiniteScroll>
 						</Grid>
 					</Grid>
