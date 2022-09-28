@@ -4,6 +4,9 @@
 			"week": "Semaine",
 			"today": "Aujourd'hui"
 		},
+		"notifications": {
+			"title": "Avis"
+		},
 		"how-it-works": {
 			"title": "Comment ça fonctionne"
 		},
@@ -268,6 +271,17 @@
 		"validation": {
 			"required": "Le champ {{attribute}} est obligatoire",
 			"email": "Le champ {{attribute}} nécessite un email valide"
+		},
+		"timestampToAge": {
+			"just-now": "juste maintenant",
+			"less-minute": "Il y a moins d'une minute",
+			"minute": "minute",
+			"minutes": "minutes",
+			"hour": "heure",
+			"hours": "heures",
+			"day": "journée",
+			"days": "journées",
+			"str": "Il y a {{MONTANT}} {{UNIT}}"
 		}
 	},
 	"common": {
