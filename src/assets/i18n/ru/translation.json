@@ -4,6 +4,9 @@
 			"week": "Неделя",
 			"today": "Сегодня"
 		},
+		"notifications": {
+			"title": "Уведомления"
+		},
 		"how-it-works": {
 			"title": "Как это устроено"
 		},
@@ -268,6 +271,17 @@
 		"validation": {
 			"required": "Требуется поле {{attribute}}",
 			"email": "В поле {{attribute}} требуется действующий адрес электронной почты."
+		},
+		"timestampToAge": {
+			"just-now": "прямо сейчас",
+			"less-minute": "Меньше минуты назад",
+			"minute": "минута",
+			"minutes": "минуты",
+			"hour": "час",
+			"hours": "часы",
+			"day": "день",
+			"days": "дни",
+			"str": "{{AMOUNT}} {{UNIT}} назад"
 		}
 	},
 	"common": {
