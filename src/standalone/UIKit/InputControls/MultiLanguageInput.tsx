@@ -3,6 +3,7 @@ import {
 	Grid,
 	IconButton,
 	InputAdornment,
+	makeStyles,
 	TextField,
 	TextFieldProps,
 	Tooltip,
@@ -10,6 +11,7 @@ import {
 } from "@material-ui/core";
 import { useCCLanguagesTranslations } from "../../../utils/useCCTranslations";
 import { Translate } from "@material-ui/icons";
+import combineClassNames from "../../../utils/combineClassNames";
 
 // src/assets/data/languages.json
 export type MultiLanguageInputSupportedLanguages =
@@ -255,6 +257,19 @@ export type MultiLanguageInputProps = Omit<
 	error?: boolean;
 };
 
+const useStyles = makeStyles(
+	{
+		langSelect: {
+			cursor: "pointer",
+			pointerEvents: "auto",
+		},
+		activeLang: {
+			fontWeight: "bold",
+		},
+	},
+	{ name: "CcMultiLanguageInput" }
+);
+
 const MultiLanguageInput = (props: MultiLanguageInputProps) => {
 	const {
 		enabledLanguages,
@@ -269,14 +284,7 @@ const MultiLanguageInput = (props: MultiLanguageInputProps) => {
 		...textFieldProps
 	} = props;
 	const { t, i18n } = useCCLanguagesTranslations();
-	const [expanded, setExpanded] = useState(false);
-	const toggleExpanded = useCallback(() => setExpanded((prev) => !prev), []);
-
-	const incomplete =
-		!textFieldProps.disabled &&
-		!disableIncompleteMarker &&
-		enabledLanguages.map((lng) => (values[lng] ?? "").trim()).find((e) => !e) !=
-			null;
+	const classes = useStyles();
 
 	// determine default language
 	let defaultLanguage = i18n.language.split(
@@ -286,6 +294,16 @@ const MultiLanguageInput = (props: MultiLanguageInputProps) => {
 	if (ignoreI18nLocale || !enabledLanguages.includes(defaultLanguage)) {
 		defaultLanguage = enabledLanguages[0];
 	}
+
+	const [expanded, setExpanded] = useState(false); // if normal text field
+	const [activeLanguage, setActiveLanguage] = useState(defaultLanguage); // if multi line text area
+	const toggleExpanded = useCallback(() => setExpanded((prev) => !prev), []);
+
+	const incomplete =
+		!textFieldProps.disabled &&
+		!disableIncompleteMarker &&
+		enabledLanguages.map((lng) => (values[lng] ?? "").trim()).find((e) => !e) !=
+			null;
 
 	const handleChange = useCallback(
 		(evt: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -314,64 +332,103 @@ const MultiLanguageInput = (props: MultiLanguageInputProps) => {
 			.filter((e) => e)
 			.join(" ");
 
+	const handleActiveLangSelect = useCallback(
+		(evt: React.MouseEvent<HTMLSpanElement>) => {
+			setActiveLanguage(
+				evt.currentTarget.getAttribute(
+					"data-lang"
+				) as MultiLanguageInputSupportedLanguages
+			);
+		},
+		[]
+	);
+
+	const renderLanguage = (lang: MultiLanguageInputSupportedLanguages) => (
+		<TextField
+			{...textFieldProps}
+			fullWidth
+			label={
+				textFieldProps.multiline ? (
+					<span>
+						{label} -{" "}
+						{[
+							defaultLanguage,
+							...enabledLanguages.filter((lang) => lang !== defaultLanguage),
+						].map((lang) => (
+							<span key={lang}>
+								<Tooltip title={getLanguageName(lang)}>
+									<span
+										className={combineClassNames([
+											classes.langSelect,
+											activeLanguage === lang && classes.activeLang,
+										])}
+										data-lang={lang}
+										onClick={handleActiveLangSelect}
+									>
+										{lang}
+									</span>
+								</Tooltip>{" "}
+							</span>
+						))}
+					</span>
+				) : lang === defaultLanguage ? (
+					label
+				) : undefined
+			}
+			required={
+				defaultLanguage === lang && activeLanguage === defaultLanguage
+					? required
+					: undefined
+			}
+			value={values[lang] ?? ""}
+			onChange={handleChange}
+			name={`${name ?? "mli"}-${lang}`}
+			InputLabelProps={{
+				...textFieldProps.InputLabelProps,
+				shrink: textFieldProps.multiline
+					? true
+					: textFieldProps.InputLabelProps?.shrink,
+			}}
+			InputProps={{
+				startAdornment: !textFieldProps.multiline ? (
+					<InputAdornment position={"start"}>
+						<Tooltip title={getLanguageName(lang)}>
+							<Typography variant={"caption"} color={"textSecondary"}>
+								{lang}
+							</Typography>
+						</Tooltip>
+					</InputAdornment>
+				) : undefined,
+				endAdornment:
+					defaultLanguage === lang && !textFieldProps.multiline ? (
+						<InputAdornment position={"end"}>
+							<IconButton onClick={toggleExpanded}>
+								<Translate
+									color={
+										expanded ? "primary" : incomplete ? "error" : undefined
+									}
+								/>
+							</IconButton>
+						</InputAdornment>
+					) : undefined,
+			}}
+		/>
+	);
+
 	return (
 		<Grid container spacing={2} data-name={name} onBlur={onBlur}>
 			<Grid item xs={12}>
-				<TextField
-					{...textFieldProps}
-					fullWidth
-					label={label}
-					value={values[defaultLanguage] ?? ""}
-					name={`${name ?? "mli"}-${defaultLanguage}`}
-					onChange={handleChange}
-					required={required}
-					InputProps={{
-						startAdornment: expanded && (
-							<InputAdornment position={"start"}>
-								<Tooltip title={getLanguageName(defaultLanguage)}>
-									<Typography variant={"caption"} color={"textSecondary"}>
-										{defaultLanguage}
-									</Typography>
-								</Tooltip>
-							</InputAdornment>
-						),
-						endAdornment: (
-							<InputAdornment position={"end"}>
-								<IconButton onClick={toggleExpanded}>
-									<Translate
-										color={
-											expanded ? "primary" : incomplete ? "error" : undefined
-										}
-									/>
-								</IconButton>
-							</InputAdornment>
-						),
-					}}
-				/>
+				{renderLanguage(
+					textFieldProps.multiline ? activeLanguage : defaultLanguage
+				)}
 			</Grid>
 			{expanded &&
+				!textFieldProps.multiline &&
 				enabledLanguages
 					.filter((lang) => lang !== defaultLanguage)
 					.map((lang) => (
 						<Grid item xs={12} key={lang}>
-							<TextField
-								{...textFieldProps}
-								fullWidth
-								value={values[lang] ?? ""}
-								onChange={handleChange}
-								name={`${name ?? "mli"}-${lang}`}
-								InputProps={{
-									startAdornment: (
-										<InputAdornment position={"start"}>
-											<Tooltip title={getLanguageName(lang)}>
-												<Typography variant={"caption"} color={"textSecondary"}>
-													{lang}
-												</Typography>
-											</Tooltip>
-										</InputAdornment>
-									),
-								}}
-							/>
+							{renderLanguage(lang)}
 						</Grid>
 					))}
 		</Grid>
