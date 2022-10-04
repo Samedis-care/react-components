@@ -385,8 +385,8 @@ class Model<
 	 */
 	public async index(
 		params: Partial<IDataGridLoadDataParameters> | undefined
-	): Promise<[Record<string, unknown>[], ResponseMeta]> {
-		const [rawData, meta] = await this.connector.index(params, this);
+	): Promise<[Record<string, unknown>[], ResponseMeta, unknown?]> {
+		const [rawData, meta, userData] = await this.connector.index(params, this);
 		return [
 			await Promise.all(
 				rawData.map((data) =>
@@ -394,6 +394,7 @@ class Model<
 				)
 			),
 			meta,
+			userData,
 		];
 	}
 
@@ -403,8 +404,8 @@ class Model<
 	 */
 	public async index2(
 		params: ConnectorIndex2Params
-	): Promise<[Record<string, unknown>[], ResponseMeta]> {
-		const [rawData, meta] = await this.connector.index2(params, this);
+	): Promise<[Record<string, unknown>[], ResponseMeta, unknown?]> {
+		const [rawData, meta, userData] = await this.connector.index2(params, this);
 		return [
 			await Promise.all(
 				rawData.map((data) =>
@@ -412,6 +413,7 @@ class Model<
 				)
 			),
 			meta,
+			userData,
 		];
 	}
 
