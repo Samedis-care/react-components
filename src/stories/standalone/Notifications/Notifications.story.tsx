@@ -5,7 +5,8 @@ import Notifications from "../../../standalone/Notifications";
 export const NotificationsStory = (): React.ReactElement => {
 	return (
 		<Notifications
-			loadMore={action("loadMore")}
+			loadRead={action("loadRead")}
+			loadUnread={action("loadUnread")}
 			loadLatest={action("loadLatest")}
 			onOpen={action("onOpen")}
 			notifications={[

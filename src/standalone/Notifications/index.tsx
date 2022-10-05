@@ -58,11 +58,16 @@ export interface NotificationsProps {
 	/**
 	 * Properties to pass to the popover showing the notifications
 	 */
-	PopoverProps?: PopoverProps;
+	PopoverProps?: Omit<PopoverProps, "open" | "onClose" | "anchorEl">;
 	/**
 	 * Callback which is fired by the infinite scroll to load old notifications
 	 */
-	loadMore: InfiniteScrollProps["loadMoreBottom"];
+	loadRead: InfiniteScrollProps["loadMoreBottom"];
+	/**
+	 * Callback which is fired by the infinite scroll to load new (unread) notifications
+	 * Should load the oldest unread notifications
+	 */
+	loadUnread: InfiniteScrollProps["loadMoreTop"] | undefined;
 	/**
 	 * Load the latest notifications
 	 * called at refreshInterval or on page focus
@@ -82,6 +87,10 @@ export interface NotificationsProps {
 	 * The notifications to display (should be updated by loadMore)
 	 */
 	notifications: Notification[];
+	/**
+	 * Total number of unread notifications (if not provided inferred from notifications)
+	 */
+	unreadCount?: number;
 	/**
 	 * Event handler which fires when the user opens the notifications
 	 */
@@ -170,7 +179,14 @@ const Notifications = (props: NotificationsProps) => {
 	const { t } = useCCTranslations();
 
 	const [anchor, setAnchor] = useState<HTMLElement | null>(null);
-	const { onOpen, loadLatest, refreshInterval } = props;
+	const {
+		onOpen,
+		loadLatest,
+		loadRead,
+		loadUnread,
+		refreshInterval,
+		unreadCount,
+	} = props;
 
 	const onIconClick = useCallback(
 		(evt: React.MouseEvent<HTMLButtonElement>) => {
@@ -214,7 +230,9 @@ const Notifications = (props: NotificationsProps) => {
 		<>
 			<IconButton onClick={onIconClick}>
 				<Badge
-					badgeContent={notifications.filter((not) => !not.read).length}
+					badgeContent={
+						unreadCount ?? notifications.filter((not) => !not.read).length
+					}
 					max={99}
 					color={"error"}
 					{...props.BadgeProps}
@@ -243,7 +261,8 @@ const Notifications = (props: NotificationsProps) => {
 						<Grid item xs={12}>
 							<InfiniteScroll
 								className={classes.notificationArea}
-								loadMoreBottom={props.loadMore}
+								loadMoreBottom={loadRead}
+								loadMoreTop={loadUnread}
 							>
 								{notifications.map((notification) => (
 									<Renderer key={notification.id} {...notification} />
