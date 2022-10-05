@@ -4,6 +4,9 @@
 			"week": "Woche",
 			"today": "Heute"
 		},
+		"notifications": {
+			"title": "Benachrichtigungen"
+		},
 		"how-it-works": {
 			"title": "Wie es funktioniert"
 		},
@@ -268,6 +271,17 @@
 		"validation": {
 			"required": "Das Feld {{attribute}} ist erforderlich",
 			"email": "Das Feld {{attribute}} erfordert eine gültige E-Mail-Adresse"
+		},
+		"timestampToAge": {
+			"just-now": "gerade jetzt",
+			"less-minute": "Vor weniger als einer Minute",
+			"minute": "Minute",
+			"minutes": "Minuten",
+			"hour": "Stunde",
+			"hours": "Stunden",
+			"day": "Tag",
+			"days": "Tage",
+			"str": "Vor {{AMOUNT}} {{UNIT}}"
 		}
 	},
 	"common": {
@@ -287,7 +301,7 @@
 			"error-title": "Ein Fehler ist aufgetreten",
 			"validation-error-title": "Ungültiges Formular",
 			"info": "Info",
-			"are-you-sure": "Bist Du sicher?",
+			"are-you-sure": "Bist du sicher?",
 			"are-you-sure-submit": "Fortfahren?"
 		}
 	}
