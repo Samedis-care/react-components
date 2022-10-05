@@ -6,6 +6,7 @@ type FilterType =
 	| "number"
 	| "currency"
 	| "date"
+	| "datetime"
 	| "boolean"
 	| "enum"
 	| null;

@@ -8,7 +8,7 @@ import i18n from "../../../i18n";
 /**
  * Type for nullable dates
  */
-abstract class TypeDateNullable implements Type<Date | null> {
+abstract class TypeDateTimeNullable implements Type<Date | null> {
 	protected error = "";
 
 	abstract render(params: ModelRenderParams<Date | null>): React.ReactElement;
@@ -18,7 +18,7 @@ abstract class TypeDateNullable implements Type<Date | null> {
 	}
 
 	getFilterType(): FilterType {
-		return "date";
+		return "datetime";
 	}
 
 	getDefaultValue(): Date | null {
@@ -27,7 +27,7 @@ abstract class TypeDateNullable implements Type<Date | null> {
 
 	stringify(value: Date | null): string {
 		return value
-			? value.toLocaleDateString(i18n.language)
+			? value.toLocaleString(i18n.language)
 			: ccI18n.t("backend-integration.model.types.date-nullable.not-set");
 	}
 
@@ -42,4 +42,4 @@ abstract class TypeDateNullable implements Type<Date | null> {
 	};
 }
 
-export default TypeDateNullable;
+export default TypeDateTimeNullable;

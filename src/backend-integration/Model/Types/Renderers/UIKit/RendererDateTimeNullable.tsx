@@ -1,15 +1,15 @@
 import React from "react";
 import { FormHelperText, Typography } from "@material-ui/core";
 import { ModelRenderParams } from "../../../index";
-import TypeDateNullable from "../../TypeDateNullable";
 import ccI18n from "../../../../../i18n";
 import { DateTimeInput } from "../../../../../standalone";
 import i18n from "../../../../../i18n";
+import TypeDateTimeNullable from "../../TypeDateTimeNullable";
 
 /**
  * Renders Date with Date Selector
  */
-class RendererDateTimeNullable extends TypeDateNullable {
+class RendererDateTimeNullable extends TypeDateTimeNullable {
 	render(params: ModelRenderParams<Date | null>): React.ReactElement {
 		const {
 			visibility,

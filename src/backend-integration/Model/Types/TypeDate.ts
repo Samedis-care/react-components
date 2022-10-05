@@ -28,7 +28,7 @@ abstract class TypeDate implements Type<Date> {
 	}
 
 	stringify(value: Date): string {
-		return value.toLocaleString(i18n.language);
+		return value.toLocaleDateString(i18n.language);
 	}
 
 	serialize = (value: Date): unknown => {

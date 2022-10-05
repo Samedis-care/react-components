@@ -22,10 +22,13 @@ import {
 	useDataGridProps,
 	useDataGridStyles,
 } from "../DataGrid";
-import { LocalizedKeyboardDatePicker } from "../../LocalizedDateTimePickers";
+import {
+	LocalizedDateTimePicker,
+	LocalizedKeyboardDatePicker,
+} from "../../LocalizedDateTimePickers";
 import { DateType } from "@date-io/type";
 import useCCTranslations from "../../../utils/useCCTranslations";
-import localDateToUtcDate from "../../../utils/localDateToUtcDate";
+import { normalizeDate } from "../../../backend-integration/Model/Types/Utils/DateUtils";
 
 export type FilterType =
 	| "contains"
@@ -172,7 +175,7 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 			subFilterComboType = "and";
 			subFilter = undefined;
 		} else if (date.isValid()) {
-			filterValue = localDateToUtcDate(date.toDate()).toISOString();
+			filterValue = normalizeDate(date.toDate()).toISOString();
 		}
 		updateParent();
 	};
@@ -222,7 +225,7 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 		updateParent();
 	};
 	const onFilterValue2ChangeDate = (date: DateType | null) => {
-		filterValue2 = date ? localDateToUtcDate(date.toDate()).toISOString() : "";
+		filterValue2 = date ? normalizeDate(date.toDate()).toISOString() : "";
 		updateParent();
 	};
 	const onSubFilterTypeChange = (value: FilterComboType) => {
@@ -307,7 +310,7 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 				</MenuItem>
 			)
 		);
-	} else if (props.valueType === "date") {
+	} else if (props.valueType === "date" || props.valueType === "datetime") {
 		filterTypeMenuItems.push(
 			checkSupport(props.valueType, "lessThan") && (
 				<MenuItem key={"lessThan"} value={"lessThan"}>
@@ -365,7 +368,8 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 			)}
 			{(props.valueType === "string" ||
 				props.valueType === "number" ||
-				props.valueType === "date") && (
+				props.valueType === "date" ||
+				props.valueType === "datetime") && (
 				<>
 					<Grid item xs={12}>
 						<Select onChange={onFilterTypeChange} value={filterType} fullWidth>
@@ -376,6 +380,12 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 						<Grid item xs={12}>
 							{props.valueType === "date" ? (
 								<LocalizedKeyboardDatePicker
+									value={filterValue === "" ? null : filterValue}
+									onChange={onFilterValueChangeDate}
+									fullWidth
+								/>
+							) : props.valueType === "datetime" ? (
+								<LocalizedDateTimePicker
 									value={filterValue === "" ? null : filterValue}
 									onChange={onFilterValueChangeDate}
 									fullWidth
@@ -395,6 +405,12 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 								<LocalizedKeyboardDatePicker
 									value={filterValue2 === "" ? null : filterValue2}
 									onChange={onFilterValue2ChangeDate}
+									fullWidth
+								/>
+							) : props.valueType === "datetime" ? (
+								<LocalizedDateTimePicker
+									value={filterValue === "" ? null : filterValue}
+									onChange={onFilterValueChangeDate}
 									fullWidth
 								/>
 							) : (
