@@ -7,10 +7,6 @@ import { combineClassNames } from "../../utils";
 
 const useClasses = makeStyles(
 	(theme) => ({
-		root: {
-			margin: 0,
-			padding: theme.spacing(2),
-		},
 		noTitle: {
 			padding: theme.spacing(1),
 			position: "absolute",
@@ -50,7 +46,7 @@ const DialogTitleRaw = (props: DialogTitleProps) => {
 		<MuiDialogTitle
 			id={id}
 			disableTypography
-			className={combineClassNames([classes.root, noTitle && classes.noTitle])}
+			className={combineClassNames([noTitle && classes.noTitle])}
 		>
 			<Grid container wrap={"nowrap"}>
 				<Grid item className={classes.textWrapper}>
