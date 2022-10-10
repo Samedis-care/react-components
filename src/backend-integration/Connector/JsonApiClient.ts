@@ -50,6 +50,14 @@ export type ResponseProcessor = (
 ) => Promise<unknown> | unknown;
 
 /**
+ * Hook for exception handling (can be used to report to e.g. Sentry)
+ * @param error The error which has happened
+ * @remarks This cannot be used to handle errors generically! Also treat these errors as unhandled
+ */
+export type ExceptionHook = (error: Error) => void;
+
+// noinspection ExceptionCaughtLocallyJS
+/**
  * A helper class to connect to JSON REST apis
  */
 class JsonApiClient {
@@ -57,17 +65,20 @@ class JsonApiClient {
 	handleResponse: ResponseProcessor;
 	handlePreRequest?: RequestHook;
 	handlePostRequest?: RequestHook;
+	exceptionHook?: ExceptionHook;
 
 	constructor(
 		authHandler: AuthenticationHandlerCallback,
 		responseProcessor: ResponseProcessor,
 		preRequestHook?: RequestHook,
-		postRequestHook?: RequestHook
+		postRequestHook?: RequestHook,
+		exceptionHook?: ExceptionHook
 	) {
 		this.handleAuthentication = authHandler;
 		this.handleResponse = responseProcessor;
 		this.handlePreRequest = preRequestHook;
 		this.handlePostRequest = postRequestHook;
+		this.exceptionHook = exceptionHook;
 	}
 
 	/**
@@ -240,6 +251,11 @@ class JsonApiClient {
 				body,
 				auth
 			)) as T;
+		} catch (e) {
+			if (this.exceptionHook) {
+				this.exceptionHook(e as Error);
+			}
+			throw e;
 		} finally {
 			if (this.handlePostRequest) {
 				void (await this.handlePostRequest(method, url, args, body, auth));
