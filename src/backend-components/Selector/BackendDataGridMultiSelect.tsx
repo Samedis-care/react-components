@@ -103,20 +103,20 @@ const BackendDataGridMultiSelect = <
 				loadData={async (
 					params: IDataGridLoadDataParameters
 				): Promise<DataGridData> => {
-					const [
-						relationshipRecordsFiltered,
-						relationshipRecordFilteredMeta,
-					] = await model.index({
-						...params,
-						fieldFilter: {
-							...params.fieldFilter,
-							id: {
-								type: "inSet",
-								value1: selected.join(","),
-								value2: "",
-							},
-						},
-					});
+					const [relationshipRecordsFiltered, relationshipRecordFilteredMeta] =
+						selected.length > 0
+							? await model.index({
+									...params,
+									fieldFilter: {
+										...params.fieldFilter,
+										id: {
+											type: "inSet",
+											value1: selected.join(","),
+											value2: "",
+										},
+									},
+							  })
+							: [[], { totalRows: 0 }];
 					const relationshipRecordFilteredCount =
 						relationshipRecordFilteredMeta.filteredRows ??
 						relationshipRecordFilteredMeta.totalRows;
