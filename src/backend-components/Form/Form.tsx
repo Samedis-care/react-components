@@ -1001,7 +1001,8 @@ const Form = <
 					(model as unknown) as Model<ModelFieldName, PageVisibility, unknown>
 				);
 			}
-			return submitForm();
+			await submitForm();
+			parentFormContext.setCustomFieldDirty(nestedFormName, false);
 		};
 
 		if (!disableNestedSubmit) {
@@ -1026,6 +1027,7 @@ const Form = <
 		parentFormContext?.setCustomValidationHandler,
 		parentFormContext?.onlyValidateMounted,
 		parentFormContext?.onlySubmitMounted,
+		parentFormContext?.setCustomFieldDirty,
 		validateForm,
 		disableValidation,
 		nestedFormPreSubmitHandler,
