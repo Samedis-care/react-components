@@ -28,7 +28,7 @@ const IntegerInputField = (
 	const { i18n } = useCCTranslations();
 	const { value, onChange, ...muiProps } = props;
 	const valueFormatted =
-		value !== null ? value.toLocaleString(i18n.language) : "";
+		value != null ? value.toLocaleString(i18n.language) : "";
 	const { handleCursorChange, cursorInputRef } = useInputCursorFix(
 		valueFormatted
 	);
