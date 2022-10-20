@@ -41,7 +41,7 @@ export const getValueByDot = (
 	const fieldParts = field.split(".");
 	let value: unknown = data;
 	for (let i = 0; i < fieldParts.length; ++i) {
-		if (typeof value !== "object") return undefined;
+		if (typeof value !== "object" || value == null) return undefined;
 		value = (value as Record<string, unknown>)[fieldParts[i]];
 	}
 	return value;
