@@ -4,6 +4,13 @@ import FilterType from "./FilterType";
 import { EnumValue } from "./Types/TypeEnum";
 import { IDataGridColumnDef } from "../../standalone/DataGrid/DataGrid";
 
+export interface TypeSettings {
+	/**
+	 * Additional field changes which cause re-render
+	 */
+	updateHooks?: string[];
+}
+
 interface Type<T> {
 	/**
 	 * Validates the given value
@@ -60,6 +67,11 @@ interface Type<T> {
 	dataGridColumnSizingHint?:
 		| IDataGridColumnDef["width"]
 		| (() => IDataGridColumnDef["width"]);
+
+	/**
+	 * Renderer settings
+	 */
+	settings?: TypeSettings;
 }
 
 export default Type;

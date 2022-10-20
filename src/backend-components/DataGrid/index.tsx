@@ -134,6 +134,7 @@ export const renderDataGridRecordUsingModel = <
 									setFieldTouched: () => {
 										throw new Error("Not implemented in Grid");
 									},
+									values: entry,
 							  })
 							: null,
 					],

@@ -64,6 +64,11 @@ interface RenderParams<T> {
 	 * The reference model from the model field definition
 	 */
 	relationModel?: Model<ModelFieldName, PageVisibility, unknown>;
+	/**
+	 * Record values
+	 * @remarks Not always updated! Configure TypeSettings.updateHooks for your type
+	 */
+	values: Record<string, unknown>;
 }
 
 export default RenderParams;

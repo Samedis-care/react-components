@@ -103,6 +103,12 @@ const Field = (props: FieldProps): React.ReactElement => {
 		values
 	);
 
+	const cacheKey = useMemo(
+		() => new Object(),
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		fieldDef.type.settings?.updateHooks ?? []
+	);
+
 	return useMemo(
 		() =>
 			type.render({
@@ -119,7 +125,10 @@ const Field = (props: FieldProps): React.ReactElement => {
 				setFieldTouched,
 				relationModel,
 				relationData,
+				values,
 			}),
+		// do not update every time values change
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[
 			value,
 			name,
@@ -136,6 +145,7 @@ const Field = (props: FieldProps): React.ReactElement => {
 			relationModel,
 			relationData,
 			readOnly,
+			cacheKey, // check for important values changes
 		]
 	);
 };

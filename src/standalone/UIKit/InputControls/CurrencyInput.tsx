@@ -1,9 +1,9 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { TextFieldProps } from "@material-ui/core";
 import TextFieldWithHelp, {
 	TextFieldWithHelpProps,
 } from "../TextFieldWithHelp";
-import { parseLocalizedNumber, useInputCursorFix } from "../../../utils";
+import { parseLocalizedNumber } from "../../../utils";
 import useCCTranslations from "../../../utils/useCCTranslations";
 
 export interface CurrencyInputProps extends TextFieldWithHelpProps {
@@ -29,29 +29,53 @@ export interface CurrencyInputProps extends TextFieldWithHelpProps {
 const CurrencyInput = (
 	props: CurrencyInputProps & Omit<TextFieldProps, "onChange" | "value">
 ) => {
-	const { value, onChange, currency, ...muiProps } = props;
+	const { value, onChange, onBlur, currency, ...muiProps } = props;
 	const { i18n } = useCCTranslations();
-	const valueFormatted =
-		value !== null
-			? value.toLocaleString(i18n.language, {
-					currency,
-					minimumFractionDigits: 2,
-					maximumFractionDigits: 2,
-			  })
-			: "";
-	const { handleCursorChange, cursorInputRef } = useInputCursorFix(
-		valueFormatted
+	const formatNumber = useCallback(
+		(value: number | null) =>
+			value != null
+				? value.toLocaleString(i18n.language, {
+						style: "currency",
+						currency,
+				  })
+				: "",
+		[currency, i18n.language]
 	);
+	const valueFormatted = formatNumber(value);
+	const [valueInternal, setValueInternal] = useState(valueFormatted);
+	useEffect(() => setValueInternal(formatNumber(value)), [formatNumber, value]);
+	const [lastChangeEvent, setLastChangeEvent] = useState<React.ChangeEvent<
+		HTMLTextAreaElement | HTMLInputElement
+	> | null>(null);
+	const [error, setError] = useState(false);
 
 	// on change handling
 	const handleChange = useCallback(
 		(event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
-			handleCursorChange(event);
 			if (!onChange) return;
-
-			onChange(event, parseLocalizedNumber(event.target.value));
+			setValueInternal(event.target.value);
+			event.persist();
+			setLastChangeEvent(event);
 		},
-		[onChange, handleCursorChange]
+		[onChange]
+	);
+
+	const handleBlur = useCallback(
+		(evt: React.FocusEvent<HTMLTextAreaElement | HTMLInputElement>) => {
+			if (onBlur) onBlur(evt);
+			if (lastChangeEvent) {
+				const value = parseLocalizedNumber(valueInternal);
+				if (value != null && isNaN(value)) {
+					setError(true);
+				} else if (onChange) {
+					setError(false);
+					const formatted = formatNumber(value);
+					// we parse here so decimal points are limited and view always matches data
+					onChange(lastChangeEvent, parseLocalizedNumber(formatted));
+				}
+			}
+		},
+		[formatNumber, lastChangeEvent, onBlur, onChange, valueInternal]
 	);
 
 	// component rendering
@@ -59,12 +83,10 @@ const CurrencyInput = (
 		<div>
 			<TextFieldWithHelp
 				{...muiProps}
-				value={valueFormatted}
+				value={valueInternal}
 				onChange={handleChange}
-				inputProps={{
-					...muiProps.inputProps,
-					ref: cursorInputRef,
-				}}
+				onBlur={handleBlur}
+				error={error || muiProps.error}
 			/>
 		</div>
 	);
