@@ -22,6 +22,7 @@ import Loader from "../../standalone/Loader";
 import {
 	deepAssign,
 	deepClone,
+	dotInObject,
 	dotSet,
 	dotToObject,
 	getValueByDot,
@@ -756,7 +757,7 @@ const Form = <
 			.filter(([, touched]) => !touched)
 			.map(([field]) => field);
 		untouchedFields
-			.filter((field) => field in serverRecord)
+			.filter((field) => dotInObject(field, serverRecord))
 			.forEach((field) => {
 				deepAssign(
 					newValues,

@@ -47,6 +47,19 @@ export const getValueByDot = (
 	return value;
 };
 
+export const dotInObject = (
+	field: string,
+	data: Record<string, unknown>
+): boolean => {
+	const fieldParts = field.split(".");
+	let value: unknown = data;
+	for (let i = 0; i < fieldParts.length; ++i) {
+		if (typeof value !== "object" || value == null) return false;
+		value = (value as Record<string, unknown>)[fieldParts[i]];
+	}
+	return true;
+};
+
 export const objectToDots = (
 	obj: Record<string, unknown>
 ): Record<string, unknown> => {
