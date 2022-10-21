@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useContext, useState } from "react";
 import { IDataGridExporter } from "./index";
 import {
 	CircularProgress,
@@ -18,6 +18,7 @@ import {
 	useDataGridProps,
 	useDataGridState,
 } from "../DataGrid";
+import { DialogContext } from "../../../framework";
 
 export interface IDataGridExportMenuEntryProps {
 	/**
@@ -39,12 +40,18 @@ const ExportMenuEntry = React.forwardRef(
 		const { getAdditionalFilters, columns, onError } = useDataGridProps();
 		const [columnsState] = useDataGridColumnState();
 		const [state] = useDataGridState();
+		const [pushDialog] = useContext(DialogContext) ?? [];
 
 		const [status, setStatus] = useState(DataGridExportStatus.Idle);
 		const [exportData, setExportData] = useState<unknown>(undefined);
 		const IdleIcon = props.exporter.icon || ExportIcon;
-		const { onRequest, onDownload } = props.exporter;
+		const { onRequest, onDownload, autoDownload } = props.exporter;
 		const { search, customData, lockedColumns, hiddenColumns } = state;
+
+		const finishExport = useCallback(() => {
+			onDownload(exportData, pushDialog);
+			setStatus(DataGridExportStatus.Idle);
+		}, [onDownload, setStatus, exportData, pushDialog]);
 
 		const startExport = useCallback(async () => {
 			setStatus(DataGridExportStatus.Working);
@@ -61,6 +68,7 @@ const ExportMenuEntry = React.forwardRef(
 				);
 				setExportData(data);
 				setStatus(DataGridExportStatus.Ready);
+				if (autoDownload) finishExport();
 			} catch (e) {
 				// eslint-disable-next-line no-console
 				console.error("[Components-Care] DataGrid Export failed", e);
@@ -78,12 +86,9 @@ const ExportMenuEntry = React.forwardRef(
 			hiddenColumns,
 			lockedColumns,
 			onError,
+			autoDownload,
+			finishExport,
 		]);
-
-		const finishExport = useCallback(() => {
-			onDownload(exportData);
-			setStatus(DataGridExportStatus.Idle);
-		}, [onDownload, setStatus, exportData]);
 
 		const cancelExport = useCallback(() => {
 			setStatus(DataGridExportStatus.Idle);

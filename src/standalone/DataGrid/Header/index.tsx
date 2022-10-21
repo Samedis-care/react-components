@@ -10,6 +10,7 @@ import {
 	IDataGridFieldFilter,
 } from "../DataGrid";
 import { SvgIconComponent } from "@material-ui/icons";
+import { DialogContextType } from "../../../framework";
 
 export interface IDataGridHeaderProps {
 	/**
@@ -78,8 +79,16 @@ export interface IDataGridExporter<T> {
 	/**
 	 * Frontend handler to download data based off metadata supplied by backend
 	 * @param data The data returned by backend
+	 * @param pushDialog function to push react dialogs (only available if DataGrid has CC dialog context)
 	 */
-	onDownload: (data: T) => void;
+	onDownload: (
+		data: T,
+		pushDialog?: DialogContextType[0] | null | undefined
+	) => void;
+	/**
+	 * Automatically call onDownload when ready (this is considered non-interactive and may come with limitations for e.g. opening popups)
+	 */
+	autoDownload?: boolean;
 }
 
 const Header = () => {
