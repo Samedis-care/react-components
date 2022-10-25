@@ -7,7 +7,7 @@ const fileToData = async (file: File, includeName = false): Promise<string> => {
 	// file -> data url
 	const reader = new FileReader();
 	return new Promise((resolve, reject) => {
-		reader.addEventListener("loadend", () => {
+		reader.addEventListener("load", () => {
 			const dataUri = reader.result as string;
 			resolve(
 				includeName
