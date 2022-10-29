@@ -106,7 +106,9 @@ const Field = (props: FieldProps): React.ReactElement => {
 	const cacheKey = useMemo(
 		() => new Object(),
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-		fieldDef.type.settings?.updateHooks ?? []
+		(fieldDef.type.settings?.updateHooks ?? []).map((key) =>
+			getValueByDot(key, values)
+		)
 	);
 
 	return useMemo(

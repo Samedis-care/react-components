@@ -9,7 +9,7 @@ import {
 	SingleSelect,
 } from "../../../../standalone/Selector";
 
-type RendererEnumSelectProps = Omit<
+export type RendererEnumSelectProps = Omit<
 	BaseSelectorProps<BaseSelectorData>,
 	"selected" | "onLoad" | "onSelect" | "disabled"
 >;
