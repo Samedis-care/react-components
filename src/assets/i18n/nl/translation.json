@@ -1,1 +1,308 @@
-{}
+{
+	"standalone": {
+		"schedule": {
+			"week": "Week",
+			"today": "Vandaag"
+		},
+		"notifications": {
+			"title": "Meldingen"
+		},
+		"how-it-works": {
+			"title": "Hoe werkt het"
+		},
+		"data-grid": {
+			"content": {
+				"filter": "Filter",
+				"reset-column-filter": "Filter wissen",
+				"bool-filter": {
+					"true": "Alle waarheidswaarden",
+					"false": "Alle valse waarden",
+					"any": "Elke waarde"
+				},
+				"set-filter": {
+					"search": "Zoeken...",
+					"select-all": "Selecteer alles"
+				},
+				"filter-type": {
+					"eq": "Gelijk aan",
+					"not-eq": "Niet gelijk aan",
+					"empty": "Is leeg",
+					"not-empty": "Is niet leeg",
+					"contains": "Bevat",
+					"not-contains": "Bevat niet",
+					"starts-with": "Begint met",
+					"ends-with": "Eindigt met",
+					"lt": "Minder dan",
+					"lte": "Minder dan of gelijk aan",
+					"gt": "Groter dan",
+					"gte": "Groter dan of gelijk aan",
+					"in-range": "Binnen bereik",
+					"lt-date": "Voor",
+					"lte-date": "Voor of op",
+					"gt-date": "Na",
+					"gte-date": "Op of na",
+					"in-range-date": "Tussen"
+				},
+				"no-data": "De lijst bevat geen data."
+			},
+			"header": {
+				"new": "Nieuw",
+				"export": "Export",
+				"import": "Import",
+				"settings": "Instellingen",
+				"reset": "Resetten",
+				"custom-filter-button": "Filter",
+				"delete": "Verwijderen",
+				"edit": "Bewerken",
+				"reset-options": {
+					"refresh": "Vernieuwen",
+					"filter": "Filter resetten",
+					"sort": "Sorteerinstellingen resetten",
+					"column": "Kolominstellingen resetten",
+					"width": "Kolombreedten resetten",
+					"all": "Alles resetten"
+				}
+			},
+			"settings": {
+				"column": "Kolom",
+				"show": "Zichtbaar",
+				"pin": "Pin",
+				"close": "Sluiten"
+			},
+			"custom-filters": {
+				"title": "Filterselectie"
+			},
+			"footer": {
+				"total": "Totaal:",
+				"filtered": "Gefilterd:",
+				"edit": "Bewerken",
+				"delete": "Verwijderen",
+				"more": "Meer",
+				"select-all": "Alles",
+				"first-page": "Eerste pagina",
+				"last-page": "Laatste pagina",
+				"next-page": "Volgende pagina",
+				"page-of": "van",
+				"page-size": "Pagina grootte:",
+				"page-size-tooltip": "Aantal records per pagina",
+				"prev-page": "Vorige pagina"
+			}
+		},
+		"selector": {
+			"add-new": "Toevoegen",
+			"base-selector": {
+				"no-options-text": "Geen opties",
+				"close-icon-text": "Sluiten",
+				"open-icon-text": "Openen",
+				"clear-icon-text": "Wissen",
+				"loading-text": "Laadt...",
+				"start-typing-to-search-text": "Voer een zoekreeks in om resultaten te krijgen",
+				"lru-label": "Laatst recent gebruikt"
+			}
+		},
+		"file-upload": {
+			"upload": "Uploaden",
+			"upload-modern": "Sleep het bestand hierheen of klik voor een uploadvenster",
+			"no-files": "Geen bijlagen beschikbaar",
+			"formats": "Bestandsindelingen",
+			"formats-modern": "Toegestane bestandsformaten:",
+			"error": {
+				"too-many": "Te veel bestanden geselecteerd",
+				"limit-reached": "Maximaal aantal toegestane bestanden",
+				"invalid-type": "Niet-ondersteund bestandstype geselecteerd"
+			},
+			"format": {
+				"any": "Elk",
+				"image": "Afbeeldingen"
+			},
+			"multi-image": {
+				"edit": "Bewerken",
+				"primary": "Primair"
+			}
+		},
+		"phone-number": {
+			"invalid": "Voer het juiste telefoonnummer in"
+		},
+		"signature-pad": {
+			"dialog": {
+				"reset": "Resetten",
+				"save-changes": "Wijzigingen opslaan",
+				"title": "Teken Hier"
+			},
+			"sign-here": "Digitaal ondertekend hier"
+		}
+	},
+	"framework": {
+		"dialogs": {
+			"navblock": "Navigatie is geblokkeerd. Sluit eerst jouw geopende dialoogvensters."
+		}
+	},
+	"non-standalone": {
+		"dialog": {
+			"okay": "Oke"
+		},
+		"language-switcher": {
+			"title": "Selecteer uw land en taal",
+			"no-locales": "Geen enkele locatie komt overeen met uw zoekopdracht"
+		}
+	},
+	"backend-integration": {
+		"connector": {
+			"json-api-client": {
+				"network-error": "Er is een netwerkfout opgetreden.",
+				"parse-error": "Parseerreactie mislukt (ongeldige JSON). Server heeft status {{STATUS_CODE}} {{STATUS_TEXT}} geretourneerd."
+			}
+		},
+		"model": {
+			"types": {
+				"renderers": {
+					"boolean": {
+						"true": "Ja",
+						"false": "Nee"
+					},
+					"date": {
+						"labels": {
+							"invalid": "Ongeldig",
+							"cancel": "Annuleren",
+							"clear": "Wissen",
+							"ok": "OK",
+							"today": "Vandaag",
+							"invalid-date": "ongeldige datum",
+							"max-date": "Datum mag niet na de maximale datum vallen",
+							"min-date": "Datum mag niet voor de minimale datum vallen"
+						},
+						"not-set": "Datum niet ingesteld",
+						"validation-error": "Gelieve een correcte datum in te voeren"
+					},
+					"enum": {
+						"unknown": "Unknown"
+					},
+					"image": {
+						"not-set": "Geen afbeelding aanwezig"
+					},
+					"signature": {
+						"not-set": "Niet ondertekend"
+					},
+					"files": {
+						"no-file": "Geen bestanden aanwezig"
+					}
+				},
+				"date-nullable": {
+					"not-set": "Nvt"
+				},
+				"image": {
+					"not-set": "Afbeelding niet aanwezig",
+					"set": "Afbeelding aanwezig"
+				},
+				"boolean": {
+					"true": "Ja",
+					"false": "Nee"
+				}
+			}
+		}
+	},
+	"backend-components": {
+		"data-grid": {
+			"delete": {
+				"confirm-dialog": {
+					"title": "Verwijderen",
+					"message": "Wilt u echt {{NUM}} items verwijderen?",
+					"messageInverted": "Wilt u echt alles verwijderen, behalve {{NUM}} items?",
+					"buttons": {
+						"yes": "Ja",
+						"no": "Nee"
+					}
+				},
+				"error-dialog": {
+					"title": "Error",
+					"message": "Kan de geselecteerde items niet verwijderen: {{ERROR}}",
+					"buttons": {
+						"okay": "Oke"
+					}
+				}
+			}
+		},
+		"form": {
+			"back-on-dirty": {
+				"title": "Formulierpagina verlaten?",
+				"message": "Wijzigingen gaan verloren",
+				"yes": "Ja",
+				"no": "Nee"
+			}
+		},
+		"selector": {
+			"loading": "Laadt...",
+			"loading-error": "Fout bij het ophalen van gegevens"
+		},
+		"crud": {
+			"import": {
+				"step1": "Gegevens uploaden",
+				"step2": "Gegevens verbinden",
+				"step3": "Validatie & Beoordeling",
+				"step4": "Data importeren",
+				"source_fields": "Bronvelden",
+				"source_field": "Veld",
+				"source_field_type": "Gegevenstypen",
+				"destination_fields": "Bestemmingsvelden",
+				"conv_script": "Conversiescript (JavaScript)",
+				"error": "Error",
+				"valid": "Valide",
+				"queue": "In wachtrij: {{COUNT}}",
+				"success": "Succes: {{COUNT}}",
+				"failed": "Mislukt: {{COUNT}}",
+				"last_error": "Laatste error",
+				"errors": {
+					"file_select": "Ongeldig bestand geselecteerd",
+					"update-key-not-uniq": "{{UPDATE_KEY}} is niet uniek in importdataset"
+				},
+				"validations": {
+					"string": "Resultaat moet een string of nul zijn",
+					"number": "Resultaat moet een getal of null zijn",
+					"currency_unsupported": "Valuta kan nog niet worden geïmporteerd",
+					"date": "Het resultaat moet een Datum of null zijn",
+					"boolean": "Het resultaat moet een boolean of null zijn",
+					"fail": "Validatie mislukt: {{REASON}}. Zie browserconsole voor details.",
+					"unknown": "Unknown"
+				}
+			}
+		}
+	},
+	"utils": {
+		"validation": {
+			"required": "Het veld {{attribuut}} is verplicht",
+			"email": "Voor het veld {{attribute}} is een geldig e-mailadres vereist"
+		},
+		"timestampToAge": {
+			"just-now": "net nu",
+			"less-minute": "Minder dan een minuut geleden",
+			"minute": "minuut",
+			"minutes": "minuten",
+			"hour": "uur",
+			"hours": "uren",
+			"day": "dag",
+			"days": "dagen",
+			"str": "{{AMOUNT}} {{UNIT}} geleden"
+		}
+	},
+	"common": {
+		"buttons": {
+			"save": "Opslaan",
+			"back": "Terug",
+			"ok": "Oke",
+			"next": "Volgende",
+			"cancel": "Annuleren",
+			"finish": "Eindigen",
+			"choose": "Kiezen",
+			"yes": "Ja",
+			"no": "Nee",
+			"reset-filters": "Alle filters resetten"
+		},
+		"dialogs": {
+			"error-title": "Er is een fout opgetreden",
+			"validation-error-title": "Ongeldig formulier",
+			"info": "Info",
+			"are-you-sure": "Weet je het zeker?",
+			"are-you-sure-submit": "Doorgaan?"
+		}
+	}
+}
