@@ -1067,6 +1067,7 @@ const DataGrid = (props: DataGridProps) => {
 		selectedRows,
 		selectionUpdatedByProps,
 	} = state;
+	const lastRefreshData = useRef<number>(0);
 	const activeCustomFiltersPack = useState(0);
 
 	const gridRoot = useRef<HTMLDivElement>();
@@ -1120,7 +1121,15 @@ const DataGrid = (props: DataGridProps) => {
 
 	// refresh data if desired
 	useEffect(() => {
-		if (refreshData !== 1) return;
+		// we have an issue with a rare stuck loading bug. my assumption is that
+		// React batches state updates and refreshData turns from 0 to 2 instantly
+		// this causes a permanent loading screen because 1 is skipped
+		const skippedFirstRefresh =
+			lastRefreshData.current === 0 && refreshData === 2;
+		lastRefreshData.current = refreshData;
+		if (refreshData !== 1 && !skippedFirstRefresh) {
+			return;
+		}
 
 		const [sorts, fieldFilter] = dataGridPrepareFiltersAndSorts(columnsState);
 
