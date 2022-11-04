@@ -1,19 +1,32 @@
 import React from "react";
 import { FormControl, FormHelperText, Typography } from "@material-ui/core";
 import { ModelRenderParams } from "../../../index";
-import TypeEnumMulti from "../TypeEnumMulti";
+import TypeEnumMulti, { AdvancedMultiEnumValue } from "../TypeEnumMulti";
 import ccI18n from "../../../../i18n";
-import { EnumValue } from "../TypeEnum";
-import { BaseSelectorData } from "../../../../standalone";
-import { AdvancedEnumValue } from "./RendererEnumSelect";
+import {
+	BaseSelectorData,
+	MultiSelectorData,
+	MultiSelectProps,
+} from "../../../../standalone";
 import MultiSelect from "../../../../standalone/Selector/MultiSelect";
 
+export type RendererEnumMultiSelectProps = Omit<
+	MultiSelectProps<MultiSelectorData>,
+	"label" | "selected" | "onLoad" | "onSelect" | "disabled"
+>;
+
 /**
- * Renders TypeEnumMulti as checkboxes
+ * Renders TypeEnumMulti as selector
  */
 class RendererEnumMultiSelect extends TypeEnumMulti {
-	constructor(values: EnumValue[]) {
+	props?: RendererEnumMultiSelectProps;
+
+	constructor(
+		values: AdvancedMultiEnumValue[],
+		props?: RendererEnumMultiSelectProps
+	) {
 		super(values);
+		this.props = props;
 	}
 
 	render(params: ModelRenderParams<string[]>): React.ReactElement {
@@ -42,7 +55,7 @@ class RendererEnumMultiSelect extends TypeEnumMulti {
 		if (visibility.editable) {
 			if (visibility.grid) throw new Error("Not supported");
 
-			const data: BaseSelectorData[] = (this.values as AdvancedEnumValue[])
+			const data: BaseSelectorData[] = this.values
 				.filter((entry) => !entry.invisible)
 				.map((entry) => ({
 					...entry,
@@ -75,6 +88,7 @@ class RendererEnumMultiSelect extends TypeEnumMulti {
 							)
 						}
 						disabled={visibility.readOnly}
+						{...this.props}
 					/>
 					<FormHelperText>{errorMsg}</FormHelperText>
 				</FormControl>

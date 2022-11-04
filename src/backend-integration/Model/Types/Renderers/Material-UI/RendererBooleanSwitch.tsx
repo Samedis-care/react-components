@@ -4,22 +4,35 @@ import {
 	FormControlLabel,
 	FormHelperText,
 	Switch,
+	SwitchProps,
 	Typography,
 } from "@material-ui/core";
 import { ModelRenderParams } from "../../../index";
 import TypeBoolean from "../../TypeBoolean";
 import ccI18n from "../../../../../i18n";
 
+export interface ModelDataTypeBooleanSwitchRendererMUIProps {
+	switchProps: Omit<
+		SwitchProps,
+		"name" | "checked" | "disabled" | "onChange" | "onBlur"
+	>;
+}
+
 /**
  * Renders a TypeBoolean field as Switch
  */
 class RendererBooleanSwitch extends TypeBoolean {
 	invert?: boolean;
+	props?: ModelDataTypeBooleanSwitchRendererMUIProps;
 
-	constructor(invert?: boolean) {
+	constructor(
+		invert?: boolean,
+		props?: ModelDataTypeBooleanSwitchRendererMUIProps
+	) {
 		super();
 
 		this.invert = invert;
+		this.props = props;
 	}
 
 	render(params: ModelRenderParams<boolean>): React.ReactElement {
@@ -57,6 +70,7 @@ class RendererBooleanSwitch extends TypeBoolean {
 					<FormControlLabel
 						control={
 							<Switch
+								{...this.props?.switchProps}
 								name={field}
 								checked={this.invert ? !value : value}
 								disabled={visibility.readOnly}

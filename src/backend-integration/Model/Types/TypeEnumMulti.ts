@@ -3,6 +3,10 @@ import Type from "../Type";
 import { ModelRenderParams } from "../index";
 import FilterType from "../FilterType";
 import { EnumValue } from "./TypeEnum";
+import { MultiSelectorData } from "../../../standalone";
+
+export type AdvancedMultiEnumValue = Omit<MultiSelectorData, "label"> &
+	Pick<EnumValue, "getLabel" | "invisible">;
 
 /**
  * Enum type with multi-select capability
@@ -45,6 +49,8 @@ abstract class TypeMultiEnum implements Type<string[]> {
 	}
 
 	getEnumValues = (): EnumValue[] => this.values;
+
+	deserialize = (value: unknown): string[] => (value as string[]) ?? [];
 }
 
 export default TypeMultiEnum;

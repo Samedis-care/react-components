@@ -2,6 +2,7 @@ export * from "./Material-UI";
 export * from "./UIKit";
 
 export { default as ModelDataTypeEnumSelectRenderer } from "./RendererEnumSelect";
+export * from "./RendererEnumMultiSelect";
 export { default as ModelDataTypeEnumMultiSelectRenderer } from "./RendererEnumMultiSelect";
 export { default as ModelDataTypeImageRenderer } from "./RendererImage";
 export { default as ModelDataTypeFilesRenderer } from "./RendererFiles";
