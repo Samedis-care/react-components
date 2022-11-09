@@ -213,6 +213,10 @@ export interface FormProps<
 	 */
 	readOnly?: boolean;
 	/**
+	 * Optional read-only reason
+	 */
+	readOnlyReason?: string | null;
+	/**
 	 * Disable Validations
 	 */
 	disableValidation?: boolean;
@@ -360,6 +364,10 @@ export interface FormContextData {
 	 */
 	readOnly: boolean;
 	/**
+	 * @see FormProps.readOnlyReason
+	 */
+	readOnlyReason: string | null | undefined;
+	/**
 	 * Is the form being submitted
 	 */
 	submitting: boolean;
@@ -443,6 +451,7 @@ export type FormContextDataLite = Pick<
 	| "onlySubmitMounted"
 	| "onlyValidateMounted"
 	| "readOnly"
+	| "readOnlyReason"
 	| "errorComponent"
 	| "getFieldValue"
 >;
@@ -502,6 +511,7 @@ const Form = <
 		onlyValidateMounted,
 		onlySubmitMounted,
 		readOnly,
+		readOnlyReason,
 		disableValidation,
 		nestedFormName,
 		disableNestedSubmit,
@@ -1133,6 +1143,7 @@ const Form = <
 			validateForm,
 			parentFormContext: nestedFormName ? parentFormContext : null,
 			readOnly: !!readOnly,
+			readOnlyReason: readOnlyReason,
 		}),
 		[
 			id,
@@ -1169,6 +1180,7 @@ const Form = <
 			parentFormContext,
 			nestedFormName,
 			readOnly,
+			readOnlyReason,
 		]
 	);
 
@@ -1180,6 +1192,7 @@ const Form = <
 			onlySubmitMounted: !!onlySubmitMounted,
 			onlyValidateMounted: !!onlyValidateMounted,
 			readOnly: !!readOnly,
+			readOnlyReason: readOnlyReason,
 			getFieldValue,
 		}),
 		[
@@ -1189,6 +1202,7 @@ const Form = <
 			onlySubmitMounted,
 			onlyValidateMounted,
 			readOnly,
+			readOnlyReason,
 			getFieldValue,
 		]
 	);

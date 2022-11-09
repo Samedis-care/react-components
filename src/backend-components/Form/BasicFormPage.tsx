@@ -26,6 +26,14 @@ export interface BasicFormPageRendererProps<CustomPropsT>
 	 */
 	dirty: boolean;
 	/**
+	 * Is the form read-only
+	 */
+	readOnly: boolean;
+	/**
+	 * Optional read-only reason
+	 */
+	readOnlyReason: string | null | undefined;
+	/**
 	 * Show back button only when not enough permission
 	 */
 	showBackButtonOnly?: boolean;
@@ -77,7 +85,7 @@ const BasicFormPage = <RendererPropsT, CustomPropsT>(
 		...otherProps
 	} = props;
 	const { t } = useCCTranslations();
-	const { readOnly } = useFormContextLite();
+	const { readOnly, readOnlyReason } = useFormContextLite();
 	const [pushDialog] = useDialogContext();
 	const formDialog = useContext(FormDialogDispatchContext);
 	const unblock = useRef<(() => void) | undefined>(undefined);
@@ -197,7 +205,11 @@ const BasicFormPage = <RendererPropsT, CustomPropsT>(
 				<FormButtons
 					{...childrenProps}
 					{...otherProps}
-					showBackButtonOnly={otherProps.showBackButtonOnly || readOnly}
+					showBackButtonOnly={
+						otherProps.showBackButtonOnly || (readOnly && !readOnlyReason)
+					}
+					readOnly={readOnly}
+					readOnlyReason={readOnlyReason}
 					isSubmitting={isSubmitting}
 					dirty={dirty}
 					disableRouting={disableRouting}

@@ -7,6 +7,7 @@ import { showConfirmDialog } from "../../non-standalone";
 import { ActionButton, FormButtons } from "../../standalone";
 import { IsInFormDialogContext } from "./FormDialog";
 import useCCTranslations from "../../utils/useCCTranslations";
+import { Tooltip } from "@material-ui/core";
 
 export const useBackButtonStyles = makeStyles({
 	root: {
@@ -25,6 +26,8 @@ const DefaultFormPageButtons = (
 ) => {
 	const {
 		showBackButtonOnly,
+		readOnly,
+		readOnlyReason,
 		dirty,
 		isSubmitting,
 		submit,
@@ -68,16 +71,25 @@ const DefaultFormPageButtons = (
 		}
 	}, [submit]);
 
+	const saveBtn = (
+		<ActionButton
+			disabled={!dirty || isSubmitting || readOnly}
+			onClick={displayConfirmDialog ? submitWithConfirmDialog : safeSubmit}
+		>
+			{t("common.buttons.save")}
+		</ActionButton>
+	);
+
 	return (
 		<FormButtons>
-			{!showBackButtonOnly && (
-				<ActionButton
-					disabled={!dirty || isSubmitting}
-					onClick={displayConfirmDialog ? submitWithConfirmDialog : safeSubmit}
-				>
-					{t("common.buttons.save")}
-				</ActionButton>
-			)}
+			{!showBackButtonOnly &&
+				(readOnly && readOnlyReason ? (
+					<Tooltip title={readOnlyReason}>
+						<span>{saveBtn}</span>
+					</Tooltip>
+				) : (
+					saveBtn
+				))}
 			{goBack && !(isInDialog && hasCustomCloseHandler) && (
 				<ActionButton
 					disabled={isSubmitting}
