@@ -13,8 +13,10 @@ import useCCTranslations, {
 import sortByLocaleRelevance from "../../utils/sortByLocaleRelevance";
 import TextFieldWithHelp from "../../standalone/UIKit/TextFieldWithHelp";
 import Loader from "../../standalone/Loader";
+import { LocaleSelectorDialogProps } from "./LanguageSelectorDialog";
 
-export interface LanguageSelectorDialogContentProps {
+export interface LanguageSelectorDialogContentProps
+	extends LocaleSelectorDialogProps {
 	close: () => void;
 }
 
@@ -61,6 +63,8 @@ const SearchInputProps = {
 const LanguageSelectorDialogContent = (
 	props: LanguageSelectorDialogContentProps
 ) => {
+	const { supportedLocales: appSupportedLocales } = props;
+
 	const [filter, setFilter] = useState("");
 	const lowercaseFilter = filter.toLowerCase();
 	const { i18n, t } = useCCTranslations();
@@ -89,6 +93,12 @@ const LanguageSelectorDialogContent = (
 				)
 				.map(([country, langs]) => langs.map((lang) => lang + "-" + country))
 				.flat()
+				.filter(
+					(locale) =>
+						!appSupportedLocales ||
+						appSupportedLocales.includes(locale) ||
+						appSupportedLocales.includes(locale.split("-")[0])
+				)
 				.map(
 					(locale) =>
 						({
@@ -113,7 +123,7 @@ const LanguageSelectorDialogContent = (
 						} as LanguageSelectorEntryFilterData)
 				)
 				.sort((a, b) => sortByLocaleRelevance(a.locale, b.locale)),
-		[countryLanguageMapping, supportedLangs, tLocale]
+		[countryLanguageMapping, appSupportedLocales, supportedLangs, tLocale]
 	);
 
 	const filteredData = useMemo(

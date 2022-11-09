@@ -20,6 +20,18 @@ const useStyles = makeStyles(
 	{ name: "CcLanguageSelectorDialog" }
 );
 
+export interface LocaleSelectorDialogProps {
+	/**
+	 * List of supported locales and/or languages
+	 * Examples:
+	 * - en-US # allow en-US
+	 * - en    # allow all en based locales
+	 * - de-DE # allow de-DE
+	 * - de    # allow all de based languages
+	 */
+	supportedLocales?: string[];
+}
+
 /**
  * Locale selector dialog
  * @usage `pushDialog(<LanguageSelectorDialog \>)`
@@ -32,7 +44,7 @@ const useStyles = makeStyles(
  * });
  * ```
  */
-const LanguageSelectorDialog = () => {
+const LanguageSelectorDialog = (props: LocaleSelectorDialogProps) => {
 	const [, popDialog] = useDialogContext();
 
 	const { t } = useCCTranslations();
@@ -45,7 +57,7 @@ const LanguageSelectorDialog = () => {
 			</DialogTitle>
 			<DialogContent className={classes.dialog}>
 				<Suspense fallback={<Loader />}>
-					<LanguageSelectorDialogContent close={popDialog} />
+					<LanguageSelectorDialogContent {...props} close={popDialog} />
 				</Suspense>
 			</DialogContent>
 		</Dialog>
