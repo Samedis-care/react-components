@@ -246,7 +246,7 @@ export interface IDataGridAddButton {
 	label: NonNullable<React.ReactNode>;
 	/**
 	 * onClick handler for the add button
-	 * Set to undefined to disable button
+	 * Set undefined to disable button
 	 */
 	onClick: (() => void) | undefined;
 }
