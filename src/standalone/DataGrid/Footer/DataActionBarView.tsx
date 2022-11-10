@@ -1,5 +1,11 @@
 import React, { useCallback, useState } from "react";
-import { Grid, MenuProps, useMediaQuery, useTheme } from "@material-ui/core";
+import {
+	Grid,
+	MenuProps,
+	Tooltip,
+	useMediaQuery,
+	useTheme,
+} from "@material-ui/core";
 import { SmallIconButton, VerticalDivider } from "../../index";
 import ComponentWithLabel from "../../UIKit/ComponentWithLabel";
 import {
@@ -28,6 +34,10 @@ export interface DataActionBarViewProps {
 	 * If not defined: Disables delete button
 	 */
 	handleDelete?: React.MouseEventHandler;
+	/**
+	 * Disable delete button reason
+	 */
+	disableDeleteHint?: string;
 	/**
 	 * @see DataGridProps.customDataActionButtons
 	 */
@@ -58,6 +68,23 @@ const DataActionBarView = (props: DataActionBarViewProps) => {
 	const handleExtendedMenuClose = useCallback(() => {
 		setExtendedMenuAnchor(undefined);
 	}, []);
+
+	const deleteBtn = (
+		<ComponentWithLabel
+			control={
+				<SmallIconButton
+					color={"primary"}
+					disabled={props.numSelected === 0 || !props.handleDelete}
+					onClick={props.handleDelete}
+				>
+					<DeleteIcon />
+				</SmallIconButton>
+			}
+			labelText={t("standalone.data-grid.footer.delete")}
+			labelPlacement={"bottom"}
+			disabled={props.numSelected === 0 || !props.handleDelete}
+		/>
+	);
 
 	return (
 		<Grid container wrap={"nowrap"}>
@@ -97,26 +124,19 @@ const DataActionBarView = (props: DataActionBarViewProps) => {
 					</Grid>
 				</>
 			)}
-			{props.handleDelete && (
+			{(props.handleDelete || props.disableDeleteHint) && (
 				<>
 					<Grid item key={"divider-2"}>
 						<VerticalDivider />
 					</Grid>
 					<Grid item key={"delete"}>
-						<ComponentWithLabel
-							control={
-								<SmallIconButton
-									color={"primary"}
-									disabled={props.numSelected === 0}
-									onClick={props.handleDelete}
-								>
-									<DeleteIcon />
-								</SmallIconButton>
-							}
-							labelText={t("standalone.data-grid.footer.delete")}
-							labelPlacement={"bottom"}
-							disabled={props.numSelected === 0}
-						/>
+						{!props.handleDelete && props.disableDeleteHint ? (
+							<Tooltip title={props.disableDeleteHint}>
+								<span>{deleteBtn}</span>
+							</Tooltip>
+						) : (
+							deleteBtn
+						)}
 					</Grid>
 				</>
 			)}

@@ -83,24 +83,36 @@ export interface CrudProps<
 	 */
 	gridWrapper?: React.ComponentType<GridWrapperProps>;
 	/**
-	 * The delete record permission
+	 * The record delete permission
 	 */
 	deletePermission: Permission;
+	/**
+	 * Hint as to why delete permissions are not granted
+	 */
+	deletePermissionHint?: string;
 	/**
 	 * The view permission (shows form in read-only mode if edit permission is not present)
 	 * Set to `false` to only show the form page if edit permissions are present
 	 */
 	readPermission: Permission;
 	/**
-	 * The edit record permission
+	 * The record edit permission
 	 */
 	editPermission: Permission;
 	/**
-	 * The create new record permission
+	 * Hint as to why edit permissions are not granted
+	 */
+	editPermissionHint?: string;
+	/**
+	 * The record create permission
 	 */
 	newPermission: Permission;
 	/**
-	 * The export records permission
+	 * Hint as to why create new permissions are not granted
+	 */
+	newPermissionHint?: string;
+	/**
+	 * The records export permission
 	 */
 	exportPermission: Permission;
 	/**
@@ -315,6 +327,7 @@ const CRUD = <
 			<GridWrapper>
 				<BackendDataGrid
 					enableDelete={hasPermission(perms, props.deletePermission)}
+					disableDeleteHint={props.deletePermissionHint}
 					disableExport={!hasPermission(perms, props.exportPermission)}
 					{...props.gridProps}
 					model={props.model}
@@ -329,7 +342,7 @@ const CRUD = <
 					onAddNew={
 						hasPermission(perms, props.newPermission) && props.children
 							? props.gridProps.onAddNew ?? showNewPage
-							: undefined
+							: props.newPermissionHint
 					}
 					onImport={enableUserImport ? handleImportButton : undefined}
 				/>
@@ -374,6 +387,7 @@ const CRUD = <
 						id === "new" ? props.newPermission : props.editPermission
 					) || props.formProps.readOnly
 				}
+				readOnlyReason={props.editPermissionHint}
 				onSubmit={handleSubmit}
 				disableRouting={disableRouting}
 				customProps={{

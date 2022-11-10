@@ -17,6 +17,7 @@ const DataActionBar = () => {
 		customDataActionButtons,
 		disableSelection,
 		enableDeleteAll,
+		disableDeleteHint,
 	} = useDataGridProps();
 	const { selectAll, selectedRows } = state;
 	const { onEdit, onDelete } = useDataGridProps();
@@ -88,6 +89,7 @@ const DataActionBar = () => {
 				numSelected={Math.min(numSelected, 2) as 0 | 1 | 2}
 				handleEdit={onEdit ? handleEdit : undefined}
 				handleDelete={onDelete ? handleDelete : undefined}
+				disableDeleteHint={disableDeleteHint}
 				customButtons={customDataActionButtons}
 				handleCustomButtonClick={handleCustomButtonCLick}
 				disableSelection={disableSelection || !enableDeleteAll}

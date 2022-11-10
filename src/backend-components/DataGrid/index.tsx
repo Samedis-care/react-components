@@ -261,7 +261,15 @@ const BackendDataGrid = <
 					onClick: props.onAddNew,
 				},
 			];
-		} else if (props.onAddNew) {
+		} else if (typeof props.onAddNew === "string") {
+			result = [
+				{
+					label: t("standalone.data-grid.header.new") ?? "",
+					onClick: undefined,
+					disableHint: props.onAddNew,
+				},
+			];
+		} else if (Array.isArray(props.onAddNew)) {
 			result = props.onAddNew;
 		} else {
 			result = [];

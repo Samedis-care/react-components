@@ -249,6 +249,10 @@ export interface IDataGridAddButton {
 	 * Set undefined to disable button
 	 */
 	onClick: (() => void) | undefined;
+	/**
+	 * Disable button reason hint
+	 */
+	disableHint?: string;
 }
 
 export interface IDataGridColumnProps {
@@ -261,9 +265,9 @@ export interface IDataGridColumnProps {
 	 */
 	searchPlaceholder?: string;
 	/**
-	 * Add new handler(s), do not specify to disable add new button(s)
+	 * Add new handler(s), do not specify to disable add new button(s). Set to string to show disabled add new button with hint
 	 */
-	onAddNew?: (() => void) | IDataGridAddButton[];
+	onAddNew?: (() => void) | string | IDataGridAddButton[];
 	/**
 	 * Edit handler
 	 * @param id The id to edit
@@ -284,6 +288,10 @@ export interface IDataGridColumnProps {
 			"quickFilter" | "additionalFilters" | "fieldFilter"
 		>
 	) => Promise<void> | unknown;
+	/**
+	 * Reason why delete is disabled
+	 */
+	disableDeleteHint?: string;
 	/**
 	 * Do we support and enable the delete all functionality?
 	 * If not set select all will only select all ids on the current page

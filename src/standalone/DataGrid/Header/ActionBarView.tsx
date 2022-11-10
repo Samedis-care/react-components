@@ -35,9 +35,10 @@ export interface IDataGridActionBarViewProps extends ResetCallbacks {
 	toggleSettings: () => void;
 	/**
 	 * Callback for add new button.
+	 * If set to string: disabled add new button reason
 	 * If not defined: Disables add new button
 	 */
-	handleAddNew?: (() => void) | IDataGridAddButton[];
+	handleAddNew?: (() => void) | string | IDataGridAddButton[];
 	/**
 	 * Callback for import button click
 	 * If not defined: Disables import button
@@ -92,6 +93,25 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 	const closeSettingsMenu = useCallback(() => {
 		setSettingsAnchorEl(undefined);
 	}, []);
+
+	const addButtons: IDataGridAddButton[] = Array.isArray(props.handleAddNew)
+		? props.handleAddNew
+		: props.handleAddNew == null
+		? []
+		: [
+				{
+					icon: undefined,
+					label: t("standalone.data-grid.header.new") ?? "",
+					onClick:
+						typeof props.handleAddNew === "function"
+							? props.handleAddNew
+							: undefined,
+					disableHint:
+						typeof props.handleAddNew === "string"
+							? props.handleAddNew
+							: undefined,
+				},
+		  ];
 
 	return (
 		<Grid container alignItems={"stretch"} wrap={"nowrap"}>
@@ -224,7 +244,7 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 					)}
 				</>
 			)}
-			{props.handleAddNew && (
+			{addButtons.length > 0 && (
 				<>
 					<Grid item xs key={"divider-2"} />
 					<Grid
@@ -236,30 +256,29 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 						spacing={2}
 						wrap={"nowrap"}
 					>
-						{typeof props.handleAddNew === "function" ? (
-							<Grid item>
+						{addButtons.map((entry, index) => {
+							const btn = (
 								<ActionButton
 									small={!bpSmUp}
-									icon={<AddIcon />}
-									onClick={props.handleAddNew}
+									icon={entry.icon ?? <AddIcon />}
+									onClick={entry.onClick}
+									disabled={!entry.onClick}
 								>
-									{t("standalone.data-grid.header.new") ?? ""}
+									{entry.label}
 								</ActionButton>
-							</Grid>
-						) : (
-							props.handleAddNew.map((entry, index) => (
+							);
+							return (
 								<Grid item key={index.toString()}>
-									<ActionButton
-										small={!bpSmUp}
-										icon={entry.icon ?? <AddIcon />}
-										onClick={entry.onClick}
-										disabled={!entry.onClick}
-									>
-										{entry.label}
-									</ActionButton>
+									{!entry.onClick && entry.disableHint ? (
+										<Tooltip title={entry.disableHint}>
+											<span>{btn}</span>
+										</Tooltip>
+									) : (
+										btn
+									)}
 								</Grid>
-							))
-						)}
+							);
+						})}
 					</Grid>
 				</>
 			)}
