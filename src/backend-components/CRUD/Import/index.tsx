@@ -21,6 +21,7 @@ import {
 import { FileData } from "../../../standalone/FileUpload/Generic";
 import { FrameworkHistory } from "../../../framework";
 import useCCTranslations from "../../../utils/useCCTranslations";
+import { ValidationError } from "../../Form";
 
 export interface CrudImportProps<
 	KeyT extends ModelFieldName,
@@ -50,6 +51,14 @@ export interface CrudImportProps<
 	 * How-to information
 	 */
 	howTo?: (string | React.ReactNode)[];
+	/**
+	 * Additional validation callback for imported records
+	 * @param record The record to validate
+	 * @returns Validation errors
+	 */
+	validate?: (
+		record: Record<string, unknown>
+	) => Promise<ValidationError> | ValidationError;
 	/**
 	 * Guided version
 	 */
@@ -92,6 +101,11 @@ export interface CrudImporterStepProps {
 	updateKey: string | undefined;
 	additionalUpdateKeyFilters: Record<string, unknown> | undefined;
 	hasImportConfig: boolean;
+	validate:
+		| undefined
+		| ((
+				record: Record<string, unknown>
+		  ) => Promise<ValidationError> | ValidationError);
 	state: CrudImporterState;
 	setState: Dispatch<SetStateAction<CrudImporterState>>;
 }
@@ -181,7 +195,13 @@ const CrudImport = <
 ) => {
 	const classes = useStyles();
 	const { t } = useCCTranslations();
-	const { updateKeyAdditionalFilters, howTo, model, updateKey } = props;
+	const {
+		updateKeyAdditionalFilters,
+		howTo,
+		model,
+		updateKey,
+		validate,
+	} = props;
 	const {
 		guided,
 		activeStep,
@@ -230,6 +250,7 @@ const CrudImport = <
 						updateKey={updateKey}
 						additionalUpdateKeyFilters={updateKeyAdditionalFilters}
 						hasImportConfig={hasImportConfig}
+						validate={validate}
 						state={state}
 						setState={setState}
 					/>
@@ -246,6 +267,7 @@ const CrudImport = <
 						updateKey={updateKey}
 						additionalUpdateKeyFilters={updateKeyAdditionalFilters}
 						hasImportConfig={hasImportConfig}
+						validate={validate}
 						state={state}
 						setState={setState}
 					/>
@@ -262,6 +284,7 @@ const CrudImport = <
 						updateKey={updateKey}
 						additionalUpdateKeyFilters={updateKeyAdditionalFilters}
 						hasImportConfig={hasImportConfig}
+						validate={validate}
 						state={state}
 						setState={setState}
 					/>
@@ -278,6 +301,7 @@ const CrudImport = <
 						updateKey={updateKey}
 						additionalUpdateKeyFilters={updateKeyAdditionalFilters}
 						hasImportConfig={hasImportConfig}
+						validate={validate}
 						state={state}
 						setState={setState}
 					/>

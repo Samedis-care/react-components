@@ -9,7 +9,7 @@ import { Loader } from "../../../standalone";
 type RecordT = [Record<string, unknown>, Record<string, string>, Error | null];
 
 export const useImportStep3Logic = (props: CrudImporterStepProps) => {
-	const { model, state, setState } = props;
+	const { model, state, setState, validate } = props;
 
 	const { t } = useCCTranslations();
 
@@ -40,7 +40,13 @@ export const useImportStep3Logic = (props: CrudImporterStepProps) => {
 							// noinspection JSUnusedAssignment
 							isModelRecordComplete = true;
 							const validation = await model.validate(modelRecord);
-							return [modelRecord, validation, null];
+							return [
+								modelRecord,
+								validate
+									? { ...(await validate(modelRecord)), ...validation }
+									: validation,
+								null,
+							];
 						} catch (e) {
 							return [
 								isModelRecordComplete ? modelRecord : record,

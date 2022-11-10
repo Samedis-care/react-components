@@ -162,6 +162,10 @@ export interface CrudProps<
 	 */
 	importHowTo?: CrudImportProps<KeyT, VisibilityT, CustomT>["howTo"];
 	/**
+	 * Additional record validation for imported records
+	 */
+	importValidate?: CrudImportProps<KeyT, VisibilityT, CustomT>["validate"];
+	/**
 	 * Custom Import UI
 	 */
 	importUI?: React.ComponentType<CrudImportProps<KeyT, VisibilityT, CustomT>>;
@@ -235,6 +239,7 @@ const CRUD = <
 		importUpdateKey,
 		importHowTo,
 		importUpdateKeyAdditionalFilters,
+		importValidate,
 	} = props;
 	const hasImportPermission =
 		!importUpdateKey ||
@@ -357,6 +362,7 @@ const CRUD = <
 			updateKey={importUpdateKey}
 			updateKeyAdditionalFilters={importUpdateKeyAdditionalFilters}
 			howTo={importHowTo}
+			validate={importValidate}
 			guided={guided}
 		/>
 	);
