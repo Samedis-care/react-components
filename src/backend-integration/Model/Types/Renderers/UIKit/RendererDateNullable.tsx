@@ -7,11 +7,10 @@ import { normalizeDate } from "../../Utils/DateUtils";
 import { DateInput } from "../../../../../standalone";
 import i18n from "../../../../../i18n";
 import { ToDateLocaleStringOptions } from "../../../../../constants";
-import { DateInputProps } from "../../../../../standalone/UIKit/InputControls/DateInput";
 import { IDataGridColumnDef } from "../../../../../standalone/DataGrid/DataGrid";
 
 export type RendererDateNullableProps = Omit<
-	DateInputProps,
+	Parameters<typeof DateInput>[0],
 	| "name"
 	| "value"
 	| "label"
