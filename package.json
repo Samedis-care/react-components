@@ -140,7 +140,7 @@
 		"@types/react-window": "^1.8.5",
 		"@wojtekmaj/enzyme-adapter-react-17": "^0.4.1",
 		"babel-jest": "^26.6.3",
-		"cldr-data": "^36.0.0",
+		"cldr-data": "^36.0.1",
 		"cpx": "^1.5.0",
 		"enzyme": "^3.11.0",
 		"enzyme-to-json": "^3.6.1",
