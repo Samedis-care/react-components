@@ -71,6 +71,8 @@ const DefaultFormPageButtons = (
 		}
 	}, [submit]);
 
+	const handleBack = useCallback(() => goBack && goBack(), [goBack]);
+
 	const saveBtn = (
 		<ActionButton
 			disabled={!dirty || isSubmitting || readOnly}
@@ -93,7 +95,7 @@ const DefaultFormPageButtons = (
 			{goBack && !(isInDialog && hasCustomCloseHandler) && (
 				<ActionButton
 					disabled={isSubmitting}
-					onClick={goBack}
+					onClick={handleBack}
 					classes={backButtonClasses}
 				>
 					{t("common.buttons.back")}

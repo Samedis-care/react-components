@@ -29,8 +29,9 @@ const CrudImport = React.lazy(() => import("./Import")) as CrudImportType;
 export interface CrudFormProps {
 	/**
 	 * Callback for closing the form page
+	 * @param forceGridRefresh force grid refresh? (default false)
 	 */
-	goBack: () => void;
+	goBack: (forceGridRefresh?: boolean) => void;
 	/**
 	 * Does the Form have a custom submit handler?
 	 */
@@ -274,17 +275,21 @@ const CRUD = <
 		}
 	}, [navigate, routeUrl, disableRouting]);
 
-	const showOverview = useCallback(() => {
-		if (disableRouting) {
-			setId(null);
-		} else {
-			navigate(routeUrl);
-		}
-	}, [navigate, routeUrl, disableRouting]);
-
 	const refreshGrid = useCallback(() => {
 		setGridRefreshToken(new Date().getTime().toString());
 	}, []);
+
+	const showOverview = useCallback(
+		(forceRefresh?: boolean) => {
+			if (disableRouting) {
+				setId(null);
+			} else {
+				navigate(routeUrl);
+			}
+			if (forceRefresh) refreshGrid();
+		},
+		[disableRouting, refreshGrid, navigate, routeUrl]
+	);
 
 	const handleSubmit = useCallback(
 		async (

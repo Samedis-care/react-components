@@ -115,7 +115,7 @@ export const CrudStory = (): React.ReactElement => {
 								disabled={formProps.isSubmitting}
 								variant={"outlined"}
 								fullWidth
-								onClick={formProps.customProps.goBack}
+								onClick={() => formProps.customProps.goBack()}
 							>
 								Back
 							</Button>
