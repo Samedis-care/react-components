@@ -24,7 +24,7 @@ const timestampToAge = (timestamp: Date): string => {
 	}
 	return ComponentsCareI18n.t("utils.timestampToAge.str", {
 		AMOUNT: amount.toFixed(0),
-		UNIT: unit,
+		UNIT: ComponentsCareI18n.t("utils.timestampToAge." + unit),
 	});
 };
 
