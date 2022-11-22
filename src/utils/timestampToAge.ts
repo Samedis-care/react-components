@@ -10,15 +10,15 @@ const timestampToAge = (timestamp: Date): string => {
 	let amount: number;
 	let unit: "minute" | "minutes" | "hour" | "hours" | "day" | "days";
 	if (delta < 3600000 /* 1h */) {
-		const minutes = delta / 60000;
+		const minutes = Math.floor(delta / 60000);
 		amount = minutes;
 		unit = minutes > 1 ? "minutes" : "minute";
 	} else if (delta < 86400000 /* 1d */) {
-		const hours = delta / 3600000;
+		const hours = Math.floor(delta / 3600000);
 		amount = hours;
 		unit = hours > 1 ? "hours" : "hour";
 	} else {
-		const days = delta / 86400000;
+		const days = Math.floor(delta / 86400000);
 		amount = days;
 		unit = days > 1 ? "days" : "day";
 	}
