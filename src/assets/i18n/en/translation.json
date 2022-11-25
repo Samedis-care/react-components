@@ -228,6 +228,12 @@
 				"message": "Changes are lost",
 				"yes": "Yes",
 				"no": "No"
+			},
+			"submit-with-warnings": {
+				"title": "Warning",
+				"message": "The following warnings are present, do you want to continue regardless?",
+				"yes": "Yes",
+				"no": "No"
 			}
 		},
 		"selector": {

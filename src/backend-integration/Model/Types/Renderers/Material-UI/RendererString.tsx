@@ -1,12 +1,11 @@
 import React from "react";
 import TypeString from "../../TypeString";
-import {
-	FormHelperText,
-	TextField,
-	TextFieldProps,
-	Typography,
-} from "@material-ui/core";
+import { TextFieldProps, Typography } from "@material-ui/core";
 import { ModelRenderParams } from "../../../index";
+import {
+	FormHelperTextCC,
+	TextFieldCC,
+} from "../../../../../standalone/UIKit/MuiWarning";
 
 export type ModelDataTypeStringRendererMUIParams = Omit<
 	TextFieldProps,
@@ -41,6 +40,7 @@ class RendererString extends TypeString {
 			handleChange,
 			handleBlur,
 			errorMsg,
+			warningMsg,
 		} = params;
 
 		if (visibility.disabled) return <></>;
@@ -60,7 +60,7 @@ class RendererString extends TypeString {
 
 			return (
 				<>
-					<TextField
+					<TextFieldCC
 						variant={this.multiline ? "outlined" : undefined}
 						fullWidth
 						{...this.props}
@@ -74,8 +74,11 @@ class RendererString extends TypeString {
 						}}
 						onBlur={handleBlur}
 						error={!!errorMsg}
+						warning={!!warningMsg}
 					/>
-					<FormHelperText error={!!errorMsg}>{errorMsg}</FormHelperText>
+					<FormHelperTextCC warning={!!warningMsg} error={!!errorMsg}>
+						{errorMsg || warningMsg}
+					</FormHelperTextCC>
 				</>
 			);
 		}

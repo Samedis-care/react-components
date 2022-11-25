@@ -1,7 +1,7 @@
 import React from "react";
-import { FormHelperText, TextFieldProps, Typography } from "@material-ui/core";
+import { TextFieldProps, Typography } from "@material-ui/core";
 import { ModelRenderParams } from "../../../index";
-import { NumberFormatter } from "../../../../../standalone";
+import { FormHelperTextCC, NumberFormatter } from "../../../../../standalone";
 import TypeNumber from "../../TypeNumber";
 import CurrencyInput, {
 	CurrencyInputProps,
@@ -9,7 +9,10 @@ import CurrencyInput, {
 import { TypeSettings } from "../../../Type";
 
 export interface ModelDataTypeDecimalCurrencyRendererCCParams
-	extends Omit<CurrencyInputProps, "currency" | "value" | "onChange">,
+	extends Omit<
+			CurrencyInputProps,
+			"currency" | "value" | "onChange" | "warning"
+		>,
 		Omit<
 			TextFieldProps,
 			| "name"
@@ -56,6 +59,7 @@ class RendererDecimalCurrency extends TypeNumber {
 			handleChange,
 			handleBlur,
 			errorMsg,
+			warningMsg,
 		} = params;
 
 		if (visibility.disabled) return <></>;
@@ -94,8 +98,11 @@ class RendererDecimalCurrency extends TypeNumber {
 						}}
 						onBlur={handleBlur}
 						error={!!errorMsg}
+						warning={!!warningMsg}
 					/>
-					<FormHelperText error={!!errorMsg}>{errorMsg}</FormHelperText>
+					<FormHelperTextCC error={!!errorMsg} warning={!!warningMsg}>
+						{errorMsg || warningMsg}
+					</FormHelperTextCC>
 				</>
 			);
 		}

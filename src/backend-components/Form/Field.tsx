@@ -41,6 +41,7 @@ const Field = (props: FieldProps): React.ReactElement => {
 	const {
 		values,
 		errors,
+		warnings,
 		touched,
 		setFieldValue,
 		getFieldValue,
@@ -97,6 +98,7 @@ const Field = (props: FieldProps): React.ReactElement => {
 	const label = fieldDef.getLabel();
 	const touch = touched[props.name] || false;
 	const errorMsg = (touch && errors[props.name]) || null;
+	const warningMsg = (touch && warnings[props.name]) || null;
 	const relationData = relations[props.name];
 	const visibility = getVisibility(
 		hasId ? fieldDef.visibility.edit : fieldDef.visibility.create,
@@ -122,7 +124,8 @@ const Field = (props: FieldProps): React.ReactElement => {
 				handleChange: setFieldValueHookWrapper,
 				handleBlur,
 				label: label,
-				errorMsg: errorMsg,
+				errorMsg,
+				warningMsg,
 				setError,
 				setFieldTouched,
 				relationModel,
@@ -140,6 +143,7 @@ const Field = (props: FieldProps): React.ReactElement => {
 			setFieldValueHookWrapper,
 			handleBlur,
 			errorMsg,
+			warningMsg,
 			setError,
 			setFieldTouched,
 			initialValue,

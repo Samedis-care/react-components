@@ -1,9 +1,10 @@
 import React from "react";
-import { FormControl, FormHelperText, FormLabel } from "@material-ui/core";
+import { FormControl, FormLabel } from "@material-ui/core";
 import { ModelRenderParams } from "../../index";
 import ImageSelector from "../../../../standalone/FileUpload/Image/ImageSelector";
 import ccI18n from "../../../../i18n";
 import TypeImage from "../TypeImage";
+import { FormHelperTextCC } from "../../../../standalone";
 
 /**
  * Renders an image selector
@@ -18,6 +19,7 @@ class RendererImage extends TypeImage {
 			handleChange,
 			handleBlur,
 			errorMsg,
+			warningMsg,
 		} = params;
 
 		if (visibility.disabled) return <></>;
@@ -53,7 +55,9 @@ class RendererImage extends TypeImage {
 						downscale={this.params?.downscale}
 						variant={this.params?.variant}
 					/>
-					<FormHelperText error={!!errorMsg}>{errorMsg}</FormHelperText>
+					<FormHelperTextCC error={!!errorMsg} warning={!!warningMsg}>
+						{errorMsg || warningMsg}
+					</FormHelperTextCC>
 				</>
 			);
 		}

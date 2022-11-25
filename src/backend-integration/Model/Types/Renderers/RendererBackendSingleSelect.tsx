@@ -1,10 +1,11 @@
 import React from "react";
-import { FormControl, FormHelperText } from "@material-ui/core";
+import { FormHelperText } from "@material-ui/core";
 import { ModelFieldName, ModelRenderParams, PageVisibility } from "../../index";
 import Model from "../../Model";
 import TypeId from "../TypeId";
 import { BackendSingleSelectProps } from "../../../../backend-components/Selector/BackendSingleSelect";
 import { BackendSingleSelect } from "../../../../backend-components";
+import { FormControlFieldsetCC } from "../../../../standalone";
 
 type OmitProperties =
 	| "selected"
@@ -45,6 +46,7 @@ class RendererBackendSingleSelect<
 			handleChange,
 			handleBlur,
 			errorMsg,
+			warningMsg,
 			relationData,
 			relationModel,
 		} = params;
@@ -70,11 +72,12 @@ class RendererBackendSingleSelect<
 				);
 
 			return (
-				<FormControl
+				<FormControlFieldsetCC
 					component={"fieldset"}
 					required={visibility.required}
 					fullWidth
 					error={!!errorMsg}
+					warning={!!warningMsg}
 					onBlur={handleBlur}
 					name={field}
 				>
@@ -89,8 +92,8 @@ class RendererBackendSingleSelect<
 						initialData={relationData}
 						{...this.props}
 					/>
-					<FormHelperText>{errorMsg}</FormHelperText>
-				</FormControl>
+					<FormHelperText>{errorMsg || warningMsg}</FormHelperText>
+				</FormControlFieldsetCC>
 			);
 		}
 

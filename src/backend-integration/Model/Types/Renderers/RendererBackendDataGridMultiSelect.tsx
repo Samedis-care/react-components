@@ -1,11 +1,12 @@
 import React from "react";
-import { FormControl, FormHelperText } from "@material-ui/core";
+import { FormControl } from "@material-ui/core";
 import { ModelFieldName, ModelRenderParams, PageVisibility } from "../../index";
 import TypeStringArray from "../TypeStringArray";
 import Model from "../../Model";
 import BackendDataGridMultiSelect, {
 	BackendDataGridMultiSelectProps,
 } from "../../../../backend-components/Selector/BackendDataGridMultiSelect";
+import { FormHelperTextCC } from "../../../../standalone";
 
 type OmitProperties = "selected" | "onChange" | "readOnly" | "model";
 
@@ -39,6 +40,7 @@ class RendererBackendDataGridMultiSelect<
 			handleChange,
 			handleBlur,
 			errorMsg,
+			warningMsg,
 			relationModel,
 			value,
 		} = params;
@@ -82,7 +84,9 @@ class RendererBackendDataGridMultiSelect<
 						readOnly={visibility.readOnly}
 						{...this.props}
 					/>
-					<FormHelperText>{errorMsg}</FormHelperText>
+					<FormHelperTextCC error={!!errorMsg} warning={!!warningMsg}>
+						{errorMsg || warningMsg}
+					</FormHelperTextCC>
 				</FormControl>
 			);
 		}

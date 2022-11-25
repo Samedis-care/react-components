@@ -12,6 +12,7 @@ import {
 import { useCCLanguagesTranslations } from "../../../utils/useCCTranslations";
 import { Translate } from "@material-ui/icons";
 import combineClassNames from "../../../utils/combineClassNames";
+import { useMuiWarningStyles } from "../MuiWarning";
 
 // src/assets/data/languages.json
 export type MultiLanguageInputSupportedLanguages =
@@ -255,6 +256,10 @@ export type MultiLanguageInputProps = Omit<
 	 * Display error
 	 */
 	error?: boolean;
+	/**
+	 * Display warning
+	 */
+	warning?: boolean;
 };
 
 const useStyles = makeStyles(
@@ -281,10 +286,12 @@ const MultiLanguageInput = (props: MultiLanguageInputProps) => {
 		disableIncompleteMarker,
 		required,
 		ignoreI18nLocale,
+		warning,
 		...textFieldProps
 	} = props;
 	const { t, i18n } = useCCLanguagesTranslations();
 	const classes = useStyles();
+	const warningClasses = useMuiWarningStyles();
 
 	// determine default language
 	let defaultLanguage = i18n.language.split(
@@ -346,6 +353,10 @@ const MultiLanguageInput = (props: MultiLanguageInputProps) => {
 	const renderLanguage = (lang: MultiLanguageInputSupportedLanguages) => (
 		<TextField
 			{...textFieldProps}
+			className={combineClassNames([
+				warning && warningClasses.warning,
+				textFieldProps.className,
+			])}
 			fullWidth
 			label={
 				textFieldProps.multiline ? (

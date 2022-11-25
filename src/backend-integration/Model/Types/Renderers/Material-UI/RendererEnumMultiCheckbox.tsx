@@ -1,6 +1,5 @@
 import React from "react";
 import {
-	FormControl,
 	FormControlLabel,
 	FormHelperText,
 	FormLabel,
@@ -12,6 +11,7 @@ import { ModelRenderParams } from "../../../index";
 import TypeEnumMulti from "../../TypeEnumMulti";
 import ccI18n from "../../../../../i18n";
 import { EnumValue } from "../../TypeEnum";
+import { FormControlFieldsetCC } from "../../../../../standalone";
 
 export type WrapButtonFunc = (
 	btn: React.ReactElement,
@@ -44,6 +44,7 @@ class RendererEnumRadio extends TypeEnumMulti {
 			handleChange,
 			handleBlur,
 			errorMsg,
+			warningMsg,
 			value,
 		} = params;
 
@@ -63,11 +64,12 @@ class RendererEnumRadio extends TypeEnumMulti {
 			if (visibility.grid) throw new Error("Not supported");
 
 			return (
-				<FormControl
+				<FormControlFieldsetCC
 					component={"fieldset"}
 					required={visibility.required}
 					fullWidth
 					error={!!errorMsg}
+					warning={!!warningMsg}
 				>
 					<FormLabel component={"legend"}>{label}</FormLabel>
 					<FormGroup
@@ -103,8 +105,8 @@ class RendererEnumRadio extends TypeEnumMulti {
 								)
 							)}
 					</FormGroup>
-					<FormHelperText>{errorMsg}</FormHelperText>
-				</FormControl>
+					<FormHelperText>{errorMsg || warningMsg}</FormHelperText>
+				</FormControlFieldsetCC>
 			);
 		}
 		return (

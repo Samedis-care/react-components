@@ -1,8 +1,8 @@
 import React from "react";
-import { FormHelperText, Typography } from "@material-ui/core";
+import { Typography } from "@material-ui/core";
 import { ModelRenderParams } from "../../../index";
 import ccI18n from "../../../../../i18n";
-import { DateTimeInput } from "../../../../../standalone";
+import { DateTimeInput, FormHelperTextCC } from "../../../../../standalone";
 import i18n from "../../../../../i18n";
 import TypeDateTimeNullable from "../../TypeDateTimeNullable";
 
@@ -20,6 +20,7 @@ class RendererDateTimeNullable extends TypeDateTimeNullable {
 			handleChange,
 			handleBlur,
 			errorMsg,
+			warningMsg,
 			setFieldTouched,
 		} = params;
 
@@ -51,6 +52,7 @@ class RendererDateTimeNullable extends TypeDateTimeNullable {
 						}
 						onBlur={handleBlur}
 						error={!!errorMsg}
+						warning={!!warningMsg}
 						onError={(error: React.ReactNode) => {
 							this.error = error
 								? ccI18n.t(
@@ -62,7 +64,9 @@ class RendererDateTimeNullable extends TypeDateTimeNullable {
 						fullWidth
 						clearable
 					/>
-					<FormHelperText error={!!errorMsg}>{errorMsg}</FormHelperText>
+					<FormHelperTextCC error={!!errorMsg} warning={!!warningMsg}>
+						{errorMsg || warningMsg}
+					</FormHelperTextCC>
 				</>
 			);
 		}

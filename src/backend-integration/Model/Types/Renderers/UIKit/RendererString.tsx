@@ -1,8 +1,8 @@
 import React from "react";
 import TypeString from "../../TypeString";
-import { FormHelperText, TextFieldProps, Typography } from "@material-ui/core";
+import { TextFieldProps, Typography } from "@material-ui/core";
 import { ModelRenderParams } from "../../../index";
-import { TextFieldWithHelp } from "../../../../../standalone";
+import { FormHelperTextCC, TextFieldWithHelp } from "../../../../../standalone";
 import { TextFieldWithHelpProps } from "../../../../../standalone/UIKit/TextFieldWithHelp";
 
 export type ModelDataTypeStringRendererCCParams = Omit<
@@ -16,7 +16,7 @@ export type ModelDataTypeStringRendererCCParams = Omit<
 	| "onBlur"
 	| "error"
 > &
-	TextFieldWithHelpProps;
+	Omit<TextFieldWithHelpProps, "warning">;
 
 /**
  * Renders a text field
@@ -39,6 +39,7 @@ class RendererString extends TypeString {
 			handleChange,
 			handleBlur,
 			errorMsg,
+			warningMsg,
 		} = params;
 
 		if (visibility.disabled) return <></>;
@@ -72,8 +73,11 @@ class RendererString extends TypeString {
 						}}
 						onBlur={handleBlur}
 						error={!!errorMsg}
+						warning={!!warningMsg}
 					/>
-					<FormHelperText error={!!errorMsg}>{errorMsg}</FormHelperText>
+					<FormHelperTextCC error={!!errorMsg} warning={!!warningMsg}>
+						{errorMsg || warningMsg}
+					</FormHelperTextCC>
 				</>
 			);
 		}

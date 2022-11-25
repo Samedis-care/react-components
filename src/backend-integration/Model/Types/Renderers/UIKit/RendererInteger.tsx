@@ -1,7 +1,11 @@
 import React from "react";
-import { FormHelperText, TextFieldProps, Typography } from "@material-ui/core";
+import { TextFieldProps, Typography } from "@material-ui/core";
 import { ModelRenderParams } from "../../../index";
-import { IntegerInputField, NumberFormatter } from "../../../../../standalone";
+import {
+	FormHelperTextCC,
+	IntegerInputField,
+	NumberFormatter,
+} from "../../../../../standalone";
 import { TextFieldWithHelpProps } from "../../../../../standalone/UIKit/TextFieldWithHelp";
 import TypeNumber from "../../TypeNumber";
 
@@ -17,7 +21,7 @@ export type ModelDataTypeIntegerRendererCCParams = Omit<
 	| "error"
 	| "multiline"
 > &
-	TextFieldWithHelpProps;
+	Omit<TextFieldWithHelpProps, "warning">;
 
 /**
  * Renders a text field
@@ -40,6 +44,7 @@ class RendererInteger extends TypeNumber {
 			handleChange,
 			handleBlur,
 			errorMsg,
+			warningMsg,
 		} = params;
 
 		if (visibility.disabled) return <></>;
@@ -75,8 +80,11 @@ class RendererInteger extends TypeNumber {
 						}}
 						onBlur={handleBlur}
 						error={!!errorMsg}
+						warning={!!warningMsg}
 					/>
-					<FormHelperText error={!!errorMsg}>{errorMsg}</FormHelperText>
+					<FormHelperTextCC error={!!errorMsg} warning={!!warningMsg}>
+						{errorMsg || warningMsg}
+					</FormHelperTextCC>
 				</>
 			);
 		}

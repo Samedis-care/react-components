@@ -1,5 +1,5 @@
 import React from "react";
-import { FormControl, FormHelperText, Typography } from "@material-ui/core";
+import { FormHelperText, Typography } from "@material-ui/core";
 import { ModelRenderParams } from "../../index";
 import TypeEnum, { EnumValue } from "../TypeEnum";
 import ccI18n from "../../../../i18n";
@@ -8,6 +8,7 @@ import {
 	BaseSelectorProps,
 	SingleSelect,
 } from "../../../../standalone/Selector";
+import { FormControlFieldsetCC } from "../../../../standalone";
 
 export type RendererEnumSelectProps = Omit<
 	BaseSelectorProps<BaseSelectorData>,
@@ -41,6 +42,7 @@ class RendererEnumSelect extends TypeEnum {
 			handleChange,
 			handleBlur,
 			errorMsg,
+			warningMsg,
 		} = params;
 
 		if (visibility.disabled) return <></>;
@@ -72,11 +74,12 @@ class RendererEnumSelect extends TypeEnum {
 				);
 
 			return (
-				<FormControl
+				<FormControlFieldsetCC
 					component={"fieldset"}
 					required={visibility.required}
 					fullWidth
 					error={!!errorMsg}
+					warning={!!warningMsg}
 					onBlur={handleBlur}
 					name={field}
 				>
@@ -88,8 +91,8 @@ class RendererEnumSelect extends TypeEnum {
 						onSelect={(value) => handleChange(field, value ? value.value : "")}
 						disabled={visibility.readOnly}
 					/>
-					<FormHelperText>{errorMsg}</FormHelperText>
-				</FormControl>
+					<FormHelperText>{errorMsg || warningMsg}</FormHelperText>
+				</FormControlFieldsetCC>
 			);
 		}
 		const valueInfo = this.values.find((entry) => entry.value === value);

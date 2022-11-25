@@ -1,7 +1,7 @@
 import React from "react";
-import { FormHelperText, Typography } from "@material-ui/core";
+import { Typography } from "@material-ui/core";
 import { ModelRenderParams } from "../../../index";
-import { ColorInput } from "../../../../../standalone";
+import { ColorInput, FormHelperTextCC } from "../../../../../standalone";
 import { ColorInputProps } from "../../../../../standalone/UIKit/InputControls/ColorInput";
 import TypeColor from "../../TypeColor";
 
@@ -15,6 +15,7 @@ export type ModelDataTypeColorRenderer = Omit<
 	| "onChange"
 	| "onBlur"
 	| "error"
+	| "warning"
 >;
 
 /**
@@ -38,6 +39,7 @@ class RendererColor extends TypeColor {
 			handleChange,
 			handleBlur,
 			errorMsg,
+			warningMsg,
 		} = params;
 
 		if (visibility.disabled) return <></>;
@@ -70,8 +72,11 @@ class RendererColor extends TypeColor {
 						}}
 						onBlur={handleBlur}
 						error={!!errorMsg}
+						warning={!!warningMsg}
 					/>
-					<FormHelperText error={!!errorMsg}>{errorMsg}</FormHelperText>
+					<FormHelperTextCC error={!!errorMsg} warning={!!warningMsg}>
+						{errorMsg || warningMsg}
+					</FormHelperTextCC>
 				</>
 			);
 		}

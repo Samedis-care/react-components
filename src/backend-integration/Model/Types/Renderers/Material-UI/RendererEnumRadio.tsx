@@ -1,6 +1,5 @@
 import React from "react";
 import {
-	FormControl,
 	FormControlLabel,
 	FormHelperText,
 	FormLabel,
@@ -11,6 +10,7 @@ import {
 import { ModelRenderParams } from "../../../index";
 import TypeEnum, { EnumValue } from "../../TypeEnum";
 import ccI18n from "../../../../../i18n";
+import { FormControlFieldsetCC } from "../../../../../standalone";
 
 export type WrapButtonFunc = (
 	btn: React.ReactElement,
@@ -45,6 +45,7 @@ class RendererEnumRadio extends TypeEnum {
 			handleChange,
 			handleBlur,
 			errorMsg,
+			warningMsg,
 		} = params;
 
 		if (visibility.disabled) return <></>;
@@ -63,11 +64,12 @@ class RendererEnumRadio extends TypeEnum {
 			if (visibility.grid) throw new Error("Not supported");
 
 			return (
-				<FormControl
+				<FormControlFieldsetCC
 					component={"fieldset"}
 					required={visibility.required}
 					fullWidth
 					error={!!errorMsg}
+					warning={!!warningMsg}
 				>
 					<FormLabel component={"legend"}>{label}</FormLabel>
 					<RadioGroup
@@ -92,8 +94,8 @@ class RendererEnumRadio extends TypeEnum {
 								)
 							)}
 					</RadioGroup>
-					<FormHelperText>{errorMsg}</FormHelperText>
-				</FormControl>
+					<FormHelperText>{errorMsg || warningMsg}</FormHelperText>
+				</FormControlFieldsetCC>
 			);
 		}
 		const valueInfo = this.values.find((entry) => entry.value === value);

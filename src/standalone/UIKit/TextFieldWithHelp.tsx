@@ -14,7 +14,8 @@ import {
 } from "@material-ui/core";
 import { Info as InfoIcon, Clear as ClearIcon } from "@material-ui/icons";
 import { InputLabelConfig, UIInputProps, useInputStyles } from "./CommonStyles";
-import { isTouchDevice } from "../../utils";
+import { combineClassNames, isTouchDevice } from "../../utils";
+import { useMuiWarningStyles } from "./MuiWarning";
 
 export interface TextFieldWithHelpProps extends UIInputProps {
 	/**
@@ -27,8 +28,9 @@ const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(
 	props: TextFieldWithHelpProps & TextFieldProps,
 	ref: ForwardedRef<HTMLDivElement>
 ) {
-	const { openInfo, important, onChange, ...muiProps } = props;
+	const { openInfo, important, warning, onChange, ...muiProps } = props;
 	const inputClasses = useInputStyles({ important });
+	const warningClasses = useMuiWarningStyles();
 
 	// handle clear
 
@@ -80,6 +82,10 @@ const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(
 			ref={ref}
 			InputLabelProps={InputLabelConfig}
 			{...muiProps}
+			className={combineClassNames([
+				warning && warningClasses.warning,
+				muiProps.className,
+			])}
 			onChange={handleChange}
 			InputProps={{
 				classes: inputClasses,

@@ -1,5 +1,5 @@
 import React from "react";
-import { FormHelperText, Typography } from "@material-ui/core";
+import { Typography } from "@material-ui/core";
 import { ModelRenderParams } from "../../../index";
 import ccI18n from "../../../../../i18n";
 import { normalizeDate } from "../../Utils/DateUtils";
@@ -8,6 +8,7 @@ import { LocalizedKeyboardDatePicker } from "../../../../../standalone/Localized
 import i18n from "../../../../../i18n";
 import { ToDateLocaleStringOptions } from "../../../../../constants";
 import { IDataGridColumnDef } from "../../../../../standalone/DataGrid/DataGrid";
+import { FormHelperTextCC } from "../../../../../standalone";
 
 /**
  * Renders Date with Date Selector
@@ -24,6 +25,7 @@ class RendererDate extends TypeDate {
 			handleBlur,
 			errorMsg,
 			setFieldTouched,
+			warningMsg,
 		} = params;
 
 		if (visibility.disabled) return <></>;
@@ -55,6 +57,7 @@ class RendererDate extends TypeDate {
 						}}
 						onBlur={handleBlur}
 						error={!!errorMsg}
+						warning={!!warningMsg}
 						onError={(error: React.ReactNode) => {
 							this.error = error
 								? ccI18n.t(
@@ -65,7 +68,9 @@ class RendererDate extends TypeDate {
 						}}
 						fullWidth
 					/>
-					<FormHelperText error={!!errorMsg}>{errorMsg}</FormHelperText>
+					<FormHelperTextCC warning={!!warningMsg} error={!!errorMsg}>
+						{errorMsg || warningMsg}
+					</FormHelperTextCC>
 				</>
 			);
 		}

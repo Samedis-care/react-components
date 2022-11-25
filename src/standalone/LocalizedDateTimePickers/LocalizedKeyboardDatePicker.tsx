@@ -7,6 +7,7 @@ import {
 import { Event as CalendarIcon } from "@material-ui/icons";
 import { useTheme } from "@material-ui/core";
 import useCCTranslations from "../../utils/useCCTranslations";
+import { withMuiWarning } from "../UIKit";
 
 export interface LocalizedKeyboardDatePickerProps
 	extends Omit<
@@ -73,4 +74,4 @@ const LocalizedKeyboardDatePicker = (
 	);
 };
 
-export default React.memo(LocalizedKeyboardDatePicker);
+export default React.memo(withMuiWarning(LocalizedKeyboardDatePicker));

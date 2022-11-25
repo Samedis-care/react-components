@@ -1,6 +1,7 @@
 import React from "react";
 import { DateTimePicker, DateTimePickerProps } from "@material-ui/pickers";
 import useCCTranslations from "../../utils/useCCTranslations";
+import { withMuiWarning } from "../UIKit";
 
 type LocalizedDateTimePickerProps = Omit<
 	DateTimePickerProps,
@@ -50,4 +51,4 @@ const LocalizedDateTimePicker = (props: LocalizedDateTimePickerProps) => {
 	);
 };
 
-export default React.memo(LocalizedDateTimePicker);
+export default React.memo(withMuiWarning(LocalizedDateTimePicker));

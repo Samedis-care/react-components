@@ -128,6 +128,7 @@ export const renderDataGridRecordUsingModel = <
 										// this is unhandled in the data grid
 									},
 									errorMsg: null,
+									warningMsg: null,
 									setError: () => {
 										throw new Error("Not implemented in Grid");
 									},

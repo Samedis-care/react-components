@@ -6,6 +6,7 @@ import { ClassNameMap } from "@material-ui/styles/withStyles";
 
 export interface UIInputProps {
 	important?: boolean;
+	warning?: boolean;
 }
 
 interface UIInputPropsWithStyles extends UIInputProps {

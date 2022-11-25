@@ -1,5 +1,4 @@
 import React from "react";
-import { FormHelperText } from "@material-ui/core";
 import { ModelRenderParams } from "../../index";
 import ccI18n from "../../../../i18n";
 import TypeFiles from "../TypeFiles";
@@ -7,6 +6,7 @@ import FileUpload, {
 	FileData,
 } from "../../../../standalone/FileUpload/Generic";
 import GroupBox from "../../../../standalone/GroupBox";
+import { FormHelperTextCC } from "../../../../standalone";
 
 /**
  * Renders a file selector
@@ -21,6 +21,7 @@ class RendererFiles extends TypeFiles {
 			handleChange,
 			handleBlur,
 			errorMsg,
+			warningMsg,
 			setError,
 		} = params;
 
@@ -63,7 +64,9 @@ class RendererFiles extends TypeFiles {
 							smallLabel={this.params?.smallLabel}
 						/>
 					</div>
-					<FormHelperText error={!!errorMsg}>{errorMsg}</FormHelperText>
+					<FormHelperTextCC error={!!errorMsg} warning={!!warningMsg}>
+						{errorMsg || warningMsg}
+					</FormHelperTextCC>
 				</>
 			);
 		}

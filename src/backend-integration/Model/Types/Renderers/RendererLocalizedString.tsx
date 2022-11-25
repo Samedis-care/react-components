@@ -1,11 +1,12 @@
 import React from "react";
-import { FormHelperText, Typography } from "@material-ui/core";
+import { Typography } from "@material-ui/core";
 import { ModelRenderParams } from "../../index";
 import MultiLanguageInput, {
 	MultiLanguageInputProps,
 	MultiLanguageInputSupportedLanguages,
 } from "../../../../standalone/UIKit/InputControls/MultiLanguageInput";
 import TypeLocalizedString from "../TypeLocalizedString";
+import { FormHelperTextCC } from "../../../../standalone";
 
 export type ModelDataTypeLocalizedStringRendererParams = Omit<
 	MultiLanguageInputProps,
@@ -17,6 +18,7 @@ export type ModelDataTypeLocalizedStringRendererParams = Omit<
 	| "onChange"
 	| "onBlur"
 	| "error"
+	| "warning"
 >;
 
 /**
@@ -44,6 +46,7 @@ class RendererLocalizedString extends TypeLocalizedString {
 			handleChange,
 			handleBlur,
 			errorMsg,
+			warningMsg,
 		} = params;
 
 		if (visibility.disabled) return <></>;
@@ -79,8 +82,11 @@ class RendererLocalizedString extends TypeLocalizedString {
 						}}
 						onBlur={handleBlur}
 						error={!!errorMsg}
+						warning={!!warningMsg}
 					/>
-					<FormHelperText error={!!errorMsg}>{errorMsg}</FormHelperText>
+					<FormHelperTextCC error={!!errorMsg} warning={!!warningMsg}>
+						{errorMsg || warningMsg}
+					</FormHelperTextCC>
 				</>
 			);
 		}

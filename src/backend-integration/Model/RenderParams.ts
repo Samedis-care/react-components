@@ -41,6 +41,10 @@ interface RenderParams<T> {
 	 */
 	errorMsg: string | null;
 	/**
+	 * The warning/hint or null if no warning/hint
+	 */
+	warningMsg: string | null;
+	/**
 	 * Function to set a new global form error
 	 * @param error The error to display
 	 */

@@ -1,10 +1,11 @@
 import React from "react";
-import { FormControl, FormHelperText, Typography } from "@material-ui/core";
+import { FormHelperText, Typography } from "@material-ui/core";
 import { ModelRenderParams } from "../../../index";
 import TypeEnumMulti, { AdvancedMultiEnumValue } from "../TypeEnumMulti";
 import ccI18n from "../../../../i18n";
 import {
 	BaseSelectorData,
+	FormControlFieldsetCC,
 	MultiSelectorData,
 	MultiSelectProps,
 } from "../../../../standalone";
@@ -37,6 +38,7 @@ class RendererEnumMultiSelect extends TypeEnumMulti {
 			handleChange,
 			handleBlur,
 			errorMsg,
+			warningMsg,
 			value,
 		} = params;
 
@@ -69,11 +71,12 @@ class RendererEnumMultiSelect extends TypeEnumMulti {
 				);
 
 			return (
-				<FormControl
+				<FormControlFieldsetCC
 					component={"fieldset"}
 					required={visibility.required}
 					fullWidth
 					error={!!errorMsg}
+					warning={!!warningMsg}
 					onBlur={handleBlur}
 					name={field}
 				>
@@ -90,8 +93,8 @@ class RendererEnumMultiSelect extends TypeEnumMulti {
 						disabled={visibility.readOnly}
 						{...this.props}
 					/>
-					<FormHelperText>{errorMsg}</FormHelperText>
-				</FormControl>
+					<FormHelperText>{errorMsg || warningMsg}</FormHelperText>
+				</FormControlFieldsetCC>
 			);
 		}
 		return (

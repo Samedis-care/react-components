@@ -1,6 +1,5 @@
 import React from "react";
 import {
-	FormControl,
 	FormControlLabel,
 	FormHelperText,
 	Typography,
@@ -9,6 +8,7 @@ import { ModelRenderParams } from "../../../index";
 import TypeBoolean from "../../TypeBoolean";
 import ccI18n from "../../../../../i18n";
 import Checkbox from "../../../../../standalone/UIKit/Checkbox";
+import { FormControlFieldsetCC } from "../../../../../standalone";
 
 /**
  * Renders a TypeBoolean field as Checkbox
@@ -31,6 +31,7 @@ class RendererBooleanCheckbox extends TypeBoolean {
 			handleChange,
 			handleBlur,
 			errorMsg,
+			warningMsg,
 		} = params;
 
 		if (visibility.disabled) return <></>;
@@ -64,14 +65,15 @@ class RendererBooleanCheckbox extends TypeBoolean {
 			return visibility.grid ? (
 				control
 			) : (
-				<FormControl
+				<FormControlFieldsetCC
 					required={visibility.required}
 					error={!!errorMsg}
+					warning={!!warningMsg}
 					component={"fieldset"}
 				>
 					<FormControlLabel control={control} label={label} />
-					<FormHelperText>{errorMsg}</FormHelperText>
-				</FormControl>
+					<FormHelperText>{errorMsg || warningMsg}</FormHelperText>
+				</FormControlFieldsetCC>
 			);
 		}
 		return (

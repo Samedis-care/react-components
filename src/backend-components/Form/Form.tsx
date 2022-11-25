@@ -28,8 +28,12 @@ import {
 	getValueByDot,
 	isObjectEmpty,
 } from "../../utils";
+import { Grid } from "@material-ui/core";
 import { getVisibility } from "../../backend-integration/Model/Visibility";
 import { QueryObserverBaseResult } from "react-query/types/core/types";
+import { showConfirmDialogBool } from "../../non-standalone";
+import useCCTranslations from "../../utils/useCCTranslations";
+import { useDialogContext } from "../../framework";
 
 // optional import
 let captureException: ((e: Error) => void) | null = null;
@@ -388,6 +392,10 @@ export interface FormContextData {
 	 */
 	errors: Record<string, string | null>;
 	/**
+	 * The current validation warnings (aka hints)
+	 */
+	warnings: Record<string, string | null>;
+	/**
 	 * The current field touched state
 	 */
 	touched: Record<string, boolean>;
@@ -427,7 +435,9 @@ export interface FormContextData {
 	 * Validates the form and returns a list of validation errors
 	 * If the returned object is empty no validation errors occurred.
 	 */
-	validateForm: () => Promise<ValidationError> | ValidationError;
+	validateForm: (
+		mode?: "normal" | "hint"
+	) => Promise<ValidationError> | ValidationError;
 	/**
 	 * Parent form context (if present and FormProps.nestedFormName is set)
 	 */
@@ -469,6 +479,7 @@ export interface FormNestedState {
 	values: Record<string, unknown>;
 	touched: Record<string, boolean>;
 	errors: Record<string, string | null>;
+	warnings: Record<string, string | null>;
 }
 
 const loaderContainerStyles: CSSProperties = {
@@ -526,6 +537,8 @@ const Form = <
 	const onlySubmitMountedBehaviour =
 		props.onlySubmitMountedBehaviour ?? OnlySubmitMountedBehaviour.OMIT;
 	const ErrorComponent = props.errorComponent;
+	const { t } = useCCTranslations();
+	const [pushDialog] = useDialogContext();
 
 	// custom fields - dirty state
 	// v1
@@ -628,12 +641,14 @@ const Form = <
 		customDirty ||
 		!!(id && !deleted && deleteOnSubmit);
 	const [errors, setErrors] = useState<Record<string, string | null>>({});
+	const [warnings, setWarnings] = useState<Record<string, string | null>>({});
 	const [submitting, setSubmitting] = useState(false);
 
 	// main form handling - validation disable toggle
 	useEffect(() => {
 		if (!disableValidation) return;
 		setErrors({});
+		setWarnings({});
 	}, [disableValidation]);
 
 	// main form handling - mounted state tracking
@@ -646,7 +661,10 @@ const Form = <
 
 	// main form handling - dispatch
 	const validateForm = useCallback(
-		async (values?: Record<string, unknown>) => {
+		async (
+			mode: "normal" | "hint" = "normal",
+			values?: Record<string, unknown>
+		) => {
 			if (disableValidation) return {};
 
 			const errors = await model.validate(
@@ -656,7 +674,8 @@ const Form = <
 					? (Object.keys(mountedFields).filter(
 							(field) => mountedFields[field as KeyT]
 					  ) as KeyT[])
-					: undefined
+					: undefined,
+				mode
 			);
 			await Promise.all(
 				Object.entries(customValidationHandlers.current).map(
@@ -676,12 +695,14 @@ const Form = <
 	);
 	const validateField = useCallback(
 		async (field: string, value?: unknown) => {
-			const errors = await validateForm(
+			const values =
 				value !== undefined
 					? deepAssign({}, valuesRef.current, dotToObject(field, value))
-					: undefined
-			);
+					: undefined;
+			const errors = await validateForm("normal", values);
+			const warnings = await validateForm("hint", values);
 			setErrors(errors);
+			setWarnings(warnings);
 		},
 		[validateForm]
 	);
@@ -830,11 +851,40 @@ const Form = <
 			return;
 		}
 		try {
-			const validation = await validateForm();
+			const validationHints = await validateForm("hint");
+			setWarnings(validationHints);
+			const validation = await validateForm("normal");
 			setErrors(validation);
 			if (!isObjectEmpty(validation)) {
 				// noinspection ExceptionCaughtLocallyJS
 				throw validation;
+			}
+
+			if (!isObjectEmpty(validationHints)) {
+				setSubmitting(false);
+				const continueSubmit = await showConfirmDialogBool(pushDialog, {
+					title: t("backend-components.form.submit-with-warnings.title"),
+					message: (
+						<Grid container spacing={2}>
+							<Grid item xs={12}>
+								{t("backend-components.form.submit-with-warnings.message")}
+							</Grid>
+							<Grid item xs={12}>
+								<ul>
+									{Object.entries(validationHints).map(([key, value]) => (
+										<li key={key}>{value}</li>
+									))}
+								</ul>
+							</Grid>
+						</Grid>
+					),
+					textButtonYes: t("backend-components.form.submit-with-warnings.yes"),
+					textButtonNo: t("backend-components.form.submit-with-warnings.no"),
+				});
+				if (!continueSubmit) {
+					return;
+				}
+				setSubmitting(true);
 			}
 
 			const isMounted = (key: KeyT): boolean =>
@@ -912,21 +962,22 @@ const Form = <
 			setSubmitting(false);
 		}
 	}, [
-		id,
-		model,
+		serverData,
+		preSubmit,
+		deleteOnSubmit,
+		setFieldValue,
+		onDeleted,
+		deleteRecord,
 		validateForm,
 		updateData,
 		onlySubmitMounted,
-		onlySubmitMountedBehaviour,
-		postSubmitHandlers,
 		onSubmit,
+		pushDialog,
+		t,
 		mountedFields,
-		deleteOnSubmit,
-		onDeleted,
-		deleteRecord,
-		preSubmit,
-		serverData,
-		setFieldValue,
+		model,
+		id,
+		onlySubmitMountedBehaviour,
 	]);
 	const handleSubmit = useCallback(
 		(evt: FormEvent<HTMLFormElement>) => {
@@ -952,6 +1003,7 @@ const Form = <
 		valuesRef.current = state.values;
 		setValues(state.values);
 		setErrors(state.errors);
+		setWarnings(state.warnings);
 		setTouched(state.touched);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
@@ -962,6 +1014,7 @@ const Form = <
 		parentFormContext.setCustomState<FormNestedState>(nestedFormName, () => ({
 			values,
 			errors,
+			warnings,
 			touched,
 		}));
 
@@ -978,6 +1031,7 @@ const Form = <
 	}, [
 		values,
 		errors,
+		warnings,
 		touched,
 		parentFormContext?.setCustomState,
 		nestedFormName,
@@ -1134,6 +1188,7 @@ const Form = <
 			initialValues: serverData ? serverData[0] : {},
 			touched,
 			errors,
+			warnings,
 			setFieldValue,
 			getFieldValue,
 			handleBlur,
@@ -1170,6 +1225,7 @@ const Form = <
 			values,
 			touched,
 			errors,
+			warnings,
 			setFieldValue,
 			getFieldValue,
 			handleBlur,

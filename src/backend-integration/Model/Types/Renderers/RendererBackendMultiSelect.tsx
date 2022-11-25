@@ -1,12 +1,15 @@
 import React from "react";
-import { FormControl, FormHelperText } from "@material-ui/core";
+import { FormHelperText } from "@material-ui/core";
 import { ModelFieldName, ModelRenderParams, PageVisibility } from "../../index";
 import TypeStringArray from "../TypeStringArray";
 import BackendMultiSelect, {
 	BackendMultiSelectProps,
 } from "../../../../backend-components/Selector/BackendMultiSelect";
 import Model from "../../Model";
-import { MultiSelectorData } from "../../../../standalone";
+import {
+	FormControlFieldsetCC,
+	MultiSelectorData,
+} from "../../../../standalone";
 
 type OmitProperties =
 	| "selected"
@@ -46,6 +49,7 @@ class RendererBackendMultiSelect<
 			handleChange,
 			handleBlur,
 			errorMsg,
+			warningMsg,
 			relationData,
 			relationModel,
 			value,
@@ -72,11 +76,12 @@ class RendererBackendMultiSelect<
 				);
 
 			return (
-				<FormControl
+				<FormControlFieldsetCC
 					component={"fieldset"}
 					required={visibility.required}
 					fullWidth
 					error={!!errorMsg}
+					warning={!!warningMsg}
 					onBlur={handleBlur}
 					name={field}
 				>
@@ -91,8 +96,8 @@ class RendererBackendMultiSelect<
 						initialData={relationData}
 						{...this.props}
 					/>
-					<FormHelperText>{errorMsg}</FormHelperText>
-				</FormControl>
+					<FormHelperText>{errorMsg || warningMsg}</FormHelperText>
+				</FormControlFieldsetCC>
 			);
 		}
 

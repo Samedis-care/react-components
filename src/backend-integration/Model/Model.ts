@@ -87,6 +87,15 @@ export interface ModelFieldDefinition<
 		field: ModelFieldDefinition<TypeT, KeyT, VisibilityT, CustomT>
 	) => Promise<string | null> | string | null;
 	/**
+	 * Callback to validate field to provide optional hints
+	 */
+	validateHint?: ModelFieldDefinition<
+		TypeT,
+		KeyT,
+		VisibilityT,
+		CustomT
+	>["validate"];
+	/**
 	 * User-defined data
 	 */
 	customData: CustomT;
@@ -719,13 +728,16 @@ class Model<
 	 * @param values The values to validate
 	 * @param view Optional view filter (only applies validations on fields present in given view)
 	 * @param fieldsToValidate List of fields to validate
+	 * @param type The validation type (normal = validate, hint = validateHint]
 	 */
 	public async validate(
 		values: Record<string, unknown>,
 		view?: "edit" | "create",
-		fieldsToValidate?: KeyT[]
+		fieldsToValidate?: KeyT[],
+		type: "normal" | "hint" = "normal"
 	): Promise<Record<string, string>> {
 		const errors: Record<string, string> = {};
+		const validationFunction = type === "normal" ? "validate" : "validateHint";
 
 		await Promise.all(
 			Object.keys(this.fields).map(async (field) => {
@@ -743,7 +755,10 @@ class Model<
 					// first apply type validation
 					let error: string | null;
 					try {
-						error = await fieldDef.type.validate(value);
+						const validate = fieldDef.type[validationFunction]?.bind(
+							fieldDef.type
+						);
+						error = validate ? await validate(value) : null;
 					} catch (e) {
 						// eslint-disable-next-line
 						console.error(
@@ -755,7 +770,7 @@ class Model<
 					}
 
 					// then apply custom field validation if present
-					const fieldValidation = fieldDef.validate;
+					const fieldValidation = fieldDef[validationFunction]?.bind(fieldDef);
 					if (!error && fieldValidation) {
 						try {
 							error = await fieldValidation(value, values, fieldDef);

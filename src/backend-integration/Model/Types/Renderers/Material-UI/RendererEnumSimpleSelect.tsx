@@ -1,6 +1,5 @@
 import React from "react";
 import {
-	FormControl,
 	FormHelperText,
 	InputLabel,
 	MenuItem,
@@ -10,6 +9,7 @@ import {
 import { ModelRenderParams } from "../../../index";
 import TypeEnum from "../../TypeEnum";
 import ccI18n from "../../../../../i18n";
+import { FormControlFieldsetCC } from "../../../../../standalone";
 
 /**
  * Renders TypeEnum as drop-down selector (without search)
@@ -24,6 +24,7 @@ class RendererEnumSelect extends TypeEnum {
 			handleChange,
 			handleBlur,
 			errorMsg,
+			warningMsg,
 		} = params;
 
 		if (visibility.disabled) return <></>;
@@ -40,11 +41,12 @@ class RendererEnumSelect extends TypeEnum {
 		}
 		if (visibility.editable) {
 			return (
-				<FormControl
+				<FormControlFieldsetCC
 					component={"fieldset"}
 					required={visibility.required}
 					fullWidth
 					error={!!errorMsg}
+					warning={!!warningMsg}
 				>
 					<InputLabel shrink>{label}</InputLabel>
 					<Select
@@ -60,8 +62,8 @@ class RendererEnumSelect extends TypeEnum {
 							</MenuItem>
 						))}
 					</Select>
-					<FormHelperText>{errorMsg}</FormHelperText>
-				</FormControl>
+					<FormHelperText>{errorMsg || warningMsg}</FormHelperText>
+				</FormControlFieldsetCC>
 			);
 		}
 		const valueInfo = this.values.find((entry) => entry.value === value);

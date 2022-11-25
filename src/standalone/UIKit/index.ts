@@ -6,4 +6,5 @@ export { default as TextFieldWithHelp } from "./TextFieldWithHelp";
 export { default as NumberFormatter } from "./NumberFormatter";
 export { default as CenteredTypography } from "./CenteredTypography";
 export { default as Checkbox } from "./Checkbox";
+export * from "./MuiWarning";
 export * from "./InputControls";

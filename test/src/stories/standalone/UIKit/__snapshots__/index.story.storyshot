@@ -60,6 +60,18 @@ exports[`Storyshots Standalone/UIKit FormButtons 1`] = `
 </Memo(ComponentsCareFramework)>
 `;
 
+exports[`Storyshots Standalone/UIKit FormControlCC 1`] = `
+<Memo(ComponentsCareFramework)
+  defaultTheme={[Function]}
+>
+  <Suspense
+    fallback={<Memo(Loader) />}
+  >
+    <Memo(MobileScalingFix) />
+  </Suspense>
+</Memo(ComponentsCareFramework)>
+`;
+
 exports[`Storyshots Standalone/UIKit IconButtonWithText 1`] = `
 <Memo(ComponentsCareFramework)
   defaultTheme={[Function]}

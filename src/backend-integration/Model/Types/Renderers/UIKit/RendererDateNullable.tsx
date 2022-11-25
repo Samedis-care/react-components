@@ -1,10 +1,10 @@
 import React from "react";
-import { FormHelperText, Typography } from "@material-ui/core";
+import { Typography } from "@material-ui/core";
 import { ModelRenderParams } from "../../../index";
 import TypeDateNullable from "../../TypeDateNullable";
 import ccI18n from "../../../../../i18n";
 import { normalizeDate } from "../../Utils/DateUtils";
-import { DateInput } from "../../../../../standalone";
+import { DateInput, FormHelperTextCC } from "../../../../../standalone";
 import i18n from "../../../../../i18n";
 import { ToDateLocaleStringOptions } from "../../../../../constants";
 import { IDataGridColumnDef } from "../../../../../standalone/DataGrid/DataGrid";
@@ -45,6 +45,7 @@ class RendererDateNullable extends TypeDateNullable {
 			handleChange,
 			handleBlur,
 			errorMsg,
+			warningMsg,
 			setFieldTouched,
 		} = params;
 
@@ -77,6 +78,7 @@ class RendererDateNullable extends TypeDateNullable {
 						}
 						onBlur={handleBlur}
 						error={!!errorMsg}
+						warning={!!warningMsg}
 						onError={(error: React.ReactNode) => {
 							this.error = error
 								? ccI18n.t(
@@ -88,7 +90,9 @@ class RendererDateNullable extends TypeDateNullable {
 						fullWidth
 						clearable
 					/>
-					<FormHelperText error={!!errorMsg}>{errorMsg}</FormHelperText>
+					<FormHelperTextCC error={!!errorMsg} warning={!!warningMsg}>
+						{errorMsg || warningMsg}
+					</FormHelperTextCC>
 				</>
 			);
 		}

@@ -1,6 +1,5 @@
 import React from "react";
 import {
-	FormControl,
 	FormControlLabel,
 	FormHelperText,
 	Switch,
@@ -10,6 +9,7 @@ import {
 import { ModelRenderParams } from "../../../index";
 import TypeBoolean from "../../TypeBoolean";
 import ccI18n from "../../../../../i18n";
+import { FormControlFieldsetCC } from "../../../../../standalone/UIKit/MuiWarning";
 
 export interface ModelDataTypeBooleanSwitchRendererMUIProps {
 	switchProps: Omit<
@@ -44,6 +44,7 @@ class RendererBooleanSwitch extends TypeBoolean {
 			handleChange,
 			handleBlur,
 			errorMsg,
+			warningMsg,
 		} = params;
 
 		if (visibility.disabled) return <></>;
@@ -62,9 +63,10 @@ class RendererBooleanSwitch extends TypeBoolean {
 			if (visibility.grid) throw new Error("Not supported");
 
 			return (
-				<FormControl
+				<FormControlFieldsetCC
 					required={visibility.required}
 					error={!!errorMsg}
+					warning={!!warningMsg}
 					component={"fieldset"}
 				>
 					<FormControlLabel
@@ -88,8 +90,8 @@ class RendererBooleanSwitch extends TypeBoolean {
 						}
 						label={label}
 					/>
-					<FormHelperText>{errorMsg}</FormHelperText>
-				</FormControl>
+					<FormHelperText>{errorMsg || warningMsg}</FormHelperText>
+				</FormControlFieldsetCC>
 			);
 		}
 		return (

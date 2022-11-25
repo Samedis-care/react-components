@@ -1,6 +1,7 @@
 import React from "react";
 import { DatePicker, DatePickerProps } from "@material-ui/pickers";
 import useCCTranslations from "../../utils/useCCTranslations";
+import { withMuiWarning } from "../UIKit";
 
 type LocalizedDatePickerProps = Omit<
 	DatePickerProps,
@@ -50,4 +51,4 @@ const LocalizedDatePicker = (props: LocalizedDatePickerProps) => {
 	);
 };
 
-export default React.memo(LocalizedDatePicker);
+export default React.memo(withMuiWarning(LocalizedDatePicker));
