@@ -541,15 +541,13 @@ const FileUpload = (props: FileUploadProps): React.ReactElement => {
 												/>
 											)
 									)}
-									{readOnly && files.length === 0 && (
-										<Grid item>
-											<Typography>
-												{t("standalone.file-upload.no-files")}
-											</Typography>
-										</Grid>
-									)}
 								</Grid>
 							</Box>
+						</Grid>
+					)}
+					{readOnly && files.length === 0 && (
+						<Grid item xs={12} key={"no-files"}>
+							<Typography>{t("standalone.file-upload.no-files")}</Typography>
 						</Grid>
 					)}
 					{!readOnly && (
