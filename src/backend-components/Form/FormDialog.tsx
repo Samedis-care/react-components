@@ -30,6 +30,10 @@ export interface FormDialogProps {
 	 * Called on dialog close
 	 */
 	onClose?: () => void;
+	/**
+	 * Disable automatic special handling of form dialog. Use if form dialog is only used as layout/design component
+	 */
+	disableFormDialogContext?: boolean;
 }
 
 const dialogStyles = makeStyles({
@@ -61,6 +65,7 @@ const FormDialog = (props: FormDialogProps) => {
 		openInNewLink,
 		children,
 		onClose,
+		disableFormDialogContext,
 	} = props;
 	const [pushDialog, popDialog] = useDialogContext();
 	const classes = dialogStyles();
@@ -115,7 +120,7 @@ const FormDialog = (props: FormDialogProps) => {
 			<DialogContent
 				classes={useCustomClasses ? { root: classes.content } : undefined}
 			>
-				<IsInFormDialogContext.Provider value={true}>
+				<IsInFormDialogContext.Provider value={!disableFormDialogContext}>
 					<FormDialogDispatchContext.Provider value={dispatch}>
 						{children}
 					</FormDialogDispatchContext.Provider>
