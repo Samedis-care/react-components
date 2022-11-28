@@ -259,6 +259,11 @@ export interface FormProps<
 	 * @remarks This is used to prevent errors when using forms in dialogs which don't support routing
 	 */
 	disableRouting?: boolean;
+	/**
+	 * List of fields to ignore when calculating form dirty state.
+	 * Useful for frontend-only fields. Format: dot notation (e.g. object.sub-object.field OR field)
+	 */
+	dirtyIgnoreFields?: string[];
 }
 
 export interface FormContextData {
@@ -491,17 +496,26 @@ const loaderContainerStyles: CSSProperties = {
 /**
  * Normalizes data for validation to ensure dirty flag matches user perception
  * @param data The data to normalize
+ * @param ignoreFields List of fields to ignore (nulled internally)
  */
-const normalizeValues = <T,>(data: T): T => {
+const normalizeValues = <T,>(
+	data: T,
+	ignoreFields: string[] | undefined | null
+): T => {
 	if (typeof data !== "object")
 		throw new Error("Only Record<string, unknown> supported");
-	const normalizedData: Record<string, unknown> = {};
+	let normalizedData: Record<string, unknown> = {};
 	Object.entries(data as Record<string, unknown>)
 		.sort((a, b) => a[0].localeCompare(b[0]))
 		.forEach(([k, v]) => {
 			const shouldBeNulled = v === "" || (Array.isArray(v) && v.length === 0);
 			normalizedData[k] = shouldBeNulled ? null : v;
 		});
+	if (ignoreFields) {
+		ignoreFields.forEach((field) => {
+			normalizedData = dotSet(field, normalizedData, null);
+		});
+	}
 	return normalizedData as T;
 };
 
@@ -533,6 +547,7 @@ const Form = <
 		onlySubmitNestedIfMounted,
 		formClass,
 		preSubmit,
+		dirtyIgnoreFields,
 	} = props;
 	const onlySubmitMountedBehaviour =
 		props.onlySubmitMountedBehaviour ?? OnlySubmitMountedBehaviour.OMIT;
@@ -633,10 +648,10 @@ const Form = <
 		useMemo(
 			() =>
 				serverData
-					? JSON.stringify(normalizeValues(values)) !==
-					  JSON.stringify(normalizeValues(serverData[0]))
+					? JSON.stringify(normalizeValues(values, dirtyIgnoreFields)) !==
+					  JSON.stringify(normalizeValues(serverData[0], dirtyIgnoreFields))
 					: false,
-			[values, serverData]
+			[values, serverData, dirtyIgnoreFields]
 		) ||
 		customDirty ||
 		!!(id && !deleted && deleteOnSubmit);
@@ -1112,8 +1127,8 @@ const Form = <
 			}
 
 			// normalize data
-			const localData = normalizeValues(values);
-			const remoteData = normalizeValues(serverData[0]);
+			const localData = normalizeValues(values, dirtyIgnoreFields);
+			const remoteData = normalizeValues(serverData[0], dirtyIgnoreFields);
 
 			console.log("Form Dirty Flag State:");
 			console.log(
@@ -1122,8 +1137,7 @@ const Form = <
 			);
 			console.log(
 				"Form Dirty State:",
-				JSON.stringify(normalizeValues(localData)) !==
-					JSON.stringify(normalizeValues(remoteData))
+				JSON.stringify(localData) !== JSON.stringify(remoteData)
 			);
 			console.log("Custom Dirty State:", customDirty);
 			console.log("Custom Dirty Fields:", customDirtyFields);
@@ -1148,7 +1162,14 @@ const Form = <
 			});
 			/* eslint-enable no-console */
 		},
-		[customDirty, customDirtyCounter, customDirtyFields, serverData, values]
+		[
+			customDirty,
+			customDirtyCounter,
+			customDirtyFields,
+			serverData,
+			values,
+			dirtyIgnoreFields,
+		]
 	);
 
 	// context and rendering
