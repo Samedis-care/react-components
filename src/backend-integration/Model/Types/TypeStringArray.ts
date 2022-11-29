@@ -24,6 +24,12 @@ abstract class TypeStringArray implements Type<string[]> {
 	stringify(value: string[]): string {
 		return value.join(",");
 	}
+
+	deserialize = (value: unknown): string[] => {
+		if (value == null) return [];
+		if (!Array.isArray(value)) throw new Error("data type mismatch");
+		return value as string[];
+	};
 }
 
 export default TypeStringArray;

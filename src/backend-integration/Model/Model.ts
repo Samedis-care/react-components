@@ -882,9 +882,6 @@ class Model<
 			const field = this.fields[key];
 
 			const value = getValueByDot(key, values);
-			if (value === undefined) {
-				continue;
-			}
 
 			// don't include disabled fields (except ID and disabled+readonly fields when serializing)
 			const visValue = getVisibility(field.visibility[visibility], values);
