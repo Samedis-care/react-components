@@ -28,7 +28,7 @@ abstract class TypeLocalizedString
 	}
 
 	getFilterType(): FilterType {
-		return "string";
+		return "localized-string";
 	}
 
 	getDefaultValue(): Partial<

@@ -3,6 +3,7 @@
  */
 type FilterType =
 	| "string"
+	| "localized-string"
 	| "number"
 	| "currency"
 	| "date"
