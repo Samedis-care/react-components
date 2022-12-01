@@ -8,7 +8,12 @@ const fileToData = async (file: File, includeName = false): Promise<string> => {
 	const reader = new FileReader();
 	return new Promise((resolve, reject) => {
 		reader.addEventListener("load", () => {
-			const dataUri = reader.result as string;
+			let dataUri = reader.result as string;
+			// if empty file in chromium
+			if (dataUri === "data:") {
+				// empty data uri in firefox
+				dataUri = "data:application/octet-stream;base64,";
+			}
 			resolve(
 				includeName
 					? dataUri.replace(
