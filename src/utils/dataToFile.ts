@@ -4,6 +4,9 @@
  * @return The blob
  */
 const dataToFile = (data: string): Blob => {
+	// handle empty data uri
+	if (data === "data:") return new Blob([new Uint8Array(0)]);
+
 	const arr = data.split(",");
 	if (arr.length < 2) throw new Error("Invalid data uri: " + data.slice(0, 64));
 	const mimeMatch = arr[0].match(/:(.*?);/);
