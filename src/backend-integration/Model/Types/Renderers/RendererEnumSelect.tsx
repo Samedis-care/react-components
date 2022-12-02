@@ -16,7 +16,7 @@ export type RendererEnumSelectProps = Omit<
 >;
 
 export type AdvancedEnumValue = Omit<BaseSelectorData, "label"> &
-	Pick<EnumValue, "getLabel" | "invisible">;
+	Pick<EnumValue, "getLabel" | "invisible" | "invisibleInGridFilter">;
 
 /**
  * Renders TypeEnum as drop-down selector (with search)

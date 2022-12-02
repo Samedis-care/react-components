@@ -7,6 +7,11 @@ export interface EnumValue {
 	value: string;
 	getLabel: () => string;
 	invisible?: boolean;
+	/**
+	 * Hide the entry in as grid filter enum selection (overwrites invisible)
+	 * @default to value of invisible
+	 */
+	invisibleInGridFilter?: boolean;
 	disabled?: boolean;
 	isDivider?: boolean;
 }

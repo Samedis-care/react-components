@@ -683,7 +683,7 @@ class Model<
 					);
 				filterData = value.type
 					.getEnumValues()
-					.filter((value) => !value.invisible)
+					.filter((value) => !(value.invisibleInGridFilter ?? value.invisible))
 					.map(
 						(value) =>
 							({
