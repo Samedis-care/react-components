@@ -228,6 +228,12 @@
 				"message": "Wijzigingen gaan verloren",
 				"yes": "Ja",
 				"no": "Nee"
+			},
+			"submit-with-warnings": {
+				"title": "Waarschuwing",
+				"message": "De volgende waarschuwingen zijn aanwezig, wilt u toch doorgaan?",
+				"yes": "Ja",
+				"no": "Nee"
 			}
 		},
 		"selector": {
