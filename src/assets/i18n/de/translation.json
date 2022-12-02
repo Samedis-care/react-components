@@ -228,6 +228,12 @@
 				"message": "Alle nicht gespeicherten Änderungen gehen verloren!",
 				"yes": "Ja",
 				"no": "Nein"
+			},
+			"submit-with-warnings": {
+				"title": "Warnung",
+				"message": "Es sind Warnungen vorhanden, trotzdem fortfahren?",
+				"yes": "Ja",
+				"no": "Nein"
 			}
 		},
 		"selector": {
@@ -280,7 +286,7 @@
 			"hour": "Stunde",
 			"hours": "Stunden",
 			"day": "Tag",
-			"days": "Tage",
+			"days": "Tagen",
 			"str": "Vor {{AMOUNT}} {{UNIT}}"
 		}
 	},
