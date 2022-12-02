@@ -59,6 +59,14 @@ const DialogContextProvider = (props: IFrameworkProps) => {
 		[setDialogs, t]
 	);
 	const popDialog = useCallback(() => {
+		if (dialogCount.current === 0) {
+			const err = new Error(
+				"[Components-Care] Trying to close non-existing dialog"
+			);
+			// eslint-disable-next-line no-console
+			console.error(err);
+			throw err;
+		}
 		// if all dialogs closed, remove callback
 		dialogCount.current--;
 		if (dialogCount.current === 0 && navBlock.current) {
