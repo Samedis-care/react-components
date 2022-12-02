@@ -228,6 +228,12 @@
 				"message": "Les modifications sont perdues",
 				"yes": "Oui",
 				"no": "Non"
+			},
+			"submit-with-warnings": {
+				"title": "Avertissement",
+				"message": "Les avertissements suivants sont présents, voulez-vous continuer quand même?",
+				"yes": "Oui",
+				"no": "Non"
 			}
 		},
 		"selector": {
