@@ -228,6 +228,12 @@
 				"message": "O'zgarishlar yo'qoladi",
 				"yes": "Ha",
 				"no": "Yo'q"
+			},
+			"submit-with-warnings": {
+				"title": "Ogohlantirish",
+				"message": "Quyidagi ogohlantirishlar mavjud, bunga qaramasdan davom etishni xohlaysizmi?",
+				"yes": "Ha",
+				"no": "Yo'q"
 			}
 		},
 		"selector": {
