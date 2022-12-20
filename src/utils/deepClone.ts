@@ -20,6 +20,13 @@ const deepClone = <T>(item: T): T => {
 		}
 	});
 
+	if (item instanceof File) {
+		result = new File([item], item.name, {
+			type: item.type,
+			lastModified: item.lastModified,
+		});
+	}
+
 	if (typeof result == "undefined") {
 		if (Array.isArray(item)) {
 			result = [];
