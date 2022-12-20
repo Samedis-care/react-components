@@ -1,0 +1,13 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots Standalone/Tree TreeView 1`] = `
+<Memo(ComponentsCareFramework)
+  defaultTheme={[Function]}
+>
+  <Suspense
+    fallback={<Memo(Loader) />}
+  >
+    <Memo(MobileScalingFix) />
+  </Suspense>
+</Memo(ComponentsCareFramework)>
+`;
