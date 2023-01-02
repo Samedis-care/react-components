@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, {
+	CSSProperties,
+	useCallback,
+	useEffect,
+	useMemo,
+	useState,
+} from "react";
 import {
 	IDataGridColumnDef,
 	IDataGridColumnProps,
@@ -176,16 +182,18 @@ const Content = (props: IDataGridContentProps) => {
 	);
 
 	const styleTopRightGrid = useMemo(
-		() => ({
+		(): CSSProperties => ({
 			overflow: "hidden",
+			overflowX:
+				(state.rowsFiltered ?? state.rowsTotal) === 0 ? "auto" : "hidden",
 			overscrollBehavior: "contain",
 			display: columns.length === 0 ? "none" : undefined,
 		}),
-		[columns.length]
+		[columns.length, state.rowsFiltered, state.rowsTotal]
 	);
 
 	const styleBottomLeftGrid = useMemo(
-		() => ({
+		(): CSSProperties => ({
 			overflow: "hidden",
 			display:
 				(state.rowsFiltered ?? state.rowsTotal) === 0 ? "none" : undefined,
