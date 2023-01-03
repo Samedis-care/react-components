@@ -209,7 +209,9 @@ const ImageSelector = (props: ImageSelectorProps) => {
 
 			evt.preventDefault();
 
-			await processFile(evt.dataTransfer?.files[0]);
+			const file = evt.dataTransfer?.files[0];
+			if (!file) return;
+			await processFile(file);
 		},
 		[readOnly, processFile]
 	);
