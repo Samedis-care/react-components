@@ -6,6 +6,7 @@ import React, {
 	PropsWithChildren,
 	ReactNodeArray,
 	ForwardedRef,
+	useMemo,
 } from "react";
 import {
 	ListItemText,
@@ -426,6 +427,13 @@ const GrowPopper = React.forwardRef(function GrowPopperImpl(
 	);
 });
 
+export interface BaseSelectorContextType {
+	addToLru: (...ids: string[]) => void;
+}
+export const BaseSelectorContext = React.createContext<BaseSelectorContextType | null>(
+	null
+);
+
 const BaseSelector = <DataT extends BaseSelectorData>(
 	props: BaseSelectorProps<DataT>
 ) => {
@@ -552,6 +560,19 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 		[enableIcons, renderIcon, customClasses]
 	);
 
+	const addToLru = useCallback(
+		(...addIds: string[]) => {
+			if (!lru) return;
+			setLruIds((prev) =>
+				[...addIds, ...prev.filter((id) => !addIds.includes(id))].slice(
+					0,
+					lru.count
+				)
+			);
+		},
+		[lru]
+	);
+
 	const onChangeHandler = useCallback(
 		async (data: DataT | NonNullable<DataT> | null) => {
 			if (!data || typeof data !== "object" || !("value" in data)) {
@@ -577,19 +598,17 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 			}
 			if (onSelect) {
 				onSelect(data);
-				if (lru && data) {
-					const dataNN: DataT = data; // please Typescript
-					// add to LRU
-					setLruIds((prev) =>
-						[getId(dataNN), ...prev.filter((id) => id !== getId(dataNN))].slice(
-							0,
-							lru.count
-						)
-					);
-				}
+				addToLru(getId(data as DataT));
 			}
 		},
-		[onSelect, onAddNew, lru, getId]
+		[onSelect, onAddNew, addToLru, getId]
+	);
+
+	const context = useMemo<BaseSelectorContextType>(
+		() => ({
+			addToLru,
+		}),
+		[addToLru]
 	);
 
 	const onSearchHandler = useCallback(
@@ -727,7 +746,7 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 			label={switchLabel}
 			classes={customClasses}
 		>
-			<>
+			<BaseSelectorContext.Provider value={context}>
 				{label && <InputLabel shrink>{label}</InputLabel>}
 				<Paper elevation={0} className={customClasses.wrapper}>
 					<Autocomplete
@@ -845,7 +864,7 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 						}`}
 					/>
 				</Paper>
-			</>
+			</BaseSelectorContext.Provider>
 		</InlineSwitch>
 	);
 };
