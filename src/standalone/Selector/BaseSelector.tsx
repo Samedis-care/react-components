@@ -598,7 +598,9 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 			}
 			if (onSelect) {
 				onSelect(data);
-				addToLru(getId(data as DataT));
+				if (data != null) {
+					addToLru(getId(data as DataT));
+				}
 			}
 		},
 		[onSelect, onAddNew, addToLru, getId]
