@@ -120,8 +120,11 @@ export interface ModelFieldDefinition<
 	/**
 	 * The referenced model for backend connected data types.
 	 * If TypeScript complains cast the return value to `Model<ModelFieldName, PageVisibility, unknown>`
+	 * @param id The current record ID
 	 */
-	getRelationModel?: () => Model<ModelFieldName, PageVisibility, unknown>;
+	getRelationModel?: (
+		id: string | null
+	) => Model<ModelFieldName, PageVisibility, unknown>;
 	// TypeScript doesn't like the following definition (it would save you the cast):
 	//getRelationModel?: <
 	//	SubKeyT extends ModelFieldName,
@@ -476,8 +479,13 @@ class Model<
 	private async deserializeResponse(
 		rawData: ModelGetResponse<KeyT>
 	): Promise<ModelGetResponse<KeyT>> {
+		const deserialized = await this.applySerialization(
+			rawData[0],
+			"deserialize",
+			"edit"
+		);
 		return [
-			await this.applySerialization(rawData[0], "deserialize", "edit"),
+			deserialized,
 			Object.fromEntries(
 				await Promise.all(
 					Object.entries(rawData[1]).map(async (keyValue) => {
@@ -499,11 +507,9 @@ class Model<
 							refModel
 								? await Promise.all(
 										values.map((value) =>
-											refModel().applySerialization(
-												value,
-												"deserialize",
-												"edit"
-											)
+											refModel(
+												deserialized.id as string | null
+											).applySerialization(value, "deserialize", "edit")
 										)
 								  )
 								: null,

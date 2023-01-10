@@ -80,11 +80,6 @@ const Field = (props: FieldProps): React.ReactElement => {
 		[setFieldValue, getFieldValue, onChange, model]
 	);
 
-	const relationModel = useMemo(
-		() => (getRelationModel ? getRelationModel() : undefined),
-		[getRelationModel]
-	);
-
 	// mark field as mounted
 	useEffect(() => {
 		markFieldMounted(props.name, true);
@@ -94,7 +89,7 @@ const Field = (props: FieldProps): React.ReactElement => {
 	const { name } = props;
 	const value = getValueByDot(name, values);
 	const initialValue = initialValues[name];
-	const hasId = "id" in values && values["id"];
+	const hasId = "id" in values && (values["id"] as string | null);
 	const label = fieldDef.getLabel();
 	const touch = touched[props.name] || false;
 	const errorMsg = (touch && errors[props.name]) || null;
@@ -103,6 +98,11 @@ const Field = (props: FieldProps): React.ReactElement => {
 	const visibility = getVisibility(
 		hasId ? fieldDef.visibility.edit : fieldDef.visibility.create,
 		values
+	);
+
+	const relationModel = useMemo(
+		() => (getRelationModel ? getRelationModel(hasId || null) : undefined),
+		[getRelationModel, hasId]
 	);
 
 	const cacheKey = useMemo(
