@@ -59,6 +59,7 @@ class RendererBooleanCheckbox extends TypeBoolean {
 						handleChange(evt.target.name, this.invert ? !checked : checked);
 					}}
 					onBlur={handleBlur}
+					data-name={field}
 				/>
 			);
 
@@ -70,6 +71,7 @@ class RendererBooleanCheckbox extends TypeBoolean {
 					error={!!errorMsg}
 					warning={!!warningMsg}
 					component={"fieldset"}
+					data-name={field}
 				>
 					<FormControlLabel control={control} label={label} />
 					<FormHelperText>{errorMsg || warningMsg}</FormHelperText>
