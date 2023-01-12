@@ -157,7 +157,7 @@ const ActionButton = (props: ActionButtonProps) => {
 		<StyledButton
 			variant={"contained"}
 			disableElevation={true}
-			fullWidth={!small || fullWidth}
+			fullWidth={fullWidth ?? !small}
 			startIcon={icon}
 			// to suppress warning
 			small={small ? "true" : undefined}
