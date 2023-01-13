@@ -165,8 +165,7 @@ class ScrollableSchedule extends PureComponent<IProps, IState> {
 			return;
 		}
 
-		this.scrollElem.wrapper.scrollTop =
-			this.todayElem.offsetTop - this.todayElem.clientHeight - 20;
+		this.scrollElem.wrapper.scrollTop = this.todayElem.offsetTop;
 	};
 
 	onLanguageChanged = () => this.setState(this.getDefaultState());
@@ -187,6 +186,7 @@ const styles = createStyles((theme: Theme) => ({
 	scroller: {
 		overflow: "auto",
 		borderRadius: `0 0 ${theme.shape.borderRadius}px ${theme.shape.borderRadius}px`,
+		position: "relative",
 	},
 }));
 
