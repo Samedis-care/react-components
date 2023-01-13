@@ -20,11 +20,11 @@ export interface IDayData {
 	/**
 	 * Optional left click handler
 	 */
-	onClick?: () => void;
+	onClick?: React.MouseEventHandler;
 	/**
 	 * Optional middle click handler
 	 */
-	onAuxClick?: () => void;
+	onAuxClick?: React.MouseEventHandler;
 }
 
 export interface IProps extends WithStyles {
