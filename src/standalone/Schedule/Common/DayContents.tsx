@@ -27,6 +27,23 @@ export interface IDayData {
 	onAuxClick?: React.MouseEventHandler;
 }
 
+export interface ScheduleFilterDefinition {
+	/**
+	 * Filter options (value -> label)
+	 */
+	options: Record<string, string>;
+	/**
+	 * Default filter value
+	 */
+	defaultValue: string;
+	/**
+	 * Change handler
+	 * @param newFilter the new selected filter
+	 * @remarks Use to persist filter value
+	 */
+	onChange?: (newFilter: string) => void;
+}
+
 export interface IProps extends WithStyles {
 	data: IDayData[];
 }

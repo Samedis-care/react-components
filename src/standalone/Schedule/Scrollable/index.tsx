@@ -11,7 +11,7 @@ import {
 import moment, { Moment } from "moment";
 import ScrollableScheduleWeek from "./ScrollableScheduleWeek";
 import InfiniteScroll from "../../InfiniteScroll";
-import { IDayData } from "../Common/DayContents";
+import { IDayData, ScheduleFilterDefinition } from "../Common/DayContents";
 import i18n from "../../../i18n";
 import { combineClassNames } from "../../../utils";
 
@@ -19,14 +19,16 @@ import { combineClassNames } from "../../../utils";
  * Callback to load week data from a data source
  * @param weekOffset The week relative to the current week of year
  * 					 Example: -1 for last week, 0 for this week, 1 for next week
+ * @param filter The filter selected by the user
  * @returns A promise containing the data for the days of the week, may throw an
  * 			error. Format: IDayData[weekday starting Monday][n]
  */
 export type LoadWeekCallback = (
-	weekOffset: number
+	weekOffset: number,
+	filter: string | null
 ) => IDayData[][] | Promise<IDayData[][]>;
 
-export interface IProps extends WithStyles {
+export interface ScrollableScheduleProps extends WithStyles {
 	/**
 	 * CSS Class which specifies the infinite scroll height
 	 */
@@ -35,7 +37,18 @@ export interface IProps extends WithStyles {
 	 * The callback to load data for a week
 	 */
 	loadWeekCallback: LoadWeekCallback;
+
+	/**
+	 * Optional filter
+	 */
+	filter?: ScheduleFilterDefinition;
 }
+
+/**
+ * Outdated alias
+ * @deprecated use ScrollableScheduleProps
+ */
+export type IProps = ScrollableScheduleProps;
 
 interface IState {
 	/**
@@ -54,13 +67,20 @@ interface IState {
 	 * Today as moment.js object
 	 */
 	today: Moment;
+	/**
+	 * The selected filter value
+	 */
+	filterValue: string | null;
 }
 
-class ScrollableSchedule extends PureComponent<IProps, IState> {
+class ScrollableSchedule extends PureComponent<
+	ScrollableScheduleProps,
+	IState
+> {
 	public todayElem: HTMLElement | null = null;
 	public scrollElem: InfiniteScroll | null = null;
 
-	constructor(props: IProps) {
+	constructor(props: ScrollableScheduleProps) {
 		super(props);
 
 		this.state = this.getDefaultState();
@@ -79,6 +99,7 @@ class ScrollableSchedule extends PureComponent<IProps, IState> {
 		dataOffsetTop: -1,
 		dataOffsetBottom: 0,
 		today: moment(),
+		filterValue: this.props.filter?.defaultValue ?? null,
 	});
 
 	render() {
@@ -90,13 +111,37 @@ class ScrollableSchedule extends PureComponent<IProps, IState> {
 					className={this.props.classes.today}
 					onClick={this.jumpToToday}
 				>
-					<Button
-						className={this.props.classes.todayBtn}
-						onClick={this.jumpToToday}
-						fullWidth
-					>
-						<Box m={2}>{this.state.today.format("ddd DD MMMM")}</Box>
-					</Button>
+					<Grid container justify={"space-between"}>
+						<Grid item>
+							<Button
+								className={this.props.classes.todayBtn}
+								onClick={this.jumpToToday}
+								fullWidth
+							>
+								<Box m={2}>{this.state.today.format("ddd DD MMMM")}</Box>
+							</Button>
+						</Grid>
+						<Grid item>
+							{this.props.filter && (
+								<Box px={2} className={this.props.classes.filterWrapper}>
+									<select
+										onClick={this.preventAction}
+										className={this.props.classes.filterSelect}
+										value={this.state.filterValue ?? ""}
+										onChange={this.handleFilterSelect}
+									>
+										{Object.entries(this.props.filter.options).map(
+											([value, label]) => (
+												<option value={value} key={value}>
+													{label}
+												</option>
+											)
+										)}
+									</select>
+								</Box>
+							)}
+						</Grid>
+					</Grid>
 				</Grid>
 				<Grid item xs={12}>
 					<InfiniteScroll
@@ -142,7 +187,9 @@ class ScrollableSchedule extends PureComponent<IProps, IState> {
 		const item = (
 			<ScrollableScheduleWeek
 				key={page.toString()}
-				loadData={() => this.props.loadWeekCallback(page)}
+				loadData={() =>
+					this.props.loadWeekCallback(page, this.state.filterValue)
+				}
 				setTodayElement={(elem: HTMLElement | null) => (this.todayElem = elem)}
 				moment={this.state.today.clone().add(page - 1, "weeks")}
 			/>
@@ -168,6 +215,17 @@ class ScrollableSchedule extends PureComponent<IProps, IState> {
 		this.scrollElem.wrapper.scrollTop = this.todayElem.offsetTop;
 	};
 
+	preventAction = (evt: React.MouseEvent) => {
+		evt.stopPropagation();
+	};
+
+	handleFilterSelect = (evt: React.ChangeEvent<HTMLSelectElement>) => {
+		this.setState({
+			...this.getDefaultState(),
+			filterValue: evt.target.value,
+		});
+	};
+
 	onLanguageChanged = () => this.setState(this.getDefaultState());
 }
 
@@ -187,6 +245,17 @@ const styles = createStyles((theme: Theme) => ({
 		overflow: "auto",
 		borderRadius: `0 0 ${theme.shape.borderRadius}px ${theme.shape.borderRadius}px`,
 		position: "relative",
+	},
+	filterWrapper: {
+		top: "50%",
+		position: "relative",
+		transform: "translateY(-50%)",
+	},
+	filterSelect: {
+		backgroundColor: "transparent",
+		border: "none",
+		color: theme.palette.getContrastText(theme.palette.primary.main),
+		cursor: "pointer",
 	},
 }));
 

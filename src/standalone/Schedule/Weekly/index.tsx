@@ -2,6 +2,7 @@ import React, { PureComponent } from "react";
 import WeekViewDay from "./WeekViewDay";
 import moment, { Moment } from "moment";
 import {
+	Box,
 	CircularProgress,
 	createStyles,
 	IconButton,
@@ -9,7 +10,7 @@ import {
 	withStyles,
 } from "@material-ui/core";
 import { Button, Typography, Grid } from "@material-ui/core";
-import { IDayData } from "../Common/DayContents";
+import { IDayData, ScheduleFilterDefinition } from "../Common/DayContents";
 import { ArrowForwardIos, ArrowBackIos } from "@material-ui/icons";
 import { DatePicker, MuiPickersUtilsProvider } from "@material-ui/pickers";
 import MomentUtils from "@date-io/moment";
@@ -21,9 +22,18 @@ import useCCTranslations from "../../../utils/useCCTranslations";
 export interface IProps extends WithStyles, WithTranslation {
 	/**
 	 * Callback to load data of this week
-	 * @param weekOffset
+	 * @param weekOffset The offset to the current week
+	 * @param filter The selected filter
 	 */
-	loadData: (weekOffset: number) => IDayData[][] | Promise<IDayData[][]>;
+	loadData: (
+		weekOffset: number,
+		filter: string | null
+	) => IDayData[][] | Promise<IDayData[][]>;
+
+	/**
+	 * Optional filter
+	 */
+	filter?: ScheduleFilterDefinition;
 }
 
 interface IState {
@@ -45,6 +55,10 @@ interface IState {
 	 * If the date picker is open
 	 */
 	datePickerOpen: boolean;
+	/**
+	 * The current filter value
+	 */
+	filterValue: string | null;
 }
 
 class WeekView extends PureComponent<IProps, IState> {
@@ -56,6 +70,7 @@ class WeekView extends PureComponent<IProps, IState> {
 			data: null,
 			loadError: null,
 			datePickerOpen: false,
+			filterValue: props.filter?.defaultValue ?? null,
 		};
 	}
 
@@ -82,16 +97,42 @@ class WeekView extends PureComponent<IProps, IState> {
 		return (
 			<Grid container alignItems={"stretch"} alignContent={"space-between"}>
 				<Grid item xs={4}>
-					<Button onClick={this.today} className={this.props.classes.todayBtn}>
-						{this.props.t("standalone.schedule.today")} (
-						{now
-							.toDate()
-							.toLocaleDateString(
-								this.props.i18n.language,
-								ToDateLocaleStringOptions
+					<Grid container>
+						<Grid item>
+							<Button
+								onClick={this.today}
+								className={this.props.classes.todayBtn}
+							>
+								{this.props.t("standalone.schedule.today")} (
+								{now
+									.toDate()
+									.toLocaleDateString(
+										this.props.i18n.language,
+										ToDateLocaleStringOptions
+									)}
+								)
+							</Button>
+						</Grid>
+						<Grid item>
+							{this.props.filter && (
+								<Box px={2} className={this.props.classes.filterWrapper}>
+									<select
+										className={this.props.classes.filterSelect}
+										value={this.state.filterValue ?? ""}
+										onChange={this.handleFilterSelect}
+									>
+										{Object.entries(this.props.filter.options).map(
+											([value, label]) => (
+												<option value={value} key={value}>
+													{label}
+												</option>
+											)
+										)}
+									</select>
+								</Box>
 							)}
-						)
-					</Button>
+						</Grid>
+					</Grid>
 				</Grid>
 				<Grid item xs={4}>
 					<Grid container justify={"center"}>
@@ -219,6 +260,18 @@ class WeekView extends PureComponent<IProps, IState> {
 			}
 		);
 
+	handleFilterSelect = (evt: React.ChangeEvent<HTMLSelectElement>) =>
+		this.setState(
+			{
+				data: null,
+				loadError: null,
+				filterValue: evt.target.value,
+			},
+			() => {
+				void this.fetchData();
+			}
+		);
+
 	today = () =>
 		this.setState(
 			{
@@ -251,7 +304,10 @@ class WeekView extends PureComponent<IProps, IState> {
 
 	fetchData = async () => {
 		try {
-			const data = await this.props.loadData(this.state.weekOffset);
+			const data = await this.props.loadData(
+				this.state.weekOffset,
+				this.state.filterValue
+			);
 			this.setState({
 				data,
 			});
@@ -286,6 +342,16 @@ const styles = createStyles({
 	},
 	picker: {
 		display: "none",
+	},
+	filterWrapper: {
+		top: "50%",
+		position: "relative",
+		transform: "translateY(-50%)",
+	},
+	filterSelect: {
+		backgroundColor: "transparent",
+		border: "none",
+		cursor: "pointer",
 	},
 });
 
