@@ -277,7 +277,7 @@ const FileUpload = (props: FileUploadProps): React.ReactElement => {
 				const allowedTypes = accept.split(",").map((type) => type.trim());
 				const allowedFileExt = allowedTypes
 					.filter((type) => type.startsWith("."))
-					.map((type) => type.substring(1));
+					.map((type) => type.substring(1).toLowerCase());
 				const allowedMimes = allowedTypes.filter((type) => type.includes("/"));
 
 				if (
@@ -286,7 +286,7 @@ const FileUpload = (props: FileUploadProps): React.ReactElement => {
 							!allowedMimes
 								.map((allowed) => matchMime(allowed, file.file.type))
 								.includes(true) &&
-							!allowedFileExt.includes(getFileExt(file.file.name))
+							!allowedFileExt.includes(getFileExt(file.file.name).toLowerCase())
 					)
 				) {
 					handleError(
