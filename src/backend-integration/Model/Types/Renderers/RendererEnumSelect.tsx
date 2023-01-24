@@ -6,6 +6,7 @@ import ccI18n from "../../../../i18n";
 import {
 	BaseSelectorData,
 	BaseSelectorProps,
+	getStringLabel,
 	SingleSelect,
 } from "../../../../standalone/Selector";
 import { FormControlFieldsetCC } from "../../../../standalone";
@@ -70,7 +71,7 @@ class RendererEnumSelect extends TypeEnum {
 
 			const onLoad = (query: string) =>
 				data.filter((entry) =>
-					entry.label.toLowerCase().includes(query.toLowerCase())
+					getStringLabel(entry).toLowerCase().includes(query.toLowerCase())
 				);
 
 			return (

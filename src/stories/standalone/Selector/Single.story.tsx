@@ -2,6 +2,7 @@ import React, { useState, useCallback } from "react";
 import "../../../i18n";
 import {
 	BaseSelectorData,
+	getStringLabel,
 	SelectorLruOptions,
 	SingleSelect,
 } from "../../../standalone/Selector";
@@ -69,7 +70,7 @@ export const SelectorSingle = (): React.ReactElement => {
 			return colourOptions
 				.map((entry) => ({ ...entry, group: entry.type }))
 				.filter((option) =>
-					option.label.toLowerCase().includes(query.toLowerCase())
+					getStringLabel(option).toLowerCase().includes(query.toLowerCase())
 				);
 		},
 		[loadDataAction]

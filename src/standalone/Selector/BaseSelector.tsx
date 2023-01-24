@@ -51,8 +51,9 @@ export interface BaseSelectorData {
 	value: string;
 	/**
 	 * The label to show the user
+	 * If [string, React.ReactNode] => string is used for search and won't be shown to use. ReactNode will be shown to user
 	 */
-	label: string;
+	label: string | [string, React.ReactNode];
 	/**
 	 * The group of this item
 	 */
@@ -92,6 +93,11 @@ export interface BaseSelectorData {
 	 */
 	className?: string;
 }
+
+export const getStringLabel = (data: BaseSelectorData) =>
+	typeof data.label === "string" ? data.label : data.label[0];
+export const getReactLabel = (data: BaseSelectorData) =>
+	typeof data.label === "string" ? data.label : data.label[1];
 
 export interface SelectorLruOptions<DataT extends BaseSelectorData> {
 	/**
@@ -408,7 +414,6 @@ const variantInput: Record<
 	standard: InputWithHelp,
 };
 
-const getOptionLabel = (option: BaseSelectorData) => option.label;
 const getOptionDisabled = (option: BaseSelectorData) =>
 	!!(option.isDisabled || option.isDivider || option.isSmallLabel);
 const getOptionSelected = (option: BaseSelectorData, value: BaseSelectorData) =>
@@ -535,7 +540,7 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 			if (data.isSmallLabel)
 				return (
 					<Typography variant={"caption"} className={customClasses.smallLabel}>
-						{data.label}
+						{getReactLabel(data)}
 					</Typography>
 				);
 
@@ -553,7 +558,7 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 					{enableIcons && (
 						<SmallListItemIcon>{renderIcon(data.icon)}</SmallListItemIcon>
 					)}
-					<ListItemText>{data.label}</ListItemText>
+					<ListItemText>{getReactLabel(data)}</ListItemText>
 				</SelectorSmallListItem>
 			);
 		},
@@ -809,7 +814,7 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 							clearText ??
 							t("standalone.selector.base-selector.clear-icon-text")
 						}
-						getOptionLabel={getOptionLabel}
+						getOptionLabel={getStringLabel}
 						renderOption={defaultRenderer}
 						getOptionDisabled={getOptionDisabled}
 						getOptionSelected={getOptionSelected}
@@ -824,7 +829,10 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 									readOnly={disableSearch}
 									{...InputProps}
 									{...otherParams}
-									inputProps={{ ...params.inputProps, title: selected?.label }}
+									inputProps={{
+										...params.inputProps,
+										title: selected ? getStringLabel(selected) : undefined,
+									}}
 									startAdornment={
 										(enableIcons ? renderIcon(selected?.icon) : undefined) ??
 										startAdornment

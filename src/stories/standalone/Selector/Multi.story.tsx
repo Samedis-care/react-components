@@ -4,6 +4,7 @@ import {
 	MultiSelect,
 	MultiSelectorData,
 	BaseSelectorData,
+	getStringLabel,
 } from "../../../standalone/Selector";
 import { colourOptions } from "./Data";
 import { action } from "@storybook/addon-actions";
@@ -17,9 +18,9 @@ interface MySelectorData extends MultiSelectorData {
 
 const enhanceData = (entry: BaseSelectorData): MySelectorData => ({
 	...entry,
-	onClick: action("onClick: " + entry.label),
+	onClick: action("onClick: " + getStringLabel(entry)),
 	canUnselect: (evtEntry: MultiSelectorData) => {
-		action("canUnselect: " + evtEntry.label)(evtEntry);
+		action("canUnselect: " + getStringLabel(evtEntry))(evtEntry);
 		return true;
 	},
 	id: entry.value,
@@ -74,7 +75,7 @@ export const SelectorMulti = (): React.ReactElement => {
 			loadDataAction(query);
 			return colourOptions
 				.filter((option) =>
-					option.label.toLowerCase().includes(query.toLowerCase())
+					getStringLabel(option).toLowerCase().includes(query.toLowerCase())
 				)
 				.map(enhanceData);
 		},

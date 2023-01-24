@@ -4,6 +4,7 @@ import {
 	MultiSelectWithTags,
 	MultiSelectorData,
 	BaseSelectorData,
+	getStringLabel,
 } from "../../../standalone/Selector";
 import { colourOptions, colourTypeOptions } from "./Data";
 import { action } from "@storybook/addon-actions";
@@ -17,9 +18,9 @@ const enhanceData = (
 	entry: typeof colourOptions[number]
 ): MultiWithTagsData => ({
 	...entry,
-	onClick: action("onClick: " + entry.label),
+	onClick: action("onClick: " + getStringLabel(entry)),
 	canUnselect: (evtEntry: MultiSelectorData) => {
-		action("canUnselect: " + evtEntry.label)(evtEntry);
+		action("canUnselect: " + getStringLabel(evtEntry))(evtEntry);
 		return true;
 	},
 });
@@ -61,7 +62,7 @@ export const SelectorMultiWithTags = (): React.ReactElement => {
 			}
 			loadDataOptions={(query: string) =>
 				options.filter((option) =>
-					option.label.toLowerCase().includes(query.toLowerCase())
+					getStringLabel(option).toLowerCase().includes(query.toLowerCase())
 				)
 			}
 			loadGroupOptions={(query: string) =>

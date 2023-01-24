@@ -4,6 +4,7 @@ import {
 	MultiSelectWithoutGroup,
 	MultiSelectorData,
 	SelectorLruOptions,
+	getStringLabel,
 } from "../../../standalone/Selector";
 import { colourOptions } from "./Data";
 import { action } from "@storybook/addon-actions";
@@ -19,9 +20,9 @@ interface MySelectorData extends MultiWithoutGroupData {
 
 const enhanceData = (entry: MultiWithoutGroupData): MySelectorData => ({
 	...entry,
-	onClick: action("onClick: " + entry.label),
+	onClick: action(`onClick: ${getStringLabel(entry)}`),
 	canUnselect: (evtEntry: MultiSelectorData) => {
-		action("canUnselect: " + evtEntry.label)(evtEntry);
+		action(`canUnselect: ${getStringLabel(evtEntry)}`)(evtEntry);
 		return true;
 	},
 	id: entry.value,
@@ -95,7 +96,9 @@ export const MultiWithoutGroup = (): React.ReactElement => {
 				action("onLoad")(query, switchValue);
 				return options.filter(
 					(option) =>
-						option.label.toLowerCase().includes(query.toLowerCase()) &&
+						getStringLabel(option)
+							.toLowerCase()
+							.includes(query.toLowerCase()) &&
 						(switchValue ? brightColours.includes(option.value) : true)
 				);
 			}}

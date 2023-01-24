@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
 	BaseSelectorData,
 	BaseSelectorProps,
+	getStringLabel,
 	SelectorLruOptions,
 	SingleSelect,
 } from "../../standalone";
@@ -118,7 +119,7 @@ const BackendSingleSelect = <
 			});
 			return [
 				...(additionalOptions ?? []).filter((x) =>
-					x.label.toLowerCase().includes(search.toLowerCase())
+					getStringLabel(x).toLowerCase().includes(search.toLowerCase())
 				),
 				...(await Promise.all(data[0].map(modelToSelectorData))),
 			];

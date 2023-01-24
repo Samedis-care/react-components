@@ -6,6 +6,7 @@ import ccI18n from "../../../../i18n";
 import {
 	BaseSelectorData,
 	FormControlFieldsetCC,
+	getStringLabel,
 	MultiSelectorData,
 	MultiSelectProps,
 } from "../../../../standalone";
@@ -67,7 +68,7 @@ class RendererEnumMultiSelect extends TypeEnumMulti {
 
 			const onLoad = (query: string) =>
 				data.filter((entry) =>
-					entry.label.toLowerCase().includes(query.toLowerCase())
+					getStringLabel(entry).toLowerCase().includes(query.toLowerCase())
 				);
 
 			return (

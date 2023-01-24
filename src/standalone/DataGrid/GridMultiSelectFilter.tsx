@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo } from "react";
 import {
 	compareArrayContent,
+	getStringLabel,
 	MultiSelectorData,
 	MultiSelectWithCheckBox,
 } from "../..";
@@ -149,7 +150,10 @@ const GridMultiSelectFilter = (props: GridMultiSelectFilterProps) => {
 			<Grid item xs={4} {...barBreakpoints}>
 				<MultiSelectWithCheckBox
 					label={label}
-					options={options}
+					options={options.map((opt) => ({
+						...opt,
+						label: getStringLabel(opt),
+					}))}
 					values={selected}
 					onChange={handleSelectorChange}
 					renderValue={getSelected as SelectProps["renderValue"]}
