@@ -1093,7 +1093,12 @@ const Form = <
 			parentFormContext.setPostSubmitHandler(nestedFormName, submitNestedForm);
 		}
 		return () => {
-			if (parentFormContext.onlyValidateMounted || disableValidation)
+			if (
+				parentFormContext.onlyValidateMounted ||
+				onlySubmitNestedIfMounted ||
+				disableValidation ||
+				disableNestedSubmit
+			)
 				parentFormContext.removeCustomValidationHandler(nestedFormName);
 			if (
 				parentFormContext.onlySubmitMounted ||
