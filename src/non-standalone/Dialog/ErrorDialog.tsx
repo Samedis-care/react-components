@@ -23,7 +23,9 @@ const ErrorDialogRaw = (props: IDialogConfigSimple) => {
 		<Dialog open={true} onClose={removeDialog}>
 			<DialogTitle>{props.title}</DialogTitle>
 			<DialogContent>
-				<DialogContentText>{props.message}</DialogContentText>
+				<DialogContentText component={"span"}>
+					{props.message}
+				</DialogContentText>
 			</DialogContent>
 			<DialogActions>
 				{props.buttons.map((data, index) => (
