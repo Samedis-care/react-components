@@ -24,6 +24,7 @@ import {
 	deepClone,
 	dotInObject,
 	dotSet,
+	dotsToObject,
 	dotToObject,
 	getValueByDot,
 	isObjectEmpty,
@@ -918,36 +919,34 @@ const Form = <
 			const oldValues = serverData[0];
 
 			const result = await updateData(
-				onlySubmitMounted
-					? (Object.fromEntries(
-							await Promise.all(
-								Object.entries(valuesRef.current)
-									.filter(
-										([key]) =>
-											onlySubmitMountedBehaviour !==
-												OnlySubmitMountedBehaviour.OMIT ||
-											isMounted(key as KeyT)
-									)
-									.map(async (data) => {
-										const [key] = data;
-										if (isMounted(key as KeyT)) return data;
-										if (
-											onlySubmitMountedBehaviour ===
-											OnlySubmitMountedBehaviour.DEFAULT
-										) {
-											return [key, (await model.getRaw(null))[0][key as KeyT]];
-										} else if (
-											onlySubmitMountedBehaviour ===
-											OnlySubmitMountedBehaviour.NULL
-										) {
-											return [key, null];
-										} else {
-											return data;
-										}
-									})
-							)
-					  ) as Record<string, unknown>)
-					: valuesRef.current
+				!onlySubmitMounted
+					? valuesRef.current
+					: await (async () => {
+							const result: Record<string, unknown> = {};
+							const behaviour = onlySubmitMountedBehaviour;
+							for (const field in model.fields) {
+								const mounted = isMounted(field);
+								if (mounted) {
+									result[field] = getValueByDot(field, valuesRef.current);
+									continue;
+								}
+								if (behaviour === OnlySubmitMountedBehaviour.OMIT) {
+									// no action
+								} else if (behaviour === OnlySubmitMountedBehaviour.NULL) {
+									result[field] = null;
+								} else if (behaviour === OnlySubmitMountedBehaviour.DEFAULT) {
+									result[field] = getValueByDot(
+										field,
+										(await model.getRaw(null))[0]
+									);
+								} else {
+									throw new Error(
+										`Invalid onlySubmitMountedBehaviour ${behaviour as string}`
+									);
+								}
+							}
+							return dotsToObject(result);
+					  })()
 			);
 
 			const newValues = deepClone(result[0]);
