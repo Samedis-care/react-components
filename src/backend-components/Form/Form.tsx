@@ -494,17 +494,97 @@ const loaderContainerStyles: CSSProperties = {
 	margin: "auto",
 };
 
+interface DirtyDetectionConfig {
+	/**
+	 * List of fields to ignore (nulled internally)
+	 */
+	ignoreFields: string[] | undefined | null;
+	/**
+	 * The model
+	 */
+	model: Model<string, PageVisibility, unknown>;
+	/**
+	 * only submit mounted config
+	 */
+	onlySubmitMounted: boolean;
+	onlySubmitMountedBehaviour: OnlySubmitMountedBehaviour;
+	defaultRecord: Record<string, unknown>;
+	/**
+	 * mounted fields
+	 */
+	mountedFields: Record<string, boolean>;
+}
+
+const getUpdateData = (
+	values: Record<string, unknown>,
+	model: Model<string, PageVisibility, unknown>,
+	onlySubmitMounted: boolean,
+	onlySubmitMountedBehaviour: OnlySubmitMountedBehaviour,
+	mountedFields: Record<string, boolean>,
+	defaultRecord: Record<string, unknown>,
+	id: string | null
+) => {
+	const isMounted = (key: string): boolean =>
+		key === "id" ||
+		mountedFields[key] ||
+		getVisibility(model.fields[key].visibility[id ? "edit" : "create"], values)
+			.hidden;
+
+	return !onlySubmitMounted
+		? values
+		: (() => {
+				const result: Record<string, unknown> = {};
+				const behaviour = onlySubmitMountedBehaviour;
+				for (const field in model.fields) {
+					const mounted = isMounted(field);
+					if (mounted) {
+						result[field] = getValueByDot(field, values);
+						continue;
+					}
+					if (behaviour === OnlySubmitMountedBehaviour.OMIT) {
+						// no action
+					} else if (behaviour === OnlySubmitMountedBehaviour.NULL) {
+						result[field] = null;
+					} else if (behaviour === OnlySubmitMountedBehaviour.DEFAULT) {
+						result[field] = getValueByDot(field, defaultRecord);
+					} else {
+						throw new Error(
+							`Invalid onlySubmitMountedBehaviour ${behaviour as string}`
+						);
+					}
+				}
+				return dotsToObject(result);
+		  })();
+};
+
 /**
  * Normalizes data for validation to ensure dirty flag matches user perception
  * @param data The data to normalize
- * @param ignoreFields List of fields to ignore (nulled internally)
+ * @param config The config
  */
-const normalizeValues = <T,>(
-	data: T,
-	ignoreFields: string[] | undefined | null
-): T => {
+const normalizeValues = <T,>(data: T, config: DirtyDetectionConfig): T => {
 	if (typeof data !== "object")
 		throw new Error("Only Record<string, unknown> supported");
+
+	const {
+		ignoreFields,
+		model,
+		onlySubmitMounted,
+		onlySubmitMountedBehaviour,
+		mountedFields,
+		defaultRecord,
+	} = config;
+
+	data = getUpdateData(
+		(data as unknown) as Record<string, unknown>,
+		model,
+		onlySubmitMounted,
+		onlySubmitMountedBehaviour,
+		mountedFields,
+		defaultRecord,
+		((data as unknown) as Record<"id", string | null>).id
+	) as T;
+
 	let normalizedData: Record<string, unknown> = {};
 	Object.entries(data as Record<string, unknown>)
 		.sort((a, b) => a[0].localeCompare(b[0]))
@@ -638,6 +718,11 @@ const Form = <
 	);
 	const { mutateAsync: updateData } = useModelMutation(model);
 	const { mutateAsync: deleteRecord } = useModelDelete(model);
+	const {
+		isLoading: isDefaultRecordLoading,
+		data: defaultRecord,
+		error: defaultRecordError,
+	} = useModelGet(model, null);
 
 	const [updateError, setUpdateError] = useState<
 		Error | ValidationError | null
@@ -645,17 +730,6 @@ const Form = <
 	const valuesRef = useRef<Record<string, unknown>>({});
 	const [values, setValues] = useState<Record<string, unknown>>({});
 	const [touched, setTouched] = useState<Record<string, boolean>>({});
-	const dirty =
-		useMemo(
-			() =>
-				serverData
-					? JSON.stringify(normalizeValues(values, dirtyIgnoreFields)) !==
-					  JSON.stringify(normalizeValues(serverData[0], dirtyIgnoreFields))
-					: false,
-			[values, serverData, dirtyIgnoreFields]
-		) ||
-		customDirty ||
-		!!(id && !deleted && deleteOnSubmit);
 	const [errors, setErrors] = useState<Record<string, string | null>>({});
 	const [warnings, setWarnings] = useState<Record<string, string | null>>({});
 	const [submitting, setSubmitting] = useState(false);
@@ -674,6 +748,54 @@ const Form = <
 	const markFieldMounted = useCallback((field: string, mounted: boolean) => {
 		setMountedFields((prev) => ({ ...prev, [field as KeyT]: mounted }));
 	}, []);
+
+	// main form handling - dirty state
+	const dirty =
+		useMemo(
+			() =>
+				serverData && defaultRecord
+					? JSON.stringify(
+							normalizeValues(values, {
+								ignoreFields: dirtyIgnoreFields,
+								model: (model as unknown) as Model<
+									string,
+									PageVisibility,
+									unknown
+								>,
+								defaultRecord: defaultRecord[0],
+								onlySubmitMountedBehaviour,
+								onlySubmitMounted: onlySubmitMounted ?? false,
+								mountedFields,
+							})
+					  ) !==
+					  JSON.stringify(
+							normalizeValues(serverData[0], {
+								ignoreFields: dirtyIgnoreFields,
+								model: (model as unknown) as Model<
+									string,
+									PageVisibility,
+									unknown
+								>,
+								defaultRecord: defaultRecord[0],
+								onlySubmitMountedBehaviour,
+								onlySubmitMounted: onlySubmitMounted ?? false,
+								mountedFields,
+							})
+					  )
+					: false,
+			[
+				serverData,
+				defaultRecord,
+				values,
+				dirtyIgnoreFields,
+				model,
+				onlySubmitMountedBehaviour,
+				onlySubmitMounted,
+				mountedFields,
+			]
+		) ||
+		customDirty ||
+		!!(id && !deleted && deleteOnSubmit);
 
 	// main form handling - dispatch
 	const validateForm = useCallback(
@@ -820,6 +942,7 @@ const Form = <
 	// main form - submit handler
 	const submitForm = useCallback(async (): Promise<void> => {
 		if (!serverData) throw new Error("serverData is null"); // should never happen
+		if (!defaultRecord) throw new Error("default record is null"); // should never happen
 
 		if (preSubmit) {
 			let cancelSubmit: boolean;
@@ -903,14 +1026,6 @@ const Form = <
 				setSubmitting(true);
 			}
 
-			const isMounted = (key: KeyT): boolean =>
-				key === "id" ||
-				mountedFields[key] ||
-				getVisibility(
-					model.fields[key].visibility[id ? "edit" : "create"],
-					valuesRef.current
-				).hidden;
-
 			await Promise.all(
 				Object.values(preSubmitHandlers.current).map((handler) => handler(id))
 			);
@@ -919,34 +1034,15 @@ const Form = <
 			const oldValues = serverData[0];
 
 			const result = await updateData(
-				!onlySubmitMounted
-					? valuesRef.current
-					: await (async () => {
-							const result: Record<string, unknown> = {};
-							const behaviour = onlySubmitMountedBehaviour;
-							for (const field in model.fields) {
-								const mounted = isMounted(field);
-								if (mounted) {
-									result[field] = getValueByDot(field, valuesRef.current);
-									continue;
-								}
-								if (behaviour === OnlySubmitMountedBehaviour.OMIT) {
-									// no action
-								} else if (behaviour === OnlySubmitMountedBehaviour.NULL) {
-									result[field] = null;
-								} else if (behaviour === OnlySubmitMountedBehaviour.DEFAULT) {
-									result[field] = getValueByDot(
-										field,
-										(await model.getRaw(null))[0]
-									);
-								} else {
-									throw new Error(
-										`Invalid onlySubmitMountedBehaviour ${behaviour as string}`
-									);
-								}
-							}
-							return dotsToObject(result);
-					  })()
+				getUpdateData(
+					valuesRef.current,
+					(model as unknown) as Model<string, PageVisibility, unknown>,
+					onlySubmitMounted ?? false,
+					onlySubmitMountedBehaviour,
+					mountedFields,
+					defaultRecord[0],
+					id
+				)
 			);
 
 			const newValues = deepClone(result[0]);
@@ -977,6 +1073,7 @@ const Form = <
 		}
 	}, [
 		serverData,
+		defaultRecord,
 		preSubmit,
 		deleteOnSubmit,
 		setFieldValue,
@@ -984,14 +1081,14 @@ const Form = <
 		deleteRecord,
 		validateForm,
 		updateData,
+		model,
 		onlySubmitMounted,
+		onlySubmitMountedBehaviour,
+		mountedFields,
+		id,
 		onSubmit,
 		pushDialog,
 		t,
-		mountedFields,
-		model,
-		id,
-		onlySubmitMountedBehaviour,
 	]);
 	const handleSubmit = useCallback(
 		(evt: FormEvent<HTMLFormElement>) => {
@@ -1129,10 +1226,27 @@ const Form = <
 				console.log("Can't determine Dirty State, No server data present");
 				return;
 			}
-
+			if (!defaultRecord) {
+				console.log("Can't determine Dirty State, No default data present");
+				return;
+			}
 			// normalize data
-			const localData = normalizeValues(values, dirtyIgnoreFields);
-			const remoteData = normalizeValues(serverData[0], dirtyIgnoreFields);
+			const localData = normalizeValues(values, {
+				ignoreFields: dirtyIgnoreFields,
+				model: (model as unknown) as Model<string, PageVisibility, unknown>,
+				defaultRecord: defaultRecord[0],
+				onlySubmitMountedBehaviour,
+				onlySubmitMounted: onlySubmitMounted ?? false,
+				mountedFields,
+			});
+			const remoteData = normalizeValues(serverData[0], {
+				ignoreFields: dirtyIgnoreFields,
+				model: (model as unknown) as Model<string, PageVisibility, unknown>,
+				defaultRecord: defaultRecord[0],
+				onlySubmitMountedBehaviour,
+				onlySubmitMounted: onlySubmitMounted ?? false,
+				mountedFields,
+			});
 
 			console.log("Form Dirty Flag State:");
 			console.log(
@@ -1167,12 +1281,17 @@ const Form = <
 			/* eslint-enable no-console */
 		},
 		[
-			customDirty,
-			customDirtyCounter,
-			customDirtyFields,
 			serverData,
+			defaultRecord,
 			values,
 			dirtyIgnoreFields,
+			model,
+			onlySubmitMountedBehaviour,
+			onlySubmitMounted,
+			mountedFields,
+			customDirty,
+			customDirtyFields,
+			customDirtyCounter,
 		]
 	);
 
@@ -1288,11 +1407,12 @@ const Form = <
 		]
 	);
 
-	if (isLoading || isObjectEmpty(values)) {
+	if (isLoading || isDefaultRecordLoading || isObjectEmpty(values)) {
 		return <Loader />;
 	}
 
-	const displayError: Error | ValidationError | null = error || updateError;
+	const displayError: Error | ValidationError | null =
+		error || defaultRecordError || updateError;
 
 	if (!serverData || serverData.length !== 2 || isObjectEmpty(serverData[0])) {
 		// eslint-disable-next-line no-console
