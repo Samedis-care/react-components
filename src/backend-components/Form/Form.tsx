@@ -382,6 +382,10 @@ export interface FormContextData {
 	 */
 	submitting: boolean;
 	/**
+	 * Submit the form
+	 */
+	submit: () => Promise<void>;
+	/**
 	 * Is the form record being deleted on submit
 	 */
 	deleteOnSubmit: boolean;
@@ -1327,6 +1331,7 @@ const Form = <
 			onlySubmitMountedBehaviour,
 			onlyValidateMounted: !!onlyValidateMounted,
 			submitting,
+			submit: submitForm,
 			deleteOnSubmit: !!deleteOnSubmit,
 			values,
 			initialValues: serverData ? serverData[0] : {},
@@ -1366,6 +1371,7 @@ const Form = <
 			onlyValidateMounted,
 			deleteOnSubmit,
 			submitting,
+			submitForm,
 			values,
 			touched,
 			errors,
