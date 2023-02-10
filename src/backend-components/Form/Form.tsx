@@ -452,6 +452,10 @@ export interface FormContextData {
 	 * Parent form context (if present and FormProps.nestedFormName is set)
 	 */
 	parentFormContext: FormContextData | null;
+	/**
+	 * Custom props passed in props
+	 */
+	customProps: unknown;
 }
 
 /**
@@ -1346,6 +1350,7 @@ const Form = <
 			refetchForm: refetch,
 			validateForm,
 			parentFormContext: nestedFormName ? parentFormContext : null,
+			customProps,
 			readOnly: !!readOnly,
 			readOnlyReason: readOnlyReason,
 		}),
@@ -1385,6 +1390,7 @@ const Form = <
 			validateForm,
 			parentFormContext,
 			nestedFormName,
+			customProps,
 			readOnly,
 			readOnlyReason,
 		]
