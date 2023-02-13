@@ -127,6 +127,11 @@ const MultiGrid = (props: MultiGridProps) => {
 		bottomLeftGrid.current?.scrollTo({ scrollTop: evt.scrollTop });
 	}, []);
 
+	const handleScrollPinned = useCallback((evt: GridOnScrollProps) => {
+		topLeftGrid.current?.scrollTo({ scrollLeft: evt.scrollLeft });
+		bottomRightGrid.current?.scrollTo({ scrollTop: evt.scrollTop });
+	}, []);
+
 	useEffect(() => {
 		topLeftGrid.current?.resetAfterColumnIndex(0, true);
 		topRightGrid.current?.resetAfterColumnIndex(0, true);
@@ -182,6 +187,7 @@ const MultiGrid = (props: MultiGridProps) => {
 				rowCount={rowCount - fixedRowCount}
 				width={fixedWidth}
 				height={height - fixedHeight}
+				onScroll={handleScrollPinned}
 				style={{
 					...styleBottomLeftGrid,
 					position: "absolute",

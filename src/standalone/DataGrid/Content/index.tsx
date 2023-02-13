@@ -194,7 +194,7 @@ const Content = (props: IDataGridContentProps) => {
 
 	const styleBottomLeftGrid = useMemo(
 		(): CSSProperties => ({
-			overflow: "hidden",
+			overflow: "auto",
 			display:
 				(state.rowsFiltered ?? state.rowsTotal) === 0 ? "none" : undefined,
 		}),
