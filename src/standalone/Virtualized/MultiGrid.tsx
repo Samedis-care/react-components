@@ -12,6 +12,10 @@ import {
 	VariableSizeGrid,
 } from "react-window";
 
+/**
+ * Most props do the same as in react-virtualized MultiGrid component
+ * Otherwise they are commented
+ */
 export interface MultiGridProps {
 	width: number;
 	height: number;
@@ -28,6 +32,15 @@ export interface MultiGridProps {
 	styleBottomRightGrid: CSSProperties;
 	children: (props: GridChildComponentProps) => React.ReactElement;
 	noContentRenderer: React.ComponentType;
+	/**
+	 * Enable global scrolling listener (enables page up/down scrolling)
+	 */
+	globalScrollListener?: boolean;
+}
+
+interface ReactWindowGridState {
+	scrollTop: number;
+	scrollLeft: number;
 }
 
 const MultiGrid = (props: MultiGridProps) => {
@@ -47,6 +60,7 @@ const MultiGrid = (props: MultiGridProps) => {
 		styleBottomRightGrid,
 		children: CellRenderer,
 		noContentRenderer: NoContentRenderer,
+		globalScrollListener,
 	} = props;
 
 	const fixedWidth = useMemo(
@@ -144,6 +158,28 @@ const MultiGrid = (props: MultiGridProps) => {
 		bottomLeftGrid.current?.resetAfterRowIndex(0, true);
 		bottomRightGrid.current?.resetAfterRowIndex(0, true);
 	}, [rowHeight]);
+
+	useEffect(() => {
+		if (!globalScrollListener) return;
+		const handleKeyPress = (evt: KeyboardEvent) => {
+			const rightGrid = bottomRightGrid.current;
+			const leftGrid = bottomLeftGrid.current;
+			if (!rightGrid || !leftGrid) return;
+			const scrollStep = height - fixedHeight;
+			const scrollCurrent = (rightGrid.state as ReactWindowGridState).scrollTop;
+			if (evt.key === "PageDown") {
+				rightGrid.scrollTo({
+					scrollTop: scrollCurrent + scrollStep,
+				});
+			} else if (evt.key === "PageUp") {
+				rightGrid.scrollTo({
+					scrollTop: scrollCurrent - scrollStep,
+				});
+			}
+		};
+		document.addEventListener("keydown", handleKeyPress);
+		return () => document.removeEventListener("keydown", handleKeyPress);
+	}, [globalScrollListener, fixedHeight, height]);
 
 	return (
 		<div style={{ position: "relative" }}>

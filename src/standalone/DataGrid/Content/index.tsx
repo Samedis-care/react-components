@@ -6,6 +6,7 @@ import React, {
 	useState,
 } from "react";
 import {
+	DataGridProps,
 	IDataGridColumnDef,
 	IDataGridColumnProps,
 	useDataGridColumnsWidthState,
@@ -21,7 +22,9 @@ import { withStyles } from "@material-ui/core";
 import CenteredTypography from "../../UIKit/CenteredTypography";
 import MultiGrid from "../../Virtualized/MultiGrid";
 
-export interface IDataGridContentProps extends IDataGridColumnProps {
+export interface IDataGridContentProps
+	extends IDataGridColumnProps,
+		Pick<DataGridProps, "globalScrollListener"> {
 	rowsPerPage: number;
 }
 
@@ -46,6 +49,7 @@ const Content = (props: IDataGridContentProps) => {
 		columns,
 		disableSelection,
 		headerHeight: headerHeightOverride,
+		globalScrollListener,
 	} = props;
 	const headerHeight = headerHeightOverride ?? 32;
 	const { t } = useCCTranslations();
@@ -242,6 +246,7 @@ const Content = (props: IDataGridContentProps) => {
 						styleBottomLeftGrid={styleBottomLeftGrid}
 						styleBottomRightGrid={STYLE_BOTTOM_RIGHT}
 						noContentRenderer={noContentRenderer}
+						globalScrollListener={globalScrollListener}
 					>
 						{Cell}
 					</MultiGrid>

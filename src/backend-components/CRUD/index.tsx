@@ -332,7 +332,7 @@ const CRUD = <
 		}
 	}, [disableRouting, navigate, routeUrl]);
 
-	const grid = () => (
+	const grid = (globalScrollListener: boolean) => (
 		<Suspense fallback={<Loader />}>
 			<GridWrapper>
 				<BackendDataGrid
@@ -355,6 +355,7 @@ const CRUD = <
 							: props.newPermissionHint
 					}
 					onImport={enableUserImport ? handleImportButton : undefined}
+					globalScrollListener={globalScrollListener}
 				/>
 			</GridWrapper>
 		</Suspense>
@@ -424,7 +425,7 @@ const CRUD = <
 				<>
 					{(id === null || !disableBackgroundGrid) && (
 						<div className={id !== null ? classes.hide : classes.show}>
-							{grid()}
+							{grid(id === null)}
 						</div>
 					)}
 					{id === "import" && importer(true)}
@@ -443,7 +444,7 @@ const CRUD = <
 								location.pathname === routeUrl ? classes.show : classes.hide
 							}
 						>
-							{grid()}
+							{grid(location.pathname === routeUrl)}
 						</div>
 					)}
 					{props.children && (

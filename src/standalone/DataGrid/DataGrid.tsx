@@ -114,6 +114,10 @@ export type DataGridProps = IDataGridHeaderProps &
 		 * Custom selection control (instead of default checkbox)
 		 */
 		customSelectionControl?: React.ComponentType<IDataGridContentSelectRowViewProps>;
+		/**
+		 * Enable the global scroll listener (listens for page up/down keydown events)
+		 */
+		globalScrollListener?: boolean;
 	};
 
 export interface IDataGridLoadDataParameters {
@@ -1042,6 +1046,7 @@ const DataGrid = (props: DataGridProps) => {
 		headerHeight,
 		selection,
 		overrideFilter,
+		globalScrollListener,
 	} = props;
 	const rowsPerPage = props.rowsPerPage || 25;
 
@@ -1291,6 +1296,7 @@ const DataGrid = (props: DataGridProps) => {
 											rowsPerPage={rowsPerPage}
 											disableSelection={disableSelection}
 											headerHeight={headerHeight}
+											globalScrollListener={globalScrollListener}
 										/>
 									</Grid>
 									{!disableFooter && (
