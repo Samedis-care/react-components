@@ -1,7 +1,14 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, {
+	ForwardedRef,
+	RefAttributes,
+	useCallback,
+	useEffect,
+	useState,
+} from "react";
 import FileUpload, {
 	FileData,
 	FileMeta,
+	FileUploadDispatch,
 	FileUploadProps,
 } from "../../standalone/FileUpload/Generic";
 import { Connector, PageVisibility } from "../../backend-integration";
@@ -47,7 +54,10 @@ export interface BackendFileMeta extends FileMeta {
 	id: string;
 }
 
-const CrudFileUpload = (props: CrudFileUploadProps) => {
+const CrudFileUpload = (
+	props: CrudFileUploadProps & RefAttributes<FileUploadDispatch>,
+	ref: ForwardedRef<FileUploadDispatch>
+) => {
 	const { connector, serialize, deserialize, onChange, ...otherProps } = props;
 	const { allowDuplicates } = otherProps;
 	const [loading, setLoading] = useState(true);
@@ -146,6 +156,7 @@ const CrudFileUpload = (props: CrudFileUploadProps) => {
 			{error && <ErrorComponent error={error} />}
 			<FileUpload
 				{...otherProps}
+				ref={ref}
 				files={files}
 				onChange={handleChange}
 				handleError={handleError}
@@ -155,4 +166,4 @@ const CrudFileUpload = (props: CrudFileUploadProps) => {
 	);
 };
 
-export default React.memo(CrudFileUpload);
+export default React.memo(React.forwardRef(CrudFileUpload));

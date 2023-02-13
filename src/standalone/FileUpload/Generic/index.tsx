@@ -1,4 +1,12 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, {
+	ForwardedRef,
+	RefAttributes,
+	useCallback,
+	useEffect,
+	useImperativeHandle,
+	useRef,
+	useState,
+} from "react";
 import {
 	Box,
 	Button,
@@ -111,7 +119,56 @@ export interface FileUploadProps {
 	 * @default classic
 	 * @remarks When using 'modern' preview size should be set to 24
 	 */
-	variant?: "classic" | "modern";
+	variant?: "classic" | "modern" | React.ComponentType<FileUploadRendererProps>;
+}
+
+export interface FileUploadRendererProps
+	extends Omit<
+		FileUploadProps,
+		"variant" | "classes" | "onChange" | "defaultFiles" | "files"
+	> {
+	/**
+	 * CSS classes
+	 */
+	classes: ClassNameMap<keyof ReturnType<typeof useStyles>>;
+	/**
+	 * Drag over event handler for drop zone
+	 */
+	handleDragOver: React.DragEventHandler;
+	/**
+	 * Drop handler for drop zone
+	 */
+	handleDrop: React.DragEventHandler;
+	/**
+	 * Dragging flag to display "drop here" styles
+	 */
+	dragging: boolean;
+	/**
+	 * Open the upload dialog
+	 */
+	handleUpload: (capture?: FileCaptureConfig) => void;
+	/**
+	 * Get remaining uploadable file count (maxFiles - currentFiles).
+	 * @remarks Only call when maxFiles is specified!
+	 */
+	getRemainingFileCount: () => number;
+	/**
+	 * onChange handler for file input
+	 */
+	handleFileChange: React.ChangeEventHandler<HTMLInputElement>;
+	/**
+	 * ref for file input
+	 */
+	inputRef: React.MutableRefObject<HTMLInputElement | null>;
+	/**
+	 * The current files
+	 */
+	files: FileData[];
+	/**
+	 * Remove a file
+	 * @param file The file to remove
+	 */
+	removeFile: (file: FileData) => void;
 }
 
 export interface FileMeta {
@@ -149,6 +206,23 @@ export interface FileData<T = File | FileMeta> {
 	delete?: boolean;
 }
 
+export interface FileUploadDispatch {
+	/**
+	 * Add the given file as if the user selected it
+	 * @param file The file
+	 */
+	addFile: (file: File) => Promise<void>;
+	/**
+	 * Open the upload dialog
+	 */
+	openUploadDialog: (capture?: FileCaptureConfig) => void;
+}
+
+export interface FileCaptureConfig {
+	type: "image" | "audio" | "video";
+	source: "user" | "environment";
+}
+
 const useStyles = makeStyles(
 	(theme: Theme) => ({
 		dropzone: {
@@ -177,7 +251,10 @@ const useStyles = makeStyles(
 	{ name: "CcFileUpload" }
 );
 
-const FileUpload = (props: FileUploadProps): React.ReactElement => {
+const FileUpload = (
+	props: FileUploadProps & RefAttributes<FileUploadDispatch>,
+	ref: ForwardedRef<FileUploadDispatch>
+): React.ReactElement => {
 	const {
 		name,
 		convertImagesTo,
@@ -220,7 +297,7 @@ const FileUpload = (props: FileUploadProps): React.ReactElement => {
 	}, [maxFiles, files]);
 
 	const processFiles = useCallback(
-		async (files: FileList) => {
+		async (files: FileList | File[]) => {
 			const processImages = !!(
 				convertImagesTo ||
 				imageDownscaleOptions ||
@@ -327,23 +404,38 @@ const FileUpload = (props: FileUploadProps): React.ReactElement => {
 			t,
 		]
 	);
-	const handleUpload = useCallback(() => {
-		const elem = inputRef.current;
+	const handleUpload = useCallback(
+		(capture?: FileCaptureConfig) => {
+			const elem = inputRef.current;
 
-		if (!elem) return;
+			if (!elem) return;
 
-		if (maxFiles) {
-			if (getRemainingFileCount() === 0) {
-				handleError(
-					"files.selector.limit-reached",
-					t("standalone.file-upload.error.limit-reached")
-				);
-				return;
+			const prevAccept = elem.accept;
+			const prevCapture = elem.capture;
+			if (capture) {
+				elem.accept = capture.type + "/*";
+				elem.capture = capture.source;
 			}
-		}
 
-		elem.click();
-	}, [maxFiles, getRemainingFileCount, handleError, t]);
+			if (maxFiles) {
+				if (getRemainingFileCount() === 0) {
+					handleError(
+						"files.selector.limit-reached",
+						t("standalone.file-upload.error.limit-reached")
+					);
+					return;
+				}
+			}
+
+			elem.click();
+
+			if (capture) {
+				elem.capture = prevCapture;
+				elem.accept = prevAccept;
+			}
+		},
+		[maxFiles, getRemainingFileCount, handleError, t]
+	);
 
 	const handleFileChange = useCallback(
 		async (evt: React.ChangeEvent<HTMLInputElement>) => {
@@ -384,7 +476,29 @@ const FileUpload = (props: FileUploadProps): React.ReactElement => {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [props.files]);
 
-	if (variant === "classic") {
+	useImperativeHandle<FileUploadDispatch, FileUploadDispatch>(ref, () => ({
+		addFile: (file) => {
+			return processFiles([file]);
+		},
+		openUploadDialog: handleUpload,
+	}));
+
+	if (typeof variant !== "string") {
+		return React.createElement(variant, {
+			...props,
+			classes,
+			handleDragOver,
+			handleDrop,
+			dragging,
+			handleUpload,
+			getRemainingFileCount,
+			// eslint-disable-next-line @typescript-eslint/no-misused-promises
+			handleFileChange,
+			inputRef,
+			files,
+			removeFile,
+		});
+	} else if (variant === "classic") {
 		return (
 			<GroupBox label={label} smallLabel={smallLabel}>
 				<Grid
@@ -404,7 +518,7 @@ const FileUpload = (props: FileUploadProps): React.ReactElement => {
 								startIcon={<AttachFile />}
 								variant={"contained"}
 								color={"primary"}
-								onClick={handleUpload}
+								onClick={() => handleUpload()}
 								name={name}
 								onBlur={onBlur}
 							>
@@ -483,7 +597,7 @@ const FileUpload = (props: FileUploadProps): React.ReactElement => {
 					alignContent={"space-between"}
 					onDragOver={handleDragOver}
 					onDrop={handleDrop}
-					onClick={handleUpload}
+					onClick={() => handleUpload()}
 					className={combineClassNames([
 						"components-care-dropzone",
 						dragging && classes.dropzone,
@@ -592,4 +706,4 @@ const FileUpload = (props: FileUploadProps): React.ReactElement => {
 	}
 };
 
-export default FileUpload;
+export default React.forwardRef(FileUpload);

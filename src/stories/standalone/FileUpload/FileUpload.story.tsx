@@ -80,7 +80,7 @@ export const FileUploadStory = (): React.ReactElement => {
 				preview: fileData,
 			}))}
 			readOnly={boolean("Read-only", false)}
-			variant={select(
+			variant={select<"classic" | "modern">(
 				"Variant",
 				{ Classic: "classic", Modern: "modern" },
 				"classic"
