@@ -159,7 +159,7 @@ const SignPadDialog = (props: SignPadDialogProps) => {
 				<div className={classes.hiddenDiv}>
 					<input
 						type="text"
-						value={signature}
+						value={signature ?? ""}
 						readOnly
 						ref={hiddenRef}
 						name={props.name}
