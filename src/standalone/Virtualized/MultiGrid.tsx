@@ -162,6 +162,8 @@ const MultiGrid = (props: MultiGridProps) => {
 	useEffect(() => {
 		if (!globalScrollListener) return;
 		const handleKeyPress = (evt: KeyboardEvent) => {
+			if (!["PageDown", "PageUp"].includes(evt.key)) return;
+			evt.preventDefault();
 			const rightGrid = bottomRightGrid.current;
 			const leftGrid = bottomLeftGrid.current;
 			if (!rightGrid || !leftGrid) return;
