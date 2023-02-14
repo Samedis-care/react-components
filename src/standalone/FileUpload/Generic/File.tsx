@@ -51,9 +51,12 @@ export interface FileProps {
 	 */
 	classes?: Partial<ReturnType<typeof useStyles>>;
 	/**
-	 * Display file as box or as list
+	 * Display file as...
+	 * - box: Box with label below
+	 * - list: Full width list
+	 * - compact-list: List with compact width, display inline block
 	 */
-	variant: "box" | "list";
+	variant: "box" | "list" | "compact-list";
 }
 
 const useStyles = makeStyles(
@@ -223,34 +226,35 @@ const File = (props: FileProps) => {
 		evt.stopPropagation();
 	}, []);
 
+	const isList = variant === "list" || variant === "compact-list";
 	const renderIcon = () =>
 		props.preview ? (
 			<img
 				src={props.preview}
 				alt={props.name}
 				className={combineClassNames([
-					variant === "list" ? classes.iconList : classes.icon,
+					isList ? classes.iconList : classes.icon,
 					props.disabled && classes.iconDisabled,
 					downloadLink && classes.clickable,
 				])}
 				onClick={openDownload}
-				style={variant === "list" ? { height: props.size } : undefined}
+				style={isList ? { height: props.size } : undefined}
 			/>
 		) : (
 			<FileIcon
 				className={combineClassNames([
-					variant === "list" ? classes.iconList : classes.icon,
+					isList ? classes.iconList : classes.icon,
 					downloadLink && classes.clickable,
 				])}
 				onClick={openDownload}
-				style={variant === "list" ? { height: props.size } : undefined}
+				style={isList ? { height: props.size } : undefined}
 			/>
 		);
 
 	const renderName = () => (
 		<Tooltip title={props.name}>
 			<Typography
-				align={variant === "list" ? "left" : "center"}
+				align={isList ? "left" : "center"}
 				noWrap
 				className={combineClassNames([
 					downloadLink && classes.downloadLink,
@@ -259,7 +263,7 @@ const File = (props: FileProps) => {
 				onClick={openDownload}
 				variant={"body2"}
 				style={
-					variant === "list"
+					isList
 						? {
 								lineHeight: `${props.size}px`,
 						  }
@@ -313,6 +317,18 @@ const File = (props: FileProps) => {
 					{renderName()}
 				</Grid>
 				<Grid item>{renderRemove()}</Grid>
+			</Grid>
+		);
+	} else if (variant === "compact-list") {
+		return (
+			<Grid item onClick={handleListClick}>
+				<Grid container spacing={2} alignItems={"stretch"} wrap={"nowrap"}>
+					<Grid item>{renderIcon()}</Grid>
+					<Grid item className={classes.listEntryText}>
+						{renderName()}
+					</Grid>
+					<Grid item>{renderRemove()}</Grid>
+				</Grid>
 			</Grid>
 		);
 	} else {
