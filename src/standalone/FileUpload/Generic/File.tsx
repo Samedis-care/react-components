@@ -96,6 +96,9 @@ const useStyles = makeStyles(
 			position: "absolute",
 			maxWidth: "100%",
 		},
+		compactListWrapper: {
+			maxWidth: "100%",
+		},
 		clickable: {
 			cursor: "pointer",
 		},
@@ -321,7 +324,11 @@ const File = (props: FileProps) => {
 		);
 	} else if (variant === "compact-list") {
 		return (
-			<Grid item onClick={handleListClick}>
+			<Grid
+				item
+				onClick={handleListClick}
+				className={classes.compactListWrapper}
+			>
 				<Grid container spacing={2} alignItems={"stretch"} wrap={"nowrap"}>
 					<Grid item>{renderIcon()}</Grid>
 					<Grid item className={classes.listEntryText}>
