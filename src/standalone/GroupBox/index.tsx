@@ -14,6 +14,8 @@ const useStyles = makeStyles(
 			height: "100%",
 			marginLeft: 0,
 			marginRight: 0,
+			minWidth: 0,
+			width: "100%",
 		},
 		legend: {
 			paddingInlineStart: 5,
