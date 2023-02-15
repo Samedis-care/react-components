@@ -157,6 +157,12 @@ export type ModelGetResponse<KeyT extends ModelFieldName> = [
 	unknown? // optional user-defined data
 ];
 
+export type ModelIndexResponse = [
+	records: Record<string, unknown>[],
+	meta: ResponseMeta,
+	userMeta?: unknown
+];
+
 /**
  * Deletion request. If invert is false only delete ids array. If invert is true delete everything except the given ids
  * @param invert Invert the selection
@@ -397,7 +403,7 @@ class Model<
 	 */
 	public async index(
 		params: Partial<IDataGridLoadDataParameters> | undefined
-	): Promise<[Record<string, unknown>[], ResponseMeta, unknown?]> {
+	): Promise<ModelIndexResponse> {
 		const [rawData, meta, userData] = await this.connector.index(params, this);
 		return [
 			await Promise.all(
@@ -416,7 +422,7 @@ class Model<
 	 */
 	public async index2(
 		params: ConnectorIndex2Params
-	): Promise<[Record<string, unknown>[], ResponseMeta, unknown?]> {
+	): Promise<ModelIndexResponse> {
 		const [rawData, meta, userData] = await this.connector.index2(params, this);
 		return [
 			await Promise.all(
@@ -427,6 +433,48 @@ class Model<
 			meta,
 			userData,
 		];
+	}
+
+	/**
+	 * Fetches all records using index calls
+	 * @param params The params to pass to index
+	 * @returns ModelIndexResponse where userMeta and meta is taken from the last call
+	 */
+	public async fetchAll(
+		params?: Partial<Omit<IDataGridLoadDataParameters, "rows" | "page">>
+	): Promise<ModelIndexResponse> {
+		let page = 1;
+		let perPage = 1000;
+		let perPageDefault = true;
+		let meta: ResponseMeta;
+		let userMeta: unknown;
+		const records: Record<string, unknown>[] = [];
+
+		// eslint-disable-next-line no-constant-condition
+		while (true) {
+			const [tRecords, tMeta, tUserMeta] = await this.index({
+				...params,
+				rows: perPage,
+				page,
+			});
+			// save data
+			records.push(...tRecords);
+			meta = tMeta;
+			userMeta = tUserMeta;
+
+			// calibrate defaults
+			if (perPageDefault) {
+				perPageDefault = false;
+				perPage = tRecords.length;
+			}
+			page++;
+
+			// finish condition
+			const totalRows = meta.filteredRows ?? meta.totalRows;
+			if (records.length >= totalRows || tRecords.length === 0) break;
+		}
+
+		return [records, meta, userMeta];
 	}
 
 	/**
