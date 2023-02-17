@@ -12,5 +12,9 @@ Object.defineProperty(window, "matchMedia", {
 	})),
 });
 
+// mock scrollTo, not implemented by JSdom
+// eslint-disable-next-line @typescript-eslint/no-empty-function
+Element.prototype.scrollTo = () => {};
+
 const MakeItAModule = "";
 export default MakeItAModule;

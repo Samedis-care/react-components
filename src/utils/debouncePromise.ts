@@ -1,4 +1,4 @@
-type DebouncePromiseFunc<ArgT extends Array<unknown>, RetT> = (
+export type DebouncePromiseFunc<ArgT extends Array<unknown>, RetT> = (
 	...args: ArgT
 ) => Promise<RetT>;
 

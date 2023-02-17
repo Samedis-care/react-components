@@ -1,4 +1,10 @@
-import React, { CSSProperties, useCallback, useState } from "react";
+import React, {
+	CSSProperties,
+	useCallback,
+	useEffect,
+	useRef,
+	useState,
+} from "react";
 import { UseDropZoneParams } from "../../../utils/useDropZone";
 import { makeStyles } from "@material-ui/core/styles";
 import {
@@ -17,6 +23,7 @@ import {
 import {
 	combineClassNames,
 	makeThemeStyles,
+	useDebounce,
 	useDropZone,
 } from "../../../utils";
 import { ClassNameMap, Styles } from "@material-ui/styles/withStyles";
@@ -76,6 +83,8 @@ export interface ImageBoxProps {
 	imageDots?: ImageDotsProps;
 }
 
+const swipeWidth = 30;
+
 const useStyles = makeStyles(
 	(theme) => ({
 		root: {
@@ -93,6 +102,17 @@ const useStyles = makeStyles(
 				transition: "visibility 0s linear 0s, opacity 300ms",
 			},
 		},
+		swipeListener: {
+			height: "100%",
+			width: "100%",
+			overflowX: "auto",
+			overflowY: "hidden",
+			scrollbarWidth: "none",
+			msOverflowStyle: "none",
+			"&::-webkit-scrollbar": {
+				display: "none",
+			},
+		},
 		background: {
 			backgroundColor: theme.palette.secondary.light,
 		},
@@ -108,10 +128,24 @@ const useStyles = makeStyles(
 			position: "relative",
 		},
 		image: {
-			width: "100%",
+			width: `calc(100% + ${swipeWidth * 2}px)`,
+			left: swipeWidth,
 			height: "100%",
 			objectFit: "contain",
 			borderRadius: theme.shape.borderRadius,
+		},
+		imageSwipeLeft: {
+			width: `calc(100%)`,
+			marginLeft: swipeWidth,
+		},
+		imageSwipeRight: {
+			width: `calc(100% + ${swipeWidth * 2}px)`,
+			marginLeft: -swipeWidth,
+			left: 0,
+		},
+		imageNoSwipe: {
+			width: "100%",
+			left: 0,
 		},
 		imageWithDots: {
 			height: "calc(100% - 48px)",
@@ -206,6 +240,50 @@ const ImageBox = (props: ImageBoxProps) => {
 		},
 		[onNextImage]
 	);
+	const handleResetScroll = useCallback(() => {
+		const ref = containerRef.current;
+		if (!ref) return;
+		const scrollBase = onPrevImage ? swipeWidth : 0;
+		ref.scrollTo(scrollBase, 0);
+	}, [onPrevImage]);
+	const [debouncedHandleResetScroll, cancelResetScroll] = useDebounce(
+		handleResetScroll,
+		100
+	);
+	const handleScroll = useCallback(
+		(evt: React.UIEvent<HTMLDivElement>) => {
+			const x = evt.currentTarget.scrollLeft;
+			const scrollTarget = onPrevImage ? swipeWidth * 2 : swipeWidth;
+			let resetScroll = false;
+			if (x === 0 && onPrevImage) {
+				onPrevImage();
+				resetScroll = true;
+			}
+			if (x === scrollTarget && onNextImage) {
+				onNextImage();
+				resetScroll = true;
+			}
+			if (resetScroll) {
+				handleResetScroll();
+				cancelResetScroll();
+			} else {
+				debouncedHandleResetScroll();
+			}
+		},
+		[
+			cancelResetScroll,
+			debouncedHandleResetScroll,
+			handleResetScroll,
+			onNextImage,
+			onPrevImage,
+		]
+	);
+	const containerRef = useRef<HTMLDivElement | null>(null);
+	useEffect(() => {
+		handleResetScroll();
+		cancelResetScroll();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [handleResetScroll]);
 
 	return (
 		<>
@@ -236,14 +314,30 @@ const ImageBox = (props: ImageBoxProps) => {
 						<NextIcon />
 					</IconButton>
 				)}
-				<Tooltip
-					title={fileName ?? ""}
-					disableTouchListener={!fileName}
-					disableHoverListener={!fileName}
-					disableFocusListener={!fileName}
+				<div
+					className={classes.swipeListener}
+					onScroll={handleScroll}
+					ref={containerRef}
+					onTouchEnd={handleResetScroll}
 				>
-					<img src={image} alt={""} className={classes.image} />
-				</Tooltip>
+					<Tooltip
+						title={fileName ?? ""}
+						disableTouchListener={!fileName}
+						disableHoverListener={!fileName}
+						disableFocusListener={!fileName}
+					>
+						<img
+							src={image}
+							alt={""}
+							className={combineClassNames([
+								classes.image,
+								onNextImage && !onPrevImage && classes.imageSwipeRight,
+								!onNextImage && onPrevImage && classes.imageSwipeLeft,
+								!onNextImage && !onPrevImage && classes.imageNoSwipe,
+							])}
+						/>
+					</Tooltip>
+				</div>
 			</div>
 			{!onClick && (
 				<Dialog open={dialogOpen} fullScreen onClose={closeDialog}>
