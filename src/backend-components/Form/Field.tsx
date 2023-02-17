@@ -44,7 +44,6 @@ const Field = (props: FieldProps): React.ReactElement => {
 		warnings,
 		touched,
 		setFieldValue,
-		getFieldValue,
 		handleBlur,
 		initialValues,
 		setFieldTouched,
@@ -67,17 +66,19 @@ const Field = (props: FieldProps): React.ReactElement => {
 		}
 	}
 
-	const { onChange, type, getRelationModel } = fieldDef;
+	const { type, getRelationModel } = fieldDef;
 
 	const setFieldValueHookWrapper = useCallback(
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		(field: string, value: any, shouldValidate?: boolean) => {
-			if (onChange) {
-				value = onChange(value, model, setFieldValue, getFieldValue);
-			}
-			setFieldValue(field, value, shouldValidate);
+		(
+			field: string,
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			value: any,
+			shouldValidate?: boolean,
+			triggerOnChange?: boolean
+		) => {
+			setFieldValue(field, value, shouldValidate, triggerOnChange ?? true);
 		},
-		[setFieldValue, getFieldValue, onChange, model]
+		[setFieldValue]
 	);
 
 	// mark field as mounted

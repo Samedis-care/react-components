@@ -412,7 +412,12 @@ export interface FormContextData {
 	/**
 	 * Sets a field value
 	 */
-	setFieldValue: (field: string, value: unknown, validate?: boolean) => void;
+	setFieldValue: (
+		field: string,
+		value: unknown,
+		validate?: boolean,
+		triggerOnChange?: boolean
+	) => void;
 	/**
 	 * Get a field value
 	 * @param field The field name
@@ -863,18 +868,35 @@ const Form = <
 		},
 		[validateField]
 	);
+	const getFieldValue = useCallback((field: string): unknown => {
+		return getValueByDot(field, valuesRef.current);
+	}, []);
 	const setFieldValue = useCallback(
-		(field: string, value: unknown, validate = true) => {
+		(
+			field: string,
+			value: unknown,
+			validate = true,
+			triggerOnChange = false // default false to prevent recursion
+		) => {
+			if (triggerOnChange) {
+				const onChange = model.fields[field as KeyT].onChange;
+				if (onChange) {
+					value = onChange(value, model, setFieldValue, getFieldValue);
+					if (value === undefined && process.env.NODE_ENV === "development") {
+						// eslint-disable-next-line no-console
+						console.error(
+							`[Components-Care] [Form] onChange handler for field '${field}' returned undefined. Missing return?`
+						);
+					}
+				}
+			}
 			setFieldTouched(field, true, false);
 			valuesRef.current = dotSet(field, valuesRef.current, value);
 			setValues(valuesRef.current);
 			if (validate) void validateField(field, value);
 		},
-		[validateField, setFieldTouched]
+		[setFieldTouched, validateField, model, getFieldValue]
 	);
-	const getFieldValue = useCallback((field: string): unknown => {
-		return getValueByDot(field, valuesRef.current);
-	}, []);
 	const resetForm = useCallback(() => {
 		if (!serverData || !serverData[0]) return;
 		valuesRef.current = deepClone(serverData[0]);

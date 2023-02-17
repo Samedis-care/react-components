@@ -113,7 +113,8 @@ export interface ModelFieldDefinition<
 		setFieldValue: (
 			field: KeyT,
 			value: unknown,
-			shouldValidate?: boolean
+			shouldValidate?: boolean,
+			triggerOnChange?: boolean
 		) => void,
 		getFieldValue: (field: KeyT) => unknown
 	) => TypeT;
