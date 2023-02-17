@@ -160,9 +160,6 @@ const useStyles = makeStyles(
 		imageItem: {
 			height: "calc(100% - 1rem)",
 		},
-		imageItemReadOnly: {
-			height: "100%",
-		},
 	},
 	{ name: "CcMultiImage" }
 );
@@ -341,11 +338,7 @@ const MultiImage = (props: MultiImageProps) => {
 		<>
 			<GroupBox label={label}>
 				<Grid container spacing={1} className={classes.rootContainer}>
-					<Grid
-						item
-						xs={12}
-						className={readOnly ? classes.imageItemReadOnly : classes.imageItem}
-					>
+					<Grid item xs={12} className={classes.imageItem}>
 						<ImageBox
 							image={
 								images[currentImage]?.image ?? placeholderImage ?? uploadImage
