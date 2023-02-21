@@ -45,6 +45,7 @@ const DialogContextProvider = (props: IFrameworkProps) => {
 	const navBlock = useRef<null | (() => void)>(null);
 	const dialogCount = useRef(0);
 	const [dialogs, setDialogs] = useState<DialogType[]>([]);
+	const parentContext = useContext(DialogContext);
 
 	const pushDialog = useCallback(
 		(dialog: React.ReactNode) => {
@@ -56,10 +57,14 @@ const DialogContextProvider = (props: IFrameworkProps) => {
 
 			setDialogs((prevValue) => [...prevValue, dialog]);
 		},
-		[setDialogs, t]
+		[t]
 	);
 	const popDialog = useCallback(() => {
 		if (dialogCount.current === 0) {
+			if (parentContext) {
+				// call parent popDialog and return
+				return parentContext[1]();
+			}
 			const err = new Error(
 				"[Components-Care] Trying to close non-existing dialog"
 			);
@@ -78,7 +83,7 @@ const DialogContextProvider = (props: IFrameworkProps) => {
 			prevValue.pop();
 			return [...prevValue];
 		});
-	}, [setDialogs]);
+	}, [parentContext]);
 
 	const dialogActions: DialogContextType = useMemo(
 		() => [pushDialog, popDialog],
