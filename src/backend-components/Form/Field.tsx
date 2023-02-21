@@ -1,11 +1,13 @@
-import React, { useCallback, useEffect, useMemo } from "react";
+import React, { useCallback, useContext, useEffect, useMemo } from "react";
 import { useFormContext } from "./Form";
 import {
 	ModelFieldDefinition,
+	ModelRenderParams,
 	PageVisibility,
 } from "../../backend-integration";
 import { getVisibility } from "../../backend-integration/Model/Visibility";
 import { getValueByDot } from "../../utils";
+import Type from "../../backend-integration/Model/Type";
 
 type NonOverridableProps =
 	| "getDefaultValue"
@@ -36,6 +38,19 @@ interface FieldProps {
 				NonOverridableProps
 		  >);
 }
+
+export interface FormFieldContextType<T> extends ModelRenderParams<T> {
+	type: Type<T>;
+}
+
+export const FormFieldContext = React.createContext<FormFieldContextType<unknown> | null>(
+	null
+);
+export const useFormFieldContext = <T,>(): FormFieldContextType<T> => {
+	const ctx = useContext(FormFieldContext);
+	if (!ctx) throw new Error("FormFieldContext not set");
+	return ctx as FormFieldContextType<T>;
+};
 
 const Field = (props: FieldProps): React.ReactElement => {
 	const {
@@ -115,8 +130,8 @@ const Field = (props: FieldProps): React.ReactElement => {
 	);
 
 	return useMemo(
-		() =>
-			type.render({
+		() => {
+			const renderParams = {
 				field: name,
 				value: value,
 				touched: touch,
@@ -132,7 +147,13 @@ const Field = (props: FieldProps): React.ReactElement => {
 				relationModel,
 				relationData,
 				values,
-			}),
+			};
+			return (
+				<FormFieldContext.Provider value={{ ...renderParams, type }}>
+					{type.render(renderParams)}
+				</FormFieldContext.Provider>
+			);
+		},
 		// do not update every time values change
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[
