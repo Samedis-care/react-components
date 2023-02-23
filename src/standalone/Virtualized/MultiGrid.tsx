@@ -11,6 +11,7 @@ import {
 	GridOnScrollProps,
 	VariableSizeGrid,
 } from "react-window";
+import { makeStyles } from "@material-ui/core";
 
 /**
  * Most props do the same as in react-virtualized MultiGrid component
@@ -43,6 +44,31 @@ interface ReactWindowGridState {
 	scrollLeft: number;
 }
 
+const useStyles = makeStyles(
+	{
+		bottomLeft: {
+			// in webkit based browsers:
+			// hide the vertical scrollbar, sadly also removes the default styles
+			// from the horizontal scrollbar
+			"&::-webkit-scrollbar": {
+				width: 0,
+				height: "auto",
+			},
+			"&::-webkit-scrollbar-track": {
+				background: "white",
+			},
+			"&::-webkit-scrollbar-thumb": {
+				background: "hsl(0, 0%, 60%)",
+			},
+			// in firefox just hide it completely
+			// we can do that because the scrollbar
+			// doesn't add to the content width in firefox
+			scrollbarWidth: "none",
+		},
+	},
+	{ name: "CcMultiGrid" }
+);
+
 const MultiGrid = (props: MultiGridProps) => {
 	const {
 		width,
@@ -62,6 +88,8 @@ const MultiGrid = (props: MultiGridProps) => {
 		noContentRenderer: NoContentRenderer,
 		globalScrollListener,
 	} = props;
+
+	const classes = useStyles();
 
 	const fixedWidth = useMemo(
 		() =>
@@ -192,7 +220,7 @@ const MultiGrid = (props: MultiGridProps) => {
 				rowHeight={(index) => rowHeight(index)}
 				columnCount={fixedColumnCount}
 				rowCount={fixedRowCount}
-				width={fixedWidth}
+				width={Math.min(fixedWidth, width)}
 				height={fixedHeight}
 				style={{ ...styleTopLeftGrid, position: "absolute", top: 0, left: 0 }}
 			>
@@ -205,7 +233,7 @@ const MultiGrid = (props: MultiGridProps) => {
 				rowHeight={(index) => rowHeight(index)}
 				columnCount={columnCount - fixedColumnCount}
 				rowCount={fixedRowCount}
-				width={width - fixedWidth}
+				width={Math.max(width - fixedWidth, 0)}
 				height={fixedHeight}
 				style={{
 					...styleTopRightGrid,
@@ -223,12 +251,14 @@ const MultiGrid = (props: MultiGridProps) => {
 				rowHeight={(index) => rowHeight(index + fixedRowCount)}
 				columnCount={fixedColumnCount}
 				rowCount={rowCount - fixedRowCount}
-				width={fixedWidth}
+				width={Math.min(fixedWidth, width)}
 				height={height - fixedHeight}
 				onScroll={handleScrollPinned}
+				className={classes.bottomLeft}
 				style={{
 					...styleBottomLeftGrid,
 					position: "absolute",
+					overflow: "scroll",
 					top: fixedHeight,
 					left: 0,
 				}}
@@ -243,11 +273,13 @@ const MultiGrid = (props: MultiGridProps) => {
 					rowHeight={(index) => rowHeight(index + fixedRowCount)}
 					columnCount={columnCount - fixedColumnCount}
 					rowCount={rowCount - fixedRowCount}
-					width={width - fixedWidth}
+					width={Math.max(width - fixedWidth, 0)}
 					height={height - fixedHeight}
 					onScroll={handleScroll}
 					style={{
 						...styleBottomRightGrid,
+						overflowX: "scroll",
+						overflowY: "auto",
 						position: "absolute",
 						top: fixedHeight,
 						left: fixedWidth,
