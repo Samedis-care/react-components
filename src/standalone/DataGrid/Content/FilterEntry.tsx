@@ -385,18 +385,21 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 									value={filterValue === "" ? null : filterValue}
 									onChange={onFilterValueChangeDate}
 									fullWidth
+									autoFocus={depth === 1}
 								/>
 							) : props.valueType === "datetime" ? (
 								<LocalizedDateTimePicker
 									value={filterValue === "" ? null : filterValue}
 									onChange={onFilterValueChangeDate}
 									fullWidth
+									autoFocus={depth === 1}
 								/>
 							) : (
 								<TextField
 									value={filterValue}
 									onChange={onFilterValueChange}
 									fullWidth
+									autoFocus={depth === 1}
 								/>
 							)}
 						</Grid>
@@ -434,6 +437,7 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 								checked={filterValue === "true"}
 								onClick={onFilterValueChangeBool}
 								indeterminate={!filterValue}
+								autoFocus={depth === 1}
 							/>
 						}
 						label={(() => {
@@ -464,6 +468,7 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 									"standalone.data-grid.content.set-filter.search"
 								)}
 								fullWidth
+								autoFocus={depth === 1}
 							/>
 						</Grid>
 					)}
