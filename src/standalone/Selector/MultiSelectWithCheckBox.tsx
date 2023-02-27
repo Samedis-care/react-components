@@ -13,16 +13,18 @@ import {
 	InputLabel,
 } from "@material-ui/core";
 import { ExpandMore } from "@material-ui/icons";
-import { MultiSelectOption } from "./TypesMultiSelect";
 import { ClassNameMap } from "@material-ui/styles/withStyles";
 import { cleanClassMap, makeThemeStyles } from "../../utils";
 import { Styles } from "@material-ui/core/styles/withStyles";
+import { MultiSelectorData } from "./MultiSelect";
+import { getStringLabel } from "./BaseSelector";
+import uniqueArray from "../../utils/uniqueArray";
 
 export interface MultiSelectWithCheckBoxProps extends SelectProps {
 	/**
 	 * Selector options
 	 */
-	options: MultiSelectOption[];
+	options: MultiSelectorData[];
 	/**
 	 * Selected values
 	 */
@@ -70,10 +72,25 @@ const MenuItemCustom = withStyles((theme) => ({
 	},
 }))(MenuItem);
 
+const MenuItemGroup = withStyles({
+	root: {
+		paddingTop: 0,
+		paddingBottom: 0,
+	},
+})(MenuItem);
+
 const ListItemTextCustom = withStyles((theme) => ({
 	primary: {
 		fontSize: 13,
 		...theme.componentsCare?.selectorWithCheckbox?.itemTextPrimaryStyle,
+	},
+}))(ListItemText);
+
+const GroupItemText = withStyles((theme) => ({
+	root: {
+		...(theme.typography.caption as CSSProperties),
+		marginTop: 0,
+		marginBottom: 0,
 	},
 }))(ListItemText);
 
@@ -125,6 +142,19 @@ const MultiSelectWithCheckBox = (props: MultiSelectWithCheckBoxProps) => {
 	const selectClasses = useSelectStyles(
 		cleanClassMap(props, true, "checkboxStyle")
 	);
+	const groupsEnabled = options.find((opt) => !!opt.group);
+	const renderOption = (option: MultiSelectorData) => {
+		return (
+			<MenuItemCustom key={getStringLabel(option)} value={option.value}>
+				<Checkbox
+					checked={values.indexOf(option.value) > -1}
+					className={classes.checkboxStyle}
+				/>
+				<ListItemTextCustom primary={option.label} />
+			</MenuItemCustom>
+		);
+	};
+
 	return (
 		<>
 			{props.label && <InputLabel shrink>{label}</InputLabel>}
@@ -154,17 +184,23 @@ const MultiSelectWithCheckBox = (props: MultiSelectWithCheckBoxProps) => {
 					},
 				}}
 			>
-				{options.map((option: MultiSelectOption) => {
-					return (
-						<MenuItemCustom key={option.label} value={option.value}>
-							<Checkbox
-								checked={values.indexOf(option.value) > -1}
-								className={classes.checkboxStyle}
-							/>
-							<ListItemTextCustom primary={option.label} />
-						</MenuItemCustom>
-					);
-				})}
+				{groupsEnabled
+					? (() => {
+							const groups = uniqueArray(
+								options.map((opt) => opt.group ?? "?" /* handle no group */)
+							).sort();
+							return groups.map((group) => (
+								<React.Fragment key={group}>
+									<MenuItemGroup disabled value={`group-${group}`}>
+										<GroupItemText disableTypography primary={group} />
+									</MenuItemGroup>
+									{options
+										.filter((opt) => opt.group === group)
+										.map(renderOption)}
+								</React.Fragment>
+							));
+					  })()
+					: options.map(renderOption)}
 			</Select>
 		</>
 	);

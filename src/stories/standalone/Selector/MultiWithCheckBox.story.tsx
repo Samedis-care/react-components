@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import { boolean, text } from "@storybook/addon-knobs";
-import { MultiSelectWithCheckBox } from "../../../standalone/Selector";
-import { MultiSelectOption } from "../../../standalone/Selector/TypesMultiSelect";
+import {
+	MultiSelectorData,
+	MultiSelectWithCheckBox,
+} from "../../../standalone/Selector";
 
 const values: string[] = ["value1", "value2"];
-const options: MultiSelectOption[] = [
+const options: MultiSelectorData[] = [
 	{ label: "Value 1", value: "value1" },
 	{ label: "Value 2", value: "value2" },
 	{ label: "Value 3", value: "value3" },
