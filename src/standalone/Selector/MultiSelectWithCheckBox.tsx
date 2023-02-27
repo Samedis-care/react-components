@@ -189,16 +189,18 @@ const MultiSelectWithCheckBox = (props: MultiSelectWithCheckBoxProps) => {
 							const groups = uniqueArray(
 								options.map((opt) => opt.group ?? "?" /* handle no group */)
 							).sort();
-							return groups.map((group) => (
-								<React.Fragment key={group}>
-									<MenuItemGroup disabled value={`group-${group}`}>
-										<GroupItemText disableTypography primary={group} />
-									</MenuItemGroup>
-									{options
-										.filter((opt) => opt.group === group)
-										.map(renderOption)}
-								</React.Fragment>
-							));
+							return groups.map((group) => [
+								<MenuItemGroup
+									disabled
+									value={`group-${group}`}
+									key={`group-${group}`}
+								>
+									<GroupItemText disableTypography primary={group} />
+								</MenuItemGroup>,
+								...options
+									.filter((opt) => opt.group === group)
+									.map(renderOption),
+							]);
 					  })()
 					: options.map(renderOption)}
 			</Select>

@@ -4,6 +4,7 @@ import React, {
 	useCallback,
 	useContext,
 	useEffect,
+	useLayoutEffect,
 	useMemo,
 	useRef,
 	useState,
@@ -1231,7 +1232,9 @@ const DataGrid = (props: DataGridProps) => {
 		[setState]
 	);
 
-	useEffect(refresh, [refresh, pages]);
+	// delay refresh call till useEffect has been processed, so we don't deadlock when auto page correction in the refresh
+	// data function is performed.
+	useLayoutEffect(refresh, [refresh, pages]);
 
 	// debounced refresh on filter and sort changes
 	const resetView = useMemo(
