@@ -57,7 +57,17 @@ export interface CrudProps<
 	formProps: Omit<
 		FormProps<KeyT, VisibilityT, CustomT, CrudFormProps>,
 		"id" | "model" | "children" | "customProps" | "disableRouting"
-	>;
+	> & {
+		/**
+		 * override for default form custom props passed in by CRUD component
+		 */
+		customProps?: FormProps<
+			KeyT,
+			VisibilityT,
+			CustomT,
+			CrudFormProps
+		>["customProps"];
+	};
 	/**
 	 * The renderer function which returns the form component
 	 * @remarks Can be set to undefined to only render the Grid
@@ -402,10 +412,12 @@ const CRUD = <
 				readOnlyReason={props.editPermissionHint}
 				onSubmit={handleSubmit}
 				disableRouting={disableRouting}
-				customProps={{
-					goBack: showOverview,
-					hasCustomSubmitHandler: props.formProps.onSubmit != null,
-				}}
+				customProps={
+					props.formProps.customProps ?? {
+						goBack: showOverview,
+						hasCustomSubmitHandler: props.formProps.onSubmit != null,
+					}
+				}
 			>
 				{formComponent}
 			</Form>
