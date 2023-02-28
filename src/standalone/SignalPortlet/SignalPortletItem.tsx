@@ -9,12 +9,13 @@ import {
 	ListItemText,
 } from "@material-ui/core";
 import { SignalPortletColorConfig } from "./index";
+import Loader from "../Loader";
 
 export interface SignalPortletItemDef {
 	/**
-	 * The count to show
+	 * The count to show or null/undefined to signal loading
 	 */
-	count: number;
+	count: number | null | undefined;
 	/**
 	 * The text of the portlet item
 	 */
@@ -34,6 +35,9 @@ export type SignalPortletItemProps = SignalPortletItemDef &
 
 const useStyles = makeStyles(
 	(theme) => ({
+		itemColorLoading: {
+			backgroundColor: "transparent",
+		},
 		itemColorActive: (props: SignalPortletItemProps) => ({
 			color: theme.palette.getContrastText(props.colorPresent),
 			backgroundColor: props.colorPresent,
@@ -60,9 +64,12 @@ const SignalPortletItem = (props: SignalPortletItemProps) => {
 		}
 	}, [navigate, link]);
 
-	const counterClass = count
-		? classes.itemColorActive
-		: classes.itemColorInactive;
+	const counterClass =
+		count == null
+			? classes.itemColorLoading
+			: count
+			? classes.itemColorActive
+			: classes.itemColorInactive;
 
 	return (
 		<ListItem
@@ -73,7 +80,9 @@ const SignalPortletItem = (props: SignalPortletItemProps) => {
 			className={classes.root}
 		>
 			<ListItemAvatar className={classes.listAvatar}>
-				<Avatar className={counterClass}>{count.toString()}</Avatar>
+				<Avatar className={counterClass}>
+					{count == null ? <Loader /> : count.toString()}
+				</Avatar>
 			</ListItemAvatar>
 			<ListItemText className={classes.listText}>{text}</ListItemText>
 		</ListItem>
