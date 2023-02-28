@@ -6,7 +6,7 @@ import {
 	PageVisibility,
 } from "../../backend-integration";
 import { getVisibility } from "../../backend-integration/Model/Visibility";
-import { getValueByDot } from "../../utils";
+import { dotsToObject, getValueByDot } from "../../utils";
 import Type from "../../backend-integration/Model/Type";
 
 type NonOverridableProps =
@@ -81,7 +81,7 @@ const Field = (props: FieldProps): React.ReactElement => {
 		}
 	}
 
-	const { type, getRelationModel } = fieldDef;
+	const { type, getRelationModel, getRelationModelValues } = fieldDef;
 
 	const setFieldValueHookWrapper = useCallback(
 		(
@@ -116,9 +116,19 @@ const Field = (props: FieldProps): React.ReactElement => {
 		values
 	);
 
+	const relationModelValues = useMemo(() => {
+		const pick = getRelationModelValues ?? [];
+		const result: Record<string, unknown> = {};
+		pick.forEach((field) => (result[field] = getValueByDot(field, values)));
+		return dotsToObject(result);
+	}, [values, getRelationModelValues]);
+
 	const relationModel = useMemo(
-		() => (getRelationModel ? getRelationModel(hasId || null) : undefined),
-		[getRelationModel, hasId]
+		() =>
+			getRelationModel
+				? getRelationModel(hasId || null, relationModelValues)
+				: undefined,
+		[getRelationModel, hasId, relationModelValues]
 	);
 
 	const cacheKey = useMemo(

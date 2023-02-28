@@ -122,9 +122,11 @@ export interface ModelFieldDefinition<
 	 * The referenced model for backend connected data types.
 	 * If TypeScript complains cast the return value to `Model<ModelFieldName, PageVisibility, unknown>`
 	 * @param id The current record ID
+	 * @param values Subset of the current record (select relevant data with getRelationModelValues)
 	 */
 	getRelationModel?: (
-		id: string | null
+		id: string | null,
+		values: Record<string, unknown>
 	) => Model<ModelFieldName, PageVisibility, unknown>;
 	// TypeScript doesn't like the following definition (it would save you the cast):
 	//getRelationModel?: <
@@ -132,6 +134,7 @@ export interface ModelFieldDefinition<
 	//	SubVisibilityT extends PageVisibility,
 	//	SubCustomT
 	//>() => Model<SubKeyT, SubVisibilityT, SubCustomT>;
+	getRelationModelValues?: string[]; // actually KeyT[], but TypeScript doesn't like it
 }
 
 export type ModelField<
@@ -557,7 +560,8 @@ class Model<
 								? await Promise.all(
 										values.map((value) =>
 											refModel(
-												deserialized.id as string | null
+												deserialized.id as string | null,
+												deserialized
 											).applySerialization(value, "deserialize", "edit")
 										)
 								  )
