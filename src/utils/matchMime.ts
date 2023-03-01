@@ -5,6 +5,9 @@
  * @returns true if actual matches pattern, otherwise false
  */
 const matchMime = (pattern: string, actual: string): boolean => {
+	// strip extra info (e.g. audio/ogg; codecs=opus)
+	if (actual.includes(";")) actual = actual.split(";")[0];
+
 	// split the type into components
 	const patternComponents = pattern.split("/").map((e) => e.toLowerCase());
 	const actualComponents = actual.split("/").map((e) => e.toLowerCase());
