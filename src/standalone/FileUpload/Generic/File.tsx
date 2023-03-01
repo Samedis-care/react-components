@@ -20,6 +20,7 @@ import {
 	WordFileIcon,
 } from "../FileIcons";
 import { combineClassNames, getFileExt } from "../../../utils";
+import dataToFile from "../../../utils/dataToFile";
 
 export interface FileProps {
 	/**
@@ -222,7 +223,15 @@ const File = (props: FileProps) => {
 	const FileIcon = getFileIconOrDefault(props.name);
 
 	const openDownload = useCallback(() => {
-		if (downloadLink) window.open(downloadLink, "_blank");
+		if (downloadLink) {
+			if (downloadLink.startsWith("data:")) {
+				const url = URL.createObjectURL(dataToFile(downloadLink));
+				window.open(url, "_blank");
+				URL.revokeObjectURL(url);
+			} else {
+				window.open(downloadLink, "_blank");
+			}
+		}
 	}, [downloadLink]);
 
 	const handleListClick = useCallback((evt: React.MouseEvent) => {
