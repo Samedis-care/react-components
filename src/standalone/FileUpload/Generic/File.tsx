@@ -56,8 +56,9 @@ export interface FileProps {
 	 * - box: Box with label below
 	 * - list: Full width list
 	 * - compact-list: List with compact width, display inline block
+	 * - icon only compact list - file name as tooltip, best used with read-only
 	 */
-	variant: "box" | "list" | "compact-list";
+	variant: "box" | "list" | "compact-list" | "icon-only";
 }
 
 const useStyles = makeStyles(
@@ -238,7 +239,8 @@ const File = (props: FileProps) => {
 		evt.stopPropagation();
 	}, []);
 
-	const isList = variant === "list" || variant === "compact-list";
+	const isList =
+		variant === "list" || variant === "compact-list" || variant === "icon-only";
 	const renderIcon = () =>
 		props.preview ? (
 			<img
@@ -287,7 +289,7 @@ const File = (props: FileProps) => {
 		</Tooltip>
 	);
 
-	const renderRemove = () =>
+	const removeBtn =
 		props.onRemove &&
 		!props.disabled &&
 		React.createElement(variant === "list" ? CancelIconList : CancelIcon, {
@@ -304,7 +306,7 @@ const File = (props: FileProps) => {
 			<Grid item style={{ width: props.size }}>
 				<Grid container spacing={2}>
 					<Grid item xs={12} className={classes.iconContainer}>
-						{renderRemove()}
+						{removeBtn}
 						{renderIcon()}
 					</Grid>
 					<Grid item xs={12}>
@@ -328,7 +330,7 @@ const File = (props: FileProps) => {
 				<Grid item xs className={classes.listEntryText}>
 					{renderName()}
 				</Grid>
-				<Grid item>{renderRemove()}</Grid>
+				{removeBtn && <Grid item>{removeBtn}</Grid>}
 			</Grid>
 		);
 	} else if (variant === "compact-list") {
@@ -343,7 +345,24 @@ const File = (props: FileProps) => {
 					<Grid item className={classes.listEntryText}>
 						{renderName()}
 					</Grid>
-					<Grid item>{renderRemove()}</Grid>
+					{removeBtn && <Grid item>{removeBtn}</Grid>}
+				</Grid>
+			</Grid>
+		);
+	} else if (variant === "icon-only") {
+		return (
+			<Grid
+				item
+				onClick={handleListClick}
+				className={classes.compactListWrapper}
+			>
+				<Grid container spacing={2} alignItems={"stretch"} wrap={"nowrap"}>
+					<Grid item>
+						<Tooltip title={props.name}>
+							<span>{renderIcon()}</span>
+						</Tooltip>
+					</Grid>
+					{removeBtn && <Grid item>{removeBtn}</Grid>}
 				</Grid>
 			</Grid>
 		);
