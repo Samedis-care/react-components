@@ -55,11 +55,17 @@ export type CustomValidationHandler = () =>
 /**
  * Pre submit handler to perform final changes (bypassing validation)
  */
-export type PreSubmitHandler = (id: string | null) => Promise<void> | unknown;
+export type PreSubmitHandler = (
+	id: string | null,
+	submitOptions: FormSubmitOptions
+) => Promise<void> | unknown;
 /**
  * Post submit handler to submit additional data for the submitted record
  */
-export type PostSubmitHandler = (id: string) => Promise<void> | unknown;
+export type PostSubmitHandler = (
+	id: string,
+	submitOptions: FormSubmitOptions
+) => Promise<void> | unknown;
 
 export enum OnlySubmitMountedBehaviour {
 	/**
@@ -85,6 +91,10 @@ export interface PreSubmitParams {
 	 * The local data
 	 */
 	readonly formData: Record<string, unknown>;
+	/**
+	 * submit options
+	 */
+	readonly submitOptions: FormSubmitOptions;
 	// select form props follow, @see docs in interface FormProps
 	readonly deleteOnSubmit: boolean;
 	// select helpers follow, @see docs in interface FormContextData
@@ -97,6 +107,10 @@ export interface ErrorComponentProps {
 	 */
 	error: Error | ValidationError;
 }
+
+export type FormSubmitOptions = Partial<{
+	ignoreWarnings: boolean;
+}>;
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export interface PageProps<KeyT extends ModelFieldName, CustomPropsT> {
@@ -122,7 +136,7 @@ export interface PageProps<KeyT extends ModelFieldName, CustomPropsT> {
 	/**
 	 * Function to trigger form submit
 	 */
-	submit: () => Promise<void>;
+	submit: (params?: FormSubmitOptions | React.SyntheticEvent) => Promise<void>;
 	/**
 	 * Function to trigger form reset
 	 */
@@ -213,6 +227,10 @@ export interface FormProps<
 	 * Only validate mounted fields
 	 */
 	onlyValidateMounted?: boolean;
+	/**
+	 * Only perform warning validations for mounted fields
+	 */
+	onlyWarnMounted?: boolean;
 	/**
 	 * Is the form read-only?
 	 */
@@ -370,6 +388,10 @@ export interface FormContextData {
 	 */
 	onlyValidateMounted: boolean;
 	/**
+	 * @see FormProps.onlyWarnMounted
+	 */
+	onlyWarnMounted: boolean;
+	/**
 	 * @see FormProps.readOnly
 	 */
 	readOnly: boolean;
@@ -384,7 +406,7 @@ export interface FormContextData {
 	/**
 	 * Submit the form
 	 */
-	submit: () => Promise<void>;
+	submit: (params?: FormSubmitOptions | React.SyntheticEvent) => Promise<void>;
 	/**
 	 * Is the form record being deleted on submit
 	 */
@@ -479,6 +501,7 @@ export type FormContextDataLite = Pick<
 	| "model"
 	| "onlySubmitMounted"
 	| "onlyValidateMounted"
+	| "onlyWarnMounted"
 	| "readOnly"
 	| "readOnlyReason"
 	| "errorComponent"
@@ -628,6 +651,7 @@ const Form = <
 		onSubmit,
 		customProps,
 		onlyValidateMounted,
+		onlyWarnMounted,
 		onlySubmitMounted,
 		readOnly,
 		readOnlyReason,
@@ -821,7 +845,7 @@ const Form = <
 			const errors = await model.validate(
 				values ?? valuesRef.current,
 				id ? "edit" : "create",
-				onlyValidateMounted
+				onlyValidateMounted || (mode === "hint" && onlyWarnMounted)
 					? (Object.keys(mountedFields).filter(
 							(field) => mountedFields[field as KeyT]
 					  ) as KeyT[])
@@ -842,7 +866,14 @@ const Form = <
 			);
 			return errors;
 		},
-		[disableValidation, model, id, onlyValidateMounted, mountedFields]
+		[
+			disableValidation,
+			model,
+			id,
+			onlyValidateMounted,
+			onlyWarnMounted,
+			mountedFields,
+		]
 	);
 	const validateField = useCallback(
 		async (field: string, value?: unknown) => {
@@ -970,156 +1001,172 @@ const Form = <
 	}, [serverData]);
 
 	// main form - submit handler
-	const submitForm = useCallback(async (): Promise<void> => {
-		if (!serverData) throw new Error("serverData is null"); // should never happen
-		if (!defaultRecord) throw new Error("default record is null"); // should never happen
+	const submitForm = useCallback(
+		async (
+			params?: FormSubmitOptions | React.SyntheticEvent
+		): Promise<void> => {
+			if (!serverData) throw new Error("serverData is null"); // should never happen
+			if (!defaultRecord) throw new Error("default record is null"); // should never happen
 
-		if (preSubmit) {
-			let cancelSubmit: boolean;
-			try {
-				cancelSubmit = await preSubmit({
-					serverData: (serverData && serverData[0]) ?? valuesRef.current,
-					formData: valuesRef.current,
-					deleteOnSubmit: !!deleteOnSubmit,
-					setFieldValue,
-				});
-			} catch (e) {
-				if (captureException) captureException(e as Error);
-				// eslint-disable-next-line no-console
-				console.error(
-					"[Components-Care] [FormEngine] Pre-submit handler threw exception",
-					e
-				);
-				cancelSubmit = true;
+			if (params && "nativeEvent" in params) params = undefined;
+			if (!params) params = {} as FormSubmitOptions;
+
+			if (preSubmit) {
+				let cancelSubmit: boolean;
+				try {
+					cancelSubmit = await preSubmit({
+						serverData: (serverData && serverData[0]) ?? valuesRef.current,
+						formData: valuesRef.current,
+						submitOptions: params,
+						deleteOnSubmit: !!deleteOnSubmit,
+						setFieldValue,
+					});
+				} catch (e) {
+					if (captureException) captureException(e as Error);
+					// eslint-disable-next-line no-console
+					console.error(
+						"[Components-Care] [FormEngine] Pre-submit handler threw exception",
+						e
+					);
+					cancelSubmit = true;
+				}
+				if (cancelSubmit) {
+					return;
+				}
 			}
-			if (cancelSubmit) {
+			setSubmitting(true);
+			setTouched((prev) =>
+				Object.fromEntries(Object.keys(prev).map((field) => [field, true]))
+			);
+			if (deleteOnSubmit) {
+				try {
+					const id = (valuesRef.current as Record<"id", string | null>).id;
+					if (id) {
+						setDeleted(true);
+						await deleteRecord(id);
+					}
+					if (onDeleted) onDeleted(id);
+				} catch (e) {
+					setDeleted(false);
+					if (e instanceof Error) {
+						setUpdateError(e);
+					}
+					throw e;
+				} finally {
+					setSubmitting(false);
+				}
 				return;
 			}
-		}
-		setSubmitting(true);
-		setTouched((prev) =>
-			Object.fromEntries(Object.keys(prev).map((field) => [field, true]))
-		);
-		if (deleteOnSubmit) {
 			try {
-				const id = (valuesRef.current as Record<"id", string | null>).id;
-				if (id) {
-					setDeleted(true);
-					await deleteRecord(id);
+				const validationHints = await validateForm("hint");
+				setWarnings(validationHints);
+				const validation = await validateForm("normal");
+				setErrors(validation);
+				if (!isObjectEmpty(validation)) {
+					// noinspection ExceptionCaughtLocallyJS
+					throw validation;
 				}
-				if (onDeleted) onDeleted(id);
+
+				if (!isObjectEmpty(validationHints) && !params.ignoreWarnings) {
+					setSubmitting(false);
+					const continueSubmit = await showConfirmDialogBool(pushDialog, {
+						title: t("backend-components.form.submit-with-warnings.title"),
+						message: (
+							<Grid container spacing={2}>
+								<Grid item xs={12}>
+									{t("backend-components.form.submit-with-warnings.message")}
+								</Grid>
+								<Grid item xs={12}>
+									<ul>
+										{Object.entries(validationHints).map(([key, value]) => (
+											<li key={key}>{value}</li>
+										))}
+									</ul>
+								</Grid>
+							</Grid>
+						),
+						textButtonYes: t(
+							"backend-components.form.submit-with-warnings.yes"
+						),
+						textButtonNo: t("backend-components.form.submit-with-warnings.no"),
+					});
+					if (!continueSubmit) {
+						return;
+					}
+					setSubmitting(true);
+				}
+
+				await Promise.all(
+					Object.values(preSubmitHandlers.current).map((handler) =>
+						handler(id, params as FormSubmitOptions)
+					)
+				);
+
+				const submitValues = valuesRef.current;
+				const oldValues = serverData[0];
+
+				const result = await updateData(
+					getUpdateData(
+						valuesRef.current,
+						(model as unknown) as Model<string, PageVisibility, unknown>,
+						onlySubmitMounted ?? false,
+						onlySubmitMountedBehaviour,
+						mountedFields,
+						defaultRecord[0],
+						id
+					)
+				);
+
+				const newValues = deepClone(result[0]);
+				valuesRef.current = newValues;
+
+				setTouched((prev) =>
+					Object.fromEntries(Object.keys(prev).map((field) => [field, false]))
+				);
+
+				await Promise.all(
+					Object.values(postSubmitHandlers.current).map((handler) =>
+						handler(
+							(newValues as Record<"id", string>).id,
+							params as FormSubmitOptions
+						)
+					)
+				);
+
+				// re-render after post submit handler, this way we avoid mounting new components before the form is fully saved
+				setValues(newValues);
+
+				if (onSubmit) {
+					await onSubmit(newValues, submitValues, oldValues);
+				}
 			} catch (e) {
-				setDeleted(false);
-				if (e instanceof Error) {
-					setUpdateError(e);
-				}
+				// don't use this for validation errors
+				setUpdateError(e as Error);
 				throw e;
 			} finally {
 				setSubmitting(false);
 			}
-			return;
-		}
-		try {
-			const validationHints = await validateForm("hint");
-			setWarnings(validationHints);
-			const validation = await validateForm("normal");
-			setErrors(validation);
-			if (!isObjectEmpty(validation)) {
-				// noinspection ExceptionCaughtLocallyJS
-				throw validation;
-			}
-
-			if (!isObjectEmpty(validationHints)) {
-				setSubmitting(false);
-				const continueSubmit = await showConfirmDialogBool(pushDialog, {
-					title: t("backend-components.form.submit-with-warnings.title"),
-					message: (
-						<Grid container spacing={2}>
-							<Grid item xs={12}>
-								{t("backend-components.form.submit-with-warnings.message")}
-							</Grid>
-							<Grid item xs={12}>
-								<ul>
-									{Object.entries(validationHints).map(([key, value]) => (
-										<li key={key}>{value}</li>
-									))}
-								</ul>
-							</Grid>
-						</Grid>
-					),
-					textButtonYes: t("backend-components.form.submit-with-warnings.yes"),
-					textButtonNo: t("backend-components.form.submit-with-warnings.no"),
-				});
-				if (!continueSubmit) {
-					return;
-				}
-				setSubmitting(true);
-			}
-
-			await Promise.all(
-				Object.values(preSubmitHandlers.current).map((handler) => handler(id))
-			);
-
-			const submitValues = valuesRef.current;
-			const oldValues = serverData[0];
-
-			const result = await updateData(
-				getUpdateData(
-					valuesRef.current,
-					(model as unknown) as Model<string, PageVisibility, unknown>,
-					onlySubmitMounted ?? false,
-					onlySubmitMountedBehaviour,
-					mountedFields,
-					defaultRecord[0],
-					id
-				)
-			);
-
-			const newValues = deepClone(result[0]);
-			valuesRef.current = newValues;
-
-			setTouched((prev) =>
-				Object.fromEntries(Object.keys(prev).map((field) => [field, false]))
-			);
-
-			await Promise.all(
-				Object.values(postSubmitHandlers.current).map((handler) =>
-					handler((newValues as Record<"id", string>).id)
-				)
-			);
-
-			// re-render after post submit handler, this way we avoid mounting new components before the form is fully saved
-			setValues(newValues);
-
-			if (onSubmit) {
-				await onSubmit(newValues, submitValues, oldValues);
-			}
-		} catch (e) {
-			// don't use this for validation errors
-			setUpdateError(e as Error);
-			throw e;
-		} finally {
-			setSubmitting(false);
-		}
-	}, [
-		serverData,
-		defaultRecord,
-		preSubmit,
-		deleteOnSubmit,
-		setFieldValue,
-		onDeleted,
-		deleteRecord,
-		validateForm,
-		updateData,
-		model,
-		onlySubmitMounted,
-		onlySubmitMountedBehaviour,
-		mountedFields,
-		id,
-		onSubmit,
-		pushDialog,
-		t,
-	]);
+		},
+		[
+			serverData,
+			defaultRecord,
+			preSubmit,
+			deleteOnSubmit,
+			setFieldValue,
+			onDeleted,
+			deleteRecord,
+			validateForm,
+			updateData,
+			model,
+			onlySubmitMounted,
+			onlySubmitMountedBehaviour,
+			mountedFields,
+			id,
+			onSubmit,
+			pushDialog,
+			t,
+		]
+	);
 	const handleSubmit = useCallback(
 		(evt: FormEvent<HTMLFormElement>) => {
 			evt.preventDefault();
@@ -1200,14 +1247,14 @@ const Form = <
 			);
 			return validateForm();
 		};
-		const submitNestedForm = async (id: string) => {
+		const submitNestedForm = async (id: string, params: FormSubmitOptions) => {
 			if (nestedFormPreSubmitHandler) {
 				await nestedFormPreSubmitHandler(
 					id,
 					(model as unknown) as Model<ModelFieldName, PageVisibility, unknown>
 				);
 			}
-			await submitForm();
+			await submitForm(params);
 			parentFormContext.setCustomFieldDirty(nestedFormName, false);
 		};
 
@@ -1356,6 +1403,7 @@ const Form = <
 			onlySubmitMounted: !!onlySubmitMounted,
 			onlySubmitMountedBehaviour,
 			onlyValidateMounted: !!onlyValidateMounted,
+			onlyWarnMounted: !!onlyWarnMounted,
 			submitting,
 			submit: submitForm,
 			deleteOnSubmit: !!deleteOnSubmit,
@@ -1396,6 +1444,7 @@ const Form = <
 			onlySubmitMounted,
 			onlySubmitMountedBehaviour,
 			onlyValidateMounted,
+			onlyWarnMounted,
 			deleteOnSubmit,
 			submitting,
 			submitForm,
@@ -1425,6 +1474,7 @@ const Form = <
 			errorComponent: ErrorComponent,
 			onlySubmitMounted: !!onlySubmitMounted,
 			onlyValidateMounted: !!onlyValidateMounted,
+			onlyWarnMounted: !!onlyWarnMounted,
 			readOnly: !!readOnly,
 			readOnlyReason: readOnlyReason,
 			getFieldValue,
@@ -1435,6 +1485,7 @@ const Form = <
 			ErrorComponent,
 			onlySubmitMounted,
 			onlyValidateMounted,
+			onlyWarnMounted,
 			readOnly,
 			readOnlyReason,
 			getFieldValue,
