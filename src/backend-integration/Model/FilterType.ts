@@ -4,6 +4,7 @@
 type FilterType =
 	| "string"
 	| "localized-string"
+	| "combined-string"
 	| "number"
 	| "currency"
 	| "date"

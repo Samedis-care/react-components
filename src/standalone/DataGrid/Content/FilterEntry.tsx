@@ -111,9 +111,11 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 	const classes = useDataGridStyles();
 
 	const maxDepth = filterLimit;
-	const defaultFilterType = ["string", "localized-string"].includes(
-		props.valueType ?? ""
-	)
+	const defaultFilterType = [
+		"string",
+		"localized-string",
+		"combined-string",
+	].includes(props.valueType ?? "")
 		? "contains"
 		: props.valueType === "enum"
 		? "inSet"
@@ -260,7 +262,11 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 			</MenuItem>
 		),
 	];
-	if (["string", "localized-string"].includes(props.valueType ?? "")) {
+	if (
+		["string", "localized-string", "combined-string"].includes(
+			props.valueType ?? ""
+		)
+	) {
 		filterTypeMenuItems.push(
 			checkSupport(props.valueType, "contains") && (
 				<MenuItem key={"contains"} value={"contains"}>
@@ -369,6 +375,7 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 			)}
 			{(props.valueType === "string" ||
 				props.valueType === "localized-string" ||
+				props.valueType === "combined-string" ||
 				props.valueType === "number" ||
 				props.valueType === "date" ||
 				props.valueType === "datetime") && (
