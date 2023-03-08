@@ -6,6 +6,7 @@ import {
 import { Theme } from "@material-ui/core";
 import { Styles } from "@material-ui/core/styles/withStyles";
 import { ClassNameMap } from "@material-ui/styles/withStyles";
+import combineClassMaps from "./combineClassMaps";
 
 /**
  * Calls makeStyles based on values from theme
@@ -47,10 +48,13 @@ const makeThemeStyles = <
 	const useCombinedStyles = (
 		props?: keyof Props extends never ? unknown : Props
 	): ClassNameMap<ClassKey> => {
-		const themeClasses = useThemeStyles(props as Props); // inherit from component props classes
+		const { classes: propClasses, ...otherProps } = props as Props & {
+			classes?: Record<string, string>;
+		};
+		const themeClasses = useThemeStyles(otherProps as Props);
 		return useParentStyles({
 			...(props as Props),
-			classes: themeClasses, // inherit from themeClasses
+			classes: combineClassMaps(themeClasses, propClasses),
 		});
 	};
 
