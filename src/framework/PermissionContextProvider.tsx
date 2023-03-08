@@ -16,6 +16,9 @@ export interface PermissionContextProviderProps {
  * - module.* => matches module.submodule.function.sub-function, module.submodule.function and module.function, but not module
  * - module.submodule.* => matches module.submodule.function.sub-function, module.submodule.function
  * - * => matches everything
+ *
+ * Permissions can be combined in a logical AND using a plus sign, ex:
+ * - app.access+module.function
  */
 export const PermissionContext = React.createContext<
 	[string[], Dispatch<SetStateAction<string[]>>] | undefined
@@ -57,23 +60,32 @@ export const hasPermission = (perms: string[], perm: Permission): boolean => {
 		return false;
 	}
 
-	const checkParts = perm.split(".");
-	for (const presentPermission of perms) {
-		const presentParts = presentPermission.split(".");
+	// return true if perm matches
+	const checkSinglePerm = (perm: string): boolean => {
+		const checkParts = perm.split(".");
+		for (const presentPermission of perms) {
+			const presentParts = presentPermission.split(".");
 
-		let okay = false;
-		for (let i = 0; i < checkParts.length; ++i) {
-			okay = false;
-			if (presentParts[i] === undefined) break;
-			if (presentParts[i] !== "*" && presentParts[i] !== checkParts[i]) break;
-			okay = true;
-			if (presentParts[i] === "*") break;
+			let okay = false;
+			for (let i = 0; i < checkParts.length; ++i) {
+				okay = false;
+				if (presentParts[i] === undefined) break;
+				if (presentParts[i] !== "*" && presentParts[i] !== checkParts[i]) break;
+				okay = true;
+				if (presentParts[i] === "*") break;
+			}
+
+			if (okay) return true;
 		}
 
-		if (okay) return true;
-	}
+		return false;
+	};
 
-	return false;
+	// if we can't find non-matching perms we have permission
+	return (
+		perm.split("+").find((singlePerm) => !checkSinglePerm(singlePerm)) ===
+		undefined
+	);
 };
 
 /**
