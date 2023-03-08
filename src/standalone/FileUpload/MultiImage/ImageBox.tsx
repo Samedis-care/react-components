@@ -128,24 +128,20 @@ const useStyles = makeStyles(
 			position: "relative",
 		},
 		image: {
-			width: `calc(100% + ${swipeWidth * 2}px)`,
+			width: "100%",
 			left: swipeWidth,
+			marginLeft: swipeWidth,
+			marginRight: swipeWidth,
 			height: "100%",
 			objectFit: "contain",
 			borderRadius: theme.shape.borderRadius,
 		},
 		imageSwipeLeft: {
-			width: `calc(100%)`,
 			marginLeft: swipeWidth,
 		},
 		imageSwipeRight: {
-			width: `calc(100% + ${swipeWidth * 2}px)`,
-			marginLeft: -swipeWidth,
-			left: 0,
-		},
-		imageNoSwipe: {
-			width: "100%",
-			left: 0,
+			marginLeft: 0,
+			marginRight: swipeWidth,
 		},
 		imageWithDots: {
 			height: "calc(100% - 48px)",
@@ -248,22 +244,27 @@ const ImageBox = (props: ImageBoxProps) => {
 	}, [onPrevImage]);
 	const [debouncedHandleResetScroll, cancelResetScroll] = useDebounce(
 		handleResetScroll,
-		100
+		200
 	);
 	const handleScroll = useCallback(
 		(evt: React.UIEvent<HTMLDivElement>) => {
 			const x = evt.currentTarget.scrollLeft;
 			const scrollTarget = onPrevImage ? swipeWidth * 2 : swipeWidth;
 			let resetScroll = false;
-			if (x === 0 && onPrevImage) {
-				onPrevImage();
+			if (touchScrolled.current) {
 				resetScroll = true;
-			}
-			if (x === scrollTarget && onNextImage) {
-				onNextImage();
-				resetScroll = true;
+			} else {
+				if (x === 0 && onPrevImage) {
+					onPrevImage();
+					resetScroll = true;
+				}
+				if (x === scrollTarget && onNextImage) {
+					onNextImage();
+					resetScroll = true;
+				}
 			}
 			if (resetScroll) {
+				touchScrolled.current = touchActive.current;
 				handleResetScroll();
 				cancelResetScroll();
 			} else {
@@ -278,6 +279,16 @@ const ImageBox = (props: ImageBoxProps) => {
 			onPrevImage,
 		]
 	);
+	const touchActive = useRef(false);
+	const touchScrolled = useRef(false);
+	const handleTouchStart = useCallback(() => {
+		touchActive.current = true;
+	}, []);
+	const handleTouchEnd = useCallback(() => {
+		touchActive.current = false;
+		touchScrolled.current = false;
+		handleResetScroll();
+	}, [handleResetScroll]);
 	const containerRef = useRef<HTMLDivElement | null>(null);
 	useEffect(() => {
 		handleResetScroll();
@@ -318,7 +329,8 @@ const ImageBox = (props: ImageBoxProps) => {
 					className={classes.swipeListener}
 					onScroll={handleScroll}
 					ref={containerRef}
-					onTouchEnd={handleResetScroll}
+					onTouchStart={handleTouchStart}
+					onTouchEnd={handleTouchEnd}
 				>
 					<Tooltip
 						title={fileName ?? ""}
@@ -333,7 +345,6 @@ const ImageBox = (props: ImageBoxProps) => {
 								classes.image,
 								onNextImage && !onPrevImage && classes.imageSwipeRight,
 								!onNextImage && onPrevImage && classes.imageSwipeLeft,
-								!onNextImage && !onPrevImage && classes.imageNoSwipe,
 							])}
 						/>
 					</Tooltip>
