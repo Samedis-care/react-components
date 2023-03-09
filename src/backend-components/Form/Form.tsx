@@ -35,6 +35,7 @@ import { QueryObserverBaseResult } from "react-query/types/core/types";
 import { showConfirmDialogBool } from "../../non-standalone";
 import useCCTranslations from "../../utils/useCCTranslations";
 import { useDialogContext } from "../../framework";
+import deepSort from "../../utils/deepSort";
 
 // optional import
 let captureException: ((e: Error) => void) | null = null;
@@ -622,18 +623,17 @@ const normalizeValues = <T,>(data: T, config: DirtyDetectionConfig): T => {
 	) as T;
 
 	let normalizedData: Record<string, unknown> = {};
-	Object.entries(data as Record<string, unknown>)
-		.sort((a, b) => a[0].localeCompare(b[0]))
-		.forEach(([k, v]) => {
-			const shouldBeNulled = v === "" || (Array.isArray(v) && v.length === 0);
-			normalizedData[k] = shouldBeNulled ? null : v;
-		});
+	Object.entries(data as Record<string, unknown>).forEach(([k, v]) => {
+		const shouldBeNulled = v === "" || (Array.isArray(v) && v.length === 0);
+		normalizedData[k] = shouldBeNulled ? null : v;
+	});
 	if (ignoreFields) {
 		ignoreFields.forEach((field) => {
 			normalizedData = dotSet(field, normalizedData, null);
 		});
 	}
-	return normalizedData as T;
+
+	return deepSort(normalizedData) as T;
 };
 
 const Form = <
