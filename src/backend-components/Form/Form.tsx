@@ -442,6 +442,13 @@ export interface FormContextData {
 		triggerOnChange?: boolean
 	) => void;
 	/**
+	 * Like setFieldValue but doesn't trigger validation
+	 * @param field The field
+	 * @param value The value
+	 * @see setFieldValue
+	 */
+	setFieldValueLite: (field: string, value: unknown) => void;
+	/**
 	 * Get a field value
 	 * @param field The field name
 	 */
@@ -461,6 +468,13 @@ export interface FormContextData {
 		touched?: boolean,
 		validate?: boolean
 	) => void;
+	/**
+	 * Like setFieldTouched but doesn't trigger validation
+	 * @param field The field name
+	 * @param touched The new touched state
+	 * @see setFieldTouched
+	 */
+	setFieldTouchedLite: (field: string, touched?: boolean) => void;
 	/**
 	 * Resets the form to server values
 	 */
@@ -507,6 +521,8 @@ export type FormContextDataLite = Pick<
 	| "readOnlyReason"
 	| "errorComponent"
 	| "getFieldValue"
+	| "setFieldValueLite"
+	| "setFieldTouchedLite"
 >;
 export const FormContextLite = React.createContext<FormContextDataLite | null>(
 	null
@@ -888,16 +904,22 @@ const Form = <
 		},
 		[validateForm]
 	);
-	const setFieldTouched = useCallback(
-		(field: string, newTouched = true, validate = false) => {
+	const setFieldTouchedLite = useCallback(
+		(field: string, newTouched = false) => {
 			setTouched((prev) =>
 				prev[field] === newTouched
 					? prev
 					: { ...prev, [field]: newTouched as boolean }
 			);
+		},
+		[]
+	);
+	const setFieldTouched = useCallback(
+		(field: string, newTouched = true, validate = false) => {
+			setFieldTouchedLite(field, newTouched);
 			if (validate) void validateField(field);
 		},
-		[validateField]
+		[setFieldTouchedLite, validateField]
 	);
 	const getFieldValue = useCallback((field: string): unknown => {
 		return getValueByDot(field, valuesRef.current);
@@ -927,6 +949,14 @@ const Form = <
 			if (validate) void validateField(field, value);
 		},
 		[setFieldTouched, validateField, model, getFieldValue]
+	);
+	const setFieldValueLite = useCallback(
+		(field: string, value: unknown) => {
+			setFieldTouchedLite(field, true);
+			valuesRef.current = dotSet(field, valuesRef.current, value);
+			setValues(valuesRef.current);
+		},
+		[setFieldTouchedLite]
 	);
 	const resetForm = useCallback(() => {
 		if (!serverData || !serverData[0]) return;
@@ -1413,6 +1443,8 @@ const Form = <
 			errors,
 			warnings,
 			setFieldValue,
+			setFieldValueLite,
+			setFieldTouchedLite,
 			getFieldValue,
 			handleBlur,
 			setFieldTouched,
@@ -1453,6 +1485,8 @@ const Form = <
 			errors,
 			warnings,
 			setFieldValue,
+			setFieldValueLite,
+			setFieldTouchedLite,
 			getFieldValue,
 			handleBlur,
 			setFieldTouched,
@@ -1478,6 +1512,8 @@ const Form = <
 			readOnly: !!readOnly,
 			readOnlyReason: readOnlyReason,
 			getFieldValue,
+			setFieldValueLite,
+			setFieldTouchedLite,
 		}),
 		[
 			id,
@@ -1489,6 +1525,8 @@ const Form = <
 			readOnly,
 			readOnlyReason,
 			getFieldValue,
+			setFieldValueLite,
+			setFieldTouchedLite,
 		]
 	);
 
