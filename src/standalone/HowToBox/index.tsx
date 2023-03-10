@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { makeStyles } from "@material-ui/core";
 import { GroupBox } from "../index";
 import { ClassNameMap } from "@material-ui/styles/withStyles";
 import useCCTranslations from "../../utils/useCCTranslations";
+import { TFunction } from "i18next";
 
 export interface HowToBoxProps {
 	/**
@@ -52,6 +53,43 @@ const HowToBox = (props: HowToBoxProps) => {
 				)}
 			</ul>
 		</GroupBox>
+	);
+};
+
+export interface HowToBoxTranslateProps
+	extends Omit<HowToBoxProps, "titleLabel" | "labels"> {
+	/**
+	 * The i18n t function
+	 */
+	t: TFunction;
+	/**
+	 * i18n key passed to t function
+	 */
+	titleLabel?: string;
+	/**
+	 * i18n key passed to t function, used in combination with return object to obtain array of strings
+	 */
+	labels: string;
+}
+
+/**
+ * i18n version of HowToBox
+ * @param props The props
+ * @see HowToBox
+ */
+export const HowToBoxTranslate = (props: HowToBoxTranslateProps) => {
+	const { t, titleLabel, labels, ...other } = props;
+	// memo content because it's an array which gets re-created every render
+	const content = useMemo(() => t(labels, { returnObjects: true }), [
+		t,
+		labels,
+	]);
+	return (
+		<HowToBox
+			{...other}
+			titleLabel={titleLabel ? t(titleLabel) : undefined}
+			labels={content}
+		/>
 	);
 };
 
