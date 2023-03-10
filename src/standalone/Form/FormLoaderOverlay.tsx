@@ -34,7 +34,7 @@ const FormLoaderOverlay = (props: FormLoaderOverlayProps) => {
 					: { visibility: "hidden", opacity: 0 }
 			}
 		>
-			<Loader />
+			{props.visible && <Loader />}
 		</div>
 	);
 };
