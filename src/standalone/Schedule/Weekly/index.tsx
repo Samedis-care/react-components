@@ -96,85 +96,89 @@ class WeekView extends PureComponent<IProps, IState> {
 
 		return (
 			<Grid container alignItems={"stretch"} alignContent={"space-between"}>
-				<Grid item xs={4}>
-					<Grid container>
-						<Grid item>
-							<Button
-								onClick={this.today}
-								className={this.props.classes.todayBtn}
-							>
-								{this.props.t("standalone.schedule.today")} (
-								{now
-									.toDate()
-									.toLocaleDateString(
-										this.props.i18n.language,
-										ToDateLocaleStringOptions
-									)}
-								)
-							</Button>
-						</Grid>
-						<Grid item>
-							{this.props.filter && (
-								<Box px={2} className={this.props.classes.filterWrapper}>
-									<select
-										className={this.props.classes.filterSelect}
-										value={this.state.filterValue ?? ""}
-										onChange={this.handleFilterSelect}
-									>
-										{Object.entries(this.props.filter.options).map(
-											([value, label]) => (
-												<option value={value} key={value}>
-													{label}
-												</option>
-											)
+				<Grid item xs={12} container wrap={"nowrap"}>
+					<Grid item xs>
+						<Grid container>
+							<Grid item>
+								<Button
+									onClick={this.today}
+									className={this.props.classes.todayBtn}
+								>
+									{this.props.t("standalone.schedule.today")} (
+									{now
+										.toDate()
+										.toLocaleDateString(
+											this.props.i18n.language,
+											ToDateLocaleStringOptions
 										)}
-									</select>
-								</Box>
-							)}
+									)
+								</Button>
+							</Grid>
+							<Grid item>
+								{this.props.filter && (
+									<Box px={2} className={this.props.classes.filterWrapper}>
+										<select
+											className={this.props.classes.filterSelect}
+											value={this.state.filterValue ?? ""}
+											onChange={this.handleFilterSelect}
+										>
+											{Object.entries(this.props.filter.options).map(
+												([value, label]) => (
+													<option value={value} key={value}>
+														{label}
+													</option>
+												)
+											)}
+										</select>
+									</Box>
+								)}
+							</Grid>
 						</Grid>
 					</Grid>
-				</Grid>
-				<Grid item xs={4}>
-					<Grid container justify={"center"}>
-						<Grid item>
-							<IconButton onClick={this.prevWeek}>
-								<ArrowBackIos />
-							</IconButton>
-							<span
-								onClick={this.openDatePicker}
-								className={this.props.classes.week}
-							>
-								{this.props.t("standalone.schedule.week")}{" "}
-								{this.nowNormalized().add(this.state.weekOffset, "week").week()}{" "}
-								{this.nowNormalized()
-									.add(this.state.weekOffset, "week")
-									.weekYear()}
-							</span>
-							<div className={this.props.classes.picker}>
-								qsq
-								<MuiPickersUtilsProvider utils={MomentUtils}>
-									<DatePicker
-										variant={"dialog"}
-										format={"II RRRR"}
-										open={this.state.datePickerOpen}
-										label={this.props.t("standalone.schedule.week")}
-										value={this.nowNormalized()
-											.add(this.state.weekOffset, "week")
-											.toDate()}
-										onChange={this.setWeek}
-										// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-										// @ts-ignore not declared in typescript def
-										onDismiss={this.closeDatePicker}
-									/>
-								</MuiPickersUtilsProvider>
-							</div>
-							<IconButton onClick={this.nextWeek}>
-								<ArrowForwardIos />
-							</IconButton>
+					<Grid item>
+						<Grid container justify={"center"}>
+							<Grid item>
+								<IconButton onClick={this.prevWeek}>
+									<ArrowBackIos />
+								</IconButton>
+								<span
+									onClick={this.openDatePicker}
+									className={this.props.classes.week}
+								>
+									{this.props.t("standalone.schedule.week")}{" "}
+									{this.nowNormalized()
+										.add(this.state.weekOffset, "week")
+										.week()}{" "}
+									{this.nowNormalized()
+										.add(this.state.weekOffset, "week")
+										.weekYear()}
+								</span>
+								<div className={this.props.classes.picker}>
+									qsq
+									<MuiPickersUtilsProvider utils={MomentUtils}>
+										<DatePicker
+											variant={"dialog"}
+											format={"II RRRR"}
+											open={this.state.datePickerOpen}
+											label={this.props.t("standalone.schedule.week")}
+											value={this.nowNormalized()
+												.add(this.state.weekOffset, "week")
+												.toDate()}
+											onChange={this.setWeek}
+											// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+											// @ts-ignore not declared in typescript def
+											onDismiss={this.closeDatePicker}
+										/>
+									</MuiPickersUtilsProvider>
+								</div>
+								<IconButton onClick={this.nextWeek}>
+									<ArrowForwardIos />
+								</IconButton>
+							</Grid>
 						</Grid>
 					</Grid>
+					<Grid item xs />
 				</Grid>
-				<Grid item xs={4} />
 				{this.state.loadError && (
 					<Grid item xs={12}>
 						<Typography align={"center"}>
