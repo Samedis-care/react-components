@@ -1,4 +1,10 @@
-import React, { useCallback, useContext, useEffect, useMemo } from "react";
+import React, {
+	useCallback,
+	useContext,
+	useEffect,
+	useMemo,
+	useRef,
+} from "react";
 import { useFormContext } from "./Form";
 import {
 	ModelFieldDefinition,
@@ -8,6 +14,7 @@ import {
 import { getVisibility } from "../../backend-integration/Model/Visibility";
 import { dotsToObject, getValueByDot } from "../../utils";
 import Type from "../../backend-integration/Model/Type";
+import shallowCompare from "../../utils/shallowCompare";
 
 type NonOverridableProps =
 	| "getDefaultValue"
@@ -116,11 +123,20 @@ const Field = (props: FieldProps): React.ReactElement => {
 		values
 	);
 
+	// cache these, so we don't trigger useless re-renders every time a value changes
+	const prevRelationModelValues = useRef<Record<string, unknown>>({});
+	const prevRelationModelValuesResult = useRef<Record<string, unknown>>({});
 	const relationModelValues = useMemo(() => {
 		const pick = getRelationModelValues ?? [];
 		const result: Record<string, unknown> = {};
 		pick.forEach((field) => (result[field] = getValueByDot(field, values)));
-		return dotsToObject(result);
+
+		if (shallowCompare(prevRelationModelValues.current, result)) {
+			return prevRelationModelValuesResult.current;
+		}
+
+		prevRelationModelValues.current = result;
+		return (prevRelationModelValuesResult.current = dotsToObject(result));
 	}, [values, getRelationModelValues]);
 
 	const relationModel = useMemo(
