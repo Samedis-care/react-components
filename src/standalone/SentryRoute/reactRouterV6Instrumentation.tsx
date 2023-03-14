@@ -145,10 +145,6 @@ export const SentryRoutesTracing = (props: SentryRoutesTracingProps) => {
 	]);
 
 	useEffect(() => {
-		if (activeTransaction) activeTransaction.setName(txName);
-	}, [txName]);
-
-	useEffect(() => {
 		// don't finish first transaction
 		if (initialTx.current) {
 			initialTx.current = false;
@@ -169,6 +165,12 @@ export const SentryRoutesTracing = (props: SentryRoutesTracingProps) => {
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [location]);
+
+	useEffect(() => {
+		if (activeTransaction) {
+			activeTransaction.setName(txName);
+		}
+	}, [txName]);
 
 	return (
 		<SentryRouteTracingContext.Provider value={ctx}>
