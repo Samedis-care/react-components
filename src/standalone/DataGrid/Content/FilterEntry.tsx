@@ -100,6 +100,8 @@ export interface DataGridContentFilterEntryProps {
 	depth: number;
 }
 
+const ENUM_FILTER_MAGIC_EMPTY = "__MAGIC_EMPTY__";
+
 const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 	const { onChange, depth, close } = props;
 	const isFirstFilter = depth === 1;
@@ -193,6 +195,27 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 		}
 		updateParent();
 	};
+
+	const handleNullEnum = () => {
+		// deal with empty/null enum values by using empty filter (possibly chained via OR)
+		const split = filterValue.split(",");
+		const hasEmpty = split.includes(ENUM_FILTER_MAGIC_EMPTY);
+		if (split.length === 1) {
+			filterType = hasEmpty ? "empty" : "inSet";
+			subFilter = undefined;
+		} else if (hasEmpty) {
+			filterType = "inSet";
+			subFilterComboType = "or";
+			subFilter = {
+				type: "empty",
+				value1: "empty",
+				value2: "",
+				nextFilter: undefined,
+				nextFilterType: undefined,
+			};
+		}
+	};
+
 	const onFilterValueChangeEnumAll = (
 		_: React.ChangeEvent<HTMLInputElement>,
 		checked: boolean
@@ -200,11 +223,12 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 		if (checked) {
 			filterValue = (props.valueData as DataGridSetFilterData)
 				.filter((entry) => !entry.isDivider)
-				.map((entry) => entry.value)
+				.map((entry) => entry.value || ENUM_FILTER_MAGIC_EMPTY)
 				.join(",");
 		} else {
 			filterValue = "";
 		}
+		handleNullEnum();
 		updateParent();
 	};
 	const onFilterValueChangeEnum = (
@@ -221,6 +245,7 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 			currentlyChecked.push(evt.target.value);
 		}
 		filterValue = currentlyChecked.join(",");
+		handleNullEnum();
 		updateParent();
 	};
 	const onFilterValue2Change = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -488,7 +513,7 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 											filterValue.split(",").sort().join(",") ===
 											(props.valueData as DataGridSetFilterData)
 												.filter((entry) => !entry.isDivider)
-												.map((entry) => entry.value)
+												.map((entry) => entry.value || ENUM_FILTER_MAGIC_EMPTY)
 												.sort()
 												.join(",")
 										}
@@ -521,8 +546,10 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 										) : (
 											<>
 												<Checkbox
-													value={entry.value}
-													checked={filterValue.split(",").includes(entry.value)}
+													value={entry.value || ENUM_FILTER_MAGIC_EMPTY}
+													checked={filterValue
+														.split(",")
+														.includes(entry.value || ENUM_FILTER_MAGIC_EMPTY)}
 													onChange={onFilterValueChangeEnum}
 													disabled={entry.disabled}
 												/>
