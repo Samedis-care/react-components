@@ -22,21 +22,20 @@ const CCI18nProvider = (props: CCI18nProviderProps) => {
 		const updateLocale = () => {
 			void (async () => {
 				setUpdating(true);
+				const lang = ccI18n.language ?? "en-Us"; // fallback
 				try {
-					await import("moment/locale/" + ccI18n.language.toLowerCase());
+					await import("moment/locale/" + lang.toLowerCase());
 				} catch (e) {
 					try {
-						await import(
-							"moment/locale/" + ccI18n.language.split("-")[0].toLowerCase()
-						);
+						await import("moment/locale/" + lang.split("-")[0].toLowerCase());
 					} catch (e) {
 						// locale not found
 					}
 				} finally {
-					moment.locale(ccI18n.language);
-					setMomentLocale(ccI18n.language);
+					moment.locale(lang);
+					setMomentLocale(lang);
 					const htmlTag = document.querySelector("html");
-					if (htmlTag) htmlTag.lang = ccI18n.language.split("-")[0];
+					if (htmlTag) htmlTag.lang = lang.split("-")[0];
 					setUpdating(false);
 				}
 			})();

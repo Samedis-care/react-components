@@ -5,8 +5,8 @@ import {
 } from "./LanguageSelectorDialogContent";
 import { Grid, ListItem } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { suspend } from "suspend-react";
 import useCCTranslations from "../../utils/useCCTranslations";
+import CountryFlags from "../../standalone/CountryFlags";
 
 export interface LanguageSelectorEntryProps
 	extends LanguageSelectorDialogContentProps {
@@ -58,13 +58,7 @@ const LanguageSelectorEntry = (
 		close();
 	}, [i18n, locale, close]);
 
-	const flag = suspend(
-		() =>
-			import(
-				`../../assets/img/countries/${locale.country_short}.svg`
-			) as Promise<Record<"default", string>>,
-		[locale.country_short]
-	).default;
+	const flag = CountryFlags[locale.country_short];
 
 	return (
 		<ListItem button onClick={handleClick} className={classes.root}>

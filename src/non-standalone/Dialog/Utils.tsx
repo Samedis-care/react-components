@@ -4,12 +4,10 @@ import {
 	IDialogConfigConfirmAsync,
 	IDialogConfigInputAsync,
 	IDialogConfigSimple,
-	IDialogConfigSign,
 } from "./Types";
 import { ConfirmDialog } from "./ConfirmDialog";
 import { InputDialog } from "./InputDialog";
 import { InfoDialog } from "./InfoDialog";
-import { SignDialog } from "./SignPadDialog";
 import i18n from "../../i18n";
 import { ErrorDialog } from "./ErrorDialog";
 import { ValidationError } from "../../backend-components";
@@ -109,18 +107,6 @@ export const showInfoDialog = (
 			/>
 		);
 	});
-};
-
-/**
- * Shows signature pad dialog
- * @param pushDialog The dialog context's (useDialogContext()) pushDialog function
- * @param props The dialog properties for sign pad
- */
-export const showSignPadDialog = (
-	pushDialog: DialogContextType[0],
-	props: IDialogConfigSign
-): void => {
-	pushDialog(<SignDialog {...props} />);
 };
 
 /**

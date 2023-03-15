@@ -5,7 +5,7 @@ import ccI18n from "../i18n";
  * Internal helper for useTranslation hook
  */
 const useCCTranslations = (): UseTranslationResponse<"translation"> =>
-	useTranslation<"translation">(undefined, {
+	useTranslation<"translation">("translation", {
 		i18n: ccI18n,
 	});
 
