@@ -6,7 +6,8 @@ import resourcesToBackend from "i18next-resources-to-backend";
 export const langs = supportedLanguages;
 
 const ccI18n = i18n.createInstance();
-const isJest = process && process.env && process.env.JEST_WORKER_ID;
+const isJest =
+	typeof process !== "undefined" && process.env && process.env.JEST_WORKER_ID;
 
 void ccI18n
 	// async fetch locales
