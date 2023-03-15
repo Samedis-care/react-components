@@ -13,7 +13,6 @@ import FileUpload, {
 } from "../../standalone/FileUpload/Generic";
 import { Connector, PageVisibility } from "../../backend-integration";
 import { ErrorComponentProps } from "../Form";
-import ErrorComponent from "../../stories/backend-components/Form/ErrorComponent";
 import { Loader } from "../../standalone";
 
 export interface CrudFileUploadProps
@@ -150,6 +149,8 @@ const CrudFileUpload = (
 
 	if (loading) return <Loader />;
 	if (loadError) return <span>{loadError.message}</span>;
+
+	const ErrorComponent = props.errorComponent;
 
 	return (
 		<>
