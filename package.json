@@ -157,7 +157,7 @@
 		"prettier": "^2.2.1",
 		"ts-jest": "^26.4.4",
 		"typedoc": "^0.22.15",
-		"webpack": "^5.72.0"
+		"webpack": "^5.76.0"
 	},
 	"engines": {
 		"npm": ">=7.x"
