@@ -144,6 +144,10 @@ const useStyles = makeStyles(
 			marginLeft: 0,
 			marginRight: swipeWidth,
 		},
+		imageSwipeNone: {
+			marginLeft: 0,
+			marginRight: 0,
+		},
 		imageWithDots: {
 			height: "calc(100% - 48px)",
 		},
@@ -357,6 +361,7 @@ const ImageBox = (props: ImageBoxProps) => {
 								classes.image,
 								onNextImage && !onPrevImage && classes.imageSwipeRight,
 								!onNextImage && onPrevImage && classes.imageSwipeLeft,
+								!onNextImage && !onPrevImage && classes.imageSwipeNone,
 							])}
 						/>
 					</Tooltip>
@@ -398,6 +403,7 @@ const ImageBox = (props: ImageBoxProps) => {
 										classes.image,
 										onNextImage && !onPrevImage && classes.imageSwipeRight,
 										!onNextImage && onPrevImage && classes.imageSwipeLeft,
+										!onNextImage && !onPrevImage && classes.imageSwipeNone,
 										imageDots && classes.imageWithDots,
 									])}
 								/>
