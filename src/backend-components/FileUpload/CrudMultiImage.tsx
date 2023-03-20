@@ -101,6 +101,14 @@ const CrudMultiImage = (props: CrudMultiImageProps) => {
 							!img.id.startsWith(MultiImageNewIdPrefix) &&
 							images.find((oldImg) => oldImg.id === img.id);
 						if (oldImg) {
+							if (oldImg.image === img.image && oldImg.name === img.name) {
+								// no changes to image or file name, so we don't cause a PUT here
+								return {
+									response: [await serialize(img, oldImg.id)],
+									index: (img as BackendMultiImageImage).index,
+									primary: (img as BackendMultiImageImage).primary,
+								};
+							}
 							return {
 								response: await connector.update(
 									await serialize(img, oldImg.id)
