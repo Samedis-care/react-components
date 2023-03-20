@@ -207,11 +207,11 @@ export const useModelGet = <
 	model: Model<KeyT, VisibilityT, CustomT>,
 	id: string | null
 ): UseQueryResult<ModelGetResponse<KeyT>, Error> => {
-	return useQuery(
-		model.getReactQueryKey(id),
-		() => model.getRaw(id),
-		model.cacheOptions
-	);
+	return useQuery(model.getReactQueryKey(id), () => model.getRaw(id), {
+		// 3 retries if we get network error
+		retry: (count, err: Error) => err.name === "NetworkError" && count < 3,
+		...model.cacheOptions,
+	});
 };
 
 /**

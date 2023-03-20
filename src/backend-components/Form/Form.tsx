@@ -29,7 +29,7 @@ import {
 	getValueByDot,
 	isObjectEmpty,
 } from "../../utils";
-import { Grid } from "@material-ui/core";
+import { Grid, Typography } from "@material-ui/core";
 import { getVisibility } from "../../backend-integration/Model/Visibility";
 import { QueryObserverBaseResult } from "react-query/types/core/types";
 import { showConfirmDialogBool } from "../../non-standalone";
@@ -1530,12 +1530,15 @@ const Form = <
 		]
 	);
 
+	if (error) {
+		return <Typography color={"error"}>{error.message}</Typography>;
+	}
 	if (isLoading || isDefaultRecordLoading || isObjectEmpty(values)) {
 		return <Loader />;
 	}
 
 	const displayError: Error | ValidationError | null =
-		error || defaultRecordError || updateError;
+		defaultRecordError || updateError;
 
 	if (!serverData || serverData.length !== 2 || isObjectEmpty(serverData[0])) {
 		// eslint-disable-next-line no-console
