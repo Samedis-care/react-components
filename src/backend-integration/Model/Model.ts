@@ -19,6 +19,7 @@ import {
 import queryCache from "../Store";
 import { QueryKey } from "react-query/types/core/types";
 import { deepAssign, dotToObject, getValueByDot } from "../../utils";
+import throwError from "../../utils/throwError";
 
 // optional import
 let captureException: ((e: Error) => void) | null = null;
@@ -373,6 +374,14 @@ class Model<
 	 * Hooks
 	 */
 	public readonly hooks: ModelHooks<KeyT>;
+	/**
+	 * Global toggle to trigger auto validation of UX when constructor is called
+	 */
+	public static autoValidateUX = false;
+	/**
+	 * Throw errors when UX auto validation fails, only used when autoValidateUX is true
+	 */
+	public static autoValidateUXThrow = false;
 
 	/**
 	 * Creates a new model
@@ -399,6 +408,7 @@ class Model<
 			staleTime: 30000,
 		};
 		this.hooks = hooks ?? {};
+		if (Model.autoValidateUX) this.validateUX(Model.autoValidateUXThrow);
 	}
 
 	/**
@@ -967,6 +977,37 @@ class Model<
 		}
 
 		return copy;
+	}
+
+	/**
+	 * Find UX issues (dev util)
+	 * @param throwErr If true throws an error, otherwise logs it to console as warning
+	 * @remarks To enable this automatically set `Model.autoValidateUX = true; Model.autoValidateUXThrow = false/true;`
+	 */
+	public validateUX(throwErr = false): void {
+		const report = (msg: string) =>
+			// eslint-disable-next-line no-console
+			throwErr ? throwError(msg) : console.warn(msg);
+
+		// iterate over the whole definition
+		Object.entries(this.fields).forEach((kv) => {
+			const field = kv[0];
+			const def = kv[1] as ModelFieldDefinition<
+				unknown,
+				KeyT,
+				VisibilityT,
+				CustomT
+			>;
+
+			// fields that are visibile in grid
+			if (def.visibility.overview.grid) {
+				// check if they have a label
+				if (!def.getLabel().trim())
+					report(
+						`[Components-Care] [Model.validateUX] ${this.modelId}.${field} is visible in Grid but doesn't have label`
+					);
+			}
+		});
 	}
 }
 
