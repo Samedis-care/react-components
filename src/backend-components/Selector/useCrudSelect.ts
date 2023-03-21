@@ -238,10 +238,25 @@ const useCrudSelect = <
 					(selEntry) => selEntry.value === entry.value
 				);
 				if (!oldEntry) return false;
-				return !shallowCompare(
-					entry as Record<string, unknown>,
-					oldEntry as Record<string, unknown>
-				);
+				// remove all base selector data and multi selector data render options
+				// this way we only update when the data actually changed
+				const normalize = (record: DataT) =>
+					Object.assign({}, record as Record<string, unknown>, {
+						label: null,
+						icon: null,
+						onClick: null,
+						canUnselect: null,
+						noDelete: null,
+						isDisabled: null,
+						hidden: null,
+						ignore: null,
+						group: null,
+						isAddNewButton: null,
+						isDivider: null,
+						isSmallLabel: null,
+						className: null,
+					});
+				return !shallowCompare(normalize(entry), normalize(oldEntry));
 			});
 			const deletedEntries = selected.filter(
 				(entry) =>
