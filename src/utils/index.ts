@@ -53,3 +53,4 @@ export { default as timestampToAge } from "./timestampToAge";
 export * from "./useDebounce";
 export { default as deepSort } from "./deepSort";
 export { default as useMemoDebug } from "./useMemoDebug";
+export { default as useCallbackDebug } from "./useCallbackDebug";

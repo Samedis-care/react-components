@@ -1,22 +1,12 @@
 import { useEffect, useMemo, useRef } from "react";
 
-/**
- * useMemo but logs which dependencies change for analysis
- * @param factory The useMemo factory (first param)
- * @param deps The useMemo dependency array (second param)
- * @param name The name for this debug (used for logging)
- */
-const useMemoDebug = <T>(
-	factory: () => T,
-	deps: unknown[],
-	name: string
-): T => {
+export const useDepsDiffLog = (deps: unknown[], name: string) => {
 	const prev = useRef<unknown[]>(deps);
 	useEffect(() => {
 		if (prev.current.length !== deps.length) {
 			// eslint-disable-next-line no-console
 			console.log(
-				`[useMemoDebug] [${name}] array length mismatch`,
+				`[useDepsDiffLog] [${name}] array length mismatch`,
 				prev.current,
 				deps
 			);
@@ -37,6 +27,20 @@ const useMemoDebug = <T>(
 		}
 		prev.current = deps;
 	}, [deps, name]);
+};
+
+/**
+ * useMemo but logs which dependencies change for analysis
+ * @param factory The useMemo factory (first param)
+ * @param deps The useMemo dependency array (second param)
+ * @param name The name for this debug (used for logging)
+ */
+const useMemoDebug = <T>(
+	factory: () => T,
+	deps: unknown[],
+	name?: string
+): T => {
+	useDepsDiffLog(deps, name ?? "useMemoDebug");
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	return useMemo(factory, deps);
 };
