@@ -816,7 +816,10 @@ class Model<
 
 				try {
 					const fieldDef = this.fields[field as KeyT];
-					if (view && getVisibility(fieldDef.visibility[view], values).disabled)
+					if (
+						view &&
+						getVisibility(fieldDef.visibility[view], values, values).disabled
+					)
 						return;
 					if (fieldsToValidate && !fieldsToValidate.includes(field as KeyT))
 						return;
@@ -881,6 +884,7 @@ class Model<
 				try {
 					return !getVisibility(
 						this.fields[field as KeyT].visibility.create,
+						{},
 						{}
 					).disabled;
 				} catch (e) {
@@ -956,7 +960,11 @@ class Model<
 			}
 
 			// don't include disabled fields (except ID and disabled+readonly fields when serializing)
-			const visValue = getVisibility(field.visibility[visibility], values);
+			const visValue = getVisibility(
+				field.visibility[visibility],
+				values,
+				values
+			);
 			if (
 				visValue.disabled &&
 				(func === "serialize" || !visValue.readOnly) &&

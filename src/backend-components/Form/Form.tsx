@@ -580,8 +580,11 @@ const getUpdateData = (
 	const isMounted = (key: string): boolean =>
 		key === "id" ||
 		mountedFields[key] ||
-		getVisibility(model.fields[key].visibility[id ? "edit" : "create"], values)
-			.hidden;
+		getVisibility(
+			model.fields[key].visibility[id ? "edit" : "create"],
+			values,
+			values
+		).hidden;
 
 	return !onlySubmitMounted
 		? values

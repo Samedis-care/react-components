@@ -120,7 +120,8 @@ const Field = (props: FieldProps): React.ReactElement => {
 	const relationData = relations[props.name];
 	const visibility = getVisibility(
 		hasId ? fieldDef.visibility.edit : fieldDef.visibility.create,
-		values
+		values,
+		initialValues
 	);
 
 	// cache these, so we don't trigger useless re-renders every time a value changes

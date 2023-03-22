@@ -30,16 +30,28 @@ interface Visibility {
 	grid: boolean;
 }
 
+/**
+ * Visibility Callback.
+ * IMPORTANT: When using the function variation you need to handle:
+ * - empty values and initialValues (when creating a new record)
+ * - values matching initialValues (form submit, dirty check)
+ * - values and initialValues correct (inside a form, for form fields)
+ * You should not dynamically switch between disabled/hidden and not disabled/hidden fields, you're risking subtle bugs otherwise
+ */
 export type VisibilityCallback =
 	| Visibility
-	| ((values: Record<string, unknown>) => Visibility);
+	| ((
+			values: Record<string, unknown>,
+			initialValues: Record<string, unknown>
+	  ) => Visibility);
 
 export const getVisibility = (
 	cb: VisibilityCallback,
-	values: Record<string, unknown>
+	values: Record<string, unknown>,
+	initialValues: Record<string, unknown>
 ): Visibility => {
 	if (typeof cb === "function") {
-		return cb(values);
+		return cb(values, initialValues);
 	}
 	return cb;
 };
