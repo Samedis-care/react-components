@@ -454,6 +454,10 @@ export interface FormContextData {
 	 */
 	getFieldValue: (field: string) => unknown;
 	/**
+	 * Gets all current values
+	 */
+	getFieldValues: () => Record<string, unknown>;
+	/**
 	 * Handle input blur events
 	 */
 	handleBlur: React.FocusEventHandler<HTMLInputElement & HTMLElement>;
@@ -521,6 +525,7 @@ export type FormContextDataLite = Pick<
 	| "readOnlyReason"
 	| "errorComponent"
 	| "getFieldValue"
+	| "getFieldValues"
 	| "setFieldValueLite"
 	| "setFieldTouchedLite"
 >;
@@ -927,6 +932,10 @@ const Form = <
 	const getFieldValue = useCallback((field: string): unknown => {
 		return getValueByDot(field, valuesRef.current);
 	}, []);
+	const getFieldValues = useCallback((): Record<string, unknown> => {
+		return valuesRef.current;
+	}, []);
+
 	const setFieldValue = useCallback(
 		(
 			field: string,
@@ -1449,6 +1458,7 @@ const Form = <
 			setFieldValueLite,
 			setFieldTouchedLite,
 			getFieldValue,
+			getFieldValues,
 			handleBlur,
 			setFieldTouched,
 			resetForm,
@@ -1491,6 +1501,7 @@ const Form = <
 			setFieldValueLite,
 			setFieldTouchedLite,
 			getFieldValue,
+			getFieldValues,
 			handleBlur,
 			setFieldTouched,
 			resetForm,
@@ -1515,6 +1526,7 @@ const Form = <
 			readOnly: !!readOnly,
 			readOnlyReason: readOnlyReason,
 			getFieldValue,
+			getFieldValues,
 			setFieldValueLite,
 			setFieldTouchedLite,
 		}),
@@ -1528,6 +1540,7 @@ const Form = <
 			readOnly,
 			readOnlyReason,
 			getFieldValue,
+			getFieldValues,
 			setFieldValueLite,
 			setFieldTouchedLite,
 		]
