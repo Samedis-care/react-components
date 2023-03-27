@@ -51,6 +51,14 @@ export interface TreeDataForRenderer extends Omit<TreeData, "children"> {
 	 * The depth of the entry
 	 */
 	depth: number;
+	/**
+	 * Has previous entry on the same depth
+	 */
+	hasPrev: boolean;
+	/**
+	 * Has another entry on the same depth
+	 */
+	hasNext: boolean;
 }
 
 export interface TreeViewRendererProps extends TreeDataForRenderer {
@@ -92,11 +100,13 @@ const enhanceData = (
 	depth: number
 ): TreeDataForRenderer[] => {
 	return data
-		.map((entry): TreeDataForRenderer[] => [
+		.map((entry, idx): TreeDataForRenderer[] => [
 			{
 				...entry,
 				index: index++,
 				depth: depth,
+				hasPrev: idx !== 0,
+				hasNext: idx < data.length - 1,
 			},
 			...(entry.children && entry.expanded
 				? (() => {

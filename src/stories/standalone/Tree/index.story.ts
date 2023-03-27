@@ -3,4 +3,5 @@ const Settings = {
 };
 export default Settings;
 
-export * from "./TreeView.story";
+export { TreeViewStory } from "./TreeView.story";
+export { TreeViewCheckboxStory } from "./TreeViewCheckbox.story";

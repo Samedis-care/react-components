@@ -1,37 +1,10 @@
 import React, { useCallback, useState } from "react";
 import TreeView, { TreeDataFlat } from "../../../standalone/Tree/TreeView";
 import { action } from "@storybook/addon-actions";
+import TreeViewCheckboxSelectionRenderer from "../../../standalone/Tree/TreeViewCheckboxSelectionRenderer";
+import { initialTreeData } from "./TreeView.story";
 
-export const initialTreeData = [
-	{
-		parentId: null,
-		id: "root",
-		expanded: true,
-		hasChildren: true,
-		icon: null,
-		label: "Root",
-	},
-	{
-		parentId: "root",
-		id: "child-1",
-		expanded: false,
-		hasChildren: false,
-		icon: null,
-		label: "Child 1",
-	},
-	{
-		parentId: "root",
-		id: "child-2",
-		expanded: false,
-		hasChildren: false,
-		icon: null,
-		label: `Child 2 has some extremely ${new Array(250)
-			.fill("long")
-			.join(" ")} label`,
-	},
-];
-
-export const TreeViewStory = (): React.ReactElement => {
+export const TreeViewCheckboxStory = (): React.ReactElement => {
 	const [data, setData] = useState<TreeDataFlat[]>(initialTreeData);
 
 	const loadChildren = useCallback((id: string) => {
@@ -52,9 +25,10 @@ export const TreeViewStory = (): React.ReactElement => {
 				data={data}
 				onLoadChildren={loadChildren}
 				onToggleExpanded={toggleExpanded}
+				renderer={TreeViewCheckboxSelectionRenderer}
 			/>
 		</div>
 	);
 };
 
-TreeViewStory.storyName = "TreeView";
+TreeViewCheckboxStory.storyName = "TreeView (Checkbox)";
