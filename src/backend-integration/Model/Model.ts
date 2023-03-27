@@ -168,6 +168,10 @@ export type ModelIndexResponse = [
 	userMeta?: unknown
 ];
 
+export type ModelFetchAllParams = Partial<
+	Omit<IDataGridLoadDataParameters, "rows" | "page">
+>;
+
 /**
  * Deletion request. If invert is false only delete ids array. If invert is true delete everything except the given ids
  * @param invert Invert the selection
@@ -213,6 +217,32 @@ export const useModelGet = <
 		retry: (count, err: Error) => err.name === "NetworkError" && count < 3,
 		...model.cacheOptions,
 	});
+};
+
+/**
+ * React-Query's useQuery for the given model and index params
+ * @param model The model ID to load
+ * @param params The params to pass to fetchAll/index
+ * @returns ModelIndexResponse where userMeta and meta is taken from the last call
+ * @see Model.fetchAll
+ */
+export const useModelFetchAll = <
+	KeyT extends ModelFieldName,
+	VisibilityT extends PageVisibility,
+	CustomT
+>(
+	model: Model<KeyT, VisibilityT, CustomT>,
+	params?: ModelFetchAllParams
+): UseQueryResult<ModelIndexResponse, Error> => {
+	return useQuery(
+		model.getReactQueryKeyFetchAll(params),
+		() => model.fetchAll(params),
+		{
+			// 3 retries if we get network error
+			retry: (count, err: Error) => err.name === "NetworkError" && count < 3,
+			...model.cacheOptions,
+		}
+	);
 };
 
 /**
@@ -455,7 +485,7 @@ class Model<
 	 * @returns ModelIndexResponse where userMeta and meta is taken from the last call
 	 */
 	public async fetchAll(
-		params?: Partial<Omit<IDataGridLoadDataParameters, "rows" | "page">>
+		params?: ModelFetchAllParams
 	): Promise<ModelIndexResponse> {
 		let page = 1;
 		let perPage = 1000;
@@ -492,11 +522,35 @@ class Model<
 	}
 
 	/**
+	 * Fetches all records using index calls and caches the result
+	 * @param params The params to pass to index
+	 * @returns ModelIndexResponse where userMeta and meta is taken from the last call
+	 * @see fetchAll
+	 */
+	public async fetchAllCached(
+		params?: ModelFetchAllParams
+	): Promise<ModelIndexResponse> {
+		return queryCache.fetchQuery(
+			this.getReactQueryKeyFetchAll(params),
+			() => this.fetchAll(params),
+			this.cacheOptions
+		);
+	}
+
+	/**
 	 * Gets the react-query cache key for this model
 	 * @param id The record id
 	 */
 	public getReactQueryKey(id: string | null): QueryKey {
 		return [this.modelId, { id: id }, this.cacheKeys];
+	}
+
+	/**
+	 * Gets the react-query cache key for this model (for fetch all)
+	 * @param params The fetch all params
+	 */
+	public getReactQueryKeyFetchAll(params?: ModelFetchAllParams): QueryKey {
+		return [this.modelId, params, this.cacheKeys];
 	}
 
 	/**
