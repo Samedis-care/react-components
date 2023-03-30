@@ -371,6 +371,24 @@ const ImageBox = (props: ImageBoxProps) => {
 				<Dialog open={dialogOpen} fullScreen onClose={closeDialog}>
 					<DialogContent>
 						<div className={classes.fullScreenImageWrapper}>
+							<div
+								className={classes.swipeListener}
+								onScroll={handleScrollFS}
+								ref={containerRefFS}
+								onTouchEnd={handleTouchEndFS}
+							>
+								<img
+									src={image}
+									alt={""}
+									className={combineClassNames([
+										classes.image,
+										onNextImage && !onPrevImage && classes.imageSwipeRight,
+										!onNextImage && onPrevImage && classes.imageSwipeLeft,
+										!onNextImage && !onPrevImage && classes.imageSwipeNone,
+										imageDots && classes.imageWithDots,
+									])}
+								/>
+							</div>
 							<IconButton onClick={closeDialog} className={classes.removeBtn}>
 								<CloseIcon />
 							</IconButton>
@@ -390,24 +408,6 @@ const ImageBox = (props: ImageBoxProps) => {
 									<NextIcon />
 								</IconButton>
 							)}
-							<div
-								className={classes.swipeListener}
-								onScroll={handleScrollFS}
-								ref={containerRefFS}
-								onTouchEnd={handleTouchEndFS}
-							>
-								<img
-									src={image}
-									alt={""}
-									className={combineClassNames([
-										classes.image,
-										onNextImage && !onPrevImage && classes.imageSwipeRight,
-										!onNextImage && onPrevImage && classes.imageSwipeLeft,
-										!onNextImage && !onPrevImage && classes.imageSwipeNone,
-										imageDots && classes.imageWithDots,
-									])}
-								/>
-							</div>
 							{imageDots && (
 								<div className={classes.imageDotsWrapper}>
 									<ImageDots
