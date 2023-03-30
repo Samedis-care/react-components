@@ -405,6 +405,20 @@ export interface FormContextData {
 	 */
 	submitting: boolean;
 	/**
+	 * Add a blocker for submitting
+	 * This is a feature to hide the form loading overlay when user interaction is required (e.g. a form dialog in a pre-submit handler)
+	 * Remove it again with removeSubmittingBlocker
+	 * @param name The name of the blocker
+	 * @see removeSubmittingBlocker
+	 */
+	addSubmittingBlocker: (name: string) => void;
+	/**
+	 * Removes the blocker added by addSubmittingBlocker
+	 * @param name The name of the blocker
+	 * @see addSubmittingBlocker
+	 */
+	removeSubmittingBlocker: (name: string) => void;
+	/**
 	 * Submit the form
 	 */
 	submit: (params?: FormSubmitOptions | React.SyntheticEvent) => Promise<void>;
@@ -793,8 +807,17 @@ const Form = <
 	const [touched, setTouched] = useState<Record<string, boolean>>({});
 	const [errors, setErrors] = useState<Record<string, string | null>>({});
 	const [warnings, setWarnings] = useState<Record<string, string | null>>({});
-	const [submitting, setSubmitting] = useState(false);
-
+	const [submittingForm, setSubmittingForm] = useState(false);
+	const [submittingBlocked, setSubmittingBlocked] = useState(false);
+	const [submittingBlocker, setSubmittingBlocker] = useState<string[]>([]);
+	const addSubmittingBlocker = useCallback((name: string) => {
+		setSubmittingBlocker((prev) => [...prev, name]);
+	}, []);
+	const removeSubmittingBlocker = useCallback((name: string) => {
+		setSubmittingBlocker((prev) => prev.filter((entry) => entry !== name));
+	}, []);
+	const submitting =
+		submittingForm && !submittingBlocked && submittingBlocker.length === 0;
 	// main form handling - validation disable toggle
 	useEffect(() => {
 		if (!disableValidation) return;
@@ -1076,7 +1099,7 @@ const Form = <
 					return;
 				}
 			}
-			setSubmitting(true);
+			setSubmittingForm(true);
 			setTouched((prev) =>
 				Object.fromEntries(Object.keys(prev).map((field) => [field, true]))
 			);
@@ -1095,7 +1118,7 @@ const Form = <
 					}
 					throw e;
 				} finally {
-					setSubmitting(false);
+					setSubmittingForm(false);
 				}
 				return;
 			}
@@ -1110,7 +1133,7 @@ const Form = <
 				}
 
 				if (!isObjectEmpty(validationHints) && !params.ignoreWarnings) {
-					setSubmitting(false);
+					setSubmittingBlocked(true);
 					const continueSubmit = await showConfirmDialogBool(pushDialog, {
 						title: t("backend-components.form.submit-with-warnings.title"),
 						message: (
@@ -1132,10 +1155,10 @@ const Form = <
 						),
 						textButtonNo: t("backend-components.form.submit-with-warnings.no"),
 					});
+					setSubmittingBlocked(false);
 					if (!continueSubmit) {
 						return;
 					}
-					setSubmitting(true);
 				}
 
 				await Promise.all(
@@ -1186,7 +1209,7 @@ const Form = <
 				setUpdateError(e as Error);
 				throw e;
 			} finally {
-				setSubmitting(false);
+				setSubmittingForm(false);
 			}
 		},
 		[
@@ -1279,6 +1302,16 @@ const Form = <
 			}
 		};
 	}, [dirty, disableNestedSubmit, nestedFormName, parentFormContext]);
+
+	// nested forms - submitting blocker
+	useEffect(() => {
+		if (!parentFormContext || !nestedFormName || !submittingBlocked) return;
+
+		parentFormContext.addSubmittingBlocker(nestedFormName);
+		return () => {
+			parentFormContext.removeSubmittingBlocker(nestedFormName);
+		};
+	}, [nestedFormName, parentFormContext, submittingBlocked]);
 
 	// nested forms - validation and submit hook
 	useEffect(() => {
@@ -1447,6 +1480,8 @@ const Form = <
 			onlyValidateMounted: !!onlyValidateMounted,
 			onlyWarnMounted: !!onlyWarnMounted,
 			submitting,
+			addSubmittingBlocker,
+			removeSubmittingBlocker,
 			submit: submitForm,
 			deleteOnSubmit: !!deleteOnSubmit,
 			values,
@@ -1492,6 +1527,8 @@ const Form = <
 			onlyWarnMounted,
 			deleteOnSubmit,
 			submitting,
+			addSubmittingBlocker,
+			removeSubmittingBlocker,
 			submitForm,
 			values,
 			touched,
