@@ -315,7 +315,7 @@ export interface FormContextData {
 	 */
 	markFieldMounted: (field: string, mounted: boolean) => void;
 	/**
-	 * Sets the pre submit handler (for custom fields)
+	 * Sets the callback to perform hard validation (for custom fields)
 	 * @param field custom field name (must not be in model)
 	 */
 	setCustomValidationHandler: (
@@ -323,10 +323,23 @@ export interface FormContextData {
 		handler: CustomValidationHandler
 	) => void;
 	/**
-	 * Removes a pre submit handler (for custom fields)
+	 * Removes the callback to perform hard validation (for custom fields)
 	 * @param field custom field name (must not be in model)
 	 */
 	removeCustomValidationHandler: (field: string) => void;
+	/**
+	 * Sets the callback to perform soft validation (for custom fields)
+	 * @param field custom field name (must not be in model)
+	 */
+	setCustomWarningHandler: (
+		field: string,
+		handler: CustomValidationHandler
+	) => void;
+	/**
+	 * Removes the callback to perform soft validation (for custom fields)
+	 * @param field custom field name (must not be in model)
+	 */
+	removeCustomWarningHandler: (field: string) => void;
 	/**
 	 * Sets the pre submit handler (for custom fields)
 	 * @param field custom field name (must not be in model)
@@ -752,6 +765,19 @@ const Form = <
 	const removeCustomValidationHandler = useCallback((field: string) => {
 		delete customValidationHandlers.current[field];
 	}, []);
+	// custom fields - custom warning handlers
+	const customWarningHandlers = useRef<Record<string, CustomValidationHandler>>(
+		{}
+	);
+	const setCustomWarningHandler = useCallback(
+		(field: string, handler: CustomValidationHandler) => {
+			customWarningHandlers.current[field] = handler;
+		},
+		[]
+	);
+	const removeCustomWarningHandler = useCallback((field: string) => {
+		delete customWarningHandlers.current[field];
+	}, []);
 
 	// custom fields - post submit handlers
 	const postSubmitHandlers = useRef<Record<string, PostSubmitHandler>>({});
@@ -900,16 +926,18 @@ const Form = <
 				mode
 			);
 			await Promise.all(
-				Object.entries(customValidationHandlers.current).map(
-					async ([name, handler]) => {
-						const customErrors = await handler();
-						for (const key in customErrors) {
-							if (!Object.prototype.hasOwnProperty.call(customErrors, key))
-								continue;
-							errors[name + "_" + key] = customErrors[key];
-						}
+				Object.entries(
+					mode === "normal"
+						? customValidationHandlers.current
+						: customWarningHandlers.current
+				).map(async ([name, handler]) => {
+					const customErrors = await handler();
+					for (const key in customErrors) {
+						if (!Object.prototype.hasOwnProperty.call(customErrors, key))
+							continue;
+						errors[name + "_" + key] = customErrors[key];
 					}
-				)
+				})
 			);
 			return errors;
 		},
@@ -1122,6 +1150,8 @@ const Form = <
 				}
 				return;
 			}
+
+			let throwIsWarning = false;
 			try {
 				const validationHints = await validateForm("hint");
 				setWarnings(validationHints);
@@ -1132,7 +1162,11 @@ const Form = <
 					throw validation;
 				}
 
-				if (!isObjectEmpty(validationHints) && !params.ignoreWarnings) {
+				if (
+					!isObjectEmpty(validationHints) &&
+					!params.ignoreWarnings &&
+					!nestedFormName
+				) {
 					setSubmittingBlocked(true);
 					const continueSubmit = await showConfirmDialogBool(pushDialog, {
 						title: t("backend-components.form.submit-with-warnings.title"),
@@ -1157,7 +1191,9 @@ const Form = <
 					});
 					setSubmittingBlocked(false);
 					if (!continueSubmit) {
-						return;
+						throwIsWarning = true;
+						// noinspection ExceptionCaughtLocallyJS
+						throw validationHints;
 					}
 				}
 
@@ -1206,7 +1242,7 @@ const Form = <
 				}
 			} catch (e) {
 				// don't use this for validation errors
-				setUpdateError(e as Error);
+				if (!throwIsWarning) setUpdateError(e as Error);
 				throw e;
 			} finally {
 				setSubmittingForm(false);
@@ -1221,6 +1257,7 @@ const Form = <
 			onDeleted,
 			deleteRecord,
 			validateForm,
+			nestedFormName,
 			updateData,
 			model,
 			onlySubmitMounted,
@@ -1320,7 +1357,13 @@ const Form = <
 			setTouched((prev) =>
 				Object.fromEntries(Object.keys(prev).map((field) => [field, true]))
 			);
-			return validateForm();
+			return validateForm("normal");
+		};
+		const validateNestedFormWarn = () => {
+			setTouched((prev) =>
+				Object.fromEntries(Object.keys(prev).map((field) => [field, true]))
+			);
+			return validateForm("hint");
 		};
 		const submitNestedForm = async (id: string, params: FormSubmitOptions) => {
 			if (nestedFormPreSubmitHandler) {
@@ -1338,6 +1381,10 @@ const Form = <
 				nestedFormName,
 				validateNestedForm
 			);
+			parentFormContext.setCustomWarningHandler(
+				nestedFormName,
+				validateNestedFormWarn
+			);
 			parentFormContext.setPostSubmitHandler(nestedFormName, submitNestedForm);
 		}
 		return () => {
@@ -1346,8 +1393,10 @@ const Form = <
 				onlySubmitNestedIfMounted ||
 				disableValidation ||
 				disableNestedSubmit
-			)
+			) {
 				parentFormContext.removeCustomValidationHandler(nestedFormName);
+				parentFormContext.removeCustomWarningHandler(nestedFormName);
+			}
 			if (
 				parentFormContext.onlySubmitMounted ||
 				onlySubmitNestedIfMounted ||
@@ -1358,6 +1407,7 @@ const Form = <
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [
 		parentFormContext?.setCustomValidationHandler,
+		parentFormContext?.setCustomWarningHandler,
 		parentFormContext?.onlyValidateMounted,
 		parentFormContext?.onlySubmitMounted,
 		parentFormContext?.setCustomFieldDirty,
@@ -1475,6 +1525,8 @@ const Form = <
 			removePostSubmitHandler,
 			setCustomValidationHandler,
 			removeCustomValidationHandler,
+			setCustomWarningHandler,
+			removeCustomWarningHandler,
 			onlySubmitMounted: !!onlySubmitMounted,
 			onlySubmitMountedBehaviour,
 			onlyValidateMounted: !!onlyValidateMounted,
@@ -1521,6 +1573,8 @@ const Form = <
 			removePostSubmitHandler,
 			setCustomValidationHandler,
 			removeCustomValidationHandler,
+			setCustomWarningHandler,
+			removeCustomWarningHandler,
 			onlySubmitMounted,
 			onlySubmitMountedBehaviour,
 			onlyValidateMounted,
