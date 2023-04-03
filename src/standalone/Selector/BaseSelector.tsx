@@ -17,6 +17,7 @@ import {
 	Divider,
 	Typography,
 	Popper,
+	Grid,
 } from "@material-ui/core";
 import { Autocomplete, AutocompleteProps } from "@material-ui/lab";
 import {
@@ -75,6 +76,10 @@ export interface BaseSelectorData {
 	 */
 	isDisabled?: boolean;
 	/**
+	 * Should the entry be marked selected
+	 */
+	selected?: boolean;
+	/**
 	 * Is this an add new button? (used for special handling in the renderer)
 	 */
 	isAddNewButton?: boolean;
@@ -98,6 +103,14 @@ export const getStringLabel = (data: BaseSelectorData) =>
 	typeof data.label === "string" ? data.label : data.label[0];
 export const getReactLabel = (data: BaseSelectorData) =>
 	typeof data.label === "string" ? data.label : data.label[1];
+
+export const modifyReactLabel = <DataT extends BaseSelectorData>(
+	data: DataT,
+	cb: (prev: React.ReactNode) => React.ReactNode
+): DataT => ({
+	...data,
+	label: [getStringLabel(data), cb(getReactLabel(data))],
+});
 
 export interface SelectorLruOptions<DataT extends BaseSelectorData> {
 	/**
@@ -387,6 +400,11 @@ const useCustomStylesBase = makeStyles(
 			paddingTop: 4,
 			color: theme.palette.text.disabled,
 		},
+		selected: {
+			borderRadius: theme.shape.borderRadius,
+			backgroundColor: theme.palette.secondary.main,
+			padding: `${theme.spacing(1) / 2}px ${theme.spacing(1)}px`,
+		},
 		divider: {
 			width: "100%",
 		},
@@ -558,11 +576,30 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 					{enableIcons && (
 						<SmallListItemIcon>{renderIcon(data.icon)}</SmallListItemIcon>
 					)}
-					<ListItemText>{getReactLabel(data)}</ListItemText>
+					<ListItemText>
+						<Grid container>
+							<Grid item xs>
+								{getReactLabel(data)}
+							</Grid>
+							{data.selected && (
+								<Grid item className={customClasses.selected}>
+									{t("standalone.selector.base-selector.selected")}
+								</Grid>
+							)}
+						</Grid>
+					</ListItemText>
 				</SelectorSmallListItem>
 			);
 		},
-		[enableIcons, renderIcon, customClasses]
+		[
+			customClasses.divider,
+			customClasses.smallLabel,
+			customClasses.listItem,
+			customClasses.selected,
+			enableIcons,
+			renderIcon,
+			t,
+		]
 	);
 
 	const addToLru = useCallback(

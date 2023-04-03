@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useMemo } from "react";
 import BaseSelector, {
 	BaseSelectorData,
 	BaseSelectorProps,
@@ -109,6 +109,8 @@ const MultiSelect = <DataT extends MultiSelectorData>(
 	const getIdDefault = useCallback((data: DataT) => data.value, []);
 	const getId = getIdOfData ?? getIdDefault;
 
+	const selectedIds = useMemo(() => selected.map(getId), [getId, selected]);
+
 	const EntryRender: React.ComponentType<IMultiSelectEntryProps<DataT>> =
 		selectedEntryRenderer || MultiSelectEntry;
 
@@ -122,8 +124,15 @@ const MultiSelect = <DataT extends MultiSelectorData>(
 	);
 
 	const multiSelectLoadHandler = useCallback(
-		(query: string, switchValue: boolean) => onLoad(query, switchValue),
-		[onLoad]
+		async (query: string, switchValue: boolean) => {
+			const results = await onLoad(query, switchValue);
+			return results.map((result) =>
+				selectedIds.includes(getId(result))
+					? { ...result, isDisabled: true, selected: true }
+					: result
+			);
+		},
+		[getId, onLoad, selectedIds]
 	);
 
 	const handleDelete = useCallback(
@@ -176,8 +185,7 @@ const MultiSelect = <DataT extends MultiSelectorData>(
 					onLoad={multiSelectLoadHandler}
 					selected={null}
 					onSelect={multiSelectHandler}
-					refreshToken={selected.map(getId).join(",")}
-					filterIds={selected.map(getId)}
+					refreshToken={selectedIds.join(",")}
 					displaySwitch={displaySwitch}
 					switchLabel={switchLabel}
 					defaultSwitchValue={defaultSwitchValue}

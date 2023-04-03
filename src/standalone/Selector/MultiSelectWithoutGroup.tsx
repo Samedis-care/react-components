@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Search as SearchIcon, Cancel as RemoveIcon } from "@material-ui/icons";
 import {
 	BaseSelectorProps,
@@ -110,6 +110,8 @@ const MultiSelectWithoutGroup = <DataT extends MultiSelectorData>(
 	const getIdDefault = useCallback((data: DataT) => data.value, []);
 	const getId = getIdOfData ?? getIdDefault;
 
+	const selectedIds = useMemo(() => selected.map(getId), [selected, getId]);
+
 	useEffect(() => {
 		selected.map((selectedOption) => {
 			setDataOptions((oldOptions) =>
@@ -158,8 +160,15 @@ const MultiSelectWithoutGroup = <DataT extends MultiSelectorData>(
 	);
 
 	const onLoad = useCallback(
-		(query: string) => loadDataOptions(query, !!switchValue),
-		[loadDataOptions, switchValue]
+		async (query: string) => {
+			const results = await loadDataOptions(query, !!switchValue);
+			return results.map((result) =>
+				selectedIds.includes(getId(result))
+					? { ...result, isDisabled: true, selected: true }
+					: result
+			);
+		},
+		[getId, loadDataOptions, selectedIds, switchValue]
 	);
 
 	return (
@@ -171,14 +180,13 @@ const MultiSelectWithoutGroup = <DataT extends MultiSelectorData>(
 				onSelect={multiSelectHandler}
 				refreshToken={
 					(refreshToken ?? "") +
-					selected.map(getId).join(",") +
+					selectedIds.join(",") +
 					(switchValue ?? false).toString()
 				}
 				variant={"standard"}
 				startAdornment={<SearchIcon color={"primary"} />}
 				freeSolo={true}
 				displaySwitch={false}
-				getIdOfData={getIdOfData}
 				filterIds={selected.map(getId)}
 			/>
 			<InlineSwitch

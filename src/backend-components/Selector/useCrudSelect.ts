@@ -248,6 +248,7 @@ const useCrudSelect = <
 						canUnselect: null,
 						noDelete: null,
 						isDisabled: null,
+						selected: null,
 						hidden: null,
 						ignore: null,
 						group: null,
