@@ -1,0 +1,1214 @@
+{
+	"ADP": {
+		"rounding": 0,
+		"digits": 0
+	},
+	"AED": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"AFA": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"AFN": {
+		"rounding": 0,
+		"digits": 0
+	},
+	"ALK": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"ALL": {
+		"rounding": 0,
+		"digits": 0
+	},
+	"AMD": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"ANG": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"AOA": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"AOK": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"AON": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"AOR": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"ARA": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"ARL": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"ARM": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"ARP": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"ARS": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"ATS": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"AUD": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"AWG": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"AZM": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"AZN": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"BAD": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"BAM": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"BAN": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"BBD": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"BDT": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"BEC": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"BEF": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"BEL": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"BGL": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"BGM": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"BGN": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"BGO": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"BHD": {
+		"rounding": 0,
+		"digits": 3
+	},
+	"BIF": {
+		"rounding": 0,
+		"digits": 0
+	},
+	"BMD": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"BND": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"BOB": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"BOL": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"BOP": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"BOV": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"BRB": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"BRC": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"BRE": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"BRL": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"BRN": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"BRR": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"BRZ": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"BSD": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"BTN": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"BUK": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"BWP": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"BYB": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"BYN": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"BYR": {
+		"rounding": 0,
+		"digits": 0
+	},
+	"BZD": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"CAD": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"CDF": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"CHE": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"CHF": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"CHW": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"CLE": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"CLF": {
+		"rounding": 0,
+		"digits": 4
+	},
+	"CLP": {
+		"rounding": 0,
+		"digits": 0
+	},
+	"CNH": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"CNX": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"CNY": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"COP": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"COU": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"CRC": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"CSD": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"CSK": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"CUC": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"CUP": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"CVE": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"CYP": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"CZK": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"DDM": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"DEM": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"DJF": {
+		"rounding": 0,
+		"digits": 0
+	},
+	"DKK": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"DOP": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"DZD": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"ECS": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"ECV": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"EEK": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"EGP": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"ERN": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"ESA": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"ESB": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"ESP": {
+		"rounding": 0,
+		"digits": 0
+	},
+	"ETB": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"EUR": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"FIM": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"FJD": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"FKP": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"FRF": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"GBP": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"GEK": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"GEL": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"GHC": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"GHS": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"GIP": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"GMD": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"GNF": {
+		"rounding": 0,
+		"digits": 0
+	},
+	"GNS": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"GQE": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"GRD": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"GTQ": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"GWE": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"GWP": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"GYD": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"HKD": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"HNL": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"HRD": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"HRK": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"HTG": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"HUF": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"IDR": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"IEP": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"ILP": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"ILR": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"ILS": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"INR": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"IQD": {
+		"rounding": 0,
+		"digits": 0
+	},
+	"IRR": {
+		"rounding": 0,
+		"digits": 0
+	},
+	"ISJ": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"ISK": {
+		"rounding": 0,
+		"digits": 0
+	},
+	"ITL": {
+		"rounding": 0,
+		"digits": 0
+	},
+	"JMD": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"JOD": {
+		"rounding": 0,
+		"digits": 3
+	},
+	"JPY": {
+		"rounding": 0,
+		"digits": 0
+	},
+	"KES": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"KGS": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"KHR": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"KMF": {
+		"rounding": 0,
+		"digits": 0
+	},
+	"KPW": {
+		"rounding": 0,
+		"digits": 0
+	},
+	"KRH": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"KRO": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"KRW": {
+		"rounding": 0,
+		"digits": 0
+	},
+	"KWD": {
+		"rounding": 0,
+		"digits": 3
+	},
+	"KYD": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"KZT": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"LAK": {
+		"rounding": 0,
+		"digits": 0
+	},
+	"LBP": {
+		"rounding": 0,
+		"digits": 0
+	},
+	"LKR": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"LRD": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"LSL": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"LTL": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"LTT": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"LUC": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"LUF": {
+		"rounding": 0,
+		"digits": 0
+	},
+	"LUL": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"LVL": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"LVR": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"LYD": {
+		"rounding": 0,
+		"digits": 3
+	},
+	"MAD": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"MAF": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"MCF": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"MDC": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"MDL": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"MGA": {
+		"rounding": 0,
+		"digits": 0
+	},
+	"MGF": {
+		"rounding": 0,
+		"digits": 0
+	},
+	"MKD": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"MKN": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"MLF": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"MMK": {
+		"rounding": 0,
+		"digits": 0
+	},
+	"MNT": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"MOP": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"MRO": {
+		"rounding": 0,
+		"digits": 0
+	},
+	"MRU": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"MTL": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"MTP": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"MUR": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"MVP": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"MVR": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"MWK": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"MXN": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"MXP": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"MXV": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"MYR": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"MZE": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"MZM": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"MZN": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"NAD": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"NGN": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"NIC": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"NIO": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"NLG": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"NOK": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"NPR": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"NZD": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"OMR": {
+		"rounding": 0,
+		"digits": 3
+	},
+	"PAB": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"PEI": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"PEN": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"PES": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"PGK": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"PHP": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"PKR": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"PLN": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"PLZ": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"PTE": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"PYG": {
+		"rounding": 0,
+		"digits": 0
+	},
+	"QAR": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"RHD": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"ROL": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"RON": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"RSD": {
+		"rounding": 0,
+		"digits": 0
+	},
+	"RUB": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"RUR": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"RWF": {
+		"rounding": 0,
+		"digits": 0
+	},
+	"SAR": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"SBD": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"SCR": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"SDD": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"SDG": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"SDP": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"SEK": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"SGD": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"SHP": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"SIT": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"SKK": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"SLL": {
+		"rounding": 0,
+		"digits": 0
+	},
+	"SOS": {
+		"rounding": 0,
+		"digits": 0
+	},
+	"SRD": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"SRG": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"SSP": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"STD": {
+		"rounding": 0,
+		"digits": 0
+	},
+	"STN": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"SUR": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"SVC": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"SYP": {
+		"rounding": 0,
+		"digits": 0
+	},
+	"SZL": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"THB": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"TJR": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"TJS": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"TMM": {
+		"rounding": 0,
+		"digits": 0
+	},
+	"TMT": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"TND": {
+		"rounding": 0,
+		"digits": 3
+	},
+	"TOP": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"TPE": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"TRL": {
+		"rounding": 0,
+		"digits": 0
+	},
+	"TRY": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"TTD": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"TWD": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"TZS": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"UAH": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"UAK": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"UGS": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"UGX": {
+		"rounding": 0,
+		"digits": 0
+	},
+	"USD": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"USN": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"USS": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"UYI": {
+		"rounding": 0,
+		"digits": 0
+	},
+	"UYP": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"UYU": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"UYW": {
+		"rounding": 0,
+		"digits": 4
+	},
+	"UZS": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"VEB": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"VEF": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"VES": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"VND": {
+		"rounding": 0,
+		"digits": 0
+	},
+	"VNN": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"VUV": {
+		"rounding": 0,
+		"digits": 0
+	},
+	"WST": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"XAF": {
+		"rounding": 0,
+		"digits": 0
+	},
+	"XAG": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"XAU": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"XBA": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"XBB": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"XBC": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"XBD": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"XCD": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"XDR": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"XEU": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"XFO": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"XFU": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"XOF": {
+		"rounding": 0,
+		"digits": 0
+	},
+	"XPD": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"XPF": {
+		"rounding": 0,
+		"digits": 0
+	},
+	"XPT": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"XRE": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"XSU": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"XTS": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"XUA": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"XXX": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"YDD": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"YER": {
+		"rounding": 0,
+		"digits": 0
+	},
+	"YUD": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"YUM": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"YUN": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"YUR": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"ZAL": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"ZAR": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"ZMK": {
+		"rounding": 0,
+		"digits": 0
+	},
+	"ZMW": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"ZRN": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"ZRZ": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"ZWD": {
+		"rounding": 0,
+		"digits": 0
+	},
+	"ZWL": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"ZWR": {
+		"rounding": 0,
+		"digits": 2
+	}
+}

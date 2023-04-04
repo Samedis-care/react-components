@@ -1,0 +1,39 @@
+import React from "react";
+export interface FormDialogProps {
+    /**
+     * Dialog tille
+     */
+    dialogTitle?: string;
+    /**
+     * Dialog width optional parameter
+     */
+    maxWidth?: false | "lg" | "xs" | "sm" | "md" | "xl" | undefined;
+    /**
+     * Boolean flag to use custom classes
+     */
+    useCustomClasses?: boolean;
+    /**
+     * Add link button option
+     */
+    openInNewLink?: () => void;
+    /**
+     * Dialog contents
+     */
+    children?: React.ReactNode;
+    /**
+     * Called on dialog close
+     */
+    onClose?: () => void;
+    /**
+     * Disable automatic special handling of form dialog. Use if form dialog is only used as layout/design component
+     */
+    disableFormDialogContext?: boolean;
+}
+export interface FormDialogDispatch {
+    blockClosing: () => void;
+    unblockClosing: () => void;
+}
+export declare const IsInFormDialogContext: React.Context<boolean>;
+export declare const FormDialogDispatchContext: React.Context<FormDialogDispatch | undefined>;
+declare const _default: React.MemoExoticComponent<(props: FormDialogProps) => JSX.Element>;
+export default _default;
