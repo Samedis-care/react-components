@@ -54,3 +54,4 @@ export * from "./useDebounce";
 export { default as deepSort } from "./deepSort";
 export { default as useMemoDebug } from "./useMemoDebug";
 export { default as useCallbackDebug } from "./useCallbackDebug";
+export * from "./useStorageState";
