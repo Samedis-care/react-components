@@ -31,6 +31,7 @@ import {
 	combineClassNames,
 	SelectorSmallListItem,
 	SmallListItemIcon,
+	useLocalStorageState,
 } from "../..";
 import { makeThemeStyles } from "../../utils";
 import { makeStyles, Theme } from "@material-ui/core/styles";
@@ -519,28 +520,13 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 	const [loading, setLoading] = useState<string | null>(null);
 	const [query, setQuery] = useState("");
 
-	const [lruIds, setLruIds] = useState<string[]>(() => {
-		if (!lru) return [];
-		try {
-			const ret: unknown = JSON.parse(
-				localStorage?.getItem(lru.storageKey) ?? "[]"
-			);
-			if (
-				!Array.isArray(ret) ||
-				(ret as unknown[]).find((entry) => typeof entry !== "string")
-			)
-				return []; // LRU != string[]
-			return (ret as string[]).slice(0, lru.count);
-		} catch (e) {
-			return []; // json parse error
-		}
-	});
-
-	// save LRU ids
-	useEffect(() => {
-		if (!lru?.storageKey) return;
-		localStorage?.setItem(lru.storageKey, JSON.stringify(lruIds));
-	}, [lruIds, lru?.storageKey]);
+	const [lruIds, setLruIds] = useLocalStorageState<string[]>(
+		lru?.storageKey,
+		[],
+		(ret): ret is string[] =>
+			Array.isArray(ret) &&
+			!(ret as unknown[]).find((entry) => typeof entry !== "string")
+	);
 
 	const renderIcon = useCallback(
 		(icon: string | React.ReactNode) =>
@@ -612,7 +598,7 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 				)
 			);
 		},
-		[lru]
+		[lru, setLruIds]
 	);
 
 	const onChangeHandler = useCallback(
@@ -777,6 +763,13 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 		void onSearchHandler("");
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [selected, switchValue, refreshToken]);
+
+	// lru change
+	useEffect(() => {
+		if (query) return;
+		void onSearchHandler("");
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [lruIds.join(",")]);
 
 	const filterOptions = useCallback((options: DataT[]) => options, []);
 
