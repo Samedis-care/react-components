@@ -50,7 +50,7 @@ jobs:
           git rm -rf .
           mv ../build_out/* .
           rmdir ../build_out
-          git add --all
+          git add package.json package-lock.json dist LICENSE
           git status
           git commit -m "$commit_message"
           git push -f origin master_dist
