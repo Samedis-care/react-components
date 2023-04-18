@@ -1,6 +1,7 @@
-import React, { CSSProperties } from "react";
-import { Button, ButtonProps, Tooltip, withStyles } from "@material-ui/core";
-import { Theme } from "@material-ui/core/styles";
+import React from "react";
+import { Button, ButtonProps, Tooltip } from "@mui/material";
+import { withStyles, CSSProperties } from "@mui/styles";
+import { Theme } from "@mui/material/styles";
 
 export interface SubActionButtonTheme {
 	width?: CSSProperties["width"];

@@ -12,8 +12,8 @@ import {
 	Select,
 	TextField,
 	Tooltip,
-} from "@material-ui/core";
-import { Delete as ClearIcon } from "@material-ui/icons";
+} from "@mui/material";
+import { Delete as ClearIcon } from "@mui/icons-material";
 import FilterCombinator from "./FilterCombinator";
 import { ModelFilterType } from "../../../backend-integration/Model";
 import {
@@ -29,6 +29,8 @@ import {
 import { DateType } from "@date-io/type";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import { normalizeDate } from "../../../backend-integration/Model/Types/Utils/DateUtils";
+import { SelectChangeEvent } from "@mui/material/Select/SelectInput";
+import moment from "moment";
 
 export type FilterType =
 	| "contains"
@@ -151,9 +153,7 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 			nextFilter: subFilter,
 		});
 
-	const onFilterTypeChange = (
-		event: React.ChangeEvent<{ name?: string; value: unknown }>
-	) => {
+	const onFilterTypeChange = (event: SelectChangeEvent<FilterType>) => {
 		// clear magic value
 		if (filterType === "empty" || filterType === "notEmpty") {
 			filterValue = "";
@@ -378,7 +378,7 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 		<>
 			{isFirstFilter && props.value?.value1 && (
 				<Grid item xs={12}>
-					<Grid container justify={"flex-end"} alignItems={"center"}>
+					<Grid container justifyContent={"flex-end"} alignItems={"center"}>
 						<Grid item>
 							<Tooltip
 								title={
@@ -389,6 +389,7 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 									<IconButton
 										className={classes.filterClearBtn}
 										onClick={resetFilter}
+										size="large"
 									>
 										<ClearIcon />
 									</IconButton>
@@ -414,14 +415,14 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 						<Grid item xs={12}>
 							{props.valueType === "date" ? (
 								<LocalizedKeyboardDatePicker
-									value={filterValue === "" ? null : filterValue}
+									value={filterValue === "" ? null : moment(filterValue)}
 									onChange={onFilterValueChangeDate}
 									fullWidth
 									autoFocus={depth === 1}
 								/>
 							) : props.valueType === "datetime" ? (
 								<LocalizedDateTimePicker
-									value={filterValue === "" ? null : filterValue}
+									value={filterValue === "" ? null : moment(filterValue)}
 									onChange={onFilterValueChangeDate}
 									fullWidth
 									autoFocus={depth === 1}
@@ -440,15 +441,13 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 						<Grid item xs={12}>
 							{props.valueType === "date" ? (
 								<LocalizedKeyboardDatePicker
-									value={filterValue2 === "" ? null : filterValue2}
+									value={filterValue2 === "" ? null : moment(filterValue2)}
 									onChange={onFilterValue2ChangeDate}
-									fullWidth
 								/>
 							) : props.valueType === "datetime" ? (
 								<LocalizedDateTimePicker
-									value={filterValue === "" ? null : filterValue}
+									value={filterValue2 === "" ? null : moment(filterValue2)}
 									onChange={onFilterValueChangeDate}
-									fullWidth
 								/>
 							) : (
 								<TextField
@@ -539,7 +538,6 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 												? classes.setFilterListItemDivider
 												: classes.setFilterListItem
 										}
-										disabled={entry.disabled || entry.isDivider}
 									>
 										{entry.isDivider ? (
 											<Divider className={classes.setFilterListDivider} />

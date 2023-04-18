@@ -1,6 +1,7 @@
-import React, { CSSProperties } from "react";
-import { makeStyles, Theme, Grid } from "@material-ui/core";
-import { fade } from "@material-ui/core/styles/colorManipulator";
+import React from "react";
+import { Theme, Unstable_Grid2 as Grid } from "@mui/material";
+import { makeStyles, CSSProperties } from "@mui/styles";
+import { alpha } from "@mui/material/styles";
 
 export interface FormButtonTheme {
 	buttonWrapper?: {
@@ -40,7 +41,7 @@ const useStyles = makeStyles(
 				undefined,
 			borderRadius:
 				theme.componentsCare?.uiKit?.formButtons?.container?.borderRadius,
-			backgroundColor: fade(
+			backgroundColor: alpha(
 				theme.componentsCare?.uiKit?.formButtons?.container?.backgroundColor ||
 					theme.palette.background.paper,
 				theme.componentsCare?.uiKit?.formButtons?.container
@@ -98,7 +99,7 @@ const FormButtons = (props: FormButtonsProps) => {
 		>
 			{children.map((child: React.ReactNode, index: number) => {
 				return (
-					<Grid item className={classes.buttonWrapper} key={index}>
+					<Grid className={classes.buttonWrapper} key={index}>
 						{child}
 					</Grid>
 				);

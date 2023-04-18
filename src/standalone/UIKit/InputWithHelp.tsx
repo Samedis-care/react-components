@@ -1,8 +1,8 @@
 import React, { Ref } from "react";
-import { IconButton, InputAdornment, Input } from "@material-ui/core";
-import { Info as InfoIcon } from "@material-ui/icons";
+import { IconButton, InputAdornment, Input } from "@mui/material";
+import { Info as InfoIcon } from "@mui/icons-material";
 import { useInputStyles } from "./CommonStyles";
-import { InputBaseProps } from "@material-ui/core/InputBase/InputBase";
+import { InputBaseProps } from "@mui/material/InputBase/InputBase";
 import { TextFieldWithHelpProps } from "./TextFieldWithHelp";
 
 const InputWithHelpInner = (

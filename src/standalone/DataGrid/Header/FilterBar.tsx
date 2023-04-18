@@ -5,7 +5,7 @@ import React, {
 	useContext,
 	useEffect,
 } from "react";
-import { Box, Grid, useMediaQuery } from "@material-ui/core";
+import { Box, Grid, useMediaQuery } from "@mui/material";
 import {
 	DataGridCustomDataType,
 	useDataGridProps,
@@ -96,7 +96,7 @@ const FilterBar = () => {
 			<Grid
 				container
 				alignItems={"center"}
-				justify={"flex-end"}
+				justifyContent={"flex-end"}
 				spacing={2}
 				className={classes.filterBarGrid}
 			>

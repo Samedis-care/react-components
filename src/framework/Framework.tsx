@@ -13,6 +13,7 @@ import PermissionContextProvider from "./PermissionContextProvider";
 import MobileScalingFix from "../standalone/MobileScalingFix/MobileScalingFix";
 import UnsafeToLeave from "./UnsafeToLeave";
 import DragAndDropPrevention from "./DragAndDropPrevention";
+import { StyledEngineProvider } from "@mui/material";
 
 /**
  * Properties for the Framework
@@ -80,19 +81,23 @@ const ComponentsCareFramework = (props: ICompleteFrameworkProps) => {
 				}
 			>
 				<MuiPickerUtils disable={props.disableMuiPickerUtils}>
-					<ThemeProvider defaultTheme={props.defaultTheme || getStandardTheme}>
-						<QueryClientProvider client={ModelDataStore}>
-							<PermissionContextProvider>
-								<UnsafeToLeave disable={props.disableUnsafeToLeave}>
-									<HistoryRouter history={FrameworkHistory}>
-										<DialogContextProvider>
-											{props.children}
-										</DialogContextProvider>
-									</HistoryRouter>
-								</UnsafeToLeave>
-							</PermissionContextProvider>
-						</QueryClientProvider>
-					</ThemeProvider>
+					<StyledEngineProvider injectFirst>
+						<ThemeProvider
+							defaultTheme={props.defaultTheme || getStandardTheme}
+						>
+							<QueryClientProvider client={ModelDataStore}>
+								<PermissionContextProvider>
+									<UnsafeToLeave disable={props.disableUnsafeToLeave}>
+										<HistoryRouter history={FrameworkHistory}>
+											<DialogContextProvider>
+												{props.children}
+											</DialogContextProvider>
+										</HistoryRouter>
+									</UnsafeToLeave>
+								</PermissionContextProvider>
+							</QueryClientProvider>
+						</ThemeProvider>
+					</StyledEngineProvider>
 				</MuiPickerUtils>
 			</CCI18nProvider>
 		</Suspense>

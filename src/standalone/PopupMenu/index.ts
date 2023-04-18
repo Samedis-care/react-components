@@ -1,6 +1,8 @@
-import { Menu, withStyles } from "@material-ui/core";
+import { Menu, Theme } from "@mui/material";
 
-const PopupMenu = withStyles((theme) => ({
+import withStyles from "@mui/styles/withStyles";
+
+const PopupMenu = withStyles((theme: Theme) => ({
 	paper: {
 		border: `1px solid ${theme.palette.divider}`,
 	},

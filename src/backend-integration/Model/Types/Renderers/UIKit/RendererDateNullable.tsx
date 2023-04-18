@@ -1,5 +1,5 @@
 import React from "react";
-import { Typography } from "@material-ui/core";
+import { Typography } from "@mui/material";
 import { ModelRenderParams } from "../../../index";
 import TypeDateNullable from "../../TypeDateNullable";
 import ccI18n from "../../../../../i18n";
@@ -68,7 +68,6 @@ class RendererDateNullable extends TypeDateNullable {
 				<>
 					<DateInput
 						{...this.props}
-						name={field}
 						value={value}
 						label={label}
 						disabled={visibility.readOnly}
@@ -88,7 +87,6 @@ class RendererDateNullable extends TypeDateNullable {
 							setFieldTouched(field, touched, true);
 						}}
 						fullWidth
-						clearable
 					/>
 					<FormHelperTextCC error={!!errorMsg} warning={!!warningMsg}>
 						{errorMsg || warningMsg}

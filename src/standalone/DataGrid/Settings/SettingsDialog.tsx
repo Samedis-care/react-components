@@ -11,7 +11,7 @@ import {
 	TableCell,
 	TableHead,
 	TableRow,
-} from "@material-ui/core";
+} from "@mui/material";
 import {
 	IDataGridColumnDef,
 	IDataGridColumnProps,
@@ -86,7 +86,7 @@ const SettingsDialog = (props: IDataGridSettingsDialogProps) => {
 			</Table>
 			<div className={classes.contentOverlayClosed}>
 				<Divider />
-				<Grid container justify={"flex-end"}>
+				<Grid container justifyContent={"flex-end"}>
 					<Grid item>
 						<Box m={2}>
 							<Button onClick={props.closeGridSettings} variant={"contained"}>

@@ -11,11 +11,12 @@ import {
 	IconButton,
 	InputAdornment,
 	InputAdornmentProps,
-} from "@material-ui/core";
-import { Info as InfoIcon, Clear as ClearIcon } from "@material-ui/icons";
+} from "@mui/material";
+import { Info as InfoIcon, Clear as ClearIcon } from "@mui/icons-material";
 import { InputLabelConfig, UIInputProps, useInputStyles } from "./CommonStyles";
 import { combineClassNames, isTouchDevice } from "../../utils";
 import { useMuiWarningStyles } from "./MuiWarning";
+import { useRefComposer } from "react-ref-composer";
 
 export interface TextFieldWithHelpProps extends UIInputProps {
 	/**
@@ -38,6 +39,7 @@ const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(
 		!!(muiProps.value ?? muiProps.defaultValue)
 	);
 
+	const composeRef = useRefComposer<HTMLTextAreaElement | HTMLInputElement>();
 	const inputRef = useRef<HTMLTextAreaElement | HTMLInputElement>(null);
 
 	const handleClear = useCallback(() => {
@@ -94,7 +96,7 @@ const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(
 					<>
 						<InputAdornment position={"end"}>
 							{isTouchDevice() && hasValue && !muiProps.disabled && (
-								<IconButton onClick={handleClear}>
+								<IconButton onClick={handleClear} size="large">
 									<ClearIcon />
 								</IconButton>
 							)}
@@ -104,7 +106,7 @@ const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(
 									?.props?.children
 							}
 							{openInfo && (
-								<IconButton onClick={openInfo}>
+								<IconButton onClick={openInfo} size="large">
 									<InfoIcon color={"disabled"} />
 								</IconButton>
 							)}
@@ -114,7 +116,7 @@ const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(
 			}}
 			inputProps={{
 				...muiProps.inputProps,
-				ref: inputRef,
+				ref: composeRef(inputRef, muiProps.inputProps?.ref as typeof inputRef),
 			}}
 		/>
 	);

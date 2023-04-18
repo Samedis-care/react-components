@@ -4,9 +4,9 @@ import {
 	MenuItem,
 	MenuProps,
 	PopoverOrigin,
-} from "@material-ui/core";
+} from "@mui/material";
 import { ExportIcon, ResetIcon, TuneIcon } from "../../Icons";
-import { Publish as ImportIcon } from "@material-ui/icons";
+import { Publish as ImportIcon } from "@mui/icons-material";
 import PopupMenu from "../../PopupMenu";
 import useCCTranslations from "../../../utils/useCCTranslations";
 
@@ -74,7 +74,6 @@ const ActionBarMenu = (props: ActionBarMenuProps) => {
 			anchorOrigin={anchorOrigin}
 			transformOrigin={transformOrigin}
 			keepMounted
-			getContentAnchorEl={null}
 			open={!!anchorEl}
 			onClose={onClose}
 		>

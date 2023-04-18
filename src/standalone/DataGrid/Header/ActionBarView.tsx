@@ -6,12 +6,12 @@ import {
 	Tooltip,
 	useMediaQuery,
 	useTheme,
-} from "@material-ui/core";
+} from "@mui/material";
 import {
 	Add as AddIcon,
 	Publish as ImportIcon,
 	Menu as MenuIcon,
-} from "@material-ui/icons";
+} from "@mui/icons-material";
 import {
 	ActionButton,
 	ExportIcon,
@@ -122,7 +122,7 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 			)}
 			{props.hasCustomFilterBar && !bpSmUp ? (
 				<>
-					<IconButton color={"primary"} onClick={openSettingsMenu}>
+					<IconButton color={"primary"} onClick={openSettingsMenu} size="large">
 						<MenuIcon />
 					</IconButton>
 					<ActionBarMenu
@@ -150,7 +150,11 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 							/>
 						) : (
 							<Tooltip title={t("standalone.data-grid.header.settings") ?? ""}>
-								<IconButton color={"primary"} onClick={props.toggleSettings}>
+								<IconButton
+									color={"primary"}
+									onClick={props.toggleSettings}
+									size="large"
+								>
 									<TuneIcon />
 								</IconButton>
 							</Tooltip>
@@ -173,7 +177,11 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 							/>
 						) : (
 							<Tooltip title={t("standalone.data-grid.header.reset") ?? ""}>
-								<IconButton color={"primary"} onClick={openResetDialog}>
+								<IconButton
+									color={"primary"}
+									onClick={openResetDialog}
+									size="large"
+								>
 									<ResetIcon />
 								</IconButton>
 							</Tooltip>
@@ -200,7 +208,11 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 									<Tooltip
 										title={t("standalone.data-grid.header.export") ?? ""}
 									>
-										<IconButton color={"primary"} onClick={openExportMenu}>
+										<IconButton
+											color={"primary"}
+											onClick={openExportMenu}
+											size="large"
+										>
 											<ExportIcon />
 										</IconButton>
 									</Tooltip>
@@ -234,7 +246,11 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 									<Tooltip
 										title={t("standalone.data-grid.header.import") ?? ""}
 									>
-										<IconButton color={"primary"} onClick={props.handleImport}>
+										<IconButton
+											color={"primary"}
+											onClick={props.handleImport}
+											size="large"
+										>
 											<ImportIcon />
 										</IconButton>
 									</Tooltip>
@@ -251,7 +267,7 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 						item
 						container
 						key={"new"}
-						justify={"flex-end"}
+						justifyContent={"flex-end"}
 						alignItems={"center"}
 						spacing={2}
 						wrap={"nowrap"}

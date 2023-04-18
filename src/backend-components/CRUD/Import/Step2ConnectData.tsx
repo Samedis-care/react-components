@@ -6,7 +6,6 @@ import {
 	CardContent,
 	CircularProgress,
 	Grid,
-	makeStyles,
 	Table,
 	TableBody,
 	TableCell,
@@ -15,12 +14,13 @@ import {
 	TextField,
 	Tooltip,
 	Typography,
-} from "@material-ui/core";
+} from "@mui/material";
+import makeStyles from "@mui/styles/makeStyles";
 import {
 	Check as CheckIcon,
 	ErrorOutline as ErrorIcon,
 	HelpOutline as UnknownIcon,
-} from "@material-ui/icons";
+} from "@mui/icons-material";
 import {
 	ModelFieldDefinition,
 	PageVisibility,
@@ -251,7 +251,7 @@ const Step2ConnectData = (props: CrudImporterStepProps) => {
 								<Grid item xs={12} key={name}>
 									<Card>
 										<CardContent className={classes.cardContent}>
-											<Grid container justify={"space-between"}>
+											<Grid container justifyContent={"space-between"}>
 												<Grid item>
 													<Typography>
 														{field.getLabel()

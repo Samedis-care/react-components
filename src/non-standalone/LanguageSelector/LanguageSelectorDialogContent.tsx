@@ -1,12 +1,12 @@
 import React, { Suspense, useCallback, useMemo, useState } from "react";
-import { Box, Grid, InputAdornment } from "@material-ui/core";
+import { Box, Grid, InputAdornment } from "@mui/material";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { FixedSizeList, ListChildComponentProps } from "react-window";
 import supportedLanguages from "../../assets/data/supported-languages.json";
 import countryLanguages from "../../assets/data/country-languages.json";
 import LanguageSelectorEntry from "./LanguageSelectorEntry";
-import { Search as SearchIcon } from "@material-ui/icons";
-import { makeStyles } from "@material-ui/core/styles";
+import { Search as SearchIcon } from "@mui/icons-material";
+import makeStyles from "@mui/styles/makeStyles";
 import useCCTranslations, {
 	useCCLocaleSwitcherTranslations,
 } from "../../utils/useCCTranslations";

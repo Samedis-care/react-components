@@ -1,12 +1,18 @@
 import React, { useCallback, useState } from "react";
 import { IFrameworkProps } from "./Framework";
 import {
-	createMuiTheme,
+	createTheme,
 	Theme,
-	ThemeOptions,
-	MuiThemeProvider,
+	ThemeProvider as MuiThemeProvider,
+	StyledEngineProvider,
 	CssBaseline,
-} from "@material-ui/core";
+	ThemeOptions,
+} from "@mui/material";
+
+declare module "@mui/styles/defaultTheme" {
+	// eslint-disable-next-line @typescript-eslint/no-empty-interface
+	interface DefaultTheme extends Theme {}
+}
 
 export type SetThemeAction = (theme: ThemeOptions) => void;
 export type GetDefaultThemeCallback = (preferDark: boolean) => ThemeOptions;
@@ -15,7 +21,7 @@ export const getStandardTheme: GetDefaultThemeCallback = (
 	preferDark: boolean
 ): ThemeOptions => ({
 	palette: {
-		type: preferDark ? "dark" : "light",
+		mode: preferDark ? "dark" : "light",
 	},
 });
 
@@ -38,23 +44,25 @@ export const ThemeContext = React.createContext<SetThemeAction | undefined>(
  */
 const ThemeProvider = (props: IThemeProviderProps) => {
 	const [theme, setTheme] = useState<Theme>(() =>
-		createMuiTheme(
+		createTheme(
 			props.defaultTheme(matchMedia("(prefers-color-scheme: dark)").matches)
 		)
 	);
 	const setNewTheme = useCallback<SetThemeAction>(
 		(newTheme: ThemeOptions) => {
-			setTheme(createMuiTheme(newTheme));
+			setTheme(createTheme(newTheme));
 		},
 		[setTheme]
 	);
 
 	return (
 		<ThemeContext.Provider value={setNewTheme}>
-			<MuiThemeProvider theme={theme}>
-				<CssBaseline />
-				<>{props.children}</>
-			</MuiThemeProvider>
+			<StyledEngineProvider injectFirst>
+				<MuiThemeProvider theme={theme}>
+					<CssBaseline />
+					<>{props.children}</>
+				</MuiThemeProvider>
+			</StyledEngineProvider>
 		</ThemeContext.Provider>
 	);
 };

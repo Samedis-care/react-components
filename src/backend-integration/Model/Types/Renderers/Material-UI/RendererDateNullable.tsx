@@ -1,5 +1,5 @@
 import React from "react";
-import { Typography } from "@material-ui/core";
+import { Typography } from "@mui/material";
 import { ModelRenderParams } from "../../../index";
 import TypeDateNullable from "../../TypeDateNullable";
 import ccI18n from "../../../../../i18n";
@@ -9,6 +9,7 @@ import i18n from "../../../../../i18n";
 import { ToDateLocaleStringOptions } from "../../../../../constants";
 import { IDataGridColumnDef } from "../../../../../standalone/DataGrid/DataGrid";
 import { FormHelperTextCC } from "../../../../../standalone/UIKit/MuiWarning";
+import moment from "moment";
 
 /**
  * Renders Date with Date Selector
@@ -46,8 +47,7 @@ class RendererDateNullable extends TypeDateNullable {
 			return (
 				<>
 					<LocalizedKeyboardDatePicker
-						name={field}
-						value={value}
+						value={value ? moment(value) : null}
 						label={label}
 						disabled={visibility.readOnly}
 						required={visibility.required}
@@ -66,7 +66,6 @@ class RendererDateNullable extends TypeDateNullable {
 							setFieldTouched(field, touched, true);
 						}}
 						fullWidth
-						clearable
 					/>
 					<FormHelperTextCC warning={!!warningMsg} error={!!errorMsg}>
 						{errorMsg || warningMsg}

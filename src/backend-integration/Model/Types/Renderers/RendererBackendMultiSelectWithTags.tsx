@@ -1,5 +1,5 @@
 import React from "react";
-import { FormHelperText } from "@material-ui/core";
+import { FormHelperText } from "@mui/material";
 import { ModelFieldName, ModelRenderParams, PageVisibility } from "../../index";
 import TypeStringArray from "../TypeStringArray";
 import Model from "../../Model";

@@ -1,4 +1,4 @@
-import { CSSProperties } from "react";
+import { CSSProperties } from "@mui/styles";
 
 export interface BasicThemeFragment {
 	display?: CSSProperties["display"];

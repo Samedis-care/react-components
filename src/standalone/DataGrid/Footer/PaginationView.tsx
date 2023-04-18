@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Typography, useMediaQuery, useTheme } from "@material-ui/core";
+import { Box, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { useDataGridStyles } from "../DataGrid";
 import useCCTranslations from "../../../utils/useCCTranslations";
 

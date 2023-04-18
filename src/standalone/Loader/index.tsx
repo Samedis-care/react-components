@@ -1,6 +1,6 @@
 import React from "react";
-import { makeStyles } from "@material-ui/core/styles";
-import { CircularProgress, Typography } from "@material-ui/core";
+import makeStyles from "@mui/styles/makeStyles";
+import { CircularProgress, Typography } from "@mui/material";
 
 export interface LoaderProps {
 	/**

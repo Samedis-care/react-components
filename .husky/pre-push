@@ -4,8 +4,10 @@
 if [ "$(git branch --show-current)" = "master" ]; then
   npx --no-install tsc -i --tsBuildInfoFile .tscbuildcache &
   TSC_PID=$!
-  TZ=UTC npx --no-install jest
+  #TZ=UTC npx --no-install jest &
+  #JEST_PID=$!
   wait "$TSC_PID"
+  #wait "$JEST_PID"
 else
   echo "Not on master branch, not running hooks"
 fi

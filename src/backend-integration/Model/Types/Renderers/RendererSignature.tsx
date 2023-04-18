@@ -1,5 +1,5 @@
 import React from "react";
-import { FormControl, FormHelperText, FormLabel } from "@material-ui/core";
+import { FormControl, FormHelperText, FormLabel } from "@mui/material";
 import { ModelRenderParams } from "../../index";
 import ccI18n from "../../../../i18n";
 import TypeImage from "../TypeImage";

@@ -9,7 +9,7 @@ import {
 	useDataGridState,
 } from "../DataGrid";
 import ActionBarView from "./ActionBarView";
-import { useTheme } from "@material-ui/core";
+import { useTheme } from "@mui/material";
 
 const ActionBar = () => {
 	const [, setState] = useDataGridState();

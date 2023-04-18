@@ -7,27 +7,27 @@ import React, {
 	useState,
 } from "react";
 import { UseDropZoneParams } from "../../../utils/useDropZone";
-import { makeStyles } from "@material-ui/core/styles";
+import makeStyles from "@mui/styles/makeStyles";
 import {
 	Dialog,
 	DialogContent,
 	IconButton,
 	Theme,
 	Tooltip,
-} from "@material-ui/core";
+} from "@mui/material";
 import {
 	Close as CloseIcon,
 	ArrowBack as PrevIcon,
 	ArrowForward as NextIcon,
 	Delete as DeleteIcon,
-} from "@material-ui/icons";
+} from "@mui/icons-material";
 import {
 	combineClassNames,
 	makeThemeStyles,
 	useDebounce,
 	useDropZone,
 } from "../../../utils";
-import { ClassNameMap, Styles } from "@material-ui/styles/withStyles";
+import { ClassNameMap, Styles } from "@mui/styles/withStyles";
 import ImageDots, { ImageDotsProps } from "./ImageDots";
 
 export interface ImageBoxProps {
@@ -328,17 +328,29 @@ const ImageBox = (props: ImageBoxProps) => {
 				])}
 			>
 				{onRemove && (
-					<IconButton onClick={handleRemove} className={classes.removeBtn}>
+					<IconButton
+						onClick={handleRemove}
+						className={classes.removeBtn}
+						size="large"
+					>
 						<DeleteIcon />
 					</IconButton>
 				)}
 				{onPrevImage && (
-					<IconButton onClick={handlePrevImage} className={classes.prevBtn}>
+					<IconButton
+						onClick={handlePrevImage}
+						className={classes.prevBtn}
+						size="large"
+					>
 						<PrevIcon />
 					</IconButton>
 				)}
 				{onNextImage && (
-					<IconButton onClick={handleNextImage} className={classes.nextBtn}>
+					<IconButton
+						onClick={handleNextImage}
+						className={classes.nextBtn}
+						size="large"
+					>
 						<NextIcon />
 					</IconButton>
 				)}
@@ -389,13 +401,18 @@ const ImageBox = (props: ImageBoxProps) => {
 									])}
 								/>
 							</div>
-							<IconButton onClick={closeDialog} className={classes.removeBtn}>
+							<IconButton
+								onClick={closeDialog}
+								className={classes.removeBtn}
+								size="large"
+							>
 								<CloseIcon />
 							</IconButton>
 							{onPrevImage && (
 								<IconButton
 									onClick={handlePrevImage}
 									className={classes.prevBtn}
+									size="large"
 								>
 									<PrevIcon />
 								</IconButton>
@@ -404,6 +421,7 @@ const ImageBox = (props: ImageBoxProps) => {
 								<IconButton
 									onClick={handleNextImage}
 									className={classes.nextBtn}
+									size="large"
 								>
 									<NextIcon />
 								</IconButton>

@@ -1,8 +1,8 @@
 import React, { CSSProperties } from "react";
 import SignalPortletItem, { SignalPortletItemDef } from "./SignalPortletItem";
-import { makeStyles } from "@material-ui/core/styles";
-import { ClassNameMap } from "@material-ui/styles/withStyles";
-import { Divider, Grid, List, Paper, Typography } from "@material-ui/core";
+import makeStyles from "@mui/styles/makeStyles";
+import { ClassNameMap } from "@mui/styles/withStyles";
+import { Divider, Grid, List, Paper, Typography } from "@mui/material";
 
 export interface SignalPortletColorConfig {
 	/**

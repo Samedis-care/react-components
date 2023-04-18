@@ -6,10 +6,10 @@ import {
 	FormHelperTextProps,
 	FormLabel,
 	FormLabelProps,
-	makeStyles,
 	TextField,
 	TextFieldProps,
-} from "@material-ui/core";
+} from "@mui/material";
+import makeStyles from "@mui/styles/makeStyles";
 import { combineClassNames } from "../../utils";
 
 export const useMuiWarningStyles = makeStyles(
@@ -77,6 +77,8 @@ export interface MuiWarningResultProps {
 export const withMuiWarning = <T extends MuiWarningSourceProps>(
 	Component: React.ComponentType<T>
 ): React.ComponentType<T & MuiWarningResultProps> => {
+	// not unnecessary, component name is inferred from it
+	// noinspection UnnecessaryLocalVariableJS
 	const MuiWarning = (props: T & MuiWarningResultProps) => {
 		const { warning, ...muiProps } = props;
 		const classes = useMuiWarningStyles();

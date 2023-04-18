@@ -1,6 +1,6 @@
-import { Drawer, Paper, useTheme } from "@material-ui/core";
+import { Drawer, Paper, useTheme } from "@mui/material";
 import React, { useMemo } from "react";
-import { makeStyles } from "@material-ui/core/styles";
+import makeStyles from "@mui/styles/makeStyles";
 
 interface IProps {
 	/**

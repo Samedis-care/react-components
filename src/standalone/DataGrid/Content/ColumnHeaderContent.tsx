@@ -6,8 +6,8 @@ import {
 	Popover,
 	PopoverOrigin,
 	Tooltip,
-} from "@material-ui/core";
-import { ArrowDownward, ArrowUpward } from "@material-ui/icons";
+} from "@mui/material";
+import { ArrowDownward, ArrowUpward } from "@mui/icons-material";
 import FilterEntry, { IFilterDef } from "./FilterEntry";
 import { ModelFilterType } from "../../../backend-integration/Model";
 import { IDataGridColumnDef, useDataGridStyles } from "../DataGrid";
@@ -102,7 +102,7 @@ const ColumnHeaderContent = (
 
 	return (
 		<>
-			<Grid container justify={"flex-start"} wrap={"nowrap"}>
+			<Grid container justifyContent={"flex-start"} wrap={"nowrap"}>
 				<Grid
 					item
 					className={combineClassNames([
@@ -139,6 +139,7 @@ const ColumnHeaderContent = (
 										classes.columnHeaderFilterButtonActive,
 								])}
 								onClick={openFilter}
+								size="large"
 							>
 								<CurrentFilterIcon className={classes.columnHeaderFilterIcon} />
 							</IconButton>
@@ -160,7 +161,7 @@ const ColumnHeaderContent = (
 				onClose={closeFilter}
 				anchorOrigin={anchorOrigin}
 				transformOrigin={transformOrigin}
-				onBackdropClick={preventPropagation}
+				onBackdropClick={preventPropagation} // suggested fix for deprecated attribute is to use onClose reason. but onClose does not supply a event (at least not according to typescript)
 				onClick={preventPropagation}
 			>
 				<Box m={2}>

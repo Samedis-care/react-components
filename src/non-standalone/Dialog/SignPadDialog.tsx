@@ -3,12 +3,12 @@ import {
 	Button,
 	Dialog,
 	DialogActions,
-	makeStyles,
 	IconButton,
 	Typography,
-} from "@material-ui/core";
-import MuiDialogTitle from "@material-ui/core/DialogTitle";
-import { Close } from "@material-ui/icons";
+} from "@mui/material";
+import makeStyles from "@mui/styles/makeStyles";
+import MuiDialogTitle from "@mui/material/DialogTitle";
+import { Close } from "@mui/icons-material";
 import SignaturePad from "react-signature-canvas";
 import { useDialogContext } from "../../framework";
 import { IDialogConfigSign } from "./Types";
@@ -116,17 +116,8 @@ const SignPadDialog = (props: SignPadDialogProps) => {
 	}, [canvasWrapper.current]);
 
 	return (
-		<Dialog
-			open={true}
-			maxWidth="sm"
-			disableBackdropClick
-			onClose={closeCanvas}
-		>
-			<MuiDialogTitle
-				id="sign-pad-dialog"
-				disableTypography
-				className={classes.root}
-			>
+		<Dialog open={true} maxWidth="sm" onClose={closeCanvas}>
+			<MuiDialogTitle id="sign-pad-dialog" className={classes.root}>
 				<Typography variant="h6">
 					{t("standalone.signature-pad.dialog.title")}
 				</Typography>
@@ -135,6 +126,7 @@ const SignPadDialog = (props: SignPadDialogProps) => {
 						aria-label="Close"
 						className={classes.closeButton}
 						onClick={closeCanvas}
+						size="large"
 					>
 						<Close />
 					</IconButton>

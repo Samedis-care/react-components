@@ -1,6 +1,6 @@
 import React from "react";
 import { IDataGridExporter } from "./index";
-import { MenuProps, PopoverOrigin } from "@material-ui/core";
+import { MenuProps, PopoverOrigin } from "@mui/material";
 import ExportMenuEntry from "./ExportMenuEntry";
 import PopupMenu from "../../PopupMenu";
 
@@ -37,7 +37,6 @@ const ExportMenu = (props: IDataGridExportMenuProps) => {
 			anchorOrigin={anchorOrigin}
 			transformOrigin={transformOrigin}
 			keepMounted
-			getContentAnchorEl={null}
 			open={!!props.anchorEl}
 			onClose={props.onClose}
 		>

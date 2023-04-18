@@ -4,13 +4,17 @@ import {
 	List,
 	ListItemSecondaryAction,
 	ListItemText,
-	makeStyles,
 	Theme,
-} from "@material-ui/core";
-import { SmallIconButton, SmallListItem, SmallListItemIcon } from "../Small";
+} from "@mui/material";
+import makeStyles from "@mui/styles/makeStyles";
+import {
+	SmallIconButton,
+	SmallListItemButton,
+	SmallListItemIcon,
+} from "../Small";
 import { MultiSelectorData } from "./MultiSelect";
-import { ClassNameMap } from "@material-ui/styles/withStyles";
-import { Cancel as RemoveIcon } from "@material-ui/icons";
+import { ClassNameMap } from "@mui/styles/withStyles";
+import { Cancel as RemoveIcon } from "@mui/icons-material";
 import { combineClassNames } from "../../utils";
 
 export interface IMultiSelectEntryProps<DataT extends MultiSelectorData> {
@@ -106,8 +110,7 @@ const MultiSelectEntry = <DataT extends MultiSelectorData>(
 	return (
 		<>
 			<List className={combineClassNames([classes.root, classes.container])}>
-				<SmallListItem
-					button
+				<SmallListItemButton
 					onClick={data.onClick}
 					className={combineClassNames([
 						classes.selected,
@@ -137,7 +140,7 @@ const MultiSelectEntry = <DataT extends MultiSelectorData>(
 							</SmallIconButton>
 						</ListItemSecondaryAction>
 					)}
-				</SmallListItem>
+				</SmallListItemButton>
 			</List>
 			{enableDivider && <Divider className={classes.divider} />}
 		</>

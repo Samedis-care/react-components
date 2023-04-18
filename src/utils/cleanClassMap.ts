@@ -1,4 +1,4 @@
-import { ClassNameMap } from "@material-ui/styles/withStyles";
+import { ClassNameMap } from "@mui/styles/withStyles";
 
 /**
  * Filters the class names of a class map for warning-free usage

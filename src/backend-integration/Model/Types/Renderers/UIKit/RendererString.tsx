@@ -1,6 +1,6 @@
 import React from "react";
 import TypeString from "../../TypeString";
-import { TextFieldProps, Typography } from "@material-ui/core";
+import { TextFieldProps, Typography } from "@mui/material";
 import { ModelRenderParams } from "../../../index";
 import { FormHelperTextCC, TextFieldWithHelp } from "../../../../../standalone";
 import { TextFieldWithHelpProps } from "../../../../../standalone/UIKit/TextFieldWithHelp";

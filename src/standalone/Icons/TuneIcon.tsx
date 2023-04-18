@@ -1,5 +1,5 @@
 import React from "react";
-import { SvgIcon, SvgIconProps } from "@material-ui/core";
+import { SvgIcon, SvgIconProps } from "@mui/material";
 
 const TuneIcon = (props: SvgIconProps) => (
 	<SvgIcon {...props} viewBox={"0 0 36.01 31.52"}>

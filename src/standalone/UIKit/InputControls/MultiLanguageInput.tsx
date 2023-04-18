@@ -3,14 +3,14 @@ import {
 	Grid,
 	IconButton,
 	InputAdornment,
-	makeStyles,
 	TextField,
 	TextFieldProps,
 	Tooltip,
 	Typography,
-} from "@material-ui/core";
+} from "@mui/material";
+import makeStyles from "@mui/styles/makeStyles";
 import { useCCLanguagesTranslations } from "../../../utils/useCCTranslations";
-import { Translate } from "@material-ui/icons";
+import { Translate } from "@mui/icons-material";
 import combineClassNames from "../../../utils/combineClassNames";
 import { useMuiWarningStyles } from "../MuiWarning";
 
@@ -413,7 +413,7 @@ const MultiLanguageInput = (props: MultiLanguageInputProps) => {
 				endAdornment:
 					defaultLanguage === lang && !textFieldProps.multiline ? (
 						<InputAdornment position={"end"}>
-							<IconButton onClick={toggleExpanded}>
+							<IconButton onClick={toggleExpanded} size="large">
 								<Translate
 									color={
 										expanded ? "primary" : incomplete ? "error" : undefined

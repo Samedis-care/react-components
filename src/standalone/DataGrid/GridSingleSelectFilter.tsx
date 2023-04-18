@@ -7,11 +7,11 @@ import {
 	Radio,
 	RadioGroup,
 	Typography,
-} from "@material-ui/core";
+} from "@mui/material";
 import { useCustomFilterActiveContext } from "./Header/FilterBar";
 import { useDataGridStyles } from "./DataGrid";
-import { Breakpoint } from "@material-ui/core/styles/createBreakpoints";
-import { GridSize } from "@material-ui/core/Grid/Grid";
+import { GridSize } from "@mui/material/Grid/Grid";
+import { Breakpoint } from "@mui/material/styles";
 
 export interface GridSingleSelectFilterProps {
 	/**

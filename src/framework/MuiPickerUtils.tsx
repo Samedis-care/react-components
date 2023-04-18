@@ -1,8 +1,7 @@
 import React from "react";
-import MomentUtils from "@date-io/moment";
-import { MuiPickersUtilsProvider } from "@material-ui/pickers";
-import moment from "moment";
 import useCCTranslations from "../utils/useCCTranslations";
+import { LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 
 export interface MuiPickerUtilsProps {
 	disable?: boolean;
@@ -16,13 +15,12 @@ const MuiPickerUtils = (props: MuiPickerUtilsProps): React.ReactElement => {
 	if (disable) return props.children;
 
 	return (
-		<MuiPickersUtilsProvider
-			libInstance={moment}
-			utils={MomentUtils}
-			locale={i18n.language}
+		<LocalizationProvider
+			dateAdapter={AdapterMoment}
+			adapterLocale={i18n.language}
 		>
 			{props.children}
-		</MuiPickersUtilsProvider>
+		</LocalizationProvider>
 	);
 };
 

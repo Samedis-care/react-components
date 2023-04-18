@@ -1,12 +1,13 @@
-import React, { CSSProperties } from "react";
+import React from "react";
 import {
 	FormControlLabel,
 	FormControlLabelProps,
 	Typography,
 	TypographyProps,
-	makeStyles,
 	Theme,
-} from "@material-ui/core";
+} from "@mui/material";
+
+import { makeStyles, CSSProperties } from "@mui/styles";
 
 export interface ComponentWithLabelProps
 	extends Omit<FormControlLabelProps, "label"> {
@@ -58,7 +59,7 @@ const useStyles = makeStyles(
 			fontSize: theme.componentsCare?.uiKit?.label?.fontSize,
 			fontWeight: theme.componentsCare?.uiKit?.label?.fontWeight,
 			...theme.componentsCare?.uiKit?.label?.style,
-		},
+		} as CSSProperties,
 	}),
 	{ name: "CcComponentWithLabel" }
 );

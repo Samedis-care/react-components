@@ -1,5 +1,7 @@
 import React, { useRef, useEffect } from "react";
-import { makeStyles, InputLabel } from "@material-ui/core";
+import { InputLabel } from "@mui/material";
+
+import makeStyles from "@mui/styles/makeStyles";
 
 const useStyles = makeStyles(
 	(theme) => ({

@@ -1,6 +1,7 @@
 import React, { useCallback } from "react";
-import { Grid, Typography, withStyles, Theme, Switch } from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
+import { Grid, Typography, Theme, Switch } from "@mui/material";
+import withStyles from "@mui/styles/withStyles";
+import makeStyles from "@mui/styles/makeStyles";
 import { cleanClassMap } from "../../utils";
 
 export interface InlineSwitchProps {

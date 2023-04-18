@@ -1,8 +1,9 @@
-import { makeStyles, Theme } from "@material-ui/core/styles";
-import { InputClassKey, InputLabelProps } from "@material-ui/core";
-import { Styles } from "@material-ui/core/styles/withStyles";
+import { Theme } from "@mui/material/styles";
+import { Styles } from "@mui/styles";
+import makeStyles from "@mui/styles/makeStyles";
+import { InputClassKey, InputLabelProps } from "@mui/material";
 import { makeThemeStyles, useMultipleStyles } from "../../utils";
-import { ClassNameMap } from "@material-ui/styles/withStyles";
+import { ClassNameMap } from "@mui/styles/withStyles";
 
 export interface UIInputProps {
 	important?: boolean;

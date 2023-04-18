@@ -1,7 +1,8 @@
 import React, { useCallback } from "react";
-import { makeStyles, InputAdornment, IconButton } from "@material-ui/core";
+import { InputAdornment, IconButton } from "@mui/material";
+import makeStyles from "@mui/styles/makeStyles";
 import { SignIcon } from "../../standalone";
-import { Info as InfoIcon } from "@material-ui/icons";
+import { Info as InfoIcon } from "@mui/icons-material";
 import useCCTranslations from "../../utils/useCCTranslations";
 
 export interface SignPadProps {
@@ -45,8 +46,8 @@ const useStyles = makeStyles(
 			backgroundColor: theme.palette.action.hover,
 		},
 		imageDiv: {
-			height: `calc(100% - ${theme.spacing(2)}px)`,
-			width: `calc(100% - ${theme.spacing(2)}px)`,
+			height: `calc(100% - ${theme.spacing(2)})`,
+			width: `calc(100% - ${theme.spacing(2)})`,
 		},
 		signPreview: {
 			height: "100%",
@@ -94,7 +95,7 @@ const SignPad = (props: SignPadProps) => {
 			<div className={classes.infoDiv}>
 				{openInfo && (
 					<InputAdornment position={"end"}>
-						<IconButton onClick={handelOpenInfo}>
+						<IconButton onClick={handelOpenInfo} size="large">
 							<InfoIcon color={"disabled"} />
 						</IconButton>
 					</InputAdornment>

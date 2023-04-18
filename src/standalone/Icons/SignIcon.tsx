@@ -1,5 +1,5 @@
 import React from "react";
-import { SvgIcon, SvgIconProps } from "@material-ui/core";
+import { SvgIcon, SvgIconProps } from "@mui/material";
 
 const SignIcon = (props: SvgIconProps) => (
 	<SvgIcon {...props} viewBox={"0 0 36 36"} fill={"#1d1d1b"}>

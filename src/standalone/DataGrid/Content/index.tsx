@@ -18,7 +18,7 @@ import Cell, { CellContext } from "./Cell";
 import { applyColumnWidthLimits } from "./ColumnHeader";
 import { Loader } from "../../index";
 import useCCTranslations from "../../../utils/useCCTranslations";
-import { withStyles } from "@material-ui/core";
+import withStyles from "@mui/styles/withStyles";
 import CenteredTypography from "../../UIKit/CenteredTypography";
 import MultiGrid from "../../Virtualized/MultiGrid";
 

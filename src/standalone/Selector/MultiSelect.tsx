@@ -3,10 +3,11 @@ import BaseSelector, {
 	BaseSelectorData,
 	BaseSelectorProps,
 } from "./BaseSelector";
-import { makeStyles, Grid, Paper } from "@material-ui/core";
+import { Grid, Paper } from "@mui/material";
+import makeStyles from "@mui/styles/makeStyles";
 import MultiSelectEntry, { IMultiSelectEntryProps } from "./MultiSelectEntry";
 import { cleanClassMap, combineClassMaps } from "../../utils";
-import { ClassNameMap } from "@material-ui/styles/withStyles";
+import { ClassNameMap } from "@mui/styles/withStyles";
 
 export interface MultiSelectorData extends BaseSelectorData {
 	/**

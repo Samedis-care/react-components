@@ -1,8 +1,9 @@
 import React from "react";
-import { makeStyles, Theme } from "@material-ui/core";
+import { Theme } from "@mui/material";
+import makeStyles from "@mui/styles/makeStyles";
 import { combineClassNames, makeThemeStyles } from "../../../utils";
-import { Styles } from "@material-ui/core/styles/withStyles";
-import { ClassNameMap } from "@material-ui/styles/withStyles";
+import { Styles } from "@mui/styles";
+import { ClassNameMap } from "@mui/styles/withStyles";
 
 export interface ImageDotsProps {
 	/**

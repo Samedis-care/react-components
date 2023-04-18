@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from "react";
-import { TextFieldProps } from "@material-ui/core";
+import { TextFieldProps } from "@mui/material";
 import TextFieldWithHelp, {
 	TextFieldWithHelpProps,
 } from "../TextFieldWithHelp";

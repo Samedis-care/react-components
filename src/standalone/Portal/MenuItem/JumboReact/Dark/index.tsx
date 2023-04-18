@@ -1,15 +1,15 @@
 import React from "react";
 import { MenuItemProps } from "../../../Menu";
 import {
-	ListItem,
+	ListItemButton,
 	ListItemIcon,
 	ListItemText,
 	Theme,
 	TypographyProps,
-	withStyles,
-} from "@material-ui/core";
-import { ExpandLess, ExpandMore } from "@material-ui/icons";
-import { makeStyles } from "@material-ui/core/styles";
+} from "@mui/material";
+import withStyles from "@mui/styles/withStyles";
+import { ExpandLess, ExpandMore } from "@mui/icons-material";
+import makeStyles from "@mui/styles/makeStyles";
 import { combineClassNames } from "../../../../../utils";
 
 const useStyles = makeStyles(
@@ -74,9 +74,9 @@ const listIconStyles = {
 	},
 };
 
-const SelectedListItem = withStyles(selectedListItemStyles)(ListItem);
-const UnselectedListItem = withStyles(unselectedListItemStyles)(ListItem);
-const ExpandableListItem = withStyles(expandableListItemStyles)(ListItem);
+const SelectedListItem = withStyles(selectedListItemStyles)(ListItemButton);
+const UnselectedListItem = withStyles(unselectedListItemStyles)(ListItemButton);
+const ExpandableListItem = withStyles(expandableListItemStyles)(ListItemButton);
 const StyledListItemIcon = withStyles(listIconStyles)(ListItemIcon);
 
 const typographyProps: TypographyProps = { variant: "body2" };
@@ -86,15 +86,14 @@ const MenuItemJumboReactDark = (props: MenuItemProps) => {
 
 	const Icon = props.icon;
 
-	const MyListItem = props.expandable
+	const MyListItem = (props.expandable
 		? ExpandableListItem
 		: props.active
 		? SelectedListItem
-		: UnselectedListItem;
+		: UnselectedListItem) as typeof ListItemButton;
 
 	return (
 		<MyListItem
-			button
 			onClick={props.onClick}
 			onAuxClick={props.onAuxClick}
 			className={combineClassNames([

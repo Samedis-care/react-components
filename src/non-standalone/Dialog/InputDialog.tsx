@@ -9,7 +9,7 @@ import {
 	DialogContentText,
 	DialogTitle,
 	TextField,
-} from "@material-ui/core";
+} from "@mui/material";
 
 const InputDialogRaw = (props: IDialogConfigInput) => {
 	const [, popDialog] = useDialogContext();

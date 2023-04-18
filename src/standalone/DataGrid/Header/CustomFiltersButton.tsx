@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, ButtonProps, Grid } from "@material-ui/core";
+import { Button, ButtonProps, Grid } from "@mui/material";
 import { AppsIcon } from "../../Icons";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import { useDataGridStyles } from "../DataGrid";
@@ -16,7 +16,7 @@ const CustomFiltersButton = (props: Omit<ButtonProps, "outlined">) => {
 				container
 				spacing={2}
 				wrap={"nowrap"}
-				justify={"space-evenly"}
+				justifyContent={"space-evenly"}
 				alignItems={"center"}
 			>
 				<Grid item>

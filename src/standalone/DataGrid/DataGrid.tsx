@@ -11,8 +11,8 @@ import React, {
 } from "react";
 import type * as Theming from "../../types/theming";
 
-import { Grid, Theme, useTheme } from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
+import { Grid, Theme, useTheme } from "@mui/material";
+import { makeStyles, Styles } from "@mui/styles";
 import Header, { IDataGridHeaderProps } from "./Header";
 import Footer from "./Footer";
 import Settings from "./Settings";
@@ -29,7 +29,6 @@ import {
 import { dataGridPrepareFiltersAndSorts } from "./CallbackUtil";
 import { ModelFilterType } from "../../backend-integration/Model";
 import { HEADER_PADDING } from "./Content/ColumnHeader";
-import { Styles } from "@material-ui/core/styles/withStyles";
 import CustomFilterDialog from "./CustomFilterDialog";
 import StatePersistence, {
 	DataGridPersistentStateContext,
@@ -901,7 +900,7 @@ const useStyles = makeStyles(
 			height: "100%",
 		},
 		filterBarGrid: {
-			height: `calc(100% + ${theme.spacing(2)}px)`,
+			height: `calc(100% + ${theme.spacing(2)})`,
 			width: "100%",
 		},
 		setFilterContainer: {
@@ -1271,7 +1270,7 @@ const DataGrid = (props: DataGridProps) => {
 		<Grid
 			container
 			direction={"column"}
-			justify={"space-between"}
+			justifyContent={"space-between"}
 			alignItems={"stretch"}
 			wrap={"nowrap"}
 			className={classes.wrapper}

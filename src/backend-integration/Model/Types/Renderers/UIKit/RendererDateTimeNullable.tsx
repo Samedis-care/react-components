@@ -1,10 +1,11 @@
 import React from "react";
-import { Typography } from "@material-ui/core";
+import { Typography } from "@mui/material";
 import { ModelRenderParams } from "../../../index";
 import ccI18n from "../../../../../i18n";
 import { DateTimeInput, FormHelperTextCC } from "../../../../../standalone";
 import i18n from "../../../../../i18n";
 import TypeDateTimeNullable from "../../TypeDateTimeNullable";
+import moment from "moment";
 
 /**
  * Renders Date with Date Selector
@@ -42,8 +43,7 @@ class RendererDateTimeNullable extends TypeDateTimeNullable {
 			return (
 				<>
 					<DateTimeInput
-						name={field}
-						value={value}
+						value={value ? moment(value) : null}
 						label={label}
 						disabled={visibility.readOnly}
 						required={visibility.required}
@@ -61,8 +61,6 @@ class RendererDateTimeNullable extends TypeDateTimeNullable {
 								: "";
 							setFieldTouched(field, touched, true);
 						}}
-						fullWidth
-						clearable
 					/>
 					<FormHelperTextCC error={!!errorMsg} warning={!!warningMsg}>
 						{errorMsg || warningMsg}

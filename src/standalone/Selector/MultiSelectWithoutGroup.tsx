@@ -1,5 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { Search as SearchIcon, Cancel as RemoveIcon } from "@material-ui/icons";
+import {
+	Search as SearchIcon,
+	Cancel as RemoveIcon,
+} from "@mui/icons-material";
 import {
 	BaseSelectorProps,
 	MultiSelectorData,
@@ -7,7 +10,9 @@ import {
 import BaseSelector from "./BaseSelector";
 import { SmallIconButton, SmallListItemIcon } from "../Small";
 import InlineSwitch from "../InlineSwitch";
-import { makeStyles, Typography } from "@material-ui/core";
+import { Typography } from "@mui/material";
+
+import makeStyles from "@mui/styles/makeStyles";
 
 export interface MultiSelectWithoutGroupProps<DataT extends MultiSelectorData>
 	extends Omit<

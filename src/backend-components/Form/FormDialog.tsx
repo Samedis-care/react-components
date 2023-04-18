@@ -1,6 +1,7 @@
 import React, { useCallback, useMemo, useRef } from "react";
-import { Dialog, DialogContent, makeStyles } from "@material-ui/core";
-import { OpenInNew } from "@material-ui/icons";
+import { Dialog, DialogContent } from "@mui/material";
+import makeStyles from "@mui/styles/makeStyles";
+import { OpenInNew } from "@mui/icons-material";
 import { useDialogContext } from "../../framework";
 import { DialogTitle, showConfirmDialog } from "../../non-standalone";
 import useCCTranslations from "../../utils/useCCTranslations";
@@ -106,7 +107,6 @@ const FormDialog = (props: FormDialogProps) => {
 			open={true}
 			onClose={handleClose}
 			fullWidth
-			disableBackdropClick
 		>
 			<DialogTitle onClose={handleClose} noTitle={!dialogTitle}>
 				{dialogTitle}

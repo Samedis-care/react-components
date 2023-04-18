@@ -1,11 +1,11 @@
-import { makeStyles } from "@material-ui/core/styles";
+import { Styles } from "@mui/styles";
+import makeStyles from "@mui/styles/makeStyles";
 import {
 	StyleRules,
 	StyleRulesCallback,
-} from "@material-ui/styles/withStyles/withStyles";
-import { Theme } from "@material-ui/core";
-import { Styles } from "@material-ui/core/styles/withStyles";
-import { ClassNameMap } from "@material-ui/styles/withStyles";
+} from "@mui/styles/withStyles/withStyles";
+import { Theme } from "@mui/material";
+import { ClassNameMap } from "@mui/styles/withStyles";
 import combineClassMaps from "./combineClassMaps";
 
 /**

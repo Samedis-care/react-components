@@ -5,14 +5,14 @@ import {
 	Tooltip,
 	useMediaQuery,
 	useTheme,
-} from "@material-ui/core";
+} from "@mui/material";
 import { SmallIconButton, VerticalDivider } from "../../index";
 import ComponentWithLabel from "../../UIKit/ComponentWithLabel";
 import {
 	Edit as EditIcon,
 	Delete as DeleteIcon,
 	Menu as MenuIcon,
-} from "@material-ui/icons";
+} from "@mui/icons-material";
 import SelectAll from "./SelectAll";
 import { DataGridProps, useDataGridStyles } from "../DataGrid";
 import useCCTranslations from "../../../utils/useCCTranslations";

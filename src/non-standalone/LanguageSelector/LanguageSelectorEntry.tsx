@@ -3,8 +3,8 @@ import {
 	LanguageSelectorDialogContentProps,
 	LanguageSelectorEntryData,
 } from "./LanguageSelectorDialogContent";
-import { Grid, ListItem } from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
+import { Grid, ListItemButton } from "@mui/material";
+import makeStyles from "@mui/styles/makeStyles";
 import useCCTranslations from "../../utils/useCCTranslations";
 import CountryFlags from "../../standalone/CountryFlags";
 
@@ -61,7 +61,7 @@ const LanguageSelectorEntry = (
 	const flag = CountryFlags[locale.country_short];
 
 	return (
-		<ListItem button onClick={handleClick} className={classes.root}>
+		<ListItemButton onClick={handleClick} className={classes.root}>
 			<Grid
 				container
 				spacing={2}
@@ -90,7 +90,7 @@ const LanguageSelectorEntry = (
 					)}
 				</Grid>
 			</Grid>
-		</ListItem>
+		</ListItemButton>
 	);
 };
 

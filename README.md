@@ -1,6 +1,4 @@
-# [Components.care React](https://samedis-care.github.io/react-components/)
-
-Take a look at our [Storybook](https://samedis-care.github.io/react-components/storybook/)
+# Components.care React
 
 ## Installing
 
@@ -12,7 +10,7 @@ Note: Make sure to install all peer-dependencies
 
 ## Overview
 
-The aim of this project is to provide a solid fundation for developing complex React based web applications.
+The aim of this project is to provide a solid foundation for developing complex React based web applications.
 
 There are 5 types of components you will find here:
 
@@ -56,12 +54,6 @@ Used Libraries:
 - `src/non-standalone`: Non-standalone components
 - `src/backend-integration`: Backend-integration components
 - `src/backend`: Backend components
-- `src/stories`: Storybook Stories for previewing library components
-- `src/stories/standalone`: Storybook Stories for standalone components
-- `src/stories/framework`: Storybook Stories for framework components
-- `src/stories/non-standalone`: Storybook Stories for non-standalone components
-- `src/stories/backend-integration`: Storybook Stories for backend-integration components
-- `src/stories/backend`: Storybook Stories for backend components
 
 ### Building the source code
 

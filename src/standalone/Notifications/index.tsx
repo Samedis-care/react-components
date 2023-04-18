@@ -1,5 +1,5 @@
 import React, { CSSProperties, useCallback, useEffect, useState } from "react";
-import { Notifications as NotificationsIcon } from "@material-ui/icons";
+import { Notifications as NotificationsIcon } from "@mui/icons-material";
 import {
 	Badge,
 	BadgeProps,
@@ -12,9 +12,9 @@ import {
 	PopoverProps,
 	Tooltip,
 	Typography,
-} from "@material-ui/core";
+} from "@mui/material";
 import InfiniteScroll, { InfiniteScrollProps } from "../InfiniteScroll";
-import { makeStyles } from "@material-ui/core/styles";
+import makeStyles from "@mui/styles/makeStyles";
 import i18n from "../../i18n";
 import timestampToAge from "../../utils/timestampToAge";
 import useCCTranslations from "../../utils/useCCTranslations";
@@ -228,7 +228,7 @@ const Notifications = (props: NotificationsProps) => {
 
 	return (
 		<>
-			<IconButton onClick={onIconClick}>
+			<IconButton onClick={onIconClick} size="large">
 				<Badge
 					badgeContent={
 						unreadCount ?? notifications.filter((not) => !not.read).length

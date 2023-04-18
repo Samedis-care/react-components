@@ -1,5 +1,5 @@
 import React from "react";
-import { FormHelperText, Typography } from "@material-ui/core";
+import { FormHelperText, Typography } from "@mui/material";
 import { ModelRenderParams } from "../../../index";
 import TypeEnumMulti, { AdvancedMultiEnumValue } from "../TypeEnumMulti";
 import ccI18n from "../../../../i18n";

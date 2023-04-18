@@ -18,7 +18,7 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Setup Node.js environment
         uses: actions/setup-node@v1.4.4
@@ -41,14 +41,17 @@ jobs:
           set -x
           git config user.name "GitHub Actions Bot"
           git config user.email "<>"
-          git checkout --orphan master_dist
+          commit_message="Release build based on commit $(git rev-parse --short HEAD) from $(git show -s --format=%ci)"
+          mv package.json package-lock.json dist LICENSE ../build_out
+          git checkout -f master_dist || git checkout --orphan master_dist
           rm -f .gitignore
           git rm -rf --cached .
-          git add package.json package-lock.json dist LICENSE
+          mv ../build_out/* .
+          git add --all
           git status
-          git commit -m "release build"
+          git commit -m "$commit_message"
           git push -f origin master_dist
-      - name: Generate Storybook
-        run: npm run deploy-storybook -- --ci
-        env:
-          GH_TOKEN: ${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}
+      #- name: Generate Storybook
+      #  run: npm run deploy-storybook -- --ci
+      #  env:
+      #    GH_TOKEN: ${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}

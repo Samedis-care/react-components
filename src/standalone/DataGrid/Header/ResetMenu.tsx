@@ -1,5 +1,5 @@
 import React, { useCallback } from "react";
-import { MenuItem, MenuProps, PopoverOrigin } from "@material-ui/core";
+import { MenuItem, MenuProps, PopoverOrigin } from "@mui/material";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import PopupMenu from "../../PopupMenu";
 
@@ -81,7 +81,6 @@ const ResetMenu = (props: ResetMenuProps) => {
 			anchorOrigin={anchorOrigin}
 			transformOrigin={transformOrigin}
 			keepMounted
-			getContentAnchorEl={null}
 			open={!!anchorEl}
 			onClose={onClose}
 		>

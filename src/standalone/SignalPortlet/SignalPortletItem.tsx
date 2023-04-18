@@ -1,13 +1,14 @@
 import React, { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { makeStyles } from "@material-ui/core/styles";
-import { ClassNameMap } from "@material-ui/styles/withStyles";
+import makeStyles from "@mui/styles/makeStyles";
+import { ClassNameMap } from "@mui/styles/withStyles";
 import {
 	Avatar,
 	ListItem,
 	ListItemAvatar,
+	ListItemButton,
 	ListItemText,
-} from "@material-ui/core";
+} from "@mui/material";
 import { SignalPortletColorConfig } from "./index";
 import Loader from "../Loader";
 
@@ -71,21 +72,22 @@ const SignalPortletItem = (props: SignalPortletItemProps) => {
 			? classes.itemColorActive
 			: classes.itemColorInactive;
 
-	return (
-		<ListItem
-			button={
-				!!link as true /* https://github.com/mui-org/material-ui/issues/14971 */
-			}
-			onClick={handleClick}
-			className={classes.root}
-		>
+	const content = (
+		<>
 			<ListItemAvatar className={classes.listAvatar}>
 				<Avatar className={counterClass}>
 					{count == null ? <Loader /> : count.toString()}
 				</Avatar>
 			</ListItemAvatar>
 			<ListItemText className={classes.listText}>{text}</ListItemText>
-		</ListItem>
+		</>
+	);
+	return link ? (
+		<ListItemButton onClick={handleClick} className={classes.root}>
+			{content}
+		</ListItemButton>
+	) : (
+		<ListItem className={classes.root}>{content}</ListItem>
 	);
 };
 

@@ -29,7 +29,7 @@ import {
 	getValueByDot,
 	isObjectEmpty,
 } from "../../utils";
-import { Grid, Typography } from "@material-ui/core";
+import { Grid, Typography } from "@mui/material";
 import { getVisibility } from "../../backend-integration/Model/Visibility";
 import { QueryObserverBaseResult } from "react-query/types/core/types";
 import { showConfirmDialogBool } from "../../non-standalone";

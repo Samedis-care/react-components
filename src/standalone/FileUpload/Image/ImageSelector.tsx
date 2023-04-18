@@ -7,11 +7,11 @@ import {
 	Tooltip,
 	Typography,
 	useTheme,
-} from "@material-ui/core";
-import { AttachFile, Person } from "@material-ui/icons";
+} from "@mui/material";
+import { AttachFile, Person } from "@mui/icons-material";
 import { combineClassNames, processImage } from "../../../utils";
 import { IDownscaleProps } from "../../../utils/processImage";
-import { makeStyles } from "@material-ui/core/styles";
+import makeStyles from "@mui/styles/makeStyles";
 import GroupBox from "../../GroupBox";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import { ImageFileIcon } from "../FileIcons";
@@ -87,8 +87,8 @@ export interface ImageSelectorProps {
 const useStyles = makeStyles(
 	(theme) => ({
 		root: {
-			width: `calc(100% - ${theme.spacing(2)}px)`,
-			height: `calc(100% - ${theme.spacing(2)}px)`,
+			width: `calc(100% - ${theme.spacing(2)})`,
+			height: `calc(100% - ${theme.spacing(2)})`,
 			marginTop: theme.spacing(2),
 		},
 		rootModern: {
@@ -101,8 +101,8 @@ const useStyles = makeStyles(
 		preview: {
 			objectFit: "contain",
 			display: "block",
-			width: `calc(100% - ${theme.spacing(2)}px)`,
-			height: `calc(100% - ${theme.spacing(2)}px)`,
+			width: `calc(100% - ${theme.spacing(2)})`,
+			height: `calc(100% - ${theme.spacing(2)})`,
 		},
 		previewModern: {
 			objectFit: "contain",
@@ -136,9 +136,6 @@ const useStyles = makeStyles(
 			height: "100%",
 			margin: 2, // borderSize in pfpImg * 2
 			padding: 0,
-		},
-		pfpIconBtnLabel: {
-			height: "100%",
 		},
 		pfpImg: {
 			width: "100%",
@@ -235,7 +232,7 @@ const ImageSelector = (props: ImageSelectorProps) => {
 					direction={"column"}
 					alignContent={"flex-start"}
 					alignItems={"stretch"}
-					justify={"center"}
+					justifyContent={"center"}
 					wrap={"nowrap"}
 					className={classes.root}
 					onDrop={handleDrop}
@@ -279,7 +276,7 @@ const ImageSelector = (props: ImageSelectorProps) => {
 					direction={"column"}
 					alignContent={"flex-start"}
 					alignItems={"stretch"}
-					justify={"center"}
+					justifyContent={"center"}
 					wrap={"nowrap"}
 					className={classes.rootModern}
 					onDrop={handleDrop}
@@ -334,7 +331,7 @@ const ImageSelector = (props: ImageSelectorProps) => {
 										xs
 										container
 										direction={"column"}
-										justify={"space-around"}
+										justifyContent={"space-around"}
 										wrap={"nowrap"}
 									>
 										<Grid item>
@@ -355,7 +352,7 @@ const ImageSelector = (props: ImageSelectorProps) => {
 											container
 											wrap={"nowrap"}
 											spacing={0}
-											justify={"space-between"}
+											justifyContent={"space-between"}
 										>
 											<Grid item>
 												<Typography className={classes.modernFormatsLabel}>
@@ -401,8 +398,8 @@ const ImageSelector = (props: ImageSelectorProps) => {
 					onClick={handleUpload}
 					classes={{
 						root: classes.pfpIconBtn,
-						label: classes.pfpIconBtnLabel,
 					}}
+					size="large"
 				>
 					{image}
 				</IconButton>

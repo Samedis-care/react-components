@@ -18,7 +18,7 @@ import {
 	Permission,
 	usePermissionContext,
 } from "../../framework";
-import { makeStyles } from "@material-ui/core/styles";
+import makeStyles from "@mui/styles/makeStyles";
 import { CrudImportProps, CrudImportType } from "./Import";
 import Loader from "../../standalone/Loader";
 import { useRouteInfo } from "../../utils";

@@ -16,8 +16,8 @@ import {
 	Tooltip,
 	Typography,
 	useTheme,
-} from "@material-ui/core";
-import { AttachFile } from "@material-ui/icons";
+} from "@mui/material";
+import { AttachFile } from "@mui/icons-material";
 import FilePreview, { getFileIconOrDefault } from "./File";
 import { FileSelectorError } from "./Errors";
 import {
@@ -29,8 +29,8 @@ import {
 } from "../../../utils";
 import { IDownscaleProps } from "../../../utils/processImage";
 import GroupBox from "../../GroupBox";
-import { makeStyles } from "@material-ui/core/styles";
-import { ClassNameMap } from "@material-ui/styles/withStyles";
+import makeStyles from "@mui/styles/makeStyles";
+import { ClassNameMap } from "@mui/styles/withStyles";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import isTouchDevice from "../../../utils/isTouchDevice";
 

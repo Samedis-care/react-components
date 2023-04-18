@@ -1,5 +1,5 @@
 import React from "react";
-import { SvgIcon, SvgIconProps } from "@material-ui/core";
+import { SvgIcon, SvgIconProps } from "@mui/material";
 
 const ResetIcon = (props: SvgIconProps) => (
 	<SvgIcon {...props} viewBox={"0 0 34.88 34.88"}>

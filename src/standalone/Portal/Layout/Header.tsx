@@ -4,8 +4,8 @@ import {
 	IconButton,
 	Toolbar,
 	ToolbarProps,
-} from "@material-ui/core";
-import { Menu as MenuIcon } from "@material-ui/icons";
+} from "@mui/material";
+import { Menu as MenuIcon } from "@mui/icons-material";
 import React from "react";
 
 export interface PortalLayoutHeaderProps {
@@ -37,7 +37,7 @@ const PortalLayoutHeader = (props: PortalLayoutHeaderProps) => {
 		<AppBar position={"relative"} classes={customClasses?.appBar}>
 			<Toolbar classes={customClasses?.toolbar}>
 				{mobile && (
-					<IconButton onClick={toggleMenu}>
+					<IconButton onClick={toggleMenu} size="large">
 						<MenuIcon />
 					</IconButton>
 				)}

@@ -1,12 +1,7 @@
-import React, { CSSProperties } from "react";
-import {
-	Box,
-	Button,
-	ButtonProps,
-	Tooltip,
-	withStyles,
-} from "@material-ui/core";
-import { Theme } from "@material-ui/core/styles";
+import React from "react";
+import { Box, Button, ButtonProps, Tooltip } from "@mui/material";
+import { withStyles, CSSProperties } from "@mui/styles";
+import { Theme } from "@mui/material/styles";
 import { combineColors } from "../../utils";
 
 export interface ActionButtonTheme {
@@ -46,6 +41,7 @@ const StyledButton = withStyles(
 				theme.palette.primary.contrastText,
 			fontSize: theme.componentsCare?.uiKit?.actionButton?.fontSize,
 			textTransform: "unset",
+			justifyContent: "flex-start",
 			"&:hover": {
 				border:
 					theme.componentsCare?.uiKit?.actionButton?.hover?.border ||

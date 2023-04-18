@@ -1,5 +1,5 @@
 import React from "react";
-import { SvgIcon, SvgIconProps } from "@material-ui/core";
+import { SvgIcon, SvgIconProps } from "@mui/material";
 
 const FilterActiveIcon = (props: SvgIconProps) => (
 	<SvgIcon {...props} viewBox="0 0 25.98 26.09">

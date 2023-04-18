@@ -1,13 +1,13 @@
 import React, { useCallback, useContext } from "react";
 import { BasicFormPageRendererProps } from "./BasicFormPage";
-import { makeStyles } from "@material-ui/core/styles";
+import makeStyles from "@mui/styles/makeStyles";
 import { CrudFormProps } from "../CRUD";
 import { useDialogContext } from "../../framework";
 import { showConfirmDialog } from "../../non-standalone";
 import { ActionButton, FormButtons } from "../../standalone";
 import { IsInFormDialogContext } from "./FormDialog";
 import useCCTranslations from "../../utils/useCCTranslations";
-import { Tooltip } from "@material-ui/core";
+import { Tooltip } from "@mui/material";
 
 export const useBackButtonStyles = makeStyles({
 	root: {

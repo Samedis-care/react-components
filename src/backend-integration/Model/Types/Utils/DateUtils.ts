@@ -1,3 +1,5 @@
+import { Moment } from "moment/moment";
+
 /**
  * Sets the date to midnight UTC
  * @param date A date
@@ -10,3 +12,6 @@ export const normalizeDate = (date: Date): Date => {
 	date.setMilliseconds(0);
 	return new Date(date.getTime() - date.getTimezoneOffset() * 60000);
 };
+
+export const normalizeMoment = (instance: Moment) =>
+	instance.weekday(0).hour(0).minute(0).second(0).millisecond(0);

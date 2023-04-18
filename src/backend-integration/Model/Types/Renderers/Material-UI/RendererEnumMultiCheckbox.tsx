@@ -6,7 +6,7 @@ import {
 	Typography,
 	Checkbox,
 	FormGroup,
-} from "@material-ui/core";
+} from "@mui/material";
 import { ModelRenderParams } from "../../../index";
 import TypeEnumMulti from "../../TypeEnumMulti";
 import ccI18n from "../../../../../i18n";

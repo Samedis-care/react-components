@@ -1,7 +1,7 @@
-import { Box, Theme, useMediaQuery, useTheme } from "@material-ui/core";
+import { Box, Theme, useMediaQuery, useTheme } from "@mui/material";
 import React from "react";
-import { makeStyles } from "@material-ui/core/styles";
-import { Styles } from "@material-ui/core/styles/withStyles";
+import { Styles } from "@mui/styles";
+import makeStyles from "@mui/styles/makeStyles";
 import { makeThemeStyles } from "../../utils";
 
 export interface FormPageLayoutProps {

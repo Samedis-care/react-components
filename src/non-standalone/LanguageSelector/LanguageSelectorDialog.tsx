@@ -1,6 +1,6 @@
 import React, { Suspense } from "react";
-import { Dialog, DialogContent } from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
+import { Dialog, DialogContent } from "@mui/material";
+import makeStyles from "@mui/styles/makeStyles";
 import { useDialogContext } from "../../framework/DialogContextProvider";
 import { DialogTitle } from "../Dialog";
 import Loader from "../../standalone/Loader";

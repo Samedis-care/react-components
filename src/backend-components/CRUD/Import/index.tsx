@@ -1,12 +1,6 @@
 import React, { Dispatch, SetStateAction, useCallback, useState } from "react";
-import {
-	Button,
-	Grid,
-	makeStyles,
-	Step,
-	StepLabel,
-	Stepper,
-} from "@material-ui/core";
+import { Button, Grid, Step, StepLabel, Stepper } from "@mui/material";
+import makeStyles from "@mui/styles/makeStyles";
 import Step1LoadData from "./Step1LoadData";
 import Step2ConnectData from "./Step2ConnectData";
 import Step3ValidateReview from "./Step3ValidateReview";
@@ -217,7 +211,7 @@ const CrudImport = <
 		<Grid
 			container
 			direction={"column"}
-			justify={"space-between"}
+			justifyContent={"space-between"}
 			alignItems={"stretch"}
 			spacing={2}
 			wrap={"nowrap"}

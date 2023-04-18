@@ -6,8 +6,8 @@ import {
 	InputAdornment,
 	Popover,
 	PopoverOrigin,
-} from "@material-ui/core";
-import { Search as SearchIcon } from "@material-ui/icons";
+} from "@mui/material";
+import { Search as SearchIcon } from "@mui/icons-material";
 import { useDataGridProps, useDataGridStyles } from "../DataGrid";
 import TextFieldWithHelp from "../../UIKit/TextFieldWithHelp";
 import { combineClassNames } from "../../../utils";
@@ -65,7 +65,7 @@ const SearchView = (props: IDataGridSearchViewProps) => {
 
 	return (
 		<>
-			<Hidden xsDown implementation={"js"}>
+			<Hidden smDown implementation={"js"}>
 				{renderTextField()}
 			</Hidden>
 			<Hidden smUp implementation={"js"}>
@@ -74,6 +74,7 @@ const SearchView = (props: IDataGridSearchViewProps) => {
 					className={combineClassNames([
 						props.search && classes.quickFilterActiveIcon,
 					])}
+					size="large"
 				>
 					<SearchIcon />
 				</IconButton>

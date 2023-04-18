@@ -1,12 +1,5 @@
 import React from "react";
-import {
-	Box,
-	Button,
-	Divider,
-	Grid,
-	Paper,
-	Typography,
-} from "@material-ui/core";
+import { Box, Button, Divider, Grid, Paper, Typography } from "@mui/material";
 import { useDataGridStyles } from "../DataGrid";
 import { IDataGridFilterBarProps } from "../Header/FilterBar";
 import useCCTranslations from "../../../utils/useCCTranslations";
@@ -35,7 +28,7 @@ const FilterDialog = (props: DataGridCustomFilterDialogProps) => {
 			</Typography>
 			<Divider />
 			<Grid
-				justify={"space-between"}
+				justifyContent={"space-between"}
 				spacing={2}
 				container
 				className={classes.customFilterContainer}
@@ -48,7 +41,7 @@ const FilterDialog = (props: DataGridCustomFilterDialogProps) => {
 			</Grid>
 			<div className={classes.contentOverlayClosed}>
 				<Divider />
-				<Grid container justify={"flex-end"}>
+				<Grid container justifyContent={"flex-end"}>
 					<Grid item>
 						<Box m={2}>
 							<Button onClick={props.closeFilterDialog} variant={"contained"}>

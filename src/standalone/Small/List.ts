@@ -1,9 +1,7 @@
-import {
-	createStyles,
-	ListItem,
-	ListItemIcon,
-	withStyles,
-} from "@material-ui/core";
+import { ListItem, ListItemButton, ListItemIcon } from "@mui/material";
+
+import createStyles from "@mui/styles/createStyles";
+import withStyles from "@mui/styles/withStyles";
 
 const smallListItemStyles = createStyles({
 	gutters: {
@@ -13,7 +11,10 @@ const smallListItemStyles = createStyles({
 });
 export const SmallListItem = withStyles(smallListItemStyles, {
 	name: "SmallListItem",
-})(ListItem);
+})(ListItem) as typeof ListItem;
+export const SmallListItemButton = withStyles(smallListItemStyles, {
+	name: "SmallListItemButton",
+})(ListItemButton) as typeof ListItemButton;
 
 const selectorSmallListItemStyles = createStyles({
 	gutters: {
@@ -23,7 +24,14 @@ const selectorSmallListItemStyles = createStyles({
 });
 export const SelectorSmallListItem = withStyles(selectorSmallListItemStyles, {
 	name: "SelectorSmallListItem",
-})(ListItem);
+})(ListItem) as typeof ListItem;
+
+export const SelectorSmallListItemButton = withStyles(
+	selectorSmallListItemStyles,
+	{
+		name: "SelectorSmallListItemButton",
+	}
+)(ListItemButton) as typeof ListItemButton;
 
 const smallListItemIconStyles = createStyles({
 	root: {
@@ -33,4 +41,4 @@ const smallListItemIconStyles = createStyles({
 });
 export const SmallListItemIcon = withStyles(smallListItemIconStyles)(
 	ListItemIcon
-);
+) as typeof ListItemIcon;

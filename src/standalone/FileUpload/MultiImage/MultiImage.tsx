@@ -16,15 +16,15 @@ import {
 	Dialog,
 	IconButton,
 	Theme,
-} from "@material-ui/core";
-import { Close as CloseIcon } from "@material-ui/icons";
-import { makeStyles } from "@material-ui/core/styles";
+} from "@mui/material";
+import { Close as CloseIcon } from "@mui/icons-material";
+import { Styles } from "@mui/styles";
+import makeStyles from "@mui/styles/makeStyles";
 import { IDownscaleProps } from "../../../utils/processImage";
 import { makeThemeStyles, processImage } from "../../../utils";
 import ImageDialogEntry, { ImageDialogEntryProps } from "./ImageDialogEntry";
 import useCCTranslations from "../../../utils/useCCTranslations";
-import { ClassNameMap } from "@material-ui/styles/withStyles";
-import { Styles } from "@material-ui/core/styles/withStyles";
+import { ClassNameMap } from "@mui/styles/withStyles";
 import ImageDots from "./ImageDots";
 
 export interface MultiImageImage {
@@ -406,9 +406,9 @@ const MultiImage = (props: MultiImageProps) => {
 						fullWidth={!previewSize}
 					>
 						<DialogTitle>
-							<Grid container justify={"flex-end"}>
+							<Grid container justifyContent={"flex-end"}>
 								<Grid item>
-									<IconButton onClick={closeDialog}>
+									<IconButton onClick={closeDialog} size="large">
 										<CloseIcon />
 									</IconButton>
 								</Grid>

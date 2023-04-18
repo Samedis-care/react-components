@@ -5,12 +5,12 @@ import {
 	ListItemIcon,
 	ListItemText,
 	MenuItem,
-} from "@material-ui/core";
+} from "@mui/material";
 import {
 	Description as ExportIcon,
 	Done as DoneIcon,
 	Error as ErrorIcon,
-} from "@material-ui/icons";
+} from "@mui/icons-material";
 import { dataGridPrepareFiltersAndSorts } from "../CallbackUtil";
 import {
 	getActiveDataGridColumns,
@@ -36,7 +36,10 @@ export enum DataGridExportStatus {
 
 // eslint-disable-next-line react/display-name
 const ExportMenuEntry = React.forwardRef(
-	(props: IDataGridExportMenuEntryProps, ref) => {
+	(
+		props: IDataGridExportMenuEntryProps,
+		ref: React.ForwardedRef<HTMLLIElement>
+	) => {
 		const { getAdditionalFilters, columns, onError } = useDataGridProps();
 		const [columnsState] = useDataGridColumnState();
 		const [state] = useDataGridState();
@@ -97,7 +100,7 @@ const ExportMenuEntry = React.forwardRef(
 		return (
 			<>
 				{status === DataGridExportStatus.Idle && (
-					<MenuItem onClick={startExport} innerRef={ref}>
+					<MenuItem onClick={startExport} ref={ref}>
 						<ListItemIcon>
 							<IdleIcon />
 						</ListItemIcon>
@@ -105,7 +108,7 @@ const ExportMenuEntry = React.forwardRef(
 					</MenuItem>
 				)}
 				{status === DataGridExportStatus.Working && (
-					<MenuItem innerRef={ref}>
+					<MenuItem ref={ref}>
 						<ListItemIcon>
 							<CircularProgress size={24} />
 						</ListItemIcon>
@@ -113,7 +116,7 @@ const ExportMenuEntry = React.forwardRef(
 					</MenuItem>
 				)}
 				{status === DataGridExportStatus.Ready && (
-					<MenuItem onClick={finishExport} innerRef={ref}>
+					<MenuItem onClick={finishExport} ref={ref}>
 						<ListItemIcon>
 							<DoneIcon />
 						</ListItemIcon>
@@ -121,7 +124,7 @@ const ExportMenuEntry = React.forwardRef(
 					</MenuItem>
 				)}
 				{status === DataGridExportStatus.Error && (
-					<MenuItem onClick={cancelExport} innerRef={ref}>
+					<MenuItem onClick={cancelExport} ref={ref}>
 						<ListItemIcon>
 							<ErrorIcon />
 						</ListItemIcon>

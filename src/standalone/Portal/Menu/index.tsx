@@ -1,13 +1,10 @@
-import React, {
-	Dispatch,
-	SetStateAction,
-	useState,
-	CSSProperties,
-} from "react";
+import React, { Dispatch, SetStateAction, useState } from "react";
 import { MenuContext, toMenuItemComponent } from "./MenuItem";
-import { makeStyles, Theme } from "@material-ui/core/styles";
-import { SvgIconComponent } from "@material-ui/icons";
+import { Theme } from "@mui/material/styles";
+import { makeStyles, CSSProperties } from "@mui/styles";
+import { SvgIconComponent } from "@mui/icons-material";
 import { combineClassNames } from "../../../utils";
+import { SvgIconProps } from "@mui/material";
 
 /**
  * Properties of the Wrapper
@@ -26,7 +23,7 @@ export interface MenuItemProps {
 	/**
 	 * An optional icon
 	 */
-	icon?: SvgIconComponent;
+	icon?: SvgIconComponent | React.ComponentType<SvgIconProps>;
 	/**
 	 * The text of the menu entry
 	 */
@@ -64,7 +61,7 @@ export interface IMenuItemDefinition {
 	/**
 	 * The icon of the menu item
 	 */
-	icon?: SvgIconComponent;
+	icon?: SvgIconComponent | React.ComponentType<SvgIconProps>;
 	/**
 	 * The text of the menu item
 	 */

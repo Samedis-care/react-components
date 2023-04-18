@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { TextFieldWithHelp } from "../index";
 import { TextFieldWithHelpProps } from "../TextFieldWithHelp";
 import { ChromePicker, ColorResult } from "react-color";
-import { Popover, PopoverOrigin, TextFieldProps } from "@material-ui/core";
+import { Popover, PopoverOrigin, TextFieldProps } from "@mui/material";
 
 export type ColorInputProps = TextFieldWithHelpProps &
 	Omit<TextFieldProps, "onChange" | "value" | "onClick" | "multiline"> & {

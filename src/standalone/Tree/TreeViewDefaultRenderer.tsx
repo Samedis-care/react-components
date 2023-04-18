@@ -1,9 +1,9 @@
 import React, { useCallback } from "react";
-import { Grid, Typography } from "@material-ui/core";
+import { Grid, Typography } from "@mui/material";
 import {
 	KeyboardArrowUp as ClosedIcon,
 	KeyboardArrowDown as ExpandedIcon,
-} from "@material-ui/icons";
+} from "@mui/icons-material";
 import { TreeViewRendererProps } from "./TreeView";
 
 const TreeViewDefaultRenderer = (props: TreeViewRendererProps) => {

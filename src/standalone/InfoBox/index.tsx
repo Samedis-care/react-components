@@ -3,17 +3,17 @@ import {
 	ErrorOutlined,
 	InfoOutlined,
 	ReportProblemOutlined,
-} from "@material-ui/icons";
+} from "@mui/icons-material";
 import {
-	makeStyles,
 	Theme,
 	Accordion,
 	AccordionSummary as MuiAccordionSummary,
 	AccordionDetails,
 	Typography,
-	withStyles,
 	AccordionProps,
-} from "@material-ui/core";
+} from "@mui/material";
+import makeStyles from "@mui/styles/makeStyles";
+import withStyles from "@mui/styles/withStyles";
 import SuccessOutlinedIcon from "../Icons/SuccessOutlinedIcon";
 import { combineClassNames } from "../../utils";
 

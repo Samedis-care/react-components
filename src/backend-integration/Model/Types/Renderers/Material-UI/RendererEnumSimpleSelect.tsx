@@ -5,7 +5,7 @@ import {
 	MenuItem,
 	Select,
 	Typography,
-} from "@material-ui/core";
+} from "@mui/material";
 import { ModelRenderParams } from "../../../index";
 import TypeEnum from "../../TypeEnum";
 import ccI18n from "../../../../../i18n";
@@ -53,7 +53,7 @@ class RendererEnumSelect extends TypeEnum {
 						name={field}
 						value={value}
 						disabled={visibility.readOnly}
-						onChange={(evt) => handleChange(field, evt.target.value as string)}
+						onChange={(evt) => handleChange(field, evt.target.value)}
 						onBlur={handleBlur}
 					>
 						{this.values.map((entry) => (

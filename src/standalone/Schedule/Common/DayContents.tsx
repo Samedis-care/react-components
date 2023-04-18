@@ -1,12 +1,7 @@
-import React, { PureComponent } from "react";
-import {
-	Button,
-	createStyles,
-	Grid,
-	WithStyles,
-	withStyles,
-} from "@material-ui/core";
+import React from "react";
+import { Button, Grid } from "@mui/material";
 import { combineClassNames } from "../../../utils";
+import makeStyles from "@mui/styles/makeStyles";
 
 export interface IDayData {
 	/**
@@ -44,49 +39,53 @@ export interface ScheduleFilterDefinition {
 	onChange?: (newFilter: string) => void;
 }
 
-export interface IProps extends WithStyles {
+export interface DayContentsProps {
 	data: IDayData[];
 }
 
-class DayContents extends PureComponent<IProps> {
-	render() {
-		return (
-			<Grid container spacing={2}>
-				{this.props.data.map((entry) => (
-					<Grid item xs={12} key={entry.id}>
-						<Button
-							variant={"outlined"}
-							size={"small"}
-							fullWidth
-							className={combineClassNames([
-								this.props.classes.btn,
-								!entry.onClick &&
-									!entry.onAuxClick &&
-									this.props.classes.btnDisabled,
-							])}
-							onClick={entry.onClick}
-							onAuxClick={entry.onAuxClick}
-							disableRipple={!entry.onClick && !entry.onAuxClick}
-						>
-							{entry.title}
-						</Button>
-					</Grid>
-				))}
-			</Grid>
-		);
-	}
-}
+// @deprecated use DayContentsProps
+export type IProps = DayContentsProps;
 
-const styles = createStyles({
-	btn: {
-		textTransform: "none",
-		textAlign: "left",
-		color: "inherit",
-		display: "block",
+const useStyles = makeStyles(
+	{
+		btn: {
+			textTransform: "none",
+			textAlign: "left",
+			color: "inherit",
+			display: "block",
+		},
+		btnDisabled: {
+			cursor: "default",
+		},
 	},
-	btnDisabled: {
-		cursor: "default",
-	},
-});
+	{ name: "CcDayContents" }
+);
 
-export default withStyles(styles)(DayContents);
+const DayContents = (props: DayContentsProps) => {
+	const { data } = props;
+	const classes = useStyles();
+	return (
+		<Grid container spacing={2}>
+			{data.map((entry) => (
+				<Grid item xs={12} key={entry.id}>
+					<Button
+						variant={"outlined"}
+						size={"small"}
+						fullWidth
+						className={combineClassNames([
+							classes.btn,
+							!entry.onClick && !entry.onAuxClick && classes.btnDisabled,
+						])}
+						onClick={entry.onClick}
+						onAuxClick={entry.onAuxClick}
+						disableRipple={!entry.onClick && !entry.onAuxClick}
+					>
+						{entry.title}
+					</Button>
+				</Grid>
+			))}
+		</Grid>
+	);
+};
+
+export default React.memo(DayContents);

@@ -1,11 +1,7 @@
-import {
-	decomposeColor,
-	hslToRgb,
-} from "@material-ui/core/styles/colorManipulator";
-import { NamedColor } from "csstype";
+import { decomposeColor, hslToRgb } from "@mui/material/styles";
 
 // map color keyword -> #rrggbbaa
-export const colorLookupMap: Record<NamedColor, string> = {
+export const colorLookupMap: Record<string, string> = {
 	aliceblue: "#f0f8ffff",
 	antiquewhite: "#faebd7ff",
 	aqua: "#00ffffff",
@@ -167,7 +163,7 @@ const colorToRgba = (
 ): [r: number, g: number, b: number, a: number] | undefined => {
 	// lookup color keywords and convert to #rrggbbaa
 	if (color.toLowerCase() in colorLookupMap) {
-		color = colorLookupMap[color.toLowerCase() as NamedColor];
+		color = colorLookupMap[color.toLowerCase()];
 	}
 
 	// decode #rgb, #rgba, #rrggbb, #rrggbbaa, rgb(), rgba(), hsl(), hsla() using JS

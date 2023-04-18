@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Grid } from "@material-ui/core";
+import { Box, Grid, SvgIconProps } from "@mui/material";
 import Search from "./Search";
 import ActionBar from "./ActionBar";
 import FilterBar, { IDataGridFilterBarProps } from "./FilterBar";
@@ -9,7 +9,7 @@ import {
 	IDataGridColumnDef,
 	IDataGridFieldFilter,
 } from "../DataGrid";
-import { SvgIconComponent } from "@material-ui/icons";
+import { SvgIconComponent } from "@mui/icons-material";
 import { DialogContextType } from "../../../framework";
 
 export interface IDataGridHeaderProps {
@@ -43,7 +43,7 @@ export interface IDataGridExporter<T> {
 	/**
 	 * An optional icon for the export menu entry
 	 */
-	icon?: SvgIconComponent;
+	icon?: SvgIconComponent | React.ComponentType<SvgIconProps>;
 	/**
 	 * The label of the export menu entry while waiting for the user to click it
 	 */
@@ -97,7 +97,7 @@ const Header = () => {
 			<Grid
 				item
 				container
-				justify={"space-between"}
+				justifyContent={"space-between"}
 				alignItems={"center"}
 				wrap={"nowrap"}
 			>

@@ -4,7 +4,7 @@ import {
 	MenuItem,
 	MenuProps,
 	PopoverOrigin,
-} from "@material-ui/core";
+} from "@mui/material";
 import PopupMenu from "../../PopupMenu";
 import { DataGridProps } from "../DataGrid";
 
@@ -41,7 +41,6 @@ const DataActionBarMenu = (props: DataActionBarMenuProps) => {
 			anchorOrigin={anchorOrigin}
 			transformOrigin={transformOrigin}
 			keepMounted
-			getContentAnchorEl={null}
 			open={!!anchorEl}
 			onClose={onClose}
 		>

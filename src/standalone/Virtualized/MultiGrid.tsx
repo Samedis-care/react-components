@@ -11,7 +11,7 @@ import {
 	GridOnScrollProps,
 	VariableSizeGrid,
 } from "react-window";
-import { makeStyles } from "@material-ui/core";
+import makeStyles from "@mui/styles/makeStyles";
 
 /**
  * Most props do the same as in react-virtualized MultiGrid component

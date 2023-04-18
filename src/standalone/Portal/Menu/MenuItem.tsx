@@ -6,7 +6,7 @@ import React, {
 	useState,
 } from "react";
 import { IMenuItemDefinition, MenuItemProps, MenuProps } from "./index";
-import { Collapse } from "@material-ui/core";
+import { Collapse } from "@mui/material";
 
 interface MenuItemControllerProps
 	extends Omit<MenuItemProps, "expanded" | "active"> {

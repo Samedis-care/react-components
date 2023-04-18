@@ -7,7 +7,7 @@ import {
 	DialogContent,
 	DialogContentText,
 	DialogTitle,
-} from "@material-ui/core";
+} from "@mui/material";
 import { IDialogConfigSimple } from "./Types";
 
 const ErrorDialogRaw = (props: IDialogConfigSimple) => {

@@ -11,40 +11,40 @@ import React, {
 import {
 	ListItemText,
 	IconButton,
-	InputLabel,
 	Paper,
 	InputProps,
 	Divider,
 	Typography,
 	Popper,
 	Grid,
-} from "@material-ui/core";
-import { Autocomplete, AutocompleteProps } from "@material-ui/lab";
+	Autocomplete,
+	Theme,
+} from "@mui/material";
 import {
 	Add as AddIcon,
 	ExpandMore,
 	Info as InfoIcon,
-} from "@material-ui/icons";
-import { TextFieldWithHelpProps } from "../UIKit/TextFieldWithHelp";
+} from "@mui/icons-material";
+import TextFieldWithHelp, {
+	TextFieldWithHelpProps,
+} from "../UIKit/TextFieldWithHelp";
 import {
 	cleanClassMap,
 	combineClassNames,
-	SelectorSmallListItem,
+	SelectorSmallListItemButton,
 	SmallListItemIcon,
 	useLocalStorageState,
 } from "../..";
 import { makeThemeStyles } from "../../utils";
-import { makeStyles, Theme } from "@material-ui/core/styles";
-import { Styles } from "@material-ui/core/styles/withStyles";
+import { makeStyles, Styles } from "@mui/styles";
 import {
+	AutocompleteProps,
 	AutocompleteClassKey,
 	AutocompleteRenderInputParams,
-} from "@material-ui/lab/Autocomplete/Autocomplete";
-import InputWithHelp from "../UIKit/InputWithHelp";
-import OutlinedInputWithHelp from "../UIKit/OutlinedInputWithHelp";
+} from "@mui/material/Autocomplete";
 import InlineSwitch from "../InlineSwitch";
 import useCCTranslations from "../../utils/useCCTranslations";
-import { PopperProps } from "@material-ui/core/Popper/Popper";
+import { PopperProps } from "@mui/material/Popper/Popper";
 
 export interface BaseSelectorData {
 	/**
@@ -100,8 +100,12 @@ export interface BaseSelectorData {
 	className?: string;
 }
 
-export const getStringLabel = (data: BaseSelectorData) =>
-	typeof data.label === "string" ? data.label : data.label[0];
+export const getStringLabel = (data: BaseSelectorData | string) =>
+	typeof data === "string"
+		? data
+		: typeof data.label === "string"
+		? data.label
+		: data.label[0];
 export const getReactLabel = (data: BaseSelectorData) =>
 	typeof data.label === "string" ? data.label : data.label[1];
 
@@ -404,7 +408,7 @@ const useCustomStylesBase = makeStyles(
 		selected: {
 			borderRadius: theme.shape.borderRadius,
 			backgroundColor: theme.palette.secondary.main,
-			padding: `${theme.spacing(1) / 2}px ${theme.spacing(1)}px`,
+			padding: `calc(${theme.spacing(1)} / 2) ${theme.spacing(1)}`,
 		},
 		divider: {
 			width: "100%",
@@ -424,14 +428,6 @@ const useCustomStyles = makeThemeStyles<
 	"CcBaseSelectorCustom",
 	useCustomStylesBase
 );
-
-const variantInput: Record<
-	NonNullable<BaseSelectorProps<BaseSelectorData>["variant"]>,
-	React.ComponentType<InputProps>
-> = {
-	outlined: OutlinedInputWithHelp,
-	standard: InputWithHelp,
-};
 
 const getOptionDisabled = (option: BaseSelectorData) =>
 	!!(option.isDisabled || option.isDivider || option.isSmallLabel);
@@ -539,20 +535,26 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 	);
 
 	const defaultRenderer = useCallback(
-		(data: BaseSelectorData) => {
+		(props: React.HTMLAttributes<HTMLLIElement>, data: BaseSelectorData) => {
 			if (data.isDivider) return <Divider className={customClasses.divider} />;
 			if (data.isSmallLabel)
 				return (
-					<Typography variant={"caption"} className={customClasses.smallLabel}>
+					<Typography
+						component={"li"}
+						{...props}
+						variant={"caption"}
+						className={customClasses.smallLabel}
+					>
 						{getReactLabel(data)}
 					</Typography>
 				);
 
 			return (
-				<SelectorSmallListItem
+				<SelectorSmallListItemButton
 					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 					// @ts-ignore: Typescript complains about the button property being "required"
-					component={"div"}
+					component={"li"}
+					{...props}
 					className={combineClassNames([
 						customClasses.listItem,
 						data.className,
@@ -574,7 +576,7 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 							)}
 						</Grid>
 					</ListItemText>
-				</SelectorSmallListItem>
+				</SelectorSmallListItemButton>
 			);
 		},
 		[
@@ -773,8 +775,6 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 
 	const filterOptions = useCallback((options: DataT[]) => options, []);
 
-	const InputComponent = variantInput[variant ?? "outlined"];
-
 	return (
 		<InlineSwitch
 			visible={!!props.displaySwitch}
@@ -784,7 +784,6 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 			classes={customClasses}
 		>
 			<BaseSelectorContext.Provider value={context}>
-				{label && <InputLabel shrink>{label}</InputLabel>}
 				<Paper elevation={0} className={customClasses.wrapper}>
 					<Autocomplete
 						id={autocompleteId}
@@ -847,7 +846,7 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 						getOptionLabel={getStringLabel}
 						renderOption={defaultRenderer}
 						getOptionDisabled={getOptionDisabled}
-						getOptionSelected={getOptionSelected}
+						isOptionEqualToValue={getOptionSelected}
 						onChange={(_event, selectedValue) =>
 							onChangeHandler(selectedValue as DataT)
 						}
@@ -855,41 +854,45 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 							// eslint-disable-next-line @typescript-eslint/no-unused-vars
 							const { InputProps, InputLabelProps, ...otherParams } = params;
 							return (
-								<InputComponent
-									readOnly={disableSearch}
-									{...InputProps}
+								<TextFieldWithHelp
+									variant={variant ?? "outlined"}
+									label={label}
 									{...otherParams}
 									inputProps={{
 										...params.inputProps,
 										title: selected ? getStringLabel(selected) : undefined,
 									}}
-									startAdornment={
-										(enableIcons ? renderIcon(selected?.icon) : undefined) ??
-										startAdornment
-									}
-									endAdornment={(() => {
-										const hasAdditionalElements =
-											openInfo || endAdornment || endAdornmentLeft;
-										return hasAdditionalElements
-											? React.cloneElement(
-													params.InputProps?.endAdornment as ReactElement,
-													{},
-													endAdornmentLeft,
-													...((params.InputProps?.endAdornment as ReactElement<
-														PropsWithChildren<unknown>
-													>).props.children as ReactNodeArray),
-													openInfo && (
-														<IconButton
-															onClick={openInfo}
-															className={customClasses.infoBtn}
-														>
-															<InfoIcon color={"disabled"} />
-														</IconButton>
-													),
-													endAdornment
-											  )
-											: params.InputProps?.endAdornment;
-									})()}
+									InputProps={{
+										...InputProps,
+										readOnly: disableSearch,
+										startAdornment:
+											(enableIcons ? renderIcon(selected?.icon) : undefined) ??
+											startAdornment,
+										endAdornment: (() => {
+											const hasAdditionalElements =
+												openInfo || endAdornment || endAdornmentLeft;
+											return hasAdditionalElements
+												? React.cloneElement(
+														params.InputProps?.endAdornment as ReactElement,
+														{},
+														endAdornmentLeft,
+														...((params.InputProps
+															?.endAdornment as ReactElement<
+															PropsWithChildren<unknown>
+														>).props.children as ReactNodeArray),
+														openInfo && (
+															<IconButton
+																onClick={openInfo}
+																className={customClasses.infoBtn}
+															>
+																<InfoIcon color={"disabled"} />
+															</IconButton>
+														),
+														endAdornment
+												  )
+												: params.InputProps?.endAdornment;
+										})(),
+									}}
 									placeholder={placeholder}
 									onChange={(event) => {
 										void onSearchHandler(event.target.value);

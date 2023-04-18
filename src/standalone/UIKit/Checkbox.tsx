@@ -1,11 +1,12 @@
-import React, { CSSProperties } from "react";
+import React from "react";
 import {
 	Checkbox as MuiCheckbox,
-	withStyles,
 	SvgIcon,
 	CheckboxProps,
 	Theme,
-} from "@material-ui/core";
+} from "@mui/material";
+
+import { withStyles, CSSProperties } from "@mui/styles";
 
 export interface CheckboxTheme {
 	padding?: CSSProperties["padding"];
@@ -56,13 +57,13 @@ const StyledCheckbox = withStyles((theme: Theme) => ({
 		border: theme.componentsCare?.uiKit?.checkbox?.border,
 		borderRadius: theme.componentsCare?.uiKit?.checkbox?.borderRadius,
 		backgroundColor: theme.componentsCare?.uiKit?.checkbox?.backgroundColor,
-		"& span>svg": {
+		"& > svg": {
 			color: theme.componentsCare?.uiKit?.checkbox?.box?.color,
 			fill: theme.componentsCare?.uiKit?.checkbox?.box?.fill,
 			fontSize:
 				props.size == "small"
-					? theme.componentsCare?.uiKit?.checkbox?.small?.fontSize || ".75em"
-					: theme.componentsCare?.uiKit?.checkbox?.fontSize || "1em",
+					? theme.componentsCare?.uiKit?.checkbox?.small?.fontSize || "1em"
+					: theme.componentsCare?.uiKit?.checkbox?.fontSize,
 			borderWidth:
 				theme.componentsCare?.uiKit?.checkbox?.box?.borderWidth || "1px",
 			borderStyle:
@@ -92,7 +93,7 @@ const StyledCheckbox = withStyles((theme: Theme) => ({
 	disabled: {
 		backgroundColor:
 			theme.componentsCare?.uiKit?.checkbox?.disabled?.backgroundColor,
-		"& span>svg": {
+		"& > svg": {
 			color: theme.componentsCare?.uiKit?.checkbox?.disabled?.box?.color,
 			fill: theme.componentsCare?.uiKit?.checkbox?.disabled?.box?.fill,
 			...theme.componentsCare?.uiKit?.checkbox?.disabled?.box?.style,

@@ -1,4 +1,4 @@
-import { ClassNameMap } from "@material-ui/styles/withStyles";
+import { ClassNameMap } from "@mui/styles/withStyles";
 
 /**
  * Combine multiple useStyle hooks

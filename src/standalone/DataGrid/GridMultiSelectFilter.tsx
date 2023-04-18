@@ -4,17 +4,13 @@ import {
 	MultiSelectorData,
 	MultiSelectWithCheckBox,
 } from "../..";
-import {
-	Checkbox,
-	FormControlLabel,
-	Grid,
-	Typography,
-} from "@material-ui/core";
+import { Checkbox, FormControlLabel, Grid, Typography } from "@mui/material";
 import { useCustomFilterActiveContext } from "./Header/FilterBar";
 import { useDataGridStyles } from "./DataGrid";
-import { SelectProps } from "@material-ui/core/Select/Select";
-import { Breakpoint } from "@material-ui/core/styles/createBreakpoints";
-import { GridSize } from "@material-ui/core/Grid/Grid";
+import { SelectProps } from "@mui/material/Select/Select";
+import { Breakpoint } from "@mui/material/styles";
+import { GridSize } from "@mui/material/Grid/Grid";
+import { SelectChangeEvent } from "@mui/material/Select/SelectInput";
 
 export interface GridMultiSelectFilterProps {
 	/**
@@ -99,7 +95,7 @@ const GridMultiSelectFilter = (props: GridMultiSelectFilterProps) => {
 	);
 
 	const handleSelectorChange = useCallback(
-		(event: React.ChangeEvent<{ value: unknown }>) => {
+		(event: SelectChangeEvent<string[]>) => {
 			onSelect(event.target.value as string[]);
 		},
 		[onSelect]

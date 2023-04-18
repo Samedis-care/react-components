@@ -1,19 +1,12 @@
-import React, { PureComponent } from "react";
-import {
-	Grid,
-	WithStyles,
-	withStyles,
-	Box,
-	Button,
-	Theme,
-	createStyles,
-} from "@material-ui/core";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { Grid, Box, Button, Theme } from "@mui/material";
 import moment, { Moment } from "moment";
 import ScrollableScheduleWeek from "./ScrollableScheduleWeek";
 import InfiniteScroll from "../../InfiniteScroll";
 import { IDayData, ScheduleFilterDefinition } from "../Common/DayContents";
-import i18n from "../../../i18n";
 import { combineClassNames } from "../../../utils";
+import useCCTranslations from "../../../utils/useCCTranslations";
+import makeStyles from "@mui/styles/makeStyles";
 
 /**
  * Callback to load week data from a data source
@@ -28,7 +21,7 @@ export type LoadWeekCallback = (
 	filter: string | null
 ) => IDayData[][] | Promise<IDayData[][]>;
 
-export interface ScrollableScheduleProps extends WithStyles {
+export interface ScrollableScheduleProps {
 	/**
 	 * CSS Class which specifies the infinite scroll height
 	 */
@@ -50,7 +43,7 @@ export interface ScrollableScheduleProps extends WithStyles {
  */
 export type IProps = ScrollableScheduleProps;
 
-interface IState {
+interface ScrollableScheduleState {
 	/**
 	 * Array of ScrollableScheduleWeek components
 	 */
@@ -73,190 +66,193 @@ interface IState {
 	filterValue: string | null;
 }
 
-class ScrollableSchedule extends PureComponent<
-	ScrollableScheduleProps,
-	IState
-> {
-	public todayElem: HTMLElement | null = null;
-	public scrollElem: InfiniteScroll | null = null;
+const useStyles = makeStyles(
+	(theme: Theme) => ({
+		today: {
+			backgroundColor: theme.palette.primary.main,
+			color: theme.palette.getContrastText(theme.palette.primary.main),
+			borderRadius: `${theme.shape.borderRadius}px ${theme.shape.borderRadius}px 0 0`,
+		},
+		todayBtn: {
+			textTransform: "none",
+			textAlign: "left",
+			color: "inherit",
+			display: "block",
+		},
+		scroller: {
+			overflow: "auto",
+			borderRadius: `0 0 ${theme.shape.borderRadius}px ${theme.shape.borderRadius}px`,
+			position: "relative",
+		},
+		filterWrapper: {
+			top: "50%",
+			position: "relative",
+			transform: "translateY(-50%)",
+		},
+		filterSelect: {
+			backgroundColor: "transparent",
+			border: "none",
+			color: theme.palette.getContrastText(theme.palette.primary.main),
+			cursor: "pointer",
+		},
+	}),
+	{ name: "CcScrollableSchedule" }
+);
 
-	constructor(props: ScrollableScheduleProps) {
-		super(props);
+const preventAction = (evt: React.MouseEvent) => {
+	evt.stopPropagation();
+};
 
-		this.state = this.getDefaultState();
-	}
+const ScrollableSchedule = (props: ScrollableScheduleProps) => {
+	const { loadWeekCallback, filter, wrapperClass } = props;
+	const { i18n } = useCCTranslations();
+	const classes = useStyles();
+	const todayElem = useRef<HTMLElement | null>(null);
+	const scrollElem = useRef<InfiniteScroll | null>(null);
 
-	componentDidMount() {
-		i18n.on("languageChanged", this.onLanguageChanged);
-	}
+	const getDefaultState = useCallback(
+		() => ({
+			items: [],
+			dataOffsetTop: -1,
+			dataOffsetBottom: 0,
+			today: moment(),
+			filterValue: filter?.defaultValue ?? null,
+		}),
+		[filter]
+	);
 
-	componentWillUnmount() {
-		i18n.off("languageChanged", this.onLanguageChanged);
-	}
+	const [state, setState] = useState<ScrollableScheduleState>(getDefaultState);
 
-	getDefaultState = () => ({
-		items: [],
-		dataOffsetTop: -1,
-		dataOffsetBottom: 0,
-		today: moment(),
-		filterValue: this.props.filter?.defaultValue ?? null,
-	});
-
-	render() {
-		return (
-			<Grid container>
-				<Grid
-					item
-					xs={12}
-					className={this.props.classes.today}
-					onClick={this.jumpToToday}
-				>
-					<Grid container justify={"space-between"}>
-						<Grid item>
-							<Button
-								className={this.props.classes.todayBtn}
-								onClick={this.jumpToToday}
-								fullWidth
-							>
-								<Box m={2}>{this.state.today.format("ddd DD MMMM")}</Box>
-							</Button>
-						</Grid>
-						<Grid item>
-							{this.props.filter && (
-								<Box px={2} className={this.props.classes.filterWrapper}>
-									<select
-										onClick={this.preventAction}
-										className={this.props.classes.filterSelect}
-										value={this.state.filterValue ?? ""}
-										onChange={this.handleFilterSelect}
-									>
-										{Object.entries(this.props.filter.options).map(
-											([value, label]) => (
-												<option value={value} key={value}>
-													{label}
-												</option>
-											)
-										)}
-									</select>
-								</Box>
-							)}
-						</Grid>
-					</Grid>
-				</Grid>
-				<Grid item xs={12}>
-					<InfiniteScroll
-						className={combineClassNames([
-							this.props.wrapperClass,
-							this.props.classes.scroller,
-						])}
-						loadMoreTop={this.loadMoreTop}
-						loadMoreBottom={this.loadMoreBottom}
-						ref={this.setScrollElemRef}
-					>
-						<Box m={2}>
-							<Grid container spacing={2}>
-								{this.state.items}
-							</Grid>
-						</Box>
-					</InfiniteScroll>
-				</Grid>
-			</Grid>
-		);
-	}
-
-	/**
-	 * Loads more data on top of the scroller
-	 */
-	loadMoreTop = () => this.loadMore(true);
-	/**
-	 * Loads more data at the bottom of the scroller
-	 */
-	loadMoreBottom = () => this.loadMore(false);
-	/**
-	 * Sets the scroller reference to control scrolling
-	 * @param elem The scroller element
-	 */
-	setScrollElemRef = (elem: InfiniteScroll | null) => (this.scrollElem = elem);
+	useEffect(() => {
+		const onLanguageChanged = () => {
+			setState(getDefaultState);
+		};
+		i18n.on("languageChanged", onLanguageChanged);
+		return () => {
+			i18n.off("languageChanged", onLanguageChanged);
+		};
+	}, [getDefaultState, i18n]);
 
 	/**
 	 * Loads more data in the infinite scroll
 	 * @param top load more data on top? (if false loads more data at bottom)
 	 */
-	loadMore = (top: boolean) => {
-		const page = top ? this.state.dataOffsetTop : this.state.dataOffsetBottom;
-		const item = (
-			<ScrollableScheduleWeek
-				key={page.toString()}
-				loadData={() =>
-					this.props.loadWeekCallback(page, this.state.filterValue)
-				}
-				setTodayElement={(elem: HTMLElement | null) => (this.todayElem = elem)}
-				moment={this.state.today.clone().add(page - 1, "weeks")}
-			/>
-		);
-		if (top) {
-			this.setState((prevState) => ({
-				items: [item, ...prevState.items],
-				dataOffsetTop: prevState.dataOffsetTop - 1,
-			}));
-		} else {
-			this.setState((prevState) => ({
-				items: [...prevState.items, item],
-				dataOffsetBottom: prevState.dataOffsetBottom + 1,
-			}));
-		}
-	};
+	const loadMore = useCallback(
+		(top: boolean) => {
+			const page = top ? state.dataOffsetTop : state.dataOffsetBottom;
+			const item = (
+				<ScrollableScheduleWeek
+					key={page.toString()}
+					loadData={() => loadWeekCallback(page, state.filterValue)}
+					setTodayElement={(elem: HTMLElement | null) =>
+						(todayElem.current = elem)
+					}
+					moment={state.today.clone().add(page - 1, "weeks")}
+				/>
+			);
+			if (top) {
+				setState((prevState) => ({
+					...prevState,
+					items: [item, ...prevState.items],
+					dataOffsetTop: prevState.dataOffsetTop - 1,
+				}));
+			} else {
+				setState((prevState) => ({
+					...prevState,
+					items: [...prevState.items, item],
+					dataOffsetBottom: prevState.dataOffsetBottom + 1,
+				}));
+			}
+		},
+		[
+			loadWeekCallback,
+			state.dataOffsetBottom,
+			state.dataOffsetTop,
+			state.filterValue,
+			state.today,
+		]
+	);
 
-	jumpToToday = () => {
-		if (!this.todayElem || !this.scrollElem || !this.scrollElem.wrapper) {
+	/**
+	 * Loads more data on top of the scroller
+	 */
+	const loadMoreTop = useCallback(() => loadMore(true), [loadMore]);
+	/**
+	 * Loads more data at the bottom of the scroller
+	 */
+	const loadMoreBottom = useCallback(() => loadMore(false), [loadMore]);
+
+	const jumpToToday = useCallback(() => {
+		if (
+			!todayElem.current ||
+			!scrollElem.current ||
+			!scrollElem.current.wrapper
+		) {
 			return;
 		}
 
-		this.scrollElem.wrapper.scrollTop = this.todayElem.offsetTop;
-	};
+		scrollElem.current.wrapper.scrollTop = todayElem.current.offsetTop;
+	}, []);
 
-	preventAction = (evt: React.MouseEvent) => {
-		evt.stopPropagation();
-	};
+	const handleFilterSelect = useCallback(
+		(evt: React.ChangeEvent<HTMLSelectElement>) => {
+			setState({
+				...getDefaultState(),
+				filterValue: evt.target.value,
+			});
+		},
+		[getDefaultState]
+	);
 
-	handleFilterSelect = (evt: React.ChangeEvent<HTMLSelectElement>) => {
-		this.setState({
-			...this.getDefaultState(),
-			filterValue: evt.target.value,
-		});
-	};
+	return (
+		<Grid container>
+			<Grid item xs={12} className={classes.today} onClick={jumpToToday}>
+				<Grid container justifyContent={"space-between"}>
+					<Grid item>
+						<Button
+							className={classes.todayBtn}
+							onClick={jumpToToday}
+							fullWidth
+						>
+							<Box m={2}>{state.today.format("ddd DD MMMM")}</Box>
+						</Button>
+					</Grid>
+					<Grid item>
+						{filter && (
+							<Box px={2} className={classes.filterWrapper}>
+								<select
+									onClick={preventAction}
+									className={classes.filterSelect}
+									value={state.filterValue ?? ""}
+									onChange={handleFilterSelect}
+								>
+									{Object.entries(filter.options).map(([value, label]) => (
+										<option value={value} key={value}>
+											{label}
+										</option>
+									))}
+								</select>
+							</Box>
+						)}
+					</Grid>
+				</Grid>
+			</Grid>
+			<Grid item xs={12}>
+				<InfiniteScroll
+					className={combineClassNames([wrapperClass, classes.scroller])}
+					loadMoreTop={loadMoreTop}
+					loadMoreBottom={loadMoreBottom}
+					ref={scrollElem}
+				>
+					<Box m={2}>
+						<Grid container spacing={2}>
+							{state.items}
+						</Grid>
+					</Box>
+				</InfiniteScroll>
+			</Grid>
+		</Grid>
+	);
+};
 
-	onLanguageChanged = () => this.setState(this.getDefaultState());
-}
-
-const styles = createStyles((theme: Theme) => ({
-	today: {
-		backgroundColor: theme.palette.primary.main,
-		color: theme.palette.getContrastText(theme.palette.primary.main),
-		borderRadius: `${theme.shape.borderRadius}px ${theme.shape.borderRadius}px 0 0`,
-	},
-	todayBtn: {
-		textTransform: "none",
-		textAlign: "left",
-		color: "inherit",
-		display: "block",
-	},
-	scroller: {
-		overflow: "auto",
-		borderRadius: `0 0 ${theme.shape.borderRadius}px ${theme.shape.borderRadius}px`,
-		position: "relative",
-	},
-	filterWrapper: {
-		top: "50%",
-		position: "relative",
-		transform: "translateY(-50%)",
-	},
-	filterSelect: {
-		backgroundColor: "transparent",
-		border: "none",
-		color: theme.palette.getContrastText(theme.palette.primary.main),
-		cursor: "pointer",
-	},
-}));
-
-export default withStyles(styles)(ScrollableSchedule);
+export default React.memo(ScrollableSchedule);

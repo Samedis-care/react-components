@@ -1,5 +1,5 @@
 import React, { useCallback } from "react";
-import { Grid } from "@material-ui/core";
+import { Grid } from "@mui/material";
 import XLSX from "xlsx";
 import GenericDataPreview from "./GenericDataPreview";
 import { CrudImporterStepProps } from "./index";
@@ -129,7 +129,7 @@ const Step1LoadData = (props: ImportStep1Props) => {
 		<Grid
 			container
 			direction={"column"}
-			justify={"space-between"}
+			justifyContent={"space-between"}
 			alignItems={"stretch"}
 			wrap={"nowrap"}
 			style={{ height: "100%" }}

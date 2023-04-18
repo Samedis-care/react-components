@@ -1,12 +1,7 @@
 import React, { CSSProperties, useCallback, useState } from "react";
-import {
-	Grid,
-	GridProps,
-	IconButton,
-	IconButtonProps,
-} from "@material-ui/core";
-import { DoubleArrow } from "@material-ui/icons";
-import { makeStyles } from "@material-ui/core/styles";
+import { Grid, GridProps, IconButton, IconButtonProps } from "@mui/material";
+import { DoubleArrow } from "@mui/icons-material";
+import makeStyles from "@mui/styles/makeStyles";
 import { usePortalLayoutContext } from "./Layout";
 import { combineClassNames } from "../../utils";
 
@@ -68,7 +63,7 @@ const CollapsibleMenu = (props: CollapsibleMenuProps) => {
 	return (
 		<Grid
 			container
-			justify={"flex-start"}
+			justifyContent={"flex-start"}
 			alignItems={"stretch"}
 			wrap={"nowrap"}
 			style={collapsed ? { overflow: "visible" } : undefined} // this is needed to force update the scrollbar, otherwise we're wasting space with a scrollbar placeholder
@@ -91,6 +86,7 @@ const CollapsibleMenu = (props: CollapsibleMenuProps) => {
 					<IconButton
 						onClick={toggleCollapsed}
 						className={props.customClasses?.button}
+						size="large"
 					>
 						<DoubleArrow
 							className={collapsed ? classes.iconOpen : classes.iconClose}

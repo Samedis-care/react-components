@@ -1,5 +1,4 @@
 import React from "react";
-import { PropTypes } from "@material-ui/core";
 
 /**
  * Configuration for a dialog button
@@ -20,7 +19,7 @@ export interface IDialogButtonConfig {
 	/**
 	 * The color of the button
 	 */
-	color?: PropTypes.Color;
+	color?: "primary" | "secondary";
 	/**
 	 * Set to true to prevent closing the dialog
 	 */

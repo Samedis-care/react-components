@@ -1,26 +1,24 @@
-import React, { CSSProperties } from "react";
+import React from "react";
 import {
 	Select,
 	SelectProps,
-	withStyles,
 	MenuItem,
 	Checkbox,
 	ListItemText,
-	makeStyles,
 	Theme,
 	InputBase,
 	SelectClassKey,
 	InputLabel,
-} from "@material-ui/core";
-import { ExpandMore } from "@material-ui/icons";
-import { ClassNameMap } from "@material-ui/styles/withStyles";
+} from "@mui/material";
+import { ExpandMore } from "@mui/icons-material";
+import { ClassNameMap } from "@mui/styles/withStyles";
 import { cleanClassMap, makeThemeStyles } from "../../utils";
-import { Styles } from "@material-ui/core/styles/withStyles";
+import { makeStyles, withStyles, Styles, CSSProperties } from "@mui/styles";
 import { MultiSelectorData } from "./MultiSelect";
 import { getStringLabel } from "./BaseSelector";
 import uniqueArray from "../../utils/uniqueArray";
 
-export interface MultiSelectWithCheckBoxProps extends SelectProps {
+export interface MultiSelectWithCheckBoxProps extends SelectProps<string[]> {
 	/**
 	 * Selector options
 	 */
@@ -61,7 +59,7 @@ const useStyles = makeStyles(
 	{ name: "CcMultiSelectWithCheckBox" }
 );
 
-const MenuItemCustom = withStyles((theme) => ({
+const MenuItemCustom = withStyles((theme: Theme) => ({
 	selected: {
 		backgroundColor: "white !important",
 		...theme.componentsCare?.selectorWithCheckbox?.itemSelectedStyle,
@@ -70,29 +68,29 @@ const MenuItemCustom = withStyles((theme) => ({
 			...theme.componentsCare?.selectorWithCheckbox?.itemSelectedHoverStyle,
 		},
 	},
-}))(MenuItem);
+}))(MenuItem) as typeof MenuItem;
 
 const MenuItemGroup = withStyles({
 	root: {
 		paddingTop: 0,
 		paddingBottom: 0,
 	},
-})(MenuItem);
+})(MenuItem) as typeof MenuItem;
 
-const ListItemTextCustom = withStyles((theme) => ({
+const ListItemTextCustom = withStyles((theme: Theme) => ({
 	primary: {
 		fontSize: 13,
 		...theme.componentsCare?.selectorWithCheckbox?.itemTextPrimaryStyle,
 	},
-}))(ListItemText);
+}))(ListItemText) as typeof ListItemText;
 
-const GroupItemText = withStyles((theme) => ({
+const GroupItemText = withStyles((theme: Theme) => ({
 	root: {
 		...(theme.typography.caption as CSSProperties),
 		marginTop: 0,
 		marginBottom: 0,
 	},
-}))(ListItemText);
+}))(ListItemText) as typeof ListItemText;
 
 const InputCustom = withStyles((theme: Theme) => ({
 	root: {
@@ -113,10 +111,10 @@ const InputCustom = withStyles((theme: Theme) => ({
 			...theme.componentsCare?.selectorWithCheckbox?.inputFocusStyle,
 		},
 	},
-}))(InputBase);
+}))(InputBase) as typeof InputBase;
 
 export type MultiSelectWithCheckBoxThemeExpert = Partial<
-	Styles<Theme, SelectProps, SelectClassKey>
+	Styles<Theme, SelectProps<string[]>, SelectClassKey>
 >;
 
 const useSelectStyles = makeThemeStyles(
@@ -175,7 +173,6 @@ const MultiSelectWithCheckBox = (props: MultiSelectWithCheckBoxProps) => {
 						vertical: "top",
 						horizontal: "left",
 					},
-					getContentAnchorEl: null,
 					PaperProps: {
 						style: {
 							marginTop: 5,

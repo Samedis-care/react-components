@@ -5,7 +5,7 @@ import {
 	IconButtonProps,
 	Typography,
 	TypographyProps,
-} from "@material-ui/core";
+} from "@mui/material";
 
 export interface IconButtonWithTextProps {
 	IconButtonProps?: Omit<IconButtonProps, "children" | "onClick">;
@@ -18,7 +18,11 @@ export interface IconButtonWithTextProps {
 const IconButtonWithText = (props: IconButtonWithTextProps) => (
 	<Grid container direction={"column"} alignItems={"center"}>
 		<Grid item>
-			<IconButton onClick={props.onClick} {...props.IconButtonProps}>
+			<IconButton
+				onClick={props.onClick}
+				{...props.IconButtonProps}
+				size="large"
+			>
 				{props.icon}
 			</IconButton>
 		</Grid>

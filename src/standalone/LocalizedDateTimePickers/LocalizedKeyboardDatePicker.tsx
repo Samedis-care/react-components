@@ -1,75 +1,71 @@
 import React from "react";
-import TypeDate from "../../backend-integration/Model/Types/TypeDate";
-import {
-	KeyboardDatePicker,
-	KeyboardDatePickerProps,
-} from "@material-ui/pickers";
-import { Event as CalendarIcon } from "@material-ui/icons";
-import { useTheme } from "@material-ui/core";
-import useCCTranslations from "../../utils/useCCTranslations";
+import { DatePicker, DatePickerProps } from "@mui/x-date-pickers";
+import { TextFieldProps, useTheme } from "@mui/material";
 import { withMuiWarning } from "../UIKit";
+import { Moment } from "moment";
 
 export interface LocalizedKeyboardDatePickerProps
-	extends Omit<
-		KeyboardDatePickerProps,
-		| "invalidLabel"
-		| "cancelLabel"
-		| "clearLabel"
-		| "okLabel"
-		| "todayLabel"
-		| "invalidDateMessage"
-		| "minDateMessage"
-		| "maxDateMessage"
-		| "format"
-		| "refuse"
-		| "rifmFormatter"
-	> {
+	extends Omit<DatePickerProps<Moment | null>, "format"> {
 	/**
 	 * Boolean flag to hide Calendar Icon (only used if disabled is truthy)
 	 */
 	hideDisabledIcon?: boolean;
+	/**
+	 * Set required flag for text field input
+	 */
+	required?: TextFieldProps["required"];
+	/**
+	 * Set error flag for text field input
+	 */
+	error?: TextFieldProps["error"];
+	/**
+	 * Set error flag for text field input
+	 */
+	fullWidth?: TextFieldProps["fullWidth"];
+	/**
+	 * onBlur callback for the text field input
+	 */
+	onBlur?: TextFieldProps["onBlur"];
 }
 
 const LocalizedKeyboardDatePicker = (
 	props: LocalizedKeyboardDatePickerProps
 ) => {
-	const { hideDisabledIcon, ...otherProps } = props;
-	const { t } = useCCTranslations();
+	const {
+		hideDisabledIcon,
+		required,
+		error,
+		fullWidth,
+		onBlur,
+		...otherProps
+	} = props;
 	const theme = useTheme();
 	const hideDisabledIcons =
-		theme.componentsCare?.uiKit?.hideDisabledIcons ?? hideDisabledIcon;
+		hideDisabledIcon ?? theme.componentsCare?.uiKit?.hideDisabledIcons;
+	const slotOverrideHideIcon = {
+		...otherProps.slots,
+		OpenPickerIcon: React.Fragment,
+	};
 
 	return (
-		<KeyboardDatePicker
-			invalidLabel={t(
-				"backend-integration.model.types.renderers.date.labels.invalid"
-			)}
-			cancelLabel={t(
-				"backend-integration.model.types.renderers.date.labels.cancel"
-			)}
-			clearLabel={t(
-				"backend-integration.model.types.renderers.date.labels.clear"
-			)}
-			okLabel={t("backend-integration.model.types.renderers.date.labels.ok")}
-			todayLabel={t(
-				"backend-integration.model.types.renderers.date.labels.today"
-			)}
-			invalidDateMessage={t(
-				"backend-integration.model.types.renderers.date.labels.invalid-date"
-			)}
-			minDateMessage={t(
-				"backend-integration.model.types.renderers.date.labels.min-date"
-			)}
-			maxDateMessage={t(
-				"backend-integration.model.types.renderers.date.labels.max-date"
-			)}
+		<DatePicker
 			format={"L"}
-			refuse={/([^0-9./-])/gi}
-			rifmFormatter={TypeDate.format}
-			keyboardIcon={
-				hideDisabledIcons && props.disabled ? null : <CalendarIcon />
-			}
 			{...otherProps}
+			slots={
+				otherProps.disabled && hideDisabledIcons
+					? slotOverrideHideIcon
+					: otherProps.slots
+			}
+			slotProps={{
+				...otherProps.slotProps,
+				textField: {
+					required,
+					error,
+					fullWidth,
+					onBlur,
+					...otherProps.slotProps?.textField,
+				},
+			}}
 		/>
 	);
 };

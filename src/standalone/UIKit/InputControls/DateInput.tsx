@@ -1,12 +1,13 @@
 import React from "react";
-import { TextFieldProps } from "@material-ui/core";
-import { KeyboardDatePickerProps } from "@material-ui/pickers";
+import { DatePickerProps } from "@mui/x-date-pickers";
 import { InputLabelConfig } from "../CommonStyles";
 import { LocalizedKeyboardDatePicker } from "../../../standalone/LocalizedDateTimePickers";
 import TextFieldWithHelp, {
 	TextFieldWithHelpProps,
 } from "../TextFieldWithHelp";
 import { localDateToUtcDate } from "../../../utils";
+import moment, { Moment } from "moment";
+import { LocalizedKeyboardDatePickerProps } from "../../LocalizedDateTimePickers/LocalizedKeyboardDatePicker";
 
 export interface DateInputProps extends TextFieldWithHelpProps {
 	/**
@@ -22,30 +23,61 @@ export interface DateInputProps extends TextFieldWithHelpProps {
 	 * Boolean flag to hide Calendar Icon (only used if disabled is truthy)
 	 */
 	hideDisabledIcon?: boolean;
+	/**
+	 * required flag passed to text field
+	 */
+	required?: LocalizedKeyboardDatePickerProps["required"];
+	/**
+	 * error flag passed to text field
+	 */
+	error?: LocalizedKeyboardDatePickerProps["error"];
+	/**
+	 * fullWidth flag passed to text field
+	 */
+	fullWidth?: LocalizedKeyboardDatePickerProps["fullWidth"];
+	/**
+	 * onBlur callback passed to text field
+	 */
+	onBlur?: LocalizedKeyboardDatePickerProps["onBlur"];
 }
 
-const CustomInput = React.forwardRef<HTMLDivElement>(
-	function DateInputCustomTextField(props: TextFieldProps, ref) {
-		return <TextFieldWithHelp {...props} ref={ref} />;
-	}
-);
-
 const DateInput = (
-	props: DateInputProps & Omit<KeyboardDatePickerProps, "value" | "onChange">
+	props: DateInputProps &
+		Omit<DatePickerProps<Moment | null>, "value" | "onChange">
 ) => {
-	const { value, onChange, hideDisabledIcon, ...muiProps } = props;
+	const {
+		value,
+		onChange,
+		hideDisabledIcon,
+		required,
+		error,
+		fullWidth,
+		onBlur,
+		...muiProps
+	} = props;
 
 	return (
 		<LocalizedKeyboardDatePicker
 			{...muiProps}
-			value={value}
+			value={value ? moment(value) : null}
 			onChange={(date) =>
 				date ? onChange(localDateToUtcDate(date.toDate())) : onChange(null)
 			}
-			clearable
 			hideDisabledIcon={hideDisabledIcon}
-			TextFieldComponent={CustomInput}
-			InputLabelProps={InputLabelConfig}
+			required={required}
+			error={error}
+			fullWidth={fullWidth}
+			onBlur={onBlur}
+			slots={{
+				textField: TextFieldWithHelp,
+			}}
+			slotProps={{
+				...muiProps.slotProps,
+				textField: {
+					InputLabelProps: InputLabelConfig,
+					...muiProps.slotProps?.textField,
+				},
+			}}
 		/>
 	);
 };

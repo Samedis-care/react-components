@@ -5,7 +5,7 @@ import {
 	Switch,
 	SwitchProps,
 	Typography,
-} from "@material-ui/core";
+} from "@mui/material";
 import { ModelRenderParams } from "../../../index";
 import TypeBoolean from "../../TypeBoolean";
 import ccI18n from "../../../../../i18n";

@@ -1,5 +1,5 @@
 import React, { PureComponent } from "react";
-import { CircularProgress, Divider, Grid } from "@material-ui/core";
+import { CircularProgress, Divider, Grid } from "@mui/material";
 import ScrollableScheduleDay from "./ScrollableScheduleDay";
 import moment, { Moment } from "moment";
 import { IDayData } from "../Common/DayContents";
@@ -65,7 +65,7 @@ class ScrollableScheduleWeek extends PureComponent<IProps, IState> {
 		if (!this.state.data) {
 			return (
 				<Grid item xs={12}>
-					<Grid container justify={"space-around"}>
+					<Grid container justifyContent={"space-around"}>
 						<CircularProgress />
 					</Grid>
 				</Grid>

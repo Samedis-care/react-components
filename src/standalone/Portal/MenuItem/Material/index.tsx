@@ -1,13 +1,13 @@
-import React, { CSSProperties } from "react";
+import React from "react";
 import { MenuItemProps } from "../../Menu";
 import {
-	ListItem,
+	ListItemButton,
 	ListItemIcon,
 	ListItemText,
-	withStyles,
 	Theme,
-} from "@material-ui/core";
-import { ExpandLess, ExpandMore } from "@material-ui/icons";
+} from "@mui/material";
+import { withStyles, CSSProperties } from "@mui/styles";
+import { ExpandLess, ExpandMore } from "@mui/icons-material";
 
 export interface MenuItemTheme {
 	borderRadius?: CSSProperties["borderRadius"];
@@ -44,13 +44,12 @@ const StyledListItem = withStyles((theme: Theme) => ({
 		},
 		...theme.componentsCare?.portal?.menuItem?.style,
 	},
-}))(ListItem);
+}))(ListItemButton) as typeof ListItemButton;
 
 const MenuItemMaterial = (props: MenuItemProps) => {
 	const Icon = props.icon;
 	return (
 		<StyledListItem
-			button
 			onClick={props.onClick}
 			onAuxClick={props.onAuxClick}
 			selected={props.active}

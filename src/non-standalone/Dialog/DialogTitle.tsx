@@ -1,8 +1,8 @@
 import React from "react";
-import MuiDialogTitle from "@material-ui/core/DialogTitle";
-import { makeStyles } from "@material-ui/core/styles";
-import { Close } from "@material-ui/icons";
-import { Grid, IconButton, Typography } from "@material-ui/core";
+import { DialogTitle as MuiDialogTitle } from "@mui/material";
+import makeStyles from "@mui/styles/makeStyles";
+import { Close } from "@mui/icons-material";
+import { Grid, IconButton, Typography } from "@mui/material";
 import { combineClassNames } from "../../utils";
 
 const useClasses = makeStyles(
@@ -14,7 +14,7 @@ const useClasses = makeStyles(
 		},
 		closeButton: {
 			color: theme.palette.grey[500],
-			padding: theme.spacing(1) / 2,
+			padding: `calc(${theme.spacing(1)} / 2)`,
 			zIndex: 1,
 		},
 		text: {
@@ -45,7 +45,6 @@ const DialogTitleRaw = (props: DialogTitleProps) => {
 	return (
 		<MuiDialogTitle
 			id={id}
-			disableTypography
 			className={combineClassNames([noTitle && classes.noTitle])}
 		>
 			<Grid container wrap={"nowrap"}>
@@ -61,6 +60,7 @@ const DialogTitleRaw = (props: DialogTitleProps) => {
 							aria-label="Close"
 							className={classes.closeButton}
 							onClick={onClose}
+							size="large"
 						>
 							<Close />
 						</IconButton>

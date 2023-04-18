@@ -70,8 +70,7 @@ class RendererYourType extends ModelDataTypeYourType {
 		// if the control is not editable we show a basic read-only view. If visibility.grid is true don't show the label
 		return (
 			<Typography>
-				{visibility.grid && `${label} `}:
-				{value}
+				{visibility.grid && `${label} `}:{value}
 			</Typography>
 		);
 	}

@@ -1,5 +1,5 @@
 import React from "react";
-import { Typography } from "@material-ui/core";
+import { Typography } from "@mui/material";
 import { ModelRenderParams } from "../../../index";
 import { ColorInput, FormHelperTextCC } from "../../../../../standalone";
 import { ColorInputProps } from "../../../../../standalone/UIKit/InputControls/ColorInput";

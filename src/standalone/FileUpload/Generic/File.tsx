@@ -1,11 +1,11 @@
 import React, { useCallback } from "react";
-import { Grid, SvgIconProps, Tooltip, Typography } from "@material-ui/core";
+import { Grid, SvgIconProps, Tooltip, Typography } from "@mui/material";
 import {
 	InsertDriveFile as DefaultFileIcon,
 	CancelOutlined as CancelIcon,
 	Cancel as CancelIconList,
-} from "@material-ui/icons";
-import { makeStyles } from "@material-ui/core/styles";
+} from "@mui/icons-material";
+import makeStyles from "@mui/styles/makeStyles";
 import {
 	ArchiveFileIcon,
 	AudioFileIcon,

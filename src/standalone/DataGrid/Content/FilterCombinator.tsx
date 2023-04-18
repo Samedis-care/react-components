@@ -1,5 +1,5 @@
 import React, { useCallback } from "react";
-import { Grid, Switch, Typography } from "@material-ui/core";
+import { Grid, Switch, Typography } from "@mui/material";
 import { FilterComboType } from "./FilterEntry";
 
 interface IProps {
@@ -30,7 +30,7 @@ const FilterCombinator = (props: IProps) => {
 				<Grid
 					component="label"
 					container
-					justify={"space-between"}
+					justifyContent={"space-between"}
 					alignItems="center"
 					spacing={1}
 				>

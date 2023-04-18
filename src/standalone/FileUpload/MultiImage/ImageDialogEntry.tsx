@@ -1,21 +1,21 @@
 import React, { useCallback } from "react";
 import ImageBox, { ImageBoxProps } from "./ImageBox";
-import { Box, Grid, Theme, Typography } from "@material-ui/core";
+import { Box, Grid, Theme, Typography } from "@mui/material";
 import {
 	Star as StarredIcon,
 	StarOutline as NotStarredIcon,
-} from "@material-ui/icons";
+} from "@mui/icons-material";
 import {
 	MultiImageImage,
 	MultiImageManipulationCallback,
 	MultiImageProcessFile,
 	MultiImageProps,
 } from "./MultiImage";
-import { makeStyles } from "@material-ui/core/styles";
+import { Styles } from "@mui/styles";
+import makeStyles from "@mui/styles/makeStyles";
 import useCCTranslations from "../../../utils/useCCTranslations";
-import { Styles } from "@material-ui/core/styles/withStyles";
 import { makeThemeStyles } from "../../../utils";
-import { ClassNameMap } from "@material-ui/styles/withStyles";
+import { ClassNameMap } from "@mui/styles/withStyles";
 
 export interface ImageDialogEntryProps
 	extends Pick<MultiImageProps, "previewSize"> {
@@ -149,7 +149,7 @@ const ImageDialogEntry = (props: ImageDialogEntryProps) => {
 					container
 					spacing={1}
 					alignItems={"center"}
-					justify={"flex-start"}
+					justifyContent={"flex-start"}
 					className={isPrimary ? undefined : classes.clickable}
 					onClick={isPrimary ? undefined : setPrimary}
 				>

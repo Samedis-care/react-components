@@ -162,16 +162,6 @@
 						"false": "No"
 					},
 					"date": {
-						"labels": {
-							"invalid": "Invalid",
-							"cancel": "Cancel",
-							"clear": "Clear",
-							"ok": "OK",
-							"today": "Today",
-							"invalid-date": "Invalid date format",
-							"max-date": "Date should not be after maximal date",
-							"min-date": "Date should not be before minimal date"
-						},
 						"not-set": "Date not set",
 						"validation-error": "Please enter a valid date"
 					},

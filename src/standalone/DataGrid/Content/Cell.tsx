@@ -14,7 +14,7 @@ import React, {
 import { GridChildComponentProps } from "react-window";
 import ColumnHeader from "./ColumnHeader";
 import SelectRow, { isSelected } from "./SelectRow";
-import { Skeleton } from "@material-ui/lab";
+import { Skeleton } from "@mui/material";
 import { combineClassNames } from "../../../utils";
 
 export interface CellContextType {
@@ -88,7 +88,7 @@ const Cell = (props: GridChildComponentProps): React.ReactElement => {
 		content = record ? (
 			<SelectRow record={record} />
 		) : (
-			<Skeleton variant={"rect"} />
+			<Skeleton variant="rectangular" />
 		);
 	} else {
 		content = record ? record[column.field] : <Skeleton variant={"text"} />;
