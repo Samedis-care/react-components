@@ -1,0 +1,15 @@
+import { useCallback } from "react";
+import { useDepsDiffLog } from "./useMemoDebug";
+/**
+ * useCallback but logs which dependencies change for analysis
+ * @param callback The useCallback callback (first param)
+ * @param deps The useCallback dependency array (second param)
+ * @param name The name for this debug (used for logging)
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+var useCallbackDebug = function (callback, deps, name) {
+    useDepsDiffLog(deps, name !== null && name !== void 0 ? name : "useCallbackDebug");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    return useCallback(callback, deps);
+};
+export default useCallbackDebug;
