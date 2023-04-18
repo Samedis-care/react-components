@@ -52,8 +52,7 @@ jobs:
           rmdir ../build_out
           git add package.json package-lock.json dist LICENSE
           git status
-          git commit -m "$commit_message"
-          git push -f origin master_dist
+          git commit -m "$commit_message" && git push -f origin master_dist || echo "No changes"
       #- name: Generate Storybook
       #  run: npm run deploy-storybook -- --ci
       #  env:
