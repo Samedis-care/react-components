@@ -42,11 +42,12 @@ jobs:
           git config user.name "GitHub Actions Bot"
           git config user.email "<>"
           commit_message="Release build based on commit $(git rev-parse --short HEAD) from $(git show -s --format=%ci)"
+          git fetch
           mkdir ../build_out
           mv package.json package-lock.json dist LICENSE ../build_out
           git checkout -f master_dist || git checkout --orphan master_dist
           rm -f .gitignore
-          git rm -rf --cached .
+          git rm -rf .
           mv ../build_out/* .
           rmdir ../build_out
           git add --all
