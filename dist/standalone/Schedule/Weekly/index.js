@@ -45,7 +45,9 @@ import { ToDateLocaleStringOptions } from "../../../constants";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import makeStyles from "@mui/styles/makeStyles";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
-import { normalizeMoment } from "../../../backend-integration/Model/Types/Utils/DateUtils";
+var normalizeMoment = function (instance) {
+    return instance.weekday(0).hour(0).minute(0).second(0).millisecond(0);
+};
 var nowNormalized = function () { return normalizeMoment(moment()); };
 var useStyles = makeStyles({
     todayBtn: {
