@@ -10,7 +10,6 @@ import { ToDateLocaleStringOptions } from "../../../constants";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import makeStyles from "@mui/styles/makeStyles";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
-import { normalizeMoment } from "../../../backend-integration/Model/Types/Utils/DateUtils";
 
 export interface WeekViewProps {
 	/**
@@ -29,6 +28,8 @@ export interface WeekViewProps {
 	filter?: ScheduleFilterDefinition;
 }
 
+const normalizeMoment = (instance: Moment) =>
+	instance.weekday(0).hour(0).minute(0).second(0).millisecond(0);
 const nowNormalized = () => normalizeMoment(moment());
 
 const useStyles = makeStyles(
