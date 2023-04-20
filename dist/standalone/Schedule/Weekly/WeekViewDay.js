@@ -22,6 +22,9 @@ var useStyles = makeStyles(function (theme) { return ({
     last: {
         borderRadius: "0 ".concat(theme.shape.borderRadius, "px ").concat(theme.shape.borderRadius, "px 0"),
     },
+    dayContents: {
+        minHeight: 150,
+    },
 }); }, { name: "CcWeekViewDay" });
 var WeekViewDay = function (props) {
     var classes = useStyles();
@@ -43,7 +46,7 @@ var WeekViewDay = function (props) {
                     React.createElement(Divider, null)),
                 React.createElement(Grid, { item: true, xs: 12 },
                     React.createElement(Box, { m: 1 }, props.date)),
-                React.createElement(Grid, { item: true, xs: 12 },
+                React.createElement(Grid, { item: true, xs: 12, className: classes.dayContents },
                     React.createElement(Box, { m: 1 },
                         React.createElement(DayContents, { data: props.data })))))));
 };
