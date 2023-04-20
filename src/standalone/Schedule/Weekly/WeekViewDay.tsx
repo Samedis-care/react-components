@@ -44,6 +44,9 @@ const useStyles = makeStyles(
 		last: {
 			borderRadius: `0 ${theme.shape.borderRadius}px ${theme.shape.borderRadius}px 0`,
 		},
+		dayContents: {
+			minHeight: 150,
+		},
 	}),
 	{ name: "CcWeekViewDay" }
 );
@@ -78,7 +81,7 @@ const WeekViewDay = (props: WeekViewDayProps) => {
 					<Grid item xs={12}>
 						<Box m={1}>{props.date}</Box>
 					</Grid>
-					<Grid item xs={12}>
+					<Grid item xs={12} className={classes.dayContents}>
 						<Box m={1}>
 							<DayContents data={props.data} />
 						</Box>
