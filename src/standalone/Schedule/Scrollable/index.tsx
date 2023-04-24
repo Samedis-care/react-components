@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Grid, Box, Button, Theme } from "@mui/material";
+import { Grid, Box, Button, Theme, IconButton, Menu } from "@mui/material";
+import { Settings as SettingsIcon } from "@mui/icons-material";
 import moment, { Moment } from "moment";
 import ScrollableScheduleWeek from "./ScrollableScheduleWeek";
 import InfiniteScroll from "../../InfiniteScroll";
@@ -7,6 +8,7 @@ import { IDayData, ScheduleFilterDefinition } from "../Common/DayContents";
 import { combineClassNames } from "../../../utils";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import makeStyles from "@mui/styles/makeStyles";
+import ScrollableFilterRenderer from "../Common/ScheduleFilterRenderers";
 
 /**
  * Callback to load week data from a data source
@@ -18,7 +20,7 @@ import makeStyles from "@mui/styles/makeStyles";
  */
 export type LoadWeekCallback = (
 	weekOffset: number,
-	filter: string | null
+	filters: Record<string, string | boolean>
 ) => IDayData[][] | Promise<IDayData[][]>;
 
 export interface ScrollableScheduleProps {
@@ -34,7 +36,7 @@ export interface ScrollableScheduleProps {
 	/**
 	 * Optional filter
 	 */
-	filter?: ScheduleFilterDefinition;
+	filters?: Record<string, ScheduleFilterDefinition>;
 }
 
 /**
@@ -43,7 +45,9 @@ export interface ScrollableScheduleProps {
  */
 export type IProps = ScrollableScheduleProps;
 
-interface ScrollableScheduleState {
+interface ScrollableScheduleState<
+	Filters extends Record<string, ScheduleFilterDefinition>
+> {
 	/**
 	 * Array of ScrollableScheduleWeek components
 	 */
@@ -63,7 +67,9 @@ interface ScrollableScheduleState {
 	/**
 	 * The selected filter value
 	 */
-	filterValue: string | null;
+	filterValues: {
+		[FilterName in keyof Filters]: Filters[FilterName]["defaultValue"];
+	};
 }
 
 const useStyles = makeStyles(
@@ -84,16 +90,13 @@ const useStyles = makeStyles(
 			borderRadius: `0 0 ${theme.shape.borderRadius}px ${theme.shape.borderRadius}px`,
 			position: "relative",
 		},
+		filterSettingsBtn: {
+			color: theme.palette.getContrastText(theme.palette.primary.main),
+		},
 		filterWrapper: {
 			top: "50%",
 			position: "relative",
 			transform: "translateY(-50%)",
-		},
-		filterSelect: {
-			backgroundColor: "transparent",
-			border: "none",
-			color: theme.palette.getContrastText(theme.palette.primary.main),
-			cursor: "pointer",
 		},
 	}),
 	{ name: "CcScrollableSchedule" }
@@ -103,29 +106,44 @@ const preventAction = (evt: React.MouseEvent) => {
 	evt.stopPropagation();
 };
 
+const EMPTY_FILTERS: Record<string, ScheduleFilterDefinition> = {};
+
 const ScrollableSchedule = (props: ScrollableScheduleProps) => {
-	const { loadWeekCallback, filter, wrapperClass } = props;
+	const { loadWeekCallback, wrapperClass } = props;
+	const filters = props.filters ?? EMPTY_FILTERS;
 	const { i18n } = useCCTranslations();
 	const classes = useStyles();
 	const todayElem = useRef<HTMLElement | null>(null);
 	const scrollElem = useRef<InfiniteScroll | null>(null);
 
 	const getDefaultState = useCallback(
-		() => ({
+		(): ScrollableScheduleState<typeof filters> => ({
 			items: [],
 			dataOffsetTop: -1,
 			dataOffsetBottom: 0,
 			today: moment(),
-			filterValue: filter?.defaultValue ?? null,
+			filterValues: filters
+				? Object.fromEntries(
+						Object.entries(filters).map(([key, filter]) => [
+							key,
+							filter.defaultValue,
+						])
+				  )
+				: {},
 		}),
-		[filter]
+		[filters]
 	);
 
-	const [state, setState] = useState<ScrollableScheduleState>(getDefaultState);
+	const [state, setState] = useState<ScrollableScheduleState<typeof filters>>(
+		getDefaultState
+	);
 
 	useEffect(() => {
 		const onLanguageChanged = () => {
-			setState(getDefaultState);
+			setState((prev) => ({
+				...getDefaultState(),
+				filterValues: prev.filterValues,
+			}));
 		};
 		i18n.on("languageChanged", onLanguageChanged);
 		return () => {
@@ -143,7 +161,7 @@ const ScrollableSchedule = (props: ScrollableScheduleProps) => {
 			const item = (
 				<ScrollableScheduleWeek
 					key={page.toString()}
-					loadData={() => loadWeekCallback(page, state.filterValue)}
+					loadData={() => loadWeekCallback(page, state.filterValues)}
 					setTodayElement={(elem: HTMLElement | null) =>
 						(todayElem.current = elem)
 					}
@@ -168,7 +186,7 @@ const ScrollableSchedule = (props: ScrollableScheduleProps) => {
 			loadWeekCallback,
 			state.dataOffsetBottom,
 			state.dataOffsetTop,
-			state.filterValue,
+			state.filterValues,
 			state.today,
 		]
 	);
@@ -194,15 +212,37 @@ const ScrollableSchedule = (props: ScrollableScheduleProps) => {
 		scrollElem.current.wrapper.scrollTop = todayElem.current.offsetTop;
 	}, []);
 
-	const handleFilterSelect = useCallback(
-		(evt: React.ChangeEvent<HTMLSelectElement>) => {
-			setState({
+	const handleFilterChange = useCallback(
+		(evt: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
+			setState((prev) => ({
 				...getDefaultState(),
-				filterValue: evt.target.value,
-			});
+				filterValues: {
+					...prev.filterValues,
+					[evt.target.name]:
+						evt.target.type === "checkbox"
+							? (evt.target as HTMLInputElement).checked
+							: evt.target.value,
+				},
+			}));
 		},
 		[getDefaultState]
 	);
+
+	const [
+		filterSettingsAnchorEl,
+		setFilterSettingsAnchorEl,
+	] = useState<HTMLElement | null>(null);
+	const openFilterSettings = useCallback(
+		(evt: React.MouseEvent<HTMLElement>) => {
+			setFilterSettingsAnchorEl(evt.currentTarget);
+		},
+		[]
+	);
+	const closeFiltersMenu = useCallback(() => {
+		setFilterSettingsAnchorEl(null);
+	}, []);
+
+	const filterCount = filters ? Object.keys(filters).length : 0;
 
 	return (
 		<Grid container>
@@ -218,20 +258,56 @@ const ScrollableSchedule = (props: ScrollableScheduleProps) => {
 						</Button>
 					</Grid>
 					<Grid item>
-						{filter && (
-							<Box px={2} className={classes.filterWrapper}>
-								<select
-									onClick={preventAction}
-									className={classes.filterSelect}
-									value={state.filterValue ?? ""}
-									onChange={handleFilterSelect}
-								>
-									{Object.entries(filter.options).map(([value, label]) => (
-										<option value={value} key={value}>
-											{label}
-										</option>
-									))}
-								</select>
+						{filterCount > 0 && (
+							<Box
+								px={2}
+								className={classes.filterWrapper}
+								onClick={preventAction}
+							>
+								{filterCount > 1 ? (
+									<>
+										<IconButton onClick={openFilterSettings}>
+											<SettingsIcon className={classes.filterSettingsBtn} />
+										</IconButton>
+										<Menu
+											open={filterSettingsAnchorEl != null}
+											anchorEl={filterSettingsAnchorEl}
+											onClose={closeFiltersMenu}
+										>
+											<Box p={1}>
+												<Grid container spacing={1}>
+													{Object.entries(filters).map(([name, filter]) => (
+														<Grid key={name} item xs={12}>
+															<ScrollableFilterRenderer
+																{...filter}
+																name={name}
+																value={
+																	filter.type === "select"
+																		? (state.filterValues[name] as string)
+																		: (state.filterValues[name] as boolean)
+																}
+																onChange={handleFilterChange}
+															/>
+														</Grid>
+													))}
+												</Grid>
+											</Box>
+										</Menu>
+									</>
+								) : (
+									(() => {
+										const [name, filter] = Object.entries(filters)[0];
+										return (
+											<ScrollableFilterRenderer
+												{...filter}
+												name={name}
+												value={state.filterValues[name]}
+												onChange={handleFilterChange}
+												inline={"scrollable"}
+											/>
+										);
+									})()
+								)}
 							</Box>
 						)}
 					</Grid>

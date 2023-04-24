@@ -22,7 +22,8 @@ export interface IDayData {
 	onAuxClick?: React.MouseEventHandler;
 }
 
-export interface ScheduleFilterDefinition {
+export interface ScheduleFilterDefinitionSelect {
+	type: "select";
 	/**
 	 * Filter options (value -> label)
 	 */
@@ -38,6 +39,28 @@ export interface ScheduleFilterDefinition {
 	 */
 	onChange?: (newFilter: string) => void;
 }
+
+export interface ScheduleFilterDefinitionSwitch {
+	type: "checkbox";
+	/**
+	 * Default filter value
+	 */
+	defaultValue: boolean;
+	/**
+	 * Change handler
+	 * @param newFilter the new filter value
+	 * @remarks Use to persist filter value
+	 */
+	onChange?: (newFilter: boolean) => void;
+	/**
+	 * Label of the filter
+	 */
+	label: string;
+}
+
+export type ScheduleFilterDefinition =
+	| ScheduleFilterDefinitionSelect
+	| ScheduleFilterDefinitionSwitch;
 
 export interface DayContentsProps {
 	data: IDayData[];

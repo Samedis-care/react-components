@@ -1,31 +1,36 @@
 import React, { useCallback, useEffect, useState } from "react";
 import WeekViewDay from "./WeekViewDay";
 import moment, { Moment } from "moment";
-import { Box, CircularProgress, IconButton } from "@mui/material";
+import { Box, CircularProgress, IconButton, Menu } from "@mui/material";
 import { Button, Typography, Grid } from "@mui/material";
 import { IDayData, ScheduleFilterDefinition } from "../Common/DayContents";
-import { ArrowForwardIos, ArrowBackIos } from "@mui/icons-material";
+import {
+	ArrowForwardIos,
+	ArrowBackIos,
+	Settings as SettingsIcon,
+} from "@mui/icons-material";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { ToDateLocaleStringOptions } from "../../../constants";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import makeStyles from "@mui/styles/makeStyles";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
+import ScheduleFilterRenderer from "../Common/ScheduleFilterRenderers";
 
 export interface WeekViewProps {
 	/**
 	 * Callback to load data of this week
 	 * @param weekOffset The offset to the current week
-	 * @param filter The selected filter
+	 * @param filter The selected filter(s)
 	 */
 	loadData: (
 		weekOffset: number,
-		filter: string | null
+		filter: Record<string, string | boolean>
 	) => IDayData[][] | Promise<IDayData[][]>;
 
 	/**
 	 * Optional filter
 	 */
-	filter?: ScheduleFilterDefinition;
+	filters?: Record<string, ScheduleFilterDefinition>;
 }
 
 const normalizeMoment = (instance: Moment) =>
@@ -57,8 +62,11 @@ const useStyles = makeStyles(
 	{ name: "CcWeekView" }
 );
 
+const EMPTY_FILTERS: Record<string, ScheduleFilterDefinition> = {};
 const WeekView = (props: WeekViewProps) => {
-	const { loadData, filter } = props;
+	const { loadData } = props;
+	const filters = props.filters ?? EMPTY_FILTERS;
+	const filterCount = Object.keys(filters).length;
 	const classes = useStyles();
 	const { t, i18n } = useCCTranslations();
 	/**
@@ -82,8 +90,15 @@ const WeekView = (props: WeekViewProps) => {
 	/**
 	 * The current filter value
 	 */
-	const [filterValue, setFilterValue] = useState<string | null>(
-		filter?.defaultValue ?? null
+	const [filterValues, setFilterValues] = useState<
+		Record<string, string | boolean>
+	>(() =>
+		Object.fromEntries(
+			Object.entries(filters).map(([name, filter]) => [
+				name,
+				filter.defaultValue,
+			])
+		)
 	);
 
 	const prevWeek = useCallback(() => {
@@ -94,12 +109,32 @@ const WeekView = (props: WeekViewProps) => {
 		setWeekOffset((prev) => prev + 1);
 	}, []);
 
-	const handleFilterSelect = useCallback(
-		(evt: React.ChangeEvent<HTMLSelectElement>) => {
-			setFilterValue(evt.target.value);
+	const handleFilterChange = useCallback(
+		(evt: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
+			setFilterValues((prev) => ({
+				...prev,
+				[evt.target.name]:
+					evt.target.type === "checkbox"
+						? (evt.target as HTMLInputElement).checked
+						: evt.target.value,
+			}));
 		},
 		[]
 	);
+
+	const [
+		filterSettingsAnchorEl,
+		setFilterSettingsAnchorEl,
+	] = useState<HTMLElement | null>(null);
+	const openFilterSettings = useCallback(
+		(evt: React.MouseEvent<HTMLElement>) => {
+			setFilterSettingsAnchorEl(evt.currentTarget);
+		},
+		[]
+	);
+	const closeFiltersMenu = useCallback(() => {
+		setFilterSettingsAnchorEl(null);
+	}, []);
 
 	const today = useCallback(() => {
 		setWeekOffset(0);
@@ -142,13 +177,13 @@ const WeekView = (props: WeekViewProps) => {
 		// fetch data
 		void (async () => {
 			try {
-				const data = await loadData(weekOffset, filterValue);
+				const data = await loadData(weekOffset, filterValues);
 				setData(data);
 			} catch (loadError) {
 				setLoadError(loadError as Error);
 			}
 		})();
-	}, [filterValue, loadData, weekOffset]);
+	}, [filterValues, loadData, weekOffset]);
 
 	const now = moment();
 	const weekday = now.weekday();
@@ -171,19 +206,20 @@ const WeekView = (props: WeekViewProps) => {
 							</Button>
 						</Grid>
 						<Grid item>
-							{filter && (
+							{filterCount > 0 && (
 								<Box px={2} className={classes.filterWrapper}>
-									<select
-										className={classes.filterSelect}
-										value={filterValue ?? ""}
-										onChange={handleFilterSelect}
-									>
-										{Object.entries(filter.options).map(([value, label]) => (
-											<option value={value} key={value}>
-												{label}
-											</option>
-										))}
-									</select>
+									{(() => {
+										const [name, filter] = Object.entries(filters)[0];
+										return (
+											<ScheduleFilterRenderer
+												{...filter}
+												name={name}
+												value={filterValues[name]}
+												onChange={handleFilterChange}
+												inline={"weekly"}
+											/>
+										);
+									})()}
 								</Box>
 							)}
 						</Grid>
@@ -224,7 +260,61 @@ const WeekView = (props: WeekViewProps) => {
 						</Grid>
 					</Grid>
 				</Grid>
-				<Grid item xs />
+				<Grid item xs container justifyContent={"flex-end"}>
+					{filterCount > 1 && (
+						<Grid item>
+							<Box px={2} className={classes.filterWrapper}>
+								{filterCount > 2 ? (
+									<>
+										<IconButton onClick={openFilterSettings}>
+											<SettingsIcon />
+										</IconButton>
+										<Menu
+											open={filterSettingsAnchorEl != null}
+											anchorEl={filterSettingsAnchorEl}
+											onClose={closeFiltersMenu}
+										>
+											<Box p={1}>
+												<Grid container spacing={1}>
+													{Object.entries(filters).map(
+														([name, filter], idx) =>
+															idx !== 0 && (
+																<Grid key={name} item xs={12}>
+																	<ScheduleFilterRenderer
+																		{...filter}
+																		name={name}
+																		value={
+																			filter.type === "select"
+																				? (filterValues[name] as string)
+																				: (filterValues[name] as boolean)
+																		}
+																		onChange={handleFilterChange}
+																	/>
+																</Grid>
+															)
+													)}
+												</Grid>
+											</Box>
+										</Menu>
+									</>
+								) : (
+									(() => {
+										const [name, filter] = Object.entries(filters)[1];
+										return (
+											<ScheduleFilterRenderer
+												{...filter}
+												name={name}
+												value={filterValues[name]}
+												onChange={handleFilterChange}
+												inline={"weekly"}
+											/>
+										);
+									})()
+								)}
+							</Box>
+						</Grid>
+					)}
+				</Grid>
 			</Grid>
 			{loadError && (
 				<Grid item xs={12}>
