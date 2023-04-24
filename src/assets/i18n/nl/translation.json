@@ -97,7 +97,8 @@
 				"clear-icon-text": "Wissen",
 				"loading-text": "Laadt...",
 				"start-typing-to-search-text": "Voer een zoekreeks in om resultaten te krijgen",
-				"lru-label": "Laatst recent gebruikt"
+				"lru-label": "Laatst recent gebruikt",
+				"selected": "GESELECTEERD"
 			}
 		},
 		"file-upload": {
@@ -161,16 +162,6 @@
 						"false": "Nee"
 					},
 					"date": {
-						"labels": {
-							"invalid": "Ongeldig",
-							"cancel": "Annuleren",
-							"clear": "Wissen",
-							"ok": "OK",
-							"today": "Vandaag",
-							"invalid-date": "ongeldige datum",
-							"max-date": "Datum mag niet na de maximale datum vallen",
-							"min-date": "Datum mag niet voor de minimale datum vallen"
-						},
 						"not-set": "Datum niet ingesteld",
 						"validation-error": "Gelieve een correcte datum in te voeren"
 					},
