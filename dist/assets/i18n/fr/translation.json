@@ -97,7 +97,8 @@
 				"clear-icon-text": "À vider",
 				"loading-text": "Chargement...",
 				"start-typing-to-search-text": "Entrez une chaîne de recherche pour obtenir des résultats",
-				"lru-label": "Dernière utilisation récente"
+				"lru-label": "Dernière utilisation récente",
+				"selected": "CHOISI"
 			}
 		},
 		"file-upload": {
@@ -161,16 +162,6 @@
 						"false": "Non"
 					},
 					"date": {
-						"labels": {
-							"invalid": "Invalide",
-							"cancel": "Annuler",
-							"clear": "Clair",
-							"ok": "OK",
-							"today": "Aujourd'hui",
-							"invalid-date": "Format de date non valide",
-							"max-date": "La date ne doit pas être postérieure à la date maximale",
-							"min-date": "La date ne doit pas être antérieure à la date minimale"
-						},
 						"not-set": "Date non fixée",
 						"validation-error": "Veuillez entrer une date valide"
 					},
