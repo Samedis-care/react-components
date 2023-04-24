@@ -8,7 +8,7 @@ import { IDayData, ScheduleFilterDefinition } from "../Common/DayContents";
  * @returns A promise containing the data for the days of the week, may throw an
  * 			error. Format: IDayData[weekday starting Monday][n]
  */
-export declare type LoadWeekCallback = (weekOffset: number, filter: string | null) => IDayData[][] | Promise<IDayData[][]>;
+export declare type LoadWeekCallback = (weekOffset: number, filters: Record<string, string | boolean>) => IDayData[][] | Promise<IDayData[][]>;
 export interface ScrollableScheduleProps {
     /**
      * CSS Class which specifies the infinite scroll height
@@ -21,7 +21,7 @@ export interface ScrollableScheduleProps {
     /**
      * Optional filter
      */
-    filter?: ScheduleFilterDefinition;
+    filters?: Record<string, ScheduleFilterDefinition>;
 }
 /**
  * Outdated alias

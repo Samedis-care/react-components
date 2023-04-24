@@ -19,13 +19,15 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
     return to.concat(ar || Array.prototype.slice.call(from));
 };
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Grid, Box, Button } from "@mui/material";
+import { Grid, Box, Button, IconButton, Menu } from "@mui/material";
+import { Settings as SettingsIcon } from "@mui/icons-material";
 import moment from "moment";
 import ScrollableScheduleWeek from "./ScrollableScheduleWeek";
 import InfiniteScroll from "../../InfiniteScroll";
 import { combineClassNames } from "../../../utils";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import makeStyles from "@mui/styles/makeStyles";
+import ScrollableFilterRenderer from "../Common/ScheduleFilterRenderers";
 var useStyles = makeStyles(function (theme) { return ({
     today: {
         backgroundColor: theme.palette.primary.main,
@@ -43,42 +45,46 @@ var useStyles = makeStyles(function (theme) { return ({
         borderRadius: "0 0 ".concat(theme.shape.borderRadius, "px ").concat(theme.shape.borderRadius, "px"),
         position: "relative",
     },
+    filterSettingsBtn: {
+        color: theme.palette.getContrastText(theme.palette.primary.main),
+    },
     filterWrapper: {
         top: "50%",
         position: "relative",
         transform: "translateY(-50%)",
     },
-    filterSelect: {
-        backgroundColor: "transparent",
-        border: "none",
-        color: theme.palette.getContrastText(theme.palette.primary.main),
-        cursor: "pointer",
-    },
 }); }, { name: "CcScrollableSchedule" });
 var preventAction = function (evt) {
     evt.stopPropagation();
 };
+var EMPTY_FILTERS = {};
 var ScrollableSchedule = function (props) {
     var _a;
-    var loadWeekCallback = props.loadWeekCallback, filter = props.filter, wrapperClass = props.wrapperClass;
+    var loadWeekCallback = props.loadWeekCallback, wrapperClass = props.wrapperClass;
+    var filters = (_a = props.filters) !== null && _a !== void 0 ? _a : EMPTY_FILTERS;
     var i18n = useCCTranslations().i18n;
     var classes = useStyles();
     var todayElem = useRef(null);
     var scrollElem = useRef(null);
-    var getDefaultState = useCallback(function () {
-        var _a;
-        return ({
-            items: [],
-            dataOffsetTop: -1,
-            dataOffsetBottom: 0,
-            today: moment(),
-            filterValue: (_a = filter === null || filter === void 0 ? void 0 : filter.defaultValue) !== null && _a !== void 0 ? _a : null,
-        });
-    }, [filter]);
+    var getDefaultState = useCallback(function () { return ({
+        items: [],
+        dataOffsetTop: -1,
+        dataOffsetBottom: 0,
+        today: moment(),
+        filterValues: filters
+            ? Object.fromEntries(Object.entries(filters).map(function (_a) {
+                var key = _a[0], filter = _a[1];
+                return [
+                    key,
+                    filter.defaultValue,
+                ];
+            }))
+            : {},
+    }); }, [filters]);
     var _b = useState(getDefaultState), state = _b[0], setState = _b[1];
     useEffect(function () {
         var onLanguageChanged = function () {
-            setState(getDefaultState);
+            setState(function (prev) { return (__assign(__assign({}, getDefaultState()), { filterValues: prev.filterValues })); });
         };
         i18n.on("languageChanged", onLanguageChanged);
         return function () {
@@ -91,7 +97,7 @@ var ScrollableSchedule = function (props) {
      */
     var loadMore = useCallback(function (top) {
         var page = top ? state.dataOffsetTop : state.dataOffsetBottom;
-        var item = (React.createElement(ScrollableScheduleWeek, { key: page.toString(), loadData: function () { return loadWeekCallback(page, state.filterValue); }, setTodayElement: function (elem) {
+        var item = (React.createElement(ScrollableScheduleWeek, { key: page.toString(), loadData: function () { return loadWeekCallback(page, state.filterValues); }, setTodayElement: function (elem) {
                 return (todayElem.current = elem);
             }, moment: state.today.clone().add(page - 1, "weeks") }));
         if (top) {
@@ -104,7 +110,7 @@ var ScrollableSchedule = function (props) {
         loadWeekCallback,
         state.dataOffsetBottom,
         state.dataOffsetTop,
-        state.filterValue,
+        state.filterValues,
         state.today,
     ]);
     /**
@@ -123,20 +129,43 @@ var ScrollableSchedule = function (props) {
         }
         scrollElem.current.wrapper.scrollTop = todayElem.current.offsetTop;
     }, []);
-    var handleFilterSelect = useCallback(function (evt) {
-        setState(__assign(__assign({}, getDefaultState()), { filterValue: evt.target.value }));
+    var handleFilterChange = useCallback(function (evt) {
+        setState(function (prev) {
+            var _a;
+            return (__assign(__assign({}, getDefaultState()), { filterValues: __assign(__assign({}, prev.filterValues), (_a = {}, _a[evt.target.name] = evt.target.type === "checkbox"
+                    ? evt.target.checked
+                    : evt.target.value, _a)) }));
+        });
     }, [getDefaultState]);
+    var _c = useState(null), filterSettingsAnchorEl = _c[0], setFilterSettingsAnchorEl = _c[1];
+    var openFilterSettings = useCallback(function (evt) {
+        setFilterSettingsAnchorEl(evt.currentTarget);
+    }, []);
+    var closeFiltersMenu = useCallback(function () {
+        setFilterSettingsAnchorEl(null);
+    }, []);
+    var filterCount = filters ? Object.keys(filters).length : 0;
     return (React.createElement(Grid, { container: true },
         React.createElement(Grid, { item: true, xs: 12, className: classes.today, onClick: jumpToToday },
             React.createElement(Grid, { container: true, justifyContent: "space-between" },
                 React.createElement(Grid, { item: true },
                     React.createElement(Button, { className: classes.todayBtn, onClick: jumpToToday, fullWidth: true },
                         React.createElement(Box, { m: 2 }, state.today.format("ddd DD MMMM")))),
-                React.createElement(Grid, { item: true }, filter && (React.createElement(Box, { px: 2, className: classes.filterWrapper },
-                    React.createElement("select", { onClick: preventAction, className: classes.filterSelect, value: (_a = state.filterValue) !== null && _a !== void 0 ? _a : "", onChange: handleFilterSelect }, Object.entries(filter.options).map(function (_a) {
-                        var value = _a[0], label = _a[1];
-                        return (React.createElement("option", { value: value, key: value }, label));
-                    }))))))),
+                React.createElement(Grid, { item: true }, filterCount > 0 && (React.createElement(Box, { px: 2, className: classes.filterWrapper, onClick: preventAction }, filterCount > 1 ? (React.createElement(React.Fragment, null,
+                    React.createElement(IconButton, { onClick: openFilterSettings },
+                        React.createElement(SettingsIcon, { className: classes.filterSettingsBtn })),
+                    React.createElement(Menu, { open: filterSettingsAnchorEl != null, anchorEl: filterSettingsAnchorEl, onClose: closeFiltersMenu },
+                        React.createElement(Box, { p: 1 },
+                            React.createElement(Grid, { container: true, spacing: 1 }, Object.entries(filters).map(function (_a) {
+                                var name = _a[0], filter = _a[1];
+                                return (React.createElement(Grid, { key: name, item: true, xs: 12 },
+                                    React.createElement(ScrollableFilterRenderer, __assign({}, filter, { name: name, value: filter.type === "select"
+                                            ? state.filterValues[name]
+                                            : state.filterValues[name], onChange: handleFilterChange }))));
+                            })))))) : ((function () {
+                    var _a = Object.entries(filters)[0], name = _a[0], filter = _a[1];
+                    return (React.createElement(ScrollableFilterRenderer, __assign({}, filter, { name: name, value: state.filterValues[name], onChange: handleFilterChange, inline: "scrollable" })));
+                })())))))),
         React.createElement(Grid, { item: true, xs: 12 },
             React.createElement(InfiniteScroll, { className: combineClassNames([wrapperClass, classes.scroller]), loadMoreTop: loadMoreTop, loadMoreBottom: loadMoreBottom, ref: scrollElem },
                 React.createElement(Box, { m: 2 },

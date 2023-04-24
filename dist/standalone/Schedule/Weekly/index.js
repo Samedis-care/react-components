@@ -1,3 +1,14 @@
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -37,14 +48,15 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 import React, { useCallback, useEffect, useState } from "react";
 import WeekViewDay from "./WeekViewDay";
 import moment from "moment";
-import { Box, CircularProgress, IconButton } from "@mui/material";
+import { Box, CircularProgress, IconButton, Menu } from "@mui/material";
 import { Button, Typography, Grid } from "@mui/material";
-import { ArrowForwardIos, ArrowBackIos } from "@mui/icons-material";
+import { ArrowForwardIos, ArrowBackIos, Settings as SettingsIcon, } from "@mui/icons-material";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { ToDateLocaleStringOptions } from "../../../constants";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import makeStyles from "@mui/styles/makeStyles";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
+import ScheduleFilterRenderer from "../Common/ScheduleFilterRenderers";
 var normalizeMoment = function (instance) {
     return instance.weekday(0).hour(0).minute(0).second(0).millisecond(0);
 };
@@ -70,9 +82,12 @@ var useStyles = makeStyles({
         cursor: "pointer",
     },
 }, { name: "CcWeekView" });
+var EMPTY_FILTERS = {};
 var WeekView = function (props) {
     var _a;
-    var loadData = props.loadData, filter = props.filter;
+    var loadData = props.loadData;
+    var filters = (_a = props.filters) !== null && _a !== void 0 ? _a : EMPTY_FILTERS;
+    var filterCount = Object.keys(filters).length;
     var classes = useStyles();
     var _b = useCCTranslations(), t = _b.t, i18n = _b.i18n;
     /**
@@ -96,15 +111,35 @@ var WeekView = function (props) {
     /**
      * The current filter value
      */
-    var _g = useState((_a = filter === null || filter === void 0 ? void 0 : filter.defaultValue) !== null && _a !== void 0 ? _a : null), filterValue = _g[0], setFilterValue = _g[1];
+    var _g = useState(function () {
+        return Object.fromEntries(Object.entries(filters).map(function (_a) {
+            var name = _a[0], filter = _a[1];
+            return [
+                name,
+                filter.defaultValue,
+            ];
+        }));
+    }), filterValues = _g[0], setFilterValues = _g[1];
     var prevWeek = useCallback(function () {
         setWeekOffset(function (prev) { return prev - 1; });
     }, []);
     var nextWeek = useCallback(function () {
         setWeekOffset(function (prev) { return prev + 1; });
     }, []);
-    var handleFilterSelect = useCallback(function (evt) {
-        setFilterValue(evt.target.value);
+    var handleFilterChange = useCallback(function (evt) {
+        setFilterValues(function (prev) {
+            var _a;
+            return (__assign(__assign({}, prev), (_a = {}, _a[evt.target.name] = evt.target.type === "checkbox"
+                ? evt.target.checked
+                : evt.target.value, _a)));
+        });
+    }, []);
+    var _h = useState(null), filterSettingsAnchorEl = _h[0], setFilterSettingsAnchorEl = _h[1];
+    var openFilterSettings = useCallback(function (evt) {
+        setFilterSettingsAnchorEl(evt.currentTarget);
+    }, []);
+    var closeFiltersMenu = useCallback(function () {
+        setFilterSettingsAnchorEl(null);
     }, []);
     var today = useCallback(function () {
         setWeekOffset(0);
@@ -144,7 +179,7 @@ var WeekView = function (props) {
                 switch (_a.label) {
                     case 0:
                         _a.trys.push([0, 2, , 3]);
-                        return [4 /*yield*/, loadData(weekOffset, filterValue)];
+                        return [4 /*yield*/, loadData(weekOffset, filterValues)];
                     case 1:
                         data_1 = _a.sent();
                         setData(data_1);
@@ -157,7 +192,7 @@ var WeekView = function (props) {
                 }
             });
         }); })();
-    }, [filterValue, loadData, weekOffset]);
+    }, [filterValues, loadData, weekOffset]);
     var now = moment();
     var weekday = now.weekday();
     var weekdays = [0, 1, 2, 3, 4, 5, 6].map(function (day) { return day - weekday; });
@@ -174,11 +209,10 @@ var WeekView = function (props) {
                                 .toDate()
                                 .toLocaleDateString(i18n.language, ToDateLocaleStringOptions),
                             ")")),
-                    React.createElement(Grid, { item: true }, filter && (React.createElement(Box, { px: 2, className: classes.filterWrapper },
-                        React.createElement("select", { className: classes.filterSelect, value: filterValue !== null && filterValue !== void 0 ? filterValue : "", onChange: handleFilterSelect }, Object.entries(filter.options).map(function (_a) {
-                            var value = _a[0], label = _a[1];
-                            return (React.createElement("option", { value: value, key: value }, label));
-                        }))))))),
+                    React.createElement(Grid, { item: true }, filterCount > 0 && (React.createElement(Box, { px: 2, className: classes.filterWrapper }, (function () {
+                        var _a = Object.entries(filters)[0], name = _a[0], filter = _a[1];
+                        return (React.createElement(ScheduleFilterRenderer, __assign({}, filter, { name: name, value: filterValues[name], onChange: handleFilterChange, inline: "weekly" })));
+                    })()))))),
             React.createElement(Grid, { item: true },
                 React.createElement(Grid, { container: true, justifyContent: "center" },
                     React.createElement(Grid, { item: true },
@@ -199,7 +233,22 @@ var WeekView = function (props) {
                                     onDismiss: closeDatePicker }))),
                         React.createElement(IconButton, { onClick: nextWeek, size: "large" },
                             React.createElement(ArrowForwardIos, null))))),
-            React.createElement(Grid, { item: true, xs: true })),
+            React.createElement(Grid, { item: true, xs: true, container: true, justifyContent: "flex-end" }, filterCount > 1 && (React.createElement(Grid, { item: true },
+                React.createElement(Box, { px: 2, className: classes.filterWrapper }, filterCount > 2 ? (React.createElement(React.Fragment, null,
+                    React.createElement(IconButton, { onClick: openFilterSettings },
+                        React.createElement(SettingsIcon, null)),
+                    React.createElement(Menu, { open: filterSettingsAnchorEl != null, anchorEl: filterSettingsAnchorEl, onClose: closeFiltersMenu },
+                        React.createElement(Box, { p: 1 },
+                            React.createElement(Grid, { container: true, spacing: 1 }, Object.entries(filters).map(function (_a, idx) {
+                                var name = _a[0], filter = _a[1];
+                                return idx !== 0 && (React.createElement(Grid, { key: name, item: true, xs: 12 },
+                                    React.createElement(ScheduleFilterRenderer, __assign({}, filter, { name: name, value: filter.type === "select"
+                                            ? filterValues[name]
+                                            : filterValues[name], onChange: handleFilterChange }))));
+                            })))))) : ((function () {
+                    var _a = Object.entries(filters)[1], name = _a[0], filter = _a[1];
+                    return (React.createElement(ScheduleFilterRenderer, __assign({}, filter, { name: name, value: filterValues[name], onChange: handleFilterChange, inline: "weekly" })));
+                })())))))),
         loadError && (React.createElement(Grid, { item: true, xs: 12 },
             React.createElement(Typography, { align: "center" }, loadError.message))),
         !data && !loadError && (React.createElement(Grid, { item: true, xs: 12 },
