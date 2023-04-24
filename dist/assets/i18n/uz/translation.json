@@ -97,7 +97,8 @@
 				"clear-icon-text": "Bo'shatish",
 				"loading-text": "Yuklanmoqda...",
 				"start-typing-to-search-text": "Natija olish uchun qidiruv qatorini kiriting",
-				"lru-label": "Oxirgi marta ishlatilgan"
+				"lru-label": "Oxirgi marta ishlatilgan",
+				"selected": "TANLANGAN"
 			}
 		},
 		"file-upload": {
@@ -161,16 +162,6 @@
 						"false": "Yo'q"
 					},
 					"date": {
-						"labels": {
-							"invalid": "Yaroqsiz",
-							"cancel": "Bekor qilish",
-							"clear": "Aniq",
-							"ok": "OK",
-							"today": "Bugun",
-							"invalid-date": "Sana formati yaroqsiz",
-							"max-date": "Sana maksimal sanadan keyin bo'lmasligi kerak",
-							"min-date": "Sana minimal sanadan oldin bo'lmasligi kerak"
-						},
 						"not-set": "Sana belgilanmagan",
 						"validation-error": "Iltimos, to'g'ri sanani kiriting"
 					},
