@@ -97,7 +97,8 @@
 				"clear-icon-text": "Leeren",
 				"loading-text": "Lade...",
 				"start-typing-to-search-text": "Gib eine Suchzeichenfolge ein, um Ergebnisse zu erhalten",
-				"lru-label": "Zuletzt verwendet"
+				"lru-label": "Zuletzt verwendet",
+				"selected": "AUSGEWÄHLT"
 			}
 		},
 		"file-upload": {
@@ -161,16 +162,6 @@
 						"false": "Nein"
 					},
 					"date": {
-						"labels": {
-							"invalid": "Ungültig",
-							"cancel": "Abbrechen",
-							"clear": "Löschen",
-							"ok": "OK",
-							"today": "Heute",
-							"invalid-date": "Ungültiges Datumsformat",
-							"max-date": "Das Datum sollte nicht nach dem maximalen Datum liegen",
-							"min-date": "Der Termin sollte nicht vor dem Mindestdatum liegen"
-						},
 						"not-set": "Datum nicht gesetzt",
 						"validation-error": "Gib ein gültiges Datum ein"
 					},
