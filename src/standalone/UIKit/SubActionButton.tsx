@@ -111,6 +111,11 @@ const StyledButton = withStyles((theme: Theme) => ({
 						theme.componentsCare?.uiKit?.subActionButton?.color ||
 						theme.palette.text.primary,
 					textTransform: "unset",
+					justifyContent: "flex-start",
+					borderColor:
+						theme.palette.mode === "light"
+							? "rgba(0, 0, 0, 0.23)"
+							: "rgba(255, 255, 255, 0.23)",
 					"&:hover": {
 						borderRadius:
 							theme.componentsCare?.uiKit?.subActionButton?.small?.hover
@@ -121,6 +126,14 @@ const StyledButton = withStyles((theme: Theme) => ({
 							theme.componentsCare?.uiKit?.subActionButton?.small?.hover
 								?.backgroundColor ||
 							theme.palette.primary.light,
+						borderLeftWidth: 0,
+						borderRightWidth: 0,
+						borderTopWidth: props.disabledivider ? 0 : undefined,
+						borderBottomWidth: 0,
+						borderColor:
+							theme.palette.mode === "light"
+								? "rgba(0, 0, 0, 0.23)"
+								: "rgba(255, 255, 255, 0.23)",
 						color:
 							theme.componentsCare?.uiKit?.subActionButton?.small?.hover
 								?.color ||
@@ -162,6 +175,11 @@ const StyledButton = withStyles((theme: Theme) => ({
 						theme.componentsCare?.uiKit?.subActionButton?.color ||
 						theme.palette.text.primary,
 					textTransform: "unset",
+					justifyContent: "flex-start",
+					borderColor:
+						theme.palette.mode === "light"
+							? "rgba(0, 0, 0, 0.23)"
+							: "rgba(255, 255, 255, 0.23)",
 					"&:hover": {
 						backgroundColor:
 							theme.componentsCare?.uiKit?.subActionButton?.hover
@@ -169,6 +187,15 @@ const StyledButton = withStyles((theme: Theme) => ({
 						color:
 							theme.componentsCare?.uiKit?.subActionButton?.hover?.color ||
 							theme.palette.primary.main,
+
+						borderLeftWidth: 0,
+						borderRightWidth: 0,
+						borderTopWidth: props.disabledivider ? 0 : undefined,
+						borderBottomWidth: 0,
+						borderColor:
+							theme.palette.mode === "light"
+								? "rgba(0, 0, 0, 0.23)"
+								: "rgba(255, 255, 255, 0.23)",
 						...theme.componentsCare?.uiKit?.subActionButton?.hover?.style,
 					},
 					"&.Mui-disabled": {
