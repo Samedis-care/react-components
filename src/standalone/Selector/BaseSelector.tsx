@@ -4,9 +4,9 @@ import React, {
 	useEffect,
 	ReactElement,
 	PropsWithChildren,
-	ReactNodeArray,
 	ForwardedRef,
 	useMemo,
+	ReactNode,
 } from "react";
 import {
 	ListItemText,
@@ -19,6 +19,7 @@ import {
 	Grid,
 	Autocomplete,
 	Theme,
+	InputLabel,
 } from "@mui/material";
 import {
 	Add as AddIcon,
@@ -370,6 +371,10 @@ const useCustomStylesBase = makeStyles(
 		textFieldStandard: {
 			position: "absolute",
 		},
+		label: {
+			marginTop: 8,
+			marginLeft: -15,
+		},
 		switch: {
 			marginTop: -30,
 		},
@@ -386,7 +391,7 @@ const useCustomStylesBase = makeStyles(
 		wrapper: (
 			props: Pick<BaseSelectorProps<BaseSelectorData>, "iconSize" | "label">
 		) => ({
-			marginTop: props.label ? 16 : undefined,
+			marginTop: props.label ? 22 : undefined,
 		}),
 		listItem: {
 			paddingLeft: "16px !important",
@@ -784,6 +789,11 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 			classes={customClasses}
 		>
 			<BaseSelectorContext.Provider value={context}>
+				{label && (
+					<InputLabel shrink className={customClasses.label}>
+						{label}
+					</InputLabel>
+				)}
 				<Paper elevation={0} className={customClasses.wrapper}>
 					<Autocomplete
 						id={autocompleteId}
@@ -856,7 +866,6 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 							return (
 								<TextFieldWithHelp
 									variant={variant ?? "outlined"}
-									label={label}
 									{...otherParams}
 									inputProps={{
 										...params.inputProps,
@@ -879,7 +888,7 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 														...((params.InputProps
 															?.endAdornment as ReactElement<
 															PropsWithChildren<unknown>
-														>).props.children as ReactNodeArray),
+														>).props.children as ReactNode[]),
 														openInfo && (
 															<IconButton
 																onClick={openInfo}
