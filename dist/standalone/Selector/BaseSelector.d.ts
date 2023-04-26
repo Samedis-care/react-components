@@ -1,4 +1,4 @@
-import React from "react";
+import React, { ReactNode } from "react";
 import { InputProps, Theme } from "@mui/material";
 import { TextFieldWithHelpProps } from "../UIKit/TextFieldWithHelp";
 import { Styles } from "@mui/styles";
@@ -246,7 +246,7 @@ export declare type SelectorThemeExpert = {
     base?: Partial<Styles<Theme, BaseSelectorProps<BaseSelectorData>, AutocompleteClassKey>>;
     extensions?: Partial<Styles<Theme, BaseSelectorProps<BaseSelectorData>, SelectorCustomStylesClassKey>>;
 };
-declare const useCustomStylesBase: (props: Pick<BaseSelectorProps<BaseSelectorData>, "label" | "iconSize">) => import("@mui/styles").ClassNameMap<"switch" | "selected" | "icon" | "wrapper" | "divider" | "smallLabel" | "labelWithSwitch" | "infoBtn" | "textFieldStandard" | "listItem" | "lruListItem">;
+declare const useCustomStylesBase: (props: Pick<BaseSelectorProps<BaseSelectorData>, "label" | "iconSize">) => import("@mui/styles").ClassNameMap<"label" | "switch" | "selected" | "icon" | "wrapper" | "divider" | "smallLabel" | "labelWithSwitch" | "infoBtn" | "textFieldStandard" | "listItem" | "lruListItem">;
 export declare type SelectorCustomStylesClassKey = keyof ReturnType<typeof useCustomStylesBase>;
 export interface BaseSelectorContextType {
     addToLru: (...ids: string[]) => void;

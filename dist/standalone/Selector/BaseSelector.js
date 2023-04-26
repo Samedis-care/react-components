@@ -66,7 +66,7 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
     return to.concat(ar || Array.prototype.slice.call(from));
 };
 import React, { useState, useCallback, useEffect, useMemo, } from "react";
-import { ListItemText, IconButton, Paper, Divider, Typography, Popper, Grid, Autocomplete, } from "@mui/material";
+import { ListItemText, IconButton, Paper, Divider, Typography, Popper, Grid, Autocomplete, InputLabel, } from "@mui/material";
 import { Add as AddIcon, ExpandMore, Info as InfoIcon, } from "@mui/icons-material";
 import TextFieldWithHelp from "../UIKit/TextFieldWithHelp";
 import { cleanClassMap, combineClassNames, SelectorSmallListItemButton, SmallListItemIcon, useLocalStorageState, } from "../..";
@@ -122,6 +122,10 @@ var useCustomStylesBase = makeStyles(function (theme) { return ({
     textFieldStandard: {
         position: "absolute",
     },
+    label: {
+        marginTop: 8,
+        marginLeft: -15,
+    },
     switch: {
         marginTop: -30,
     },
@@ -137,7 +141,7 @@ var useCustomStylesBase = makeStyles(function (theme) { return ({
         });
     },
     wrapper: function (props) { return ({
-        marginTop: props.label ? 16 : undefined,
+        marginTop: props.label ? 22 : undefined,
     }); },
     listItem: {
         paddingLeft: "16px !important",
@@ -404,6 +408,7 @@ var BaseSelector = function (props) {
     var filterOptions = useCallback(function (options) { return options; }, []);
     return (React.createElement(InlineSwitch, { visible: !!props.displaySwitch, value: switchValue, onChange: setSwitchValue, label: switchLabel, classes: customClasses },
         React.createElement(BaseSelectorContext.Provider, { value: context },
+            label && (React.createElement(InputLabel, { shrink: true, className: customClasses.label }, label)),
             React.createElement(Paper, { elevation: 0, className: customClasses.wrapper },
                 React.createElement(Autocomplete, { id: autocompleteId, classes: classes, open: open, onOpen: function () {
                         setOpen(true);
@@ -424,7 +429,7 @@ var BaseSelector = function (props) {
                         var _a;
                         // eslint-disable-next-line @typescript-eslint/no-unused-vars
                         var InputProps = params.InputProps, InputLabelProps = params.InputLabelProps, otherParams = __rest(params, ["InputProps", "InputLabelProps"]);
-                        return (React.createElement(TextFieldWithHelp, __assign({ variant: variant !== null && variant !== void 0 ? variant : "outlined", label: label }, otherParams, { inputProps: __assign(__assign({}, params.inputProps), { title: selected ? getStringLabel(selected) : undefined }), InputProps: __assign(__assign({}, InputProps), { readOnly: disableSearch, startAdornment: (_a = (enableIcons ? renderIcon(selected === null || selected === void 0 ? void 0 : selected.icon) : undefined)) !== null && _a !== void 0 ? _a : startAdornment, endAdornment: (function () {
+                        return (React.createElement(TextFieldWithHelp, __assign({ variant: variant !== null && variant !== void 0 ? variant : "outlined" }, otherParams, { inputProps: __assign(__assign({}, params.inputProps), { title: selected ? getStringLabel(selected) : undefined }), InputProps: __assign(__assign({}, InputProps), { readOnly: disableSearch, startAdornment: (_a = (enableIcons ? renderIcon(selected === null || selected === void 0 ? void 0 : selected.icon) : undefined)) !== null && _a !== void 0 ? _a : startAdornment, endAdornment: (function () {
                                     var _a, _b, _c;
                                     var hasAdditionalElements = openInfo || endAdornment || endAdornmentLeft;
                                     return hasAdditionalElements
