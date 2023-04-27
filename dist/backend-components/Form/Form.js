@@ -64,6 +64,7 @@ import { showConfirmDialogBool } from "../../non-standalone";
 import useCCTranslations from "../../utils/useCCTranslations";
 import { useDialogContext } from "../../framework";
 import deepSort from "../../utils/deepSort";
+import useDevKeybinds from "../../utils/useDevKeybinds";
 // optional import
 var captureException = null;
 import("@sentry/react")
@@ -787,7 +788,7 @@ var Form = function (props) {
         onlySubmitNestedIfMounted,
     ]);
     // Debug Helper (for React Devtools)
-    useCallback(function (onlyDirty) {
+    var debugDirty = useCallback(function (onlyDirty) {
         /* eslint-disable no-console */
         if (!serverData) {
             console.log("Can't determine Dirty State, No server data present");
@@ -844,6 +845,7 @@ var Form = function (props) {
         customDirtyFields,
         customDirtyCounter,
     ]);
+    useDevKeybinds(useMemo(function () { return ({ "ccform dirty?": function () { return debugDirty(true); } }); }, [debugDirty]));
     // context and rendering
     var Children = useMemo(function () { return React.memo(children); }, [children]);
     var setError = useCallback(function (error) {
