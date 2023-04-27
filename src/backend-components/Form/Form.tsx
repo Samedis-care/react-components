@@ -36,6 +36,7 @@ import { showConfirmDialogBool } from "../../non-standalone";
 import useCCTranslations from "../../utils/useCCTranslations";
 import { useDialogContext } from "../../framework";
 import deepSort from "../../utils/deepSort";
+import useDevKeybinds from "../../utils/useDevKeybinds";
 
 // optional import
 let captureException: ((e: Error) => void) | null = null;
@@ -1421,7 +1422,7 @@ const Form = <
 	]);
 
 	// Debug Helper (for React Devtools)
-	useCallback(
+	const debugDirty = useCallback(
 		(onlyDirty?: boolean) => {
 			/* eslint-disable no-console */
 			if (!serverData) {
@@ -1495,6 +1496,9 @@ const Form = <
 			customDirtyFields,
 			customDirtyCounter,
 		]
+	);
+	useDevKeybinds(
+		useMemo(() => ({ "ccform dirty?": () => debugDirty(true) }), [debugDirty])
 	);
 
 	// context and rendering
