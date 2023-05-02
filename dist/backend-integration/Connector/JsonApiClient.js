@@ -45,12 +45,13 @@ import { UnsafeToLeaveDispatch } from "../../framework/UnsafeToLeave";
  * A helper class to connect to JSON REST apis
  */
 var JsonApiClient = /** @class */ (function () {
-    function JsonApiClient(authHandler, responseProcessor, preRequestHook, postRequestHook, exceptionHook) {
+    function JsonApiClient(authHandler, responseProcessor, preRequestHook, postRequestHook, exceptionHook, customRequestPerformer) {
         this.handleAuthentication = authHandler;
         this.handleResponse = responseProcessor;
         this.handlePreRequest = preRequestHook;
         this.handlePostRequest = postRequestHook;
         this.exceptionHook = exceptionHook;
+        this.customRequestPerformer = customRequestPerformer;
     }
     /**
      * @see request
@@ -141,7 +142,7 @@ var JsonApiClient = /** @class */ (function () {
                         void (_b.sent());
                         _b.label = 2;
                     case 2:
-                        _b.trys.push([2, 14, 15, 18]);
+                        _b.trys.push([2, 16, 17, 20]);
                         headers = {};
                         // Handle localization
                         headers["Accept-Language"] = ccI18n.language;
@@ -152,41 +153,48 @@ var JsonApiClient = /** @class */ (function () {
                         _a.Authorization = _b.sent();
                         _b.label = 4;
                     case 4:
+                        response = void 0;
+                        if (!this.customRequestPerformer) return [3 /*break*/, 6];
+                        return [4 /*yield*/, this.customRequestPerformer(method, url, args, headers, body, auth)];
+                    case 5:
+                        response = _b.sent();
+                        _b.label = 6;
+                    case 6:
+                        if (!!response) return [3 /*break*/, 10];
                         // Handle URL GET arguments
                         url = addGetParams(url, args);
                         // Handle POST data
                         body = this.convertBody(body, headers);
-                        response = void 0;
-                        _b.label = 5;
-                    case 5:
-                        _b.trys.push([5, 7, , 8]);
+                        _b.label = 7;
+                    case 7:
+                        _b.trys.push([7, 9, , 10]);
                         return [4 /*yield*/, fetch(url, {
                                 body: body,
                                 headers: headers,
                                 method: method,
                             })];
-                    case 6:
+                    case 8:
                         response = _b.sent();
-                        return [3 /*break*/, 8];
-                    case 7:
+                        return [3 /*break*/, 10];
+                    case 9:
                         e_1 = _b.sent();
                         // Network error
                         console.error("Failed fetch", e_1);
                         throw new NetworkError(ccI18n.t("backend-integration.connector.json-api-client.network-error"));
-                    case 8:
-                        responseText = void 0;
-                        _b.label = 9;
-                    case 9:
-                        _b.trys.push([9, 11, , 12]);
-                        return [4 /*yield*/, response.text()];
                     case 10:
-                        responseText = _b.sent();
-                        return [3 /*break*/, 12];
+                        responseText = void 0;
+                        _b.label = 11;
                     case 11:
+                        _b.trys.push([11, 13, , 14]);
+                        return [4 /*yield*/, response.text()];
+                    case 12:
+                        responseText = _b.sent();
+                        return [3 /*break*/, 14];
+                    case 13:
                         e_2 = _b.sent();
                         console.error("[JsonApiClient] Failed reading response", e_2);
                         throw new NetworkError(ccI18n.t("backend-integration.connector.json-api-client.network-error"));
-                    case 12:
+                    case 14:
                         responseData = void 0;
                         try {
                             responseData = JSON.parse(responseText);
@@ -200,25 +208,25 @@ var JsonApiClient = /** @class */ (function () {
                             }));
                         }
                         return [4 /*yield*/, this.handleResponse(response, responseData, method, url, args, body, auth)];
-                    case 13: return [2 /*return*/, (_b.sent())];
-                    case 14:
+                    case 15: return [2 /*return*/, (_b.sent())];
+                    case 16:
                         e_3 = _b.sent();
                         if (this.exceptionHook) {
                             this.exceptionHook(e_3);
                         }
                         throw e_3;
-                    case 15:
-                        if (!this.handlePostRequest) return [3 /*break*/, 17];
-                        return [4 /*yield*/, this.handlePostRequest(method, url, args, body, auth)];
-                    case 16:
-                        void (_b.sent());
-                        _b.label = 17;
                     case 17:
+                        if (!this.handlePostRequest) return [3 /*break*/, 19];
+                        return [4 /*yield*/, this.handlePostRequest(method, url, args, body, auth)];
+                    case 18:
+                        void (_b.sent());
+                        _b.label = 19;
+                    case 19:
                         if (safeToLeave) {
                             safeToLeave();
                         }
                         return [7 /*endfinally*/];
-                    case 18: return [2 /*return*/];
+                    case 20: return [2 /*return*/];
                 }
             });
         });

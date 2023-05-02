@@ -27,6 +27,19 @@ export declare type RequestHook = (method: string, url: string, args: GetParams,
  */
 export declare type ResponseProcessor = (response: Response, responseData: unknown, method: string, url: string, args: GetParams, body: unknown | null, auth: AuthMode) => Promise<unknown> | unknown;
 /**
+ * Custom handler for requests (if not enabled defaults to fetch)
+ * @param method The HTTP Verb
+ * @param url The url of the request
+ * @param args The query parameters of the request
+ * @param headers The request headers
+ * @param body The JSON body of the request
+ * @param auth The authentication mode of the request
+ * @returns Response if successfully handled or undefined if fallback handler (fetch) should be used instead
+ * @throws Can throw exception (like fetch)
+ * @remarks Body conversion and query params are not applied here! You have to do that manually
+ */
+export declare type CustomRequestPerformer = (method: string, url: string, args: GetParams, headers: Record<string, string>, body: unknown | null, auth: AuthMode) => Promise<Response> | Response | undefined;
+/**
  * Hook for exception handling (can be used to report to e.g. Sentry)
  * @param error The error which has happened
  * @remarks This cannot be used to handle errors generically! Also treat these errors as unhandled
@@ -41,7 +54,8 @@ declare class JsonApiClient {
     handlePreRequest?: RequestHook;
     handlePostRequest?: RequestHook;
     exceptionHook?: ExceptionHook;
-    constructor(authHandler: AuthenticationHandlerCallback, responseProcessor: ResponseProcessor, preRequestHook?: RequestHook, postRequestHook?: RequestHook, exceptionHook?: ExceptionHook);
+    customRequestPerformer?: CustomRequestPerformer;
+    constructor(authHandler: AuthenticationHandlerCallback, responseProcessor: ResponseProcessor, preRequestHook?: RequestHook, postRequestHook?: RequestHook, exceptionHook?: ExceptionHook, customRequestPerformer?: CustomRequestPerformer);
     /**
      * @see request
      */
@@ -69,7 +83,7 @@ declare class JsonApiClient {
      * @return The body data passed to fetch
      * @protected
      */
-    protected convertBody(body: unknown | null, headers: Record<string, string>): string | FormData | null;
+    convertBody(body: unknown | null, headers: Record<string, string>): string | FormData | null;
     /**
      * Performs an HTTP request with automatic authorization if desired
      * @param method The HTTP Verb
