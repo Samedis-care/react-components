@@ -50,6 +50,27 @@ export type ResponseProcessor = (
 ) => Promise<unknown> | unknown;
 
 /**
+ * Custom handler for requests (if not enabled defaults to fetch)
+ * @param method The HTTP Verb
+ * @param url The url of the request
+ * @param args The query parameters of the request
+ * @param headers The request headers
+ * @param body The JSON body of the request
+ * @param auth The authentication mode of the request
+ * @returns Response if successfully handled or undefined if fallback handler (fetch) should be used instead
+ * @throws Can throw exception (like fetch)
+ * @remarks Body conversion and query params are not applied here! You have to do that manually
+ */
+export type CustomRequestPerformer = (
+	method: string,
+	url: string,
+	args: GetParams,
+	headers: Record<string, string>,
+	body: unknown | null,
+	auth: AuthMode
+) => Promise<Response> | Response | undefined;
+
+/**
  * Hook for exception handling (can be used to report to e.g. Sentry)
  * @param error The error which has happened
  * @remarks This cannot be used to handle errors generically! Also treat these errors as unhandled
@@ -66,19 +87,22 @@ class JsonApiClient {
 	handlePreRequest?: RequestHook;
 	handlePostRequest?: RequestHook;
 	exceptionHook?: ExceptionHook;
+	customRequestPerformer?: CustomRequestPerformer;
 
 	constructor(
 		authHandler: AuthenticationHandlerCallback,
 		responseProcessor: ResponseProcessor,
 		preRequestHook?: RequestHook,
 		postRequestHook?: RequestHook,
-		exceptionHook?: ExceptionHook
+		exceptionHook?: ExceptionHook,
+		customRequestPerformer?: CustomRequestPerformer
 	) {
 		this.handleAuthentication = authHandler;
 		this.handleResponse = responseProcessor;
 		this.handlePreRequest = preRequestHook;
 		this.handlePostRequest = postRequestHook;
 		this.exceptionHook = exceptionHook;
+		this.customRequestPerformer = customRequestPerformer;
 	}
 
 	/**
@@ -146,7 +170,7 @@ class JsonApiClient {
 	 * @return The body data passed to fetch
 	 * @protected
 	 */
-	protected convertBody(
+	public convertBody(
 		body: unknown | null,
 		headers: Record<string, string>
 	): string | FormData | null {
@@ -188,26 +212,39 @@ class JsonApiClient {
 				headers.Authorization = await this.handleAuthentication(auth);
 			}
 
-			// Handle URL GET arguments
-			url = addGetParams(url, args);
-			// Handle POST data
-			body = this.convertBody(body, headers);
-			// Perform request
-			let response: Response;
-			try {
-				response = await fetch(url, {
-					body: body as FormData | string,
-					headers,
+			let response: Response | undefined;
+
+			if (this.customRequestPerformer) {
+				response = await this.customRequestPerformer(
 					method,
-				});
-			} catch (e) {
-				// Network error
-				console.error("Failed fetch", e);
-				throw new NetworkError(
-					ccI18n.t(
-						"backend-integration.connector.json-api-client.network-error"
-					)
+					url,
+					args,
+					headers,
+					body,
+					auth
 				);
+			}
+			if (!response) {
+				// Handle URL GET arguments
+				url = addGetParams(url, args);
+				// Handle POST data
+				body = this.convertBody(body, headers);
+				// Perform request
+				try {
+					response = await fetch(url, {
+						body: body as FormData | string,
+						headers,
+						method,
+					});
+				} catch (e) {
+					// Network error
+					console.error("Failed fetch", e);
+					throw new NetworkError(
+						ccI18n.t(
+							"backend-integration.connector.json-api-client.network-error"
+						)
+					);
+				}
 			}
 
 			// Read response

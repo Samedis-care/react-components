@@ -66,7 +66,7 @@ const objectToRails = (
 };
 
 class RailsApiClient extends JsonApiClient {
-	protected convertBody(
+	public convertBody(
 		body: unknown | null,
 		headers: Record<string, string>
 	): string | FormData | null {
