@@ -514,6 +514,11 @@ export interface IDataGridState {
 	 */
 	refreshData: number;
 	/**
+	 * Should refresh data wipe the rows (when its on 2). This is needed because
+	 * filters can change between refreshes without being reset
+	 */
+	refreshShouldWipeRows: boolean;
+	/**
 	 * Custom user-defined data
 	 */
 	customData: DataGridCustomDataType;
@@ -620,6 +625,7 @@ export const getDataGridDefaultState = (
 	rows: {},
 	dataLoadError: null,
 	refreshData: 1,
+	refreshShouldWipeRows: false,
 	customData: defaultCustomData ?? {},
 	initialResize: false,
 });
@@ -1216,6 +1222,12 @@ const DataGrid = (props: DataGridProps) => {
 			setState((prevState) => ({
 				...prevState,
 				refreshData: prevState.refreshData - 1,
+				// handle filter changes invalidating data
+				rows:
+					prevState.refreshShouldWipeRows && prevState.refreshData === 2
+						? {}
+						: prevState.rows,
+				refreshShouldWipeRows: false,
 			}));
 		})();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -1243,14 +1255,19 @@ const DataGrid = (props: DataGridProps) => {
 					...prevState,
 					rows: {},
 					refreshData: Math.min(prevState.refreshData + 1, 2),
+					refreshShouldWipeRows: prevState.refreshData === 1, // when we set refreshData to two and this is changing filters, we need an rows reset to prevent old data from getting displayed
 				}));
 			}, 500),
 		[setState]
 	);
 
+	const initialRender = useRef(true);
 	useEffect(() => {
 		// make sure we don't refresh data twice on initial render
-		if (refreshData && isObjectEmpty(rows)) return;
+		if (refreshData && isObjectEmpty(rows) && initialRender.current) {
+			initialRender.current = false;
+			return;
+		}
 
 		resetView();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
