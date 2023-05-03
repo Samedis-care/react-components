@@ -453,6 +453,11 @@ export interface IDataGridState {
      */
     refreshData: number;
     /**
+     * Should refresh data wipe the rows (when its on 2). This is needed because
+     * filters can change between refreshes without being reset
+     */
+    refreshShouldWipeRows: boolean;
+    /**
      * Custom user-defined data
      */
     customData: DataGridCustomDataType;
