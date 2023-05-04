@@ -556,15 +556,12 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 
 			return (
 				<SelectorSmallListItemButton
-					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-					// @ts-ignore: Typescript complains about the button property being "required"
 					component={"li"}
 					{...props}
 					className={combineClassNames([
 						customClasses.listItem,
 						data.className,
 					])}
-					//style={data.isDisabled ? { opacity: 0.38 } : undefined}
 					disabled={data.isDisabled}
 				>
 					{enableIcons && (
