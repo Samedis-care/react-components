@@ -207,18 +207,10 @@ var BaseSelector = function (props) {
             return React.createElement(Divider, { className: customClasses.divider });
         if (data.isSmallLabel)
             return (React.createElement(Typography, __assign({ component: "li" }, props, { variant: "caption", className: customClasses.smallLabel }), getReactLabel(data)));
-        return (React.createElement(SelectorSmallListItemButton
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore: Typescript complains about the button property being "required"
-        , __assign({ 
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore: Typescript complains about the button property being "required"
-            component: "li" }, props, { className: combineClassNames([
+        return (React.createElement(SelectorSmallListItemButton, __assign({ component: "li" }, props, { className: combineClassNames([
                 customClasses.listItem,
                 data.className,
-            ]), 
-            //style={data.isDisabled ? { opacity: 0.38 } : undefined}
-            disabled: data.isDisabled }),
+            ]), disabled: data.isDisabled }),
             enableIcons && (React.createElement(SmallListItemIcon, null, renderIcon(data.icon))),
             React.createElement(ListItemText, null,
                 React.createElement(Grid, { container: true },
