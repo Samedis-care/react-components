@@ -564,7 +564,8 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 						customClasses.listItem,
 						data.className,
 					])}
-					style={data.isDisabled ? { opacity: 0.38 } : undefined}
+					//style={data.isDisabled ? { opacity: 0.38 } : undefined}
+					disabled={data.isDisabled}
 				>
 					{enableIcons && (
 						<SmallListItemIcon>{renderIcon(data.icon)}</SmallListItemIcon>
