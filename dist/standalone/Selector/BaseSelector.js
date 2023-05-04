@@ -216,7 +216,9 @@ var BaseSelector = function (props) {
             component: "li" }, props, { className: combineClassNames([
                 customClasses.listItem,
                 data.className,
-            ]), style: data.isDisabled ? { opacity: 0.38 } : undefined }),
+            ]), 
+            //style={data.isDisabled ? { opacity: 0.38 } : undefined}
+            disabled: data.isDisabled }),
             enableIcons && (React.createElement(SmallListItemIcon, null, renderIcon(data.icon))),
             React.createElement(ListItemText, null,
                 React.createElement(Grid, { container: true },
