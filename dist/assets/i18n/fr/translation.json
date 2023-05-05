@@ -103,7 +103,7 @@
 		},
 		"file-upload": {
 			"upload": "Télécharger",
-			"upload-modern": "Déposer le fichier par glisser-déposer ou cliquer ici",
+			"upload-modern": "Faites glisser et déposez le fichier ici ou cliquez pour une boîte de dialogue de téléchargement",
 			"no-files": "Aucune pièce jointe disponible",
 			"formats": "Formats de fichiers",
 			"formats-modern": "Formats de fichiers autorisés :",
