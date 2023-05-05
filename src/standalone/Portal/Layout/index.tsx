@@ -225,7 +225,7 @@ const PortalLayout = (props: PortalLayoutProps) => {
 		props.mobileViewCondition || "()"
 	);
 	const shouldCollapse = useMediaQuery(
-		theme.breakpoints.down(props.collapseBreakpoint ?? "sm")
+		theme.breakpoints.down(props.collapseBreakpoint ?? "md")
 	);
 	const mobile = !!(
 		shouldCollapse ||
