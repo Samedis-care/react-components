@@ -55,6 +55,9 @@ const useStyles = makeStyles(
 			marginRight: 10,
 			...theme.componentsCare?.selectorWithCheckbox?.checkboxStyle,
 		},
+		label: {
+			marginTop: 1,
+		},
 	}),
 	{ name: "CcMultiSelectWithCheckBox" }
 );
@@ -102,7 +105,7 @@ const InputCustom = withStyles((theme: Theme) => ({
 		backgroundColor: theme.palette.background.paper,
 		border: "1px solid #ced4da",
 		fontSize: 13,
-		padding: 9,
+		padding: 8,
 		transition: theme.transitions.create(["border-color", "box-shadow"]),
 		...theme.componentsCare?.selectorWithCheckbox?.inputStyle,
 		"&:focus": {
@@ -155,7 +158,11 @@ const MultiSelectWithCheckBox = (props: MultiSelectWithCheckBoxProps) => {
 
 	return (
 		<>
-			{props.label && <InputLabel shrink>{label}</InputLabel>}
+			{props.label && (
+				<InputLabel shrink className={classes.label}>
+					{label}
+				</InputLabel>
+			)}
 			<Select
 				{...selectProps}
 				multiple

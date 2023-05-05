@@ -102,7 +102,9 @@ const FilterBar = () => {
 			>
 				{FilterBarView &&
 					(enableDialog ? (
-						<CustomFiltersButton onClick={openDialog} />
+						<Grid item>
+							<CustomFiltersButton onClick={openDialog} />
+						</Grid>
 					) : (
 						<FilterBarView
 							customData={state.customData}
