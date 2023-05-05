@@ -40,6 +40,9 @@ var useStyles = makeStyles(function (theme) {
     var _a, _b;
     return ({
         checkboxStyle: __assign({ borderRadius: 4, width: 16, height: 16, marginRight: 10 }, (_b = (_a = theme.componentsCare) === null || _a === void 0 ? void 0 : _a.selectorWithCheckbox) === null || _b === void 0 ? void 0 : _b.checkboxStyle),
+        label: {
+            marginTop: 1,
+        },
     });
 }, { name: "CcMultiSelectWithCheckBox" });
 var MenuItemCustom = withStyles(function (theme) {
@@ -67,7 +70,7 @@ var InputCustom = withStyles(function (theme) {
     var _a, _b, _c, _d, _e, _f;
     return ({
         root: __assign({}, (_b = (_a = theme.componentsCare) === null || _a === void 0 ? void 0 : _a.selectorWithCheckbox) === null || _b === void 0 ? void 0 : _b.inputRootStyle),
-        input: __assign(__assign({ borderRadius: theme.shape.borderRadius, position: "relative", backgroundColor: theme.palette.background.paper, border: "1px solid #ced4da", fontSize: 13, padding: 9, transition: theme.transitions.create(["border-color", "box-shadow"]) }, (_d = (_c = theme.componentsCare) === null || _c === void 0 ? void 0 : _c.selectorWithCheckbox) === null || _d === void 0 ? void 0 : _d.inputStyle), { "&:focus": __assign({ borderRadius: theme.shape.borderRadius, borderColor: theme.palette.primary.main }, (_f = (_e = theme.componentsCare) === null || _e === void 0 ? void 0 : _e.selectorWithCheckbox) === null || _f === void 0 ? void 0 : _f.inputFocusStyle) }),
+        input: __assign(__assign({ borderRadius: theme.shape.borderRadius, position: "relative", backgroundColor: theme.palette.background.paper, border: "1px solid #ced4da", fontSize: 13, padding: 8, transition: theme.transitions.create(["border-color", "box-shadow"]) }, (_d = (_c = theme.componentsCare) === null || _c === void 0 ? void 0 : _c.selectorWithCheckbox) === null || _d === void 0 ? void 0 : _d.inputStyle), { "&:focus": __assign({ borderRadius: theme.shape.borderRadius, borderColor: theme.palette.primary.main }, (_f = (_e = theme.componentsCare) === null || _e === void 0 ? void 0 : _e.selectorWithCheckbox) === null || _f === void 0 ? void 0 : _f.inputFocusStyle) }),
     });
 })(InputBase);
 var useSelectStyles = makeThemeStyles(function (theme) {
@@ -85,7 +88,7 @@ var MultiSelectWithCheckBox = function (props) {
             React.createElement(ListItemTextCustom, { primary: option.label })));
     };
     return (React.createElement(React.Fragment, null,
-        props.label && React.createElement(InputLabel, { shrink: true }, label),
+        props.label && (React.createElement(InputLabel, { shrink: true, className: classes.label }, label)),
         React.createElement(Select, __assign({}, selectProps, { multiple: true, displayEmpty: true, classes: selectClasses, value: values, input: React.createElement(InputCustom, null), IconComponent: ExpandMore, MenuProps: {
                 anchorOrigin: {
                     vertical: "bottom",

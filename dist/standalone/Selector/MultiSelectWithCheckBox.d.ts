@@ -27,7 +27,7 @@ export interface MultiSelectWithCheckBoxTheme {
     inputFocusStyle?: CSSProperties;
     selectStyle?: MultiSelectWithCheckBoxThemeExpert;
 }
-declare const useStyles: (props?: any) => ClassNameMap<"checkboxStyle">;
+declare const useStyles: (props?: any) => ClassNameMap<"label" | "checkboxStyle">;
 export declare type MultiSelectWithCheckBoxThemeExpert = Partial<Styles<Theme, SelectProps<string[]>, SelectClassKey>>;
 declare const _default: React.MemoExoticComponent<(props: MultiSelectWithCheckBoxProps) => JSX.Element>;
 export default _default;

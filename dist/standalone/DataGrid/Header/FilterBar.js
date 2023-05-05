@@ -46,6 +46,7 @@ var FilterBar = function () {
     var FilterBarView = props.filterBar;
     return (React.createElement(Box, { ml: 4, className: classes.filterBarBox },
         React.createElement(Grid, { container: true, alignItems: "center", justifyContent: "flex-end", spacing: 2, className: classes.filterBarGrid }, FilterBarView &&
-            (enableDialog ? (React.createElement(CustomFiltersButton, { onClick: openDialog })) : (React.createElement(FilterBarView, { customData: state.customData, setCustomData: setCustomData, inDialog: false }))))));
+            (enableDialog ? (React.createElement(Grid, { item: true },
+                React.createElement(CustomFiltersButton, { onClick: openDialog }))) : (React.createElement(FilterBarView, { customData: state.customData, setCustomData: setCustomData, inDialog: false }))))));
 };
 export default React.memo(FilterBar);
