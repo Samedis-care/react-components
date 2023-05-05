@@ -87,7 +87,7 @@ var PortalLayout = function (props) {
     var classes = useContainerStyles(props);
     var theme = useTheme();
     var mobileViewConditionMet = useMediaQuery(props.mobileViewCondition || "()");
-    var shouldCollapse = useMediaQuery(theme.breakpoints.down((_a = props.collapseBreakpoint) !== null && _a !== void 0 ? _a : "sm"));
+    var shouldCollapse = useMediaQuery(theme.breakpoints.down((_a = props.collapseBreakpoint) !== null && _a !== void 0 ? _a : "md"));
     var mobile = !!(shouldCollapse ||
         props.collapseMenu ||
         (props.mobileViewCondition && mobileViewConditionMet));

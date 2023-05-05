@@ -103,7 +103,7 @@
 		},
 		"file-upload": {
 			"upload": "Hochladen",
-			"upload-modern": "Datei per Drag & Drop hier ablegen oder klicken für einen Upload Dialog",
+			"upload-modern": "Datei per Drag & Drop ablegen oder hier klicken",
 			"no-files": "Keine Anhänge verfügbar",
 			"formats": "Dateiformate",
 			"formats-modern": "Erlaubte Dateiformate:",

@@ -103,7 +103,7 @@
 		},
 		"file-upload": {
 			"upload": "Uploaden",
-			"upload-modern": "Sleep het bestand hierheen of klik voor een uploadvenster",
+			"upload-modern": "Bestand via drag & drop of klik hier",
 			"no-files": "Geen bijlagen beschikbaar",
 			"formats": "Bestandsindelingen",
 			"formats-modern": "Toegestane bestandsformaten:",
