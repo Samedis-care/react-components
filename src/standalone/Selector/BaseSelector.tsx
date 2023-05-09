@@ -561,6 +561,7 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 					className={combineClassNames([
 						customClasses.listItem,
 						data.className,
+						props.className,
 					])}
 					disabled={data.isDisabled}
 				>
