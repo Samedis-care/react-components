@@ -210,6 +210,7 @@ var BaseSelector = function (props) {
         return (React.createElement(SelectorSmallListItemButton, __assign({ component: "li" }, props, { className: combineClassNames([
                 customClasses.listItem,
                 data.className,
+                props.className,
             ]), disabled: data.isDisabled }),
             enableIcons && (React.createElement(SmallListItemIcon, null, renderIcon(data.icon))),
             React.createElement(ListItemText, null,
