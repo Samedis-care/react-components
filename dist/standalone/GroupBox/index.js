@@ -1,7 +1,8 @@
-import React, { useRef, useEffect } from "react";
-import { InputLabel } from "@mui/material";
+import React from "react";
 import makeStyles from "@mui/styles/makeStyles";
-var useStyles = makeStyles(function (theme) { return ({
+import combineClassNames from "../../utils/combineClassNames";
+import { makeThemeStyles, useMultipleStyles } from "../../utils";
+var useStylesBase = makeStyles(function (theme) { return ({
     fieldSetRoot: {
         padding: "8px",
         borderStyle: "solid",
@@ -21,31 +22,21 @@ var useStyles = makeStyles(function (theme) { return ({
         paddingInlineEnd: 5,
     },
     smallLabel: {
-        maxWidth: "100%",
-        whiteSpace: "nowrap",
+        fontSize: "0.75em",
     },
 }); }, { name: "CcGroupBox" });
+var useThemeStyles = makeThemeStyles(function (theme) { var _a; return (_a = theme.componentsCare) === null || _a === void 0 ? void 0 : _a.groupBox; }, "CcGroupBox");
+var useStyles = function (props) {
+    return useMultipleStyles(props, useThemeStyles, useStylesBase);
+};
 var GroupBox = function (props) {
     var id = props.id, label = props.label, children = props.children, smallLabel = props.smallLabel;
     var classes = useStyles(props);
-    var inputLabelRef = useRef(null);
-    useEffect(function () {
-        if (!smallLabel)
-            return;
-        if (inputLabelRef.current) {
-            var elem = inputLabelRef.current;
-            var parentElem = elem.parentElement;
-            if (parentElem) {
-                parentElem.style.maxWidth =
-                    (elem.getBoundingClientRect().width + 5).toString() + "px";
-            }
-        }
-    }, [smallLabel]);
     return (React.createElement("fieldset", { id: id, className: classes.fieldSetRoot },
-        smallLabel
-            ? label && (React.createElement("legend", { className: classes.smallLabel },
-                React.createElement(InputLabel, { shrink: true, ref: inputLabelRef }, label)))
-            : label && React.createElement("legend", { className: classes.legend }, label),
+        label && (React.createElement("legend", { className: combineClassNames([
+                classes.legend,
+                smallLabel && classes.smallLabel,
+            ]) }, label)),
         children));
 };
 export default React.memo(GroupBox);

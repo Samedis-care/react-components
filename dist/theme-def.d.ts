@@ -15,9 +15,11 @@ import { ActionButtonTheme } from "./standalone/UIKit/ActionButton";
 import { SubActionButtonTheme } from "./standalone/UIKit/SubActionButton";
 import { FormButtonTheme } from "./standalone/UIKit/FormButtons";
 import { FormPageLayoutTheme } from "./standalone/Form/FormPageLayout";
+import { GroupBoxTheme } from "./standalone/GroupBox";
 export interface ComponentsCareTheme {
     dataGrid?: DataGridTheme;
     dataGridExpert?: DataGridThemeExpert;
+    groupBox?: GroupBoxTheme;
     portal?: {
         menu?: MenuTheme;
         menuItem?: MenuItemTheme;
