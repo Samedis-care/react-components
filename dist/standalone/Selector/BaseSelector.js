@@ -123,8 +123,7 @@ var useCustomStylesBase = makeStyles(function (theme) { return ({
         position: "absolute",
     },
     label: {
-        marginTop: 8,
-        marginLeft: -15,
+        position: "relative",
     },
     switch: {
         marginTop: -30,
@@ -140,9 +139,7 @@ var useCustomStylesBase = makeStyles(function (theme) { return ({
             objectFit: "contain",
         });
     },
-    wrapper: function (props) { return ({
-        marginTop: props.label ? 22 : undefined,
-    }); },
+    wrapper: {},
     listItem: {
         paddingLeft: "16px !important",
         paddingRight: "16px !important",
