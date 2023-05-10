@@ -868,6 +868,7 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 									{...otherParams}
 									inputProps={{
 										...params.inputProps,
+										readOnly: disableSearch,
 										title: selected ? getStringLabel(selected) : undefined,
 									}}
 									InputProps={{
