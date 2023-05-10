@@ -372,8 +372,7 @@ const useCustomStylesBase = makeStyles(
 			position: "absolute",
 		},
 		label: {
-			marginTop: 8,
-			marginLeft: -15,
+			position: "relative",
 		},
 		switch: {
 			marginTop: -30,
@@ -388,11 +387,7 @@ const useCustomStylesBase = makeStyles(
 			height: props.iconSize ?? 32,
 			objectFit: "contain",
 		}),
-		wrapper: (
-			props: Pick<BaseSelectorProps<BaseSelectorData>, "iconSize" | "label">
-		) => ({
-			marginTop: props.label ? 22 : undefined,
-		}),
+		wrapper: {},
 		listItem: {
 			paddingLeft: "16px !important",
 			paddingRight: "16px !important",
