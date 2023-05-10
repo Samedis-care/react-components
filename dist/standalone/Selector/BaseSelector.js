@@ -424,7 +424,7 @@ var BaseSelector = function (props) {
                         var _a;
                         // eslint-disable-next-line @typescript-eslint/no-unused-vars
                         var InputProps = params.InputProps, InputLabelProps = params.InputLabelProps, otherParams = __rest(params, ["InputProps", "InputLabelProps"]);
-                        return (React.createElement(TextFieldWithHelp, __assign({ variant: variant !== null && variant !== void 0 ? variant : "outlined" }, otherParams, { inputProps: __assign(__assign({}, params.inputProps), { title: selected ? getStringLabel(selected) : undefined }), InputProps: __assign(__assign({}, InputProps), { readOnly: disableSearch, startAdornment: (_a = (enableIcons ? renderIcon(selected === null || selected === void 0 ? void 0 : selected.icon) : undefined)) !== null && _a !== void 0 ? _a : startAdornment, endAdornment: (function () {
+                        return (React.createElement(TextFieldWithHelp, __assign({ variant: variant !== null && variant !== void 0 ? variant : "outlined" }, otherParams, { inputProps: __assign(__assign({}, params.inputProps), { readOnly: disableSearch, title: selected ? getStringLabel(selected) : undefined }), InputProps: __assign(__assign({}, InputProps), { readOnly: disableSearch, startAdornment: (_a = (enableIcons ? renderIcon(selected === null || selected === void 0 ? void 0 : selected.icon) : undefined)) !== null && _a !== void 0 ? _a : startAdornment, endAdornment: (function () {
                                     var _a, _b, _c;
                                     var hasAdditionalElements = openInfo || endAdornment || endAdornmentLeft;
                                     return hasAdditionalElements
