@@ -373,6 +373,7 @@ const useCustomStylesBase = makeStyles(
 		},
 		label: {
 			position: "relative",
+			transform: "translate(0,0) scale(0.75)",
 		},
 		switch: {
 			marginTop: -30,
@@ -784,7 +785,7 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 		>
 			<BaseSelectorContext.Provider value={context}>
 				{label && (
-					<InputLabel shrink className={customClasses.label}>
+					<InputLabel shrink disableAnimation className={customClasses.label}>
 						{label}
 					</InputLabel>
 				)}
