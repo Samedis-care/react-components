@@ -214,18 +214,24 @@ const ScrollableSchedule = (props: ScrollableScheduleProps) => {
 
 	const handleFilterChange = useCallback(
 		(evt: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
+			const value =
+				evt.target.type === "checkbox"
+					? (evt.target as HTMLInputElement).checked
+					: evt.target.value;
 			setState((prev) => ({
 				...getDefaultState(),
 				filterValues: {
 					...prev.filterValues,
-					[evt.target.name]:
-						evt.target.type === "checkbox"
-							? (evt.target as HTMLInputElement).checked
-							: evt.target.value,
+					[evt.target.name]: value,
 				},
 			}));
+			if (!props.filters) return;
+			const changeHandler = props.filters[evt.target.name].onChange as (
+				newFilter: string | boolean
+			) => void;
+			if (changeHandler) changeHandler(value);
 		},
-		[getDefaultState]
+		[getDefaultState, props.filters]
 	);
 
 	const [

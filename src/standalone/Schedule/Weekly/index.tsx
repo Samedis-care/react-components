@@ -46,7 +46,10 @@ const useStyles = makeStyles(
 			cursor: "pointer",
 		},
 		picker: {
-			display: "none",
+			opacity: 0,
+			position: "absolute",
+			pointerEvents: "none",
+			marginTop: -64,
 		},
 		filterWrapper: {
 			top: "50%",
@@ -86,7 +89,10 @@ const WeekView = (props: WeekViewProps) => {
 	/**
 	 * If the date picker is open
 	 */
-	const [datePickerOpen, setDatePickerOpen] = useState(false);
+	const [
+		datePickerAnchorEl,
+		setDatePickerAnchorEl,
+	] = useState<HTMLElement | null>(null);
 	/**
 	 * The current filter value
 	 */
@@ -111,15 +117,21 @@ const WeekView = (props: WeekViewProps) => {
 
 	const handleFilterChange = useCallback(
 		(evt: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
+			const value =
+				evt.target.type === "checkbox"
+					? (evt.target as HTMLInputElement).checked
+					: evt.target.value;
 			setFilterValues((prev) => ({
 				...prev,
-				[evt.target.name]:
-					evt.target.type === "checkbox"
-						? (evt.target as HTMLInputElement).checked
-						: evt.target.value,
+				[evt.target.name]: value,
 			}));
+			if (!props.filters) return;
+			const changeHandler = props.filters[evt.target.name].onChange as (
+				newFilter: string | boolean
+			) => void;
+			if (changeHandler) changeHandler(value);
 		},
-		[]
+		[props.filters]
 	);
 
 	const [
@@ -148,15 +160,15 @@ const WeekView = (props: WeekViewProps) => {
 		const week = end.diff(start, "week");
 
 		setWeekOffset(week);
-		setDatePickerOpen(false);
+		setDatePickerAnchorEl(null);
 	}, []);
 
-	const openDatePicker = useCallback(() => {
-		setDatePickerOpen(true);
+	const openDatePicker = useCallback((evt: React.MouseEvent<HTMLElement>) => {
+		setDatePickerAnchorEl(evt.currentTarget);
 	}, []);
 
 	const closeDatePicker = useCallback(() => {
-		setDatePickerOpen(false);
+		setDatePickerAnchorEl(null);
 	}, []);
 
 	useEffect(() => {
@@ -237,20 +249,17 @@ const WeekView = (props: WeekViewProps) => {
 								{nowNormalized().add(weekOffset, "week").weekYear()}
 							</span>
 							<div className={classes.picker}>
-								qsq
 								<LocalizationProvider
 									dateAdapter={AdapterMoment}
 									adapterLocale={i18n.language}
 								>
 									<DatePicker
 										format={"II RRRR"}
-										open={datePickerOpen}
+										open={datePickerAnchorEl != null}
 										label={t("standalone.schedule.week")}
 										value={nowNormalized().add(weekOffset, "week")}
 										onChange={setWeek}
-										// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-										// @ts-ignore not declared in typescript def
-										onDismiss={closeDatePicker}
+										onClose={closeDatePicker}
 									/>
 								</LocalizationProvider>
 							</div>
