@@ -69,7 +69,10 @@ var useStyles = makeStyles({
         cursor: "pointer",
     },
     picker: {
-        display: "none",
+        opacity: 0,
+        position: "absolute",
+        pointerEvents: "none",
+        marginTop: -64,
     },
     filterWrapper: {
         top: "50%",
@@ -107,7 +110,7 @@ var WeekView = function (props) {
     /**
      * If the date picker is open
      */
-    var _f = useState(false), datePickerOpen = _f[0], setDatePickerOpen = _f[1];
+    var _f = useState(null), datePickerAnchorEl = _f[0], setDatePickerAnchorEl = _f[1];
     /**
      * The current filter value
      */
@@ -127,13 +130,19 @@ var WeekView = function (props) {
         setWeekOffset(function (prev) { return prev + 1; });
     }, []);
     var handleFilterChange = useCallback(function (evt) {
+        var value = evt.target.type === "checkbox"
+            ? evt.target.checked
+            : evt.target.value;
         setFilterValues(function (prev) {
             var _a;
-            return (__assign(__assign({}, prev), (_a = {}, _a[evt.target.name] = evt.target.type === "checkbox"
-                ? evt.target.checked
-                : evt.target.value, _a)));
+            return (__assign(__assign({}, prev), (_a = {}, _a[evt.target.name] = value, _a)));
         });
-    }, []);
+        if (!props.filters)
+            return;
+        var changeHandler = props.filters[evt.target.name].onChange;
+        if (changeHandler)
+            changeHandler(value);
+    }, [props.filters]);
     var _h = useState(null), filterSettingsAnchorEl = _h[0], setFilterSettingsAnchorEl = _h[1];
     var openFilterSettings = useCallback(function (evt) {
         setFilterSettingsAnchorEl(evt.currentTarget);
@@ -151,13 +160,13 @@ var WeekView = function (props) {
         var end = normalizeMoment(date);
         var week = end.diff(start, "week");
         setWeekOffset(week);
-        setDatePickerOpen(false);
+        setDatePickerAnchorEl(null);
     }, []);
-    var openDatePicker = useCallback(function () {
-        setDatePickerOpen(true);
+    var openDatePicker = useCallback(function (evt) {
+        setDatePickerAnchorEl(evt.currentTarget);
     }, []);
     var closeDatePicker = useCallback(function () {
-        setDatePickerOpen(false);
+        setDatePickerAnchorEl(null);
     }, []);
     useEffect(function () {
         var langChangeHandler = function () {
@@ -225,12 +234,8 @@ var WeekView = function (props) {
                             " ",
                             nowNormalized().add(weekOffset, "week").weekYear()),
                         React.createElement("div", { className: classes.picker },
-                            "qsq",
                             React.createElement(LocalizationProvider, { dateAdapter: AdapterMoment, adapterLocale: i18n.language },
-                                React.createElement(DatePicker, { format: "II RRRR", open: datePickerOpen, label: t("standalone.schedule.week"), value: nowNormalized().add(weekOffset, "week"), onChange: setWeek, 
-                                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                                    // @ts-ignore not declared in typescript def
-                                    onDismiss: closeDatePicker }))),
+                                React.createElement(DatePicker, { format: "II RRRR", open: datePickerAnchorEl != null, label: t("standalone.schedule.week"), value: nowNormalized().add(weekOffset, "week"), onChange: setWeek, onClose: closeDatePicker }))),
                         React.createElement(IconButton, { onClick: nextWeek, size: "large" },
                             React.createElement(ArrowForwardIos, null))))),
             React.createElement(Grid, { item: true, xs: true, container: true, justifyContent: "flex-end" }, filterCount > 1 && (React.createElement(Grid, { item: true },

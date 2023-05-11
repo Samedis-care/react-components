@@ -130,13 +130,19 @@ var ScrollableSchedule = function (props) {
         scrollElem.current.wrapper.scrollTop = todayElem.current.offsetTop;
     }, []);
     var handleFilterChange = useCallback(function (evt) {
+        var value = evt.target.type === "checkbox"
+            ? evt.target.checked
+            : evt.target.value;
         setState(function (prev) {
             var _a;
-            return (__assign(__assign({}, getDefaultState()), { filterValues: __assign(__assign({}, prev.filterValues), (_a = {}, _a[evt.target.name] = evt.target.type === "checkbox"
-                    ? evt.target.checked
-                    : evt.target.value, _a)) }));
+            return (__assign(__assign({}, getDefaultState()), { filterValues: __assign(__assign({}, prev.filterValues), (_a = {}, _a[evt.target.name] = value, _a)) }));
         });
-    }, [getDefaultState]);
+        if (!props.filters)
+            return;
+        var changeHandler = props.filters[evt.target.name].onChange;
+        if (changeHandler)
+            changeHandler(value);
+    }, [getDefaultState, props.filters]);
     var _c = useState(null), filterSettingsAnchorEl = _c[0], setFilterSettingsAnchorEl = _c[1];
     var openFilterSettings = useCallback(function (evt) {
         setFilterSettingsAnchorEl(evt.currentTarget);
