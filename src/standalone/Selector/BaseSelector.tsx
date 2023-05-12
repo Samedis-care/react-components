@@ -543,6 +543,7 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 					<Typography
 						component={"li"}
 						{...props}
+						onClick={undefined}
 						variant={"caption"}
 						className={customClasses.smallLabel}
 					>
