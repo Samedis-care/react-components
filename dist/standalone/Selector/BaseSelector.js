@@ -204,7 +204,7 @@ var BaseSelector = function (props) {
         if (data.isDivider)
             return React.createElement(Divider, { className: customClasses.divider });
         if (data.isSmallLabel)
-            return (React.createElement(Typography, __assign({ component: "li" }, props, { variant: "caption", className: customClasses.smallLabel }), getReactLabel(data)));
+            return (React.createElement(Typography, __assign({ component: "li" }, props, { onClick: undefined, variant: "caption", className: customClasses.smallLabel }), getReactLabel(data)));
         return (React.createElement(SelectorSmallListItemButton, __assign({ component: "li" }, props, { className: combineClassNames([
                 customClasses.listItem,
                 data.className,
