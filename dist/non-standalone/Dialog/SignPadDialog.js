@@ -77,20 +77,20 @@ var SignPadDialog = function (props) {
     var saveCanvas = useCallback(function () {
         var _a, _b;
         if (signCanvas.current && !signCanvas.current.isEmpty()) {
-            var signature_1 = signCanvas.current
+            var newSignature = signCanvas.current
                 .getTrimmedCanvas()
                 .toDataURL("image/png");
             if (setSignature)
-                setSignature(signature_1);
+                setSignature(newSignature);
         }
         else {
             if (setSignature)
-                setSignature("");
+                setSignature(resetCanvas ? signature : "");
         }
         (_a = hiddenRef.current) === null || _a === void 0 ? void 0 : _a.focus();
         (_b = hiddenRef.current) === null || _b === void 0 ? void 0 : _b.blur();
         popDialog();
-    }, [setSignature, popDialog]);
+    }, [setSignature, popDialog, signature, resetCanvas]);
     var closeCanvas = useCallback(function () {
         var _a, _b;
         (_a = hiddenRef.current) === null || _a === void 0 ? void 0 : _a.focus();
