@@ -55,7 +55,7 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
     return to.concat(ar || Array.prototype.slice.call(from));
 };
 import React, { useCallback, useEffect, useImperativeHandle, useRef, useState, } from "react";
-import { Box, Button, FormHelperText, Grid, Tooltip, Typography, useTheme, } from "@mui/material";
+import { Box, Button, FormHelperText, Unstable_Grid2 as Grid, Tooltip, Typography, useTheme, } from "@mui/material";
 import { AttachFile } from "@mui/icons-material";
 import FilePreview, { getFileIconOrDefault } from "./File";
 import { combineClassNames, getFileExt, matchMime, processImage, useDropZone, } from "../../../utils";
@@ -271,10 +271,10 @@ var FileUpload = function (props, ref) {
                     "components-care-dropzone",
                     dragging && classes.dropzone,
                 ]) },
-                !readOnly && (React.createElement(Grid, { item: true, xs: true, key: "upload" },
+                !readOnly && (React.createElement(Grid, { xs: true, key: "upload" },
                     React.createElement(Button, { startIcon: React.createElement(AttachFile, null), variant: "contained", color: "primary", onClick: function () { return handleUpload(); }, name: name, onBlur: onBlur }, uploadLabel || t("standalone.file-upload.upload")),
                     React.createElement("input", { type: "file", accept: accept || undefined, multiple: maxFiles ? getRemainingFileCount() > 1 : true, onChange: handleFileChange, className: classes.fileInput, ref: inputRef }))),
-                React.createElement(Grid, { item: true, xs: 12, key: "files" },
+                React.createElement(Grid, { xs: 12, key: "files" },
                     React.createElement(Grid, { container: true, spacing: 2, alignContent: "flex-start", alignItems: "flex-start" },
                         files.map(function (data, index) {
                             return data && (React.createElement(FilePreview, { name: data.file.name, downloadLink: "downloadLink" in data.file
@@ -283,9 +283,9 @@ var FileUpload = function (props, ref) {
                                     ? undefined
                                     : function () { return removeFile(data); }, variant: "box" }));
                         }),
-                        readOnly && files.length === 0 && (React.createElement(Grid, { item: true },
+                        readOnly && files.length === 0 && (React.createElement(Grid, null,
                             React.createElement(Typography, null, t("standalone.file-upload.no-files")))))),
-                !readOnly && (React.createElement(Grid, { item: true, xs: 12, key: "info" },
+                !readOnly && (React.createElement(Grid, { xs: 12, key: "info" },
                     React.createElement(FormHelperText, { className: classes.formatText },
                         "(",
                         t("standalone.file-upload.formats"),
@@ -303,13 +303,13 @@ var FileUpload = function (props, ref) {
                     "components-care-dropzone",
                     dragging && classes.dropzone,
                 ]) },
-                !readOnly && (React.createElement(Grid, { item: true, xs: true, key: "upload" },
+                !readOnly && (React.createElement(Grid, { xs: true, key: "upload" },
                     React.createElement("span", { className: combineClassNames([
                             classes.modernUploadLabel,
                             files.length === 0 && classes.modernUploadLabelEmpty,
                         ]) }, uploadLabel || t("standalone.file-upload.upload-modern")),
                     React.createElement("input", { type: "file", accept: accept || undefined, multiple: maxFiles ? getRemainingFileCount() > 1 : true, onChange: handleFileChange, className: classes.fileInput, ref: inputRef }))),
-                files.length > 0 && (React.createElement(Grid, { item: true, xs: 12, key: "files" },
+                files.length > 0 && (React.createElement(Grid, { xs: 12, key: "files" },
                     React.createElement(Box, { mx: 1 },
                         React.createElement(Grid, { container: true, spacing: 1, alignContent: "flex-start", alignItems: "flex-start" }, files.map(function (data, index) {
                             return data && (React.createElement(FilePreview, { name: data.file.name, downloadLink: "downloadLink" in data.file
@@ -318,16 +318,16 @@ var FileUpload = function (props, ref) {
                                     ? undefined
                                     : function () { return removeFile(data); }, variant: "list" }));
                         }))))),
-                readOnly && files.length === 0 && (React.createElement(Grid, { item: true, xs: 12, key: "no-files" },
+                readOnly && files.length === 0 && (React.createElement(Grid, { xs: 12, key: "no-files" },
                     React.createElement(Typography, null, t("standalone.file-upload.no-files")))),
-                !readOnly && (React.createElement(Grid, { item: true, xs: 12, key: "info", container: true, wrap: "nowrap", spacing: 1 },
-                    React.createElement(Grid, { item: true, xs: true },
+                !readOnly && (React.createElement(Grid, { xs: 12, key: "info", container: true, wrap: "nowrap", spacing: 1 },
+                    React.createElement(Grid, { xs: true },
                         React.createElement(Typography, { align: "right", className: classes.formatTextModern },
                             t("standalone.file-upload.formats-modern"),
                             " ",
                             acceptFiles.length == 0 &&
                                 t("standalone.file-upload.format.any"))),
-                    acceptFiles.map(function (entry, idx) { return (React.createElement(Grid, { item: true, className: classes.formatIconsModern, key: idx.toString(16) },
+                    acceptFiles.map(function (entry, idx) { return (React.createElement(Grid, { className: classes.formatIconsModern, key: idx.toString(16) },
                         React.createElement(Tooltip, { title: acceptLabel || accept || "" },
                             React.createElement("span", null, React.createElement(getFileIconOrDefault(entry)))))); }))))));
     }
