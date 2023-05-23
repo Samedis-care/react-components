@@ -11,7 +11,7 @@ import {
 	Box,
 	Button,
 	FormHelperText,
-	Grid,
+	Unstable_Grid2 as Grid,
 	Theme,
 	Tooltip,
 	Typography,
@@ -513,7 +513,7 @@ const FileUpload = (
 					])}
 				>
 					{!readOnly && (
-						<Grid item xs key={"upload"}>
+						<Grid xs key={"upload"}>
 							<Button
 								startIcon={<AttachFile />}
 								variant={"contained"}
@@ -534,7 +534,7 @@ const FileUpload = (
 							/>
 						</Grid>
 					)}
-					<Grid item xs={12} key={"files"}>
+					<Grid xs={12} key={"files"}>
 						<Grid
 							container
 							spacing={2}
@@ -565,7 +565,7 @@ const FileUpload = (
 									)
 							)}
 							{readOnly && files.length === 0 && (
-								<Grid item>
+								<Grid>
 									<Typography>
 										{t("standalone.file-upload.no-files")}
 									</Typography>
@@ -574,7 +574,7 @@ const FileUpload = (
 						</Grid>
 					</Grid>
 					{!readOnly && (
-						<Grid item xs={12} key={"info"}>
+						<Grid xs={12} key={"info"}>
 							<FormHelperText className={classes.formatText}>
 								({t("standalone.file-upload.formats")}:{" "}
 								{acceptLabel ||
@@ -604,7 +604,7 @@ const FileUpload = (
 					])}
 				>
 					{!readOnly && (
-						<Grid item xs key={"upload"}>
+						<Grid xs key={"upload"}>
 							<span
 								className={combineClassNames([
 									classes.modernUploadLabel,
@@ -624,7 +624,7 @@ const FileUpload = (
 						</Grid>
 					)}
 					{files.length > 0 && (
-						<Grid item xs={12} key={"files"}>
+						<Grid xs={12} key={"files"}>
 							<Box mx={1}>
 								<Grid
 									container
@@ -660,20 +660,13 @@ const FileUpload = (
 						</Grid>
 					)}
 					{readOnly && files.length === 0 && (
-						<Grid item xs={12} key={"no-files"}>
+						<Grid xs={12} key={"no-files"}>
 							<Typography>{t("standalone.file-upload.no-files")}</Typography>
 						</Grid>
 					)}
 					{!readOnly && (
-						<Grid
-							item
-							xs={12}
-							key={"info"}
-							container
-							wrap={"nowrap"}
-							spacing={1}
-						>
-							<Grid item xs>
+						<Grid xs={12} key={"info"} container wrap={"nowrap"} spacing={1}>
+							<Grid xs>
 								<Typography
 									align={"right"}
 									className={classes.formatTextModern}
@@ -685,7 +678,6 @@ const FileUpload = (
 							</Grid>
 							{acceptFiles.map((entry, idx) => (
 								<Grid
-									item
 									className={classes.formatIconsModern}
 									key={idx.toString(16)}
 								>
