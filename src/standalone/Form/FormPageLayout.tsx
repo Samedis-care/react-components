@@ -1,4 +1,4 @@
-import { Box, Theme, useMediaQuery, useTheme } from "@mui/material";
+import { Theme } from "@mui/material";
 import React from "react";
 import { Styles } from "@mui/styles";
 import makeStyles from "@mui/styles/makeStyles";
@@ -54,18 +54,16 @@ const useThemeStyles = makeThemeStyles<
 );
 
 const FormPageLayout = (props: FormPageLayoutProps) => {
-	const theme = useTheme();
-	const isXs = useMediaQuery(theme.breakpoints.only("xs"));
 	const classes = useThemeStyles(props);
 
 	return (
-		<Box p={isXs ? 2 : 0} className={classes.box}>
+		<div className={classes.box}>
 			<div className={classes.wrapper}>
 				<div className={classes.body}>{props.body}</div>
 				<div className={classes.footer}>{props.footer}</div>
 			</div>
 			{props.other}
-		</Box>
+		</div>
 	);
 };
 
