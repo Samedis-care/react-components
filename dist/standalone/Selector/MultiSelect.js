@@ -105,6 +105,7 @@ var MultiSelect = function (props) {
         });
     }); }, [getId, onLoad, selectedIds]);
     var handleDelete = useCallback(function (evt) {
+        evt.stopPropagation(); // don't trigger onClick event on item itself
         var canDelete = true;
         var entry = selected.find(function (s) { return s.value === evt.currentTarget.name; });
         if (!entry) {
