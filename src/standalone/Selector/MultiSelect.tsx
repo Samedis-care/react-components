@@ -138,6 +138,8 @@ const MultiSelect = <DataT extends MultiSelectorData>(
 
 	const handleDelete = useCallback(
 		(evt: React.MouseEvent<HTMLButtonElement>) => {
+			evt.stopPropagation(); // don't trigger onClick event on item itself
+
 			let canDelete = true;
 			const entry: MultiSelectorData | null | undefined = selected.find(
 				(s) => s.value === evt.currentTarget.name
