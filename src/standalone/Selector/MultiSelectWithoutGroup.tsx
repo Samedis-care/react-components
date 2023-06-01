@@ -129,6 +129,7 @@ const MultiSelectWithoutGroup = <DataT extends MultiSelectorData>(
 
 	const handleDelete = useCallback(
 		async (evt: React.MouseEvent<HTMLButtonElement>) => {
+			evt.stopPropagation();
 			if (!onSelect) return;
 
 			// find the item
@@ -144,7 +145,7 @@ const MultiSelectWithoutGroup = <DataT extends MultiSelectorData>(
 			// check that we can delete the item
 			if (
 				entryToDelete.canUnselect &&
-				!(await entryToDelete.canUnselect(entryToDelete))
+				!(await entryToDelete.canUnselect(entryToDelete, evt))
 			) {
 				return;
 			}

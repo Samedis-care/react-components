@@ -7,7 +7,7 @@ export interface IDialogButtonConfig {
 	/**
 	 * The button label
 	 */
-	text: string;
+	text: React.ReactNode;
 	/**
 	 * The action to perform if the button is clicked (the dialog will be closed automatically)
 	 */
@@ -67,7 +67,7 @@ export interface IDialogConfigConfirm {
 	/**
 	 * The label on the yes button
 	 */
-	textButtonYes: string;
+	textButtonYes: React.ReactNode;
 	/**
 	 * The callback for the yes button (the dialog closes automatically)
 	 */
@@ -75,7 +75,7 @@ export interface IDialogConfigConfirm {
 	/**
 	 * The label on the no button
 	 */
-	textButtonNo: string;
+	textButtonNo: React.ReactNode;
 	/**
 	 * The callback for the no button (the dialog closes automatically)
 	 */

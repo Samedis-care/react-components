@@ -1,13 +1,16 @@
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useContext, useMemo } from "react";
 import BaseSelector, {
 	BaseSelectorData,
 	BaseSelectorProps,
 } from "./BaseSelector";
-import { Grid, Paper } from "@mui/material";
+import { Grid, Paper, useTheme } from "@mui/material";
 import makeStyles from "@mui/styles/makeStyles";
 import MultiSelectEntry, { IMultiSelectEntryProps } from "./MultiSelectEntry";
 import { cleanClassMap, combineClassMaps } from "../../utils";
 import { ClassNameMap } from "@mui/styles/withStyles";
+import { showConfirmDialogBool } from "../../non-standalone";
+import { DialogContext } from "../../framework";
+import useCCTranslations from "../../utils/useCCTranslations";
 
 export interface MultiSelectorData extends BaseSelectorData {
 	/**
@@ -18,7 +21,10 @@ export interface MultiSelectorData extends BaseSelectorData {
 	 * Can the entry be unselected?
 	 * @param data The data entry to be unselected
 	 */
-	canUnselect?: (data: MultiSelectorData) => boolean | Promise<boolean>;
+	canUnselect?: (
+		data: MultiSelectorData,
+		evt: React.MouseEvent<HTMLElement>
+	) => boolean | Promise<boolean>;
 	/**
 	 * Disable delete button
 	 */
@@ -58,6 +64,11 @@ export interface MultiSelectProps<DataT extends MultiSelectorData>
 	 * @see Array.sort
 	 */
 	selectedSort?: (a: DataT, b: DataT) => number;
+	/**
+	 * Provide generic confirm remove/delete dialog when set to true.
+	 * Defaults to MultiSelectTheme.confirmDeleteDefault, which defaults to false
+	 */
+	confirmDelete?: boolean;
 }
 
 const useBaseSelectorStyles = makeStyles(
@@ -83,6 +94,13 @@ const useMultiSelectorStyles = makeStyles(
 	{ name: "CcMultiSelect" }
 );
 
+export interface MultiSelectTheme {
+	/**
+	 * default value for confirm delete, default false
+	 */
+	confirmDeleteDefault?: boolean;
+}
+
 const MultiSelect = <DataT extends MultiSelectorData>(
 	props: MultiSelectProps<DataT>
 ) => {
@@ -99,6 +117,12 @@ const MultiSelect = <DataT extends MultiSelectorData>(
 		defaultSwitchValue,
 		selectedSort,
 	} = props;
+	const theme = useTheme();
+	const { t } = useCCTranslations();
+	const confirmDelete =
+		props.confirmDelete ??
+		theme.componentsCare?.multiSelect?.confirmDeleteDefault ??
+		false;
 	const multiSelectClasses = useMultiSelectorStyles(props);
 	const baseSelectorClasses = useBaseSelectorStyles(
 		cleanClassMap(
@@ -136,6 +160,27 @@ const MultiSelect = <DataT extends MultiSelectorData>(
 		[getId, onLoad, selectedIds]
 	);
 
+	const dialogContext = useContext(DialogContext); // this is standalone, so this has to be optional. framework might not be present.
+	if (confirmDelete && !dialogContext) {
+		throw new Error(
+			"[Components-Care] You enabled MultiSelect.confirmDelete, but no DialogContext can be found."
+		);
+	}
+	const genericDeleteConfirm = useCallback(
+		async (evt: React.MouseEvent<HTMLElement>): Promise<boolean> => {
+			if (evt.shiftKey) return true;
+			if (!dialogContext) return true;
+			const [pushDialog] = dialogContext;
+			return showConfirmDialogBool(pushDialog, {
+				title: t("standalone.selector.multi-select.delete-confirm.title"),
+				message: t("standalone.selector.multi-select.delete-confirm.message"),
+				textButtonYes: t("standalone.selector.multi-select.delete-confirm.yes"),
+				textButtonNo: t("standalone.selector.multi-select.delete-confirm.no"),
+			});
+		},
+		[dialogContext, t]
+	);
+
 	const handleDelete = useCallback(
 		(evt: React.MouseEvent<HTMLButtonElement>) => {
 			evt.stopPropagation(); // don't trigger onClick event on item itself
@@ -151,7 +196,9 @@ const MultiSelect = <DataT extends MultiSelectorData>(
 			}
 			void (async () => {
 				if (entry.canUnselect) {
-					canDelete = await entry.canUnselect(entry);
+					canDelete = await entry.canUnselect(entry, evt);
+				} else if (confirmDelete) {
+					canDelete = await genericDeleteConfirm(evt);
 				}
 				if (canDelete && onSelect) {
 					const selectedOptions = selected.filter(
@@ -161,7 +208,7 @@ const MultiSelect = <DataT extends MultiSelectorData>(
 				}
 			})();
 		},
-		[onSelect, selected]
+		[onSelect, selected, genericDeleteConfirm, confirmDelete]
 	);
 
 	const handleSetData = useCallback(

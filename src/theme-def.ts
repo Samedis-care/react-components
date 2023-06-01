@@ -11,6 +11,7 @@ import { ImageBoxTheme } from "./standalone/FileUpload/MultiImage/ImageBox";
 import { ImageDialogEntryTheme } from "./standalone/FileUpload/MultiImage/ImageDialogEntry";
 import { ImageDotsTheme } from "./standalone/FileUpload/MultiImage/ImageDots";
 import {
+	MultiSelectTheme,
 	MultiSelectWithCheckBoxTheme,
 	SelectorTheme,
 	SelectorThemeExpert,
@@ -47,6 +48,7 @@ export interface ComponentsCareTheme {
 		};
 	};
 	selector?: SelectorTheme;
+	multiSelect?: MultiSelectTheme;
 	selectorWithCheckbox?: MultiSelectWithCheckBoxTheme;
 	uiKit?: {
 		label?: ComponentWithLabelTheme;
