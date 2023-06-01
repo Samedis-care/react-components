@@ -54,12 +54,15 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
     }
     return to.concat(ar || Array.prototype.slice.call(from));
 };
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useContext, useMemo } from "react";
 import BaseSelector from "./BaseSelector";
-import { Grid, Paper } from "@mui/material";
+import { Grid, Paper, useTheme } from "@mui/material";
 import makeStyles from "@mui/styles/makeStyles";
 import MultiSelectEntry from "./MultiSelectEntry";
 import { cleanClassMap, combineClassMaps } from "../../utils";
+import { showConfirmDialogBool } from "../../non-standalone";
+import { DialogContext } from "../../framework";
+import useCCTranslations from "../../utils/useCCTranslations";
 var useBaseSelectorStyles = makeStyles(function (theme) { return ({
     inputRoot: function (props) { return ({
         borderRadius: props.selected.length > 0
@@ -75,8 +78,11 @@ var useMultiSelectorStyles = makeStyles(function (theme) { return ({
     },
 }); }, { name: "CcMultiSelect" });
 var MultiSelect = function (props) {
-    var _a;
+    var _a, _b, _c, _d, _e;
     var onLoad = props.onLoad, onSelect = props.onSelect, selected = props.selected, enableIcons = props.enableIcons, selectedEntryRenderer = props.selectedEntryRenderer, disabled = props.disabled, getIdOfData = props.getIdOfData, displaySwitch = props.displaySwitch, switchLabel = props.switchLabel, defaultSwitchValue = props.defaultSwitchValue, selectedSort = props.selectedSort;
+    var theme = useTheme();
+    var t = useCCTranslations().t;
+    var confirmDelete = (_d = (_a = props.confirmDelete) !== null && _a !== void 0 ? _a : (_c = (_b = theme.componentsCare) === null || _b === void 0 ? void 0 : _b.multiSelect) === null || _c === void 0 ? void 0 : _c.confirmDeleteDefault) !== null && _d !== void 0 ? _d : false;
     var multiSelectClasses = useMultiSelectorStyles(props);
     var baseSelectorClasses = useBaseSelectorStyles(cleanClassMap(props, true));
     var getIdDefault = useCallback(function (data) { return data.value; }, []);
@@ -104,6 +110,26 @@ var MultiSelect = function (props) {
             }
         });
     }); }, [getId, onLoad, selectedIds]);
+    var dialogContext = useContext(DialogContext); // this is standalone, so this has to be optional. framework might not be present.
+    if (confirmDelete && !dialogContext) {
+        throw new Error("[Components-Care] You enabled MultiSelect.confirmDelete, but no DialogContext can be found.");
+    }
+    var genericDeleteConfirm = useCallback(function (evt) { return __awaiter(void 0, void 0, void 0, function () {
+        var pushDialog;
+        return __generator(this, function (_a) {
+            if (evt.shiftKey)
+                return [2 /*return*/, true];
+            if (!dialogContext)
+                return [2 /*return*/, true];
+            pushDialog = dialogContext[0];
+            return [2 /*return*/, showConfirmDialogBool(pushDialog, {
+                    title: t("standalone.selector.multi-select.delete-confirm.title"),
+                    message: t("standalone.selector.multi-select.delete-confirm.message"),
+                    textButtonYes: t("standalone.selector.multi-select.delete-confirm.yes"),
+                    textButtonNo: t("standalone.selector.multi-select.delete-confirm.no"),
+                })];
+        });
+    }); }, [dialogContext, t]);
     var handleDelete = useCallback(function (evt) {
         evt.stopPropagation(); // don't trigger onClick event on item itself
         var canDelete = true;
@@ -117,11 +143,17 @@ var MultiSelect = function (props) {
                 switch (_a.label) {
                     case 0:
                         if (!entry.canUnselect) return [3 /*break*/, 2];
-                        return [4 /*yield*/, entry.canUnselect(entry)];
+                        return [4 /*yield*/, entry.canUnselect(entry, evt)];
                     case 1:
                         canDelete = _a.sent();
-                        _a.label = 2;
+                        return [3 /*break*/, 4];
                     case 2:
+                        if (!confirmDelete) return [3 /*break*/, 4];
+                        return [4 /*yield*/, genericDeleteConfirm(evt)];
+                    case 3:
+                        canDelete = _a.sent();
+                        _a.label = 4;
+                    case 4:
                         if (canDelete && onSelect) {
                             selectedOptions = selected.filter(function (s) { return s.value !== entry.value; });
                             onSelect(selectedOptions);
@@ -130,7 +162,7 @@ var MultiSelect = function (props) {
                 }
             });
         }); })();
-    }, [onSelect, selected]);
+    }, [onSelect, selected, genericDeleteConfirm, confirmDelete]);
     var handleSetData = useCallback(function (newValue) {
         if (!onSelect)
             return;
@@ -140,7 +172,7 @@ var MultiSelect = function (props) {
     }, [getId, onSelect, selected]);
     return (React.createElement(Grid, { container: true },
         React.createElement(Grid, { item: true, xs: 12 },
-            React.createElement(BaseSelector, __assign({}, props, { classes: combineClassMaps(baseSelectorClasses, (_a = props.subClasses) === null || _a === void 0 ? void 0 : _a.baseSelector), onLoad: multiSelectLoadHandler, selected: null, onSelect: multiSelectHandler, refreshToken: selectedIds.join(","), displaySwitch: displaySwitch, switchLabel: switchLabel, defaultSwitchValue: defaultSwitchValue }))),
+            React.createElement(BaseSelector, __assign({}, props, { classes: combineClassMaps(baseSelectorClasses, (_e = props.subClasses) === null || _e === void 0 ? void 0 : _e.baseSelector), onLoad: multiSelectLoadHandler, selected: null, onSelect: multiSelectHandler, refreshToken: selectedIds.join(","), displaySwitch: displaySwitch, switchLabel: switchLabel, defaultSwitchValue: defaultSwitchValue }))),
         props.selected.length > 0 && (React.createElement(Grid, { item: true, xs: 12, className: multiSelectClasses.selectedEntries },
             React.createElement(Paper, { elevation: 0 }, (selectedSort
                 ? props.selected.sort(selectedSort)

@@ -116,6 +116,7 @@ var MultiSelectWithoutGroup = function (props) {
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
+                    evt.stopPropagation();
                     if (!onSelect)
                         return [2 /*return*/];
                     entryToDelete = selected.find(function (s) { return s.value === evt.currentTarget.name; });
@@ -124,7 +125,7 @@ var MultiSelectWithoutGroup = function (props) {
                     }
                     _a = entryToDelete.canUnselect;
                     if (!_a) return [3 /*break*/, 2];
-                    return [4 /*yield*/, entryToDelete.canUnselect(entryToDelete)];
+                    return [4 /*yield*/, entryToDelete.canUnselect(entryToDelete, evt)];
                 case 1:
                     _a = !(_b.sent());
                     _b.label = 2;

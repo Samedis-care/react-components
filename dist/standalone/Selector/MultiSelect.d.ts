@@ -11,7 +11,7 @@ export interface MultiSelectorData extends BaseSelectorData {
      * Can the entry be unselected?
      * @param data The data entry to be unselected
      */
-    canUnselect?: (data: MultiSelectorData) => boolean | Promise<boolean>;
+    canUnselect?: (data: MultiSelectorData, evt: React.MouseEvent<HTMLElement>) => boolean | Promise<boolean>;
     /**
      * Disable delete button
      */
@@ -47,7 +47,18 @@ export interface MultiSelectProps<DataT extends MultiSelectorData> extends Omit<
      * @see Array.sort
      */
     selectedSort?: (a: DataT, b: DataT) => number;
+    /**
+     * Provide generic confirm remove/delete dialog when set to true.
+     * Defaults to MultiSelectTheme.confirmDeleteDefault, which defaults to false
+     */
+    confirmDelete?: boolean;
 }
 declare const useMultiSelectorStyles: (props?: any) => ClassNameMap<"selectedEntries">;
+export interface MultiSelectTheme {
+    /**
+     * default value for confirm delete, default false
+     */
+    confirmDeleteDefault?: boolean;
+}
 declare const _default: <DataT extends MultiSelectorData>(props: MultiSelectProps<DataT>) => JSX.Element;
 export default _default;

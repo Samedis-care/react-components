@@ -99,6 +99,14 @@
 				"start-typing-to-search-text": "Enter a search string to get results",
 				"lru-label": "Last recently used",
 				"selected": "SELECTED"
+			},
+			"multi-select": {
+				"delete-confirm": {
+					"title": "Confirm Removal",
+					"message": "Are you sure you want to remove this entry?",
+					"yes": "Yes",
+					"no": "No"
+				}
 			}
 		},
 		"file-upload": {

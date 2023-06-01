@@ -38,7 +38,7 @@ export interface FileProps {
      */
     variant: "box" | "list" | "compact-list" | "icon-only";
 }
-declare const useStyles: (props?: any) => import("@mui/styles").ClassNameMap<"icon" | "downloadLink" | "clickable" | "iconContainer" | "closeIcon" | "closeIconList" | "iconList" | "iconDisabled" | "listEntryText" | "listLabel" | "compactListWrapper">;
+declare const useStyles: (props?: any) => import("@mui/styles").ClassNameMap<"icon" | "clickable" | "downloadLink" | "iconContainer" | "closeIcon" | "closeIconList" | "iconList" | "iconDisabled" | "listEntryText" | "listLabel" | "compactListWrapper">;
 export declare const ExcelFileExtensions: string[];
 export declare const WordFileExtensions: string[];
 export declare const PowerPointFileExtensions: string[];
