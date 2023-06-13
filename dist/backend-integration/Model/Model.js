@@ -70,11 +70,12 @@ import("@sentry/react")
  * React-Query's useQuery for the given model and record ID
  * @param model The model ID to load
  * @param id The record ID (or null to get default values on create)
+ * @param options Extra options to pass to useQuery (defaults are provided for retry, staleTime and cacheTime (last two only if configured in model))
  */
-export var useModelGet = function (model, id) {
-    return useQuery(model.getReactQueryKey(id), function () { return model.getRaw(id); }, __assign({ 
+export var useModelGet = function (model, id, options) {
+    return useQuery(model.getReactQueryKey(id), function () { return model.getRaw(id); }, __assign(__assign({ 
         // 3 retries if we get network error
-        retry: function (count, err) { return err.name === "NetworkError" && count < 3; } }, model.cacheOptions));
+        retry: function (count, err) { return err.name === "NetworkError" && count < 3; } }, model.cacheOptions), options));
 };
 /**
  * React-Query's useQuery for the given model and index params
