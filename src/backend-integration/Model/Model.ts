@@ -14,6 +14,7 @@ import {
 } from "../../standalone/DataGrid/DataGrid";
 import {
 	UseMutationResult,
+	UseQueryOptions,
 	UseQueryResult,
 } from "react-query/types/react/types";
 import queryCache from "../Store";
@@ -203,6 +204,7 @@ export interface CacheOptions {
  * React-Query's useQuery for the given model and record ID
  * @param model The model ID to load
  * @param id The record ID (or null to get default values on create)
+ * @param options Extra options to pass to useQuery (defaults are provided for retry, staleTime and cacheTime (last two only if configured in model))
  */
 export const useModelGet = <
 	KeyT extends ModelFieldName,
@@ -210,12 +212,18 @@ export const useModelGet = <
 	CustomT
 >(
 	model: Model<KeyT, VisibilityT, CustomT>,
-	id: string | null
+	id: string | null,
+	options?: UseQueryOptions<
+		ModelGetResponse<KeyT>,
+		Error,
+		ModelGetResponse<KeyT>
+	>
 ): UseQueryResult<ModelGetResponse<KeyT>, Error> => {
 	return useQuery(model.getReactQueryKey(id), () => model.getRaw(id), {
 		// 3 retries if we get network error
 		retry: (count, err: Error) => err.name === "NetworkError" && count < 3,
 		...model.cacheOptions,
+		...options,
 	});
 };
 
