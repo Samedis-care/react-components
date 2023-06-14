@@ -40,7 +40,8 @@ const useInputCursorFix = (newValue: string): InputCursorFixHook => {
 			current.selectionEnd = cursor[1] === null ? null : cursor[1] + curOffset;
 			current.selectionDirection = cursor[2];
 		}
-	});
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [newValue]);
 
 	const handleChange = useCallback(
 		(event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
