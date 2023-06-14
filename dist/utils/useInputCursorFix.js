@@ -17,7 +17,8 @@ var useInputCursorFix = function (newValue) {
             current.selectionEnd = cursor[1] === null ? null : cursor[1] + curOffset;
             current.selectionDirection = cursor[2];
         }
-    });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [newValue]);
     var handleChange = useCallback(function (event) {
         setCursor([
             event.target.selectionStart,
