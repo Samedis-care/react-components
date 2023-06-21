@@ -99,6 +99,14 @@
 				"start-typing-to-search-text": "Voer een zoekreeks in om resultaten te krijgen",
 				"lru-label": "Laatst recent gebruikt",
 				"selected": "GESELECTEERD"
+			},
+			"multi-select": {
+				"delete-confirm": {
+					"title": "Bevestig verwijdering",
+					"message": "Weet u zeker dat u dit item wilt verwijderen?",
+					"yes": "Ja",
+					"no": "Nee"
+				}
 			}
 		},
 		"file-upload": {
