@@ -99,6 +99,14 @@
 				"start-typing-to-search-text": "Natija olish uchun qidiruv qatorini kiriting",
 				"lru-label": "Oxirgi marta ishlatilgan",
 				"selected": "TANLANGAN"
+			},
+			"multi-select": {
+				"delete-confirm": {
+					"title": "O'chirishni tasdiqlang",
+					"message": "Haqiqatan ham bu yozuvni olib tashlamoqchimisiz?",
+					"yes": "Ha",
+					"no": "Yo'q"
+				}
 			}
 		},
 		"file-upload": {
