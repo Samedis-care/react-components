@@ -453,7 +453,9 @@ var DataGrid = function (props) {
                             // handle filter changes invalidating data
                             rows: prevState.refreshShouldWipeRows && prevState.refreshData === 2
                                 ? {}
-                                : prevState.rows, refreshShouldWipeRows: false })); });
+                                : prevState.rows, selectedRows: prevState.refreshShouldWipeRows && prevState.refreshData === 2
+                                ? []
+                                : prevState.selectedRows, refreshShouldWipeRows: false })); });
                         return [2 /*return*/];
                 }
             });
@@ -470,7 +472,7 @@ var DataGrid = function (props) {
     // debounced refresh on filter and sort changes
     var resetView = useMemo(function () {
         return debounce(function () {
-            setState(function (prevState) { return (__assign(__assign({}, prevState), { rows: {}, refreshData: Math.min(prevState.refreshData + 1, 2), refreshShouldWipeRows: prevState.refreshData === 1 })); });
+            setState(function (prevState) { return (__assign(__assign({}, prevState), { rows: {}, selectedRows: [], refreshData: Math.min(prevState.refreshData + 1, 2), refreshShouldWipeRows: prevState.refreshData === 1 })); });
         }, 500);
     }, [setState]);
     var initialRender = useRef(true);
