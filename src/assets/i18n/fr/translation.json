@@ -99,6 +99,14 @@
 				"start-typing-to-search-text": "Entrez une chaîne de recherche pour obtenir des résultats",
 				"lru-label": "Dernière utilisation récente",
 				"selected": "CHOISI"
+			},
+			"multi-select": {
+				"delete-confirm": {
+					"title": "Confirmer la suppression",
+					"message": "Voulez-vous vraiment supprimer cette entrée?",
+					"yes": "Oui",
+					"no": "Non"
+				}
 			}
 		},
 		"file-upload": {
