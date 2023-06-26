@@ -1227,6 +1227,10 @@ const DataGrid = (props: DataGridProps) => {
 					prevState.refreshShouldWipeRows && prevState.refreshData === 2
 						? {}
 						: prevState.rows,
+				selectedRows:
+					prevState.refreshShouldWipeRows && prevState.refreshData === 2
+						? []
+						: prevState.selectedRows,
 				refreshShouldWipeRows: false,
 			}));
 		})();
@@ -1254,6 +1258,7 @@ const DataGrid = (props: DataGridProps) => {
 				setState((prevState) => ({
 					...prevState,
 					rows: {},
+					selectedRows: [],
 					refreshData: Math.min(prevState.refreshData + 1, 2),
 					refreshShouldWipeRows: prevState.refreshData === 1, // when we set refreshData to two and this is changing filters, we need an rows reset to prevent old data from getting displayed
 				}));
