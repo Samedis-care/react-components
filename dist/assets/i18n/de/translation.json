@@ -275,7 +275,8 @@
 	"utils": {
 		"validation": {
 			"required": "Das Feld {{attribute}} ist erforderlich",
-			"email": "Das Feld {{attribute}} erfordert eine gültige E-Mail-Adresse"
+			"email": "Das Feld {{attribute}} erfordert eine gültige E-Mail-Adresse",
+			"url": "Das Feld {{attribute}} erfordert eine gültige URL"
 		},
 		"timestampToAge": {
 			"just-now": "gerade jetzt",

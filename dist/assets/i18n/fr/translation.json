@@ -275,7 +275,8 @@
 	"utils": {
 		"validation": {
 			"required": "Le champ {{attribute}} est obligatoire",
-			"email": "Le champ {{attribute}} nécessite un email valide"
+			"email": "Le champ {{attribute}} nécessite un email valide",
+			"url": "Le champ {{attribute}} nécessite une URL valide"
 		},
 		"timestampToAge": {
 			"just-now": "juste maintenant",
