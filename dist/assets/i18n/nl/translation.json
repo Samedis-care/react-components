@@ -275,7 +275,8 @@
 	"utils": {
 		"validation": {
 			"required": "Het veld {{attribuut}} is verplicht",
-			"email": "Voor het veld {{attribute}} is een geldig e-mailadres vereist"
+			"email": "Voor het veld {{attribute}} is een geldig e-mailadres vereist",
+			"url": "Het veld {{attribute}} vereist een geldige URL"
 		},
 		"timestampToAge": {
 			"just-now": "net nu",
