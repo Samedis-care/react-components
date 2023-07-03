@@ -275,7 +275,8 @@
 	"utils": {
 		"validation": {
 			"required": "{{attribute}} maydoni talab qilinadi",
-			"email": "{{attribute}} maydoni toʻgʻri elektron pochta manzilini talab qiladi"
+			"email": "{{attribute}} maydoni toʻgʻri elektron pochta manzilini talab qiladi",
+			"url": "{{attribute}} maydoni toʻgʻri URL manzilni talab qiladi"
 		},
 		"timestampToAge": {
 			"just-now": "hozirgina",
