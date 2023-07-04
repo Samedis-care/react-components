@@ -30,6 +30,6 @@ export interface IMultiSelectEntryProps<DataT extends MultiSelectorData> {
     setData: (newValue: DataT) => void;
 }
 declare const _default: <DataT extends MultiSelectorData>(props: IMultiSelectEntryProps<DataT> & {
-    classes?: ClassNameMap<"label" | "image" | "selected" | "root" | "container" | "icon" | "divider" | "ignored" | "iconSvg"> | undefined;
+    classes?: ClassNameMap<"label" | "image" | "selected" | "root" | "container" | "icon" | "divider" | "unClickable" | "ignored" | "iconSvg"> | undefined;
 }) => JSX.Element;
 export default _default;

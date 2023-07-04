@@ -22,6 +22,9 @@ var useStyles = makeStyles(function (theme) {
         divider: {},
         container: __assign({ border: (_d = (_c = (_b = (_a = theme.componentsCare) === null || _a === void 0 ? void 0 : _a.selector) === null || _b === void 0 ? void 0 : _b.selected) === null || _c === void 0 ? void 0 : _c.container) === null || _d === void 0 ? void 0 : _d.border, borderRadius: (_h = (_g = (_f = (_e = theme.componentsCare) === null || _e === void 0 ? void 0 : _e.selector) === null || _f === void 0 ? void 0 : _f.selected) === null || _g === void 0 ? void 0 : _g.container) === null || _h === void 0 ? void 0 : _h.borderRadius, margin: (_m = (_l = (_k = (_j = theme.componentsCare) === null || _j === void 0 ? void 0 : _j.selector) === null || _k === void 0 ? void 0 : _k.selected) === null || _l === void 0 ? void 0 : _l.container) === null || _m === void 0 ? void 0 : _m.margin, padding: (_r = (_q = (_p = (_o = theme.componentsCare) === null || _o === void 0 ? void 0 : _o.selector) === null || _p === void 0 ? void 0 : _p.selected) === null || _q === void 0 ? void 0 : _q.container) === null || _r === void 0 ? void 0 : _r.padding, backgroundColor: (_v = (_u = (_t = (_s = theme.componentsCare) === null || _s === void 0 ? void 0 : _s.selector) === null || _t === void 0 ? void 0 : _t.selected) === null || _u === void 0 ? void 0 : _u.container) === null || _v === void 0 ? void 0 : _v.backgroundColor }, (_z = (_y = (_x = (_w = theme.componentsCare) === null || _w === void 0 ? void 0 : _w.selector) === null || _x === void 0 ? void 0 : _x.selected) === null || _y === void 0 ? void 0 : _y.container) === null || _z === void 0 ? void 0 : _z.style),
         selected: __assign({ border: (_2 = (_1 = (_0 = theme.componentsCare) === null || _0 === void 0 ? void 0 : _0.selector) === null || _1 === void 0 ? void 0 : _1.selected) === null || _2 === void 0 ? void 0 : _2.border, borderRadius: (_5 = (_4 = (_3 = theme.componentsCare) === null || _3 === void 0 ? void 0 : _3.selector) === null || _4 === void 0 ? void 0 : _4.selected) === null || _5 === void 0 ? void 0 : _5.borderRadius, margin: (_8 = (_7 = (_6 = theme.componentsCare) === null || _6 === void 0 ? void 0 : _6.selector) === null || _7 === void 0 ? void 0 : _7.selected) === null || _8 === void 0 ? void 0 : _8.margin, padding: (_11 = (_10 = (_9 = theme.componentsCare) === null || _9 === void 0 ? void 0 : _9.selector) === null || _10 === void 0 ? void 0 : _10.selected) === null || _11 === void 0 ? void 0 : _11.padding, backgroundColor: (_14 = (_13 = (_12 = theme.componentsCare) === null || _12 === void 0 ? void 0 : _12.selector) === null || _13 === void 0 ? void 0 : _13.selected) === null || _14 === void 0 ? void 0 : _14.backgroundColor }, (_17 = (_16 = (_15 = theme.componentsCare) === null || _15 === void 0 ? void 0 : _15.selector) === null || _16 === void 0 ? void 0 : _16.selected) === null || _17 === void 0 ? void 0 : _17.style),
+        unClickable: {
+            cursor: "unset",
+        },
         ignored: {
             textDecoration: "line-through",
         },
@@ -51,8 +54,9 @@ var MultiSelectEntry = function (props) {
         React.createElement(List, { className: combineClassNames([classes.root, classes.container]) },
             React.createElement(SmallListItemButton, { onClick: data.onClick, className: combineClassNames([
                     classes.selected,
+                    !data.onClick && classes.unClickable,
                     data.ignore && classes.ignored,
-                ]) },
+                ]), disableRipple: !data.onClick, disableTouchRipple: !data.onClick },
                 enableIcons && (React.createElement(SmallListItemIcon, null, typeof data.icon === "string" ? (React.createElement("img", { src: data.icon, alt: "", className: classes.image })) : (data.icon))),
                 React.createElement(ListItemText, { className: classes.label }, data.label),
                 handleDelete && (React.createElement(ListItemSecondaryAction, null,
