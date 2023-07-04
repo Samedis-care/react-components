@@ -69,6 +69,9 @@ const useStyles = makeStyles(
 				theme.componentsCare?.selector?.selected?.backgroundColor,
 			...theme.componentsCare?.selector?.selected?.style,
 		},
+		unClickable: {
+			cursor: "unset",
+		},
 		ignored: {
 			textDecoration: "line-through",
 		},
@@ -114,8 +117,11 @@ const MultiSelectEntry = <DataT extends MultiSelectorData>(
 					onClick={data.onClick}
 					className={combineClassNames([
 						classes.selected,
+						!data.onClick && classes.unClickable,
 						data.ignore && classes.ignored,
 					])}
+					disableRipple={!data.onClick}
+					disableTouchRipple={!data.onClick}
 				>
 					{enableIcons && (
 						<SmallListItemIcon>
