@@ -152,6 +152,7 @@ const useCrudSelect = <
 	const [error, setError] = useState<Error | null>(null);
 	const [loadError, setLoadError] = useState<Error | null>(null);
 	const [selected, setSelected] = useState<DataT[]>([]);
+	const currentSelected = useRef<DataT[]>([]); // current state of selected, always set this and then use setSelected(currentSelected.current)
 	const [initialRawData, setInitialRawData] = useState<
 		Record<string, unknown>[]
 	>([]);
@@ -180,9 +181,12 @@ const useCrudSelect = <
 	);
 
 	// async processing of add to selection
+	const fetchingAddSelection = useRef(false);
 	useEffect(() => {
 		if (loading) return;
 		if (addToSelectionQueue.length === 0) return;
+		if (fetchingAddSelection.current) return; // don't run this code twice
+		fetchingAddSelection.current = true;
 		const ticket = addToSelectionQueue[0];
 		let entry = addToSelectionInputs.current[ticket];
 		if (entry === undefined) return; // if entry is undefined here we already started working on this, thus just wait
@@ -191,7 +195,7 @@ const useCrudSelect = <
 		delete addToSelectionResults.current[ticket];
 		(async () => {
 			if (loadError) throw new Error("CrudSelect loading failed");
-			const existing = selected.find(
+			const existing = currentSelected.current.find(
 				(selEntry) => getIdOfData(selEntry) === getIdOfData(entry)
 			);
 			if (existing) return;
@@ -203,22 +207,18 @@ const useCrudSelect = <
 			// store record in cache
 			setInitialRawData((oldRawData) => [...oldRawData, modelRecord]);
 
-			setSelected((selected) => {
-				const existing = selected.find(
-					(selEntry) => getIdOfData(selEntry) === getIdOfData(entry)
-				);
-				if (existing) return selected;
-
-				return [...selected, entry];
-			});
+			currentSelected.current = [...currentSelected.current, entry];
+			setSelected(currentSelected.current);
 		})()
 			.then(resolve)
 			.catch(reject)
-			.finally(() =>
+			.finally(() => {
+				fetchingAddSelection.current = false;
+				// state update re-triggers useEffect
 				setAddToSelectionQueue((prev) =>
 					prev.filter((queueTicket) => queueTicket !== ticket)
-				)
-			);
+				);
+			});
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [loading, addToSelectionQueue]);
 
@@ -303,7 +303,8 @@ const useCrudSelect = <
 
 				// reflect changes
 				setInitialRawData((oldRawData) => [...oldRawData, ...created]);
-				setSelected(finalSelected);
+				currentSelected.current = finalSelected;
+				setSelected(currentSelected.current);
 			} catch (e) {
 				setError(e as Error);
 			}
@@ -344,7 +345,8 @@ const useCrudSelect = <
 				);
 
 				setInitialRawData(currentlySelected[0]);
-				setSelected(initialSelected);
+				currentSelected.current = initialSelected;
+				setSelected(currentSelected.current);
 			} catch (e) {
 				setLoadError(e as Error);
 			} finally {
