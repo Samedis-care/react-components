@@ -63,6 +63,7 @@ var useCrudSelect = function (params, ref) {
     var _b = useState(null), error = _b[0], setError = _b[1];
     var _c = useState(null), loadError = _c[0], setLoadError = _c[1];
     var _d = useState([]), selected = _d[0], setSelected = _d[1];
+    var currentSelected = useRef([]); // current state of selected, always set this and then use setSelected(currentSelected.current)
     var _e = useState([]), initialRawData = _e[0], setInitialRawData = _e[1];
     // async processing of add to selection
     var addToSelectionResults = useRef({});
@@ -83,11 +84,15 @@ var useCrudSelect = function (params, ref) {
         }); },
     }); });
     // async processing of add to selection
+    var fetchingAddSelection = useRef(false);
     useEffect(function () {
         if (loading)
             return;
         if (addToSelectionQueue.length === 0)
             return;
+        if (fetchingAddSelection.current)
+            return; // don't run this code twice
+        fetchingAddSelection.current = true;
         var ticket = addToSelectionQueue[0];
         var entry = addToSelectionInputs.current[ticket];
         if (entry === undefined)
@@ -102,7 +107,7 @@ var useCrudSelect = function (params, ref) {
                     case 0:
                         if (loadError)
                             throw new Error("CrudSelect loading failed");
-                        existing = selected.find(function (selEntry) { return getIdOfData(selEntry) === getIdOfData(entry); });
+                        existing = currentSelected.current.find(function (selEntry) { return getIdOfData(selEntry) === getIdOfData(entry); });
                         if (existing)
                             return [2 /*return*/];
                         _b = (_a = connector).create;
@@ -116,12 +121,8 @@ var useCrudSelect = function (params, ref) {
                         entry = __assign.apply(void 0, _c.concat([(_d.sent())]));
                         // store record in cache
                         setInitialRawData(function (oldRawData) { return __spreadArray(__spreadArray([], oldRawData, true), [modelRecord], false); });
-                        setSelected(function (selected) {
-                            var existing = selected.find(function (selEntry) { return getIdOfData(selEntry) === getIdOfData(entry); });
-                            if (existing)
-                                return selected;
-                            return __spreadArray(__spreadArray([], selected, true), [entry], false);
-                        });
+                        currentSelected.current = __spreadArray(__spreadArray([], currentSelected.current, true), [entry], false);
+                        setSelected(currentSelected.current);
                         return [2 /*return*/];
                 }
             });
@@ -129,7 +130,9 @@ var useCrudSelect = function (params, ref) {
             .then(resolve)
             .catch(reject)
             .finally(function () {
-            return setAddToSelectionQueue(function (prev) {
+            fetchingAddSelection.current = false;
+            // state update re-triggers useEffect
+            setAddToSelectionQueue(function (prev) {
                 return prev.filter(function (queueTicket) { return queueTicket !== ticket; });
             });
         });
@@ -225,7 +228,8 @@ var useCrudSelect = function (params, ref) {
                     finalSelected = __spreadArray.apply(void 0, _a.concat([(_b.sent()), true]));
                     // reflect changes
                     setInitialRawData(function (oldRawData) { return __spreadArray(__spreadArray([], oldRawData, true), created_1, true); });
-                    setSelected(finalSelected);
+                    currentSelected.current = finalSelected;
+                    setSelected(currentSelected.current);
                     return [3 /*break*/, 7];
                 case 6:
                     e_1 = _b.sent();
@@ -279,7 +283,8 @@ var useCrudSelect = function (params, ref) {
                     case 4:
                         initialSelected_1 = _a.sent();
                         setInitialRawData(currentlySelected[0]);
-                        setSelected(initialSelected_1);
+                        currentSelected.current = initialSelected_1;
+                        setSelected(currentSelected.current);
                         return [3 /*break*/, 7];
                     case 5:
                         e_2 = _a.sent();
