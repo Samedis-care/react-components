@@ -10,7 +10,7 @@ export interface FormDialogProps {
 	/**
 	 * Dialog tille
 	 */
-	dialogTitle?: string;
+	dialogTitle?: React.ReactNode;
 	/**
 	 * Dialog width optional parameter
 	 */
