@@ -59,6 +59,12 @@ export interface BaseSelectorData {
 export declare const getStringLabel: (data: BaseSelectorData | string) => string;
 export declare const getReactLabel: (data: BaseSelectorData) => React.ReactNode;
 export declare const modifyReactLabel: <DataT extends BaseSelectorData>(data: DataT, cb: (prev: React.ReactNode) => React.ReactNode) => DataT;
+/**
+ * On load handler for selectors using a local dataset
+ * Performs a case-insensitive label search
+ * @param data The data set
+ */
+export declare const selectorLocalLoadHandler: (data: BaseSelectorData[]) => (query: string) => BaseSelectorData[];
 export interface SelectorLruOptions<DataT extends BaseSelectorData> {
     /**
      * The max amount of LRU cache entries
@@ -94,6 +100,7 @@ export interface BaseSelectorProps<DataT extends BaseSelectorData> extends TextF
      * Data load function
      * @param search The user search input
      * @param switchValue The value of switch input
+     * @remarks When using this with an already loaded dataset consider using selectorLocalLoadHandler
      */
     onLoad: (search: string, switchValue: boolean) => DataT[] | Promise<DataT[]>;
     /**

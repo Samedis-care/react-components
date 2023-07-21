@@ -85,6 +85,16 @@ export var getReactLabel = function (data) {
     return typeof data.label === "string" ? data.label : data.label[1];
 };
 export var modifyReactLabel = function (data, cb) { return (__assign(__assign({}, data), { label: [getStringLabel(data), cb(getReactLabel(data))] })); };
+/**
+ * On load handler for selectors using a local dataset
+ * Performs a case-insensitive label search
+ * @param data The data set
+ */
+export var selectorLocalLoadHandler = function (data) { return function (query) {
+    return data.filter(function (entry) {
+        return query.toLowerCase().includes(getStringLabel(entry).toLowerCase());
+    });
+}; };
 var useCustomDefaultSelectorStyles = makeStyles({
     root: {},
     focused: {},
