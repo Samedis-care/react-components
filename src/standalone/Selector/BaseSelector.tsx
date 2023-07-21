@@ -125,10 +125,12 @@ export const modifyReactLabel = <DataT extends BaseSelectorData>(
  */
 export const selectorLocalLoadHandler = (data: BaseSelectorData[]) => (
 	query: string
-) =>
-	data.filter((entry) =>
-		query.toLowerCase().includes(getStringLabel(entry).toLowerCase())
+) => {
+	query = query.toLowerCase();
+	return data.filter((entry) =>
+		getStringLabel(entry).toLowerCase().includes(query)
 	);
+};
 
 export interface SelectorLruOptions<DataT extends BaseSelectorData> {
 	/**
