@@ -91,8 +91,9 @@ export var modifyReactLabel = function (data, cb) { return (__assign(__assign({}
  * @param data The data set
  */
 export var selectorLocalLoadHandler = function (data) { return function (query) {
+    query = query.toLowerCase();
     return data.filter(function (entry) {
-        return query.toLowerCase().includes(getStringLabel(entry).toLowerCase());
+        return getStringLabel(entry).toLowerCase().includes(query);
     });
 }; };
 var useCustomDefaultSelectorStyles = makeStyles({
