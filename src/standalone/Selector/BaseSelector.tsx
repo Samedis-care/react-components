@@ -118,6 +118,18 @@ export const modifyReactLabel = <DataT extends BaseSelectorData>(
 	label: [getStringLabel(data), cb(getReactLabel(data))],
 });
 
+/**
+ * On load handler for selectors using a local dataset
+ * Performs a case-insensitive label search
+ * @param data The data set
+ */
+export const selectorLocalLoadHandler = (data: BaseSelectorData[]) => (
+	query: string
+) =>
+	data.filter((entry) =>
+		query.toLowerCase().includes(getStringLabel(entry).toLowerCase())
+	);
+
 export interface SelectorLruOptions<DataT extends BaseSelectorData> {
 	/**
 	 * The max amount of LRU cache entries
@@ -154,6 +166,7 @@ export interface BaseSelectorProps<DataT extends BaseSelectorData>
 	 * Data load function
 	 * @param search The user search input
 	 * @param switchValue The value of switch input
+	 * @remarks When using this with an already loaded dataset consider using selectorLocalLoadHandler
 	 */
 	onLoad: (search: string, switchValue: boolean) => DataT[] | Promise<DataT[]>;
 	/**
