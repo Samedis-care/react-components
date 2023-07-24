@@ -1,4 +1,8 @@
-import { useTranslation, UseTranslationResponse } from "react-i18next";
+import {
+	Namespace,
+	useTranslation,
+	UseTranslationResponse,
+} from "react-i18next";
 import ccI18n from "../i18n";
 
 /**
@@ -6,6 +10,13 @@ import ccI18n from "../i18n";
  */
 const useCCTranslations = (): UseTranslationResponse<"translation"> =>
 	useTranslation<"translation">("translation", {
+		i18n: ccI18n,
+	});
+
+export const useCCTranslationsNS = <N extends Namespace>(
+	namespaces: N
+): UseTranslationResponse<N> =>
+	useTranslation<N>(namespaces, {
 		i18n: ccI18n,
 	});
 
