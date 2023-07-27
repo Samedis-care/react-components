@@ -39,7 +39,7 @@ var RendererSignature = /** @class */ (function (_super) {
                 throw new Error("Not supported");
             return (React.createElement(FormControlCC, { required: visibility.required, fullWidth: true, error: !!errorMsg, warning: !!warningMsg, onBlur: handleBlur, "data-name": field },
                 React.createElement(FormLabel, { component: "legend" }, label),
-                React.createElement(SignaturePad, { name: field, signature: value, setSignature: function (newValue) { return handleChange(field, newValue); }, disabled: visibility.disabled }),
+                React.createElement(SignaturePad, { name: field, signature: value, setSignature: function (newValue) { return handleChange(field, newValue); }, disabled: visibility.readOnly }),
                 React.createElement(FormHelperText, null, errorMsg || warningMsg)));
         }
         var content = value ? (React.createElement("img", { src: value, alt: label })) : (React.createElement(React.Fragment, null, ccI18n.t("backend-integration.model.types.renderers.signature.not-set")));
