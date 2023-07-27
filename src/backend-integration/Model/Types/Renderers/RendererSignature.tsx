@@ -51,7 +51,7 @@ class RendererSignature extends TypeImage {
 						name={field}
 						signature={value}
 						setSignature={(newValue) => handleChange(field, newValue)}
-						disabled={visibility.disabled}
+						disabled={visibility.readOnly}
 					/>
 					<FormHelperText>{errorMsg || warningMsg}</FormHelperText>
 				</FormControlCC>
