@@ -104,11 +104,11 @@ export interface BaseSelectorData {
 export const getStringLabel = (data: BaseSelectorData | string) =>
 	typeof data === "string"
 		? data
-		: typeof data.label === "string"
-		? data.label
-		: data.label[0];
+		: Array.isArray(data.label)
+		? data.label[0]
+		: data.label;
 export const getReactLabel = (data: BaseSelectorData) =>
-	typeof data.label === "string" ? data.label : data.label[1];
+	Array.isArray(data.label) ? data.label[1] : data.label;
 
 export const modifyReactLabel = <DataT extends BaseSelectorData>(
 	data: DataT,
