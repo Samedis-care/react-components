@@ -61,11 +61,14 @@ export var useLocalStorageState = function (storageKey, defaultValue, validateDa
             localStorage.setItem(storageKey, JSON.stringify(updatedValue));
             return updatedValue;
         });
-        stateUpdateListeners[storageKey].forEach(function (hook) {
-            if (hook === setState)
-                return;
-            hook(newValue);
-        });
+        if (storageKey in stateUpdateListeners) {
+            // storageKey may not be in stateUpdateListeners when the component is unmounted but a reference to this callback is still held
+            stateUpdateListeners[storageKey].forEach(function (hook) {
+                if (hook === setState)
+                    return;
+                hook(newValue);
+            });
+        }
     }, [storageKey]);
     return [state, setStateHook];
 };
