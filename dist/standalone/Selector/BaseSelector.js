@@ -77,12 +77,12 @@ import useCCTranslations from "../../utils/useCCTranslations";
 export var getStringLabel = function (data) {
     return typeof data === "string"
         ? data
-        : typeof data.label === "string"
-            ? data.label
-            : data.label[0];
+        : Array.isArray(data.label)
+            ? data.label[0]
+            : data.label;
 };
 export var getReactLabel = function (data) {
-    return typeof data.label === "string" ? data.label : data.label[1];
+    return Array.isArray(data.label) ? data.label[1] : data.label;
 };
 export var modifyReactLabel = function (data, cb) { return (__assign(__assign({}, data), { label: [getStringLabel(data), cb(getReactLabel(data))] })); };
 /**
