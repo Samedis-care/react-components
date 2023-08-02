@@ -128,6 +128,12 @@ export interface CrudSelectDispatch<DataT extends BaseSelectorData> {
 	addToSelection: (entry: DataT) => Promise<void>;
 }
 
+let ticketCounter = 0;
+const nextTicket = () => {
+	ticketCounter = (ticketCounter + 1) % Number.MAX_SAFE_INTEGER;
+	return ticketCounter;
+};
+
 const useCrudSelect = <
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
@@ -168,8 +174,7 @@ const useCrudSelect = <
 		() => ({
 			addToSelection: async (entry) => {
 				// create ticket and add for async processing
-				const ticket =
-					Math.random().toString() + new Date().getTime().toString();
+				const ticket = nextTicket().toString(16) + ":" + Date.now().toString();
 				const result = new Promise<void>((resolve, reject) => {
 					addToSelectionResults.current[ticket] = [resolve, reject];
 				});
@@ -189,7 +194,13 @@ const useCrudSelect = <
 		fetchingAddSelection.current = true;
 		const ticket = addToSelectionQueue[0];
 		let entry = addToSelectionInputs.current[ticket];
-		if (entry === undefined) return; // if entry is undefined here we already started working on this, thus just wait
+		// if entry is undefined here we already started working on this, thus just wait and keep retrying
+		if (entry === undefined) {
+			// this happens when fetchingAddSelection is set to false before selection queue is updated (removed first entry) in finally handler of async code
+			// this usually happens when addToSelection keeps getting called
+			fetchingAddSelection.current = false; // allow retry
+			return;
+		}
 		delete addToSelectionInputs.current[ticket];
 		const [resolve, reject] = addToSelectionResults.current[ticket];
 		delete addToSelectionResults.current[ticket];
