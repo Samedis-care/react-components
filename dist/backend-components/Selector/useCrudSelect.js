@@ -57,6 +57,11 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
 import { useCallback, useContext, useEffect, useImperativeHandle, useRef, useState, } from "react";
 import { shallowCompare } from "../../utils";
 import { FormContext } from "../Form";
+var ticketCounter = 0;
+var nextTicket = function () {
+    ticketCounter = (ticketCounter + 1) % Number.MAX_SAFE_INTEGER;
+    return ticketCounter;
+};
 var useCrudSelect = function (params, ref) {
     var connector = params.connector, serialize = params.serialize, deserialize = params.deserialize, deserializeModel = params.deserializeModel, onChange = params.onChange, initialSelected = params.initialSelected, validate = params.validate, field = params.field, getIdOfData = params.getIdOfData;
     var _a = useState(true), loading = _a[0], setLoading = _a[1];
@@ -73,7 +78,7 @@ var useCrudSelect = function (params, ref) {
         addToSelection: function (entry) { return __awaiter(void 0, void 0, void 0, function () {
             var ticket, result;
             return __generator(this, function (_a) {
-                ticket = Math.random().toString() + new Date().getTime().toString();
+                ticket = nextTicket().toString(16) + ":" + Date.now().toString();
                 result = new Promise(function (resolve, reject) {
                     addToSelectionResults.current[ticket] = [resolve, reject];
                 });
@@ -95,8 +100,13 @@ var useCrudSelect = function (params, ref) {
         fetchingAddSelection.current = true;
         var ticket = addToSelectionQueue[0];
         var entry = addToSelectionInputs.current[ticket];
-        if (entry === undefined)
-            return; // if entry is undefined here we already started working on this, thus just wait
+        // if entry is undefined here we already started working on this, thus just wait and keep retrying
+        if (entry === undefined) {
+            // this happens when fetchingAddSelection is set to false before selection queue is updated (removed first entry) in finally handler of async code
+            // this usually happens when addToSelection keeps getting called
+            fetchingAddSelection.current = false; // allow retry
+            return;
+        }
         delete addToSelectionInputs.current[ticket];
         var _a = addToSelectionResults.current[ticket], resolve = _a[0], reject = _a[1];
         delete addToSelectionResults.current[ticket];
