@@ -56,3 +56,4 @@ export { default as useMemoDebug } from "./useMemoDebug";
 export { default as useCallbackDebug } from "./useCallbackDebug";
 export * from "./useStorageState";
 export { default as useDevKeybinds } from "./useDevKeybinds";
+export { default as useWindowSize } from "./useWindowSize";
