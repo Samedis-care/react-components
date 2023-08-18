@@ -166,7 +166,7 @@ var normalizeValues = function (data, config) {
 };
 var Form = function (props) {
     var _a;
-    var model = props.model, id = props.id, children = props.children, onSubmit = props.onSubmit, customProps = props.customProps, onlyValidateMounted = props.onlyValidateMounted, onlyWarnMounted = props.onlyWarnMounted, onlySubmitMounted = props.onlySubmitMounted, readOnly = props.readOnly, readOnlyReason = props.readOnlyReason, disableValidation = props.disableValidation, nestedFormName = props.nestedFormName, disableNestedSubmit = props.disableNestedSubmit, nestedFormPreSubmitHandler = props.nestedFormPreSubmitHandler, deleteOnSubmit = props.deleteOnSubmit, onDeleted = props.onDeleted, initialRecord = props.initialRecord, onlySubmitNestedIfMounted = props.onlySubmitNestedIfMounted, formClass = props.formClass, preSubmit = props.preSubmit, dirtyIgnoreFields = props.dirtyIgnoreFields;
+    var model = props.model, id = props.id, children = props.children, onSubmit = props.onSubmit, customProps = props.customProps, onlyValidateMounted = props.onlyValidateMounted, onlyWarnMounted = props.onlyWarnMounted, onlyWarnChanged = props.onlyWarnChanged, onlySubmitMounted = props.onlySubmitMounted, readOnly = props.readOnly, readOnlyReason = props.readOnlyReason, disableValidation = props.disableValidation, nestedFormName = props.nestedFormName, disableNestedSubmit = props.disableNestedSubmit, nestedFormPreSubmitHandler = props.nestedFormPreSubmitHandler, deleteOnSubmit = props.deleteOnSubmit, onDeleted = props.onDeleted, initialRecord = props.initialRecord, onlySubmitNestedIfMounted = props.onlySubmitNestedIfMounted, formClass = props.formClass, preSubmit = props.preSubmit, dirtyIgnoreFields = props.dirtyIgnoreFields;
     var onlySubmitMountedBehaviour = (_a = props.onlySubmitMountedBehaviour) !== null && _a !== void 0 ? _a : OnlySubmitMountedBehaviour.OMIT;
     var ErrorComponent = props.errorComponent;
     var t = useCCTranslations().t;
@@ -273,52 +273,73 @@ var Form = function (props) {
         });
     }, []);
     // main form handling - dirty state
-    var dirty = useMemo(function () {
-        return serverData && defaultRecord
-            ? JSON.stringify(normalizeValues(values, {
-                ignoreFields: dirtyIgnoreFields,
-                model: model,
-                defaultRecord: defaultRecord[0],
-                onlySubmitMountedBehaviour: onlySubmitMountedBehaviour,
-                onlySubmitMounted: onlySubmitMounted !== null && onlySubmitMounted !== void 0 ? onlySubmitMounted : false,
-                mountedFields: mountedFields,
-            })) !==
-                JSON.stringify(normalizeValues(serverData[0], {
-                    ignoreFields: dirtyIgnoreFields,
-                    model: model,
-                    defaultRecord: defaultRecord[0],
-                    onlySubmitMountedBehaviour: onlySubmitMountedBehaviour,
-                    onlySubmitMounted: onlySubmitMounted !== null && onlySubmitMounted !== void 0 ? onlySubmitMounted : false,
-                    mountedFields: mountedFields,
-                }))
-            : false;
+    var getNormalizedData = useCallback(function (values) {
+        if (!serverData) {
+            throw new Error("No server data");
+        }
+        if (!defaultRecord) {
+            throw new Error("No default record");
+        }
+        var localData = normalizeValues(values !== null && values !== void 0 ? values : valuesRef.current, {
+            ignoreFields: dirtyIgnoreFields,
+            model: model,
+            defaultRecord: defaultRecord[0],
+            onlySubmitMountedBehaviour: onlySubmitMountedBehaviour,
+            onlySubmitMounted: onlySubmitMounted !== null && onlySubmitMounted !== void 0 ? onlySubmitMounted : false,
+            mountedFields: mountedFields,
+        });
+        var remoteData = normalizeValues(serverData[0], {
+            ignoreFields: dirtyIgnoreFields,
+            model: model,
+            defaultRecord: defaultRecord[0],
+            onlySubmitMountedBehaviour: onlySubmitMountedBehaviour,
+            onlySubmitMounted: onlySubmitMounted !== null && onlySubmitMounted !== void 0 ? onlySubmitMounted : false,
+            mountedFields: mountedFields,
+        });
+        return [localData, remoteData];
     }, [
-        serverData,
         defaultRecord,
-        values,
         dirtyIgnoreFields,
         model,
-        onlySubmitMountedBehaviour,
-        onlySubmitMounted,
         mountedFields,
-    ]) ||
+        onlySubmitMounted,
+        onlySubmitMountedBehaviour,
+        serverData,
+    ]);
+    var dirty = useMemo(function () {
+        return serverData && defaultRecord
+            ? (function () {
+                var _a = getNormalizedData(values), local = _a[0], remote = _a[1];
+                return JSON.stringify(local) !== JSON.stringify(remote);
+            })()
+            : false;
+    }, [serverData, defaultRecord, getNormalizedData, values]) ||
         customDirty ||
         !!(id && !deleted && deleteOnSubmit);
     // main form handling - dispatch
     var validateForm = useCallback(function (mode, values) {
         if (mode === void 0) { mode = "normal"; }
         return __awaiter(void 0, void 0, void 0, function () {
-            var errors;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
+            var fieldsToValidate, _a, localData_1, remoteData_1, errors;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
                     case 0:
                         if (disableValidation)
                             return [2 /*return*/, {}];
-                        return [4 /*yield*/, model.validate(values !== null && values !== void 0 ? values : valuesRef.current, id ? "edit" : "create", onlyValidateMounted || (mode === "hint" && onlyWarnMounted)
-                                ? Object.keys(mountedFields).filter(function (field) { return mountedFields[field]; })
-                                : undefined, mode)];
+                        fieldsToValidate = Object.keys(model.fields);
+                        if (onlyValidateMounted || (mode === "hint" && onlyWarnMounted)) {
+                            fieldsToValidate = fieldsToValidate.filter(function (field) { return field in mountedFields && mountedFields[field]; });
+                        }
+                        if (mode === "hint" && onlyWarnChanged) {
+                            _a = getNormalizedData(values), localData_1 = _a[0], remoteData_1 = _a[1];
+                            fieldsToValidate = fieldsToValidate.filter(function (field) {
+                                return JSON.stringify(dotInObject(field, localData_1)) !==
+                                    JSON.stringify(dotInObject(field, remoteData_1));
+                            });
+                        }
+                        return [4 /*yield*/, model.validate(values !== null && values !== void 0 ? values : valuesRef.current, id ? "edit" : "create", fieldsToValidate, mode)];
                     case 1:
-                        errors = _a.sent();
+                        errors = _b.sent();
                         return [4 /*yield*/, Promise.all(Object.entries(mode === "normal"
                                 ? customValidationHandlers.current
                                 : customWarningHandlers.current).map(function (_a) {
@@ -341,7 +362,7 @@ var Form = function (props) {
                                 });
                             }))];
                     case 2:
-                        _a.sent();
+                        _b.sent();
                         return [2 /*return*/, errors];
                 }
             });
@@ -349,10 +370,12 @@ var Form = function (props) {
     }, [
         disableValidation,
         model,
-        id,
         onlyValidateMounted,
         onlyWarnMounted,
+        onlyWarnChanged,
+        id,
         mountedFields,
+        getNormalizedData,
     ]);
     var validateField = useCallback(function (field, value) { return __awaiter(void 0, void 0, void 0, function () {
         var values, errors, warnings;
@@ -799,22 +822,7 @@ var Form = function (props) {
             return;
         }
         // normalize data
-        var localData = normalizeValues(values, {
-            ignoreFields: dirtyIgnoreFields,
-            model: model,
-            defaultRecord: defaultRecord[0],
-            onlySubmitMountedBehaviour: onlySubmitMountedBehaviour,
-            onlySubmitMounted: onlySubmitMounted !== null && onlySubmitMounted !== void 0 ? onlySubmitMounted : false,
-            mountedFields: mountedFields,
-        });
-        var remoteData = normalizeValues(serverData[0], {
-            ignoreFields: dirtyIgnoreFields,
-            model: model,
-            defaultRecord: defaultRecord[0],
-            onlySubmitMountedBehaviour: onlySubmitMountedBehaviour,
-            onlySubmitMounted: onlySubmitMounted !== null && onlySubmitMounted !== void 0 ? onlySubmitMounted : false,
-            mountedFields: mountedFields,
-        });
+        var _a = getNormalizedData(), localData = _a[0], remoteData = _a[1];
         console.log("Form Dirty Flag State:");
         console.log("Form Dirty State (exact):", JSON.stringify(localData) !== JSON.stringify(remoteData));
         console.log("Form Dirty State:", JSON.stringify(localData) !== JSON.stringify(remoteData));
@@ -823,9 +831,9 @@ var Form = function (props) {
         console.log("Custom Dirty Counter:", customDirtyCounter);
         console.log("Server Data:", remoteData);
         console.log("Form Data:", localData);
-        Object.keys(localData).forEach(function (key) {
-            var server = remoteData[key];
-            var form = localData[key];
+        Object.keys(model.fields).forEach(function (key) {
+            var server = dotInObject(key, remoteData);
+            var form = dotInObject(key, localData);
             var dirty = JSON.stringify(server) !== JSON.stringify(form);
             if (onlyDirty && !dirty)
                 return;
@@ -835,15 +843,11 @@ var Form = function (props) {
     }, [
         serverData,
         defaultRecord,
-        values,
-        dirtyIgnoreFields,
-        model,
-        onlySubmitMountedBehaviour,
-        onlySubmitMounted,
-        mountedFields,
+        getNormalizedData,
         customDirty,
         customDirtyFields,
         customDirtyCounter,
+        model.fields,
     ]);
     useDevKeybinds(useMemo(function () { return ({ "ccform dirty?": function () { return debugDirty(true); } }); }, [debugDirty]));
     // context and rendering
@@ -875,6 +879,7 @@ var Form = function (props) {
         onlySubmitMountedBehaviour: onlySubmitMountedBehaviour,
         onlyValidateMounted: !!onlyValidateMounted,
         onlyWarnMounted: !!onlyWarnMounted,
+        onlyWarnChanged: !!onlyWarnChanged,
         submitting: submitting,
         addSubmittingBlocker: addSubmittingBlocker,
         removeSubmittingBlocker: removeSubmittingBlocker,
@@ -922,6 +927,7 @@ var Form = function (props) {
         onlySubmitMountedBehaviour,
         onlyValidateMounted,
         onlyWarnMounted,
+        onlyWarnChanged,
         deleteOnSubmit,
         submitting,
         addSubmittingBlocker,
@@ -954,6 +960,7 @@ var Form = function (props) {
         onlySubmitMounted: !!onlySubmitMounted,
         onlyValidateMounted: !!onlyValidateMounted,
         onlyWarnMounted: !!onlyWarnMounted,
+        onlyWarnChanged: !!onlyWarnChanged,
         readOnly: !!readOnly,
         readOnlyReason: readOnlyReason,
         getFieldValue: getFieldValue,
@@ -967,6 +974,7 @@ var Form = function (props) {
         onlySubmitMounted,
         onlyValidateMounted,
         onlyWarnMounted,
+        onlyWarnChanged,
         readOnly,
         readOnlyReason,
         getFieldValue,

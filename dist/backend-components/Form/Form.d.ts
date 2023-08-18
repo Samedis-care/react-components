@@ -164,6 +164,10 @@ export interface FormProps<KeyT extends ModelFieldName, VisibilityT extends Page
      */
     onlyWarnMounted?: boolean;
     /**
+     * Only perform warning validations for changed fields
+     */
+    onlyWarnChanged?: boolean;
+    /**
      * Is the form read-only?
      */
     readOnly?: boolean;
@@ -324,6 +328,10 @@ export interface FormContextData {
      */
     onlyWarnMounted: boolean;
     /**
+     * @see FormProps.onlyWarnChanged
+     */
+    onlyWarnChanged: boolean;
+    /**
      * @see FormProps.readOnly
      */
     readOnly: boolean;
@@ -442,7 +450,7 @@ export interface FormContextData {
  */
 export declare const FormContext: React.Context<FormContextData | null>;
 export declare const useFormContext: () => FormContextData;
-export declare type FormContextDataLite = Pick<FormContextData, "id" | "model" | "onlySubmitMounted" | "onlyValidateMounted" | "onlyWarnMounted" | "readOnly" | "readOnlyReason" | "errorComponent" | "getFieldValue" | "getFieldValues" | "setFieldValueLite" | "setFieldTouchedLite">;
+export declare type FormContextDataLite = Pick<FormContextData, "id" | "model" | "onlySubmitMounted" | "onlyValidateMounted" | "onlyWarnMounted" | "onlyWarnChanged" | "readOnly" | "readOnlyReason" | "errorComponent" | "getFieldValue" | "getFieldValues" | "setFieldValueLite" | "setFieldTouchedLite">;
 export declare const FormContextLite: React.Context<FormContextDataLite | null>;
 export declare const useFormContextLite: () => FormContextDataLite;
 export interface FormNestedState {
