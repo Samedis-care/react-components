@@ -234,6 +234,10 @@ export interface FormProps<
 	 */
 	onlyWarnMounted?: boolean;
 	/**
+	 * Only perform warning validations for changed fields
+	 */
+	onlyWarnChanged?: boolean;
+	/**
 	 * Is the form read-only?
 	 */
 	readOnly?: boolean;
@@ -407,6 +411,10 @@ export interface FormContextData {
 	 */
 	onlyWarnMounted: boolean;
 	/**
+	 * @see FormProps.onlyWarnChanged
+	 */
+	onlyWarnChanged: boolean;
+	/**
 	 * @see FormProps.readOnly
 	 */
 	readOnly: boolean;
@@ -549,6 +557,7 @@ export type FormContextDataLite = Pick<
 	| "onlySubmitMounted"
 	| "onlyValidateMounted"
 	| "onlyWarnMounted"
+	| "onlyWarnChanged"
 	| "readOnly"
 	| "readOnlyReason"
 	| "errorComponent"
@@ -704,6 +713,7 @@ const Form = <
 		customProps,
 		onlyValidateMounted,
 		onlyWarnMounted,
+		onlyWarnChanged,
 		onlySubmitMounted,
 		readOnly,
 		readOnlyReason,
@@ -861,49 +871,53 @@ const Form = <
 	}, []);
 
 	// main form handling - dirty state
+	const getNormalizedData = useCallback(
+		(values?: Record<string, unknown>) => {
+			if (!serverData) {
+				throw new Error("No server data");
+			}
+			if (!defaultRecord) {
+				throw new Error("No default record");
+			}
+			const localData = normalizeValues(values ?? valuesRef.current, {
+				ignoreFields: dirtyIgnoreFields,
+				model: (model as unknown) as Model<string, PageVisibility, unknown>,
+				defaultRecord: defaultRecord[0],
+				onlySubmitMountedBehaviour,
+				onlySubmitMounted: onlySubmitMounted ?? false,
+				mountedFields,
+			});
+			const remoteData = normalizeValues(serverData[0], {
+				ignoreFields: dirtyIgnoreFields,
+				model: (model as unknown) as Model<string, PageVisibility, unknown>,
+				defaultRecord: defaultRecord[0],
+				onlySubmitMountedBehaviour,
+				onlySubmitMounted: onlySubmitMounted ?? false,
+				mountedFields,
+			});
+			return [localData, remoteData];
+		},
+		[
+			defaultRecord,
+			dirtyIgnoreFields,
+			model,
+			mountedFields,
+			onlySubmitMounted,
+			onlySubmitMountedBehaviour,
+			serverData,
+		]
+	);
+
 	const dirty =
 		useMemo(
 			() =>
 				serverData && defaultRecord
-					? JSON.stringify(
-							normalizeValues(values, {
-								ignoreFields: dirtyIgnoreFields,
-								model: (model as unknown) as Model<
-									string,
-									PageVisibility,
-									unknown
-								>,
-								defaultRecord: defaultRecord[0],
-								onlySubmitMountedBehaviour,
-								onlySubmitMounted: onlySubmitMounted ?? false,
-								mountedFields,
-							})
-					  ) !==
-					  JSON.stringify(
-							normalizeValues(serverData[0], {
-								ignoreFields: dirtyIgnoreFields,
-								model: (model as unknown) as Model<
-									string,
-									PageVisibility,
-									unknown
-								>,
-								defaultRecord: defaultRecord[0],
-								onlySubmitMountedBehaviour,
-								onlySubmitMounted: onlySubmitMounted ?? false,
-								mountedFields,
-							})
-					  )
+					? (() => {
+							const [local, remote] = getNormalizedData(values);
+							return JSON.stringify(local) !== JSON.stringify(remote);
+					  })()
 					: false,
-			[
-				serverData,
-				defaultRecord,
-				values,
-				dirtyIgnoreFields,
-				model,
-				onlySubmitMountedBehaviour,
-				onlySubmitMounted,
-				mountedFields,
-			]
+			[serverData, defaultRecord, getNormalizedData, values]
 		) ||
 		customDirty ||
 		!!(id && !deleted && deleteOnSubmit);
@@ -916,14 +930,25 @@ const Form = <
 		) => {
 			if (disableValidation) return {};
 
+			let fieldsToValidate: KeyT[] = Object.keys(model.fields) as KeyT[];
+			if (onlyValidateMounted || (mode === "hint" && onlyWarnMounted)) {
+				fieldsToValidate = fieldsToValidate.filter(
+					(field) => field in mountedFields && mountedFields[field]
+				);
+			}
+			if (mode === "hint" && onlyWarnChanged) {
+				const [localData, remoteData] = getNormalizedData(values);
+				fieldsToValidate = fieldsToValidate.filter(
+					(field) =>
+						JSON.stringify(dotInObject(field, localData)) !==
+						JSON.stringify(dotInObject(field, remoteData))
+				);
+			}
+
 			const errors = await model.validate(
 				values ?? valuesRef.current,
 				id ? "edit" : "create",
-				onlyValidateMounted || (mode === "hint" && onlyWarnMounted)
-					? (Object.keys(mountedFields).filter(
-							(field) => mountedFields[field as KeyT]
-					  ) as KeyT[])
-					: undefined,
+				fieldsToValidate,
 				mode
 			);
 			await Promise.all(
@@ -945,10 +970,12 @@ const Form = <
 		[
 			disableValidation,
 			model,
-			id,
 			onlyValidateMounted,
 			onlyWarnMounted,
+			onlyWarnChanged,
+			id,
 			mountedFields,
+			getNormalizedData,
 		]
 	);
 	const validateField = useCallback(
@@ -1434,22 +1461,7 @@ const Form = <
 				return;
 			}
 			// normalize data
-			const localData = normalizeValues(values, {
-				ignoreFields: dirtyIgnoreFields,
-				model: (model as unknown) as Model<string, PageVisibility, unknown>,
-				defaultRecord: defaultRecord[0],
-				onlySubmitMountedBehaviour,
-				onlySubmitMounted: onlySubmitMounted ?? false,
-				mountedFields,
-			});
-			const remoteData = normalizeValues(serverData[0], {
-				ignoreFields: dirtyIgnoreFields,
-				model: (model as unknown) as Model<string, PageVisibility, unknown>,
-				defaultRecord: defaultRecord[0],
-				onlySubmitMountedBehaviour,
-				onlySubmitMounted: onlySubmitMounted ?? false,
-				mountedFields,
-			});
+			const [localData, remoteData] = getNormalizedData();
 
 			console.log("Form Dirty Flag State:");
 			console.log(
@@ -1467,9 +1479,9 @@ const Form = <
 			console.log("Server Data:", remoteData);
 			console.log("Form Data:", localData);
 
-			Object.keys(localData).forEach((key) => {
-				const server: unknown = remoteData[key as KeyT];
-				const form = localData[key];
+			Object.keys(model.fields).forEach((key) => {
+				const server: unknown = dotInObject(key, remoteData);
+				const form = dotInObject(key, localData);
 				const dirty = JSON.stringify(server) !== JSON.stringify(form);
 				if (onlyDirty && !dirty) return;
 				console.log(
@@ -1486,15 +1498,11 @@ const Form = <
 		[
 			serverData,
 			defaultRecord,
-			values,
-			dirtyIgnoreFields,
-			model,
-			onlySubmitMountedBehaviour,
-			onlySubmitMounted,
-			mountedFields,
+			getNormalizedData,
 			customDirty,
 			customDirtyFields,
 			customDirtyCounter,
+			model.fields,
 		]
 	);
 	useDevKeybinds(
@@ -1535,6 +1543,7 @@ const Form = <
 			onlySubmitMountedBehaviour,
 			onlyValidateMounted: !!onlyValidateMounted,
 			onlyWarnMounted: !!onlyWarnMounted,
+			onlyWarnChanged: !!onlyWarnChanged,
 			submitting,
 			addSubmittingBlocker,
 			removeSubmittingBlocker,
@@ -1583,6 +1592,7 @@ const Form = <
 			onlySubmitMountedBehaviour,
 			onlyValidateMounted,
 			onlyWarnMounted,
+			onlyWarnChanged,
 			deleteOnSubmit,
 			submitting,
 			addSubmittingBlocker,
@@ -1618,6 +1628,7 @@ const Form = <
 			onlySubmitMounted: !!onlySubmitMounted,
 			onlyValidateMounted: !!onlyValidateMounted,
 			onlyWarnMounted: !!onlyWarnMounted,
+			onlyWarnChanged: !!onlyWarnChanged,
 			readOnly: !!readOnly,
 			readOnlyReason: readOnlyReason,
 			getFieldValue,
@@ -1632,6 +1643,7 @@ const Form = <
 			onlySubmitMounted,
 			onlyValidateMounted,
 			onlyWarnMounted,
+			onlyWarnChanged,
 			readOnly,
 			readOnlyReason,
 			getFieldValue,
