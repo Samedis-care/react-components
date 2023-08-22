@@ -37,6 +37,9 @@ var RendererLocalizedString = /** @class */ (function (_super) {
     function RendererLocalizedString(props) {
         var _this = _super.call(this, props === null || props === void 0 ? void 0 : props.multiline) || this;
         _this.props = props;
+        _this.settings = {
+            updateHooks: props.getFallbackLabelValues,
+        };
         return _this;
     }
     RendererLocalizedString.prototype.render = function (params) {
@@ -57,7 +60,10 @@ var RendererLocalizedString = /** @class */ (function (_super) {
         }
         return (React.createElement(Typography, { noWrap: visibility.grid },
             !visibility.grid && "".concat(label, ": "),
-            this.stringify(value)));
+            this.stringify(value) ||
+                (this.props.getFallbackLabel
+                    ? this.props.getFallbackLabel(value, params.values)
+                    : "")));
     };
     return RendererLocalizedString;
 }(TypeLocalizedString));
