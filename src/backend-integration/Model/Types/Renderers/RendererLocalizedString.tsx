@@ -7,6 +7,12 @@ import MultiLanguageInput, {
 } from "../../../../standalone/UIKit/InputControls/MultiLanguageInput";
 import TypeLocalizedString from "../TypeLocalizedString";
 import { FormHelperTextCC } from "../../../../standalone";
+import { TypeSettings } from "../../Type";
+
+export type ModelDataTypeLocalizedStringRendererGetFallbackLabel = (
+	value: Partial<Record<MultiLanguageInputSupportedLanguages, string>>,
+	values: Record<string, unknown>
+) => string;
 
 export type ModelDataTypeLocalizedStringRendererParams = Omit<
 	MultiLanguageInputProps,
@@ -19,18 +25,32 @@ export type ModelDataTypeLocalizedStringRendererParams = Omit<
 	| "onBlur"
 	| "error"
 	| "warning"
->;
+> & {
+	/**
+	 * fallback label for data-grid view
+	 */
+	getFallbackLabel?: ModelDataTypeLocalizedStringRendererGetFallbackLabel;
+	/**
+	 * Values used in getFallbackLabel
+	 * @see TypeSettings.updateHooks
+	 */
+	getFallbackLabelValues?: string[];
+};
 
 /**
  * Renders a text field
  */
 class RendererLocalizedString extends TypeLocalizedString {
 	props: ModelDataTypeLocalizedStringRendererParams;
+	settings: TypeSettings;
 
 	constructor(props: ModelDataTypeLocalizedStringRendererParams) {
 		super(props?.multiline);
 
 		this.props = props;
+		this.settings = {
+			updateHooks: props.getFallbackLabelValues,
+		};
 	}
 
 	render(
@@ -93,7 +113,10 @@ class RendererLocalizedString extends TypeLocalizedString {
 		return (
 			<Typography noWrap={visibility.grid}>
 				{!visibility.grid && `${label}: `}
-				{this.stringify(value)}
+				{this.stringify(value) ||
+					(this.props.getFallbackLabel
+						? this.props.getFallbackLabel(value, params.values)
+						: "")}
 			</Typography>
 		);
 	}
