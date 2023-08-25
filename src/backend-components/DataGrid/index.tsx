@@ -55,6 +55,12 @@ export interface BackendDataGridProps<
 	 * Additional buttons next to new button
 	 */
 	additionalNewButtons?: IDataGridAddButton[];
+	/**
+	 * Custom delete error handler
+	 * @param error The error
+	 * @remarks Usually shows an error dialog for the user
+	 */
+	customDeleteErrorHandler?: (error: Error) => Promise<void> | void;
 }
 
 export const renderDataGridRecordUsingModel = <
@@ -152,7 +158,13 @@ const BackendDataGrid = <
 >(
 	props: BackendDataGridProps<KeyT, VisibilityT, CustomDataT>
 ) => {
-	const { model, enableDelete, enableDeleteAll, customDeleteConfirm } = props;
+	const {
+		model,
+		enableDelete,
+		enableDeleteAll,
+		customDeleteConfirm,
+		customDeleteErrorHandler,
+	} = props;
 	const { t } = useCCTranslations();
 
 	const [pushDialog] = useDialogContext();
@@ -221,26 +233,33 @@ const BackendDataGrid = <
 				refreshGrid();
 			} catch (e) {
 				refreshGrid();
-				pushDialog(
-					<ErrorDialog
-						title={t("backend-components.data-grid.delete.error-dialog.title")}
-						message={t(
-							"backend-components.data-grid.delete.error-dialog.message",
-							{ ERROR: (e as Error).message }
-						)}
-						buttons={[
-							{
-								text: t(
-									"backend-components.data-grid.delete.error-dialog.buttons.okay"
-								),
-							},
-						]}
-					/>
-				);
+				if (customDeleteErrorHandler) {
+					await customDeleteErrorHandler(e as Error);
+				} else {
+					pushDialog(
+						<ErrorDialog
+							title={t(
+								"backend-components.data-grid.delete.error-dialog.title"
+							)}
+							message={t(
+								"backend-components.data-grid.delete.error-dialog.message",
+								{ ERROR: (e as Error).message }
+							)}
+							buttons={[
+								{
+									text: t(
+										"backend-components.data-grid.delete.error-dialog.buttons.okay"
+									),
+								},
+							]}
+						/>
+					);
+				}
 			}
 		},
 		[
 			customDeleteConfirm,
+			customDeleteErrorHandler,
 			pushDialog,
 			t,
 			enableDeleteAll,
