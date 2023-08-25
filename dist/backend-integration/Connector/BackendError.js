@@ -19,11 +19,13 @@ var BackendError = /** @class */ (function (_super) {
      * A error raised by backend
      * @param msg The message (human readable)
      * @param code Optional unique identifier for error
+     * @param meta Optional custom meta data
      */
-    function BackendError(msg, code) {
+    function BackendError(msg, code, meta) {
         var _this = _super.call(this, msg) || this;
         _this.name = "BackendError";
         _this.code = code;
+        _this.meta = meta;
         return _this;
     }
     return BackendError;
