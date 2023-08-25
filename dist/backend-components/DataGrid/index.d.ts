@@ -26,6 +26,12 @@ export interface BackendDataGridProps<KeyT extends ModelFieldName, VisibilityT e
      * Additional buttons next to new button
      */
     additionalNewButtons?: IDataGridAddButton[];
+    /**
+     * Custom delete error handler
+     * @param error The error
+     * @remarks Usually shows an error dialog for the user
+     */
+    customDeleteErrorHandler?: (error: Error) => Promise<void> | void;
 }
 export declare const renderDataGridRecordUsingModel: <KeyT extends string, VisibilityT extends PageVisibility, CustomT>(model: Model<KeyT, VisibilityT, CustomT>, refreshGrid: () => void) => (entry: Record<string, unknown>) => {
     id: string;

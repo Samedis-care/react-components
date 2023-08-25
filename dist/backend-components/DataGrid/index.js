@@ -129,7 +129,7 @@ export var renderDataGridRecordUsingModel = function (model, refreshGrid) { retu
         .flat());
 }; };
 var BackendDataGrid = function (props) {
-    var model = props.model, enableDelete = props.enableDelete, enableDeleteAll = props.enableDeleteAll, customDeleteConfirm = props.customDeleteConfirm;
+    var model = props.model, enableDelete = props.enableDelete, enableDeleteAll = props.enableDeleteAll, customDeleteConfirm = props.customDeleteConfirm, customDeleteErrorHandler = props.customDeleteErrorHandler;
     var t = useCCTranslations().t;
     var pushDialog = useDialogContext()[0];
     var _a = useState(""), refreshToken = _a[0], setRefreshToken = _a[1];
@@ -176,7 +176,7 @@ var BackendDataGrid = function (props) {
                     _a.sent();
                     _a.label = 4;
                 case 4:
-                    _a.trys.push([4, 9, , 10]);
+                    _a.trys.push([4, 9, , 13]);
                     if (!enableDeleteAll) return [3 /*break*/, 6];
                     return [4 /*yield*/, deleteAdvanced([invert, ids, filter])];
                 case 5:
@@ -188,21 +188,29 @@ var BackendDataGrid = function (props) {
                     _a.label = 8;
                 case 8:
                     refreshGrid();
-                    return [3 /*break*/, 10];
+                    return [3 /*break*/, 13];
                 case 9:
                     e_1 = _a.sent();
                     refreshGrid();
+                    if (!customDeleteErrorHandler) return [3 /*break*/, 11];
+                    return [4 /*yield*/, customDeleteErrorHandler(e_1)];
+                case 10:
+                    _a.sent();
+                    return [3 /*break*/, 12];
+                case 11:
                     pushDialog(React.createElement(ErrorDialog, { title: t("backend-components.data-grid.delete.error-dialog.title"), message: t("backend-components.data-grid.delete.error-dialog.message", { ERROR: e_1.message }), buttons: [
                             {
                                 text: t("backend-components.data-grid.delete.error-dialog.buttons.okay"),
                             },
                         ] }));
-                    return [3 /*break*/, 10];
-                case 10: return [2 /*return*/];
+                    _a.label = 12;
+                case 12: return [3 /*break*/, 13];
+                case 13: return [2 /*return*/];
             }
         });
     }); }, [
         customDeleteConfirm,
+        customDeleteErrorHandler,
         pushDialog,
         t,
         enableDeleteAll,
