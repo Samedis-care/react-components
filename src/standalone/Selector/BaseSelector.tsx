@@ -801,7 +801,12 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 		>
 			<BaseSelectorContext.Provider value={context}>
 				{label && (
-					<InputLabel shrink disableAnimation className={customClasses.label}>
+					<InputLabel
+						shrink
+						disableAnimation
+						disabled={disabled}
+						className={customClasses.label}
+					>
 						{label}
 					</InputLabel>
 				)}
