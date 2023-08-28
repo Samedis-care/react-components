@@ -21,3 +21,4 @@ export { default as SentryRoute } from "./SentryRoute";
 export * from "./SentryRoute";
 export * from "./CountryFlags";
 export { default as CountryFlags } from "./CountryFlags";
+export * from "./Tree";
