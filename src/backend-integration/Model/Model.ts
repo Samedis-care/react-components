@@ -21,6 +21,7 @@ import queryCache from "../Store";
 import { QueryKey } from "react-query/types/core/types";
 import { deepAssign, dotToObject, getValueByDot } from "../../utils";
 import throwError from "../../utils/throwError";
+import RequestBatching from "./RequestBatching";
 
 // optional import
 let captureException: ((e: Error) => void) | null = null;
@@ -200,6 +201,14 @@ export interface CacheOptions {
 	cacheTime?: number;
 }
 
+export interface ModelGetOptions {
+	/**
+	 * Use batched requests
+	 * @see ModelOptions.enableRequestBatching
+	 */
+	batch?: boolean;
+}
+
 /**
  * React-Query's useQuery for the given model and record ID
  * @param model The model ID to load
@@ -217,14 +226,19 @@ export const useModelGet = <
 		ModelGetResponse<KeyT>,
 		Error,
 		ModelGetResponse<KeyT>
-	>
+	> &
+		ModelGetOptions
 ): UseQueryResult<ModelGetResponse<KeyT>, Error> => {
-	return useQuery(model.getReactQueryKey(id), () => model.getRaw(id), {
-		// 3 retries if we get network error
-		retry: (count, err: Error) => err.name === "NetworkError" && count < 3,
-		...model.cacheOptions,
-		...options,
-	});
+	return useQuery(
+		model.getReactQueryKey(id, options?.batch ?? model.requestBatchingEnabled),
+		() => model.getRaw(id, options),
+		{
+			// 3 retries if we get network error
+			retry: (count, err: Error) => err.name === "NetworkError" && count < 3,
+			...model.cacheOptions,
+			...options,
+		}
+	);
 };
 
 /**
@@ -283,9 +297,15 @@ export const useModelMutation = <
 					model.hooks.onCreateOrUpdate(data);
 				}
 				ModelDataStore.setQueryData(
-					model.getReactQueryKey((data[0] as Record<"id", string>).id),
+					model.getReactQueryKey((data[0] as Record<"id", string>).id, false),
 					data
 				);
+				if (model.requestBatchingEnabled) {
+					ModelDataStore.setQueryData(
+						model.getReactQueryKey((data[0] as Record<"id", string>).id, true),
+						data
+					);
+				}
 			},
 		}
 	);
@@ -304,9 +324,7 @@ export const useModelDelete = <
 	model: Model<KeyT, VisibilityT, CustomT>
 ): UseMutationResult<void, Error, string, TContext> => {
 	return useMutation(model.modelId + "-delete", model.deleteRaw.bind(model), {
-		onSuccess: (data: void, id: string) => {
-			ModelDataStore.removeQueries(model.getReactQueryKey(id));
-		},
+		onSuccess: (data: void, id: string) => model.invalidateCacheForId(id),
 	});
 };
 
@@ -327,9 +345,7 @@ export const useModelDeleteMultiple = <
 		model.deleteMultipleRaw.bind(model),
 		{
 			onSuccess: (data: void, ids: string[]) => {
-				ids.forEach((id) =>
-					ModelDataStore.removeQueries(model.getReactQueryKey(id))
-				);
+				ids.forEach((id) => model.invalidateCacheForId(id));
 			},
 		}
 	);
@@ -353,12 +369,10 @@ export const useModelDeleteAdvanced = <
 		model.deleteAdvancedRaw.bind(model),
 		{
 			onSuccess: (data: void, req: AdvancedDeleteRequest) => {
-				// this function is likely to flush more then actually deleted
+				// this function is likely to flush more than actually deleted
 				const [invert, ids] = req;
 				if (!invert) {
-					ids.forEach((id) =>
-						ModelDataStore.removeQueries(model.getReactQueryKey(id))
-					);
+					ids.forEach((id) => model.invalidateCacheForId(id));
 				} else {
 					// delete everything from this model, unless ID matches
 					ModelDataStore.removeQueries(undefined, {
@@ -381,6 +395,24 @@ export interface ModelHooks<KeyT extends ModelFieldName> {
 	 * @param data The updated record
 	 */
 	onCreateOrUpdate?: (data: ModelGetResponse<KeyT>) => void;
+}
+
+export interface ModelOptions<KeyT extends ModelFieldName> {
+	/**
+	 * Cache options
+	 */
+	cacheOptions?: CacheOptions;
+	/**
+	 * Hooks
+	 */
+	hooks?: ModelHooks<KeyT>;
+	/**
+	 * Enable request batching: uses index requests instead of show requests using field filter for ID inSet to reduce the number of GET requests
+	 * Uses overview visibility settings, can be toggled for single requests using options there. This is the default value if not specified there
+	 * @remarks configure RequestBatching class for performance tweaking
+	 * @see RequestBatching
+	 */
+	enableRequestBatching?: boolean;
 }
 
 class Model<
@@ -413,6 +445,15 @@ class Model<
 	 */
 	public readonly hooks: ModelHooks<KeyT>;
 	/**
+	 * @see ModelOptions.enableRequestBatching
+	 */
+	public readonly requestBatchingEnabled: boolean;
+	/**
+	 * The options passed in the constructor
+	 * @readonly
+	 */
+	public readonly options?: Readonly<ModelOptions<KeyT>>;
+	/**
 	 * Global toggle to trigger auto validation of UX when constructor is called
 	 */
 	public static autoValidateUX = false;
@@ -420,33 +461,39 @@ class Model<
 	 * Throw errors when UX auto validation fails, only used when autoValidateUX is true
 	 */
 	public static autoValidateUXThrow = false;
+	/**
+	 * Print developer warnings?
+	 */
+	public static printDevWarnings = process.env.NODE_ENV === "development";
 
 	/**
 	 * Creates a new model
 	 * @param name A unique name for the model (modelId)
 	 * @param model The actual model definition
 	 * @param connector A backend connector
-	 * @param cacheKeys Optional cache keys
-	 * @param cacheOptions Optional cache options
-	 * @param hooks Optional: Model hooks
+	 * @param cacheKeys The cache keys
+	 * @param options Model options
 	 */
 	constructor(
 		name: string,
 		model: ModelField<KeyT, VisibilityT, CustomT>,
 		connector: Connector<KeyT, VisibilityT, CustomT>,
 		cacheKeys?: unknown,
-		cacheOptions?: CacheOptions,
-		hooks?: ModelHooks<KeyT>
+		options?: ModelOptions<KeyT>
 	) {
 		this.modelId = name;
 		this.fields = model;
 		this.connector = connector;
+		this.options = options;
 		this.cacheKeys = cacheKeys;
-		this.cacheOptions = cacheOptions ?? {
+		this.cacheOptions = options?.cacheOptions ?? {
 			staleTime: 30000,
 		};
-		this.hooks = hooks ?? {};
+		this.hooks = options?.hooks ?? {};
+		this.requestBatchingEnabled = options?.enableRequestBatching ?? false;
 		if (Model.autoValidateUX) this.validateUX(Model.autoValidateUXThrow);
+		if (this.requestBatchingEnabled)
+			this.canRequestsBeBatched(Model.printDevWarnings);
 	}
 
 	/**
@@ -458,9 +505,11 @@ class Model<
 	): Promise<ModelIndexResponse> {
 		const [rawData, meta, userData] = await this.connector.index(params, this);
 		return [
-			await Promise.all(
-				rawData.map((data) =>
-					this.applySerialization(data, "deserialize", "overview")
+			this.cacheIndexRecords(
+				await Promise.all(
+					rawData.map((data) =>
+						this.applySerialization(data, "deserialize", "overview")
+					)
 				)
 			),
 			meta,
@@ -477,14 +526,34 @@ class Model<
 	): Promise<ModelIndexResponse> {
 		const [rawData, meta, userData] = await this.connector.index2(params, this);
 		return [
-			await Promise.all(
-				rawData.map((data) =>
-					this.applySerialization(data, "deserialize", "overview")
+			this.cacheIndexRecords(
+				await Promise.all(
+					rawData.map((data) =>
+						this.applySerialization(data, "deserialize", "overview")
+					)
 				)
 			),
 			meta,
 			userData,
 		];
+	}
+
+	/**
+	 * Cache index records for batched requests
+	 * @param records The records to cache (from index response)
+	 * @returns records Same as input
+	 * @private
+	 */
+	private cacheIndexRecords(records: Record<string, unknown>[]) {
+		// cache records for batching
+		records.forEach((record) => {
+			queryCache.setQueryData(
+				this.getReactQueryKey(record.id as string, true),
+				[record, {}]
+			);
+		});
+
+		return records;
 	}
 
 	/**
@@ -548,9 +617,10 @@ class Model<
 	/**
 	 * Gets the react-query cache key for this model
 	 * @param id The record id
+	 * @param batch Is request batched (uses index action)?
 	 */
-	public getReactQueryKey(id: string | null): QueryKey {
-		return [this.modelId, { id: id }, this.cacheKeys];
+	public getReactQueryKey(id: string | null, batch: boolean): QueryKey {
+		return [this.modelId, { id: id }, batch, this.cacheKeys];
 	}
 
 	/**
@@ -559,6 +629,15 @@ class Model<
 	 */
 	public getReactQueryKeyFetchAll(params?: ModelFetchAllParams): QueryKey {
 		return [this.modelId, params, this.cacheKeys];
+	}
+
+	/**
+	 * Invalidates the cached data for record ID
+	 * @param id The record ID
+	 */
+	public invalidateCacheForId(id: string) {
+		ModelDataStore.removeQueries(this.getReactQueryKey(id, false));
+		ModelDataStore.removeQueries(this.getReactQueryKey(id, true));
 	}
 
 	/**
@@ -574,11 +653,15 @@ class Model<
 	/**
 	 * Provides cached access for the given data id
 	 * @param id The data record id or null to obtain the default values
+	 * @param options Request options
 	 */
-	public getCached(id: string | null): Promise<ModelGetResponse<KeyT>> {
+	public getCached(
+		id: string | null,
+		options?: ModelGetOptions
+	): Promise<ModelGetResponse<KeyT>> {
 		return queryCache.fetchQuery(
-			this.getReactQueryKey(id),
-			() => this.getRaw(id),
+			this.getReactQueryKey(id, options?.batch ?? this.requestBatchingEnabled),
+			() => this.getRaw(id, options),
 			this.cacheOptions
 		);
 	}
@@ -586,13 +669,23 @@ class Model<
 	/**
 	 * Provides uncached access for the given data id
 	 * @param id The data record id or null to obtain the default values
+	 * @param options Request options
 	 */
-	public async getRaw(id: string | null): Promise<ModelGetResponse<KeyT>> {
+	public async getRaw(
+		id: string | null,
+		options?: ModelGetOptions
+	): Promise<ModelGetResponse<KeyT>> {
 		if (!id) return [await this.getDefaultValues(), {}];
 
-		const rawData = await this.connector.read(id, this);
+		const batch = options?.batch ?? this.requestBatchingEnabled;
 
-		return this.deserializeResponse(rawData);
+		if (batch) {
+			const rawData = await RequestBatching.get(id, this);
+			return [rawData, {}];
+		} else {
+			const rawData = await this.connector.read(id, this);
+			return this.deserializeResponse(rawData);
+		}
 	}
 
 	/**
@@ -764,14 +857,16 @@ class Model<
 	/**
 	 * Updates stored data (not relations)
 	 * @param id The id of the record to edit
+	 * @param batch Data from index response?
 	 * @param updater The function which updates the data
 	 */
 	public updateStoredData(
 		id: string,
+		batch: boolean,
 		updater: (old: Record<string, unknown>) => Record<string, unknown>
 	): void {
 		ModelDataStore.setQueryData(
-			this.getReactQueryKey(id),
+			this.getReactQueryKey(id, batch),
 			(data: ModelGetResponse<KeyT> | undefined): ModelGetResponse<KeyT> => {
 				if (!data) throw new Error("Data not set");
 				const [record, ...other] = data;
@@ -1020,6 +1115,17 @@ class Model<
 			if (value === undefined && func === "serialize") {
 				continue;
 			}
+			if (
+				Model.printDevWarnings &&
+				value === undefined &&
+				func === "deserialize"
+			) {
+				// eslint-disable-next-line no-console
+				console.log(
+					`[Components-Care] [Model(id = ${this.modelId}).applySerialization(..., 'deserialize', '${visibility}')] Field ${key} cannot be found in values`,
+					values
+				);
+			}
 
 			// don't include disabled fields (except ID and disabled+readonly fields when serializing)
 			const visValue = getVisibility(
@@ -1078,6 +1184,32 @@ class Model<
 					);
 			}
 		});
+	}
+
+	public canRequestsBeBatched(printWarnings = false): boolean {
+		const fieldsNotInOverview = Object.entries(this.fields)
+			.filter(([field, def]) => {
+				if (field === "id") return false;
+				const fieldDef = def as ModelFieldDefinition<
+					unknown,
+					KeyT,
+					VisibilityT,
+					CustomT
+				>;
+				const edit = getVisibility(fieldDef.visibility.edit, {}, {});
+				const overview = getVisibility(fieldDef.visibility.overview, {}, {});
+				const enabled = (vis: Visibility) => !vis.disabled || vis.readOnly;
+				return enabled(edit) && !enabled(overview);
+			})
+			.map(([field]) => field);
+		if (printWarnings && fieldsNotInOverview.length > 0) {
+			// eslint-disable-next-line no-console
+			console.log(
+				`[Components-Care] [Model(id = ${this.modelId}).canRequestsBeBatched] Fields enabled in edit, but not in overview:`,
+				fieldsNotInOverview
+			);
+		}
+		return fieldsNotInOverview.length === 0;
 	}
 }
 

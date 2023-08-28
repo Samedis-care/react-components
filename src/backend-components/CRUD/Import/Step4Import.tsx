@@ -42,7 +42,7 @@ export const useImportStep4Logic = (props: CrudImporterStepProps) => {
 		),
 		model.connector,
 		model.cacheKeys,
-		model.cacheOptions
+		model.options
 	);
 	const { mutateAsync: createOrUpdateRecord } = useModelMutation(customModel);
 
