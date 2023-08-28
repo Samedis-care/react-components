@@ -14,6 +14,18 @@ export type ModelDataTypeLocalizedStringRendererGetFallbackLabel = (
 	values: Record<string, unknown>
 ) => string;
 
+export interface ModelDataTypeLocalizedStringRendererParamsExtra {
+	/**
+	 * fallback label for data-grid view
+	 */
+	getFallbackLabel?: ModelDataTypeLocalizedStringRendererGetFallbackLabel;
+	/**
+	 * Values used in getFallbackLabel
+	 * @see TypeSettings.updateHooks
+	 */
+	getFallbackLabelValues?: string[];
+}
+
 export type ModelDataTypeLocalizedStringRendererParams = Omit<
 	MultiLanguageInputProps,
 	| "name"
@@ -25,31 +37,31 @@ export type ModelDataTypeLocalizedStringRendererParams = Omit<
 	| "onBlur"
 	| "error"
 	| "warning"
-> & {
-	/**
-	 * fallback label for data-grid view
-	 */
-	getFallbackLabel?: ModelDataTypeLocalizedStringRendererGetFallbackLabel;
-	/**
-	 * Values used in getFallbackLabel
-	 * @see TypeSettings.updateHooks
-	 */
-	getFallbackLabelValues?: string[];
-};
+> &
+	ModelDataTypeLocalizedStringRendererParamsExtra;
 
 /**
  * Renders a text field
  */
 class RendererLocalizedString extends TypeLocalizedString {
-	props: ModelDataTypeLocalizedStringRendererParams;
+	props: Omit<
+		ModelDataTypeLocalizedStringRendererParams,
+		keyof ModelDataTypeLocalizedStringRendererParamsExtra
+	>;
 	settings: TypeSettings;
+	extra: ModelDataTypeLocalizedStringRendererParamsExtra;
 
 	constructor(props: ModelDataTypeLocalizedStringRendererParams) {
 		super(props?.multiline);
 
-		this.props = props;
+		const { getFallbackLabel, getFallbackLabelValues, ...other } = props;
+		this.props = other;
+		this.extra = {
+			getFallbackLabel,
+			getFallbackLabelValues,
+		};
 		this.settings = {
-			updateHooks: props.getFallbackLabelValues,
+			updateHooks: getFallbackLabelValues,
 		};
 	}
 
@@ -114,8 +126,8 @@ class RendererLocalizedString extends TypeLocalizedString {
 			<Typography noWrap={visibility.grid}>
 				{!visibility.grid && `${label}: `}
 				{this.stringify(value) ||
-					(this.props.getFallbackLabel
-						? this.props.getFallbackLabel(value, params.values)
+					(this.extra.getFallbackLabel
+						? this.extra.getFallbackLabel(value, params.values)
 						: "")}
 			</Typography>
 		);
