@@ -60,7 +60,7 @@ export var useImportStep4Logic = function (props) {
             key,
             __assign(__assign({}, field), { visibility: __assign(__assign({}, field.visibility), { create: ModelVisibilityHidden }) }),
         ];
-    })), model.connector, model.cacheKeys, model.cacheOptions);
+    })), model.connector, model.cacheKeys, model.options);
     var createOrUpdateRecord = useModelMutation(customModel).mutateAsync;
     var _a = useState(false), importDone = _a[0], setImportDone = _a[1];
     useEffect(function () {

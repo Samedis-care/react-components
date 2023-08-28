@@ -60,6 +60,7 @@ import { ModelDataStore } from "../index";
 import queryCache from "../Store";
 import { deepAssign, dotToObject, getValueByDot } from "../../utils";
 import throwError from "../../utils/throwError";
+import RequestBatching from "./RequestBatching";
 // optional import
 var captureException = null;
 import("@sentry/react")
@@ -73,7 +74,8 @@ import("@sentry/react")
  * @param options Extra options to pass to useQuery (defaults are provided for retry, staleTime and cacheTime (last two only if configured in model))
  */
 export var useModelGet = function (model, id, options) {
-    return useQuery(model.getReactQueryKey(id), function () { return model.getRaw(id); }, __assign(__assign({ 
+    var _a;
+    return useQuery(model.getReactQueryKey(id, (_a = options === null || options === void 0 ? void 0 : options.batch) !== null && _a !== void 0 ? _a : model.requestBatchingEnabled), function () { return model.getRaw(id, options); }, __assign(__assign({ 
         // 3 retries if we get network error
         retry: function (count, err) { return err.name === "NetworkError" && count < 3; } }, model.cacheOptions), options));
 };
@@ -103,7 +105,10 @@ export var useModelMutation = function (model) {
             if (model.hooks.onCreateOrUpdate) {
                 model.hooks.onCreateOrUpdate(data);
             }
-            ModelDataStore.setQueryData(model.getReactQueryKey(data[0].id), data);
+            ModelDataStore.setQueryData(model.getReactQueryKey(data[0].id, false), data);
+            if (model.requestBatchingEnabled) {
+                ModelDataStore.setQueryData(model.getReactQueryKey(data[0].id, true), data);
+            }
         },
     });
 };
@@ -113,9 +118,7 @@ export var useModelMutation = function (model) {
  */
 export var useModelDelete = function (model) {
     return useMutation(model.modelId + "-delete", model.deleteRaw.bind(model), {
-        onSuccess: function (data, id) {
-            ModelDataStore.removeQueries(model.getReactQueryKey(id));
-        },
+        onSuccess: function (data, id) { return model.invalidateCacheForId(id); },
     });
 };
 /**
@@ -125,9 +128,7 @@ export var useModelDelete = function (model) {
 export var useModelDeleteMultiple = function (model) {
     return useMutation(model.modelId + "-delete-multi", model.deleteMultipleRaw.bind(model), {
         onSuccess: function (data, ids) {
-            ids.forEach(function (id) {
-                return ModelDataStore.removeQueries(model.getReactQueryKey(id));
-            });
+            ids.forEach(function (id) { return model.invalidateCacheForId(id); });
         },
     });
 };
@@ -139,12 +140,10 @@ export var useModelDeleteMultiple = function (model) {
 export var useModelDeleteAdvanced = function (model) {
     return useMutation(model.modelId + "-delete-adv", model.deleteAdvancedRaw.bind(model), {
         onSuccess: function (data, req) {
-            // this function is likely to flush more then actually deleted
+            // this function is likely to flush more than actually deleted
             var invert = req[0], ids = req[1];
             if (!invert) {
-                ids.forEach(function (id) {
-                    return ModelDataStore.removeQueries(model.getReactQueryKey(id));
-                });
+                ids.forEach(function (id) { return model.invalidateCacheForId(id); });
             }
             else {
                 // delete everything from this model, unless ID matches
@@ -164,21 +163,25 @@ var Model = /** @class */ (function () {
      * @param name A unique name for the model (modelId)
      * @param model The actual model definition
      * @param connector A backend connector
-     * @param cacheKeys Optional cache keys
-     * @param cacheOptions Optional cache options
-     * @param hooks Optional: Model hooks
+     * @param cacheKeys The cache keys
+     * @param options Model options
      */
-    function Model(name, model, connector, cacheKeys, cacheOptions, hooks) {
+    function Model(name, model, connector, cacheKeys, options) {
+        var _a, _b, _c;
         this.modelId = name;
         this.fields = model;
         this.connector = connector;
+        this.options = options;
         this.cacheKeys = cacheKeys;
-        this.cacheOptions = cacheOptions !== null && cacheOptions !== void 0 ? cacheOptions : {
+        this.cacheOptions = (_a = options === null || options === void 0 ? void 0 : options.cacheOptions) !== null && _a !== void 0 ? _a : {
             staleTime: 30000,
         };
-        this.hooks = hooks !== null && hooks !== void 0 ? hooks : {};
+        this.hooks = (_b = options === null || options === void 0 ? void 0 : options.hooks) !== null && _b !== void 0 ? _b : {};
+        this.requestBatchingEnabled = (_c = options === null || options === void 0 ? void 0 : options.enableRequestBatching) !== null && _c !== void 0 ? _c : false;
         if (Model.autoValidateUX)
             this.validateUX(Model.autoValidateUXThrow);
+        if (this.requestBatchingEnabled)
+            this.canRequestsBeBatched(Model.printDevWarnings);
     }
     /**
      * Loads a list of data entries by the given search params
@@ -186,18 +189,19 @@ var Model = /** @class */ (function () {
      */
     Model.prototype.index = function (params) {
         return __awaiter(this, void 0, void 0, function () {
-            var _a, rawData, meta, userData;
+            var _a, rawData, meta, userData, _b;
             var _this = this;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
+            return __generator(this, function (_c) {
+                switch (_c.label) {
                     case 0: return [4 /*yield*/, this.connector.index(params, this)];
                     case 1:
-                        _a = _b.sent(), rawData = _a[0], meta = _a[1], userData = _a[2];
+                        _a = _c.sent(), rawData = _a[0], meta = _a[1], userData = _a[2];
+                        _b = this.cacheIndexRecords;
                         return [4 /*yield*/, Promise.all(rawData.map(function (data) {
                                 return _this.applySerialization(data, "deserialize", "overview");
                             }))];
                     case 2: return [2 /*return*/, [
-                            _b.sent(),
+                            _b.apply(this, [_c.sent()]),
                             meta,
                             userData
                         ]];
@@ -211,24 +215,39 @@ var Model = /** @class */ (function () {
      */
     Model.prototype.index2 = function (params) {
         return __awaiter(this, void 0, void 0, function () {
-            var _a, rawData, meta, userData;
+            var _a, rawData, meta, userData, _b;
             var _this = this;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
+            return __generator(this, function (_c) {
+                switch (_c.label) {
                     case 0: return [4 /*yield*/, this.connector.index2(params, this)];
                     case 1:
-                        _a = _b.sent(), rawData = _a[0], meta = _a[1], userData = _a[2];
+                        _a = _c.sent(), rawData = _a[0], meta = _a[1], userData = _a[2];
+                        _b = this.cacheIndexRecords;
                         return [4 /*yield*/, Promise.all(rawData.map(function (data) {
                                 return _this.applySerialization(data, "deserialize", "overview");
                             }))];
                     case 2: return [2 /*return*/, [
-                            _b.sent(),
+                            _b.apply(this, [_c.sent()]),
                             meta,
                             userData
                         ]];
                 }
             });
         });
+    };
+    /**
+     * Cache index records for batched requests
+     * @param records The records to cache (from index response)
+     * @returns records Same as input
+     * @private
+     */
+    Model.prototype.cacheIndexRecords = function (records) {
+        var _this = this;
+        // cache records for batching
+        records.forEach(function (record) {
+            queryCache.setQueryData(_this.getReactQueryKey(record.id, true), [record, {}]);
+        });
+        return records;
     };
     /**
      * Fetches all records using index calls
@@ -288,9 +307,10 @@ var Model = /** @class */ (function () {
     /**
      * Gets the react-query cache key for this model
      * @param id The record id
+     * @param batch Is request batched (uses index action)?
      */
-    Model.prototype.getReactQueryKey = function (id) {
-        return [this.modelId, { id: id }, this.cacheKeys];
+    Model.prototype.getReactQueryKey = function (id, batch) {
+        return [this.modelId, { id: id }, batch, this.cacheKeys];
     };
     /**
      * Gets the react-query cache key for this model (for fetch all)
@@ -298,6 +318,14 @@ var Model = /** @class */ (function () {
      */
     Model.prototype.getReactQueryKeyFetchAll = function (params) {
         return [this.modelId, params, this.cacheKeys];
+    };
+    /**
+     * Invalidates the cached data for record ID
+     * @param id The record ID
+     */
+    Model.prototype.invalidateCacheForId = function (id) {
+        ModelDataStore.removeQueries(this.getReactQueryKey(id, false));
+        ModelDataStore.removeQueries(this.getReactQueryKey(id, true));
     };
     /**
      * Provides a react-query useQuery hook for the given data id
@@ -311,27 +339,38 @@ var Model = /** @class */ (function () {
     /**
      * Provides cached access for the given data id
      * @param id The data record id or null to obtain the default values
+     * @param options Request options
      */
-    Model.prototype.getCached = function (id) {
+    Model.prototype.getCached = function (id, options) {
         var _this = this;
-        return queryCache.fetchQuery(this.getReactQueryKey(id), function () { return _this.getRaw(id); }, this.cacheOptions);
+        var _a;
+        return queryCache.fetchQuery(this.getReactQueryKey(id, (_a = options === null || options === void 0 ? void 0 : options.batch) !== null && _a !== void 0 ? _a : this.requestBatchingEnabled), function () { return _this.getRaw(id, options); }, this.cacheOptions);
     };
     /**
      * Provides uncached access for the given data id
      * @param id The data record id or null to obtain the default values
+     * @param options Request options
      */
-    Model.prototype.getRaw = function (id) {
+    Model.prototype.getRaw = function (id, options) {
+        var _a;
         return __awaiter(this, void 0, void 0, function () {
-            var rawData;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
+            var batch, rawData, rawData;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
                     case 0:
                         if (!!id) return [3 /*break*/, 2];
                         return [4 /*yield*/, this.getDefaultValues()];
-                    case 1: return [2 /*return*/, [_a.sent(), {}]];
-                    case 2: return [4 /*yield*/, this.connector.read(id, this)];
+                    case 1: return [2 /*return*/, [_b.sent(), {}]];
+                    case 2:
+                        batch = (_a = options === null || options === void 0 ? void 0 : options.batch) !== null && _a !== void 0 ? _a : this.requestBatchingEnabled;
+                        if (!batch) return [3 /*break*/, 4];
+                        return [4 /*yield*/, RequestBatching.get(id, this)];
                     case 3:
-                        rawData = _a.sent();
+                        rawData = _b.sent();
+                        return [2 /*return*/, [rawData, {}]];
+                    case 4: return [4 /*yield*/, this.connector.read(id, this)];
+                    case 5:
+                        rawData = _b.sent();
                         return [2 /*return*/, this.deserializeResponse(rawData)];
                 }
             });
@@ -497,10 +536,11 @@ var Model = /** @class */ (function () {
     /**
      * Updates stored data (not relations)
      * @param id The id of the record to edit
+     * @param batch Data from index response?
      * @param updater The function which updates the data
      */
-    Model.prototype.updateStoredData = function (id, updater) {
-        ModelDataStore.setQueryData(this.getReactQueryKey(id), function (data) {
+    Model.prototype.updateStoredData = function (id, batch, updater) {
+        ModelDataStore.setQueryData(this.getReactQueryKey(id, batch), function (data) {
             if (!data)
                 throw new Error("Data not set");
             var record = data[0], other = data.slice(1);
@@ -774,6 +814,12 @@ var Model = /** @class */ (function () {
                         if (value === undefined && func === "serialize") {
                             return [3 /*break*/, 5];
                         }
+                        if (Model.printDevWarnings &&
+                            value === undefined &&
+                            func === "deserialize") {
+                            // eslint-disable-next-line no-console
+                            console.log("[Components-Care] [Model(id = ".concat(this.modelId, ").applySerialization(..., 'deserialize', '").concat(visibility, "')] Field ").concat(key, " cannot be found in values"), values);
+                        }
                         visValue = getVisibility(field.visibility[visibility], values, values);
                         if (visValue.disabled &&
                             (func === "serialize" || !visValue.readOnly) &&
@@ -825,6 +871,29 @@ var Model = /** @class */ (function () {
             }
         });
     };
+    Model.prototype.canRequestsBeBatched = function (printWarnings) {
+        if (printWarnings === void 0) { printWarnings = false; }
+        var fieldsNotInOverview = Object.entries(this.fields)
+            .filter(function (_a) {
+            var field = _a[0], def = _a[1];
+            if (field === "id")
+                return false;
+            var fieldDef = def;
+            var edit = getVisibility(fieldDef.visibility.edit, {}, {});
+            var overview = getVisibility(fieldDef.visibility.overview, {}, {});
+            var enabled = function (vis) { return !vis.disabled || vis.readOnly; };
+            return enabled(edit) && !enabled(overview);
+        })
+            .map(function (_a) {
+            var field = _a[0];
+            return field;
+        });
+        if (printWarnings && fieldsNotInOverview.length > 0) {
+            // eslint-disable-next-line no-console
+            console.log("[Components-Care] [Model(id = ".concat(this.modelId, ").canRequestsBeBatched] Fields enabled in edit, but not in overview:"), fieldsNotInOverview);
+        }
+        return fieldsNotInOverview.length === 0;
+    };
     /**
      * Global toggle to trigger auto validation of UX when constructor is called
      */
@@ -833,6 +902,10 @@ var Model = /** @class */ (function () {
      * Throw errors when UX auto validation fails, only used when autoValidateUX is true
      */
     Model.autoValidateUXThrow = false;
+    /**
+     * Print developer warnings?
+     */
+    Model.printDevWarnings = process.env.NODE_ENV === "development";
     return Model;
 }());
 export default Model;

@@ -412,7 +412,7 @@ var BaseSelector = function (props) {
     var filterOptions = useCallback(function (options) { return options; }, []);
     return (React.createElement(InlineSwitch, { visible: !!props.displaySwitch, value: switchValue, onChange: setSwitchValue, label: switchLabel, classes: customClasses },
         React.createElement(BaseSelectorContext.Provider, { value: context },
-            label && (React.createElement(InputLabel, { shrink: true, disableAnimation: true, className: customClasses.label }, label)),
+            label && (React.createElement(InputLabel, { shrink: true, disableAnimation: true, disabled: disabled, className: customClasses.label }, label)),
             React.createElement(Paper, { elevation: 0, className: customClasses.wrapper },
                 React.createElement(Autocomplete, { id: autocompleteId, classes: classes, open: open, onOpen: function () {
                         setOpen(true);

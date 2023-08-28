@@ -4,7 +4,7 @@ import { MultiLanguageInputProps, MultiLanguageInputSupportedLanguages } from ".
 import TypeLocalizedString from "../TypeLocalizedString";
 import { TypeSettings } from "../../Type";
 export declare type ModelDataTypeLocalizedStringRendererGetFallbackLabel = (value: Partial<Record<MultiLanguageInputSupportedLanguages, string>>, values: Record<string, unknown>) => string;
-export declare type ModelDataTypeLocalizedStringRendererParams = Omit<MultiLanguageInputProps, "name" | "values" | "label" | "disabled" | "required" | "onChange" | "onBlur" | "error" | "warning"> & {
+export interface ModelDataTypeLocalizedStringRendererParamsExtra {
     /**
      * fallback label for data-grid view
      */
@@ -14,13 +14,15 @@ export declare type ModelDataTypeLocalizedStringRendererParams = Omit<MultiLangu
      * @see TypeSettings.updateHooks
      */
     getFallbackLabelValues?: string[];
-};
+}
+export declare type ModelDataTypeLocalizedStringRendererParams = Omit<MultiLanguageInputProps, "name" | "values" | "label" | "disabled" | "required" | "onChange" | "onBlur" | "error" | "warning"> & ModelDataTypeLocalizedStringRendererParamsExtra;
 /**
  * Renders a text field
  */
 declare class RendererLocalizedString extends TypeLocalizedString {
-    props: ModelDataTypeLocalizedStringRendererParams;
+    props: Omit<ModelDataTypeLocalizedStringRendererParams, keyof ModelDataTypeLocalizedStringRendererParamsExtra>;
     settings: TypeSettings;
+    extra: ModelDataTypeLocalizedStringRendererParamsExtra;
     constructor(props: ModelDataTypeLocalizedStringRendererParams);
     render(params: ModelRenderParams<Partial<Record<MultiLanguageInputSupportedLanguages, string>>>): React.ReactElement;
 }

@@ -117,13 +117,20 @@ export interface CacheOptions {
      */
     cacheTime?: number;
 }
+export interface ModelGetOptions {
+    /**
+     * Use batched requests
+     * @see ModelOptions.enableRequestBatching
+     */
+    batch?: boolean;
+}
 /**
  * React-Query's useQuery for the given model and record ID
  * @param model The model ID to load
  * @param id The record ID (or null to get default values on create)
  * @param options Extra options to pass to useQuery (defaults are provided for retry, staleTime and cacheTime (last two only if configured in model))
  */
-export declare const useModelGet: <KeyT extends string, VisibilityT extends PageVisibility, CustomT>(model: Model<KeyT, VisibilityT, CustomT>, id: string | null, options?: UseQueryOptions<ModelGetResponse<KeyT>, Error, ModelGetResponse<KeyT>> | undefined) => UseQueryResult<ModelGetResponse<KeyT>, Error>;
+export declare const useModelGet: <KeyT extends string, VisibilityT extends PageVisibility, CustomT>(model: Model<KeyT, VisibilityT, CustomT>, id: string | null, options?: (UseQueryOptions<ModelGetResponse<KeyT>, Error, ModelGetResponse<KeyT>> & ModelGetOptions) | undefined) => UseQueryResult<ModelGetResponse<KeyT>, Error>;
 /**
  * React-Query's useQuery for the given model and index params
  * @param model The model ID to load
@@ -161,6 +168,23 @@ export interface ModelHooks<KeyT extends ModelFieldName> {
      */
     onCreateOrUpdate?: (data: ModelGetResponse<KeyT>) => void;
 }
+export interface ModelOptions<KeyT extends ModelFieldName> {
+    /**
+     * Cache options
+     */
+    cacheOptions?: CacheOptions;
+    /**
+     * Hooks
+     */
+    hooks?: ModelHooks<KeyT>;
+    /**
+     * Enable request batching: uses index requests instead of show requests using field filter for ID inSet to reduce the number of GET requests
+     * Uses overview visibility settings, can be toggled for single requests using options there. This is the default value if not specified there
+     * @remarks configure RequestBatching class for performance tweaking
+     * @see RequestBatching
+     */
+    enableRequestBatching?: boolean;
+}
 declare class Model<KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT> {
     /**
      * A unique model identifier, used for caching
@@ -187,6 +211,15 @@ declare class Model<KeyT extends ModelFieldName, VisibilityT extends PageVisibil
      */
     readonly hooks: ModelHooks<KeyT>;
     /**
+     * @see ModelOptions.enableRequestBatching
+     */
+    readonly requestBatchingEnabled: boolean;
+    /**
+     * The options passed in the constructor
+     * @readonly
+     */
+    readonly options?: Readonly<ModelOptions<KeyT>>;
+    /**
      * Global toggle to trigger auto validation of UX when constructor is called
      */
     static autoValidateUX: boolean;
@@ -195,15 +228,18 @@ declare class Model<KeyT extends ModelFieldName, VisibilityT extends PageVisibil
      */
     static autoValidateUXThrow: boolean;
     /**
+     * Print developer warnings?
+     */
+    static printDevWarnings: boolean;
+    /**
      * Creates a new model
      * @param name A unique name for the model (modelId)
      * @param model The actual model definition
      * @param connector A backend connector
-     * @param cacheKeys Optional cache keys
-     * @param cacheOptions Optional cache options
-     * @param hooks Optional: Model hooks
+     * @param cacheKeys The cache keys
+     * @param options Model options
      */
-    constructor(name: string, model: ModelField<KeyT, VisibilityT, CustomT>, connector: Connector<KeyT, VisibilityT, CustomT>, cacheKeys?: unknown, cacheOptions?: CacheOptions, hooks?: ModelHooks<KeyT>);
+    constructor(name: string, model: ModelField<KeyT, VisibilityT, CustomT>, connector: Connector<KeyT, VisibilityT, CustomT>, cacheKeys?: unknown, options?: ModelOptions<KeyT>);
     /**
      * Loads a list of data entries by the given search params
      * @param params The search params
@@ -214,6 +250,13 @@ declare class Model<KeyT extends ModelFieldName, VisibilityT extends PageVisibil
      * @param params The search params
      */
     index2(params: ConnectorIndex2Params): Promise<ModelIndexResponse>;
+    /**
+     * Cache index records for batched requests
+     * @param records The records to cache (from index response)
+     * @returns records Same as input
+     * @private
+     */
+    private cacheIndexRecords;
     /**
      * Fetches all records using index calls
      * @param params The params to pass to index
@@ -230,13 +273,19 @@ declare class Model<KeyT extends ModelFieldName, VisibilityT extends PageVisibil
     /**
      * Gets the react-query cache key for this model
      * @param id The record id
+     * @param batch Is request batched (uses index action)?
      */
-    getReactQueryKey(id: string | null): QueryKey;
+    getReactQueryKey(id: string | null, batch: boolean): QueryKey;
     /**
      * Gets the react-query cache key for this model (for fetch all)
      * @param params The fetch all params
      */
     getReactQueryKeyFetchAll(params?: ModelFetchAllParams): QueryKey;
+    /**
+     * Invalidates the cached data for record ID
+     * @param id The record ID
+     */
+    invalidateCacheForId(id: string): void;
     /**
      * Provides a react-query useQuery hook for the given data id
      * @param id The data record id
@@ -246,13 +295,15 @@ declare class Model<KeyT extends ModelFieldName, VisibilityT extends PageVisibil
     /**
      * Provides cached access for the given data id
      * @param id The data record id or null to obtain the default values
+     * @param options Request options
      */
-    getCached(id: string | null): Promise<ModelGetResponse<KeyT>>;
+    getCached(id: string | null, options?: ModelGetOptions): Promise<ModelGetResponse<KeyT>>;
     /**
      * Provides uncached access for the given data id
      * @param id The data record id or null to obtain the default values
+     * @param options Request options
      */
-    getRaw(id: string | null): Promise<ModelGetResponse<KeyT>>;
+    getRaw(id: string | null, options?: ModelGetOptions): Promise<ModelGetResponse<KeyT>>;
     /**
      * Deserializes the given ModelGetResponse
      * @param rawData The data to deserialize
@@ -306,9 +357,10 @@ declare class Model<KeyT extends ModelFieldName, VisibilityT extends PageVisibil
     /**
      * Updates stored data (not relations)
      * @param id The id of the record to edit
+     * @param batch Data from index response?
      * @param updater The function which updates the data
      */
-    updateStoredData(id: string, updater: (old: Record<string, unknown>) => Record<string, unknown>): void;
+    updateStoredData(id: string, batch: boolean, updater: (old: Record<string, unknown>) => Record<string, unknown>): void;
     /**
      * Returns a data grid compatible column definition
      */
@@ -351,5 +403,6 @@ declare class Model<KeyT extends ModelFieldName, VisibilityT extends PageVisibil
      * @remarks To enable this automatically set `Model.autoValidateUX = true; Model.autoValidateUXThrow = false/true;`
      */
     validateUX(throwErr?: boolean): void;
+    canRequestsBeBatched(printWarnings?: boolean): boolean;
 }
 export default Model;

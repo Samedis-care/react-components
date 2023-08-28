@@ -24,6 +24,17 @@ var __assign = (this && this.__assign) || function () {
     };
     return __assign.apply(this, arguments);
 };
+var __rest = (this && this.__rest) || function (s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
+        }
+    return t;
+};
 import React from "react";
 import { Typography } from "@mui/material";
 import MultiLanguageInput from "../../../../standalone/UIKit/InputControls/MultiLanguageInput";
@@ -36,9 +47,14 @@ var RendererLocalizedString = /** @class */ (function (_super) {
     __extends(RendererLocalizedString, _super);
     function RendererLocalizedString(props) {
         var _this = _super.call(this, props === null || props === void 0 ? void 0 : props.multiline) || this;
-        _this.props = props;
+        var getFallbackLabel = props.getFallbackLabel, getFallbackLabelValues = props.getFallbackLabelValues, other = __rest(props, ["getFallbackLabel", "getFallbackLabelValues"]);
+        _this.props = other;
+        _this.extra = {
+            getFallbackLabel: getFallbackLabel,
+            getFallbackLabelValues: getFallbackLabelValues,
+        };
         _this.settings = {
-            updateHooks: props.getFallbackLabelValues,
+            updateHooks: getFallbackLabelValues,
         };
         return _this;
     }
@@ -61,8 +77,8 @@ var RendererLocalizedString = /** @class */ (function (_super) {
         return (React.createElement(Typography, { noWrap: visibility.grid },
             !visibility.grid && "".concat(label, ": "),
             this.stringify(value) ||
-                (this.props.getFallbackLabel
-                    ? this.props.getFallbackLabel(value, params.values)
+                (this.extra.getFallbackLabel
+                    ? this.extra.getFallbackLabel(value, params.values)
                     : "")));
     };
     return RendererLocalizedString;
