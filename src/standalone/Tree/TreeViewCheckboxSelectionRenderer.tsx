@@ -16,6 +16,8 @@ const TreeViewCheckboxSelectionRenderer = (props: TreeViewRendererProps) => {
 		id,
 		depth,
 		hasNext,
+		onClick,
+		onAuxClick,
 	} = props;
 
 	const handleExpand = useCallback(() => onToggleExpanded(id), [
@@ -71,11 +73,11 @@ const TreeViewCheckboxSelectionRenderer = (props: TreeViewRendererProps) => {
 				)}
 			</Grid>
 			{icon && (
-				<Grid item key={"icon"}>
+				<Grid item key={"icon"} onClick={onClick} onAuxClick={onAuxClick}>
 					{icon}
 				</Grid>
 			)}
-			<Grid item xs key={"label"}>
+			<Grid item xs key={"label"} onClick={onClick} onAuxClick={onAuxClick}>
 				<Typography noWrap>{label}</Typography>
 			</Grid>
 		</Grid>

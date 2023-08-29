@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import TreeViewDefaultRenderer from "./TreeViewDefaultRenderer";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { FixedSizeList, ListChildComponentProps } from "react-window";
@@ -17,6 +17,14 @@ export interface TreeData {
 	 */
 	label: string;
 	/**
+	 * Click event handler
+	 */
+	onClick?: React.MouseEventHandler;
+	/**
+	 * Aux click handler
+	 */
+	onAuxClick?: React.MouseEventHandler;
+	/**
 	 * Entry expanded?
 	 */
 	expanded: boolean;
@@ -25,6 +33,10 @@ export interface TreeData {
 	 * If true and children is not defined lazy load of children may be requested
 	 */
 	hasChildren: boolean;
+	/**
+	 * Mark this entry as focused
+	 */
+	focus?: boolean;
 	/**
 	 * Tree view children. May be null to support lazy load
 	 */
@@ -59,14 +71,17 @@ export interface TreeDataForRenderer extends Omit<TreeData, "children"> {
 	 * Has another entry on the same depth
 	 */
 	hasNext: boolean;
+	/**
+	 * Are children currently being loaded?
+	 */
+	childrenLoading: boolean;
+	/**
+	 * Are children loaded or is a call to onLoadChildren required
+	 */
+	childrenLoaded: boolean;
 }
 
 export interface TreeViewRendererProps extends TreeDataForRenderer {
-	/**
-	 * Load children of a specific record
-	 * @param id The record ID
-	 */
-	onLoadChildren: (id: string) => Promise<void> | void;
 	/**
 	 * Toggle the expanded state of the given record
 	 * @param id The record ID
@@ -76,7 +91,7 @@ export interface TreeViewRendererProps extends TreeDataForRenderer {
 
 export type TreeViewRendererCallbacks = Pick<
 	TreeViewRendererProps,
-	"onLoadChildren" | "onToggleExpanded"
+	"onToggleExpanded"
 >;
 export interface TreeViewProps extends TreeViewRendererCallbacks {
 	/**
@@ -92,10 +107,16 @@ export interface TreeViewProps extends TreeViewRendererCallbacks {
 	 * Renderer item height
 	 */
 	rendererItemHeight?: number;
+	/**
+	 * Load children of a specific record
+	 * @param id The record ID
+	 */
+	onLoadChildren: (id: string) => Promise<void> | void;
 }
 
 const enhanceData = (
 	data: TreeData[],
+	loading: string[],
 	index: number,
 	depth: number
 ): TreeDataForRenderer[] => {
@@ -107,10 +128,12 @@ const enhanceData = (
 				depth: depth,
 				hasPrev: idx !== 0,
 				hasNext: idx < data.length - 1,
+				childrenLoading: loading.includes(entry.id),
+				childrenLoaded: entry.children != null && entry.children.length > 0,
 			},
 			...(entry.children && entry.expanded
 				? (() => {
-						const data = enhanceData(entry.children, index, depth + 1);
+						const data = enhanceData(entry.children, loading, index, depth + 1);
 						index += data.length;
 						return data;
 				  })()
@@ -154,8 +177,16 @@ const RendererWrapper = (
 };
 
 const TreeView = (props: TreeViewProps) => {
-	const { data, renderer, rendererItemHeight, ...rendererProps } = props;
+	const {
+		data,
+		renderer,
+		rendererItemHeight,
+		onLoadChildren,
+		onToggleExpanded,
+		...rendererProps
+	} = props;
 	const itemHeight = rendererItemHeight ?? 24;
+	const [loading, setLoading] = useState<string[]>([]);
 	const enhancedData = useMemo((): TreeDataForRenderer[] => {
 		let processingTarget: TreeData;
 		if (Array.isArray(data)) {
@@ -163,15 +194,37 @@ const TreeView = (props: TreeViewProps) => {
 		} else {
 			processingTarget = data;
 		}
-		return enhanceData([processingTarget], 0, 0);
-	}, [data]);
+		return enhanceData([processingTarget], loading, 0, 0);
+	}, [data, loading]);
+	const hookOnToggleExpanded = useCallback(
+		(id: string) => {
+			void (async () => {
+				const toggleRecord = enhancedData.find((record) => record.id === id);
+				if (
+					toggleRecord &&
+					toggleRecord.hasChildren &&
+					!toggleRecord.childrenLoaded
+				) {
+					if (toggleRecord.childrenLoading) return;
+					setLoading((prev) => [...prev, id]);
+					await onLoadChildren(id);
+					setLoading((prev) => prev.filter((entry) => entry !== id));
+				}
+				onToggleExpanded(id);
+			})();
+		},
+		[enhancedData, onLoadChildren, onToggleExpanded]
+	);
 	const itemData = useMemo(
 		(): TreeViewContextType => ({
 			renderer: renderer ?? TreeViewDefaultRenderer,
 			data: enhancedData,
-			rendererProps,
+			rendererProps: {
+				...rendererProps,
+				onToggleExpanded: hookOnToggleExpanded,
+			},
 		}),
-		[renderer, enhancedData, rendererProps]
+		[renderer, enhancedData, rendererProps, hookOnToggleExpanded]
 	);
 
 	return (
