@@ -12,6 +12,12 @@ export interface CrudFormProps {
      */
     goBack: (forceGridRefresh?: boolean) => void;
     /**
+     * Open view
+     * @param id The ID of the record or special values for special views
+     * @see CrudSpecialIds
+     */
+    open: (id: "import" | "devimport" | "new" | string) => void;
+    /**
      * Does the Form have a custom submit handler?
      */
     hasCustomSubmitHandler: boolean;

@@ -127,6 +127,14 @@ var CRUD = function (props) {
         if (forceRefresh)
             refreshGrid();
     }, [disableRouting, refreshGrid, navigate, routeUrl]);
+    var openView = useCallback(function (id) {
+        if (disableRouting) {
+            setId(id);
+        }
+        else {
+            navigate(routeUrl + "/" + id);
+        }
+    }, [disableRouting, navigate, routeUrl]);
     var handleSubmit = useCallback(function (data, submit, old) { return __awaiter(void 0, void 0, void 0, function () {
         var id;
         return __generator(this, function (_a) {
@@ -193,6 +201,7 @@ var CRUD = function (props) {
         }
         return (React.createElement(Form, __assign({ id: id === "new" ? null : id, key: formKey.current, model: props.model }, props.formProps, { readOnly: !hasPermission(perms, id === "new" ? props.newPermission : props.editPermission) || props.formProps.readOnly, readOnlyReason: props.editPermissionHint, onSubmit: handleSubmit, disableRouting: disableRouting, customProps: (_a = props.formProps.customProps) !== null && _a !== void 0 ? _a : {
                 goBack: showOverview,
+                open: openView,
                 hasCustomSubmitHandler: props.formProps.onSubmit != null,
             } }), formComponent));
     };
