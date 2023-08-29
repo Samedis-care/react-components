@@ -33,6 +33,12 @@ export interface CrudFormProps {
 	 */
 	goBack: (forceGridRefresh?: boolean) => void;
 	/**
+	 * Open view
+	 * @param id The ID of the record or special values for special views
+	 * @see CrudSpecialIds
+	 */
+	open: (id: "import" | "devimport" | "new" | string) => void;
+	/**
 	 * Does the Form have a custom submit handler?
 	 */
 	hasCustomSubmitHandler: boolean;
@@ -301,6 +307,17 @@ const CRUD = <
 		[disableRouting, refreshGrid, navigate, routeUrl]
 	);
 
+	const openView = useCallback(
+		(id: "import" | "devimport" | "new" | string) => {
+			if (disableRouting) {
+				setId(id);
+			} else {
+				navigate(routeUrl + "/" + id);
+			}
+		},
+		[disableRouting, navigate, routeUrl]
+	);
+
 	const handleSubmit = useCallback(
 		async (
 			data: Record<string, unknown>,
@@ -415,6 +432,7 @@ const CRUD = <
 				customProps={
 					props.formProps.customProps ?? {
 						goBack: showOverview,
+						open: openView,
 						hasCustomSubmitHandler: props.formProps.onSubmit != null,
 					}
 				}
