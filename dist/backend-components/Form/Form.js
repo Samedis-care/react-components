@@ -956,6 +956,7 @@ var Form = function (props) {
     var formContextDataLite = useMemo(function () { return ({
         id: id,
         model: model,
+        customProps: customProps,
         errorComponent: ErrorComponent,
         onlySubmitMounted: !!onlySubmitMounted,
         onlyValidateMounted: !!onlyValidateMounted,
@@ -970,6 +971,7 @@ var Form = function (props) {
     }); }, [
         id,
         model,
+        customProps,
         ErrorComponent,
         onlySubmitMounted,
         onlyValidateMounted,
