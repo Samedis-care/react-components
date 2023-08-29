@@ -554,6 +554,7 @@ export type FormContextDataLite = Pick<
 	FormContextData,
 	| "id"
 	| "model"
+	| "customProps"
 	| "onlySubmitMounted"
 	| "onlyValidateMounted"
 	| "onlyWarnMounted"
@@ -1624,6 +1625,7 @@ const Form = <
 		() => ({
 			id,
 			model: (model as unknown) as Model<ModelFieldName, PageVisibility, never>,
+			customProps,
 			errorComponent: ErrorComponent,
 			onlySubmitMounted: !!onlySubmitMounted,
 			onlyValidateMounted: !!onlyValidateMounted,
@@ -1639,6 +1641,7 @@ const Form = <
 		[
 			id,
 			model,
+			customProps,
 			ErrorComponent,
 			onlySubmitMounted,
 			onlyValidateMounted,
