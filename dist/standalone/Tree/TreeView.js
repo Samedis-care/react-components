@@ -69,17 +69,20 @@ import React, { useCallback, useMemo, useState } from "react";
 import TreeViewDefaultRenderer from "./TreeViewDefaultRenderer";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { FixedSizeList } from "react-window";
-var enhanceData = function (data, loading, index, depth) {
+var enhanceData = function (data, loading, parentHasNext, index, depth) {
     return data
-        .map(function (entry, idx) { return __spreadArray([
-        __assign(__assign({}, entry), { index: index++, depth: depth, hasPrev: idx !== 0, hasNext: idx < data.length - 1, childrenLoading: loading.includes(entry.id), childrenLoaded: entry.children != null && entry.children.length > 0 })
-    ], (entry.children && entry.expanded
-        ? (function () {
-            var data = enhanceData(entry.children, loading, index, depth + 1);
-            index += data.length;
-            return data;
-        })()
-        : []), true); })
+        .map(function (entry, idx) {
+        var hasNext = idx < data.length - 1;
+        return __spreadArray([
+            __assign(__assign({}, entry), { index: index++, depth: depth, hasPrev: idx !== 0, hasNext: hasNext, childrenLoading: loading.includes(entry.id), childrenLoaded: entry.children != null && entry.children.length > 0, parentHasNext: parentHasNext })
+        ], (entry.children && entry.expanded
+            ? (function () {
+                var data = enhanceData(entry.children, loading, __spreadArray(__spreadArray([], parentHasNext, true), [hasNext], false), index, depth + 1);
+                index += data.length;
+                return data;
+            })()
+            : []), true);
+    })
         .flat();
 };
 var buildTreeFromFlat = function (data) {
@@ -112,7 +115,7 @@ var TreeView = function (props) {
         else {
             processingTarget = data;
         }
-        return enhanceData([processingTarget], loading, 0, 0);
+        return enhanceData([processingTarget], loading, [], 0, 0);
     }, [data, loading]);
     var hookOnToggleExpanded = useCallback(function (id) {
         void (function () { return __awaiter(void 0, void 0, void 0, function () {

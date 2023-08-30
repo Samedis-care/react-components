@@ -25,6 +25,10 @@ export interface TreeData {
      */
     expanded: boolean;
     /**
+     * Entry expanded toggleable?
+     */
+    expandLocked?: boolean;
+    /**
      * Has the record children?
      * If true and children is not defined lazy load of children may be requested
      */
@@ -65,6 +69,10 @@ export interface TreeDataForRenderer extends Omit<TreeData, "children"> {
      * Has another entry on the same depth
      */
     hasNext: boolean;
+    /**
+     * List of parent hasNext flags. Elements contained start at root node.
+     */
+    parentHasNext: boolean[];
     /**
      * Are children currently being loaded?
      */
