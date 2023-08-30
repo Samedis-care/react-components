@@ -13,6 +13,7 @@ const TreeViewDefaultRenderer = (props: TreeViewRendererProps) => {
 		label,
 		hasChildren,
 		onToggleExpanded,
+		expandLocked,
 		id,
 		depth,
 		onClick,
@@ -39,7 +40,7 @@ const TreeViewDefaultRenderer = (props: TreeViewRendererProps) => {
 					item
 					style={{ height: 24 }}
 					key={"expandable"}
-					onClick={handleExpand}
+					onClick={expandLocked ? undefined : handleExpand}
 				>
 					{expanded ? <ExpandedIcon /> : <ClosedIcon />}
 				</Grid>

@@ -29,6 +29,10 @@ export interface TreeData {
 	 */
 	expanded: boolean;
 	/**
+	 * Entry expanded toggleable?
+	 */
+	expandLocked?: boolean;
+	/**
 	 * Has the record children?
 	 * If true and children is not defined lazy load of children may be requested
 	 */
@@ -71,6 +75,10 @@ export interface TreeDataForRenderer extends Omit<TreeData, "children"> {
 	 * Has another entry on the same depth
 	 */
 	hasNext: boolean;
+	/**
+	 * List of parent hasNext flags. Elements contained start at root node.
+	 */
+	parentHasNext: boolean[];
 	/**
 	 * Are children currently being loaded?
 	 */
@@ -117,28 +125,39 @@ export interface TreeViewProps extends TreeViewRendererCallbacks {
 const enhanceData = (
 	data: TreeData[],
 	loading: string[],
+	parentHasNext: boolean[],
 	index: number,
 	depth: number
 ): TreeDataForRenderer[] => {
 	return data
-		.map((entry, idx): TreeDataForRenderer[] => [
-			{
-				...entry,
-				index: index++,
-				depth: depth,
-				hasPrev: idx !== 0,
-				hasNext: idx < data.length - 1,
-				childrenLoading: loading.includes(entry.id),
-				childrenLoaded: entry.children != null && entry.children.length > 0,
-			},
-			...(entry.children && entry.expanded
-				? (() => {
-						const data = enhanceData(entry.children, loading, index, depth + 1);
-						index += data.length;
-						return data;
-				  })()
-				: []),
-		])
+		.map((entry, idx): TreeDataForRenderer[] => {
+			const hasNext = idx < data.length - 1;
+			return [
+				{
+					...entry,
+					index: index++,
+					depth: depth,
+					hasPrev: idx !== 0,
+					hasNext,
+					childrenLoading: loading.includes(entry.id),
+					childrenLoaded: entry.children != null && entry.children.length > 0,
+					parentHasNext,
+				},
+				...(entry.children && entry.expanded
+					? (() => {
+							const data = enhanceData(
+								entry.children,
+								loading,
+								[...parentHasNext, hasNext],
+								index,
+								depth + 1
+							);
+							index += data.length;
+							return data;
+					  })()
+					: []),
+			];
+		})
 		.flat();
 };
 
@@ -194,7 +213,7 @@ const TreeView = (props: TreeViewProps) => {
 		} else {
 			processingTarget = data;
 		}
-		return enhanceData([processingTarget], loading, 0, 0);
+		return enhanceData([processingTarget], loading, [], 0, 0);
 	}, [data, loading]);
 	const hookOnToggleExpanded = useCallback(
 		(id: string) => {

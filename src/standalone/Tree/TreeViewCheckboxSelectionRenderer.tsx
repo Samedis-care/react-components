@@ -13,9 +13,11 @@ const TreeViewCheckboxSelectionRenderer = (props: TreeViewRendererProps) => {
 		label,
 		hasChildren,
 		onToggleExpanded,
+		expandLocked,
 		id,
 		depth,
 		hasNext,
+		parentHasNext,
 		onClick,
 		onAuxClick,
 	} = props;
@@ -25,7 +27,7 @@ const TreeViewCheckboxSelectionRenderer = (props: TreeViewRendererProps) => {
 		id,
 	]);
 
-	const offsetLeft = Math.max(depth * 24 - 12, 0);
+	const offsetLeft = depth > 0 ? 12 : 0;
 
 	return (
 		<Grid
@@ -38,29 +40,42 @@ const TreeViewCheckboxSelectionRenderer = (props: TreeViewRendererProps) => {
 			wrap={"nowrap"}
 		>
 			{depth !== 0 && (
-				<Grid item>
-					<div
-						style={{
-							height: 12,
-							width: 12,
-							borderLeft: "1px solid black",
-							borderBottom: "1px solid black",
-						}}
-					/>
-					<div
-						style={{
-							height: 12,
-							width: 12,
-							borderLeft: hasNext ? "1px solid black" : undefined,
-						}}
-					/>
-				</Grid>
+				<>
+					{parentHasNext.slice(1).map((pHasNext, idx) => (
+						<Grid item key={idx}>
+							<div
+								style={{
+									height: 24,
+									width: 24,
+									borderLeft: pHasNext ? "1px solid black" : undefined,
+								}}
+							/>
+						</Grid>
+					))}
+					<Grid item>
+						<div
+							style={{
+								height: 12,
+								width: 12,
+								borderLeft: "1px solid black",
+								borderBottom: "1px solid black",
+							}}
+						/>
+						<div
+							style={{
+								height: 12,
+								width: 12,
+								borderLeft: hasNext ? "1px solid black" : undefined,
+							}}
+						/>
+					</Grid>
+				</>
 			)}
 			<Grid
 				item
 				style={{ height: 24 }}
 				key={"expandable"}
-				onClick={handleExpand}
+				onClick={expandLocked ? undefined : handleExpand}
 			>
 				{hasChildren ? (
 					expanded ? (
