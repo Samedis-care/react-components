@@ -5,4 +5,5 @@ export { default as validationChain } from "./validationChain";
 export { default as validateOptional } from "./validateOptional";
 export { default as validateEmail } from "./validateEmail";
 export { default as validateURL } from "./validateURL";
+export { default as validateLocalized } from "./validateLocalized";
 export * from "./validateEmail";
