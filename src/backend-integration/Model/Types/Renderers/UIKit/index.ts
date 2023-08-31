@@ -11,3 +11,5 @@ export { default as ModelDataTypeDateTimeNullableRendererCC } from "./RendererDa
 export { default as ModelDataTypeBooleanCheckboxRendererCC } from "./RendererBooleanCheckbox";
 export * from "./RendererColor";
 export { default as ModelDataTypeColorRendererCC } from "./RendererColor";
+export { default as ModelDataTypeStringLocalizedSingleRenderer } from "./RendererStringLocalizedSingle";
+export * from "./RendererStringLocalizedSingle";
