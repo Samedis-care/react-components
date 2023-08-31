@@ -8,7 +8,5 @@
  * @see https://developer.mozilla.org/en-US/docs/Web/API/Clipboard/writeText
  * @see https://caniuse.com/mdn-api_clipboard_writetext
  */
-var copyText = function (text) {
-    return navigator.clipboard.writeText(text);
-};
+const copyText = (text) => navigator.clipboard.writeText(text);
 export default copyText;

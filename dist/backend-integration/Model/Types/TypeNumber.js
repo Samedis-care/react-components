@@ -2,21 +2,18 @@
  * Type to handle numbers
  * @type number if set, null if not set
  */
-var TypeNumber = /** @class */ (function () {
-    function TypeNumber() {
+class TypeNumber {
+    validate() {
+        return null;
     }
-    TypeNumber.prototype.validate = function () {
-        return null;
-    };
-    TypeNumber.prototype.getFilterType = function () {
+    getFilterType() {
         return "number";
-    };
-    TypeNumber.prototype.getDefaultValue = function () {
+    }
+    getDefaultValue() {
         return null;
-    };
-    TypeNumber.prototype.stringify = function (value) {
+    }
+    stringify(value) {
         return value === null ? "" : value.toString();
-    };
-    return TypeNumber;
-}());
+    }
+}
 export default TypeNumber;

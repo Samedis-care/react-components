@@ -1,28 +1,25 @@
 /**
  * Type to handle string arrays (e.g. id arrays)
  */
-var TypeStringArray = /** @class */ (function () {
-    function TypeStringArray() {
-        this.deserialize = function (value) {
-            if (value == null)
-                return [];
-            if (!Array.isArray(value))
-                throw new Error("data type mismatch");
-            return value;
-        };
+class TypeStringArray {
+    validate() {
+        return null;
     }
-    TypeStringArray.prototype.validate = function () {
+    getFilterType() {
         return null;
-    };
-    TypeStringArray.prototype.getFilterType = function () {
-        return null;
-    };
-    TypeStringArray.prototype.getDefaultValue = function () {
+    }
+    getDefaultValue() {
         return [];
-    };
-    TypeStringArray.prototype.stringify = function (value) {
+    }
+    stringify(value) {
         return value.join(",");
+    }
+    deserialize = (value) => {
+        if (value == null)
+            return [];
+        if (!Array.isArray(value))
+            throw new Error("data type mismatch");
+        return value;
     };
-    return TypeStringArray;
-}());
+}
 export default TypeStringArray;

@@ -1,5 +1,4 @@
-var inlineLog = function (data, prefix) {
-    if (prefix === void 0) { prefix = ""; }
+const inlineLog = (data, prefix = "") => {
     // eslint-disable-next-line no-console
     console.log(prefix, data);
     return data;

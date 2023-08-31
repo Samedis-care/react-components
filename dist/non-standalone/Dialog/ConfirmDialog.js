@@ -1,6 +1,6 @@
 import React from "react";
 import { InfoDialog } from "./InfoDialog";
-var ConfirmDialogRaw = function (props) { return (React.createElement(InfoDialog, { title: props.title, message: props.message, onClose: props.onClose, buttons: [
+const ConfirmDialogRaw = (props) => (React.createElement(InfoDialog, { title: props.title, message: props.message, onClose: props.onClose, buttons: [
         {
             text: props.textButtonYes,
             onClick: props.handlerButtonYes,
@@ -12,5 +12,5 @@ var ConfirmDialogRaw = function (props) { return (React.createElement(InfoDialog
             autoFocus: false,
             color: "secondary",
         },
-    ] })); };
-export var ConfirmDialog = React.memo(ConfirmDialogRaw);
+    ] }));
+export const ConfirmDialog = React.memo(ConfirmDialogRaw);

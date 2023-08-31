@@ -1,13 +1,13 @@
 import React, { useEffect } from "react";
-var cancelDragAndDrop = function (evt) {
+const cancelDragAndDrop = (evt) => {
     evt.preventDefault();
 };
-var DragAndDropPrevention = function () {
+const DragAndDropPrevention = () => {
     // drag and drop unload prevention
-    useEffect(function () {
+    useEffect(() => {
         document.addEventListener("drop", cancelDragAndDrop);
         document.addEventListener("dragover", cancelDragAndDrop);
-        return function () {
+        return () => {
             document.removeEventListener("drop", cancelDragAndDrop);
             document.removeEventListener("dragover", cancelDragAndDrop);
         };

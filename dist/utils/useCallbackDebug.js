@@ -7,8 +7,8 @@ import { useDepsDiffLog } from "./useMemoDebug";
  * @param name The name for this debug (used for logging)
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-var useCallbackDebug = function (callback, deps, name) {
-    useDepsDiffLog(deps, name !== null && name !== void 0 ? name : "useCallbackDebug");
+const useCallbackDebug = (callback, deps, name) => {
+    useDepsDiffLog(deps, name ?? "useCallbackDebug");
     // eslint-disable-next-line react-hooks/exhaustive-deps
     return useCallback(callback, deps);
 };

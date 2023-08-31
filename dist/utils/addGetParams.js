@@ -5,26 +5,24 @@
  * @private
  * @returns The url with query parameter
  */
-var addGetParams = function (url, args) {
+const addGetParams = (url, args) => {
     if (!args) {
         return url;
     }
-    var argString = "";
-    var _loop_1 = function (key) {
+    let argString = "";
+    for (const key in args) {
         if (!Object.prototype.hasOwnProperty.call(args, key)) {
-            return "continue";
+            continue;
         }
-        var value = args[key];
+        const value = args[key];
         if (value === null || value === undefined)
-            return "continue";
+            continue;
         if (Array.isArray(value)) {
             argString += value
-                .map(function (entry) {
-                return "&" +
-                    encodeURIComponent(key + "[]") +
-                    "=" +
-                    encodeURIComponent(stringifyValue(entry));
-            })
+                .map((entry) => "&" +
+                encodeURIComponent(key + "[]") +
+                "=" +
+                encodeURIComponent(stringifyValue(entry)))
                 .join("");
         }
         else {
@@ -34,13 +32,10 @@ var addGetParams = function (url, args) {
                     "=" +
                     encodeURIComponent(stringifyValue(value));
         }
-    };
-    for (var key in args) {
-        _loop_1(key);
     }
     return argString.length === 0 ? url : url + "?" + argString.substr(1);
 };
-var stringifyValue = function (value) {
+const stringifyValue = (value) => {
     if (typeof value === "string") {
         return value;
     }

@@ -1,4 +1,4 @@
-export var getVisibility = function (cb, values, initialValues) {
+export const getVisibility = (cb, values, initialValues) => {
     if (typeof cb === "function") {
         return cb(values, initialValues);
     }

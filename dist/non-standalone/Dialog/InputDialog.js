@@ -1,25 +1,25 @@
 import React, { useCallback, useState } from "react";
 import { useDialogContext } from "../../framework";
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField, } from "@mui/material";
-var InputDialogRaw = function (props) {
-    var _a = useDialogContext(), popDialog = _a[1];
-    var onClose = props.onClose, handlerButtonNo = props.handlerButtonNo, handlerButtonYes = props.handlerButtonYes, textFieldValidator = props.textFieldValidator;
-    var _b = useState(true), valid = _b[0], setValid = _b[1];
-    var _c = useState(""), value = _c[0], setValue = _c[1];
-    var updateValue = useCallback(function (evt) {
+const InputDialogRaw = (props) => {
+    const [, popDialog] = useDialogContext();
+    const { onClose, handlerButtonNo, handlerButtonYes, textFieldValidator, } = props;
+    const [valid, setValid] = useState(true);
+    const [value, setValue] = useState("");
+    const updateValue = useCallback((evt) => {
         setValue(evt.target.value);
         setValid(textFieldValidator(evt.target.value));
     }, [textFieldValidator]);
-    var removeDialog = React.useCallback(function () {
+    const removeDialog = React.useCallback(() => {
         popDialog();
         if (onClose)
             onClose();
     }, [popDialog, onClose]);
-    var handleNo = React.useCallback(function () {
+    const handleNo = React.useCallback(() => {
         popDialog();
         handlerButtonNo();
     }, [popDialog, handlerButtonNo]);
-    var handleYes = React.useCallback(function () {
+    const handleYes = React.useCallback(() => {
         if (textFieldValidator(value)) {
             popDialog();
             handlerButtonYes(value);
@@ -37,4 +37,4 @@ var InputDialogRaw = function (props) {
             React.createElement(Button, { onClick: handleNo, color: "primary" }, props.textButtonNo),
             React.createElement(Button, { onClick: handleYes, color: "primary" }, props.textButtonYes))));
 };
-export var InputDialog = React.memo(InputDialogRaw);
+export const InputDialog = React.memo(InputDialogRaw);

@@ -1,12 +1,11 @@
 import isPlainObject from "./isPlainObject";
-var deepSort = function (data) {
+const deepSort = (data) => {
     if (!isPlainObject(data))
         return data;
-    var newData = {};
+    const newData = {};
     Object.entries(data)
-        .sort(function (a, b) { return a[0].localeCompare(b[0]); })
-        .forEach(function (_a) {
-        var k = _a[0], v = _a[1];
+        .sort((a, b) => a[0].localeCompare(b[0]))
+        .forEach(([k, v]) => {
         newData[k] = deepSort(v);
     });
     return newData;

@@ -1,7 +1,7 @@
 import React from "react";
 import makeStyles from "@mui/styles/makeStyles";
 import { CircularProgress, Typography } from "@mui/material";
-var useStyles = makeStyles({
+const useStyles = makeStyles({
     innerProgressWrapper: {
         left: "50%",
         position: "absolute",
@@ -28,8 +28,8 @@ var useStyles = makeStyles({
         width: "100%",
     },
 }, { name: "CcLoader" });
-var Loader = function (props) {
-    var classes = useStyles(props);
+const Loader = (props) => {
+    const classes = useStyles(props);
     return (React.createElement("div", { className: classes.outerWrapper },
         React.createElement("div", { className: classes.innerWrapper },
             props.text && React.createElement(Typography, { variant: "h6" }, props.text),

@@ -1,15 +1,6 @@
-var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
-    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
-        if (ar || !(i in from)) {
-            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
-            ar[i] = from[i];
-        }
-    }
-    return to.concat(ar || Array.prototype.slice.call(from));
-};
 import { decomposeColor, hslToRgb } from "@mui/material/styles";
 // map color keyword -> #rrggbbaa
-export var colorLookupMap = {
+export const colorLookupMap = {
     aliceblue: "#f0f8ffff",
     antiquewhite: "#faebd7ff",
     aqua: "#00ffffff",
@@ -165,7 +156,7 @@ export var colorLookupMap = {
  * @param color The color
  * @return undefined if color cannot be parsed, rgba array on success. alpha channel is 0.0 - 1.0
  */
-var colorToRgba = function (color) {
+const colorToRgba = (color) => {
     // lookup color keywords and convert to #rrggbbaa
     if (color.toLowerCase() in colorLookupMap) {
         color = colorLookupMap[color.toLowerCase()];
@@ -173,12 +164,12 @@ var colorToRgba = function (color) {
     // decode #rgb, #rgba, #rrggbb, #rrggbbaa, rgb(), rgba(), hsl(), hsla() using JS
     // https://github.com/mui/material-ui/blob/v4.12.3/packages/material-ui/src/styles/colorManipulator.js#L102
     try {
-        var decoded = decomposeColor(color);
+        let decoded = decomposeColor(color);
         if (["hsl", "hsla"].includes(decoded.type)) {
             decoded = decomposeColor(hslToRgb(color));
         }
         if (decoded.values.length === 3) {
-            return __spreadArray(__spreadArray([], decoded.values, true), [1.0], false);
+            return [...decoded.values, 1.0];
         }
         else {
             return decoded.values;
@@ -196,8 +187,8 @@ var colorToRgba = function (color) {
         // eslint-disable-next-line no-console
         console.warn("[Components-Care] colorToRgba (slow/unreliable) fallback triggered with color input:", color);
     }
-    var canvas = document.createElement("canvas");
-    var ctx = canvas.getContext("2d");
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
     if (!ctx)
         throw new Error("Failed getting Canvas 2D context");
     ctx.clearRect(0, 0, 1, 1);
@@ -206,15 +197,15 @@ var colorToRgba = function (color) {
     // but we can ask it to implicitly compute a normalized value twice and compare.
     ctx.fillStyle = "#000";
     ctx.fillStyle = color;
-    var computed = ctx.fillStyle;
+    const computed = ctx.fillStyle;
     ctx.fillStyle = "#fff";
     ctx.fillStyle = color;
     if (computed !== ctx.fillStyle) {
         return; // invalid color
     }
     ctx.fillRect(0, 0, 1, 1);
-    var ret = [];
-    ctx.getImageData(0, 0, 1, 1).data.forEach(function (val) { return ret.push(val); });
+    const ret = [];
+    ctx.getImageData(0, 0, 1, 1).data.forEach((val) => ret.push(val));
     ret[3] = Math.round((ret[3] / 0xff) * 1000) / 1000; // 0 - 255 => 0.0 - 1.0
     return ret;
 };

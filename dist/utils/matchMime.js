@@ -4,17 +4,17 @@
  * @param actual The actual mime type to match (e.g. "image/jpg")
  * @returns true if actual matches pattern, otherwise false
  */
-var matchMime = function (pattern, actual) {
+const matchMime = (pattern, actual) => {
     // strip extra info (e.g. audio/ogg; codecs=opus)
     if (actual.includes(";"))
         actual = actual.split(";")[0];
     // split the type into components
-    var patternComponents = pattern.split("/").map(function (e) { return e.toLowerCase(); });
-    var actualComponents = actual.split("/").map(function (e) { return e.toLowerCase(); });
+    const patternComponents = pattern.split("/").map((e) => e.toLowerCase());
+    const actualComponents = actual.split("/").map((e) => e.toLowerCase());
     if (patternComponents.length !== actualComponents.length)
         return false;
     // match with wildcard support
-    for (var i = 0; i < patternComponents.length; ++i) {
+    for (let i = 0; i < patternComponents.length; ++i) {
         if (patternComponents[i] === "*")
             continue;
         if (patternComponents[i] !== actualComponents[i])

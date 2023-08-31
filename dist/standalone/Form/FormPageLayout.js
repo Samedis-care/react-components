@@ -1,7 +1,7 @@
 import React from "react";
 import makeStyles from "@mui/styles/makeStyles";
 import { makeThemeStyles } from "../../utils";
-var useStyles = makeStyles({
+const useStyles = makeStyles({
     wrapper: {
         flexGrow: 1,
         display: "flex",
@@ -25,9 +25,9 @@ var useStyles = makeStyles({
         padding: 0,
     },
 }, { name: "CcFormPageLayout" });
-var useThemeStyles = makeThemeStyles(function (theme) { var _a, _b, _c; return (_c = (_b = (_a = theme.componentsCare) === null || _a === void 0 ? void 0 : _a.uiKit) === null || _b === void 0 ? void 0 : _b.formPage) === null || _c === void 0 ? void 0 : _c.layout; }, "CcFormPageLayout", useStyles);
-var FormPageLayout = function (props) {
-    var classes = useThemeStyles(props);
+const useThemeStyles = makeThemeStyles((theme) => theme.componentsCare?.uiKit?.formPage?.layout, "CcFormPageLayout", useStyles);
+const FormPageLayout = (props) => {
+    const classes = useThemeStyles(props);
     return (React.createElement("div", { className: classes.box },
         React.createElement("div", { className: classes.wrapper },
             React.createElement("div", { className: classes.body }, props.body),

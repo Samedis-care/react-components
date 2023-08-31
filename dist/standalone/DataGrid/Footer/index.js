@@ -2,7 +2,7 @@ import React from "react";
 import { Grid } from "@mui/material";
 import Pagination from "./Pagination";
 import StatusBar from "./DataActionBar";
-var Footer = function () {
+const Footer = () => {
     return (React.createElement(Grid, { container: true, justifyContent: "space-between", wrap: "nowrap" },
         React.createElement(Grid, { item: true },
             React.createElement(StatusBar, null)),

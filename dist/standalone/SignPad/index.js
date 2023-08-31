@@ -4,7 +4,7 @@ import makeStyles from "@mui/styles/makeStyles";
 import { SignIcon } from "../../standalone";
 import { Info as InfoIcon } from "@mui/icons-material";
 import useCCTranslations from "../../utils/useCCTranslations";
-var useStyles = makeStyles(function (theme) { return ({
+const useStyles = makeStyles((theme) => ({
     signPadDiv: {
         position: "relative",
         cursor: "pointer",
@@ -17,8 +17,8 @@ var useStyles = makeStyles(function (theme) { return ({
         backgroundColor: theme.palette.action.hover,
     },
     imageDiv: {
-        height: "calc(100% - ".concat(theme.spacing(2), ")"),
-        width: "calc(100% - ".concat(theme.spacing(2), ")"),
+        height: `calc(100% - ${theme.spacing(2)})`,
+        width: `calc(100% - ${theme.spacing(2)})`,
     },
     signPreview: {
         height: "100%",
@@ -38,12 +38,12 @@ var useStyles = makeStyles(function (theme) { return ({
         right: 5,
         bottom: 20,
     },
-}); }, { name: "CcSignPad" });
-var SignPad = function (props) {
-    var signature = props.signature, disabled = props.disabled, openInfo = props.openInfo, openSignPad = props.openSignPad;
-    var t = useCCTranslations().t;
-    var classes = useStyles(props);
-    var handelOpenInfo = useCallback(function (event) {
+}), { name: "CcSignPad" });
+const SignPad = (props) => {
+    const { signature, disabled, openInfo, openSignPad } = props;
+    const { t } = useCCTranslations();
+    const classes = useStyles(props);
+    const handelOpenInfo = useCallback((event) => {
         event.stopPropagation();
         if (openInfo)
             openInfo();

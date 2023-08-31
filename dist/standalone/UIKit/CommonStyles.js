@@ -1,7 +1,7 @@
 import makeStyles from "@mui/styles/makeStyles";
 import { makeThemeStyles, useMultipleStyles } from "../../utils";
-var useThemeStyles = makeThemeStyles(function (theme) { var _a, _b; return (_b = (_a = theme.componentsCare) === null || _a === void 0 ? void 0 : _a.uiKit) === null || _b === void 0 ? void 0 : _b.input; }, "CcUIKitInput");
-var useRawInputStyles = makeStyles(function (theme) { return ({
+const useThemeStyles = makeThemeStyles((theme) => theme.componentsCare?.uiKit?.input, "CcUIKitInput");
+const useRawInputStyles = makeStyles((theme) => ({
     root: {
         paddingTop: 0,
         paddingRight: theme.spacing(2),
@@ -11,18 +11,18 @@ var useRawInputStyles = makeStyles(function (theme) { return ({
             right: theme.spacing(2),
         },
     },
-    input: function (props) { return ({
+    input: (props) => ({
         "&::placeholder": {
             color: props.important ? theme.palette.error.main : undefined,
         },
-    }); },
+    }),
     multiline: {
         padding: theme.spacing(2),
     },
-}); }, { name: "CcUIKitInput" });
-export var useInputStyles = function (props) {
+}), { name: "CcUIKitInput" });
+export const useInputStyles = (props) => {
     return useMultipleStyles(props, useThemeStyles, useRawInputStyles);
 };
-export var InputLabelConfig = {
+export const InputLabelConfig = {
     shrink: true,
 };

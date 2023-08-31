@@ -5,7 +5,7 @@ import makeStyles from "@mui/styles/makeStyles";
 import { ArchiveFileIcon, AudioFileIcon, CodeFileIcon, CsvFileIcon, ExcelFileIcon, ImageFileIcon, PdfFileIcon, PowerPointFileIcon, TextFileIcon, VideoFileIcon, WordFileIcon, } from "../FileIcons";
 import { combineClassNames, getFileExt } from "../../../utils";
 import dataToFile from "../../../utils/dataToFile";
-var useStyles = makeStyles(function (theme) { return ({
+const useStyles = makeStyles((theme) => ({
     iconContainer: {
         position: "relative",
     },
@@ -53,8 +53,8 @@ var useStyles = makeStyles(function (theme) { return ({
             textDecoration: "underline",
         },
     },
-}); }, { name: "CcFile" });
-export var ExcelFileExtensions = [
+}), { name: "CcFile" });
+export const ExcelFileExtensions = [
     "xlsx",
     "xlsm",
     "xltx",
@@ -63,7 +63,7 @@ export var ExcelFileExtensions = [
     "xlt",
     "xlm",
 ];
-export var WordFileExtensions = [
+export const WordFileExtensions = [
     "doc",
     "dot",
     "docx",
@@ -72,7 +72,7 @@ export var WordFileExtensions = [
     "dotm",
     "docb",
 ];
-export var PowerPointFileExtensions = [
+export const PowerPointFileExtensions = [
     "ppt",
     "pot",
     "pps",
@@ -85,9 +85,9 @@ export var PowerPointFileExtensions = [
     "sldx",
     "sldm",
 ];
-export var ArchiveFileExtensions = ["zip", "7z", "rar", "tar"];
-export var AudioFileExtensions = ["mp3", "wav", "ogg"];
-export var ImageFileExtensions = [
+export const ArchiveFileExtensions = ["zip", "7z", "rar", "tar"];
+export const AudioFileExtensions = ["mp3", "wav", "ogg"];
+export const ImageFileExtensions = [
     "jpg",
     "jpeg",
     "png",
@@ -96,7 +96,7 @@ export var ImageFileExtensions = [
     "svg",
     "webp",
 ];
-export var CodeFileExtensions = [
+export const CodeFileExtensions = [
     "js",
     "jsx",
     "ts",
@@ -115,14 +115,14 @@ export var CodeFileExtensions = [
     "css",
     "php",
 ];
-export var CsvFileExtensions = ["csv"];
-export var TextFileExtensions = ["txt"];
-export var VideoFileExtensions = ["mp4", "mkv", "avi"];
-export var AudioMimeType = /^audio\//;
-export var ImageMimeType = /^image\//;
-export var VideoMimeType = /^video\//;
-export var PdfFileExtensions = ["pdf"];
-export var getFileIcon = function (nameOrMime) {
+export const CsvFileExtensions = ["csv"];
+export const TextFileExtensions = ["txt"];
+export const VideoFileExtensions = ["mp4", "mkv", "avi"];
+export const AudioMimeType = /^audio\//;
+export const ImageMimeType = /^image\//;
+export const VideoMimeType = /^video\//;
+export const PdfFileExtensions = ["pdf"];
+export const getFileIcon = (nameOrMime) => {
     if (nameOrMime.includes("/")) {
         if (AudioMimeType.test(nameOrMime))
             return AudioFileIcon;
@@ -133,7 +133,7 @@ export var getFileIcon = function (nameOrMime) {
         return null;
     }
     else {
-        var fileExt = getFileExt(nameOrMime).toLowerCase();
+        const fileExt = getFileExt(nameOrMime).toLowerCase();
         if (ArchiveFileExtensions.includes(fileExt))
             return ArchiveFileIcon;
         if (AudioFileExtensions.includes(fileExt))
@@ -159,15 +159,15 @@ export var getFileIcon = function (nameOrMime) {
         return null;
     }
 };
-export var getFileIconOrDefault = function (nameOrMime) { var _a; return (_a = getFileIcon(nameOrMime)) !== null && _a !== void 0 ? _a : DefaultFileIcon; };
-var File = function (props) {
-    var downloadLink = props.downloadLink, variant = props.variant;
-    var classes = useStyles(props);
-    var FileIcon = getFileIconOrDefault(props.name);
-    var openDownload = useCallback(function () {
+export const getFileIconOrDefault = (nameOrMime) => getFileIcon(nameOrMime) ?? DefaultFileIcon;
+const File = (props) => {
+    const { downloadLink, variant } = props;
+    const classes = useStyles(props);
+    const FileIcon = getFileIconOrDefault(props.name);
+    const openDownload = useCallback(() => {
         if (downloadLink) {
             if (downloadLink.startsWith("data:")) {
-                var url = URL.createObjectURL(dataToFile(downloadLink));
+                const url = URL.createObjectURL(dataToFile(downloadLink));
                 window.open(url, "_blank");
                 URL.revokeObjectURL(url);
             }
@@ -176,30 +176,28 @@ var File = function (props) {
             }
         }
     }, [downloadLink]);
-    var handleListClick = useCallback(function (evt) {
+    const handleListClick = useCallback((evt) => {
         evt.stopPropagation();
     }, []);
-    var isList = variant === "list" || variant === "compact-list" || variant === "icon-only";
-    var renderIcon = function () {
-        return props.preview ? (React.createElement("img", { src: props.preview, alt: props.name, className: combineClassNames([
-                isList ? classes.iconList : classes.icon,
-                props.disabled && classes.iconDisabled,
-                downloadLink && classes.clickable,
-            ]), onClick: openDownload, style: isList ? { height: props.size } : undefined })) : (React.createElement(FileIcon, { className: combineClassNames([
-                isList ? classes.iconList : classes.icon,
-                downloadLink && classes.clickable,
-            ]), onClick: openDownload, style: isList ? { height: props.size } : undefined }));
-    };
-    var renderName = function () { return (React.createElement(Tooltip, { title: props.name },
+    const isList = variant === "list" || variant === "compact-list" || variant === "icon-only";
+    const renderIcon = () => props.preview ? (React.createElement("img", { src: props.preview, alt: props.name, className: combineClassNames([
+            isList ? classes.iconList : classes.icon,
+            props.disabled && classes.iconDisabled,
+            downloadLink && classes.clickable,
+        ]), onClick: openDownload, style: isList ? { height: props.size } : undefined })) : (React.createElement(FileIcon, { className: combineClassNames([
+            isList ? classes.iconList : classes.icon,
+            downloadLink && classes.clickable,
+        ]), onClick: openDownload, style: isList ? { height: props.size } : undefined }));
+    const renderName = () => (React.createElement(Tooltip, { title: props.name },
         React.createElement(Typography, { align: isList ? "left" : "center", noWrap: true, className: combineClassNames([
                 downloadLink && classes.downloadLink,
                 variant === "list" && classes.listLabel,
             ]), onClick: openDownload, variant: "body2", style: isList
                 ? {
-                    lineHeight: "".concat(props.size, "px"),
+                    lineHeight: `${props.size}px`,
                 }
-                : undefined }, props.name))); };
-    var removeBtn = props.onRemove &&
+                : undefined }, props.name)));
+    const removeBtn = props.onRemove &&
         !props.disabled &&
         React.createElement(variant === "list" ? CancelIconList : CancelIcon, {
             className: combineClassNames([

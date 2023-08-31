@@ -7,7 +7,7 @@ import { DataGridRowData, IDataGridColumnDef, IDataGridLoadDataParameters } from
  * @returns An array containing the filtered, sorted and paginated data in the first slot
  *          and the total amount of filtered rows before pagination in the second slot
  */
-export declare const filterSortPaginate2: (rowData: DataGridRowData[], params: Omit<IDataGridLoadDataParameters, "rows" | "page"> & {
+export declare const filterSortPaginate2: (rowData: DataGridRowData[], params: Omit<IDataGridLoadDataParameters, "page" | "rows"> & {
     offset: number;
     rows: number;
 }, columnDef: IDataGridColumnDef[]) => [DataGridRowData[], number];

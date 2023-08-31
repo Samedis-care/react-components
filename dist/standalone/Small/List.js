@@ -1,34 +1,34 @@
 import { ListItem, ListItemButton, ListItemIcon } from "@mui/material";
 import createStyles from "@mui/styles/createStyles";
 import withStyles from "@mui/styles/withStyles";
-var smallListItemStyles = createStyles({
+const smallListItemStyles = createStyles({
     gutters: {
         paddingLeft: 8,
         paddingRight: 8,
     },
 });
-export var SmallListItem = withStyles(smallListItemStyles, {
+export const SmallListItem = withStyles(smallListItemStyles, {
     name: "SmallListItem",
 })(ListItem);
-export var SmallListItemButton = withStyles(smallListItemStyles, {
+export const SmallListItemButton = withStyles(smallListItemStyles, {
     name: "SmallListItemButton",
 })(ListItemButton);
-var selectorSmallListItemStyles = createStyles({
+const selectorSmallListItemStyles = createStyles({
     gutters: {
         paddingLeft: 0,
         paddingRight: 8,
     },
 });
-export var SelectorSmallListItem = withStyles(selectorSmallListItemStyles, {
+export const SelectorSmallListItem = withStyles(selectorSmallListItemStyles, {
     name: "SelectorSmallListItem",
 })(ListItem);
-export var SelectorSmallListItemButton = withStyles(selectorSmallListItemStyles, {
+export const SelectorSmallListItemButton = withStyles(selectorSmallListItemStyles, {
     name: "SelectorSmallListItemButton",
 })(ListItemButton);
-var smallListItemIconStyles = createStyles({
+const smallListItemIconStyles = createStyles({
     root: {
         minWidth: 0,
         paddingRight: 8,
     },
 });
-export var SmallListItemIcon = withStyles(smallListItemIconStyles)(ListItemIcon);
+export const SmallListItemIcon = withStyles(smallListItemIconStyles)(ListItemIcon);

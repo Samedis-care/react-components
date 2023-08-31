@@ -5,11 +5,11 @@ import { DataGridPersistentStateContext, } from "./StatePersistence";
  * Uses localStorage for storage.
  * Wrap around DataGrid component to archive persistence
  */
-var LocalStoragePersist = function (props) {
-    var storageKey = props.storageKey, children = props.children;
-    var setData = useCallback(function (data) {
+const LocalStoragePersist = (props) => {
+    const { storageKey, children } = props;
+    const setData = useCallback((data) => {
         try {
-            localStorage === null || localStorage === void 0 ? void 0 : localStorage.setItem(storageKey, JSON.stringify(data));
+            localStorage?.setItem(storageKey, JSON.stringify(data));
         }
         catch (e) {
             // eslint-disable-next-line no-console
@@ -17,9 +17,9 @@ var LocalStoragePersist = function (props) {
                 storageKey, e);
         }
     }, [storageKey]);
-    var persistCtx = useMemo(function () {
-        var dataStr = localStorage === null || localStorage === void 0 ? void 0 : localStorage.getItem(storageKey);
-        var data;
+    const persistCtx = useMemo(() => {
+        const dataStr = localStorage?.getItem(storageKey);
+        let data;
         if (dataStr) {
             try {
                 data = JSON.parse(dataStr);
@@ -28,7 +28,7 @@ var LocalStoragePersist = function (props) {
                 // eslint-disable-next-line no-console
                 console.error("[Components-Care] Failed parsing DataGrid config from localStorage." +
                     storageKey, "Removing from localStorage");
-                localStorage === null || localStorage === void 0 ? void 0 : localStorage.removeItem(storageKey);
+                localStorage?.removeItem(storageKey);
             }
         }
         return [data, setData];

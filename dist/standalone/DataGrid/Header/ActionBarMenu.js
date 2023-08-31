@@ -4,35 +4,35 @@ import { ExportIcon, ResetIcon, TuneIcon } from "../../Icons";
 import { Publish as ImportIcon } from "@mui/icons-material";
 import PopupMenu from "../../PopupMenu";
 import useCCTranslations from "../../../utils/useCCTranslations";
-var anchorOrigin = {
+const anchorOrigin = {
     vertical: "bottom",
     horizontal: "center",
 };
-var transformOrigin = {
+const transformOrigin = {
     vertical: "top",
     horizontal: "center",
 };
-var ActionBarMenu = function (props) {
-    var anchorEl = props.anchorEl, onClose = props.onClose, toggleSettings = props.toggleSettings, openResetDialog = props.openResetDialog, openExportMenu = props.openExportMenu, handleImport = props.handleImport;
-    var toggleSettingsWrap = useCallback(function (evt) {
+const ActionBarMenu = (props) => {
+    const { anchorEl, onClose, toggleSettings, openResetDialog, openExportMenu, handleImport, } = props;
+    const toggleSettingsWrap = useCallback((evt) => {
         toggleSettings(evt);
         onClose();
     }, [toggleSettings, onClose]);
-    var openResetDialogWrap = useCallback(function (evt) {
+    const openResetDialogWrap = useCallback((evt) => {
         openResetDialog(evt);
         onClose();
     }, [openResetDialog, onClose]);
-    var openExportMenuWrap = useCallback(function (evt) {
+    const openExportMenuWrap = useCallback((evt) => {
         if (openExportMenu)
             openExportMenu(evt);
         onClose();
     }, [openExportMenu, onClose]);
-    var handleImportWrap = useCallback(function (evt) {
+    const handleImportWrap = useCallback((evt) => {
         if (handleImport)
             handleImport(evt);
         onClose();
     }, [handleImport, onClose]);
-    var t = useCCTranslations().t;
+    const { t } = useCCTranslations();
     return (React.createElement(PopupMenu, { elevation: 0, anchorEl: anchorEl, anchorOrigin: anchorOrigin, transformOrigin: transformOrigin, keepMounted: true, open: !!anchorEl, onClose: onClose },
         React.createElement(MenuItem, { onClick: toggleSettingsWrap },
             React.createElement(ListItemIcon, null,

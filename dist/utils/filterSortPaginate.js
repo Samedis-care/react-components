@@ -1,23 +1,3 @@
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
-var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
-    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
-        if (ar || !(i in from)) {
-            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
-            ar[i] = from[i];
-        }
-    }
-    return to.concat(ar || Array.prototype.slice.call(from));
-};
 /**
  * Applies the given filters, sort and offset-based pagination settings to the given data.
  * @param rowData The data to filter, sort and paginate
@@ -26,15 +6,15 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
  * @returns An array containing the filtered, sorted and paginated data in the first slot
  *          and the total amount of filtered rows before pagination in the second slot
  */
-export var filterSortPaginate2 = function (rowData, params, columnDef) {
-    var offset = params.offset, amountRows = params.rows, quickFilter = params.quickFilter, fieldFilter = params.fieldFilter, sort = params.sort;
+export const filterSortPaginate2 = (rowData, params, columnDef) => {
+    const { offset, rows: amountRows, quickFilter, fieldFilter, sort } = params;
     // quickfilter
     if (quickFilter) {
-        rowData = rowData.filter(function (row) {
-            for (var key in row) {
+        rowData = rowData.filter((row) => {
+            for (const key in row) {
                 if (!Object.prototype.hasOwnProperty.call(row, key))
                     continue;
-                var value = row[key];
+                const value = row[key];
                 if (value !== null &&
                     value.toString().toLowerCase().includes(quickFilter.toLowerCase())) {
                     return true;
@@ -43,22 +23,23 @@ export var filterSortPaginate2 = function (rowData, params, columnDef) {
             return false;
         });
     }
-    var _loop_1 = function (filterField) {
+    // field filter
+    for (const filterField in fieldFilter) {
         if (!Object.prototype.hasOwnProperty.call(fieldFilter, filterField)) {
-            return "continue";
+            continue;
         }
-        var filter = fieldFilter[filterField];
-        var column = columnDef.find(function (e) { return e.field === filterField; });
+        let filter = fieldFilter[filterField];
+        const column = columnDef.find((e) => e.field === filterField);
         if (!column)
             throw new Error("Non-null assertion failed");
-        var filterCache = {};
-        var filterIndex = 0;
-        var expr = "";
+        const filterCache = {};
+        let filterIndex = 0;
+        let expr = "";
         while (filter) {
             filter.value1 = filter.value1.toLowerCase();
             filter.value2 = filter.value2.toLowerCase();
             filterIndex++;
-            var filterKey = filterIndex.toString();
+            const filterKey = filterIndex.toString();
             filterCache[filterKey] = filter;
             switch (filter.type) {
                 case "contains":
@@ -152,12 +133,12 @@ export var filterSortPaginate2 = function (rowData, params, columnDef) {
             else
                 break;
         }
-        rowData = rowData.filter(function (row) {
-            var rawValue = row[filterField];
+        rowData = rowData.filter((row) => {
+            let rawValue = row[filterField];
             if (!rawValue)
                 rawValue = "";
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            var value = rawValue.toString().toLowerCase();
+            const value = rawValue.toString().toLowerCase();
             try {
                 // eslint-disable-next-line no-eval
                 return !expr || eval(expr);
@@ -168,24 +149,19 @@ export var filterSortPaginate2 = function (rowData, params, columnDef) {
                 return false;
             }
         });
-    };
-    // field filter
-    for (var filterField in fieldFilter) {
-        _loop_1(filterField);
     }
     // sort
-    rowData.sort(function (a, b) {
-        for (var _i = 0, sort_1 = sort; _i < sort_1.length; _i++) {
-            var sorter = sort_1[_i];
-            var valA = a[sorter.field];
-            var valB = b[sorter.field];
-            var res = 0;
+    rowData.sort((a, b) => {
+        for (const sorter of sort) {
+            const valA = a[sorter.field];
+            const valB = b[sorter.field];
+            let res = 0;
             if (typeof valA === "number" && typeof valB === "number") {
                 res = valA - valB;
             }
             else if (valA && valB) {
-                var av = valA.toString();
-                var bv = valB.toString();
+                const av = valA.toString();
+                const bv = valB.toString();
                 res = av.localeCompare(bv);
             }
             else {
@@ -203,8 +179,8 @@ export var filterSortPaginate2 = function (rowData, params, columnDef) {
         return 0;
     });
     // pagination
-    var filteredRows = rowData.length;
-    return [__spreadArray([], rowData, true).splice(offset, amountRows), filteredRows];
+    const filteredRows = rowData.length;
+    return [[...rowData].splice(offset, amountRows), filteredRows];
 };
 /**
  * Applies the given filters, sort and pagination settings to the given data
@@ -214,8 +190,8 @@ export var filterSortPaginate2 = function (rowData, params, columnDef) {
  * @returns An array containing the filtered, sorted and paginated data in the first slot
  *          and the total amount of filtered rows before pagination in the second slot
  */
-var filterSortPaginate = function (rowData, params, columnDef) {
-    var offset = (params.page - 1) * params.rows;
-    return filterSortPaginate2(rowData, __assign(__assign({}, params), { offset: offset }), columnDef);
+const filterSortPaginate = (rowData, params, columnDef) => {
+    const offset = (params.page - 1) * params.rows;
+    return filterSortPaginate2(rowData, { ...params, offset }, columnDef);
 };
 export default filterSortPaginate;

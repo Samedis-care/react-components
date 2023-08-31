@@ -2,13 +2,13 @@
  * Gets the uniq elements from given array
  * @param array The array object
  */
-var uniqueArray = function (array) {
-    return array.filter(function (item, pos) {
+const uniqueArray = (array) => {
+    return array.filter((item, pos) => {
         return array.indexOf(item) === pos;
     });
 };
-export var isUniqueArray = function (array) {
-    return (array.find(function (item, pos) {
+export const isUniqueArray = (array) => {
+    return (array.find((item, pos) => {
         return array.indexOf(item) !== pos;
     }) == null);
 };

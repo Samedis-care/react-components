@@ -4,7 +4,7 @@ import { getNumberSeparator } from "./index";
  * usage with parseFloat(...). Returns an empty string if value is empty.
  * @param value The value to "delocalize"
  */
-var delocalizeNumber = function (value) {
+const delocalizeNumber = (value) => {
     return value
         .replace(new RegExp("[^0-9\\" + getNumberSeparator("decimal") + "]", "g"), "")
         .replace(new RegExp("\\" + getNumberSeparator("decimal"), "g"), ".");

@@ -7,49 +7,46 @@ import { LocalizedDateTimePicker, LocalizedKeyboardDatePicker, } from "../../Loc
 import useCCTranslations from "../../../utils/useCCTranslations";
 import { normalizeDate } from "../../../backend-integration/Model/Types/Utils/DateUtils";
 import moment from "moment";
-var ENUM_FILTER_MAGIC_EMPTY = "__MAGIC_EMPTY__";
-var FilterEntry = function (props) {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _j;
-    var onChange = props.onChange, depth = props.depth, close = props.close;
-    var isFirstFilter = depth === 1;
-    var t = useCCTranslations().t;
-    var _k = useDataGridProps(), filterLimit = _k.filterLimit, isFilterSupported = _k.isFilterSupported;
-    var _l = useState(""), enumFilterSearch = _l[0], setEnumFilterSearch = _l[1];
-    var classes = useDataGridStyles();
-    var maxDepth = filterLimit;
-    var defaultFilterType = [
+const ENUM_FILTER_MAGIC_EMPTY = "__MAGIC_EMPTY__";
+const FilterEntry = (props) => {
+    const { onChange, depth, close } = props;
+    const isFirstFilter = depth === 1;
+    const { t } = useCCTranslations();
+    const { filterLimit, isFilterSupported } = useDataGridProps();
+    const [enumFilterSearch, setEnumFilterSearch] = useState("");
+    const classes = useDataGridStyles();
+    const maxDepth = filterLimit;
+    const defaultFilterType = [
         "string",
         "localized-string",
         "combined-string",
-    ].includes((_a = props.valueType) !== null && _a !== void 0 ? _a : "")
+    ].includes(props.valueType ?? "")
         ? "contains"
         : props.valueType === "enum"
             ? "inSet"
             : "equals";
-    var filterType = ((_b = props.value) === null || _b === void 0 ? void 0 : _b.type) || defaultFilterType;
-    var filterValue = ((_c = props.value) === null || _c === void 0 ? void 0 : _c.value1) || "";
-    var filterValue2 = ((_d = props.value) === null || _d === void 0 ? void 0 : _d.value2) || "";
-    var subFilterComboType = ((_e = props.value) === null || _e === void 0 ? void 0 : _e.nextFilterType) || "and";
-    var subFilter = ((_f = props.value) === null || _f === void 0 ? void 0 : _f.nextFilter) || undefined;
-    var checkSupport = function (dataType, filterType) {
+    let filterType = props.value?.type || defaultFilterType;
+    let filterValue = props.value?.value1 || "";
+    let filterValue2 = props.value?.value2 || "";
+    let subFilterComboType = props.value?.nextFilterType || "and";
+    let subFilter = props.value?.nextFilter || undefined;
+    const checkSupport = (dataType, filterType) => {
         if (!isFilterSupported)
             return true;
         return isFilterSupported(dataType, filterType);
     };
-    var resetFilter = useCallback(function () {
+    const resetFilter = useCallback(() => {
         onChange({ type: defaultFilterType, value1: "", value2: "" });
         close();
     }, [close, onChange, defaultFilterType]);
-    var updateParent = function () {
-        return onChange({
-            type: filterType,
-            value1: filterValue,
-            value2: filterValue2,
-            nextFilterType: subFilterComboType,
-            nextFilter: subFilter,
-        });
-    };
-    var onFilterTypeChange = function (event) {
+    const updateParent = () => onChange({
+        type: filterType,
+        value1: filterValue,
+        value2: filterValue2,
+        nextFilterType: subFilterComboType,
+        nextFilter: subFilter,
+    });
+    const onFilterTypeChange = (event) => {
         // clear magic value
         if (filterType === "empty" || filterType === "notEmpty") {
             filterValue = "";
@@ -62,7 +59,7 @@ var FilterEntry = function (props) {
         filterValue2 = "";
         updateParent();
     };
-    var onFilterValueChange = function (event) {
+    const onFilterValueChange = (event) => {
         filterValue = event.target.value;
         if (!filterValue) {
             subFilterComboType = "and";
@@ -70,7 +67,7 @@ var FilterEntry = function (props) {
         }
         updateParent();
     };
-    var onFilterValueChangeDate = function (date) {
+    const onFilterValueChangeDate = (date) => {
         filterValue = "";
         if (!date) {
             subFilterComboType = "and";
@@ -81,7 +78,7 @@ var FilterEntry = function (props) {
         }
         updateParent();
     };
-    var onFilterValueChangeBool = function () {
+    const onFilterValueChangeBool = () => {
         filterType = "equals";
         if (!filterValue) {
             filterValue = "true";
@@ -94,10 +91,10 @@ var FilterEntry = function (props) {
         }
         updateParent();
     };
-    var handleNullEnum = function () {
+    const handleNullEnum = () => {
         // deal with empty/null enum values by using empty filter (possibly chained via OR)
-        var split = filterValue.split(",");
-        var hasEmpty = split.includes(ENUM_FILTER_MAGIC_EMPTY);
+        const split = filterValue.split(",");
+        const hasEmpty = split.includes(ENUM_FILTER_MAGIC_EMPTY);
         if (split.length === 1) {
             filterType = hasEmpty ? "empty" : "inSet";
             subFilter = undefined;
@@ -114,11 +111,11 @@ var FilterEntry = function (props) {
             };
         }
     };
-    var onFilterValueChangeEnumAll = function (_, checked) {
+    const onFilterValueChangeEnumAll = (_, checked) => {
         if (checked) {
             filterValue = props.valueData
-                .filter(function (entry) { return !entry.isDivider; })
-                .map(function (entry) { return entry.value || ENUM_FILTER_MAGIC_EMPTY; })
+                .filter((entry) => !entry.isDivider)
+                .map((entry) => entry.value || ENUM_FILTER_MAGIC_EMPTY)
                 .join(",");
         }
         else {
@@ -127,10 +124,10 @@ var FilterEntry = function (props) {
         handleNullEnum();
         updateParent();
     };
-    var onFilterValueChangeEnum = function (evt, checked) {
-        var currentlyChecked = filterValue.length === 0 ? [] : filterValue.split(",");
+    const onFilterValueChangeEnum = (evt, checked) => {
+        let currentlyChecked = filterValue.length === 0 ? [] : filterValue.split(",");
         if (!checked) {
-            currentlyChecked = currentlyChecked.filter(function (val) { return val !== evt.target.value; });
+            currentlyChecked = currentlyChecked.filter((val) => val !== evt.target.value);
         }
         else {
             currentlyChecked.push(evt.target.value);
@@ -139,29 +136,29 @@ var FilterEntry = function (props) {
         handleNullEnum();
         updateParent();
     };
-    var onFilterValue2Change = function (event) {
+    const onFilterValue2Change = (event) => {
         filterValue2 = event.target.value;
         updateParent();
     };
-    var onFilterValue2ChangeDate = function (date) {
+    const onFilterValue2ChangeDate = (date) => {
         filterValue2 = date ? normalizeDate(date.toDate()).toISOString() : "";
         updateParent();
     };
-    var onSubFilterTypeChange = function (value) {
+    const onSubFilterTypeChange = (value) => {
         subFilterComboType = value;
         updateParent();
     };
-    var onSubFilterChange = function (value) {
+    const onSubFilterChange = (value) => {
         subFilter = value;
         updateParent();
     };
-    var filterTypeMenuItems = [
+    let filterTypeMenuItems = [
         checkSupport(props.valueType, "equals") && (React.createElement(MenuItem, { key: "equals", value: "equals" }, t("standalone.data-grid.content.filter-type.eq"))),
         checkSupport(props.valueType, "notEqual") && (React.createElement(MenuItem, { key: "notEqual", value: "notEqual" }, t("standalone.data-grid.content.filter-type.not-eq"))),
         checkSupport(props.valueType, "empty") && (React.createElement(MenuItem, { key: "empty", value: "empty" }, t("standalone.data-grid.content.filter-type.empty"))),
         checkSupport(props.valueType, "notEmpty") && (React.createElement(MenuItem, { key: "notEmpty", value: "notEmpty" }, t("standalone.data-grid.content.filter-type.not-empty"))),
     ];
-    if (["string", "localized-string", "combined-string"].includes((_g = props.valueType) !== null && _g !== void 0 ? _g : "")) {
+    if (["string", "localized-string", "combined-string"].includes(props.valueType ?? "")) {
         filterTypeMenuItems.push(checkSupport(props.valueType, "contains") && (React.createElement(MenuItem, { key: "contains", value: "contains" }, t("standalone.data-grid.content.filter-type.contains"))), checkSupport(props.valueType, "notContains") && (React.createElement(MenuItem, { key: "notContains", value: "notContains" }, t("standalone.data-grid.content.filter-type.not-contains"))), checkSupport(props.valueType, "startsWith") && (React.createElement(MenuItem, { key: "startsWith", value: "startsWith" }, t("standalone.data-grid.content.filter-type.starts-with"))), checkSupport(props.valueType, "endsWith") && (React.createElement(MenuItem, { key: "endsWith", value: "endsWith" }, t("standalone.data-grid.content.filter-type.ends-with"))));
     }
     else if (props.valueType === "number") {
@@ -170,12 +167,12 @@ var FilterEntry = function (props) {
     else if (props.valueType === "date" || props.valueType === "datetime") {
         filterTypeMenuItems.push(checkSupport(props.valueType, "lessThan") && (React.createElement(MenuItem, { key: "lessThan", value: "lessThan" }, t("standalone.data-grid.content.filter-type.lt-date"))), checkSupport(props.valueType, "lessThanOrEqual") && (React.createElement(MenuItem, { key: "lessThanOrEqual", value: "lessThanOrEqual" }, t("standalone.data-grid.content.filter-type.lte-date"))), checkSupport(props.valueType, "greaterThan") && (React.createElement(MenuItem, { key: "greaterThan", value: "greaterThan" }, t("standalone.data-grid.content.filter-type.gt-date"))), checkSupport(props.valueType, "greaterThanOrEqual") && (React.createElement(MenuItem, { key: "greaterThanOrEqual", value: "greaterThanOrEqual" }, t("standalone.data-grid.content.filter-type.gte-date"))), checkSupport(props.valueType, "inRange") && (React.createElement(MenuItem, { key: "inRange", value: "inRange" }, t("standalone.data-grid.content.filter-type.in-range-date"))));
     }
-    filterTypeMenuItems = filterTypeMenuItems.filter(function (e) { return e; });
+    filterTypeMenuItems = filterTypeMenuItems.filter((e) => e);
     return (React.createElement(React.Fragment, null,
-        isFirstFilter && ((_h = props.value) === null || _h === void 0 ? void 0 : _h.value1) && (React.createElement(Grid, { item: true, xs: 12 },
+        isFirstFilter && props.value?.value1 && (React.createElement(Grid, { item: true, xs: 12 },
             React.createElement(Grid, { container: true, justifyContent: "flex-end", alignItems: "center" },
                 React.createElement(Grid, { item: true },
-                    React.createElement(Tooltip, { title: (_j = t("standalone.data-grid.content.reset-column-filter")) !== null && _j !== void 0 ? _j : "" },
+                    React.createElement(Tooltip, { title: t("standalone.data-grid.content.reset-column-filter") ?? "" },
                         React.createElement("span", null,
                             React.createElement(IconButton, { className: classes.filterClearBtn, onClick: resetFilter, size: "large" },
                                 React.createElement(ClearIcon, null)))))))),
@@ -190,44 +187,39 @@ var FilterEntry = function (props) {
             filterType !== "empty" && filterType !== "notEmpty" && (React.createElement(Grid, { item: true, xs: 12 }, props.valueType === "date" ? (React.createElement(LocalizedKeyboardDatePicker, { value: filterValue === "" ? null : moment(filterValue), onChange: onFilterValueChangeDate, fullWidth: true, autoFocus: depth === 1 })) : props.valueType === "datetime" ? (React.createElement(LocalizedDateTimePicker, { value: filterValue === "" ? null : moment(filterValue), onChange: onFilterValueChangeDate, fullWidth: true, autoFocus: depth === 1 })) : (React.createElement(TextField, { value: filterValue, onChange: onFilterValueChange, fullWidth: true, autoFocus: depth === 1 })))),
             filterType === "inRange" && (React.createElement(Grid, { item: true, xs: 12 }, props.valueType === "date" ? (React.createElement(LocalizedKeyboardDatePicker, { value: filterValue2 === "" ? null : moment(filterValue2), onChange: onFilterValue2ChangeDate })) : props.valueType === "datetime" ? (React.createElement(LocalizedDateTimePicker, { value: filterValue2 === "" ? null : moment(filterValue2), onChange: onFilterValueChangeDate })) : (React.createElement(TextField, { value: filterValue2, onChange: onFilterValue2Change, fullWidth: true })))))),
         props.valueType === "boolean" && (React.createElement(Grid, { item: true, xs: 12 },
-            React.createElement(FormControlLabel, { control: React.createElement(Checkbox, { checked: filterValue === "true", onClick: onFilterValueChangeBool, indeterminate: !filterValue, autoFocus: depth === 1 }), label: (function () {
-                    var _a, _b;
+            React.createElement(FormControlLabel, { control: React.createElement(Checkbox, { checked: filterValue === "true", onClick: onFilterValueChangeBool, indeterminate: !filterValue, autoFocus: depth === 1 }), label: (() => {
                     if (!filterValue)
                         return t("standalone.data-grid.content.bool-filter.any");
-                    var entry = (_a = props.valueData) === null || _a === void 0 ? void 0 : _a.find(function (entry) { return entry.value === filterValue; });
+                    const entry = props.valueData?.find((entry) => entry.value === filterValue);
                     if (!entry)
                         return t("standalone.data-grid.content.bool-filter." + filterValue);
-                    return ((_b = entry.getLabel) !== null && _b !== void 0 ? _b : entry.getLabelText)();
+                    return (entry.getLabel ?? entry.getLabelText)();
                 })() }))),
         props.valueType === "enum" && (React.createElement(React.Fragment, null,
             props.valueData.length > 10 && (React.createElement(Grid, { item: true, xs: 12 },
-                React.createElement(TextField, { value: enumFilterSearch, onChange: function (evt) {
-                        return setEnumFilterSearch(evt.target.value);
-                    }, placeholder: t("standalone.data-grid.content.set-filter.search"), fullWidth: true, autoFocus: depth === 1 }))),
+                React.createElement(TextField, { value: enumFilterSearch, onChange: (evt) => setEnumFilterSearch(evt.target.value), placeholder: t("standalone.data-grid.content.set-filter.search"), fullWidth: true, autoFocus: depth === 1 }))),
             React.createElement(Grid, { item: true, xs: 12, className: classes.setFilterContainer },
                 React.createElement(List, null,
                     props.valueData.length > 5 && (React.createElement(ListItem, { className: classes.setFilterListItem },
                         React.createElement(Checkbox, { checked: filterValue.split(",").sort().join(",") ===
                                 props.valueData
-                                    .filter(function (entry) { return !entry.isDivider; })
-                                    .map(function (entry) { return entry.value || ENUM_FILTER_MAGIC_EMPTY; })
+                                    .filter((entry) => !entry.isDivider)
+                                    .map((entry) => entry.value || ENUM_FILTER_MAGIC_EMPTY)
                                     .sort()
                                     .join(","), onChange: onFilterValueChangeEnumAll }),
                         React.createElement(ListItemText, null, t("standalone.data-grid.content.set-filter.select-all")))),
                     props.valueData
-                        .filter(function (entry) {
-                        return entry
-                            .getLabelText()
-                            .toLowerCase()
-                            .includes(enumFilterSearch.toLocaleLowerCase());
-                    })
-                        .map(function (entry) { return (React.createElement(ListItem, { key: entry.value, className: entry.isDivider
+                        .filter((entry) => entry
+                        .getLabelText()
+                        .toLowerCase()
+                        .includes(enumFilterSearch.toLocaleLowerCase()))
+                        .map((entry) => (React.createElement(ListItem, { key: entry.value, className: entry.isDivider
                             ? classes.setFilterListItemDivider
                             : classes.setFilterListItem }, entry.isDivider ? (React.createElement(Divider, { className: classes.setFilterListDivider })) : (React.createElement(React.Fragment, null,
                         React.createElement(Checkbox, { value: entry.value || ENUM_FILTER_MAGIC_EMPTY, checked: filterValue
                                 .split(",")
                                 .includes(entry.value || ENUM_FILTER_MAGIC_EMPTY), onChange: onFilterValueChangeEnum, disabled: entry.disabled }),
-                        React.createElement(ListItemText, null, (entry.getLabel || entry.getLabelText)()))))); }))))),
+                        React.createElement(ListItemText, null, (entry.getLabel || entry.getLabelText)())))))))))),
         filterValue &&
             props.valueType !== "enum" &&
             props.valueType !== "boolean" &&

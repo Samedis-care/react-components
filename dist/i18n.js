@@ -2,14 +2,12 @@ import i18n from "i18next";
 import LanguageDetector from "i18next-browser-languagedetector";
 import supportedLanguages from "./assets/data/supported-languages.json";
 import resourcesToBackend from "i18next-resources-to-backend";
-export var langs = supportedLanguages;
-var ccI18n = i18n.createInstance();
-var isJest = typeof process !== "undefined" && process.env && process.env.JEST_WORKER_ID;
+export const langs = supportedLanguages;
+const ccI18n = i18n.createInstance();
+const isJest = typeof process !== "undefined" && process.env && process.env.JEST_WORKER_ID;
 void ccI18n
     // async fetch locales
-    .use(resourcesToBackend(function (lang, namespace) {
-    return import("./assets/i18n/".concat(lang.split("-")[0], "/").concat(namespace, ".json"));
-}))
+    .use(resourcesToBackend((lang, namespace) => import(`./assets/i18n/${lang.split("-")[0]}/${namespace}.json`)))
     // detect user language
     // see: https://github.com/i18next/i18next-browser-languageDetector
     .use(LanguageDetector)

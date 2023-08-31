@@ -235,7 +235,7 @@ import flag_ZA from "../../assets/img/countries/ZA.svg";
 import flag_ZM from "../../assets/img/countries/ZM.svg";
 import flag_ZW from "../../assets/img/countries/ZW.svg";
 // JS Object
-var CountryFlags = {
+const CountryFlags = {
     AD: flag_AD,
     AE: flag_AE,
     AF: flag_AF,

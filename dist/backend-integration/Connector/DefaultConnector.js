@@ -1,4 +1,4 @@
-var DefaultConnector = {
+const DefaultConnector = {
     getNormal: null,
     getApi: null,
 };
@@ -6,14 +6,14 @@ var DefaultConnector = {
  * Set the default "normal" backend connector
  * @param def The new default
  */
-export var setDefaultConnectorNormal = function (def) {
+export const setDefaultConnectorNormal = (def) => {
     DefaultConnector.getNormal = def;
 };
 /**
  * Set the default API AND "normal" backend connector
  * @param def The new default
  */
-export var setDefaultConnectorAPI = function (def) {
+export const setDefaultConnectorAPI = (def) => {
     DefaultConnector.getApi = def;
     DefaultConnector.getNormal = def;
 };

@@ -1,25 +1,3 @@
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
-var __rest = (this && this.__rest) || function (s, e) {
-    var t = {};
-    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
-        t[p] = s[p];
-    if (s != null && typeof Object.getOwnPropertySymbols === "function")
-        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
-            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
-                t[p[i]] = s[p[i]];
-        }
-    return t;
-};
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Button, Dialog, DialogActions, IconButton, Typography, } from "@mui/material";
 import makeStyles from "@mui/styles/makeStyles";
@@ -28,7 +6,7 @@ import { Close } from "@mui/icons-material";
 import SignaturePad from "react-signature-canvas";
 import { useDialogContext } from "../../framework";
 import useCCTranslations from "../../utils/useCCTranslations";
-var useStyles = makeStyles(function (theme) { return ({
+const useStyles = makeStyles((theme) => ({
     root: {
         margin: 0,
         padding: theme.spacing(2),
@@ -57,27 +35,26 @@ var useStyles = makeStyles(function (theme) { return ({
         left: -500,
         position: "absolute",
     },
-}); }, { name: "CcSignPadDialog" });
-var SignPadDialog = function (props) {
-    var t = useCCTranslations().t;
-    var penColor = props.penColor, setSignature = props.setSignature, signature = props.signature, canvasProps = __rest(props, ["penColor", "setSignature", "signature"]);
-    var _a = useState(!!signature), resetCanvas = _a[0], setResetCanvas = _a[1];
-    var _b = useDialogContext(), popDialog = _b[1];
-    var canvasWrapper = useRef();
-    var signCanvas = useRef(null);
-    var hiddenRef = useRef(null);
-    var _c = useState([0, 0]), canvasSize = _c[0], setCanvasSize = _c[1];
-    var classes = useStyles(props);
-    var clearCanvas = useCallback(function () {
+}), { name: "CcSignPadDialog" });
+const SignPadDialog = (props) => {
+    const { t } = useCCTranslations();
+    const { penColor, setSignature, signature, ...canvasProps } = props;
+    const [resetCanvas, setResetCanvas] = useState(!!signature);
+    const [, popDialog] = useDialogContext();
+    const canvasWrapper = useRef();
+    const signCanvas = useRef(null);
+    const hiddenRef = useRef(null);
+    const [canvasSize, setCanvasSize] = useState([0, 0]);
+    const classes = useStyles(props);
+    const clearCanvas = useCallback(() => {
         if (signCanvas.current) {
             signCanvas.current.clear();
         }
         setResetCanvas(false);
     }, []);
-    var saveCanvas = useCallback(function () {
-        var _a, _b;
+    const saveCanvas = useCallback(() => {
         if (signCanvas.current && !signCanvas.current.isEmpty()) {
-            var newSignature = signCanvas.current
+            const newSignature = signCanvas.current
                 .getTrimmedCanvas()
                 .toDataURL("image/png");
             if (setSignature)
@@ -87,31 +64,28 @@ var SignPadDialog = function (props) {
             if (setSignature)
                 setSignature(resetCanvas ? signature : "");
         }
-        (_a = hiddenRef.current) === null || _a === void 0 ? void 0 : _a.focus();
-        (_b = hiddenRef.current) === null || _b === void 0 ? void 0 : _b.blur();
+        hiddenRef.current?.focus();
+        hiddenRef.current?.blur();
         popDialog();
     }, [setSignature, popDialog, signature, resetCanvas]);
-    var closeCanvas = useCallback(function () {
-        var _a, _b;
-        (_a = hiddenRef.current) === null || _a === void 0 ? void 0 : _a.focus();
-        (_b = hiddenRef.current) === null || _b === void 0 ? void 0 : _b.blur();
+    const closeCanvas = useCallback(() => {
+        hiddenRef.current?.focus();
+        hiddenRef.current?.blur();
         popDialog();
     }, [popDialog]);
-    var handleResize = useCallback(function (wrapper) {
+    const handleResize = useCallback((wrapper) => {
         setCanvasSize([wrapper.clientWidth, wrapper.clientHeight]);
     }, []);
-    var setCanvasWrapperRef = useCallback(function (node) {
+    const setCanvasWrapperRef = useCallback((node) => {
         canvasWrapper.current = node;
         if (node) {
             handleResize(node);
         }
     }, [handleResize]);
-    useEffect(function () {
-        var resizeHandler = function () {
-            return canvasWrapper.current && handleResize(canvasWrapper.current);
-        };
+    useEffect(() => {
+        const resizeHandler = () => canvasWrapper.current && handleResize(canvasWrapper.current);
         window.addEventListener("resize", resizeHandler);
-        return function () { return window.removeEventListener("resize", resizeHandler); };
+        return () => window.removeEventListener("resize", resizeHandler);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [canvasWrapper.current]);
     return (React.createElement(Dialog, { open: true, maxWidth: "sm", onClose: closeCanvas },
@@ -120,15 +94,15 @@ var SignPadDialog = function (props) {
             closeCanvas && (React.createElement(IconButton, { "aria-label": "Close", className: classes.closeButton, onClick: closeCanvas, size: "large" },
                 React.createElement(Close, null)))),
         React.createElement("div", { className: classes.signDiv, ref: setCanvasWrapperRef },
-            !resetCanvas ? (React.createElement(SignaturePad, __assign({ ref: signCanvas, penColor: penColor || "blue" }, canvasProps, { canvasProps: {
+            !resetCanvas ? (React.createElement(SignaturePad, { ref: signCanvas, penColor: penColor || "blue", ...canvasProps, canvasProps: {
                     width: canvasSize[0],
                     height: canvasSize[1],
-                } }))) : (React.createElement("div", { className: classes.imageDiv },
+                } })) : (React.createElement("div", { className: classes.imageDiv },
                 React.createElement("img", { src: signature, alt: "Sign" }))),
             React.createElement("div", { className: classes.hiddenDiv },
-                React.createElement("input", { type: "text", value: signature !== null && signature !== void 0 ? signature : "", readOnly: true, ref: hiddenRef, name: props.name, onBlur: props.onBlur }))),
+                React.createElement("input", { type: "text", value: signature ?? "", readOnly: true, ref: hiddenRef, name: props.name, onBlur: props.onBlur }))),
         React.createElement(DialogActions, null,
             React.createElement(Button, { onClick: saveCanvas, color: "primary" }, t("standalone.signature-pad.dialog.save-changes")),
             React.createElement(Button, { onClick: clearCanvas, color: "secondary" }, t("standalone.signature-pad.dialog.reset")))));
 };
-export var SignDialog = React.memo(SignPadDialog);
+export const SignDialog = React.memo(SignPadDialog);

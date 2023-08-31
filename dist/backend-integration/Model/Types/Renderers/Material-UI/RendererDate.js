@@ -1,18 +1,3 @@
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    };
-    return function (d, b) {
-        if (typeof b !== "function" && b !== null)
-            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
 import React from "react";
 import { Typography } from "@mui/material";
 import ccI18n from "../../../../../i18n";
@@ -26,21 +11,9 @@ import moment from "moment";
 /**
  * Renders Date with Date Selector
  */
-var RendererDate = /** @class */ (function (_super) {
-    __extends(RendererDate, _super);
-    function RendererDate() {
-        var _this = _super !== null && _super.apply(this, arguments) || this;
-        _this.dataGridColumnSizingHint = function () {
-            var def = Math.max(ccI18n.t("backend-integration.model.types.renderers.date.not-set")
-                .length, 10 // date length
-            ) * 10;
-            return [0, Number.MAX_SAFE_INTEGER, def];
-        };
-        return _this;
-    }
-    RendererDate.prototype.render = function (params) {
-        var _this = this;
-        var visibility = params.visibility, field = params.field, value = params.value, touched = params.touched, label = params.label, handleChange = params.handleChange, handleBlur = params.handleBlur, errorMsg = params.errorMsg, setFieldTouched = params.setFieldTouched, warningMsg = params.warningMsg;
+class RendererDate extends TypeDate {
+    render(params) {
+        const { visibility, field, value, touched, label, handleChange, handleBlur, errorMsg, setFieldTouched, warningMsg, } = params;
         if (visibility.disabled)
             return React.createElement(React.Fragment, null);
         if (visibility.hidden) {
@@ -50,13 +23,13 @@ var RendererDate = /** @class */ (function (_super) {
             if (visibility.grid)
                 throw new Error("Not supported");
             return (React.createElement(React.Fragment, null,
-                React.createElement(LocalizedKeyboardDatePicker, { value: value ? moment(value) : null, label: label, disabled: visibility.readOnly, required: visibility.required, onChange: function (date) {
+                React.createElement(LocalizedKeyboardDatePicker, { value: value ? moment(value) : null, label: label, disabled: visibility.readOnly, required: visibility.required, onChange: (date) => {
                         if (!date)
                             throw new Error("Date is null");
                         else
                             handleChange(field, normalizeDate(date.toDate()));
-                    }, onBlur: handleBlur, error: !!errorMsg, warning: !!warningMsg, onError: function (error) {
-                        _this.error = error
+                    }, onBlur: handleBlur, error: !!errorMsg, warning: !!warningMsg, onError: (error) => {
+                        this.error = error
                             ? ccI18n.t("backend-integration.model.types.renderers.date.validation-error")
                             : "";
                         setFieldTouched(field, touched, true);
@@ -64,11 +37,16 @@ var RendererDate = /** @class */ (function (_super) {
                 React.createElement(FormHelperTextCC, { warning: !!warningMsg, error: !!errorMsg }, errorMsg || warningMsg)));
         }
         return (React.createElement(Typography, null,
-            !visibility.grid && "".concat(label, ": "),
+            !visibility.grid && `${label}: `,
             value
                 ? value.toLocaleDateString(i18n.language, ToDateLocaleStringOptions)
                 : ccI18n.t("backend-integration.model.types.renderers.date.not-set")));
+    }
+    dataGridColumnSizingHint = () => {
+        const def = Math.max(ccI18n.t("backend-integration.model.types.renderers.date.not-set")
+            .length, 10 // date length
+        ) * 10;
+        return [0, Number.MAX_SAFE_INTEGER, def];
     };
-    return RendererDate;
-}(TypeDate));
+}
 export default RendererDate;

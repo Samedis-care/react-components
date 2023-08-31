@@ -1,30 +1,8 @@
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
-var __rest = (this && this.__rest) || function (s, e) {
-    var t = {};
-    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
-        t[p] = s[p];
-    if (s != null && typeof Object.getOwnPropertySymbols === "function")
-        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
-            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
-                t[p[i]] = s[p[i]];
-        }
-    return t;
-};
 import React from "react";
 import { FormControl, FormHelperText, FormLabel, TextField, } from "@mui/material";
 import makeStyles from "@mui/styles/makeStyles";
 import { combineClassNames } from "../../utils";
-export var useMuiWarningStyles = makeStyles(function (theme) { return ({
+export const useMuiWarningStyles = makeStyles((theme) => ({
     warning: {
         "& > .MuiFormLabel-root": {
             color: theme.palette.warning.main,
@@ -73,22 +51,22 @@ export var useMuiWarningStyles = makeStyles(function (theme) { return ({
             borderBottomColor: theme.palette.error.main,
         },
     },
-}); }, { name: "CcMuiWarning" });
-export var withMuiWarning = function (Component) {
+}), { name: "CcMuiWarning" });
+export const withMuiWarning = (Component) => {
     // not unnecessary, component name is inferred from it
     // noinspection UnnecessaryLocalVariableJS
-    var MuiWarning = function (props) {
-        var warning = props.warning, muiProps = __rest(props, ["warning"]);
-        var classes = useMuiWarningStyles();
-        return (React.createElement(Component, __assign({}, muiProps, { className: combineClassNames([
+    const MuiWarning = (props) => {
+        const { warning, ...muiProps } = props;
+        const classes = useMuiWarningStyles();
+        return (React.createElement(Component, { ...muiProps, className: combineClassNames([
                 warning && classes.warning,
                 props.className,
-            ]) })));
+            ]) }));
     };
     return MuiWarning;
 };
-export var FormControlCC = withMuiWarning(FormControl);
-export var FormControlFieldsetCC = withMuiWarning(FormControl);
-export var FormLabelCC = withMuiWarning(FormLabel);
-export var FormHelperTextCC = withMuiWarning(FormHelperText);
-export var TextFieldCC = withMuiWarning(TextField);
+export const FormControlCC = withMuiWarning(FormControl);
+export const FormControlFieldsetCC = withMuiWarning(FormControl);
+export const FormLabelCC = withMuiWarning(FormLabel);
+export const FormHelperTextCC = withMuiWarning(FormHelperText);
+export const TextFieldCC = withMuiWarning(TextField);

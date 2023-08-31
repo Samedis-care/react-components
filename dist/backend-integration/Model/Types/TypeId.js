@@ -1,21 +1,18 @@
 /**
  * Type to handle an id
  */
-var TypeId = /** @class */ (function () {
-    function TypeId() {
+class TypeId {
+    validate() {
+        return null;
     }
-    TypeId.prototype.validate = function () {
-        return null;
-    };
-    TypeId.prototype.getFilterType = function () {
+    getFilterType() {
         return "string";
-    };
-    TypeId.prototype.getDefaultValue = function () {
+    }
+    getDefaultValue() {
         return null;
-    };
-    TypeId.prototype.stringify = function (value) {
-        return value !== null && value !== void 0 ? value : "null";
-    };
-    return TypeId;
-}());
+    }
+    stringify(value) {
+        return value ?? "null";
+    }
+}
 export default TypeId;

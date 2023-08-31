@@ -1,23 +1,22 @@
 /**
  * Type to handle strings
  */
-var TypeString = /** @class */ (function () {
-    function TypeString(multiline) {
-        if (multiline === void 0) { multiline = false; }
+class TypeString {
+    multiline;
+    constructor(multiline = false) {
         this.multiline = multiline;
     }
-    TypeString.prototype.validate = function () {
+    validate() {
         return null;
-    };
-    TypeString.prototype.getFilterType = function () {
+    }
+    getFilterType() {
         return "string";
-    };
-    TypeString.prototype.getDefaultValue = function () {
+    }
+    getDefaultValue() {
         return "";
-    };
-    TypeString.prototype.stringify = function (value) {
+    }
+    stringify(value) {
         return value;
-    };
-    return TypeString;
-}());
+    }
+}
 export default TypeString;

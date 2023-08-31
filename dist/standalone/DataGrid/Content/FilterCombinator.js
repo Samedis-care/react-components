@@ -1,8 +1,8 @@
 import React, { useCallback } from "react";
 import { Grid, Switch, Typography } from "@mui/material";
-var FilterCombinator = function (props) {
-    var value = props.value, onChange = props.onChange;
-    var handleChange = useCallback(function (_evt, newValue) {
+const FilterCombinator = (props) => {
+    const { value, onChange } = props;
+    const handleChange = useCallback((_evt, newValue) => {
         onChange(newValue ? "or" : "and");
     }, [onChange]);
     return (React.createElement(Grid, { item: true, xs: 12 },

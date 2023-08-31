@@ -1,15 +1,15 @@
 import { IconButton } from "@mui/material";
 import createStyles from "@mui/styles/createStyles";
 import withStyles from "@mui/styles/withStyles";
-var smallIconButtonStyles = createStyles({
+const smallIconButtonStyles = createStyles({
     root: {
         padding: 4,
     },
 });
-export var SmallIconButton = withStyles(smallIconButtonStyles)(IconButton);
-var smallestIconButtonStyles = createStyles({
+export const SmallIconButton = withStyles(smallIconButtonStyles)(IconButton);
+const smallestIconButtonStyles = createStyles({
     root: {
         padding: 0,
     },
 });
-export var SmallestIconButton = withStyles(smallestIconButtonStyles)(IconButton);
+export const SmallestIconButton = withStyles(smallestIconButtonStyles)(IconButton);

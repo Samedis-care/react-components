@@ -1,31 +1,22 @@
-var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
-    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
-        if (ar || !(i in from)) {
-            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
-            ar[i] = from[i];
-        }
-    }
-    return to.concat(ar || Array.prototype.slice.call(from));
-};
 import React, { useContext, useEffect, useRef, useState } from "react";
-var noopLock = function () { return function () {
+const noopLock = () => () => {
     return;
-}; };
-export var UnsafeToLeaveDispatch = {
+};
+export const UnsafeToLeaveDispatch = {
     lock: noopLock,
 };
-var UnsafeToLeaveContext = React.createContext(false);
-export var useIsUnsafeToLeave = function () {
+const UnsafeToLeaveContext = React.createContext(false);
+export const useIsUnsafeToLeave = () => {
     return useContext(UnsafeToLeaveContext);
 };
-var UnsafeToLeave = function (props) {
-    var disable = props.disable;
-    var _a = useState([]), reasons = _a[0], setReasons = _a[1];
-    var reasonsRef = useRef([]);
-    useEffect(function () {
+const UnsafeToLeave = (props) => {
+    const { disable } = props;
+    const [reasons, setReasons] = useState([]);
+    const reasonsRef = useRef([]);
+    useEffect(() => {
         if (disable)
             return;
-        var unloadListener = function (evt) {
+        const unloadListener = (evt) => {
             // https://developer.mozilla.org/en-US/docs/Web/API/WindowEventHandlers/onbeforeunload#example
             // message customization not possible
             if (reasonsRef.current.length > 0) {
@@ -40,19 +31,19 @@ var UnsafeToLeave = function (props) {
         if (UnsafeToLeaveDispatch.lock !== noopLock) {
             throw new Error("More than one instance of UnsafeToLeave loaded");
         }
-        UnsafeToLeaveDispatch.lock = function (reason) {
-            var uuid = Array.from(crypto.getRandomValues(new Uint8Array(16)))
-                .map(function (e) { return e.toString(16); })
+        UnsafeToLeaveDispatch.lock = (reason) => {
+            const uuid = Array.from(crypto.getRandomValues(new Uint8Array(16)))
+                .map((e) => e.toString(16))
                 .join("");
-            var ident = reason ? uuid + "_" + reason : uuid;
-            reasonsRef.current = __spreadArray(__spreadArray([], reasonsRef.current, true), [ident], false);
+            const ident = reason ? uuid + "_" + reason : uuid;
+            reasonsRef.current = [...reasonsRef.current, ident];
             setReasons(reasonsRef.current);
-            return function () {
-                reasonsRef.current = reasonsRef.current.filter(function (entry) { return entry !== ident; });
+            return () => {
+                reasonsRef.current = reasonsRef.current.filter((entry) => entry !== ident);
                 setReasons(reasonsRef.current);
             };
         };
-        return function () {
+        return () => {
             UnsafeToLeaveDispatch.lock = noopLock;
             window.removeEventListener("beforeunload", unloadListener);
         };

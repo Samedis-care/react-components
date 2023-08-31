@@ -6,28 +6,27 @@ import { useDataGridStyles } from "../DataGrid";
 import { FilterIcon, FilterActiveIcon } from "../../Icons";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import { combineClassNames } from "../../../utils";
-var anchorOrigin = {
+const anchorOrigin = {
     vertical: "bottom",
     horizontal: "center",
 };
-var transformOrigin = {
+const transformOrigin = {
     vertical: "top",
     horizontal: "center",
 };
-var ColumnHeaderContent = function (props) {
-    var _a, _b;
-    var t = useCCTranslations().t;
-    var classes = useDataGridStyles();
-    var _c = useState(null), filterAnchorEl = _c[0], setFilterAnchorEl = _c[1];
-    var openFilter = useCallback(function (event) {
+const ColumnHeaderContent = (props) => {
+    const { t } = useCCTranslations();
+    const classes = useDataGridStyles();
+    const [filterAnchorEl, setFilterAnchorEl] = useState(null);
+    const openFilter = useCallback((event) => {
         event.stopPropagation();
         setFilterAnchorEl(event.currentTarget);
     }, [setFilterAnchorEl]);
-    var closeFilter = useCallback(function () { return setFilterAnchorEl(null); }, [
+    const closeFilter = useCallback(() => setFilterAnchorEl(null), [
         setFilterAnchorEl,
     ]);
-    var preventPropagation = useCallback(function (evt) { return evt.stopPropagation(); }, []);
-    var CurrentFilterIcon = props.filter && props.filter.value1 ? FilterActiveIcon : FilterIcon;
+    const preventPropagation = useCallback((evt) => evt.stopPropagation(), []);
+    const CurrentFilterIcon = props.filter && props.filter.value1 ? FilterActiveIcon : FilterIcon;
     return (React.createElement(React.Fragment, null,
         React.createElement(Grid, { container: true, justifyContent: "flex-start", wrap: "nowrap" },
             React.createElement(Grid, { item: true, className: combineClassNames([
@@ -35,18 +34,18 @@ var ColumnHeaderContent = function (props) {
                     classes.columnHeaderLabel,
                 ]), key: "header" },
                 React.createElement(Tooltip, { title: props.headerName },
-                    React.createElement("span", null, props.headerName.split("\n").map(function (text, index, arr) { return (React.createElement(React.Fragment, { key: text },
+                    React.createElement("span", null, props.headerName.split("\n").map((text, index, arr) => (React.createElement(React.Fragment, { key: text },
                         text,
-                        index == arr.length - 1 ? undefined : React.createElement("br", null))); })))),
+                        index == arr.length - 1 ? undefined : React.createElement("br", null))))))),
             React.createElement(Grid, { item: true, className: classes.columnHeaderSortIcon },
                 props.sort === -1 && React.createElement(ArrowDownward, null),
                 props.sort === 1 && React.createElement(ArrowUpward, null)),
-            React.createElement(Grid, { item: true, xs: true }, props.sort !== 0 && ((_a = props.sortOrder) === null || _a === void 0 ? void 0 : _a.toString())),
+            React.createElement(Grid, { item: true, xs: true }, props.sort !== 0 && props.sortOrder?.toString()),
             props.filterable && (React.createElement(Grid, { item: true, key: "filter" },
                 React.createElement(Tooltip, { title: t("standalone.data-grid.content.filter") || "" },
                     React.createElement(IconButton, { className: combineClassNames([
                             classes.columnHeaderFilterButton,
-                            ((_b = props.filter) === null || _b === void 0 ? void 0 : _b.value1) &&
+                            props.filter?.value1 &&
                                 classes.columnHeaderFilterButtonActive,
                         ]), onClick: openFilter, size: "large" },
                         React.createElement(CurrentFilterIcon, { className: classes.columnHeaderFilterIcon })))))),

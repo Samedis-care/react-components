@@ -2,23 +2,20 @@ import ccI18n from "../../../i18n";
 /**
  * Type for booleans
  */
-var TypeBoolean = /** @class */ (function () {
-    function TypeBoolean() {
-    }
-    TypeBoolean.prototype.validate = function () {
+class TypeBoolean {
+    validate() {
         return null;
-    };
-    TypeBoolean.prototype.getFilterType = function () {
+    }
+    getFilterType() {
         return "boolean";
-    };
-    TypeBoolean.prototype.getDefaultValue = function () {
+    }
+    getDefaultValue() {
         return false;
-    };
-    TypeBoolean.prototype.stringify = function (value) {
+    }
+    stringify(value) {
         return value
             ? ccI18n.t("backend-integration.model.types.boolean.true")
             : ccI18n.t("backend-integration.model.types.boolean.false");
-    };
-    return TypeBoolean;
-}());
+    }
+}
 export default TypeBoolean;

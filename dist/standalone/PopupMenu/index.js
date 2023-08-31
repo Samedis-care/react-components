@@ -1,8 +1,8 @@
 import { Menu } from "@mui/material";
 import withStyles from "@mui/styles/withStyles";
-var PopupMenu = withStyles(function (theme) { return ({
+const PopupMenu = withStyles((theme) => ({
     paper: {
-        border: "1px solid ".concat(theme.palette.divider),
+        border: `1px solid ${theme.palette.divider}`,
     },
-}); })(Menu);
+}))(Menu);
 export default PopupMenu;

@@ -3,18 +3,17 @@ import { Collapse } from "@mui/material";
 /**
  * Context for the menu state
  */
-export var MenuContext = React.createContext(undefined);
-var MenuItem = function (props) {
-    var _a;
-    var depth = props.depth, title = props.title, expandable = props.expandable, forceExpand = props.forceExpand, onClick = props.onClick, onAuxClick = props.onAuxClick, menuItemId = props.menuItemId;
-    var _b = useState(false), expanded = _b[0], setExpanded = _b[1];
-    var menuContext = useContext(MenuContext);
+export const MenuContext = React.createContext(undefined);
+const MenuItem = (props) => {
+    const { depth, title, expandable, forceExpand, onClick, onAuxClick, menuItemId, } = props;
+    const [expanded, setExpanded] = useState(false);
+    const menuContext = useContext(MenuContext);
     if (!menuContext)
         throw new Error("MenuContext is undefined");
-    var menuState = menuContext[0], setMenuState = menuContext[1];
-    var clickProxy = useCallback(function (evt) {
+    const [menuState, setMenuState] = menuContext;
+    const clickProxy = useCallback((evt) => {
         if (expandable)
-            setExpanded(forceExpand ? true : function (prevFlag) { return !prevFlag; });
+            setExpanded(forceExpand ? true : (prevFlag) => !prevFlag);
         else
             setMenuState(menuItemId);
         onClick(evt);
@@ -23,15 +22,10 @@ var MenuItem = function (props) {
     if (expandable && !expanded && forceExpand) {
         setExpanded(true);
     }
-    var Renderer = props.menuProps.menuItem;
+    const Renderer = props.menuProps.menuItem;
     return (React.createElement(React.Fragment, null,
         React.createElement(Renderer, { icon: props.icon, title: title, expandable: expandable, expanded: expandable ? expanded : undefined, active: expandable ? undefined : menuState === menuItemId, onClick: clickProxy, onAuxClick: onAuxClick, depth: depth }),
-        expandable && (React.createElement(Collapse, { in: expanded, className: props.childWrapperClassName }, (_a = props.childDefs) === null || _a === void 0 ? void 0 : _a.map(function (child) {
-            return toMenuItemComponent(props.menuProps, child, depth + 1, menuItemId);
-        })))));
+        expandable && (React.createElement(Collapse, { in: expanded, className: props.childWrapperClassName }, props.childDefs?.map((child) => toMenuItemComponent(props.menuProps, child, depth + 1, menuItemId))))));
 };
 export default React.memo(MenuItem);
-export var toMenuItemComponent = function (menuProps, def, depth, menuItemId) {
-    var _a;
-    return def.shouldRender && (React.createElement(MenuItem, { key: menuItemId ? "".concat(menuItemId, "@").concat(def.title) : def.title, menuItemId: menuItemId ? "".concat(menuItemId, "@").concat(def.title) : def.title, icon: def.icon, title: def.title, expandable: !!(def.children && def.children.length > 0), onClick: def.onClick, onAuxClick: (_a = def.onAuxClick) !== null && _a !== void 0 ? _a : (function () { return undefined; }), menuProps: menuProps, childDefs: def.children, forceExpand: !!def.forceExpand, depth: depth, childWrapperClassName: menuProps.childWrapperClassName }));
-};
+export const toMenuItemComponent = (menuProps, def, depth, menuItemId) => def.shouldRender && (React.createElement(MenuItem, { key: menuItemId ? `${menuItemId}@${def.title}` : def.title, menuItemId: menuItemId ? `${menuItemId}@${def.title}` : def.title, icon: def.icon, title: def.title, expandable: !!(def.children && def.children.length > 0), onClick: def.onClick, onAuxClick: def.onAuxClick ?? (() => undefined), menuProps: menuProps, childDefs: def.children, forceExpand: !!def.forceExpand, depth: depth, childWrapperClassName: menuProps.childWrapperClassName }));

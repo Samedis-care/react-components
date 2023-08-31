@@ -20,78 +20,61 @@ utils come in handy. You can simply access the number by calling `getValueByDot(
 
 The following utils are for the conversion of nested objects to dot-notation based records and vice versa
  */
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
-export var dotToObject = function (field, value) {
-    var _a;
-    var fieldParts = field.split(".").reverse();
-    for (var _i = 0, fieldParts_1 = fieldParts; _i < fieldParts_1.length; _i++) {
-        var fieldPart = fieldParts_1[_i];
-        value = (_a = {},
-            _a[fieldPart] = value,
-            _a);
+export const dotToObject = (field, value) => {
+    const fieldParts = field.split(".").reverse();
+    for (const fieldPart of fieldParts) {
+        value = {
+            [fieldPart]: value,
+        };
     }
     return value;
 };
-export var getValueByDot = function (field, data) {
-    var fieldParts = field.split(".");
-    var value = data;
-    for (var i = 0; i < fieldParts.length; ++i) {
+export const getValueByDot = (field, data) => {
+    const fieldParts = field.split(".");
+    let value = data;
+    for (let i = 0; i < fieldParts.length; ++i) {
         if (typeof value !== "object" || value == null)
             return undefined;
         value = value[fieldParts[i]];
     }
     return value;
 };
-export var dotInObject = function (field, data) {
-    var fieldParts = field.split(".");
-    var value = data;
-    for (var i = 0; i < fieldParts.length; ++i) {
+export const dotInObject = (field, data) => {
+    const fieldParts = field.split(".");
+    let value = data;
+    for (let i = 0; i < fieldParts.length; ++i) {
         if (typeof value !== "object" || value == null)
             return false;
         value = value[fieldParts[i]];
     }
     return true;
 };
-export var objectToDots = function (obj) {
-    var ret = {};
-    var _loop_1 = function (key) {
+export const objectToDots = (obj) => {
+    const ret = {};
+    for (const key in obj) {
         if (!Object.prototype.hasOwnProperty.call(obj, key))
-            return "continue";
-        var value = obj[key];
+            continue;
+        const value = obj[key];
         if (typeof value === "object") {
-            var dots = objectToDots(value);
-            Object.entries(dots).forEach(function (_a) {
-                var dot = _a[0], nestedValue = _a[1];
+            const dots = objectToDots(value);
+            Object.entries(dots).forEach(([dot, nestedValue]) => {
                 ret[key + "." + dot] = nestedValue;
             });
         }
         else {
             ret[key] = value;
         }
-    };
-    for (var key in obj) {
-        _loop_1(key);
     }
     return ret;
 };
-export var dotsToObject = function (dots) {
-    var result = {};
-    var _loop_2 = function (key) {
+export const dotsToObject = (dots) => {
+    const result = {};
+    for (const key in dots) {
         if (!Object.prototype.hasOwnProperty.call(dots, key))
-            return "continue";
-        var parts = key.split(".");
-        var insertion = result;
-        parts.forEach(function (part, idx) {
+            continue;
+        const parts = key.split(".");
+        let insertion = result;
+        parts.forEach((part, idx) => {
             // set value
             if (idx == parts.length - 1) {
                 insertion[part] = dots[key];
@@ -103,17 +86,14 @@ export var dotsToObject = function (dots) {
             }
             insertion = insertion[part];
         });
-    };
-    for (var key in dots) {
-        _loop_2(key);
     }
     return result;
 };
-export var dotSet = function (field, value, data) {
+export const dotSet = (field, value, data) => {
     if (typeof value !== "object")
         throw new Error("invalid");
-    var fieldParts = field.split(".");
-    var ret = __assign({}, value);
+    const fieldParts = field.split(".");
+    const ret = { ...value };
     ret[fieldParts[0]] =
         fieldParts.length > 1
             ? dotSet(fieldParts.slice(1).join("."), ret[fieldParts[0]], data)

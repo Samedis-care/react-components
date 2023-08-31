@@ -2,28 +2,25 @@ import i18n from "../../../i18n";
 /**
  * Type for non-nullable dates with time
  */
-var TypeDateTime = /** @class */ (function () {
-    function TypeDateTime() {
-        this.error = "";
-        this.serialize = function (value) {
-            return value.toISOString();
-        };
-        this.deserialize = function (value) {
-            return new Date(value);
-        };
-    }
-    TypeDateTime.prototype.validate = function () {
+class TypeDateTime {
+    error = "";
+    validate() {
         return this.error || null;
-    };
-    TypeDateTime.prototype.getFilterType = function () {
+    }
+    getFilterType() {
         return "datetime";
-    };
-    TypeDateTime.prototype.getDefaultValue = function () {
+    }
+    getDefaultValue() {
         return new Date();
-    };
-    TypeDateTime.prototype.stringify = function (value) {
+    }
+    stringify(value) {
         return value.toLocaleString(i18n.language);
+    }
+    serialize = (value) => {
+        return value.toISOString();
     };
-    return TypeDateTime;
-}());
+    deserialize = (value) => {
+        return new Date(value);
+    };
+}
 export default TypeDateTime;

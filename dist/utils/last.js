@@ -2,7 +2,7 @@
  * Returns the last element of an array
  * @param arr The array
  */
-var last = function (arr) {
+const last = (arr) => {
     return arr[arr.length - 1];
 };
 export default last;

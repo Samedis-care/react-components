@@ -3,34 +3,22 @@ import ccI18n from "../i18n";
 /**
  * Internal helper for useTranslation hook
  */
-var useCCTranslations = function () {
-    return useTranslation("translation", {
-        i18n: ccI18n,
-    });
-};
-export var useCCTranslationsNS = function (namespaces) {
-    return useTranslation(namespaces, {
-        i18n: ccI18n,
-    });
-};
-export var useCCLanguagesTranslations = function () {
-    return useTranslation("languages", {
-        i18n: ccI18n,
-    });
-};
-export var useCCLocaleSwitcherTranslations = function () {
-    return useTranslation("locale-switcher", {
-        i18n: ccI18n,
-    });
-};
-export var useCCCountryTranslations = function () {
-    return useTranslation("countries", {
-        i18n: ccI18n,
-    });
-};
-export var useCCCurrencyTranslations = function () {
-    return useTranslation("currencies", {
-        i18n: ccI18n,
-    });
-};
+const useCCTranslations = () => useTranslation("translation", {
+    i18n: ccI18n,
+});
+export const useCCTranslationsNS = (namespaces) => useTranslation(namespaces, {
+    i18n: ccI18n,
+});
+export const useCCLanguagesTranslations = () => useTranslation("languages", {
+    i18n: ccI18n,
+});
+export const useCCLocaleSwitcherTranslations = () => useTranslation("locale-switcher", {
+    i18n: ccI18n,
+});
+export const useCCCountryTranslations = () => useTranslation("countries", {
+    i18n: ccI18n,
+});
+export const useCCCurrencyTranslations = () => useTranslation("currencies", {
+    i18n: ccI18n,
+});
 export default useCCTranslations;

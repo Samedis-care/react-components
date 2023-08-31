@@ -1,18 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
 import { debounce } from "./index";
-var getWindowSize = function () {
+const getWindowSize = () => {
     return [window.innerWidth, window.innerHeight];
 };
-var useWindowSize = function () {
-    var _a = useState(getWindowSize), size = _a[0], setSize = _a[1];
-    var handleResize = useMemo(function () {
-        return debounce(function () {
-            setSize(getWindowSize);
-        }, 100);
-    }, []);
-    useEffect(function () {
+const useWindowSize = () => {
+    const [size, setSize] = useState(getWindowSize);
+    const handleResize = useMemo(() => debounce(() => {
+        setSize(getWindowSize);
+    }, 100), []);
+    useEffect(() => {
         addEventListener("resize", handleResize);
-        return function () {
+        return () => {
             removeEventListener("resize", handleResize);
         };
     }, [handleResize]);

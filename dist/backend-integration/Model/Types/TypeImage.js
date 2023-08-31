@@ -2,28 +2,27 @@ import ccI18n from "../../../i18n";
 /**
  * A type to handle images
  */
-var TypeImage = /** @class */ (function () {
-    function TypeImage(params) {
+class TypeImage {
+    params;
+    constructor(params) {
         this.params = params;
     }
-    TypeImage.prototype.getParams = function () {
-        var _a;
-        return (_a = this.params) !== null && _a !== void 0 ? _a : {};
-    };
-    TypeImage.prototype.validate = function () {
+    getParams() {
+        return this.params ?? {};
+    }
+    validate() {
         return null;
-    };
-    TypeImage.prototype.getFilterType = function () {
+    }
+    getFilterType() {
         return null;
-    };
-    TypeImage.prototype.getDefaultValue = function () {
+    }
+    getDefaultValue() {
         return "";
-    };
-    TypeImage.prototype.stringify = function (value) {
+    }
+    stringify(value) {
         return value
             ? ccI18n.t("backend-integration.model.types.image.set")
             : ccI18n.t("backend-integration.model.types.image.not-set");
-    };
-    return TypeImage;
-}());
+    }
+}
 export default TypeImage;

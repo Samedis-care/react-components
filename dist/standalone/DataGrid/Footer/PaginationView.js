@@ -2,22 +2,21 @@ import React from "react";
 import { Box, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { useDataGridStyles } from "../DataGrid";
 import useCCTranslations from "../../../utils/useCCTranslations";
-var PaginationView = function (props) {
-    var _a;
-    var classes = useDataGridStyles();
-    var theme = useTheme();
-    var isMobile = useMediaQuery(theme.breakpoints.only("xs"));
-    var t = useCCTranslations().t;
-    var total = props.rowsTotal;
-    var filtered = (_a = props.rowsFiltered) !== null && _a !== void 0 ? _a : 0;
-    var showFiltered = props.rowsFiltered !== null && props.rowsFiltered !== props.rowsTotal;
-    var text = isMobile
+const PaginationView = (props) => {
+    const classes = useDataGridStyles();
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.only("xs"));
+    const { t } = useCCTranslations();
+    const total = props.rowsTotal;
+    const filtered = props.rowsFiltered ?? 0;
+    const showFiltered = props.rowsFiltered !== null && props.rowsFiltered !== props.rowsTotal;
+    const text = isMobile
         ? showFiltered
-            ? "#".concat(filtered, "/").concat(total)
-            : "#".concat(total)
-        : "".concat(showFiltered
-            ? "".concat(t("standalone.data-grid.footer.filtered"), " ").concat(filtered, " ")
-            : "").concat(t("standalone.data-grid.footer.total"), " ").concat(total);
+            ? `#${filtered}/${total}`
+            : `#${total}`
+        : `${showFiltered
+            ? `${t("standalone.data-grid.footer.filtered")} ${filtered} `
+            : ""}${t("standalone.data-grid.footer.total")} ${total}`;
     return (React.createElement(Box, { mx: 2 },
         React.createElement(Typography, { className: classes.paginationText }, text)));
 };

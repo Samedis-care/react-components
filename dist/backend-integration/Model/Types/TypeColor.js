@@ -1,21 +1,18 @@
 /**
  * Type to handle (hex string) colors
  */
-var TypeColor = /** @class */ (function () {
-    function TypeColor() {
+class TypeColor {
+    validate() {
+        return null;
     }
-    TypeColor.prototype.validate = function () {
+    getFilterType() {
         return null;
-    };
-    TypeColor.prototype.getFilterType = function () {
-        return null;
-    };
-    TypeColor.prototype.getDefaultValue = function () {
+    }
+    getDefaultValue() {
         return "";
-    };
-    TypeColor.prototype.stringify = function (value) {
+    }
+    stringify(value) {
         return value;
-    };
-    return TypeColor;
-}());
+    }
+}
 export default TypeColor;

@@ -3,34 +3,31 @@ import i18n from "../../../i18n";
 /**
  * Type for nullable dates
  */
-var TypeDateTimeNullable = /** @class */ (function () {
-    function TypeDateTimeNullable() {
-        this.error = "";
-        this.serialize = function (value) {
-            if (!value)
-                return null;
-            return value.toISOString();
-        };
-        this.deserialize = function (value) {
-            if (value)
-                return new Date(value);
-            return null;
-        };
-    }
-    TypeDateTimeNullable.prototype.validate = function () {
+class TypeDateTimeNullable {
+    error = "";
+    validate() {
         return this.error || null;
-    };
-    TypeDateTimeNullable.prototype.getFilterType = function () {
+    }
+    getFilterType() {
         return "datetime";
-    };
-    TypeDateTimeNullable.prototype.getDefaultValue = function () {
+    }
+    getDefaultValue() {
         return null;
-    };
-    TypeDateTimeNullable.prototype.stringify = function (value) {
+    }
+    stringify(value) {
         return value
             ? value.toLocaleString(i18n.language)
             : ccI18n.t("backend-integration.model.types.date-nullable.not-set");
+    }
+    serialize = (value) => {
+        if (!value)
+            return null;
+        return value.toISOString();
     };
-    return TypeDateTimeNullable;
-}());
+    deserialize = (value) => {
+        if (value)
+            return new Date(value);
+        return null;
+    };
+}
 export default TypeDateTimeNullable;

@@ -11,7 +11,7 @@ import MobileScalingFix from "../standalone/MobileScalingFix/MobileScalingFix";
 import UnsafeToLeave from "./UnsafeToLeave";
 import DragAndDropPrevention from "./DragAndDropPrevention";
 import { StyledEngineProvider } from "@mui/material";
-var loaderComponent = React.createElement(Loader, null);
+const loaderComponent = React.createElement(Loader, null);
 /**
  * Provides:
  * - react-router instance
@@ -26,7 +26,7 @@ var loaderComponent = React.createElement(Loader, null);
  * - mobile scaling fix (optional, enabled by default)
  * - drag & drop default prevention (prevents unloading page)
  */
-var ComponentsCareFramework = function (props) {
+const ComponentsCareFramework = (props) => {
     return (React.createElement(Suspense, { fallback: loaderComponent },
         !props.disableMobileScalingFix && React.createElement(MobileScalingFix, null),
         !props.disableDragAndDropPrevention && React.createElement(DragAndDropPrevention, null),

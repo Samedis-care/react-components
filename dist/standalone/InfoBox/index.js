@@ -5,7 +5,7 @@ import makeStyles from "@mui/styles/makeStyles";
 import withStyles from "@mui/styles/withStyles";
 import SuccessOutlinedIcon from "../Icons/SuccessOutlinedIcon";
 import { combineClassNames } from "../../utils";
-var AccordionSummary = withStyles({
+const AccordionSummary = withStyles({
     root: {
         minHeight: 48,
         "&$expanded": {
@@ -19,7 +19,7 @@ var AccordionSummary = withStyles({
     },
     expanded: {},
 })(MuiAccordionSummary);
-export var useStyles = makeStyles(function (theme) { return ({
+export const useStyles = makeStyles((theme) => ({
     noShadow: {
         "box-shadow": "none",
     },
@@ -28,7 +28,7 @@ export var useStyles = makeStyles(function (theme) { return ({
     },
     panelDetails: {
         border: "1px solid grey",
-        borderRadius: "0px 0px ".concat(theme.shape.borderRadius, "px ").concat(theme.shape.borderRadius, "px"),
+        borderRadius: `0px 0px ${theme.shape.borderRadius}px ${theme.shape.borderRadius}px`,
         padding: "8px 24px",
         whiteSpace: "pre-line",
     },
@@ -73,13 +73,13 @@ export var useStyles = makeStyles(function (theme) { return ({
         borderColor: theme.palette.error.main,
         color: theme.palette.error.contrastText,
     },
-}); }, { name: "CcInfoBox" });
+}), { name: "CcInfoBox" });
 // .MuiAccordionSummary-content.Mui-expanded => margin => unset
 // .MuiAccordionSummary-root.Mui-expanded => min-height => unset
-var InfoBox = function (props) {
-    var heading = props.heading, onChange = props.onChange, expanded = props.expanded, alwaysExpanded = props.alwaysExpanded, message = props.message, status = props.status;
-    var classes = useStyles(props);
-    var getIcon = useCallback(function () {
+const InfoBox = (props) => {
+    const { heading, onChange, expanded, alwaysExpanded, message, status, } = props;
+    const classes = useStyles(props);
+    const getIcon = useCallback(() => {
         switch (status) {
             case "warning":
                 return React.createElement(ReportProblemOutlined, null);
@@ -91,7 +91,7 @@ var InfoBox = function (props) {
                 return React.createElement(InfoOutlined, null);
         }
     }, [status]);
-    var getAccordionClass = useCallback(function () {
+    const getAccordionClass = useCallback(() => {
         switch (status) {
             case "warning":
                 return classes.accordionWarning;

@@ -1,22 +1,22 @@
 import React, { useContext, useEffect } from "react";
 import { useDataGridColumnState, useDataGridColumnsWidthState, useDataGridState, } from "./DataGrid";
-export var DataGridPersistentStateContext = React.createContext(undefined);
+export const DataGridPersistentStateContext = React.createContext(undefined);
 /**
  * Logical component which takes care of optional state persistence for the data grid
  * @remarks Used internally in DataGrid, do not use in your code!
  */
-var StatePersistence = function () {
-    var persistedContext = useContext(DataGridPersistentStateContext);
-    var _a = persistedContext || [], setPersisted = _a[1];
-    var state = useDataGridState()[0];
-    var columnState = useDataGridColumnState()[0];
-    var columnWidthState = useDataGridColumnsWidthState()[0];
+const StatePersistence = () => {
+    const persistedContext = useContext(DataGridPersistentStateContext);
+    const [, setPersisted] = persistedContext || [];
+    const [state] = useDataGridState();
+    const [columnState] = useDataGridColumnState();
+    const [columnWidthState] = useDataGridColumnsWidthState();
     // save on changes
-    useEffect(function () {
+    useEffect(() => {
         if (!setPersisted)
             return;
         void setPersisted({
-            columnState: columnState,
+            columnState,
             columnWidth: columnWidthState,
             state: {
                 search: state.search,

@@ -1,25 +1,10 @@
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    };
-    return function (d, b) {
-        if (typeof b !== "function" && b !== null)
-            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
 import JsonApiClient from "./JsonApiClient";
 import dataToFile from "../../utils/dataToFile";
-var objectContainsBlob = function (obj) {
-    for (var key in obj) {
+const objectContainsBlob = (obj) => {
+    for (const key in obj) {
         if (!Object.prototype.hasOwnProperty.call(obj, key))
             continue;
-        var value = obj[key];
+        const value = obj[key];
         if (typeof value === "object") {
             if (objectContainsBlob(value))
                 return true;
@@ -31,7 +16,7 @@ var objectContainsBlob = function (obj) {
     }
     return false;
 };
-var convertDataToFormData = function (data) {
+const convertDataToFormData = (data) => {
     if (typeof data === "number")
         return data.toString();
     if (typeof data === "boolean")
@@ -48,22 +33,19 @@ var convertDataToFormData = function (data) {
     }
     return data;
 };
-var objectToRails = function (obj) {
-    var ret = [];
-    var _loop_1 = function (key) {
+const objectToRails = (obj) => {
+    const ret = [];
+    for (const key in obj) {
         if (!Object.prototype.hasOwnProperty.call(obj, key))
-            return "continue";
-        var value = obj[key];
+            continue;
+        const value = obj[key];
         if (Array.isArray(value)) {
-            ret.push.apply(ret, value.map(function (val) {
-                return [key + "[]", convertDataToFormData(val)];
-            }));
+            ret.push(...value.map((val) => [key + "[]", convertDataToFormData(val)]));
         }
         else if (typeof value === "object") {
-            var dots = objectToRails(value);
-            dots.forEach(function (_a) {
-                var dot = _a[0], nestedValue = _a[1];
-                var _b = dot.split("["), dotKey = _b[0], suffix = _b.slice(1);
+            const dots = objectToRails(value);
+            dots.forEach(([dot, nestedValue]) => {
+                const [dotKey, ...suffix] = dot.split("[");
                 ret.push([
                     key +
                         "[" +
@@ -77,31 +59,22 @@ var objectToRails = function (obj) {
         else if (value !== undefined) {
             ret.push([key, convertDataToFormData(value)]);
         }
-    };
-    for (var key in obj) {
-        _loop_1(key);
     }
     return ret;
 };
-var RailsApiClient = /** @class */ (function (_super) {
-    __extends(RailsApiClient, _super);
-    function RailsApiClient() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    RailsApiClient.prototype.convertBody = function (body, headers) {
+class RailsApiClient extends JsonApiClient {
+    convertBody(body, headers) {
         if (objectContainsBlob(body)) {
-            var formBody_1 = new FormData();
-            objectToRails(body).forEach(function (_a) {
-                var key = _a[0], value = _a[1];
-                formBody_1.append(key, value);
+            const formBody = new FormData();
+            objectToRails(body).forEach(([key, value]) => {
+                formBody.append(key, value);
             });
-            return formBody_1;
+            return formBody;
         }
         else {
             // Use JSON
-            return _super.prototype.convertBody.call(this, body, headers);
+            return super.convertBody(body, headers);
         }
-    };
-    return RailsApiClient;
-}(JsonApiClient));
+    }
+}
 export default RailsApiClient;

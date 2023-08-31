@@ -7,20 +7,19 @@ import SelectAll from "./SelectAll";
 import { useDataGridStyles } from "../DataGrid";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import DataActionBarMenu from "./DataActionBarMenu";
-var DataActionBarView = function (props) {
-    var _a;
-    var classes = useDataGridStyles();
-    var t = useCCTranslations().t;
-    var theme = useTheme();
-    var isXs = useMediaQuery(theme.breakpoints.only("xs"));
-    var _b = useState(undefined), extendedMenuAnchor = _b[0], setExtendedMenuAnchor = _b[1];
-    var handleExtendedMenuOpen = useCallback(function (evt) {
+const DataActionBarView = (props) => {
+    const classes = useDataGridStyles();
+    const { t } = useCCTranslations();
+    const theme = useTheme();
+    const isXs = useMediaQuery(theme.breakpoints.only("xs"));
+    const [extendedMenuAnchor, setExtendedMenuAnchor] = useState(undefined);
+    const handleExtendedMenuOpen = useCallback((evt) => {
         setExtendedMenuAnchor(evt.currentTarget);
     }, []);
-    var handleExtendedMenuClose = useCallback(function () {
+    const handleExtendedMenuClose = useCallback(() => {
         setExtendedMenuAnchor(undefined);
     }, []);
-    var deleteBtn = (React.createElement(ComponentWithLabel, { control: React.createElement(SmallIconButton, { color: "primary", disabled: props.numSelected === 0 || !props.handleDelete, onClick: props.handleDelete },
+    const deleteBtn = (React.createElement(ComponentWithLabel, { control: React.createElement(SmallIconButton, { color: "primary", disabled: props.numSelected === 0 || !props.handleDelete, onClick: props.handleDelete },
             React.createElement(DeleteIcon, null)), labelText: t("standalone.data-grid.footer.delete"), labelPlacement: "bottom", disabled: props.numSelected === 0 || !props.handleDelete }));
     return (React.createElement(Grid, { container: true, wrap: "nowrap" },
         React.createElement(Grid, { item: true, key: "select-all" },
@@ -42,14 +41,14 @@ var DataActionBarView = function (props) {
             React.createElement(Grid, { item: true },
                 React.createElement(VerticalDivider, null)),
             React.createElement(Grid, { item: true },
-                React.createElement(ComponentWithLabel, { control: React.createElement(SmallIconButton, { color: "primary", disabled: !props.customButtons.find(function (entry) { return !entry.isDisabled(props.numSelected); }), onClick: handleExtendedMenuOpen },
-                        React.createElement(MenuIcon, null)), labelText: t("standalone.data-grid.footer.more"), labelPlacement: "bottom", disabled: !props.customButtons.find(function (entry) { return !entry.isDisabled(props.numSelected); }) })),
-            React.createElement(DataActionBarMenu, { numSelected: props.numSelected, anchorEl: extendedMenuAnchor, onClose: handleExtendedMenuClose, customButtons: props.customButtons, handleCustomButtonClick: props.handleCustomButtonClick }))) : ((_a = props.customButtons) === null || _a === void 0 ? void 0 : _a.map(function (entry) { return (React.createElement(React.Fragment, { key: entry.label },
+                React.createElement(ComponentWithLabel, { control: React.createElement(SmallIconButton, { color: "primary", disabled: !props.customButtons.find((entry) => !entry.isDisabled(props.numSelected)), onClick: handleExtendedMenuOpen },
+                        React.createElement(MenuIcon, null)), labelText: t("standalone.data-grid.footer.more"), labelPlacement: "bottom", disabled: !props.customButtons.find((entry) => !entry.isDisabled(props.numSelected)) })),
+            React.createElement(DataActionBarMenu, { numSelected: props.numSelected, anchorEl: extendedMenuAnchor, onClose: handleExtendedMenuClose, customButtons: props.customButtons, handleCustomButtonClick: props.handleCustomButtonClick }))) : (props.customButtons?.map((entry) => (React.createElement(React.Fragment, { key: entry.label },
             React.createElement(Grid, { item: true },
                 React.createElement(VerticalDivider, null)),
             React.createElement(Grid, { item: true },
-                React.createElement(ComponentWithLabel, { control: React.createElement(SmallIconButton, { color: "primary", disabled: entry.isDisabled(props.numSelected), onClick: function () {
+                React.createElement(ComponentWithLabel, { control: React.createElement(SmallIconButton, { color: "primary", disabled: entry.isDisabled(props.numSelected), onClick: () => {
                             props.handleCustomButtonClick(entry.label);
-                        } }, entry.icon), labelText: entry.label, labelPlacement: "bottom", disabled: entry.isDisabled(props.numSelected) })))); }))));
+                        } }, entry.icon), labelText: entry.label, labelPlacement: "bottom", disabled: entry.isDisabled(props.numSelected) }))))))));
 };
 export default React.memo(DataActionBarView);

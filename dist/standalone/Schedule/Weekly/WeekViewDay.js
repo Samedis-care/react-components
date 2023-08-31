@@ -8,7 +8,7 @@ import Paper from "@mui/material/Paper";
 import Box from "@mui/material/Box";
 import moment from "moment";
 import { combineClassNames } from "../../../utils";
-var useStyles = makeStyles(function (theme) { return ({
+const useStyles = makeStyles((theme) => ({
     paper: {
         height: "100%",
     },
@@ -17,20 +17,20 @@ var useStyles = makeStyles(function (theme) { return ({
         color: theme.palette.getContrastText(theme.palette.primary.main),
     },
     first: {
-        borderRadius: "".concat(theme.shape.borderRadius, "px 0 0 ").concat(theme.shape.borderRadius, "px"),
+        borderRadius: `${theme.shape.borderRadius}px 0 0 ${theme.shape.borderRadius}px`,
     },
     last: {
-        borderRadius: "0 ".concat(theme.shape.borderRadius, "px ").concat(theme.shape.borderRadius, "px 0"),
+        borderRadius: `0 ${theme.shape.borderRadius}px ${theme.shape.borderRadius}px 0`,
     },
     dayContents: {
         minHeight: 150,
     },
-}); }, { name: "CcWeekViewDay" });
-var WeekViewDay = function (props) {
-    var classes = useStyles();
-    var isFirst = props.dayIdx === 0;
-    var isLast = props.dayIdx === 6;
-    var isToday = props.day.dayOfYear() === moment().dayOfYear() &&
+}), { name: "CcWeekViewDay" });
+const WeekViewDay = (props) => {
+    const classes = useStyles();
+    const isFirst = props.dayIdx === 0;
+    const isLast = props.dayIdx === 6;
+    const isToday = props.day.dayOfYear() === moment().dayOfYear() &&
         props.day.year() === moment().year();
     return (React.createElement(Grid, { item: true, xs: true },
         React.createElement(Paper, { square: true, elevation: 0, className: combineClassNames([

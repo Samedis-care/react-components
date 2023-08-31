@@ -1,6 +1,6 @@
 import shallowCompareArray from "./shallowCompareArray";
 import isPlainObject from "./isPlainObject";
-var deepEqual = function (a, b) {
+const deepEqual = (a, b) => {
     // check if same type
     if (typeof a !== typeof b)
         return false;
@@ -32,7 +32,7 @@ var deepEqual = function (a, b) {
         if (!shallowCompareArray(Object.keys(a).sort(), Object.keys(b).sort()))
             return false;
         // check all sub-values to be equal
-        return Object.keys(a).find(function (key) { return !deepEqual(a[key], b[key]); }) == null;
+        return Object.keys(a).find((key) => !deepEqual(a[key], b[key])) == null;
     }
     // fallback comparison
     if (typeof a !== "string" && typeof a !== "number")

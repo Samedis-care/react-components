@@ -1,9 +1,9 @@
 import React, { useEffect } from "react";
-var MobileScalingFix = function () {
-    useEffect(function () {
-        var meta = document.querySelector("meta[name='viewport']");
-        var metaContent = "width=device-width, initial-scale=1";
-        if (["iPhone", "iPod"].find(function (device) { return navigator.platform.includes(device); })) {
+const MobileScalingFix = () => {
+    useEffect(() => {
+        let meta = document.querySelector("meta[name='viewport']");
+        let metaContent = "width=device-width, initial-scale=1";
+        if (["iPhone", "iPod"].find((device) => navigator.platform.includes(device))) {
             metaContent += ", maximum-scale=1"; // prevent scaling in on inputs
         }
         if (!meta) {

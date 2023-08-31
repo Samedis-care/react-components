@@ -3,7 +3,7 @@ import { Grid, Typography, Switch } from "@mui/material";
 import withStyles from "@mui/styles/withStyles";
 import makeStyles from "@mui/styles/makeStyles";
 import { cleanClassMap } from "../../utils";
-var useStyles = makeStyles({
+const useStyles = makeStyles({
     switch: {
         lineHeight: "30px",
         float: "right",
@@ -12,7 +12,7 @@ var useStyles = makeStyles({
         marginTop: 15,
     },
 }, { name: "CcInlineSwitch" });
-var AntSwitch = withStyles(function (theme) { return ({
+const AntSwitch = withStyles((theme) => ({
     root: {
         width: 35,
         height: 16,
@@ -38,17 +38,17 @@ var AntSwitch = withStyles(function (theme) { return ({
         boxShadow: "none",
     },
     track: {
-        border: "1px solid ".concat(theme.palette.grey[500]),
+        border: `1px solid ${theme.palette.grey[500]}`,
         borderRadius: 16 / 2,
         opacity: 1,
         backgroundColor: theme.palette.common.white,
     },
     checked: {},
-}); })(Switch);
-var InlineSwitch = function (props) {
-    var classes = useStyles(cleanClassMap(props, false, "switch", "labelWithSwitch"));
-    var label = props.label, value = props.value, onChange = props.onChange, visible = props.visible, children = props.children;
-    var handleSwitchChange = useCallback(function (event) {
+}))(Switch);
+const InlineSwitch = (props) => {
+    const classes = useStyles(cleanClassMap(props, false, "switch", "labelWithSwitch"));
+    const { label, value, onChange, visible, children } = props;
+    const handleSwitchChange = useCallback((event) => {
         if (onChange)
             onChange(event.target.checked);
     }, [onChange]);

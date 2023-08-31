@@ -2,38 +2,38 @@ import React, { useCallback } from "react";
 import { MenuItem } from "@mui/material";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import PopupMenu from "../../PopupMenu";
-var anchorOrigin = {
+const anchorOrigin = {
     vertical: "bottom",
     horizontal: "center",
 };
-var transformOrigin = {
+const transformOrigin = {
     vertical: "top",
     horizontal: "center",
 };
-var ResetMenu = function (props) {
-    var t = useCCTranslations().t;
-    var anchorEl = props.anchorEl, onClose = props.onClose, refresh = props.refresh, resetFilter = props.resetFilter, resetSort = props.resetSort, resetColumn = props.resetColumn, resetWidth = props.resetWidth, resetAll = props.resetAll;
-    var refreshAndClose = useCallback(function () {
+const ResetMenu = (props) => {
+    const { t } = useCCTranslations();
+    const { anchorEl, onClose, refresh, resetFilter, resetSort, resetColumn, resetWidth, resetAll, } = props;
+    const refreshAndClose = useCallback(() => {
         refresh();
         onClose();
     }, [refresh, onClose]);
-    var resetFilterAndClose = useCallback(function () {
+    const resetFilterAndClose = useCallback(() => {
         resetFilter();
         onClose();
     }, [resetFilter, onClose]);
-    var resetSortAndClose = useCallback(function () {
+    const resetSortAndClose = useCallback(() => {
         resetSort();
         onClose();
     }, [resetSort, onClose]);
-    var resetColumnAndClose = useCallback(function () {
+    const resetColumnAndClose = useCallback(() => {
         resetColumn();
         onClose();
     }, [resetColumn, onClose]);
-    var resetWidthAndClose = useCallback(function () {
+    const resetWidthAndClose = useCallback(() => {
         resetWidth();
         onClose();
     }, [resetWidth, onClose]);
-    var resetAllAndClose = useCallback(function () {
+    const resetAllAndClose = useCallback(() => {
         resetAll();
         onClose();
     }, [resetAll, onClose]);

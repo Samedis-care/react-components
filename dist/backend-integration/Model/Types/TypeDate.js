@@ -5,53 +5,50 @@ import i18n from "../../../i18n";
 /**
  * Type for non-nullable dates
  */
-var TypeDate = /** @class */ (function () {
-    function TypeDate() {
-        this.error = "";
-        this.serialize = function (value) {
-            return value.toISOString();
-        };
-        this.deserialize = function (value) {
-            return new Date(value);
-        };
-    }
-    TypeDate.prototype.validate = function () {
+class TypeDate {
+    error = "";
+    validate() {
         return this.error || null;
-    };
-    TypeDate.prototype.getFilterType = function () {
+    }
+    getFilterType() {
         return "date";
-    };
-    TypeDate.prototype.getDefaultValue = function () {
+    }
+    getDefaultValue() {
         return normalizeDate(new Date());
-    };
-    TypeDate.prototype.stringify = function (value) {
+    }
+    stringify(value) {
         return value.toLocaleDateString(i18n.language);
+    }
+    serialize = (value) => {
+        return value.toISOString();
+    };
+    deserialize = (value) => {
+        return new Date(value);
     };
     /**
      * Formatting helper used in date renderers
      * @param value The user input
      * @returns The formatted value
      */
-    TypeDate.format = function (value) {
+    static format = (value) => {
         // convert format to __/__/____
-        var format = moment()
+        let format = moment()
             .locale(ccI18n.language)
             .localeData()
             .longDateFormat("L")
             .replace(/[DMY]/gm, "_");
         // get numeric values from user input
-        var values = value.replace(/([^0-9])/gm, "");
+        const values = value.replace(/([^0-9])/gm, "");
         if (values.length === 0)
             return "";
         // replace _ in format with user input values
-        var vI = 0;
-        for (var i = 0; i < format.length && vI < values.length; ++i) {
+        let vI = 0;
+        for (let i = 0; i < format.length && vI < values.length; ++i) {
             if (format[i] === "_") {
                 format = format.replace("_", values[vI++]);
             }
         }
         return format;
     };
-    return TypeDate;
-}());
+}
 export default TypeDate;

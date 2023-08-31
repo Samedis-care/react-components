@@ -1,25 +1,25 @@
 import React, { useCallback } from "react";
 import { Checkbox, Grid, Typography } from "@mui/material";
 import { KeyboardArrowUp as ClosedIcon, KeyboardArrowDown as ExpandedIcon, } from "@mui/icons-material";
-var TreeViewCheckboxSelectionRenderer = function (props) {
-    var expanded = props.expanded, icon = props.icon, label = props.label, hasChildren = props.hasChildren, onToggleExpanded = props.onToggleExpanded, expandLocked = props.expandLocked, id = props.id, depth = props.depth, hasNext = props.hasNext, parentHasNext = props.parentHasNext, onClick = props.onClick, onAuxClick = props.onAuxClick;
-    var handleExpand = useCallback(function () { return onToggleExpanded(id); }, [
+const TreeViewCheckboxSelectionRenderer = (props) => {
+    const { expanded, icon, label, hasChildren, onToggleExpanded, expandLocked, id, depth, hasNext, parentHasNext, onClick, onAuxClick, } = props;
+    const handleExpand = useCallback(() => onToggleExpanded(id), [
         onToggleExpanded,
         id,
     ]);
-    var offsetLeft = depth > 0 ? 12 : 0;
+    const offsetLeft = depth > 0 ? 12 : 0;
     return (React.createElement(Grid, { container: true, style: {
             height: 24,
             marginLeft: offsetLeft,
-            width: "calc(100% - ".concat(offsetLeft, "px)"),
+            width: `calc(100% - ${offsetLeft}px)`,
         }, wrap: "nowrap" },
         depth !== 0 && (React.createElement(React.Fragment, null,
-            parentHasNext.slice(1).map(function (pHasNext, idx) { return (React.createElement(Grid, { item: true, key: idx },
+            parentHasNext.slice(1).map((pHasNext, idx) => (React.createElement(Grid, { item: true, key: idx },
                 React.createElement("div", { style: {
                         height: 24,
                         width: 24,
                         borderLeft: pHasNext ? "1px solid black" : undefined,
-                    } }))); }),
+                    } })))),
             React.createElement(Grid, { item: true },
                 React.createElement("div", { style: {
                         height: 12,

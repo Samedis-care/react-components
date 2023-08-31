@@ -1,11 +1,10 @@
 import { useEffect, useRef } from "react";
-var useDevKeybinds = function (handlers) {
-    var matches = useRef({});
-    useEffect(function () {
-        var keyHandler = function (evt) {
-            var _a;
-            for (var key in handlers) {
-                var matchOffset = (_a = matches.current[key]) !== null && _a !== void 0 ? _a : 0;
+const useDevKeybinds = (handlers) => {
+    const matches = useRef({});
+    useEffect(() => {
+        const keyHandler = (evt) => {
+            for (const key in handlers) {
+                const matchOffset = matches.current[key] ?? 0;
                 if (key[matchOffset] === evt.key) {
                     if (matchOffset === key.length - 1) {
                         // full match, call handler
@@ -22,7 +21,7 @@ var useDevKeybinds = function (handlers) {
             }
         };
         document.addEventListener("keypress", keyHandler);
-        return function () {
+        return () => {
             document.removeEventListener("keypress", keyHandler);
         };
     }, [handlers]);

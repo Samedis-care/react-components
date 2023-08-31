@@ -1,5 +1,5 @@
-var sleep = function (ms) {
-    return new Promise(function (resolve) {
+const sleep = (ms) => {
+    return new Promise((resolve) => {
         window.setTimeout(resolve, ms);
     });
 };

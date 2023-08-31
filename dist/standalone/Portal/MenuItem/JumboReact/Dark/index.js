@@ -4,7 +4,7 @@ import withStyles from "@mui/styles/withStyles";
 import { ExpandLess, ExpandMore } from "@mui/icons-material";
 import makeStyles from "@mui/styles/makeStyles";
 import { combineClassNames } from "../../../../../utils";
-var useStyles = makeStyles(function (theme) { return ({
+const useStyles = makeStyles((theme) => ({
     item: {
         borderBottomRightRadius: "30px",
         borderTopRightRadius: "30px",
@@ -21,8 +21,8 @@ var useStyles = makeStyles(function (theme) { return ({
         borderRadius: "50%",
         top: "50%",
     },
-}); }, { name: "CcPortalMenuItemDark" });
-var selectedListItemStyles = function (theme) { return ({
+}), { name: "CcPortalMenuItemDark" });
+const selectedListItemStyles = (theme) => ({
     root: {
         backgroundColor: theme.palette.primary.main,
         color: "white",
@@ -32,8 +32,8 @@ var selectedListItemStyles = function (theme) { return ({
             backgroundColor: theme.palette.primary.main,
         },
     },
-}); };
-var unselectedListItemStyles = {
+});
+const unselectedListItemStyles = {
     root: {
         color: "#a1a1a1",
     },
@@ -44,7 +44,7 @@ var unselectedListItemStyles = {
         },
     },
 };
-var expandableListItemStyles = {
+const expandableListItemStyles = {
     root: {
         color: "#a1a1a1",
     },
@@ -54,20 +54,20 @@ var expandableListItemStyles = {
         },
     },
 };
-var listIconStyles = {
+const listIconStyles = {
     root: {
         color: "inherit",
     },
 };
-var SelectedListItem = withStyles(selectedListItemStyles)(ListItemButton);
-var UnselectedListItem = withStyles(unselectedListItemStyles)(ListItemButton);
-var ExpandableListItem = withStyles(expandableListItemStyles)(ListItemButton);
-var StyledListItemIcon = withStyles(listIconStyles)(ListItemIcon);
-var typographyProps = { variant: "body2" };
-var MenuItemJumboReactDark = function (props) {
-    var classes = useStyles();
-    var Icon = props.icon;
-    var MyListItem = (props.expandable
+const SelectedListItem = withStyles(selectedListItemStyles)(ListItemButton);
+const UnselectedListItem = withStyles(unselectedListItemStyles)(ListItemButton);
+const ExpandableListItem = withStyles(expandableListItemStyles)(ListItemButton);
+const StyledListItemIcon = withStyles(listIconStyles)(ListItemIcon);
+const typographyProps = { variant: "body2" };
+const MenuItemJumboReactDark = (props) => {
+    const classes = useStyles();
+    const Icon = props.icon;
+    const MyListItem = (props.expandable
         ? ExpandableListItem
         : props.active
             ? SelectedListItem

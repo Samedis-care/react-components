@@ -1,16 +1,16 @@
 import React, { useCallback } from "react";
 import { Grid, Typography } from "@mui/material";
 import { KeyboardArrowUp as ClosedIcon, KeyboardArrowDown as ExpandedIcon, } from "@mui/icons-material";
-var TreeViewDefaultRenderer = function (props) {
-    var expanded = props.expanded, icon = props.icon, label = props.label, hasChildren = props.hasChildren, onToggleExpanded = props.onToggleExpanded, expandLocked = props.expandLocked, id = props.id, depth = props.depth, onClick = props.onClick, onAuxClick = props.onAuxClick;
-    var handleExpand = useCallback(function () { return onToggleExpanded(id); }, [
+const TreeViewDefaultRenderer = (props) => {
+    const { expanded, icon, label, hasChildren, onToggleExpanded, expandLocked, id, depth, onClick, onAuxClick, } = props;
+    const handleExpand = useCallback(() => onToggleExpanded(id), [
         onToggleExpanded,
         id,
     ]);
     return (React.createElement(Grid, { container: true, style: {
             height: 24,
             marginLeft: depth * 48,
-            width: "calc(100% - ".concat(depth * 48, "px)"),
+            width: `calc(100% - ${depth * 48}px)`,
         }, wrap: "nowrap" },
         hasChildren && (React.createElement(Grid, { item: true, style: { height: 24 }, key: "expandable", onClick: expandLocked ? undefined : handleExpand }, expanded ? React.createElement(ExpandedIcon, null) : React.createElement(ClosedIcon, null))),
         icon && (React.createElement(Grid, { item: true, key: "icon", onClick: onClick, onAuxClick: onAuxClick }, icon)),

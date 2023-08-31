@@ -2,10 +2,10 @@ import React from "react";
 import { Box, Button, Divider, Grid, Paper, Typography } from "@mui/material";
 import { useDataGridStyles } from "../DataGrid";
 import useCCTranslations from "../../../utils/useCCTranslations";
-var FilterDialog = function (props) {
-    var classes = useDataGridStyles();
-    var t = useCCTranslations().t;
-    var Filters = props.customFilters, customData = props.customData, setCustomData = props.setCustomData;
+const FilterDialog = (props) => {
+    const classes = useDataGridStyles();
+    const { t } = useCCTranslations();
+    const { customFilters: Filters, customData, setCustomData } = props;
     return (React.createElement(Paper, { elevation: 0, className: classes.contentOverlayPaper },
         React.createElement(Typography, { variant: "h6" }, t("standalone.data-grid.custom-filters.title") || ""),
         React.createElement(Divider, null),
