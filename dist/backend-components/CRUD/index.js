@@ -98,6 +98,7 @@ var CRUD = function (props) {
     var _e = useState((_d = props.initialView) !== null && _d !== void 0 ? _d : null), id = _e[0], setId = _e[1];
     var _f = useState(new Date().getTime().toString()), gridRefreshToken = _f[0], setGridRefreshToken = _f[1];
     var classes = useStyles();
+    var skipNextFormIdReset = useRef(false);
     var showEditPage = useCallback(function (id) {
         if (disableRouting) {
             setId(id);
@@ -141,6 +142,7 @@ var CRUD = function (props) {
             switch (_a.label) {
                 case 0:
                     id = data.id;
+                    skipNextFormIdReset.current = true;
                     if (disableRouting) {
                         setId(function (oldId) { return (oldId === null ? null : id); });
                     }
@@ -190,13 +192,14 @@ var CRUD = function (props) {
     var formKey = useRef(Date.now().toString(16));
     var form = function (id, formComponent) {
         var _a;
-        // when we switch IDs (everything except from new -> id) we reset form fully
+        // when we switch IDs (everything except from new -> id triggered by form submit) we reset form fully
         if (lastFormId.current == null)
             lastFormId.current = id;
         if (lastFormId.current !== id) {
-            if (lastFormId.current !== "new") {
+            if (!skipNextFormIdReset.current) {
                 formKey.current = Date.now().toString(16);
             }
+            skipNextFormIdReset.current = false;
             lastFormId.current = id;
         }
         return (React.createElement(Form, __assign({ id: id === "new" ? null : id, key: formKey.current, model: props.model }, props.formProps, { readOnly: !hasPermission(perms, id === "new" ? props.newPermission : props.editPermission) || props.formProps.readOnly, readOnlyReason: props.editPermissionHint, onSubmit: handleSubmit, disableRouting: disableRouting, customProps: (_a = props.formProps.customProps) !== null && _a !== void 0 ? _a : {
