@@ -27,7 +27,7 @@ const validateLocalized = <
 	>
 ): string | null => {
 	if (!value) return null;
-	return Object.keys(value)
+	const validationMsgs = Object.keys(value)
 		.map((language) => {
 			const result = callback(
 				value[language as keyof typeof value],
@@ -37,7 +37,9 @@ const validateLocalized = <
 			if (result) return language + ": " + result;
 			return null;
 		})
-		.join("\n");
+		.filter((result) => !!result);
+	if (validationMsgs.length === 0) return null;
+	return validationMsgs.join("\n");
 };
 
 export default validateLocalized;
