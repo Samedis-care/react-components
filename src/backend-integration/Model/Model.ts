@@ -1115,17 +1115,6 @@ class Model<
 			if (value === undefined && func === "serialize") {
 				continue;
 			}
-			if (
-				Model.printDevWarnings &&
-				value === undefined &&
-				func === "deserialize"
-			) {
-				// eslint-disable-next-line no-console
-				console.log(
-					`[Components-Care] [Model(id = ${this.modelId}).applySerialization(..., 'deserialize', '${visibility}')] Field ${key} cannot be found in values`,
-					values
-				);
-			}
 
 			// don't include disabled fields (except ID and disabled+readonly fields when serializing)
 			const visValue = getVisibility(
@@ -1139,6 +1128,18 @@ class Model<
 				key !== "id"
 			) {
 				continue;
+			}
+
+			if (
+				Model.printDevWarnings &&
+				value === undefined &&
+				func === "deserialize"
+			) {
+				// eslint-disable-next-line no-console
+				console.log(
+					`[Components-Care] [Model(id = ${this.modelId}).applySerialization(..., 'deserialize', '${visibility}')] Field ${key} cannot be found in values`,
+					values
+				);
 			}
 
 			const serializeFunc = field.type[func];
