@@ -11,7 +11,7 @@ import { useRouteInfo } from "../../utils";
 const BasicFormPage = (props) => {
     const { submit, dirty, disableRouting, postSubmitHandler, isSubmitting, children: FormButtons, form, childrenProps, customProps: originalCustomProps, ...otherProps } = props;
     const { t } = useCCTranslations();
-    const { readOnly, readOnlyReason } = useFormContextLite();
+    const { readOnly, readOnlyReasons } = useFormContextLite();
     const [pushDialog] = useDialogContext();
     const formDialog = useContext(FormDialogDispatchContext);
     const unblock = useRef(undefined);
@@ -118,6 +118,7 @@ const BasicFormPage = (props) => {
             }
         }
     }, [submit, postSubmitHandler, pushDialog]);
-    return (React.createElement(FormPageLayout, { body: form, footer: React.createElement(FormButtons, { ...childrenProps, ...otherProps, showBackButtonOnly: otherProps.showBackButtonOnly || (readOnly && !readOnlyReason), readOnly: readOnly, readOnlyReason: readOnlyReason, isSubmitting: isSubmitting, dirty: dirty, disableRouting: disableRouting, submit: handleSubmit, customProps: customProps }), other: React.createElement(FormLoaderOverlay, { visible: isSubmitting }) }));
+    return (React.createElement(FormPageLayout, { body: form, footer: React.createElement(FormButtons, { ...childrenProps, ...otherProps, showBackButtonOnly: otherProps.showBackButtonOnly ||
+                (readOnly && readOnlyReasons.length === 0), readOnly: readOnly, readOnlyReasons: readOnlyReasons, isSubmitting: isSubmitting, dirty: dirty, disableRouting: disableRouting, submit: handleSubmit, customProps: customProps }), other: React.createElement(FormLoaderOverlay, { visible: isSubmitting }) }));
 };
 export default React.memo(BasicFormPage);

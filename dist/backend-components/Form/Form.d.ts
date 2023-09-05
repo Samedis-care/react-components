@@ -308,6 +308,18 @@ export interface FormContextData {
      */
     setCustomFieldDirty: (field: string, dirty: boolean) => void;
     /**
+     * Set form read only
+     * @param ident A unique identifier triggering the read-only state
+     * @param reason Optional reason for user
+     */
+    setCustomReadOnly: (ident: string, reason?: string) => void;
+    /**
+     * Set form read-write
+     * @param ident The unique identifier that triggered the read-only state
+     * @see setCustomReadOnly
+     */
+    removeCustomReadOnly: (ident: string) => void;
+    /**
      * Is the form dirty?
      */
     dirty: boolean;
@@ -336,9 +348,17 @@ export interface FormContextData {
      */
     readOnly: boolean;
     /**
-     * @see FormProps.readOnlyReason
+     * First read-only reason
+     * @see readOnlyReasons
+     * @deprecated use readOnlyReasons
      */
     readOnlyReason: string | null | undefined;
+    /**
+     * Read only reasons
+     * @see FormProps.readOnlyReason
+     * @see setCustomReadOnly
+     */
+    readOnlyReasons: string[];
     /**
      * Is the form being submitted
      */
@@ -450,7 +470,7 @@ export interface FormContextData {
  */
 export declare const FormContext: React.Context<FormContextData | null>;
 export declare const useFormContext: () => FormContextData;
-export declare type FormContextDataLite = Pick<FormContextData, "id" | "model" | "customProps" | "onlySubmitMounted" | "onlyValidateMounted" | "onlyWarnMounted" | "onlyWarnChanged" | "readOnly" | "readOnlyReason" | "errorComponent" | "getFieldValue" | "getFieldValues" | "setFieldValueLite" | "setFieldTouchedLite">;
+export declare type FormContextDataLite = Pick<FormContextData, "id" | "model" | "customProps" | "onlySubmitMounted" | "onlyValidateMounted" | "onlyWarnMounted" | "onlyWarnChanged" | "readOnly" | "readOnlyReason" | "readOnlyReasons" | "errorComponent" | "getFieldValue" | "getFieldValues" | "setFieldValueLite" | "setFieldTouchedLite">;
 export declare const FormContextLite: React.Context<FormContextDataLite | null>;
 export declare const useFormContextLite: () => FormContextDataLite;
 export interface FormNestedState {

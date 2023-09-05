@@ -15,9 +15,9 @@ export interface BasicFormPageRendererProps<CustomPropsT> extends Omit<PageProps
      */
     readOnly: boolean;
     /**
-     * Optional read-only reason
+     * Optional read-only reasons
      */
-    readOnlyReason: string | null | undefined;
+    readOnlyReasons: string[];
     /**
      * Show back button only when not enough permission
      */

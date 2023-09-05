@@ -9,6 +9,7 @@ import useCCTranslations from "../../utils/useCCTranslations";
 import { useDialogContext } from "../../framework";
 import deepSort from "../../utils/deepSort";
 import useDevKeybinds from "../../utils/useDevKeybinds";
+import uniqueArray from "../../utils/uniqueArray";
 // optional import
 let captureException = null;
 import("@sentry/react")
@@ -106,7 +107,7 @@ const normalizeValues = (data, config) => {
     return deepSort(normalizedData);
 };
 const Form = (props) => {
-    const { model, id, children, onSubmit, customProps, onlyValidateMounted, onlyWarnMounted, onlyWarnChanged, onlySubmitMounted, readOnly, readOnlyReason, disableValidation, nestedFormName, disableNestedSubmit, nestedFormPreSubmitHandler, deleteOnSubmit, onDeleted, initialRecord, onlySubmitNestedIfMounted, formClass, preSubmit, dirtyIgnoreFields, } = props;
+    const { model, id, children, onSubmit, customProps, onlyValidateMounted, onlyWarnMounted, onlyWarnChanged, onlySubmitMounted, readOnly: readOnlyProp, readOnlyReason: readOnlyReasonProp, disableValidation, nestedFormName, disableNestedSubmit, nestedFormPreSubmitHandler, deleteOnSubmit, onDeleted, initialRecord, onlySubmitNestedIfMounted, formClass, preSubmit, dirtyIgnoreFields, } = props;
     const onlySubmitMountedBehaviour = props.onlySubmitMountedBehaviour ?? OnlySubmitMountedBehaviour.OMIT;
     const ErrorComponent = props.errorComponent;
     const { t } = useCCTranslations();
@@ -169,6 +170,34 @@ const Form = (props) => {
                 ? value(customFieldState.current[field])
                 : value;
     }, []);
+    // custom read-only
+    const [customReadOnlyState, setCustomReadOnlyState] = useState([]);
+    const [customReadOnlyReasons, setCustomReadOnlyReasons] = useState({});
+    const setCustomReadOnly = useCallback((ident, reason) => {
+        setCustomReadOnlyState((prev) => uniqueArray([...prev, ident]));
+        setCustomReadOnlyReasons((prev) => {
+            const newReasons = { ...prev };
+            if (reason) {
+                newReasons[ident] = reason;
+            }
+            else {
+                delete newReasons[ident];
+            }
+            return newReasons;
+        });
+    }, []);
+    const removeCustomReadOnly = useCallback((ident) => {
+        setCustomReadOnlyState((prev) => prev.filter((otherIdent) => otherIdent !== ident));
+        setCustomReadOnlyReasons((prev) => {
+            const newReaons = { ...prev };
+            delete newReaons[ident];
+            return newReaons;
+        });
+    }, []);
+    const readOnly = readOnlyProp || customReadOnlyState.length > 0;
+    const readOnlyReasons = useMemo(() => readOnlyReasonProp
+        ? [readOnlyReasonProp, ...Object.values(customReadOnlyReasons)]
+        : Object.values(customReadOnlyReasons), [readOnlyReasonProp, customReadOnlyReasons]);
     // main form handling
     const [deleted, setDeleted] = useState(false);
     useEffect(() => {
@@ -697,6 +726,8 @@ const Form = (props) => {
         removeCustomValidationHandler,
         setCustomWarningHandler,
         removeCustomWarningHandler,
+        setCustomReadOnly,
+        removeCustomReadOnly,
         onlySubmitMounted: !!onlySubmitMounted,
         onlySubmitMountedBehaviour,
         onlyValidateMounted: !!onlyValidateMounted,
@@ -724,8 +755,9 @@ const Form = (props) => {
         validateForm,
         parentFormContext: nestedFormName ? parentFormContext : null,
         customProps,
-        readOnly: !!readOnly,
-        readOnlyReason: readOnlyReason,
+        readOnly: readOnly,
+        readOnlyReason: readOnlyReasons[0],
+        readOnlyReasons: readOnlyReasons,
     }), [
         id,
         model,
@@ -733,10 +765,10 @@ const Form = (props) => {
         serverData,
         setError,
         markFieldMounted,
+        setCustomFieldDirty,
         dirty,
         getCustomState,
         setCustomState,
-        setCustomFieldDirty,
         setPreSubmitHandler,
         removePreSubmitHandler,
         setPostSubmitHandler,
@@ -745,16 +777,18 @@ const Form = (props) => {
         removeCustomValidationHandler,
         setCustomWarningHandler,
         removeCustomWarningHandler,
+        setCustomReadOnly,
+        removeCustomReadOnly,
         onlySubmitMounted,
         onlySubmitMountedBehaviour,
         onlyValidateMounted,
         onlyWarnMounted,
         onlyWarnChanged,
-        deleteOnSubmit,
         submitting,
         addSubmittingBlocker,
         removeSubmittingBlocker,
         submitForm,
+        deleteOnSubmit,
         values,
         touched,
         errors,
@@ -769,11 +803,11 @@ const Form = (props) => {
         resetForm,
         refetch,
         validateForm,
-        parentFormContext,
         nestedFormName,
+        parentFormContext,
         customProps,
         readOnly,
-        readOnlyReason,
+        readOnlyReasons,
     ]);
     const formContextDataLite = useMemo(() => ({
         id,
@@ -784,8 +818,9 @@ const Form = (props) => {
         onlyValidateMounted: !!onlyValidateMounted,
         onlyWarnMounted: !!onlyWarnMounted,
         onlyWarnChanged: !!onlyWarnChanged,
-        readOnly: !!readOnly,
-        readOnlyReason: readOnlyReason,
+        readOnly: readOnly,
+        readOnlyReason: readOnlyReasons[0],
+        readOnlyReasons: readOnlyReasons,
         getFieldValue,
         getFieldValues,
         setFieldValueLite,
@@ -800,7 +835,7 @@ const Form = (props) => {
         onlyWarnMounted,
         onlyWarnChanged,
         readOnly,
-        readOnlyReason,
+        readOnlyReasons,
         getFieldValue,
         getFieldValues,
         setFieldValueLite,

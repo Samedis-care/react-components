@@ -18,7 +18,7 @@ export const useBackButtonStyles = makeStyles({
     },
 });
 const DefaultFormPageButtons = (props) => {
-    const { showBackButtonOnly, readOnly, readOnlyReason, dirty, isSubmitting, submit, customProps, confirmDialogMessage, } = props;
+    const { showBackButtonOnly, readOnly, readOnlyReasons, dirty, isSubmitting, submit, customProps, confirmDialogMessage, } = props;
     const goBack = customProps?.goBack;
     const hasCustomCloseHandler = customProps?.hasCustomSubmitHandler;
     const { t } = useCCTranslations();
@@ -58,7 +58,7 @@ const DefaultFormPageButtons = (props) => {
     const saveBtn = (React.createElement(ActionButton, { disabled: !dirty || isSubmitting || readOnly, onClick: displayConfirmDialog ? submitWithConfirmDialog : safeSubmit }, t("common.buttons.save")));
     return (React.createElement(FormButtons, null,
         !showBackButtonOnly &&
-            (readOnly && readOnlyReason ? (React.createElement(Tooltip, { title: readOnlyReason },
+            (readOnly && readOnlyReasons ? (React.createElement(Tooltip, { title: readOnlyReasons.join(", ") },
                 React.createElement("span", null, saveBtn))) : (saveBtn)),
         goBack && !(isInDialog && hasCustomCloseHandler) && (React.createElement(ActionButton, { disabled: isSubmitting, onClick: handleBack, classes: backButtonClasses }, t("common.buttons.back")))));
 };
