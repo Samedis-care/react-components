@@ -58,7 +58,7 @@ const DefaultFormPageButtons = (props) => {
     const saveBtn = (React.createElement(ActionButton, { disabled: !dirty || isSubmitting || readOnly, onClick: displayConfirmDialog ? submitWithConfirmDialog : safeSubmit }, t("common.buttons.save")));
     return (React.createElement(FormButtons, null,
         !showBackButtonOnly &&
-            (readOnly && readOnlyReasons ? (React.createElement(Tooltip, { title: readOnlyReasons.join(", ") },
+            (readOnly && readOnlyReasons.length > 0 ? (React.createElement(Tooltip, { title: readOnlyReasons.join(", ") },
                 React.createElement("span", null, saveBtn))) : (saveBtn)),
         goBack && !(isInDialog && hasCustomCloseHandler) && (React.createElement(ActionButton, { disabled: isSubmitting, onClick: handleBack, classes: backButtonClasses }, t("common.buttons.back")))));
 };
