@@ -85,7 +85,7 @@ const DefaultFormPageButtons = (
 	return (
 		<FormButtons>
 			{!showBackButtonOnly &&
-				(readOnly && readOnlyReasons ? (
+				(readOnly && readOnlyReasons.length > 0 ? (
 					<Tooltip title={readOnlyReasons.join(", ")}>
 						<span>{saveBtn}</span>
 					</Tooltip>
