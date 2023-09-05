@@ -37,6 +37,7 @@ import useCCTranslations from "../../utils/useCCTranslations";
 import { useDialogContext } from "../../framework";
 import deepSort from "../../utils/deepSort";
 import useDevKeybinds from "../../utils/useDevKeybinds";
+import uniqueArray from "../../utils/uniqueArray";
 
 // optional import
 let captureException: ((e: Error) => void) | null = null;
@@ -391,6 +392,18 @@ export interface FormContextData {
 	 */
 	setCustomFieldDirty: (field: string, dirty: boolean) => void;
 	/**
+	 * Set form read only
+	 * @param ident A unique identifier triggering the read-only state
+	 * @param reason Optional reason for user
+	 */
+	setCustomReadOnly: (ident: string, reason?: string) => void;
+	/**
+	 * Set form read-write
+	 * @param ident The unique identifier that triggered the read-only state
+	 * @see setCustomReadOnly
+	 */
+	removeCustomReadOnly: (ident: string) => void;
+	/**
 	 * Is the form dirty?
 	 */
 	dirty: boolean;
@@ -419,9 +432,17 @@ export interface FormContextData {
 	 */
 	readOnly: boolean;
 	/**
-	 * @see FormProps.readOnlyReason
+	 * First read-only reason
+	 * @see readOnlyReasons
+	 * @deprecated use readOnlyReasons
 	 */
 	readOnlyReason: string | null | undefined;
+	/**
+	 * Read only reasons
+	 * @see FormProps.readOnlyReason
+	 * @see setCustomReadOnly
+	 */
+	readOnlyReasons: string[];
 	/**
 	 * Is the form being submitted
 	 */
@@ -561,6 +582,7 @@ export type FormContextDataLite = Pick<
 	| "onlyWarnChanged"
 	| "readOnly"
 	| "readOnlyReason"
+	| "readOnlyReasons"
 	| "errorComponent"
 	| "getFieldValue"
 	| "getFieldValues"
@@ -716,8 +738,8 @@ const Form = <
 		onlyWarnMounted,
 		onlyWarnChanged,
 		onlySubmitMounted,
-		readOnly,
-		readOnlyReason,
+		readOnly: readOnlyProp,
+		readOnlyReason: readOnlyReasonProp,
 		disableValidation,
 		nestedFormName,
 		disableNestedSubmit,
@@ -817,6 +839,42 @@ const Form = <
 					: value;
 		},
 		[]
+	);
+
+	// custom read-only
+	const [customReadOnlyState, setCustomReadOnlyState] = useState<string[]>([]);
+	const [customReadOnlyReasons, setCustomReadOnlyReasons] = useState<
+		Record<string, string>
+	>({});
+	const setCustomReadOnly = useCallback((ident: string, reason?: string) => {
+		setCustomReadOnlyState((prev) => uniqueArray([...prev, ident]));
+		setCustomReadOnlyReasons((prev) => {
+			const newReasons = { ...prev };
+			if (reason) {
+				newReasons[ident] = reason;
+			} else {
+				delete newReasons[ident];
+			}
+			return newReasons;
+		});
+	}, []);
+	const removeCustomReadOnly = useCallback((ident: string) => {
+		setCustomReadOnlyState((prev) =>
+			prev.filter((otherIdent) => otherIdent !== ident)
+		);
+		setCustomReadOnlyReasons((prev) => {
+			const newReaons = { ...prev };
+			delete newReaons[ident];
+			return newReaons;
+		});
+	}, []);
+	const readOnly = readOnlyProp || customReadOnlyState.length > 0;
+	const readOnlyReasons = useMemo(
+		(): string[] =>
+			readOnlyReasonProp
+				? [readOnlyReasonProp, ...Object.values(customReadOnlyReasons)]
+				: Object.values(customReadOnlyReasons),
+		[readOnlyReasonProp, customReadOnlyReasons]
 	);
 
 	// main form handling
@@ -1540,6 +1598,8 @@ const Form = <
 			removeCustomValidationHandler,
 			setCustomWarningHandler,
 			removeCustomWarningHandler,
+			setCustomReadOnly,
+			removeCustomReadOnly,
 			onlySubmitMounted: !!onlySubmitMounted,
 			onlySubmitMountedBehaviour,
 			onlyValidateMounted: !!onlyValidateMounted,
@@ -1567,8 +1627,9 @@ const Form = <
 			validateForm,
 			parentFormContext: nestedFormName ? parentFormContext : null,
 			customProps,
-			readOnly: !!readOnly,
-			readOnlyReason: readOnlyReason,
+			readOnly: readOnly,
+			readOnlyReason: readOnlyReasons[0],
+			readOnlyReasons: readOnlyReasons,
 		}),
 		[
 			id,
@@ -1577,10 +1638,10 @@ const Form = <
 			serverData,
 			setError,
 			markFieldMounted,
+			setCustomFieldDirty,
 			dirty,
 			getCustomState,
 			setCustomState,
-			setCustomFieldDirty,
 			setPreSubmitHandler,
 			removePreSubmitHandler,
 			setPostSubmitHandler,
@@ -1589,16 +1650,18 @@ const Form = <
 			removeCustomValidationHandler,
 			setCustomWarningHandler,
 			removeCustomWarningHandler,
+			setCustomReadOnly,
+			removeCustomReadOnly,
 			onlySubmitMounted,
 			onlySubmitMountedBehaviour,
 			onlyValidateMounted,
 			onlyWarnMounted,
 			onlyWarnChanged,
-			deleteOnSubmit,
 			submitting,
 			addSubmittingBlocker,
 			removeSubmittingBlocker,
 			submitForm,
+			deleteOnSubmit,
 			values,
 			touched,
 			errors,
@@ -1613,11 +1676,11 @@ const Form = <
 			resetForm,
 			refetch,
 			validateForm,
-			parentFormContext,
 			nestedFormName,
+			parentFormContext,
 			customProps,
 			readOnly,
-			readOnlyReason,
+			readOnlyReasons,
 		]
 	);
 
@@ -1631,8 +1694,9 @@ const Form = <
 			onlyValidateMounted: !!onlyValidateMounted,
 			onlyWarnMounted: !!onlyWarnMounted,
 			onlyWarnChanged: !!onlyWarnChanged,
-			readOnly: !!readOnly,
-			readOnlyReason: readOnlyReason,
+			readOnly: readOnly,
+			readOnlyReason: readOnlyReasons[0],
+			readOnlyReasons: readOnlyReasons,
 			getFieldValue,
 			getFieldValues,
 			setFieldValueLite,
@@ -1648,7 +1712,7 @@ const Form = <
 			onlyWarnMounted,
 			onlyWarnChanged,
 			readOnly,
-			readOnlyReason,
+			readOnlyReasons,
 			getFieldValue,
 			getFieldValues,
 			setFieldValueLite,

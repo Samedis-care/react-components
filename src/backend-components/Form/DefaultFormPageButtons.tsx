@@ -27,7 +27,7 @@ const DefaultFormPageButtons = (
 	const {
 		showBackButtonOnly,
 		readOnly,
-		readOnlyReason,
+		readOnlyReasons,
 		dirty,
 		isSubmitting,
 		submit,
@@ -85,8 +85,8 @@ const DefaultFormPageButtons = (
 	return (
 		<FormButtons>
 			{!showBackButtonOnly &&
-				(readOnly && readOnlyReason ? (
-					<Tooltip title={readOnlyReason}>
+				(readOnly && readOnlyReasons ? (
+					<Tooltip title={readOnlyReasons.join(", ")}>
 						<span>{saveBtn}</span>
 					</Tooltip>
 				) : (
