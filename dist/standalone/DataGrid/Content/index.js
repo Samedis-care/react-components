@@ -56,13 +56,11 @@ const Content = (props) => {
         return scrollbarWidth;
     }, []);
     const remainingWidth = useMemo(() => {
-        const columnsToResize = Object.keys(columnWidth)
+        const shownColumns = Object.keys(columnWidth)
             .map((field) => columns.find((col) => col.field === field))
-            .filter((entry) => entry)
-            .filter((entry) => !state.hiddenColumns.includes(entry.field))
-            .filter((entry) => !entry.width || !entry.width[2]);
+            .filter((entry) => entry).filter((entry) => !state.hiddenColumns.includes(entry.field));
         const usedWidth = Object.entries(columnWidth)
-            .filter(([field]) => columnsToResize.find((col) => col.field === field))
+            .filter(([field]) => shownColumns.find((col) => col.field === field))
             .reduce((a, b) => a + b[1], 0) +
             (disableSelection ? 0 : SELECT_ROW_WIDTH);
         return Math.max(width - usedWidth - scrollbarWidth, 0);
@@ -82,14 +80,13 @@ const Content = (props) => {
         // only run on initial resize
         setColumnWidth((prevState) => {
             // resolve all visible columns which don't have an fixed initial width
-            let columnsToResize = Object.keys(prevState)
+            const shownColumns = Object.keys(prevState)
                 .map((field) => columns.find((col) => col.field === field))
-                .filter((entry) => entry)
-                .filter((entry) => !state.hiddenColumns.includes(entry.field))
-                .filter((entry) => !entry.width || !entry.width[2]);
+                .filter((entry) => entry).filter((entry) => !state.hiddenColumns.includes(entry.field));
+            let columnsToResize = shownColumns.filter((entry) => !entry.width || !entry.width[2]);
             // determine width used by visible columns
             const usedWidth = Object.entries(prevState)
-                .filter(([field]) => columnsToResize.find((col) => col.field === field))
+                .filter(([field]) => shownColumns.find((col) => col.field === field))
                 .reduce((a, b) => a + b[1], 0) +
                 (disableSelection ? 0 : SELECT_ROW_WIDTH);
             let remainingWidth = width - usedWidth - scrollbarWidth;
@@ -98,7 +95,7 @@ const Content = (props) => {
             // divide width over the visible columns while honoring limits
             const newState = { ...prevState };
             while (remainingWidth > 0) {
-                const resizePerColumn = remainingWidth / columns.length;
+                const resizePerColumn = remainingWidth / columnsToResize.length;
                 let newRemainingWidth = 0;
                 columnsToResize.forEach((col) => {
                     if (!(col.field in newState))
