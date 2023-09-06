@@ -999,8 +999,8 @@ const Form = <
 				const [localData, remoteData] = getNormalizedData(values);
 				fieldsToValidate = fieldsToValidate.filter(
 					(field) =>
-						JSON.stringify(dotInObject(field, localData)) !==
-						JSON.stringify(dotInObject(field, remoteData))
+						JSON.stringify(getValueByDot(field, localData)) !==
+						JSON.stringify(getValueByDot(field, remoteData))
 				);
 			}
 
@@ -1539,8 +1539,8 @@ const Form = <
 			console.log("Form Data:", localData);
 
 			Object.keys(model.fields).forEach((key) => {
-				const server: unknown = dotInObject(key, remoteData);
-				const form = dotInObject(key, localData);
+				const server: unknown = getValueByDot(key, remoteData);
+				const form = getValueByDot(key, localData);
 				const dirty = JSON.stringify(server) !== JSON.stringify(form);
 				if (onlyDirty && !dirty) return;
 				console.log(
