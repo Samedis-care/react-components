@@ -91,18 +91,19 @@ const Content = (props: IDataGridContentProps) => {
 	}, []);
 
 	const remainingWidth = useMemo(() => {
-		const columnsToResize: IDataGridColumnDef[] = (Object.keys(columnWidth)
+		const shownColumns: IDataGridColumnDef[] = (Object.keys(columnWidth)
 			.map((field) => columns.find((col) => col.field === field))
-			.filter((entry) => entry) as IDataGridColumnDef[])
-			.filter((entry) => !state.hiddenColumns.includes(entry.field))
-			.filter((entry) => !entry.width || !entry.width[2]);
+			.filter((entry) => entry) as IDataGridColumnDef[]).filter(
+			(entry) => !state.hiddenColumns.includes(entry.field)
+		);
 		const usedWidth =
 			Object.entries(columnWidth)
 				.filter(([field]) =>
-					columnsToResize.find((col: IDataGridColumnDef) => col.field === field)
+					shownColumns.find((col: IDataGridColumnDef) => col.field === field)
 				)
 				.reduce((a, b) => a + b[1], 0) +
 			(disableSelection ? 0 : SELECT_ROW_WIDTH);
+
 		return Math.max(width - usedWidth - scrollbarWidth, 0);
 	}, [
 		columnWidth,
@@ -119,18 +120,19 @@ const Content = (props: IDataGridContentProps) => {
 		// only run on initial resize
 		setColumnWidth((prevState) => {
 			// resolve all visible columns which don't have an fixed initial width
-			let columnsToResize: IDataGridColumnDef[] = (Object.keys(prevState)
+			const shownColumns: IDataGridColumnDef[] = (Object.keys(prevState)
 				.map((field) => columns.find((col) => col.field === field))
-				.filter((entry) => entry) as IDataGridColumnDef[])
-				.filter((entry) => !state.hiddenColumns.includes(entry.field))
-				.filter((entry) => !entry.width || !entry.width[2]);
+				.filter((entry) => entry) as IDataGridColumnDef[]).filter(
+				(entry) => !state.hiddenColumns.includes(entry.field)
+			);
+			let columnsToResize = shownColumns.filter(
+				(entry) => !entry.width || !entry.width[2]
+			);
 			// determine width used by visible columns
 			const usedWidth =
 				Object.entries(prevState)
 					.filter(([field]) =>
-						columnsToResize.find(
-							(col: IDataGridColumnDef) => col.field === field
-						)
+						shownColumns.find((col: IDataGridColumnDef) => col.field === field)
 					)
 					.reduce((a, b) => a + b[1], 0) +
 				(disableSelection ? 0 : SELECT_ROW_WIDTH);
@@ -140,7 +142,7 @@ const Content = (props: IDataGridContentProps) => {
 			// divide width over the visible columns while honoring limits
 			const newState = { ...prevState };
 			while (remainingWidth > 0) {
-				const resizePerColumn = remainingWidth / columns.length;
+				const resizePerColumn = remainingWidth / columnsToResize.length;
 				let newRemainingWidth = 0;
 				columnsToResize.forEach((col) => {
 					if (!(col.field in newState)) return;
