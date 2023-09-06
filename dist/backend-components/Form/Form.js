@@ -288,8 +288,8 @@ const Form = (props) => {
         }
         if (mode === "hint" && onlyWarnChanged) {
             const [localData, remoteData] = getNormalizedData(values);
-            fieldsToValidate = fieldsToValidate.filter((field) => JSON.stringify(dotInObject(field, localData)) !==
-                JSON.stringify(dotInObject(field, remoteData)));
+            fieldsToValidate = fieldsToValidate.filter((field) => JSON.stringify(getValueByDot(field, localData)) !==
+                JSON.stringify(getValueByDot(field, remoteData)));
         }
         const errors = await model.validate(values ?? valuesRef.current, id ? "edit" : "create", fieldsToValidate, mode);
         await Promise.all(Object.entries(mode === "normal"
@@ -683,8 +683,8 @@ const Form = (props) => {
         console.log("Server Data:", remoteData);
         console.log("Form Data:", localData);
         Object.keys(model.fields).forEach((key) => {
-            const server = dotInObject(key, remoteData);
-            const form = dotInObject(key, localData);
+            const server = getValueByDot(key, remoteData);
+            const form = getValueByDot(key, localData);
             const dirty = JSON.stringify(server) !== JSON.stringify(form);
             if (onlyDirty && !dirty)
                 return;
