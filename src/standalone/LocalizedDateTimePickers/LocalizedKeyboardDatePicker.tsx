@@ -44,7 +44,7 @@ const LocalizedKeyboardDatePicker = (
 		hideDisabledIcon ?? theme.componentsCare?.uiKit?.hideDisabledIcons;
 	const slotOverrideHideIcon = {
 		...otherProps.slots,
-		OpenPickerIcon: React.Fragment,
+		openPickerIcon: React.Fragment,
 	};
 
 	return (
