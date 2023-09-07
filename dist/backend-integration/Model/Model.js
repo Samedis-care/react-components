@@ -46,20 +46,22 @@ export const useModelFetchAll = (model, params) => {
  */
 export const useModelMutation = (model) => {
     return useMutation(model.modelId + "-create-or-update", model.createOrUpdateRecordRaw.bind(model), {
-        onSuccess: (data) => {
-            if (!data[0].id) {
+        onSuccess: (responseData, inputData) => {
+            const id = responseData[0].id;
+            if (!id) {
                 throw new Error("Can't update null ID");
             }
             if (model.hooks.onCreateOrUpdate) {
-                model.hooks.onCreateOrUpdate(data);
+                model.hooks.onCreateOrUpdate(responseData);
             }
-            ModelDataStore.setQueryData(model.getReactQueryKey(data[0].id, false), data);
+            ModelDataStore.setQueryData(model.getReactQueryKey(id, false), responseData);
             if (model.requestBatchingEnabled) {
-                ModelDataStore.setQueryData(model.getReactQueryKey(data[0].id, true), data);
+                ModelDataStore.setQueryData(model.getReactQueryKey(id, true), responseData);
             }
             else {
-                ModelDataStore.removeQueries(model.getReactQueryKey(data[0].id, true));
+                ModelDataStore.removeQueries(model.getReactQueryKey(id, true));
             }
+            model.triggerMutationEvent(!inputData.id, responseData);
         },
     });
 };
@@ -653,6 +655,10 @@ class Model {
             }
         });
     }
+    /**
+     * dev util to check if requests can be batched
+     * @param printWarnings output warnings, default false
+     */
     canRequestsBeBatched(printWarnings = false) {
         const fieldsNotInOverview = Object.entries(this.fields)
             .filter(([field, def]) => {
@@ -670,6 +676,71 @@ class Model {
             console.log(`[Components-Care] [Model(id = ${this.modelId}).canRequestsBeBatched] Fields enabled in edit, but not in overview:`, fieldsNotInOverview);
         }
         return fieldsNotInOverview.length === 0;
+    }
+    // EVENT HANDLERS
+    /**
+     * static event handler registry
+     * @private
+     */
+    static eventHandlers = {
+        mutate: {},
+    };
+    /**
+     * Adds an event handler
+     * @param evt The event to listen to
+     * @param handler The handler
+     * @param idFilter optional: id filter, undefined for any, null for newly created
+     * @remarks Remove handler with removeEventHandler when done
+     * @see removeEventHandler
+     */
+    addEventHandler(evt, handler, idFilter) {
+        const handlerKey = JSON.stringify(this.getReactQueryKey(idFilter === undefined ? "any" : idFilter, false));
+        if (!(handlerKey in Model.eventHandlers[evt])) {
+            Model.eventHandlers[evt][handlerKey] = [handler];
+        }
+        else {
+            Model.eventHandlers[evt][handlerKey].push(handler);
+        }
+    }
+    /**
+     * Removes an event handler
+     * @param evt The event to unsubscribe from
+     * @param handler The handler that was passed to addEventHandler (exact reference!)
+     * @param idFilter optional: id filter, undefined for any, null for newly created. needs to be the same as in addEventHandler
+     * @remarks Removes handler added by addEventHandler
+     * @see addEventHandler
+     */
+    removeEventHandler(evt, handler, idFilter) {
+        const handlerKey = JSON.stringify(this.getReactQueryKey(idFilter === undefined ? "any" : idFilter, false));
+        if (!(handlerKey in Model.eventHandlers[evt])) {
+            return;
+        }
+        const handlers = Model.eventHandlers[evt][handlerKey];
+        Model.eventHandlers[evt][handlerKey] = handlers.filter((h) => h !== handler);
+        if (Model.eventHandlers[evt][handlerKey].length === handlers.length) {
+            throw new Error("Handler not unregistered as was not registered");
+        }
+        if (Model.eventHandlers[evt][handlerKey].length === 0)
+            delete Model.eventHandlers[evt][handlerKey];
+    }
+    /**
+     * Trigger the mutation event and call event listeners
+     * @param isCreate Is the record just created
+     * @param data The response data
+     * @remarks used internally, usually not called by library using code
+     */
+    triggerMutationEvent(isCreate, data) {
+        const handlers = Model.eventHandlers.mutate;
+        const id = data[0].id;
+        const keys = ["any", id];
+        if (isCreate)
+            keys.push(null);
+        keys.forEach((key) => {
+            const handlerKey = JSON.stringify(this.getReactQueryKey(key, false));
+            if (handlerKey in handlers) {
+                handlers[handlerKey].forEach((handler) => handler(data));
+            }
+        });
     }
 }
 export default Model;

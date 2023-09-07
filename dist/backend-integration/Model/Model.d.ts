@@ -161,6 +161,11 @@ export declare const useModelDeleteMultiple: <KeyT extends string, VisibilityT e
  * @see model.deleteAdvancedRaw
  */
 export declare const useModelDeleteAdvanced: <KeyT extends string, VisibilityT extends PageVisibility, CustomT, TContext = unknown>(model: Model<KeyT, VisibilityT, CustomT>) => UseMutationResult<void, Error, AdvancedDeleteRequest, TContext>;
+/**
+ * Mutation event handler
+ * @param data The response data
+ */
+export declare type ModelEventMutation = <KeyT extends ModelFieldName>(data: ModelGetResponse<KeyT>) => void;
 export interface ModelHooks<KeyT extends ModelFieldName> {
     /**
      * Hook fired on useModelMutation success
@@ -403,6 +408,40 @@ declare class Model<KeyT extends ModelFieldName, VisibilityT extends PageVisibil
      * @remarks To enable this automatically set `Model.autoValidateUX = true; Model.autoValidateUXThrow = false/true;`
      */
     validateUX(throwErr?: boolean): void;
+    /**
+     * dev util to check if requests can be batched
+     * @param printWarnings output warnings, default false
+     */
     canRequestsBeBatched(printWarnings?: boolean): boolean;
+    /**
+     * static event handler registry
+     * @private
+     */
+    private static eventHandlers;
+    /**
+     * Adds an event handler
+     * @param evt The event to listen to
+     * @param handler The handler
+     * @param idFilter optional: id filter, undefined for any, null for newly created
+     * @remarks Remove handler with removeEventHandler when done
+     * @see removeEventHandler
+     */
+    addEventHandler(evt: "mutate", handler: ModelEventMutation, idFilter?: string | null): void;
+    /**
+     * Removes an event handler
+     * @param evt The event to unsubscribe from
+     * @param handler The handler that was passed to addEventHandler (exact reference!)
+     * @param idFilter optional: id filter, undefined for any, null for newly created. needs to be the same as in addEventHandler
+     * @remarks Removes handler added by addEventHandler
+     * @see addEventHandler
+     */
+    removeEventHandler(evt: "mutate", handler: ModelEventMutation, idFilter?: string | null): void;
+    /**
+     * Trigger the mutation event and call event listeners
+     * @param isCreate Is the record just created
+     * @param data The response data
+     * @remarks used internally, usually not called by library using code
+     */
+    triggerMutationEvent(isCreate: boolean, data: ModelGetResponse<KeyT>): void;
 }
 export default Model;
