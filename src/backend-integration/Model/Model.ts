@@ -305,6 +305,10 @@ export const useModelMutation = <
 						model.getReactQueryKey((data[0] as Record<"id", string>).id, true),
 						data
 					);
+				} else {
+					ModelDataStore.removeQueries(
+						model.getReactQueryKey((data[0] as Record<"id", string>).id, true)
+					);
 				}
 			},
 		}
