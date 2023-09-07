@@ -57,6 +57,9 @@ export const useModelMutation = (model) => {
             if (model.requestBatchingEnabled) {
                 ModelDataStore.setQueryData(model.getReactQueryKey(data[0].id, true), data);
             }
+            else {
+                ModelDataStore.removeQueries(model.getReactQueryKey(data[0].id, true));
+            }
         },
     });
 };
