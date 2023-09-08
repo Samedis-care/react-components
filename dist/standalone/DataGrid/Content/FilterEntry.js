@@ -59,6 +59,11 @@ const FilterEntry = (props) => {
         filterValue2 = "";
         updateParent();
     };
+    const enumFilterInverted = ["notEmpty", "notInSet"].includes(filterType);
+    const onFilterTypeChangeEnum = (_, checked) => {
+        filterType = checked ? "notInSet" : "inSet";
+        updateParent();
+    };
     const onFilterValueChange = (event) => {
         filterValue = event.target.value;
         if (!filterValue) {
@@ -92,19 +97,26 @@ const FilterEntry = (props) => {
         updateParent();
     };
     const handleNullEnum = () => {
-        // deal with empty/null enum values by using empty filter (possibly chained via OR)
+        // deal with empty/null enum values by using empty/notEmpty filter (possibly chained via OR or AND if inverted)
         const split = filterValue.split(",");
         const hasEmpty = split.includes(ENUM_FILTER_MAGIC_EMPTY);
+        const isInverted = ["notEmpty", "notInSet"].includes(filterType);
         if (split.length === 1) {
-            filterType = hasEmpty ? "empty" : "inSet";
+            filterType = isInverted
+                ? hasEmpty
+                    ? "notEmpty"
+                    : "notInSet"
+                : hasEmpty
+                    ? "empty"
+                    : "inSet";
             subFilter = undefined;
         }
         else if (hasEmpty) {
-            filterType = "inSet";
-            subFilterComboType = "or";
+            filterType = isInverted ? "notInSet" : "inSet";
+            subFilterComboType = isInverted ? "and" : "or";
             subFilter = {
-                type: "empty",
-                value1: "empty",
+                type: isInverted ? "notEmpty" : "empty",
+                value1: isInverted ? "notEmpty" : "empty",
                 value2: "",
                 nextFilter: undefined,
                 nextFilterType: undefined,
@@ -208,6 +220,9 @@ const FilterEntry = (props) => {
                                     .sort()
                                     .join(","), onChange: onFilterValueChangeEnumAll }),
                         React.createElement(ListItemText, null, t("standalone.data-grid.content.set-filter.select-all")))),
+                    checkSupport(props.valueType, "notInSet") && (React.createElement(ListItem, { className: classes.setFilterListItem },
+                        React.createElement(Checkbox, { checked: enumFilterInverted, onChange: onFilterTypeChangeEnum }),
+                        React.createElement(ListItemText, null, t("standalone.data-grid.content.set-filter.invert")))),
                     props.valueData
                         .filter((entry) => entry
                         .getLabelText()
