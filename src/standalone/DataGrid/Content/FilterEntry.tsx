@@ -166,6 +166,15 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 		filterValue2 = "";
 		updateParent();
 	};
+
+	const enumFilterInverted = ["notEmpty", "notInSet"].includes(filterType);
+	const onFilterTypeChangeEnum = (
+		_: React.ChangeEvent<HTMLInputElement>,
+		checked: boolean
+	) => {
+		filterType = checked ? "notInSet" : "inSet";
+		updateParent();
+	};
 	const onFilterValueChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		filterValue = event.target.value;
 		if (!filterValue) {
@@ -197,18 +206,25 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 	};
 
 	const handleNullEnum = () => {
-		// deal with empty/null enum values by using empty filter (possibly chained via OR)
+		// deal with empty/null enum values by using empty/notEmpty filter (possibly chained via OR or AND if inverted)
 		const split = filterValue.split(",");
 		const hasEmpty = split.includes(ENUM_FILTER_MAGIC_EMPTY);
+		const isInverted = ["notEmpty", "notInSet"].includes(filterType);
 		if (split.length === 1) {
-			filterType = hasEmpty ? "empty" : "inSet";
+			filterType = isInverted
+				? hasEmpty
+					? "notEmpty"
+					: "notInSet"
+				: hasEmpty
+				? "empty"
+				: "inSet";
 			subFilter = undefined;
 		} else if (hasEmpty) {
-			filterType = "inSet";
-			subFilterComboType = "or";
+			filterType = isInverted ? "notInSet" : "inSet";
+			subFilterComboType = isInverted ? "and" : "or";
 			subFilter = {
-				type: "empty",
-				value1: "empty",
+				type: isInverted ? "notEmpty" : "empty",
+				value1: isInverted ? "notEmpty" : "empty",
 				value2: "",
 				nextFilter: undefined,
 				nextFilterType: undefined,
@@ -520,6 +536,17 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 									/>
 									<ListItemText>
 										{t("standalone.data-grid.content.set-filter.select-all")}
+									</ListItemText>
+								</ListItem>
+							)}
+							{checkSupport(props.valueType, "notInSet") && (
+								<ListItem className={classes.setFilterListItem}>
+									<Checkbox
+										checked={enumFilterInverted}
+										onChange={onFilterTypeChangeEnum}
+									/>
+									<ListItemText>
+										{t("standalone.data-grid.content.set-filter.invert")}
 									</ListItemText>
 								</ListItem>
 							)}
