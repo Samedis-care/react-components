@@ -21,7 +21,8 @@
 				},
 				"set-filter": {
 					"search": "Chercher...",
-					"select-all": "Tout sélectionner"
+					"select-all": "Tout sélectionner",
+					"invert": "Afficher tout ce qui ne correspond pas"
 				},
 				"filter-type": {
 					"eq": "Équivaut à",
