@@ -131,7 +131,7 @@ const BaseSelector = (props) => {
     const renderIcon = useCallback((icon) => typeof icon === "string" ? (React.createElement("img", { src: icon, alt: "", className: customClasses.icon })) : (icon), [customClasses.icon]);
     const defaultRenderer = useCallback((props, data) => {
         if (data.isDivider)
-            return React.createElement(Divider, { className: customClasses.divider });
+            return (React.createElement(Divider, { component: "li", ...props, className: customClasses.divider }));
         if (data.isSmallLabel)
             return (React.createElement(Typography, { component: "li", ...props, onClick: undefined, variant: "caption", className: customClasses.smallLabel }, getReactLabel(data)));
         return (React.createElement(SelectorSmallListItemButton, { component: "li", ...props, className: combineClassNames([
