@@ -552,7 +552,14 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 
 	const defaultRenderer = useCallback(
 		(props: React.HTMLAttributes<HTMLLIElement>, data: BaseSelectorData) => {
-			if (data.isDivider) return <Divider className={customClasses.divider} />;
+			if (data.isDivider)
+				return (
+					<Divider
+						component={"li"}
+						{...props}
+						className={customClasses.divider}
+					/>
+				);
 			if (data.isSmallLabel)
 				return (
 					<Typography
