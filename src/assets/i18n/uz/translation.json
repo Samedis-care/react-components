@@ -21,7 +21,8 @@
 				},
 				"set-filter": {
 					"search": "Qidirmoq...",
-					"select-all": "Hammasini belgilash"
+					"select-all": "Hammasini belgilash",
+					"invert": "Barcha mos kelmaydiganlarni ko'rsatish"
 				},
 				"filter-type": {
 					"eq": "Teng",

@@ -21,7 +21,8 @@
 				},
 				"set-filter": {
 					"search": "Zoeken...",
-					"select-all": "Selecteer alles"
+					"select-all": "Selecteer alles",
+					"invert": "Toon alle niet-overeenkomende"
 				},
 				"filter-type": {
 					"eq": "Gelijk aan",
