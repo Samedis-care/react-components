@@ -21,8 +21,9 @@ import {
 import makeStyles from "@mui/styles/makeStyles";
 import { CrudImportProps, CrudImportType } from "./Import";
 import Loader from "../../standalone/Loader";
-import { useRouteInfo } from "../../utils";
+import { throwError, useRouteInfo } from "../../utils";
 import { SentryRoutes } from "../../standalone/SentryRoute";
+import { IDataGridAddButton } from "../../standalone/DataGrid/DataGrid";
 
 const CrudImport = React.lazy(() => import("./Import")) as CrudImportType;
 
@@ -100,7 +101,14 @@ export interface CrudProps<
 		| "forceRefreshToken"
 		| "onAddNew"
 	> &
-		Pick<Partial<BackendDataGridProps<KeyT, VisibilityT, CustomT>>, "onAddNew">;
+		Pick<Partial<BackendDataGridProps<KeyT, VisibilityT, CustomT>>, never> & {
+			onAddNew?:
+				| ((showNew: () => void) => void)
+				| string
+				| (Omit<IDataGridAddButton, "onClick"> & {
+						onClick: (showNew: () => void) => void | undefined;
+				  })[];
+		};
 	/**
 	 * Component wrapping the DataGrid
 	 */
@@ -386,7 +394,25 @@ const CRUD = <
 					}
 					onAddNew={
 						hasPermission(perms, props.newPermission) && props.children
-							? props.gridProps.onAddNew ?? showNewPage
+							? props.gridProps.onAddNew == null
+								? showNewPage
+								: typeof props.gridProps.onAddNew === "string"
+								? props.gridProps.onAddNew
+								: typeof props.gridProps.onAddNew === "function"
+								? () =>
+										(props.gridProps.onAddNew as (showNew: () => void) => void)(
+											showNewPage
+										)
+								: Array.isArray(props.gridProps.onAddNew)
+								? props.gridProps.onAddNew.map(
+										(btn): IDataGridAddButton => ({
+											...btn,
+											onClick: btn.onClick
+												? () => btn.onClick(showNewPage)
+												: undefined,
+										})
+								  )
+								: throwError("invalid type")
 							: props.newPermissionHint
 					}
 					onImport={enableUserImport ? handleImportButton : undefined}
