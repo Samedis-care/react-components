@@ -36,9 +36,13 @@ export interface CrudFormProps {
 	/**
 	 * Open view
 	 * @param id The ID of the record or special values for special views
+	 * @param forceRefresh force refresh data grid?
 	 * @see CrudSpecialIds
 	 */
-	open: (id: "import" | "devimport" | "new" | string) => void;
+	open: (
+		id: "import" | "devimport" | "new" | string,
+		forceRefresh?: boolean
+	) => void;
 	/**
 	 * Does the Form have a custom submit handler?
 	 */
@@ -323,14 +327,15 @@ const CRUD = <
 	);
 
 	const openView = useCallback(
-		(id: "import" | "devimport" | "new" | string) => {
+		(id: "import" | "devimport" | "new" | string, forceRefresh?: boolean) => {
 			if (disableRouting) {
 				setId(id);
 			} else {
 				navigate(routeUrl + "/" + id);
 			}
+			if (forceRefresh) refreshGrid();
 		},
-		[disableRouting, navigate, routeUrl]
+		[disableRouting, navigate, routeUrl, refreshGrid]
 	);
 
 	const handleSubmit = useCallback(
