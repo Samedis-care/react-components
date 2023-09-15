@@ -219,7 +219,13 @@ const BaseSelector = (props) => {
                         isSmallLabel: true,
                     }
                     : undefined,
-                ...(await Promise.all(filteredLruIds.map((id) => (async (id) => lru.loadData(id))(id).catch(() => undefined)))).filter((e) => !!e).map((entry) => ({
+                ...(await Promise.all(filteredLruIds.map((id) => (async (id) => lru.loadData(id))(id).catch((e) => {
+                    // remove IDs from LRU on backend error
+                    if (e instanceof Error && e.name === "BackendError") {
+                        setLruIds((ids) => ids.filter((oId) => oId !== id));
+                    }
+                    return undefined;
+                })))).filter((e) => !!e).map((entry) => ({
                     ...entry,
                     className: combineClassNames([
                         customClasses.lruListItem,
@@ -259,20 +265,21 @@ const BaseSelector = (props) => {
             return null;
         });
     }, [
-        t,
         actualAddNewLabel,
-        lru,
+        filterIds,
         lruIds,
+        lru,
         grouped,
         disableGroupSorting,
+        onAddNew,
+        t,
+        setLruIds,
         customClasses.lruListItem,
         onLoad,
         switchValue,
-        onAddNew,
+        getId,
         groupSorter,
         noGroupLabel,
-        filterIds,
-        getId,
     ]);
     const updateQuery = useCallback((_, newQuery) => {
         setQuery(newQuery);
