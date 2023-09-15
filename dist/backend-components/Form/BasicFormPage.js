@@ -1,5 +1,5 @@
 import React, { useCallback, useContext, useEffect, useRef } from "react";
-import { useFormContextLite } from "..";
+import { useFormContextLite, } from "..";
 import { UnsafeToLeaveDispatch } from "../../framework/UnsafeToLeave";
 import { FrameworkHistory, useDialogContext } from "../../framework";
 import { showConfirmDialog, showConfirmDialogBool, showErrorDialog, } from "../../non-standalone";
@@ -119,6 +119,6 @@ const BasicFormPage = (props) => {
         }
     }, [submit, postSubmitHandler, pushDialog]);
     return (React.createElement(FormPageLayout, { body: form, footer: React.createElement(FormButtons, { ...childrenProps, ...otherProps, showBackButtonOnly: otherProps.showBackButtonOnly ||
-                (readOnly && readOnlyReasons.length === 0), readOnly: readOnly, readOnlyReasons: readOnlyReasons, isSubmitting: isSubmitting, dirty: dirty, disableRouting: disableRouting, submit: handleSubmit, customProps: customProps }), other: React.createElement(FormLoaderOverlay, { visible: isSubmitting }) }));
+                (readOnly && !!Object.values(readOnlyReasons).find((e) => !!e)), readOnly: readOnly, readOnlyReasons: readOnlyReasons, isSubmitting: isSubmitting, dirty: dirty, disableRouting: disableRouting, submit: handleSubmit, customProps: customProps }), other: React.createElement(FormLoaderOverlay, { visible: isSubmitting }) }));
 };
 export default React.memo(BasicFormPage);

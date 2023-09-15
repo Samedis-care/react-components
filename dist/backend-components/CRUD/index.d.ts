@@ -33,7 +33,7 @@ export interface CrudProps<KeyT extends ModelFieldName, VisibilityT extends Page
     /**
      * The properties to pass to form
      */
-    formProps: Omit<FormProps<KeyT, VisibilityT, CustomT, CrudFormProps>, "id" | "model" | "children" | "customProps" | "disableRouting"> & {
+    formProps: Omit<FormProps<KeyT, VisibilityT, CustomT, CrudFormProps>, "id" | "model" | "children" | "customProps" | "disableRouting" | "readOnly" | "readOnlyReason"> & {
         /**
          * override for default form custom props passed in by CRUD component
          */

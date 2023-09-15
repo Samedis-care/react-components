@@ -169,12 +169,19 @@ export interface FormProps<KeyT extends ModelFieldName, VisibilityT extends Page
     onlyWarnChanged?: boolean;
     /**
      * Is the form read-only?
+     * @deprecated use readOnlyReasons
      */
     readOnly?: boolean;
     /**
      * Optional read-only reason
+     * @deprecated use readOnlyReasons instead
      */
     readOnlyReason?: string | null;
+    /**
+     * Read only reasons.
+     * @type Record<unique-identifier, human-readable-reason-or-NULL>
+     */
+    readOnlyReasons?: Record<string, string | null>;
     /**
      * Disable Validations
      */
@@ -355,10 +362,11 @@ export interface FormContextData {
     readOnlyReason: string | null | undefined;
     /**
      * Read only reasons
-     * @see FormProps.readOnlyReason
+     * @see FormProps.readOnlyReasons
      * @see setCustomReadOnly
+     * @remarks identifier "form-legacy" is used for compatibility
      */
-    readOnlyReasons: string[];
+    readOnlyReasons: Partial<Record<"form-legacy" | string, string | null>>;
     /**
      * Is the form being submitted
      */

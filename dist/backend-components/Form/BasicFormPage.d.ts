@@ -1,5 +1,5 @@
 import React from "react";
-import { PageProps } from "..";
+import { FormContextData, PageProps } from "..";
 import { ModelFieldName } from "../../backend-integration";
 export interface BasicFormPageRendererProps<CustomPropsT> extends Omit<PageProps<ModelFieldName, CustomPropsT>, "submit" | "dirty"> {
     /**
@@ -17,7 +17,7 @@ export interface BasicFormPageRendererProps<CustomPropsT> extends Omit<PageProps
     /**
      * Optional read-only reasons
      */
-    readOnlyReasons: string[];
+    readOnlyReasons: FormContextData["readOnlyReasons"];
     /**
      * Show back button only when not enough permission
      */

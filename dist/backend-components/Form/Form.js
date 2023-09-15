@@ -9,7 +9,6 @@ import useCCTranslations from "../../utils/useCCTranslations";
 import { useDialogContext } from "../../framework";
 import deepSort from "../../utils/deepSort";
 import useDevKeybinds from "../../utils/useDevKeybinds";
-import uniqueArray from "../../utils/uniqueArray";
 // optional import
 let captureException = null;
 import("@sentry/react")
@@ -107,7 +106,7 @@ const normalizeValues = (data, config) => {
     return deepSort(normalizedData);
 };
 const Form = (props) => {
-    const { model, id, children, onSubmit, customProps, onlyValidateMounted, onlyWarnMounted, onlyWarnChanged, onlySubmitMounted, readOnly: readOnlyProp, readOnlyReason: readOnlyReasonProp, disableValidation, nestedFormName, disableNestedSubmit, nestedFormPreSubmitHandler, deleteOnSubmit, onDeleted, initialRecord, onlySubmitNestedIfMounted, formClass, preSubmit, dirtyIgnoreFields, } = props;
+    const { model, id, children, onSubmit, customProps, onlyValidateMounted, onlyWarnMounted, onlyWarnChanged, onlySubmitMounted, readOnly: readOnlyProp, readOnlyReason: readOnlyReasonProp, readOnlyReasons: readOnlyReasonsProp, disableValidation, nestedFormName, disableNestedSubmit, nestedFormPreSubmitHandler, deleteOnSubmit, onDeleted, initialRecord, onlySubmitNestedIfMounted, formClass, preSubmit, dirtyIgnoreFields, } = props;
     const onlySubmitMountedBehaviour = props.onlySubmitMountedBehaviour ?? OnlySubmitMountedBehaviour.OMIT;
     const ErrorComponent = props.errorComponent;
     const { t } = useCCTranslations();
@@ -171,33 +170,38 @@ const Form = (props) => {
                 : value;
     }, []);
     // custom read-only
-    const [customReadOnlyState, setCustomReadOnlyState] = useState([]);
     const [customReadOnlyReasons, setCustomReadOnlyReasons] = useState({});
     const setCustomReadOnly = useCallback((ident, reason) => {
-        setCustomReadOnlyState((prev) => uniqueArray([...prev, ident]));
         setCustomReadOnlyReasons((prev) => {
-            const newReasons = { ...prev };
-            if (reason) {
-                newReasons[ident] = reason;
-            }
-            else {
-                delete newReasons[ident];
-            }
-            return newReasons;
+            return {
+                ...prev,
+                [ident]: reason ?? null,
+            };
         });
     }, []);
     const removeCustomReadOnly = useCallback((ident) => {
-        setCustomReadOnlyState((prev) => prev.filter((otherIdent) => otherIdent !== ident));
         setCustomReadOnlyReasons((prev) => {
             const newReaons = { ...prev };
             delete newReaons[ident];
             return newReaons;
         });
     }, []);
-    const readOnly = readOnlyProp || customReadOnlyState.length > 0;
-    const readOnlyReasons = useMemo(() => readOnlyReasonProp
-        ? [readOnlyReasonProp, ...Object.values(customReadOnlyReasons)]
-        : Object.values(customReadOnlyReasons), [readOnlyReasonProp, customReadOnlyReasons]);
+    const readOnlyReasons = useMemo(() => {
+        const legacy = readOnlyProp
+            ? { "form-legacy": readOnlyReasonProp ?? null }
+            : {};
+        return {
+            ...legacy,
+            ...readOnlyReasonsProp,
+            ...customReadOnlyReasons,
+        };
+    }, [
+        readOnlyProp,
+        readOnlyReasonProp,
+        readOnlyReasonsProp,
+        customReadOnlyReasons,
+    ]);
+    const readOnly = !isObjectEmpty(readOnlyReasons);
     // main form handling
     const [deleted, setDeleted] = useState(false);
     useEffect(() => {

@@ -141,7 +141,10 @@ const CRUD = (props) => {
             skipNextFormIdReset.current = false;
             lastFormId.current = id;
         }
-        return (React.createElement(Form, { id: id === "new" ? null : id, key: formKey.current, model: props.model, ...props.formProps, readOnly: !hasPermission(perms, id === "new" ? props.newPermission : props.editPermission) || props.formProps.readOnly, readOnlyReason: props.editPermissionHint, onSubmit: handleSubmit, disableRouting: disableRouting, customProps: props.formProps.customProps ?? {
+        return (React.createElement(Form, { id: id === "new" ? null : id, key: formKey.current, model: props.model, ...props.formProps, readOnlyReasons: {
+                ...props.formProps.readOnlyReasons,
+                ...(!hasPermission(perms, id === "new" ? props.newPermission : props.editPermission) && { permissions: props.editPermissionHint ?? null }),
+            }, onSubmit: handleSubmit, disableRouting: disableRouting, customProps: props.formProps.customProps ?? {
                 goBack: showOverview,
                 open: openView,
                 hasCustomSubmitHandler: props.formProps.onSubmit != null,

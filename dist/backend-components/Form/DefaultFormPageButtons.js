@@ -1,4 +1,4 @@
-import React, { useCallback, useContext } from "react";
+import React, { useCallback, useContext, useMemo } from "react";
 import makeStyles from "@mui/styles/makeStyles";
 import { useDialogContext } from "../../framework";
 import { showConfirmDialog } from "../../non-standalone";
@@ -56,9 +56,10 @@ const DefaultFormPageButtons = (props) => {
     }, [submit]);
     const handleBack = useCallback(() => goBack && goBack(), [goBack]);
     const saveBtn = (React.createElement(ActionButton, { disabled: !dirty || isSubmitting || readOnly, onClick: displayConfirmDialog ? submitWithConfirmDialog : safeSubmit }, t("common.buttons.save")));
+    const humanReadOnlyReasons = useMemo(() => Object.values(readOnlyReasons).filter((e) => !!e), [readOnlyReasons]);
     return (React.createElement(FormButtons, null,
         !showBackButtonOnly &&
-            (readOnly && readOnlyReasons.length > 0 ? (React.createElement(Tooltip, { title: readOnlyReasons.join(", ") },
+            (readOnly && humanReadOnlyReasons.length > 0 ? (React.createElement(Tooltip, { title: humanReadOnlyReasons.join(", ") },
                 React.createElement("span", null, saveBtn))) : (saveBtn)),
         goBack && !(isInDialog && hasCustomCloseHandler) && (React.createElement(ActionButton, { disabled: isSubmitting, onClick: handleBack, classes: backButtonClasses }, t("common.buttons.back")))));
 };
