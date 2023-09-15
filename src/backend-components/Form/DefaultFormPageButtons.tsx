@@ -1,4 +1,4 @@
-import React, { useCallback, useContext } from "react";
+import React, { useCallback, useContext, useMemo } from "react";
 import { BasicFormPageRendererProps } from "./BasicFormPage";
 import makeStyles from "@mui/styles/makeStyles";
 import { CrudFormProps } from "../CRUD";
@@ -82,11 +82,16 @@ const DefaultFormPageButtons = (
 		</ActionButton>
 	);
 
+	const humanReadOnlyReasons = useMemo(
+		() => Object.values(readOnlyReasons).filter((e) => !!e) as string[],
+		[readOnlyReasons]
+	);
+
 	return (
 		<FormButtons>
 			{!showBackButtonOnly &&
-				(readOnly && readOnlyReasons.length > 0 ? (
-					<Tooltip title={readOnlyReasons.join(", ")}>
+				(readOnly && humanReadOnlyReasons.length > 0 ? (
+					<Tooltip title={humanReadOnlyReasons.join(", ")}>
 						<span>{saveBtn}</span>
 					</Tooltip>
 				) : (

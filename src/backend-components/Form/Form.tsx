@@ -37,7 +37,6 @@ import useCCTranslations from "../../utils/useCCTranslations";
 import { useDialogContext } from "../../framework";
 import deepSort from "../../utils/deepSort";
 import useDevKeybinds from "../../utils/useDevKeybinds";
-import uniqueArray from "../../utils/uniqueArray";
 
 // optional import
 let captureException: ((e: Error) => void) | null = null;
@@ -240,12 +239,19 @@ export interface FormProps<
 	onlyWarnChanged?: boolean;
 	/**
 	 * Is the form read-only?
+	 * @deprecated use readOnlyReasons
 	 */
 	readOnly?: boolean;
 	/**
 	 * Optional read-only reason
+	 * @deprecated use readOnlyReasons instead
 	 */
 	readOnlyReason?: string | null;
+	/**
+	 * Read only reasons.
+	 * @type Record<unique-identifier, human-readable-reason-or-NULL>
+	 */
+	readOnlyReasons?: Record<string, string | null>;
 	/**
 	 * Disable Validations
 	 */
@@ -439,10 +445,11 @@ export interface FormContextData {
 	readOnlyReason: string | null | undefined;
 	/**
 	 * Read only reasons
-	 * @see FormProps.readOnlyReason
+	 * @see FormProps.readOnlyReasons
 	 * @see setCustomReadOnly
+	 * @remarks identifier "form-legacy" is used for compatibility
 	 */
-	readOnlyReasons: string[];
+	readOnlyReasons: Partial<Record<"form-legacy" | string, string | null>>;
 	/**
 	 * Is the form being submitted
 	 */
@@ -740,6 +747,7 @@ const Form = <
 		onlySubmitMounted,
 		readOnly: readOnlyProp,
 		readOnlyReason: readOnlyReasonProp,
+		readOnlyReasons: readOnlyReasonsProp,
 		disableValidation,
 		nestedFormName,
 		disableNestedSubmit,
@@ -842,40 +850,43 @@ const Form = <
 	);
 
 	// custom read-only
-	const [customReadOnlyState, setCustomReadOnlyState] = useState<string[]>([]);
 	const [customReadOnlyReasons, setCustomReadOnlyReasons] = useState<
-		Record<string, string>
+		Record<string, string | null>
 	>({});
-	const setCustomReadOnly = useCallback((ident: string, reason?: string) => {
-		setCustomReadOnlyState((prev) => uniqueArray([...prev, ident]));
-		setCustomReadOnlyReasons((prev) => {
-			const newReasons = { ...prev };
-			if (reason) {
-				newReasons[ident] = reason;
-			} else {
-				delete newReasons[ident];
-			}
-			return newReasons;
-		});
-	}, []);
+	const setCustomReadOnly = useCallback(
+		(ident: string, reason?: string | null) => {
+			setCustomReadOnlyReasons((prev) => {
+				return {
+					...prev,
+					[ident]: reason ?? null,
+				};
+			});
+		},
+		[]
+	);
 	const removeCustomReadOnly = useCallback((ident: string) => {
-		setCustomReadOnlyState((prev) =>
-			prev.filter((otherIdent) => otherIdent !== ident)
-		);
 		setCustomReadOnlyReasons((prev) => {
 			const newReaons = { ...prev };
 			delete newReaons[ident];
 			return newReaons;
 		});
 	}, []);
-	const readOnly = readOnlyProp || customReadOnlyState.length > 0;
-	const readOnlyReasons = useMemo(
-		(): string[] =>
-			readOnlyReasonProp
-				? [readOnlyReasonProp, ...Object.values(customReadOnlyReasons)]
-				: Object.values(customReadOnlyReasons),
-		[readOnlyReasonProp, customReadOnlyReasons]
-	);
+	const readOnlyReasons = useMemo((): Record<string, string | null> => {
+		const legacy: Record<string, string | null> = readOnlyProp
+			? { "form-legacy": readOnlyReasonProp ?? null }
+			: {};
+		return {
+			...legacy,
+			...readOnlyReasonsProp,
+			...customReadOnlyReasons,
+		};
+	}, [
+		readOnlyProp,
+		readOnlyReasonProp,
+		readOnlyReasonsProp,
+		customReadOnlyReasons,
+	]);
+	const readOnly = !isObjectEmpty(readOnlyReasons);
 
 	// main form handling
 	const [deleted, setDeleted] = useState(false);

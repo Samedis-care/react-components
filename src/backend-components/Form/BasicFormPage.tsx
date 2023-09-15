@@ -1,5 +1,10 @@
 import React, { useCallback, useContext, useEffect, useRef } from "react";
-import { PageProps, useFormContextLite, ValidationError } from "..";
+import {
+	FormContextData,
+	PageProps,
+	useFormContextLite,
+	ValidationError,
+} from "..";
 import { UnsafeToLeaveDispatch } from "../../framework/UnsafeToLeave";
 import { FrameworkHistory, useDialogContext } from "../../framework";
 import { ModelFieldName } from "../../backend-integration";
@@ -32,7 +37,7 @@ export interface BasicFormPageRendererProps<CustomPropsT>
 	/**
 	 * Optional read-only reasons
 	 */
-	readOnlyReasons: string[];
+	readOnlyReasons: FormContextData["readOnlyReasons"];
 	/**
 	 * Show back button only when not enough permission
 	 */
@@ -207,7 +212,7 @@ const BasicFormPage = <RendererPropsT, CustomPropsT>(
 					{...otherProps}
 					showBackButtonOnly={
 						otherProps.showBackButtonOnly ||
-						(readOnly && readOnlyReasons.length === 0)
+						(readOnly && !!Object.values(readOnlyReasons).find((e) => !!e))
 					}
 					readOnly={readOnly}
 					readOnlyReasons={readOnlyReasons}

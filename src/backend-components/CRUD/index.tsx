@@ -62,7 +62,13 @@ export interface CrudProps<
 	 */
 	formProps: Omit<
 		FormProps<KeyT, VisibilityT, CustomT, CrudFormProps>,
-		"id" | "model" | "children" | "customProps" | "disableRouting"
+		| "id"
+		| "model"
+		| "children"
+		| "customProps"
+		| "disableRouting"
+		| "readOnly"
+		| "readOnlyReason"
 	> & {
 		/**
 		 * override for default form custom props passed in by CRUD component
@@ -417,19 +423,20 @@ const CRUD = <
 			skipNextFormIdReset.current = false;
 			lastFormId.current = id;
 		}
+
 		return (
 			<Form
 				id={id === "new" ? null : id}
 				key={formKey.current}
 				model={props.model}
 				{...props.formProps}
-				readOnly={
-					!hasPermission(
+				readOnlyReasons={{
+					...props.formProps.readOnlyReasons,
+					...(!hasPermission(
 						perms,
 						id === "new" ? props.newPermission : props.editPermission
-					) || props.formProps.readOnly
-				}
-				readOnlyReason={props.editPermissionHint}
+					) && { permissions: props.editPermissionHint ?? null }),
+				}}
 				onSubmit={handleSubmit}
 				disableRouting={disableRouting}
 				customProps={
