@@ -5,6 +5,7 @@ import { BackendDataGridProps } from "../DataGrid";
 import { FormProps } from "../Form";
 import { Permission } from "../../framework";
 import { CrudImportProps } from "./Import";
+import { IDataGridAddButton } from "../../standalone/DataGrid/DataGrid";
 export interface CrudFormProps {
     /**
      * Callback for closing the form page
@@ -48,7 +49,11 @@ export interface CrudProps<KeyT extends ModelFieldName, VisibilityT extends Page
      * The properties to pass to grid
      * @remarks onAddNew can be used to overCrudImportTypewrite the new button action
      */
-    gridProps: Omit<BackendDataGridProps<KeyT, VisibilityT, CustomT>, "model" | "enableDelete" | "disableExport" | "onEdit" | "forceRefreshToken" | "onAddNew"> & Pick<Partial<BackendDataGridProps<KeyT, VisibilityT, CustomT>>, "onAddNew">;
+    gridProps: Omit<BackendDataGridProps<KeyT, VisibilityT, CustomT>, "model" | "enableDelete" | "disableExport" | "onEdit" | "forceRefreshToken" | "onAddNew"> & Pick<Partial<BackendDataGridProps<KeyT, VisibilityT, CustomT>>, never> & {
+        onAddNew?: ((showNew: () => void) => void) | string | (Omit<IDataGridAddButton, "onClick"> & {
+            onClick: (showNew: () => void) => void | undefined;
+        })[];
+    };
     /**
      * Component wrapping the DataGrid
      */

@@ -5,7 +5,7 @@ import { Form } from "../Form";
 import { hasPermission, usePermissionContext, } from "../../framework";
 import makeStyles from "@mui/styles/makeStyles";
 import Loader from "../../standalone/Loader";
-import { useRouteInfo } from "../../utils";
+import { throwError, useRouteInfo } from "../../utils";
 import { SentryRoutes } from "../../standalone/SentryRoute";
 const CrudImport = React.lazy(() => import("./Import"));
 const useStyles = makeStyles({
@@ -125,7 +125,20 @@ const CRUD = (props) => {
                     props.children
                     ? showEditPage
                     : undefined, onAddNew: hasPermission(perms, props.newPermission) && props.children
-                    ? props.gridProps.onAddNew ?? showNewPage
+                    ? props.gridProps.onAddNew == null
+                        ? showNewPage
+                        : typeof props.gridProps.onAddNew === "string"
+                            ? props.gridProps.onAddNew
+                            : typeof props.gridProps.onAddNew === "function"
+                                ? () => props.gridProps.onAddNew(showNewPage)
+                                : Array.isArray(props.gridProps.onAddNew)
+                                    ? props.gridProps.onAddNew.map((btn) => ({
+                                        ...btn,
+                                        onClick: btn.onClick
+                                            ? () => btn.onClick(showNewPage)
+                                            : undefined,
+                                    }))
+                                    : throwError("invalid type")
                     : props.newPermissionHint, onImport: enableUserImport ? handleImportButton : undefined, globalScrollListener: globalScrollListener }))));
     const importer = (guided) => (React.createElement(ImportUI, { model: props.model, importConfig: importConfig, updateKey: importUpdateKey, updateKeyAdditionalFilters: importUpdateKeyAdditionalFilters, howTo: importHowTo, validate: importValidate, guided: guided }));
     const lastFormId = useRef(null);
