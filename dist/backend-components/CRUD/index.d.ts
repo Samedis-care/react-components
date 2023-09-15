@@ -15,9 +15,10 @@ export interface CrudFormProps {
     /**
      * Open view
      * @param id The ID of the record or special values for special views
+     * @param forceRefresh force refresh data grid?
      * @see CrudSpecialIds
      */
-    open: (id: "import" | "devimport" | "new" | string) => void;
+    open: (id: "import" | "devimport" | "new" | string, forceRefresh?: boolean) => void;
     /**
      * Does the Form have a custom submit handler?
      */

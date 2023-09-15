@@ -79,14 +79,16 @@ const CRUD = (props) => {
         if (forceRefresh)
             refreshGrid();
     }, [disableRouting, refreshGrid, navigate, routeUrl]);
-    const openView = useCallback((id) => {
+    const openView = useCallback((id, forceRefresh) => {
         if (disableRouting) {
             setId(id);
         }
         else {
             navigate(routeUrl + "/" + id);
         }
-    }, [disableRouting, navigate, routeUrl]);
+        if (forceRefresh)
+            refreshGrid();
+    }, [disableRouting, navigate, routeUrl, refreshGrid]);
     const handleSubmit = useCallback(async (data, submit, old) => {
         // redirect to edit page
         const { id } = data;
