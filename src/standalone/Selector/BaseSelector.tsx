@@ -707,7 +707,13 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 							filteredLruIds.map((id) =>
 								(async (id: string): Promise<DataT> => lru.loadData(id))(
 									id
-								).catch(() => undefined)
+								).catch((e) => {
+									// remove IDs from LRU on backend error
+									if (e instanceof Error && e.name === "BackendError") {
+										setLruIds((ids) => ids.filter((oId) => oId !== id));
+									}
+									return undefined;
+								})
 							)
 						)
 					).filter((e) => !!e) as DataT[]).map((entry) => ({
@@ -755,20 +761,21 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 			});
 		},
 		[
-			t,
 			actualAddNewLabel,
-			lru,
+			filterIds,
 			lruIds,
+			lru,
 			grouped,
 			disableGroupSorting,
+			onAddNew,
+			t,
+			setLruIds,
 			customClasses.lruListItem,
 			onLoad,
 			switchValue,
-			onAddNew,
+			getId,
 			groupSorter,
 			noGroupLabel,
-			filterIds,
-			getId,
 		]
 	);
 
