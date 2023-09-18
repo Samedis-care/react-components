@@ -91,7 +91,7 @@ const MultiSelect = (props) => {
     }, [getId, onSelect, selected]);
     return (React.createElement(Grid, { container: true },
         React.createElement(Grid, { item: true, xs: 12 },
-            React.createElement(BaseSelector, { ...props, classes: combineClassMaps(baseSelectorClasses, props.subClasses?.baseSelector), onLoad: multiSelectLoadHandler, selected: null, onSelect: multiSelectHandler, refreshToken: selectedIds.join(","), displaySwitch: displaySwitch, switchLabel: switchLabel, defaultSwitchValue: defaultSwitchValue })),
+            React.createElement(BaseSelector, { ...props, classes: combineClassMaps(baseSelectorClasses, props.subClasses?.baseSelector), onLoad: multiSelectLoadHandler, selected: null, onSelect: multiSelectHandler, refreshToken: selectedIds.join(","), displaySwitch: displaySwitch, switchLabel: switchLabel, defaultSwitchValue: defaultSwitchValue, filterIds: selectedIds })),
         props.selected.length > 0 && (React.createElement(Grid, { item: true, xs: 12, className: multiSelectClasses.selectedEntries },
             React.createElement(Paper, { elevation: 0 }, (selectedSort
                 ? props.selected.sort(selectedSort)
