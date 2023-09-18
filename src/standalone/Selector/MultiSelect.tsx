@@ -239,6 +239,7 @@ const MultiSelect = <DataT extends MultiSelectorData>(
 					displaySwitch={displaySwitch}
 					switchLabel={switchLabel}
 					defaultSwitchValue={defaultSwitchValue}
+					filterIds={selectedIds}
 				/>
 			</Grid>
 			{props.selected.length > 0 && (
