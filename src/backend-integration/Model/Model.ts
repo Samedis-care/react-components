@@ -425,6 +425,10 @@ export interface ModelOptions<KeyT extends ModelFieldName> {
 	 * @see RequestBatching
 	 */
 	enableRequestBatching?: boolean;
+	/**
+	 * Optional additional cache keys for index/fetchAll action
+	 */
+	cacheKeysIndex?: unknown;
 }
 
 class Model<
@@ -448,6 +452,10 @@ class Model<
 	 * Optional additional cache keys
 	 */
 	public readonly cacheKeys?: unknown;
+	/**
+	 * Optional additional cache keys for index/fetchAll action
+	 */
+	public readonly cacheKeysIndex?: unknown;
 	/**
 	 * Caching options
 	 */
@@ -504,6 +512,7 @@ class Model<
 		};
 		this.hooks = options?.hooks ?? {};
 		this.requestBatchingEnabled = options?.enableRequestBatching ?? false;
+		this.cacheKeysIndex = options?.cacheKeysIndex;
 		if (Model.autoValidateUX) this.validateUX(Model.autoValidateUXThrow);
 		if (this.requestBatchingEnabled)
 			this.canRequestsBeBatched(Model.printDevWarnings);
@@ -641,7 +650,7 @@ class Model<
 	 * @param params The fetch all params
 	 */
 	public getReactQueryKeyFetchAll(params?: ModelFetchAllParams): QueryKey {
-		return [this.modelId, params, this.cacheKeys];
+		return [this.modelId, params, this.cacheKeys, this.cacheKeysIndex];
 	}
 
 	/**
