@@ -218,6 +218,7 @@ export interface FormProps<
 	customProps: CustomPropsT;
 	/**
 	 * Only submit mounted fields
+	 * @remarks Exempt fields using alwaysSubmitFields
 	 */
 	onlySubmitMounted?: boolean;
 	/**
@@ -225,6 +226,10 @@ export interface FormProps<
 	 * @default OnlySubmitMountedBehaviour.OMIT
 	 */
 	onlySubmitMountedBehaviour?: OnlySubmitMountedBehaviour;
+	/**
+	 * Fields to always be included during submit, regardless of onlySubmitMounted
+	 */
+	alwaysSubmitFields?: string[];
 	/**
 	 * Only validate mounted fields
 	 */
@@ -633,6 +638,7 @@ interface DirtyDetectionConfig {
 	 */
 	onlySubmitMounted: boolean;
 	onlySubmitMountedBehaviour: OnlySubmitMountedBehaviour;
+	alwaysSubmitFields: string[];
 	defaultRecord: Record<string, unknown>;
 	/**
 	 * mounted fields
@@ -645,12 +651,14 @@ const getUpdateData = (
 	model: Model<string, PageVisibility, unknown>,
 	onlySubmitMounted: boolean,
 	onlySubmitMountedBehaviour: OnlySubmitMountedBehaviour,
+	alwaysSubmitFields: string[],
 	mountedFields: Record<string, boolean>,
 	defaultRecord: Record<string, unknown>,
 	id: string | null
 ) => {
 	const isMounted = (key: string): boolean =>
 		key === "id" ||
+		alwaysSubmitFields.includes(key) ||
 		mountedFields[key] ||
 		getVisibility(
 			model.fields[key].visibility[id ? "edit" : "create"],
@@ -699,6 +707,7 @@ const normalizeValues = <T,>(data: T, config: DirtyDetectionConfig): T => {
 		model,
 		onlySubmitMounted,
 		onlySubmitMountedBehaviour,
+		alwaysSubmitFields,
 		mountedFields,
 		defaultRecord,
 	} = config;
@@ -708,6 +717,7 @@ const normalizeValues = <T,>(data: T, config: DirtyDetectionConfig): T => {
 		model,
 		onlySubmitMounted,
 		onlySubmitMountedBehaviour,
+		alwaysSubmitFields,
 		mountedFields,
 		defaultRecord,
 		((data as unknown) as Record<"id", string | null>).id
@@ -743,6 +753,7 @@ const Form = <
 		customProps,
 		onlyValidateMounted,
 		onlyWarnMounted,
+		alwaysSubmitFields,
 		onlyWarnChanged,
 		onlySubmitMounted,
 		readOnly: readOnlyProp,
@@ -955,6 +966,7 @@ const Form = <
 				defaultRecord: defaultRecord[0],
 				onlySubmitMountedBehaviour,
 				onlySubmitMounted: onlySubmitMounted ?? false,
+				alwaysSubmitFields: alwaysSubmitFields ?? [],
 				mountedFields,
 			});
 			const remoteData = normalizeValues(serverData[0], {
@@ -963,6 +975,7 @@ const Form = <
 				defaultRecord: defaultRecord[0],
 				onlySubmitMountedBehaviour,
 				onlySubmitMounted: onlySubmitMounted ?? false,
+				alwaysSubmitFields: alwaysSubmitFields ?? [],
 				mountedFields,
 			});
 			return [localData, remoteData];
@@ -974,6 +987,7 @@ const Form = <
 			mountedFields,
 			onlySubmitMounted,
 			onlySubmitMountedBehaviour,
+			alwaysSubmitFields,
 			serverData,
 		]
 	);
@@ -1310,6 +1324,7 @@ const Form = <
 						(model as unknown) as Model<string, PageVisibility, unknown>,
 						onlySubmitMounted ?? false,
 						onlySubmitMountedBehaviour,
+						alwaysSubmitFields ?? [],
 						mountedFields,
 						defaultRecord[0],
 						id
@@ -1360,6 +1375,7 @@ const Form = <
 			model,
 			onlySubmitMounted,
 			onlySubmitMountedBehaviour,
+			alwaysSubmitFields,
 			mountedFields,
 			id,
 			onSubmit,
