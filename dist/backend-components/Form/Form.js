@@ -52,8 +52,9 @@ const loaderContainerStyles = {
     width: 320,
     margin: "auto",
 };
-const getUpdateData = (values, model, onlySubmitMounted, onlySubmitMountedBehaviour, mountedFields, defaultRecord, id) => {
+const getUpdateData = (values, model, onlySubmitMounted, onlySubmitMountedBehaviour, alwaysSubmitFields, mountedFields, defaultRecord, id) => {
     const isMounted = (key) => key === "id" ||
+        alwaysSubmitFields.includes(key) ||
         mountedFields[key] ||
         getVisibility(model.fields[key].visibility[id ? "edit" : "create"], values, values).hidden;
     return !onlySubmitMounted
@@ -91,8 +92,8 @@ const getUpdateData = (values, model, onlySubmitMounted, onlySubmitMountedBehavi
 const normalizeValues = (data, config) => {
     if (typeof data !== "object")
         throw new Error("Only Record<string, unknown> supported");
-    const { ignoreFields, model, onlySubmitMounted, onlySubmitMountedBehaviour, mountedFields, defaultRecord, } = config;
-    data = getUpdateData(data, model, onlySubmitMounted, onlySubmitMountedBehaviour, mountedFields, defaultRecord, data.id);
+    const { ignoreFields, model, onlySubmitMounted, onlySubmitMountedBehaviour, alwaysSubmitFields, mountedFields, defaultRecord, } = config;
+    data = getUpdateData(data, model, onlySubmitMounted, onlySubmitMountedBehaviour, alwaysSubmitFields, mountedFields, defaultRecord, data.id);
     let normalizedData = {};
     Object.entries(data).forEach(([k, v]) => {
         const shouldBeNulled = v === "" || (Array.isArray(v) && v.length === 0);
@@ -106,7 +107,7 @@ const normalizeValues = (data, config) => {
     return deepSort(normalizedData);
 };
 const Form = (props) => {
-    const { model, id, children, onSubmit, customProps, onlyValidateMounted, onlyWarnMounted, onlyWarnChanged, onlySubmitMounted, readOnly: readOnlyProp, readOnlyReason: readOnlyReasonProp, readOnlyReasons: readOnlyReasonsProp, disableValidation, nestedFormName, disableNestedSubmit, nestedFormPreSubmitHandler, deleteOnSubmit, onDeleted, initialRecord, onlySubmitNestedIfMounted, formClass, preSubmit, dirtyIgnoreFields, } = props;
+    const { model, id, children, onSubmit, customProps, onlyValidateMounted, onlyWarnMounted, alwaysSubmitFields, onlyWarnChanged, onlySubmitMounted, readOnly: readOnlyProp, readOnlyReason: readOnlyReasonProp, readOnlyReasons: readOnlyReasonsProp, disableValidation, nestedFormName, disableNestedSubmit, nestedFormPreSubmitHandler, deleteOnSubmit, onDeleted, initialRecord, onlySubmitNestedIfMounted, formClass, preSubmit, dirtyIgnoreFields, } = props;
     const onlySubmitMountedBehaviour = props.onlySubmitMountedBehaviour ?? OnlySubmitMountedBehaviour.OMIT;
     const ErrorComponent = props.errorComponent;
     const { t } = useCCTranslations();
@@ -254,6 +255,7 @@ const Form = (props) => {
             defaultRecord: defaultRecord[0],
             onlySubmitMountedBehaviour,
             onlySubmitMounted: onlySubmitMounted ?? false,
+            alwaysSubmitFields: alwaysSubmitFields ?? [],
             mountedFields,
         });
         const remoteData = normalizeValues(serverData[0], {
@@ -262,6 +264,7 @@ const Form = (props) => {
             defaultRecord: defaultRecord[0],
             onlySubmitMountedBehaviour,
             onlySubmitMounted: onlySubmitMounted ?? false,
+            alwaysSubmitFields: alwaysSubmitFields ?? [],
             mountedFields,
         });
         return [localData, remoteData];
@@ -272,6 +275,7 @@ const Form = (props) => {
         mountedFields,
         onlySubmitMounted,
         onlySubmitMountedBehaviour,
+        alwaysSubmitFields,
         serverData,
     ]);
     const dirty = useMemo(() => serverData && defaultRecord
@@ -504,7 +508,7 @@ const Form = (props) => {
             await Promise.all(Object.values(preSubmitHandlers.current).map((handler) => handler(id, params)));
             const submitValues = valuesRef.current;
             const oldValues = serverData[0];
-            const result = await updateData(getUpdateData(valuesRef.current, model, onlySubmitMounted ?? false, onlySubmitMountedBehaviour, mountedFields, defaultRecord[0], id));
+            const result = await updateData(getUpdateData(valuesRef.current, model, onlySubmitMounted ?? false, onlySubmitMountedBehaviour, alwaysSubmitFields ?? [], mountedFields, defaultRecord[0], id));
             const newValues = deepClone(result[0]);
             valuesRef.current = newValues;
             setTouched((prev) => Object.fromEntries(Object.keys(prev).map((field) => [field, false])));
@@ -538,6 +542,7 @@ const Form = (props) => {
         model,
         onlySubmitMounted,
         onlySubmitMountedBehaviour,
+        alwaysSubmitFields,
         mountedFields,
         id,
         onSubmit,

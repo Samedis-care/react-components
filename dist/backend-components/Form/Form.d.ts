@@ -148,6 +148,7 @@ export interface FormProps<KeyT extends ModelFieldName, VisibilityT extends Page
     customProps: CustomPropsT;
     /**
      * Only submit mounted fields
+     * @remarks Exempt fields using alwaysSubmitFields
      */
     onlySubmitMounted?: boolean;
     /**
@@ -155,6 +156,10 @@ export interface FormProps<KeyT extends ModelFieldName, VisibilityT extends Page
      * @default OnlySubmitMountedBehaviour.OMIT
      */
     onlySubmitMountedBehaviour?: OnlySubmitMountedBehaviour;
+    /**
+     * Fields to always be included during submit, regardless of onlySubmitMounted
+     */
+    alwaysSubmitFields?: string[];
     /**
      * Only validate mounted fields
      */
