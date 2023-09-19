@@ -282,8 +282,12 @@ class Model {
      * @param id The record ID
      */
     invalidateCacheForId(id) {
-        ModelDataStore.removeQueries(this.getReactQueryKey(id, false));
-        ModelDataStore.removeQueries(this.getReactQueryKey(id, true));
+        void ModelDataStore.invalidateQueries({
+            queryKey: this.getReactQueryKey(id, false),
+        });
+        void ModelDataStore.invalidateQueries({
+            queryKey: this.getReactQueryKey(id, true),
+        });
     }
     /**
      * Provides a react-query useQuery hook for the given data id
