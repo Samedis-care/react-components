@@ -189,6 +189,10 @@ export interface ModelOptions<KeyT extends ModelFieldName> {
      * @see RequestBatching
      */
     enableRequestBatching?: boolean;
+    /**
+     * Optional additional cache keys for index/fetchAll action
+     */
+    cacheKeysIndex?: unknown;
 }
 declare class Model<KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT> {
     /**
@@ -207,6 +211,10 @@ declare class Model<KeyT extends ModelFieldName, VisibilityT extends PageVisibil
      * Optional additional cache keys
      */
     readonly cacheKeys?: unknown;
+    /**
+     * Optional additional cache keys for index/fetchAll action
+     */
+    readonly cacheKeysIndex?: unknown;
     /**
      * Caching options
      */

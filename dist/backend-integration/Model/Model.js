@@ -128,6 +128,10 @@ class Model {
      */
     cacheKeys;
     /**
+     * Optional additional cache keys for index/fetchAll action
+     */
+    cacheKeysIndex;
+    /**
      * Caching options
      */
     cacheOptions;
@@ -175,6 +179,7 @@ class Model {
         };
         this.hooks = options?.hooks ?? {};
         this.requestBatchingEnabled = options?.enableRequestBatching ?? false;
+        this.cacheKeysIndex = options?.cacheKeysIndex;
         if (Model.autoValidateUX)
             this.validateUX(Model.autoValidateUXThrow);
         if (this.requestBatchingEnabled)
@@ -275,7 +280,7 @@ class Model {
      * @param params The fetch all params
      */
     getReactQueryKeyFetchAll(params) {
-        return [this.modelId, params, this.cacheKeys];
+        return [this.modelId, params, this.cacheKeys, this.cacheKeysIndex];
     }
     /**
      * Invalidates the cached data for record ID
