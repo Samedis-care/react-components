@@ -7,6 +7,7 @@ import { makeThemeStyles } from "../../utils";
 import { makeStyles } from "@mui/styles";
 import InlineSwitch from "../InlineSwitch";
 import useCCTranslations from "../../utils/useCCTranslations";
+import uniqueArray from "../../utils/uniqueArray";
 export const getStringLabel = (data) => typeof data === "string"
     ? data
     : Array.isArray(data.label)
@@ -24,7 +25,10 @@ export const modifyReactLabel = (data, cb) => ({
  */
 export const selectorLocalLoadHandler = (data) => (query) => {
     query = query.toLowerCase();
-    return data.filter((entry) => getStringLabel(entry).toLowerCase().includes(query));
+    return uniqueArray([
+        ...data.filter((entry) => getStringLabel(entry).toLowerCase().startsWith(query)),
+        ...data.filter((entry) => getStringLabel(entry).toLowerCase().includes(query)),
+    ]);
 };
 const useCustomDefaultSelectorStyles = makeStyles({
     root: {},

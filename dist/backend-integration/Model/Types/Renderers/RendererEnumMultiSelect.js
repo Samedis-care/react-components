@@ -4,6 +4,7 @@ import TypeEnumMulti from "../TypeEnumMulti";
 import ccI18n from "../../../../i18n";
 import { FormControlFieldsetCC, getStringLabel, } from "../../../../standalone";
 import MultiSelect from "../../../../standalone/Selector/MultiSelect";
+import uniqueArray from "../../../../utils/uniqueArray";
 /**
  * Renders TypeEnumMulti as selector
  */
@@ -30,7 +31,10 @@ class RendererEnumMultiSelect extends TypeEnumMulti {
                 label: entry.getLabel(),
             }));
             const selected = data.filter((entry) => value.includes(entry.value));
-            const onLoad = (query) => data.filter((entry) => getStringLabel(entry).toLowerCase().includes(query.toLowerCase()));
+            const onLoad = (query) => uniqueArray([
+                ...data.filter((entry) => getStringLabel(entry).toLowerCase().startsWith(query.toLowerCase())),
+                ...data.filter((entry) => getStringLabel(entry).toLowerCase().includes(query.toLowerCase())),
+            ]);
             return (React.createElement(FormControlFieldsetCC, { component: "fieldset", required: visibility.required, fullWidth: true, error: !!errorMsg, warning: !!warningMsg, onBlur: handleBlur, name: field },
                 React.createElement(MultiSelect, { label: label, selected: selected, onLoad: onLoad, onSelect: (selected) => handleChange(field, selected.map((entry) => entry.value)), disabled: visibility.readOnly, ...this.props }),
                 React.createElement(FormHelperText, null, errorMsg || warningMsg)));
