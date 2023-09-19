@@ -649,8 +649,12 @@ class Model<
 	 * @param id The record ID
 	 */
 	public invalidateCacheForId(id: string) {
-		ModelDataStore.removeQueries(this.getReactQueryKey(id, false));
-		ModelDataStore.removeQueries(this.getReactQueryKey(id, true));
+		void ModelDataStore.invalidateQueries({
+			queryKey: this.getReactQueryKey(id, false),
+		});
+		void ModelDataStore.invalidateQueries({
+			queryKey: this.getReactQueryKey(id, true),
+		});
 	}
 
 	/**
