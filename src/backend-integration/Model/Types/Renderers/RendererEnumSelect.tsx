@@ -10,6 +10,7 @@ import {
 	SingleSelect,
 } from "../../../../standalone/Selector";
 import { FormControlFieldsetCC } from "../../../../standalone";
+import uniqueArray from "../../../../utils/uniqueArray";
 
 export type RendererEnumSelectProps = Omit<
 	BaseSelectorProps<BaseSelectorData>,
@@ -70,9 +71,14 @@ class RendererEnumSelect extends TypeEnum {
 			const selected = data.find((entry) => entry.value === value) || null;
 
 			const onLoad = (query: string) =>
-				data.filter((entry) =>
-					getStringLabel(entry).toLowerCase().includes(query.toLowerCase())
-				);
+				uniqueArray([
+					...data.filter((entry) =>
+						getStringLabel(entry).toLowerCase().startsWith(query.toLowerCase())
+					),
+					...data.filter((entry) =>
+						getStringLabel(entry).toLowerCase().includes(query.toLowerCase())
+					),
+				]);
 
 			return (
 				<FormControlFieldsetCC

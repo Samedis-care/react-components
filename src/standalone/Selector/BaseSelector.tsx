@@ -46,6 +46,7 @@ import {
 import InlineSwitch from "../InlineSwitch";
 import useCCTranslations from "../../utils/useCCTranslations";
 import { PopperProps } from "@mui/material/Popper/Popper";
+import uniqueArray from "../../utils/uniqueArray";
 
 export interface BaseSelectorData {
 	/**
@@ -127,9 +128,14 @@ export const selectorLocalLoadHandler = (data: BaseSelectorData[]) => (
 	query: string
 ) => {
 	query = query.toLowerCase();
-	return data.filter((entry) =>
-		getStringLabel(entry).toLowerCase().includes(query)
-	);
+	return uniqueArray([
+		...data.filter((entry) =>
+			getStringLabel(entry).toLowerCase().startsWith(query)
+		),
+		...data.filter((entry) =>
+			getStringLabel(entry).toLowerCase().includes(query)
+		),
+	]);
 };
 
 export interface SelectorLruOptions<DataT extends BaseSelectorData> {

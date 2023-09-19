@@ -11,6 +11,7 @@ import {
 	MultiSelectProps,
 } from "../../../../standalone";
 import MultiSelect from "../../../../standalone/Selector/MultiSelect";
+import uniqueArray from "../../../../utils/uniqueArray";
 
 export type RendererEnumMultiSelectProps = Omit<
 	MultiSelectProps<MultiSelectorData>,
@@ -67,9 +68,14 @@ class RendererEnumMultiSelect extends TypeEnumMulti {
 			const selected = data.filter((entry) => value.includes(entry.value));
 
 			const onLoad = (query: string) =>
-				data.filter((entry) =>
-					getStringLabel(entry).toLowerCase().includes(query.toLowerCase())
-				);
+				uniqueArray([
+					...data.filter((entry) =>
+						getStringLabel(entry).toLowerCase().startsWith(query.toLowerCase())
+					),
+					...data.filter((entry) =>
+						getStringLabel(entry).toLowerCase().includes(query.toLowerCase())
+					),
+				]);
 
 			return (
 				<FormControlFieldsetCC
