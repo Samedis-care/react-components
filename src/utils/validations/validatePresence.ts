@@ -23,6 +23,7 @@ const validatePresence = <
 ): Promise<string | null> | string | null => {
 	if (
 		!value ||
+		(Array.isArray(value) && value.length === 0) ||
 		(value instanceof Date && isNaN((value as unknown) as number)) // invalid date
 	) {
 		return ccI18n.t("utils.validation.required", {
