@@ -289,7 +289,7 @@ const CRUD = <
 		new Date().getTime().toString()
 	);
 	const classes = useStyles();
-	const skipNextFormIdReset = useRef(false);
+	const skipNextFormIdReset = useRef<string | null>(null);
 
 	const showEditPage = useCallback(
 		(id: string) => {
@@ -346,7 +346,7 @@ const CRUD = <
 		) => {
 			// redirect to edit page
 			const { id } = data as Record<"id", string>;
-			skipNextFormIdReset.current = true;
+			skipNextFormIdReset.current = id;
 			if (disableRouting) {
 				setId((oldId) => (oldId === null ? null : id));
 			} else if (
@@ -448,13 +448,12 @@ const CRUD = <
 		// when we switch IDs (everything except from new -> id triggered by form submit) we reset form fully
 		if (lastFormId.current == null) lastFormId.current = id;
 		if (lastFormId.current !== id) {
-			if (!skipNextFormIdReset.current) {
+			if (skipNextFormIdReset.current !== id) {
 				formKey.current = Date.now().toString(16);
 			}
-			skipNextFormIdReset.current = false;
+			skipNextFormIdReset.current = null;
 			lastFormId.current = id;
 		}
-
 		return (
 			<Form
 				id={id === "new" ? null : id}
