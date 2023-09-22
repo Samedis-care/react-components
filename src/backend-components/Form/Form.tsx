@@ -460,6 +460,20 @@ export interface FormContextData {
 	 */
 	submitting: boolean;
 	/**
+	 * Adds a busy reason, which triggers isSubmitting to become true and form loading overlay to show
+	 * @param name The reason identifier
+	 * @param promise The promise to await to remove the busy reason
+	 * @remarks remove busy reason with removeBusyReason if no promise is set
+	 * @see removeBusyReason
+	 */
+	addBusyReason: (name: string, promise?: Promise<unknown>) => void;
+	/**
+	 * Removes a busy reason added by addBusyReason
+	 * @param name The reason identifier
+	 * @see addBusyReason
+	 */
+	removeBusyReason: (name: string) => void;
+	/**
 	 * Add a blocker for submitting
 	 * This is a feature to hide the form loading overlay when user interaction is required (e.g. a form dialog in a pre-submit handler)
 	 * Remove it again with removeSubmittingBlocker
@@ -926,6 +940,17 @@ const Form = <
 	const [errors, setErrors] = useState<Record<string, string | null>>({});
 	const [warnings, setWarnings] = useState<Record<string, string | null>>({});
 	const [submittingForm, setSubmittingForm] = useState(false);
+	const [submittingOther, setSubmittingOther] = useState<string[]>([]);
+	const removeBusyReason = useCallback((name: string) => {
+		setSubmittingOther((prev) => prev.filter((e) => e !== name));
+	}, []);
+	const addBusyReason = useCallback(
+		(name: string, promise?: Promise<unknown>) => {
+			setSubmittingOther((prev) => [...prev, name]);
+			if (promise) promise.finally(() => removeBusyReason(name));
+		},
+		[removeBusyReason]
+	);
 	const [submittingBlocked, setSubmittingBlocked] = useState(false);
 	const [submittingBlocker, setSubmittingBlocker] = useState<string[]>([]);
 	const addSubmittingBlocker = useCallback((name: string) => {
@@ -935,7 +960,9 @@ const Form = <
 		setSubmittingBlocker((prev) => prev.filter((entry) => entry !== name));
 	}, []);
 	const submitting =
-		submittingForm && !submittingBlocked && submittingBlocker.length === 0;
+		(submittingForm || submittingOther.length > 0) &&
+		!submittingBlocked &&
+		submittingBlocker.length === 0;
 	// main form handling - validation disable toggle
 	useEffect(() => {
 		if (!disableValidation) return;
@@ -1633,6 +1660,8 @@ const Form = <
 			onlyWarnMounted: !!onlyWarnMounted,
 			onlyWarnChanged: !!onlyWarnChanged,
 			submitting,
+			addBusyReason,
+			removeBusyReason,
 			addSubmittingBlocker,
 			removeSubmittingBlocker,
 			submit: submitForm,
@@ -1685,6 +1714,8 @@ const Form = <
 			onlyWarnMounted,
 			onlyWarnChanged,
 			submitting,
+			addBusyReason,
+			removeBusyReason,
 			addSubmittingBlocker,
 			removeSubmittingBlocker,
 			submitForm,
