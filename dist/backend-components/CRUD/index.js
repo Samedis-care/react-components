@@ -49,7 +49,7 @@ const CRUD = (props) => {
     const [id, setId] = useState(props.initialView ?? null);
     const [gridRefreshToken, setGridRefreshToken] = useState(new Date().getTime().toString());
     const classes = useStyles();
-    const skipNextFormIdReset = useRef(false);
+    const skipNextFormIdReset = useRef(null);
     const showEditPage = useCallback((id) => {
         if (disableRouting) {
             setId(id);
@@ -92,7 +92,7 @@ const CRUD = (props) => {
     const handleSubmit = useCallback(async (data, submit, old) => {
         // redirect to edit page
         const { id } = data;
-        skipNextFormIdReset.current = true;
+        skipNextFormIdReset.current = id;
         if (disableRouting) {
             setId((oldId) => (oldId === null ? null : id));
         }
@@ -150,10 +150,10 @@ const CRUD = (props) => {
         if (lastFormId.current == null)
             lastFormId.current = id;
         if (lastFormId.current !== id) {
-            if (!skipNextFormIdReset.current) {
+            if (skipNextFormIdReset.current !== id) {
                 formKey.current = Date.now().toString(16);
             }
-            skipNextFormIdReset.current = false;
+            skipNextFormIdReset.current = null;
             lastFormId.current = id;
         }
         return (React.createElement(Form, { id: id === "new" ? null : id, key: formKey.current, model: props.model, ...props.formProps, readOnlyReasons: {
