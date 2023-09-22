@@ -377,6 +377,20 @@ export interface FormContextData {
      */
     submitting: boolean;
     /**
+     * Adds a busy reason, which triggers isSubmitting to become true and form loading overlay to show
+     * @param name The reason identifier
+     * @param promise The promise to await to remove the busy reason
+     * @remarks remove busy reason with removeBusyReason if no promise is set
+     * @see removeBusyReason
+     */
+    addBusyReason: (name: string, promise?: Promise<unknown>) => void;
+    /**
+     * Removes a busy reason added by addBusyReason
+     * @param name The reason identifier
+     * @see addBusyReason
+     */
+    removeBusyReason: (name: string) => void;
+    /**
      * Add a blocker for submitting
      * This is a feature to hide the form loading overlay when user interaction is required (e.g. a form dialog in a pre-submit handler)
      * Remove it again with removeSubmittingBlocker

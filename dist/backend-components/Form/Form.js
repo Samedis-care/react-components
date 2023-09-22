@@ -220,6 +220,15 @@ const Form = (props) => {
     const [errors, setErrors] = useState({});
     const [warnings, setWarnings] = useState({});
     const [submittingForm, setSubmittingForm] = useState(false);
+    const [submittingOther, setSubmittingOther] = useState([]);
+    const removeBusyReason = useCallback((name) => {
+        setSubmittingOther((prev) => prev.filter((e) => e !== name));
+    }, []);
+    const addBusyReason = useCallback((name, promise) => {
+        setSubmittingOther((prev) => [...prev, name]);
+        if (promise)
+            promise.finally(() => removeBusyReason(name));
+    }, [removeBusyReason]);
     const [submittingBlocked, setSubmittingBlocked] = useState(false);
     const [submittingBlocker, setSubmittingBlocker] = useState([]);
     const addSubmittingBlocker = useCallback((name) => {
@@ -228,7 +237,9 @@ const Form = (props) => {
     const removeSubmittingBlocker = useCallback((name) => {
         setSubmittingBlocker((prev) => prev.filter((entry) => entry !== name));
     }, []);
-    const submitting = submittingForm && !submittingBlocked && submittingBlocker.length === 0;
+    const submitting = (submittingForm || submittingOther.length > 0) &&
+        !submittingBlocked &&
+        submittingBlocker.length === 0;
     // main form handling - validation disable toggle
     useEffect(() => {
         if (!disableValidation)
@@ -743,6 +754,8 @@ const Form = (props) => {
         onlyWarnMounted: !!onlyWarnMounted,
         onlyWarnChanged: !!onlyWarnChanged,
         submitting,
+        addBusyReason,
+        removeBusyReason,
         addSubmittingBlocker,
         removeSubmittingBlocker,
         submit: submitForm,
@@ -794,6 +807,8 @@ const Form = (props) => {
         onlyWarnMounted,
         onlyWarnChanged,
         submitting,
+        addBusyReason,
+        removeBusyReason,
         addSubmittingBlocker,
         removeSubmittingBlocker,
         submitForm,
