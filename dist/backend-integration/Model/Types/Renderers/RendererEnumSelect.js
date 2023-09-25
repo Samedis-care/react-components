@@ -25,10 +25,11 @@ class RendererEnumSelect extends TypeEnum {
             if (visibility.grid)
                 throw new Error("Not supported");
             const data = this.values
-                .filter((entry) => !entry.invisible)
+                .filter((entry) => !entry.invisible || value === entry.value)
                 .map((entry) => ({
                 ...entry,
                 label: entry.getLabel(),
+                isDisabled: entry.invisible,
             }));
             const selected = data.find((entry) => entry.value === value) || null;
             const onLoad = (query) => uniqueArray([

@@ -25,10 +25,11 @@ class RendererEnumMultiSelect extends TypeEnumMulti {
             if (visibility.grid)
                 throw new Error("Not supported");
             const data = this.values
-                .filter((entry) => !entry.invisible)
+                .filter((entry) => !entry.invisible || value.includes(entry.value))
                 .map((entry) => ({
                 ...entry,
                 label: entry.getLabel(),
+                disabled: entry.invisible,
             }));
             const selected = data.filter((entry) => value.includes(entry.value));
             const onLoad = (query) => uniqueArray([
