@@ -63,10 +63,11 @@ class RendererEnumSelect extends TypeEnum {
 			if (visibility.grid) throw new Error("Not supported");
 
 			const data: BaseSelectorData[] = (this.values as AdvancedEnumValue[])
-				.filter((entry) => !entry.invisible)
+				.filter((entry) => !entry.invisible || value === entry.value)
 				.map((entry) => ({
 					...entry,
 					label: entry.getLabel(),
+					isDisabled: entry.invisible,
 				}));
 			const selected = data.find((entry) => entry.value === value) || null;
 
