@@ -115,5 +115,8 @@ export interface TreeViewContextType {
     rendererProps: TreeViewRendererCallbacks;
     data: TreeDataForRenderer[];
 }
-declare const _default: React.MemoExoticComponent<(props: TreeViewProps) => JSX.Element>;
+export interface TreeViewDispatch {
+    scrollTo: (id: string) => void;
+}
+declare const _default: React.MemoExoticComponent<React.ForwardRefExoticComponent<TreeViewProps & React.RefAttributes<TreeViewDispatch>>>;
 export default _default;

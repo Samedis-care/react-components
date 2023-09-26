@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState, } from "react";
 import TreeViewDefaultRenderer from "./TreeViewDefaultRenderer";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { FixedSizeList } from "react-window";
@@ -49,8 +49,9 @@ const RendererWrapper = (props) => {
     return (React.createElement("div", { style: style },
         React.createElement(Renderer, { ...rendererProps, ...itemData[index] })));
 };
-const TreeView = (props) => {
+const TreeView = React.forwardRef(function TreeView(props, ref) {
     const { data, renderer, rendererItemHeight, onLoadChildren, onToggleExpanded, ...rendererProps } = props;
+    const listRef = useRef(null);
     const itemHeight = rendererItemHeight ?? 24;
     const [loading, setLoading] = useState([]);
     const enhancedData = useMemo(() => {
@@ -86,6 +87,26 @@ const TreeView = (props) => {
             onToggleExpanded: hookOnToggleExpanded,
         },
     }), [renderer, enhancedData, rendererProps, hookOnToggleExpanded]);
-    return (React.createElement(AutoSizer, null, ({ width, height }) => (React.createElement(FixedSizeList, { itemSize: itemHeight, height: height, width: width, itemCount: enhancedData.length, itemData: itemData }, RendererWrapper))));
-};
+    // controlled scrolling
+    const [scrollToId, setScrollToId] = useState(null);
+    useEffect(() => {
+        if (!scrollToId)
+            return;
+        const list = listRef.current;
+        if (!list)
+            return;
+        setScrollToId(null);
+        const entry = enhancedData.find((entry) => entry.id === scrollToId);
+        if (!entry)
+            return;
+        list.scrollToItem(entry.index);
+    }, [scrollToId, enhancedData]);
+    // ref
+    useImperativeHandle(ref, () => ({
+        scrollTo: (id) => {
+            setScrollToId(id);
+        },
+    }), []);
+    return (React.createElement(AutoSizer, null, ({ width, height }) => (React.createElement(FixedSizeList, { ref: listRef, itemSize: itemHeight, height: height, width: width, itemCount: enhancedData.length, itemData: itemData }, RendererWrapper))));
+});
 export default React.memo(TreeView);
