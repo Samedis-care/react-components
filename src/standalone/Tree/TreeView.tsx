@@ -1,4 +1,11 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React, {
+	useCallback,
+	useEffect,
+	useImperativeHandle,
+	useMemo,
+	useRef,
+	useState,
+} from "react";
 import TreeViewDefaultRenderer from "./TreeViewDefaultRenderer";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { FixedSizeList, ListChildComponentProps } from "react-window";
@@ -195,7 +202,14 @@ const RendererWrapper = (
 	);
 };
 
-const TreeView = (props: TreeViewProps) => {
+export interface TreeViewDispatch {
+	scrollTo: (id: string) => void;
+}
+
+const TreeView = React.forwardRef(function TreeView(
+	props: TreeViewProps,
+	ref: React.ForwardedRef<TreeViewDispatch>
+) {
 	const {
 		data,
 		renderer,
@@ -204,6 +218,7 @@ const TreeView = (props: TreeViewProps) => {
 		onToggleExpanded,
 		...rendererProps
 	} = props;
+	const listRef = useRef<FixedSizeList>(null);
 	const itemHeight = rendererItemHeight ?? 24;
 	const [loading, setLoading] = useState<string[]>([]);
 	const enhancedData = useMemo((): TreeDataForRenderer[] => {
@@ -246,10 +261,34 @@ const TreeView = (props: TreeViewProps) => {
 		[renderer, enhancedData, rendererProps, hookOnToggleExpanded]
 	);
 
+	// controlled scrolling
+	const [scrollToId, setScrollToId] = useState<string | null>(null);
+	useEffect(() => {
+		if (!scrollToId) return;
+		const list = listRef.current;
+		if (!list) return;
+		setScrollToId(null);
+		const entry = enhancedData.find((entry) => entry.id === scrollToId);
+		if (!entry) return;
+		list.scrollToItem(entry.index);
+	}, [scrollToId, enhancedData]);
+
+	// ref
+	useImperativeHandle(
+		ref,
+		() => ({
+			scrollTo: (id: string) => {
+				setScrollToId(id);
+			},
+		}),
+		[]
+	);
+
 	return (
 		<AutoSizer>
 			{({ width, height }) => (
 				<FixedSizeList
+					ref={listRef}
 					itemSize={itemHeight}
 					height={height}
 					width={width}
@@ -261,6 +300,6 @@ const TreeView = (props: TreeViewProps) => {
 			)}
 		</AutoSizer>
 	);
-};
+});
 
 export default React.memo(TreeView);
