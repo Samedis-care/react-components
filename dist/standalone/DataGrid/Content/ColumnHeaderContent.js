@@ -52,7 +52,9 @@ const ColumnHeaderContent = (props) => {
         props.enableResize && (React.createElement("div", { className: classes.columnHeaderResizer, onMouseDown: props.startDrag, onClick: preventPropagation, onDoubleClick: props.autoResize })),
         React.createElement(Popover, { open: filterAnchorEl !== null, anchorEl: filterAnchorEl, onClose: closeFilter, anchorOrigin: anchorOrigin, transformOrigin: transformOrigin, onBackdropClick: preventPropagation, onClick: preventPropagation },
             React.createElement(Box, { m: 2 },
-                React.createElement(Grid, { container: true, className: classes.columnHeaderFilterPopup },
+                React.createElement(Grid, { container: true, className: props.columnType === "enum"
+                        ? classes.columnHeaderFilterPopupEnum
+                        : classes.columnHeaderFilterPopup },
                     React.createElement(FilterEntry, { valueType: props.columnType, onChange: props.onFilterChange, value: props.filter, valueData: props.filterData, close: closeFilter, depth: 1 }))))));
 };
 export default React.memo(ColumnHeaderContent);

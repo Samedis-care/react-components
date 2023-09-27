@@ -251,6 +251,9 @@ const useStyles = makeStyles((theme) => ({
     columnHeaderFilterPopup: {
         width: 160,
     },
+    columnHeaderFilterPopupEnum: {
+        minWidth: 160,
+    },
     columnHeaderFilterIcon: {
         width: 16,
         height: "auto",

@@ -8,6 +8,7 @@ import useCCTranslations from "../../../utils/useCCTranslations";
 import { normalizeDate } from "../../../backend-integration/Model/Types/Utils/DateUtils";
 import moment from "moment";
 const ENUM_FILTER_MAGIC_EMPTY = "__MAGIC_EMPTY__";
+const TYPOGRAPHY_PROPS = { noWrap: true };
 const FilterEntry = (props) => {
     const { onChange, depth, close } = props;
     const isFirstFilter = depth === 1;
@@ -219,10 +220,10 @@ const FilterEntry = (props) => {
                                     .map((entry) => entry.value || ENUM_FILTER_MAGIC_EMPTY)
                                     .sort()
                                     .join(","), onChange: onFilterValueChangeEnumAll }),
-                        React.createElement(ListItemText, null, t("standalone.data-grid.content.set-filter.select-all")))),
+                        React.createElement(ListItemText, { primaryTypographyProps: TYPOGRAPHY_PROPS }, t("standalone.data-grid.content.set-filter.select-all")))),
                     checkSupport(props.valueType, "notInSet") && (React.createElement(ListItem, { className: classes.setFilterListItem },
                         React.createElement(Checkbox, { checked: enumFilterInverted, onChange: onFilterTypeChangeEnum }),
-                        React.createElement(ListItemText, null, t("standalone.data-grid.content.set-filter.invert")))),
+                        React.createElement(ListItemText, { primaryTypographyProps: TYPOGRAPHY_PROPS }, t("standalone.data-grid.content.set-filter.invert")))),
                     props.valueData
                         .filter((entry) => entry
                         .getLabelText()
@@ -234,7 +235,7 @@ const FilterEntry = (props) => {
                         React.createElement(Checkbox, { value: entry.value || ENUM_FILTER_MAGIC_EMPTY, checked: filterValue
                                 .split(",")
                                 .includes(entry.value || ENUM_FILTER_MAGIC_EMPTY), onChange: onFilterValueChangeEnum, disabled: entry.disabled }),
-                        React.createElement(ListItemText, null, (entry.getLabel || entry.getLabelText)())))))))))),
+                        React.createElement(ListItemText, { primaryTypographyProps: TYPOGRAPHY_PROPS }, (entry.getLabel || entry.getLabelText)())))))))))),
         filterValue &&
             props.valueType !== "enum" &&
             props.valueType !== "boolean" &&
