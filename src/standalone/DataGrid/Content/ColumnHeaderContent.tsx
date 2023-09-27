@@ -165,7 +165,14 @@ const ColumnHeaderContent = (
 				onClick={preventPropagation}
 			>
 				<Box m={2}>
-					<Grid container className={classes.columnHeaderFilterPopup}>
+					<Grid
+						container
+						className={
+							props.columnType === "enum"
+								? classes.columnHeaderFilterPopupEnum
+								: classes.columnHeaderFilterPopup
+						}
+					>
 						<FilterEntry
 							valueType={props.columnType}
 							onChange={props.onFilterChange}

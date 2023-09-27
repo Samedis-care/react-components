@@ -103,6 +103,7 @@ export interface DataGridContentFilterEntryProps {
 }
 
 const ENUM_FILTER_MAGIC_EMPTY = "__MAGIC_EMPTY__";
+const TYPOGRAPHY_PROPS = { noWrap: true };
 
 const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 	const { onChange, depth, close } = props;
@@ -534,7 +535,7 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 										}
 										onChange={onFilterValueChangeEnumAll}
 									/>
-									<ListItemText>
+									<ListItemText primaryTypographyProps={TYPOGRAPHY_PROPS}>
 										{t("standalone.data-grid.content.set-filter.select-all")}
 									</ListItemText>
 								</ListItem>
@@ -545,7 +546,7 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 										checked={enumFilterInverted}
 										onChange={onFilterTypeChangeEnum}
 									/>
-									<ListItemText>
+									<ListItemText primaryTypographyProps={TYPOGRAPHY_PROPS}>
 										{t("standalone.data-grid.content.set-filter.invert")}
 									</ListItemText>
 								</ListItem>
@@ -578,7 +579,7 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 													onChange={onFilterValueChangeEnum}
 													disabled={entry.disabled}
 												/>
-												<ListItemText>
+												<ListItemText primaryTypographyProps={TYPOGRAPHY_PROPS}>
 													{(entry.getLabel || entry.getLabelText)()}
 												</ListItemText>
 											</>
