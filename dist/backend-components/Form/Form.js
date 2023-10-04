@@ -289,14 +289,15 @@ const Form = (props) => {
         alwaysSubmitFields,
         serverData,
     ]);
-    const dirty = useMemo(() => serverData && defaultRecord
+    const getFormDirty = useCallback((values) => serverData && defaultRecord
         ? (() => {
             const [local, remote] = getNormalizedData(values);
             return JSON.stringify(local) !== JSON.stringify(remote);
         })()
-        : false, [serverData, defaultRecord, getNormalizedData, values]) ||
-        customDirty ||
-        !!(id && !deleted && deleteOnSubmit);
+        : false, [serverData, defaultRecord, getNormalizedData]);
+    const formDirty = useMemo(() => getFormDirty(values), [getFormDirty, values]);
+    const getDirty = useCallback((formDirty) => formDirty || customDirty || !!(id && !deleted && deleteOnSubmit), [customDirty, deleteOnSubmit, deleted, id]);
+    const dirty = getDirty(formDirty);
     // main form handling - dispatch
     const validateForm = useCallback(async (mode = "normal", values) => {
         if (disableValidation)
@@ -436,6 +437,8 @@ const Form = (props) => {
             throw new Error("serverData is null"); // should never happen
         if (!defaultRecord)
             throw new Error("default record is null"); // should never happen
+        if (!getDirty(getFormDirty(valuesRef.current)))
+            return; // when form isn't dirty we don't have to submit
         if (params && "nativeEvent" in params)
             params = undefined;
         if (!params)
@@ -542,6 +545,8 @@ const Form = (props) => {
     }, [
         serverData,
         defaultRecord,
+        getDirty,
+        getFormDirty,
         preSubmit,
         deleteOnSubmit,
         setFieldValue,
