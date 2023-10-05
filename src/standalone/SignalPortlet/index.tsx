@@ -2,7 +2,9 @@ import React, { CSSProperties } from "react";
 import SignalPortletItem, { SignalPortletItemDef } from "./SignalPortletItem";
 import makeStyles from "@mui/styles/makeStyles";
 import { ClassNameMap } from "@mui/styles/withStyles";
-import { Divider, Grid, List, Paper, Typography } from "@mui/material";
+import { Divider, Grid, List, Paper, Theme, Typography } from "@mui/material";
+import makeThemeStyles from "../../utils/makeThemeStyles";
+import { Styles } from "@mui/styles";
 
 export interface SignalPortletColorConfig {
 	/**
@@ -35,6 +37,7 @@ const useStyles = makeStyles(
 		paper: {
 			height: "100%",
 		},
+		divider: {},
 		list: {},
 		title: {},
 		titleWrapper: {},
@@ -42,8 +45,20 @@ const useStyles = makeStyles(
 	{ name: "CcSignalPortlet" }
 );
 
+export type SignalPortletClassKey = keyof ReturnType<typeof useStyles>;
+
+export type SignalPortletTheme = Partial<
+	Styles<Theme, SignalPortletProps, SignalPortletClassKey>
+>;
+
+const useThemeStyles = makeThemeStyles(
+	(theme) => theme.componentsCare?.signalPortlet?.root,
+	"CcSignalPortlet",
+	useStyles
+);
+
 const SignalPortlet = (props: SignalPortletProps) => {
-	const classes = useStyles(props);
+	const classes = useThemeStyles(props);
 
 	return (
 		<Paper className={classes.paper}>
@@ -53,7 +68,7 @@ const SignalPortlet = (props: SignalPortletProps) => {
 						{props.title}
 					</Typography>
 				</Grid>
-				<Grid item xs={12}>
+				<Grid item xs={12} className={classes.divider}>
 					<Divider />
 				</Grid>
 				<Grid item xs={12}>

@@ -8,9 +8,12 @@ import {
 	ListItemAvatar,
 	ListItemButton,
 	ListItemText,
+	Theme,
 } from "@mui/material";
 import { SignalPortletColorConfig } from "./index";
 import Loader from "../Loader";
+import { Styles } from "@mui/styles";
+import makeThemeStyles from "../../utils/makeThemeStyles";
 
 export interface SignalPortletItemDef {
 	/**
@@ -50,13 +53,29 @@ const useStyles = makeStyles(
 		root: {},
 		listAvatar: {},
 		listText: {},
+		listTextPrimary: {},
 	}),
 	{ name: "CcSignalPortletItem" }
 );
 
+export type SignalPortletItemClassKey = keyof ReturnType<typeof useStyles>;
+
+export type SignalPortletItemTheme = Partial<
+	Styles<Theme, SignalPortletItemProps, SignalPortletItemClassKey>
+>;
+
+const useThemeStyles = makeThemeStyles<
+	SignalPortletItemProps,
+	SignalPortletItemClassKey
+>(
+	(theme) => theme.componentsCare?.signalPortlet?.item,
+	"CcSignalPortletItem",
+	useStyles
+);
+
 const SignalPortletItem = (props: SignalPortletItemProps) => {
 	const { count, link, text } = props;
-	const classes = useStyles(props);
+	const classes = useThemeStyles(props);
 	const navigate = useNavigate();
 
 	const handleClick = useCallback(() => {
@@ -79,7 +98,12 @@ const SignalPortletItem = (props: SignalPortletItemProps) => {
 					{count == null ? <Loader /> : count.toString()}
 				</Avatar>
 			</ListItemAvatar>
-			<ListItemText className={classes.listText}>{text}</ListItemText>
+			<ListItemText
+				className={classes.listText}
+				primaryTypographyProps={{ className: classes.listTextPrimary }}
+			>
+				{text}
+			</ListItemText>
 		</>
 	);
 	return link ? (

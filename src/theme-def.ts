@@ -24,6 +24,8 @@ import { SubActionButtonTheme } from "./standalone/UIKit/SubActionButton";
 import { FormButtonTheme } from "./standalone/UIKit/FormButtons";
 import { FormPageLayoutTheme } from "./standalone/Form/FormPageLayout";
 import { GroupBoxTheme } from "./standalone/GroupBox";
+import { SignalPortletItemTheme } from "./standalone/SignalPortlet/SignalPortletItem";
+import { SignalPortletTheme } from "./standalone/SignalPortlet";
 
 export interface ComponentsCareTheme {
 	dataGrid?: DataGridTheme;
@@ -46,6 +48,10 @@ export interface ComponentsCareTheme {
 			imageDialogEntry?: ImageDialogEntryTheme;
 			dots?: ImageDotsTheme;
 		};
+	};
+	signalPortlet?: {
+		root?: SignalPortletTheme;
+		item?: SignalPortletItemTheme;
 	};
 	selector?: SelectorTheme;
 	multiSelect?: MultiSelectTheme;
