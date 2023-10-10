@@ -54,6 +54,7 @@ export interface CrudProps<KeyT extends ModelFieldName, VisibilityT extends Page
         onAddNew?: ((showNew: () => void) => void) | string | (Omit<IDataGridAddButton, "onClick"> & {
             onClick: (showNew: () => void) => void | undefined;
         })[];
+        forceAddNew?: BackendDataGridProps<KeyT, VisibilityT, CustomT>["onAddNew"];
     };
     /**
      * Component wrapping the DataGrid

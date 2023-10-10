@@ -126,22 +126,23 @@ const CRUD = (props) => {
                     hasPermission(perms, props.editPermission)) &&
                     props.children
                     ? showEditPage
-                    : undefined, onAddNew: hasPermission(perms, props.newPermission) && props.children
-                    ? props.gridProps.onAddNew == null
-                        ? showNewPage
-                        : typeof props.gridProps.onAddNew === "string"
-                            ? props.gridProps.onAddNew
-                            : typeof props.gridProps.onAddNew === "function"
-                                ? () => props.gridProps.onAddNew(showNewPage)
-                                : Array.isArray(props.gridProps.onAddNew)
-                                    ? props.gridProps.onAddNew.map((btn) => ({
-                                        ...btn,
-                                        onClick: btn.onClick
-                                            ? () => btn.onClick(showNewPage)
-                                            : undefined,
-                                    }))
-                                    : throwError("invalid type")
-                    : props.newPermissionHint, onImport: enableUserImport ? handleImportButton : undefined, globalScrollListener: globalScrollListener }))));
+                    : undefined, onAddNew: props.gridProps.forceAddNew ??
+                    (hasPermission(perms, props.newPermission) && props.children
+                        ? props.gridProps.onAddNew == null
+                            ? showNewPage
+                            : typeof props.gridProps.onAddNew === "string"
+                                ? props.gridProps.onAddNew
+                                : typeof props.gridProps.onAddNew === "function"
+                                    ? () => props.gridProps.onAddNew(showNewPage)
+                                    : Array.isArray(props.gridProps.onAddNew)
+                                        ? props.gridProps.onAddNew.map((btn) => ({
+                                            ...btn,
+                                            onClick: btn.onClick
+                                                ? () => btn.onClick(showNewPage)
+                                                : undefined,
+                                        }))
+                                        : throwError("invalid type")
+                        : props.newPermissionHint), onImport: enableUserImport ? handleImportButton : undefined, globalScrollListener: globalScrollListener }))));
     const importer = (guided) => (React.createElement(ImportUI, { model: props.model, importConfig: importConfig, updateKey: importUpdateKey, updateKeyAdditionalFilters: importUpdateKeyAdditionalFilters, howTo: importHowTo, validate: importValidate, guided: guided }));
     const lastFormId = useRef(null);
     const formKey = useRef(Date.now().toString(16));
