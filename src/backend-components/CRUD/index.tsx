@@ -112,6 +112,12 @@ export interface CrudProps<
 				| (Omit<IDataGridAddButton, "onClick"> & {
 						onClick: (showNew: () => void) => void | undefined;
 				  })[];
+			// forced version of addNew, is directly passed along
+			forceAddNew?: BackendDataGridProps<
+				KeyT,
+				VisibilityT,
+				CustomT
+			>["onAddNew"];
 		};
 	/**
 	 * Component wrapping the DataGrid
@@ -398,7 +404,8 @@ const CRUD = <
 							: undefined
 					}
 					onAddNew={
-						hasPermission(perms, props.newPermission) && props.children
+						props.gridProps.forceAddNew ??
+						(hasPermission(perms, props.newPermission) && props.children
 							? props.gridProps.onAddNew == null
 								? showNewPage
 								: typeof props.gridProps.onAddNew === "string"
@@ -418,7 +425,7 @@ const CRUD = <
 										})
 								  )
 								: throwError("invalid type")
-							: props.newPermissionHint
+							: props.newPermissionHint)
 					}
 					onImport={enableUserImport ? handleImportButton : undefined}
 					globalScrollListener={globalScrollListener}
