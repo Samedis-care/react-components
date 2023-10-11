@@ -221,6 +221,7 @@ const ColumnHeader = (props: IDataGridContentColumnHeaderProps) => {
 			])}
 		>
 			<ColumnHeaderContent
+				field={props.column.field}
 				headerName={props.column.headerLabel ?? props.column.headerName}
 				enableResize
 				startDrag={startDrag}

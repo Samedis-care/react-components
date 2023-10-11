@@ -17,6 +17,10 @@ import { combineClassNames } from "../../../utils";
 
 export interface IDataGridContentColumnHeaderContentProps {
 	/**
+	 * The column field name
+	 */
+	field: string;
+	/**
 	 * The header columnHeaderLabel
 	 */
 	headerName: string;
@@ -174,6 +178,7 @@ const ColumnHeaderContent = (
 						}
 					>
 						<FilterEntry
+							field={props.field}
 							valueType={props.columnType}
 							onChange={props.onFilterChange}
 							value={props.filter}

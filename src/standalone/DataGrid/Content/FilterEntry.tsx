@@ -76,6 +76,10 @@ export interface IFilterDef {
 
 export interface DataGridContentFilterEntryProps {
 	/**
+	 * The column field name
+	 */
+	field: string;
+	/**
 	 * The type of the column value (string, number, etc). See ValueType
 	 */
 	valueType: ModelFilterType;
@@ -137,7 +141,7 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 		filterType: FilterType
 	): boolean => {
 		if (!isFilterSupported) return true;
-		return isFilterSupported(dataType, filterType);
+		return isFilterSupported(dataType, filterType, props.field);
 	};
 
 	const resetFilter = useCallback(() => {
@@ -600,6 +604,7 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 							onChange={onSubFilterTypeChange}
 						/>
 						<FilterEntry
+							field={props.field}
 							onChange={onSubFilterChange}
 							valueType={props.valueType}
 							valueData={props.valueData}

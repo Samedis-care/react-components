@@ -202,11 +202,13 @@ export interface IDataGridCallbacks {
 	 * Callback to check if filter is supported
 	 * @param dataType The data type
 	 * @param filterType The filter type
+	 * @param fieldName the column field name
 	 * @returns Supported?
 	 */
 	isFilterSupported?: (
 		dataType: ModelFilterType,
-		filterType: FilterType
+		filterType: FilterType,
+		fieldName: string
 	) => boolean;
 	/**
 	 * Callback for unhandled JS errors
