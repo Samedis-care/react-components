@@ -34,7 +34,7 @@ const FilterEntry = (props) => {
     const checkSupport = (dataType, filterType) => {
         if (!isFilterSupported)
             return true;
-        return isFilterSupported(dataType, filterType);
+        return isFilterSupported(dataType, filterType, props.field);
     };
     const resetFilter = useCallback(() => {
         onChange({ type: defaultFilterType, value1: "", value2: "" });
@@ -241,6 +241,6 @@ const FilterEntry = (props) => {
             props.valueType !== "boolean" &&
             (!maxDepth || depth <= maxDepth) && (React.createElement(React.Fragment, null,
             React.createElement(FilterCombinator, { value: subFilterComboType, onChange: onSubFilterTypeChange }),
-            React.createElement(FilterEntry, { onChange: onSubFilterChange, valueType: props.valueType, valueData: props.valueData, value: subFilter, close: close, depth: depth + 1 })))));
+            React.createElement(FilterEntry, { field: props.field, onChange: onSubFilterChange, valueType: props.valueType, valueData: props.valueData, value: subFilter, close: close, depth: depth + 1 })))));
 };
 export default React.memo(FilterEntry);

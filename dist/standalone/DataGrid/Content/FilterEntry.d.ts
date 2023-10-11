@@ -28,6 +28,10 @@ export interface IFilterDef {
 }
 export interface DataGridContentFilterEntryProps {
     /**
+     * The column field name
+     */
+    field: string;
+    /**
      * The type of the column value (string, number, etc). See ValueType
      */
     valueType: ModelFilterType;

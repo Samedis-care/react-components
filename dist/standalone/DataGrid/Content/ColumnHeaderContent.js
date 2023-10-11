@@ -55,6 +55,6 @@ const ColumnHeaderContent = (props) => {
                 React.createElement(Grid, { container: true, className: props.columnType === "enum"
                         ? classes.columnHeaderFilterPopupEnum
                         : classes.columnHeaderFilterPopup },
-                    React.createElement(FilterEntry, { valueType: props.columnType, onChange: props.onFilterChange, value: props.filter, valueData: props.filterData, close: closeFilter, depth: 1 }))))));
+                    React.createElement(FilterEntry, { field: props.field, valueType: props.columnType, onChange: props.onFilterChange, value: props.filter, valueData: props.filterData, close: closeFilter, depth: 1 }))))));
 };
 export default React.memo(ColumnHeaderContent);

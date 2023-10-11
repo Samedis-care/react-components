@@ -161,6 +161,6 @@ const ColumnHeader = (props) => {
             filterable && classes.columnHeaderFilterable,
             "column-header-" + column.field,
         ]) },
-        React.createElement(ColumnHeaderContent, { headerName: props.column.headerLabel ?? props.column.headerName, enableResize: true, startDrag: startDrag, autoResize: autoResize, sort: sort, sortOrder: sortOrder, filterable: !!filterable, filter: filter, onFilterChange: internalOnFilterChange, columnType: props.column.type, filterData: props.column.filterData })));
+        React.createElement(ColumnHeaderContent, { field: props.column.field, headerName: props.column.headerLabel ?? props.column.headerName, enableResize: true, startDrag: startDrag, autoResize: autoResize, sort: sort, sortOrder: sortOrder, filterable: !!filterable, filter: filter, onFilterChange: internalOnFilterChange, columnType: props.column.type, filterData: props.column.filterData })));
 };
 export default React.memo(ColumnHeader);

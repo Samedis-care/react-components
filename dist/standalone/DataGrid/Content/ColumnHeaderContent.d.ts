@@ -4,6 +4,10 @@ import { ModelFilterType } from "../../../backend-integration/Model";
 import { IDataGridColumnDef } from "../DataGrid";
 export interface IDataGridContentColumnHeaderContentProps {
     /**
+     * The column field name
+     */
+    field: string;
+    /**
      * The header columnHeaderLabel
      */
     headerName: string;
