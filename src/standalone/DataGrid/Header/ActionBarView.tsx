@@ -32,7 +32,7 @@ export interface IDataGridActionBarViewProps extends ResetCallbacks {
 	/**
 	 * Callback to toggle the settings popover
 	 */
-	toggleSettings: () => void;
+	toggleSettings?: () => void;
 	/**
 	 * Callback for add new button.
 	 * If set to string: disabled add new button reason
@@ -52,6 +52,10 @@ export interface IDataGridActionBarViewProps extends ResetCallbacks {
 	 * List of available export providers
 	 */
 	exporters?: IDataGridExporter<unknown>[];
+	/**
+	 * Hide reset menu
+	 */
+	hideReset: boolean;
 }
 
 const ActionBarView = (props: IDataGridActionBarViewProps) => {
@@ -115,20 +119,23 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 
 	return (
 		<Grid container alignItems={"stretch"} wrap={"nowrap"}>
-			{props.hasCustomFilterBar && (
-				<Grid item key={"divider-1"}>
-					<VerticalDivider />
-				</Grid>
-			)}
-			{props.hasCustomFilterBar && !bpSmUp ? (
+			{props.hasCustomFilterBar &&
+			!bpSmUp &&
+			(props.toggleSettings ||
+				!props.hideReset ||
+				props.exporters ||
+				props.handleImport) ? (
 				<>
+					<Grid item key={"divider-1"}>
+						<VerticalDivider />
+					</Grid>
 					<IconButton color={"primary"} onClick={openSettingsMenu} size="large">
 						<MenuIcon />
 					</IconButton>
 					<ActionBarMenu
 						anchorEl={settingsAnchorEl}
 						toggleSettings={props.toggleSettings}
-						openResetDialog={openResetDialog}
+						openResetDialog={props.hideReset ? undefined : openResetDialog}
 						openExportMenu={props.exporters ? openExportMenu : undefined}
 						handleImport={props.handleImport}
 						onClose={closeSettingsMenu}
@@ -136,57 +143,72 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 				</>
 			) : (
 				<>
-					<Grid item key={"settings"}>
-						{bpMdUp ? (
-							<ComponentWithLabel
-								control={
-									<SmallIconButton color={"primary"}>
-										<TuneIcon />
-									</SmallIconButton>
-								}
-								labelText={t("standalone.data-grid.header.settings")}
-								onClick={props.toggleSettings}
-								labelPlacement={"bottom"}
-							/>
-						) : (
-							<Tooltip title={t("standalone.data-grid.header.settings") ?? ""}>
-								<IconButton
-									color={"primary"}
-									onClick={props.toggleSettings}
-									size="large"
-								>
-									<TuneIcon />
-								</IconButton>
-							</Tooltip>
-						)}
-					</Grid>
-					<Grid item key={"divider-4"}>
-						<VerticalDivider />
-					</Grid>
-					<Grid item key={"reset"}>
-						{bpMdUp ? (
-							<ComponentWithLabel
-								control={
-									<SmallIconButton color={"primary"}>
-										<ResetIcon />
-									</SmallIconButton>
-								}
-								labelText={t("standalone.data-grid.header.reset")}
-								onClick={openResetDialog}
-								labelPlacement={"bottom"}
-							/>
-						) : (
-							<Tooltip title={t("standalone.data-grid.header.reset") ?? ""}>
-								<IconButton
-									color={"primary"}
-									onClick={openResetDialog}
-									size="large"
-								>
-									<ResetIcon />
-								</IconButton>
-							</Tooltip>
-						)}
-					</Grid>
+					{props.toggleSettings && (
+						<>
+							{props.hasCustomFilterBar && (
+								<Grid item key={"divider-1"}>
+									<VerticalDivider />
+								</Grid>
+							)}
+							<Grid item key={"settings"}>
+								{bpMdUp ? (
+									<ComponentWithLabel
+										control={
+											<SmallIconButton color={"primary"}>
+												<TuneIcon />
+											</SmallIconButton>
+										}
+										labelText={t("standalone.data-grid.header.settings")}
+										onClick={props.toggleSettings}
+										labelPlacement={"bottom"}
+									/>
+								) : (
+									<Tooltip
+										title={t("standalone.data-grid.header.settings") ?? ""}
+									>
+										<IconButton
+											color={"primary"}
+											onClick={props.toggleSettings}
+											size="large"
+										>
+											<TuneIcon />
+										</IconButton>
+									</Tooltip>
+								)}
+							</Grid>
+						</>
+					)}
+					{!props.hideReset && (
+						<>
+							<Grid item key={"divider-4"}>
+								<VerticalDivider />
+							</Grid>
+							<Grid item key={"reset"}>
+								{bpMdUp ? (
+									<ComponentWithLabel
+										control={
+											<SmallIconButton color={"primary"}>
+												<ResetIcon />
+											</SmallIconButton>
+										}
+										labelText={t("standalone.data-grid.header.reset")}
+										onClick={openResetDialog}
+										labelPlacement={"bottom"}
+									/>
+								) : (
+									<Tooltip title={t("standalone.data-grid.header.reset") ?? ""}>
+										<IconButton
+											color={"primary"}
+											onClick={openResetDialog}
+											size="large"
+										>
+											<ResetIcon />
+										</IconButton>
+									</Tooltip>
+								)}
+							</Grid>
+						</>
+					)}
 					{props.exporters && (
 						<>
 							<Grid item key={"divider-3"}>

@@ -24,6 +24,8 @@ const ActionBar = () => {
 		defaultSort,
 		defaultFilter,
 		defaultCustomData,
+		hideReset,
+		hideSettings,
 	} = useDataGridProps();
 	const theme = useTheme();
 
@@ -124,7 +126,8 @@ const ActionBar = () => {
 
 	return (
 		<ActionBarView
-			toggleSettings={toggleSettings}
+			toggleSettings={hideSettings ? undefined : toggleSettings}
+			hideReset={!!hideReset}
 			handleAddNew={onAddNew}
 			handleImport={onImport}
 			refresh={handleRefresh}

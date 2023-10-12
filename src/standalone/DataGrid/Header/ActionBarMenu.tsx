@@ -12,8 +12,8 @@ import useCCTranslations from "../../../utils/useCCTranslations";
 
 export interface ActionBarMenuProps {
 	anchorEl: MenuProps["anchorEl"];
-	toggleSettings: (evt: React.MouseEvent) => void;
-	openResetDialog: (evt: React.MouseEvent) => void;
+	toggleSettings?: (evt: React.MouseEvent) => void;
+	openResetDialog?: (evt: React.MouseEvent) => void;
 	openExportMenu?: (evt: React.MouseEvent) => void;
 	handleImport?: (evt: React.MouseEvent) => void;
 	onClose: () => void;
@@ -40,14 +40,14 @@ const ActionBarMenu = (props: ActionBarMenuProps) => {
 	} = props;
 	const toggleSettingsWrap = useCallback(
 		(evt: React.MouseEvent) => {
-			toggleSettings(evt);
+			if (toggleSettings) toggleSettings(evt);
 			onClose();
 		},
 		[toggleSettings, onClose]
 	);
 	const openResetDialogWrap = useCallback(
 		(evt: React.MouseEvent) => {
-			openResetDialog(evt);
+			if (openResetDialog) openResetDialog(evt);
 			onClose();
 		},
 		[openResetDialog, onClose]
@@ -77,18 +77,22 @@ const ActionBarMenu = (props: ActionBarMenuProps) => {
 			open={!!anchorEl}
 			onClose={onClose}
 		>
-			<MenuItem onClick={toggleSettingsWrap}>
-				<ListItemIcon>
-					<TuneIcon fontSize={"small"} />
-				</ListItemIcon>
-				{t("standalone.data-grid.header.settings")}
-			</MenuItem>
-			<MenuItem onClick={openResetDialogWrap}>
-				<ListItemIcon>
-					<ResetIcon fontSize={"small"} />
-				</ListItemIcon>
-				{t("standalone.data-grid.header.reset")}
-			</MenuItem>
+			{toggleSettings && (
+				<MenuItem onClick={toggleSettingsWrap}>
+					<ListItemIcon>
+						<TuneIcon fontSize={"small"} />
+					</ListItemIcon>
+					{t("standalone.data-grid.header.settings")}
+				</MenuItem>
+			)}
+			{openResetDialog && (
+				<MenuItem onClick={openResetDialogWrap}>
+					<ListItemIcon>
+						<ResetIcon fontSize={"small"} />
+					</ListItemIcon>
+					{t("standalone.data-grid.header.reset")}
+				</MenuItem>
+			)}
 			{openExportMenu && (
 				<MenuItem onClick={openExportMenuWrap}>
 					<ListItemIcon>

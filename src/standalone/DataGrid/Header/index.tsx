@@ -25,6 +25,14 @@ export interface IDataGridHeaderProps {
 	 * List of available export providers
 	 */
 	exporters?: IDataGridExporter<unknown>[];
+	/**
+	 * Hide user column settings
+	 */
+	hideSettings?: boolean;
+	/**
+	 * Hide user reset button
+	 */
+	hideReset?: boolean;
 }
 
 /**
