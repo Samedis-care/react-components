@@ -6,7 +6,7 @@ const ActionBar = () => {
     const [, setState] = useDataGridState();
     const [, setColumnState] = useDataGridColumnState();
     const [, setColumnWidth] = useDataGridColumnsWidthState();
-    const { columns, onAddNew, onImport, exporters, filterBar, defaultSort, defaultFilter, defaultCustomData, } = useDataGridProps();
+    const { columns, onAddNew, onImport, exporters, filterBar, defaultSort, defaultFilter, defaultCustomData, hideReset, hideSettings, } = useDataGridProps();
     const theme = useTheme();
     const toggleSettings = useCallback(() => {
         setState((prevState) => ({
@@ -83,6 +83,6 @@ const ActionBar = () => {
             refreshData: Math.min(prevState.refreshData + 1, 2),
         }));
     }, [setState]);
-    return (React.createElement(ActionBarView, { toggleSettings: toggleSettings, handleAddNew: onAddNew, handleImport: onImport, refresh: handleRefresh, resetFilter: handleResetFilter, resetSort: handleResetSort, resetColumn: handleResetColumn, resetWidth: handleResetWidth, resetAll: handleResetAll, exporters: exporters, hasCustomFilterBar: !!filterBar }));
+    return (React.createElement(ActionBarView, { toggleSettings: hideSettings ? undefined : toggleSettings, hideReset: !!hideReset, handleAddNew: onAddNew, handleImport: onImport, refresh: handleRefresh, resetFilter: handleResetFilter, resetSort: handleResetSort, resetColumn: handleResetColumn, resetWidth: handleResetWidth, resetAll: handleResetAll, exporters: exporters, hasCustomFilterBar: !!filterBar }));
 };
 export default React.memo(ActionBar);

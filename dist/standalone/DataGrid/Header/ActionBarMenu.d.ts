@@ -2,8 +2,8 @@ import React from "react";
 import { MenuProps } from "@mui/material";
 export interface ActionBarMenuProps {
     anchorEl: MenuProps["anchorEl"];
-    toggleSettings: (evt: React.MouseEvent) => void;
-    openResetDialog: (evt: React.MouseEvent) => void;
+    toggleSettings?: (evt: React.MouseEvent) => void;
+    openResetDialog?: (evt: React.MouseEvent) => void;
     openExportMenu?: (evt: React.MouseEvent) => void;
     handleImport?: (evt: React.MouseEvent) => void;
     onClose: () => void;

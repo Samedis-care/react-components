@@ -15,11 +15,13 @@ const transformOrigin = {
 const ActionBarMenu = (props) => {
     const { anchorEl, onClose, toggleSettings, openResetDialog, openExportMenu, handleImport, } = props;
     const toggleSettingsWrap = useCallback((evt) => {
-        toggleSettings(evt);
+        if (toggleSettings)
+            toggleSettings(evt);
         onClose();
     }, [toggleSettings, onClose]);
     const openResetDialogWrap = useCallback((evt) => {
-        openResetDialog(evt);
+        if (openResetDialog)
+            openResetDialog(evt);
         onClose();
     }, [openResetDialog, onClose]);
     const openExportMenuWrap = useCallback((evt) => {
@@ -34,14 +36,14 @@ const ActionBarMenu = (props) => {
     }, [handleImport, onClose]);
     const { t } = useCCTranslations();
     return (React.createElement(PopupMenu, { elevation: 0, anchorEl: anchorEl, anchorOrigin: anchorOrigin, transformOrigin: transformOrigin, keepMounted: true, open: !!anchorEl, onClose: onClose },
-        React.createElement(MenuItem, { onClick: toggleSettingsWrap },
+        toggleSettings && (React.createElement(MenuItem, { onClick: toggleSettingsWrap },
             React.createElement(ListItemIcon, null,
                 React.createElement(TuneIcon, { fontSize: "small" })),
-            t("standalone.data-grid.header.settings")),
-        React.createElement(MenuItem, { onClick: openResetDialogWrap },
+            t("standalone.data-grid.header.settings"))),
+        openResetDialog && (React.createElement(MenuItem, { onClick: openResetDialogWrap },
             React.createElement(ListItemIcon, null,
                 React.createElement(ResetIcon, { fontSize: "small" })),
-            t("standalone.data-grid.header.reset")),
+            t("standalone.data-grid.header.reset"))),
         openExportMenu && (React.createElement(MenuItem, { onClick: openExportMenuWrap },
             React.createElement(ListItemIcon, null,
                 React.createElement(ExportIcon, { fontSize: "small" })),

@@ -6,7 +6,7 @@ export interface IDataGridActionBarViewProps extends ResetCallbacks {
     /**
      * Callback to toggle the settings popover
      */
-    toggleSettings: () => void;
+    toggleSettings?: () => void;
     /**
      * Callback for add new button.
      * If set to string: disabled add new button reason
@@ -26,6 +26,10 @@ export interface IDataGridActionBarViewProps extends ResetCallbacks {
      * List of available export providers
      */
     exporters?: IDataGridExporter<unknown>[];
+    /**
+     * Hide reset menu
+     */
+    hideReset: boolean;
 }
 declare const _default: React.MemoExoticComponent<(props: IDataGridActionBarViewProps) => JSX.Element>;
 export default _default;
