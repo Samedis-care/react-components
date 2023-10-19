@@ -12,6 +12,9 @@ const DateInput = (props) => {
             ...muiProps.slotProps,
             textField: {
                 InputLabelProps: InputLabelConfig,
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // @ts-ignore This just passes props down to the text field component, TS defs don't support custom props here, but the implementation does.
+                customHandleClear: () => onChange(null),
                 ...muiProps.slotProps?.textField,
             },
         } }));

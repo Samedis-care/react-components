@@ -6,19 +6,24 @@ import { combineClassNames, isTouchDevice } from "../../utils";
 import { useMuiWarningStyles } from "./MuiWarning";
 import { useRefComposer } from "react-ref-composer";
 const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(props, ref) {
-    const { openInfo, important, warning, onChange, ...muiProps } = props;
+    const { openInfo, customHandleClear, important, warning, onChange, ...muiProps } = props;
     const inputClasses = useInputStyles({ important });
     const warningClasses = useMuiWarningStyles();
     // handle clear
     const [hasValue, setHasValue] = useState(!!(muiProps.value ?? muiProps.defaultValue));
     const composeRef = useRefComposer();
     const inputRef = useRef(null);
-    const handleClear = useCallback(() => {
+    const handleClear = useCallback((evt) => {
         if (!inputRef.current) {
             throw new Error("InputRef not set");
         }
-        const proto = (muiProps.multiline ? HTMLTextAreaElement : HTMLInputElement)
-            .prototype;
+        evt.stopPropagation();
+        if (customHandleClear) {
+            return customHandleClear();
+        }
+        const proto = (muiProps.multiline
+            ? HTMLTextAreaElement
+            : HTMLInputElement).prototype;
         // eslint-disable-next-line @typescript-eslint/unbound-method
         const nativeInputValueSetter = Object.getOwnPropertyDescriptor(proto, "value")?.set;
         if (!nativeInputValueSetter) {
@@ -27,7 +32,7 @@ const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(props
         nativeInputValueSetter.call(inputRef.current, "");
         const event = new Event("input", { bubbles: true });
         inputRef.current.dispatchEvent(event);
-    }, [muiProps.multiline]);
+    }, [muiProps.multiline, customHandleClear]);
     // keep "hasValue" up to date
     const handleChange = useCallback((evt) => {
         if (onChange)
