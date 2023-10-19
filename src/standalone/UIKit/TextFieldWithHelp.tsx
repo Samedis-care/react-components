@@ -23,13 +23,24 @@ export interface TextFieldWithHelpProps extends UIInputProps {
 	 * Optional callback which opens a dialog with information about the field
 	 */
 	openInfo?: () => void;
+	/**
+	 * custom clear handler if clear button is pressed
+	 */
+	customHandleClear?: () => void;
 }
 
 const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(
 	props: TextFieldWithHelpProps & TextFieldProps,
 	ref: ForwardedRef<HTMLDivElement>
 ) {
-	const { openInfo, important, warning, onChange, ...muiProps } = props;
+	const {
+		openInfo,
+		customHandleClear,
+		important,
+		warning,
+		onChange,
+		...muiProps
+	} = props;
 	const inputClasses = useInputStyles({ important });
 	const warningClasses = useMuiWarningStyles();
 
@@ -42,26 +53,35 @@ const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(
 	const composeRef = useRefComposer<HTMLTextAreaElement | HTMLInputElement>();
 	const inputRef = useRef<HTMLTextAreaElement | HTMLInputElement>(null);
 
-	const handleClear = useCallback(() => {
-		if (!inputRef.current) {
-			throw new Error("InputRef not set");
-		}
+	const handleClear = useCallback(
+		(evt: React.MouseEvent) => {
+			if (!inputRef.current) {
+				throw new Error("InputRef not set");
+			}
+			evt.stopPropagation();
+			if (customHandleClear) {
+				return customHandleClear();
+			}
 
-		const proto = (muiProps.multiline ? HTMLTextAreaElement : HTMLInputElement)
-			.prototype;
-		// eslint-disable-next-line @typescript-eslint/unbound-method
-		const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
-			proto,
-			"value"
-		)?.set;
-		if (!nativeInputValueSetter) {
-			throw new Error("Native Input Value Setter is undefined");
-		}
-		nativeInputValueSetter.call(inputRef.current, "");
+			const proto = (muiProps.multiline
+				? HTMLTextAreaElement
+				: HTMLInputElement
+			).prototype;
+			// eslint-disable-next-line @typescript-eslint/unbound-method
+			const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
+				proto,
+				"value"
+			)?.set;
+			if (!nativeInputValueSetter) {
+				throw new Error("Native Input Value Setter is undefined");
+			}
+			nativeInputValueSetter.call(inputRef.current, "");
 
-		const event = new Event("input", { bubbles: true });
-		inputRef.current.dispatchEvent(event);
-	}, [muiProps.multiline]);
+			const event = new Event("input", { bubbles: true });
+			inputRef.current.dispatchEvent(event);
+		},
+		[muiProps.multiline, customHandleClear]
+	);
 
 	// keep "hasValue" up to date
 
