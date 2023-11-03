@@ -83,7 +83,7 @@ const WeekViewDay = (props: WeekViewDayProps) => {
 					</Grid>
 					<Grid item xs={12} className={classes.dayContents}>
 						<Box m={1}>
-							<DayContents data={props.data} />
+							<DayContents data={props.data} altBorder={isToday} />
 						</Box>
 					</Grid>
 				</Grid>

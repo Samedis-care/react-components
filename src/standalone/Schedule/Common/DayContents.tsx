@@ -2,6 +2,7 @@ import React from "react";
 import { Button, Grid } from "@mui/material";
 import { combineClassNames } from "../../../utils";
 import makeStyles from "@mui/styles/makeStyles";
+import combineColors from "../../../utils/combineColors";
 
 export interface IDayData {
 	/**
@@ -64,28 +65,38 @@ export type ScheduleFilterDefinition =
 
 export interface DayContentsProps {
 	data: IDayData[];
+	altBorder?: boolean; // alternative border color, to maintain contrast to background
 }
 
 // @deprecated use DayContentsProps
 export type IProps = DayContentsProps;
 
 const useStyles = makeStyles(
-	{
+	(theme) => ({
 		btn: {
 			textTransform: "none",
 			textAlign: "left",
 			color: "inherit",
 			display: "block",
 		},
+		btnAltBorder: {
+			borderColor: `rgba(${combineColors(
+				theme.palette.background.paper,
+				theme.palette.action.hover
+			).join()})`,
+			"&:hover": {
+				borderColor: theme.palette.background.paper,
+			},
+		},
 		btnDisabled: {
 			cursor: "default",
 		},
-	},
+	}),
 	{ name: "CcDayContents" }
 );
 
 const DayContents = (props: DayContentsProps) => {
-	const { data } = props;
+	const { data, altBorder } = props;
 	const classes = useStyles();
 	return (
 		<Grid container spacing={2}>
@@ -97,6 +108,7 @@ const DayContents = (props: DayContentsProps) => {
 						fullWidth
 						className={combineClassNames([
 							classes.btn,
+							altBorder && classes.btnAltBorder,
 							!entry.onClick && !entry.onAuxClick && classes.btnDisabled,
 						])}
 						onClick={entry.onClick}
