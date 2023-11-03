@@ -20,6 +20,7 @@ import {
 	Autocomplete,
 	Theme,
 	InputLabel,
+	TextFieldProps,
 } from "@mui/material";
 import {
 	Add as AddIcon,
@@ -47,6 +48,8 @@ import InlineSwitch from "../InlineSwitch";
 import useCCTranslations from "../../utils/useCCTranslations";
 import { PopperProps } from "@mui/material/Popper/Popper";
 import uniqueArray from "../../utils/uniqueArray";
+import { OutlinedInputProps } from "@mui/material/OutlinedInput";
+import { InputProps as StandardInputProps } from "@mui/material/Input/Input";
 
 export interface BaseSelectorData {
 	/**
@@ -282,6 +285,16 @@ export interface BaseSelectorProps<DataT extends BaseSelectorData>
 		undefined
 	>["classes"];
 	/**
+	 * Custom styles used for selector input (text field)
+	 */
+	textFieldClasses?: TextFieldProps["classes"];
+	/**
+	 * Custom styles used for selector input (text field input)
+	 */
+	textFieldInputClasses?:
+		| OutlinedInputProps["classes"]
+		| StandardInputProps["classes"];
+	/**
 	 * Display switch control?
 	 */
 	displaySwitch?: boolean;
@@ -513,6 +526,8 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 		freeSolo,
 		getIdOfData,
 		filterIds,
+		textFieldClasses,
+		textFieldInputClasses,
 	} = props;
 
 	const getIdDefault = useCallback((data: DataT) => data.value, []);
@@ -903,6 +918,7 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 								<TextFieldWithHelp
 									variant={variant ?? "outlined"}
 									{...otherParams}
+									classes={textFieldClasses}
 									inputProps={{
 										...params.inputProps,
 										readOnly: disableSearch,
@@ -910,6 +926,7 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 									}}
 									InputProps={{
 										...InputProps,
+										classes: textFieldInputClasses,
 										readOnly: disableSearch,
 										startAdornment:
 											(enableIcons ? renderIcon(selected?.icon) : undefined) ??
