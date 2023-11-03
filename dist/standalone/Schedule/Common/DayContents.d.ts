@@ -54,6 +54,7 @@ export interface ScheduleFilterDefinitionSwitch {
 export declare type ScheduleFilterDefinition = ScheduleFilterDefinitionSelect | ScheduleFilterDefinitionSwitch;
 export interface DayContentsProps {
     data: IDayData[];
+    altBorder?: boolean;
 }
 export declare type IProps = DayContentsProps;
 declare const _default: React.MemoExoticComponent<(props: DayContentsProps) => JSX.Element>;

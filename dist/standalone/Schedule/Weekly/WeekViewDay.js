@@ -48,6 +48,6 @@ const WeekViewDay = (props) => {
                     React.createElement(Box, { m: 1 }, props.date)),
                 React.createElement(Grid, { item: true, xs: 12, className: classes.dayContents },
                     React.createElement(Box, { m: 1 },
-                        React.createElement(DayContents, { data: props.data })))))));
+                        React.createElement(DayContents, { data: props.data, altBorder: isToday })))))));
 };
 export default React.memo(WeekViewDay);
