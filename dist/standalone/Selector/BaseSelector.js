@@ -117,7 +117,7 @@ const GrowPopper = React.forwardRef(function GrowPopperImpl(props, ref) {
 });
 export const BaseSelectorContext = React.createContext(null);
 const BaseSelector = (props) => {
-    const { variant, refreshToken, onSelect, selected, label, disabled, disableSearch, placeholder, autocompleteId, addNewLabel, onLoad, onAddNew, enableIcons, noOptionsText, loadingText, startTypingToSearchText, openText, closeText, clearText, disableClearable, openInfo, grouped, noGroupLabel, disableGroupSorting, groupSorter, switchLabel, lru, startAdornment, endAdornment, endAdornmentLeft, freeSolo, getIdOfData, filterIds, } = props;
+    const { variant, refreshToken, onSelect, selected, label, disabled, disableSearch, placeholder, autocompleteId, addNewLabel, onLoad, onAddNew, enableIcons, noOptionsText, loadingText, startTypingToSearchText, openText, closeText, clearText, disableClearable, openInfo, grouped, noGroupLabel, disableGroupSorting, groupSorter, switchLabel, lru, startAdornment, endAdornment, endAdornmentLeft, freeSolo, getIdOfData, filterIds, textFieldClasses, textFieldInputClasses, } = props;
     const getIdDefault = useCallback((data) => data.value, []);
     const getId = getIdOfData ?? getIdDefault;
     const classes = useThemeStyles(props);
@@ -332,12 +332,13 @@ const BaseSelector = (props) => {
                         t("standalone.selector.base-selector.clear-icon-text"), getOptionLabel: getStringLabel, renderOption: defaultRenderer, getOptionDisabled: getOptionDisabled, isOptionEqualToValue: getOptionSelected, onChange: (_event, selectedValue) => onChangeHandler(selectedValue), renderInput: (params) => {
                         // eslint-disable-next-line @typescript-eslint/no-unused-vars
                         const { InputProps, InputLabelProps, ...otherParams } = params;
-                        return (React.createElement(TextFieldWithHelp, { variant: variant ?? "outlined", ...otherParams, inputProps: {
+                        return (React.createElement(TextFieldWithHelp, { variant: variant ?? "outlined", ...otherParams, classes: textFieldClasses, inputProps: {
                                 ...params.inputProps,
                                 readOnly: disableSearch,
                                 title: selected ? getStringLabel(selected) : undefined,
                             }, InputProps: {
                                 ...InputProps,
+                                classes: textFieldInputClasses,
                                 readOnly: disableSearch,
                                 startAdornment: (enableIcons ? renderIcon(selected?.icon) : undefined) ??
                                     startAdornment,

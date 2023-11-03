@@ -1,8 +1,10 @@
 import React, { ReactNode } from "react";
-import { InputProps, Theme } from "@mui/material";
+import { InputProps, Theme, TextFieldProps } from "@mui/material";
 import { TextFieldWithHelpProps } from "../UIKit/TextFieldWithHelp";
 import { Styles } from "@mui/styles";
 import { AutocompleteProps, AutocompleteClassKey } from "@mui/material/Autocomplete";
+import { OutlinedInputProps } from "@mui/material/OutlinedInput";
+import { InputProps as StandardInputProps } from "@mui/material/Input/Input";
 export interface BaseSelectorData {
     /**
      * A unique value
@@ -202,6 +204,14 @@ export interface BaseSelectorProps<DataT extends BaseSelectorData> extends TextF
      * Custom styles to be used for selector
      */
     classes?: AutocompleteProps<unknown, undefined, undefined, undefined>["classes"];
+    /**
+     * Custom styles used for selector input (text field)
+     */
+    textFieldClasses?: TextFieldProps["classes"];
+    /**
+     * Custom styles used for selector input (text field input)
+     */
+    textFieldInputClasses?: OutlinedInputProps["classes"] | StandardInputProps["classes"];
     /**
      * Display switch control?
      */
