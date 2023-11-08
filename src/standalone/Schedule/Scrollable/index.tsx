@@ -157,38 +157,34 @@ const ScrollableSchedule = (props: ScrollableScheduleProps) => {
 	 */
 	const loadMore = useCallback(
 		(top: boolean) => {
-			const page = top ? state.dataOffsetTop : state.dataOffsetBottom;
-			const item = (
-				<ScrollableScheduleWeek
-					key={page.toString()}
-					loadData={() => loadWeekCallback(page, state.filterValues)}
-					setTodayElement={(elem: HTMLElement | null) =>
-						(todayElem.current = elem)
-					}
-					moment={state.today.clone().add(page - 1, "weeks")}
-				/>
-			);
+			const mkItem = (state: ScrollableScheduleState<typeof filters>) => {
+				const page = top ? state.dataOffsetTop : state.dataOffsetBottom;
+				return (
+					<ScrollableScheduleWeek
+						key={page.toString()}
+						loadData={() => loadWeekCallback(page, state.filterValues)}
+						setTodayElement={(elem: HTMLElement | null) =>
+							(todayElem.current = elem)
+						}
+						moment={state.today.clone().add(page - 1, "weeks")}
+					/>
+				);
+			};
 			if (top) {
 				setState((prevState) => ({
 					...prevState,
-					items: [item, ...prevState.items],
+					items: [mkItem(prevState), ...prevState.items],
 					dataOffsetTop: prevState.dataOffsetTop - 1,
 				}));
 			} else {
 				setState((prevState) => ({
 					...prevState,
-					items: [...prevState.items, item],
+					items: [...prevState.items, mkItem(prevState)],
 					dataOffsetBottom: prevState.dataOffsetBottom + 1,
 				}));
 			}
 		},
-		[
-			loadWeekCallback,
-			state.dataOffsetBottom,
-			state.dataOffsetTop,
-			state.filterValues,
-			state.today,
-		]
+		[loadWeekCallback]
 	);
 
 	/**
