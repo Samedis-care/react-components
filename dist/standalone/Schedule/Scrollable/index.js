@@ -75,29 +75,25 @@ const ScrollableSchedule = (props) => {
      * @param top load more data on top? (if false loads more data at bottom)
      */
     const loadMore = useCallback((top) => {
-        const page = top ? state.dataOffsetTop : state.dataOffsetBottom;
-        const item = (React.createElement(ScrollableScheduleWeek, { key: page.toString(), loadData: () => loadWeekCallback(page, state.filterValues), setTodayElement: (elem) => (todayElem.current = elem), moment: state.today.clone().add(page - 1, "weeks") }));
+        const mkItem = (state) => {
+            const page = top ? state.dataOffsetTop : state.dataOffsetBottom;
+            return (React.createElement(ScrollableScheduleWeek, { key: page.toString(), loadData: () => loadWeekCallback(page, state.filterValues), setTodayElement: (elem) => (todayElem.current = elem), moment: state.today.clone().add(page - 1, "weeks") }));
+        };
         if (top) {
             setState((prevState) => ({
                 ...prevState,
-                items: [item, ...prevState.items],
+                items: [mkItem(prevState), ...prevState.items],
                 dataOffsetTop: prevState.dataOffsetTop - 1,
             }));
         }
         else {
             setState((prevState) => ({
                 ...prevState,
-                items: [...prevState.items, item],
+                items: [...prevState.items, mkItem(prevState)],
                 dataOffsetBottom: prevState.dataOffsetBottom + 1,
             }));
         }
-    }, [
-        loadWeekCallback,
-        state.dataOffsetBottom,
-        state.dataOffsetTop,
-        state.filterValues,
-        state.today,
-    ]);
+    }, [loadWeekCallback]);
     /**
      * Loads more data on top of the scroller
      */
