@@ -1,9 +1,19 @@
 import React, { useCallback, useEffect, useState } from "react";
 import WeekViewDay from "./WeekViewDay";
 import moment, { Moment } from "moment";
-import { Box, CircularProgress, IconButton, Menu } from "@mui/material";
+import {
+	Box,
+	CircularProgress,
+	Divider,
+	IconButton,
+	Menu,
+} from "@mui/material";
 import { Button, Typography, Grid } from "@mui/material";
-import { IDayData, ScheduleFilterDefinition } from "../Common/DayContents";
+import {
+	IDayData,
+	ScheduleAction,
+	ScheduleFilterDefinition,
+} from "../Common/DayContents";
 import {
 	ArrowForwardIos,
 	ArrowBackIos,
@@ -31,6 +41,10 @@ export interface WeekViewProps {
 	 * Optional filter
 	 */
 	filters?: Record<string, ScheduleFilterDefinition>;
+	/**
+	 * Optional actions
+	 */
+	actions?: ScheduleAction[];
 }
 
 const normalizeMoment = (instance: Moment) =>
@@ -66,9 +80,11 @@ const useStyles = makeStyles(
 );
 
 const EMPTY_FILTERS: Record<string, ScheduleFilterDefinition> = {};
+const NO_ACTIONS: ScheduleAction[] = [];
 const WeekView = (props: WeekViewProps) => {
 	const { loadData } = props;
 	const filters = props.filters ?? EMPTY_FILTERS;
+	const actions = props.actions ?? NO_ACTIONS;
 	const filterCount = Object.keys(filters).length;
 	const classes = useStyles();
 	const { t, i18n } = useCCTranslations();
@@ -270,10 +286,10 @@ const WeekView = (props: WeekViewProps) => {
 					</Grid>
 				</Grid>
 				<Grid item xs container justifyContent={"flex-end"}>
-					{filterCount > 1 && (
+					{(filterCount > 1 || actions.length > 0) && (
 						<Grid item>
 							<Box px={2} className={classes.filterWrapper}>
-								{filterCount > 2 ? (
+								{filterCount > 2 || actions.length > 1 ? (
 									<>
 										<IconButton onClick={openFilterSettings}>
 											<SettingsIcon />
@@ -288,7 +304,7 @@ const WeekView = (props: WeekViewProps) => {
 													{Object.entries(filters).map(
 														([name, filter], idx) =>
 															idx !== 0 && (
-																<Grid key={name} item xs={12}>
+																<Grid key={"filter-" + name} item xs={12}>
 																	<ScheduleFilterRenderer
 																		{...filter}
 																		name={name}
@@ -302,23 +318,73 @@ const WeekView = (props: WeekViewProps) => {
 																</Grid>
 															)
 													)}
+													{filterCount > 2 && (
+														<Grid item key={"divider"} xs={12}>
+															<Divider />
+														</Grid>
+													)}
+													{actions.length > 1 &&
+														actions.map(
+															(action, idx) =>
+																idx !== 0 && (
+																	<Grid
+																		item
+																		key={"action-" + action.id}
+																		xs={12}
+																	>
+																		<Button
+																			onClick={action.onClick}
+																			disabled={action.disabled}
+																			fullWidth
+																		>
+																			{action.label}
+																		</Button>
+																	</Grid>
+																)
+														)}
 												</Grid>
 											</Box>
 										</Menu>
 									</>
 								) : (
-									(() => {
-										const [name, filter] = Object.entries(filters)[1];
-										return (
-											<ScheduleFilterRenderer
-												{...filter}
-												name={name}
-												value={filterValues[name]}
-												onChange={handleFilterChange}
-												inline={"weekly"}
-											/>
-										);
-									})()
+									<Grid
+										container
+										spacing={2}
+										wrap={"nowrap"}
+										alignItems={"center"}
+									>
+										{(() => {
+											const ret: React.ReactNode[] = [];
+											if (actions.length > 0) {
+												const action = actions[0];
+												ret.push(
+													<Grid item key={"action-" + action.id}>
+														<Button
+															onClick={action.onClick}
+															disabled={action.disabled}
+														>
+															{action.label}
+														</Button>
+													</Grid>
+												);
+											}
+											if (filterCount > 1) {
+												const [name, filter] = Object.entries(filters)[1];
+												ret.push(
+													<Grid item key={"filter-" + name}>
+														<ScheduleFilterRenderer
+															{...filter}
+															name={name}
+															value={filterValues[name]}
+															onChange={handleFilterChange}
+															inline={"weekly"}
+														/>
+													</Grid>
+												);
+											}
+											return ret;
+										})()}
+									</Grid>
 								)}
 							</Box>
 						</Grid>

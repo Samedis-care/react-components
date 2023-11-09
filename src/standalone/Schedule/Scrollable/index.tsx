@@ -1,14 +1,27 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Grid, Box, Button, Theme, IconButton, Menu } from "@mui/material";
+import {
+	Grid,
+	Box,
+	Button,
+	Theme,
+	IconButton,
+	Menu,
+	Divider,
+} from "@mui/material";
 import { Settings as SettingsIcon } from "@mui/icons-material";
 import moment, { Moment } from "moment";
 import ScrollableScheduleWeek from "./ScrollableScheduleWeek";
 import InfiniteScroll from "../../InfiniteScroll";
-import { IDayData, ScheduleFilterDefinition } from "../Common/DayContents";
+import {
+	IDayData,
+	ScheduleAction,
+	ScheduleFilterDefinition,
+} from "../Common/DayContents";
 import { combineClassNames } from "../../../utils";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import makeStyles from "@mui/styles/makeStyles";
 import ScrollableFilterRenderer from "../Common/ScheduleFilterRenderers";
+import throwError from "../../../utils/throwError";
 
 /**
  * Callback to load week data from a data source
@@ -37,6 +50,10 @@ export interface ScrollableScheduleProps {
 	 * Optional filter
 	 */
 	filters?: Record<string, ScheduleFilterDefinition>;
+	/**
+	 * Optional actions
+	 */
+	actions?: ScheduleAction[];
 }
 
 /**
@@ -107,10 +124,11 @@ const preventAction = (evt: React.MouseEvent) => {
 };
 
 const EMPTY_FILTERS: Record<string, ScheduleFilterDefinition> = {};
-
+const NO_ACTIONS: ScheduleAction[] = [];
 const ScrollableSchedule = (props: ScrollableScheduleProps) => {
 	const { loadWeekCallback, wrapperClass } = props;
 	const filters = props.filters ?? EMPTY_FILTERS;
+	const actions = props.actions ?? NO_ACTIONS;
 	const { i18n } = useCCTranslations();
 	const classes = useStyles();
 	const todayElem = useRef<HTMLElement | null>(null);
@@ -260,13 +278,13 @@ const ScrollableSchedule = (props: ScrollableScheduleProps) => {
 						</Button>
 					</Grid>
 					<Grid item>
-						{filterCount > 0 && (
+						{filterCount + actions.length > 0 && (
 							<Box
 								px={2}
 								className={classes.filterWrapper}
 								onClick={preventAction}
 							>
-								{filterCount > 1 ? (
+								{filterCount + actions.length > 1 ? (
 									<>
 										<IconButton onClick={openFilterSettings}>
 											<SettingsIcon className={classes.filterSettingsBtn} />
@@ -279,7 +297,7 @@ const ScrollableSchedule = (props: ScrollableScheduleProps) => {
 											<Box p={1}>
 												<Grid container spacing={1}>
 													{Object.entries(filters).map(([name, filter]) => (
-														<Grid key={name} item xs={12}>
+														<Grid key={"filter-" + name} item xs={12}>
 															<ScrollableFilterRenderer
 																{...filter}
 																name={name}
@@ -292,15 +310,32 @@ const ScrollableSchedule = (props: ScrollableScheduleProps) => {
 															/>
 														</Grid>
 													))}
+													{filterCount > 0 && (
+														<Grid key={"divider"} item xs={12}>
+															<Divider />
+														</Grid>
+													)}
+													{actions.map((action) => (
+														<Grid key={"action-" + action.id} item xs={12}>
+															<Button
+																onClick={action.onClick}
+																disabled={action.disabled}
+																fullWidth
+															>
+																{action.label}
+															</Button>
+														</Grid>
+													))}
 												</Grid>
 											</Box>
 										</Menu>
 									</>
-								) : (
+								) : filterCount > 0 ? (
 									(() => {
 										const [name, filter] = Object.entries(filters)[0];
 										return (
 											<ScrollableFilterRenderer
+												key={"filter-" + name}
 												{...filter}
 												name={name}
 												value={state.filterValues[name]}
@@ -309,6 +344,21 @@ const ScrollableSchedule = (props: ScrollableScheduleProps) => {
 											/>
 										);
 									})()
+								) : actions.length > 0 ? (
+									(() => {
+										const action = actions[0];
+										return (
+											<Button
+												key={"action-" + action.id}
+												onClick={action.onClick}
+												disabled={action.disabled}
+											>
+												{action.label}
+											</Button>
+										);
+									})()
+								) : (
+									throwError("code should be unreachable")
 								)}
 							</Box>
 						)}

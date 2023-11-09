@@ -63,6 +63,25 @@ export type ScheduleFilterDefinition =
 	| ScheduleFilterDefinitionSelect
 	| ScheduleFilterDefinitionSwitch;
 
+export interface ScheduleAction {
+	/**
+	 * unique identifier for action
+	 */
+	id: string;
+	/**
+	 * The button label
+	 */
+	label: string;
+	/**
+	 * The click handler
+	 */
+	onClick: () => void;
+	/**
+	 * Is the button disabled?
+	 */
+	disabled?: boolean;
+}
+
 export interface DayContentsProps {
 	data: IDayData[];
 	altBorder?: boolean; // alternative border color, to maintain contrast to background
