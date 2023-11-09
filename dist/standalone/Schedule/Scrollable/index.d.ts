@@ -1,5 +1,5 @@
 import React from "react";
-import { IDayData, ScheduleFilterDefinition } from "../Common/DayContents";
+import { IDayData, ScheduleAction, ScheduleFilterDefinition } from "../Common/DayContents";
 /**
  * Callback to load week data from a data source
  * @param weekOffset The week relative to the current week of year
@@ -22,6 +22,10 @@ export interface ScrollableScheduleProps {
      * Optional filter
      */
     filters?: Record<string, ScheduleFilterDefinition>;
+    /**
+     * Optional actions
+     */
+    actions?: ScheduleAction[];
 }
 /**
  * Outdated alias

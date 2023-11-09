@@ -1,5 +1,5 @@
 import React from "react";
-import { IDayData, ScheduleFilterDefinition } from "../Common/DayContents";
+import { IDayData, ScheduleAction, ScheduleFilterDefinition } from "../Common/DayContents";
 export interface WeekViewProps {
     /**
      * Callback to load data of this week
@@ -11,6 +11,10 @@ export interface WeekViewProps {
      * Optional filter
      */
     filters?: Record<string, ScheduleFilterDefinition>;
+    /**
+     * Optional actions
+     */
+    actions?: ScheduleAction[];
 }
 declare const _default: React.MemoExoticComponent<(props: WeekViewProps) => JSX.Element>;
 export default _default;

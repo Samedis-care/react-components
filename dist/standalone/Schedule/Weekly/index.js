@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import WeekViewDay from "./WeekViewDay";
 import moment from "moment";
-import { Box, CircularProgress, IconButton, Menu } from "@mui/material";
+import { Box, CircularProgress, Divider, IconButton, Menu, } from "@mui/material";
 import { Button, Typography, Grid } from "@mui/material";
 import { ArrowForwardIos, ArrowBackIos, Settings as SettingsIcon, } from "@mui/icons-material";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
@@ -37,9 +37,11 @@ const useStyles = makeStyles({
     },
 }, { name: "CcWeekView" });
 const EMPTY_FILTERS = {};
+const NO_ACTIONS = [];
 const WeekView = (props) => {
     const { loadData } = props;
     const filters = props.filters ?? EMPTY_FILTERS;
+    const actions = props.actions ?? NO_ACTIONS;
     const filterCount = Object.keys(filters).length;
     const classes = useStyles();
     const { t, i18n } = useCCTranslations();
@@ -173,19 +175,35 @@ const WeekView = (props) => {
                                 React.createElement(DatePicker, { format: "II RRRR", open: datePickerAnchorEl != null, label: t("standalone.schedule.week"), value: nowNormalized().add(weekOffset, "week"), onChange: setWeek, onClose: closeDatePicker }))),
                         React.createElement(IconButton, { onClick: nextWeek, size: "large" },
                             React.createElement(ArrowForwardIos, null))))),
-            React.createElement(Grid, { item: true, xs: true, container: true, justifyContent: "flex-end" }, filterCount > 1 && (React.createElement(Grid, { item: true },
-                React.createElement(Box, { px: 2, className: classes.filterWrapper }, filterCount > 2 ? (React.createElement(React.Fragment, null,
+            React.createElement(Grid, { item: true, xs: true, container: true, justifyContent: "flex-end" }, (filterCount > 1 || actions.length > 0) && (React.createElement(Grid, { item: true },
+                React.createElement(Box, { px: 2, className: classes.filterWrapper }, filterCount > 2 || actions.length > 1 ? (React.createElement(React.Fragment, null,
                     React.createElement(IconButton, { onClick: openFilterSettings },
                         React.createElement(SettingsIcon, null)),
                     React.createElement(Menu, { open: filterSettingsAnchorEl != null, anchorEl: filterSettingsAnchorEl, onClose: closeFiltersMenu },
                         React.createElement(Box, { p: 1 },
-                            React.createElement(Grid, { container: true, spacing: 1 }, Object.entries(filters).map(([name, filter], idx) => idx !== 0 && (React.createElement(Grid, { key: name, item: true, xs: 12 },
-                                React.createElement(ScheduleFilterRenderer, { ...filter, name: name, value: filter.type === "select"
-                                        ? filterValues[name]
-                                        : filterValues[name], onChange: handleFilterChange }))))))))) : ((() => {
-                    const [name, filter] = Object.entries(filters)[1];
-                    return (React.createElement(ScheduleFilterRenderer, { ...filter, name: name, value: filterValues[name], onChange: handleFilterChange, inline: "weekly" }));
-                })())))))),
+                            React.createElement(Grid, { container: true, spacing: 1 },
+                                Object.entries(filters).map(([name, filter], idx) => idx !== 0 && (React.createElement(Grid, { key: "filter-" + name, item: true, xs: 12 },
+                                    React.createElement(ScheduleFilterRenderer, { ...filter, name: name, value: filter.type === "select"
+                                            ? filterValues[name]
+                                            : filterValues[name], onChange: handleFilterChange })))),
+                                filterCount > 2 && (React.createElement(Grid, { item: true, key: "divider", xs: 12 },
+                                    React.createElement(Divider, null))),
+                                actions.length > 1 &&
+                                    actions.map((action, idx) => idx !== 0 && (React.createElement(Grid, { item: true, key: "action-" + action.id, xs: 12 },
+                                        React.createElement(Button, { onClick: action.onClick, disabled: action.disabled, fullWidth: true }, action.label))))))))) : (React.createElement(Grid, { container: true, spacing: 2, wrap: "nowrap", alignItems: "center" }, (() => {
+                    const ret = [];
+                    if (actions.length > 0) {
+                        const action = actions[0];
+                        ret.push(React.createElement(Grid, { item: true, key: "action-" + action.id },
+                            React.createElement(Button, { onClick: action.onClick, disabled: action.disabled }, action.label)));
+                    }
+                    if (filterCount > 1) {
+                        const [name, filter] = Object.entries(filters)[1];
+                        ret.push(React.createElement(Grid, { item: true, key: "filter-" + name },
+                            React.createElement(ScheduleFilterRenderer, { ...filter, name: name, value: filterValues[name], onChange: handleFilterChange, inline: "weekly" })));
+                    }
+                    return ret;
+                })()))))))),
         loadError && (React.createElement(Grid, { item: true, xs: 12 },
             React.createElement(Typography, { align: "center" }, loadError.message))),
         !data && !loadError && (React.createElement(Grid, { item: true, xs: 12 },
