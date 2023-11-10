@@ -3,7 +3,8 @@ import { MultiSelect, } from "../../standalone";
 import { debouncePromise } from "../../utils";
 import useCCTranslations from "../../utils/useCCTranslations";
 export const useSelectedCache = (props) => {
-    const { model, modelToSelectorData, onSelect, selected, initialData, onLoadError, } = props;
+    const { model, disableRequestBatching, modelToSelectorData, onSelect, selected, initialData, onLoadError, } = props;
+    const modelFetch = props.modelFetch ?? model;
     const [selectedCache, setSelectedCache] = useState({});
     const { t } = useCCTranslations();
     const handleSelect = useCallback((selected) => {
@@ -29,7 +30,9 @@ export const useSelectedCache = (props) => {
             const isIdNotInCache = (value) => !(value in selectedCache) && !(value in newCache);
             await Promise.all(selected.filter(isIdNotInCache).map(async (value) => {
                 try {
-                    const data = await model.getCached(value);
+                    const data = await modelFetch.getCached(value, {
+                        batch: !disableRequestBatching,
+                    });
                     newCache[value] = await modelToSelectorData(data[0]);
                 }
                 catch (e) {
@@ -74,13 +77,14 @@ export const useSelectedCache = (props) => {
  * @constructor
  */
 const BackendMultiSelect = (props) => {
-    const { model, modelToSelectorData, searchResultLimit, 
+    const { model, disableRequestBatching, modelToSelectorData, searchResultLimit, 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     onSelect, 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     selected: selectedIds, 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     initialData, searchDebounceTime, sort, switchFilterName, lru, ...otherProps } = props;
+    const modelFetch = props.modelFetch ?? model;
     const { selected, handleSelect } = useSelectedCache(props);
     const handleLoad = useCallback(async (search, switchValue) => {
         const data = await model.index({
@@ -95,9 +99,11 @@ const BackendMultiSelect = (props) => {
         return Promise.all(data[0].map(modelToSelectorData));
     }, [model, modelToSelectorData, searchResultLimit, sort, switchFilterName]);
     const handleLoadRecord = useCallback(async (id) => {
-        const [data] = await model.getCached(id);
+        const [data] = await modelFetch.getCached(id, {
+            batch: !disableRequestBatching,
+        });
         return modelToSelectorData(data);
-    }, [model, modelToSelectorData]);
+    }, [disableRequestBatching, modelFetch, modelToSelectorData]);
     const lruConfig = useMemo(() => lru
         ? {
             ...lru,
