@@ -31,6 +31,14 @@ export interface BackendMultiSelectProps<
 	 */
 	model: Model<KeyT, VisibilityT, CustomT>;
 	/**
+	 * The model to use for fetch requests (to enable request batching)
+	 */
+	modelFetch?: Model<KeyT, VisibilityT, CustomT>;
+	/**
+	 * Disable the use of request batching
+	 */
+	disableRequestBatching?: boolean;
+	/**
 	 * The debounce time for search in ms
 	 * @default 500
 	 */
@@ -101,6 +109,8 @@ export const useSelectedCache = <
 	props: Pick<
 		BackendMultiSelectProps<KeyT, VisibilityT, CustomT, DataT>,
 		| "model"
+		| "modelFetch"
+		| "disableRequestBatching"
 		| "modelToSelectorData"
 		| "onSelect"
 		| "selected"
@@ -110,12 +120,14 @@ export const useSelectedCache = <
 ): UseSelectedCacheResult<DataT> => {
 	const {
 		model,
+		disableRequestBatching,
 		modelToSelectorData,
 		onSelect,
 		selected,
 		initialData,
 		onLoadError,
 	} = props;
+	const modelFetch = props.modelFetch ?? model;
 
 	const [selectedCache, setSelectedCache] = useState<Record<string, DataT>>({});
 
@@ -163,7 +175,9 @@ export const useSelectedCache = <
 			await Promise.all(
 				selected.filter(isIdNotInCache).map(async (value) => {
 					try {
-						const data = await model.getCached(value);
+						const data = await modelFetch.getCached(value, {
+							batch: !disableRequestBatching,
+						});
 						newCache[value] = await modelToSelectorData(data[0]);
 					} catch (e) {
 						const err = e as Error;
@@ -228,6 +242,7 @@ const BackendMultiSelect = <
 ) => {
 	const {
 		model,
+		disableRequestBatching,
 		modelToSelectorData,
 		searchResultLimit,
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -242,6 +257,7 @@ const BackendMultiSelect = <
 		lru,
 		...otherProps
 	} = props;
+	const modelFetch = props.modelFetch ?? model;
 
 	const { selected, handleSelect } = useSelectedCache(props);
 
@@ -263,10 +279,12 @@ const BackendMultiSelect = <
 
 	const handleLoadRecord = useCallback(
 		async (id: string): Promise<DataT> => {
-			const [data] = await model.getCached(id);
+			const [data] = await modelFetch.getCached(id, {
+				batch: !disableRequestBatching,
+			});
 			return modelToSelectorData(data);
 		},
-		[model, modelToSelectorData]
+		[disableRequestBatching, modelFetch, modelToSelectorData]
 	);
 
 	const lruConfig: SelectorLruOptions<DataT> | undefined = useMemo(
