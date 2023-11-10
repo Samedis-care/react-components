@@ -6,6 +6,7 @@ import { Close } from "@mui/icons-material";
 import SignaturePad from "react-signature-canvas";
 import { useDialogContext } from "../../framework";
 import useCCTranslations from "../../utils/useCCTranslations";
+import { showConfirmDialogBool } from "./Utils";
 const useStyles = makeStyles((theme) => ({
     root: {
         margin: 0,
@@ -38,20 +39,33 @@ const useStyles = makeStyles((theme) => ({
 }), { name: "CcSignPadDialog" });
 const SignPadDialog = (props) => {
     const { t } = useCCTranslations();
-    const { penColor, setSignature, signature, ...canvasProps } = props;
+    const { penColor, setSignature, signature, signerName: signerNameUntrim, ...canvasProps } = props;
+    const signerName = signerNameUntrim?.trim();
     const [resetCanvas, setResetCanvas] = useState(!!signature);
-    const [, popDialog] = useDialogContext();
+    const [pushDialog, popDialog] = useDialogContext();
     const canvasWrapper = useRef();
     const signCanvas = useRef(null);
     const hiddenRef = useRef(null);
     const [canvasSize, setCanvasSize] = useState([0, 0]);
     const classes = useStyles(props);
-    const clearCanvas = useCallback(() => {
+    const clearCanvas = useCallback(async () => {
+        if (!(await showConfirmDialogBool(pushDialog, {
+            title: t("standalone.signature-pad.dialog.reset-confirm.title"),
+            message: signerName
+                ? t("standalone.signature-pad.dialog.reset-confirm.message-name", {
+                    NAME: signerName,
+                })
+                : t("standalone.signature-pad.dialog.reset-confirm.message"),
+            textButtonYes: t("standalone.signature-pad.dialog.reset-confirm.yes"),
+            textButtonNo: t("standalone.signature-pad.dialog.reset-confirm.no"),
+        }))) {
+            return;
+        }
         if (signCanvas.current) {
             signCanvas.current.clear();
         }
         setResetCanvas(false);
-    }, []);
+    }, [pushDialog, signerName, t]);
     const saveCanvas = useCallback(() => {
         if (signCanvas.current && !signCanvas.current.isEmpty()) {
             const newSignature = signCanvas.current
@@ -90,7 +104,11 @@ const SignPadDialog = (props) => {
     }, [canvasWrapper.current]);
     return (React.createElement(Dialog, { open: true, maxWidth: "sm", onClose: closeCanvas },
         React.createElement(MuiDialogTitle, { id: "sign-pad-dialog", className: classes.root },
-            React.createElement(Typography, { variant: "h6" }, t("standalone.signature-pad.dialog.title")),
+            React.createElement(Typography, { variant: "h6" }, signerName
+                ? t("standalone.signature-pad.dialog.title-name", {
+                    NAME: signerName,
+                })
+                : t("standalone.signature-pad.dialog.title")),
             closeCanvas && (React.createElement(IconButton, { "aria-label": "Close", className: classes.closeButton, onClick: closeCanvas, size: "large" },
                 React.createElement(Close, null)))),
         React.createElement("div", { className: classes.signDiv, ref: setCanvasWrapperRef },
@@ -103,6 +121,6 @@ const SignPadDialog = (props) => {
                 React.createElement("input", { type: "text", value: signature ?? "", readOnly: true, ref: hiddenRef, name: props.name, onBlur: props.onBlur }))),
         React.createElement(DialogActions, null,
             React.createElement(Button, { onClick: saveCanvas, color: "primary" }, t("standalone.signature-pad.dialog.save-changes")),
-            React.createElement(Button, { onClick: clearCanvas, color: "secondary" }, t("standalone.signature-pad.dialog.reset")))));
+            React.createElement(Button, { onClick: clearCanvas, color: "error" }, t("standalone.signature-pad.dialog.reset")))));
 };
 export const SignDialog = React.memo(SignPadDialog);

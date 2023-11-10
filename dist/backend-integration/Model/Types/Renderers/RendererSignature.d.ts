@@ -1,8 +1,10 @@
 import React from "react";
 import { ModelRenderParams } from "../../index";
 import TypeImage from "../TypeImage";
+export declare const SignatureNameContext: React.Context<string | null>;
 /**
- * Renders an signature field (for electronic signing)
+ * Renders a signature field (for electronic signing)
+ * Wrap FormField with SignatureNameContext.Provider for name context
  */
 declare class RendererSignature extends TypeImage {
     render(params: ModelRenderParams<string>): React.ReactElement;

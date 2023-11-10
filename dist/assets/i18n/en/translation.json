@@ -135,9 +135,17 @@
 		},
 		"signature-pad": {
 			"dialog": {
-				"reset": "Reset",
+				"reset": "Clear signature",
 				"save-changes": "Save Changes",
-				"title": "Sign Here"
+				"title": "Sign Here",
+				"title-name": "Sign here ({{NAME}})",
+				"reset-confirm": {
+					"title": "Clear signature",
+					"message": "Are you sure you want to clear the signature?",
+					"message-name": "Are you sure you want to clear the signature for {{NAME}}?",
+					"yes": "Yes",
+					"no": "No"
+				}
 			},
 			"sign-here": "Digitally signed here"
 		}

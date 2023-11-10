@@ -4,8 +4,10 @@ import ccI18n from "../../../../i18n";
 import TypeImage from "../TypeImage";
 import { SignaturePad } from "../../../../non-standalone";
 import { FormControlCC } from "../../../../standalone";
+export const SignatureNameContext = React.createContext(null);
 /**
- * Renders an signature field (for electronic signing)
+ * Renders a signature field (for electronic signing)
+ * Wrap FormField with SignatureNameContext.Provider for name context
  */
 class RendererSignature extends TypeImage {
     render(params) {
@@ -20,7 +22,7 @@ class RendererSignature extends TypeImage {
                 throw new Error("Not supported");
             return (React.createElement(FormControlCC, { required: visibility.required, fullWidth: true, error: !!errorMsg, warning: !!warningMsg, onBlur: handleBlur, "data-name": field },
                 React.createElement(FormLabel, { component: "legend" }, label),
-                React.createElement(SignaturePad, { name: field, signature: value, setSignature: (newValue) => handleChange(field, newValue), disabled: visibility.readOnly }),
+                React.createElement(SignatureNameContext.Consumer, null, (signerName) => (React.createElement(SignaturePad, { name: field, signature: value, setSignature: (newValue) => handleChange(field, newValue), disabled: visibility.readOnly, signerName: signerName }))),
                 React.createElement(FormHelperText, null, errorMsg || warningMsg)));
         }
         const content = value ? (React.createElement("img", { src: value, alt: label })) : (React.createElement(React.Fragment, null, ccI18n.t("backend-integration.model.types.renderers.signature.not-set")));

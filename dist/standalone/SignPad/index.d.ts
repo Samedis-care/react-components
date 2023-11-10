@@ -9,6 +9,10 @@ export interface SignPadProps {
      */
     signature: string;
     /**
+     * Name of the signer
+     */
+    signerName?: string | null;
+    /**
      * Custom styles
      */
     classes?: Partial<ReturnType<typeof useStyles>>;
