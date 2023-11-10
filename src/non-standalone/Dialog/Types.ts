@@ -177,6 +177,10 @@ export interface IDialogConfigSign {
 	 */
 	setSignature?: (url: string) => void;
 	/**
+	 * Name of the signer
+	 */
+	signerName?: string | null;
+	/**
 	 * Blur event
 	 */
 	onBlur?: React.FocusEventHandler<HTMLInputElement>;

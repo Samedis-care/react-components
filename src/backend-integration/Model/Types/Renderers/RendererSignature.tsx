@@ -6,8 +6,11 @@ import TypeImage from "../TypeImage";
 import { SignaturePad } from "../../../../non-standalone";
 import { FormControlCC } from "../../../../standalone";
 
+export const SignatureNameContext = React.createContext<string | null>(null);
+
 /**
- * Renders an signature field (for electronic signing)
+ * Renders a signature field (for electronic signing)
+ * Wrap FormField with SignatureNameContext.Provider for name context
  */
 class RendererSignature extends TypeImage {
 	render(params: ModelRenderParams<string>): React.ReactElement {
@@ -47,12 +50,17 @@ class RendererSignature extends TypeImage {
 					data-name={field}
 				>
 					<FormLabel component={"legend"}>{label}</FormLabel>
-					<SignaturePad
-						name={field}
-						signature={value}
-						setSignature={(newValue) => handleChange(field, newValue)}
-						disabled={visibility.readOnly}
-					/>
+					<SignatureNameContext.Consumer>
+						{(signerName) => (
+							<SignaturePad
+								name={field}
+								signature={value}
+								setSignature={(newValue) => handleChange(field, newValue)}
+								disabled={visibility.readOnly}
+								signerName={signerName}
+							/>
+						)}
+					</SignatureNameContext.Consumer>
 					<FormHelperText>{errorMsg || warningMsg}</FormHelperText>
 				</FormControlCC>
 			);
