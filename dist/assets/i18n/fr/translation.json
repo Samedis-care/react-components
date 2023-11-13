@@ -135,9 +135,17 @@
 		},
 		"signature-pad": {
 			"dialog": {
-				"reset": "Réinitialiser",
+				"reset": "Effacer la signature",
 				"save-changes": "Enregistrer les changements",
-				"title": "Signez ici"
+				"title": "Signez ici",
+				"title-name": "Signez ici ({{NAME}})",
+				"reset-confirm": {
+					"title": "Effacer la signature",
+					"message": "Êtes-vous sûr de vouloir effacer la signature?",
+					"message-name": "Êtes-vous sûr de vouloir effacer la signature de {{NAME}}?",
+					"yes": "Oui",
+					"no": "Non"
+				}
 			},
 			"sign-here": "Signé numériquement ici"
 		}
