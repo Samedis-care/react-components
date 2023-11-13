@@ -135,9 +135,17 @@
 		},
 		"signature-pad": {
 			"dialog": {
-				"reset": "Resetten",
+				"reset": "Handtekening verwijderen",
 				"save-changes": "Wijzigingen opslaan",
-				"title": "Teken Hier"
+				"title": "Teken Hier",
+				"title-name": "Teken hier ({{NAME}})",
+				"reset-confirm": {
+					"title": "Handtekening verwijderen",
+					"message": "Ben je zeker dat je de handtekening wilt verwijderen?",
+					"message-name": "Ben je zeker dat je de handtekening voor {{NAME}} wilt verwijderen?",
+					"yes": "Ja",
+					"no": "Nee"
+				}
 			},
 			"sign-here": "Digitaal ondertekend hier"
 		}
