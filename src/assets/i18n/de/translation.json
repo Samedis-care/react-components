@@ -135,9 +135,17 @@
 		},
 		"signature-pad": {
 			"dialog": {
-				"reset": "Zurücksetzen",
+				"reset": "Signatur zurücksetzen",
 				"save-changes": "Änderungen speichern",
-				"title": "Hier unterschreiben"
+				"title": "Hier unterschreiben",
+				"title-name": "Hier unterschreiben ({{NAME}})",
+				"reset-confirm": {
+					"title": "Signatur zurücksetzen",
+					"message": "Bist Du sicher, dass Du die Signatur löschen möchtest?",
+					"message-name": "Bist Du sicher, dass Du die Signatur für {{NAME}} löschen möchtest?",
+					"yes": "Ja",
+					"no": "Nein"
+				}
 			},
 			"sign-here": "Hier digital unterschrieben"
 		}
