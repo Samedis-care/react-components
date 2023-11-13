@@ -135,9 +135,17 @@
 		},
 		"signature-pad": {
 			"dialog": {
-				"reset": "Qayta o'rnatish",
+				"reset": "Imzoni tozalash",
 				"save-changes": "O'zgarishlarni saqlash",
-				"title": "Bu erda ro'yxatdan o'ting"
+				"title": "Bu erda ro'yxatdan o'ting",
+				"title-name": "Bu yerga kiring ({{NAME}})",
+				"reset-confirm": {
+					"title": "Imzoni tozalash",
+					"message": "Imzoni tozalamoqchimisiz?",
+					"message-name": "Haqiqatan ham {{NAME}} imzosini tozalamoqchimisiz?",
+					"yes": "Ha",
+					"no": "Yo'q"
+				}
 			},
 			"sign-here": "Bu erda raqamli imzolangan"
 		}
