@@ -68,6 +68,7 @@ const useStyles = makeStyles((theme) => ({
         overflow: "hidden",
         display: "flex",
         alignItems: "center",
+        aspectRatio: "1/1",
     },
 }), { name: "CcImageSelector" });
 const ImageSelector = (props) => {
