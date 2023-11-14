@@ -147,6 +147,7 @@ const useStyles = makeStyles(
 			overflow: "hidden",
 			display: "flex",
 			alignItems: "center",
+			aspectRatio: "1/1",
 		},
 	}),
 	{ name: "CcImageSelector" }
