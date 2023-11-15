@@ -83,10 +83,7 @@ const useCustomStylesBase = makeStyles((theme) => ({
         height: props.iconSize ?? 32,
         objectFit: "contain",
     }),
-    wrapper: {
-        zIndex: -1,
-        position: "relative",
-    },
+    wrapper: {},
     listItem: {
         paddingLeft: "16px !important",
         paddingRight: "16px !important",
