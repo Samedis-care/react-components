@@ -408,6 +408,7 @@ const useCustomStylesBase = makeStyles(
 		label: {
 			position: "relative",
 			transform: "translate(0,0) scale(0.75)",
+			zIndex: "unset",
 		},
 		switch: {
 			marginTop: -30,
@@ -422,7 +423,10 @@ const useCustomStylesBase = makeStyles(
 			height: props.iconSize ?? 32,
 			objectFit: "contain",
 		}),
-		wrapper: {},
+		wrapper: {
+			zIndex: -1,
+			position: "relative",
+		},
 		listItem: {
 			paddingLeft: "16px !important",
 			paddingRight: "16px !important",
