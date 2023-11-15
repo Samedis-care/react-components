@@ -47,6 +47,7 @@ export const useModelFetchAll = (model, params) => {
 export const useModelMutation = (model) => {
     return useMutation(model.modelId + "-create-or-update", model.createOrUpdateRecordRaw.bind(model), {
         onSuccess: (responseData, inputData) => {
+            const inputId = inputData.id;
             const id = responseData[0].id;
             if (!id) {
                 throw new Error("Can't update null ID");
@@ -54,12 +55,23 @@ export const useModelMutation = (model) => {
             if (model.hooks.onCreateOrUpdate) {
                 model.hooks.onCreateOrUpdate(responseData);
             }
-            ModelDataStore.setQueryData(model.getReactQueryKey(id, false), responseData);
-            if (model.requestBatchingEnabled) {
-                ModelDataStore.setQueryData(model.getReactQueryKey(id, true), responseData);
-            }
-            else {
-                ModelDataStore.removeQueries(model.getReactQueryKey(id, true));
+            const updateForId = (id) => {
+                ModelDataStore.setQueryData(model.getReactQueryKey(id, false), responseData);
+                if (model.requestBatchingEnabled) {
+                    ModelDataStore.setQueryData(model.getReactQueryKey(id, true), responseData);
+                }
+                else {
+                    ModelDataStore.removeQueries(model.getReactQueryKey(id, true));
+                }
+            };
+            updateForId(id);
+            if (inputId) {
+                if (inputId === "singleton") {
+                    updateForId(inputId);
+                }
+                else {
+                    model.invalidateCacheForId(inputId);
+                }
             }
             model.triggerMutationEvent(!inputData.id, responseData);
         },
