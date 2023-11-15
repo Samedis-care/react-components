@@ -290,6 +290,7 @@ export const useModelMutation = <
 		model.createOrUpdateRecordRaw.bind(model),
 		{
 			onSuccess: (responseData: ModelGetResponse<KeyT>, inputData) => {
+				const inputId = (inputData as { id: string | null }).id;
 				const id = (responseData[0] as Record<"id", string>).id;
 				if (!id) {
 					throw new Error("Can't update null ID");
@@ -297,17 +298,27 @@ export const useModelMutation = <
 				if (model.hooks.onCreateOrUpdate) {
 					model.hooks.onCreateOrUpdate(responseData);
 				}
-				ModelDataStore.setQueryData(
-					model.getReactQueryKey(id, false),
-					responseData
-				);
-				if (model.requestBatchingEnabled) {
+				const updateForId = (id: string) => {
 					ModelDataStore.setQueryData(
-						model.getReactQueryKey(id, true),
+						model.getReactQueryKey(id, false),
 						responseData
 					);
-				} else {
-					ModelDataStore.removeQueries(model.getReactQueryKey(id, true));
+					if (model.requestBatchingEnabled) {
+						ModelDataStore.setQueryData(
+							model.getReactQueryKey(id, true),
+							responseData
+						);
+					} else {
+						ModelDataStore.removeQueries(model.getReactQueryKey(id, true));
+					}
+				};
+				updateForId(id);
+				if (inputId) {
+					if (inputId === "singleton") {
+						updateForId(inputId);
+					} else {
+						model.invalidateCacheForId(inputId);
+					}
 				}
 				model.triggerMutationEvent(!inputData.id, responseData);
 			},
