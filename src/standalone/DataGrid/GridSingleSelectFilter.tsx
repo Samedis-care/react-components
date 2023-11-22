@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo } from "react";
 import { BaseSelectorData, SingleSelect } from "../..";
 import {
+	Divider,
 	FormControl,
 	FormControlLabel,
 	Grid,
@@ -112,12 +113,18 @@ const GridSingleSelectFilter = (props: GridSingleSelectFilterProps) => {
 							)}
 							{options.map((option) => (
 								<Grid item xs={12} key={option.value}>
-									<FormControlLabel
-										control={<Radio />}
-										name={option.value}
-										value={option.value}
-										label={option.label}
-									/>
+									{option.isDivider ? (
+										<Divider />
+									) : option.isSmallLabel ? (
+										<Typography>{option.label}</Typography>
+									) : (
+										<FormControlLabel
+											control={<Radio />}
+											name={option.value}
+											value={option.value}
+											label={option.label}
+										/>
+									)}
 								</Grid>
 							))}
 						</Grid>

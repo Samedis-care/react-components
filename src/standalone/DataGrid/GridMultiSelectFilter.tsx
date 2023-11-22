@@ -4,7 +4,13 @@ import {
 	MultiSelectorData,
 	MultiSelectWithCheckBox,
 } from "../..";
-import { Checkbox, FormControlLabel, Grid, Typography } from "@mui/material";
+import {
+	Checkbox,
+	Divider,
+	FormControlLabel,
+	Grid,
+	Typography,
+} from "@mui/material";
 import { useCustomFilterActiveContext } from "./Header/FilterBar";
 import { useDataGridStyles } from "./DataGrid";
 import { SelectProps } from "@mui/material/Select/Select";
@@ -126,16 +132,22 @@ const GridMultiSelectFilter = (props: GridMultiSelectFilterProps) => {
 				)}
 				{options.map((option) => (
 					<Grid item xs={12} key={option.value}>
-						<FormControlLabel
-							control={
-								<Checkbox
-									name={option.value}
-									checked={selected.includes(option.value)}
-									onChange={handleDialogCheckboxToggle}
-								/>
-							}
-							label={option.label}
-						/>
+						{option.isDivider ? (
+							<Divider />
+						) : option.isSmallLabel ? (
+							<Typography>{option.label}</Typography>
+						) : (
+							<FormControlLabel
+								control={
+									<Checkbox
+										name={option.value}
+										checked={selected.includes(option.value)}
+										onChange={handleDialogCheckboxToggle}
+									/>
+								}
+								label={option.label}
+							/>
+						)}
 					</Grid>
 				))}
 			</Grid>
