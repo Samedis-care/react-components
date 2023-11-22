@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo } from "react";
 import { SingleSelect } from "../..";
-import { FormControl, FormControlLabel, Grid, Radio, RadioGroup, Typography, } from "@mui/material";
+import { Divider, FormControl, FormControlLabel, Grid, Radio, RadioGroup, Typography, } from "@mui/material";
 import { useCustomFilterActiveContext } from "./Header/FilterBar";
 import { useDataGridStyles } from "./DataGrid";
 const GridSingleSelectFilter = (props) => {
@@ -34,8 +34,7 @@ const GridSingleSelectFilter = (props) => {
                     React.createElement(Grid, { item: true, xs: 12, container: true, spacing: 2 },
                         label && (React.createElement(Grid, { item: true, xs: 12 },
                             React.createElement(Typography, null, label))),
-                        options.map((option) => (React.createElement(Grid, { item: true, xs: 12, key: option.value },
-                            React.createElement(FormControlLabel, { control: React.createElement(Radio, null), name: option.value, value: option.value, label: option.label })))))))));
+                        options.map((option) => (React.createElement(Grid, { item: true, xs: 12, key: option.value }, option.isDivider ? (React.createElement(Divider, null)) : option.isSmallLabel ? (React.createElement(Typography, null, option.label)) : (React.createElement(FormControlLabel, { control: React.createElement(Radio, null), name: option.value, value: option.value, label: option.label }))))))))));
     }
     else {
         return (React.createElement(Grid, { item: true, xs: 4, ...barBreakpoints },
