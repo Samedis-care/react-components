@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Button, Dialog, DialogActions, IconButton, Typography, } from "@mui/material";
+import { Button, Dialog, DialogActions, IconButton } from "@mui/material";
 import makeStyles from "@mui/styles/makeStyles";
 import MuiDialogTitle from "@mui/material/DialogTitle";
 import { Close } from "@mui/icons-material";
@@ -104,11 +104,11 @@ const SignPadDialog = (props) => {
     }, [canvasWrapper.current]);
     return (React.createElement(Dialog, { open: true, maxWidth: "sm", onClose: closeCanvas },
         React.createElement(MuiDialogTitle, { id: "sign-pad-dialog", className: classes.root },
-            React.createElement(Typography, { variant: "h6" }, signerName
+            signerName
                 ? t("standalone.signature-pad.dialog.title-name", {
                     NAME: signerName,
                 })
-                : t("standalone.signature-pad.dialog.title")),
+                : t("standalone.signature-pad.dialog.title"),
             closeCanvas && (React.createElement(IconButton, { "aria-label": "Close", className: classes.closeButton, onClick: closeCanvas, size: "large" },
                 React.createElement(Close, null)))),
         React.createElement("div", { className: classes.signDiv, ref: setCanvasWrapperRef },
