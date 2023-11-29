@@ -14,6 +14,9 @@ import sortByLocaleRelevance from "../../utils/sortByLocaleRelevance";
 import TextFieldWithHelp from "../../standalone/UIKit/TextFieldWithHelp";
 import Loader from "../../standalone/Loader";
 import { LocaleSelectorDialogProps } from "./LanguageSelectorDialog";
+import { useDialogContext } from "../../framework";
+import { showErrorDialog } from "../Dialog";
+import FormLoaderOverlay from "../../standalone/Form/FormLoaderOverlay";
 
 export interface LanguageSelectorDialogContentProps
 	extends LocaleSelectorDialogProps {
@@ -63,7 +66,7 @@ const SearchInputProps = {
 const LanguageSelectorDialogContent = (
 	props: LanguageSelectorDialogContentProps
 ) => {
-	const { supportedLocales: appSupportedLocales } = props;
+	const { supportedLocales: appSupportedLocales, close } = props;
 
 	const [filter, setFilter] = useState("");
 	const lowercaseFilter = filter.toLowerCase();
@@ -77,6 +80,8 @@ const LanguageSelectorDialogContent = (
 		},
 		[setFilter]
 	);
+	const [switchingLanguage, setSwitchingLanguage] = useState(false);
+	const [pushDialog] = useDialogContext();
 
 	const supportedLangs = supportedLanguages;
 	const countryLanguageMapping = countryLanguages as Record<string, string[]>;
@@ -139,6 +144,21 @@ const LanguageSelectorDialogContent = (
 		[data, lowercaseFilter]
 	);
 
+	const handleSwitch = useCallback(
+		async (lang: string) => {
+			setSwitchingLanguage(true);
+			try {
+				await i18n.changeLanguage(lang);
+				close();
+			} catch (e) {
+				await showErrorDialog(pushDialog, e as Error);
+			} finally {
+				setSwitchingLanguage(false);
+			}
+		},
+		[close, i18n, pushDialog]
+	);
+
 	const LocaleEntryRenderer = useCallback(
 		(entryProps: ListChildComponentProps) => {
 			const locale = filteredData[entryProps.index];
@@ -149,14 +169,15 @@ const LanguageSelectorDialogContent = (
 						<LanguageSelectorEntry
 							locale={locale}
 							currentLanguage={currentLang}
-							close={props.close}
+							handleSwitch={handleSwitch}
+							disabled={switchingLanguage}
 							key={locale.locale}
 						/>
 					</Suspense>
 				</div>
 			);
 		},
-		[currentLang, filteredData, props.close]
+		[currentLang, filteredData, handleSwitch, switchingLanguage]
 	);
 
 	return (
@@ -172,6 +193,7 @@ const LanguageSelectorDialogContent = (
 				</Box>
 			</Grid>
 			<Grid item xs={12} className={classes.localeList}>
+				<FormLoaderOverlay visible={switchingLanguage} />
 				{filteredData.length === 0 ? (
 					<div className={classes.noLocalesMessage}>
 						{t("non-standalone.language-switcher.no-locales")}

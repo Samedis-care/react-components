@@ -5,13 +5,14 @@ import {
 } from "./LanguageSelectorDialogContent";
 import { Grid, ListItemButton } from "@mui/material";
 import makeStyles from "@mui/styles/makeStyles";
-import useCCTranslations from "../../utils/useCCTranslations";
 import CountryFlags from "../../standalone/CountryFlags";
 
 export interface LanguageSelectorEntryProps
-	extends LanguageSelectorDialogContentProps {
+	extends Omit<LanguageSelectorDialogContentProps, "close"> {
 	locale: LanguageSelectorEntryData;
 	currentLanguage: string;
+	handleSwitch: (lang: string) => void;
+	disabled: boolean;
 }
 
 const useStyles = makeStyles(
@@ -48,20 +49,22 @@ const useStyles = makeStyles(
 const LanguageSelectorEntry = (
 	props: LanguageSelectorEntryProps
 ): React.ReactElement => {
-	const { locale, currentLanguage, close } = props;
-	const { i18n } = useCCTranslations();
+	const { locale, currentLanguage, handleSwitch, disabled } = props;
 	const classes = useStyles();
 	const sameLang = locale.language_short === currentLanguage;
 
-	const handleClick = useCallback(async () => {
-		await i18n.changeLanguage(locale.locale);
-		close();
-	}, [i18n, locale, close]);
+	const handleClick = useCallback(() => {
+		handleSwitch(locale.locale);
+	}, [locale, handleSwitch]);
 
 	const flag = CountryFlags[locale.country_short];
 
 	return (
-		<ListItemButton onClick={handleClick} className={classes.root}>
+		<ListItemButton
+			onClick={handleClick}
+			disabled={disabled}
+			className={classes.root}
+		>
 			<Grid
 				container
 				spacing={2}
