@@ -11,6 +11,9 @@ import useCCTranslations, { useCCLocaleSwitcherTranslations, } from "../../utils
 import sortByLocaleRelevance from "../../utils/sortByLocaleRelevance";
 import TextFieldWithHelp from "../../standalone/UIKit/TextFieldWithHelp";
 import Loader from "../../standalone/Loader";
+import { useDialogContext } from "../../framework";
+import { showErrorDialog } from "../Dialog";
+import FormLoaderOverlay from "../../standalone/Form/FormLoaderOverlay";
 const useStyles = makeStyles({
     localeList: {
         height: "calc(75vh - 128px)",
@@ -26,7 +29,7 @@ const SearchInputProps = {
         React.createElement(SearchIcon, null))),
 };
 const LanguageSelectorDialogContent = (props) => {
-    const { supportedLocales: appSupportedLocales } = props;
+    const { supportedLocales: appSupportedLocales, close } = props;
     const [filter, setFilter] = useState("");
     const lowercaseFilter = filter.toLowerCase();
     const { i18n, t } = useCCTranslations();
@@ -36,6 +39,8 @@ const LanguageSelectorDialogContent = (props) => {
     const handleFilterChange = useCallback((evt) => {
         setFilter(evt.target.value);
     }, [setFilter]);
+    const [switchingLanguage, setSwitchingLanguage] = useState(false);
+    const [pushDialog] = useDialogContext();
     const supportedLangs = supportedLanguages;
     const countryLanguageMapping = countryLanguages;
     const data = useMemo(() => Object.entries(countryLanguageMapping)
@@ -71,16 +76,31 @@ const LanguageSelectorDialogContent = (props) => {
         entry.language_lower.includes(lowercaseFilter) ||
         entry.native_country_lower.includes(lowercaseFilter) ||
         entry.native_language_lower.includes(lowercaseFilter)), [data, lowercaseFilter]);
+    const handleSwitch = useCallback(async (lang) => {
+        setSwitchingLanguage(true);
+        try {
+            await i18n.changeLanguage(lang);
+            close();
+        }
+        catch (e) {
+            await showErrorDialog(pushDialog, e);
+        }
+        finally {
+            setSwitchingLanguage(false);
+        }
+    }, [close, i18n, pushDialog]);
     const LocaleEntryRenderer = useCallback((entryProps) => {
         const locale = filteredData[entryProps.index];
         return (React.createElement("div", { style: entryProps.style },
             React.createElement(Suspense, { fallback: React.createElement(Loader, null) },
-                React.createElement(LanguageSelectorEntry, { locale: locale, currentLanguage: currentLang, close: props.close, key: locale.locale }))));
-    }, [currentLang, filteredData, props.close]);
+                React.createElement(LanguageSelectorEntry, { locale: locale, currentLanguage: currentLang, handleSwitch: handleSwitch, disabled: switchingLanguage, key: locale.locale }))));
+    }, [currentLang, filteredData, handleSwitch, switchingLanguage]);
     return (React.createElement(Grid, { container: true },
         React.createElement(Grid, { item: true, xs: 12 },
             React.createElement(Box, { px: 2, pb: 1 },
                 React.createElement(TextFieldWithHelp, { value: filter, onChange: handleFilterChange, fullWidth: true, InputProps: SearchInputProps }))),
-        React.createElement(Grid, { item: true, xs: 12, className: classes.localeList }, filteredData.length === 0 ? (React.createElement("div", { className: classes.noLocalesMessage }, t("non-standalone.language-switcher.no-locales"))) : (React.createElement(AutoSizer, null, ({ width, height }) => (React.createElement(FixedSizeList, { width: width, height: height, overscanCount: 2, itemCount: filteredData.length, itemSize: 70 }, LocaleEntryRenderer)))))));
+        React.createElement(Grid, { item: true, xs: 12, className: classes.localeList },
+            React.createElement(FormLoaderOverlay, { visible: switchingLanguage }),
+            filteredData.length === 0 ? (React.createElement("div", { className: classes.noLocalesMessage }, t("non-standalone.language-switcher.no-locales"))) : (React.createElement(AutoSizer, null, ({ width, height }) => (React.createElement(FixedSizeList, { width: width, height: height, overscanCount: 2, itemCount: filteredData.length, itemSize: 70 }, LocaleEntryRenderer)))))));
 };
 export default React.memo(LanguageSelectorDialogContent);
