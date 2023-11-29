@@ -466,7 +466,7 @@ const useCustomStyles = makeThemeStyles<
 );
 
 const getOptionDisabled = (option: BaseSelectorData) =>
-	!!(option.isDisabled || option.isDivider || option.isSmallLabel);
+	!!(!option || option.isDisabled || option.isDivider || option.isSmallLabel);
 const getOptionSelected = (option: BaseSelectorData, value: BaseSelectorData) =>
 	option.value === value.value;
 
