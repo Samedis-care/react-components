@@ -111,7 +111,7 @@ const useCustomStylesBase = makeStyles((theme) => ({
     },
 }), { name: "CcBaseSelectorCustomBase" });
 const useCustomStyles = makeThemeStyles((theme) => theme.componentsCare?.uiKit?.baseSelectorExpert?.extensions, "CcBaseSelectorCustom", useCustomStylesBase);
-const getOptionDisabled = (option) => !!(option.isDisabled || option.isDivider || option.isSmallLabel);
+const getOptionDisabled = (option) => !!(!option || option.isDisabled || option.isDivider || option.isSmallLabel);
 const getOptionSelected = (option, value) => option.value === value.value;
 const GrowPopper = React.forwardRef(function GrowPopperImpl(props, ref) {
     return (React.createElement(Popper, { ...props, ref: ref, style: { ...props.style, width: "unset", minWidth: props.style?.width } }));
