@@ -1,11 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import {
-	Button,
-	Dialog,
-	DialogActions,
-	IconButton,
-	Typography,
-} from "@mui/material";
+import { Button, Dialog, DialogActions, IconButton } from "@mui/material";
 import makeStyles from "@mui/styles/makeStyles";
 import MuiDialogTitle from "@mui/material/DialogTitle";
 import { Close } from "@mui/icons-material";
@@ -140,13 +134,11 @@ const SignPadDialog = (props: SignPadDialogProps) => {
 	return (
 		<Dialog open={true} maxWidth="sm" onClose={closeCanvas}>
 			<MuiDialogTitle id="sign-pad-dialog" className={classes.root}>
-				<Typography variant="h6">
-					{signerName
-						? t("standalone.signature-pad.dialog.title-name", {
-								NAME: signerName,
-						  })
-						: t("standalone.signature-pad.dialog.title")}
-				</Typography>
+				{signerName
+					? t("standalone.signature-pad.dialog.title-name", {
+							NAME: signerName,
+					  })
+					: t("standalone.signature-pad.dialog.title")}
 				{closeCanvas && (
 					<IconButton
 						aria-label="Close"
