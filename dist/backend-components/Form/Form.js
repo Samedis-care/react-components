@@ -187,22 +187,6 @@ const Form = (props) => {
             return newReaons;
         });
     }, []);
-    const readOnlyReasons = useMemo(() => {
-        const legacy = readOnlyProp
-            ? { "form-legacy": readOnlyReasonProp ?? null }
-            : {};
-        return {
-            ...legacy,
-            ...readOnlyReasonsProp,
-            ...customReadOnlyReasons,
-        };
-    }, [
-        readOnlyProp,
-        readOnlyReasonProp,
-        readOnlyReasonsProp,
-        customReadOnlyReasons,
-    ]);
-    const readOnly = !isObjectEmpty(readOnlyReasons);
     // main form handling
     const [deleted, setDeleted] = useState(false);
     useEffect(() => {
@@ -240,6 +224,31 @@ const Form = (props) => {
     const submitting = (submittingForm || submittingOther.length > 0) &&
         !submittingBlocked &&
         submittingBlocker.length === 0;
+    // main form handling - read-only
+    const readOnlyReasons = useMemo(() => {
+        const legacy = readOnlyProp
+            ? { "form-legacy": readOnlyReasonProp ?? null }
+            : {};
+        const submitReadOnly = submitting
+            ? {
+                submit: t("backend-components.form.read-only.submitting") ?? null,
+            }
+            : {};
+        return {
+            ...legacy,
+            ...submitReadOnly,
+            ...readOnlyReasonsProp,
+            ...customReadOnlyReasons,
+        };
+    }, [
+        readOnlyProp,
+        readOnlyReasonProp,
+        readOnlyReasonsProp,
+        customReadOnlyReasons,
+        submitting,
+        t,
+    ]);
+    const readOnly = !isObjectEmpty(readOnlyReasons);
     // main form handling - validation disable toggle
     useEffect(() => {
         if (!disableValidation)
