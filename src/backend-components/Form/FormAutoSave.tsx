@@ -11,7 +11,7 @@ export interface FormAutoSaveProps {
  * Helper to implement auto save in forms
  * @param debounceTime The debounce time (time between changes for save to trigger)
  */
-const useFormAutoSave = (debounceTime = 500) => {
+const useFormAutoSave = (debounceTime = 5000) => {
 	const { submit, submitting, dirty, values } = useFormContext();
 	const debounceSubmit = useMemo(
 		() => (debounceTime == 0 ? submit : debounce(submit, debounceTime)),
