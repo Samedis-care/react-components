@@ -242,6 +242,9 @@
 				"message": "The following warnings are present, do you want to continue regardless?",
 				"yes": "Yes",
 				"no": "No"
+			},
+			"read-only": {
+				"submitting": "The form is currently being saved"
 			}
 		},
 		"selector": {
