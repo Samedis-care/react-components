@@ -146,8 +146,14 @@ const FileUpload = (props, ref) => {
         }
         elem.click();
         if (capture) {
-            elem.capture = prevCapture;
-            elem.accept = prevAccept;
+            if (prevCapture)
+                elem.capture = prevCapture;
+            else
+                elem.removeAttribute("capture");
+            if (prevAccept)
+                elem.accept = prevAccept;
+            else
+                elem.removeAttribute("accept");
         }
     }, [maxFiles, getRemainingFileCount, handleError, t]);
     const handleFileChange = useCallback(async (evt) => {
