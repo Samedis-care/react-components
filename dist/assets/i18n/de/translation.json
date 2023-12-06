@@ -242,6 +242,9 @@
 				"message": "Es sind Warnungen vorhanden, trotzdem fortfahren?",
 				"yes": "Ja",
 				"no": "Nein"
+			},
+			"read-only": {
+				"submitting": "Das Formular wird gerade gespeichert"
 			}
 		},
 		"selector": {
