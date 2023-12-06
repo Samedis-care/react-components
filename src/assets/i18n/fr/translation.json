@@ -242,6 +242,9 @@
 				"message": "Les avertissements suivants sont présents, voulez-vous continuer quand même?",
 				"yes": "Oui",
 				"no": "Non"
+			},
+			"read-only": {
+				"submitting": "Le formulaire est en cours d'enregistrement"
 			}
 		},
 		"selector": {
