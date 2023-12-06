@@ -242,6 +242,9 @@
 				"message": "De volgende waarschuwingen zijn aanwezig, wilt u toch doorgaan?",
 				"yes": "Ja",
 				"no": "Nee"
+			},
+			"read-only": {
+				"submitting": "Het formulier wordt momenteel opgeslagen"
 			}
 		},
 		"selector": {
