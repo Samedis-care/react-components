@@ -81,6 +81,7 @@ const useStyles = makeStyles(
 			width: "100%",
 			height: "auto",
 			marginTop: 16,
+			objectFit: "contain",
 		},
 		iconList: {
 			height: "100%",
@@ -252,7 +253,7 @@ const File = (props: FileProps) => {
 					downloadLink && classes.clickable,
 				])}
 				onClick={openDownload}
-				style={isList ? { height: props.size } : undefined}
+				style={{ height: props.size }}
 			/>
 		) : (
 			<FileIcon
@@ -261,7 +262,7 @@ const File = (props: FileProps) => {
 					downloadLink && classes.clickable,
 				])}
 				onClick={openDownload}
-				style={isList ? { height: props.size } : undefined}
+				style={{ height: props.size }}
 			/>
 		);
 
