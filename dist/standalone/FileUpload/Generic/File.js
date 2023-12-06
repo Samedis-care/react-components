@@ -24,6 +24,7 @@ const useStyles = makeStyles((theme) => ({
         width: "100%",
         height: "auto",
         marginTop: 16,
+        objectFit: "contain",
     },
     iconList: {
         height: "100%",
@@ -184,10 +185,10 @@ const File = (props) => {
             isList ? classes.iconList : classes.icon,
             props.disabled && classes.iconDisabled,
             downloadLink && classes.clickable,
-        ]), onClick: openDownload, style: isList ? { height: props.size } : undefined })) : (React.createElement(FileIcon, { className: combineClassNames([
+        ]), onClick: openDownload, style: { height: props.size } })) : (React.createElement(FileIcon, { className: combineClassNames([
             isList ? classes.iconList : classes.icon,
             downloadLink && classes.clickable,
-        ]), onClick: openDownload, style: isList ? { height: props.size } : undefined }));
+        ]), onClick: openDownload, style: { height: props.size } }));
     const renderName = () => (React.createElement(Tooltip, { title: props.name },
         React.createElement(Typography, { align: isList ? "left" : "center", noWrap: true, className: combineClassNames([
                 downloadLink && classes.downloadLink,
