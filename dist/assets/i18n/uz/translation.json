@@ -242,6 +242,9 @@
 				"message": "Quyidagi ogohlantirishlar mavjud, bunga qaramasdan davom etishni xohlaysizmi?",
 				"yes": "Ha",
 				"no": "Yo'q"
+			},
+			"read-only": {
+				"submitting": "Shakl hozir saqlanmoqda"
 			}
 		},
 		"selector": {
