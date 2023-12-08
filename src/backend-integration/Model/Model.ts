@@ -536,18 +536,32 @@ class Model<
 	public async index(
 		params: Partial<IDataGridLoadDataParameters> | undefined
 	): Promise<ModelIndexResponse> {
-		const [rawData, meta, userData] = await this.connector.index(params, this);
-		return [
-			this.cacheIndexRecords(
-				await Promise.all(
-					rawData.map((data) =>
-						this.applySerialization(data, "deserialize", "overview")
+		try {
+			const [rawData, meta, userData] = await this.connector.index(
+				params,
+				this
+			);
+			return [
+				this.cacheIndexRecords(
+					await Promise.all(
+						rawData.map((data) =>
+							this.applySerialization(data, "deserialize", "overview")
+						)
 					)
-				)
-			),
-			meta,
-			userData,
-		];
+				),
+				meta,
+				userData,
+			];
+		} catch (err) {
+			if (
+				captureException &&
+				err instanceof Error &&
+				!["NetworkError", "BackendError"].includes(err.name)
+			) {
+				captureException(err);
+			}
+			throw err;
+		}
 	}
 
 	/**
@@ -712,16 +726,27 @@ class Model<
 		id: string | null,
 		options?: ModelGetOptions
 	): Promise<ModelGetResponse<KeyT>> {
-		if (!id) return [await this.getDefaultValues(), {}];
+		try {
+			if (!id) return [await this.getDefaultValues(), {}];
 
-		const batch = options?.batch ?? this.requestBatchingEnabled;
+			const batch = options?.batch ?? this.requestBatchingEnabled;
 
-		if (batch) {
-			const rawData = await RequestBatching.get(id, this);
-			return [rawData, {}];
-		} else {
-			const rawData = await this.connector.read(id, this);
-			return this.deserializeResponse(rawData);
+			if (batch) {
+				const rawData = await RequestBatching.get(id, this);
+				return [rawData, {}];
+			} else {
+				const rawData = await this.connector.read(id, this);
+				return this.deserializeResponse(rawData);
+			}
+		} catch (err) {
+			if (
+				captureException &&
+				err instanceof Error &&
+				!["NetworkError", "BackendError"].includes(err.name)
+			) {
+				captureException(err);
+			}
+			throw err;
 		}
 	}
 
