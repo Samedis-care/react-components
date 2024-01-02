@@ -731,7 +731,11 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 									id
 								).catch((e) => {
 									// remove IDs from LRU on backend error
-									if (e instanceof Error && e.name === "BackendError") {
+									if (
+										e instanceof Error &&
+										(e.name === "BackendError" ||
+											e.name === "RequestBatchingError")
+									) {
 										setLruIds((ids) => ids.filter((oId) => oId !== id));
 									}
 									return undefined;
