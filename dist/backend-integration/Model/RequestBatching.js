@@ -32,6 +32,15 @@ class RequestBatching {
             const batchStart = (this.batchLastAdded[batchKey] = Date.now());
             const batchNonce = (this.batchNonce[batchKey] = `${Date.now().toString()}-${Math.random()}`);
             this.batchPromises[batchKey] = promise = (async () => {
+                await sleep(0); // 'return' here so batchPromises is saved
+                // this is to prevent a rare bug under presumably high CPU load
+                // the bug happens when MAX_BATCH_TIME expires and therefore the following while loop
+                // immediately breaks, not yielding the execution flow by awaiting sleep.
+                // this leads to the delete statements below being executed, before the promise for this async function call
+                // can get saved.
+                // thus batchPromises have a value, but everything else is empty, which leads to an undefined value in
+                // the check whether the MAX_BATCH_REQUESTS have been reached (batchKey is in batchPromises, but batchRequestIds
+                // is undefined)
                 // wait for the batch to ready
                 while (batchRequests.length < this.MAX_BATCH_REQUESTS) {
                     const now = Date.now();
