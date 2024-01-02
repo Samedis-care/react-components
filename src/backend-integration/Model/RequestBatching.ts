@@ -4,6 +4,7 @@ import Model, {
 	PageVisibility,
 } from "./Model";
 import { sleep } from "../../utils";
+import RequestBatchingError from "../Connector/RequestBatchingError";
 
 class RequestBatching {
 	/**
@@ -96,7 +97,7 @@ class RequestBatching {
 		const result = await promise;
 		const record = result[0].find((record) => record.id === id);
 		if (!record)
-			throw new Error(
+			throw new RequestBatchingError(
 				"[Components-Care] [RequestBatching] Requested record not returned by backend"
 			);
 		return record;
