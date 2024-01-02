@@ -1,4 +1,5 @@
 import { sleep } from "../../utils";
+import RequestBatchingError from "../Connector/RequestBatchingError";
 class RequestBatching {
     /**
      * Time in milliseconds in which no new request shall be added to the batch for the batch to be processed (debounce timer)
@@ -73,7 +74,7 @@ class RequestBatching {
         const result = await promise;
         const record = result[0].find((record) => record.id === id);
         if (!record)
-            throw new Error("[Components-Care] [RequestBatching] Requested record not returned by backend");
+            throw new RequestBatchingError("[Components-Care] [RequestBatching] Requested record not returned by backend");
         return record;
     }
 }
