@@ -79,6 +79,10 @@ export interface BackendSingleSelectProps<
 	 * @remarks Has no effect if LRU. Will be shown at the top of the list
 	 */
 	additionalOptions?: BaseSelectorData[];
+	/**
+	 * Disable request batching
+	 */
+	disableRequestBatching?: boolean;
 }
 
 const BackendSingleSelect = <
@@ -100,6 +104,7 @@ const BackendSingleSelect = <
 		lru,
 		onLoadError,
 		additionalOptions,
+		disableRequestBatching,
 		...otherProps
 	} = props;
 
@@ -129,10 +134,12 @@ const BackendSingleSelect = <
 
 	const handleLoadRecord = useCallback(
 		async (id: string): Promise<BaseSelectorData> => {
-			const [data] = await model.getCached(id);
+			const [data] = await model.getCached(id, {
+				batch: !disableRequestBatching,
+			});
 			return modelToSelectorData(data);
 		},
-		[model, modelToSelectorData]
+		[model, modelToSelectorData, disableRequestBatching]
 	);
 
 	const lruConfig: SelectorLruOptions<BaseSelectorData> | undefined = useMemo(
@@ -184,7 +191,9 @@ const BackendSingleSelect = <
 
 			if (!newCache) {
 				try {
-					const data = await model.getCached(selected);
+					const data = await model.getCached(selected, {
+						batch: !disableRequestBatching,
+					});
 					newCache = await modelToSelectorData(data[0]);
 				} catch (e) {
 					const err = e as Error;
