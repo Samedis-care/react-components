@@ -55,6 +55,10 @@ export interface BackendSingleSelectProps<KeyT extends ModelFieldName, Visibilit
      * @remarks Has no effect if LRU. Will be shown at the top of the list
      */
     additionalOptions?: BaseSelectorData[];
+    /**
+     * Disable request batching
+     */
+    disableRequestBatching?: boolean;
 }
 declare const _default: <KeyT extends string, VisibilityT extends PageVisibility, CustomT>(props: BackendSingleSelectProps<KeyT, VisibilityT, CustomT>) => JSX.Element;
 export default _default;
