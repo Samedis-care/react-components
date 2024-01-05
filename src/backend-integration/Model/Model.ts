@@ -742,7 +742,9 @@ class Model<
 			if (
 				captureException &&
 				err instanceof Error &&
-				!["NetworkError", "BackendError"].includes(err.name)
+				!["NetworkError", "BackendError", "RequestBatchingError"].includes(
+					err.name
+				)
 			) {
 				captureException(err);
 			}
