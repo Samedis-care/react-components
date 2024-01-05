@@ -132,10 +132,11 @@ const BackendSingleSelect = <
 		[model, searchResultLimit, sort, additionalOptions, modelToSelectorData]
 	);
 
-	const handleLoadRecord = useCallback(
+	const handleLoadLruRecord = useCallback(
 		async (id: string): Promise<BaseSelectorData> => {
 			const [data] = await model.getCached(id, {
 				batch: !disableRequestBatching,
+				dontReportNotFoundInBatch: true,
 			});
 			return modelToSelectorData(data);
 		},
@@ -147,10 +148,10 @@ const BackendSingleSelect = <
 			lru
 				? {
 						...lru,
-						loadData: handleLoadRecord,
+						loadData: handleLoadLruRecord,
 				  }
 				: undefined,
-		[lru, handleLoadRecord]
+		[lru, handleLoadLruRecord]
 	);
 
 	const handleSelect = useCallback(

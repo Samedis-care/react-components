@@ -207,6 +207,10 @@ export interface ModelGetOptions {
 	 * @see ModelOptions.enableRequestBatching
 	 */
 	batch?: boolean;
+	/**
+	 * Dont report RequestBatchingError errors
+	 */
+	dontReportNotFoundInBatch?: boolean;
 }
 
 /**
@@ -742,8 +746,10 @@ class Model<
 			if (
 				captureException &&
 				err instanceof Error &&
-				!["NetworkError", "BackendError", "RequestBatchingError"].includes(
-					err.name
+				!["NetworkError", "BackendError"].includes(err.name) &&
+				!(
+					options?.dontReportNotFoundInBatch &&
+					err.name === "RequestBatchingError"
 				)
 			) {
 				captureException(err);

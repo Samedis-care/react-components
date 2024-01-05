@@ -277,10 +277,11 @@ const BackendMultiSelect = <
 		[model, modelToSelectorData, searchResultLimit, sort, switchFilterName]
 	);
 
-	const handleLoadRecord = useCallback(
+	const handleLoadLruRecord = useCallback(
 		async (id: string): Promise<DataT> => {
 			const [data] = await modelFetch.getCached(id, {
 				batch: !disableRequestBatching,
+				dontReportNotFoundInBatch: true,
 			});
 			return modelToSelectorData(data);
 		},
@@ -292,10 +293,10 @@ const BackendMultiSelect = <
 			lru
 				? {
 						...lru,
-						loadData: handleLoadRecord,
+						loadData: handleLoadLruRecord,
 				  }
 				: undefined,
-		[lru, handleLoadRecord]
+		[lru, handleLoadLruRecord]
 	);
 
 	const debouncedLoad = useMemo(
