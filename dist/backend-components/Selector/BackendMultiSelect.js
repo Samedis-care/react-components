@@ -98,18 +98,19 @@ const BackendMultiSelect = (props) => {
         });
         return Promise.all(data[0].map(modelToSelectorData));
     }, [model, modelToSelectorData, searchResultLimit, sort, switchFilterName]);
-    const handleLoadRecord = useCallback(async (id) => {
+    const handleLoadLruRecord = useCallback(async (id) => {
         const [data] = await modelFetch.getCached(id, {
             batch: !disableRequestBatching,
+            dontReportNotFoundInBatch: true,
         });
         return modelToSelectorData(data);
     }, [disableRequestBatching, modelFetch, modelToSelectorData]);
     const lruConfig = useMemo(() => lru
         ? {
             ...lru,
-            loadData: handleLoadRecord,
+            loadData: handleLoadLruRecord,
         }
-        : undefined, [lru, handleLoadRecord]);
+        : undefined, [lru, handleLoadLruRecord]);
     const debouncedLoad = useMemo(() => debouncePromise(handleLoad, searchDebounceTime ?? 500), [searchDebounceTime, handleLoad]);
     return (React.createElement(MultiSelect, { ...otherProps, onLoad: debouncedLoad, onSelect: handleSelect, selected: selected, displaySwitch: !!switchFilterName, lru: lruConfig }));
 };

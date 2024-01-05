@@ -123,6 +123,10 @@ export interface ModelGetOptions {
      * @see ModelOptions.enableRequestBatching
      */
     batch?: boolean;
+    /**
+     * Dont report RequestBatchingError errors
+     */
+    dontReportNotFoundInBatch?: boolean;
 }
 /**
  * React-Query's useQuery for the given model and record ID

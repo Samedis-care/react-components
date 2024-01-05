@@ -18,18 +18,19 @@ const BackendSingleSelect = (props) => {
             ...(await Promise.all(data[0].map(modelToSelectorData))),
         ];
     }, [model, searchResultLimit, sort, additionalOptions, modelToSelectorData]);
-    const handleLoadRecord = useCallback(async (id) => {
+    const handleLoadLruRecord = useCallback(async (id) => {
         const [data] = await model.getCached(id, {
             batch: !disableRequestBatching,
+            dontReportNotFoundInBatch: true,
         });
         return modelToSelectorData(data);
     }, [model, modelToSelectorData, disableRequestBatching]);
     const lruConfig = useMemo(() => lru
         ? {
             ...lru,
-            loadData: handleLoadRecord,
+            loadData: handleLoadLruRecord,
         }
-        : undefined, [lru, handleLoadRecord]);
+        : undefined, [lru, handleLoadLruRecord]);
     const handleSelect = useCallback((selected) => {
         setSelectedCache(selected);
         if (onSelect) {
