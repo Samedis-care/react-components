@@ -12,3 +12,4 @@ export { default as ModelDataTypeBackendMultiSelectWithTagsRenderer } from "./Re
 export { default as ModelDataTypeBackendSingleSelectRenderer } from "./RendererBackendSingleSelect";
 export { default as ModelDataTypeStringArrayBackendRenderer } from "./RendererBackendStringArray";
 export { default as ModelDataTypeLocalizedStringRenderer } from "./RendererLocalizedString";
+export { default as ModelDataTypeAny } from "./RendererBackendType";
