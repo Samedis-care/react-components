@@ -8,7 +8,12 @@ import ccI18n from "../../../i18n";
 export type TypeImageParams = Partial<
 	Pick<
 		ImageSelectorProps,
-		"uploadLabel" | "convertImagesTo" | "downscale" | "capture" | "variant"
+		| "uploadLabel"
+		| "convertImagesTo"
+		| "downscale"
+		| "capture"
+		| "variant"
+		| "postEditCallback"
 	>
 >;
 

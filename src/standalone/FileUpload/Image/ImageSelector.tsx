@@ -9,12 +9,16 @@ import {
 	useTheme,
 } from "@mui/material";
 import { AttachFile, Person } from "@mui/icons-material";
-import { combineClassNames, processImage } from "../../../utils";
+import { combineClassNames, processImageB64 } from "../../../utils";
 import { IDownscaleProps } from "../../../utils/processImage";
 import makeStyles from "@mui/styles/makeStyles";
 import GroupBox from "../../GroupBox";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import { ImageFileIcon } from "../FileIcons";
+import fileToData from "../../../utils/fileToData";
+
+// resolve to edited image to continue change, or reject to cancel
+export type PostImageEditCallback = (image: string) => Promise<string>;
 
 export interface ImageSelectorProps {
 	/**
@@ -82,6 +86,11 @@ export interface ImageSelectorProps {
 	 * @default normal (overridable by theme)
 	 */
 	variant?: "normal" | "modern" | "profile_picture";
+	/**
+	 * Post upload image editing callback
+	 * @param image The data uri image
+	 */
+	postEditCallback?: PostImageEditCallback;
 }
 
 const useStyles = makeStyles(
@@ -162,6 +171,7 @@ const ImageSelector = (props: ImageSelectorProps) => {
 		readOnly,
 		capture,
 		onChange,
+		postEditCallback,
 	} = props;
 	const theme = useTheme();
 	const variant =
@@ -176,9 +186,31 @@ const ImageSelector = (props: ImageSelectorProps) => {
 		async (file: File) => {
 			if (!onChange) return;
 
-			onChange(name, await processImage(file, convertImagesTo, downscale));
+			const imageB64 = await fileToData(file);
+			let finalImage: string;
+			try {
+				finalImage = postEditCallback
+					? await postEditCallback(imageB64)
+					: imageB64;
+			} catch (e) {
+				// probably user cancel
+				// eslint-disable-next-line no-console
+				console.error(
+					"[Components-Care] [ImageSelector] Post edit callback with error (or cancellation)",
+					e
+				);
+				return;
+			}
+			onChange(
+				name,
+				await processImageB64(
+					finalImage,
+					convertImagesTo || file.type,
+					downscale
+				)
+			);
 		},
-		[name, onChange, convertImagesTo, downscale]
+		[onChange, name, postEditCallback, convertImagesTo, downscale]
 	);
 
 	const handleFileChange = useCallback(

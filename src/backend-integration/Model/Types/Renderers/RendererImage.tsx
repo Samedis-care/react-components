@@ -54,6 +54,7 @@ class RendererImage extends TypeImage {
 						convertImagesTo={this.params?.convertImagesTo}
 						downscale={this.params?.downscale}
 						variant={this.params?.variant}
+						postEditCallback={this.params?.postEditCallback}
 					/>
 					<FormHelperTextCC error={!!errorMsg} warning={!!warningMsg}>
 						{errorMsg || warningMsg}
