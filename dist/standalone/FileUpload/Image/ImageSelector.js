@@ -1,11 +1,12 @@
 import React, { useCallback, useRef } from "react";
 import { Box, Button, Grid, IconButton, Tooltip, Typography, useTheme, } from "@mui/material";
 import { AttachFile, Person } from "@mui/icons-material";
-import { combineClassNames, processImage } from "../../../utils";
+import { combineClassNames, processImageB64 } from "../../../utils";
 import makeStyles from "@mui/styles/makeStyles";
 import GroupBox from "../../GroupBox";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import { ImageFileIcon } from "../FileIcons";
+import fileToData from "../../../utils/fileToData";
 const useStyles = makeStyles((theme) => ({
     root: {
         width: `calc(100% - ${theme.spacing(2)})`,
@@ -72,7 +73,7 @@ const useStyles = makeStyles((theme) => ({
     },
 }), { name: "CcImageSelector" });
 const ImageSelector = (props) => {
-    const { convertImagesTo, downscale, name, value, readOnly, capture, onChange, } = props;
+    const { convertImagesTo, downscale, name, value, readOnly, capture, onChange, postEditCallback, } = props;
     const theme = useTheme();
     const variant = props.variant ??
         theme.componentsCare?.fileUpload?.image?.defaultVariant ??
@@ -83,8 +84,21 @@ const ImageSelector = (props) => {
     const processFile = useCallback(async (file) => {
         if (!onChange)
             return;
-        onChange(name, await processImage(file, convertImagesTo, downscale));
-    }, [name, onChange, convertImagesTo, downscale]);
+        const imageB64 = await fileToData(file);
+        let finalImage;
+        try {
+            finalImage = postEditCallback
+                ? await postEditCallback(imageB64)
+                : imageB64;
+        }
+        catch (e) {
+            // probably user cancel
+            // eslint-disable-next-line no-console
+            console.error("[Components-Care] [ImageSelector] Post edit callback with error (or cancellation)", e);
+            return;
+        }
+        onChange(name, await processImageB64(finalImage, convertImagesTo || file.type, downscale));
+    }, [onChange, name, postEditCallback, convertImagesTo, downscale]);
     const handleFileChange = useCallback(async (evt) => {
         const elem = evt.currentTarget;
         const file = elem.files && elem.files[0];

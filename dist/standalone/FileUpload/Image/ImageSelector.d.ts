@@ -1,5 +1,6 @@
 import React from "react";
 import { IDownscaleProps } from "../../../utils/processImage";
+export declare type PostImageEditCallback = (image: string) => Promise<string>;
 export interface ImageSelectorProps {
     /**
      * The name of the input
@@ -66,6 +67,11 @@ export interface ImageSelectorProps {
      * @default normal (overridable by theme)
      */
     variant?: "normal" | "modern" | "profile_picture";
+    /**
+     * Post upload image editing callback
+     * @param image The data uri image
+     */
+    postEditCallback?: PostImageEditCallback;
 }
 declare const useStyles: (props?: any) => import("@mui/styles").ClassNameMap<"root" | "preview" | "rootModern" | "imgWrapper" | "previewModern" | "modernUploadLabel" | "modernFormatsLabel" | "modernFormatIcon" | "modernFullHeight" | "clickablePreview" | "changeEventHelper" | "pfpRoot" | "pfpIconBtn" | "pfpImg">;
 declare const _default: React.MemoExoticComponent<(props: ImageSelectorProps) => JSX.Element>;

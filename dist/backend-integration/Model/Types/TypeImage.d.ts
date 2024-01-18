@@ -3,7 +3,7 @@ import Type from "../Type";
 import { ModelRenderParams } from "../index";
 import FilterType from "../FilterType";
 import { ImageSelectorProps } from "../../../standalone/FileUpload/Image/ImageSelector";
-export declare type TypeImageParams = Partial<Pick<ImageSelectorProps, "uploadLabel" | "convertImagesTo" | "downscale" | "capture" | "variant">>;
+export declare type TypeImageParams = Partial<Pick<ImageSelectorProps, "uploadLabel" | "convertImagesTo" | "downscale" | "capture" | "variant" | "postEditCallback">>;
 /**
  * A type to handle images
  */
