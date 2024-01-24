@@ -328,7 +328,7 @@ const useStyles = makeStyles((theme) => ({
         padding: 0,
     },
     contentOverlayPaper: {
-        padding: "0",
+        padding: theme.spacing(1),
     },
     contentOverlayClosed: {
         position: "sticky",
