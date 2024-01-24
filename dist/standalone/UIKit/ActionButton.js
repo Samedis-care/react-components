@@ -78,17 +78,11 @@ const StyledButton = withStyles((theme) => ({
         ...theme.componentsCare?.uiKit?.actionButton?.label?.style,
     }),
 }), { name: "CcActionButtonStyledButton" })(Button);
-const StyledIconBox = withStyles(() => ({
-    root: {
-        overflow: "hidden",
-        width: 0,
-    },
-}))(Box);
 const ActionButton = (props) => {
     const { icon, fullWidth, small, children, ...otherProps } = props;
     const renderButton = () => (React.createElement(StyledButton, { variant: "contained", disableElevation: true, fullWidth: fullWidth ?? !small, startIcon: icon, 
         // to suppress warning
-        small: small ? "true" : undefined, ...otherProps }, small ? React.createElement(StyledIconBox, null, "\u00A0") : React.createElement(Box, null, children)));
+        small: small ? "true" : undefined, ...otherProps }, !small && React.createElement(Box, null, children)));
     if (props.disabled || !small)
         return renderButton();
     return React.createElement(Tooltip, { title: React.createElement("span", null, children) }, renderButton());
