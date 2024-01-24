@@ -114,13 +114,6 @@ const StyledButton = withStyles(
 	{ name: "CcActionButtonStyledButton" }
 )(Button);
 
-const StyledIconBox = withStyles(() => ({
-	root: {
-		overflow: "hidden",
-		width: 0,
-	},
-}))(Box);
-
 export interface ActionButtonProps extends Omit<ButtonProps, "children"> {
 	/**
 	 * The icon of the button
@@ -159,7 +152,7 @@ const ActionButton = (props: ActionButtonProps) => {
 			small={small ? "true" : undefined}
 			{...otherProps}
 		>
-			{small ? <StyledIconBox>&nbsp;</StyledIconBox> : <Box>{children}</Box>}
+			{!small && <Box>{children}</Box>}
 		</StyledButton>
 	);
 
