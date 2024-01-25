@@ -35,7 +35,7 @@ const GridMultiSelectFilter = (props) => {
         select: isActive ? classes.customFilterBorder : undefined,
     }), [isActive, classes.customFilterBorder]);
     if (dialog) {
-        return (React.createElement(Grid, { item: true, xs: 12, md: 6, lg: 3, ...dialogBreakpoints, container: true, spacing: 2 },
+        return (React.createElement(Grid, { item: true, xs: 12, md: 6, lg: 3, ...dialogBreakpoints, container: true },
             label && (React.createElement(Grid, { item: true, xs: 12 },
                 React.createElement(Typography, null, label))),
             options.map((option) => (React.createElement(Grid, { item: true, xs: 12, key: option.value }, option.isDivider ? (React.createElement(Divider, null)) : option.isSmallLabel ? (React.createElement(Typography, null, option.label)) : (React.createElement(FormControlLabel, { control: React.createElement(Checkbox, { name: option.value, checked: selected.includes(option.value), onChange: handleDialogCheckboxToggle }), label: option.label })))))));

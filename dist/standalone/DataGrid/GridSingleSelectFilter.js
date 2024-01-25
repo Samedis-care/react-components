@@ -31,7 +31,7 @@ const GridSingleSelectFilter = (props) => {
         return (React.createElement(Grid, { item: true, xs: 12, md: 6, lg: 3, ...dialogBreakpoints },
             React.createElement(FormControl, { component: "fieldset" },
                 React.createElement(RadioGroup, { value: selected, onChange: handleDialogRadioToggle },
-                    React.createElement(Grid, { item: true, xs: 12, container: true, spacing: 2 },
+                    React.createElement(Grid, { item: true, xs: 12, container: true },
                         label && (React.createElement(Grid, { item: true, xs: 12 },
                             React.createElement(Typography, null, label))),
                         options.map((option) => (React.createElement(Grid, { item: true, xs: 12, key: option.value }, option.isDivider ? (React.createElement(Divider, null)) : option.isSmallLabel ? (React.createElement(Typography, null, option.label)) : (React.createElement(FormControlLabel, { control: React.createElement(Radio, null), name: option.value, value: option.value, label: option.label }))))))))));
