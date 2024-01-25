@@ -105,7 +105,7 @@ const GridSingleSelectFilter = (props: GridSingleSelectFilterProps) => {
 			<Grid item xs={12} md={6} lg={3} {...dialogBreakpoints}>
 				<FormControl component={"fieldset"}>
 					<RadioGroup value={selected} onChange={handleDialogRadioToggle}>
-						<Grid item xs={12} container spacing={2}>
+						<Grid item xs={12} container>
 							{label && (
 								<Grid item xs={12}>
 									<Typography>{label}</Typography>

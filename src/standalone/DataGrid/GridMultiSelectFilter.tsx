@@ -116,15 +116,7 @@ const GridMultiSelectFilter = (props: GridMultiSelectFilterProps) => {
 
 	if (dialog) {
 		return (
-			<Grid
-				item
-				xs={12}
-				md={6}
-				lg={3}
-				{...dialogBreakpoints}
-				container
-				spacing={2}
-			>
+			<Grid item xs={12} md={6} lg={3} {...dialogBreakpoints} container>
 				{label && (
 					<Grid item xs={12}>
 						<Typography>{label}</Typography>
