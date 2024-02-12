@@ -57,7 +57,7 @@ const getUpdateData = (values, model, onlySubmitMounted, onlySubmitMountedBehavi
         alwaysSubmitFields.includes(key) ||
         mountedFields[key] ||
         getVisibility(model.fields[key].visibility[id ? "edit" : "create"], values, values).hidden;
-    return !onlySubmitMounted
+    const data = !onlySubmitMounted
         ? values
         : (() => {
             const result = {};
@@ -83,6 +83,9 @@ const getUpdateData = (values, model, onlySubmitMounted, onlySubmitMountedBehavi
             }
             return dotsToObject(result);
         })();
+    if (id === "singleton")
+        return { ...data, id };
+    return data;
 };
 /**
  * Normalizes data for validation to ensure dirty flag matches user perception
