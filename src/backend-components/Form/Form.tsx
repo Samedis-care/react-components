@@ -680,7 +680,7 @@ const getUpdateData = (
 			values
 		).hidden;
 
-	return !onlySubmitMounted
+	const data = !onlySubmitMounted
 		? values
 		: (() => {
 				const result: Record<string, unknown> = {};
@@ -705,6 +705,8 @@ const getUpdateData = (
 				}
 				return dotsToObject(result);
 		  })();
+	if (id === "singleton") return { ...data, id };
+	return data;
 };
 
 /**
