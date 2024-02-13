@@ -282,10 +282,14 @@ export interface FormProps<
 	 * Called after parent form submit, before this form submit
 	 * @param id The ID of the parent form (after submit)
 	 * @param model The model currently in use (can be used to modify connector endpoints)
+	 * @param getFieldValue getFieldValue of this form
+	 * @param setFieldValueLite setFieldValueLite of this form
 	 */
 	nestedFormPreSubmitHandler?: (
 		id: string,
-		model: Model<ModelFieldName, PageVisibility, unknown>
+		model: Model<ModelFieldName, PageVisibility, unknown>,
+		getFieldValue: FormContextData["getFieldValue"],
+		setFieldValueLite: FormContextData["setFieldValueLite"]
 	) => Promise<void> | unknown;
 	/**
 	 * CSS class for form styles
@@ -1530,7 +1534,9 @@ const Form = <
 			if (nestedFormPreSubmitHandler) {
 				await nestedFormPreSubmitHandler(
 					id,
-					(model as unknown) as Model<ModelFieldName, PageVisibility, unknown>
+					(model as unknown) as Model<ModelFieldName, PageVisibility, unknown>,
+					getFieldValue,
+					setFieldValueLite
 				);
 			}
 			await submitForm(params);
