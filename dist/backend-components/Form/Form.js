@@ -660,7 +660,7 @@ const Form = (props) => {
         };
         const submitNestedForm = async (id, params) => {
             if (nestedFormPreSubmitHandler) {
-                await nestedFormPreSubmitHandler(id, model);
+                await nestedFormPreSubmitHandler(id, model, getFieldValue, setFieldValueLite);
             }
             await submitForm(params);
             parentFormContext.setCustomFieldDirty(nestedFormName, false);

@@ -212,8 +212,10 @@ export interface FormProps<KeyT extends ModelFieldName, VisibilityT extends Page
      * Called after parent form submit, before this form submit
      * @param id The ID of the parent form (after submit)
      * @param model The model currently in use (can be used to modify connector endpoints)
+     * @param getFieldValue getFieldValue of this form
+     * @param setFieldValueLite setFieldValueLite of this form
      */
-    nestedFormPreSubmitHandler?: (id: string, model: Model<ModelFieldName, PageVisibility, unknown>) => Promise<void> | unknown;
+    nestedFormPreSubmitHandler?: (id: string, model: Model<ModelFieldName, PageVisibility, unknown>, getFieldValue: FormContextData["getFieldValue"], setFieldValueLite: FormContextData["setFieldValueLite"]) => Promise<void> | unknown;
     /**
      * CSS class for form styles
      */
