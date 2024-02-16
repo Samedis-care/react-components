@@ -866,6 +866,7 @@ const Form = (props) => {
         getFieldValues,
         setFieldValueLite,
         setFieldTouchedLite,
+        setCustomReadOnly,
     }), [
         id,
         model,
@@ -875,6 +876,7 @@ const Form = (props) => {
         onlyValidateMounted,
         onlyWarnMounted,
         onlyWarnChanged,
+        setCustomReadOnly,
         readOnly,
         readOnlyReasons,
         getFieldValue,
