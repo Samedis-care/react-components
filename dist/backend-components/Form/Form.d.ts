@@ -499,7 +499,7 @@ export interface FormContextData {
  */
 export declare const FormContext: React.Context<FormContextData | null>;
 export declare const useFormContext: () => FormContextData;
-export declare type FormContextDataLite = Pick<FormContextData, "id" | "model" | "customProps" | "onlySubmitMounted" | "onlyValidateMounted" | "onlyWarnMounted" | "onlyWarnChanged" | "readOnly" | "readOnlyReason" | "readOnlyReasons" | "errorComponent" | "getFieldValue" | "getFieldValues" | "setFieldValueLite" | "setFieldTouchedLite" | "setCustomReadOnly">;
+export declare type FormContextDataLite = Pick<FormContextData, "id" | "model" | "customProps" | "onlySubmitMounted" | "onlyValidateMounted" | "onlyWarnMounted" | "onlyWarnChanged" | "readOnly" | "readOnlyReason" | "readOnlyReasons" | "errorComponent" | "getFieldValue" | "getFieldValues" | "setFieldValueLite" | "setFieldTouchedLite" | "setCustomReadOnly" | "removeCustomReadOnly">;
 export declare const FormContextLite: React.Context<FormContextDataLite | null>;
 export declare const useFormContextLite: () => FormContextDataLite;
 export interface FormNestedState {
