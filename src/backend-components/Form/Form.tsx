@@ -619,6 +619,7 @@ export type FormContextDataLite = Pick<
 	| "setFieldValueLite"
 	| "setFieldTouchedLite"
 	| "setCustomReadOnly"
+	| "removeCustomReadOnly"
 >;
 export const FormContextLite = React.createContext<FormContextDataLite | null>(
 	null
@@ -1787,6 +1788,7 @@ const Form = <
 			setFieldValueLite,
 			setFieldTouchedLite,
 			setCustomReadOnly,
+			removeCustomReadOnly,
 		}),
 		[
 			id,
@@ -1798,6 +1800,7 @@ const Form = <
 			onlyWarnMounted,
 			onlyWarnChanged,
 			setCustomReadOnly,
+			removeCustomReadOnly,
 			readOnly,
 			readOnlyReasons,
 			getFieldValue,
