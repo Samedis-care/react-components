@@ -31,6 +31,10 @@ export interface BackendSingleSelectProps<
 	 */
 	model: Model<KeyT, VisibilityT, CustomT>;
 	/**
+	 * The model to use for fetch requests (to enable request batching)
+	 */
+	modelFetch?: Model<KeyT, VisibilityT, CustomT>;
+	/**
 	 * The debounce time for search in ms
 	 * @default 500
 	 */
@@ -94,6 +98,7 @@ const BackendSingleSelect = <
 ) => {
 	const {
 		model,
+		modelFetch: modelFetchProp,
 		modelToSelectorData,
 		searchResultLimit,
 		onSelect,
@@ -107,6 +112,7 @@ const BackendSingleSelect = <
 		disableRequestBatching,
 		...otherProps
 	} = props;
+	const modelFetch = modelFetchProp ?? model;
 
 	const [selectedCache, setSelectedCache] = useState<BaseSelectorData | null>(
 		null
@@ -134,13 +140,13 @@ const BackendSingleSelect = <
 
 	const handleLoadLruRecord = useCallback(
 		async (id: string): Promise<BaseSelectorData> => {
-			const [data] = await model.getCached(id, {
+			const [data] = await modelFetch.getCached(id, {
 				batch: !disableRequestBatching,
 				dontReportNotFoundInBatch: true,
 			});
 			return modelToSelectorData(data);
 		},
-		[model, modelToSelectorData, disableRequestBatching]
+		[modelFetch, modelToSelectorData, disableRequestBatching]
 	);
 
 	const lruConfig: SelectorLruOptions<BaseSelectorData> | undefined = useMemo(
@@ -192,7 +198,7 @@ const BackendSingleSelect = <
 
 			if (!newCache) {
 				try {
-					const data = await model.getCached(selected, {
+					const data = await modelFetch.getCached(selected, {
 						batch: !disableRequestBatching,
 					});
 					newCache = await modelToSelectorData(data[0]);
