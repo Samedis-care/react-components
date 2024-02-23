@@ -9,6 +9,10 @@ export interface BackendSingleSelectProps<KeyT extends ModelFieldName, Visibilit
      */
     model: Model<KeyT, VisibilityT, CustomT>;
     /**
+     * The model to use for fetch requests (to enable request batching)
+     */
+    modelFetch?: Model<KeyT, VisibilityT, CustomT>;
+    /**
      * The debounce time for search in ms
      * @default 500
      */

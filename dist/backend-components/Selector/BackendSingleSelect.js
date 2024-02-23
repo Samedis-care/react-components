@@ -3,7 +3,8 @@ import { getStringLabel, SingleSelect, } from "../../standalone";
 import { debouncePromise } from "../../utils";
 import useCCTranslations from "../../utils/useCCTranslations";
 const BackendSingleSelect = (props) => {
-    const { model, modelToSelectorData, searchResultLimit, onSelect, selected, initialData, searchDebounceTime, sort, lru, onLoadError, additionalOptions, disableRequestBatching, ...otherProps } = props;
+    const { model, modelFetch: modelFetchProp, modelToSelectorData, searchResultLimit, onSelect, selected, initialData, searchDebounceTime, sort, lru, onLoadError, additionalOptions, disableRequestBatching, ...otherProps } = props;
+    const modelFetch = modelFetchProp ?? model;
     const [selectedCache, setSelectedCache] = useState(null);
     const { t } = useCCTranslations();
     const handleLoad = useCallback(async (search) => {
@@ -19,12 +20,12 @@ const BackendSingleSelect = (props) => {
         ];
     }, [model, searchResultLimit, sort, additionalOptions, modelToSelectorData]);
     const handleLoadLruRecord = useCallback(async (id) => {
-        const [data] = await model.getCached(id, {
+        const [data] = await modelFetch.getCached(id, {
             batch: !disableRequestBatching,
             dontReportNotFoundInBatch: true,
         });
         return modelToSelectorData(data);
-    }, [model, modelToSelectorData, disableRequestBatching]);
+    }, [modelFetch, modelToSelectorData, disableRequestBatching]);
     const lruConfig = useMemo(() => lru
         ? {
             ...lru,
@@ -60,7 +61,7 @@ const BackendSingleSelect = (props) => {
             }
             if (!newCache) {
                 try {
-                    const data = await model.getCached(selected, {
+                    const data = await modelFetch.getCached(selected, {
                         batch: !disableRequestBatching,
                     });
                     newCache = await modelToSelectorData(data[0]);
