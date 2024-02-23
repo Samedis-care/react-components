@@ -74,7 +74,8 @@ class RequestBatching {
         const result = await promise;
         const record = result[0].find((record) => record.id === id);
         if (!record)
-            throw new RequestBatchingError("[Components-Care] [RequestBatching] Requested record not returned by backend");
+            throw new RequestBatchingError("[Components-Care] [RequestBatching] Requested record not returned by backend: " +
+                JSON.stringify(model.getReactQueryKey(id, true)));
         return record;
     }
 }
