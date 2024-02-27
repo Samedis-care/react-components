@@ -1,9 +1,9 @@
-import React from "react";
-import { SelectProps, Theme, SelectClassKey } from "@mui/material";
+/// <reference types="react" />
+import { SelectClassKey, SelectProps, Theme } from "@mui/material";
 import { ClassNameMap } from "@mui/styles/withStyles";
-import { Styles, CSSProperties } from "@mui/styles";
+import { CSSProperties, Styles } from "@mui/styles";
 import { MultiSelectorData } from "./MultiSelect";
-export interface MultiSelectWithCheckBoxProps extends SelectProps<string[]> {
+export interface MultiSelectWithCheckBoxProps extends SelectProps<string[], "outlined"> {
     /**
      * Selector options
      */
@@ -29,5 +29,5 @@ export interface MultiSelectWithCheckBoxTheme {
 }
 declare const useStyles: (props?: any) => ClassNameMap<"label" | "checkboxStyle">;
 export declare type MultiSelectWithCheckBoxThemeExpert = Partial<Styles<Theme, SelectProps<string[]>, SelectClassKey>>;
-declare const _default: React.MemoExoticComponent<(props: MultiSelectWithCheckBoxProps) => JSX.Element>;
+declare const _default: (props: MultiSelectWithCheckBoxProps) => JSX.Element;
 export default _default;

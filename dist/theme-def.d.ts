@@ -17,7 +17,8 @@ import { FormButtonTheme } from "./standalone/UIKit/FormButtons";
 import { FormPageLayoutTheme } from "./standalone/Form/FormPageLayout";
 import { GroupBoxTheme } from "./standalone/GroupBox";
 import { SignalPortletItemTheme } from "./standalone/SignalPortlet/SignalPortletItem";
-import { SignalPortletTheme } from "./standalone/SignalPortlet";
+import { SignalPortletClassKey, SignalPortletProps } from "./standalone/SignalPortlet";
+import { ComponentsOverrides, ComponentsVariants, Theme as MuiTheme } from "@mui/material";
 export interface ComponentsCareTheme {
     dataGrid?: DataGridTheme;
     dataGridExpert?: DataGridThemeExpert;
@@ -41,7 +42,6 @@ export interface ComponentsCareTheme {
         };
     };
     signalPortlet?: {
-        root?: SignalPortletTheme;
         item?: SignalPortletItemTheme;
     };
     selector?: SelectorTheme;
@@ -69,3 +69,20 @@ declare module "@mui/material/styles/createTheme" {
         componentsCare?: ComponentsCareTheme;
     }
 }
+declare type Theme = Omit<MuiTheme, "components">;
+declare module "@mui/material/styles" {
+    interface ComponentNameToClassKey {
+        CcSignalPortlet: SignalPortletClassKey;
+    }
+    interface ComponentsPropsList {
+        CcSignalPortlet: SignalPortletProps;
+    }
+    interface Components {
+        CcSignalPortlet?: {
+            defaultProps?: ComponentsPropsList["CcSignalPortlet"];
+            styleOverrides?: ComponentsOverrides<Theme>["CcSignalPortlet"];
+            variants?: ComponentsVariants["CcSignalPortlet"];
+        };
+    }
+}
+export {};

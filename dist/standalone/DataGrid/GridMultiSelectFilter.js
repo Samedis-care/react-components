@@ -42,7 +42,7 @@ const GridMultiSelectFilter = (props) => {
     }
     else {
         return (React.createElement(Grid, { item: true, xs: 4, ...barBreakpoints },
-            React.createElement(MultiSelectWithCheckBox, { label: label, options: options, values: selected, onChange: handleSelectorChange, renderValue: getSelected, fullWidth: true, classes: selectorClasses })));
+            React.createElement(MultiSelectWithCheckBox, { variant: "outlined", label: label, options: options, values: selected, onChange: handleSelectorChange, renderValue: getSelected, fullWidth: true, classes: selectorClasses })));
     }
 };
 export default React.memo(GridMultiSelectFilter);

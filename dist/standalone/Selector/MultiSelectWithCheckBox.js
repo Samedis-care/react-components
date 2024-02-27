@@ -1,5 +1,5 @@
 import React from "react";
-import { Select, MenuItem, Checkbox, ListItemText, InputBase, InputLabel, } from "@mui/material";
+import { Checkbox, InputBase, InputLabel, ListItemText, MenuItem, Select, } from "@mui/material";
 import { ExpandMore } from "@mui/icons-material";
 import { cleanClassMap, makeThemeStyles } from "../../utils";
 import { makeStyles, withStyles } from "@mui/styles";

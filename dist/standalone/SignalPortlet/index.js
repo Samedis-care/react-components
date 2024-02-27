@@ -1,27 +1,42 @@
 import React from "react";
 import SignalPortletItem from "./SignalPortletItem";
-import makeStyles from "@mui/styles/makeStyles";
-import { Divider, Grid, List, Paper, Typography } from "@mui/material";
-import makeThemeStyles from "../../utils/makeThemeStyles";
-const useStyles = makeStyles({
-    paper: {
-        height: "100%",
-    },
-    divider: {},
-    list: {},
-    title: {},
-    titleWrapper: {},
-}, { name: "CcSignalPortlet" });
-const useThemeStyles = makeThemeStyles((theme) => theme.componentsCare?.signalPortlet?.root, "CcSignalPortlet", useStyles);
-const SignalPortlet = (props) => {
-    const classes = useThemeStyles(props);
-    return (React.createElement(Paper, { className: classes.paper },
-        React.createElement(Grid, { container: true, spacing: 1 },
-            React.createElement(Grid, { item: true, xs: 12, className: classes.titleWrapper },
-                React.createElement(Typography, { variant: "h5", align: "center", className: classes.title }, props.title)),
-            React.createElement(Grid, { item: true, xs: 12, className: classes.divider },
-                React.createElement(Divider, null)),
-            React.createElement(Grid, { item: true, xs: 12 },
-                React.createElement(List, { className: classes.list }, props.items.map((item, index) => (React.createElement(SignalPortletItem, { key: index.toString(), colorPresent: props.colorPresent, colorNotPresent: props.colorNotPresent, ...item }))))))));
+import { Divider, Grid, List, Paper, styled, Typography, useThemeProps, } from "@mui/material";
+const SignalPortletRoot = styled("div", {
+    name: "CcSignalPortlet",
+    slot: "paper",
+})({});
+const SignalPortletPaper = styled(Paper, {
+    name: "CcSignalPortlet",
+    slot: "paper",
+})({
+    height: "100%",
+});
+const SignalPortletDivider = styled(Grid, {
+    name: "CcSignalPortlet",
+    slot: "divider",
+})({});
+const SignalPortletTitleWrapper = styled(Grid, {
+    name: "CcSignalPortlet",
+    slot: "titleWrapper",
+})({});
+const SignalPortletTitle = styled(Typography, {
+    name: "CcSignalPortlet",
+    slot: "title",
+})({});
+const SignalPortletList = styled(List, {
+    name: "CcSignalPortlet",
+    slot: "list",
+})({});
+const SignalPortlet = (inProps) => {
+    const props = useThemeProps({ props: inProps, name: "CcSignalPortlet" });
+    return (React.createElement(SignalPortletRoot, null,
+        React.createElement(SignalPortletPaper, { className: props.classes?.paper },
+            React.createElement(Grid, { container: true, spacing: 1 },
+                React.createElement(SignalPortletTitleWrapper, { item: true, xs: 12, className: props.classes?.titleWrapper },
+                    React.createElement(SignalPortletTitle, { variant: "h5", align: "center", className: props.classes?.title }, props.title)),
+                React.createElement(SignalPortletDivider, { item: true, xs: 12, className: props.classes?.divider },
+                    React.createElement(Divider, null)),
+                React.createElement(Grid, { item: true, xs: 12 },
+                    React.createElement(SignalPortletList, { className: props.classes?.list }, props.items.map((item, index) => (React.createElement(SignalPortletItem, { key: index.toString(), colorPresent: props.colorPresent, colorNotPresent: props.colorNotPresent, ...item })))))))));
 };
 export default React.memo(SignalPortlet);

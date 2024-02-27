@@ -1,8 +1,5 @@
 import React, { CSSProperties } from "react";
 import { SignalPortletItemDef } from "./SignalPortletItem";
-import { ClassNameMap } from "@mui/styles/withStyles";
-import { Theme } from "@mui/material";
-import { Styles } from "@mui/styles";
 export interface SignalPortletColorConfig {
     /**
      * Color used for counter if count != 0
@@ -23,12 +20,10 @@ export interface SignalPortletProps extends SignalPortletColorConfig {
      */
     items: SignalPortletItemDef[];
     /**
-     * Custom CSS styles
+     * Custom CSS classes
      */
-    classes?: Partial<ClassNameMap<keyof ReturnType<typeof useStyles>>>;
+    classes?: Partial<Record<SignalPortletClassKey, string>>;
 }
-declare const useStyles: (props?: any) => ClassNameMap<"title" | "list" | "divider" | "paper" | "titleWrapper">;
-export declare type SignalPortletClassKey = keyof ReturnType<typeof useStyles>;
-export declare type SignalPortletTheme = Partial<Styles<Theme, SignalPortletProps, SignalPortletClassKey>>;
-declare const _default: React.MemoExoticComponent<(props: SignalPortletProps) => JSX.Element>;
+export declare type SignalPortletClassKey = "paper" | "divider" | "titleWrapper" | "title" | "list";
+declare const _default: React.MemoExoticComponent<(inProps: SignalPortletProps) => JSX.Element>;
 export default _default;
