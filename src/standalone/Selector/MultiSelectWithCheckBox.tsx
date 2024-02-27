@@ -1,24 +1,25 @@
 import React from "react";
 import {
-	Select,
-	SelectProps,
-	MenuItem,
 	Checkbox,
-	ListItemText,
-	Theme,
 	InputBase,
-	SelectClassKey,
 	InputLabel,
+	ListItemText,
+	MenuItem,
+	Select,
+	SelectClassKey,
+	SelectProps,
+	Theme,
 } from "@mui/material";
 import { ExpandMore } from "@mui/icons-material";
 import { ClassNameMap } from "@mui/styles/withStyles";
 import { cleanClassMap, makeThemeStyles } from "../../utils";
-import { makeStyles, withStyles, Styles, CSSProperties } from "@mui/styles";
+import { CSSProperties, makeStyles, Styles, withStyles } from "@mui/styles";
 import { MultiSelectorData } from "./MultiSelect";
 import { getStringLabel } from "./BaseSelector";
 import uniqueArray from "../../utils/uniqueArray";
 
-export interface MultiSelectWithCheckBoxProps extends SelectProps<string[]> {
+export interface MultiSelectWithCheckBoxProps
+	extends SelectProps<string[], "outlined"> {
 	/**
 	 * Selector options
 	 */
@@ -212,4 +213,6 @@ const MultiSelectWithCheckBox = (props: MultiSelectWithCheckBoxProps) => {
 	);
 };
 
-export default React.memo(MultiSelectWithCheckBox);
+export default React.memo(
+	MultiSelectWithCheckBox
+) as typeof MultiSelectWithCheckBox;

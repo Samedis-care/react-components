@@ -26,11 +26,10 @@ import {
 	LocalizedDateTimePicker,
 	LocalizedKeyboardDatePicker,
 } from "../../LocalizedDateTimePickers";
-import { DateType } from "@date-io/type";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import { normalizeDate } from "../../../backend-integration/Model/Types/Utils/DateUtils";
 import { SelectChangeEvent } from "@mui/material/Select/SelectInput";
-import moment from "moment";
+import moment, { Moment } from "moment";
 
 export type FilterType =
 	| "contains"
@@ -188,7 +187,7 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 		}
 		updateParent();
 	};
-	const onFilterValueChangeDate = (date: DateType | null) => {
+	const onFilterValueChangeDate = (date: Moment | null) => {
 		filterValue = "";
 		if (!date) {
 			subFilterComboType = "and";
@@ -273,7 +272,7 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 		filterValue2 = event.target.value;
 		updateParent();
 	};
-	const onFilterValue2ChangeDate = (date: DateType | null) => {
+	const onFilterValue2ChangeDate = (date: Moment | null) => {
 		filterValue2 = date ? normalizeDate(date.toDate()).toISOString() : "";
 		updateParent();
 	};

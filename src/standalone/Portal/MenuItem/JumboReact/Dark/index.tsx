@@ -79,7 +79,7 @@ const UnselectedListItem = withStyles(unselectedListItemStyles)(ListItemButton);
 const ExpandableListItem = withStyles(expandableListItemStyles)(ListItemButton);
 const StyledListItemIcon = withStyles(listIconStyles)(ListItemIcon);
 
-const typographyProps: TypographyProps = { variant: "body2" };
+const typographyProps: Pick<TypographyProps, "variant"> = { variant: "body2" };
 
 const MenuItemJumboReactDark = (props: MenuItemProps) => {
 	const classes = useStyles();

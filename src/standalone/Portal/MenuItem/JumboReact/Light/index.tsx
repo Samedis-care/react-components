@@ -64,7 +64,7 @@ const SelectedListItem = withStyles(selectedListItemStyles)(ListItemButton);
 const UnselectedListItem = withStyles(unselectedListItemStyles)(ListItemButton);
 const ExpandableListItem = withStyles(expandableListItemStyles)(ListItemButton);
 
-const typographyProps: TypographyProps = { variant: "body2" };
+const typographyProps: Pick<TypographyProps, "variant"> = { variant: "body2" };
 
 const MenuItemJumboReactLight = (props: MenuItemProps) => {
 	const classes = useStyles();

@@ -148,6 +148,7 @@ const GridMultiSelectFilter = (props: GridMultiSelectFilterProps) => {
 		return (
 			<Grid item xs={4} {...barBreakpoints}>
 				<MultiSelectWithCheckBox
+					variant={"outlined"}
 					label={label}
 					options={options}
 					values={selected}
