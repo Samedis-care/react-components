@@ -1,10 +1,14 @@
 import React, { CSSProperties } from "react";
 import SignalPortletItem, { SignalPortletItemDef } from "./SignalPortletItem";
-import makeStyles from "@mui/styles/makeStyles";
-import { ClassNameMap } from "@mui/styles/withStyles";
-import { Divider, Grid, List, Paper, Theme, Typography } from "@mui/material";
-import makeThemeStyles from "../../utils/makeThemeStyles";
-import { Styles } from "@mui/styles";
+import {
+	Divider,
+	Grid,
+	List,
+	Paper,
+	styled,
+	Typography,
+	useThemeProps,
+} from "@mui/material";
 
 export interface SignalPortletColorConfig {
 	/**
@@ -27,64 +31,83 @@ export interface SignalPortletProps extends SignalPortletColorConfig {
 	 */
 	items: SignalPortletItemDef[];
 	/**
-	 * Custom CSS styles
+	 * Custom CSS classes
 	 */
-	classes?: Partial<ClassNameMap<keyof ReturnType<typeof useStyles>>>;
+	classes?: Partial<Record<SignalPortletClassKey, string>>;
 }
 
-const useStyles = makeStyles(
-	{
-		paper: {
-			height: "100%",
-		},
-		divider: {},
-		list: {},
-		title: {},
-		titleWrapper: {},
-	},
-	{ name: "CcSignalPortlet" }
-);
+const SignalPortletRoot = styled("div", {
+	name: "CcSignalPortlet",
+	slot: "paper",
+})({});
+const SignalPortletPaper = styled(Paper, {
+	name: "CcSignalPortlet",
+	slot: "paper",
+})({
+	height: "100%",
+});
+const SignalPortletDivider = styled(Grid, {
+	name: "CcSignalPortlet",
+	slot: "divider",
+})({});
+const SignalPortletTitleWrapper = styled(Grid, {
+	name: "CcSignalPortlet",
+	slot: "titleWrapper",
+})({});
+const SignalPortletTitle = styled(Typography, {
+	name: "CcSignalPortlet",
+	slot: "title",
+})({});
+const SignalPortletList = styled(List, {
+	name: "CcSignalPortlet",
+	slot: "list",
+})({});
 
-export type SignalPortletClassKey = keyof ReturnType<typeof useStyles>;
+export type SignalPortletClassKey =
+	| "paper"
+	| "divider"
+	| "titleWrapper"
+	| "title"
+	| "list";
 
-export type SignalPortletTheme = Partial<
-	Styles<Theme, SignalPortletProps, SignalPortletClassKey>
->;
-
-const useThemeStyles = makeThemeStyles(
-	(theme) => theme.componentsCare?.signalPortlet?.root,
-	"CcSignalPortlet",
-	useStyles
-);
-
-const SignalPortlet = (props: SignalPortletProps) => {
-	const classes = useThemeStyles(props);
+const SignalPortlet = (inProps: SignalPortletProps) => {
+	const props = useThemeProps({ props: inProps, name: "CcSignalPortlet" });
 
 	return (
-		<Paper className={classes.paper}>
-			<Grid container spacing={1}>
-				<Grid item xs={12} className={classes.titleWrapper}>
-					<Typography variant={"h5"} align={"center"} className={classes.title}>
-						{props.title}
-					</Typography>
+		<SignalPortletRoot>
+			<SignalPortletPaper className={props.classes?.paper}>
+				<Grid container spacing={1}>
+					<SignalPortletTitleWrapper
+						item
+						xs={12}
+						className={props.classes?.titleWrapper}
+					>
+						<SignalPortletTitle
+							variant={"h5"}
+							align={"center"}
+							className={props.classes?.title}
+						>
+							{props.title}
+						</SignalPortletTitle>
+					</SignalPortletTitleWrapper>
+					<SignalPortletDivider item xs={12} className={props.classes?.divider}>
+						<Divider />
+					</SignalPortletDivider>
+					<Grid item xs={12}>
+						<SignalPortletList className={props.classes?.list}>
+							{props.items.map((item, index) => (
+								<SignalPortletItem
+									key={index.toString()}
+									colorPresent={props.colorPresent}
+									colorNotPresent={props.colorNotPresent}
+									{...item}
+								/>
+							))}
+						</SignalPortletList>
+					</Grid>
 				</Grid>
-				<Grid item xs={12} className={classes.divider}>
-					<Divider />
-				</Grid>
-				<Grid item xs={12}>
-					<List className={classes.list}>
-						{props.items.map((item, index) => (
-							<SignalPortletItem
-								key={index.toString()}
-								colorPresent={props.colorPresent}
-								colorNotPresent={props.colorNotPresent}
-								{...item}
-							/>
-						))}
-					</List>
-				</Grid>
-			</Grid>
-		</Paper>
+			</SignalPortletPaper>
+		</SignalPortletRoot>
 	);
 };
 
