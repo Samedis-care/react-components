@@ -70,7 +70,7 @@ const Content = (props: IDataGridContentProps) => {
 				}));
 			}
 		},
-		[rowsPerPage, setState, pages]
+		[rowsPerPage, setState, pages],
 	);
 
 	const onResize = useCallback((size: Size) => {
@@ -91,15 +91,15 @@ const Content = (props: IDataGridContentProps) => {
 	}, []);
 
 	const remainingWidth = useMemo(() => {
-		const shownColumns: IDataGridColumnDef[] = (Object.keys(columnWidth)
-			.map((field) => columns.find((col) => col.field === field))
-			.filter((entry) => entry) as IDataGridColumnDef[]).filter(
-			(entry) => !state.hiddenColumns.includes(entry.field)
-		);
+		const shownColumns: IDataGridColumnDef[] = (
+			Object.keys(columnWidth)
+				.map((field) => columns.find((col) => col.field === field))
+				.filter((entry) => entry) as IDataGridColumnDef[]
+		).filter((entry) => !state.hiddenColumns.includes(entry.field));
 		const usedWidth =
 			Object.entries(columnWidth)
 				.filter(([field]) =>
-					shownColumns.find((col: IDataGridColumnDef) => col.field === field)
+					shownColumns.find((col: IDataGridColumnDef) => col.field === field),
 				)
 				.reduce((a, b) => a + b[1], 0) +
 			(disableSelection ? 0 : SELECT_ROW_WIDTH);
@@ -120,19 +120,19 @@ const Content = (props: IDataGridContentProps) => {
 		// only run on initial resize
 		setColumnWidth((prevState) => {
 			// resolve all visible columns which don't have an fixed initial width
-			const shownColumns: IDataGridColumnDef[] = (Object.keys(prevState)
-				.map((field) => columns.find((col) => col.field === field))
-				.filter((entry) => entry) as IDataGridColumnDef[]).filter(
-				(entry) => !state.hiddenColumns.includes(entry.field)
-			);
+			const shownColumns: IDataGridColumnDef[] = (
+				Object.keys(prevState)
+					.map((field) => columns.find((col) => col.field === field))
+					.filter((entry) => entry) as IDataGridColumnDef[]
+			).filter((entry) => !state.hiddenColumns.includes(entry.field));
 			let columnsToResize = shownColumns.filter(
-				(entry) => !entry.width || !entry.width[2]
+				(entry) => !entry.width || !entry.width[2],
 			);
 			// determine width used by visible columns
 			const usedWidth =
 				Object.entries(prevState)
 					.filter(([field]) =>
-						shownColumns.find((col: IDataGridColumnDef) => col.field === field)
+						shownColumns.find((col: IDataGridColumnDef) => col.field === field),
 					)
 					.reduce((a, b) => a + b[1], 0) +
 				(disableSelection ? 0 : SELECT_ROW_WIDTH);
@@ -148,13 +148,13 @@ const Content = (props: IDataGridContentProps) => {
 					if (!(col.field in newState)) return;
 					const newSize = applyColumnWidthLimits(
 						col,
-						newState[col.field] + resizePerColumn
+						newState[col.field] + resizePerColumn,
 					);
 					const widthDiff = newState[col.field] + resizePerColumn - newSize;
 					if (widthDiff !== 0) {
 						// remove the current column from the resizable list if we hit max-width
 						columnsToResize = columnsToResize.filter(
-							(altcol) => altcol.field !== col.field
+							(altcol) => altcol.field !== col.field,
 						);
 					}
 					newRemainingWidth += widthDiff;
@@ -184,7 +184,7 @@ const Content = (props: IDataGridContentProps) => {
 				)}
 			</>
 		),
-		[state.dataLoadError, state.refreshData, t]
+		[state.dataLoadError, state.refreshData, t],
 	);
 
 	const styleTopRightGrid = useMemo(
@@ -195,7 +195,7 @@ const Content = (props: IDataGridContentProps) => {
 			overscrollBehavior: "contain",
 			display: columns.length === 0 ? "none" : undefined,
 		}),
-		[columns.length, state.rowsFiltered, state.rowsTotal]
+		[columns.length, state.rowsFiltered, state.rowsTotal],
 	);
 
 	const styleBottomLeftGrid = useMemo(
@@ -203,22 +203,22 @@ const Content = (props: IDataGridContentProps) => {
 			display:
 				(state.rowsFiltered ?? state.rowsTotal) === 0 ? "none" : undefined,
 		}),
-		[state.rowsFiltered, state.rowsTotal]
+		[state.rowsFiltered, state.rowsTotal],
 	);
 
 	const getRowHeight = useCallback(
 		(index: number) => (index === 0 ? headerHeight : 57),
-		[headerHeight]
+		[headerHeight],
 	);
 	const getColumnWidth = useCallback(
 		(index: number) =>
 			!disableSelection && index === 0
 				? SELECT_ROW_WIDTH
 				: index !== columns.length + (disableSelection ? 0 : 1)
-				? columnWidth[columns[index - (disableSelection ? 0 : 1)].field] ??
-				  DEFAULT_COLUMN_WIDTH
-				: remainingWidth,
-		[columnWidth, columns, disableSelection, remainingWidth]
+					? columnWidth[columns[index - (disableSelection ? 0 : 1)].field] ??
+						DEFAULT_COLUMN_WIDTH
+					: remainingWidth,
+		[columnWidth, columns, disableSelection, remainingWidth],
 	);
 
 	return (

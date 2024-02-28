@@ -16,48 +16,46 @@ export const useImportStep3Logic = (props: CrudImporterStepProps) => {
 	const records: RecordT[] | null = useAsyncMemo(
 		() =>
 			Promise.all(
-				state.data.map(
-					async (record): Promise<RecordT> => {
-						const modelRecord: Record<string, unknown> = {};
-						let isModelRecordComplete = false;
-						try {
-							Object.entries(model.fields)
-								.filter(
-									([name, field]) =>
-										isFieldImportable(name, field) &&
-										state.conversionScripts[name]?.script
-								)
-								.forEach(([name]) => {
-									deepAssign(
-										modelRecord,
-										dotToObject(
-											name,
-											// eslint-disable-next-line no-eval
-											eval(state.conversionScripts[name].script) ?? null
-										)
-									);
-								});
-							// noinspection JSUnusedAssignment
-							isModelRecordComplete = true;
-							const validation = await model.validate(modelRecord);
-							return [
-								modelRecord,
-								validate
-									? { ...(await validate(modelRecord)), ...validation }
-									: validation,
-								null,
-							];
-						} catch (e) {
-							return [
-								isModelRecordComplete ? modelRecord : record,
-								{},
-								e as Error,
-							];
-						}
+				state.data.map(async (record): Promise<RecordT> => {
+					const modelRecord: Record<string, unknown> = {};
+					let isModelRecordComplete = false;
+					try {
+						Object.entries(model.fields)
+							.filter(
+								([name, field]) =>
+									isFieldImportable(name, field) &&
+									state.conversionScripts[name]?.script,
+							)
+							.forEach(([name]) => {
+								deepAssign(
+									modelRecord,
+									dotToObject(
+										name,
+										// eslint-disable-next-line no-eval
+										eval(state.conversionScripts[name].script) ?? null,
+									),
+								);
+							});
+						// noinspection JSUnusedAssignment
+						isModelRecordComplete = true;
+						const validation = await model.validate(modelRecord);
+						return [
+							modelRecord,
+							validate
+								? { ...(await validate(modelRecord)), ...validation }
+								: validation,
+							null,
+						];
+					} catch (e) {
+						return [
+							isModelRecordComplete ? modelRecord : record,
+							{},
+							e as Error,
+						];
 					}
-				)
+				}),
 			),
-		[model, state.conversionScripts, state.data]
+		[model, state.conversionScripts, state.data],
 	);
 
 	const recordsNormalized = useMemo(
@@ -68,14 +66,14 @@ export const useImportStep3Logic = (props: CrudImporterStepProps) => {
 				const updateKey = props.updateKey;
 				if (updateKey && !(updateKey in validation) && data[updateKey]) {
 					const recordsWithUpdateKey = (records ?? []).filter(
-						(r) => r[0][updateKey] === data[updateKey]
+						(r) => r[0][updateKey] === data[updateKey],
 					);
 					if (recordsWithUpdateKey.length > 1) {
 						validation[updateKey] = t(
 							"backend-components.crud.import.errors.update-key-not-uniq",
 							{
 								UPDATE_KEY: model.fields[updateKey].getLabel(),
-							}
+							},
 						);
 					}
 				}
@@ -89,7 +87,7 @@ export const useImportStep3Logic = (props: CrudImporterStepProps) => {
 					...data,
 				};
 			}),
-		[model.fields, props.updateKey, records, t]
+		[model.fields, props.updateKey, records, t],
 	);
 
 	const everythingOkay = useMemo(
@@ -97,7 +95,7 @@ export const useImportStep3Logic = (props: CrudImporterStepProps) => {
 			records
 				? !records.find((record) => !isObjectEmpty(record[1]) || record[2])
 				: false,
-		[records]
+		[records],
 	);
 	useEffect(() => {
 		setState((prev) => ({
@@ -115,9 +113,8 @@ export const useImportStep3Logic = (props: CrudImporterStepProps) => {
 
 const Step3ValidateReview = (props: CrudImporterStepProps) => {
 	const { model } = props;
-	const { records, recordsNormalized, everythingOkay } = useImportStep3Logic(
-		props
-	);
+	const { records, recordsNormalized, everythingOkay } =
+		useImportStep3Logic(props);
 
 	const { t } = useCCTranslations();
 
@@ -165,7 +162,7 @@ const Step3ValidateReview = (props: CrudImporterStepProps) => {
 									value2: "",
 								},
 							},
-					  ]
+						]
 			}
 		/>
 	);

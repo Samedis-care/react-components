@@ -48,7 +48,7 @@ const useStyles = makeStyles(
 			minHeight: 150,
 		},
 	}),
-	{ name: "CcWeekViewDay" }
+	{ name: "CcWeekViewDay" },
 );
 
 const WeekViewDay = (props: WeekViewDayProps) => {

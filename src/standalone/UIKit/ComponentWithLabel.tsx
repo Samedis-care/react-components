@@ -61,11 +61,11 @@ const useStyles = makeStyles(
 			...theme.componentsCare?.uiKit?.label?.style,
 		} as CSSProperties,
 	}),
-	{ name: "CcComponentWithLabel" }
+	{ name: "CcComponentWithLabel" },
 );
 
 const ComponentWithLabel = (
-	props: ComponentWithLabelProps | FormControlLabelProps
+	props: ComponentWithLabelProps | FormControlLabelProps,
 ) => {
 	const classes = useStyles(props);
 

@@ -230,7 +230,7 @@ export type MultiLanguageInputProps = Omit<
 	 * @param newValues New values
 	 */
 	onChange: (
-		newValues: Partial<Record<MultiLanguageInputSupportedLanguages, string>>
+		newValues: Partial<Record<MultiLanguageInputSupportedLanguages, string>>,
 	) => void;
 	/**
 	 * Label for the text field
@@ -272,7 +272,7 @@ const useStyles = makeStyles(
 			fontWeight: "bold",
 		},
 	},
-	{ name: "CcMultiLanguageInput" }
+	{ name: "CcMultiLanguageInput" },
 );
 
 const MultiLanguageInput = (props: MultiLanguageInputProps) => {
@@ -295,7 +295,7 @@ const MultiLanguageInput = (props: MultiLanguageInputProps) => {
 
 	// determine default language
 	let defaultLanguage = i18n.language.split(
-		"-"
+		"-",
 	)[0] as MultiLanguageInputSupportedLanguages;
 	const i18nLang = defaultLanguage;
 	if (ignoreI18nLocale || !enabledLanguages.includes(defaultLanguage)) {
@@ -326,7 +326,7 @@ const MultiLanguageInput = (props: MultiLanguageInputProps) => {
 				[lang]: evt.target.value,
 			});
 		},
-		[enabledLanguages, onChange, values]
+		[enabledLanguages, onChange, values],
 	);
 
 	const getLanguageName = (lang: string) =>
@@ -343,11 +343,11 @@ const MultiLanguageInput = (props: MultiLanguageInputProps) => {
 		(evt: React.MouseEvent<HTMLSpanElement>) => {
 			setActiveLanguage(
 				evt.currentTarget.getAttribute(
-					"data-lang"
-				) as MultiLanguageInputSupportedLanguages
+					"data-lang",
+				) as MultiLanguageInputSupportedLanguages,
 			);
 		},
-		[]
+		[],
 	);
 
 	const renderLanguage = (lang: MultiLanguageInputSupportedLanguages) => (
@@ -430,7 +430,7 @@ const MultiLanguageInput = (props: MultiLanguageInputProps) => {
 		<Grid container spacing={2} data-name={name} onBlur={onBlur}>
 			<Grid item xs={12}>
 				{renderLanguage(
-					textFieldProps.multiline ? activeLanguage : defaultLanguage
+					textFieldProps.multiline ? activeLanguage : defaultLanguage,
 				)}
 			</Grid>
 			{expanded &&

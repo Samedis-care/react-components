@@ -41,7 +41,7 @@ const useStyles = makeStyles(
 			width: "100%",
 		},
 	},
-	{ name: "CcLoader" }
+	{ name: "CcLoader" },
 );
 
 const Loader = (props: LoaderProps) => {

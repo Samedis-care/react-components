@@ -19,9 +19,8 @@ export type ModelDataTypeStringLocalizedSingleRendererCCParams = Omit<
 > &
 	Omit<TextFieldWithHelpProps, "warning">;
 
-export const ModelDataTypeStringLocalizedSingleRendererContext = React.createContext<MultiLanguageInputSupportedLanguages | null>(
-	null
-);
+export const ModelDataTypeStringLocalizedSingleRendererContext =
+	React.createContext<MultiLanguageInputSupportedLanguages | null>(null);
 
 /**
  * Renders a text field
@@ -38,7 +37,7 @@ class RendererStringLocalizedSingle extends TypeLocalizedString {
 	render(
 		params: ModelRenderParams<
 			Partial<Record<MultiLanguageInputSupportedLanguages, string>>
-		>
+		>,
 	): React.ReactElement {
 		const {
 			visibility,
@@ -73,7 +72,7 @@ class RendererStringLocalizedSingle extends TypeLocalizedString {
 							throw new Error(
 								"Please wrap field" +
 									field +
-									" with ModelDataTypeStringLocalizedSingleRendererContext.Provider and specify a language"
+									" with ModelDataTypeStringLocalizedSingleRendererContext.Provider and specify a language",
 							);
 						return (
 							<>

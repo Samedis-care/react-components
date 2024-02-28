@@ -16,7 +16,7 @@ type OmitProperties = "selected" | "onChange" | "readOnly" | "model";
 class RendererBackendDataGridMultiSelect<
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
-	CustomT
+	CustomT,
 > extends TypeStringArray {
 	private readonly props?: Omit<
 		BackendDataGridMultiSelectProps<KeyT, VisibilityT, CustomT>,
@@ -27,7 +27,7 @@ class RendererBackendDataGridMultiSelect<
 		props?: Omit<
 			BackendDataGridMultiSelectProps<KeyT, VisibilityT, CustomT>,
 			OmitProperties
-		>
+		>,
 	) {
 		super();
 		this.props = props;
@@ -62,7 +62,7 @@ class RendererBackendDataGridMultiSelect<
 
 			if (!relationModel)
 				throw new Error(
-					"Type BackendDataGridMultiSelect requires relation model: " + field
+					"Type BackendDataGridMultiSelect requires relation model: " + field,
 				);
 
 			return (
@@ -78,7 +78,7 @@ class RendererBackendDataGridMultiSelect<
 					<BackendDataGridMultiSelect
 						selected={value}
 						model={
-							(relationModel as unknown) as Model<KeyT, VisibilityT, CustomT>
+							relationModel as unknown as Model<KeyT, VisibilityT, CustomT>
 						}
 						onChange={(value) => handleChange(field, value)}
 						readOnly={visibility.readOnly}

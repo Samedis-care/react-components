@@ -50,7 +50,7 @@ export interface MultiSelectWithoutGroupProps<DataT extends MultiSelectorData>
 	 */
 	loadDataOptions: (
 		query: string,
-		switchValue: boolean
+		switchValue: boolean,
 	) => DataT[] | Promise<DataT[]>;
 	/**
 	 * Optional callback for customizing the unique identifier of data
@@ -89,11 +89,11 @@ const useStyles = makeStyles(
 			marginTop: 0,
 		},
 	},
-	{ name: "CcMultiSelectWithoutGroup" }
+	{ name: "CcMultiSelectWithoutGroup" },
 );
 
 const MultiSelectWithoutGroup = <DataT extends MultiSelectorData>(
-	props: MultiSelectWithoutGroupProps<DataT>
+	props: MultiSelectWithoutGroupProps<DataT>,
 ) => {
 	const {
 		onSelect,
@@ -121,8 +121,8 @@ const MultiSelectWithoutGroup = <DataT extends MultiSelectorData>(
 		selected.map((selectedOption) => {
 			setDataOptions((oldOptions) =>
 				oldOptions.filter(
-					(option) => !getId(option).includes(getId(selectedOption))
-				)
+					(option) => !getId(option).includes(getId(selectedOption)),
+				),
 			);
 		});
 	}, [getId, selected]);
@@ -134,11 +134,11 @@ const MultiSelectWithoutGroup = <DataT extends MultiSelectorData>(
 
 			// find the item
 			const entryToDelete = selected.find(
-				(s) => s.value === evt.currentTarget.name
+				(s) => s.value === evt.currentTarget.name,
 			);
 			if (!entryToDelete) {
 				throw new Error(
-					"[Components-Care] [MultiSelectWithoutGroups] Entry couldn't be found. entry.value is not set"
+					"[Components-Care] [MultiSelectWithoutGroups] Entry couldn't be found. entry.value is not set",
 				);
 			}
 
@@ -153,7 +153,7 @@ const MultiSelectWithoutGroup = <DataT extends MultiSelectorData>(
 			setDataOptions([...dataOptions, entryToDelete]);
 			onSelect(selected.filter((entry) => entry !== entryToDelete));
 		},
-		[onSelect, setDataOptions, dataOptions, selected]
+		[onSelect, setDataOptions, dataOptions, selected],
 	);
 
 	const multiSelectHandler = useCallback(
@@ -162,7 +162,7 @@ const MultiSelectWithoutGroup = <DataT extends MultiSelectorData>(
 			const selectedOptions = [...selected, data];
 			if (onSelect) onSelect(selectedOptions);
 		},
-		[onSelect, selected]
+		[onSelect, selected],
 	);
 
 	const onLoad = useCallback(
@@ -171,10 +171,10 @@ const MultiSelectWithoutGroup = <DataT extends MultiSelectorData>(
 			return results.map((result) =>
 				selectedIds.includes(getId(result))
 					? { ...result, isDisabled: true, selected: true }
-					: result
+					: result,
 			);
 		},
-		[getId, loadDataOptions, selectedIds, switchValue]
+		[getId, loadDataOptions, selectedIds, switchValue],
 	);
 
 	return (
@@ -223,7 +223,7 @@ const MultiSelectWithoutGroup = <DataT extends MultiSelectorData>(
 									)}
 								</div>
 							);
-						}
+						},
 					)}
 				</>
 			</InlineSwitch>
@@ -232,5 +232,5 @@ const MultiSelectWithoutGroup = <DataT extends MultiSelectorData>(
 };
 
 export default React.memo(
-	MultiSelectWithoutGroup
+	MultiSelectWithoutGroup,
 ) as typeof MultiSelectWithoutGroup;

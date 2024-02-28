@@ -32,8 +32,8 @@ const StyledButton = withStyles(
 			backgroundColor: props.color
 				? undefined
 				: props.backgroundColor ||
-				  theme.componentsCare?.uiKit?.actionButton?.backgroundColor ||
-				  theme.palette.primary.main,
+					theme.componentsCare?.uiKit?.actionButton?.backgroundColor ||
+					theme.palette.primary.main,
 			color:
 				props.textColor ||
 				props.color ||
@@ -52,8 +52,8 @@ const StyledButton = withStyles(
 							props.backgroundColor ||
 								theme.componentsCare?.uiKit?.actionButton?.backgroundColor ||
 								theme.palette.primary.main,
-							theme.palette.action.hover
-					  ).join()})`,
+							theme.palette.action.hover,
+						).join()})`,
 				...{
 					...theme.componentsCare?.uiKit?.actionButton?.style,
 					...theme.componentsCare?.uiKit?.actionButton?.hover?.style,
@@ -111,7 +111,7 @@ const StyledButton = withStyles(
 			...theme.componentsCare?.uiKit?.actionButton?.label?.style,
 		}),
 	}),
-	{ name: "CcActionButtonStyledButton" }
+	{ name: "CcActionButtonStyledButton" },
 )(Button);
 
 export interface ActionButtonProps extends Omit<ButtonProps, "children"> {

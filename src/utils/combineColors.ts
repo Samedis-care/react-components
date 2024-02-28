@@ -8,7 +8,7 @@ import colorToRgba from "./colorToRgba";
 
 const combineColors = (
 	color1: string,
-	color2: string
+	color2: string,
 ): [r: number, g: number, b: number, a: number] => {
 	const color1Decoded = colorToRgba(color1);
 	const color2Decoded = colorToRgba(color2);

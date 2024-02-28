@@ -14,21 +14,21 @@ import { TFunction } from "i18next";
 export type DialogType = React.ReactNode;
 export type DialogContextType = [
 	pushDialog: (dialog: React.ReactNode) => void,
-	popDialog: () => void
+	popDialog: () => void,
 ];
 
 /**
  * Context for the dialog state
  */
 export const DialogContext = React.createContext<DialogContextType | undefined>(
-	undefined
+	undefined,
 );
 
 export const useDialogContext = (): DialogContextType => {
 	const ctx = useContext(DialogContext);
 	if (!ctx)
 		throw new Error(
-			"DialogContext is missing, did you forget to add Components-Care Framework or DialogContextProvider?"
+			"DialogContext is missing, did you forget to add Components-Care Framework or DialogContextProvider?",
 		);
 	return ctx;
 };
@@ -57,7 +57,7 @@ const DialogContextProvider = (props: IFrameworkProps) => {
 
 			setDialogs((prevValue) => [...prevValue, dialog]);
 		},
-		[t]
+		[t],
 	);
 	const popDialog = useCallback(() => {
 		if (dialogCount.current === 0) {
@@ -66,7 +66,7 @@ const DialogContextProvider = (props: IFrameworkProps) => {
 				return parentContext[1]();
 			}
 			const err = new Error(
-				"[Components-Care] Trying to close non-existing dialog"
+				"[Components-Care] Trying to close non-existing dialog",
 			);
 			// eslint-disable-next-line no-console
 			console.error(err);
@@ -87,7 +87,7 @@ const DialogContextProvider = (props: IFrameworkProps) => {
 
 	const dialogActions: DialogContextType = useMemo(
 		() => [pushDialog, popDialog],
-		[pushDialog, popDialog]
+		[pushDialog, popDialog],
 	);
 
 	// update callback if locale changes

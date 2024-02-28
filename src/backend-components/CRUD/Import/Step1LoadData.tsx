@@ -46,7 +46,7 @@ export const useImportStep1FileUploadProps = (props: ImportStep1Props) => {
 							reader.addEventListener("error", reject);
 							reader.readAsArrayBuffer(file.file as File);
 						});
-					})
+					}),
 				);
 				const json = workbooks
 					.map((book) =>
@@ -75,12 +75,12 @@ export const useImportStep1FileUploadProps = (props: ImportStep1Props) => {
 												Object.entries(record).map(([k, v]) => [
 													k,
 													typeof v === "number" ? v.toString() : v,
-												])
-											)
+												]),
+											),
 										)
 								);
 							})
-							.flat()
+							.flat(),
 					)
 					.flat();
 				setState((prev) => ({
@@ -90,7 +90,7 @@ export const useImportStep1FileUploadProps = (props: ImportStep1Props) => {
 				}));
 			})();
 		},
-		[setState]
+		[setState],
 	);
 
 	const handleError = useCallback(
@@ -106,7 +106,7 @@ export const useImportStep1FileUploadProps = (props: ImportStep1Props) => {
 				],
 			});
 		},
-		[pushDialog, t]
+		[pushDialog, t],
 	);
 
 	return {

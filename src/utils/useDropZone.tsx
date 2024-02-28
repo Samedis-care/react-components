@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
-export type UseDropZoneParams = (files: FileList) => Promise<void> | unknown;
+export type UseDropZoneParams = (files: FileList) => Promise<void> | void;
 
 export interface UseDropZoneResult {
 	handleDragOver: React.DragEventHandler;
@@ -24,7 +24,7 @@ const useDropZone = (processFiles?: UseDropZoneParams): UseDropZoneResult => {
 			const files = evt.dataTransfer?.files;
 			if (files) void processFiles(files);
 		},
-		[processFiles]
+		[processFiles],
 	);
 
 	const handleDragOver = useCallback(
@@ -33,7 +33,7 @@ const useDropZone = (processFiles?: UseDropZoneParams): UseDropZoneResult => {
 
 			evt.preventDefault();
 		},
-		[processFiles]
+		[processFiles],
 	);
 
 	const handleDragStart = useCallback(() => {

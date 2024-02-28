@@ -161,7 +161,7 @@ const StyledButton = withStyles((theme: Theme) => ({
 						theme.componentsCare?.uiKit?.subActionButton?.small?.padding ||
 						theme.spacing(1),
 					...theme.componentsCare?.uiKit?.subActionButton?.small?.style,
-			  }
+				}
 			: {
 					padding:
 						theme.componentsCare?.uiKit?.subActionButton?.padding ||
@@ -212,7 +212,7 @@ const StyledButton = withStyles((theme: Theme) => ({
 					},
 					minWidth: theme.componentsCare?.uiKit?.subActionButton?.minWidth,
 					...theme.componentsCare?.uiKit?.subActionButton?.style,
-			  },
+				},
 	outlined: (props: SubActionButtonPropsForStyles) =>
 		props.small
 			? {
@@ -276,7 +276,7 @@ const StyledButton = withStyles((theme: Theme) => ({
 						},
 					},
 					padding: theme.spacing(2),
-			  }
+				}
 			: {
 					"& svg": {
 						fill:
@@ -289,8 +289,8 @@ const StyledButton = withStyles((theme: Theme) => ({
 						...theme.componentsCare?.uiKit?.subActionButton?.icon?.style,
 					},
 					"&:hover svg": {
-						fill:
-							theme.componentsCare?.uiKit?.subActionButton?.hover?.icon?.color,
+						fill: theme.componentsCare?.uiKit?.subActionButton?.hover?.icon
+							?.color,
 						...theme.componentsCare?.uiKit?.subActionButton?.hover?.icon?.style,
 					},
 					borderRadius:
@@ -332,7 +332,7 @@ const StyledButton = withStyles((theme: Theme) => ({
 						theme.componentsCare?.uiKit?.subActionButton?.padding ||
 						theme.spacing(2, 3),
 					...theme.componentsCare?.uiKit?.subActionButton?.style,
-			  },
+				},
 	label: {
 		justifyContent:
 			theme.componentsCare?.uiKit?.subActionButton?.label?.justifyContent ||

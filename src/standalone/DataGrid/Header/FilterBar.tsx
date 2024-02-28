@@ -31,30 +31,31 @@ export interface IDataGridFilterBarProps {
 
 type CustomFilterActiveContextType = [
 	number,
-	Dispatch<React.SetStateAction<number>>
+	Dispatch<React.SetStateAction<number>>,
 ];
 export const CustomFilterActiveContext = React.createContext<
 	CustomFilterActiveContextType | undefined
 >(undefined);
-export const useCustomFilterActiveContext = (): CustomFilterActiveContextType => {
-	const ctx = useContext(CustomFilterActiveContext);
-	if (!ctx) throw new Error("Context not set");
-	return ctx;
-};
+export const useCustomFilterActiveContext =
+	(): CustomFilterActiveContextType => {
+		const ctx = useContext(CustomFilterActiveContext);
+		if (!ctx) throw new Error("Context not set");
+		return ctx;
+	};
 
 const FilterBar = () => {
 	const props = useDataGridProps();
 	const [state, setState] = useDataGridState();
 	const classes = useDataGridStyles();
 	const enableDialog = useMediaQuery(
-		props.enableFilterDialogMediaQuery ?? "(false)"
+		props.enableFilterDialogMediaQuery ?? "(false)",
 	);
 
 	const setCustomData = useCallback(
 		(
 			newState:
 				| DataGridCustomDataType
-				| ((prevState: DataGridCustomDataType) => DataGridCustomDataType)
+				| ((prevState: DataGridCustomDataType) => DataGridCustomDataType),
 		) => {
 			if (typeof newState === "function") {
 				setState((prevState) => ({
@@ -68,7 +69,7 @@ const FilterBar = () => {
 				}));
 			}
 		},
-		[setState]
+		[setState],
 	);
 
 	const openDialog = useCallback(() => {

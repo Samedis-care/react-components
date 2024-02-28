@@ -101,7 +101,7 @@ const useStyles = makeStyles(
 		btnAltBorder: {
 			borderColor: `rgba(${combineColors(
 				theme.palette.background.paper,
-				theme.palette.action.hover
+				theme.palette.action.hover,
 			).join()})`,
 			"&:hover": {
 				borderColor: theme.palette.background.paper,
@@ -111,7 +111,7 @@ const useStyles = makeStyles(
 			cursor: "default",
 		},
 	}),
-	{ name: "CcDayContents" }
+	{ name: "CcDayContents" },
 );
 
 const DayContents = (props: DayContentsProps) => {

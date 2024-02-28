@@ -16,7 +16,7 @@ import Loader from "../Loader";
 
 export interface MultiSelectWithTagsProps<
 	DataT extends MultiSelectorData,
-	GroupT extends BaseSelectorData
+	GroupT extends BaseSelectorData,
 > extends Pick<
 			BaseSelectorProps<GroupT>,
 			| "disabled"
@@ -66,7 +66,7 @@ export interface MultiSelectWithTagsProps<
 	 */
 	loadDataOptions: (
 		query: string,
-		switchValue: boolean
+		switchValue: boolean,
 	) => DataT[] | Promise<DataT[]>;
 	/**
 	 * Search callback which is called to load available group entries
@@ -75,7 +75,7 @@ export interface MultiSelectWithTagsProps<
 	 */
 	loadGroupOptions: (
 		query: string,
-		switchValue: boolean
+		switchValue: boolean,
 	) => GroupT[] | Promise<GroupT[]>;
 	/**
 	 * LRU options for group
@@ -114,14 +114,14 @@ const useStyles = makeStyles(
 			transition: "opacity 500ms cubic-bezier(0.4, 0, 0.2, 1) 500ms",
 		},
 	},
-	{ name: "CcMultiSelectWithTags" }
+	{ name: "CcMultiSelectWithTags" },
 );
 
 const MultiSelectWithTags = <
 	DataT extends MultiSelectorData,
-	GroupT extends BaseSelectorData
+	GroupT extends BaseSelectorData,
 >(
-	props: MultiSelectWithTagsProps<DataT, GroupT>
+	props: MultiSelectWithTagsProps<DataT, GroupT>,
 ) => {
 	const {
 		title,
@@ -167,8 +167,8 @@ const MultiSelectWithTags = <
 		const selectedIds = selected.map(getId);
 		setSelectedGroups((oldSelectedGroups) =>
 			oldSelectedGroups.filter(
-				(group) => !group.items.find((item) => !selectedIds.includes(item))
-			)
+				(group) => !group.items.find((item) => !selectedIds.includes(item)),
+			),
 		);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [selected]);
@@ -194,25 +194,27 @@ const MultiSelectWithTags = <
 							.map(getId)
 							.map(
 								(value) =>
-									combinedArray.find((entry) => getId(entry) === value) as DataT
-							)
-					)
+									combinedArray.find(
+										(entry) => getId(entry) === value,
+									) as DataT,
+							),
+					),
 				);
 			} finally {
 				setLoadingGroupRecords(false);
 			}
 		},
-		[onChange, loadGroupEntries, getId, selected]
+		[onChange, loadGroupEntries, getId, selected],
 	);
 
 	const loadGroupOptionsAndProcess = useCallback(
 		async (query: string) => {
 			const selectedGroupIds = selectedGroups.map((group) => group.group);
 			return (await loadGroupOptions(query, switchValue)).filter(
-				(group) => !selectedGroupIds.includes(group.value)
+				(group) => !selectedGroupIds.includes(group.value),
 			);
 		},
-		[loadGroupOptions, selectedGroups, switchValue]
+		[loadGroupOptions, selectedGroups, switchValue],
 	);
 
 	return (

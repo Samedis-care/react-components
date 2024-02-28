@@ -109,14 +109,14 @@ export const getStringLabel = (data: BaseSelectorData | string) =>
 	typeof data === "string"
 		? data
 		: Array.isArray(data.label)
-		? data.label[0]
-		: data.label;
+			? data.label[0]
+			: data.label;
 export const getReactLabel = (data: BaseSelectorData) =>
 	Array.isArray(data.label) ? data.label[1] : data.label;
 
 export const modifyReactLabel = <DataT extends BaseSelectorData>(
 	data: DataT,
-	cb: (prev: React.ReactNode) => React.ReactNode
+	cb: (prev: React.ReactNode) => React.ReactNode,
 ): DataT => ({
 	...data,
 	label: [getStringLabel(data), cb(getReactLabel(data))],
@@ -127,19 +127,18 @@ export const modifyReactLabel = <DataT extends BaseSelectorData>(
  * Performs a case-insensitive label search
  * @param data The data set
  */
-export const selectorLocalLoadHandler = (data: BaseSelectorData[]) => (
-	query: string
-) => {
-	query = query.toLowerCase();
-	return uniqueArray([
-		...data.filter((entry) =>
-			getStringLabel(entry).toLowerCase().startsWith(query)
-		),
-		...data.filter((entry) =>
-			getStringLabel(entry).toLowerCase().includes(query)
-		),
-	]);
-};
+export const selectorLocalLoadHandler =
+	(data: BaseSelectorData[]) => (query: string) => {
+		query = query.toLowerCase();
+		return uniqueArray([
+			...data.filter((entry) =>
+				getStringLabel(entry).toLowerCase().startsWith(query),
+			),
+			...data.filter((entry) =>
+				getStringLabel(entry).toLowerCase().includes(query),
+			),
+		]);
+	};
 
 export interface SelectorLruOptions<DataT extends BaseSelectorData> {
 	/**
@@ -384,7 +383,7 @@ const useCustomDefaultSelectorStyles = makeStyles(
 			},
 		},
 	},
-	{ name: "CcBaseSelectorBase" }
+	{ name: "CcBaseSelectorBase" },
 );
 
 const useThemeStyles = makeThemeStyles<
@@ -393,7 +392,7 @@ const useThemeStyles = makeThemeStyles<
 >(
 	(theme) => theme.componentsCare?.uiKit?.baseSelectorExpert?.base,
 	"CcBaseSelector",
-	useCustomDefaultSelectorStyles
+	useCustomDefaultSelectorStyles,
 );
 
 const useCustomStylesBase = makeStyles(
@@ -417,7 +416,7 @@ const useCustomStylesBase = makeStyles(
 			marginTop: 0,
 		},
 		icon: (
-			props: Pick<BaseSelectorProps<BaseSelectorData>, "iconSize" | "label">
+			props: Pick<BaseSelectorProps<BaseSelectorData>, "iconSize" | "label">,
 		) => ({
 			width: props.iconSize ?? 32,
 			height: props.iconSize ?? 32,
@@ -450,7 +449,7 @@ const useCustomStylesBase = makeStyles(
 			width: "100%",
 		},
 	}),
-	{ name: "CcBaseSelectorCustomBase" }
+	{ name: "CcBaseSelectorCustomBase" },
 );
 
 export type SelectorCustomStylesClassKey = keyof ReturnType<
@@ -462,7 +461,7 @@ const useCustomStyles = makeThemeStyles<
 >(
 	(theme) => theme.componentsCare?.uiKit?.baseSelectorExpert?.extensions,
 	"CcBaseSelectorCustom",
-	useCustomStylesBase
+	useCustomStylesBase,
 );
 
 const getOptionDisabled = (option: BaseSelectorData) =>
@@ -472,7 +471,7 @@ const getOptionSelected = (option: BaseSelectorData, value: BaseSelectorData) =>
 
 const GrowPopper = React.forwardRef(function GrowPopperImpl(
 	props: PopperProps,
-	ref: ForwardedRef<HTMLDivElement>
+	ref: ForwardedRef<HTMLDivElement>,
 ) {
 	return (
 		<Popper
@@ -486,12 +485,11 @@ const GrowPopper = React.forwardRef(function GrowPopperImpl(
 export interface BaseSelectorContextType {
 	addToLru: (...ids: string[]) => void;
 }
-export const BaseSelectorContext = React.createContext<BaseSelectorContextType | null>(
-	null
-);
+export const BaseSelectorContext =
+	React.createContext<BaseSelectorContextType | null>(null);
 
 const BaseSelector = <DataT extends BaseSelectorData>(
-	props: BaseSelectorProps<DataT>
+	props: BaseSelectorProps<DataT>,
 ) => {
 	const {
 		variant,
@@ -535,7 +533,7 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 	const getId = getIdOfData ?? getIdDefault;
 
 	const classes = useThemeStyles(
-		(props as unknown) as BaseSelectorProps<BaseSelectorData>
+		props as unknown as BaseSelectorProps<BaseSelectorData>,
 	);
 	const defaultSwitchValue = !!(
 		props.displaySwitch && props.defaultSwitchValue
@@ -544,9 +542,9 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 	const { t } = useCCTranslations();
 	const customClasses = useCustomStyles(
 		cleanClassMap(
-			(props as unknown) as BaseSelectorProps<BaseSelectorData>,
-			true
-		)
+			props as unknown as BaseSelectorProps<BaseSelectorData>,
+			true,
+		),
 	);
 	const [open, setOpen] = useState(false);
 	const actualAddNewLabel = addNewLabel || t("standalone.selector.add-new");
@@ -559,7 +557,7 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 		[],
 		(ret): ret is string[] =>
 			Array.isArray(ret) &&
-			!(ret as unknown[]).find((entry) => typeof entry !== "string")
+			!(ret as unknown[]).find((entry) => typeof entry !== "string"),
 	);
 
 	const renderIcon = useCallback(
@@ -569,7 +567,7 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 			) : (
 				icon
 			),
-		[customClasses.icon]
+		[customClasses.icon],
 	);
 
 	const defaultRenderer = useCallback(
@@ -632,7 +630,7 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 			enableIcons,
 			renderIcon,
 			t,
-		]
+		],
 	);
 
 	const addToLru = useCallback(
@@ -641,11 +639,11 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 			setLruIds((prev) =>
 				[...addIds, ...prev.filter((id) => !addIds.includes(id))].slice(
 					0,
-					lru.count
-				)
+					lru.count,
+				),
 			);
 		},
-		[lru, setLruIds]
+		[lru, setLruIds],
 	);
 
 	const onChangeHandler = useCallback(
@@ -655,7 +653,7 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 					// eslint-disable-next-line no-console
 					console.warn(
 						"[Components-Care] [BaseSelector] Unexpected value passed to handleOptionSelect:",
-						data
+						data,
 					);
 					return;
 				}
@@ -678,14 +676,14 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 				}
 			}
 		},
-		[onSelect, onAddNew, addToLru, getId]
+		[onSelect, onAddNew, addToLru, getId],
 	);
 
 	const context = useMemo<BaseSelectorContextType>(
 		() => ({
 			addToLru,
 		}),
-		[addToLru]
+		[addToLru],
 	);
 
 	const onSearchHandler = useCallback(
@@ -715,34 +713,36 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 								label: "",
 								value: "lru-divider",
 								isDivider: true,
-						  } as DataT)
+							} as DataT)
 						: undefined,
 					filteredLruIds.length > 0
 						? ({
 								label: t("standalone.selector.base-selector.lru-label"),
 								value: "lru-label",
 								isSmallLabel: true,
-						  } as DataT)
+							} as DataT)
 						: undefined,
-					...((
-						await Promise.all(
-							filteredLruIds.map((id) =>
-								(async (id: string): Promise<DataT> => lru.loadData(id))(
-									id
-								).catch((e) => {
-									// remove IDs from LRU on backend error
-									if (
-										e instanceof Error &&
-										(e.name === "BackendError" ||
-											e.name === "RequestBatchingError")
-									) {
-										setLruIds((ids) => ids.filter((oId) => oId !== id));
-									}
-									return undefined;
-								})
+					...(
+						(
+							await Promise.all(
+								filteredLruIds.map((id) =>
+									(async (id: string): Promise<DataT> => lru.loadData(id))(
+										id,
+									).catch((e) => {
+										// remove IDs from LRU on backend error
+										if (
+											e instanceof Error &&
+											(e.name === "BackendError" ||
+												e.name === "RequestBatchingError")
+										) {
+											setLruIds((ids) => ids.filter((oId) => oId !== id));
+										}
+										return undefined;
+									}),
+								),
 							)
-						)
-					).filter((e) => !!e) as DataT[]).map((entry) => ({
+						).filter((e) => !!e) as DataT[]
+					).map((entry) => ({
 						...entry,
 						className: combineClassNames([
 							customClasses.lruListItem,
@@ -774,8 +774,8 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 					groupSorter ??
 						((a, b) =>
 							-(b.group ?? noGroupLabel ?? "").localeCompare(
-								a.group ?? noGroupLabel ?? ""
-							))
+								a.group ?? noGroupLabel ?? "",
+							)),
 				);
 			}
 			setLoading((prev) => {
@@ -802,7 +802,7 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 			getId,
 			groupSorter,
 			noGroupLabel,
-		]
+		],
 	);
 
 	const updateQuery = useCallback((_, newQuery: string) => {
@@ -892,11 +892,11 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 						noOptionsText={
 							lru && query === ""
 								? startTypingToSearchText ??
-								  t(
-										"standalone.selector.base-selector.start-typing-to-search-text"
-								  )
+									t(
+										"standalone.selector.base-selector.start-typing-to-search-text",
+									)
 								: noOptionsText ??
-								  t("standalone.selector.base-selector.no-options-text")
+									t("standalone.selector.base-selector.no-options-text")
 						}
 						openText={
 							openText ?? t("standalone.selector.base-selector.open-icon-text")
@@ -944,10 +944,11 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 														params.InputProps?.endAdornment as ReactElement,
 														{},
 														endAdornmentLeft,
-														...((params.InputProps
-															?.endAdornment as ReactElement<
-															PropsWithChildren<unknown>
-														>).props.children as ReactNode[]),
+														...((
+															params.InputProps?.endAdornment as ReactElement<
+																PropsWithChildren<unknown>
+															>
+														).props.children as ReactNode[]),
 														openInfo && (
 															<IconButton
 																onClick={openInfo}
@@ -956,8 +957,8 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 																<InfoIcon color={"disabled"} />
 															</IconButton>
 														),
-														endAdornment
-												  )
+														endAdornment,
+													)
 												: params.InputProps?.endAdornment;
 										})(),
 									}}

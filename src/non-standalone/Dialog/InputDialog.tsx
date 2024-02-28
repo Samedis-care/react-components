@@ -13,12 +13,8 @@ import {
 
 const InputDialogRaw = (props: IDialogConfigInput) => {
 	const [, popDialog] = useDialogContext();
-	const {
-		onClose,
-		handlerButtonNo,
-		handlerButtonYes,
-		textFieldValidator,
-	} = props;
+	const { onClose, handlerButtonNo, handlerButtonYes, textFieldValidator } =
+		props;
 	const [valid, setValid] = useState(true);
 	const [value, setValue] = useState("");
 
@@ -27,7 +23,7 @@ const InputDialogRaw = (props: IDialogConfigInput) => {
 			setValue(evt.target.value);
 			setValid(textFieldValidator(evt.target.value));
 		},
-		[textFieldValidator]
+		[textFieldValidator],
 	);
 
 	const removeDialog = React.useCallback(() => {

@@ -30,7 +30,7 @@ export const PermissionContext = React.createContext<
  */
 export const usePermissionContext = (): [
 	string[],
-	Dispatch<SetStateAction<string[]>>
+	Dispatch<SetStateAction<string[]>>,
 ] => {
 	const ctx = useContext(PermissionContext);
 	if (!ctx) throw new Error("PermissionContext is not set");

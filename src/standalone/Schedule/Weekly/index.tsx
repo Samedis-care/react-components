@@ -34,7 +34,7 @@ export interface WeekViewProps {
 	 */
 	loadData: (
 		weekOffset: number,
-		filter: Record<string, string | boolean>
+		filter: Record<string, string | boolean>,
 	) => IDayData[][] | Promise<IDayData[][]>;
 
 	/**
@@ -76,7 +76,7 @@ const useStyles = makeStyles(
 			cursor: "pointer",
 		},
 	},
-	{ name: "CcWeekView" }
+	{ name: "CcWeekView" },
 );
 
 const EMPTY_FILTERS: Record<string, ScheduleFilterDefinition> = {};
@@ -105,10 +105,8 @@ const WeekView = (props: WeekViewProps) => {
 	/**
 	 * If the date picker is open
 	 */
-	const [
-		datePickerAnchorEl,
-		setDatePickerAnchorEl,
-	] = useState<HTMLElement | null>(null);
+	const [datePickerAnchorEl, setDatePickerAnchorEl] =
+		useState<HTMLElement | null>(null);
 	/**
 	 * The current filter value
 	 */
@@ -119,8 +117,8 @@ const WeekView = (props: WeekViewProps) => {
 			Object.entries(filters).map(([name, filter]) => [
 				name,
 				filter.defaultValue,
-			])
-		)
+			]),
+		),
 	);
 
 	const prevWeek = useCallback(() => {
@@ -143,22 +141,20 @@ const WeekView = (props: WeekViewProps) => {
 			}));
 			if (!props.filters) return;
 			const changeHandler = props.filters[evt.target.name].onChange as (
-				newFilter: string | boolean
+				newFilter: string | boolean,
 			) => void;
 			if (changeHandler) changeHandler(value);
 		},
-		[props.filters]
+		[props.filters],
 	);
 
-	const [
-		filterSettingsAnchorEl,
-		setFilterSettingsAnchorEl,
-	] = useState<HTMLElement | null>(null);
+	const [filterSettingsAnchorEl, setFilterSettingsAnchorEl] =
+		useState<HTMLElement | null>(null);
 	const openFilterSettings = useCallback(
 		(evt: React.MouseEvent<HTMLElement>) => {
 			setFilterSettingsAnchorEl(evt.currentTarget);
 		},
-		[]
+		[],
 	);
 	const closeFiltersMenu = useCallback(() => {
 		setFilterSettingsAnchorEl(null);
@@ -316,7 +312,7 @@ const WeekView = (props: WeekViewProps) => {
 																		onChange={handleFilterChange}
 																	/>
 																</Grid>
-															)
+															),
 													)}
 													{filterCount > 2 && (
 														<Grid item key={"divider"} xs={12}>
@@ -340,7 +336,7 @@ const WeekView = (props: WeekViewProps) => {
 																			{action.label}
 																		</Button>
 																	</Grid>
-																)
+																),
 														)}
 												</Grid>
 											</Box>
@@ -365,7 +361,7 @@ const WeekView = (props: WeekViewProps) => {
 														>
 															{action.label}
 														</Button>
-													</Grid>
+													</Grid>,
 												);
 											}
 											if (filterCount > 1) {
@@ -379,7 +375,7 @@ const WeekView = (props: WeekViewProps) => {
 															onChange={handleFilterChange}
 															inline={"weekly"}
 														/>
-													</Grid>
+													</Grid>,
 												);
 											}
 											return ret;

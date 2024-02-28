@@ -112,7 +112,7 @@ const useStyles = makeStyles(
 			},
 		},
 	}),
-	{ name: "CcFile" }
+	{ name: "CcFile" },
 );
 
 export const ExcelFileExtensions = [
@@ -189,7 +189,7 @@ export const VideoMimeType = /^video\//;
 export const PdfFileExtensions = ["pdf"];
 
 export const getFileIcon = (
-	nameOrMime: string
+	nameOrMime: string,
 ): React.ComponentType<SvgIconProps> | null => {
 	if (nameOrMime.includes("/")) {
 		if (AudioMimeType.test(nameOrMime)) return AudioFileIcon;
@@ -214,7 +214,7 @@ export const getFileIcon = (
 };
 
 export const getFileIconOrDefault = (
-	nameOrMime: string
+	nameOrMime: string,
 ): React.ComponentType<SvgIconProps> =>
 	getFileIcon(nameOrMime) ?? DefaultFileIcon;
 
@@ -281,7 +281,7 @@ const File = (props: FileProps) => {
 					isList
 						? {
 								lineHeight: `${props.size}px`,
-						  }
+							}
 						: undefined
 				}
 			>

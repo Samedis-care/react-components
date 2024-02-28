@@ -55,7 +55,7 @@ const useStyles = makeStyles(
 		listText: {},
 		listTextPrimary: {},
 	}),
-	{ name: "CcSignalPortletItem" }
+	{ name: "CcSignalPortletItem" },
 );
 
 export type SignalPortletItemClassKey = keyof ReturnType<typeof useStyles>;
@@ -70,7 +70,7 @@ const useThemeStyles = makeThemeStyles<
 >(
 	(theme) => theme.componentsCare?.signalPortlet?.item,
 	"CcSignalPortletItem",
-	useStyles
+	useStyles,
 );
 
 const SignalPortletItem = (props: SignalPortletItemProps) => {
@@ -88,8 +88,8 @@ const SignalPortletItem = (props: SignalPortletItemProps) => {
 		count == null
 			? classes.itemColorLoading
 			: count
-			? classes.itemColorActive
-			: classes.itemColorInactive;
+				? classes.itemColorActive
+				: classes.itemColorInactive;
 
 	const content = (
 		<>

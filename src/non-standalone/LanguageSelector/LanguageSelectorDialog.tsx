@@ -7,7 +7,7 @@ import Loader from "../../standalone/Loader";
 import useCCTranslations from "../../utils/useCCTranslations";
 
 const LanguageSelectorDialogContent = React.lazy(
-	() => import("./LanguageSelectorDialogContent")
+	() => import("./LanguageSelectorDialogContent"),
 );
 
 const useStyles = makeStyles(
@@ -17,7 +17,7 @@ const useStyles = makeStyles(
 			paddingRight: 0,
 		},
 	},
-	{ name: "CcLanguageSelectorDialog" }
+	{ name: "CcLanguageSelectorDialog" },
 );
 
 export interface LocaleSelectorDialogProps {

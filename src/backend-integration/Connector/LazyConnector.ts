@@ -38,7 +38,7 @@ export enum IndexEnhancementLevel {
 class LazyConnector<
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
-	CustomT
+	CustomT,
 > extends Connector<KeyT, VisibilityT, CustomT> {
 	public realConnector: ApiConnector<KeyT, VisibilityT, CustomT>;
 	public fakeReads: boolean;
@@ -54,7 +54,7 @@ class LazyConnector<
 	constructor(
 		connector: ApiConnector<KeyT, VisibilityT, CustomT>,
 		fakeReads: boolean,
-		onQueueChange?: QueueChangeHandler
+		onQueueChange?: QueueChangeHandler,
 	) {
 		super();
 
@@ -68,7 +68,7 @@ class LazyConnector<
 
 	create(
 		data: Record<string, unknown>,
-		model: Model<KeyT, VisibilityT, CustomT> | undefined
+		model: Model<KeyT, VisibilityT, CustomT> | undefined,
 	): ModelGetResponse<KeyT> {
 		const fakeId = `${this.FAKE_ID_PREFIX}${this.fakeIdCounter++}`;
 		const returnData: ModelGetResponse<KeyT> = [
@@ -93,7 +93,7 @@ class LazyConnector<
 
 	delete(
 		id: string,
-		model: Model<KeyT, VisibilityT, CustomT> | undefined
+		model: Model<KeyT, VisibilityT, CustomT> | undefined,
 	): void {
 		this.queue = this.queue.filter((entry) => !entry.id || entry.id !== id);
 
@@ -116,7 +116,7 @@ class LazyConnector<
 
 	async index(
 		params: Partial<IDataGridLoadDataParameters> | undefined,
-		model: Model<KeyT, VisibilityT, CustomT> | undefined
+		model: Model<KeyT, VisibilityT, CustomT> | undefined,
 	): Promise<[Record<string, unknown>[], ResponseMeta, unknown?]> {
 		let result: [Record<string, unknown>[], ResponseMeta, unknown?] = [
 			[],
@@ -145,7 +145,7 @@ class LazyConnector<
 				result[0] = result[0]
 					.filter(
 						(backendRecord) =>
-							(backendRecord as Record<"id", string>).id !== entry.id
+							(backendRecord as Record<"id", string>).id !== entry.id,
 					)
 					.concat((entry.result as ModelGetResponse<KeyT>)[0]);
 			} else if (entry.type === "delete") {
@@ -156,7 +156,7 @@ class LazyConnector<
 						(backendRecord as Record<"id", string>).id !== entry.id &&
 						!entryId
 							.split(",")
-							.includes((backendRecord as Record<"id", string>).id)
+							.includes((backendRecord as Record<"id", string>).id),
 				);
 			}
 		});
@@ -165,12 +165,12 @@ class LazyConnector<
 
 	read(
 		id: string,
-		model: Model<KeyT, VisibilityT, CustomT> | undefined
+		model: Model<KeyT, VisibilityT, CustomT> | undefined,
 	): Promise<ModelGetResponse<KeyT>> | ModelGetResponse<KeyT> {
 		const localData = last(
 			this.queue.filter(
-				(entry) => entry.id === id || entry.id?.split(",").includes(id)
-			)
+				(entry) => entry.id === id || entry.id?.split(",").includes(id),
+			),
 		);
 		if (localData) {
 			if (localData.result) {
@@ -184,19 +184,19 @@ class LazyConnector<
 
 	update(
 		data: Record<ModelFieldName, unknown>,
-		model: Model<KeyT, VisibilityT, CustomT> | undefined
+		model: Model<KeyT, VisibilityT, CustomT> | undefined,
 	): Promise<ModelGetResponse<KeyT>> | ModelGetResponse<KeyT> {
 		const previousQueueEntry = this.queue.find(
 			(entry) =>
 				(entry.type === "create" || entry.type === "update") &&
-				entry.id === (data.id as string)
+				entry.id === (data.id as string),
 		);
 		const { id, ...otherData } = data;
 
 		const updateFunc = () =>
 			this.realConnector.update(
 				{ ...otherData, id: this.mapId(id as string) },
-				model
+				model,
 			);
 
 		if (previousQueueEntry) {
@@ -206,7 +206,7 @@ class LazyConnector<
 				previousQueueEntry.func = this.realConnector.create.bind(
 					this.realConnector,
 					otherData,
-					model
+					model,
 				);
 			}
 		} else {
@@ -225,16 +225,16 @@ class LazyConnector<
 
 	deleteMultiple(
 		ids: string[],
-		model?: Model<KeyT, VisibilityT, CustomT>
+		model?: Model<KeyT, VisibilityT, CustomT>,
 	): void {
 		this.queue = this.queue.filter(
-			(entry) => !entry.id || !ids.includes(entry.id)
+			(entry) => !entry.id || !ids.includes(entry.id),
 		);
 		ids = ids.map((id) => this.mapId(id));
 		ids = ids.filter(
 			(id) =>
 				!id.startsWith(this.FAKE_ID_PREFIX) ||
-				this.queue.find((entry) => entry.id === id)
+				this.queue.find((entry) => entry.id === id),
 		);
 		if (ids.length === 0) {
 			this.onAfterOperation();
@@ -246,7 +246,7 @@ class LazyConnector<
 			func: this.realConnector.deleteMultiple.bind(
 				this.realConnector,
 				ids,
-				model
+				model,
 			),
 			result: null,
 		});
@@ -255,7 +255,7 @@ class LazyConnector<
 
 	handleAdvancedDelete = (
 		req: AdvancedDeleteRequest,
-		model?: Model<KeyT, VisibilityT, CustomT>
+		model?: Model<KeyT, VisibilityT, CustomT>,
 	): void => {
 		if (!this.realConnector.deleteAdvanced)
 			throw new Error("deleteAdvanced got undefined!");
@@ -270,12 +270,12 @@ class LazyConnector<
 			req[1] = req[1].filter(
 				(id) =>
 					!id.startsWith(this.FAKE_ID_PREFIX) ||
-					this.queue.find((entry) => entry.id === id)
+					this.queue.find((entry) => entry.id === id),
 			);
 			req[1] = req[1].filter(
 				(id) =>
 					!id.startsWith(this.FAKE_ID_PREFIX) ||
-					this.queue.find((entry) => entry.id === id)
+					this.queue.find((entry) => entry.id === id),
 			);
 			if (!invert && req[1].length === 0) {
 				this.onAfterOperation();
@@ -288,7 +288,7 @@ class LazyConnector<
 			func: this.realConnector.deleteAdvanced.bind(
 				this.realConnector,
 				req,
-				model
+				model,
 			),
 			result: null,
 		});
@@ -304,10 +304,9 @@ class LazyConnector<
 			try {
 				const res: unknown = await entry.func();
 				if (entry.type === "create") {
-					const realId = (res as [
-						Record<"id", string>,
-						Record<never, unknown>
-					])[0].id;
+					const realId = (
+						res as [Record<"id", string>, Record<never, unknown>]
+					)[0].id;
 					this.fakeIdMapping[entry.id as string] = realId;
 					this.fakeIdMappingRev[realId] = entry.id as string;
 				}

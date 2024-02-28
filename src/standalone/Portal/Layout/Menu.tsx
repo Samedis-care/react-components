@@ -36,7 +36,7 @@ const useStyles = makeStyles(
 			height: "100%",
 		}),
 	},
-	{ name: "CcPortalLayoutMenu" }
+	{ name: "CcPortalLayoutMenu" },
 );
 
 const PortalLayoutMenu = (props: IProps) => {
@@ -48,7 +48,7 @@ const PortalLayoutMenu = (props: IProps) => {
 		() => ({
 			className: classes.menuPaper,
 		}),
-		[classes.menuPaper]
+		[classes.menuPaper],
 	);
 
 	if (!props.mobile) {

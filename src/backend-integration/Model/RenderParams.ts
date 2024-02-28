@@ -58,7 +58,7 @@ interface RenderParams<T> {
 	setFieldTouched: (
 		field: ModelFieldName,
 		touched?: boolean,
-		validate?: boolean
+		validate?: boolean,
 	) => void;
 	/**
 	 * If the given field has a relation and relation data was fetched while loading the form it can be accessed using this field

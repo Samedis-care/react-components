@@ -18,20 +18,19 @@ export interface IntegerInputFieldProps extends TextFieldWithHelpProps {
 	 */
 	onChange?: (
 		evt: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>,
-		value: number | null
+		value: number | null,
 	) => void;
 }
 
 const IntegerInputField = (
-	props: IntegerInputFieldProps & Omit<TextFieldProps, "onChange" | "value">
+	props: IntegerInputFieldProps & Omit<TextFieldProps, "onChange" | "value">,
 ) => {
 	const { i18n } = useCCTranslations();
 	const { value, onChange, ...muiProps } = props;
 	const valueFormatted =
 		value != null ? value.toLocaleString(i18n.language) : "";
-	const { handleCursorChange, cursorInputRef } = useInputCursorFix(
-		valueFormatted
-	);
+	const { handleCursorChange, cursorInputRef } =
+		useInputCursorFix(valueFormatted);
 
 	// on change handling
 	const handleChange = useCallback(
@@ -47,7 +46,7 @@ const IntegerInputField = (
 				onChange(event, null);
 			}
 		},
-		[onChange, handleCursorChange]
+		[onChange, handleCursorChange],
 	);
 
 	// component rendering

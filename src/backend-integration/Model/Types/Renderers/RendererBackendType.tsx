@@ -14,7 +14,7 @@ class RendererBackendType<T> implements Type<T> {
 		return null;
 	}
 	getDefaultValue(): T {
-		return (null as unknown) as T;
+		return null as unknown as T;
 	}
 	stringify(value: T): string {
 		return JSON.stringify(value);

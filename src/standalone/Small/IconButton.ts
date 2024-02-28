@@ -16,5 +16,5 @@ const smallestIconButtonStyles = createStyles({
 	},
 });
 export const SmallestIconButton = withStyles(smallestIconButtonStyles)(
-	IconButton
+	IconButton,
 );

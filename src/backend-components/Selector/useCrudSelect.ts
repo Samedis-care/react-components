@@ -21,7 +21,7 @@ export interface UseCrudSelectParams<
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
 	CustomT,
-	DataT extends BaseSelectorData
+	DataT extends BaseSelectorData,
 > {
 	/**
 	 * The backend connector used as CRUD interface
@@ -33,7 +33,7 @@ export interface UseCrudSelectParams<
 	 * @returns Data to be passed to the backend connector, id may be null or data.value
 	 */
 	serialize: (
-		data: DataT
+		data: DataT,
 	) =>
 		| Promise<Partial<Record<string, unknown>>>
 		| Partial<Record<string, unknown>>;
@@ -49,7 +49,7 @@ export interface UseCrudSelectParams<
 	 * @returns The selector data which can be used by the control
 	 */
 	deserializeModel: (
-		data: Record<string, unknown>
+		data: Record<string, unknown>,
 	) => Promise<Omit<DataT, "value">> | Omit<DataT, "value">;
 	/**
 	 * Selection change event
@@ -84,7 +84,7 @@ export interface UseCrudSelectParams<
 export interface UseCrudSelectResult<
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	KeyT extends ModelFieldName,
-	DataT extends BaseSelectorData
+	DataT extends BaseSelectorData,
 > {
 	/**
 	 * Fetching initial data?
@@ -138,10 +138,10 @@ const useCrudSelect = <
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
 	CustomT,
-	DataT extends BaseSelectorData
+	DataT extends BaseSelectorData,
 >(
 	params: UseCrudSelectParams<KeyT, VisibilityT, CustomT, DataT>,
-	ref: ForwardedRef<CrudSelectDispatch<DataT>>
+	ref: ForwardedRef<CrudSelectDispatch<DataT>>,
 ): UseCrudSelectResult<KeyT, DataT> => {
 	const {
 		connector,
@@ -182,7 +182,7 @@ const useCrudSelect = <
 				setAddToSelectionQueue((prev) => [...prev, ticket]);
 				return result;
 			},
-		})
+		}),
 	);
 
 	// async processing of add to selection
@@ -207,7 +207,7 @@ const useCrudSelect = <
 		(async () => {
 			if (loadError) throw new Error("CrudSelect loading failed");
 			const existing = currentSelected.current.find(
-				(selEntry) => getIdOfData(selEntry) === getIdOfData(entry)
+				(selEntry) => getIdOfData(selEntry) === getIdOfData(entry),
 			);
 			if (existing) return;
 
@@ -227,7 +227,7 @@ const useCrudSelect = <
 				fetchingAddSelection.current = false;
 				// state update re-triggers useEffect
 				setAddToSelectionQueue((prev) =>
-					prev.filter((queueTicket) => queueTicket !== ticket)
+					prev.filter((queueTicket) => queueTicket !== ticket),
 				);
 			});
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -237,16 +237,16 @@ const useCrudSelect = <
 		async (_, newSelected: DataT[]) => {
 			// find new entries
 			const newEntries = newSelected.filter(
-				(entry) => !selected.find((selEntry) => selEntry.value === entry.value)
+				(entry) => !selected.find((selEntry) => selEntry.value === entry.value),
 			);
 			// remove new entries from array
 			newSelected = newSelected.filter((entry) =>
-				selected.find((selEntry) => selEntry.value === entry.value)
+				selected.find((selEntry) => selEntry.value === entry.value),
 			);
 
 			const changedEntries = newSelected.filter((entry) => {
 				const oldEntry = selected.find(
-					(selEntry) => selEntry.value === entry.value
+					(selEntry) => selEntry.value === entry.value,
 				);
 				if (!oldEntry) return false;
 				// remove all base selector data and multi selector data render options
@@ -272,7 +272,7 @@ const useCrudSelect = <
 			});
 			const deletedEntries = selected.filter(
 				(entry) =>
-					!newSelected.find((selEntry) => selEntry.value === entry.value)
+					!newSelected.find((selEntry) => selEntry.value === entry.value),
 			);
 
 			// call backend
@@ -280,24 +280,24 @@ const useCrudSelect = <
 				newEntries
 					.map((entry) => serialize(entry))
 					.map(async (serializedEntry) =>
-						connector.create(await serializedEntry)
-					)
+						connector.create(await serializedEntry),
+					),
 			);
 			const updatePromise = Promise.all(
 				changedEntries
 					.map((entry) => serialize(entry))
 					.map(async (serializedEntry) =>
-						connector.update(await serializedEntry)
-					)
+						connector.update(await serializedEntry),
+					),
 			);
 			const deletePromise = Promise.all(
 				deletedEntries
 					.map((entry) => serialize(entry))
 					.map(async (serializedEntry) =>
 						connector.delete(
-							((await serializedEntry) as Record<"id", string>).id
-						)
-					)
+							((await serializedEntry) as Record<"id", string>).id,
+						),
+					),
 			);
 
 			try {
@@ -320,18 +320,18 @@ const useCrudSelect = <
 				setError(e as Error);
 			}
 		},
-		[connector, deserialize, selected, serialize]
+		[connector, deserialize, selected, serialize],
 	);
 
 	const modelToSelectorData = useCallback(
 		async (data: Record<string, unknown>): Promise<DataT> =>
 			initialRawData.includes(data)
 				? deserialize(data)
-				: (({
+				: ({
 						...(await deserializeModel(data)),
 						value: "to-create-" + Math.random().toString(),
-				  } as unknown) as DataT),
-		[deserialize, deserializeModel, initialRawData]
+					} as unknown as DataT),
+		[deserialize, deserializeModel, initialRawData],
 	);
 
 	// initial load
@@ -352,7 +352,7 @@ const useCrudSelect = <
 				});
 
 				const initialSelected = await Promise.all(
-					currentlySelected[0].map((record) => deserialize(record))
+					currentlySelected[0].map((record) => deserialize(record)),
 				);
 
 				setInitialRawData(currentlySelected[0]);
@@ -380,16 +380,16 @@ const useCrudSelect = <
 				const reasons = [];
 				if (!formCtx)
 					reasons.push(
-						"Form context not present, validate only works inside of Components-Care Form Engine"
+						"Form context not present, validate only works inside of Components-Care Form Engine",
 					);
 				if (!field)
 					reasons.push(
-						"Field prop not passed. This is required to register the validation handler with the Form Engine. This value has to be unique to the form"
+						"Field prop not passed. This is required to register the validation handler with the Form Engine. This value has to be unique to the form",
 					);
 				// eslint-disable-next-line no-console
 				console.error(
 					"[Components-Care] [useCrudSelect] Crud Select has been given validate function, but can't be activated due to the following reasons",
-					reasons
+					reasons,
 				);
 			}
 			return;

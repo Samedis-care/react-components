@@ -10,7 +10,7 @@ interface IDataGridColumnsStateArrayEntry extends IDataGridColumnState {
 }
 
 export const dataGridPrepareFiltersAndSorts = (
-	columnsState: IDataGridColumnsState
+	columnsState: IDataGridColumnsState,
 ): [DataGridSortSetting[], IDataGridFieldFilter] => {
 	const baseSorts: IDataGridColumnsStateArrayEntry[] = [];
 	const fieldFilter: IDataGridFieldFilter = {};

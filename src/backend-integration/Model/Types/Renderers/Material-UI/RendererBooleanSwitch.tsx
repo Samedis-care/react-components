@@ -27,7 +27,7 @@ class RendererBooleanSwitch extends TypeBoolean {
 
 	constructor(
 		invert?: boolean,
-		props?: ModelDataTypeBooleanSwitchRendererMUIProps
+		props?: ModelDataTypeBooleanSwitchRendererMUIProps,
 	) {
 		super();
 
@@ -78,11 +78,11 @@ class RendererBooleanSwitch extends TypeBoolean {
 								disabled={visibility.readOnly}
 								onChange={(
 									evt: React.ChangeEvent<HTMLInputElement>,
-									checked: boolean
+									checked: boolean,
 								) => {
 									handleChange(
 										evt.target.name,
-										this.invert ? !checked : checked
+										this.invert ? !checked : checked,
 									);
 								}}
 								onBlur={handleBlur}

@@ -22,12 +22,12 @@ export interface CurrencyInputProps extends TextFieldWithHelpProps {
 	 */
 	onChange?: (
 		evt: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>,
-		value: number | null
+		value: number | null,
 	) => void;
 }
 
 const CurrencyInput = (
-	props: CurrencyInputProps & Omit<TextFieldProps, "onChange" | "value">
+	props: CurrencyInputProps & Omit<TextFieldProps, "onChange" | "value">,
 ) => {
 	const { value, onChange, onBlur, currency, ...muiProps } = props;
 	const { i18n } = useCCTranslations();
@@ -37,9 +37,9 @@ const CurrencyInput = (
 				? value.toLocaleString(i18n.language, {
 						style: "currency",
 						currency,
-				  })
+					})
 				: "",
-		[currency, i18n.language]
+		[currency, i18n.language],
 	);
 	const valueFormatted = formatNumber(value);
 	const [valueInternal, setValueInternal] = useState(valueFormatted);
@@ -57,7 +57,7 @@ const CurrencyInput = (
 			event.persist();
 			setLastChangeEvent(event);
 		},
-		[onChange]
+		[onChange],
 	);
 
 	const handleBlur = useCallback(
@@ -75,7 +75,7 @@ const CurrencyInput = (
 				}
 			}
 		},
-		[formatNumber, lastChangeEvent, onBlur, onChange, valueInternal]
+		[formatNumber, lastChangeEvent, onBlur, onChange, valueInternal],
 	);
 
 	// component rendering

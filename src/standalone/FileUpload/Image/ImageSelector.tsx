@@ -159,7 +159,7 @@ const useStyles = makeStyles(
 			aspectRatio: "1/1",
 		},
 	}),
-	{ name: "CcImageSelector" }
+	{ name: "CcImageSelector" },
 );
 
 const ImageSelector = (props: ImageSelectorProps) => {
@@ -197,7 +197,7 @@ const ImageSelector = (props: ImageSelectorProps) => {
 				// eslint-disable-next-line no-console
 				console.error(
 					"[Components-Care] [ImageSelector] Post edit callback with error (or cancellation)",
-					e
+					e,
 				);
 				return;
 			}
@@ -206,11 +206,11 @@ const ImageSelector = (props: ImageSelectorProps) => {
 				await processImageB64(
 					finalImage,
 					convertImagesTo || file.type,
-					downscale
-				)
+					downscale,
+				),
 			);
 		},
-		[onChange, name, postEditCallback, convertImagesTo, downscale]
+		[onChange, name, postEditCallback, convertImagesTo, downscale],
 	);
 
 	const handleFileChange = useCallback(
@@ -220,7 +220,7 @@ const ImageSelector = (props: ImageSelectorProps) => {
 			if (!file) return;
 			await processFile(file);
 		},
-		[processFile]
+		[processFile],
 	);
 
 	// upload click handler
@@ -243,7 +243,7 @@ const ImageSelector = (props: ImageSelectorProps) => {
 			if (!file) return;
 			await processFile(file);
 		},
-		[readOnly, processFile]
+		[readOnly, processFile],
 	);
 
 	const handleDragOver = useCallback(
@@ -252,7 +252,7 @@ const ImageSelector = (props: ImageSelectorProps) => {
 
 			evt.preventDefault();
 		},
-		[readOnly]
+		[readOnly],
 	);
 
 	// render component

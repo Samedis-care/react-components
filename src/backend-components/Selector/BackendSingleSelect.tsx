@@ -14,14 +14,13 @@ import { debouncePromise } from "../../utils";
 import useCCTranslations from "../../utils/useCCTranslations";
 import { DataGridSortSetting } from "../../standalone/DataGrid/DataGrid";
 
-export type BackendSingleSelectLruOptions<
-	DataT extends BaseSelectorData
-> = Omit<SelectorLruOptions<DataT>, "loadData">;
+export type BackendSingleSelectLruOptions<DataT extends BaseSelectorData> =
+	Omit<SelectorLruOptions<DataT>, "loadData">;
 
 export interface BackendSingleSelectProps<
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
-	CustomT
+	CustomT,
 > extends Omit<
 		BaseSelectorProps<BaseSelectorData>,
 		"onLoad" | "selected" | "onSelect" | "lru"
@@ -44,7 +43,7 @@ export interface BackendSingleSelectProps<
 	 * @param modelData The model data
 	 */
 	modelToSelectorData: (
-		modelData: Record<string, unknown>
+		modelData: Record<string, unknown>,
 	) => Promise<BaseSelectorData> | BaseSelectorData;
 	/**
 	 * The amount of search results to load (defaults to 25)
@@ -92,9 +91,9 @@ export interface BackendSingleSelectProps<
 const BackendSingleSelect = <
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
-	CustomT
+	CustomT,
 >(
-	props: BackendSingleSelectProps<KeyT, VisibilityT, CustomT>
+	props: BackendSingleSelectProps<KeyT, VisibilityT, CustomT>,
 ) => {
 	const {
 		model,
@@ -115,7 +114,7 @@ const BackendSingleSelect = <
 	const modelFetch = modelFetchProp ?? model;
 
 	const [selectedCache, setSelectedCache] = useState<BaseSelectorData | null>(
-		null
+		null,
 	);
 
 	const { t } = useCCTranslations();
@@ -130,12 +129,12 @@ const BackendSingleSelect = <
 			});
 			return [
 				...(additionalOptions ?? []).filter((x) =>
-					getStringLabel(x).toLowerCase().includes(search.toLowerCase())
+					getStringLabel(x).toLowerCase().includes(search.toLowerCase()),
 				),
 				...(await Promise.all(data[0].map(modelToSelectorData))),
 			];
 		},
-		[model, searchResultLimit, sort, additionalOptions, modelToSelectorData]
+		[model, searchResultLimit, sort, additionalOptions, modelToSelectorData],
 	);
 
 	const handleLoadLruRecord = useCallback(
@@ -146,7 +145,7 @@ const BackendSingleSelect = <
 			});
 			return modelToSelectorData(data);
 		},
-		[modelFetch, modelToSelectorData, disableRequestBatching]
+		[modelFetch, modelToSelectorData, disableRequestBatching],
 	);
 
 	const lruConfig: SelectorLruOptions<BaseSelectorData> | undefined = useMemo(
@@ -155,9 +154,9 @@ const BackendSingleSelect = <
 				? {
 						...lru,
 						loadData: handleLoadLruRecord,
-				  }
+					}
 				: undefined,
-		[lru, handleLoadLruRecord]
+		[lru, handleLoadLruRecord],
 	);
 
 	const handleSelect = useCallback(
@@ -167,7 +166,7 @@ const BackendSingleSelect = <
 				onSelect(selected ? selected.value : null);
 			}
 		},
-		[onSelect]
+		[onSelect],
 	);
 
 	// fetch missing data entries
@@ -177,7 +176,7 @@ const BackendSingleSelect = <
 
 		// no need to fetch additional options
 		const additionalOption = additionalOptions?.find(
-			(opt) => opt.value === selected
+			(opt) => opt.value === selected,
 		);
 		if (additionalOption) {
 			setSelectedCache(additionalOption);
@@ -189,7 +188,7 @@ const BackendSingleSelect = <
 			if (initialData) {
 				// process initial data
 				const selectedRecord = initialData.find(
-					(record) => record["id" as keyof typeof record] === selected
+					(record) => record["id" as keyof typeof record] === selected,
 				);
 				if (selectedRecord) {
 					newCache = await modelToSelectorData(selectedRecord);
@@ -230,7 +229,7 @@ const BackendSingleSelect = <
 
 	const debouncedLoad = useMemo(
 		() => debouncePromise(handleLoad, searchDebounceTime ?? 500),
-		[handleLoad, searchDebounceTime]
+		[handleLoad, searchDebounceTime],
 	);
 
 	return (
@@ -243,7 +242,7 @@ const BackendSingleSelect = <
 					? selectedCache ?? {
 							value: selected,
 							label: t("backend-components.selector.loading"),
-					  }
+						}
 					: null
 			}
 			lru={lruConfig}

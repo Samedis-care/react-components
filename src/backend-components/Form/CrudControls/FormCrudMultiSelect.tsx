@@ -18,7 +18,7 @@ export interface FormCrudMultiSelectProps<
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
 	CustomT,
-	DataT extends MultiSelectorData
+	DataT extends MultiSelectorData,
 > extends Omit<
 			CrudMultiSelectProps<KeyT, VisibilityT, CustomT, DataT>,
 			"errorComponent" | "connector" | "field"
@@ -34,11 +34,11 @@ const FormCrudMultiSelect = <
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
 	CustomT,
-	DataT extends MultiSelectorData
+	DataT extends MultiSelectorData,
 >(
 	props: FormCrudMultiSelectProps<KeyT, VisibilityT, CustomT, DataT> &
 		RefAttributes<CrudSelectDispatch<DataT>>,
-	ref: ForwardedRef<CrudSelectDispatch<DataT>>
+	ref: ForwardedRef<CrudSelectDispatch<DataT>>,
 ) => {
 	const [connectorParams, otherProps] = extractLazyCrudConnectorParams<
 		KeyT,
@@ -68,5 +68,5 @@ const FormCrudMultiSelect = <
 };
 
 export default React.memo(
-	React.forwardRef(FormCrudMultiSelect)
+	React.forwardRef(FormCrudMultiSelect),
 ) as typeof FormCrudMultiSelect;

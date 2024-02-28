@@ -30,7 +30,7 @@ export const SelectorSmallListItemButton = withStyles(
 	selectorSmallListItemStyles,
 	{
 		name: "SelectorSmallListItemButton",
-	}
+	},
 )(ListItemButton) as typeof ListItemButton;
 
 const smallListItemIconStyles = createStyles({
@@ -40,5 +40,5 @@ const smallListItemIconStyles = createStyles({
 	},
 });
 export const SmallListItemIcon = withStyles(smallListItemIconStyles)(
-	ListItemIcon
+	ListItemIcon,
 ) as typeof ListItemIcon;

@@ -62,7 +62,7 @@ const useStyles = makeStyles(
 			cursor: "pointer",
 		},
 	},
-	{ name: "CcImageDialogEntry" }
+	{ name: "CcImageDialogEntry" },
 );
 
 export type ImageDialogEntryClassKey = keyof ReturnType<typeof useStyles>;
@@ -77,7 +77,7 @@ const useThemeStyles = makeThemeStyles<
 >(
 	(theme) => theme.componentsCare?.fileUpload?.multiImage?.imageDialogEntry,
 	"CcImageDialogEntry",
-	useStyles
+	useStyles,
 );
 
 const ImageDialogEntry = (props: ImageDialogEntryProps) => {
@@ -119,11 +119,11 @@ const ImageDialogEntry = (props: ImageDialogEntryProps) => {
 
 			changeImages((images) =>
 				images.map((image) =>
-					image === img ? { ...image, image: imageData } : image
-				)
+					image === img ? { ...image, image: imageData } : image,
+				),
 			);
 		},
-		[changeImages, img, processFile]
+		[changeImages, img, processFile],
 	);
 
 	return (

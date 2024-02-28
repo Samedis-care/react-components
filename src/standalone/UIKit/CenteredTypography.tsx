@@ -33,7 +33,7 @@ const useStyles = makeStyles(
 			width: "100%",
 		},
 	},
-	{ name: "CcCenteredTypography" }
+	{ name: "CcCenteredTypography" },
 );
 
 const CenteredTypography = (props: CenteredTypographyProps) => {

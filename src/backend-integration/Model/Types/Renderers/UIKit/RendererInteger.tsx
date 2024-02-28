@@ -74,7 +74,7 @@ class RendererInteger extends TypeNumber {
 						required={visibility.required}
 						onChange={(
 							evt: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-							value: number | null
+							value: number | null,
 						) => {
 							handleChange(evt.target.name, value);
 						}}

@@ -63,7 +63,7 @@ export const useMuiWarningStyles = makeStyles(
 			},
 		},
 	}),
-	{ name: "CcMuiWarning" }
+	{ name: "CcMuiWarning" },
 );
 
 export interface MuiWarningSourceProps {
@@ -75,7 +75,7 @@ export interface MuiWarningResultProps {
 }
 
 export const withMuiWarning = <T extends MuiWarningSourceProps>(
-	Component: React.ComponentType<T>
+	Component: React.ComponentType<T>,
 ): React.ComponentType<T & MuiWarningResultProps> => {
 	// not unnecessary, component name is inferred from it
 	// noinspection UnnecessaryLocalVariableJS
@@ -84,7 +84,7 @@ export const withMuiWarning = <T extends MuiWarningSourceProps>(
 		const classes = useMuiWarningStyles();
 		return (
 			<Component
-				{...((muiProps as unknown) as T)}
+				{...(muiProps as unknown as T)}
 				className={combineClassNames([
 					warning && classes.warning,
 					props.className,
@@ -96,11 +96,11 @@ export const withMuiWarning = <T extends MuiWarningSourceProps>(
 };
 
 export const FormControlCC = withMuiWarning<FormControlProps>(FormControl);
-export const FormControlFieldsetCC = withMuiWarning<
-	FormControlProps<"fieldset", { component: "fieldset" }>
->(FormControl);
+export const FormControlFieldsetCC =
+	withMuiWarning<FormControlProps<"fieldset", { component: "fieldset" }>>(
+		FormControl,
+	);
 export const FormLabelCC = withMuiWarning<FormLabelProps>(FormLabel);
-export const FormHelperTextCC = withMuiWarning<FormHelperTextProps>(
-	FormHelperText
-);
+export const FormHelperTextCC =
+	withMuiWarning<FormHelperTextProps>(FormHelperText);
 export const TextFieldCC = withMuiWarning<TextFieldProps>(TextField);

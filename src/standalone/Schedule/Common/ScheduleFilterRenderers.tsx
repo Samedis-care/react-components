@@ -10,7 +10,7 @@ const ScheduleFilterRenderer = (
 	props: Omit<
 		ScheduleFilterRendererSelectProps | ScheduleFilterRendererSwitchProps,
 		"value"
-	> & { value: string | boolean }
+	> & { value: string | boolean },
 ) => {
 	const type = props.type;
 	if (type === "select")
@@ -40,7 +40,7 @@ const useStyles = makeStyles(
 			color: theme.palette.getContrastText(theme.palette.primary.main),
 		},
 	}),
-	{ name: "CcScheduleFilterRenderers" }
+	{ name: "CcScheduleFilterRenderers" },
 );
 
 interface ScheduleFilterRendererSelectProps
@@ -64,7 +64,7 @@ interface ScheduleFilterRendererSelectProps
 }
 
 const ScheduleFilterRendererSelect = (
-	props: ScheduleFilterRendererSelectProps
+	props: ScheduleFilterRendererSelectProps,
 ) => {
 	const classes = useStyles();
 	return (
@@ -107,7 +107,7 @@ interface ScheduleFilterRendererSwitchProps
 }
 
 const ScheduleFilterRendererSwitch = (
-	props: ScheduleFilterRendererSwitchProps
+	props: ScheduleFilterRendererSwitchProps,
 ) => {
 	const [id] = useState(Math.random().toString().substring(2));
 

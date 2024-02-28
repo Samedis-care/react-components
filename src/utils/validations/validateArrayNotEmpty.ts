@@ -12,14 +12,14 @@ const validateArrayNotEmpty = <
 	TypeT extends unknown[],
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
-	CustomT
+	CustomT,
 >(
 	value: TypeT,
 	values: Record<string, unknown>,
 	fieldDef: Pick<
 		ModelFieldDefinition<TypeT, KeyT, VisibilityT, CustomT>,
 		"getLabel"
-	>
+	>,
 ): string | null => {
 	if (!value || value.length === 0) {
 		return ccI18n.t("utils.validation.required", {

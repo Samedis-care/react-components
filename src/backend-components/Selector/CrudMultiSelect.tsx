@@ -15,7 +15,7 @@ export interface CrudMultiSelectProps<
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
 	CustomT,
-	DataT extends MultiSelectorData
+	DataT extends MultiSelectorData,
 > extends Omit<
 			BackendMultiSelectProps<KeyT, VisibilityT, CustomT, DataT>,
 			| "modelToSelectorData"
@@ -47,11 +47,11 @@ const CrudMultiSelect = <
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
 	CustomT,
-	DataT extends MultiSelectorData
+	DataT extends MultiSelectorData,
 >(
 	props: CrudMultiSelectProps<KeyT, VisibilityT, CustomT, DataT> &
 		RefAttributes<CrudSelectDispatch<DataT>>,
-	ref: ForwardedRef<CrudSelectDispatch<DataT>>
+	ref: ForwardedRef<CrudSelectDispatch<DataT>>,
 ) => {
 	const { errorComponent: ErrorComponent } = props;
 
@@ -72,7 +72,7 @@ const CrudMultiSelect = <
 	return (
 		<CrudSelectContext.Provider
 			value={
-				(crudSelect as unknown) as UseCrudSelectResult<
+				crudSelect as unknown as UseCrudSelectResult<
 					ModelFieldName,
 					MultiSelectorData
 				>
@@ -95,5 +95,5 @@ const CrudMultiSelect = <
 };
 
 export default React.memo(
-	React.forwardRef(CrudMultiSelect)
+	React.forwardRef(CrudMultiSelect),
 ) as typeof CrudMultiSelect;

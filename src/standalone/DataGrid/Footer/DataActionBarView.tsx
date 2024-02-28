@@ -59,9 +59,8 @@ const DataActionBarView = (props: DataActionBarViewProps) => {
 	const theme = useTheme();
 	const isXs = useMediaQuery(theme.breakpoints.only("xs"));
 
-	const [extendedMenuAnchor, setExtendedMenuAnchor] = useState<
-		MenuProps["anchorEl"]
-	>(undefined);
+	const [extendedMenuAnchor, setExtendedMenuAnchor] =
+		useState<MenuProps["anchorEl"]>(undefined);
 	const handleExtendedMenuOpen = useCallback((evt: React.MouseEvent) => {
 		setExtendedMenuAnchor(evt.currentTarget);
 	}, []);
@@ -152,7 +151,7 @@ const DataActionBarView = (props: DataActionBarViewProps) => {
 									color={"primary"}
 									disabled={
 										!props.customButtons.find(
-											(entry) => !entry.isDisabled(props.numSelected)
+											(entry) => !entry.isDisabled(props.numSelected),
 										)
 									}
 									onClick={handleExtendedMenuOpen}
@@ -164,7 +163,7 @@ const DataActionBarView = (props: DataActionBarViewProps) => {
 							labelPlacement={"bottom"}
 							disabled={
 								!props.customButtons.find(
-									(entry) => !entry.isDisabled(props.numSelected)
+									(entry) => !entry.isDisabled(props.numSelected),
 								)
 							}
 						/>

@@ -30,7 +30,7 @@ const useStylesBase = makeStyles(
 			fontSize: "0.75em",
 		},
 	}),
-	{ name: "CcGroupBox" }
+	{ name: "CcGroupBox" },
 );
 
 export type GroupBoxClassKey = keyof ReturnType<typeof useStylesBase>;
@@ -41,7 +41,7 @@ export type GroupBoxTheme = Partial<
 
 const useThemeStyles = makeThemeStyles<GroupBoxProps, GroupBoxClassKey>(
 	(theme) => theme.componentsCare?.groupBox,
-	"CcGroupBox"
+	"CcGroupBox",
 );
 
 const useStyles = (props: GroupBoxProps): ReturnType<typeof useStylesBase> => {

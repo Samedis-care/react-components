@@ -98,7 +98,7 @@ const FormDialog = (props: FormDialogProps) => {
 			blockClosing,
 			unblockClosing,
 		}),
-		[blockClosing, unblockClosing]
+		[blockClosing, unblockClosing],
 	);
 
 	return (

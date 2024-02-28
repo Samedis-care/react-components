@@ -24,7 +24,7 @@ export interface IDownscaleProps {
 const processImage = async (
 	file: File,
 	convertImagesTo?: string,
-	downscale?: IDownscaleProps
+	downscale?: IDownscaleProps,
 ): Promise<string> => {
 	const imageFormatTarget = convertImagesTo || file.type;
 

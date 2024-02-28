@@ -25,7 +25,7 @@ const useClasses = makeStyles(
 			maxWidth: "75%",
 		},
 	}),
-	{ name: "CcDialogTitle" }
+	{ name: "CcDialogTitle" },
 );
 
 export interface DialogTitleProps {

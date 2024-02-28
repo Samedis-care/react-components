@@ -31,7 +31,7 @@ import useCCTranslations from "../../../utils/useCCTranslations";
 type ConversionScriptRunnerFunc = (
 	data: Record<string, unknown>[],
 	field: ModelFieldDefinition<unknown, string, PageVisibility, unknown>,
-	script: string
+	script: string,
 ) => Promise<void>;
 
 const useStyles = makeStyles(
@@ -51,7 +51,7 @@ const useStyles = makeStyles(
 			},
 		},
 	},
-	{ name: "CcCrudImportStep2" }
+	{ name: "CcCrudImportStep2" },
 );
 
 export const useImportStep2Logic = (props: CrudImporterStepProps) => {
@@ -60,7 +60,7 @@ export const useImportStep2Logic = (props: CrudImporterStepProps) => {
 
 	const columns = useMemo(
 		() => uniqueArray(state.data.map(Object.keys).flat()),
-		[state.data]
+		[state.data],
 	);
 
 	const conversionScriptUpdates = useRef<
@@ -69,77 +69,85 @@ export const useImportStep2Logic = (props: CrudImporterStepProps) => {
 		Object.fromEntries(
 			Object.keys(model.fields).map((key) => [
 				key,
-				debouncePromise(async (
-					data: Record<string, unknown>[],
-					field: ModelFieldDefinition<unknown, string, PageVisibility, unknown>,
-					script: string
-					// eslint-disable-next-line @typescript-eslint/require-await
-				): Promise<void> => {
-					for (const record of data) {
-						// eslint-disable-next-line no-eval
-						const result: unknown = eval(script) ?? null; // ensure this is never undefined
-						let validation: string | null = null;
-						switch (field.type.getFilterType()) {
-							case "enum":
-							case "string":
-								if (result != null && typeof result !== "string") {
-									validation = t(
-										"backend-components.crud.import.validations.string"
-									);
-								}
-								break;
-							case "number":
-								if (result != null && typeof result !== "number") {
-									validation = t(
-										"backend-components.crud.import.validations.number"
-									);
-								}
-								break;
-							case "currency":
-								if (result !== null)
-									validation = t(
-										"backend-components.crud.import.validations.currency_unsupported"
-									);
-								break;
-							case "date":
-								if (result !== null && !(result instanceof Date)) {
-									validation = t(
-										"backend-components.crud.import.validations.date"
-									);
-								}
-								break;
-							case "boolean":
-								if (result !== true && result !== false && result !== null) {
-									validation = t(
-										"backend-components.crud.import.validations.boolean"
-									);
-								}
-								break;
+				debouncePromise(
+					async (
+						data: Record<string, unknown>[],
+						field: ModelFieldDefinition<
+							unknown,
+							string,
+							PageVisibility,
+							unknown
+						>,
+						script: string,
+						// eslint-disable-next-line @typescript-eslint/require-await
+					): Promise<void> => {
+						for (const record of data) {
+							// eslint-disable-next-line no-eval
+							const result: unknown = eval(script) ?? null; // ensure this is never undefined
+							let validation: string | null = null;
+							switch (field.type.getFilterType()) {
+								case "enum":
+								case "string":
+									if (result != null && typeof result !== "string") {
+										validation = t(
+											"backend-components.crud.import.validations.string",
+										);
+									}
+									break;
+								case "number":
+									if (result != null && typeof result !== "number") {
+										validation = t(
+											"backend-components.crud.import.validations.number",
+										);
+									}
+									break;
+								case "currency":
+									if (result !== null)
+										validation = t(
+											"backend-components.crud.import.validations.currency_unsupported",
+										);
+									break;
+								case "date":
+									if (result !== null && !(result instanceof Date)) {
+										validation = t(
+											"backend-components.crud.import.validations.date",
+										);
+									}
+									break;
+								case "boolean":
+									if (result !== true && result !== false && result !== null) {
+										validation = t(
+											"backend-components.crud.import.validations.boolean",
+										);
+									}
+									break;
+							}
+							if (!validation) {
+								// if type checks have passed, call field type validator
+								validation = await field.type.validate(result);
+							}
+							if (validation) {
+								// eslint-disable-next-line no-console
+								console.error(
+									"Validation failed:",
+									validation,
+									"; Result =",
+									result,
+									"; Record =",
+									record,
+								);
+								throw new Error(
+									t("backend-components.crud.import.validations.fail", {
+										REASON: validation,
+									}),
+								);
+							}
 						}
-						if (!validation) {
-							// if type checks have passed, call field type validator
-							validation = await field.type.validate(result);
-						}
-						if (validation) {
-							// eslint-disable-next-line no-console
-							console.error(
-								"Validation failed:",
-								validation,
-								"; Result =",
-								result,
-								"; Record =",
-								record
-							);
-							throw new Error(
-								t("backend-components.crud.import.validations.fail", {
-									REASON: validation,
-								})
-							);
-						}
-					}
-				}, 1000),
-			])
-		)
+					},
+					1000,
+				),
+			]),
+		),
 	);
 
 	const handleConversionScriptChange = useCallback(
@@ -160,7 +168,7 @@ export const useImportStep2Logic = (props: CrudImporterStepProps) => {
 				await conversionScriptUpdates.current[evt.target.name](
 					state.data,
 					model.fields[evt.target.name],
-					evt.target.value
+					evt.target.value,
 				);
 				setState((prev) => ({
 					...prev,
@@ -187,7 +195,7 @@ export const useImportStep2Logic = (props: CrudImporterStepProps) => {
 				}));
 			}
 		},
-		[model.fields, setState, state.data]
+		[model.fields, setState, state.data],
 	);
 
 	return { columns, conversionScriptUpdates, handleConversionScriptChange };
@@ -221,7 +229,7 @@ const Step2ConnectData = (props: CrudImporterStepProps) => {
 					<TableBody>
 						{columns.map((column) => {
 							const dataTypes = uniqueArray(
-								state.data.map((record) => typeof record[column])
+								state.data.map((record) => typeof record[column]),
 							).sort();
 
 							return (
@@ -268,8 +276,8 @@ const Step2ConnectData = (props: CrudImporterStepProps) => {
 															convScript
 																? convScript.error?.toString() ?? ""
 																: t(
-																		"backend-components.crud.import.validations.unknown"
-																  ) ?? ""
+																		"backend-components.crud.import.validations.unknown",
+																	) ?? ""
 														}
 													>
 														{convScript ? (
@@ -299,7 +307,7 @@ const Step2ConnectData = (props: CrudImporterStepProps) => {
 													<TextField
 														multiline
 														label={t(
-															"backend-components.crud.import.conv_script"
+															"backend-components.crud.import.conv_script",
 														)}
 														name={name}
 														value={convScript?.script ?? ""}

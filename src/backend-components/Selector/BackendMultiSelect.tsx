@@ -13,15 +13,14 @@ import { debouncePromise } from "../../utils";
 import useCCTranslations from "../../utils/useCCTranslations";
 import { DataGridSortSetting } from "../../standalone/DataGrid/DataGrid";
 
-export type BackendMultiSelectLruOptions<
-	DataT extends MultiSelectorData
-> = Omit<SelectorLruOptions<DataT>, "loadData">;
+export type BackendMultiSelectLruOptions<DataT extends MultiSelectorData> =
+	Omit<SelectorLruOptions<DataT>, "loadData">;
 
 export interface BackendMultiSelectProps<
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
 	CustomT,
-	DataT extends MultiSelectorData
+	DataT extends MultiSelectorData,
 > extends Omit<
 		MultiSelectProps<DataT>,
 		"onLoad" | "selected" | "onSelect" | "lru"
@@ -48,7 +47,7 @@ export interface BackendMultiSelectProps<
 	 * @param modelData The model data
 	 */
 	modelToSelectorData: (
-		modelData: Record<string, unknown>
+		modelData: Record<string, unknown>,
 	) => Promise<DataT> | DataT;
 	/**
 	 * The amount of search results to load (defaults to 25)
@@ -104,7 +103,7 @@ export const useSelectedCache = <
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
 	CustomT,
-	DataT extends MultiSelectorData
+	DataT extends MultiSelectorData,
 >(
 	props: Pick<
 		BackendMultiSelectProps<KeyT, VisibilityT, CustomT, DataT>,
@@ -116,7 +115,7 @@ export const useSelectedCache = <
 		| "selected"
 		| "initialData"
 		| "onLoadError"
-	>
+	>,
 ): UseSelectedCacheResult<DataT> => {
 	const {
 		model,
@@ -143,11 +142,11 @@ export const useSelectedCache = <
 			if (onSelect) {
 				onSelect(
 					selected.map((entry) => entry.value),
-					selected
+					selected,
 				);
 			}
 		},
-		[onSelect]
+		[onSelect],
 	);
 
 	// fetch missing data entries
@@ -160,14 +159,13 @@ export const useSelectedCache = <
 					initialData
 						.filter(
 							(record) =>
-								!((record as Record<"id", string>).id in selectedCache)
+								!((record as Record<"id", string>).id in selectedCache),
 						)
 						.map(
 							async (record) =>
-								(newCache[
-									(record as Record<"id", string>).id
-								] = await modelToSelectorData(record))
-						)
+								(newCache[(record as Record<"id", string>).id] =
+									await modelToSelectorData(record)),
+						),
 				);
 			}
 			const isIdNotInCache = (value: string): boolean =>
@@ -196,7 +194,7 @@ export const useSelectedCache = <
 							label: errorMsg,
 						};
 					}
-				})
+				}),
 			);
 
 			// now that everything has loaded ensure we actually drop records
@@ -206,7 +204,7 @@ export const useSelectedCache = <
 				const newSelection = selected.filter((id) => !isIdNotInCache(id));
 				onSelect(
 					newSelection,
-					newSelection.map((id) => selectedCache[id] ?? newCache[id])
+					newSelection.map((id) => selectedCache[id] ?? newCache[id]),
 				);
 			}
 
@@ -221,7 +219,7 @@ export const useSelectedCache = <
 				selectedCache[value] ?? {
 					value,
 					label: t("backend-components.selector.loading"),
-				}
+				},
 		),
 		handleSelect,
 	};
@@ -236,9 +234,9 @@ const BackendMultiSelect = <
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
 	CustomT,
-	DataT extends MultiSelectorData
+	DataT extends MultiSelectorData,
 >(
-	props: BackendMultiSelectProps<KeyT, VisibilityT, CustomT, DataT>
+	props: BackendMultiSelectProps<KeyT, VisibilityT, CustomT, DataT>,
 ) => {
 	const {
 		model,
@@ -274,7 +272,7 @@ const BackendMultiSelect = <
 			});
 			return Promise.all(data[0].map(modelToSelectorData));
 		},
-		[model, modelToSelectorData, searchResultLimit, sort, switchFilterName]
+		[model, modelToSelectorData, searchResultLimit, sort, switchFilterName],
 	);
 
 	const handleLoadLruRecord = useCallback(
@@ -285,7 +283,7 @@ const BackendMultiSelect = <
 			});
 			return modelToSelectorData(data);
 		},
-		[disableRequestBatching, modelFetch, modelToSelectorData]
+		[disableRequestBatching, modelFetch, modelToSelectorData],
 	);
 
 	const lruConfig: SelectorLruOptions<DataT> | undefined = useMemo(
@@ -294,14 +292,14 @@ const BackendMultiSelect = <
 				? {
 						...lru,
 						loadData: handleLoadLruRecord,
-				  }
+					}
 				: undefined,
-		[lru, handleLoadLruRecord]
+		[lru, handleLoadLruRecord],
 	);
 
 	const debouncedLoad = useMemo(
 		() => debouncePromise(handleLoad, searchDebounceTime ?? 500),
-		[searchDebounceTime, handleLoad]
+		[searchDebounceTime, handleLoad],
 	);
 
 	return (

@@ -23,7 +23,7 @@ export const HEADER_PADDING = 32; // px
 
 export const applyColumnWidthLimits = (
 	column: IDataGridColumnDef,
-	targetWidth: number
+	targetWidth: number,
 ): number => {
 	const { width } = column;
 	const absMinWidth = HEADER_PADDING * (column.filterable ? 3 : 2);
@@ -61,7 +61,7 @@ const ColumnHeader = (props: IDataGridContentColumnHeaderProps) => {
 				},
 			}));
 		},
-		[setColumnState]
+		[setColumnState],
 	);
 	const onSortChange = useCallback(
 		(field: string, newSort: -1 | 0 | 1, additional: boolean) => {
@@ -82,7 +82,8 @@ const ColumnHeader = (props: IDataGridContentColumnHeaderProps) => {
 								(otherField) =>
 									prevState[otherField].sort !== 0 &&
 									// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-									prevState[field].sortOrder! < prevState[otherField].sortOrder!
+									prevState[field].sortOrder! <
+										prevState[otherField].sortOrder!,
 							)
 							.forEach((otherField) => {
 								newColumnState = {
@@ -98,7 +99,7 @@ const ColumnHeader = (props: IDataGridContentColumnHeaderProps) => {
 						// if enable sorting, set to highest order
 						const order =
 							Object.keys(prevState).filter(
-								(otherField) => prevState[otherField].sort !== 0
+								(otherField) => prevState[otherField].sort !== 0,
 							).length + 1;
 						newColumnState = {
 							...newColumnState,
@@ -130,7 +131,7 @@ const ColumnHeader = (props: IDataGridContentColumnHeaderProps) => {
 				return newColumnState;
 			});
 		},
-		[sortLimit, setColumnState]
+		[sortLimit, setColumnState],
 	);
 
 	const startDrag = useCallback(() => setDragging(true), [setDragging]);
@@ -147,7 +148,7 @@ const ColumnHeader = (props: IDataGridContentColumnHeaderProps) => {
 				[field]: applyColumnWidthLimits(column, prevState[field] + move),
 			}));
 		},
-		[column, dragging, field, setColumnWidthState]
+		[column, dragging, field, setColumnWidthState],
 	);
 	const onColumnSortChange = useCallback(
 		(modKey: boolean) => {
@@ -157,25 +158,25 @@ const ColumnHeader = (props: IDataGridContentColumnHeaderProps) => {
 			else if (sort === 1) onSortChange(field, -1, true);
 			else if (sort === -1) onSortChange(field, 0, true);
 		},
-		[sortable, field, sort, onSortChange]
+		[sortable, field, sort, onSortChange],
 	);
 	const onColumnClick = useCallback(
 		(evt: React.MouseEvent) => {
 			onColumnSortChange(evt.shiftKey);
 		},
-		[onColumnSortChange]
+		[onColumnSortChange],
 	);
 	const onColumnLongClick = useCallback(
 		(evt: React.MouseEvent) => {
 			evt.preventDefault();
 			onColumnSortChange(true);
 		},
-		[onColumnSortChange]
+		[onColumnSortChange],
 	);
 
 	const internalOnFilterChange = useCallback(
 		(newFilter: IFilterDef) => onFilterChange(field, newFilter),
-		[field, onFilterChange]
+		[field, onFilterChange],
 	);
 	const autoResize = useCallback(() => {
 		if (!gridRoot) return;

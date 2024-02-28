@@ -18,6 +18,7 @@ import {
 	useLocation,
 	createRoutesFromChildren,
 	useNavigationType,
+	NavigationType,
 } from "react-router-dom";
 
 interface RouteObject {
@@ -31,7 +32,7 @@ interface RouteObject {
 let activeTransaction: Transaction | undefined;
 
 let _customStartTransaction: (
-	context: TransactionContext
+	context: TransactionContext,
 ) => Transaction | undefined;
 let _startTransactionOnLocationChange: boolean;
 
@@ -52,10 +53,10 @@ function getInitPathName(): string | undefined {
 export function reactRouterV6Instrumentation() {
 	return (
 		customStartTransaction: (
-			context: TransactionContext
+			context: TransactionContext,
 		) => Transaction | undefined,
 		startTransactionOnPageLoad = true,
-		startTransactionOnLocationChange = true
+		startTransactionOnLocationChange = true,
 	): void => {
 		const initPathName = getInitPathName();
 		if (startTransactionOnPageLoad && initPathName) {
@@ -73,7 +74,7 @@ export function reactRouterV6Instrumentation() {
 
 const getTransactionName = (
 	routes: RouteObject[],
-	location: Location
+	location: Location,
 ): string => {
 	if (!routes || routes.length === 0) {
 		return location.pathname;
@@ -104,15 +105,14 @@ interface SentryRouteContextType {
 	route: RouteObject | null | undefined;
 }
 const SentryRouteContext = React.createContext<SentryRouteContextType | null>(
-	null
+	null,
 );
 // tracing, has all routes so it can listen to navigation events
 interface SentryRouteTracingContextType {
 	setRoutes: Dispatch<SetStateAction<RouteObject[]>>;
 }
-const SentryRouteTracingContext = React.createContext<SentryRouteTracingContextType | null>(
-	null
-);
+const SentryRouteTracingContext =
+	React.createContext<SentryRouteTracingContextType | null>(null);
 const useSentryRouteTracingContext = () => {
 	const ctx = useContext(SentryRouteTracingContext);
 	if (!ctx) throw new Error("missing SentryRouteTracingContext");
@@ -131,18 +131,18 @@ export const SentryRoutesTracing = (props: SentryRoutesTracingProps) => {
 		(): SentryRouteTracingContextType => ({
 			setRoutes,
 		}),
-		[]
+		[],
 	);
 
 	const routesSorted = useMemo(
 		() => routes.sort((a, b) => (b.path?.length ?? 0) - (a.path?.length ?? 0)),
-		[routes]
+		[routes],
 	);
 
-	const txName = useMemo(() => getTransactionName(routesSorted, location), [
-		location,
-		routesSorted,
-	]);
+	const txName = useMemo(
+		() => getTransactionName(routesSorted, location),
+		[location, routesSorted],
+	);
 
 	useEffect(() => {
 		// don't finish first transaction
@@ -152,7 +152,8 @@ export const SentryRoutesTracing = (props: SentryRoutesTracingProps) => {
 		}
 		if (
 			_startTransactionOnLocationChange &&
-			(navigationType === "PUSH" || navigationType === "POP")
+			(navigationType === NavigationType.Push ||
+				navigationType === NavigationType.Pop)
 		) {
 			if (activeTransaction) {
 				activeTransaction.finish();
@@ -181,7 +182,7 @@ export const SentryRoutesTracing = (props: SentryRoutesTracingProps) => {
 
 export function withSentryReactRouterV6Routing<
 	P extends Record<string, unknown>,
-	R extends React.FC<P>
+	R extends React.FC<P>,
 >(Routes: R): R {
 	const SentryRoutes: React.FC<P> = (props: P) => {
 		const location = useLocation();
@@ -193,12 +194,12 @@ export function withSentryReactRouterV6Routing<
 			// Performance concern:
 			// This is repeated when <Routes /> is rendered.
 			let childRoutes = createRoutesFromChildren(
-				props.children as JSX.Element[]
+				props.children as JSX.Element[],
 			);
 			if (routeContext) {
 				if (!routeContext.route)
 					throw new Error(
-						"child rendered, but parent does not have route match"
+						"child rendered, but parent does not have route match",
 					);
 				let basePath: string = routeContext.route.path ?? "";
 				if (basePath) {
@@ -206,9 +207,10 @@ export function withSentryReactRouterV6Routing<
 					if (basePath.endsWith("/*")) basePath = basePath.slice(0, -1);
 					childRoutes = childRoutes.map((route) => {
 						if (route.path == null) return route;
-						const pathFull = (route.path.startsWith("/")
-							? `${basePath}${route.path}`
-							: `${basePath}/${route.path}`
+						const pathFull = (
+							route.path.startsWith("/")
+								? `${basePath}${route.path}`
+								: `${basePath}/${route.path}`
 						).replace("//", "/");
 						return {
 							...route,
@@ -226,7 +228,7 @@ export function withSentryReactRouterV6Routing<
 			traceContext.setRoutes((prev) => [...prev, ...routes]);
 			return () => {
 				traceContext.setRoutes((prev) =>
-					prev.filter((entry) => !routes.includes(entry))
+					prev.filter((entry) => !routes.includes(entry)),
 				);
 			};
 		}, [routes, traceContext]);

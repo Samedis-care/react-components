@@ -82,14 +82,14 @@ const GridSingleSelectFilter = (props: GridSingleSelectFilterProps) => {
 		(_, value: string) => {
 			onSelect(value);
 		},
-		[onSelect]
+		[onSelect],
 	);
 
 	const handleSelectorChange = useCallback(
 		(value: BaseSelectorData | null) => {
 			onSelect(value?.value ?? "");
 		},
-		[onSelect]
+		[onSelect],
 	);
 
 	const getOptions = useCallback(() => options, [options]);
@@ -97,7 +97,7 @@ const GridSingleSelectFilter = (props: GridSingleSelectFilterProps) => {
 		() => ({
 			inputRoot: isActive ? classes.customFilterBorder : undefined,
 		}),
-		[isActive, classes.customFilterBorder]
+		[isActive, classes.customFilterBorder],
 	);
 
 	if (dialog) {

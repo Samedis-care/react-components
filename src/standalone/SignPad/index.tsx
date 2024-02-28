@@ -72,7 +72,7 @@ const useStyles = makeStyles(
 			bottom: 20,
 		},
 	}),
-	{ name: "CcSignPad" }
+	{ name: "CcSignPad" },
 );
 const SignPad = (props: SignPadProps) => {
 	const { signature, disabled, openInfo, openSignPad } = props;
@@ -83,7 +83,7 @@ const SignPad = (props: SignPadProps) => {
 			event.stopPropagation();
 			if (openInfo) openInfo();
 		},
-		[openInfo]
+		[openInfo],
 	);
 	return (
 		<div className={classes.signPadDiv} onClick={openSignPad}>

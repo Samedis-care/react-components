@@ -27,7 +27,8 @@ export interface SignaturePadCanvasProps extends SignPadProps {
 }
 
 const SignaturePadCanvas = (
-	props: SignaturePadCanvasProps & Omit<SignPadProps, "classes" | "openSignPad">
+	props: SignaturePadCanvasProps &
+		Omit<SignPadProps, "classes" | "openSignPad">,
 ) => {
 	const { signature, disabled, openInfo, ...dialogProps } = props;
 	const [pushDialog] = useDialogContext();

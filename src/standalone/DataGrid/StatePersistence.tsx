@@ -28,7 +28,7 @@ export type DataGridPersistentStateContextType = [
 		| Partial<DataGridPersistentState>
 		| undefined
 	),
-	(data: DataGridPersistentState) => Promise<void> | void
+	(data: DataGridPersistentState) => Promise<void> | void,
 ];
 export const DataGridPersistentStateContext = React.createContext<
 	DataGridPersistentStateContextType | undefined

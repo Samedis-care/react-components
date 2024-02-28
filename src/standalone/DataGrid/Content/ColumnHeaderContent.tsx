@@ -78,12 +78,12 @@ const transformOrigin: PopoverOrigin = {
 };
 
 const ColumnHeaderContent = (
-	props: IDataGridContentColumnHeaderContentProps
+	props: IDataGridContentColumnHeaderContentProps,
 ) => {
 	const { t } = useCCTranslations();
 	const classes = useDataGridStyles();
 	const [filterAnchorEl, setFilterAnchorEl] = useState<HTMLElement | null>(
-		null
+		null,
 	);
 
 	const openFilter = useCallback(
@@ -91,14 +91,15 @@ const ColumnHeaderContent = (
 			event.stopPropagation();
 			setFilterAnchorEl(event.currentTarget);
 		},
-		[setFilterAnchorEl]
+		[setFilterAnchorEl],
 	);
-	const closeFilter = useCallback(() => setFilterAnchorEl(null), [
-		setFilterAnchorEl,
-	]);
+	const closeFilter = useCallback(
+		() => setFilterAnchorEl(null),
+		[setFilterAnchorEl],
+	);
 	const preventPropagation = useCallback(
 		(evt: SyntheticEvent<unknown>) => evt.stopPropagation(),
-		[]
+		[],
 	);
 
 	const CurrentFilterIcon =

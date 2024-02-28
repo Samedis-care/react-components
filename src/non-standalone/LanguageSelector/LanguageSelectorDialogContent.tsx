@@ -52,7 +52,7 @@ const useStyles = makeStyles(
 			width: "100%",
 		},
 	},
-	{ name: "CcLanguageSelectorDialogContent" }
+	{ name: "CcLanguageSelectorDialogContent" },
 );
 
 const SearchInputProps = {
@@ -64,7 +64,7 @@ const SearchInputProps = {
 };
 
 const LanguageSelectorDialogContent = (
-	props: LanguageSelectorDialogContentProps
+	props: LanguageSelectorDialogContentProps,
 ) => {
 	const { supportedLocales: appSupportedLocales, close } = props;
 
@@ -78,7 +78,7 @@ const LanguageSelectorDialogContent = (
 		(evt: React.ChangeEvent<HTMLInputElement>) => {
 			setFilter(evt.target.value);
 		},
-		[setFilter]
+		[setFilter],
 	);
 	const [switchingLanguage, setSwitchingLanguage] = useState(false);
 	const [pushDialog] = useDialogContext();
@@ -94,7 +94,7 @@ const LanguageSelectorDialogContent = (
 						[
 							country,
 							langs.filter((lang) => supportedLangs.includes(lang)),
-						] as [string, string[]]
+						] as [string, string[]],
 				)
 				.map(([country, langs]) => langs.map((lang) => lang + "-" + country))
 				.flat()
@@ -102,7 +102,7 @@ const LanguageSelectorDialogContent = (
 					(locale) =>
 						!appSupportedLocales ||
 						appSupportedLocales.includes(locale) ||
-						appSupportedLocales.includes(locale.split("-")[0])
+						appSupportedLocales.includes(locale.split("-")[0]),
 				)
 				.map(
 					(locale) =>
@@ -114,7 +114,7 @@ const LanguageSelectorDialogContent = (
 							language: tLocale(locale + ".language"),
 							native_country: tLocale(locale + ".native_country"),
 							native_language: tLocale(locale + ".native_language"),
-						} as LanguageSelectorEntryData)
+						}) as LanguageSelectorEntryData,
 				)
 				.map(
 					(entry) =>
@@ -125,10 +125,10 @@ const LanguageSelectorDialogContent = (
 							language_lower: entry.language.toLowerCase(),
 							native_country_lower: entry.native_country.toLowerCase(),
 							native_language_lower: entry.native_language.toLowerCase(),
-						} as LanguageSelectorEntryFilterData)
+						}) as LanguageSelectorEntryFilterData,
 				)
 				.sort((a, b) => sortByLocaleRelevance(a.locale, b.locale)),
-		[countryLanguageMapping, appSupportedLocales, supportedLangs, tLocale]
+		[countryLanguageMapping, appSupportedLocales, supportedLangs, tLocale],
 	);
 
 	const filteredData = useMemo(
@@ -139,9 +139,9 @@ const LanguageSelectorDialogContent = (
 					entry.country_lower.includes(lowercaseFilter) ||
 					entry.language_lower.includes(lowercaseFilter) ||
 					entry.native_country_lower.includes(lowercaseFilter) ||
-					entry.native_language_lower.includes(lowercaseFilter)
+					entry.native_language_lower.includes(lowercaseFilter),
 			),
-		[data, lowercaseFilter]
+		[data, lowercaseFilter],
 	);
 
 	const handleSwitch = useCallback(
@@ -156,7 +156,7 @@ const LanguageSelectorDialogContent = (
 				setSwitchingLanguage(false);
 			}
 		},
-		[close, i18n, pushDialog]
+		[close, i18n, pushDialog],
 	);
 
 	const LocaleEntryRenderer = useCallback(
@@ -177,7 +177,7 @@ const LanguageSelectorDialogContent = (
 				</div>
 			);
 		},
-		[currentLang, filteredData, handleSwitch, switchingLanguage]
+		[currentLang, filteredData, handleSwitch, switchingLanguage],
 	);
 
 	return (

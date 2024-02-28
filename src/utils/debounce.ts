@@ -4,7 +4,7 @@ export type DebounceTargetFunc<ArgT extends Array<unknown>> = (
 
 export default function debounce<ArgT extends Array<unknown>>(
 	func: DebounceTargetFunc<ArgT>,
-	timeout: number
+	timeout: number,
 ): DebounceTargetFunc<ArgT> {
 	let debounceState = 0;
 	return (...args) => {

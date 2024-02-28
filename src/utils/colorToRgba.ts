@@ -159,7 +159,7 @@ export const colorLookupMap: Record<string, string> = {
  * @return undefined if color cannot be parsed, rgba array on success. alpha channel is 0.0 - 1.0
  */
 const colorToRgba = (
-	color: string
+	color: string,
 ): [r: number, g: number, b: number, a: number] | undefined => {
 	// lookup color keywords and convert to #rrggbbaa
 	if (color.toLowerCase() in colorLookupMap) {
@@ -191,7 +191,7 @@ const colorToRgba = (
 		// eslint-disable-next-line no-console
 		console.warn(
 			"[Components-Care] colorToRgba (slow/unreliable) fallback triggered with color input:",
-			color
+			color,
 		);
 	}
 

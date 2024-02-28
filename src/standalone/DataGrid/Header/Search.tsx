@@ -13,7 +13,7 @@ const Search = () => {
 				search: newSearch,
 			}));
 		},
-		[setState]
+		[setState],
 	);
 
 	return (

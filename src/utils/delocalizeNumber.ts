@@ -9,7 +9,7 @@ const delocalizeNumber = (value: string): string => {
 	return value
 		.replace(
 			new RegExp("[^0-9\\" + getNumberSeparator("decimal") + "]", "g"),
-			""
+			"",
 		)
 		.replace(new RegExp("\\" + getNumberSeparator("decimal"), "g"), ".");
 };

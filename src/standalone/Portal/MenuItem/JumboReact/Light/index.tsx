@@ -28,13 +28,13 @@ const useStyles = makeStyles(
 			width: 6,
 			height: 6,
 			backgroundColor: theme.palette.getContrastText(
-				theme.palette.primary.main
+				theme.palette.primary.main,
 			),
 			borderRadius: "50%",
 			top: "50%",
 		},
 	}),
-	{ name: "CcPortalMenuItemLight" }
+	{ name: "CcPortalMenuItemLight" },
 );
 
 const selectedListItemStyles = createStyles((theme: Theme) => ({
@@ -71,11 +71,13 @@ const MenuItemJumboReactLight = (props: MenuItemProps) => {
 
 	const Icon = props.icon;
 
-	const MyListItem = (props.expandable
-		? ExpandableListItem
-		: props.active
-		? SelectedListItem
-		: UnselectedListItem) as typeof ListItemButton;
+	const MyListItem = (
+		props.expandable
+			? ExpandableListItem
+			: props.active
+				? SelectedListItem
+				: UnselectedListItem
+	) as typeof ListItemButton;
 
 	return (
 		<MyListItem

@@ -24,7 +24,7 @@ abstract class TypeMultiEnum implements Type<string[]> {
 		if (values.length === 0) return null;
 
 		return values.find((value) =>
-			this.values.find((entry) => entry.value === value)
+			this.values.find((entry) => entry.value === value),
 		)
 			? null
 			: "Invalid Enum Value detected!"; // Developer warning
@@ -43,7 +43,7 @@ abstract class TypeMultiEnum implements Type<string[]> {
 			.map(
 				(value) =>
 					this.values.find((val) => val.value === value)?.getLabel() ||
-					"Invalid Enum Value detected!"
+					"Invalid Enum Value detected!",
 			)
 			.join(", ");
 	}

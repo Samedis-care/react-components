@@ -9,7 +9,7 @@ import FilterType from "../FilterType";
  */
 abstract class TypeCurrency implements Type<[string, number] | null> {
 	abstract render(
-		params: ModelRenderParams<[string, number] | null>
+		params: ModelRenderParams<[string, number] | null>,
 	): React.ReactElement;
 
 	validate(): string | null {

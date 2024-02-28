@@ -14,7 +14,7 @@ const SelectAll = () => {
 				selectionUpdatedByProps: false,
 			}));
 		},
-		[setState]
+		[setState],
 	);
 
 	return (

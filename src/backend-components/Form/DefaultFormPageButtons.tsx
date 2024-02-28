@@ -22,7 +22,7 @@ export const useBackButtonStyles = makeStyles({
 });
 
 const DefaultFormPageButtons = (
-	props: BasicFormPageRendererProps<CrudFormProps | undefined>
+	props: BasicFormPageRendererProps<CrudFormProps | undefined>,
 ) => {
 	const {
 		showBackButtonOnly,
@@ -84,7 +84,7 @@ const DefaultFormPageButtons = (
 
 	const humanReadOnlyReasons = useMemo(
 		() => Object.values(readOnlyReasons).filter((e) => !!e) as string[],
-		[readOnlyReasons]
+		[readOnlyReasons],
 	);
 
 	return (

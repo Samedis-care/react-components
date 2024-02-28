@@ -43,28 +43,28 @@ const ActionBarMenu = (props: ActionBarMenuProps) => {
 			if (toggleSettings) toggleSettings(evt);
 			onClose();
 		},
-		[toggleSettings, onClose]
+		[toggleSettings, onClose],
 	);
 	const openResetDialogWrap = useCallback(
 		(evt: React.MouseEvent) => {
 			if (openResetDialog) openResetDialog(evt);
 			onClose();
 		},
-		[openResetDialog, onClose]
+		[openResetDialog, onClose],
 	);
 	const openExportMenuWrap = useCallback(
 		(evt: React.MouseEvent) => {
 			if (openExportMenu) openExportMenu(evt);
 			onClose();
 		},
-		[openExportMenu, onClose]
+		[openExportMenu, onClose],
 	);
 	const handleImportWrap = useCallback(
 		(evt: React.MouseEvent) => {
 			if (handleImport) handleImport(evt);
 			onClose();
 		},
-		[handleImport, onClose]
+		[handleImport, onClose],
 	);
 	const { t } = useCCTranslations();
 	return (

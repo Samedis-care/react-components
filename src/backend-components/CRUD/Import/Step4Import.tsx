@@ -17,13 +17,8 @@ interface ImportCounters {
 }
 
 export const useImportStep4Logic = (props: CrudImporterStepProps) => {
-	const {
-		model,
-		state,
-		setState,
-		updateKey,
-		additionalUpdateKeyFilters,
-	} = props;
+	const { model, state, setState, updateKey, additionalUpdateKeyFilters } =
+		props;
 
 	// model which can write to all fields
 	const customModel = new Model<string, PageVisibility, unknown>(
@@ -38,11 +33,11 @@ export const useImportStep4Logic = (props: CrudImporterStepProps) => {
 						create: ModelVisibilityHidden,
 					},
 				},
-			])
+			]),
 		),
 		model.connector,
 		model.cacheKeys,
-		model.options
+		model.options,
 	);
 	const { mutateAsync: createOrUpdateRecord } = useModelMutation(customModel);
 
@@ -86,14 +81,14 @@ export const useImportStep4Logic = (props: CrudImporterStepProps) => {
 									dotToObject(
 										name,
 										// eslint-disable-next-line no-eval
-										eval(state.conversionScripts[name]?.script ?? "") ?? null
-									)
+										eval(state.conversionScripts[name]?.script ?? "") ?? null,
+									),
 								);
 							});
 
 						if (updateKey) {
 							const filterKey = model.fields[updateKey].type.stringify(
-								getValueByDot(updateKey, modelRecord)
+								getValueByDot(updateKey, modelRecord),
 							);
 							if (filterKey) {
 								const [records, meta] = await model.index({
@@ -139,8 +134,8 @@ export const useImportStep4Logic = (props: CrudImporterStepProps) => {
 									sourceRecord: record,
 								},
 								undefined,
-								4
-							)
+								4,
+							),
 						);
 					} finally {
 						setCounters((prev) => ({
@@ -149,7 +144,7 @@ export const useImportStep4Logic = (props: CrudImporterStepProps) => {
 						}));
 						activeRequests--;
 					}
-				})
+				}),
 			);
 
 			setImportDone(true);

@@ -56,7 +56,7 @@ const useStyles = makeStyles(
 			whiteSpace: "nowrap",
 		},
 	}),
-	{ name: "CcImageDots" }
+	{ name: "CcImageDots" },
 );
 
 export type ImageDotsClassKey = keyof ReturnType<typeof useStyles>;
@@ -68,7 +68,7 @@ export type ImageDotsTheme = Partial<
 const useThemeStyles = makeThemeStyles<ImageDotsProps, ImageDotsClassKey>(
 	(theme) => theme.componentsCare?.fileUpload?.multiImage?.dots,
 	"CcImageDots",
-	useStyles
+	useStyles,
 );
 
 const ImageDots = (props: ImageDotsProps) => {

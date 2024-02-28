@@ -60,7 +60,7 @@ const useStyles = makeStyles(
 			marginTop: 1,
 		},
 	}),
-	{ name: "CcMultiSelectWithCheckBox" }
+	{ name: "CcMultiSelectWithCheckBox" },
 );
 
 const MenuItemCustom = withStyles((theme: Theme) => ({
@@ -135,14 +135,14 @@ const useSelectStyles = makeThemeStyles(
 		iconOutlined: {},
 		...theme?.componentsCare?.selectorWithCheckbox?.selectStyle,
 	}),
-	"CcMultiSelectWithCheckboxSelect"
+	"CcMultiSelectWithCheckboxSelect",
 );
 
 const MultiSelectWithCheckBox = (props: MultiSelectWithCheckBoxProps) => {
 	const { label, options, values, ...selectProps } = props;
 	const classes = useStyles(cleanClassMap(props, false, "checkboxStyle"));
 	const selectClasses = useSelectStyles(
-		cleanClassMap(props, true, "checkboxStyle")
+		cleanClassMap(props, true, "checkboxStyle"),
 	);
 	const groupsEnabled = options.find((opt) => !!opt.group);
 	const renderOption = (option: MultiSelectorData) => {
@@ -192,7 +192,7 @@ const MultiSelectWithCheckBox = (props: MultiSelectWithCheckBoxProps) => {
 				{groupsEnabled
 					? (() => {
 							const groups = uniqueArray(
-								options.map((opt) => opt.group ?? "?" /* handle no group */)
+								options.map((opt) => opt.group ?? "?" /* handle no group */),
 							).sort();
 							return groups.map((group) => [
 								<MenuItemGroup
@@ -206,7 +206,7 @@ const MultiSelectWithCheckBox = (props: MultiSelectWithCheckBoxProps) => {
 									.filter((opt) => opt.group === group)
 									.map(renderOption),
 							]);
-					  })()
+						})()
 					: options.map(renderOption)}
 			</Select>
 		</>
@@ -214,5 +214,5 @@ const MultiSelectWithCheckBox = (props: MultiSelectWithCheckBoxProps) => {
 };
 
 export default React.memo(
-	MultiSelectWithCheckBox
+	MultiSelectWithCheckBox,
 ) as typeof MultiSelectWithCheckBox;

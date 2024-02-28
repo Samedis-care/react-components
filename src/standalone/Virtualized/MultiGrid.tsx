@@ -66,7 +66,7 @@ const useStyles = makeStyles(
 			scrollbarWidth: "none",
 		},
 	},
-	{ name: "CcMultiGrid" }
+	{ name: "CcMultiGrid" },
 );
 
 const MultiGrid = (props: MultiGridProps) => {
@@ -95,17 +95,17 @@ const MultiGrid = (props: MultiGridProps) => {
 		() =>
 			Array.from(new Array(fixedColumnCount).keys()).reduce(
 				(p, c) => p + columnWidth(c),
-				0
+				0,
 			),
-		[columnWidth, fixedColumnCount]
+		[columnWidth, fixedColumnCount],
 	);
 	const fixedHeight = useMemo(
 		() =>
 			Array.from(new Array(fixedRowCount).keys()).reduce(
 				(p, c) => p + rowHeight(c),
-				0
+				0,
 			),
-		[fixedRowCount, rowHeight]
+		[fixedRowCount, rowHeight],
 	);
 
 	const CellRendererTopRight = useCallback(
@@ -115,7 +115,7 @@ const MultiGrid = (props: MultiGridProps) => {
 				columnIndex: props.columnIndex + fixedColumnCount,
 			});
 		},
-		[CellRenderer, fixedColumnCount]
+		[CellRenderer, fixedColumnCount],
 	);
 	const CellRendererBottomLeft = useCallback(
 		(props: GridChildComponentProps) => {
@@ -124,7 +124,7 @@ const MultiGrid = (props: MultiGridProps) => {
 				rowIndex: props.rowIndex + fixedRowCount,
 			});
 		},
-		[CellRenderer, fixedRowCount]
+		[CellRenderer, fixedRowCount],
 	);
 	const CellRendererBottomRight = useCallback(
 		(props: GridChildComponentProps) => {
@@ -134,7 +134,7 @@ const MultiGrid = (props: MultiGridProps) => {
 				rowIndex: props.rowIndex + fixedRowCount,
 			});
 		},
-		[CellRenderer, fixedColumnCount, fixedRowCount]
+		[CellRenderer, fixedColumnCount, fixedRowCount],
 	);
 
 	const handleItemsRendered = useCallback(
@@ -156,7 +156,7 @@ const MultiGrid = (props: MultiGridProps) => {
 				visibleRowStopIndex: params.visibleRowStopIndex + fixedRowCount,
 			});
 		},
-		[fixedColumnCount, fixedRowCount, onItemsRendered]
+		[fixedColumnCount, fixedRowCount, onItemsRendered],
 	);
 
 	const topLeftGrid = useRef<VariableSizeGrid>(null);

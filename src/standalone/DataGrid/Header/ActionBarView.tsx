@@ -64,23 +64,21 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 	const bpSmUp = useMediaQuery(theme.breakpoints.up("sm"), { noSsr: true });
 
 	const { t } = useCCTranslations();
-	const [exportAnchorEl, setExportAnchorEl] = useState<MenuProps["anchorEl"]>(
-		undefined
-	);
+	const [exportAnchorEl, setExportAnchorEl] =
+		useState<MenuProps["anchorEl"]>(undefined);
 	const openExportMenu = useCallback(
 		(evt: React.MouseEvent) => {
 			setExportAnchorEl(evt.currentTarget);
 		},
-		[setExportAnchorEl]
+		[setExportAnchorEl],
 	);
 
 	const closeExportMenu = useCallback(() => {
 		setExportAnchorEl(null);
 	}, [setExportAnchorEl]);
 
-	const [resetAnchorEl, setResetAnchorEl] = useState<MenuProps["anchorEl"]>(
-		undefined
-	);
+	const [resetAnchorEl, setResetAnchorEl] =
+		useState<MenuProps["anchorEl"]>(undefined);
 	const openResetDialog = useCallback((evt: React.MouseEvent) => {
 		setResetAnchorEl(evt.currentTarget);
 	}, []);
@@ -88,9 +86,8 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 		setResetAnchorEl(null);
 	}, []);
 
-	const [settingsAnchorEl, setSettingsAnchorEl] = useState<
-		MenuProps["anchorEl"]
-	>(undefined);
+	const [settingsAnchorEl, setSettingsAnchorEl] =
+		useState<MenuProps["anchorEl"]>(undefined);
 	const openSettingsMenu = useCallback((evt: React.MouseEvent) => {
 		setSettingsAnchorEl(evt.currentTarget);
 	}, []);
@@ -101,21 +98,21 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 	const addButtons: IDataGridAddButton[] = Array.isArray(props.handleAddNew)
 		? props.handleAddNew
 		: props.handleAddNew == null
-		? []
-		: [
-				{
-					icon: undefined,
-					label: t("standalone.data-grid.header.new") ?? "",
-					onClick:
-						typeof props.handleAddNew === "function"
-							? props.handleAddNew
-							: undefined,
-					disableHint:
-						typeof props.handleAddNew === "string"
-							? props.handleAddNew
-							: undefined,
-				},
-		  ];
+			? []
+			: [
+					{
+						icon: undefined,
+						label: t("standalone.data-grid.header.new") ?? "",
+						onClick:
+							typeof props.handleAddNew === "function"
+								? props.handleAddNew
+								: undefined,
+						disableHint:
+							typeof props.handleAddNew === "string"
+								? props.handleAddNew
+								: undefined,
+					},
+				];
 
 	return (
 		<Grid container alignItems={"stretch"} wrap={"nowrap"}>

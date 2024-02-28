@@ -14,8 +14,8 @@ void ccI18n
 	.use(
 		resourcesToBackend(
 			(lang: string, namespace: string) =>
-				import(`./assets/i18n/${lang.split("-")[0]}/${namespace}.json`)
-		)
+				import(`./assets/i18n/${lang.split("-")[0]}/${namespace}.json`),
+		),
 	)
 	// detect user language
 	// see: https://github.com/i18next/i18next-browser-languageDetector
@@ -31,7 +31,7 @@ void ccI18n
 					"currencies",
 					"languages",
 					"locale-switcher",
-			  ]
+				]
 			: ["translation"],
 		defaultNS: "translation",
 		supportedLngs: langs,

@@ -6,7 +6,7 @@ export const doesRouteMatch = (
 	route: string,
 	path: string,
 	exact = false,
-	strict = false
+	strict = false,
 ): boolean =>
 	!!matchPath({ path: route, caseSensitive: strict, end: exact }, path);
 
@@ -14,11 +14,11 @@ export const extractRouteParameters = (
 	route: string,
 	path: string,
 	exact = false,
-	strict = false
+	strict = false,
 ): Record<string, string> => {
 	const match = matchPath(
 		{ path: route, caseSensitive: strict, end: exact },
-		path
+		path,
 	);
 	if (!match) throw new Error("Route does not match");
 	return match.params as Record<string, string>;
@@ -26,11 +26,11 @@ export const extractRouteParameters = (
 
 export const insertRouteParameters = (
 	route: string,
-	params: Record<string, string>
+	params: Record<string, string>,
 ): string => {
 	let pathParts = route.split("/");
 	pathParts = pathParts.map((entry) =>
-		entry.startsWith(":") ? params[entry.substr(1)] : entry
+		entry.startsWith(":") ? params[entry.substr(1)] : entry,
 	);
 	return pathParts.join("/");
 };
@@ -41,8 +41,8 @@ const reconstructPath = (matches: RouteMatch[]) => {
 		? path.endsWith("/*")
 			? path.slice(0, -1)
 			: path
-			? path + "/"
-			: ""
+				? path + "/"
+				: ""
 		: "";
 };
 

@@ -39,7 +39,7 @@ const SearchView = (props: IDataGridSearchViewProps) => {
 	const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 	const openPopover = useCallback(
 		(evt: React.MouseEvent<HTMLElement>) => setAnchorEl(evt.currentTarget),
-		[]
+		[],
 	);
 	const closePopover = useCallback(() => setAnchorEl(null), []);
 

@@ -36,7 +36,7 @@ export interface CrudMultiImageProps
 	 */
 	serialize: (
 		data: MultiImageImage,
-		id: string | null
+		id: string | null,
 	) => Promise<Record<string, unknown>> | Record<string, unknown>;
 	/**
 	 * Callback for deserializing data after getting it from the backend connector
@@ -44,14 +44,14 @@ export interface CrudMultiImageProps
 	 * @returns The image data which can be used by the control
 	 */
 	deserialize: (
-		data: Record<string, unknown>
+		data: Record<string, unknown>,
 	) => Promise<BackendMultiImageImage> | BackendMultiImageImage;
 	/**
 	 * @see MultiImageProps.onChange
 	 */
 	onChange?: (
 		name: string | undefined,
-		newImages: BackendMultiImageImage[]
+		newImages: BackendMultiImageImage[],
 	) => void;
 }
 
@@ -93,7 +93,7 @@ const CrudMultiImage = (props: CrudMultiImageProps) => {
 				newImages
 					.filter(
 						(img) =>
-							img.id.startsWith(MultiImageNewIdPrefix) || !images.includes(img)
+							img.id.startsWith(MultiImageNewIdPrefix) || !images.includes(img),
 					)
 					.map(async (img) => {
 						// check if we have to replace a file (update)
@@ -111,7 +111,7 @@ const CrudMultiImage = (props: CrudMultiImageProps) => {
 							}
 							return {
 								response: await connector.update(
-									await serialize(img, oldImg.id)
+									await serialize(img, oldImg.id),
 								),
 								index: (img as BackendMultiImageImage).index,
 								primary: (img as BackendMultiImageImage).primary,
@@ -127,11 +127,11 @@ const CrudMultiImage = (props: CrudMultiImageProps) => {
 					.map(async (request) => {
 						const result = await request;
 						return {
-							...deserialize(result.response[0]),
+							...(await deserialize(result.response[0])),
 							index: result.index,
 							primary: result.primary,
 						};
-					})
+					}),
 			);
 			// delete deleted files
 			const deletePromise = connector.deleteMultiple(
@@ -141,10 +141,10 @@ const CrudMultiImage = (props: CrudMultiImageProps) => {
 							!newImages.find(
 								(other) =>
 									!other.id.startsWith(MultiImageNewIdPrefix) &&
-									other.id === img.id
-							)
+									other.id === img.id,
+							),
 					)
-					.map((img) => img.id)
+					.map((img) => img.id),
 			);
 
 			try {
@@ -156,16 +156,18 @@ const CrudMultiImage = (props: CrudMultiImageProps) => {
 				const uploadedImages = await uploadPromise;
 
 				const finalImages: BackendMultiImageImage[] = [];
-				(newImages.filter(
-					(img) =>
-						!img.id.startsWith(MultiImageNewIdPrefix) && images.includes(img)
-				) as BackendMultiImageImage[]).forEach((img) => {
+				(
+					newImages.filter(
+						(img) =>
+							!img.id.startsWith(MultiImageNewIdPrefix) && images.includes(img),
+					) as BackendMultiImageImage[]
+				).forEach((img) => {
 					// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 					finalImages[img.index!] = img;
 				});
 				uploadedImages.forEach(
 					// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-					(img) => (finalImages[(img as BackendMultiImageImage).index!] = img)
+					(img) => (finalImages[(img as BackendMultiImageImage).index!] = img),
 				);
 
 				// update state
@@ -173,7 +175,7 @@ const CrudMultiImage = (props: CrudMultiImageProps) => {
 				if (onPrimaryChange)
 					onPrimaryChange(
 						name,
-						finalImages.find((img) => img.primary)?.id ?? ""
+						finalImages.find((img) => img.primary)?.id ?? "",
 					);
 			} catch (e) {
 				setError(e as Error);
@@ -188,7 +190,7 @@ const CrudMultiImage = (props: CrudMultiImageProps) => {
 			onPrimaryChange,
 			name,
 			serialize,
-		]
+		],
 	);
 
 	useEffect(() => {

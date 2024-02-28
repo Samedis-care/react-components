@@ -4,7 +4,7 @@
  * @remarks Falsy values are filtered, this is useful for conditional classes
  */
 const combineClassNames = (
-	names: (string | false | undefined | null)[]
+	names: (string | false | undefined | null)[],
 ): string => names.filter((e) => !!e).join(" ");
 
 export default combineClassNames;

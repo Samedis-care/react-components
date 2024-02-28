@@ -33,11 +33,11 @@ const LocalStoragePersist = (props: LocalStoragePersistProps) => {
 				console.error(
 					"[Components-Care] Failed to persist DataGrid config in localStorage." +
 						storageKey,
-					e
+					e,
 				);
 			}
 		},
-		[storageKey]
+		[storageKey],
 	);
 
 	const persistCtx = useMemo(() => {
@@ -51,7 +51,7 @@ const LocalStoragePersist = (props: LocalStoragePersistProps) => {
 				console.error(
 					"[Components-Care] Failed parsing DataGrid config from localStorage." +
 						storageKey,
-					"Removing from localStorage"
+					"Removing from localStorage",
 				);
 				localStorage?.removeItem(storageKey);
 			}

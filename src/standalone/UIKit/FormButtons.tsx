@@ -45,7 +45,7 @@ const useStyles = makeStyles(
 				theme.componentsCare?.uiKit?.formButtons?.container?.backgroundColor ||
 					theme.palette.background.paper,
 				theme.componentsCare?.uiKit?.formButtons?.container
-					?.backgroundColorOpacity || 1
+					?.backgroundColorOpacity || 1,
 			),
 			...theme.componentsCare?.uiKit?.formButtons?.container?.style,
 		},
@@ -66,7 +66,7 @@ const useStyles = makeStyles(
 			...theme.componentsCare?.uiKit?.formButtons?.buttonWrapper?.style,
 		},
 	}),
-	{ name: "CcFormButtons" }
+	{ name: "CcFormButtons" },
 );
 
 export interface FormButtonsProps {
@@ -82,9 +82,8 @@ export interface FormButtonsProps {
 
 const FormButtons = (props: FormButtonsProps) => {
 	const classes = useStyles(props);
-	const children = (Array.isArray(props.children)
-		? props.children
-		: [props.children]
+	const children = (
+		Array.isArray(props.children) ? props.children : [props.children]
 	).filter((child) => child !== undefined && child !== null && child !== false);
 
 	if (children.length === 0) return <></>;

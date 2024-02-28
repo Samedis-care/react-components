@@ -6,7 +6,7 @@ export interface InputCursorFixHook {
 	 * @param event The on change event
 	 */
 	handleCursorChange: (
-		event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+		event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
 	) => void;
 	/**
 	 * Has to be passed to the input ref prop
@@ -23,7 +23,7 @@ const useInputCursorFix = (newValue: string): InputCursorFixHook => {
 		| [
 				HTMLInputElement["selectionStart"],
 				HTMLInputElement["selectionEnd"],
-				HTMLInputElement["selectionDirection"]
+				HTMLInputElement["selectionDirection"],
 		  ]
 		| null
 	>(null);
@@ -52,7 +52,7 @@ const useInputCursorFix = (newValue: string): InputCursorFixHook => {
 			]);
 			setPrevValue(newValue);
 		},
-		[setCursor, setPrevValue, newValue]
+		[setCursor, setPrevValue, newValue],
 	);
 
 	return {

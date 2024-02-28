@@ -10,7 +10,8 @@ import ccI18n from "../../../i18n";
  */
 abstract class TypeLocalizedString
 	implements
-		Type<Partial<Record<MultiLanguageInputSupportedLanguages, string>>> {
+		Type<Partial<Record<MultiLanguageInputSupportedLanguages, string>>>
+{
 	protected multiline: boolean;
 
 	constructor(multiline = false) {
@@ -20,7 +21,7 @@ abstract class TypeLocalizedString
 	abstract render(
 		params: ModelRenderParams<
 			Partial<Record<MultiLanguageInputSupportedLanguages, string>>
-		>
+		>,
 	): React.ReactElement;
 
 	validate(): string | null {
@@ -38,11 +39,11 @@ abstract class TypeLocalizedString
 	}
 
 	stringify(
-		value: Partial<Record<MultiLanguageInputSupportedLanguages, string>>
+		value: Partial<Record<MultiLanguageInputSupportedLanguages, string>>,
 	): string {
 		if (!value) return "";
 		const currentLang = ccI18n.language.split(
-			"-"
+			"-",
 		)[0] as MultiLanguageInputSupportedLanguages;
 		return value[currentLang] ?? "";
 	}

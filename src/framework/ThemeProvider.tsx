@@ -18,7 +18,7 @@ export type SetThemeAction = (theme: ThemeOptions) => void;
 export type GetDefaultThemeCallback = (preferDark: boolean) => ThemeOptions;
 
 export const getStandardTheme: GetDefaultThemeCallback = (
-	preferDark: boolean
+	preferDark: boolean,
 ): ThemeOptions => ({
 	palette: {
 		mode: preferDark ? "dark" : "light",
@@ -36,7 +36,7 @@ export interface IThemeProviderProps extends IFrameworkProps {
  * Context for the dialog state
  */
 export const ThemeContext = React.createContext<SetThemeAction | undefined>(
-	undefined
+	undefined,
 );
 
 /**
@@ -45,14 +45,14 @@ export const ThemeContext = React.createContext<SetThemeAction | undefined>(
 const ThemeProvider = (props: IThemeProviderProps) => {
 	const [theme, setTheme] = useState<Theme>(() =>
 		createTheme(
-			props.defaultTheme(matchMedia("(prefers-color-scheme: dark)").matches)
-		)
+			props.defaultTheme(matchMedia("(prefers-color-scheme: dark)").matches),
+		),
 	);
 	const setNewTheme = useCallback<SetThemeAction>(
 		(newTheme: ThemeOptions) => {
 			setTheme(createTheme(newTheme));
 		},
-		[setTheme]
+		[setTheme],
 	);
 
 	return (

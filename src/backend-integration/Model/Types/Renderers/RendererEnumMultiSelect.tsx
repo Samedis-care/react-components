@@ -26,7 +26,7 @@ class RendererEnumMultiSelect extends TypeEnumMulti {
 
 	constructor(
 		values: AdvancedMultiEnumValue[],
-		props?: RendererEnumMultiSelectProps
+		props?: RendererEnumMultiSelectProps,
 	) {
 		super(values);
 		this.props = props;
@@ -71,10 +71,10 @@ class RendererEnumMultiSelect extends TypeEnumMulti {
 			const onLoad = (query: string) =>
 				uniqueArray([
 					...data.filter((entry) =>
-						getStringLabel(entry).toLowerCase().startsWith(query.toLowerCase())
+						getStringLabel(entry).toLowerCase().startsWith(query.toLowerCase()),
 					),
 					...data.filter((entry) =>
-						getStringLabel(entry).toLowerCase().includes(query.toLowerCase())
+						getStringLabel(entry).toLowerCase().includes(query.toLowerCase()),
 					),
 				]);
 
@@ -95,7 +95,7 @@ class RendererEnumMultiSelect extends TypeEnumMulti {
 						onSelect={(selected) =>
 							handleChange(
 								field,
-								selected.map((entry) => entry.value)
+								selected.map((entry) => entry.value),
 							)
 						}
 						disabled={visibility.readOnly}
@@ -111,13 +111,13 @@ class RendererEnumMultiSelect extends TypeEnumMulti {
 				{value
 					.map((enumValue) => {
 						const valueInfo = this.values.find(
-							(entry) => entry.value === enumValue
+							(entry) => entry.value === enumValue,
 						);
 						return valueInfo
 							? valueInfo.getLabel()
 							: ccI18n.t(
-									"backend-integration.model.types.renderers.enum.unknown"
-							  );
+									"backend-integration.model.types.renderers.enum.unknown",
+								);
 					})
 					.join(", ")}
 			</Typography>

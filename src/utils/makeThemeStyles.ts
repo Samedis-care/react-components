@@ -17,13 +17,13 @@ import combineClassMaps from "./combineClassMaps";
 const makeThemeStyles = <
 	// eslint-disable-next-line @typescript-eslint/ban-types
 	Props extends object,
-	ClassKey extends string = string
+	ClassKey extends string = string,
 >(
 	getSubStyles: (
-		theme: Theme
+		theme: Theme,
 	) => Partial<Styles<Theme, Props, ClassKey>> | undefined,
 	name: string,
-	useParentStyles?: ReturnType<typeof makeStyles>
+	useParentStyles?: ReturnType<typeof makeStyles>,
 ): keyof Props extends never // `makeStyles` where the passed `styles` do not depend on props
 	? (props?: unknown) => ClassNameMap<ClassKey> // `makeStyles` where the passed `styles` do depend on props
 	: (props: Props) => ClassNameMap<ClassKey> => {
@@ -32,13 +32,13 @@ const makeThemeStyles = <
 			const styleProvider = getSubStyles(theme) ?? {};
 			if (typeof styleProvider === "function") {
 				return (styleProvider as StyleRulesCallback<Theme, Props, ClassKey>)(
-					theme
+					theme,
 				);
 			} else {
 				return styleProvider as StyleRules<Props, ClassKey>;
 			}
 		},
-		{ name: name + "-ThemeStyles" }
+		{ name: name + "-ThemeStyles" },
 	);
 
 	if (!useParentStyles) {
@@ -46,7 +46,7 @@ const makeThemeStyles = <
 	}
 
 	const useCombinedStyles = (
-		props?: keyof Props extends never ? unknown : Props
+		props?: keyof Props extends never ? unknown : Props,
 	): ClassNameMap<ClassKey> => {
 		const { classes: propClasses, ...otherProps } = props as Props & {
 			classes?: Record<string, string>;

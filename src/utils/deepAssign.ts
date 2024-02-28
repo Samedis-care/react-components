@@ -20,7 +20,7 @@ const deepAssign = (
 			) {
 				target[key] = deepAssign(
 					target[key] as Record<string, unknown>,
-					source[key] as Record<string, unknown>
+					source[key] as Record<string, unknown>,
 				);
 			} else {
 				target[key] = source[key];

@@ -24,7 +24,7 @@ type OmitProperties =
 class RendererBackendMultiSelect<
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
-	CustomT
+	CustomT,
 > extends TypeStringArray {
 	private readonly props: Omit<
 		BackendMultiSelectProps<KeyT, VisibilityT, CustomT, MultiSelectorData>,
@@ -35,7 +35,7 @@ class RendererBackendMultiSelect<
 		props: Omit<
 			BackendMultiSelectProps<KeyT, VisibilityT, CustomT, MultiSelectorData>,
 			OmitProperties
-		>
+		>,
 	) {
 		super();
 		this.props = props;
@@ -72,7 +72,7 @@ class RendererBackendMultiSelect<
 
 			if (!relationModel)
 				throw new Error(
-					"Type BackendMultiSelect requires relation model: " + field
+					"Type BackendMultiSelect requires relation model: " + field,
 				);
 
 			return (
@@ -91,7 +91,7 @@ class RendererBackendMultiSelect<
 						onSelect={(value) => handleChange(field, value)}
 						disabled={visibility.readOnly}
 						model={
-							(relationModel as unknown) as Model<KeyT, VisibilityT, CustomT>
+							relationModel as unknown as Model<KeyT, VisibilityT, CustomT>
 						}
 						initialData={relationData}
 						{...this.props}

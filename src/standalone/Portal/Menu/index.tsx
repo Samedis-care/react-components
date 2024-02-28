@@ -146,7 +146,7 @@ const useStyles = makeStyles(
 			...theme.componentsCare?.portal?.menu?.container?.style,
 		},
 	}),
-	{ name: "CcPortalMenu" }
+	{ name: "CcPortalMenu" },
 );
 
 const PortalMenu = (props: MenuProps) => {
@@ -159,7 +159,7 @@ const PortalMenu = (props: MenuProps) => {
 			<Wrapper>
 				<MenuContext.Provider value={props.customState || state}>
 					{props.definition.map((child) =>
-						toMenuItemComponent(props, child, 0, null)
+						toMenuItemComponent(props, child, 0, null),
 					)}
 				</MenuContext.Provider>
 			</Wrapper>

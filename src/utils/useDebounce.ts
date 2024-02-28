@@ -4,7 +4,7 @@ import { DebounceTargetFunc } from "./debounce";
 
 export function useDebouncePromise<ArgT extends Array<unknown>, RetT>(
 	func: DebouncePromiseFunc<ArgT, RetT>,
-	timeout: number
+	timeout: number,
 ): [func: DebouncePromiseFunc<ArgT, RetT>, cancelDebounce: () => void] {
 	const debounceState = useRef(0);
 	const resolves = useRef<ResolveT<RetT>[]>([]);
@@ -50,7 +50,7 @@ export function useDebouncePromise<ArgT extends Array<unknown>, RetT>(
 
 export function useDebounce<ArgT extends Array<unknown>>(
 	func: DebounceTargetFunc<ArgT>,
-	timeout: number
+	timeout: number,
 ): [func: DebounceTargetFunc<ArgT>, cancelDebounce: () => void] {
 	const debounceState = useRef(0);
 	const cancelDebounce = useCallback(() => {

@@ -19,7 +19,7 @@ import { dotToObject, getValueByDot } from "../../utils";
 export interface BackendDataGridProps<
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
-	CustomDataT
+	CustomDataT,
 > extends Omit<
 		DataGridProps,
 		"loadData" | "columns" | "exporters" | "onDelete"
@@ -49,8 +49,8 @@ export interface BackendDataGridProps<
 		filter?: Pick<
 			IDataGridLoadDataParameters,
 			"quickFilter" | "additionalFilters" | "fieldFilter"
-		>
-	) => Promise<void> | unknown;
+		>,
+	) => Promise<void> | void;
 	/**
 	 * Additional buttons next to new button
 	 */
@@ -63,100 +63,98 @@ export interface BackendDataGridProps<
 	customDeleteErrorHandler?: (error: Error) => Promise<void> | void;
 }
 
-export const renderDataGridRecordUsingModel = <
-	KeyT extends ModelFieldName,
-	VisibilityT extends PageVisibility,
-	CustomT
->(
-	model: Model<KeyT, VisibilityT, CustomT>,
-	refreshGrid: () => void
-) => (
-	entry: Record<string, unknown>
-): { id: string } & Record<string, string | null> =>
-	Object.fromEntries(
-		Object.keys(model.fields)
-			.map((key) => {
-				// we cannot render the ID, this will cause issues with the selection
-				const value = getValueByDot(key, entry);
-				if (key === "id") {
+export const renderDataGridRecordUsingModel =
+	<KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT>(
+		model: Model<KeyT, VisibilityT, CustomT>,
+		refreshGrid: () => void,
+	) =>
+	(
+		entry: Record<string, unknown>,
+	): { id: string } & Record<string, string | null> =>
+		Object.fromEntries(
+			Object.keys(model.fields)
+				.map((key) => {
+					// we cannot render the ID, this will cause issues with the selection
+					const value = getValueByDot(key, entry);
+					if (key === "id") {
+						return [
+							[key, value],
+							[key + "_raw", value],
+						];
+					}
+
+					const field = model.fields[key as KeyT];
+					const { id } = entry as Record<"id", string>;
+
+					// no need to render disabled fields
+					if (field.visibility.overview.disabled) {
+						return [
+							[key, value],
+							[key + "_raw", value],
+						];
+					}
+
 					return [
-						[key, value],
+						[
+							key,
+							// eslint-disable-next-line @typescript-eslint/no-unsafe-call
+							field
+								? field.type.render({
+										field: key,
+										value: value,
+										touched: false,
+										initialValue: value,
+										label: field.getLabel(),
+										visibility: Object.assign({}, field.visibility.overview, {
+											hidden: false,
+										}),
+										/**
+										 * The onChange handler for editable input fields
+										 */
+										handleChange: (field: ModelFieldName, value: unknown) => {
+											if (!id) throw new Error("ID not set!");
+
+											void (async () => {
+												await model.connector.update(
+													await model.applySerialization(
+														{
+															id,
+															...dotToObject(field, value),
+														} as Record<string, unknown>,
+														"serialize",
+														"overview",
+													),
+												);
+												refreshGrid();
+											})();
+										},
+										handleBlur: () => {
+											// this is unhandled in the data grid
+										},
+										errorMsg: null,
+										warningMsg: null,
+										setError: () => {
+											throw new Error("Not implemented in Grid");
+										},
+										setFieldTouched: () => {
+											throw new Error("Not implemented in Grid");
+										},
+										values: entry,
+									})
+								: null,
+						],
 						[key + "_raw", value],
 					];
-				}
-
-				const field = model.fields[key as KeyT];
-				const { id } = entry as Record<"id", string>;
-
-				// no need to render disabled fields
-				if (field.visibility.overview.disabled) {
-					return [
-						[key, value],
-						[key + "_raw", value],
-					];
-				}
-
-				return [
-					[
-						key,
-						// eslint-disable-next-line @typescript-eslint/no-unsafe-call
-						field
-							? field.type.render({
-									field: key,
-									value: value,
-									touched: false,
-									initialValue: value,
-									label: field.getLabel(),
-									visibility: Object.assign({}, field.visibility.overview, {
-										hidden: false,
-									}),
-									/**
-									 * The onChange handler for editable input fields
-									 */
-									handleChange: (field: ModelFieldName, value: unknown) => {
-										if (!id) throw new Error("ID not set!");
-
-										void (async () => {
-											await model.connector.update(
-												await model.applySerialization(
-													{
-														id,
-														...dotToObject(field, value),
-													} as Record<string, unknown>,
-													"serialize",
-													"overview"
-												)
-											);
-											refreshGrid();
-										})();
-									},
-									handleBlur: () => {
-										// this is unhandled in the data grid
-									},
-									errorMsg: null,
-									warningMsg: null,
-									setError: () => {
-										throw new Error("Not implemented in Grid");
-									},
-									setFieldTouched: () => {
-										throw new Error("Not implemented in Grid");
-									},
-									values: entry,
-							  })
-							: null,
-					],
-					[key + "_raw", value],
-				];
-			})
-			.flat()
-	) as { id: string } & Record<string, string | null>;
+				})
+				.flat(),
+		) as { id: string } & Record<string, string | null>;
 
 const BackendDataGrid = <
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
-	CustomDataT
+	CustomDataT,
 >(
-	props: BackendDataGridProps<KeyT, VisibilityT, CustomDataT>
+	props: BackendDataGridProps<KeyT, VisibilityT, CustomDataT>,
 ) => {
 	const {
 		model,
@@ -172,13 +170,13 @@ const BackendDataGrid = <
 
 	if (enableDeleteAll && !model.doesSupportAdvancedDeletion()) {
 		throw new Error(
-			"Delete All functionality requested, but not provided by model backend connector"
+			"Delete All functionality requested, but not provided by model backend connector",
 		);
 	}
 
 	const refreshGrid = useCallback(
 		() => setRefreshToken(new Date().getTime().toString()),
-		[]
+		[],
 	);
 
 	const loadData = useCallback(
@@ -191,7 +189,7 @@ const BackendDataGrid = <
 				rows: result.map(renderDataGridRecordUsingModel(model, refreshGrid)),
 			};
 		},
-		[model, refreshGrid]
+		[model, refreshGrid],
 	);
 
 	const { mutateAsync: deleteAdvanced } = useModelDeleteAdvanced(model);
@@ -203,7 +201,7 @@ const BackendDataGrid = <
 			filter?: Pick<
 				IDataGridLoadDataParameters,
 				"quickFilter" | "additionalFilters" | "fieldFilter"
-			>
+			>,
 		): Promise<void> => {
 			if (customDeleteConfirm) {
 				await customDeleteConfirm(invert, ids, filter);
@@ -213,13 +211,13 @@ const BackendDataGrid = <
 					message: t(
 						"backend-components.data-grid.delete.confirm-dialog." +
 							(invert ? "messageInverted" : "message"),
-						{ NUM: ids.length }
+						{ NUM: ids.length },
 					),
 					textButtonYes: t(
-						"backend-components.data-grid.delete.confirm-dialog.buttons.yes"
+						"backend-components.data-grid.delete.confirm-dialog.buttons.yes",
 					),
 					textButtonNo: t(
-						"backend-components.data-grid.delete.confirm-dialog.buttons.no"
+						"backend-components.data-grid.delete.confirm-dialog.buttons.no",
 					),
 				});
 			}
@@ -239,20 +237,20 @@ const BackendDataGrid = <
 					pushDialog(
 						<ErrorDialog
 							title={t(
-								"backend-components.data-grid.delete.error-dialog.title"
+								"backend-components.data-grid.delete.error-dialog.title",
 							)}
 							message={t(
 								"backend-components.data-grid.delete.error-dialog.message",
-								{ ERROR: (e as Error).message }
+								{ ERROR: (e as Error).message },
 							)}
 							buttons={[
 								{
 									text: t(
-										"backend-components.data-grid.delete.error-dialog.buttons.okay"
+										"backend-components.data-grid.delete.error-dialog.buttons.okay",
 									),
 								},
 							]}
-						/>
+						/>,
 					);
 				}
 			}
@@ -266,7 +264,7 @@ const BackendDataGrid = <
 			refreshGrid,
 			deleteAdvanced,
 			deleteMultiple,
-		]
+		],
 	);
 
 	const addNewButtons: DataGridProps["onAddNew"] = useMemo(() => {

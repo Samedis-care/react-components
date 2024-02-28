@@ -9,7 +9,7 @@ import { ClassNameMap } from "@mui/styles/withStyles";
  */
 const cleanClassMap = <
 	ClassKeys extends string,
-	Props extends { classes?: Partial<ClassNameMap<ClassKeys>> }
+	Props extends { classes?: Partial<ClassNameMap<ClassKeys>> },
 >(
 	input: Props,
 	invert: boolean,
@@ -33,8 +33,8 @@ const cleanClassMap = <
 			Object.entries(input.classes).filter(([key]) =>
 				invert
 					? !classes.includes(key as ClassKeys)
-					: classes.includes(key as ClassKeys)
-			)
+					: classes.includes(key as ClassKeys),
+			),
 		) as Partial<ClassNameMap<ClassKeys>>,
 	};
 };

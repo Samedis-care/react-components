@@ -15,7 +15,7 @@ const useStyles = makeStyles(
 			transition: "opacity 500ms cubic-bezier(0.4, 0, 0.2, 1) 1000ms",
 		},
 	},
-	{ name: "CcFormLoaderOverlay" }
+	{ name: "CcFormLoaderOverlay" },
 );
 
 export interface FormLoaderOverlayProps {

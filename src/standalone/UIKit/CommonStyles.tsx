@@ -21,7 +21,7 @@ export type InputTheme = Partial<Styles<Theme, UIInputProps, InputClassKey>>;
 
 const useThemeStyles = makeThemeStyles<UIInputProps, InputClassKey>(
 	(theme) => theme.componentsCare?.uiKit?.input,
-	"CcUIKitInput"
+	"CcUIKitInput",
 );
 
 const useRawInputStyles = makeStyles(
@@ -44,11 +44,11 @@ const useRawInputStyles = makeStyles(
 			padding: theme.spacing(2),
 		},
 	}),
-	{ name: "CcUIKitInput" }
+	{ name: "CcUIKitInput" },
 );
 
 export const useInputStyles = (
-	props: UIInputProps
+	props: UIInputProps,
 ): Partial<ClassNameMap<InputClassKey>> => {
 	return useMultipleStyles(props, useThemeStyles, useRawInputStyles);
 };

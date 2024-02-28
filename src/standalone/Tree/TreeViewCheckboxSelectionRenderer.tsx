@@ -22,10 +22,10 @@ const TreeViewCheckboxSelectionRenderer = (props: TreeViewRendererProps) => {
 		onAuxClick,
 	} = props;
 
-	const handleExpand = useCallback(() => onToggleExpanded(id), [
-		onToggleExpanded,
-		id,
-	]);
+	const handleExpand = useCallback(
+		() => onToggleExpanded(id),
+		[onToggleExpanded, id],
+	);
 
 	const offsetLeft = depth > 0 ? 12 : 0;
 

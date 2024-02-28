@@ -28,7 +28,7 @@ const DataGridSettings = (props: IDataGridColumnProps) => {
 					: [...prevState.lockedColumns, value],
 			}));
 		},
-		[setState]
+		[setState],
 	);
 	const toggleColumnVisibility = useCallback(
 		(evt: ChangeEvent<HTMLInputElement>) => {
@@ -40,7 +40,7 @@ const DataGridSettings = (props: IDataGridColumnProps) => {
 					: [...prevState.hiddenColumns, value],
 			}));
 		},
-		[setState]
+		[setState],
 	);
 
 	return (

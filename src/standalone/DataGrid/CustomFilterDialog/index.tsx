@@ -25,7 +25,7 @@ const DataGridCustomFilters = () => {
 		(
 			newState:
 				| DataGridCustomDataType
-				| ((prevState: DataGridCustomDataType) => DataGridCustomDataType)
+				| ((prevState: DataGridCustomDataType) => DataGridCustomDataType),
 		) => {
 			if (typeof newState === "function") {
 				setState((prevState) => ({
@@ -39,7 +39,7 @@ const DataGridCustomFilters = () => {
 				}));
 			}
 		},
-		[setState]
+		[setState],
 	);
 
 	if (!filterBar) {

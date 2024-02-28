@@ -31,7 +31,7 @@ class RendererBackendMultiSelectWithTags<
 	GroupCustomT,
 	DataCustomT,
 	GroupDataT extends BaseSelectorData,
-	DataDataT extends MultiSelectorData
+	DataDataT extends MultiSelectorData,
 > extends TypeStringArray {
 	private readonly props: Omit<
 		BackendMultiSelectWithTagsProps<
@@ -60,7 +60,7 @@ class RendererBackendMultiSelectWithTags<
 				DataDataT
 			>,
 			OmitProperties
-		>
+		>,
 	) {
 		super();
 		this.props = props;
@@ -97,7 +97,7 @@ class RendererBackendMultiSelectWithTags<
 
 			if (!relationModel)
 				throw new Error(
-					"Type BackendMultiSelect requires relation model: " + field
+					"Type BackendMultiSelect requires relation model: " + field,
 				);
 
 			return (
@@ -115,7 +115,7 @@ class RendererBackendMultiSelectWithTags<
 						onChange={(value) => handleChange(field, value)}
 						disabled={visibility.readOnly}
 						dataModel={
-							(relationModel as unknown) as Model<
+							relationModel as unknown as Model<
 								DataKeyT,
 								DataVisibilityT,
 								DataCustomT

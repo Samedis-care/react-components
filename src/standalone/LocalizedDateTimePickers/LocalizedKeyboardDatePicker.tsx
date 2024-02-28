@@ -29,7 +29,7 @@ export interface LocalizedKeyboardDatePickerProps
 }
 
 const LocalizedKeyboardDatePicker = (
-	props: LocalizedKeyboardDatePickerProps
+	props: LocalizedKeyboardDatePickerProps,
 ) => {
 	const {
 		hideDisabledIcon,

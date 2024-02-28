@@ -27,7 +27,7 @@ export interface DateTimeInputProps extends UIInputProps {
 }
 
 const DateTimeInput = (
-	props: DateTimeInputProps & DateTimePickerProps<Moment | null>
+	props: DateTimeInputProps & DateTimePickerProps<Moment | null>,
 ) => {
 	const { openInfo, important, required, error, onBlur, ...muiProps } = props;
 	const inputClasses = useInputStyles({ important });
@@ -38,7 +38,7 @@ const DateTimeInput = (
 			event.stopPropagation();
 			if (openInfo) openInfo();
 		},
-		[openInfo]
+		[openInfo],
 	);
 
 	return (

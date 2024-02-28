@@ -12,7 +12,7 @@ export type GetParams = Record<string, unknown> | null;
  * @throws If the user has no session
  */
 export type AuthenticationHandlerCallback = (
-	authMode: AuthMode
+	authMode: AuthMode,
 ) => Promise<string> | string;
 /**
  * Can be used to show a loading status.
@@ -27,7 +27,7 @@ export type RequestHook = (
 	url: string,
 	args: GetParams,
 	body: unknown | null,
-	auth: AuthMode
+	auth: AuthMode,
 ) => Promise<void> | void;
 /**
  * The response processor throws if the response is erroneous
@@ -46,7 +46,7 @@ export type ResponseProcessor = (
 	url: string,
 	args: GetParams,
 	body: unknown | null,
-	auth: AuthMode
+	auth: AuthMode,
 ) => Promise<unknown> | unknown;
 
 /**
@@ -67,7 +67,7 @@ export type CustomRequestPerformer = (
 	args: GetParams,
 	headers: Record<string, string>,
 	body: unknown | null,
-	auth: AuthMode
+	auth: AuthMode,
 ) => Promise<Response> | Response | undefined;
 
 /**
@@ -95,7 +95,7 @@ class JsonApiClient {
 		preRequestHook?: RequestHook,
 		postRequestHook?: RequestHook,
 		exceptionHook?: ExceptionHook,
-		customRequestPerformer?: CustomRequestPerformer
+		customRequestPerformer?: CustomRequestPerformer,
 	) {
 		this.handleAuthentication = authHandler;
 		this.handleResponse = responseProcessor;
@@ -111,7 +111,7 @@ class JsonApiClient {
 	public async get<T>(
 		url: string,
 		args: GetParams,
-		auth: AuthMode = AuthMode.On
+		auth: AuthMode = AuthMode.On,
 	): Promise<T> {
 		return this.request<T>("GET", url, args, null, auth);
 	}
@@ -123,7 +123,7 @@ class JsonApiClient {
 		url: string,
 		args: GetParams,
 		body: Record<string, unknown>,
-		auth: AuthMode = AuthMode.On
+		auth: AuthMode = AuthMode.On,
 	): Promise<T> {
 		return this.request<T>("POST", url, args, body, auth);
 	}
@@ -135,7 +135,7 @@ class JsonApiClient {
 		url: string,
 		args: GetParams,
 		body: Record<string, unknown>,
-		auth: AuthMode = AuthMode.On
+		auth: AuthMode = AuthMode.On,
 	): Promise<T> {
 		return this.request<T>("PUT", url, args, body, auth);
 	}
@@ -147,7 +147,7 @@ class JsonApiClient {
 		url: string,
 		args: GetParams,
 		body: Record<string, unknown>,
-		auth: AuthMode = AuthMode.On
+		auth: AuthMode = AuthMode.On,
 	): Promise<T> {
 		return this.request<T>("PATCH", url, args, body, auth);
 	}
@@ -158,7 +158,7 @@ class JsonApiClient {
 	public async delete<T>(
 		url: string,
 		args: GetParams,
-		auth: AuthMode = AuthMode.On
+		auth: AuthMode = AuthMode.On,
 	): Promise<T> {
 		return this.request<T>("DELETE", url, args, null, auth);
 	}
@@ -172,7 +172,7 @@ class JsonApiClient {
 	 */
 	public convertBody(
 		body: unknown | null,
-		headers: Record<string, string>
+		headers: Record<string, string>,
 	): string | FormData | null {
 		if (!body) return null;
 		headers["Content-Type"] = "application/json";
@@ -192,7 +192,7 @@ class JsonApiClient {
 		url: string,
 		args: GetParams,
 		body: unknown | null,
-		auth: AuthMode
+		auth: AuthMode,
 	): Promise<T> {
 		const safeToLeave =
 			method !== "GET" ? UnsafeToLeaveDispatch.lock(method + "-request") : null;
@@ -221,7 +221,7 @@ class JsonApiClient {
 					args,
 					headers,
 					body,
-					auth
+					auth,
 				);
 			}
 			if (!response) {
@@ -241,8 +241,8 @@ class JsonApiClient {
 					console.error("Failed fetch", e);
 					throw new NetworkError(
 						ccI18n.t(
-							"backend-integration.connector.json-api-client.network-error"
-						)
+							"backend-integration.connector.json-api-client.network-error",
+						),
 					);
 				}
 			}
@@ -255,8 +255,8 @@ class JsonApiClient {
 				console.error("[JsonApiClient] Failed reading response", e);
 				throw new NetworkError(
 					ccI18n.t(
-						"backend-integration.connector.json-api-client.network-error"
-					)
+						"backend-integration.connector.json-api-client.network-error",
+					),
 				);
 			}
 
@@ -274,8 +274,8 @@ class JsonApiClient {
 						{
 							STATUS_CODE: response.status,
 							STATUS_TEXT: response.statusText,
-						}
-					)
+						},
+					),
 				);
 			}
 
@@ -286,7 +286,7 @@ class JsonApiClient {
 				url,
 				args,
 				body,
-				auth
+				auth,
 			)) as T;
 		} catch (e) {
 			if (this.exceptionHook) {

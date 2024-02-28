@@ -18,7 +18,7 @@ import { DataGridNoPersist } from "../../standalone";
 export interface BackendDataGridMultiSelectProps<
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
-	CustomT
+	CustomT,
 > extends Omit<
 		DataGridProps,
 		| "columns"
@@ -52,20 +52,18 @@ export interface BackendDataGridMultiSelectProps<
 const BackendDataGridMultiSelect = <
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
-	CustomT
+	CustomT,
 >(
-	props: BackendDataGridMultiSelectProps<KeyT, VisibilityT, CustomT>
+	props: BackendDataGridMultiSelectProps<KeyT, VisibilityT, CustomT>,
 ) => {
 	const { model, readOnly, selected, onChange, ...gridProps } = props;
 	const [refreshToken, setRefreshToken] = useState(new Date().toISOString());
 	const refreshGrid = useCallback(
 		() => setRefreshToken(new Date().toISOString()),
-		[]
+		[],
 	);
-	const [
-		initialSelectionChangeReceived,
-		setInitialSelectionChangeReceived,
-	] = useState(false);
+	const [initialSelectionChangeReceived, setInitialSelectionChangeReceived] =
+		useState(false);
 
 	// developer warning
 	useEffect(() => {
@@ -75,7 +73,7 @@ const BackendDataGridMultiSelect = <
 		) {
 			// eslint-disable-next-line no-console
 			console.warn(
-				"[Components-Care] [DataGridMultiSelectCRUD] Backend connector does not support index2 function, offset based pagination will be emulated (inefficient)"
+				"[Components-Care] [DataGridMultiSelectCRUD] Backend connector does not support index2 function, offset based pagination will be emulated (inefficient)",
 			);
 		}
 	}, [model]);
@@ -101,7 +99,7 @@ const BackendDataGridMultiSelect = <
 				}}
 				selection={[false, selected]}
 				loadData={async (
-					params: IDataGridLoadDataParameters
+					params: IDataGridLoadDataParameters,
 				): Promise<DataGridData> => {
 					const [relationshipRecordsFiltered, relationshipRecordFilteredMeta] =
 						selected.length > 0
@@ -115,7 +113,7 @@ const BackendDataGridMultiSelect = <
 											value2: "",
 										},
 									},
-							  })
+								})
 							: [[], { totalRows: 0 }];
 					const relationshipRecordFilteredCount =
 						relationshipRecordFilteredMeta.filteredRows ??
@@ -155,5 +153,5 @@ const BackendDataGridMultiSelect = <
 };
 
 export default React.memo(
-	BackendDataGridMultiSelect
+	BackendDataGridMultiSelect,
 ) as typeof BackendDataGridMultiSelect;

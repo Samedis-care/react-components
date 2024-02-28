@@ -32,7 +32,7 @@ export type ConnectorIndex2Params = Partial<
 abstract class Connector<
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
-	CustomT
+	CustomT,
 > {
 	/**
 	 * Lists all available data entries
@@ -43,7 +43,7 @@ abstract class Connector<
 	 */
 	abstract index(
 		params?: Partial<IDataGridLoadDataParameters>,
-		model?: Model<KeyT, VisibilityT, CustomT>
+		model?: Model<KeyT, VisibilityT, CustomT>,
 	): Promise<[Record<string, unknown>[], ResponseMeta, unknown?]>;
 
 	/**
@@ -56,7 +56,7 @@ abstract class Connector<
 	 */
 	public async index2(
 		params: ConnectorIndex2Params,
-		model?: Model<KeyT, VisibilityT, CustomT>
+		model?: Model<KeyT, VisibilityT, CustomT>,
 	): Promise<[Record<string, unknown>[], ResponseMeta, unknown?]> {
 		const pageSize = 25; // we call the main index function with this page size
 		if (params.rows < 0)
@@ -70,7 +70,7 @@ abstract class Connector<
 		do {
 			const [resultSet, meta] = await this.index(
 				Object.assign({}, params, { page: page + 1, rows: pageSize }),
-				model
+				model,
 			);
 			lastMeta = meta;
 
@@ -80,7 +80,7 @@ abstract class Connector<
 				Math.min(params.offset + params.rows, maxRows) - offset;
 			const copySet = resultSet.slice(
 				Math.max(recordStartIndex, 0),
-				Math.min(recordEndIndex, pageSize)
+				Math.min(recordEndIndex, pageSize),
 			);
 			mergedResultSet.push(...copySet);
 
@@ -104,7 +104,7 @@ abstract class Connector<
 	 */
 	abstract create(
 		data: Record<string, unknown>,
-		model?: Model<KeyT, VisibilityT, CustomT>
+		model?: Model<KeyT, VisibilityT, CustomT>,
 	): Promise<ModelGetResponse<KeyT>> | ModelGetResponse<KeyT>;
 
 	/**
@@ -115,7 +115,7 @@ abstract class Connector<
 	 */
 	abstract read(
 		id: string,
-		model?: Model<KeyT, VisibilityT, CustomT>
+		model?: Model<KeyT, VisibilityT, CustomT>,
 	): Promise<ModelGetResponse<KeyT>> | ModelGetResponse<KeyT>;
 
 	/**
@@ -126,7 +126,7 @@ abstract class Connector<
 	 */
 	abstract update(
 		data: Record<ModelFieldName, unknown>,
-		model?: Model<KeyT, VisibilityT, CustomT>
+		model?: Model<KeyT, VisibilityT, CustomT>,
 	): Promise<ModelGetResponse<KeyT>> | ModelGetResponse<KeyT>;
 
 	/**
@@ -136,7 +136,7 @@ abstract class Connector<
 	 */
 	abstract delete(
 		id: string,
-		model?: Model<KeyT, VisibilityT, CustomT>
+		model?: Model<KeyT, VisibilityT, CustomT>,
 	): Promise<void> | void;
 
 	/**
@@ -146,11 +146,11 @@ abstract class Connector<
 	 */
 	deleteMultiple(
 		ids: string[],
-		model?: Model<KeyT, VisibilityT, CustomT>
-	): void;
+		model?: Model<KeyT, VisibilityT, CustomT>,
+	): Promise<void> | void;
 	async deleteMultiple(
 		ids: string[],
-		model?: Model<KeyT, VisibilityT, CustomT>
+		model?: Model<KeyT, VisibilityT, CustomT>,
 	): Promise<void> {
 		await Promise.all(ids.map((id) => this.delete(id, model)));
 	}
@@ -162,7 +162,7 @@ abstract class Connector<
 	 */
 	public deleteAdvanced?: (
 		req: AdvancedDeleteRequest,
-		model?: Model<KeyT, VisibilityT, CustomT>
+		model?: Model<KeyT, VisibilityT, CustomT>,
 	) => Promise<void> | void;
 
 	/**

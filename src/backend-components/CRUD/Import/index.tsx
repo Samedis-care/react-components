@@ -20,7 +20,7 @@ import { ValidationError } from "../../Form";
 export interface CrudImportProps<
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
-	CustomT
+	CustomT,
 > {
 	/**
 	 * The model to import for
@@ -51,7 +51,7 @@ export interface CrudImportProps<
 	 * @returns Validation errors
 	 */
 	validate?: (
-		record: Record<string, unknown>
+		record: Record<string, unknown>,
 	) => Promise<ValidationError> | ValidationError;
 	/**
 	 * Guided version
@@ -73,7 +73,7 @@ const useStyles = makeStyles(
 			height: "100%",
 		},
 	},
-	{ name: "CcCrudImport" }
+	{ name: "CcCrudImport" },
 );
 
 interface ConversionScript {
@@ -98,7 +98,7 @@ export interface CrudImporterStepProps {
 	validate:
 		| undefined
 		| ((
-				record: Record<string, unknown>
+				record: Record<string, unknown>,
 		  ) => Promise<ValidationError> | ValidationError);
 	state: CrudImporterState;
 	setState: Dispatch<SetStateAction<CrudImporterState>>;
@@ -106,7 +106,7 @@ export interface CrudImporterStepProps {
 
 export const isFieldImportable = (
 	name: string,
-	field: ModelFieldDefinition<unknown, string, PageVisibility, unknown>
+	field: ModelFieldDefinition<unknown, string, PageVisibility, unknown>,
 ): boolean => {
 	const createVisibility = field.visibility.create;
 	const editVisibility = field.visibility.edit;
@@ -123,9 +123,9 @@ export const isFieldImportable = (
 export const useCrudImportLogic = <
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
-	CustomT
+	CustomT,
 >(
-	props: CrudImportProps<KeyT, VisibilityT, CustomT>
+	props: CrudImportProps<KeyT, VisibilityT, CustomT>,
 ) => {
 	const { model, importConfig, updateKey } = props;
 	const guided = props.guided && importConfig;
@@ -148,8 +148,8 @@ export const useCrudImportLogic = <
 							status: "pending",
 							error: null,
 						} as ConversionScript,
-					])
-			  )
+					]),
+				)
 			: {},
 		validationPassed: false,
 		importDone: false,
@@ -157,11 +157,11 @@ export const useCrudImportLogic = <
 	const hasImportConfig = !!importConfig;
 	const next = useCallback(
 		() => setActiveStep((prev) => prev + (prev == 0 && guided ? 2 : 1)),
-		[guided]
+		[guided],
 	);
 	const prev = useCallback(
 		() => setActiveStep((prev) => prev - (prev == 2 && guided ? 2 : 1)),
-		[guided]
+		[guided],
 	);
 	const finish = useCallback(() => {
 		// remove /import from url
@@ -183,19 +183,14 @@ export const useCrudImportLogic = <
 const CrudImport = <
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
-	CustomT
+	CustomT,
 >(
-	props: CrudImportProps<KeyT, VisibilityT, CustomT>
+	props: CrudImportProps<KeyT, VisibilityT, CustomT>,
 ) => {
 	const classes = useStyles();
 	const { t } = useCCTranslations();
-	const {
-		updateKeyAdditionalFilters,
-		howTo,
-		model,
-		updateKey,
-		validate,
-	} = props;
+	const { updateKeyAdditionalFilters, howTo, model, updateKey, validate } =
+		props;
 	const {
 		guided,
 		activeStep,
@@ -226,7 +221,7 @@ const CrudImport = <
 							<Step key={index.toString(16)}>
 								<StepLabel>{t(label)}</StepLabel>
 							</Step>
-						)
+						),
 					)}
 				</Stepper>
 			</Grid>
@@ -234,11 +229,7 @@ const CrudImport = <
 				{activeStep === 0 && (
 					<Step1LoadData
 						model={
-							(model as unknown) as Model<
-								ModelFieldName,
-								PageVisibility,
-								unknown
-							>
+							model as unknown as Model<ModelFieldName, PageVisibility, unknown>
 						}
 						howTo={guided ? howTo : undefined}
 						updateKey={updateKey}
@@ -252,11 +243,7 @@ const CrudImport = <
 				{activeStep === 1 && (
 					<Step2ConnectData
 						model={
-							(model as unknown) as Model<
-								ModelFieldName,
-								PageVisibility,
-								unknown
-							>
+							model as unknown as Model<ModelFieldName, PageVisibility, unknown>
 						}
 						updateKey={updateKey}
 						additionalUpdateKeyFilters={updateKeyAdditionalFilters}
@@ -269,11 +256,7 @@ const CrudImport = <
 				{activeStep === 2 && (
 					<Step3ValidateReview
 						model={
-							(model as unknown) as Model<
-								ModelFieldName,
-								PageVisibility,
-								unknown
-							>
+							model as unknown as Model<ModelFieldName, PageVisibility, unknown>
 						}
 						updateKey={updateKey}
 						additionalUpdateKeyFilters={updateKeyAdditionalFilters}
@@ -286,11 +269,7 @@ const CrudImport = <
 				{activeStep === 3 && (
 					<Step4Import
 						model={
-							(model as unknown) as Model<
-								ModelFieldName,
-								PageVisibility,
-								unknown
-							>
+							model as unknown as Model<ModelFieldName, PageVisibility, unknown>
 						}
 						updateKey={updateKey}
 						additionalUpdateKeyFilters={updateKeyAdditionalFilters}

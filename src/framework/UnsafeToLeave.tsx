@@ -23,7 +23,7 @@ export const useIsUnsafeToLeave = (): boolean => {
 };
 
 const UnsafeToLeave = (
-	props: React.PropsWithChildren<{ disable?: boolean }>
+	props: React.PropsWithChildren<{ disable?: boolean }>,
 ): React.ReactElement => {
 	const { disable } = props;
 	const [reasons, setReasons] = useState<string[]>([]);
@@ -59,7 +59,7 @@ const UnsafeToLeave = (
 			setReasons(reasonsRef.current);
 			return () => {
 				reasonsRef.current = reasonsRef.current.filter(
-					(entry) => entry !== ident
+					(entry) => entry !== ident,
 				);
 				setReasons(reasonsRef.current);
 			};

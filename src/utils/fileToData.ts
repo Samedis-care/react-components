@@ -18,9 +18,9 @@ const fileToData = async (file: File, includeName = false): Promise<string> => {
 				includeName
 					? dataUri.replace(
 							";base64,",
-							`;name=${encodeURIComponent(file.name)};base64,`
-					  )
-					: dataUri
+							`;name=${encodeURIComponent(file.name)};base64,`,
+						)
+					: dataUri,
 			);
 		});
 		reader.addEventListener("error", () => {

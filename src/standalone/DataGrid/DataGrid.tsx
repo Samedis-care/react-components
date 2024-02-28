@@ -154,7 +154,7 @@ export interface IDataGridCallbacks {
 	 * @returns The loaded data (resolve) or an error (reject)
 	 */
 	loadData: (
-		params: IDataGridLoadDataParameters
+		params: IDataGridLoadDataParameters,
 	) => DataGridData | Promise<DataGridData>;
 	/**
 	 * Specifies the amount of data entries to load at once.
@@ -170,7 +170,7 @@ export interface IDataGridCallbacks {
 	 * @param customData The custom user-defined state-stored data
 	 */
 	getAdditionalFilters?: (
-		customData: DataGridCustomDataType
+		customData: DataGridCustomDataType,
 	) => DataGridAdditionalFilters;
 	/**
 	 * Default initial values for custom data (overwritten by persisted custom data)
@@ -208,7 +208,7 @@ export interface IDataGridCallbacks {
 	isFilterSupported?: (
 		dataType: ModelFilterType,
 		filterType: FilterType,
-		fieldName: string
+		fieldName: string,
 	) => boolean;
 	/**
 	 * Callback for unhandled JS errors
@@ -292,7 +292,7 @@ export interface IDataGridColumnProps {
 		filter?: Pick<
 			IDataGridLoadDataParameters,
 			"quickFilter" | "additionalFilters" | "fieldFilter"
-		>
+		>,
 	) => Promise<void> | unknown;
 	/**
 	 * Reason why delete is disabled
@@ -536,7 +536,7 @@ const DataGridStateContext = React.createContext<
 
 export const useDataGridState = (): [
 	IDataGridState,
-	Dispatch<SetStateAction<IDataGridState>>
+	Dispatch<SetStateAction<IDataGridState>>,
 ] => {
 	const ctx = useContext(DataGridStateContext);
 	if (!ctx) throw new Error("State context not set");
@@ -544,7 +544,7 @@ export const useDataGridState = (): [
 };
 
 const DataGridPropsContext = React.createContext<DataGridProps | undefined>(
-	undefined
+	undefined,
 );
 
 export const useDataGridProps = (): DataGridProps => {
@@ -563,7 +563,7 @@ export type DataGridColumnState = [
 	/**
 	 * Update column state callback
 	 */
-	Dispatch<SetStateAction<IDataGridColumnsState>>
+	Dispatch<SetStateAction<IDataGridColumnsState>>,
 ];
 
 const DataGridColumnsStateContext = React.createContext<
@@ -584,7 +584,7 @@ export type DataGridColumnsWidthState = [
 	/**
 	 * Set state function
 	 */
-	Dispatch<SetStateAction<Record<string, number>>>
+	Dispatch<SetStateAction<Record<string, number>>>,
 ];
 
 const DataGridColumnsWidthStateContext = React.createContext<
@@ -598,7 +598,7 @@ export const useDataGridColumnsWidthState = (): DataGridColumnsWidthState => {
 };
 
 const DataGridRootRefContext = React.createContext<HTMLDivElement | undefined>(
-	undefined
+	undefined,
 );
 
 export const useDataGridRootRef = (): HTMLDivElement => {
@@ -609,7 +609,7 @@ export const useDataGridRootRef = (): HTMLDivElement => {
 
 export const getDataGridDefaultState = (
 	columns: IDataGridColumnDef[],
-	defaultCustomData: Record<string, unknown> | undefined
+	defaultCustomData: Record<string, unknown> | undefined,
 ): IDataGridState => ({
 	search: "",
 	rowsTotal: 0,
@@ -635,15 +635,15 @@ export const getDataGridDefaultState = (
 export const getDataGridDefaultColumnsState = (
 	columns: IDataGridColumnDef[],
 	defaultSort: DataGridSortSetting[] | undefined,
-	defaultFilter: DataGridFilterSetting[] | undefined
+	defaultFilter: DataGridFilterSetting[] | undefined,
 ): IDataGridColumnsState => {
 	const data: IDataGridColumnsState = {};
 	columns.forEach((column) => {
 		const defaultSortIndex = defaultSort?.findIndex(
-			(entry) => entry.field === column.field
+			(entry) => entry.field === column.field,
 		);
 		const defaultFilterSetting = defaultFilter?.find(
-			(entry) => entry.field === column.field
+			(entry) => entry.field === column.field,
 		);
 		data[column.field] = {
 			sort:
@@ -760,7 +760,7 @@ const useStyles = makeStyles(
 					?.backgroundColor || theme.palette.background.paper,
 			color: theme.palette.getContrastText(
 				theme.componentsCare?.dataGrid?.content?.row?.cell?.header
-					?.backgroundColor ?? theme.palette.background.paper
+					?.backgroundColor ?? theme.palette.background.paper,
 			),
 			...theme.componentsCare?.dataGrid?.content?.row?.cell?.header?.style,
 		},
@@ -779,7 +779,7 @@ const useStyles = makeStyles(
 				theme.componentsCare?.dataGrid?.content?.row?.borderColor,
 			color: theme.palette.getContrastText(
 				theme.componentsCare?.dataGrid?.content?.backgroundColor ??
-					theme.palette.background.paper
+					theme.palette.background.paper,
 			),
 			...theme.componentsCare?.dataGrid?.content?.row?.cell?.data?.style,
 		},
@@ -791,7 +791,7 @@ const useStyles = makeStyles(
 				theme.componentsCare?.dataGrid?.content?.row?.selected
 					?.backgroundColor ||
 					theme.componentsCare?.dataGrid?.content?.backgroundColor ||
-					theme.palette.background.paper
+					theme.palette.background.paper,
 			),
 			...theme.componentsCare?.dataGrid?.content?.row?.selected?.style,
 		},
@@ -962,7 +962,7 @@ const useStyles = makeStyles(
 			paddingBottom: theme.spacing(2),
 		},
 	}),
-	{ name: "CcDataGrid" }
+	{ name: "CcDataGrid" },
 );
 
 export type DataGridClassKey = keyof ReturnType<typeof useStyles>;
@@ -973,7 +973,7 @@ export type DataGridThemeExpert = Partial<
 
 const useThemeStyles = makeThemeStyles<DataGridProps, DataGridClassKey>(
 	(theme) => theme.componentsCare?.dataGridExpert,
-	"CcDataGrid"
+	"CcDataGrid",
 );
 
 export const useDataGridStyles = (): ReturnType<typeof useStyles> => {
@@ -981,7 +981,7 @@ export const useDataGridStyles = (): ReturnType<typeof useStyles> => {
 };
 
 const useDataGridStylesInternal = (
-	props: DataGridProps
+	props: DataGridProps,
 ): ReturnType<typeof useStyles> => {
 	return useMultipleStyles(props, useThemeStyles, useStyles);
 };
@@ -989,7 +989,7 @@ const useDataGridStylesInternal = (
 export const getActiveDataGridColumns = (
 	columns: IDataGridColumnDef[],
 	hiddenColumns: string[],
-	lockedColumns: string[]
+	lockedColumns: string[],
 ): IDataGridColumnDef[] => {
 	return columns
 		.filter((column) => !hiddenColumns.includes(column.field))
@@ -997,7 +997,7 @@ export const getActiveDataGridColumns = (
 		.concat(
 			columns
 				.filter((column) => !hiddenColumns.includes(column.field))
-				.filter((column) => !lockedColumns.includes(column.field))
+				.filter((column) => !lockedColumns.includes(column.field)),
 		)
 		.map((column) => ({
 			...column,
@@ -1007,7 +1007,7 @@ export const getActiveDataGridColumns = (
 
 export const getDefaultColumnWidths = (
 	columns: IDataGridColumnDef[],
-	theme: Theme
+	theme: Theme,
 ): Record<string, number> => {
 	const widthData: Record<string, number> = {};
 	columns.forEach((column) => {
@@ -1015,7 +1015,7 @@ export const getDefaultColumnWidths = (
 			widthData[column.field] =
 				measureText(
 					theme.typography.body1.font || "16px Roboto, sans-serif",
-					column.headerName
+					column.headerName,
 				).width + 100;
 		} catch (e) {
 			// if canvas is not available to measure text
@@ -1029,12 +1029,12 @@ export const getDefaultColumnWidths = (
 			// min width
 			widthData[column.field] = Math.max(
 				column.width[0],
-				widthData[column.field]
+				widthData[column.field],
 			);
 			// max width
 			widthData[column.field] = Math.min(
 				column.width[1],
-				widthData[column.field]
+				widthData[column.field],
 			);
 		}
 	});
@@ -1064,9 +1064,10 @@ const DataGrid = (props: DataGridProps) => {
 	const theme = useTheme();
 	const persistedContext = useContext(DataGridPersistentStateContext);
 	const [persistedPromise] = persistedContext || [];
-	const persisted = suspend(() => Promise.resolve(persistedPromise), [
-		persistedPromise,
-	]);
+	const persisted = suspend(
+		() => Promise.resolve(persistedPromise),
+		[persistedPromise],
+	);
 
 	const classes = useDataGridStylesInternal(props);
 	const statePack = useState<IDataGridState>(() => ({
@@ -1098,7 +1099,7 @@ const DataGrid = (props: DataGridProps) => {
 
 	const visibleColumns = useMemo(
 		() => getActiveDataGridColumns(columns, hiddenColumns, lockedColumns),
-		[columns, hiddenColumns, lockedColumns]
+		[columns, hiddenColumns, lockedColumns],
 	);
 
 	const columnsStatePack = useState<IDataGridColumnsState>(() => {
@@ -1139,7 +1140,7 @@ const DataGrid = (props: DataGridProps) => {
 						selectAll: selection[0],
 						selectedRows: selection[1],
 						selectionUpdatedByProps: true,
-				  };
+					};
 		});
 	}, [setState, selection]);
 
@@ -1190,7 +1191,7 @@ const DataGrid = (props: DataGridProps) => {
 						// eslint-disable-next-line no-console
 						console.assert(
 							newPage !== pageIndex,
-							"[Components-Care] [DataGrid] Detected invalid page, but newly calculated page equals invalid page"
+							"[Components-Care] [DataGrid] Detected invalid page, but newly calculated page equals invalid page",
 						);
 						if (newPage !== pageIndex) {
 							setState((prevState) => ({
@@ -1249,7 +1250,7 @@ const DataGrid = (props: DataGridProps) => {
 				...prevState,
 				refreshData: Math.min(prevState.refreshData + 1, 2),
 			})),
-		[setState]
+		[setState],
 	);
 
 	// delay refresh call till useEffect has been processed, so we don't deadlock when auto page correction in the refresh
@@ -1268,7 +1269,7 @@ const DataGrid = (props: DataGridProps) => {
 					refreshShouldWipeRows: prevState.refreshData === 1, // when we set refreshData to two and this is changing filters, we need an rows reset to prevent old data from getting displayed
 				}));
 			}, 500),
-		[setState]
+		[setState],
 	);
 
 	const initialRender = useRef(true);

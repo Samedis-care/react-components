@@ -10,11 +10,11 @@ import { Model, ModelFieldName, PageVisibility } from "../backend-integration";
 const generateLocalizedExcelImportTemplate = <
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
-	CustomT
+	CustomT,
 >(
 	model: Model<KeyT, VisibilityT, CustomT>,
 	fields: KeyT[],
-	fileName: string
+	fileName: string,
 ) => {
 	const book = XLSX.utils.book_new();
 	const sheet = XLSX.utils.json_to_sheet([], {
@@ -31,7 +31,7 @@ const generateLocalizedExcelImportTemplate = <
 				bookType: "xlsx",
 			}) as ArrayBuffer,
 		],
-		fileName
+		fileName,
 	);
 };
 

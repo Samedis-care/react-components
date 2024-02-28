@@ -3,7 +3,7 @@
  * @param object The object to check
  */
 const isObjectEmpty = (
-	object: Record<string | number | symbol, unknown>
+	object: Record<string | number | symbol, unknown>,
 ): boolean => {
 	for (const key in object) {
 		if (!Object.prototype.hasOwnProperty.call(object, key)) continue;

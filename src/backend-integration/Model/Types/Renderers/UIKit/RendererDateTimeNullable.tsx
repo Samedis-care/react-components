@@ -56,8 +56,8 @@ class RendererDateTimeNullable extends TypeDateTimeNullable {
 						onError={(error: React.ReactNode) => {
 							this.error = error
 								? ccI18n.t(
-										"backend-integration.model.types.renderers.date.validation-error"
-								  )
+										"backend-integration.model.types.renderers.date.validation-error",
+									)
 								: "";
 							setFieldTouched(field, touched, true);
 						}}

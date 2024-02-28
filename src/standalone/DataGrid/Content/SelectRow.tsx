@@ -23,7 +23,7 @@ export const isSelected = (
 	selectAll: boolean,
 	selectedIds: string[],
 	record?: Record<string, unknown>,
-	isSelectedHook?: DataGridProps["isSelected"]
+	isSelectedHook?: DataGridProps["isSelected"],
 ): boolean => {
 	if (!record) return false;
 	const result = xor(selectAll, selectedIds.includes(record.id as string));
@@ -46,7 +46,7 @@ const SelectRow = (props: IDataGridContentSelectRowProps) => {
 				state.selectAll,
 				state.selectedRows,
 				record,
-				isSelectedHook
+				isSelectedHook,
 			)}
 			disabled={canSelectRow ? !canSelectRow(record) : false}
 			id={record.id}

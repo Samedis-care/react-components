@@ -17,7 +17,7 @@ export interface CrudMultiSelectWithGroupsProps<
 	GroupCustomT,
 	DataCustomT,
 	GroupDataT extends BaseSelectorData,
-	DataDataT extends MultiSelectorData
+	DataDataT extends MultiSelectorData,
 > extends Omit<
 			BackendMultiSelectWithTagsProps<
 				GroupKeyT,
@@ -61,7 +61,7 @@ const CrudMultiSelectWithGroups = <
 	GroupCustomT,
 	DataCustomT,
 	GroupDataT extends BaseSelectorData,
-	DataDataT extends MultiSelectorData
+	DataDataT extends MultiSelectorData,
 >(
 	props: CrudMultiSelectWithGroupsProps<
 		GroupKeyT,
@@ -74,7 +74,7 @@ const CrudMultiSelectWithGroups = <
 		DataDataT
 	> &
 		RefAttributes<CrudSelectDispatch<DataDataT>>,
-	ref: ForwardedRef<CrudSelectDispatch<DataDataT>>
+	ref: ForwardedRef<CrudSelectDispatch<DataDataT>>,
 ) => {
 	const { errorComponent: ErrorComponent } = props;
 
@@ -115,5 +115,5 @@ const CrudMultiSelectWithGroups = <
 };
 
 export default React.memo(
-	React.forwardRef(CrudMultiSelectWithGroups)
+	React.forwardRef(CrudMultiSelectWithGroups),
 ) as typeof CrudMultiSelectWithGroups;

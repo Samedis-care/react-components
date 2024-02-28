@@ -181,7 +181,7 @@ const useStyles = makeStyles(
 			overflow: "unset",
 		},
 	}),
-	{ name: "CcImageBox" }
+	{ name: "CcImageBox" },
 );
 
 export type ImageBoxClassKey = keyof ReturnType<typeof useStyles>;
@@ -193,11 +193,11 @@ export type ImageBoxTheme = Partial<
 const useThemeStyles = makeThemeStyles<ImageBoxProps, ImageBoxClassKey>(
 	(theme) => theme.componentsCare?.fileUpload?.multiImage?.imageBox,
 	"CcImageBox",
-	useStyles
+	useStyles,
 );
 
 const useScrollSwipe = (
-	params: Pick<ImageBoxProps, "onPrevImage" | "onNextImage">
+	params: Pick<ImageBoxProps, "onPrevImage" | "onNextImage">,
 ): {
 	containerRef: MutableRefObject<HTMLDivElement | null>;
 	handleScroll: React.UIEventHandler<HTMLDivElement>;
@@ -214,7 +214,7 @@ const useScrollSwipe = (
 	}, [onPrevImage]);
 	const [debouncedHandleResetScroll, cancelResetScroll] = useDebounce(
 		handleResetScroll,
-		200
+		200,
 	);
 	const handleScroll = useCallback(
 		(evt: React.UIEvent<HTMLDivElement>) => {
@@ -240,7 +240,7 @@ const useScrollSwipe = (
 				debouncedHandleResetScroll();
 			}
 		},
-		[cancelResetScroll, debouncedHandleResetScroll, onNextImage, onPrevImage]
+		[cancelResetScroll, debouncedHandleResetScroll, onNextImage, onPrevImage],
 	);
 	useEffect(() => {
 		handleResetScroll();
@@ -285,21 +285,21 @@ const ImageBox = (props: ImageBoxProps) => {
 			evt.stopPropagation();
 			if (onRemove) onRemove();
 		},
-		[onRemove]
+		[onRemove],
 	);
 	const handlePrevImage = useCallback(
 		(evt: React.MouseEvent) => {
 			evt.stopPropagation();
 			if (onPrevImage) onPrevImage();
 		},
-		[onPrevImage]
+		[onPrevImage],
 	);
 	const handleNextImage = useCallback(
 		(evt: React.MouseEvent) => {
 			evt.stopPropagation();
 			if (onNextImage) onNextImage();
 		},
-		[onNextImage]
+		[onNextImage],
 	);
 
 	const {

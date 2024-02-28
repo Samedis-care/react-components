@@ -10,7 +10,7 @@ import { useFormContext } from "./Form";
  */
 const useFormState = <S>(
 	name: string,
-	initialState: S | (() => S)
+	initialState: S | (() => S),
 ): [S, Dispatch<SetStateAction<S>>] => {
 	const { getCustomState, setCustomState } = useFormContext();
 	const statePack = useState<S>(
@@ -18,7 +18,7 @@ const useFormState = <S>(
 			getCustomState<S>(name) ??
 			(typeof initialState === "function"
 				? (initialState as () => S)()
-				: initialState)
+				: initialState),
 	);
 	const [state] = statePack;
 	useEffect(() => {

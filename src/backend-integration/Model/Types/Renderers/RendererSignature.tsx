@@ -71,7 +71,7 @@ class RendererSignature extends TypeImage {
 		) : (
 			<>
 				{ccI18n.t(
-					"backend-integration.model.types.renderers.signature.not-set"
+					"backend-integration.model.types.renderers.signature.not-set",
 				)}
 			</>
 		);

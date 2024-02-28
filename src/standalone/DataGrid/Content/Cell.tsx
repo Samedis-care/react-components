@@ -28,7 +28,7 @@ export interface CellContextType {
 	hoverState: [number | null, Dispatch<SetStateAction<number | null>>];
 }
 export const CellContext = React.createContext<CellContextType | undefined>(
-	undefined
+	undefined,
 );
 export const useCellContext = () => {
 	const ctx = useContext(CellContext);
@@ -100,6 +100,7 @@ const Cell = (props: GridChildComponentProps): React.ReactElement => {
 			!React.isValidElement(content) &&
 			"toString" in content
 		) {
+			// eslint-disable-next-line @typescript-eslint/no-base-to-string
 			content = content.toString();
 		}
 	}
@@ -135,7 +136,7 @@ const Cell = (props: GridChildComponentProps): React.ReactElement => {
 						state.selectAll,
 						state.selectedRows,
 						record,
-						isSelectedHook
+						isSelectedHook,
 					)) &&
 					classes.dataCellSelected,
 			])}

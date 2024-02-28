@@ -15,7 +15,7 @@ import { FormControlFieldsetCC } from "../../../../../standalone";
 
 export type WrapButtonFunc = (
 	btn: React.ReactElement,
-	value: EnumValue
+	value: EnumValue,
 ) => React.ReactElement;
 
 /**
@@ -28,7 +28,7 @@ class RendererEnumRadio extends TypeEnumMulti {
 	constructor(
 		values: EnumValue[],
 		horizontal = false,
-		wrapButton: WrapButtonFunc = (btn: React.ReactElement) => btn
+		wrapButton: WrapButtonFunc = (btn: React.ReactElement) => btn,
 	) {
 		super(values);
 
@@ -93,7 +93,7 @@ class RendererEnumRadio extends TypeEnumMulti {
 														field,
 														evt.target.checked
 															? value.concat([entry.value]) // add value
-															: value.filter((v) => v !== entry.value) // remove value
+															: value.filter((v) => v !== entry.value), // remove value
 													)
 												}
 											/>
@@ -101,8 +101,8 @@ class RendererEnumRadio extends TypeEnumMulti {
 										label={entry.getLabel()}
 										disabled={visibility.readOnly}
 									/>,
-									entry
-								)
+									entry,
+								),
 							)}
 					</FormGroup>
 					<FormHelperText>{errorMsg || warningMsg}</FormHelperText>
@@ -115,13 +115,13 @@ class RendererEnumRadio extends TypeEnumMulti {
 				{value
 					.map((enumValue) => {
 						const valueInfo = this.values.find(
-							(entry) => entry.value === enumValue
+							(entry) => entry.value === enumValue,
 						);
 						return valueInfo
 							? valueInfo.getLabel()
 							: ccI18n.t(
-									"backend-integration.model.types.renderers.enum.unknown"
-							  );
+									"backend-integration.model.types.renderers.enum.unknown",
+								);
 					})
 					.join(", ")}
 			</Typography>

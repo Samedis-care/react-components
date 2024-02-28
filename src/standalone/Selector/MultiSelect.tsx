@@ -23,7 +23,7 @@ export interface MultiSelectorData extends BaseSelectorData {
 	 */
 	canUnselect?: (
 		data: MultiSelectorData,
-		evt: React.MouseEvent<HTMLElement>
+		evt: React.MouseEvent<HTMLElement>,
 	) => boolean | Promise<boolean>;
 	/**
 	 * Disable delete button
@@ -80,7 +80,7 @@ const useBaseSelectorStyles = makeStyles(
 					: undefined,
 		}),
 	}),
-	{ name: "CcMultiSelectBase" }
+	{ name: "CcMultiSelectBase" },
 );
 
 const useMultiSelectorStyles = makeStyles(
@@ -91,7 +91,7 @@ const useMultiSelectorStyles = makeStyles(
 			borderRadius: `0px 0px ${theme.shape.borderRadius}px ${theme.shape.borderRadius}px`,
 		},
 	}),
-	{ name: "CcMultiSelect" }
+	{ name: "CcMultiSelect" },
 );
 
 export interface MultiSelectTheme {
@@ -102,7 +102,7 @@ export interface MultiSelectTheme {
 }
 
 const MultiSelect = <DataT extends MultiSelectorData>(
-	props: MultiSelectProps<DataT>
+	props: MultiSelectProps<DataT>,
 ) => {
 	const {
 		onLoad,
@@ -126,9 +126,9 @@ const MultiSelect = <DataT extends MultiSelectorData>(
 	const multiSelectClasses = useMultiSelectorStyles(props);
 	const baseSelectorClasses = useBaseSelectorStyles(
 		cleanClassMap(
-			(props as unknown) as MultiSelectProps<MultiSelectorData>,
-			true
-		)
+			props as unknown as MultiSelectProps<MultiSelectorData>,
+			true,
+		),
 	);
 
 	const getIdDefault = useCallback((data: DataT) => data.value, []);
@@ -145,7 +145,7 @@ const MultiSelect = <DataT extends MultiSelectorData>(
 			const selectedOptions = [...selected, data];
 			if (onSelect) onSelect(selectedOptions);
 		},
-		[onSelect, selected]
+		[onSelect, selected],
 	);
 
 	const multiSelectLoadHandler = useCallback(
@@ -154,16 +154,16 @@ const MultiSelect = <DataT extends MultiSelectorData>(
 			return results.map((result) =>
 				selectedIds.includes(getId(result))
 					? { ...result, isDisabled: true, selected: true }
-					: result
+					: result,
 			);
 		},
-		[getId, onLoad, selectedIds]
+		[getId, onLoad, selectedIds],
 	);
 
 	const dialogContext = useContext(DialogContext); // this is standalone, so this has to be optional. framework might not be present.
 	if (confirmDelete && !dialogContext) {
 		throw new Error(
-			"[Components-Care] You enabled MultiSelect.confirmDelete, but no DialogContext can be found."
+			"[Components-Care] You enabled MultiSelect.confirmDelete, but no DialogContext can be found.",
 		);
 	}
 	const genericDeleteConfirm = useCallback(
@@ -178,7 +178,7 @@ const MultiSelect = <DataT extends MultiSelectorData>(
 				textButtonNo: t("standalone.selector.multi-select.delete-confirm.no"),
 			});
 		},
-		[dialogContext, t]
+		[dialogContext, t],
 	);
 
 	const handleDelete = useCallback(
@@ -187,11 +187,11 @@ const MultiSelect = <DataT extends MultiSelectorData>(
 
 			let canDelete = true;
 			const entry: MultiSelectorData | null | undefined = selected.find(
-				(s) => s.value === evt.currentTarget.name
+				(s) => s.value === evt.currentTarget.name,
 			);
 			if (!entry) {
 				throw new Error(
-					"[Components-Care] [MultiSelect] Entry couldn't be found. Either entry.value is not set, or the entity renderer does not correctly set the name attribute"
+					"[Components-Care] [MultiSelect] Entry couldn't be found. Either entry.value is not set, or the entity renderer does not correctly set the name attribute",
 				);
 			}
 			void (async () => {
@@ -202,13 +202,13 @@ const MultiSelect = <DataT extends MultiSelectorData>(
 				}
 				if (canDelete && onSelect) {
 					const selectedOptions = selected.filter(
-						(s) => s.value !== entry.value
+						(s) => s.value !== entry.value,
 					);
 					onSelect(selectedOptions);
 				}
 			})();
 		},
-		[onSelect, selected, genericDeleteConfirm, confirmDelete]
+		[onSelect, selected, genericDeleteConfirm, confirmDelete],
 	);
 
 	const handleSetData = useCallback(
@@ -216,11 +216,11 @@ const MultiSelect = <DataT extends MultiSelectorData>(
 			if (!onSelect) return;
 			onSelect(
 				selected.map((entry) =>
-					getId(entry) === getId(newValue) ? newValue : entry
-				)
+					getId(entry) === getId(newValue) ? newValue : entry,
+				),
 			);
 		},
-		[getId, onSelect, selected]
+		[getId, onSelect, selected],
 	);
 
 	return (
@@ -230,7 +230,7 @@ const MultiSelect = <DataT extends MultiSelectorData>(
 					{...props}
 					classes={combineClassMaps(
 						baseSelectorClasses,
-						props.subClasses?.baseSelector
+						props.subClasses?.baseSelector,
 					)}
 					onLoad={multiSelectLoadHandler}
 					selected={null}

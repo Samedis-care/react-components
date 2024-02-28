@@ -60,7 +60,7 @@ const MenuItem = (props: MenuItemControllerProps) => {
 			else setMenuState(menuItemId);
 			onClick(evt);
 		},
-		[expandable, forceExpand, setMenuState, menuItemId, onClick]
+		[expandable, forceExpand, setMenuState, menuItemId, onClick],
 	);
 
 	// force expand
@@ -84,7 +84,7 @@ const MenuItem = (props: MenuItemControllerProps) => {
 			{expandable && (
 				<Collapse in={expanded} className={props.childWrapperClassName}>
 					{props.childDefs?.map((child) =>
-						toMenuItemComponent(props.menuProps, child, depth + 1, menuItemId)
+						toMenuItemComponent(props.menuProps, child, depth + 1, menuItemId),
 					)}
 				</Collapse>
 			)}
@@ -98,7 +98,7 @@ export const toMenuItemComponent = (
 	menuProps: MenuProps,
 	def: IMenuItemDefinition,
 	depth: number,
-	menuItemId: string | null
+	menuItemId: string | null,
 ): JSX.Element | false =>
 	def.shouldRender && (
 		<MenuItem

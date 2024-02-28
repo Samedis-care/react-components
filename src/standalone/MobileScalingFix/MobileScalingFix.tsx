@@ -3,7 +3,7 @@ import React, { useEffect } from "react";
 const MobileScalingFix = () => {
 	useEffect(() => {
 		let meta: HTMLMetaElement | null = document.querySelector(
-			"meta[name='viewport']"
+			"meta[name='viewport']",
 		);
 		let metaContent = "width=device-width, initial-scale=1";
 		if (

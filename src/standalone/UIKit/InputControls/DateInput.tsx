@@ -43,7 +43,7 @@ export interface DateInputProps extends TextFieldWithHelpProps {
 
 const DateInput = (
 	props: DateInputProps &
-		Omit<DatePickerProps<Moment | null>, "value" | "onChange">
+		Omit<DatePickerProps<Moment | null>, "value" | "onChange">,
 ) => {
 	const {
 		value,

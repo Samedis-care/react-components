@@ -12,7 +12,7 @@ export interface UseLazyCrudConnectorParams<
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
 	CustomT,
-	ExtraT = undefined
+	ExtraT = undefined,
 > {
 	/**
 	 * The custom field name (must not be in model)
@@ -38,14 +38,14 @@ export interface UseLazyCrudConnectorParams<
 	 */
 	getConnector?: (
 		initialEndpoint: string,
-		extraParams: ExtraT | undefined
+		extraParams: ExtraT | undefined,
 	) => ApiConnector<KeyT, VisibilityT, CustomT>;
 	/**
 	 * Callback to configure the connector after it got created by getConnector
 	 * @param connector The connector which was created by getConnector
 	 */
 	configureConnector?: (
-		connector: ApiConnector<KeyT, VisibilityT, CustomT>
+		connector: ApiConnector<KeyT, VisibilityT, CustomT>,
 	) => void;
 	/**
 	 * The initial ID to use for getEndpoint
@@ -56,7 +56,7 @@ export interface UseLazyCrudConnectorParams<
 export interface UseLazyCrudConnectorResult<
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
-	CustomT
+	CustomT,
 > {
 	connector: LazyConnector<KeyT, VisibilityT, CustomT>;
 }
@@ -66,12 +66,12 @@ export const extractLazyCrudConnectorParams = <
 	VisibilityT extends PageVisibility,
 	CustomT,
 	ExtraT,
-	T extends UseLazyCrudConnectorParams<KeyT, VisibilityT, CustomT, ExtraT>
+	T extends UseLazyCrudConnectorParams<KeyT, VisibilityT, CustomT, ExtraT>,
 >(
-	data: T
+	data: T,
 ): [
 	UseLazyCrudConnectorParams<KeyT, VisibilityT, CustomT, ExtraT>,
-	Omit<T, keyof UseLazyCrudConnectorParams<KeyT, VisibilityT, CustomT, ExtraT>>
+	Omit<T, keyof UseLazyCrudConnectorParams<KeyT, VisibilityT, CustomT, ExtraT>>,
 ] => {
 	const {
 		getEndpoint,
@@ -83,20 +83,16 @@ export const extractLazyCrudConnectorParams = <
 		field,
 		...otherProps
 	} = data;
-	const params: UseLazyCrudConnectorParams<
-		KeyT,
-		VisibilityT,
-		CustomT,
-		ExtraT
-	> = {
-		getEndpoint,
-		initialId,
-		getConnector,
-		configureConnector,
-		onParentIdChange,
-		extraParams,
-		field,
-	};
+	const params: UseLazyCrudConnectorParams<KeyT, VisibilityT, CustomT, ExtraT> =
+		{
+			getEndpoint,
+			initialId,
+			getConnector,
+			configureConnector,
+			onParentIdChange,
+			extraParams,
+			field,
+		};
 	return [params, otherProps];
 };
 
@@ -104,9 +100,9 @@ const useLazyCrudConnector = <
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
 	CustomT,
-	ExtraT = undefined
+	ExtraT = undefined,
 >(
-	params: UseLazyCrudConnectorParams<KeyT, VisibilityT, CustomT, ExtraT>
+	params: UseLazyCrudConnectorParams<KeyT, VisibilityT, CustomT, ExtraT>,
 ): UseLazyCrudConnectorResult<KeyT, VisibilityT, CustomT> => {
 	// when updating params, also update extractLazyCrudConnectorParams
 	const {
@@ -132,13 +128,13 @@ const useLazyCrudConnector = <
 			if (onParentIdChange) onParentIdChange(currentId);
 			return getEndpoint(currentId);
 		},
-		[onParentIdChange, getEndpoint]
+		[onParentIdChange, getEndpoint],
 	);
 
 	const getConnector = (getConnectorOverride ?? DefaultConnector.getApi) as
 		| ((
 				initialEndpoint: string,
-				extraParams: ExtraT | undefined
+				extraParams: ExtraT | undefined,
 		  ) => ApiConnector<KeyT, VisibilityT, CustomT>)
 		| null;
 	if (!getConnector) throw new Error("No default connector set");
@@ -149,7 +145,7 @@ const useLazyCrudConnector = <
 			if (configureConnector) configureConnector(connector);
 			return connector;
 		},
-		[getConnector, configureConnector]
+		[getConnector, configureConnector],
 	);
 
 	const uploadConnector = useRef<LazyConnector<KeyT, VisibilityT, CustomT>>(
@@ -160,9 +156,9 @@ const useLazyCrudConnector = <
 					initialId === null,
 					(queue) => {
 						setCustomFieldDirty(field, queue.length !== 0);
-					}
+					},
 				);
-			})()
+			})(),
 	);
 	// we need to update thee QueueChangeHandler if params changed
 	useEffect(() => {
@@ -176,7 +172,7 @@ const useLazyCrudConnector = <
 		const connector = uploadConnector.current;
 		setCustomState<LazyConnector<KeyT, VisibilityT, CustomT>>(
 			field,
-			() => connector
+			() => connector,
 		);
 
 		const submitHandler = async (id: string) => {

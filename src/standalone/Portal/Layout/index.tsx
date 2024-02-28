@@ -114,7 +114,7 @@ const useContainerStyles = makeStyles(
 			height: "100%",
 		}),
 	},
-	{ name: "CcPortalLayout" }
+	{ name: "CcPortalLayout" },
 );
 
 const useStyles = makeStyles(
@@ -139,7 +139,7 @@ const useStyles = makeStyles(
 			height: 56,
 		},
 	},
-	{ name: "CcRenderLayout" }
+	{ name: "CcRenderLayout" },
 );
 
 export interface PortalLayoutContextType {
@@ -162,9 +162,10 @@ const RenderLayout = (props: PortalLayoutProps & IRenderProps) => {
 	const { mobile, headerContent, drawerWidth, menuContent, content } = props;
 	const [menuOpen, setMenuOpen] = useState(false);
 
-	const toggleMenu = useCallback(() => setMenuOpen((prevState) => !prevState), [
-		setMenuOpen,
-	]);
+	const toggleMenu = useCallback(
+		() => setMenuOpen((prevState) => !prevState),
+		[setMenuOpen],
+	);
 	const classes = useStyles(props);
 
 	const portalContext = useMemo(
@@ -173,7 +174,7 @@ const RenderLayout = (props: PortalLayoutProps & IRenderProps) => {
 			menuOpen,
 			setMenuOpen,
 		}),
-		[mobile, menuOpen, setMenuOpen]
+		[mobile, menuOpen, setMenuOpen],
 	);
 
 	return (
@@ -222,10 +223,10 @@ const PortalLayout = (props: PortalLayoutProps) => {
 	const classes = useContainerStyles(props);
 	const theme = useTheme();
 	const mobileViewConditionMet = useMediaQuery(
-		props.mobileViewCondition || "()"
+		props.mobileViewCondition || "()",
 	);
 	const shouldCollapse = useMediaQuery(
-		theme.breakpoints.down(props.collapseBreakpoint ?? "md")
+		theme.breakpoints.down(props.collapseBreakpoint ?? "md"),
 	);
 	const mobile = !!(
 		shouldCollapse ||

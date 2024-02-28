@@ -10,11 +10,11 @@ const SentryRoute = Route;
 
 export const SentryRoutes = Sentry
 	? // Sentry.withSentryReactRouterV6Routing will do nothing if Sentry has not been initialized yet, so we need to defer it using React.lazy
-	  React.lazy(() =>
+		React.lazy(() =>
 			Promise.resolve({
 				default: withSentryReactRouterV6Routing(Routes),
-			})
-	  )
+			}),
+		)
 	: Routes;
 
-export default (SentryRoute as unknown) as typeof Route;
+export default SentryRoute as unknown as typeof Route;

@@ -41,7 +41,7 @@ const deepClone = <T>(item: T): T => {
 				"cloneType" in item &&
 				typeof (item as Record<string, unknown>).cloneNode == "function"
 			) {
-				result = ((item as unknown) as HTMLElement).cloneNode(true);
+				result = (item as unknown as HTMLElement).cloneNode(true);
 			} else if (
 				!("prototype" in item) ||
 				!(item as Record<string, unknown>).prototype

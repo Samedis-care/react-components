@@ -40,7 +40,7 @@ export interface ModelFieldDefinition<
 	TypeT,
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
-	CustomT
+	CustomT,
 > {
 	/**
 	 * The Renderer of the field
@@ -87,7 +87,7 @@ export interface ModelFieldDefinition<
 	validate?: (
 		value: TypeT,
 		values: Record<string, unknown>,
-		field: ModelFieldDefinition<TypeT, KeyT, VisibilityT, CustomT>
+		field: ModelFieldDefinition<TypeT, KeyT, VisibilityT, CustomT>,
 	) => Promise<string | null> | string | null;
 	/**
 	 * Callback to validate field to provide optional hints
@@ -117,9 +117,9 @@ export interface ModelFieldDefinition<
 			field: KeyT,
 			value: unknown,
 			shouldValidate?: boolean,
-			triggerOnChange?: boolean
+			triggerOnChange?: boolean,
 		) => void,
-		getFieldValue: (field: KeyT) => unknown
+		getFieldValue: (field: KeyT) => unknown,
 	) => TypeT;
 	/**
 	 * The referenced model for backend connected data types.
@@ -129,7 +129,7 @@ export interface ModelFieldDefinition<
 	 */
 	getRelationModel?: (
 		id: string | null,
-		values: Record<string, unknown>
+		values: Record<string, unknown>,
 	) => Model<ModelFieldName, PageVisibility, unknown>;
 	// TypeScript doesn't like the following definition (it would save you the cast):
 	//getRelationModel?: <
@@ -143,7 +143,7 @@ export interface ModelFieldDefinition<
 export type ModelField<
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
-	CustomT
+	CustomT,
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 > = Record<KeyT, ModelFieldDefinition<any, KeyT, VisibilityT, CustomT>>;
 export type ModelFieldName = "id" | string;
@@ -161,13 +161,13 @@ export type ModelData<KeyT extends ModelFieldName> = Record<string, unknown>;
 export type ModelGetResponse<KeyT extends ModelFieldName> = [
 	ModelData<KeyT>, // the main data entry
 	ModelGetResponseRelations<KeyT>, // data in relations
-	unknown? // optional user-defined data
+	unknown?, // optional user-defined data
 ];
 
 export type ModelIndexResponse = [
 	records: Record<string, unknown>[],
 	meta: ResponseMeta,
-	userMeta?: unknown
+	userMeta?: unknown,
 ];
 
 export type ModelFetchAllParams = Partial<
@@ -185,7 +185,7 @@ export type AdvancedDeleteRequest = [
 	filter?: Pick<
 		IDataGridLoadDataParameters,
 		"quickFilter" | "additionalFilters" | "fieldFilter"
-	>
+	>,
 ];
 
 export interface CacheOptions {
@@ -222,7 +222,7 @@ export interface ModelGetOptions {
 export const useModelGet = <
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
-	CustomT
+	CustomT,
 >(
 	model: Model<KeyT, VisibilityT, CustomT>,
 	id: string | null,
@@ -231,7 +231,7 @@ export const useModelGet = <
 		Error,
 		ModelGetResponse<KeyT>
 	> &
-		ModelGetOptions
+		ModelGetOptions,
 ): UseQueryResult<ModelGetResponse<KeyT>, Error> => {
 	return useQuery(
 		model.getReactQueryKey(id, options?.batch ?? model.requestBatchingEnabled),
@@ -241,7 +241,7 @@ export const useModelGet = <
 			retry: (count, err: Error) => err.name === "NetworkError" && count < 3,
 			...model.cacheOptions,
 			...options,
-		}
+		},
 	);
 };
 
@@ -255,10 +255,10 @@ export const useModelGet = <
 export const useModelFetchAll = <
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
-	CustomT
+	CustomT,
 >(
 	model: Model<KeyT, VisibilityT, CustomT>,
-	params?: ModelFetchAllParams
+	params?: ModelFetchAllParams,
 ): UseQueryResult<ModelIndexResponse, Error> => {
 	return useQuery(
 		model.getReactQueryKeyFetchAll(params),
@@ -267,7 +267,7 @@ export const useModelFetchAll = <
 			// 3 retries if we get network error
 			retry: (count, err: Error) => err.name === "NetworkError" && count < 3,
 			...model.cacheOptions,
-		}
+		},
 	);
 };
 
@@ -280,9 +280,9 @@ export const useModelMutation = <
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
 	CustomT,
-	TContext = unknown
+	TContext = unknown,
 >(
-	model: Model<KeyT, VisibilityT, CustomT>
+	model: Model<KeyT, VisibilityT, CustomT>,
 ): UseMutationResult<
 	ModelGetResponse<KeyT>,
 	Error,
@@ -305,12 +305,12 @@ export const useModelMutation = <
 				const updateForId = (id: string) => {
 					ModelDataStore.setQueryData(
 						model.getReactQueryKey(id, false),
-						responseData
+						responseData,
 					);
 					if (model.requestBatchingEnabled) {
 						ModelDataStore.setQueryData(
 							model.getReactQueryKey(id, true),
-							responseData
+							responseData,
 						);
 					} else {
 						ModelDataStore.removeQueries(model.getReactQueryKey(id, true));
@@ -326,7 +326,7 @@ export const useModelMutation = <
 				}
 				model.triggerMutationEvent(!inputData.id, responseData);
 			},
-		}
+		},
 	);
 };
 
@@ -338,9 +338,9 @@ export const useModelDelete = <
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
 	CustomT,
-	TContext = unknown
+	TContext = unknown,
 >(
-	model: Model<KeyT, VisibilityT, CustomT>
+	model: Model<KeyT, VisibilityT, CustomT>,
 ): UseMutationResult<void, Error, string, TContext> => {
 	return useMutation(model.modelId + "-delete", model.deleteRaw.bind(model), {
 		onSuccess: (data: void, id: string) => model.invalidateCacheForId(id),
@@ -355,9 +355,9 @@ export const useModelDeleteMultiple = <
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
 	CustomT,
-	TContext = unknown
+	TContext = unknown,
 >(
-	model: Model<KeyT, VisibilityT, CustomT>
+	model: Model<KeyT, VisibilityT, CustomT>,
 ): UseMutationResult<void, Error, string[], TContext> => {
 	return useMutation(
 		model.modelId + "-delete-multi",
@@ -366,7 +366,7 @@ export const useModelDeleteMultiple = <
 			onSuccess: (data: void, ids: string[]) => {
 				ids.forEach((id) => model.invalidateCacheForId(id));
 			},
-		}
+		},
 	);
 };
 
@@ -379,9 +379,9 @@ export const useModelDeleteAdvanced = <
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
 	CustomT,
-	TContext = unknown
+	TContext = unknown,
 >(
-	model: Model<KeyT, VisibilityT, CustomT>
+	model: Model<KeyT, VisibilityT, CustomT>,
 ): UseMutationResult<void, Error, AdvancedDeleteRequest, TContext> => {
 	return useMutation(
 		model.modelId + "-delete-adv",
@@ -404,7 +404,7 @@ export const useModelDeleteAdvanced = <
 					});
 				}
 			},
-		}
+		},
 	);
 };
 
@@ -413,7 +413,7 @@ export const useModelDeleteAdvanced = <
  * @param data The response data
  */
 export type ModelEventMutation = <KeyT extends ModelFieldName>(
-	data: ModelGetResponse<KeyT>
+	data: ModelGetResponse<KeyT>,
 ) => void;
 
 export interface ModelHooks<KeyT extends ModelFieldName> {
@@ -449,7 +449,7 @@ export interface ModelOptions<KeyT extends ModelFieldName> {
 class Model<
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
-	CustomT
+	CustomT,
 > {
 	/**
 	 * A unique model identifier, used for caching
@@ -515,7 +515,7 @@ class Model<
 		model: ModelField<KeyT, VisibilityT, CustomT>,
 		connector: Connector<KeyT, VisibilityT, CustomT>,
 		cacheKeys?: unknown,
-		options?: ModelOptions<KeyT>
+		options?: ModelOptions<KeyT>,
 	) {
 		this.modelId = name;
 		this.fields = model;
@@ -538,20 +538,20 @@ class Model<
 	 * @param params The search params
 	 */
 	public async index(
-		params: Partial<IDataGridLoadDataParameters> | undefined
+		params: Partial<IDataGridLoadDataParameters> | undefined,
 	): Promise<ModelIndexResponse> {
 		try {
 			const [rawData, meta, userData] = await this.connector.index(
 				params,
-				this
+				this,
 			);
 			return [
 				this.cacheIndexRecords(
 					await Promise.all(
 						rawData.map((data) =>
-							this.applySerialization(data, "deserialize", "overview")
-						)
-					)
+							this.applySerialization(data, "deserialize", "overview"),
+						),
+					),
 				),
 				meta,
 				userData,
@@ -573,16 +573,16 @@ class Model<
 	 * @param params The search params
 	 */
 	public async index2(
-		params: ConnectorIndex2Params
+		params: ConnectorIndex2Params,
 	): Promise<ModelIndexResponse> {
 		const [rawData, meta, userData] = await this.connector.index2(params, this);
 		return [
 			this.cacheIndexRecords(
 				await Promise.all(
 					rawData.map((data) =>
-						this.applySerialization(data, "deserialize", "overview")
-					)
-				)
+						this.applySerialization(data, "deserialize", "overview"),
+					),
+				),
 			),
 			meta,
 			userData,
@@ -600,7 +600,7 @@ class Model<
 		records.forEach((record) => {
 			queryCache.setQueryData(
 				this.getReactQueryKey(record.id as string, true),
-				[record, {}]
+				[record, {}],
 			);
 		});
 
@@ -613,7 +613,7 @@ class Model<
 	 * @returns ModelIndexResponse where userMeta and meta is taken from the last call
 	 */
 	public async fetchAll(
-		params?: ModelFetchAllParams
+		params?: ModelFetchAllParams,
 	): Promise<ModelIndexResponse> {
 		let page = 1;
 		let perPage = 1000;
@@ -656,12 +656,12 @@ class Model<
 	 * @see fetchAll
 	 */
 	public async fetchAllCached(
-		params?: ModelFetchAllParams
+		params?: ModelFetchAllParams,
 	): Promise<ModelIndexResponse> {
 		return queryCache.fetchQuery(
 			this.getReactQueryKeyFetchAll(params),
 			() => this.fetchAll(params),
-			this.cacheOptions
+			this.cacheOptions,
 		);
 	}
 
@@ -712,12 +712,12 @@ class Model<
 	 */
 	public getCached(
 		id: string | null,
-		options?: ModelGetOptions
+		options?: ModelGetOptions,
 	): Promise<ModelGetResponse<KeyT>> {
 		return queryCache.fetchQuery(
 			this.getReactQueryKey(id, options?.batch ?? this.requestBatchingEnabled),
 			() => this.getRaw(id, options),
-			this.cacheOptions
+			this.cacheOptions,
 		);
 	}
 
@@ -728,7 +728,7 @@ class Model<
 	 */
 	public async getRaw(
 		id: string | null,
-		options?: ModelGetOptions
+		options?: ModelGetOptions,
 	): Promise<ModelGetResponse<KeyT>> {
 		try {
 			if (!id) return [await this.getDefaultValues(), {}];
@@ -764,12 +764,12 @@ class Model<
 	 * @private
 	 */
 	private async deserializeResponse(
-		rawData: ModelGetResponse<KeyT>
+		rawData: ModelGetResponse<KeyT>,
 	): Promise<ModelGetResponse<KeyT>> {
 		const deserialized = await this.applySerialization(
 			rawData[0],
 			"deserialize",
-			"edit"
+			"edit",
 		);
 		return [
 			deserialized,
@@ -785,7 +785,7 @@ class Model<
 							console.warn(
 								"[Components-Care] [Model] Backend connector supplied related data, but no model is defined for this relationship (relationship name = " +
 									fieldName +
-									"). Data will be ignored."
+									"). Data will be ignored.",
 							);
 						}
 
@@ -796,14 +796,14 @@ class Model<
 										values.map((value) =>
 											refModel(
 												deserialized.id as string | null,
-												deserialized
-											).applySerialization(value, "deserialize", "edit")
-										)
-								  )
+												deserialized,
+											).applySerialization(value, "deserialize", "edit"),
+										),
+									)
 								: null,
 						];
-					})
-				)
+					}),
+				),
 			),
 		];
 	}
@@ -827,22 +827,22 @@ class Model<
 	 * @param values The new values (set id field to update)
 	 */
 	public async createOrUpdateRecordRaw(
-		values: Record<string, unknown>
+		values: Record<string, unknown>,
 	): Promise<ModelGetResponse<KeyT>> {
 		const update = !!("id" in values && values.id);
 		const serializedValues = await this.applySerialization(
 			values,
 			"serialize",
-			update ? "edit" : "create"
+			update ? "edit" : "create",
 		);
 		if (update) {
 			return this.deserializeResponse(
-				await this.connector.update(serializedValues, this)
+				await this.connector.update(serializedValues, this),
 			);
 		} else {
 			delete serializedValues["id" as KeyT];
 			return this.deserializeResponse(
-				await this.connector.create(serializedValues, this)
+				await this.connector.create(serializedValues, this),
 			);
 		}
 	}
@@ -933,7 +933,7 @@ class Model<
 	public updateStoredData(
 		id: string,
 		batch: boolean,
-		updater: (old: Record<string, unknown>) => Record<string, unknown>
+		updater: (old: Record<string, unknown>) => Record<string, unknown>,
 	): void {
 		ModelDataStore.setQueryData(
 			this.getReactQueryKey(id, batch),
@@ -941,7 +941,7 @@ class Model<
 				if (!data) throw new Error("Data not set");
 				const [record, ...other] = data;
 				return [updater(record), ...other];
-			}
+			},
 		);
 	}
 
@@ -949,19 +949,22 @@ class Model<
 	 * Returns a data grid compatible column definition
 	 */
 	public toDataGridColumnDefinition(
-		includeHidden = false
+		includeHidden = false,
 	): IDataGridColumnDef[] {
-		return (!includeHidden
-			? Object.entries(this.fields).filter(
-					(entry) =>
-						!(entry[1] as ModelFieldDefinition<
-							unknown,
-							KeyT,
-							VisibilityT,
-							CustomT
-						>).visibility.overview.disabled
-			  )
-			: Object.entries(this.fields)
+		return (
+			!includeHidden
+				? Object.entries(this.fields).filter(
+						(entry) =>
+							!(
+								entry[1] as ModelFieldDefinition<
+									unknown,
+									KeyT,
+									VisibilityT,
+									CustomT
+								>
+							).visibility.overview.disabled,
+					)
+				: Object.entries(this.fields)
 		).map((entry) => {
 			const key = entry[0];
 			const value = entry[1] as ModelFieldDefinition<
@@ -975,7 +978,7 @@ class Model<
 			if (value.type.getFilterType() === "enum") {
 				if (!value.type.getEnumValues)
 					throw new Error(
-						"Model Type Filter Type is enum, but getEnumValues not set"
+						"Model Type Filter Type is enum, but getEnumValues not set",
 					);
 				filterData = value.type
 					.getEnumValues()
@@ -987,7 +990,7 @@ class Model<
 								value: value.value,
 								disabled: value.disabled,
 								isDivider: value.isDivider,
-							} as DataGridSetFilterDataEntry)
+							}) as DataGridSetFilterDataEntry,
 					);
 			} else if (value.type.getFilterType() === "boolean") {
 				filterData = [true, false].map(
@@ -995,7 +998,7 @@ class Model<
 						({
 							getLabelText: value.type.stringify.bind(value.type, boolVal),
 							value: boolVal ? "true" : "false",
-						} as DataGridSetFilterDataEntry)
+						}) as DataGridSetFilterDataEntry,
 				);
 			}
 
@@ -1030,7 +1033,7 @@ class Model<
 		values: Record<string, unknown>,
 		view?: "edit" | "create",
 		fieldsToValidate?: KeyT[],
-		type: "normal" | "hint" = "normal"
+		type: "normal" | "hint" = "normal",
 	): Promise<Record<string, string>> {
 		const errors: Record<string, string> = {};
 		const validationFunction = type === "normal" ? "validate" : "validateHint";
@@ -1055,14 +1058,14 @@ class Model<
 					let error: string | null;
 					try {
 						const validate = fieldDef.type[validationFunction]?.bind(
-							fieldDef.type
+							fieldDef.type,
 						);
 						error = validate ? await validate(value) : null;
 					} catch (e) {
 						// eslint-disable-next-line
 						console.error(
 							"[Components-Care] [Model.validate] Error during validation:",
-							e
+							e,
 						);
 						if (captureException) captureException(e as Error);
 						error = (e as Error).message;
@@ -1077,7 +1080,7 @@ class Model<
 							// eslint-disable-next-line
 							console.error(
 								"[Components-Care] [Model.validate] Error during validation:",
-								e
+								e,
 							);
 							if (captureException) captureException(e as Error);
 							error = (e as Error).message;
@@ -1091,11 +1094,11 @@ class Model<
 						"[Components-Care] [Model.validate] Error during field validation:",
 						field,
 						value,
-						e
+						e,
 					);
 					if (captureException) captureException(e as Error);
 				}
-			})
+			}),
 		);
 
 		return errors;
@@ -1112,7 +1115,7 @@ class Model<
 					return !getVisibility(
 						this.fields[field as KeyT].visibility.create,
 						{},
-						{}
+						{},
 					).disabled;
 				} catch (e) {
 					return true;
@@ -1121,7 +1124,7 @@ class Model<
 			.map(async (entry) => {
 				const [field, def] = entry as [
 					KeyT,
-					ModelFieldDefinition<unknown, KeyT, VisibilityT, CustomT>
+					ModelFieldDefinition<unknown, KeyT, VisibilityT, CustomT>,
 				];
 				let defaultValue: unknown;
 				if (def.getDefaultValue) defaultValue = await def.getDefaultValue();
@@ -1139,12 +1142,12 @@ class Model<
 	 */
 	public async serialize(
 		values: Record<string, unknown>,
-		visibility: keyof PageVisibility
+		visibility: keyof PageVisibility,
 	): Promise<string> {
 		const serializable = await this.applySerialization(
 			values,
 			"serialize",
-			visibility
+			visibility,
 		);
 		return JSON.stringify(serializable);
 	}
@@ -1156,7 +1159,7 @@ class Model<
 	 */
 	public async deserialize(
 		data: string,
-		visibility: keyof PageVisibility
+		visibility: keyof PageVisibility,
 	): Promise<Record<string, unknown>> {
 		const parsed = JSON.parse(data) as Record<string, unknown>;
 		return await this.applySerialization(parsed, "deserialize", visibility);
@@ -1172,7 +1175,7 @@ class Model<
 	public async applySerialization(
 		values: Record<string, unknown>,
 		func: "serialize" | "deserialize",
-		visibility: keyof PageVisibility
+		visibility: keyof PageVisibility,
 	): Promise<Record<string, unknown>> {
 		const copy: Record<string, unknown> = {};
 
@@ -1190,7 +1193,7 @@ class Model<
 			const visValue = getVisibility(
 				field.visibility[visibility],
 				values,
-				values
+				values,
 			);
 			if (
 				visValue.disabled &&
@@ -1208,7 +1211,7 @@ class Model<
 				// eslint-disable-next-line no-console
 				console.log(
 					`[Components-Care] [Model(id = ${this.modelId}).applySerialization(..., 'deserialize', '${visibility}')] Field ${key} cannot be found in values`,
-					values
+					values,
 				);
 			}
 
@@ -1251,7 +1254,7 @@ class Model<
 				// check if they have a label
 				if (!def.getLabel().trim())
 					report(
-						`[Components-Care] [Model.validateUX] ${this.modelId}.${field} is visible in Grid but doesn't have label`
+						`[Components-Care] [Model.validateUX] ${this.modelId}.${field} is visible in Grid but doesn't have label`,
 					);
 			}
 		});
@@ -1281,7 +1284,7 @@ class Model<
 			// eslint-disable-next-line no-console
 			console.log(
 				`[Components-Care] [Model(id = ${this.modelId}).canRequestsBeBatched] Fields enabled in edit, but not in overview:`,
-				fieldsNotInOverview
+				fieldsNotInOverview,
 			);
 		}
 		return fieldsNotInOverview.length === 0;
@@ -1310,10 +1313,10 @@ class Model<
 	public addEventHandler(
 		evt: "mutate",
 		handler: ModelEventMutation,
-		idFilter?: string | null
+		idFilter?: string | null,
 	) {
 		const handlerKey = JSON.stringify(
-			this.getReactQueryKey(idFilter === undefined ? "any" : idFilter, false)
+			this.getReactQueryKey(idFilter === undefined ? "any" : idFilter, false),
 		);
 		if (!(handlerKey in Model.eventHandlers[evt])) {
 			Model.eventHandlers[evt][handlerKey] = [handler];
@@ -1333,17 +1336,17 @@ class Model<
 	public removeEventHandler(
 		evt: "mutate",
 		handler: ModelEventMutation,
-		idFilter?: string | null
+		idFilter?: string | null,
 	) {
 		const handlerKey = JSON.stringify(
-			this.getReactQueryKey(idFilter === undefined ? "any" : idFilter, false)
+			this.getReactQueryKey(idFilter === undefined ? "any" : idFilter, false),
 		);
 		if (!(handlerKey in Model.eventHandlers[evt])) {
 			return;
 		}
 		const handlers = Model.eventHandlers[evt][handlerKey];
 		Model.eventHandlers[evt][handlerKey] = handlers.filter(
-			(h) => h !== handler
+			(h) => h !== handler,
 		);
 		if (Model.eventHandlers[evt][handlerKey].length === handlers.length) {
 			throw new Error("Handler not unregistered as was not registered");

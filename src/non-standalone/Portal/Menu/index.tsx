@@ -43,12 +43,12 @@ export interface IRoutedMenuProps
  */
 const getMenuRouteParams = (
 	definitions: IRoutedMenuItemDefinition[],
-	path: string
+	path: string,
 ): Record<string, string> => {
 	// first try and find an exact match
 	let exact = true;
 	let match = definitions.find(
-		(entry) => entry.route && doesRouteMatch(entry.route, path, true)
+		(entry) => entry.route && doesRouteMatch(entry.route, path, true),
 	);
 	if (!match) {
 		// if this fails, get the closest match we can get
@@ -76,14 +76,14 @@ const convertDefinition = (
 	definition: IRoutedMenuItemDefinition,
 	path: string,
 	depth: number,
-	navigate: NavigateFunction
+	navigate: NavigateFunction,
 ): IMenuItemDefinition => ({
 	...definition,
 	forceExpand:
 		definition.children &&
 		!!resolveLocation(definition.children, path, depth + 1, null),
 	children: definition.children?.map((entry) =>
-		convertDefinition(definitions, entry, path, depth + 1, navigate)
+		convertDefinition(definitions, entry, path, depth + 1, navigate),
 	),
 	onClick: (evt) => {
 		if (definition.onClick) {
@@ -93,7 +93,7 @@ const convertDefinition = (
 			// keep URL parameters
 			const target = insertRouteParameters(
 				definition.route,
-				getMenuRouteParams(definitions, path)
+				getMenuRouteParams(definitions, path),
 			);
 			if (evt.ctrlKey || evt.metaKey || evt.shiftKey)
 				window.open(target, "_blank");
@@ -108,7 +108,7 @@ const convertDefinition = (
 			// keep URL parameters
 			const target = insertRouteParameters(
 				definition.route,
-				getMenuRouteParams(definitions, path)
+				getMenuRouteParams(definitions, path),
 			);
 			window.open(target);
 		}
@@ -127,7 +127,7 @@ const resolveLocation = (
 	definitions: IRoutedMenuItemDefinition[],
 	path: string,
 	depth: number,
-	itemId: string | null
+	itemId: string | null,
 ): string | null => {
 	// first recurse to find the deepest matching link
 	for (const def of definitions) {
@@ -136,7 +136,7 @@ const resolveLocation = (
 				def.children,
 				path,
 				depth + 1,
-				itemId ? `${itemId}@${def.title}` : def.title
+				itemId ? `${itemId}@${def.title}` : def.title,
 			);
 			if (nextLevel) return nextLevel;
 		}
@@ -171,7 +171,7 @@ const RoutedMenu = (props: IRoutedMenuProps) => {
 	const rawDef = props.definition;
 	const definition = React.useMemo(() => {
 		return rawDef.map((entry) =>
-			convertDefinition(rawDef, entry, path, 0, navigate)
+			convertDefinition(rawDef, entry, path, 0, navigate),
 		);
 	}, [rawDef, path, navigate]);
 

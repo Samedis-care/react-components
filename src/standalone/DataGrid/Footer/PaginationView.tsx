@@ -32,7 +32,7 @@ const PaginationView = (props: IDataGridPaginationViewProps) => {
 				showFiltered
 					? `${t("standalone.data-grid.footer.filtered")} ${filtered} `
 					: ""
-		  }${t("standalone.data-grid.footer.total")} ${total}`;
+			}${t("standalone.data-grid.footer.total")} ${total}`;
 
 	return (
 		<Box mx={2}>

@@ -28,7 +28,7 @@ export interface BackendMultiSelectWithTagsProps<
 	GroupCustomT,
 	DataCustomT,
 	GroupDataT extends BaseSelectorData,
-	DataDataT extends MultiSelectorData
+	DataDataT extends MultiSelectorData,
 > extends Omit<
 		MultiSelectWithTagsProps<DataDataT, GroupDataT>,
 		| "loadGroupEntries"
@@ -64,7 +64,7 @@ export interface BackendMultiSelectWithTagsProps<
 	 * @remarks Selector data value must be set to ID
 	 */
 	convGroup: (
-		data: Record<string, unknown>
+		data: Record<string, unknown>,
 	) => Promise<GroupDataT> | GroupDataT;
 	/**
 	 * Callback that gets the group entries for a given group record
@@ -73,7 +73,7 @@ export interface BackendMultiSelectWithTagsProps<
 	 * @remarks Selector data value must be set to ID of data record
 	 */
 	getGroupDataEntries: (
-		data: ModelGetResponse<GroupKeyT>
+		data: ModelGetResponse<GroupKeyT>,
 	) => Promise<DataDataT[]> | DataDataT[];
 	/**
 	 * The data source for data entries
@@ -135,7 +135,7 @@ const BackendMultiSelectWithTags = <
 	GroupCustomT,
 	DataCustomT,
 	GroupDataT extends BaseSelectorData,
-	DataDataT extends MultiSelectorData
+	DataDataT extends MultiSelectorData,
 >(
 	props: BackendMultiSelectWithTagsProps<
 		GroupKeyT,
@@ -146,7 +146,7 @@ const BackendMultiSelectWithTags = <
 		DataCustomT,
 		GroupDataT,
 		DataDataT
-	>
+	>,
 ) => {
 	const {
 		groupModel,
@@ -180,7 +180,7 @@ const BackendMultiSelectWithTags = <
 		async (data: BaseSelectorData) => {
 			return getGroupDataEntries(await groupModel.getCached(data.value));
 		},
-		[getGroupDataEntries, groupModel]
+		[getGroupDataEntries, groupModel],
 	);
 	const loadGroupOptions = useCallback(
 		async (query: string, switchValue: boolean) => {
@@ -194,7 +194,7 @@ const BackendMultiSelectWithTags = <
 			});
 			return Promise.all(records.map(convGroup));
 		},
-		[convGroup, groupModel, groupSort, switchFilterNameGroup]
+		[convGroup, groupModel, groupSort, switchFilterNameGroup],
 	);
 	const loadDataOptions = useCallback(
 		async (query: string, switchValue: boolean) => {
@@ -208,7 +208,7 @@ const BackendMultiSelectWithTags = <
 			});
 			return Promise.all(records.map(convData));
 		},
-		[convData, dataModel, dataSort, switchFilterNameData]
+		[convData, dataModel, dataSort, switchFilterNameData],
 	);
 
 	const handleLoadGroupRecord = useCallback(
@@ -216,7 +216,7 @@ const BackendMultiSelectWithTags = <
 			const [data] = await groupModel.getCached(id);
 			return convGroup(data);
 		},
-		[groupModel, convGroup]
+		[groupModel, convGroup],
 	);
 
 	const lruGroupConfig: SelectorLruOptions<GroupDataT> | undefined = useMemo(
@@ -225,9 +225,9 @@ const BackendMultiSelectWithTags = <
 				? {
 						...lruGroup,
 						loadData: handleLoadGroupRecord,
-				  }
+					}
 				: undefined,
-		[lruGroup, handleLoadGroupRecord]
+		[lruGroup, handleLoadGroupRecord],
 	);
 
 	const handleLoadDataRecord = useCallback(
@@ -235,7 +235,7 @@ const BackendMultiSelectWithTags = <
 			const [data] = await dataModel.getCached(id);
 			return convData(data);
 		},
-		[dataModel, convData]
+		[dataModel, convData],
 	);
 
 	const lruDataConfig: SelectorLruOptions<DataDataT> | undefined = useMemo(
@@ -244,18 +244,18 @@ const BackendMultiSelectWithTags = <
 				? {
 						...lruData,
 						loadData: handleLoadDataRecord,
-				  }
+					}
 				: undefined,
-		[lruData, handleLoadDataRecord]
+		[lruData, handleLoadDataRecord],
 	);
 
 	const debouncedGroupLoad = useMemo(
 		() => debouncePromise(loadGroupOptions, groupSearchDebounceTime ?? 500),
-		[groupSearchDebounceTime, loadGroupOptions]
+		[groupSearchDebounceTime, loadGroupOptions],
 	);
 	const debouncedDataLoad = useMemo(
 		() => debouncePromise(loadDataOptions, dataSearchDebounceTime ?? 500),
-		[dataSearchDebounceTime, loadDataOptions]
+		[dataSearchDebounceTime, loadDataOptions],
 	);
 
 	return (
@@ -274,5 +274,5 @@ const BackendMultiSelectWithTags = <
 };
 
 export default React.memo(
-	BackendMultiSelectWithTags
+	BackendMultiSelectWithTags,
 ) as typeof BackendMultiSelectWithTags;

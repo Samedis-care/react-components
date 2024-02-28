@@ -10,7 +10,7 @@ import { useEffect, useState } from "react";
 const useAsyncMemo = <T>(
 	factory: () => Promise<T> | T,
 	dependencies: unknown[],
-	keepPreviousResult = false
+	keepPreviousResult = false,
 ): T | null => {
 	const [value, setValue] = useState<T | null>(null);
 

@@ -21,10 +21,8 @@ class RequestBatching {
 	 */
 	public static MAX_BATCH_REQUESTS = 100;
 
-	private static batchPromises: Record<
-		string,
-		Promise<ModelIndexResponse>
-	> = {};
+	private static batchPromises: Record<string, Promise<ModelIndexResponse>> =
+		{};
 	private static batchNonce: Record<string, string> = {};
 	private static batchRequestIds: Record<string, string[]> = {};
 	private static batchLastAdded: Record<string, number> = {};
@@ -32,10 +30,10 @@ class RequestBatching {
 	public static async get<
 		KeyT extends ModelFieldName,
 		VisibilityT extends PageVisibility,
-		CustomT
+		CustomT,
 	>(
 		id: string,
-		model: Model<KeyT, VisibilityT, CustomT>
+		model: Model<KeyT, VisibilityT, CustomT>,
 	): Promise<Record<string, unknown>> {
 		const batchKey = JSON.stringify(model.getReactQueryKey(null, true));
 		let promise: Promise<ModelIndexResponse>;
@@ -50,9 +48,8 @@ class RequestBatching {
 			// keep local references to the data we just created because the global vars might be overridden
 			const batchRequests = (this.batchRequestIds[batchKey] = [id]);
 			const batchStart = (this.batchLastAdded[batchKey] = Date.now());
-			const batchNonce = (this.batchNonce[
-				batchKey
-			] = `${Date.now().toString()}-${Math.random()}`);
+			const batchNonce = (this.batchNonce[batchKey] =
+				`${Date.now().toString()}-${Math.random()}`);
 			this.batchPromises[batchKey] = promise = (async () => {
 				await sleep(0); // 'return' here so batchPromises is saved
 				// this is to prevent a rare bug under presumably high CPU load
@@ -99,7 +96,7 @@ class RequestBatching {
 		if (!record)
 			throw new RequestBatchingError(
 				"[Components-Care] [RequestBatching] Requested record not returned by backend: " +
-					JSON.stringify(model.getReactQueryKey(id, true))
+					JSON.stringify(model.getReactQueryKey(id, true)),
 			);
 		return record;
 	}

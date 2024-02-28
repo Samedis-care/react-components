@@ -23,7 +23,7 @@ The following utils are for the conversion of nested objects to dot-notation bas
 
 export const dotToObject = (
 	field: string,
-	value: unknown
+	value: unknown,
 ): Record<string, unknown> => {
 	const fieldParts = field.split(".").reverse();
 	for (const fieldPart of fieldParts) {
@@ -36,7 +36,7 @@ export const dotToObject = (
 
 export const getValueByDot = (
 	field: string,
-	data: Record<string, unknown>
+	data: Record<string, unknown>,
 ): unknown => {
 	const fieldParts = field.split(".");
 	let value: unknown = data;
@@ -49,7 +49,7 @@ export const getValueByDot = (
 
 export const dotInObject = (
 	field: string,
-	data: Record<string, unknown>
+	data: Record<string, unknown>,
 ): boolean => {
 	const fieldParts = field.split(".");
 	let value: unknown = data;
@@ -61,7 +61,7 @@ export const dotInObject = (
 };
 
 export const objectToDots = (
-	obj: Record<string, unknown>
+	obj: Record<string, unknown>,
 ): Record<string, unknown> => {
 	const ret: Record<string, unknown> = {};
 	for (const key in obj) {
@@ -81,7 +81,7 @@ export const objectToDots = (
 };
 
 export const dotsToObject = (
-	dots: Record<string, unknown>
+	dots: Record<string, unknown>,
 ): Record<string, unknown> => {
 	const result: Record<string, unknown> = {};
 
@@ -110,7 +110,7 @@ export const dotsToObject = (
 export const dotSet = (
 	field: string,
 	value: Record<string, unknown>,
-	data: unknown
+	data: unknown,
 ): Record<string, unknown> => {
 	if (typeof value !== "object") throw new Error("invalid");
 	const fieldParts = field.split(".");
@@ -120,8 +120,8 @@ export const dotSet = (
 			? dotSet(
 					fieldParts.slice(1).join("."),
 					ret[fieldParts[0]] as Record<string, unknown>,
-					data
-			  )
+					data,
+				)
 			: data;
 	return ret;
 };

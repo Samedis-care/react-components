@@ -43,11 +43,11 @@ const useStyles = makeStyles(
 			border: "1px solid lightgray",
 		},
 	},
-	{ name: "CcLanguageSelectorEntry" }
+	{ name: "CcLanguageSelectorEntry" },
 );
 
 const LanguageSelectorEntry = (
-	props: LanguageSelectorEntryProps
+	props: LanguageSelectorEntryProps,
 ): React.ReactElement => {
 	const { locale, currentLanguage, handleSwitch, disabled } = props;
 	const classes = useStyles();

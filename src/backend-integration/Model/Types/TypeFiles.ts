@@ -75,7 +75,7 @@ abstract class TypeFiles implements Type<FileData[]> {
 					(this.params?.alwaysSendRawData || !file.preview)
 						? await fileToData(file.file as File)
 						: undefined,
-			}))
+			})),
 		);
 	};
 

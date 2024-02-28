@@ -8,7 +8,7 @@ export const useDepsDiffLog = (deps: unknown[], name: string) => {
 			console.log(
 				`[useDepsDiffLog] [${name}] array length mismatch`,
 				prev.current,
-				deps
+				deps,
 			);
 		} else {
 			for (let i = 0; i < deps.length; ++i) {
@@ -20,7 +20,7 @@ export const useDepsDiffLog = (deps: unknown[], name: string) => {
 						deps[i],
 						"complete deps:",
 						prev.current,
-						deps
+						deps,
 					);
 				}
 			}
@@ -38,7 +38,7 @@ export const useDepsDiffLog = (deps: unknown[], name: string) => {
 const useMemoDebug = <T>(
 	factory: () => T,
 	deps: unknown[],
-	name?: string
+	name?: string,
 ): T => {
 	useDepsDiffLog(deps, name ?? "useMemoDebug");
 	// eslint-disable-next-line react-hooks/exhaustive-deps

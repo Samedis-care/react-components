@@ -29,7 +29,7 @@ class RendererEnumSelect extends TypeEnum {
 	constructor(
 		values: AdvancedEnumValue[],
 		props?: RendererEnumSelectProps,
-		numericMode = false
+		numericMode = false,
 	) {
 		super(values, numericMode);
 		this.props = props;
@@ -74,10 +74,10 @@ class RendererEnumSelect extends TypeEnum {
 			const onLoad = (query: string) =>
 				uniqueArray([
 					...data.filter((entry) =>
-						getStringLabel(entry).toLowerCase().startsWith(query.toLowerCase())
+						getStringLabel(entry).toLowerCase().startsWith(query.toLowerCase()),
 					),
 					...data.filter((entry) =>
-						getStringLabel(entry).toLowerCase().includes(query.toLowerCase())
+						getStringLabel(entry).toLowerCase().includes(query.toLowerCase()),
 					),
 				]);
 

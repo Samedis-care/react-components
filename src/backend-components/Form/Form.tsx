@@ -59,15 +59,15 @@ export type CustomValidationHandler = () =>
  */
 export type PreSubmitHandler = (
 	id: string | null,
-	submitOptions: FormSubmitOptions
-) => Promise<void> | unknown;
+	submitOptions: FormSubmitOptions,
+) => Promise<void> | void;
 /**
  * Post submit handler to submit additional data for the submitted record
  */
 export type PostSubmitHandler = (
 	id: string,
-	submitOptions: FormSubmitOptions
-) => Promise<void> | unknown;
+	submitOptions: FormSubmitOptions,
+) => Promise<void> | void;
 
 export enum OnlySubmitMountedBehaviour {
 	/**
@@ -157,7 +157,7 @@ export interface FormProps<
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
 	CustomT,
-	CustomPropsT
+	CustomPropsT,
 > {
 	/**
 	 * The data model this form follows
@@ -200,7 +200,7 @@ export interface FormProps<
 	onSubmit?: (
 		dataFromServer: Record<string, unknown>,
 		submittedData: Record<string, unknown>,
-		previousData: Record<string, unknown>
+		previousData: Record<string, unknown>,
 	) => Promise<void> | void;
 	/**
 	 * Delete the record on submit rather then save it?
@@ -289,8 +289,8 @@ export interface FormProps<
 		id: string,
 		model: Model<ModelFieldName, PageVisibility, unknown>,
 		getFieldValue: FormContextData["getFieldValue"],
-		setFieldValueLite: FormContextData["setFieldValueLite"]
-	) => Promise<void> | unknown;
+		setFieldValueLite: FormContextData["setFieldValueLite"],
+	) => Promise<void> | void;
 	/**
 	 * CSS class for form styles
 	 */
@@ -341,7 +341,7 @@ export interface FormContextData {
 	 */
 	setCustomValidationHandler: (
 		field: string,
-		handler: CustomValidationHandler
+		handler: CustomValidationHandler,
 	) => void;
 	/**
 	 * Removes the callback to perform hard validation (for custom fields)
@@ -354,7 +354,7 @@ export interface FormContextData {
 	 */
 	setCustomWarningHandler: (
 		field: string,
-		handler: CustomValidationHandler
+		handler: CustomValidationHandler,
 	) => void;
 	/**
 	 * Removes the callback to perform soft validation (for custom fields)
@@ -393,7 +393,7 @@ export interface FormContextData {
 	 */
 	setCustomState: <T>(
 		field: string,
-		data: Dispatch<SetStateAction<T | undefined>>
+		data: Dispatch<SetStateAction<T | undefined>>,
 	) => void;
 	/**
 	 * Set dirty custom field count (for fields modified by post submit handlers)
@@ -526,7 +526,7 @@ export interface FormContextData {
 		field: string,
 		value: unknown,
 		validate?: boolean,
-		triggerOnChange?: boolean
+		triggerOnChange?: boolean,
 	) => void;
 	/**
 	 * Like setFieldValue but doesn't trigger validation
@@ -557,7 +557,7 @@ export interface FormContextData {
 	setFieldTouched: (
 		field: string,
 		touched?: boolean,
-		validate?: boolean
+		validate?: boolean,
 	) => void;
 	/**
 	 * Like setFieldTouched but doesn't trigger validation
@@ -579,7 +579,7 @@ export interface FormContextData {
 	 * If the returned object is empty no validation errors occurred.
 	 */
 	validateForm: (
-		mode?: "normal" | "hint"
+		mode?: "normal" | "hint",
 	) => Promise<ValidationError> | ValidationError;
 	/**
 	 * Parent form context (if present and FormProps.nestedFormName is set)
@@ -622,7 +622,7 @@ export type FormContextDataLite = Pick<
 	| "removeCustomReadOnly"
 >;
 export const FormContextLite = React.createContext<FormContextDataLite | null>(
-	null
+	null,
 );
 export const useFormContextLite = (): FormContextDataLite => {
 	const ctx = useContext(FormContextLite);
@@ -674,7 +674,7 @@ const getUpdateData = (
 	alwaysSubmitFields: string[],
 	mountedFields: Record<string, boolean>,
 	defaultRecord: Record<string, unknown>,
-	id: string | null
+	id: string | null,
 ) => {
 	const isMounted = (key: string): boolean =>
 		key === "id" ||
@@ -683,7 +683,7 @@ const getUpdateData = (
 		getVisibility(
 			model.fields[key].visibility[id ? "edit" : "create"],
 			values,
-			values
+			values,
 		).hidden;
 
 	const data = !onlySubmitMounted
@@ -705,12 +705,12 @@ const getUpdateData = (
 						result[field] = getValueByDot(field, defaultRecord);
 					} else {
 						throw new Error(
-							`Invalid onlySubmitMountedBehaviour ${behaviour as string}`
+							`Invalid onlySubmitMountedBehaviour ${behaviour as string}`,
 						);
 					}
 				}
 				return dotsToObject(result);
-		  })();
+			})();
 	if (id === "singleton") return { ...data, id };
 	return data;
 };
@@ -735,14 +735,14 @@ const normalizeValues = <T,>(data: T, config: DirtyDetectionConfig): T => {
 	} = config;
 
 	data = getUpdateData(
-		(data as unknown) as Record<string, unknown>,
+		data as unknown as Record<string, unknown>,
 		model,
 		onlySubmitMounted,
 		onlySubmitMountedBehaviour,
 		alwaysSubmitFields,
 		mountedFields,
 		defaultRecord,
-		((data as unknown) as Record<"id", string | null>).id
+		(data as unknown as Record<"id", string | null>).id,
 	) as T;
 
 	let normalizedData: Record<string, unknown> = {};
@@ -763,9 +763,9 @@ const Form = <
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
 	CustomT,
-	CustomPropsT
+	CustomPropsT,
 >(
-	props: FormProps<KeyT, VisibilityT, CustomT, CustomPropsT>
+	props: FormProps<KeyT, VisibilityT, CustomT, CustomPropsT>,
 ) => {
 	const {
 		model,
@@ -822,7 +822,7 @@ const Form = <
 		(field: string, handler: PreSubmitHandler) => {
 			preSubmitHandlers.current[field] = handler;
 		},
-		[]
+		[],
 	);
 	const removePreSubmitHandler = useCallback((field: string) => {
 		delete preSubmitHandlers.current[field];
@@ -835,20 +835,20 @@ const Form = <
 		(field: string, handler: CustomValidationHandler) => {
 			customValidationHandlers.current[field] = handler;
 		},
-		[]
+		[],
 	);
 	const removeCustomValidationHandler = useCallback((field: string) => {
 		delete customValidationHandlers.current[field];
 	}, []);
 	// custom fields - custom warning handlers
 	const customWarningHandlers = useRef<Record<string, CustomValidationHandler>>(
-		{}
+		{},
 	);
 	const setCustomWarningHandler = useCallback(
 		(field: string, handler: CustomValidationHandler) => {
 			customWarningHandlers.current[field] = handler;
 		},
-		[]
+		[],
 	);
 	const removeCustomWarningHandler = useCallback((field: string) => {
 		delete customWarningHandlers.current[field];
@@ -860,7 +860,7 @@ const Form = <
 		(field: string, handler: PostSubmitHandler) => {
 			postSubmitHandlers.current[field] = handler;
 		},
-		[]
+		[],
 	);
 	const removePostSubmitHandler = useCallback((field: string) => {
 		delete postSubmitHandlers.current[field];
@@ -870,7 +870,7 @@ const Form = <
 	const customFieldState = useRef<Record<string, unknown>>({});
 	const getCustomState = useCallback(
 		<T,>(field: string): T => customFieldState.current[field] as T,
-		[]
+		[],
 	);
 	const setCustomState = useCallback(
 		<T,>(field: string, value: Dispatch<SetStateAction<T | undefined>>) => {
@@ -879,7 +879,7 @@ const Form = <
 					? value(customFieldState.current[field] as T | undefined)
 					: value;
 		},
-		[]
+		[],
 	);
 
 	// custom read-only
@@ -895,7 +895,7 @@ const Form = <
 				};
 			});
 		},
-		[]
+		[],
 	);
 	const removeCustomReadOnly = useCallback((ident: string) => {
 		setCustomReadOnlyReasons((prev) => {
@@ -911,10 +911,12 @@ const Form = <
 		// clear deleted state upon id change
 		setDeleted(false);
 	}, [id]);
-	const { isLoading, error, data: serverData, refetch } = useModelGet(
-		model,
-		deleted ? null : id || null
-	);
+	const {
+		isLoading,
+		error,
+		data: serverData,
+		refetch,
+	} = useModelGet(model, deleted ? null : id || null);
 	const { mutateAsync: updateData } = useModelMutation(model);
 	const { mutateAsync: deleteRecord } = useModelDelete(model);
 	const {
@@ -939,9 +941,9 @@ const Form = <
 	const addBusyReason = useCallback(
 		(name: string, promise?: Promise<unknown>) => {
 			setSubmittingOther((prev) => [...prev, name]);
-			if (promise) promise.finally(() => removeBusyReason(name));
+			if (promise) void promise.finally(() => removeBusyReason(name));
 		},
-		[removeBusyReason]
+		[removeBusyReason],
 	);
 	const [submittingBlocked, setSubmittingBlocked] = useState(false);
 	const [submittingBlocker, setSubmittingBlocker] = useState<string[]>([]);
@@ -964,7 +966,7 @@ const Form = <
 		const submitReadOnly: Record<string, string | null> = submitting
 			? {
 					submit: t("backend-components.form.read-only.submitting") ?? null,
-			  }
+				}
 			: {};
 		return {
 			...legacy,
@@ -991,7 +993,9 @@ const Form = <
 
 	// main form handling - mounted state tracking
 	const [mountedFields, setMountedFields] = useState(() =>
-		Object.fromEntries(Object.keys(model.fields).map((field) => [field, false]))
+		Object.fromEntries(
+			Object.keys(model.fields).map((field) => [field, false]),
+		),
 	);
 	const markFieldMounted = useCallback((field: string, mounted: boolean) => {
 		setMountedFields((prev) => ({ ...prev, [field as KeyT]: mounted }));
@@ -1008,7 +1012,7 @@ const Form = <
 			}
 			const localData = normalizeValues(values ?? valuesRef.current, {
 				ignoreFields: dirtyIgnoreFields,
-				model: (model as unknown) as Model<string, PageVisibility, unknown>,
+				model: model as unknown as Model<string, PageVisibility, unknown>,
 				defaultRecord: defaultRecord[0],
 				onlySubmitMountedBehaviour,
 				onlySubmitMounted: onlySubmitMounted ?? false,
@@ -1017,7 +1021,7 @@ const Form = <
 			});
 			const remoteData = normalizeValues(serverData[0], {
 				ignoreFields: dirtyIgnoreFields,
-				model: (model as unknown) as Model<string, PageVisibility, unknown>,
+				model: model as unknown as Model<string, PageVisibility, unknown>,
 				defaultRecord: defaultRecord[0],
 				onlySubmitMountedBehaviour,
 				onlySubmitMounted: onlySubmitMounted ?? false,
@@ -1035,7 +1039,7 @@ const Form = <
 			onlySubmitMountedBehaviour,
 			alwaysSubmitFields,
 			serverData,
-		]
+		],
 	);
 
 	const getFormDirty = useCallback(
@@ -1044,15 +1048,15 @@ const Form = <
 				? (() => {
 						const [local, remote] = getNormalizedData(values);
 						return JSON.stringify(local) !== JSON.stringify(remote);
-				  })()
+					})()
 				: false,
-		[serverData, defaultRecord, getNormalizedData]
+		[serverData, defaultRecord, getNormalizedData],
 	);
 	const formDirty = useMemo(() => getFormDirty(values), [getFormDirty, values]);
 	const getDirty = useCallback(
 		(formDirty: boolean) =>
 			formDirty || customDirty || !!(id && !deleted && deleteOnSubmit),
-		[customDirty, deleteOnSubmit, deleted, id]
+		[customDirty, deleteOnSubmit, deleted, id],
 	);
 	const dirty = getDirty(formDirty);
 
@@ -1060,14 +1064,14 @@ const Form = <
 	const validateForm = useCallback(
 		async (
 			mode: "normal" | "hint" = "normal",
-			values?: Record<string, unknown>
+			values?: Record<string, unknown>,
 		) => {
 			if (disableValidation) return {};
 
 			let fieldsToValidate: KeyT[] = Object.keys(model.fields) as KeyT[];
 			if (onlyValidateMounted || (mode === "hint" && onlyWarnMounted)) {
 				fieldsToValidate = fieldsToValidate.filter(
-					(field) => field in mountedFields && mountedFields[field]
+					(field) => field in mountedFields && mountedFields[field],
 				);
 			}
 			if (mode === "hint" && onlyWarnChanged) {
@@ -1075,7 +1079,7 @@ const Form = <
 				fieldsToValidate = fieldsToValidate.filter(
 					(field) =>
 						JSON.stringify(getValueByDot(field, localData)) !==
-						JSON.stringify(getValueByDot(field, remoteData))
+						JSON.stringify(getValueByDot(field, remoteData)),
 				);
 			}
 
@@ -1083,13 +1087,13 @@ const Form = <
 				values ?? valuesRef.current,
 				id ? "edit" : "create",
 				fieldsToValidate,
-				mode
+				mode,
 			);
 			await Promise.all(
 				Object.entries(
 					mode === "normal"
 						? customValidationHandlers.current
-						: customWarningHandlers.current
+						: customWarningHandlers.current,
 				).map(async ([name, handler]) => {
 					const customErrors = await handler();
 					for (const key in customErrors) {
@@ -1097,7 +1101,7 @@ const Form = <
 							continue;
 						errors[name + "_" + key] = customErrors[key];
 					}
-				})
+				}),
 			);
 			return errors;
 		},
@@ -1110,7 +1114,7 @@ const Form = <
 			id,
 			mountedFields,
 			getNormalizedData,
-		]
+		],
 	);
 	const validateField = useCallback(
 		async (field: string, value?: unknown) => {
@@ -1123,24 +1127,24 @@ const Form = <
 			setErrors(errors);
 			setWarnings(warnings);
 		},
-		[validateForm]
+		[validateForm],
 	);
 	const setFieldTouchedLite = useCallback(
 		(field: string, newTouched = false) => {
 			setTouched((prev) =>
 				prev[field] === newTouched
 					? prev
-					: { ...prev, [field]: newTouched as boolean }
+					: { ...prev, [field]: newTouched as boolean },
 			);
 		},
-		[]
+		[],
 	);
 	const setFieldTouched = useCallback(
 		(field: string, newTouched = true, validate = false) => {
 			setFieldTouchedLite(field, newTouched);
 			if (validate) void validateField(field);
 		},
-		[setFieldTouchedLite, validateField]
+		[setFieldTouchedLite, validateField],
 	);
 	const getFieldValue = useCallback((field: string): unknown => {
 		return getValueByDot(field, valuesRef.current);
@@ -1154,7 +1158,7 @@ const Form = <
 			field: string,
 			value: unknown,
 			validate = true,
-			triggerOnChange = false // default false to prevent recursion
+			triggerOnChange = false, // default false to prevent recursion
 		) => {
 			if (triggerOnChange) {
 				const onChange = model.fields[field as KeyT].onChange;
@@ -1163,7 +1167,7 @@ const Form = <
 					if (value === undefined && process.env.NODE_ENV === "development") {
 						// eslint-disable-next-line no-console
 						console.error(
-							`[Components-Care] [Form] onChange handler for field '${field}' returned undefined. Missing return?`
+							`[Components-Care] [Form] onChange handler for field '${field}' returned undefined. Missing return?`,
 						);
 					}
 				}
@@ -1173,7 +1177,7 @@ const Form = <
 			setValues(valuesRef.current);
 			if (validate) void validateField(field, value);
 		},
-		[setFieldTouched, validateField, model, getFieldValue]
+		[setFieldTouched, validateField, model, getFieldValue],
 	);
 	const setFieldValueLite = useCallback(
 		(field: string, value: unknown) => {
@@ -1181,7 +1185,7 @@ const Form = <
 			valuesRef.current = dotSet(field, valuesRef.current, value);
 			setValues(valuesRef.current);
 		},
-		[setFieldTouchedLite]
+		[setFieldTouchedLite],
 	);
 	const resetForm = useCallback(() => {
 		if (!serverData || !serverData[0]) return;
@@ -1201,13 +1205,13 @@ const Form = <
 				// eslint-disable-next-line no-console
 				console.error(
 					"[Components-Care] [Form] Handling on blur event for element without name. Please set form name via one of these attributes: name, data-name or id",
-					evt
+					evt,
 				);
 				return;
 			}
 			setFieldTouched(fieldName);
 		},
-		[setFieldTouched]
+		[setFieldTouched],
 	);
 
 	// init data structs after first load
@@ -1217,14 +1221,14 @@ const Form = <
 		valuesRef.current = deepClone(serverData[0]);
 		setValues(valuesRef.current);
 		setTouched(
-			Object.fromEntries(Object.keys(model.fields).map((key) => [key, false]))
+			Object.fromEntries(Object.keys(model.fields).map((key) => [key, false])),
 		);
 
 		if (initialRecord && id == null) {
 			void Promise.all(
 				Object.entries(initialRecord).map(([key, value]) =>
-					setFieldValue(key, value, false)
-				)
+					setFieldValue(key, value, false),
+				),
 			);
 		}
 
@@ -1246,7 +1250,7 @@ const Form = <
 			.forEach((field) => {
 				deepAssign(
 					newValues,
-					dotToObject(field, getValueByDot(field, serverRecord))
+					dotToObject(field, getValueByDot(field, serverRecord)),
 				);
 			});
 
@@ -1258,7 +1262,7 @@ const Form = <
 	// main form - submit handler
 	const submitForm = useCallback(
 		async (
-			params?: FormSubmitOptions | React.SyntheticEvent
+			params?: FormSubmitOptions | React.SyntheticEvent,
 		): Promise<void> => {
 			if (!serverData) throw new Error("serverData is null"); // should never happen
 			if (!defaultRecord) throw new Error("default record is null"); // should never happen
@@ -1282,7 +1286,7 @@ const Form = <
 					// eslint-disable-next-line no-console
 					console.error(
 						"[Components-Care] [FormEngine] Pre-submit handler threw exception",
-						e
+						e,
 					);
 					cancelSubmit = true;
 				}
@@ -1292,7 +1296,7 @@ const Form = <
 			}
 			setSubmittingForm(true);
 			setTouched((prev) =>
-				Object.fromEntries(Object.keys(prev).map((field) => [field, true]))
+				Object.fromEntries(Object.keys(prev).map((field) => [field, true])),
 			);
 			if (deleteOnSubmit) {
 				try {
@@ -1348,7 +1352,7 @@ const Form = <
 							</Grid>
 						),
 						textButtonYes: t(
-							"backend-components.form.submit-with-warnings.yes"
+							"backend-components.form.submit-with-warnings.yes",
 						),
 						textButtonNo: t("backend-components.form.submit-with-warnings.no"),
 					});
@@ -1362,8 +1366,8 @@ const Form = <
 
 				await Promise.all(
 					Object.values(preSubmitHandlers.current).map((handler) =>
-						handler(id, params as FormSubmitOptions)
-					)
+						handler(id, params as FormSubmitOptions),
+					),
 				);
 
 				const submitValues = valuesRef.current;
@@ -1372,30 +1376,30 @@ const Form = <
 				const result = await updateData(
 					getUpdateData(
 						valuesRef.current,
-						(model as unknown) as Model<string, PageVisibility, unknown>,
+						model as unknown as Model<string, PageVisibility, unknown>,
 						onlySubmitMounted ?? false,
 						onlySubmitMountedBehaviour,
 						alwaysSubmitFields ?? [],
 						mountedFields,
 						defaultRecord[0],
-						id
-					)
+						id,
+					),
 				);
 
 				const newValues = deepClone(result[0]);
 				valuesRef.current = newValues;
 
 				setTouched((prev) =>
-					Object.fromEntries(Object.keys(prev).map((field) => [field, false]))
+					Object.fromEntries(Object.keys(prev).map((field) => [field, false])),
 				);
 
 				await Promise.all(
 					Object.values(postSubmitHandlers.current).map((handler) =>
 						handler(
 							(newValues as Record<"id", string>).id,
-							params as FormSubmitOptions
-						)
-					)
+							params as FormSubmitOptions,
+						),
+					),
 				);
 
 				// re-render after post submit handler, this way we avoid mounting new components before the form is fully saved
@@ -1434,7 +1438,7 @@ const Form = <
 			onSubmit,
 			pushDialog,
 			t,
-		]
+		],
 	);
 	const handleSubmit = useCallback(
 		(evt: FormEvent<HTMLFormElement>) => {
@@ -1442,7 +1446,7 @@ const Form = <
 			evt.stopPropagation();
 			void submitForm();
 		},
-		[submitForm]
+		[submitForm],
 	);
 
 	// nested forms
@@ -1453,9 +1457,8 @@ const Form = <
 	// nested forms - loading
 	useEffect(() => {
 		if (!parentFormContext || !nestedFormName) return;
-		const state = parentFormContext.getCustomState<FormNestedState>(
-			nestedFormName
-		);
+		const state =
+			parentFormContext.getCustomState<FormNestedState>(nestedFormName);
 		if (!state) return;
 		valuesRef.current = state.values;
 		setValues(state.values);
@@ -1480,7 +1483,7 @@ const Form = <
 			if (!deleted) return;
 			parentFormContext.setCustomState<FormNestedState>(
 				nestedFormName,
-				() => undefined
+				() => undefined,
 			);
 		};
 
@@ -1522,13 +1525,13 @@ const Form = <
 		if (!parentFormContext || !nestedFormName) return;
 		const validateNestedForm = () => {
 			setTouched((prev) =>
-				Object.fromEntries(Object.keys(prev).map((field) => [field, true]))
+				Object.fromEntries(Object.keys(prev).map((field) => [field, true])),
 			);
 			return validateForm("normal");
 		};
 		const validateNestedFormWarn = () => {
 			setTouched((prev) =>
-				Object.fromEntries(Object.keys(prev).map((field) => [field, true]))
+				Object.fromEntries(Object.keys(prev).map((field) => [field, true])),
 			);
 			return validateForm("hint");
 		};
@@ -1536,9 +1539,9 @@ const Form = <
 			if (nestedFormPreSubmitHandler) {
 				await nestedFormPreSubmitHandler(
 					id,
-					(model as unknown) as Model<ModelFieldName, PageVisibility, unknown>,
+					model as unknown as Model<ModelFieldName, PageVisibility, unknown>,
 					getFieldValue,
-					setFieldValueLite
+					setFieldValueLite,
 				);
 			}
 			await submitForm(params);
@@ -1548,11 +1551,11 @@ const Form = <
 		if (!disableNestedSubmit) {
 			parentFormContext.setCustomValidationHandler(
 				nestedFormName,
-				validateNestedForm
+				validateNestedForm,
 			);
 			parentFormContext.setCustomWarningHandler(
 				nestedFormName,
-				validateNestedFormWarn
+				validateNestedFormWarn,
 			);
 			parentFormContext.setPostSubmitHandler(nestedFormName, submitNestedForm);
 		}
@@ -1607,11 +1610,11 @@ const Form = <
 			console.log("Form Dirty Flag State:");
 			console.log(
 				"Form Dirty State (exact):",
-				JSON.stringify(localData) !== JSON.stringify(remoteData)
+				JSON.stringify(localData) !== JSON.stringify(remoteData),
 			);
 			console.log(
 				"Form Dirty State:",
-				JSON.stringify(localData) !== JSON.stringify(remoteData)
+				JSON.stringify(localData) !== JSON.stringify(remoteData),
 			);
 			console.log("Custom Dirty State:", customDirty);
 			console.log("Custom Dirty Fields:", customDirtyFields);
@@ -1631,7 +1634,7 @@ const Form = <
 					"]: ByRef:",
 					server !== form,
 					"ByJSON:",
-					dirty
+					dirty,
 				);
 			});
 			/* eslint-enable no-console */
@@ -1644,10 +1647,10 @@ const Form = <
 			customDirtyFields,
 			customDirtyCounter,
 			model.fields,
-		]
+		],
 	);
 	useDevKeybinds(
-		useMemo(() => ({ "ccform dirty?": () => debugDirty(true) }), [debugDirty])
+		useMemo(() => ({ "ccform dirty?": () => debugDirty(true) }), [debugDirty]),
 	);
 
 	// context and rendering
@@ -1656,13 +1659,13 @@ const Form = <
 		(error: Error) => {
 			setUpdateError(error);
 		},
-		[setUpdateError]
+		[setUpdateError],
 	);
 
 	const formContextData: FormContextData = useMemo(
 		() => ({
 			id,
-			model: (model as unknown) as Model<ModelFieldName, PageVisibility, never>,
+			model: model as unknown as Model<ModelFieldName, PageVisibility, never>,
 			errorComponent: ErrorComponent,
 			relations: serverData && serverData[1] ? serverData[1] : {},
 			setError,
@@ -1767,13 +1770,13 @@ const Form = <
 			customProps,
 			readOnly,
 			readOnlyReasons,
-		]
+		],
 	);
 
 	const formContextDataLite: FormContextDataLite = useMemo(
 		() => ({
 			id,
-			model: (model as unknown) as Model<ModelFieldName, PageVisibility, never>,
+			model: model as unknown as Model<ModelFieldName, PageVisibility, never>,
 			customProps,
 			errorComponent: ErrorComponent,
 			onlySubmitMounted: !!onlySubmitMounted,
@@ -1807,7 +1810,7 @@ const Form = <
 			getFieldValues,
 			setFieldValueLite,
 			setFieldTouchedLite,
-		]
+		],
 	);
 
 	if (error) {
@@ -1824,7 +1827,7 @@ const Form = <
 		// eslint-disable-next-line no-console
 		console.error(
 			"[Components-Care] [FormEngine] Data is faulty",
-			serverData ? JSON.stringify(serverData, undefined, 4) : null
+			serverData ? JSON.stringify(serverData, undefined, 4) : null,
 		);
 		throw new Error("Data is not present, this should never happen");
 	}

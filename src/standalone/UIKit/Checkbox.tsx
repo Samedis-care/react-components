@@ -80,14 +80,14 @@ const StyledCheckbox = withStyles((theme: Theme) => ({
 				? {
 						...theme.componentsCare?.uiKit?.checkbox?.box?.style,
 						...theme.componentsCare?.uiKit?.checkbox?.box?.small?.style,
-				  }
+					}
 				: theme.componentsCare?.uiKit?.checkbox?.box?.style),
 		},
 		...(props.size == "small"
 			? {
 					...theme.componentsCare?.uiKit?.checkbox?.style,
 					...theme.componentsCare?.uiKit?.checkbox?.small?.style,
-			  }
+				}
 			: theme.componentsCare?.uiKit?.checkbox?.style),
 	}),
 	disabled: {

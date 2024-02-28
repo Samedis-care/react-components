@@ -31,7 +31,7 @@ const useStyles = makeStyles(
 			paddingLeft: "1.5rem",
 		},
 	},
-	{ name: "CcHowToBox" }
+	{ name: "CcHowToBox" },
 );
 
 const HowToBox = (props: HowToBoxProps) => {
@@ -80,10 +80,10 @@ export interface HowToBoxTranslateProps
 export const HowToBoxTranslate = (props: HowToBoxTranslateProps) => {
 	const { t, titleLabel, labels, ...other } = props;
 	// memo content because it's an array which gets re-created every render
-	const content = useMemo(() => t(labels, { returnObjects: true }), [
-		t,
-		labels,
-	]);
+	const content = useMemo(
+		() => t(labels, { returnObjects: true }),
+		[t, labels],
+	);
 	return (
 		<HowToBox
 			{...other}

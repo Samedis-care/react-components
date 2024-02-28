@@ -15,7 +15,7 @@ const useFormAutoSave = (debounceTime = 5000) => {
 	const { submit, submitting, dirty, values } = useFormContext();
 	const debounceSubmit = useMemo(
 		() => (debounceTime == 0 ? submit : debounce(submit, debounceTime)),
-		[submit, debounceTime]
+		[submit, debounceTime],
 	);
 	const dataStr = JSON.stringify(values);
 	useEffect(() => {

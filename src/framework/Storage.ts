@@ -17,7 +17,7 @@ export abstract class StorageProvider {
 	 */
 	public abstract setItem(
 		key: StorageKeyType,
-		value: StorageValueType
+		value: StorageValueType,
 	): Promise<void> | void;
 
 	/**
@@ -26,7 +26,7 @@ export abstract class StorageProvider {
 	 * @returns The stored value or null if nothing is stored
 	 */
 	public abstract getItem(
-		key: StorageKeyType
+		key: StorageKeyType,
 	): Promise<StorageValueType> | StorageValueType;
 
 	/**
@@ -100,7 +100,7 @@ export abstract class CachedServerStorageProvider extends StorageProvider {
 	 * @protected
 	 */
 	protected abstract getItemFromServer(
-		key: StorageKeyType
+		key: StorageKeyType,
 	): Promise<string | null>;
 
 	/**
@@ -111,7 +111,7 @@ export abstract class CachedServerStorageProvider extends StorageProvider {
 	 */
 	protected abstract setItemOnServer(
 		key: StorageKeyType,
-		value: StorageValueType
+		value: StorageValueType,
 	): Promise<void>;
 
 	/**
@@ -125,7 +125,7 @@ export abstract class CachedServerStorageProvider extends StorageProvider {
 			return ModelDataStore.fetchQuery(
 				["cc-css", key],
 				() => this.getItemFromServer(key),
-				this.cacheOptions
+				this.cacheOptions,
 			);
 		} catch (e) {
 			// on failure return null
@@ -146,7 +146,7 @@ export abstract class CachedServerStorageProvider extends StorageProvider {
 							ModelDataStore.setQueryData(["cc-css", key], () => value);
 						},
 					}),
-				1000
+				1000,
 			);
 		}
 		window.setTimeout(this.cleanDebounce.bind(this), 300000, key);
@@ -184,16 +184,17 @@ export const SessionStorageProviderInstance = new SessionStorageProvider();
  */
 export type GetStorageProviderCallback = (
 	id: string,
-	keys: Record<string, string>
+	keys: Record<string, string>,
 ) => [StorageProvider, Record<string, string>];
 
 export const DefaultGetStorageProviderCallback: GetStorageProviderCallback = (
 	id: string,
-	keys: Record<string, string>
+	keys: Record<string, string>,
 ) => [LocalStorageProviderInstance, keys];
 
 export class StorageManager {
-	private static storageProviderCallback: GetStorageProviderCallback = DefaultGetStorageProviderCallback;
+	private static storageProviderCallback: GetStorageProviderCallback =
+		DefaultGetStorageProviderCallback;
 
 	/**
 	 * Configures storage manager
@@ -211,7 +212,7 @@ export class StorageManager {
 	 */
 	public static getItem(
 		id: StorageKeyType,
-		keys: Record<string, string>
+		keys: Record<string, string>,
 	): Promise<StorageValueType> | StorageValueType {
 		const [storageProvider, keysToUse] = this.storageProviderCallback(id, {
 			...keys,
@@ -228,7 +229,7 @@ export class StorageManager {
 	public static setItem(
 		id: StorageKeyType,
 		keys: Record<string, string>,
-		value: StorageValueType
+		value: StorageValueType,
 	): Promise<void> | void {
 		const [storageProvider, keysToUse] = this.storageProviderCallback(id, {
 			...keys,
@@ -243,7 +244,7 @@ export class StorageManager {
 	 */
 	private static buildStorageKey(
 		id: StorageKeyType,
-		keys: Record<string, string>
+		keys: Record<string, string>,
 	): string {
 		return id + "-" + JSON.stringify(keys);
 	}

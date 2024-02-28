@@ -42,13 +42,13 @@ export type VisibilityCallback =
 	| Visibility
 	| ((
 			values: Record<string, unknown>,
-			initialValues: Record<string, unknown>
+			initialValues: Record<string, unknown>,
 	  ) => Visibility);
 
 export const getVisibility = (
 	cb: VisibilityCallback,
 	values: Record<string, unknown>,
-	initialValues: Record<string, unknown>
+	initialValues: Record<string, unknown>,
 ): Visibility => {
 	if (typeof cb === "function") {
 		return cb(values, initialValues);

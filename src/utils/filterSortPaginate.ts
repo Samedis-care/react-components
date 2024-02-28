@@ -19,7 +19,7 @@ export const filterSortPaginate2 = (
 		offset: number;
 		rows: number;
 	},
-	columnDef: IDataGridColumnDef[]
+	columnDef: IDataGridColumnDef[],
 ): [DataGridRowData[], number] => {
 	const { offset, rows: amountRows, quickFilter, fieldFilter, sort } = params;
 	// quickfilter
@@ -30,6 +30,7 @@ export const filterSortPaginate2 = (
 				const value = row[key];
 				if (
 					value !== null &&
+					// eslint-disable-next-line @typescript-eslint/no-base-to-string
 					value.toString().toLowerCase().includes(quickFilter.toLowerCase())
 				) {
 					return true;
@@ -152,7 +153,7 @@ export const filterSortPaginate2 = (
 		rowData = rowData.filter((row) => {
 			let rawValue = row[filterField];
 			if (!rawValue) rawValue = "";
-			// eslint-disable-next-line @typescript-eslint/no-unused-vars
+			// eslint-disable-next-line @typescript-eslint/no-unused-vars,@typescript-eslint/no-base-to-string
 			const value = rawValue.toString().toLowerCase();
 			try {
 				// eslint-disable-next-line no-eval
@@ -174,7 +175,9 @@ export const filterSortPaginate2 = (
 			if (typeof valA === "number" && typeof valB === "number") {
 				res = valA - valB;
 			} else if (valA && valB) {
+				// eslint-disable-next-line @typescript-eslint/no-base-to-string
 				const av = valA.toString();
+				// eslint-disable-next-line @typescript-eslint/no-base-to-string
 				const bv = valB.toString();
 				res = av.localeCompare(bv);
 			} else {
@@ -204,7 +207,7 @@ export const filterSortPaginate2 = (
 const filterSortPaginate = (
 	rowData: DataGridRowData[],
 	params: IDataGridLoadDataParameters,
-	columnDef: IDataGridColumnDef[]
+	columnDef: IDataGridColumnDef[],
 ): [DataGridRowData[], number] => {
 	const offset = (params.page - 1) * params.rows;
 	return filterSortPaginate2(rowData, { ...params, offset }, columnDef);

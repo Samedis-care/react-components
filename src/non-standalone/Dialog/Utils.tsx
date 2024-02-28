@@ -20,7 +20,7 @@ import { ValidationError } from "../../backend-components";
  */
 export const showConfirmDialog = async (
 	pushDialog: DialogContextType[0],
-	props: IDialogConfigConfirmAsync
+	props: IDialogConfigConfirmAsync,
 ): Promise<void> => {
 	return new Promise((resolve, reject) => {
 		pushDialog(
@@ -29,7 +29,7 @@ export const showConfirmDialog = async (
 				onClose={reject}
 				handlerButtonYes={resolve}
 				handlerButtonNo={reject}
-			/>
+			/>,
 		);
 	});
 };
@@ -42,7 +42,7 @@ export const showConfirmDialog = async (
  */
 export const showConfirmDialogBool = async (
 	pushDialog: DialogContextType[0],
-	props: IDialogConfigConfirmAsync
+	props: IDialogConfigConfirmAsync,
 ): Promise<boolean> => {
 	return new Promise((resolve) => {
 		pushDialog(
@@ -51,7 +51,7 @@ export const showConfirmDialogBool = async (
 				onClose={() => resolve(false)}
 				handlerButtonYes={() => resolve(true)}
 				handlerButtonNo={() => resolve(false)}
-			/>
+			/>,
 		);
 	});
 };
@@ -64,7 +64,7 @@ export const showConfirmDialogBool = async (
  */
 export const showInputDialog = async (
 	pushDialog: DialogContextType[0],
-	props: IDialogConfigInputAsync
+	props: IDialogConfigInputAsync,
 ): Promise<string> => {
 	return new Promise((resolve, reject) => {
 		pushDialog(
@@ -73,7 +73,7 @@ export const showInputDialog = async (
 				onClose={reject}
 				handlerButtonYes={resolve}
 				handlerButtonNo={reject}
-			/>
+			/>,
 		);
 	});
 };
@@ -87,7 +87,7 @@ export const showInputDialog = async (
 export const showInfoDialog = (
 	pushDialog: DialogContextType[0],
 	props: Omit<IDialogConfigSimple, "buttons"> &
-		Partial<Pick<IDialogConfigSimple, "buttons">>
+		Partial<Pick<IDialogConfigSimple, "buttons">>,
 ): Promise<void> => {
 	const { title, message, buttons } = props;
 	return new Promise((resolve) => {
@@ -104,7 +104,7 @@ export const showInfoDialog = (
 					]
 				}
 				onClose={resolve}
-			/>
+			/>,
 		);
 	});
 };
@@ -117,7 +117,7 @@ export const showInfoDialog = (
  */
 export const showErrorDialog = (
 	pushDialog: DialogContextType[0],
-	e: Error | ValidationError | string
+	e: Error | ValidationError | string,
 ): Promise<void> => {
 	// display generic errors and validation errors
 	let errorTitle = "";
@@ -151,7 +151,7 @@ export const showErrorDialog = (
 					},
 				]}
 				onClose={resolve}
-			/>
+			/>,
 		);
 	});
 };

@@ -50,7 +50,7 @@ class RendererBooleanCheckbox extends TypeBoolean {
 					disabled={visibility.readOnly}
 					onChange={(
 						evt: React.ChangeEvent<HTMLInputElement>,
-						checked: boolean
+						checked: boolean,
 					) => {
 						handleChange(evt.target.name, this.invert ? !checked : checked);
 					}}

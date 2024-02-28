@@ -81,10 +81,10 @@ const GridMultiSelectFilter = (props: GridMultiSelectFilterProps) => {
 			onSelect(
 				checked
 					? selected.concat([evt.target.name])
-					: selected.filter((entry) => entry !== evt.target.name)
+					: selected.filter((entry) => entry !== evt.target.name),
 			);
 		},
-		[selected, onSelect]
+		[selected, onSelect],
 	);
 
 	const getSelected = useCallback(
@@ -92,26 +92,26 @@ const GridMultiSelectFilter = (props: GridMultiSelectFilterProps) => {
 			return values
 				.map(
 					(selected) =>
-						options.find((option) => option.value === selected)?.label
+						options.find((option) => option.value === selected)?.label,
 				)
 				.filter((selected) => selected)
 				.join(", ");
 		},
-		[options]
+		[options],
 	);
 
 	const handleSelectorChange = useCallback(
 		(event: SelectChangeEvent<string[]>) => {
 			onSelect(event.target.value as string[]);
 		},
-		[onSelect]
+		[onSelect],
 	);
 
 	const selectorClasses = useMemo(
 		() => ({
 			select: isActive ? classes.customFilterBorder : undefined,
 		}),
-		[isActive, classes.customFilterBorder]
+		[isActive, classes.customFilterBorder],
 	);
 
 	if (dialog) {

@@ -48,7 +48,7 @@ const useStyles = makeStyles(
 			transform: "rotate(180deg)",
 		},
 	},
-	{ name: "CcPortal" }
+	{ name: "CcPortal" },
 );
 
 const CollapsibleMenu = (props: CollapsibleMenuProps) => {
@@ -56,9 +56,10 @@ const CollapsibleMenu = (props: CollapsibleMenuProps) => {
 	const [collapsed, setCollapsed] = useState(false);
 	const { mobile } = usePortalLayoutContext();
 
-	const toggleCollapsed = useCallback(() => setCollapsed((prev) => !prev), [
-		setCollapsed,
-	]);
+	const toggleCollapsed = useCallback(
+		() => setCollapsed((prev) => !prev),
+		[setCollapsed],
+	);
 
 	return (
 		<Grid

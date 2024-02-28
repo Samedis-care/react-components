@@ -82,7 +82,7 @@ export interface IDataGridExporter<T> {
 		additionalFilters: DataGridAdditionalFilters,
 		fieldFilter: IDataGridFieldFilter,
 		sort: DataGridSortSetting[],
-		columns: IDataGridColumnDef[]
+		columns: IDataGridColumnDef[],
 	) => Promise<T>;
 	/**
 	 * Frontend handler to download data based off metadata supplied by backend
@@ -91,7 +91,7 @@ export interface IDataGridExporter<T> {
 	 */
 	onDownload: (
 		data: T,
-		pushDialog?: DialogContextType[0] | null | undefined
+		pushDialog?: DialogContextType[0] | null | undefined,
 	) => void;
 	/**
 	 * Automatically call onDownload when ready (this is considered non-interactive and may come with limitations for e.g. opening popups)

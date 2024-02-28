@@ -7,7 +7,7 @@ import { Connector } from "./index";
 abstract class ApiConnector<
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
-	CustomT
+	CustomT,
 > extends Connector<KeyT, VisibilityT, CustomT> {
 	/**
 	 * Updates the API endpoint

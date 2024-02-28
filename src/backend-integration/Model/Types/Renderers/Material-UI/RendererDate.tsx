@@ -61,8 +61,8 @@ class RendererDate extends TypeDate {
 						onError={(error: React.ReactNode) => {
 							this.error = error
 								? ccI18n.t(
-										"backend-integration.model.types.renderers.date.validation-error"
-								  )
+										"backend-integration.model.types.renderers.date.validation-error",
+									)
 								: "";
 							setFieldTouched(field, touched, true);
 						}}
@@ -89,7 +89,7 @@ class RendererDate extends TypeDate {
 			Math.max(
 				ccI18n.t("backend-integration.model.types.renderers.date.not-set")
 					.length,
-				10 // date length
+				10, // date length
 			) * 10;
 		return [0, Number.MAX_SAFE_INTEGER, def];
 	};

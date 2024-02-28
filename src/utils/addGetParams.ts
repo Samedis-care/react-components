@@ -7,7 +7,7 @@
  */
 const addGetParams = (
 	url: string,
-	args: Record<string, unknown> | null
+	args: Record<string, unknown> | null,
 ): string => {
 	if (!args) {
 		return url;
@@ -29,7 +29,7 @@ const addGetParams = (
 						"&" +
 						encodeURIComponent(key + "[]") +
 						"=" +
-						encodeURIComponent(stringifyValue(entry))
+						encodeURIComponent(stringifyValue(entry)),
 				)
 				.join("");
 		} else {

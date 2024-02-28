@@ -11,7 +11,7 @@ import { useDepsDiffLog } from "./useMemoDebug";
 const useCallbackDebug = <T extends (...args: any[]) => any>(
 	callback: T,
 	deps: unknown[],
-	name?: string
+	name?: string,
 ): T => {
 	useDepsDiffLog(deps, name ?? "useCallbackDebug");
 	// eslint-disable-next-line react-hooks/exhaustive-deps

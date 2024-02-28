@@ -11,7 +11,7 @@ import { TypeSettings } from "../../Type";
 
 export type ModelDataTypeLocalizedStringRendererGetFallbackLabel = (
 	value: Partial<Record<MultiLanguageInputSupportedLanguages, string>>,
-	values: Record<string, unknown>
+	values: Record<string, unknown>,
 ) => string;
 
 export interface ModelDataTypeLocalizedStringRendererParamsExtra {
@@ -68,7 +68,7 @@ class RendererLocalizedString extends TypeLocalizedString {
 	render(
 		params: ModelRenderParams<
 			Partial<Record<MultiLanguageInputSupportedLanguages, string>>
-		>
+		>,
 	): React.ReactElement {
 		const {
 			visibility,
@@ -108,7 +108,7 @@ class RendererLocalizedString extends TypeLocalizedString {
 						onChange={(
 							newValues: Partial<
 								Record<MultiLanguageInputSupportedLanguages, string>
-							>
+							>,
 						) => {
 							handleChange(field, newValues);
 						}}

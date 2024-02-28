@@ -171,7 +171,7 @@ const useStyles = makeStyles(
 			overflow: "auto",
 		},
 	},
-	{ name: "CcNotifications" }
+	{ name: "CcNotifications" },
 );
 
 const Notifications = (props: NotificationsProps) => {
@@ -193,7 +193,7 @@ const Notifications = (props: NotificationsProps) => {
 			setAnchor(evt.currentTarget);
 			if (onOpen) onOpen(evt);
 		},
-		[setAnchor, onOpen]
+		[setAnchor, onOpen],
 	);
 
 	const onClose = useCallback(() => {
@@ -208,7 +208,7 @@ const Notifications = (props: NotificationsProps) => {
 		window.addEventListener("focus", handleLoadLatest);
 		const intervalHandle = window.setInterval(
 			handleLoadLatest,
-			refreshInterval ?? 60000
+			refreshInterval ?? 60000,
 		);
 		return () => {
 			window.removeEventListener("focus", handleLoadLatest);
@@ -223,7 +223,7 @@ const Notifications = (props: NotificationsProps) => {
 
 	const Renderer = props.notificationRenderer || defaultRenderer;
 	const notifications = props.notifications.filter(
-		(not) => !not.expires || not.expires > new Date()
+		(not) => !not.expires || not.expires > new Date(),
 	);
 
 	return (

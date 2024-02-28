@@ -248,12 +248,12 @@ const useStyles = makeStyles(
 		},
 		modernUploadLabelEmpty: theme.typography.h5,
 	}),
-	{ name: "CcFileUpload" }
+	{ name: "CcFileUpload" },
 );
 
 const FileUpload = (
 	props: FileUploadProps & RefAttributes<FileUploadDispatch>,
-	ref: ForwardedRef<FileUploadDispatch>
+	ref: ForwardedRef<FileUploadDispatch>,
 ): React.ReactElement => {
 	const {
 		name,
@@ -308,7 +308,7 @@ const FileUpload = (
 				if (files.length > getRemainingFileCount()) {
 					handleError(
 						"files.selector.too-many",
-						t("standalone.file-upload.error.too-many")
+						t("standalone.file-upload.error.too-many"),
 					);
 					return;
 				}
@@ -329,7 +329,7 @@ const FileUpload = (
 						{
 							type: file.type,
 							lastModified: file.lastModified,
-						}
+						},
 					);
 				}
 
@@ -340,7 +340,7 @@ const FileUpload = (
 						preview: await processImage(
 							file,
 							convertImagesTo,
-							imageDownscaleOptions
+							imageDownscaleOptions,
 						),
 						canBeUploaded: true,
 						delete: false,
@@ -363,12 +363,14 @@ const FileUpload = (
 							!allowedMimes
 								.map((allowed) => matchMime(allowed, file.file.type))
 								.includes(true) &&
-							!allowedFileExt.includes(getFileExt(file.file.name).toLowerCase())
+							!allowedFileExt.includes(
+								getFileExt(file.file.name).toLowerCase(),
+							),
 					)
 				) {
 					handleError(
 						"files.type.invalid",
-						t("standalone.file-upload.error.invalid-type")
+						t("standalone.file-upload.error.invalid-type"),
 					);
 					return;
 				}
@@ -383,10 +385,10 @@ const FileUpload = (
 								(file) =>
 									!newFiles
 										.map((newFile) => newFile.file.name)
-										.includes(file.file.name)
+										.includes(file.file.name),
 							),
 							...newFiles,
-					  ];
+						];
 				if (onChange) onChange(newValue);
 				return newValue;
 			});
@@ -402,7 +404,7 @@ const FileUpload = (
 			onChange,
 			previewImages,
 			t,
-		]
+		],
 	);
 	const handleUpload = useCallback(
 		(capture?: FileCaptureConfig) => {
@@ -421,7 +423,7 @@ const FileUpload = (
 				if (getRemainingFileCount() === 0) {
 					handleError(
 						"files.selector.limit-reached",
-						t("standalone.file-upload.error.limit-reached")
+						t("standalone.file-upload.error.limit-reached"),
 					);
 					return;
 				}
@@ -436,7 +438,7 @@ const FileUpload = (
 				else elem.removeAttribute("accept");
 			}
 		},
-		[maxFiles, getRemainingFileCount, handleError, t]
+		[maxFiles, getRemainingFileCount, handleError, t],
 	);
 
 	const handleFileChange = useCallback(
@@ -445,7 +447,7 @@ const FileUpload = (
 			if (!files) return;
 			return processFiles(files);
 		},
-		[processFiles]
+		[processFiles],
 	);
 
 	const removeFile = useCallback(
@@ -466,10 +468,10 @@ const FileUpload = (
 				return newValue;
 			});
 		},
-		[onChange]
+		[onChange],
 	);
 	const { handleDrop, handleDragOver, dragging } = useDropZone(
-		readOnly ? undefined : processFiles
+		readOnly ? undefined : processFiles,
 	);
 
 	// update files if necessary
@@ -564,7 +566,7 @@ const FileUpload = (
 											}
 											variant={"box"}
 										/>
-									)
+									),
 							)}
 							{readOnly && files.length === 0 && (
 								<Grid>
@@ -655,7 +657,7 @@ const FileUpload = (
 													}
 													variant={"list"}
 												/>
-											)
+											),
 									)}
 								</Grid>
 							</Box>

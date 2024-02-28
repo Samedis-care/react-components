@@ -134,7 +134,7 @@ const enhanceData = (
 	loading: string[],
 	parentHasNext: boolean[],
 	index: number,
-	depth: number
+	depth: number,
 ): TreeDataForRenderer[] => {
 	return data
 		.map((entry, idx): TreeDataForRenderer[] => {
@@ -157,11 +157,11 @@ const enhanceData = (
 								loading,
 								[...parentHasNext, hasNext],
 								index,
-								depth + 1
+								depth + 1,
 							);
 							index += data.length;
 							return data;
-					  })()
+						})()
 					: []),
 			];
 		})
@@ -191,7 +191,7 @@ export interface TreeViewContextType {
 }
 
 const RendererWrapper = (
-	props: ListChildComponentProps<TreeViewContextType>
+	props: ListChildComponentProps<TreeViewContextType>,
 ) => {
 	const { index, data, style } = props;
 	const { renderer: Renderer, rendererProps, data: itemData } = data;
@@ -208,7 +208,7 @@ export interface TreeViewDispatch {
 
 const TreeView = React.forwardRef(function TreeView(
 	props: TreeViewProps,
-	ref: React.ForwardedRef<TreeViewDispatch>
+	ref: React.ForwardedRef<TreeViewDispatch>,
 ) {
 	const {
 		data,
@@ -247,7 +247,7 @@ const TreeView = React.forwardRef(function TreeView(
 				onToggleExpanded(id);
 			})();
 		},
-		[enhancedData, onLoadChildren, onToggleExpanded]
+		[enhancedData, onLoadChildren, onToggleExpanded],
 	);
 	const itemData = useMemo(
 		(): TreeViewContextType => ({
@@ -258,7 +258,7 @@ const TreeView = React.forwardRef(function TreeView(
 				onToggleExpanded: hookOnToggleExpanded,
 			},
 		}),
-		[renderer, enhancedData, rendererProps, hookOnToggleExpanded]
+		[renderer, enhancedData, rendererProps, hookOnToggleExpanded],
 	);
 
 	// controlled scrolling
@@ -281,7 +281,7 @@ const TreeView = React.forwardRef(function TreeView(
 				setScrollToId(id);
 			},
 		}),
-		[]
+		[],
 	);
 
 	return (

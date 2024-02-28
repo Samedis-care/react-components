@@ -34,7 +34,7 @@ export interface CrudFileUploadProps
 	 */
 	serialize: (
 		data: FileData<File>,
-		id: string | null
+		id: string | null,
 	) => Promise<Record<string, unknown>> | Record<string, unknown>;
 	/**
 	 * Callback for deserializing data after getting it from the backend connector
@@ -42,7 +42,7 @@ export interface CrudFileUploadProps
 	 * @returns The file data which can be used by the control
 	 */
 	deserialize: (
-		data: Record<string, unknown>
+		data: Record<string, unknown>,
 	) => Promise<FileData<BackendFileMeta>> | FileData<BackendFileMeta>;
 }
 
@@ -55,7 +55,7 @@ export interface BackendFileMeta extends FileMeta {
 
 const CrudFileUpload = (
 	props: CrudFileUploadProps & RefAttributes<FileUploadDispatch>,
-	ref: ForwardedRef<FileUploadDispatch>
+	ref: ForwardedRef<FileUploadDispatch>,
 ) => {
 	const { connector, serialize, deserialize, onChange, ...otherProps } = props;
 	const { allowDuplicates } = otherProps;
@@ -76,26 +76,26 @@ const CrudFileUpload = (
 						// check if we have to replace a file (update)
 						if (allowDuplicates) {
 							const oldFile = files.find(
-								(oldFile) => oldFile.file.name === file.file.name
+								(oldFile) => oldFile.file.name === file.file.name,
 							);
 							if (oldFile) {
 								return connector.update(
-									await serialize(file as FileData<File>, oldFile.file.id)
+									await serialize(file as FileData<File>, oldFile.file.id),
 								);
 							}
 						}
 						// or create new
 						return connector.create(
-							await serialize(file as FileData<File>, null)
+							await serialize(file as FileData<File>, null),
 						);
 					})
-					.map(async (request) => deserialize((await request)[0]))
+					.map(async (request) => deserialize((await request)[0])),
 			);
 			// delete deleted files
 			const deletePromise = connector.deleteMultiple(
 				newFiles
 					.filter((file) => file.delete)
-					.map((file) => (file.file as BackendFileMeta).id)
+					.map((file) => (file.file as BackendFileMeta).id),
 			);
 
 			try {
@@ -106,9 +106,11 @@ const CrudFileUpload = (
 				await deletePromise;
 				const uploadedFiles = await uploadPromise;
 
-				const finalFiles = (newFiles.filter(
-					(file) => !file.delete && !file.canBeUploaded
-				) as FileData<BackendFileMeta>[]).concat(uploadedFiles);
+				const finalFiles = (
+					newFiles.filter(
+						(file) => !file.delete && !file.canBeUploaded,
+					) as FileData<BackendFileMeta>[]
+				).concat(uploadedFiles);
 
 				// update state
 				setFiles(finalFiles);
@@ -116,7 +118,7 @@ const CrudFileUpload = (
 				setError(e as Error);
 			}
 		},
-		[allowDuplicates, connector, deserialize, files, serialize]
+		[allowDuplicates, connector, deserialize, files, serialize],
 	);
 
 	const handleError = useCallback((_, msg: string) => {

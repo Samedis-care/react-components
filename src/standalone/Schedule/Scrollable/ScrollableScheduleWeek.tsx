@@ -90,7 +90,7 @@ class ScrollableScheduleWeek extends PureComponent<IProps, IState> {
 						data={this.state.data[day]}
 						refFwd={this.props.setTodayElement}
 						moment={dayMoment}
-					/>
+					/>,
 				);
 			} else {
 				dayItems.push(
@@ -98,7 +98,7 @@ class ScrollableScheduleWeek extends PureComponent<IProps, IState> {
 						key={`${day}`}
 						data={this.state.data[day]}
 						moment={dayMoment}
-					/>
+					/>,
 				);
 			}
 		}
@@ -121,7 +121,7 @@ class ScrollableScheduleWeek extends PureComponent<IProps, IState> {
 }
 
 const ScrollableScheduleWeekWithTranslation = (
-	props: Omit<IProps, keyof WithTranslation>
+	props: Omit<IProps, keyof WithTranslation>,
 ): React.ReactElement => {
 	const { i18n, t, ready: tReady } = useCCTranslations();
 	return (

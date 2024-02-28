@@ -126,8 +126,8 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 	].includes(props.valueType ?? "")
 		? "contains"
 		: props.valueType === "enum"
-		? "inSet"
-		: "equals";
+			? "inSet"
+			: "equals";
 	let filterType: FilterType = props.value?.type || defaultFilterType;
 	let filterValue = props.value?.value1 || "";
 	let filterValue2 = props.value?.value2 || "";
@@ -137,7 +137,7 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 
 	const checkSupport = (
 		dataType: ModelFilterType,
-		filterType: FilterType
+		filterType: FilterType,
 	): boolean => {
 		if (!isFilterSupported) return true;
 		return isFilterSupported(dataType, filterType, props.field);
@@ -174,7 +174,7 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 	const enumFilterInverted = ["notEmpty", "notInSet"].includes(filterType);
 	const onFilterTypeChangeEnum = (
 		_: React.ChangeEvent<HTMLInputElement>,
-		checked: boolean
+		checked: boolean,
 	) => {
 		filterType = checked ? "notInSet" : "inSet";
 		updateParent();
@@ -220,8 +220,8 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 					? "notEmpty"
 					: "notInSet"
 				: hasEmpty
-				? "empty"
-				: "inSet";
+					? "empty"
+					: "inSet";
 			subFilter = undefined;
 		} else if (hasEmpty) {
 			filterType = isInverted ? "notInSet" : "inSet";
@@ -238,7 +238,7 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 
 	const onFilterValueChangeEnumAll = (
 		_: React.ChangeEvent<HTMLInputElement>,
-		checked: boolean
+		checked: boolean,
 	) => {
 		if (checked) {
 			filterValue = (props.valueData as DataGridSetFilterData)
@@ -253,13 +253,13 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 	};
 	const onFilterValueChangeEnum = (
 		evt: React.ChangeEvent<HTMLInputElement>,
-		checked: boolean
+		checked: boolean,
 	) => {
 		let currentlyChecked =
 			filterValue.length === 0 ? [] : filterValue.split(",");
 		if (!checked) {
 			currentlyChecked = currentlyChecked.filter(
-				(val) => val !== evt.target.value
+				(val) => val !== evt.target.value,
 			);
 		} else {
 			currentlyChecked.push(evt.target.value);
@@ -309,7 +309,7 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 	];
 	if (
 		["string", "localized-string", "combined-string"].includes(
-			props.valueType ?? ""
+			props.valueType ?? "",
 		)
 	) {
 		filterTypeMenuItems.push(
@@ -332,7 +332,7 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 				<MenuItem key={"endsWith"} value={"endsWith"}>
 					{t("standalone.data-grid.content.filter-type.ends-with")}
 				</MenuItem>
-			)
+			),
 		);
 	} else if (props.valueType === "number") {
 		filterTypeMenuItems.push(
@@ -360,7 +360,7 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 				<MenuItem key={"inRange"} value={"inRange"}>
 					{t("standalone.data-grid.content.filter-type.in-range")}
 				</MenuItem>
-			)
+			),
 		);
 	} else if (props.valueType === "date" || props.valueType === "datetime") {
 		filterTypeMenuItems.push(
@@ -388,7 +388,7 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 				<MenuItem key={"inRange"} value={"inRange"}>
 					{t("standalone.data-grid.content.filter-type.in-range-date")}
 				</MenuItem>
-			)
+			),
 		);
 	}
 
@@ -495,11 +495,11 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 							if (!filterValue)
 								return t("standalone.data-grid.content.bool-filter.any");
 							const entry = props.valueData?.find(
-								(entry) => entry.value === filterValue
+								(entry) => entry.value === filterValue,
 							);
 							if (!entry)
 								return t(
-									"standalone.data-grid.content.bool-filter." + filterValue
+									"standalone.data-grid.content.bool-filter." + filterValue,
 								);
 							return (entry.getLabel ?? entry.getLabelText)();
 						})()}
@@ -516,7 +516,7 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 									setEnumFilterSearch(evt.target.value)
 								}
 								placeholder={t(
-									"standalone.data-grid.content.set-filter.search"
+									"standalone.data-grid.content.set-filter.search",
 								)}
 								fullWidth
 								autoFocus={depth === 1}
@@ -559,7 +559,7 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 									entry
 										.getLabelText()
 										.toLowerCase()
-										.includes(enumFilterSearch.toLocaleLowerCase())
+										.includes(enumFilterSearch.toLocaleLowerCase()),
 								)
 								.map((entry) => (
 									<ListItem

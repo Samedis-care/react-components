@@ -22,27 +22,25 @@ export interface DecimalInputFieldProps extends TextFieldWithHelpProps {
 	 */
 	onChange?: (
 		evt: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>,
-		value: number | null
+		value: number | null,
 	) => void;
 }
 
 const DecimalInputField = (
-	props: DecimalInputFieldProps & Omit<TextFieldProps, "onChange" | "value">
+	props: DecimalInputFieldProps & Omit<TextFieldProps, "onChange" | "value">,
 ) => {
 	const { i18n } = useCCTranslations();
 	const { value, onChange, ...muiProps } = props;
 	const decimalSeparator = getNumberSeparator("decimal");
-	const [danglingDecimalSeparator, setDanglingDecimalSeparator] = useState(
-		false
-	);
+	const [danglingDecimalSeparator, setDanglingDecimalSeparator] =
+		useState(false);
 	const valueFormatted =
 		value !== null
 			? value.toLocaleString(i18n.language) +
-			  (danglingDecimalSeparator && !muiProps.disabled ? decimalSeparator : "")
+				(danglingDecimalSeparator && !muiProps.disabled ? decimalSeparator : "")
 			: "";
-	const { handleCursorChange, cursorInputRef } = useInputCursorFix(
-		valueFormatted
-	);
+	const { handleCursorChange, cursorInputRef } =
+		useInputCursorFix(valueFormatted);
 
 	// on change handling
 	const handleChange = useCallback(
@@ -51,11 +49,11 @@ const DecimalInputField = (
 			if (!onChange) return;
 
 			setDanglingDecimalSeparator(
-				event.target.value.endsWith(decimalSeparator)
+				event.target.value.endsWith(decimalSeparator),
 			);
 			onChange(event, parseLocalizedNumber(event.target.value));
 		},
-		[onChange, handleCursorChange, decimalSeparator]
+		[onChange, handleCursorChange, decimalSeparator],
 	);
 
 	return (

@@ -30,7 +30,7 @@ const GenericDataPreview = (props: GenericDataPreviewProps) => {
 
 	const columns: string[] = useMemo(
 		() => uniqueArray(data.map(Object.keys).flat()),
-		[data]
+		[data],
 	);
 
 	const columnDef: IDataGridColumnDef[] = useMemo(
@@ -45,9 +45,9 @@ const GenericDataPreview = (props: GenericDataPreviewProps) => {
 						filterable: true,
 						sortable: true,
 						isLocked: false,
-					}
+					},
 			),
-		[existingDefinition, columns]
+		[existingDefinition, columns],
 	);
 
 	const rowData: DataGridRowData[] = useMemo(
@@ -56,7 +56,7 @@ const GenericDataPreview = (props: GenericDataPreviewProps) => {
 				id: index.toString(16),
 				...entry,
 			})),
-		[data]
+		[data],
 	);
 
 	return (

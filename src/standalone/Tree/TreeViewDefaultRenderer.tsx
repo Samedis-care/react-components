@@ -20,10 +20,10 @@ const TreeViewDefaultRenderer = (props: TreeViewRendererProps) => {
 		onAuxClick,
 	} = props;
 
-	const handleExpand = useCallback(() => onToggleExpanded(id), [
-		onToggleExpanded,
-		id,
-	]);
+	const handleExpand = useCallback(
+		() => onToggleExpanded(id),
+		[onToggleExpanded, id],
+	);
 
 	return (
 		<Grid

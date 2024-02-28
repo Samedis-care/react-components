@@ -31,7 +31,7 @@ export interface TextFieldWithHelpProps extends UIInputProps {
 
 const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(
 	props: TextFieldWithHelpProps & TextFieldProps,
-	ref: ForwardedRef<HTMLDivElement>
+	ref: ForwardedRef<HTMLDivElement>,
 ) {
 	const {
 		openInfo,
@@ -47,7 +47,7 @@ const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(
 	// handle clear
 
 	const [hasValue, setHasValue] = useState<boolean>(
-		!!(muiProps.value ?? muiProps.defaultValue)
+		!!(muiProps.value ?? muiProps.defaultValue),
 	);
 
 	const composeRef = useRefComposer<HTMLTextAreaElement | HTMLInputElement>();
@@ -63,14 +63,13 @@ const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(
 				return customHandleClear();
 			}
 
-			const proto = (muiProps.multiline
-				? HTMLTextAreaElement
-				: HTMLInputElement
+			const proto = (
+				muiProps.multiline ? HTMLTextAreaElement : HTMLInputElement
 			).prototype;
 			// eslint-disable-next-line @typescript-eslint/unbound-method
 			const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
 				proto,
-				"value"
+				"value",
 			)?.set;
 			if (!nativeInputValueSetter) {
 				throw new Error("Native Input Value Setter is undefined");
@@ -80,7 +79,7 @@ const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(
 			const event = new Event("input", { bubbles: true });
 			inputRef.current.dispatchEvent(event);
 		},
-		[muiProps.multiline, customHandleClear]
+		[muiProps.multiline, customHandleClear],
 	);
 
 	// keep "hasValue" up to date
@@ -90,7 +89,7 @@ const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(
 			if (onChange) onChange(evt);
 			setHasValue(!!evt.target.value);
 		},
-		[onChange]
+		[onChange],
 	);
 
 	useEffect(() => {
@@ -121,9 +120,10 @@ const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(
 								</IconButton>
 							)}
 							{
-								(muiProps.InputProps
-									?.endAdornment as React.ReactElement<InputAdornmentProps>)
-									?.props?.children
+								(
+									muiProps.InputProps
+										?.endAdornment as React.ReactElement<InputAdornmentProps>
+								)?.props?.children
 							}
 							{openInfo && (
 								<IconButton onClick={openInfo} size="large">

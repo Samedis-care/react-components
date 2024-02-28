@@ -7,7 +7,7 @@ import { TextFieldWithHelpProps } from "./TextFieldWithHelp";
 
 const OutlinedInputWithHelpInner = (
 	props: TextFieldWithHelpProps & InputBaseProps,
-	ref: React.Ref<unknown>
+	ref: React.Ref<unknown>,
 ) => {
 	const { openInfo, important, ...muiProps } = props;
 	const inputClasses = useInputStyles({ important });

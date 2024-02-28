@@ -7,7 +7,7 @@ import { TextFieldWithHelpProps } from "./TextFieldWithHelp";
 
 const InputWithHelpInner = (
 	props: TextFieldWithHelpProps & InputBaseProps,
-	ref: Ref<unknown>
+	ref: Ref<unknown>,
 ) => {
 	const { openInfo, important, ...muiProps } = props;
 	const inputClasses = useInputStyles({ important });

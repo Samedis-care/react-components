@@ -39,7 +39,7 @@ interface FieldProps {
 				>
 		  >
 		| ((
-				original: ModelFieldDefinition<unknown, string, PageVisibility, never>
+				original: ModelFieldDefinition<unknown, string, PageVisibility, never>,
 		  ) => Omit<
 				ModelFieldDefinition<unknown, string, PageVisibility, never>,
 				NonOverridableProps
@@ -50,9 +50,8 @@ export interface FormFieldContextType<T> extends ModelRenderParams<T> {
 	type: Type<T>;
 }
 
-export const FormFieldContext = React.createContext<FormFieldContextType<unknown> | null>(
-	null
-);
+export const FormFieldContext =
+	React.createContext<FormFieldContextType<unknown> | null>(null);
 export const useFormFieldContext = <T,>(): FormFieldContextType<T> => {
 	const ctx = useContext(FormFieldContext);
 	if (!ctx) throw new Error("FormFieldContext not set");
@@ -96,11 +95,11 @@ const Field = (props: FieldProps): React.ReactElement => {
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			value: any,
 			shouldValidate?: boolean,
-			triggerOnChange?: boolean
+			triggerOnChange?: boolean,
 		) => {
 			setFieldValue(field, value, shouldValidate, triggerOnChange ?? true);
 		},
-		[setFieldValue]
+		[setFieldValue],
 	);
 
 	// mark field as mounted
@@ -121,7 +120,7 @@ const Field = (props: FieldProps): React.ReactElement => {
 	const visibility = getVisibility(
 		hasId ? fieldDef.visibility.edit : fieldDef.visibility.create,
 		values,
-		initialValues
+		initialValues,
 	);
 
 	// cache these, so we don't trigger useless re-renders every time a value changes
@@ -145,15 +144,15 @@ const Field = (props: FieldProps): React.ReactElement => {
 			getRelationModel
 				? getRelationModel(hasId || null, relationModelValues)
 				: undefined,
-		[getRelationModel, hasId, relationModelValues]
+		[getRelationModel, hasId, relationModelValues],
 	);
 
 	const cacheKey = useMemo(
 		() => new Object(),
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 		(fieldDef.type.settings?.updateHooks ?? []).map((key) =>
-			getValueByDot(key, values)
-		)
+			getValueByDot(key, values),
+		),
 	);
 
 	return useMemo(
@@ -201,7 +200,7 @@ const Field = (props: FieldProps): React.ReactElement => {
 			relationData,
 			readOnly,
 			cacheKey, // check for important values changes
-		]
+		],
 	);
 };
 

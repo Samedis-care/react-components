@@ -99,13 +99,13 @@ const useStyles = makeStyles(
 			fill: theme.componentsCare?.selector?.selected?.icon?.color,
 		},
 	}),
-	{ name: "CcMultiSelectEntry" }
+	{ name: "CcMultiSelectEntry" },
 );
 
 const MultiSelectEntry = <DataT extends MultiSelectorData>(
 	props: IMultiSelectEntryProps<DataT> & {
 		classes?: ClassNameMap<keyof ReturnType<typeof useStyles>>;
-	}
+	},
 ) => {
 	const { enableIcons, enableDivider, handleDelete, data } = props;
 	const classes = useStyles(props);

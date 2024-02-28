@@ -21,7 +21,7 @@ const convertDataToFormData = (data: unknown): string | Blob => {
 		// eslint-disable-next-line no-console
 		console.log(
 			"[Components-Care] [RailsApiClient] [convertDataToFormData] unsupported data",
-			data
+			data,
 		);
 		throw new Error("unsupported data " + JSON.stringify(data));
 	}
@@ -31,7 +31,7 @@ const convertDataToFormData = (data: unknown): string | Blob => {
 	return data;
 };
 const objectToRails = (
-	obj: Record<string, unknown>
+	obj: Record<string, unknown>,
 ): [string, string | Blob][] => {
 	const ret: [string, string | Blob][] = [];
 	for (const key in obj) {
@@ -42,8 +42,8 @@ const objectToRails = (
 			ret.push(
 				...value.map(
 					(val) =>
-						[key + "[]", convertDataToFormData(val)] as [string, string | Blob]
-				)
+						[key + "[]", convertDataToFormData(val)] as [string, string | Blob],
+				),
 			);
 		} else if (typeof value === "object") {
 			const dots = objectToRails(value as Record<string, unknown>);
@@ -68,7 +68,7 @@ const objectToRails = (
 class RailsApiClient extends JsonApiClient {
 	public convertBody(
 		body: unknown | null,
-		headers: Record<string, string>
+		headers: Record<string, string>,
 	): string | FormData | null {
 		if (objectContainsBlob(body as Record<string, unknown>)) {
 			const formBody = new FormData();

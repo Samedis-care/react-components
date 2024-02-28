@@ -21,7 +21,7 @@ const FilterCombinator = (props: IProps) => {
 		(_evt: React.ChangeEvent, newValue: boolean) => {
 			onChange(newValue ? "or" : "and");
 		},
-		[onChange]
+		[onChange],
 	);
 
 	return (

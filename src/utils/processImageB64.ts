@@ -9,7 +9,7 @@ import { IDownscaleProps } from "./processImage";
 const processImageB64 = async (
 	imageData: string,
 	convertImagesTo: string,
-	downscale?: IDownscaleProps
+	downscale?: IDownscaleProps,
 ): Promise<string> => {
 	// data url -> image
 	const image = new Image();
@@ -33,7 +33,7 @@ const processImageB64 = async (
 		} else {
 			const downscaleRatio = Math.max(
 				image.width / downscale.width,
-				image.height / downscale.height
+				image.height / downscale.height,
 			);
 			newWidth = image.width / downscaleRatio;
 			newHeight = image.height / downscaleRatio;

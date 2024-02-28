@@ -34,7 +34,7 @@ const DataActionBar = () => {
 		if (numSelected !== 1) return;
 		if (!firstSelection)
 			throw new Error(
-				"Calling handleEdit without selection? This shouldn't happen."
+				"Calling handleEdit without selection? This shouldn't happen.",
 			);
 		if (onEdit) onEdit(firstSelection);
 	}, [numSelected, onEdit, firstSelection]);
@@ -75,12 +75,12 @@ const DataActionBar = () => {
 		(label: string) => {
 			if (!customDataActionButtons) return;
 			const clickedButton = customDataActionButtons.find(
-				(entry) => entry.label === label
+				(entry) => entry.label === label,
 			);
 			if (!clickedButton) return;
 			clickedButton.onClick(selectAll, selectedRows);
 		},
-		[customDataActionButtons, selectAll, selectedRows]
+		[customDataActionButtons, selectAll, selectedRows],
 	);
 
 	return (

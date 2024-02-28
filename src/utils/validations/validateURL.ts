@@ -26,14 +26,14 @@ export const validateURLRaw = (value: string): boolean => {
 const validateURL = <
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
-	CustomT
+	CustomT,
 >(
 	value: string,
 	values: Record<string, unknown>,
 	fieldDef: Pick<
 		ModelFieldDefinition<string, KeyT, VisibilityT, CustomT>,
 		"getLabel"
-	>
+	>,
 ): string | null => {
 	if (!validateURLRaw(value)) {
 		return ccI18n.t("utils.validation.url", {

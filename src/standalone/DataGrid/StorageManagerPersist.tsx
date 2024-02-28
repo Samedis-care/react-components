@@ -48,7 +48,7 @@ const StorageManagerPersist = (props: StorageManagerPersistProps) => {
 						state: {
 							initialResize,
 						},
-					})
+					}),
 				),
 				StorageManager.setItem(
 					DATA_GRID_STORAGE_KEY_FILTERS,
@@ -58,12 +58,12 @@ const StorageManagerPersist = (props: StorageManagerPersistProps) => {
 						state: {
 							...otherState,
 						},
-					})
+					}),
 				),
 			]);
 		},
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[JSON.stringify(storageKeys)]
+		[JSON.stringify(storageKeys)],
 	);
 
 	const persistCtx = useMemo(() => {
@@ -85,16 +85,16 @@ const StorageManagerPersist = (props: StorageManagerPersistProps) => {
 								"[Components-Care] Failed parsing DataGrid config from StorageManager." +
 									storageKey,
 								storageKeys,
-								"Removing from server"
+								"Removing from server",
 							);
 							return StorageManager.setItem(storageKey, storageKeys, null);
 						}
 					}
-				})
+				}),
 			);
 			return resultObjects.reduce<Partial<DataGridPersistentState>>(
 				(prev, next) => Object.assign(prev, next),
-				{}
+				{},
 			);
 		})();
 		return [data, setData] as DataGridPersistentStateContextType;

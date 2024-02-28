@@ -8,7 +8,7 @@ import { ApiConnector, Connector } from "./index";
  */
 export type ConnectorCallback<T> = (
 	endpoint: string,
-	extraParams: Record<string, unknown> | undefined
+	extraParams: Record<string, unknown> | undefined,
 ) => T;
 
 export interface DefaultConnectors {
@@ -36,7 +36,7 @@ const DefaultConnector: DefaultConnectors = {
  * @param def The new default
  */
 export const setDefaultConnectorNormal = (
-	def: ConnectorCallback<Connector<ModelFieldName, PageVisibility, unknown>>
+	def: ConnectorCallback<Connector<ModelFieldName, PageVisibility, unknown>>,
 ): void => {
 	DefaultConnector.getNormal = def;
 };
@@ -46,7 +46,7 @@ export const setDefaultConnectorNormal = (
  * @param def The new default
  */
 export const setDefaultConnectorAPI = (
-	def: ConnectorCallback<ApiConnector<ModelFieldName, PageVisibility, unknown>>
+	def: ConnectorCallback<ApiConnector<ModelFieldName, PageVisibility, unknown>>,
 ): void => {
 	DefaultConnector.getApi = def;
 	DefaultConnector.getNormal = def;

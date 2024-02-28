@@ -44,7 +44,7 @@ const ActionBar = () => {
 		const defaultColumnState = getDataGridDefaultColumnsState(
 			columns,
 			defaultSort,
-			defaultFilter
+			defaultFilter,
 		);
 		setState((state) => ({
 			...state,
@@ -56,8 +56,8 @@ const ActionBar = () => {
 				Object.entries(colState).map(([field, def]) => [
 					field,
 					{ ...def, filter: defaultColumnState[field]?.filter },
-				])
-			)
+				]),
+			),
 		);
 	}, [
 		columns,
@@ -71,7 +71,7 @@ const ActionBar = () => {
 		const defaultColumnState = getDataGridDefaultColumnsState(
 			columns,
 			defaultSort,
-			defaultFilter
+			defaultFilter,
 		);
 		setColumnState((colState) =>
 			Object.fromEntries(
@@ -84,8 +84,8 @@ const ActionBar = () => {
 							sort: defaultColumnState[field].sort,
 							sortOrder: defaultColumnState[field].sortOrder,
 						},
-					])
-			)
+					]),
+			),
 		);
 	}, [columns, defaultFilter, defaultSort, setColumnState]);
 	const handleResetColumn = useCallback(() => {
@@ -103,7 +103,7 @@ const ActionBar = () => {
 	const handleResetAll = useCallback(() => {
 		setState(getDataGridDefaultState(columns, defaultCustomData));
 		setColumnState(
-			getDataGridDefaultColumnsState(columns, defaultSort, defaultFilter)
+			getDataGridDefaultColumnsState(columns, defaultSort, defaultFilter),
 		);
 		setColumnWidth(getDefaultColumnWidths(columns, theme));
 	}, [

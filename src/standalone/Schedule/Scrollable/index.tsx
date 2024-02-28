@@ -33,7 +33,7 @@ import throwError from "../../../utils/throwError";
  */
 export type LoadWeekCallback = (
 	weekOffset: number,
-	filters: Record<string, string | boolean>
+	filters: Record<string, string | boolean>,
 ) => IDayData[][] | Promise<IDayData[][]>;
 
 export interface ScrollableScheduleProps {
@@ -63,7 +63,7 @@ export interface ScrollableScheduleProps {
 export type IProps = ScrollableScheduleProps;
 
 interface ScrollableScheduleState<
-	Filters extends Record<string, ScheduleFilterDefinition>
+	Filters extends Record<string, ScheduleFilterDefinition>,
 > {
 	/**
 	 * Array of ScrollableScheduleWeek components
@@ -116,7 +116,7 @@ const useStyles = makeStyles(
 			transform: "translateY(-50%)",
 		},
 	}),
-	{ name: "CcScrollableSchedule" }
+	{ name: "CcScrollableSchedule" },
 );
 
 const preventAction = (evt: React.MouseEvent) => {
@@ -145,16 +145,15 @@ const ScrollableSchedule = (props: ScrollableScheduleProps) => {
 						Object.entries(filters).map(([key, filter]) => [
 							key,
 							filter.defaultValue,
-						])
-				  )
+						]),
+					)
 				: {},
 		}),
-		[filters]
+		[filters],
 	);
 
-	const [state, setState] = useState<ScrollableScheduleState<typeof filters>>(
-		getDefaultState
-	);
+	const [state, setState] =
+		useState<ScrollableScheduleState<typeof filters>>(getDefaultState);
 
 	useEffect(() => {
 		const onLanguageChanged = () => {
@@ -202,7 +201,7 @@ const ScrollableSchedule = (props: ScrollableScheduleProps) => {
 				}));
 			}
 		},
-		[loadWeekCallback]
+		[loadWeekCallback],
 	);
 
 	/**
@@ -241,22 +240,20 @@ const ScrollableSchedule = (props: ScrollableScheduleProps) => {
 			}));
 			if (!props.filters) return;
 			const changeHandler = props.filters[evt.target.name].onChange as (
-				newFilter: string | boolean
+				newFilter: string | boolean,
 			) => void;
 			if (changeHandler) changeHandler(value);
 		},
-		[getDefaultState, props.filters]
+		[getDefaultState, props.filters],
 	);
 
-	const [
-		filterSettingsAnchorEl,
-		setFilterSettingsAnchorEl,
-	] = useState<HTMLElement | null>(null);
+	const [filterSettingsAnchorEl, setFilterSettingsAnchorEl] =
+		useState<HTMLElement | null>(null);
 	const openFilterSettings = useCallback(
 		(evt: React.MouseEvent<HTMLElement>) => {
 			setFilterSettingsAnchorEl(evt.currentTarget);
 		},
-		[]
+		[],
 	);
 	const closeFiltersMenu = useCallback(() => {
 		setFilterSettingsAnchorEl(null);

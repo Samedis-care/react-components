@@ -23,7 +23,7 @@ const stateUpdateListeners: Record<
 export const useLocalStorageState = <T>(
 	storageKey: string | null | undefined,
 	defaultValue: T,
-	validateData: (data: unknown) => data is T
+	validateData: (data: unknown) => data is T,
 ): [T, Dispatch<SetStateAction<T>>] => {
 	const [state, setState] = useState<T>(() => {
 		if (!storageKey) return defaultValue;
@@ -50,7 +50,7 @@ export const useLocalStorageState = <T>(
 			];
 		} else {
 			stateUpdateListeners[storageKey].push(
-				setState as Dispatch<SetStateAction<unknown>>
+				setState as Dispatch<SetStateAction<unknown>>,
 			);
 		}
 
@@ -86,7 +86,7 @@ export const useLocalStorageState = <T>(
 				});
 			}
 		},
-		[storageKey]
+		[storageKey],
 	);
 
 	return [state, setStateHook];

@@ -39,7 +39,7 @@ const useStyles = makeStyles(
 			marginTop: 15,
 		},
 	},
-	{ name: "CcInlineSwitch" }
+	{ name: "CcInlineSwitch" },
 );
 
 const AntSwitch = withStyles((theme: Theme) => ({
@@ -78,7 +78,7 @@ const AntSwitch = withStyles((theme: Theme) => ({
 
 const InlineSwitch = (props: InlineSwitchProps) => {
 	const classes = useStyles(
-		cleanClassMap(props, false, "switch", "labelWithSwitch")
+		cleanClassMap(props, false, "switch", "labelWithSwitch"),
 	);
 	const { label, value, onChange, visible, children } = props;
 
@@ -86,7 +86,7 @@ const InlineSwitch = (props: InlineSwitchProps) => {
 		(event: React.ChangeEvent<HTMLInputElement>) => {
 			if (onChange) onChange(event.target.checked);
 		},
-		[onChange]
+		[onChange],
 	);
 
 	return (

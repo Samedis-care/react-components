@@ -46,7 +46,7 @@ const useStyles = makeStyles(
 			position: "absolute",
 		},
 	}),
-	{ name: "CcSignPadDialog" }
+	{ name: "CcSignPadDialog" },
 );
 
 const SignPadDialog = (props: SignPadDialogProps) => {
@@ -73,7 +73,7 @@ const SignPadDialog = (props: SignPadDialogProps) => {
 				message: signerName
 					? t("standalone.signature-pad.dialog.reset-confirm.message-name", {
 							NAME: signerName,
-					  })
+						})
 					: t("standalone.signature-pad.dialog.reset-confirm.message"),
 				textButtonYes: t("standalone.signature-pad.dialog.reset-confirm.yes"),
 				textButtonNo: t("standalone.signature-pad.dialog.reset-confirm.no"),
@@ -119,7 +119,7 @@ const SignPadDialog = (props: SignPadDialogProps) => {
 				handleResize(node);
 			}
 		},
-		[handleResize]
+		[handleResize],
 	);
 
 	useEffect(() => {
@@ -137,7 +137,7 @@ const SignPadDialog = (props: SignPadDialogProps) => {
 				{signerName
 					? t("standalone.signature-pad.dialog.title-name", {
 							NAME: signerName,
-					  })
+						})
 					: t("standalone.signature-pad.dialog.title")}
 				{closeCanvas && (
 					<IconButton

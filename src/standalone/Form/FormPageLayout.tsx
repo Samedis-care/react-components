@@ -35,7 +35,7 @@ const useStyles = makeStyles(
 			padding: 0,
 		},
 	},
-	{ name: "CcFormPageLayout" }
+	{ name: "CcFormPageLayout" },
 );
 
 export type FormPageLayoutClassKey = keyof ReturnType<typeof useStyles>;
@@ -50,7 +50,7 @@ const useThemeStyles = makeThemeStyles<
 >(
 	(theme) => theme.componentsCare?.uiKit?.formPage?.layout,
 	"CcFormPageLayout",
-	useStyles
+	useStyles,
 );
 
 const FormPageLayout = (props: FormPageLayoutProps) => {

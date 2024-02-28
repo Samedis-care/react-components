@@ -14,7 +14,7 @@ import { FormControlFieldsetCC } from "../../../../../standalone";
 
 export type WrapButtonFunc = (
 	btn: React.ReactElement,
-	value: EnumValue
+	value: EnumValue,
 ) => React.ReactElement;
 
 /**
@@ -28,7 +28,7 @@ class RendererEnumRadio extends TypeEnum {
 		values: EnumValue[],
 		horizontal = false,
 		wrapButton: WrapButtonFunc = (btn: React.ReactElement) => btn,
-		numericMode = false
+		numericMode = false,
 	) {
 		super(values, numericMode);
 
@@ -90,8 +90,8 @@ class RendererEnumRadio extends TypeEnum {
 										label={entry.getLabel()}
 										disabled={visibility.readOnly}
 									/>,
-									entry
-								)
+									entry,
+								),
 							)}
 					</RadioGroup>
 					<FormHelperText>{errorMsg || warningMsg}</FormHelperText>

@@ -88,7 +88,7 @@ export const useStyles = makeStyles(
 			color: theme.palette.error.contrastText,
 		},
 	}),
-	{ name: "CcInfoBox" }
+	{ name: "CcInfoBox" },
 );
 
 interface InfoBoxProps {
@@ -126,14 +126,8 @@ interface InfoBoxProps {
 // .MuiAccordionSummary-content.Mui-expanded => margin => unset
 // .MuiAccordionSummary-root.Mui-expanded => min-height => unset
 const InfoBox = (props: InfoBoxProps) => {
-	const {
-		heading,
-		onChange,
-		expanded,
-		alwaysExpanded,
-		message,
-		status,
-	} = props;
+	const { heading, onChange, expanded, alwaysExpanded, message, status } =
+		props;
 
 	const classes = useStyles(props);
 

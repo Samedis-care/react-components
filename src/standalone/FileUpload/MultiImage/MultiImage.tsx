@@ -47,7 +47,7 @@ export interface MultiImageImage {
 }
 
 export type MultiImageManipulationCallback = (
-	images: MultiImageImage[]
+	images: MultiImageImage[],
 ) => MultiImageImage[];
 export type MultiImageProcessFile = (file: File) => Promise<string>;
 
@@ -161,7 +161,7 @@ const useStyles = makeStyles(
 			height: "calc(100% - 1rem)",
 		},
 	},
-	{ name: "CcMultiImage" }
+	{ name: "CcMultiImage" },
 );
 
 export type MultiImageClassKey = keyof ReturnType<typeof useStyles>;
@@ -173,7 +173,7 @@ export type MultiImageTheme = Partial<
 const useThemeStyles = makeThemeStyles<MultiImageProps, MultiImageClassKey>(
 	(theme) => theme.componentsCare?.fileUpload?.multiImage?.root,
 	"CcMultiImage",
-	useStyles
+	useStyles,
 );
 
 export const MultiImageNewIdPrefix = "MultiImage-New-";
@@ -205,7 +205,7 @@ const MultiImage = (props: MultiImageProps) => {
 	const primaryImg = useMemo(
 		(): MultiImageImage | undefined =>
 			images.find((img) => img.id === primary) ?? images[0],
-		[images, primary]
+		[images, primary],
 	);
 
 	// images.indexOf(undefined) works and returns -1
@@ -240,7 +240,7 @@ const MultiImage = (props: MultiImageProps) => {
 			maxImages
 				? Math.max(images.length - maxImages, 0)
 				: Number.MAX_SAFE_INTEGER,
-		[maxImages, images]
+		[maxImages, images],
 	);
 
 	const startUpload = useCallback(() => {
@@ -253,7 +253,7 @@ const MultiImage = (props: MultiImageProps) => {
 	const processFile = useCallback(
 		(file: File): Promise<string> =>
 			processImage(file, convertImagesTo, downscale),
-		[convertImagesTo, downscale]
+		[convertImagesTo, downscale],
 	);
 
 	const processFiles = useCallback(
@@ -264,10 +264,10 @@ const MultiImage = (props: MultiImageProps) => {
 					id: `${MultiImageNewIdPrefix}${new Date().getTime()}-${index}`,
 					image: img,
 					name: fileArr[index].name,
-				})
+				}),
 			);
 		},
-		[processFile]
+		[processFile],
 	);
 
 	const handleUploadViaDrop = useCallback(
@@ -277,7 +277,7 @@ const MultiImage = (props: MultiImageProps) => {
 
 			onChange(name, images.concat(newImages));
 		},
-		[processFiles, name, images, onChange]
+		[processFiles, name, images, onChange],
 	);
 
 	const handlePreviewDrop = useCallback(
@@ -289,7 +289,7 @@ const MultiImage = (props: MultiImageProps) => {
 			onChange(name, images.concat(newImages));
 			if (onPrimaryChange) onPrimaryChange(name, newImages[0].id);
 		},
-		[onChange, name, images, processFiles, onPrimaryChange]
+		[onChange, name, images, processFiles, onPrimaryChange],
 	);
 
 	const handleUpload = useCallback(
@@ -298,7 +298,7 @@ const MultiImage = (props: MultiImageProps) => {
 			if (!files) return;
 			void handleUploadViaDrop(files);
 		},
-		[handleUploadViaDrop]
+		[handleUploadViaDrop],
 	);
 
 	useEffect(() => {
@@ -323,7 +323,7 @@ const MultiImage = (props: MultiImageProps) => {
 			if (!onChange) return;
 			onChange(name, process(images));
 		},
-		[onChange, name, images]
+		[onChange, name, images],
 	);
 
 	const changePrimary = useCallback(
@@ -331,7 +331,7 @@ const MultiImage = (props: MultiImageProps) => {
 			if (!onPrimaryChange) return;
 			onPrimaryChange(name, id);
 		},
-		[onPrimaryChange, name]
+		[onPrimaryChange, name],
 	);
 
 	return (

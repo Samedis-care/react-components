@@ -38,7 +38,7 @@ export enum DataGridExportStatus {
 const ExportMenuEntry = React.forwardRef(
 	(
 		props: IDataGridExportMenuEntryProps,
-		ref: React.ForwardedRef<HTMLLIElement>
+		ref: React.ForwardedRef<HTMLLIElement>,
 	) => {
 		const { getAdditionalFilters, columns, onError } = useDataGridProps();
 		const [columnsState] = useDataGridColumnState();
@@ -59,15 +59,14 @@ const ExportMenuEntry = React.forwardRef(
 		const startExport = useCallback(async () => {
 			setStatus(DataGridExportStatus.Working);
 			try {
-				const [sorts, fieldFilter] = dataGridPrepareFiltersAndSorts(
-					columnsState
-				);
+				const [sorts, fieldFilter] =
+					dataGridPrepareFiltersAndSorts(columnsState);
 				const data = await onRequest(
 					search,
 					getAdditionalFilters ? getAdditionalFilters(customData) : {},
 					fieldFilter,
 					sorts,
-					getActiveDataGridColumns(columns, hiddenColumns, lockedColumns)
+					getActiveDataGridColumns(columns, hiddenColumns, lockedColumns),
 				);
 				setExportData(data);
 				setStatus(DataGridExportStatus.Ready);
@@ -133,7 +132,7 @@ const ExportMenuEntry = React.forwardRef(
 				)}
 			</>
 		);
-	}
+	},
 );
 
 export default React.memo(ExportMenuEntry);

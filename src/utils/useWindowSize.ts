@@ -14,7 +14,7 @@ const useWindowSize = (): WindowSize => {
 			debounce(() => {
 				setSize(getWindowSize);
 			}, 100),
-		[]
+		[],
 	);
 
 	useEffect(() => {

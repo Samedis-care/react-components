@@ -41,7 +41,7 @@ export interface CrudFormProps {
 	 */
 	open: (
 		id: "import" | "devimport" | "new" | string,
-		forceRefresh?: boolean
+		forceRefresh?: boolean,
 	) => void;
 	/**
 	 * Does the Form have a custom submit handler?
@@ -56,7 +56,7 @@ export interface GridWrapperProps {
 export interface CrudProps<
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
-	CustomT
+	CustomT,
 > {
 	/**
 	 * The model to use
@@ -224,7 +224,7 @@ const useStyles = makeStyles(
 			height: "100%",
 		},
 	},
-	{ name: "CcCrud" }
+	{ name: "CcCrud" },
 );
 
 export interface CrudDispatch {
@@ -235,7 +235,7 @@ export interface CrudDispatch {
 }
 
 const CrudDispatchContext = React.createContext<CrudDispatch | undefined>(
-	undefined
+	undefined,
 );
 export const useCrudDispatchContext = (): CrudDispatch => {
 	const ctx = useContext(CrudDispatchContext);
@@ -251,7 +251,7 @@ interface FormPageWrapperProps {
 		id: string,
 		children: NonNullable<
 			CrudProps<ModelFieldName, PageVisibility, unknown>["children"]
-		>
+		>,
 	) => React.ReactElement;
 }
 const FormPageWrapper = (props: FormPageWrapperProps) => {
@@ -263,9 +263,9 @@ const FormPageWrapper = (props: FormPageWrapperProps) => {
 const CRUD = <
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
-	CustomT
+	CustomT,
 >(
-	props: CrudProps<KeyT, VisibilityT, CustomT>
+	props: CrudProps<KeyT, VisibilityT, CustomT>,
 ) => {
 	const navigate = useNavigate();
 	const { url: routeUrl } = useRouteInfo(props.disableRouting);
@@ -292,7 +292,7 @@ const CRUD = <
 	const ImportUI = props.importUI ?? CrudImport;
 	const [id, setId] = useState<string | null>(props.initialView ?? null);
 	const [gridRefreshToken, setGridRefreshToken] = useState<string>(
-		new Date().getTime().toString()
+		new Date().getTime().toString(),
 	);
 	const classes = useStyles();
 	const skipNextFormIdReset = useRef<string | null>(null);
@@ -305,7 +305,7 @@ const CRUD = <
 				navigate(`${routeUrl}/${id}`);
 			}
 		},
-		[navigate, routeUrl, disableRouting]
+		[navigate, routeUrl, disableRouting],
 	);
 
 	const showNewPage = useCallback(() => {
@@ -329,7 +329,7 @@ const CRUD = <
 			}
 			if (forceRefresh) refreshGrid();
 		},
-		[disableRouting, refreshGrid, navigate, routeUrl]
+		[disableRouting, refreshGrid, navigate, routeUrl],
 	);
 
 	const openView = useCallback(
@@ -341,14 +341,14 @@ const CRUD = <
 			}
 			if (forceRefresh) refreshGrid();
 		},
-		[disableRouting, navigate, routeUrl, refreshGrid]
+		[disableRouting, navigate, routeUrl, refreshGrid],
 	);
 
 	const handleSubmit = useCallback(
 		async (
 			data: Record<string, unknown>,
 			submit: Record<string, unknown>,
-			old: Record<string, unknown>
+			old: Record<string, unknown>,
 		) => {
 			// redirect to edit page
 			const { id } = data as Record<"id", string>;
@@ -375,7 +375,7 @@ const CRUD = <
 			navigate,
 			routeUrl,
 			refreshGrid,
-		]
+		],
 	);
 
 	const handleImportButton = useCallback(() => {
@@ -409,22 +409,24 @@ const CRUD = <
 							? props.gridProps.onAddNew == null
 								? showNewPage
 								: typeof props.gridProps.onAddNew === "string"
-								? props.gridProps.onAddNew
-								: typeof props.gridProps.onAddNew === "function"
-								? () =>
-										(props.gridProps.onAddNew as (showNew: () => void) => void)(
-											showNewPage
-										)
-								: Array.isArray(props.gridProps.onAddNew)
-								? props.gridProps.onAddNew.map(
-										(btn): IDataGridAddButton => ({
-											...btn,
-											onClick: btn.onClick
-												? () => btn.onClick(showNewPage)
-												: undefined,
-										})
-								  )
-								: throwError("invalid type")
+									? props.gridProps.onAddNew
+									: typeof props.gridProps.onAddNew === "function"
+										? () =>
+												(
+													props.gridProps.onAddNew as (
+														showNew: () => void,
+													) => void
+												)(showNewPage)
+										: Array.isArray(props.gridProps.onAddNew)
+											? props.gridProps.onAddNew.map(
+													(btn): IDataGridAddButton => ({
+														...btn,
+														onClick: btn.onClick
+															? () => btn.onClick(showNewPage)
+															: undefined,
+													}),
+												)
+											: throwError("invalid type")
 							: props.newPermissionHint)
 					}
 					onImport={enableUserImport ? handleImportButton : undefined}
@@ -450,7 +452,7 @@ const CRUD = <
 	const formKey = useRef(Date.now().toString(16));
 	const form = (
 		id: string,
-		formComponent: NonNullable<typeof props.children>
+		formComponent: NonNullable<typeof props.children>,
 	) => {
 		// when we switch IDs (everything except from new -> id triggered by form submit) we reset form fully
 		if (lastFormId.current == null) lastFormId.current = id;
@@ -471,7 +473,7 @@ const CRUD = <
 					...props.formProps.readOnlyReasons,
 					...(!hasPermission(
 						perms,
-						id === "new" ? props.newPermission : props.editPermission
+						id === "new" ? props.newPermission : props.editPermission,
 					) && { permissions: props.editPermissionHint ?? null }),
 				}}
 				onSubmit={handleSubmit}
@@ -493,7 +495,7 @@ const CRUD = <
 		() => ({
 			refreshGrid,
 		}),
-		[refreshGrid]
+		[refreshGrid],
 	);
 
 	return (
