@@ -1,6 +1,5 @@
-import { matchPath, UNSAFE_RouteContext } from "react-router-dom";
+import { matchPath, RouteMatch, UNSAFE_RouteContext } from "react-router-dom";
 import React from "react";
-import { RouteMatch } from "react-router/lib/router";
 
 export const doesRouteMatch = (
 	route: string,

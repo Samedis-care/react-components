@@ -12,7 +12,10 @@ import React, {
 	useRef,
 	useState,
 } from "react";
-import { Location } from "@sentry/react/types/types";
+import {
+	AgnosticNonIndexRouteObject,
+	Location,
+} from "@sentry/react/types/types";
 import {
 	matchRoutes,
 	useLocation,
@@ -80,7 +83,10 @@ const getTransactionName = (
 		return location.pathname;
 	}
 
-	const branches = matchRoutes(routes, location);
+	const branches = matchRoutes(
+		routes as AgnosticNonIndexRouteObject[],
+		location,
+	);
 
 	if (branches) {
 		// eslint-disable-next-line @typescript-eslint/prefer-for-of
@@ -234,7 +240,10 @@ export function withSentryReactRouterV6Routing<
 		}, [routes, traceContext]);
 
 		const routeCtx = useMemo(() => {
-			const matches = matchRoutes(routes, location);
+			const matches = matchRoutes(
+				routes as AgnosticNonIndexRouteObject[],
+				location,
+			);
 			const match = matches && matches[0];
 			return {
 				route: match?.route,

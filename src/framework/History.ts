@@ -1,5 +1,5 @@
-import { createBrowserHistory, History } from "history";
 import { Location, Action } from "@sentry/react/types/types";
+import { createBrowserHistory, History } from "@remix-run/router/history";
 
 /**
  * The History used by the react-router instance provided by the framework
