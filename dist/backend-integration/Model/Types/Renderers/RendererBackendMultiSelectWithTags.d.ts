@@ -3,7 +3,7 @@ import { ModelFieldName, ModelRenderParams, PageVisibility } from "../../index";
 import TypeStringArray from "../TypeStringArray";
 import { BackendMultiSelectWithTagsProps } from "../../../../backend-components/Selector/BackendMultiSelectWithTags";
 import { BaseSelectorData, MultiSelectorData } from "../../../../standalone";
-declare type OmitProperties = "selected" | "onSelect" | "disabled" | "dataModel" | "initialData" | "title";
+type OmitProperties = "selected" | "onSelect" | "disabled" | "dataModel" | "initialData" | "title";
 /**
  * Renders TypeEnum as drop-down selector (with search)
  */

@@ -5,7 +5,7 @@ import { ApiConnector, Connector } from "./index";
  * @param endpoint The endpoint the connector
  * @param extraParams Extra parameters passed though
  */
-export declare type ConnectorCallback<T> = (endpoint: string, extraParams: Record<string, unknown> | undefined) => T;
+export type ConnectorCallback<T> = (endpoint: string, extraParams: Record<string, unknown> | undefined) => T;
 export interface DefaultConnectors {
     /**
      * The default "normal" backend connector

@@ -3,7 +3,7 @@ import { ModelRenderParams } from "../../../index";
 import TypeDateNullable from "../../TypeDateNullable";
 import { DateInput } from "../../../../../standalone";
 import { IDataGridColumnDef } from "../../../../../standalone/DataGrid/DataGrid";
-export declare type RendererDateNullableProps = Omit<Parameters<typeof DateInput>[0], "name" | "value" | "label" | "disabled" | "onChange" | "onBlur" | "error" | "onError" | "fullWidth" | "clearable">;
+export type RendererDateNullableProps = Omit<Parameters<typeof DateInput>[0], "name" | "value" | "label" | "disabled" | "onChange" | "onBlur" | "error" | "onError" | "fullWidth" | "clearable">;
 /**
  * Renders Date with Date Selector
  */

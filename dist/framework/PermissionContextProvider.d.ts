@@ -30,7 +30,7 @@ export declare const usePermissionContext: () => [
 /**
  * A single permission, multiple permissions (logical OR) or no permission required (null) or never (false)
  */
-export declare type Permission = string | string[] | null | false;
+export type Permission = string | string[] | null | false;
 /**
  * Pattern matching permission checking
  * @param perms A list of permissions, usually taken from PermissionContext (usePermissionContext)

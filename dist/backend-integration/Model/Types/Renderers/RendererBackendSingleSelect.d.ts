@@ -2,7 +2,7 @@ import React from "react";
 import { ModelFieldName, ModelRenderParams, PageVisibility } from "../../index";
 import TypeId from "../TypeId";
 import { BackendSingleSelectProps } from "../../../../backend-components/Selector/BackendSingleSelect";
-declare type OmitProperties = "selected" | "onSelect" | "disabled" | "model" | "initialData";
+type OmitProperties = "selected" | "onSelect" | "disabled" | "model" | "initialData";
 /**
  * Renders TypeEnum as drop-down selector (with search)
  */

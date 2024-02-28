@@ -2,7 +2,7 @@ import React from "react";
 import { ModelRenderParams } from "../../../index";
 import TypeEnumMulti, { AdvancedMultiEnumValue } from "../TypeEnumMulti";
 import { MultiSelectorData, MultiSelectProps } from "../../../../standalone";
-export declare type RendererEnumMultiSelectProps = Omit<MultiSelectProps<MultiSelectorData>, "label" | "selected" | "onLoad" | "onSelect" | "disabled">;
+export type RendererEnumMultiSelectProps = Omit<MultiSelectProps<MultiSelectorData>, "label" | "selected" | "onLoad" | "onSelect" | "disabled">;
 /**
  * Renders TypeEnumMulti as selector
  */

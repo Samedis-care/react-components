@@ -37,6 +37,8 @@ const CCI18nProvider = (props) => {
     }, []);
     return (React.createElement(I18nextProvider, { i18n: getI18n() ?? ccI18n, 
         // defaultNS used to force refresh
-        defaultNS: updating ? (getI18n() ?? ccI18n).options.defaultNS ?? "" : undefined }, props.children));
+        defaultNS: updating
+            ? ((getI18n() ?? ccI18n).options.defaultNS || "")
+            : undefined }, props.children));
 };
 export default React.memo(CCI18nProvider);

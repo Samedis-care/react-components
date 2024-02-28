@@ -28,6 +28,6 @@ export interface MultiSelectWithCheckBoxTheme {
     selectStyle?: MultiSelectWithCheckBoxThemeExpert;
 }
 declare const useStyles: (props?: any) => ClassNameMap<"label" | "checkboxStyle">;
-export declare type MultiSelectWithCheckBoxThemeExpert = Partial<Styles<Theme, SelectProps<string[]>, SelectClassKey>>;
+export type MultiSelectWithCheckBoxThemeExpert = Partial<Styles<Theme, SelectProps<string[]>, SelectClassKey>>;
 declare const _default: (props: MultiSelectWithCheckBoxProps) => JSX.Element;
 export default _default;

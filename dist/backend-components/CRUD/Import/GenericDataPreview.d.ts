@@ -1,6 +1,6 @@
 import React from "react";
 import { DataGridProps, IDataGridColumnDef } from "../../../standalone/DataGrid/DataGrid";
-export declare type GenericDataType = string | number | Date | null;
+export type GenericDataType = string | number | Date | null;
 export interface GenericDataPreviewProps {
     /**
      * The generic data, should be a Record<string, GenericDataType>

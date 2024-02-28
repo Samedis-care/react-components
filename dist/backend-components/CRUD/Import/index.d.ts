@@ -73,4 +73,4 @@ export declare const useCrudImportLogic: <KeyT extends string, VisibilityT exten
 declare const CrudImport: <KeyT extends string, VisibilityT extends PageVisibility, CustomT>(props: CrudImportProps<KeyT, VisibilityT, CustomT>) => JSX.Element;
 declare const _default: <KeyT extends string, VisibilityT extends PageVisibility, CustomT>(props: CrudImportProps<KeyT, VisibilityT, CustomT>) => JSX.Element;
 export default _default;
-export declare type CrudImportType = typeof CrudImport;
+export type CrudImportType = typeof CrudImport;

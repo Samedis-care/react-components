@@ -23,8 +23,8 @@ export interface MultiImageImage {
      */
     readOnly?: boolean;
 }
-export declare type MultiImageManipulationCallback = (images: MultiImageImage[]) => MultiImageImage[];
-export declare type MultiImageProcessFile = (file: File) => Promise<string>;
+export type MultiImageManipulationCallback = (images: MultiImageImage[]) => MultiImageImage[];
+export type MultiImageProcessFile = (file: File) => Promise<string>;
 export interface MultiImageProps {
     /**
      * The label of the control
@@ -120,8 +120,8 @@ export interface MultiImageProps {
     };
 }
 declare const useStyles: (props?: any) => ClassNameMap<"clickable" | "uploadInput" | "rootContainer" | "imageItem">;
-export declare type MultiImageClassKey = keyof ReturnType<typeof useStyles>;
-export declare type MultiImageTheme = Partial<Styles<Theme, MultiImageProps, MultiImageClassKey>>;
+export type MultiImageClassKey = keyof ReturnType<typeof useStyles>;
+export type MultiImageTheme = Partial<Styles<Theme, MultiImageProps, MultiImageClassKey>>;
 export declare const MultiImageNewIdPrefix = "MultiImage-New-";
 declare const _default: React.MemoExoticComponent<(props: MultiImageProps) => JSX.Element>;
 export default _default;

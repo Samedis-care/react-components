@@ -77,30 +77,30 @@ export interface ModelFieldDefinition<TypeT, KeyT extends ModelFieldName, Visibi
     getRelationModel?: (id: string | null, values: Record<string, unknown>) => Model<ModelFieldName, PageVisibility, unknown>;
     getRelationModelValues?: string[];
 }
-export declare type ModelField<KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT> = Record<KeyT, ModelFieldDefinition<any, KeyT, VisibilityT, CustomT>>;
-export declare type ModelFieldName = "id" | string;
-export declare type ModelGetResponseRelations<KeyT extends ModelFieldName> = Partial<Record<KeyT, Record<ModelFieldName, unknown>[]>>;
-export declare type ModelData<KeyT extends ModelFieldName> = Record<string, unknown>;
+export type ModelField<KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT> = Record<KeyT, ModelFieldDefinition<any, KeyT, VisibilityT, CustomT>>;
+export type ModelFieldName = "id" | string;
+export type ModelGetResponseRelations<KeyT extends ModelFieldName> = Partial<Record<KeyT, Record<ModelFieldName, unknown>[]>>;
+export type ModelData<KeyT extends ModelFieldName> = Record<string, unknown>;
 /**
  * Response for GET single data entry
  */
-export declare type ModelGetResponse<KeyT extends ModelFieldName> = [
+export type ModelGetResponse<KeyT extends ModelFieldName> = [
     ModelData<KeyT>,
     ModelGetResponseRelations<KeyT>,
     unknown?
 ];
-export declare type ModelIndexResponse = [
+export type ModelIndexResponse = [
     records: Record<string, unknown>[],
     meta: ResponseMeta,
     userMeta?: unknown
 ];
-export declare type ModelFetchAllParams = Partial<Omit<IDataGridLoadDataParameters, "rows" | "page">>;
+export type ModelFetchAllParams = Partial<Omit<IDataGridLoadDataParameters, "rows" | "page">>;
 /**
  * Deletion request. If invert is false only delete ids array. If invert is true delete everything except the given ids
  * @param invert Invert the selection
  * @param ids The selection
  */
-export declare type AdvancedDeleteRequest = [
+export type AdvancedDeleteRequest = [
     invert: boolean,
     ids: string[],
     filter?: Pick<IDataGridLoadDataParameters, "quickFilter" | "additionalFilters" | "fieldFilter">
@@ -134,7 +134,7 @@ export interface ModelGetOptions {
  * @param id The record ID (or null to get default values on create)
  * @param options Extra options to pass to useQuery (defaults are provided for retry, staleTime and cacheTime (last two only if configured in model))
  */
-export declare const useModelGet: <KeyT extends string, VisibilityT extends PageVisibility, CustomT>(model: Model<KeyT, VisibilityT, CustomT>, id: string | null, options?: (UseQueryOptions<ModelGetResponse<KeyT>, Error, ModelGetResponse<KeyT>> & ModelGetOptions) | undefined) => UseQueryResult<ModelGetResponse<KeyT>, Error>;
+export declare const useModelGet: <KeyT extends string, VisibilityT extends PageVisibility, CustomT>(model: Model<KeyT, VisibilityT, CustomT>, id: string | null, options?: (UseQueryOptions<ModelGetResponse<KeyT>, Error, ModelGetResponse<KeyT>, QueryKey> & ModelGetOptions) | undefined) => UseQueryResult<ModelGetResponse<KeyT>, Error>;
 /**
  * React-Query's useQuery for the given model and index params
  * @param model The model ID to load
@@ -142,7 +142,7 @@ export declare const useModelGet: <KeyT extends string, VisibilityT extends Page
  * @returns ModelIndexResponse where userMeta and meta is taken from the last call
  * @see Model.fetchAll
  */
-export declare const useModelFetchAll: <KeyT extends string, VisibilityT extends PageVisibility, CustomT>(model: Model<KeyT, VisibilityT, CustomT>, params?: Partial<Omit<IDataGridLoadDataParameters, "rows" | "page">> | undefined) => UseQueryResult<ModelIndexResponse, Error>;
+export declare const useModelFetchAll: <KeyT extends string, VisibilityT extends PageVisibility, CustomT>(model: Model<KeyT, VisibilityT, CustomT>, params?: ModelFetchAllParams) => UseQueryResult<ModelIndexResponse, Error>;
 /**
  * React-Query's useMutation to update/create a new record on backend
  * @param model The model
@@ -169,7 +169,7 @@ export declare const useModelDeleteAdvanced: <KeyT extends string, VisibilityT e
  * Mutation event handler
  * @param data The response data
  */
-export declare type ModelEventMutation = <KeyT extends ModelFieldName>(data: ModelGetResponse<KeyT>) => void;
+export type ModelEventMutation = <KeyT extends ModelFieldName>(data: ModelGetResponse<KeyT>) => void;
 export interface ModelHooks<KeyT extends ModelFieldName> {
     /**
      * Hook fired on useModelMutation success

@@ -32,6 +32,6 @@ interface Visibility {
  * - values and initialValues correct (inside a form, for form fields)
  * You should not dynamically switch between disabled/hidden and not disabled/hidden fields, you're risking subtle bugs otherwise
  */
-export declare type VisibilityCallback = Visibility | ((values: Record<string, unknown>, initialValues: Record<string, unknown>) => Visibility);
+export type VisibilityCallback = Visibility | ((values: Record<string, unknown>, initialValues: Record<string, unknown>) => Visibility);
 export declare const getVisibility: (cb: VisibilityCallback, values: Record<string, unknown>, initialValues: Record<string, unknown>) => Visibility;
 export default Visibility;

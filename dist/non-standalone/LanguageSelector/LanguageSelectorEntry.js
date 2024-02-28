@@ -13,7 +13,7 @@ const useStyles = makeStyles({
         margin: 0,
     },
     imageWrapper: {
-        height: 30,
+        height: 30, // available: 70px - 16px padding
         position: "relative",
     },
     image: {

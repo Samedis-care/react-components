@@ -1,21 +1,21 @@
 import React, { Dispatch, SetStateAction } from "react";
 import Model, { ModelFieldName, ModelGetResponseRelations, PageVisibility } from "../../backend-integration/Model/Model";
 import { QueryObserverBaseResult } from "react-query/types/core/types";
-export declare type ValidationError = Record<string, string>;
+export type ValidationError = Record<string, string>;
 /**
  * Pre submit handler for additional validations
  * Throw to cancel submit and display error.
  * Thrown error may be a ValidationError or an normal Error (other error)
  */
-export declare type CustomValidationHandler = () => Promise<ValidationError> | ValidationError;
+export type CustomValidationHandler = () => Promise<ValidationError> | ValidationError;
 /**
  * Pre submit handler to perform final changes (bypassing validation)
  */
-export declare type PreSubmitHandler = (id: string | null, submitOptions: FormSubmitOptions) => Promise<void> | unknown;
+export type PreSubmitHandler = (id: string | null, submitOptions: FormSubmitOptions) => Promise<void> | unknown;
 /**
  * Post submit handler to submit additional data for the submitted record
  */
-export declare type PostSubmitHandler = (id: string, submitOptions: FormSubmitOptions) => Promise<void> | unknown;
+export type PostSubmitHandler = (id: string, submitOptions: FormSubmitOptions) => Promise<void> | unknown;
 export declare enum OnlySubmitMountedBehaviour {
     /**
      * Omit the unmounted values from backend POST/PUT requests entirely
@@ -52,7 +52,7 @@ export interface ErrorComponentProps {
      */
     error: Error | ValidationError;
 }
-export declare type FormSubmitOptions = Partial<{
+export type FormSubmitOptions = Partial<{
     ignoreWarnings: boolean;
 }>;
 export interface PageProps<KeyT extends ModelFieldName, CustomPropsT> {
@@ -499,7 +499,7 @@ export interface FormContextData {
  */
 export declare const FormContext: React.Context<FormContextData | null>;
 export declare const useFormContext: () => FormContextData;
-export declare type FormContextDataLite = Pick<FormContextData, "id" | "model" | "customProps" | "onlySubmitMounted" | "onlyValidateMounted" | "onlyWarnMounted" | "onlyWarnChanged" | "readOnly" | "readOnlyReason" | "readOnlyReasons" | "errorComponent" | "getFieldValue" | "getFieldValues" | "setFieldValueLite" | "setFieldTouchedLite" | "setCustomReadOnly" | "removeCustomReadOnly">;
+export type FormContextDataLite = Pick<FormContextData, "id" | "model" | "customProps" | "onlySubmitMounted" | "onlyValidateMounted" | "onlyWarnMounted" | "onlyWarnChanged" | "readOnly" | "readOnlyReason" | "readOnlyReasons" | "errorComponent" | "getFieldValue" | "getFieldValues" | "setFieldValueLite" | "setFieldTouchedLite" | "setCustomReadOnly" | "removeCustomReadOnly">;
 export declare const FormContextLite: React.Context<FormContextDataLite | null>;
 export declare const useFormContextLite: () => FormContextDataLite;
 export interface FormNestedState {

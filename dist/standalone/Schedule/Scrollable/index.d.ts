@@ -8,7 +8,7 @@ import { IDayData, ScheduleAction, ScheduleFilterDefinition } from "../Common/Da
  * @returns A promise containing the data for the days of the week, may throw an
  * 			error. Format: IDayData[weekday starting Monday][n]
  */
-export declare type LoadWeekCallback = (weekOffset: number, filters: Record<string, string | boolean>) => IDayData[][] | Promise<IDayData[][]>;
+export type LoadWeekCallback = (weekOffset: number, filters: Record<string, string | boolean>) => IDayData[][] | Promise<IDayData[][]>;
 export interface ScrollableScheduleProps {
     /**
      * CSS Class which specifies the infinite scroll height
@@ -31,6 +31,6 @@ export interface ScrollableScheduleProps {
  * Outdated alias
  * @deprecated use ScrollableScheduleProps
  */
-export declare type IProps = ScrollableScheduleProps;
+export type IProps = ScrollableScheduleProps;
 declare const _default: React.MemoExoticComponent<(props: ScrollableScheduleProps) => JSX.Element>;
 export default _default;

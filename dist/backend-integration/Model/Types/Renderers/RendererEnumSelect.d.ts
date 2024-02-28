@@ -2,8 +2,8 @@ import React from "react";
 import { ModelRenderParams } from "../../index";
 import TypeEnum, { EnumValue } from "../TypeEnum";
 import { BaseSelectorData, BaseSelectorProps } from "../../../../standalone/Selector";
-export declare type RendererEnumSelectProps = Omit<BaseSelectorProps<BaseSelectorData>, "selected" | "onLoad" | "onSelect" | "disabled">;
-export declare type AdvancedEnumValue = Omit<BaseSelectorData, "label"> & Pick<EnumValue, "getLabel" | "invisible" | "invisibleInGridFilter">;
+export type RendererEnumSelectProps = Omit<BaseSelectorProps<BaseSelectorData>, "selected" | "onLoad" | "onSelect" | "disabled">;
+export type AdvancedEnumValue = Omit<BaseSelectorData, "label"> & Pick<EnumValue, "getLabel" | "invisible" | "invisibleInGridFilter">;
 /**
  * Renders TypeEnum as drop-down selector (with search)
  */

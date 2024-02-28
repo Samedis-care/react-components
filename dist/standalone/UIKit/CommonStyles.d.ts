@@ -6,6 +6,6 @@ export interface UIInputProps {
     important?: boolean;
     warning?: boolean;
 }
-export declare type InputTheme = Partial<Styles<Theme, UIInputProps, InputClassKey>>;
+export type InputTheme = Partial<Styles<Theme, UIInputProps, InputClassKey>>;
 export declare const useInputStyles: (props: UIInputProps) => Partial<ClassNameMap<InputClassKey>>;
 export declare const InputLabelConfig: InputLabelProps;

@@ -5,8 +5,8 @@ declare module "@mui/styles/defaultTheme" {
     interface DefaultTheme extends Theme {
     }
 }
-export declare type SetThemeAction = (theme: ThemeOptions) => void;
-export declare type GetDefaultThemeCallback = (preferDark: boolean) => ThemeOptions;
+export type SetThemeAction = (theme: ThemeOptions) => void;
+export type GetDefaultThemeCallback = (preferDark: boolean) => ThemeOptions;
 export declare const getStandardTheme: GetDefaultThemeCallback;
 export interface IThemeProviderProps extends IFrameworkProps {
     /**

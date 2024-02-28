@@ -1,7 +1,7 @@
 import React from "react";
 import { ModelRenderParams } from "../../../index";
 import TypeEnum, { EnumValue } from "../../TypeEnum";
-export declare type WrapButtonFunc = (btn: React.ReactElement, value: EnumValue) => React.ReactElement;
+export type WrapButtonFunc = (btn: React.ReactElement, value: EnumValue) => React.ReactElement;
 /**
  * Renders TypeEnum as radio buttons
  */

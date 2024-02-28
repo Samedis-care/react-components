@@ -1,7 +1,7 @@
 import React from "react";
 import { CrudImporterStepProps } from "./index";
 import { ModelFieldDefinition, PageVisibility } from "../../../backend-integration";
-declare type ConversionScriptRunnerFunc = (data: Record<string, unknown>[], field: ModelFieldDefinition<unknown, string, PageVisibility, unknown>, script: string) => Promise<void>;
+type ConversionScriptRunnerFunc = (data: Record<string, unknown>[], field: ModelFieldDefinition<unknown, string, PageVisibility, unknown>, script: string) => Promise<void>;
 export declare const useImportStep2Logic: (props: CrudImporterStepProps) => {
     columns: string[];
     conversionScriptUpdates: React.MutableRefObject<Record<string, ConversionScriptRunnerFunc>>;

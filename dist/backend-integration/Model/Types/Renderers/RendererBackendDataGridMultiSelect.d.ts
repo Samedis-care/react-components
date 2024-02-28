@@ -2,7 +2,7 @@ import React from "react";
 import { ModelFieldName, ModelRenderParams, PageVisibility } from "../../index";
 import TypeStringArray from "../TypeStringArray";
 import { BackendDataGridMultiSelectProps } from "../../../../backend-components/Selector/BackendDataGridMultiSelect";
-declare type OmitProperties = "selected" | "onChange" | "readOnly" | "model";
+type OmitProperties = "selected" | "onChange" | "readOnly" | "model";
 /**
  * Renders TypeEnum as drop-down selector (with search)
  */

@@ -1,7 +1,7 @@
 import React from "react";
 import { TextFieldWithHelpProps } from "../TextFieldWithHelp";
 import { TextFieldProps } from "@mui/material";
-export declare type ColorInputProps = TextFieldWithHelpProps & Omit<TextFieldProps, "onChange" | "value" | "onClick" | "multiline"> & {
+export type ColorInputProps = TextFieldWithHelpProps & Omit<TextFieldProps, "onChange" | "value" | "onClick" | "multiline"> & {
     /**
      * On Change event handler
      * @param newColor The new color or empty string

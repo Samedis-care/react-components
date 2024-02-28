@@ -42,7 +42,7 @@ export interface ImageDialogEntryProps extends Pick<MultiImageProps, "previewSiz
     };
 }
 declare const useStyles: (props?: any) => ClassNameMap<"clickable">;
-export declare type ImageDialogEntryClassKey = keyof ReturnType<typeof useStyles>;
-export declare type ImageDialogEntryTheme = Partial<Styles<Theme, ImageDialogEntryProps, ImageDialogEntryClassKey>>;
+export type ImageDialogEntryClassKey = keyof ReturnType<typeof useStyles>;
+export type ImageDialogEntryTheme = Partial<Styles<Theme, ImageDialogEntryProps, ImageDialogEntryClassKey>>;
 declare const _default: React.MemoExoticComponent<(props: ImageDialogEntryProps) => JSX.Element>;
 export default _default;

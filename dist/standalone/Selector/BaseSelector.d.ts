@@ -90,7 +90,7 @@ export interface SelectorLruOptions<DataT extends BaseSelectorData> {
 /**
  * A callback used to get an label value for a specific input (search) value
  */
-declare type SelectorLabelCallback = (obj: {
+type SelectorLabelCallback = (obj: {
     inputValue: string;
 }) => string | null;
 export interface BaseSelectorProps<DataT extends BaseSelectorData> extends TextFieldWithHelpProps {
@@ -259,12 +259,12 @@ export interface BaseSelectorProps<DataT extends BaseSelectorData> extends TextF
      */
     filterIds?: string[] | undefined;
 }
-export declare type SelectorThemeExpert = {
+export type SelectorThemeExpert = {
     base?: Partial<Styles<Theme, BaseSelectorProps<BaseSelectorData>, AutocompleteClassKey>>;
     extensions?: Partial<Styles<Theme, BaseSelectorProps<BaseSelectorData>, SelectorCustomStylesClassKey>>;
 };
 declare const useCustomStylesBase: (props: Pick<BaseSelectorProps<BaseSelectorData>, "label" | "iconSize">) => import("@mui/styles").ClassNameMap<"label" | "switch" | "selected" | "icon" | "wrapper" | "divider" | "smallLabel" | "labelWithSwitch" | "infoBtn" | "textFieldStandard" | "listItem" | "lruListItem">;
-export declare type SelectorCustomStylesClassKey = keyof ReturnType<typeof useCustomStylesBase>;
+export type SelectorCustomStylesClassKey = keyof ReturnType<typeof useCustomStylesBase>;
 export interface BaseSelectorContextType {
     addToLru: (...ids: string[]) => void;
 }

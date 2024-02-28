@@ -1,4 +1,4 @@
-import { useTranslation, } from "react-i18next";
+import { useTranslation } from "react-i18next";
 import ccI18n from "../i18n";
 /**
  * Internal helper for useTranslation hook

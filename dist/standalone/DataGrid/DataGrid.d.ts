@@ -29,7 +29,7 @@ export interface DataGridTheme extends Theming.BasicElementThemeFragment {
         total?: Theming.BasicElementThemeFragment;
     };
 }
-export declare type DataGridProps = IDataGridHeaderProps & IDataGridColumnProps & IDataGridCallbacks & {
+export type DataGridProps = IDataGridHeaderProps & IDataGridColumnProps & IDataGridCallbacks & {
     /**
      * Custom styles
      */
@@ -184,12 +184,12 @@ export interface IDataGridCallbacks {
      */
     canSelectRow?: (record: Record<string, unknown>) => boolean;
 }
-export declare type DataGridAdditionalFilters = Record<string, unknown>;
-export declare type DataGridSortSetting = {
+export type DataGridAdditionalFilters = Record<string, unknown>;
+export type DataGridSortSetting = {
     field: string;
     direction: -1 | 1;
 };
-export declare type DataGridFilterSetting = {
+export type DataGridFilterSetting = {
     field: string;
     filter: IFilterDef;
 };
@@ -283,7 +283,7 @@ export interface IDataGridColumnProps {
      */
     headerHeight?: number;
 }
-export declare type IDataGridFieldFilter = {
+export type IDataGridFieldFilter = {
     [field: string]: IFilterDef;
 };
 export interface DataGridSetFilterDataEntry {
@@ -310,7 +310,7 @@ export interface DataGridSetFilterDataEntry {
      */
     isDivider?: boolean;
 }
-export declare type DataGridSetFilterData = DataGridSetFilterDataEntry[];
+export type DataGridSetFilterData = DataGridSetFilterDataEntry[];
 export interface IDataGridColumnDef {
     /**
      * The field name
@@ -390,12 +390,12 @@ export interface DataGridData {
      */
     rows: DataGridRowData[];
 }
-export declare type DataGridRowData = {
+export type DataGridRowData = {
     id: string;
 } & Record<string, string | number | {
     toString: () => string;
 } | React.ReactElement | null>;
-export declare type DataGridCustomDataType = Record<string, unknown>;
+export type DataGridCustomDataType = Record<string, unknown>;
 export interface IDataGridState {
     /**
      * The current search (quick filter) string
@@ -472,10 +472,10 @@ export declare const useDataGridState: () => [
     Dispatch<SetStateAction<IDataGridState>>
 ];
 export declare const useDataGridProps: () => DataGridProps;
-export declare type IDataGridColumnsState = {
+export type IDataGridColumnsState = {
     [field: string]: IDataGridColumnState;
 };
-export declare type DataGridColumnState = [
+export type DataGridColumnState = [
     /**
      * Column state of all columns
      */
@@ -486,7 +486,7 @@ export declare type DataGridColumnState = [
     Dispatch<SetStateAction<IDataGridColumnsState>>
 ];
 export declare const useDataGridColumnState: () => DataGridColumnState;
-export declare type DataGridColumnsWidthState = [
+export type DataGridColumnsWidthState = [
     /**
      * Field -> Width in px
      */
@@ -500,9 +500,9 @@ export declare const useDataGridColumnsWidthState: () => DataGridColumnsWidthSta
 export declare const useDataGridRootRef: () => HTMLDivElement;
 export declare const getDataGridDefaultState: (columns: IDataGridColumnDef[], defaultCustomData: Record<string, unknown> | undefined) => IDataGridState;
 export declare const getDataGridDefaultColumnsState: (columns: IDataGridColumnDef[], defaultSort: DataGridSortSetting[] | undefined, defaultFilter: DataGridFilterSetting[] | undefined) => IDataGridColumnsState;
-declare const useStyles: (props?: any) => import("@mui/styles").ClassNameMap<"footer" | "header" | "cell" | "content" | "wrapper" | "rowOdd" | "rowEven" | "headerCell" | "dataCell" | "dataCellSelected" | "columnHeaderContentWrapper" | "columnHeaderFilterable" | "columnHeaderFilterButton" | "columnHeaderFilterButtonActive" | "columnHeaderResizer" | "columnHeaderFilterPopup" | "columnHeaderFilterPopupEnum" | "columnHeaderFilterIcon" | "columnHeaderSortIcon" | "quickFilterActiveIcon" | "customFilterIcon" | "customFilterActiveIcon" | "customFilterBorder" | "columnHeaderLabel" | "disableClick" | "filterClearBtn" | "filterBarBox" | "filterBarGrid" | "setFilterContainer" | "setFilterListItem" | "setFilterListItemDivider" | "setFilterListDivider" | "contentOverlayCollapse" | "paginationText" | "selectAllWrapper" | "selectAllCheckbox" | "selectCheckbox" | "contentOverlayPaper" | "contentOverlayClosed" | "customFilterContainer">;
-export declare type DataGridClassKey = keyof ReturnType<typeof useStyles>;
-export declare type DataGridThemeExpert = Partial<Styles<Theme, DataGridProps, DataGridClassKey>>;
+declare const useStyles: (props?: any) => import("@mui/styles").ClassNameMap<"footer" | "header" | "content" | "cell" | "wrapper" | "rowOdd" | "rowEven" | "headerCell" | "dataCell" | "dataCellSelected" | "columnHeaderContentWrapper" | "columnHeaderFilterable" | "columnHeaderFilterButton" | "columnHeaderFilterButtonActive" | "columnHeaderResizer" | "columnHeaderFilterPopup" | "columnHeaderFilterPopupEnum" | "columnHeaderFilterIcon" | "columnHeaderSortIcon" | "quickFilterActiveIcon" | "customFilterIcon" | "customFilterActiveIcon" | "customFilterBorder" | "columnHeaderLabel" | "disableClick" | "filterClearBtn" | "filterBarBox" | "filterBarGrid" | "setFilterContainer" | "setFilterListItem" | "setFilterListItemDivider" | "setFilterListDivider" | "contentOverlayCollapse" | "paginationText" | "selectAllWrapper" | "selectAllCheckbox" | "selectCheckbox" | "contentOverlayPaper" | "contentOverlayClosed" | "customFilterContainer">;
+export type DataGridClassKey = keyof ReturnType<typeof useStyles>;
+export type DataGridThemeExpert = Partial<Styles<Theme, DataGridProps, DataGridClassKey>>;
 export declare const useDataGridStyles: () => ReturnType<typeof useStyles>;
 export declare const getActiveDataGridColumns: (columns: IDataGridColumnDef[], hiddenColumns: string[], lockedColumns: string[]) => IDataGridColumnDef[];
 export declare const getDefaultColumnWidths: (columns: IDataGridColumnDef[], theme: Theme) => Record<string, number>;

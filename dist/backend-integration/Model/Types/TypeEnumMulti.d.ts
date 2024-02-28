@@ -4,7 +4,7 @@ import { ModelRenderParams } from "../index";
 import FilterType from "../FilterType";
 import { EnumValue } from "./TypeEnum";
 import { MultiSelectorData } from "../../../standalone";
-export declare type AdvancedMultiEnumValue = Omit<MultiSelectorData, "label"> & Pick<EnumValue, "getLabel" | "invisible">;
+export type AdvancedMultiEnumValue = Omit<MultiSelectorData, "label"> & Pick<EnumValue, "getLabel" | "invisible">;
 /**
  * Enum type with multi-select capability
  */

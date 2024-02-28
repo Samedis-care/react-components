@@ -8,7 +8,7 @@ interface QueuedFunction {
     func: () => unknown;
     result: ModelGetResponse<string> | null;
 }
-declare type QueueChangeHandler = (queue: QueuedFunction[]) => void;
+type QueueChangeHandler = (queue: QueuedFunction[]) => void;
 export declare enum IndexEnhancementLevel {
     /**
      * Pass though index call to backend
@@ -40,7 +40,7 @@ declare class LazyConnector<KeyT extends ModelFieldName, VisibilityT extends Pag
     read(id: string, model: Model<KeyT, VisibilityT, CustomT> | undefined): Promise<ModelGetResponse<KeyT>> | ModelGetResponse<KeyT>;
     update(data: Record<ModelFieldName, unknown>, model: Model<KeyT, VisibilityT, CustomT> | undefined): Promise<ModelGetResponse<KeyT>> | ModelGetResponse<KeyT>;
     deleteMultiple(ids: string[], model?: Model<KeyT, VisibilityT, CustomT>): void;
-    handleAdvancedDelete: (req: AdvancedDeleteRequest, model?: Model<KeyT, VisibilityT, CustomT> | undefined) => void;
+    handleAdvancedDelete: (req: AdvancedDeleteRequest, model?: Model<KeyT, VisibilityT, CustomT>) => void;
     private onAfterOperation;
     workQueue: () => Promise<void>;
     /**

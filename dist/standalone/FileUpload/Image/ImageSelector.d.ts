@@ -1,6 +1,6 @@
 import React from "react";
 import { IDownscaleProps } from "../../../utils/processImage";
-export declare type PostImageEditCallback = (image: string) => Promise<string>;
+export type PostImageEditCallback = (image: string) => Promise<string>;
 export interface ImageSelectorProps {
     /**
      * The name of the input

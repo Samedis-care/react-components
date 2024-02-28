@@ -1,4 +1,5 @@
 import React from "react";
+import { TextFieldProps } from "@mui/material";
 export declare const useMuiWarningStyles: (props?: any) => import("@mui/styles").ClassNameMap<"warning">;
 export interface MuiWarningSourceProps {
     className?: string;
@@ -29,4 +30,4 @@ export declare const FormHelperTextCC: React.ComponentType<import("@mui/material
 }, "className" | "style" | "classes" | "children" | "sx" | "disabled" | "required" | "error" | "margin" | "filled" | "variant" | "focused"> & {
     component?: React.ElementType<any> | undefined;
 } & MuiWarningResultProps>;
-export declare const TextFieldCC: React.ComponentType<(import("@mui/material").FilledTextFieldProps | import("@mui/material").OutlinedTextFieldProps | import("@mui/material").StandardTextFieldProps) & MuiWarningResultProps>;
+export declare const TextFieldCC: React.ComponentType<TextFieldProps & MuiWarningResultProps>;

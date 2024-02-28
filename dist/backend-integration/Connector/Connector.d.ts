@@ -11,7 +11,7 @@ export interface ResponseMeta {
      */
     filteredRows?: number;
 }
-export declare type ConnectorIndex2Params = Partial<Omit<IDataGridLoadDataParameters, "page" | "rows">> & {
+export type ConnectorIndex2Params = Partial<Omit<IDataGridLoadDataParameters, "page" | "rows">> & {
     offset: number;
     rows: number;
 };

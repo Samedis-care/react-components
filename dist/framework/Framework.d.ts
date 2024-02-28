@@ -35,6 +35,6 @@ export interface IFrameworkThemeProps {
      */
     defaultTheme?: GetDefaultThemeCallback;
 }
-declare type ICompleteFrameworkProps = IFrameworkProps & IFrameworkThemeProps;
+type ICompleteFrameworkProps = IFrameworkProps & IFrameworkThemeProps;
 declare const _default: React.MemoExoticComponent<(props: ICompleteFrameworkProps) => JSX.Element>;
 export default _default;

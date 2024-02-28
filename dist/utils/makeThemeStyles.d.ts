@@ -1,4 +1,5 @@
 import { Styles } from "@mui/styles";
+import makeStyles from "@mui/styles/makeStyles";
 import { Theme } from "@mui/material";
 import { ClassNameMap } from "@mui/styles/withStyles";
 /**
@@ -7,5 +8,5 @@ import { ClassNameMap } from "@mui/styles/withStyles";
  * @param name The name for the styles
  * @param useParentStyles The parent styles to override with theme styles
  */
-declare const makeThemeStyles: <Props extends object, ClassKey extends string = string>(getSubStyles: (theme: Theme) => Partial<Styles<Theme, Props, ClassKey>> | undefined, name: string, useParentStyles?: ((props?: any) => ClassNameMap<string>) | undefined) => keyof Props extends never ? (props?: unknown) => ClassNameMap<ClassKey> : (props: Props) => ClassNameMap<ClassKey>;
+declare const makeThemeStyles: <Props extends object, ClassKey extends string = string>(getSubStyles: (theme: Theme) => Partial<Styles<Theme, Props, ClassKey>> | undefined, name: string, useParentStyles?: ReturnType<typeof makeStyles>) => keyof Props extends never ? (props?: unknown) => ClassNameMap<ClassKey> : (props: Props) => ClassNameMap<ClassKey>;
 export default makeThemeStyles;

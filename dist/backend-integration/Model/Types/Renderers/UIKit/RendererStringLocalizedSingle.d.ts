@@ -4,7 +4,7 @@ import { ModelRenderParams } from "../../../index";
 import { TextFieldWithHelpProps } from "../../../../../standalone/UIKit/TextFieldWithHelp";
 import TypeLocalizedString from "../../TypeLocalizedString";
 import { MultiLanguageInputSupportedLanguages } from "../../../../../standalone/UIKit/InputControls/MultiLanguageInput";
-export declare type ModelDataTypeStringLocalizedSingleRendererCCParams = Omit<TextFieldProps, "name" | "value" | "label" | "disabled" | "required" | "onChange" | "onBlur" | "error"> & Omit<TextFieldWithHelpProps, "warning">;
+export type ModelDataTypeStringLocalizedSingleRendererCCParams = Omit<TextFieldProps, "name" | "value" | "label" | "disabled" | "required" | "onChange" | "onBlur" | "error"> & Omit<TextFieldWithHelpProps, "warning">;
 export declare const ModelDataTypeStringLocalizedSingleRendererContext: React.Context<MultiLanguageInputSupportedLanguages | null>;
 /**
  * Renders a text field

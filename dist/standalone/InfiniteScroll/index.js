@@ -13,7 +13,7 @@ class InfiniteScroll extends PureComponent {
             ? new ResizeObserver(this.handleResize)
             : null;
         this.state = {
-            initScroll: !this.props.loadMoreTop,
+            initScroll: !this.props.loadMoreTop, // we don't need to set an initial scroll if we don't need up-scrolling
             loadMoreTop: debounceWait === 0
                 ? this.props.loadMoreTop
                     ? debounce(this.props.loadMoreTop, debounceWait)

@@ -1,7 +1,7 @@
 import React from "react";
 import { CrudImporterStepProps } from "./index";
 import { FileUploadProps } from "../../../standalone/FileUpload/Generic";
-export declare type ImportStep1Props = CrudImporterStepProps & {
+export type ImportStep1Props = CrudImporterStepProps & {
     howTo?: (string | React.ReactNode)[];
 };
 export declare const useImportStep1FileUploadProps: (props: ImportStep1Props) => Pick<FileUploadProps, "onChange" | "accept" | "maxFiles" | "handleError" | "files">;

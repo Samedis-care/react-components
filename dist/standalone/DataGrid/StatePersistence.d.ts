@@ -5,7 +5,7 @@ export interface DataGridPersistentState {
     columnWidth: Record<string, number>;
     state: Partial<Pick<IDataGridState, "search" | "hiddenColumns" | "lockedColumns" | "customData" | "initialResize">>;
 }
-export declare type DataGridPersistentStateContextType = [
+export type DataGridPersistentStateContextType = [
     (Promise<Partial<DataGridPersistentState>> | Partial<DataGridPersistentState> | undefined),
     (data: DataGridPersistentState) => Promise<void> | void
 ];

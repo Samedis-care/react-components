@@ -81,11 +81,11 @@ export interface IDialogConfigConfirm {
 /**
  * Props which will be provided by the promise in the async handlers
  */
-declare type DialogConfirmCallbackProps = "onClose" | "handlerButtonYes" | "handlerButtonNo";
+type DialogConfirmCallbackProps = "onClose" | "handlerButtonYes" | "handlerButtonNo";
 /**
  * awaitable confirm dialog properties
  */
-export declare type IDialogConfigConfirmAsync = Omit<IDialogConfigConfirm, DialogConfirmCallbackProps>;
+export type IDialogConfigConfirmAsync = Omit<IDialogConfigConfirm, DialogConfirmCallbackProps>;
 /**
  * Input dialog properties, extends confirm dialog.
  * Yes and No of confirm dialog could be labelled as Submit and Cancel.
@@ -115,7 +115,7 @@ export interface IDialogConfigInput extends Omit<IDialogConfigConfirm, "handlerB
 /**
  * Awaitable input dialog properties
  */
-export declare type IDialogConfigInputAsync = Omit<IDialogConfigInput, DialogConfirmCallbackProps>;
+export type IDialogConfigInputAsync = Omit<IDialogConfigInput, DialogConfirmCallbackProps>;
 /**
  * Form dialog. State of inputs needs to be handled manually.
  * You most likely want to use this inside your own component, which handles state.

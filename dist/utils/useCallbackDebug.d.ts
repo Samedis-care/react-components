@@ -4,5 +4,5 @@
  * @param deps The useCallback dependency array (second param)
  * @param name The name for this debug (used for logging)
  */
-declare const useCallbackDebug: <T extends (...args: any[]) => any>(callback: T, deps: unknown[], name?: string | undefined) => T;
+declare const useCallbackDebug: <T extends (...args: any[]) => any>(callback: T, deps: unknown[], name?: string) => T;
 export default useCallbackDebug;

@@ -56,7 +56,7 @@ const useStyles = makeStyles((theme) => ({
     pfpIconBtn: {
         width: "100%",
         height: "100%",
-        margin: 2,
+        margin: 2, // borderSize in pfpImg * 2
         padding: 0,
     },
     pfpImg: {

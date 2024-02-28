@@ -81,7 +81,7 @@ export interface IMenuItemDefinition {
      */
     children?: IMenuItemDefinition[];
 }
-export declare type MenuItemComponent = React.ComponentType<MenuItemProps>;
+export type MenuItemComponent = React.ComponentType<MenuItemProps>;
 /**
  * The menu properties
  */

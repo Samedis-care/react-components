@@ -14,7 +14,7 @@ export interface IDataGridFilterBarProps {
      */
     inDialog: boolean;
 }
-declare type CustomFilterActiveContextType = [
+type CustomFilterActiveContextType = [
     number,
     Dispatch<React.SetStateAction<number>>
 ];

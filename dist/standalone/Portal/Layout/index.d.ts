@@ -65,7 +65,7 @@ interface PortalLayoutPropsBase {
      */
     mainId?: string;
 }
-export declare type PortalLayoutProps = PortalLayoutPropsBase & (PortalLayoutBasic | PortalLayoutNoTopLeft);
+export type PortalLayoutProps = PortalLayoutPropsBase & (PortalLayoutBasic | PortalLayoutNoTopLeft);
 export interface PortalLayoutContextType {
     mobile: boolean;
     menuOpen: boolean;

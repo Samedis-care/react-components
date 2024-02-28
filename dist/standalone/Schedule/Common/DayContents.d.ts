@@ -51,7 +51,7 @@ export interface ScheduleFilterDefinitionSwitch {
      */
     label: string;
 }
-export declare type ScheduleFilterDefinition = ScheduleFilterDefinitionSelect | ScheduleFilterDefinitionSwitch;
+export type ScheduleFilterDefinition = ScheduleFilterDefinitionSelect | ScheduleFilterDefinitionSwitch;
 export interface ScheduleAction {
     /**
      * unique identifier for action
@@ -74,6 +74,6 @@ export interface DayContentsProps {
     data: IDayData[];
     altBorder?: boolean;
 }
-export declare type IProps = DayContentsProps;
+export type IProps = DayContentsProps;
 declare const _default: React.MemoExoticComponent<(props: DayContentsProps) => JSX.Element>;
 export default _default;

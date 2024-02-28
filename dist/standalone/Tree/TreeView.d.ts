@@ -89,7 +89,7 @@ export interface TreeViewRendererProps extends TreeDataForRenderer {
      */
     onToggleExpanded: (id: string) => void;
 }
-export declare type TreeViewRendererCallbacks = Pick<TreeViewRendererProps, "onToggleExpanded">;
+export type TreeViewRendererCallbacks = Pick<TreeViewRendererProps, "onToggleExpanded">;
 export interface TreeViewProps extends TreeViewRendererCallbacks {
     /**
      * The tree view root node

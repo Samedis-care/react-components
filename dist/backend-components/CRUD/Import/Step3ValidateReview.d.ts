@@ -1,6 +1,6 @@
 import React from "react";
 import { CrudImporterStepProps } from "./index";
-declare type RecordT = [Record<string, unknown>, Record<string, string>, Error | null];
+type RecordT = [Record<string, unknown>, Record<string, string>, Error | null];
 export declare const useImportStep3Logic: (props: CrudImporterStepProps) => {
     records: RecordT[] | null;
     recordsNormalized: {

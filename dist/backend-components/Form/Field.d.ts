@@ -1,7 +1,7 @@
 import React from "react";
 import { ModelFieldDefinition, ModelRenderParams, PageVisibility } from "../../backend-integration";
 import Type from "../../backend-integration/Model/Type";
-declare type NonOverridableProps = "getDefaultValue" | "validate" | "filterable" | "sortable" | "columnWidth";
+type NonOverridableProps = "getDefaultValue" | "validate" | "filterable" | "sortable" | "columnWidth";
 interface FieldProps {
     /**
      * The name of the field as specified in the model

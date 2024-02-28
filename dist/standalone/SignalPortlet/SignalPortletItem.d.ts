@@ -21,9 +21,9 @@ export interface SignalPortletItemDef {
      */
     classes?: Partial<ClassNameMap<keyof ReturnType<typeof useStyles>>>;
 }
-export declare type SignalPortletItemProps = SignalPortletItemDef & SignalPortletColorConfig;
+export type SignalPortletItemProps = SignalPortletItemDef & SignalPortletColorConfig;
 declare const useStyles: (props: SignalPortletItemProps) => ClassNameMap<"root" | "itemColorLoading" | "itemColorActive" | "itemColorInactive" | "listAvatar" | "listText" | "listTextPrimary">;
-export declare type SignalPortletItemClassKey = keyof ReturnType<typeof useStyles>;
-export declare type SignalPortletItemTheme = Partial<Styles<Theme, SignalPortletItemProps, SignalPortletItemClassKey>>;
+export type SignalPortletItemClassKey = keyof ReturnType<typeof useStyles>;
+export type SignalPortletItemTheme = Partial<Styles<Theme, SignalPortletItemProps, SignalPortletItemClassKey>>;
 declare const _default: React.MemoExoticComponent<(props: SignalPortletItemProps) => JSX.Element>;
 export default _default;

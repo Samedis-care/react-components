@@ -1,4 +1,5 @@
 import React from "react";
+import { TextFieldProps } from "@mui/material";
 import { TextFieldWithHelpProps } from "../TextFieldWithHelp";
 export interface DecimalInputFieldProps extends TextFieldWithHelpProps {
     /**
@@ -12,5 +13,5 @@ export interface DecimalInputFieldProps extends TextFieldWithHelpProps {
      */
     onChange?: (evt: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>, value: number | null) => void;
 }
-declare const _default: React.MemoExoticComponent<(props: DecimalInputFieldProps & Omit<import("@mui/material").FilledTextFieldProps | import("@mui/material").OutlinedTextFieldProps | import("@mui/material").StandardTextFieldProps, "onChange" | "value">) => JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: DecimalInputFieldProps & Omit<TextFieldProps, "onChange" | "value">) => JSX.Element>;
 export default _default;

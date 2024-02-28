@@ -5,5 +5,5 @@ export declare const useDepsDiffLog: (deps: unknown[], name: string) => void;
  * @param deps The useMemo dependency array (second param)
  * @param name The name for this debug (used for logging)
  */
-declare const useMemoDebug: <T>(factory: () => T, deps: unknown[], name?: string | undefined) => T;
+declare const useMemoDebug: <T>(factory: () => T, deps: unknown[], name?: string) => T;
 export default useMemoDebug;

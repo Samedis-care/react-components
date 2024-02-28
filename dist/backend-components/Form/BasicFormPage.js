@@ -78,12 +78,14 @@ const BasicFormPage = (props) => {
         disableRouting,
     ]);
     // go back confirm dialog if form is dirty
-    const customProps = {
-        ...originalCustomProps,
+    const customPropsWithGoBack = {
+        ...(typeof originalCustomProps === "object" ? originalCustomProps : null),
     };
-    if (originalCustomProps && "goBack" in originalCustomProps) {
+    if (typeof originalCustomProps === "object" &&
+        originalCustomProps &&
+        "goBack" in originalCustomProps) {
         const orgGoBack = originalCustomProps.goBack;
-        customProps.goBack =
+        customPropsWithGoBack.goBack =
             typeof orgGoBack === "function"
                 ? async () => {
                     try {
@@ -99,7 +101,7 @@ const BasicFormPage = (props) => {
                             unblock.current();
                             unblock.current = undefined;
                         }
-                        orgGoBack();
+                        await orgGoBack();
                     }
                     catch (e) {
                         // user cancelled
@@ -119,6 +121,9 @@ const BasicFormPage = (props) => {
         }
     }, [submit, postSubmitHandler, pushDialog]);
     return (React.createElement(FormPageLayout, { body: form, footer: React.createElement(FormButtons, { ...childrenProps, ...otherProps, showBackButtonOnly: otherProps.showBackButtonOnly ||
-                (readOnly && !!Object.values(readOnlyReasons).find((e) => !!e)), readOnly: readOnly, readOnlyReasons: readOnlyReasons, isSubmitting: isSubmitting, dirty: dirty, disableRouting: disableRouting, submit: handleSubmit, customProps: customProps }), other: React.createElement(FormLoaderOverlay, { visible: isSubmitting }) }));
+                (readOnly && !!Object.values(readOnlyReasons).find((e) => !!e)), readOnly: readOnly, readOnlyReasons: readOnlyReasons, isSubmitting: isSubmitting, dirty: dirty, disableRouting: disableRouting, submit: handleSubmit, customProps: typeof originalCustomProps === "object" &&
+                originalCustomProps != null
+                ? customPropsWithGoBack
+                : originalCustomProps }), other: React.createElement(FormLoaderOverlay, { visible: isSubmitting }) }));
 };
 export default React.memo(BasicFormPage);

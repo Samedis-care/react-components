@@ -69,7 +69,7 @@ declare module "@mui/material/styles/createTheme" {
         componentsCare?: ComponentsCareTheme;
     }
 }
-declare type Theme = Omit<MuiTheme, "components">;
+type Theme = Omit<MuiTheme, "components">;
 declare module "@mui/material/styles" {
     interface ComponentNameToClassKey {
         CcSignalPortlet: SignalPortletClassKey;

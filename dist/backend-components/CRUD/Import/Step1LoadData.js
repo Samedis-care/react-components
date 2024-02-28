@@ -48,7 +48,7 @@ export const useImportStep1FileUploadProps = (props) => {
                     .sheet_to_json(sheet, {
                     dateNF: 'YYYY-MM-DD"T"hh:mm:ss',
                     raw: false,
-                    rawNumbers: true,
+                    rawNumbers: true, // output dates as numbers and numbers as raw numbers
                     defval: undefined,
                     blankrows: false,
                 })

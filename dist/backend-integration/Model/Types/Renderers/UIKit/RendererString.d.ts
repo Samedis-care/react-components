@@ -3,7 +3,7 @@ import TypeString from "../../TypeString";
 import { TextFieldProps } from "@mui/material";
 import { ModelRenderParams } from "../../../index";
 import { TextFieldWithHelpProps } from "../../../../../standalone/UIKit/TextFieldWithHelp";
-export declare type ModelDataTypeStringRendererCCParams = Omit<TextFieldProps, "name" | "value" | "label" | "disabled" | "required" | "onChange" | "onBlur" | "error"> & Omit<TextFieldWithHelpProps, "warning">;
+export type ModelDataTypeStringRendererCCParams = Omit<TextFieldProps, "name" | "value" | "label" | "disabled" | "required" | "onChange" | "onBlur" | "error"> & Omit<TextFieldWithHelpProps, "warning">;
 /**
  * Renders a text field
  */

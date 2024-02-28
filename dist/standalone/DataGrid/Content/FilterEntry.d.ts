@@ -1,8 +1,8 @@
 import React from "react";
 import { ModelFilterType } from "../../../backend-integration/Model";
 import { IDataGridColumnDef } from "../DataGrid";
-export declare type FilterType = "contains" | "notContains" | "equals" | "notEqual" | "empty" | "notEmpty" | "startsWith" | "endsWith" | "lessThan" | "lessThanOrEqual" | "greaterThan" | "greaterThanOrEqual" | "inRange" | "inSet" | "notInSet";
-export declare type FilterComboType = "or" | "and";
+export type FilterType = "contains" | "notContains" | "equals" | "notEqual" | "empty" | "notEmpty" | "startsWith" | "endsWith" | "lessThan" | "lessThanOrEqual" | "greaterThan" | "greaterThanOrEqual" | "inRange" | "inSet" | "notInSet";
+export type FilterComboType = "or" | "and";
 export interface IFilterDef {
     /**
      * Type of comparison

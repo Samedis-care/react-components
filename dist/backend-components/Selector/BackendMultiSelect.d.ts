@@ -2,7 +2,7 @@
 import { MultiSelectProps, MultiSelectorData, SelectorLruOptions } from "../../standalone";
 import Model, { ModelFieldName, PageVisibility } from "../../backend-integration/Model/Model";
 import { DataGridSortSetting } from "../../standalone/DataGrid/DataGrid";
-export declare type BackendMultiSelectLruOptions<DataT extends MultiSelectorData> = Omit<SelectorLruOptions<DataT>, "loadData">;
+export type BackendMultiSelectLruOptions<DataT extends MultiSelectorData> = Omit<SelectorLruOptions<DataT>, "loadData">;
 export interface BackendMultiSelectProps<KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT, DataT extends MultiSelectorData> extends Omit<MultiSelectProps<DataT>, "onLoad" | "selected" | "onSelect" | "lru"> {
     /**
      * The model to use

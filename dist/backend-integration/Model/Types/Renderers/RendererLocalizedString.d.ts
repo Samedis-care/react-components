@@ -3,7 +3,7 @@ import { ModelRenderParams } from "../../index";
 import { MultiLanguageInputProps, MultiLanguageInputSupportedLanguages } from "../../../../standalone/UIKit/InputControls/MultiLanguageInput";
 import TypeLocalizedString from "../TypeLocalizedString";
 import { TypeSettings } from "../../Type";
-export declare type ModelDataTypeLocalizedStringRendererGetFallbackLabel = (value: Partial<Record<MultiLanguageInputSupportedLanguages, string>>, values: Record<string, unknown>) => string;
+export type ModelDataTypeLocalizedStringRendererGetFallbackLabel = (value: Partial<Record<MultiLanguageInputSupportedLanguages, string>>, values: Record<string, unknown>) => string;
 export interface ModelDataTypeLocalizedStringRendererParamsExtra {
     /**
      * fallback label for data-grid view
@@ -15,7 +15,7 @@ export interface ModelDataTypeLocalizedStringRendererParamsExtra {
      */
     getFallbackLabelValues?: string[];
 }
-export declare type ModelDataTypeLocalizedStringRendererParams = Omit<MultiLanguageInputProps, "name" | "values" | "label" | "disabled" | "required" | "onChange" | "onBlur" | "error" | "warning"> & ModelDataTypeLocalizedStringRendererParamsExtra;
+export type ModelDataTypeLocalizedStringRendererParams = Omit<MultiLanguageInputProps, "name" | "values" | "label" | "disabled" | "required" | "onChange" | "onBlur" | "error" | "warning"> & ModelDataTypeLocalizedStringRendererParamsExtra;
 /**
  * Renders a text field
  */

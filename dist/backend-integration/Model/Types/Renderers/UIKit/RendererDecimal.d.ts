@@ -3,7 +3,7 @@ import { TextFieldProps } from "@mui/material";
 import { ModelRenderParams } from "../../../index";
 import { TextFieldWithHelpProps } from "../../../../../standalone/UIKit/TextFieldWithHelp";
 import TypeNumber from "../../TypeNumber";
-export declare type ModelDataTypeDecimalRendererCCParams = Omit<TextFieldProps, "name" | "value" | "label" | "disabled" | "required" | "onChange" | "onBlur" | "error" | "multiline"> & Omit<TextFieldWithHelpProps, "warning">;
+export type ModelDataTypeDecimalRendererCCParams = Omit<TextFieldProps, "name" | "value" | "label" | "disabled" | "required" | "onChange" | "onBlur" | "error" | "multiline"> & Omit<TextFieldWithHelpProps, "warning">;
 /**
  * Renders a text field
  */

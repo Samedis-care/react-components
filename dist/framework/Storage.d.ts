@@ -2,8 +2,8 @@ import { CacheOptions } from "../backend-integration/Model/Model";
 /**
  * Simple KV Storage
  */
-export declare type StorageKeyType = string;
-export declare type StorageValueType = string | null;
+export type StorageKeyType = string;
+export type StorageValueType = string | null;
 export declare abstract class StorageProvider {
     /**
      * Set item in key value store
@@ -74,7 +74,7 @@ export declare const SessionStorageProviderInstance: SessionStorageProvider;
  * @returns The storage provider to use and the keys to use to create the final key used in the storage provider
  * @remarks You can add/remove keys to your liking. For example, you can add a tenant ID to make the record tenant specific.
  */
-export declare type GetStorageProviderCallback = (id: string, keys: Record<string, string>) => [StorageProvider, Record<string, string>];
+export type GetStorageProviderCallback = (id: string, keys: Record<string, string>) => [StorageProvider, Record<string, string>];
 export declare const DefaultGetStorageProviderCallback: GetStorageProviderCallback;
 export declare class StorageManager {
     private static storageProviderCallback;
