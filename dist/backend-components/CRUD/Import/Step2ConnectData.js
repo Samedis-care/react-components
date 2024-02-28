@@ -27,9 +27,7 @@ export const useImportStep2Logic = (props) => {
     const columns = useMemo(() => uniqueArray(state.data.map(Object.keys).flat()), [state.data]);
     const conversionScriptUpdates = useRef(Object.fromEntries(Object.keys(model.fields).map((key) => [
         key,
-        debouncePromise(async (data, field, script
-        // eslint-disable-next-line @typescript-eslint/require-await
-        ) => {
+        debouncePromise(async (data, field, script) => {
             for (const record of data) {
                 // eslint-disable-next-line no-eval
                 const result = eval(script) ?? null; // ensure this is never undefined

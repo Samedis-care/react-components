@@ -25,7 +25,8 @@ export const useSelectedCache = (props) => {
                 // process initial data
                 await Promise.all(initialData
                     .filter((record) => !(record.id in selectedCache))
-                    .map(async (record) => (newCache[record.id] = await modelToSelectorData(record))));
+                    .map(async (record) => (newCache[record.id] =
+                    await modelToSelectorData(record))));
             }
             const isIdNotInCache = (value) => !(value in selectedCache) && !(value in newCache);
             await Promise.all(selected.filter(isIdNotInCache).map(async (value) => {

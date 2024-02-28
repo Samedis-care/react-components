@@ -62,7 +62,7 @@ const WeekView = (props) => {
     /**
      * If the date picker is open
      */
-    const [datePickerAnchorEl, setDatePickerAnchorEl,] = useState(null);
+    const [datePickerAnchorEl, setDatePickerAnchorEl] = useState(null);
     /**
      * The current filter value
      */
@@ -90,7 +90,7 @@ const WeekView = (props) => {
         if (changeHandler)
             changeHandler(value);
     }, [props.filters]);
-    const [filterSettingsAnchorEl, setFilterSettingsAnchorEl,] = useState(null);
+    const [filterSettingsAnchorEl, setFilterSettingsAnchorEl] = useState(null);
     const openFilterSettings = useCallback((evt) => {
         setFilterSettingsAnchorEl(evt.currentTarget);
     }, []);

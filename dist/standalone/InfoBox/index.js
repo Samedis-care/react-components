@@ -77,7 +77,7 @@ export const useStyles = makeStyles((theme) => ({
 // .MuiAccordionSummary-content.Mui-expanded => margin => unset
 // .MuiAccordionSummary-root.Mui-expanded => min-height => unset
 const InfoBox = (props) => {
-    const { heading, onChange, expanded, alwaysExpanded, message, status, } = props;
+    const { heading, onChange, expanded, alwaysExpanded, message, status } = props;
     const classes = useStyles(props);
     const getIcon = useCallback(() => {
         switch (status) {

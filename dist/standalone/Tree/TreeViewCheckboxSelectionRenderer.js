@@ -3,10 +3,7 @@ import { Checkbox, Grid, Typography } from "@mui/material";
 import { KeyboardArrowUp as ClosedIcon, KeyboardArrowDown as ExpandedIcon, } from "@mui/icons-material";
 const TreeViewCheckboxSelectionRenderer = (props) => {
     const { expanded, icon, label, hasChildren, onToggleExpanded, expandLocked, id, depth, hasNext, parentHasNext, onClick, onAuxClick, } = props;
-    const handleExpand = useCallback(() => onToggleExpanded(id), [
-        onToggleExpanded,
-        id,
-    ]);
+    const handleExpand = useCallback(() => onToggleExpanded(id), [onToggleExpanded, id]);
     const offsetLeft = depth > 0 ? 12 : 0;
     return (React.createElement(Grid, { container: true, style: {
             height: 24,

@@ -21,7 +21,7 @@ export interface BackendDataGridProps<KeyT extends ModelFieldName, VisibilityT e
      * @param filter Complex filter (see DataGridProps.onDelete)
      * @throws Error to cancel delete
      */
-    customDeleteConfirm?: (inverted: boolean, ids: string[], filter?: Pick<IDataGridLoadDataParameters, "quickFilter" | "additionalFilters" | "fieldFilter">) => Promise<void> | unknown;
+    customDeleteConfirm?: (inverted: boolean, ids: string[], filter?: Pick<IDataGridLoadDataParameters, "quickFilter" | "additionalFilters" | "fieldFilter">) => Promise<void> | void;
     /**
      * Additional buttons next to new button
      */

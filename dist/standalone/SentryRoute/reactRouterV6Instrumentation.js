@@ -2,7 +2,7 @@
 import { getGlobalObject } from "@sentry/utils";
 import hoistNonReactStatics from "hoist-non-react-statics";
 import React, { useContext, useEffect, useMemo, useRef, useState, } from "react";
-import { matchRoutes, useLocation, createRoutesFromChildren, useNavigationType, } from "react-router-dom";
+import { matchRoutes, useLocation, createRoutesFromChildren, useNavigationType, NavigationType, } from "react-router-dom";
 let activeTransaction;
 let _customStartTransaction;
 let _startTransactionOnLocationChange;
@@ -67,10 +67,7 @@ export const SentryRoutesTracing = (props) => {
         setRoutes,
     }), []);
     const routesSorted = useMemo(() => routes.sort((a, b) => (b.path?.length ?? 0) - (a.path?.length ?? 0)), [routes]);
-    const txName = useMemo(() => getTransactionName(routesSorted, location), [
-        location,
-        routesSorted,
-    ]);
+    const txName = useMemo(() => getTransactionName(routesSorted, location), [location, routesSorted]);
     useEffect(() => {
         // don't finish first transaction
         if (initialTx.current) {
@@ -78,7 +75,8 @@ export const SentryRoutesTracing = (props) => {
             return;
         }
         if (_startTransactionOnLocationChange &&
-            (navigationType === "PUSH" || navigationType === "POP")) {
+            (navigationType === NavigationType.Push ||
+                navigationType === NavigationType.Pop)) {
             if (activeTransaction) {
                 activeTransaction.finish();
             }

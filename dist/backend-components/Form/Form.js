@@ -196,7 +196,7 @@ const Form = (props) => {
         // clear deleted state upon id change
         setDeleted(false);
     }, [id]);
-    const { isLoading, error, data: serverData, refetch } = useModelGet(model, deleted ? null : id || null);
+    const { isLoading, error, data: serverData, refetch, } = useModelGet(model, deleted ? null : id || null);
     const { mutateAsync: updateData } = useModelMutation(model);
     const { mutateAsync: deleteRecord } = useModelDelete(model);
     const { isLoading: isDefaultRecordLoading, data: defaultRecord, error: defaultRecordError, } = useModelGet(model, null);
@@ -214,7 +214,7 @@ const Form = (props) => {
     const addBusyReason = useCallback((name, promise) => {
         setSubmittingOther((prev) => [...prev, name]);
         if (promise)
-            promise.finally(() => removeBusyReason(name));
+            void promise.finally(() => removeBusyReason(name));
     }, [removeBusyReason]);
     const [submittingBlocked, setSubmittingBlocked] = useState(false);
     const [submittingBlocker, setSubmittingBlocker] = useState([]);
@@ -370,8 +370,7 @@ const Form = (props) => {
     const getFieldValues = useCallback(() => {
         return valuesRef.current;
     }, []);
-    const setFieldValue = useCallback((field, value, validate = true, triggerOnChange = false // default false to prevent recursion
-    ) => {
+    const setFieldValue = useCallback((field, value, validate = true, triggerOnChange = false) => {
         if (triggerOnChange) {
             const onChange = model.fields[field].onChange;
             if (onChange) {

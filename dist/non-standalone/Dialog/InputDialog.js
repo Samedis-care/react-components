@@ -3,7 +3,7 @@ import { useDialogContext } from "../../framework";
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField, } from "@mui/material";
 const InputDialogRaw = (props) => {
     const [, popDialog] = useDialogContext();
-    const { onClose, handlerButtonNo, handlerButtonYes, textFieldValidator, } = props;
+    const { onClose, handlerButtonNo, handlerButtonYes, textFieldValidator } = props;
     const [valid, setValid] = useState(true);
     const [value, setValue] = useState("");
     const updateValue = useCallback((evt) => {

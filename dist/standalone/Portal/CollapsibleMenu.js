@@ -28,9 +28,7 @@ const CollapsibleMenu = (props) => {
     const classes = useStyles(props);
     const [collapsed, setCollapsed] = useState(false);
     const { mobile } = usePortalLayoutContext();
-    const toggleCollapsed = useCallback(() => setCollapsed((prev) => !prev), [
-        setCollapsed,
-    ]);
+    const toggleCollapsed = useCallback(() => setCollapsed((prev) => !prev), [setCollapsed]);
     return (React.createElement(Grid, { container: true, justifyContent: "flex-start", alignItems: "stretch", wrap: "nowrap", style: collapsed ? { overflow: "visible" } : undefined, className: combineClassNames([
             classes.container,
             props.customClasses?.root,

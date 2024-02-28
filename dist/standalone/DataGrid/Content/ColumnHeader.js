@@ -51,7 +51,8 @@ const ColumnHeader = (props) => {
                     Object.keys(prevState)
                         .filter((otherField) => prevState[otherField].sort !== 0 &&
                         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                        prevState[field].sortOrder < prevState[otherField].sortOrder)
+                        prevState[field].sortOrder <
+                            prevState[otherField].sortOrder)
                         .forEach((otherField) => {
                         newColumnState = {
                             ...newColumnState,

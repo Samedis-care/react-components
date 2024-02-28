@@ -21,9 +21,7 @@ const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(props
         if (customHandleClear) {
             return customHandleClear();
         }
-        const proto = (muiProps.multiline
-            ? HTMLTextAreaElement
-            : HTMLInputElement).prototype;
+        const proto = (muiProps.multiline ? HTMLTextAreaElement : HTMLInputElement).prototype;
         // eslint-disable-next-line @typescript-eslint/unbound-method
         const nativeInputValueSetter = Object.getOwnPropertyDescriptor(proto, "value")?.set;
         if (!nativeInputValueSetter) {
@@ -54,8 +52,7 @@ const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(props
                     isTouchDevice() && hasValue && !muiProps.disabled && (React.createElement(IconButton, { onClick: handleClear, size: "large" },
                         React.createElement(ClearIcon, null))),
                     muiProps.InputProps
-                        ?.endAdornment
-                        ?.props?.children,
+                        ?.endAdornment?.props?.children,
                     openInfo && (React.createElement(IconButton, { onClick: openInfo, size: "large" },
                         React.createElement(InfoIcon, { color: "disabled" })))))),
         }, inputProps: {

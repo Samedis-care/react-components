@@ -348,8 +348,7 @@ const BaseSelector = (props) => {
                                 endAdornment: (() => {
                                     const hasAdditionalElements = openInfo || endAdornment || endAdornmentLeft;
                                     return hasAdditionalElements
-                                        ? React.cloneElement(params.InputProps?.endAdornment, {}, endAdornmentLeft, ...(params.InputProps
-                                            ?.endAdornment).props.children, openInfo && (React.createElement(IconButton, { onClick: openInfo, className: customClasses.infoBtn },
+                                        ? React.cloneElement(params.InputProps?.endAdornment, {}, endAdornmentLeft, ...(params.InputProps?.endAdornment).props.children, openInfo && (React.createElement(IconButton, { onClick: openInfo, className: customClasses.infoBtn },
                                             React.createElement(InfoIcon, { color: "disabled" }))), endAdornment)
                                         : params.InputProps?.endAdornment;
                                 })(),

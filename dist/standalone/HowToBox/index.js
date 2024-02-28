@@ -24,10 +24,7 @@ const HowToBox = (props) => {
 export const HowToBoxTranslate = (props) => {
     const { t, titleLabel, labels, ...other } = props;
     // memo content because it's an array which gets re-created every render
-    const content = useMemo(() => t(labels, { returnObjects: true }), [
-        t,
-        labels,
-    ]);
+    const content = useMemo(() => t(labels, { returnObjects: true }), [t, labels]);
     return (React.createElement(HowToBox, { ...other, titleLabel: titleLabel ? t(titleLabel) : undefined, labels: content }));
 };
 export default React.memo(HowToBox);

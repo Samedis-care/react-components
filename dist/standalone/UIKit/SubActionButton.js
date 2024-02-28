@@ -158,7 +158,8 @@ const StyledButton = withStyles((theme) => ({
                 ...theme.componentsCare?.uiKit?.subActionButton?.icon?.style,
             },
             "&:hover svg": {
-                fill: theme.componentsCare?.uiKit?.subActionButton?.hover?.icon?.color,
+                fill: theme.componentsCare?.uiKit?.subActionButton?.hover?.icon
+                    ?.color,
                 ...theme.componentsCare?.uiKit?.subActionButton?.hover?.icon?.style,
             },
             borderRadius: theme.componentsCare?.uiKit?.subActionButton?.borderRadius,

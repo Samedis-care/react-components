@@ -31,7 +31,8 @@ class RequestBatching {
             // keep local references to the data we just created because the global vars might be overridden
             const batchRequests = (this.batchRequestIds[batchKey] = [id]);
             const batchStart = (this.batchLastAdded[batchKey] = Date.now());
-            const batchNonce = (this.batchNonce[batchKey] = `${Date.now().toString()}-${Math.random()}`);
+            const batchNonce = (this.batchNonce[batchKey] =
+                `${Date.now().toString()}-${Math.random()}`);
             this.batchPromises[batchKey] = promise = (async () => {
                 await sleep(0); // 'return' here so batchPromises is saved
                 // this is to prevent a rare bug under presumably high CPU load

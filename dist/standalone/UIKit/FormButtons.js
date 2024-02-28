@@ -34,9 +34,7 @@ const useStyles = makeStyles((theme) => ({
 }), { name: "CcFormButtons" });
 const FormButtons = (props) => {
     const classes = useStyles(props);
-    const children = (Array.isArray(props.children)
-        ? props.children
-        : [props.children]).filter((child) => child !== undefined && child !== null && child !== false);
+    const children = (Array.isArray(props.children) ? props.children : [props.children]).filter((child) => child !== undefined && child !== null && child !== false);
     if (children.length === 0)
         return React.createElement(React.Fragment, null);
     return (React.createElement(Grid, { container: true, direction: "row", spacing: 2, className: classes.container, wrap: "nowrap" }, children.map((child, index) => {

@@ -48,7 +48,7 @@ const CrudMultiImage = (props) => {
             .map(async (request) => {
             const result = await request;
             return {
-                ...deserialize(result.response[0]),
+                ...(await deserialize(result.response[0])),
                 index: result.index,
                 primary: result.primary,
             };

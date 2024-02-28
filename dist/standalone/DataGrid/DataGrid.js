@@ -392,9 +392,7 @@ const DataGrid = (props) => {
     const theme = useTheme();
     const persistedContext = useContext(DataGridPersistentStateContext);
     const [persistedPromise] = persistedContext || [];
-    const persisted = suspend(() => Promise.resolve(persistedPromise), [
-        persistedPromise,
-    ]);
+    const persisted = suspend(() => Promise.resolve(persistedPromise), [persistedPromise]);
     const classes = useDataGridStylesInternal(props);
     const statePack = useState(() => ({
         ...getDataGridDefaultState(columns, undefined),

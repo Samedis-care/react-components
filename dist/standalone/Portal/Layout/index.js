@@ -52,9 +52,7 @@ export const usePortalLayoutContext = () => {
 const RenderLayout = (props) => {
     const { mobile, headerContent, drawerWidth, menuContent, content } = props;
     const [menuOpen, setMenuOpen] = useState(false);
-    const toggleMenu = useCallback(() => setMenuOpen((prevState) => !prevState), [
-        setMenuOpen,
-    ]);
+    const toggleMenu = useCallback(() => setMenuOpen((prevState) => !prevState), [setMenuOpen]);
     const classes = useStyles(props);
     const portalContext = useMemo(() => ({
         mobile,

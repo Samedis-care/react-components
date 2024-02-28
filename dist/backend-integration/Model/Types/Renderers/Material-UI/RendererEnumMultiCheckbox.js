@@ -30,8 +30,7 @@ class RendererEnumRadio extends TypeEnumMulti {
                     .filter((entry) => !entry.invisible)
                     .map((entry) => this.wrapButton(React.createElement(FormControlLabel, { key: entry.value, value: entry.value, control: React.createElement(Checkbox, { checked: value.includes(entry.value), name: entry.value, onChange: (evt) => handleChange(field, evt.target.checked
                             ? value.concat([entry.value]) // add value
-                            : value.filter((v) => v !== entry.value) // remove value
-                        ) }), label: entry.getLabel(), disabled: visibility.readOnly }), entry))),
+                            : value.filter((v) => v !== entry.value)) }), label: entry.getLabel(), disabled: visibility.readOnly }), entry))),
                 React.createElement(FormHelperText, null, errorMsg || warningMsg)));
         }
         return (React.createElement(Typography, null,

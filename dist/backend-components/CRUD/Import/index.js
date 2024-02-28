@@ -76,7 +76,7 @@ export const useCrudImportLogic = (props) => {
 const CrudImport = (props) => {
     const classes = useStyles();
     const { t } = useCCTranslations();
-    const { updateKeyAdditionalFilters, howTo, model, updateKey, validate, } = props;
+    const { updateKeyAdditionalFilters, howTo, model, updateKey, validate } = props;
     const { guided, activeStep, state, setState, hasImportConfig, next, prev, finish, } = useCrudImportLogic(props);
     return (React.createElement(Grid, { container: true, direction: "column", justifyContent: "space-between", alignItems: "stretch", spacing: 2, wrap: "nowrap", className: classes.wrapper },
         React.createElement(Grid, { item: true },

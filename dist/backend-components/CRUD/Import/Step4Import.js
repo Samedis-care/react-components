@@ -5,7 +5,7 @@ import { Model, ModelVisibilityHidden, useModelMutation, } from "../../../backen
 import { deepAssign, dotToObject, getValueByDot, sleep } from "../../../utils";
 import useCCTranslations from "../../../utils/useCCTranslations";
 export const useImportStep4Logic = (props) => {
-    const { model, state, setState, updateKey, additionalUpdateKeyFilters, } = props;
+    const { model, state, setState, updateKey, additionalUpdateKeyFilters } = props;
     // model which can write to all fields
     const customModel = new Model(model.modelId, Object.fromEntries(Object.entries(model.fields).map(([key, field]) => [
         key,

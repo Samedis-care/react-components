@@ -39,8 +39,7 @@ class RendererDateNullable extends TypeDateNullable {
     }
     dataGridColumnSizingHint = () => {
         const def = Math.max(ccI18n.t("backend-integration.model.types.renderers.date.not-set")
-            .length, 10 // date length
-        ) * 10;
+            .length, 10) * 10;
         return [0, Number.MAX_SAFE_INTEGER, def];
     };
 }

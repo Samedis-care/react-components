@@ -16,6 +16,7 @@ export const filterSortPaginate2 = (rowData, params, columnDef) => {
                     continue;
                 const value = row[key];
                 if (value !== null &&
+                    // eslint-disable-next-line @typescript-eslint/no-base-to-string
                     value.toString().toLowerCase().includes(quickFilter.toLowerCase())) {
                     return true;
                 }
@@ -137,7 +138,7 @@ export const filterSortPaginate2 = (rowData, params, columnDef) => {
             let rawValue = row[filterField];
             if (!rawValue)
                 rawValue = "";
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars,@typescript-eslint/no-base-to-string
             const value = rawValue.toString().toLowerCase();
             try {
                 // eslint-disable-next-line no-eval
@@ -160,7 +161,9 @@ export const filterSortPaginate2 = (rowData, params, columnDef) => {
                 res = valA - valB;
             }
             else if (valA && valB) {
+                // eslint-disable-next-line @typescript-eslint/no-base-to-string
                 const av = valA.toString();
+                // eslint-disable-next-line @typescript-eslint/no-base-to-string
                 const bv = valB.toString();
                 res = av.localeCompare(bv);
             }

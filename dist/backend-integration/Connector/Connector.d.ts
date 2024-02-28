@@ -68,7 +68,7 @@ declare abstract class Connector<KeyT extends ModelFieldName, VisibilityT extend
      * @param ids The IDs of the data entries to delete
      * @param model The model performing the request
      */
-    deleteMultiple(ids: string[], model?: Model<KeyT, VisibilityT, CustomT>): void;
+    deleteMultiple(ids: string[], model?: Model<KeyT, VisibilityT, CustomT>): Promise<void> | void;
     /**
      * Advanced deletion handler which supports delete all
      * @param req The deletion request

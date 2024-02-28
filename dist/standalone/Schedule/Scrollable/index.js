@@ -130,7 +130,7 @@ const ScrollableSchedule = (props) => {
         if (changeHandler)
             changeHandler(value);
     }, [getDefaultState, props.filters]);
-    const [filterSettingsAnchorEl, setFilterSettingsAnchorEl,] = useState(null);
+    const [filterSettingsAnchorEl, setFilterSettingsAnchorEl] = useState(null);
     const openFilterSettings = useCallback((evt) => {
         setFilterSettingsAnchorEl(evt.currentTarget);
     }, []);

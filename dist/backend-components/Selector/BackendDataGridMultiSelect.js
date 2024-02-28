@@ -7,7 +7,7 @@ const BackendDataGridMultiSelect = (props) => {
     const { model, readOnly, selected, onChange, ...gridProps } = props;
     const [refreshToken, setRefreshToken] = useState(new Date().toISOString());
     const refreshGrid = useCallback(() => setRefreshToken(new Date().toISOString()), []);
-    const [initialSelectionChangeReceived, setInitialSelectionChangeReceived,] = useState(false);
+    const [initialSelectionChangeReceived, setInitialSelectionChangeReceived] = useState(false);
     // developer warning
     useEffect(() => {
         if (process.env.NODE_ENV === "development" &&

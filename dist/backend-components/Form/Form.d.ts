@@ -11,11 +11,11 @@ export type CustomValidationHandler = () => Promise<ValidationError> | Validatio
 /**
  * Pre submit handler to perform final changes (bypassing validation)
  */
-export type PreSubmitHandler = (id: string | null, submitOptions: FormSubmitOptions) => Promise<void> | unknown;
+export type PreSubmitHandler = (id: string | null, submitOptions: FormSubmitOptions) => Promise<void> | void;
 /**
  * Post submit handler to submit additional data for the submitted record
  */
-export type PostSubmitHandler = (id: string, submitOptions: FormSubmitOptions) => Promise<void> | unknown;
+export type PostSubmitHandler = (id: string, submitOptions: FormSubmitOptions) => Promise<void> | void;
 export declare enum OnlySubmitMountedBehaviour {
     /**
      * Omit the unmounted values from backend POST/PUT requests entirely
@@ -215,7 +215,7 @@ export interface FormProps<KeyT extends ModelFieldName, VisibilityT extends Page
      * @param getFieldValue getFieldValue of this form
      * @param setFieldValueLite setFieldValueLite of this form
      */
-    nestedFormPreSubmitHandler?: (id: string, model: Model<ModelFieldName, PageVisibility, unknown>, getFieldValue: FormContextData["getFieldValue"], setFieldValueLite: FormContextData["setFieldValueLite"]) => Promise<void> | unknown;
+    nestedFormPreSubmitHandler?: (id: string, model: Model<ModelFieldName, PageVisibility, unknown>, getFieldValue: FormContextData["getFieldValue"], setFieldValueLite: FormContextData["setFieldValueLite"]) => Promise<void> | void;
     /**
      * CSS class for form styles
      */

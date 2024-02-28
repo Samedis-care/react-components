@@ -22,9 +22,7 @@ const ColumnHeaderContent = (props) => {
         event.stopPropagation();
         setFilterAnchorEl(event.currentTarget);
     }, [setFilterAnchorEl]);
-    const closeFilter = useCallback(() => setFilterAnchorEl(null), [
-        setFilterAnchorEl,
-    ]);
+    const closeFilter = useCallback(() => setFilterAnchorEl(null), [setFilterAnchorEl]);
     const preventPropagation = useCallback((evt) => evt.stopPropagation(), []);
     const CurrentFilterIcon = props.filter && props.filter.value1 ? FilterActiveIcon : FilterIcon;
     return (React.createElement(React.Fragment, null,

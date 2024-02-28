@@ -3,10 +3,7 @@ import { Grid, Typography } from "@mui/material";
 import { KeyboardArrowUp as ClosedIcon, KeyboardArrowDown as ExpandedIcon, } from "@mui/icons-material";
 const TreeViewDefaultRenderer = (props) => {
     const { expanded, icon, label, hasChildren, onToggleExpanded, expandLocked, id, depth, onClick, onAuxClick, } = props;
-    const handleExpand = useCallback(() => onToggleExpanded(id), [
-        onToggleExpanded,
-        id,
-    ]);
+    const handleExpand = useCallback(() => onToggleExpanded(id), [onToggleExpanded, id]);
     return (React.createElement(Grid, { container: true, style: {
             height: 24,
             marginLeft: depth * 48,
