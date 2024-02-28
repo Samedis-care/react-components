@@ -51,7 +51,11 @@ const CCI18nProvider = (props: CCI18nProviderProps) => {
 			i18n={getI18n() ?? ccI18n}
 			// defaultNS used to force refresh
 			defaultNS={
-				updating ? (getI18n() ?? ccI18n).options.defaultNS ?? "" : undefined
+				updating
+					? (((getI18n() ?? ccI18n).options.defaultNS || "") as
+							| string
+							| string[])
+					: undefined
 			}
 		>
 			{props.children}

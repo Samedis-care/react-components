@@ -16,5 +16,5 @@
 		"outDir": "dist",
 		"rootDir": "src"
 	},
-	"include": ["src"]
+	"include": ["src", "src/env.d.ts"]
 }

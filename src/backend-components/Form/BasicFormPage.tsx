@@ -75,7 +75,7 @@ export interface BasicFormPageProps<RendererPropsT, CustomPropsT>
 }
 
 const BasicFormPage = <RendererPropsT, CustomPropsT>(
-	props: BasicFormPageProps<RendererPropsT, CustomPropsT>
+	props: BasicFormPageProps<RendererPropsT, CustomPropsT>,
 ) => {
 	const {
 		submit,
@@ -158,17 +158,23 @@ const BasicFormPage = <RendererPropsT, CustomPropsT>(
 	]);
 
 	// go back confirm dialog if form is dirty
-	const customProps: CustomPropsT & {
-		goBack?: () => void;
+	const customPropsWithGoBack: {
+		goBack?: () => void | Promise<void>;
 	} = {
-		...originalCustomProps,
+		...(typeof originalCustomProps === "object" ? originalCustomProps : null),
 	};
-	if (originalCustomProps && "goBack" in originalCustomProps) {
-		const orgGoBack = ((originalCustomProps as unknown) as Pick<
-			typeof customProps,
-			"goBack"
-		>).goBack;
-		customProps.goBack =
+	if (
+		typeof originalCustomProps === "object" &&
+		originalCustomProps &&
+		"goBack" in originalCustomProps
+	) {
+		const orgGoBack = (
+			originalCustomProps as unknown as Pick<
+				typeof customPropsWithGoBack,
+				"goBack"
+			>
+		).goBack;
+		customPropsWithGoBack.goBack =
 			typeof orgGoBack === "function"
 				? async () => {
 						try {
@@ -184,11 +190,11 @@ const BasicFormPage = <RendererPropsT, CustomPropsT>(
 								unblock.current();
 								unblock.current = undefined;
 							}
-							orgGoBack();
+							await orgGoBack();
 						} catch (e) {
 							// user cancelled
 						}
-				  }
+					}
 				: orgGoBack;
 	}
 
@@ -220,7 +226,12 @@ const BasicFormPage = <RendererPropsT, CustomPropsT>(
 					dirty={dirty}
 					disableRouting={disableRouting}
 					submit={handleSubmit}
-					customProps={customProps}
+					customProps={
+						typeof originalCustomProps === "object" &&
+						originalCustomProps != null
+							? (customPropsWithGoBack as CustomPropsT)
+							: originalCustomProps
+					}
 				/>
 			}
 			other={<FormLoaderOverlay visible={isSubmitting} />}
