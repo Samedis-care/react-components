@@ -508,5 +508,5 @@ export interface FormNestedState {
     errors: Record<string, string | null>;
     warnings: Record<string, string | null>;
 }
-declare const _default: <KeyT extends string, VisibilityT extends PageVisibility, CustomT, CustomPropsT>(props: FormProps<KeyT, VisibilityT, CustomT, CustomPropsT>) => JSX.Element;
+declare const _default: <KeyT extends string, VisibilityT extends PageVisibility, CustomT, CustomPropsT>(props: FormProps<KeyT, VisibilityT, CustomT, CustomPropsT>) => React.JSX.Element;
 export default _default;

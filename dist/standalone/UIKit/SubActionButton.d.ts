@@ -111,5 +111,5 @@ export interface SubActionButtonProps extends Omit<ButtonProps, "children"> {
      */
     disableDivider?: boolean | "true";
 }
-declare const _default: React.MemoExoticComponent<(props: SubActionButtonProps) => JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: SubActionButtonProps) => React.JSX.Element>;
 export default _default;

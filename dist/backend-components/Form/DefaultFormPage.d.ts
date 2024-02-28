@@ -16,5 +16,5 @@ export interface DefaultFormPageProps extends PageProps<ModelFieldName, CrudForm
      */
     confirmDialogMessage?: string;
 }
-declare const _default: React.MemoExoticComponent<(props: DefaultFormPageProps) => JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: DefaultFormPageProps) => React.JSX.Element>;
 export default _default;

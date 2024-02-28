@@ -10,5 +10,5 @@ export interface LoaderProps {
     classes?: Partial<ReturnType<typeof useStyles>>;
 }
 declare const useStyles: (props?: any) => import("@mui/styles").ClassNameMap<"innerWrapper" | "outerWrapper" | "innerProgressWrapper" | "outerProgressWrapper">;
-declare const _default: React.MemoExoticComponent<(props: LoaderProps) => JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: LoaderProps) => React.JSX.Element>;
 export default _default;

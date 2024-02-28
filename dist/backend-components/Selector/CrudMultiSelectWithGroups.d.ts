@@ -14,5 +14,5 @@ export interface CrudMultiSelectWithGroupsProps<GroupKeyT extends ModelFieldName
      */
     getIdOfData: NonNullable<BackendMultiSelectWithTagsProps<GroupKeyT, DataKeyT, GroupVisibilityT, DataVisibilityT, GroupCustomT, DataCustomT, GroupDataT, DataDataT>["getIdOfData"]>;
 }
-declare const _default: <GroupKeyT extends string, DataKeyT extends string, GroupVisibilityT extends PageVisibility, DataVisibilityT extends PageVisibility, GroupCustomT, DataCustomT, GroupDataT extends BaseSelectorData, DataDataT extends MultiSelectorData>(props: CrudMultiSelectWithGroupsProps<GroupKeyT, DataKeyT, GroupVisibilityT, DataVisibilityT, GroupCustomT, DataCustomT, GroupDataT, DataDataT> & React.RefAttributes<CrudSelectDispatch<DataDataT>>, ref: React.ForwardedRef<CrudSelectDispatch<DataDataT>>) => JSX.Element;
+declare const _default: <GroupKeyT extends string, DataKeyT extends string, GroupVisibilityT extends PageVisibility, DataVisibilityT extends PageVisibility, GroupCustomT, DataCustomT, GroupDataT extends BaseSelectorData, DataDataT extends MultiSelectorData>(props: CrudMultiSelectWithGroupsProps<GroupKeyT, DataKeyT, GroupVisibilityT, DataVisibilityT, GroupCustomT, DataCustomT, GroupDataT, DataDataT> & React.RefAttributes<CrudSelectDispatch<DataDataT>>, ref: React.ForwardedRef<CrudSelectDispatch<DataDataT>>) => React.JSX.Element;
 export default _default;

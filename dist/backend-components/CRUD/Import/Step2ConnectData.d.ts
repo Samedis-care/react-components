@@ -7,5 +7,5 @@ export declare const useImportStep2Logic: (props: CrudImporterStepProps) => {
     conversionScriptUpdates: React.MutableRefObject<Record<string, ConversionScriptRunnerFunc>>;
     handleConversionScriptChange: (evt: React.ChangeEvent<HTMLTextAreaElement>) => Promise<void>;
 };
-declare const _default: React.MemoExoticComponent<(props: CrudImporterStepProps) => JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: CrudImporterStepProps) => React.JSX.Element>;
 export default _default;

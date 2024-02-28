@@ -6,5 +6,5 @@ import { MultiSelectorData } from "../../../standalone";
 import { CrudSelectDispatch } from "../../Selector/useCrudSelect";
 export interface FormCrudMultiSelectProps<KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT, DataT extends MultiSelectorData> extends Omit<CrudMultiSelectProps<KeyT, VisibilityT, CustomT, DataT>, "errorComponent" | "connector" | "field">, UseLazyCrudConnectorParams<KeyT, VisibilityT, CustomT, Record<string, unknown>> {
 }
-declare const _default: <KeyT extends string, VisibilityT extends PageVisibility, CustomT, DataT extends MultiSelectorData>(props: FormCrudMultiSelectProps<KeyT, VisibilityT, CustomT, DataT> & React.RefAttributes<CrudSelectDispatch<DataT>>, ref: React.ForwardedRef<CrudSelectDispatch<DataT>>) => JSX.Element;
+declare const _default: <KeyT extends string, VisibilityT extends PageVisibility, CustomT, DataT extends MultiSelectorData>(props: FormCrudMultiSelectProps<KeyT, VisibilityT, CustomT, DataT> & React.RefAttributes<CrudSelectDispatch<DataT>>, ref: React.ForwardedRef<CrudSelectDispatch<DataT>>) => React.JSX.Element;
 export default _default;

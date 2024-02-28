@@ -25,5 +25,5 @@ export interface SignalPortletProps extends SignalPortletColorConfig {
     classes?: Partial<Record<SignalPortletClassKey, string>>;
 }
 export type SignalPortletClassKey = "paper" | "divider" | "titleWrapper" | "title" | "list";
-declare const _default: React.MemoExoticComponent<(inProps: SignalPortletProps) => JSX.Element>;
+declare const _default: React.MemoExoticComponent<(inProps: SignalPortletProps) => React.JSX.Element>;
 export default _default;

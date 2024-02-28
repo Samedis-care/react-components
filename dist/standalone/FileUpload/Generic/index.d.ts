@@ -182,5 +182,5 @@ export interface FileCaptureConfig {
     source: "user" | "environment";
 }
 declare const useStyles: (props?: any) => ClassNameMap<"modernUploadLabel" | "dropzone" | "formatText" | "formatTextModern" | "formatIconsModern" | "fileInput" | "modernUploadLabelEmpty">;
-declare const _default: React.ForwardRefExoticComponent<Pick<FileUploadProps & React.RefAttributes<FileUploadDispatch>, "key" | keyof FileUploadProps> & React.RefAttributes<FileUploadDispatch>>;
+declare const _default: React.ForwardRefExoticComponent<Omit<FileUploadProps & React.RefAttributes<FileUploadDispatch>, "ref"> & React.RefAttributes<FileUploadDispatch>>;
 export default _default;

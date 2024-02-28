@@ -10,5 +10,5 @@ export interface LocaleSelectorDialogProps {
      */
     supportedLocales?: string[];
 }
-declare const _default: React.MemoExoticComponent<(props: LocaleSelectorDialogProps) => JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: LocaleSelectorDialogProps) => React.JSX.Element>;
 export default _default;

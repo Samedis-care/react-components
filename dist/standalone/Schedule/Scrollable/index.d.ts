@@ -32,5 +32,5 @@ export interface ScrollableScheduleProps {
  * @deprecated use ScrollableScheduleProps
  */
 export type IProps = ScrollableScheduleProps;
-declare const _default: React.MemoExoticComponent<(props: ScrollableScheduleProps) => JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: ScrollableScheduleProps) => React.JSX.Element>;
 export default _default;

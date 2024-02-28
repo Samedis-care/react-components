@@ -9,5 +9,5 @@ export interface NumberFormatterProps {
      */
     options?: Intl.NumberFormatOptions;
 }
-declare const _default: React.MemoExoticComponent<(props: NumberFormatterProps) => JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: NumberFormatterProps) => React.JSX.Element>;
 export default _default;

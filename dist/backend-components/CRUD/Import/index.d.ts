@@ -70,7 +70,7 @@ export declare const useCrudImportLogic: <KeyT extends string, VisibilityT exten
     prev: () => void;
     finish: () => void;
 };
-declare const CrudImport: <KeyT extends string, VisibilityT extends PageVisibility, CustomT>(props: CrudImportProps<KeyT, VisibilityT, CustomT>) => JSX.Element;
-declare const _default: <KeyT extends string, VisibilityT extends PageVisibility, CustomT>(props: CrudImportProps<KeyT, VisibilityT, CustomT>) => JSX.Element;
+declare const CrudImport: <KeyT extends string, VisibilityT extends PageVisibility, CustomT>(props: CrudImportProps<KeyT, VisibilityT, CustomT>) => React.JSX.Element;
+declare const _default: <KeyT extends string, VisibilityT extends PageVisibility, CustomT>(props: CrudImportProps<KeyT, VisibilityT, CustomT>) => React.JSX.Element;
 export default _default;
 export type CrudImportType = typeof CrudImport;

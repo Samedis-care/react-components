@@ -17,5 +17,5 @@ export interface CurrencyInputProps extends TextFieldWithHelpProps {
      */
     onChange?: (evt: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>, value: number | null) => void;
 }
-declare const _default: React.MemoExoticComponent<(props: CurrencyInputProps & Omit<TextFieldProps, "onChange" | "value">) => JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: CurrencyInputProps & Omit<TextFieldProps, "onChange" | "value">) => React.JSX.Element>;
 export default _default;

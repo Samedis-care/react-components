@@ -7,5 +7,5 @@ export interface IconButtonWithTextProps {
     icon: IconButtonProps["children"];
     onClick?: IconButtonProps["onClick"];
 }
-declare const _default: React.MemoExoticComponent<(props: IconButtonWithTextProps) => JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: IconButtonWithTextProps) => React.JSX.Element>;
 export default _default;

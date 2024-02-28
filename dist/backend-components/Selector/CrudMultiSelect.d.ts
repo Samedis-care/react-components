@@ -12,5 +12,5 @@ export interface CrudMultiSelectProps<KeyT extends ModelFieldName, VisibilityT e
 }
 export declare const CrudSelectContext: React.Context<UseCrudSelectResult<string, MultiSelectorData> | undefined>;
 export declare const useCrudSelectContext: () => UseCrudSelectResult<ModelFieldName, MultiSelectorData>;
-declare const _default: <KeyT extends string, VisibilityT extends PageVisibility, CustomT, DataT extends MultiSelectorData>(props: CrudMultiSelectProps<KeyT, VisibilityT, CustomT, DataT> & React.RefAttributes<CrudSelectDispatch<DataT>>, ref: React.ForwardedRef<CrudSelectDispatch<DataT>>) => JSX.Element;
+declare const _default: <KeyT extends string, VisibilityT extends PageVisibility, CustomT, DataT extends MultiSelectorData>(props: CrudMultiSelectProps<KeyT, VisibilityT, CustomT, DataT> & React.RefAttributes<CrudSelectDispatch<DataT>>, ref: React.ForwardedRef<CrudSelectDispatch<DataT>>) => React.JSX.Element;
 export default _default;

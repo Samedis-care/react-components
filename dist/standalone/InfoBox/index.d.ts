@@ -33,5 +33,5 @@ interface InfoBoxProps {
      */
     status?: "info" | "warning" | "success" | "error";
 }
-declare const _default: React.MemoExoticComponent<(props: InfoBoxProps) => JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: InfoBoxProps) => React.JSX.Element>;
 export default _default;

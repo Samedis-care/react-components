@@ -22,5 +22,5 @@ export interface CollapsibleMenuProps {
     classes?: Partial<ReturnType<typeof useStyles>>;
 }
 declare const useStyles: (props?: any) => import("@mui/styles").ClassNameMap<"content" | "container" | "bar" | "iconOpen" | "iconClose">;
-declare const _default: React.MemoExoticComponent<(props: CollapsibleMenuProps) => JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: CollapsibleMenuProps) => React.JSX.Element>;
 export default _default;

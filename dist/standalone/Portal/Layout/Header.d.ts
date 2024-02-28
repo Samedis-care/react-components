@@ -21,5 +21,5 @@ export interface PortalLayoutHeaderProps {
         toolbar?: ToolbarProps["classes"];
     };
 }
-declare const _default: React.MemoExoticComponent<(props: PortalLayoutHeaderProps) => JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: PortalLayoutHeaderProps) => React.JSX.Element>;
 export default _default;

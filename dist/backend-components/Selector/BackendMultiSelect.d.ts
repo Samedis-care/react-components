@@ -1,4 +1,4 @@
-/// <reference types="react" />
+import React from "react";
 import { MultiSelectProps, MultiSelectorData, SelectorLruOptions } from "../../standalone";
 import Model, { ModelFieldName, PageVisibility } from "../../backend-integration/Model/Model";
 import { DataGridSortSetting } from "../../standalone/DataGrid/DataGrid";
@@ -75,5 +75,5 @@ interface UseSelectedCacheResult<DataT extends MultiSelectorData> {
     handleSelect: (selected: DataT[]) => void;
 }
 export declare const useSelectedCache: <KeyT extends string, VisibilityT extends PageVisibility, CustomT, DataT extends MultiSelectorData>(props: Pick<BackendMultiSelectProps<KeyT, VisibilityT, CustomT, DataT>, "onSelect" | "selected" | "initialData" | "model" | "modelFetch" | "disableRequestBatching" | "modelToSelectorData" | "onLoadError">) => UseSelectedCacheResult<DataT>;
-declare const _default: <KeyT extends string, VisibilityT extends PageVisibility, CustomT, DataT extends MultiSelectorData>(props: BackendMultiSelectProps<KeyT, VisibilityT, CustomT, DataT>) => JSX.Element;
+declare const _default: <KeyT extends string, VisibilityT extends PageVisibility, CustomT, DataT extends MultiSelectorData>(props: BackendMultiSelectProps<KeyT, VisibilityT, CustomT, DataT>) => React.JSX.Element;
 export default _default;

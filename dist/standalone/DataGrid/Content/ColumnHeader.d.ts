@@ -8,5 +8,5 @@ export interface IDataGridContentColumnHeaderProps {
 }
 export declare const HEADER_PADDING = 32;
 export declare const applyColumnWidthLimits: (column: IDataGridColumnDef, targetWidth: number) => number;
-declare const _default: React.MemoExoticComponent<(props: IDataGridContentColumnHeaderProps) => JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: IDataGridContentColumnHeaderProps) => React.JSX.Element>;
 export default _default;

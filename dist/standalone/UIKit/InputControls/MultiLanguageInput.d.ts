@@ -49,5 +49,5 @@ export type MultiLanguageInputProps = Omit<TextFieldProps, "value" | "onChange" 
      */
     warning?: boolean;
 };
-declare const _default: React.MemoExoticComponent<(props: MultiLanguageInputProps) => JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: MultiLanguageInputProps) => React.JSX.Element>;
 export default _default;

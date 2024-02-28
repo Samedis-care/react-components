@@ -22,5 +22,5 @@ export interface SignaturePadCanvasProps extends SignPadProps {
      */
     setSignature?: (imageURL: string) => void;
 }
-declare const _default: React.MemoExoticComponent<(props: SignaturePadCanvasProps & Omit<SignPadProps, "classes" | "openSignPad">) => JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: SignaturePadCanvasProps & Omit<SignPadProps, "classes" | "openSignPad">) => React.JSX.Element>;
 export default _default;

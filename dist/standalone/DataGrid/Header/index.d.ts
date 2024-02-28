@@ -80,5 +80,5 @@ export interface IDataGridExporter<T> {
      */
     autoDownload?: boolean;
 }
-declare const _default: React.MemoExoticComponent<() => JSX.Element>;
+declare const _default: React.MemoExoticComponent<() => React.JSX.Element>;
 export default _default;

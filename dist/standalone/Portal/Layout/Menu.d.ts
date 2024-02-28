@@ -21,5 +21,5 @@ interface IProps {
      */
     items: React.ReactNode;
 }
-declare const _default: React.MemoExoticComponent<(props: IProps) => JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: IProps) => React.JSX.Element>;
 export default _default;

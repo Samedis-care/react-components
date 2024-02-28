@@ -10,5 +10,5 @@ export type DialogContextType = [
  */
 export declare const DialogContext: React.Context<DialogContextType | undefined>;
 export declare const useDialogContext: () => DialogContextType;
-declare const _default: React.MemoExoticComponent<(props: IFrameworkProps) => JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: IFrameworkProps) => React.JSX.Element>;
 export default _default;

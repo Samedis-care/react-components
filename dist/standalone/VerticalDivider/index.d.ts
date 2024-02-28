@@ -6,5 +6,5 @@ export interface VerticalDividerProps {
      */
     classes?: Partial<ReturnType<typeof useStyles>>;
 }
-declare const _default: React.MemoExoticComponent<(props: VerticalDividerProps) => JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: VerticalDividerProps) => React.JSX.Element>;
 export default _default;

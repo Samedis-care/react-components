@@ -82,5 +82,5 @@ export interface NotificationsProps {
     classes?: Partial<ReturnType<typeof useStyles>>;
 }
 declare const useStyles: (props?: any) => import("@mui/styles").ClassNameMap<"notificationArea">;
-declare const _default: React.MemoExoticComponent<(props: NotificationsProps) => JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: NotificationsProps) => React.JSX.Element>;
 export default _default;

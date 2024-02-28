@@ -1,4 +1,4 @@
-/// <reference types="react" />
+import React from "react";
 import { SelectClassKey, SelectProps, Theme } from "@mui/material";
 import { ClassNameMap } from "@mui/styles/withStyles";
 import { CSSProperties, Styles } from "@mui/styles";
@@ -29,5 +29,5 @@ export interface MultiSelectWithCheckBoxTheme {
 }
 declare const useStyles: (props?: any) => ClassNameMap<"label" | "checkboxStyle">;
 export type MultiSelectWithCheckBoxThemeExpert = Partial<Styles<Theme, SelectProps<string[]>, SelectClassKey>>;
-declare const _default: (props: MultiSelectWithCheckBoxProps) => JSX.Element;
+declare const _default: (props: MultiSelectWithCheckBoxProps) => React.JSX.Element;
 export default _default;

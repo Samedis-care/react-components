@@ -53,5 +53,5 @@ export interface IDataGridContentColumnHeaderContentProps {
      */
     filterData: IDataGridColumnDef["filterData"];
 }
-declare const _default: React.MemoExoticComponent<(props: IDataGridContentColumnHeaderContentProps) => JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: IDataGridContentColumnHeaderContentProps) => React.JSX.Element>;
 export default _default;

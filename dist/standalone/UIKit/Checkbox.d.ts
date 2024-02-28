@@ -41,5 +41,5 @@ export interface CheckboxTheme {
         style?: CSSProperties;
     };
 }
-declare const _default: React.MemoExoticComponent<(props: CheckboxProps) => JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: CheckboxProps) => React.JSX.Element>;
 export default _default;

@@ -9,5 +9,5 @@ export interface FormPageLayoutProps {
 declare const useStyles: (props?: any) => import("@mui/styles").ClassNameMap<"body" | "footer" | "wrapper" | "box">;
 export type FormPageLayoutClassKey = keyof ReturnType<typeof useStyles>;
 export type FormPageLayoutTheme = Partial<Styles<Theme, FormPageLayoutProps, FormPageLayoutClassKey>>;
-declare const _default: React.MemoExoticComponent<(props: FormPageLayoutProps) => JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: FormPageLayoutProps) => React.JSX.Element>;
 export default _default;

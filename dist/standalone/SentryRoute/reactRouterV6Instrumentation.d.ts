@@ -4,5 +4,5 @@ export declare function reactRouterV6Instrumentation(): (customStartTransaction:
 export interface SentryRoutesTracingProps {
     children: NonNullable<React.ReactElement>;
 }
-export declare const SentryRoutesTracing: (props: SentryRoutesTracingProps) => JSX.Element;
+export declare const SentryRoutesTracing: (props: SentryRoutesTracingProps) => React.JSX.Element;
 export declare function withSentryReactRouterV6Routing<P extends Record<string, unknown>, R extends React.FC<P>>(Routes: R): R;

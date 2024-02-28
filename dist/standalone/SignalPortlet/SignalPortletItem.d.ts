@@ -25,5 +25,5 @@ export type SignalPortletItemProps = SignalPortletItemDef & SignalPortletColorCo
 declare const useStyles: (props: SignalPortletItemProps) => ClassNameMap<"root" | "itemColorLoading" | "itemColorActive" | "itemColorInactive" | "listAvatar" | "listText" | "listTextPrimary">;
 export type SignalPortletItemClassKey = keyof ReturnType<typeof useStyles>;
 export type SignalPortletItemTheme = Partial<Styles<Theme, SignalPortletItemProps, SignalPortletItemClassKey>>;
-declare const _default: React.MemoExoticComponent<(props: SignalPortletItemProps) => JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: SignalPortletItemProps) => React.JSX.Element>;
 export default _default;

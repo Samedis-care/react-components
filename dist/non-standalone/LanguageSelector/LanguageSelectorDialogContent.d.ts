@@ -12,5 +12,5 @@ export interface LanguageSelectorEntryData {
     native_country: string;
     native_language: string;
 }
-declare const _default: React.MemoExoticComponent<(props: LanguageSelectorDialogContentProps) => JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: LanguageSelectorDialogContentProps) => React.JSX.Element>;
 export default _default;

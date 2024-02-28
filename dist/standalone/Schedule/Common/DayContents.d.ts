@@ -75,5 +75,5 @@ export interface DayContentsProps {
     altBorder?: boolean;
 }
 export type IProps = DayContentsProps;
-declare const _default: React.MemoExoticComponent<(props: DayContentsProps) => JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: DayContentsProps) => React.JSX.Element>;
 export default _default;

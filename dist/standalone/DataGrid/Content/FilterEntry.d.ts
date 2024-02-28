@@ -57,5 +57,5 @@ export interface DataGridContentFilterEntryProps {
      */
     depth: number;
 }
-declare const _default: React.MemoExoticComponent<(props: DataGridContentFilterEntryProps) => JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: DataGridContentFilterEntryProps) => React.JSX.Element>;
 export default _default;

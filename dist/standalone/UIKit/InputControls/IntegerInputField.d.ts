@@ -13,5 +13,5 @@ export interface IntegerInputFieldProps extends TextFieldWithHelpProps {
      */
     onChange?: (evt: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>, value: number | null) => void;
 }
-declare const _default: React.MemoExoticComponent<(props: IntegerInputFieldProps & Omit<TextFieldProps, "onChange" | "value">) => JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: IntegerInputFieldProps & Omit<TextFieldProps, "onChange" | "value">) => React.JSX.Element>;
 export default _default;

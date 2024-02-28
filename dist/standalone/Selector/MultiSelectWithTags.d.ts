@@ -1,4 +1,4 @@
-/// <reference types="react" />
+import React from "react";
 import { BaseSelectorProps, MultiSelectorData, SelectorLruOptions } from "../../standalone/Selector";
 import { MultiSelectWithoutGroupProps } from "./MultiSelectWithoutGroup";
 import { BaseSelectorData } from "./BaseSelector";
@@ -49,5 +49,5 @@ export interface MultiSelectWithTagsProps<DataT extends MultiSelectorData, Group
      */
     lruData?: SelectorLruOptions<DataT>;
 }
-declare const _default: <DataT extends MultiSelectorData, GroupT extends BaseSelectorData>(props: MultiSelectWithTagsProps<DataT, GroupT>) => JSX.Element;
+declare const _default: <DataT extends MultiSelectorData, GroupT extends BaseSelectorData>(props: MultiSelectWithTagsProps<DataT, GroupT>) => React.JSX.Element;
 export default _default;

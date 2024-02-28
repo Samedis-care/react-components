@@ -21,5 +21,5 @@ export interface ResetMenuProps extends ResetCallbacks {
      */
     onClose: () => void;
 }
-declare const _default: React.MemoExoticComponent<(props: ResetMenuProps) => JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: ResetMenuProps) => React.JSX.Element>;
 export default _default;

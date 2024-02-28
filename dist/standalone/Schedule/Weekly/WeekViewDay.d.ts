@@ -19,5 +19,5 @@ export interface WeekViewDayProps {
      */
     data: IDayData[];
 }
-declare const _default: React.MemoExoticComponent<(props: WeekViewDayProps) => JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: WeekViewDayProps) => React.JSX.Element>;
 export default _default;

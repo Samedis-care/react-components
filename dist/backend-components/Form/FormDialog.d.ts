@@ -35,5 +35,5 @@ export interface FormDialogDispatch {
 }
 export declare const IsInFormDialogContext: React.Context<boolean>;
 export declare const FormDialogDispatchContext: React.Context<FormDialogDispatch | undefined>;
-declare const _default: React.MemoExoticComponent<(props: FormDialogProps) => JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: FormDialogProps) => React.JSX.Element>;
 export default _default;

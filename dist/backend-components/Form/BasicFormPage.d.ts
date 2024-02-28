@@ -49,5 +49,5 @@ export interface BasicFormPageProps<RendererPropsT, CustomPropsT> extends PagePr
      */
     showBackButtonOnly?: boolean;
 }
-declare const _default: <RendererPropsT, CustomPropsT>(props: BasicFormPageProps<RendererPropsT, CustomPropsT>) => JSX.Element;
+declare const _default: <RendererPropsT, CustomPropsT>(props: BasicFormPageProps<RendererPropsT, CustomPropsT>) => React.JSX.Element;
 export default _default;

@@ -1,4 +1,4 @@
-/// <reference types="react" />
+import React from "react";
 import { BaseSelectorProps, MultiSelectorData } from "../../standalone/Selector";
 export interface MultiSelectWithoutGroupProps<DataT extends MultiSelectorData> extends Omit<BaseSelectorProps<DataT>, "onSelect" | "selected" | "classes" | "onLoad"> {
     /**
@@ -42,5 +42,5 @@ export interface MultiSelectWithoutGroupProps<DataT extends MultiSelectorData> e
     sortCompareFn?: (value1: DataT, value2: DataT) => number;
 }
 declare const useStyles: (props?: any) => import("@mui/styles").ClassNameMap<"switch" | "outlined" | "labelWithSwitch" | "searchLabel">;
-declare const _default: <DataT extends MultiSelectorData>(props: MultiSelectWithoutGroupProps<DataT>) => JSX.Element;
+declare const _default: <DataT extends MultiSelectorData>(props: MultiSelectWithoutGroupProps<DataT>) => React.JSX.Element;
 export default _default;

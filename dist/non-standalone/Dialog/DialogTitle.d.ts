@@ -8,4 +8,4 @@ export interface DialogTitleProps {
      */
     noTitle?: boolean;
 }
-export declare const DialogTitle: React.MemoExoticComponent<(props: DialogTitleProps) => JSX.Element>;
+export declare const DialogTitle: React.MemoExoticComponent<(props: DialogTitleProps) => React.JSX.Element>;

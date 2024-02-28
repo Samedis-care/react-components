@@ -18,5 +18,5 @@ export interface IThemeProviderProps extends IFrameworkProps {
  * Context for the dialog state
  */
 export declare const ThemeContext: React.Context<SetThemeAction | undefined>;
-declare const _default: React.MemoExoticComponent<(props: IThemeProviderProps) => JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: IThemeProviderProps) => React.JSX.Element>;
 export default _default;

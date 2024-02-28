@@ -7,5 +7,5 @@ export interface IDataGridContentSelectRowProps {
     record: DataGridRowData;
 }
 export declare const isSelected: (selectAll: boolean, selectedIds: string[], record?: Record<string, unknown>, isSelectedHook?: DataGridProps["isSelected"]) => boolean;
-declare const _default: React.MemoExoticComponent<(props: IDataGridContentSelectRowProps) => JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: IDataGridContentSelectRowProps) => React.JSX.Element>;
 export default _default;

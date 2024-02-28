@@ -1,4 +1,4 @@
-import { createBrowserHistory } from "history";
+import { createBrowserHistory } from "@remix-run/router/history";
 /**
  * The History used by the react-router instance provided by the framework
  * Can be used to navigate programmatically

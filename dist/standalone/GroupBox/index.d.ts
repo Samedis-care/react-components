@@ -27,5 +27,5 @@ export interface GroupBoxProps {
      */
     classes?: Partial<ReturnType<typeof useStyles>>;
 }
-declare const _default: React.MemoExoticComponent<(props: GroupBoxProps) => JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: GroupBoxProps) => React.JSX.Element>;
 export default _default;

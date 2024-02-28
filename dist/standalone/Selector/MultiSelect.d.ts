@@ -60,5 +60,5 @@ export interface MultiSelectTheme {
      */
     confirmDeleteDefault?: boolean;
 }
-declare const _default: <DataT extends MultiSelectorData>(props: MultiSelectProps<DataT>) => JSX.Element;
+declare const _default: <DataT extends MultiSelectorData>(props: MultiSelectProps<DataT>) => React.JSX.Element;
 export default _default;

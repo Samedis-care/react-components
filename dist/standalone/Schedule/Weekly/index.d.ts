@@ -16,5 +16,5 @@ export interface WeekViewProps {
      */
     actions?: ScheduleAction[];
 }
-declare const _default: React.MemoExoticComponent<(props: WeekViewProps) => JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: WeekViewProps) => React.JSX.Element>;
 export default _default;

@@ -9,5 +9,5 @@ export interface IDataGridPaginationViewProps {
      */
     rowsFiltered: number | null;
 }
-declare const _default: React.MemoExoticComponent<(props: IDataGridPaginationViewProps) => JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: IDataGridPaginationViewProps) => React.JSX.Element>;
 export default _default;

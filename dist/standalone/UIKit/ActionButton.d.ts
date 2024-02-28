@@ -45,5 +45,5 @@ export interface ActionButtonProps extends Omit<ButtonProps, "children"> {
     backgroundColor?: CSSProperties["backgroundColor"];
     borderColor?: CSSProperties["borderColor"];
 }
-declare const _default: React.MemoExoticComponent<(props: ActionButtonProps) => JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: ActionButtonProps) => React.JSX.Element>;
 export default _default;

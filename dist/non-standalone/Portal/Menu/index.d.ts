@@ -20,5 +20,5 @@ export interface IRoutedMenuProps extends Omit<MenuProps, "definition" | "custom
      */
     definition: IRoutedMenuItemDefinition[];
 }
-declare const _default: React.MemoExoticComponent<(props: IRoutedMenuProps) => JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: IRoutedMenuProps) => React.JSX.Element>;
 export default _default;

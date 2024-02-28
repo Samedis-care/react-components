@@ -1,4 +1,4 @@
-/// <reference types="react" />
+import React from "react";
 import { BaseSelectorData, BaseSelectorProps, SelectorLruOptions } from "../../standalone";
 import Model, { ModelFieldName, PageVisibility } from "../../backend-integration/Model/Model";
 import { DataGridSortSetting } from "../../standalone/DataGrid/DataGrid";
@@ -64,5 +64,5 @@ export interface BackendSingleSelectProps<KeyT extends ModelFieldName, Visibilit
      */
     disableRequestBatching?: boolean;
 }
-declare const _default: <KeyT extends string, VisibilityT extends PageVisibility, CustomT>(props: BackendSingleSelectProps<KeyT, VisibilityT, CustomT>) => JSX.Element;
+declare const _default: <KeyT extends string, VisibilityT extends PageVisibility, CustomT>(props: BackendSingleSelectProps<KeyT, VisibilityT, CustomT>) => React.JSX.Element;
 export default _default;

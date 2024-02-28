@@ -37,5 +37,5 @@ export interface GridMultiSelectFilterProps {
      */
     barBreakpoints?: Partial<Record<Breakpoint, boolean | GridSize>>;
 }
-declare const _default: React.MemoExoticComponent<(props: GridMultiSelectFilterProps) => JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: GridMultiSelectFilterProps) => React.JSX.Element>;
 export default _default;

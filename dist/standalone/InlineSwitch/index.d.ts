@@ -24,5 +24,5 @@ export interface InlineSwitchProps {
     classes?: Partial<ReturnType<typeof useStyles>>;
 }
 declare const useStyles: (props?: any) => import("@mui/styles/withStyles").ClassNameMap<"switch" | "labelWithSwitch">;
-declare const _default: (props: InlineSwitchProps) => JSX.Element;
+declare const _default: (props: InlineSwitchProps) => React.JSX.Element;
 export default _default;

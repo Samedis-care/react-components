@@ -17,5 +17,5 @@ export interface MenuItemTheme {
         style?: CSSProperties;
     };
 }
-declare const _default: React.MemoExoticComponent<(props: MenuItemProps) => JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: MenuItemProps) => React.JSX.Element>;
 export default _default;

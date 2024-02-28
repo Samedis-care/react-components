@@ -152,5 +152,5 @@ export interface CrudDispatch {
 }
 export declare const useCrudDispatchContext: () => CrudDispatch;
 export declare const CrudSpecialIds: string[];
-declare const _default: <KeyT extends string, VisibilityT extends PageVisibility, CustomT>(props: CrudProps<KeyT, VisibilityT, CustomT>) => JSX.Element;
+declare const _default: <KeyT extends string, VisibilityT extends PageVisibility, CustomT>(props: CrudProps<KeyT, VisibilityT, CustomT>) => React.JSX.Element;
 export default _default;

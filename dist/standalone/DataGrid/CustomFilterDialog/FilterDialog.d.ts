@@ -10,5 +10,5 @@ export interface DataGridCustomFilterDialogProps extends Omit<IDataGridFilterBar
      */
     customFilters: React.ComponentType<IDataGridFilterBarProps>;
 }
-declare const _default: React.MemoExoticComponent<(props: DataGridCustomFilterDialogProps) => JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: DataGridCustomFilterDialogProps) => React.JSX.Element>;
 export default _default;

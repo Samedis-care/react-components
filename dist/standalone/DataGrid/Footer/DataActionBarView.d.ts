@@ -34,5 +34,5 @@ export interface DataActionBarViewProps {
      */
     disableSelection: boolean;
 }
-declare const _default: React.MemoExoticComponent<(props: DataActionBarViewProps) => JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: DataActionBarViewProps) => React.JSX.Element>;
 export default _default;

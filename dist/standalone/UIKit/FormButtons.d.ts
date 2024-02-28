@@ -35,5 +35,5 @@ export interface FormButtonsProps {
      */
     classes?: Partial<ReturnType<typeof useStyles>>;
 }
-declare const _default: React.MemoExoticComponent<(props: FormButtonsProps) => JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: FormButtonsProps) => React.JSX.Element>;
 export default _default;

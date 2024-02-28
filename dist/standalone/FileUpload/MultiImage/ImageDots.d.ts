@@ -24,5 +24,5 @@ export interface ImageDotsProps {
 declare const useStyles: (props?: any) => ClassNameMap<"activeImageDot" | "imageDot" | "imageDotContainerContainer" | "imageDotContainer">;
 export type ImageDotsClassKey = keyof ReturnType<typeof useStyles>;
 export type ImageDotsTheme = Partial<Styles<Theme, ImageDotsProps, ImageDotsClassKey>>;
-declare const _default: React.MemoExoticComponent<(props: ImageDotsProps) => JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: ImageDotsProps) => React.JSX.Element>;
 export default _default;

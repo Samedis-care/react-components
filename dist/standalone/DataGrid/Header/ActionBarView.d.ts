@@ -31,5 +31,5 @@ export interface IDataGridActionBarViewProps extends ResetCallbacks {
      */
     hideReset: boolean;
 }
-declare const _default: React.MemoExoticComponent<(props: IDataGridActionBarViewProps) => JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: IDataGridActionBarViewProps) => React.JSX.Element>;
 export default _default;

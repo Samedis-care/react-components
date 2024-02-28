@@ -126,5 +126,5 @@ export interface MenuTheme {
     };
 }
 declare const useStyles: (props?: any) => import("@mui/styles").ClassNameMap<"root">;
-declare const _default: React.MemoExoticComponent<(props: MenuProps) => JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: MenuProps) => React.JSX.Element>;
 export default _default;

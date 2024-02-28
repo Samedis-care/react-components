@@ -25,5 +25,5 @@ export interface MultiGridProps {
      */
     globalScrollListener?: boolean;
 }
-declare const _default: React.MemoExoticComponent<(props: MultiGridProps) => JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: MultiGridProps) => React.JSX.Element>;
 export default _default;

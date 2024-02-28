@@ -15,5 +15,5 @@ export interface GenericDataPreviewProps {
      */
     defaultFilter?: DataGridProps["defaultFilter"];
 }
-declare const _default: React.MemoExoticComponent<(props: GenericDataPreviewProps) => JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: GenericDataPreviewProps) => React.JSX.Element>;
 export default _default;

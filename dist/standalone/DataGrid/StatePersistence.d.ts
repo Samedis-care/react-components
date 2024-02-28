@@ -10,5 +10,5 @@ export type DataGridPersistentStateContextType = [
     (data: DataGridPersistentState) => Promise<void> | void
 ];
 export declare const DataGridPersistentStateContext: React.Context<DataGridPersistentStateContextType | undefined>;
-declare const _default: React.MemoExoticComponent<() => JSX.Element>;
+declare const _default: React.MemoExoticComponent<() => React.JSX.Element>;
 export default _default;

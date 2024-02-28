@@ -506,5 +506,5 @@ export type DataGridThemeExpert = Partial<Styles<Theme, DataGridProps, DataGridC
 export declare const useDataGridStyles: () => ReturnType<typeof useStyles>;
 export declare const getActiveDataGridColumns: (columns: IDataGridColumnDef[], hiddenColumns: string[], lockedColumns: string[]) => IDataGridColumnDef[];
 export declare const getDefaultColumnWidths: (columns: IDataGridColumnDef[], theme: Theme) => Record<string, number>;
-declare const _default: React.MemoExoticComponent<(props: DataGridProps) => JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: DataGridProps) => React.JSX.Element>;
 export default _default;

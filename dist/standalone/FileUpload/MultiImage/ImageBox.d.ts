@@ -59,5 +59,5 @@ export interface ImageBoxProps {
 declare const useStyles: (props?: any) => ClassNameMap<"image" | "root" | "background" | "dragging" | "swipeListener" | "clickable" | "fullScreenImageWrapper" | "imageSwipeLeft" | "imageSwipeRight" | "imageSwipeNone" | "imageWithDots" | "removeBtn" | "prevBtn" | "nextBtn" | "imageDotsWrapper" | "imageDotsContainer">;
 export type ImageBoxClassKey = keyof ReturnType<typeof useStyles>;
 export type ImageBoxTheme = Partial<Styles<Theme, ImageBoxProps, ImageBoxClassKey>>;
-declare const _default: React.MemoExoticComponent<(props: ImageBoxProps) => JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: ImageBoxProps) => React.JSX.Element>;
 export default _default;

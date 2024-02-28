@@ -55,5 +55,5 @@ export declare const VideoMimeType: RegExp;
 export declare const PdfFileExtensions: string[];
 export declare const getFileIcon: (nameOrMime: string) => React.ComponentType<SvgIconProps> | null;
 export declare const getFileIconOrDefault: (nameOrMime: string) => React.ComponentType<SvgIconProps>;
-declare const _default: React.MemoExoticComponent<(props: FileProps) => JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: FileProps) => React.JSX.Element>;
 export default _default;

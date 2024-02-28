@@ -26,6 +26,6 @@ interface MenuItemControllerProps extends Omit<MenuItemProps, "expanded" | "acti
  * Context for the menu state
  */
 export declare const MenuContext: React.Context<[string, React.Dispatch<React.SetStateAction<string>>] | undefined>;
-declare const _default: React.MemoExoticComponent<(props: MenuItemControllerProps) => JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: MenuItemControllerProps) => React.JSX.Element>;
 export default _default;
 export declare const toMenuItemComponent: (menuProps: MenuProps, def: IMenuItemDefinition, depth: number, menuItemId: string | null) => JSX.Element | false;

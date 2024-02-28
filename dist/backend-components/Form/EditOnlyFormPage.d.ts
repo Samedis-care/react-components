@@ -7,5 +7,5 @@ export interface EditOnlyFormPageProps extends PageProps<ModelFieldName, undefin
      */
     children: React.ReactNode;
 }
-declare const _default: React.MemoExoticComponent<(props: EditOnlyFormPageProps) => JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: EditOnlyFormPageProps) => React.JSX.Element>;
 export default _default;

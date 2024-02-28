@@ -123,5 +123,5 @@ declare const useStyles: (props?: any) => ClassNameMap<"clickable" | "uploadInpu
 export type MultiImageClassKey = keyof ReturnType<typeof useStyles>;
 export type MultiImageTheme = Partial<Styles<Theme, MultiImageProps, MultiImageClassKey>>;
 export declare const MultiImageNewIdPrefix = "MultiImage-New-";
-declare const _default: React.MemoExoticComponent<(props: MultiImageProps) => JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: MultiImageProps) => React.JSX.Element>;
 export default _default;

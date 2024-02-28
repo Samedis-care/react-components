@@ -1,4 +1,4 @@
-/// <reference types="react" />
+import React from "react";
 import { IDataGridLoadDataParameters, DataGridProps, IDataGridAddButton } from "../../standalone/DataGrid/DataGrid";
 import Model, { ModelFieldName, PageVisibility } from "../../backend-integration/Model/Model";
 export interface BackendDataGridProps<KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomDataT> extends Omit<DataGridProps, "loadData" | "columns" | "exporters" | "onDelete"> {
@@ -36,5 +36,5 @@ export interface BackendDataGridProps<KeyT extends ModelFieldName, VisibilityT e
 export declare const renderDataGridRecordUsingModel: <KeyT extends string, VisibilityT extends PageVisibility, CustomT>(model: Model<KeyT, VisibilityT, CustomT>, refreshGrid: () => void) => (entry: Record<string, unknown>) => {
     id: string;
 } & Record<string, string | null>;
-declare const _default: <KeyT extends string, VisibilityT extends PageVisibility, CustomDataT>(props: BackendDataGridProps<KeyT, VisibilityT, CustomDataT>) => JSX.Element;
+declare const _default: <KeyT extends string, VisibilityT extends PageVisibility, CustomDataT>(props: BackendDataGridProps<KeyT, VisibilityT, CustomDataT>) => React.JSX.Element;
 export default _default;
