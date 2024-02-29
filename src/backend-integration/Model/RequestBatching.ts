@@ -3,7 +3,7 @@ import Model, {
 	ModelIndexResponse,
 	PageVisibility,
 } from "./Model";
-import { sleep } from "../../utils";
+import sleep from "../../utils/sleep";
 import RequestBatchingError from "../Connector/RequestBatchingError";
 
 class RequestBatching {

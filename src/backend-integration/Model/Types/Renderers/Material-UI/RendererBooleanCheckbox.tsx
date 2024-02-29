@@ -5,7 +5,7 @@ import {
 	FormHelperText,
 	Typography,
 } from "@mui/material";
-import { ModelRenderParams } from "../../../index";
+import ModelRenderParams from "../../../RenderParams";
 import TypeBoolean from "../../TypeBoolean";
 import ccI18n from "../../../../../i18n";
 import { FormControlFieldsetCC } from "../../../../../standalone";

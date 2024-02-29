@@ -1,12 +1,12 @@
 import React from "react";
 import { Typography } from "@mui/material";
-import { ModelRenderParams } from "../../index";
+import ModelRenderParams from "../../RenderParams";
 import MultiLanguageInput, {
 	MultiLanguageInputProps,
 	MultiLanguageInputSupportedLanguages,
 } from "../../../../standalone/UIKit/InputControls/MultiLanguageInput";
 import TypeLocalizedString from "../TypeLocalizedString";
-import { FormHelperTextCC } from "../../../../standalone";
+import { FormHelperTextCC } from "../../../../standalone/UIKit/MuiWarning";
 import { TypeSettings } from "../../Type";
 
 export type ModelDataTypeLocalizedStringRendererGetFallbackLabel = (

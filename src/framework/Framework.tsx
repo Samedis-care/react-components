@@ -1,13 +1,15 @@
 import React, { Suspense } from "react";
-import { Loader } from "../standalone";
+import Loader from "../standalone/Loader";
 import { unstable_HistoryRouter as HistoryRouter } from "react-router-dom";
-import { DialogContextProvider, FrameworkHistory, CCI18nProvider } from ".";
+import DialogContextProvider from "./DialogContextProvider";
+import { FrameworkHistory } from "./History";
+import CCI18nProvider from "./CCI18nProvider";
 import ThemeProvider, {
 	GetDefaultThemeCallback,
 	getStandardTheme,
 } from "./ThemeProvider";
 import { QueryClientProvider } from "react-query";
-import { ModelDataStore } from "../backend-integration";
+import ModelDataStore from "../backend-integration/Store";
 import MuiPickerUtils from "./MuiPickerUtils";
 import PermissionContextProvider from "./PermissionContextProvider";
 import MobileScalingFix from "../standalone/MobileScalingFix/MobileScalingFix";

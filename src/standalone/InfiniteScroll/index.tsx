@@ -1,5 +1,5 @@
 import React, { PureComponent } from "react";
-import { debounce } from "../../utils";
+import debounce from "../../utils/debounce";
 
 export interface InfiniteScrollProps {
 	/**

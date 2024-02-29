@@ -1,4 +1,4 @@
-import { ComponentsCareI18n } from "../index";
+import ComponentsCareI18n from "../i18n";
 
 const timestampToAge = (timestamp: Date): string => {
 	const delta = new Date().getTime() - timestamp.getTime();

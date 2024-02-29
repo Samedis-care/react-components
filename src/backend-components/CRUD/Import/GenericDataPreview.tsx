@@ -5,7 +5,8 @@ import {
 	DataGridRowData,
 	IDataGridColumnDef,
 } from "../../../standalone/DataGrid/DataGrid";
-import { filterSortPaginate, uniqueArray } from "../../../utils";
+import filterSortPaginate from "../../../utils/filterSortPaginate";
+import uniqueArray from "../../../utils/uniqueArray";
 import { DataGrid, DataGridNoPersist } from "../../../standalone";
 
 export type GenericDataType = string | number | Date | null;

@@ -1,7 +1,8 @@
 import React from "react";
 import { Theme } from "@mui/material";
 import makeStyles from "@mui/styles/makeStyles";
-import { combineClassNames, makeThemeStyles } from "../../../utils";
+import combineClassNames from "../../../utils/combineClassNames";
+import makeThemeStyles from "../../../utils/makeThemeStyles";
 import { Styles } from "@mui/styles";
 import { ClassNameMap } from "@mui/styles/withStyles";
 

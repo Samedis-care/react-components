@@ -5,7 +5,7 @@ import React, {
 	useContext,
 	useState,
 } from "react";
-import { IMenuItemDefinition, MenuItemProps, MenuProps } from "./index";
+import type { IMenuItemDefinition, MenuItemProps, MenuProps } from "./index";
 import { Collapse } from "@mui/material";
 
 interface MenuItemControllerProps

@@ -2,8 +2,9 @@ import React, { useCallback, useMemo, useRef } from "react";
 import { Dialog, DialogContent } from "@mui/material";
 import makeStyles from "@mui/styles/makeStyles";
 import { OpenInNew } from "@mui/icons-material";
-import { useDialogContext } from "../../framework";
-import { DialogTitle, showConfirmDialog } from "../../non-standalone";
+import { useDialogContext } from "../../framework/DialogContextProvider";
+import { showConfirmDialog } from "../../non-standalone/Dialog/Utils";
+import { DialogTitle } from "../../non-standalone/Dialog/DialogTitle";
 import useCCTranslations from "../../utils/useCCTranslations";
 
 export interface FormDialogProps {

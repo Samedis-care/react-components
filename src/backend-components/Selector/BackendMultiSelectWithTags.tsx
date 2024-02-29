@@ -16,7 +16,7 @@ import {
 	BackendMultiSelectLruOptions,
 	useSelectedCache,
 } from "./BackendMultiSelect";
-import { debouncePromise } from "../../utils";
+import debouncePromise from "../../utils/debouncePromise";
 import { DataGridSortSetting } from "../../standalone/DataGrid/DataGrid";
 import { BackendSingleSelectLruOptions } from "./BackendSingleSelect";
 

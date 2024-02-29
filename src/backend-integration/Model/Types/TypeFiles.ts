@@ -7,7 +7,7 @@ import {
 	FileMeta,
 	FileUploadProps,
 } from "../../../standalone/FileUpload/Generic";
-import { fileToData } from "../../../utils";
+import fileToData from "../../../utils/fileToData";
 
 export interface TypeFilesParams
 	extends Partial<

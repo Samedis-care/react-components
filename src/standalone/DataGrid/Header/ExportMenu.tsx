@@ -1,5 +1,5 @@
 import React from "react";
-import { IDataGridExporter } from "./index";
+import type { IDataGridExporter } from "./index";
 import { MenuProps, PopoverOrigin } from "@mui/material";
 import ExportMenuEntry from "./ExportMenuEntry";
 import PopupMenu from "../../PopupMenu";

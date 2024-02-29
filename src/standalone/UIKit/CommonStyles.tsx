@@ -2,7 +2,8 @@ import { Theme } from "@mui/material/styles";
 import { Styles } from "@mui/styles";
 import makeStyles from "@mui/styles/makeStyles";
 import { InputClassKey, InputLabelProps } from "@mui/material";
-import { makeThemeStyles, useMultipleStyles } from "../../utils";
+import makeThemeStyles from "../../utils/makeThemeStyles";
+import useMultipleStyles from "../../utils/useMultipleStyles";
 import { ClassNameMap } from "@mui/styles/withStyles";
 
 export interface UIInputProps {

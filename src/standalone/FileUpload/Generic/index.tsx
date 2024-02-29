@@ -20,19 +20,17 @@ import {
 import { AttachFile } from "@mui/icons-material";
 import FilePreview, { getFileIconOrDefault } from "./File";
 import { FileSelectorError } from "./Errors";
-import {
-	combineClassNames,
-	getFileExt,
-	matchMime,
-	processImage,
-	useDropZone,
-} from "../../../utils";
 import { IDownscaleProps } from "../../../utils/processImage";
 import GroupBox from "../../GroupBox";
 import makeStyles from "@mui/styles/makeStyles";
 import { ClassNameMap } from "@mui/styles/withStyles";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import isTouchDevice from "../../../utils/isTouchDevice";
+import combineClassNames from "../../../utils/combineClassNames";
+import getFileExt from "../../../utils/getFileExt";
+import matchMime from "../../../utils/matchMime";
+import processImage from "../../../utils/processImage";
+import useDropZone from "../../../utils/useDropZone";
 
 export interface FileUploadProps {
 	/**

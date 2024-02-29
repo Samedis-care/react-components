@@ -1,13 +1,14 @@
 import React from "react";
 import { DatePickerProps } from "@mui/x-date-pickers";
 import { InputLabelConfig } from "../CommonStyles";
-import { LocalizedKeyboardDatePicker } from "../../../standalone/LocalizedDateTimePickers";
 import TextFieldWithHelp, {
 	TextFieldWithHelpProps,
 } from "../TextFieldWithHelp";
-import { localDateToUtcDate } from "../../../utils";
+import localDateToUtcDate from "../../../utils/localDateToUtcDate";
 import moment, { Moment } from "moment";
-import { LocalizedKeyboardDatePickerProps } from "../../LocalizedDateTimePickers/LocalizedKeyboardDatePicker";
+import LocalizedKeyboardDatePicker, {
+	LocalizedKeyboardDatePickerProps,
+} from "../../LocalizedDateTimePickers/LocalizedKeyboardDatePicker";
 
 export interface DateInputProps extends TextFieldWithHelpProps {
 	/**

@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useRef } from "react";
+import DefaultConnector from "../../backend-integration/Connector/DefaultConnector";
 import {
-	LazyConnector,
 	ModelFieldName,
 	PageVisibility,
-	useFormContext,
-} from "../..";
-import { ApiConnector } from "../../backend-integration";
-import DefaultConnector from "../../backend-integration/Connector/DefaultConnector";
+} from "../../backend-integration/Model/Model";
+import ApiConnector from "../../backend-integration/Connector/ApiConnector";
+import LazyConnector from "../../backend-integration/Connector/LazyConnector";
+import { useFormContext } from "./Form";
 
 export interface UseLazyCrudConnectorParams<
 	KeyT extends ModelFieldName,

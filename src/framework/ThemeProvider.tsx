@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from "react";
-import { IFrameworkProps } from "./Framework";
+import type { IFrameworkProps } from "./Framework";
 import {
 	createTheme,
 	Theme,

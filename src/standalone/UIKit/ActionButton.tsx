@@ -2,7 +2,7 @@ import React from "react";
 import { Box, Button, ButtonProps, Tooltip } from "@mui/material";
 import { withStyles, CSSProperties } from "@mui/styles";
 import { Theme } from "@mui/material/styles";
-import { combineColors } from "../../utils";
+import combineColors from "../../utils/combineColors";
 
 export interface ActionButtonTheme {
 	padding?: CSSProperties["padding"];

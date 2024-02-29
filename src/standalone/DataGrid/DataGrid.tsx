@@ -18,14 +18,12 @@ import Footer from "./Footer";
 import Settings from "./Settings";
 import Content from "./Content";
 import { FilterType, IFilterDef } from "./Content/FilterEntry";
-import {
-	debounce,
-	isObjectEmpty,
-	measureText,
-	makeThemeStyles,
-	useMultipleStyles,
-	shallowCompareArray,
-} from "../../utils";
+import debounce from "../../utils/debounce";
+import isObjectEmpty from "../../utils/isObjectEmpty";
+import measureText from "../../utils/measureText";
+import makeThemeStyles from "../../utils/makeThemeStyles";
+import useMultipleStyles from "../../utils/useMultipleStyles";
+import shallowCompareArray from "../../utils/shallowCompareArray";
 import { dataGridPrepareFiltersAndSorts } from "./CallbackUtil";
 import { ModelFilterType } from "../../backend-integration/Model";
 import { HEADER_PADDING } from "./Content/ColumnHeader";

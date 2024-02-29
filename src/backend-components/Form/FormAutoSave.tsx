@@ -1,7 +1,7 @@
 import React from "react";
 import { useFormContext } from "./Form";
 import { useEffect, useMemo } from "react";
-import { debounce } from "../../utils";
+import debounce from "../../utils/debounce";
 
 export interface FormAutoSaveProps {
 	debounceTime?: number;

@@ -13,7 +13,7 @@ import { ModelFilterType } from "../../../backend-integration/Model";
 import { IDataGridColumnDef, useDataGridStyles } from "../DataGrid";
 import { FilterIcon, FilterActiveIcon } from "../../Icons";
 import useCCTranslations from "../../../utils/useCCTranslations";
-import { combineClassNames } from "../../../utils";
+import combineClassNames from "../../../utils/combineClassNames";
 
 export interface IDataGridContentColumnHeaderContentProps {
 	/**

@@ -3,11 +3,9 @@ import { TextFieldProps } from "@mui/material";
 import TextFieldWithHelp, {
 	TextFieldWithHelpProps,
 } from "../TextFieldWithHelp";
-import {
-	getNumberSeparator,
-	parseLocalizedNumber,
-	useInputCursorFix,
-} from "../../../utils";
+import getNumberSeparator from "../../../utils/getNumberSeparator";
+import parseLocalizedNumber from "../../../utils/parseLocalizedNumber";
+import useInputCursorFix from "../../../utils/useInputCursorFix";
 import useCCTranslations from "../../../utils/useCCTranslations";
 
 export interface DecimalInputFieldProps extends TextFieldWithHelpProps {

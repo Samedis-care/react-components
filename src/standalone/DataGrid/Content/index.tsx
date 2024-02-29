@@ -16,7 +16,7 @@ import AutoSizer, { Size } from "react-virtualized-auto-sizer";
 import { GridOnItemsRenderedProps } from "react-window";
 import Cell, { CellContext } from "./Cell";
 import { applyColumnWidthLimits } from "./ColumnHeader";
-import { Loader } from "../../index";
+import Loader from "../../Loader";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import withStyles from "@mui/styles/withStyles";
 import CenteredTypography from "../../UIKit/CenteredTypography";

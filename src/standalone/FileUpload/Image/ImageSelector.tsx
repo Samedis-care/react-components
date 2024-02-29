@@ -9,7 +9,8 @@ import {
 	useTheme,
 } from "@mui/material";
 import { AttachFile, Person } from "@mui/icons-material";
-import { combineClassNames, processImageB64 } from "../../../utils";
+import processImageB64 from "../../../utils/processImageB64";
+import combineClassNames from "../../../utils/combineClassNames";
 import { IDownscaleProps } from "../../../utils/processImage";
 import makeStyles from "@mui/styles/makeStyles";
 import GroupBox from "../../GroupBox";

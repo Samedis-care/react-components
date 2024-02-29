@@ -1,5 +1,5 @@
 import React from "react";
-import { DialogContextType } from "../../framework";
+import { DialogContextType } from "../../framework/DialogContextProvider";
 import {
 	IDialogConfigConfirmAsync,
 	IDialogConfigInputAsync,
@@ -10,7 +10,7 @@ import { InputDialog } from "./InputDialog";
 import { InfoDialog } from "./InfoDialog";
 import i18n from "../../i18n";
 import { ErrorDialog } from "./ErrorDialog";
-import { ValidationError } from "../../backend-components";
+import type { ValidationError } from "../../backend-components/Form/Form";
 
 /**
  * Shows an awaitable confirm dialog

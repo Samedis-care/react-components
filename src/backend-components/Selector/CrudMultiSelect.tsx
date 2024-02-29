@@ -2,14 +2,15 @@ import React, { ForwardedRef, RefAttributes, useContext } from "react";
 import { ModelFieldName, PageVisibility } from "../../backend-integration";
 import { ErrorComponentProps } from "../Form";
 import { Loader, MultiSelectorData } from "../../standalone";
-import { BackendMultiSelectProps } from "./BackendMultiSelect";
-import { BackendMultiSelect } from "./index";
+import BackendMultiSelect, {
+	BackendMultiSelectProps,
+} from "./BackendMultiSelect";
 import useCrudSelect, {
 	CrudSelectDispatch,
 	UseCrudSelectParams,
 	UseCrudSelectResult,
 } from "./useCrudSelect";
-import { DialogContextProvider } from "../../framework";
+import DialogContextProvider from "../../framework/DialogContextProvider";
 
 export interface CrudMultiSelectProps<
 	KeyT extends ModelFieldName,

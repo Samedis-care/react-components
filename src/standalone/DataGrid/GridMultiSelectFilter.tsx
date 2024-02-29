@@ -1,10 +1,5 @@
 import React, { useCallback, useEffect, useMemo } from "react";
 import {
-	compareArrayContent,
-	MultiSelectorData,
-	MultiSelectWithCheckBox,
-} from "../..";
-import {
 	Checkbox,
 	Divider,
 	FormControlLabel,
@@ -17,6 +12,9 @@ import { SelectProps } from "@mui/material/Select/Select";
 import { Breakpoint } from "@mui/material/styles";
 import { GridSize } from "@mui/material/Grid/Grid";
 import { SelectChangeEvent } from "@mui/material/Select/SelectInput";
+import compareArrayContent from "../../utils/compareArrayContent";
+import { MultiSelectorData } from "../Selector";
+import MultiSelectWithCheckBox from "../Selector/MultiSelectWithCheckBox";
 
 export interface GridMultiSelectFilterProps {
 	/**

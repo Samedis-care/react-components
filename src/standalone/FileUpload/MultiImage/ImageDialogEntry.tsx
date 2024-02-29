@@ -14,7 +14,7 @@ import {
 import { Styles } from "@mui/styles";
 import makeStyles from "@mui/styles/makeStyles";
 import useCCTranslations from "../../../utils/useCCTranslations";
-import { makeThemeStyles } from "../../../utils";
+import makeThemeStyles from "../../../utils/makeThemeStyles";
 import { ClassNameMap } from "@mui/styles/withStyles";
 
 export interface ImageDialogEntryProps

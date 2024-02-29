@@ -7,7 +7,7 @@ import {
 	UIInputProps,
 	useInputStyles,
 } from "../CommonStyles";
-import { LocalizedDateTimePicker } from "../../../standalone/LocalizedDateTimePickers";
+import LocalizedDateTimePicker from "../../../standalone/LocalizedDateTimePickers/LocalizedDateTimePicker";
 import { Moment } from "moment";
 
 export interface DateTimeInputProps extends UIInputProps {

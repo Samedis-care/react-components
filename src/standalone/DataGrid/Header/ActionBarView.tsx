@@ -12,15 +12,11 @@ import {
 	Publish as ImportIcon,
 	Menu as MenuIcon,
 } from "@mui/icons-material";
-import {
-	ActionButton,
-	ExportIcon,
-	ResetIcon,
-	SmallIconButton,
-	TuneIcon,
-	VerticalDivider,
-} from "../../index";
-import { IDataGridExporter } from "./index";
+import { ExportIcon, ResetIcon, TuneIcon } from "../../Icons";
+import ActionButton from "../../UIKit/ActionButton";
+import { SmallIconButton } from "../../Small";
+import VerticalDivider from "../../VerticalDivider";
+import type { IDataGridExporter } from "./index";
 import ExportMenu from "./ExportMenu";
 import ComponentWithLabel from "../../UIKit/ComponentWithLabel";
 import { IDataGridAddButton } from "../DataGrid";

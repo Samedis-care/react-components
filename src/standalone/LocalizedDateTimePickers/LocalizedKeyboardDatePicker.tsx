@@ -1,7 +1,7 @@
 import React from "react";
 import { DatePicker, DatePickerProps } from "@mui/x-date-pickers";
 import { TextFieldProps, useTheme } from "@mui/material";
-import { withMuiWarning } from "../UIKit";
+import { withMuiWarning } from "../UIKit/MuiWarning";
 import { Moment } from "moment";
 
 export interface LocalizedKeyboardDatePickerProps

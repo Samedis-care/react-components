@@ -6,10 +6,11 @@ import BaseSelector, {
 import { Grid, Paper, useTheme } from "@mui/material";
 import makeStyles from "@mui/styles/makeStyles";
 import MultiSelectEntry, { IMultiSelectEntryProps } from "./MultiSelectEntry";
-import { cleanClassMap, combineClassMaps } from "../../utils";
+import cleanClassMap from "../../utils/cleanClassMap";
+import combineClassMaps from "../../utils/combineClassMaps";
 import { ClassNameMap } from "@mui/styles/withStyles";
-import { showConfirmDialogBool } from "../../non-standalone";
-import { DialogContext } from "../../framework";
+import { showConfirmDialogBool } from "../../non-standalone/Dialog/Utils";
+import { DialogContext } from "../../framework/DialogContextProvider";
 import useCCTranslations from "../../utils/useCCTranslations";
 
 export interface MultiSelectorData extends BaseSelectorData {

@@ -17,7 +17,7 @@ import {
 	ScheduleAction,
 	ScheduleFilterDefinition,
 } from "../Common/DayContents";
-import { combineClassNames } from "../../../utils";
+import combineClassNames from "../../../utils/combineClassNames";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import makeStyles from "@mui/styles/makeStyles";
 import ScrollableFilterRenderer from "../Common/ScheduleFilterRenderers";

@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { CrudImporterStepProps, isFieldImportable } from "./index";
 import { Grid, TextField, Typography } from "@mui/material";
-import {
-	Model,
-	ModelVisibilityHidden,
+import Model, {
 	PageVisibility,
 	useModelMutation,
-} from "../../../backend-integration";
-import { deepAssign, dotToObject, getValueByDot, sleep } from "../../../utils";
+} from "../../../backend-integration/Model/Model";
+import ModelVisibilityHidden from "../../../backend-integration/Model/Visibilities/VisibilityHidden";
+import deepAssign from "../../../utils/deepAssign";
+import { dotToObject, getValueByDot } from "../../../utils/dotUtils";
+import sleep from "../../../utils/sleep";
 import useCCTranslations from "../../../utils/useCCTranslations";
 
 interface ImportCounters {

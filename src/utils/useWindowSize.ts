@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { debounce } from "./index";
+import debounce from "./debounce";
 
 export type WindowSize = [width: number, height: number];
 

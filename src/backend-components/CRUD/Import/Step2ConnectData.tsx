@@ -25,7 +25,9 @@ import {
 	ModelFieldDefinition,
 	PageVisibility,
 } from "../../../backend-integration";
-import { debouncePromise, uniqueArray } from "../../../utils";
+import uniqueArray from "../../../utils/uniqueArray";
+import debouncePromise from "../../../utils/debouncePromise";
+
 import useCCTranslations from "../../../utils/useCCTranslations";
 
 type ConversionScriptRunnerFunc = (

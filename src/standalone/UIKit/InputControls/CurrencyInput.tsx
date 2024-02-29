@@ -3,7 +3,7 @@ import { TextFieldProps } from "@mui/material";
 import TextFieldWithHelp, {
 	TextFieldWithHelpProps,
 } from "../TextFieldWithHelp";
-import { parseLocalizedNumber } from "../../../utils";
+import parseLocalizedNumber from "../../../utils/parseLocalizedNumber";
 import useCCTranslations from "../../../utils/useCCTranslations";
 
 export interface CurrencyInputProps extends TextFieldWithHelpProps {

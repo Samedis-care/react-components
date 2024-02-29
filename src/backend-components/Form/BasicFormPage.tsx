@@ -4,20 +4,20 @@ import {
 	PageProps,
 	useFormContextLite,
 	ValidationError,
-} from "..";
+} from "../Form";
 import { UnsafeToLeaveDispatch } from "../../framework/UnsafeToLeave";
-import { useDialogContext } from "../../framework";
-import { ModelFieldName } from "../../backend-integration";
+import { useDialogContext } from "../../framework/DialogContextProvider";
+import { ModelFieldName } from "../../backend-integration/Model/Model";
 import {
 	showConfirmDialog,
 	showConfirmDialogBool,
 	showErrorDialog,
-} from "../../non-standalone";
+} from "../../non-standalone/Dialog/Utils";
 import { FormDialogDispatchContext } from "./FormDialog";
 import FormPageLayout from "../../standalone/Form/FormPageLayout";
 import FormLoaderOverlay from "../../standalone/Form/FormLoaderOverlay";
 import useCCTranslations from "../../utils/useCCTranslations";
-import { useRouteInfo } from "../../utils";
+import { useRouteInfo } from "../../utils/routeUtils";
 import { useBlocker } from "react-router-dom";
 import { BlockerFunction } from "@remix-run/router/router";
 

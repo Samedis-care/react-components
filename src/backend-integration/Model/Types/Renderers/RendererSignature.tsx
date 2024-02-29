@@ -1,10 +1,10 @@
 import React from "react";
 import { FormControl, FormHelperText, FormLabel } from "@mui/material";
-import { ModelRenderParams } from "../../index";
+import ModelRenderParams from "../../RenderParams";
 import ccI18n from "../../../../i18n";
 import TypeImage from "../TypeImage";
-import { SignaturePad } from "../../../../non-standalone";
-import { FormControlCC } from "../../../../standalone";
+import { FormControlCC } from "../../../../standalone/UIKit/MuiWarning";
+import SignaturePad from "../../../../non-standalone/SignaturePad/SignaturePad";
 
 export const SignatureNameContext = React.createContext<string | null>(null);
 

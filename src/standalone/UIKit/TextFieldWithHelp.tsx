@@ -14,7 +14,8 @@ import {
 } from "@mui/material";
 import { Info as InfoIcon, Clear as ClearIcon } from "@mui/icons-material";
 import { InputLabelConfig, UIInputProps, useInputStyles } from "./CommonStyles";
-import { combineClassNames, isTouchDevice } from "../../utils";
+import combineClassNames from "../../utils/combineClassNames";
+import isTouchDevice from "../../utils/isTouchDevice";
 import { useMuiWarningStyles } from "./MuiWarning";
 import { useRefComposer } from "react-ref-composer";
 

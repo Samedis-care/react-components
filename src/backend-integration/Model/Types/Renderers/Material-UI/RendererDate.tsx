@@ -1,6 +1,6 @@
 import React from "react";
 import { Typography } from "@mui/material";
-import { ModelRenderParams } from "../../../index";
+import ModelRenderParams from "../../../RenderParams";
 import ccI18n from "../../../../../i18n";
 import { normalizeDate } from "../../Utils/DateUtils";
 import TypeDate from "../../TypeDate";

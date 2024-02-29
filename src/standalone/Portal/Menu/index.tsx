@@ -3,7 +3,7 @@ import { MenuContext, toMenuItemComponent } from "./MenuItem";
 import { Theme } from "@mui/material/styles";
 import { makeStyles, CSSProperties } from "@mui/styles";
 import { SvgIconComponent } from "@mui/icons-material";
-import { combineClassNames } from "../../../utils";
+import combineClassNames from "../../../utils/combineClassNames";
 import { SvgIconProps } from "@mui/material";
 
 /**

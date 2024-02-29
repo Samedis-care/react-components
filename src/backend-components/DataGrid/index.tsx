@@ -11,10 +11,10 @@ import Model, {
 	useModelDeleteAdvanced,
 	useModelDeleteMultiple,
 } from "../../backend-integration/Model/Model";
-import { useDialogContext } from "../../framework";
-import { ErrorDialog, showConfirmDialog } from "../../non-standalone";
+import { useDialogContext } from "../../framework/DialogContextProvider";
+import { ErrorDialog, showConfirmDialog } from "../../non-standalone/Dialog";
 import useCCTranslations from "../../utils/useCCTranslations";
-import { dotToObject, getValueByDot } from "../../utils";
+import { dotToObject, getValueByDot } from "../../utils/dotUtils";
 
 export interface BackendDataGridProps<
 	KeyT extends ModelFieldName,

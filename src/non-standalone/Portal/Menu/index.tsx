@@ -3,8 +3,8 @@ import {
 	doesRouteMatch,
 	extractRouteParameters,
 	insertRouteParameters,
-	MenuBase,
-} from "../../..";
+} from "../../../utils/routeUtils";
+import MenuBase from "../../../standalone/Portal/Menu";
 import {
 	IMenuItemDefinition,
 	MenuProps,

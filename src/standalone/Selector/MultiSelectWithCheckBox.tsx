@@ -12,7 +12,8 @@ import {
 } from "@mui/material";
 import { ExpandMore } from "@mui/icons-material";
 import { ClassNameMap } from "@mui/styles/withStyles";
-import { cleanClassMap, makeThemeStyles } from "../../utils";
+import makeThemeStyles from "../../utils/makeThemeStyles";
+import cleanClassMap from "../../utils/cleanClassMap";
 import { CSSProperties, makeStyles, Styles, withStyles } from "@mui/styles";
 import { MultiSelectorData } from "./MultiSelect";
 import { getStringLabel } from "./BaseSelector";

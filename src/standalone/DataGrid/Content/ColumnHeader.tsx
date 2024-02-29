@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { combineClassNames, isTouchDevice } from "../../../utils";
+import isTouchDevice from "../../../utils/isTouchDevice";
+import combineClassNames from "../../../utils/combineClassNames";
 import {
 	IDataGridColumnDef,
 	IDataGridColumnState,

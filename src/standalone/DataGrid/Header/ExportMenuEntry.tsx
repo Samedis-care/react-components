@@ -1,5 +1,5 @@
 import React, { useCallback, useContext, useState } from "react";
-import { IDataGridExporter } from "./index";
+import type { IDataGridExporter } from "./index";
 import {
 	CircularProgress,
 	ListItemIcon,

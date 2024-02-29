@@ -1,12 +1,12 @@
 import React from "react";
-import { ModelRenderParams } from "../../index";
+import ModelRenderParams from "../../RenderParams";
 import ccI18n from "../../../../i18n";
 import TypeFiles from "../TypeFiles";
 import FileUpload, {
 	FileData,
 } from "../../../../standalone/FileUpload/Generic";
 import GroupBox from "../../../../standalone/GroupBox";
-import { FormHelperTextCC } from "../../../../standalone";
+import { FormHelperTextCC } from "../../../../standalone/UIKit/MuiWarning";
 
 /**
  * Renders a file selector

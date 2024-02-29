@@ -1,6 +1,6 @@
 import React, { useCallback } from "react";
 import { Grid, Switch, Typography } from "@mui/material";
-import { FilterComboType } from "./FilterEntry";
+import type { FilterComboType } from "./FilterEntry";
 
 interface IProps {
 	/**

@@ -1,5 +1,6 @@
 import { ModelFieldName, PageVisibility } from "../Model";
-import { ApiConnector, Connector } from "./index";
+import Connector from "./Connector";
+import ApiConnector from "./ApiConnector";
 
 /**
  * Callback to get connector instance

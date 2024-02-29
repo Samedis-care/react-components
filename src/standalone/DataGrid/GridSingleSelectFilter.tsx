@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo } from "react";
-import { BaseSelectorData, SingleSelect } from "../..";
+import { BaseSelectorData, SingleSelect } from "../../standalone/Selector";
 import {
 	Divider,
 	FormControl,

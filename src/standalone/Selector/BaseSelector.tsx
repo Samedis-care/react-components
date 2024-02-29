@@ -31,13 +31,13 @@ import TextFieldWithHelp, {
 	TextFieldWithHelpProps,
 } from "../UIKit/TextFieldWithHelp";
 import {
-	cleanClassMap,
-	combineClassNames,
 	SelectorSmallListItemButton,
 	SmallListItemIcon,
-	useLocalStorageState,
-} from "../..";
-import { makeThemeStyles } from "../../utils";
+} from "../../standalone/Small";
+import makeThemeStyles from "../../utils/makeThemeStyles";
+import cleanClassMap from "../../utils/cleanClassMap";
+import combineClassNames from "../../utils/combineClassNames";
+import { useLocalStorageState } from "../../utils/useStorageState";
 import { makeStyles, Styles } from "@mui/styles";
 import {
 	AutocompleteProps,

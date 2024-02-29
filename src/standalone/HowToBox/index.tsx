@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 import makeStyles from "@mui/styles/makeStyles";
-import { GroupBox } from "../index";
+import GroupBox from "../GroupBox";
 import { ClassNameMap } from "@mui/styles/withStyles";
 import useCCTranslations from "../../utils/useCCTranslations";
 import { TFunction } from "i18next";

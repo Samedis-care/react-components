@@ -1,5 +1,5 @@
-import { IFilterDef } from "../standalone/DataGrid/Content/FilterEntry";
-import {
+import type { IFilterDef } from "../standalone/DataGrid/Content/FilterEntry";
+import type {
 	DataGridRowData,
 	IDataGridColumnDef,
 	IDataGridLoadDataParameters,

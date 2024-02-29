@@ -8,8 +8,9 @@ import {
 	FileData,
 	FileUploadProps,
 } from "../../../standalone/FileUpload/Generic";
-import { FileUploadGeneric, HowToBox } from "../../../standalone";
-import { showInfoDialog } from "../../../non-standalone";
+import { FileUploadGeneric } from "../../../standalone/FileUpload";
+import HowToBox from "../../../standalone/HowToBox";
+import { showInfoDialog } from "../../../non-standalone/Dialog";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import { FileSelectorError } from "../../../standalone/FileUpload/Generic/Errors";
 

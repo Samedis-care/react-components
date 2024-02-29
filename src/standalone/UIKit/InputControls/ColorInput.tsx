@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { TextFieldWithHelp } from "../index";
-import { TextFieldWithHelpProps } from "../TextFieldWithHelp";
+import TextFieldWithHelp, {
+	TextFieldWithHelpProps,
+} from "../TextFieldWithHelp";
 import { ChromePicker, ColorResult } from "react-color";
 import { Popover, PopoverOrigin, TextFieldProps } from "@mui/material";
 

@@ -7,7 +7,7 @@ import {
 	Checkbox,
 	FormGroup,
 } from "@mui/material";
-import { ModelRenderParams } from "../../../index";
+import ModelRenderParams from "../../../RenderParams";
 import TypeEnumMulti from "../../TypeEnumMulti";
 import ccI18n from "../../../../../i18n";
 import { EnumValue } from "../../TypeEnum";

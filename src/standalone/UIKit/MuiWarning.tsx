@@ -10,7 +10,7 @@ import {
 	TextFieldProps,
 } from "@mui/material";
 import makeStyles from "@mui/styles/makeStyles";
-import { combineClassNames } from "../../utils";
+import combineClassNames from "../../utils/combineClassNames";
 
 export const useMuiWarningStyles = makeStyles(
 	(theme) => ({

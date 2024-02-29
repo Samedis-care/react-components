@@ -12,7 +12,7 @@ import {
 	PageVisibility,
 } from "../../backend-integration";
 import { getVisibility } from "../../backend-integration/Model/Visibility";
-import { dotsToObject, getValueByDot } from "../../utils";
+import { dotsToObject, getValueByDot } from "../../utils/dotUtils";
 import Type from "../../backend-integration/Model/Type";
 import shallowCompare from "../../utils/shallowCompare";
 

@@ -1,6 +1,6 @@
 import React from "react";
 import { DatePicker, DatePickerProps } from "@mui/x-date-pickers";
-import { withMuiWarning } from "../UIKit";
+import { withMuiWarning } from "../UIKit/MuiWarning";
 import { Moment } from "moment";
 
 type LocalizedDatePickerProps = Omit<DatePickerProps<Moment | null>, "format">;

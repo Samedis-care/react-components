@@ -1,8 +1,8 @@
-import React from "react";
-import { ModelRenderParams } from "./index";
-import FilterType from "./FilterType";
-import { EnumValue } from "./Types/TypeEnum";
-import { IDataGridColumnDef } from "../../standalone/DataGrid/DataGrid";
+import type React from "react";
+import type ModelRenderParams from "./RenderParams";
+import type FilterType from "./FilterType";
+import type { EnumValue } from "./Types/TypeEnum";
+import type { IDataGridColumnDef } from "../../standalone/DataGrid/DataGrid";
 
 export interface TypeSettings {
 	/**

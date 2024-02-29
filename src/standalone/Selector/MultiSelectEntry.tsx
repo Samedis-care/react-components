@@ -15,7 +15,7 @@ import {
 import { MultiSelectorData } from "./MultiSelect";
 import { ClassNameMap } from "@mui/styles/withStyles";
 import { Cancel as RemoveIcon } from "@mui/icons-material";
-import { combineClassNames } from "../../utils";
+import combineClassNames from "../../utils/combineClassNames";
 
 export interface IMultiSelectEntryProps<DataT extends MultiSelectorData> {
 	/**

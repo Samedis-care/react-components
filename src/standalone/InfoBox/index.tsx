@@ -15,7 +15,7 @@ import {
 import makeStyles from "@mui/styles/makeStyles";
 import withStyles from "@mui/styles/withStyles";
 import SuccessOutlinedIcon from "../Icons/SuccessOutlinedIcon";
-import { combineClassNames } from "../../utils";
+import combineClassNames from "../../utils/combineClassNames";
 
 const AccordionSummary = withStyles({
 	root: {

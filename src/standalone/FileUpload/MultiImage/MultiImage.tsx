@@ -6,7 +6,7 @@ import React, {
 	useState,
 } from "react";
 import ImageBox, { ImageBoxProps } from "./ImageBox";
-import { GroupBox } from "../../index";
+import GroupBox from "../../GroupBox";
 import {
 	DialogTitle,
 	DialogContent,
@@ -20,8 +20,8 @@ import {
 import { Close as CloseIcon } from "@mui/icons-material";
 import { Styles } from "@mui/styles";
 import makeStyles from "@mui/styles/makeStyles";
-import { IDownscaleProps } from "../../../utils/processImage";
-import { makeThemeStyles, processImage } from "../../../utils";
+import processImage, { IDownscaleProps } from "../../../utils/processImage";
+import makeThemeStyles from "../../../utils/makeThemeStyles";
 import ImageDialogEntry, { ImageDialogEntryProps } from "./ImageDialogEntry";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import { ClassNameMap } from "@mui/styles/withStyles";

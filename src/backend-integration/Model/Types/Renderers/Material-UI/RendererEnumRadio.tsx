@@ -7,7 +7,7 @@ import {
 	RadioGroup,
 	Typography,
 } from "@mui/material";
-import { ModelRenderParams } from "../../../index";
+import ModelRenderParams from "../../../RenderParams";
 import TypeEnum, { EnumValue } from "../../TypeEnum";
 import ccI18n from "../../../../../i18n";
 import { FormControlFieldsetCC } from "../../../../../standalone";

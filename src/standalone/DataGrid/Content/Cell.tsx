@@ -15,7 +15,7 @@ import { GridChildComponentProps } from "react-window";
 import ColumnHeader from "./ColumnHeader";
 import SelectRow, { isSelected } from "./SelectRow";
 import { Skeleton } from "@mui/material";
-import { combineClassNames } from "../../../utils";
+import combineClassNames from "../../../utils/combineClassNames";
 
 export interface CellContextType {
 	/**

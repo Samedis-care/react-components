@@ -1,4 +1,4 @@
-import { delocalizeNumber } from "./index";
+import delocalizeNumber from "./delocalizeNumber";
 
 /**
  * Parses a localized number string

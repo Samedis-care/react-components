@@ -1,6 +1,6 @@
 import React from "react";
 import { TextFieldProps, Typography } from "@mui/material";
-import { ModelRenderParams } from "../../../index";
+import ModelRenderParams from "../../../RenderParams";
 import {
 	FormHelperTextCC,
 	IntegerInputField,

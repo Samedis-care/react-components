@@ -10,7 +10,7 @@ import {
 import { Search as SearchIcon } from "@mui/icons-material";
 import { useDataGridProps, useDataGridStyles } from "../DataGrid";
 import TextFieldWithHelp from "../../UIKit/TextFieldWithHelp";
-import { combineClassNames } from "../../../utils";
+import combineClassNames from "../../../utils/combineClassNames";
 
 export interface IDataGridSearchViewProps {
 	/**

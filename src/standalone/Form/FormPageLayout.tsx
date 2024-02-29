@@ -2,7 +2,7 @@ import { Theme } from "@mui/material";
 import React from "react";
 import { Styles } from "@mui/styles";
 import makeStyles from "@mui/styles/makeStyles";
-import { makeThemeStyles } from "../../utils";
+import makeThemeStyles from "../../utils/makeThemeStyles";
 
 export interface FormPageLayoutProps {
 	body: React.ReactNode;

@@ -19,8 +19,9 @@ import {
 	VideoFileIcon,
 	WordFileIcon,
 } from "../FileIcons";
-import { combineClassNames, getFileExt } from "../../../utils";
 import dataToFile from "../../../utils/dataToFile";
+import combineClassNames from "../../../utils/combineClassNames";
+import getFileExt from "../../../utils/getFileExt";
 
 export interface FileProps {
 	/**

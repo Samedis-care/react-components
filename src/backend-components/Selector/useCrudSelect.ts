@@ -13,7 +13,7 @@ import {
 	useRef,
 	useState,
 } from "react";
-import { shallowCompare } from "../../utils";
+import shallowCompare from "../../utils/shallowCompare";
 import { FormContext, ValidationError } from "../Form";
 import { BackendMultiSelectProps } from "./BackendMultiSelect";
 

@@ -5,9 +5,9 @@ import React, {
 	useRef,
 	useState,
 } from "react";
-import { IFrameworkProps } from "./Framework";
+import type { IFrameworkProps } from "./Framework";
 import useCCTranslations from "../utils/useCCTranslations";
-import { TFunction } from "i18next";
+import type { TFunction } from "i18next";
 import { useBlocker } from "react-router-dom";
 
 export type DialogType = React.ReactNode;

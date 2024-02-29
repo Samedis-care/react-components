@@ -1,18 +1,18 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Box, Typography } from "@mui/material";
 import makeStyles from "@mui/styles/makeStyles";
-import {
-	BaseSelectorProps,
-	MultiSelectorData,
-	SelectorLruOptions,
-	SingleSelect,
-} from "../../standalone/Selector";
+import SingleSelect from "../../standalone/Selector/SingleSelect";
 import MultiSelectWithoutGroup, {
 	MultiSelectWithoutGroupProps,
 } from "./MultiSelectWithoutGroup";
-import { BaseSelectorData } from "./BaseSelector";
-import { uniqueArray } from "../../utils";
+import {
+	SelectorLruOptions,
+	BaseSelectorProps,
+	BaseSelectorData,
+} from "./BaseSelector";
+import uniqueArray from "../../utils/uniqueArray";
 import Loader from "../Loader";
+import { MultiSelectorData } from "./MultiSelect";
 
 export interface MultiSelectWithTagsProps<
 	DataT extends MultiSelectorData,

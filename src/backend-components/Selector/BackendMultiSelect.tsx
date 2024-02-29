@@ -9,7 +9,7 @@ import Model, {
 	ModelFieldName,
 	PageVisibility,
 } from "../../backend-integration/Model/Model";
-import { debouncePromise } from "../../utils";
+import debouncePromise from "../../utils/debouncePromise";
 import useCCTranslations from "../../utils/useCCTranslations";
 import { DataGridSortSetting } from "../../standalone/DataGrid/DataGrid";
 

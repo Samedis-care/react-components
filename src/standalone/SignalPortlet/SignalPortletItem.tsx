@@ -10,7 +10,7 @@ import {
 	ListItemText,
 	Theme,
 } from "@mui/material";
-import { SignalPortletColorConfig } from "./index";
+import type { SignalPortletColorConfig } from "./index";
 import Loader from "../Loader";
 import { Styles } from "@mui/styles";
 import makeThemeStyles from "../../utils/makeThemeStyles";

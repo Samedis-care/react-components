@@ -4,7 +4,8 @@ import makeStyles from "@mui/styles/makeStyles";
 import combineClassNames from "../../utils/combineClassNames";
 import { Styles } from "@mui/styles";
 import { Theme } from "@mui/material";
-import { makeThemeStyles, useMultipleStyles } from "../../utils";
+import makeThemeStyles from "../../utils/makeThemeStyles";
+import useMultipleStyles from "../../utils/useMultipleStyles";
 
 const useStylesBase = makeStyles(
 	(theme) => ({

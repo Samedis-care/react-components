@@ -1,6 +1,7 @@
 import React from "react";
 import { FormHelperText } from "@mui/material";
-import { ModelFieldName, ModelRenderParams, PageVisibility } from "../../index";
+import { ModelFieldName, PageVisibility } from "../../Model";
+import ModelRenderParams from "../../RenderParams";
 import TypeStringArray from "../TypeStringArray";
 import Model from "../../Model";
 import BackendMultiSelectWithTags, {

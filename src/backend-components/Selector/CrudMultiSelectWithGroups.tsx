@@ -2,8 +2,9 @@ import React, { ForwardedRef, RefAttributes } from "react";
 import { ModelFieldName, PageVisibility } from "../../backend-integration";
 import { ErrorComponentProps } from "../Form";
 import { BaseSelectorData, Loader, MultiSelectorData } from "../../standalone";
-import { BackendMultiSelectWithTags } from "./index";
-import { BackendMultiSelectWithTagsProps } from "./BackendMultiSelectWithTags";
+import BackendMultiSelectWithTags, {
+	BackendMultiSelectWithTagsProps,
+} from "./BackendMultiSelectWithTags";
 import useCrudSelect, {
 	CrudSelectDispatch,
 	UseCrudSelectParams,

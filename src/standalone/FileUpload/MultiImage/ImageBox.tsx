@@ -21,12 +21,10 @@ import {
 	ArrowForward as NextIcon,
 	Delete as DeleteIcon,
 } from "@mui/icons-material";
-import {
-	combineClassNames,
-	makeThemeStyles,
-	useDebounce,
-	useDropZone,
-} from "../../../utils";
+import combineClassNames from "../../../utils/combineClassNames";
+import makeThemeStyles from "../../../utils/makeThemeStyles";
+import { useDebounce } from "../../../utils/useDebounce";
+import useDropZone from "../../../utils/useDropZone";
 import { ClassNameMap, Styles } from "@mui/styles/withStyles";
 import ImageDots, { ImageDotsProps } from "./ImageDots";
 

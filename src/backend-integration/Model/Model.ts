@@ -5,7 +5,6 @@ import Connector, {
 	ResponseMeta,
 } from "../Connector/Connector";
 import { useMutation, useQuery } from "react-query";
-import { ModelDataStore } from "../index";
 import {
 	DataGridSetFilterData,
 	DataGridSetFilterDataEntry,
@@ -17,9 +16,10 @@ import {
 	UseQueryOptions,
 	UseQueryResult,
 } from "react-query/types/react/types";
-import queryCache from "../Store";
+import ModelDataStore from "../Store";
 import { QueryKey } from "react-query/types/core/types";
-import { deepAssign, dotToObject, getValueByDot } from "../../utils";
+import { dotToObject, getValueByDot } from "../../utils/dotUtils";
+import deepAssign from "../../utils/deepAssign";
 import throwError from "../../utils/throwError";
 import RequestBatching from "./RequestBatching";
 
@@ -598,7 +598,7 @@ class Model<
 	private cacheIndexRecords(records: Record<string, unknown>[]) {
 		// cache records for batching
 		records.forEach((record) => {
-			queryCache.setQueryData(
+			ModelDataStore.setQueryData(
 				this.getReactQueryKey(record.id as string, true),
 				[record, {}],
 			);
@@ -658,7 +658,7 @@ class Model<
 	public async fetchAllCached(
 		params?: ModelFetchAllParams,
 	): Promise<ModelIndexResponse> {
-		return queryCache.fetchQuery(
+		return ModelDataStore.fetchQuery(
 			this.getReactQueryKeyFetchAll(params),
 			() => this.fetchAll(params),
 			this.cacheOptions,
@@ -714,7 +714,7 @@ class Model<
 		id: string | null,
 		options?: ModelGetOptions,
 	): Promise<ModelGetResponse<KeyT>> {
-		return queryCache.fetchQuery(
+		return ModelDataStore.fetchQuery(
 			this.getReactQueryKey(id, options?.batch ?? this.requestBatchingEnabled),
 			() => this.getRaw(id, options),
 			this.cacheOptions,

@@ -21,7 +21,8 @@ import {
 import makeStyles from "@mui/styles/makeStyles";
 import { CrudImportProps, CrudImportType } from "./Import";
 import Loader from "../../standalone/Loader";
-import { throwError, useRouteInfo } from "../../utils";
+import throwError from "../../utils/throwError";
+import { useRouteInfo } from "../../utils/routeUtils";
 import { SentryRoutes } from "../../standalone/SentryRoute";
 import { IDataGridAddButton } from "../../standalone/DataGrid/DataGrid";
 

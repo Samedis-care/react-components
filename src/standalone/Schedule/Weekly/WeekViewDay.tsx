@@ -8,7 +8,7 @@ import { makeStyles } from "@mui/styles";
 import Paper from "@mui/material/Paper";
 import Box from "@mui/material/Box";
 import moment, { Moment } from "moment";
-import { combineClassNames } from "../../../utils";
+import combineClassNames from "../../../utils/combineClassNames";
 
 export interface WeekViewDayProps {
 	/**

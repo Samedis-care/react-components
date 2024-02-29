@@ -1,4 +1,4 @@
-import { getNumberSeparator } from "./index";
+import getNumberSeparator from "./getNumberSeparator";
 
 /**
  * Removes group separators from the given value and replaces the locale specific decimal separator with a dot for

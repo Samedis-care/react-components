@@ -3,7 +3,7 @@ import { TextFieldProps } from "@mui/material";
 import TextFieldWithHelp, {
 	TextFieldWithHelpProps,
 } from "../TextFieldWithHelp";
-import { useInputCursorFix } from "../../../utils";
+import useInputCursorFix from "../../../utils/useInputCursorFix";
 import useCCTranslations from "../../../utils/useCCTranslations";
 
 export interface IntegerInputFieldProps extends TextFieldWithHelpProps {
