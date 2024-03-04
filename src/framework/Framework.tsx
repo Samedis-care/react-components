@@ -1,6 +1,5 @@
 import React, { Suspense } from "react";
 import Loader from "../standalone/Loader";
-import { unstable_HistoryRouter as HistoryRouter } from "react-router-dom";
 import DialogContextProvider from "./DialogContextProvider";
 import { FrameworkHistory } from "./History";
 import CCI18nProvider from "./CCI18nProvider";
@@ -16,6 +15,7 @@ import MobileScalingFix from "../standalone/MobileScalingFix/MobileScalingFix";
 import UnsafeToLeave from "./UnsafeToLeave";
 import DragAndDropPrevention from "./DragAndDropPrevention";
 import { StyledEngineProvider } from "@mui/material";
+import HistoryRouter from "../standalone/Routes/HistoryRouter";
 
 /**
  * Properties for the Framework

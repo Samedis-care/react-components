@@ -1,5 +1,4 @@
-import { matchPath, RouteMatch, UNSAFE_RouteContext } from "react-router-dom";
-import React from "react";
+import matchPath from "../standalone/Routes/matchPath";
 
 export const doesRouteMatch = (
 	route: string,
@@ -20,7 +19,7 @@ export const extractRouteParameters = (
 		path,
 	);
 	if (!match) throw new Error("Route does not match");
-	return match.params as Record<string, string>;
+	return match.params;
 };
 
 export const insertRouteParameters = (
@@ -32,33 +31,4 @@ export const insertRouteParameters = (
 		entry.startsWith(":") ? params[entry.substr(1)] : entry,
 	);
 	return pathParts.join("/");
-};
-
-const reconstructPath = (matches: RouteMatch[]) => {
-	const path = matches[matches.length - 1].route.path;
-	return path
-		? path.endsWith("/*")
-			? path.slice(0, -1)
-			: path
-				? path + "/"
-				: ""
-		: "";
-};
-
-interface RouteContextObject {
-	outlet: React.ReactElement | null;
-	matches: RouteMatch[];
-}
-const findLastNode = (node: RouteContextObject): RouteContextObject =>
-	node.outlet
-		? findLastNode((node.outlet.props as { value: RouteContextObject }).value)
-		: node;
-
-export const useRouteInfo = (optional = false) => {
-	const routeInfo = findLastNode(React.useContext(UNSAFE_RouteContext));
-	if (optional && routeInfo.matches.length === 0) return { route: "", url: "" };
-	return {
-		route: reconstructPath(routeInfo.matches),
-		url: routeInfo.matches[routeInfo.matches.length - 1].pathnameBase,
-	};
 };

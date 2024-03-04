@@ -5,7 +5,6 @@ import Step1LoadData from "./Step1LoadData";
 import Step2ConnectData from "./Step2ConnectData";
 import Step3ValidateReview from "./Step3ValidateReview";
 import Step4Import from "./Step4Import";
-import { useLocation } from "react-router";
 import {
 	Model,
 	ModelFieldDefinition,
@@ -16,6 +15,7 @@ import { FileData } from "../../../standalone/FileUpload/Generic";
 import { FrameworkHistory } from "../../../framework";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import { ValidationError } from "../../Form";
+import useLocation from "../../../standalone/Routes/useLocation";
 
 export interface CrudImportProps<
 	KeyT extends ModelFieldName,

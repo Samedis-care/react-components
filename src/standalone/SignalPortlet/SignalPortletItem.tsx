@@ -1,5 +1,4 @@
 import React, { useCallback } from "react";
-import { useNavigate } from "react-router-dom";
 import makeStyles from "@mui/styles/makeStyles";
 import { ClassNameMap } from "@mui/styles/withStyles";
 import {
@@ -14,6 +13,7 @@ import type { SignalPortletColorConfig } from "./index";
 import Loader from "../Loader";
 import { Styles } from "@mui/styles";
 import makeThemeStyles from "../../utils/makeThemeStyles";
+import useNavigate from "../Routes/useNavigate";
 
 export interface SignalPortletItemDef {
 	/**

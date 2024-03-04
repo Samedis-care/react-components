@@ -19,7 +19,7 @@ There are 5 types of components you will find here:
   > 
   > WARNING: If not using the Components-Care Framework you still need to add CCI18nProvider to your render tree for localization 
 - Application Framework
-  > The Application Framework provides you with a set of pre-configured common libraries to enable you rapid development of new applications
+  > The Application Framework provides you with a set of pre-configured common libraries to enable you rapid development of new applications and our own simple routing solution
 - Non-standalone Components
   > UI Components based off the application framework
 - Backend Integration
@@ -31,7 +31,6 @@ Used Libraries:
 
 - Material-UI (Used as base for UI components)
 - i18n (Used to provide pre-translated components)
-- react-router-dom (Provided by the framework to enable programmatically controllable routing in your React app)
 - moment.js (Used for localized date/time related components)
 - react-query (Used as backend connector/caching layer)
 - react-window (Used for DOM virtualization)

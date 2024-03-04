@@ -10,7 +10,6 @@ import Model, {
 	ModelFieldName,
 	PageVisibility,
 } from "../../backend-integration/Model/Model";
-import { Route, useLocation, useNavigate, useParams } from "react-router-dom";
 import BackendDataGrid, { BackendDataGridProps } from "../DataGrid";
 import { Form, FormProps } from "../Form";
 import {
@@ -22,9 +21,12 @@ import makeStyles from "@mui/styles/makeStyles";
 import { CrudImportProps, CrudImportType } from "./Import";
 import Loader from "../../standalone/Loader";
 import throwError from "../../utils/throwError";
-import { useRouteInfo } from "../../utils/routeUtils";
-import { SentryRoutes } from "../../standalone/SentryRoute";
 import { IDataGridAddButton } from "../../standalone/DataGrid/DataGrid";
+import useNavigate from "../../standalone/Routes/useNavigate";
+import Route, { RouteContext } from "../../standalone/Routes/Route";
+import useLocation from "../../standalone/Routes/useLocation";
+import useParams from "../../standalone/Routes/useParams";
+import Routes from "../../standalone/Routes/Routes";
 
 const CrudImport = React.lazy(() => import("./Import")) as CrudImportType;
 
@@ -269,7 +271,9 @@ const CRUD = <
 	props: CrudProps<KeyT, VisibilityT, CustomT>,
 ) => {
 	const navigate = useNavigate();
-	const { url: routeUrl } = useRouteInfo(props.disableRouting);
+	const routeCtx = useContext(RouteContext);
+	if (!props.disableRouting && !routeCtx) throw new Error("no route match");
+	const routeUrl = routeCtx ? routeCtx.url : "";
 	const location = useLocation();
 	const [perms] = usePermissionContext();
 	const {
@@ -521,14 +525,14 @@ const CRUD = <
 					{(id === null || !disableBackgroundGrid) && (
 						<div
 							className={
-								location.pathname === routeUrl ? classes.show : classes.hide
+								routeUrl === location.pathname ? classes.show : classes.hide
 							}
 						>
-							{grid(location.pathname === routeUrl)}
+							{grid(routeUrl === location.pathname)}
 						</div>
 					)}
 					{props.children && (
-						<SentryRoutes>
+						<Routes>
 							<RouteComponent
 								path={`import/*`}
 								element={
@@ -564,7 +568,7 @@ const CRUD = <
 									)
 								}
 							/>
-						</SentryRoutes>
+						</Routes>
 					)}
 				</>
 			)}

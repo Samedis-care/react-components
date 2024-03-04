@@ -1,6 +1,7 @@
 import React, {
 	useCallback,
 	useContext,
+	useEffect,
 	useMemo,
 	useRef,
 	useState,
@@ -8,7 +9,7 @@ import React, {
 import type { IFrameworkProps } from "./Framework";
 import useCCTranslations from "../utils/useCCTranslations";
 import type { TFunction } from "i18next";
-import { useBlocker } from "react-router-dom";
+import { FrameworkHistory } from "./History";
 
 export type DialogType = React.ReactNode;
 export type DialogContextType = [
@@ -41,19 +42,23 @@ const navBlockFn = (t: TFunction) => (): false => {
  */
 const DialogContextProvider = (props: IFrameworkProps) => {
 	const { t } = useCCTranslations();
+	const navBlock = useRef<null | (() => void)>(null);
 	const dialogCount = useRef(0);
 	const [dialogs, setDialogs] = useState<DialogType[]>([]);
 	const parentContext = useContext(DialogContext);
 
-	const blocker = useBlocker(
-		dialogs.length > 0 && dialogCount.current > 0 && navBlockFn(t),
+	const pushDialog = useCallback(
+		(dialog: React.ReactNode) => {
+			// if no dialogs were present, add callback
+			if (dialogCount.current === 0) {
+				navBlock.current = FrameworkHistory.block(navBlockFn(t));
+			}
+			dialogCount.current++;
+
+			setDialogs((prevValue) => [...prevValue, dialog]);
+		},
+		[t],
 	);
-
-	const pushDialog = useCallback((dialog: React.ReactNode) => {
-		dialogCount.current++;
-
-		setDialogs((prevValue) => [...prevValue, dialog]);
-	}, []);
 	const popDialog = useCallback(() => {
 		if (dialogCount.current === 0) {
 			if (parentContext) {
@@ -69,20 +74,39 @@ const DialogContextProvider = (props: IFrameworkProps) => {
 		}
 		// if all dialogs closed, remove callback
 		dialogCount.current--;
-		if (dialogCount.current === 0 && blocker.reset) {
-			blocker.reset();
+		if (dialogCount.current === 0 && navBlock.current) {
+			navBlock.current();
+			navBlock.current = null;
 		}
 
 		setDialogs((prevValue) => {
 			prevValue.pop();
 			return [...prevValue];
 		});
-	}, [blocker, parentContext]);
+	}, [parentContext]);
 
 	const dialogActions: DialogContextType = useMemo(
 		() => [pushDialog, popDialog],
 		[pushDialog, popDialog],
 	);
+
+	// update callback if locale changes
+	useEffect(() => {
+		if (!navBlock.current) return;
+
+		navBlock.current(); // unblock
+		navBlock.current = FrameworkHistory.block(navBlockFn(t)); // reblock
+	}, [t]);
+
+	// remove callback on unmount
+	useEffect(() => {
+		return () => {
+			if (navBlock.current) {
+				navBlock.current();
+				navBlock.current = null;
+			}
+		};
+	}, []);
 
 	return (
 		<>

@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useEffect } from "react";
+import React, { useCallback, useContext, useEffect, useRef } from "react";
 import {
 	FormContextData,
 	PageProps,
@@ -6,6 +6,7 @@ import {
 	ValidationError,
 } from "../Form";
 import { UnsafeToLeaveDispatch } from "../../framework/UnsafeToLeave";
+import { FrameworkHistory } from "../../framework/History";
 import { useDialogContext } from "../../framework/DialogContextProvider";
 import { ModelFieldName } from "../../backend-integration/Model/Model";
 import {
@@ -17,9 +18,8 @@ import { FormDialogDispatchContext } from "./FormDialog";
 import FormPageLayout from "../../standalone/Form/FormPageLayout";
 import FormLoaderOverlay from "../../standalone/Form/FormLoaderOverlay";
 import useCCTranslations from "../../utils/useCCTranslations";
-import { useRouteInfo } from "../../utils/routeUtils";
-import { useBlocker } from "react-router-dom";
-import { BlockerFunction } from "@remix-run/router/router";
+import { Transition } from "history";
+import { RouteContext } from "../../standalone/Routes/Route";
 
 export interface BasicFormPageRendererProps<CustomPropsT>
 	extends Omit<PageProps<ModelFieldName, CustomPropsT>, "submit" | "dirty"> {
@@ -94,35 +94,10 @@ const BasicFormPage = <RendererPropsT, CustomPropsT>(
 	const { readOnly, readOnlyReasons } = useFormContextLite();
 	const [pushDialog] = useDialogContext();
 	const formDialog = useContext(FormDialogDispatchContext);
-	const { url: routeUrl } = useRouteInfo(disableRouting);
-
-	const askForLeaveConfirmation: BlockerFunction = useCallback(
-		({ nextLocation }) => {
-			return !(!disableRouting && nextLocation.pathname.startsWith(routeUrl));
-		},
-		[disableRouting, routeUrl],
-	);
-	const blocker = useBlocker(
-		dirty && !readOnly && !isSubmitting && askForLeaveConfirmation,
-	);
-
-	useEffect(() => {
-		if (blocker.state != "blocked") return;
-		void (async () => {
-			const leave = await showConfirmDialogBool(pushDialog, {
-				title: t("backend-components.form.back-on-dirty.title"),
-				message: t("backend-components.form.back-on-dirty.message"),
-				textButtonYes: t("backend-components.form.back-on-dirty.yes"),
-				textButtonNo: t("backend-components.form.back-on-dirty.no"),
-			});
-			if (leave) {
-				return blocker.proceed();
-			} else {
-				blocker.reset();
-			}
-		})();
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [blocker.state]);
+	const unblock = useRef<(() => void) | undefined>(undefined);
+	const routeCtx = useContext(RouteContext);
+	if (!disableRouting && !routeCtx) throw new Error("no route match");
+	const routeUrl = routeCtx ? routeCtx.url : "";
 
 	useEffect(() => {
 		// if the form isn't dirty, don't block submitting
@@ -131,12 +106,46 @@ const BasicFormPage = <RendererPropsT, CustomPropsT>(
 		// otherwise we'd run into a data race, as dirty flag is not updated during submit, only afterwards, which would
 		// block the redirect to the edit page here
 		if (!dirty || readOnly || isSubmitting) return;
+		const blocker = (transition: Transition) => {
+			const allowTransition = () => {
+				// temp unblock to retry transaction
+				if (unblock.current) {
+					unblock.current();
+					unblock.current = undefined;
+				}
+				transition.retry();
+			};
+			//console.log("History.block(", location, ",", action, ")", match);
+			// special handling: routing inside form page (e.g. routed tab panels, routed stepper)
+			if (
+				!disableRouting &&
+				transition.location.pathname.startsWith(routeUrl)
+			) {
+				allowTransition();
+				unblock.current = FrameworkHistory.block(blocker);
+				return;
+			}
+			// otherwise: ask user for confirmation
+			void (async () => {
+				const leave = await showConfirmDialogBool(pushDialog, {
+					title: t("backend-components.form.back-on-dirty.title"),
+					message: t("backend-components.form.back-on-dirty.message"),
+					textButtonYes: t("backend-components.form.back-on-dirty.yes"),
+					textButtonNo: t("backend-components.form.back-on-dirty.no"),
+				});
+				if (leave) {
+					allowTransition();
+				}
+			})();
+		};
+		unblock.current = FrameworkHistory.block(blocker);
 		const safeToLeave = UnsafeToLeaveDispatch.lock("form-dirty");
 		if (formDialog) formDialog.blockClosing();
 		return () => {
 			safeToLeave();
-			if (blocker.reset) {
-				blocker.reset();
+			if (unblock.current) {
+				unblock.current();
+				unblock.current = undefined;
 			}
 			if (formDialog) formDialog.unblockClosing();
 		};
@@ -149,7 +158,6 @@ const BasicFormPage = <RendererPropsT, CustomPropsT>(
 		routeUrl,
 		pushDialog,
 		disableRouting,
-		blocker,
 	]);
 
 	// go back confirm dialog if form is dirty
@@ -181,8 +189,9 @@ const BasicFormPage = <RendererPropsT, CustomPropsT>(
 									textButtonNo: t("backend-components.form.back-on-dirty.no"),
 								});
 							}
-							if (blocker.reset) {
-								blocker.reset();
+							if (unblock.current) {
+								unblock.current();
+								unblock.current = undefined;
 							}
 							await orgGoBack();
 						} catch (e) {

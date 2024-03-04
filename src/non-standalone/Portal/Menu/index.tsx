@@ -9,7 +9,10 @@ import {
 	IMenuItemDefinition,
 	MenuProps,
 } from "../../../standalone/Portal/Menu";
-import { NavigateFunction, useLocation, useNavigate } from "react-router-dom";
+import useLocation from "../../../standalone/Routes/useLocation";
+import useNavigate, {
+	NavigateFunction,
+} from "../../../standalone/Routes/useNavigate";
 
 export interface IRoutedMenuItemDefinition
 	extends Omit<IMenuItemDefinition, "onClick" | "children"> {
