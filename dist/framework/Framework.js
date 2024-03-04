@@ -1,16 +1,18 @@
 import React, { Suspense } from "react";
-import { Loader } from "../standalone";
-import { unstable_HistoryRouter as HistoryRouter } from "react-router-dom";
-import { DialogContextProvider, FrameworkHistory, CCI18nProvider } from ".";
+import Loader from "../standalone/Loader";
+import DialogContextProvider from "./DialogContextProvider";
+import { FrameworkHistory } from "./History";
+import CCI18nProvider from "./CCI18nProvider";
 import ThemeProvider, { getStandardTheme, } from "./ThemeProvider";
 import { QueryClientProvider } from "react-query";
-import { ModelDataStore } from "../backend-integration";
+import ModelDataStore from "../backend-integration/Store";
 import MuiPickerUtils from "./MuiPickerUtils";
 import PermissionContextProvider from "./PermissionContextProvider";
 import MobileScalingFix from "../standalone/MobileScalingFix/MobileScalingFix";
 import UnsafeToLeave from "./UnsafeToLeave";
 import DragAndDropPrevention from "./DragAndDropPrevention";
 import { StyledEngineProvider } from "@mui/material";
+import HistoryRouter from "../standalone/Routes/HistoryRouter";
 const loaderComponent = React.createElement(Loader, null);
 /**
  * Provides:

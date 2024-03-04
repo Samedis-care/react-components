@@ -3,8 +3,9 @@ import { Grid } from "@mui/material";
 import XLSX from "xlsx";
 import GenericDataPreview from "./GenericDataPreview";
 import { useDialogContext } from "../../../framework";
-import { FileUploadGeneric, HowToBox } from "../../../standalone";
-import { showInfoDialog } from "../../../non-standalone";
+import { FileUploadGeneric } from "../../../standalone/FileUpload";
+import HowToBox from "../../../standalone/HowToBox";
+import { showInfoDialog } from "../../../non-standalone/Dialog";
 import useCCTranslations from "../../../utils/useCCTranslations";
 export const useImportStep1FileUploadProps = (props) => {
     const { state, setState } = props;

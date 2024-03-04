@@ -1,4 +1,4 @@
-import { Connector } from "./index";
+import Connector from "./Connector";
 /**
  * Backend connector for APIs
  */

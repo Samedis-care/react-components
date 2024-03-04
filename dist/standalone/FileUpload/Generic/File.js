@@ -3,8 +3,9 @@ import { Grid, Tooltip, Typography } from "@mui/material";
 import { InsertDriveFile as DefaultFileIcon, CancelOutlined as CancelIcon, Cancel as CancelIconList, } from "@mui/icons-material";
 import makeStyles from "@mui/styles/makeStyles";
 import { ArchiveFileIcon, AudioFileIcon, CodeFileIcon, CsvFileIcon, ExcelFileIcon, ImageFileIcon, PdfFileIcon, PowerPointFileIcon, TextFileIcon, VideoFileIcon, WordFileIcon, } from "../FileIcons";
-import { combineClassNames, getFileExt } from "../../../utils";
 import dataToFile from "../../../utils/dataToFile";
+import combineClassNames from "../../../utils/combineClassNames";
+import getFileExt from "../../../utils/getFileExt";
 const useStyles = makeStyles((theme) => ({
     iconContainer: {
         position: "relative",

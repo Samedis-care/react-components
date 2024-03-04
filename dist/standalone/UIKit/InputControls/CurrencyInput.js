@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import TextFieldWithHelp from "../TextFieldWithHelp";
-import { parseLocalizedNumber } from "../../../utils";
+import parseLocalizedNumber from "../../../utils/parseLocalizedNumber";
 import useCCTranslations from "../../../utils/useCCTranslations";
 const CurrencyInput = (props) => {
     const { value, onChange, onBlur, currency, ...muiProps } = props;

@@ -3,7 +3,7 @@ import { DialogTitle as MuiDialogTitle } from "@mui/material";
 import makeStyles from "@mui/styles/makeStyles";
 import { Close } from "@mui/icons-material";
 import { Grid, IconButton, Typography } from "@mui/material";
-import { combineClassNames } from "../../utils";
+import combineClassNames from "../../utils/combineClassNames";
 const useClasses = makeStyles((theme) => ({
     noTitle: {
         padding: theme.spacing(1),

@@ -73,6 +73,6 @@ export interface ImageSelectorProps {
      */
     postEditCallback?: PostImageEditCallback;
 }
-declare const useStyles: (props?: any) => import("@mui/styles").ClassNameMap<"root" | "preview" | "rootModern" | "imgWrapper" | "previewModern" | "modernUploadLabel" | "modernFormatsLabel" | "modernFormatIcon" | "modernFullHeight" | "clickablePreview" | "changeEventHelper" | "pfpRoot" | "pfpIconBtn" | "pfpImg">;
+declare const useStyles: (props?: any) => import("@mui/styles").ClassNameMap<"root" | "modernUploadLabel" | "preview" | "rootModern" | "imgWrapper" | "previewModern" | "modernFormatsLabel" | "modernFormatIcon" | "modernFullHeight" | "clickablePreview" | "changeEventHelper" | "pfpRoot" | "pfpIconBtn" | "pfpImg">;
 declare const _default: React.MemoExoticComponent<(props: ImageSelectorProps) => React.JSX.Element>;
 export default _default;

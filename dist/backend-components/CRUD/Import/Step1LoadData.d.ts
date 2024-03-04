@@ -4,6 +4,6 @@ import { FileUploadProps } from "../../../standalone/FileUpload/Generic";
 export type ImportStep1Props = CrudImporterStepProps & {
     howTo?: (string | React.ReactNode)[];
 };
-export declare const useImportStep1FileUploadProps: (props: ImportStep1Props) => Pick<FileUploadProps, "onChange" | "accept" | "maxFiles" | "handleError" | "files">;
+export declare const useImportStep1FileUploadProps: (props: ImportStep1Props) => Pick<FileUploadProps, "onChange" | "accept" | "files" | "maxFiles" | "handleError">;
 declare const _default: React.MemoExoticComponent<(props: ImportStep1Props) => React.JSX.Element>;
 export default _default;

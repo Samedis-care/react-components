@@ -1,7 +1,7 @@
 import React from "react";
 import { Box, Button, Tooltip } from "@mui/material";
 import { withStyles } from "@mui/styles";
-import { combineColors } from "../../utils";
+import combineColors from "../../utils/combineColors";
 const StyledButton = withStyles((theme) => ({
     root: (props) => ({
         border: theme.componentsCare?.uiKit?.actionButton?.border,

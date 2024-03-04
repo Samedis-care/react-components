@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { TextFieldWithHelp } from "../index";
+import TextFieldWithHelp from "../TextFieldWithHelp";
 import { ChromePicker } from "react-color";
 import { Popover } from "@mui/material";
 const anchorOrigin = {

@@ -1,5 +1,5 @@
 import React from "react";
-import { IMenuItemDefinition, MenuItemProps, MenuProps } from "./index";
+import type { IMenuItemDefinition, MenuItemProps, MenuProps } from "./index";
 interface MenuItemControllerProps extends Omit<MenuItemProps, "expanded" | "active"> {
     /**
      * The menu item renderer properties

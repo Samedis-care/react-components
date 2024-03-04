@@ -1,8 +1,8 @@
 import React, { useContext } from "react";
 import { Loader } from "../../standalone";
-import { BackendMultiSelect } from "./index";
+import BackendMultiSelect from "./BackendMultiSelect";
 import useCrudSelect from "./useCrudSelect";
-import { DialogContextProvider } from "../../framework";
+import DialogContextProvider from "../../framework/DialogContextProvider";
 export const CrudSelectContext = React.createContext(undefined);
 export const useCrudSelectContext = () => {
     const ctx = useContext(CrudSelectContext);

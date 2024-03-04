@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { MultiSelect, } from "../../standalone";
-import { debouncePromise } from "../../utils";
+import debouncePromise from "../../utils/debouncePromise";
 import useCCTranslations from "../../utils/useCCTranslations";
 export const useSelectedCache = (props) => {
     const { model, disableRequestBatching, modelToSelectorData, onSelect, selected, initialData, onLoadError, } = props;

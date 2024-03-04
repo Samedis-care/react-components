@@ -1,6 +1,6 @@
 import React from "react";
 import { Loader } from "../../standalone";
-import { BackendMultiSelectWithTags } from "./index";
+import BackendMultiSelectWithTags from "./BackendMultiSelectWithTags";
 import useCrudSelect from "./useCrudSelect";
 const CrudMultiSelectWithGroups = (props, ref) => {
     const { errorComponent: ErrorComponent } = props;

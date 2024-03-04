@@ -2,11 +2,15 @@ import React, { useCallback, useEffect, useImperativeHandle, useRef, useState, }
 import { Box, Button, FormHelperText, Unstable_Grid2 as Grid, Tooltip, Typography, useTheme, } from "@mui/material";
 import { AttachFile } from "@mui/icons-material";
 import FilePreview, { getFileIconOrDefault } from "./File";
-import { combineClassNames, getFileExt, matchMime, processImage, useDropZone, } from "../../../utils";
 import GroupBox from "../../GroupBox";
 import makeStyles from "@mui/styles/makeStyles";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import isTouchDevice from "../../../utils/isTouchDevice";
+import combineClassNames from "../../../utils/combineClassNames";
+import getFileExt from "../../../utils/getFileExt";
+import matchMime from "../../../utils/matchMime";
+import processImage from "../../../utils/processImage";
+import useDropZone from "../../../utils/useDropZone";
 const useStyles = makeStyles((theme) => ({
     dropzone: {
         border: `2px solid ${theme.palette.primary.main}`,

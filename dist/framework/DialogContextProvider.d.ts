@@ -1,5 +1,5 @@
 import React from "react";
-import { IFrameworkProps } from "./Framework";
+import type { IFrameworkProps } from "./Framework";
 export type DialogType = React.ReactNode;
 export type DialogContextType = [
     pushDialog: (dialog: React.ReactNode) => void,

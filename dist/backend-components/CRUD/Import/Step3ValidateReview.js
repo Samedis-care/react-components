@@ -1,7 +1,9 @@
 import React, { useEffect, useMemo } from "react";
 import { isFieldImportable } from "./index";
 import GenericDataPreview from "./GenericDataPreview";
-import { deepAssign, dotToObject, isObjectEmpty } from "../../../utils";
+import deepAssign from "../../../utils/deepAssign";
+import { dotToObject } from "../../../utils/dotUtils";
+import isObjectEmpty from "../../../utils/isObjectEmpty";
 import useAsyncMemo from "../../../utils/useAsyncMemo";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import { Loader } from "../../../standalone";

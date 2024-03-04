@@ -1,7 +1,10 @@
 import React, { useCallback, useState } from "react";
 import { Grid, IconButton, Tooltip, useMediaQuery, useTheme, } from "@mui/material";
 import { Add as AddIcon, Publish as ImportIcon, Menu as MenuIcon, } from "@mui/icons-material";
-import { ActionButton, ExportIcon, ResetIcon, SmallIconButton, TuneIcon, VerticalDivider, } from "../../index";
+import { ExportIcon, ResetIcon, TuneIcon } from "../../Icons";
+import ActionButton from "../../UIKit/ActionButton";
+import { SmallIconButton } from "../../Small";
+import VerticalDivider from "../../VerticalDivider";
 import ExportMenu from "./ExportMenu";
 import ComponentWithLabel from "../../UIKit/ComponentWithLabel";
 import ResetMenu from "./ResetMenu";

@@ -1,5 +1,5 @@
 import React from "react";
-import { ModelRenderParams } from "../../index";
+import ModelRenderParams from "../../RenderParams";
 import TypeImage from "../TypeImage";
 export declare const SignatureNameContext: React.Context<string | null>;
 /**

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo } from "react";
-import { SingleSelect } from "../..";
+import { SingleSelect } from "../../standalone/Selector";
 import { Divider, FormControl, FormControlLabel, Grid, Radio, RadioGroup, Typography, } from "@mui/material";
 import { useCustomFilterActiveContext } from "./Header/FilterBar";
 import { useDataGridStyles } from "./DataGrid";

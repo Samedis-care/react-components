@@ -1,7 +1,7 @@
 import React from "react";
 import { useFormContext } from "./Form";
 import { useEffect, useMemo } from "react";
-import { debounce } from "../../utils";
+import debounce from "../../utils/debounce";
 /**
  * Helper to implement auto save in forms
  * @param debounceTime The debounce time (time between changes for save to trigger)

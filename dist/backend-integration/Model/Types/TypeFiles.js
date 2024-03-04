@@ -1,4 +1,4 @@
-import { fileToData } from "../../../utils";
+import fileToData from "../../../utils/fileToData";
 /**
  * A type to handle files
  */

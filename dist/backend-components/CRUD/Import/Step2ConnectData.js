@@ -3,7 +3,8 @@ import { isFieldImportable } from "./index";
 import { Box, Card, CardContent, CircularProgress, Grid, Table, TableBody, TableCell, TableHead, TableRow, TextField, Tooltip, Typography, } from "@mui/material";
 import makeStyles from "@mui/styles/makeStyles";
 import { Check as CheckIcon, ErrorOutline as ErrorIcon, HelpOutline as UnknownIcon, } from "@mui/icons-material";
-import { debouncePromise, uniqueArray } from "../../../utils";
+import uniqueArray from "../../../utils/uniqueArray";
+import debouncePromise from "../../../utils/debouncePromise";
 import useCCTranslations from "../../../utils/useCCTranslations";
 const useStyles = makeStyles({
     scriptInput: {

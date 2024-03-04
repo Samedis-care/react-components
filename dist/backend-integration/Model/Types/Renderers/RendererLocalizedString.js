@@ -2,7 +2,7 @@ import React from "react";
 import { Typography } from "@mui/material";
 import MultiLanguageInput from "../../../../standalone/UIKit/InputControls/MultiLanguageInput";
 import TypeLocalizedString from "../TypeLocalizedString";
-import { FormHelperTextCC } from "../../../../standalone";
+import { FormHelperTextCC } from "../../../../standalone/UIKit/MuiWarning";
 /**
  * Renders a text field
  */

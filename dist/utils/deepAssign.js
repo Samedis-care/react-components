@@ -1,4 +1,4 @@
-import { isPlainObject } from "./index";
+import isPlainObject from "./isPlainObject";
 /**
  * Like Object.assign, just with deep-copy capability
  * @param target The target object

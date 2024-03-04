@@ -1,8 +1,9 @@
 /* eslint-disable no-console */
 import ccI18n from "../../i18n";
 import AuthMode from "./AuthMode";
-import { addGetParams } from "../../utils";
-import { BackendError, NetworkError } from "./index";
+import addGetParams from "../../utils/addGetParams";
+import BackendError from "./BackendError";
+import NetworkError from "./NetworkError";
 import { UnsafeToLeaveDispatch } from "../../framework/UnsafeToLeave";
 // noinspection ExceptionCaughtLocallyJS
 /**

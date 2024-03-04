@@ -1,12 +1,15 @@
 import React, { Suspense, useCallback, useContext, useMemo, useRef, useState, } from "react";
-import { Route, useLocation, useNavigate, useParams } from "react-router-dom";
 import BackendDataGrid from "../DataGrid";
 import { Form } from "../Form";
 import { hasPermission, usePermissionContext, } from "../../framework";
 import makeStyles from "@mui/styles/makeStyles";
 import Loader from "../../standalone/Loader";
-import { throwError, useRouteInfo } from "../../utils";
-import { SentryRoutes } from "../../standalone/SentryRoute";
+import throwError from "../../utils/throwError";
+import useNavigate from "../../standalone/Routes/useNavigate";
+import Route, { RouteContext } from "../../standalone/Routes/Route";
+import useLocation from "../../standalone/Routes/useLocation";
+import useParams from "../../standalone/Routes/useParams";
+import Routes from "../../standalone/Routes/Routes";
 const CrudImport = React.lazy(() => import("./Import"));
 const useStyles = makeStyles({
     hide: {
@@ -35,7 +38,10 @@ const FormPageWrapper = (props) => {
 };
 const CRUD = (props) => {
     const navigate = useNavigate();
-    const { url: routeUrl } = useRouteInfo(props.disableRouting);
+    const routeCtx = useContext(RouteContext);
+    if (!props.disableRouting && !routeCtx)
+        throw new Error("no route match");
+    const routeUrl = routeCtx ? routeCtx.url : "";
     const location = useLocation();
     const [perms] = usePermissionContext();
     const { disableRouting, disableBackgroundGrid, forbiddenPage: ForbiddenPage, enableUserImport: requestEnableUserImport, importConfig, importUpdateKey, importHowTo, importUpdateKeyAdditionalFilters, importValidate, } = props;
@@ -178,8 +184,8 @@ const CRUD = (props) => {
             id !== "devimport" &&
             props.children &&
             form(id, props.children))) : (React.createElement(React.Fragment, null,
-        (id === null || !disableBackgroundGrid) && (React.createElement("div", { className: location.pathname === routeUrl ? classes.show : classes.hide }, grid(location.pathname === routeUrl))),
-        props.children && (React.createElement(SentryRoutes, null,
+        (id === null || !disableBackgroundGrid) && (React.createElement("div", { className: routeUrl === location.pathname ? classes.show : classes.hide }, grid(routeUrl === location.pathname))),
+        props.children && (React.createElement(Routes, null,
             React.createElement(RouteComponent, { path: `import/*`, element: hasImportPermission || !ForbiddenPage ? (importer(true)) : (React.createElement(ForbiddenPage, null)) }),
             React.createElement(RouteComponent, { path: `devimport/*`, element: hasImportPermission || !ForbiddenPage ? (importer(false)) : (React.createElement(ForbiddenPage, null)) }),
             React.createElement(RouteComponent, { path: `:id/*`, element: hasPermission(perms, props.readPermission) ||

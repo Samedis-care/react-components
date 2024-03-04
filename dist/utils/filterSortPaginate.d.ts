@@ -1,4 +1,4 @@
-import { DataGridRowData, IDataGridColumnDef, IDataGridLoadDataParameters } from "../standalone/DataGrid/DataGrid";
+import type { DataGridRowData, IDataGridColumnDef, IDataGridLoadDataParameters } from "../standalone/DataGrid/DataGrid";
 /**
  * Applies the given filters, sort and offset-based pagination settings to the given data.
  * @param rowData The data to filter, sort and paginate

@@ -1,6 +1,6 @@
 import React from "react";
 import makeStyles from "@mui/styles/makeStyles";
-import { makeThemeStyles } from "../../utils";
+import makeThemeStyles from "../../utils/makeThemeStyles";
 const useStyles = makeStyles({
     wrapper: {
         flexGrow: 1,

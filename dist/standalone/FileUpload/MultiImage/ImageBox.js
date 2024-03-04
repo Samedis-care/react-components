@@ -2,7 +2,10 @@ import React, { useCallback, useEffect, useRef, useState, } from "react";
 import makeStyles from "@mui/styles/makeStyles";
 import { Dialog, DialogContent, IconButton, Tooltip, } from "@mui/material";
 import { Close as CloseIcon, ArrowBack as PrevIcon, ArrowForward as NextIcon, Delete as DeleteIcon, } from "@mui/icons-material";
-import { combineClassNames, makeThemeStyles, useDebounce, useDropZone, } from "../../../utils";
+import combineClassNames from "../../../utils/combineClassNames";
+import makeThemeStyles from "../../../utils/makeThemeStyles";
+import { useDebounce } from "../../../utils/useDebounce";
+import useDropZone from "../../../utils/useDropZone";
 import ImageDots from "./ImageDots";
 const swipeWidth = 30;
 const useStyles = makeStyles((theme) => ({

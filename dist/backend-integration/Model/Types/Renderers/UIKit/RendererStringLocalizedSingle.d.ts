@@ -1,6 +1,6 @@
 import React from "react";
 import { TextFieldProps } from "@mui/material";
-import { ModelRenderParams } from "../../../index";
+import ModelRenderParams from "../../../RenderParams";
 import { TextFieldWithHelpProps } from "../../../../../standalone/UIKit/TextFieldWithHelp";
 import TypeLocalizedString from "../../TypeLocalizedString";
 import { MultiLanguageInputSupportedLanguages } from "../../../../../standalone/UIKit/InputControls/MultiLanguageInput";

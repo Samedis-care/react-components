@@ -1,5 +1,5 @@
 import React from "react";
-import { ModelRenderParams } from "../../index";
+import ModelRenderParams from "../../RenderParams";
 import { MultiLanguageInputProps, MultiLanguageInputSupportedLanguages } from "../../../../standalone/UIKit/InputControls/MultiLanguageInput";
 import TypeLocalizedString from "../TypeLocalizedString";
 import { TypeSettings } from "../../Type";

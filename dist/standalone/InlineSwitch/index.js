@@ -2,7 +2,7 @@ import React, { useCallback } from "react";
 import { Grid, Typography, Switch } from "@mui/material";
 import withStyles from "@mui/styles/withStyles";
 import makeStyles from "@mui/styles/makeStyles";
-import { cleanClassMap } from "../../utils";
+import cleanClassMap from "../../utils/cleanClassMap";
 const useStyles = makeStyles({
     switch: {
         lineHeight: "30px",

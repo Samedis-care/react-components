@@ -1,5 +1,5 @@
 import React from "react";
-import { FilterComboType } from "./FilterEntry";
+import type { FilterComboType } from "./FilterEntry";
 interface IProps {
     /**
      * The current filter combination type

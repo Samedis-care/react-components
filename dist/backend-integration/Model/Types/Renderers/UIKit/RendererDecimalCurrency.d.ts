@@ -1,6 +1,6 @@
 import React from "react";
 import { TextFieldProps } from "@mui/material";
-import { ModelRenderParams } from "../../../index";
+import ModelRenderParams from "../../../RenderParams";
 import TypeNumber from "../../TypeNumber";
 import { CurrencyInputProps } from "../../../../../standalone/UIKit/InputControls/CurrencyInput";
 import { TypeSettings } from "../../../Type";

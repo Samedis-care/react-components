@@ -5,7 +5,7 @@ import FilterEntry from "./FilterEntry";
 import { useDataGridStyles } from "../DataGrid";
 import { FilterIcon, FilterActiveIcon } from "../../Icons";
 import useCCTranslations from "../../../utils/useCCTranslations";
-import { combineClassNames } from "../../../utils";
+import combineClassNames from "../../../utils/combineClassNames";
 const anchorOrigin = {
     vertical: "bottom",
     horizontal: "center",

@@ -1,6 +1,8 @@
 import React, { useCallback, useState } from "react";
 import TextFieldWithHelp from "../TextFieldWithHelp";
-import { getNumberSeparator, parseLocalizedNumber, useInputCursorFix, } from "../../../utils";
+import getNumberSeparator from "../../../utils/getNumberSeparator";
+import parseLocalizedNumber from "../../../utils/parseLocalizedNumber";
+import useInputCursorFix from "../../../utils/useInputCursorFix";
 import useCCTranslations from "../../../utils/useCCTranslations";
 const DecimalInputField = (props) => {
     const { i18n } = useCCTranslations();

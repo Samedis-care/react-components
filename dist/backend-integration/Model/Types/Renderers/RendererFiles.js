@@ -3,7 +3,7 @@ import ccI18n from "../../../../i18n";
 import TypeFiles from "../TypeFiles";
 import FileUpload from "../../../../standalone/FileUpload/Generic";
 import GroupBox from "../../../../standalone/GroupBox";
-import { FormHelperTextCC } from "../../../../standalone";
+import { FormHelperTextCC } from "../../../../standalone/UIKit/MuiWarning";
 /**
  * Renders a file selector
  */

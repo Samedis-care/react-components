@@ -1,10 +1,11 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState, } from "react";
 import ImageBox from "./ImageBox";
-import { GroupBox } from "../../index";
+import GroupBox from "../../GroupBox";
 import { DialogTitle, DialogContent, Grid, Link, Typography, Dialog, IconButton, } from "@mui/material";
 import { Close as CloseIcon } from "@mui/icons-material";
 import makeStyles from "@mui/styles/makeStyles";
-import { makeThemeStyles, processImage } from "../../../utils";
+import processImage from "../../../utils/processImage";
+import makeThemeStyles from "../../../utils/makeThemeStyles";
 import ImageDialogEntry from "./ImageDialogEntry";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import ImageDots from "./ImageDots";

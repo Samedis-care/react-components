@@ -1,7 +1,7 @@
 import React from "react";
-import { MultiSelectorData } from "../..";
 import { Breakpoint } from "@mui/material/styles";
 import { GridSize } from "@mui/material/Grid/Grid";
+import { MultiSelectorData } from "../Selector";
 export interface GridMultiSelectFilterProps {
     /**
      * Optional label for the filter

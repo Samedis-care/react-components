@@ -1,7 +1,7 @@
 import React from "react";
 import { ClassNameMap } from "@mui/styles/withStyles";
 import { Theme } from "@mui/material";
-import { SignalPortletColorConfig } from "./index";
+import type { SignalPortletColorConfig } from "./index";
 import { Styles } from "@mui/styles";
 export interface SignalPortletItemDef {
     /**

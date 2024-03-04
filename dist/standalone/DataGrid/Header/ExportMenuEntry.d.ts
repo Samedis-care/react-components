@@ -1,5 +1,5 @@
 import React from "react";
-import { IDataGridExporter } from "./index";
+import type { IDataGridExporter } from "./index";
 export interface IDataGridExportMenuEntryProps {
     /**
      * The exporter for this entry

@@ -1,5 +1,5 @@
 import React from "react";
-import { ModelRenderParams } from "../../index";
+import ModelRenderParams from "../../RenderParams";
 import TypeEnum, { EnumValue } from "../TypeEnum";
 import { BaseSelectorData, BaseSelectorProps } from "../../../../standalone/Selector";
 export type RendererEnumSelectProps = Omit<BaseSelectorProps<BaseSelectorData>, "selected" | "onLoad" | "onSelect" | "disabled">;

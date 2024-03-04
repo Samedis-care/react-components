@@ -1,5 +1,6 @@
 import React from "react";
-import { BasicFormPage, DefaultFormPageButtons } from "./index";
+import BasicFormPage from "./BasicFormPage";
+import DefaultFormPageButtons from "./DefaultFormPageButtons";
 const EditOnlyFormPage = (props) => {
     const { children } = props;
     return (React.createElement(BasicFormPage, { ...props, form: children, childrenProps: undefined }, DefaultFormPageButtons));

@@ -3,7 +3,7 @@ import { Divider, List, ListItemSecondaryAction, ListItemText, } from "@mui/mate
 import makeStyles from "@mui/styles/makeStyles";
 import { SmallIconButton, SmallListItemButton, SmallListItemIcon, } from "../Small";
 import { Cancel as RemoveIcon } from "@mui/icons-material";
-import { combineClassNames } from "../../utils";
+import combineClassNames from "../../utils/combineClassNames";
 const useStyles = makeStyles((theme) => ({
     root: {},
     divider: {},

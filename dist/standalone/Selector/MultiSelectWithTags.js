@@ -1,9 +1,9 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Box, Typography } from "@mui/material";
 import makeStyles from "@mui/styles/makeStyles";
-import { SingleSelect, } from "../../standalone/Selector";
+import SingleSelect from "../../standalone/Selector/SingleSelect";
 import MultiSelectWithoutGroup from "./MultiSelectWithoutGroup";
-import { uniqueArray } from "../../utils";
+import uniqueArray from "../../utils/uniqueArray";
 import Loader from "../Loader";
 const useStyles = makeStyles({
     root: {

@@ -1,11 +1,11 @@
 import React from "react";
 import Model, { ModelFieldName, PageVisibility } from "../../backend-integration/Model/Model";
-import { Route } from "react-router-dom";
 import { BackendDataGridProps } from "../DataGrid";
 import { FormProps } from "../Form";
 import { Permission } from "../../framework";
 import { CrudImportProps } from "./Import";
 import { IDataGridAddButton } from "../../standalone/DataGrid/DataGrid";
+import Route from "../../standalone/Routes/Route";
 export interface CrudFormProps {
     /**
      * Callback for closing the form page

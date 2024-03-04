@@ -1,7 +1,7 @@
 import React, { useCallback, useContext, useEffect, useMemo, useRef, } from "react";
 import { useFormContext } from "./Form";
 import { getVisibility } from "../../backend-integration/Model/Visibility";
-import { dotsToObject, getValueByDot } from "../../utils";
+import { dotsToObject, getValueByDot } from "../../utils/dotUtils";
 import shallowCompare from "../../utils/shallowCompare";
 export const FormFieldContext = React.createContext(null);
 export const useFormFieldContext = () => {

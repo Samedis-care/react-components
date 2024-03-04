@@ -1,6 +1,7 @@
 import React, { useCallback, useState } from "react";
 import { Grid, Tooltip, useMediaQuery, useTheme, } from "@mui/material";
-import { SmallIconButton, VerticalDivider } from "../../index";
+import { SmallIconButton } from "../../Small";
+import VerticalDivider from "../../VerticalDivider";
 import ComponentWithLabel from "../../UIKit/ComponentWithLabel";
 import { Edit as EditIcon, Delete as DeleteIcon, Menu as MenuIcon, } from "@mui/icons-material";
 import SelectAll from "./SelectAll";

@@ -1,6 +1,6 @@
 import React from "react";
 import { Button, Grid } from "@mui/material";
-import { combineClassNames } from "../../../utils";
+import combineClassNames from "../../../utils/combineClassNames";
 import makeStyles from "@mui/styles/makeStyles";
 import combineColors from "../../../utils/combineColors";
 const useStyles = makeStyles((theme) => ({

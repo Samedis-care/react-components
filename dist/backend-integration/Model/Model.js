@@ -1,8 +1,8 @@
 import { getVisibility } from "./Visibility";
 import { useMutation, useQuery } from "react-query";
-import { ModelDataStore } from "../index";
-import queryCache from "../Store";
-import { deepAssign, dotToObject, getValueByDot } from "../../utils";
+import ModelDataStore from "../Store";
+import { dotToObject, getValueByDot } from "../../utils/dotUtils";
+import deepAssign from "../../utils/deepAssign";
 import throwError from "../../utils/throwError";
 import RequestBatching from "./RequestBatching";
 // optional import
@@ -240,7 +240,7 @@ class Model {
     cacheIndexRecords(records) {
         // cache records for batching
         records.forEach((record) => {
-            queryCache.setQueryData(this.getReactQueryKey(record.id, true), [record, {}]);
+            ModelDataStore.setQueryData(this.getReactQueryKey(record.id, true), [record, {}]);
         });
         return records;
     }
@@ -287,7 +287,7 @@ class Model {
      * @see fetchAll
      */
     async fetchAllCached(params) {
-        return queryCache.fetchQuery(this.getReactQueryKeyFetchAll(params), () => this.fetchAll(params), this.cacheOptions);
+        return ModelDataStore.fetchQuery(this.getReactQueryKeyFetchAll(params), () => this.fetchAll(params), this.cacheOptions);
     }
     /**
      * Gets the react-query cache key for this model
@@ -331,7 +331,7 @@ class Model {
      * @param options Request options
      */
     getCached(id, options) {
-        return queryCache.fetchQuery(this.getReactQueryKey(id, options?.batch ?? this.requestBatchingEnabled), () => this.getRaw(id, options), this.cacheOptions);
+        return ModelDataStore.fetchQuery(this.getReactQueryKey(id, options?.batch ?? this.requestBatchingEnabled), () => this.getRaw(id, options), this.cacheOptions);
     }
     /**
      * Provides uncached access for the given data id

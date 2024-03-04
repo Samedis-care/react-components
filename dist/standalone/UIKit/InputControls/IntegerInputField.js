@@ -1,6 +1,6 @@
 import React, { useCallback } from "react";
 import TextFieldWithHelp from "../TextFieldWithHelp";
-import { useInputCursorFix } from "../../../utils";
+import useInputCursorFix from "../../../utils/useInputCursorFix";
 import useCCTranslations from "../../../utils/useCCTranslations";
 const IntegerInputField = (props) => {
     const { i18n } = useCCTranslations();

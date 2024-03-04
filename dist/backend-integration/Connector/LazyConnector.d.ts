@@ -1,5 +1,5 @@
-import { AdvancedDeleteRequest, Model, ModelFieldName, ModelGetResponse, PageVisibility } from "../..";
-import { IDataGridLoadDataParameters } from "../../standalone/DataGrid/DataGrid";
+import Model, { AdvancedDeleteRequest, ModelFieldName, ModelGetResponse, PageVisibility } from "../../backend-integration/Model/Model";
+import type { IDataGridLoadDataParameters } from "../../standalone/DataGrid/DataGrid";
 import Connector, { ResponseMeta } from "./Connector";
 import ApiConnector from "./ApiConnector";
 interface QueuedFunction {

@@ -4,7 +4,7 @@ import createStyles from "@mui/styles/createStyles";
 import withStyles from "@mui/styles/withStyles";
 import { ExpandLess, ExpandMore } from "@mui/icons-material";
 import makeStyles from "@mui/styles/makeStyles";
-import { combineClassNames } from "../../../../../utils";
+import combineClassNames from "../../../../../utils/combineClassNames";
 const useStyles = makeStyles((theme) => ({
     item: {
         borderBottomRightRadius: "30px",

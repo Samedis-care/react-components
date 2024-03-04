@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { doesRouteMatch, extractRouteParameters, insertRouteParameters, MenuBase, } from "../../..";
-import { useLocation, useNavigate } from "react-router-dom";
+import { doesRouteMatch, extractRouteParameters, insertRouteParameters, } from "../../../utils/routeUtils";
+import MenuBase from "../../../standalone/Portal/Menu";
+import useLocation from "../../../standalone/Routes/useLocation";
+import useNavigate from "../../../standalone/Routes/useNavigate";
 /**
  * Extract current route params
  * @param definitions The route definitions

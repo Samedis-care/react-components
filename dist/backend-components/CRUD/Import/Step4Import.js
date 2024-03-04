@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { isFieldImportable } from "./index";
 import { Grid, TextField, Typography } from "@mui/material";
-import { Model, ModelVisibilityHidden, useModelMutation, } from "../../../backend-integration";
-import { deepAssign, dotToObject, getValueByDot, sleep } from "../../../utils";
+import Model, { useModelMutation, } from "../../../backend-integration/Model/Model";
+import ModelVisibilityHidden from "../../../backend-integration/Model/Visibilities/VisibilityHidden";
+import deepAssign from "../../../utils/deepAssign";
+import { dotToObject, getValueByDot } from "../../../utils/dotUtils";
+import sleep from "../../../utils/sleep";
 import useCCTranslations from "../../../utils/useCCTranslations";
 export const useImportStep4Logic = (props) => {
     const { model, state, setState, updateKey, additionalUpdateKeyFilters } = props;

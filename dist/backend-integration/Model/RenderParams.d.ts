@@ -1,7 +1,7 @@
-import { ModelFieldName, PageVisibility } from "./Model";
-import Visibility from "./Visibility";
-import React from "react";
-import { Model } from "./index";
+import type { ModelFieldName, PageVisibility } from "./Model";
+import type Model from "./Model";
+import type Visibility from "./Visibility";
+import type React from "react";
 interface RenderParams<T> {
     /**
      * The field the value belongs to

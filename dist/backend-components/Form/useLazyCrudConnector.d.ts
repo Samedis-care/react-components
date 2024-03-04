@@ -1,5 +1,6 @@
-import { LazyConnector, ModelFieldName, PageVisibility } from "../..";
-import { ApiConnector } from "../../backend-integration";
+import { ModelFieldName, PageVisibility } from "../../backend-integration/Model/Model";
+import ApiConnector from "../../backend-integration/Connector/ApiConnector";
+import LazyConnector from "../../backend-integration/Connector/LazyConnector";
 export interface UseLazyCrudConnectorParams<KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT, ExtraT = undefined> {
     /**
      * The custom field name (must not be in model)

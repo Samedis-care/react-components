@@ -1,5 +1,6 @@
 import React, { useMemo } from "react";
-import { filterSortPaginate, uniqueArray } from "../../../utils";
+import filterSortPaginate from "../../../utils/filterSortPaginate";
+import uniqueArray from "../../../utils/uniqueArray";
 import { DataGrid, DataGridNoPersist } from "../../../standalone";
 const GenericDataPreview = (props) => {
     const { data, existingDefinition, defaultFilter } = props;

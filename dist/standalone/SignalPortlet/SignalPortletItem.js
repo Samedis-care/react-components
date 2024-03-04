@@ -1,9 +1,9 @@
 import React, { useCallback } from "react";
-import { useNavigate } from "react-router-dom";
 import makeStyles from "@mui/styles/makeStyles";
 import { Avatar, ListItem, ListItemAvatar, ListItemButton, ListItemText, } from "@mui/material";
 import Loader from "../Loader";
 import makeThemeStyles from "../../utils/makeThemeStyles";
+import useNavigate from "../Routes/useNavigate";
 const useStyles = makeStyles((theme) => ({
     itemColorLoading: {
         backgroundColor: "transparent",

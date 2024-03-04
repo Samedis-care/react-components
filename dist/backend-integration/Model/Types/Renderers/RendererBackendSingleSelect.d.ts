@@ -1,5 +1,6 @@
 import React from "react";
-import { ModelFieldName, ModelRenderParams, PageVisibility } from "../../index";
+import { ModelFieldName, PageVisibility } from "../../Model";
+import ModelRenderParams from "../../RenderParams";
 import TypeId from "../TypeId";
 import { BackendSingleSelectProps } from "../../../../backend-components/Selector/BackendSingleSelect";
 type OmitProperties = "selected" | "onSelect" | "disabled" | "model" | "initialData";

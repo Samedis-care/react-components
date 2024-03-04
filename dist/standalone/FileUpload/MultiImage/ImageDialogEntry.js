@@ -4,7 +4,7 @@ import { Box, Grid, Typography } from "@mui/material";
 import { Star as StarredIcon, StarOutline as NotStarredIcon, } from "@mui/icons-material";
 import makeStyles from "@mui/styles/makeStyles";
 import useCCTranslations from "../../../utils/useCCTranslations";
-import { makeThemeStyles } from "../../../utils";
+import makeThemeStyles from "../../../utils/makeThemeStyles";
 const useStyles = makeStyles({
     clickable: {
         cursor: "pointer",

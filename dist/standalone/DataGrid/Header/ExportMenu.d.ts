@@ -1,5 +1,5 @@
 import React from "react";
-import { IDataGridExporter } from "./index";
+import type { IDataGridExporter } from "./index";
 import { MenuProps } from "@mui/material";
 export interface IDataGridExportMenuProps {
     /**

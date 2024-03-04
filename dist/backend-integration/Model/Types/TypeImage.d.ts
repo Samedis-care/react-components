@@ -1,6 +1,6 @@
 import React from "react";
 import Type from "../Type";
-import { ModelRenderParams } from "../index";
+import ModelRenderParams from "../RenderParams";
 import FilterType from "../FilterType";
 import { ImageSelectorProps } from "../../../standalone/FileUpload/Image/ImageSelector";
 export type TypeImageParams = Partial<Pick<ImageSelectorProps, "uploadLabel" | "convertImagesTo" | "downscale" | "capture" | "variant" | "postEditCallback">>;

@@ -1,5 +1,5 @@
 import { useCallback, useContext, useEffect, useImperativeHandle, useRef, useState, } from "react";
-import { shallowCompare } from "../../utils";
+import shallowCompare from "../../utils/shallowCompare";
 import { FormContext } from "../Form";
 let ticketCounter = 0;
 const nextTicket = () => {

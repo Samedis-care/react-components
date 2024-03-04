@@ -1,5 +1,6 @@
 import React from "react";
-import { ModelFieldName, ModelRenderParams, PageVisibility } from "../../index";
+import { ModelFieldName, PageVisibility } from "../../Model";
+import ModelRenderParams from "../../RenderParams";
 import TypeStringArray from "../TypeStringArray";
 import { BackendMultiSelectWithTagsProps } from "../../../../backend-components/Selector/BackendMultiSelectWithTags";
 import { BaseSelectorData, MultiSelectorData } from "../../../../standalone";

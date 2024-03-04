@@ -1,7 +1,8 @@
 import React from "react";
 import { Checkbox, InputBase, InputLabel, ListItemText, MenuItem, Select, } from "@mui/material";
 import { ExpandMore } from "@mui/icons-material";
-import { cleanClassMap, makeThemeStyles } from "../../utils";
+import makeThemeStyles from "../../utils/makeThemeStyles";
+import cleanClassMap from "../../utils/cleanClassMap";
 import { makeStyles, withStyles } from "@mui/styles";
 import { getStringLabel } from "./BaseSelector";
 import uniqueArray from "../../utils/uniqueArray";

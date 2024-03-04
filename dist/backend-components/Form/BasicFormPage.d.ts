@@ -1,6 +1,6 @@
 import React from "react";
-import { FormContextData, PageProps } from "..";
-import { ModelFieldName } from "../../backend-integration";
+import { FormContextData, PageProps } from "../Form";
+import { ModelFieldName } from "../../backend-integration/Model/Model";
 export interface BasicFormPageRendererProps<CustomPropsT> extends Omit<PageProps<ModelFieldName, CustomPropsT>, "submit" | "dirty"> {
     /**
      * Function to submit everything

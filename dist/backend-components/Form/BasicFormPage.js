@@ -1,44 +1,25 @@
-import React, { useCallback, useContext, useEffect } from "react";
-import { useFormContextLite, } from "..";
+import React, { useCallback, useContext, useEffect, useRef } from "react";
+import { useFormContextLite, } from "../Form";
 import { UnsafeToLeaveDispatch } from "../../framework/UnsafeToLeave";
-import { useDialogContext } from "../../framework";
-import { showConfirmDialog, showConfirmDialogBool, showErrorDialog, } from "../../non-standalone";
+import { FrameworkHistory } from "../../framework/History";
+import { useDialogContext } from "../../framework/DialogContextProvider";
+import { showConfirmDialog, showConfirmDialogBool, showErrorDialog, } from "../../non-standalone/Dialog/Utils";
 import { FormDialogDispatchContext } from "./FormDialog";
 import FormPageLayout from "../../standalone/Form/FormPageLayout";
 import FormLoaderOverlay from "../../standalone/Form/FormLoaderOverlay";
 import useCCTranslations from "../../utils/useCCTranslations";
-import { useRouteInfo } from "../../utils";
-import { useBlocker } from "react-router-dom";
+import { RouteContext } from "../../standalone/Routes/Route";
 const BasicFormPage = (props) => {
     const { submit, dirty, disableRouting, postSubmitHandler, isSubmitting, children: FormButtons, form, childrenProps, customProps: originalCustomProps, ...otherProps } = props;
     const { t } = useCCTranslations();
     const { readOnly, readOnlyReasons } = useFormContextLite();
     const [pushDialog] = useDialogContext();
     const formDialog = useContext(FormDialogDispatchContext);
-    const { url: routeUrl } = useRouteInfo(disableRouting);
-    const askForLeaveConfirmation = useCallback(({ nextLocation }) => {
-        return !(!disableRouting && nextLocation.pathname.startsWith(routeUrl));
-    }, [disableRouting, routeUrl]);
-    const blocker = useBlocker(dirty && !readOnly && !isSubmitting && askForLeaveConfirmation);
-    useEffect(() => {
-        if (blocker.state != "blocked")
-            return;
-        void (async () => {
-            const leave = await showConfirmDialogBool(pushDialog, {
-                title: t("backend-components.form.back-on-dirty.title"),
-                message: t("backend-components.form.back-on-dirty.message"),
-                textButtonYes: t("backend-components.form.back-on-dirty.yes"),
-                textButtonNo: t("backend-components.form.back-on-dirty.no"),
-            });
-            if (leave) {
-                return blocker.proceed();
-            }
-            else {
-                blocker.reset();
-            }
-        })();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [blocker.state]);
+    const unblock = useRef(undefined);
+    const routeCtx = useContext(RouteContext);
+    if (!disableRouting && !routeCtx)
+        throw new Error("no route match");
+    const routeUrl = routeCtx ? routeCtx.url : "";
     useEffect(() => {
         // if the form isn't dirty, don't block submitting
         // if the form is read-only, don't annoy the user
@@ -47,13 +28,45 @@ const BasicFormPage = (props) => {
         // block the redirect to the edit page here
         if (!dirty || readOnly || isSubmitting)
             return;
+        const blocker = (transition) => {
+            const allowTransition = () => {
+                // temp unblock to retry transaction
+                if (unblock.current) {
+                    unblock.current();
+                    unblock.current = undefined;
+                }
+                transition.retry();
+            };
+            //console.log("History.block(", location, ",", action, ")", match);
+            // special handling: routing inside form page (e.g. routed tab panels, routed stepper)
+            if (!disableRouting &&
+                transition.location.pathname.startsWith(routeUrl)) {
+                allowTransition();
+                unblock.current = FrameworkHistory.block(blocker);
+                return;
+            }
+            // otherwise: ask user for confirmation
+            void (async () => {
+                const leave = await showConfirmDialogBool(pushDialog, {
+                    title: t("backend-components.form.back-on-dirty.title"),
+                    message: t("backend-components.form.back-on-dirty.message"),
+                    textButtonYes: t("backend-components.form.back-on-dirty.yes"),
+                    textButtonNo: t("backend-components.form.back-on-dirty.no"),
+                });
+                if (leave) {
+                    allowTransition();
+                }
+            })();
+        };
+        unblock.current = FrameworkHistory.block(blocker);
         const safeToLeave = UnsafeToLeaveDispatch.lock("form-dirty");
         if (formDialog)
             formDialog.blockClosing();
         return () => {
             safeToLeave();
-            if (blocker.reset) {
-                blocker.reset();
+            if (unblock.current) {
+                unblock.current();
+                unblock.current = undefined;
             }
             if (formDialog)
                 formDialog.unblockClosing();
@@ -67,7 +80,6 @@ const BasicFormPage = (props) => {
         routeUrl,
         pushDialog,
         disableRouting,
-        blocker,
     ]);
     // go back confirm dialog if form is dirty
     const customPropsWithGoBack = {
@@ -89,8 +101,9 @@ const BasicFormPage = (props) => {
                                 textButtonNo: t("backend-components.form.back-on-dirty.no"),
                             });
                         }
-                        if (blocker.reset) {
-                            blocker.reset();
+                        if (unblock.current) {
+                            unblock.current();
+                            unblock.current = undefined;
                         }
                         await orgGoBack();
                     }

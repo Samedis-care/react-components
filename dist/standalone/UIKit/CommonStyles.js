@@ -1,5 +1,6 @@
 import makeStyles from "@mui/styles/makeStyles";
-import { makeThemeStyles, useMultipleStyles } from "../../utils";
+import makeThemeStyles from "../../utils/makeThemeStyles";
+import useMultipleStyles from "../../utils/useMultipleStyles";
 const useThemeStyles = makeThemeStyles((theme) => theme.componentsCare?.uiKit?.input, "CcUIKitInput");
 const useRawInputStyles = makeStyles((theme) => ({
     root: {

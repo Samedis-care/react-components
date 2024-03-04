@@ -36,5 +36,5 @@ export interface ComponentWithLabelTheme {
     style?: CSSProperties;
 }
 declare const useStyles: (props?: any) => import("@mui/styles").ClassNameMap<"label">;
-declare const _default: React.MemoExoticComponent<(props: ComponentWithLabelProps | FormControlLabelProps) => React.JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: FormControlLabelProps | ComponentWithLabelProps) => React.JSX.Element>;
 export default _default;

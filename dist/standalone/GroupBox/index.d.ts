@@ -1,7 +1,7 @@
 import React from "react";
 import { Styles } from "@mui/styles";
 import { Theme } from "@mui/material";
-declare const useStylesBase: (props?: any) => import("@mui/styles").ClassNameMap<"legend" | "smallLabel" | "fieldSetRoot">;
+declare const useStylesBase: (props?: any) => import("@mui/styles").ClassNameMap<"legend" | "fieldSetRoot" | "smallLabel">;
 export type GroupBoxClassKey = keyof ReturnType<typeof useStylesBase>;
 export type GroupBoxTheme = Partial<Styles<Theme, GroupBoxProps, GroupBoxClassKey>>;
 declare const useStyles: (props: GroupBoxProps) => ReturnType<typeof useStylesBase>;

@@ -1,5 +1,5 @@
 import React, { PureComponent } from "react";
-import { debounce } from "../../utils";
+import debounce from "../../utils/debounce";
 /**
  * Provides infinite scrolling to whatever is inside it
  */

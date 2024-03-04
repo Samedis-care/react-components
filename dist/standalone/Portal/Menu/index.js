@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { MenuContext, toMenuItemComponent } from "./MenuItem";
 import { makeStyles } from "@mui/styles";
-import { combineClassNames } from "../../../utils";
+import combineClassNames from "../../../utils/combineClassNames";
 const useStyles = makeStyles((theme) => ({
     root: {
         padding: theme.componentsCare?.portal?.menu?.container?.padding,

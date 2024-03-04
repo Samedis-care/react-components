@@ -1,5 +1,5 @@
 import { ModelFieldName, PageVisibility } from "../Model";
-import { Connector } from "./index";
+import Connector from "./Connector";
 /**
  * Backend connector for APIs
  */

@@ -2,7 +2,7 @@ import React, { useCallback } from "react";
 import { IconButton, InputAdornment } from "@mui/material";
 import { Info as InfoIcon, Event as CalenderIcon } from "@mui/icons-material";
 import { InputLabelConfig, useInputStyles, } from "../CommonStyles";
-import { LocalizedDateTimePicker } from "../../../standalone/LocalizedDateTimePickers";
+import LocalizedDateTimePicker from "../../../standalone/LocalizedDateTimePickers/LocalizedDateTimePicker";
 const DateTimeInput = (props) => {
     const { openInfo, important, required, error, onBlur, ...muiProps } = props;
     const inputClasses = useInputStyles({ important });

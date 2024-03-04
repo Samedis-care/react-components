@@ -1,7 +1,8 @@
 import React, { useCallback, useRef } from "react";
 import { Box, Button, Grid, IconButton, Tooltip, Typography, useTheme, } from "@mui/material";
 import { AttachFile, Person } from "@mui/icons-material";
-import { combineClassNames, processImageB64 } from "../../../utils";
+import processImageB64 from "../../../utils/processImageB64";
+import combineClassNames from "../../../utils/combineClassNames";
 import makeStyles from "@mui/styles/makeStyles";
 import GroupBox from "../../GroupBox";
 import useCCTranslations from "../../../utils/useCCTranslations";

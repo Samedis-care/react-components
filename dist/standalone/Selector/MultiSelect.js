@@ -3,9 +3,10 @@ import BaseSelector from "./BaseSelector";
 import { Grid, Paper, useTheme } from "@mui/material";
 import makeStyles from "@mui/styles/makeStyles";
 import MultiSelectEntry from "./MultiSelectEntry";
-import { cleanClassMap, combineClassMaps } from "../../utils";
-import { showConfirmDialogBool } from "../../non-standalone";
-import { DialogContext } from "../../framework";
+import cleanClassMap from "../../utils/cleanClassMap";
+import combineClassMaps from "../../utils/combineClassMaps";
+import { showConfirmDialogBool } from "../../non-standalone/Dialog/Utils";
+import { DialogContext } from "../../framework/DialogContextProvider";
 import useCCTranslations from "../../utils/useCCTranslations";
 const useBaseSelectorStyles = makeStyles((theme) => ({
     inputRoot: (props) => ({

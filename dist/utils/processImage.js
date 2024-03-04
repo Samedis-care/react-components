@@ -1,4 +1,5 @@
-import { fileToData, processImageB64 } from "./index";
+import fileToData from "./fileToData";
+import processImageB64 from "./processImageB64";
 /**
  * Processes an image file
  * @param file The image file

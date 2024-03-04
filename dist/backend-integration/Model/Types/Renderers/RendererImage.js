@@ -3,7 +3,7 @@ import { FormControl, FormLabel } from "@mui/material";
 import ImageSelector from "../../../../standalone/FileUpload/Image/ImageSelector";
 import ccI18n from "../../../../i18n";
 import TypeImage from "../TypeImage";
-import { FormHelperTextCC } from "../../../../standalone";
+import { FormHelperTextCC } from "../../../../standalone/UIKit/MuiWarning";
 /**
  * Renders an image selector
  */

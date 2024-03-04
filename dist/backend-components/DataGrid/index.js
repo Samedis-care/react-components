@@ -1,10 +1,10 @@
 import React, { useCallback, useMemo, useState } from "react";
 import DataGrid from "../../standalone/DataGrid/DataGrid";
 import { useModelDeleteAdvanced, useModelDeleteMultiple, } from "../../backend-integration/Model/Model";
-import { useDialogContext } from "../../framework";
-import { ErrorDialog, showConfirmDialog } from "../../non-standalone";
+import { useDialogContext } from "../../framework/DialogContextProvider";
+import { ErrorDialog, showConfirmDialog } from "../../non-standalone/Dialog";
 import useCCTranslations from "../../utils/useCCTranslations";
-import { dotToObject, getValueByDot } from "../../utils";
+import { dotToObject, getValueByDot } from "../../utils/dotUtils";
 export const renderDataGridRecordUsingModel = (model, refreshGrid) => (entry) => Object.fromEntries(Object.keys(model.fields)
     .map((key) => {
     // we cannot render the ID, this will cause issues with the selection

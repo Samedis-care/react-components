@@ -1,6 +1,6 @@
 import React from "react";
 import { DatePicker } from "@mui/x-date-pickers";
-import { withMuiWarning } from "../UIKit";
+import { withMuiWarning } from "../UIKit/MuiWarning";
 const LocalizedDatePicker = (props) => {
     return React.createElement(DatePicker, { format: "L", ...props });
 };

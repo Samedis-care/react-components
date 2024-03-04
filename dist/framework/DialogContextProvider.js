@@ -1,6 +1,6 @@
-import React, { useCallback, useContext, useMemo, useRef, useState, } from "react";
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState, } from "react";
 import useCCTranslations from "../utils/useCCTranslations";
-import { useBlocker } from "react-router-dom";
+import { FrameworkHistory } from "./History";
 /**
  * Context for the dialog state
  */
@@ -20,14 +20,18 @@ const navBlockFn = (t) => () => {
  */
 const DialogContextProvider = (props) => {
     const { t } = useCCTranslations();
+    const navBlock = useRef(null);
     const dialogCount = useRef(0);
     const [dialogs, setDialogs] = useState([]);
     const parentContext = useContext(DialogContext);
-    const blocker = useBlocker(dialogs.length > 0 && dialogCount.current > 0 && navBlockFn(t));
     const pushDialog = useCallback((dialog) => {
+        // if no dialogs were present, add callback
+        if (dialogCount.current === 0) {
+            navBlock.current = FrameworkHistory.block(navBlockFn(t));
+        }
         dialogCount.current++;
         setDialogs((prevValue) => [...prevValue, dialog]);
-    }, []);
+    }, [t]);
     const popDialog = useCallback(() => {
         if (dialogCount.current === 0) {
             if (parentContext) {
@@ -41,15 +45,32 @@ const DialogContextProvider = (props) => {
         }
         // if all dialogs closed, remove callback
         dialogCount.current--;
-        if (dialogCount.current === 0 && blocker.reset) {
-            blocker.reset();
+        if (dialogCount.current === 0 && navBlock.current) {
+            navBlock.current();
+            navBlock.current = null;
         }
         setDialogs((prevValue) => {
             prevValue.pop();
             return [...prevValue];
         });
-    }, [blocker, parentContext]);
+    }, [parentContext]);
     const dialogActions = useMemo(() => [pushDialog, popDialog], [pushDialog, popDialog]);
+    // update callback if locale changes
+    useEffect(() => {
+        if (!navBlock.current)
+            return;
+        navBlock.current(); // unblock
+        navBlock.current = FrameworkHistory.block(navBlockFn(t)); // reblock
+    }, [t]);
+    // remove callback on unmount
+    useEffect(() => {
+        return () => {
+            if (navBlock.current) {
+                navBlock.current();
+                navBlock.current = null;
+            }
+        };
+    }, []);
     return (React.createElement(React.Fragment, null,
         React.createElement(DialogContext.Provider, { value: dialogActions },
             React.createElement(React.Fragment, null, props.children),

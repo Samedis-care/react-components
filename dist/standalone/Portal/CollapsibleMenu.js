@@ -3,7 +3,7 @@ import { Grid, IconButton } from "@mui/material";
 import { DoubleArrow } from "@mui/icons-material";
 import makeStyles from "@mui/styles/makeStyles";
 import { usePortalLayoutContext } from "./Layout";
-import { combineClassNames } from "../../utils";
+import combineClassNames from "../../utils/combineClassNames";
 const useStyles = makeStyles({
     container: {
         width: "100%",

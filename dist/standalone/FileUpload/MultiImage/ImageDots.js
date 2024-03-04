@@ -1,6 +1,7 @@
 import React from "react";
 import makeStyles from "@mui/styles/makeStyles";
-import { combineClassNames, makeThemeStyles } from "../../../utils";
+import combineClassNames from "../../../utils/combineClassNames";
+import makeThemeStyles from "../../../utils/makeThemeStyles";
 const useStyles = makeStyles((theme) => ({
     activeImageDot: {
         backgroundColor: theme.palette.text.primary,

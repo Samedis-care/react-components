@@ -1,5 +1,5 @@
-import { last, } from "../..";
 import Connector from "./Connector";
+import last from "../../utils/last";
 export var IndexEnhancementLevel;
 (function (IndexEnhancementLevel) {
     /**

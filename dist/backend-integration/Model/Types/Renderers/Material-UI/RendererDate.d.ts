@@ -1,5 +1,5 @@
 import React from "react";
-import { ModelRenderParams } from "../../../index";
+import ModelRenderParams from "../../../RenderParams";
 import TypeDate from "../../TypeDate";
 import { IDataGridColumnDef } from "../../../../../standalone/DataGrid/DataGrid";
 /**

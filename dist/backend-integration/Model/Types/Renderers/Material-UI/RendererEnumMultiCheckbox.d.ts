@@ -1,5 +1,5 @@
 import React from "react";
-import { ModelRenderParams } from "../../../index";
+import ModelRenderParams from "../../../RenderParams";
 import TypeEnumMulti from "../../TypeEnumMulti";
 import { EnumValue } from "../../TypeEnum";
 export type WrapButtonFunc = (btn: React.ReactElement, value: EnumValue) => React.ReactElement;

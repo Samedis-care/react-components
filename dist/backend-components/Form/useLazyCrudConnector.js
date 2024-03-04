@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef } from "react";
-import { LazyConnector, useFormContext, } from "../..";
 import DefaultConnector from "../../backend-integration/Connector/DefaultConnector";
+import LazyConnector from "../../backend-integration/Connector/LazyConnector";
+import { useFormContext } from "./Form";
 export const extractLazyCrudConnectorParams = (data) => {
     const { getEndpoint, initialId, getConnector, configureConnector, onParentIdChange, extraParams, field, ...otherProps } = data;
     const params = {

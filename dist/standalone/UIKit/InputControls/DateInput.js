@@ -1,9 +1,9 @@
 import React from "react";
 import { InputLabelConfig } from "../CommonStyles";
-import { LocalizedKeyboardDatePicker } from "../../../standalone/LocalizedDateTimePickers";
 import TextFieldWithHelp from "../TextFieldWithHelp";
-import { localDateToUtcDate } from "../../../utils";
+import localDateToUtcDate from "../../../utils/localDateToUtcDate";
 import moment from "moment";
+import LocalizedKeyboardDatePicker from "../../LocalizedDateTimePickers/LocalizedKeyboardDatePicker";
 const DateInput = (props) => {
     const { value, onChange, hideDisabledIcon, required, error, fullWidth, onBlur, ...muiProps } = props;
     return (React.createElement(LocalizedKeyboardDatePicker, { ...muiProps, value: value ? moment(value) : null, onChange: (date) => date ? onChange(localDateToUtcDate(date.toDate())) : onChange(null), hideDisabledIcon: hideDisabledIcon, required: required, error: error, fullWidth: fullWidth, onBlur: onBlur, slots: {

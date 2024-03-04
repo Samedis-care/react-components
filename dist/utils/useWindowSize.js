@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { debounce } from "./index";
+import debounce from "./debounce";
 const getWindowSize = () => {
     return [window.innerWidth, window.innerHeight];
 };

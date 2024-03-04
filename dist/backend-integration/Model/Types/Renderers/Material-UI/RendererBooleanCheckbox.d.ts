@@ -1,5 +1,5 @@
 import React from "react";
-import { ModelRenderParams } from "../../../index";
+import ModelRenderParams from "../../../RenderParams";
 import TypeBoolean from "../../TypeBoolean";
 /**
  * Renders a TypeBoolean field as Checkbox

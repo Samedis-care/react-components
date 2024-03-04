@@ -7,7 +7,7 @@ import { makeStyles } from "@mui/styles";
 import Paper from "@mui/material/Paper";
 import Box from "@mui/material/Box";
 import moment from "moment";
-import { combineClassNames } from "../../../utils";
+import combineClassNames from "../../../utils/combineClassNames";
 const useStyles = makeStyles((theme) => ({
     paper: {
         height: "100%",

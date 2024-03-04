@@ -1,7 +1,7 @@
 import React from "react";
 import { FormControl, FormHelperText, FormLabel, TextField, } from "@mui/material";
 import makeStyles from "@mui/styles/makeStyles";
-import { combineClassNames } from "../../utils";
+import combineClassNames from "../../utils/combineClassNames";
 export const useMuiWarningStyles = makeStyles((theme) => ({
     warning: {
         "& > .MuiFormLabel-root": {

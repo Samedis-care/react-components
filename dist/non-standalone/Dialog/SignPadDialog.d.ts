@@ -6,6 +6,6 @@ export interface SignPadDialogProps extends IDialogConfigSign {
      */
     classes?: Partial<ReturnType<typeof useStyles>>;
 }
-declare const useStyles: (props?: any) => import("@mui/styles").ClassNameMap<"root" | "closeButton" | "signDiv" | "imageDiv" | "hiddenDiv">;
+declare const useStyles: (props?: any) => import("@mui/styles").ClassNameMap<"root" | "imageDiv" | "closeButton" | "signDiv" | "hiddenDiv">;
 export declare const SignDialog: React.MemoExoticComponent<(props: SignPadDialogProps) => React.JSX.Element>;
 export {};

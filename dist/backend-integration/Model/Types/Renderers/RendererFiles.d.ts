@@ -1,5 +1,5 @@
 import React from "react";
-import { ModelRenderParams } from "../../index";
+import ModelRenderParams from "../../RenderParams";
 import TypeFiles from "../TypeFiles";
 import { FileData } from "../../../../standalone/FileUpload/Generic";
 /**

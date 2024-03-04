@@ -2,7 +2,8 @@ import React, { useCallback, useEffect, useRef, useState, } from "react";
 import { TextField, IconButton, InputAdornment, } from "@mui/material";
 import { Info as InfoIcon, Clear as ClearIcon } from "@mui/icons-material";
 import { InputLabelConfig, useInputStyles } from "./CommonStyles";
-import { combineClassNames, isTouchDevice } from "../../utils";
+import combineClassNames from "../../utils/combineClassNames";
+import isTouchDevice from "../../utils/isTouchDevice";
 import { useMuiWarningStyles } from "./MuiWarning";
 import { useRefComposer } from "react-ref-composer";
 const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(props, ref) {

@@ -3,7 +3,7 @@ import { useDataGridColumnsWidthState, useDataGridState, } from "../DataGrid";
 import AutoSizer from "react-virtualized-auto-sizer";
 import Cell, { CellContext } from "./Cell";
 import { applyColumnWidthLimits } from "./ColumnHeader";
-import { Loader } from "../../index";
+import Loader from "../../Loader";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import withStyles from "@mui/styles/withStyles";
 import CenteredTypography from "../../UIKit/CenteredTypography";

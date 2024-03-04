@@ -3,7 +3,7 @@ import React, { useCallback, useContext, } from "react";
 import ColumnHeader from "./ColumnHeader";
 import SelectRow, { isSelected } from "./SelectRow";
 import { Skeleton } from "@mui/material";
-import { combineClassNames } from "../../../utils";
+import combineClassNames from "../../../utils/combineClassNames";
 export const CellContext = React.createContext(undefined);
 export const useCellContext = () => {
     const ctx = useContext(CellContext);

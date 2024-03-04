@@ -3,7 +3,7 @@ import { Button, Grid } from "@mui/material";
 import { AppsIcon } from "../../Icons";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import { useDataGridStyles } from "../DataGrid";
-import { combineClassNames } from "../../../utils";
+import combineClassNames from "../../../utils/combineClassNames";
 import { useCustomFilterActiveContext } from "./FilterBar";
 const CustomFiltersButton = (props) => {
     const classes = useDataGridStyles();

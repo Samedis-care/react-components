@@ -1,4 +1,4 @@
-import { IDownscaleProps } from "./processImage";
+import type { IDownscaleProps } from "./processImage";
 /**
  * Processes an image file
  * @param imageData The image (as data uri)

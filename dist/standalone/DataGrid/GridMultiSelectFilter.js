@@ -1,8 +1,9 @@
 import React, { useCallback, useEffect, useMemo } from "react";
-import { compareArrayContent, MultiSelectWithCheckBox, } from "../..";
 import { Checkbox, Divider, FormControlLabel, Grid, Typography, } from "@mui/material";
 import { useCustomFilterActiveContext } from "./Header/FilterBar";
 import { useDataGridStyles } from "./DataGrid";
+import compareArrayContent from "../../utils/compareArrayContent";
+import MultiSelectWithCheckBox from "../Selector/MultiSelectWithCheckBox";
 const GridMultiSelectFilter = (props) => {
     const { label, options, onSelect, dialog, dialogBreakpoints, barBreakpoints, } = props;
     const classes = useDataGridStyles();

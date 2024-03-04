@@ -3,7 +3,7 @@ import { Box, Hidden, IconButton, InputAdornment, Popover, } from "@mui/material
 import { Search as SearchIcon } from "@mui/icons-material";
 import { useDataGridProps, useDataGridStyles } from "../DataGrid";
 import TextFieldWithHelp from "../../UIKit/TextFieldWithHelp";
-import { combineClassNames } from "../../../utils";
+import combineClassNames from "../../../utils/combineClassNames";
 const anchorOrigin = {
     vertical: "bottom",
     horizontal: "center",

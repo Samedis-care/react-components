@@ -1,6 +1,6 @@
-import { DialogContextType } from "../../framework";
+import { DialogContextType } from "../../framework/DialogContextProvider";
 import { IDialogConfigConfirmAsync, IDialogConfigInputAsync, IDialogConfigSimple } from "./Types";
-import { ValidationError } from "../../backend-components";
+import type { ValidationError } from "../../backend-components/Form/Form";
 /**
  * Shows an awaitable confirm dialog
  * @param pushDialog The dialog context's (useDialogContext()) pushDialog function

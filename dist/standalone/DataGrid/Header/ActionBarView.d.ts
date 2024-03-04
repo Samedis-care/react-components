@@ -1,5 +1,5 @@
 import React from "react";
-import { IDataGridExporter } from "./index";
+import type { IDataGridExporter } from "./index";
 import { IDataGridAddButton } from "../DataGrid";
 import { ResetCallbacks } from "./ResetMenu";
 export interface IDataGridActionBarViewProps extends ResetCallbacks {

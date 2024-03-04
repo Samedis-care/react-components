@@ -1,7 +1,10 @@
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState, } from "react";
 import { useModelDelete, useModelGet, useModelMutation, } from "../../backend-integration/Model/Model";
 import Loader from "../../standalone/Loader";
-import { deepAssign, deepClone, dotInObject, dotSet, dotsToObject, dotToObject, getValueByDot, isObjectEmpty, } from "../../utils";
+import { dotInObject, dotSet, dotsToObject, dotToObject, getValueByDot, } from "../../utils/dotUtils";
+import deepAssign from "../../utils/deepAssign";
+import deepClone from "../../utils/deepClone";
+import isObjectEmpty from "../../utils/isObjectEmpty";
 import { Grid, Typography } from "@mui/material";
 import { getVisibility } from "../../backend-integration/Model/Visibility";
 import { showConfirmDialogBool } from "../../non-standalone";

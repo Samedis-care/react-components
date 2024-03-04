@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo } from "react";
 import { MultiSelectWithTags, } from "../../standalone";
 import { useSelectedCache, } from "./BackendMultiSelect";
-import { debouncePromise } from "../../utils";
+import debouncePromise from "../../utils/debouncePromise";
 /**
  * Backend connected MultiSelectWithTags
  * @remarks Doesn't support custom data

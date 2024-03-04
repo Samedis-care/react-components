@@ -1,5 +1,5 @@
 import React from "react";
-import { IFrameworkProps } from "./Framework";
+import type { IFrameworkProps } from "./Framework";
 import { Theme, ThemeOptions } from "@mui/material";
 declare module "@mui/styles/defaultTheme" {
     interface DefaultTheme extends Theme {

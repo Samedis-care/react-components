@@ -5,9 +5,9 @@ import Step1LoadData from "./Step1LoadData";
 import Step2ConnectData from "./Step2ConnectData";
 import Step3ValidateReview from "./Step3ValidateReview";
 import Step4Import from "./Step4Import";
-import { useLocation } from "react-router";
 import { FrameworkHistory } from "../../../framework";
 import useCCTranslations from "../../../utils/useCCTranslations";
+import useLocation from "../../../standalone/Routes/useLocation";
 export const IMPORT_STEPS = [
     "backend-components.crud.import.step1",
     "backend-components.crud.import.step2",

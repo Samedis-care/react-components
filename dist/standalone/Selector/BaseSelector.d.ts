@@ -263,7 +263,7 @@ export type SelectorThemeExpert = {
     base?: Partial<Styles<Theme, BaseSelectorProps<BaseSelectorData>, AutocompleteClassKey>>;
     extensions?: Partial<Styles<Theme, BaseSelectorProps<BaseSelectorData>, SelectorCustomStylesClassKey>>;
 };
-declare const useCustomStylesBase: (props: Pick<BaseSelectorProps<BaseSelectorData>, "label" | "iconSize">) => import("@mui/styles").ClassNameMap<"label" | "switch" | "selected" | "icon" | "wrapper" | "divider" | "smallLabel" | "labelWithSwitch" | "infoBtn" | "textFieldStandard" | "listItem" | "lruListItem">;
+declare const useCustomStylesBase: (props: Pick<BaseSelectorProps<BaseSelectorData>, "label" | "iconSize">) => import("@mui/styles").ClassNameMap<"label" | "switch" | "selected" | "icon" | "smallLabel" | "divider" | "wrapper" | "labelWithSwitch" | "infoBtn" | "textFieldStandard" | "listItem" | "lruListItem">;
 export type SelectorCustomStylesClassKey = keyof ReturnType<typeof useCustomStylesBase>;
 export interface BaseSelectorContextType {
     addToLru: (...ids: string[]) => void;
