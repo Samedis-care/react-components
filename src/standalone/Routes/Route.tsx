@@ -46,12 +46,14 @@ const Route = (props: RouteProps) => {
 	const { path, element } = props;
 	const { pathname } = useLocation();
 	const routePrefix = useRoutePrefix();
-	const ctx = useMemo((): RouteContextType => {
+	const ctx = useMemo((): RouteContextType | null => {
 		const finalPath = normalizePath(routePrefix + path);
 		const match = matchPath({ path: finalPath }, pathname);
-		if (!match) throw new Error("Route rendered that does not match");
+		if (!match) return null; // this one is about to be unmounted
 		return { url: match.url, path: finalPath };
 	}, [path, pathname, routePrefix]);
+
+	if (!ctx) return <React.Fragment />;
 	return <RouteContext.Provider value={ctx}>{element}</RouteContext.Provider>;
 };
 
