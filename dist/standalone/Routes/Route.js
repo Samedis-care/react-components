@@ -26,9 +26,11 @@ const Route = (props) => {
         const finalPath = normalizePath(routePrefix + path);
         const match = matchPath({ path: finalPath }, pathname);
         if (!match)
-            throw new Error("Route rendered that does not match");
+            return null; // this one is about to be unmounted
         return { url: match.url, path: finalPath };
     }, [path, pathname, routePrefix]);
+    if (!ctx)
+        return React.createElement(React.Fragment, null);
     return React.createElement(RouteContext.Provider, { value: ctx }, element);
 };
 export default React.memo(Route);
