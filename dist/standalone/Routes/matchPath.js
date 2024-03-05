@@ -14,8 +14,12 @@ export const normalizePath = (path) => {
  * @return PathMatch if matched, null if not
  */
 const matchPath = (pattern, pathname) => {
-    const locSplit = normalizePath(pathname).split("/");
-    const routeSplit = normalizePath(pattern.path).split("/");
+    const locSplit = normalizePath(pathname)
+        .split("/")
+        .filter((x) => !!x);
+    const routeSplit = normalizePath(pattern.path)
+        .split("/")
+        .filter((x) => !!x);
     if (routeSplit.length === 0)
         return null;
     const freeEnd = routeSplit[routeSplit.length - 1] === "*";
@@ -47,9 +51,10 @@ const matchPath = (pattern, pathname) => {
         }
     }
     return {
-        url: locSplit
-            .slice(0, freeEnd ? routeSplit.length - 1 : routeSplit.length)
-            .join("/"),
+        url: "/" +
+            locSplit
+                .slice(0, freeEnd ? routeSplit.length - 1 : routeSplit.length)
+                .join("/"),
         params: Object.fromEntries(params),
     };
 };
