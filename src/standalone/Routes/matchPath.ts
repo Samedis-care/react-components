@@ -45,8 +45,12 @@ const matchPath = (
 	pattern: PathPattern,
 	pathname: string,
 ): PathMatch | null => {
-	const locSplit = normalizePath(pathname).split("/");
-	const routeSplit = normalizePath(pattern.path).split("/");
+	const locSplit = normalizePath(pathname)
+		.split("/")
+		.filter((x) => !!x);
+	const routeSplit = normalizePath(pattern.path)
+		.split("/")
+		.filter((x) => !!x);
 	if (routeSplit.length === 0) return null;
 	const freeEnd = routeSplit[routeSplit.length - 1] === "*";
 	if (pattern.end) {
@@ -74,9 +78,11 @@ const matchPath = (
 		}
 	}
 	return {
-		url: locSplit
-			.slice(0, freeEnd ? routeSplit.length - 1 : routeSplit.length)
-			.join("/"),
+		url:
+			"/" +
+			locSplit
+				.slice(0, freeEnd ? routeSplit.length - 1 : routeSplit.length)
+				.join("/"),
 		params: Object.fromEntries(params),
 	};
 };
