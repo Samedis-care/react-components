@@ -51,7 +51,8 @@ const matchPath = (
 	const routeSplit = normalizePath(pattern.path)
 		.split("/")
 		.filter((x) => !!x);
-	if (routeSplit.length === 0) return null;
+	if (routeSplit.length === 0)
+		return locSplit.length === 0 ? { url: "/", params: {} } : null;
 	const freeEnd = routeSplit[routeSplit.length - 1] === "*";
 	if (pattern.end) {
 		if (locSplit.length > routeSplit.length && !freeEnd) return null;
