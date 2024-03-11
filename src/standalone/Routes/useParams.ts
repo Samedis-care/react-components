@@ -6,7 +6,7 @@ import matchPath from "./matchPath";
 /**
  * Use route params
  */
-const useParams = (): Record<string, string> => {
+const useParams = <T extends string = string>(): Partial<Record<T, string>> => {
 	const location = useLocation();
 	const route = useContext(RouteContext);
 	if (!route) return {};
