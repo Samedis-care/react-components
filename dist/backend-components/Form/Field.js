@@ -71,6 +71,7 @@ const Field = (props) => {
             initialValue: initialValue,
             visibility: readOnly ? { ...visibility, readOnly: true } : visibility,
             handleChange: setFieldValueHookWrapper,
+            setFieldValue: setFieldValueHookWrapper,
             handleBlur,
             label: label,
             errorMsg,

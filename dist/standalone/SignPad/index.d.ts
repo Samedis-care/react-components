@@ -29,6 +29,6 @@ export interface SignPadProps {
      */
     onBlur?: React.FocusEventHandler<HTMLDivElement>;
 }
-declare const useStyles: (props?: any) => import("@mui/styles").ClassNameMap<"signPadDiv" | "imageDiv" | "signPreview" | "signTextDiv" | "infoDiv">;
+declare const useStyles: (props?: any) => import("@mui/styles").ClassNameMap<"imageDiv" | "signPadDiv" | "signPreview" | "signTextDiv" | "infoDiv">;
 declare const _default: React.MemoExoticComponent<(props: SignPadProps) => React.JSX.Element>;
 export default _default;
