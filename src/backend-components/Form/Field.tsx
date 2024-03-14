@@ -15,6 +15,7 @@ import { getVisibility } from "../../backend-integration/Model/Visibility";
 import { dotsToObject, getValueByDot } from "../../utils/dotUtils";
 import Type from "../../backend-integration/Model/Type";
 import shallowCompare from "../../utils/shallowCompare";
+import RenderParams from "../../backend-integration/Model/RenderParams";
 
 type NonOverridableProps =
 	| "getDefaultValue"
@@ -157,13 +158,14 @@ const Field = (props: FieldProps): React.ReactElement => {
 
 	return useMemo(
 		() => {
-			const renderParams = {
+			const renderParams: RenderParams<unknown> = {
 				field: name,
 				value: value,
 				touched: touch,
 				initialValue: initialValue,
 				visibility: readOnly ? { ...visibility, readOnly: true } : visibility,
 				handleChange: setFieldValueHookWrapper,
+				setFieldValue: setFieldValueHookWrapper,
 				handleBlur,
 				label: label,
 				errorMsg,

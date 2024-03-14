@@ -128,6 +128,9 @@ export const renderDataGridRecordUsingModel =
 												refreshGrid();
 											})();
 										},
+										setFieldValue: () => {
+											throw new Error("Not implemented in Grid");
+										},
 										handleBlur: () => {
 											// this is unhandled in the data grid
 										},

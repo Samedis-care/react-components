@@ -2,6 +2,7 @@ import type { ModelFieldName, PageVisibility } from "./Model";
 import type Model from "./Model";
 import type Visibility from "./Visibility";
 import type React from "react";
+import { FormContextData } from "../../backend-components";
 
 interface RenderParams<T> {
 	/**
@@ -60,6 +61,11 @@ interface RenderParams<T> {
 		touched?: boolean,
 		validate?: boolean,
 	) => void;
+	/**
+	 * Set a field value
+	 * @see FormContextData["setFieldValue"]
+	 */
+	setFieldValue: FormContextData["setFieldValue"];
 	/**
 	 * If the given field has a relation and relation data was fetched while loading the form it can be accessed using this field
 	 */
