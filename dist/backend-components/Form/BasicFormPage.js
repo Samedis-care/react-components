@@ -125,7 +125,7 @@ const BasicFormPage = (props) => {
         }
     }, [submit, postSubmitHandler, pushDialog]);
     return (React.createElement(FormPageLayout, { body: form, footer: React.createElement(FormButtons, { ...childrenProps, ...otherProps, showBackButtonOnly: otherProps.showBackButtonOnly ||
-                (readOnly && !!Object.values(readOnlyReasons).find((e) => !!e)), readOnly: readOnly, readOnlyReasons: readOnlyReasons, isSubmitting: isSubmitting, dirty: dirty, disableRouting: disableRouting, submit: handleSubmit, customProps: typeof originalCustomProps === "object" &&
+                (readOnly && !Object.values(readOnlyReasons).find((e) => !!e)), readOnly: readOnly, readOnlyReasons: readOnlyReasons, isSubmitting: isSubmitting, dirty: dirty, disableRouting: disableRouting, submit: handleSubmit, customProps: typeof originalCustomProps === "object" &&
                 originalCustomProps != null
                 ? customPropsWithGoBack
                 : originalCustomProps }), other: React.createElement(FormLoaderOverlay, { visible: isSubmitting }) }));
