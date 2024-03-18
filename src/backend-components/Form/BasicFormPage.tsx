@@ -221,7 +221,7 @@ const BasicFormPage = <RendererPropsT, CustomPropsT>(
 					{...otherProps}
 					showBackButtonOnly={
 						otherProps.showBackButtonOnly ||
-						(readOnly && !!Object.values(readOnlyReasons).find((e) => !!e))
+						(readOnly && !Object.values(readOnlyReasons).find((e) => !!e))
 					}
 					readOnly={readOnly}
 					readOnlyReasons={readOnlyReasons}
