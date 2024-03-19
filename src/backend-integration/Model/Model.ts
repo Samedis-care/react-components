@@ -259,6 +259,7 @@ export const useModelFetchAll = <
 >(
 	model: Model<KeyT, VisibilityT, CustomT>,
 	params?: ModelFetchAllParams,
+	options?: UseQueryOptions<ModelIndexResponse, Error, ModelIndexResponse>,
 ): UseQueryResult<ModelIndexResponse, Error> => {
 	return useQuery(
 		model.getReactQueryKeyFetchAll(params),
@@ -267,6 +268,7 @@ export const useModelFetchAll = <
 			// 3 retries if we get network error
 			retry: (count, err: Error) => err.name === "NetworkError" && count < 3,
 			...model.cacheOptions,
+			...options,
 		},
 	);
 };
