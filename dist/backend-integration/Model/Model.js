@@ -32,11 +32,12 @@ export const useModelGet = (model, id, options) => {
  * @returns ModelIndexResponse where userMeta and meta is taken from the last call
  * @see Model.fetchAll
  */
-export const useModelFetchAll = (model, params) => {
+export const useModelFetchAll = (model, params, options) => {
     return useQuery(model.getReactQueryKeyFetchAll(params), () => model.fetchAll(params), {
         // 3 retries if we get network error
         retry: (count, err) => err.name === "NetworkError" && count < 3,
         ...model.cacheOptions,
+        ...options,
     });
 };
 /**

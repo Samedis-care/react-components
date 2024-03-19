@@ -142,7 +142,7 @@ export declare const useModelGet: <KeyT extends string, VisibilityT extends Page
  * @returns ModelIndexResponse where userMeta and meta is taken from the last call
  * @see Model.fetchAll
  */
-export declare const useModelFetchAll: <KeyT extends string, VisibilityT extends PageVisibility, CustomT>(model: Model<KeyT, VisibilityT, CustomT>, params?: ModelFetchAllParams) => UseQueryResult<ModelIndexResponse, Error>;
+export declare const useModelFetchAll: <KeyT extends string, VisibilityT extends PageVisibility, CustomT>(model: Model<KeyT, VisibilityT, CustomT>, params?: ModelFetchAllParams, options?: UseQueryOptions<ModelIndexResponse, Error, ModelIndexResponse>) => UseQueryResult<ModelIndexResponse, Error>;
 /**
  * React-Query's useMutation to update/create a new record on backend
  * @param model The model
