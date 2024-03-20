@@ -99,7 +99,9 @@ const FilterBar = () => {
 				alignItems={"center"}
 				justifyContent={"flex-end"}
 				spacing={2}
-				className={classes.filterBarGrid}
+				className={
+					classes.filterBarGrid + " components-care-data-grid-filter-bar"
+				}
 			>
 				{FilterBarView &&
 					(enableDialog ? (
