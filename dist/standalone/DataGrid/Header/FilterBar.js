@@ -46,7 +46,7 @@ const FilterBar = () => {
     }, [enableDialog, setState]);
     const FilterBarView = props.filterBar;
     return (React.createElement(Box, { ml: 4, className: classes.filterBarBox },
-        React.createElement(Grid, { container: true, alignItems: "center", justifyContent: "flex-end", spacing: 2, className: classes.filterBarGrid }, FilterBarView &&
+        React.createElement(Grid, { container: true, alignItems: "center", justifyContent: "flex-end", spacing: 2, className: classes.filterBarGrid + " components-care-data-grid-filter-bar" }, FilterBarView &&
             (enableDialog ? (React.createElement(Grid, { item: true },
                 React.createElement(CustomFiltersButton, { onClick: openDialog }))) : (React.createElement(FilterBarView, { customData: state.customData, setCustomData: setCustomData, inDialog: false }))))));
 };
