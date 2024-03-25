@@ -1,10 +1,3 @@
-import React from "react";
-declare const useStyles: (props?: any) => import("@mui/styles").ClassNameMap<"root">;
-export interface VerticalDividerProps {
-    /**
-     * Custom styles to apply
-     */
-    classes?: Partial<ReturnType<typeof useStyles>>;
-}
-declare const _default: React.MemoExoticComponent<(props: VerticalDividerProps) => React.JSX.Element>;
-export default _default;
+/// <reference types="react" />
+declare const VerticalDivider: import("@emotion/styled").StyledComponent<import("@mui/system").MUIStyledCommonProps<import("@mui/material").Theme>, Pick<import("react").DetailedHTMLProps<import("react").HTMLAttributes<HTMLDivElement>, HTMLDivElement>, keyof import("react").ClassAttributes<HTMLDivElement> | keyof import("react").HTMLAttributes<HTMLDivElement>>, {}>;
+export default VerticalDivider;

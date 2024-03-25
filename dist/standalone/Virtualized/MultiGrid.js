@@ -1,30 +1,30 @@
 import React, { useCallback, useEffect, useMemo, useRef, } from "react";
 import { VariableSizeGrid, } from "react-window";
-import makeStyles from "@mui/styles/makeStyles";
-const useStyles = makeStyles({
-    bottomLeft: {
-        // in webkit based browsers:
-        // hide the vertical scrollbar, sadly also removes the default styles
-        // from the horizontal scrollbar
-        "&::-webkit-scrollbar": {
-            width: 0,
-            height: "auto",
-        },
-        "&::-webkit-scrollbar-track": {
-            background: "white",
-        },
-        "&::-webkit-scrollbar-thumb": {
-            background: "hsl(0, 0%, 60%)",
-        },
-        // in firefox just hide it completely
-        // we can do that because the scrollbar
-        // doesn't add to the content width in firefox
-        scrollbarWidth: "none",
+import { styled } from "@mui/material";
+const BottomLeftVariableSizeGrid = styled(VariableSizeGrid, {
+    name: "CcMultiGrid",
+    slot: "BottomLeftGrid",
+})({
+    // in webkit based browsers:
+    // hide the vertical scrollbar, sadly also removes the default styles
+    // from the horizontal scrollbar
+    "&::-webkit-scrollbar": {
+        width: 0,
+        height: "auto",
     },
-}, { name: "CcMultiGrid" });
+    "&::-webkit-scrollbar-track": {
+        background: "white",
+    },
+    "&::-webkit-scrollbar-thumb": {
+        background: "hsl(0, 0%, 60%)",
+    },
+    // in firefox just hide it completely
+    // we can do that because the scrollbar
+    // doesn't add to the content width in firefox
+    scrollbarWidth: "none",
+});
 const MultiGrid = (props) => {
     const { width, height, columnCount, columnWidth, rowCount, rowHeight, onItemsRendered, fixedColumnCount, fixedRowCount, styleTopLeftGrid, styleTopRightGrid, styleBottomLeftGrid, styleBottomRightGrid, children: CellRenderer, noContentRenderer: NoContentRenderer, globalScrollListener, } = props;
-    const classes = useStyles();
     const fixedWidth = useMemo(() => Array.from(new Array(fixedColumnCount).keys()).reduce((p, c) => p + columnWidth(c), 0), [columnWidth, fixedColumnCount]);
     const fixedHeight = useMemo(() => Array.from(new Array(fixedRowCount).keys()).reduce((p, c) => p + rowHeight(c), 0), [fixedRowCount, rowHeight]);
     const CellRendererTopRight = useCallback((props) => {
@@ -120,7 +120,7 @@ const MultiGrid = (props) => {
                 top: 0,
                 left: fixedWidth,
             } }, CellRendererTopRight),
-        React.createElement(VariableSizeGrid, { ref: bottomLeftGrid, columnWidth: (index) => columnWidth(index), rowHeight: (index) => rowHeight(index + fixedRowCount), columnCount: fixedColumnCount, rowCount: rowCount - fixedRowCount, width: Math.min(fixedWidth, width), height: height - fixedHeight, onScroll: handleScrollPinned, className: classes.bottomLeft, style: {
+        React.createElement(BottomLeftVariableSizeGrid, { ref: bottomLeftGrid, columnWidth: (index) => columnWidth(index), rowHeight: (index) => rowHeight(index + fixedRowCount), columnCount: fixedColumnCount, rowCount: rowCount - fixedRowCount, width: Math.min(fixedWidth, width), height: height - fixedHeight, onScroll: handleScrollPinned, style: {
                 ...styleBottomLeftGrid,
                 position: "absolute",
                 overflow: "scroll",

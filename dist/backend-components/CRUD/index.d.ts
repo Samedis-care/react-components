@@ -144,6 +144,9 @@ export interface CrudProps<KeyT extends ModelFieldName, VisibilityT extends Page
      */
     importUI?: React.ComponentType<CrudImportProps<KeyT, VisibilityT, CustomT>>;
 }
+export interface CRUDGridVisibilityWrapperOwnerState {
+    hidden: boolean;
+}
 export interface CrudDispatch {
     /**
      * Force-refreshes the grid

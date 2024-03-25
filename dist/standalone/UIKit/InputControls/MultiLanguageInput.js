@@ -1,23 +1,22 @@
 import React, { useCallback, useState } from "react";
-import { Grid, IconButton, InputAdornment, TextField, Tooltip, Typography, } from "@mui/material";
-import makeStyles from "@mui/styles/makeStyles";
+import { Grid, IconButton, InputAdornment, TextField, Tooltip, Typography, styled, } from "@mui/material";
 import { useCCLanguagesTranslations } from "../../../utils/useCCTranslations";
 import { Translate } from "@mui/icons-material";
 import combineClassNames from "../../../utils/combineClassNames";
 import { useMuiWarningStyles } from "../MuiWarning";
-const useStyles = makeStyles({
-    langSelect: {
-        cursor: "pointer",
-        pointerEvents: "auto",
-    },
-    activeLang: {
+const LanguageLabel = styled("span", {
+    name: "CcMultiLanguageInput",
+    slot: "languageLabel",
+})(({ ownerState }) => ({
+    cursor: "pointer",
+    pointerEvents: "auto",
+    ...(ownerState.active && {
         fontWeight: "bold",
-    },
-}, { name: "CcMultiLanguageInput" });
+    }),
+}));
 const MultiLanguageInput = (props) => {
     const { enabledLanguages, values, onChange, name, onBlur, label, disableIncompleteMarker, required, ignoreI18nLocale, warning, ...textFieldProps } = props;
     const { t, i18n } = useCCLanguagesTranslations();
-    const classes = useStyles();
     const warningClasses = useMuiWarningStyles();
     // determine default language
     let defaultLanguage = i18n.language.split("-")[0];
@@ -66,10 +65,7 @@ const MultiLanguageInput = (props) => {
                 ...enabledLanguages.filter((lang) => lang !== defaultLanguage),
             ].map((lang) => (React.createElement("span", { key: lang },
                 React.createElement(Tooltip, { title: getLanguageName(lang) },
-                    React.createElement("span", { className: combineClassNames([
-                            classes.langSelect,
-                            activeLanguage === lang && classes.activeLang,
-                        ]), "data-lang": lang, onClick: handleActiveLangSelect }, lang)),
+                    React.createElement(LanguageLabel, { ownerState: { active: activeLanguage === lang }, "data-lang": lang, onClick: handleActiveLangSelect }, lang)),
                 " "))))) : lang === defaultLanguage ? (label) : undefined, required: defaultLanguage === lang && activeLanguage === defaultLanguage
             ? required
             : undefined, value: values[lang] ?? "", onChange: handleChange, name: `${name ?? "mli"}-${lang}`, InputLabelProps: {

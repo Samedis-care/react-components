@@ -1,27 +1,33 @@
 import React, { useCallback, useMemo, useRef } from "react";
 import { isFieldImportable } from "./index";
-import { Box, Card, CardContent, CircularProgress, Grid, Table, TableBody, TableCell, TableHead, TableRow, TextField, Tooltip, Typography, } from "@mui/material";
-import makeStyles from "@mui/styles/makeStyles";
+import { Box, Card, CardContent, CircularProgress, Grid, Table, TableBody, TableCell, TableHead, TableRow, TextField, Tooltip, Typography, styled, } from "@mui/material";
 import { Check as CheckIcon, ErrorOutline as ErrorIcon, HelpOutline as UnknownIcon, } from "@mui/icons-material";
 import uniqueArray from "../../../utils/uniqueArray";
 import debouncePromise from "../../../utils/debouncePromise";
 import useCCTranslations from "../../../utils/useCCTranslations";
-const useStyles = makeStyles({
-    scriptInput: {
-        "& textarea": {
-            fontFamily: "monospace",
-        },
-    },
-    monospace: {
+const ScriptInput = styled(TextField, {
+    name: "CcCrudImportStep2",
+    slot: "ScriptInput",
+})({
+    "& textarea": {
         fontFamily: "monospace",
     },
-    cardContent: {
+});
+const MonoTableCell = styled(TableCell, {
+    name: "CcCrudImportStep2",
+    slot: "MonoTableCell",
+})({
+    fontFamily: "monospace",
+});
+const StyledCardContent = styled(CardContent, {
+    name: "CcCrudImportStep2",
+    slot: "CardContent",
+})({
+    paddingBottom: 4,
+    "&:last-child": {
         paddingBottom: 4,
-        "&:last-child": {
-            paddingBottom: 4,
-        },
     },
-}, { name: "CcCrudImportStep2" });
+});
 export const useImportStep2Logic = (props) => {
     const { model, state, setState } = props;
     const { t } = useCCTranslations();
@@ -118,7 +124,6 @@ export const useImportStep2Logic = (props) => {
 };
 const Step2ConnectData = (props) => {
     const { model, state } = props;
-    const classes = useStyles();
     const { t } = useCCTranslations();
     const { columns, handleConversionScriptChange } = useImportStep2Logic(props);
     return (React.createElement(Grid, { container: true, spacing: 2 },
@@ -133,7 +138,7 @@ const Step2ConnectData = (props) => {
                 React.createElement(TableBody, null, columns.map((column) => {
                     const dataTypes = uniqueArray(state.data.map((record) => typeof record[column])).sort();
                     return (React.createElement(TableRow, { key: column },
-                        React.createElement(TableCell, { className: classes.monospace }, `record["${column}"]`),
+                        React.createElement(MonoTableCell, null, `record["${column}"]`),
                         React.createElement(TableCell, null, dataTypes.join(", "))));
                 })))),
         React.createElement(Grid, { item: true, xs: 6 },
@@ -145,7 +150,7 @@ const Step2ConnectData = (props) => {
                 const convScript = state.conversionScripts[name];
                 return (React.createElement(Grid, { item: true, xs: 12, key: name },
                     React.createElement(Card, null,
-                        React.createElement(CardContent, { className: classes.cardContent },
+                        React.createElement(StyledCardContent, null,
                             React.createElement(Grid, { container: true, justifyContent: "space-between" },
                                 React.createElement(Grid, { item: true },
                                     React.createElement(Typography, null, field.getLabel()
@@ -161,7 +166,7 @@ const Step2ConnectData = (props) => {
                             React.createElement(Grid, { item: true, xs: 12 },
                                 React.createElement(Box, { mt: 2 },
                                     convScript?.error && (React.createElement(Typography, null, convScript.error.toString())),
-                                    React.createElement(TextField, { multiline: true, label: t("backend-components.crud.import.conv_script"), name: name, value: convScript?.script ?? "", onChange: handleConversionScriptChange, placeholder: `${name} = `, className: classes.scriptInput, fullWidth: true })))))));
+                                    React.createElement(ScriptInput, { multiline: true, label: t("backend-components.crud.import.conv_script"), name: name, value: convScript?.script ?? "", onChange: handleConversionScriptChange, placeholder: `${name} = `, fullWidth: true })))))));
             })))));
 };
 export default React.memo(Step2ConnectData);

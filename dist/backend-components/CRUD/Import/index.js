@@ -1,6 +1,5 @@
 import React, { useCallback, useState } from "react";
-import { Button, Grid, Step, StepLabel, Stepper } from "@mui/material";
-import makeStyles from "@mui/styles/makeStyles";
+import { Button, Grid, Step, StepLabel, Stepper, styled } from "@mui/material";
 import Step1LoadData from "./Step1LoadData";
 import Step2ConnectData from "./Step2ConnectData";
 import Step3ValidateReview from "./Step3ValidateReview";
@@ -14,12 +13,10 @@ export const IMPORT_STEPS = [
     "backend-components.crud.import.step3",
     "backend-components.crud.import.step4",
 ];
-const useStyles = makeStyles({
-    wrapper: {
-        width: "100%",
-        height: "100%",
-    },
-}, { name: "CcCrudImport" });
+const Wrapper = styled(Grid, { name: "CcCrudImport", slot: "Wrapper" })({
+    width: "100%",
+    height: "100%",
+});
 export const isFieldImportable = (name, field) => {
     const createVisibility = field.visibility.create;
     const editVisibility = field.visibility.edit;
@@ -74,11 +71,10 @@ export const useCrudImportLogic = (props) => {
     };
 };
 const CrudImport = (props) => {
-    const classes = useStyles();
     const { t } = useCCTranslations();
     const { updateKeyAdditionalFilters, howTo, model, updateKey, validate } = props;
     const { guided, activeStep, state, setState, hasImportConfig, next, prev, finish, } = useCrudImportLogic(props);
-    return (React.createElement(Grid, { container: true, direction: "column", justifyContent: "space-between", alignItems: "stretch", spacing: 2, wrap: "nowrap", className: classes.wrapper },
+    return (React.createElement(Wrapper, { container: true, direction: "column", justifyContent: "space-between", alignItems: "stretch", spacing: 2, wrap: "nowrap" },
         React.createElement(Grid, { item: true },
             React.createElement(Stepper, { activeStep: guided && activeStep > 1 ? activeStep - 1 : activeStep }, IMPORT_STEPS.filter((label, index) => !(guided && index === 1)).map((label, index) => (React.createElement(Step, { key: index.toString(16) },
                 React.createElement(StepLabel, null, t(label))))))),
