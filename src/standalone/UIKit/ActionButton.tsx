@@ -1,53 +1,72 @@
 import React from "react";
-import { Box, Button, ButtonProps, Tooltip, styled } from "@mui/material";
+import {
+	Box,
+	Button,
+	ButtonProps,
+	Tooltip,
+	styled,
+	useThemeProps,
+} from "@mui/material";
 import combineColors from "../../utils/combineColors";
 
 export type ActionButtonClassKey = "button";
 
+export interface ActionButtonOwnerState {
+	small: boolean;
+	color: boolean;
+}
+
 const StyledButton = styled(Button, {
 	name: "CcActionButton",
 	slot: "button",
-})<ActionButtonProps>(({ theme, small }) => ({
-	backgroundColor: theme.palette.primary.main,
-	color: theme.palette.primary.contrastText,
-	textTransform: "unset",
-	justifyContent: "flex-start",
-	"&:hover": {
-		backgroundColor: `rgba(${combineColors(
-			theme.palette.primary.main,
-			theme.palette.action.hover,
-		).join()})`,
-	},
-	"&:.Mui-disabled": {
-		backgroundColor: theme.palette.action.disabled,
-	},
-	minWidth: small ? 0 : undefined,
-	paddingLeft: small ? theme.spacing(3) : undefined,
-	paddingRight: small ? theme.spacing(3) : undefined,
-	"& .MuiButton-startIcon": {
-		margin: small ? 0 : undefined,
-	},
-	"& .MuiButton-outlined": {
-		borderRadius: theme.shape.borderRadius,
-		"&.Mui-disabled": {
-			color: theme.palette.background.paper,
+})<{ ownerState: ActionButtonOwnerState }>(({
+	theme,
+	ownerState: { small, color },
+}) => {
+	return {
+		backgroundColor: color ? undefined : theme.palette.primary.main,
+		color: color ? undefined : theme.palette.primary.contrastText,
+		textTransform: "unset",
+		justifyContent: "flex-start",
+		"&:hover": {
+			backgroundColor: color
+				? undefined
+				: `rgba(${combineColors(
+						theme.palette.primary.main,
+						theme.palette.action.hover,
+					).join()})`,
 		},
+		"&:.Mui-disabled": {
+			backgroundColor: theme.palette.action.disabled,
+		},
+		minWidth: small ? 0 : undefined,
 		paddingLeft: small ? theme.spacing(3) : undefined,
 		paddingRight: small ? theme.spacing(3) : undefined,
-	},
-	"& .MuiButton-contained": {
-		borderRadius: theme.shape.borderRadius,
-		"&.Mui-disabled": {
-			color: theme.palette.background.paper,
+		"& .MuiButton-startIcon": {
+			margin: small ? 0 : undefined,
 		},
-		paddingLeft: small ? theme.spacing(3) : undefined,
-		paddingRight: small ? theme.spacing(3) : undefined,
-	},
-	"& .MuiButton-label": {
-		padding: 0,
-		justifyContent: small ? "center" : "flex-start",
-	},
-}));
+		"& .MuiButton-outlined": {
+			borderRadius: theme.shape.borderRadius,
+			"&.Mui-disabled": {
+				color: theme.palette.background.paper,
+			},
+			paddingLeft: small ? theme.spacing(3) : undefined,
+			paddingRight: small ? theme.spacing(3) : undefined,
+		},
+		"& .MuiButton-contained": {
+			borderRadius: theme.shape.borderRadius,
+			"&.Mui-disabled": {
+				color: theme.palette.background.paper,
+			},
+			paddingLeft: small ? theme.spacing(3) : undefined,
+			paddingRight: small ? theme.spacing(3) : undefined,
+		},
+		"& .MuiButton-label": {
+			padding: 0,
+			justifyContent: small ? "center" : "flex-start",
+		},
+	};
+});
 
 export interface ActionButtonProps extends Omit<ButtonProps, "children"> {
 	/**
@@ -68,7 +87,8 @@ export interface ActionButtonProps extends Omit<ButtonProps, "children"> {
 	children: React.ReactNode;
 }
 
-const ActionButton = (props: ActionButtonProps) => {
+const ActionButton = (inProps: ActionButtonProps) => {
+	const props = useThemeProps({ props: inProps, name: "CcActionButton" });
 	const { icon, fullWidth, small, children, ...otherProps } = props;
 
 	const renderButton = (): React.ReactElement => (
@@ -77,8 +97,7 @@ const ActionButton = (props: ActionButtonProps) => {
 			disableElevation={true}
 			fullWidth={fullWidth ?? !small}
 			startIcon={icon}
-			// to suppress warning
-			small={small ? "true" : undefined}
+			ownerState={{ small: Boolean(small), color: Boolean(otherProps.color) }}
 			{...otherProps}
 		>
 			{!small && <Box>{children}</Box>}
