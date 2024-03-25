@@ -11,7 +11,7 @@ import {
 	GridOnScrollProps,
 	VariableSizeGrid,
 } from "react-window";
-import makeStyles from "@mui/styles/makeStyles";
+import { styled } from "@mui/material";
 
 /**
  * Most props do the same as in react-virtualized MultiGrid component
@@ -44,30 +44,28 @@ interface ReactWindowGridState {
 	scrollLeft: number;
 }
 
-const useStyles = makeStyles(
-	{
-		bottomLeft: {
-			// in webkit based browsers:
-			// hide the vertical scrollbar, sadly also removes the default styles
-			// from the horizontal scrollbar
-			"&::-webkit-scrollbar": {
-				width: 0,
-				height: "auto",
-			},
-			"&::-webkit-scrollbar-track": {
-				background: "white",
-			},
-			"&::-webkit-scrollbar-thumb": {
-				background: "hsl(0, 0%, 60%)",
-			},
-			// in firefox just hide it completely
-			// we can do that because the scrollbar
-			// doesn't add to the content width in firefox
-			scrollbarWidth: "none",
-		},
+const BottomLeftVariableSizeGrid = styled(VariableSizeGrid, {
+	name: "CcMultiGrid",
+	slot: "BottomLeftGrid",
+})({
+	// in webkit based browsers:
+	// hide the vertical scrollbar, sadly also removes the default styles
+	// from the horizontal scrollbar
+	"&::-webkit-scrollbar": {
+		width: 0,
+		height: "auto",
 	},
-	{ name: "CcMultiGrid" },
-);
+	"&::-webkit-scrollbar-track": {
+		background: "white",
+	},
+	"&::-webkit-scrollbar-thumb": {
+		background: "hsl(0, 0%, 60%)",
+	},
+	// in firefox just hide it completely
+	// we can do that because the scrollbar
+	// doesn't add to the content width in firefox
+	scrollbarWidth: "none",
+});
 
 const MultiGrid = (props: MultiGridProps) => {
 	const {
@@ -88,8 +86,6 @@ const MultiGrid = (props: MultiGridProps) => {
 		noContentRenderer: NoContentRenderer,
 		globalScrollListener,
 	} = props;
-
-	const classes = useStyles();
 
 	const fixedWidth = useMemo(
 		() =>
@@ -245,7 +241,7 @@ const MultiGrid = (props: MultiGridProps) => {
 				{CellRendererTopRight}
 			</VariableSizeGrid>
 			{/* bottom left */}
-			<VariableSizeGrid
+			<BottomLeftVariableSizeGrid
 				ref={bottomLeftGrid}
 				columnWidth={(index) => columnWidth(index)}
 				rowHeight={(index) => rowHeight(index + fixedRowCount)}
@@ -254,7 +250,6 @@ const MultiGrid = (props: MultiGridProps) => {
 				width={Math.min(fixedWidth, width)}
 				height={height - fixedHeight}
 				onScroll={handleScrollPinned}
-				className={classes.bottomLeft}
 				style={{
 					...styleBottomLeftGrid,
 					position: "absolute",
@@ -264,7 +259,7 @@ const MultiGrid = (props: MultiGridProps) => {
 				}}
 			>
 				{CellRendererBottomLeft}
-			</VariableSizeGrid>
+			</BottomLeftVariableSizeGrid>
 			{/* bottom right */}
 			{rowCount - fixedRowCount > 0 ? (
 				<VariableSizeGrid

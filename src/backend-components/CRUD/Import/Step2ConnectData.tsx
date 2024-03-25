@@ -14,8 +14,8 @@ import {
 	TextField,
 	Tooltip,
 	Typography,
+	styled,
 } from "@mui/material";
-import makeStyles from "@mui/styles/makeStyles";
 import {
 	Check as CheckIcon,
 	ErrorOutline as ErrorIcon,
@@ -36,25 +36,31 @@ type ConversionScriptRunnerFunc = (
 	script: string,
 ) => Promise<void>;
 
-const useStyles = makeStyles(
-	{
-		scriptInput: {
-			"& textarea": {
-				fontFamily: "monospace",
-			},
-		},
-		monospace: {
-			fontFamily: "monospace",
-		},
-		cardContent: {
-			paddingBottom: 4,
-			"&:last-child": {
-				paddingBottom: 4,
-			},
-		},
+const ScriptInput = styled(TextField, {
+	name: "CcCrudImportStep2",
+	slot: "ScriptInput",
+})({
+	"& textarea": {
+		fontFamily: "monospace",
 	},
-	{ name: "CcCrudImportStep2" },
-);
+});
+
+const MonoTableCell = styled(TableCell, {
+	name: "CcCrudImportStep2",
+	slot: "MonoTableCell",
+})({
+	fontFamily: "monospace",
+});
+
+const StyledCardContent = styled(CardContent, {
+	name: "CcCrudImportStep2",
+	slot: "CardContent",
+})({
+	paddingBottom: 4,
+	"&:last-child": {
+		paddingBottom: 4,
+	},
+});
 
 export const useImportStep2Logic = (props: CrudImporterStepProps) => {
 	const { model, state, setState } = props;
@@ -205,7 +211,6 @@ export const useImportStep2Logic = (props: CrudImporterStepProps) => {
 
 const Step2ConnectData = (props: CrudImporterStepProps) => {
 	const { model, state } = props;
-	const classes = useStyles();
 	const { t } = useCCTranslations();
 	const { columns, handleConversionScriptChange } = useImportStep2Logic(props);
 
@@ -236,9 +241,7 @@ const Step2ConnectData = (props: CrudImporterStepProps) => {
 
 							return (
 								<TableRow key={column}>
-									<TableCell className={classes.monospace}>
-										{`record["${column}"]`}
-									</TableCell>
+									<MonoTableCell>{`record["${column}"]`}</MonoTableCell>
 									<TableCell>{dataTypes.join(", ")}</TableCell>
 								</TableRow>
 							);
@@ -260,7 +263,7 @@ const Step2ConnectData = (props: CrudImporterStepProps) => {
 							return (
 								<Grid item xs={12} key={name}>
 									<Card>
-										<CardContent className={classes.cardContent}>
+										<StyledCardContent>
 											<Grid container justifyContent={"space-between"}>
 												<Grid item>
 													<Typography>
@@ -306,7 +309,7 @@ const Step2ConnectData = (props: CrudImporterStepProps) => {
 															{convScript.error.toString()}
 														</Typography>
 													)}
-													<TextField
+													<ScriptInput
 														multiline
 														label={t(
 															"backend-components.crud.import.conv_script",
@@ -315,12 +318,11 @@ const Step2ConnectData = (props: CrudImporterStepProps) => {
 														value={convScript?.script ?? ""}
 														onChange={handleConversionScriptChange}
 														placeholder={`${name} = `}
-														className={classes.scriptInput}
 														fullWidth
 													/>
 												</Box>
 											</Grid>
-										</CardContent>
+										</StyledCardContent>
 									</Card>
 								</Grid>
 							);

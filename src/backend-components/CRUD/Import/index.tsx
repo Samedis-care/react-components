@@ -1,6 +1,5 @@
 import React, { Dispatch, SetStateAction, useCallback, useState } from "react";
-import { Button, Grid, Step, StepLabel, Stepper } from "@mui/material";
-import makeStyles from "@mui/styles/makeStyles";
+import { Button, Grid, Step, StepLabel, Stepper, styled } from "@mui/material";
 import Step1LoadData from "./Step1LoadData";
 import Step2ConnectData from "./Step2ConnectData";
 import Step3ValidateReview from "./Step3ValidateReview";
@@ -66,15 +65,10 @@ export const IMPORT_STEPS = [
 	"backend-components.crud.import.step4",
 ];
 
-const useStyles = makeStyles(
-	{
-		wrapper: {
-			width: "100%",
-			height: "100%",
-		},
-	},
-	{ name: "CcCrudImport" },
-);
+const Wrapper = styled(Grid, { name: "CcCrudImport", slot: "Wrapper" })({
+	width: "100%",
+	height: "100%",
+});
 
 interface ConversionScript {
 	script: string;
@@ -187,7 +181,6 @@ const CrudImport = <
 >(
 	props: CrudImportProps<KeyT, VisibilityT, CustomT>,
 ) => {
-	const classes = useStyles();
 	const { t } = useCCTranslations();
 	const { updateKeyAdditionalFilters, howTo, model, updateKey, validate } =
 		props;
@@ -203,14 +196,13 @@ const CrudImport = <
 	} = useCrudImportLogic(props);
 
 	return (
-		<Grid
+		<Wrapper
 			container
 			direction={"column"}
 			justifyContent={"space-between"}
 			alignItems={"stretch"}
 			spacing={2}
 			wrap={"nowrap"}
-			className={classes.wrapper}
 		>
 			<Grid item>
 				<Stepper
@@ -309,7 +301,7 @@ const CrudImport = <
 					</Grid>
 				</Grid>
 			</Grid>
-		</Grid>
+		</Wrapper>
 	);
 };
 

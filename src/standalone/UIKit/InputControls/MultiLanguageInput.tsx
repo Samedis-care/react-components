@@ -7,8 +7,8 @@ import {
 	TextFieldProps,
 	Tooltip,
 	Typography,
+	styled,
 } from "@mui/material";
-import makeStyles from "@mui/styles/makeStyles";
 import { useCCLanguagesTranslations } from "../../../utils/useCCTranslations";
 import { Translate } from "@mui/icons-material";
 import combineClassNames from "../../../utils/combineClassNames";
@@ -262,17 +262,20 @@ export type MultiLanguageInputProps = Omit<
 	warning?: boolean;
 };
 
-const useStyles = makeStyles(
-	{
-		langSelect: {
-			cursor: "pointer",
-			pointerEvents: "auto",
-		},
-		activeLang: {
+export interface MultiLanguageInputLanguageLabelOwnerState {
+	active: boolean;
+}
+const LanguageLabel = styled("span", {
+	name: "CcMultiLanguageInput",
+	slot: "languageLabel",
+})<{ ownerState: MultiLanguageInputLanguageLabelOwnerState }>(
+	({ ownerState }) => ({
+		cursor: "pointer",
+		pointerEvents: "auto",
+		...(ownerState.active && {
 			fontWeight: "bold",
-		},
-	},
-	{ name: "CcMultiLanguageInput" },
+		}),
+	}),
 );
 
 const MultiLanguageInput = (props: MultiLanguageInputProps) => {
@@ -290,7 +293,6 @@ const MultiLanguageInput = (props: MultiLanguageInputProps) => {
 		...textFieldProps
 	} = props;
 	const { t, i18n } = useCCLanguagesTranslations();
-	const classes = useStyles();
 	const warningClasses = useMuiWarningStyles();
 
 	// determine default language
@@ -368,16 +370,13 @@ const MultiLanguageInput = (props: MultiLanguageInputProps) => {
 						].map((lang) => (
 							<span key={lang}>
 								<Tooltip title={getLanguageName(lang)}>
-									<span
-										className={combineClassNames([
-											classes.langSelect,
-											activeLanguage === lang && classes.activeLang,
-										])}
+									<LanguageLabel
+										ownerState={{ active: activeLanguage === lang }}
 										data-lang={lang}
 										onClick={handleActiveLangSelect}
 									>
 										{lang}
-									</span>
+									</LanguageLabel>
 								</Tooltip>{" "}
 							</span>
 						))}

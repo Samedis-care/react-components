@@ -17,7 +17,6 @@ import {
 	Permission,
 	usePermissionContext,
 } from "../../framework";
-import makeStyles from "@mui/styles/makeStyles";
 import { CrudImportProps, CrudImportType } from "./Import";
 import Loader from "../../standalone/Loader";
 import throwError from "../../utils/throwError";
@@ -27,6 +26,7 @@ import Route, { RouteContext } from "../../standalone/Routes/Route";
 import useLocation from "../../standalone/Routes/useLocation";
 import useParams from "../../standalone/Routes/useParams";
 import Routes from "../../standalone/Routes/Routes";
+import { styled } from "@mui/material";
 
 const CrudImport = React.lazy(() => import("./Import")) as CrudImportType;
 
@@ -215,20 +215,21 @@ export interface CrudProps<
 	importUI?: React.ComponentType<CrudImportProps<KeyT, VisibilityT, CustomT>>;
 }
 
-const useStyles = makeStyles(
-	{
-		hide: {
-			display: "none",
-			width: "100%",
-			height: "100%",
-		},
-		show: {
-			width: "100%",
-			height: "100%",
-		},
-	},
-	{ name: "CcCrud" },
-);
+export interface CRUDGridVisibilityWrapperOwnerState {
+	hidden: boolean;
+}
+const GridVisibilityWrapper = styled("div", {
+	name: "CcCrud",
+	slot: "GridWrapper",
+})<{
+	ownerState: CRUDGridVisibilityWrapperOwnerState;
+}>(({ ownerState }) => ({
+	width: "100%",
+	height: "100%",
+	...(ownerState.hidden && {
+		display: "none",
+	}),
+}));
 
 export interface CrudDispatch {
 	/**
@@ -299,7 +300,6 @@ const CRUD = <
 	const [gridRefreshToken, setGridRefreshToken] = useState<string>(
 		new Date().getTime().toString(),
 	);
-	const classes = useStyles();
 	const skipNextFormIdReset = useRef<string | null>(null);
 
 	const showEditPage = useCallback(
@@ -508,9 +508,9 @@ const CRUD = <
 			{disableRouting ? (
 				<>
 					{(id === null || !disableBackgroundGrid) && (
-						<div className={id !== null ? classes.hide : classes.show}>
+						<GridVisibilityWrapper ownerState={{ hidden: id !== null }}>
 							{grid(id === null)}
-						</div>
+						</GridVisibilityWrapper>
 					)}
 					{id === "import" && importer(true)}
 					{id === "devimport" && importer(false)}
@@ -523,13 +523,11 @@ const CRUD = <
 			) : (
 				<>
 					{(id === null || !disableBackgroundGrid) && (
-						<div
-							className={
-								routeUrl === location.pathname ? classes.show : classes.hide
-							}
+						<GridVisibilityWrapper
+							ownerState={{ hidden: routeUrl !== location.pathname }}
 						>
 							{grid(routeUrl === location.pathname)}
-						</div>
+						</GridVisibilityWrapper>
 					)}
 					{props.children && (
 						<Routes>
