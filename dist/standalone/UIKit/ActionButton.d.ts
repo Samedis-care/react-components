@@ -1,26 +1,6 @@
 import React from "react";
 import { ButtonProps } from "@mui/material";
-import { CSSProperties } from "@mui/styles";
-export interface ActionButtonTheme {
-    padding?: CSSProperties["padding"];
-    border?: CSSProperties["border"];
-    borderRadius?: CSSProperties["borderRadius"];
-    backgroundColor?: CSSProperties["backgroundColor"];
-    color?: CSSProperties["color"];
-    fontSize?: CSSProperties["fontSize"];
-    style?: CSSProperties;
-    hover?: {
-        border?: CSSProperties["border"];
-        style?: CSSProperties;
-    };
-    disabled?: {
-        backgroundColor?: CSSProperties["backgroundColor"];
-        style?: CSSProperties;
-    };
-    label?: {
-        style?: CSSProperties;
-    };
-}
+export type ActionButtonClassKey = "button";
 export interface ActionButtonProps extends Omit<ButtonProps, "children"> {
     /**
      * The icon of the button
@@ -38,12 +18,6 @@ export interface ActionButtonProps extends Omit<ButtonProps, "children"> {
      * The text of the button (used for tooltip if small is true)
      */
     children: React.ReactNode;
-    /**
-     * Custom colored buttons
-     */
-    textColor?: CSSProperties["color"];
-    backgroundColor?: CSSProperties["backgroundColor"];
-    borderColor?: CSSProperties["borderColor"];
 }
 declare const _default: React.MemoExoticComponent<(props: ActionButtonProps) => React.JSX.Element>;
 export default _default;
