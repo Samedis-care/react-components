@@ -19,7 +19,10 @@ import {
 import { ComponentWithLabelTheme } from "./standalone/UIKit/ComponentWithLabel";
 import { CheckboxTheme } from "./standalone/UIKit/Checkbox";
 import { InputTheme } from "./standalone/UIKit/CommonStyles";
-import { ActionButtonTheme } from "./standalone/UIKit/ActionButton";
+import {
+	ActionButtonClassKey,
+	ActionButtonProps,
+} from "./standalone/UIKit/ActionButton";
 import { SubActionButtonTheme } from "./standalone/UIKit/SubActionButton";
 import { FormButtonTheme } from "./standalone/UIKit/FormButtons";
 import { FormPageLayoutTheme } from "./standalone/Form/FormPageLayout";
@@ -67,7 +70,6 @@ export interface ComponentsCareTheme {
 		label?: ComponentWithLabelTheme;
 		checkbox?: CheckboxTheme;
 		input?: InputTheme;
-		actionButton?: ActionButtonTheme;
 		subActionButton?: SubActionButtonTheme;
 		formButtons?: FormButtonTheme;
 		baseSelectorExpert?: SelectorThemeExpert;
@@ -95,10 +97,12 @@ type Theme = Omit<MuiTheme, "components">;
 declare module "@mui/material/styles" {
 	interface ComponentNameToClassKey {
 		CcSignalPortlet: SignalPortletClassKey;
+		CcActionButton: ActionButtonClassKey;
 	}
 
 	interface ComponentsPropsList {
 		CcSignalPortlet: SignalPortletProps;
+		CcActionButton: ActionButtonProps;
 	}
 
 	interface Components {
@@ -106,6 +110,11 @@ declare module "@mui/material/styles" {
 			defaultProps?: ComponentsPropsList["CcSignalPortlet"];
 			styleOverrides?: ComponentsOverrides<Theme>["CcSignalPortlet"];
 			variants?: ComponentsVariants["CcSignalPortlet"];
+		};
+		CcActionButton: {
+			defaultProps?: ComponentsPropsList["CcActionButton"];
+			styleOverrides?: ComponentsOverrides<Theme>["CcActionButton"];
+			variants?: ComponentsVariants["CcActionButton"];
 		};
 	}
 }

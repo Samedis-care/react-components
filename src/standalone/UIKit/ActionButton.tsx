@@ -1,118 +1,53 @@
 import React from "react";
-import { Box, Button, ButtonProps, Tooltip } from "@mui/material";
-import { withStyles, CSSProperties } from "@mui/styles";
-import { Theme } from "@mui/material/styles";
+import { Box, Button, ButtonProps, Tooltip, styled } from "@mui/material";
 import combineColors from "../../utils/combineColors";
 
-export interface ActionButtonTheme {
-	padding?: CSSProperties["padding"];
-	border?: CSSProperties["border"];
-	borderRadius?: CSSProperties["borderRadius"];
-	backgroundColor?: CSSProperties["backgroundColor"];
-	color?: CSSProperties["color"];
-	fontSize?: CSSProperties["fontSize"];
-	style?: CSSProperties;
-	hover?: {
-		border?: CSSProperties["border"];
-		style?: CSSProperties;
-	};
-	disabled?: {
-		backgroundColor?: CSSProperties["backgroundColor"];
-		style?: CSSProperties;
-	};
-	label?: {
-		style?: CSSProperties;
-	};
-}
+export type ActionButtonClassKey = "button";
 
-const StyledButton = withStyles(
-	(theme: Theme) => ({
-		root: (props: ActionButtonProps) => ({
-			border: theme.componentsCare?.uiKit?.actionButton?.border,
-			backgroundColor: props.color
-				? undefined
-				: props.backgroundColor ||
-					theme.componentsCare?.uiKit?.actionButton?.backgroundColor ||
-					theme.palette.primary.main,
-			color:
-				props.textColor ||
-				props.color ||
-				theme.componentsCare?.uiKit?.actionButton?.color ||
-				theme.palette.primary.contrastText,
-			fontSize: theme.componentsCare?.uiKit?.actionButton?.fontSize,
-			textTransform: "unset",
-			justifyContent: "flex-start",
-			"&:hover": {
-				border:
-					theme.componentsCare?.uiKit?.actionButton?.hover?.border ||
-					theme.componentsCare?.uiKit?.actionButton?.border,
-				backgroundColor: props.color
-					? undefined
-					: `rgba(${combineColors(
-							props.backgroundColor ||
-								theme.componentsCare?.uiKit?.actionButton?.backgroundColor ||
-								theme.palette.primary.main,
-							theme.palette.action.hover,
-						).join()})`,
-				...{
-					...theme.componentsCare?.uiKit?.actionButton?.style,
-					...theme.componentsCare?.uiKit?.actionButton?.hover?.style,
-				},
-			},
-			"&.Mui-disabled": {
-				backgroundColor: theme.palette.action.disabled,
-				...{
-					...theme.componentsCare?.uiKit?.actionButton?.style,
-					...theme.componentsCare?.uiKit?.actionButton?.disabled?.style,
-				},
-			},
-			minWidth: props.small ? 0 : undefined,
-			padding: theme.componentsCare?.uiKit?.actionButton?.padding,
-			paddingLeft: props.small ? theme.spacing(3) : undefined,
-			paddingRight: props.small ? theme.spacing(3) : undefined,
-			...theme.componentsCare?.uiKit?.actionButton?.style,
-		}),
-		startIcon: (props: ActionButtonProps) => ({
-			margin: props.small ? 0 : undefined,
-		}),
-		outlined: (props: ActionButtonProps) => ({
-			borderRadius:
-				theme.componentsCare?.uiKit?.actionButton?.borderRadius ||
-				theme.shape.borderRadius,
-			"&.Mui-disabled": {
-				border: theme.componentsCare?.uiKit?.actionButton?.border,
-				color: theme.palette.background.paper,
-				backgroundColor:
-					theme.componentsCare?.uiKit?.actionButton?.disabled?.backgroundColor,
-			},
-			padding: theme.componentsCare?.uiKit?.actionButton?.padding,
-			paddingLeft: props.small ? theme.spacing(3) : undefined,
-			paddingRight: props.small ? theme.spacing(3) : undefined,
-			...theme.componentsCare?.uiKit?.actionButton?.style,
-		}),
-		contained: (props: ActionButtonProps) => ({
-			borderRadius:
-				theme.componentsCare?.uiKit?.actionButton?.borderRadius ||
-				theme.shape.borderRadius,
-			"&.Mui-disabled": {
-				border: theme.componentsCare?.uiKit?.actionButton?.border,
-				color: theme.palette.background.paper,
-				backgroundColor:
-					theme.componentsCare?.uiKit?.actionButton?.disabled?.backgroundColor,
-			},
-			padding: theme.componentsCare?.uiKit?.actionButton?.padding,
-			paddingLeft: props.small ? theme.spacing(3) : undefined,
-			paddingRight: props.small ? theme.spacing(3) : undefined,
-			...theme.componentsCare?.uiKit?.actionButton?.style,
-		}),
-		label: (props: ActionButtonProps) => ({
-			padding: 0,
-			justifyContent: props.small ? "center" : "flex-start",
-			...theme.componentsCare?.uiKit?.actionButton?.label?.style,
-		}),
-	}),
-	{ name: "CcActionButtonStyledButton" },
-)(Button);
+const StyledButton = styled(Button, {
+	name: "CcActionButton",
+	slot: "button",
+})<ActionButtonProps>(({ theme, small }) => ({
+	backgroundColor: theme.palette.primary.main,
+	color: theme.palette.primary.contrastText,
+	textTransform: "unset",
+	justifyContent: "flex-start",
+	"&:hover": {
+		backgroundColor: `rgba(${combineColors(
+			theme.palette.primary.main,
+			theme.palette.action.hover,
+		).join()})`,
+	},
+	"&:.Mui-disabled": {
+		backgroundColor: theme.palette.action.disabled,
+	},
+	minWidth: small ? 0 : undefined,
+	paddingLeft: small ? theme.spacing(3) : undefined,
+	paddingRight: small ? theme.spacing(3) : undefined,
+	"& .MuiButton-startIcon": {
+		margin: small ? 0 : undefined,
+	},
+	"& .MuiButton-outlined": {
+		borderRadius: theme.shape.borderRadius,
+		"&.Mui-disabled": {
+			color: theme.palette.background.paper,
+		},
+		paddingLeft: small ? theme.spacing(3) : undefined,
+		paddingRight: small ? theme.spacing(3) : undefined,
+	},
+	"& .MuiButton-contained": {
+		borderRadius: theme.shape.borderRadius,
+		"&.Mui-disabled": {
+			color: theme.palette.background.paper,
+		},
+		paddingLeft: small ? theme.spacing(3) : undefined,
+		paddingRight: small ? theme.spacing(3) : undefined,
+	},
+	"& .MuiButton-label": {
+		padding: 0,
+		justifyContent: small ? "center" : "flex-start",
+	},
+}));
 
 export interface ActionButtonProps extends Omit<ButtonProps, "children"> {
 	/**
@@ -131,12 +66,6 @@ export interface ActionButtonProps extends Omit<ButtonProps, "children"> {
 	 * The text of the button (used for tooltip if small is true)
 	 */
 	children: React.ReactNode;
-	/**
-	 * Custom colored buttons
-	 */
-	textColor?: CSSProperties["color"];
-	backgroundColor?: CSSProperties["backgroundColor"];
-	borderColor?: CSSProperties["borderColor"];
 }
 
 const ActionButton = (props: ActionButtonProps) => {
