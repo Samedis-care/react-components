@@ -12,6 +12,6 @@ export interface CenteredTypographyProps extends Omit<TypographyProps, "classes"
         typography?: TypographyProps["classes"];
     };
 }
-declare const useStyles: (props?: any) => import("@mui/styles").ClassNameMap<"innerWrapper" | "outerWrapper">;
+declare const useStyles: (props?: any) => import("@mui/styles").ClassNameMap<"outerWrapper" | "innerWrapper">;
 declare const _default: React.MemoExoticComponent<(props: CenteredTypographyProps) => React.JSX.Element>;
 export default _default;

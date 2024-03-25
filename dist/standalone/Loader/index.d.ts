@@ -1,14 +1,15 @@
 import React from "react";
+import { Variant } from "@mui/material/styles/createTypography";
 export interface LoaderProps {
     /**
      * Optional status message to show
      */
     text?: string;
     /**
-     * Custom styles
+     * Typography variant to use for text
      */
-    classes?: Partial<ReturnType<typeof useStyles>>;
+    typographyVariant?: Variant;
 }
-declare const useStyles: (props?: any) => import("@mui/styles").ClassNameMap<"innerProgressWrapper" | "innerWrapper" | "outerProgressWrapper" | "outerWrapper">;
-declare const _default: React.MemoExoticComponent<(props: LoaderProps) => React.JSX.Element>;
+export type LoaderClassKey = "outerWrapper" | "innerWrapper" | "outerProgressWrapper" | "innerProgressWrapper" | "progress";
+declare const _default: React.MemoExoticComponent<(inProps: LoaderProps) => React.JSX.Element>;
 export default _default;

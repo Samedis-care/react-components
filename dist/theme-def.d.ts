@@ -13,12 +13,17 @@ import { CheckboxTheme } from "./standalone/UIKit/Checkbox";
 import { InputTheme } from "./standalone/UIKit/CommonStyles";
 import { ActionButtonClassKey, ActionButtonProps } from "./standalone/UIKit/ActionButton";
 import { SubActionButtonTheme } from "./standalone/UIKit/SubActionButton";
-import { FormButtonTheme } from "./standalone/UIKit/FormButtons";
+import { FormButtonsClassKey, FormButtonsProps } from "./standalone/UIKit/FormButtons";
 import { FormPageLayoutTheme } from "./standalone/Form/FormPageLayout";
 import { GroupBoxTheme } from "./standalone/GroupBox";
 import { SignalPortletItemTheme } from "./standalone/SignalPortlet/SignalPortletItem";
 import { SignalPortletClassKey, SignalPortletProps } from "./standalone/SignalPortlet";
 import { ComponentsOverrides, ComponentsVariants, Theme as MuiTheme } from "@mui/material";
+import { LoaderClassKey, LoaderProps } from "./standalone/Loader";
+import { FormLoaderOverlayClassKey, FormLoaderOverlayProps } from "./standalone/Form/FormLoaderOverlay";
+import { MultiGridClassKey, MultiGridProps } from "./standalone/Virtualized/MultiGrid";
+import { VerticalDividerClassKey, VerticalDividerProps } from "./standalone/VerticalDivider";
+import { MultiLanguageInputClassKey, MultiLanguageInputProps } from "./standalone/UIKit/InputControls/MultiLanguageInput";
 export interface ComponentsCareTheme {
     dataGrid?: DataGridTheme;
     dataGridExpert?: DataGridThemeExpert;
@@ -52,7 +57,6 @@ export interface ComponentsCareTheme {
         checkbox?: CheckboxTheme;
         input?: InputTheme;
         subActionButton?: SubActionButtonTheme;
-        formButtons?: FormButtonTheme;
         baseSelectorExpert?: SelectorThemeExpert;
         formPage?: {
             layout?: FormPageLayoutTheme;
@@ -73,10 +77,22 @@ declare module "@mui/material/styles" {
     interface ComponentNameToClassKey {
         CcSignalPortlet: SignalPortletClassKey;
         CcActionButton: ActionButtonClassKey;
+        CcFormLoaderOverlay: FormLoaderOverlayClassKey;
+        CcLoader: LoaderClassKey;
+        CcMultiGrid: MultiGridClassKey;
+        CcVerticalDivider: VerticalDividerClassKey;
+        CcMultiLanguageInput: MultiLanguageInputClassKey;
+        CcFormButtons: FormButtonsClassKey;
     }
     interface ComponentsPropsList {
         CcSignalPortlet: SignalPortletProps;
         CcActionButton: ActionButtonProps;
+        CcFormLoaderOverlay: FormLoaderOverlayProps;
+        CcLoader: LoaderProps;
+        CcMultiGrid: MultiGridProps;
+        CcVerticalDivider: VerticalDividerProps;
+        CcMultiLanguageInput: MultiLanguageInputProps;
+        CcFormButtons: FormButtonsProps;
     }
     interface Components {
         CcSignalPortlet?: {
@@ -84,10 +100,40 @@ declare module "@mui/material/styles" {
             styleOverrides?: ComponentsOverrides<Theme>["CcSignalPortlet"];
             variants?: ComponentsVariants["CcSignalPortlet"];
         };
-        CcActionButton: {
+        CcActionButton?: {
             defaultProps?: ComponentsPropsList["CcActionButton"];
             styleOverrides?: ComponentsOverrides<Theme>["CcActionButton"];
             variants?: ComponentsVariants["CcActionButton"];
+        };
+        CcFormLoaderOverlay?: {
+            defaultProps?: ComponentsPropsList["CcFormLoaderOverlay"];
+            styleOverrides?: ComponentsOverrides<Theme>["CcFormLoaderOverlay"];
+            variants?: ComponentsVariants["CcFormLoaderOverlay"];
+        };
+        CcLoader?: {
+            defaultProps?: ComponentsPropsList["CcLoader"];
+            styleOverrides?: ComponentsOverrides<Theme>["CcLoader"];
+            variants?: ComponentsVariants["CcLoader"];
+        };
+        CcMultiGrid?: {
+            defaultProps?: ComponentsPropsList["CcMultiGrid"];
+            styleOverrides?: ComponentsOverrides<Theme>["CcMultiGrid"];
+            variants?: ComponentsVariants["CcMultiGrid"];
+        };
+        CcVerticalDivider?: {
+            defaultProps?: ComponentsPropsList["CcVerticalDivider"];
+            styleOverrides?: ComponentsOverrides<Theme>["CcVerticalDivider"];
+            variants?: ComponentsVariants["CcVerticalDivider"];
+        };
+        CcMultiLanguageInput?: {
+            defaultProps?: ComponentsPropsList["CcMultiLanguageInput"];
+            styleOverrides?: ComponentsOverrides<Theme>["CcMultiLanguageInput"];
+            variants?: ComponentsVariants["CcMultiLanguageInput"];
+        };
+        CcFormButtons?: {
+            defaultProps?: ComponentsPropsList["CcFormButtons"];
+            styleOverrides?: ComponentsOverrides<Theme>["CcFormButtons"];
+            variants?: ComponentsVariants["CcFormButtons"];
         };
     }
 }

@@ -21,10 +21,10 @@ const StyledButton = styled(Button, {
         minWidth: small ? 0 : undefined,
         paddingLeft: small ? theme.spacing(3) : undefined,
         paddingRight: small ? theme.spacing(3) : undefined,
-        "& .MuiButton-startIcon": {
+        "&.MuiButton-startIcon": {
             margin: small ? 0 : undefined,
         },
-        "& .MuiButton-outlined": {
+        "&.MuiButton-outlined": {
             borderRadius: theme.shape.borderRadius,
             "&.Mui-disabled": {
                 color: theme.palette.background.paper,
@@ -32,7 +32,7 @@ const StyledButton = styled(Button, {
             paddingLeft: small ? theme.spacing(3) : undefined,
             paddingRight: small ? theme.spacing(3) : undefined,
         },
-        "& .MuiButton-contained": {
+        "&.MuiButton-contained": {
             borderRadius: theme.shape.borderRadius,
             "&.Mui-disabled": {
                 color: theme.palette.background.paper,
@@ -40,7 +40,7 @@ const StyledButton = styled(Button, {
             paddingLeft: small ? theme.spacing(3) : undefined,
             paddingRight: small ? theme.spacing(3) : undefined,
         },
-        "& .MuiButton-label": {
+        "&.MuiButton-label": {
             padding: 0,
             justifyContent: small ? "center" : "flex-start",
         },

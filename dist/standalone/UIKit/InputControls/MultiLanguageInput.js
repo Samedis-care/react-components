@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from "react";
-import { Grid, IconButton, InputAdornment, TextField, Tooltip, Typography, styled, } from "@mui/material";
+import { Grid, IconButton, InputAdornment, TextField, Tooltip, Typography, styled, useThemeProps, } from "@mui/material";
 import { useCCLanguagesTranslations } from "../../../utils/useCCTranslations";
 import { Translate } from "@mui/icons-material";
 import combineClassNames from "../../../utils/combineClassNames";
@@ -14,7 +14,8 @@ const LanguageLabel = styled("span", {
         fontWeight: "bold",
     }),
 }));
-const MultiLanguageInput = (props) => {
+const MultiLanguageInput = (inProps) => {
+    const props = useThemeProps({ props: inProps, name: "CcMultiLanguageInput" });
     const { enabledLanguages, values, onChange, name, onBlur, label, disableIncompleteMarker, required, ignoreI18nLocale, warning, ...textFieldProps } = props;
     const { t, i18n } = useCCLanguagesTranslations();
     const warningClasses = useMuiWarningStyles();

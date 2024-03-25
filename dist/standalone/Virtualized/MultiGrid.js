@@ -1,9 +1,12 @@
 import React, { useCallback, useEffect, useMemo, useRef, } from "react";
 import { VariableSizeGrid, } from "react-window";
-import { styled } from "@mui/material";
+import { styled, useThemeProps } from "@mui/material";
+const Root = styled("div", { name: "CcMultiGrid", slot: "root" })({
+    position: "relative",
+});
 const BottomLeftVariableSizeGrid = styled(VariableSizeGrid, {
     name: "CcMultiGrid",
-    slot: "BottomLeftGrid",
+    slot: "bottomLeftGrid",
 })({
     // in webkit based browsers:
     // hide the vertical scrollbar, sadly also removes the default styles
@@ -23,7 +26,8 @@ const BottomLeftVariableSizeGrid = styled(VariableSizeGrid, {
     // doesn't add to the content width in firefox
     scrollbarWidth: "none",
 });
-const MultiGrid = (props) => {
+const MultiGrid = (inProps) => {
+    const props = useThemeProps({ props: inProps, name: "CcMultiGrid" });
     const { width, height, columnCount, columnWidth, rowCount, rowHeight, onItemsRendered, fixedColumnCount, fixedRowCount, styleTopLeftGrid, styleTopRightGrid, styleBottomLeftGrid, styleBottomRightGrid, children: CellRenderer, noContentRenderer: NoContentRenderer, globalScrollListener, } = props;
     const fixedWidth = useMemo(() => Array.from(new Array(fixedColumnCount).keys()).reduce((p, c) => p + columnWidth(c), 0), [columnWidth, fixedColumnCount]);
     const fixedHeight = useMemo(() => Array.from(new Array(fixedRowCount).keys()).reduce((p, c) => p + rowHeight(c), 0), [fixedRowCount, rowHeight]);
@@ -112,7 +116,7 @@ const MultiGrid = (props) => {
         document.addEventListener("keydown", handleKeyPress);
         return () => document.removeEventListener("keydown", handleKeyPress);
     }, [globalScrollListener, fixedHeight, height]);
-    return (React.createElement("div", { style: { position: "relative" } },
+    return (React.createElement(Root, null,
         React.createElement(VariableSizeGrid, { ref: topLeftGrid, columnWidth: (index) => columnWidth(index), rowHeight: (index) => rowHeight(index), columnCount: fixedColumnCount, rowCount: fixedRowCount, width: Math.min(fixedWidth, width), height: fixedHeight, style: { ...styleTopLeftGrid, position: "absolute", top: 0, left: 0 } }, CellRenderer),
         React.createElement(VariableSizeGrid, { ref: topRightGrid, columnWidth: (index) => columnWidth(index + fixedColumnCount), rowHeight: (index) => rowHeight(index), columnCount: columnCount - fixedColumnCount, rowCount: fixedRowCount, width: Math.max(width - fixedWidth, 0), height: fixedHeight, style: {
                 ...styleTopRightGrid,

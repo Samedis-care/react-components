@@ -13,11 +13,11 @@ import { styled } from "@mui/material";
 const CrudImport = React.lazy(() => import("./Import"));
 const GridVisibilityWrapper = styled("div", {
     name: "CcCrud",
-    slot: "GridWrapper",
-})(({ ownerState }) => ({
+    slot: "gridWrapper",
+})(({ ownerState: { hidden } }) => ({
     width: "100%",
     height: "100%",
-    ...(ownerState.hidden && {
+    ...(hidden && {
         display: "none",
     }),
 }));
