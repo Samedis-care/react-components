@@ -1,6 +1,10 @@
 import React from "react";
 import { ButtonProps } from "@mui/material";
 export type ActionButtonClassKey = "button";
+export interface ActionButtonOwnerState {
+    small: boolean;
+    color: boolean;
+}
 export interface ActionButtonProps extends Omit<ButtonProps, "children"> {
     /**
      * The icon of the button
@@ -19,5 +23,5 @@ export interface ActionButtonProps extends Omit<ButtonProps, "children"> {
      */
     children: React.ReactNode;
 }
-declare const _default: React.MemoExoticComponent<(props: ActionButtonProps) => React.JSX.Element>;
+declare const _default: React.MemoExoticComponent<(inProps: ActionButtonProps) => React.JSX.Element>;
 export default _default;
