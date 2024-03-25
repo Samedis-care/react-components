@@ -1,6 +1,11 @@
 import React from "react";
-import makeStyles from "@mui/styles/makeStyles";
-import { CircularProgress, Typography } from "@mui/material";
+import {
+	CircularProgress,
+	styled,
+	Typography,
+	useThemeProps,
+} from "@mui/material";
+import { Variant } from "@mui/material/styles/createTypography";
 
 export interface LoaderProps {
 	/**
@@ -8,56 +13,72 @@ export interface LoaderProps {
 	 */
 	text?: string;
 	/**
-	 * Custom styles
+	 * Typography variant to use for text
 	 */
-	classes?: Partial<ReturnType<typeof useStyles>>;
+	typographyVariant?: Variant;
 }
 
-const useStyles = makeStyles(
-	{
-		innerProgressWrapper: {
-			left: "50%",
-			position: "absolute",
-			top: "50%",
-			transform: "translate(-50%, -50%)",
-		},
-		innerWrapper: {
-			height: 70,
-			left: "50%",
-			position: "absolute",
-			textAlign: "center",
-			top: "50%",
-			transform: "translate(-50%, -50%)",
-			width: "100%",
-		},
-		outerProgressWrapper: {
-			height: "100%",
-			position: "relative",
-			width: "100%",
-		},
-		outerWrapper: {
-			height: "100%",
-			position: "relative",
-			width: "100%",
-		},
-	},
-	{ name: "CcLoader" },
-);
+const OuterWrapper = styled("div", { name: "CcLoader", slot: "outerWrapper" })({
+	height: "100%",
+	position: "relative",
+	width: "100%",
+});
 
-const Loader = (props: LoaderProps) => {
-	const classes = useStyles(props);
+const InnerWrapper = styled("div", { name: "CcLoader", slot: "innerWrapper" })({
+	height: 70,
+	left: "50%",
+	position: "absolute",
+	textAlign: "center",
+	top: "50%",
+	transform: "translate(-50%, -50%)",
+	width: "100%",
+});
+
+const OuterProgressWrapper = styled("div", {
+	name: "CcLoader",
+	slot: "outerProgressWrapper",
+})({
+	height: "100%",
+	position: "relative",
+	width: "100%",
+});
+
+const InnerProgressWrapper = styled("div", {
+	name: "CcLoader",
+	slot: "innerProgressWrapper",
+})({
+	left: "50%",
+	position: "absolute",
+	top: "50%",
+	transform: "translate(-50%, -50%)",
+});
+
+const Progress = styled(CircularProgress, {
+	name: "CcLoader",
+	slot: "progress",
+})({});
+
+export type LoaderClassKey =
+	| "outerWrapper"
+	| "innerWrapper"
+	| "outerProgressWrapper"
+	| "innerProgressWrapper"
+	| "progress";
+
+const Loader = (inProps: LoaderProps) => {
+	const props = useThemeProps({ props: inProps, name: "CcLoader" });
 
 	return (
-		<div className={classes.outerWrapper}>
-			<div className={classes.innerWrapper}>
+		<OuterWrapper>
+			<InnerWrapper>
 				{props.text && <Typography variant={"h6"}>{props.text}</Typography>}
-				<div className={classes.outerProgressWrapper}>
-					<div className={classes.innerProgressWrapper}>
-						<CircularProgress />
-					</div>
-				</div>
-			</div>
-		</div>
+				<OuterProgressWrapper>
+					<InnerProgressWrapper>
+						<Progress />
+					</InnerProgressWrapper>
+				</OuterProgressWrapper>
+			</InnerWrapper>
+		</OuterWrapper>
 	);
 };
 

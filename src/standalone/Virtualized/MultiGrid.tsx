@@ -11,7 +11,7 @@ import {
 	GridOnScrollProps,
 	VariableSizeGrid,
 } from "react-window";
-import { styled } from "@mui/material";
+import { styled, useThemeProps } from "@mui/material";
 
 /**
  * Most props do the same as in react-virtualized MultiGrid component
@@ -44,9 +44,13 @@ interface ReactWindowGridState {
 	scrollLeft: number;
 }
 
+const Root = styled("div", { name: "CcMultiGrid", slot: "root" })({
+	position: "relative",
+});
+
 const BottomLeftVariableSizeGrid = styled(VariableSizeGrid, {
 	name: "CcMultiGrid",
-	slot: "BottomLeftGrid",
+	slot: "bottomLeftGrid",
 })({
 	// in webkit based browsers:
 	// hide the vertical scrollbar, sadly also removes the default styles
@@ -67,7 +71,10 @@ const BottomLeftVariableSizeGrid = styled(VariableSizeGrid, {
 	scrollbarWidth: "none",
 });
 
-const MultiGrid = (props: MultiGridProps) => {
+export type MultiGridClassKey = "root" | "bottomLeftGrid";
+
+const MultiGrid = (inProps: MultiGridProps) => {
+	const props = useThemeProps({ props: inProps, name: "CcMultiGrid" });
 	const {
 		width,
 		height,
@@ -208,7 +215,7 @@ const MultiGrid = (props: MultiGridProps) => {
 	}, [globalScrollListener, fixedHeight, height]);
 
 	return (
-		<div style={{ position: "relative" }}>
+		<Root>
 			{/* top left */}
 			<VariableSizeGrid
 				ref={topLeftGrid}
@@ -297,7 +304,7 @@ const MultiGrid = (props: MultiGridProps) => {
 					<NoContentRenderer />
 				</div>
 			)}
-		</div>
+		</Root>
 	);
 };
 

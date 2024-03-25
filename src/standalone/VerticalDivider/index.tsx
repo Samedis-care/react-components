@@ -1,5 +1,14 @@
 import { styled } from "@mui/material";
 
+export interface VerticalDividerProps {
+	/**
+	 * CSS class names to apply
+	 */
+	className?: string;
+}
+
+export type VerticalDividerClassKey = "root";
+
 const VerticalDivider = styled("div", {
 	name: "CcVerticalDivider",
 	slot: "root",

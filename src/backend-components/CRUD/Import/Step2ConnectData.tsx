@@ -38,7 +38,7 @@ type ConversionScriptRunnerFunc = (
 
 const ScriptInput = styled(TextField, {
 	name: "CcCrudImportStep2",
-	slot: "ScriptInput",
+	slot: "scriptInput",
 })({
 	"& textarea": {
 		fontFamily: "monospace",
@@ -47,14 +47,14 @@ const ScriptInput = styled(TextField, {
 
 const MonoTableCell = styled(TableCell, {
 	name: "CcCrudImportStep2",
-	slot: "MonoTableCell",
+	slot: "monoTableCell",
 })({
 	fontFamily: "monospace",
 });
 
 const StyledCardContent = styled(CardContent, {
 	name: "CcCrudImportStep2",
-	slot: "CardContent",
+	slot: "cardContent",
 })({
 	paddingBottom: 4,
 	"&:last-child": {

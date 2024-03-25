@@ -8,6 +8,7 @@ import {
 	Tooltip,
 	Typography,
 	styled,
+	useThemeProps,
 } from "@mui/material";
 import { useCCLanguagesTranslations } from "../../../utils/useCCTranslations";
 import { Translate } from "@mui/icons-material";
@@ -278,7 +279,10 @@ const LanguageLabel = styled("span", {
 	}),
 );
 
-const MultiLanguageInput = (props: MultiLanguageInputProps) => {
+export type MultiLanguageInputClassKey = "languageLabel";
+
+const MultiLanguageInput = (inProps: MultiLanguageInputProps) => {
+	const props = useThemeProps({ props: inProps, name: "CcMultiLanguageInput" });
 	const {
 		enabledLanguages,
 		values,

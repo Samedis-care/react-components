@@ -65,7 +65,7 @@ export const IMPORT_STEPS = [
 	"backend-components.crud.import.step4",
 ];
 
-const Wrapper = styled(Grid, { name: "CcCrudImport", slot: "Wrapper" })({
+const Wrapper = styled(Grid, { name: "CcCrudImport", slot: "wrapper" })({
 	width: "100%",
 	height: "100%",
 });

@@ -220,13 +220,13 @@ export interface CRUDGridVisibilityWrapperOwnerState {
 }
 const GridVisibilityWrapper = styled("div", {
 	name: "CcCrud",
-	slot: "GridWrapper",
+	slot: "gridWrapper",
 })<{
 	ownerState: CRUDGridVisibilityWrapperOwnerState;
-}>(({ ownerState }) => ({
+}>(({ ownerState: { hidden } }) => ({
 	width: "100%",
 	height: "100%",
-	...(ownerState.hidden && {
+	...(hidden && {
 		display: "none",
 	}),
 }));
