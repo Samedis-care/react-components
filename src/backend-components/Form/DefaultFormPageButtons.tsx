@@ -1,29 +1,36 @@
 import React, { useCallback, useContext, useMemo } from "react";
 import { BasicFormPageRendererProps } from "./BasicFormPage";
-import makeStyles from "@mui/styles/makeStyles";
 import { CrudFormProps } from "../CRUD";
 import { useDialogContext } from "../../framework";
 import { showConfirmDialog } from "../../non-standalone";
 import { ActionButton, FormButtons } from "../../standalone";
 import { IsInFormDialogContext } from "./FormDialog";
 import useCCTranslations from "../../utils/useCCTranslations";
-import { Tooltip } from "@mui/material";
+import { styled, Tooltip, useThemeProps } from "@mui/material";
 
-export const useBackButtonStyles = makeStyles({
-	root: {
-		backgroundColor: "#bcbdbf",
+export const BackActionButton = styled(ActionButton, {
+	name: "CcDefaultFormPageButtons",
+	slot: "backButton",
+})({
+	backgroundColor: "#bcbdbf",
+	boxShadow: "none",
+	border: "none",
+	"&:hover": {
 		boxShadow: "none",
 		border: "none",
-		"&:hover": {
-			boxShadow: "none",
-			border: "none",
-		},
 	},
 });
 
-const DefaultFormPageButtons = (
-	props: BasicFormPageRendererProps<CrudFormProps | undefined>,
-) => {
+export type DefaultFormPageButtonsClassKey = "backButton";
+export type DefaultFormPageButtonsProps = BasicFormPageRendererProps<
+	CrudFormProps | undefined
+>;
+
+const DefaultFormPageButtons = (inProps: DefaultFormPageButtonsProps) => {
+	const props = useThemeProps({
+		props: inProps,
+		name: "CcDefaultFormPageButtons",
+	});
 	const {
 		showBackButtonOnly,
 		readOnly,
@@ -37,7 +44,6 @@ const DefaultFormPageButtons = (
 	const goBack = customProps?.goBack;
 	const hasCustomCloseHandler = customProps?.hasCustomSubmitHandler;
 	const { t } = useCCTranslations();
-	const backButtonClasses = useBackButtonStyles();
 	const isInDialog = useContext(IsInFormDialogContext);
 	const [pushDialog] = useDialogContext();
 	const displayConfirmDialog = !!confirmDialogMessage;
@@ -98,13 +104,9 @@ const DefaultFormPageButtons = (
 					saveBtn
 				))}
 			{goBack && !(isInDialog && hasCustomCloseHandler) && (
-				<ActionButton
-					disabled={isSubmitting}
-					onClick={handleBack}
-					classes={backButtonClasses}
-				>
+				<BackActionButton disabled={isSubmitting} onClick={handleBack}>
 					{t("common.buttons.back")}
-				</ActionButton>
+				</BackActionButton>
 			)}
 		</FormButtons>
 	);

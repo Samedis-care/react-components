@@ -57,6 +57,10 @@ import {
 	MultiLanguageInputClassKey,
 	MultiLanguageInputProps,
 } from "./standalone/UIKit/InputControls/MultiLanguageInput";
+import {
+	DefaultFormPageButtonsClassKey,
+	DefaultFormPageButtonsProps,
+} from "./backend-components/Form/DefaultFormPageButtons";
 
 export interface ComponentsCareTheme {
 	dataGrid?: DataGridTheme;
@@ -123,6 +127,7 @@ declare module "@mui/material/styles" {
 		CcVerticalDivider: VerticalDividerClassKey;
 		CcMultiLanguageInput: MultiLanguageInputClassKey;
 		CcFormButtons: FormButtonsClassKey;
+		CcDefaultFormPageButtons: DefaultFormPageButtonsClassKey;
 	}
 
 	interface ComponentsPropsList {
@@ -134,6 +139,7 @@ declare module "@mui/material/styles" {
 		CcVerticalDivider: VerticalDividerProps;
 		CcMultiLanguageInput: MultiLanguageInputProps;
 		CcFormButtons: FormButtonsProps;
+		CcDefaultFormPageButtons: DefaultFormPageButtonsProps;
 	}
 
 	interface Components {
@@ -176,6 +182,11 @@ declare module "@mui/material/styles" {
 			defaultProps?: ComponentsPropsList["CcFormButtons"];
 			styleOverrides?: ComponentsOverrides<Theme>["CcFormButtons"];
 			variants?: ComponentsVariants["CcFormButtons"];
+		};
+		CcDefaultFormPageButtons?: {
+			defaultProps?: ComponentsPropsList["CcDefaultFormPageButtons"];
+			styleOverrides?: ComponentsOverrides<Theme>["CcDefaultFormPageButtons"];
+			variants?: ComponentsVariants["CcDefaultFormPageButtons"];
 		};
 	}
 }
