@@ -14,10 +14,10 @@ const ButtonWrapper = styled(Grid, {
 	slot: "buttonWrapper",
 })(({ theme }) => ({
 	margin: theme.spacing(0, 1, 0, 0),
-	"&:first-child": {
+	"&:first-of-type": {
 		marginLeft: 0,
 	},
-	"&:last-child": {
+	"&:last-of-type": {
 		marginRight: 0,
 	},
 }));
