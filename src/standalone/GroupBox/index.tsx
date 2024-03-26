@@ -1,53 +1,41 @@
 import React from "react";
-
-import makeStyles from "@mui/styles/makeStyles";
 import combineClassNames from "../../utils/combineClassNames";
-import { Styles } from "@mui/styles";
-import { Theme } from "@mui/material";
-import makeThemeStyles from "../../utils/makeThemeStyles";
-import useMultipleStyles from "../../utils/useMultipleStyles";
+import { styled, useThemeProps } from "@mui/material";
 
-const useStylesBase = makeStyles(
-	(theme) => ({
-		fieldSetRoot: {
-			padding: "8px",
-			borderStyle: "solid",
-			borderColor: "lightgrey",
-			borderRadius: theme.shape.borderRadius,
-			borderWidth: 1,
-			position: "relative",
-			maxHeight: "inherit",
-			height: "100%",
-			marginLeft: 0,
-			marginRight: 0,
-			minWidth: 0,
-			width: "100%",
-		},
-		legend: {
-			paddingInlineStart: 5,
-			paddingInlineEnd: 5,
-		},
-		smallLabel: {
-			fontSize: "0.75em",
-		},
+const GroupBoxRoot = styled("fieldset", { name: "CcGroupBox", slot: "root" })(
+	({ theme }) => ({
+		padding: "8px",
+		borderStyle: "solid",
+		borderColor: "lightgrey",
+		borderRadius: theme.shape.borderRadius,
+		borderWidth: 1,
+		position: "relative",
+		maxHeight: "inherit",
+		height: "100%",
+		marginLeft: 0,
+		marginRight: 0,
+		minWidth: 0,
+		width: "100%",
 	}),
-	{ name: "CcGroupBox" },
 );
 
-export type GroupBoxClassKey = keyof ReturnType<typeof useStylesBase>;
-
-export type GroupBoxTheme = Partial<
-	Styles<Theme, GroupBoxProps, GroupBoxClassKey>
->;
-
-const useThemeStyles = makeThemeStyles<GroupBoxProps, GroupBoxClassKey>(
-	(theme) => theme.componentsCare?.groupBox,
-	"CcGroupBox",
+export interface GroupBoxLegendOwnerState {
+	smallLabel: boolean;
+}
+const GroupBoxLegend = styled("legend", {
+	name: "CcGroupBox",
+	slot: "legend",
+})<{ ownerState: GroupBoxLegendOwnerState }>(
+	({ ownerState: { smallLabel } }) => ({
+		paddingInlineStart: 5,
+		paddingInlineEnd: 5,
+		...(smallLabel && {
+			fontSize: "0.75em",
+		}),
+	}),
 );
 
-const useStyles = (props: GroupBoxProps): ReturnType<typeof useStylesBase> => {
-	return useMultipleStyles(props, useThemeStyles, useStylesBase);
-};
+export type GroupBoxClassKey = "root" | "legend";
 
 export interface GroupBoxProps {
 	/**
@@ -67,28 +55,30 @@ export interface GroupBoxProps {
 	 */
 	children?: React.ReactNode;
 	/**
+	 * CSS class to apply to fieldset
+	 */
+	className?: string;
+	/**
 	 * Custom styles
 	 */
-	classes?: Partial<ReturnType<typeof useStyles>>;
+	classes?: Partial<Record<GroupBoxClassKey, string>>;
 }
 
-const GroupBox = (props: GroupBoxProps) => {
-	const { id, label, children, smallLabel } = props;
-	const classes = useStyles(props);
+const GroupBox = (inProps: GroupBoxProps) => {
+	const props = useThemeProps({ props: inProps, name: "CcGroupBox" });
+	const { id, label, children, smallLabel, className, classes } = props;
 	return (
-		<fieldset id={id} className={classes.fieldSetRoot}>
+		<GroupBoxRoot
+			id={id}
+			className={combineClassNames([className, classes?.root])}
+		>
 			{label && (
-				<legend
-					className={combineClassNames([
-						classes.legend,
-						smallLabel && classes.smallLabel,
-					])}
-				>
+				<GroupBoxLegend ownerState={{ smallLabel: !!smallLabel }}>
 					{label}
-				</legend>
+				</GroupBoxLegend>
 			)}
 			{children}
-		</fieldset>
+		</GroupBoxRoot>
 	);
 };
 

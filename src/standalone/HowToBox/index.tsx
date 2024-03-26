@@ -1,9 +1,9 @@
 import React, { useMemo } from "react";
-import makeStyles from "@mui/styles/makeStyles";
 import GroupBox from "../GroupBox";
-import { ClassNameMap } from "@mui/styles/withStyles";
 import useCCTranslations from "../../utils/useCCTranslations";
 import { TFunction } from "i18next";
+import { styled, useThemeProps } from "@mui/material";
+import combineClassNames from "../../utils/combineClassNames";
 
 export interface HowToBoxProps {
 	/**
@@ -19,40 +19,49 @@ export interface HowToBoxProps {
 		| string
 		| React.ReactNode
 		| undefined;
+	className?: string;
 	/**
 	 * Custom CSS styles
 	 */
-	classes?: ClassNameMap<keyof ReturnType<typeof useStyles>>;
+	classes?: Partial<Record<HowToBoxClassKey, string>>;
 }
 
-const useStyles = makeStyles(
-	{
-		groupBox: {
-			paddingLeft: "1.5rem",
-		},
-	},
-	{ name: "CcHowToBox" },
+const GroupBoxStyled = styled(GroupBox, { name: "CcHowToBox", slot: "root" })(
+	{},
 );
 
-const HowToBox = (props: HowToBoxProps) => {
-	const { titleLabel, labels } = props;
+const UnorderedList = styled("ul", { name: "CcHowToBox", slot: "ul" })({
+	paddingLeft: "1.5rem",
+});
+
+const ListItem = styled("li", { name: "CcHowToBox", slot: "li" })({});
+
+export type HowToBoxClassKey = "root" | "ul" | "li";
+
+const HowToBox = (inProps: HowToBoxProps) => {
+	const props = useThemeProps({ props: inProps, name: "CcHowToBox" });
+	const { titleLabel, labels, className, classes } = props;
 	const { t } = useCCTranslations();
-	const classes = useStyles(props);
 
 	if (!labels) return <></>;
 
 	return (
-		<GroupBox label={titleLabel ?? t("standalone.how-it-works.title")}>
-			<ul className={classes.groupBox}>
+		<GroupBoxStyled
+			label={titleLabel ?? t("standalone.how-it-works.title")}
+			className={combineClassNames([className, classes?.root])}
+		>
+			<UnorderedList className={classes?.ul}>
 				{Array.isArray(labels) ? (
 					labels.map((label: string | React.ReactNode, i: number) => (
-						<li key={i.toString(16)}>{label}</li>
+						<ListItem key={i} className={classes?.li}>
+							{label}
+						</ListItem>
 					))
 				) : (
-					<li>{labels}</li>
+					<ListItem className={classes?.li}>{labels}</ListItem>
 				)}
-			</ul>
-		</GroupBox>
+			</UnorderedList>
+		</GroupBoxStyled>
 	);
 };
 
