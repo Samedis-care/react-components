@@ -1,326 +1,326 @@
 {
-	"standalone": {
-		"schedule": {
-			"week": "Woche",
-			"today": "Heute"
-		},
-		"notifications": {
-			"title": "Benachrichtigungen"
-		},
-		"how-it-works": {
-			"title": "Wie es funktioniert"
-		},
-		"data-grid": {
-			"content": {
-				"filter": "Filter",
-				"reset-column-filter": "Filter löschen",
-				"bool-filter": {
-					"true": "Alle wahrheitsgemäßen Werte",
-					"false": "Alle falschen Werte",
-					"any": "Beliebiger Wert"
-				},
-				"set-filter": {
-					"search": "Suche...",
-					"select-all": "Alle auswählen",
-					"invert": "Alle nicht passenden anzeigen"
-				},
-				"filter-type": {
-					"eq": "Gleich",
-					"not-eq": "Nicht gleich",
-					"empty": "Ist leer",
-					"not-empty": "Ist nicht leer",
-					"contains": "Enthält",
-					"not-contains": "Enthält nicht",
-					"starts-with": "Beginnt mit",
-					"ends-with": "Endet mit",
-					"lt": "Weniger als",
-					"lte": "Weniger als oder gleich",
-					"gt": "Größer als",
-					"gte": "Größer als oder gleich",
-					"in-range": "Im Bereich",
-					"lt-date": "Vor",
-					"lte-date": "Vorher oder am",
-					"gt-date": "Nach dem",
-					"gte-date": "Am oder nach",
-					"in-range-date": "Zwischen"
-				},
-				"no-data": "Die Liste enthält keine Daten."
-			},
-			"header": {
-				"new": "Neu",
-				"export": "Exportieren",
-				"import": "Importieren",
-				"settings": "Spalten",
-				"reset": "Zurücksetzen",
-				"custom-filter-button": "Filter",
-				"delete": "Löschen",
-				"edit": "Bearbeiten",
-				"reset-options": {
-					"refresh": "Neu laden",
-					"filter": "Filter zurücksetzen",
-					"sort": "Sortiereinstellungen zurücksetzen",
-					"column": "Spalteneinstellungen zurücksetzen",
-					"width": "Spaltenbreiten zurücksetzen",
-					"all": "Alles zurücksetzen"
-				}
-			},
-			"settings": {
-				"column": "Spalte",
-				"show": "Sichtbar",
-				"pin": "Anheften",
-				"close": "Schließen"
-			},
-			"custom-filters": {
-				"title": "Filterauswahl"
-			},
-			"footer": {
-				"total": "Gesamt:",
-				"filtered": "Gefiltert:",
-				"edit": "Bearbeiten",
-				"delete": "Löschen",
-				"more": "Mehr",
-				"select-all": "Alle",
-				"first-page": "Erste Seite",
-				"last-page": "Letzte Seite",
-				"next-page": "Nächste Seite",
-				"page-of": "von",
-				"page-size": "Seitengröße:",
-				"page-size-tooltip": "Anzahl Einträge pro Seite",
-				"prev-page": "Vorherige Seite"
-			}
-		},
-		"selector": {
-			"add-new": "Hinzufügen",
-			"base-selector": {
-				"no-options-text": "Keine Optionen",
-				"close-icon-text": "Schließen",
-				"open-icon-text": "Öffnen",
-				"clear-icon-text": "Leeren",
-				"loading-text": "Lade...",
-				"start-typing-to-search-text": "Gib eine Suchzeichenfolge ein, um Ergebnisse zu erhalten",
-				"lru-label": "Zuletzt verwendet",
-				"selected": "AUSGEWÄHLT"
-			},
-			"multi-select": {
-				"delete-confirm": {
-					"title": "Entfernen bestätigen",
-					"message": "Möchtest Du diesen Eintrag wirklich entfernen?",
-					"yes": "Ja",
-					"no": "Nein"
-				}
-			}
-		},
-		"file-upload": {
-			"upload": "Hochladen",
-			"upload-modern": "Datei per Drag & Drop ablegen oder hier klicken",
-			"no-files": "Keine Anhänge verfügbar",
-			"formats": "Dateiformate",
-			"formats-modern": "Erlaubte Dateiformate:",
-			"error": {
-				"too-many": "Zu viele Dateien ausgewählt",
-				"limit-reached": "Maximale Anzahl der erlaubten Dateien erreicht",
-				"invalid-type": "Nicht unterstützter Dateityp ausgewählt"
-			},
-			"format": {
-				"any": "Alle",
-				"image": "Bilder"
-			},
-			"multi-image": {
-				"edit": "Bearbeiten",
-				"primary": "Primär"
-			}
-		},
-		"phone-number": {
-			"invalid": "Korrekte Rufnummer eingeben"
-		},
-		"signature-pad": {
-			"dialog": {
-				"reset": "Signatur zurücksetzen",
-				"save-changes": "Änderungen speichern",
-				"title": "Hier unterschreiben",
-				"title-name": "Hier unterschreiben ({{NAME}})",
-				"reset-confirm": {
-					"title": "Signatur zurücksetzen",
-					"message": "Bist Du sicher, dass Du die Signatur löschen möchtest?",
-					"message-name": "Bist Du sicher, dass Du die Signatur für {{NAME}} löschen möchtest?",
-					"yes": "Ja",
-					"no": "Nein"
-				}
-			},
-			"sign-here": "Hier digital unterschrieben"
-		}
-	},
-	"framework": {
-		"dialogs": {
-			"navblock": "Die Navigation ist gesperrt. Bitte schließe zuerst die geöffneten Dialoge."
-		}
-	},
-	"non-standalone": {
-		"dialog": {
-			"okay": "Okay"
-		},
-		"language-switcher": {
-			"title": "Wähle das Land und die Sprache",
-			"no-locales": "Keine Gebietsschemas entsprechen Ihrer Suchanfrage"
-		}
-	},
-	"backend-integration": {
-		"connector": {
-			"json-api-client": {
-				"network-error": "Ein Netzwerkfehler ist aufgetreten.",
-				"parse-error": "Konnte die Antwort des Servers nicht verstehen (Ungültiges JSON). Der Server gab den Status {{STATUS_CODE}} {{STATUS_TEXT}} zurück."
-			}
-		},
-		"model": {
-			"types": {
-				"renderers": {
-					"boolean": {
-						"true": "Ja",
-						"false": "Nein"
-					},
-					"date": {
-						"not-set": "Datum nicht gesetzt",
-						"validation-error": "Gib ein gültiges Datum ein"
-					},
-					"enum": {
-						"unknown": "Unbekannt"
-					},
-					"image": {
-						"not-set": "Bild nicht vorhanden"
-					},
-					"signature": {
-						"not-set": "Nicht unterschrieben"
-					},
-					"files": {
-						"no-file": "Keine Dateien vorhanden"
-					}
-				},
-				"date-nullable": {
-					"not-set": "N/A"
-				},
-				"image": {
-					"not-set": "Bild nicht vorhanden",
-					"set": "Bild vorhanden"
-				},
-				"boolean": {
-					"true": "Ja",
-					"false": "Nein"
-				}
-			}
-		}
-	},
-	"backend-components": {
-		"data-grid": {
-			"delete": {
-				"confirm-dialog": {
-					"title": "Löschen",
-					"message": "Wirklich {{NUM}}-Einträge löschen?",
-					"messageInverted": "Wirklich alles außer {{NUM}}-Einträge löschen?",
-					"buttons": {
-						"yes": "Ja",
-						"no": "Nein"
-					}
-				},
-				"error-dialog": {
-					"title": "Fehler",
-					"message": "Das Löschen der ausgewählten Einträge ist fehlgeschlagen: {{ERROR}}",
-					"buttons": {
-						"okay": "Okay"
-					}
-				}
-			}
-		},
-		"form": {
-			"back-on-dirty": {
-				"title": "Seite verlassen?",
-				"message": "Alle nicht gespeicherten Änderungen gehen verloren!",
-				"yes": "Ja",
-				"no": "Nein"
-			},
-			"submit-with-warnings": {
-				"title": "Warnung",
-				"message": "Es sind Warnungen vorhanden, trotzdem fortfahren?",
-				"yes": "Ja",
-				"no": "Nein"
-			},
-			"read-only": {
-				"submitting": "Das Formular wird gerade gespeichert"
-			}
-		},
-		"selector": {
-			"loading": "Wird geladen...",
-			"loading-error": "Fehler beim Abrufen der Daten"
-		},
-		"crud": {
-			"import": {
-				"step1": "Daten hochladen",
-				"step2": "Daten verbinden",
-				"step3": "Validierung & Überprüfung",
-				"step4": "Daten importieren",
-				"source_fields": "Quellfelder",
-				"source_field": "Feld",
-				"source_field_type": "Datentypen",
-				"destination_fields": "Zielfelder",
-				"conv_script": "Konvertierungsskript (JavaScript)",
-				"error": "Fehler",
-				"valid": "Gültig",
-				"queue": "In Warteschlange: {{COUNT}}",
-				"success": "Erfolg: {{COUNT}}",
-				"failed": "Fehlgeschlagen: {{COUNT}}",
-				"last_error": "Letzter Fehler",
-				"errors": {
-					"file_select": "Ungültige Datei ausgewählt",
-					"update-key-not-uniq": "{{UPDATE_KEY}} ist im Importdatensatz nicht eindeutig"
-				},
-				"validations": {
-					"string": "Ergebnis muss eine Zeichenfolge oder null sein",
-					"number": "Ergebnis muss eine Zahl oder null sein",
-					"currency_unsupported": "Währung kann noch nicht importiert werden",
-					"date": "Ergebnis muss ein Datum oder null sein",
-					"boolean": "Ergebnis muss ein boolescher Wert oder null sein",
-					"fail": "Validierung fehlgeschlagen: {{REASON}}. Für Details siehe Browser-Konsole.",
-					"unknown": "Unbekannt"
-				}
-			}
-		}
-	},
-	"utils": {
-		"validation": {
-			"required": "Das Feld {{attribute}} ist erforderlich",
-			"email": "Das Feld {{attribute}} erfordert eine gültige E-Mail-Adresse",
-			"url": "Das Feld {{attribute}} erfordert eine gültige URL"
-		},
-		"timestampToAge": {
-			"just-now": "gerade jetzt",
-			"less-minute": "Vor weniger als einer Minute",
-			"minute": "Minute",
-			"minutes": "Minuten",
-			"hour": "Stunde",
-			"hours": "Stunden",
-			"day": "Tag",
-			"days": "Tagen",
-			"str": "Vor {{AMOUNT}} {{UNIT}}"
-		}
-	},
-	"common": {
-		"buttons": {
-			"save": "Speichern",
-			"back": "Zurück",
-			"ok": "Okay",
-			"next": "Weiter",
-			"cancel": "Abbrechen",
-			"finish": "Abschließen",
-			"choose": "Wählen",
-			"yes": "Ja",
-			"no": "Nein",
-			"reset-filters": "Alle Filter zurücksetzen"
-		},
-		"dialogs": {
-			"error-title": "Ein Fehler ist aufgetreten",
-			"validation-error-title": "Ungültiges Formular",
-			"info": "Info",
-			"are-you-sure": "Bist du sicher?",
-			"are-you-sure-submit": "Fortfahren?"
-		}
-	}
+    "standalone": {
+        "schedule": {
+            "week": "Woche",
+            "today": "Heute"
+        },
+        "notifications": {
+            "title": "Benachrichtigungen"
+        },
+        "how-it-works": {
+            "title": "Wie es funktioniert"
+        },
+        "data-grid": {
+            "content": {
+                "filter": "Filter",
+                "reset-column-filter": "Filter löschen",
+                "bool-filter": {
+                    "true": "Alle wahrheitsgemäßen Werte",
+                    "false": "Alle falschen Werte",
+                    "any": "Beliebiger Wert"
+                },
+                "set-filter": {
+                    "search": "Suche...",
+                    "select-all": "Alle auswählen",
+                    "invert": "Alle nicht passenden anzeigen"
+                },
+                "filter-type": {
+                    "eq": "Gleich",
+                    "not-eq": "Nicht gleich",
+                    "empty": "Ist leer",
+                    "not-empty": "Ist nicht leer",
+                    "contains": "Enthält",
+                    "not-contains": "Enthält nicht",
+                    "starts-with": "Beginnt mit",
+                    "ends-with": "Endet mit",
+                    "lt": "Weniger als",
+                    "lte": "Weniger als oder gleich",
+                    "gt": "Größer als",
+                    "gte": "Größer als oder gleich",
+                    "in-range": "Im Bereich",
+                    "lt-date": "Vor",
+                    "lte-date": "Vorher oder am",
+                    "gt-date": "Nach dem",
+                    "gte-date": "Am oder nach",
+                    "in-range-date": "Zwischen"
+                },
+                "no-data": "Die Liste enthält keine Daten."
+            },
+            "header": {
+                "new": "Neu",
+                "export": "Exportieren",
+                "import": "Importieren",
+                "settings": "Spalten",
+                "reset": "Zurücksetzen",
+                "custom-filter-button": "Filter",
+                "delete": "Löschen",
+                "edit": "Bearbeiten",
+                "reset-options": {
+                    "refresh": "Neu laden",
+                    "filter": "Filter zurücksetzen",
+                    "sort": "Sortiereinstellungen zurücksetzen",
+                    "column": "Spalteneinstellungen zurücksetzen",
+                    "width": "Spaltenbreiten zurücksetzen",
+                    "all": "Alles zurücksetzen"
+                }
+            },
+            "settings": {
+                "column": "Spalte",
+                "show": "Sichtbar",
+                "pin": "Anheften",
+                "close": "Schließen"
+            },
+            "custom-filters": {
+                "title": "Filterauswahl"
+            },
+            "footer": {
+                "total": "Gesamt:",
+                "filtered": "Gefiltert:",
+                "edit": "Bearbeiten",
+                "delete": "Löschen",
+                "more": "Mehr",
+                "select-all": "Alle",
+                "first-page": "Erste Seite",
+                "last-page": "Letzte Seite",
+                "next-page": "Nächste Seite",
+                "page-of": "von",
+                "page-size": "Seitengröße:",
+                "page-size-tooltip": "Anzahl Einträge pro Seite",
+                "prev-page": "Vorherige Seite"
+            }
+        },
+        "selector": {
+            "add-new": "Erstellen",
+            "base-selector": {
+                "no-options-text": "Keine Optionen",
+                "close-icon-text": "Schließen",
+                "open-icon-text": "Öffnen",
+                "clear-icon-text": "Leeren",
+                "loading-text": "Lade...",
+                "start-typing-to-search-text": "Gib eine Suchzeichenfolge ein, um Ergebnisse zu erhalten",
+                "lru-label": "Zuletzt verwendet",
+                "selected": "AUSGEWÄHLT"
+            },
+            "multi-select": {
+                "delete-confirm": {
+                    "title": "Entfernen bestätigen",
+                    "message": "Möchtest Du diesen Eintrag wirklich entfernen?",
+                    "yes": "Ja",
+                    "no": "Nein"
+                }
+            }
+        },
+        "file-upload": {
+            "upload": "Hochladen",
+            "upload-modern": "Datei per Drag & Drop ablegen oder hier klicken",
+            "no-files": "Keine Anhänge verfügbar",
+            "formats": "Dateiformate",
+            "formats-modern": "Erlaubte Dateiformate:",
+            "error": {
+                "too-many": "Zu viele Dateien ausgewählt",
+                "limit-reached": "Maximale Anzahl der erlaubten Dateien erreicht",
+                "invalid-type": "Nicht unterstützter Dateityp ausgewählt"
+            },
+            "format": {
+                "any": "Alle",
+                "image": "Bilder"
+            },
+            "multi-image": {
+                "edit": "Bearbeiten",
+                "primary": "Primär"
+            }
+        },
+        "phone-number": {
+            "invalid": "Korrekte Rufnummer eingeben"
+        },
+        "signature-pad": {
+            "dialog": {
+                "reset": "Signatur zurücksetzen",
+                "save-changes": "Änderungen speichern",
+                "title": "Hier unterschreiben",
+                "title-name": "Hier unterschreiben ({{NAME}})",
+                "reset-confirm": {
+                    "title": "Signatur zurücksetzen",
+                    "message": "Bist Du sicher, dass Du die Signatur löschen möchtest?",
+                    "message-name": "Bist Du sicher, dass Du die Signatur für {{NAME}} löschen möchtest?",
+                    "yes": "Ja",
+                    "no": "Nein"
+                }
+            },
+            "sign-here": "Hier digital unterschrieben"
+        }
+    },
+    "framework": {
+        "dialogs": {
+            "navblock": "Die Navigation ist gesperrt. Bitte schließe zuerst die geöffneten Dialoge."
+        }
+    },
+    "non-standalone": {
+        "dialog": {
+            "okay": "Okay"
+        },
+        "language-switcher": {
+            "title": "Wähle das Land und die Sprache",
+            "no-locales": "Keine Gebietsschemas entsprechen Ihrer Suchanfrage"
+        }
+    },
+    "backend-integration": {
+        "connector": {
+            "json-api-client": {
+                "network-error": "Ein Netzwerkfehler ist aufgetreten.",
+                "parse-error": "Konnte die Antwort des Servers nicht verstehen (Ungültiges JSON). Der Server gab den Status {{STATUS_CODE}} {{STATUS_TEXT}} zurück."
+            }
+        },
+        "model": {
+            "types": {
+                "renderers": {
+                    "boolean": {
+                        "true": "Ja",
+                        "false": "Nein"
+                    },
+                    "date": {
+                        "not-set": "Datum nicht gesetzt",
+                        "validation-error": "Gib ein gültiges Datum ein"
+                    },
+                    "enum": {
+                        "unknown": "Unbekannt"
+                    },
+                    "image": {
+                        "not-set": "Bild nicht vorhanden"
+                    },
+                    "signature": {
+                        "not-set": "Nicht unterschrieben"
+                    },
+                    "files": {
+                        "no-file": "Keine Dateien vorhanden"
+                    }
+                },
+                "date-nullable": {
+                    "not-set": "N/A"
+                },
+                "image": {
+                    "not-set": "Bild nicht vorhanden",
+                    "set": "Bild vorhanden"
+                },
+                "boolean": {
+                    "true": "Ja",
+                    "false": "Nein"
+                }
+            }
+        }
+    },
+    "backend-components": {
+        "data-grid": {
+            "delete": {
+                "confirm-dialog": {
+                    "title": "Löschen",
+                    "message": "Wirklich {{NUM}}-Einträge löschen?",
+                    "messageInverted": "Wirklich alles außer {{NUM}}-Einträge löschen?",
+                    "buttons": {
+                        "yes": "Ja",
+                        "no": "Nein"
+                    }
+                },
+                "error-dialog": {
+                    "title": "Fehler",
+                    "message": "Das Löschen der ausgewählten Einträge ist fehlgeschlagen: {{ERROR}}",
+                    "buttons": {
+                        "okay": "Okay"
+                    }
+                }
+            }
+        },
+        "form": {
+            "back-on-dirty": {
+                "title": "Seite verlassen?",
+                "message": "Alle nicht gespeicherten Änderungen gehen verloren!",
+                "yes": "Ja",
+                "no": "Nein"
+            },
+            "submit-with-warnings": {
+                "title": "Warnung",
+                "message": "Es sind Warnungen vorhanden, trotzdem fortfahren?",
+                "yes": "Ja",
+                "no": "Nein"
+            },
+            "read-only": {
+                "submitting": "Das Formular wird gerade gespeichert"
+            }
+        },
+        "selector": {
+            "loading": "Wird geladen...",
+            "loading-error": "Fehler beim Abrufen der Daten"
+        },
+        "crud": {
+            "import": {
+                "step1": "Daten hochladen",
+                "step2": "Daten verbinden",
+                "step3": "Validierung & Überprüfung",
+                "step4": "Daten importieren",
+                "source_fields": "Quellfelder",
+                "source_field": "Feld",
+                "source_field_type": "Datentypen",
+                "destination_fields": "Zielfelder",
+                "conv_script": "Konvertierungsskript (JavaScript)",
+                "error": "Fehler",
+                "valid": "Gültig",
+                "queue": "In Warteschlange: {{COUNT}}",
+                "success": "Erfolg: {{COUNT}}",
+                "failed": "Fehlgeschlagen: {{COUNT}}",
+                "last_error": "Letzter Fehler",
+                "errors": {
+                    "file_select": "Ungültige Datei ausgewählt",
+                    "update-key-not-uniq": "{{UPDATE_KEY}} ist im Importdatensatz nicht eindeutig"
+                },
+                "validations": {
+                    "string": "Ergebnis muss eine Zeichenfolge oder null sein",
+                    "number": "Ergebnis muss eine Zahl oder null sein",
+                    "currency_unsupported": "Währung kann noch nicht importiert werden",
+                    "date": "Ergebnis muss ein Datum oder null sein",
+                    "boolean": "Ergebnis muss ein boolescher Wert oder null sein",
+                    "fail": "Validierung fehlgeschlagen: {{REASON}}. Für Details siehe Browser-Konsole.",
+                    "unknown": "Unbekannt"
+                }
+            }
+        }
+    },
+    "utils": {
+        "validation": {
+            "required": "Das Feld {{attribute}} ist erforderlich",
+            "email": "Das Feld {{attribute}} erfordert eine gültige E-Mail-Adresse",
+            "url": "Das Feld {{attribute}} erfordert eine gültige URL"
+        },
+        "timestampToAge": {
+            "just-now": "gerade jetzt",
+            "less-minute": "Vor weniger als einer Minute",
+            "minute": "Minute",
+            "minutes": "Minuten",
+            "hour": "Stunde",
+            "hours": "Stunden",
+            "day": "Tag",
+            "days": "Tagen",
+            "str": "Vor {{AMOUNT}} {{UNIT}}"
+        }
+    },
+    "common": {
+        "buttons": {
+            "save": "Speichern",
+            "back": "Zurück",
+            "ok": "Okay",
+            "next": "Weiter",
+            "cancel": "Abbrechen",
+            "finish": "Abschließen",
+            "choose": "Wählen",
+            "yes": "Ja",
+            "no": "Nein",
+            "reset-filters": "Alle Filter zurücksetzen"
+        },
+        "dialogs": {
+            "error-title": "Ein Fehler ist aufgetreten",
+            "validation-error-title": "Ungültiges Formular",
+            "info": "Info",
+            "are-you-sure": "Bist du sicher?",
+            "are-you-sure-submit": "Fortfahren?"
+        }
+    }
 }
