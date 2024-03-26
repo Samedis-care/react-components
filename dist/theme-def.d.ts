@@ -7,7 +7,7 @@ import { MultiImageTheme } from "./standalone/FileUpload/MultiImage/MultiImage";
 import { ImageBoxTheme } from "./standalone/FileUpload/MultiImage/ImageBox";
 import { ImageDialogEntryTheme } from "./standalone/FileUpload/MultiImage/ImageDialogEntry";
 import { ImageDotsTheme } from "./standalone/FileUpload/MultiImage/ImageDots";
-import { MultiSelectTheme, MultiSelectWithCheckBoxTheme, SelectorTheme, SelectorThemeExpert } from "./standalone";
+import { HowToBoxClassKey, HowToBoxProps, MultiSelectTheme, MultiSelectWithCheckBoxTheme, SelectorTheme, SelectorThemeExpert } from "./standalone";
 import { ComponentWithLabelTheme } from "./standalone/UIKit/ComponentWithLabel";
 import { CheckboxTheme } from "./standalone/UIKit/Checkbox";
 import { InputTheme } from "./standalone/UIKit/CommonStyles";
@@ -15,7 +15,7 @@ import { ActionButtonClassKey, ActionButtonProps } from "./standalone/UIKit/Acti
 import { SubActionButtonTheme } from "./standalone/UIKit/SubActionButton";
 import { FormButtonsClassKey, FormButtonsProps } from "./standalone/UIKit/FormButtons";
 import { FormPageLayoutTheme } from "./standalone/Form/FormPageLayout";
-import { GroupBoxTheme } from "./standalone/GroupBox";
+import { GroupBoxClassKey, GroupBoxProps } from "./standalone/GroupBox";
 import { SignalPortletItemTheme } from "./standalone/SignalPortlet/SignalPortletItem";
 import { SignalPortletClassKey, SignalPortletProps } from "./standalone/SignalPortlet";
 import { ComponentsOverrides, ComponentsVariants, Theme as MuiTheme } from "@mui/material";
@@ -25,10 +25,10 @@ import { MultiGridClassKey, MultiGridProps } from "./standalone/Virtualized/Mult
 import { VerticalDividerClassKey, VerticalDividerProps } from "./standalone/VerticalDivider";
 import { MultiLanguageInputClassKey, MultiLanguageInputProps } from "./standalone/UIKit/InputControls/MultiLanguageInput";
 import { DefaultFormPageButtonsClassKey, DefaultFormPageButtonsProps } from "./backend-components/Form/DefaultFormPageButtons";
+import { InfoBoxClassKey, InfoBoxProps } from "./standalone/InfoBox";
 export interface ComponentsCareTheme {
     dataGrid?: DataGridTheme;
     dataGridExpert?: DataGridThemeExpert;
-    groupBox?: GroupBoxTheme;
     portal?: {
         menu?: MenuTheme;
         menuItem?: MenuItemTheme;
@@ -85,6 +85,9 @@ declare module "@mui/material/styles" {
         CcMultiLanguageInput: MultiLanguageInputClassKey;
         CcFormButtons: FormButtonsClassKey;
         CcDefaultFormPageButtons: DefaultFormPageButtonsClassKey;
+        CcGroupBox: GroupBoxClassKey;
+        CcHowToBox: HowToBoxClassKey;
+        CcInfoBox: InfoBoxClassKey;
     }
     interface ComponentsPropsList {
         CcSignalPortlet: SignalPortletProps;
@@ -96,6 +99,9 @@ declare module "@mui/material/styles" {
         CcMultiLanguageInput: MultiLanguageInputProps;
         CcFormButtons: FormButtonsProps;
         CcDefaultFormPageButtons: DefaultFormPageButtonsProps;
+        CcGroupBox: GroupBoxProps;
+        CcHowToBox: HowToBoxProps;
+        CcInfoBox: InfoBoxProps;
     }
     interface Components {
         CcSignalPortlet?: {
@@ -142,6 +148,21 @@ declare module "@mui/material/styles" {
             defaultProps?: ComponentsPropsList["CcDefaultFormPageButtons"];
             styleOverrides?: ComponentsOverrides<Theme>["CcDefaultFormPageButtons"];
             variants?: ComponentsVariants["CcDefaultFormPageButtons"];
+        };
+        CcGroupBox?: {
+            defaultProps?: ComponentsPropsList["CcGroupBox"];
+            styleOverrides?: ComponentsOverrides<Theme>["CcGroupBox"];
+            variants?: ComponentsVariants["CcGroupBox"];
+        };
+        CcHowToBox?: {
+            defaultProps?: ComponentsPropsList["CcHowToBox"];
+            styleOverrides?: ComponentsOverrides<Theme>["CcHowToBox"];
+            variants?: ComponentsVariants["CcHowToBox"];
+        };
+        CcInfoBox?: {
+            defaultProps?: ComponentsPropsList["CcInfoBox"];
+            styleOverrides?: ComponentsOverrides<Theme>["CcInfoBox"];
+            variants?: ComponentsVariants["CcInfoBox"];
         };
     }
 }

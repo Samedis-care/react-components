@@ -1,7 +1,12 @@
 import React from "react";
 import { AccordionProps } from "@mui/material";
-export declare const useStyles: (props?: any) => import("@mui/styles/withStyles").ClassNameMap<"root" | "rounded" | "noShadow" | "panelDetails" | "alwaysExpanded" | "iconButton" | "accordionPrimary" | "accordionWarning" | "accordionSuccess" | "accordionError">;
-interface InfoBoxProps {
+import { Variant } from "@mui/material/styles/createTypography";
+export interface InfoBoxSummaryOwnerState {
+    status?: "info" | "warning" | "success" | "error";
+    alwaysExpanded: boolean;
+}
+export type InfoBoxClassKey = "root" | "summary" | "summaryRoot" | "iconButton" | "heading" | "details" | "detailsText";
+export interface InfoBoxProps {
     /**
      * Title of the info box
      */
@@ -25,13 +30,22 @@ interface InfoBoxProps {
      */
     onChange?: AccordionProps["onChange"];
     /**
+     * typography variant to use for heading
+     * @default "caption"
+     */
+    headingVariant?: Variant;
+    /**
+     * custom class name to apply to root
+     */
+    className?: string;
+    /**
      * Custom styles
      */
-    classes?: Partial<ReturnType<typeof useStyles>>;
+    classes?: Partial<Record<InfoBoxClassKey, string>>;
     /**
      * For which status InfoBox used
      */
     status?: "info" | "warning" | "success" | "error";
 }
-declare const _default: React.MemoExoticComponent<(props: InfoBoxProps) => React.JSX.Element>;
+declare const _default: React.MemoExoticComponent<(inProps: InfoBoxProps) => React.JSX.Element>;
 export default _default;

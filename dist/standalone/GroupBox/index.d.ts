@@ -1,10 +1,8 @@
 import React from "react";
-import { Styles } from "@mui/styles";
-import { Theme } from "@mui/material";
-declare const useStylesBase: (props?: any) => import("@mui/styles").ClassNameMap<"legend" | "fieldSetRoot" | "smallLabel">;
-export type GroupBoxClassKey = keyof ReturnType<typeof useStylesBase>;
-export type GroupBoxTheme = Partial<Styles<Theme, GroupBoxProps, GroupBoxClassKey>>;
-declare const useStyles: (props: GroupBoxProps) => ReturnType<typeof useStylesBase>;
+export interface GroupBoxLegendOwnerState {
+    smallLabel: boolean;
+}
+export type GroupBoxClassKey = "root" | "legend";
 export interface GroupBoxProps {
     /**
      * The HTML id of the fieldset
@@ -23,9 +21,13 @@ export interface GroupBoxProps {
      */
     children?: React.ReactNode;
     /**
+     * CSS class to apply to fieldset
+     */
+    className?: string;
+    /**
      * Custom styles
      */
-    classes?: Partial<ReturnType<typeof useStyles>>;
+    classes?: Partial<Record<GroupBoxClassKey, string>>;
 }
-declare const _default: React.MemoExoticComponent<(props: GroupBoxProps) => React.JSX.Element>;
+declare const _default: React.MemoExoticComponent<(inProps: GroupBoxProps) => React.JSX.Element>;
 export default _default;

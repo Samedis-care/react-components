@@ -1,5 +1,4 @@
 import React from "react";
-import { ClassNameMap } from "@mui/styles/withStyles";
 import { TFunction } from "i18next";
 export interface HowToBoxProps {
     /**
@@ -10,12 +9,13 @@ export interface HowToBoxProps {
      * How to entries
      */
     labels: string[] | React.ReactNodeArray | string | React.ReactNode | undefined;
+    className?: string;
     /**
      * Custom CSS styles
      */
-    classes?: ClassNameMap<keyof ReturnType<typeof useStyles>>;
+    classes?: Partial<Record<HowToBoxClassKey, string>>;
 }
-declare const useStyles: (props?: any) => ClassNameMap<"groupBox">;
+export type HowToBoxClassKey = "root" | "ul" | "li";
 export interface HowToBoxTranslateProps extends Omit<HowToBoxProps, "titleLabel" | "labels"> {
     /**
      * The i18n t function
@@ -36,5 +36,5 @@ export interface HowToBoxTranslateProps extends Omit<HowToBoxProps, "titleLabel"
  * @see HowToBox
  */
 export declare const HowToBoxTranslate: (props: HowToBoxTranslateProps) => React.JSX.Element;
-declare const _default: React.MemoExoticComponent<(props: HowToBoxProps) => React.JSX.Element>;
+declare const _default: React.MemoExoticComponent<(inProps: HowToBoxProps) => React.JSX.Element>;
 export default _default;
