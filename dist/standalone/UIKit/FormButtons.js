@@ -1,5 +1,6 @@
 import React from "react";
 import { styled, Unstable_Grid2 as Grid, useThemeProps } from "@mui/material";
+import combineClassNames from "../../utils/combineClassNames";
 const Container = styled(Grid, { name: "CcFormButtons", slot: "root" })(({ theme }) => ({
     padding: theme.spacing(3),
     backgroundColor: theme.palette.background.paper,
@@ -21,8 +22,8 @@ const FormButtons = (inProps) => {
     const children = (Array.isArray(props.children) ? props.children : [props.children]).filter((child) => child !== undefined && child !== null && child !== false);
     if (children.length === 0)
         return React.createElement(React.Fragment, null);
-    return (React.createElement(Container, { container: true, direction: "row", spacing: 2, wrap: "nowrap" }, children.map((child, index) => {
-        return React.createElement(ButtonWrapper, { key: index }, child);
+    return (React.createElement(Container, { container: true, direction: "row", spacing: 2, wrap: "nowrap", className: combineClassNames([props.classes?.root, props.className]) }, children.map((child, index) => {
+        return (React.createElement(ButtonWrapper, { key: index, className: props.classes?.buttonWrapper }, child));
     })));
 };
 export default React.memo(FormButtons);
