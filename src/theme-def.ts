@@ -23,7 +23,10 @@ import {
 	ActionButtonClassKey,
 	ActionButtonProps,
 } from "./standalone/UIKit/ActionButton";
-import { SubActionButtonTheme } from "./standalone/UIKit/SubActionButton";
+import {
+	SubActionButtonClassKey,
+	SubActionButtonProps,
+} from "./standalone/UIKit/SubActionButton";
 import {
 	FormButtonsClassKey,
 	FormButtonsProps,
@@ -94,7 +97,6 @@ export interface ComponentsCareTheme {
 		label?: ComponentWithLabelTheme;
 		checkbox?: CheckboxTheme;
 		input?: InputTheme;
-		subActionButton?: SubActionButtonTheme;
 		baseSelectorExpert?: SelectorThemeExpert;
 		formPage?: {
 			layout?: FormPageLayoutTheme;
@@ -128,6 +130,7 @@ declare module "@mui/material/styles" {
 		CcMultiLanguageInput: MultiLanguageInputClassKey;
 		CcFormButtons: FormButtonsClassKey;
 		CcDefaultFormPageButtons: DefaultFormPageButtonsClassKey;
+		CcSubActionButton: SubActionButtonClassKey;
 	}
 
 	interface ComponentsPropsList {
@@ -140,6 +143,7 @@ declare module "@mui/material/styles" {
 		CcMultiLanguageInput: MultiLanguageInputProps;
 		CcFormButtons: FormButtonsProps;
 		CcDefaultFormPageButtons: DefaultFormPageButtonsProps;
+		CcSubActionButton: SubActionButtonProps;
 	}
 
 	interface Components {
@@ -187,6 +191,11 @@ declare module "@mui/material/styles" {
 			defaultProps?: ComponentsPropsList["CcDefaultFormPageButtons"];
 			styleOverrides?: ComponentsOverrides<Theme>["CcDefaultFormPageButtons"];
 			variants?: ComponentsVariants["CcDefaultFormPageButtons"];
+		};
+		CcSubActionButton?: {
+			defaultProps?: ComponentsPropsList["CcSubActionButton"];
+			styleOverrides?: ComponentsOverrides<Theme>["CcSubActionButton"];
+			variants?: ComponentsVariants["CcSubActionButton"];
 		};
 	}
 }
