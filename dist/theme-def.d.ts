@@ -12,7 +12,7 @@ import { ComponentWithLabelTheme } from "./standalone/UIKit/ComponentWithLabel";
 import { CheckboxTheme } from "./standalone/UIKit/Checkbox";
 import { InputTheme } from "./standalone/UIKit/CommonStyles";
 import { ActionButtonClassKey, ActionButtonProps } from "./standalone/UIKit/ActionButton";
-import { SubActionButtonTheme } from "./standalone/UIKit/SubActionButton";
+import { SubActionButtonClassKey, SubActionButtonProps } from "./standalone/UIKit/SubActionButton";
 import { FormButtonsClassKey, FormButtonsProps } from "./standalone/UIKit/FormButtons";
 import { FormPageLayoutClassKey, FormPageLayoutProps } from "./standalone/Form/FormPageLayout";
 import { GroupBoxClassKey, GroupBoxProps } from "./standalone/GroupBox";
@@ -57,7 +57,6 @@ export interface ComponentsCareTheme {
         label?: ComponentWithLabelTheme;
         checkbox?: CheckboxTheme;
         input?: InputTheme;
-        subActionButton?: SubActionButtonTheme;
         baseSelectorExpert?: SelectorThemeExpert;
         hideDisabledIcons?: boolean;
     };
@@ -82,6 +81,7 @@ declare module "@mui/material/styles" {
         CcMultiLanguageInput: MultiLanguageInputClassKey;
         CcFormButtons: FormButtonsClassKey;
         CcDefaultFormPageButtons: DefaultFormPageButtonsClassKey;
+        CcSubActionButton: SubActionButtonClassKey;
         CcGroupBox: GroupBoxClassKey;
         CcHowToBox: HowToBoxClassKey;
         CcInfoBox: InfoBoxClassKey;
@@ -97,6 +97,7 @@ declare module "@mui/material/styles" {
         CcMultiLanguageInput: MultiLanguageInputProps;
         CcFormButtons: FormButtonsProps;
         CcDefaultFormPageButtons: DefaultFormPageButtonsProps;
+        CcSubActionButton: SubActionButtonProps;
         CcGroupBox: GroupBoxProps;
         CcHowToBox: HowToBoxProps;
         CcInfoBox: InfoBoxProps;
@@ -147,6 +148,11 @@ declare module "@mui/material/styles" {
             defaultProps?: ComponentsPropsList["CcDefaultFormPageButtons"];
             styleOverrides?: ComponentsOverrides<Theme>["CcDefaultFormPageButtons"];
             variants?: ComponentsVariants["CcDefaultFormPageButtons"];
+        };
+        CcSubActionButton?: {
+            defaultProps?: ComponentsPropsList["CcSubActionButton"];
+            styleOverrides?: ComponentsOverrides<Theme>["CcSubActionButton"];
+            variants?: ComponentsVariants["CcSubActionButton"];
         };
         CcGroupBox?: {
             defaultProps?: ComponentsPropsList["CcGroupBox"];

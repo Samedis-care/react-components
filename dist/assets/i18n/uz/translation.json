@@ -1,326 +1,326 @@
 {
-    "standalone": {
-        "schedule": {
-            "week": "Hafta",
-            "today": "Bugun"
-        },
-        "notifications": {
-            "title": "Bildirishnomalar"
-        },
-        "how-it-works": {
-            "title": "U qanday ishlaydi"
-        },
-        "data-grid": {
-            "content": {
-                "filter": "Filtr",
-                "reset-column-filter": "Filtrni tozalash",
-                "bool-filter": {
-                    "true": "Barcha haqiqiy qadriyatlar",
-                    "false": "Barcha noto'g'ri qiymatlar",
-                    "any": "Har qanday qiymat"
-                },
-                "set-filter": {
-                    "search": "Qidirmoq...",
-                    "select-all": "Hammasini belgilash",
-                    "invert": "Barcha mos kelmaydiganlarni ko'rsatish"
-                },
-                "filter-type": {
-                    "eq": "Teng",
-                    "not-eq": "Teng emas",
-                    "empty": "Bo'sh",
-                    "not-empty": "Bo'sh emas",
-                    "contains": "O'z ichiga oladi",
-                    "not-contains": "Tarkibida yo'q",
-                    "starts-with": "Bilan boshlanadi",
-                    "ends-with": "Tugaydi",
-                    "lt": "Dan kam",
-                    "lte": "Kam yoki teng",
-                    "gt": "Undan kattaroq",
-                    "gte": "Undan kattaroq yoki tengdir",
-                    "in-range": "Oralig'ida",
-                    "lt-date": "Oldin",
-                    "lte-date": "Oldin yoki oldin",
-                    "gt-date": "Keyin",
-                    "gte-date": "Yoqimli yoki keyin",
-                    "in-range-date": "Orasida"
-                },
-                "no-data": "Ro'yxatda hech qanday ma'lumot yo'q."
-            },
-            "header": {
-                "new": "Yangi",
-                "export": "Eksport",
-                "import": "Import",
-                "settings": "Ustunlar",
-                "reset": "Qayta o'rnatish",
-                "custom-filter-button": "Filtr",
-                "delete": "O'chirish",
-                "edit": "Tahrirlash",
-                "reset-options": {
-                    "refresh": "Qayta yuklang",
-                    "filter": "Filtrni tiklash",
-                    "sort": "Saralash sozlamalarini tiklash",
-                    "column": "Ustun sozlamalarini tiklash",
-                    "width": "Ustun kengliklarini tiklash",
-                    "all": "Barchasini tiklash"
-                }
-            },
-            "settings": {
-                "column": "Ustun",
-                "show": "Ko'rinadigan",
-                "pin": "Qoplash uchun",
-                "close": "Yoping"
-            },
-            "custom-filters": {
-                "title": "Filtrni tanlash"
-            },
-            "footer": {
-                "total": "Jami:",
-                "filtered": "Filtrlangan:",
-                "edit": "Tahrirlash",
-                "delete": "O'chirish",
-                "more": "Ko'proq",
-                "select-all": "Hammasi",
-                "first-page": "Birinchi sahifa",
-                "last-page": "Oxirgi sahifa",
-                "next-page": "Keyingi sahifa",
-                "page-of": "dan",
-                "page-size": "Sahifa hajmi:",
-                "page-size-tooltip": "Bir varaqdagi yozuvlar soni",
-                "prev-page": "Oldingi sahifa"
-            }
-        },
-        "selector": {
-            "add-new": "Yaratmoq",
-            "base-selector": {
-                "no-options-text": "Variant yo'q",
-                "close-icon-text": "Yoping",
-                "open-icon-text": "Ochiq",
-                "clear-icon-text": "Bo'shatish",
-                "loading-text": "Yuklanmoqda...",
-                "start-typing-to-search-text": "Natija olish uchun qidiruv qatorini kiriting",
-                "lru-label": "Oxirgi marta ishlatilgan",
-                "selected": "TANLANGAN"
-            },
-            "multi-select": {
-                "delete-confirm": {
-                    "title": "O'chirishni tasdiqlang",
-                    "message": "Haqiqatan ham bu yozuvni olib tashlamoqchimisiz?",
-                    "yes": "Ha",
-                    "no": "Yo'q"
-                }
-            }
-        },
-        "file-upload": {
-            "upload": "Yuklash",
-            "upload-modern": "Faylni bu yerga sudrab olib tashlang yoki yuklash oynasi uchun bosing",
-            "no-files": "Qo'shimchalar mavjud emas",
-            "formats": "Fayl formatlari",
-            "formats-modern": "Ruxsat etilgan fayl formatlari:",
-            "error": {
-                "too-many": "Juda ko‘p fayl tanlandi",
-                "limit-reached": "Ruxsat berilgan fayllarning maksimal miqdori",
-                "invalid-type": "Qo'llab-quvvatlanmaydigan fayl turi tanlandi"
-            },
-            "format": {
-                "any": "Har qanday",
-                "image": "Tasvirlar"
-            },
-            "multi-image": {
-                "edit": "Tahrirlash",
-                "primary": "Birlamchi"
-            }
-        },
-        "phone-number": {
-            "invalid": "To'g'ri telefon raqamini kiriting"
-        },
-        "signature-pad": {
-            "dialog": {
-                "reset": "Imzoni tozalash",
-                "save-changes": "O'zgarishlarni saqlash",
-                "title": "Bu erda ro'yxatdan o'ting",
-                "title-name": "Bu yerga kiring ({{NAME}})",
-                "reset-confirm": {
-                    "title": "Imzoni tozalash",
-                    "message": "Imzoni tozalamoqchimisiz?",
-                    "message-name": "Haqiqatan ham {{NAME}} imzosini tozalamoqchimisiz?",
-                    "yes": "Ha",
-                    "no": "Yo'q"
-                }
-            },
-            "sign-here": "Bu erda raqamli imzolangan"
-        }
-    },
-    "framework": {
-        "dialogs": {
-            "navblock": "Navigatsiya bloklangan. Iltimos, avval ochiq muloqot oynalarini yoping."
-        }
-    },
-    "non-standalone": {
-        "dialog": {
-            "okay": "xop"
-        },
-        "language-switcher": {
-            "title": "Mamlakatingizni va tilingizni tanlang",
-            "no-locales": "Sizning qidiruv so'rovingizga hech qanday mahalliy til mos kelmaydi"
-        }
-    },
-    "backend-integration": {
-        "connector": {
-            "json-api-client": {
-                "network-error": "Tarmoqda xatolik yuz berdi.",
-                "parse-error": "Sinxni bajarib bo'lmadi (JSON yaroqsiz). Server {{STATUS_CODE}} {{STATUS_TEXT}} holatini qaytardi."
-            }
-        },
-        "model": {
-            "types": {
-                "renderers": {
-                    "boolean": {
-                        "true": "Ha",
-                        "false": "Yo'q"
-                    },
-                    "date": {
-                        "not-set": "Sana belgilanmagan",
-                        "validation-error": "Iltimos, to'g'ri sanani kiriting"
-                    },
-                    "enum": {
-                        "unknown": "Noma'lum"
-                    },
-                    "image": {
-                        "not-set": "Hech qanday rasm mavjud emas"
-                    },
-                    "signature": {
-                        "not-set": "Imzo qo'yilmagan"
-                    },
-                    "files": {
-                        "no-file": "Hech qanday fayl mavjud emas"
-                    }
-                },
-                "date-nullable": {
-                    "not-set": "Yo'q"
-                },
-                "image": {
-                    "not-set": "Rasm mavjud emas",
-                    "set": "Rasm mavjud"
-                },
-                "boolean": {
-                    "true": "Ha",
-                    "false": "Yo'q"
-                }
-            }
-        }
-    },
-    "backend-components": {
-        "data-grid": {
-            "delete": {
-                "confirm-dialog": {
-                    "title": "O'chirish",
-                    "message": "Haqiqatan ham {{NUM}} ta yozuvni o'chirmoqchimisiz?",
-                    "messageInverted": "Haqiqatan ham {{NUM}} ta yozuvdan boshqasini o'chirishni xohlaysizmi?",
-                    "buttons": {
-                        "yes": "Ha",
-                        "no": "Yo'q"
-                    }
-                },
-                "error-dialog": {
-                    "title": "Xato",
-                    "message": "Tanlangan yozuvlarni o'chirib bo'lmadi: {{ERROR}}",
-                    "buttons": {
-                        "okay": "xop"
-                    }
-                }
-            }
-        },
-        "form": {
-            "back-on-dirty": {
-                "title": "Shakl sahifasidan chiqasizmi?",
-                "message": "O'zgarishlar yo'qoladi",
-                "yes": "Ha",
-                "no": "Yo'q"
-            },
-            "submit-with-warnings": {
-                "title": "Ogohlantirish",
-                "message": "Quyidagi ogohlantirishlar mavjud, bunga qaramasdan davom etishni xohlaysizmi?",
-                "yes": "Ha",
-                "no": "Yo'q"
-            },
-            "read-only": {
-                "submitting": "Shakl hozir saqlanmoqda"
-            }
-        },
-        "selector": {
-            "loading": "Yuklanmoqda ...",
-            "loading-error": "Ma'lumotlarni olishda xatolik yuz berdi"
-        },
-        "crud": {
-            "import": {
-                "step1": "Ma'lumotlarni yuklash",
-                "step2": "Ma'lumotlarni ulash",
-                "step3": "Tasdiqlash va ko'rib chiqish",
-                "step4": "Ma'lumotlarni import qilish",
-                "source_fields": "Manba maydonlari",
-                "source_field": "Maydon",
-                "source_field_type": "Ma'lumotlar turlari",
-                "destination_fields": "Belgilangan joylar",
-                "conv_script": "Konvertatsiya skripti (JavaScript)",
-                "error": "Xato",
-                "valid": "Yaroqli",
-                "queue": "Navbatda: {{COUNT}}",
-                "success": "Muvaffaqiyatli: {{COUNT}}",
-                "failed": "Muvaffaqiyatsiz: {{COUNT}}",
-                "last_error": "Oxirgi xato",
-                "errors": {
-                    "file_select": "Yaroqsiz fayl tanlandi",
-                    "update-key-not-uniq": "{{UPDATE_KEY}} import maʼlumotlar toʻplamida yagona emas"
-                },
-                "validations": {
-                    "string": "Natija satr yoki null bo'lishi kerak",
-                    "number": "Natija raqam yoki null bo'lishi kerak",
-                    "currency_unsupported": "Hozircha valyutani import qilib bo‘lmaydi",
-                    "date": "Natija sana yoki null bo'lishi kerak",
-                    "boolean": "Natija mantiqiy yoki null bo'lishi kerak",
-                    "fail": "Tasdiqlash amalga oshmadi: {{REASON}}. Tafsilotlar uchun brauzer konsoliga qarang.",
-                    "unknown": "Noma'lum"
-                }
-            }
-        }
-    },
-    "utils": {
-        "validation": {
-            "required": "{{attribute}} maydoni talab qilinadi",
-            "email": "{{attribute}} maydoni toʻgʻri elektron pochta manzilini talab qiladi",
-            "url": "{{attribute}} maydoni toʻgʻri URL manzilni talab qiladi"
-        },
-        "timestampToAge": {
-            "just-now": "hozirgina",
-            "less-minute": "Bir daqiqadan kamroq vaqt oldin",
-            "minute": "daqiqa",
-            "minutes": "daqiqa",
-            "hour": "soat",
-            "hours": "soat",
-            "day": "kun",
-            "days": "kunlar",
-            "str": "{{AMOUNT}} {{UNIT}} oldin"
-        }
-    },
-    "common": {
-        "buttons": {
-            "save": "Saqlash",
-            "back": "Orqaga",
-            "ok": "xop",
-            "next": "Keyingisi",
-            "cancel": "Bekor qilish",
-            "finish": "Tugatish",
-            "choose": "Tanlang",
-            "yes": "Ha",
-            "no": "Yo'q",
-            "reset-filters": "Barcha filtrlarni qayta o'rnating"
-        },
-        "dialogs": {
-            "error-title": "Xatolik yuz berdi",
-            "validation-error-title": "Shakl yaroqsiz",
-            "info": "Ma'lumot",
-            "are-you-sure": "Ishonchingiz komilmi?",
-            "are-you-sure-submit": "Davom etasizmi?"
-        }
-    }
+	"standalone": {
+		"schedule": {
+			"week": "Hafta",
+			"today": "Bugun"
+		},
+		"notifications": {
+			"title": "Bildirishnomalar"
+		},
+		"how-it-works": {
+			"title": "U qanday ishlaydi"
+		},
+		"data-grid": {
+			"content": {
+				"filter": "Filtr",
+				"reset-column-filter": "Filtrni tozalash",
+				"bool-filter": {
+					"true": "Barcha haqiqiy qadriyatlar",
+					"false": "Barcha noto'g'ri qiymatlar",
+					"any": "Har qanday qiymat"
+				},
+				"set-filter": {
+					"search": "Qidirmoq...",
+					"select-all": "Hammasini belgilash",
+					"invert": "Barcha mos kelmaydiganlarni ko'rsatish"
+				},
+				"filter-type": {
+					"eq": "Teng",
+					"not-eq": "Teng emas",
+					"empty": "Bo'sh",
+					"not-empty": "Bo'sh emas",
+					"contains": "O'z ichiga oladi",
+					"not-contains": "Tarkibida yo'q",
+					"starts-with": "Bilan boshlanadi",
+					"ends-with": "Tugaydi",
+					"lt": "Dan kam",
+					"lte": "Kam yoki teng",
+					"gt": "Undan kattaroq",
+					"gte": "Undan kattaroq yoki tengdir",
+					"in-range": "Oralig'ida",
+					"lt-date": "Oldin",
+					"lte-date": "Oldin yoki oldin",
+					"gt-date": "Keyin",
+					"gte-date": "Yoqimli yoki keyin",
+					"in-range-date": "Orasida"
+				},
+				"no-data": "Ro'yxatda hech qanday ma'lumot yo'q."
+			},
+			"header": {
+				"new": "Yangi",
+				"export": "Eksport",
+				"import": "Import",
+				"settings": "Ustunlar",
+				"reset": "Qayta o'rnatish",
+				"custom-filter-button": "Filtr",
+				"delete": "O'chirish",
+				"edit": "Tahrirlash",
+				"reset-options": {
+					"refresh": "Qayta yuklang",
+					"filter": "Filtrni tiklash",
+					"sort": "Saralash sozlamalarini tiklash",
+					"column": "Ustun sozlamalarini tiklash",
+					"width": "Ustun kengliklarini tiklash",
+					"all": "Barchasini tiklash"
+				}
+			},
+			"settings": {
+				"column": "Ustun",
+				"show": "Ko'rinadigan",
+				"pin": "Qoplash uchun",
+				"close": "Yoping"
+			},
+			"custom-filters": {
+				"title": "Filtrni tanlash"
+			},
+			"footer": {
+				"total": "Jami:",
+				"filtered": "Filtrlangan:",
+				"edit": "Tahrirlash",
+				"delete": "O'chirish",
+				"more": "Ko'proq",
+				"select-all": "Hammasi",
+				"first-page": "Birinchi sahifa",
+				"last-page": "Oxirgi sahifa",
+				"next-page": "Keyingi sahifa",
+				"page-of": "dan",
+				"page-size": "Sahifa hajmi:",
+				"page-size-tooltip": "Bir varaqdagi yozuvlar soni",
+				"prev-page": "Oldingi sahifa"
+			}
+		},
+		"selector": {
+			"add-new": "Yaratmoq",
+			"base-selector": {
+				"no-options-text": "Variant yo'q",
+				"close-icon-text": "Yoping",
+				"open-icon-text": "Ochiq",
+				"clear-icon-text": "Bo'shatish",
+				"loading-text": "Yuklanmoqda...",
+				"start-typing-to-search-text": "Natija olish uchun qidiruv qatorini kiriting",
+				"lru-label": "Oxirgi marta ishlatilgan",
+				"selected": "TANLANGAN"
+			},
+			"multi-select": {
+				"delete-confirm": {
+					"title": "O'chirishni tasdiqlang",
+					"message": "Haqiqatan ham bu yozuvni olib tashlamoqchimisiz?",
+					"yes": "Ha",
+					"no": "Yo'q"
+				}
+			}
+		},
+		"file-upload": {
+			"upload": "Yuklash",
+			"upload-modern": "Faylni bu yerga sudrab olib tashlang yoki yuklash oynasi uchun bosing",
+			"no-files": "Qo'shimchalar mavjud emas",
+			"formats": "Fayl formatlari",
+			"formats-modern": "Ruxsat etilgan fayl formatlari:",
+			"error": {
+				"too-many": "Juda ko‘p fayl tanlandi",
+				"limit-reached": "Ruxsat berilgan fayllarning maksimal miqdori",
+				"invalid-type": "Qo'llab-quvvatlanmaydigan fayl turi tanlandi"
+			},
+			"format": {
+				"any": "Har qanday",
+				"image": "Tasvirlar"
+			},
+			"multi-image": {
+				"edit": "Tahrirlash",
+				"primary": "Birlamchi"
+			}
+		},
+		"phone-number": {
+			"invalid": "To'g'ri telefon raqamini kiriting"
+		},
+		"signature-pad": {
+			"dialog": {
+				"reset": "Imzoni tozalash",
+				"save-changes": "O'zgarishlarni saqlash",
+				"title": "Bu erda ro'yxatdan o'ting",
+				"title-name": "Bu yerga kiring ({{NAME}})",
+				"reset-confirm": {
+					"title": "Imzoni tozalash",
+					"message": "Imzoni tozalamoqchimisiz?",
+					"message-name": "Haqiqatan ham {{NAME}} imzosini tozalamoqchimisiz?",
+					"yes": "Ha",
+					"no": "Yo'q"
+				}
+			},
+			"sign-here": "Bu erda raqamli imzolangan"
+		}
+	},
+	"framework": {
+		"dialogs": {
+			"navblock": "Navigatsiya bloklangan. Iltimos, avval ochiq muloqot oynalarini yoping."
+		}
+	},
+	"non-standalone": {
+		"dialog": {
+			"okay": "xop"
+		},
+		"language-switcher": {
+			"title": "Mamlakatingizni va tilingizni tanlang",
+			"no-locales": "Sizning qidiruv so'rovingizga hech qanday mahalliy til mos kelmaydi"
+		}
+	},
+	"backend-integration": {
+		"connector": {
+			"json-api-client": {
+				"network-error": "Tarmoqda xatolik yuz berdi.",
+				"parse-error": "Sinxni bajarib bo'lmadi (JSON yaroqsiz). Server {{STATUS_CODE}} {{STATUS_TEXT}} holatini qaytardi."
+			}
+		},
+		"model": {
+			"types": {
+				"renderers": {
+					"boolean": {
+						"true": "Ha",
+						"false": "Yo'q"
+					},
+					"date": {
+						"not-set": "Sana belgilanmagan",
+						"validation-error": "Iltimos, to'g'ri sanani kiriting"
+					},
+					"enum": {
+						"unknown": "Noma'lum"
+					},
+					"image": {
+						"not-set": "Hech qanday rasm mavjud emas"
+					},
+					"signature": {
+						"not-set": "Imzo qo'yilmagan"
+					},
+					"files": {
+						"no-file": "Hech qanday fayl mavjud emas"
+					}
+				},
+				"date-nullable": {
+					"not-set": "Yo'q"
+				},
+				"image": {
+					"not-set": "Rasm mavjud emas",
+					"set": "Rasm mavjud"
+				},
+				"boolean": {
+					"true": "Ha",
+					"false": "Yo'q"
+				}
+			}
+		}
+	},
+	"backend-components": {
+		"data-grid": {
+			"delete": {
+				"confirm-dialog": {
+					"title": "O'chirish",
+					"message": "Haqiqatan ham {{NUM}} ta yozuvni o'chirmoqchimisiz?",
+					"messageInverted": "Haqiqatan ham {{NUM}} ta yozuvdan boshqasini o'chirishni xohlaysizmi?",
+					"buttons": {
+						"yes": "Ha",
+						"no": "Yo'q"
+					}
+				},
+				"error-dialog": {
+					"title": "Xato",
+					"message": "Tanlangan yozuvlarni o'chirib bo'lmadi: {{ERROR}}",
+					"buttons": {
+						"okay": "xop"
+					}
+				}
+			}
+		},
+		"form": {
+			"back-on-dirty": {
+				"title": "Shakl sahifasidan chiqasizmi?",
+				"message": "O'zgarishlar yo'qoladi",
+				"yes": "Ha",
+				"no": "Yo'q"
+			},
+			"submit-with-warnings": {
+				"title": "Ogohlantirish",
+				"message": "Quyidagi ogohlantirishlar mavjud, bunga qaramasdan davom etishni xohlaysizmi?",
+				"yes": "Ha",
+				"no": "Yo'q"
+			},
+			"read-only": {
+				"submitting": "Shakl hozir saqlanmoqda"
+			}
+		},
+		"selector": {
+			"loading": "Yuklanmoqda ...",
+			"loading-error": "Ma'lumotlarni olishda xatolik yuz berdi"
+		},
+		"crud": {
+			"import": {
+				"step1": "Ma'lumotlarni yuklash",
+				"step2": "Ma'lumotlarni ulash",
+				"step3": "Tasdiqlash va ko'rib chiqish",
+				"step4": "Ma'lumotlarni import qilish",
+				"source_fields": "Manba maydonlari",
+				"source_field": "Maydon",
+				"source_field_type": "Ma'lumotlar turlari",
+				"destination_fields": "Belgilangan joylar",
+				"conv_script": "Konvertatsiya skripti (JavaScript)",
+				"error": "Xato",
+				"valid": "Yaroqli",
+				"queue": "Navbatda: {{COUNT}}",
+				"success": "Muvaffaqiyatli: {{COUNT}}",
+				"failed": "Muvaffaqiyatsiz: {{COUNT}}",
+				"last_error": "Oxirgi xato",
+				"errors": {
+					"file_select": "Yaroqsiz fayl tanlandi",
+					"update-key-not-uniq": "{{UPDATE_KEY}} import maʼlumotlar toʻplamida yagona emas"
+				},
+				"validations": {
+					"string": "Natija satr yoki null bo'lishi kerak",
+					"number": "Natija raqam yoki null bo'lishi kerak",
+					"currency_unsupported": "Hozircha valyutani import qilib bo‘lmaydi",
+					"date": "Natija sana yoki null bo'lishi kerak",
+					"boolean": "Natija mantiqiy yoki null bo'lishi kerak",
+					"fail": "Tasdiqlash amalga oshmadi: {{REASON}}. Tafsilotlar uchun brauzer konsoliga qarang.",
+					"unknown": "Noma'lum"
+				}
+			}
+		}
+	},
+	"utils": {
+		"validation": {
+			"required": "{{attribute}} maydoni talab qilinadi",
+			"email": "{{attribute}} maydoni toʻgʻri elektron pochta manzilini talab qiladi",
+			"url": "{{attribute}} maydoni toʻgʻri URL manzilni talab qiladi"
+		},
+		"timestampToAge": {
+			"just-now": "hozirgina",
+			"less-minute": "Bir daqiqadan kamroq vaqt oldin",
+			"minute": "daqiqa",
+			"minutes": "daqiqa",
+			"hour": "soat",
+			"hours": "soat",
+			"day": "kun",
+			"days": "kunlar",
+			"str": "{{AMOUNT}} {{UNIT}} oldin"
+		}
+	},
+	"common": {
+		"buttons": {
+			"save": "Saqlash",
+			"back": "Orqaga",
+			"ok": "xop",
+			"next": "Keyingisi",
+			"cancel": "Bekor qilish",
+			"finish": "Tugatish",
+			"choose": "Tanlang",
+			"yes": "Ha",
+			"no": "Yo'q",
+			"reset-filters": "Barcha filtrlarni qayta o'rnating"
+		},
+		"dialogs": {
+			"error-title": "Xatolik yuz berdi",
+			"validation-error-title": "Shakl yaroqsiz",
+			"info": "Ma'lumot",
+			"are-you-sure": "Ishonchingiz komilmi?",
+			"are-you-sure-submit": "Davom etasizmi?"
+		}
+	}
 }
