@@ -90,7 +90,7 @@
 			}
 		},
 		"selector": {
-			"add-new": "Add",
+			"add-new": "Create",
 			"base-selector": {
 				"no-options-text": "No options",
 				"close-icon-text": "Close",

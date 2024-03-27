@@ -11,6 +11,8 @@ import { ImageBoxTheme } from "./standalone/FileUpload/MultiImage/ImageBox";
 import { ImageDialogEntryTheme } from "./standalone/FileUpload/MultiImage/ImageDialogEntry";
 import { ImageDotsTheme } from "./standalone/FileUpload/MultiImage/ImageDots";
 import {
+	HowToBoxClassKey,
+	HowToBoxProps,
 	MultiSelectTheme,
 	MultiSelectWithCheckBoxTheme,
 	SelectorTheme,
@@ -31,8 +33,11 @@ import {
 	FormButtonsClassKey,
 	FormButtonsProps,
 } from "./standalone/UIKit/FormButtons";
-import { FormPageLayoutTheme } from "./standalone/Form/FormPageLayout";
-import { GroupBoxTheme } from "./standalone/GroupBox";
+import {
+	FormPageLayoutClassKey,
+	FormPageLayoutProps,
+} from "./standalone/Form/FormPageLayout";
+import { GroupBoxClassKey, GroupBoxProps } from "./standalone/GroupBox";
 import { SignalPortletItemTheme } from "./standalone/SignalPortlet/SignalPortletItem";
 import {
 	SignalPortletClassKey,
@@ -64,11 +69,11 @@ import {
 	DefaultFormPageButtonsClassKey,
 	DefaultFormPageButtonsProps,
 } from "./backend-components/Form/DefaultFormPageButtons";
+import { InfoBoxClassKey, InfoBoxProps } from "./standalone/InfoBox";
 
 export interface ComponentsCareTheme {
 	dataGrid?: DataGridTheme;
 	dataGridExpert?: DataGridThemeExpert;
-	groupBox?: GroupBoxTheme;
 	portal?: {
 		menu?: MenuTheme;
 		menuItem?: MenuItemTheme;
@@ -98,9 +103,6 @@ export interface ComponentsCareTheme {
 		checkbox?: CheckboxTheme;
 		input?: InputTheme;
 		baseSelectorExpert?: SelectorThemeExpert;
-		formPage?: {
-			layout?: FormPageLayoutTheme;
-		};
 		hideDisabledIcons?: boolean;
 	};
 }
@@ -131,6 +133,10 @@ declare module "@mui/material/styles" {
 		CcFormButtons: FormButtonsClassKey;
 		CcDefaultFormPageButtons: DefaultFormPageButtonsClassKey;
 		CcSubActionButton: SubActionButtonClassKey;
+		CcGroupBox: GroupBoxClassKey;
+		CcHowToBox: HowToBoxClassKey;
+		CcInfoBox: InfoBoxClassKey;
+		CcFormPageLayout: FormPageLayoutClassKey;
 	}
 
 	interface ComponentsPropsList {
@@ -144,6 +150,10 @@ declare module "@mui/material/styles" {
 		CcFormButtons: FormButtonsProps;
 		CcDefaultFormPageButtons: DefaultFormPageButtonsProps;
 		CcSubActionButton: SubActionButtonProps;
+		CcGroupBox: GroupBoxProps;
+		CcHowToBox: HowToBoxProps;
+		CcInfoBox: InfoBoxProps;
+		CcFormPageLayout: FormPageLayoutProps;
 	}
 
 	interface Components {
@@ -196,6 +206,26 @@ declare module "@mui/material/styles" {
 			defaultProps?: ComponentsPropsList["CcSubActionButton"];
 			styleOverrides?: ComponentsOverrides<Theme>["CcSubActionButton"];
 			variants?: ComponentsVariants["CcSubActionButton"];
+		};
+		CcGroupBox?: {
+			defaultProps?: ComponentsPropsList["CcGroupBox"];
+			styleOverrides?: ComponentsOverrides<Theme>["CcGroupBox"];
+			variants?: ComponentsVariants["CcGroupBox"];
+		};
+		CcHowToBox?: {
+			defaultProps?: ComponentsPropsList["CcHowToBox"];
+			styleOverrides?: ComponentsOverrides<Theme>["CcHowToBox"];
+			variants?: ComponentsVariants["CcHowToBox"];
+		};
+		CcInfoBox?: {
+			defaultProps?: ComponentsPropsList["CcInfoBox"];
+			styleOverrides?: ComponentsOverrides<Theme>["CcInfoBox"];
+			variants?: ComponentsVariants["CcInfoBox"];
+		};
+		CcFormPageLayout?: {
+			defaultProps?: ComponentsPropsList["CcFormPageLayout"];
+			styleOverrides?: ComponentsOverrides<Theme>["CcFormPageLayout"];
+			variants?: ComponentsVariants["CcFormPageLayout"];
 		};
 	}
 }

@@ -90,7 +90,7 @@
 			}
 		},
 		"selector": {
-			"add-new": "Toevoegen",
+			"add-new": "Creëren",
 			"base-selector": {
 				"no-options-text": "Geen opties",
 				"close-icon-text": "Sluiten",

@@ -90,7 +90,7 @@
 			}
 		},
 		"selector": {
-			"add-new": "Qo'shish",
+			"add-new": "Yaratmoq",
 			"base-selector": {
 				"no-options-text": "Variant yo'q",
 				"close-icon-text": "Yoping",

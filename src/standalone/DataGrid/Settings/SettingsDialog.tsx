@@ -1,4 +1,4 @@
-import React, { ChangeEvent } from "react";
+import React, { ChangeEvent, useMemo } from "react";
 import {
 	Box,
 	Button,
@@ -48,6 +48,14 @@ const SettingsDialog = (props: IDataGridSettingsDialogProps) => {
 	const classes = useDataGridStyles();
 	const { t } = useCCTranslations();
 
+	const columns = useMemo(
+		() =>
+			[...props.columns].sort((a, b) =>
+				a.headerName.localeCompare(b.headerName),
+			),
+		[props.columns],
+	);
+
 	return (
 		<Paper elevation={0} className={classes.contentOverlayPaper}>
 			<Table stickyHeader>
@@ -59,7 +67,7 @@ const SettingsDialog = (props: IDataGridSettingsDialogProps) => {
 					</TableRow>
 				</TableHead>
 				<TableBody>
-					{props.columns.map((column: IDataGridColumnDef) => (
+					{columns.map((column: IDataGridColumnDef) => (
 						<TableRow key={column.field}>
 							<TableCell>{column.headerName}</TableCell>
 							<TableCell>

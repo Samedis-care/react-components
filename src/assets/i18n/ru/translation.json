@@ -90,7 +90,7 @@
 			}
 		},
 		"selector": {
-			"add-new": "Добавить",
+			"add-new": "Создавать",
 			"base-selector": {
 				"no-options-text": "Нет вариантов",
 				"close-icon-text": "Закрыть",

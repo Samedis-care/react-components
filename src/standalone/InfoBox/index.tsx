@@ -5,93 +5,124 @@ import {
 	ReportProblemOutlined,
 } from "@mui/icons-material";
 import {
-	Theme,
 	Accordion,
-	AccordionSummary as MuiAccordionSummary,
 	AccordionDetails,
-	Typography,
 	AccordionProps,
+	AccordionSummary,
+	styled,
+	Typography,
+	useThemeProps,
 } from "@mui/material";
-import makeStyles from "@mui/styles/makeStyles";
-import withStyles from "@mui/styles/withStyles";
 import SuccessOutlinedIcon from "../Icons/SuccessOutlinedIcon";
 import combineClassNames from "../../utils/combineClassNames";
+import { Variant } from "@mui/material/styles/createTypography";
 
-const AccordionSummary = withStyles({
-	root: {
+const AccordionStyled = styled(Accordion, { name: "CcInfoBox", slot: "root" })({
+	boxShadow: "none",
+	"&.MuiAccordion-rounded": {
+		overflow: "hidden",
+	},
+});
+
+export interface InfoBoxSummaryOwnerState {
+	status?: "info" | "warning" | "success" | "error";
+	alwaysExpanded: boolean;
+}
+const AccordionSummaryStyled = styled(AccordionSummary, {
+	name: "CcInfoBox",
+	slot: "summary",
+})<{ ownerState: InfoBoxSummaryOwnerState }>(
+	({ theme, ownerState: { status, alwaysExpanded } }) => ({
 		minHeight: 48,
-		"&$expanded": {
+		"&.Mui-expanded": {
 			minHeight: 48,
 		},
-	},
-	content: {
-		"&$expanded": {
-			margin: "12px 0",
+		"&.MuiAccordionSummary-content": {
+			"&.Mui-expanded": {
+				margin: "12px 0",
+			},
 		},
-	},
-	expanded: {},
-})(MuiAccordionSummary);
-
-export const useStyles = makeStyles(
-	(theme: Theme) => ({
-		noShadow: {
-			"box-shadow": "none",
-		},
-		rounded: {
-			overflow: "hidden",
-		},
-		panelDetails: {
-			border: "1px solid grey",
-			borderRadius: `0px 0px ${theme.shape.borderRadius}px ${theme.shape.borderRadius}px`,
-			padding: "8px 24px",
-			whiteSpace: "pre-line",
-		},
-		root: {
-			margin: 0,
-			paddingLeft: theme.spacing(5),
-		},
-		alwaysExpanded: {
+		...(alwaysExpanded && {
 			cursor: "default",
 			"&:hover:not(.Mui-disabled)": {
 				cursor: "default",
 			},
-		},
-		iconButton: {
-			position: "absolute",
-			left: 0,
-			top: 0,
-			bottom: 0,
-			alignItems: "center",
-			justifyContent: "center",
-			display: "flex",
-			backgroundColor: "rgba(0,0,0,.2)",
-			width: theme.spacing(6),
-		},
-		accordionPrimary: {
+		}),
+
+		...((status == null || status === "info") && {
 			backgroundColor: theme.palette.primary.main,
 			borderColor: theme.palette.primary.main,
 			color: theme.palette.primary.contrastText,
-		},
-		accordionWarning: {
-			backgroundColor: theme.palette.warning.main,
-			borderColor: theme.palette.warning.main,
-			color: theme.palette.warning.contrastText,
-		},
-		accordionSuccess: {
-			backgroundColor: theme.palette.success.main,
-			borderColor: theme.palette.success.main,
-			color: theme.palette.success.contrastText,
-		},
-		accordionError: {
+		}),
+		...(status === "error" && {
 			backgroundColor: theme.palette.error.main,
 			borderColor: theme.palette.error.main,
 			color: theme.palette.error.contrastText,
-		},
+		}),
+		...(status === "warning" && {
+			backgroundColor: theme.palette.warning.main,
+			borderColor: theme.palette.warning.main,
+			color: theme.palette.warning.contrastText,
+		}),
+		...(status === "success" && {
+			backgroundColor: theme.palette.success.main,
+			borderColor: theme.palette.success.main,
+			color: theme.palette.success.contrastText,
+		}),
 	}),
-	{ name: "CcInfoBox" },
 );
 
-interface InfoBoxProps {
+const SummaryRoot = styled("div", { name: "CcInfoBox", slot: "summaryRoot" })(
+	({ theme }) => ({
+		margin: 0,
+		paddingLeft: theme.spacing(5),
+	}),
+);
+
+const SummaryHeading = styled(Typography, {
+	name: "CcInfoBox",
+	slot: "heading",
+})({});
+
+const SpanIconButton = styled("span", {
+	name: "CcInfoBox",
+	slot: "iconButton",
+})(({ theme }) => ({
+	position: "absolute",
+	left: 0,
+	top: 0,
+	bottom: 0,
+	alignItems: "center",
+	justifyContent: "center",
+	display: "flex",
+	backgroundColor: "rgba(0,0,0,.2)",
+	width: theme.spacing(6),
+}));
+
+const AccordionDetailsStyled = styled(AccordionDetails, {
+	name: "CcInfoBox",
+	slot: "details",
+})(({ theme }) => ({
+	border: "1px solid grey",
+	borderRadius: `0px 0px ${theme.shape.borderRadius}px ${theme.shape.borderRadius}px`,
+	padding: "8px 24px",
+	whiteSpace: "pre-line",
+}));
+
+const DetailsText = styled("div", { name: "CcInfoBox", slot: "detailsText" })(
+	{},
+);
+
+export type InfoBoxClassKey =
+	| "root"
+	| "summary"
+	| "summaryRoot"
+	| "iconButton"
+	| "heading"
+	| "details"
+	| "detailsText";
+
+export interface InfoBoxProps {
 	/**
 	 * Title of the info box
 	 */
@@ -115,9 +146,18 @@ interface InfoBoxProps {
 	 */
 	onChange?: AccordionProps["onChange"];
 	/**
+	 * typography variant to use for heading
+	 * @default "caption"
+	 */
+	headingVariant?: Variant;
+	/**
+	 * custom class name to apply to root
+	 */
+	className?: string;
+	/**
 	 * Custom styles
 	 */
-	classes?: Partial<ReturnType<typeof useStyles>>;
+	classes?: Partial<Record<InfoBoxClassKey, string>>;
 	/**
 	 * For which status InfoBox used
 	 */
@@ -125,11 +165,19 @@ interface InfoBoxProps {
 }
 // .MuiAccordionSummary-content.Mui-expanded => margin => unset
 // .MuiAccordionSummary-root.Mui-expanded => min-height => unset
-const InfoBox = (props: InfoBoxProps) => {
-	const { heading, onChange, expanded, alwaysExpanded, message, status } =
-		props;
-
-	const classes = useStyles(props);
+const InfoBox = (inProps: InfoBoxProps) => {
+	const props = useThemeProps({ props: inProps, name: "CcInfoBox" });
+	const {
+		heading,
+		onChange,
+		expanded,
+		alwaysExpanded,
+		message,
+		status,
+		headingVariant,
+		className,
+		classes,
+	} = props;
 
 	const getIcon = useCallback(() => {
 		switch (status) {
@@ -144,42 +192,33 @@ const InfoBox = (props: InfoBoxProps) => {
 		}
 	}, [status]);
 
-	const getAccordionClass = useCallback(() => {
-		switch (status) {
-			case "warning":
-				return classes.accordionWarning;
-			case "success":
-				return classes.accordionSuccess;
-			case "error":
-				return classes.accordionError;
-			default:
-				return classes.accordionPrimary;
-		}
-	}, [classes, status]);
-
 	return (
-		<Accordion
-			className={classes.noShadow}
-			classes={{ rounded: classes.rounded }}
+		<AccordionStyled
+			className={combineClassNames([className, classes?.root])}
 			defaultExpanded={expanded}
 			expanded={alwaysExpanded}
 			onChange={onChange}
 		>
-			<AccordionSummary
-				className={combineClassNames([
-					getAccordionClass(),
-					alwaysExpanded && classes.alwaysExpanded,
-				])}
+			<AccordionSummaryStyled
+				ownerState={{ status, alwaysExpanded: !!alwaysExpanded }}
+				className={classes?.summary}
 			>
-				<div className={classes.root}>
-					<span className={classes.iconButton}>{getIcon()}</span>
-					<Typography variant="caption">{heading}</Typography>
-				</div>
-			</AccordionSummary>
-			<AccordionDetails className={classes.panelDetails}>
-				<div>{message}</div>
-			</AccordionDetails>
-		</Accordion>
+				<SummaryRoot className={classes?.summaryRoot}>
+					<SpanIconButton className={classes?.iconButton}>
+						{getIcon()}
+					</SpanIconButton>
+					<SummaryHeading
+						variant={headingVariant ?? "caption"}
+						className={classes?.heading}
+					>
+						{heading}
+					</SummaryHeading>
+				</SummaryRoot>
+			</AccordionSummaryStyled>
+			<AccordionDetailsStyled className={classes?.details}>
+				<DetailsText className={classes?.detailsText}>{message}</DetailsText>
+			</AccordionDetailsStyled>
+		</AccordionStyled>
 	);
 };
 
