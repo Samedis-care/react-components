@@ -1,69 +1,61 @@
-import { Theme } from "@mui/material";
+import { styled, useThemeProps } from "@mui/material";
 import React from "react";
-import { Styles } from "@mui/styles";
-import makeStyles from "@mui/styles/makeStyles";
-import makeThemeStyles from "../../utils/makeThemeStyles";
+import combineClassNames from "../../utils/combineClassNames";
 
 export interface FormPageLayoutProps {
 	body: React.ReactNode;
 	footer: React.ReactNode;
 	other?: React.ReactNode;
+	/**
+	 * class name to apply to root
+	 */
+	className?: string;
+	/**
+	 * custom CSS classes
+	 */
+	classes?: Partial<Record<FormPageLayoutClassKey, string>>;
 }
 
-const useStyles = makeStyles(
-	{
-		wrapper: {
-			flexGrow: 1,
-			display: "flex",
-			flexDirection: "column",
-		},
-		box: {
-			flexGrow: 1,
-			display: "flex",
-			flexDirection: "column",
-		},
-		body: {
-			paddingBottom: 150,
-			flexGrow: 1,
-			display: "flex",
-			flexDirection: "column",
-		},
-		footer: {
-			position: "absolute",
-			bottom: 36,
-			transform: "translateX(36px)",
-			padding: 0,
-		},
-	},
-	{ name: "CcFormPageLayout" },
-);
+const Root = styled("div", { name: "CcFormPageLayout", slot: "root" })({
+	flexGrow: 1,
+	display: "flex",
+	flexDirection: "column",
+});
 
-export type FormPageLayoutClassKey = keyof ReturnType<typeof useStyles>;
+const Wrapper = styled("div", { name: "CcFormPageLayout", slot: "wrapper" })({
+	flexGrow: 1,
+	display: "flex",
+	flexDirection: "column",
+});
 
-export type FormPageLayoutTheme = Partial<
-	Styles<Theme, FormPageLayoutProps, FormPageLayoutClassKey>
->;
+const Body = styled("div", { name: "CcFormPageLayout", slot: "body" })({
+	paddingBottom: 150,
+	flexGrow: 1,
+	display: "flex",
+	flexDirection: "column",
+});
 
-const useThemeStyles = makeThemeStyles<
-	FormPageLayoutProps,
-	FormPageLayoutClassKey
->(
-	(theme) => theme.componentsCare?.uiKit?.formPage?.layout,
-	"CcFormPageLayout",
-	useStyles,
-);
+const Footer = styled("div", { name: "CcFormPageLayout", slot: "footer" })({
+	position: "absolute",
+	bottom: 36,
+	transform: "translateX(36px)",
+	padding: 0,
+});
 
-const FormPageLayout = (props: FormPageLayoutProps) => {
-	const classes = useThemeStyles(props);
+export type FormPageLayoutClassKey = "root" | "wrapper" | "body" | "footer";
+
+const FormPageLayout = (inProps: FormPageLayoutProps) => {
+	const props = useThemeProps({ props: inProps, name: "CcFormPageLayout" });
+	const { body, footer, other, className, classes } = props;
 
 	return (
-		<div className={classes.box}>
-			<div className={classes.wrapper}>
-				<div className={classes.body}>{props.body}</div>
-				<div className={classes.footer}>{props.footer}</div>
-			</div>
-			{props.other}
-		</div>
+		<Root className={combineClassNames([className, classes?.root])}>
+			<Wrapper className={classes?.wrapper}>
+				<Body className={classes?.body}>{body}</Body>
+				<Footer className={classes?.footer}>{footer}</Footer>
+			</Wrapper>
+			{other}
+		</Root>
 	);
 };
 
