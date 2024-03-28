@@ -1,5 +1,5 @@
-import React, { CSSProperties } from "react";
-import SignalPortletItem, { SignalPortletItemDef } from "./SignalPortletItem";
+import React from "react";
+import SignalPortletItem, { SignalPortletItemProps } from "./SignalPortletItem";
 import {
 	Divider,
 	Grid,
@@ -10,18 +10,7 @@ import {
 	useThemeProps,
 } from "@mui/material";
 
-export interface SignalPortletColorConfig {
-	/**
-	 * Color used for counter if count != 0
-	 */
-	colorPresent: NonNullable<CSSProperties["color"]>;
-	/**
-	 * Color used for counter if count == 0
-	 */
-	colorNotPresent: NonNullable<CSSProperties["color"]>;
-}
-
-export interface SignalPortletProps extends SignalPortletColorConfig {
+export interface SignalPortletProps {
 	/**
 	 * The title of the portlet
 	 */
@@ -29,7 +18,7 @@ export interface SignalPortletProps extends SignalPortletColorConfig {
 	/**
 	 * The portlet items
 	 */
-	items: SignalPortletItemDef[];
+	items: SignalPortletItemProps[];
 	/**
 	 * Custom CSS classes
 	 */
@@ -62,13 +51,18 @@ const SignalPortletList = styled(List, {
 	name: "CcSignalPortlet",
 	slot: "list",
 })({});
+const SignalPortletItemStyled = styled(SignalPortletItem, {
+	name: "CcSignalPortlet",
+	slot: "item",
+})({});
 
 export type SignalPortletClassKey =
 	| "paper"
 	| "divider"
 	| "titleWrapper"
 	| "title"
-	| "list";
+	| "list"
+	| "item";
 
 const SignalPortlet = (inProps: SignalPortletProps) => {
 	const props = useThemeProps({ props: inProps, name: "CcSignalPortlet" });
@@ -96,10 +90,9 @@ const SignalPortlet = (inProps: SignalPortletProps) => {
 					<Grid item xs={12}>
 						<SignalPortletList className={props.classes?.list}>
 							{props.items.map((item, index) => (
-								<SignalPortletItem
+								<SignalPortletItemStyled
 									key={index.toString()}
-									colorPresent={props.colorPresent}
-									colorNotPresent={props.colorNotPresent}
+									className={props.classes?.item}
 									{...item}
 								/>
 							))}

@@ -1,21 +1,19 @@
 import React, { useCallback } from "react";
-import makeStyles from "@mui/styles/makeStyles";
-import { ClassNameMap } from "@mui/styles/withStyles";
 import {
 	Avatar,
 	ListItem,
 	ListItemAvatar,
 	ListItemButton,
 	ListItemText,
-	Theme,
+	styled,
+	TypographyProps,
+	useThemeProps,
 } from "@mui/material";
-import type { SignalPortletColorConfig } from "./index";
 import Loader from "../Loader";
-import { Styles } from "@mui/styles";
-import makeThemeStyles from "../../utils/makeThemeStyles";
 import useNavigate from "../Routes/useNavigate";
+import combineClassNames from "../../utils/combineClassNames";
 
-export interface SignalPortletItemDef {
+export interface SignalPortletItemProps {
 	/**
 	 * The count to show or null/undefined to signal loading
 	 */
@@ -25,57 +23,72 @@ export interface SignalPortletItemDef {
 	 */
 	text: React.ReactNode;
 	/**
+	 * Typography props
+	 */
+	textTypographyProps?: TypographyProps;
+	/**
 	 * The url the portlet item links to onClick
 	 */
 	link?: string;
 	/**
+	 * custom CSS classes to apply to root/rootBtn
+	 */
+	className?: string;
+	/**
 	 * Custom CSS styles
 	 */
-	classes?: Partial<ClassNameMap<keyof ReturnType<typeof useStyles>>>;
+	classes?: Partial<Record<SignalPortletItemClassKey, string>>;
 }
 
-export type SignalPortletItemProps = SignalPortletItemDef &
-	SignalPortletColorConfig;
+const ListAvatar = styled(ListItemAvatar, {
+	name: "CcSignalPortletItem",
+	slot: "listAvatar",
+})({});
+const AvatarLoading = styled(Avatar, {
+	name: "CcSignalPortletItem",
+	slot: "itemColorLoading",
+})({
+	backgroundColor: "transparent",
+});
+const AvatarActive = styled(Avatar, {
+	name: "CcSignalPortletItem",
+	slot: "itemColorActive",
+})(({ theme }) => ({
+	color: theme.palette.primary.contrastText,
+	backgroundColor: theme.palette.primary.main,
+}));
+const AvatarInactive = styled(Avatar, {
+	name: "CcSignalPortletItem",
+	slot: "itemColorInactive",
+})(({ theme }) => ({
+	color: theme.palette.getContrastText(theme.palette.action.disabled),
+	backgroundColor: theme.palette.action.disabled,
+}));
+const ListText = styled(ListItemText, {
+	name: "CcSignalPortletItem",
+	slot: "listText",
+})({});
+const ListRoot = styled(ListItem, {
+	name: "CcSignalPortletItem",
+	slot: "root",
+})({});
+const ListRootButton = styled(ListItemButton, {
+	name: "CcSignalPortletItem",
+	slot: "rootBtn",
+})({});
 
-const useStyles = makeStyles(
-	(theme) => ({
-		itemColorLoading: {
-			backgroundColor: "transparent",
-		},
-		itemColorActive: (props: SignalPortletItemProps) => ({
-			color: theme.palette.getContrastText(props.colorPresent),
-			backgroundColor: props.colorPresent,
-		}),
-		itemColorInactive: (props: SignalPortletItemProps) => ({
-			color: theme.palette.getContrastText(props.colorNotPresent),
-			backgroundColor: props.colorNotPresent,
-		}),
-		root: {},
-		listAvatar: {},
-		listText: {},
-		listTextPrimary: {},
-	}),
-	{ name: "CcSignalPortletItem" },
-);
+export type SignalPortletItemClassKey =
+	| "listAvatar"
+	| "itemColorLoading"
+	| "itemColorActive"
+	| "itemColorInactive"
+	| "listText"
+	| "root"
+	| "rootBtn";
 
-export type SignalPortletItemClassKey = keyof ReturnType<typeof useStyles>;
-
-export type SignalPortletItemTheme = Partial<
-	Styles<Theme, SignalPortletItemProps, SignalPortletItemClassKey>
->;
-
-const useThemeStyles = makeThemeStyles<
-	SignalPortletItemProps,
-	SignalPortletItemClassKey
->(
-	(theme) => theme.componentsCare?.signalPortlet?.item,
-	"CcSignalPortletItem",
-	useStyles,
-);
-
-const SignalPortletItem = (props: SignalPortletItemProps) => {
-	const { count, link, text } = props;
-	const classes = useThemeStyles(props);
+const SignalPortletItem = (inProps: SignalPortletItemProps) => {
+	const props = useThemeProps({ props: inProps, name: "CcSignalPortletItem" });
+	const { count, link, text, textTypographyProps, className, classes } = props;
 	const navigate = useNavigate();
 
 	const handleClick = useCallback(() => {
@@ -84,34 +97,37 @@ const SignalPortletItem = (props: SignalPortletItemProps) => {
 		}
 	}, [navigate, link]);
 
-	const counterClass =
-		count == null
+	const AvatarComponent =
+		count == null ? AvatarLoading : count ? AvatarActive : AvatarInactive;
+	const avatarClass: string | undefined = classes
+		? count == null
 			? classes.itemColorLoading
 			: count
 				? classes.itemColorActive
-				: classes.itemColorInactive;
+				: classes.itemColorInactive
+		: undefined;
 
 	const content = (
 		<>
-			<ListItemAvatar className={classes.listAvatar}>
-				<Avatar className={counterClass}>
+			<ListAvatar className={classes?.listAvatar}>
+				<AvatarComponent className={avatarClass}>
 					{count == null ? <Loader /> : count.toString()}
-				</Avatar>
-			</ListItemAvatar>
-			<ListItemText
-				className={classes.listText}
-				primaryTypographyProps={{ className: classes.listTextPrimary }}
-			>
-				{text}
-			</ListItemText>
+				</AvatarComponent>
+			</ListAvatar>
+			<ListText primaryTypographyProps={textTypographyProps}>{text}</ListText>
 		</>
 	);
 	return link ? (
-		<ListItemButton onClick={handleClick} className={classes.root}>
+		<ListRootButton
+			onClick={handleClick}
+			className={combineClassNames([className, classes?.rootBtn])}
+		>
 			{content}
-		</ListItemButton>
+		</ListRootButton>
 	) : (
-		<ListItem className={classes.root}>{content}</ListItem>
+		<ListRoot className={combineClassNames([className, classes?.root])}>
+			{content}
+		</ListRoot>
 	);
 };
 

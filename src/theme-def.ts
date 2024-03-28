@@ -38,7 +38,6 @@ import {
 	FormPageLayoutProps,
 } from "./standalone/Form/FormPageLayout";
 import { GroupBoxClassKey, GroupBoxProps } from "./standalone/GroupBox";
-import { SignalPortletItemTheme } from "./standalone/SignalPortlet/SignalPortletItem";
 import {
 	SignalPortletClassKey,
 	SignalPortletProps,
@@ -70,6 +69,10 @@ import {
 	DefaultFormPageButtonsProps,
 } from "./backend-components/Form/DefaultFormPageButtons";
 import { InfoBoxClassKey, InfoBoxProps } from "./standalone/InfoBox";
+import {
+	SignalPortletItemClassKey,
+	SignalPortletItemProps,
+} from "./standalone/SignalPortlet/SignalPortletItem";
 
 export interface ComponentsCareTheme {
 	dataGrid?: DataGridTheme;
@@ -91,9 +94,6 @@ export interface ComponentsCareTheme {
 			imageDialogEntry?: ImageDialogEntryTheme;
 			dots?: ImageDotsTheme;
 		};
-	};
-	signalPortlet?: {
-		item?: SignalPortletItemTheme;
 	};
 	selector?: SelectorTheme;
 	multiSelect?: MultiSelectTheme;
@@ -124,6 +124,7 @@ type Theme = Omit<MuiTheme, "components">;
 declare module "@mui/material/styles" {
 	interface ComponentNameToClassKey {
 		CcSignalPortlet: SignalPortletClassKey;
+		CcSignalPortletItem: SignalPortletItemClassKey;
 		CcActionButton: ActionButtonClassKey;
 		CcFormLoaderOverlay: FormLoaderOverlayClassKey;
 		CcLoader: LoaderClassKey;
@@ -141,6 +142,7 @@ declare module "@mui/material/styles" {
 
 	interface ComponentsPropsList {
 		CcSignalPortlet: SignalPortletProps;
+		CcSignalPortletItem: SignalPortletItemProps;
 		CcActionButton: ActionButtonProps;
 		CcFormLoaderOverlay: FormLoaderOverlayProps;
 		CcLoader: LoaderProps;
@@ -161,6 +163,11 @@ declare module "@mui/material/styles" {
 			defaultProps?: ComponentsPropsList["CcSignalPortlet"];
 			styleOverrides?: ComponentsOverrides<Theme>["CcSignalPortlet"];
 			variants?: ComponentsVariants["CcSignalPortlet"];
+		};
+		CcSignalPortletItem?: {
+			defaultProps?: ComponentsPropsList["CcSignalPortletItem"];
+			styleOverrides?: ComponentsOverrides<Theme>["CcSignalPortletItem"];
+			variants?: ComponentsVariants["CcSignalPortletItem"];
 		};
 		CcActionButton?: {
 			defaultProps?: ComponentsPropsList["CcActionButton"];
