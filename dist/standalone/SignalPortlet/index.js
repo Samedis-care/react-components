@@ -27,6 +27,10 @@ const SignalPortletList = styled(List, {
     name: "CcSignalPortlet",
     slot: "list",
 })({});
+const SignalPortletItemStyled = styled(SignalPortletItem, {
+    name: "CcSignalPortlet",
+    slot: "item",
+})({});
 const SignalPortlet = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcSignalPortlet" });
     return (React.createElement(SignalPortletRoot, null,
@@ -37,6 +41,6 @@ const SignalPortlet = (inProps) => {
                 React.createElement(SignalPortletDivider, { item: true, xs: 12, className: props.classes?.divider },
                     React.createElement(Divider, null)),
                 React.createElement(Grid, { item: true, xs: 12 },
-                    React.createElement(SignalPortletList, { className: props.classes?.list }, props.items.map((item, index) => (React.createElement(SignalPortletItem, { key: index.toString(), colorPresent: props.colorPresent, colorNotPresent: props.colorNotPresent, ...item })))))))));
+                    React.createElement(SignalPortletList, { className: props.classes?.list }, props.items.map((item, index) => (React.createElement(SignalPortletItemStyled, { key: index.toString(), className: props.classes?.item, ...item })))))))));
 };
 export default React.memo(SignalPortlet);

@@ -1,16 +1,6 @@
-import React, { CSSProperties } from "react";
-import { SignalPortletItemDef } from "./SignalPortletItem";
-export interface SignalPortletColorConfig {
-    /**
-     * Color used for counter if count != 0
-     */
-    colorPresent: NonNullable<CSSProperties["color"]>;
-    /**
-     * Color used for counter if count == 0
-     */
-    colorNotPresent: NonNullable<CSSProperties["color"]>;
-}
-export interface SignalPortletProps extends SignalPortletColorConfig {
+import React from "react";
+import { SignalPortletItemProps } from "./SignalPortletItem";
+export interface SignalPortletProps {
     /**
      * The title of the portlet
      */
@@ -18,12 +8,12 @@ export interface SignalPortletProps extends SignalPortletColorConfig {
     /**
      * The portlet items
      */
-    items: SignalPortletItemDef[];
+    items: SignalPortletItemProps[];
     /**
      * Custom CSS classes
      */
     classes?: Partial<Record<SignalPortletClassKey, string>>;
 }
-export type SignalPortletClassKey = "paper" | "divider" | "titleWrapper" | "title" | "list";
+export type SignalPortletClassKey = "paper" | "divider" | "titleWrapper" | "title" | "list" | "item";
 declare const _default: React.MemoExoticComponent<(inProps: SignalPortletProps) => React.JSX.Element>;
 export default _default;

@@ -1,9 +1,6 @@
 import React from "react";
-import { ClassNameMap } from "@mui/styles/withStyles";
-import { Theme } from "@mui/material";
-import type { SignalPortletColorConfig } from "./index";
-import { Styles } from "@mui/styles";
-export interface SignalPortletItemDef {
+import { TypographyProps } from "@mui/material";
+export interface SignalPortletItemProps {
     /**
      * The count to show or null/undefined to signal loading
      */
@@ -13,17 +10,22 @@ export interface SignalPortletItemDef {
      */
     text: React.ReactNode;
     /**
+     * Typography props
+     */
+    textTypographyProps?: TypographyProps;
+    /**
      * The url the portlet item links to onClick
      */
     link?: string;
     /**
+     * custom CSS classes to apply to root/rootBtn
+     */
+    className?: string;
+    /**
      * Custom CSS styles
      */
-    classes?: Partial<ClassNameMap<keyof ReturnType<typeof useStyles>>>;
+    classes?: Partial<Record<SignalPortletItemClassKey, string>>;
 }
-export type SignalPortletItemProps = SignalPortletItemDef & SignalPortletColorConfig;
-declare const useStyles: (props: SignalPortletItemProps) => ClassNameMap<"root" | "itemColorLoading" | "itemColorActive" | "itemColorInactive" | "listAvatar" | "listText" | "listTextPrimary">;
-export type SignalPortletItemClassKey = keyof ReturnType<typeof useStyles>;
-export type SignalPortletItemTheme = Partial<Styles<Theme, SignalPortletItemProps, SignalPortletItemClassKey>>;
-declare const _default: React.MemoExoticComponent<(props: SignalPortletItemProps) => React.JSX.Element>;
+export type SignalPortletItemClassKey = "listAvatar" | "itemColorLoading" | "itemColorActive" | "itemColorInactive" | "listText" | "root" | "rootBtn";
+declare const _default: React.MemoExoticComponent<(inProps: SignalPortletItemProps) => React.JSX.Element>;
 export default _default;
