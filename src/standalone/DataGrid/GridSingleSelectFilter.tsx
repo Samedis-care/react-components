@@ -95,7 +95,7 @@ const GridSingleSelectFilter = (props: GridSingleSelectFilterProps) => {
 	const getOptions = useCallback(() => options, [options]);
 	const selectorStyles = useMemo(
 		() => ({
-			inputRoot: isActive ? classes.customFilterBorder : undefined,
+			autocomplete: isActive ? classes.customFilterBorder : undefined,
 		}),
 		[isActive, classes.customFilterBorder],
 	);

@@ -891,6 +891,12 @@ const useStyles = makeStyles(
 			"& > fieldset": {
 				borderColor: theme.palette.secondary.main,
 			},
+			"& .MuiAutocomplete-inputRoot": {
+				borderColor: theme.palette.secondary.main,
+				"& > fieldset": {
+					borderColor: theme.palette.secondary.main,
+				},
+			},
 		},
 		columnHeaderLabel: {
 			textOverflow: "ellipsis",

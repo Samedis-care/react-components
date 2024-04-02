@@ -3,15 +3,12 @@ import BaseSelector, {
 	BaseSelectorData,
 	BaseSelectorProps,
 } from "./BaseSelector";
-import { Grid, Paper, useTheme } from "@mui/material";
-import makeStyles from "@mui/styles/makeStyles";
-import MultiSelectEntry, { IMultiSelectEntryProps } from "./MultiSelectEntry";
-import cleanClassMap from "../../utils/cleanClassMap";
-import combineClassMaps from "../../utils/combineClassMaps";
-import { ClassNameMap } from "@mui/styles/withStyles";
+import { Grid, Paper, styled, useThemeProps } from "@mui/material";
+import MultiSelectEntry, { MultiSelectEntryProps } from "./MultiSelectEntry";
 import { showConfirmDialogBool } from "../../non-standalone/Dialog/Utils";
 import { DialogContext } from "../../framework/DialogContextProvider";
 import useCCTranslations from "../../utils/useCCTranslations";
+import combineClassNames from "../../utils/combineClassNames";
 
 export interface MultiSelectorData extends BaseSelectorData {
 	/**
@@ -49,19 +46,15 @@ export interface MultiSelectProps<DataT extends MultiSelectorData>
 	/**
 	 * Specify a custom component for displaying multi select items
 	 */
-	selectedEntryRenderer?: React.ComponentType<IMultiSelectEntryProps<DataT>>;
+	selectedEntryRenderer?: React.ComponentType<MultiSelectEntryProps<DataT>>;
+	/**
+	 * CSS class for root
+	 */
+	className?: string;
 	/**
 	 * CSS classes to apply
 	 */
-	classes?: Partial<
-		ClassNameMap<keyof ReturnType<typeof useMultiSelectorStyles>>
-	>;
-	/**
-	 * Custom classes passed to subcomponents
-	 */
-	subClasses?: {
-		baseSelector: BaseSelectorProps<BaseSelectorData, false>["classes"];
-	};
+	classes?: Partial<Record<MultiSelectClassKey, string>>;
 	/**
 	 * Sort function to perform a view-based sort on selected entries
 	 * @remarks This is a comparison function
@@ -70,44 +63,47 @@ export interface MultiSelectProps<DataT extends MultiSelectorData>
 	selectedSort?: (a: DataT, b: DataT) => number;
 	/**
 	 * Provide generic confirm remove/delete dialog when set to true.
-	 * Defaults to MultiSelectTheme.confirmDeleteDefault, which defaults to false
+	 * @default false
 	 */
 	confirmDelete?: boolean;
 }
 
-const useBaseSelectorStyles = makeStyles(
-	(theme) => ({
-		inputRoot: (props: MultiSelectProps<MultiSelectorData>) => ({
-			borderRadius:
-				props.selected.length > 0
-					? `${theme.shape.borderRadius}px ${theme.shape.borderRadius}px 0px 0px`
-					: undefined,
-		}),
-	}),
-	{ name: "CcMultiSelectBase" },
-);
+const Root = styled(Grid, {
+	name: "CcMultiSelect",
+	slot: "root",
+})({});
 
-const useMultiSelectorStyles = makeStyles(
-	(theme) => ({
-		selectedEntries: {
-			border: `1px solid rgba(0, 0, 0, 0.23)`,
-			borderTop: 0,
-			borderRadius: `0px 0px ${theme.shape.borderRadius}px ${theme.shape.borderRadius}px`,
+const SelectedEntry = styled(Grid, {
+	name: "CcMultiSelect",
+	slot: "selectedEntry",
+})(({ theme }) => ({
+	border: `1px solid rgba(0, 0, 0, 0.23)`,
+	borderTop: 0,
+	borderRadius: `0px 0px ${theme.shape.borderRadius}px ${theme.shape.borderRadius}px`,
+}));
+
+export interface MultiSelectSelectorOwnerState {
+	selected: boolean;
+}
+const StyledBaseSelector = styled(BaseSelector, {
+	name: "CcMultiSelect",
+	slot: "selector",
+})<{ ownerState: MultiSelectSelectorOwnerState }>(
+	({ theme, ownerState: { selected } }) => ({
+		"& .MuiAutocomplete-inputRoot": {
+			borderRadius: selected
+				? `${theme.shape.borderRadius}px ${theme.shape.borderRadius}px 0px 0px`
+				: undefined,
 		},
 	}),
-	{ name: "CcMultiSelect" },
-);
+) as unknown as typeof BaseSelector; // tradeoff: remove ownerState from type config, but keep generics
 
-export interface MultiSelectTheme {
-	/**
-	 * default value for confirm delete, default false
-	 */
-	confirmDeleteDefault?: boolean;
-}
+export type MultiSelectClassKey = "root" | "selectedEntry" | "selector";
 
 const MultiSelect = <DataT extends MultiSelectorData>(
-	props: MultiSelectProps<DataT>,
+	inProps: MultiSelectProps<DataT>,
 ) => {
+	const props = useThemeProps({ props: inProps, name: "CcMultiSelect" });
 	const {
 		onLoad,
 		onSelect,
@@ -120,33 +116,24 @@ const MultiSelect = <DataT extends MultiSelectorData>(
 		switchLabel,
 		defaultSwitchValue,
 		selectedSort,
+		confirmDelete,
+		className,
+		classes,
 	} = props;
-	const theme = useTheme();
 	const { t } = useCCTranslations();
-	const confirmDelete =
-		props.confirmDelete ??
-		theme.componentsCare?.multiSelect?.confirmDeleteDefault ??
-		false;
-	const multiSelectClasses = useMultiSelectorStyles(props);
-	const baseSelectorClasses = useBaseSelectorStyles(
-		cleanClassMap(
-			props as unknown as MultiSelectProps<MultiSelectorData>,
-			true,
-		),
-	);
 
 	const getIdDefault = useCallback((data: DataT) => data.value, []);
 	const getId = getIdOfData ?? getIdDefault;
 
 	const selectedIds = useMemo(() => selected.map(getId), [getId, selected]);
 
-	const EntryRender: React.ComponentType<IMultiSelectEntryProps<DataT>> =
+	const EntryRender: React.ComponentType<MultiSelectEntryProps<DataT>> =
 		selectedEntryRenderer || MultiSelectEntry;
 
 	const multiSelectHandler = useCallback(
 		(data: DataT | null) => {
 			if (!data) return;
-			const selectedOptions = [...selected, data];
+			const selectedOptions: DataT[] = [...selected, data];
 			if (onSelect) onSelect(selectedOptions);
 		},
 		[onSelect, selected],
@@ -228,14 +215,13 @@ const MultiSelect = <DataT extends MultiSelectorData>(
 	);
 
 	return (
-		<Grid container>
+		<Root container className={combineClassNames([className, classes?.root])}>
 			<Grid item xs={12}>
-				<BaseSelector
+				<StyledBaseSelector
 					{...props}
-					classes={combineClassMaps(
-						baseSelectorClasses,
-						props.subClasses?.baseSelector,
-					)}
+					// @ts-expect-error removed owner state from props to preserve generics
+					ownerState={{ selected: selected.length > 0 }}
+					className={classes?.selector}
 					onLoad={multiSelectLoadHandler}
 					selected={null}
 					onSelect={multiSelectHandler}
@@ -247,7 +233,7 @@ const MultiSelect = <DataT extends MultiSelectorData>(
 				/>
 			</Grid>
 			{props.selected.length > 0 && (
-				<Grid item xs={12} className={multiSelectClasses.selectedEntries}>
+				<SelectedEntry item xs={12} className={classes?.selectedEntry}>
 					<Paper elevation={0}>
 						{(selectedSort
 							? props.selected.sort(selectedSort)
@@ -266,9 +252,9 @@ const MultiSelect = <DataT extends MultiSelectorData>(
 							/>
 						))}
 					</Paper>
-				</Grid>
+				</SelectedEntry>
 			)}
-		</Grid>
+		</Root>
 	);
 };
 

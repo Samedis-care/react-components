@@ -11,11 +11,14 @@ import { ImageBoxTheme } from "./standalone/FileUpload/MultiImage/ImageBox";
 import { ImageDialogEntryTheme } from "./standalone/FileUpload/MultiImage/ImageDialogEntry";
 import { ImageDotsTheme } from "./standalone/FileUpload/MultiImage/ImageDots";
 import {
+	BaseSelectorClassKey,
+	BaseSelectorData,
+	BaseSelectorProps,
 	HowToBoxClassKey,
 	HowToBoxProps,
-	MultiSelectTheme,
-	SelectorTheme,
-	SelectorThemeExpert,
+	MultiSelectClassKey,
+	MultiSelectorData,
+	MultiSelectProps,
 } from "./standalone";
 import { ComponentWithLabelTheme } from "./standalone/UIKit/ComponentWithLabel";
 import { CheckboxTheme } from "./standalone/UIKit/Checkbox";
@@ -72,6 +75,14 @@ import {
 	SignalPortletItemClassKey,
 	SignalPortletItemProps,
 } from "./standalone/SignalPortlet/SignalPortletItem";
+import {
+	InlineSwitchClassKey,
+	InlineSwitchProps,
+} from "./standalone/InlineSwitch";
+import {
+	MultiSelectEntryClassKey,
+	MultiSelectEntryProps,
+} from "./standalone/Selector/MultiSelectEntry";
 
 export interface ComponentsCareTheme {
 	dataGrid?: DataGridTheme;
@@ -94,13 +105,10 @@ export interface ComponentsCareTheme {
 			dots?: ImageDotsTheme;
 		};
 	};
-	selector?: SelectorTheme;
-	multiSelect?: MultiSelectTheme;
 	uiKit?: {
 		label?: ComponentWithLabelTheme;
 		checkbox?: CheckboxTheme;
 		input?: InputTheme;
-		baseSelectorExpert?: SelectorThemeExpert;
 		hideDisabledIcons?: boolean;
 	};
 }
@@ -136,24 +144,32 @@ declare module "@mui/material/styles" {
 		CcHowToBox: HowToBoxClassKey;
 		CcInfoBox: InfoBoxClassKey;
 		CcFormPageLayout: FormPageLayoutClassKey;
+		CcInlineSwitch: InlineSwitchClassKey;
+		CcBaseSelector: BaseSelectorClassKey;
+		CcMultiSelectEntry: MultiSelectEntryClassKey;
+		CcMultiSelect: MultiSelectClassKey;
 	}
 
 	interface ComponentsPropsList {
-		CcSignalPortlet: SignalPortletProps;
-		CcSignalPortletItem: SignalPortletItemProps;
-		CcActionButton: ActionButtonProps;
-		CcFormLoaderOverlay: FormLoaderOverlayProps;
-		CcLoader: LoaderProps;
-		CcMultiGrid: MultiGridProps;
-		CcVerticalDivider: VerticalDividerProps;
-		CcMultiLanguageInput: MultiLanguageInputProps;
-		CcFormButtons: FormButtonsProps;
-		CcDefaultFormPageButtons: DefaultFormPageButtonsProps;
-		CcSubActionButton: SubActionButtonProps;
-		CcGroupBox: GroupBoxProps;
-		CcHowToBox: HowToBoxProps;
-		CcInfoBox: InfoBoxProps;
-		CcFormPageLayout: FormPageLayoutProps;
+		CcSignalPortlet: Partial<SignalPortletProps>;
+		CcSignalPortletItem: Partial<SignalPortletItemProps>;
+		CcActionButton: Partial<ActionButtonProps>;
+		CcFormLoaderOverlay: Partial<FormLoaderOverlayProps>;
+		CcLoader: Partial<LoaderProps>;
+		CcMultiGrid: Partial<MultiGridProps>;
+		CcVerticalDivider: Partial<VerticalDividerProps>;
+		CcMultiLanguageInput: Partial<MultiLanguageInputProps>;
+		CcFormButtons: Partial<FormButtonsProps>;
+		CcDefaultFormPageButtons: Partial<DefaultFormPageButtonsProps>;
+		CcSubActionButton: Partial<SubActionButtonProps>;
+		CcGroupBox: Partial<GroupBoxProps>;
+		CcHowToBox: Partial<HowToBoxProps>;
+		CcInfoBox: Partial<InfoBoxProps>;
+		CcFormPageLayout: Partial<FormPageLayoutProps>;
+		CcInlineSwitch: Partial<InlineSwitchProps>;
+		CcBaseSelector: Partial<BaseSelectorProps<BaseSelectorData, never>>;
+		CcMultiSelectEntry: Partial<MultiSelectEntryProps<MultiSelectorData>>;
+		CcMultiSelect: Partial<MultiSelectProps<MultiSelectorData>>;
 	}
 
 	interface Components {
@@ -231,6 +247,26 @@ declare module "@mui/material/styles" {
 			defaultProps?: ComponentsPropsList["CcFormPageLayout"];
 			styleOverrides?: ComponentsOverrides<Theme>["CcFormPageLayout"];
 			variants?: ComponentsVariants["CcFormPageLayout"];
+		};
+		CcInlineSwitch?: {
+			defaultProps?: ComponentsPropsList["CcInlineSwitch"];
+			styleOverrides?: ComponentsOverrides<Theme>["CcInlineSwitch"];
+			variants?: ComponentsVariants["CcInlineSwitch"];
+		};
+		CcBaseSelector?: {
+			defaultProps?: ComponentsPropsList["CcBaseSelector"];
+			styleOverrides?: ComponentsOverrides<Theme>["CcBaseSelector"];
+			variants?: ComponentsVariants["CcBaseSelector"];
+		};
+		CcMultiSelectEntry?: {
+			defaultProps?: ComponentsPropsList["CcMultiSelectEntry"];
+			styleOverrides?: ComponentsOverrides<Theme>["CcMultiSelectEntry"];
+			variants?: ComponentsVariants["CcMultiSelectEntry"];
+		};
+		CcMultiSelect?: {
+			defaultProps?: ComponentsPropsList["CcMultiSelect"];
+			styleOverrides?: ComponentsOverrides<Theme>["CcMultiSelect"];
+			variants?: ComponentsVariants["CcMultiSelect"];
 		};
 	}
 }

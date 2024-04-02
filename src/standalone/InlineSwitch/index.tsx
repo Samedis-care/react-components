@@ -1,8 +1,6 @@
 import React, { useCallback } from "react";
-import { Grid, Typography, Theme, Switch } from "@mui/material";
-import withStyles from "@mui/styles/withStyles";
-import makeStyles from "@mui/styles/makeStyles";
-import cleanClassMap from "../../utils/cleanClassMap";
+import { Grid, styled, Switch, Typography, useThemeProps } from "@mui/material";
+import combineClassNames from "../../utils/combineClassNames";
 
 export interface InlineSwitchProps {
 	/**
@@ -24,63 +22,66 @@ export interface InlineSwitchProps {
 	label?: React.ReactNode;
 	children?: React.ReactElement;
 	/**
+	 * custom styles
+	 */
+	className?: string;
+	/**
 	 * Custom styles
 	 */
-	classes?: Partial<ReturnType<typeof useStyles>>;
+	classes?: Partial<Record<InlineSwitchClassKey, string>>;
 }
 
-const useStyles = makeStyles(
-	{
-		switch: {
-			lineHeight: "30px",
-			float: "right",
-		},
-		labelWithSwitch: {
-			marginTop: 15,
-		},
-	},
-	{ name: "CcInlineSwitch" },
-);
-
-const AntSwitch = withStyles((theme: Theme) => ({
-	root: {
+const AntSwitch = styled(Switch, { name: "CcInlineSwitch", slot: "switch" })(
+	({ theme }) => ({
 		width: 35,
 		height: 16,
 		padding: 0,
 		display: "flex",
-	},
-	switchBase: {
-		padding: 2,
-		color: theme.palette.grey[500],
-		"&$checked": {
-			transform: "translateX(18px)",
-			color: theme.palette.common.white,
-			"& + $track": {
-				opacity: 1,
-				backgroundColor: theme.palette.primary.main,
-				borderColor: theme.palette.primary.main,
+		"& .MuiSwitch-switchBase": {
+			padding: 2,
+			color: theme.palette.grey[500],
+			"&.Mui-checked": {
+				transform: "translateX(18px)",
+				color: theme.palette.common.white,
+				"& + .MuiSwitch-track": {
+					opacity: 1,
+					backgroundColor: theme.palette.primary.main,
+					borderColor: theme.palette.primary.main,
+				},
 			},
 		},
-	},
-	thumb: {
-		width: 12,
-		height: 12,
-		boxShadow: "none",
-	},
-	track: {
-		border: `1px solid ${theme.palette.grey[500]}`,
-		borderRadius: 16 / 2,
-		opacity: 1,
-		backgroundColor: theme.palette.common.white,
-	},
-	checked: {},
-}))(Switch);
+		"& .MuiSwitch-thumb": {
+			width: 12,
+			height: 12,
+			boxShadow: "none",
+		},
+		"& .MuiSwitch-track": {
+			border: `1px solid ${theme.palette.grey[500]}`,
+			borderRadius: 16 / 2,
+			opacity: 1,
+			backgroundColor: theme.palette.common.white,
+		},
+	}),
+);
 
-const InlineSwitch = (props: InlineSwitchProps) => {
-	const classes = useStyles(
-		cleanClassMap(props, false, "switch", "labelWithSwitch"),
-	);
-	const { label, value, onChange, visible, children } = props;
+const StyledRoot = styled("div", { name: "CcInlineSwitch", slot: "root" })({
+	marginTop: 15,
+});
+
+const StyledSwitchWrapper = styled(Typography, {
+	name: "CcInlineSwitch",
+	slot: "switchWrapper",
+})({
+	lineHeight: "30px",
+	float: "right",
+}) as typeof Typography;
+
+export type InlineSwitchClassKey = "switch" | "root" | "switchWrapper";
+
+const InlineSwitch = (inProps: InlineSwitchProps) => {
+	const props = useThemeProps({ props: inProps, name: "CcInlineSwitch" });
+	const { label, value, onChange, visible, children, classes, className } =
+		props;
 
 	const handleSwitchChange = useCallback(
 		(event: React.ChangeEvent<HTMLInputElement>) => {
@@ -90,11 +91,11 @@ const InlineSwitch = (props: InlineSwitchProps) => {
 	);
 
 	return (
-		<Typography component="div" className={classes.labelWithSwitch}>
+		<StyledRoot className={combineClassNames([className, classes?.root])}>
 			{visible && (
-				<Typography
+				<StyledSwitchWrapper
 					component="div"
-					className={classes.switch}
+					className={classes?.switchWrapper}
 					variant={"caption"}
 				>
 					<Grid component="label" container alignItems="center" spacing={1}>
@@ -103,10 +104,10 @@ const InlineSwitch = (props: InlineSwitchProps) => {
 						</Grid>
 						<Grid item>{label}</Grid>
 					</Grid>
-				</Typography>
+				</StyledSwitchWrapper>
 			)}
-			<Typography component="div">{children}</Typography>
-		</Typography>
+			<div>{children}</div>
+		</StyledRoot>
 	);
 };
 

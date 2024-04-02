@@ -102,7 +102,7 @@ const GridMultiSelectFilter = (props: GridMultiSelectFilterProps) => {
 
 	const selectorClasses = useMemo(
 		() => ({
-			inputRoot: isActive ? classes.customFilterBorder : undefined,
+			autocomplete: isActive ? classes.customFilterBorder : undefined,
 		}),
 		[isActive, classes.customFilterBorder],
 	);

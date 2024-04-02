@@ -4,20 +4,19 @@ import {
 	List,
 	ListItemSecondaryAction,
 	ListItemText,
-	Theme,
+	styled,
+	useThemeProps,
 } from "@mui/material";
-import makeStyles from "@mui/styles/makeStyles";
 import {
 	SmallIconButton,
 	SmallListItemButton,
 	SmallListItemIcon,
 } from "../Small";
 import { MultiSelectorData } from "./MultiSelect";
-import { ClassNameMap } from "@mui/styles/withStyles";
 import { Cancel as RemoveIcon } from "@mui/icons-material";
 import combineClassNames from "../../utils/combineClassNames";
 
-export interface IMultiSelectEntryProps<DataT extends MultiSelectorData> {
+export interface MultiSelectEntryProps<DataT extends MultiSelectorData> {
 	/**
 	 * Should we show icons?
 	 */
@@ -44,111 +43,136 @@ export interface IMultiSelectEntryProps<DataT extends MultiSelectorData> {
 	 * @remarks The data.value identifies the entry to be changed
 	 */
 	setData: (newValue: DataT) => void;
+	/**
+	 * Custom CSS class to apply to root
+	 */
+	className?: string;
+	/**
+	 * Custom CSS classes
+	 */
+	classes?: Partial<Record<MultiSelectEntryClassKey, string>>;
 }
 
-const useStyles = makeStyles(
-	(theme: Theme) => ({
-		root: {},
-		divider: {},
-		container: {
-			border: theme.componentsCare?.selector?.selected?.container?.border,
-			borderRadius:
-				theme.componentsCare?.selector?.selected?.container?.borderRadius,
-			margin: theme.componentsCare?.selector?.selected?.container?.margin,
-			padding: theme.componentsCare?.selector?.selected?.container?.padding,
-			backgroundColor:
-				theme.componentsCare?.selector?.selected?.container?.backgroundColor,
-			...theme.componentsCare?.selector?.selected?.container?.style,
-		},
-		selected: {
-			border: theme.componentsCare?.selector?.selected?.border,
-			borderRadius: theme.componentsCare?.selector?.selected?.borderRadius,
-			margin: theme.componentsCare?.selector?.selected?.margin,
-			padding: theme.componentsCare?.selector?.selected?.padding,
-			backgroundColor:
-				theme.componentsCare?.selector?.selected?.backgroundColor,
-			...theme.componentsCare?.selector?.selected?.style,
-		},
-		unClickable: {
-			cursor: "unset",
-		},
-		ignored: {
-			textDecoration: "line-through",
-		},
-		label: {
-			margin: theme.componentsCare?.selector?.selected?.label?.margin,
-			padding:
-				theme.componentsCare?.selector?.selected?.label?.padding ||
-				"0 32px 0 0",
-			color: theme.componentsCare?.selector?.selected?.label?.color,
-			"& > span": {
-				textOverflow: "ellipsis",
-				overflow: "hidden",
-			},
-			...theme.componentsCare?.selector?.selected?.label?.style,
-		},
-		image: (props: { iconSize?: number }) => ({
-			height: props.iconSize ?? 24,
-			width: props.iconSize ?? 24,
-			objectFit: "contain",
-		}),
-		icon: {
-			...theme.componentsCare?.selector?.selected?.icon?.style,
-		},
-		iconSvg: {
-			fill: theme.componentsCare?.selector?.selected?.icon?.color,
-		},
+const Root = styled(List, { name: "CcMultiSelectEntry", slot: "root" })({});
+
+export interface MultiSelectEntrySelectedOwnerState {
+	unClickable: boolean;
+	ignore: boolean;
+}
+const Selected = styled(SmallListItemButton, {
+	name: "CcMultiSelectEntry",
+	slot: "selected",
+})<{ ownerState: MultiSelectEntrySelectedOwnerState }>(
+	({ ownerState: { unClickable, ignore } }) => ({
+		...(unClickable && { cursor: "unset" }),
+		...(ignore && { textDecoration: "line-through" }),
 	}),
-	{ name: "CcMultiSelectEntry" },
 );
 
-const MultiSelectEntry = <DataT extends MultiSelectorData>(
-	props: IMultiSelectEntryProps<DataT> & {
-		classes?: ClassNameMap<keyof ReturnType<typeof useStyles>>;
+const Label = styled(ListItemText, {
+	name: "CcMultiSelectEntry",
+	slot: "label",
+})({
+	padding: "0 32px 0 0",
+	"& > span": {
+		textOverflow: "ellipsis",
+		overflow: "hidden",
 	},
+});
+
+const StyledRemoveButton = styled(SmallIconButton, {
+	name: "CcMultiSelectEntry",
+	slot: "icon",
+})({});
+
+const StyledRemoveIcon = styled(RemoveIcon, {
+	name: "CcMultiSelectEntry",
+	slot: "iconSvg",
+})({});
+
+const StyledDivider = styled(Divider, {
+	name: "CcMultiSelectEntry",
+	slot: "divider",
+})({});
+
+export interface MultiSelectEntryImageOwnerState {
+	iconSize?: number;
+}
+const StyledImage = styled("img", {
+	name: "CcMultiSelectEntry",
+	slot: "image",
+})<{ ownerState: MultiSelectEntryImageOwnerState }>(
+	({ ownerState: { iconSize } }) => ({
+		height: iconSize ?? 24,
+		width: iconSize ?? 24,
+		objectFit: "contain",
+	}),
+);
+
+export type MultiSelectEntryClassKey =
+	| "root"
+	| "selected"
+	| "label"
+	| "icon"
+	| "iconSvg"
+	| "divider"
+	| "image";
+
+const MultiSelectEntry = <DataT extends MultiSelectorData>(
+	inProps: MultiSelectEntryProps<DataT>,
 ) => {
-	const { enableIcons, enableDivider, handleDelete, data } = props;
-	const classes = useStyles(props);
+	const props = useThemeProps({ props: inProps, name: "CcMultiSelectEntry" });
+	const {
+		enableIcons,
+		enableDivider,
+		handleDelete,
+		data,
+		classes,
+		iconSize,
+		className,
+	} = props;
 
 	return (
 		<>
-			<List className={combineClassNames([classes.root, classes.container])}>
-				<SmallListItemButton
+			<Root className={combineClassNames([className, classes?.root])}>
+				<Selected
+					ownerState={{ unClickable: !data.onClick, ignore: !!data.ignore }}
 					onClick={data.onClick}
-					className={combineClassNames([
-						classes.selected,
-						!data.onClick && classes.unClickable,
-						data.ignore && classes.ignored,
-					])}
+					className={classes?.selected}
 					disableRipple={!data.onClick}
 					disableTouchRipple={!data.onClick}
 				>
 					{enableIcons && (
 						<SmallListItemIcon>
 							{typeof data.icon === "string" ? (
-								<img src={data.icon} alt={""} className={classes.image} />
+								<StyledImage
+									ownerState={{ iconSize }}
+									src={data.icon}
+									alt={""}
+									className={classes?.image}
+								/>
 							) : (
 								data.icon
 							)}
 						</SmallListItemIcon>
 					)}
-					<ListItemText className={classes.label}>{data.label}</ListItemText>
+					<Label className={classes?.label}>{data.label}</Label>
 					{handleDelete && (
 						<ListItemSecondaryAction>
-							<SmallIconButton
-								className={classes.icon}
+							<StyledRemoveButton
+								className={classes?.icon}
 								edge={"end"}
 								name={data.value}
 								disabled={!handleDelete}
 								onClick={handleDelete}
 							>
-								<RemoveIcon className={classes.iconSvg} />
-							</SmallIconButton>
+								<StyledRemoveIcon className={classes?.iconSvg} />
+							</StyledRemoveButton>
 						</ListItemSecondaryAction>
 					)}
-				</SmallListItemButton>
-			</List>
-			{enableDivider && <Divider className={classes.divider} />}
+				</Selected>
+			</Root>
+			{enableDivider && <StyledDivider className={classes?.divider} />}
 		</>
 	);
 };

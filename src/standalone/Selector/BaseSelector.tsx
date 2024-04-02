@@ -1,26 +1,27 @@
 import React, {
-	useState,
+	ForwardedRef,
+	PropsWithChildren,
+	ReactElement,
+	ReactNode,
 	useCallback,
 	useEffect,
-	ReactElement,
-	PropsWithChildren,
-	ForwardedRef,
 	useMemo,
-	ReactNode,
+	useState,
 } from "react";
 import {
-	ListItemText,
-	IconButton,
-	Paper,
-	InputProps,
-	Divider,
-	Typography,
-	Popper,
-	Grid,
 	Autocomplete,
-	Theme,
+	Divider,
+	Grid,
+	IconButton,
 	InputLabel,
+	InputProps,
+	ListItemText,
+	Paper,
+	Popper,
+	styled,
 	TextFieldProps,
+	Typography,
+	useThemeProps,
 } from "@mui/material";
 import {
 	Add as AddIcon,
@@ -34,16 +35,9 @@ import {
 	SelectorSmallListItemButton,
 	SmallListItemIcon,
 } from "../../standalone/Small";
-import makeThemeStyles from "../../utils/makeThemeStyles";
-import cleanClassMap from "../../utils/cleanClassMap";
 import combineClassNames from "../../utils/combineClassNames";
 import { useLocalStorageState } from "../../utils/useStorageState";
-import { makeStyles, Styles } from "@mui/styles";
-import {
-	AutocompleteProps,
-	AutocompleteClassKey,
-	AutocompleteRenderInputParams,
-} from "@mui/material/Autocomplete";
+import { AutocompleteRenderInputParams } from "@mui/material/Autocomplete";
 import InlineSwitch from "../InlineSwitch";
 import useCCTranslations from "../../utils/useCCTranslations";
 import { PopperProps } from "@mui/material/Popper/Popper";
@@ -195,7 +189,11 @@ export interface BaseSelectorMulti<DataT extends BaseSelectorData> {
 export type BaseSelectorVariants<
 	DataT extends BaseSelectorData,
 	Multi extends boolean,
-> = Multi extends true ? BaseSelectorMulti<DataT> : BaseSelectorSingle<DataT>;
+> = Multi extends true
+	? BaseSelectorMulti<DataT>
+	: Multi extends false
+		? BaseSelectorSingle<DataT>
+		: never;
 
 export type BaseSelectorProps<
 	DataT extends BaseSelectorData,
@@ -304,14 +302,13 @@ export type BaseSelectorProps<
 		 */
 		groupSorter?: (a: DataT, b: DataT) => number;
 		/**
+		 * CSS class name to apply
+		 */
+		className?: string;
+		/**
 		 * Custom styles to be used for selector
 		 */
-		classes?: AutocompleteProps<
-			unknown,
-			undefined,
-			undefined,
-			undefined
-		>["classes"];
+		classes?: Partial<Record<BaseSelectorClassKey, string>>;
 		/**
 		 * Custom styles used for selector input (text field)
 		 */
@@ -370,142 +367,127 @@ export type BaseSelectorProps<
 		filterIds?: string[] | undefined;
 	};
 
-export type SelectorThemeExpert = {
-	base?: Partial<
-		Styles<
-			Theme,
-			BaseSelectorProps<BaseSelectorData, boolean>,
-			AutocompleteClassKey
-		>
-	>;
-	extensions?: Partial<
-		Styles<
-			Theme,
-			BaseSelectorProps<BaseSelectorData, boolean>,
-			SelectorCustomStylesClassKey
-		>
-	>;
-};
-
-const useCustomDefaultSelectorStyles = makeStyles(
-	{
-		root: {},
-		focused: {},
-		tag: {},
-		tagSizeSmall: {},
-		inputRoot: {},
-		input: {},
-		inputFocused: {},
-		endAdornment: {},
-		clearIndicator: {},
-		clearIndicatorDirty: {},
-		popupIndicator: {},
-		popupIndicatorOpen: {},
-		popper: {},
-		popperDisablePortal: {},
-		paper: {},
-		listbox: {},
-		loading: {},
-		noOptions: {},
-		groupLabel: {},
-		groupUl: {},
-		option: {
-			padding: 0,
-			'&[aria-disabled="true"]': {
-				opacity: 1,
-			},
+const StyledAutocomplete = styled(Autocomplete, {
+	name: "CcBaseSelector",
+	slot: "autocomplete",
+})({
+	"& .MuiAutocomplete-option": {
+		padding: 0,
+		'&[aria-disabled="true"]': {
+			opacity: 1,
 		},
 	},
-	{ name: "CcBaseSelectorBase" },
-);
+}) as typeof Autocomplete;
 
-const useThemeStyles = makeThemeStyles<
-	BaseSelectorProps<BaseSelectorData, boolean>,
-	AutocompleteClassKey
->(
-	(theme) => theme.componentsCare?.uiKit?.baseSelectorExpert?.base,
-	"CcBaseSelector",
-	useCustomDefaultSelectorStyles,
-);
+const StyledInlineSwitch = styled(InlineSwitch, {
+	name: "CcBaseSelector",
+	slot: "inlineSwitch",
+})({
+	marginTop: 0,
+	"& .CcInlineSwitch-switchWrapper": {
+		marginTop: -30,
+	},
+});
 
-const useCustomStylesBase = makeStyles(
-	(theme) => ({
-		infoBtn: {
-			padding: 2,
-			marginRight: -2,
-		},
-		textFieldStandard: {
-			position: "absolute",
-		},
-		label: {
-			position: "relative",
-			transform: "translate(0,0) scale(0.75)",
-			zIndex: "unset",
-		},
-		switch: {
-			marginTop: -30,
-		},
-		labelWithSwitch: {
-			marginTop: 0,
-		},
-		icon: (
-			props: Pick<
-				BaseSelectorProps<BaseSelectorData, boolean>,
-				"iconSize" | "label"
-			>,
-		) => ({
-			width: props.iconSize ?? 32,
-			height: props.iconSize ?? 32,
-			objectFit: "contain",
-		}),
-		wrapper: {},
-		listItem: {
-			paddingLeft: "16px !important",
-			paddingRight: "16px !important",
-			paddingTop: 6,
-			paddingBottom: 6,
-		},
-		lruListItem: {
-			backgroundColor: theme.palette.background.default,
-			"&:hover": {
-				backgroundColor: theme.palette.background.paper,
-			},
-		},
-		smallLabel: {
-			paddingLeft: 16,
-			paddingTop: 4,
-			color: theme.palette.text.disabled,
-		},
-		selected: {
-			borderRadius: theme.shape.borderRadius,
-			backgroundColor: theme.palette.secondary.main,
-			padding: `calc(${theme.spacing(1)} / 2) ${theme.spacing(1)}`,
-		},
-		divider: {
-			width: "100%",
-		},
-		checkBoxStyle: {
-			borderRadius: 4,
-			width: 16,
-			height: 16,
-			marginRight: 10,
-		},
+const StyledLabel = styled(InputLabel, {
+	name: "CcBaseSelector",
+	slot: "label",
+})({
+	position: "relative",
+	transform: "translate(0,0) scale(0.75)",
+	zIndex: "unset",
+});
+
+export interface BaseSelectorIconOwnerState {
+	iconSize?: number;
+}
+const StyledIcon = styled("img", {
+	name: "CcBaseSelector",
+	slot: "icon",
+})<{ ownerState: BaseSelectorIconOwnerState }>(
+	({ ownerState: { iconSize } }) => ({
+		width: iconSize ?? 32,
+		height: iconSize ?? 32,
+		objectFit: "contain",
 	}),
-	{ name: "CcBaseSelectorCustomBase" },
 );
 
-export type SelectorCustomStylesClassKey = keyof ReturnType<
-	typeof useCustomStylesBase
->;
-const useCustomStyles = makeThemeStyles<
-	BaseSelectorProps<BaseSelectorData, boolean>,
-	SelectorCustomStylesClassKey
->(
-	(theme) => theme.componentsCare?.uiKit?.baseSelectorExpert?.extensions,
-	"CcBaseSelectorCustom",
-	useCustomStylesBase,
-);
+const StyledDivider = styled(Divider, {
+	name: "CcBaseSelector",
+	slot: "divider",
+})({
+	width: "100%",
+}) as typeof Divider;
 
+const SmallLabelOption = styled(Typography, {
+	name: "CcBaseSelector",
+	slot: "smallLabel",
+})(({ theme }) => ({
+	paddingLeft: 16,
+	paddingTop: 4,
+	color: theme.palette.text.disabled,
+})) as typeof Typography;
+
+const StyledCheckbox = styled(Checkbox, {
+	name: "CcBaseSelector",
+	slot: "checkbox",
+})({
+	borderRadius: 4,
+	width: 16,
+	height: 16,
+	marginRight: 10,
+});
+
+const SelectedMarker = styled(Grid, {
+	name: "CcBaseSelector",
+	slot: "selected",
+})(({ theme }) => ({
+	borderRadius: theme.shape.borderRadius,
+	backgroundColor: theme.palette.secondary.main,
+	padding: `calc(${theme.spacing(1)} / 2) ${theme.spacing(1)}`,
+}));
+
+export const BaseSelectorLruOptionCssClassName =
+	"components-care-base-selector-lru-option";
+const OptionListItem = styled(SelectorSmallListItemButton, {
+	name: "CcBaseSelector",
+	slot: "listItem",
+})(({ theme }) => ({
+	paddingLeft: "16px !important",
+	paddingRight: "16px !important",
+	paddingTop: 6,
+	paddingBottom: 6,
+	[`&.${BaseSelectorLruOptionCssClassName}`]: {
+		backgroundColor: theme.palette.background.default,
+
+		"&:hover": {
+			backgroundColor: theme.palette.background.paper,
+		},
+	},
+})) as typeof SelectorSmallListItemButton;
+
+const Wrapper = styled(Paper, { name: "CcBaseSelector", slot: "wrapper" })({});
+
+const InfoButton = styled(IconButton, {
+	name: "CcBaseSelector",
+	slot: "infoBtn",
+})({
+	padding: 2,
+	marginRight: -2,
+});
+
+export type BaseSelectorClassKey =
+	| "autocomplete"
+	| "inlineSwitch"
+	| "label"
+	| "icon"
+	| "divider"
+	| "smallLabel"
+	| "checkbox"
+	| "selected"
+	| "listItem"
+	| "wrapper"
+	| "infoBtn";
 const getOptionDisabled = (option: BaseSelectorData) =>
 	!!(!option || option.isDisabled || option.isDivider || option.isSmallLabel);
 const getOptionSelected = (option: BaseSelectorData, value: BaseSelectorData) =>
@@ -531,8 +513,9 @@ export const BaseSelectorContext =
 	React.createContext<BaseSelectorContextType | null>(null);
 
 const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
-	props: BaseSelectorProps<DataT, Multi>,
+	inProps: BaseSelectorProps<DataT, Multi>,
 ) => {
+	const props = useThemeProps({ props: inProps, name: "CcBaseSelector" });
 	const {
 		variant,
 		refreshToken,
@@ -570,25 +553,19 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 		filterIds,
 		textFieldClasses,
 		textFieldInputClasses,
+		iconSize,
+		classes,
+		className,
 	} = props;
 
 	const getIdDefault = useCallback((data: DataT) => data.value, []);
 	const getId = getIdOfData ?? getIdDefault;
 
-	const classes = useThemeStyles(
-		props as unknown as BaseSelectorProps<BaseSelectorData, boolean>,
-	);
 	const defaultSwitchValue = !!(
 		props.displaySwitch && props.defaultSwitchValue
 	);
 	const [switchValue, setSwitchValue] = useState<boolean>(defaultSwitchValue);
 	const { t } = useCCTranslations();
-	const customClasses = useCustomStyles(
-		cleanClassMap(
-			props as unknown as BaseSelectorProps<BaseSelectorData, boolean>,
-			true,
-		),
-	);
 	const [open, setOpen] = useState(false);
 	const actualAddNewLabel = addNewLabel || t("standalone.selector.add-new");
 	const [selectorOptions, setSelectorOptions] = useState<DataT[]>([]);
@@ -606,11 +583,16 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 	const renderIcon = useCallback(
 		(icon: string | React.ReactNode) =>
 			typeof icon === "string" ? (
-				<img src={icon} alt={""} className={customClasses.icon} />
+				<StyledIcon
+					src={icon}
+					alt={""}
+					ownerState={{ iconSize }}
+					className={classes?.icon}
+				/>
 			) : (
 				icon
 			),
-		[customClasses.icon],
+		[iconSize, classes?.icon],
 	);
 
 	const defaultRenderer = useCallback(
@@ -622,31 +604,31 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 			const { selected } = state;
 			if (data.isDivider)
 				return (
-					<Divider
+					<StyledDivider
 						component={"li"}
 						{...props}
-						className={customClasses.divider}
+						className={classes?.divider}
 					/>
 				);
 			if (data.isSmallLabel)
 				return (
-					<Typography
+					<SmallLabelOption
 						component={"li"}
 						{...props}
 						onClick={undefined}
 						variant={"caption"}
-						className={customClasses.smallLabel}
+						className={classes?.smallLabel}
 					>
 						{getReactLabel(data)}
-					</Typography>
+					</SmallLabelOption>
 				);
 
 			return (
-				<SelectorSmallListItemButton
+				<OptionListItem
 					component={"li"}
 					{...props}
 					className={combineClassNames([
-						customClasses.listItem,
+						classes?.listItem,
 						data.className,
 						props.className,
 					])}
@@ -654,9 +636,9 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 				>
 					{multiple && (
 						<SmallListItemIcon>
-							<Checkbox
+							<StyledCheckbox
 								checked={selected}
-								className={customClasses.checkBoxStyle}
+								className={classes?.checkbox}
 							/>
 						</SmallListItemIcon>
 					)}
@@ -669,22 +651,22 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 								{getReactLabel(data)}
 							</Grid>
 							{data.selected && (
-								<Grid item className={customClasses.selected}>
+								<SelectedMarker item className={classes?.selected}>
 									{t("standalone.selector.base-selector.selected")}
-								</Grid>
+								</SelectedMarker>
 							)}
 						</Grid>
 					</ListItemText>
-				</SelectorSmallListItemButton>
+				</OptionListItem>
 			);
 		},
 		[
 			multiple,
-			customClasses.divider,
-			customClasses.smallLabel,
-			customClasses.listItem,
-			customClasses.selected,
-			customClasses.checkBoxStyle,
+			classes?.divider,
+			classes?.smallLabel,
+			classes?.listItem,
+			classes?.selected,
+			classes?.checkbox,
 			enableIcons,
 			renderIcon,
 			t,
@@ -820,7 +802,7 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 					).map((entry) => ({
 						...entry,
 						className: combineClassNames([
-							customClasses.lruListItem,
+							BaseSelectorLruOptionCssClassName,
 							entry.className,
 						]),
 					})),
@@ -871,7 +853,6 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 			onAddNew,
 			t,
 			setLruIds,
-			customClasses.lruListItem,
 			onLoad,
 			switchValue,
 			getId,
@@ -907,28 +888,28 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 	const filterOptions = useCallback((options: DataT[]) => options, []);
 
 	return (
-		<InlineSwitch
+		<StyledInlineSwitch
 			visible={!!props.displaySwitch}
 			value={switchValue}
 			onChange={setSwitchValue}
 			label={switchLabel}
-			classes={customClasses}
+			className={combineClassNames([className, classes?.inlineSwitch])}
 		>
 			<BaseSelectorContext.Provider value={context}>
 				{label && (
-					<InputLabel
+					<StyledLabel
 						shrink
 						disableAnimation
 						disabled={disabled}
-						className={customClasses.label}
+						className={classes?.label}
 					>
 						{label}
-					</InputLabel>
+					</StyledLabel>
 				)}
-				<Paper elevation={0} className={customClasses.wrapper}>
-					<Autocomplete
+				<Wrapper elevation={0} className={classes?.wrapper}>
+					<StyledAutocomplete
 						id={autocompleteId}
-						classes={classes}
+						className={classes?.autocomplete}
 						multiple={multiple}
 						disableCloseOnSelect={multiple}
 						open={open}
@@ -1046,12 +1027,12 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 															>
 														).props.children as ReactNode[]),
 														openInfo && (
-															<IconButton
+															<InfoButton
 																onClick={openInfo}
-																className={customClasses.infoBtn}
+																className={classes?.infoBtn}
 															>
 																<InfoIcon color={"disabled"} />
-															</IconButton>
+															</InfoButton>
 														),
 														endAdornment,
 													)
@@ -1071,9 +1052,9 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 								: "no-add-new"
 						}`}
 					/>
-				</Paper>
+				</Wrapper>
 			</BaseSelectorContext.Provider>
-		</InlineSwitch>
+		</StyledInlineSwitch>
 	);
 };
 
