@@ -544,15 +544,20 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 								</ListItem>
 							)}
 							{checkSupport(props.valueType, "notInSet") && (
-								<ListItem className={classes.setFilterListItem}>
-									<Checkbox
-										checked={enumFilterInverted}
-										onChange={onFilterTypeChangeEnum}
-									/>
-									<ListItemText primaryTypographyProps={TYPOGRAPHY_PROPS}>
-										{t("standalone.data-grid.content.set-filter.invert")}
-									</ListItemText>
-								</ListItem>
+								<>
+									<ListItem className={classes.setFilterListItem}>
+										<Checkbox
+											checked={enumFilterInverted}
+											onChange={onFilterTypeChangeEnum}
+										/>
+										<ListItemText primaryTypographyProps={TYPOGRAPHY_PROPS}>
+											{t("standalone.data-grid.content.set-filter.invert")}
+										</ListItemText>
+									</ListItem>
+									<ListItem className={classes.setFilterListItemDivider}>
+										<Divider className={classes.setFilterListDivider} />
+									</ListItem>
+								</>
 							)}
 							{(props.valueData as DataGridSetFilterData)
 								.filter((entry) =>
