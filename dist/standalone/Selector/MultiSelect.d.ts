@@ -17,7 +17,7 @@ export interface MultiSelectorData extends BaseSelectorData {
      */
     noDelete?: boolean;
 }
-export interface MultiSelectProps<DataT extends MultiSelectorData> extends Omit<BaseSelectorProps<DataT>, "onSelect" | "selected" | "classes"> {
+export interface MultiSelectProps<DataT extends MultiSelectorData> extends Omit<BaseSelectorProps<DataT, false>, "onSelect" | "selected" | "classes"> {
     /**
      * Extended selection change handler
      * @param data The selected data entry/entries
@@ -39,7 +39,7 @@ export interface MultiSelectProps<DataT extends MultiSelectorData> extends Omit<
      * Custom classes passed to subcomponents
      */
     subClasses?: {
-        baseSelector: BaseSelectorProps<BaseSelectorData>["classes"];
+        baseSelector: BaseSelectorProps<BaseSelectorData, false>["classes"];
     };
     /**
      * Sort function to perform a view-based sort on selected entries

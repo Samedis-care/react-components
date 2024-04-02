@@ -1,6 +1,6 @@
 import React from "react";
 import { BaseSelectorProps, MultiSelectorData } from "../../standalone/Selector";
-export interface MultiSelectWithoutGroupProps<DataT extends MultiSelectorData> extends Omit<BaseSelectorProps<DataT>, "onSelect" | "selected" | "classes" | "onLoad"> {
+export interface MultiSelectWithoutGroupProps<DataT extends MultiSelectorData> extends Omit<BaseSelectorProps<DataT, false>, "onSelect" | "selected" | "classes" | "onLoad"> {
     /**
      * Extended selection change handler
      * @param data The selected data entry/entries

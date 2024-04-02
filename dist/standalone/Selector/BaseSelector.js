@@ -11,6 +11,7 @@ import { makeStyles } from "@mui/styles";
 import InlineSwitch from "../InlineSwitch";
 import useCCTranslations from "../../utils/useCCTranslations";
 import uniqueArray from "../../utils/uniqueArray";
+import Checkbox from "../UIKit/Checkbox";
 export const getStringLabel = (data) => typeof data === "string"
     ? data
     : Array.isArray(data.label)
@@ -112,6 +113,12 @@ const useCustomStylesBase = makeStyles((theme) => ({
     divider: {
         width: "100%",
     },
+    checkBoxStyle: {
+        borderRadius: 4,
+        width: 16,
+        height: 16,
+        marginRight: 10,
+    },
 }), { name: "CcBaseSelectorCustomBase" });
 const useCustomStyles = makeThemeStyles((theme) => theme.componentsCare?.uiKit?.baseSelectorExpert?.extensions, "CcBaseSelectorCustom", useCustomStylesBase);
 const getOptionDisabled = (option) => !!(!option || option.isDisabled || option.isDivider || option.isSmallLabel);
@@ -121,7 +128,7 @@ const GrowPopper = React.forwardRef(function GrowPopperImpl(props, ref) {
 });
 export const BaseSelectorContext = React.createContext(null);
 const BaseSelector = (props) => {
-    const { variant, refreshToken, onSelect, selected, label, disabled, disableSearch, placeholder, autocompleteId, addNewLabel, onLoad, onAddNew, enableIcons, noOptionsText, loadingText, startTypingToSearchText, openText, closeText, clearText, disableClearable, openInfo, grouped, noGroupLabel, disableGroupSorting, groupSorter, switchLabel, lru, startAdornment, endAdornment, endAdornmentLeft, freeSolo, getIdOfData, filterIds, textFieldClasses, textFieldInputClasses, } = props;
+    const { variant, refreshToken, onSelect, multiple, selected, label, disabled, disableSearch, placeholder, autocompleteId, addNewLabel, onLoad, onAddNew, enableIcons, noOptionsText, loadingText, startTypingToSearchText, openText, closeText, clearText, disableClearable, openInfo, grouped, noGroupLabel, disableGroupSorting, groupSorter, switchLabel, lru, startAdornment, endAdornment, endAdornmentLeft, freeSolo, getIdOfData, filterIds, textFieldClasses, textFieldInputClasses, } = props;
     const getIdDefault = useCallback((data) => data.value, []);
     const getId = getIdOfData ?? getIdDefault;
     const classes = useThemeStyles(props);
@@ -137,7 +144,8 @@ const BaseSelector = (props) => {
     const [lruIds, setLruIds] = useLocalStorageState(lru?.storageKey, [], (ret) => Array.isArray(ret) &&
         !ret.find((entry) => typeof entry !== "string"));
     const renderIcon = useCallback((icon) => typeof icon === "string" ? (React.createElement("img", { src: icon, alt: "", className: customClasses.icon })) : (icon), [customClasses.icon]);
-    const defaultRenderer = useCallback((props, data) => {
+    const defaultRenderer = useCallback((props, data, state) => {
+        const { selected } = state;
         if (data.isDivider)
             return (React.createElement(Divider, { component: "li", ...props, className: customClasses.divider }));
         if (data.isSmallLabel)
@@ -147,16 +155,20 @@ const BaseSelector = (props) => {
                 data.className,
                 props.className,
             ]), disabled: data.isDisabled },
+            multiple && (React.createElement(SmallListItemIcon, null,
+                React.createElement(Checkbox, { checked: selected, className: customClasses.checkBoxStyle }))),
             enableIcons && (React.createElement(SmallListItemIcon, null, renderIcon(data.icon))),
             React.createElement(ListItemText, null,
                 React.createElement(Grid, { container: true },
                     React.createElement(Grid, { item: true, xs: true }, getReactLabel(data)),
                     data.selected && (React.createElement(Grid, { item: true, className: customClasses.selected }, t("standalone.selector.base-selector.selected")))))));
     }, [
+        multiple,
         customClasses.divider,
         customClasses.smallLabel,
         customClasses.listItem,
         customClasses.selected,
+        customClasses.checkBoxStyle,
         enableIcons,
         renderIcon,
         t,
@@ -167,31 +179,47 @@ const BaseSelector = (props) => {
         setLruIds((prev) => [...addIds, ...prev.filter((id) => !addIds.includes(id))].slice(0, lru.count));
     }, [lru, setLruIds]);
     const onChangeHandler = useCallback(async (data) => {
-        if (!data || typeof data !== "object" || !("value" in data)) {
+        if (multiple
+            ? !Array.isArray(data)
+            : !data || typeof data !== "object" || !("value" in data)) {
             if (data) {
                 // eslint-disable-next-line no-console
                 console.warn("[Components-Care] [BaseSelector] Unexpected value passed to handleOptionSelect:", data);
                 return;
             }
         }
-        if (data &&
-            "isAddNewButton" in data &&
-            data.isAddNewButton) {
+        const dataNormalized = multiple
+            ? data
+            : data
+                ? [data]
+                : [];
+        const selectedNormalized = multiple
+            ? selected
+            : selected
+                ? [selected]
+                : [];
+        if (dataNormalized.length > 0 &&
+            dataNormalized[dataNormalized.length - 1].isAddNewButton) {
             if (!onAddNew)
                 return;
             const created = await onAddNew();
             if (!created)
                 return;
             setSelectorOptions((old) => [created, ...old]);
-            data = created;
+            dataNormalized[dataNormalized.length - 1] = created;
         }
         if (onSelect) {
-            onSelect(data);
-            if (data != null) {
-                addToLru(getId(data));
+            if (multiple) {
+                onSelect(dataNormalized);
+            }
+            else {
+                onSelect(dataNormalized[0] ?? null);
+            }
+            if (dataNormalized.length > selectedNormalized.length) {
+                addToLru(getId(dataNormalized[dataNormalized.length - 1]));
             }
         }
-    }, [onSelect, onAddNew, addToLru, getId]);
+    }, [onSelect, onAddNew, multiple, selected, addToLru, getId]);
     const context = useMemo(() => ({
         addToLru,
     }), [addToLru]);
@@ -318,18 +346,23 @@ const BaseSelector = (props) => {
         React.createElement(BaseSelectorContext.Provider, { value: context },
             label && (React.createElement(InputLabel, { shrink: true, disableAnimation: true, disabled: disabled, className: customClasses.label }, label)),
             React.createElement(Paper, { elevation: 0, className: customClasses.wrapper },
-                React.createElement(Autocomplete, { id: autocompleteId, classes: classes, open: open, onOpen: () => {
+                React.createElement(Autocomplete, { id: autocompleteId, classes: classes, multiple: multiple, disableCloseOnSelect: multiple, open: open, onOpen: () => {
                         setOpen(true);
                     }, onClose: () => {
                         setOpen(false);
                     }, disableClearable: disableClearable, loading: !!loading, loadingText: loadingText ?? t("standalone.selector.base-selector.loading-text"), autoComplete: true, disabled: disabled, selectOnFocus: !disableSearch, options: 
                     // add selected to selectorOptions if not present to suppress warnings
-                    selected &&
-                        !selectorOptions.find((option) => option.value === selected.value)
-                        ? selectorOptions.concat([selected])
-                        : selectorOptions, groupBy: grouped
+                    multiple
+                        ? selectorOptions
+                            .concat(selected)
+                            .filter((entry, idx, arr) => arr.findIndex((data) => data.value === entry.value) ===
+                            idx)
+                        : selected &&
+                            !selectorOptions.find((option) => option.value === selected.value)
+                            ? selectorOptions.concat([selected])
+                            : selectorOptions, groupBy: grouped
                         ? (option) => option.group ?? noGroupLabel ?? ""
-                        : undefined, PopperComponent: GrowPopper, filterOptions: filterOptions, value: selected, inputValue: query, blurOnSelect: true, onInputChange: updateQuery, popupIcon: React.createElement(ExpandMore, null), freeSolo: freeSolo, noOptionsText: lru && query === ""
+                        : undefined, PopperComponent: GrowPopper, filterOptions: filterOptions, value: selected, inputValue: query, blurOnSelect: !multiple, onInputChange: updateQuery, popupIcon: React.createElement(ExpandMore, null), freeSolo: freeSolo, noOptionsText: lru && query === ""
                         ? startTypingToSearchText ??
                             t("standalone.selector.base-selector.start-typing-to-search-text")
                         : noOptionsText ??
@@ -341,13 +374,19 @@ const BaseSelector = (props) => {
                         return (React.createElement(TextFieldWithHelp, { variant: variant ?? "outlined", ...otherParams, classes: textFieldClasses, inputProps: {
                                 ...params.inputProps,
                                 readOnly: disableSearch,
-                                title: selected ? getStringLabel(selected) : undefined,
+                                title: selected && !multiple
+                                    ? getStringLabel(selected)
+                                    : undefined,
+                                value: multiple
+                                    ? selected.map((sel) => sel.label).join(", ")
+                                    : params.inputProps.value,
                             }, InputProps: {
                                 ...InputProps,
                                 classes: textFieldInputClasses,
                                 readOnly: disableSearch,
-                                startAdornment: (enableIcons ? renderIcon(selected?.icon) : undefined) ??
-                                    startAdornment,
+                                startAdornment: (enableIcons && !multiple
+                                    ? renderIcon(selected?.icon)
+                                    : undefined) ?? startAdornment,
                                 endAdornment: (() => {
                                     const hasAdditionalElements = openInfo || endAdornment || endAdornmentLeft;
                                     return hasAdditionalElements

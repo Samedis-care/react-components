@@ -93,7 +93,30 @@ export interface SelectorLruOptions<DataT extends BaseSelectorData> {
 type SelectorLabelCallback = (obj: {
     inputValue: string;
 }) => string | null;
-export interface BaseSelectorProps<DataT extends BaseSelectorData> extends TextFieldWithHelpProps {
+export interface BaseSelectorSingle<DataT extends BaseSelectorData> {
+    multiple?: false;
+    /**
+     * Callback for autocomplete change
+     */
+    onSelect: (selected: DataT | null) => void;
+    /**
+     * The currently selected values
+     */
+    selected: DataT | null;
+}
+export interface BaseSelectorMulti<DataT extends BaseSelectorData> {
+    multiple: true;
+    /**
+     * Callback for autocomplete change
+     */
+    onSelect: (selected: DataT[]) => void;
+    /**
+     * The currently selected values
+     */
+    selected: DataT[];
+}
+export type BaseSelectorVariants<DataT extends BaseSelectorData, Multi extends boolean> = Multi extends true ? BaseSelectorMulti<DataT> : BaseSelectorSingle<DataT>;
+export type BaseSelectorProps<DataT extends BaseSelectorData, Multi extends boolean> = TextFieldWithHelpProps & BaseSelectorVariants<DataT, Multi> & {
     /**
      * Refresh token used to force refreshing data.
      */
@@ -105,10 +128,6 @@ export interface BaseSelectorProps<DataT extends BaseSelectorData> extends TextF
      * @remarks When using this with an already loaded dataset consider using selectorLocalLoadHandler
      */
     onLoad: (search: string, switchValue: boolean) => DataT[] | Promise<DataT[]>;
-    /**
-     * Callback for autocomplete change
-     */
-    onSelect: (selected: DataT | null) => void;
     /**
      * The textfield type of input
      */
@@ -139,10 +158,6 @@ export interface BaseSelectorProps<DataT extends BaseSelectorData> extends TextF
      * Label for the "Add new" button
      */
     addNewLabel?: string;
-    /**
-     * The currently selected values
-     */
-    selected: DataT | null;
     /**
      * Enables icons in the list renderers
      */
@@ -258,16 +273,16 @@ export interface BaseSelectorProps<DataT extends BaseSelectorData> extends TextF
      * Ids to filter from options
      */
     filterIds?: string[] | undefined;
-}
-export type SelectorThemeExpert = {
-    base?: Partial<Styles<Theme, BaseSelectorProps<BaseSelectorData>, AutocompleteClassKey>>;
-    extensions?: Partial<Styles<Theme, BaseSelectorProps<BaseSelectorData>, SelectorCustomStylesClassKey>>;
 };
-declare const useCustomStylesBase: (props: Pick<BaseSelectorProps<BaseSelectorData>, "label" | "iconSize">) => import("@mui/styles").ClassNameMap<"label" | "switch" | "selected" | "icon" | "smallLabel" | "divider" | "wrapper" | "labelWithSwitch" | "infoBtn" | "textFieldStandard" | "listItem" | "lruListItem">;
+export type SelectorThemeExpert = {
+    base?: Partial<Styles<Theme, BaseSelectorProps<BaseSelectorData, boolean>, AutocompleteClassKey>>;
+    extensions?: Partial<Styles<Theme, BaseSelectorProps<BaseSelectorData, boolean>, SelectorCustomStylesClassKey>>;
+};
+declare const useCustomStylesBase: (props: Pick<BaseSelectorProps<BaseSelectorData, boolean>, "label" | "iconSize">) => import("@mui/styles").ClassNameMap<"label" | "switch" | "selected" | "icon" | "smallLabel" | "divider" | "wrapper" | "labelWithSwitch" | "infoBtn" | "textFieldStandard" | "listItem" | "lruListItem" | "checkBoxStyle">;
 export type SelectorCustomStylesClassKey = keyof ReturnType<typeof useCustomStylesBase>;
 export interface BaseSelectorContextType {
     addToLru: (...ids: string[]) => void;
 }
 export declare const BaseSelectorContext: React.Context<BaseSelectorContextType | null>;
-declare const _default: <DataT extends BaseSelectorData>(props: BaseSelectorProps<DataT>) => React.JSX.Element;
+declare const _default: <DataT extends BaseSelectorData, Multi extends boolean>(props: BaseSelectorProps<DataT, Multi>) => React.JSX.Element;
 export default _default;

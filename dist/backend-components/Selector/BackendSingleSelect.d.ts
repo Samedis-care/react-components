@@ -3,7 +3,7 @@ import { BaseSelectorData, BaseSelectorProps, SelectorLruOptions } from "../../s
 import Model, { ModelFieldName, PageVisibility } from "../../backend-integration/Model/Model";
 import { DataGridSortSetting } from "../../standalone/DataGrid/DataGrid";
 export type BackendSingleSelectLruOptions<DataT extends BaseSelectorData> = Omit<SelectorLruOptions<DataT>, "loadData">;
-export interface BackendSingleSelectProps<KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT> extends Omit<BaseSelectorProps<BaseSelectorData>, "onLoad" | "selected" | "onSelect" | "lru"> {
+export interface BackendSingleSelectProps<KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT> extends Omit<BaseSelectorProps<BaseSelectorData, false>, "onLoad" | "selected" | "onSelect" | "lru"> {
     /**
      * The model to use
      */

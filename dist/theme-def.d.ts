@@ -7,7 +7,7 @@ import { MultiImageTheme } from "./standalone/FileUpload/MultiImage/MultiImage";
 import { ImageBoxTheme } from "./standalone/FileUpload/MultiImage/ImageBox";
 import { ImageDialogEntryTheme } from "./standalone/FileUpload/MultiImage/ImageDialogEntry";
 import { ImageDotsTheme } from "./standalone/FileUpload/MultiImage/ImageDots";
-import { HowToBoxClassKey, HowToBoxProps, MultiSelectTheme, MultiSelectWithCheckBoxTheme, SelectorTheme, SelectorThemeExpert } from "./standalone";
+import { HowToBoxClassKey, HowToBoxProps, MultiSelectTheme, SelectorTheme, SelectorThemeExpert } from "./standalone";
 import { ComponentWithLabelTheme } from "./standalone/UIKit/ComponentWithLabel";
 import { CheckboxTheme } from "./standalone/UIKit/Checkbox";
 import { InputTheme } from "./standalone/UIKit/CommonStyles";
@@ -49,7 +49,6 @@ export interface ComponentsCareTheme {
     };
     selector?: SelectorTheme;
     multiSelect?: MultiSelectTheme;
-    selectorWithCheckbox?: MultiSelectWithCheckBoxTheme;
     uiKit?: {
         label?: ComponentWithLabelTheme;
         checkbox?: CheckboxTheme;

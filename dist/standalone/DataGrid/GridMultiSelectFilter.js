@@ -3,7 +3,7 @@ import { Checkbox, Divider, FormControlLabel, Grid, Typography, } from "@mui/mat
 import { useCustomFilterActiveContext } from "./Header/FilterBar";
 import { useDataGridStyles } from "./DataGrid";
 import compareArrayContent from "../../utils/compareArrayContent";
-import MultiSelectWithCheckBox from "../Selector/MultiSelectWithCheckBox";
+import BaseSelector from "../Selector/BaseSelector";
 const GridMultiSelectFilter = (props) => {
     const { label, options, onSelect, dialog, dialogBreakpoints, barBreakpoints, } = props;
     const classes = useDataGridStyles();
@@ -23,17 +23,15 @@ const GridMultiSelectFilter = (props) => {
             ? selected.concat([evt.target.name])
             : selected.filter((entry) => entry !== evt.target.name));
     }, [selected, onSelect]);
-    const getSelected = useCallback((values) => {
-        return values
-            .map((selected) => options.find((option) => option.value === selected)?.label)
-            .filter((selected) => selected)
-            .join(", ");
-    }, [options]);
-    const handleSelectorChange = useCallback((event) => {
-        onSelect(event.target.value);
+    const getOptions = useCallback(() => options, [options]);
+    const selectedData = useMemo(() => selected
+        .map((value) => options.find((opt) => opt.value === value))
+        .filter(Boolean), [selected, options]);
+    const handleSelectorChange = useCallback((data) => {
+        onSelect(data.map((entry) => entry.value));
     }, [onSelect]);
     const selectorClasses = useMemo(() => ({
-        select: isActive ? classes.customFilterBorder : undefined,
+        inputRoot: isActive ? classes.customFilterBorder : undefined,
     }), [isActive, classes.customFilterBorder]);
     if (dialog) {
         return (React.createElement(Grid, { item: true, xs: 12, md: 6, lg: 3, ...dialogBreakpoints, container: true },
@@ -43,7 +41,7 @@ const GridMultiSelectFilter = (props) => {
     }
     else {
         return (React.createElement(Grid, { item: true, xs: 4, ...barBreakpoints },
-            React.createElement(MultiSelectWithCheckBox, { variant: "outlined", label: label, options: options, values: selected, onChange: handleSelectorChange, renderValue: getSelected, fullWidth: true, classes: selectorClasses })));
+            React.createElement(BaseSelector, { multiple: true, label: label, disableSearch: true, disableClearable: true, onLoad: getOptions, selected: selectedData, onSelect: handleSelectorChange, classes: selectorClasses })));
     }
 };
 export default React.memo(GridMultiSelectFilter);
