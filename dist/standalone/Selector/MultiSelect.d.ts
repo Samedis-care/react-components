@@ -1,7 +1,6 @@
 import React from "react";
 import { BaseSelectorData, BaseSelectorProps } from "./BaseSelector";
-import { IMultiSelectEntryProps } from "./MultiSelectEntry";
-import { ClassNameMap } from "@mui/styles/withStyles";
+import { MultiSelectEntryProps } from "./MultiSelectEntry";
 export interface MultiSelectorData extends BaseSelectorData {
     /**
      * Item click handler
@@ -30,17 +29,15 @@ export interface MultiSelectProps<DataT extends MultiSelectorData> extends Omit<
     /**
      * Specify a custom component for displaying multi select items
      */
-    selectedEntryRenderer?: React.ComponentType<IMultiSelectEntryProps<DataT>>;
+    selectedEntryRenderer?: React.ComponentType<MultiSelectEntryProps<DataT>>;
+    /**
+     * CSS class for root
+     */
+    className?: string;
     /**
      * CSS classes to apply
      */
-    classes?: Partial<ClassNameMap<keyof ReturnType<typeof useMultiSelectorStyles>>>;
-    /**
-     * Custom classes passed to subcomponents
-     */
-    subClasses?: {
-        baseSelector: BaseSelectorProps<BaseSelectorData, false>["classes"];
-    };
+    classes?: Partial<Record<MultiSelectClassKey, string>>;
     /**
      * Sort function to perform a view-based sort on selected entries
      * @remarks This is a comparison function
@@ -49,16 +46,13 @@ export interface MultiSelectProps<DataT extends MultiSelectorData> extends Omit<
     selectedSort?: (a: DataT, b: DataT) => number;
     /**
      * Provide generic confirm remove/delete dialog when set to true.
-     * Defaults to MultiSelectTheme.confirmDeleteDefault, which defaults to false
+     * @default false
      */
     confirmDelete?: boolean;
 }
-declare const useMultiSelectorStyles: (props?: any) => ClassNameMap<"selectedEntries">;
-export interface MultiSelectTheme {
-    /**
-     * default value for confirm delete, default false
-     */
-    confirmDeleteDefault?: boolean;
+export interface MultiSelectSelectorOwnerState {
+    selected: boolean;
 }
-declare const _default: <DataT extends MultiSelectorData>(props: MultiSelectProps<DataT>) => React.JSX.Element;
+export type MultiSelectClassKey = "root" | "selectedEntry" | "selector";
+declare const _default: <DataT extends MultiSelectorData>(inProps: MultiSelectProps<DataT>) => React.JSX.Element;
 export default _default;

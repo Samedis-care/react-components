@@ -1,8 +1,6 @@
 import React, { ReactNode } from "react";
-import { InputProps, Theme, TextFieldProps } from "@mui/material";
+import { InputProps, TextFieldProps } from "@mui/material";
 import { TextFieldWithHelpProps } from "../UIKit/TextFieldWithHelp";
-import { Styles } from "@mui/styles";
-import { AutocompleteProps, AutocompleteClassKey } from "@mui/material/Autocomplete";
 import { OutlinedInputProps } from "@mui/material/OutlinedInput";
 import { InputProps as StandardInputProps } from "@mui/material/Input/Input";
 export interface BaseSelectorData {
@@ -115,7 +113,7 @@ export interface BaseSelectorMulti<DataT extends BaseSelectorData> {
      */
     selected: DataT[];
 }
-export type BaseSelectorVariants<DataT extends BaseSelectorData, Multi extends boolean> = Multi extends true ? BaseSelectorMulti<DataT> : BaseSelectorSingle<DataT>;
+export type BaseSelectorVariants<DataT extends BaseSelectorData, Multi extends boolean> = Multi extends true ? BaseSelectorMulti<DataT> : Multi extends false ? BaseSelectorSingle<DataT> : never;
 export type BaseSelectorProps<DataT extends BaseSelectorData, Multi extends boolean> = TextFieldWithHelpProps & BaseSelectorVariants<DataT, Multi> & {
     /**
      * Refresh token used to force refreshing data.
@@ -216,9 +214,13 @@ export type BaseSelectorProps<DataT extends BaseSelectorData, Multi extends bool
      */
     groupSorter?: (a: DataT, b: DataT) => number;
     /**
+     * CSS class name to apply
+     */
+    className?: string;
+    /**
      * Custom styles to be used for selector
      */
-    classes?: AutocompleteProps<unknown, undefined, undefined, undefined>["classes"];
+    classes?: Partial<Record<BaseSelectorClassKey, string>>;
     /**
      * Custom styles used for selector input (text field)
      */
@@ -274,15 +276,14 @@ export type BaseSelectorProps<DataT extends BaseSelectorData, Multi extends bool
      */
     filterIds?: string[] | undefined;
 };
-export type SelectorThemeExpert = {
-    base?: Partial<Styles<Theme, BaseSelectorProps<BaseSelectorData, boolean>, AutocompleteClassKey>>;
-    extensions?: Partial<Styles<Theme, BaseSelectorProps<BaseSelectorData, boolean>, SelectorCustomStylesClassKey>>;
-};
-declare const useCustomStylesBase: (props: Pick<BaseSelectorProps<BaseSelectorData, boolean>, "label" | "iconSize">) => import("@mui/styles").ClassNameMap<"label" | "switch" | "selected" | "icon" | "smallLabel" | "divider" | "wrapper" | "labelWithSwitch" | "infoBtn" | "textFieldStandard" | "listItem" | "lruListItem" | "checkBoxStyle">;
-export type SelectorCustomStylesClassKey = keyof ReturnType<typeof useCustomStylesBase>;
+export interface BaseSelectorIconOwnerState {
+    iconSize?: number;
+}
+export declare const BaseSelectorLruOptionCssClassName = "components-care-base-selector-lru-option";
+export type BaseSelectorClassKey = "autocomplete" | "inlineSwitch" | "label" | "icon" | "divider" | "smallLabel" | "checkbox" | "selected" | "listItem" | "wrapper" | "infoBtn";
 export interface BaseSelectorContextType {
     addToLru: (...ids: string[]) => void;
 }
 export declare const BaseSelectorContext: React.Context<BaseSelectorContextType | null>;
-declare const _default: <DataT extends BaseSelectorData, Multi extends boolean>(props: BaseSelectorProps<DataT, Multi>) => React.JSX.Element;
+declare const _default: <DataT extends BaseSelectorData, Multi extends boolean>(inProps: BaseSelectorProps<DataT, Multi>) => React.JSX.Element;
 export default _default;

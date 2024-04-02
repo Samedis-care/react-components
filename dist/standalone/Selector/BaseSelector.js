@@ -1,13 +1,10 @@
-import React, { useState, useCallback, useEffect, useMemo, } from "react";
-import { ListItemText, IconButton, Paper, Divider, Typography, Popper, Grid, Autocomplete, InputLabel, } from "@mui/material";
+import React, { useCallback, useEffect, useMemo, useState, } from "react";
+import { Autocomplete, Divider, Grid, IconButton, InputLabel, ListItemText, Paper, Popper, styled, Typography, useThemeProps, } from "@mui/material";
 import { Add as AddIcon, ExpandMore, Info as InfoIcon, } from "@mui/icons-material";
 import TextFieldWithHelp from "../UIKit/TextFieldWithHelp";
 import { SelectorSmallListItemButton, SmallListItemIcon, } from "../../standalone/Small";
-import makeThemeStyles from "../../utils/makeThemeStyles";
-import cleanClassMap from "../../utils/cleanClassMap";
 import combineClassNames from "../../utils/combineClassNames";
 import { useLocalStorageState } from "../../utils/useStorageState";
-import { makeStyles } from "@mui/styles";
 import InlineSwitch from "../InlineSwitch";
 import useCCTranslations from "../../utils/useCCTranslations";
 import uniqueArray from "../../utils/uniqueArray";
@@ -34,108 +31,111 @@ export const selectorLocalLoadHandler = (data) => (query) => {
         ...data.filter((entry) => getStringLabel(entry).toLowerCase().includes(query)),
     ]);
 };
-const useCustomDefaultSelectorStyles = makeStyles({
-    root: {},
-    focused: {},
-    tag: {},
-    tagSizeSmall: {},
-    inputRoot: {},
-    input: {},
-    inputFocused: {},
-    endAdornment: {},
-    clearIndicator: {},
-    clearIndicatorDirty: {},
-    popupIndicator: {},
-    popupIndicatorOpen: {},
-    popper: {},
-    popperDisablePortal: {},
-    paper: {},
-    listbox: {},
-    loading: {},
-    noOptions: {},
-    groupLabel: {},
-    groupUl: {},
-    option: {
+const StyledAutocomplete = styled(Autocomplete, {
+    name: "CcBaseSelector",
+    slot: "autocomplete",
+})({
+    "& .MuiAutocomplete-option": {
         padding: 0,
         '&[aria-disabled="true"]': {
             opacity: 1,
         },
     },
-}, { name: "CcBaseSelectorBase" });
-const useThemeStyles = makeThemeStyles((theme) => theme.componentsCare?.uiKit?.baseSelectorExpert?.base, "CcBaseSelector", useCustomDefaultSelectorStyles);
-const useCustomStylesBase = makeStyles((theme) => ({
-    infoBtn: {
-        padding: 2,
-        marginRight: -2,
-    },
-    textFieldStandard: {
-        position: "absolute",
-    },
-    label: {
-        position: "relative",
-        transform: "translate(0,0) scale(0.75)",
-        zIndex: "unset",
-    },
-    switch: {
+});
+const StyledInlineSwitch = styled(InlineSwitch, {
+    name: "CcBaseSelector",
+    slot: "inlineSwitch",
+})({
+    marginTop: 0,
+    "& .CcInlineSwitch-switchWrapper": {
         marginTop: -30,
     },
-    labelWithSwitch: {
-        marginTop: 0,
-    },
-    icon: (props) => ({
-        width: props.iconSize ?? 32,
-        height: props.iconSize ?? 32,
-        objectFit: "contain",
-    }),
-    wrapper: {},
-    listItem: {
-        paddingLeft: "16px !important",
-        paddingRight: "16px !important",
-        paddingTop: 6,
-        paddingBottom: 6,
-    },
-    lruListItem: {
+});
+const StyledLabel = styled(InputLabel, {
+    name: "CcBaseSelector",
+    slot: "label",
+})({
+    position: "relative",
+    transform: "translate(0,0) scale(0.75)",
+    zIndex: "unset",
+});
+const StyledIcon = styled("img", {
+    name: "CcBaseSelector",
+    slot: "icon",
+})(({ ownerState: { iconSize } }) => ({
+    width: iconSize ?? 32,
+    height: iconSize ?? 32,
+    objectFit: "contain",
+}));
+const StyledDivider = styled(Divider, {
+    name: "CcBaseSelector",
+    slot: "divider",
+})({
+    width: "100%",
+});
+const SmallLabelOption = styled(Typography, {
+    name: "CcBaseSelector",
+    slot: "smallLabel",
+})(({ theme }) => ({
+    paddingLeft: 16,
+    paddingTop: 4,
+    color: theme.palette.text.disabled,
+}));
+const StyledCheckbox = styled(Checkbox, {
+    name: "CcBaseSelector",
+    slot: "checkbox",
+})({
+    borderRadius: 4,
+    width: 16,
+    height: 16,
+    marginRight: 10,
+});
+const SelectedMarker = styled(Grid, {
+    name: "CcBaseSelector",
+    slot: "selected",
+})(({ theme }) => ({
+    borderRadius: theme.shape.borderRadius,
+    backgroundColor: theme.palette.secondary.main,
+    padding: `calc(${theme.spacing(1)} / 2) ${theme.spacing(1)}`,
+}));
+export const BaseSelectorLruOptionCssClassName = "components-care-base-selector-lru-option";
+const OptionListItem = styled(SelectorSmallListItemButton, {
+    name: "CcBaseSelector",
+    slot: "listItem",
+})(({ theme }) => ({
+    paddingLeft: "16px !important",
+    paddingRight: "16px !important",
+    paddingTop: 6,
+    paddingBottom: 6,
+    [`&.${BaseSelectorLruOptionCssClassName}`]: {
         backgroundColor: theme.palette.background.default,
         "&:hover": {
             backgroundColor: theme.palette.background.paper,
         },
     },
-    smallLabel: {
-        paddingLeft: 16,
-        paddingTop: 4,
-        color: theme.palette.text.disabled,
-    },
-    selected: {
-        borderRadius: theme.shape.borderRadius,
-        backgroundColor: theme.palette.secondary.main,
-        padding: `calc(${theme.spacing(1)} / 2) ${theme.spacing(1)}`,
-    },
-    divider: {
-        width: "100%",
-    },
-    checkBoxStyle: {
-        borderRadius: 4,
-        width: 16,
-        height: 16,
-        marginRight: 10,
-    },
-}), { name: "CcBaseSelectorCustomBase" });
-const useCustomStyles = makeThemeStyles((theme) => theme.componentsCare?.uiKit?.baseSelectorExpert?.extensions, "CcBaseSelectorCustom", useCustomStylesBase);
+}));
+const Wrapper = styled(Paper, { name: "CcBaseSelector", slot: "wrapper" })({});
+const InfoButton = styled(IconButton, {
+    name: "CcBaseSelector",
+    slot: "infoBtn",
+})({
+    padding: 2,
+    marginRight: -2,
+});
 const getOptionDisabled = (option) => !!(!option || option.isDisabled || option.isDivider || option.isSmallLabel);
 const getOptionSelected = (option, value) => option.value === value.value;
 const GrowPopper = React.forwardRef(function GrowPopperImpl(props, ref) {
     return (React.createElement(Popper, { ...props, ref: ref, style: { ...props.style, width: "unset", minWidth: props.style?.width } }));
 });
 export const BaseSelectorContext = React.createContext(null);
-const BaseSelector = (props) => {
-    const { variant, refreshToken, onSelect, multiple, selected, label, disabled, disableSearch, placeholder, autocompleteId, addNewLabel, onLoad, onAddNew, enableIcons, noOptionsText, loadingText, startTypingToSearchText, openText, closeText, clearText, disableClearable, openInfo, grouped, noGroupLabel, disableGroupSorting, groupSorter, switchLabel, lru, startAdornment, endAdornment, endAdornmentLeft, freeSolo, getIdOfData, filterIds, textFieldClasses, textFieldInputClasses, } = props;
+const BaseSelector = (inProps) => {
+    const props = useThemeProps({ props: inProps, name: "CcBaseSelector" });
+    const { variant, refreshToken, onSelect, multiple, selected, label, disabled, disableSearch, placeholder, autocompleteId, addNewLabel, onLoad, onAddNew, enableIcons, noOptionsText, loadingText, startTypingToSearchText, openText, closeText, clearText, disableClearable, openInfo, grouped, noGroupLabel, disableGroupSorting, groupSorter, switchLabel, lru, startAdornment, endAdornment, endAdornmentLeft, freeSolo, getIdOfData, filterIds, textFieldClasses, textFieldInputClasses, iconSize, classes, className, } = props;
     const getIdDefault = useCallback((data) => data.value, []);
     const getId = getIdOfData ?? getIdDefault;
-    const classes = useThemeStyles(props);
     const defaultSwitchValue = !!(props.displaySwitch && props.defaultSwitchValue);
     const [switchValue, setSwitchValue] = useState(defaultSwitchValue);
     const { t } = useCCTranslations();
-    const customClasses = useCustomStyles(cleanClassMap(props, true));
     const [open, setOpen] = useState(false);
     const actualAddNewLabel = addNewLabel || t("standalone.selector.add-new");
     const [selectorOptions, setSelectorOptions] = useState([]);
@@ -143,32 +143,32 @@ const BaseSelector = (props) => {
     const [query, setQuery] = useState("");
     const [lruIds, setLruIds] = useLocalStorageState(lru?.storageKey, [], (ret) => Array.isArray(ret) &&
         !ret.find((entry) => typeof entry !== "string"));
-    const renderIcon = useCallback((icon) => typeof icon === "string" ? (React.createElement("img", { src: icon, alt: "", className: customClasses.icon })) : (icon), [customClasses.icon]);
+    const renderIcon = useCallback((icon) => typeof icon === "string" ? (React.createElement(StyledIcon, { src: icon, alt: "", ownerState: { iconSize }, className: classes?.icon })) : (icon), [iconSize, classes?.icon]);
     const defaultRenderer = useCallback((props, data, state) => {
         const { selected } = state;
         if (data.isDivider)
-            return (React.createElement(Divider, { component: "li", ...props, className: customClasses.divider }));
+            return (React.createElement(StyledDivider, { component: "li", ...props, className: classes?.divider }));
         if (data.isSmallLabel)
-            return (React.createElement(Typography, { component: "li", ...props, onClick: undefined, variant: "caption", className: customClasses.smallLabel }, getReactLabel(data)));
-        return (React.createElement(SelectorSmallListItemButton, { component: "li", ...props, className: combineClassNames([
-                customClasses.listItem,
+            return (React.createElement(SmallLabelOption, { component: "li", ...props, onClick: undefined, variant: "caption", className: classes?.smallLabel }, getReactLabel(data)));
+        return (React.createElement(OptionListItem, { component: "li", ...props, className: combineClassNames([
+                classes?.listItem,
                 data.className,
                 props.className,
             ]), disabled: data.isDisabled },
             multiple && (React.createElement(SmallListItemIcon, null,
-                React.createElement(Checkbox, { checked: selected, className: customClasses.checkBoxStyle }))),
+                React.createElement(StyledCheckbox, { checked: selected, className: classes?.checkbox }))),
             enableIcons && (React.createElement(SmallListItemIcon, null, renderIcon(data.icon))),
             React.createElement(ListItemText, null,
                 React.createElement(Grid, { container: true },
                     React.createElement(Grid, { item: true, xs: true }, getReactLabel(data)),
-                    data.selected && (React.createElement(Grid, { item: true, className: customClasses.selected }, t("standalone.selector.base-selector.selected")))))));
+                    data.selected && (React.createElement(SelectedMarker, { item: true, className: classes?.selected }, t("standalone.selector.base-selector.selected")))))));
     }, [
         multiple,
-        customClasses.divider,
-        customClasses.smallLabel,
-        customClasses.listItem,
-        customClasses.selected,
-        customClasses.checkBoxStyle,
+        classes?.divider,
+        classes?.smallLabel,
+        classes?.listItem,
+        classes?.selected,
+        classes?.checkbox,
         enableIcons,
         renderIcon,
         t,
@@ -266,7 +266,7 @@ const BaseSelector = (props) => {
                 })))).filter((e) => !!e).map((entry) => ({
                     ...entry,
                     className: combineClassNames([
-                        customClasses.lruListItem,
+                        BaseSelectorLruOptionCssClassName,
                         entry.className,
                     ]),
                 })),
@@ -312,7 +312,6 @@ const BaseSelector = (props) => {
         onAddNew,
         t,
         setLruIds,
-        customClasses.lruListItem,
         onLoad,
         switchValue,
         getId,
@@ -342,11 +341,11 @@ const BaseSelector = (props) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [lruIds.join(",")]);
     const filterOptions = useCallback((options) => options, []);
-    return (React.createElement(InlineSwitch, { visible: !!props.displaySwitch, value: switchValue, onChange: setSwitchValue, label: switchLabel, classes: customClasses },
+    return (React.createElement(StyledInlineSwitch, { visible: !!props.displaySwitch, value: switchValue, onChange: setSwitchValue, label: switchLabel, className: combineClassNames([className, classes?.inlineSwitch]) },
         React.createElement(BaseSelectorContext.Provider, { value: context },
-            label && (React.createElement(InputLabel, { shrink: true, disableAnimation: true, disabled: disabled, className: customClasses.label }, label)),
-            React.createElement(Paper, { elevation: 0, className: customClasses.wrapper },
-                React.createElement(Autocomplete, { id: autocompleteId, classes: classes, multiple: multiple, disableCloseOnSelect: multiple, open: open, onOpen: () => {
+            label && (React.createElement(StyledLabel, { shrink: true, disableAnimation: true, disabled: disabled, className: classes?.label }, label)),
+            React.createElement(Wrapper, { elevation: 0, className: classes?.wrapper },
+                React.createElement(StyledAutocomplete, { id: autocompleteId, className: classes?.autocomplete, multiple: multiple, disableCloseOnSelect: multiple, open: open, onOpen: () => {
                         setOpen(true);
                     }, onClose: () => {
                         setOpen(false);
@@ -390,7 +389,7 @@ const BaseSelector = (props) => {
                                 endAdornment: (() => {
                                     const hasAdditionalElements = openInfo || endAdornment || endAdornmentLeft;
                                     return hasAdditionalElements
-                                        ? React.cloneElement(params.InputProps?.endAdornment, {}, endAdornmentLeft, ...(params.InputProps?.endAdornment).props.children, openInfo && (React.createElement(IconButton, { onClick: openInfo, className: customClasses.infoBtn },
+                                        ? React.cloneElement(params.InputProps?.endAdornment, {}, endAdornmentLeft, ...(params.InputProps?.endAdornment).props.children, openInfo && (React.createElement(InfoButton, { onClick: openInfo, className: classes?.infoBtn },
                                             React.createElement(InfoIcon, { color: "disabled" }))), endAdornment)
                                         : params.InputProps?.endAdornment;
                                 })(),

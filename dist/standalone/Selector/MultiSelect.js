@@ -1,36 +1,37 @@
 import React, { useCallback, useContext, useMemo } from "react";
 import BaseSelector from "./BaseSelector";
-import { Grid, Paper, useTheme } from "@mui/material";
-import makeStyles from "@mui/styles/makeStyles";
+import { Grid, Paper, styled, useThemeProps } from "@mui/material";
 import MultiSelectEntry from "./MultiSelectEntry";
-import cleanClassMap from "../../utils/cleanClassMap";
-import combineClassMaps from "../../utils/combineClassMaps";
 import { showConfirmDialogBool } from "../../non-standalone/Dialog/Utils";
 import { DialogContext } from "../../framework/DialogContextProvider";
 import useCCTranslations from "../../utils/useCCTranslations";
-const useBaseSelectorStyles = makeStyles((theme) => ({
-    inputRoot: (props) => ({
-        borderRadius: props.selected.length > 0
+import combineClassNames from "../../utils/combineClassNames";
+const Root = styled(Grid, {
+    name: "CcMultiSelect",
+    slot: "root",
+})({});
+const SelectedEntry = styled(Grid, {
+    name: "CcMultiSelect",
+    slot: "selectedEntry",
+})(({ theme }) => ({
+    border: `1px solid rgba(0, 0, 0, 0.23)`,
+    borderTop: 0,
+    borderRadius: `0px 0px ${theme.shape.borderRadius}px ${theme.shape.borderRadius}px`,
+}));
+const StyledBaseSelector = styled(BaseSelector, {
+    name: "CcMultiSelect",
+    slot: "selector",
+})(({ theme, ownerState: { selected } }) => ({
+    "& .MuiAutocomplete-inputRoot": {
+        borderRadius: selected
             ? `${theme.shape.borderRadius}px ${theme.shape.borderRadius}px 0px 0px`
             : undefined,
-    }),
-}), { name: "CcMultiSelectBase" });
-const useMultiSelectorStyles = makeStyles((theme) => ({
-    selectedEntries: {
-        border: `1px solid rgba(0, 0, 0, 0.23)`,
-        borderTop: 0,
-        borderRadius: `0px 0px ${theme.shape.borderRadius}px ${theme.shape.borderRadius}px`,
     },
-}), { name: "CcMultiSelect" });
-const MultiSelect = (props) => {
-    const { onLoad, onSelect, selected, enableIcons, selectedEntryRenderer, disabled, getIdOfData, displaySwitch, switchLabel, defaultSwitchValue, selectedSort, } = props;
-    const theme = useTheme();
+})); // tradeoff: remove ownerState from type config, but keep generics
+const MultiSelect = (inProps) => {
+    const props = useThemeProps({ props: inProps, name: "CcMultiSelect" });
+    const { onLoad, onSelect, selected, enableIcons, selectedEntryRenderer, disabled, getIdOfData, displaySwitch, switchLabel, defaultSwitchValue, selectedSort, confirmDelete, className, classes, } = props;
     const { t } = useCCTranslations();
-    const confirmDelete = props.confirmDelete ??
-        theme.componentsCare?.multiSelect?.confirmDeleteDefault ??
-        false;
-    const multiSelectClasses = useMultiSelectorStyles(props);
-    const baseSelectorClasses = useBaseSelectorStyles(cleanClassMap(props, true));
     const getIdDefault = useCallback((data) => data.value, []);
     const getId = getIdOfData ?? getIdDefault;
     const selectedIds = useMemo(() => selected.map(getId), [getId, selected]);
@@ -90,10 +91,12 @@ const MultiSelect = (props) => {
             return;
         onSelect(selected.map((entry) => getId(entry) === getId(newValue) ? newValue : entry));
     }, [getId, onSelect, selected]);
-    return (React.createElement(Grid, { container: true },
+    return (React.createElement(Root, { container: true, className: combineClassNames([className, classes?.root]) },
         React.createElement(Grid, { item: true, xs: 12 },
-            React.createElement(BaseSelector, { ...props, classes: combineClassMaps(baseSelectorClasses, props.subClasses?.baseSelector), onLoad: multiSelectLoadHandler, selected: null, onSelect: multiSelectHandler, refreshToken: selectedIds.join(","), displaySwitch: displaySwitch, switchLabel: switchLabel, defaultSwitchValue: defaultSwitchValue, filterIds: selectedIds })),
-        props.selected.length > 0 && (React.createElement(Grid, { item: true, xs: 12, className: multiSelectClasses.selectedEntries },
+            React.createElement(StyledBaseSelector, { ...props, 
+                // @ts-expect-error removed owner state from props to preserve generics
+                ownerState: { selected: selected.length > 0 }, className: classes?.selector, onLoad: multiSelectLoadHandler, selected: null, onSelect: multiSelectHandler, refreshToken: selectedIds.join(","), displaySwitch: displaySwitch, switchLabel: switchLabel, defaultSwitchValue: defaultSwitchValue, filterIds: selectedIds })),
+        props.selected.length > 0 && (React.createElement(SelectedEntry, { item: true, xs: 12, className: classes?.selectedEntry },
             React.createElement(Paper, { elevation: 0 }, (selectedSort
                 ? props.selected.sort(selectedSort)
                 : props.selected).map((data, index) => (React.createElement(EntryRender, { key: getId(data) || index.toString(16), enableDivider: props.selected.length === index - 1, enableIcons: enableIcons, handleDelete: disabled || data.noDelete ? undefined : handleDelete, data: data, setData: handleSetData, iconSize: props.iconSize }))))))));

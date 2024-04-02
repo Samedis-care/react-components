@@ -31,7 +31,7 @@ const GridMultiSelectFilter = (props) => {
         onSelect(data.map((entry) => entry.value));
     }, [onSelect]);
     const selectorClasses = useMemo(() => ({
-        inputRoot: isActive ? classes.customFilterBorder : undefined,
+        autocomplete: isActive ? classes.customFilterBorder : undefined,
     }), [isActive, classes.customFilterBorder]);
     if (dialog) {
         return (React.createElement(Grid, { item: true, xs: 12, md: 6, lg: 3, ...dialogBreakpoints, container: true },

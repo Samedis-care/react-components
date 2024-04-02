@@ -41,6 +41,6 @@ export interface MultiSelectWithoutGroupProps<DataT extends MultiSelectorData> e
      */
     sortCompareFn?: (value1: DataT, value2: DataT) => number;
 }
-declare const useStyles: (props?: any) => import("@mui/styles").ClassNameMap<"switch" | "outlined" | "labelWithSwitch" | "searchLabel">;
+declare const useStyles: (props?: any) => import("@mui/styles").ClassNameMap<"switch" | "outlined" | "searchLabel" | "labelWithSwitch">;
 declare const _default: <DataT extends MultiSelectorData>(props: MultiSelectWithoutGroupProps<DataT>) => React.JSX.Element;
 export default _default;

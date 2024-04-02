@@ -25,7 +25,7 @@ const GridSingleSelectFilter = (props) => {
     }, [onSelect]);
     const getOptions = useCallback(() => options, [options]);
     const selectorStyles = useMemo(() => ({
-        inputRoot: isActive ? classes.customFilterBorder : undefined,
+        autocomplete: isActive ? classes.customFilterBorder : undefined,
     }), [isActive, classes.customFilterBorder]);
     if (dialog) {
         return (React.createElement(Grid, { item: true, xs: 12, md: 6, lg: 3, ...dialogBreakpoints },

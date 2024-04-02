@@ -1,7 +1,6 @@
 import React from "react";
 import { MultiSelectorData } from "./MultiSelect";
-import { ClassNameMap } from "@mui/styles/withStyles";
-export interface IMultiSelectEntryProps<DataT extends MultiSelectorData> {
+export interface MultiSelectEntryProps<DataT extends MultiSelectorData> {
     /**
      * Should we show icons?
      */
@@ -28,8 +27,22 @@ export interface IMultiSelectEntryProps<DataT extends MultiSelectorData> {
      * @remarks The data.value identifies the entry to be changed
      */
     setData: (newValue: DataT) => void;
+    /**
+     * Custom CSS class to apply to root
+     */
+    className?: string;
+    /**
+     * Custom CSS classes
+     */
+    classes?: Partial<Record<MultiSelectEntryClassKey, string>>;
 }
-declare const _default: <DataT extends MultiSelectorData>(props: IMultiSelectEntryProps<DataT> & {
-    classes?: ClassNameMap<"label" | "image" | "selected" | "root" | "container" | "icon" | "divider" | "unClickable" | "ignored" | "iconSvg"> | undefined;
-}) => React.JSX.Element;
+export interface MultiSelectEntrySelectedOwnerState {
+    unClickable: boolean;
+    ignore: boolean;
+}
+export interface MultiSelectEntryImageOwnerState {
+    iconSize?: number;
+}
+export type MultiSelectEntryClassKey = "root" | "selected" | "label" | "icon" | "iconSvg" | "divider" | "image";
+declare const _default: <DataT extends MultiSelectorData>(inProps: MultiSelectEntryProps<DataT>) => React.JSX.Element;
 export default _default;

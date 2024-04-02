@@ -19,10 +19,14 @@ export interface InlineSwitchProps {
     label?: React.ReactNode;
     children?: React.ReactElement;
     /**
+     * custom styles
+     */
+    className?: string;
+    /**
      * Custom styles
      */
-    classes?: Partial<ReturnType<typeof useStyles>>;
+    classes?: Partial<Record<InlineSwitchClassKey, string>>;
 }
-declare const useStyles: (props?: any) => import("@mui/styles/withStyles").ClassNameMap<"switch" | "labelWithSwitch">;
-declare const _default: (props: InlineSwitchProps) => React.JSX.Element;
+export type InlineSwitchClassKey = "switch" | "root" | "switchWrapper";
+declare const _default: (inProps: InlineSwitchProps) => React.JSX.Element;
 export default _default;
