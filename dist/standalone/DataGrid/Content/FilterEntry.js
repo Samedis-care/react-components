@@ -221,9 +221,12 @@ const FilterEntry = (props) => {
                                     .sort()
                                     .join(","), onChange: onFilterValueChangeEnumAll }),
                         React.createElement(ListItemText, { primaryTypographyProps: TYPOGRAPHY_PROPS }, t("standalone.data-grid.content.set-filter.select-all")))),
-                    checkSupport(props.valueType, "notInSet") && (React.createElement(ListItem, { className: classes.setFilterListItem },
-                        React.createElement(Checkbox, { checked: enumFilterInverted, onChange: onFilterTypeChangeEnum }),
-                        React.createElement(ListItemText, { primaryTypographyProps: TYPOGRAPHY_PROPS }, t("standalone.data-grid.content.set-filter.invert")))),
+                    checkSupport(props.valueType, "notInSet") && (React.createElement(React.Fragment, null,
+                        React.createElement(ListItem, { className: classes.setFilterListItem },
+                            React.createElement(Checkbox, { checked: enumFilterInverted, onChange: onFilterTypeChangeEnum }),
+                            React.createElement(ListItemText, { primaryTypographyProps: TYPOGRAPHY_PROPS }, t("standalone.data-grid.content.set-filter.invert"))),
+                        React.createElement(ListItem, { className: classes.setFilterListItemDivider },
+                            React.createElement(Divider, { className: classes.setFilterListDivider })))),
                     props.valueData
                         .filter((entry) => entry
                         .getLabelText()
