@@ -13,7 +13,7 @@ import { FormControlFieldsetCC } from "../../../../standalone";
 import uniqueArray from "../../../../utils/uniqueArray";
 
 export type RendererEnumSelectProps = Omit<
-	BaseSelectorProps<BaseSelectorData>,
+	BaseSelectorProps<BaseSelectorData, false>,
 	"selected" | "onLoad" | "onSelect" | "disabled"
 >;
 

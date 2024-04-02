@@ -8,13 +8,11 @@ import {
 } from "@mui/material";
 import { useCustomFilterActiveContext } from "./Header/FilterBar";
 import { useDataGridStyles } from "./DataGrid";
-import { SelectProps } from "@mui/material/Select/Select";
 import { Breakpoint } from "@mui/material/styles";
 import { GridSize } from "@mui/material/Grid/Grid";
-import { SelectChangeEvent } from "@mui/material/Select/SelectInput";
 import compareArrayContent from "../../utils/compareArrayContent";
 import { MultiSelectorData } from "../Selector";
-import MultiSelectWithCheckBox from "../Selector/MultiSelectWithCheckBox";
+import BaseSelector from "../Selector/BaseSelector";
 
 export interface GridMultiSelectFilterProps {
 	/**
@@ -85,29 +83,26 @@ const GridMultiSelectFilter = (props: GridMultiSelectFilterProps) => {
 		[selected, onSelect],
 	);
 
-	const getSelected = useCallback(
-		(values: string[]): string => {
-			return values
-				.map(
-					(selected) =>
-						options.find((option) => option.value === selected)?.label,
-				)
-				.filter((selected) => selected)
-				.join(", ");
-		},
-		[options],
+	const getOptions = useCallback(() => options, [options]);
+
+	const selectedData = useMemo(
+		(): MultiSelectorData[] =>
+			selected
+				.map((value) => options.find((opt) => opt.value === value)!)
+				.filter(Boolean),
+		[selected, options],
 	);
 
 	const handleSelectorChange = useCallback(
-		(event: SelectChangeEvent<string[]>) => {
-			onSelect(event.target.value as string[]);
+		(data: MultiSelectorData[]) => {
+			onSelect(data.map((entry) => entry.value));
 		},
 		[onSelect],
 	);
 
 	const selectorClasses = useMemo(
 		() => ({
-			select: isActive ? classes.customFilterBorder : undefined,
+			inputRoot: isActive ? classes.customFilterBorder : undefined,
 		}),
 		[isActive, classes.customFilterBorder],
 	);
@@ -145,14 +140,14 @@ const GridMultiSelectFilter = (props: GridMultiSelectFilterProps) => {
 	} else {
 		return (
 			<Grid item xs={4} {...barBreakpoints}>
-				<MultiSelectWithCheckBox
-					variant={"outlined"}
+				<BaseSelector<MultiSelectorData, true>
+					multiple
 					label={label}
-					options={options}
-					values={selected}
-					onChange={handleSelectorChange}
-					renderValue={getSelected as SelectProps["renderValue"]}
-					fullWidth
+					disableSearch
+					disableClearable
+					onLoad={getOptions}
+					selected={selectedData}
+					onSelect={handleSelectorChange}
 					classes={selectorClasses}
 				/>
 			</Grid>

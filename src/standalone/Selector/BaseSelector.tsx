@@ -50,6 +50,8 @@ import { PopperProps } from "@mui/material/Popper/Popper";
 import uniqueArray from "../../utils/uniqueArray";
 import { OutlinedInputProps } from "@mui/material/OutlinedInput";
 import { InputProps as StandardInputProps } from "@mui/material/Input/Input";
+import Checkbox from "../UIKit/Checkbox";
+import { AutocompleteRenderOptionState } from "@mui/material/Autocomplete/Autocomplete";
 
 export interface BaseSelectorData {
 	/**
@@ -166,189 +168,220 @@ export interface SelectorLruOptions<DataT extends BaseSelectorData> {
  */
 type SelectorLabelCallback = (obj: { inputValue: string }) => string | null;
 
-export interface BaseSelectorProps<DataT extends BaseSelectorData>
-	extends TextFieldWithHelpProps {
-	/**
-	 * Refresh token used to force refreshing data.
-	 */
-	refreshToken?: string;
-	/**
-	 * Data load function
-	 * @param search The user search input
-	 * @param switchValue The value of switch input
-	 * @remarks When using this with an already loaded dataset consider using selectorLocalLoadHandler
-	 */
-	onLoad: (search: string, switchValue: boolean) => DataT[] | Promise<DataT[]>;
+export interface BaseSelectorSingle<DataT extends BaseSelectorData> {
+	multiple?: false;
 	/**
 	 * Callback for autocomplete change
 	 */
 	onSelect: (selected: DataT | null) => void;
 	/**
-	 * The textfield type of input
-	 */
-	variant?: "outlined" | "standard";
-	/**
-	 * The label of the selector
-	 */
-	label?: string;
-	/**
-	 * Disable autocomplete control
-	 */
-	disabled?: boolean;
-	/**
-	 * String used for the Autocomplete component
-	 */
-	autocompleteId?: string;
-	/**
-	 * String used to set placeholder of the Autocomplete component
-	 */
-	placeholder?: string;
-	/**
-	 * Handler for the "Add new" button
-	 * Add new button only shows if this is set.
-	 * @returns The newly created data entry which will be selected or null if user cancelled
-	 */
-	onAddNew?: () => DataT | null | Promise<DataT | null>;
-	/**
-	 * Label for the "Add new" button
-	 */
-	addNewLabel?: string;
-	/**
 	 * The currently selected values
 	 */
 	selected: DataT | null;
-	/**
-	 * Enables icons in the list renderers
-	 */
-	enableIcons?: boolean;
-	/**
-	 * Size of the icons (if enableIcons) in px
-	 */
-	iconSize?: number;
-	/**
-	 * Label which is shown if there is no data
-	 */
-	noOptionsText?: string | SelectorLabelCallback;
-	/**
-	 * Label which is shown while loading data
-	 */
-	loadingText?: string | SelectorLabelCallback;
-	/**
-	 * Label which is shown if forceQuery == true and nothing has been typed
-	 */
-	startTypingToSearchText?: string | SelectorLabelCallback;
-	/**
-	 * Label which is shown for close icon button while popup is opened
-	 */
-	closeText?: string;
-	/**
-	 * Label which is shown for open icon button while popup is closed
-	 */
-	openText?: string;
-	/**
-	 * Label which is shown for the clear selected icon
-	 */
-	clearText?: string;
-	/**
-	 * Is the selector clearable?
-	 */
-	disableClearable?: boolean;
-	/**
-	 * Disable search?
-	 */
-	disableSearch?: boolean;
-	/**
-	 * Enable grouping
-	 */
-	grouped?: boolean;
-	/**
-	 * Label used if no group is set
-	 */
-	noGroupLabel?: string;
-	/**
-	 * Disable group sorting
-	 */
-	disableGroupSorting?: boolean;
-	/**
-	 * Group sorting algorithm
-	 * @see Array.sort
-	 */
-	groupSorter?: (a: DataT, b: DataT) => number;
-	/**
-	 * Custom styles to be used for selector
-	 */
-	classes?: AutocompleteProps<
-		unknown,
-		undefined,
-		undefined,
-		undefined
-	>["classes"];
-	/**
-	 * Custom styles used for selector input (text field)
-	 */
-	textFieldClasses?: TextFieldProps["classes"];
-	/**
-	 * Custom styles used for selector input (text field input)
-	 */
-	textFieldInputClasses?:
-		| OutlinedInputProps["classes"]
-		| StandardInputProps["classes"];
-	/**
-	 * Display switch control?
-	 */
-	displaySwitch?: boolean;
-	/**
-	 * Default value for switch position
-	 */
-	defaultSwitchValue?: boolean;
-	/**
-	 * Label for switch control (only used if displaySwitch is truthy)
-	 */
-	switchLabel?: React.ReactNode;
-	/**
-	 * Last recently used (LRU) cache options
-	 * LRU shows the user the previous items he selected when no search term is entered
-	 */
-	lru?: SelectorLruOptions<DataT>;
-	/**
-	 * Enable freeSolo
-	 */
-	freeSolo?: boolean;
-	/**
-	 * Icon when no item is selected
-	 */
-	startAdornment?: InputProps["startAdornment"];
-	/**
-	 * Icon to show on the right of the selector
-	 * @remarks Must be IconButton with padding: 2px; margin-right: -2px applied to it
-	 */
-	endAdornment?: InputProps["endAdornment"];
-	/**
-	 * Like endAdornment, but on the left side of the drop-down arrow
-	 * @see endAdornment
-	 */
-	endAdornmentLeft?: InputProps["endAdornment"];
-	/**
-	 * Optional callback for customizing the unique identifier of data
-	 * @param data The data struct
-	 * @returns A unique ID extracted from data
-	 * @default returns data.value
-	 */
-	getIdOfData?: (data: DataT) => string;
-	/**
-	 * Ids to filter from options
-	 */
-	filterIds?: string[] | undefined;
 }
+
+export interface BaseSelectorMulti<DataT extends BaseSelectorData> {
+	multiple: true;
+	/**
+	 * Callback for autocomplete change
+	 */
+	onSelect: (selected: DataT[]) => void;
+	/**
+	 * The currently selected values
+	 */
+	selected: DataT[];
+}
+
+export type BaseSelectorVariants<
+	DataT extends BaseSelectorData,
+	Multi extends boolean,
+> = Multi extends true ? BaseSelectorMulti<DataT> : BaseSelectorSingle<DataT>;
+
+export type BaseSelectorProps<
+	DataT extends BaseSelectorData,
+	Multi extends boolean,
+> = TextFieldWithHelpProps &
+	BaseSelectorVariants<DataT, Multi> & {
+		/**
+		 * Refresh token used to force refreshing data.
+		 */
+		refreshToken?: string;
+		/**
+		 * Data load function
+		 * @param search The user search input
+		 * @param switchValue The value of switch input
+		 * @remarks When using this with an already loaded dataset consider using selectorLocalLoadHandler
+		 */
+		onLoad: (
+			search: string,
+			switchValue: boolean,
+		) => DataT[] | Promise<DataT[]>;
+		/**
+		 * The textfield type of input
+		 */
+		variant?: "outlined" | "standard";
+		/**
+		 * The label of the selector
+		 */
+		label?: string;
+		/**
+		 * Disable autocomplete control
+		 */
+		disabled?: boolean;
+		/**
+		 * String used for the Autocomplete component
+		 */
+		autocompleteId?: string;
+		/**
+		 * String used to set placeholder of the Autocomplete component
+		 */
+		placeholder?: string;
+		/**
+		 * Handler for the "Add new" button
+		 * Add new button only shows if this is set.
+		 * @returns The newly created data entry which will be selected or null if user cancelled
+		 */
+		onAddNew?: () => DataT | null | Promise<DataT | null>;
+		/**
+		 * Label for the "Add new" button
+		 */
+		addNewLabel?: string;
+		/**
+		 * Enables icons in the list renderers
+		 */
+		enableIcons?: boolean;
+		/**
+		 * Size of the icons (if enableIcons) in px
+		 */
+		iconSize?: number;
+		/**
+		 * Label which is shown if there is no data
+		 */
+		noOptionsText?: string | SelectorLabelCallback;
+		/**
+		 * Label which is shown while loading data
+		 */
+		loadingText?: string | SelectorLabelCallback;
+		/**
+		 * Label which is shown if forceQuery == true and nothing has been typed
+		 */
+		startTypingToSearchText?: string | SelectorLabelCallback;
+		/**
+		 * Label which is shown for close icon button while popup is opened
+		 */
+		closeText?: string;
+		/**
+		 * Label which is shown for open icon button while popup is closed
+		 */
+		openText?: string;
+		/**
+		 * Label which is shown for the clear selected icon
+		 */
+		clearText?: string;
+		/**
+		 * Is the selector clearable?
+		 */
+		disableClearable?: boolean;
+		/**
+		 * Disable search?
+		 */
+		disableSearch?: boolean;
+		/**
+		 * Enable grouping
+		 */
+		grouped?: boolean;
+		/**
+		 * Label used if no group is set
+		 */
+		noGroupLabel?: string;
+		/**
+		 * Disable group sorting
+		 */
+		disableGroupSorting?: boolean;
+		/**
+		 * Group sorting algorithm
+		 * @see Array.sort
+		 */
+		groupSorter?: (a: DataT, b: DataT) => number;
+		/**
+		 * Custom styles to be used for selector
+		 */
+		classes?: AutocompleteProps<
+			unknown,
+			undefined,
+			undefined,
+			undefined
+		>["classes"];
+		/**
+		 * Custom styles used for selector input (text field)
+		 */
+		textFieldClasses?: TextFieldProps["classes"];
+		/**
+		 * Custom styles used for selector input (text field input)
+		 */
+		textFieldInputClasses?:
+			| OutlinedInputProps["classes"]
+			| StandardInputProps["classes"];
+		/**
+		 * Display switch control?
+		 */
+		displaySwitch?: boolean;
+		/**
+		 * Default value for switch position
+		 */
+		defaultSwitchValue?: boolean;
+		/**
+		 * Label for switch control (only used if displaySwitch is truthy)
+		 */
+		switchLabel?: React.ReactNode;
+		/**
+		 * Last recently used (LRU) cache options
+		 * LRU shows the user the previous items he selected when no search term is entered
+		 */
+		lru?: SelectorLruOptions<DataT>;
+		/**
+		 * Enable freeSolo
+		 */
+		freeSolo?: boolean;
+		/**
+		 * Icon when no item is selected
+		 */
+		startAdornment?: InputProps["startAdornment"];
+		/**
+		 * Icon to show on the right of the selector
+		 * @remarks Must be IconButton with padding: 2px; margin-right: -2px applied to it
+		 */
+		endAdornment?: InputProps["endAdornment"];
+		/**
+		 * Like endAdornment, but on the left side of the drop-down arrow
+		 * @see endAdornment
+		 */
+		endAdornmentLeft?: InputProps["endAdornment"];
+		/**
+		 * Optional callback for customizing the unique identifier of data
+		 * @param data The data struct
+		 * @returns A unique ID extracted from data
+		 * @default returns data.value
+		 */
+		getIdOfData?: (data: DataT) => string;
+		/**
+		 * Ids to filter from options
+		 */
+		filterIds?: string[] | undefined;
+	};
 
 export type SelectorThemeExpert = {
 	base?: Partial<
-		Styles<Theme, BaseSelectorProps<BaseSelectorData>, AutocompleteClassKey>
+		Styles<
+			Theme,
+			BaseSelectorProps<BaseSelectorData, boolean>,
+			AutocompleteClassKey
+		>
 	>;
 	extensions?: Partial<
 		Styles<
 			Theme,
-			BaseSelectorProps<BaseSelectorData>,
+			BaseSelectorProps<BaseSelectorData, boolean>,
 			SelectorCustomStylesClassKey
 		>
 	>;
@@ -387,7 +420,7 @@ const useCustomDefaultSelectorStyles = makeStyles(
 );
 
 const useThemeStyles = makeThemeStyles<
-	BaseSelectorProps<BaseSelectorData>,
+	BaseSelectorProps<BaseSelectorData, boolean>,
 	AutocompleteClassKey
 >(
 	(theme) => theme.componentsCare?.uiKit?.baseSelectorExpert?.base,
@@ -416,7 +449,10 @@ const useCustomStylesBase = makeStyles(
 			marginTop: 0,
 		},
 		icon: (
-			props: Pick<BaseSelectorProps<BaseSelectorData>, "iconSize" | "label">,
+			props: Pick<
+				BaseSelectorProps<BaseSelectorData, boolean>,
+				"iconSize" | "label"
+			>,
 		) => ({
 			width: props.iconSize ?? 32,
 			height: props.iconSize ?? 32,
@@ -448,6 +484,12 @@ const useCustomStylesBase = makeStyles(
 		divider: {
 			width: "100%",
 		},
+		checkBoxStyle: {
+			borderRadius: 4,
+			width: 16,
+			height: 16,
+			marginRight: 10,
+		},
 	}),
 	{ name: "CcBaseSelectorCustomBase" },
 );
@@ -456,7 +498,7 @@ export type SelectorCustomStylesClassKey = keyof ReturnType<
 	typeof useCustomStylesBase
 >;
 const useCustomStyles = makeThemeStyles<
-	BaseSelectorProps<BaseSelectorData>,
+	BaseSelectorProps<BaseSelectorData, boolean>,
 	SelectorCustomStylesClassKey
 >(
 	(theme) => theme.componentsCare?.uiKit?.baseSelectorExpert?.extensions,
@@ -488,13 +530,14 @@ export interface BaseSelectorContextType {
 export const BaseSelectorContext =
 	React.createContext<BaseSelectorContextType | null>(null);
 
-const BaseSelector = <DataT extends BaseSelectorData>(
-	props: BaseSelectorProps<DataT>,
+const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
+	props: BaseSelectorProps<DataT, Multi>,
 ) => {
 	const {
 		variant,
 		refreshToken,
 		onSelect,
+		multiple,
 		selected,
 		label,
 		disabled,
@@ -533,7 +576,7 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 	const getId = getIdOfData ?? getIdDefault;
 
 	const classes = useThemeStyles(
-		props as unknown as BaseSelectorProps<BaseSelectorData>,
+		props as unknown as BaseSelectorProps<BaseSelectorData, boolean>,
 	);
 	const defaultSwitchValue = !!(
 		props.displaySwitch && props.defaultSwitchValue
@@ -542,7 +585,7 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 	const { t } = useCCTranslations();
 	const customClasses = useCustomStyles(
 		cleanClassMap(
-			props as unknown as BaseSelectorProps<BaseSelectorData>,
+			props as unknown as BaseSelectorProps<BaseSelectorData, boolean>,
 			true,
 		),
 	);
@@ -571,7 +614,12 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 	);
 
 	const defaultRenderer = useCallback(
-		(props: React.HTMLAttributes<HTMLLIElement>, data: BaseSelectorData) => {
+		(
+			props: React.HTMLAttributes<HTMLLIElement>,
+			data: BaseSelectorData,
+			state: AutocompleteRenderOptionState,
+		) => {
+			const { selected } = state;
 			if (data.isDivider)
 				return (
 					<Divider
@@ -604,6 +652,14 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 					])}
 					disabled={data.isDisabled}
 				>
+					{multiple && (
+						<SmallListItemIcon>
+							<Checkbox
+								checked={selected}
+								className={customClasses.checkBoxStyle}
+							/>
+						</SmallListItemIcon>
+					)}
 					{enableIcons && (
 						<SmallListItemIcon>{renderIcon(data.icon)}</SmallListItemIcon>
 					)}
@@ -623,10 +679,12 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 			);
 		},
 		[
+			multiple,
 			customClasses.divider,
 			customClasses.smallLabel,
 			customClasses.listItem,
 			customClasses.selected,
+			customClasses.checkBoxStyle,
 			enableIcons,
 			renderIcon,
 			t,
@@ -647,8 +705,12 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 	);
 
 	const onChangeHandler = useCallback(
-		async (data: DataT | NonNullable<DataT> | null) => {
-			if (!data || typeof data !== "object" || !("value" in data)) {
+		async (data: Multi extends true ? DataT[] : DataT | null) => {
+			if (
+				multiple
+					? !Array.isArray(data)
+					: !data || typeof data !== "object" || !("value" in data)
+			) {
 				if (data) {
 					// eslint-disable-next-line no-console
 					console.warn(
@@ -658,25 +720,38 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 					return;
 				}
 			}
+			const dataNormalized: DataT[] = multiple
+				? (data as DataT[])
+				: data
+					? [data as DataT]
+					: [];
+			const selectedNormalized: DataT[] = multiple
+				? selected
+				: selected
+					? [selected]
+					: [];
 			if (
-				data &&
-				"isAddNewButton" in data &&
-				(data as BaseSelectorData).isAddNewButton
+				dataNormalized.length > 0 &&
+				dataNormalized[dataNormalized.length - 1].isAddNewButton
 			) {
 				if (!onAddNew) return;
 				const created = await onAddNew();
 				if (!created) return;
 				setSelectorOptions((old) => [created, ...old]);
-				data = created;
+				dataNormalized[dataNormalized.length - 1] = created;
 			}
 			if (onSelect) {
-				onSelect(data);
-				if (data != null) {
-					addToLru(getId(data as DataT));
+				if (multiple) {
+					onSelect(dataNormalized);
+				} else {
+					onSelect(dataNormalized[0] ?? null);
+				}
+				if (dataNormalized.length > selectedNormalized.length) {
+					addToLru(getId(dataNormalized[dataNormalized.length - 1]));
 				}
 			}
 		},
-		[onSelect, onAddNew, addToLru, getId],
+		[onSelect, onAddNew, multiple, selected, addToLru, getId],
 	);
 
 	const context = useMemo<BaseSelectorContextType>(
@@ -854,6 +929,8 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 					<Autocomplete
 						id={autocompleteId}
 						classes={classes}
+						multiple={multiple}
+						disableCloseOnSelect={multiple}
 						open={open}
 						onOpen={() => {
 							setOpen(true);
@@ -871,10 +948,20 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 						selectOnFocus={!disableSearch}
 						options={
 							// add selected to selectorOptions if not present to suppress warnings
-							selected &&
-							!selectorOptions.find((option) => option.value === selected.value)
-								? selectorOptions.concat([selected])
-								: selectorOptions
+							multiple
+								? selectorOptions
+										.concat(selected)
+										.filter(
+											(entry, idx, arr) =>
+												arr.findIndex((data) => data.value === entry.value) ===
+												idx,
+										)
+								: selected &&
+									  !selectorOptions.find(
+											(option) => option.value === selected.value,
+									  )
+									? selectorOptions.concat([selected])
+									: selectorOptions
 						}
 						groupBy={
 							grouped
@@ -885,7 +972,7 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 						filterOptions={filterOptions}
 						value={selected}
 						inputValue={query}
-						blurOnSelect={true}
+						blurOnSelect={!multiple}
 						onInputChange={updateQuery}
 						popupIcon={<ExpandMore />}
 						freeSolo={freeSolo}
@@ -914,7 +1001,9 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 						getOptionDisabled={getOptionDisabled}
 						isOptionEqualToValue={getOptionSelected}
 						onChange={(_event, selectedValue) =>
-							onChangeHandler(selectedValue as DataT)
+							onChangeHandler(
+								selectedValue as Multi extends true ? DataT[] : DataT | null,
+							)
 						}
 						renderInput={(params: AutocompleteRenderInputParams) => {
 							// eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -927,15 +1016,22 @@ const BaseSelector = <DataT extends BaseSelectorData>(
 									inputProps={{
 										...params.inputProps,
 										readOnly: disableSearch,
-										title: selected ? getStringLabel(selected) : undefined,
+										title:
+											selected && !multiple
+												? getStringLabel(selected)
+												: undefined,
+										value: multiple
+											? selected.map((sel) => sel.label).join(", ")
+											: params.inputProps.value,
 									}}
 									InputProps={{
 										...InputProps,
 										classes: textFieldInputClasses,
 										readOnly: disableSearch,
 										startAdornment:
-											(enableIcons ? renderIcon(selected?.icon) : undefined) ??
-											startAdornment,
+											(enableIcons && !multiple
+												? renderIcon(selected?.icon)
+												: undefined) ?? startAdornment,
 										endAdornment: (() => {
 											const hasAdditionalElements =
 												openInfo || endAdornment || endAdornmentLeft;

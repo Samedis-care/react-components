@@ -22,7 +22,7 @@ export interface BackendSingleSelectProps<
 	VisibilityT extends PageVisibility,
 	CustomT,
 > extends Omit<
-		BaseSelectorProps<BaseSelectorData>,
+		BaseSelectorProps<BaseSelectorData, false>,
 		"onLoad" | "selected" | "onSelect" | "lru"
 	> {
 	/**

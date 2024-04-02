@@ -14,7 +14,6 @@ import {
 	HowToBoxClassKey,
 	HowToBoxProps,
 	MultiSelectTheme,
-	MultiSelectWithCheckBoxTheme,
 	SelectorTheme,
 	SelectorThemeExpert,
 } from "./standalone";
@@ -97,7 +96,6 @@ export interface ComponentsCareTheme {
 	};
 	selector?: SelectorTheme;
 	multiSelect?: MultiSelectTheme;
-	selectorWithCheckbox?: MultiSelectWithCheckBoxTheme;
 	uiKit?: {
 		label?: ComponentWithLabelTheme;
 		checkbox?: CheckboxTheme;

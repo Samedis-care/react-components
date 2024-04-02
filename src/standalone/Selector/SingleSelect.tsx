@@ -5,7 +5,7 @@ import BaseSelector, {
 } from "./BaseSelector";
 
 const SingleSelect = <DataT extends BaseSelectorData>(
-	props: BaseSelectorProps<DataT>,
+	props: BaseSelectorProps<DataT, false>,
 ) => {
 	return <BaseSelector {...props} />;
 };

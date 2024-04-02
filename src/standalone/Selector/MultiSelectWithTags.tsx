@@ -18,7 +18,7 @@ export interface MultiSelectWithTagsProps<
 	DataT extends MultiSelectorData,
 	GroupT extends BaseSelectorData,
 > extends Pick<
-			BaseSelectorProps<GroupT>,
+			BaseSelectorProps<GroupT, false>,
 			| "disabled"
 			| "noOptionsText"
 			| "loadingText"

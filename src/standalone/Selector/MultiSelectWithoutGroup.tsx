@@ -16,7 +16,7 @@ import makeStyles from "@mui/styles/makeStyles";
 
 export interface MultiSelectWithoutGroupProps<DataT extends MultiSelectorData>
 	extends Omit<
-		BaseSelectorProps<DataT>,
+		BaseSelectorProps<DataT, false>,
 		"onSelect" | "selected" | "classes" | "onLoad"
 	> {
 	// UI Props
