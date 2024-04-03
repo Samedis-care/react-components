@@ -6,26 +6,23 @@ import React, {
 	useRef,
 	useState,
 } from "react";
-import { UseDropZoneParams } from "../../../utils/useDropZone";
-import makeStyles from "@mui/styles/makeStyles";
+import useDropZone, { UseDropZoneParams } from "../../../utils/useDropZone";
 import {
 	Dialog,
 	DialogContent,
 	IconButton,
-	Theme,
+	styled,
 	Tooltip,
+	useThemeProps,
 } from "@mui/material";
 import {
-	Close as CloseIcon,
 	ArrowBack as PrevIcon,
 	ArrowForward as NextIcon,
+	Close as CloseIcon,
 	Delete as DeleteIcon,
 } from "@mui/icons-material";
 import combineClassNames from "../../../utils/combineClassNames";
-import makeThemeStyles from "../../../utils/makeThemeStyles";
 import { useDebounce } from "../../../utils/useDebounce";
-import useDropZone from "../../../utils/useDropZone";
-import { ClassNameMap, Styles } from "@mui/styles/withStyles";
 import ImageDots, { ImageDotsProps } from "./ImageDots";
 
 export interface ImageBoxProps {
@@ -73,9 +70,13 @@ export interface ImageBoxProps {
 	 */
 	disableBackground?: boolean;
 	/**
+	 * Custom CSS styles to apply to root
+	 */
+	className?: string;
+	/**
 	 * Custom CSS styles
 	 */
-	classes?: ClassNameMap<keyof ReturnType<typeof useStyles>>;
+	classes?: Partial<Record<ImageBoxClassKey, string>>;
 	/**
 	 * Image dots props (set to enable image props)
 	 */
@@ -84,115 +85,153 @@ export interface ImageBoxProps {
 
 const swipeWidth = 30;
 
-const useStyles = makeStyles(
-	(theme) => ({
-		root: {
-			borderRadius: theme.shape.borderRadius,
-			position: "relative",
-			height: "100%",
-			"& button": {
-				visibility: "hidden",
-				opacity: 0,
-				transition: "visibility 0s linear 300ms, opacity 300ms",
-			},
-			"&:hover button": {
-				visibility: "visible",
-				opacity: 1,
-				transition: "visibility 0s linear 0s, opacity 300ms",
-			},
-		},
-		swipeListener: {
-			height: "100%",
-			width: "100%",
-			overflowX: "auto",
-			overflowY: "hidden",
-			scrollbarWidth: "none",
-			msOverflowStyle: "none",
-			"&::-webkit-scrollbar": {
-				display: "none",
-			},
-		},
-		background: {
-			backgroundColor: theme.palette.secondary.light,
-		},
-		clickable: {
-			cursor: "pointer",
-		},
-		dragging: {
-			border: `1px solid ${theme.palette.primary.main}`,
-		},
-		fullScreenImageWrapper: {
-			width: "100%",
-			height: "100%",
-			position: "relative",
-		},
-		image: {
-			width: "100%",
-			left: swipeWidth,
+export interface ImageBoxRootOwnerState {
+	background: boolean;
+	dragging: boolean;
+	clickable: boolean;
+}
+const Root = styled("div", { name: "CcImageBox", slot: "root" })<{
+	ownerState: ImageBoxRootOwnerState;
+}>(({ theme, ownerState: { background, dragging, clickable } }) => ({
+	borderRadius: theme.shape.borderRadius,
+	position: "relative",
+	height: "100%",
+	"& button": {
+		visibility: "hidden",
+		opacity: 0,
+		transition: "visibility 0s linear 300ms, opacity 300ms",
+	},
+	"&:hover button": {
+		visibility: "visible",
+		opacity: 1,
+		transition: "visibility 0s linear 0s, opacity 300ms",
+	},
+	...(background && {
+		backgroundColor: theme.palette.secondary.light,
+	}),
+	...(dragging && {
+		border: `1px solid ${theme.palette.primary.main}`,
+	}),
+	...(clickable && {
+		cursor: "pointer",
+	}),
+}));
+
+const RemoveButton = styled(IconButton, {
+	name: "CcImageBox",
+	slot: "removeBtn",
+})(({ theme }) => ({
+	padding: theme.spacing(1),
+	position: "absolute",
+	top: 0,
+	right: 0,
+}));
+
+const PrevButton = styled(IconButton, { name: "CcImageBox", slot: "prevBtn" })({
+	position: "absolute",
+	top: "50%",
+	left: 0,
+	transform: "translateY(-50%)",
+});
+
+const NextButton = styled(IconButton, { name: "CcImageBox", slot: "nextBtn" })({
+	position: "absolute",
+	top: "50%",
+	right: 0,
+	transform: "translateY(-50%)",
+});
+
+const SwipeListener = styled("div", {
+	name: "CcImageBox",
+	slot: "swipeListener",
+})({
+	height: "100%",
+	width: "100%",
+	overflowX: "auto",
+	overflowY: "hidden",
+	scrollbarWidth: "none",
+	msOverflowStyle: "none",
+	"&::-webkit-scrollbar": {
+		display: "none",
+	},
+});
+
+export interface ImageBoxStyledImageOwnerState {
+	swipeLeft: boolean;
+	swipeRight: boolean;
+	imageDots: boolean;
+}
+const StyledImage = styled("img", { name: "CcImageBox", slot: "image" })<{
+	ownerState: ImageBoxStyledImageOwnerState;
+}>(({ theme, ownerState: { swipeLeft, swipeRight, imageDots } }) => ({
+	width: "100%",
+	left: swipeWidth,
+	marginLeft: swipeWidth,
+	marginRight: swipeWidth,
+	height: "100%",
+	objectFit: "contain",
+	borderRadius: theme.shape.borderRadius,
+	...(swipeLeft &&
+		!swipeRight && {
 			marginLeft: swipeWidth,
-			marginRight: swipeWidth,
-			height: "100%",
-			objectFit: "contain",
-			borderRadius: theme.shape.borderRadius,
-		},
-		imageSwipeLeft: {
-			marginLeft: swipeWidth,
-		},
-		imageSwipeRight: {
+		}),
+	...(swipeRight &&
+		!swipeLeft && {
 			marginLeft: 0,
 			marginRight: swipeWidth,
-		},
-		imageSwipeNone: {
+		}),
+	...(!swipeRight &&
+		!swipeLeft && {
 			marginLeft: 0,
 			marginRight: 0,
-		},
-		imageWithDots: {
-			height: "calc(100% - 48px)",
-		},
-		removeBtn: {
-			padding: theme.spacing(1),
-			position: "absolute",
-			top: 0,
-			right: 0,
-		},
-		prevBtn: {
-			position: "absolute",
-			top: "50%",
-			left: 0,
-			transform: "translateY(-50%)",
-		},
-		nextBtn: {
-			position: "absolute",
-			top: "50%",
-			right: 0,
-			transform: "translateY(-50%)",
-		},
-		imageDotsWrapper: {
-			position: "absolute",
-			bottom: 16,
-			left: "50%",
-			height: 16,
-			transform: "translateX(-50%)",
-		},
-		imageDotsContainer: {
-			position: "unset",
-			overflow: "unset",
-		},
+		}),
+	...(imageDots && {
+		height: "calc(100% - 48px)",
 	}),
-	{ name: "CcImageBox" },
-);
+}));
 
-export type ImageBoxClassKey = keyof ReturnType<typeof useStyles>;
+const FullScreenImageWrapper = styled("div", {
+	name: "CcImageBox",
+	slot: "fullScreenImageWrapper",
+})({
+	width: "100%",
+	height: "100%",
+	position: "relative",
+});
 
-export type ImageBoxTheme = Partial<
-	Styles<Theme, ImageBoxProps, ImageBoxClassKey>
->;
+const ImageDotsWrapper = styled("div", {
+	name: "CcImageBox",
+	slot: "imageDotsWrapper",
+})({
+	position: "absolute",
+	bottom: 16,
+	left: "50%",
+	height: 16,
+	transform: "translateX(-50%)",
+});
 
-const useThemeStyles = makeThemeStyles<ImageBoxProps, ImageBoxClassKey>(
-	(theme) => theme.componentsCare?.fileUpload?.multiImage?.imageBox,
-	"CcImageBox",
-	useStyles,
-);
+const StyledImageDots = styled(ImageDots, {
+	name: "CcImageBox",
+	slot: "imageDots",
+})({
+	position: "unset",
+	overflow: "unset",
+	"& .CcImageDots-container": {
+		position: "unset",
+		overflow: "unset",
+	},
+});
+
+export type ImageBoxClassKey =
+	| "root"
+	| "removeBtn"
+	| "prevBtn"
+	| "nextBtn"
+	| "swipeListener"
+	| "image"
+	| "fullScreenImageWrapper"
+	| "imageDotsWrapper"
+	| "imageDots";
 
 const useScrollSwipe = (
 	params: Pick<ImageBoxProps, "onPrevImage" | "onNextImage">,
@@ -254,7 +293,8 @@ const useScrollSwipe = (
 	return { containerRef, handleScroll, handleTouchEnd: handleResetScroll };
 };
 
-const ImageBox = (props: ImageBoxProps) => {
+const ImageBox = (inProps: ImageBoxProps) => {
+	const props = useThemeProps({ props: inProps, name: "CcImageBox" });
 	const {
 		image,
 		width,
@@ -267,8 +307,9 @@ const ImageBox = (props: ImageBoxProps) => {
 		disableBackground,
 		fileName,
 		imageDots,
+		className,
+		classes,
 	} = props;
-	const classes = useThemeStyles(props);
 	const { handleDragOver, handleDrop, dragging } = useDropZone(onFilesDropped);
 	const [dialogOpen, setDialogOpen] = useState(false);
 
@@ -313,47 +354,47 @@ const ImageBox = (props: ImageBoxProps) => {
 
 	return (
 		<>
-			<div
+			<Root
 				onClick={onClick === null ? undefined : onClick ?? openDialog}
 				onDragOver={handleDragOver}
 				onDrop={handleDrop}
 				style={{ width, height }}
-				className={combineClassNames([
-					classes.root,
-					!disableBackground && classes.background,
-					dragging && classes.dragging,
-					onClick !== null && classes.clickable,
-				])}
+				ownerState={{
+					clickable: !!onClick,
+					dragging,
+					background: !disableBackground,
+				}}
+				className={combineClassNames([className, classes?.root])}
 			>
 				{onRemove && (
-					<IconButton
+					<RemoveButton
 						onClick={handleRemove}
-						className={classes.removeBtn}
+						className={classes?.removeBtn}
 						size="large"
 					>
 						<DeleteIcon />
-					</IconButton>
+					</RemoveButton>
 				)}
 				{onPrevImage && (
-					<IconButton
+					<PrevButton
 						onClick={handlePrevImage}
-						className={classes.prevBtn}
+						className={classes?.prevBtn}
 						size="large"
 					>
 						<PrevIcon />
-					</IconButton>
+					</PrevButton>
 				)}
 				{onNextImage && (
-					<IconButton
+					<NextButton
 						onClick={handleNextImage}
-						className={classes.nextBtn}
+						className={classes?.nextBtn}
 						size="large"
 					>
 						<NextIcon />
-					</IconButton>
+					</NextButton>
 				)}
-				<div
-					className={classes.swipeListener}
+				<SwipeListener
+					className={classes?.swipeListener}
 					onScroll={handleScrollImage}
 					ref={containerRefImage}
 					onTouchEnd={handleTouchEndImage}
@@ -364,78 +405,77 @@ const ImageBox = (props: ImageBoxProps) => {
 						disableHoverListener={!fileName}
 						disableFocusListener={!fileName}
 					>
-						<img
+						<StyledImage
 							src={image}
 							alt={""}
-							className={combineClassNames([
-								classes.image,
-								onNextImage && !onPrevImage && classes.imageSwipeRight,
-								!onNextImage && onPrevImage && classes.imageSwipeLeft,
-								!onNextImage && !onPrevImage && classes.imageSwipeNone,
-							])}
+							ownerState={{
+								swipeLeft: !!onPrevImage,
+								swipeRight: !!onNextImage,
+								imageDots: false,
+							}}
+							className={classes?.image}
 						/>
 					</Tooltip>
-				</div>
-			</div>
+				</SwipeListener>
+			</Root>
 			{!onClick && (
 				<Dialog open={dialogOpen} fullScreen onClose={closeDialog}>
 					<DialogContent>
-						<div className={classes.fullScreenImageWrapper}>
-							<div
-								className={classes.swipeListener}
+						<FullScreenImageWrapper className={classes?.fullScreenImageWrapper}>
+							<SwipeListener
+								className={classes?.swipeListener}
 								onScroll={handleScrollFS}
 								ref={containerRefFS}
 								onTouchEnd={handleTouchEndFS}
 							>
-								<img
+								<StyledImage
 									src={image}
 									alt={""}
-									className={combineClassNames([
-										classes.image,
-										onNextImage && !onPrevImage && classes.imageSwipeRight,
-										!onNextImage && onPrevImage && classes.imageSwipeLeft,
-										!onNextImage && !onPrevImage && classes.imageSwipeNone,
-										imageDots && classes.imageWithDots,
-									])}
+									ownerState={{
+										swipeLeft: !!onPrevImage,
+										swipeRight: !!onNextImage,
+										imageDots: !imageDots,
+									}}
+									className={classes?.image}
 								/>
-							</div>
-							<IconButton
+							</SwipeListener>
+							<RemoveButton
 								onClick={closeDialog}
-								className={classes.removeBtn}
+								className={classes?.removeBtn}
 								size="large"
 							>
 								<CloseIcon />
-							</IconButton>
+							</RemoveButton>
 							{onPrevImage && (
-								<IconButton
+								<PrevButton
 									onClick={handlePrevImage}
-									className={classes.prevBtn}
+									className={classes?.prevBtn}
 									size="large"
 								>
 									<PrevIcon />
-								</IconButton>
+								</PrevButton>
 							)}
 							{onNextImage && (
-								<IconButton
+								<NextButton
 									onClick={handleNextImage}
-									className={classes.nextBtn}
+									className={classes?.nextBtn}
 									size="large"
 								>
 									<NextIcon />
-								</IconButton>
+								</NextButton>
 							)}
 							{imageDots && (
-								<div className={classes.imageDotsWrapper}>
-									<ImageDots
+								<ImageDotsWrapper className={classes?.imageDotsWrapper}>
+									<StyledImageDots
 										{...imageDots}
-										classes={{
-											imageDotContainer: classes.imageDotsContainer,
-											imageDotContainerContainer: classes.imageDotsContainer,
-										}}
+										className={combineClassNames([
+											classes?.imageDots,
+											imageDots.className,
+										])}
 									/>
-								</div>
+								</ImageDotsWrapper>
 							)}
-						</div>
+						</FullScreenImageWrapper>
 					</DialogContent>
 				</Dialog>
 			)}

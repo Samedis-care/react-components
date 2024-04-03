@@ -1,6 +1,6 @@
 import React, { useCallback } from "react";
 import ImageBox, { ImageBoxProps } from "./ImageBox";
-import { Box, Grid, Theme, Typography } from "@mui/material";
+import { Box, Grid, styled, Typography, useThemeProps } from "@mui/material";
 import {
 	Star as StarredIcon,
 	StarOutline as NotStarredIcon,
@@ -11,11 +11,8 @@ import {
 	MultiImageProcessFile,
 	MultiImageProps,
 } from "./MultiImage";
-import { Styles } from "@mui/styles";
-import makeStyles from "@mui/styles/makeStyles";
 import useCCTranslations from "../../../utils/useCCTranslations";
-import makeThemeStyles from "../../../utils/makeThemeStyles";
-import { ClassNameMap } from "@mui/styles/withStyles";
+import combineClassNames from "../../../utils/combineClassNames";
 
 export interface ImageDialogEntryProps
 	extends Pick<MultiImageProps, "previewSize"> {
@@ -45,9 +42,13 @@ export interface ImageDialogEntryProps
 	 */
 	onDelete?: MultiImageProps["onDelete"];
 	/**
+	 * Custom CSS class to apply to root
+	 */
+	className?: string;
+	/**
 	 * Custom CSS styles
 	 */
-	classes?: ClassNameMap<ImageDialogEntryClassKey>;
+	classes?: Partial<Record<ImageDialogEntryClassKey, string>>;
 	/**
 	 * Nested custom CSS styles
 	 */
@@ -56,31 +57,22 @@ export interface ImageDialogEntryProps
 	};
 }
 
-const useStyles = makeStyles(
-	{
-		clickable: {
-			cursor: "pointer",
-		},
-	},
-	{ name: "CcImageDialogEntry" },
-);
+const Root = styled(Grid, { name: "CcImageDialogEntry", slot: "root" })({});
+const MakePrimary = styled(Grid, {
+	name: "CcImageDialogEntry",
+	slot: "makePrimary",
+})({
+	cursor: "pointer",
+});
+const IsPrimary = styled(Grid, {
+	name: "CcImageDialogEntry",
+	slot: "isPrimary",
+})({});
 
-export type ImageDialogEntryClassKey = keyof ReturnType<typeof useStyles>;
+export type ImageDialogEntryClassKey = "root" | "makePrimary" | "isPrimary";
 
-export type ImageDialogEntryTheme = Partial<
-	Styles<Theme, ImageDialogEntryProps, ImageDialogEntryClassKey>
->;
-
-const useThemeStyles = makeThemeStyles<
-	ImageDialogEntryProps,
-	ImageDialogEntryClassKey
->(
-	(theme) => theme.componentsCare?.fileUpload?.multiImage?.imageDialogEntry,
-	"CcImageDialogEntry",
-	useStyles,
-);
-
-const ImageDialogEntry = (props: ImageDialogEntryProps) => {
+const ImageDialogEntry = (inProps: ImageDialogEntryProps) => {
+	const props = useThemeProps({ props: inProps, name: "CcImageDialogEntry" });
 	const {
 		previewSize,
 		img,
@@ -90,9 +82,10 @@ const ImageDialogEntry = (props: ImageDialogEntryProps) => {
 		processFile,
 		subClasses,
 		onDelete,
+		className,
+		classes,
 	} = props;
 	const { t } = useCCTranslations();
-	const classes = useThemeStyles(props);
 
 	const setPrimary = useCallback(() => {
 		changePrimary(img.id);
@@ -126,12 +119,15 @@ const ImageDialogEntry = (props: ImageDialogEntryProps) => {
 		[changeImages, img, processFile],
 	);
 
+	const PrimaryComp = isPrimary ? IsPrimary : MakePrimary;
+
 	return (
-		<Grid
+		<Root
 			item
 			xs={previewSize ? undefined : 12}
 			md={previewSize ? undefined : 6}
 			lg={previewSize ? undefined : 3}
+			className={combineClassNames([className, classes?.root])}
 		>
 			<div>
 				<ImageBox
@@ -145,12 +141,12 @@ const ImageDialogEntry = (props: ImageDialogEntryProps) => {
 				/>
 			</div>
 			<Box mt={1}>
-				<Grid
+				<PrimaryComp
 					container
 					spacing={1}
 					alignItems={"center"}
 					justifyContent={"flex-start"}
-					className={isPrimary ? undefined : classes.clickable}
+					className={isPrimary ? classes?.isPrimary : classes?.makePrimary}
 					onClick={isPrimary ? undefined : setPrimary}
 				>
 					<Grid item>
@@ -161,9 +157,9 @@ const ImageDialogEntry = (props: ImageDialogEntryProps) => {
 							{t("standalone.file-upload.multi-image.primary")}
 						</Typography>
 					</Grid>
-				</Grid>
+				</PrimaryComp>
 			</Box>
-		</Grid>
+		</Root>
 	);
 };
 

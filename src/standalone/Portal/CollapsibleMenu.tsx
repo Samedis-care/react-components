@@ -1,7 +1,6 @@
 import React, { CSSProperties, useCallback, useState } from "react";
-import { Grid, GridProps, IconButton, IconButtonProps } from "@mui/material";
+import { Grid, IconButton, styled, useThemeProps } from "@mui/material";
 import { DoubleArrow } from "@mui/icons-material";
-import makeStyles from "@mui/styles/makeStyles";
 import { usePortalLayoutContext } from "./Layout";
 import combineClassNames from "../../utils/combineClassNames";
 
@@ -11,48 +10,64 @@ export interface CollapsibleMenuProps {
 	 */
 	children: React.ReactNode;
 	/**
-	 * Custom styles for some child components
-	 */
-	customClasses?: {
-		root?: GridProps["className"];
-		button?: IconButtonProps["className"];
-	};
-	/**
 	 * Width of the menu (excluding collapse area)
 	 */
 	width?: CSSProperties["width"];
 	/**
+	 * CSS class name
+	 */
+	className?: string;
+	/**
 	 * Custom styles (for collapse)
 	 */
-	classes?: Partial<ReturnType<typeof useStyles>>;
+	classes?: Partial<Record<CollapsibleMenuClassKey, string>>;
 }
 
-const useStyles = makeStyles(
-	{
-		container: {
-			width: "100%",
-			height: "100%",
-			overflow: "auto",
-		},
-		content: {
-			"& > div": {
-				overflow: "unset",
-			},
-		},
-		bar: {
-			position: "sticky",
-			top: 0,
-		},
-		iconOpen: {},
-		iconClose: {
-			transform: "rotate(180deg)",
-		},
-	},
-	{ name: "CcPortal" },
-);
+const Root = styled(Grid, { name: "CcCollapsibleMenu", slot: "root" })({
+	width: "100%",
+	height: "100%",
+	overflow: "auto",
+});
 
-const CollapsibleMenu = (props: CollapsibleMenuProps) => {
-	const classes = useStyles(props);
+const Content = styled(Grid, { name: "CcCollapsibleMenu", slot: "content" })({
+	"& > div": {
+		overflow: "unset",
+	},
+});
+
+const Bar = styled(Grid, { name: "CcCollapsibleMenu", slot: "bar" })({
+	position: "sticky",
+	top: 0,
+});
+
+const IconOpen = styled(DoubleArrow, {
+	name: "CcCollapsibleMenu",
+	slot: "iconOpen",
+})({});
+const IconClose = styled(DoubleArrow, {
+	name: "CcCollapsibleMenu",
+	slot: "iconClose",
+})({
+	transform: "rotate(180deg)",
+});
+
+const StyledButton = styled(IconButton, {
+	name: "CcCollapsibleMenu",
+	slot: "button",
+})({});
+
+export type CollapsibleMenuClassKey =
+	| "root"
+	| "content"
+	| "bar"
+	| "iconOpen"
+	| "iconClose"
+	| "button";
+
+const CollapsibleMenu = (inProps: CollapsibleMenuProps) => {
+	const props = useThemeProps({ props: inProps, name: "CcCollapsibleMenu" });
+	const { classes, className } = props;
+
 	const [collapsed, setCollapsed] = useState(false);
 	const { mobile } = usePortalLayoutContext();
 
@@ -61,41 +76,40 @@ const CollapsibleMenu = (props: CollapsibleMenuProps) => {
 		[setCollapsed],
 	);
 
+	const ArrowComp = collapsed ? IconOpen : IconClose;
+
 	return (
-		<Grid
+		<Root
 			container
 			justifyContent={"flex-start"}
 			alignItems={"stretch"}
 			wrap={"nowrap"}
 			style={collapsed ? { overflow: "visible" } : undefined} // this is needed to force update the scrollbar, otherwise we're wasting space with a scrollbar placeholder
-			className={combineClassNames([
-				classes.container,
-				props.customClasses?.root,
-			])}
+			className={combineClassNames([className, classes?.root])}
 		>
-			<Grid
+			<Content
 				item
 				xs
 				style={{ width: props.width, display: collapsed ? "none" : undefined }}
-				className={classes.content}
+				className={classes?.content}
 				key={"content"}
 			>
 				{props.children}
-			</Grid>
+			</Content>
 			{!mobile && (
-				<Grid item key={"bar"} className={classes.bar}>
-					<IconButton
+				<Bar item key={"bar"} className={classes?.bar}>
+					<StyledButton
 						onClick={toggleCollapsed}
-						className={props.customClasses?.button}
+						className={classes?.button}
 						size="large"
 					>
-						<DoubleArrow
-							className={collapsed ? classes.iconOpen : classes.iconClose}
+						<ArrowComp
+							className={collapsed ? classes?.iconOpen : classes?.iconClose}
 						/>
-					</IconButton>
-				</Grid>
+					</StyledButton>
+				</Bar>
 			)}
-		</Grid>
+		</Root>
 	);
 };
 
