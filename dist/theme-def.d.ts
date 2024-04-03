@@ -4,9 +4,6 @@ import { MenuItemTheme } from "./standalone/Portal/MenuItem/Material";
 import { FileUploadProps } from "./standalone/FileUpload/Generic";
 import { ImageSelectorProps } from "./standalone/FileUpload/Image/ImageSelector";
 import { MultiImageTheme } from "./standalone/FileUpload/MultiImage/MultiImage";
-import { ImageBoxTheme } from "./standalone/FileUpload/MultiImage/ImageBox";
-import { ImageDialogEntryTheme } from "./standalone/FileUpload/MultiImage/ImageDialogEntry";
-import { ImageDotsTheme } from "./standalone/FileUpload/MultiImage/ImageDots";
 import { BaseSelectorClassKey, BaseSelectorData, BaseSelectorProps, HowToBoxClassKey, HowToBoxProps, MultiSelectClassKey, MultiSelectorData, MultiSelectProps } from "./standalone";
 import { ComponentWithLabelTheme } from "./standalone/UIKit/ComponentWithLabel";
 import { CheckboxTheme } from "./standalone/UIKit/Checkbox";
@@ -28,6 +25,10 @@ import { InfoBoxClassKey, InfoBoxProps } from "./standalone/InfoBox";
 import { SignalPortletItemClassKey, SignalPortletItemProps } from "./standalone/SignalPortlet/SignalPortletItem";
 import { InlineSwitchClassKey, InlineSwitchProps } from "./standalone/InlineSwitch";
 import { MultiSelectEntryClassKey, MultiSelectEntryProps } from "./standalone/Selector/MultiSelectEntry";
+import { ImageDotsClassKey, ImageDotsProps } from "./standalone/FileUpload/MultiImage/ImageDots";
+import { ImageBoxClassKey, ImageBoxProps } from "./standalone/FileUpload/MultiImage/ImageBox";
+import { ImageDialogEntryClassKey, ImageDialogEntryProps } from "./standalone/FileUpload/MultiImage/ImageDialogEntry";
+import { CollapsibleMenuClassKey, CollapsibleMenuProps } from "./standalone/Portal/CollapsibleMenu";
 export interface ComponentsCareTheme {
     dataGrid?: DataGridTheme;
     dataGridExpert?: DataGridThemeExpert;
@@ -44,9 +45,6 @@ export interface ComponentsCareTheme {
         };
         multiImage?: {
             root?: MultiImageTheme;
-            imageBox?: ImageBoxTheme;
-            imageDialogEntry?: ImageDialogEntryTheme;
-            dots?: ImageDotsTheme;
         };
     };
     uiKit?: {
@@ -86,6 +84,10 @@ declare module "@mui/material/styles" {
         CcBaseSelector: BaseSelectorClassKey;
         CcMultiSelectEntry: MultiSelectEntryClassKey;
         CcMultiSelect: MultiSelectClassKey;
+        CcImageDots: ImageDotsClassKey;
+        CcImageBox: ImageBoxClassKey;
+        CcImageDialogEntry: ImageDialogEntryClassKey;
+        CcCollapsibleMenu: CollapsibleMenuClassKey;
     }
     interface ComponentsPropsList {
         CcSignalPortlet: Partial<SignalPortletProps>;
@@ -107,6 +109,10 @@ declare module "@mui/material/styles" {
         CcBaseSelector: Partial<BaseSelectorProps<BaseSelectorData, never>>;
         CcMultiSelectEntry: Partial<MultiSelectEntryProps<MultiSelectorData>>;
         CcMultiSelect: Partial<MultiSelectProps<MultiSelectorData>>;
+        CcImageDots: Partial<ImageDotsProps>;
+        CcImageBox: Partial<ImageBoxProps>;
+        CcImageDialogEntry: Partial<ImageDialogEntryProps>;
+        CcCollapsibleMenu: Partial<CollapsibleMenuProps>;
     }
     interface Components {
         CcSignalPortlet?: {
@@ -203,6 +209,26 @@ declare module "@mui/material/styles" {
             defaultProps?: ComponentsPropsList["CcMultiSelect"];
             styleOverrides?: ComponentsOverrides<Theme>["CcMultiSelect"];
             variants?: ComponentsVariants["CcMultiSelect"];
+        };
+        CcImageDots?: {
+            defaultProps?: ComponentsPropsList["CcImageDots"];
+            styleOverrides?: ComponentsOverrides<Theme>["CcImageDots"];
+            variants?: ComponentsVariants["CcImageDots"];
+        };
+        CcImageBox?: {
+            defaultProps?: ComponentsPropsList["CcImageBox"];
+            styleOverrides?: ComponentsOverrides<Theme>["CcImageBox"];
+            variants?: ComponentsVariants["CcImageBox"];
+        };
+        CcImageDialogEntry?: {
+            defaultProps?: ComponentsPropsList["CcImageDialogEntry"];
+            styleOverrides?: ComponentsOverrides<Theme>["CcImageDialogEntry"];
+            variants?: ComponentsVariants["CcImageDialogEntry"];
+        };
+        CcCollapsibleMenu?: {
+            defaultProps?: ComponentsPropsList["CcCollapsibleMenu"];
+            styleOverrides?: ComponentsOverrides<Theme>["CcCollapsibleMenu"];
+            variants?: ComponentsVariants["CcCollapsibleMenu"];
         };
     }
 }

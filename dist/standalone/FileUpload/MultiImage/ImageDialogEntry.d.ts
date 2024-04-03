@@ -1,9 +1,6 @@
 import React from "react";
 import { ImageBoxProps } from "./ImageBox";
-import { Theme } from "@mui/material";
 import { MultiImageImage, MultiImageManipulationCallback, MultiImageProcessFile, MultiImageProps } from "./MultiImage";
-import { Styles } from "@mui/styles";
-import { ClassNameMap } from "@mui/styles/withStyles";
 export interface ImageDialogEntryProps extends Pick<MultiImageProps, "previewSize"> {
     /**
      * The image
@@ -31,9 +28,13 @@ export interface ImageDialogEntryProps extends Pick<MultiImageProps, "previewSiz
      */
     onDelete?: MultiImageProps["onDelete"];
     /**
+     * Custom CSS class to apply to root
+     */
+    className?: string;
+    /**
      * Custom CSS styles
      */
-    classes?: ClassNameMap<ImageDialogEntryClassKey>;
+    classes?: Partial<Record<ImageDialogEntryClassKey, string>>;
     /**
      * Nested custom CSS styles
      */
@@ -41,8 +42,6 @@ export interface ImageDialogEntryProps extends Pick<MultiImageProps, "previewSiz
         imageBox?: ImageBoxProps["classes"];
     };
 }
-declare const useStyles: (props?: any) => ClassNameMap<"clickable">;
-export type ImageDialogEntryClassKey = keyof ReturnType<typeof useStyles>;
-export type ImageDialogEntryTheme = Partial<Styles<Theme, ImageDialogEntryProps, ImageDialogEntryClassKey>>;
-declare const _default: React.MemoExoticComponent<(props: ImageDialogEntryProps) => React.JSX.Element>;
+export type ImageDialogEntryClassKey = "root" | "makePrimary" | "isPrimary";
+declare const _default: React.MemoExoticComponent<(inProps: ImageDialogEntryProps) => React.JSX.Element>;
 export default _default;

@@ -1,7 +1,4 @@
 import React from "react";
-import { Theme } from "@mui/material";
-import { Styles } from "@mui/styles";
-import { ClassNameMap } from "@mui/styles/withStyles";
 export interface ImageDotsProps {
     /**
      * Total number of images
@@ -17,12 +14,14 @@ export interface ImageDotsProps {
      */
     setActive: (active: number) => void;
     /**
+     * CSS class for root
+     */
+    className?: string;
+    /**
      * Optional style overrides
      */
-    classes?: Partial<ClassNameMap<keyof ReturnType<typeof useStyles>>>;
+    classes?: Partial<Record<ImageDotsClassKey, string>>;
 }
-declare const useStyles: (props?: any) => ClassNameMap<"activeImageDot" | "imageDot" | "imageDotContainerContainer" | "imageDotContainer">;
-export type ImageDotsClassKey = keyof ReturnType<typeof useStyles>;
-export type ImageDotsTheme = Partial<Styles<Theme, ImageDotsProps, ImageDotsClassKey>>;
-declare const _default: React.MemoExoticComponent<(props: ImageDotsProps) => React.JSX.Element>;
+export type ImageDotsClassKey = "root" | "container" | "imageDot";
+declare const _default: React.MemoExoticComponent<(inProps: ImageDotsProps) => React.JSX.Element>;
 export default _default;

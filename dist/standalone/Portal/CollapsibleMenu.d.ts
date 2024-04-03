@@ -1,26 +1,22 @@
 import React, { CSSProperties } from "react";
-import { GridProps, IconButtonProps } from "@mui/material";
 export interface CollapsibleMenuProps {
     /**
      * The actual menu (Menu/RoutedMenu)
      */
     children: React.ReactNode;
     /**
-     * Custom styles for some child components
-     */
-    customClasses?: {
-        root?: GridProps["className"];
-        button?: IconButtonProps["className"];
-    };
-    /**
      * Width of the menu (excluding collapse area)
      */
     width?: CSSProperties["width"];
     /**
+     * CSS class name
+     */
+    className?: string;
+    /**
      * Custom styles (for collapse)
      */
-    classes?: Partial<ReturnType<typeof useStyles>>;
+    classes?: Partial<Record<CollapsibleMenuClassKey, string>>;
 }
-declare const useStyles: (props?: any) => import("@mui/styles").ClassNameMap<"content" | "container" | "bar" | "iconOpen" | "iconClose">;
-declare const _default: React.MemoExoticComponent<(props: CollapsibleMenuProps) => React.JSX.Element>;
+export type CollapsibleMenuClassKey = "root" | "content" | "bar" | "iconOpen" | "iconClose" | "button";
+declare const _default: React.MemoExoticComponent<(inProps: CollapsibleMenuProps) => React.JSX.Element>;
 export default _default;

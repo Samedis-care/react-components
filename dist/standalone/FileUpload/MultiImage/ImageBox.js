@@ -1,108 +1,125 @@
 import React, { useCallback, useEffect, useRef, useState, } from "react";
-import makeStyles from "@mui/styles/makeStyles";
-import { Dialog, DialogContent, IconButton, Tooltip, } from "@mui/material";
-import { Close as CloseIcon, ArrowBack as PrevIcon, ArrowForward as NextIcon, Delete as DeleteIcon, } from "@mui/icons-material";
-import combineClassNames from "../../../utils/combineClassNames";
-import makeThemeStyles from "../../../utils/makeThemeStyles";
-import { useDebounce } from "../../../utils/useDebounce";
 import useDropZone from "../../../utils/useDropZone";
+import { Dialog, DialogContent, IconButton, styled, Tooltip, useThemeProps, } from "@mui/material";
+import { ArrowBack as PrevIcon, ArrowForward as NextIcon, Close as CloseIcon, Delete as DeleteIcon, } from "@mui/icons-material";
+import combineClassNames from "../../../utils/combineClassNames";
+import { useDebounce } from "../../../utils/useDebounce";
 import ImageDots from "./ImageDots";
 const swipeWidth = 30;
-const useStyles = makeStyles((theme) => ({
-    root: {
-        borderRadius: theme.shape.borderRadius,
-        position: "relative",
-        height: "100%",
-        "& button": {
-            visibility: "hidden",
-            opacity: 0,
-            transition: "visibility 0s linear 300ms, opacity 300ms",
-        },
-        "&:hover button": {
-            visibility: "visible",
-            opacity: 1,
-            transition: "visibility 0s linear 0s, opacity 300ms",
-        },
+const Root = styled("div", { name: "CcImageBox", slot: "root" })(({ theme, ownerState: { background, dragging, clickable } }) => ({
+    borderRadius: theme.shape.borderRadius,
+    position: "relative",
+    height: "100%",
+    "& button": {
+        visibility: "hidden",
+        opacity: 0,
+        transition: "visibility 0s linear 300ms, opacity 300ms",
     },
-    swipeListener: {
-        height: "100%",
-        width: "100%",
-        overflowX: "auto",
-        overflowY: "hidden",
-        scrollbarWidth: "none",
-        msOverflowStyle: "none",
-        "&::-webkit-scrollbar": {
-            display: "none",
-        },
+    "&:hover button": {
+        visibility: "visible",
+        opacity: 1,
+        transition: "visibility 0s linear 0s, opacity 300ms",
     },
-    background: {
+    ...(background && {
         backgroundColor: theme.palette.secondary.light,
-    },
-    clickable: {
-        cursor: "pointer",
-    },
-    dragging: {
+    }),
+    ...(dragging && {
         border: `1px solid ${theme.palette.primary.main}`,
+    }),
+    ...(clickable && {
+        cursor: "pointer",
+    }),
+}));
+const RemoveButton = styled(IconButton, {
+    name: "CcImageBox",
+    slot: "removeBtn",
+})(({ theme }) => ({
+    padding: theme.spacing(1),
+    position: "absolute",
+    top: 0,
+    right: 0,
+}));
+const PrevButton = styled(IconButton, { name: "CcImageBox", slot: "prevBtn" })({
+    position: "absolute",
+    top: "50%",
+    left: 0,
+    transform: "translateY(-50%)",
+});
+const NextButton = styled(IconButton, { name: "CcImageBox", slot: "nextBtn" })({
+    position: "absolute",
+    top: "50%",
+    right: 0,
+    transform: "translateY(-50%)",
+});
+const SwipeListener = styled("div", {
+    name: "CcImageBox",
+    slot: "swipeListener",
+})({
+    height: "100%",
+    width: "100%",
+    overflowX: "auto",
+    overflowY: "hidden",
+    scrollbarWidth: "none",
+    msOverflowStyle: "none",
+    "&::-webkit-scrollbar": {
+        display: "none",
     },
-    fullScreenImageWrapper: {
-        width: "100%",
-        height: "100%",
-        position: "relative",
-    },
-    image: {
-        width: "100%",
-        left: swipeWidth,
+});
+const StyledImage = styled("img", { name: "CcImageBox", slot: "image" })(({ theme, ownerState: { swipeLeft, swipeRight, imageDots } }) => ({
+    width: "100%",
+    left: swipeWidth,
+    marginLeft: swipeWidth,
+    marginRight: swipeWidth,
+    height: "100%",
+    objectFit: "contain",
+    borderRadius: theme.shape.borderRadius,
+    ...(swipeLeft &&
+        !swipeRight && {
         marginLeft: swipeWidth,
-        marginRight: swipeWidth,
-        height: "100%",
-        objectFit: "contain",
-        borderRadius: theme.shape.borderRadius,
-    },
-    imageSwipeLeft: {
-        marginLeft: swipeWidth,
-    },
-    imageSwipeRight: {
+    }),
+    ...(swipeRight &&
+        !swipeLeft && {
         marginLeft: 0,
         marginRight: swipeWidth,
-    },
-    imageSwipeNone: {
+    }),
+    ...(!swipeRight &&
+        !swipeLeft && {
         marginLeft: 0,
         marginRight: 0,
-    },
-    imageWithDots: {
+    }),
+    ...(imageDots && {
         height: "calc(100% - 48px)",
-    },
-    removeBtn: {
-        padding: theme.spacing(1),
-        position: "absolute",
-        top: 0,
-        right: 0,
-    },
-    prevBtn: {
-        position: "absolute",
-        top: "50%",
-        left: 0,
-        transform: "translateY(-50%)",
-    },
-    nextBtn: {
-        position: "absolute",
-        top: "50%",
-        right: 0,
-        transform: "translateY(-50%)",
-    },
-    imageDotsWrapper: {
-        position: "absolute",
-        bottom: 16,
-        left: "50%",
-        height: 16,
-        transform: "translateX(-50%)",
-    },
-    imageDotsContainer: {
+    }),
+}));
+const FullScreenImageWrapper = styled("div", {
+    name: "CcImageBox",
+    slot: "fullScreenImageWrapper",
+})({
+    width: "100%",
+    height: "100%",
+    position: "relative",
+});
+const ImageDotsWrapper = styled("div", {
+    name: "CcImageBox",
+    slot: "imageDotsWrapper",
+})({
+    position: "absolute",
+    bottom: 16,
+    left: "50%",
+    height: 16,
+    transform: "translateX(-50%)",
+});
+const StyledImageDots = styled(ImageDots, {
+    name: "CcImageBox",
+    slot: "imageDots",
+})({
+    position: "unset",
+    overflow: "unset",
+    "& .CcImageDots-container": {
         position: "unset",
         overflow: "unset",
     },
-}), { name: "CcImageBox" });
-const useThemeStyles = makeThemeStyles((theme) => theme.componentsCare?.fileUpload?.multiImage?.imageBox, "CcImageBox", useStyles);
+});
 const useScrollSwipe = (params) => {
     const { onPrevImage, onNextImage } = params;
     const handleResetScroll = useCallback(() => {
@@ -151,9 +168,9 @@ const useScrollSwipe = (params) => {
     }, [handleResetScroll]);
     return { containerRef, handleScroll, handleTouchEnd: handleResetScroll };
 };
-const ImageBox = (props) => {
-    const { image, width, height, onClick, onFilesDropped, onRemove, onNextImage, onPrevImage, disableBackground, fileName, imageDots, } = props;
-    const classes = useThemeStyles(props);
+const ImageBox = (inProps) => {
+    const props = useThemeProps({ props: inProps, name: "CcImageBox" });
+    const { image, width, height, onClick, onFilesDropped, onRemove, onNextImage, onPrevImage, disableBackground, fileName, imageDots, className, classes, } = props;
     const { handleDragOver, handleDrop, dragging } = useDropZone(onFilesDropped);
     const [dialogOpen, setDialogOpen] = useState(false);
     const openDialog = useCallback(() => {
@@ -180,47 +197,43 @@ const ImageBox = (props) => {
     const { containerRef: containerRefImage, handleScroll: handleScrollImage, handleTouchEnd: handleTouchEndImage, } = useScrollSwipe(props);
     const { containerRef: containerRefFS, handleScroll: handleScrollFS, handleTouchEnd: handleTouchEndFS, } = useScrollSwipe(props);
     return (React.createElement(React.Fragment, null,
-        React.createElement("div", { onClick: onClick === null ? undefined : onClick ?? openDialog, onDragOver: handleDragOver, onDrop: handleDrop, style: { width, height }, className: combineClassNames([
-                classes.root,
-                !disableBackground && classes.background,
-                dragging && classes.dragging,
-                onClick !== null && classes.clickable,
-            ]) },
-            onRemove && (React.createElement(IconButton, { onClick: handleRemove, className: classes.removeBtn, size: "large" },
+        React.createElement(Root, { onClick: onClick === null ? undefined : onClick ?? openDialog, onDragOver: handleDragOver, onDrop: handleDrop, style: { width, height }, ownerState: {
+                clickable: !!onClick,
+                dragging,
+                background: !disableBackground,
+            }, className: combineClassNames([className, classes?.root]) },
+            onRemove && (React.createElement(RemoveButton, { onClick: handleRemove, className: classes?.removeBtn, size: "large" },
                 React.createElement(DeleteIcon, null))),
-            onPrevImage && (React.createElement(IconButton, { onClick: handlePrevImage, className: classes.prevBtn, size: "large" },
+            onPrevImage && (React.createElement(PrevButton, { onClick: handlePrevImage, className: classes?.prevBtn, size: "large" },
                 React.createElement(PrevIcon, null))),
-            onNextImage && (React.createElement(IconButton, { onClick: handleNextImage, className: classes.nextBtn, size: "large" },
+            onNextImage && (React.createElement(NextButton, { onClick: handleNextImage, className: classes?.nextBtn, size: "large" },
                 React.createElement(NextIcon, null))),
-            React.createElement("div", { className: classes.swipeListener, onScroll: handleScrollImage, ref: containerRefImage, onTouchEnd: handleTouchEndImage },
+            React.createElement(SwipeListener, { className: classes?.swipeListener, onScroll: handleScrollImage, ref: containerRefImage, onTouchEnd: handleTouchEndImage },
                 React.createElement(Tooltip, { title: fileName ?? "", disableTouchListener: !fileName, disableHoverListener: !fileName, disableFocusListener: !fileName },
-                    React.createElement("img", { src: image, alt: "", className: combineClassNames([
-                            classes.image,
-                            onNextImage && !onPrevImage && classes.imageSwipeRight,
-                            !onNextImage && onPrevImage && classes.imageSwipeLeft,
-                            !onNextImage && !onPrevImage && classes.imageSwipeNone,
-                        ]) })))),
+                    React.createElement(StyledImage, { src: image, alt: "", ownerState: {
+                            swipeLeft: !!onPrevImage,
+                            swipeRight: !!onNextImage,
+                            imageDots: false,
+                        }, className: classes?.image })))),
         !onClick && (React.createElement(Dialog, { open: dialogOpen, fullScreen: true, onClose: closeDialog },
             React.createElement(DialogContent, null,
-                React.createElement("div", { className: classes.fullScreenImageWrapper },
-                    React.createElement("div", { className: classes.swipeListener, onScroll: handleScrollFS, ref: containerRefFS, onTouchEnd: handleTouchEndFS },
-                        React.createElement("img", { src: image, alt: "", className: combineClassNames([
-                                classes.image,
-                                onNextImage && !onPrevImage && classes.imageSwipeRight,
-                                !onNextImage && onPrevImage && classes.imageSwipeLeft,
-                                !onNextImage && !onPrevImage && classes.imageSwipeNone,
-                                imageDots && classes.imageWithDots,
-                            ]) })),
-                    React.createElement(IconButton, { onClick: closeDialog, className: classes.removeBtn, size: "large" },
+                React.createElement(FullScreenImageWrapper, { className: classes?.fullScreenImageWrapper },
+                    React.createElement(SwipeListener, { className: classes?.swipeListener, onScroll: handleScrollFS, ref: containerRefFS, onTouchEnd: handleTouchEndFS },
+                        React.createElement(StyledImage, { src: image, alt: "", ownerState: {
+                                swipeLeft: !!onPrevImage,
+                                swipeRight: !!onNextImage,
+                                imageDots: !imageDots,
+                            }, className: classes?.image })),
+                    React.createElement(RemoveButton, { onClick: closeDialog, className: classes?.removeBtn, size: "large" },
                         React.createElement(CloseIcon, null)),
-                    onPrevImage && (React.createElement(IconButton, { onClick: handlePrevImage, className: classes.prevBtn, size: "large" },
+                    onPrevImage && (React.createElement(PrevButton, { onClick: handlePrevImage, className: classes?.prevBtn, size: "large" },
                         React.createElement(PrevIcon, null))),
-                    onNextImage && (React.createElement(IconButton, { onClick: handleNextImage, className: classes.nextBtn, size: "large" },
+                    onNextImage && (React.createElement(NextButton, { onClick: handleNextImage, className: classes?.nextBtn, size: "large" },
                         React.createElement(NextIcon, null))),
-                    imageDots && (React.createElement("div", { className: classes.imageDotsWrapper },
-                        React.createElement(ImageDots, { ...imageDots, classes: {
-                                imageDotContainer: classes.imageDotsContainer,
-                                imageDotContainerContainer: classes.imageDotsContainer,
-                            } })))))))));
+                    imageDots && (React.createElement(ImageDotsWrapper, { className: classes?.imageDotsWrapper },
+                        React.createElement(StyledImageDots, { ...imageDots, className: combineClassNames([
+                                classes?.imageDots,
+                                imageDots.className,
+                            ]) })))))))));
 };
 export default React.memo(ImageBox);

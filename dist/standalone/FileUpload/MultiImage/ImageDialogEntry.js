@@ -1,20 +1,24 @@
 import React, { useCallback } from "react";
 import ImageBox from "./ImageBox";
-import { Box, Grid, Typography } from "@mui/material";
+import { Box, Grid, styled, Typography, useThemeProps } from "@mui/material";
 import { Star as StarredIcon, StarOutline as NotStarredIcon, } from "@mui/icons-material";
-import makeStyles from "@mui/styles/makeStyles";
 import useCCTranslations from "../../../utils/useCCTranslations";
-import makeThemeStyles from "../../../utils/makeThemeStyles";
-const useStyles = makeStyles({
-    clickable: {
-        cursor: "pointer",
-    },
-}, { name: "CcImageDialogEntry" });
-const useThemeStyles = makeThemeStyles((theme) => theme.componentsCare?.fileUpload?.multiImage?.imageDialogEntry, "CcImageDialogEntry", useStyles);
-const ImageDialogEntry = (props) => {
-    const { previewSize, img, isPrimary, changeImages, changePrimary, processFile, subClasses, onDelete, } = props;
+import combineClassNames from "../../../utils/combineClassNames";
+const Root = styled(Grid, { name: "CcImageDialogEntry", slot: "root" })({});
+const MakePrimary = styled(Grid, {
+    name: "CcImageDialogEntry",
+    slot: "makePrimary",
+})({
+    cursor: "pointer",
+});
+const IsPrimary = styled(Grid, {
+    name: "CcImageDialogEntry",
+    slot: "isPrimary",
+})({});
+const ImageDialogEntry = (inProps) => {
+    const props = useThemeProps({ props: inProps, name: "CcImageDialogEntry" });
+    const { previewSize, img, isPrimary, changeImages, changePrimary, processFile, subClasses, onDelete, className, classes, } = props;
     const { t } = useCCTranslations();
-    const classes = useThemeStyles(props);
     const setPrimary = useCallback(() => {
         changePrimary(img.id);
     }, [changePrimary, img]);
@@ -37,11 +41,12 @@ const ImageDialogEntry = (props) => {
         const imageData = await processFile(file);
         changeImages((images) => images.map((image) => image === img ? { ...image, image: imageData } : image));
     }, [changeImages, img, processFile]);
-    return (React.createElement(Grid, { item: true, xs: previewSize ? undefined : 12, md: previewSize ? undefined : 6, lg: previewSize ? undefined : 3 },
+    const PrimaryComp = isPrimary ? IsPrimary : MakePrimary;
+    return (React.createElement(Root, { item: true, xs: previewSize ? undefined : 12, md: previewSize ? undefined : 6, lg: previewSize ? undefined : 3, className: combineClassNames([className, classes?.root]) },
         React.createElement("div", null,
             React.createElement(ImageBox, { fileName: img.name, width: previewSize, height: previewSize, image: img.image, onRemove: img.readOnly ? undefined : removeImage, onFilesDropped: img.readOnly ? undefined : replaceImage, classes: subClasses?.imageBox })),
         React.createElement(Box, { mt: 1 },
-            React.createElement(Grid, { container: true, spacing: 1, alignItems: "center", justifyContent: "flex-start", className: isPrimary ? undefined : classes.clickable, onClick: isPrimary ? undefined : setPrimary },
+            React.createElement(PrimaryComp, { container: true, spacing: 1, alignItems: "center", justifyContent: "flex-start", className: isPrimary ? classes?.isPrimary : classes?.makePrimary, onClick: isPrimary ? undefined : setPrimary },
                 React.createElement(Grid, { item: true }, isPrimary ? React.createElement(StarredIcon, { color: "primary" }) : React.createElement(NotStarredIcon, null)),
                 React.createElement(Grid, { item: true },
                     React.createElement(Typography, null, t("standalone.file-upload.multi-image.primary")))))));

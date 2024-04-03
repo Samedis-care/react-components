@@ -1,7 +1,5 @@
 import React, { CSSProperties } from "react";
 import { UseDropZoneParams } from "../../../utils/useDropZone";
-import { Theme } from "@mui/material";
-import { ClassNameMap, Styles } from "@mui/styles/withStyles";
 import { ImageDotsProps } from "./ImageDots";
 export interface ImageBoxProps {
     /**
@@ -48,16 +46,28 @@ export interface ImageBoxProps {
      */
     disableBackground?: boolean;
     /**
+     * Custom CSS styles to apply to root
+     */
+    className?: string;
+    /**
      * Custom CSS styles
      */
-    classes?: ClassNameMap<keyof ReturnType<typeof useStyles>>;
+    classes?: Partial<Record<ImageBoxClassKey, string>>;
     /**
      * Image dots props (set to enable image props)
      */
     imageDots?: ImageDotsProps;
 }
-declare const useStyles: (props?: any) => ClassNameMap<"image" | "root" | "background" | "clickable" | "dragging" | "swipeListener" | "fullScreenImageWrapper" | "imageSwipeLeft" | "imageSwipeRight" | "imageSwipeNone" | "imageWithDots" | "removeBtn" | "prevBtn" | "nextBtn" | "imageDotsWrapper" | "imageDotsContainer">;
-export type ImageBoxClassKey = keyof ReturnType<typeof useStyles>;
-export type ImageBoxTheme = Partial<Styles<Theme, ImageBoxProps, ImageBoxClassKey>>;
-declare const _default: React.MemoExoticComponent<(props: ImageBoxProps) => React.JSX.Element>;
+export interface ImageBoxRootOwnerState {
+    background: boolean;
+    dragging: boolean;
+    clickable: boolean;
+}
+export interface ImageBoxStyledImageOwnerState {
+    swipeLeft: boolean;
+    swipeRight: boolean;
+    imageDots: boolean;
+}
+export type ImageBoxClassKey = "root" | "removeBtn" | "prevBtn" | "nextBtn" | "swipeListener" | "image" | "fullScreenImageWrapper" | "imageDotsWrapper" | "imageDots";
+declare const _default: React.MemoExoticComponent<(inProps: ImageBoxProps) => React.JSX.Element>;
 export default _default;
