@@ -8,10 +8,21 @@ import {
 import filterSortPaginate from "../../../utils/filterSortPaginate";
 import uniqueArray from "../../../utils/uniqueArray";
 import { DataGrid, DataGridNoPersist } from "../../../standalone";
+import throwError from "../../../utils/throwError";
+import {
+	Model,
+	ModelFieldName,
+	ModelVisibilityGridView,
+	PageVisibility,
+} from "../../../backend-integration";
 
 export type GenericDataType = string | number | Date | null;
 
 export interface GenericDataPreviewProps {
+	/**
+	 * The model to render data with
+	 */
+	model?: Model<ModelFieldName, PageVisibility, unknown>;
 	/**
 	 * The generic data, should be a Record<string, GenericDataType>
 	 */
@@ -27,7 +38,7 @@ export interface GenericDataPreviewProps {
 }
 
 const GenericDataPreview = (props: GenericDataPreviewProps) => {
-	const { data, existingDefinition, defaultFilter } = props;
+	const { model, data, existingDefinition, defaultFilter } = props;
 
 	const columns: string[] = useMemo(
 		() => uniqueArray(data.map(Object.keys).flat()),
@@ -70,7 +81,35 @@ const GenericDataPreview = (props: GenericDataPreviewProps) => {
 					return {
 						rowsTotal: rowData.length,
 						rowsFiltered: processed[1],
-						rows: processed[0],
+						rows: model
+							? processed[0].map(
+									(entry) =>
+										Object.fromEntries(
+											Object.entries(entry).map(([key, value]) => [
+												key,
+												key in model.fields
+													? model.fields[key].type.render({
+															label: model.fields[key].getLabel(),
+															field: key,
+															initialValue: value as unknown,
+															value: value as unknown,
+															visibility: ModelVisibilityGridView,
+															values: entry,
+															errorMsg: null,
+															warningMsg: null,
+															touched: false,
+															setError: () => throwError("not supported"),
+															setFieldValue: () => throwError("not supported"),
+															handleBlur: () => throwError("not supported"),
+															handleChange: () => throwError("not supported"),
+															setFieldTouched: () =>
+																throwError("not supported"),
+														})
+													: value,
+											]),
+										) as DataGridData["rows"][number],
+								)
+							: processed[0],
 					};
 				}}
 				defaultFilter={defaultFilter}

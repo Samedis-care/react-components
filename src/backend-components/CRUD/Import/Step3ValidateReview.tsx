@@ -80,12 +80,15 @@ export const useImportStep3Logic = (props: CrudImporterStepProps) => {
 					}
 				}
 				return {
-					valid: isObjectEmpty(validation)
-						? "true"
+					validation_errors: isObjectEmpty(validation)
+						? "-"
 						: Object.entries(validation)
-								.map(([name, error]) => name + ": " + error)
+								.map(
+									([name, error]) =>
+										model.fields[name].getLabel() + ": " + error,
+								)
 								.join("; "),
-					error: error?.toString() ?? "none",
+					conversion_errors: error?.toString() ?? "-",
 					...data,
 				};
 			}),
@@ -124,6 +127,7 @@ const Step3ValidateReview = (props: CrudImporterStepProps) => {
 
 	return (
 		<GenericDataPreview
+			model={model}
 			data={recordsNormalized}
 			existingDefinition={[
 				...model.toDataGridColumnDefinition().map((columnDef) => ({
@@ -134,18 +138,18 @@ const Step3ValidateReview = (props: CrudImporterStepProps) => {
 					hidden: false,
 				})),
 				{
-					field: "valid",
+					field: "validation_errors",
 					type: "string",
-					headerName: t("backend-components.crud.import.valid"),
+					headerName: t("backend-components.crud.import.validation_errors"),
 					filterable: true,
 					sortable: true,
 					isLocked: false,
 					hidden: false,
 				},
 				{
-					field: "error",
+					field: "conversion_errors",
 					type: "string",
-					headerName: t("backend-components.crud.import.error"),
+					headerName: t("backend-components.crud.import.conversion_errors"),
 					filterable: true,
 					sortable: true,
 					isLocked: false,
@@ -157,10 +161,10 @@ const Step3ValidateReview = (props: CrudImporterStepProps) => {
 					? []
 					: [
 							{
-								field: "valid",
+								field: "validation_errors",
 								filter: {
 									type: "notEqual",
-									value1: "true",
+									value1: "-",
 									value2: "",
 								},
 							},

@@ -262,8 +262,6 @@
                 "source_field_type": "Data types",
                 "destination_fields": "Destination fields",
                 "conv_script": "Conversion Script (JavaScript)",
-                "error": "Error",
-                "valid": "Valid",
                 "queue": "In queue: {{COUNT}}",
                 "success": "Success: {{COUNT}}",
                 "failed": "Failed: {{COUNT}}",
@@ -280,7 +278,9 @@
                     "boolean": "Result must be a boolean or null",
                     "fail": "Validation failed: {{REASON}}. For details see browser console.",
                     "unknown": "Unknown"
-                }
+                },
+                "validation_errors": "Validation errors",
+                "conversion_errors": "Data conversion errors"
             }
         }
     },
