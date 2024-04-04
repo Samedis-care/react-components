@@ -54,12 +54,12 @@ export const useImportStep3Logic = (props) => {
             }
         }
         return {
-            valid: isObjectEmpty(validation)
-                ? "true"
+            validation_errors: isObjectEmpty(validation)
+                ? "-"
                 : Object.entries(validation)
-                    .map(([name, error]) => name + ": " + error)
+                    .map(([name, error]) => model.fields[name].getLabel() + ": " + error)
                     .join("; "),
-            error: error?.toString() ?? "none",
+            conversion_errors: error?.toString() ?? "-",
             ...data,
         };
     }), [model.fields, props.updateKey, records, t]);
@@ -84,7 +84,7 @@ const Step3ValidateReview = (props) => {
     const { t } = useCCTranslations();
     if (!records)
         return React.createElement(Loader, null);
-    return (React.createElement(GenericDataPreview, { data: recordsNormalized, existingDefinition: [
+    return (React.createElement(GenericDataPreview, { model: model, data: recordsNormalized, existingDefinition: [
             ...model.toDataGridColumnDefinition().map((columnDef) => ({
                 ...columnDef,
                 filterable: true,
@@ -93,18 +93,18 @@ const Step3ValidateReview = (props) => {
                 hidden: false,
             })),
             {
-                field: "valid",
+                field: "validation_errors",
                 type: "string",
-                headerName: t("backend-components.crud.import.valid"),
+                headerName: t("backend-components.crud.import.validation_errors"),
                 filterable: true,
                 sortable: true,
                 isLocked: false,
                 hidden: false,
             },
             {
-                field: "error",
+                field: "conversion_errors",
                 type: "string",
-                headerName: t("backend-components.crud.import.error"),
+                headerName: t("backend-components.crud.import.conversion_errors"),
                 filterable: true,
                 sortable: true,
                 isLocked: false,
@@ -114,10 +114,10 @@ const Step3ValidateReview = (props) => {
             ? []
             : [
                 {
-                    field: "valid",
+                    field: "validation_errors",
                     filter: {
                         type: "notEqual",
-                        value1: "true",
+                        value1: "-",
                         value2: "",
                     },
                 },

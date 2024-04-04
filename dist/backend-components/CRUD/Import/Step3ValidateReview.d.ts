@@ -4,8 +4,8 @@ type RecordT = [Record<string, unknown>, Record<string, string>, Error | null];
 export declare const useImportStep3Logic: (props: CrudImporterStepProps) => {
     records: RecordT[] | null;
     recordsNormalized: {
-        valid: string;
-        error: string;
+        validation_errors: string;
+        conversion_errors: string;
     }[];
     everythingOkay: boolean;
 };
