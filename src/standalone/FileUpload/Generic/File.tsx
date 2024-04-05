@@ -1,11 +1,17 @@
 import React, { useCallback } from "react";
-import { Grid, SvgIconProps, Tooltip, Typography } from "@mui/material";
 import {
-	InsertDriveFile as DefaultFileIcon,
-	CancelOutlined as CancelIcon,
+	Grid,
+	styled,
+	SvgIconProps,
+	Tooltip,
+	Typography,
+	useThemeProps,
+} from "@mui/material";
+import {
 	Cancel as CancelIconList,
+	CancelOutlined as CancelIcon,
+	InsertDriveFile as DefaultFileIcon,
 } from "@mui/icons-material";
-import makeStyles from "@mui/styles/makeStyles";
 import {
 	ArchiveFileIcon,
 	AudioFileIcon,
@@ -49,9 +55,13 @@ export interface FileProps {
 	 */
 	downloadLink?: string;
 	/**
+	 * CSS class to apply to root element
+	 */
+	className?: string;
+	/**
 	 * Custom styles
 	 */
-	classes?: Partial<ReturnType<typeof useStyles>>;
+	classes?: Partial<Record<FileClassKey, string>>;
 	/**
 	 * Display file as...
 	 * - box: Box with label below
@@ -62,59 +72,104 @@ export interface FileProps {
 	variant: "box" | "list" | "compact-list" | "icon-only";
 }
 
-const useStyles = makeStyles(
-	(theme) => ({
-		iconContainer: {
-			position: "relative",
+const CompactListWrapper = styled(Grid, {
+	name: "CcFile",
+	slot: "compactListWrapper",
+})({
+	maxWidth: "100%",
+});
+
+const IconContainer = styled(Grid, { name: "CcFile", slot: "iconContainer" })({
+	position: "relative",
+});
+
+const ListEntryText = styled(Grid, { name: "CcFile", slot: "listEntryText" })({
+	minWidth: 0,
+	position: "relative",
+});
+
+const CloseIconList = styled(CancelIconList, {
+	name: "CcFile",
+	slot: "closeIconList",
+})(({ theme }) => ({
+	width: "auto",
+	position: "static",
+	cursor: "pointer",
+	color: theme.palette.action.active,
+}));
+
+const CloseIcon = styled(CancelIcon, {
+	name: "CcFile",
+	slot: "closeIcon",
+})(({ theme }) => ({
+	position: "absolute",
+	cursor: "pointer",
+	color: theme.palette.error.main,
+}));
+
+const IconWrapperList = styled("div", {
+	name: "CcFile",
+	slot: "iconWrapperList",
+})(({ theme }) => ({
+	height: "100%",
+	width: "auto",
+	color: theme.palette.error.main,
+	"&.Mui-disabled": {
+		opacity: 0.5,
+	},
+	"&.Mui-active": {
+		cursor: "pointer",
+	},
+}));
+
+const IconWrapper = styled("div", {
+	name: "CcFile",
+	slot: "iconWrapper",
+})({
+	width: "100%",
+	height: "auto",
+	marginTop: 16,
+	objectFit: "contain",
+});
+
+const StyledLabelList = styled(Typography, {
+	name: "CcFile",
+	slot: "listLabel",
+})({
+	position: "absolute",
+	maxWidth: "100%",
+	"&.Mui-active": {
+		cursor: "pointer",
+		"&:hover": {
+			textDecoration: "underline",
 		},
-		closeIcon: {
-			position: "absolute",
-			cursor: "pointer",
-			color: theme.palette.error.main,
+	},
+});
+
+const StyledLabel = styled(Typography, {
+	name: "CcFile",
+	slot: "label",
+})({
+	position: "absolute",
+	maxWidth: "100%",
+	"&.Mui-active": {
+		cursor: "pointer",
+		"&:hover": {
+			textDecoration: "underline",
 		},
-		closeIconList: {
-			width: "auto",
-			position: "static",
-			cursor: "pointer",
-			color: theme.palette.action.active,
-		},
-		icon: {
-			width: "100%",
-			height: "auto",
-			marginTop: 16,
-			objectFit: "contain",
-		},
-		iconList: {
-			height: "100%",
-			width: "auto",
-			color: theme.palette.error.main,
-		},
-		iconDisabled: {
-			opacity: 0.5,
-		},
-		listEntryText: {
-			minWidth: 0,
-			position: "relative",
-		},
-		listLabel: {
-			position: "absolute",
-			maxWidth: "100%",
-		},
-		compactListWrapper: {
-			maxWidth: "100%",
-		},
-		clickable: {
-			cursor: "pointer",
-		},
-		downloadLink: {
-			cursor: "pointer",
-			"&:hover": {
-				textDecoration: "underline",
-			},
-		},
-	}),
-	{ name: "CcFile" },
-);
+	},
+});
+
+export type FileClassKey =
+	| "compactListWrapper"
+	| "iconContainer"
+	| "listEntryText"
+	| "closeIconList"
+	| "closeIcon"
+	| "iconWrapperList"
+	| "iconWrapper"
+	| "listLabel"
+	| "label";
 
 export const ExcelFileExtensions = [
 	"xlsx",
@@ -219,9 +274,9 @@ export const getFileIconOrDefault = (
 ): React.ComponentType<SvgIconProps> =>
 	getFileIcon(nameOrMime) ?? DefaultFileIcon;
 
-const File = (props: FileProps) => {
-	const { downloadLink, variant } = props;
-	const classes = useStyles(props);
+const File = (inProps: FileProps) => {
+	const props = useThemeProps({ props: inProps, name: "CcFile" });
+	const { downloadLink, variant, className, classes } = props;
 
 	const FileIcon = getFileIconOrDefault(props.name);
 
@@ -243,74 +298,85 @@ const File = (props: FileProps) => {
 
 	const isList =
 		variant === "list" || variant === "compact-list" || variant === "icon-only";
-	const renderIcon = () =>
-		props.preview ? (
-			<img
-				src={props.preview}
-				alt={props.name}
+	const renderIcon = () => {
+		const IconWrapperComp = isList ? IconWrapperList : IconWrapper;
+		return (
+			<IconWrapperComp
 				className={combineClassNames([
-					isList ? classes.iconList : classes.icon,
-					props.disabled && classes.iconDisabled,
-					downloadLink && classes.clickable,
+					isList ? classes?.iconWrapperList : classes?.iconWrapper,
+					props.disabled && "Mui-disabled",
+					downloadLink && "Mui-active",
 				])}
-				onClick={openDownload}
-				style={{ height: props.size }}
-			/>
-		) : (
-			<FileIcon
-				className={combineClassNames([
-					isList ? classes.iconList : classes.icon,
-					downloadLink && classes.clickable,
-				])}
-				onClick={openDownload}
-				style={{ height: props.size }}
-			/>
-		);
-
-	const renderName = () => (
-		<Tooltip title={props.name}>
-			<Typography
-				align={isList ? "left" : "center"}
-				noWrap
-				className={combineClassNames([
-					downloadLink && classes.downloadLink,
-					variant === "list" && classes.listLabel,
-				])}
-				onClick={openDownload}
-				variant={"body2"}
-				style={
-					isList
-						? {
-								lineHeight: `${props.size}px`,
-							}
-						: undefined
-				}
 			>
-				{props.name}
-			</Typography>
-		</Tooltip>
-	);
+				{props.preview ? (
+					<img
+						src={props.preview}
+						alt={props.name}
+						onClick={openDownload}
+						style={{ height: props.size }}
+					/>
+				) : (
+					<FileIcon onClick={openDownload} style={{ height: props.size }} />
+				)}
+			</IconWrapperComp>
+		);
+	};
+
+	const renderName = () => {
+		const TypographyComp = variant === "list" ? StyledLabelList : StyledLabel;
+
+		return (
+			<Tooltip title={props.name}>
+				<TypographyComp
+					align={isList ? "left" : "center"}
+					noWrap
+					className={combineClassNames([
+						variant === "list" ? classes?.listLabel : classes?.label,
+						downloadLink && "Mui-active",
+					])}
+					onClick={openDownload}
+					variant={"body2"}
+					style={
+						isList
+							? {
+									lineHeight: `${props.size}px`,
+								}
+							: undefined
+					}
+				>
+					{props.name}
+				</TypographyComp>
+			</Tooltip>
+		);
+	};
 
 	const removeBtn =
 		props.onRemove &&
 		!props.disabled &&
-		React.createElement(variant === "list" ? CancelIconList : CancelIcon, {
-			className: combineClassNames([
-				variant === "box" && classes.closeIcon,
-				variant === "list" && classes.closeIconList,
-			]),
-			onClick: props.onRemove,
-			style: variant === "list" ? { height: props.size } : undefined,
-		});
+		React.createElement(
+			variant === "list"
+				? CloseIconList
+				: variant === "box"
+					? CloseIcon
+					: CancelIcon,
+			{
+				className: combineClassNames([
+					variant === "box" && classes?.closeIcon,
+					variant === "list" && classes?.closeIconList,
+				]),
+				onClick: props.onRemove,
+				style: variant === "list" ? { height: props.size } : undefined,
+			},
+		);
 
 	if (variant === "box") {
 		return (
-			<Grid item style={{ width: props.size }}>
+			<Grid item className={className} style={{ width: props.size }}>
 				<Grid container spacing={2}>
-					<Grid item xs={12} className={classes.iconContainer}>
+					<IconContainer item xs={12} className={classes?.iconContainer}>
 						{removeBtn}
 						{renderIcon()}
-					</Grid>
+					</IconContainer>
 					<Grid item xs={12}>
 						{renderName()}
 					</Grid>
@@ -327,36 +393,37 @@ const File = (props: FileProps) => {
 				spacing={2}
 				alignItems={"stretch"}
 				wrap={"nowrap"}
+				className={className}
 			>
 				<Grid item>{renderIcon()}</Grid>
-				<Grid item xs className={classes.listEntryText}>
+				<ListEntryText item xs className={classes?.listEntryText}>
 					{renderName()}
-				</Grid>
+				</ListEntryText>
 				{removeBtn && <Grid item>{removeBtn}</Grid>}
 			</Grid>
 		);
 	} else if (variant === "compact-list") {
 		return (
-			<Grid
+			<CompactListWrapper
 				item
 				onClick={handleListClick}
-				className={classes.compactListWrapper}
+				className={combineClassNames([className, classes?.compactListWrapper])}
 			>
 				<Grid container spacing={2} alignItems={"stretch"} wrap={"nowrap"}>
 					<Grid item>{renderIcon()}</Grid>
-					<Grid item className={classes.listEntryText}>
+					<ListEntryText item className={classes?.listEntryText}>
 						{renderName()}
-					</Grid>
+					</ListEntryText>
 					{removeBtn && <Grid item>{removeBtn}</Grid>}
 				</Grid>
-			</Grid>
+			</CompactListWrapper>
 		);
 	} else if (variant === "icon-only") {
 		return (
-			<Grid
+			<CompactListWrapper
 				item
 				onClick={handleListClick}
-				className={classes.compactListWrapper}
+				className={combineClassNames([className, classes?.compactListWrapper])}
 			>
 				<Grid container spacing={2} alignItems={"stretch"} wrap={"nowrap"}>
 					<Grid item>
@@ -366,7 +433,7 @@ const File = (props: FileProps) => {
 					</Grid>
 					{removeBtn && <Grid item>{removeBtn}</Grid>}
 				</Grid>
-			</Grid>
+			</CompactListWrapper>
 		);
 	} else {
 		throw new Error("Invalid variant passed");

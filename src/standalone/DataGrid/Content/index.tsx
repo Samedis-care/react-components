@@ -18,9 +18,9 @@ import Cell, { CellContext } from "./Cell";
 import { applyColumnWidthLimits } from "./ColumnHeader";
 import Loader from "../../Loader";
 import useCCTranslations from "../../../utils/useCCTranslations";
-import withStyles from "@mui/styles/withStyles";
 import CenteredTypography from "../../UIKit/CenteredTypography";
 import MultiGrid from "../../Virtualized/MultiGrid";
+import { styled } from "@mui/material";
 
 export interface IDataGridContentProps
 	extends IDataGridColumnProps,
@@ -28,15 +28,16 @@ export interface IDataGridContentProps
 	rowsPerPage: number;
 }
 
-const CenteredStickyTypography = withStyles({
-	outerWrapper: {
-		position: "sticky",
-		top: 0,
-		left: 0,
-		right: 0,
-		bottom: 0,
-	},
-})(CenteredTypography);
+const CenteredStickyTypography = styled(CenteredTypography, {
+	name: "CcDataGrid",
+	slot: "centeredStickyTypography", // TODO: add to class key
+})({
+	position: "sticky",
+	top: 0,
+	left: 0,
+	right: 0,
+	bottom: 0,
+});
 
 const SELECT_ROW_WIDTH = 57;
 const DEFAULT_COLUMN_WIDTH = 200;

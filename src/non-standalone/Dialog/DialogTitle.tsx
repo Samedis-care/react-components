@@ -1,32 +1,15 @@
 import React from "react";
-import { DialogTitle as MuiDialogTitle } from "@mui/material";
-import makeStyles from "@mui/styles/makeStyles";
+import {
+	DialogTitle as MuiDialogTitle,
+	Grid,
+	IconButton,
+	styled,
+	Typography,
+	useThemeProps,
+} from "@mui/material";
 import { Close } from "@mui/icons-material";
-import { Grid, IconButton, Typography } from "@mui/material";
 import combineClassNames from "../../utils/combineClassNames";
-
-const useClasses = makeStyles(
-	(theme) => ({
-		noTitle: {
-			padding: theme.spacing(1),
-			position: "absolute",
-			right: 0,
-		},
-		closeButton: {
-			color: theme.palette.grey[500],
-			padding: `calc(${theme.spacing(1)} / 2)`,
-			zIndex: 1,
-		},
-		text: {
-			textOverflow: "ellipsis",
-			overflow: "hidden",
-		},
-		textWrapper: {
-			maxWidth: "75%",
-		},
-	}),
-	{ name: "CcDialogTitle" },
-);
+import useCCTranslations from "../../utils/useCCTranslations";
 
 export interface DialogTitleProps {
 	id?: string;
@@ -36,38 +19,89 @@ export interface DialogTitleProps {
 	 * special CSS which puts buttons on the right floating
 	 */
 	noTitle?: boolean;
+	/**
+	 * css class to apply to root
+	 */
+	className?: string;
+	/**
+	 * custom CSS styles
+	 */
+	classes?: Partial<Record<DialogTitleClassKey, string>>;
 }
 
-const DialogTitleRaw = (props: DialogTitleProps) => {
-	const { id, children, onClose, noTitle } = props;
+const Root = styled(MuiDialogTitle, { name: "CcDialogTitle", slot: "root" })(
+	({ theme }) => ({
+		"&.CcDialogTitle-noTitle": {
+			padding: theme.spacing(1),
+			position: "absolute",
+			right: 0,
+		},
+	}),
+);
 
-	const classes = useClasses();
+const TextWrapper = styled(Grid, {
+	name: "CcDialogTitle",
+	slot: "textWrapper",
+})({
+	maxWidth: "75%",
+});
+
+const Text = styled(Typography, { name: "CcDialogTitle", slot: "text" })({
+	textOverflow: "ellipsis",
+	overflow: "hidden",
+});
+
+const CloseButton = styled(IconButton, {
+	name: "CcDialogTitle",
+	slot: "closeButton",
+})(({ theme }) => ({
+	color: theme.palette.grey[500],
+	padding: `calc(${theme.spacing(1)} / 2)`,
+	zIndex: 1,
+}));
+
+export type DialogTitleClassKey =
+	| "root"
+	| "textWrapper"
+	| "text"
+	| "closeButton";
+
+const DialogTitleRaw = (inProps: DialogTitleProps) => {
+	const props = useThemeProps({ props: inProps, name: "CcDialogTitle" });
+	const { id, children, onClose, noTitle, className, classes } = props;
+
+	const { t } = useCCTranslations();
+
 	return (
-		<MuiDialogTitle
+		<Root
 			id={id}
-			className={combineClassNames([noTitle && classes.noTitle])}
+			className={combineClassNames([
+				className,
+				classes?.root,
+				noTitle && "CcDialogTitle-noTitle",
+			])}
 		>
 			<Grid container wrap={"nowrap"}>
-				<Grid item className={classes.textWrapper}>
-					<Typography variant="h6" noWrap className={classes.text}>
+				<TextWrapper item className={classes?.textWrapper}>
+					<Text variant="h6" noWrap className={classes?.text}>
 						{children}
-					</Typography>
-				</Grid>
+					</Text>
+				</TextWrapper>
 				<Grid item xs />
 				{onClose && (
 					<Grid item>
-						<IconButton
-							aria-label="Close"
-							className={classes.closeButton}
+						<CloseButton
+							aria-label={t("non-standalone.dialog.dialog-title.close")}
+							className={classes?.closeButton}
 							onClick={onClose}
 							size="large"
 						>
 							<Close />
-						</IconButton>
+						</CloseButton>
 					</Grid>
 				)}
 			</Grid>
-		</MuiDialogTitle>
+		</Root>
 	);
 };
 

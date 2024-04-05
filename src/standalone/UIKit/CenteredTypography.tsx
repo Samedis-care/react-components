@@ -1,50 +1,60 @@
 import React from "react";
-import makeStyles from "@mui/styles/makeStyles";
-import { Typography, TypographyProps } from "@mui/material";
+import {
+	styled,
+	Typography,
+	TypographyProps,
+	useThemeProps,
+} from "@mui/material";
+import combineClassNames from "../../utils/combineClassNames";
 
 export interface CenteredTypographyProps
-	extends Omit<TypographyProps, "classes"> {
+	extends Omit<TypographyProps, "className" | "classes"> {
+	/**
+	 * CSS class to apply to root
+	 */
+	className?: string;
 	/**
 	 * Custom styles
 	 */
-	classes?: Partial<ReturnType<typeof useStyles>>;
-	/**
-	 * Sub classes to apply
-	 */
-	subClasses?: {
-		typography?: TypographyProps["classes"];
-	};
+	classes?: Partial<Record<CenteredTypographyClassKey, string>>;
 }
 
-const useStyles = makeStyles(
-	{
-		innerWrapper: {
-			height: 70,
-			left: "50%",
-			position: "absolute",
-			textAlign: "center",
-			top: "50%",
-			transform: "translate(-50%, -50%)",
-			width: "100%",
-		},
-		outerWrapper: {
-			height: "100%",
-			position: "relative",
-			width: "100%",
-		},
-	},
-	{ name: "CcCenteredTypography" },
-);
+const Root = styled("div", { name: "CcCenteredTypography", slot: "root" })({
+	position: "relative",
+	height: "100%",
+	width: "100%",
+});
 
-const CenteredTypography = (props: CenteredTypographyProps) => {
-	const classes = useStyles(props);
+const Inner = styled("div", { name: "CcCenteredTypography", slot: "inner" })({
+	height: 70,
+	left: "50%",
+	position: "absolute",
+	textAlign: "center",
+	top: "50%",
+	transform: "translate(-50%, -50%)",
+	width: "100%",
+});
+
+const StyledTypography = styled(Typography, {
+	name: "CcCenteredTypography",
+	slot: "typography",
+})({});
+
+export type CenteredTypographyClassKey = "root" | "inner" | "typography";
+
+const CenteredTypography = (inProps: CenteredTypographyProps) => {
+	const props = useThemeProps({ props: inProps, name: "CcCenteredTypography" });
+	const { className, classes, ...typographyProps } = props;
 
 	return (
-		<div className={classes.outerWrapper}>
-			<div className={classes.innerWrapper}>
-				<Typography {...props} classes={props.subClasses?.typography} />
-			</div>
-		</div>
+		<Root className={combineClassNames([className, classes?.root])}>
+			<Inner className={classes?.inner}>
+				<StyledTypography
+					{...typographyProps}
+					className={classes?.typography}
+				/>
+			</Inner>
+		</Root>
 	);
 };
 

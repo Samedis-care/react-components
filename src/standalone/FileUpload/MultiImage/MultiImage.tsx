@@ -8,24 +8,22 @@ import React, {
 import ImageBox, { ImageBoxProps } from "./ImageBox";
 import GroupBox from "../../GroupBox";
 import {
-	DialogTitle,
-	DialogContent,
-	Grid,
-	Link,
-	Typography,
 	Dialog,
+	DialogContent,
+	DialogTitle,
+	Grid,
 	IconButton,
-	Theme,
+	Link,
+	styled,
+	Typography,
+	useThemeProps,
 } from "@mui/material";
 import { Close as CloseIcon } from "@mui/icons-material";
-import { Styles } from "@mui/styles";
-import makeStyles from "@mui/styles/makeStyles";
 import processImage, { IDownscaleProps } from "../../../utils/processImage";
-import makeThemeStyles from "../../../utils/makeThemeStyles";
 import ImageDialogEntry, { ImageDialogEntryProps } from "./ImageDialogEntry";
 import useCCTranslations from "../../../utils/useCCTranslations";
-import { ClassNameMap } from "@mui/styles/withStyles";
 import ImageDots from "./ImageDots";
+import combineClassNames from "../../../utils/combineClassNames";
 
 export interface MultiImageImage {
 	/**
@@ -133,9 +131,13 @@ export interface MultiImageProps {
 	 */
 	additionalDialogContent?: React.ReactNode[];
 	/**
+	 * custom CSS class to apply to root
+	 */
+	className?: string;
+	/**
 	 * Custom CSS styles
 	 */
-	classes?: ClassNameMap<keyof ReturnType<typeof useStyles>>;
+	classes?: Partial<Record<MultiImageClassKey, string>>;
 	/**
 	 * Custom CSS styles (sub-components)
 	 */
@@ -146,39 +148,39 @@ export interface MultiImageProps {
 	};
 }
 
-const useStyles = makeStyles(
-	{
-		uploadInput: {
-			display: "none",
-		},
-		clickable: {
-			cursor: "pointer",
-		},
-		rootContainer: {
-			height: "100%",
-		},
-		imageItem: {
-			height: "calc(100% - 1rem)",
-		},
-	},
-	{ name: "CcMultiImage" },
-);
+const Root = styled("div", {
+	name: "CcMultiImage",
+	slot: "root",
+})({});
 
-export type MultiImageClassKey = keyof ReturnType<typeof useStyles>;
+const UploadInput = styled("input", {
+	name: "CcMultiImage",
+	slot: "uploadInput",
+})({
+	display: "none",
+});
 
-export type MultiImageTheme = Partial<
-	Styles<Theme, MultiImageProps, MultiImageClassKey>
->;
+const RootContainer = styled(Grid, {
+	name: "CcMultiImage",
+	slot: "rootContainer",
+})({
+	height: "100%",
+});
 
-const useThemeStyles = makeThemeStyles<MultiImageProps, MultiImageClassKey>(
-	(theme) => theme.componentsCare?.fileUpload?.multiImage?.root,
-	"CcMultiImage",
-	useStyles,
-);
+const ImageItem = styled(Grid, { name: "CcMultiImage", slot: "imageItem" })({
+	height: "calc(100% - 1rem)",
+});
+
+export type MultiImageClassKey =
+	| "root"
+	| "uploadInput"
+	| "rootContainer"
+	| "imageItem";
 
 export const MultiImageNewIdPrefix = "MultiImage-New-";
 
-const MultiImage = (props: MultiImageProps) => {
+const MultiImage = (inProps: MultiImageProps) => {
+	const props = useThemeProps({ props: inProps, name: "CcMultiImage" });
 	const {
 		label,
 		name,
@@ -197,10 +199,11 @@ const MultiImage = (props: MultiImageProps) => {
 		onPrimaryChange,
 		subClasses,
 		onDelete,
+		className,
+		classes,
 	} = props;
 	const previewSize = props.previewSize ?? 256;
 	const { t } = useCCTranslations();
-	const classes = useThemeStyles(props);
 
 	const primaryImg = useMemo(
 		(): MultiImageImage | undefined =>
@@ -335,10 +338,10 @@ const MultiImage = (props: MultiImageProps) => {
 	);
 
 	return (
-		<>
+		<Root className={combineClassNames([className, classes?.root])}>
 			<GroupBox label={label}>
-				<Grid container spacing={1} className={classes.rootContainer}>
-					<Grid item xs={12} className={classes.imageItem}>
+				<RootContainer container spacing={1} className={classes?.rootContainer}>
+					<ImageItem item xs={12} className={classes?.imageItem}>
 						<ImageBox
 							image={
 								images[currentImage]?.image ?? placeholderImage ?? uploadImage
@@ -360,7 +363,7 @@ const MultiImage = (props: MultiImageProps) => {
 							}}
 							disableBackground
 						/>
-					</Grid>
+					</ImageItem>
 					<Grid
 						item
 						xs={12}
@@ -379,23 +382,23 @@ const MultiImage = (props: MultiImageProps) => {
 						{!readOnly && (
 							<Grid item>
 								<Typography variant={"body2"}>
-									<Link onClick={openDialog} className={classes.clickable}>
+									<Link onClick={openDialog} href={"#"}>
 										{editLabel ?? t("standalone.file-upload.multi-image.edit")}
 									</Link>
 								</Typography>
 							</Grid>
 						)}
 					</Grid>
-				</Grid>
+				</RootContainer>
 			</GroupBox>
-			<input
+			<UploadInput
 				type={"file"}
 				multiple={remainingFiles > 1}
 				accept={"image/*"}
 				capture={capture}
 				ref={fileUpload}
 				onChange={handleUpload}
-				className={classes.uploadInput}
+				className={classes?.uploadInput}
 			/>
 			{!readOnly && (
 				<>
@@ -464,7 +467,7 @@ const MultiImage = (props: MultiImageProps) => {
 					</Dialog>
 				</>
 			)}
-		</>
+		</Root>
 	);
 };
 

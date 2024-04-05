@@ -1,8 +1,8 @@
-import { Drawer, Paper, useTheme } from "@mui/material";
+import { Drawer, Paper, styled, useTheme, useThemeProps } from "@mui/material";
 import React, { useMemo } from "react";
-import makeStyles from "@mui/styles/makeStyles";
+import combineClassNames from "../../../utils/combineClassNames";
 
-interface IProps {
+export interface PortalLayoutMenuProps {
 	/**
 	 * Is the menu open? (if non-permanent)
 	 */
@@ -23,48 +23,68 @@ interface IProps {
 	 * The menu items
 	 */
 	items: React.ReactNode;
+	/**
+	 * class name to apply to drawer/paper
+	 */
+	className?: string;
+	/**
+	 * CSS classes
+	 */
+	classes?: Partial<Record<PortalLayoutMenuClassKey, string>>;
 }
 
 const modalProps = {
 	keepMounted: true, // Better open performance on mobile.
 };
 
-const useStyles = makeStyles(
-	{
-		menuPaper: (props: IProps) => ({
-			width: props.drawerWidth,
-			height: "100%",
-		}),
-	},
-	{ name: "CcPortalLayoutMenu" },
-);
+const MenuPaper = styled(Paper, {
+	name: "CcPortalLayoutMenu",
+	slot: "menuPaper",
+})({
+	height: "100%",
+});
 
-const PortalLayoutMenu = (props: IProps) => {
-	const { menuOpen, toggleMenu } = props;
+const MenuDrawer = styled(Drawer, {
+	name: "CcPortalLayoutMenu",
+	slot: "menuDrawer",
+})({});
+
+export type PortalLayoutMenuClassKey = "menuPaper" | "menuDrawer";
+
+const PortalLayoutMenu = (inProps: PortalLayoutMenuProps) => {
+	const props = useThemeProps({ props: inProps, name: "CcPortalLayoutMenu" });
+	const { menuOpen, toggleMenu, drawerWidth, className, classes } = props;
 	const theme = useTheme();
-	const classes = useStyles(props);
 
 	const paperProps = useMemo(
 		() => ({
-			className: classes.menuPaper,
+			style: { width: drawerWidth },
 		}),
-		[classes.menuPaper],
+		[drawerWidth],
 	);
 
 	if (!props.mobile) {
-		return <Paper {...paperProps}>{props.items}</Paper>;
+		return (
+			<MenuPaper
+				{...paperProps}
+				className={combineClassNames([className, classes?.menuPaper])}
+			>
+				{props.items}
+			</MenuPaper>
+		);
 	} else {
 		return (
-			<Drawer
+			<MenuDrawer
 				variant={"temporary"}
 				anchor={theme.direction === "rtl" ? "right" : "left"}
 				open={menuOpen}
 				onClose={toggleMenu}
 				PaperProps={paperProps}
 				ModalProps={modalProps}
+				className={combineClassNames([className, classes?.menuDrawer])}
 			>
 				{props.items}
-			</Drawer>
+			</MenuDrawer>
 		);
 	}
 };
