@@ -1,5 +1,5 @@
 import React from "react";
-interface IProps {
+export interface PortalLayoutMenuProps {
     /**
      * Is the menu open? (if non-permanent)
      */
@@ -20,6 +20,15 @@ interface IProps {
      * The menu items
      */
     items: React.ReactNode;
+    /**
+     * class name to apply to drawer/paper
+     */
+    className?: string;
+    /**
+     * CSS classes
+     */
+    classes?: Partial<Record<PortalLayoutMenuClassKey, string>>;
 }
-declare const _default: React.MemoExoticComponent<(props: IProps) => React.JSX.Element>;
+export type PortalLayoutMenuClassKey = "menuPaper" | "menuDrawer";
+declare const _default: React.MemoExoticComponent<(inProps: PortalLayoutMenuProps) => React.JSX.Element>;
 export default _default;

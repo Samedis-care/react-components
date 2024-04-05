@@ -1,84 +1,57 @@
 import React from "react";
-import { ListItemButton, ListItemIcon, ListItemText, } from "@mui/material";
-import withStyles from "@mui/styles/withStyles";
+import { ListItemButton, ListItemIcon, ListItemText, styled, useThemeProps, } from "@mui/material";
 import { ExpandLess, ExpandMore } from "@mui/icons-material";
-import makeStyles from "@mui/styles/makeStyles";
 import combineClassNames from "../../../../../utils/combineClassNames";
-const useStyles = makeStyles((theme) => ({
-    item: {
-        borderBottomRightRadius: "30px",
-        borderTopRightRadius: "30px",
-        width: "calc(100% - 20px)",
-    },
-    selectedItem: {
+const MyListItem = styled(ListItemButton, {
+    name: "CcMenuItemJumboReactDark",
+    slot: "root",
+})(({ theme }) => ({
+    borderBottomRightRadius: "30px",
+    borderTopRightRadius: "30px",
+    width: "calc(100% - 20px)",
+    color: "#a1a1a1",
+    "&.Mui-active": {
+        backgroundColor: theme.palette.primary.main,
         color: theme.palette.getContrastText(theme.palette.primary.main),
-        backgroundColor: theme.palette.primary.main,
     },
-    dot: {
-        width: 6,
-        height: 6,
-        backgroundColor: theme.palette.getContrastText(theme.palette.primary.main),
-        borderRadius: "50%",
-        top: "50%",
-    },
-}), { name: "CcPortalMenuItemDark" });
-const selectedListItemStyles = (theme) => ({
-    root: {
-        backgroundColor: theme.palette.primary.main,
+    "& .MuiListItemButton-button:hover": {
         color: "white",
-    },
-    button: {
-        "&:hover": {
+        backgroundColor: "#1d1d1d",
+        "&.Mui-active": {
             backgroundColor: theme.palette.primary.main,
         },
-    },
-});
-const unselectedListItemStyles = {
-    root: {
-        color: "#a1a1a1",
-    },
-    button: {
-        "&:hover": {
-            color: "white",
-            backgroundColor: "#1d1d1d",
-        },
-    },
-};
-const expandableListItemStyles = {
-    root: {
-        color: "#a1a1a1",
-    },
-    button: {
-        "&:hover": {
+        "&.Cc-expandable": {
             backgroundColor: "transparent",
         },
     },
-};
-const listIconStyles = {
-    root: {
-        color: "inherit",
-    },
-};
-const SelectedListItem = withStyles(selectedListItemStyles)(ListItemButton);
-const UnselectedListItem = withStyles(unselectedListItemStyles)(ListItemButton);
-const ExpandableListItem = withStyles(expandableListItemStyles)(ListItemButton);
-const StyledListItemIcon = withStyles(listIconStyles)(ListItemIcon);
+}));
+const StyledListItemIcon = styled(ListItemIcon, {
+    name: "CcMenuItemJumboReactDark",
+    slot: "icon",
+})({
+    color: "inherit",
+});
+const Dot = styled("div", { name: "CcMenuItemJumboReactDark", slot: "dot" })(({ theme }) => ({
+    width: 6,
+    height: 6,
+    backgroundColor: theme.palette.getContrastText(theme.palette.primary.main),
+    borderRadius: "50%",
+    top: "50%",
+}));
 const typographyProps = { variant: "body2" };
-const MenuItemJumboReactDark = (props) => {
-    const classes = useStyles();
+const MenuItemJumboReactDark = (inProps) => {
+    const props = useThemeProps({
+        props: inProps,
+        name: "CcMenuItemJumboReactDark",
+    });
     const Icon = props.icon;
-    const MyListItem = (props.expandable
-        ? ExpandableListItem
-        : props.active
-            ? SelectedListItem
-            : UnselectedListItem);
     return (React.createElement(MyListItem, { onClick: props.onClick, onAuxClick: props.onAuxClick, className: combineClassNames([
-            classes.item,
-            props.active && classes.selectedItem,
+            props.active && "Mui-active",
+            props.expandable && "Cc-expandable",
         ]) },
         React.createElement(StyledListItemIcon, null, Icon && React.createElement(Icon, null)),
-        React.createElement(ListItemText, { primary: props.title, primaryTypographyProps: typographyProps }),
+        React.createElement(ListItemText, { primary: props.title, primaryTypographyProps: props.typographyProps ?? typographyProps }),
         props.expandable && (props.expanded ? React.createElement(ExpandLess, null) : React.createElement(ExpandMore, null)),
-        props.active && React.createElement("div", { className: classes.dot })));
+        props.active && React.createElement(Dot, null)));
 };
 export default React.memo(MenuItemJumboReactDark);

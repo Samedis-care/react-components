@@ -1,61 +1,89 @@
 import React, { useCallback } from "react";
-import { Grid, Tooltip, Typography } from "@mui/material";
-import { InsertDriveFile as DefaultFileIcon, CancelOutlined as CancelIcon, Cancel as CancelIconList, } from "@mui/icons-material";
-import makeStyles from "@mui/styles/makeStyles";
+import { Grid, styled, Tooltip, Typography, useThemeProps, } from "@mui/material";
+import { Cancel as CancelIconList, CancelOutlined as CancelIcon, InsertDriveFile as DefaultFileIcon, } from "@mui/icons-material";
 import { ArchiveFileIcon, AudioFileIcon, CodeFileIcon, CsvFileIcon, ExcelFileIcon, ImageFileIcon, PdfFileIcon, PowerPointFileIcon, TextFileIcon, VideoFileIcon, WordFileIcon, } from "../FileIcons";
 import dataToFile from "../../../utils/dataToFile";
 import combineClassNames from "../../../utils/combineClassNames";
 import getFileExt from "../../../utils/getFileExt";
-const useStyles = makeStyles((theme) => ({
-    iconContainer: {
-        position: "relative",
-    },
-    closeIcon: {
-        position: "absolute",
-        cursor: "pointer",
-        color: theme.palette.error.main,
-    },
-    closeIconList: {
-        width: "auto",
-        position: "static",
-        cursor: "pointer",
-        color: theme.palette.action.active,
-    },
-    icon: {
-        width: "100%",
-        height: "auto",
-        marginTop: 16,
-        objectFit: "contain",
-    },
-    iconList: {
-        height: "100%",
-        width: "auto",
-        color: theme.palette.error.main,
-    },
-    iconDisabled: {
+const CompactListWrapper = styled(Grid, {
+    name: "CcFile",
+    slot: "compactListWrapper",
+})({
+    maxWidth: "100%",
+});
+const IconContainer = styled(Grid, { name: "CcFile", slot: "iconContainer" })({
+    position: "relative",
+});
+const ListEntryText = styled(Grid, { name: "CcFile", slot: "listEntryText" })({
+    minWidth: 0,
+    position: "relative",
+});
+const CloseIconList = styled(CancelIconList, {
+    name: "CcFile",
+    slot: "closeIconList",
+})(({ theme }) => ({
+    width: "auto",
+    position: "static",
+    cursor: "pointer",
+    color: theme.palette.action.active,
+}));
+const CloseIcon = styled(CancelIcon, {
+    name: "CcFile",
+    slot: "closeIcon",
+})(({ theme }) => ({
+    position: "absolute",
+    cursor: "pointer",
+    color: theme.palette.error.main,
+}));
+const IconWrapperList = styled("div", {
+    name: "CcFile",
+    slot: "iconWrapperList",
+})(({ theme }) => ({
+    height: "100%",
+    width: "auto",
+    color: theme.palette.error.main,
+    "&.Mui-disabled": {
         opacity: 0.5,
     },
-    listEntryText: {
-        minWidth: 0,
-        position: "relative",
-    },
-    listLabel: {
-        position: "absolute",
-        maxWidth: "100%",
-    },
-    compactListWrapper: {
-        maxWidth: "100%",
-    },
-    clickable: {
+    "&.Mui-active": {
         cursor: "pointer",
     },
-    downloadLink: {
+}));
+const IconWrapper = styled("div", {
+    name: "CcFile",
+    slot: "iconWrapper",
+})({
+    width: "100%",
+    height: "auto",
+    marginTop: 16,
+    objectFit: "contain",
+});
+const StyledLabelList = styled(Typography, {
+    name: "CcFile",
+    slot: "listLabel",
+})({
+    position: "absolute",
+    maxWidth: "100%",
+    "&.Mui-active": {
         cursor: "pointer",
         "&:hover": {
             textDecoration: "underline",
         },
     },
-}), { name: "CcFile" });
+});
+const StyledLabel = styled(Typography, {
+    name: "CcFile",
+    slot: "label",
+})({
+    position: "absolute",
+    maxWidth: "100%",
+    "&.Mui-active": {
+        cursor: "pointer",
+        "&:hover": {
+            textDecoration: "underline",
+        },
+    },
+});
 export const ExcelFileExtensions = [
     "xlsx",
     "xlsm",
@@ -162,9 +190,9 @@ export const getFileIcon = (nameOrMime) => {
     }
 };
 export const getFileIconOrDefault = (nameOrMime) => getFileIcon(nameOrMime) ?? DefaultFileIcon;
-const File = (props) => {
-    const { downloadLink, variant } = props;
-    const classes = useStyles(props);
+const File = (inProps) => {
+    const props = useThemeProps({ props: inProps, name: "CcFile" });
+    const { downloadLink, variant, className, classes } = props;
     const FileIcon = getFileIconOrDefault(props.name);
     const openDownload = useCallback(() => {
         if (downloadLink) {
@@ -182,56 +210,63 @@ const File = (props) => {
         evt.stopPropagation();
     }, []);
     const isList = variant === "list" || variant === "compact-list" || variant === "icon-only";
-    const renderIcon = () => props.preview ? (React.createElement("img", { src: props.preview, alt: props.name, className: combineClassNames([
-            isList ? classes.iconList : classes.icon,
-            props.disabled && classes.iconDisabled,
-            downloadLink && classes.clickable,
-        ]), onClick: openDownload, style: { height: props.size } })) : (React.createElement(FileIcon, { className: combineClassNames([
-            isList ? classes.iconList : classes.icon,
-            downloadLink && classes.clickable,
-        ]), onClick: openDownload, style: { height: props.size } }));
-    const renderName = () => (React.createElement(Tooltip, { title: props.name },
-        React.createElement(Typography, { align: isList ? "left" : "center", noWrap: true, className: combineClassNames([
-                downloadLink && classes.downloadLink,
-                variant === "list" && classes.listLabel,
-            ]), onClick: openDownload, variant: "body2", style: isList
-                ? {
-                    lineHeight: `${props.size}px`,
-                }
-                : undefined }, props.name)));
+    const renderIcon = () => {
+        const IconWrapperComp = isList ? IconWrapperList : IconWrapper;
+        return (React.createElement(IconWrapperComp, { className: combineClassNames([
+                isList ? classes?.iconWrapperList : classes?.iconWrapper,
+                props.disabled && "Mui-disabled",
+                downloadLink && "Mui-active",
+            ]) }, props.preview ? (React.createElement("img", { src: props.preview, alt: props.name, onClick: openDownload, style: { height: props.size } })) : (React.createElement(FileIcon, { onClick: openDownload, style: { height: props.size } }))));
+    };
+    const renderName = () => {
+        const TypographyComp = variant === "list" ? StyledLabelList : StyledLabel;
+        return (React.createElement(Tooltip, { title: props.name },
+            React.createElement(TypographyComp, { align: isList ? "left" : "center", noWrap: true, className: combineClassNames([
+                    variant === "list" ? classes?.listLabel : classes?.label,
+                    downloadLink && "Mui-active",
+                ]), onClick: openDownload, variant: "body2", style: isList
+                    ? {
+                        lineHeight: `${props.size}px`,
+                    }
+                    : undefined }, props.name)));
+    };
     const removeBtn = props.onRemove &&
         !props.disabled &&
-        React.createElement(variant === "list" ? CancelIconList : CancelIcon, {
+        React.createElement(variant === "list"
+            ? CloseIconList
+            : variant === "box"
+                ? CloseIcon
+                : CancelIcon, {
             className: combineClassNames([
-                variant === "box" && classes.closeIcon,
-                variant === "list" && classes.closeIconList,
+                variant === "box" && classes?.closeIcon,
+                variant === "list" && classes?.closeIconList,
             ]),
             onClick: props.onRemove,
             style: variant === "list" ? { height: props.size } : undefined,
         });
     if (variant === "box") {
-        return (React.createElement(Grid, { item: true, style: { width: props.size } },
+        return (React.createElement(Grid, { item: true, className: className, style: { width: props.size } },
             React.createElement(Grid, { container: true, spacing: 2 },
-                React.createElement(Grid, { item: true, xs: 12, className: classes.iconContainer },
+                React.createElement(IconContainer, { item: true, xs: 12, className: classes?.iconContainer },
                     removeBtn,
                     renderIcon()),
                 React.createElement(Grid, { item: true, xs: 12 }, renderName()))));
     }
     else if (variant === "list") {
-        return (React.createElement(Grid, { item: true, xs: 12, onClick: handleListClick, container: true, spacing: 2, alignItems: "stretch", wrap: "nowrap" },
+        return (React.createElement(Grid, { item: true, xs: 12, onClick: handleListClick, container: true, spacing: 2, alignItems: "stretch", wrap: "nowrap", className: className },
             React.createElement(Grid, { item: true }, renderIcon()),
-            React.createElement(Grid, { item: true, xs: true, className: classes.listEntryText }, renderName()),
+            React.createElement(ListEntryText, { item: true, xs: true, className: classes?.listEntryText }, renderName()),
             removeBtn && React.createElement(Grid, { item: true }, removeBtn)));
     }
     else if (variant === "compact-list") {
-        return (React.createElement(Grid, { item: true, onClick: handleListClick, className: classes.compactListWrapper },
+        return (React.createElement(CompactListWrapper, { item: true, onClick: handleListClick, className: combineClassNames([className, classes?.compactListWrapper]) },
             React.createElement(Grid, { container: true, spacing: 2, alignItems: "stretch", wrap: "nowrap" },
                 React.createElement(Grid, { item: true }, renderIcon()),
-                React.createElement(Grid, { item: true, className: classes.listEntryText }, renderName()),
+                React.createElement(ListEntryText, { item: true, className: classes?.listEntryText }, renderName()),
                 removeBtn && React.createElement(Grid, { item: true }, removeBtn))));
     }
     else if (variant === "icon-only") {
-        return (React.createElement(Grid, { item: true, onClick: handleListClick, className: classes.compactListWrapper },
+        return (React.createElement(CompactListWrapper, { item: true, onClick: handleListClick, className: combineClassNames([className, classes?.compactListWrapper]) },
             React.createElement(Grid, { container: true, spacing: 2, alignItems: "stretch", wrap: "nowrap" },
                 React.createElement(Grid, { item: true },
                     React.createElement(Tooltip, { title: props.name },

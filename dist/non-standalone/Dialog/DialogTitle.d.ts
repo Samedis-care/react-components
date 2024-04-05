@@ -7,5 +7,14 @@ export interface DialogTitleProps {
      * special CSS which puts buttons on the right floating
      */
     noTitle?: boolean;
+    /**
+     * css class to apply to root
+     */
+    className?: string;
+    /**
+     * custom CSS styles
+     */
+    classes?: Partial<Record<DialogTitleClassKey, string>>;
 }
-export declare const DialogTitle: React.MemoExoticComponent<(props: DialogTitleProps) => React.JSX.Element>;
+export type DialogTitleClassKey = "root" | "textWrapper" | "text" | "closeButton";
+export declare const DialogTitle: React.MemoExoticComponent<(inProps: DialogTitleProps) => React.JSX.Element>;

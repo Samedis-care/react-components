@@ -1,35 +1,38 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState, } from "react";
 import ImageBox from "./ImageBox";
 import GroupBox from "../../GroupBox";
-import { DialogTitle, DialogContent, Grid, Link, Typography, Dialog, IconButton, } from "@mui/material";
+import { Dialog, DialogContent, DialogTitle, Grid, IconButton, Link, styled, Typography, useThemeProps, } from "@mui/material";
 import { Close as CloseIcon } from "@mui/icons-material";
-import makeStyles from "@mui/styles/makeStyles";
 import processImage from "../../../utils/processImage";
-import makeThemeStyles from "../../../utils/makeThemeStyles";
 import ImageDialogEntry from "./ImageDialogEntry";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import ImageDots from "./ImageDots";
-const useStyles = makeStyles({
-    uploadInput: {
-        display: "none",
-    },
-    clickable: {
-        cursor: "pointer",
-    },
-    rootContainer: {
-        height: "100%",
-    },
-    imageItem: {
-        height: "calc(100% - 1rem)",
-    },
-}, { name: "CcMultiImage" });
-const useThemeStyles = makeThemeStyles((theme) => theme.componentsCare?.fileUpload?.multiImage?.root, "CcMultiImage", useStyles);
+import combineClassNames from "../../../utils/combineClassNames";
+const Root = styled("div", {
+    name: "CcMultiImage",
+    slot: "root",
+})({});
+const UploadInput = styled("input", {
+    name: "CcMultiImage",
+    slot: "uploadInput",
+})({
+    display: "none",
+});
+const RootContainer = styled(Grid, {
+    name: "CcMultiImage",
+    slot: "rootContainer",
+})({
+    height: "100%",
+});
+const ImageItem = styled(Grid, { name: "CcMultiImage", slot: "imageItem" })({
+    height: "calc(100% - 1rem)",
+});
 export const MultiImageNewIdPrefix = "MultiImage-New-";
-const MultiImage = (props) => {
-    const { label, name, editLabel, additionalDialogContent, images, primary, placeholderImage, uploadImage, readOnly, maxImages, capture, convertImagesTo, downscale, onChange, onPrimaryChange, subClasses, onDelete, } = props;
+const MultiImage = (inProps) => {
+    const props = useThemeProps({ props: inProps, name: "CcMultiImage" });
+    const { label, name, editLabel, additionalDialogContent, images, primary, placeholderImage, uploadImage, readOnly, maxImages, capture, convertImagesTo, downscale, onChange, onPrimaryChange, subClasses, onDelete, className, classes, } = props;
     const previewSize = props.previewSize ?? 256;
     const { t } = useCCTranslations();
-    const classes = useThemeStyles(props);
     const primaryImg = useMemo(() => images.find((img) => img.id === primary) ?? images[0], [images, primary]);
     // images.indexOf(undefined) works and returns -1
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -122,10 +125,10 @@ const MultiImage = (props) => {
             return;
         onPrimaryChange(name, id);
     }, [onPrimaryChange, name]);
-    return (React.createElement(React.Fragment, null,
+    return (React.createElement(Root, { className: combineClassNames([className, classes?.root]) },
         React.createElement(GroupBox, { label: label },
-            React.createElement(Grid, { container: true, spacing: 1, className: classes.rootContainer },
-                React.createElement(Grid, { item: true, xs: 12, className: classes.imageItem },
+            React.createElement(RootContainer, { container: true, spacing: 1, className: classes?.rootContainer },
+                React.createElement(ImageItem, { item: true, xs: 12, className: classes?.imageItem },
                     React.createElement(ImageBox, { image: images[currentImage]?.image ?? placeholderImage ?? uploadImage, fileName: images[currentImage]?.name, onPrevImage: currentImage <= 0 ? undefined : showPrevImage, onNextImage: currentImage < images.length - 1 ? showNextImage : undefined, onFilesDropped: readOnly ? undefined : handlePreviewDrop, onClick: images[currentImage] ? undefined : readOnly ? null : startUpload, classes: subClasses?.imageBox, imageDots: {
                             total: images.length,
                             active: currentImage,
@@ -136,8 +139,8 @@ const MultiImage = (props) => {
                         React.createElement(ImageDots, { total: images.length, active: currentImage, setActive: setCurrentImage })),
                     !readOnly && (React.createElement(Grid, { item: true },
                         React.createElement(Typography, { variant: "body2" },
-                            React.createElement(Link, { onClick: openDialog, className: classes.clickable }, editLabel ?? t("standalone.file-upload.multi-image.edit")))))))),
-        React.createElement("input", { type: "file", multiple: remainingFiles > 1, accept: "image/*", capture: capture, ref: fileUpload, onChange: handleUpload, className: classes.uploadInput }),
+                            React.createElement(Link, { onClick: openDialog, href: "#" }, editLabel ?? t("standalone.file-upload.multi-image.edit")))))))),
+        React.createElement(UploadInput, { type: "file", multiple: remainingFiles > 1, accept: "image/*", capture: capture, ref: fileUpload, onChange: handleUpload, className: classes?.uploadInput }),
         !readOnly && (React.createElement(React.Fragment, null,
             React.createElement(Dialog, { open: dialogOpen, onClose: closeDialog, maxWidth: "lg", fullWidth: !previewSize },
                 React.createElement(DialogTitle, null,

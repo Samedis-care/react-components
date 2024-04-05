@@ -1,4 +1,9 @@
 import React from "react";
 import { MenuItemProps } from "../../../Menu";
-declare const _default: React.MemoExoticComponent<(props: MenuItemProps) => React.JSX.Element>;
+import { TypographyProps } from "@mui/material";
+export type MenuItemJumboReactLightClassKey = "root" | "dot";
+export interface MenuItemJumboReactLightProps {
+    typographyProps?: TypographyProps;
+}
+declare const _default: React.MemoExoticComponent<(inProps: MenuItemProps & MenuItemJumboReactLightProps) => React.JSX.Element>;
 export default _default;

@@ -1,10 +1,7 @@
 import React from "react";
 import { ImageBoxProps } from "./ImageBox";
-import { Theme } from "@mui/material";
-import { Styles } from "@mui/styles";
 import { IDownscaleProps } from "../../../utils/processImage";
 import { ImageDialogEntryProps } from "./ImageDialogEntry";
-import { ClassNameMap } from "@mui/styles/withStyles";
 export interface MultiImageImage {
     /**
      * A unique identifier for the image
@@ -107,9 +104,13 @@ export interface MultiImageProps {
      */
     additionalDialogContent?: React.ReactNode[];
     /**
+     * custom CSS class to apply to root
+     */
+    className?: string;
+    /**
      * Custom CSS styles
      */
-    classes?: ClassNameMap<keyof ReturnType<typeof useStyles>>;
+    classes?: Partial<Record<MultiImageClassKey, string>>;
     /**
      * Custom CSS styles (sub-components)
      */
@@ -119,9 +120,7 @@ export interface MultiImageProps {
         imageDialogEntrySubClasses?: ImageDialogEntryProps["subClasses"];
     };
 }
-declare const useStyles: (props?: any) => ClassNameMap<"clickable" | "uploadInput" | "rootContainer" | "imageItem">;
-export type MultiImageClassKey = keyof ReturnType<typeof useStyles>;
-export type MultiImageTheme = Partial<Styles<Theme, MultiImageProps, MultiImageClassKey>>;
+export type MultiImageClassKey = "root" | "uploadInput" | "rootContainer" | "imageItem";
 export declare const MultiImageNewIdPrefix = "MultiImage-New-";
-declare const _default: React.MemoExoticComponent<(props: MultiImageProps) => React.JSX.Element>;
+declare const _default: React.MemoExoticComponent<(inProps: MultiImageProps) => React.JSX.Element>;
 export default _default;

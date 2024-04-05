@@ -3,7 +3,7 @@ import { MenuTheme } from "./standalone/Portal/Menu";
 import { MenuItemTheme } from "./standalone/Portal/MenuItem/Material";
 import { FileUploadProps } from "./standalone/FileUpload/Generic";
 import { ImageSelectorProps } from "./standalone/FileUpload/Image/ImageSelector";
-import { MultiImageTheme } from "./standalone/FileUpload/MultiImage/MultiImage";
+import { MultiImageClassKey, MultiImageProps } from "./standalone/FileUpload/MultiImage/MultiImage";
 import { BaseSelectorClassKey, BaseSelectorData, BaseSelectorProps, HowToBoxClassKey, HowToBoxProps, MultiSelectClassKey, MultiSelectorData, MultiSelectProps } from "./standalone";
 import { ComponentWithLabelTheme } from "./standalone/UIKit/ComponentWithLabel";
 import { CheckboxTheme } from "./standalone/UIKit/Checkbox";
@@ -29,6 +29,13 @@ import { ImageDotsClassKey, ImageDotsProps } from "./standalone/FileUpload/Multi
 import { ImageBoxClassKey, ImageBoxProps } from "./standalone/FileUpload/MultiImage/ImageBox";
 import { ImageDialogEntryClassKey, ImageDialogEntryProps } from "./standalone/FileUpload/MultiImage/ImageDialogEntry";
 import { CollapsibleMenuClassKey, CollapsibleMenuProps } from "./standalone/Portal/CollapsibleMenu";
+import { CenteredTypographyClassKey, CenteredTypographyProps } from "./standalone/UIKit/CenteredTypography";
+import { PortalLayoutMenuClassKey, PortalLayoutMenuProps } from "./standalone/Portal/Layout/Menu";
+import { SignPadDialogClassKey, SignPadDialogProps } from "./non-standalone/Dialog/SignPadDialog";
+import { DialogTitleClassKey, DialogTitleProps } from "./non-standalone/Dialog/DialogTitle";
+import { MenuItemJumboReactLightClassKey, MenuItemJumboReactLightProps } from "./standalone/Portal/MenuItem/JumboReact/Light";
+import { MenuItemJumboReactDarkClassKey, MenuItemJumboReactDarkProps } from "./standalone/Portal/MenuItem/JumboReact/Dark";
+import { FileClassKey, FileProps } from "./standalone/FileUpload/Generic/File";
 export interface ComponentsCareTheme {
     dataGrid?: DataGridTheme;
     dataGridExpert?: DataGridThemeExpert;
@@ -42,9 +49,6 @@ export interface ComponentsCareTheme {
         };
         image?: {
             defaultVariant?: ImageSelectorProps["variant"];
-        };
-        multiImage?: {
-            root?: MultiImageTheme;
         };
     };
     uiKit?: {
@@ -88,6 +92,14 @@ declare module "@mui/material/styles" {
         CcImageBox: ImageBoxClassKey;
         CcImageDialogEntry: ImageDialogEntryClassKey;
         CcCollapsibleMenu: CollapsibleMenuClassKey;
+        CcCenteredTypography: CenteredTypographyClassKey;
+        CcMultiImage: MultiImageClassKey;
+        CcPortalLayoutMenu: PortalLayoutMenuClassKey;
+        CcSignPadDialog: SignPadDialogClassKey;
+        CcMenuItemJumboReactLight: MenuItemJumboReactLightClassKey;
+        CcMenuItemJumboReactDark: MenuItemJumboReactDarkClassKey;
+        CcFile: FileClassKey;
+        CcDialogTitle: DialogTitleClassKey;
     }
     interface ComponentsPropsList {
         CcSignalPortlet: Partial<SignalPortletProps>;
@@ -113,6 +125,14 @@ declare module "@mui/material/styles" {
         CcImageBox: Partial<ImageBoxProps>;
         CcImageDialogEntry: Partial<ImageDialogEntryProps>;
         CcCollapsibleMenu: Partial<CollapsibleMenuProps>;
+        CcCenteredTypography: Partial<CenteredTypographyProps>;
+        CcMultiImage: Partial<MultiImageProps>;
+        CcPortalLayoutMenu: Partial<PortalLayoutMenuProps>;
+        CcSignPadDialog: Partial<SignPadDialogProps>;
+        CcMenuItemJumboReactLight: Partial<MenuItemJumboReactLightProps>;
+        CcMenuItemJumboReactDark: Partial<MenuItemJumboReactDarkProps>;
+        CcFile: Partial<FileProps>;
+        CcDialogTitle: Partial<DialogTitleProps>;
     }
     interface Components {
         CcSignalPortlet?: {
@@ -229,6 +249,46 @@ declare module "@mui/material/styles" {
             defaultProps?: ComponentsPropsList["CcCollapsibleMenu"];
             styleOverrides?: ComponentsOverrides<Theme>["CcCollapsibleMenu"];
             variants?: ComponentsVariants["CcCollapsibleMenu"];
+        };
+        CcCenteredTypography?: {
+            defaultProps?: ComponentsPropsList["CcCenteredTypography"];
+            styleOverrides?: ComponentsOverrides<Theme>["CcCenteredTypography"];
+            variants?: ComponentsVariants["CcCenteredTypography"];
+        };
+        CcMultiImage?: {
+            defaultProps?: ComponentsPropsList["CcMultiImage"];
+            styleOverrides?: ComponentsOverrides<Theme>["CcMultiImage"];
+            variants?: ComponentsVariants["CcMultiImage"];
+        };
+        CcPortalLayoutMenu?: {
+            defaultProps?: ComponentsPropsList["CcPortalLayoutMenu"];
+            styleOverrides?: ComponentsOverrides<Theme>["CcPortalLayoutMenu"];
+            variants?: ComponentsVariants["CcPortalLayoutMenu"];
+        };
+        CcSignPadDialog?: {
+            defaultProps?: ComponentsPropsList["CcSignPadDialog"];
+            styleOverrides?: ComponentsOverrides<Theme>["CcSignPadDialog"];
+            variants?: ComponentsVariants["CcSignPadDialog"];
+        };
+        CcMenuItemJumboReactLight?: {
+            defaultProps?: ComponentsPropsList["CcMenuItemJumboReactLight"];
+            styleOverrides?: ComponentsOverrides<Theme>["CcMenuItemJumboReactLight"];
+            variants?: ComponentsVariants["CcMenuItemJumboReactLight"];
+        };
+        CcMenuItemJumboReactDark?: {
+            defaultProps?: ComponentsPropsList["CcMenuItemJumboReactDark"];
+            styleOverrides?: ComponentsOverrides<Theme>["CcMenuItemJumboReactDark"];
+            variants?: ComponentsVariants["CcMenuItemJumboReactDark"];
+        };
+        CcFile?: {
+            defaultProps?: ComponentsPropsList["CcFile"];
+            styleOverrides?: ComponentsOverrides<Theme>["CcFile"];
+            variants?: ComponentsVariants["CcFile"];
+        };
+        CcDialogTitle?: {
+            defaultProps?: ComponentsPropsList["CcDialogTitle"];
+            styleOverrides?: ComponentsOverrides<Theme>["CcDialogTitle"];
+            variants?: ComponentsVariants["CcDialogTitle"];
         };
     }
 }

@@ -26,9 +26,13 @@ export interface FileProps {
      */
     downloadLink?: string;
     /**
+     * CSS class to apply to root element
+     */
+    className?: string;
+    /**
      * Custom styles
      */
-    classes?: Partial<ReturnType<typeof useStyles>>;
+    classes?: Partial<Record<FileClassKey, string>>;
     /**
      * Display file as...
      * - box: Box with label below
@@ -38,7 +42,7 @@ export interface FileProps {
      */
     variant: "box" | "list" | "compact-list" | "icon-only";
 }
-declare const useStyles: (props?: any) => import("@mui/styles").ClassNameMap<"iconContainer" | "icon" | "closeIcon" | "closeIconList" | "iconList" | "iconDisabled" | "listEntryText" | "listLabel" | "compactListWrapper" | "clickable" | "downloadLink">;
+export type FileClassKey = "compactListWrapper" | "iconContainer" | "listEntryText" | "closeIconList" | "closeIcon" | "iconWrapperList" | "iconWrapper" | "listLabel" | "label";
 export declare const ExcelFileExtensions: string[];
 export declare const WordFileExtensions: string[];
 export declare const PowerPointFileExtensions: string[];
@@ -55,5 +59,5 @@ export declare const VideoMimeType: RegExp;
 export declare const PdfFileExtensions: string[];
 export declare const getFileIcon: (nameOrMime: string) => React.ComponentType<SvgIconProps> | null;
 export declare const getFileIconOrDefault: (nameOrMime: string) => React.ComponentType<SvgIconProps>;
-declare const _default: React.MemoExoticComponent<(props: FileProps) => React.JSX.Element>;
+declare const _default: React.MemoExoticComponent<(inProps: FileProps) => React.JSX.Element>;
 export default _default;

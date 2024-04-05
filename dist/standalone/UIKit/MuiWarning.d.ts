@@ -27,7 +27,7 @@ export declare const FormLabelCC: React.ComponentType<import("@mui/material").Fo
 } & MuiWarningResultProps>;
 export declare const FormHelperTextCC: React.ComponentType<import("@mui/material").FormHelperTextOwnProps & import("@mui/material/OverridableComponent").CommonProps & Omit<Omit<React.DetailedHTMLProps<React.HTMLAttributes<HTMLParagraphElement>, HTMLParagraphElement>, "ref"> & {
     ref?: ((instance: HTMLParagraphElement | null) => void) | React.RefObject<HTMLParagraphElement> | null | undefined;
-}, "className" | "style" | "classes" | "children" | "sx" | "disabled" | "required" | "error" | "margin" | "filled" | "variant" | "focused"> & {
+}, "className" | "style" | "classes" | "children" | "sx" | "disabled" | "required" | "error" | "margin" | "variant" | "filled" | "focused"> & {
     component?: React.ElementType<any> | undefined;
 } & MuiWarningResultProps>;
 export declare const TextFieldCC: React.ComponentType<TextFieldProps & MuiWarningResultProps>;
