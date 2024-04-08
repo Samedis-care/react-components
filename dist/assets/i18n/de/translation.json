@@ -20,7 +20,7 @@
 					"any": "Beliebiger Wert"
 				},
 				"set-filter": {
-					"search": "Suche...",
+					"search": "Suche…",
 					"select-all": "Alle auswählen",
 					"invert": "Alle anzeigen außer…"
 				},
@@ -96,7 +96,7 @@
 				"close-icon-text": "Schließen",
 				"open-icon-text": "Öffnen",
 				"clear-icon-text": "Leeren",
-				"loading-text": "Lade...",
+				"loading-text": "Lade…",
 				"start-typing-to-search-text": "Gib eine Suchzeichenfolge ein, um Ergebnisse zu erhalten",
 				"lru-label": "Zuletzt verwendet",
 				"selected": "AUSGEWÄHLT"
@@ -159,7 +159,7 @@
 	},
 	"non-standalone": {
 		"dialog": {
-			"okay": "Okay",
+			"okay": "OK",
 			"dialog-title": {
 				"close": "Schließen"
 			}
@@ -230,7 +230,7 @@
 					"title": "Fehler",
 					"message": "Das Löschen der ausgewählten Einträge ist fehlgeschlagen: {{ERROR}}",
 					"buttons": {
-						"okay": "Okay"
+						"okay": "OK"
 					}
 				}
 			}
@@ -238,7 +238,7 @@
 		"form": {
 			"back-on-dirty": {
 				"title": "Seite verlassen?",
-				"message": "Alle nicht gespeicherten Änderungen gehen verloren!",
+				"message": "Alle nicht gespeicherten Änderungen gehen verloren",
 				"yes": "Ja",
 				"no": "Nein"
 			},
@@ -253,7 +253,7 @@
 			}
 		},
 		"selector": {
-			"loading": "Wird geladen...",
+			"loading": "Wird geladen…",
 			"loading-error": "Fehler beim Abrufen der Daten"
 		},
 		"crud": {
@@ -313,7 +313,7 @@
 		"buttons": {
 			"save": "Speichern",
 			"back": "Zurück",
-			"ok": "Okay",
+			"ok": "OK",
 			"next": "Weiter",
 			"cancel": "Abbrechen",
 			"finish": "Abschließen",
