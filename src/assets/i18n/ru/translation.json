@@ -20,7 +20,7 @@
 					"any": "Любое значение"
 				},
 				"set-filter": {
-					"search": "Поиск...",
+					"search": "Поиск…",
 					"select-all": "Выбрать все",
 					"invert": "Показать все, кроме…"
 				},
@@ -96,7 +96,7 @@
 				"close-icon-text": "Закрыть",
 				"open-icon-text": "Открыть",
 				"clear-icon-text": "Очистить",
-				"loading-text": "Загрузка...",
+				"loading-text": "Загрузка…",
 				"start-typing-to-search-text": "Введите строку поиска, чтобы получить результаты",
 				"lru-label": "Последний недавно использованный",
 				"selected": "ВЫБРАН"
@@ -159,7 +159,7 @@
 	},
 	"non-standalone": {
 		"dialog": {
-			"okay": "ОК",
+			"okay": "OK",
 			"dialog-title": {
 				"close": "Закрыть"
 			}
@@ -230,7 +230,7 @@
 					"title": "Ошибка",
 					"message": "Не удалось удалить выбранные записи: {{ERROR}}",
 					"buttons": {
-						"okay": "ОК"
+						"okay": "OK"
 					}
 				}
 			}
@@ -253,7 +253,7 @@
 			}
 		},
 		"selector": {
-			"loading": "Загружается...",
+			"loading": "Загружается…",
 			"loading-error": "Ошибка при получении данных"
 		},
 		"crud": {
@@ -313,7 +313,7 @@
 		"buttons": {
 			"save": "Сохранить",
 			"back": "Назад",
-			"ok": "ОК",
+			"ok": "OK",
 			"next": "Следующий",
 			"cancel": "Отмена",
 			"finish": "Закончить",
