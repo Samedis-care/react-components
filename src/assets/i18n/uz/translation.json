@@ -20,7 +20,7 @@
 					"any": "Har qanday qiymat"
 				},
 				"set-filter": {
-					"search": "Qidirmoq...",
+					"search": "Qidirmoq…",
 					"select-all": "Hammasini belgilash",
 					"invert": "Barchasini ko'rsatish…"
 				},
@@ -96,7 +96,7 @@
 				"close-icon-text": "Yoping",
 				"open-icon-text": "Ochiq",
 				"clear-icon-text": "Bo'shatish",
-				"loading-text": "Yuklanmoqda...",
+				"loading-text": "Yuklanmoqda…",
 				"start-typing-to-search-text": "Natija olish uchun qidiruv qatorini kiriting",
 				"lru-label": "Oxirgi marta ishlatilgan",
 				"selected": "TANLANGAN"
@@ -159,7 +159,7 @@
 	},
 	"non-standalone": {
 		"dialog": {
-			"okay": "xop",
+			"okay": "OK",
 			"dialog-title": {
 				"close": "Yoping"
 			}
@@ -253,7 +253,7 @@
 			}
 		},
 		"selector": {
-			"loading": "Yuklanmoqda ...",
+			"loading": "Yuklanmoqda…",
 			"loading-error": "Ma'lumotlarni olishda xatolik yuz berdi"
 		},
 		"crud": {
@@ -313,7 +313,7 @@
 		"buttons": {
 			"save": "Saqlash",
 			"back": "Orqaga",
-			"ok": "xop",
+			"ok": "OK",
 			"next": "Keyingisi",
 			"cancel": "Bekor qilish",
 			"finish": "Tugatish",
