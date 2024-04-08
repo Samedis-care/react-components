@@ -20,7 +20,7 @@
 					"any": "De n'importe quelle valeur"
 				},
 				"set-filter": {
-					"search": "Chercher...",
+					"search": "Chercher…",
 					"select-all": "Tout sélectionner",
 					"invert": "Afficher tout sauf…"
 				},
@@ -96,7 +96,7 @@
 				"close-icon-text": "Fermer",
 				"open-icon-text": "Ouvrir",
 				"clear-icon-text": "À vider",
-				"loading-text": "Chargement...",
+				"loading-text": "Chargement…",
 				"start-typing-to-search-text": "Entrez une chaîne de recherche pour obtenir des résultats",
 				"lru-label": "Dernière utilisation récente",
 				"selected": "CHOISI"
@@ -159,7 +159,7 @@
 	},
 	"non-standalone": {
 		"dialog": {
-			"okay": "D'accord",
+			"okay": "OK",
 			"dialog-title": {
 				"close": "Fermer"
 			}
@@ -230,7 +230,7 @@
 					"title": "Erreur",
 					"message": "Echec de la suppression des entrées sélectionnées : {{ERROR}}",
 					"buttons": {
-						"okay": "Ok"
+						"okay": "OK"
 					}
 				}
 			}
@@ -253,7 +253,7 @@
 			}
 		},
 		"selector": {
-			"loading": "Chargement...",
+			"loading": "Chargement…",
 			"loading-error": "Erreur lors de la récupération des données"
 		},
 		"crud": {
@@ -313,7 +313,7 @@
 		"buttons": {
 			"save": "Sauvegarder",
 			"back": "Retour",
-			"ok": "Ok",
+			"ok": "OK",
 			"next": "Suivant",
 			"cancel": "Annuler",
 			"finish": "Fermer",
