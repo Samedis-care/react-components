@@ -20,7 +20,7 @@
 					"any": "Elke waarde"
 				},
 				"set-filter": {
-					"search": "Zoeken...",
+					"search": "Zoeken…",
 					"select-all": "Selecteer alles",
 					"invert": "Toon alles behalve…"
 				},
@@ -96,7 +96,7 @@
 				"close-icon-text": "Sluiten",
 				"open-icon-text": "Openen",
 				"clear-icon-text": "Wissen",
-				"loading-text": "Laadt...",
+				"loading-text": "Laadt…",
 				"start-typing-to-search-text": "Voer een zoekreeks in om resultaten te krijgen",
 				"lru-label": "Laatst recent gebruikt",
 				"selected": "GESELECTEERD"
@@ -159,7 +159,7 @@
 	},
 	"non-standalone": {
 		"dialog": {
-			"okay": "Oke",
+			"okay": "OK",
 			"dialog-title": {
 				"close": "Sluiten"
 			}
@@ -188,7 +188,7 @@
 						"validation-error": "Gelieve een correcte datum in te voeren"
 					},
 					"enum": {
-						"unknown": "Unknown"
+						"unknown": "Onbekend"
 					},
 					"image": {
 						"not-set": "Geen afbeelding aanwezig"
@@ -204,7 +204,7 @@
 					"not-set": "Nvt"
 				},
 				"image": {
-					"not-set": "Afbeelding niet aanwezig",
+					"not-set": "Geen afbeelding aanwezig",
 					"set": "Afbeelding aanwezig"
 				},
 				"boolean": {
@@ -230,7 +230,7 @@
 					"title": "Error",
 					"message": "Kan de geselecteerde items niet verwijderen: {{ERROR}}",
 					"buttons": {
-						"okay": "Oke"
+						"okay": "OK"
 					}
 				}
 			}
@@ -253,7 +253,7 @@
 			}
 		},
 		"selector": {
-			"loading": "Laadt...",
+			"loading": "Laadt…",
 			"loading-error": "Fout bij het ophalen van gegevens"
 		},
 		"crud": {
@@ -284,7 +284,7 @@
 					"date": "Het resultaat moet een Datum of null zijn",
 					"boolean": "Het resultaat moet een boolean of null zijn",
 					"fail": "Validatie mislukt: {{REASON}}. Zie browserconsole voor details.",
-					"unknown": "Unknown"
+					"unknown": "Onbekend"
 				},
 				"conversion_errors": "Fouten bij gegevensconversie",
 				"validation_errors": "Validatiefouten"
@@ -293,7 +293,7 @@
 	},
 	"utils": {
 		"validation": {
-			"required": "Het veld {{attribuut}} is verplicht",
+			"required": "Het veld {{attribute}} is verplicht",
 			"email": "Voor het veld {{attribute}} is een geldig e-mailadres vereist",
 			"url": "Het veld {{attribute}} vereist een geldige URL"
 		},
@@ -313,7 +313,7 @@
 		"buttons": {
 			"save": "Opslaan",
 			"back": "Terug",
-			"ok": "Oke",
+			"ok": "OK",
 			"next": "Volgende",
 			"cancel": "Annuleren",
 			"finish": "Eindigen",
