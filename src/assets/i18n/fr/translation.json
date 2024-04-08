@@ -1,326 +1,333 @@
 {
-    "standalone": {
-        "schedule": {
-            "week": "Semaine",
-            "today": "Aujourd'hui"
-        },
-        "notifications": {
-            "title": "Avis"
-        },
-        "how-it-works": {
-            "title": "Comment ça fonctionne"
-        },
-        "data-grid": {
-            "content": {
-                "filter": "Filtrez",
-                "reset-column-filter": "Effacer le filtre",
-                "bool-filter": {
-                    "true": "Toutes les valeurs de vérité",
-                    "false": "Toutes les fausses valeurs",
-                    "any": "De n'importe quelle valeur"
-                },
-                "set-filter": {
-                    "search": "Chercher...",
-                    "select-all": "Tout sélectionner",
-                    "invert": "Afficher tout sauf…"
-                },
-                "filter-type": {
-                    "eq": "Équivaut à",
-                    "not-eq": "Inégal",
-                    "empty": "Est vide",
-                    "not-empty": "N'est pas vide",
-                    "contains": "Contient",
-                    "not-contains": "Ne contient pas",
-                    "starts-with": "Commence avec",
-                    "ends-with": "Se termine par",
-                    "lt": "Moins que",
-                    "lte": "Inférieur ou égal",
-                    "gt": "Plus grand que",
-                    "gte": "Supérieur ou égal",
-                    "in-range": "Dans la gamme",
-                    "lt-date": "Avant que",
-                    "lte-date": "Avant ou le",
-                    "gt-date": "Après",
-                    "gte-date": "Le ou après",
-                    "in-range-date": "Entre"
-                },
-                "no-data": "La liste ne contient aucune donnée."
-            },
-            "header": {
-                "new": "Nouveau",
-                "export": "Exporter",
-                "import": "Importer",
-                "settings": "Colonnes",
-                "reset": "Réinitialiser",
-                "custom-filter-button": "Filtre",
-                "delete": "Supprimer",
-                "edit": "Éditer",
-                "reset-options": {
-                    "refresh": "Recharger",
-                    "filter": "Réinitialiser le filtre",
-                    "sort": "Réinitialiser les paramètres de tri",
-                    "column": "Réinitialiser les paramètres de la colonne",
-                    "width": "Réinitialiser les largeurs de colonne",
-                    "all": "Effacer tout"
-                }
-            },
-            "settings": {
-                "column": "Colonne",
-                "show": "Visible",
-                "pin": "Accrocher",
-                "close": "Fermer"
-            },
-            "custom-filters": {
-                "title": "Sélection de filtre"
-            },
-            "footer": {
-                "total": "Total:",
-                "filtered": "Filtré:",
-                "edit": "Éditer",
-                "delete": "Effacer",
-                "more": "Suite",
-                "select-all": "Tout",
-                "first-page": "Première page",
-                "last-page": "Dernière page",
-                "next-page": "Page suivante",
-                "page-of": "de",
-                "page-size": "Taille de la page :",
-                "page-size-tooltip": "Nombre d'entrées par page",
-                "prev-page": "Page précédente"
-            }
-        },
-        "selector": {
-            "add-new": "Créer",
-            "base-selector": {
-                "no-options-text": "Aucune option",
-                "close-icon-text": "Fermer",
-                "open-icon-text": "Ouvrir",
-                "clear-icon-text": "À vider",
-                "loading-text": "Chargement...",
-                "start-typing-to-search-text": "Entrez une chaîne de recherche pour obtenir des résultats",
-                "lru-label": "Dernière utilisation récente",
-                "selected": "CHOISI"
-            },
-            "multi-select": {
-                "delete-confirm": {
-                    "title": "Confirmer la suppression",
-                    "message": "Voulez-vous vraiment supprimer cette entrée?",
-                    "yes": "Oui",
-                    "no": "Non"
-                }
-            }
-        },
-        "file-upload": {
-            "upload": "Télécharger",
-            "upload-modern": "Déposer le fichier par glisser-déposer ou cliquer ici",
-            "no-files": "Aucune pièce jointe disponible",
-            "formats": "Formats de fichiers",
-            "formats-modern": "Formats de fichiers autorisés :",
-            "error": {
-                "too-many": "Trop de dossiers sélectionnés",
-                "limit-reached": "Nombre maximum de dossiers autorisés atteint",
-                "invalid-type": "Type de fichier non supporté sélectionné"
-            },
-            "format": {
-                "any": "Tout",
-                "image": "Images"
-            },
-            "multi-image": {
-                "edit": "Éditer",
-                "primary": "Primaire"
-            }
-        },
-        "phone-number": {
-            "invalid": "Entrez le numéro de téléphone correct"
-        },
-        "signature-pad": {
-            "dialog": {
-                "reset": "Effacer la signature",
-                "save-changes": "Enregistrer les changements",
-                "title": "Signez ici",
-                "title-name": "Signez ici ({{NAME}})",
-                "reset-confirm": {
-                    "title": "Effacer la signature",
-                    "message": "Êtes-vous sûr de vouloir effacer la signature?",
-                    "message-name": "Êtes-vous sûr de vouloir effacer la signature de {{NAME}}?",
-                    "yes": "Oui",
-                    "no": "Non"
-                }
-            },
-            "sign-here": "Signé numériquement ici"
-        }
-    },
-    "framework": {
-        "dialogs": {
-            "navblock": "La navigation est bloquée. Veuillez d'abord fermer vos boîtes de dialogue ouvertes."
-        }
-    },
-    "non-standalone": {
-        "dialog": {
-            "okay": "D'accord"
-        },
-        "language-switcher": {
-            "title": "Sélectionnez votre pays et votre langue",
-            "no-locales": "Aucun paramètre régional ne correspond à votre requête de recherche"
-        }
-    },
-    "backend-integration": {
-        "connector": {
-            "json-api-client": {
-                "network-error": "Une erreur de réseau s'est produite.",
-                "parse-error": "Echec de l'analyse de la réponse (JSON invalide). Le serveur a renvoyé l'état {{STATUS_CODE}} {{STATUS_TEXT}}."
-            }
-        },
-        "model": {
-            "types": {
-                "renderers": {
-                    "boolean": {
-                        "true": "Qui",
-                        "false": "Non"
-                    },
-                    "date": {
-                        "not-set": "Date non fixée",
-                        "validation-error": "Veuillez entrer une date valide"
-                    },
-                    "enum": {
-                        "unknown": "Inconnu"
-                    },
-                    "image": {
-                        "not-set": "Image non présente"
-                    },
-                    "signature": {
-                        "not-set": "Pas signé"
-                    },
-                    "files": {
-                        "no-file": "Aucun dossier présent"
-                    }
-                },
-                "date-nullable": {
-                    "not-set": "N/A"
-                },
-                "image": {
-                    "not-set": "Image non présente",
-                    "set": "Image présente"
-                },
-                "boolean": {
-                    "true": "Oui",
-                    "false": "Non"
-                }
-            }
-        }
-    },
-    "backend-components": {
-        "data-grid": {
-            "delete": {
-                "confirm-dialog": {
-                    "title": "Supprimer",
-                    "message": "Souhaitez-vous vraiment supprimer les entrées {{NUM}} ?",
-                    "messageInverted": "Voulez-vous vraiment tout supprimer sauf les entrées {{NUM}} ?",
-                    "buttons": {
-                        "yes": "Qui",
-                        "no": "Non"
-                    }
-                },
-                "error-dialog": {
-                    "title": "Erreur",
-                    "message": "Echec de la suppression des entrées sélectionnées : {{ERROR}}",
-                    "buttons": {
-                        "okay": "Ok"
-                    }
-                }
-            }
-        },
-        "form": {
-            "back-on-dirty": {
-                "title": "Quitter la page du formulaire ?",
-                "message": "Les modifications sont perdues",
-                "yes": "Oui",
-                "no": "Non"
-            },
-            "submit-with-warnings": {
-                "title": "Avertissement",
-                "message": "Les avertissements suivants sont présents, voulez-vous continuer quand même?",
-                "yes": "Oui",
-                "no": "Non"
-            },
-            "read-only": {
-                "submitting": "Le formulaire est en cours d'enregistrement"
-            }
-        },
-        "selector": {
-            "loading": "Chargement...",
-            "loading-error": "Erreur lors de la récupération des données"
-        },
-        "crud": {
-            "import": {
-                "step1": "Télécharger des données",
-                "step2": "Connecter les données",
-                "step3": "Validation et examen",
-                "step4": "Importer des données",
-                "source_fields": "Champs sources",
-                "source_field": "Champ",
-                "source_field_type": "Types de données",
-                "destination_fields": "Champs de destination",
-                "conv_script": "Script de conversion (JavaScript)",
-                "error": "Erreur",
-                "valid": "Valide",
-                "queue": "En file d'attente : {{COUNT}}",
-                "success": "Succès : {{COUNT}}",
-                "failed": "Échec : {{COUNT}}",
-                "last_error": "Dernière erreur",
-                "errors": {
-                    "file_select": "Fichier sélectionné non valide",
-                    "update-key-not-uniq": "{{UPDATE_KEY}} n'est pas unique dans l'ensemble de données d'importation"
-                },
-                "validations": {
-                    "string": "Le résultat doit être une chaîne ou null",
-                    "number": "Le résultat doit être un nombre ou nul",
-                    "currency_unsupported": "La devise ne peut pas encore être importée",
-                    "date": "Le résultat doit être une date ou nul",
-                    "boolean": "Le résultat doit être un booléen ou nul",
-                    "fail": "Échec de la validation : {{REASON}}. Pour plus de détails, voir la console du navigateur.",
-                    "unknown": "Inconnu"
-                }
-            }
-        }
-    },
-    "utils": {
-        "validation": {
-            "required": "Le champ {{attribute}} est obligatoire",
-            "email": "Le champ {{attribute}} nécessite un email valide",
-            "url": "Le champ {{attribute}} nécessite une URL valide"
-        },
-        "timestampToAge": {
-            "just-now": "juste maintenant",
-            "less-minute": "Il y a moins d'une minute",
-            "minute": "minute",
-            "minutes": "minutes",
-            "hour": "heure",
-            "hours": "heures",
-            "day": "journée",
-            "days": "journées",
-            "str": "Il y a {{MONTANT}} {{UNIT}}"
-        }
-    },
-    "common": {
-        "buttons": {
-            "save": "Sauvegarder",
-            "back": "Retour",
-            "ok": "Ok",
-            "next": "Suivant",
-            "cancel": "Annuler",
-            "finish": "Fermer",
-            "choose": "Choisir",
-            "yes": "Oui",
-            "no": "Non",
-            "reset-filters": "Réinitialiser tous les filtres"
-        },
-        "dialogs": {
-            "error-title": "Une erreur s'est produite",
-            "validation-error-title": "Forme non valide",
-            "info": "Info",
-            "are-you-sure": "Êtes-vous sûr ?",
-            "are-you-sure-submit": "Continuer?"
-        }
-    }
+	"standalone": {
+		"schedule": {
+			"week": "Semaine",
+			"today": "Aujourd'hui"
+		},
+		"notifications": {
+			"title": "Avis"
+		},
+		"how-it-works": {
+			"title": "Comment ça fonctionne"
+		},
+		"data-grid": {
+			"content": {
+				"filter": "Filtrez",
+				"reset-column-filter": "Effacer le filtre",
+				"bool-filter": {
+					"true": "Toutes les valeurs de vérité",
+					"false": "Toutes les fausses valeurs",
+					"any": "De n'importe quelle valeur"
+				},
+				"set-filter": {
+					"search": "Chercher...",
+					"select-all": "Tout sélectionner",
+					"invert": "Afficher tout sauf…"
+				},
+				"filter-type": {
+					"eq": "Équivaut à",
+					"not-eq": "Inégal",
+					"empty": "Est vide",
+					"not-empty": "N'est pas vide",
+					"contains": "Contient",
+					"not-contains": "Ne contient pas",
+					"starts-with": "Commence avec",
+					"ends-with": "Se termine par",
+					"lt": "Moins que",
+					"lte": "Inférieur ou égal",
+					"gt": "Plus grand que",
+					"gte": "Supérieur ou égal",
+					"in-range": "Dans la gamme",
+					"lt-date": "Avant que",
+					"lte-date": "Avant ou le",
+					"gt-date": "Après",
+					"gte-date": "Le ou après",
+					"in-range-date": "Entre"
+				},
+				"no-data": "La liste ne contient aucune donnée."
+			},
+			"header": {
+				"new": "Nouveau",
+				"export": "Exporter",
+				"import": "Importer",
+				"settings": "Colonnes",
+				"reset": "Réinitialiser",
+				"custom-filter-button": "Filtre",
+				"delete": "Supprimer",
+				"edit": "Éditer",
+				"reset-options": {
+					"refresh": "Recharger",
+					"filter": "Réinitialiser le filtre",
+					"sort": "Réinitialiser les paramètres de tri",
+					"column": "Réinitialiser les paramètres de la colonne",
+					"width": "Réinitialiser les largeurs de colonne",
+					"all": "Effacer tout"
+				}
+			},
+			"settings": {
+				"column": "Colonne",
+				"show": "Visible",
+				"pin": "Accrocher",
+				"close": "Fermer"
+			},
+			"custom-filters": {
+				"title": "Sélection de filtre"
+			},
+			"footer": {
+				"total": "Total:",
+				"filtered": "Filtré:",
+				"edit": "Éditer",
+				"delete": "Effacer",
+				"more": "Suite",
+				"select-all": "Tout",
+				"first-page": "Première page",
+				"last-page": "Dernière page",
+				"next-page": "Page suivante",
+				"page-of": "de",
+				"page-size": "Taille de la page :",
+				"page-size-tooltip": "Nombre d'entrées par page",
+				"prev-page": "Page précédente"
+			}
+		},
+		"selector": {
+			"add-new": "Créer",
+			"base-selector": {
+				"no-options-text": "Aucune option",
+				"close-icon-text": "Fermer",
+				"open-icon-text": "Ouvrir",
+				"clear-icon-text": "À vider",
+				"loading-text": "Chargement...",
+				"start-typing-to-search-text": "Entrez une chaîne de recherche pour obtenir des résultats",
+				"lru-label": "Dernière utilisation récente",
+				"selected": "CHOISI"
+			},
+			"multi-select": {
+				"delete-confirm": {
+					"title": "Confirmer la suppression",
+					"message": "Voulez-vous vraiment supprimer cette entrée?",
+					"yes": "Oui",
+					"no": "Non"
+				}
+			}
+		},
+		"file-upload": {
+			"upload": "Télécharger",
+			"upload-modern": "Déposer le fichier par glisser-déposer ou cliquer ici",
+			"no-files": "Aucune pièce jointe disponible",
+			"formats": "Formats de fichiers",
+			"formats-modern": "Formats de fichiers autorisés :",
+			"error": {
+				"too-many": "Trop de dossiers sélectionnés",
+				"limit-reached": "Nombre maximum de dossiers autorisés atteint",
+				"invalid-type": "Type de fichier non supporté sélectionné"
+			},
+			"format": {
+				"any": "Tout",
+				"image": "Images"
+			},
+			"multi-image": {
+				"edit": "Éditer",
+				"primary": "Primaire"
+			}
+		},
+		"phone-number": {
+			"invalid": "Entrez le numéro de téléphone correct"
+		},
+		"signature-pad": {
+			"dialog": {
+				"reset": "Effacer la signature",
+				"save-changes": "Enregistrer les changements",
+				"title": "Signez ici",
+				"title-name": "Signez ici ({{NAME}})",
+				"reset-confirm": {
+					"title": "Effacer la signature",
+					"message": "Êtes-vous sûr de vouloir effacer la signature?",
+					"message-name": "Êtes-vous sûr de vouloir effacer la signature de {{NAME}}?",
+					"yes": "Oui",
+					"no": "Non"
+				},
+				"close": "Fermer",
+				"signature": "Signature"
+			},
+			"sign-here": "Signé numériquement ici"
+		}
+	},
+	"framework": {
+		"dialogs": {
+			"navblock": "La navigation est bloquée. Veuillez d'abord fermer vos boîtes de dialogue ouvertes."
+		}
+	},
+	"non-standalone": {
+		"dialog": {
+			"okay": "D'accord",
+			"dialog-title": {
+				"close": "Fermer"
+			}
+		},
+		"language-switcher": {
+			"title": "Sélectionnez votre pays et votre langue",
+			"no-locales": "Aucun paramètre régional ne correspond à votre requête de recherche"
+		}
+	},
+	"backend-integration": {
+		"connector": {
+			"json-api-client": {
+				"network-error": "Une erreur de réseau s'est produite.",
+				"parse-error": "Echec de l'analyse de la réponse (JSON invalide). Le serveur a renvoyé l'état {{STATUS_CODE}} {{STATUS_TEXT}}."
+			}
+		},
+		"model": {
+			"types": {
+				"renderers": {
+					"boolean": {
+						"true": "Qui",
+						"false": "Non"
+					},
+					"date": {
+						"not-set": "Date non fixée",
+						"validation-error": "Veuillez entrer une date valide"
+					},
+					"enum": {
+						"unknown": "Inconnu"
+					},
+					"image": {
+						"not-set": "Image non présente"
+					},
+					"signature": {
+						"not-set": "Pas signé"
+					},
+					"files": {
+						"no-file": "Aucun dossier présent"
+					}
+				},
+				"date-nullable": {
+					"not-set": "N/A"
+				},
+				"image": {
+					"not-set": "Image non présente",
+					"set": "Image présente"
+				},
+				"boolean": {
+					"true": "Oui",
+					"false": "Non"
+				}
+			}
+		}
+	},
+	"backend-components": {
+		"data-grid": {
+			"delete": {
+				"confirm-dialog": {
+					"title": "Supprimer",
+					"message": "Souhaitez-vous vraiment supprimer les entrées {{NUM}} ?",
+					"messageInverted": "Voulez-vous vraiment tout supprimer sauf les entrées {{NUM}} ?",
+					"buttons": {
+						"yes": "Qui",
+						"no": "Non"
+					}
+				},
+				"error-dialog": {
+					"title": "Erreur",
+					"message": "Echec de la suppression des entrées sélectionnées : {{ERROR}}",
+					"buttons": {
+						"okay": "Ok"
+					}
+				}
+			}
+		},
+		"form": {
+			"back-on-dirty": {
+				"title": "Quitter la page du formulaire ?",
+				"message": "Les modifications sont perdues",
+				"yes": "Oui",
+				"no": "Non"
+			},
+			"submit-with-warnings": {
+				"title": "Avertissement",
+				"message": "Les avertissements suivants sont présents, voulez-vous continuer quand même?",
+				"yes": "Oui",
+				"no": "Non"
+			},
+			"read-only": {
+				"submitting": "Le formulaire est en cours d'enregistrement"
+			}
+		},
+		"selector": {
+			"loading": "Chargement...",
+			"loading-error": "Erreur lors de la récupération des données"
+		},
+		"crud": {
+			"import": {
+				"step1": "Télécharger des données",
+				"step2": "Connecter les données",
+				"step3": "Validation et examen",
+				"step4": "Importer des données",
+				"source_fields": "Champs sources",
+				"source_field": "Champ",
+				"source_field_type": "Types de données",
+				"destination_fields": "Champs de destination",
+				"conv_script": "Script de conversion (JavaScript)",
+				"error": "Erreur",
+				"valid": "Valide",
+				"queue": "En file d'attente : {{COUNT}}",
+				"success": "Succès : {{COUNT}}",
+				"failed": "Échec : {{COUNT}}",
+				"last_error": "Dernière erreur",
+				"errors": {
+					"file_select": "Fichier sélectionné non valide",
+					"update-key-not-uniq": "{{UPDATE_KEY}} n'est pas unique dans l'ensemble de données d'importation"
+				},
+				"validations": {
+					"string": "Le résultat doit être une chaîne ou null",
+					"number": "Le résultat doit être un nombre ou nul",
+					"currency_unsupported": "La devise ne peut pas encore être importée",
+					"date": "Le résultat doit être une date ou nul",
+					"boolean": "Le résultat doit être un booléen ou nul",
+					"fail": "Échec de la validation : {{REASON}}. Pour plus de détails, voir la console du navigateur.",
+					"unknown": "Inconnu"
+				},
+				"validation_errors": "Erreurs de validation",
+				"conversion_errors": "Erreurs de conversion de données"
+			}
+		}
+	},
+	"utils": {
+		"validation": {
+			"required": "Le champ {{attribute}} est obligatoire",
+			"email": "Le champ {{attribute}} nécessite un email valide",
+			"url": "Le champ {{attribute}} nécessite une URL valide"
+		},
+		"timestampToAge": {
+			"just-now": "juste maintenant",
+			"less-minute": "Il y a moins d'une minute",
+			"minute": "minute",
+			"minutes": "minutes",
+			"hour": "heure",
+			"hours": "heures",
+			"day": "journée",
+			"days": "journées",
+			"str": "Il y a {{MONTANT}} {{UNIT}}"
+		}
+	},
+	"common": {
+		"buttons": {
+			"save": "Sauvegarder",
+			"back": "Retour",
+			"ok": "Ok",
+			"next": "Suivant",
+			"cancel": "Annuler",
+			"finish": "Fermer",
+			"choose": "Choisir",
+			"yes": "Oui",
+			"no": "Non",
+			"reset-filters": "Réinitialiser tous les filtres"
+		},
+		"dialogs": {
+			"error-title": "Une erreur s'est produite",
+			"validation-error-title": "Forme non valide",
+			"info": "Info",
+			"are-you-sure": "Êtes-vous sûr ?",
+			"are-you-sure-submit": "Continuer?"
+		}
+	}
 }
