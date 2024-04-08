@@ -1,6 +1,6 @@
 import React from "react";
 import { DatePicker, DatePickerProps } from "@mui/x-date-pickers";
-import { TextFieldProps, useTheme } from "@mui/material";
+import { TextFieldProps, useThemeProps } from "@mui/material";
 import { withMuiWarning } from "../UIKit/MuiWarning";
 import { Moment } from "moment";
 
@@ -28,9 +28,15 @@ export interface LocalizedKeyboardDatePickerProps
 	onBlur?: TextFieldProps["onBlur"];
 }
 
+export type LocalizedKeyboardDatePickerClassKey = never;
+
 const LocalizedKeyboardDatePicker = (
-	props: LocalizedKeyboardDatePickerProps,
+	inProps: LocalizedKeyboardDatePickerProps,
 ) => {
+	const props = useThemeProps({
+		props: inProps,
+		name: "CcLocalizedKeyboardDatePicker",
+	});
 	const {
 		hideDisabledIcon,
 		required,
@@ -39,9 +45,6 @@ const LocalizedKeyboardDatePicker = (
 		onBlur,
 		...otherProps
 	} = props;
-	const theme = useTheme();
-	const hideDisabledIcons =
-		hideDisabledIcon ?? theme.componentsCare?.uiKit?.hideDisabledIcons;
 	const slotOverrideHideIcon = {
 		...otherProps.slots,
 		openPickerIcon: React.Fragment,
@@ -52,7 +55,7 @@ const LocalizedKeyboardDatePicker = (
 			format={"L"}
 			{...otherProps}
 			slots={
-				otherProps.disabled && hideDisabledIcons
+				otherProps.disabled && hideDisabledIcon
 					? slotOverrideHideIcon
 					: otherProps.slots
 			}

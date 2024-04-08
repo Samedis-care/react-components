@@ -2,12 +2,12 @@ import React from "react";
 import {
 	FormControlLabel,
 	FormControlLabelProps,
+	styled,
 	Typography,
 	TypographyProps,
-	Theme,
+	useThemeProps,
 } from "@mui/material";
-
-import { makeStyles, CSSProperties } from "@mui/styles";
+import combineClassNames from "../../utils/combineClassNames";
 
 export interface ComponentWithLabelProps
 	extends Omit<FormControlLabelProps, "label"> {
@@ -28,46 +28,33 @@ export interface ComponentWithLabelProps
 	 */
 	labelAlign?: TypographyProps["align"];
 	/**
+	 * custom class name to apply to root
+	 */
+	className?: string;
+	/**
 	 * Custom styles
 	 */
-	classes?: Partial<ReturnType<typeof useStyles>>;
+	classes?: Partial<Record<ComponentWithLabelClassKey, string>>;
 }
 
-export interface ComponentWithLabelTheme {
-	whiteSpace?: CSSProperties["whiteSpace"];
-	padding?: CSSProperties["padding"];
-	margin?: CSSProperties["margin"];
-	border?: CSSProperties["border"];
-	borderRadius?: CSSProperties["borderRadius"];
-	backgroundColor?: CSSProperties["backgroundColor"];
-	color?: CSSProperties["color"];
-	fontSize?: CSSProperties["fontSize"];
-	fontWeight?: CSSProperties["fontWeight"];
-	style?: CSSProperties;
-}
+const StyledFormControlLabel = styled(FormControlLabel, {
+	name: "CcComponentWithLabel",
+	slot: "root",
+})({});
 
-const useStyles = makeStyles(
-	(theme: Theme) => ({
-		label: {
-			whiteSpace: theme.componentsCare?.uiKit?.label?.whiteSpace || "pre",
-			padding: theme.componentsCare?.uiKit?.label?.padding,
-			margin: theme.componentsCare?.uiKit?.label?.margin,
-			border: theme.componentsCare?.uiKit?.label?.border,
-			borderRadius: theme.componentsCare?.uiKit?.label?.borderRadius,
-			backgroundColor: theme.componentsCare?.uiKit?.label?.backgroundColor,
-			color: theme.componentsCare?.uiKit?.label?.color,
-			fontSize: theme.componentsCare?.uiKit?.label?.fontSize,
-			fontWeight: theme.componentsCare?.uiKit?.label?.fontWeight,
-			...theme.componentsCare?.uiKit?.label?.style,
-		} as CSSProperties,
-	}),
-	{ name: "CcComponentWithLabel" },
-);
+const Label = styled(Typography, {
+	name: "CcComponentWithLabel",
+	slot: "label",
+})({
+	whiteSpace: "pre",
+});
+
+export type ComponentWithLabelClassKey = "root" | "label";
 
 const ComponentWithLabel = (
-	props: ComponentWithLabelProps | FormControlLabelProps,
+	inProps: ComponentWithLabelProps | FormControlLabelProps,
 ) => {
-	const classes = useStyles(props);
+	let props = useThemeProps({ props: inProps, name: "CcComponentWithLabel" });
 
 	let label: FormControlLabelProps["label"];
 
@@ -93,20 +80,26 @@ const ComponentWithLabel = (
 				bottom: "center",
 			}[labelPlacement] as TypographyProps["align"]);
 		label = (
-			<Typography
+			<Label
 				variant={labelVariant}
 				display={labelDisplay}
 				align={labelAlign}
-				className={classes.label}
+				className={propsCopy.classes?.label}
 			>
 				{labelText}
-			</Typography>
+			</Label>
 		);
 		props = { ...propsCopy, label: "" };
 	} else {
 		label = props.label;
 	}
-	return <FormControlLabel {...props} label={label} />;
+	return (
+		<StyledFormControlLabel
+			{...props}
+			className={combineClassNames([props.className, props.classes?.root])}
+			label={label}
+		/>
+	);
 };
 
 export default React.memo(ComponentWithLabel);

@@ -1,10 +1,8 @@
 import React, { Dispatch, SetStateAction, useState } from "react";
 import { MenuContext, toMenuItemComponent } from "./MenuItem";
-import { Theme } from "@mui/material/styles";
-import { makeStyles, CSSProperties } from "@mui/styles";
 import { SvgIconComponent } from "@mui/icons-material";
 import combineClassNames from "../../../utils/combineClassNames";
-import { SvgIconProps } from "@mui/material";
+import { styled, SvgIconProps, useThemeProps } from "@mui/material";
 
 /**
  * Properties of the Wrapper
@@ -122,48 +120,39 @@ export interface MenuProps {
 	/**
 	 * Custom styles
 	 */
-	classes?: Partial<ReturnType<typeof useStyles>>;
+	classes?: Partial<Record<PortalMenuClassKey, string>>;
 }
 
-export interface MenuTheme {
-	container?: {
-		padding?: CSSProperties["padding"];
-		height?: CSSProperties["height"];
-		width?: CSSProperties["width"];
-		overflow?: CSSProperties["overflow"];
-		style?: CSSProperties;
-	};
-}
+const Root = styled("div", { name: "CcPortalMenu", slot: "root" })({
+	height: "100%",
+	width: "100%",
+	overflow: "auto",
+});
 
-const useStyles = makeStyles(
-	(theme: Theme) => ({
-		root: {
-			padding: theme.componentsCare?.portal?.menu?.container?.padding,
-			height: theme.componentsCare?.portal?.menu?.container?.height || "100%",
-			width: theme.componentsCare?.portal?.menu?.container?.width || "100%",
-			overflow:
-				theme.componentsCare?.portal?.menu?.container?.overflow || "auto",
-			...theme.componentsCare?.portal?.menu?.container?.style,
-		},
-	}),
-	{ name: "CcPortalMenu" },
-);
+export type PortalMenuClassKey = "root";
+export type PortalMenuProps = MenuProps; // alias
 
-const PortalMenu = (props: MenuProps) => {
-	const Wrapper = props.wrapper;
+const PortalMenu = (inProps: MenuProps) => {
+	const props = useThemeProps({ props: inProps, name: "CcPortalMenu" });
+	const {
+		wrapper: Wrapper,
+		className,
+		classes,
+		customState,
+		definition,
+	} = props;
 	const state = useState("");
-	const classes = useStyles(props);
 
 	return (
-		<div className={combineClassNames([classes.root, props.className])}>
+		<Root className={combineClassNames([className, classes?.root])}>
 			<Wrapper>
-				<MenuContext.Provider value={props.customState || state}>
-					{props.definition.map((child) =>
+				<MenuContext.Provider value={customState || state}>
+					{definition.map((child) =>
 						toMenuItemComponent(props, child, 0, null),
 					)}
 				</MenuContext.Provider>
 			</Wrapper>
-		</div>
+		</Root>
 	);
 };
 

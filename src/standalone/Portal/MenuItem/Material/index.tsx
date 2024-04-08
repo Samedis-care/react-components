@@ -4,49 +4,26 @@ import {
 	ListItemButton,
 	ListItemIcon,
 	ListItemText,
-	Theme,
+	styled,
+	TypographyProps,
+	useThemeProps,
 } from "@mui/material";
-import { withStyles, CSSProperties } from "@mui/styles";
 import { ExpandLess, ExpandMore } from "@mui/icons-material";
 
-export interface MenuItemTheme {
-	borderRadius?: CSSProperties["borderRadius"];
-	border?: CSSProperties["border"];
-	backgroundColor?: CSSProperties["backgroundColor"];
-	color?: CSSProperties["color"];
-	padding?: CSSProperties["padding"];
-	margin?: CSSProperties["margin"];
-	height?: CSSProperties["height"];
-	width?: CSSProperties["width"];
-	overflow?: CSSProperties["overflow"];
-	style?: CSSProperties;
-	icon?: {
-		color?: CSSProperties["color"];
-		style?: CSSProperties;
-	};
+const StyledListItem = styled(ListItemButton, {
+	name: "CcMenuItemMaterial",
+	slot: "root",
+})({});
+
+export type MenuItemMaterialClassKey = "root";
+
+export interface MenuItemMaterialProps {
+	typographyProps?: TypographyProps;
 }
 
-const StyledListItem = withStyles((theme: Theme) => ({
-	root: {
-		borderRadius: theme.componentsCare?.portal?.menuItem?.borderRadius,
-		border: theme.componentsCare?.portal?.menuItem?.border,
-		backgroundColor: theme.componentsCare?.portal?.menuItem?.backgroundColor,
-		color: theme.componentsCare?.portal?.menuItem?.color,
+const MenuItemMaterial = (inProps: MenuItemProps & MenuItemMaterialProps) => {
+	const props = useThemeProps({ props: inProps, name: "CcMenuItemMaterial" });
 
-		padding: theme.componentsCare?.portal?.menuItem?.padding,
-		margin: theme.componentsCare?.portal?.menuItem?.margin,
-
-		"& svg": {
-			fill:
-				theme.componentsCare?.portal?.menuItem?.icon?.color ||
-				theme.componentsCare?.portal?.menuItem?.color,
-			...theme.componentsCare?.portal?.menuItem?.icon?.style,
-		},
-		...theme.componentsCare?.portal?.menuItem?.style,
-	},
-}))(ListItemButton) as typeof ListItemButton;
-
-const MenuItemMaterial = (props: MenuItemProps) => {
 	const Icon = props.icon;
 	return (
 		<StyledListItem

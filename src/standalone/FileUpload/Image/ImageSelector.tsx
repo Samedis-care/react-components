@@ -4,15 +4,16 @@ import {
 	Button,
 	Grid,
 	IconButton,
+	styled,
+	Theme,
 	Tooltip,
 	Typography,
-	useTheme,
+	useThemeProps,
 } from "@mui/material";
 import { AttachFile, Person } from "@mui/icons-material";
 import processImageB64 from "../../../utils/processImageB64";
 import combineClassNames from "../../../utils/combineClassNames";
 import { IDownscaleProps } from "../../../utils/processImage";
-import makeStyles from "@mui/styles/makeStyles";
 import GroupBox from "../../GroupBox";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import { ImageFileIcon } from "../FileIcons";
@@ -79,9 +80,13 @@ export interface ImageSelectorProps {
 	 */
 	downscale?: IDownscaleProps;
 	/**
+	 * CSS class to apply to root
+	 */
+	className?: string;
+	/**
 	 * Custom styles
 	 */
-	classes?: Partial<ReturnType<typeof useStyles>>;
+	classes?: Partial<Record<ImageSelectorClassKey, string>>;
 	/**
 	 * The display variant
 	 * @default normal (overridable by theme)
@@ -94,76 +99,151 @@ export interface ImageSelectorProps {
 	postEditCallback?: PostImageEditCallback;
 }
 
-const useStyles = makeStyles(
-	(theme) => ({
-		root: {
-			width: `calc(100% - ${theme.spacing(2)})`,
-			height: `calc(100% - ${theme.spacing(2)})`,
-			marginTop: theme.spacing(2),
-		},
-		rootModern: {
-			cursor: "pointer",
-			height: "100%",
-		},
-		imgWrapper: {
-			maxHeight: "100%",
-		},
-		preview: {
-			objectFit: "contain",
-			display: "block",
-			width: `calc(100% - ${theme.spacing(2)})`,
-			height: `calc(100% - ${theme.spacing(2)})`,
-		},
-		previewModern: {
-			objectFit: "contain",
-			display: "block",
-			width: "100%",
-			height: "100%",
-		},
-		modernUploadLabel: {
-			color: theme.palette.action.disabled,
-		},
-		modernFormatsLabel: {
-			color: theme.palette.action.disabled,
-		},
-		modernFormatIcon: {
-			color: theme.palette.action.disabled,
-		},
-		modernFullHeight: {
-			height: "100%",
-		},
-		clickablePreview: {
-			cursor: "pointer",
-		},
-		changeEventHelper: {
-			display: "none",
-		},
-		pfpRoot: {
-			height: "100%",
-		},
-		pfpIconBtn: {
-			width: "100%",
-			height: "100%",
-			margin: 2, // borderSize in pfpImg * 2
-			padding: 0,
-		},
-		pfpImg: {
-			width: "100%",
-			height: "100%",
-			border: `1px lightgray solid`,
-			borderRadius: "50%",
-			boxShadow: theme.shadows[4],
-			textOverflow: "ellipsis",
-			overflow: "hidden",
-			display: "flex",
-			alignItems: "center",
-			aspectRatio: "1/1",
-		},
-	}),
-	{ name: "CcImageSelector" },
+const RootClassic = styled(Grid, {
+	name: "CcImageSelector",
+	slot: "rootClassic",
+})(({ theme }) => ({
+	width: `calc(100% - ${theme.spacing(2)})`,
+	height: `calc(100% - ${theme.spacing(2)})`,
+	marginTop: theme.spacing(2),
+}));
+
+const RootModern = styled(Grid, {
+	name: "CcImageSelector",
+	slot: "rootModern",
+})({
+	cursor: "pointer",
+	height: "100%",
+});
+
+const ImageWrapper = styled(Grid, {
+	name: "CcImageSelector",
+	slot: "imgWrapper",
+})({
+	maxHeight: "100%",
+});
+
+const PreviewClassic = styled("img", {
+	name: "CcImageSelector",
+	slot: "previewClassic",
+})(({ theme }) => ({
+	objectFit: "contain",
+	display: "block",
+	width: `calc(100% - ${theme.spacing(2)})`,
+	height: `calc(100% - ${theme.spacing(2)})`,
+}));
+
+const PreviewModern = styled("img", {
+	name: "CcImageSelector",
+	slot: "previewModern",
+})({
+	objectFit: "contain",
+	display: "block",
+	width: "100%",
+	height: "100%",
+	cursor: "pointer",
+});
+
+const ChangeEventHelper = styled("input", {
+	name: "CcImageSelector",
+	slot: "changeEventHelper",
+})({
+	display: "none",
+});
+
+const ModernUploadLabel = styled(Typography, {
+	name: "CcImageSelector",
+	slot: "modernUploadLabel",
+})(({ theme }) => ({
+	color: theme.palette.action.disabled,
+})) as typeof Typography;
+
+const ModernFullHeightBox = styled(Box, {
+	name: "CcImageSelector",
+	slot: "modernFullHeightBox",
+})({
+	height: "100%",
+});
+
+const ModernFullHeightGrid = styled(Grid, {
+	name: "CcImageSelector",
+	slot: "modernFullHeightGrid",
+})({
+	height: "100%",
+});
+
+const ModernFormatsLabel = styled(Typography, {
+	name: "CcImageSelector",
+	slot: "modernFormatsLabel",
+})(({ theme }) => ({
+	color: theme.palette.action.disabled,
+}));
+
+const ModernFormatIcon = styled(ImageFileIcon, {
+	name: "CcImageSelector",
+	slot: "modernFormatIcon",
+})(({ theme }) => ({
+	color: theme.palette.action.disabled,
+}));
+
+const PfpRoot = styled("div", {
+	name: "CcImageSelector",
+	slot: "pfpRoot",
+})({
+	height: "100%",
+});
+
+const PfpIconButton = styled(IconButton, {
+	name: "CcImageSelector",
+	slot: "pfpIconBtn",
+})({
+	width: "100%",
+	height: "100%",
+	margin: 2, // borderSize in pfpImg * 2
+	padding: 0,
+});
+
+const pfpImageStyles = ({ theme }: { theme: Theme }) => ({
+	width: "100%",
+	height: "100%",
+	border: `1px lightgray solid`,
+	borderRadius: "50%",
+	boxShadow: theme.shadows[4],
+	textOverflow: "ellipsis",
+	overflow: "hidden",
+	display: "flex",
+	alignItems: "center",
+	aspectRatio: "1/1",
+});
+
+const PfpImage = styled("img", { name: "CcImageSelector", slot: "pfpImg" })(
+	pfpImageStyles,
 );
 
-const ImageSelector = (props: ImageSelectorProps) => {
+const PfpImagePlaceholder = styled(Person, {
+	name: "CcImageSelector",
+	slot: "pfpImgPlaceholder",
+})(pfpImageStyles);
+
+export type ImageSelectorClassKey =
+	| "rootClassic"
+	| "rootModern"
+	| "imgWrapper"
+	| "previewClassic"
+	| "previewModern"
+	| "changeEventHelper"
+	| "modernUploadLabel"
+	| "modernFullHeightBox"
+	| "modernFullHeightGrid"
+	| "modernFormatsLabel"
+	| "modernFormatIcon"
+	| "pfpRoot"
+	| "pfpIconBtn"
+	| "pfpImg"
+	| "pfpImgPlaceholder";
+
+const ImageSelector = (inProps: ImageSelectorProps) => {
+	const props = useThemeProps({ props: inProps, name: "CcImageSelector" });
 	const {
 		convertImagesTo,
 		downscale,
@@ -173,13 +253,10 @@ const ImageSelector = (props: ImageSelectorProps) => {
 		capture,
 		onChange,
 		postEditCallback,
+		classes,
+		className,
 	} = props;
-	const theme = useTheme();
-	const variant =
-		props.variant ??
-		theme.componentsCare?.fileUpload?.image?.defaultVariant ??
-		"normal";
-	const classes = useStyles(props);
+	const variant = props.variant ?? "normal";
 	const fileRef = useRef<HTMLInputElement>(null);
 	const { t } = useCCTranslations();
 
@@ -259,8 +336,12 @@ const ImageSelector = (props: ImageSelectorProps) => {
 	// render component
 	if (variant === "normal") {
 		return (
-			<GroupBox label={props.label} smallLabel={props.smallLabel}>
-				<Grid
+			<GroupBox
+				label={props.label}
+				smallLabel={props.smallLabel}
+				className={className}
+			>
+				<RootClassic
 					container
 					spacing={2}
 					direction={"column"}
@@ -268,7 +349,7 @@ const ImageSelector = (props: ImageSelectorProps) => {
 					alignItems={"stretch"}
 					justifyContent={"center"}
 					wrap={"nowrap"}
-					className={classes.root}
+					className={classes?.rootClassic}
 					onDrop={handleDrop}
 					onDragOver={handleDragOver}
 				>
@@ -284,27 +365,35 @@ const ImageSelector = (props: ImageSelectorProps) => {
 							>
 								{props.uploadLabel || t("standalone.file-upload.upload")}
 							</Button>
-							<input
+							<ChangeEventHelper
 								type={"file"}
 								accept={"image/*"}
 								ref={fileRef}
 								onChange={handleFileChange}
-								className={classes.changeEventHelper}
+								className={classes?.changeEventHelper}
 							/>
 						</Grid>
 					)}
-					<Grid item xs key={"image"} className={classes.imgWrapper}>
+					<ImageWrapper item xs key={"image"} className={classes?.imgWrapper}>
 						{value && (
-							<img src={value} alt={props.alt} className={classes.preview} />
+							<PreviewClassic
+								src={value}
+								alt={props.alt}
+								className={classes?.previewClassic}
+							/>
 						)}
-					</Grid>
-				</Grid>
+					</ImageWrapper>
+				</RootClassic>
 			</GroupBox>
 		);
 	} else if (variant === "modern") {
 		return (
-			<GroupBox label={props.label} smallLabel={props.smallLabel}>
-				<Grid
+			<GroupBox
+				label={props.label}
+				smallLabel={props.smallLabel}
+				className={className}
+			>
+				<RootModern
 					container
 					spacing={0}
 					direction={"column"}
@@ -312,24 +401,24 @@ const ImageSelector = (props: ImageSelectorProps) => {
 					alignItems={"stretch"}
 					justifyContent={"center"}
 					wrap={"nowrap"}
-					className={classes.rootModern}
+					className={classes?.rootModern}
 					onDrop={handleDrop}
 					onDragOver={handleDragOver}
 				>
 					{!props.readOnly && (
-						<input
+						<ChangeEventHelper
 							type={"file"}
 							accept={"image/*"}
 							ref={fileRef}
 							onChange={handleFileChange}
-							className={classes.changeEventHelper}
+							className={classes?.changeEventHelper}
 						/>
 					)}
-					<Grid
+					<ImageWrapper
 						item
 						xs
 						key={"image"}
-						className={classes.imgWrapper}
+						className={classes?.imgWrapper}
 						onBlur={props.onBlur}
 						data-name={props.name}
 					>
@@ -341,24 +430,24 @@ const ImageSelector = (props: ImageSelectorProps) => {
 									""
 								}
 							>
-								<img
+								<PreviewModern
 									src={value}
 									alt={props.alt}
 									onClick={handleUpload}
-									className={combineClassNames([
-										classes.previewModern,
-										classes.clickablePreview,
-									])}
+									className={classes?.previewModern}
 								/>
 							</Tooltip>
 						) : (
-							<Box px={2} className={classes.modernFullHeight}>
-								<Grid
+							<ModernFullHeightBox
+								px={2}
+								className={classes?.modernFullHeightBox}
+							>
+								<ModernFullHeightGrid
 									container
 									onClick={handleUpload}
 									direction={"column"}
 									spacing={0}
-									className={classes.modernFullHeight}
+									className={classes?.modernFullHeightGrid}
 								>
 									<Grid
 										item
@@ -369,16 +458,16 @@ const ImageSelector = (props: ImageSelectorProps) => {
 										wrap={"nowrap"}
 									>
 										<Grid item>
-											<Typography
+											<ModernUploadLabel
 												component={"h1"}
 												variant={"h5"}
-												className={classes.modernUploadLabel}
+												className={classes?.modernUploadLabel}
 												align={"center"}
 											>
 												{props.uploadLabel ??
 													t("standalone.file-upload.upload-modern") ??
 													""}
-											</Typography>
+											</ModernUploadLabel>
 										</Grid>
 									</Grid>
 									<Grid item>
@@ -389,55 +478,57 @@ const ImageSelector = (props: ImageSelectorProps) => {
 											justifyContent={"space-between"}
 										>
 											<Grid item>
-												<Typography className={classes.modernFormatsLabel}>
+												<ModernFormatsLabel
+													className={classes?.modernFormatsLabel}
+												>
 													{props.formatsLabel ??
 														t("standalone.file-upload.formats-modern") ??
 														""}
-												</Typography>
+												</ModernFormatsLabel>
 											</Grid>
 											<Grid item>
-												<ImageFileIcon className={classes.modernFormatIcon} />
+												<ModernFormatIcon
+													className={classes?.modernFormatIcon}
+												/>
 											</Grid>
 										</Grid>
 									</Grid>
-								</Grid>
-							</Box>
+								</ModernFullHeightGrid>
+							</ModernFullHeightBox>
 						)}
-					</Grid>
-				</Grid>
+					</ImageWrapper>
+				</RootModern>
 			</GroupBox>
 		);
 	} else if (variant === "profile_picture") {
 		const image = value ? (
-			<img src={value} className={classes.pfpImg} alt={props.label} />
+			<PfpImage src={value} className={classes?.pfpImg} alt={props.label} />
 		) : (
-			<Person className={classes.pfpImg} />
+			<PfpImagePlaceholder className={classes?.pfpImgPlaceholder} />
 		);
 
 		return (
-			<div
+			<PfpRoot
 				onDrop={handleDrop}
 				onDragOver={handleDragOver}
-				className={classes.pfpRoot}
+				className={combineClassNames([className, classes?.pfpRoot])}
 			>
-				<input
+				<ChangeEventHelper
 					type={"file"}
 					accept={"image/*"}
 					ref={fileRef}
 					onChange={handleFileChange}
-					className={classes.changeEventHelper}
+					className={classes?.changeEventHelper}
 				/>
-				<IconButton
+				<PfpIconButton
 					disabled={props.readOnly}
 					onClick={handleUpload}
-					classes={{
-						root: classes.pfpIconBtn,
-					}}
+					className={classes?.pfpIconBtn}
 					size="large"
 				>
 					{image}
-				</IconButton>
-			</div>
+				</PfpIconButton>
+			</PfpRoot>
 		);
 	} else {
 		throw new Error("Unknown variant");

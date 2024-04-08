@@ -11,25 +11,22 @@ import {
 	Box,
 	Button,
 	FormHelperText,
-	Unstable_Grid2 as Grid,
-	Theme,
+	styled,
 	Tooltip,
 	Typography,
-	useTheme,
+	Unstable_Grid2 as Grid,
+	useThemeProps,
 } from "@mui/material";
 import { AttachFile } from "@mui/icons-material";
 import FilePreview, { getFileIconOrDefault } from "./File";
 import { FileSelectorError } from "./Errors";
-import { IDownscaleProps } from "../../../utils/processImage";
+import processImage, { IDownscaleProps } from "../../../utils/processImage";
 import GroupBox from "../../GroupBox";
-import makeStyles from "@mui/styles/makeStyles";
-import { ClassNameMap } from "@mui/styles/withStyles";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import isTouchDevice from "../../../utils/isTouchDevice";
 import combineClassNames from "../../../utils/combineClassNames";
 import getFileExt from "../../../utils/getFileExt";
 import matchMime from "../../../utils/matchMime";
-import processImage from "../../../utils/processImage";
 import useDropZone from "../../../utils/useDropZone";
 
 export interface FileUploadProps {
@@ -109,9 +106,13 @@ export interface FileUploadProps {
 	 */
 	label?: string;
 	/**
+	 * CSS class to apply to root
+	 */
+	className?: string;
+	/**
 	 * Custom CSS classes for styling
 	 */
-	classes?: ClassNameMap<keyof ReturnType<typeof useStyles>>;
+	classes?: Partial<Record<FileUploadClassKey, string>>;
 	/**
 	 * Variant (design) to use
 	 * @default classic
@@ -123,12 +124,8 @@ export interface FileUploadProps {
 export interface FileUploadRendererProps
 	extends Omit<
 		FileUploadProps,
-		"variant" | "classes" | "onChange" | "defaultFiles" | "files"
+		"variant" | "onChange" | "defaultFiles" | "files"
 	> {
-	/**
-	 * CSS classes
-	 */
-	classes: ClassNameMap<keyof ReturnType<typeof useStyles>>;
 	/**
 	 * Drag over event handler for drop zone
 	 */
@@ -221,38 +218,70 @@ export interface FileCaptureConfig {
 	source: "user" | "environment";
 }
 
-const useStyles = makeStyles(
-	(theme: Theme) => ({
-		dropzone: {
+const StyledGroupBox = styled(GroupBox, { name: "CcFileUpload", slot: "root" })(
+	{},
+);
+const Dropzone = styled(Grid, { name: "CcFileUpload", slot: "dropzone" })(
+	({ theme }) => ({
+		"&.Mui-active": {
 			border: `2px solid ${theme.palette.primary.main}`,
 		},
-		formatText: {
-			textAlign: "right",
-		},
-		formatTextModern: {
-			color: theme.palette.action.disabled,
-		},
-		formatIconsModern: {
-			color: theme.palette.action.disabled,
-		},
-		fileInput: {
-			display: "none",
-		},
-		modernUploadLabel: {
-			textAlign: "center",
-			color: theme.palette.action.disabled,
-			display: "block",
-			width: "100%",
-		},
-		modernUploadLabelEmpty: theme.typography.h5,
 	}),
-	{ name: "CcFileUpload" },
 );
 
+const FormatTextModern = styled(Typography, {
+	name: "CcFileUpload",
+	slot: "formatTextModern",
+})(({ theme }) => ({
+	color: theme.palette.action.disabled,
+}));
+
+const FormatIconsModern = styled(Grid, {
+	name: "CcFileUpload",
+	slot: "formatIconsModern",
+})(({ theme }) => ({
+	color: theme.palette.action.disabled,
+}));
+
+const FileInput = styled("input", {
+	name: "CcFileUpload",
+	slot: "fileInput",
+})({
+	display: "none",
+});
+
+const FormatText = styled(FormHelperText, {
+	name: "CcFileUpload",
+	slot: "formatText",
+})({
+	textAlign: "right",
+});
+
+const ModernUploadLabel = styled("span", {
+	name: "CcFileUpload",
+	slot: "modernUploadLabel",
+})(({ theme }) => ({
+	textAlign: "center",
+	color: theme.palette.action.disabled,
+	display: "block",
+	width: "100%",
+	"&.CcFileUpload-modernUploadLabel-empty": theme.typography.h5,
+}));
+
+export type FileUploadClassKey =
+	| "root"
+	| "dropzone"
+	| "formatTextModern"
+	| "formatIconsModern"
+	| "fileInput"
+	| "formatText"
+	| "modernUploadLabel";
+
 const FileUpload = (
-	props: FileUploadProps & RefAttributes<FileUploadDispatch>,
+	inProps: FileUploadProps & RefAttributes<FileUploadDispatch>,
 	ref: ForwardedRef<FileUploadDispatch>,
 ): React.ReactElement => {
+	const props = useThemeProps({ props: inProps, name: "CcFileUpload" });
 	const {
 		name,
 		convertImagesTo,
@@ -270,13 +299,10 @@ const FileUpload = (
 		onBlur,
 		uploadLabel,
 		allowDuplicates,
+		className,
+		classes,
 	} = props;
-	const theme = useTheme();
-	const variant =
-		props.variant ??
-		theme.componentsCare?.fileUpload?.generic?.defaultVariant ??
-		"classic";
-	const classes = useStyles(props);
+	const variant = props.variant ?? "classic";
 	const loadInitialFiles = () =>
 		(props.files || props.defaultFiles || []).map((meta) => ({
 			canBeUploaded: false,
@@ -488,7 +514,6 @@ const FileUpload = (
 	if (typeof variant !== "string") {
 		return React.createElement(variant, {
 			...props,
-			classes,
 			handleDragOver,
 			handleDrop,
 			dragging,
@@ -502,8 +527,12 @@ const FileUpload = (
 		});
 	} else if (variant === "classic") {
 		return (
-			<GroupBox label={label} smallLabel={smallLabel}>
-				<Grid
+			<StyledGroupBox
+				label={label}
+				smallLabel={smallLabel}
+				className={combineClassNames([className, classes?.root])}
+			>
+				<Dropzone
 					container
 					spacing={2}
 					alignContent={"space-between"}
@@ -511,7 +540,8 @@ const FileUpload = (
 					onDrop={handleDrop}
 					className={combineClassNames([
 						"components-care-dropzone",
-						dragging && classes.dropzone,
+						classes?.dropzone,
+						dragging && "Mui-active",
 					])}
 				>
 					{!readOnly && (
@@ -526,12 +556,12 @@ const FileUpload = (
 							>
 								{uploadLabel || t("standalone.file-upload.upload")}
 							</Button>
-							<input
+							<FileInput
 								type={"file"}
 								accept={accept || undefined}
 								multiple={maxFiles ? getRemainingFileCount() > 1 : true}
 								onChange={handleFileChange}
-								className={classes.fileInput}
+								className={classes?.fileInput}
 								ref={inputRef}
 							/>
 						</Grid>
@@ -577,22 +607,26 @@ const FileUpload = (
 					</Grid>
 					{!readOnly && (
 						<Grid xs={12} key={"info"}>
-							<FormHelperText className={classes.formatText}>
+							<FormatText className={classes?.formatText}>
 								({t("standalone.file-upload.formats")}:{" "}
 								{acceptLabel ||
 									accept ||
 									t("standalone.file-upload.format.any")}
 								)
-							</FormHelperText>
+							</FormatText>
 						</Grid>
 					)}
-				</Grid>
-			</GroupBox>
+				</Dropzone>
+			</StyledGroupBox>
 		);
 	} else if (variant === "modern") {
 		const acceptFiles = accept ? accept.split(",") : [];
 		return (
-			<GroupBox label={label} smallLabel={smallLabel}>
+			<StyledGroupBox
+				label={label}
+				smallLabel={smallLabel}
+				className={combineClassNames([className, classes?.root])}
+			>
 				<Grid
 					container
 					spacing={2}
@@ -601,26 +635,27 @@ const FileUpload = (
 					onDrop={handleDrop}
 					onClick={() => handleUpload()}
 					className={combineClassNames([
+						classes?.dropzone,
 						"components-care-dropzone",
-						dragging && classes.dropzone,
+						dragging && "Mui-active",
 					])}
 				>
 					{!readOnly && (
 						<Grid xs key={"upload"}>
-							<span
+							<ModernUploadLabel
 								className={combineClassNames([
-									classes.modernUploadLabel,
-									files.length === 0 && classes.modernUploadLabelEmpty,
+									classes?.modernUploadLabel,
+									files.length === 0 && "CcFileUpload-modernUploadLabel-empty",
 								])}
 							>
 								{uploadLabel || t("standalone.file-upload.upload-modern")}
-							</span>
-							<input
+							</ModernUploadLabel>
+							<FileInput
 								type={"file"}
 								accept={accept || undefined}
 								multiple={maxFiles ? getRemainingFileCount() > 1 : true}
 								onChange={handleFileChange}
-								className={classes.fileInput}
+								className={classes?.fileInput}
 								ref={inputRef}
 							/>
 						</Grid>
@@ -669,18 +704,18 @@ const FileUpload = (
 					{!readOnly && (
 						<Grid xs={12} key={"info"} container wrap={"nowrap"} spacing={1}>
 							<Grid xs>
-								<Typography
+								<FormatTextModern
 									align={"right"}
-									className={classes.formatTextModern}
+									className={classes?.formatTextModern}
 								>
 									{t("standalone.file-upload.formats-modern")}{" "}
 									{acceptFiles.length == 0 &&
 										t("standalone.file-upload.format.any")}
-								</Typography>
+								</FormatTextModern>
 							</Grid>
 							{acceptFiles.map((entry, idx) => (
-								<Grid
-									className={classes.formatIconsModern}
+								<FormatIconsModern
+									className={classes?.formatIconsModern}
 									key={idx.toString(16)}
 								>
 									<Tooltip title={acceptLabel || accept || ""}>
@@ -688,12 +723,12 @@ const FileUpload = (
 											{React.createElement(getFileIconOrDefault(entry))}
 										</span>
 									</Tooltip>
-								</Grid>
+								</FormatIconsModern>
 							))}
 						</Grid>
 					)}
 				</Grid>
-			</GroupBox>
+			</StyledGroupBox>
 		);
 	} else {
 		throw new Error("Invalid variant prop passed");
