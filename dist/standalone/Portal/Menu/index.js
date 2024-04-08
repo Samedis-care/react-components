@@ -1,22 +1,18 @@
 import React, { useState } from "react";
 import { MenuContext, toMenuItemComponent } from "./MenuItem";
-import { makeStyles } from "@mui/styles";
 import combineClassNames from "../../../utils/combineClassNames";
-const useStyles = makeStyles((theme) => ({
-    root: {
-        padding: theme.componentsCare?.portal?.menu?.container?.padding,
-        height: theme.componentsCare?.portal?.menu?.container?.height || "100%",
-        width: theme.componentsCare?.portal?.menu?.container?.width || "100%",
-        overflow: theme.componentsCare?.portal?.menu?.container?.overflow || "auto",
-        ...theme.componentsCare?.portal?.menu?.container?.style,
-    },
-}), { name: "CcPortalMenu" });
-const PortalMenu = (props) => {
-    const Wrapper = props.wrapper;
+import { styled, useThemeProps } from "@mui/material";
+const Root = styled("div", { name: "CcPortalMenu", slot: "root" })({
+    height: "100%",
+    width: "100%",
+    overflow: "auto",
+});
+const PortalMenu = (inProps) => {
+    const props = useThemeProps({ props: inProps, name: "CcPortalMenu" });
+    const { wrapper: Wrapper, className, classes, customState, definition, } = props;
     const state = useState("");
-    const classes = useStyles(props);
-    return (React.createElement("div", { className: combineClassNames([classes.root, props.className]) },
+    return (React.createElement(Root, { className: combineClassNames([className, classes?.root]) },
         React.createElement(Wrapper, null,
-            React.createElement(MenuContext.Provider, { value: props.customState || state }, props.definition.map((child) => toMenuItemComponent(props, child, 0, null))))));
+            React.createElement(MenuContext.Provider, { value: customState || state }, definition.map((child) => toMenuItemComponent(props, child, 0, null))))));
 };
 export default React.memo(PortalMenu);

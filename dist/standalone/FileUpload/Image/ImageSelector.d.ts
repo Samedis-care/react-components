@@ -59,9 +59,13 @@ export interface ImageSelectorProps {
      */
     downscale?: IDownscaleProps;
     /**
+     * CSS class to apply to root
+     */
+    className?: string;
+    /**
      * Custom styles
      */
-    classes?: Partial<ReturnType<typeof useStyles>>;
+    classes?: Partial<Record<ImageSelectorClassKey, string>>;
     /**
      * The display variant
      * @default normal (overridable by theme)
@@ -73,6 +77,6 @@ export interface ImageSelectorProps {
      */
     postEditCallback?: PostImageEditCallback;
 }
-declare const useStyles: (props?: any) => import("@mui/styles").ClassNameMap<"root" | "modernUploadLabel" | "preview" | "rootModern" | "imgWrapper" | "previewModern" | "modernFormatsLabel" | "modernFormatIcon" | "modernFullHeight" | "clickablePreview" | "changeEventHelper" | "pfpRoot" | "pfpIconBtn" | "pfpImg">;
-declare const _default: React.MemoExoticComponent<(props: ImageSelectorProps) => React.JSX.Element>;
+export type ImageSelectorClassKey = "rootClassic" | "rootModern" | "imgWrapper" | "previewClassic" | "previewModern" | "changeEventHelper" | "modernUploadLabel" | "modernFullHeightBox" | "modernFullHeightGrid" | "modernFormatsLabel" | "modernFormatIcon" | "pfpRoot" | "pfpIconBtn" | "pfpImg" | "pfpImgPlaceholder";
+declare const _default: React.MemoExoticComponent<(inProps: ImageSelectorProps) => React.JSX.Element>;
 export default _default;

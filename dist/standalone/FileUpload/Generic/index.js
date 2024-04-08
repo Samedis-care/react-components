@@ -1,47 +1,59 @@
 import React, { useCallback, useEffect, useImperativeHandle, useRef, useState, } from "react";
-import { Box, Button, FormHelperText, Unstable_Grid2 as Grid, Tooltip, Typography, useTheme, } from "@mui/material";
+import { Box, Button, FormHelperText, styled, Tooltip, Typography, Unstable_Grid2 as Grid, useThemeProps, } from "@mui/material";
 import { AttachFile } from "@mui/icons-material";
 import FilePreview, { getFileIconOrDefault } from "./File";
+import processImage from "../../../utils/processImage";
 import GroupBox from "../../GroupBox";
-import makeStyles from "@mui/styles/makeStyles";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import isTouchDevice from "../../../utils/isTouchDevice";
 import combineClassNames from "../../../utils/combineClassNames";
 import getFileExt from "../../../utils/getFileExt";
 import matchMime from "../../../utils/matchMime";
-import processImage from "../../../utils/processImage";
 import useDropZone from "../../../utils/useDropZone";
-const useStyles = makeStyles((theme) => ({
-    dropzone: {
+const StyledGroupBox = styled(GroupBox, { name: "CcFileUpload", slot: "root" })({});
+const Dropzone = styled(Grid, { name: "CcFileUpload", slot: "dropzone" })(({ theme }) => ({
+    "&.Mui-active": {
         border: `2px solid ${theme.palette.primary.main}`,
     },
-    formatText: {
-        textAlign: "right",
-    },
-    formatTextModern: {
-        color: theme.palette.action.disabled,
-    },
-    formatIconsModern: {
-        color: theme.palette.action.disabled,
-    },
-    fileInput: {
-        display: "none",
-    },
-    modernUploadLabel: {
-        textAlign: "center",
-        color: theme.palette.action.disabled,
-        display: "block",
-        width: "100%",
-    },
-    modernUploadLabelEmpty: theme.typography.h5,
-}), { name: "CcFileUpload" });
-const FileUpload = (props, ref) => {
-    const { name, convertImagesTo, imageDownscaleOptions, previewImages, previewSize, maxFiles, handleError, accept, acceptLabel, onChange, label, smallLabel, readOnly, onBlur, uploadLabel, allowDuplicates, } = props;
-    const theme = useTheme();
-    const variant = props.variant ??
-        theme.componentsCare?.fileUpload?.generic?.defaultVariant ??
-        "classic";
-    const classes = useStyles(props);
+}));
+const FormatTextModern = styled(Typography, {
+    name: "CcFileUpload",
+    slot: "formatTextModern",
+})(({ theme }) => ({
+    color: theme.palette.action.disabled,
+}));
+const FormatIconsModern = styled(Grid, {
+    name: "CcFileUpload",
+    slot: "formatIconsModern",
+})(({ theme }) => ({
+    color: theme.palette.action.disabled,
+}));
+const FileInput = styled("input", {
+    name: "CcFileUpload",
+    slot: "fileInput",
+})({
+    display: "none",
+});
+const FormatText = styled(FormHelperText, {
+    name: "CcFileUpload",
+    slot: "formatText",
+})({
+    textAlign: "right",
+});
+const ModernUploadLabel = styled("span", {
+    name: "CcFileUpload",
+    slot: "modernUploadLabel",
+})(({ theme }) => ({
+    textAlign: "center",
+    color: theme.palette.action.disabled,
+    display: "block",
+    width: "100%",
+    "&.CcFileUpload-modernUploadLabel-empty": theme.typography.h5,
+}));
+const FileUpload = (inProps, ref) => {
+    const props = useThemeProps({ props: inProps, name: "CcFileUpload" });
+    const { name, convertImagesTo, imageDownscaleOptions, previewImages, previewSize, maxFiles, handleError, accept, acceptLabel, onChange, label, smallLabel, readOnly, onBlur, uploadLabel, allowDuplicates, className, classes, } = props;
+    const variant = props.variant ?? "classic";
     const loadInitialFiles = () => (props.files || props.defaultFiles || []).map((meta) => ({
         canBeUploaded: false,
         delete: false,
@@ -199,7 +211,6 @@ const FileUpload = (props, ref) => {
     if (typeof variant !== "string") {
         return React.createElement(variant, {
             ...props,
-            classes,
             handleDragOver,
             handleDrop,
             dragging,
@@ -213,14 +224,15 @@ const FileUpload = (props, ref) => {
         });
     }
     else if (variant === "classic") {
-        return (React.createElement(GroupBox, { label: label, smallLabel: smallLabel },
-            React.createElement(Grid, { container: true, spacing: 2, alignContent: "space-between", onDragOver: handleDragOver, onDrop: handleDrop, className: combineClassNames([
+        return (React.createElement(StyledGroupBox, { label: label, smallLabel: smallLabel, className: combineClassNames([className, classes?.root]) },
+            React.createElement(Dropzone, { container: true, spacing: 2, alignContent: "space-between", onDragOver: handleDragOver, onDrop: handleDrop, className: combineClassNames([
                     "components-care-dropzone",
-                    dragging && classes.dropzone,
+                    classes?.dropzone,
+                    dragging && "Mui-active",
                 ]) },
                 !readOnly && (React.createElement(Grid, { xs: true, key: "upload" },
                     React.createElement(Button, { startIcon: React.createElement(AttachFile, null), variant: "contained", color: "primary", onClick: () => handleUpload(), name: name, onBlur: onBlur }, uploadLabel || t("standalone.file-upload.upload")),
-                    React.createElement("input", { type: "file", accept: accept || undefined, multiple: maxFiles ? getRemainingFileCount() > 1 : true, onChange: handleFileChange, className: classes.fileInput, ref: inputRef }))),
+                    React.createElement(FileInput, { type: "file", accept: accept || undefined, multiple: maxFiles ? getRemainingFileCount() > 1 : true, onChange: handleFileChange, className: classes?.fileInput, ref: inputRef }))),
                 React.createElement(Grid, { xs: 12, key: "files" },
                     React.createElement(Grid, { container: true, spacing: 2, alignContent: "flex-start", alignItems: "flex-start" },
                         files.map((data, index) => data && (React.createElement(FilePreview, { name: data.file.name, downloadLink: "downloadLink" in data.file
@@ -231,7 +243,7 @@ const FileUpload = (props, ref) => {
                         readOnly && files.length === 0 && (React.createElement(Grid, null,
                             React.createElement(Typography, null, t("standalone.file-upload.no-files")))))),
                 !readOnly && (React.createElement(Grid, { xs: 12, key: "info" },
-                    React.createElement(FormHelperText, { className: classes.formatText },
+                    React.createElement(FormatText, { className: classes?.formatText },
                         "(",
                         t("standalone.file-upload.formats"),
                         ":",
@@ -243,17 +255,18 @@ const FileUpload = (props, ref) => {
     }
     else if (variant === "modern") {
         const acceptFiles = accept ? accept.split(",") : [];
-        return (React.createElement(GroupBox, { label: label, smallLabel: smallLabel },
+        return (React.createElement(StyledGroupBox, { label: label, smallLabel: smallLabel, className: combineClassNames([className, classes?.root]) },
             React.createElement(Grid, { container: true, spacing: 2, alignContent: "space-between", onDragOver: handleDragOver, onDrop: handleDrop, onClick: () => handleUpload(), className: combineClassNames([
+                    classes?.dropzone,
                     "components-care-dropzone",
-                    dragging && classes.dropzone,
+                    dragging && "Mui-active",
                 ]) },
                 !readOnly && (React.createElement(Grid, { xs: true, key: "upload" },
-                    React.createElement("span", { className: combineClassNames([
-                            classes.modernUploadLabel,
-                            files.length === 0 && classes.modernUploadLabelEmpty,
+                    React.createElement(ModernUploadLabel, { className: combineClassNames([
+                            classes?.modernUploadLabel,
+                            files.length === 0 && "CcFileUpload-modernUploadLabel-empty",
                         ]) }, uploadLabel || t("standalone.file-upload.upload-modern")),
-                    React.createElement("input", { type: "file", accept: accept || undefined, multiple: maxFiles ? getRemainingFileCount() > 1 : true, onChange: handleFileChange, className: classes.fileInput, ref: inputRef }))),
+                    React.createElement(FileInput, { type: "file", accept: accept || undefined, multiple: maxFiles ? getRemainingFileCount() > 1 : true, onChange: handleFileChange, className: classes?.fileInput, ref: inputRef }))),
                 files.length > 0 && (React.createElement(Grid, { xs: 12, key: "files" },
                     React.createElement(Box, { mx: 1 },
                         React.createElement(Grid, { container: true, spacing: 1, alignContent: "flex-start", alignItems: "flex-start" }, files.map((data, index) => data && (React.createElement(FilePreview, { name: data.file.name, downloadLink: "downloadLink" in data.file
@@ -265,12 +278,12 @@ const FileUpload = (props, ref) => {
                     React.createElement(Typography, null, t("standalone.file-upload.no-files")))),
                 !readOnly && (React.createElement(Grid, { xs: 12, key: "info", container: true, wrap: "nowrap", spacing: 1 },
                     React.createElement(Grid, { xs: true },
-                        React.createElement(Typography, { align: "right", className: classes.formatTextModern },
+                        React.createElement(FormatTextModern, { align: "right", className: classes?.formatTextModern },
                             t("standalone.file-upload.formats-modern"),
                             " ",
                             acceptFiles.length == 0 &&
                                 t("standalone.file-upload.format.any"))),
-                    acceptFiles.map((entry, idx) => (React.createElement(Grid, { className: classes.formatIconsModern, key: idx.toString(16) },
+                    acceptFiles.map((entry, idx) => (React.createElement(FormatIconsModern, { className: classes?.formatIconsModern, key: idx.toString(16) },
                         React.createElement(Tooltip, { title: acceptLabel || accept || "" },
                             React.createElement("span", null, React.createElement(getFileIconOrDefault(entry))))))))))));
     }

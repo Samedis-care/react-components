@@ -1,12 +1,11 @@
 import { DataGridTheme, DataGridThemeExpert } from "./standalone/DataGrid/DataGrid";
-import { MenuTheme } from "./standalone/Portal/Menu";
-import { MenuItemTheme } from "./standalone/Portal/MenuItem/Material";
-import { FileUploadProps } from "./standalone/FileUpload/Generic";
-import { ImageSelectorProps } from "./standalone/FileUpload/Image/ImageSelector";
+import { PortalMenuClassKey, PortalMenuProps } from "./standalone/Portal/Menu";
+import { FileUploadClassKey, FileUploadProps } from "./standalone/FileUpload/Generic";
+import { ImageSelectorClassKey, ImageSelectorProps } from "./standalone/FileUpload/Image/ImageSelector";
 import { MultiImageClassKey, MultiImageProps } from "./standalone/FileUpload/MultiImage/MultiImage";
 import { BaseSelectorClassKey, BaseSelectorData, BaseSelectorProps, HowToBoxClassKey, HowToBoxProps, MultiSelectClassKey, MultiSelectorData, MultiSelectProps } from "./standalone";
-import { ComponentWithLabelTheme } from "./standalone/UIKit/ComponentWithLabel";
-import { CheckboxTheme } from "./standalone/UIKit/Checkbox";
+import { ComponentWithLabelClassKey, ComponentWithLabelProps } from "./standalone/UIKit/ComponentWithLabel";
+import { CheckboxClassKey } from "./standalone/UIKit/Checkbox";
 import { InputTheme } from "./standalone/UIKit/CommonStyles";
 import { ActionButtonClassKey, ActionButtonProps } from "./standalone/UIKit/ActionButton";
 import { SubActionButtonClassKey, SubActionButtonProps } from "./standalone/UIKit/SubActionButton";
@@ -14,7 +13,7 @@ import { FormButtonsClassKey, FormButtonsProps } from "./standalone/UIKit/FormBu
 import { FormPageLayoutClassKey, FormPageLayoutProps } from "./standalone/Form/FormPageLayout";
 import { GroupBoxClassKey, GroupBoxProps } from "./standalone/GroupBox";
 import { SignalPortletClassKey, SignalPortletProps } from "./standalone/SignalPortlet";
-import { ComponentsOverrides, ComponentsVariants, Theme as MuiTheme } from "@mui/material";
+import { CheckboxProps, ComponentsOverrides, ComponentsVariants, Theme as MuiTheme } from "@mui/material";
 import { LoaderClassKey, LoaderProps } from "./standalone/Loader";
 import { FormLoaderOverlayClassKey, FormLoaderOverlayProps } from "./standalone/Form/FormLoaderOverlay";
 import { MultiGridClassKey, MultiGridProps } from "./standalone/Virtualized/MultiGrid";
@@ -36,26 +35,13 @@ import { DialogTitleClassKey, DialogTitleProps } from "./non-standalone/Dialog/D
 import { MenuItemJumboReactLightClassKey, MenuItemJumboReactLightProps } from "./standalone/Portal/MenuItem/JumboReact/Light";
 import { MenuItemJumboReactDarkClassKey, MenuItemJumboReactDarkProps } from "./standalone/Portal/MenuItem/JumboReact/Dark";
 import { FileClassKey, FileProps } from "./standalone/FileUpload/Generic/File";
+import { MenuItemMaterialClassKey, MenuItemMaterialProps } from "./standalone/Portal/MenuItem/Material";
+import { LocalizedKeyboardDatePickerClassKey, LocalizedKeyboardDatePickerProps } from "./standalone/LocalizedDateTimePickers/LocalizedKeyboardDatePicker";
 export interface ComponentsCareTheme {
     dataGrid?: DataGridTheme;
     dataGridExpert?: DataGridThemeExpert;
-    portal?: {
-        menu?: MenuTheme;
-        menuItem?: MenuItemTheme;
-    };
-    fileUpload?: {
-        generic?: {
-            defaultVariant?: FileUploadProps["variant"];
-        };
-        image?: {
-            defaultVariant?: ImageSelectorProps["variant"];
-        };
-    };
     uiKit?: {
-        label?: ComponentWithLabelTheme;
-        checkbox?: CheckboxTheme;
         input?: InputTheme;
-        hideDisabledIcons?: boolean;
     };
 }
 declare module "@mui/material/styles/createTheme" {
@@ -100,6 +86,13 @@ declare module "@mui/material/styles" {
         CcMenuItemJumboReactDark: MenuItemJumboReactDarkClassKey;
         CcFile: FileClassKey;
         CcDialogTitle: DialogTitleClassKey;
+        CcFileUpload: FileUploadClassKey;
+        CcImageSelector: ImageSelectorClassKey;
+        CcPortalMenu: PortalMenuClassKey;
+        CcMenuItemMaterial: MenuItemMaterialClassKey;
+        CcLocalizedKeyboardDatePicker: LocalizedKeyboardDatePickerClassKey;
+        CcComponentWithLabel: ComponentWithLabelClassKey;
+        CcCheckbox: CheckboxClassKey;
     }
     interface ComponentsPropsList {
         CcSignalPortlet: Partial<SignalPortletProps>;
@@ -133,6 +126,13 @@ declare module "@mui/material/styles" {
         CcMenuItemJumboReactDark: Partial<MenuItemJumboReactDarkProps>;
         CcFile: Partial<FileProps>;
         CcDialogTitle: Partial<DialogTitleProps>;
+        CcFileUpload: Partial<FileUploadProps>;
+        CcImageSelector: Partial<ImageSelectorProps>;
+        CcPortalMenu: Partial<PortalMenuProps>;
+        CcMenuItemMaterial: Partial<MenuItemMaterialProps>;
+        CcLocalizedKeyboardDatePicker: Partial<LocalizedKeyboardDatePickerProps>;
+        CcComponentWithLabel: Partial<ComponentWithLabelProps>;
+        CcCheckbox: Partial<CheckboxProps>;
     }
     interface Components {
         CcSignalPortlet?: {
@@ -289,6 +289,41 @@ declare module "@mui/material/styles" {
             defaultProps?: ComponentsPropsList["CcDialogTitle"];
             styleOverrides?: ComponentsOverrides<Theme>["CcDialogTitle"];
             variants?: ComponentsVariants["CcDialogTitle"];
+        };
+        CcFileUpload?: {
+            defaultProps?: ComponentsPropsList["CcFileUpload"];
+            styleOverrides?: ComponentsOverrides<Theme>["CcFileUpload"];
+            variants?: ComponentsVariants["CcFileUpload"];
+        };
+        CcImageSelector?: {
+            defaultProps?: ComponentsPropsList["CcImageSelector"];
+            styleOverrides?: ComponentsOverrides<Theme>["CcImageSelector"];
+            variants?: ComponentsVariants["CcImageSelector"];
+        };
+        CcPortalMenu?: {
+            defaultProps?: ComponentsPropsList["CcPortalMenu"];
+            styleOverrides?: ComponentsOverrides<Theme>["CcPortalMenu"];
+            variants?: ComponentsVariants["CcPortalMenu"];
+        };
+        CcMenuItemMaterial?: {
+            defaultProps?: ComponentsPropsList["CcMenuItemMaterial"];
+            styleOverrides?: ComponentsOverrides<Theme>["CcMenuItemMaterial"];
+            variants?: ComponentsVariants["CcMenuItemMaterial"];
+        };
+        CcLocalizedKeyboardDatePicker?: {
+            defaultProps?: ComponentsPropsList["CcLocalizedKeyboardDatePicker"];
+            styleOverrides?: ComponentsOverrides<Theme>["CcLocalizedKeyboardDatePicker"];
+            variants?: ComponentsVariants["CcLocalizedKeyboardDatePicker"];
+        };
+        CcComponentWithLabel?: {
+            defaultProps?: ComponentsPropsList["CcComponentWithLabel"];
+            styleOverrides?: ComponentsOverrides<Theme>["CcComponentWithLabel"];
+            variants?: ComponentsVariants["CcComponentWithLabel"];
+        };
+        CcCheckbox?: {
+            defaultProps?: ComponentsPropsList["CcCheckbox"];
+            styleOverrides?: ComponentsOverrides<Theme>["CcCheckbox"];
+            variants?: ComponentsVariants["CcCheckbox"];
         };
     }
 }

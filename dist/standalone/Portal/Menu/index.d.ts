@@ -1,5 +1,4 @@
 import React, { Dispatch, SetStateAction } from "react";
-import { CSSProperties } from "@mui/styles";
 import { SvgIconComponent } from "@mui/icons-material";
 import { SvgIconProps } from "@mui/material";
 /**
@@ -114,17 +113,9 @@ export interface MenuProps {
     /**
      * Custom styles
      */
-    classes?: Partial<ReturnType<typeof useStyles>>;
+    classes?: Partial<Record<PortalMenuClassKey, string>>;
 }
-export interface MenuTheme {
-    container?: {
-        padding?: CSSProperties["padding"];
-        height?: CSSProperties["height"];
-        width?: CSSProperties["width"];
-        overflow?: CSSProperties["overflow"];
-        style?: CSSProperties;
-    };
-}
-declare const useStyles: (props?: any) => import("@mui/styles").ClassNameMap<"root">;
-declare const _default: React.MemoExoticComponent<(props: MenuProps) => React.JSX.Element>;
+export type PortalMenuClassKey = "root";
+export type PortalMenuProps = MenuProps;
+declare const _default: React.MemoExoticComponent<(inProps: MenuProps) => React.JSX.Element>;
 export default _default;

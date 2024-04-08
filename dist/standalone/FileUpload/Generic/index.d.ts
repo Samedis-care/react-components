@@ -1,7 +1,6 @@
 import React from "react";
 import { FileSelectorError } from "./Errors";
 import { IDownscaleProps } from "../../../utils/processImage";
-import { ClassNameMap } from "@mui/styles/withStyles";
 export interface FileUploadProps {
     /**
      * The HTML name attribute on the upload button
@@ -79,9 +78,13 @@ export interface FileUploadProps {
      */
     label?: string;
     /**
+     * CSS class to apply to root
+     */
+    className?: string;
+    /**
      * Custom CSS classes for styling
      */
-    classes?: ClassNameMap<keyof ReturnType<typeof useStyles>>;
+    classes?: Partial<Record<FileUploadClassKey, string>>;
     /**
      * Variant (design) to use
      * @default classic
@@ -89,11 +92,7 @@ export interface FileUploadProps {
      */
     variant?: "classic" | "modern" | React.ComponentType<FileUploadRendererProps>;
 }
-export interface FileUploadRendererProps extends Omit<FileUploadProps, "variant" | "classes" | "onChange" | "defaultFiles" | "files"> {
-    /**
-     * CSS classes
-     */
-    classes: ClassNameMap<keyof ReturnType<typeof useStyles>>;
+export interface FileUploadRendererProps extends Omit<FileUploadProps, "variant" | "onChange" | "defaultFiles" | "files"> {
     /**
      * Drag over event handler for drop zone
      */
@@ -181,6 +180,6 @@ export interface FileCaptureConfig {
     type: "image" | "audio" | "video";
     source: "user" | "environment";
 }
-declare const useStyles: (props?: any) => ClassNameMap<"dropzone" | "formatText" | "formatTextModern" | "formatIconsModern" | "fileInput" | "modernUploadLabel" | "modernUploadLabelEmpty">;
+export type FileUploadClassKey = "root" | "dropzone" | "formatTextModern" | "formatIconsModern" | "fileInput" | "formatText" | "modernUploadLabel";
 declare const _default: React.ForwardRefExoticComponent<Omit<FileUploadProps & React.RefAttributes<FileUploadDispatch>, "ref"> & React.RefAttributes<FileUploadDispatch>>;
 export default _default;

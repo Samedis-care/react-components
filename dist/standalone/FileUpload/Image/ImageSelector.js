@@ -1,85 +1,124 @@
 import React, { useCallback, useRef } from "react";
-import { Box, Button, Grid, IconButton, Tooltip, Typography, useTheme, } from "@mui/material";
+import { Box, Button, Grid, IconButton, styled, Tooltip, Typography, useThemeProps, } from "@mui/material";
 import { AttachFile, Person } from "@mui/icons-material";
 import processImageB64 from "../../../utils/processImageB64";
 import combineClassNames from "../../../utils/combineClassNames";
-import makeStyles from "@mui/styles/makeStyles";
 import GroupBox from "../../GroupBox";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import { ImageFileIcon } from "../FileIcons";
 import fileToData from "../../../utils/fileToData";
-const useStyles = makeStyles((theme) => ({
-    root: {
-        width: `calc(100% - ${theme.spacing(2)})`,
-        height: `calc(100% - ${theme.spacing(2)})`,
-        marginTop: theme.spacing(2),
-    },
-    rootModern: {
-        cursor: "pointer",
-        height: "100%",
-    },
-    imgWrapper: {
-        maxHeight: "100%",
-    },
-    preview: {
-        objectFit: "contain",
-        display: "block",
-        width: `calc(100% - ${theme.spacing(2)})`,
-        height: `calc(100% - ${theme.spacing(2)})`,
-    },
-    previewModern: {
-        objectFit: "contain",
-        display: "block",
-        width: "100%",
-        height: "100%",
-    },
-    modernUploadLabel: {
-        color: theme.palette.action.disabled,
-    },
-    modernFormatsLabel: {
-        color: theme.palette.action.disabled,
-    },
-    modernFormatIcon: {
-        color: theme.palette.action.disabled,
-    },
-    modernFullHeight: {
-        height: "100%",
-    },
-    clickablePreview: {
-        cursor: "pointer",
-    },
-    changeEventHelper: {
-        display: "none",
-    },
-    pfpRoot: {
-        height: "100%",
-    },
-    pfpIconBtn: {
-        width: "100%",
-        height: "100%",
-        margin: 2, // borderSize in pfpImg * 2
-        padding: 0,
-    },
-    pfpImg: {
-        width: "100%",
-        height: "100%",
-        border: `1px lightgray solid`,
-        borderRadius: "50%",
-        boxShadow: theme.shadows[4],
-        textOverflow: "ellipsis",
-        overflow: "hidden",
-        display: "flex",
-        alignItems: "center",
-        aspectRatio: "1/1",
-    },
-}), { name: "CcImageSelector" });
-const ImageSelector = (props) => {
-    const { convertImagesTo, downscale, name, value, readOnly, capture, onChange, postEditCallback, } = props;
-    const theme = useTheme();
-    const variant = props.variant ??
-        theme.componentsCare?.fileUpload?.image?.defaultVariant ??
-        "normal";
-    const classes = useStyles(props);
+const RootClassic = styled(Grid, {
+    name: "CcImageSelector",
+    slot: "rootClassic",
+})(({ theme }) => ({
+    width: `calc(100% - ${theme.spacing(2)})`,
+    height: `calc(100% - ${theme.spacing(2)})`,
+    marginTop: theme.spacing(2),
+}));
+const RootModern = styled(Grid, {
+    name: "CcImageSelector",
+    slot: "rootModern",
+})({
+    cursor: "pointer",
+    height: "100%",
+});
+const ImageWrapper = styled(Grid, {
+    name: "CcImageSelector",
+    slot: "imgWrapper",
+})({
+    maxHeight: "100%",
+});
+const PreviewClassic = styled("img", {
+    name: "CcImageSelector",
+    slot: "previewClassic",
+})(({ theme }) => ({
+    objectFit: "contain",
+    display: "block",
+    width: `calc(100% - ${theme.spacing(2)})`,
+    height: `calc(100% - ${theme.spacing(2)})`,
+}));
+const PreviewModern = styled("img", {
+    name: "CcImageSelector",
+    slot: "previewModern",
+})({
+    objectFit: "contain",
+    display: "block",
+    width: "100%",
+    height: "100%",
+    cursor: "pointer",
+});
+const ChangeEventHelper = styled("input", {
+    name: "CcImageSelector",
+    slot: "changeEventHelper",
+})({
+    display: "none",
+});
+const ModernUploadLabel = styled(Typography, {
+    name: "CcImageSelector",
+    slot: "modernUploadLabel",
+})(({ theme }) => ({
+    color: theme.palette.action.disabled,
+}));
+const ModernFullHeightBox = styled(Box, {
+    name: "CcImageSelector",
+    slot: "modernFullHeightBox",
+})({
+    height: "100%",
+});
+const ModernFullHeightGrid = styled(Grid, {
+    name: "CcImageSelector",
+    slot: "modernFullHeightGrid",
+})({
+    height: "100%",
+});
+const ModernFormatsLabel = styled(Typography, {
+    name: "CcImageSelector",
+    slot: "modernFormatsLabel",
+})(({ theme }) => ({
+    color: theme.palette.action.disabled,
+}));
+const ModernFormatIcon = styled(ImageFileIcon, {
+    name: "CcImageSelector",
+    slot: "modernFormatIcon",
+})(({ theme }) => ({
+    color: theme.palette.action.disabled,
+}));
+const PfpRoot = styled("div", {
+    name: "CcImageSelector",
+    slot: "pfpRoot",
+})({
+    height: "100%",
+});
+const PfpIconButton = styled(IconButton, {
+    name: "CcImageSelector",
+    slot: "pfpIconBtn",
+})({
+    width: "100%",
+    height: "100%",
+    margin: 2, // borderSize in pfpImg * 2
+    padding: 0,
+});
+const pfpImageStyles = ({ theme }) => ({
+    width: "100%",
+    height: "100%",
+    border: `1px lightgray solid`,
+    borderRadius: "50%",
+    boxShadow: theme.shadows[4],
+    textOverflow: "ellipsis",
+    overflow: "hidden",
+    display: "flex",
+    alignItems: "center",
+    aspectRatio: "1/1",
+});
+const PfpImage = styled("img", { name: "CcImageSelector", slot: "pfpImg" })(pfpImageStyles);
+const PfpImagePlaceholder = styled(Person, {
+    name: "CcImageSelector",
+    slot: "pfpImgPlaceholder",
+})(pfpImageStyles);
+const ImageSelector = (inProps) => {
+    const props = useThemeProps({ props: inProps, name: "CcImageSelector" });
+    const { convertImagesTo, downscale, name, value, readOnly, capture, onChange, postEditCallback, classes, className, } = props;
+    const variant = props.variant ?? "normal";
     const fileRef = useRef(null);
     const { t } = useCCTranslations();
     const processFile = useCallback(async (file) => {
@@ -133,46 +172,41 @@ const ImageSelector = (props) => {
     }, [readOnly]);
     // render component
     if (variant === "normal") {
-        return (React.createElement(GroupBox, { label: props.label, smallLabel: props.smallLabel },
-            React.createElement(Grid, { container: true, spacing: 2, direction: "column", alignContent: "flex-start", alignItems: "stretch", justifyContent: "center", wrap: "nowrap", className: classes.root, onDrop: handleDrop, onDragOver: handleDragOver },
+        return (React.createElement(GroupBox, { label: props.label, smallLabel: props.smallLabel, className: className },
+            React.createElement(RootClassic, { container: true, spacing: 2, direction: "column", alignContent: "flex-start", alignItems: "stretch", justifyContent: "center", wrap: "nowrap", className: classes?.rootClassic, onDrop: handleDrop, onDragOver: handleDragOver },
                 !props.readOnly && (React.createElement(Grid, { item: true, key: "upload" },
                     React.createElement(Button, { startIcon: React.createElement(AttachFile, null), variant: "contained", color: "primary", name: props.name, onClick: handleUpload, onBlur: props.onBlur }, props.uploadLabel || t("standalone.file-upload.upload")),
-                    React.createElement("input", { type: "file", accept: "image/*", ref: fileRef, onChange: handleFileChange, className: classes.changeEventHelper }))),
-                React.createElement(Grid, { item: true, xs: true, key: "image", className: classes.imgWrapper }, value && (React.createElement("img", { src: value, alt: props.alt, className: classes.preview }))))));
+                    React.createElement(ChangeEventHelper, { type: "file", accept: "image/*", ref: fileRef, onChange: handleFileChange, className: classes?.changeEventHelper }))),
+                React.createElement(ImageWrapper, { item: true, xs: true, key: "image", className: classes?.imgWrapper }, value && (React.createElement(PreviewClassic, { src: value, alt: props.alt, className: classes?.previewClassic }))))));
     }
     else if (variant === "modern") {
-        return (React.createElement(GroupBox, { label: props.label, smallLabel: props.smallLabel },
-            React.createElement(Grid, { container: true, spacing: 0, direction: "column", alignContent: "flex-start", alignItems: "stretch", justifyContent: "center", wrap: "nowrap", className: classes.rootModern, onDrop: handleDrop, onDragOver: handleDragOver },
-                !props.readOnly && (React.createElement("input", { type: "file", accept: "image/*", ref: fileRef, onChange: handleFileChange, className: classes.changeEventHelper })),
-                React.createElement(Grid, { item: true, xs: true, key: "image", className: classes.imgWrapper, onBlur: props.onBlur, "data-name": props.name }, value ? (React.createElement(Tooltip, { title: props.uploadLabel ??
+        return (React.createElement(GroupBox, { label: props.label, smallLabel: props.smallLabel, className: className },
+            React.createElement(RootModern, { container: true, spacing: 0, direction: "column", alignContent: "flex-start", alignItems: "stretch", justifyContent: "center", wrap: "nowrap", className: classes?.rootModern, onDrop: handleDrop, onDragOver: handleDragOver },
+                !props.readOnly && (React.createElement(ChangeEventHelper, { type: "file", accept: "image/*", ref: fileRef, onChange: handleFileChange, className: classes?.changeEventHelper })),
+                React.createElement(ImageWrapper, { item: true, xs: true, key: "image", className: classes?.imgWrapper, onBlur: props.onBlur, "data-name": props.name }, value ? (React.createElement(Tooltip, { title: props.uploadLabel ??
                         t("standalone.file-upload.upload-modern") ??
                         "" },
-                    React.createElement("img", { src: value, alt: props.alt, onClick: handleUpload, className: combineClassNames([
-                            classes.previewModern,
-                            classes.clickablePreview,
-                        ]) }))) : (React.createElement(Box, { px: 2, className: classes.modernFullHeight },
-                    React.createElement(Grid, { container: true, onClick: handleUpload, direction: "column", spacing: 0, className: classes.modernFullHeight },
+                    React.createElement(PreviewModern, { src: value, alt: props.alt, onClick: handleUpload, className: classes?.previewModern }))) : (React.createElement(ModernFullHeightBox, { px: 2, className: classes?.modernFullHeightBox },
+                    React.createElement(ModernFullHeightGrid, { container: true, onClick: handleUpload, direction: "column", spacing: 0, className: classes?.modernFullHeightGrid },
                         React.createElement(Grid, { item: true, xs: true, container: true, direction: "column", justifyContent: "space-around", wrap: "nowrap" },
                             React.createElement(Grid, { item: true },
-                                React.createElement(Typography, { component: "h1", variant: "h5", className: classes.modernUploadLabel, align: "center" }, props.uploadLabel ??
+                                React.createElement(ModernUploadLabel, { component: "h1", variant: "h5", className: classes?.modernUploadLabel, align: "center" }, props.uploadLabel ??
                                     t("standalone.file-upload.upload-modern") ??
                                     ""))),
                         React.createElement(Grid, { item: true },
                             React.createElement(Grid, { container: true, wrap: "nowrap", spacing: 0, justifyContent: "space-between" },
                                 React.createElement(Grid, { item: true },
-                                    React.createElement(Typography, { className: classes.modernFormatsLabel }, props.formatsLabel ??
+                                    React.createElement(ModernFormatsLabel, { className: classes?.modernFormatsLabel }, props.formatsLabel ??
                                         t("standalone.file-upload.formats-modern") ??
                                         "")),
                                 React.createElement(Grid, { item: true },
-                                    React.createElement(ImageFileIcon, { className: classes.modernFormatIcon })))))))))));
+                                    React.createElement(ModernFormatIcon, { className: classes?.modernFormatIcon })))))))))));
     }
     else if (variant === "profile_picture") {
-        const image = value ? (React.createElement("img", { src: value, className: classes.pfpImg, alt: props.label })) : (React.createElement(Person, { className: classes.pfpImg }));
-        return (React.createElement("div", { onDrop: handleDrop, onDragOver: handleDragOver, className: classes.pfpRoot },
-            React.createElement("input", { type: "file", accept: "image/*", ref: fileRef, onChange: handleFileChange, className: classes.changeEventHelper }),
-            React.createElement(IconButton, { disabled: props.readOnly, onClick: handleUpload, classes: {
-                    root: classes.pfpIconBtn,
-                }, size: "large" }, image)));
+        const image = value ? (React.createElement(PfpImage, { src: value, className: classes?.pfpImg, alt: props.label })) : (React.createElement(PfpImagePlaceholder, { className: classes?.pfpImgPlaceholder }));
+        return (React.createElement(PfpRoot, { onDrop: handleDrop, onDragOver: handleDragOver, className: combineClassNames([className, classes?.pfpRoot]) },
+            React.createElement(ChangeEventHelper, { type: "file", accept: "image/*", ref: fileRef, onChange: handleFileChange, className: classes?.changeEventHelper }),
+            React.createElement(PfpIconButton, { disabled: props.readOnly, onClick: handleUpload, className: classes?.pfpIconBtn, size: "large" }, image)));
     }
     else {
         throw new Error("Unknown variant");

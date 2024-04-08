@@ -10,14 +10,14 @@ export interface MuiWarningResultProps {
 export declare const withMuiWarning: <T extends MuiWarningSourceProps>(Component: React.ComponentType<T>) => React.ComponentType<T & MuiWarningResultProps>;
 export declare const FormControlCC: React.ComponentType<import("@mui/material").FormControlOwnProps & import("@mui/material/OverridableComponent").CommonProps & Omit<Omit<React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>, "ref"> & {
     ref?: ((instance: HTMLDivElement | null) => void) | React.RefObject<HTMLDivElement> | null | undefined;
-}, "className" | "style" | "classes" | "children" | "color" | "sx" | "disabled" | "required" | "size" | "error" | "margin" | "variant" | "fullWidth" | "focused" | "hiddenLabel"> & {
+}, "className" | "style" | "classes" | "children" | "color" | "sx" | "disabled" | "required" | "size" | "error" | "margin" | "variant" | "focused" | "fullWidth" | "hiddenLabel"> & {
     component?: React.ElementType<any> | undefined;
 } & MuiWarningResultProps>;
 export declare const FormControlFieldsetCC: React.ComponentType<{
     component: "fieldset";
 } & import("@mui/material").FormControlOwnProps & import("@mui/material/OverridableComponent").CommonProps & Omit<Omit<React.DetailedHTMLProps<React.FieldsetHTMLAttributes<HTMLFieldSetElement>, HTMLFieldSetElement>, "ref"> & {
     ref?: ((instance: HTMLFieldSetElement | null) => void) | React.RefObject<HTMLFieldSetElement> | null | undefined;
-}, "className" | "style" | "classes" | "children" | "color" | "sx" | "disabled" | "required" | "size" | "error" | "margin" | "component" | "variant" | "fullWidth" | "focused" | "hiddenLabel"> & {
+}, "className" | "style" | "classes" | "children" | "color" | "sx" | "disabled" | "required" | "size" | "error" | "margin" | "component" | "variant" | "focused" | "fullWidth" | "hiddenLabel"> & {
     component?: React.ElementType<any> | undefined;
 } & MuiWarningResultProps>;
 export declare const FormLabelCC: React.ComponentType<import("@mui/material").FormLabelBaseProps & import("@mui/material").FormLabelOwnProps & import("@mui/material/OverridableComponent").CommonProps & Omit<Omit<React.DetailedHTMLProps<React.LabelHTMLAttributes<HTMLLabelElement>, HTMLLabelElement>, "ref"> & {

@@ -1,6 +1,5 @@
 import React from "react";
 import { FormControlLabelProps, TypographyProps } from "@mui/material";
-import { CSSProperties } from "@mui/styles";
 export interface ComponentWithLabelProps extends Omit<FormControlLabelProps, "label"> {
     /**
      * The text of the label
@@ -19,22 +18,14 @@ export interface ComponentWithLabelProps extends Omit<FormControlLabelProps, "la
      */
     labelAlign?: TypographyProps["align"];
     /**
+     * custom class name to apply to root
+     */
+    className?: string;
+    /**
      * Custom styles
      */
-    classes?: Partial<ReturnType<typeof useStyles>>;
+    classes?: Partial<Record<ComponentWithLabelClassKey, string>>;
 }
-export interface ComponentWithLabelTheme {
-    whiteSpace?: CSSProperties["whiteSpace"];
-    padding?: CSSProperties["padding"];
-    margin?: CSSProperties["margin"];
-    border?: CSSProperties["border"];
-    borderRadius?: CSSProperties["borderRadius"];
-    backgroundColor?: CSSProperties["backgroundColor"];
-    color?: CSSProperties["color"];
-    fontSize?: CSSProperties["fontSize"];
-    fontWeight?: CSSProperties["fontWeight"];
-    style?: CSSProperties;
-}
-declare const useStyles: (props?: any) => import("@mui/styles").ClassNameMap<"label">;
-declare const _default: React.MemoExoticComponent<(props: FormControlLabelProps | ComponentWithLabelProps) => React.JSX.Element>;
+export type ComponentWithLabelClassKey = "root" | "label";
+declare const _default: React.MemoExoticComponent<(inProps: FormControlLabelProps | ComponentWithLabelProps) => React.JSX.Element>;
 export default _default;

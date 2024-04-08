@@ -24,5 +24,6 @@ export interface LocalizedKeyboardDatePickerProps extends Omit<DatePickerProps<M
      */
     onBlur?: TextFieldProps["onBlur"];
 }
+export type LocalizedKeyboardDatePickerClassKey = never;
 declare const _default: React.MemoExoticComponent<React.ComponentType<LocalizedKeyboardDatePickerProps & import("../UIKit/MuiWarning").MuiWarningResultProps>>;
 export default _default;
