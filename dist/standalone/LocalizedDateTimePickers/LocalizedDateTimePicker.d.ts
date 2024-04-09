@@ -2,7 +2,7 @@ import React from "react";
 import { DateTimePickerProps } from "@mui/x-date-pickers";
 import { Moment } from "moment";
 import { TextFieldProps } from "@mui/material";
-interface LocalizedDateTimePickerProps extends Omit<DateTimePickerProps<Moment | null>, "format"> {
+interface LocalizedDateTimePickerProps extends Omit<DateTimePickerProps<Moment>, "format"> {
     /**
      * Set required flag for text field input
      */

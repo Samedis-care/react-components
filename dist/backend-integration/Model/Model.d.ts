@@ -134,7 +134,7 @@ export interface ModelGetOptions {
  * @param id The record ID (or null to get default values on create)
  * @param options Extra options to pass to useQuery (defaults are provided for retry, staleTime and cacheTime (last two only if configured in model))
  */
-export declare const useModelGet: <KeyT extends string, VisibilityT extends PageVisibility, CustomT>(model: Model<KeyT, VisibilityT, CustomT>, id: string | null, options?: (UseQueryOptions<ModelGetResponse<KeyT>, Error, ModelGetResponse<KeyT>, QueryKey> & ModelGetOptions) | undefined) => UseQueryResult<ModelGetResponse<KeyT>, Error>;
+export declare const useModelGet: <KeyT extends string, VisibilityT extends PageVisibility, CustomT>(model: Model<KeyT, VisibilityT, CustomT>, id: string | null, options?: UseQueryOptions<ModelGetResponse<KeyT>, Error, ModelGetResponse<KeyT>> & ModelGetOptions) => UseQueryResult<ModelGetResponse<KeyT>, Error>;
 /**
  * React-Query's useQuery for the given model and index params
  * @param model The model ID to load

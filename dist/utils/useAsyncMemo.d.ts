@@ -5,5 +5,5 @@
  * @param keepPreviousResult Cache previous results
  * @returns The value from the factory OR null while the factory is still updating
  */
-declare const useAsyncMemo: <T>(factory: () => T | Promise<T>, dependencies: unknown[], keepPreviousResult?: boolean) => T | null;
+declare const useAsyncMemo: <T>(factory: () => Promise<T> | T, dependencies: unknown[], keepPreviousResult?: boolean) => T | null;
 export default useAsyncMemo;

@@ -10,6 +10,6 @@ const useParams = () => {
     const route = useContext(RouteContext);
     if (!route)
         return {};
-    return matchPath({ path: route.path }, location.pathname)?.params ?? {};
+    return (matchPath({ path: route.path }, location.pathname)?.params ?? {});
 };
 export default useParams;

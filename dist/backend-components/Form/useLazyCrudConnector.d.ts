@@ -38,6 +38,9 @@ export interface UseLazyCrudConnectorParams<KeyT extends ModelFieldName, Visibil
 export interface UseLazyCrudConnectorResult<KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT> {
     connector: LazyConnector<KeyT, VisibilityT, CustomT>;
 }
-export declare const extractLazyCrudConnectorParams: <KeyT extends string, VisibilityT extends PageVisibility, CustomT, ExtraT, T extends UseLazyCrudConnectorParams<KeyT, VisibilityT, CustomT, ExtraT>>(data: T) => [UseLazyCrudConnectorParams<KeyT, VisibilityT, CustomT, ExtraT>, Omit<T, keyof UseLazyCrudConnectorParams<KeyT, VisibilityT, CustomT, ExtraT>>];
+export declare const extractLazyCrudConnectorParams: <KeyT extends string, VisibilityT extends PageVisibility, CustomT, ExtraT, T extends UseLazyCrudConnectorParams<KeyT, VisibilityT, CustomT, ExtraT>>(data: T) => [
+    UseLazyCrudConnectorParams<KeyT, VisibilityT, CustomT, ExtraT>,
+    Omit<T, keyof UseLazyCrudConnectorParams<KeyT, VisibilityT, CustomT, ExtraT>>
+];
 declare const useLazyCrudConnector: <KeyT extends string, VisibilityT extends PageVisibility, CustomT, ExtraT = undefined>(params: UseLazyCrudConnectorParams<KeyT, VisibilityT, CustomT, ExtraT>) => UseLazyCrudConnectorResult<KeyT, VisibilityT, CustomT>;
 export default useLazyCrudConnector;
