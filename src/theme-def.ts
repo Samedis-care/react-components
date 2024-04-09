@@ -24,6 +24,9 @@ import {
 	MultiSelectClassKey,
 	MultiSelectorData,
 	MultiSelectProps,
+	PopupMenuClassKey,
+	PortalLayoutClassKey,
+	PortalLayoutProps,
 } from "./standalone";
 import {
 	ComponentWithLabelClassKey,
@@ -160,6 +163,15 @@ import {
 	LocaleSelectorEntryClassKey,
 	LocaleSelectorEntryProps,
 } from "./non-standalone/LocaleSelector/LocaleSelectorEntry";
+import { SignPadClassKey, SignPadProps } from "./standalone/SignPad";
+import {
+	FormDialogClassKey,
+	FormDialogProps,
+} from "./backend-components/Form/FormDialog";
+import {
+	NotificationsClassKey,
+	NotificationsProps,
+} from "./standalone/Notifications";
 
 export interface ComponentsCareTheme {
 	dataGrid?: DataGridTheme;
@@ -226,6 +238,11 @@ declare module "@mui/material/styles" {
 		CcLocaleSelectorDialog: LocaleSelectorDialogClassKey;
 		CcLocaleSelectorDialogContent: LocaleSelectorDialogContentClassKey;
 		CcLocaleSelectorEntry: LocaleSelectorEntryClassKey;
+		CcSignPad: SignPadClassKey;
+		CcFormDialog: FormDialogClassKey;
+		CcPopupMenu: PopupMenuClassKey;
+		CcPortalLayout: PortalLayoutClassKey;
+		CcNotifications: NotificationsClassKey;
 	}
 
 	interface ComponentsPropsList {
@@ -273,6 +290,10 @@ declare module "@mui/material/styles" {
 		CcLocaleSelectorDialog: Partial<LocaleSelectorDialogProps>;
 		CcLocaleSelectorDialogContent: Partial<LocaleSelectorDialogContentProps>;
 		CcLocaleSelectorEntry: Partial<LocaleSelectorEntryProps>;
+		CcSignPad: Partial<SignPadProps>;
+		CcFormDialog: Partial<FormDialogProps>;
+		CcPortalLayout: Partial<PortalLayoutProps>;
+		CcNotifications: Partial<NotificationsProps>;
 	}
 
 	interface Components {
@@ -495,6 +516,30 @@ declare module "@mui/material/styles" {
 			defaultProps?: ComponentsPropsList["CcLocaleSelectorEntry"];
 			styleOverrides?: ComponentsOverrides<Theme>["CcLocaleSelectorEntry"];
 			variants?: ComponentsVariants["CcLocaleSelectorEntry"];
+		};
+		CcSignPad?: {
+			defaultProps?: ComponentsPropsList["CcSignPad"];
+			styleOverrides?: ComponentsOverrides<Theme>["CcSignPad"];
+			variants?: ComponentsVariants["CcSignPad"];
+		};
+		CcFormDialog?: {
+			defaultProps?: ComponentsPropsList["CcFormDialog"];
+			styleOverrides?: ComponentsOverrides<Theme>["CcFormDialog"];
+			variants?: ComponentsVariants["CcFormDialog"];
+		};
+		CcPopupMenu?: {
+			styleOverrides?: ComponentsOverrides<Theme>["CcPopupMenu"];
+			variants?: ComponentsVariants["CcFormDialog"];
+		};
+		CcPortalLayout?: {
+			defaultProps?: ComponentsPropsList["CcPortalLayout"];
+			styleOverrides?: ComponentsOverrides<Theme>["CcPortalLayout"];
+			variants?: ComponentsVariants["CcPortalLayout"];
+		};
+		CcNotifications?: {
+			defaultProps?: ComponentsPropsList["CcNotifications"];
+			styleOverrides?: ComponentsOverrides<Theme>["CcNotifications"];
+			variants?: ComponentsVariants["CcNotifications"];
 		};
 	}
 }

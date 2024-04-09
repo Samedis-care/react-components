@@ -1,11 +1,12 @@
-import { Menu, Theme } from "@mui/material";
+import { Menu, styled } from "@mui/material";
 
-import withStyles from "@mui/styles/withStyles";
-
-const PopupMenu = withStyles((theme: Theme) => ({
-	paper: {
-		border: `1px solid ${theme.palette.divider}`,
-	},
-}))(Menu);
+export type PopupMenuClassKey = "root";
+const PopupMenu = styled(Menu, { name: "CcPopupMenu", slot: "root" })(
+	({ theme }) => ({
+		"& .MuiMenu-paper": {
+			border: `1px solid ${theme.palette.divider}`,
+		},
+	}),
+);
 
 export default PopupMenu;

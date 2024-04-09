@@ -11,7 +11,7 @@ import Header, { PortalLayoutHeaderProps } from "./Header";
 import Menu from "./Menu";
 import { Breakpoint } from "@mui/material/styles";
 import makeStyles from "@mui/styles/makeStyles";
-import { useMediaQuery, useTheme } from "@mui/material";
+import { styled, useMediaQuery, useTheme, useThemeProps } from "@mui/material";
 
 interface PortalLayoutBasic {
 	/**
@@ -78,6 +78,10 @@ interface PortalLayoutPropsBase {
 	 * ID for the main content
 	 */
 	mainId?: string;
+	/**
+	 * custom CSS class to apply
+	 */
+	className?: string;
 }
 
 interface IRenderProps {
@@ -90,57 +94,75 @@ interface IRenderProps {
 export type PortalLayoutProps = PortalLayoutPropsBase &
 	(PortalLayoutBasic | PortalLayoutNoTopLeft);
 
-const useContainerStyles = makeStyles(
-	{
-		containerDesktop: (props: PortalLayoutProps) => ({
-			display: "grid",
-			gridTemplateAreas:
-				props.variant === "basic"
-					? `"top-left top" "sidebar main"`
-					: `"top top" "sidebar main"`,
-			gridTemplateRows: "max-content 100fr",
-			gridTemplateColumns: `${
-				props.drawerWidth ? `${props.drawerWidth}px` : "max-content"
-			} 100fr`,
-			height: "100%",
-		}),
-		containerMobile: (props: PortalLayoutProps) => ({
-			display: "grid",
-			gridTemplateAreas: `"top top" "main main"`,
-			gridTemplateRows: "max-content 100fr",
-			gridTemplateColumns: `${
-				props.drawerWidth ? `${props.drawerWidth}px` : "max-content"
-			} 100fr`,
-			height: "100%",
-		}),
-	},
-	{ name: "CcPortalLayout" },
+export interface PortalLayoutContainerOwnerState {
+	variant: PortalLayoutProps["variant"];
+	drawerWidth: PortalLayoutProps["drawerWidth"];
+}
+const ContainerDesktop = styled("div", {
+	name: "CcPortalLayout",
+	slot: "containerDesktop",
+})<{ ownerState: PortalLayoutContainerOwnerState }>(
+	({ ownerState: { variant, drawerWidth } }) => ({
+		display: "grid",
+		gridTemplateAreas:
+			variant === "basic"
+				? `"top-left top" "sidebar main"`
+				: `"top top" "sidebar main"`,
+		gridTemplateRows: "max-content 100fr",
+		gridTemplateColumns: `${
+			drawerWidth ? `${drawerWidth}px` : "max-content"
+		} 100fr`,
+		height: "100%",
+	}),
+);
+const ContainerMobile = styled("div", {
+	name: "CcPortalLayout",
+	slot: "containerMobile",
+})<{ ownerState: PortalLayoutContainerOwnerState }>(
+	({ ownerState: { drawerWidth } }) => ({
+		display: "grid",
+		gridTemplateAreas: `"top top" "main main"`,
+		gridTemplateRows: "max-content 100fr",
+		gridTemplateColumns: `${
+			drawerWidth ? `${drawerWidth}px` : "max-content"
+		} 100fr`,
+		height: "100%",
+	}),
 );
 
-const useStyles = makeStyles(
-	{
-		header: {
-			gridArea: "top",
-		},
-		topLeft: {
-			gridArea: "top-left",
-		},
-		menu: {
-			gridArea: "sidebar",
-			minHeight: "100%",
-		},
-		main: {
-			gridArea: "main",
-			overflow: "auto",
-			display: "flex",
-			flexDirection: "column",
-		},
-		mobileTopLeft: {
-			height: 56,
-		},
-	},
-	{ name: "CcRenderLayout" },
-);
+export type PortalLayoutClassKey = "containerDesktop" | "containerMobile";
+
+const RenderLayoutHeader = styled("div", {
+	name: "CcPortalRenderLayout",
+	slot: "header",
+})({ gridArea: "top" });
+const RenderLayoutTopLeft = styled("div", {
+	name: "CcPortalRenderLayout",
+	slot: "topLeft",
+})({ gridArea: "top-left" });
+const RenderLayoutMenu = styled("div", {
+	name: "CcPortalRenderLayout",
+	slot: "menu",
+})({ gridArea: "sidebar", minHeight: "100%" });
+const RenderLayoutMain = styled("div", {
+	name: "CcPortalRenderLayout",
+	slot: "main",
+})({
+	gridArea: "main",
+	overflow: "auto",
+	display: "flex",
+	flexDirection: "column",
+});
+const RenderLayoutMobileTopLeft = styled("div", {
+	name: "CcPortalRenderLayout",
+	slot: "mobileTopLeft",
+})({ height: 56 });
+export type PortalRenderLayoutClassKey =
+	| "header"
+	| "topLeft"
+	| "menu"
+	| "main"
+	| "mobileTopLeft";
 
 export interface PortalLayoutContextType {
 	mobile: boolean;
@@ -166,7 +188,6 @@ const RenderLayout = (props: PortalLayoutProps & IRenderProps) => {
 		() => setMenuOpen((prevState) => !prevState),
 		[setMenuOpen],
 	);
-	const classes = useStyles(props);
 
 	const portalContext = useMemo(
 		() => ({
@@ -180,9 +201,9 @@ const RenderLayout = (props: PortalLayoutProps & IRenderProps) => {
 	return (
 		<PortalLayoutContext.Provider value={portalContext}>
 			{!props.mobile && props.variant === "basic" && (
-				<div className={classes.topLeft}>{props.topLeft}</div>
+				<RenderLayoutTopLeft>{props.topLeft}</RenderLayoutTopLeft>
 			)}
-			<div id={props.headerId} className={classes.header}>
+			<RenderLayoutHeader id={props.headerId}>
 				{headerContent && (
 					<Header
 						contents={headerContent}
@@ -191,8 +212,8 @@ const RenderLayout = (props: PortalLayoutProps & IRenderProps) => {
 						customClasses={props.customClasses?.header}
 					/>
 				)}
-			</div>
-			<div id={props.menuId} className={classes.menu}>
+			</RenderLayoutHeader>
+			<RenderLayoutMenu id={props.menuId}>
 				{menuContent && (
 					<Menu
 						menuOpen={menuOpen}
@@ -202,25 +223,26 @@ const RenderLayout = (props: PortalLayoutProps & IRenderProps) => {
 						items={
 							<>
 								{mobile && props.variant === "basic" && (
-									<div className={classes.mobileTopLeft}>{props.topLeft}</div>
+									<RenderLayoutMobileTopLeft>
+										{props.topLeft}
+									</RenderLayoutMobileTopLeft>
 								)}
 								{menuContent}
 							</>
 						}
 					/>
 				)}
-			</div>
-			<div id={props.mainId} className={classes.main}>
-				{content}
-			</div>
+			</RenderLayoutMenu>
+			<RenderLayoutMain id={props.mainId}>{content}</RenderLayoutMain>
 		</PortalLayoutContext.Provider>
 	);
 };
 
 const RenderLayoutMemo = React.memo(RenderLayout);
 
-const PortalLayout = (props: PortalLayoutProps) => {
-	const classes = useContainerStyles(props);
+const PortalLayout = (inProps: PortalLayoutProps) => {
+	const props = useThemeProps({ props: inProps, name: "CcPortalLayout" });
+	const { className, ...rendererProps } = props;
 	const theme = useTheme();
 	const mobileViewConditionMet = useMediaQuery(
 		props.mobileViewCondition || "()",
@@ -234,12 +256,15 @@ const PortalLayout = (props: PortalLayoutProps) => {
 		(props.mobileViewCondition && mobileViewConditionMet)
 	);
 
+	const ContainerComp = mobile ? ContainerMobile : ContainerDesktop;
+
 	return (
-		<div
-			className={mobile ? classes.containerMobile : classes.containerDesktop}
+		<ContainerComp
+			ownerState={{ variant: props.variant, drawerWidth: props.drawerWidth }}
+			className={className}
 		>
-			<RenderLayoutMemo mobile={mobile} {...props} />
-		</div>
+			<RenderLayoutMemo mobile={mobile} {...rendererProps} />
+		</ContainerComp>
 	);
 };
 

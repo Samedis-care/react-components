@@ -1,9 +1,15 @@
 import React, { useCallback } from "react";
-import { InputAdornment, IconButton } from "@mui/material";
+import {
+	InputAdornment,
+	IconButton,
+	styled,
+	useThemeProps,
+} from "@mui/material";
 import makeStyles from "@mui/styles/makeStyles";
 import { SignIcon } from "../../standalone";
 import { Info as InfoIcon } from "@mui/icons-material";
 import useCCTranslations from "../../utils/useCCTranslations";
+import combineClassNames from "../../utils/combineClassNames";
 
 export interface SignPadProps {
 	/**
@@ -19,9 +25,13 @@ export interface SignPadProps {
 	 */
 	signerName?: string | null;
 	/**
+	 * custom CSS class to apply to root
+	 */
+	className?: string;
+	/**
 	 * Custom styles
 	 */
-	classes?: Partial<ReturnType<typeof useStyles>>;
+	classes?: Partial<Record<SignPadClassKey, string>>;
 	/**
 	 * Open info dialog
 	 */
@@ -36,48 +46,62 @@ export interface SignPadProps {
 	onBlur?: React.FocusEventHandler<HTMLDivElement>;
 }
 
-const useStyles = makeStyles(
-	(theme) => ({
-		signPadDiv: {
-			position: "relative",
-			cursor: "pointer",
-			borderBottom: "1px dotted",
-			height: "100%",
-			width: "100%",
-			minHeight: "100px",
-			color: theme.palette.grey[700],
-			display: "inline-block",
-			backgroundColor: theme.palette.action.hover,
-		},
-		imageDiv: {
-			height: `calc(100% - ${theme.spacing(2)})`,
-			width: `calc(100% - ${theme.spacing(2)})`,
-		},
-		signPreview: {
-			height: "100%",
-			width: "100%",
-			objectFit: "contain",
-		},
-		signTextDiv: {
-			position: "absolute",
-			left: 5,
-			bottom: 5,
-			alignItems: "center",
-			display: "flex",
-			color: theme.palette.text.secondary,
-		},
-		infoDiv: {
-			position: "absolute",
-			right: 5,
-			bottom: 20,
-		},
+const SignPadDiv = styled("div", { name: "CcSignPad", slot: "root" })(
+	({ theme }) => ({
+		position: "relative",
+		cursor: "pointer",
+		borderBottom: "1px dotted",
+		height: "100%",
+		width: "100%",
+		minHeight: "100px",
+		color: theme.palette.grey[700],
+		display: "inline-block",
+		backgroundColor: theme.palette.action.hover,
 	}),
-	{ name: "CcSignPad" },
 );
-const SignPad = (props: SignPadProps) => {
-	const { signature, disabled, openInfo, openSignPad } = props;
+
+const SignTextDiv = styled("div", { name: "CcSignPad", slot: "signTextDiv" })(
+	({ theme }) => ({
+		position: "absolute",
+		left: 5,
+		bottom: 5,
+		alignItems: "center",
+		display: "flex",
+		color: theme.palette.text.secondary,
+	}),
+);
+
+const ImageDiv = styled("div", { name: "CcSignPad", slot: "imageDiv" })(
+	({ theme }) => ({
+		height: `calc(100% - ${theme.spacing(2)})`,
+		width: `calc(100% - ${theme.spacing(2)})`,
+	}),
+);
+
+const SignPreview = styled("img", { name: "CcSignPad", slot: "signPreview" })({
+	height: "100%",
+	width: "100%",
+	objectFit: "contain",
+});
+
+const InfoDiv = styled("div", { name: "CcSignPad", slot: "infoDiv" })({
+	position: "absolute",
+	right: 5,
+	bottom: 20,
+});
+
+export type SignPadClassKey =
+	| "root"
+	| "signTextDiv"
+	| "imageDiv"
+	| "signPreview"
+	| "infoDiv";
+
+const SignPad = (inProps: SignPadProps) => {
+	const props = useThemeProps({ props: inProps, name: "CcSignPad" });
+	const { signature, disabled, openInfo, openSignPad, className, classes } =
+		props;
 	const { t } = useCCTranslations();
-	const classes = useStyles(props);
 	const handelOpenInfo = useCallback(
 		(event: React.MouseEvent<HTMLButtonElement>) => {
 			event.stopPropagation();
@@ -86,17 +110,24 @@ const SignPad = (props: SignPadProps) => {
 		[openInfo],
 	);
 	return (
-		<div className={classes.signPadDiv} onClick={openSignPad}>
-			<div className={classes.signTextDiv}>
+		<SignPadDiv
+			className={combineClassNames([className, classes?.root])}
+			onClick={openSignPad}
+		>
+			<SignTextDiv className={classes?.signTextDiv}>
 				<SignIcon color={disabled ? "disabled" : "primary"} />
 				{!signature && <span>{t("standalone.signature-pad.sign-here")}</span>}
-			</div>
-			<div className={classes.imageDiv}>
+			</SignTextDiv>
+			<ImageDiv className={classes?.imageDiv}>
 				{signature && (
-					<img className={classes.signPreview} src={signature} alt={""} />
+					<SignPreview
+						className={classes?.signPreview}
+						src={signature}
+						alt={""}
+					/>
 				)}
-			</div>
-			<div className={classes.infoDiv}>
+			</ImageDiv>
+			<InfoDiv className={classes?.infoDiv}>
 				{openInfo && (
 					<InputAdornment position={"end"}>
 						<IconButton onClick={handelOpenInfo} size="large">
@@ -104,8 +135,8 @@ const SignPad = (props: SignPadProps) => {
 						</IconButton>
 					</InputAdornment>
 				)}
-			</div>
-		</div>
+			</InfoDiv>
+		</SignPadDiv>
 	);
 };
 export default React.memo(SignPad);

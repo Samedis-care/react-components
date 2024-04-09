@@ -10,8 +10,10 @@ import {
 	Popover,
 	PopoverOrigin,
 	PopoverProps,
+	styled,
 	Tooltip,
 	Typography,
+	useThemeProps,
 } from "@mui/material";
 import InfiniteScroll, { InfiniteScrollProps } from "../InfiniteScroll";
 import makeStyles from "@mui/styles/makeStyles";
@@ -96,9 +98,13 @@ export interface NotificationsProps {
 	 */
 	onOpen?: React.EventHandler<React.MouseEvent<HTMLButtonElement>>;
 	/**
+	 * Custom CSS class to apply
+	 */
+	className?: string;
+	/**
 	 * Custom styles
 	 */
-	classes?: Partial<ReturnType<typeof useStyles>>;
+	classes?: Partial<Record<NotificationsClassKey, string>>;
 }
 
 const anchorOrigin: PopoverOrigin = {
@@ -164,18 +170,18 @@ const defaultRenderer = (notification: Notification): React.ReactElement => (
 	</Box>
 );
 
-const useStyles = makeStyles(
-	{
-		notificationArea: {
-			height: "50vh",
-			overflow: "auto",
-		},
-	},
-	{ name: "CcNotifications" },
-);
+const StyledInfiniteScroll = styled(InfiniteScroll, {
+	name: "CcNotifications",
+	slot: "notificationArea",
+})({
+	height: "50vh",
+	overflow: "auto",
+});
 
-const Notifications = (props: NotificationsProps) => {
-	const classes = useStyles(props);
+export type NotificationsClassKey = "notificationArea";
+
+const Notifications = (inProps: NotificationsProps) => {
+	const props = useThemeProps({ props: inProps, name: "CcNotifications" });
 	const { t } = useCCTranslations();
 
 	const [anchor, setAnchor] = useState<HTMLElement | null>(null);
@@ -186,6 +192,8 @@ const Notifications = (props: NotificationsProps) => {
 		loadUnread,
 		refreshInterval,
 		unreadCount,
+		classes,
+		className,
 	} = props;
 
 	const onIconClick = useCallback(
@@ -227,7 +235,7 @@ const Notifications = (props: NotificationsProps) => {
 	);
 
 	return (
-		<>
+		<div className={className}>
 			<IconButton onClick={onIconClick} size="large">
 				<Badge
 					badgeContent={
@@ -259,20 +267,20 @@ const Notifications = (props: NotificationsProps) => {
 							<Divider />
 						</Grid>
 						<Grid item xs={12}>
-							<InfiniteScroll
-								className={classes.notificationArea}
+							<StyledInfiniteScroll
 								loadMoreBottom={loadRead}
 								loadMoreTop={loadUnread}
+								className={classes?.notificationArea ?? ""}
 							>
 								{notifications.map((notification) => (
 									<Renderer key={notification.id} {...notification} />
 								))}
-							</InfiniteScroll>
+							</StyledInfiniteScroll>
 						</Grid>
 					</Grid>
 				</Box>
 			</Popover>
-		</>
+		</div>
 	);
 };
 

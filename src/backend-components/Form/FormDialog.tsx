@@ -1,6 +1,11 @@
 import React, { useCallback, useMemo, useRef } from "react";
-import { Dialog, DialogContent } from "@mui/material";
-import makeStyles from "@mui/styles/makeStyles";
+import {
+	Dialog,
+	DialogContent,
+	styled,
+	SvgIconProps,
+	useThemeProps,
+} from "@mui/material";
 import { OpenInNew } from "@mui/icons-material";
 import { useDialogContext } from "../../framework/DialogContextProvider";
 import { showConfirmDialog } from "../../non-standalone/Dialog/Utils";
@@ -38,16 +43,23 @@ export interface FormDialogProps {
 	disableFormDialogContext?: boolean;
 }
 
-const dialogStyles = makeStyles({
-	content: {
-		height: "80vh",
-	},
-	openInNewIcon: {
-		verticalAlign: "middle",
-		cursor: "pointer",
-		marginLeft: 10,
-	},
+const TallDialogContent = styled(DialogContent, {
+	name: "CcFormDialog",
+	slot: "content",
+})({
+	height: "80vh",
 });
+
+const OpenInNewIcon = styled<React.ComponentType<SvgIconProps>>(OpenInNew, {
+	name: "CcFormDialog",
+	slot: "openInNewIcon",
+})({
+	verticalAlign: "middle",
+	cursor: "pointer",
+	marginLeft: 10,
+});
+
+export type FormDialogClassKey = "content" | "openInNewIcon";
 
 export interface FormDialogDispatch {
 	blockClosing: () => void;
@@ -59,7 +71,8 @@ export const FormDialogDispatchContext = React.createContext<
 	FormDialogDispatch | undefined
 >(undefined);
 
-const FormDialog = (props: FormDialogProps) => {
+const FormDialog = (inProps: FormDialogProps) => {
+	const props = useThemeProps({ props: inProps, name: "CcFormDialog" });
 	const {
 		dialogTitle,
 		maxWidth,
@@ -70,7 +83,6 @@ const FormDialog = (props: FormDialogProps) => {
 		disableFormDialogContext,
 	} = props;
 	const [pushDialog, popDialog] = useDialogContext();
-	const classes = dialogStyles();
 	const blockClosingCounter = useRef(0);
 	const { t } = useCCTranslations();
 
@@ -102,6 +114,8 @@ const FormDialog = (props: FormDialogProps) => {
 		[blockClosing, unblockClosing],
 	);
 
+	const ContentComp = useCustomClasses ? TallDialogContent : DialogContent;
+
 	return (
 		<Dialog
 			maxWidth={maxWidth ?? "lg"}
@@ -111,22 +125,15 @@ const FormDialog = (props: FormDialogProps) => {
 		>
 			<DialogTitle onClose={handleClose} noTitle={!dialogTitle}>
 				{dialogTitle}
-				{openInNewLink && (
-					<OpenInNew
-						classes={{ root: classes.openInNewIcon }}
-						onClick={openInNewLink}
-					/>
-				)}
+				{openInNewLink && <OpenInNewIcon onClick={openInNewLink} />}
 			</DialogTitle>
-			<DialogContent
-				classes={useCustomClasses ? { root: classes.content } : undefined}
-			>
+			<ContentComp>
 				<IsInFormDialogContext.Provider value={!disableFormDialogContext}>
 					<FormDialogDispatchContext.Provider value={dispatch}>
 						{children}
 					</FormDialogDispatchContext.Provider>
 				</IsInFormDialogContext.Provider>
-			</DialogContent>
+			</ContentComp>
 		</Dialog>
 	);
 };
