@@ -328,7 +328,7 @@ declare module "@mui/material/styles" {
             styleOverrides?: ComponentsOverrides<Theme>["CcCheckbox"];
             variants?: ComponentsVariants["CcCheckbox"];
         };
-        CcUIKitInput?: {
+        CcUiKitInput?: {
             defaultProps?: ComponentsPropsList["CcUiKitInput"];
             styleOverrides?: ComponentsOverrides<Theme>["CcUiKitInput"];
             variants?: ComponentsVariants["CcUiKitInput"];
