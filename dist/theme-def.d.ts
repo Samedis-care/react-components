@@ -37,6 +37,9 @@ import { FileClassKey, FileProps } from "./standalone/FileUpload/Generic/File";
 import { MenuItemMaterialClassKey, MenuItemMaterialProps } from "./standalone/Portal/MenuItem/Material";
 import { LocalizedKeyboardDatePickerClassKey, LocalizedKeyboardDatePickerProps } from "./standalone/LocalizedDateTimePickers/LocalizedKeyboardDatePicker";
 import { UiKitInputClassKey, UiKitInputOutlinedClassKey, UiKitInputOutlinedProps, UiKitInputProps, UiKitTextFieldClassKey, UiKitTextFieldProps } from "./standalone/UIKit/CommonStyles";
+import { LocaleSelectorDialogClassKey, LocaleSelectorDialogProps } from "./non-standalone/LocaleSelector/LocaleSelectorDialog";
+import { LocaleSelectorDialogContentClassKey, LocaleSelectorDialogContentProps } from "./non-standalone/LocaleSelector/LocaleSelectorDialogContent";
+import { LocaleSelectorEntryClassKey, LocaleSelectorEntryProps } from "./non-standalone/LocaleSelector/LocaleSelectorEntry";
 export interface ComponentsCareTheme {
     dataGrid?: DataGridTheme;
     dataGridExpert?: DataGridThemeExpert;
@@ -93,6 +96,9 @@ declare module "@mui/material/styles" {
         CcUiKitInput: UiKitInputClassKey;
         CcUiKitInputOutlined: UiKitInputOutlinedClassKey;
         CcUiKitTextField: UiKitTextFieldClassKey;
+        CcLocaleSelectorDialog: LocaleSelectorDialogClassKey;
+        CcLocaleSelectorDialogContent: LocaleSelectorDialogContentClassKey;
+        CcLocaleSelectorEntry: LocaleSelectorEntryClassKey;
     }
     interface ComponentsPropsList {
         CcSignalPortlet: Partial<SignalPortletProps>;
@@ -136,6 +142,9 @@ declare module "@mui/material/styles" {
         CcUiKitInput: Partial<UiKitInputProps>;
         CcUiKitInputOutlined: Partial<UiKitInputOutlinedProps>;
         CcUiKitTextField: Partial<UiKitTextFieldProps>;
+        CcLocaleSelectorDialog: Partial<LocaleSelectorDialogProps>;
+        CcLocaleSelectorDialogContent: Partial<LocaleSelectorDialogContentProps>;
+        CcLocaleSelectorEntry: Partial<LocaleSelectorEntryProps>;
     }
     interface Components {
         CcSignalPortlet?: {
@@ -342,6 +351,21 @@ declare module "@mui/material/styles" {
             defaultProps?: ComponentsPropsList["CcUiKitTextField"];
             styleOverrides?: ComponentsOverrides<Theme>["CcUiKitTextField"];
             variants?: ComponentsVariants["CcUiKitTextField"];
+        };
+        CcLocaleSelectorDialog?: {
+            defaultProps?: ComponentsPropsList["CcLocaleSelectorDialog"];
+            styleOverrides?: ComponentsOverrides<Theme>["CcLocaleSelectorDialog"];
+            variants?: ComponentsVariants["CcLocaleSelectorDialog"];
+        };
+        CcLocaleSelectorDialogContent?: {
+            defaultProps?: ComponentsPropsList["CcLocaleSelectorDialogContent"];
+            styleOverrides?: ComponentsOverrides<Theme>["CcLocaleSelectorDialogContent"];
+            variants?: ComponentsVariants["CcLocaleSelectorDialogContent"];
+        };
+        CcLocaleSelectorEntry?: {
+            defaultProps?: ComponentsPropsList["CcLocaleSelectorEntry"];
+            styleOverrides?: ComponentsOverrides<Theme>["CcLocaleSelectorEntry"];
+            variants?: ComponentsVariants["CcLocaleSelectorEntry"];
         };
     }
 }
