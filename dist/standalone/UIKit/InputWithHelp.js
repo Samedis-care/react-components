@@ -1,11 +1,10 @@
 import React from "react";
-import { IconButton, InputAdornment, Input } from "@mui/material";
+import { IconButton, InputAdornment } from "@mui/material";
 import { Info as InfoIcon } from "@mui/icons-material";
-import { useInputStyles } from "./CommonStyles";
+import { UiKitInput } from "./CommonStyles";
 const InputWithHelpInner = (props, ref) => {
     const { openInfo, important, ...muiProps } = props;
-    const inputClasses = useInputStyles({ important });
-    return (React.createElement(Input, { ref: ref, classes: inputClasses, endAdornment: openInfo && (React.createElement(InputAdornment, { position: "end" },
+    return (React.createElement(UiKitInput, { ref: ref, important: important, endAdornment: openInfo && (React.createElement(InputAdornment, { position: "end" },
             React.createElement(IconButton, { onClick: openInfo },
                 React.createElement(InfoIcon, { color: "disabled" })))), ...muiProps }));
 };

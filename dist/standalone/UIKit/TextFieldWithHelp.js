@@ -1,14 +1,13 @@
 import React, { useCallback, useEffect, useRef, useState, } from "react";
-import { TextField, IconButton, InputAdornment, } from "@mui/material";
-import { Info as InfoIcon, Clear as ClearIcon } from "@mui/icons-material";
-import { InputLabelConfig, useInputStyles } from "./CommonStyles";
+import { IconButton, InputAdornment, } from "@mui/material";
+import { Clear as ClearIcon, Info as InfoIcon } from "@mui/icons-material";
+import { InputLabelConfig, UiKitTextField } from "./CommonStyles";
 import combineClassNames from "../../utils/combineClassNames";
 import isTouchDevice from "../../utils/isTouchDevice";
 import { useMuiWarningStyles } from "./MuiWarning";
 import { useRefComposer } from "react-ref-composer";
 const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(props, ref) {
-    const { openInfo, customHandleClear, important, warning, onChange, ...muiProps } = props;
-    const inputClasses = useInputStyles({ important });
+    const { openInfo, customHandleClear, warning, onChange, ...muiProps } = props;
     const warningClasses = useMuiWarningStyles();
     // handle clear
     const [hasValue, setHasValue] = useState(!!(muiProps.value ?? muiProps.defaultValue));
@@ -42,11 +41,10 @@ const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(props
         setHasValue(!!muiProps.value);
     }, [muiProps.value]);
     // render
-    return (React.createElement(TextField, { ref: ref, InputLabelProps: InputLabelConfig, ...muiProps, className: combineClassNames([
+    return (React.createElement(UiKitTextField, { ref: ref, InputLabelProps: InputLabelConfig, ...muiProps, className: combineClassNames([
             warning && warningClasses.warning,
             muiProps.className,
         ]), onChange: handleChange, InputProps: {
-            classes: inputClasses,
             ...muiProps.InputProps,
             endAdornment: (React.createElement(React.Fragment, null,
                 React.createElement(InputAdornment, { position: "end" },
