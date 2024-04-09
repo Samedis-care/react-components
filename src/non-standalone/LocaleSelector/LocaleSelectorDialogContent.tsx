@@ -1,29 +1,35 @@
 import React, { Suspense, useCallback, useMemo, useState } from "react";
-import { Box, Grid, InputAdornment } from "@mui/material";
+import {
+	Box,
+	Grid,
+	InputAdornment,
+	styled,
+	useThemeProps,
+} from "@mui/material";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { FixedSizeList, ListChildComponentProps } from "react-window";
 import supportedLanguages from "../../assets/data/supported-languages.json";
 import countryLanguages from "../../assets/data/country-languages.json";
-import LanguageSelectorEntry from "./LanguageSelectorEntry";
+import LocaleSelectorEntry from "./LocaleSelectorEntry";
 import { Search as SearchIcon } from "@mui/icons-material";
-import makeStyles from "@mui/styles/makeStyles";
 import useCCTranslations, {
 	useCCLocaleSwitcherTranslations,
 } from "../../utils/useCCTranslations";
 import sortByLocaleRelevance from "../../utils/sortByLocaleRelevance";
 import TextFieldWithHelp from "../../standalone/UIKit/TextFieldWithHelp";
 import Loader from "../../standalone/Loader";
-import { LocaleSelectorDialogProps } from "./LanguageSelectorDialog";
+import { LocaleSelectorDialogCommonProps } from "./LocaleSelectorDialog";
 import { useDialogContext } from "../../framework";
 import { showErrorDialog } from "../Dialog";
 import FormLoaderOverlay from "../../standalone/Form/FormLoaderOverlay";
 
-export interface LanguageSelectorDialogContentProps
-	extends LocaleSelectorDialogProps {
+export interface LocaleSelectorDialogContentProps
+	extends LocaleSelectorDialogCommonProps {
 	close: () => void;
+	className?: string;
 }
 
-export interface LanguageSelectorEntryData {
+export interface LocaleSelectorEntryData {
 	locale: string;
 	language_short: string;
 	country_short: string;
@@ -33,7 +39,7 @@ export interface LanguageSelectorEntryData {
 	native_language: string;
 }
 
-interface LanguageSelectorEntryFilterData extends LanguageSelectorEntryData {
+interface LocaleSelectorEntryFilterData extends LocaleSelectorEntryData {
 	locale_lower: string;
 	country_lower: string;
 	language_lower: string;
@@ -41,19 +47,25 @@ interface LanguageSelectorEntryFilterData extends LanguageSelectorEntryData {
 	native_language_lower: string;
 }
 
-const useStyles = makeStyles(
-	{
-		localeList: {
-			height: "calc(75vh - 128px)",
-			width: 200,
-		},
-		noLocalesMessage: {
-			textAlign: "center",
-			width: "100%",
-		},
-	},
-	{ name: "CcLanguageSelectorDialogContent" },
-);
+const LocaleList = styled(Grid, {
+	name: "CcLocaleSelectorDialogContent",
+	slot: "localeList",
+})({
+	height: "calc(75vh - 128px)",
+	width: 200,
+});
+
+const NoLocalesMessage = styled("div", {
+	name: "CcLocaleSelectorDialogContent",
+	slot: "noLocalesMessage",
+})({
+	textAlign: "center",
+	width: "100%",
+});
+
+export type LocaleSelectorDialogContentClassKey =
+	| "localeList"
+	| "noLocalesMessage";
 
 const SearchInputProps = {
 	startAdornment: (
@@ -63,17 +75,20 @@ const SearchInputProps = {
 	),
 };
 
-const LanguageSelectorDialogContent = (
-	props: LanguageSelectorDialogContentProps,
+const LocaleSelectorDialogContent = (
+	inProps: LocaleSelectorDialogContentProps,
 ) => {
-	const { supportedLocales: appSupportedLocales, close } = props;
+	const props = useThemeProps({
+		props: inProps,
+		name: "CcLocaleSelectorDialogContent",
+	});
+	const { supportedLocales: appSupportedLocales, className, close } = props;
 
 	const [filter, setFilter] = useState("");
 	const lowercaseFilter = filter.toLowerCase();
 	const { i18n, t } = useCCTranslations();
 	const { t: tLocale } = useCCLocaleSwitcherTranslations();
 	const currentLang = i18n.language.substring(0, 2);
-	const classes = useStyles();
 	const handleFilterChange = useCallback(
 		(evt: React.ChangeEvent<HTMLInputElement>) => {
 			setFilter(evt.target.value);
@@ -86,7 +101,7 @@ const LanguageSelectorDialogContent = (
 	const supportedLangs = supportedLanguages;
 	const countryLanguageMapping = countryLanguages as Record<string, string[]>;
 
-	const data: LanguageSelectorEntryFilterData[] = useMemo(
+	const data: LocaleSelectorEntryFilterData[] = useMemo(
 		() =>
 			Object.entries(countryLanguageMapping)
 				.map(
@@ -114,7 +129,7 @@ const LanguageSelectorDialogContent = (
 							language: tLocale(locale + ".language"),
 							native_country: tLocale(locale + ".native_country"),
 							native_language: tLocale(locale + ".native_language"),
-						}) as LanguageSelectorEntryData,
+						}) as LocaleSelectorEntryData,
 				)
 				.map(
 					(entry) =>
@@ -125,7 +140,7 @@ const LanguageSelectorDialogContent = (
 							language_lower: entry.language.toLowerCase(),
 							native_country_lower: entry.native_country.toLowerCase(),
 							native_language_lower: entry.native_language.toLowerCase(),
-						}) as LanguageSelectorEntryFilterData,
+						}) as LocaleSelectorEntryFilterData,
 				)
 				.sort((a, b) => sortByLocaleRelevance(a.locale, b.locale)),
 		[countryLanguageMapping, appSupportedLocales, supportedLangs, tLocale],
@@ -166,7 +181,7 @@ const LanguageSelectorDialogContent = (
 			return (
 				<div style={entryProps.style}>
 					<Suspense fallback={<Loader />}>
-						<LanguageSelectorEntry
+						<LocaleSelectorEntry
 							locale={locale}
 							currentLanguage={currentLang}
 							handleSwitch={handleSwitch}
@@ -181,7 +196,7 @@ const LanguageSelectorDialogContent = (
 	);
 
 	return (
-		<Grid container>
+		<Grid container className={className}>
 			<Grid item xs={12}>
 				<Box px={2} pb={1}>
 					<TextFieldWithHelp
@@ -192,12 +207,12 @@ const LanguageSelectorDialogContent = (
 					/>
 				</Box>
 			</Grid>
-			<Grid item xs={12} className={classes.localeList}>
+			<LocaleList item xs={12}>
 				<FormLoaderOverlay visible={switchingLanguage} />
 				{filteredData.length === 0 ? (
-					<div className={classes.noLocalesMessage}>
+					<NoLocalesMessage>
 						{t("non-standalone.language-switcher.no-locales")}
-					</div>
+					</NoLocalesMessage>
 				) : (
 					<AutoSizer>
 						{({ width, height }) => (
@@ -213,9 +228,9 @@ const LanguageSelectorDialogContent = (
 						)}
 					</AutoSizer>
 				)}
-			</Grid>
+			</LocaleList>
 		</Grid>
 	);
 };
 
-export default React.memo(LanguageSelectorDialogContent);
+export default React.memo(LocaleSelectorDialogContent);

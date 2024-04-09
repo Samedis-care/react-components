@@ -148,6 +148,18 @@ import {
 	UiKitTextFieldClassKey,
 	UiKitTextFieldProps,
 } from "./standalone/UIKit/CommonStyles";
+import {
+	LocaleSelectorDialogClassKey,
+	LocaleSelectorDialogProps,
+} from "./non-standalone/LocaleSelector/LocaleSelectorDialog";
+import {
+	LocaleSelectorDialogContentClassKey,
+	LocaleSelectorDialogContentProps,
+} from "./non-standalone/LocaleSelector/LocaleSelectorDialogContent";
+import {
+	LocaleSelectorEntryClassKey,
+	LocaleSelectorEntryProps,
+} from "./non-standalone/LocaleSelector/LocaleSelectorEntry";
 
 export interface ComponentsCareTheme {
 	dataGrid?: DataGridTheme;
@@ -211,6 +223,9 @@ declare module "@mui/material/styles" {
 		CcUiKitInput: UiKitInputClassKey;
 		CcUiKitInputOutlined: UiKitInputOutlinedClassKey;
 		CcUiKitTextField: UiKitTextFieldClassKey;
+		CcLocaleSelectorDialog: LocaleSelectorDialogClassKey;
+		CcLocaleSelectorDialogContent: LocaleSelectorDialogContentClassKey;
+		CcLocaleSelectorEntry: LocaleSelectorEntryClassKey;
 	}
 
 	interface ComponentsPropsList {
@@ -255,6 +270,9 @@ declare module "@mui/material/styles" {
 		CcUiKitInput: Partial<UiKitInputProps>;
 		CcUiKitInputOutlined: Partial<UiKitInputOutlinedProps>;
 		CcUiKitTextField: Partial<UiKitTextFieldProps>;
+		CcLocaleSelectorDialog: Partial<LocaleSelectorDialogProps>;
+		CcLocaleSelectorDialogContent: Partial<LocaleSelectorDialogContentProps>;
+		CcLocaleSelectorEntry: Partial<LocaleSelectorEntryProps>;
 	}
 
 	interface Components {
@@ -462,6 +480,21 @@ declare module "@mui/material/styles" {
 			defaultProps?: ComponentsPropsList["CcUiKitTextField"];
 			styleOverrides?: ComponentsOverrides<Theme>["CcUiKitTextField"];
 			variants?: ComponentsVariants["CcUiKitTextField"];
+		};
+		CcLocaleSelectorDialog?: {
+			defaultProps?: ComponentsPropsList["CcLocaleSelectorDialog"];
+			styleOverrides?: ComponentsOverrides<Theme>["CcLocaleSelectorDialog"];
+			variants?: ComponentsVariants["CcLocaleSelectorDialog"];
+		};
+		CcLocaleSelectorDialogContent?: {
+			defaultProps?: ComponentsPropsList["CcLocaleSelectorDialogContent"];
+			styleOverrides?: ComponentsOverrides<Theme>["CcLocaleSelectorDialogContent"];
+			variants?: ComponentsVariants["CcLocaleSelectorDialogContent"];
+		};
+		CcLocaleSelectorEntry?: {
+			defaultProps?: ComponentsPropsList["CcLocaleSelectorEntry"];
+			styleOverrides?: ComponentsOverrides<Theme>["CcLocaleSelectorEntry"];
+			variants?: ComponentsVariants["CcLocaleSelectorEntry"];
 		};
 	}
 }
