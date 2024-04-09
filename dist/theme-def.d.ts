@@ -333,7 +333,7 @@ declare module "@mui/material/styles" {
             styleOverrides?: ComponentsOverrides<Theme>["CcUiKitInput"];
             variants?: ComponentsVariants["CcUiKitInput"];
         };
-        CcUIKitInputOutlined?: {
+        CcUiKitInputOutlined?: {
             defaultProps?: ComponentsPropsList["CcUiKitInputOutlined"];
             styleOverrides?: ComponentsOverrides<Theme>["CcUiKitInputOutlined"];
             variants?: ComponentsVariants["CcUiKitInputOutlined"];
