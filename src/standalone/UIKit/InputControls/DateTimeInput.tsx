@@ -2,13 +2,10 @@ import React, { useCallback } from "react";
 import { IconButton, InputAdornment, TextFieldProps } from "@mui/material";
 import { DateTimePickerProps } from "@mui/x-date-pickers";
 import { Info as InfoIcon, Event as CalenderIcon } from "@mui/icons-material";
-import {
-	InputLabelConfig,
-	UIInputProps,
-	useInputStyles,
-} from "../CommonStyles";
+import { InputLabelConfig, UIInputProps } from "../CommonStyles";
 import LocalizedDateTimePicker from "../../../standalone/LocalizedDateTimePickers/LocalizedDateTimePicker";
 import { Moment } from "moment";
+import TextFieldWithHelp from "../TextFieldWithHelp";
 
 export interface DateTimeInputProps extends UIInputProps {
 	openInfo?: () => void;
@@ -30,7 +27,6 @@ const DateTimeInput = (
 	props: DateTimeInputProps & DateTimePickerProps<Moment | null>,
 ) => {
 	const { openInfo, important, required, error, onBlur, ...muiProps } = props;
-	const inputClasses = useInputStyles({ important });
 
 	const handleOpenInfo = useCallback(
 		(event: React.MouseEvent<HTMLButtonElement>) => {
@@ -44,14 +40,19 @@ const DateTimeInput = (
 	return (
 		<LocalizedDateTimePicker
 			{...muiProps}
+			slots={{
+				textField: TextFieldWithHelp,
+				...muiProps.slots,
+			}}
 			slotProps={{
 				...muiProps.slotProps,
 				textField: {
+					// @ts-expect-error custom property for slot
+					important,
 					required,
 					error,
 					onBlur,
 					InputProps: {
-						classes: inputClasses,
 						endAdornment: (
 							<InputAdornment position="end">
 								{!muiProps.disabled && (

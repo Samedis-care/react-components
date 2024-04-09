@@ -1,58 +1,63 @@
-import { Theme } from "@mui/material/styles";
-import { Styles } from "@mui/styles";
-import makeStyles from "@mui/styles/makeStyles";
-import { InputClassKey, InputLabelProps } from "@mui/material";
-import makeThemeStyles from "../../utils/makeThemeStyles";
-import useMultipleStyles from "../../utils/useMultipleStyles";
-import { ClassNameMap } from "@mui/styles/withStyles";
+import {
+	Input,
+	InputLabelProps,
+	InputProps,
+	OutlinedInput,
+	OutlinedInputProps,
+	styled,
+	TextField,
+	TextFieldProps,
+	Theme,
+} from "@mui/material";
 
 export interface UIInputProps {
 	important?: boolean;
 	warning?: boolean;
 }
 
-interface UIInputPropsWithStyles extends UIInputProps {
-	/**
-	 * Custom CSS styles
-	 */
-	classes?: ClassNameMap<InputClassKey>;
-}
+export type UiKitInputClassKey = "root";
+export type UiKitInputProps = UIInputProps & InputProps;
+export type UiKitInputOutlinedClassKey = "root";
+export type UiKitInputOutlinedProps = UIInputProps & OutlinedInputProps;
+export type UiKitTextFieldClassKey = "root";
+export type UiKitTextFieldProps = UIInputProps & TextFieldProps;
 
-export type InputTheme = Partial<Styles<Theme, UIInputProps, InputClassKey>>;
+const inputStyles = ({
+	theme,
+	important,
+}: {
+	theme: Theme;
+	important?: boolean;
+}) => ({
+	paddingTop: 0,
+	paddingRight: theme.spacing(2),
+	paddingBottom: 0,
+	paddingLeft: theme.spacing(2),
+	"& .MuiAutocomplete-endAdornment": {
+		right: theme.spacing(2),
+	},
+	"& .MuiInput-input::placeholder": {
+		color: important ? theme.palette.error.main : undefined,
+	},
+	"& .MuiInput-multiline": {
+		padding: theme.spacing(2),
+	},
+});
 
-const useThemeStyles = makeThemeStyles<UIInputProps, InputClassKey>(
-	(theme) => theme.componentsCare?.uiKit?.input,
-	"CcUIKitInput",
-);
-
-const useRawInputStyles = makeStyles(
-	(theme) => ({
-		root: {
-			paddingTop: 0,
-			paddingRight: theme.spacing(2),
-			paddingBottom: 0,
-			paddingLeft: theme.spacing(2),
-			"& .MuiAutocomplete-endAdornment": {
-				right: theme.spacing(2),
-			},
-		},
-		input: (props: UIInputPropsWithStyles) => ({
-			"&::placeholder": {
-				color: props.important ? theme.palette.error.main : undefined,
-			},
-		}),
-		multiline: {
-			padding: theme.spacing(2),
-		},
-	}),
-	{ name: "CcUIKitInput" },
-);
-
-export const useInputStyles = (
-	props: UIInputProps,
-): Partial<ClassNameMap<InputClassKey>> => {
-	return useMultipleStyles(props, useThemeStyles, useRawInputStyles);
-};
+export const UiKitInput = styled(Input, {
+	name: "CcUiKitInput",
+	slot: "root",
+})<UiKitInputProps>(inputStyles);
+export const UiKitInputOutlined = styled(OutlinedInput, {
+	name: "CcUiKitInputOutlined",
+	slot: "root",
+})<UiKitInputOutlinedProps>(inputStyles);
+export const UiKitTextField = styled(TextField, {
+	name: "CcUiKitTextField",
+	slot: "root",
+})<UiKitTextFieldProps>(({ theme, important }) => ({
+	"& .MuiInput-root": inputStyles({ theme, important }),
+}));
 
 export const InputLabelConfig: InputLabelProps = {
 	shrink: true,

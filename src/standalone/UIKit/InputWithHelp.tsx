@@ -1,7 +1,7 @@
 import React, { Ref } from "react";
-import { IconButton, InputAdornment, Input } from "@mui/material";
+import { IconButton, InputAdornment } from "@mui/material";
 import { Info as InfoIcon } from "@mui/icons-material";
-import { useInputStyles } from "./CommonStyles";
+import { UiKitInput } from "./CommonStyles";
 import { InputBaseProps } from "@mui/material/InputBase/InputBase";
 import { TextFieldWithHelpProps } from "./TextFieldWithHelp";
 
@@ -10,12 +10,11 @@ const InputWithHelpInner = (
 	ref: Ref<unknown>,
 ) => {
 	const { openInfo, important, ...muiProps } = props;
-	const inputClasses = useInputStyles({ important });
 
 	return (
-		<Input
+		<UiKitInput
 			ref={ref}
-			classes={inputClasses}
+			important={important}
 			endAdornment={
 				openInfo && (
 					<InputAdornment position={"end"}>

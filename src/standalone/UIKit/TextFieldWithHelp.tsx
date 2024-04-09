@@ -6,14 +6,13 @@ import React, {
 	useState,
 } from "react";
 import {
-	TextField,
-	TextFieldProps,
 	IconButton,
 	InputAdornment,
 	InputAdornmentProps,
+	TextFieldProps,
 } from "@mui/material";
-import { Info as InfoIcon, Clear as ClearIcon } from "@mui/icons-material";
-import { InputLabelConfig, UIInputProps, useInputStyles } from "./CommonStyles";
+import { Clear as ClearIcon, Info as InfoIcon } from "@mui/icons-material";
+import { InputLabelConfig, UIInputProps, UiKitTextField } from "./CommonStyles";
 import combineClassNames from "../../utils/combineClassNames";
 import isTouchDevice from "../../utils/isTouchDevice";
 import { useMuiWarningStyles } from "./MuiWarning";
@@ -34,15 +33,7 @@ const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(
 	props: TextFieldWithHelpProps & TextFieldProps,
 	ref: ForwardedRef<HTMLDivElement>,
 ) {
-	const {
-		openInfo,
-		customHandleClear,
-		important,
-		warning,
-		onChange,
-		...muiProps
-	} = props;
-	const inputClasses = useInputStyles({ important });
+	const { openInfo, customHandleClear, warning, onChange, ...muiProps } = props;
 	const warningClasses = useMuiWarningStyles();
 
 	// handle clear
@@ -100,7 +91,7 @@ const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(
 	// render
 
 	return (
-		<TextField
+		<UiKitTextField
 			ref={ref}
 			InputLabelProps={InputLabelConfig}
 			{...muiProps}
@@ -110,7 +101,6 @@ const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(
 			])}
 			onChange={handleChange}
 			InputProps={{
-				classes: inputClasses,
 				...muiProps.InputProps,
 				endAdornment: (
 					<>

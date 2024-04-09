@@ -30,7 +30,6 @@ import {
 	ComponentWithLabelProps,
 } from "./standalone/UIKit/ComponentWithLabel";
 import { CheckboxClassKey } from "./standalone/UIKit/Checkbox";
-import { InputTheme } from "./standalone/UIKit/CommonStyles";
 import {
 	ActionButtonClassKey,
 	ActionButtonProps,
@@ -141,13 +140,18 @@ import {
 	LocalizedKeyboardDatePickerClassKey,
 	LocalizedKeyboardDatePickerProps,
 } from "./standalone/LocalizedDateTimePickers/LocalizedKeyboardDatePicker";
+import {
+	UiKitInputClassKey,
+	UiKitInputOutlinedClassKey,
+	UiKitInputOutlinedProps,
+	UiKitInputProps,
+	UiKitTextFieldClassKey,
+	UiKitTextFieldProps,
+} from "./standalone/UIKit/CommonStyles";
 
 export interface ComponentsCareTheme {
 	dataGrid?: DataGridTheme;
 	dataGridExpert?: DataGridThemeExpert;
-	uiKit?: {
-		input?: InputTheme;
-	};
 }
 
 declare module "@mui/material/styles/createTheme" {
@@ -204,6 +208,9 @@ declare module "@mui/material/styles" {
 		CcLocalizedKeyboardDatePicker: LocalizedKeyboardDatePickerClassKey;
 		CcComponentWithLabel: ComponentWithLabelClassKey;
 		CcCheckbox: CheckboxClassKey;
+		CcUiKitInput: UiKitInputClassKey;
+		CcUiKitInputOutlined: UiKitInputOutlinedClassKey;
+		CcUiKitTextField: UiKitTextFieldClassKey;
 	}
 
 	interface ComponentsPropsList {
@@ -245,6 +252,9 @@ declare module "@mui/material/styles" {
 		CcLocalizedKeyboardDatePicker: Partial<LocalizedKeyboardDatePickerProps>;
 		CcComponentWithLabel: Partial<ComponentWithLabelProps>;
 		CcCheckbox: Partial<CheckboxProps>;
+		CcUiKitInput: Partial<UiKitInputProps>;
+		CcUiKitInputOutlined: Partial<UiKitInputOutlinedProps>;
+		CcUiKitTextField: Partial<UiKitTextFieldProps>;
 	}
 
 	interface Components {
@@ -437,6 +447,21 @@ declare module "@mui/material/styles" {
 			defaultProps?: ComponentsPropsList["CcCheckbox"];
 			styleOverrides?: ComponentsOverrides<Theme>["CcCheckbox"];
 			variants?: ComponentsVariants["CcCheckbox"];
+		};
+		CcUIKitInput?: {
+			defaultProps?: ComponentsPropsList["CcUiKitInput"];
+			styleOverrides?: ComponentsOverrides<Theme>["CcUiKitInput"];
+			variants?: ComponentsVariants["CcUiKitInput"];
+		};
+		CcUIKitInputOutlined?: {
+			defaultProps?: ComponentsPropsList["CcUiKitInputOutlined"];
+			styleOverrides?: ComponentsOverrides<Theme>["CcUiKitInputOutlined"];
+			variants?: ComponentsVariants["CcUiKitInputOutlined"];
+		};
+		CcUiKitTextField?: {
+			defaultProps?: ComponentsPropsList["CcUiKitTextField"];
+			styleOverrides?: ComponentsOverrides<Theme>["CcUiKitTextField"];
+			variants?: ComponentsVariants["CcUiKitTextField"];
 		};
 	}
 }
