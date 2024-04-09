@@ -1,8 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Notifications as NotificationsIcon } from "@mui/icons-material";
-import { Badge, Box, Divider, Grid, IconButton, Popover, Tooltip, Typography, } from "@mui/material";
+import { Badge, Box, Divider, Grid, IconButton, Popover, styled, Tooltip, Typography, useThemeProps, } from "@mui/material";
 import InfiniteScroll from "../InfiniteScroll";
-import makeStyles from "@mui/styles/makeStyles";
 import i18n from "../../i18n";
 import timestampToAge from "../../utils/timestampToAge";
 import useCCTranslations from "../../utils/useCCTranslations";
@@ -41,17 +40,18 @@ const defaultRenderer = (notification) => (React.createElement(Box, { p: 2, styl
                                 React.createElement("span", null, timestampToAge(notification.created)))))))),
         React.createElement(Grid, { item: true, xs: 12 },
             React.createElement(Divider, null)))));
-const useStyles = makeStyles({
-    notificationArea: {
-        height: "50vh",
-        overflow: "auto",
-    },
-}, { name: "CcNotifications" });
-const Notifications = (props) => {
-    const classes = useStyles(props);
+const StyledInfiniteScroll = styled(InfiniteScroll, {
+    name: "CcNotifications",
+    slot: "notificationArea",
+})({
+    height: "50vh",
+    overflow: "auto",
+});
+const Notifications = (inProps) => {
+    const props = useThemeProps({ props: inProps, name: "CcNotifications" });
     const { t } = useCCTranslations();
     const [anchor, setAnchor] = useState(null);
-    const { onOpen, loadLatest, loadRead, loadUnread, refreshInterval, unreadCount, } = props;
+    const { onOpen, loadLatest, loadRead, loadUnread, refreshInterval, unreadCount, classes, className, } = props;
     const onIconClick = useCallback((evt) => {
         setAnchor(evt.currentTarget);
         if (onOpen)
@@ -78,7 +78,7 @@ const Notifications = (props) => {
     }, []);
     const Renderer = props.notificationRenderer || defaultRenderer;
     const notifications = props.notifications.filter((not) => !not.expires || not.expires > new Date());
-    return (React.createElement(React.Fragment, null,
+    return (React.createElement("div", { className: className },
         React.createElement(IconButton, { onClick: onIconClick, size: "large" },
             React.createElement(Badge, { badgeContent: unreadCount ?? notifications.filter((not) => !not.read).length, max: 99, color: "error", ...props.BadgeProps },
                 React.createElement(NotificationsIcon, null))),
@@ -90,6 +90,6 @@ const Notifications = (props) => {
                     React.createElement(Grid, { item: true, xs: 12 },
                         React.createElement(Divider, null)),
                     React.createElement(Grid, { item: true, xs: 12 },
-                        React.createElement(InfiniteScroll, { className: classes.notificationArea, loadMoreBottom: loadRead, loadMoreTop: loadUnread }, notifications.map((notification) => (React.createElement(Renderer, { key: notification.id, ...notification }))))))))));
+                        React.createElement(StyledInfiniteScroll, { loadMoreBottom: loadRead, loadMoreTop: loadUnread, className: classes?.notificationArea ?? "" }, notifications.map((notification) => (React.createElement(Renderer, { key: notification.id, ...notification }))))))))));
 };
 export default React.memo(Notifications);

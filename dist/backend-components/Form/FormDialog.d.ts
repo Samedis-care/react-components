@@ -29,11 +29,12 @@ export interface FormDialogProps {
      */
     disableFormDialogContext?: boolean;
 }
+export type FormDialogClassKey = "content" | "openInNewIcon";
 export interface FormDialogDispatch {
     blockClosing: () => void;
     unblockClosing: () => void;
 }
 export declare const IsInFormDialogContext: React.Context<boolean>;
 export declare const FormDialogDispatchContext: React.Context<FormDialogDispatch | undefined>;
-declare const _default: React.MemoExoticComponent<(props: FormDialogProps) => React.JSX.Element>;
+declare const _default: React.MemoExoticComponent<(inProps: FormDialogProps) => React.JSX.Element>;
 export default _default;

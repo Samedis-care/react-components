@@ -1,34 +1,29 @@
-import { ListItem, ListItemButton, ListItemIcon } from "@mui/material";
-import createStyles from "@mui/styles/createStyles";
-import withStyles from "@mui/styles/withStyles";
-const smallListItemStyles = createStyles({
-    gutters: {
+import { ListItem, ListItemButton, ListItemIcon, styled } from "@mui/material";
+export const SmallListItem = styled(ListItem)({
+    "& .MuiListItem-gutters": {
         paddingLeft: 8,
         paddingRight: 8,
     },
 });
-export const SmallListItem = withStyles(smallListItemStyles, {
-    name: "SmallListItem",
-})(ListItem);
-export const SmallListItemButton = withStyles(smallListItemStyles, {
-    name: "SmallListItemButton",
-})(ListItemButton);
-const selectorSmallListItemStyles = createStyles({
-    gutters: {
+export const SmallListItemButton = styled(ListItemButton)({
+    "& .MuiListItem-gutters": {
+        paddingLeft: 8,
+        paddingRight: 8,
+    },
+});
+export const SelectorSmallListItem = styled(ListItem)({
+    "& .MuiListItem-gutters": {
         paddingLeft: 0,
         paddingRight: 8,
     },
 });
-export const SelectorSmallListItem = withStyles(selectorSmallListItemStyles, {
-    name: "SelectorSmallListItem",
-})(ListItem);
-export const SelectorSmallListItemButton = withStyles(selectorSmallListItemStyles, {
-    name: "SelectorSmallListItemButton",
-})(ListItemButton);
-const smallListItemIconStyles = createStyles({
-    root: {
-        minWidth: 0,
+export const SelectorSmallListItemButton = styled(ListItemButton)({
+    "& .MuiListItem-gutters": {
+        paddingLeft: 0,
         paddingRight: 8,
     },
 });
-export const SmallListItemIcon = withStyles(smallListItemIconStyles)(ListItemIcon);
+export const SmallListItemIcon = styled(ListItemIcon)({
+    minWidth: 0,
+    paddingRight: 8,
+});

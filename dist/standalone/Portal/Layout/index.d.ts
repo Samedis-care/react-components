@@ -64,8 +64,18 @@ interface PortalLayoutPropsBase {
      * ID for the main content
      */
     mainId?: string;
+    /**
+     * custom CSS class to apply
+     */
+    className?: string;
 }
 export type PortalLayoutProps = PortalLayoutPropsBase & (PortalLayoutBasic | PortalLayoutNoTopLeft);
+export interface PortalLayoutContainerOwnerState {
+    variant: PortalLayoutProps["variant"];
+    drawerWidth: PortalLayoutProps["drawerWidth"];
+}
+export type PortalLayoutClassKey = "containerDesktop" | "containerMobile";
+export type PortalRenderLayoutClassKey = "header" | "topLeft" | "menu" | "main" | "mobileTopLeft";
 export interface PortalLayoutContextType {
     mobile: boolean;
     menuOpen: boolean;
@@ -73,5 +83,5 @@ export interface PortalLayoutContextType {
 }
 export declare const PortalLayoutContext: React.Context<PortalLayoutContextType | undefined>;
 export declare const usePortalLayoutContext: () => PortalLayoutContextType;
-declare const _default: React.MemoExoticComponent<(props: PortalLayoutProps) => React.JSX.Element>;
+declare const _default: React.MemoExoticComponent<(inProps: PortalLayoutProps) => React.JSX.Element>;
 export default _default;

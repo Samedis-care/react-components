@@ -3,7 +3,7 @@ import { PortalMenuClassKey, PortalMenuProps } from "./standalone/Portal/Menu";
 import { FileUploadClassKey, FileUploadProps } from "./standalone/FileUpload/Generic";
 import { ImageSelectorClassKey, ImageSelectorProps } from "./standalone/FileUpload/Image/ImageSelector";
 import { MultiImageClassKey, MultiImageProps } from "./standalone/FileUpload/MultiImage/MultiImage";
-import { BaseSelectorClassKey, BaseSelectorData, BaseSelectorProps, HowToBoxClassKey, HowToBoxProps, MultiSelectClassKey, MultiSelectorData, MultiSelectProps } from "./standalone";
+import { BaseSelectorClassKey, BaseSelectorData, BaseSelectorProps, HowToBoxClassKey, HowToBoxProps, MultiSelectClassKey, MultiSelectorData, MultiSelectProps, PopupMenuClassKey, PortalLayoutClassKey, PortalLayoutProps } from "./standalone";
 import { ComponentWithLabelClassKey, ComponentWithLabelProps } from "./standalone/UIKit/ComponentWithLabel";
 import { CheckboxClassKey } from "./standalone/UIKit/Checkbox";
 import { ActionButtonClassKey, ActionButtonProps } from "./standalone/UIKit/ActionButton";
@@ -40,6 +40,9 @@ import { UiKitInputClassKey, UiKitInputOutlinedClassKey, UiKitInputOutlinedProps
 import { LocaleSelectorDialogClassKey, LocaleSelectorDialogProps } from "./non-standalone/LocaleSelector/LocaleSelectorDialog";
 import { LocaleSelectorDialogContentClassKey, LocaleSelectorDialogContentProps } from "./non-standalone/LocaleSelector/LocaleSelectorDialogContent";
 import { LocaleSelectorEntryClassKey, LocaleSelectorEntryProps } from "./non-standalone/LocaleSelector/LocaleSelectorEntry";
+import { SignPadClassKey, SignPadProps } from "./standalone/SignPad";
+import { FormDialogClassKey, FormDialogProps } from "./backend-components/Form/FormDialog";
+import { NotificationsClassKey, NotificationsProps } from "./standalone/Notifications";
 export interface ComponentsCareTheme {
     dataGrid?: DataGridTheme;
     dataGridExpert?: DataGridThemeExpert;
@@ -99,6 +102,11 @@ declare module "@mui/material/styles" {
         CcLocaleSelectorDialog: LocaleSelectorDialogClassKey;
         CcLocaleSelectorDialogContent: LocaleSelectorDialogContentClassKey;
         CcLocaleSelectorEntry: LocaleSelectorEntryClassKey;
+        CcSignPad: SignPadClassKey;
+        CcFormDialog: FormDialogClassKey;
+        CcPopupMenu: PopupMenuClassKey;
+        CcPortalLayout: PortalLayoutClassKey;
+        CcNotifications: NotificationsClassKey;
     }
     interface ComponentsPropsList {
         CcSignalPortlet: Partial<SignalPortletProps>;
@@ -145,6 +153,10 @@ declare module "@mui/material/styles" {
         CcLocaleSelectorDialog: Partial<LocaleSelectorDialogProps>;
         CcLocaleSelectorDialogContent: Partial<LocaleSelectorDialogContentProps>;
         CcLocaleSelectorEntry: Partial<LocaleSelectorEntryProps>;
+        CcSignPad: Partial<SignPadProps>;
+        CcFormDialog: Partial<FormDialogProps>;
+        CcPortalLayout: Partial<PortalLayoutProps>;
+        CcNotifications: Partial<NotificationsProps>;
     }
     interface Components {
         CcSignalPortlet?: {
@@ -366,6 +378,30 @@ declare module "@mui/material/styles" {
             defaultProps?: ComponentsPropsList["CcLocaleSelectorEntry"];
             styleOverrides?: ComponentsOverrides<Theme>["CcLocaleSelectorEntry"];
             variants?: ComponentsVariants["CcLocaleSelectorEntry"];
+        };
+        CcSignPad?: {
+            defaultProps?: ComponentsPropsList["CcSignPad"];
+            styleOverrides?: ComponentsOverrides<Theme>["CcSignPad"];
+            variants?: ComponentsVariants["CcSignPad"];
+        };
+        CcFormDialog?: {
+            defaultProps?: ComponentsPropsList["CcFormDialog"];
+            styleOverrides?: ComponentsOverrides<Theme>["CcFormDialog"];
+            variants?: ComponentsVariants["CcFormDialog"];
+        };
+        CcPopupMenu?: {
+            styleOverrides?: ComponentsOverrides<Theme>["CcPopupMenu"];
+            variants?: ComponentsVariants["CcFormDialog"];
+        };
+        CcPortalLayout?: {
+            defaultProps?: ComponentsPropsList["CcPortalLayout"];
+            styleOverrides?: ComponentsOverrides<Theme>["CcPortalLayout"];
+            variants?: ComponentsVariants["CcPortalLayout"];
+        };
+        CcNotifications?: {
+            defaultProps?: ComponentsPropsList["CcNotifications"];
+            styleOverrides?: ComponentsOverrides<Theme>["CcNotifications"];
+            variants?: ComponentsVariants["CcNotifications"];
         };
     }
 }

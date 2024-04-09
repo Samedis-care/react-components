@@ -13,9 +13,13 @@ export interface SignPadProps {
      */
     signerName?: string | null;
     /**
+     * custom CSS class to apply to root
+     */
+    className?: string;
+    /**
      * Custom styles
      */
-    classes?: Partial<ReturnType<typeof useStyles>>;
+    classes?: Partial<Record<SignPadClassKey, string>>;
     /**
      * Open info dialog
      */
@@ -29,6 +33,6 @@ export interface SignPadProps {
      */
     onBlur?: React.FocusEventHandler<HTMLDivElement>;
 }
-declare const useStyles: (props?: any) => import("@mui/styles").ClassNameMap<"imageDiv" | "signPadDiv" | "signPreview" | "signTextDiv" | "infoDiv">;
-declare const _default: React.MemoExoticComponent<(props: SignPadProps) => React.JSX.Element>;
+export type SignPadClassKey = "root" | "signTextDiv" | "imageDiv" | "signPreview" | "infoDiv";
+declare const _default: React.MemoExoticComponent<(inProps: SignPadProps) => React.JSX.Element>;
 export default _default;

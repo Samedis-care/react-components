@@ -77,10 +77,14 @@ export interface NotificationsProps {
      */
     onOpen?: React.EventHandler<React.MouseEvent<HTMLButtonElement>>;
     /**
+     * Custom CSS class to apply
+     */
+    className?: string;
+    /**
      * Custom styles
      */
-    classes?: Partial<ReturnType<typeof useStyles>>;
+    classes?: Partial<Record<NotificationsClassKey, string>>;
 }
-declare const useStyles: (props?: any) => import("@mui/styles").ClassNameMap<"notificationArea">;
-declare const _default: React.MemoExoticComponent<(props: NotificationsProps) => React.JSX.Element>;
+export type NotificationsClassKey = "notificationArea";
+declare const _default: React.MemoExoticComponent<(inProps: NotificationsProps) => React.JSX.Element>;
 export default _default;

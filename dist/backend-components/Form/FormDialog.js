@@ -1,27 +1,30 @@
 import React, { useCallback, useMemo, useRef } from "react";
-import { Dialog, DialogContent } from "@mui/material";
-import makeStyles from "@mui/styles/makeStyles";
+import { Dialog, DialogContent, styled, useThemeProps, } from "@mui/material";
 import { OpenInNew } from "@mui/icons-material";
 import { useDialogContext } from "../../framework/DialogContextProvider";
 import { showConfirmDialog } from "../../non-standalone/Dialog/Utils";
 import { DialogTitle } from "../../non-standalone/Dialog/DialogTitle";
 import useCCTranslations from "../../utils/useCCTranslations";
-const dialogStyles = makeStyles({
-    content: {
-        height: "80vh",
-    },
-    openInNewIcon: {
-        verticalAlign: "middle",
-        cursor: "pointer",
-        marginLeft: 10,
-    },
+const TallDialogContent = styled(DialogContent, {
+    name: "CcFormDialog",
+    slot: "content",
+})({
+    height: "80vh",
+});
+const OpenInNewIcon = styled(OpenInNew, {
+    name: "CcFormDialog",
+    slot: "openInNewIcon",
+})({
+    verticalAlign: "middle",
+    cursor: "pointer",
+    marginLeft: 10,
 });
 export const IsInFormDialogContext = React.createContext(false);
 export const FormDialogDispatchContext = React.createContext(undefined);
-const FormDialog = (props) => {
+const FormDialog = (inProps) => {
+    const props = useThemeProps({ props: inProps, name: "CcFormDialog" });
     const { dialogTitle, maxWidth, useCustomClasses, openInNewLink, children, onClose, disableFormDialogContext, } = props;
     const [pushDialog, popDialog] = useDialogContext();
-    const classes = dialogStyles();
     const blockClosingCounter = useRef(0);
     const { t } = useCCTranslations();
     const handleClose = useCallback(async () => {
@@ -48,11 +51,12 @@ const FormDialog = (props) => {
         blockClosing,
         unblockClosing,
     }), [blockClosing, unblockClosing]);
+    const ContentComp = useCustomClasses ? TallDialogContent : DialogContent;
     return (React.createElement(Dialog, { maxWidth: maxWidth ?? "lg", open: true, onClose: handleClose, fullWidth: true },
         React.createElement(DialogTitle, { onClose: handleClose, noTitle: !dialogTitle },
             dialogTitle,
-            openInNewLink && (React.createElement(OpenInNew, { classes: { root: classes.openInNewIcon }, onClick: openInNewLink }))),
-        React.createElement(DialogContent, { classes: useCustomClasses ? { root: classes.content } : undefined },
+            openInNewLink && React.createElement(OpenInNewIcon, { onClick: openInNewLink })),
+        React.createElement(ContentComp, null,
             React.createElement(IsInFormDialogContext.Provider, { value: !disableFormDialogContext },
                 React.createElement(FormDialogDispatchContext.Provider, { value: dispatch }, children)))));
 };
