@@ -5,7 +5,7 @@ import { withMuiWarning } from "../UIKit/MuiWarning";
 import { Moment } from "moment";
 
 export interface LocalizedKeyboardDatePickerProps
-	extends Omit<DatePickerProps<Moment | null>, "format"> {
+	extends Omit<DatePickerProps<Moment>, "format"> {
 	/**
 	 * Boolean flag to hide Calendar Icon (only used if disabled is truthy)
 	 */

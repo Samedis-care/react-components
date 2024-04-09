@@ -54,7 +54,10 @@ const makeThemeStyles = <
 		const themeClasses = useThemeStyles(otherProps as Props);
 		return useParentStyles({
 			...(props as Props),
-			classes: combineClassMaps(themeClasses, propClasses),
+			classes: combineClassMaps(
+				themeClasses,
+				propClasses as Partial<Record<ClassKey, string>>,
+			),
 		});
 	};
 

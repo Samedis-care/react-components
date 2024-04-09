@@ -3,7 +3,7 @@ import { DatePicker, DatePickerProps } from "@mui/x-date-pickers";
 import { withMuiWarning } from "../UIKit/MuiWarning";
 import { Moment } from "moment";
 
-type LocalizedDatePickerProps = Omit<DatePickerProps<Moment | null>, "format">;
+type LocalizedDatePickerProps = Omit<DatePickerProps<Moment>, "format">;
 
 const LocalizedDatePicker = (props: LocalizedDatePickerProps) => {
 	return <DatePicker format={"L"} {...props} />;

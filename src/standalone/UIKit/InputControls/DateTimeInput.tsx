@@ -24,7 +24,7 @@ export interface DateTimeInputProps extends UIInputProps {
 }
 
 const DateTimeInput = (
-	props: DateTimeInputProps & DateTimePickerProps<Moment | null>,
+	props: DateTimeInputProps & DateTimePickerProps<Moment>,
 ) => {
 	const { openInfo, important, required, error, onBlur, ...muiProps } = props;
 

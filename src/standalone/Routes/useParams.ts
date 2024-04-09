@@ -10,7 +10,11 @@ const useParams = <T extends string = string>(): Partial<Record<T, string>> => {
 	const location = useLocation();
 	const route = useContext(RouteContext);
 	if (!route) return {};
-	return matchPath({ path: route.path }, location.pathname)?.params ?? {};
+	return (
+		(matchPath({ path: route.path }, location.pathname)?.params as Partial<
+			Record<T, string>
+		>) ?? {}
+	);
 };
 
 export default useParams;
