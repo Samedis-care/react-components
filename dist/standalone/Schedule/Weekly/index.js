@@ -1,49 +1,43 @@
 import React, { useCallback, useEffect, useState } from "react";
 import WeekViewDay from "./WeekViewDay";
 import moment from "moment";
-import { Box, CircularProgress, Divider, IconButton, Menu, } from "@mui/material";
-import { Button, Typography, Grid } from "@mui/material";
-import { ArrowForwardIos, ArrowBackIos, Settings as SettingsIcon, } from "@mui/icons-material";
+import { Box, Button, CircularProgress, Divider, Grid, IconButton, Menu, styled, Typography, useThemeProps, } from "@mui/material";
+import { ArrowBackIos, ArrowForwardIos, Settings as SettingsIcon, } from "@mui/icons-material";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { ToDateLocaleStringOptions } from "../../../constants";
 import useCCTranslations from "../../../utils/useCCTranslations";
-import makeStyles from "@mui/styles/makeStyles";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 import ScheduleFilterRenderer from "../Common/ScheduleFilterRenderers";
 const normalizeMoment = (instance) => instance.weekday(0).hour(0).minute(0).second(0).millisecond(0);
 const nowNormalized = () => normalizeMoment(moment());
-const useStyles = makeStyles({
-    todayBtn: {
-        height: "100%",
-    },
-    week: {
-        cursor: "pointer",
-    },
-    picker: {
-        opacity: 0,
-        position: "absolute",
-        pointerEvents: "none",
-        marginTop: -64,
-    },
-    filterWrapper: {
-        top: "50%",
-        position: "relative",
-        transform: "translateY(-50%)",
-    },
-    filterSelect: {
-        backgroundColor: "transparent",
-        border: "none",
-        cursor: "pointer",
-    },
-}, { name: "CcWeekView" });
+const TodayBtn = styled(Button, { name: "CcWeekView", slot: "todayBtn" })({
+    height: "100%",
+});
+const FilterWrapper = styled(Box, {
+    name: "CcWeekView",
+    slot: "filterWrapper",
+})({
+    top: "50%",
+    position: "relative",
+    transform: "translateY(-50%)",
+});
+const Week = styled("span", { name: "CcWeekView", slot: "week" })({
+    cursor: "pointer",
+});
+const Picker = styled("div", { name: "CcWeekView", slot: "picker" })({
+    opacity: 0,
+    position: "absolute",
+    pointerEvents: "none",
+    marginTop: -64,
+});
 const EMPTY_FILTERS = {};
 const NO_ACTIONS = [];
-const WeekView = (props) => {
-    const { loadData } = props;
+const WeekView = (inProps) => {
+    const props = useThemeProps({ props: inProps, name: "CcWeekView" });
+    const { loadData, className, classes } = props;
     const filters = props.filters ?? EMPTY_FILTERS;
     const actions = props.actions ?? NO_ACTIONS;
     const filterCount = Object.keys(filters).length;
-    const classes = useStyles();
     const { t, i18n } = useCCTranslations();
     /**
      * The offset to the current week
@@ -143,19 +137,19 @@ const WeekView = (props) => {
     const weekday = now.weekday();
     const weekdays = [0, 1, 2, 3, 4, 5, 6].map((day) => day - weekday);
     let prevDate = null;
-    return (React.createElement(Grid, { container: true, alignItems: "stretch", alignContent: "space-between" },
+    return (React.createElement(Grid, { container: true, alignItems: "stretch", alignContent: "space-between", className: className },
         React.createElement(Grid, { item: true, xs: 12, container: true, wrap: "nowrap" },
             React.createElement(Grid, { item: true, xs: true },
                 React.createElement(Grid, { container: true },
                     React.createElement(Grid, { item: true },
-                        React.createElement(Button, { onClick: today, className: classes.todayBtn },
+                        React.createElement(TodayBtn, { onClick: today, className: classes?.todayBtn },
                             t("standalone.schedule.today"),
                             " (",
                             now
                                 .toDate()
                                 .toLocaleDateString(i18n.language, ToDateLocaleStringOptions),
                             ")")),
-                    React.createElement(Grid, { item: true }, filterCount > 0 && (React.createElement(Box, { px: 2, className: classes.filterWrapper }, (() => {
+                    React.createElement(Grid, { item: true }, filterCount > 0 && (React.createElement(FilterWrapper, { px: 2, className: classes?.filterWrapper }, (() => {
                         const [name, filter] = Object.entries(filters)[0];
                         return (React.createElement(ScheduleFilterRenderer, { ...filter, name: name, value: filterValues[name], onChange: handleFilterChange, inline: "weekly" }));
                     })()))))),
@@ -164,19 +158,19 @@ const WeekView = (props) => {
                     React.createElement(Grid, { item: true },
                         React.createElement(IconButton, { onClick: prevWeek, size: "large" },
                             React.createElement(ArrowBackIos, null)),
-                        React.createElement("span", { onClick: openDatePicker, className: classes.week },
+                        React.createElement(Week, { onClick: openDatePicker, className: classes?.week },
                             t("standalone.schedule.week"),
                             " ",
                             nowNormalized().add(weekOffset, "week").week(),
                             " ",
                             nowNormalized().add(weekOffset, "week").weekYear()),
-                        React.createElement("div", { className: classes.picker },
+                        React.createElement(Picker, { className: classes?.picker },
                             React.createElement(LocalizationProvider, { dateAdapter: AdapterMoment, adapterLocale: i18n.language },
                                 React.createElement(DatePicker, { format: "II RRRR", open: datePickerAnchorEl != null, label: t("standalone.schedule.week"), value: nowNormalized().add(weekOffset, "week"), onChange: setWeek, onClose: closeDatePicker }))),
                         React.createElement(IconButton, { onClick: nextWeek, size: "large" },
                             React.createElement(ArrowForwardIos, null))))),
             React.createElement(Grid, { item: true, xs: true, container: true, justifyContent: "flex-end" }, (filterCount > 1 || actions.length > 0) && (React.createElement(Grid, { item: true },
-                React.createElement(Box, { px: 2, className: classes.filterWrapper }, filterCount > 2 || actions.length > 1 ? (React.createElement(React.Fragment, null,
+                React.createElement(FilterWrapper, { px: 2, className: classes?.filterWrapper }, filterCount > 2 || actions.length > 1 ? (React.createElement(React.Fragment, null,
                     React.createElement(IconButton, { onClick: openFilterSettings },
                         React.createElement(SettingsIcon, null)),
                     React.createElement(Menu, { open: filterSettingsAnchorEl != null, anchorEl: filterSettingsAnchorEl, onClose: closeFiltersMenu },

@@ -26,11 +26,20 @@ export interface ScrollableScheduleProps {
      * Optional actions
      */
     actions?: ScheduleAction[];
+    /**
+     * CSS class to apply to root
+     */
+    className?: string;
+    /**
+     * Custom CSS classes
+     */
+    classes?: Partial<Record<ScrollableScheduleClassKey, string>>;
 }
 /**
  * Outdated alias
  * @deprecated use ScrollableScheduleProps
  */
 export type IProps = ScrollableScheduleProps;
-declare const _default: React.MemoExoticComponent<(props: ScrollableScheduleProps) => React.JSX.Element>;
+export type ScrollableScheduleClassKey = "today" | "todayBtn" | "scroller" | "filterSettingsBtn" | "filterWrapper";
+declare const _default: React.MemoExoticComponent<(inProps: ScrollableScheduleProps) => React.JSX.Element>;
 export default _default;

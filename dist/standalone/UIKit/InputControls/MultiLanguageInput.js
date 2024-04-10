@@ -1,9 +1,8 @@
 import React, { useCallback, useState } from "react";
-import { Grid, IconButton, InputAdornment, TextField, Tooltip, Typography, styled, useThemeProps, } from "@mui/material";
+import { Grid, IconButton, InputAdornment, styled, Tooltip, Typography, useThemeProps, } from "@mui/material";
 import { useCCLanguagesTranslations } from "../../../utils/useCCTranslations";
 import { Translate } from "@mui/icons-material";
-import combineClassNames from "../../../utils/combineClassNames";
-import { useMuiWarningStyles } from "../MuiWarning";
+import { TextFieldCC } from "../MuiWarning";
 const LanguageLabel = styled("span", {
     name: "CcMultiLanguageInput",
     slot: "languageLabel",
@@ -18,7 +17,6 @@ const MultiLanguageInput = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcMultiLanguageInput" });
     const { enabledLanguages, values, onChange, name, onBlur, label, disableIncompleteMarker, required, ignoreI18nLocale, warning, ...textFieldProps } = props;
     const { t, i18n } = useCCLanguagesTranslations();
-    const warningClasses = useMuiWarningStyles();
     // determine default language
     let defaultLanguage = i18n.language.split("-")[0];
     const i18nLang = defaultLanguage;
@@ -54,10 +52,7 @@ const MultiLanguageInput = (inProps) => {
     const handleActiveLangSelect = useCallback((evt) => {
         setActiveLanguage(evt.currentTarget.getAttribute("data-lang"));
     }, []);
-    const renderLanguage = (lang) => (React.createElement(TextField, { ...textFieldProps, className: combineClassNames([
-            warning && warningClasses.warning,
-            textFieldProps.className,
-        ]), fullWidth: true, label: textFieldProps.multiline ? (React.createElement("span", null,
+    const renderLanguage = (lang) => (React.createElement(TextFieldCC, { ...textFieldProps, warning: warning, fullWidth: true, label: textFieldProps.multiline ? (React.createElement("span", null,
             label,
             " -",
             " ",

@@ -3,7 +3,7 @@ import { PortalMenuClassKey, PortalMenuProps } from "./standalone/Portal/Menu";
 import { FileUploadClassKey, FileUploadProps } from "./standalone/FileUpload/Generic";
 import { ImageSelectorClassKey, ImageSelectorProps } from "./standalone/FileUpload/Image/ImageSelector";
 import { MultiImageClassKey, MultiImageProps } from "./standalone/FileUpload/MultiImage/MultiImage";
-import { BaseSelectorClassKey, BaseSelectorData, BaseSelectorProps, HowToBoxClassKey, HowToBoxProps, MultiSelectClassKey, MultiSelectorData, MultiSelectProps, PopupMenuClassKey, PortalLayoutClassKey, PortalLayoutProps } from "./standalone";
+import { BaseSelectorClassKey, BaseSelectorData, BaseSelectorProps, HowToBoxClassKey, HowToBoxProps, MultiSelectClassKey, MultiSelectorData, MultiSelectProps, MultiSelectWithoutGroupClassKey, MultiSelectWithoutGroupProps, MultiSelectWithTagsClassKey, MultiSelectWithTagsProps, PopupMenuClassKey, PortalLayoutClassKey, PortalLayoutProps } from "./standalone";
 import { ComponentWithLabelClassKey, ComponentWithLabelProps } from "./standalone/UIKit/ComponentWithLabel";
 import { CheckboxClassKey } from "./standalone/UIKit/Checkbox";
 import { ActionButtonClassKey, ActionButtonProps } from "./standalone/UIKit/ActionButton";
@@ -43,6 +43,10 @@ import { LocaleSelectorEntryClassKey, LocaleSelectorEntryProps } from "./non-sta
 import { SignPadClassKey, SignPadProps } from "./standalone/SignPad";
 import { FormDialogClassKey, FormDialogProps } from "./backend-components/Form/FormDialog";
 import { NotificationsClassKey, NotificationsProps } from "./standalone/Notifications";
+import { DayContentsClassKey, DayContentsProps } from "./standalone/Schedule/Common/DayContents";
+import { WeekViewDayClassKey, WeekViewDayProps } from "./standalone/Schedule/Weekly/WeekViewDay";
+import { ScrollableScheduleClassKey, ScrollableScheduleProps } from "./standalone/Schedule/Scrollable";
+import { WeekViewClassKey, WeekViewProps } from "./standalone/Schedule/Weekly";
 export interface ComponentsCareTheme {
     dataGrid?: DataGridTheme;
     dataGridExpert?: DataGridThemeExpert;
@@ -107,6 +111,12 @@ declare module "@mui/material/styles" {
         CcPopupMenu: PopupMenuClassKey;
         CcPortalLayout: PortalLayoutClassKey;
         CcNotifications: NotificationsClassKey;
+        CcMultiSelectWithTags: MultiSelectWithTagsClassKey;
+        CcMultiSelectWithoutGroup: MultiSelectWithoutGroupClassKey;
+        CcDayContents: DayContentsClassKey;
+        CcWeekViewDay: WeekViewDayClassKey;
+        CcScrollableSchedule: ScrollableScheduleClassKey;
+        CcWeekView: WeekViewClassKey;
     }
     interface ComponentsPropsList {
         CcSignalPortlet: Partial<SignalPortletProps>;
@@ -157,6 +167,12 @@ declare module "@mui/material/styles" {
         CcFormDialog: Partial<FormDialogProps>;
         CcPortalLayout: Partial<PortalLayoutProps>;
         CcNotifications: Partial<NotificationsProps>;
+        CcMultiSelectWithTags: Partial<MultiSelectWithTagsProps<MultiSelectorData, BaseSelectorData>>;
+        CcMultiSelectWithoutGroup: Partial<MultiSelectWithoutGroupProps<BaseSelectorData>>;
+        CcDayContents: Partial<DayContentsProps>;
+        CcWeekViewDay: Partial<WeekViewDayProps>;
+        CcScrollableSchedule: Partial<ScrollableScheduleProps>;
+        CcWeekView: Partial<WeekViewProps>;
     }
     interface Components {
         CcSignalPortlet?: {
@@ -402,6 +418,36 @@ declare module "@mui/material/styles" {
             defaultProps?: ComponentsPropsList["CcNotifications"];
             styleOverrides?: ComponentsOverrides<Theme>["CcNotifications"];
             variants?: ComponentsVariants["CcNotifications"];
+        };
+        CcMultiSelectWithTags?: {
+            defaultProps?: ComponentsPropsList["CcMultiSelectWithTags"];
+            styleOverrides?: ComponentsOverrides<Theme>["CcMultiSelectWithTags"];
+            variants?: ComponentsVariants["CcMultiSelectWithTags"];
+        };
+        CcMultiSelectWithoutGroup?: {
+            defaultProps?: ComponentsPropsList["CcMultiSelectWithoutGroup"];
+            styleOverrides?: ComponentsOverrides<Theme>["CcMultiSelectWithoutGroup"];
+            variants?: ComponentsVariants["CcMultiSelectWithoutGroup"];
+        };
+        CcDayContents?: {
+            defaultProps?: ComponentsPropsList["CcDayContents"];
+            styleOverrides?: ComponentsOverrides<Theme>["CcDayContents"];
+            variants?: ComponentsVariants["CcDayContents"];
+        };
+        CcWeekViewDay?: {
+            defaultProps?: ComponentsPropsList["CcWeekViewDay"];
+            styleOverrides?: ComponentsOverrides<Theme>["CcWeekViewDay"];
+            variants?: ComponentsVariants["CcWeekViewDay"];
+        };
+        CcScrollableSchedule?: {
+            defaultProps?: ComponentsPropsList["CcScrollableSchedule"];
+            styleOverrides?: ComponentsOverrides<Theme>["CcScrollableSchedule"];
+            variants?: ComponentsVariants["CcScrollableSchedule"];
+        };
+        CcWeekView?: {
+            defaultProps?: ComponentsPropsList["CcWeekView"];
+            styleOverrides?: ComponentsOverrides<Theme>["CcWeekView"];
+            variants?: ComponentsVariants["CcWeekView"];
         };
     }
 }

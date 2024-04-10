@@ -71,9 +71,28 @@ export interface ScheduleAction {
     disabled?: boolean;
 }
 export interface DayContentsProps {
+    /**
+     * the data to display
+     */
     data: IDayData[];
+    /**
+     * alternative border color, to maintain contrast to background
+     */
     altBorder?: boolean;
+    /**
+     * css class to apply to root
+     */
+    className?: string;
+    /**
+     * custom CSS classes
+     */
+    classes?: Partial<Record<DayContentsClassKey, string>>;
 }
 export type IProps = DayContentsProps;
-declare const _default: React.MemoExoticComponent<(props: DayContentsProps) => React.JSX.Element>;
+export interface DayContentsButtonOwnerState {
+    altBorder: boolean;
+    unClickable: boolean;
+}
+export type DayContentsClassKey = "button";
+declare const _default: React.MemoExoticComponent<(inProps: DayContentsProps) => React.JSX.Element>;
 export default _default;

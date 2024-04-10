@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useRef } from "react";
-import { Dialog, DialogContent, styled, useThemeProps, } from "@mui/material";
+import { Dialog, DialogContent, styled, useThemeProps } from "@mui/material";
 import { OpenInNew } from "@mui/icons-material";
 import { useDialogContext } from "../../framework/DialogContextProvider";
 import { showConfirmDialog } from "../../non-standalone/Dialog/Utils";

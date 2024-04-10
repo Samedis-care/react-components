@@ -1,38 +1,38 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { Search as SearchIcon, Cancel as RemoveIcon, } from "@mui/icons-material";
+import { Cancel as RemoveIcon, Search as SearchIcon, } from "@mui/icons-material";
 import BaseSelector from "./BaseSelector";
 import { SmallIconButton, SmallListItemIcon } from "../Small";
 import InlineSwitch from "../InlineSwitch";
-import { Typography } from "@mui/material";
-import makeStyles from "@mui/styles/makeStyles";
-const useStyles = makeStyles({
-    outlined: {
-        float: "left",
-        backgroundColor: "#cce1f6",
-        padding: "0px 20px",
-        borderRadius: 20,
-        borderColor: "#cce1f6",
-        margin: "5px",
-        lineHeight: "30px",
-    },
-    searchLabel: {
-        lineHeight: "30px",
-        float: "left",
-    },
-    switch: {
+import { styled, Typography, useThemeProps } from "@mui/material";
+const Outlined = styled("div", {
+    name: "CcMultiSelectWithoutGroup",
+    slot: "outlined",
+})({
+    float: "left",
+    backgroundColor: "#cce1f6",
+    padding: "0px 20px",
+    borderRadius: 20,
+    borderColor: "#cce1f6",
+    margin: "5px",
+    lineHeight: "30px",
+});
+const StyledInlineSwitch = styled(InlineSwitch, {
+    name: "CcMultiSelectWithoutGroup",
+    slot: "switch",
+})({
+    marginTop: 0,
+    "& .CcInlineSwitch-switchWrapper": {
         lineHeight: "30px",
         width: "100%",
         direction: "rtl",
     },
-    labelWithSwitch: {
-        marginTop: 0,
-    },
-}, { name: "CcMultiSelectWithoutGroup" });
-const MultiSelectWithoutGroup = (props) => {
-    const { onSelect, selected, disabled, enableIcons, loadDataOptions, getIdOfData, refreshToken, switchValue, sortCompareFn, 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    classes: classProps, ...otherProps } = props;
-    const classes = useStyles(props);
+});
+const MultiSelectWithoutGroup = (inProps) => {
+    const props = useThemeProps({
+        props: inProps,
+        name: "CcMultiSelectWithoutGroup",
+    });
+    const { onSelect, selected, disabled, enableIcons, loadDataOptions, getIdOfData, refreshToken, switchValue, sortCompareFn, classes, className, ...otherProps } = props;
     const [dataOptions, setDataOptions] = useState([]);
     const getIdDefault = useCallback((data) => data.value, []);
     const getId = getIdOfData ?? getIdDefault;
@@ -72,13 +72,13 @@ const MultiSelectWithoutGroup = (props) => {
             ? { ...result, isDisabled: true, selected: true }
             : result);
     }, [getId, loadDataOptions, selectedIds, switchValue]);
-    return (React.createElement(Typography, { component: "div" },
+    return (React.createElement(Typography, { component: "div", className: className },
         React.createElement(BaseSelector, { ...otherProps, onLoad: onLoad, selected: null, onSelect: multiSelectHandler, refreshToken: (refreshToken ?? "") +
                 selectedIds.join(",") +
                 (switchValue ?? false).toString(), variant: "standard", startAdornment: React.createElement(SearchIcon, { color: "primary" }), freeSolo: true, displaySwitch: false, filterIds: selected.map(getId) }),
-        React.createElement(InlineSwitch, { visible: !!props.displaySwitch, value: !!switchValue, onChange: props.setSwitchValue, label: props.switchLabel, classes: classes },
+        React.createElement(StyledInlineSwitch, { visible: !!props.displaySwitch, value: !!switchValue, onChange: props.setSwitchValue, label: props.switchLabel, className: classes?.switch },
             React.createElement(React.Fragment, null, (sortCompareFn ? selected.sort(sortCompareFn) : selected).map((data, index) => {
-                return (React.createElement("div", { key: index, className: classes.outlined },
+                return (React.createElement(Outlined, { key: index, className: classes?.outlined },
                     enableIcons && (React.createElement(SmallListItemIcon, null, data.icon)),
                     React.createElement("span", null, data.label),
                     !disabled && (React.createElement(SmallIconButton, { edge: "end", name: data.value, disabled: disabled, onClick: handleDelete },

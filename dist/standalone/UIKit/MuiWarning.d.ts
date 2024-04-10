@@ -1,6 +1,5 @@
 import React from "react";
 import { TextFieldProps } from "@mui/material";
-export declare const useMuiWarningStyles: (props?: any) => import("@mui/styles").ClassNameMap<"warning">;
 export interface MuiWarningSourceProps {
     className?: string;
 }

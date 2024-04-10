@@ -1,27 +1,32 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Box, Typography } from "@mui/material";
-import makeStyles from "@mui/styles/makeStyles";
+import { Box, styled, Typography, useThemeProps } from "@mui/material";
 import SingleSelect from "../../standalone/Selector/SingleSelect";
 import MultiSelectWithoutGroup from "./MultiSelectWithoutGroup";
 import uniqueArray from "../../utils/uniqueArray";
 import Loader from "../Loader";
-const useStyles = makeStyles({
-    root: {
-        position: "relative",
-    },
-    loadOverlay: {
-        position: "absolute",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        zIndex: 9999,
-        backgroundColor: "rgba(255,255,255,.3)",
-        transition: "opacity 500ms cubic-bezier(0.4, 0, 0.2, 1) 500ms",
-    },
-}, { name: "CcMultiSelectWithTags" });
-const MultiSelectWithTags = (props) => {
-    const { title, searchInputLabel, selected, disabled, autocompleteId, enableIcons, noOptionsText, loadingText, openText, closeText, loadGroupEntries, loadGroupOptions, loadDataOptions, onChange, openInfo, getIdOfData, switchLabel, lruGroup, lruData, sortCompareFn, } = props;
+import combineClassNames from "../../utils/combineClassNames";
+const Root = styled("div", { name: "CcMultiSelectWithTags", slot: "root" })({
+    position: "relative",
+});
+const LoadOverlay = styled("div", {
+    name: "CcMultiSelectWithTags",
+    slot: "loadOverlay",
+})({
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 9999,
+    backgroundColor: "rgba(255,255,255,.3)",
+    transition: "opacity 500ms cubic-bezier(0.4, 0, 0.2, 1) 500ms",
+});
+const MultiSelectWithTags = (inProps) => {
+    const props = useThemeProps({
+        props: inProps,
+        name: "CcMultiSelectWithTags",
+    });
+    const { title, searchInputLabel, selected, disabled, autocompleteId, enableIcons, noOptionsText, loadingText, openText, closeText, loadGroupEntries, loadGroupOptions, loadDataOptions, onChange, openInfo, getIdOfData, switchLabel, lruGroup, lruData, sortCompareFn, className, classes, } = props;
     const defaultSwitchValue = props.displaySwitch
         ? props.defaultSwitchValue ?? false
         : false;
@@ -30,7 +35,6 @@ const MultiSelectWithTags = (props) => {
     const [loadingGroupRecords, setLoadingGroupRecords] = useState(false);
     const getIdDefault = useCallback((data) => data.value, []);
     const getId = getIdOfData ?? getIdDefault;
-    const classes = useStyles();
     // set switch value if switch visibility is toggled
     useEffect(() => {
         setSwitchValue(defaultSwitchValue);
@@ -69,8 +73,8 @@ const MultiSelectWithTags = (props) => {
         const selectedGroupIds = selectedGroups.map((group) => group.group);
         return (await loadGroupOptions(query, switchValue)).filter((group) => !selectedGroupIds.includes(group.value));
     }, [loadGroupOptions, selectedGroups, switchValue]);
-    return (React.createElement("div", { className: classes.root },
-        React.createElement("div", { className: classes.loadOverlay, style: loadingGroupRecords
+    return (React.createElement(Root, { className: combineClassNames([className, classes?.root]) },
+        React.createElement(LoadOverlay, { className: classes?.loadOverlay, style: loadingGroupRecords
                 ? { visibility: "visible", opacity: 1 }
                 : { visibility: "hidden", opacity: 0 } },
             React.createElement(Loader, null)),

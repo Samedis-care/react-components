@@ -15,6 +15,15 @@ export interface WeekViewProps {
      * Optional actions
      */
     actions?: ScheduleAction[];
+    /**
+     * CSS class to apply to root
+     */
+    className?: string;
+    /**
+     * Custom CSS classes
+     */
+    classes?: Partial<Record<WeekViewClassKey, string>>;
 }
-declare const _default: React.MemoExoticComponent<(props: WeekViewProps) => React.JSX.Element>;
+export type WeekViewClassKey = "todayBtn" | "filterWrapper" | "week" | "picker";
+declare const _default: React.MemoExoticComponent<(inProps: WeekViewProps) => React.JSX.Element>;
 export default _default;

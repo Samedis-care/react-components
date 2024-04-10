@@ -18,6 +18,15 @@ export interface WeekViewDayProps {
      * The contents of the day
      */
     data: IDayData[];
+    /**
+     * class name to apply to root
+     */
+    className?: string;
+    /**
+     * custom CSS classes
+     */
+    classes?: Partial<Record<WeekViewDayClassKey, string>>;
 }
-declare const _default: React.MemoExoticComponent<(props: WeekViewDayProps) => React.JSX.Element>;
+export type WeekViewDayClassKey = "paper" | "dayContents";
+declare const _default: React.MemoExoticComponent<(inProps: WeekViewDayProps) => React.JSX.Element>;
 export default _default;

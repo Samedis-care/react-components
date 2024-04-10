@@ -9,7 +9,7 @@ export interface MultiSelectWithoutGroupProps<DataT extends MultiSelectorData> e
     /**
      * Custom styles
      */
-    classes?: Partial<keyof ReturnType<typeof useStyles>>;
+    classes?: Partial<Record<MultiSelectWithoutGroupClassKey, string>>;
     /**
      * The currently selected values
      */
@@ -41,6 +41,6 @@ export interface MultiSelectWithoutGroupProps<DataT extends MultiSelectorData> e
      */
     sortCompareFn?: (value1: DataT, value2: DataT) => number;
 }
-declare const useStyles: (props?: any) => import("@mui/styles").ClassNameMap<"switch" | "outlined" | "searchLabel" | "labelWithSwitch">;
-declare const _default: <DataT extends MultiSelectorData>(props: MultiSelectWithoutGroupProps<DataT>) => React.JSX.Element;
+export type MultiSelectWithoutGroupClassKey = "outlined" | "switch";
+declare const _default: <DataT extends MultiSelectorData>(inProps: MultiSelectWithoutGroupProps<DataT>) => React.JSX.Element;
 export default _default;

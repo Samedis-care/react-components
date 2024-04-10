@@ -1,6 +1,6 @@
 import React from "react";
 import { MultiSelectWithoutGroupProps } from "./MultiSelectWithoutGroup";
-import { SelectorLruOptions, BaseSelectorProps, BaseSelectorData } from "./BaseSelector";
+import { BaseSelectorData, BaseSelectorProps, SelectorLruOptions } from "./BaseSelector";
 import { MultiSelectorData } from "./MultiSelect";
 export interface MultiSelectWithTagsProps<DataT extends MultiSelectorData, GroupT extends BaseSelectorData> extends Pick<BaseSelectorProps<GroupT, false>, "disabled" | "noOptionsText" | "loadingText" | "closeText" | "openText" | "displaySwitch" | "defaultSwitchValue" | "switchLabel">, Omit<MultiSelectWithoutGroupProps<DataT>, "classes" | "onChange" | "dataOptions" | "setDataOptions" | "label"> {
     /**
@@ -48,6 +48,15 @@ export interface MultiSelectWithTagsProps<DataT extends MultiSelectorData, Group
      * LRU options for data
      */
     lruData?: SelectorLruOptions<DataT>;
+    /**
+     * custom CSS class to apply to root
+     */
+    className?: string;
+    /**
+     * Custom CSS classes
+     */
+    classes?: Partial<Record<MultiSelectWithTagsClassKey, string>>;
 }
-declare const _default: <DataT extends MultiSelectorData, GroupT extends BaseSelectorData>(props: MultiSelectWithTagsProps<DataT, GroupT>) => React.JSX.Element;
+export type MultiSelectWithTagsClassKey = "root" | "loadOverlay";
+declare const _default: <DataT extends MultiSelectorData, GroupT extends BaseSelectorData>(inProps: MultiSelectWithTagsProps<DataT, GroupT>) => React.JSX.Element;
 export default _default;

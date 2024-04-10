@@ -1,51 +1,63 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Grid, Box, Button, IconButton, Menu, Divider, } from "@mui/material";
+import { Box, Button, Divider, Grid, IconButton, Menu, styled, useThemeProps, } from "@mui/material";
 import { Settings as SettingsIcon } from "@mui/icons-material";
 import moment from "moment";
 import ScrollableScheduleWeek from "./ScrollableScheduleWeek";
 import InfiniteScroll from "../../InfiniteScroll";
 import combineClassNames from "../../../utils/combineClassNames";
 import useCCTranslations from "../../../utils/useCCTranslations";
-import makeStyles from "@mui/styles/makeStyles";
 import ScrollableFilterRenderer from "../Common/ScheduleFilterRenderers";
 import throwError from "../../../utils/throwError";
-const useStyles = makeStyles((theme) => ({
-    today: {
-        backgroundColor: theme.palette.primary.main,
-        color: theme.palette.getContrastText(theme.palette.primary.main),
-        borderRadius: `${theme.shape.borderRadius}px ${theme.shape.borderRadius}px 0 0`,
-    },
-    todayBtn: {
-        textTransform: "none",
-        textAlign: "left",
-        color: "inherit",
-        display: "block",
-    },
-    scroller: {
-        overflow: "auto",
-        borderRadius: `0 0 ${theme.shape.borderRadius}px ${theme.shape.borderRadius}px`,
-        position: "relative",
-    },
-    filterSettingsBtn: {
-        color: theme.palette.getContrastText(theme.palette.primary.main),
-    },
-    filterWrapper: {
-        top: "50%",
-        position: "relative",
-        transform: "translateY(-50%)",
-    },
-}), { name: "CcScrollableSchedule" });
+const TodayButtonWrapper = styled(Grid, {
+    name: "CcScrollableSchedule",
+    slot: "today",
+})(({ theme }) => ({
+    backgroundColor: theme.palette.primary.main,
+    color: theme.palette.primary.contrastText,
+    borderRadius: `${theme.shape.borderRadius}px ${theme.shape.borderRadius}px 0 0`,
+}));
+const TodayButton = styled(Button, {
+    name: "CcScrollableSchedule",
+    slot: "todayBtn",
+})({
+    textTransform: "none",
+    textAlign: "left",
+    color: "inherit",
+    display: "block",
+});
+const StyledInfiniteScroll = styled(InfiniteScroll, {
+    name: "CcScrollableSchedule",
+    slot: "scroller",
+})(({ theme }) => ({
+    overflow: "auto",
+    borderRadius: `0 0 ${theme.shape.borderRadius}px ${theme.shape.borderRadius}px`,
+    position: "relative",
+}));
+const FilterSettingsIcon = styled(SettingsIcon, {
+    name: "CcScrollableSchedule",
+    slot: "filterSettingsBtn",
+})(({ theme }) => ({
+    color: theme.palette.primary.contrastText,
+}));
+const FilterWrapper = styled(Box, {
+    name: "CcScrollableSchedule",
+    slot: "filterWrapper",
+})({
+    top: "50%",
+    position: "relative",
+    transform: "translateY(-50%)",
+});
 const preventAction = (evt) => {
     evt.stopPropagation();
 };
 const EMPTY_FILTERS = {};
 const NO_ACTIONS = [];
-const ScrollableSchedule = (props) => {
-    const { loadWeekCallback, wrapperClass } = props;
+const ScrollableSchedule = (inProps) => {
+    const props = useThemeProps({ props: inProps, name: "CcScrollableSchedule" });
+    const { loadWeekCallback, wrapperClass, className, classes } = props;
     const filters = props.filters ?? EMPTY_FILTERS;
     const actions = props.actions ?? NO_ACTIONS;
     const { i18n } = useCCTranslations();
-    const classes = useStyles();
     const todayElem = useRef(null);
     const scrollElem = useRef(null);
     const getDefaultState = useCallback(() => ({
@@ -138,15 +150,15 @@ const ScrollableSchedule = (props) => {
         setFilterSettingsAnchorEl(null);
     }, []);
     const filterCount = filters ? Object.keys(filters).length : 0;
-    return (React.createElement(Grid, { container: true },
-        React.createElement(Grid, { item: true, xs: 12, className: classes.today, onClick: jumpToToday },
+    return (React.createElement(Grid, { container: true, className: className },
+        React.createElement(TodayButtonWrapper, { item: true, xs: 12, className: classes?.today, onClick: jumpToToday },
             React.createElement(Grid, { container: true, justifyContent: "space-between" },
                 React.createElement(Grid, { item: true },
-                    React.createElement(Button, { className: classes.todayBtn, onClick: jumpToToday, fullWidth: true },
+                    React.createElement(TodayButton, { className: classes?.todayBtn, onClick: jumpToToday, fullWidth: true },
                         React.createElement(Box, { m: 2 }, state.today.format("ddd DD MMMM")))),
-                React.createElement(Grid, { item: true }, filterCount + actions.length > 0 && (React.createElement(Box, { px: 2, className: classes.filterWrapper, onClick: preventAction }, filterCount + actions.length > 1 ? (React.createElement(React.Fragment, null,
+                React.createElement(Grid, { item: true }, filterCount + actions.length > 0 && (React.createElement(FilterWrapper, { px: 2, className: classes?.filterWrapper, onClick: preventAction }, filterCount + actions.length > 1 ? (React.createElement(React.Fragment, null,
                     React.createElement(IconButton, { onClick: openFilterSettings },
-                        React.createElement(SettingsIcon, { className: classes.filterSettingsBtn })),
+                        React.createElement(FilterSettingsIcon, { className: classes?.filterSettingsBtn })),
                     React.createElement(Menu, { open: filterSettingsAnchorEl != null, anchorEl: filterSettingsAnchorEl, onClose: closeFiltersMenu },
                         React.createElement(Box, { p: 1 },
                             React.createElement(Grid, { container: true, spacing: 1 },
@@ -165,7 +177,7 @@ const ScrollableSchedule = (props) => {
                     return (React.createElement(Button, { key: "action-" + action.id, onClick: action.onClick, disabled: action.disabled }, action.label));
                 })()) : (throwError("code should be unreachable"))))))),
         React.createElement(Grid, { item: true, xs: 12 },
-            React.createElement(InfiniteScroll, { className: combineClassNames([wrapperClass, classes.scroller]), loadMoreTop: loadMoreTop, loadMoreBottom: loadMoreBottom, ref: scrollElem },
+            React.createElement(StyledInfiniteScroll, { className: combineClassNames([wrapperClass, classes?.scroller]), loadMoreTop: loadMoreTop, loadMoreBottom: loadMoreBottom, ref: scrollElem },
                 React.createElement(Box, { m: 2 },
                     React.createElement(Grid, { container: true, spacing: 2 }, state.items))))));
 };

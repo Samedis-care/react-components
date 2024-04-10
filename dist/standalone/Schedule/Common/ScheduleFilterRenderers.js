@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import makeStyles from "@mui/styles/makeStyles";
+import { styled } from "@mui/material";
 import combineClassNames from "../../../utils/combineClassNames";
 const ScheduleFilterRenderer = (props) => {
     const type = props.type;
@@ -9,23 +9,22 @@ const ScheduleFilterRenderer = (props) => {
         return (React.createElement(ScheduleFilterRendererSwitch, { ...props }));
     throw new Error(`Invalid filter type: ${type}`);
 };
-const useStyles = makeStyles((theme) => ({
-    filterSelect: {
-        border: "none",
-        backgroundColor: "transparent",
-        cursor: "pointer",
-        width: "100%",
+const StyledSelect = styled("select", {
+    name: "CcScheduleFilterRendererSelect",
+    slot: "root",
+})(({ theme }) => ({
+    border: "none",
+    backgroundColor: "transparent",
+    cursor: "pointer",
+    width: "100%",
+    "&.Cc-scrollable": {
+        color: theme.palette.primary.contrastText,
     },
-    filterSelectInlineScrollable: {
-        color: theme.palette.getContrastText(theme.palette.primary.main),
-    },
-}), { name: "CcScheduleFilterRenderers" });
+}));
 const ScheduleFilterRendererSelect = (props) => {
-    const classes = useStyles();
-    return (React.createElement("select", { className: combineClassNames([
-            classes.filterSelect,
-            props.inline === "scrollable" && classes.filterSelectInlineScrollable,
-        ]), value: props.value, name: props.name, onChange: props.onChange }, Object.entries(props.options).map(([value, label]) => (React.createElement("option", { value: value, key: value }, label)))));
+    return (React.createElement(StyledSelect, { value: props.value, name: props.name, onChange: props.onChange, className: combineClassNames([
+            props.inline === "scrollable" && "Cc-scrollable",
+        ]) }, Object.entries(props.options).map(([value, label]) => (React.createElement("option", { value: value, key: value }, label)))));
 };
 const ScheduleFilterRendererSwitch = (props) => {
     const [id] = useState(Math.random().toString().substring(2));
