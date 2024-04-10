@@ -3,7 +3,7 @@ import {
 	ScheduleFilterDefinitionSelect,
 	ScheduleFilterDefinitionSwitch,
 } from "./DayContents";
-import makeStyles from "@mui/styles/makeStyles";
+import { styled } from "@mui/material";
 import combineClassNames from "../../../utils/combineClassNames";
 
 const ScheduleFilterRenderer = (
@@ -28,20 +28,18 @@ const ScheduleFilterRenderer = (
 	throw new Error(`Invalid filter type: ${type as string}`);
 };
 
-const useStyles = makeStyles(
-	(theme) => ({
-		filterSelect: {
-			border: "none",
-			backgroundColor: "transparent",
-			cursor: "pointer",
-			width: "100%",
-		},
-		filterSelectInlineScrollable: {
-			color: theme.palette.getContrastText(theme.palette.primary.main),
-		},
-	}),
-	{ name: "CcScheduleFilterRenderers" },
-);
+const StyledSelect = styled("select", {
+	name: "CcScheduleFilterRendererSelect",
+	slot: "root",
+})(({ theme }) => ({
+	border: "none",
+	backgroundColor: "transparent",
+	cursor: "pointer",
+	width: "100%",
+	"&.Cc-scrollable": {
+		color: theme.palette.primary.contrastText,
+	},
+}));
 
 interface ScheduleFilterRendererSelectProps
 	extends Pick<ScheduleFilterDefinitionSelect, "type" | "options"> {
@@ -66,23 +64,21 @@ interface ScheduleFilterRendererSelectProps
 const ScheduleFilterRendererSelect = (
 	props: ScheduleFilterRendererSelectProps,
 ) => {
-	const classes = useStyles();
 	return (
-		<select
-			className={combineClassNames([
-				classes.filterSelect,
-				props.inline === "scrollable" && classes.filterSelectInlineScrollable,
-			])}
+		<StyledSelect
 			value={props.value}
 			name={props.name}
 			onChange={props.onChange}
+			className={combineClassNames([
+				props.inline === "scrollable" && "Cc-scrollable",
+			])}
 		>
 			{Object.entries(props.options).map(([value, label]) => (
 				<option value={value} key={value}>
 					{label}
 				</option>
 			))}
-		</select>
+		</StyledSelect>
 	);
 };
 

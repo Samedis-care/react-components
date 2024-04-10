@@ -1,18 +1,18 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Box, Typography } from "@mui/material";
-import makeStyles from "@mui/styles/makeStyles";
+import { Box, styled, Typography, useThemeProps } from "@mui/material";
 import SingleSelect from "../../standalone/Selector/SingleSelect";
 import MultiSelectWithoutGroup, {
 	MultiSelectWithoutGroupProps,
 } from "./MultiSelectWithoutGroup";
 import {
-	SelectorLruOptions,
-	BaseSelectorProps,
 	BaseSelectorData,
+	BaseSelectorProps,
+	SelectorLruOptions,
 } from "./BaseSelector";
 import uniqueArray from "../../utils/uniqueArray";
 import Loader from "../Loader";
 import { MultiSelectorData } from "./MultiSelect";
+import combineClassNames from "../../utils/combineClassNames";
 
 export interface MultiSelectWithTagsProps<
 	DataT extends MultiSelectorData,
@@ -85,6 +85,14 @@ export interface MultiSelectWithTagsProps<
 	 * LRU options for data
 	 */
 	lruData?: SelectorLruOptions<DataT>;
+	/**
+	 * custom CSS class to apply to root
+	 */
+	className?: string;
+	/**
+	 * Custom CSS classes
+	 */
+	classes?: Partial<Record<MultiSelectWithTagsClassKey, string>>;
 }
 
 interface SelectedGroup {
@@ -98,31 +106,36 @@ interface SelectedGroup {
 	items: string[];
 }
 
-const useStyles = makeStyles(
-	{
-		root: {
-			position: "relative",
-		},
-		loadOverlay: {
-			position: "absolute",
-			top: 0,
-			left: 0,
-			right: 0,
-			bottom: 0,
-			zIndex: 9999,
-			backgroundColor: "rgba(255,255,255,.3)",
-			transition: "opacity 500ms cubic-bezier(0.4, 0, 0.2, 1) 500ms",
-		},
-	},
-	{ name: "CcMultiSelectWithTags" },
-);
+const Root = styled("div", { name: "CcMultiSelectWithTags", slot: "root" })({
+	position: "relative",
+});
+
+const LoadOverlay = styled("div", {
+	name: "CcMultiSelectWithTags",
+	slot: "loadOverlay",
+})({
+	position: "absolute",
+	top: 0,
+	left: 0,
+	right: 0,
+	bottom: 0,
+	zIndex: 9999,
+	backgroundColor: "rgba(255,255,255,.3)",
+	transition: "opacity 500ms cubic-bezier(0.4, 0, 0.2, 1) 500ms",
+});
+
+export type MultiSelectWithTagsClassKey = "root" | "loadOverlay";
 
 const MultiSelectWithTags = <
 	DataT extends MultiSelectorData,
 	GroupT extends BaseSelectorData,
 >(
-	props: MultiSelectWithTagsProps<DataT, GroupT>,
+	inProps: MultiSelectWithTagsProps<DataT, GroupT>,
 ) => {
+	const props = useThemeProps({
+		props: inProps,
+		name: "CcMultiSelectWithTags",
+	});
 	const {
 		title,
 		searchInputLabel,
@@ -144,6 +157,8 @@ const MultiSelectWithTags = <
 		lruGroup,
 		lruData,
 		sortCompareFn,
+		className,
+		classes,
 	} = props;
 
 	const defaultSwitchValue = props.displaySwitch
@@ -154,7 +169,6 @@ const MultiSelectWithTags = <
 	const [loadingGroupRecords, setLoadingGroupRecords] = useState(false);
 	const getIdDefault = useCallback((data: DataT) => data.value, []);
 	const getId = getIdOfData ?? getIdDefault;
-	const classes = useStyles();
 
 	// set switch value if switch visibility is toggled
 	useEffect(() => {
@@ -218,9 +232,9 @@ const MultiSelectWithTags = <
 	);
 
 	return (
-		<div className={classes.root}>
-			<div
-				className={classes.loadOverlay}
+		<Root className={combineClassNames([className, classes?.root])}>
+			<LoadOverlay
+				className={classes?.loadOverlay}
 				style={
 					loadingGroupRecords
 						? { visibility: "visible", opacity: 1 }
@@ -228,7 +242,7 @@ const MultiSelectWithTags = <
 				}
 			>
 				<Loader />
-			</div>
+			</LoadOverlay>
 			<Typography component="label" variant={"caption"} color={"textSecondary"}>
 				{title}
 			</Typography>
@@ -269,7 +283,7 @@ const MultiSelectWithTags = <
 					sortCompareFn={sortCompareFn}
 				/>
 			</Box>
-		</div>
+		</Root>
 	);
 };
 

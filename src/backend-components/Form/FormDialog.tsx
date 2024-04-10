@@ -1,11 +1,5 @@
 import React, { useCallback, useMemo, useRef } from "react";
-import {
-	Dialog,
-	DialogContent,
-	styled,
-	SvgIconProps,
-	useThemeProps,
-} from "@mui/material";
+import { Dialog, DialogContent, styled, useThemeProps } from "@mui/material";
 import { OpenInNew } from "@mui/icons-material";
 import { useDialogContext } from "../../framework/DialogContextProvider";
 import { showConfirmDialog } from "../../non-standalone/Dialog/Utils";
@@ -50,7 +44,7 @@ const TallDialogContent = styled(DialogContent, {
 	height: "80vh",
 });
 
-const OpenInNewIcon = styled<React.ComponentType<SvgIconProps>>(OpenInNew, {
+const OpenInNewIcon = styled(OpenInNew, {
 	name: "CcFormDialog",
 	slot: "openInNewIcon",
 })({

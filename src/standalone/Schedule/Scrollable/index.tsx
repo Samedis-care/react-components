@@ -1,12 +1,13 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
-	Grid,
 	Box,
 	Button,
-	Theme,
+	Divider,
+	Grid,
 	IconButton,
 	Menu,
-	Divider,
+	styled,
+	useThemeProps,
 } from "@mui/material";
 import { Settings as SettingsIcon } from "@mui/icons-material";
 import moment, { Moment } from "moment";
@@ -19,7 +20,6 @@ import {
 } from "../Common/DayContents";
 import combineClassNames from "../../../utils/combineClassNames";
 import useCCTranslations from "../../../utils/useCCTranslations";
-import makeStyles from "@mui/styles/makeStyles";
 import ScrollableFilterRenderer from "../Common/ScheduleFilterRenderers";
 import throwError from "../../../utils/throwError";
 
@@ -54,6 +54,15 @@ export interface ScrollableScheduleProps {
 	 * Optional actions
 	 */
 	actions?: ScheduleAction[];
+
+	/**
+	 * CSS class to apply to root
+	 */
+	className?: string;
+	/**
+	 * Custom CSS classes
+	 */
+	classes?: Partial<Record<ScrollableScheduleClassKey, string>>;
 }
 
 /**
@@ -89,35 +98,56 @@ interface ScrollableScheduleState<
 	};
 }
 
-const useStyles = makeStyles(
-	(theme: Theme) => ({
-		today: {
-			backgroundColor: theme.palette.primary.main,
-			color: theme.palette.getContrastText(theme.palette.primary.main),
-			borderRadius: `${theme.shape.borderRadius}px ${theme.shape.borderRadius}px 0 0`,
-		},
-		todayBtn: {
-			textTransform: "none",
-			textAlign: "left",
-			color: "inherit",
-			display: "block",
-		},
-		scroller: {
-			overflow: "auto",
-			borderRadius: `0 0 ${theme.shape.borderRadius}px ${theme.shape.borderRadius}px`,
-			position: "relative",
-		},
-		filterSettingsBtn: {
-			color: theme.palette.getContrastText(theme.palette.primary.main),
-		},
-		filterWrapper: {
-			top: "50%",
-			position: "relative",
-			transform: "translateY(-50%)",
-		},
-	}),
-	{ name: "CcScrollableSchedule" },
-);
+const TodayButtonWrapper = styled(Grid, {
+	name: "CcScrollableSchedule",
+	slot: "today",
+})(({ theme }) => ({
+	backgroundColor: theme.palette.primary.main,
+	color: theme.palette.primary.contrastText,
+	borderRadius: `${theme.shape.borderRadius}px ${theme.shape.borderRadius}px 0 0`,
+}));
+
+const TodayButton = styled(Button, {
+	name: "CcScrollableSchedule",
+	slot: "todayBtn",
+})({
+	textTransform: "none",
+	textAlign: "left",
+	color: "inherit",
+	display: "block",
+});
+
+const StyledInfiniteScroll = styled(InfiniteScroll, {
+	name: "CcScrollableSchedule",
+	slot: "scroller",
+})(({ theme }) => ({
+	overflow: "auto",
+	borderRadius: `0 0 ${theme.shape.borderRadius}px ${theme.shape.borderRadius}px`,
+	position: "relative",
+}));
+
+const FilterSettingsIcon = styled(SettingsIcon, {
+	name: "CcScrollableSchedule",
+	slot: "filterSettingsBtn",
+})(({ theme }) => ({
+	color: theme.palette.primary.contrastText,
+}));
+
+const FilterWrapper = styled(Box, {
+	name: "CcScrollableSchedule",
+	slot: "filterWrapper",
+})({
+	top: "50%",
+	position: "relative",
+	transform: "translateY(-50%)",
+});
+
+export type ScrollableScheduleClassKey =
+	| "today"
+	| "todayBtn"
+	| "scroller"
+	| "filterSettingsBtn"
+	| "filterWrapper";
 
 const preventAction = (evt: React.MouseEvent) => {
 	evt.stopPropagation();
@@ -125,12 +155,12 @@ const preventAction = (evt: React.MouseEvent) => {
 
 const EMPTY_FILTERS: Record<string, ScheduleFilterDefinition> = {};
 const NO_ACTIONS: ScheduleAction[] = [];
-const ScrollableSchedule = (props: ScrollableScheduleProps) => {
-	const { loadWeekCallback, wrapperClass } = props;
+const ScrollableSchedule = (inProps: ScrollableScheduleProps) => {
+	const props = useThemeProps({ props: inProps, name: "CcScrollableSchedule" });
+	const { loadWeekCallback, wrapperClass, className, classes } = props;
 	const filters = props.filters ?? EMPTY_FILTERS;
 	const actions = props.actions ?? NO_ACTIONS;
 	const { i18n } = useCCTranslations();
-	const classes = useStyles();
 	const todayElem = useRef<HTMLElement | null>(null);
 	const scrollElem = useRef<InfiniteScroll | null>(null);
 
@@ -262,29 +292,36 @@ const ScrollableSchedule = (props: ScrollableScheduleProps) => {
 	const filterCount = filters ? Object.keys(filters).length : 0;
 
 	return (
-		<Grid container>
-			<Grid item xs={12} className={classes.today} onClick={jumpToToday}>
+		<Grid container className={className}>
+			<TodayButtonWrapper
+				item
+				xs={12}
+				className={classes?.today}
+				onClick={jumpToToday}
+			>
 				<Grid container justifyContent={"space-between"}>
 					<Grid item>
-						<Button
-							className={classes.todayBtn}
+						<TodayButton
+							className={classes?.todayBtn}
 							onClick={jumpToToday}
 							fullWidth
 						>
 							<Box m={2}>{state.today.format("ddd DD MMMM")}</Box>
-						</Button>
+						</TodayButton>
 					</Grid>
 					<Grid item>
 						{filterCount + actions.length > 0 && (
-							<Box
+							<FilterWrapper
 								px={2}
-								className={classes.filterWrapper}
+								className={classes?.filterWrapper}
 								onClick={preventAction}
 							>
 								{filterCount + actions.length > 1 ? (
 									<>
 										<IconButton onClick={openFilterSettings}>
-											<SettingsIcon className={classes.filterSettingsBtn} />
+											<FilterSettingsIcon
+												className={classes?.filterSettingsBtn}
+											/>
 										</IconButton>
 										<Menu
 											open={filterSettingsAnchorEl != null}
@@ -357,14 +394,14 @@ const ScrollableSchedule = (props: ScrollableScheduleProps) => {
 								) : (
 									throwError("code should be unreachable")
 								)}
-							</Box>
+							</FilterWrapper>
 						)}
 					</Grid>
 				</Grid>
-			</Grid>
+			</TodayButtonWrapper>
 			<Grid item xs={12}>
-				<InfiniteScroll
-					className={combineClassNames([wrapperClass, classes.scroller])}
+				<StyledInfiniteScroll
+					className={combineClassNames([wrapperClass, classes?.scroller])}
 					loadMoreTop={loadMoreTop}
 					loadMoreBottom={loadMoreBottom}
 					ref={scrollElem}
@@ -374,7 +411,7 @@ const ScrollableSchedule = (props: ScrollableScheduleProps) => {
 							{state.items}
 						</Grid>
 					</Box>
-				</InfiniteScroll>
+				</StyledInfiniteScroll>
 			</Grid>
 		</Grid>
 	);

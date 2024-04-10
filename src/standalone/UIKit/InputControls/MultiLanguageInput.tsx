@@ -3,17 +3,15 @@ import {
 	Grid,
 	IconButton,
 	InputAdornment,
-	TextField,
+	styled,
 	TextFieldProps,
 	Tooltip,
 	Typography,
-	styled,
 	useThemeProps,
 } from "@mui/material";
 import { useCCLanguagesTranslations } from "../../../utils/useCCTranslations";
 import { Translate } from "@mui/icons-material";
-import combineClassNames from "../../../utils/combineClassNames";
-import { useMuiWarningStyles } from "../MuiWarning";
+import { TextFieldCC } from "../MuiWarning";
 
 // src/assets/data/languages.json
 export type MultiLanguageInputSupportedLanguages =
@@ -297,7 +295,6 @@ const MultiLanguageInput = (inProps: MultiLanguageInputProps) => {
 		...textFieldProps
 	} = props;
 	const { t, i18n } = useCCLanguagesTranslations();
-	const warningClasses = useMuiWarningStyles();
 
 	// determine default language
 	let defaultLanguage = i18n.language.split(
@@ -357,12 +354,9 @@ const MultiLanguageInput = (inProps: MultiLanguageInputProps) => {
 	);
 
 	const renderLanguage = (lang: MultiLanguageInputSupportedLanguages) => (
-		<TextField
+		<TextFieldCC
 			{...textFieldProps}
-			className={combineClassNames([
-				warning && warningClasses.warning,
-				textFieldProps.className,
-			])}
+			warning={warning}
 			fullWidth
 			label={
 				textFieldProps.multiline ? (

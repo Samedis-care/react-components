@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
-	Search as SearchIcon,
 	Cancel as RemoveIcon,
+	Search as SearchIcon,
 } from "@mui/icons-material";
 import {
 	BaseSelectorProps,
@@ -10,9 +10,7 @@ import {
 import BaseSelector from "./BaseSelector";
 import { SmallIconButton, SmallListItemIcon } from "../Small";
 import InlineSwitch from "../InlineSwitch";
-import { Typography } from "@mui/material";
-
-import makeStyles from "@mui/styles/makeStyles";
+import { styled, Typography, useThemeProps } from "@mui/material";
 
 export interface MultiSelectWithoutGroupProps<DataT extends MultiSelectorData>
 	extends Omit<
@@ -28,7 +26,7 @@ export interface MultiSelectWithoutGroupProps<DataT extends MultiSelectorData>
 	/**
 	 * Custom styles
 	 */
-	classes?: Partial<keyof ReturnType<typeof useStyles>>;
+	classes?: Partial<Record<MultiSelectWithoutGroupClassKey, string>>;
 	// Data management props
 	/**
 	 * The currently selected values
@@ -65,36 +63,40 @@ export interface MultiSelectWithoutGroupProps<DataT extends MultiSelectorData>
 	sortCompareFn?: (value1: DataT, value2: DataT) => number;
 }
 
-const useStyles = makeStyles(
-	{
-		outlined: {
-			float: "left",
-			backgroundColor: "#cce1f6",
-			padding: "0px 20px",
-			borderRadius: 20,
-			borderColor: "#cce1f6",
-			margin: "5px",
-			lineHeight: "30px",
-		},
-		searchLabel: {
-			lineHeight: "30px",
-			float: "left",
-		},
-		switch: {
-			lineHeight: "30px",
-			width: "100%",
-			direction: "rtl",
-		},
-		labelWithSwitch: {
-			marginTop: 0,
-		},
+const Outlined = styled("div", {
+	name: "CcMultiSelectWithoutGroup",
+	slot: "outlined",
+})({
+	float: "left",
+	backgroundColor: "#cce1f6",
+	padding: "0px 20px",
+	borderRadius: 20,
+	borderColor: "#cce1f6",
+	margin: "5px",
+	lineHeight: "30px",
+});
+
+const StyledInlineSwitch = styled(InlineSwitch, {
+	name: "CcMultiSelectWithoutGroup",
+	slot: "switch",
+})({
+	marginTop: 0,
+	"& .CcInlineSwitch-switchWrapper": {
+		lineHeight: "30px",
+		width: "100%",
+		direction: "rtl",
 	},
-	{ name: "CcMultiSelectWithoutGroup" },
-);
+});
+
+export type MultiSelectWithoutGroupClassKey = "outlined" | "switch";
 
 const MultiSelectWithoutGroup = <DataT extends MultiSelectorData>(
-	props: MultiSelectWithoutGroupProps<DataT>,
+	inProps: MultiSelectWithoutGroupProps<DataT>,
 ) => {
+	const props = useThemeProps({
+		props: inProps,
+		name: "CcMultiSelectWithoutGroup",
+	});
 	const {
 		onSelect,
 		selected,
@@ -105,11 +107,10 @@ const MultiSelectWithoutGroup = <DataT extends MultiSelectorData>(
 		refreshToken,
 		switchValue,
 		sortCompareFn,
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars
-		classes: classProps,
+		classes,
+		className,
 		...otherProps
 	} = props;
-	const classes = useStyles(props);
 	const [dataOptions, setDataOptions] = useState<DataT[]>([]);
 
 	const getIdDefault = useCallback((data: DataT) => data.value, []);
@@ -178,7 +179,7 @@ const MultiSelectWithoutGroup = <DataT extends MultiSelectorData>(
 	);
 
 	return (
-		<Typography component="div">
+		<Typography component="div" className={className}>
 			<BaseSelector
 				{...otherProps}
 				onLoad={onLoad}
@@ -195,18 +196,18 @@ const MultiSelectWithoutGroup = <DataT extends MultiSelectorData>(
 				displaySwitch={false}
 				filterIds={selected.map(getId)}
 			/>
-			<InlineSwitch
+			<StyledInlineSwitch
 				visible={!!props.displaySwitch}
 				value={!!switchValue}
 				onChange={props.setSwitchValue}
 				label={props.switchLabel}
-				classes={classes}
+				className={classes?.switch}
 			>
 				<>
 					{(sortCompareFn ? selected.sort(sortCompareFn) : selected).map(
 						(data: MultiSelectorData, index: number) => {
 							return (
-								<div key={index} className={classes.outlined}>
+								<Outlined key={index} className={classes?.outlined}>
 									{enableIcons && (
 										<SmallListItemIcon>{data.icon}</SmallListItemIcon>
 									)}
@@ -221,12 +222,12 @@ const MultiSelectWithoutGroup = <DataT extends MultiSelectorData>(
 											<RemoveIcon />
 										</SmallIconButton>
 									)}
-								</div>
+								</Outlined>
 							);
 						},
 					)}
 				</>
-			</InlineSwitch>
+			</StyledInlineSwitch>
 		</Typography>
 	);
 };

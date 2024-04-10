@@ -6,15 +6,26 @@ import {
 	FormHelperTextProps,
 	FormLabel,
 	FormLabelProps,
+	styled,
 	TextField,
 	TextFieldProps,
 } from "@mui/material";
-import makeStyles from "@mui/styles/makeStyles";
-import combineClassNames from "../../utils/combineClassNames";
 
-export const useMuiWarningStyles = makeStyles(
-	(theme) => ({
-		warning: {
+export interface MuiWarningSourceProps {
+	className?: string;
+}
+
+export interface MuiWarningResultProps {
+	warning?: boolean;
+}
+
+export const withMuiWarning = <T extends MuiWarningSourceProps>(
+	Component: React.ComponentType<T>,
+): React.ComponentType<T & MuiWarningResultProps> => {
+	// not unnecessary, component name is inferred from it
+	// noinspection UnnecessaryLocalVariableJS
+	return styled(Component)<T & MuiWarningResultProps>(({ theme, warning }) => ({
+		...(warning && {
 			"& > .MuiFormLabel-root": {
 				color: theme.palette.warning.main,
 			},
@@ -61,38 +72,8 @@ export const useMuiWarningStyles = makeStyles(
 				transform: "scaleX(1)",
 				borderBottomColor: theme.palette.error.main,
 			},
-		},
-	}),
-	{ name: "CcMuiWarning" },
-);
-
-export interface MuiWarningSourceProps {
-	className?: string;
-}
-
-export interface MuiWarningResultProps {
-	warning?: boolean;
-}
-
-export const withMuiWarning = <T extends MuiWarningSourceProps>(
-	Component: React.ComponentType<T>,
-): React.ComponentType<T & MuiWarningResultProps> => {
-	// not unnecessary, component name is inferred from it
-	// noinspection UnnecessaryLocalVariableJS
-	const MuiWarning = (props: T & MuiWarningResultProps) => {
-		const { warning, ...muiProps } = props;
-		const classes = useMuiWarningStyles();
-		return (
-			<Component
-				{...(muiProps as unknown as T)}
-				className={combineClassNames([
-					warning && classes.warning,
-					props.className,
-				])}
-			/>
-		);
-	};
-	return MuiWarning;
+		}),
+	}));
 };
 
 export const FormControlCC = withMuiWarning<FormControlProps>(FormControl);

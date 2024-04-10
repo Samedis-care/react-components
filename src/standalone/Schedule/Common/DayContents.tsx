@@ -1,7 +1,5 @@
 import React from "react";
-import { Button, Grid } from "@mui/material";
-import combineClassNames from "../../../utils/combineClassNames";
-import makeStyles from "@mui/styles/makeStyles";
+import { Button, Grid, styled, useThemeProps } from "@mui/material";
 import combineColors from "../../../utils/combineColors";
 
 export interface IDayData {
@@ -83,59 +81,76 @@ export interface ScheduleAction {
 }
 
 export interface DayContentsProps {
+	/**
+	 * the data to display
+	 */
 	data: IDayData[];
-	altBorder?: boolean; // alternative border color, to maintain contrast to background
+	/**
+	 * alternative border color, to maintain contrast to background
+	 */
+	altBorder?: boolean;
+	/**
+	 * css class to apply to root
+	 */
+	className?: string;
+	/**
+	 * custom CSS classes
+	 */
+	classes?: Partial<Record<DayContentsClassKey, string>>;
 }
 
 // @deprecated use DayContentsProps
 export type IProps = DayContentsProps;
 
-const useStyles = makeStyles(
-	(theme) => ({
-		btn: {
-			textTransform: "none",
-			textAlign: "left",
-			color: "inherit",
-			display: "block",
-		},
-		btnAltBorder: {
-			borderColor: `rgba(${combineColors(
-				theme.palette.background.paper,
-				theme.palette.action.hover,
-			).join()})`,
-			"&:hover": {
-				borderColor: theme.palette.background.paper,
-			},
-		},
-		btnDisabled: {
-			cursor: "default",
+export interface DayContentsButtonOwnerState {
+	altBorder: boolean;
+	unClickable: boolean;
+}
+const StyledButton = styled(Button, { name: "CcDayContents", slot: "button" })<{
+	ownerState: DayContentsButtonOwnerState;
+}>(({ theme, ownerState: { altBorder, unClickable } }) => ({
+	textTransform: "none",
+	textAlign: "left",
+	color: "inherit",
+	display: "block",
+	...(altBorder && {
+		borderColor: `rgba(${combineColors(
+			theme.palette.background.paper,
+			theme.palette.action.hover,
+		).join()})`,
+		"&:hover": {
+			borderColor: theme.palette.background.paper,
 		},
 	}),
-	{ name: "CcDayContents" },
-);
+	...(unClickable && {
+		cursor: "default",
+	}),
+}));
 
-const DayContents = (props: DayContentsProps) => {
-	const { data, altBorder } = props;
-	const classes = useStyles();
+export type DayContentsClassKey = "button";
+
+const DayContents = (inProps: DayContentsProps) => {
+	const props = useThemeProps({ props: inProps, name: "CcDayContents" });
+	const { data, altBorder, className, classes } = props;
 	return (
-		<Grid container spacing={2}>
+		<Grid container spacing={2} className={className}>
 			{data.map((entry) => (
 				<Grid item xs={12} key={entry.id}>
-					<Button
+					<StyledButton
 						variant={"outlined"}
 						size={"small"}
 						fullWidth
-						className={combineClassNames([
-							classes.btn,
-							altBorder && classes.btnAltBorder,
-							!entry.onClick && !entry.onAuxClick && classes.btnDisabled,
-						])}
+						ownerState={{
+							altBorder: !!altBorder,
+							unClickable: !entry.onClick && !entry.onAuxClick,
+						}}
+						className={classes?.button}
 						onClick={entry.onClick}
 						onAuxClick={entry.onAuxClick}
 						disableRipple={!entry.onClick && !entry.onAuxClick}
 					>
 						{entry.title}
-					</Button>
+					</StyledButton>
 				</Grid>
 			))}
 		</Grid>

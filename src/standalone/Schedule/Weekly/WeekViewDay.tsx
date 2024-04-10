@@ -3,8 +3,7 @@ import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
 import Divider from "@mui/material/Divider";
 import DayContents, { IDayData } from "../Common/DayContents";
-import { Theme } from "@mui/material";
-import { makeStyles } from "@mui/styles";
+import { styled, useThemeProps } from "@mui/material";
 import Paper from "@mui/material/Paper";
 import Box from "@mui/material/Box";
 import moment, { Moment } from "moment";
@@ -27,67 +26,78 @@ export interface WeekViewDayProps {
 	 * The contents of the day
 	 */
 	data: IDayData[];
+	/**
+	 * class name to apply to root
+	 */
+	className?: string;
+	/**
+	 * custom CSS classes
+	 */
+	classes?: Partial<Record<WeekViewDayClassKey, string>>;
 }
 
-const useStyles = makeStyles(
-	(theme: Theme) => ({
-		paper: {
-			height: "100%",
-		},
-		today: {
+const StyledPaper = styled(Paper, { name: "CcWeekViewDay", slot: "paper" })(
+	({ theme }) => ({
+		height: "100%",
+		".CcWeekViewDay-today": {
 			backgroundColor: theme.palette.primary.main,
-			color: theme.palette.getContrastText(theme.palette.primary.main),
+			color: theme.palette.primary.contrastText,
 		},
-		first: {
+		".CcWeekViewDay-first": {
 			borderRadius: `${theme.shape.borderRadius}px 0 0 ${theme.shape.borderRadius}px`,
 		},
-		last: {
+		".CcWeekViewDay-last": {
 			borderRadius: `0 ${theme.shape.borderRadius}px ${theme.shape.borderRadius}px 0`,
 		},
-		dayContents: {
-			minHeight: 150,
-		},
 	}),
-	{ name: "CcWeekViewDay" },
 );
 
-const WeekViewDay = (props: WeekViewDayProps) => {
-	const classes = useStyles();
-	const isFirst = props.dayIdx === 0;
-	const isLast = props.dayIdx === 6;
+const DayContentsWrapper = styled(Grid, {
+	name: "CcWeekViewDay",
+	slot: "dayContents",
+})({
+	minHeight: 150,
+});
+
+export type WeekViewDayClassKey = "paper" | "dayContents";
+
+const WeekViewDay = (inProps: WeekViewDayProps) => {
+	const props = useThemeProps({ props: inProps, name: "CcWeekViewDay" });
+	const { dayIdx, day, date, data, className, classes } = props;
+	const isFirst = dayIdx === 0;
+	const isLast = dayIdx === 6;
 	const isToday =
-		props.day.dayOfYear() === moment().dayOfYear() &&
-		props.day.year() === moment().year();
+		day.dayOfYear() === moment().dayOfYear() && day.year() === moment().year();
 
 	return (
-		<Grid item xs>
-			<Paper
+		<Grid item xs className={className}>
+			<StyledPaper
 				square
 				elevation={0}
 				className={combineClassNames([
-					isToday && classes.today,
-					classes.paper,
-					isFirst && classes.first,
-					isLast && classes.last,
+					classes?.paper,
+					isToday && "CcWeekViewDay-today",
+					isFirst && "CcWeekViewDay-first",
+					isLast && "CcWeekViewDay-last",
 				])}
 			>
 				<Grid container>
 					<Grid item xs={12}>
-						<Typography align={"center"}>{props.day.format("dddd")}</Typography>
+						<Typography align={"center"}>{day.format("dddd")}</Typography>
 					</Grid>
 					<Grid item xs={12}>
 						<Divider />
 					</Grid>
 					<Grid item xs={12}>
-						<Box m={1}>{props.date}</Box>
+						<Box m={1}>{date}</Box>
 					</Grid>
-					<Grid item xs={12} className={classes.dayContents}>
+					<DayContentsWrapper item xs={12} className={classes?.dayContents}>
 						<Box m={1}>
-							<DayContents data={props.data} altBorder={isToday} />
+							<DayContents data={data} altBorder={isToday} />
 						</Box>
-					</Grid>
+					</DayContentsWrapper>
 				</Grid>
-			</Paper>
+			</StyledPaper>
 		</Grid>
 	);
 };

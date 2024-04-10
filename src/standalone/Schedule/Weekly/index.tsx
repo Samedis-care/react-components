@@ -3,26 +3,29 @@ import WeekViewDay from "./WeekViewDay";
 import moment, { Moment } from "moment";
 import {
 	Box,
+	Button,
 	CircularProgress,
 	Divider,
+	Grid,
 	IconButton,
 	Menu,
+	styled,
+	Typography,
+	useThemeProps,
 } from "@mui/material";
-import { Button, Typography, Grid } from "@mui/material";
 import {
 	IDayData,
 	ScheduleAction,
 	ScheduleFilterDefinition,
 } from "../Common/DayContents";
 import {
-	ArrowForwardIos,
 	ArrowBackIos,
+	ArrowForwardIos,
 	Settings as SettingsIcon,
 } from "@mui/icons-material";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { ToDateLocaleStringOptions } from "../../../constants";
 import useCCTranslations from "../../../utils/useCCTranslations";
-import makeStyles from "@mui/styles/makeStyles";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 import ScheduleFilterRenderer from "../Common/ScheduleFilterRenderers";
 
@@ -45,48 +48,54 @@ export interface WeekViewProps {
 	 * Optional actions
 	 */
 	actions?: ScheduleAction[];
+	/**
+	 * CSS class to apply to root
+	 */
+	className?: string;
+	/**
+	 * Custom CSS classes
+	 */
+	classes?: Partial<Record<WeekViewClassKey, string>>;
 }
 
 const normalizeMoment = (instance: Moment) =>
 	instance.weekday(0).hour(0).minute(0).second(0).millisecond(0);
 const nowNormalized = () => normalizeMoment(moment());
 
-const useStyles = makeStyles(
-	{
-		todayBtn: {
-			height: "100%",
-		},
-		week: {
-			cursor: "pointer",
-		},
-		picker: {
-			opacity: 0,
-			position: "absolute",
-			pointerEvents: "none",
-			marginTop: -64,
-		},
-		filterWrapper: {
-			top: "50%",
-			position: "relative",
-			transform: "translateY(-50%)",
-		},
-		filterSelect: {
-			backgroundColor: "transparent",
-			border: "none",
-			cursor: "pointer",
-		},
-	},
-	{ name: "CcWeekView" },
-);
+const TodayBtn = styled(Button, { name: "CcWeekView", slot: "todayBtn" })({
+	height: "100%",
+});
+
+const FilterWrapper = styled(Box, {
+	name: "CcWeekView",
+	slot: "filterWrapper",
+})({
+	top: "50%",
+	position: "relative",
+	transform: "translateY(-50%)",
+});
+
+const Week = styled("span", { name: "CcWeekView", slot: "week" })({
+	cursor: "pointer",
+});
+
+const Picker = styled("div", { name: "CcWeekView", slot: "picker" })({
+	opacity: 0,
+	position: "absolute",
+	pointerEvents: "none",
+	marginTop: -64,
+});
+
+export type WeekViewClassKey = "todayBtn" | "filterWrapper" | "week" | "picker";
 
 const EMPTY_FILTERS: Record<string, ScheduleFilterDefinition> = {};
 const NO_ACTIONS: ScheduleAction[] = [];
-const WeekView = (props: WeekViewProps) => {
-	const { loadData } = props;
+const WeekView = (inProps: WeekViewProps) => {
+	const props = useThemeProps({ props: inProps, name: "CcWeekView" });
+	const { loadData, className, classes } = props;
 	const filters = props.filters ?? EMPTY_FILTERS;
 	const actions = props.actions ?? NO_ACTIONS;
 	const filterCount = Object.keys(filters).length;
-	const classes = useStyles();
 	const { t, i18n } = useCCTranslations();
 	/**
 	 * The offset to the current week
@@ -216,22 +225,27 @@ const WeekView = (props: WeekViewProps) => {
 	let prevDate: Moment | null = null;
 
 	return (
-		<Grid container alignItems={"stretch"} alignContent={"space-between"}>
+		<Grid
+			container
+			alignItems={"stretch"}
+			alignContent={"space-between"}
+			className={className}
+		>
 			<Grid item xs={12} container wrap={"nowrap"}>
 				<Grid item xs>
 					<Grid container>
 						<Grid item>
-							<Button onClick={today} className={classes.todayBtn}>
+							<TodayBtn onClick={today} className={classes?.todayBtn}>
 								{t("standalone.schedule.today")} (
 								{now
 									.toDate()
 									.toLocaleDateString(i18n.language, ToDateLocaleStringOptions)}
 								)
-							</Button>
+							</TodayBtn>
 						</Grid>
 						<Grid item>
 							{filterCount > 0 && (
-								<Box px={2} className={classes.filterWrapper}>
+								<FilterWrapper px={2} className={classes?.filterWrapper}>
 									{(() => {
 										const [name, filter] = Object.entries(filters)[0];
 										return (
@@ -244,7 +258,7 @@ const WeekView = (props: WeekViewProps) => {
 											/>
 										);
 									})()}
-								</Box>
+								</FilterWrapper>
 							)}
 						</Grid>
 					</Grid>
@@ -255,12 +269,12 @@ const WeekView = (props: WeekViewProps) => {
 							<IconButton onClick={prevWeek} size="large">
 								<ArrowBackIos />
 							</IconButton>
-							<span onClick={openDatePicker} className={classes.week}>
+							<Week onClick={openDatePicker} className={classes?.week}>
 								{t("standalone.schedule.week")}{" "}
 								{nowNormalized().add(weekOffset, "week").week()}{" "}
 								{nowNormalized().add(weekOffset, "week").weekYear()}
-							</span>
-							<div className={classes.picker}>
+							</Week>
+							<Picker className={classes?.picker}>
 								<LocalizationProvider
 									dateAdapter={AdapterMoment}
 									adapterLocale={i18n.language}
@@ -274,7 +288,7 @@ const WeekView = (props: WeekViewProps) => {
 										onClose={closeDatePicker}
 									/>
 								</LocalizationProvider>
-							</div>
+							</Picker>
 							<IconButton onClick={nextWeek} size="large">
 								<ArrowForwardIos />
 							</IconButton>
@@ -284,7 +298,7 @@ const WeekView = (props: WeekViewProps) => {
 				<Grid item xs container justifyContent={"flex-end"}>
 					{(filterCount > 1 || actions.length > 0) && (
 						<Grid item>
-							<Box px={2} className={classes.filterWrapper}>
+							<FilterWrapper px={2} className={classes?.filterWrapper}>
 								{filterCount > 2 || actions.length > 1 ? (
 									<>
 										<IconButton onClick={openFilterSettings}>
@@ -382,7 +396,7 @@ const WeekView = (props: WeekViewProps) => {
 										})()}
 									</Grid>
 								)}
-							</Box>
+							</FilterWrapper>
 						</Grid>
 					)}
 				</Grid>
