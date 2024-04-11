@@ -7,8 +7,7 @@ import {
 	Popover,
 	PopoverOrigin,
 } from "@mui/material";
-import { Search as SearchIcon } from "@mui/icons-material";
-import { useDataGridProps, useDataGridStyles } from "../DataGrid";
+import { DataGridQuickFilterIcon, useDataGridProps } from "../DataGrid";
 import TextFieldWithHelp from "../../UIKit/TextFieldWithHelp";
 import combineClassNames from "../../../utils/combineClassNames";
 
@@ -34,8 +33,7 @@ const transformOrigin: PopoverOrigin = {
 };
 
 const SearchView = (props: IDataGridSearchViewProps) => {
-	const { searchPlaceholder } = useDataGridProps();
-	const classes = useDataGridStyles();
+	const { searchPlaceholder, classes } = useDataGridProps();
 	const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 	const openPopover = useCallback(
 		(evt: React.MouseEvent<HTMLElement>) => setAnchorEl(evt.currentTarget),
@@ -51,9 +49,10 @@ const SearchView = (props: IDataGridSearchViewProps) => {
 			InputProps={{
 				startAdornment: (
 					<InputAdornment position="start">
-						<SearchIcon
+						<DataGridQuickFilterIcon
 							className={combineClassNames([
-								props.search && classes.quickFilterActiveIcon,
+								classes?.quickFilterIcon,
+								props.search && "CcDataGrid-quickFilterActiveIcon",
 							])}
 						/>
 					</InputAdornment>
@@ -69,14 +68,13 @@ const SearchView = (props: IDataGridSearchViewProps) => {
 				{renderTextField()}
 			</Hidden>
 			<Hidden smUp implementation={"js"}>
-				<IconButton
-					onClick={openPopover}
-					className={combineClassNames([
-						props.search && classes.quickFilterActiveIcon,
-					])}
-					size="large"
-				>
-					<SearchIcon />
+				<IconButton onClick={openPopover} size="large">
+					<DataGridQuickFilterIcon
+						className={combineClassNames([
+							classes?.quickFilterIcon,
+							props.search && "CcDataGrid-quickFilterActiveIcon",
+						])}
+					/>
 				</IconButton>
 				<Popover
 					open={anchorEl !== null}

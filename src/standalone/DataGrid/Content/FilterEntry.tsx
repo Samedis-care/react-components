@@ -1,12 +1,9 @@
 import React, { useCallback, useState } from "react";
 import {
 	Checkbox,
-	Divider,
 	FormControlLabel,
 	Grid,
-	IconButton,
 	List,
-	ListItem,
 	ListItemText,
 	MenuItem,
 	Select,
@@ -17,10 +14,14 @@ import { Delete as ClearIcon } from "@mui/icons-material";
 import FilterCombinator from "./FilterCombinator";
 import { ModelFilterType } from "../../../backend-integration/Model";
 import {
+	DataGridFilterClearButton,
+	DataGridSetFilterContainer,
 	DataGridSetFilterData,
+	DataGridSetFilterListDivider,
+	DataGridSetFilterListItem,
+	DataGridSetFilterListItemDivider,
 	IDataGridColumnDef,
 	useDataGridProps,
-	useDataGridStyles,
 } from "../DataGrid";
 import {
 	LocalizedDateTimePicker,
@@ -112,11 +113,9 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 	const { onChange, depth, close } = props;
 	const isFirstFilter = depth === 1;
 	const { t } = useCCTranslations();
-	const { filterLimit, isFilterSupported } = useDataGridProps();
+	const { filterLimit, isFilterSupported, classes } = useDataGridProps();
 
 	const [enumFilterSearch, setEnumFilterSearch] = useState("");
-
-	const classes = useDataGridStyles();
 
 	const maxDepth = filterLimit;
 	const defaultFilterType = [
@@ -406,13 +405,13 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 								}
 							>
 								<span>
-									<IconButton
-										className={classes.filterClearBtn}
+									<DataGridFilterClearButton
+										className={classes?.filterClearBtn}
 										onClick={resetFilter}
 										size="large"
 									>
 										<ClearIcon />
-									</IconButton>
+									</DataGridFilterClearButton>
 								</span>
 							</Tooltip>
 						</Grid>
@@ -523,10 +522,16 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 							/>
 						</Grid>
 					)}
-					<Grid item xs={12} className={classes.setFilterContainer}>
+					<DataGridSetFilterContainer
+						item
+						xs={12}
+						className={classes?.setFilterContainer}
+					>
 						<List>
 							{(props.valueData as DataGridSetFilterData).length > 5 && (
-								<ListItem className={classes.setFilterListItem}>
+								<DataGridSetFilterListItem
+									className={classes?.setFilterListItem}
+								>
 									<Checkbox
 										checked={
 											filterValue.split(",").sort().join(",") ===
@@ -541,11 +546,13 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 									<ListItemText primaryTypographyProps={TYPOGRAPHY_PROPS}>
 										{t("standalone.data-grid.content.set-filter.select-all")}
 									</ListItemText>
-								</ListItem>
+								</DataGridSetFilterListItem>
 							)}
 							{checkSupport(props.valueType, "notInSet") && (
 								<>
-									<ListItem className={classes.setFilterListItem}>
+									<DataGridSetFilterListItem
+										className={classes?.setFilterListItem}
+									>
 										<Checkbox
 											checked={enumFilterInverted}
 											onChange={onFilterTypeChangeEnum}
@@ -553,10 +560,14 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 										<ListItemText primaryTypographyProps={TYPOGRAPHY_PROPS}>
 											{t("standalone.data-grid.content.set-filter.invert")}
 										</ListItemText>
-									</ListItem>
-									<ListItem className={classes.setFilterListItemDivider}>
-										<Divider className={classes.setFilterListDivider} />
-									</ListItem>
+									</DataGridSetFilterListItem>
+									<DataGridSetFilterListItemDivider
+										className={classes?.setFilterListItemDivider}
+									>
+										<DataGridSetFilterListDivider
+											className={classes?.setFilterListDivider}
+										/>
+									</DataGridSetFilterListItemDivider>
 								</>
 							)}
 							{(props.valueData as DataGridSetFilterData)
@@ -566,36 +577,45 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 										.toLowerCase()
 										.includes(enumFilterSearch.toLocaleLowerCase()),
 								)
-								.map((entry) => (
-									<ListItem
-										key={entry.value}
-										className={
-											entry.isDivider
-												? classes.setFilterListItemDivider
-												: classes.setFilterListItem
-										}
-									>
-										{entry.isDivider ? (
-											<Divider className={classes.setFilterListDivider} />
-										) : (
-											<>
-												<Checkbox
-													value={entry.value || ENUM_FILTER_MAGIC_EMPTY}
-													checked={filterValue
-														.split(",")
-														.includes(entry.value || ENUM_FILTER_MAGIC_EMPTY)}
-													onChange={onFilterValueChangeEnum}
-													disabled={entry.disabled}
+								.map((entry) => {
+									const ListItemComp = entry.isDivider
+										? DataGridSetFilterListItemDivider
+										: DataGridSetFilterListItem;
+									return (
+										<ListItemComp
+											key={entry.value}
+											className={
+												entry.isDivider
+													? classes?.setFilterListItemDivider
+													: classes?.setFilterListItem
+											}
+										>
+											{entry.isDivider ? (
+												<DataGridSetFilterListDivider
+													className={classes?.setFilterListDivider}
 												/>
-												<ListItemText primaryTypographyProps={TYPOGRAPHY_PROPS}>
-													{(entry.getLabel || entry.getLabelText)()}
-												</ListItemText>
-											</>
-										)}
-									</ListItem>
-								))}
+											) : (
+												<>
+													<Checkbox
+														value={entry.value || ENUM_FILTER_MAGIC_EMPTY}
+														checked={filterValue
+															.split(",")
+															.includes(entry.value || ENUM_FILTER_MAGIC_EMPTY)}
+														onChange={onFilterValueChangeEnum}
+														disabled={entry.disabled}
+													/>
+													<ListItemText
+														primaryTypographyProps={TYPOGRAPHY_PROPS}
+													>
+														{(entry.getLabel || entry.getLabelText)()}
+													</ListItemText>
+												</>
+											)}
+										</ListItemComp>
+									);
+								})}
 						</List>
-					</Grid>
+					</DataGridSetFilterContainer>
 				</>
 			)}
 			{filterValue &&

@@ -1,6 +1,6 @@
 import React from "react";
-import { Box, Typography, useMediaQuery, useTheme } from "@mui/material";
-import { useDataGridStyles } from "../DataGrid";
+import { Box, useMediaQuery, useTheme } from "@mui/material";
+import { DataGridPaginationText, useDataGridProps } from "../DataGrid";
 import useCCTranslations from "../../../utils/useCCTranslations";
 
 export interface IDataGridPaginationViewProps {
@@ -15,7 +15,7 @@ export interface IDataGridPaginationViewProps {
 }
 
 const PaginationView = (props: IDataGridPaginationViewProps) => {
-	const classes = useDataGridStyles();
+	const { classes } = useDataGridProps();
 	const theme = useTheme();
 	const isMobile = useMediaQuery(theme.breakpoints.only("xs"));
 	const { t } = useCCTranslations();
@@ -36,7 +36,9 @@ const PaginationView = (props: IDataGridPaginationViewProps) => {
 
 	return (
 		<Box mx={2}>
-			<Typography className={classes.paginationText}>{text}</Typography>
+			<DataGridPaginationText className={classes?.paginationText}>
+				{text}
+			</DataGridPaginationText>
 		</Box>
 	);
 };

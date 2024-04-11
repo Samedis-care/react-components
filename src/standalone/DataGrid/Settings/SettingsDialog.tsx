@@ -5,7 +5,6 @@ import {
 	Checkbox,
 	Divider,
 	Grid,
-	Paper,
 	Table,
 	TableBody,
 	TableCell,
@@ -13,9 +12,11 @@ import {
 	TableRow,
 } from "@mui/material";
 import {
+	DataGridContentOverlayClosed,
+	DataGridContentOverlayPaper,
 	IDataGridColumnDef,
 	IDataGridColumnProps,
-	useDataGridStyles,
+	useDataGridProps,
 } from "../DataGrid";
 import useCCTranslations from "../../../utils/useCCTranslations";
 
@@ -45,7 +46,7 @@ export interface IDataGridSettingsDialogProps extends IDataGridColumnProps {
 }
 
 const SettingsDialog = (props: IDataGridSettingsDialogProps) => {
-	const classes = useDataGridStyles();
+	const { classes } = useDataGridProps();
 	const { t } = useCCTranslations();
 
 	const columns = useMemo(
@@ -57,7 +58,10 @@ const SettingsDialog = (props: IDataGridSettingsDialogProps) => {
 	);
 
 	return (
-		<Paper elevation={0} className={classes.contentOverlayPaper}>
+		<DataGridContentOverlayPaper
+			elevation={0}
+			className={classes?.contentOverlayPaper}
+		>
 			<Table stickyHeader>
 				<TableHead>
 					<TableRow>
@@ -92,7 +96,7 @@ const SettingsDialog = (props: IDataGridSettingsDialogProps) => {
 					))}
 				</TableBody>
 			</Table>
-			<div className={classes.contentOverlayClosed}>
+			<DataGridContentOverlayClosed className={classes?.contentOverlayClosed}>
 				<Divider />
 				<Grid container justifyContent={"flex-end"}>
 					<Grid item>
@@ -103,8 +107,8 @@ const SettingsDialog = (props: IDataGridSettingsDialogProps) => {
 						</Box>
 					</Grid>
 				</Grid>
-			</div>
-		</Paper>
+			</DataGridContentOverlayClosed>
+		</DataGridContentOverlayPaper>
 	);
 };
 

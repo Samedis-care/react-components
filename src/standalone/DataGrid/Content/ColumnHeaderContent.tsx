@@ -1,17 +1,20 @@
 import React, { SyntheticEvent, useCallback, useState } from "react";
-import {
-	Box,
-	Grid,
-	IconButton,
-	Popover,
-	PopoverOrigin,
-	Tooltip,
-} from "@mui/material";
+import { Box, Grid, Popover, PopoverOrigin, Tooltip } from "@mui/material";
 import { ArrowDownward, ArrowUpward } from "@mui/icons-material";
 import FilterEntry, { IFilterDef } from "./FilterEntry";
 import { ModelFilterType } from "../../../backend-integration/Model";
-import { IDataGridColumnDef, useDataGridStyles } from "../DataGrid";
-import { FilterIcon, FilterActiveIcon } from "../../Icons";
+import {
+	DataGridColumnHeaderFilterActiveIcon,
+	DataGridColumnHeaderFilterButton,
+	DataGridColumnHeaderFilterIcon,
+	DataGridColumnHeaderFilterPopup,
+	DataGridColumnHeaderFilterPopupEnum,
+	DataGridColumnHeaderLabel,
+	DataGridColumnHeaderResizer,
+	DataGridColumnHeaderSortIcon,
+	IDataGridColumnDef,
+	useDataGridProps,
+} from "../DataGrid";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import combineClassNames from "../../../utils/combineClassNames";
 
@@ -81,7 +84,7 @@ const ColumnHeaderContent = (
 	props: IDataGridContentColumnHeaderContentProps,
 ) => {
 	const { t } = useCCTranslations();
-	const classes = useDataGridStyles();
+	const { classes } = useDataGridProps();
 	const [filterAnchorEl, setFilterAnchorEl] = useState<HTMLElement | null>(
 		null,
 	);
@@ -103,17 +106,21 @@ const ColumnHeaderContent = (
 	);
 
 	const CurrentFilterIcon =
-		props.filter && props.filter.value1 ? FilterActiveIcon : FilterIcon;
+		props.filter && props.filter.value1
+			? DataGridColumnHeaderFilterActiveIcon
+			: DataGridColumnHeaderFilterIcon;
+
+	const ColumnHeaderFilterPopupComp =
+		props.columnType === "enum"
+			? DataGridColumnHeaderFilterPopupEnum
+			: DataGridColumnHeaderFilterPopup;
 
 	return (
 		<>
 			<Grid container justifyContent={"flex-start"} wrap={"nowrap"}>
-				<Grid
+				<DataGridColumnHeaderLabel
 					item
-					className={combineClassNames([
-						classes.disableClick,
-						classes.columnHeaderLabel,
-					])}
+					className={classes?.columnHeaderLabel}
 					key={"header"}
 				>
 					<Tooltip title={props.headerName}>
@@ -126,35 +133,44 @@ const ColumnHeaderContent = (
 							))}
 						</span>
 					</Tooltip>
-				</Grid>
-				<Grid item className={classes.columnHeaderSortIcon}>
+				</DataGridColumnHeaderLabel>
+				<DataGridColumnHeaderSortIcon
+					item
+					className={classes?.columnHeaderSortIcon}
+				>
 					{props.sort === -1 && <ArrowDownward />}
 					{props.sort === 1 && <ArrowUpward />}
-				</Grid>
+				</DataGridColumnHeaderSortIcon>
 				<Grid item xs>
 					{props.sort !== 0 && props.sortOrder?.toString()}
 				</Grid>
 				{props.filterable && (
 					<Grid item key={"filter"}>
 						<Tooltip title={t("standalone.data-grid.content.filter") || ""}>
-							<IconButton
+							<DataGridColumnHeaderFilterButton
 								className={combineClassNames([
-									classes.columnHeaderFilterButton,
+									classes?.columnHeaderFilterButton,
 									props.filter?.value1 &&
-										classes.columnHeaderFilterButtonActive,
+										"CcDataGrid-columnHeaderFilterButtonActive",
 								])}
 								onClick={openFilter}
 								size="large"
 							>
-								<CurrentFilterIcon className={classes.columnHeaderFilterIcon} />
-							</IconButton>
+								<CurrentFilterIcon
+									className={
+										props.filter?.value1
+											? classes?.columnHeaderFilterActiveIcon
+											: classes?.columnHeaderFilterIcon
+									}
+								/>
+							</DataGridColumnHeaderFilterButton>
 						</Tooltip>
 					</Grid>
 				)}
 			</Grid>
 			{props.enableResize && (
-				<div
-					className={classes.columnHeaderResizer}
+				<DataGridColumnHeaderResizer
+					className={classes?.columnHeaderResizer}
 					onMouseDown={props.startDrag}
 					onClick={preventPropagation}
 					onDoubleClick={props.autoResize}
@@ -170,12 +186,12 @@ const ColumnHeaderContent = (
 				onClick={preventPropagation}
 			>
 				<Box m={2}>
-					<Grid
+					<ColumnHeaderFilterPopupComp
 						container
 						className={
 							props.columnType === "enum"
-								? classes.columnHeaderFilterPopupEnum
-								: classes.columnHeaderFilterPopup
+								? classes?.columnHeaderFilterPopupEnum
+								: classes?.columnHeaderFilterPopup
 						}
 					>
 						<FilterEntry
@@ -187,7 +203,7 @@ const ColumnHeaderContent = (
 							close={closeFilter}
 							depth={1}
 						/>
-					</Grid>
+					</ColumnHeaderFilterPopupComp>
 				</Box>
 			</Popover>
 		</>

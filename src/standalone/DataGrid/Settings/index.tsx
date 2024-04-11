@@ -1,14 +1,14 @@
 import React, { ChangeEvent, useCallback } from "react";
-import { Collapse } from "@mui/material";
 import {
+	DataGridContentOverlayCollapse,
 	IDataGridColumnProps,
+	useDataGridProps,
 	useDataGridState,
-	useDataGridStyles,
 } from "../DataGrid";
 import Dialog from "./SettingsDialog";
 
 const DataGridSettings = (props: IDataGridColumnProps) => {
-	const classes = useDataGridStyles();
+	const { classes } = useDataGridProps();
 
 	const [state, setState] = useDataGridState();
 
@@ -44,8 +44,8 @@ const DataGridSettings = (props: IDataGridColumnProps) => {
 	);
 
 	return (
-		<Collapse
-			className={classes.contentOverlayCollapse}
+		<DataGridContentOverlayCollapse
+			className={classes?.contentOverlayCollapse}
 			in={state.showSettings}
 		>
 			<Dialog
@@ -56,7 +56,7 @@ const DataGridSettings = (props: IDataGridColumnProps) => {
 				lockedColumns={state.lockedColumns}
 				hiddenColumns={state.hiddenColumns}
 			/>
-		</Collapse>
+		</DataGridContentOverlayCollapse>
 	);
 };
 

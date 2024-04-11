@@ -10,12 +10,16 @@ import { SmallIconButton } from "../../Small";
 import VerticalDivider from "../../VerticalDivider";
 import ComponentWithLabel from "../../UIKit/ComponentWithLabel";
 import {
-	Edit as EditIcon,
 	Delete as DeleteIcon,
+	Edit as EditIcon,
 	Menu as MenuIcon,
 } from "@mui/icons-material";
 import SelectAll from "./SelectAll";
-import { DataGridProps, useDataGridStyles } from "../DataGrid";
+import {
+	DataGridProps,
+	DataGridSelectAllWrapper,
+	useDataGridProps,
+} from "../DataGrid";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import DataActionBarMenu from "./DataActionBarMenu";
 
@@ -55,7 +59,7 @@ export interface DataActionBarViewProps {
 }
 
 const DataActionBarView = (props: DataActionBarViewProps) => {
-	const classes = useDataGridStyles();
+	const { classes } = useDataGridProps();
 	const { t } = useCCTranslations();
 	const theme = useTheme();
 	const isXs = useMediaQuery(theme.breakpoints.only("xs"));
@@ -89,11 +93,11 @@ const DataActionBarView = (props: DataActionBarViewProps) => {
 	return (
 		<Grid container wrap={"nowrap"}>
 			<Grid item key={"select-all"}>
-				<ComponentWithLabel
+				<DataGridSelectAllWrapper
 					control={<SelectAll />}
 					labelText={t("standalone.data-grid.footer.select-all")}
 					labelPlacement={"bottom"}
-					className={classes.selectAllWrapper}
+					className={classes?.selectAllWrapper}
 					style={
 						props.disableSelection
 							? { opacity: 0, pointerEvents: "none" }

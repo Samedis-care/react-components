@@ -1,13 +1,12 @@
 import React from "react";
 import { Button, ButtonProps, Grid } from "@mui/material";
-import { AppsIcon } from "../../Icons";
 import useCCTranslations from "../../../utils/useCCTranslations";
-import { useDataGridStyles } from "../DataGrid";
+import { DataGridCustomFilterIcon, useDataGridProps } from "../DataGrid";
 import combineClassNames from "../../../utils/combineClassNames";
 import { useCustomFilterActiveContext } from "./FilterBar";
 
 const CustomFiltersButton = (props: Omit<ButtonProps, "outlined">) => {
-	const classes = useDataGridStyles();
+	const { classes } = useDataGridProps();
 	const customDataChanged = useCustomFilterActiveContext()[0] > 0;
 	const { t } = useCCTranslations();
 	return (
@@ -23,10 +22,10 @@ const CustomFiltersButton = (props: Omit<ButtonProps, "outlined">) => {
 					{t("standalone.data-grid.header.custom-filter-button")}
 				</Grid>
 				<Grid item>
-					<AppsIcon
+					<DataGridCustomFilterIcon
 						className={combineClassNames([
-							classes.customFilterIcon,
-							customDataChanged && classes.customFilterActiveIcon,
+							classes?.customFilterIcon,
+							customDataChanged && "CcDataGrid-customFilterActiveIcon",
 						])}
 					/>
 				</Grid>

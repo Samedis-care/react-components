@@ -1,17 +1,14 @@
 import React, { useCallback } from "react";
-import { Collapse } from "@mui/material";
 import {
+	DataGridContentOverlayCollapse,
 	DataGridCustomDataType,
 	useDataGridProps,
 	useDataGridState,
-	useDataGridStyles,
 } from "../DataGrid";
 import Dialog from "./FilterDialog";
 
 const DataGridCustomFilters = () => {
-	const classes = useDataGridStyles();
-
-	const { filterBar } = useDataGridProps();
+	const { filterBar, classes } = useDataGridProps();
 	const [state, setState] = useDataGridState();
 
 	const closeCustomFilterDialog = useCallback(() => {
@@ -47,8 +44,8 @@ const DataGridCustomFilters = () => {
 	}
 
 	return (
-		<Collapse
-			className={classes.contentOverlayCollapse}
+		<DataGridContentOverlayCollapse
+			className={classes?.contentOverlayCollapse}
 			in={state.showFilterDialog}
 		>
 			<Dialog
@@ -57,7 +54,7 @@ const DataGridCustomFilters = () => {
 				customData={state.customData}
 				setCustomData={setCustomData}
 			/>
-		</Collapse>
+		</DataGridContentOverlayCollapse>
 	);
 };
 

@@ -1,6 +1,5 @@
 import React from "react";
-import Checkbox from "../../UIKit/Checkbox";
-import { useDataGridStyles } from "../DataGrid";
+import { DataGridSelectAllCheckbox, useDataGridProps } from "../DataGrid";
 
 export interface IDataGridContentSelectAllViewProps {
 	/**
@@ -20,11 +19,11 @@ export interface IDataGridContentSelectAllViewProps {
 }
 
 const SelectAllView = (props: IDataGridContentSelectAllViewProps) => {
-	const classes = useDataGridStyles();
+	const { classes } = useDataGridProps();
 
 	return (
-		<Checkbox
-			className={classes.selectAllCheckbox}
+		<DataGridSelectAllCheckbox
+			className={classes?.selectAllCheckbox}
 			checked={props.checked}
 			onChange={props.onSelect}
 			disabled={props.disabled}

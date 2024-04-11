@@ -2,13 +2,13 @@ import React, { useCallback, useEffect, useState } from "react";
 import isTouchDevice from "../../../utils/isTouchDevice";
 import combineClassNames from "../../../utils/combineClassNames";
 import {
+	DataGridColumnHeaderContentWrapper,
 	IDataGridColumnDef,
 	IDataGridColumnState,
 	useDataGridColumnState,
 	useDataGridColumnsWidthState,
 	useDataGridProps,
 	useDataGridRootRef,
-	useDataGridStyles,
 } from "../DataGrid";
 import ColumnHeaderContent from "./ColumnHeaderContent";
 import { IFilterDef } from "./FilterEntry";
@@ -46,11 +46,10 @@ const ColumnHeader = (props: IDataGridContentColumnHeaderProps) => {
 	const { field, sortable, filterable } = column;
 	const gridRoot = useDataGridRootRef();
 	const [columnState, setColumnState] = useDataGridColumnState();
-	const { sortLimit } = useDataGridProps();
+	const { sortLimit, classes } = useDataGridProps();
 	const { sort, sortOrder, filter } = columnState[field] ?? FallbackColumnState;
 	const [, setColumnWidthState] = useDataGridColumnsWidthState();
 	const [dragging, setDragging] = useState(false);
-	const classes = useDataGridStyles();
 
 	const onFilterChange = useCallback(
 		(field: string, newFilter: IFilterDef) => {
@@ -213,12 +212,12 @@ const ColumnHeader = (props: IDataGridContentColumnHeaderProps) => {
 	}, [onDrag, stopDrag]);
 
 	return (
-		<div
+		<DataGridColumnHeaderContentWrapper
 			onClick={onColumnClick}
 			onContextMenu={isTouchDevice() ? onColumnLongClick : undefined}
 			className={combineClassNames([
-				classes.columnHeaderContentWrapper,
-				filterable && classes.columnHeaderFilterable,
+				classes?.columnHeaderContentWrapper,
+				filterable && "CcDataGrid-columnHeaderFilterable",
 				"column-header-" + column.field,
 			])}
 		>
@@ -236,7 +235,7 @@ const ColumnHeader = (props: IDataGridContentColumnHeaderProps) => {
 				columnType={props.column.type}
 				filterData={props.column.filterData}
 			/>
-		</div>
+		</DataGridColumnHeaderContentWrapper>
 	);
 };
 

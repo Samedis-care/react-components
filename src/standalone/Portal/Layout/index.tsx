@@ -10,7 +10,6 @@ import React, {
 import Header, { PortalLayoutHeaderProps } from "./Header";
 import Menu from "./Menu";
 import { Breakpoint } from "@mui/material/styles";
-import makeStyles from "@mui/styles/makeStyles";
 import { styled, useMediaQuery, useTheme, useThemeProps } from "@mui/material";
 
 interface PortalLayoutBasic {

@@ -5,14 +5,16 @@ import React, {
 	useContext,
 	useEffect,
 } from "react";
-import { Box, Grid, useMediaQuery } from "@mui/material";
+import { Grid, useMediaQuery } from "@mui/material";
 import {
 	DataGridCustomDataType,
+	DataGridFilterBarBox,
+	DataGridFilterBarGrid,
 	useDataGridProps,
 	useDataGridState,
-	useDataGridStyles,
 } from "../DataGrid";
 import CustomFiltersButton from "./CustomFiltersButton";
+import combineClassNames from "../../../utils/combineClassNames";
 
 export interface IDataGridFilterBarProps {
 	/**
@@ -45,8 +47,8 @@ export const useCustomFilterActiveContext =
 
 const FilterBar = () => {
 	const props = useDataGridProps();
+	const { classes } = props;
 	const [state, setState] = useDataGridState();
-	const classes = useDataGridStyles();
 	const enableDialog = useMediaQuery(
 		props.enableFilterDialogMediaQuery ?? "(false)",
 	);
@@ -93,15 +95,16 @@ const FilterBar = () => {
 	const FilterBarView = props.filterBar;
 
 	return (
-		<Box ml={4} className={classes.filterBarBox}>
-			<Grid
+		<DataGridFilterBarBox ml={4} className={classes?.filterBarBox}>
+			<DataGridFilterBarGrid
 				container
 				alignItems={"center"}
 				justifyContent={"flex-end"}
 				spacing={2}
-				className={
-					classes.filterBarGrid + " components-care-data-grid-filter-bar"
-				}
+				className={combineClassNames([
+					classes?.filterBarGrid,
+					"components-care-data-grid-filter-bar",
+				])}
 			>
 				{FilterBarView &&
 					(enableDialog ? (
@@ -115,8 +118,8 @@ const FilterBar = () => {
 							inDialog={false}
 						/>
 					))}
-			</Grid>
-		</Box>
+			</DataGridFilterBarGrid>
+		</DataGridFilterBarBox>
 	);
 };
 

@@ -1,6 +1,11 @@
 import React from "react";
-import { Box, Button, Divider, Grid, Paper, Typography } from "@mui/material";
-import { useDataGridStyles } from "../DataGrid";
+import { Box, Button, Divider, Grid, Typography } from "@mui/material";
+import {
+	DataGridContentOverlayClosed,
+	DataGridContentOverlayPaper,
+	DataGridCustomFilterContainer,
+	useDataGridProps,
+} from "../DataGrid";
 import { IDataGridFilterBarProps } from "../Header/FilterBar";
 import useCCTranslations from "../../../utils/useCCTranslations";
 
@@ -17,29 +22,32 @@ export interface DataGridCustomFilterDialogProps
 }
 
 const FilterDialog = (props: DataGridCustomFilterDialogProps) => {
-	const classes = useDataGridStyles();
+	const { classes } = useDataGridProps();
 	const { t } = useCCTranslations();
 	const { customFilters: Filters, customData, setCustomData } = props;
 
 	return (
-		<Paper elevation={0} className={classes.contentOverlayPaper}>
+		<DataGridContentOverlayPaper
+			elevation={0}
+			className={classes?.contentOverlayPaper}
+		>
 			<Typography variant={"h6"}>
 				{t("standalone.data-grid.custom-filters.title") || ""}
 			</Typography>
 			<Divider />
-			<Grid
+			<DataGridCustomFilterContainer
 				justifyContent={"space-between"}
 				spacing={2}
 				container
-				className={classes.customFilterContainer}
+				className={classes?.customFilterContainer}
 			>
 				<Filters
 					customData={customData}
 					setCustomData={setCustomData}
 					inDialog
 				/>
-			</Grid>
-			<div className={classes.contentOverlayClosed}>
+			</DataGridCustomFilterContainer>
+			<DataGridContentOverlayClosed className={classes?.contentOverlayClosed}>
 				<Divider />
 				<Grid container justifyContent={"flex-end"}>
 					<Grid item>
@@ -50,8 +58,8 @@ const FilterDialog = (props: DataGridCustomFilterDialogProps) => {
 						</Box>
 					</Grid>
 				</Grid>
-			</div>
-		</Paper>
+			</DataGridContentOverlayClosed>
+		</DataGridContentOverlayPaper>
 	);
 };
 

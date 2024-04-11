@@ -7,12 +7,11 @@ import {
 	Typography,
 } from "@mui/material";
 import { useCustomFilterActiveContext } from "./Header/FilterBar";
-import { useDataGridStyles } from "./DataGrid";
+import { DataGridCustomFilterMulti, useDataGridProps } from "./DataGrid";
 import { Breakpoint } from "@mui/material/styles";
 import { GridSize } from "@mui/material/Grid/Grid";
 import compareArrayContent from "../../utils/compareArrayContent";
 import { MultiSelectorData } from "../Selector";
-import BaseSelector from "../Selector/BaseSelector";
 
 export interface GridMultiSelectFilterProps {
 	/**
@@ -59,7 +58,7 @@ const GridMultiSelectFilter = (props: GridMultiSelectFilterProps) => {
 		dialogBreakpoints,
 		barBreakpoints,
 	} = props;
-	const classes = useDataGridStyles();
+	const { classes } = useDataGridProps();
 	const selected = props.selected ?? props.defaultSelection;
 	const isActive = !compareArrayContent(selected, props.defaultSelection);
 	const [, setActiveFilter] = useCustomFilterActiveContext();
@@ -102,9 +101,9 @@ const GridMultiSelectFilter = (props: GridMultiSelectFilterProps) => {
 
 	const selectorClasses = useMemo(
 		() => ({
-			autocomplete: isActive ? classes.customFilterBorder : undefined,
+			autocomplete: isActive ? "Mui-active" : undefined,
 		}),
-		[isActive, classes.customFilterBorder],
+		[isActive],
 	);
 
 	if (dialog) {
@@ -140,7 +139,7 @@ const GridMultiSelectFilter = (props: GridMultiSelectFilterProps) => {
 	} else {
 		return (
 			<Grid item xs={4} {...barBreakpoints}>
-				<BaseSelector<MultiSelectorData, true>
+				<DataGridCustomFilterMulti<MultiSelectorData, true>
 					multiple
 					label={label}
 					disableSearch
@@ -149,6 +148,7 @@ const GridMultiSelectFilter = (props: GridMultiSelectFilterProps) => {
 					selected={selectedData}
 					onSelect={handleSelectorChange}
 					classes={selectorClasses}
+					className={classes?.customFilterMulti}
 				/>
 			</Grid>
 		);

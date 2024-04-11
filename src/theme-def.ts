@@ -1,7 +1,3 @@
-import {
-	DataGridTheme,
-	DataGridThemeExpert,
-} from "./standalone/DataGrid/DataGrid";
 import { PortalMenuClassKey, PortalMenuProps } from "./standalone/Portal/Menu";
 import {
 	FileUploadClassKey,
@@ -189,11 +185,12 @@ import {
 	ScrollableScheduleProps,
 } from "./standalone/Schedule/Scrollable";
 import { WeekViewClassKey, WeekViewProps } from "./standalone/Schedule/Weekly";
+import {
+	DataGridClassKey,
+	DataGridProps,
+} from "./standalone/DataGrid/DataGrid";
 
-export interface ComponentsCareTheme {
-	dataGrid?: DataGridTheme;
-	dataGridExpert?: DataGridThemeExpert;
-}
+export interface ComponentsCareTheme {}
 
 declare module "@mui/material/styles/createTheme" {
 	interface Theme {
@@ -266,6 +263,7 @@ declare module "@mui/material/styles" {
 		CcWeekViewDay: WeekViewDayClassKey;
 		CcScrollableSchedule: ScrollableScheduleClassKey;
 		CcWeekView: WeekViewClassKey;
+		CcDataGrid: DataGridClassKey;
 	}
 
 	interface ComponentsPropsList {
@@ -327,6 +325,7 @@ declare module "@mui/material/styles" {
 		CcWeekViewDay: Partial<WeekViewDayProps>;
 		CcScrollableSchedule: Partial<ScrollableScheduleProps>;
 		CcWeekView: Partial<WeekViewProps>;
+		CcDataGrid: Partial<DataGridProps>;
 	}
 
 	interface Components {
@@ -603,6 +602,11 @@ declare module "@mui/material/styles" {
 			defaultProps?: ComponentsPropsList["CcWeekView"];
 			styleOverrides?: ComponentsOverrides<Theme>["CcWeekView"];
 			variants?: ComponentsVariants["CcWeekView"];
+		};
+		CcDataGrid?: {
+			defaultProps?: ComponentsPropsList["CcDataGrid"];
+			styleOverrides?: ComponentsOverrides<Theme>["CcDataGrid"];
+			variants?: ComponentsVariants["CcDataGrid"];
 		};
 	}
 }

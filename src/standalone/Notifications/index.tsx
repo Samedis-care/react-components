@@ -16,7 +16,6 @@ import {
 	useThemeProps,
 } from "@mui/material";
 import InfiniteScroll, { InfiniteScrollProps } from "../InfiniteScroll";
-import makeStyles from "@mui/styles/makeStyles";
 import i18n from "../../i18n";
 import timestampToAge from "../../utils/timestampToAge";
 import useCCTranslations from "../../utils/useCCTranslations";
