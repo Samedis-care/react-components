@@ -1,10 +1,9 @@
 #!/bin/sh
-. "$(dirname "$0")/_/husky.sh"
 
 if [ "$(git branch --show-current)" = "master" ]; then
-  npx --no-install tsc -i --tsBuildInfoFile .tscbuildcache &
+  node_modules/.bin/tsc --noEmit -i --tsBuildInfoFile .tscbuildcache &
   TSC_PID=$!
-  #TZ=UTC npx --no-install jest &
+  #TZ=UTC node_modules/.bin/jest &
   #JEST_PID=$!
   wait "$TSC_PID"
   #wait "$JEST_PID"
