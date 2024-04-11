@@ -28,7 +28,6 @@ class RendererStringLocalizedSingle extends TypeLocalizedString {
                         field +
                         " with ModelDataTypeStringLocalizedSingleRendererContext.Provider and specify a language");
                 return (React.createElement(React.Fragment, null,
-                    " ",
                     React.createElement(TextFieldWithHelp, { variant: this.multiline ? "outlined" : undefined, fullWidth: true, ...this.props, name: field, value: value[language] ?? "", label: label, disabled: visibility.readOnly, required: visibility.required, onChange: (evt) => {
                             handleChange(evt.target.name, {
                                 ...value,
@@ -38,9 +37,15 @@ class RendererStringLocalizedSingle extends TypeLocalizedString {
                     React.createElement(FormHelperTextCC, { error: !!errorMsg, warning: !!warningMsg }, errorMsg || warningMsg)));
             }));
         }
-        return (React.createElement(Typography, { noWrap: visibility.grid },
-            !visibility.grid && `${label}: `,
-            value));
+        return (React.createElement(ModelDataTypeStringLocalizedSingleRendererContext.Consumer, null, (language) => {
+            if (!language)
+                throw new Error("Please wrap field" +
+                    field +
+                    " with ModelDataTypeStringLocalizedSingleRendererContext.Provider and specify a language");
+            return (React.createElement(Typography, { noWrap: visibility.grid },
+                !visibility.grid && `${label}: `,
+                value[language] ?? ""));
+        }));
     }
 }
 export default RendererStringLocalizedSingle;

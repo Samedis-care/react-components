@@ -1,12 +1,11 @@
 import React, { useCallback, useEffect, useMemo } from "react";
 import { Checkbox, Divider, FormControlLabel, Grid, Typography, } from "@mui/material";
 import { useCustomFilterActiveContext } from "./Header/FilterBar";
-import { useDataGridStyles } from "./DataGrid";
+import { DataGridCustomFilterMulti, useDataGridProps } from "./DataGrid";
 import compareArrayContent from "../../utils/compareArrayContent";
-import BaseSelector from "../Selector/BaseSelector";
 const GridMultiSelectFilter = (props) => {
     const { label, options, onSelect, dialog, dialogBreakpoints, barBreakpoints, } = props;
-    const classes = useDataGridStyles();
+    const { classes } = useDataGridProps();
     const selected = props.selected ?? props.defaultSelection;
     const isActive = !compareArrayContent(selected, props.defaultSelection);
     const [, setActiveFilter] = useCustomFilterActiveContext();
@@ -31,8 +30,8 @@ const GridMultiSelectFilter = (props) => {
         onSelect(data.map((entry) => entry.value));
     }, [onSelect]);
     const selectorClasses = useMemo(() => ({
-        autocomplete: isActive ? classes.customFilterBorder : undefined,
-    }), [isActive, classes.customFilterBorder]);
+        autocomplete: isActive ? "Mui-active" : undefined,
+    }), [isActive]);
     if (dialog) {
         return (React.createElement(Grid, { item: true, xs: 12, md: 6, lg: 3, ...dialogBreakpoints, container: true },
             label && (React.createElement(Grid, { item: true, xs: 12 },
@@ -41,7 +40,7 @@ const GridMultiSelectFilter = (props) => {
     }
     else {
         return (React.createElement(Grid, { item: true, xs: 4, ...barBreakpoints },
-            React.createElement(BaseSelector, { multiple: true, label: label, disableSearch: true, disableClearable: true, onLoad: getOptions, selected: selectedData, onSelect: handleSelectorChange, classes: selectorClasses })));
+            React.createElement(DataGridCustomFilterMulti, { multiple: true, label: label, disableSearch: true, disableClearable: true, onLoad: getOptions, selected: selectedData, onSelect: handleSelectorChange, classes: selectorClasses, className: classes?.customFilterMulti })));
     }
 };
 export default React.memo(GridMultiSelectFilter);

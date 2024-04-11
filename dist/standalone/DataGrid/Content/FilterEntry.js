@@ -1,8 +1,8 @@
 import React, { useCallback, useState } from "react";
-import { Checkbox, Divider, FormControlLabel, Grid, IconButton, List, ListItem, ListItemText, MenuItem, Select, TextField, Tooltip, } from "@mui/material";
+import { Checkbox, FormControlLabel, Grid, List, ListItemText, MenuItem, Select, TextField, Tooltip, } from "@mui/material";
 import { Delete as ClearIcon } from "@mui/icons-material";
 import FilterCombinator from "./FilterCombinator";
-import { useDataGridProps, useDataGridStyles, } from "../DataGrid";
+import { DataGridFilterClearButton, DataGridSetFilterContainer, DataGridSetFilterListDivider, DataGridSetFilterListItem, DataGridSetFilterListItemDivider, useDataGridProps, } from "../DataGrid";
 import { LocalizedDateTimePicker, LocalizedKeyboardDatePicker, } from "../../LocalizedDateTimePickers";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import { normalizeDate } from "../../../backend-integration/Model/Types/Utils/DateUtils";
@@ -13,9 +13,8 @@ const FilterEntry = (props) => {
     const { onChange, depth, close } = props;
     const isFirstFilter = depth === 1;
     const { t } = useCCTranslations();
-    const { filterLimit, isFilterSupported } = useDataGridProps();
+    const { filterLimit, isFilterSupported, classes } = useDataGridProps();
     const [enumFilterSearch, setEnumFilterSearch] = useState("");
-    const classes = useDataGridStyles();
     const maxDepth = filterLimit;
     const defaultFilterType = [
         "string",
@@ -187,7 +186,7 @@ const FilterEntry = (props) => {
                 React.createElement(Grid, { item: true },
                     React.createElement(Tooltip, { title: t("standalone.data-grid.content.reset-column-filter") ?? "" },
                         React.createElement("span", null,
-                            React.createElement(IconButton, { className: classes.filterClearBtn, onClick: resetFilter, size: "large" },
+                            React.createElement(DataGridFilterClearButton, { className: classes?.filterClearBtn, onClick: resetFilter, size: "large" },
                                 React.createElement(ClearIcon, null)))))))),
         (props.valueType === "string" ||
             props.valueType === "localized-string" ||
@@ -211,9 +210,9 @@ const FilterEntry = (props) => {
         props.valueType === "enum" && (React.createElement(React.Fragment, null,
             props.valueData.length > 10 && (React.createElement(Grid, { item: true, xs: 12 },
                 React.createElement(TextField, { value: enumFilterSearch, onChange: (evt) => setEnumFilterSearch(evt.target.value), placeholder: t("standalone.data-grid.content.set-filter.search"), fullWidth: true, autoFocus: depth === 1 }))),
-            React.createElement(Grid, { item: true, xs: 12, className: classes.setFilterContainer },
+            React.createElement(DataGridSetFilterContainer, { item: true, xs: 12, className: classes?.setFilterContainer },
                 React.createElement(List, null,
-                    props.valueData.length > 5 && (React.createElement(ListItem, { className: classes.setFilterListItem },
+                    props.valueData.length > 5 && (React.createElement(DataGridSetFilterListItem, { className: classes?.setFilterListItem },
                         React.createElement(Checkbox, { checked: filterValue.split(",").sort().join(",") ===
                                 props.valueData
                                     .filter((entry) => !entry.isDivider)
@@ -222,23 +221,28 @@ const FilterEntry = (props) => {
                                     .join(","), onChange: onFilterValueChangeEnumAll }),
                         React.createElement(ListItemText, { primaryTypographyProps: TYPOGRAPHY_PROPS }, t("standalone.data-grid.content.set-filter.select-all")))),
                     checkSupport(props.valueType, "notInSet") && (React.createElement(React.Fragment, null,
-                        React.createElement(ListItem, { className: classes.setFilterListItem },
+                        React.createElement(DataGridSetFilterListItem, { className: classes?.setFilterListItem },
                             React.createElement(Checkbox, { checked: enumFilterInverted, onChange: onFilterTypeChangeEnum }),
                             React.createElement(ListItemText, { primaryTypographyProps: TYPOGRAPHY_PROPS }, t("standalone.data-grid.content.set-filter.invert"))),
-                        React.createElement(ListItem, { className: classes.setFilterListItemDivider },
-                            React.createElement(Divider, { className: classes.setFilterListDivider })))),
+                        React.createElement(DataGridSetFilterListItemDivider, { className: classes?.setFilterListItemDivider },
+                            React.createElement(DataGridSetFilterListDivider, { className: classes?.setFilterListDivider })))),
                     props.valueData
                         .filter((entry) => entry
                         .getLabelText()
                         .toLowerCase()
                         .includes(enumFilterSearch.toLocaleLowerCase()))
-                        .map((entry) => (React.createElement(ListItem, { key: entry.value, className: entry.isDivider
-                            ? classes.setFilterListItemDivider
-                            : classes.setFilterListItem }, entry.isDivider ? (React.createElement(Divider, { className: classes.setFilterListDivider })) : (React.createElement(React.Fragment, null,
-                        React.createElement(Checkbox, { value: entry.value || ENUM_FILTER_MAGIC_EMPTY, checked: filterValue
-                                .split(",")
-                                .includes(entry.value || ENUM_FILTER_MAGIC_EMPTY), onChange: onFilterValueChangeEnum, disabled: entry.disabled }),
-                        React.createElement(ListItemText, { primaryTypographyProps: TYPOGRAPHY_PROPS }, (entry.getLabel || entry.getLabelText)())))))))))),
+                        .map((entry) => {
+                        const ListItemComp = entry.isDivider
+                            ? DataGridSetFilterListItemDivider
+                            : DataGridSetFilterListItem;
+                        return (React.createElement(ListItemComp, { key: entry.value, className: entry.isDivider
+                                ? classes?.setFilterListItemDivider
+                                : classes?.setFilterListItem }, entry.isDivider ? (React.createElement(DataGridSetFilterListDivider, { className: classes?.setFilterListDivider })) : (React.createElement(React.Fragment, null,
+                            React.createElement(Checkbox, { value: entry.value || ENUM_FILTER_MAGIC_EMPTY, checked: filterValue
+                                    .split(",")
+                                    .includes(entry.value || ENUM_FILTER_MAGIC_EMPTY), onChange: onFilterValueChangeEnum, disabled: entry.disabled }),
+                            React.createElement(ListItemText, { primaryTypographyProps: TYPOGRAPHY_PROPS }, (entry.getLabel || entry.getLabelText)())))));
+                    }))))),
         filterValue &&
             props.valueType !== "enum" &&
             props.valueType !== "boolean" &&

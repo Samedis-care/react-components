@@ -1,17 +1,17 @@
 import React from "react";
-import { Box, Button, Divider, Grid, Paper, Typography } from "@mui/material";
-import { useDataGridStyles } from "../DataGrid";
+import { Box, Button, Divider, Grid, Typography } from "@mui/material";
+import { DataGridContentOverlayClosed, DataGridContentOverlayPaper, DataGridCustomFilterContainer, useDataGridProps, } from "../DataGrid";
 import useCCTranslations from "../../../utils/useCCTranslations";
 const FilterDialog = (props) => {
-    const classes = useDataGridStyles();
+    const { classes } = useDataGridProps();
     const { t } = useCCTranslations();
     const { customFilters: Filters, customData, setCustomData } = props;
-    return (React.createElement(Paper, { elevation: 0, className: classes.contentOverlayPaper },
+    return (React.createElement(DataGridContentOverlayPaper, { elevation: 0, className: classes?.contentOverlayPaper },
         React.createElement(Typography, { variant: "h6" }, t("standalone.data-grid.custom-filters.title") || ""),
         React.createElement(Divider, null),
-        React.createElement(Grid, { justifyContent: "space-between", spacing: 2, container: true, className: classes.customFilterContainer },
+        React.createElement(DataGridCustomFilterContainer, { justifyContent: "space-between", spacing: 2, container: true, className: classes?.customFilterContainer },
             React.createElement(Filters, { customData: customData, setCustomData: setCustomData, inDialog: true })),
-        React.createElement("div", { className: classes.contentOverlayClosed },
+        React.createElement(DataGridContentOverlayClosed, { className: classes?.contentOverlayClosed },
             React.createElement(Divider, null),
             React.createElement(Grid, { container: true, justifyContent: "flex-end" },
                 React.createElement(Grid, { item: true },

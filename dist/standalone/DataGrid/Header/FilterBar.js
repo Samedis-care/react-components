@@ -1,7 +1,8 @@
 import React, { useCallback, useContext, useEffect, } from "react";
-import { Box, Grid, useMediaQuery } from "@mui/material";
-import { useDataGridProps, useDataGridState, useDataGridStyles, } from "../DataGrid";
+import { Grid, useMediaQuery } from "@mui/material";
+import { DataGridFilterBarBox, DataGridFilterBarGrid, useDataGridProps, useDataGridState, } from "../DataGrid";
 import CustomFiltersButton from "./CustomFiltersButton";
+import combineClassNames from "../../../utils/combineClassNames";
 export const CustomFilterActiveContext = React.createContext(undefined);
 export const useCustomFilterActiveContext = () => {
     const ctx = useContext(CustomFilterActiveContext);
@@ -11,8 +12,8 @@ export const useCustomFilterActiveContext = () => {
 };
 const FilterBar = () => {
     const props = useDataGridProps();
+    const { classes } = props;
     const [state, setState] = useDataGridState();
-    const classes = useDataGridStyles();
     const enableDialog = useMediaQuery(props.enableFilterDialogMediaQuery ?? "(false)");
     const setCustomData = useCallback((newState) => {
         if (typeof newState === "function") {
@@ -45,8 +46,11 @@ const FilterBar = () => {
         }
     }, [enableDialog, setState]);
     const FilterBarView = props.filterBar;
-    return (React.createElement(Box, { ml: 4, className: classes.filterBarBox },
-        React.createElement(Grid, { container: true, alignItems: "center", justifyContent: "flex-end", spacing: 2, className: classes.filterBarGrid + " components-care-data-grid-filter-bar" }, FilterBarView &&
+    return (React.createElement(DataGridFilterBarBox, { ml: 4, className: classes?.filterBarBox },
+        React.createElement(DataGridFilterBarGrid, { container: true, alignItems: "center", justifyContent: "flex-end", spacing: 2, className: combineClassNames([
+                classes?.filterBarGrid,
+                "components-care-data-grid-filter-bar",
+            ]) }, FilterBarView &&
             (enableDialog ? (React.createElement(Grid, { item: true },
                 React.createElement(CustomFiltersButton, { onClick: openDialog }))) : (React.createElement(FilterBarView, { customData: state.customData, setCustomData: setCustomData, inDialog: false }))))));
 };

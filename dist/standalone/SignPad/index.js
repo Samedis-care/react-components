@@ -1,5 +1,5 @@
 import React, { useCallback } from "react";
-import { InputAdornment, IconButton, styled, useThemeProps, } from "@mui/material";
+import { IconButton, InputAdornment, styled, useThemeProps, } from "@mui/material";
 import { SignIcon } from "../../standalone";
 import { Info as InfoIcon } from "@mui/icons-material";
 import useCCTranslations from "../../utils/useCCTranslations";

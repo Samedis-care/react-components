@@ -318,7 +318,7 @@ const BaseSelector = (inProps) => {
         groupSorter,
         noGroupLabel,
     ]);
-    const updateQuery = useCallback((_, newQuery) => {
+    const updateQuery = useCallback((_evt, newQuery) => {
         setQuery(newQuery);
     }, []);
     // search handler

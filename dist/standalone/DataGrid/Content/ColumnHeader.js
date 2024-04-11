@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import isTouchDevice from "../../../utils/isTouchDevice";
 import combineClassNames from "../../../utils/combineClassNames";
-import { useDataGridColumnState, useDataGridColumnsWidthState, useDataGridProps, useDataGridRootRef, useDataGridStyles, } from "../DataGrid";
+import { DataGridColumnHeaderContentWrapper, useDataGridColumnState, useDataGridColumnsWidthState, useDataGridProps, useDataGridRootRef, } from "../DataGrid";
 import ColumnHeaderContent from "./ColumnHeaderContent";
 export const HEADER_PADDING = 32; // px
 export const applyColumnWidthLimits = (column, targetWidth) => {
@@ -23,11 +23,10 @@ const ColumnHeader = (props) => {
     const { field, sortable, filterable } = column;
     const gridRoot = useDataGridRootRef();
     const [columnState, setColumnState] = useDataGridColumnState();
-    const { sortLimit } = useDataGridProps();
+    const { sortLimit, classes } = useDataGridProps();
     const { sort, sortOrder, filter } = columnState[field] ?? FallbackColumnState;
     const [, setColumnWidthState] = useDataGridColumnsWidthState();
     const [dragging, setDragging] = useState(false);
-    const classes = useDataGridStyles();
     const onFilterChange = useCallback((field, newFilter) => {
         setColumnState((prevState) => ({
             ...prevState,
@@ -158,9 +157,9 @@ const ColumnHeader = (props) => {
             document.removeEventListener("mouseup", stopDrag);
         };
     }, [onDrag, stopDrag]);
-    return (React.createElement("div", { onClick: onColumnClick, onContextMenu: isTouchDevice() ? onColumnLongClick : undefined, className: combineClassNames([
-            classes.columnHeaderContentWrapper,
-            filterable && classes.columnHeaderFilterable,
+    return (React.createElement(DataGridColumnHeaderContentWrapper, { onClick: onColumnClick, onContextMenu: isTouchDevice() ? onColumnLongClick : undefined, className: combineClassNames([
+            classes?.columnHeaderContentWrapper,
+            filterable && "CcDataGrid-columnHeaderFilterable",
             "column-header-" + column.field,
         ]) },
         React.createElement(ColumnHeaderContent, { field: props.column.field, headerName: props.column.headerLabel ?? props.column.headerName, enableResize: true, startDrag: startDrag, autoResize: autoResize, sort: sort, sortOrder: sortOrder, filterable: !!filterable, filter: filter, onFilterChange: internalOnFilterChange, columnType: props.column.type, filterData: props.column.filterData })));

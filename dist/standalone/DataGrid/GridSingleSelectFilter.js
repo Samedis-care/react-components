@@ -1,11 +1,10 @@
 import React, { useCallback, useEffect, useMemo } from "react";
-import { SingleSelect } from "../../standalone/Selector";
 import { Divider, FormControl, FormControlLabel, Grid, Radio, RadioGroup, Typography, } from "@mui/material";
 import { useCustomFilterActiveContext } from "./Header/FilterBar";
-import { useDataGridStyles } from "./DataGrid";
+import { DataGridCustomFilterSingle, useDataGridProps } from "./DataGrid";
 const GridSingleSelectFilter = (props) => {
     const { label, options, onSelect, dialog, autocompleteId, dialogBreakpoints, barBreakpoints, } = props;
-    const classes = useDataGridStyles();
+    const { classes } = useDataGridProps();
     const selected = props.selected ?? props.defaultSelection;
     const isActive = selected !== props.defaultSelection;
     const [, setActiveFilter] = useCustomFilterActiveContext();
@@ -17,7 +16,7 @@ const GridSingleSelectFilter = (props) => {
             setActiveFilter((prev) => prev - 1);
         };
     }, [setActiveFilter, isActive]);
-    const handleDialogRadioToggle = useCallback((_, value) => {
+    const handleDialogRadioToggle = useCallback((_evt, value) => {
         onSelect(value);
     }, [onSelect]);
     const handleSelectorChange = useCallback((value) => {
@@ -25,8 +24,8 @@ const GridSingleSelectFilter = (props) => {
     }, [onSelect]);
     const getOptions = useCallback(() => options, [options]);
     const selectorStyles = useMemo(() => ({
-        autocomplete: isActive ? classes.customFilterBorder : undefined,
-    }), [isActive, classes.customFilterBorder]);
+        autocomplete: isActive ? "Mui-active" : undefined,
+    }), [isActive]);
     if (dialog) {
         return (React.createElement(Grid, { item: true, xs: 12, md: 6, lg: 3, ...dialogBreakpoints },
             React.createElement(FormControl, { component: "fieldset" },
@@ -39,7 +38,7 @@ const GridSingleSelectFilter = (props) => {
     else {
         return (React.createElement(Grid, { item: true, xs: 4, ...barBreakpoints },
             React.createElement(FormControl, { component: "fieldset", fullWidth: true },
-                React.createElement(SingleSelect, { label: label, disableSearch: true, disableClearable: true, onLoad: getOptions, selected: options.find((option) => option.value === selected) ?? options[0], onSelect: handleSelectorChange, autocompleteId: autocompleteId, classes: selectorStyles }))));
+                React.createElement(DataGridCustomFilterSingle, { label: label, disableSearch: true, disableClearable: true, onLoad: getOptions, selected: options.find((option) => option.value === selected) ?? options[0], onSelect: handleSelectorChange, autocompleteId: autocompleteId, classes: selectorStyles, className: classes?.customFilterSingle }))));
     }
 };
 export default React.memo(GridSingleSelectFilter);

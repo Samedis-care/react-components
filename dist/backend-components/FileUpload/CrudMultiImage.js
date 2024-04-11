@@ -8,7 +8,7 @@ const CrudMultiImage = (props) => {
     const [error, setError] = useState(null);
     const [loadError, setLoadError] = useState(null);
     const [images, setImages] = useState([]);
-    const handleChange = useCallback(async (_, newImages) => {
+    const handleChange = useCallback(async (_name, newImages) => {
         if (additionalImages)
             newImages = newImages.filter((img) => !additionalImages.includes(img));
         newImages = newImages.map((img, n) => ({

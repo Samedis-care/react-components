@@ -1,4 +1,3 @@
-import { DataGridTheme, DataGridThemeExpert } from "./standalone/DataGrid/DataGrid";
 import { PortalMenuClassKey, PortalMenuProps } from "./standalone/Portal/Menu";
 import { FileUploadClassKey, FileUploadProps } from "./standalone/FileUpload/Generic";
 import { ImageSelectorClassKey, ImageSelectorProps } from "./standalone/FileUpload/Image/ImageSelector";
@@ -47,9 +46,8 @@ import { DayContentsClassKey, DayContentsProps } from "./standalone/Schedule/Com
 import { WeekViewDayClassKey, WeekViewDayProps } from "./standalone/Schedule/Weekly/WeekViewDay";
 import { ScrollableScheduleClassKey, ScrollableScheduleProps } from "./standalone/Schedule/Scrollable";
 import { WeekViewClassKey, WeekViewProps } from "./standalone/Schedule/Weekly";
+import { DataGridClassKey, DataGridProps } from "./standalone/DataGrid/DataGrid";
 export interface ComponentsCareTheme {
-    dataGrid?: DataGridTheme;
-    dataGridExpert?: DataGridThemeExpert;
 }
 declare module "@mui/material/styles/createTheme" {
     interface Theme {
@@ -117,6 +115,7 @@ declare module "@mui/material/styles" {
         CcWeekViewDay: WeekViewDayClassKey;
         CcScrollableSchedule: ScrollableScheduleClassKey;
         CcWeekView: WeekViewClassKey;
+        CcDataGrid: DataGridClassKey;
     }
     interface ComponentsPropsList {
         CcSignalPortlet: Partial<SignalPortletProps>;
@@ -173,6 +172,7 @@ declare module "@mui/material/styles" {
         CcWeekViewDay: Partial<WeekViewDayProps>;
         CcScrollableSchedule: Partial<ScrollableScheduleProps>;
         CcWeekView: Partial<WeekViewProps>;
+        CcDataGrid: Partial<DataGridProps>;
     }
     interface Components {
         CcSignalPortlet?: {
@@ -448,6 +448,11 @@ declare module "@mui/material/styles" {
             defaultProps?: ComponentsPropsList["CcWeekView"];
             styleOverrides?: ComponentsOverrides<Theme>["CcWeekView"];
             variants?: ComponentsVariants["CcWeekView"];
+        };
+        CcDataGrid?: {
+            defaultProps?: ComponentsPropsList["CcDataGrid"];
+            styleOverrides?: ComponentsOverrides<Theme>["CcDataGrid"];
+            variants?: ComponentsVariants["CcDataGrid"];
         };
     }
 }

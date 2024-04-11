@@ -1,12 +1,12 @@
 import React, { useMemo } from "react";
-import { Box, Button, Checkbox, Divider, Grid, Paper, Table, TableBody, TableCell, TableHead, TableRow, } from "@mui/material";
-import { useDataGridStyles, } from "../DataGrid";
+import { Box, Button, Checkbox, Divider, Grid, Table, TableBody, TableCell, TableHead, TableRow, } from "@mui/material";
+import { DataGridContentOverlayClosed, DataGridContentOverlayPaper, useDataGridProps, } from "../DataGrid";
 import useCCTranslations from "../../../utils/useCCTranslations";
 const SettingsDialog = (props) => {
-    const classes = useDataGridStyles();
+    const { classes } = useDataGridProps();
     const { t } = useCCTranslations();
     const columns = useMemo(() => [...props.columns].sort((a, b) => a.headerName.localeCompare(b.headerName)), [props.columns]);
-    return (React.createElement(Paper, { elevation: 0, className: classes.contentOverlayPaper },
+    return (React.createElement(DataGridContentOverlayPaper, { elevation: 0, className: classes?.contentOverlayPaper },
         React.createElement(Table, { stickyHeader: true },
             React.createElement(TableHead, null,
                 React.createElement(TableRow, null,
@@ -20,7 +20,7 @@ const SettingsDialog = (props) => {
                 React.createElement(TableCell, null,
                     React.createElement(Checkbox, { checked: props.lockedColumns.includes(column.field), disabled: props.hiddenColumns.includes(column.field) ||
                             column.forcePin, onChange: props.toggleColumnLock, value: column.field }))))))),
-        React.createElement("div", { className: classes.contentOverlayClosed },
+        React.createElement(DataGridContentOverlayClosed, { className: classes?.contentOverlayClosed },
             React.createElement(Divider, null),
             React.createElement(Grid, { container: true, justifyContent: "flex-end" },
                 React.createElement(Grid, { item: true },

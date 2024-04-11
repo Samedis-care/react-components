@@ -3,13 +3,13 @@ import { Grid, Tooltip, useMediaQuery, useTheme, } from "@mui/material";
 import { SmallIconButton } from "../../Small";
 import VerticalDivider from "../../VerticalDivider";
 import ComponentWithLabel from "../../UIKit/ComponentWithLabel";
-import { Edit as EditIcon, Delete as DeleteIcon, Menu as MenuIcon, } from "@mui/icons-material";
+import { Delete as DeleteIcon, Edit as EditIcon, Menu as MenuIcon, } from "@mui/icons-material";
 import SelectAll from "./SelectAll";
-import { useDataGridStyles } from "../DataGrid";
+import { DataGridSelectAllWrapper, useDataGridProps, } from "../DataGrid";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import DataActionBarMenu from "./DataActionBarMenu";
 const DataActionBarView = (props) => {
-    const classes = useDataGridStyles();
+    const { classes } = useDataGridProps();
     const { t } = useCCTranslations();
     const theme = useTheme();
     const isXs = useMediaQuery(theme.breakpoints.only("xs"));
@@ -24,7 +24,7 @@ const DataActionBarView = (props) => {
             React.createElement(DeleteIcon, null)), labelText: t("standalone.data-grid.footer.delete"), labelPlacement: "bottom", disabled: props.numSelected === 0 || !props.handleDelete }));
     return (React.createElement(Grid, { container: true, wrap: "nowrap" },
         React.createElement(Grid, { item: true, key: "select-all" },
-            React.createElement(ComponentWithLabel, { control: React.createElement(SelectAll, null), labelText: t("standalone.data-grid.footer.select-all"), labelPlacement: "bottom", className: classes.selectAllWrapper, style: props.disableSelection
+            React.createElement(DataGridSelectAllWrapper, { control: React.createElement(SelectAll, null), labelText: t("standalone.data-grid.footer.select-all"), labelPlacement: "bottom", className: classes?.selectAllWrapper, style: props.disableSelection
                     ? { opacity: 0, pointerEvents: "none" }
                     : undefined })),
         props.handleEdit && (React.createElement(React.Fragment, null,

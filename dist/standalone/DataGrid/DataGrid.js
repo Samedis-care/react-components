@@ -1,6 +1,6 @@
 import React, { useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, } from "react";
-import { Grid, useTheme } from "@mui/material";
-import { makeStyles } from "@mui/styles";
+import { Box, Collapse, Divider, Grid, IconButton, ListItem, Paper, styled, Typography, useTheme, useThemeProps, } from "@mui/material";
+import { Apps as AppsIcon, Search as SearchIcon } from "@mui/icons-material";
 import Header from "./Header";
 import Footer from "./Footer";
 import Settings from "./Settings";
@@ -8,8 +8,6 @@ import Content from "./Content";
 import debounce from "../../utils/debounce";
 import isObjectEmpty from "../../utils/isObjectEmpty";
 import measureText from "../../utils/measureText";
-import makeThemeStyles from "../../utils/makeThemeStyles";
-import useMultipleStyles from "../../utils/useMultipleStyles";
 import shallowCompareArray from "../../utils/shallowCompareArray";
 import { dataGridPrepareFiltersAndSorts } from "./CallbackUtil";
 import { HEADER_PADDING } from "./Content/ColumnHeader";
@@ -17,6 +15,12 @@ import CustomFilterDialog from "./CustomFilterDialog";
 import StatePersistence, { DataGridPersistentStateContext, } from "./StatePersistence";
 import { suspend } from "suspend-react";
 import { CustomFilterActiveContext } from "./Header/FilterBar";
+import combineClassNames from "../../utils/combineClassNames";
+import Checkbox from "../UIKit/Checkbox";
+import ComponentWithLabel from "../UIKit/ComponentWithLabel";
+import FilterIcon from "../Icons/FilterIcon";
+import BaseSelector from "../Selector/BaseSelector";
+import SingleSelect from "../Selector/SingleSelect";
 const DataGridStateContext = React.createContext(undefined);
 export const useDataGridState = () => {
     const ctx = useContext(DataGridStateContext);
@@ -90,90 +94,173 @@ export const getDataGridDefaultColumnsState = (columns, defaultSort, defaultFilt
     });
     return data;
 };
-const useStyles = makeStyles((theme) => ({
-    wrapper: {
-        width: theme.componentsCare?.dataGrid?.width || "100%",
-        height: theme.componentsCare?.dataGrid?.height || "100%",
-        flexGrow: 1,
-        borderRadius: theme.componentsCare?.dataGrid?.borderRadius ||
-            theme.shape.borderRadius,
-        border: theme.componentsCare?.dataGrid?.border ||
-            `1px solid ${theme.palette.divider}`,
-        backgroundColor: theme.componentsCare?.dataGrid?.backgroundColor ||
-            theme.palette.background.paper,
-        background: theme.componentsCare?.dataGrid?.background,
-        ...theme.componentsCare?.dataGrid?.style,
+const Wrapper = styled(Grid, { name: "CcDataGrid", slot: "root" })(({ theme }) => ({
+    width: "100%",
+    height: "100%",
+    flexGrow: 1,
+    borderRadius: theme.shape.borderRadius,
+    border: `1px solid ${theme.palette.divider}`,
+    backgroundColor: theme.palette.background.paper,
+}));
+const HeaderWrapper = styled(Grid, { name: "CcDataGrid", slot: "header" })(({ theme }) => ({
+    border: `1px solid ${theme.palette.divider}`,
+    borderWidth: "0 0 1px 0",
+}));
+const ContentWrapper = styled(Grid, { name: "CcDataGrid", slot: "content" })({
+    position: "relative",
+});
+const FooterWrapper = styled(Grid, { name: "CcDataGrid", slot: "footer" })(({ theme }) => ({
+    border: `1px solid ${theme.palette.divider}`,
+    borderWidth: "1px 0 0 0",
+}));
+export const DataGridContentOverlayCollapse = styled(Collapse, {
+    name: "CcDataGrid",
+    slot: "contentOverlayCollapse",
+})({
+    position: "absolute",
+    zIndex: 1000,
+    width: "100%",
+    maxHeight: "100%",
+    overflow: "auto",
+});
+export const DataGridContentOverlayPaper = styled(Paper, {
+    name: "CcDataGrid",
+    slot: "contentOverlayPaper",
+})(({ theme }) => ({
+    padding: theme.spacing(1),
+}));
+export const DataGridContentOverlayClosed = styled("div", {
+    name: "CcDataGrid",
+    slot: "contentOverlayClosed",
+})(({ theme }) => ({
+    position: "sticky",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: theme.palette.background.paper,
+}));
+export const DataGridCustomFilterContainer = styled(Grid, {
+    name: "CcDataGrid",
+    slot: "customFilterContainer",
+})(({ theme }) => ({
+    paddingTop: theme.spacing(2),
+    paddingBottom: theme.spacing(2),
+}));
+export const DataGridSelectCheckbox = styled(Checkbox, {
+    name: "CcDataGrid",
+    slot: "selectCheckbox",
+})({
+    padding: 0,
+});
+export const DataGridSelectAllCheckbox = styled(Checkbox, {
+    name: "CcDataGrid",
+    slot: "selectAllCheckbox",
+})({
+    padding: "4px 0",
+});
+export const DataGridSelectAllWrapper = styled(ComponentWithLabel, {
+    name: "CcDataGrid",
+    slot: "selectAllWrapper",
+})({});
+export const DataGridPaginationText = styled(Typography, {
+    name: "CcDataGrid",
+    slot: "paginationText",
+})({
+    padding: "12px 0",
+});
+export const DataGridSetFilterListDivider = styled(Divider, {
+    name: "CcDataGrid",
+    slot: "setFilterListDivider",
+})({
+    width: "100%",
+});
+export const DataGridSetFilterListItemDivider = styled(ListItem, {
+    name: "CcDataGrid",
+    slot: "setFilterListItemDivider",
+})({
+    padding: 0,
+});
+export const DataGridSetFilterListItem = styled(ListItem, {
+    name: "CcDataGrid",
+    slot: "setFilterListItem",
+})({
+    paddingLeft: 0,
+    paddingRight: 0,
+});
+export const DataGridSetFilterContainer = styled(Grid, {
+    name: "CcDataGrid",
+    slot: "setFilterContainer",
+})({
+    maxHeight: "40vh",
+    overflow: "auto",
+});
+export const DataGridFilterBarGrid = styled(Grid, {
+    name: "CcDataGrid",
+    slot: "filterBarGrid",
+})(({ theme }) => ({
+    height: `calc(100% + ${theme.spacing(2)})`,
+    width: "100%",
+}));
+export const DataGridFilterBarBox = styled(Box, {
+    name: "CcDataGrid",
+    slot: "filterBarBox",
+})({
+    height: "100%",
+});
+export const DataGridFilterClearButton = styled(IconButton, {
+    name: "CcDataGrid",
+    slot: "filterClearBtn",
+})({
+    padding: 0,
+});
+export const DataGridColumnHeaderLabel = styled(Grid, {
+    name: "CcDataGrid",
+    slot: "columnHeaderLabel",
+})({
+    textOverflow: "ellipsis",
+    overflow: "hidden",
+    userSelect: "none",
+    "&:hover": {
+        pointerEvents: "auto",
     },
-    header: {
-        border: theme.componentsCare?.dataGrid?.header?.border ||
-            `1px solid ${theme.palette.divider}`,
-        borderWidth: theme.componentsCare?.dataGrid?.header?.borderWidth || "0 0 1px 0",
-        padding: theme.componentsCare?.dataGrid?.header?.padding,
-        background: theme.componentsCare?.dataGrid?.header?.background,
-        backgroundColor: theme.componentsCare?.dataGrid?.header?.backgroundColor,
-        ...theme.componentsCare?.dataGrid?.header?.style,
+});
+export const DataGridColumnHeaderResizer = styled(Grid, {
+    name: "CcDataGrid",
+    slot: "columnHeaderResizer",
+})(({ theme }) => ({
+    cursor: "col-resize",
+    width: 8,
+    height: "100%",
+    right: 0,
+    top: 0,
+    position: "absolute",
+    border: `1px solid ${theme.palette.divider}`,
+    borderWidth: "0 0 0 0",
+}));
+export const DataGridColumnHeaderSortIcon = styled(Grid, {
+    name: "CcDataGrid",
+    slot: "columnHeaderSortIcon",
+})({
+    height: 24,
+});
+export const DataGridColumnHeaderContentWrapper = styled("div", {
+    name: "CcDataGrid",
+    slot: "columnHeaderContentWrapper",
+})(({ theme }) => ({
+    width: "100%",
+    minWidth: "100%",
+    zIndex: 1000,
+    border: `1px solid ${theme.palette.divider}`,
+    borderWidth: "0 0 0 0",
+    "&.CcDataGrid-columnHeaderFilterable": {
+        color: theme.palette.primary.main,
     },
-    content: {
-        position: "relative",
-        margin: theme.componentsCare?.dataGrid?.content?.margin,
-        padding: theme.componentsCare?.dataGrid?.content?.padding,
-        border: theme.componentsCare?.dataGrid?.content?.border,
-        borderWidth: theme.componentsCare?.dataGrid?.content?.borderWidth,
-        background: theme.componentsCare?.dataGrid?.content?.background,
-        backgroundColor: theme.componentsCare?.dataGrid?.content?.backgroundColor,
-        ...theme.componentsCare?.dataGrid?.content?.style,
-    },
-    footer: {
-        border: theme.componentsCare?.dataGrid?.footer?.border ||
-            `1px solid ${theme.palette.divider}`,
-        borderWidth: theme.componentsCare?.dataGrid?.footer?.borderWidth || "1px 0 0 0",
-        padding: theme.componentsCare?.dataGrid?.footer?.padding,
-        background: theme.componentsCare?.dataGrid?.footer?.background,
-        backgroundColor: theme.componentsCare?.dataGrid?.footer?.backgroundColor,
-        ...theme.componentsCare?.dataGrid?.footer?.style,
-    },
-    rowOdd: {
-        background: theme.componentsCare?.dataGrid?.content?.row?.background,
-        backgroundColor: theme.componentsCare?.dataGrid?.content?.row?.backgroundColor,
-        padding: theme.componentsCare?.dataGrid?.content?.row?.padding,
-        ...theme.componentsCare?.dataGrid?.content?.row?.odd,
-    },
-    rowEven: {
-        background: theme.componentsCare?.dataGrid?.content?.row?.background,
-        backgroundColor: theme.componentsCare?.dataGrid?.content?.row?.backgroundColor,
-        padding: theme.componentsCare?.dataGrid?.content?.row?.padding,
-        ...theme.componentsCare?.dataGrid?.content?.row?.even,
-    },
-    cell: {
-        border: theme.componentsCare?.dataGrid?.content?.row?.cell?.data?.border ||
-            theme.componentsCare?.dataGrid?.content?.row?.cell?.border ||
-            `1px solid ${theme.componentsCare?.dataGrid?.content?.row?.cell?.data
-                ?.borderColor ?? theme.palette.divider}`,
-        borderWidth: theme.componentsCare?.dataGrid?.content?.row?.cell?.data?.borderWidth ||
-            theme.componentsCare?.dataGrid?.content?.row?.cell?.borderWidth ||
-            "0 1px 1px 0",
-        padding: theme.componentsCare?.dataGrid?.content?.row?.cell?.data?.padding ||
-            theme.componentsCare?.dataGrid?.content?.row?.cell?.padding ||
-            `0 ${HEADER_PADDING / 2}px`,
-        ...theme.componentsCare?.dataGrid?.content?.row?.cell?.data?.style,
-    },
-    headerCell: {
-        border: theme.componentsCare?.dataGrid?.content?.row?.cell?.border ||
-            theme.componentsCare?.dataGrid?.content?.row?.cell?.header?.border,
-        borderWidth: theme.componentsCare?.dataGrid?.content?.row?.cell?.borderWidth ||
-            theme.componentsCare?.dataGrid?.content?.row?.cell?.header
-                ?.borderWidth ||
-            "0 1px 1px 0",
-        padding: theme.componentsCare?.dataGrid?.content?.row?.cell?.header?.padding ||
-            theme.componentsCare?.dataGrid?.content?.row?.cell?.padding ||
-            `0 ${HEADER_PADDING / 2}px`,
-        backgroundColor: theme.componentsCare?.dataGrid?.content?.row?.cell?.header
-            ?.backgroundColor || theme.palette.background.paper,
-        color: theme.palette.getContrastText(theme.componentsCare?.dataGrid?.content?.row?.cell?.header
-            ?.backgroundColor ?? theme.palette.background.paper),
-        ...theme.componentsCare?.dataGrid?.content?.row?.cell?.header?.style,
-    },
-    dataCell: {
+}));
+export const DataGridCell = styled("div", { name: "CcDataGrid", slot: "cell" })(({ theme }) => ({
+    border: `1px solid ${theme.palette.divider}`,
+    borderWidth: "0 1px 1px 0",
+    padding: `0 ${HEADER_PADDING / 2}px`,
+    "&.CcDataGrid-dataCell": {
         overflow: "hidden",
         whiteSpace: "nowrap",
         textOverflow: "ellipsis",
@@ -183,99 +270,77 @@ const useStyles = makeStyles((theme) => ({
             textOverflow: "ellipsis",
         },
         padding: HEADER_PADDING / 2,
-        borderColor: theme.componentsCare?.dataGrid?.content?.row?.cell?.data?.borderColor ||
-            theme.componentsCare?.dataGrid?.content?.row?.borderColor,
-        color: theme.palette.getContrastText(theme.componentsCare?.dataGrid?.content?.backgroundColor ??
-            theme.palette.background.paper),
-        ...theme.componentsCare?.dataGrid?.content?.row?.cell?.data?.style,
+        color: theme.palette.getContrastText(theme.palette.background.paper),
     },
-    dataCellSelected: {
-        backgroundColor: theme.componentsCare?.dataGrid?.content?.row?.selected
-            ?.backgroundColor || theme.palette.action.hover,
-        color: theme.palette.getContrastText(theme.componentsCare?.dataGrid?.content?.row?.selected
-            ?.backgroundColor ||
-            theme.componentsCare?.dataGrid?.content?.backgroundColor ||
-            theme.palette.background.paper),
-        ...theme.componentsCare?.dataGrid?.content?.row?.selected?.style,
+    "&.CcDataGrid-headerCell": {
+        borderWidth: "0 1px 1px 0",
+        padding: `0 ${HEADER_PADDING / 2}px`,
+        backgroundColor: theme.palette.background.paper,
+        color: theme.palette.getContrastText(theme.palette.background.paper),
     },
-    columnHeaderContentWrapper: {
-        width: "100%",
-        minWidth: "100%",
-        zIndex: 1000,
-        fontSize: theme.componentsCare?.dataGrid?.content?.row?.cell?.header?.label
-            ?.fontSize,
-        fontWeight: theme.componentsCare?.dataGrid?.content?.row?.cell?.header?.label
-            ?.fontWeight,
-        fontStyle: theme.componentsCare?.dataGrid?.content?.row?.cell?.header?.label
-            ?.fontStyle,
-        border: theme.componentsCare?.dataGrid?.content?.row?.cell?.header?.label
-            ?.border ||
-            `1px solid ${theme.componentsCare?.dataGrid?.content?.row?.cell?.borderColor ??
-                theme.palette.divider}`,
-        borderWidth: theme.componentsCare?.dataGrid?.content?.row?.cell?.header?.label
-            ?.borderWidth || "0 0 0 0",
-        background: theme.componentsCare?.dataGrid?.content?.row?.cell?.header?.label
-            ?.background,
-        backgroundColor: theme.componentsCare?.dataGrid?.content?.row?.cell?.header?.label
-            ?.backgroundColor,
-        padding: theme.componentsCare?.dataGrid?.content?.row?.cell?.header?.label
-            ?.padding,
-        ...theme.componentsCare?.dataGrid?.content?.row?.cell?.header?.label
-            ?.style,
+    "&.CcDataCell-dataCellSelected": {
+        backgroundColor: theme.palette.action.hover,
+        color: theme.palette.getContrastText(theme.palette.background.paper),
     },
-    columnHeaderFilterable: {
-        color: theme.palette.primary.main,
-    },
-    columnHeaderFilterButton: {
-        padding: 0,
-        color: "inherit",
-    },
-    columnHeaderFilterButtonActive: {
+}));
+export const DataGridColumnHeaderFilterPopup = styled(Grid, {
+    name: "CcDataGrid",
+    slot: "columnHeaderFilterPopup",
+})({
+    width: 160,
+});
+export const DataGridColumnHeaderFilterPopupEnum = styled(Grid, {
+    name: "CcDataGrid",
+    slot: "columnHeaderFilterPopupEnum",
+})({
+    minWidth: 160,
+});
+export const DataGridColumnHeaderFilterIcon = styled(FilterIcon, {
+    name: "CcDataGrid",
+    slot: "columnHeaderFilterIcon",
+})({
+    width: 16,
+    height: "auto",
+});
+export const DataGridColumnHeaderFilterActiveIcon = styled(FilterIcon, {
+    name: "CcDataGrid",
+    slot: "columnHeaderFilterActiveIcon",
+})({
+    width: 16,
+    height: "auto",
+});
+export const DataGridColumnHeaderFilterButton = styled(IconButton, {
+    name: "CcDataGrid",
+    slot: "columnHeaderFilterButton",
+})(({ theme }) => ({
+    padding: 0,
+    color: "inherit",
+    "&.CcDataGrid-columnHeaderFilterButtonActive": {
         color: theme.palette.secondary.main,
     },
-    columnHeaderResizer: {
-        cursor: "col-resize",
-        width: 8,
-        height: "100%",
-        right: 0,
-        top: 0,
-        position: "absolute",
-        border: theme.componentsCare?.dataGrid?.content?.row?.cell?.header?.resizer
-            ?.border ||
-            `1px solid ${theme.componentsCare?.dataGrid?.content?.row?.cell?.borderColor ??
-                theme.palette.divider}`,
-        borderWidth: theme.componentsCare?.dataGrid?.content?.row?.cell?.header?.resizer
-            ?.borderWidth || "0 0 0 0",
-        background: theme.componentsCare?.dataGrid?.content?.row?.cell?.header?.resizer
-            ?.background,
-        backgroundColor: theme.componentsCare?.dataGrid?.content?.row?.cell?.header?.resizer
-            ?.backgroundColor,
-        ...theme.componentsCare?.dataGrid?.content?.row?.cell?.header?.resizer
-            ?.style,
-    },
-    columnHeaderFilterPopup: {
-        width: 160,
-    },
-    columnHeaderFilterPopupEnum: {
-        minWidth: 160,
-    },
-    columnHeaderFilterIcon: {
-        width: 16,
-        height: "auto",
-    },
-    columnHeaderSortIcon: {
-        height: 24,
-    },
-    quickFilterActiveIcon: {
+}));
+export const DataGridQuickFilterIcon = styled(SearchIcon, {
+    name: "CcDataGrid",
+    slot: "quickFilterIcon",
+})(({ theme }) => ({
+    "&.CcDataGrid-quickFilterActiveIcon": {
         color: theme.palette.secondary.main,
     },
-    customFilterIcon: {
-        color: theme.palette.primary.main,
-    },
-    customFilterActiveIcon: {
+}));
+export const DataGridCustomFilterIcon = styled(AppsIcon, {
+    name: "CcDataGrid",
+    slot: "customFilterIcon",
+})(({ theme }) => ({
+    color: theme.palette.primary.main,
+    "&.CcDataGrid-customFilterActiveIcon": {
         color: theme.palette.secondary.main,
     },
-    customFilterBorder: {
+}));
+export const DataGridCustomFilterMulti = styled(BaseSelector, {
+    name: "CcDataGrid",
+    slot: "customFilterMulti",
+})(({ theme }) => ({
+    "& .MuiAutocomplete-root.Mui-active": {
         borderColor: theme.palette.secondary.main,
         "& > fieldset": {
             borderColor: theme.palette.secondary.main,
@@ -287,80 +352,24 @@ const useStyles = makeStyles((theme) => ({
             },
         },
     },
-    columnHeaderLabel: {
-        textOverflow: "ellipsis",
-        overflow: "hidden",
-        "&:hover": {
-            pointerEvents: "auto",
+}));
+export const DataGridCustomFilterSingle = styled(SingleSelect, {
+    name: "CcDataGrid",
+    slot: "customFilterSingle",
+})(({ theme }) => ({
+    "& .MuiAutocomplete-root.Mui-active": {
+        borderColor: theme.palette.secondary.main,
+        "& > fieldset": {
+            borderColor: theme.palette.secondary.main,
+        },
+        "& .MuiAutocomplete-inputRoot": {
+            borderColor: theme.palette.secondary.main,
+            "& > fieldset": {
+                borderColor: theme.palette.secondary.main,
+            },
         },
     },
-    disableClick: {
-        userSelect: "none",
-    },
-    filterClearBtn: {
-        padding: 0,
-    },
-    filterBarBox: {
-        height: "100%",
-    },
-    filterBarGrid: {
-        height: `calc(100% + ${theme.spacing(2)})`,
-        width: "100%",
-    },
-    setFilterContainer: {
-        maxHeight: "40vh",
-        overflow: "auto",
-    },
-    setFilterListItem: {
-        paddingLeft: 0,
-        paddingRight: 0,
-    },
-    setFilterListItemDivider: {
-        padding: 0,
-    },
-    setFilterListDivider: {
-        width: "100%",
-    },
-    contentOverlayCollapse: {
-        position: "absolute",
-        zIndex: 1000,
-        width: "100%",
-        maxHeight: "100%",
-        overflow: "auto",
-    },
-    paginationText: {
-        padding: "12px 0",
-    },
-    selectAllWrapper: {},
-    selectAllCheckbox: {
-        padding: "4px 0",
-    },
-    selectCheckbox: {
-        padding: 0,
-    },
-    contentOverlayPaper: {
-        padding: theme.spacing(1),
-    },
-    contentOverlayClosed: {
-        position: "sticky",
-        bottom: 0,
-        left: 0,
-        right: 0,
-        backgroundColor: theme.componentsCare?.dataGrid?.backgroundColor ||
-            theme.palette.background.paper,
-    },
-    customFilterContainer: {
-        paddingTop: theme.spacing(2),
-        paddingBottom: theme.spacing(2),
-    },
-}), { name: "CcDataGrid" });
-const useThemeStyles = makeThemeStyles((theme) => theme.componentsCare?.dataGridExpert, "CcDataGrid");
-export const useDataGridStyles = () => {
-    return useDataGridStylesInternal(useDataGridProps());
-};
-const useDataGridStylesInternal = (props) => {
-    return useMultipleStyles(props, useThemeStyles, useStyles);
-};
+}));
 export const getActiveDataGridColumns = (columns, hiddenColumns, lockedColumns) => {
     return columns
         .filter((column) => !hiddenColumns.includes(column.field))
@@ -397,14 +406,14 @@ export const getDefaultColumnWidths = (columns, theme) => {
     });
     return widthData;
 };
-const DataGrid = (props) => {
-    const { columns, loadData, getAdditionalFilters, forceRefreshToken, defaultCustomData, overrideCustomData, onSelectionChange, defaultSort, defaultFilter, disableFooter, disableSelection, headerHeight, selection, overrideFilter, globalScrollListener, } = props;
+const DataGrid = (inProps) => {
+    const props = useThemeProps({ props: inProps, name: "CcDataGrid" });
+    const { columns, loadData, getAdditionalFilters, forceRefreshToken, defaultCustomData, overrideCustomData, onSelectionChange, defaultSort, defaultFilter, disableFooter, disableSelection, headerHeight, selection, overrideFilter, globalScrollListener, className, classes, } = props;
     const rowsPerPage = props.rowsPerPage || 25;
     const theme = useTheme();
     const persistedContext = useContext(DataGridPersistentStateContext);
     const [persistedPromise] = persistedContext || [];
     const persisted = suspend(() => Promise.resolve(persistedPromise), [persistedPromise]);
-    const classes = useDataGridStylesInternal(props);
     const statePack = useState(() => ({
         ...getDataGridDefaultState(columns, undefined),
         ...persisted?.state,
@@ -579,7 +588,7 @@ const DataGrid = (props) => {
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectAll, selectedRows]);
-    return (React.createElement(Grid, { container: true, direction: "column", justifyContent: "space-between", alignItems: "stretch", wrap: "nowrap", className: classes.wrapper, ref: (r) => (gridRoot.current = r ? r : undefined) },
+    return (React.createElement(Wrapper, { container: true, direction: "column", justifyContent: "space-between", alignItems: "stretch", wrap: "nowrap", className: combineClassNames([className, classes?.root]), ref: (r) => (gridRoot.current = r ? r : undefined) },
         React.createElement(DataGridRootRefContext.Provider, { value: gridRoot.current },
             React.createElement(DataGridPropsContext.Provider, { value: props },
                 React.createElement(DataGridStateContext.Provider, { value: statePack },
@@ -587,13 +596,13 @@ const DataGrid = (props) => {
                         React.createElement(DataGridColumnsWidthStateContext.Provider, { value: columnWidthStatePack },
                             React.createElement(CustomFilterActiveContext.Provider, { value: activeCustomFiltersPack },
                                 React.createElement(StatePersistence, null),
-                                React.createElement(Grid, { item: true, className: classes.header },
+                                React.createElement(HeaderWrapper, { item: true, className: classes?.header },
                                     React.createElement(Header, null)),
-                                React.createElement(Grid, { item: true, xs: true, className: classes.content },
+                                React.createElement(ContentWrapper, { item: true, xs: true, className: classes?.content },
                                     React.createElement(Settings, { columns: columns }),
                                     React.createElement(CustomFilterDialog, null),
                                     React.createElement(Content, { columns: visibleColumns, rowsPerPage: rowsPerPage, disableSelection: disableSelection, headerHeight: headerHeight, globalScrollListener: globalScrollListener })),
-                                !disableFooter && (React.createElement(Grid, { item: true, className: classes.footer },
+                                !disableFooter && (React.createElement(FooterWrapper, { item: true, className: classes?.footer },
                                     React.createElement(Footer, null)))))))))));
 };
 export default React.memo(DataGrid);

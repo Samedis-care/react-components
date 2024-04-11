@@ -358,9 +358,7 @@ const Form = (props) => {
         setWarnings(warnings);
     }, [validateForm]);
     const setFieldTouchedLite = useCallback((field, newTouched = false) => {
-        setTouched((prev) => prev[field] === newTouched
-            ? prev
-            : { ...prev, [field]: newTouched });
+        setTouched((prev) => prev[field] === newTouched ? prev : { ...prev, [field]: newTouched });
     }, []);
     const setFieldTouched = useCallback((field, newTouched = true, validate = false) => {
         setFieldTouchedLite(field, newTouched);

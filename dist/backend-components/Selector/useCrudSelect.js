@@ -76,7 +76,7 @@ const useCrudSelect = (params, ref) => {
         });
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [loading, addToSelectionQueue]);
-    const handleSelect = useCallback(async (_, newSelected) => {
+    const handleSelect = useCallback(async (_ids, newSelected) => {
         // find new entries
         const newEntries = newSelected.filter((entry) => !selected.find((selEntry) => selEntry.value === entry.value));
         // remove new entries from array
@@ -146,7 +146,7 @@ const useCrudSelect = (params, ref) => {
         void (async () => {
             setLoading(true);
             if (initialSelected) {
-                await handleSelect(undefined, initialSelected);
+                await handleSelect(initialSelected.map((entry) => entry.value), initialSelected);
                 setLoading(false);
                 return;
             }

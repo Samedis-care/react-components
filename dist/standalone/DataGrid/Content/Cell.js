@@ -1,4 +1,4 @@
-import { useDataGridProps, useDataGridState, useDataGridStyles, } from "../DataGrid";
+import { DataGridCell, useDataGridProps, useDataGridState, } from "../DataGrid";
 import React, { useCallback, useContext, } from "react";
 import ColumnHeader from "./ColumnHeader";
 import SelectRow, { isSelected } from "./SelectRow";
@@ -12,10 +12,9 @@ export const useCellContext = () => {
     return ctx;
 };
 const Cell = (props) => {
-    const classes = useDataGridStyles();
     const { columnIndex, rowIndex } = props;
     const { columns, hoverState } = useCellContext();
-    const { onEdit, prohibitMultiSelect, onRowDoubleClick, disableSelection, isSelected: isSelectedHook, canSelectRow, } = useDataGridProps();
+    const { onEdit, prohibitMultiSelect, onRowDoubleClick, disableSelection, isSelected: isSelectedHook, canSelectRow, classes, } = useDataGridProps();
     const [state, setState] = useDataGridState();
     const [hover, setHover] = hoverState;
     const record = state.rows[props.rowIndex - 1];
@@ -58,14 +57,17 @@ const Cell = (props) => {
         content = record ? (React.createElement(SelectRow, { record: record })) : (React.createElement(Skeleton, { variant: "rectangular" }));
     }
     else {
-        content = record ? record[column.field] : React.createElement(Skeleton, { variant: "text" });
+        const content2 = record ? (record[column.field]) : (React.createElement(Skeleton, { variant: "text" }));
         // special handling for objects (Date, etc). use toString on them
-        if (content &&
-            typeof content === "object" &&
-            !React.isValidElement(content) &&
-            "toString" in content) {
+        if (content2 &&
+            typeof content2 === "object" &&
+            !React.isValidElement(content2) &&
+            "toString" in content2) {
             // eslint-disable-next-line @typescript-eslint/no-base-to-string
-            content = content.toString();
+            content = content2.toString();
+        }
+        else {
+            content = content2;
         }
     }
     const startHover = useCallback(() => {
@@ -76,17 +78,19 @@ const Cell = (props) => {
     const endHover = useCallback(() => {
         setHover(null);
     }, [setHover]);
-    return (React.createElement("div", { style: props.style, onMouseEnter: startHover, onMouseLeave: endHover, onClick: disableSelection || !record || (canSelectRow && !canSelectRow(record))
+    return (React.createElement(DataGridCell, { style: props.style, onMouseEnter: startHover, onMouseLeave: endHover, onClick: disableSelection || !record || (canSelectRow && !canSelectRow(record))
             ? undefined
             : toggleSelection, onDoubleClick: editRecord, className: combineClassNames([
-            classes.cell,
-            props.rowIndex !== 0 ? classes.dataCell : classes.headerCell,
+            classes?.cell,
+            props.rowIndex !== 0 ? "CcDataGrid-dataCell" : "CcDataGrid-headerCell",
             props.rowIndex !== 0 &&
-                (props.rowIndex % 2 === 0 ? classes.rowEven : classes.rowOdd),
+                (props.rowIndex % 2 === 0
+                    ? "CcDataGrid-rowEven"
+                    : "CcDataGrid-rowOdd"),
             props.rowIndex !== 0 && column && `column-${column.field}`,
             (hover == rowIndex ||
                 isSelected(state.selectAll, state.selectedRows, record, isSelectedHook)) &&
-                classes.dataCellSelected,
+                "CcDataCell-dataCellSelected",
         ]) }, content));
 };
 export default Cell;

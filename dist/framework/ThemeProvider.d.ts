@@ -1,10 +1,6 @@
 import React from "react";
 import type { IFrameworkProps } from "./Framework";
-import { Theme, ThemeOptions } from "@mui/material";
-declare module "@mui/styles/defaultTheme" {
-    interface DefaultTheme extends Theme {
-    }
-}
+import { ThemeOptions } from "@mui/material";
 export type SetThemeAction = (theme: ThemeOptions) => void;
 export type GetDefaultThemeCallback = (preferDark: boolean) => ThemeOptions;
 export declare const getStandardTheme: GetDefaultThemeCallback;

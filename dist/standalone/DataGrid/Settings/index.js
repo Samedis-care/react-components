@@ -1,9 +1,8 @@
 import React, { useCallback } from "react";
-import { Collapse } from "@mui/material";
-import { useDataGridState, useDataGridStyles, } from "../DataGrid";
+import { DataGridContentOverlayCollapse, useDataGridProps, useDataGridState, } from "../DataGrid";
 import Dialog from "./SettingsDialog";
 const DataGridSettings = (props) => {
-    const classes = useDataGridStyles();
+    const { classes } = useDataGridProps();
     const [state, setState] = useDataGridState();
     const closeGridSettings = useCallback(() => {
         setState((prevState) => ({
@@ -29,7 +28,7 @@ const DataGridSettings = (props) => {
                 : [...prevState.hiddenColumns, value],
         }));
     }, [setState]);
-    return (React.createElement(Collapse, { className: classes.contentOverlayCollapse, in: state.showSettings },
+    return (React.createElement(DataGridContentOverlayCollapse, { className: classes?.contentOverlayCollapse, in: state.showSettings },
         React.createElement(Dialog, { columns: props.columns, closeGridSettings: closeGridSettings, toggleColumnLock: toggleColumnLock, toggleColumnVisibility: toggleColumnVisibility, lockedColumns: state.lockedColumns, hiddenColumns: state.hiddenColumns })));
 };
 export default React.memo(DataGridSettings);
