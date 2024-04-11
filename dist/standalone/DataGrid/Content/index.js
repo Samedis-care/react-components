@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState, } from "react";
-import { useDataGridColumnsWidthState, useDataGridState, } from "../DataGrid";
+import { useDataGridColumnsWidthState, useDataGridProps, useDataGridState, } from "../DataGrid";
 import AutoSizer from "react-virtualized-auto-sizer";
 import Cell, { CellContext } from "./Cell";
 import { applyColumnWidthLimits } from "./ColumnHeader";
@@ -10,7 +10,7 @@ import MultiGrid from "../../Virtualized/MultiGrid";
 import { styled } from "@mui/material";
 const CenteredStickyTypography = styled(CenteredTypography, {
     name: "CcDataGrid",
-    slot: "centeredStickyTypography", // TODO: add to class key
+    slot: "centeredStickyTypography",
 })({
     position: "sticky",
     top: 0,
@@ -25,6 +25,7 @@ const STYLE_BOTTOM_RIGHT = { outline: "none" };
 const Content = (props) => {
     const { rowsPerPage, columns, disableSelection, headerHeight: headerHeightOverride, globalScrollListener, } = props;
     const headerHeight = headerHeightOverride ?? 32;
+    const { classes } = useDataGridProps();
     const { t } = useCCTranslations();
     const [state, setState] = useDataGridState();
     const [columnWidth, setColumnWidth] = useDataGridColumnsWidthState();
@@ -117,7 +118,12 @@ const Content = (props) => {
         setState((prev) => ({ ...prev, initialResize: true }));
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [state.initialResize, width]);
-    const noContentRenderer = useCallback(() => (React.createElement(React.Fragment, null, state.refreshData ? (React.createElement(Loader, null)) : state.dataLoadError ? (React.createElement(CenteredStickyTypography, { variant: "h5" }, state.dataLoadError.message)) : (React.createElement(CenteredStickyTypography, { variant: "h4" }, t("standalone.data-grid.content.no-data"))))), [state.dataLoadError, state.refreshData, t]);
+    const noContentRenderer = useCallback(() => (React.createElement(React.Fragment, null, state.refreshData ? (React.createElement(Loader, null)) : state.dataLoadError ? (React.createElement(CenteredStickyTypography, { className: classes?.centeredStickyTypography, variant: "h5" }, state.dataLoadError.message)) : (React.createElement(CenteredStickyTypography, { className: classes?.centeredStickyTypography, variant: "h4" }, t("standalone.data-grid.content.no-data"))))), [
+        classes?.centeredStickyTypography,
+        state.dataLoadError,
+        state.refreshData,
+        t,
+    ]);
     const styleTopRightGrid = useMemo(() => ({
         overflow: "hidden",
         overflowX: (state.rowsFiltered ?? state.rowsTotal) === 0 ? "auto" : "hidden",
