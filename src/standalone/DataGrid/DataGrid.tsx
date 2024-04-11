@@ -998,7 +998,8 @@ export type DataGridClassKey =
 	| "quickFilterIcon"
 	| "customFilterIcon"
 	| "customFilterMulti"
-	| "customFilterSingle";
+	| "customFilterSingle"
+	| "centeredStickyTypography";
 
 export const getActiveDataGridColumns = (
 	columns: IDataGridColumnDef[],

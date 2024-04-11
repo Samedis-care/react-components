@@ -10,6 +10,7 @@ import {
 	IDataGridColumnDef,
 	IDataGridColumnProps,
 	useDataGridColumnsWidthState,
+	useDataGridProps,
 	useDataGridState,
 } from "../DataGrid";
 import AutoSizer, { Size } from "react-virtualized-auto-sizer";
@@ -30,7 +31,7 @@ export interface IDataGridContentProps
 
 const CenteredStickyTypography = styled(CenteredTypography, {
 	name: "CcDataGrid",
-	slot: "centeredStickyTypography", // TODO: add to class key
+	slot: "centeredStickyTypography",
 })({
 	position: "sticky",
 	top: 0,
@@ -53,6 +54,7 @@ const Content = (props: IDataGridContentProps) => {
 		globalScrollListener,
 	} = props;
 	const headerHeight = headerHeightOverride ?? 32;
+	const { classes } = useDataGridProps();
 	const { t } = useCCTranslations();
 	const [state, setState] = useDataGridState();
 	const [columnWidth, setColumnWidth] = useDataGridColumnsWidthState();
@@ -175,17 +177,28 @@ const Content = (props: IDataGridContentProps) => {
 				{state.refreshData ? (
 					<Loader />
 				) : state.dataLoadError ? (
-					<CenteredStickyTypography variant={"h5"}>
+					<CenteredStickyTypography
+						className={classes?.centeredStickyTypography}
+						variant={"h5"}
+					>
 						{state.dataLoadError.message}
 					</CenteredStickyTypography>
 				) : (
-					<CenteredStickyTypography variant={"h4"}>
+					<CenteredStickyTypography
+						className={classes?.centeredStickyTypography}
+						variant={"h4"}
+					>
 						{t("standalone.data-grid.content.no-data")}
 					</CenteredStickyTypography>
 				)}
 			</>
 		),
-		[state.dataLoadError, state.refreshData, t],
+		[
+			classes?.centeredStickyTypography,
+			state.dataLoadError,
+			state.refreshData,
+			t,
+		],
 	);
 
 	const styleTopRightGrid = useMemo(
