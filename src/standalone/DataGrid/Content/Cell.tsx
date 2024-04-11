@@ -1,9 +1,9 @@
 import {
+	DataGridCell,
 	DataGridRowData,
 	IDataGridColumnDef,
 	useDataGridProps,
 	useDataGridState,
-	useDataGridStyles,
 } from "../DataGrid";
 import React, {
 	Dispatch,
@@ -37,7 +37,6 @@ export const useCellContext = () => {
 };
 
 const Cell = (props: GridChildComponentProps): React.ReactElement => {
-	const classes = useDataGridStyles();
 	const { columnIndex, rowIndex } = props;
 	const { columns, hoverState } = useCellContext();
 	const {
@@ -47,6 +46,7 @@ const Cell = (props: GridChildComponentProps): React.ReactElement => {
 		disableSelection,
 		isSelected: isSelectedHook,
 		canSelectRow,
+		classes,
 	} = useDataGridProps();
 	const [state, setState] = useDataGridState();
 	const [hover, setHover] = hoverState;
@@ -91,17 +91,23 @@ const Cell = (props: GridChildComponentProps): React.ReactElement => {
 			<Skeleton variant="rectangular" />
 		);
 	} else {
-		content = record ? record[column.field] : <Skeleton variant={"text"} />;
+		const content2 = record ? (
+			record[column.field]
+		) : (
+			<Skeleton variant={"text"} />
+		);
 
 		// special handling for objects (Date, etc). use toString on them
 		if (
-			content &&
-			typeof content === "object" &&
-			!React.isValidElement(content) &&
-			"toString" in content
+			content2 &&
+			typeof content2 === "object" &&
+			!React.isValidElement(content2) &&
+			"toString" in content2
 		) {
 			// eslint-disable-next-line @typescript-eslint/no-base-to-string
-			content = content.toString();
+			content = content2.toString();
+		} else {
+			content = content2;
 		}
 	}
 
@@ -115,7 +121,7 @@ const Cell = (props: GridChildComponentProps): React.ReactElement => {
 	}, [setHover]);
 
 	return (
-		<div
+		<DataGridCell
 			style={props.style}
 			onMouseEnter={startHover}
 			onMouseLeave={endHover}
@@ -126,10 +132,12 @@ const Cell = (props: GridChildComponentProps): React.ReactElement => {
 			}
 			onDoubleClick={editRecord}
 			className={combineClassNames([
-				classes.cell,
-				props.rowIndex !== 0 ? classes.dataCell : classes.headerCell,
+				classes?.cell,
+				props.rowIndex !== 0 ? "CcDataGrid-dataCell" : "CcDataGrid-headerCell",
 				props.rowIndex !== 0 &&
-					(props.rowIndex % 2 === 0 ? classes.rowEven : classes.rowOdd),
+					(props.rowIndex % 2 === 0
+						? "CcDataGrid-rowEven"
+						: "CcDataGrid-rowOdd"),
 				props.rowIndex !== 0 && column && `column-${column.field}`,
 				(hover == rowIndex ||
 					isSelected(
@@ -138,11 +146,11 @@ const Cell = (props: GridChildComponentProps): React.ReactElement => {
 						record,
 						isSelectedHook,
 					)) &&
-					classes.dataCellSelected,
+					"CcDataCell-dataCellSelected",
 			])}
 		>
 			{content}
-		</div>
+		</DataGridCell>
 	);
 };
 

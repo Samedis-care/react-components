@@ -79,7 +79,10 @@ const CrudMultiImage = (props: CrudMultiImageProps) => {
 	const [images, setImages] = useState<BackendMultiImageImage[]>([]);
 
 	const handleChange = useCallback(
-		async (_, newImages: (MultiImageImage | BackendMultiImageImage)[]) => {
+		async (
+			_name: string | undefined,
+			newImages: (MultiImageImage | BackendMultiImageImage)[],
+		) => {
 			if (additionalImages)
 				newImages = newImages.filter((img) => !additionalImages.includes(img));
 

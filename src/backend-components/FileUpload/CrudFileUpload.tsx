@@ -14,6 +14,7 @@ import FileUpload, {
 import { Connector, PageVisibility } from "../../backend-integration";
 import { ErrorComponentProps } from "../Form";
 import { Loader } from "../../standalone";
+import { FileSelectorError } from "../../standalone/FileUpload/Generic/Errors";
 
 export interface CrudFileUploadProps
 	extends Omit<FileUploadProps, "files" | "handleError"> {
@@ -121,7 +122,7 @@ const CrudFileUpload = (
 		[allowDuplicates, connector, deserialize, files, serialize],
 	);
 
-	const handleError = useCallback((_, msg: string) => {
+	const handleError = useCallback((_: FileSelectorError, msg: string) => {
 		setError(new Error(msg));
 	}, []);
 

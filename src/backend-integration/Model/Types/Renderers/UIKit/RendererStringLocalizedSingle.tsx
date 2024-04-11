@@ -76,7 +76,6 @@ class RendererStringLocalizedSingle extends TypeLocalizedString {
 							);
 						return (
 							<>
-								{" "}
 								<TextFieldWithHelp
 									variant={this.multiline ? "outlined" : undefined}
 									fullWidth
@@ -105,11 +104,24 @@ class RendererStringLocalizedSingle extends TypeLocalizedString {
 				</ModelDataTypeStringLocalizedSingleRendererContext.Consumer>
 			);
 		}
+
 		return (
-			<Typography noWrap={visibility.grid}>
-				{!visibility.grid && `${label}: `}
-				{value}
-			</Typography>
+			<ModelDataTypeStringLocalizedSingleRendererContext.Consumer>
+				{(language) => {
+					if (!language)
+						throw new Error(
+							"Please wrap field" +
+								field +
+								" with ModelDataTypeStringLocalizedSingleRendererContext.Provider and specify a language",
+						);
+					return (
+						<Typography noWrap={visibility.grid}>
+							{!visibility.grid && `${label}: `}
+							{value[language] ?? ""}
+						</Typography>
+					);
+				}}
+			</ModelDataTypeStringLocalizedSingleRendererContext.Consumer>
 		);
 	}
 }

@@ -1132,9 +1132,7 @@ const Form = <
 	const setFieldTouchedLite = useCallback(
 		(field: string, newTouched = false) => {
 			setTouched((prev) =>
-				prev[field] === newTouched
-					? prev
-					: { ...prev, [field]: newTouched as boolean },
+				prev[field] === newTouched ? prev : { ...prev, [field]: newTouched },
 			);
 		},
 		[],
@@ -1366,7 +1364,7 @@ const Form = <
 
 				await Promise.all(
 					Object.values(preSubmitHandlers.current).map((handler) =>
-						handler(id, params as FormSubmitOptions),
+						handler(id, params),
 					),
 				);
 
@@ -1395,10 +1393,7 @@ const Form = <
 
 				await Promise.all(
 					Object.values(postSubmitHandlers.current).map((handler) =>
-						handler(
-							(newValues as Record<"id", string>).id,
-							params as FormSubmitOptions,
-						),
+						handler((newValues as Record<"id", string>).id, params),
 					),
 				);
 

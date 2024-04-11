@@ -89,7 +89,7 @@ export interface HowToBoxTranslateProps
 export const HowToBoxTranslate = (props: HowToBoxTranslateProps) => {
 	const { t, titleLabel, labels, ...other } = props;
 	// memo content because it's an array which gets re-created every render
-	const content = useMemo(
+	const content: string[] = useMemo(
 		() => t(labels, { returnObjects: true }),
 		[t, labels],
 	);

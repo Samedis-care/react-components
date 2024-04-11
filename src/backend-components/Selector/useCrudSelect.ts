@@ -234,7 +234,7 @@ const useCrudSelect = <
 	}, [loading, addToSelectionQueue]);
 
 	const handleSelect = useCallback(
-		async (_, newSelected: DataT[]) => {
+		async (_ids: string[], newSelected: DataT[]) => {
 			// find new entries
 			const newEntries = newSelected.filter(
 				(entry) => !selected.find((selEntry) => selEntry.value === entry.value),
@@ -340,7 +340,10 @@ const useCrudSelect = <
 			setLoading(true);
 
 			if (initialSelected) {
-				await handleSelect(undefined, initialSelected);
+				await handleSelect(
+					initialSelected.map((entry) => entry.value),
+					initialSelected,
+				);
 				setLoading(false);
 				return;
 			}

@@ -157,11 +157,6 @@ export interface SelectorLruOptions<DataT extends BaseSelectorData> {
 	forceQuery: boolean;
 }
 
-/**
- * A callback used to get an label value for a specific input (search) value
- */
-type SelectorLabelCallback = (obj: { inputValue: string }) => string | null;
-
 export interface BaseSelectorSingle<DataT extends BaseSelectorData> {
 	multiple?: false;
 	/**
@@ -255,15 +250,15 @@ export type BaseSelectorProps<
 		/**
 		 * Label which is shown if there is no data
 		 */
-		noOptionsText?: string | SelectorLabelCallback;
+		noOptionsText?: string;
 		/**
 		 * Label which is shown while loading data
 		 */
-		loadingText?: string | SelectorLabelCallback;
+		loadingText?: string;
 		/**
 		 * Label which is shown if forceQuery == true and nothing has been typed
 		 */
-		startTypingToSearchText?: string | SelectorLabelCallback;
+		startTypingToSearchText?: string;
 		/**
 		 * Label which is shown for close icon button while popup is opened
 		 */
@@ -861,9 +856,12 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 		],
 	);
 
-	const updateQuery = useCallback((_, newQuery: string) => {
-		setQuery(newQuery);
-	}, []);
+	const updateQuery = useCallback(
+		(_evt: React.SyntheticEvent, newQuery: string) => {
+			setQuery(newQuery);
+		},
+		[],
+	);
 
 	// search handler
 	useEffect(() => {

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo } from "react";
-import { BaseSelectorData, SingleSelect } from "../../standalone/Selector";
+import { BaseSelectorData } from "../../standalone/Selector";
 import {
 	Divider,
 	FormControl,
@@ -10,7 +10,7 @@ import {
 	Typography,
 } from "@mui/material";
 import { useCustomFilterActiveContext } from "./Header/FilterBar";
-import { useDataGridStyles } from "./DataGrid";
+import { DataGridCustomFilterSingle, useDataGridProps } from "./DataGrid";
 import { GridSize } from "@mui/material/Grid/Grid";
 import { Breakpoint } from "@mui/material/styles";
 
@@ -64,7 +64,7 @@ const GridSingleSelectFilter = (props: GridSingleSelectFilterProps) => {
 		dialogBreakpoints,
 		barBreakpoints,
 	} = props;
-	const classes = useDataGridStyles();
+	const { classes } = useDataGridProps();
 	const selected = props.selected ?? props.defaultSelection;
 	const isActive = selected !== props.defaultSelection;
 
@@ -79,7 +79,7 @@ const GridSingleSelectFilter = (props: GridSingleSelectFilterProps) => {
 	}, [setActiveFilter, isActive]);
 
 	const handleDialogRadioToggle = useCallback(
-		(_, value: string) => {
+		(_evt: React.ChangeEvent<HTMLInputElement>, value: string) => {
 			onSelect(value);
 		},
 		[onSelect],
@@ -95,9 +95,9 @@ const GridSingleSelectFilter = (props: GridSingleSelectFilterProps) => {
 	const getOptions = useCallback(() => options, [options]);
 	const selectorStyles = useMemo(
 		() => ({
-			autocomplete: isActive ? classes.customFilterBorder : undefined,
+			autocomplete: isActive ? "Mui-active" : undefined,
 		}),
-		[isActive, classes.customFilterBorder],
+		[isActive],
 	);
 
 	if (dialog) {
@@ -136,7 +136,7 @@ const GridSingleSelectFilter = (props: GridSingleSelectFilterProps) => {
 		return (
 			<Grid item xs={4} {...barBreakpoints}>
 				<FormControl component={"fieldset"} fullWidth>
-					<SingleSelect
+					<DataGridCustomFilterSingle
 						label={label}
 						disableSearch
 						disableClearable
@@ -147,6 +147,7 @@ const GridSingleSelectFilter = (props: GridSingleSelectFilterProps) => {
 						onSelect={handleSelectorChange}
 						autocompleteId={autocompleteId}
 						classes={selectorStyles}
+						className={classes?.customFilterSingle}
 					/>
 				</FormControl>
 			</Grid>
