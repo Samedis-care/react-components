@@ -59,7 +59,7 @@ export interface IMenuItemDefinition {
 	/**
 	 * The icon of the menu item
 	 */
-	icon?: SvgIconComponent | React.ComponentType<SvgIconProps>;
+	icon?: SvgIconComponent | React.ComponentType<Omit<SvgIconProps, "ref">>;
 	/**
 	 * The text of the menu item
 	 */
