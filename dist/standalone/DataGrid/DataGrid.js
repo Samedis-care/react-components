@@ -13,7 +13,6 @@ import { dataGridPrepareFiltersAndSorts } from "./CallbackUtil";
 import { HEADER_PADDING } from "./Content/ColumnHeader";
 import CustomFilterDialog from "./CustomFilterDialog";
 import StatePersistence, { DataGridPersistentStateContext, } from "./StatePersistence";
-import { suspend } from "suspend-react";
 import { CustomFilterActiveContext } from "./Header/FilterBar";
 import combineClassNames from "../../utils/combineClassNames";
 import Checkbox from "../UIKit/Checkbox";
@@ -21,6 +20,7 @@ import ComponentWithLabel from "../UIKit/ComponentWithLabel";
 import FilterIcon from "../Icons/FilterIcon";
 import BaseSelector from "../Selector/BaseSelector";
 import SingleSelect from "../Selector/SingleSelect";
+import useSuspend from "../../utils/useSuspend";
 const DataGridStateContext = React.createContext(undefined);
 export const useDataGridState = () => {
     const ctx = useContext(DataGridStateContext);
@@ -413,7 +413,7 @@ const DataGrid = (inProps) => {
     const theme = useTheme();
     const persistedContext = useContext(DataGridPersistentStateContext);
     const [persistedPromise] = persistedContext || [];
-    const persisted = suspend(() => Promise.resolve(persistedPromise), [persistedPromise]);
+    const persisted = useSuspend(persistedPromise);
     const statePack = useState(() => ({
         ...getDataGridDefaultState(columns, undefined),
         ...persisted?.state,
@@ -569,6 +569,12 @@ const DataGrid = (inProps) => {
         }));
     }, 500), [setState]);
     const initialRender = useRef(true);
+    // reset initial render state after unmount (react 18 does remounts with persisted data)
+    useEffect(() => {
+        return () => {
+            initialRender.current = true;
+        };
+    }, []);
     useEffect(() => {
         // make sure we don't refresh data twice on initial render
         if (refreshData && isObjectEmpty(rows) && initialRender.current) {
