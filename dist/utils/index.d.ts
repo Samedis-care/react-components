@@ -54,3 +54,5 @@ export { default as useDevKeybinds } from "./useDevKeybinds";
 export { default as useWindowSize } from "./useWindowSize";
 export { default as useRefState } from "./useRefState";
 export { default as useSuspend } from "./useSuspend";
+export { default as useSuspendMemo } from "./useSuspendMemo";
+export { default as useSuspendCache } from "./useSuspendCache";
