@@ -5,7 +5,7 @@ import useNavigate from "./useNavigate";
  * anchor element using history API for routing
  * @param props The props
  */
-const Link = (props) => {
+const Link = React.forwardRef(function Link(props, ref) {
     const { to, replace, state, ...anchorProps } = props;
     const { history } = useHistoryRouterContext();
     const navigate = useNavigate();
@@ -14,6 +14,6 @@ const Link = (props) => {
             return;
         navigate(to, { replace, state });
     }, [navigate, replace, state, to]);
-    return (React.createElement("a", { href: history.createHref(to), onClick: handleNav, ...anchorProps }));
-};
+    return (React.createElement("a", { ref: ref, href: history.createHref(to), onClick: handleNav, ...anchorProps }));
+});
 export default React.memo(Link);
