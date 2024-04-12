@@ -1,8 +1,13 @@
+import React from "react";
 import { FormControl, FormHelperText, FormLabel, styled, TextField, } from "@mui/material";
 export const withMuiWarning = (Component) => {
     // not unnecessary, component name is inferred from it
     // noinspection UnnecessaryLocalVariableJS
-    return styled(Component)(({ theme, warning }) => ({
+    return styled((props) => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { warning, ...other } = props;
+        return React.createElement(Component, { ...other });
+    })(({ theme, warning }) => ({
         ...(warning && {
             "& > .MuiFormLabel-root": {
                 color: theme.palette.warning.main,
