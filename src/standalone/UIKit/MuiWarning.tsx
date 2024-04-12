@@ -24,7 +24,11 @@ export const withMuiWarning = <T extends MuiWarningSourceProps>(
 ): React.ComponentType<T & MuiWarningResultProps> => {
 	// not unnecessary, component name is inferred from it
 	// noinspection UnnecessaryLocalVariableJS
-	return styled(Component)<T & MuiWarningResultProps>(({ theme, warning }) => ({
+	return styled((props: T & MuiWarningResultProps) => {
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		const { warning, ...other } = props;
+		return <Component {...(other as T)} />;
+	})<T & MuiWarningResultProps>(({ theme, warning }) => ({
 		...(warning && {
 			"& > .MuiFormLabel-root": {
 				color: theme.palette.warning.main,
