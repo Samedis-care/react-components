@@ -29,7 +29,10 @@ export interface LinkProps
  * anchor element using history API for routing
  * @param props The props
  */
-const Link = (props: LinkProps) => {
+const Link = React.forwardRef(function Link(
+	props: LinkProps,
+	ref: React.ForwardedRef<HTMLAnchorElement>,
+) {
 	const { to, replace, state, ...anchorProps } = props;
 	const { history } = useHistoryRouterContext();
 	const navigate = useNavigate();
@@ -41,8 +44,13 @@ const Link = (props: LinkProps) => {
 		[navigate, replace, state, to],
 	);
 	return (
-		<a href={history.createHref(to)} onClick={handleNav} {...anchorProps} />
+		<a
+			ref={ref}
+			href={history.createHref(to)}
+			onClick={handleNav}
+			{...anchorProps}
+		/>
 	);
-};
+});
 
 export default React.memo(Link);
