@@ -1,6 +1,7 @@
 import React, { useCallback, useMemo } from "react";
 import { DataGridPersistentStateContext, } from "./StatePersistence";
 import { StorageManager } from "../../framework/Storage";
+import useAsyncMemo from "../../utils/useAsyncMemo";
 const DATA_GRID_STORAGE_KEY_BASE = "data-grid-";
 // recommended default: localStorage
 export const DATA_GRID_STORAGE_KEY_COLUMN_SIZING = DATA_GRID_STORAGE_KEY_BASE + "column-sizing";
@@ -33,30 +34,26 @@ const StorageManagerPersist = (props) => {
     }, 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [JSON.stringify(storageKeys)]);
-    const persistCtx = useMemo(() => {
-        const data = (async () => {
-            const resultObjects = await Promise.all([
-                DATA_GRID_STORAGE_KEY_COLUMN_SIZING,
-                DATA_GRID_STORAGE_KEY_FILTERS,
-            ].map(async (storageKey) => {
-                const dataStr = await StorageManager.getItem(storageKey, storageKeys);
-                if (dataStr) {
-                    try {
-                        return JSON.parse(dataStr);
-                    }
-                    catch (e) {
-                        // eslint-disable-next-line no-console
-                        console.error("[Components-Care] Failed parsing DataGrid config from StorageManager." +
-                            storageKey, storageKeys, "Removing from server");
-                        return StorageManager.setItem(storageKey, storageKeys, null);
-                    }
+    const data = useAsyncMemo(async () => {
+        const resultObjects = await Promise.all([DATA_GRID_STORAGE_KEY_COLUMN_SIZING, DATA_GRID_STORAGE_KEY_FILTERS].map(async (storageKey) => {
+            const dataStr = await StorageManager.getItem(storageKey, storageKeys);
+            if (dataStr) {
+                try {
+                    return JSON.parse(dataStr);
                 }
-            }));
-            return resultObjects.reduce((prev, next) => Object.assign(prev, next), {});
-        })();
+                catch (e) {
+                    // eslint-disable-next-line no-console
+                    console.error("[Components-Care] Failed parsing DataGrid config from StorageManager." +
+                        storageKey, storageKeys, "Removing from server");
+                    return StorageManager.setItem(storageKey, storageKeys, null);
+                }
+            }
+        }));
+        return resultObjects.reduce((prev, next) => Object.assign(prev, next), {});
+    }, [storageKeys]);
+    const persistCtx = useMemo(() => {
         return [data, setData];
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [setData, JSON.stringify(storageKeys)]);
-    return (React.createElement(DataGridPersistentStateContext.Provider, { value: persistCtx }, children));
+    }, [data, setData]);
+    return (React.createElement(React.Fragment, null, data && (React.createElement(DataGridPersistentStateContext.Provider, { value: persistCtx }, children))));
 };
 export default React.memo(StorageManagerPersist);

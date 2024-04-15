@@ -20,7 +20,6 @@ import ComponentWithLabel from "../UIKit/ComponentWithLabel";
 import FilterIcon from "../Icons/FilterIcon";
 import BaseSelector from "../Selector/BaseSelector";
 import SingleSelect from "../Selector/SingleSelect";
-import useSuspend from "../../utils/useSuspend";
 const DataGridStateContext = React.createContext(undefined);
 export const useDataGridState = () => {
     const ctx = useContext(DataGridStateContext);
@@ -412,8 +411,7 @@ const DataGrid = (inProps) => {
     const rowsPerPage = props.rowsPerPage || 25;
     const theme = useTheme();
     const persistedContext = useContext(DataGridPersistentStateContext);
-    const [persistedPromise] = persistedContext || [];
-    const persisted = useSuspend(persistedPromise);
+    const [persisted] = persistedContext || [];
     const statePack = useState(() => ({
         ...getDataGridDefaultState(columns, undefined),
         ...persisted?.state,

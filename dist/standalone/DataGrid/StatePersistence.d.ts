@@ -6,7 +6,7 @@ export interface DataGridPersistentState {
     state: Partial<Pick<IDataGridState, "search" | "hiddenColumns" | "lockedColumns" | "customData" | "initialResize">>;
 }
 export type DataGridPersistentStateContextType = [
-    (Promise<Partial<DataGridPersistentState>> | Partial<DataGridPersistentState> | undefined),
+    Partial<DataGridPersistentState> | undefined,
     (data: DataGridPersistentState) => Promise<void> | void
 ];
 export declare const DataGridPersistentStateContext: React.Context<DataGridPersistentStateContextType | undefined>;
