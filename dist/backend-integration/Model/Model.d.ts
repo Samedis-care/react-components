@@ -139,6 +139,7 @@ export declare const useModelGet: <KeyT extends string, VisibilityT extends Page
  * React-Query's useQuery for the given model and index params
  * @param model The model ID to load
  * @param params The params to pass to fetchAll/index
+ * @param options The useQuery options
  * @returns ModelIndexResponse where userMeta and meta is taken from the last call
  * @see Model.fetchAll
  */

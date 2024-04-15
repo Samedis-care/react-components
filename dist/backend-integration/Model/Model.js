@@ -29,6 +29,7 @@ export const useModelGet = (model, id, options) => {
  * React-Query's useQuery for the given model and index params
  * @param model The model ID to load
  * @param params The params to pass to fetchAll/index
+ * @param options The useQuery options
  * @returns ModelIndexResponse where userMeta and meta is taken from the last call
  * @see Model.fetchAll
  */
@@ -296,7 +297,12 @@ class Model {
      * @param batch Is request batched (uses index action)?
      */
     getReactQueryKey(id, batch) {
-        return [this.modelId, { id: id }, batch, this.cacheKeys];
+        return [
+            this.modelId,
+            { id: id ?? "create-" + Date.now().toString(16) },
+            batch,
+            this.cacheKeys,
+        ];
     }
     /**
      * Gets the react-query cache key for this model (for fetch all)
