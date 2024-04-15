@@ -120,7 +120,7 @@ export interface MultiImageProps {
         imageDialogEntrySubClasses?: ImageDialogEntryProps["subClasses"];
     };
 }
-export type MultiImageClassKey = "root" | "uploadInput" | "rootContainer" | "imageItem";
+export type MultiImageClassKey = "root" | "uploadInput" | "rootContainer" | "imageItem" | "editLabel";
 export declare const MultiImageNewIdPrefix = "MultiImage-New-";
 declare const _default: React.MemoExoticComponent<(inProps: MultiImageProps) => React.JSX.Element>;
 export default _default;

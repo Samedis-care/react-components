@@ -27,6 +27,10 @@ const RootContainer = styled(Grid, {
 const ImageItem = styled(Grid, { name: "CcMultiImage", slot: "imageItem" })({
     height: "calc(100% - 1rem)",
 });
+const EditLabel = styled(Typography, {
+    name: "CcMultiImage",
+    slot: "editLabel",
+})({});
 export const MultiImageNewIdPrefix = "MultiImage-New-";
 const MultiImage = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcMultiImage" });
@@ -138,8 +142,7 @@ const MultiImage = (inProps) => {
                     React.createElement(Grid, { item: true, xs: true },
                         React.createElement(ImageDots, { total: images.length, active: currentImage, setActive: setCurrentImage })),
                     !readOnly && (React.createElement(Grid, { item: true },
-                        React.createElement(Typography, { variant: "body2" },
-                            React.createElement(Link, { onClick: openDialog, href: "#" }, editLabel ?? t("standalone.file-upload.multi-image.edit")))))))),
+                        React.createElement(EditLabel, { component: Link, variant: "body2", onClick: openDialog, href: "#" }, editLabel ?? t("standalone.file-upload.multi-image.edit"))))))),
         React.createElement(UploadInput, { type: "file", multiple: remainingFiles > 1, accept: "image/*", capture: capture, ref: fileUpload, onChange: handleUpload, className: classes?.uploadInput }),
         !readOnly && (React.createElement(React.Fragment, null,
             React.createElement(Dialog, { open: dialogOpen, onClose: closeDialog, maxWidth: "lg", fullWidth: !previewSize },
