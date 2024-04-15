@@ -67,7 +67,7 @@ class RendererEnumSelect extends TypeEnum {
 				.map((entry) => ({
 					...entry,
 					label: entry.getLabel(),
-					isDisabled: entry.invisible,
+					isDisabled: entry.invisible || entry.isDisabled,
 				}));
 			const selected = data.find((entry) => entry.value === value) || null;
 
