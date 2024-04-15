@@ -171,11 +171,17 @@ const ImageItem = styled(Grid, { name: "CcMultiImage", slot: "imageItem" })({
 	height: "calc(100% - 1rem)",
 });
 
+const EditLabel = styled(Typography, {
+	name: "CcMultiImage",
+	slot: "editLabel",
+})({}) as typeof Typography;
+
 export type MultiImageClassKey =
 	| "root"
 	| "uploadInput"
 	| "rootContainer"
-	| "imageItem";
+	| "imageItem"
+	| "editLabel";
 
 export const MultiImageNewIdPrefix = "MultiImage-New-";
 
@@ -381,11 +387,14 @@ const MultiImage = (inProps: MultiImageProps) => {
 						</Grid>
 						{!readOnly && (
 							<Grid item>
-								<Typography variant={"body2"}>
-									<Link onClick={openDialog} href={"#"}>
-										{editLabel ?? t("standalone.file-upload.multi-image.edit")}
-									</Link>
-								</Typography>
+								<EditLabel
+									component={Link}
+									variant={"body2"}
+									onClick={openDialog}
+									href={"#"}
+								>
+									{editLabel ?? t("standalone.file-upload.multi-image.edit")}
+								</EditLabel>
 							</Grid>
 						)}
 					</Grid>
