@@ -297,12 +297,7 @@ class Model {
      * @param batch Is request batched (uses index action)?
      */
     getReactQueryKey(id, batch) {
-        return [
-            this.modelId,
-            { id: id ?? "create-" + Date.now().toString(16) },
-            batch,
-            this.cacheKeys,
-        ];
+        return [this.modelId, { id: id }, batch, this.cacheKeys];
     }
     /**
      * Gets the react-query cache key for this model (for fetch all)
