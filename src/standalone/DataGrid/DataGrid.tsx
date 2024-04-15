@@ -51,7 +51,6 @@ import ComponentWithLabel, {
 import FilterIcon from "../Icons/FilterIcon";
 import BaseSelector from "../Selector/BaseSelector";
 import SingleSelect from "../Selector/SingleSelect";
-import useSuspend from "../../utils/useSuspend";
 
 export type DataGridProps = IDataGridHeaderProps &
 	IDataGridColumnProps &
@@ -1081,8 +1080,7 @@ const DataGrid = (inProps: DataGridProps) => {
 
 	const theme = useTheme();
 	const persistedContext = useContext(DataGridPersistentStateContext);
-	const [persistedPromise] = persistedContext || [];
-	const persisted = useSuspend(persistedPromise);
+	const [persisted] = persistedContext || [];
 
 	const statePack = useState<IDataGridState>(() => ({
 		...getDataGridDefaultState(columns, undefined),
