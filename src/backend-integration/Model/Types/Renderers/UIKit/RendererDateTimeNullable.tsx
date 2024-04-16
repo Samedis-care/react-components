@@ -61,6 +61,7 @@ class RendererDateTimeNullable extends TypeDateTimeNullable {
 								: "";
 							setFieldTouched(field, touched, true);
 						}}
+						fullWidth
 					/>
 					<FormHelperTextCC error={!!errorMsg} warning={!!warningMsg}>
 						{errorMsg || warningMsg}

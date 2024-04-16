@@ -1,7 +1,6 @@
-import React, { useCallback } from "react";
-import { IconButton, InputAdornment, TextFieldProps } from "@mui/material";
+import React from "react";
+import { TextFieldProps } from "@mui/material";
 import { DateTimePickerProps } from "@mui/x-date-pickers";
-import { Info as InfoIcon, Event as CalenderIcon } from "@mui/icons-material";
 import { InputLabelConfig, UIInputProps } from "../CommonStyles";
 import LocalizedDateTimePicker from "../../../standalone/LocalizedDateTimePickers/LocalizedDateTimePicker";
 import { Moment } from "moment";
@@ -21,21 +20,24 @@ export interface DateTimeInputProps extends UIInputProps {
 	 * onBlur callback for the text field input
 	 */
 	onBlur?: TextFieldProps["onBlur"];
+	/**
+	 * full width?
+	 */
+	fullWidth?: TextFieldProps["fullWidth"];
 }
 
 const DateTimeInput = (
 	props: DateTimeInputProps & DateTimePickerProps<Moment>,
 ) => {
-	const { openInfo, important, required, error, onBlur, ...muiProps } = props;
-
-	const handleOpenInfo = useCallback(
-		(event: React.MouseEvent<HTMLButtonElement>) => {
-			// Prevent calendar popup open event, while clicking on info icon
-			event.stopPropagation();
-			if (openInfo) openInfo();
-		},
-		[openInfo],
-	);
+	const {
+		openInfo,
+		important,
+		required,
+		error,
+		fullWidth,
+		onBlur,
+		...muiProps
+	} = props;
 
 	return (
 		<LocalizedDateTimePicker
@@ -52,22 +54,8 @@ const DateTimeInput = (
 					required,
 					error,
 					onBlur,
-					InputProps: {
-						endAdornment: (
-							<InputAdornment position="end">
-								{!muiProps.disabled && (
-									<IconButton size="large">
-										<CalenderIcon color={"disabled"} />
-									</IconButton>
-								)}
-								{openInfo && (
-									<IconButton onClick={handleOpenInfo} size="large">
-										<InfoIcon color={"disabled"} />
-									</IconButton>
-								)}
-							</InputAdornment>
-						),
-					},
+					fullWidth,
+					openInfo,
 					InputLabelProps: InputLabelConfig,
 					...muiProps.slotProps?.textField,
 				},
