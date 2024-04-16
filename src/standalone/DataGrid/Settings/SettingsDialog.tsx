@@ -10,6 +10,7 @@ import {
 	TableCell,
 	TableHead,
 	TableRow,
+	styled,
 } from "@mui/material";
 import {
 	DataGridContentOverlayClosed,
@@ -45,6 +46,13 @@ export interface IDataGridSettingsDialogProps extends IDataGridColumnProps {
 	hiddenColumns: string[];
 }
 
+const StyledTableCell = styled(TableCell, {
+	name: "CcDataGrid",
+	slot: "settingsTableCell",
+})({
+	padding: 4,
+});
+
 const SettingsDialog = (props: IDataGridSettingsDialogProps) => {
 	const { classes } = useDataGridProps();
 	const { t } = useCCTranslations();
@@ -65,23 +73,29 @@ const SettingsDialog = (props: IDataGridSettingsDialogProps) => {
 			<Table stickyHeader>
 				<TableHead>
 					<TableRow>
-						<TableCell>{t("standalone.data-grid.settings.column")}</TableCell>
-						<TableCell>{t("standalone.data-grid.settings.show")}</TableCell>
-						<TableCell>{t("standalone.data-grid.settings.pin")}</TableCell>
+						<StyledTableCell>
+							{t("standalone.data-grid.settings.column")}
+						</StyledTableCell>
+						<StyledTableCell>
+							{t("standalone.data-grid.settings.show")}
+						</StyledTableCell>
+						<StyledTableCell>
+							{t("standalone.data-grid.settings.pin")}
+						</StyledTableCell>
 					</TableRow>
 				</TableHead>
 				<TableBody>
 					{columns.map((column: IDataGridColumnDef) => (
 						<TableRow key={column.field}>
-							<TableCell>{column.headerName}</TableCell>
-							<TableCell>
+							<StyledTableCell>{column.headerName}</StyledTableCell>
+							<StyledTableCell>
 								<Checkbox
 									checked={!props.hiddenColumns.includes(column.field)}
 									onChange={props.toggleColumnVisibility}
 									value={column.field}
 								/>
-							</TableCell>
-							<TableCell>
+							</StyledTableCell>
+							<StyledTableCell>
 								<Checkbox
 									checked={props.lockedColumns.includes(column.field)}
 									disabled={
@@ -91,7 +105,7 @@ const SettingsDialog = (props: IDataGridSettingsDialogProps) => {
 									onChange={props.toggleColumnLock}
 									value={column.field}
 								/>
-							</TableCell>
+							</StyledTableCell>
 						</TableRow>
 					))}
 				</TableBody>
