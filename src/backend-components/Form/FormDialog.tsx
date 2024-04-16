@@ -116,6 +116,7 @@ const FormDialog = (inProps: FormDialogProps) => {
 			open={true}
 			onClose={handleClose}
 			fullWidth
+			className={"CcFormDialog"}
 		>
 			<DialogTitle onClose={handleClose} noTitle={!dialogTitle}>
 				{dialogTitle}
