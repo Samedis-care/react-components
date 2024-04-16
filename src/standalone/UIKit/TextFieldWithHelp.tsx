@@ -89,6 +89,12 @@ const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(
 	}, [muiProps.value]);
 
 	// render
+	const showClear = isTouchDevice() && hasValue && !muiProps.disabled;
+	const hasEndAdornment = !!(
+		showClear ||
+		openInfo ||
+		muiProps.InputProps?.endAdornment
+	);
 
 	return (
 		<UiKitTextFieldWithWarnings
@@ -99,10 +105,10 @@ const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(
 			onChange={handleChange}
 			InputProps={{
 				...muiProps.InputProps,
-				endAdornment: (
+				endAdornment: hasEndAdornment ? (
 					<>
 						<InputAdornment position={"end"}>
-							{isTouchDevice() && hasValue && !muiProps.disabled && (
+							{showClear && (
 								<IconButton onClick={handleClear} size="large">
 									<ClearIcon />
 								</IconButton>
@@ -120,7 +126,7 @@ const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(
 							)}
 						</InputAdornment>
 					</>
-				),
+				) : undefined,
 			}}
 			inputProps={{
 				...muiProps.inputProps,
