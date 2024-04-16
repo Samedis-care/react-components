@@ -40,16 +40,20 @@ const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(props
         setHasValue(!!muiProps.value);
     }, [muiProps.value]);
     // render
+    const showClear = isTouchDevice() && hasValue && !muiProps.disabled;
+    const hasEndAdornment = !!(showClear ||
+        openInfo ||
+        muiProps.InputProps?.endAdornment);
     return (React.createElement(UiKitTextFieldWithWarnings, { ref: ref, InputLabelProps: InputLabelConfig, ...muiProps, warning: warning, onChange: handleChange, InputProps: {
             ...muiProps.InputProps,
-            endAdornment: (React.createElement(React.Fragment, null,
+            endAdornment: hasEndAdornment ? (React.createElement(React.Fragment, null,
                 React.createElement(InputAdornment, { position: "end" },
-                    isTouchDevice() && hasValue && !muiProps.disabled && (React.createElement(IconButton, { onClick: handleClear, size: "large" },
+                    showClear && (React.createElement(IconButton, { onClick: handleClear, size: "large" },
                         React.createElement(ClearIcon, null))),
                     muiProps.InputProps
                         ?.endAdornment?.props?.children,
                     openInfo && (React.createElement(IconButton, { onClick: openInfo, size: "large" },
-                        React.createElement(InfoIcon, { color: "disabled" })))))),
+                        React.createElement(InfoIcon, { color: "disabled" })))))) : undefined,
         }, inputProps: {
             ...muiProps.inputProps,
             ref: composeRef(inputRef, muiProps.inputProps?.ref),
