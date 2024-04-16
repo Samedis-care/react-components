@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useRef } from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import { Dialog, DialogContent, styled, useThemeProps } from "@mui/material";
 import { OpenInNew } from "@mui/icons-material";
 import { useDialogContext } from "../../framework/DialogContextProvider";
@@ -56,6 +56,7 @@ const OpenInNewIcon = styled(OpenInNew, {
 export type FormDialogClassKey = "content" | "openInNewIcon";
 
 export interface FormDialogDispatch {
+	setTitle: (title: React.ReactNode) => void;
 	blockClosing: () => void;
 	unblockClosing: () => void;
 }
@@ -68,7 +69,7 @@ export const FormDialogDispatchContext = React.createContext<
 const FormDialog = (inProps: FormDialogProps) => {
 	const props = useThemeProps({ props: inProps, name: "CcFormDialog" });
 	const {
-		dialogTitle,
+		dialogTitle: titleOverride,
 		maxWidth,
 		useCustomClasses,
 		openInNewLink,
@@ -78,6 +79,7 @@ const FormDialog = (inProps: FormDialogProps) => {
 	} = props;
 	const [pushDialog, popDialog] = useDialogContext();
 	const blockClosingCounter = useRef(0);
+	const [title, setTitle] = useState<React.ReactNode>(null);
 	const { t } = useCCTranslations();
 
 	const handleClose = useCallback(async () => {
@@ -104,10 +106,12 @@ const FormDialog = (inProps: FormDialogProps) => {
 		(): FormDialogDispatch => ({
 			blockClosing,
 			unblockClosing,
+			setTitle,
 		}),
 		[blockClosing, unblockClosing],
 	);
 
+	const dialogTitle = titleOverride ?? title;
 	const ContentComp = useCustomClasses ? TallDialogContent : DialogContent;
 
 	return (
