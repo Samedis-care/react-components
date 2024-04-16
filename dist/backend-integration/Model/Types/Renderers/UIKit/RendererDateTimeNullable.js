@@ -25,7 +25,7 @@ class RendererDateTimeNullable extends TypeDateTimeNullable {
                             ? ccI18n.t("backend-integration.model.types.renderers.date.validation-error")
                             : "";
                         setFieldTouched(field, touched, true);
-                    } }),
+                    }, fullWidth: true }),
                 React.createElement(FormHelperTextCC, { error: !!errorMsg, warning: !!warningMsg }, errorMsg || warningMsg)));
         }
         return (React.createElement(Typography, null,

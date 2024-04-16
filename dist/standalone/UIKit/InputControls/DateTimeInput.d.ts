@@ -17,6 +17,10 @@ export interface DateTimeInputProps extends UIInputProps {
      * onBlur callback for the text field input
      */
     onBlur?: TextFieldProps["onBlur"];
+    /**
+     * full width?
+     */
+    fullWidth?: TextFieldProps["fullWidth"];
 }
 declare const _default: React.MemoExoticComponent<(props: DateTimeInputProps & DateTimePickerProps<Moment, false>) => React.JSX.Element>;
 export default _default;
