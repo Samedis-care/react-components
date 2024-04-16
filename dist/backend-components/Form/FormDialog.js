@@ -52,7 +52,7 @@ const FormDialog = (inProps) => {
         unblockClosing,
     }), [blockClosing, unblockClosing]);
     const ContentComp = useCustomClasses ? TallDialogContent : DialogContent;
-    return (React.createElement(Dialog, { maxWidth: maxWidth ?? "lg", open: true, onClose: handleClose, fullWidth: true },
+    return (React.createElement(Dialog, { maxWidth: maxWidth ?? "lg", open: true, onClose: handleClose, fullWidth: true, className: "CcFormDialog" },
         React.createElement(DialogTitle, { onClose: handleClose, noTitle: !dialogTitle },
             dialogTitle,
             openInNewLink && React.createElement(OpenInNewIcon, { onClick: openInNewLink })),
