@@ -31,6 +31,7 @@ export interface FormDialogProps {
 }
 export type FormDialogClassKey = "content" | "openInNewIcon";
 export interface FormDialogDispatch {
+    setTitle: (title: React.ReactNode) => void;
     blockClosing: () => void;
     unblockClosing: () => void;
 }

@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useRef } from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import { Dialog, DialogContent, styled, useThemeProps } from "@mui/material";
 import { OpenInNew } from "@mui/icons-material";
 import { useDialogContext } from "../../framework/DialogContextProvider";
@@ -23,9 +23,10 @@ export const IsInFormDialogContext = React.createContext(false);
 export const FormDialogDispatchContext = React.createContext(undefined);
 const FormDialog = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcFormDialog" });
-    const { dialogTitle, maxWidth, useCustomClasses, openInNewLink, children, onClose, disableFormDialogContext, } = props;
+    const { dialogTitle: titleOverride, maxWidth, useCustomClasses, openInNewLink, children, onClose, disableFormDialogContext, } = props;
     const [pushDialog, popDialog] = useDialogContext();
     const blockClosingCounter = useRef(0);
+    const [title, setTitle] = useState(null);
     const { t } = useCCTranslations();
     const handleClose = useCallback(async () => {
         try {
@@ -50,7 +51,9 @@ const FormDialog = (inProps) => {
     const dispatch = useMemo(() => ({
         blockClosing,
         unblockClosing,
+        setTitle,
     }), [blockClosing, unblockClosing]);
+    const dialogTitle = titleOverride ?? title;
     const ContentComp = useCustomClasses ? TallDialogContent : DialogContent;
     return (React.createElement(Dialog, { maxWidth: maxWidth ?? "lg", open: true, onClose: handleClose, fullWidth: true, className: "CcFormDialog" },
         React.createElement(DialogTitle, { onClose: handleClose, noTitle: !dialogTitle },
