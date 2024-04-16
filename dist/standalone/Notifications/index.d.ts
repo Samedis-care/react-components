@@ -85,6 +85,6 @@ export interface NotificationsProps {
      */
     classes?: Partial<Record<NotificationsClassKey, string>>;
 }
-export type NotificationsClassKey = "notificationArea";
+export type NotificationsClassKey = "notificationArea" | "header";
 declare const _default: React.MemoExoticComponent<(inProps: NotificationsProps) => React.JSX.Element>;
 export default _default;

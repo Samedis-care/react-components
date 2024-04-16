@@ -47,6 +47,10 @@ const StyledInfiniteScroll = styled(InfiniteScroll, {
     height: "50vh",
     overflow: "auto",
 });
+const StyledHeader = styled(Typography, {
+    name: "CcNotifications",
+    slot: "header",
+})({});
 const Notifications = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcNotifications" });
     const { t } = useCCTranslations();
@@ -86,7 +90,7 @@ const Notifications = (inProps) => {
             React.createElement(Box, { p: 2 },
                 React.createElement(Grid, { container: true, spacing: 2 },
                     React.createElement(Grid, { item: true, xs: 12 },
-                        React.createElement(Typography, { variant: "h6" }, t("standalone.notifications.title"))),
+                        React.createElement(StyledHeader, { component: "h2", variant: "h6", className: classes?.header }, t("standalone.notifications.title"))),
                     React.createElement(Grid, { item: true, xs: 12 },
                         React.createElement(Divider, null)),
                     React.createElement(Grid, { item: true, xs: 12 },
