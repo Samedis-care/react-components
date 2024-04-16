@@ -177,7 +177,12 @@ const StyledInfiniteScroll = styled(InfiniteScroll, {
 	overflow: "auto",
 });
 
-export type NotificationsClassKey = "notificationArea";
+const StyledHeader = styled(Typography, {
+	name: "CcNotifications",
+	slot: "header",
+})({}) as typeof Typography;
+
+export type NotificationsClassKey = "notificationArea" | "header";
 
 const Notifications = (inProps: NotificationsProps) => {
 	const props = useThemeProps({ props: inProps, name: "CcNotifications" });
@@ -258,9 +263,9 @@ const Notifications = (inProps: NotificationsProps) => {
 				<Box p={2}>
 					<Grid container spacing={2}>
 						<Grid item xs={12}>
-							<Typography variant={"h6"}>
+							<StyledHeader component={"h2"} variant={"h6"}>
 								{t("standalone.notifications.title")}
-							</Typography>
+							</StyledHeader>
 						</Grid>
 						<Grid item xs={12}>
 							<Divider />
