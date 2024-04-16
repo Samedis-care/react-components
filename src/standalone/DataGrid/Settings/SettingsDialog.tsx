@@ -73,13 +73,13 @@ const SettingsDialog = (props: IDataGridSettingsDialogProps) => {
 			<Table stickyHeader>
 				<TableHead>
 					<TableRow>
-						<StyledTableCell>
+						<StyledTableCell className={classes?.settingsTableCell}>
 							{t("standalone.data-grid.settings.column")}
 						</StyledTableCell>
-						<StyledTableCell>
+						<StyledTableCell className={classes?.settingsTableCell}>
 							{t("standalone.data-grid.settings.show")}
 						</StyledTableCell>
-						<StyledTableCell>
+						<StyledTableCell className={classes?.settingsTableCell}>
 							{t("standalone.data-grid.settings.pin")}
 						</StyledTableCell>
 					</TableRow>
@@ -87,15 +87,17 @@ const SettingsDialog = (props: IDataGridSettingsDialogProps) => {
 				<TableBody>
 					{columns.map((column: IDataGridColumnDef) => (
 						<TableRow key={column.field}>
-							<StyledTableCell>{column.headerName}</StyledTableCell>
-							<StyledTableCell>
+							<StyledTableCell className={classes?.settingsTableCell}>
+								{column.headerName}
+							</StyledTableCell>
+							<StyledTableCell className={classes?.settingsTableCell}>
 								<Checkbox
 									checked={!props.hiddenColumns.includes(column.field)}
 									onChange={props.toggleColumnVisibility}
 									value={column.field}
 								/>
 							</StyledTableCell>
-							<StyledTableCell>
+							<StyledTableCell className={classes?.settingsTableCell}>
 								<Checkbox
 									checked={props.lockedColumns.includes(column.field)}
 									disabled={

@@ -263,7 +263,11 @@ const Notifications = (inProps: NotificationsProps) => {
 				<Box p={2}>
 					<Grid container spacing={2}>
 						<Grid item xs={12}>
-							<StyledHeader component={"h2"} variant={"h6"}>
+							<StyledHeader
+								component={"h2"}
+								variant={"h6"}
+								className={classes?.header}
+							>
 								{t("standalone.notifications.title")}
 							</StyledHeader>
 						</Grid>
