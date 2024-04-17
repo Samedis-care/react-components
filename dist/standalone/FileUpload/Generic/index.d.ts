@@ -180,6 +180,7 @@ export interface FileCaptureConfig {
     type: "image" | "audio" | "video";
     source: "user" | "environment";
 }
+export declare const FileInput: import("@emotion/styled").StyledComponent<import("@mui/system").MUIStyledCommonProps<import("@mui/material").Theme>, Pick<React.DetailedHTMLProps<React.InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>, keyof React.ClassAttributes<HTMLInputElement> | keyof React.InputHTMLAttributes<HTMLInputElement>>, {}>;
 export type FileUploadClassKey = "root" | "dropzone" | "formatTextModern" | "formatIconsModern" | "fileInput" | "formatText" | "modernUploadLabel";
 declare const _default: React.ForwardRefExoticComponent<Omit<FileUploadProps & React.RefAttributes<FileUploadDispatch>, "ref"> & React.RefAttributes<FileUploadDispatch>>;
 export default _default;
