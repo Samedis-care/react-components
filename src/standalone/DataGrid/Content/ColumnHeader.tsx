@@ -179,11 +179,12 @@ const ColumnHeader = (props: IDataGridContentColumnHeaderProps) => {
 		[field, onFilterChange],
 	);
 	const autoResize = useCallback(() => {
-		if (!gridRoot) return;
+		const root = gridRoot.current;
+		if (!root) return;
 
 		let width = 0;
 
-		gridRoot.querySelectorAll(".column-" + field).forEach((entry) => {
+		root.querySelectorAll(".column-" + field).forEach((entry) => {
 			const widthMeasurement = document.createElement("div");
 			widthMeasurement.style.display = "inline";
 			widthMeasurement.style.position = "absolute";

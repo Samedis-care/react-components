@@ -584,11 +584,11 @@ export const useDataGridColumnsWidthState = (): DataGridColumnsWidthState => {
 	return ctx;
 };
 
-const DataGridRootRefContext = React.createContext<HTMLDivElement | undefined>(
-	undefined,
-);
+const DataGridRootRefContext = React.createContext<
+	React.RefObject<HTMLDivElement> | undefined
+>(undefined);
 
-export const useDataGridRootRef = (): HTMLDivElement => {
+export const useDataGridRootRef = (): React.RefObject<HTMLDivElement> => {
 	const ctx = useContext(DataGridRootRefContext);
 	if (!ctx) throw new Error("RootRef context not set");
 	return ctx;
@@ -1108,7 +1108,7 @@ const DataGrid = (inProps: DataGridProps) => {
 	const lastRefreshData = useRef<number>(0);
 	const activeCustomFiltersPack = useState(0);
 
-	const gridRoot = useRef<HTMLDivElement>();
+	const gridRoot = useRef<HTMLDivElement>(null);
 
 	const visibleColumns = useMemo(
 		() => getActiveDataGridColumns(columns, hiddenColumns, lockedColumns),
@@ -1322,9 +1322,9 @@ const DataGrid = (inProps: DataGridProps) => {
 			alignItems={"stretch"}
 			wrap={"nowrap"}
 			className={combineClassNames([className, classes?.root])}
-			ref={(r) => (gridRoot.current = r ? r : undefined)}
+			ref={gridRoot}
 		>
-			<DataGridRootRefContext.Provider value={gridRoot.current}>
+			<DataGridRootRefContext.Provider value={gridRoot}>
 				<DataGridPropsContext.Provider value={props}>
 					<DataGridStateContext.Provider value={statePack}>
 						<DataGridColumnsStateContext.Provider value={columnsStatePack}>
