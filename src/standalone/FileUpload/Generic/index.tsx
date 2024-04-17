@@ -243,7 +243,7 @@ const FormatIconsModern = styled(Grid, {
 	color: theme.palette.action.disabled,
 }));
 
-const FileInput = styled("input", {
+export const FileInput = styled("input", {
 	name: "CcFileUpload",
 	slot: "fileInput",
 })({
