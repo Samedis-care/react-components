@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useEffect, useMemo, useRef, useState, } from "react";
+import React, { Suspense, useCallback, useContext, useEffect, useMemo, useRef, useState, } from "react";
 import useCCTranslations from "../utils/useCCTranslations";
 import { FrameworkHistory } from "./History";
 /**
@@ -74,6 +74,6 @@ const DialogContextProvider = (props) => {
     return (React.createElement(React.Fragment, null,
         React.createElement(DialogContext.Provider, { value: dialogActions },
             React.createElement(React.Fragment, null, props.children),
-            React.createElement(React.Fragment, null, dialogs.map((dialog, index) => (React.createElement(React.Fragment, { key: index.toString() }, dialog)))))));
+            React.createElement(React.Fragment, null, dialogs.map((dialog, index) => (React.createElement(Suspense, { key: index.toString() }, dialog)))))));
 };
 export default React.memo(DialogContextProvider);

@@ -33,7 +33,7 @@ const FormPageWrapper = (props) => {
     const params = useParams();
     if (!props.children)
         return React.createElement(React.Fragment, null);
-    return props.form(params.id ?? "", props.children);
+    return (React.createElement(Suspense, { fallback: React.createElement(Loader, null) }, props.form(params.id ?? "", props.children)));
 };
 const CRUD = (props) => {
     const navigate = useNavigate();

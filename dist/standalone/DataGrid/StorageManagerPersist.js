@@ -2,6 +2,7 @@ import React, { useCallback, useMemo } from "react";
 import { DataGridPersistentStateContext, } from "./StatePersistence";
 import { StorageManager } from "../../framework/Storage";
 import useAsyncMemo from "../../utils/useAsyncMemo";
+import Loader from "../Loader";
 const DATA_GRID_STORAGE_KEY_BASE = "data-grid-";
 // recommended default: localStorage
 export const DATA_GRID_STORAGE_KEY_COLUMN_SIZING = DATA_GRID_STORAGE_KEY_BASE + "column-sizing";
@@ -59,6 +60,8 @@ const StorageManagerPersist = (props) => {
     const persistCtx = useMemo(() => {
         return [data, setData];
     }, [data, setData]);
-    return (React.createElement(React.Fragment, null, data && (React.createElement(DataGridPersistentStateContext.Provider, { value: persistCtx }, children))));
+    if (!data)
+        return React.createElement(Loader, null);
+    return (React.createElement(DataGridPersistentStateContext.Provider, { value: persistCtx }, children));
 };
 export default React.memo(StorageManagerPersist);

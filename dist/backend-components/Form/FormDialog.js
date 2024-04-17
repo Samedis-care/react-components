@@ -1,10 +1,11 @@
-import React, { useCallback, useMemo, useRef, useState } from "react";
+import React, { Suspense, useCallback, useMemo, useRef, useState } from "react";
 import { Dialog, DialogContent, styled, useThemeProps } from "@mui/material";
 import { OpenInNew } from "@mui/icons-material";
 import { useDialogContext } from "../../framework/DialogContextProvider";
 import { showConfirmDialog } from "../../non-standalone/Dialog/Utils";
 import { DialogTitle } from "../../non-standalone/Dialog/DialogTitle";
 import useCCTranslations from "../../utils/useCCTranslations";
+import Loader from "../../standalone/Loader";
 const TallDialogContent = styled(DialogContent, {
     name: "CcFormDialog",
     slot: "content",
@@ -61,6 +62,7 @@ const FormDialog = (inProps) => {
             openInNewLink && React.createElement(OpenInNewIcon, { onClick: openInNewLink })),
         React.createElement(ContentComp, null,
             React.createElement(IsInFormDialogContext.Provider, { value: !disableFormDialogContext },
-                React.createElement(FormDialogDispatchContext.Provider, { value: dispatch }, children)))));
+                React.createElement(FormDialogDispatchContext.Provider, { value: dispatch },
+                    React.createElement(Suspense, { fallback: React.createElement(Loader, null) }, children))))));
 };
 export default React.memo(FormDialog);
