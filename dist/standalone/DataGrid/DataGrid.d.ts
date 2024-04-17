@@ -477,7 +477,7 @@ export type DataGridColumnsWidthState = [
     Dispatch<SetStateAction<Record<string, number>>>
 ];
 export declare const useDataGridColumnsWidthState: () => DataGridColumnsWidthState;
-export declare const useDataGridRootRef: () => HTMLDivElement;
+export declare const useDataGridRootRef: () => React.RefObject<HTMLDivElement>;
 export declare const getDataGridDefaultState: (columns: IDataGridColumnDef[], defaultCustomData: Record<string, unknown> | undefined) => IDataGridState;
 export declare const getDataGridDefaultColumnsState: (columns: IDataGridColumnDef[], defaultSort: DataGridSortSetting[] | undefined, defaultFilter: DataGridFilterSetting[] | undefined) => IDataGridColumnsState;
 export declare const DataGridContentOverlayCollapse: import("@emotion/styled").StyledComponent<Pick<import("@mui/material").CollapseProps, keyof import("@mui/material").CollapseProps> & import("@mui/system").MUIStyledCommonProps<Theme>, {}, {}>;

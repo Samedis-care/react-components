@@ -424,7 +424,7 @@ const DataGrid = (inProps) => {
     const { search, rows, pages, hiddenColumns, lockedColumns, refreshData, customData, selectAll, selectedRows, selectionUpdatedByProps, } = state;
     const lastRefreshData = useRef(0);
     const activeCustomFiltersPack = useState(0);
-    const gridRoot = useRef();
+    const gridRoot = useRef(null);
     const visibleColumns = useMemo(() => getActiveDataGridColumns(columns, hiddenColumns, lockedColumns), [columns, hiddenColumns, lockedColumns]);
     const columnsStatePack = useState(() => {
         const ret = {
@@ -592,8 +592,8 @@ const DataGrid = (inProps) => {
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectAll, selectedRows]);
-    return (React.createElement(Wrapper, { container: true, direction: "column", justifyContent: "space-between", alignItems: "stretch", wrap: "nowrap", className: combineClassNames([className, classes?.root]), ref: (r) => (gridRoot.current = r ? r : undefined) },
-        React.createElement(DataGridRootRefContext.Provider, { value: gridRoot.current },
+    return (React.createElement(Wrapper, { container: true, direction: "column", justifyContent: "space-between", alignItems: "stretch", wrap: "nowrap", className: combineClassNames([className, classes?.root]), ref: gridRoot },
+        React.createElement(DataGridRootRefContext.Provider, { value: gridRoot },
             React.createElement(DataGridPropsContext.Provider, { value: props },
                 React.createElement(DataGridStateContext.Provider, { value: statePack },
                     React.createElement(DataGridColumnsStateContext.Provider, { value: columnsStatePack },

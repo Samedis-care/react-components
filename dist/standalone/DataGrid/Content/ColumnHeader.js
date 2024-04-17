@@ -129,10 +129,11 @@ const ColumnHeader = (props) => {
     }, [onColumnSortChange]);
     const internalOnFilterChange = useCallback((newFilter) => onFilterChange(field, newFilter), [field, onFilterChange]);
     const autoResize = useCallback(() => {
-        if (!gridRoot)
+        const root = gridRoot.current;
+        if (!root)
             return;
         let width = 0;
-        gridRoot.querySelectorAll(".column-" + field).forEach((entry) => {
+        root.querySelectorAll(".column-" + field).forEach((entry) => {
             const widthMeasurement = document.createElement("div");
             widthMeasurement.style.display = "inline";
             widthMeasurement.style.position = "absolute";
