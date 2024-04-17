@@ -1,10 +1,11 @@
-import React, { useCallback, useMemo, useRef, useState } from "react";
+import React, { Suspense, useCallback, useMemo, useRef, useState } from "react";
 import { Dialog, DialogContent, styled, useThemeProps } from "@mui/material";
 import { OpenInNew } from "@mui/icons-material";
 import { useDialogContext } from "../../framework/DialogContextProvider";
 import { showConfirmDialog } from "../../non-standalone/Dialog/Utils";
 import { DialogTitle } from "../../non-standalone/Dialog/DialogTitle";
 import useCCTranslations from "../../utils/useCCTranslations";
+import Loader from "../../standalone/Loader";
 
 export interface FormDialogProps {
 	/**
@@ -129,7 +130,7 @@ const FormDialog = (inProps: FormDialogProps) => {
 			<ContentComp>
 				<IsInFormDialogContext.Provider value={!disableFormDialogContext}>
 					<FormDialogDispatchContext.Provider value={dispatch}>
-						{children}
+						<Suspense fallback={<Loader />}>{children}</Suspense>
 					</FormDialogDispatchContext.Provider>
 				</IsInFormDialogContext.Provider>
 			</ContentComp>

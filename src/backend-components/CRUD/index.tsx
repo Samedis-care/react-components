@@ -261,7 +261,11 @@ interface FormPageWrapperProps {
 const FormPageWrapper = (props: FormPageWrapperProps) => {
 	const params = useParams();
 	if (!props.children) return <></>;
-	return props.form(params.id ?? "", props.children);
+	return (
+		<Suspense fallback={<Loader />}>
+			{props.form(params.id ?? "", props.children)}
+		</Suspense>
+	);
 };
 
 const CRUD = <

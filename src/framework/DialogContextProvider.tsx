@@ -1,4 +1,5 @@
 import React, {
+	Suspense,
 	useCallback,
 	useContext,
 	useEffect,
@@ -114,7 +115,7 @@ const DialogContextProvider = (props: IFrameworkProps) => {
 				<>{props.children}</>
 				<>
 					{dialogs.map((dialog, index) => (
-						<React.Fragment key={index.toString()}>{dialog}</React.Fragment>
+						<Suspense key={index.toString()}>{dialog}</Suspense>
 					))}
 				</>
 			</DialogContext.Provider>

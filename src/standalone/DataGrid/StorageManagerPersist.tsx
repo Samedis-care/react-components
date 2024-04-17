@@ -6,6 +6,7 @@ import {
 } from "./StatePersistence";
 import { StorageManager } from "../../framework/Storage";
 import useAsyncMemo from "../../utils/useAsyncMemo";
+import Loader from "../Loader";
 
 export interface StorageManagerPersistProps {
 	/**
@@ -104,14 +105,11 @@ const StorageManagerPersist = (props: StorageManagerPersistProps) => {
 		return [data, setData] as DataGridPersistentStateContextType;
 	}, [data, setData]);
 
+	if (!data) return <Loader />;
 	return (
-		<>
-			{data && (
-				<DataGridPersistentStateContext.Provider value={persistCtx}>
-					{children}
-				</DataGridPersistentStateContext.Provider>
-			)}
-		</>
+		<DataGridPersistentStateContext.Provider value={persistCtx}>
+			{children}
+		</DataGridPersistentStateContext.Provider>
 	);
 };
 
