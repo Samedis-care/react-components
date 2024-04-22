@@ -1,9 +1,10 @@
 import React from "react";
-import { Box, Button, Divider, Grid, Typography } from "@mui/material";
+import { Box, Button, Divider, Grid } from "@mui/material";
 import {
 	DataGridContentOverlayClosed,
 	DataGridContentOverlayPaper,
 	DataGridCustomFilterContainer,
+	DataGridCustomFilterDialogTitle,
 	useDataGridProps,
 } from "../DataGrid";
 import { IDataGridFilterBarProps } from "../Header/FilterBar";
@@ -31,9 +32,12 @@ const FilterDialog = (props: DataGridCustomFilterDialogProps) => {
 			elevation={0}
 			className={classes?.contentOverlayPaper}
 		>
-			<Typography variant={"h6"}>
+			<DataGridCustomFilterDialogTitle
+				variant={"h6"}
+				className={classes?.customFilterContainerHeader}
+			>
 				{t("standalone.data-grid.custom-filters.title") || ""}
-			</Typography>
+			</DataGridCustomFilterDialogTitle>
 			<Divider />
 			<DataGridCustomFilterContainer
 				justifyContent={"space-between"}

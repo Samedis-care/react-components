@@ -108,32 +108,34 @@ const GridMultiSelectFilter = (props: GridMultiSelectFilterProps) => {
 
 	if (dialog) {
 		return (
-			<Grid item xs={12} md={6} lg={3} {...dialogBreakpoints} container>
-				{label && (
-					<Grid item xs={12}>
-						<Typography>{label}</Typography>
-					</Grid>
-				)}
-				{options.map((option) => (
-					<Grid item xs={12} key={option.value}>
-						{option.isDivider ? (
-							<Divider />
-						) : option.isSmallLabel ? (
-							<Typography>{option.label}</Typography>
-						) : (
-							<FormControlLabel
-								control={
-									<Checkbox
-										name={option.value}
-										checked={selected.includes(option.value)}
-										onChange={handleDialogCheckboxToggle}
-									/>
-								}
-								label={option.label}
-							/>
-						)}
-					</Grid>
-				))}
+			<Grid item xs={12} md={6} lg={3} {...dialogBreakpoints}>
+				<Grid container>
+					{label && (
+						<Grid item xs={12}>
+							<Typography>{label}</Typography>
+						</Grid>
+					)}
+					{options.map((option) => (
+						<Grid item xs={12} key={option.value}>
+							{option.isDivider ? (
+								<Divider />
+							) : option.isSmallLabel ? (
+								<Typography>{option.label}</Typography>
+							) : (
+								<FormControlLabel
+									control={
+										<Checkbox
+											name={option.value}
+											checked={selected.includes(option.value)}
+											onChange={handleDialogCheckboxToggle}
+										/>
+									}
+									label={option.label}
+								/>
+							)}
+						</Grid>
+					))}
+				</Grid>
 			</Grid>
 		);
 	} else {
