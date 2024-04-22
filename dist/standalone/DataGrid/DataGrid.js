@@ -138,6 +138,10 @@ export const DataGridContentOverlayClosed = styled("div", {
     right: 0,
     backgroundColor: theme.palette.background.paper,
 }));
+export const DataGridCustomFilterDialogTitle = styled(Typography, {
+    name: "CcDataGrid",
+    slot: "customFilterContainerHeader",
+})({});
 export const DataGridCustomFilterContainer = styled(Grid, {
     name: "CcDataGrid",
     slot: "customFilterContainer",
@@ -331,6 +335,7 @@ export const DataGridCustomFilterIcon = styled(AppsIcon, {
     slot: "customFilterIcon",
 })(({ theme }) => ({
     color: theme.palette.primary.main,
+    verticalAlign: "text-bottom",
     "&.CcDataGrid-customFilterActiveIcon": {
         color: theme.palette.secondary.main,
     },
