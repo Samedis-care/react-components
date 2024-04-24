@@ -37,7 +37,7 @@ class RendererEnumMultiSelect extends TypeEnumMulti {
                 ...data.filter((entry) => getStringLabel(entry).toLowerCase().includes(query.toLowerCase())),
             ]);
             return (React.createElement(FormControlFieldsetCC, { component: "fieldset", required: visibility.required, fullWidth: true, error: !!errorMsg, warning: !!warningMsg, onBlur: handleBlur, name: field },
-                React.createElement(MultiSelect, { label: label, selected: selected, onLoad: onLoad, onSelect: (selected) => handleChange(field, selected.map((entry) => entry.value)), disabled: visibility.readOnly, ...this.props }),
+                React.createElement(MultiSelect, { refreshToken: this.values.map((e) => e.value).join(","), label: label, selected: selected, onLoad: onLoad, onSelect: (selected) => handleChange(field, selected.map((entry) => entry.value)), disabled: visibility.readOnly, ...this.props }),
                 React.createElement(FormHelperText, null, errorMsg || warningMsg)));
         }
         return (React.createElement(Typography, null,
