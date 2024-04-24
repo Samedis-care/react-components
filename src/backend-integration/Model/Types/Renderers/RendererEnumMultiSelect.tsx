@@ -89,6 +89,7 @@ class RendererEnumMultiSelect extends TypeEnumMulti {
 					name={field}
 				>
 					<MultiSelect
+						refreshToken={this.values.map((e) => e.value).join(",")}
 						label={label}
 						selected={selected}
 						onLoad={onLoad}

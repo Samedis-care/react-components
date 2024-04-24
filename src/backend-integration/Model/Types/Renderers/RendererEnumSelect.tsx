@@ -92,6 +92,7 @@ class RendererEnumSelect extends TypeEnum {
 					name={field}
 				>
 					<SingleSelect
+						refreshToken={this.values.map((e) => e.value).join(",")}
 						{...this.props}
 						label={label}
 						selected={selected}
