@@ -1,6 +1,7 @@
-import React, { useContext, useMemo } from "react";
+import React, { useContext, useEffect, useMemo } from "react";
 import useLocation from "./useLocation";
 import matchPath, { normalizePath } from "./matchPath";
+import { sentrySetRoutePath } from "./SentryRoutingInstrumentation";
 
 export interface RouteProps {
 	/**
@@ -52,6 +53,10 @@ const Route = (props: RouteProps) => {
 		if (!match) return null; // this one is about to be unmounted
 		return { url: match.url, path: finalPath };
 	}, [path, pathname, routePrefix]);
+
+	useEffect(() => {
+		sentrySetRoutePath(normalizePath(routePrefix + path));
+	}, [routePrefix, path]);
 
 	if (!ctx) return <React.Fragment />;
 	return <RouteContext.Provider value={ctx}>{element}</RouteContext.Provider>;
