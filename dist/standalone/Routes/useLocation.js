@@ -10,8 +10,7 @@ const useLocation = () => {
         return ctx.history.listen((update) => {
             setLocation(update.location);
         });
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [ctx.history]);
     return location;
 };
 export default useLocation;
