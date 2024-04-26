@@ -276,7 +276,7 @@ export const DataGridCell = styled("div", { name: "CcDataGrid", slot: "cell" })(
         color: theme.palette.getContrastText(theme.palette.background.paper),
     },
     "&.CcDataGrid-headerCell": {
-        borderWidth: "0 1px 1px 0",
+        borderWidth: 0,
         padding: `0 ${HEADER_PADDING / 2}px`,
         backgroundColor: theme.palette.background.paper,
         color: theme.palette.getContrastText(theme.palette.background.paper),
