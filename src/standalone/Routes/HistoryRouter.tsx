@@ -1,6 +1,7 @@
-import React, { useContext, useEffect, useMemo } from "react";
-import { History } from "history";
+import React, { useContext, useEffect, useMemo, useState } from "react";
+import { History, Location } from "history";
 import { sentryHandleNavigation } from "./SentryRoutingInstrumentation";
+import { LocationContext } from "./useLocation";
 
 export interface HistoryRouterProps {
 	history: History;
@@ -21,15 +22,19 @@ export const useHistoryRouterContext = () => {
 
 const HistoryRouter = (props: HistoryRouterProps) => {
 	const { history, children } = props;
+	const [location, setLocation] = useState<Location>(history.location);
 	const ctx = useMemo((): HistoryRouterContextType => ({ history }), [history]);
 	useEffect(() => {
 		return history.listen((update) => {
+			setLocation(update.location);
 			sentryHandleNavigation(update);
 		});
 	}, [history]);
 	return (
 		<HistoryRouterContext.Provider value={ctx}>
-			{children}
+			<LocationContext.Provider value={location}>
+				{children}
+			</LocationContext.Provider>
 		</HistoryRouterContext.Provider>
 	);
 };
