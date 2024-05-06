@@ -168,11 +168,13 @@ const MultiGrid = (inProps: MultiGridProps) => {
 	const bottomRightGrid = useRef<VariableSizeGrid>(null);
 
 	const handleScroll = useCallback((evt: GridOnScrollProps) => {
+		if (evt.scrollUpdateWasRequested) return;
 		topRightGrid.current?.scrollTo({ scrollLeft: evt.scrollLeft });
 		bottomLeftGrid.current?.scrollTo({ scrollTop: evt.scrollTop });
 	}, []);
 
 	const handleScrollPinned = useCallback((evt: GridOnScrollProps) => {
+		if (evt.scrollUpdateWasRequested) return;
 		topLeftGrid.current?.scrollTo({ scrollLeft: evt.scrollLeft });
 		bottomRightGrid.current?.scrollTo({ scrollTop: evt.scrollTop });
 	}, []);
