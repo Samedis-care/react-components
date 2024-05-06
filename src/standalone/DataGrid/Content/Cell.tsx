@@ -146,7 +146,7 @@ const Cell = (props: GridChildComponentProps): React.ReactElement => {
 						record,
 						isSelectedHook,
 					)) &&
-					"CcDataCell-dataCellSelected",
+					"CcDataGrid-dataCellSelected",
 			])}
 		>
 			{content}
