@@ -90,7 +90,7 @@ const Cell = (props) => {
             props.rowIndex !== 0 && column && `column-${column.field}`,
             (hover == rowIndex ||
                 isSelected(state.selectAll, state.selectedRows, record, isSelectedHook)) &&
-                "CcDataCell-dataCellSelected",
+                "CcDataGrid-dataCellSelected",
         ]) }, content));
 };
 export default Cell;

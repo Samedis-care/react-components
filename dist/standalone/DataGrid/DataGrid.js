@@ -281,7 +281,7 @@ export const DataGridCell = styled("div", { name: "CcDataGrid", slot: "cell" })(
         backgroundColor: theme.palette.background.paper,
         color: theme.palette.getContrastText(theme.palette.background.paper),
     },
-    "&.CcDataCell-dataCellSelected": {
+    "&.CcDataGrid-dataCellSelected": {
         backgroundColor: theme.palette.action.hover,
         color: theme.palette.getContrastText(theme.palette.background.paper),
     },
