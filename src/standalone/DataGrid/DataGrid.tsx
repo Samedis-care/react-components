@@ -367,8 +367,9 @@ export interface IDataGridColumnDef {
 	headerName: string;
 	/**
 	 * Optional label override for column header
+	 * @remarks You should supply a string unless you want to customize this
 	 */
-	headerLabel?: string;
+	headerLabel?: NonNullable<React.ReactNode>;
 	/**
 	 * The data type used for filtering
 	 */

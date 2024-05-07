@@ -26,7 +26,7 @@ export interface IDataGridContentColumnHeaderContentProps {
 	/**
 	 * The header columnHeaderLabel
 	 */
-	headerName: string;
+	headerName: NonNullable<React.ReactNode>;
 	/**
 	 * Allow resizing of column (disabled for locked columns)
 	 */
@@ -125,12 +125,14 @@ const ColumnHeaderContent = (
 				>
 					<Tooltip title={props.headerName}>
 						<span>
-							{props.headerName.split("\n").map((text, index, arr) => (
-								<React.Fragment key={text}>
-									{text}
-									{index == arr.length - 1 ? undefined : <br />}
-								</React.Fragment>
-							))}
+							{typeof props.headerName === "string"
+								? props.headerName.split("\n").map((text, index, arr) => (
+										<React.Fragment key={text}>
+											{text}
+											{index == arr.length - 1 ? undefined : <br />}
+										</React.Fragment>
+									))
+								: props.headerName}
 						</span>
 					</Tooltip>
 				</DataGridColumnHeaderLabel>
