@@ -33,9 +33,11 @@ const ColumnHeaderContent = (props) => {
         React.createElement(Grid, { container: true, justifyContent: "flex-start", wrap: "nowrap" },
             React.createElement(DataGridColumnHeaderLabel, { item: true, className: classes?.columnHeaderLabel, key: "header" },
                 React.createElement(Tooltip, { title: props.headerName },
-                    React.createElement("span", null, props.headerName.split("\n").map((text, index, arr) => (React.createElement(React.Fragment, { key: text },
-                        text,
-                        index == arr.length - 1 ? undefined : React.createElement("br", null))))))),
+                    React.createElement("span", null, typeof props.headerName === "string"
+                        ? props.headerName.split("\n").map((text, index, arr) => (React.createElement(React.Fragment, { key: text },
+                            text,
+                            index == arr.length - 1 ? undefined : React.createElement("br", null))))
+                        : props.headerName))),
             React.createElement(DataGridColumnHeaderSortIcon, { item: true, className: classes?.columnHeaderSortIcon },
                 props.sort === -1 && React.createElement(ArrowDownward, null),
                 props.sort === 1 && React.createElement(ArrowUpward, null)),

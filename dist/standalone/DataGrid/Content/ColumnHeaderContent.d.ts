@@ -10,7 +10,7 @@ export interface IDataGridContentColumnHeaderContentProps {
     /**
      * The header columnHeaderLabel
      */
-    headerName: string;
+    headerName: NonNullable<React.ReactNode>;
     /**
      * Allow resizing of column (disabled for locked columns)
      */
