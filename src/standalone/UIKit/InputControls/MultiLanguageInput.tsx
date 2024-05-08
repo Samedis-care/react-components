@@ -277,7 +277,14 @@ const LanguageLabel = styled("span", {
 	}),
 );
 
-export type MultiLanguageInputClassKey = "languageLabel";
+const LanguageLabelInputAdornment = styled(Typography, {
+	name: "CcMultiLanguageInput",
+	slot: "languageLabelInputAdornment",
+})({});
+
+export type MultiLanguageInputClassKey =
+	| "languageLabel"
+	| "languageLabelInputAdornment";
 
 const MultiLanguageInput = (inProps: MultiLanguageInputProps) => {
 	const props = useThemeProps({ props: inProps, name: "CcMultiLanguageInput" });
@@ -401,9 +408,12 @@ const MultiLanguageInput = (inProps: MultiLanguageInputProps) => {
 				startAdornment: !textFieldProps.multiline ? (
 					<InputAdornment position={"start"}>
 						<Tooltip title={getLanguageName(lang)}>
-							<Typography variant={"caption"} color={"textSecondary"}>
+							<LanguageLabelInputAdornment
+								variant={"caption"}
+								color={"textSecondary"}
+							>
 								{lang}
-							</Typography>
+							</LanguageLabelInputAdornment>
 						</Tooltip>
 					</InputAdornment>
 				) : undefined,
