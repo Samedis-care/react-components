@@ -13,6 +13,10 @@ const LanguageLabel = styled("span", {
         fontWeight: "bold",
     }),
 }));
+const LanguageLabelInputAdornment = styled(Typography, {
+    name: "CcMultiLanguageInput",
+    slot: "languageLabelInputAdornment",
+})({});
 const MultiLanguageInput = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcMultiLanguageInput" });
     const { enabledLanguages, values, onChange, name, onBlur, label, disableIncompleteMarker, required, ignoreI18nLocale, warning, ...textFieldProps } = props;
@@ -72,7 +76,7 @@ const MultiLanguageInput = (inProps) => {
         }, InputProps: {
             startAdornment: !textFieldProps.multiline ? (React.createElement(InputAdornment, { position: "start" },
                 React.createElement(Tooltip, { title: getLanguageName(lang) },
-                    React.createElement(Typography, { variant: "caption", color: "textSecondary" }, lang)))) : undefined,
+                    React.createElement(LanguageLabelInputAdornment, { variant: "caption", color: "textSecondary" }, lang)))) : undefined,
             endAdornment: defaultLanguage === lang && !textFieldProps.multiline ? (React.createElement(InputAdornment, { position: "end" },
                 React.createElement(IconButton, { onClick: toggleExpanded, size: "large" },
                     React.createElement(Translate, { color: expanded ? "primary" : incomplete ? "error" : undefined })))) : undefined,

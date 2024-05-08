@@ -52,6 +52,6 @@ export type MultiLanguageInputProps = Omit<TextFieldProps, "value" | "onChange" 
 export interface MultiLanguageInputLanguageLabelOwnerState {
     active: boolean;
 }
-export type MultiLanguageInputClassKey = "languageLabel";
+export type MultiLanguageInputClassKey = "languageLabel" | "languageLabelInputAdornment";
 declare const _default: React.MemoExoticComponent<(inProps: MultiLanguageInputProps) => React.JSX.Element>;
 export default _default;
