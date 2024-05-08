@@ -222,6 +222,18 @@ export type BaseSelectorProps<
 		 */
 		disabled?: boolean;
 		/**
+		 * Required of input
+		 */
+		required?: boolean;
+		/**
+		 * Error state of input
+		 */
+		error?: boolean;
+		/**
+		 * Warning state of input
+		 */
+		warning?: boolean;
+		/**
 		 * String used for the Autocomplete component
 		 */
 		autocompleteId?: string;
@@ -519,6 +531,9 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 		selected,
 		label,
 		disabled,
+		required,
+		error,
+		warning,
 		disableSearch,
 		placeholder,
 		autocompleteId,
@@ -900,6 +915,8 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 						disableAnimation
 						disabled={disabled}
 						className={classes?.label}
+						required={!!required}
+						error={!!error}
 					>
 						{label}
 					</StyledLabel>
@@ -1041,6 +1058,9 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 									onChange={(event) => {
 										void onSearchHandler(event.target.value);
 									}}
+									required={required}
+									error={error}
+									warning={warning}
 								/>
 							);
 						}}
