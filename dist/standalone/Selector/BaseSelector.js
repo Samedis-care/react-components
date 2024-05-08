@@ -130,7 +130,7 @@ const GrowPopper = React.forwardRef(function GrowPopperImpl(props, ref) {
 export const BaseSelectorContext = React.createContext(null);
 const BaseSelector = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcBaseSelector" });
-    const { variant, refreshToken, onSelect, multiple, selected, label, disabled, disableSearch, placeholder, autocompleteId, addNewLabel, onLoad, onAddNew, enableIcons, noOptionsText, loadingText, startTypingToSearchText, openText, closeText, clearText, disableClearable, openInfo, grouped, noGroupLabel, disableGroupSorting, groupSorter, switchLabel, lru, startAdornment, endAdornment, endAdornmentLeft, freeSolo, getIdOfData, filterIds, textFieldClasses, textFieldInputClasses, iconSize, classes, className, } = props;
+    const { variant, refreshToken, onSelect, multiple, selected, label, disabled, required, error, warning, disableSearch, placeholder, autocompleteId, addNewLabel, onLoad, onAddNew, enableIcons, noOptionsText, loadingText, startTypingToSearchText, openText, closeText, clearText, disableClearable, openInfo, grouped, noGroupLabel, disableGroupSorting, groupSorter, switchLabel, lru, startAdornment, endAdornment, endAdornmentLeft, freeSolo, getIdOfData, filterIds, textFieldClasses, textFieldInputClasses, iconSize, classes, className, } = props;
     const getIdDefault = useCallback((data) => data.value, []);
     const getId = getIdOfData ?? getIdDefault;
     const defaultSwitchValue = !!(props.displaySwitch && props.defaultSwitchValue);
@@ -343,7 +343,7 @@ const BaseSelector = (inProps) => {
     const filterOptions = useCallback((options) => options, []);
     return (React.createElement(StyledInlineSwitch, { visible: !!props.displaySwitch, value: switchValue, onChange: setSwitchValue, label: switchLabel, className: combineClassNames([className, classes?.inlineSwitch]) },
         React.createElement(BaseSelectorContext.Provider, { value: context },
-            label && (React.createElement(StyledLabel, { shrink: true, disableAnimation: true, disabled: disabled, className: classes?.label }, label)),
+            label && (React.createElement(StyledLabel, { shrink: true, disableAnimation: true, disabled: disabled, className: classes?.label, required: !!required, error: !!error }, label)),
             React.createElement(Wrapper, { elevation: 0, className: classes?.wrapper },
                 React.createElement(StyledAutocomplete, { id: autocompleteId, className: classes?.autocomplete, multiple: multiple, disableCloseOnSelect: multiple, open: open, onOpen: () => {
                         setOpen(true);
@@ -395,7 +395,7 @@ const BaseSelector = (inProps) => {
                                 })(),
                             }, placeholder: placeholder, onChange: (event) => {
                                 void onSearchHandler(event.target.value);
-                            } }));
+                            }, required: required, error: error, warning: warning }));
                     }, key: `${refreshToken || "no-refresh-token"} ${onAddNew
                         ? `add-new${actualAddNewLabel || "no-add-new-label"}`
                         : "no-add-new"}` })))));

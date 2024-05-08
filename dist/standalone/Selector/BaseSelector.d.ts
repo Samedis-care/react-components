@@ -133,6 +133,18 @@ export type BaseSelectorProps<DataT extends BaseSelectorData, Multi extends bool
      */
     disabled?: boolean;
     /**
+     * Required of input
+     */
+    required?: boolean;
+    /**
+     * Error state of input
+     */
+    error?: boolean;
+    /**
+     * Warning state of input
+     */
+    warning?: boolean;
+    /**
      * String used for the Autocomplete component
      */
     autocompleteId?: string;
