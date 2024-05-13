@@ -21,7 +21,7 @@ class RendererBooleanCheckbox extends TypeBoolean {
             return (React.createElement("input", { type: "hidden", name: field, checked: value, readOnly: true, "aria-hidden": "true" }));
         }
         if (visibility.editable) {
-            const control = (React.createElement(Checkbox, { name: field, checked: this.invert ? !value : value, disabled: visibility.readOnly, onChange: (evt, checked) => {
+            const control = (React.createElement(Checkbox, { name: field, checked: this.invert ? !value : !!value, disabled: visibility.readOnly, onChange: (evt, checked) => {
                     handleChange(evt.target.name, this.invert ? !checked : checked);
                 }, onBlur: handleBlur, "data-name": field }));
             return visibility.grid ? (control) : (React.createElement(FormControlFieldsetCC, { required: visibility.required, error: !!errorMsg, warning: !!warningMsg, component: "fieldset", "data-name": field },
