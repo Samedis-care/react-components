@@ -46,7 +46,7 @@ class RendererBooleanCheckbox extends TypeBoolean {
 			const control = (
 				<Checkbox
 					name={field}
-					checked={this.invert ? !value : value}
+					checked={this.invert ? !value : !!value}
 					disabled={visibility.readOnly}
 					onChange={(
 						evt: React.ChangeEvent<HTMLInputElement>,
