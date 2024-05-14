@@ -963,6 +963,7 @@ const Form = <
 	>(null);
 	const valuesStagedRef = useRef<Record<string, unknown>>({});
 	const [valuesStaged, setValuesStaged] = useState<Record<string, unknown>>({});
+	const valuesStagedModifiedRef = useRef<Record<string, boolean>>({});
 	const [valuesStagedModified, setValuesStagedModified] = useState<
 		Record<string, boolean>
 	>({});
@@ -1273,7 +1274,8 @@ const Form = <
 
 		valuesStagedRef.current = deepClone(valuesRef.current);
 		setValuesStaged(valuesStagedRef.current);
-		setValuesStagedModified(deepClone(touchedRef.current));
+		valuesStagedModifiedRef.current = deepClone(touchedRef.current);
+		setValuesStagedModified(valuesStagedModifiedRef.current);
 
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [isLoading]);
@@ -1304,7 +1306,7 @@ const Form = <
 		valuesRef.current = updateUnmodified(valuesRef.current, touched);
 		valuesStagedRef.current = updateUnmodified(
 			valuesStagedRef.current,
-			valuesStagedModified,
+			valuesStagedModifiedRef.current,
 		);
 		setValues(valuesRef.current);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -1438,16 +1440,17 @@ const Form = <
 						updateData,
 					);
 					setValuesStaged(valuesStagedRef.current);
-					setValuesStagedModified((prev) =>
-						Object.fromEntries(
-							Object.entries(prev).map(([key, modified]) => [
+					valuesStagedModifiedRef.current = Object.fromEntries(
+						Object.entries(valuesStagedModifiedRef.current).map(
+							([key, modified]) => [
 								key,
 								modified ||
 									getValueByDot(key, originalStaged) !==
 										getValueByDot(key, valuesStagedRef.current),
-							]),
+							],
 						),
 					);
+					setValuesStagedModified(valuesStagedModifiedRef.current);
 					touchedRef.current = setAllTouched(touchedRef.current, false);
 					setTouched(touchedRef.current);
 					valuesRef.current = deepClone(valuesStagedRef.current);
@@ -1462,10 +1465,10 @@ const Form = <
 						getUpdateData(
 							flowEngine ? valuesStagedRef.current : valuesRef.current,
 							model as unknown as Model<string, PageVisibility, unknown>,
-							flowEngine ? false : onlySubmitMounted ?? false,
+							flowEngine && id === null ? false : onlySubmitMounted ?? false,
 							onlySubmitMountedBehaviour,
 							alwaysSubmitFields ?? [],
-							mountedFields,
+							flowEngine ? valuesStagedModifiedRef.current : mountedFields,
 							defaultRecord[0],
 							id,
 						),
@@ -1477,7 +1480,11 @@ const Form = <
 
 					touchedRef.current = setAllTouched(touchedRef.current, false);
 					setTouched(touchedRef.current);
-					setValuesStagedModified((prev) => setAllTouched(prev, false));
+					valuesStagedModifiedRef.current = setAllTouched(
+						valuesStagedModifiedRef.current,
+						false,
+					);
+					setValuesStagedModified(valuesStagedModifiedRef.current);
 
 					await Promise.all(
 						Object.values(postSubmitHandlers.current).map((handler) =>
@@ -1553,6 +1560,7 @@ const Form = <
 		setTouched(state.touched);
 		valuesStagedRef.current = state.valuesStaged;
 		setValuesStaged(state.valuesStaged);
+		valuesStagedModifiedRef.current = state.valuesStagedModified;
 		setValuesStagedModified(state.valuesStagedModified);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
