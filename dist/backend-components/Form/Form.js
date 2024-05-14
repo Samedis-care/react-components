@@ -112,8 +112,16 @@ const normalizeValues = (data, config) => {
     }
     return deepSort(normalizedData);
 };
+const setAllTouched = (touched, set) => Object.fromEntries(Object.keys(touched).map((field) => [field, set]));
 const Form = (props) => {
-    const { model, id, children, onSubmit, customProps, onlyValidateMounted, onlyWarnMounted, alwaysSubmitFields, onlyWarnChanged, onlySubmitMounted, readOnly: readOnlyProp, readOnlyReason: readOnlyReasonProp, readOnlyReasons: readOnlyReasonsProp, disableValidation, nestedFormName, disableNestedSubmit, nestedFormPreSubmitHandler, deleteOnSubmit, onDeleted, initialRecord, onlySubmitNestedIfMounted, formClass, preSubmit, dirtyIgnoreFields, } = props;
+    const { model, id, children, onSubmit, customProps, onlyWarnMounted, alwaysSubmitFields, onlyWarnChanged, readOnly: readOnlyProp, readOnlyReason: readOnlyReasonProp, readOnlyReasons: readOnlyReasonsProp, disableValidation, nestedFormName, disableNestedSubmit, nestedFormPreSubmitHandler, deleteOnSubmit, onDeleted, initialRecord, formClass, preSubmit, dirtyIgnoreFields, flowEngine, } = props;
+    // flow engine mode defaults
+    const onlyValidateMounted = flowEngine ? true : props.onlyValidateMounted;
+    const onlySubmitNestedIfMounted = flowEngine
+        ? false
+        : props.onlySubmitNestedIfMounted;
+    const onlySubmitMounted = flowEngine ? true : props.onlySubmitMounted;
+    //
     const onlySubmitMountedBehaviour = props.onlySubmitMountedBehaviour ?? OnlySubmitMountedBehaviour.OMIT;
     const ErrorComponent = props.errorComponent;
     const { t } = useCCTranslations();
@@ -203,9 +211,14 @@ const Form = (props) => {
     const { mutateAsync: updateData } = useModelMutation(model);
     const { mutateAsync: deleteRecord } = useModelDelete(model);
     const { isLoading: isDefaultRecordLoading, data: defaultRecord, error: defaultRecordError, } = useModelGet(model, null);
+    const getDefaultTouched = useCallback(() => Object.fromEntries(Object.keys(model.fields).map((key) => [key, false])), [model]);
     const [updateError, setUpdateError] = useState(null);
+    const valuesStagedRef = useRef({});
+    const [valuesStaged, setValuesStaged] = useState({});
+    const [valuesStagedModified, setValuesStagedModified] = useState({});
     const valuesRef = useRef({});
     const [values, setValues] = useState({});
+    const touchedRef = useRef({});
     const [touched, setTouched] = useState({});
     const [errors, setErrors] = useState({});
     const [warnings, setWarnings] = useState({});
@@ -358,7 +371,10 @@ const Form = (props) => {
         setWarnings(warnings);
     }, [validateForm]);
     const setFieldTouchedLite = useCallback((field, newTouched = false) => {
-        setTouched((prev) => prev[field] === newTouched ? prev : { ...prev, [field]: newTouched });
+        if (touchedRef.current[field] !== newTouched) {
+            touchedRef.current = { ...touchedRef.current, [field]: newTouched };
+            setTouched(touchedRef.current);
+        }
     }, []);
     const setFieldTouched = useCallback((field, newTouched = true, validate = false) => {
         setFieldTouchedLite(field, newTouched);
@@ -398,6 +414,8 @@ const Form = (props) => {
             return;
         valuesRef.current = deepClone(serverData[0]);
         setValues(valuesRef.current);
+        valuesStagedRef.current = deepClone(serverData[0]);
+        setValuesStaged(valuesStagedRef.current);
     }, [serverData]);
     const handleBlur = useCallback((evt) => {
         const fieldName = evt.currentTarget?.name ??
@@ -419,28 +437,36 @@ const Form = (props) => {
             return;
         valuesRef.current = deepClone(serverData[0]);
         setValues(valuesRef.current);
-        setTouched(Object.fromEntries(Object.keys(model.fields).map((key) => [key, false])));
+        touchedRef.current = getDefaultTouched();
+        setTouched(touchedRef.current);
         if (initialRecord && id == null) {
             void Promise.all(Object.entries(initialRecord).map(([key, value]) => setFieldValue(key, value, false)));
         }
+        valuesStagedRef.current = deepClone(valuesRef.current);
+        setValuesStaged(valuesStagedRef.current);
+        setValuesStagedModified(deepClone(touchedRef.current));
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isLoading]);
     // update data struct after background fetch
     useEffect(() => {
         if (isLoading || !serverData || !serverData[0])
             return;
-        const newValues = deepClone(valuesRef.current);
         const serverRecord = deepClone(serverData[0]);
-        const untouchedFields = Object.entries(touched)
-            .filter(([, touched]) => !touched)
-            .map(([field]) => field);
-        untouchedFields
-            .filter((field) => dotInObject(field, serverRecord))
-            .forEach((field) => {
-            deepAssign(newValues, dotToObject(field, getValueByDot(field, serverRecord)));
-        });
-        valuesRef.current = newValues;
-        setValues(newValues);
+        const updateUnmodified = (data, modifiedValues) => {
+            const newValues = deepClone(data);
+            const untouchedFields = Object.entries(modifiedValues)
+                .filter(([, modified]) => !modified)
+                .map(([field]) => field);
+            untouchedFields
+                .filter((field) => dotInObject(field, serverRecord))
+                .forEach((field) => {
+                deepAssign(newValues, dotToObject(field, getValueByDot(field, serverRecord)));
+            });
+            return newValues;
+        };
+        valuesRef.current = updateUnmodified(valuesRef.current, touched);
+        valuesStagedRef.current = updateUnmodified(valuesStagedRef.current, valuesStagedModified);
+        setValues(valuesRef.current);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [serverData]);
     // main form - submit handler
@@ -478,7 +504,8 @@ const Form = (props) => {
             }
         }
         setSubmittingForm(true);
-        setTouched((prev) => Object.fromEntries(Object.keys(prev).map((field) => [field, true])));
+        touchedRef.current = setAllTouched(touchedRef.current, true);
+        setTouched(touchedRef.current);
         if (deleteOnSubmit) {
             try {
                 const id = valuesRef.current.id;
@@ -532,17 +559,40 @@ const Form = (props) => {
                 }
             }
             await Promise.all(Object.values(preSubmitHandlers.current).map((handler) => handler(id, params)));
-            const submitValues = valuesRef.current;
-            const oldValues = serverData[0];
-            const result = await updateData(getUpdateData(valuesRef.current, model, onlySubmitMounted ?? false, onlySubmitMountedBehaviour, alwaysSubmitFields ?? [], mountedFields, defaultRecord[0], id));
-            const newValues = deepClone(result[0]);
-            valuesRef.current = newValues;
-            setTouched((prev) => Object.fromEntries(Object.keys(prev).map((field) => [field, false])));
-            await Promise.all(Object.values(postSubmitHandlers.current).map((handler) => handler(newValues.id, params)));
-            // re-render after post submit handler, this way we avoid mounting new components before the form is fully saved
-            setValues(newValues);
-            if (onSubmit) {
-                await onSubmit(newValues, submitValues, oldValues);
+            if (flowEngine) {
+                // flow engine staged submit
+                const updateData = getUpdateData(valuesRef.current, model, true, OnlySubmitMountedBehaviour.OMIT, alwaysSubmitFields ?? [], mountedFields, defaultRecord[0], id);
+                const originalStaged = deepClone(valuesStagedRef.current);
+                valuesStagedRef.current = deepAssign(valuesStagedRef.current, updateData);
+                setValuesStaged(valuesStagedRef.current);
+                setValuesStagedModified((prev) => Object.fromEntries(Object.entries(prev).map(([key, modified]) => [
+                    key,
+                    modified ||
+                        getValueByDot(key, originalStaged) !==
+                            getValueByDot(key, valuesStagedRef.current),
+                ])));
+                touchedRef.current = setAllTouched(touchedRef.current, false);
+                setTouched(touchedRef.current);
+                valuesRef.current = deepClone(valuesStagedRef.current);
+                setValues(valuesRef.current);
+            }
+            if (!flowEngine || params.submitToServer) {
+                const submitValues = valuesRef.current;
+                const oldValues = serverData[0];
+                const result = await updateData(getUpdateData(flowEngine ? valuesStagedRef.current : valuesRef.current, model, flowEngine ? false : onlySubmitMounted ?? false, onlySubmitMountedBehaviour, alwaysSubmitFields ?? [], mountedFields, defaultRecord[0], id));
+                const newValues = deepClone(result[0]);
+                valuesRef.current = newValues;
+                valuesStagedRef.current = deepClone(result[0]);
+                touchedRef.current = setAllTouched(touchedRef.current, false);
+                setTouched(touchedRef.current);
+                setValuesStagedModified((prev) => setAllTouched(prev, false));
+                await Promise.all(Object.values(postSubmitHandlers.current).map((handler) => handler(newValues.id, params)));
+                // re-render after post submit handler, this way we avoid mounting new components before the form is fully saved
+                setValues(newValues);
+                setValuesStaged(valuesStagedRef.current);
+                if (onSubmit) {
+                    await onSubmit(newValues, submitValues, oldValues);
+                }
             }
         }
         catch (e) {
@@ -566,16 +616,17 @@ const Form = (props) => {
         deleteRecord,
         validateForm,
         nestedFormName,
+        flowEngine,
+        pushDialog,
+        t,
+        id,
         updateData,
         model,
         onlySubmitMounted,
         onlySubmitMountedBehaviour,
         alwaysSubmitFields,
         mountedFields,
-        id,
         onSubmit,
-        pushDialog,
-        t,
     ]);
     const handleSubmit = useCallback((evt) => {
         evt.preventDefault();
@@ -598,6 +649,9 @@ const Form = (props) => {
         setErrors(state.errors);
         setWarnings(state.warnings);
         setTouched(state.touched);
+        valuesStagedRef.current = state.valuesStaged;
+        setValuesStaged(state.valuesStaged);
+        setValuesStagedModified(state.valuesStagedModified);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
     // nested forms - saving
@@ -609,6 +663,8 @@ const Form = (props) => {
             errors,
             warnings,
             touched,
+            valuesStaged,
+            valuesStagedModified,
         }));
         return () => {
             // clear nested state if record was deleted
@@ -651,11 +707,13 @@ const Form = (props) => {
         if (!parentFormContext || !nestedFormName)
             return;
         const validateNestedForm = () => {
-            setTouched((prev) => Object.fromEntries(Object.keys(prev).map((field) => [field, true])));
+            touchedRef.current = setAllTouched(touchedRef.current, true);
+            setTouched(touchedRef.current);
             return validateForm("normal");
         };
         const validateNestedFormWarn = () => {
-            setTouched((prev) => Object.fromEntries(Object.keys(prev).map((field) => [field, true])));
+            touchedRef.current = setAllTouched(touchedRef.current, true);
+            setTouched(touchedRef.current);
             return validateForm("hint");
         };
         const submitNestedForm = async (id, params) => {
@@ -719,6 +777,7 @@ const Form = (props) => {
         console.log("Custom Dirty Counter:", customDirtyCounter);
         console.log("Server Data:", remoteData);
         console.log("Form Data:", localData);
+        console.log("Staged Data:", valuesStagedRef.current);
         Object.keys(model.fields).forEach((key) => {
             const server = getValueByDot(key, remoteData);
             const form = getValueByDot(key, localData);
@@ -797,6 +856,7 @@ const Form = (props) => {
         readOnly: readOnly,
         readOnlyReason: readOnlyReasons[0],
         readOnlyReasons: readOnlyReasons,
+        flowEngine: !!flowEngine,
     }), [
         id,
         model,
@@ -849,6 +909,7 @@ const Form = (props) => {
         customProps,
         readOnly,
         readOnlyReasons,
+        flowEngine,
     ]);
     const formContextDataLite = useMemo(() => ({
         id,
@@ -868,6 +929,8 @@ const Form = (props) => {
         setFieldTouchedLite,
         setCustomReadOnly,
         removeCustomReadOnly,
+        flowEngine: !!flowEngine,
+        submit: submitForm,
     }), [
         id,
         model,
@@ -885,6 +948,8 @@ const Form = (props) => {
         getFieldValues,
         setFieldValueLite,
         setFieldTouchedLite,
+        flowEngine,
+        submitForm,
     ]);
     if (error) {
         return React.createElement(Typography, { color: "error" }, error.message);

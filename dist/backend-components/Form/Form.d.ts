@@ -5,7 +5,7 @@ export type ValidationError = Record<string, string>;
 /**
  * Pre submit handler for additional validations
  * Throw to cancel submit and display error.
- * Thrown error may be a ValidationError or an normal Error (other error)
+ * Thrown error may be a ValidationError or a normal Error (other error)
  */
 export type CustomValidationHandler = () => Promise<ValidationError> | ValidationError;
 /**
@@ -54,6 +54,10 @@ export interface ErrorComponentProps {
 }
 export type FormSubmitOptions = Partial<{
     ignoreWarnings: boolean;
+    /**
+     * submit to server instead of staged values (only when using flowEngine mode)
+     */
+    submitToServer: boolean;
 }>;
 export interface PageProps<KeyT extends ModelFieldName, CustomPropsT> {
     /**
@@ -120,7 +124,7 @@ export interface FormProps<KeyT extends ModelFieldName, VisibilityT extends Page
     renderConditionally?: boolean;
     /**
      * Pre-submit callback to cancel submission
-     * @param params The params provded
+     * @param params The params provided
      * @return should cancel? false for continue, true for cancel
      */
     preSubmit?: (params: PreSubmitParams) => Promise<boolean> | boolean;
@@ -133,7 +137,7 @@ export interface FormProps<KeyT extends ModelFieldName, VisibilityT extends Page
      */
     onSubmit?: (dataFromServer: Record<string, unknown>, submittedData: Record<string, unknown>, previousData: Record<string, unknown>) => Promise<void> | void;
     /**
-     * Delete the record on submit rather then save it?
+     * Delete the record on submit rather than save it?
      */
     deleteOnSubmit?: boolean;
     /**
@@ -230,6 +234,10 @@ export interface FormProps<KeyT extends ModelFieldName, VisibilityT extends Page
      * Useful for frontend-only fields. Format: dot notation (e.g. object.sub-object.field OR field)
      */
     dirtyIgnoreFields?: string[];
+    /**
+     * Enable flow engine mode
+     */
+    flowEngine?: boolean;
 }
 export interface FormContextData {
     /**
@@ -493,16 +501,22 @@ export interface FormContextData {
      * Custom props passed in props
      */
     customProps: unknown;
+    /**
+     * Flow engine mode enabled?
+     */
+    flowEngine: boolean;
 }
 /**
  * Context which stores information about the current form so it can be used by fields
  */
 export declare const FormContext: React.Context<FormContextData | null>;
 export declare const useFormContext: () => FormContextData;
-export type FormContextDataLite = Pick<FormContextData, "id" | "model" | "customProps" | "onlySubmitMounted" | "onlyValidateMounted" | "onlyWarnMounted" | "onlyWarnChanged" | "readOnly" | "readOnlyReason" | "readOnlyReasons" | "errorComponent" | "getFieldValue" | "getFieldValues" | "setFieldValueLite" | "setFieldTouchedLite" | "setCustomReadOnly" | "removeCustomReadOnly">;
+export type FormContextDataLite = Pick<FormContextData, "id" | "model" | "customProps" | "onlySubmitMounted" | "onlyValidateMounted" | "onlyWarnMounted" | "onlyWarnChanged" | "readOnly" | "readOnlyReason" | "readOnlyReasons" | "errorComponent" | "getFieldValue" | "getFieldValues" | "setFieldValueLite" | "setFieldTouchedLite" | "setCustomReadOnly" | "removeCustomReadOnly" | "flowEngine" | "submit">;
 export declare const FormContextLite: React.Context<FormContextDataLite | null>;
 export declare const useFormContextLite: () => FormContextDataLite;
 export interface FormNestedState {
+    valuesStaged: Record<string, unknown>;
+    valuesStagedModified: Record<string, boolean>;
     values: Record<string, unknown>;
     touched: Record<string, boolean>;
     errors: Record<string, string | null>;
