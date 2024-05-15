@@ -96,7 +96,7 @@
 				"close-icon-text": "Schließen",
 				"open-icon-text": "Öffnen",
 				"clear-icon-text": "Leeren",
-				"loading-text": "Lade…",
+				"loading-text": "Lädt…",
 				"start-typing-to-search-text": "Gib eine Suchzeichenfolge ein, um Ergebnisse zu erhalten",
 				"lru-label": "Zuletzt verwendet",
 				"selected": "AUSGEWÄHLT"
@@ -253,7 +253,7 @@
 			}
 		},
 		"selector": {
-			"loading": "Wird geladen…",
+			"loading": "Lädt…",
 			"loading-error": "Fehler beim Abrufen der Daten"
 		},
 		"crud": {
