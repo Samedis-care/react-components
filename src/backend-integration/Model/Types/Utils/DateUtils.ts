@@ -5,9 +5,6 @@
  */
 export const normalizeDate = (date: Date): Date => {
 	const newDate = new Date(date);
-	newDate.setUTCHours(12); // set to noon, so when we read this from any timezone, including american timezones the date is correct
-	newDate.setUTCMinutes(0);
-	newDate.setUTCSeconds(0);
-	newDate.setUTCMilliseconds(0);
+	newDate.setUTCHours(12, 0, 0, 0); // set to noon, so when we read this from any timezone, including american timezones the date is correct
 	return newDate;
 };
