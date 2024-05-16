@@ -267,8 +267,6 @@
 				"source_field_type": "Типы данных",
 				"destination_fields": "Поля назначения",
 				"conv_script": "Сценарий преобразования (JavaScript)",
-				"error": "Ошибка",
-				"valid": "Действительный",
 				"queue": "В очереди: {{COUNT}}",
 				"success": "Успех: {{COUNT}}",
 				"failed": "Ошибка: {{COUNT}}",

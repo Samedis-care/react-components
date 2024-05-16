@@ -267,8 +267,6 @@
 				"source_field_type": "Datentypen",
 				"destination_fields": "Zielfelder",
 				"conv_script": "Konvertierungsskript (JavaScript)",
-				"error": "Fehler",
-				"valid": "Gültig",
 				"queue": "In Warteschlange: {{COUNT}}",
 				"success": "Erfolg: {{COUNT}}",
 				"failed": "Fehlgeschlagen: {{COUNT}}",

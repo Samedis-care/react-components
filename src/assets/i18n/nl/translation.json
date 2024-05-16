@@ -267,8 +267,6 @@
 				"source_field_type": "Gegevenstypen",
 				"destination_fields": "Bestemmingsvelden",
 				"conv_script": "Conversiescript (JavaScript)",
-				"error": "Error",
-				"valid": "Valide",
 				"queue": "In wachtrij: {{COUNT}}",
 				"success": "Succes: {{COUNT}}",
 				"failed": "Mislukt: {{COUNT}}",

@@ -267,8 +267,6 @@
 				"source_field_type": "Types de données",
 				"destination_fields": "Champs de destination",
 				"conv_script": "Script de conversion (JavaScript)",
-				"error": "Erreur",
-				"valid": "Valide",
 				"queue": "En file d'attente : {{COUNT}}",
 				"success": "Succès : {{COUNT}}",
 				"failed": "Échec : {{COUNT}}",
