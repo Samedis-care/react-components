@@ -267,8 +267,6 @@
 				"source_field_type": "Types de données",
 				"destination_fields": "Champs de destination",
 				"conv_script": "Script de conversion (JavaScript)",
-				"error": "Erreur",
-				"valid": "Valide",
 				"queue": "En file d'attente : {{COUNT}}",
 				"success": "Succès : {{COUNT}}",
 				"failed": "Échec : {{COUNT}}",
@@ -326,7 +324,7 @@
 			"error-title": "Une erreur s'est produite",
 			"validation-error-title": "Forme non valide",
 			"info": "Info",
-			"are-you-sure": "Êtes-vous sûr ?",
+			"are-you-sure": "Es-tu sûr ?",
 			"are-you-sure-submit": "Continuer?"
 		}
 	}

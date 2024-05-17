@@ -267,8 +267,6 @@
 				"source_field_type": "Ma'lumotlar turlari",
 				"destination_fields": "Belgilangan joylar",
 				"conv_script": "Konvertatsiya skripti (JavaScript)",
-				"error": "Xato",
-				"valid": "Yaroqli",
 				"queue": "Navbatda: {{COUNT}}",
 				"success": "Muvaffaqiyatli: {{COUNT}}",
 				"failed": "Muvaffaqiyatsiz: {{COUNT}}",
