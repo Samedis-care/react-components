@@ -55,6 +55,12 @@ export interface ModelFieldDefinition<
 	 */
 	getLabel: () => string;
 	/**
+	 * Custom label shown in DataGrid settings (not column label, use getColumnLabel for that)
+	 * @remarks Used for BackendDataGrid
+	 * @default return value of getLabel
+	 */
+	getHeaderName?: () => string;
+	/**
 	 * Enable filtering? (for BackendDataGrid)
 	 */
 	filterable?: boolean;
@@ -69,7 +75,7 @@ export interface ModelFieldDefinition<
 		| IDataGridColumnDef["width"]
 		| (() => IDataGridColumnDef["width"]);
 	/**
-	 * Custom label for grid column header
+	 * Custom label for grid column header (not DataGrid settings, use getHeaderName for that)
 	 * @remarks Used for BackendDataGrid
 	 * @default return value of getLabel
 	 */
@@ -1007,7 +1013,9 @@ class Model<
 
 			return {
 				field: key,
-				headerName: value.getLabel(),
+				headerName: value.getHeaderName
+					? value.getHeaderName()
+					: value.getLabel(),
 				headerLabel: value.getColumnLabel ? value.getColumnLabel() : undefined,
 				type: value.type.getFilterType(),
 				filterData,
