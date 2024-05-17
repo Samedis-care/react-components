@@ -23,6 +23,12 @@ export interface ModelFieldDefinition<TypeT, KeyT extends ModelFieldName, Visibi
      */
     getLabel: () => string;
     /**
+     * Custom label shown in DataGrid settings (not column label, use getColumnLabel for that)
+     * @remarks Used for BackendDataGrid
+     * @default return value of getLabel
+     */
+    getHeaderName?: () => string;
+    /**
      * Enable filtering? (for BackendDataGrid)
      */
     filterable?: boolean;
@@ -35,7 +41,7 @@ export interface ModelFieldDefinition<TypeT, KeyT extends ModelFieldName, Visibi
      */
     columnWidth?: IDataGridColumnDef["width"] | (() => IDataGridColumnDef["width"]);
     /**
-     * Custom label for grid column header
+     * Custom label for grid column header (not DataGrid settings, use getHeaderName for that)
      * @remarks Used for BackendDataGrid
      * @default return value of getLabel
      */

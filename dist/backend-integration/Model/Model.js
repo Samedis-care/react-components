@@ -516,7 +516,9 @@ class Model {
             }
             return {
                 field: key,
-                headerName: value.getLabel(),
+                headerName: value.getHeaderName
+                    ? value.getHeaderName()
+                    : value.getLabel(),
                 headerLabel: value.getColumnLabel ? value.getColumnLabel() : undefined,
                 type: value.type.getFilterType(),
                 filterData,
