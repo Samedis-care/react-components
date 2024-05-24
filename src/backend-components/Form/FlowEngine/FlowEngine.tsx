@@ -16,6 +16,13 @@ export interface FlowStageProps<
 	CustomPropsT,
 > {
 	formProps: PageProps<KeyT, CustomPropsT>;
+	/**
+	 * Go to next stage (or current stage to submit)
+	 * @param nextStage The next stage
+	 * @param submitToServer Submit to server?
+	 * @throws ValidationError
+	 * @remarks this calls FormEngine submitForm and if successful sets the stage
+	 */
 	goToStage: (nextStage: StageT, submitToServer: boolean) => Promise<void>;
 }
 
@@ -42,11 +49,7 @@ const FlowEngine = <KeyT extends string, StageT extends string, CustomPropsT>(
 
 	const goToStage = useCallback(
 		async (nextStage: StageT, submitToServer: boolean) => {
-			try {
-				await submit({ submitToServer });
-			} catch (e) {
-				// validation error, shown to user via ErrorComponent
-			}
+			await submit({ submitToServer });
 			setStage(nextStage);
 		},
 		[submit],
