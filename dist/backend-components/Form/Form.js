@@ -936,6 +936,8 @@ const Form = (props) => {
         removeCustomReadOnly,
         flowEngine: !!flowEngine,
         submit: submitForm,
+        submitting,
+        dirty,
     }), [
         id,
         model,
@@ -955,6 +957,8 @@ const Form = (props) => {
         setFieldTouchedLite,
         flowEngine,
         submitForm,
+        submitting,
+        dirty,
     ]);
     if (error) {
         return React.createElement(Typography, { color: "error" }, error.message);
