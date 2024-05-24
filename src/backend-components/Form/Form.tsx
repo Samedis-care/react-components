@@ -634,6 +634,8 @@ export type FormContextDataLite = Pick<
 	| "removeCustomReadOnly"
 	| "flowEngine"
 	| "submit"
+	| "submitting"
+	| "dirty"
 >;
 export const FormContextLite = React.createContext<FormContextDataLite | null>(
 	null,
@@ -1894,6 +1896,8 @@ const Form = <
 			removeCustomReadOnly,
 			flowEngine: !!flowEngine,
 			submit: submitForm,
+			submitting,
+			dirty,
 		}),
 		[
 			id,
@@ -1914,6 +1918,8 @@ const Form = <
 			setFieldTouchedLite,
 			flowEngine,
 			submitForm,
+			submitting,
+			dirty,
 		],
 	);
 
