@@ -7,12 +7,7 @@ const FlowEngine = (props) => {
     if (!flowEngine)
         throw new Error("Form not configured for flowEngine");
     const goToStage = useCallback(async (nextStage, submitToServer) => {
-        try {
-            await submit({ submitToServer });
-        }
-        catch (e) {
-            // validation error, shown to user via ErrorComponent
-        }
+        await submit({ submitToServer });
         setStage(nextStage);
     }, [submit]);
     const StageComp = children[stage];
