@@ -3,6 +3,7 @@ import type ModelRenderParams from "./RenderParams";
 import type FilterType from "./FilterType";
 import type { EnumValue } from "./Types/TypeEnum";
 import type { IDataGridColumnDef } from "../../standalone/DataGrid/DataGrid";
+import { ModelFieldDefinition, PageVisibility } from "./Model";
 export interface TypeSettings {
     /**
      * Additional field changes which cause re-render
@@ -13,15 +14,17 @@ interface Type<T> {
     /**
      * Validates the given value
      * @param value The value to verify
+     * @param field The field that's being validated
      * @returns An error string or null if no validation error occurred
      */
-    validate(value: T): Promise<string | null> | string | null;
+    validate(value: T, field: ModelFieldDefinition<T, string, PageVisibility, unknown>): Promise<string | null> | string | null;
     /**
      * Validate the given value for hints
      * @param value The value to verify
+     * @param field The field that's being validated
      * @returns An warning string or null if no validation warning occurred
      */
-    validateHint?: (value: T) => Promise<string | null> | string | null;
+    validateHint?: (value: T, field: ModelFieldDefinition<T, string, PageVisibility, unknown>) => Promise<string | null> | string | null;
     /**
      * Renders the value
      * @param params The render parameters

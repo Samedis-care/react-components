@@ -560,7 +560,9 @@ class Model {
                 let error;
                 try {
                     const validate = fieldDef.type[validationFunction]?.bind(fieldDef.type);
-                    error = validate ? await validate(value) : null;
+                    error = validate
+                        ? await validate(value, fieldDef)
+                        : null;
                 }
                 catch (e) {
                     // eslint-disable-next-line
