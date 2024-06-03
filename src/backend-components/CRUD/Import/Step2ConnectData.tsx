@@ -132,7 +132,7 @@ export const useImportStep2Logic = (props: CrudImporterStepProps) => {
 							}
 							if (!validation) {
 								// if type checks have passed, call field type validator
-								validation = await field.type.validate(result);
+								validation = await field.type.validate(result, field);
 							}
 							if (validation) {
 								// eslint-disable-next-line no-console
