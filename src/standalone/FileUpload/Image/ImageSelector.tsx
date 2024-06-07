@@ -14,9 +14,9 @@ import {
 } from "@mui/material";
 import {
 	AttachFile,
-	Person,
-	FileUpload as UploadIcon,
 	Close as CloseIcon,
+	FileUpload as UploadIcon,
+	Person,
 } from "@mui/icons-material";
 import processImageB64 from "../../../utils/processImageB64";
 import combineClassNames from "../../../utils/combineClassNames";
@@ -487,7 +487,7 @@ const ImageSelector = (inProps: ImageSelectorProps) => {
 									<Tooltip
 										title={
 											props.uploadLabel ??
-											t("standalone.file-upload.upload-modern") ??
+											t("standalone.file-upload.upload-modern-dnd") ??
 											""
 										}
 									>
@@ -499,9 +499,13 @@ const ImageSelector = (inProps: ImageSelectorProps) => {
 										/>
 									</Tooltip>
 									<ModernUploadControlsWrapper>
-										<ModernUploadControlUpload onClick={handleUpload}>
-											<UploadIcon />
-										</ModernUploadControlUpload>
+										<Tooltip
+											title={t("standalone.file-upload.upload-modern-btn")}
+										>
+											<ModernUploadControlUpload onClick={handleUpload}>
+												<UploadIcon />
+											</ModernUploadControlUpload>
+										</Tooltip>
 									</ModernUploadControlsWrapper>
 								</>
 							) : (
