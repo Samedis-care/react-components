@@ -2,7 +2,6 @@ import React, { createContext, useCallback, useContext, useMemo, useState, } fro
 import Header from "./Header";
 import Menu from "./Menu";
 import { styled, useMediaQuery, useTheme, useThemeProps } from "@mui/material";
-import useMountLogging from "../../../utils/useMountLogging";
 const Container = styled("div", {
     name: "CcPortalLayout",
     slot: "container",
@@ -58,7 +57,6 @@ const RenderLayout = (props) => {
         menuOpen,
         setMenuOpen,
     }), [mobile, menuOpen, setMenuOpen]);
-    useMountLogging({ name: "RenderLayoutMemo" });
     return (React.createElement(PortalLayoutContext.Provider, { value: portalContext },
         !props.mobile && props.variant === "basic" && (React.createElement(RenderLayoutTopLeft, null, props.topLeft)),
         React.createElement(RenderLayoutHeader, { id: props.headerId }, headerContent && (React.createElement(Header, { contents: headerContent, toggleMenu: toggleMenu, mobile: mobile && !!menuContent, customClasses: props.customClasses?.header }))),
@@ -77,7 +75,6 @@ const PortalLayout = (inProps) => {
     const mobile = !!(shouldCollapse ||
         props.collapseMenu ||
         (props.mobileViewCondition && mobileViewConditionMet));
-    useMountLogging({ name: "RenderLayout" });
     return (React.createElement(Container, { ownerState: {
             mobile,
             variant: props.variant,
