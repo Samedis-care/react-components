@@ -77,6 +77,6 @@ export interface ImageSelectorProps {
      */
     postEditCallback?: PostImageEditCallback;
 }
-export type ImageSelectorClassKey = "rootClassic" | "rootModern" | "imgWrapper" | "previewClassic" | "previewModern" | "changeEventHelper" | "modernUploadLabel" | "modernFullHeightBox" | "modernFullHeightGrid" | "modernFormatsLabel" | "modernFormatIcon" | "pfpRoot" | "pfpIconBtn" | "pfpImg" | "pfpImgPlaceholder";
+export type ImageSelectorClassKey = "rootClassic" | "rootModern" | "imgWrapper" | "previewClassic" | "previewModern" | "changeEventHelper" | "modernUploadLabel" | "modernFullHeightBox" | "modernFullHeightGrid" | "modernFormatsLabel" | "modernFormatIcon" | "modernUploadControlsWrapper" | "previewDialogCloseButton" | "pfpRoot" | "pfpIconBtn" | "pfpImg" | "pfpImgPlaceholder";
 declare const _default: React.MemoExoticComponent<(inProps: ImageSelectorProps) => React.JSX.Element>;
 export default _default;

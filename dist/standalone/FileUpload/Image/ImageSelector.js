@@ -1,6 +1,6 @@
-import React, { useCallback, useRef } from "react";
-import { Box, Button, Grid, IconButton, styled, Tooltip, Typography, useThemeProps, } from "@mui/material";
-import { AttachFile, Person } from "@mui/icons-material";
+import React, { useCallback, useRef, useState } from "react";
+import { alpha, Box, Button, Dialog, Grid, IconButton, styled, Tooltip, Typography, useThemeProps, } from "@mui/material";
+import { AttachFile, Person, FileUpload as UploadIcon, Close as CloseIcon, } from "@mui/icons-material";
 import processImageB64 from "../../../utils/processImageB64";
 import combineClassNames from "../../../utils/combineClassNames";
 import GroupBox from "../../GroupBox";
@@ -115,6 +115,24 @@ const PfpImagePlaceholder = styled(Person, {
     name: "CcImageSelector",
     slot: "pfpImgPlaceholder",
 })(pfpImageStyles);
+const ModernUploadControlsWrapper = styled("div", {
+    name: "CcImageSelector",
+    slot: "modernUploadControlsWrapper",
+})(({ theme }) => ({
+    position: "absolute",
+    bottom: theme.spacing(2),
+    right: theme.spacing(2),
+    backgroundColor: alpha(theme.palette.background.paper, 0.7),
+    borderRadius: theme.shape.borderRadius,
+}));
+const PreviewDialogCloseButton = styled(IconButton, {
+    name: "CcImageSelector",
+    slot: "previewDialogCloseButton",
+})(({ theme }) => ({
+    position: "absolute",
+    top: theme.spacing(2),
+    right: theme.spacing(2),
+}));
 const ImageSelector = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcImageSelector" });
     const { convertImagesTo, downscale, name, value, readOnly, capture, onChange, postEditCallback, classes, className, } = props;
@@ -170,6 +188,17 @@ const ImageSelector = (inProps) => {
             return;
         evt.preventDefault();
     }, [readOnly]);
+    const [showPreviewDialog, setShowPreviewDialog] = useState(false);
+    const handlePreviewDialog = useCallback(() => {
+        setShowPreviewDialog(true);
+    }, []);
+    const handlePreviewDialogClose = useCallback(() => {
+        setShowPreviewDialog(false);
+    }, []);
+    const previewDialog = showPreviewDialog && (React.createElement(Dialog, { open: true, fullScreen: true, onClose: handlePreviewDialogClose },
+        React.createElement(PreviewDialogCloseButton, { onClick: handlePreviewDialogClose },
+            React.createElement(CloseIcon, null)),
+        React.createElement(PreviewModern, { src: value, alt: props.alt, className: classes?.previewModern })));
     // render component
     if (variant === "normal") {
         return (React.createElement(GroupBox, { label: props.label, smallLabel: props.smallLabel, className: className },
@@ -180,27 +209,33 @@ const ImageSelector = (inProps) => {
                 React.createElement(ImageWrapper, { item: true, xs: true, key: "image", className: classes?.imgWrapper }, value && (React.createElement(PreviewClassic, { src: value, alt: props.alt, className: classes?.previewClassic }))))));
     }
     else if (variant === "modern") {
-        return (React.createElement(GroupBox, { label: props.label, smallLabel: props.smallLabel, className: className },
-            React.createElement(RootModern, { container: true, spacing: 0, direction: "column", alignContent: "flex-start", alignItems: "stretch", justifyContent: "center", wrap: "nowrap", className: classes?.rootModern, onDrop: handleDrop, onDragOver: handleDragOver },
-                !props.readOnly && (React.createElement(ChangeEventHelper, { type: "file", accept: "image/*", ref: fileRef, onChange: handleFileChange, className: classes?.changeEventHelper })),
-                React.createElement(ImageWrapper, { item: true, xs: true, key: "image", className: classes?.imgWrapper, onBlur: props.onBlur, "data-name": props.name }, value ? (React.createElement(Tooltip, { title: props.uploadLabel ??
-                        t("standalone.file-upload.upload-modern") ??
-                        "" },
-                    React.createElement(PreviewModern, { src: value, alt: props.alt, onClick: handleUpload, className: classes?.previewModern }))) : (React.createElement(ModernFullHeightBox, { px: 2, className: classes?.modernFullHeightBox },
-                    React.createElement(ModernFullHeightGrid, { container: true, onClick: handleUpload, direction: "column", spacing: 0, className: classes?.modernFullHeightGrid },
-                        React.createElement(Grid, { item: true, xs: true, container: true, direction: "column", justifyContent: "space-around", wrap: "nowrap" },
+        return (React.createElement(React.Fragment, null,
+            previewDialog,
+            React.createElement(GroupBox, { label: props.label, smallLabel: props.smallLabel, className: className },
+                React.createElement(RootModern, { container: true, spacing: 0, direction: "column", alignContent: "flex-start", alignItems: "stretch", justifyContent: "center", wrap: "nowrap", className: classes?.rootModern, onDrop: handleDrop, onDragOver: handleDragOver },
+                    !props.readOnly && (React.createElement(ChangeEventHelper, { type: "file", accept: "image/*", ref: fileRef, onChange: handleFileChange, className: classes?.changeEventHelper })),
+                    React.createElement(ImageWrapper, { item: true, xs: true, key: "image", className: classes?.imgWrapper, onBlur: props.onBlur, "data-name": props.name }, value ? (React.createElement(React.Fragment, null,
+                        React.createElement(Tooltip, { title: props.uploadLabel ??
+                                t("standalone.file-upload.upload-modern") ??
+                                "" },
+                            React.createElement(PreviewModern, { src: value, alt: props.alt, onClick: handlePreviewDialog, className: classes?.previewModern })),
+                        React.createElement(ModernUploadControlsWrapper, null,
+                            React.createElement(IconButton, { onClick: handleUpload },
+                                React.createElement(UploadIcon, null))))) : (React.createElement(ModernFullHeightBox, { px: 2, className: classes?.modernFullHeightBox },
+                        React.createElement(ModernFullHeightGrid, { container: true, onClick: handleUpload, direction: "column", spacing: 0, className: classes?.modernFullHeightGrid },
+                            React.createElement(Grid, { item: true, xs: true, container: true, direction: "column", justifyContent: "space-around", wrap: "nowrap" },
+                                React.createElement(Grid, { item: true },
+                                    React.createElement(ModernUploadLabel, { component: "h1", variant: "h5", className: classes?.modernUploadLabel, align: "center" }, props.uploadLabel ??
+                                        t("standalone.file-upload.upload-modern") ??
+                                        ""))),
                             React.createElement(Grid, { item: true },
-                                React.createElement(ModernUploadLabel, { component: "h1", variant: "h5", className: classes?.modernUploadLabel, align: "center" }, props.uploadLabel ??
-                                    t("standalone.file-upload.upload-modern") ??
-                                    ""))),
-                        React.createElement(Grid, { item: true },
-                            React.createElement(Grid, { container: true, wrap: "nowrap", spacing: 0, justifyContent: "space-between" },
-                                React.createElement(Grid, { item: true },
-                                    React.createElement(ModernFormatsLabel, { className: classes?.modernFormatsLabel }, props.formatsLabel ??
-                                        t("standalone.file-upload.formats-modern") ??
-                                        "")),
-                                React.createElement(Grid, { item: true },
-                                    React.createElement(ModernFormatIcon, { className: classes?.modernFormatIcon })))))))))));
+                                React.createElement(Grid, { container: true, wrap: "nowrap", spacing: 0, justifyContent: "space-between" },
+                                    React.createElement(Grid, { item: true },
+                                        React.createElement(ModernFormatsLabel, { className: classes?.modernFormatsLabel }, props.formatsLabel ??
+                                            t("standalone.file-upload.formats-modern") ??
+                                            "")),
+                                    React.createElement(Grid, { item: true },
+                                        React.createElement(ModernFormatIcon, { className: classes?.modernFormatIcon }))))))))))));
     }
     else if (variant === "profile_picture") {
         const image = value ? (React.createElement(PfpImage, { src: value, className: classes?.pfpImg, alt: props.label })) : (React.createElement(PfpImagePlaceholder, { className: classes?.pfpImgPlaceholder }));
