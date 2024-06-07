@@ -11,7 +11,6 @@ import Header, { PortalLayoutHeaderProps } from "./Header";
 import Menu from "./Menu";
 import { Breakpoint } from "@mui/material/styles";
 import { styled, useMediaQuery, useTheme, useThemeProps } from "@mui/material";
-import useMountLogging from "../../../utils/useMountLogging";
 
 interface PortalLayoutBasic {
 	/**
@@ -184,7 +183,6 @@ const RenderLayout = (props: PortalLayoutProps & IRenderProps) => {
 		}),
 		[mobile, menuOpen, setMenuOpen],
 	);
-	useMountLogging({ name: "RenderLayoutMemo" });
 
 	return (
 		<PortalLayoutContext.Provider value={portalContext}>
@@ -243,8 +241,6 @@ const PortalLayout = (inProps: PortalLayoutProps) => {
 		props.collapseMenu ||
 		(props.mobileViewCondition && mobileViewConditionMet)
 	);
-
-	useMountLogging({ name: "RenderLayout" });
 
 	return (
 		<Container
