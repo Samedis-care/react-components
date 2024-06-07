@@ -1,6 +1,6 @@
 import React, { useCallback, useRef, useState } from "react";
 import { alpha, Box, Button, Dialog, Grid, IconButton, styled, Tooltip, Typography, useThemeProps, } from "@mui/material";
-import { AttachFile, Person, FileUpload as UploadIcon, Close as CloseIcon, } from "@mui/icons-material";
+import { AttachFile, Close as CloseIcon, FileUpload as UploadIcon, Person, } from "@mui/icons-material";
 import processImageB64 from "../../../utils/processImageB64";
 import combineClassNames from "../../../utils/combineClassNames";
 import GroupBox from "../../GroupBox";
@@ -223,12 +223,13 @@ const ImageSelector = (inProps) => {
                     !props.readOnly && (React.createElement(ChangeEventHelper, { type: "file", accept: "image/*", ref: fileRef, onChange: handleFileChange, className: classes?.changeEventHelper })),
                     React.createElement(ImageWrapper, { item: true, xs: true, key: "image", className: classes?.imgWrapper, onBlur: props.onBlur, "data-name": props.name }, value ? (React.createElement(React.Fragment, null,
                         React.createElement(Tooltip, { title: props.uploadLabel ??
-                                t("standalone.file-upload.upload-modern") ??
+                                t("standalone.file-upload.upload-modern-dnd") ??
                                 "" },
                             React.createElement(PreviewModern, { src: value, alt: props.alt, onClick: handlePreviewDialog, className: classes?.previewModern })),
                         React.createElement(ModernUploadControlsWrapper, null,
-                            React.createElement(ModernUploadControlUpload, { onClick: handleUpload },
-                                React.createElement(UploadIcon, null))))) : (React.createElement(ModernFullHeightBox, { px: 2, className: classes?.modernFullHeightBox },
+                            React.createElement(Tooltip, { title: t("standalone.file-upload.upload-modern-btn") },
+                                React.createElement(ModernUploadControlUpload, { onClick: handleUpload },
+                                    React.createElement(UploadIcon, null)))))) : (React.createElement(ModernFullHeightBox, { px: 2, className: classes?.modernFullHeightBox },
                         React.createElement(ModernFullHeightGrid, { container: true, onClick: handleUpload, direction: "column", spacing: 0, className: classes?.modernFullHeightGrid },
                             React.createElement(Grid, { item: true, xs: true, container: true, direction: "column", justifyContent: "space-around", wrap: "nowrap" },
                                 React.createElement(Grid, { item: true },
