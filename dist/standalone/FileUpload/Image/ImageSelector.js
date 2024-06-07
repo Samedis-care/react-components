@@ -125,6 +125,10 @@ const ModernUploadControlsWrapper = styled("div", {
     backgroundColor: alpha(theme.palette.background.paper, 0.7),
     borderRadius: theme.shape.borderRadius,
 }));
+const ModernUploadControlUpload = styled(IconButton, {
+    name: "CcImageSelector",
+    slot: "modernUploadControlUpload",
+})();
 const PreviewDialogCloseButton = styled(IconButton, {
     name: "CcImageSelector",
     slot: "previewDialogCloseButton",
@@ -220,7 +224,7 @@ const ImageSelector = (inProps) => {
                                 "" },
                             React.createElement(PreviewModern, { src: value, alt: props.alt, onClick: handlePreviewDialog, className: classes?.previewModern })),
                         React.createElement(ModernUploadControlsWrapper, null,
-                            React.createElement(IconButton, { onClick: handleUpload },
+                            React.createElement(ModernUploadControlUpload, { onClick: handleUpload },
                                 React.createElement(UploadIcon, null))))) : (React.createElement(ModernFullHeightBox, { px: 2, className: classes?.modernFullHeightBox },
                         React.createElement(ModernFullHeightGrid, { container: true, onClick: handleUpload, direction: "column", spacing: 0, className: classes?.modernFullHeightGrid },
                             React.createElement(Grid, { item: true, xs: true, container: true, direction: "column", justifyContent: "space-around", wrap: "nowrap" },
