@@ -240,13 +240,16 @@ const ModernUploadControlsWrapper = styled("div", {
 	bottom: theme.spacing(2),
 	right: theme.spacing(2),
 	backgroundColor: alpha(theme.palette.background.paper, 0.7),
+	border: `1px solid ${theme.palette.divider}`,
 	borderRadius: theme.shape.borderRadius,
 }));
 
 const ModernUploadControlUpload = styled(IconButton, {
 	name: "CcImageSelector",
 	slot: "modernUploadControlUpload",
-})();
+})(({ theme }) => ({
+	borderRadius: theme.shape.borderRadius,
+}));
 
 const PreviewDialogCloseButton = styled(IconButton, {
 	name: "CcImageSelector",
