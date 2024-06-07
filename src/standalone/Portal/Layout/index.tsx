@@ -11,6 +11,7 @@ import Header, { PortalLayoutHeaderProps } from "./Header";
 import Menu from "./Menu";
 import { Breakpoint } from "@mui/material/styles";
 import { styled, useMediaQuery, useTheme, useThemeProps } from "@mui/material";
+import useMountLogging from "../../../utils/useMountLogging";
 
 interface PortalLayoutBasic {
 	/**
@@ -94,42 +95,29 @@ export type PortalLayoutProps = PortalLayoutPropsBase &
 	(PortalLayoutBasic | PortalLayoutNoTopLeft);
 
 export interface PortalLayoutContainerOwnerState {
+	mobile: boolean;
 	variant: PortalLayoutProps["variant"];
 	drawerWidth: PortalLayoutProps["drawerWidth"];
 }
-const ContainerDesktop = styled("div", {
+const Container = styled("div", {
 	name: "CcPortalLayout",
-	slot: "containerDesktop",
+	slot: "container",
 })<{ ownerState: PortalLayoutContainerOwnerState }>(
-	({ ownerState: { variant, drawerWidth } }) => ({
+	({ ownerState: { variant, drawerWidth, mobile } }) => ({
 		display: "grid",
-		gridTemplateAreas:
-			variant === "basic"
+		height: "100%",
+		gridTemplateRows: "max-content 100fr",
+		gridTemplateColumns: `${
+			drawerWidth ? `${drawerWidth}px` : "max-content"
+		} 100fr`,
+		gridTemplateAreas: mobile
+			? `"top top" "main main"`
+			: variant === "basic"
 				? `"top-left top" "sidebar main"`
 				: `"top top" "sidebar main"`,
-		gridTemplateRows: "max-content 100fr",
-		gridTemplateColumns: `${
-			drawerWidth ? `${drawerWidth}px` : "max-content"
-		} 100fr`,
-		height: "100%",
 	}),
 );
-const ContainerMobile = styled("div", {
-	name: "CcPortalLayout",
-	slot: "containerMobile",
-})<{ ownerState: PortalLayoutContainerOwnerState }>(
-	({ ownerState: { drawerWidth } }) => ({
-		display: "grid",
-		gridTemplateAreas: `"top top" "main main"`,
-		gridTemplateRows: "max-content 100fr",
-		gridTemplateColumns: `${
-			drawerWidth ? `${drawerWidth}px` : "max-content"
-		} 100fr`,
-		height: "100%",
-	}),
-);
-
-export type PortalLayoutClassKey = "containerDesktop" | "containerMobile";
+export type PortalLayoutClassKey = "container";
 
 const RenderLayoutHeader = styled("div", {
 	name: "CcPortalRenderLayout",
@@ -196,6 +184,7 @@ const RenderLayout = (props: PortalLayoutProps & IRenderProps) => {
 		}),
 		[mobile, menuOpen, setMenuOpen],
 	);
+	useMountLogging({ name: "RenderLayoutMemo" });
 
 	return (
 		<PortalLayoutContext.Provider value={portalContext}>
@@ -255,15 +244,19 @@ const PortalLayout = (inProps: PortalLayoutProps) => {
 		(props.mobileViewCondition && mobileViewConditionMet)
 	);
 
-	const ContainerComp = mobile ? ContainerMobile : ContainerDesktop;
+	useMountLogging({ name: "RenderLayout" });
 
 	return (
-		<ContainerComp
-			ownerState={{ variant: props.variant, drawerWidth: props.drawerWidth }}
+		<Container
+			ownerState={{
+				mobile,
+				variant: props.variant,
+				drawerWidth: props.drawerWidth,
+			}}
 			className={className}
 		>
 			<RenderLayoutMemo mobile={mobile} {...rendererProps} />
-		</ContainerComp>
+		</Container>
 	);
 };
 
