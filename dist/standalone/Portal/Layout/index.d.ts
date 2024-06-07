@@ -71,10 +71,11 @@ interface PortalLayoutPropsBase {
 }
 export type PortalLayoutProps = PortalLayoutPropsBase & (PortalLayoutBasic | PortalLayoutNoTopLeft);
 export interface PortalLayoutContainerOwnerState {
+    mobile: boolean;
     variant: PortalLayoutProps["variant"];
     drawerWidth: PortalLayoutProps["drawerWidth"];
 }
-export type PortalLayoutClassKey = "containerDesktop" | "containerMobile";
+export type PortalLayoutClassKey = "container";
 export type PortalRenderLayoutClassKey = "header" | "topLeft" | "menu" | "main" | "mobileTopLeft";
 export interface PortalLayoutContextType {
     mobile: boolean;

@@ -2,27 +2,20 @@ import React, { createContext, useCallback, useContext, useMemo, useState, } fro
 import Header from "./Header";
 import Menu from "./Menu";
 import { styled, useMediaQuery, useTheme, useThemeProps } from "@mui/material";
-const ContainerDesktop = styled("div", {
+import useMountLogging from "../../../utils/useMountLogging";
+const Container = styled("div", {
     name: "CcPortalLayout",
-    slot: "containerDesktop",
-})(({ ownerState: { variant, drawerWidth } }) => ({
+    slot: "container",
+})(({ ownerState: { variant, drawerWidth, mobile } }) => ({
     display: "grid",
-    gridTemplateAreas: variant === "basic"
-        ? `"top-left top" "sidebar main"`
-        : `"top top" "sidebar main"`,
+    height: "100%",
     gridTemplateRows: "max-content 100fr",
     gridTemplateColumns: `${drawerWidth ? `${drawerWidth}px` : "max-content"} 100fr`,
-    height: "100%",
-}));
-const ContainerMobile = styled("div", {
-    name: "CcPortalLayout",
-    slot: "containerMobile",
-})(({ ownerState: { drawerWidth } }) => ({
-    display: "grid",
-    gridTemplateAreas: `"top top" "main main"`,
-    gridTemplateRows: "max-content 100fr",
-    gridTemplateColumns: `${drawerWidth ? `${drawerWidth}px` : "max-content"} 100fr`,
-    height: "100%",
+    gridTemplateAreas: mobile
+        ? `"top top" "main main"`
+        : variant === "basic"
+            ? `"top-left top" "sidebar main"`
+            : `"top top" "sidebar main"`,
 }));
 const RenderLayoutHeader = styled("div", {
     name: "CcPortalRenderLayout",
@@ -65,6 +58,7 @@ const RenderLayout = (props) => {
         menuOpen,
         setMenuOpen,
     }), [mobile, menuOpen, setMenuOpen]);
+    useMountLogging({ name: "RenderLayoutMemo" });
     return (React.createElement(PortalLayoutContext.Provider, { value: portalContext },
         !props.mobile && props.variant === "basic" && (React.createElement(RenderLayoutTopLeft, null, props.topLeft)),
         React.createElement(RenderLayoutHeader, { id: props.headerId }, headerContent && (React.createElement(Header, { contents: headerContent, toggleMenu: toggleMenu, mobile: mobile && !!menuContent, customClasses: props.customClasses?.header }))),
@@ -83,8 +77,12 @@ const PortalLayout = (inProps) => {
     const mobile = !!(shouldCollapse ||
         props.collapseMenu ||
         (props.mobileViewCondition && mobileViewConditionMet));
-    const ContainerComp = mobile ? ContainerMobile : ContainerDesktop;
-    return (React.createElement(ContainerComp, { ownerState: { variant: props.variant, drawerWidth: props.drawerWidth }, className: className },
+    useMountLogging({ name: "RenderLayout" });
+    return (React.createElement(Container, { ownerState: {
+            mobile,
+            variant: props.variant,
+            drawerWidth: props.drawerWidth,
+        }, className: className },
         React.createElement(RenderLayoutMemo, { mobile: mobile, ...rendererProps })));
 };
 export default React.memo(PortalLayout);
