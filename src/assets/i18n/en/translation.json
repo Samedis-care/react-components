@@ -112,7 +112,7 @@
 		},
 		"file-upload": {
 			"upload": "Upload",
-			"upload-modern": "Drag & drop file here or click for an upload dialog",
+			"upload-modern": "Drag & drop file here",
 			"no-files": "No attachments available",
 			"formats": "File formats",
 			"formats-modern": "Allowed file formats:",

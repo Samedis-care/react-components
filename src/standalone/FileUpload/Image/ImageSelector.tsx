@@ -1,7 +1,9 @@
-import React, { useCallback, useRef } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import {
+	alpha,
 	Box,
 	Button,
+	Dialog,
 	Grid,
 	IconButton,
 	styled,
@@ -10,7 +12,12 @@ import {
 	Typography,
 	useThemeProps,
 } from "@mui/material";
-import { AttachFile, Person } from "@mui/icons-material";
+import {
+	AttachFile,
+	Person,
+	FileUpload as UploadIcon,
+	Close as CloseIcon,
+} from "@mui/icons-material";
 import processImageB64 from "../../../utils/processImageB64";
 import combineClassNames from "../../../utils/combineClassNames";
 import { IDownscaleProps } from "../../../utils/processImage";
@@ -225,6 +232,26 @@ const PfpImagePlaceholder = styled(Person, {
 	slot: "pfpImgPlaceholder",
 })(pfpImageStyles);
 
+const ModernUploadControlsWrapper = styled("div", {
+	name: "CcImageSelector",
+	slot: "modernUploadControlsWrapper",
+})(({ theme }) => ({
+	position: "absolute",
+	bottom: theme.spacing(2),
+	right: theme.spacing(2),
+	backgroundColor: alpha(theme.palette.background.paper, 0.7),
+	borderRadius: theme.shape.borderRadius,
+}));
+
+const PreviewDialogCloseButton = styled(IconButton, {
+	name: "CcImageSelector",
+	slot: "previewDialogCloseButton",
+})(({ theme }) => ({
+	position: "absolute",
+	top: theme.spacing(2),
+	right: theme.spacing(2),
+}));
+
 export type ImageSelectorClassKey =
 	| "rootClassic"
 	| "rootModern"
@@ -237,6 +264,8 @@ export type ImageSelectorClassKey =
 	| "modernFullHeightGrid"
 	| "modernFormatsLabel"
 	| "modernFormatIcon"
+	| "modernUploadControlsWrapper"
+	| "previewDialogCloseButton"
 	| "pfpRoot"
 	| "pfpIconBtn"
 	| "pfpImg"
@@ -333,6 +362,26 @@ const ImageSelector = (inProps: ImageSelectorProps) => {
 		[readOnly],
 	);
 
+	const [showPreviewDialog, setShowPreviewDialog] = useState(false);
+	const handlePreviewDialog = useCallback(() => {
+		setShowPreviewDialog(true);
+	}, []);
+	const handlePreviewDialogClose = useCallback(() => {
+		setShowPreviewDialog(false);
+	}, []);
+	const previewDialog = showPreviewDialog && (
+		<Dialog open={true} fullScreen onClose={handlePreviewDialogClose}>
+			<PreviewDialogCloseButton onClick={handlePreviewDialogClose}>
+				<CloseIcon />
+			</PreviewDialogCloseButton>
+			<PreviewModern
+				src={value}
+				alt={props.alt}
+				className={classes?.previewModern}
+			/>
+		</Dialog>
+	);
+
 	// render component
 	if (variant === "normal") {
 		return (
@@ -388,117 +437,127 @@ const ImageSelector = (inProps: ImageSelectorProps) => {
 		);
 	} else if (variant === "modern") {
 		return (
-			<GroupBox
-				label={props.label}
-				smallLabel={props.smallLabel}
-				className={className}
-			>
-				<RootModern
-					container
-					spacing={0}
-					direction={"column"}
-					alignContent={"flex-start"}
-					alignItems={"stretch"}
-					justifyContent={"center"}
-					wrap={"nowrap"}
-					className={classes?.rootModern}
-					onDrop={handleDrop}
-					onDragOver={handleDragOver}
+			<>
+				{previewDialog}
+				<GroupBox
+					label={props.label}
+					smallLabel={props.smallLabel}
+					className={className}
 				>
-					{!props.readOnly && (
-						<ChangeEventHelper
-							type={"file"}
-							accept={"image/*"}
-							ref={fileRef}
-							onChange={handleFileChange}
-							className={classes?.changeEventHelper}
-						/>
-					)}
-					<ImageWrapper
-						item
-						xs
-						key={"image"}
-						className={classes?.imgWrapper}
-						onBlur={props.onBlur}
-						data-name={props.name}
+					<RootModern
+						container
+						spacing={0}
+						direction={"column"}
+						alignContent={"flex-start"}
+						alignItems={"stretch"}
+						justifyContent={"center"}
+						wrap={"nowrap"}
+						className={classes?.rootModern}
+						onDrop={handleDrop}
+						onDragOver={handleDragOver}
 					>
-						{value ? (
-							<Tooltip
-								title={
-									props.uploadLabel ??
-									t("standalone.file-upload.upload-modern") ??
-									""
-								}
-							>
-								<PreviewModern
-									src={value}
-									alt={props.alt}
-									onClick={handleUpload}
-									className={classes?.previewModern}
-								/>
-							</Tooltip>
-						) : (
-							<ModernFullHeightBox
-								px={2}
-								className={classes?.modernFullHeightBox}
-							>
-								<ModernFullHeightGrid
-									container
-									onClick={handleUpload}
-									direction={"column"}
-									spacing={0}
-									className={classes?.modernFullHeightGrid}
-								>
-									<Grid
-										item
-										xs
-										container
-										direction={"column"}
-										justifyContent={"space-around"}
-										wrap={"nowrap"}
+						{!props.readOnly && (
+							<ChangeEventHelper
+								type={"file"}
+								accept={"image/*"}
+								ref={fileRef}
+								onChange={handleFileChange}
+								className={classes?.changeEventHelper}
+							/>
+						)}
+						<ImageWrapper
+							item
+							xs
+							key={"image"}
+							className={classes?.imgWrapper}
+							onBlur={props.onBlur}
+							data-name={props.name}
+						>
+							{value ? (
+								<>
+									<Tooltip
+										title={
+											props.uploadLabel ??
+											t("standalone.file-upload.upload-modern") ??
+											""
+										}
 									>
-										<Grid item>
-											<ModernUploadLabel
-												component={"h1"}
-												variant={"h5"}
-												className={classes?.modernUploadLabel}
-												align={"center"}
-											>
-												{props.uploadLabel ??
-													t("standalone.file-upload.upload-modern") ??
-													""}
-											</ModernUploadLabel>
-										</Grid>
-									</Grid>
-									<Grid item>
+										<PreviewModern
+											src={value}
+											alt={props.alt}
+											onClick={handlePreviewDialog}
+											className={classes?.previewModern}
+										/>
+									</Tooltip>
+									<ModernUploadControlsWrapper>
+										<IconButton onClick={handleUpload}>
+											<UploadIcon />
+										</IconButton>
+									</ModernUploadControlsWrapper>
+								</>
+							) : (
+								<ModernFullHeightBox
+									px={2}
+									className={classes?.modernFullHeightBox}
+								>
+									<ModernFullHeightGrid
+										container
+										onClick={handleUpload}
+										direction={"column"}
+										spacing={0}
+										className={classes?.modernFullHeightGrid}
+									>
 										<Grid
+											item
+											xs
 											container
+											direction={"column"}
+											justifyContent={"space-around"}
 											wrap={"nowrap"}
-											spacing={0}
-											justifyContent={"space-between"}
 										>
 											<Grid item>
-												<ModernFormatsLabel
-													className={classes?.modernFormatsLabel}
+												<ModernUploadLabel
+													component={"h1"}
+													variant={"h5"}
+													className={classes?.modernUploadLabel}
+													align={"center"}
 												>
-													{props.formatsLabel ??
-														t("standalone.file-upload.formats-modern") ??
+													{props.uploadLabel ??
+														t("standalone.file-upload.upload-modern") ??
 														""}
-												</ModernFormatsLabel>
-											</Grid>
-											<Grid item>
-												<ModernFormatIcon
-													className={classes?.modernFormatIcon}
-												/>
+												</ModernUploadLabel>
 											</Grid>
 										</Grid>
-									</Grid>
-								</ModernFullHeightGrid>
-							</ModernFullHeightBox>
-						)}
-					</ImageWrapper>
-				</RootModern>
-			</GroupBox>
+										<Grid item>
+											<Grid
+												container
+												wrap={"nowrap"}
+												spacing={0}
+												justifyContent={"space-between"}
+											>
+												<Grid item>
+													<ModernFormatsLabel
+														className={classes?.modernFormatsLabel}
+													>
+														{props.formatsLabel ??
+															t("standalone.file-upload.formats-modern") ??
+															""}
+													</ModernFormatsLabel>
+												</Grid>
+												<Grid item>
+													<ModernFormatIcon
+														className={classes?.modernFormatIcon}
+													/>
+												</Grid>
+											</Grid>
+										</Grid>
+									</ModernFullHeightGrid>
+								</ModernFullHeightBox>
+							)}
+						</ImageWrapper>
+					</RootModern>
+				</GroupBox>
+			</>
 		);
 	} else if (variant === "profile_picture") {
 		const image = value ? (
