@@ -128,7 +128,9 @@
 			"multi-image": {
 				"edit": "Tahrirlash",
 				"primary": "Birlamchi"
-			}
+			},
+			"upload-modern-dnd": "Faylni bu yerga sudrab olib tashlang",
+			"upload-modern-btn": "Yuklash muloqot oynasi uchun bosing"
 		},
 		"phone-number": {
 			"invalid": "To'g'ri telefon raqamini kiriting"
