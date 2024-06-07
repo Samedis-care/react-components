@@ -243,6 +243,11 @@ const ModernUploadControlsWrapper = styled("div", {
 	borderRadius: theme.shape.borderRadius,
 }));
 
+const ModernUploadControlUpload = styled(IconButton, {
+	name: "CcImageSelector",
+	slot: "modernUploadControlUpload",
+})();
+
 const PreviewDialogCloseButton = styled(IconButton, {
 	name: "CcImageSelector",
 	slot: "previewDialogCloseButton",
@@ -265,6 +270,7 @@ export type ImageSelectorClassKey =
 	| "modernFormatsLabel"
 	| "modernFormatIcon"
 	| "modernUploadControlsWrapper"
+	| "modernUploadControlUpload"
 	| "previewDialogCloseButton"
 	| "pfpRoot"
 	| "pfpIconBtn"
@@ -490,9 +496,9 @@ const ImageSelector = (inProps: ImageSelectorProps) => {
 										/>
 									</Tooltip>
 									<ModernUploadControlsWrapper>
-										<IconButton onClick={handleUpload}>
+										<ModernUploadControlUpload onClick={handleUpload}>
 											<UploadIcon />
-										</IconButton>
+										</ModernUploadControlUpload>
 									</ModernUploadControlsWrapper>
 								</>
 							) : (
