@@ -128,7 +128,9 @@
 			"multi-image": {
 				"edit": "Bearbeiten",
 				"primary": "Primär"
-			}
+			},
+			"upload-modern-dnd": "Datei hierher ziehen und ablegen",
+			"upload-modern-btn": "Klicke hier, um einen Upload-Dialog aufzurufen"
 		},
 		"phone-number": {
 			"invalid": "Korrekte Rufnummer eingeben"

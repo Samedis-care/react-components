@@ -128,7 +128,9 @@
 			"multi-image": {
 				"edit": "Bewerken",
 				"primary": "Primair"
-			}
+			},
+			"upload-modern-dnd": "Sleep het bestand hierheen",
+			"upload-modern-btn": "Klik voor een uploaddialoogvenster"
 		},
 		"phone-number": {
 			"invalid": "Voer het juiste telefoonnummer in"
