@@ -47,7 +47,7 @@ export const dotInObject = (field, data) => {
             return false;
         value = value[fieldParts[i]];
     }
-    return true;
+    return value !== undefined;
 };
 export const objectToDots = (obj) => {
     const ret = {};
