@@ -57,7 +57,7 @@ export const dotInObject = (
 		if (typeof value !== "object" || value == null) return false;
 		value = (value as Record<string, unknown>)[fieldParts[i]];
 	}
-	return true;
+	return value !== undefined;
 };
 
 export const objectToDots = (

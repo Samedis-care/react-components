@@ -1268,9 +1268,11 @@ const Form = <
 
 		if (initialRecord && id == null) {
 			void Promise.all(
-				Object.entries(initialRecord).map(([key, value]) =>
-					setFieldValue(key, value, false),
-				),
+				Object.keys(model.fields)
+					.filter((key) => dotInObject(key, initialRecord))
+					.map((key) =>
+						setFieldValue(key, getValueByDot(key, initialRecord), false),
+					),
 			);
 		}
 
