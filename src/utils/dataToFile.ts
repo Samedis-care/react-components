@@ -10,7 +10,8 @@ const dataToFile = (data: string): Blob => {
 	const arr = data.split(",");
 	if (arr.length < 2) throw new Error("Invalid data uri: " + data.slice(0, 64));
 	const mimeMatch = arr[0].match(/:(.*?);/);
-	if (!mimeMatch || mimeMatch.length < 2) throw new Error("mimeMatch invalid");
+	if (!mimeMatch || mimeMatch.length < 2)
+		throw new Error("mimeMatch invalid for data uri: " + data.slice(0, 64));
 	const mime = mimeMatch[1];
 	const bstr = atob(arr[1]);
 	let n = bstr.length;
