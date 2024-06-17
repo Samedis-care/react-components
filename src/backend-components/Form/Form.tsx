@@ -601,6 +601,10 @@ export interface FormContextData {
 	 * Flow engine mode enabled?
 	 */
 	flowEngine: boolean;
+	/**
+	 * Flow engine config
+	 */
+	flowEngineConfig: React.MutableRefObject<FormFlowEngineStageConfig>;
 }
 
 /**
@@ -636,6 +640,7 @@ export type FormContextDataLite = Pick<
 	| "submit"
 	| "submitting"
 	| "dirty"
+	| "flowEngineConfig"
 >;
 export const FormContextLite = React.createContext<FormContextDataLite | null>(
 	null,
@@ -655,6 +660,23 @@ export interface FormNestedState {
 	errors: Record<string, string | null>;
 	warnings: Record<string, string | null>;
 }
+
+export type FormFlowEngineStageConfig = Partial<{
+	onlySubmitMounted: boolean;
+	onlySubmitMountedBehaviour: OnlySubmitMountedBehaviour;
+}>;
+
+export const useFormFlowEngineStageConfig = (
+	config: FormFlowEngineStageConfig,
+) => {
+	const { flowEngineConfig } = useFormContextLite();
+	useEffect(() => {
+		flowEngineConfig.current = config;
+		return () => {
+			flowEngineConfig.current = {};
+		};
+	}, [config, flowEngineConfig]);
+};
 
 const loaderContainerStyles: CSSProperties = {
 	height: 320,
@@ -816,15 +838,20 @@ const Form = <
 		flowEngine,
 	} = props;
 	// flow engine mode defaults
+	const flowEngineConfig = useRef<FormFlowEngineStageConfig>({});
 	const onlyValidateMounted = flowEngine ? true : props.onlyValidateMounted;
 	const onlySubmitNestedIfMounted = flowEngine
 		? false
 		: props.onlySubmitNestedIfMounted;
-	const onlySubmitMounted = flowEngine ? true : props.onlySubmitMounted;
+	const onlySubmitMounted = flowEngine
+		? flowEngineConfig.current.onlySubmitMounted ?? true
+		: props.onlySubmitMounted;
 
 	//
 	const onlySubmitMountedBehaviour =
-		props.onlySubmitMountedBehaviour ?? OnlySubmitMountedBehaviour.OMIT;
+		flowEngineConfig.current.onlySubmitMountedBehaviour ??
+		props.onlySubmitMountedBehaviour ??
+		OnlySubmitMountedBehaviour.OMIT;
 	const ErrorComponent = props.errorComponent;
 	const { t } = useCCTranslations();
 	const [pushDialog] = useDialogContext();
@@ -1431,8 +1458,9 @@ const Form = <
 					const updateData = getUpdateData(
 						valuesRef.current,
 						model as unknown as Model<string, PageVisibility, unknown>,
-						true,
-						OnlySubmitMountedBehaviour.OMIT,
+						flowEngineConfig.current.onlySubmitMounted ?? true,
+						flowEngineConfig.current.onlySubmitMountedBehaviour ??
+							OnlySubmitMountedBehaviour.OMIT,
 						alwaysSubmitFields ?? [],
 						mountedFields,
 						defaultRecord[0],
@@ -1820,6 +1848,7 @@ const Form = <
 			readOnlyReason: readOnlyReasons[0],
 			readOnlyReasons: readOnlyReasons,
 			flowEngine: !!flowEngine,
+			flowEngineConfig,
 		}),
 		[
 			id,
@@ -1900,6 +1929,7 @@ const Form = <
 			submit: submitForm,
 			submitting,
 			dirty,
+			flowEngineConfig,
 		}),
 		[
 			id,
