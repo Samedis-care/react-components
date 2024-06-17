@@ -92,6 +92,10 @@ class RendererBackendSingleSelect<
 						}
 						initialData={relationData}
 						{...this.props}
+						refreshToken={
+							JSON.stringify(relationModel.getReactQueryKeyFetchAll()) +
+							this.props.refreshToken
+						}
 					/>
 					<FormHelperText>{errorMsg || warningMsg}</FormHelperText>
 				</FormControlFieldsetCC>
