@@ -50,6 +50,15 @@ export const useFormContextLite = () => {
         throw new Error("Form Context (Lite) not set. Not using form engine?");
     return ctx;
 };
+export const useFormFlowEngineStageConfig = (config) => {
+    const { flowEngineConfig } = useFormContextLite();
+    useEffect(() => {
+        flowEngineConfig.current = config;
+        return () => {
+            flowEngineConfig.current = {};
+        };
+    }, [config, flowEngineConfig]);
+};
 const loaderContainerStyles = {
     height: 320,
     width: 320,
@@ -116,13 +125,18 @@ const setAllTouched = (touched, set) => Object.fromEntries(Object.keys(touched).
 const Form = (props) => {
     const { model, id, children, onSubmit, customProps, onlyWarnMounted, alwaysSubmitFields, onlyWarnChanged, readOnly: readOnlyProp, readOnlyReason: readOnlyReasonProp, readOnlyReasons: readOnlyReasonsProp, disableValidation, nestedFormName, disableNestedSubmit, nestedFormPreSubmitHandler, deleteOnSubmit, onDeleted, initialRecord, formClass, preSubmit, dirtyIgnoreFields, flowEngine, } = props;
     // flow engine mode defaults
+    const flowEngineConfig = useRef({});
     const onlyValidateMounted = flowEngine ? true : props.onlyValidateMounted;
     const onlySubmitNestedIfMounted = flowEngine
         ? false
         : props.onlySubmitNestedIfMounted;
-    const onlySubmitMounted = flowEngine ? true : props.onlySubmitMounted;
+    const onlySubmitMounted = flowEngine
+        ? flowEngineConfig.current.onlySubmitMounted ?? true
+        : props.onlySubmitMounted;
     //
-    const onlySubmitMountedBehaviour = props.onlySubmitMountedBehaviour ?? OnlySubmitMountedBehaviour.OMIT;
+    const onlySubmitMountedBehaviour = flowEngineConfig.current.onlySubmitMountedBehaviour ??
+        props.onlySubmitMountedBehaviour ??
+        OnlySubmitMountedBehaviour.OMIT;
     const ErrorComponent = props.errorComponent;
     const { t } = useCCTranslations();
     const [pushDialog] = useDialogContext();
@@ -565,7 +579,8 @@ const Form = (props) => {
             await Promise.all(Object.values(preSubmitHandlers.current).map((handler) => handler(id, params)));
             if (flowEngine) {
                 // flow engine staged submit
-                const updateData = getUpdateData(valuesRef.current, model, true, OnlySubmitMountedBehaviour.OMIT, alwaysSubmitFields ?? [], mountedFields, defaultRecord[0], id);
+                const updateData = getUpdateData(valuesRef.current, model, flowEngineConfig.current.onlySubmitMounted ?? true, flowEngineConfig.current.onlySubmitMountedBehaviour ??
+                    OnlySubmitMountedBehaviour.OMIT, alwaysSubmitFields ?? [], mountedFields, defaultRecord[0], id);
                 const originalStaged = deepClone(valuesStagedRef.current);
                 valuesStagedRef.current = deepAssign(valuesStagedRef.current, updateData);
                 setValuesStaged(valuesStagedRef.current);
@@ -864,6 +879,7 @@ const Form = (props) => {
         readOnlyReason: readOnlyReasons[0],
         readOnlyReasons: readOnlyReasons,
         flowEngine: !!flowEngine,
+        flowEngineConfig,
     }), [
         id,
         model,
@@ -940,6 +956,7 @@ const Form = (props) => {
         submit: submitForm,
         submitting,
         dirty,
+        flowEngineConfig,
     }), [
         id,
         model,

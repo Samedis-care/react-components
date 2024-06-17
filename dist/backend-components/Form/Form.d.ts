@@ -505,13 +505,17 @@ export interface FormContextData {
      * Flow engine mode enabled?
      */
     flowEngine: boolean;
+    /**
+     * Flow engine config
+     */
+    flowEngineConfig: React.MutableRefObject<FormFlowEngineStageConfig>;
 }
 /**
  * Context which stores information about the current form so it can be used by fields
  */
 export declare const FormContext: React.Context<FormContextData | null>;
 export declare const useFormContext: () => FormContextData;
-export type FormContextDataLite = Pick<FormContextData, "id" | "model" | "customProps" | "onlySubmitMounted" | "onlyValidateMounted" | "onlyWarnMounted" | "onlyWarnChanged" | "readOnly" | "readOnlyReason" | "readOnlyReasons" | "errorComponent" | "getFieldValue" | "getFieldValues" | "setFieldValueLite" | "setFieldTouchedLite" | "setCustomReadOnly" | "removeCustomReadOnly" | "flowEngine" | "submit" | "submitting" | "dirty">;
+export type FormContextDataLite = Pick<FormContextData, "id" | "model" | "customProps" | "onlySubmitMounted" | "onlyValidateMounted" | "onlyWarnMounted" | "onlyWarnChanged" | "readOnly" | "readOnlyReason" | "readOnlyReasons" | "errorComponent" | "getFieldValue" | "getFieldValues" | "setFieldValueLite" | "setFieldTouchedLite" | "setCustomReadOnly" | "removeCustomReadOnly" | "flowEngine" | "submit" | "submitting" | "dirty" | "flowEngineConfig">;
 export declare const FormContextLite: React.Context<FormContextDataLite | null>;
 export declare const useFormContextLite: () => FormContextDataLite;
 export interface FormNestedState {
@@ -522,5 +526,10 @@ export interface FormNestedState {
     errors: Record<string, string | null>;
     warnings: Record<string, string | null>;
 }
+export type FormFlowEngineStageConfig = Partial<{
+    onlySubmitMounted: boolean;
+    onlySubmitMountedBehaviour: OnlySubmitMountedBehaviour;
+}>;
+export declare const useFormFlowEngineStageConfig: (config: FormFlowEngineStageConfig) => void;
 declare const _default: <KeyT extends string, VisibilityT extends PageVisibility, CustomT, CustomPropsT>(props: FormProps<KeyT, VisibilityT, CustomT, CustomPropsT>) => React.JSX.Element;
 export default _default;
