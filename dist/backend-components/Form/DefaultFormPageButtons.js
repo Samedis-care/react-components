@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useMemo } from "react";
+import React, { useCallback, useContext, useEffect, useMemo, useState, } from "react";
 import { useDialogContext } from "../../framework";
 import { showConfirmDialog } from "../../non-standalone";
 import { ActionButton, FormButtons } from "../../standalone";
@@ -22,13 +22,15 @@ const DefaultFormPageButtons = (inProps) => {
         props: inProps,
         name: "CcDefaultFormPageButtons",
     });
-    const { showBackButtonOnly, readOnly, readOnlyReasons, dirty, isSubmitting, submit, customProps, confirmDialogMessage, } = props;
+    const { showBackButtonOnly, readOnly, readOnlyReasons, dirty, isSubmitting, submit, customProps, confirmDialogMessage, autoBack, } = props;
     const goBack = customProps?.goBack;
     const hasCustomCloseHandler = customProps?.hasCustomSubmitHandler;
     const { t } = useCCTranslations();
     const isInDialog = useContext(IsInFormDialogContext);
     const [pushDialog] = useDialogContext();
     const displayConfirmDialog = !!confirmDialogMessage;
+    const handleBack = useCallback(() => goBack && goBack(), [goBack]);
+    const [autoBackTrigger, setAutoBackTrigger] = useState(null);
     const submitWithConfirmDialog = useCallback(async () => {
         try {
             await showConfirmDialog(pushDialog, {
@@ -44,20 +46,28 @@ const DefaultFormPageButtons = (inProps) => {
         }
         try {
             await submit();
+            if (autoBack)
+                setAutoBackTrigger(Date.now());
         }
         catch (e) {
             // ignore, error is shown regardless
         }
-    }, [confirmDialogMessage, pushDialog, submit, t]);
+    }, [autoBack, confirmDialogMessage, pushDialog, submit, t]);
     const safeSubmit = useCallback(async () => {
         try {
             await submit();
+            if (autoBack)
+                setAutoBackTrigger(Date.now());
         }
         catch (e) {
             // ignore, error is shown regardless
         }
-    }, [submit]);
-    const handleBack = useCallback(() => goBack && goBack(), [goBack]);
+    }, [autoBack, submit]);
+    useEffect(() => {
+        if (autoBackTrigger === null)
+            return;
+        handleBack();
+    }, [autoBackTrigger, handleBack]);
     const saveBtn = (React.createElement(ActionButton, { disabled: !dirty || isSubmitting || readOnly, onClick: displayConfirmDialog ? submitWithConfirmDialog : safeSubmit }, t("common.buttons.save")));
     const humanReadOnlyReasons = useMemo(() => Object.values(readOnlyReasons).filter((e) => !!e), [readOnlyReasons]);
     return (React.createElement(FormButtons, null,

@@ -23,6 +23,10 @@ export interface BasicFormPageRendererProps<CustomPropsT> extends Omit<PageProps
      */
     showBackButtonOnly?: boolean;
     /**
+     * Automatically go back after submit
+     */
+    autoBack?: boolean;
+    /**
      * Confirm dialog message
      */
     confirmDialogMessage?: string;
