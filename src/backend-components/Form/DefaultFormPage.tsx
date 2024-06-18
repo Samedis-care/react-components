@@ -12,6 +12,10 @@ export interface DefaultFormPageProps
 	 */
 	children: React.ReactNode;
 	/**
+	 * Automatically go back after submit
+	 */
+	autoBack?: boolean;
+	/**
 	 * Show back button only when not enough permission
 	 */
 	showBackButtonOnly?: boolean;

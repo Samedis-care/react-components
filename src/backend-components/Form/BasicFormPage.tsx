@@ -44,6 +44,10 @@ export interface BasicFormPageRendererProps<CustomPropsT>
 	 */
 	showBackButtonOnly?: boolean;
 	/**
+	 * Automatically go back after submit
+	 */
+	autoBack?: boolean;
+	/**
 	 * Confirm dialog message
 	 */
 	confirmDialogMessage?: string;

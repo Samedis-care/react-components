@@ -1,4 +1,10 @@
-import React, { useCallback, useContext, useMemo } from "react";
+import React, {
+	useCallback,
+	useContext,
+	useEffect,
+	useMemo,
+	useState,
+} from "react";
 import { BasicFormPageRendererProps } from "./BasicFormPage";
 import { CrudFormProps } from "../CRUD";
 import { useDialogContext } from "../../framework";
@@ -40,6 +46,7 @@ const DefaultFormPageButtons = (inProps: DefaultFormPageButtonsProps) => {
 		submit,
 		customProps,
 		confirmDialogMessage,
+		autoBack,
 	} = props;
 	const goBack = customProps?.goBack;
 	const hasCustomCloseHandler = customProps?.hasCustomSubmitHandler;
@@ -47,6 +54,9 @@ const DefaultFormPageButtons = (inProps: DefaultFormPageButtonsProps) => {
 	const isInDialog = useContext(IsInFormDialogContext);
 	const [pushDialog] = useDialogContext();
 	const displayConfirmDialog = !!confirmDialogMessage;
+
+	const handleBack = useCallback(() => goBack && goBack(), [goBack]);
+	const [autoBackTrigger, setAutoBackTrigger] = useState<null | number>(null);
 
 	const submitWithConfirmDialog = useCallback(async () => {
 		try {
@@ -64,20 +74,25 @@ const DefaultFormPageButtons = (inProps: DefaultFormPageButtonsProps) => {
 
 		try {
 			await submit();
+			if (autoBack) setAutoBackTrigger(Date.now());
 		} catch (e) {
 			// ignore, error is shown regardless
 		}
-	}, [confirmDialogMessage, pushDialog, submit, t]);
+	}, [autoBack, confirmDialogMessage, pushDialog, submit, t]);
 
 	const safeSubmit = useCallback(async () => {
 		try {
 			await submit();
+			if (autoBack) setAutoBackTrigger(Date.now());
 		} catch (e) {
 			// ignore, error is shown regardless
 		}
-	}, [submit]);
+	}, [autoBack, submit]);
 
-	const handleBack = useCallback(() => goBack && goBack(), [goBack]);
+	useEffect(() => {
+		if (autoBackTrigger === null) return;
+		handleBack();
+	}, [autoBackTrigger, handleBack]);
 
 	const saveBtn = (
 		<ActionButton
