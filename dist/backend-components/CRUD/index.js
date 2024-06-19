@@ -10,6 +10,7 @@ import useLocation from "../../standalone/Routes/useLocation";
 import useParams from "../../standalone/Routes/useParams";
 import Routes from "../../standalone/Routes/Routes";
 import { styled } from "@mui/material";
+import DialogContextProvider from "../../framework/DialogContextProvider";
 const CrudImport = React.lazy(() => import("./Import"));
 const GridVisibilityWrapper = styled("div", {
     name: "CcCrud",
@@ -161,14 +162,15 @@ const CRUD = (props) => {
             skipNextFormIdReset.current = null;
             lastFormId.current = id;
         }
-        return (React.createElement(Form, { id: id === "new" ? null : id, key: formKey.current, model: props.model, ...props.formProps, readOnlyReasons: {
-                ...props.formProps.readOnlyReasons,
-                ...(!hasPermission(perms, id === "new" ? props.newPermission : props.editPermission) && { permissions: props.editPermissionHint ?? null }),
-            }, onSubmit: handleSubmit, disableRouting: disableRouting, customProps: props.formProps.customProps ?? {
-                goBack: showOverview,
-                open: openView,
-                hasCustomSubmitHandler: props.formProps.onSubmit != null,
-            } }, formComponent));
+        return (React.createElement(DialogContextProvider, null,
+            React.createElement(Form, { id: id === "new" ? null : id, key: formKey.current, model: props.model, ...props.formProps, readOnlyReasons: {
+                    ...props.formProps.readOnlyReasons,
+                    ...(!hasPermission(perms, id === "new" ? props.newPermission : props.editPermission) && { permissions: props.editPermissionHint ?? null }),
+                }, onSubmit: handleSubmit, disableRouting: disableRouting, customProps: props.formProps.customProps ?? {
+                    goBack: showOverview,
+                    open: openView,
+                    hasCustomSubmitHandler: props.formProps.onSubmit != null,
+                } }, formComponent)));
     };
     const dispatch = useMemo(() => ({
         refreshGrid,
