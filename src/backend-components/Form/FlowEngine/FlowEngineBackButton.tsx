@@ -11,6 +11,20 @@ export interface FlowEngineBackButtonProps
 	children?: ActionButtonProps["children"];
 }
 
+export const useShouldRenderFlowEngineBackButton = () => {
+	const { customProps } = useFormContextLite();
+	const custProps = customProps as CrudFormProps | undefined;
+	const isInDialog = useContext(IsInFormDialogContext);
+	const goBack = custProps?.goBack;
+	const hasCustomCloseHandler = custProps?.hasCustomSubmitHandler;
+	return goBack && !(isInDialog && hasCustomCloseHandler);
+};
+
+/**
+ * back button with same logic as DefaultFormPage back button
+ * @remarks Should only be rendered if useShouldRenderFlowEngineBackButton() returns true
+ * @param props The props
+ */
 const FlowEngineBackButton = (props: FlowEngineBackButtonProps) => {
 	const { customProps, submitting } = useFormContextLite();
 	const custProps = customProps as CrudFormProps | undefined;
