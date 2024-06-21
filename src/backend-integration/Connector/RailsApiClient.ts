@@ -13,6 +13,21 @@ const objectContainsBlob = (obj: Record<string, unknown>) => {
 	}
 	return false;
 };
+const objectContainsArrayOfObjects = (obj: Record<string, unknown>) => {
+	if (Array.isArray(obj)) {
+		if (obj.find((entry) => typeof entry === "object") !== undefined)
+			return true;
+	}
+	for (const key in obj) {
+		if (!Object.prototype.hasOwnProperty.call(obj, key)) continue;
+		const value = obj[key];
+		if (typeof value === "object") {
+			if (objectContainsArrayOfObjects(value as Record<string, unknown>))
+				return true;
+		}
+	}
+	return false;
+};
 const convertDataToFormData = (data: unknown): string | Blob => {
 	if (typeof data === "number") return data.toString();
 	if (typeof data === "boolean") return data ? "true" : "false";
@@ -70,7 +85,10 @@ class RailsApiClient extends JsonApiClient {
 		body: unknown | null,
 		headers: Record<string, string>,
 	): string | FormData | null {
-		if (objectContainsBlob(body as Record<string, unknown>)) {
+		if (
+			objectContainsBlob(body as Record<string, unknown>) &&
+			!objectContainsArrayOfObjects(body as Record<string, unknown>) // too sketchy, does not work with omitted/optional keys
+		) {
 			const formBody = new FormData();
 			objectToRails(body as Record<string, unknown>).forEach(([key, value]) => {
 				formBody.append(key, value);
