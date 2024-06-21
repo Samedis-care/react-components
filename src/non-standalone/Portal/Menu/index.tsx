@@ -154,7 +154,9 @@ const resolveLocation = (
 		: null;
 };
 
-const RoutedMenu = (props: IRoutedMenuProps) => {
+export const useRoutedMenuLogic = (
+	props: Pick<IRoutedMenuProps, "definition">,
+) => {
 	const controlledState = useState("");
 	const [activeMenuItem, setActiveMenuItem] = controlledState;
 	const location = useLocation();
@@ -176,7 +178,11 @@ const RoutedMenu = (props: IRoutedMenuProps) => {
 			convertDefinition(rawDef, entry, path, 0, navigate),
 		);
 	}, [rawDef, path, navigate]);
+	return { definition, controlledState };
+};
 
+const RoutedMenu = (props: IRoutedMenuProps) => {
+	const { definition, controlledState } = useRoutedMenuLogic(props);
 	return (
 		<MenuBase
 			{...props}
