@@ -16,6 +16,22 @@ const objectContainsBlob = (obj) => {
     }
     return false;
 };
+const objectContainsArrayOfObjects = (obj) => {
+    if (Array.isArray(obj)) {
+        if (obj.find((entry) => typeof entry === "object") !== undefined)
+            return true;
+    }
+    for (const key in obj) {
+        if (!Object.prototype.hasOwnProperty.call(obj, key))
+            continue;
+        const value = obj[key];
+        if (typeof value === "object") {
+            if (objectContainsArrayOfObjects(value))
+                return true;
+        }
+    }
+    return false;
+};
 const convertDataToFormData = (data) => {
     if (typeof data === "number")
         return data.toString();
@@ -64,7 +80,9 @@ const objectToRails = (obj) => {
 };
 class RailsApiClient extends JsonApiClient {
     convertBody(body, headers) {
-        if (objectContainsBlob(body)) {
+        if (objectContainsBlob(body) &&
+            !objectContainsArrayOfObjects(body) // too sketchy, does not work with omitted/optional keys
+        ) {
             const formBody = new FormData();
             objectToRails(body).forEach(([key, value]) => {
                 formBody.append(key, value);
