@@ -89,7 +89,7 @@ const resolveLocation = (definitions, path, depth, itemId) => {
             : matchDef.title
         : null;
 };
-const RoutedMenu = (props) => {
+export const useRoutedMenuLogic = (props) => {
     const controlledState = useState("");
     const [activeMenuItem, setActiveMenuItem] = controlledState;
     const location = useLocation();
@@ -107,6 +107,10 @@ const RoutedMenu = (props) => {
     const definition = React.useMemo(() => {
         return rawDef.map((entry) => convertDefinition(rawDef, entry, path, 0, navigate));
     }, [rawDef, path, navigate]);
+    return { definition, controlledState };
+};
+const RoutedMenu = (props) => {
+    const { definition, controlledState } = useRoutedMenuLogic(props);
     return (React.createElement(MenuBase, { ...props, definition: definition, customState: controlledState }));
 };
 export default React.memo(RoutedMenu);

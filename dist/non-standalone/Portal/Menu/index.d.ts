@@ -20,5 +20,9 @@ export interface IRoutedMenuProps extends Omit<MenuProps, "definition" | "custom
      */
     definition: IRoutedMenuItemDefinition[];
 }
+export declare const useRoutedMenuLogic: (props: Pick<IRoutedMenuProps, "definition">) => {
+    definition: IMenuItemDefinition[];
+    controlledState: [string, React.Dispatch<React.SetStateAction<string>>];
+};
 declare const _default: React.MemoExoticComponent<(props: IRoutedMenuProps) => React.JSX.Element>;
 export default _default;
