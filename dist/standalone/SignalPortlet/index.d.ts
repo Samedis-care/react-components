@@ -10,10 +10,18 @@ export interface SignalPortletProps {
      */
     items: SignalPortletItemProps[];
     /**
+     * Updated at (optional)
+     */
+    updatedAt?: number | Date | null | undefined;
+    /**
+     * Refresh handler
+     */
+    onRefresh?: () => void;
+    /**
      * Custom CSS classes
      */
     classes?: Partial<Record<SignalPortletClassKey, string>>;
 }
-export type SignalPortletClassKey = "paper" | "divider" | "titleWrapper" | "title" | "list" | "item";
+export type SignalPortletClassKey = "paper" | "divider" | "titleWrapper" | "title" | "list" | "item" | "refreshIconButton" | "refreshIcon" | "lastUpdatedAt";
 declare const _default: React.MemoExoticComponent<(inProps: SignalPortletProps) => React.JSX.Element>;
 export default _default;
