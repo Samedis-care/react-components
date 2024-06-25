@@ -4,6 +4,9 @@
 			"week": "Week",
 			"today": "Today"
 		},
+		"signal-portlet": {
+			"last-updated": "Last updated: {{AGE}}"
+		},
 		"notifications": {
 			"title": "Notifications"
 		},

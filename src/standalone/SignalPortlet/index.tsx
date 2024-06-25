@@ -3,12 +3,17 @@ import SignalPortletItem, { SignalPortletItemProps } from "./SignalPortletItem";
 import {
 	Divider,
 	Grid,
+	IconButton,
 	List,
 	Paper,
 	styled,
+	Tooltip,
 	Typography,
 	useThemeProps,
 } from "@mui/material";
+import { Sync as RefreshIcon } from "@mui/icons-material";
+import timestampToAge from "../../utils/timestampToAge";
+import useCCTranslations from "../../utils/useCCTranslations";
 
 export interface SignalPortletProps {
 	/**
@@ -19,6 +24,14 @@ export interface SignalPortletProps {
 	 * The portlet items
 	 */
 	items: SignalPortletItemProps[];
+	/**
+	 * Updated at (optional)
+	 */
+	updatedAt?: number | Date | null | undefined;
+	/**
+	 * Refresh handler
+	 */
+	onRefresh?: () => void;
 	/**
 	 * Custom CSS classes
 	 */
@@ -55,6 +68,18 @@ const SignalPortletItemStyled = styled(SignalPortletItem, {
 	name: "CcSignalPortlet",
 	slot: "item",
 })({});
+const SignalPortletRefreshIconButton = styled(IconButton, {
+	name: "CcSignalPortlet",
+	slot: "refreshIconButton",
+})({});
+const SignalPortletRefreshIcon = styled(RefreshIcon, {
+	name: "CcSignalPortlet",
+	slot: "refreshIcon",
+})({});
+const SignalPortletLastUpdatedAt = styled("span", {
+	name: "CcSignalPortlet",
+	slot: "lastUpdatedAt",
+})({});
 
 export type SignalPortletClassKey =
 	| "paper"
@@ -62,42 +87,94 @@ export type SignalPortletClassKey =
 	| "titleWrapper"
 	| "title"
 	| "list"
-	| "item";
+	| "item"
+	| "refreshIconButton"
+	| "refreshIcon"
+	| "lastUpdatedAt";
 
 const SignalPortlet = (inProps: SignalPortletProps) => {
 	const props = useThemeProps({ props: inProps, name: "CcSignalPortlet" });
+	const { t, i18n } = useCCTranslations();
 
 	return (
 		<SignalPortletRoot>
 			<SignalPortletPaper className={props.classes?.paper}>
-				<Grid container spacing={1}>
-					<SignalPortletTitleWrapper
-						item
-						xs={12}
-						className={props.classes?.titleWrapper}
-					>
-						<SignalPortletTitle
-							variant={"h5"}
-							align={"center"}
-							className={props.classes?.title}
+				<Grid
+					container
+					spacing={1}
+					direction={"column"}
+					justifyContent={"space-between"}
+				>
+					<Grid item xs container spacing={1}>
+						<SignalPortletTitleWrapper
+							item
+							xs={12}
+							className={props.classes?.titleWrapper}
 						>
-							{props.title}
-						</SignalPortletTitle>
-					</SignalPortletTitleWrapper>
-					<SignalPortletDivider item xs={12} className={props.classes?.divider}>
-						<Divider />
-					</SignalPortletDivider>
-					<Grid item xs={12}>
-						<SignalPortletList className={props.classes?.list}>
-							{props.items.map((item, index) => (
-								<SignalPortletItemStyled
-									key={index.toString()}
-									className={props.classes?.item}
-									{...item}
-								/>
-							))}
-						</SignalPortletList>
+							<SignalPortletTitle
+								variant={"h5"}
+								align={"center"}
+								className={props.classes?.title}
+							>
+								{props.title}
+							</SignalPortletTitle>
+						</SignalPortletTitleWrapper>
+						<SignalPortletDivider
+							item
+							xs={12}
+							className={props.classes?.divider}
+						>
+							<Divider />
+						</SignalPortletDivider>
+						<Grid item xs={12}>
+							<SignalPortletList className={props.classes?.list}>
+								{props.items.map((item, index) => (
+									<SignalPortletItemStyled
+										key={index.toString()}
+										className={props.classes?.item}
+										{...item}
+									/>
+								))}
+							</SignalPortletList>
+						</Grid>
 					</Grid>
+					{(props.updatedAt || props.onRefresh) && (
+						<Grid
+							item
+							container
+							spacing={1}
+							justifyContent={"flex-end"}
+							alignItems={"center"}
+							alignContent={"center"}
+						>
+							{props.updatedAt && (
+								<Grid item>
+									<Tooltip
+										title={new Date(props.updatedAt).toLocaleString(
+											i18n.language,
+										)}
+									>
+										<SignalPortletLastUpdatedAt>
+											{t("standalone.signal-portlet.last-updated", {
+												AGE: timestampToAge(new Date(props.updatedAt)),
+											})}
+										</SignalPortletLastUpdatedAt>
+									</Tooltip>
+								</Grid>
+							)}
+							{props.onRefresh && (
+								<Grid item>
+									<SignalPortletRefreshIconButton
+										onClick={props.onRefresh}
+										size={"small"}
+										color={"primary"}
+									>
+										<SignalPortletRefreshIcon />
+									</SignalPortletRefreshIconButton>
+								</Grid>
+							)}
+						</Grid>
+					)}
 				</Grid>
 			</SignalPortletPaper>
 		</SignalPortletRoot>
