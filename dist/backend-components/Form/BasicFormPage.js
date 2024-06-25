@@ -91,7 +91,7 @@ const BasicFormPage = (props) => {
         const orgGoBack = originalCustomProps.goBack;
         customPropsWithGoBack.goBack =
             typeof orgGoBack === "function"
-                ? async () => {
+                ? async (forceRefresh) => {
                     try {
                         if (dirty && !readOnly) {
                             await showConfirmDialog(pushDialog, {
@@ -105,7 +105,7 @@ const BasicFormPage = (props) => {
                             unblock.current();
                             unblock.current = undefined;
                         }
-                        await orgGoBack();
+                        await orgGoBack(forceRefresh);
                     }
                     catch (e) {
                         // user cancelled
