@@ -166,7 +166,7 @@ const BasicFormPage = <RendererPropsT, CustomPropsT>(
 
 	// go back confirm dialog if form is dirty
 	const customPropsWithGoBack: {
-		goBack?: () => void | Promise<void>;
+		goBack?: (forceRefresh?: boolean) => void | Promise<void>;
 	} = {
 		...(typeof originalCustomProps === "object" ? originalCustomProps : null),
 	};
@@ -183,7 +183,7 @@ const BasicFormPage = <RendererPropsT, CustomPropsT>(
 		).goBack;
 		customPropsWithGoBack.goBack =
 			typeof orgGoBack === "function"
-				? async () => {
+				? async (forceRefresh?: boolean) => {
 						try {
 							if (dirty && !readOnly) {
 								await showConfirmDialog(pushDialog, {
@@ -197,7 +197,7 @@ const BasicFormPage = <RendererPropsT, CustomPropsT>(
 								unblock.current();
 								unblock.current = undefined;
 							}
-							await orgGoBack();
+							await orgGoBack(forceRefresh);
 						} catch (e) {
 							// user cancelled
 						}
