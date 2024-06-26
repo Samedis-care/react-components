@@ -152,6 +152,9 @@
 				"signature": "Handtekening"
 			},
 			"sign-here": "Digitaal ondertekend hier"
+		},
+		"signal-portlet": {
+			"last-updated": "Laatste vernieuwing: {{AGE}}"
 		}
 	},
 	"framework": {
