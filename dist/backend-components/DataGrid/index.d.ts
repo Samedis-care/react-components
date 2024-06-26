@@ -33,8 +33,9 @@ export interface BackendDataGridProps<KeyT extends ModelFieldName, VisibilityT e
      */
     customDeleteErrorHandler?: (error: Error) => Promise<void> | void;
 }
-export declare const renderDataGridRecordUsingModel: <KeyT extends string, VisibilityT extends PageVisibility, CustomT>(model: Model<KeyT, VisibilityT, CustomT>, refreshGrid: () => void) => (entry: Record<string, unknown>) => {
+export declare const renderDataGridRecordUsingModel: <KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT>(model: Model<KeyT, VisibilityT, CustomT>, refreshGrid: () => void) => (entry: Record<string, unknown>) => {
     id: string;
 } & Record<string, string | null>;
-declare const _default: <KeyT extends string, VisibilityT extends PageVisibility, CustomDataT>(props: BackendDataGridProps<KeyT, VisibilityT, CustomDataT>) => React.JSX.Element;
+declare const BackendDataGrid: <KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomDataT>(props: BackendDataGridProps<KeyT, VisibilityT, CustomDataT>) => React.JSX.Element;
+declare const _default: typeof BackendDataGrid;
 export default _default;

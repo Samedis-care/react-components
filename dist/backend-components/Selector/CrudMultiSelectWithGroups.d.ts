@@ -1,4 +1,4 @@
-import React from "react";
+import React, { ForwardedRef, RefAttributes } from "react";
 import { ModelFieldName, PageVisibility } from "../../backend-integration";
 import { ErrorComponentProps } from "../Form";
 import { BaseSelectorData, MultiSelectorData } from "../../standalone";
@@ -14,5 +14,6 @@ export interface CrudMultiSelectWithGroupsProps<GroupKeyT extends ModelFieldName
      */
     getIdOfData: NonNullable<BackendMultiSelectWithTagsProps<GroupKeyT, DataKeyT, GroupVisibilityT, DataVisibilityT, GroupCustomT, DataCustomT, GroupDataT, DataDataT>["getIdOfData"]>;
 }
-declare const _default: <GroupKeyT extends string, DataKeyT extends string, GroupVisibilityT extends PageVisibility, DataVisibilityT extends PageVisibility, GroupCustomT, DataCustomT, GroupDataT extends BaseSelectorData, DataDataT extends MultiSelectorData>(props: CrudMultiSelectWithGroupsProps<GroupKeyT, DataKeyT, GroupVisibilityT, DataVisibilityT, GroupCustomT, DataCustomT, GroupDataT, DataDataT> & React.RefAttributes<CrudSelectDispatch<DataDataT>>, ref: React.ForwardedRef<CrudSelectDispatch<DataDataT>>) => React.JSX.Element;
+declare const CrudMultiSelectWithGroups: <GroupKeyT extends ModelFieldName, DataKeyT extends ModelFieldName, GroupVisibilityT extends PageVisibility, DataVisibilityT extends PageVisibility, GroupCustomT, DataCustomT, GroupDataT extends BaseSelectorData, DataDataT extends MultiSelectorData>(props: CrudMultiSelectWithGroupsProps<GroupKeyT, DataKeyT, GroupVisibilityT, DataVisibilityT, GroupCustomT, DataCustomT, GroupDataT, DataDataT> & RefAttributes<CrudSelectDispatch<DataDataT>>, ref: ForwardedRef<CrudSelectDispatch<DataDataT>>) => React.JSX.Element;
+declare const _default: typeof CrudMultiSelectWithGroups;
 export default _default;

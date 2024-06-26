@@ -22,5 +22,6 @@ export interface BackendDataGridMultiSelectProps<KeyT extends ModelFieldName, Vi
      */
     onChange: (selected: string[]) => void;
 }
-declare const _default: <KeyT extends string, VisibilityT extends PageVisibility, CustomT>(props: BackendDataGridMultiSelectProps<KeyT, VisibilityT, CustomT>) => React.JSX.Element;
+declare const BackendDataGridMultiSelect: <KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT>(props: BackendDataGridMultiSelectProps<KeyT, VisibilityT, CustomT>) => React.JSX.Element;
+declare const _default: typeof BackendDataGridMultiSelect;
 export default _default;

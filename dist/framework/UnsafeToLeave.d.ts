@@ -10,6 +10,6 @@ export interface UnsafeToLeaveDispatchT {
 export declare const UnsafeToLeaveDispatch: UnsafeToLeaveDispatchT;
 export declare const useIsUnsafeToLeave: () => boolean;
 declare const _default: React.MemoExoticComponent<(props: React.PropsWithChildren<{
-    disable?: boolean | undefined;
-}>) => React.ReactElement<any, string | React.JSXElementConstructor<any>>>;
+    disable?: boolean;
+}>) => React.ReactElement>;
 export default _default;

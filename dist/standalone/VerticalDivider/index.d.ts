@@ -1,4 +1,3 @@
-/// <reference types="react" />
 export interface VerticalDividerProps {
     /**
      * CSS class names to apply

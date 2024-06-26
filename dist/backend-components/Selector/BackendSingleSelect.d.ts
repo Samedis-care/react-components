@@ -64,5 +64,6 @@ export interface BackendSingleSelectProps<KeyT extends ModelFieldName, Visibilit
      */
     disableRequestBatching?: boolean;
 }
-declare const _default: <KeyT extends string, VisibilityT extends PageVisibility, CustomT>(props: BackendSingleSelectProps<KeyT, VisibilityT, CustomT>) => React.JSX.Element;
+declare const BackendSingleSelect: <KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT>(props: BackendSingleSelectProps<KeyT, VisibilityT, CustomT>) => React.JSX.Element;
+declare const _default: typeof BackendSingleSelect;
 export default _default;

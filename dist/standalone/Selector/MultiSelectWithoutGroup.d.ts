@@ -42,5 +42,6 @@ export interface MultiSelectWithoutGroupProps<DataT extends MultiSelectorData> e
     sortCompareFn?: (value1: DataT, value2: DataT) => number;
 }
 export type MultiSelectWithoutGroupClassKey = "outlined" | "switch";
-declare const _default: <DataT extends MultiSelectorData>(inProps: MultiSelectWithoutGroupProps<DataT>) => React.JSX.Element;
+declare const MultiSelectWithoutGroup: <DataT extends MultiSelectorData>(inProps: MultiSelectWithoutGroupProps<DataT>) => React.JSX.Element;
+declare const _default: typeof MultiSelectWithoutGroup;
 export default _default;

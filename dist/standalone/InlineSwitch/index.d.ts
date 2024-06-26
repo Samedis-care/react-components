@@ -28,5 +28,6 @@ export interface InlineSwitchProps {
     classes?: Partial<Record<InlineSwitchClassKey, string>>;
 }
 export type InlineSwitchClassKey = "switch" | "root" | "switchWrapper";
-declare const _default: (inProps: InlineSwitchProps) => React.JSX.Element;
+declare const InlineSwitch: (inProps: InlineSwitchProps) => React.JSX.Element;
+declare const _default: typeof InlineSwitch;
 export default _default;

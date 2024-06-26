@@ -17,5 +17,5 @@ export interface FormFieldContextType<T> extends ModelRenderParams<T> {
 }
 export declare const FormFieldContext: React.Context<FormFieldContextType<unknown> | null>;
 export declare const useFormFieldContext: <T>() => FormFieldContextType<T>;
-declare const _default: React.MemoExoticComponent<(props: FieldProps) => React.ReactElement<any, string | React.JSXElementConstructor<any>>>;
+declare const _default: React.MemoExoticComponent<(props: FieldProps) => React.ReactElement>;
 export default _default;

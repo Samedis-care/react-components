@@ -58,5 +58,6 @@ export interface MultiSelectWithTagsProps<DataT extends MultiSelectorData, Group
     classes?: Partial<Record<MultiSelectWithTagsClassKey, string>>;
 }
 export type MultiSelectWithTagsClassKey = "root" | "loadOverlay";
-declare const _default: <DataT extends MultiSelectorData, GroupT extends BaseSelectorData>(inProps: MultiSelectWithTagsProps<DataT, GroupT>) => React.JSX.Element;
+declare const MultiSelectWithTags: <DataT extends MultiSelectorData, GroupT extends BaseSelectorData>(inProps: MultiSelectWithTagsProps<DataT, GroupT>) => React.JSX.Element;
+declare const _default: typeof MultiSelectWithTags;
 export default _default;

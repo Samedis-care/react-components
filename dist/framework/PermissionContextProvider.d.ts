@@ -23,10 +23,7 @@ export declare const PermissionContext: React.Context<[string[], React.Dispatch<
  * Provides the current permission context, throwing an error if it's not set
  * @remarks This is a React hook
  */
-export declare const usePermissionContext: () => [
-    string[],
-    Dispatch<SetStateAction<string[]>>
-];
+export declare const usePermissionContext: () => [string[], Dispatch<SetStateAction<string[]>>];
 /**
  * A single permission, multiple permissions (logical OR) or no permission required (null) or never (false)
  */

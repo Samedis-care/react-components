@@ -60,7 +60,7 @@ export interface CrudImporterStepProps {
     setState: Dispatch<SetStateAction<CrudImporterState>>;
 }
 export declare const isFieldImportable: (name: string, field: ModelFieldDefinition<unknown, string, PageVisibility, unknown>) => boolean;
-export declare const useCrudImportLogic: <KeyT extends string, VisibilityT extends PageVisibility, CustomT>(props: CrudImportProps<KeyT, VisibilityT, CustomT>) => {
+export declare const useCrudImportLogic: <KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT>(props: CrudImportProps<KeyT, VisibilityT, CustomT>) => {
     guided: false | Partial<Record<KeyT, string>> | undefined;
     activeStep: number;
     state: CrudImporterState;
@@ -70,7 +70,7 @@ export declare const useCrudImportLogic: <KeyT extends string, VisibilityT exten
     prev: () => void;
     finish: () => void;
 };
-declare const CrudImport: <KeyT extends string, VisibilityT extends PageVisibility, CustomT>(props: CrudImportProps<KeyT, VisibilityT, CustomT>) => React.JSX.Element;
-declare const _default: <KeyT extends string, VisibilityT extends PageVisibility, CustomT>(props: CrudImportProps<KeyT, VisibilityT, CustomT>) => React.JSX.Element;
+declare const CrudImport: <KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT>(props: CrudImportProps<KeyT, VisibilityT, CustomT>) => React.JSX.Element;
+declare const _default: typeof CrudImport;
 export default _default;
 export type CrudImportType = typeof CrudImport;

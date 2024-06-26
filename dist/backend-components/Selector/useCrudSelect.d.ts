@@ -94,5 +94,5 @@ export interface CrudSelectDispatch<DataT extends BaseSelectorData> {
      */
     addToSelection: (entry: DataT) => Promise<void>;
 }
-declare const useCrudSelect: <KeyT extends string, VisibilityT extends PageVisibility, CustomT, DataT extends BaseSelectorData>(params: UseCrudSelectParams<KeyT, VisibilityT, CustomT, DataT>, ref: ForwardedRef<CrudSelectDispatch<DataT>>) => UseCrudSelectResult<KeyT, DataT>;
+declare const useCrudSelect: <KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT, DataT extends BaseSelectorData>(params: UseCrudSelectParams<KeyT, VisibilityT, CustomT, DataT>, ref: ForwardedRef<CrudSelectDispatch<DataT>>) => UseCrudSelectResult<KeyT, DataT>;
 export default useCrudSelect;

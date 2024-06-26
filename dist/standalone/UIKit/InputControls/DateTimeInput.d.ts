@@ -22,5 +22,5 @@ export interface DateTimeInputProps extends UIInputProps {
      */
     fullWidth?: TextFieldProps["fullWidth"];
 }
-declare const _default: React.MemoExoticComponent<(props: DateTimeInputProps & DateTimePickerProps<Moment, false>) => React.JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: DateTimeInputProps & DateTimePickerProps<Moment>) => React.JSX.Element>;
 export default _default;

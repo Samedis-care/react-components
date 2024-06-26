@@ -74,6 +74,12 @@ interface UseSelectedCacheResult<DataT extends MultiSelectorData> {
      */
     handleSelect: (selected: DataT[]) => void;
 }
-export declare const useSelectedCache: <KeyT extends string, VisibilityT extends PageVisibility, CustomT, DataT extends MultiSelectorData>(props: Pick<BackendMultiSelectProps<KeyT, VisibilityT, CustomT, DataT>, "model" | "modelFetch" | "disableRequestBatching" | "modelToSelectorData" | "onSelect" | "selected" | "initialData" | "onLoadError">) => UseSelectedCacheResult<DataT>;
-declare const _default: <KeyT extends string, VisibilityT extends PageVisibility, CustomT, DataT extends MultiSelectorData>(props: BackendMultiSelectProps<KeyT, VisibilityT, CustomT, DataT>) => React.JSX.Element;
+export declare const useSelectedCache: <KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT, DataT extends MultiSelectorData>(props: Pick<BackendMultiSelectProps<KeyT, VisibilityT, CustomT, DataT>, "model" | "modelFetch" | "disableRequestBatching" | "modelToSelectorData" | "onSelect" | "selected" | "initialData" | "onLoadError">) => UseSelectedCacheResult<DataT>;
+/**
+ * Backend connected MultiSelect
+ * @remarks Doesn't support custom data
+ * @constructor
+ */
+declare const BackendMultiSelect: <KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT, DataT extends MultiSelectorData>(props: BackendMultiSelectProps<KeyT, VisibilityT, CustomT, DataT>) => React.JSX.Element;
+declare const _default: typeof BackendMultiSelect;
 export default _default;

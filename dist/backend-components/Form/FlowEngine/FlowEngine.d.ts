@@ -20,5 +20,6 @@ export interface FlowEngineProps<KeyT extends string, StageT extends string, Cus
     formProps: PageProps<KeyT, CustomPropsT>;
     children: Record<StageT, React.ComponentType<FlowStageProps<KeyT, StageT, CustomPropsT>>>;
 }
-declare const _default: <KeyT extends string, StageT extends string, CustomPropsT>(props: FlowEngineProps<KeyT, StageT, CustomPropsT>) => React.JSX.Element;
+declare const FlowEngine: <KeyT extends string, StageT extends string, CustomPropsT>(props: FlowEngineProps<KeyT, StageT, CustomPropsT>) => React.JSX.Element;
+declare const _default: typeof FlowEngine;
 export default _default;

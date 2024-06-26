@@ -1,4 +1,4 @@
-import React, { ReactNode } from "react";
+import React from "react";
 import { InputProps, TextFieldProps } from "@mui/material";
 import { TextFieldWithHelpProps } from "../UIKit/TextFieldWithHelp";
 import { OutlinedInputProps } from "@mui/material/OutlinedInput";
@@ -291,5 +291,6 @@ export interface BaseSelectorContextType {
     addToLru: (...ids: string[]) => void;
 }
 export declare const BaseSelectorContext: React.Context<BaseSelectorContextType | null>;
-declare const _default: <DataT extends BaseSelectorData, Multi extends boolean>(inProps: BaseSelectorProps<DataT, Multi>) => React.JSX.Element;
+declare const BaseSelector: <DataT extends BaseSelectorData, Multi extends boolean>(inProps: BaseSelectorProps<DataT, Multi>) => React.JSX.Element;
+declare const _default: typeof BaseSelector;
 export default _default;

@@ -531,5 +531,6 @@ export type FormFlowEngineStageConfig = Partial<{
     onlySubmitMountedBehaviour: OnlySubmitMountedBehaviour;
 }>;
 export declare const useFormFlowEngineStageConfig: (config: FormFlowEngineStageConfig) => void;
-declare const _default: <KeyT extends string, VisibilityT extends PageVisibility, CustomT, CustomPropsT>(props: FormProps<KeyT, VisibilityT, CustomT, CustomPropsT>) => React.JSX.Element;
+declare const Form: <KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT, CustomPropsT>(props: FormProps<KeyT, VisibilityT, CustomT, CustomPropsT>) => React.JSX.Element;
+declare const _default: typeof Form;
 export default _default;

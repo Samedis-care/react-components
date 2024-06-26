@@ -140,7 +140,7 @@ export interface ModelGetOptions {
  * @param id The record ID (or null to get default values on create)
  * @param options Extra options to pass to useQuery (defaults are provided for retry, staleTime and cacheTime (last two only if configured in model))
  */
-export declare const useModelGet: <KeyT extends string, VisibilityT extends PageVisibility, CustomT>(model: Model<KeyT, VisibilityT, CustomT>, id: string | null, options?: UseQueryOptions<ModelGetResponse<KeyT>, Error, ModelGetResponse<KeyT>> & ModelGetOptions) => UseQueryResult<ModelGetResponse<KeyT>, Error>;
+export declare const useModelGet: <KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT>(model: Model<KeyT, VisibilityT, CustomT>, id: string | null, options?: UseQueryOptions<ModelGetResponse<KeyT>, Error, ModelGetResponse<KeyT>> & ModelGetOptions) => UseQueryResult<ModelGetResponse<KeyT>, Error>;
 /**
  * React-Query's useQuery for the given model and index params
  * @param model The model ID to load
@@ -149,29 +149,29 @@ export declare const useModelGet: <KeyT extends string, VisibilityT extends Page
  * @returns ModelIndexResponse where userMeta and meta is taken from the last call
  * @see Model.fetchAll
  */
-export declare const useModelFetchAll: <KeyT extends string, VisibilityT extends PageVisibility, CustomT>(model: Model<KeyT, VisibilityT, CustomT>, params?: ModelFetchAllParams, options?: UseQueryOptions<ModelIndexResponse, Error, ModelIndexResponse>) => UseQueryResult<ModelIndexResponse, Error>;
+export declare const useModelFetchAll: <KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT>(model: Model<KeyT, VisibilityT, CustomT>, params?: ModelFetchAllParams, options?: UseQueryOptions<ModelIndexResponse, Error, ModelIndexResponse>) => UseQueryResult<ModelIndexResponse, Error>;
 /**
  * React-Query's useMutation to update/create a new record on backend
  * @param model The model
  * @see model.createOrUpdateRecordRaw
  */
-export declare const useModelMutation: <KeyT extends string, VisibilityT extends PageVisibility, CustomT, TContext = unknown>(model: Model<KeyT, VisibilityT, CustomT>) => UseMutationResult<ModelGetResponse<KeyT>, Error, Record<string, unknown>, TContext>;
+export declare const useModelMutation: <KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT, TContext = unknown>(model: Model<KeyT, VisibilityT, CustomT>) => UseMutationResult<ModelGetResponse<KeyT>, Error, Record<string, unknown>, TContext>;
 /**
  * React-Query's useMutation to delete a single record on backend
  * @param model The model
  */
-export declare const useModelDelete: <KeyT extends string, VisibilityT extends PageVisibility, CustomT, TContext = unknown>(model: Model<KeyT, VisibilityT, CustomT>) => UseMutationResult<void, Error, string, TContext>;
+export declare const useModelDelete: <KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT, TContext = unknown>(model: Model<KeyT, VisibilityT, CustomT>) => UseMutationResult<void, Error, string, TContext>;
 /**
  * React-Query's useMutation to delete multiple records by ID on backend
  * @param model The model
  */
-export declare const useModelDeleteMultiple: <KeyT extends string, VisibilityT extends PageVisibility, CustomT, TContext = unknown>(model: Model<KeyT, VisibilityT, CustomT>) => UseMutationResult<void, Error, string[], TContext>;
+export declare const useModelDeleteMultiple: <KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT, TContext = unknown>(model: Model<KeyT, VisibilityT, CustomT>) => UseMutationResult<void, Error, string[], TContext>;
 /**
  * React-Query's useMutation to delete records using advanced filters on backend
  * @param model The model
  * @see model.deleteAdvancedRaw
  */
-export declare const useModelDeleteAdvanced: <KeyT extends string, VisibilityT extends PageVisibility, CustomT, TContext = unknown>(model: Model<KeyT, VisibilityT, CustomT>) => UseMutationResult<void, Error, AdvancedDeleteRequest, TContext>;
+export declare const useModelDeleteAdvanced: <KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT, TContext = unknown>(model: Model<KeyT, VisibilityT, CustomT>) => UseMutationResult<void, Error, AdvancedDeleteRequest, TContext>;
 /**
  * Mutation event handler
  * @param data The response data
