@@ -152,6 +152,9 @@
 				"signature": "Signature"
 			},
 			"sign-here": "Signé numériquement ici"
+		},
+		"signal-portlet": {
+			"last-updated": "Dernière actualisation : {{AGE}}"
 		}
 	},
 	"framework": {

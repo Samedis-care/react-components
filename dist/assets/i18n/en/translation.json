@@ -5,7 +5,7 @@
 			"today": "Today"
 		},
 		"signal-portlet": {
-			"last-updated": "Last updated: {{AGE}}"
+			"last-updated": "Last refresh: {{AGE}}"
 		},
 		"notifications": {
 			"title": "Notifications"
