@@ -152,6 +152,9 @@
 				"close": "Закрыть"
 			},
 			"sign-here": "Цифровая подпись здесь"
+		},
+		"signal-portlet": {
+			"last-updated": "Последнее обновление: {{AGE}}"
 		}
 	},
 	"framework": {

@@ -152,6 +152,9 @@
 				"signature": "Imzo"
 			},
 			"sign-here": "Bu erda raqamli imzolangan"
+		},
+		"signal-portlet": {
+			"last-updated": "Oxirgi yangilanish: {{AGE}}"
 		}
 	},
 	"framework": {
