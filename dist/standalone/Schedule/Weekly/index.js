@@ -10,6 +10,7 @@ import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 import ScheduleFilterRenderer from "../Common/ScheduleFilterRenderers";
 const normalizeMoment = (instance) => instance.weekday(0).hour(0).minute(0).second(0).millisecond(0);
 const nowNormalized = () => normalizeMoment(moment());
+const Root = styled(Grid, { name: "CcWeekView", slot: "root" })({});
 const TodayBtn = styled(Button, { name: "CcWeekView", slot: "todayBtn" })({
     height: "100%",
 });
@@ -137,7 +138,7 @@ const WeekView = (inProps) => {
     const weekday = now.weekday();
     const weekdays = [0, 1, 2, 3, 4, 5, 6].map((day) => day - weekday);
     let prevDate = null;
-    return (React.createElement(Grid, { container: true, alignItems: "stretch", alignContent: "space-between", className: className },
+    return (React.createElement(Root, { container: true, alignItems: "stretch", alignContent: "space-between", className: className },
         React.createElement(Grid, { item: true, xs: 12, container: true, wrap: "nowrap" },
             React.createElement(Grid, { item: true, xs: true },
                 React.createElement(Grid, { container: true },

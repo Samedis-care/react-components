@@ -21,7 +21,11 @@ export interface SignalPortletProps {
      * Custom CSS classes
      */
     classes?: Partial<Record<SignalPortletClassKey, string>>;
+    /**
+     * Class name to apply to root
+     */
+    className?: string;
 }
-export type SignalPortletClassKey = "paper" | "divider" | "titleWrapper" | "title" | "list" | "item" | "refreshIconButton" | "refreshIcon" | "lastUpdatedAt";
+export type SignalPortletClassKey = "root" | "paper" | "divider" | "titleWrapper" | "title" | "list" | "item" | "refreshIconButton" | "refreshIcon" | "lastUpdatedAt";
 declare const _default: React.MemoExoticComponent<(inProps: SignalPortletProps) => React.JSX.Element>;
 export default _default;
