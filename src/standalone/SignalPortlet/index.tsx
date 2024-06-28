@@ -14,6 +14,7 @@ import {
 import { Sync as RefreshIcon } from "@mui/icons-material";
 import timestampToAge from "../../utils/timestampToAge";
 import useCCTranslations from "../../utils/useCCTranslations";
+import combineClassNames from "../../utils/combineClassNames";
 
 export interface SignalPortletProps {
 	/**
@@ -36,11 +37,15 @@ export interface SignalPortletProps {
 	 * Custom CSS classes
 	 */
 	classes?: Partial<Record<SignalPortletClassKey, string>>;
+	/**
+	 * Class name to apply to root
+	 */
+	className?: string;
 }
 
 const SignalPortletRoot = styled("div", {
 	name: "CcSignalPortlet",
-	slot: "paper",
+	slot: "root",
 })({});
 const SignalPortletPaper = styled(Paper, {
 	name: "CcSignalPortlet",
@@ -48,6 +53,10 @@ const SignalPortletPaper = styled(Paper, {
 })({
 	height: "100%",
 });
+const SignalPortletInnerContainer = styled(Grid, {
+	name: "CcSignalPortlet",
+	slot: "innerContainer",
+})({ height: "100%" });
 const SignalPortletDivider = styled(Grid, {
 	name: "CcSignalPortlet",
 	slot: "divider",
@@ -82,6 +91,7 @@ const SignalPortletLastUpdatedAt = styled("span", {
 })({});
 
 export type SignalPortletClassKey =
+	| "root"
 	| "paper"
 	| "divider"
 	| "titleWrapper"
@@ -97,46 +107,42 @@ const SignalPortlet = (inProps: SignalPortletProps) => {
 	const { t, i18n } = useCCTranslations();
 
 	return (
-		<SignalPortletRoot>
+		<SignalPortletRoot
+			className={combineClassNames([props.className, props.classes?.root])}
+		>
 			<SignalPortletPaper className={props.classes?.paper}>
-				<Grid
+				<SignalPortletInnerContainer
 					container
 					spacing={1}
 					direction={"column"}
 					justifyContent={"space-between"}
+					wrap={"nowrap"}
 				>
-					<Grid item xs container spacing={1}>
-						<SignalPortletTitleWrapper
-							item
-							xs={12}
-							className={props.classes?.titleWrapper}
+					<SignalPortletTitleWrapper
+						item
+						className={props.classes?.titleWrapper}
+					>
+						<SignalPortletTitle
+							variant={"h5"}
+							align={"center"}
+							className={props.classes?.title}
 						>
-							<SignalPortletTitle
-								variant={"h5"}
-								align={"center"}
-								className={props.classes?.title}
-							>
-								{props.title}
-							</SignalPortletTitle>
-						</SignalPortletTitleWrapper>
-						<SignalPortletDivider
-							item
-							xs={12}
-							className={props.classes?.divider}
-						>
-							<Divider />
-						</SignalPortletDivider>
-						<Grid item xs={12}>
-							<SignalPortletList className={props.classes?.list}>
-								{props.items.map((item, index) => (
-									<SignalPortletItemStyled
-										key={index.toString()}
-										className={props.classes?.item}
-										{...item}
-									/>
-								))}
-							</SignalPortletList>
-						</Grid>
+							{props.title}
+						</SignalPortletTitle>
+					</SignalPortletTitleWrapper>
+					<SignalPortletDivider item className={props.classes?.divider}>
+						<Divider />
+					</SignalPortletDivider>
+					<Grid item>
+						<SignalPortletList className={props.classes?.list}>
+							{props.items.map((item, index) => (
+								<SignalPortletItemStyled
+									key={index.toString()}
+									className={props.classes?.item}
+									{...item}
+								/>
+							))}
+						</SignalPortletList>
 					</Grid>
 					{(props.updatedAt || props.onRefresh) && (
 						<Grid
@@ -175,7 +181,7 @@ const SignalPortlet = (inProps: SignalPortletProps) => {
 							)}
 						</Grid>
 					)}
-				</Grid>
+				</SignalPortletInnerContainer>
 			</SignalPortletPaper>
 		</SignalPortletRoot>
 	);

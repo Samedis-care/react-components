@@ -62,6 +62,8 @@ const normalizeMoment = (instance: Moment) =>
 	instance.weekday(0).hour(0).minute(0).second(0).millisecond(0);
 const nowNormalized = () => normalizeMoment(moment());
 
+const Root = styled(Grid, { name: "CcWeekView", slot: "root" })({});
+
 const TodayBtn = styled(Button, { name: "CcWeekView", slot: "todayBtn" })({
 	height: "100%",
 });
@@ -86,7 +88,12 @@ const Picker = styled("div", { name: "CcWeekView", slot: "picker" })({
 	marginTop: -64,
 });
 
-export type WeekViewClassKey = "todayBtn" | "filterWrapper" | "week" | "picker";
+export type WeekViewClassKey =
+	| "root"
+	| "todayBtn"
+	| "filterWrapper"
+	| "week"
+	| "picker";
 
 const EMPTY_FILTERS: Record<string, ScheduleFilterDefinition> = {};
 const NO_ACTIONS: ScheduleAction[] = [];
@@ -225,7 +232,7 @@ const WeekView = (inProps: WeekViewProps) => {
 	let prevDate: Moment | null = null;
 
 	return (
-		<Grid
+		<Root
 			container
 			alignItems={"stretch"}
 			alignContent={"space-between"}
@@ -449,7 +456,7 @@ const WeekView = (inProps: WeekViewProps) => {
 					})}
 				</Grid>
 			)}
-		</Grid>
+		</Root>
 	);
 };
 
