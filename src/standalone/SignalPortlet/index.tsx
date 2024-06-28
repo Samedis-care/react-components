@@ -118,31 +118,40 @@ const SignalPortlet = (inProps: SignalPortletProps) => {
 					justifyContent={"space-between"}
 					wrap={"nowrap"}
 				>
-					<SignalPortletTitleWrapper
+					<Grid
 						item
-						className={props.classes?.titleWrapper}
+						xs
+						container
+						spacing={1}
+						justifyContent={"flex-start"}
+						direction={"column"}
 					>
-						<SignalPortletTitle
-							variant={"h5"}
-							align={"center"}
-							className={props.classes?.title}
+						<SignalPortletTitleWrapper
+							item
+							className={props.classes?.titleWrapper}
 						>
-							{props.title}
-						</SignalPortletTitle>
-					</SignalPortletTitleWrapper>
-					<SignalPortletDivider item className={props.classes?.divider}>
-						<Divider />
-					</SignalPortletDivider>
-					<Grid item>
-						<SignalPortletList className={props.classes?.list}>
-							{props.items.map((item, index) => (
-								<SignalPortletItemStyled
-									key={index.toString()}
-									className={props.classes?.item}
-									{...item}
-								/>
-							))}
-						</SignalPortletList>
+							<SignalPortletTitle
+								variant={"h5"}
+								align={"center"}
+								className={props.classes?.title}
+							>
+								{props.title}
+							</SignalPortletTitle>
+						</SignalPortletTitleWrapper>
+						<SignalPortletDivider item className={props.classes?.divider}>
+							<Divider />
+						</SignalPortletDivider>
+						<Grid item>
+							<SignalPortletList className={props.classes?.list}>
+								{props.items.map((item, index) => (
+									<SignalPortletItemStyled
+										key={index.toString()}
+										className={props.classes?.item}
+										{...item}
+									/>
+								))}
+							</SignalPortletList>
+						</Grid>
 					</Grid>
 					{(props.updatedAt || props.onRefresh) && (
 						<Grid
