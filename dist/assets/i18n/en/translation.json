@@ -18,9 +18,9 @@
 				"filter": "Filter",
 				"reset-column-filter": "Clear filter",
 				"bool-filter": {
-					"true": "All truthy values",
-					"false": "All false values",
-					"any": "Any value"
+					"true": "Yes",
+					"false": "No",
+					"any": "Any"
 				},
 				"set-filter": {
 					"search": "Search…",

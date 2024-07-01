@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from "react";
-import { Checkbox, FormControlLabel, Grid, List, ListItemText, MenuItem, Select, TextField, Tooltip, } from "@mui/material";
+import { Checkbox, FormControl, FormControlLabel, Grid, List, ListItemText, MenuItem, Radio, RadioGroup, Select, TextField, Tooltip, } from "@mui/material";
 import { Delete as ClearIcon } from "@mui/icons-material";
 import FilterCombinator from "./FilterCombinator";
 import { DataGridFilterClearButton, DataGridSetFilterContainer, DataGridSetFilterListDivider, DataGridSetFilterListItem, DataGridSetFilterListItemDivider, useDataGridProps, } from "../DataGrid";
@@ -83,17 +83,9 @@ const FilterEntry = (props) => {
         }
         updateParent();
     };
-    const onFilterValueChangeBool = () => {
+    const onFilterValueChangeBool = (evt) => {
         filterType = "equals";
-        if (!filterValue) {
-            filterValue = "true";
-        }
-        else if (filterValue === "true") {
-            filterValue = "false";
-        }
-        else {
-            filterValue = "";
-        }
+        filterValue = evt.currentTarget.value;
         updateParent();
     };
     const handleNullEnum = () => {
@@ -199,14 +191,11 @@ const FilterEntry = (props) => {
             filterType !== "empty" && filterType !== "notEmpty" && (React.createElement(Grid, { item: true, xs: 12 }, props.valueType === "date" ? (React.createElement(LocalizedKeyboardDatePicker, { value: filterValue === "" ? null : moment(filterValue), onChange: onFilterValueChangeDate, fullWidth: true, autoFocus: depth === 1 })) : props.valueType === "datetime" ? (React.createElement(LocalizedDateTimePicker, { value: filterValue === "" ? null : moment(filterValue), onChange: onFilterValueChangeDate, fullWidth: true, autoFocus: depth === 1 })) : (React.createElement(TextField, { value: filterValue, onChange: onFilterValueChange, fullWidth: true, autoFocus: depth === 1 })))),
             filterType === "inRange" && (React.createElement(Grid, { item: true, xs: 12 }, props.valueType === "date" ? (React.createElement(LocalizedKeyboardDatePicker, { value: filterValue2 === "" ? null : moment(filterValue2), onChange: onFilterValue2ChangeDate })) : props.valueType === "datetime" ? (React.createElement(LocalizedDateTimePicker, { value: filterValue2 === "" ? null : moment(filterValue2), onChange: onFilterValueChangeDate })) : (React.createElement(TextField, { value: filterValue2, onChange: onFilterValue2Change, fullWidth: true })))))),
         props.valueType === "boolean" && (React.createElement(Grid, { item: true, xs: 12 },
-            React.createElement(FormControlLabel, { control: React.createElement(Checkbox, { checked: filterValue === "true", onClick: onFilterValueChangeBool, indeterminate: !filterValue, autoFocus: depth === 1 }), label: (() => {
-                    if (!filterValue)
-                        return t("standalone.data-grid.content.bool-filter.any");
-                    const entry = props.valueData?.find((entry) => entry.value === filterValue);
-                    if (!entry)
-                        return t("standalone.data-grid.content.bool-filter." + filterValue);
-                    return (entry.getLabel ?? entry.getLabelText)();
-                })() }))),
+            React.createElement(FormControl, null,
+                React.createElement(RadioGroup, { defaultValue: "", onChange: onFilterValueChangeBool },
+                    React.createElement(FormControlLabel, { value: "", control: React.createElement(Radio, null), label: t("standalone.data-grid.content.bool-filter.any") }),
+                    React.createElement(FormControlLabel, { value: "true", control: React.createElement(Radio, null), label: t("standalone.data-grid.content.bool-filter.true") }),
+                    React.createElement(FormControlLabel, { value: "false", control: React.createElement(Radio, null), label: t("standalone.data-grid.content.bool-filter.false") }))))),
         props.valueType === "enum" && (React.createElement(React.Fragment, null,
             props.valueData.length > 10 && (React.createElement(Grid, { item: true, xs: 12 },
                 React.createElement(TextField, { value: enumFilterSearch, onChange: (evt) => setEnumFilterSearch(evt.target.value), placeholder: t("standalone.data-grid.content.set-filter.search"), fullWidth: true, autoFocus: depth === 1 }))),
