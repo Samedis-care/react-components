@@ -1,11 +1,14 @@
 import React, { useCallback, useState } from "react";
 import {
 	Checkbox,
+	FormControl,
 	FormControlLabel,
 	Grid,
 	List,
 	ListItemText,
 	MenuItem,
+	Radio,
+	RadioGroup,
 	Select,
 	TextField,
 	Tooltip,
@@ -196,15 +199,11 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 		}
 		updateParent();
 	};
-	const onFilterValueChangeBool = () => {
+	const onFilterValueChangeBool = (
+		evt: React.ChangeEvent<HTMLInputElement>,
+	) => {
 		filterType = "equals";
-		if (!filterValue) {
-			filterValue = "true";
-		} else if (filterValue === "true") {
-			filterValue = "false";
-		} else {
-			filterValue = "";
-		}
+		filterValue = evt.currentTarget.value;
 		updateParent();
 	};
 
@@ -481,28 +480,25 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 			)}
 			{props.valueType === "boolean" && (
 				<Grid item xs={12}>
-					<FormControlLabel
-						control={
-							<Checkbox
-								checked={filterValue === "true"}
-								onClick={onFilterValueChangeBool}
-								indeterminate={!filterValue}
-								autoFocus={depth === 1}
+					<FormControl>
+						<RadioGroup defaultValue={""} onChange={onFilterValueChangeBool}>
+							<FormControlLabel
+								value={""}
+								control={<Radio />}
+								label={t("standalone.data-grid.content.bool-filter.any")}
 							/>
-						}
-						label={(() => {
-							if (!filterValue)
-								return t("standalone.data-grid.content.bool-filter.any");
-							const entry = props.valueData?.find(
-								(entry) => entry.value === filterValue,
-							);
-							if (!entry)
-								return t(
-									"standalone.data-grid.content.bool-filter." + filterValue,
-								);
-							return (entry.getLabel ?? entry.getLabelText)();
-						})()}
-					/>
+							<FormControlLabel
+								value={"true"}
+								control={<Radio />}
+								label={t("standalone.data-grid.content.bool-filter.true")}
+							/>
+							<FormControlLabel
+								value={"false"}
+								control={<Radio />}
+								label={t("standalone.data-grid.content.bool-filter.false")}
+							/>
+						</RadioGroup>
+					</FormControl>
 				</Grid>
 			)}
 			{props.valueType === "enum" && (
