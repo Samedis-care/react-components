@@ -15,9 +15,9 @@
 				"filter": "Filter",
 				"reset-column-filter": "Filter löschen",
 				"bool-filter": {
-					"true": "Alle wahrheitsgemäßen Werte",
-					"false": "Alle falschen Werte",
-					"any": "Beliebiger Wert"
+					"true": "Ja",
+					"false": "Nein",
+					"any": "Alle"
 				},
 				"set-filter": {
 					"search": "Suche…",
