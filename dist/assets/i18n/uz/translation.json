@@ -15,9 +15,9 @@
 				"filter": "Filtr",
 				"reset-column-filter": "Filtrni tozalash",
 				"bool-filter": {
-					"true": "Barcha haqiqiy qadriyatlar",
-					"false": "Barcha noto'g'ri qiymatlar",
-					"any": "Har qanday qiymat"
+					"true": "Ha",
+					"false": "Yo'q",
+					"any": "Hammasi"
 				},
 				"set-filter": {
 					"search": "Qidirmoq…",
