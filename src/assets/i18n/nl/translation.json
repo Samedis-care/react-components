@@ -15,9 +15,9 @@
 				"filter": "Filter",
 				"reset-column-filter": "Filter wissen",
 				"bool-filter": {
-					"true": "Alle waarheidswaarden",
-					"false": "Alle valse waarden",
-					"any": "Elke waarde"
+					"true": "Ja",
+					"false": "Nee",
+					"any": "Alle"
 				},
 				"set-filter": {
 					"search": "Zoeken…",
