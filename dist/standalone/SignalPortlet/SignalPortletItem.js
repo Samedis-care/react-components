@@ -58,7 +58,7 @@ const SignalPortletItem = (inProps) => {
         : undefined;
     const content = (React.createElement(React.Fragment, null,
         React.createElement(ListAvatar, { className: classes?.listAvatar },
-            React.createElement(AvatarComponent, { className: avatarClass }, count == null ? React.createElement(Loader, null) : count.toString())),
+            React.createElement(AvatarComponent, { className: avatarClass }, count == null ? React.createElement(Loader, null) : Math.min(count, 999).toString())),
         React.createElement(ListText, { primaryTypographyProps: textTypographyProps }, text)));
     return link ? (React.createElement(ListRootButton, { onClick: handleClick, className: combineClassNames([className, classes?.rootBtn]) }, content)) : (React.createElement(ListRoot, { className: combineClassNames([className, classes?.root]) }, content));
 };
