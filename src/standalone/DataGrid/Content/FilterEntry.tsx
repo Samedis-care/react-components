@@ -481,7 +481,7 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 			{props.valueType === "boolean" && (
 				<Grid item xs={12}>
 					<FormControl>
-						<RadioGroup defaultValue={""} onChange={onFilterValueChangeBool}>
+						<RadioGroup value={filterValue} onChange={onFilterValueChangeBool}>
 							<FormControlLabel
 								value={""}
 								control={<Radio />}
