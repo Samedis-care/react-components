@@ -111,7 +111,7 @@ const SignalPortletItem = (inProps: SignalPortletItemProps) => {
 		<>
 			<ListAvatar className={classes?.listAvatar}>
 				<AvatarComponent className={avatarClass}>
-					{count == null ? <Loader /> : count.toString()}
+					{count == null ? <Loader /> : Math.min(count, 999).toString()}
 				</AvatarComponent>
 			</ListAvatar>
 			<ListText primaryTypographyProps={textTypographyProps}>{text}</ListText>
