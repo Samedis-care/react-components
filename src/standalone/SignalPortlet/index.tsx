@@ -125,6 +125,7 @@ const SignalPortlet = (inProps: SignalPortletProps) => {
 						spacing={1}
 						justifyContent={"flex-start"}
 						direction={"column"}
+						wrap={"nowrap"}
 					>
 						<SignalPortletTitleWrapper
 							item
