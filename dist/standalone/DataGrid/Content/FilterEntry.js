@@ -192,7 +192,7 @@ const FilterEntry = (props) => {
             filterType === "inRange" && (React.createElement(Grid, { item: true, xs: 12 }, props.valueType === "date" ? (React.createElement(LocalizedKeyboardDatePicker, { value: filterValue2 === "" ? null : moment(filterValue2), onChange: onFilterValue2ChangeDate })) : props.valueType === "datetime" ? (React.createElement(LocalizedDateTimePicker, { value: filterValue2 === "" ? null : moment(filterValue2), onChange: onFilterValueChangeDate })) : (React.createElement(TextField, { value: filterValue2, onChange: onFilterValue2Change, fullWidth: true })))))),
         props.valueType === "boolean" && (React.createElement(Grid, { item: true, xs: 12 },
             React.createElement(FormControl, null,
-                React.createElement(RadioGroup, { defaultValue: "", onChange: onFilterValueChangeBool },
+                React.createElement(RadioGroup, { value: filterValue, onChange: onFilterValueChangeBool },
                     React.createElement(FormControlLabel, { value: "", control: React.createElement(Radio, null), label: t("standalone.data-grid.content.bool-filter.any") }),
                     React.createElement(FormControlLabel, { value: "true", control: React.createElement(Radio, null), label: t("standalone.data-grid.content.bool-filter.true") }),
                     React.createElement(FormControlLabel, { value: "false", control: React.createElement(Radio, null), label: t("standalone.data-grid.content.bool-filter.false") }))))),
