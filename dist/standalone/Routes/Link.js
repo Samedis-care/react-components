@@ -10,8 +10,9 @@ const Link = React.forwardRef(function Link(props, ref) {
     const { history } = useHistoryRouterContext();
     const navigate = useNavigate();
     const handleNav = useCallback((evt) => {
-        if (evt.ctrlKey)
+        if (evt.ctrlKey || evt.metaKey || evt.shiftKey || evt.altKey)
             return;
+        evt.preventDefault();
         navigate(to, { replace, state });
     }, [navigate, replace, state, to]);
     return (React.createElement("a", { ref: ref, href: history.createHref(to), onClick: handleNav, ...anchorProps }));
