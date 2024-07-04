@@ -38,7 +38,8 @@ const Link = React.forwardRef(function Link(
 	const navigate = useNavigate();
 	const handleNav = useCallback(
 		(evt: React.MouseEvent) => {
-			if (evt.ctrlKey) return;
+			if (evt.ctrlKey || evt.metaKey || evt.shiftKey || evt.altKey) return;
+			evt.preventDefault();
 			navigate(to, { replace, state });
 		},
 		[navigate, replace, state, to],
