@@ -171,6 +171,6 @@ const BackendDataGrid = (props) => {
         result = result.concat(props.additionalNewButtons);
         return result;
     }, [props.additionalNewButtons, props.onAddNew, t]);
-    return (React.createElement(DataGrid, { ...props, onAddNew: addNewButtons, onDelete: enableDelete ? handleDelete : undefined, loadData: loadData, columns: model.toDataGridColumnDefinition(), forceRefreshToken: `${props.forceRefreshToken || "undefined"}${refreshToken}`, exporters: props.disableExport ? undefined : model.connector.dataGridExporters }));
+    return (React.createElement(DataGrid, { ...props, onAddNew: addNewButtons, onDelete: enableDelete ? handleDelete : undefined, loadData: loadData, columns: useMemo(() => model.toDataGridColumnDefinition(), [model]), forceRefreshToken: `${props.forceRefreshToken || "undefined"}${refreshToken}`, exporters: props.disableExport ? undefined : model.connector.dataGridExporters }));
 };
 export default React.memo(BackendDataGrid);
