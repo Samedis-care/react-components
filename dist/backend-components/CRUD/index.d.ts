@@ -52,7 +52,7 @@ export interface CrudProps<KeyT extends ModelFieldName, VisibilityT extends Page
      */
     gridProps: Omit<BackendDataGridProps<KeyT, VisibilityT, CustomT>, "model" | "enableDelete" | "disableExport" | "onEdit" | "forceRefreshToken" | "onAddNew"> & Pick<Partial<BackendDataGridProps<KeyT, VisibilityT, CustomT>>, never> & {
         onAddNew?: ((showNew: () => void) => void) | string | (Omit<IDataGridAddButton, "onClick"> & {
-            onClick: (showNew: () => void) => void | undefined;
+            onClick: ((showNew: () => void) => void) | undefined;
         })[];
         forceAddNew?: BackendDataGridProps<KeyT, VisibilityT, CustomT>["onAddNew"];
     };
