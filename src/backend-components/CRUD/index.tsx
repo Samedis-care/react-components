@@ -114,7 +114,7 @@ export interface CrudProps<
 				| ((showNew: () => void) => void)
 				| string
 				| (Omit<IDataGridAddButton, "onClick"> & {
-						onClick: (showNew: () => void) => void | undefined;
+						onClick: ((showNew: () => void) => void) | undefined;
 				  })[];
 			// forced version of addNew, is directly passed along
 			forceAddNew?: BackendDataGridProps<
@@ -432,7 +432,7 @@ const CRUD = <
 													(btn): IDataGridAddButton => ({
 														...btn,
 														onClick: btn.onClick
-															? () => btn.onClick(showNewPage)
+															? () => btn.onClick!(showNewPage)
 															: undefined,
 													}),
 												)
