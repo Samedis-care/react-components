@@ -305,7 +305,7 @@ const BackendDataGrid = <
 			onAddNew={addNewButtons}
 			onDelete={enableDelete ? handleDelete : undefined}
 			loadData={loadData}
-			columns={model.toDataGridColumnDefinition()}
+			columns={useMemo(() => model.toDataGridColumnDefinition(), [model])}
 			forceRefreshToken={`${
 				props.forceRefreshToken || "undefined"
 			}${refreshToken}`}
