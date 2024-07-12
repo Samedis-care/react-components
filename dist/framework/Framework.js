@@ -30,7 +30,7 @@ const loaderComponent = React.createElement(Loader, null);
  */
 const ComponentsCareFramework = (props) => {
     return (React.createElement(Suspense, { fallback: loaderComponent },
-        !props.disableMobileScalingFix && React.createElement(MobileScalingFix, null),
+        !props.disableMobileScalingFix && (React.createElement(MobileScalingFix, { ...props.mobileScalingFixProps })),
         !props.disableDragAndDropPrevention && React.createElement(DragAndDropPrevention, null),
         React.createElement(CCI18nProvider, { disableHtmlLanguageAttributeSetter: props.disableHtmlLanguageAttributeSetter },
             React.createElement(MuiPickerUtils, { disable: props.disableMuiPickerUtils },

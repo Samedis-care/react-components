@@ -1,5 +1,6 @@
 import React from "react";
 import { GetDefaultThemeCallback } from "./ThemeProvider";
+import { MobileScalingFixProps } from "../standalone/MobileScalingFix/MobileScalingFix";
 /**
  * Properties for the Framework
  */
@@ -20,6 +21,10 @@ export interface IFrameworkProps {
      * Disable mobile scaling fix
      */
     disableMobileScalingFix?: boolean;
+    /**
+     * Mobile scaling fix props
+     */
+    mobileScalingFixProps?: MobileScalingFixProps;
     /**
      * Disable unsafe-to-leave handling (window.beforeunload callback)
      */

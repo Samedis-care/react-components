@@ -1,3 +1,6 @@
 import React from "react";
-declare const _default: React.MemoExoticComponent<() => React.JSX.Element>;
+export interface MobileScalingFixProps {
+    minWidth?: number;
+}
+declare const _default: React.MemoExoticComponent<(props: MobileScalingFixProps) => React.JSX.Element>;
 export default _default;
