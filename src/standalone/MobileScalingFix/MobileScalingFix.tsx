@@ -1,11 +1,19 @@
 import React, { useEffect } from "react";
 
-const MobileScalingFix = () => {
+export interface MobileScalingFixProps {
+	minWidth?: number;
+}
+
+const MobileScalingFix = (props: MobileScalingFixProps) => {
+	const { minWidth } = props;
 	useEffect(() => {
 		let meta: HTMLMetaElement | null = document.querySelector(
 			"meta[name='viewport']",
 		);
-		let metaContent = "width=device-width, initial-scale=1";
+		let metaContent =
+			"width=" +
+			(minWidth ? minWidth.toFixed() : "device-width") +
+			", initial-scale=1";
 		if (
 			["iPhone", "iPod"].find((device) => navigator.platform.includes(device))
 		) {
@@ -17,7 +25,7 @@ const MobileScalingFix = () => {
 			document.head.appendChild(meta);
 		}
 		meta.content = metaContent;
-	}, []);
+	}, [minWidth]);
 
 	return <></>;
 };

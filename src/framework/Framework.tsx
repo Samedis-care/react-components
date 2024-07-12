@@ -11,7 +11,9 @@ import { QueryClientProvider } from "react-query";
 import ModelDataStore from "../backend-integration/Store";
 import MuiPickerUtils from "./MuiPickerUtils";
 import PermissionContextProvider from "./PermissionContextProvider";
-import MobileScalingFix from "../standalone/MobileScalingFix/MobileScalingFix";
+import MobileScalingFix, {
+	MobileScalingFixProps,
+} from "../standalone/MobileScalingFix/MobileScalingFix";
 import UnsafeToLeave from "./UnsafeToLeave";
 import DragAndDropPrevention from "./DragAndDropPrevention";
 import { StyledEngineProvider } from "@mui/material";
@@ -37,6 +39,10 @@ export interface IFrameworkProps {
 	 * Disable mobile scaling fix
 	 */
 	disableMobileScalingFix?: boolean;
+	/**
+	 * Mobile scaling fix props
+	 */
+	mobileScalingFixProps?: MobileScalingFixProps;
 	/**
 	 * Disable unsafe-to-leave handling (window.beforeunload callback)
 	 */
@@ -75,7 +81,9 @@ const loaderComponent = <Loader />;
 const ComponentsCareFramework = (props: ICompleteFrameworkProps) => {
 	return (
 		<Suspense fallback={loaderComponent}>
-			{!props.disableMobileScalingFix && <MobileScalingFix />}
+			{!props.disableMobileScalingFix && (
+				<MobileScalingFix {...props.mobileScalingFixProps} />
+			)}
 			{!props.disableDragAndDropPrevention && <DragAndDropPrevention />}
 			<CCI18nProvider
 				disableHtmlLanguageAttributeSetter={
