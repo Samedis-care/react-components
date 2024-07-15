@@ -22,6 +22,9 @@ const FilterWrapper = styled(Box, {
     position: "relative",
     transform: "translateY(-50%)",
 });
+const LoadWrapper = styled(Grid, { name: "CcWeekView", slot: "loadWrapper" })({
+    minHeight: 204,
+});
 const Week = styled("span", { name: "CcWeekView", slot: "week" })({
     cursor: "pointer",
 });
@@ -201,7 +204,7 @@ const WeekView = (inProps) => {
                 })()))))))),
         loadError && (React.createElement(Grid, { item: true, xs: 12 },
             React.createElement(Typography, { align: "center" }, loadError.message))),
-        !data && !loadError && (React.createElement(Grid, { item: true, xs: 12 },
+        !data && !loadError && (React.createElement(LoadWrapper, { item: true, xs: 12 },
             React.createElement(Grid, { container: true, justifyContent: "space-around" },
                 React.createElement(CircularProgress, null)))),
         data && (React.createElement(Grid, { item: true, xs: 12, container: true, alignItems: "stretch", alignContent: "space-between", wrap: "nowrap" }, weekdays.map((day, dayIdx) => {
