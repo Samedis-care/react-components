@@ -10,14 +10,14 @@ import moment from "moment";
 import combineClassNames from "../../../utils/combineClassNames";
 const StyledPaper = styled(Paper, { name: "CcWeekViewDay", slot: "paper" })(({ theme }) => ({
     height: "100%",
-    ".CcWeekViewDay-today": {
+    "&.CcWeekViewDay-today": {
         backgroundColor: theme.palette.primary.main,
         color: theme.palette.primary.contrastText,
     },
-    ".CcWeekViewDay-first": {
+    "&.CcWeekViewDay-first": {
         borderRadius: `${theme.shape.borderRadius}px 0 0 ${theme.shape.borderRadius}px`,
     },
-    ".CcWeekViewDay-last": {
+    "&.CcWeekViewDay-last": {
         borderRadius: `0 ${theme.shape.borderRadius}px ${theme.shape.borderRadius}px 0`,
     },
 }));
