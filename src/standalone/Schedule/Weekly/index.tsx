@@ -77,6 +77,10 @@ const FilterWrapper = styled(Box, {
 	transform: "translateY(-50%)",
 });
 
+const LoadWrapper = styled(Grid, { name: "CcWeekView", slot: "loadWrapper" })({
+	minHeight: 204,
+});
+
 const Week = styled("span", { name: "CcWeekView", slot: "week" })({
 	cursor: "pointer",
 });
@@ -91,6 +95,7 @@ const Picker = styled("div", { name: "CcWeekView", slot: "picker" })({
 export type WeekViewClassKey =
 	| "root"
 	| "todayBtn"
+	| "loadWrapper"
 	| "filterWrapper"
 	| "week"
 	| "picker";
@@ -414,11 +419,11 @@ const WeekView = (inProps: WeekViewProps) => {
 				</Grid>
 			)}
 			{!data && !loadError && (
-				<Grid item xs={12}>
+				<LoadWrapper item xs={12}>
 					<Grid container justifyContent={"space-around"}>
 						<CircularProgress />
 					</Grid>
-				</Grid>
+				</LoadWrapper>
 			)}
 			{data && (
 				<Grid
