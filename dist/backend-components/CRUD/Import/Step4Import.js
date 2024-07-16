@@ -52,9 +52,11 @@ export const useImportStep4Logic = (props) => {
                     Object.entries(model.fields)
                         .filter(([name, field]) => isFieldImportable(name, field))
                         .forEach(([name]) => {
-                        deepAssign(modelRecord, dotToObject(name, 
                         // eslint-disable-next-line no-eval
-                        eval(state.conversionScripts[name]?.script ?? "") ?? null));
+                        const value = eval(state.conversionScripts[name]?.script ?? "");
+                        if (value === undefined)
+                            return;
+                        deepAssign(modelRecord, dotToObject(name, value));
                     });
                     if (updateKey) {
                         const filterKey = model.fields[updateKey].type.stringify(getValueByDot(updateKey, modelRecord));
