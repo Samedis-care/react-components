@@ -41,5 +41,6 @@ export interface GridSingleSelectFilterProps {
      */
     barBreakpoints?: Partial<Record<Breakpoint, boolean | GridSize>>;
 }
-declare const _default: React.MemoExoticComponent<(props: GridSingleSelectFilterProps) => React.JSX.Element>;
+export type GridSingleSelectFilterClassKey = "dialogRoot" | "barRoot";
+declare const _default: React.MemoExoticComponent<(inProps: GridSingleSelectFilterProps) => React.JSX.Element>;
 export default _default;

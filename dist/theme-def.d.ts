@@ -47,6 +47,8 @@ import { WeekViewDayClassKey, WeekViewDayProps } from "./standalone/Schedule/Wee
 import { ScrollableScheduleClassKey, ScrollableScheduleProps } from "./standalone/Schedule/Scrollable";
 import { WeekViewClassKey, WeekViewProps } from "./standalone/Schedule/Weekly";
 import { DataGridClassKey, DataGridProps } from "./standalone/DataGrid/DataGrid";
+import { GridMultiSelectFilterClassKey, GridMultiSelectFilterProps } from "./standalone/DataGrid/GridMultiSelectFilter";
+import { GridSingleSelectFilterClassKey, GridSingleSelectFilterProps } from "./standalone/DataGrid/GridSingleSelectFilter";
 export interface ComponentsCareTheme {
 }
 declare module "@mui/material/styles/createTheme" {
@@ -116,6 +118,8 @@ declare module "@mui/material/styles" {
         CcScrollableSchedule: ScrollableScheduleClassKey;
         CcWeekView: WeekViewClassKey;
         CcDataGrid: DataGridClassKey;
+        CcGridMultiSelectFilter?: GridMultiSelectFilterClassKey;
+        CcGridSingleSelectFilter?: GridSingleSelectFilterClassKey;
     }
     interface ComponentsPropsList {
         CcSignalPortlet: Partial<SignalPortletProps>;
@@ -173,6 +177,8 @@ declare module "@mui/material/styles" {
         CcScrollableSchedule: Partial<ScrollableScheduleProps>;
         CcWeekView: Partial<WeekViewProps>;
         CcDataGrid: Partial<DataGridProps>;
+        CcGridMultiSelectFilter?: Partial<GridMultiSelectFilterProps>;
+        CcGridSingleSelectFilter?: Partial<GridSingleSelectFilterProps>;
     }
     interface Components {
         CcSignalPortlet?: {
@@ -453,6 +459,16 @@ declare module "@mui/material/styles" {
             defaultProps?: ComponentsPropsList["CcDataGrid"];
             styleOverrides?: ComponentsOverrides<Theme>["CcDataGrid"];
             variants?: ComponentsVariants["CcDataGrid"];
+        };
+        CcGridMultiSelectFilter?: {
+            defaultProps?: ComponentsPropsList["CcGridMultiSelectFilter"];
+            styleOverrides?: ComponentsOverrides<Theme>["CcGridMultiSelectFilter"];
+            variants?: ComponentsVariants["CcGridMultiSelectFilter"];
+        };
+        CcGridSingleSelectFilter?: {
+            defaultProps?: ComponentsPropsList["CcGridSingleSelectFilter"];
+            styleOverrides?: ComponentsOverrides<Theme>["CcGridSingleSelectFilter"];
+            variants?: ComponentsVariants["CcGridSingleSelectFilter"];
         };
     }
 }
