@@ -9,12 +9,12 @@ import {
 } from "@mui/material";
 import {
 	Add as AddIcon,
-	Publish as ImportIcon,
 	Menu as MenuIcon,
+	Publish as ImportIcon,
 } from "@mui/icons-material";
 import { ExportIcon, ResetIcon, TuneIcon } from "../../Icons";
 import ActionButton from "../../UIKit/ActionButton";
-import { SmallIconButton } from "../../Small";
+import { SmallestIconButton } from "../../Small";
 import VerticalDivider from "../../VerticalDivider";
 import type { IDataGridExporter } from "./index";
 import ExportMenu from "./ExportMenu";
@@ -147,9 +147,9 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 								{bpMdUp ? (
 									<ComponentWithLabel
 										control={
-											<SmallIconButton color={"primary"}>
+											<SmallestIconButton color={"primary"}>
 												<TuneIcon />
-											</SmallIconButton>
+											</SmallestIconButton>
 										}
 										labelText={t("standalone.data-grid.header.settings")}
 										onClick={props.toggleSettings}
@@ -180,9 +180,9 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 								{bpMdUp ? (
 									<ComponentWithLabel
 										control={
-											<SmallIconButton color={"primary"}>
+											<SmallestIconButton color={"primary"}>
 												<ResetIcon />
-											</SmallIconButton>
+											</SmallestIconButton>
 										}
 										labelText={t("standalone.data-grid.header.reset")}
 										onClick={openResetDialog}
@@ -211,9 +211,9 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 								{bpMdUp ? (
 									<ComponentWithLabel
 										control={
-											<SmallIconButton color={"primary"}>
+											<SmallestIconButton color={"primary"}>
 												<ExportIcon />
-											</SmallIconButton>
+											</SmallestIconButton>
 										}
 										labelText={t("standalone.data-grid.header.export")}
 										onClick={openExportMenu}
@@ -249,9 +249,9 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 								{bpMdUp ? (
 									<ComponentWithLabel
 										control={
-											<SmallIconButton color={"primary"}>
+											<SmallestIconButton color={"primary"}>
 												<ImportIcon />
-											</SmallIconButton>
+											</SmallestIconButton>
 										}
 										labelText={t("standalone.data-grid.header.import")}
 										onClick={props.handleImport}

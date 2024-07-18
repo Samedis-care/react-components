@@ -6,7 +6,7 @@ import {
 	useMediaQuery,
 	useTheme,
 } from "@mui/material";
-import { SmallIconButton } from "../../Small";
+import { SmallestIconButton } from "../../Small";
 import VerticalDivider from "../../VerticalDivider";
 import ComponentWithLabel from "../../UIKit/ComponentWithLabel";
 import {
@@ -76,13 +76,13 @@ const DataActionBarView = (props: DataActionBarViewProps) => {
 	const deleteBtn = (
 		<ComponentWithLabel
 			control={
-				<SmallIconButton
+				<SmallestIconButton
 					color={"primary"}
 					disabled={props.numSelected === 0 || !props.handleDelete}
 					onClick={props.handleDelete}
 				>
 					<DeleteIcon />
-				</SmallIconButton>
+				</SmallestIconButton>
 			}
 			labelText={t("standalone.data-grid.footer.delete")}
 			labelPlacement={"bottom"}
@@ -113,13 +113,13 @@ const DataActionBarView = (props: DataActionBarViewProps) => {
 					<Grid item key={"edit"}>
 						<ComponentWithLabel
 							control={
-								<SmallIconButton
+								<SmallestIconButton
 									color={"primary"}
 									disabled={props.numSelected !== 1}
 									onClick={props.handleEdit}
 								>
 									<EditIcon />
-								</SmallIconButton>
+								</SmallestIconButton>
 							}
 							labelText={t("standalone.data-grid.footer.edit")}
 							labelPlacement={"bottom"}
@@ -152,7 +152,7 @@ const DataActionBarView = (props: DataActionBarViewProps) => {
 					<Grid item>
 						<ComponentWithLabel
 							control={
-								<SmallIconButton
+								<SmallestIconButton
 									color={"primary"}
 									disabled={
 										!props.customButtons.find(
@@ -162,7 +162,7 @@ const DataActionBarView = (props: DataActionBarViewProps) => {
 									onClick={handleExtendedMenuOpen}
 								>
 									<MenuIcon />
-								</SmallIconButton>
+								</SmallestIconButton>
 							}
 							labelText={t("standalone.data-grid.footer.more")}
 							labelPlacement={"bottom"}
@@ -190,7 +190,7 @@ const DataActionBarView = (props: DataActionBarViewProps) => {
 						<Grid item>
 							<ComponentWithLabel
 								control={
-									<SmallIconButton
+									<SmallestIconButton
 										color={"primary"}
 										disabled={entry.isDisabled(props.numSelected)}
 										onClick={() => {
@@ -198,7 +198,7 @@ const DataActionBarView = (props: DataActionBarViewProps) => {
 										}}
 									>
 										{entry.icon}
-									</SmallIconButton>
+									</SmallestIconButton>
 								}
 								labelText={entry.label}
 								labelPlacement={"bottom"}
