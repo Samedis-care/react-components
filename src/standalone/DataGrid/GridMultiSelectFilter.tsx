@@ -4,7 +4,9 @@ import {
 	Divider,
 	FormControlLabel,
 	Grid,
+	styled,
 	Typography,
+	useThemeProps,
 } from "@mui/material";
 import { useCustomFilterActiveContext } from "./Header/FilterBar";
 import { DataGridCustomFilterMulti, useDataGridProps } from "./DataGrid";
@@ -49,7 +51,21 @@ export interface GridMultiSelectFilterProps {
 	barBreakpoints?: Partial<Record<Breakpoint, boolean | GridSize>>;
 }
 
-const GridMultiSelectFilter = (props: GridMultiSelectFilterProps) => {
+const GridMultiSelectFilterDialogRoot = styled(Grid, {
+	name: "CcGridMultiSelectFilter",
+	slot: "dialogRoot",
+})({});
+const GridMultiSelectFilterBarRoot = styled(Grid, {
+	name: "CcGridMultiSelectFilter",
+	slot: "barRoot",
+})({});
+export type GridMultiSelectFilterClassKey = "dialogRoot" | "barRoot";
+
+const GridMultiSelectFilter = (inProps: GridMultiSelectFilterProps) => {
+	const props = useThemeProps({
+		props: inProps,
+		name: "CcGridMultiSelectFilter",
+	});
 	const {
 		label,
 		options,
@@ -108,7 +124,13 @@ const GridMultiSelectFilter = (props: GridMultiSelectFilterProps) => {
 
 	if (dialog) {
 		return (
-			<Grid item xs={12} md={6} lg={3} {...dialogBreakpoints}>
+			<GridMultiSelectFilterDialogRoot
+				item
+				xs={12}
+				md={6}
+				lg={3}
+				{...dialogBreakpoints}
+			>
 				<Grid container>
 					{label && (
 						<Grid item xs={12}>
@@ -136,11 +158,11 @@ const GridMultiSelectFilter = (props: GridMultiSelectFilterProps) => {
 						</Grid>
 					))}
 				</Grid>
-			</Grid>
+			</GridMultiSelectFilterDialogRoot>
 		);
 	} else {
 		return (
-			<Grid item xs={4} {...barBreakpoints}>
+			<GridMultiSelectFilterBarRoot item xs={4} {...barBreakpoints}>
 				<DataGridCustomFilterMulti<MultiSelectorData, true>
 					multiple
 					label={label}
@@ -152,7 +174,7 @@ const GridMultiSelectFilter = (props: GridMultiSelectFilterProps) => {
 					classes={selectorClasses}
 					className={classes?.customFilterMulti}
 				/>
-			</Grid>
+			</GridMultiSelectFilterBarRoot>
 		);
 	}
 };

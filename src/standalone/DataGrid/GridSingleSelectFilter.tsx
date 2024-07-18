@@ -7,7 +7,9 @@ import {
 	Grid,
 	Radio,
 	RadioGroup,
+	styled,
 	Typography,
+	useThemeProps,
 } from "@mui/material";
 import { useCustomFilterActiveContext } from "./Header/FilterBar";
 import { DataGridCustomFilterSingle, useDataGridProps } from "./DataGrid";
@@ -54,7 +56,21 @@ export interface GridSingleSelectFilterProps {
 	barBreakpoints?: Partial<Record<Breakpoint, boolean | GridSize>>;
 }
 
-const GridSingleSelectFilter = (props: GridSingleSelectFilterProps) => {
+const GridSingleSelectFilterDialogRoot = styled(Grid, {
+	name: "CcGridSingleSelectFilter",
+	slot: "dialogRoot",
+})({});
+const GridSingleSelectFilterBarRoot = styled(Grid, {
+	name: "CcGridSingleSelectFilter",
+	slot: "barRoot",
+})({});
+export type GridSingleSelectFilterClassKey = "dialogRoot" | "barRoot";
+
+const GridSingleSelectFilter = (inProps: GridSingleSelectFilterProps) => {
+	const props = useThemeProps({
+		props: inProps,
+		name: "CcGridSingleSelectFilter",
+	});
 	const {
 		label,
 		options,
@@ -102,7 +118,13 @@ const GridSingleSelectFilter = (props: GridSingleSelectFilterProps) => {
 
 	if (dialog) {
 		return (
-			<Grid item xs={12} md={6} lg={3} {...dialogBreakpoints}>
+			<GridSingleSelectFilterDialogRoot
+				item
+				xs={12}
+				md={6}
+				lg={3}
+				{...dialogBreakpoints}
+			>
 				<FormControl component={"fieldset"}>
 					<RadioGroup value={selected} onChange={handleDialogRadioToggle}>
 						<Grid item xs={12} container>
@@ -130,11 +152,11 @@ const GridSingleSelectFilter = (props: GridSingleSelectFilterProps) => {
 						</Grid>
 					</RadioGroup>
 				</FormControl>
-			</Grid>
+			</GridSingleSelectFilterDialogRoot>
 		);
 	} else {
 		return (
-			<Grid item xs={4} {...barBreakpoints}>
+			<GridSingleSelectFilterBarRoot item xs={4} {...barBreakpoints}>
 				<FormControl component={"fieldset"} fullWidth>
 					<DataGridCustomFilterSingle
 						label={label}
@@ -150,7 +172,7 @@ const GridSingleSelectFilter = (props: GridSingleSelectFilterProps) => {
 						className={classes?.customFilterSingle}
 					/>
 				</FormControl>
-			</Grid>
+			</GridSingleSelectFilterBarRoot>
 		);
 	}
 };
