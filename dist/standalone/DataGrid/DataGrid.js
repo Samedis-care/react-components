@@ -159,7 +159,7 @@ export const DataGridSelectAllCheckbox = styled(Checkbox, {
     name: "CcDataGrid",
     slot: "selectAllCheckbox",
 })({
-    padding: "4px 0",
+    padding: 0,
 });
 export const DataGridSelectAllWrapper = styled(ComponentWithLabel, {
     name: "CcDataGrid",
@@ -221,6 +221,7 @@ export const DataGridColumnHeaderLabel = styled(Grid, {
     slot: "columnHeaderLabel",
 })({
     textOverflow: "ellipsis",
+    whiteSpace: "nowrap",
     overflow: "hidden",
     userSelect: "none",
     "&:hover": {
