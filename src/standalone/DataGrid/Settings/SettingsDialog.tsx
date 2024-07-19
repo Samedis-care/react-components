@@ -46,6 +46,26 @@ export interface IDataGridSettingsDialogProps extends IDataGridColumnProps {
 	hiddenColumns: string[];
 }
 
+const StyledTable = styled(Table, {
+	name: "CcDataGrid",
+	slot: "settingsTable",
+})({});
+
+const StyledTableRow = styled(TableRow, {
+	name: "CcDataGrid",
+	slot: "settingsTableRow",
+})({});
+
+const StyledTableHead = styled(TableHead, {
+	name: "CcDataGrid",
+	slot: "settingsTableHead",
+})({});
+
+const StyledTableBody = styled(TableBody, {
+	name: "CcDataGrid",
+	slot: "settingsTableBody",
+})({});
+
 const StyledTableCell = styled(TableCell, {
 	name: "CcDataGrid",
 	slot: "settingsTableCell",
@@ -70,9 +90,9 @@ const SettingsDialog = (props: IDataGridSettingsDialogProps) => {
 			elevation={0}
 			className={classes?.contentOverlayPaper}
 		>
-			<Table stickyHeader>
-				<TableHead>
-					<TableRow>
+			<StyledTable stickyHeader>
+				<StyledTableHead className={classes?.settingsTableHead}>
+					<StyledTableRow className={classes?.settingsTableRow}>
 						<StyledTableCell className={classes?.settingsTableCell}>
 							{t("standalone.data-grid.settings.column")}
 						</StyledTableCell>
@@ -82,11 +102,14 @@ const SettingsDialog = (props: IDataGridSettingsDialogProps) => {
 						<StyledTableCell className={classes?.settingsTableCell}>
 							{t("standalone.data-grid.settings.pin")}
 						</StyledTableCell>
-					</TableRow>
-				</TableHead>
-				<TableBody>
+					</StyledTableRow>
+				</StyledTableHead>
+				<StyledTableBody className={classes?.settingsTableBody}>
 					{columns.map((column: IDataGridColumnDef) => (
-						<TableRow key={column.field}>
+						<StyledTableRow
+							key={column.field}
+							className={classes?.settingsTableRow}
+						>
 							<StyledTableCell className={classes?.settingsTableCell}>
 								{column.headerName}
 							</StyledTableCell>
@@ -108,10 +131,10 @@ const SettingsDialog = (props: IDataGridSettingsDialogProps) => {
 									value={column.field}
 								/>
 							</StyledTableCell>
-						</TableRow>
+						</StyledTableRow>
 					))}
-				</TableBody>
-			</Table>
+				</StyledTableBody>
+			</StyledTable>
 			<DataGridContentOverlayClosed className={classes?.contentOverlayClosed}>
 				<Divider />
 				<Grid container justifyContent={"flex-end"}>

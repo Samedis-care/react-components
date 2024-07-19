@@ -1008,6 +1008,10 @@ export type DataGridClassKey =
 	| "customFilterSingle"
 	| "centeredStickyTypography"
 	| "settingsTableCell"
+	| "settingsTable"
+	| "settingsTableRow"
+	| "settingsTableHead"
+	| "settingsTableBody"
 	| "customFilterContainerHeader";
 
 export const getActiveDataGridColumns = (
