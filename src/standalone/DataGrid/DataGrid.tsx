@@ -680,13 +680,14 @@ const FooterWrapper = styled(Grid, { name: "CcDataGrid", slot: "footer" })(
 export const DataGridContentOverlayCollapse = styled(Collapse, {
 	name: "CcDataGrid",
 	slot: "contentOverlayCollapse",
-})({
+})(({ theme }) => ({
 	position: "absolute",
 	zIndex: 1000,
 	width: "100%",
 	maxHeight: "100%",
 	overflow: "auto",
-});
+	backgroundColor: theme.palette.background.paper,
+}));
 
 export const DataGridContentOverlayPaper = styled(Paper, {
 	name: "CcDataGrid",
