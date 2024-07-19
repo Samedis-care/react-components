@@ -2,6 +2,22 @@ import React, { useMemo } from "react";
 import { Box, Button, Checkbox, Divider, Grid, Table, TableBody, TableCell, TableHead, TableRow, styled, } from "@mui/material";
 import { DataGridContentOverlayClosed, DataGridContentOverlayPaper, useDataGridProps, } from "../DataGrid";
 import useCCTranslations from "../../../utils/useCCTranslations";
+const StyledTable = styled(Table, {
+    name: "CcDataGrid",
+    slot: "settingsTable",
+})({});
+const StyledTableRow = styled(TableRow, {
+    name: "CcDataGrid",
+    slot: "settingsTableRow",
+})({});
+const StyledTableHead = styled(TableHead, {
+    name: "CcDataGrid",
+    slot: "settingsTableHead",
+})({});
+const StyledTableBody = styled(TableBody, {
+    name: "CcDataGrid",
+    slot: "settingsTableBody",
+})({});
 const StyledTableCell = styled(TableCell, {
     name: "CcDataGrid",
     slot: "settingsTableCell",
@@ -13,13 +29,13 @@ const SettingsDialog = (props) => {
     const { t } = useCCTranslations();
     const columns = useMemo(() => [...props.columns].sort((a, b) => a.headerName.localeCompare(b.headerName)), [props.columns]);
     return (React.createElement(DataGridContentOverlayPaper, { elevation: 0, className: classes?.contentOverlayPaper },
-        React.createElement(Table, { stickyHeader: true },
-            React.createElement(TableHead, null,
-                React.createElement(TableRow, null,
+        React.createElement(StyledTable, { stickyHeader: true },
+            React.createElement(StyledTableHead, { className: classes?.settingsTableHead },
+                React.createElement(StyledTableRow, { className: classes?.settingsTableRow },
                     React.createElement(StyledTableCell, { className: classes?.settingsTableCell }, t("standalone.data-grid.settings.column")),
                     React.createElement(StyledTableCell, { className: classes?.settingsTableCell }, t("standalone.data-grid.settings.show")),
                     React.createElement(StyledTableCell, { className: classes?.settingsTableCell }, t("standalone.data-grid.settings.pin")))),
-            React.createElement(TableBody, null, columns.map((column) => (React.createElement(TableRow, { key: column.field },
+            React.createElement(StyledTableBody, { className: classes?.settingsTableBody }, columns.map((column) => (React.createElement(StyledTableRow, { key: column.field, className: classes?.settingsTableRow },
                 React.createElement(StyledTableCell, { className: classes?.settingsTableCell }, column.headerName),
                 React.createElement(StyledTableCell, { className: classes?.settingsTableCell },
                     React.createElement(Checkbox, { checked: !props.hiddenColumns.includes(column.field), onChange: props.toggleColumnVisibility, value: column.field })),
