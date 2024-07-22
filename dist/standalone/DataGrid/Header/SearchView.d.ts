@@ -9,6 +9,10 @@ export interface IDataGridSearchViewProps {
      * @param evt The change event
      */
     handleSearchChange: (evt: ChangeEvent<HTMLInputElement>) => void;
+    /**
+     * CSS class name
+     */
+    className?: string;
 }
 declare const _default: React.MemoExoticComponent<(props: IDataGridSearchViewProps) => React.JSX.Element>;
 export default _default;

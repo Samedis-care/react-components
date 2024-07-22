@@ -23,7 +23,7 @@ const SearchView = (props) => {
                         props.search && "CcDataGrid-quickFilterActiveIcon",
                     ]) }))),
         }, margin: "dense" }));
-    return (React.createElement(React.Fragment, null,
+    return (React.createElement("div", { className: combineClassNames([props.className, classes?.search]) },
         React.createElement(Hidden, { smDown: true, implementation: "js" }, renderTextField()),
         React.createElement(Hidden, { smUp: true, implementation: "js" },
             React.createElement(IconButton, { onClick: openPopover, size: "large" },
