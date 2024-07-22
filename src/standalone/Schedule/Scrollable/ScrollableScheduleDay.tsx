@@ -9,10 +9,12 @@ export interface ScrollableScheduleDayProps {
 	data: IDayData[];
 }
 
-const Root = styled(Grid, {
+const Root = styled("div", {
 	name: "CcScrollableScheduleDay",
 	slot: "root",
-})({});
+})(({ theme }) => ({
+	margin: theme.spacing(0, -2),
+}));
 
 export type ScrollableScheduleDayClassKey = "root";
 
@@ -25,20 +27,20 @@ const ScrollableScheduleDay = React.forwardRef(function ScrollableScheduleDay(
 		name: "CcScrollableScheduleDay",
 	});
 	return (
-		<Root
-			item
-			xs={12}
-			container
-			spacing={2}
-			className={props.today ? "CcScrollableScheduleDay-today" : undefined}
-		>
-			<Grid item xs={1} ref={ref}>
-				{props.moment.format("DD ddd")}
-			</Grid>
-			<Grid item xs={11}>
-				<DayContents data={props.data} />
-			</Grid>
-		</Root>
+		<Grid item xs={12}>
+			<Root
+				className={props.today ? "CcScrollableScheduleDay-today" : undefined}
+			>
+				<Grid container spacing={2}>
+					<Grid item xs={1} ref={ref}>
+						{props.moment.format("DD ddd")}
+					</Grid>
+					<Grid item xs={11}>
+						<DayContents data={props.data} />
+					</Grid>
+				</Grid>
+			</Root>
+		</Grid>
 	);
 });
 
