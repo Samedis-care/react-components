@@ -88,8 +88,9 @@ class ScrollableScheduleWeek extends PureComponent<IProps, IState> {
 					<ScrollableScheduleDay
 						key={day}
 						data={this.state.data[day]}
-						refFwd={this.props.setTodayElement}
+						ref={this.props.setTodayElement}
 						moment={dayMoment}
+						today
 					/>,
 				);
 			} else {

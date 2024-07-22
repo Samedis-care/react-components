@@ -213,7 +213,7 @@ const ScrollableSchedule = (inProps: ScrollableScheduleProps) => {
 						setTodayElement={(elem: HTMLElement | null) =>
 							(todayElem.current = elem)
 						}
-						moment={state.today.clone().add(page - 1, "weeks")}
+						moment={state.today.clone().add(page, "weeks")}
 					/>
 				);
 			};

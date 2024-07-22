@@ -1,27 +1,45 @@
-import React, { PureComponent } from "react";
-import { Grid } from "@mui/material";
+import React from "react";
+import { Grid, styled, useThemeProps } from "@mui/material";
 import DayContents, { IDayData } from "../Common/DayContents";
 import { Moment } from "moment";
 
-export interface IProps {
-	refFwd?: (elem: HTMLElement | null) => void;
+export interface ScrollableScheduleDayProps {
 	moment: Moment;
+	today?: boolean;
 	data: IDayData[];
 }
 
-class ScrollableScheduleDay extends PureComponent<IProps> {
-	render(): React.ReactElement {
-		return (
-			<>
-				<Grid item xs={1} ref={this.props.refFwd}>
-					{this.props.moment.format("DD ddd")}
-				</Grid>
-				<Grid item xs={11}>
-					<DayContents data={this.props.data} />
-				</Grid>
-			</>
-		);
-	}
-}
+const Root = styled(Grid, {
+	name: "CcScrollableScheduleDay",
+	slot: "root",
+})({});
 
-export default ScrollableScheduleDay;
+export type ScrollableScheduleDayClassKey = "root";
+
+const ScrollableScheduleDay = React.forwardRef(function ScrollableScheduleDay(
+	inProps: ScrollableScheduleDayProps,
+	ref: React.ForwardedRef<HTMLDivElement>,
+) {
+	const props = useThemeProps({
+		props: inProps,
+		name: "CcScrollableScheduleDay",
+	});
+	return (
+		<Root
+			item
+			xs={12}
+			container
+			spacing={2}
+			className={props.today ? "CcScrollableScheduleDay-today" : undefined}
+		>
+			<Grid item xs={1} ref={ref}>
+				{props.moment.format("DD ddd")}
+			</Grid>
+			<Grid item xs={11}>
+				<DayContents data={props.data} />
+			</Grid>
+		</Root>
+	);
+});
+
+export default React.memo(ScrollableScheduleDay);
