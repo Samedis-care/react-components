@@ -1,6 +1,12 @@
 import React, { ChangeEvent, useCallback } from "react";
 import { useDataGridState } from "../DataGrid";
 import SearchView from "./SearchView";
+import { styled } from "@mui/material";
+
+const SearchViewStyled = styled(SearchView, {
+	name: "CcDataGrid",
+	slot: "search",
+})({});
 
 const Search = () => {
 	const [state, setState] = useDataGridState();
@@ -17,7 +23,10 @@ const Search = () => {
 	);
 
 	return (
-		<SearchView search={state.search} handleSearchChange={handleSearchChange} />
+		<SearchViewStyled
+			search={state.search}
+			handleSearchChange={handleSearchChange}
+		/>
 	);
 };
 

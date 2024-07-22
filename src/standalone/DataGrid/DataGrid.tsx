@@ -1013,7 +1013,8 @@ export type DataGridClassKey =
 	| "settingsTableRow"
 	| "settingsTableHead"
 	| "settingsTableBody"
-	| "customFilterContainerHeader";
+	| "customFilterContainerHeader"
+	| "search";
 
 export const getActiveDataGridColumns = (
 	columns: IDataGridColumnDef[],

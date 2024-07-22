@@ -21,6 +21,10 @@ export interface IDataGridSearchViewProps {
 	 * @param evt The change event
 	 */
 	handleSearchChange: (evt: ChangeEvent<HTMLInputElement>) => void;
+	/**
+	 * CSS class name
+	 */
+	className?: string;
 }
 
 const anchorOrigin: PopoverOrigin = {
@@ -63,7 +67,7 @@ const SearchView = (props: IDataGridSearchViewProps) => {
 	);
 
 	return (
-		<>
+		<div className={combineClassNames([props.className, classes?.search])}>
 			<Hidden smDown implementation={"js"}>
 				{renderTextField()}
 			</Hidden>
@@ -86,7 +90,7 @@ const SearchView = (props: IDataGridSearchViewProps) => {
 					<Box p={1}>{renderTextField()}</Box>
 				</Popover>
 			</Hidden>
-		</>
+		</div>
 	);
 };
 
