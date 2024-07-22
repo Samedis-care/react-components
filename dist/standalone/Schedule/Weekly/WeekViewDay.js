@@ -15,10 +15,10 @@ const StyledPaper = styled(Paper, { name: "CcWeekViewDay", slot: "paper" })(({ t
         color: theme.palette.primary.contrastText,
     },
     "&.CcWeekViewDay-first": {
-        borderRadius: `${theme.shape.borderRadius}px 0 0 ${theme.shape.borderRadius}px`,
+        borderRadius: `0 0 0 ${theme.shape.borderRadius}px`,
     },
     "&.CcWeekViewDay-last": {
-        borderRadius: `0 ${theme.shape.borderRadius}px ${theme.shape.borderRadius}px 0`,
+        borderRadius: `0 0 ${theme.shape.borderRadius}px 0`,
     },
 }));
 const DayContentsWrapper = styled(Grid, {

@@ -41,7 +41,7 @@ class ScrollableScheduleWeek extends PureComponent {
             const dayMoment = firstDay.clone().add(day, "days");
             if (dayMoment.dayOfYear() === now.dayOfYear() &&
                 dayMoment.year() === now.year()) {
-                dayItems.push(React.createElement(ScrollableScheduleDay, { key: day, data: this.state.data[day], refFwd: this.props.setTodayElement, moment: dayMoment }));
+                dayItems.push(React.createElement(ScrollableScheduleDay, { key: day, data: this.state.data[day], ref: this.props.setTodayElement, moment: dayMoment, today: true }));
             }
             else {
                 dayItems.push(React.createElement(ScrollableScheduleDay, { key: `${day}`, data: this.state.data[day], moment: dayMoment }));

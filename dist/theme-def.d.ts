@@ -49,6 +49,7 @@ import { WeekViewClassKey, WeekViewProps } from "./standalone/Schedule/Weekly";
 import { DataGridClassKey, DataGridProps } from "./standalone/DataGrid/DataGrid";
 import { GridMultiSelectFilterClassKey, GridMultiSelectFilterProps } from "./standalone/DataGrid/GridMultiSelectFilter";
 import { GridSingleSelectFilterClassKey, GridSingleSelectFilterProps } from "./standalone/DataGrid/GridSingleSelectFilter";
+import { ScrollableScheduleDayClassKey, ScrollableScheduleDayProps } from "./standalone/Schedule/Scrollable/ScrollableScheduleDay";
 export interface ComponentsCareTheme {
 }
 declare module "@mui/material/styles/createTheme" {
@@ -116,6 +117,7 @@ declare module "@mui/material/styles" {
         CcDayContents: DayContentsClassKey;
         CcWeekViewDay: WeekViewDayClassKey;
         CcScrollableSchedule: ScrollableScheduleClassKey;
+        CcScrollableScheduleDay?: ScrollableScheduleDayClassKey;
         CcWeekView: WeekViewClassKey;
         CcDataGrid: DataGridClassKey;
         CcGridMultiSelectFilter?: GridMultiSelectFilterClassKey;
@@ -175,6 +177,7 @@ declare module "@mui/material/styles" {
         CcDayContents: Partial<DayContentsProps>;
         CcWeekViewDay: Partial<WeekViewDayProps>;
         CcScrollableSchedule: Partial<ScrollableScheduleProps>;
+        CcScrollableScheduleDay: Partial<ScrollableScheduleDayProps>;
         CcWeekView: Partial<WeekViewProps>;
         CcDataGrid: Partial<DataGridProps>;
         CcGridMultiSelectFilter?: Partial<GridMultiSelectFilterProps>;
@@ -449,6 +452,11 @@ declare module "@mui/material/styles" {
             defaultProps?: ComponentsPropsList["CcScrollableSchedule"];
             styleOverrides?: ComponentsOverrides<Theme>["CcScrollableSchedule"];
             variants?: ComponentsVariants["CcScrollableSchedule"];
+        };
+        CcScrollableScheduleDay?: {
+            defaultProps?: ComponentsPropsList["CcScrollableScheduleDay"];
+            styleOverrides?: ComponentsOverrides<Theme>["CcScrollableScheduleDay"];
+            variants?: ComponentsVariants["CcScrollableScheduleDay"];
         };
         CcWeekView?: {
             defaultProps?: ComponentsPropsList["CcWeekView"];

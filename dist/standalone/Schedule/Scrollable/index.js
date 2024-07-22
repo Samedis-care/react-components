@@ -92,7 +92,7 @@ const ScrollableSchedule = (inProps) => {
     const loadMore = useCallback((top) => {
         const mkItem = (state) => {
             const page = top ? state.dataOffsetTop : state.dataOffsetBottom;
-            return (React.createElement(ScrollableScheduleWeek, { key: page.toString(), loadData: () => loadWeekCallback(page, state.filterValues), setTodayElement: (elem) => (todayElem.current = elem), moment: state.today.clone().add(page - 1, "weeks") }));
+            return (React.createElement(ScrollableScheduleWeek, { key: page.toString(), loadData: () => loadWeekCallback(page, state.filterValues), setTodayElement: (elem) => (todayElem.current = elem), moment: state.today.clone().add(page, "weeks") }));
         };
         if (top) {
             setState((prevState) => ({
