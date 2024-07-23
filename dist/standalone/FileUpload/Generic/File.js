@@ -152,41 +152,72 @@ export const AudioMimeType = /^audio\//;
 export const ImageMimeType = /^image\//;
 export const VideoMimeType = /^video\//;
 export const PdfFileExtensions = ["pdf"];
-export const getFileIcon = (nameOrMime) => {
+export const getFileType = (nameOrMime) => {
     if (nameOrMime.includes("/")) {
         if (AudioMimeType.test(nameOrMime))
-            return AudioFileIcon;
+            return "audio";
         if (ImageMimeType.test(nameOrMime))
-            return ImageFileIcon;
+            return "image";
         if (VideoMimeType.test(nameOrMime))
-            return VideoFileIcon;
+            return "video";
         return null;
     }
     else {
         const fileExt = getFileExt(nameOrMime).toLowerCase();
         if (ArchiveFileExtensions.includes(fileExt))
-            return ArchiveFileIcon;
+            return "archive";
         if (AudioFileExtensions.includes(fileExt))
-            return AudioFileIcon;
+            return "audio";
         if (CodeFileExtensions.includes(fileExt))
-            return CodeFileIcon;
+            return "code";
         if (CsvFileExtensions.includes(fileExt))
-            return CsvFileIcon;
+            return "csv";
         if (ExcelFileExtensions.includes(fileExt))
-            return ExcelFileIcon;
+            return "excel";
         if (ImageFileExtensions.includes(fileExt))
-            return ImageFileIcon;
+            return "image";
         if (PdfFileExtensions.includes(fileExt))
-            return PdfFileIcon;
+            return "pdf";
         if (PowerPointFileExtensions.includes(fileExt))
-            return PowerPointFileIcon;
+            return "power-point";
         if (TextFileExtensions.includes(fileExt))
-            return TextFileIcon;
+            return "text";
         if (VideoFileExtensions.includes(fileExt))
-            return VideoFileIcon;
+            return "video";
         if (WordFileExtensions.includes(fileExt))
-            return WordFileIcon;
+            return "word";
         return null;
+    }
+};
+export const getFileIcon = (nameOrMime) => {
+    return getFileTypeIcon(getFileType(nameOrMime));
+};
+export const getFileTypeIcon = (type) => {
+    switch (type) {
+        case "archive":
+            return ArchiveFileIcon;
+        case "audio":
+            return AudioFileIcon;
+        case "code":
+            return CodeFileIcon;
+        case "csv":
+            return CsvFileIcon;
+        case "excel":
+            return ExcelFileIcon;
+        case "image":
+            return ImageFileIcon;
+        case "pdf":
+            return PdfFileIcon;
+        case "power-point":
+            return PowerPointFileIcon;
+        case "text":
+            return TextFileIcon;
+        case "video":
+            return VideoFileIcon;
+        case "word":
+            return WordFileIcon;
+        default:
+            return null;
     }
 };
 export const getFileIconOrDefault = (nameOrMime) => getFileIcon(nameOrMime) ?? DefaultFileIcon;
