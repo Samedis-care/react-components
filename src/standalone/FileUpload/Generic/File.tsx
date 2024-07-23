@@ -244,28 +244,77 @@ export const ImageMimeType = /^image\//;
 export const VideoMimeType = /^video\//;
 export const PdfFileExtensions = ["pdf"];
 
-export const getFileIcon = (
-	nameOrMime: string,
-): React.ComponentType<SvgIconProps> | null => {
+export type FileType =
+	| "archive"
+	| "audio"
+	| "code"
+	| "csv"
+	| "excel"
+	| "image"
+	| "pdf"
+	| "power-point"
+	| "text"
+	| "video"
+	| "word"
+	| null;
+
+export const getFileType = (nameOrMime: string): FileType => {
 	if (nameOrMime.includes("/")) {
-		if (AudioMimeType.test(nameOrMime)) return AudioFileIcon;
-		if (ImageMimeType.test(nameOrMime)) return ImageFileIcon;
-		if (VideoMimeType.test(nameOrMime)) return VideoFileIcon;
+		if (AudioMimeType.test(nameOrMime)) return "audio";
+		if (ImageMimeType.test(nameOrMime)) return "image";
+		if (VideoMimeType.test(nameOrMime)) return "video";
 		return null;
 	} else {
 		const fileExt = getFileExt(nameOrMime).toLowerCase();
-		if (ArchiveFileExtensions.includes(fileExt)) return ArchiveFileIcon;
-		if (AudioFileExtensions.includes(fileExt)) return AudioFileIcon;
-		if (CodeFileExtensions.includes(fileExt)) return CodeFileIcon;
-		if (CsvFileExtensions.includes(fileExt)) return CsvFileIcon;
-		if (ExcelFileExtensions.includes(fileExt)) return ExcelFileIcon;
-		if (ImageFileExtensions.includes(fileExt)) return ImageFileIcon;
-		if (PdfFileExtensions.includes(fileExt)) return PdfFileIcon;
-		if (PowerPointFileExtensions.includes(fileExt)) return PowerPointFileIcon;
-		if (TextFileExtensions.includes(fileExt)) return TextFileIcon;
-		if (VideoFileExtensions.includes(fileExt)) return VideoFileIcon;
-		if (WordFileExtensions.includes(fileExt)) return WordFileIcon;
+		if (ArchiveFileExtensions.includes(fileExt)) return "archive";
+		if (AudioFileExtensions.includes(fileExt)) return "audio";
+		if (CodeFileExtensions.includes(fileExt)) return "code";
+		if (CsvFileExtensions.includes(fileExt)) return "csv";
+		if (ExcelFileExtensions.includes(fileExt)) return "excel";
+		if (ImageFileExtensions.includes(fileExt)) return "image";
+		if (PdfFileExtensions.includes(fileExt)) return "pdf";
+		if (PowerPointFileExtensions.includes(fileExt)) return "power-point";
+		if (TextFileExtensions.includes(fileExt)) return "text";
+		if (VideoFileExtensions.includes(fileExt)) return "video";
+		if (WordFileExtensions.includes(fileExt)) return "word";
 		return null;
+	}
+};
+
+export const getFileIcon = (
+	nameOrMime: string,
+): React.ComponentType<SvgIconProps> | null => {
+	return getFileTypeIcon(getFileType(nameOrMime));
+};
+
+export const getFileTypeIcon = (
+	type: FileType,
+): React.ComponentType<SvgIconProps> | null => {
+	switch (type) {
+		case "archive":
+			return ArchiveFileIcon;
+		case "audio":
+			return AudioFileIcon;
+		case "code":
+			return CodeFileIcon;
+		case "csv":
+			return CsvFileIcon;
+		case "excel":
+			return ExcelFileIcon;
+		case "image":
+			return ImageFileIcon;
+		case "pdf":
+			return PdfFileIcon;
+		case "power-point":
+			return PowerPointFileIcon;
+		case "text":
+			return TextFileIcon;
+		case "video":
+			return VideoFileIcon;
+		case "word":
+			return WordFileIcon;
+		default:
+			return null;
 	}
 };
 
