@@ -35,6 +35,12 @@ const CloseIcon = styled(CancelIcon, {
     cursor: "pointer",
     color: theme.palette.error.main,
 }));
+const RemoveIcon = styled(CancelIcon, {
+    name: "CcFile",
+    slot: "removeIcon",
+})({
+    cursor: "pointer",
+});
 const IconWrapperList = styled("div", {
     name: "CcFile",
     slot: "iconWrapperList",
@@ -75,8 +81,6 @@ const StyledLabel = styled(Typography, {
     name: "CcFile",
     slot: "label",
 })({
-    position: "absolute",
-    maxWidth: "100%",
     "&.Mui-active": {
         cursor: "pointer",
         "&:hover": {
@@ -259,7 +263,7 @@ const File = (inProps) => {
                     ? {
                         lineHeight: `${props.size}px`,
                     }
-                    : undefined }, props.name)));
+                    : undefined }, props.label ?? props.name)));
     };
     const removeBtn = props.onRemove &&
         !props.disabled &&
@@ -267,10 +271,11 @@ const File = (inProps) => {
             ? CloseIconList
             : variant === "box"
                 ? CloseIcon
-                : CancelIcon, {
+                : RemoveIcon, {
             className: combineClassNames([
                 variant === "box" && classes?.closeIcon,
                 variant === "list" && classes?.closeIconList,
+                variant !== "box" && variant !== "list" && classes?.removeIcon,
             ]),
             onClick: props.onRemove,
             style: variant === "list" ? { height: props.size } : undefined,

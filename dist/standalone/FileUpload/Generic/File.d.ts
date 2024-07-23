@@ -6,6 +6,10 @@ export interface FileProps {
      */
     name: string;
     /**
+     * the file label
+     */
+    label?: string;
+    /**
      * Optional callback for removing the file
      */
     onRemove?: () => void;
@@ -42,7 +46,7 @@ export interface FileProps {
      */
     variant: "box" | "list" | "compact-list" | "icon-only";
 }
-export type FileClassKey = "compactListWrapper" | "iconContainer" | "listEntryText" | "closeIconList" | "closeIcon" | "iconWrapperList" | "iconWrapper" | "listLabel" | "label";
+export type FileClassKey = "compactListWrapper" | "iconContainer" | "listEntryText" | "closeIconList" | "closeIcon" | "removeIcon" | "iconWrapperList" | "iconWrapper" | "listLabel" | "label";
 export declare const ExcelFileExtensions: string[];
 export declare const WordFileExtensions: string[];
 export declare const PowerPointFileExtensions: string[];
