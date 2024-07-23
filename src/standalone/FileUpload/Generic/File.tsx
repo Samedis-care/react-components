@@ -35,6 +35,10 @@ export interface FileProps {
 	 */
 	name: string;
 	/**
+	 * the file label
+	 */
+	label?: string;
+	/**
 	 * Optional callback for removing the file
 	 */
 	onRemove?: () => void;
@@ -107,6 +111,13 @@ const CloseIcon = styled(CancelIcon, {
 	color: theme.palette.error.main,
 }));
 
+const RemoveIcon = styled(CancelIcon, {
+	name: "CcFile",
+	slot: "removeIcon",
+})({
+	cursor: "pointer",
+});
+
 const IconWrapperList = styled("div", {
 	name: "CcFile",
 	slot: "iconWrapperList",
@@ -150,8 +161,6 @@ const StyledLabel = styled(Typography, {
 	name: "CcFile",
 	slot: "label",
 })({
-	position: "absolute",
-	maxWidth: "100%",
 	"&.Mui-active": {
 		cursor: "pointer",
 		"&:hover": {
@@ -166,6 +175,7 @@ export type FileClassKey =
 	| "listEntryText"
 	| "closeIconList"
 	| "closeIcon"
+	| "removeIcon"
 	| "iconWrapperList"
 	| "iconWrapper"
 	| "listLabel"
@@ -393,7 +403,7 @@ const File = (inProps: FileProps) => {
 							: undefined
 					}
 				>
-					{props.name}
+					{props.label ?? props.name}
 				</TypographyComp>
 			</Tooltip>
 		);
@@ -407,11 +417,12 @@ const File = (inProps: FileProps) => {
 				? CloseIconList
 				: variant === "box"
 					? CloseIcon
-					: CancelIcon,
+					: RemoveIcon,
 			{
 				className: combineClassNames([
 					variant === "box" && classes?.closeIcon,
 					variant === "list" && classes?.closeIconList,
+					variant !== "box" && variant !== "list" && classes?.removeIcon,
 				]),
 				onClick: props.onRemove,
 				style: variant === "list" ? { height: props.size } : undefined,
