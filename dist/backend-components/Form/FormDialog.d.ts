@@ -6,8 +6,14 @@ export interface FormDialogProps {
     dialogTitle?: React.ReactNode;
     /**
      * Dialog width optional parameter
+     * @default "lg"
      */
     maxWidth?: false | "lg" | "xs" | "sm" | "md" | "xl" | undefined;
+    /**
+     * Dialog fullWidth param
+     * @default true
+     */
+    fullWidth?: boolean;
     /**
      * Boolean flag to use custom classes
      */
@@ -28,6 +34,10 @@ export interface FormDialogProps {
      * Disable automatic special handling of form dialog. Use if form dialog is only used as layout/design component
      */
     disableFormDialogContext?: boolean;
+    /**
+     * CSS class name
+     */
+    className?: string;
 }
 export type FormDialogClassKey = "content" | "openInNewIcon";
 export interface FormDialogDispatch {

@@ -6,6 +6,7 @@ import { showConfirmDialog } from "../../non-standalone/Dialog/Utils";
 import { DialogTitle } from "../../non-standalone/Dialog/DialogTitle";
 import useCCTranslations from "../../utils/useCCTranslations";
 import Loader from "../../standalone/Loader";
+import combineClassNames from "../../utils/combineClassNames";
 const TallDialogContent = styled(DialogContent, {
     name: "CcFormDialog",
     slot: "content",
@@ -24,7 +25,7 @@ export const IsInFormDialogContext = React.createContext(false);
 export const FormDialogDispatchContext = React.createContext(undefined);
 const FormDialog = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcFormDialog" });
-    const { dialogTitle: titleOverride, maxWidth, useCustomClasses, openInNewLink, children, onClose, disableFormDialogContext, } = props;
+    const { dialogTitle: titleOverride, maxWidth, fullWidth, useCustomClasses, openInNewLink, children, onClose, disableFormDialogContext, className, } = props;
     const [pushDialog, popDialog] = useDialogContext();
     const blockClosingCounter = useRef(0);
     const [title, setTitle] = useState(null);
@@ -56,7 +57,7 @@ const FormDialog = (inProps) => {
     }), [blockClosing, unblockClosing]);
     const dialogTitle = titleOverride ?? title;
     const ContentComp = useCustomClasses ? TallDialogContent : DialogContent;
-    return (React.createElement(Dialog, { maxWidth: maxWidth ?? "lg", open: true, onClose: handleClose, fullWidth: true, className: "CcFormDialog" },
+    return (React.createElement(Dialog, { maxWidth: maxWidth ?? "lg", open: true, onClose: handleClose, fullWidth: fullWidth ?? true, className: combineClassNames(["CcFormDialog", className]) },
         React.createElement(DialogTitle, { onClose: handleClose, noTitle: !dialogTitle },
             dialogTitle,
             openInNewLink && React.createElement(OpenInNewIcon, { onClick: openInNewLink })),
