@@ -6,6 +6,7 @@ import { showConfirmDialog } from "../../non-standalone/Dialog/Utils";
 import { DialogTitle } from "../../non-standalone/Dialog/DialogTitle";
 import useCCTranslations from "../../utils/useCCTranslations";
 import Loader from "../../standalone/Loader";
+import combineClassNames from "../../utils/combineClassNames";
 
 export interface FormDialogProps {
 	/**
@@ -14,8 +15,14 @@ export interface FormDialogProps {
 	dialogTitle?: React.ReactNode;
 	/**
 	 * Dialog width optional parameter
+	 * @default "lg"
 	 */
 	maxWidth?: false | "lg" | "xs" | "sm" | "md" | "xl" | undefined;
+	/**
+	 * Dialog fullWidth param
+	 * @default true
+	 */
+	fullWidth?: boolean;
 	/**
 	 * Boolean flag to use custom classes
 	 */
@@ -36,6 +43,10 @@ export interface FormDialogProps {
 	 * Disable automatic special handling of form dialog. Use if form dialog is only used as layout/design component
 	 */
 	disableFormDialogContext?: boolean;
+	/**
+	 * CSS class name
+	 */
+	className?: string;
 }
 
 const TallDialogContent = styled(DialogContent, {
@@ -72,11 +83,13 @@ const FormDialog = (inProps: FormDialogProps) => {
 	const {
 		dialogTitle: titleOverride,
 		maxWidth,
+		fullWidth,
 		useCustomClasses,
 		openInNewLink,
 		children,
 		onClose,
 		disableFormDialogContext,
+		className,
 	} = props;
 	const [pushDialog, popDialog] = useDialogContext();
 	const blockClosingCounter = useRef(0);
@@ -120,8 +133,8 @@ const FormDialog = (inProps: FormDialogProps) => {
 			maxWidth={maxWidth ?? "lg"}
 			open={true}
 			onClose={handleClose}
-			fullWidth
-			className={"CcFormDialog"}
+			fullWidth={fullWidth ?? true}
+			className={combineClassNames(["CcFormDialog", className])}
 		>
 			<DialogTitle onClose={handleClose} noTitle={!dialogTitle}>
 				{dialogTitle}
