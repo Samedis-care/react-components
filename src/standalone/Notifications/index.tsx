@@ -7,6 +7,7 @@ import {
 	Divider,
 	Grid,
 	IconButton,
+	IconButtonProps,
 	Popover,
 	PopoverOrigin,
 	PopoverProps,
@@ -60,6 +61,10 @@ export interface NotificationsProps {
 	 * Properties to pass to the popover showing the notifications
 	 */
 	PopoverProps?: Omit<PopoverProps, "open" | "onClose" | "anchorEl">;
+	/**
+	 * Props to pass to the icon button
+	 */
+	IconButtonProps?: Omit<IconButtonProps, "onClick">;
 	/**
 	 * Callback which is fired by the infinite scroll to load old notifications
 	 */
@@ -198,6 +203,7 @@ const Notifications = (inProps: NotificationsProps) => {
 		unreadCount,
 		classes,
 		className,
+		IconButtonProps,
 	} = props;
 
 	const onIconClick = useCallback(
@@ -240,7 +246,7 @@ const Notifications = (inProps: NotificationsProps) => {
 
 	return (
 		<div className={className}>
-			<IconButton onClick={onIconClick} size="large">
+			<IconButton size="large" {...IconButtonProps} onClick={onIconClick}>
 				<Badge
 					badgeContent={
 						unreadCount ?? notifications.filter((not) => !not.read).length
