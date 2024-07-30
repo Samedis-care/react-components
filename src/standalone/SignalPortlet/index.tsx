@@ -100,7 +100,8 @@ export type SignalPortletClassKey =
 	| "item"
 	| "refreshIconButton"
 	| "refreshIcon"
-	| "lastUpdatedAt";
+	| "lastUpdatedAt"
+	| "innerContainer";
 
 const SignalPortlet = (inProps: SignalPortletProps) => {
 	const props = useThemeProps({ props: inProps, name: "CcSignalPortlet" });
@@ -117,6 +118,7 @@ const SignalPortlet = (inProps: SignalPortletProps) => {
 					direction={"column"}
 					justifyContent={"space-between"}
 					wrap={"nowrap"}
+					className={props.classes?.innerContainer}
 				>
 					<Grid
 						item
