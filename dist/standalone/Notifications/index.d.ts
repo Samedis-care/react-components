@@ -1,5 +1,5 @@
 import React from "react";
-import { BadgeProps, PopoverProps } from "@mui/material";
+import { BadgeProps, IconButtonProps, PopoverProps } from "@mui/material";
 import { InfiniteScrollProps } from "../InfiniteScroll";
 export interface Notification {
     /**
@@ -40,6 +40,10 @@ export interface NotificationsProps {
      * Properties to pass to the popover showing the notifications
      */
     PopoverProps?: Omit<PopoverProps, "open" | "onClose" | "anchorEl">;
+    /**
+     * Props to pass to the icon button
+     */
+    IconButtonProps?: Omit<IconButtonProps, "onClick">;
     /**
      * Callback which is fired by the infinite scroll to load old notifications
      */

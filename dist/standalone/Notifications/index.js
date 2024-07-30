@@ -55,7 +55,7 @@ const Notifications = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcNotifications" });
     const { t } = useCCTranslations();
     const [anchor, setAnchor] = useState(null);
-    const { onOpen, loadLatest, loadRead, loadUnread, refreshInterval, unreadCount, classes, className, } = props;
+    const { onOpen, loadLatest, loadRead, loadUnread, refreshInterval, unreadCount, classes, className, IconButtonProps, } = props;
     const onIconClick = useCallback((evt) => {
         setAnchor(evt.currentTarget);
         if (onOpen)
@@ -83,7 +83,7 @@ const Notifications = (inProps) => {
     const Renderer = props.notificationRenderer || defaultRenderer;
     const notifications = props.notifications.filter((not) => !not.expires || not.expires > new Date());
     return (React.createElement("div", { className: className },
-        React.createElement(IconButton, { onClick: onIconClick, size: "large" },
+        React.createElement(IconButton, { size: "large", ...IconButtonProps, onClick: onIconClick },
             React.createElement(Badge, { badgeContent: unreadCount ?? notifications.filter((not) => !not.read).length, max: 99, color: "error", ...props.BadgeProps },
                 React.createElement(NotificationsIcon, null))),
         React.createElement(Popover, { open: !!anchor, anchorEl: anchor, anchorOrigin: anchorOrigin, transformOrigin: transformOrigin, onClose: onClose, ...props.PopoverProps },
