@@ -56,7 +56,7 @@ const SignalPortlet = (inProps) => {
     const { t, i18n } = useCCTranslations();
     return (React.createElement(SignalPortletRoot, { className: combineClassNames([props.className, props.classes?.root]) },
         React.createElement(SignalPortletPaper, { className: props.classes?.paper },
-            React.createElement(SignalPortletInnerContainer, { container: true, spacing: 1, direction: "column", justifyContent: "space-between", wrap: "nowrap" },
+            React.createElement(SignalPortletInnerContainer, { container: true, spacing: 1, direction: "column", justifyContent: "space-between", wrap: "nowrap", className: props.classes?.innerContainer },
                 React.createElement(Grid, { item: true, xs: true, container: true, spacing: 1, justifyContent: "flex-start", direction: "column", wrap: "nowrap" },
                     React.createElement(SignalPortletTitleWrapper, { item: true, className: props.classes?.titleWrapper },
                         React.createElement(SignalPortletTitle, { variant: "h5", align: "center", className: props.classes?.title }, props.title)),
