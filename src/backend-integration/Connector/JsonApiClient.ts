@@ -229,11 +229,11 @@ class JsonApiClient {
 				// Handle URL GET arguments
 				const urlWithArgs = addGetParams(url, args);
 				// Handle POST data
-				body = this.convertBody(body, headers);
+				const convertedBody = this.convertBody(body, headers);
 				// Perform request
 				try {
 					response = await fetch(urlWithArgs, {
-						body: body as FormData | string,
+						body: convertedBody as FormData | string,
 						headers,
 						method,
 					});
