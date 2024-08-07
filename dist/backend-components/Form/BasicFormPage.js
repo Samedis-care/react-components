@@ -9,8 +9,10 @@ import FormPageLayout from "../../standalone/Form/FormPageLayout";
 import FormLoaderOverlay from "../../standalone/Form/FormLoaderOverlay";
 import useCCTranslations from "../../utils/useCCTranslations";
 import { RouteContext } from "../../standalone/Routes/Route";
-const BasicFormPage = (props) => {
-    const { submit, dirty, disableRouting, postSubmitHandler, isSubmitting, children: FormButtons, form, childrenProps, customProps: originalCustomProps, ...otherProps } = props;
+import { useThemeProps } from "@mui/material";
+const BasicFormPage = (inProps) => {
+    const props = useThemeProps({ props: inProps, name: "CcBasicFormPage" });
+    const { submit, dirty, disableRouting, postSubmitHandler, isSubmitting, children: FormButtons, form, childrenProps, customProps: originalCustomProps, formPageLayoutComponent, ...otherProps } = props;
     const { t } = useCCTranslations();
     const { readOnly, readOnlyReasons } = useFormContextLite();
     const [pushDialog] = useDialogContext();
@@ -124,7 +126,8 @@ const BasicFormPage = (props) => {
             }
         }
     }, [submit, postSubmitHandler, pushDialog]);
-    return (React.createElement(FormPageLayout, { body: form, footer: React.createElement(FormButtons, { ...childrenProps, ...otherProps, showBackButtonOnly: otherProps.showBackButtonOnly ||
+    const UsedFormPageLayout = formPageLayoutComponent ?? FormPageLayout;
+    return (React.createElement(UsedFormPageLayout, { body: form, footer: React.createElement(FormButtons, { ...childrenProps, ...otherProps, showBackButtonOnly: otherProps.showBackButtonOnly ||
                 (readOnly && !Object.values(readOnlyReasons).find((e) => !!e)), readOnly: readOnly, readOnlyReasons: readOnlyReasons, isSubmitting: isSubmitting, dirty: dirty, disableRouting: disableRouting, submit: handleSubmit, customProps: typeof originalCustomProps === "object" &&
                 originalCustomProps != null
                 ? customPropsWithGoBack

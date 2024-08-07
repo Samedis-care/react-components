@@ -61,6 +61,10 @@ export interface CrudProps<KeyT extends ModelFieldName, VisibilityT extends Page
      */
     gridWrapper?: React.ComponentType<GridWrapperProps>;
     /**
+     * Custom BackendDataGrid component
+     */
+    gridComponent?: React.ComponentType<BackendDataGridProps<KeyT, VisibilityT, CustomT>>;
+    /**
      * The record delete permission
      */
     deletePermission: Permission;

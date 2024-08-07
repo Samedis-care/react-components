@@ -5,7 +5,7 @@ import { dotInObject, dotSet, dotsToObject, dotToObject, getValueByDot, } from "
 import deepAssign from "../../utils/deepAssign";
 import deepClone from "../../utils/deepClone";
 import isObjectEmpty from "../../utils/isObjectEmpty";
-import { Grid, Typography } from "@mui/material";
+import { Grid, styled, Typography } from "@mui/material";
 import { getVisibility } from "../../backend-integration/Model/Visibility";
 import { showConfirmDialogBool } from "../../non-standalone";
 import useCCTranslations from "../../utils/useCCTranslations";
@@ -122,6 +122,7 @@ const normalizeValues = (data, config) => {
     return deepSort(normalizedData);
 };
 const setAllTouched = (touched, set) => Object.fromEntries(Object.keys(touched).map((field) => [field, set]));
+const StyledForm = styled("form", { name: "CcForm", slot: "root" })({});
 const Form = (props) => {
     const { model, id, children, onSubmit, customProps, onlyWarnMounted, alwaysSubmitFields, onlyWarnChanged, readOnly: readOnlyProp, readOnlyReason: readOnlyReasonProp, readOnlyReasons: readOnlyReasonsProp, disableValidation, nestedFormName, disableNestedSubmit, nestedFormPreSubmitHandler, deleteOnSubmit, onDeleted, initialRecord, formClass, preSubmit, dirtyIgnoreFields, flowEngine, } = props;
     // flow engine mode defaults
@@ -996,6 +997,6 @@ const Form = (props) => {
         isLoading ? (React.createElement("div", { style: loaderContainerStyles },
             React.createElement(Loader, null))) : (React.createElement(Children, { isSubmitting: submitting, values: props.renderConditionally ? values : undefined, submit: submitForm, reset: resetForm, dirty: dirty, id: id, customProps: customProps, disableRouting: !!props.disableRouting }))));
     return (React.createElement(FormContextLite.Provider, { value: formContextDataLite },
-        React.createElement(FormContext.Provider, { value: formContextData }, !parentFormContext ? (React.createElement("form", { onSubmit: handleSubmit, className: formClass }, innerForm())) : (React.createElement("div", { className: formClass }, innerForm())))));
+        React.createElement(FormContext.Provider, { value: formContextData }, !parentFormContext ? (React.createElement(StyledForm, { onSubmit: handleSubmit, className: formClass }, innerForm())) : (React.createElement("div", { className: formClass }, innerForm())))));
 };
 export default React.memo(Form);

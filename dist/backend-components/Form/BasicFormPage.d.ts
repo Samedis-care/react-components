@@ -1,6 +1,7 @@
 import React from "react";
 import { FormContextData, PageProps } from "../Form";
 import { ModelFieldName } from "../../backend-integration/Model/Model";
+import { FormPageLayoutProps } from "../../standalone/Form/FormPageLayout";
 export interface BasicFormPageRendererProps<CustomPropsT> extends Omit<PageProps<ModelFieldName, CustomPropsT>, "submit" | "dirty"> {
     /**
      * Function to submit everything
@@ -52,7 +53,11 @@ export interface BasicFormPageProps<RendererPropsT, CustomPropsT> extends PagePr
      * read only mode?
      */
     showBackButtonOnly?: boolean;
+    /**
+     * custom form page layout component
+     */
+    formPageLayoutComponent?: React.ComponentType<FormPageLayoutProps>;
 }
-declare const BasicFormPage: <RendererPropsT, CustomPropsT>(props: BasicFormPageProps<RendererPropsT, CustomPropsT>) => React.JSX.Element;
+declare const BasicFormPage: <RendererPropsT, CustomPropsT>(inProps: BasicFormPageProps<RendererPropsT, CustomPropsT>) => React.JSX.Element;
 declare const _default: typeof BasicFormPage;
 export default _default;

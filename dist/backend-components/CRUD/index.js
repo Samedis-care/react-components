@@ -125,9 +125,10 @@ const CRUD = (props) => {
             navigate(`${routeUrl}/import`);
         }
     }, [disableRouting, navigate, routeUrl]);
+    const MyBackendDataGrid = props.gridComponent ?? BackendDataGrid;
     const grid = (globalScrollListener) => (React.createElement(Suspense, { fallback: React.createElement(Loader, null) },
         React.createElement(GridWrapper, null,
-            React.createElement(BackendDataGrid, { enableDelete: hasPermission(perms, props.deletePermission), disableDeleteHint: props.deletePermissionHint, disableExport: !hasPermission(perms, props.exportPermission), ...props.gridProps, model: props.model, forceRefreshToken: gridRefreshToken, onEdit: (hasPermission(perms, props.readPermission) ||
+            React.createElement(MyBackendDataGrid, { enableDelete: hasPermission(perms, props.deletePermission), disableDeleteHint: props.deletePermissionHint, disableExport: !hasPermission(perms, props.exportPermission), ...props.gridProps, model: props.model, forceRefreshToken: gridRefreshToken, onEdit: (hasPermission(perms, props.readPermission) ||
                     hasPermission(perms, props.editPermission)) &&
                     props.children
                     ? showEditPage
