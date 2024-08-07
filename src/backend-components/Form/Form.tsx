@@ -29,7 +29,7 @@ import {
 import deepAssign from "../../utils/deepAssign";
 import deepClone from "../../utils/deepClone";
 import isObjectEmpty from "../../utils/isObjectEmpty";
-import { Grid, Typography } from "@mui/material";
+import { Grid, styled, Typography } from "@mui/material";
 import { getVisibility } from "../../backend-integration/Model/Visibility";
 import { QueryObserverBaseResult } from "react-query/types/core/types";
 import { showConfirmDialogBool } from "../../non-standalone";
@@ -804,6 +804,10 @@ const setAllTouched = (
 	set: boolean,
 ): Record<string, boolean> =>
 	Object.fromEntries(Object.keys(touched).map((field) => [field, set]));
+
+const StyledForm = styled("form", { name: "CcForm", slot: "root" })({});
+
+export type FormClassKey = "root";
 
 const Form = <
 	KeyT extends ModelFieldName,
@@ -2002,9 +2006,9 @@ const Form = <
 		<FormContextLite.Provider value={formContextDataLite}>
 			<FormContext.Provider value={formContextData}>
 				{!parentFormContext ? (
-					<form onSubmit={handleSubmit} className={formClass}>
+					<StyledForm onSubmit={handleSubmit} className={formClass}>
 						{innerForm()}
-					</form>
+					</StyledForm>
 				) : (
 					<div className={formClass}>{innerForm()}</div>
 				)}

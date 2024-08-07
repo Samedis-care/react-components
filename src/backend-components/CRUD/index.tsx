@@ -128,6 +128,12 @@ export interface CrudProps<
 	 */
 	gridWrapper?: React.ComponentType<GridWrapperProps>;
 	/**
+	 * Custom BackendDataGrid component
+	 */
+	gridComponent?: React.ComponentType<
+		BackendDataGridProps<KeyT, VisibilityT, CustomT>
+	>;
+	/**
 	 * The record delete permission
 	 */
 	deletePermission: Permission;
@@ -396,10 +402,12 @@ const CRUD = <
 		}
 	}, [disableRouting, navigate, routeUrl]);
 
+	const MyBackendDataGrid = props.gridComponent ?? BackendDataGrid;
+
 	const grid = (globalScrollListener: boolean) => (
 		<Suspense fallback={<Loader />}>
 			<GridWrapper>
-				<BackendDataGrid
+				<MyBackendDataGrid
 					enableDelete={hasPermission(perms, props.deletePermission)}
 					disableDeleteHint={props.deletePermissionHint}
 					disableExport={!hasPermission(perms, props.exportPermission)}

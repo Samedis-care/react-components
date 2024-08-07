@@ -201,6 +201,8 @@ import {
 	ScrollableScheduleDayClassKey,
 	ScrollableScheduleDayProps,
 } from "./standalone/Schedule/Scrollable/ScrollableScheduleDay";
+import { FormClassKey } from "./backend-components";
+import { BasicFormPageProps } from "./backend-components/Form/BasicFormPage";
 
 export interface ComponentsCareTheme {}
 
@@ -274,11 +276,12 @@ declare module "@mui/material/styles" {
 		CcDayContents: DayContentsClassKey;
 		CcWeekViewDay: WeekViewDayClassKey;
 		CcScrollableSchedule: ScrollableScheduleClassKey;
-		CcScrollableScheduleDay?: ScrollableScheduleDayClassKey;
+		CcScrollableScheduleDay: ScrollableScheduleDayClassKey;
 		CcWeekView: WeekViewClassKey;
 		CcDataGrid: DataGridClassKey;
-		CcGridMultiSelectFilter?: GridMultiSelectFilterClassKey;
-		CcGridSingleSelectFilter?: GridSingleSelectFilterClassKey;
+		CcGridMultiSelectFilter: GridMultiSelectFilterClassKey;
+		CcGridSingleSelectFilter: GridSingleSelectFilterClassKey;
+		CcForm: FormClassKey;
 	}
 
 	interface ComponentsPropsList {
@@ -342,8 +345,9 @@ declare module "@mui/material/styles" {
 		CcScrollableScheduleDay: Partial<ScrollableScheduleDayProps>;
 		CcWeekView: Partial<WeekViewProps>;
 		CcDataGrid: Partial<DataGridProps>;
-		CcGridMultiSelectFilter?: Partial<GridMultiSelectFilterProps>;
-		CcGridSingleSelectFilter?: Partial<GridSingleSelectFilterProps>;
+		CcGridMultiSelectFilter: Partial<GridMultiSelectFilterProps>;
+		CcGridSingleSelectFilter: Partial<GridSingleSelectFilterProps>;
+		CcBasicFormPage: Partial<BasicFormPageProps<never, never>>;
 	}
 
 	interface Components {
@@ -640,6 +644,12 @@ declare module "@mui/material/styles" {
 			defaultProps?: ComponentsPropsList["CcGridSingleSelectFilter"];
 			styleOverrides?: ComponentsOverrides<Theme>["CcGridSingleSelectFilter"];
 			variants?: ComponentsVariants["CcGridSingleSelectFilter"];
+		};
+		CcForm?: {
+			styleOverrides?: ComponentsOverrides<Theme>["CcForm"];
+		};
+		CcBasicFormPage?: {
+			defaultProps?: ComponentsPropsList["CcBasicFormPage"];
 		};
 	}
 }

@@ -15,11 +15,14 @@ import {
 	showErrorDialog,
 } from "../../non-standalone/Dialog/Utils";
 import { FormDialogDispatchContext } from "./FormDialog";
-import FormPageLayout from "../../standalone/Form/FormPageLayout";
+import FormPageLayout, {
+	FormPageLayoutProps,
+} from "../../standalone/Form/FormPageLayout";
 import FormLoaderOverlay from "../../standalone/Form/FormLoaderOverlay";
 import useCCTranslations from "../../utils/useCCTranslations";
 import { Transition } from "history";
 import { RouteContext } from "../../standalone/Routes/Route";
+import { useThemeProps } from "@mui/material";
 
 export interface BasicFormPageRendererProps<CustomPropsT>
 	extends Omit<PageProps<ModelFieldName, CustomPropsT>, "submit" | "dirty"> {
@@ -77,11 +80,16 @@ export interface BasicFormPageProps<RendererPropsT, CustomPropsT>
 	 * read only mode?
 	 */
 	showBackButtonOnly?: boolean;
+	/**
+	 * custom form page layout component
+	 */
+	formPageLayoutComponent?: React.ComponentType<FormPageLayoutProps>;
 }
 
 const BasicFormPage = <RendererPropsT, CustomPropsT>(
-	props: BasicFormPageProps<RendererPropsT, CustomPropsT>,
+	inProps: BasicFormPageProps<RendererPropsT, CustomPropsT>,
 ) => {
+	const props = useThemeProps({ props: inProps, name: "CcBasicFormPage" });
 	const {
 		submit,
 		dirty,
@@ -92,6 +100,7 @@ const BasicFormPage = <RendererPropsT, CustomPropsT>(
 		form,
 		childrenProps,
 		customProps: originalCustomProps,
+		formPageLayoutComponent,
 		...otherProps
 	} = props;
 	const { t } = useCCTranslations();
@@ -216,8 +225,10 @@ const BasicFormPage = <RendererPropsT, CustomPropsT>(
 		}
 	}, [submit, postSubmitHandler, pushDialog]);
 
+	const UsedFormPageLayout = formPageLayoutComponent ?? FormPageLayout;
+
 	return (
-		<FormPageLayout
+		<UsedFormPageLayout
 			body={form}
 			footer={
 				<FormButtons
