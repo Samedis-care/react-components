@@ -806,6 +806,7 @@ const setAllTouched = (
 	Object.fromEntries(Object.keys(touched).map((field) => [field, set]));
 
 const StyledForm = styled("form", { name: "CcForm", slot: "root" })({});
+const StyledFormDiv = styled("div", { name: "CcForm", slot: "root" })({});
 
 export type FormClassKey = "root";
 
@@ -2010,7 +2011,7 @@ const Form = <
 						{innerForm()}
 					</StyledForm>
 				) : (
-					<div className={formClass}>{innerForm()}</div>
+					<StyledFormDiv className={formClass}>{innerForm()}</StyledFormDiv>
 				)}
 			</FormContext.Provider>
 		</FormContextLite.Provider>
