@@ -123,6 +123,7 @@ const normalizeValues = (data, config) => {
 };
 const setAllTouched = (touched, set) => Object.fromEntries(Object.keys(touched).map((field) => [field, set]));
 const StyledForm = styled("form", { name: "CcForm", slot: "root" })({});
+const StyledFormDiv = styled("div", { name: "CcForm", slot: "root" })({});
 const Form = (props) => {
     const { model, id, children, onSubmit, customProps, onlyWarnMounted, alwaysSubmitFields, onlyWarnChanged, readOnly: readOnlyProp, readOnlyReason: readOnlyReasonProp, readOnlyReasons: readOnlyReasonsProp, disableValidation, nestedFormName, disableNestedSubmit, nestedFormPreSubmitHandler, deleteOnSubmit, onDeleted, initialRecord, formClass, preSubmit, dirtyIgnoreFields, flowEngine, } = props;
     // flow engine mode defaults
@@ -997,6 +998,6 @@ const Form = (props) => {
         isLoading ? (React.createElement("div", { style: loaderContainerStyles },
             React.createElement(Loader, null))) : (React.createElement(Children, { isSubmitting: submitting, values: props.renderConditionally ? values : undefined, submit: submitForm, reset: resetForm, dirty: dirty, id: id, customProps: customProps, disableRouting: !!props.disableRouting }))));
     return (React.createElement(FormContextLite.Provider, { value: formContextDataLite },
-        React.createElement(FormContext.Provider, { value: formContextData }, !parentFormContext ? (React.createElement(StyledForm, { onSubmit: handleSubmit, className: formClass }, innerForm())) : (React.createElement("div", { className: formClass }, innerForm())))));
+        React.createElement(FormContext.Provider, { value: formContextData }, !parentFormContext ? (React.createElement(StyledForm, { onSubmit: handleSubmit, className: formClass }, innerForm())) : (React.createElement(StyledFormDiv, { className: formClass }, innerForm())))));
 };
 export default React.memo(Form);
