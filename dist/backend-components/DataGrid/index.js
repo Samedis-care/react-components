@@ -5,6 +5,42 @@ import { useDialogContext } from "../../framework/DialogContextProvider";
 import { ErrorDialog, showConfirmDialog } from "../../non-standalone/Dialog";
 import useCCTranslations from "../../utils/useCCTranslations";
 import { dotToObject, getValueByDot } from "../../utils/dotUtils";
+export const useBackendDataGridAddNewButtons = (props) => {
+    const { t } = useCCTranslations();
+    const addNewButtons = useMemo(() => {
+        if (!props.additionalNewButtons)
+            return props.onAddNew;
+        if (!props.onAddNew)
+            return props.additionalNewButtons;
+        let result;
+        if (typeof props.onAddNew === "function") {
+            result = [
+                {
+                    label: t("standalone.data-grid.header.new") ?? "",
+                    onClick: props.onAddNew,
+                },
+            ];
+        }
+        else if (typeof props.onAddNew === "string") {
+            result = [
+                {
+                    label: t("standalone.data-grid.header.new") ?? "",
+                    onClick: undefined,
+                    disableHint: props.onAddNew,
+                },
+            ];
+        }
+        else if (Array.isArray(props.onAddNew)) {
+            result = props.onAddNew;
+        }
+        else {
+            result = [];
+        }
+        result = result.concat(props.additionalNewButtons);
+        return result;
+    }, [props.additionalNewButtons, props.onAddNew, t]);
+    return addNewButtons;
+};
 export const renderDataGridRecordUsingModel = (model, refreshGrid) => (entry) => Object.fromEntries(Object.keys(model.fields)
     .map((key) => {
     // we cannot render the ID, this will cause issues with the selection
@@ -139,38 +175,7 @@ const BackendDataGrid = (props) => {
         deleteAdvanced,
         deleteMultiple,
     ]);
-    const addNewButtons = useMemo(() => {
-        if (!props.additionalNewButtons)
-            return props.onAddNew;
-        if (!props.onAddNew)
-            return props.additionalNewButtons;
-        let result;
-        if (typeof props.onAddNew === "function") {
-            result = [
-                {
-                    label: t("standalone.data-grid.header.new") ?? "",
-                    onClick: props.onAddNew,
-                },
-            ];
-        }
-        else if (typeof props.onAddNew === "string") {
-            result = [
-                {
-                    label: t("standalone.data-grid.header.new") ?? "",
-                    onClick: undefined,
-                    disableHint: props.onAddNew,
-                },
-            ];
-        }
-        else if (Array.isArray(props.onAddNew)) {
-            result = props.onAddNew;
-        }
-        else {
-            result = [];
-        }
-        result = result.concat(props.additionalNewButtons);
-        return result;
-    }, [props.additionalNewButtons, props.onAddNew, t]);
+    const addNewButtons = useBackendDataGridAddNewButtons(props);
     return (React.createElement(DataGrid, { ...props, onAddNew: addNewButtons, onDelete: enableDelete ? handleDelete : undefined, loadData: loadData, columns: useMemo(() => model.toDataGridColumnDefinition(), [model]), forceRefreshToken: `${props.forceRefreshToken || "undefined"}${refreshToken}`, exporters: props.disableExport ? undefined : model.connector.dataGridExporters }));
 };
 export default React.memo(BackendDataGrid);
