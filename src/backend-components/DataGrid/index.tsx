@@ -63,6 +63,44 @@ export interface BackendDataGridProps<
 	customDeleteErrorHandler?: (error: Error) => Promise<void> | void;
 }
 
+export const useBackendDataGridAddNewButtons = (
+	props: Pick<
+		BackendDataGridProps<never, never, never>,
+		"onAddNew" | "additionalNewButtons"
+	>,
+) => {
+	const { t } = useCCTranslations();
+	const addNewButtons: DataGridProps["onAddNew"] = useMemo(() => {
+		if (!props.additionalNewButtons) return props.onAddNew;
+		if (!props.onAddNew) return props.additionalNewButtons;
+
+		let result: IDataGridAddButton[];
+		if (typeof props.onAddNew === "function") {
+			result = [
+				{
+					label: t("standalone.data-grid.header.new") ?? "",
+					onClick: props.onAddNew,
+				},
+			];
+		} else if (typeof props.onAddNew === "string") {
+			result = [
+				{
+					label: t("standalone.data-grid.header.new") ?? "",
+					onClick: undefined,
+					disableHint: props.onAddNew,
+				},
+			];
+		} else if (Array.isArray(props.onAddNew)) {
+			result = props.onAddNew;
+		} else {
+			result = [];
+		}
+		result = result.concat(props.additionalNewButtons);
+		return result;
+	}, [props.additionalNewButtons, props.onAddNew, t]);
+	return addNewButtons;
+};
+
 export const renderDataGridRecordUsingModel =
 	<KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT>(
 		model: Model<KeyT, VisibilityT, CustomT>,
@@ -270,34 +308,7 @@ const BackendDataGrid = <
 		],
 	);
 
-	const addNewButtons: DataGridProps["onAddNew"] = useMemo(() => {
-		if (!props.additionalNewButtons) return props.onAddNew;
-		if (!props.onAddNew) return props.additionalNewButtons;
-
-		let result: IDataGridAddButton[];
-		if (typeof props.onAddNew === "function") {
-			result = [
-				{
-					label: t("standalone.data-grid.header.new") ?? "",
-					onClick: props.onAddNew,
-				},
-			];
-		} else if (typeof props.onAddNew === "string") {
-			result = [
-				{
-					label: t("standalone.data-grid.header.new") ?? "",
-					onClick: undefined,
-					disableHint: props.onAddNew,
-				},
-			];
-		} else if (Array.isArray(props.onAddNew)) {
-			result = props.onAddNew;
-		} else {
-			result = [];
-		}
-		result = result.concat(props.additionalNewButtons);
-		return result;
-	}, [props.additionalNewButtons, props.onAddNew, t]);
+	const addNewButtons = useBackendDataGridAddNewButtons(props);
 
 	return (
 		<DataGrid
