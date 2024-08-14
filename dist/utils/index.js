@@ -56,3 +56,4 @@ export { default as useWindowSize } from "./useWindowSize";
 export { default as useRefState } from "./useRefState";
 export { default as useAsyncMemo } from "./useAsyncMemo";
 export { default as useAsyncCache } from "./useAsyncCache";
+export { default as semaphoreExec } from "./semaphoreExec";
