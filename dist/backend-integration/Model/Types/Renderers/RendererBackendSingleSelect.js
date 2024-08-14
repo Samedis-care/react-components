@@ -13,7 +13,7 @@ class RendererBackendSingleSelect extends TypeId {
         this.props = props;
     }
     render(params) {
-        const { visibility, field, value, label, handleChange, handleBlur, errorMsg, warningMsg, relationData, relationModel, } = params;
+        const { visibility, field, value, values, label, handleChange, handleBlur, errorMsg, warningMsg, relationData, relationModel, } = params;
         if (visibility.disabled)
             return React.createElement(React.Fragment, null);
         if (visibility.hidden) {
@@ -24,8 +24,11 @@ class RendererBackendSingleSelect extends TypeId {
                 throw new Error("Not supported");
             if (!relationModel)
                 throw new Error("Type BackendMultiSelect requires relation model: " + field);
+            const modelFetch = typeof this.props.modelFetch === "function"
+                ? this.props.modelFetch(values)
+                : this.props.modelFetch;
             return (React.createElement(FormControlFieldsetCC, { component: "fieldset", required: visibility.required, fullWidth: true, error: !!errorMsg, warning: !!warningMsg, onBlur: handleBlur, name: field },
-                React.createElement(BackendSingleSelect, { selected: value, label: label, onSelect: (value) => handleChange(field, value), disabled: visibility.readOnly, model: relationModel, initialData: relationData, ...this.props, refreshToken: JSON.stringify(relationModel.getReactQueryKeyFetchAll()) +
+                React.createElement(BackendSingleSelect, { selected: value, label: label, onSelect: (value) => handleChange(field, value), disabled: visibility.readOnly, model: relationModel, initialData: relationData, ...this.props, modelFetch: modelFetch, refreshToken: JSON.stringify(relationModel.getReactQueryKeyFetchAll()) +
                         this.props.refreshToken }),
                 React.createElement(FormHelperText, null, errorMsg || warningMsg)));
         }
