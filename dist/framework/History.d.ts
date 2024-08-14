@@ -1,5 +1,4 @@
-import { Location, Action } from "@sentry/react/types/types";
-import { History } from "history";
+import { Action, Location, History } from "history";
 /**
  * The History used by the react-router instance provided by the framework
  * Can be used to navigate programmatically
@@ -11,6 +10,6 @@ export declare let FrameworkHistory: import("history").BrowserHistory;
  */
 export declare const setFrameworkHistory: (history: History) => void;
 export declare class SentryHistory {
-    get location(): import("history").Location;
+    get location(): Location;
     listen(cb: (location: Location, action: Action) => void): void;
 }

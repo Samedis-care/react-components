@@ -362,10 +362,10 @@ const BaseSelector = (inProps) => {
                             : selectorOptions, groupBy: grouped
                         ? (option) => option.group ?? noGroupLabel ?? ""
                         : undefined, PopperComponent: GrowPopper, filterOptions: filterOptions, value: selected, inputValue: query, blurOnSelect: !multiple, onInputChange: updateQuery, popupIcon: React.createElement(ExpandMore, null), freeSolo: freeSolo, noOptionsText: lru && query === ""
-                        ? startTypingToSearchText ??
-                            t("standalone.selector.base-selector.start-typing-to-search-text")
-                        : noOptionsText ??
-                            t("standalone.selector.base-selector.no-options-text"), openText: openText ?? t("standalone.selector.base-selector.open-icon-text"), closeText: closeText ??
+                        ? (startTypingToSearchText ??
+                            t("standalone.selector.base-selector.start-typing-to-search-text"))
+                        : (noOptionsText ??
+                            t("standalone.selector.base-selector.no-options-text")), openText: openText ?? t("standalone.selector.base-selector.open-icon-text"), closeText: closeText ??
                         t("standalone.selector.base-selector.close-icon-text"), clearText: clearText ??
                         t("standalone.selector.base-selector.clear-icon-text"), getOptionLabel: getStringLabel, renderOption: defaultRenderer, getOptionDisabled: getOptionDisabled, isOptionEqualToValue: getOptionSelected, onChange: (_event, selectedValue) => onChangeHandler(selectedValue), renderInput: (params) => {
                         // eslint-disable-next-line @typescript-eslint/no-unused-vars

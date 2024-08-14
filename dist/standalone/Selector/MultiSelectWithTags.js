@@ -28,7 +28,7 @@ const MultiSelectWithTags = (inProps) => {
     });
     const { title, searchInputLabel, selected, disabled, autocompleteId, enableIcons, noOptionsText, loadingText, openText, closeText, loadGroupEntries, loadGroupOptions, loadDataOptions, onChange, openInfo, getIdOfData, switchLabel, lruGroup, lruData, sortCompareFn, className, classes, } = props;
     const defaultSwitchValue = props.displaySwitch
-        ? props.defaultSwitchValue ?? false
+        ? (props.defaultSwitchValue ?? false)
         : false;
     const [selectedGroups, setSelectedGroups] = useState([]);
     const [switchValue, setSwitchValue] = useState(defaultSwitchValue);

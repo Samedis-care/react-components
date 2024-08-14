@@ -137,8 +137,8 @@ const Content = (props) => {
     const getColumnWidth = useCallback((index) => !disableSelection && index === 0
         ? SELECT_ROW_WIDTH
         : index !== columns.length + (disableSelection ? 0 : 1)
-            ? columnWidth[columns[index - (disableSelection ? 0 : 1)].field] ??
-                DEFAULT_COLUMN_WIDTH
+            ? (columnWidth[columns[index - (disableSelection ? 0 : 1)].field] ??
+                DEFAULT_COLUMN_WIDTH)
             : remainingWidth, [columnWidth, columns, disableSelection, remainingWidth]);
     return (React.createElement(AutoSizer, { onResize: onResize }, ({ width, height }) => (React.createElement(CellContext.Provider, { value: { columns, hoverState } },
         React.createElement(MultiGrid, { columnCount: columns.length +

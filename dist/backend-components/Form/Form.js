@@ -133,7 +133,7 @@ const Form = (props) => {
         ? false
         : props.onlySubmitNestedIfMounted;
     const onlySubmitMounted = flowEngine
-        ? flowEngineConfig.current.onlySubmitMounted ?? true
+        ? (flowEngineConfig.current.onlySubmitMounted ?? true)
         : props.onlySubmitMounted;
     //
     const onlySubmitMountedBehaviour = flowEngineConfig.current.onlySubmitMountedBehaviour ??
@@ -555,8 +555,10 @@ const Form = (props) => {
             const validation = await validateForm("normal");
             setErrors(validation);
             if (!isObjectEmpty(validation)) {
+                /* eslint-disable @typescript-eslint/only-throw-error */
                 // noinspection ExceptionCaughtLocallyJS
                 throw validation;
+                /* eslint-enable */
             }
             if (!isObjectEmpty(validationHints) &&
                 !params.ignoreWarnings &&
@@ -574,8 +576,10 @@ const Form = (props) => {
                 setSubmittingBlocked(false);
                 if (!continueSubmit) {
                     throwIsWarning = true;
+                    /* eslint-disable @typescript-eslint/only-throw-error */
                     // noinspection ExceptionCaughtLocallyJS
                     throw validationHints;
+                    /* eslint-enable */
                 }
             }
             await Promise.all(Object.values(preSubmitHandlers.current).map((handler) => handler(id, params)));
@@ -601,7 +605,7 @@ const Form = (props) => {
             if (!flowEngine || params.submitToServer) {
                 const submitValues = valuesRef.current;
                 const oldValues = serverData[0];
-                const result = await updateData(getUpdateData(flowEngine ? valuesStagedRef.current : valuesRef.current, model, flowEngine && id === null ? false : onlySubmitMounted ?? false, onlySubmitMountedBehaviour, alwaysSubmitFields ?? [], flowEngine ? valuesStagedModifiedRef.current : mountedFields, defaultRecord[0], id));
+                const result = await updateData(getUpdateData(flowEngine ? valuesStagedRef.current : valuesRef.current, model, flowEngine && id === null ? false : (onlySubmitMounted ?? false), onlySubmitMountedBehaviour, alwaysSubmitFields ?? [], flowEngine ? valuesStagedModifiedRef.current : mountedFields, defaultRecord[0], id));
                 const newValues = deepClone(result[0]);
                 valuesRef.current = newValues;
                 valuesStagedRef.current = deepClone(result[0]);

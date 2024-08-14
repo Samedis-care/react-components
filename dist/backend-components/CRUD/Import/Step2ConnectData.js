@@ -159,8 +159,8 @@ const Step2ConnectData = (props) => {
                                     React.createElement(Typography, { color: "textSecondary" }, field.type.getFilterType())),
                                 React.createElement(Grid, { item: true },
                                     React.createElement(Tooltip, { title: convScript
-                                            ? convScript.error?.toString() ?? ""
-                                            : t("backend-components.crud.import.validations.unknown") ?? "" }, convScript ? (convScript.status === "okay" ? (React.createElement(CheckIcon, null)) : convScript.status === "pending" ? (React.createElement(CircularProgress, null)) : convScript.status === "error" ? (React.createElement(ErrorIcon, null)) : (React.createElement(UnknownIcon, null))) : (
+                                            ? (convScript.error?.toString() ?? "")
+                                            : (t("backend-components.crud.import.validations.unknown") ?? "") }, convScript ? (convScript.status === "okay" ? (React.createElement(CheckIcon, null)) : convScript.status === "pending" ? (React.createElement(CircularProgress, null)) : convScript.status === "error" ? (React.createElement(ErrorIcon, null)) : (React.createElement(UnknownIcon, null))) : (
                                     // unknown status
                                     React.createElement(UnknownIcon, null))))),
                             React.createElement(Grid, { item: true, xs: 12 },

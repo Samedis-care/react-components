@@ -93,10 +93,10 @@ const BackendSingleSelect = (props) => {
     }, [selected]);
     const debouncedLoad = useMemo(() => debouncePromise(handleLoad, searchDebounceTime ?? 500), [handleLoad, searchDebounceTime]);
     return (React.createElement(SingleSelect, { ...otherProps, onLoad: debouncedLoad, onSelect: handleSelect, selected: selected
-            ? selectedCache ?? {
+            ? (selectedCache ?? {
                 value: selected,
                 label: t("backend-components.selector.loading"),
-            }
+            })
             : null, lru: lruConfig }));
 };
 export default React.memo(BackendSingleSelect);

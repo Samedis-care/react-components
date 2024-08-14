@@ -197,7 +197,7 @@ const ImageBox = (inProps) => {
     const { containerRef: containerRefImage, handleScroll: handleScrollImage, handleTouchEnd: handleTouchEndImage, } = useScrollSwipe(props);
     const { containerRef: containerRefFS, handleScroll: handleScrollFS, handleTouchEnd: handleTouchEndFS, } = useScrollSwipe(props);
     return (React.createElement(React.Fragment, null,
-        React.createElement(Root, { onClick: onClick === null ? undefined : onClick ?? openDialog, onDragOver: handleDragOver, onDrop: handleDrop, style: { width, height }, ownerState: {
+        React.createElement(Root, { onClick: onClick === null ? undefined : (onClick ?? openDialog), onDragOver: handleDragOver, onDrop: handleDrop, style: { width, height }, ownerState: {
                 clickable: !!onClick,
                 dragging,
                 background: !disableBackground,
