@@ -239,10 +239,10 @@ const BackendSingleSelect = <
 			onSelect={handleSelect}
 			selected={
 				selected
-					? selectedCache ?? {
+					? (selectedCache ?? {
 							value: selected,
 							label: t("backend-components.selector.loading"),
-						}
+						})
 					: null
 			}
 			lru={lruConfig}

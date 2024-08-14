@@ -162,7 +162,7 @@ const MultiSelectWithTags = <
 	} = props;
 
 	const defaultSwitchValue = props.displaySwitch
-		? props.defaultSwitchValue ?? false
+		? (props.defaultSwitchValue ?? false)
 		: false;
 	const [selectedGroups, setSelectedGroups] = useState<SelectedGroup[]>([]);
 	const [switchValue, setSwitchValue] = useState<boolean>(defaultSwitchValue);

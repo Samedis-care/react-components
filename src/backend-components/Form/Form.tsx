@@ -849,7 +849,7 @@ const Form = <
 		? false
 		: props.onlySubmitNestedIfMounted;
 	const onlySubmitMounted = flowEngine
-		? flowEngineConfig.current.onlySubmitMounted ?? true
+		? (flowEngineConfig.current.onlySubmitMounted ?? true)
 		: props.onlySubmitMounted;
 
 	//
@@ -1413,8 +1413,10 @@ const Form = <
 				const validation = await validateForm("normal");
 				setErrors(validation);
 				if (!isObjectEmpty(validation)) {
+					/* eslint-disable @typescript-eslint/only-throw-error */
 					// noinspection ExceptionCaughtLocallyJS
 					throw validation;
+					/* eslint-enable */
 				}
 
 				if (
@@ -1447,8 +1449,10 @@ const Form = <
 					setSubmittingBlocked(false);
 					if (!continueSubmit) {
 						throwIsWarning = true;
+						/* eslint-disable @typescript-eslint/only-throw-error */
 						// noinspection ExceptionCaughtLocallyJS
 						throw validationHints;
+						/* eslint-enable */
 					}
 				}
 
@@ -1502,7 +1506,7 @@ const Form = <
 						getUpdateData(
 							flowEngine ? valuesStagedRef.current : valuesRef.current,
 							model as unknown as Model<string, PageVisibility, unknown>,
-							flowEngine && id === null ? false : onlySubmitMounted ?? false,
+							flowEngine && id === null ? false : (onlySubmitMounted ?? false),
 							onlySubmitMountedBehaviour,
 							alwaysSubmitFields ?? [],
 							flowEngine ? valuesStagedModifiedRef.current : mountedFields,

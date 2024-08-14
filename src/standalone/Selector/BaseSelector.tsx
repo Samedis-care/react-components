@@ -974,12 +974,12 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 						freeSolo={freeSolo}
 						noOptionsText={
 							lru && query === ""
-								? startTypingToSearchText ??
+								? (startTypingToSearchText ??
 									t(
 										"standalone.selector.base-selector.start-typing-to-search-text",
-									)
-								: noOptionsText ??
-									t("standalone.selector.base-selector.no-options-text")
+									))
+								: (noOptionsText ??
+									t("standalone.selector.base-selector.no-options-text"))
 						}
 						openText={
 							openText ?? t("standalone.selector.base-selector.open-icon-text")

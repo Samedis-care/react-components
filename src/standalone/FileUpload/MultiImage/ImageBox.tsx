@@ -355,7 +355,7 @@ const ImageBox = (inProps: ImageBoxProps) => {
 	return (
 		<>
 			<Root
-				onClick={onClick === null ? undefined : onClick ?? openDialog}
+				onClick={onClick === null ? undefined : (onClick ?? openDialog)}
 				onDragOver={handleDragOver}
 				onDrop={handleDrop}
 				style={{ width, height }}

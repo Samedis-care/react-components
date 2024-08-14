@@ -279,10 +279,10 @@ const Step2ConnectData = (props: CrudImporterStepProps) => {
 													<Tooltip
 														title={
 															convScript
-																? convScript.error?.toString() ?? ""
-																: t(
+																? (convScript.error?.toString() ?? "")
+																: (t(
 																		"backend-components.crud.import.validations.unknown",
-																	) ?? ""
+																	) ?? "")
 														}
 													>
 														{convScript ? (

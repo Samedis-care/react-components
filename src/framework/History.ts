@@ -1,5 +1,4 @@
-import { Location, Action } from "@sentry/react/types/types";
-import { createBrowserHistory, History } from "history";
+import { Action, Location, createBrowserHistory, History } from "history";
 
 /**
  * The History used by the react-router instance provided by the framework
