@@ -15,6 +15,22 @@ type OmitProperties =
 	| "model"
 	| "initialData";
 
+export type RendererBackendSingleSelectProps<
+	KeyT extends ModelFieldName,
+	VisibilityT extends PageVisibility,
+	CustomT,
+> = Omit<
+	BackendSingleSelectProps<KeyT, VisibilityT, CustomT>,
+	OmitProperties | "modelFetch"
+> & {
+	// model fetch with callback for current values, works similar to ModelFieldDefinition getRelationModel
+	modelFetch?:
+		| BackendSingleSelectProps<KeyT, VisibilityT, CustomT>["modelFetch"]
+		| ((
+				data: Record<string, unknown>,
+		  ) => BackendSingleSelectProps<KeyT, VisibilityT, CustomT>["modelFetch"]);
+};
+
 /**
  * Renders TypeEnum as drop-down selector (with search)
  */
@@ -23,16 +39,14 @@ class RendererBackendSingleSelect<
 	VisibilityT extends PageVisibility,
 	CustomT,
 > extends TypeId {
-	private readonly props: Omit<
-		BackendSingleSelectProps<KeyT, VisibilityT, CustomT>,
-		OmitProperties
+	private readonly props: RendererBackendSingleSelectProps<
+		KeyT,
+		VisibilityT,
+		CustomT
 	>;
 
 	constructor(
-		props: Omit<
-			BackendSingleSelectProps<KeyT, VisibilityT, CustomT>,
-			OmitProperties
-		>,
+		props: RendererBackendSingleSelectProps<KeyT, VisibilityT, CustomT>,
 	) {
 		super();
 		this.props = props;
@@ -43,6 +57,7 @@ class RendererBackendSingleSelect<
 			visibility,
 			field,
 			value,
+			values,
 			label,
 			handleChange,
 			handleBlur,
@@ -72,6 +87,11 @@ class RendererBackendSingleSelect<
 					"Type BackendMultiSelect requires relation model: " + field,
 				);
 
+			const modelFetch =
+				typeof this.props.modelFetch === "function"
+					? this.props.modelFetch(values)
+					: this.props.modelFetch;
+
 			return (
 				<FormControlFieldsetCC
 					component={"fieldset"}
@@ -92,6 +112,7 @@ class RendererBackendSingleSelect<
 						}
 						initialData={relationData}
 						{...this.props}
+						modelFetch={modelFetch}
 						refreshToken={
 							JSON.stringify(relationModel.getReactQueryKeyFetchAll()) +
 							this.props.refreshToken
