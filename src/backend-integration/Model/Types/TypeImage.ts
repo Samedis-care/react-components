@@ -15,7 +15,12 @@ export type TypeImageParams = Partial<
 		| "variant"
 		| "postEditCallback"
 	>
->;
+> & {
+	/**
+	 * Fallback image to display
+	 */
+	placeholder?: string;
+};
 
 /**
  * A type to handle images

@@ -41,7 +41,7 @@ class RendererImage extends TypeImage {
 				<>
 					<ImageSelector
 						name={field}
-						value={value}
+						value={value || (this.params?.placeholder ?? "")}
 						label={label}
 						readOnly={visibility.readOnly}
 						onChange={(name, value) => {
@@ -63,15 +63,18 @@ class RendererImage extends TypeImage {
 			);
 		}
 
-		const content = value ? (
-			<img
-				src={value}
-				alt={label}
-				style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }}
-			/>
-		) : (
-			<>{ccI18n.t("backend-integration.model.types.renderers.image.not-set")}</>
-		);
+		const content =
+			value || this.params?.placeholder ? (
+				<img
+					src={value || (this.params?.placeholder ?? "")}
+					alt={label}
+					style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }}
+				/>
+			) : (
+				<>
+					{ccI18n.t("backend-integration.model.types.renderers.image.not-set")}
+				</>
+			);
 
 		return visibility.grid ? (
 			content
