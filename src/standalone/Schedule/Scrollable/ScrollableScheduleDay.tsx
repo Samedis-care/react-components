@@ -14,6 +14,7 @@ const Root = styled("div", {
 	slot: "root",
 })(({ theme }) => ({
 	margin: theme.spacing(0, -2),
+	paddingLeft: theme.spacing(1),
 }));
 
 export type ScrollableScheduleDayClassKey = "root";
