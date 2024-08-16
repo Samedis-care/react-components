@@ -6,6 +6,7 @@ const Root = styled("div", {
     slot: "root",
 })(({ theme }) => ({
     margin: theme.spacing(0, -2),
+    paddingLeft: theme.spacing(1),
 }));
 const ScrollableScheduleDay = React.forwardRef(function ScrollableScheduleDay(inProps, ref) {
     const props = useThemeProps({
