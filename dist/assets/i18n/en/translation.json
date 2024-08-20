@@ -123,7 +123,7 @@
 			"formats-modern": "Allowed file formats:",
 			"error": {
 				"too-many": "Too many files selected",
-				"limit-reached": "Maximum amount of allowed files",
+				"limit-reached": "Maximum amount of allowed files reached",
 				"invalid-type": "Unsupported file type selected"
 			},
 			"format": {

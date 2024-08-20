@@ -36,6 +36,7 @@ export const useImportStep1FileUploadProps = (props) => {
             }));
             const json = workbooks
                 .map((book) => Object.values(book.Sheets)
+                .slice(0, 1) // only first
                 .map((sheet) => {
                 //remove prerendered values, otherwise dateNF is ignored
                 for (const cellref in sheet) {
