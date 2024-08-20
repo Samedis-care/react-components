@@ -518,7 +518,7 @@ export interface IDataGridState {
 	initialResize: boolean;
 }
 
-const DataGridStateContext = React.createContext<
+export const DataGridStateContext = React.createContext<
 	[IDataGridState, Dispatch<SetStateAction<IDataGridState>>] | undefined
 >(undefined);
 
@@ -531,9 +531,9 @@ export const useDataGridState = (): [
 	return ctx;
 };
 
-const DataGridPropsContext = React.createContext<DataGridProps | undefined>(
-	undefined,
-);
+export const DataGridPropsContext = React.createContext<
+	DataGridProps | undefined
+>(undefined);
 
 export const useDataGridProps = (): DataGridProps => {
 	const ctx = useContext(DataGridPropsContext);
@@ -554,7 +554,7 @@ export type DataGridColumnState = [
 	Dispatch<SetStateAction<IDataGridColumnsState>>,
 ];
 
-const DataGridColumnsStateContext = React.createContext<
+export const DataGridColumnsStateContext = React.createContext<
 	DataGridColumnState | undefined
 >(undefined);
 
@@ -575,7 +575,7 @@ export type DataGridColumnsWidthState = [
 	Dispatch<SetStateAction<Record<string, number>>>,
 ];
 
-const DataGridColumnsWidthStateContext = React.createContext<
+export const DataGridColumnsWidthStateContext = React.createContext<
 	DataGridColumnsWidthState | undefined
 >(undefined);
 
@@ -585,7 +585,7 @@ export const useDataGridColumnsWidthState = (): DataGridColumnsWidthState => {
 	return ctx;
 };
 
-const DataGridRootRefContext = React.createContext<
+export const DataGridRootRefContext = React.createContext<
 	React.RefObject<HTMLDivElement> | undefined
 >(undefined);
 
@@ -1047,7 +1047,7 @@ export const getDefaultColumnWidths = (
 					theme.typography.body1.font || "16px Roboto, sans-serif",
 					column.headerName,
 				).width + 100;
-		} catch (e) {
+		} catch {
 			// if canvas is not available to measure text
 			widthData[column.field] = column.headerName.length * 16;
 		}
