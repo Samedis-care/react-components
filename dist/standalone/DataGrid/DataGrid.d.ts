@@ -450,7 +450,9 @@ export interface IDataGridState {
      */
     initialResize: boolean;
 }
+export declare const DataGridStateContext: React.Context<[IDataGridState, React.Dispatch<React.SetStateAction<IDataGridState>>] | undefined>;
 export declare const useDataGridState: () => [IDataGridState, Dispatch<SetStateAction<IDataGridState>>];
+export declare const DataGridPropsContext: React.Context<DataGridProps | undefined>;
 export declare const useDataGridProps: () => DataGridProps;
 export type IDataGridColumnsState = {
     [field: string]: IDataGridColumnState;
@@ -465,6 +467,7 @@ export type DataGridColumnState = [
      */
     Dispatch<SetStateAction<IDataGridColumnsState>>
 ];
+export declare const DataGridColumnsStateContext: React.Context<DataGridColumnState | undefined>;
 export declare const useDataGridColumnState: () => DataGridColumnState;
 export type DataGridColumnsWidthState = [
     /**
@@ -476,7 +479,9 @@ export type DataGridColumnsWidthState = [
      */
     Dispatch<SetStateAction<Record<string, number>>>
 ];
+export declare const DataGridColumnsWidthStateContext: React.Context<DataGridColumnsWidthState | undefined>;
 export declare const useDataGridColumnsWidthState: () => DataGridColumnsWidthState;
+export declare const DataGridRootRefContext: React.Context<React.RefObject<HTMLDivElement> | undefined>;
 export declare const useDataGridRootRef: () => React.RefObject<HTMLDivElement>;
 export declare const getDataGridDefaultState: (columns: IDataGridColumnDef[], defaultCustomData: Record<string, unknown> | undefined) => IDataGridState;
 export declare const getDataGridDefaultColumnsState: (columns: IDataGridColumnDef[], defaultSort: DataGridSortSetting[] | undefined, defaultFilter: DataGridFilterSetting[] | undefined) => IDataGridColumnsState;

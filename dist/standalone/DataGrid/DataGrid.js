@@ -20,35 +20,35 @@ import ComponentWithLabel from "../UIKit/ComponentWithLabel";
 import FilterIcon from "../Icons/FilterIcon";
 import BaseSelector from "../Selector/BaseSelector";
 import SingleSelect from "../Selector/SingleSelect";
-const DataGridStateContext = React.createContext(undefined);
+export const DataGridStateContext = React.createContext(undefined);
 export const useDataGridState = () => {
     const ctx = useContext(DataGridStateContext);
     if (!ctx)
         throw new Error("State context not set");
     return ctx;
 };
-const DataGridPropsContext = React.createContext(undefined);
+export const DataGridPropsContext = React.createContext(undefined);
 export const useDataGridProps = () => {
     const ctx = useContext(DataGridPropsContext);
     if (!ctx)
         throw new Error("Props context not set");
     return ctx;
 };
-const DataGridColumnsStateContext = React.createContext(undefined);
+export const DataGridColumnsStateContext = React.createContext(undefined);
 export const useDataGridColumnState = () => {
     const ctx = useContext(DataGridColumnsStateContext);
     if (!ctx)
         throw new Error("Columns state context not set");
     return ctx;
 };
-const DataGridColumnsWidthStateContext = React.createContext(undefined);
+export const DataGridColumnsWidthStateContext = React.createContext(undefined);
 export const useDataGridColumnsWidthState = () => {
     const ctx = useContext(DataGridColumnsWidthStateContext);
     if (!ctx)
         throw new Error("Columns state width context not set");
     return ctx;
 };
-const DataGridRootRefContext = React.createContext(undefined);
+export const DataGridRootRefContext = React.createContext(undefined);
 export const useDataGridRootRef = () => {
     const ctx = useContext(DataGridRootRefContext);
     if (!ctx)
@@ -395,7 +395,7 @@ export const getDefaultColumnWidths = (columns, theme) => {
             widthData[column.field] =
                 measureText(theme.typography.body1.font || "16px Roboto, sans-serif", column.headerName).width + 100;
         }
-        catch (e) {
+        catch {
             // if canvas is not available to measure text
             widthData[column.field] = column.headerName.length * 16;
         }
