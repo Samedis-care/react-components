@@ -41,7 +41,7 @@ export const useImportStep1FileUploadProps = (props: ImportStep1Props) => {
 
 									resolve(workbook);
 								} catch (e) {
-									reject(e);
+									reject(e as Error);
 								}
 							});
 							reader.addEventListener("error", reject);
@@ -52,6 +52,7 @@ export const useImportStep1FileUploadProps = (props: ImportStep1Props) => {
 				const json = workbooks
 					.map((book) =>
 						Object.values(book.Sheets)
+							.slice(0, 1) // only first
 							.map((sheet) => {
 								//remove prerendered values, otherwise dateNF is ignored
 								for (const cellref in sheet) {
