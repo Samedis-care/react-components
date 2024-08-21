@@ -91,6 +91,10 @@ const StyledImage = styled("img", { name: "CcImageBox", slot: "image" })(({ them
         height: "calc(100% - 48px)",
     }),
 }));
+const StyledDialog = styled(Dialog, {
+    name: "CcImageBox",
+    slot: "fullScreenDialog",
+})({});
 const FullScreenImageWrapper = styled("div", {
     name: "CcImageBox",
     slot: "fullScreenImageWrapper",
@@ -215,7 +219,7 @@ const ImageBox = (inProps) => {
                             swipeRight: !!onNextImage,
                             imageDots: false,
                         }, className: classes?.image })))),
-        !onClick && (React.createElement(Dialog, { open: dialogOpen, fullScreen: true, onClose: closeDialog },
+        !onClick && (React.createElement(StyledDialog, { open: dialogOpen, fullScreen: true, onClose: closeDialog },
             React.createElement(DialogContent, null,
                 React.createElement(FullScreenImageWrapper, { className: classes?.fullScreenImageWrapper },
                     React.createElement(SwipeListener, { className: classes?.swipeListener, onScroll: handleScrollFS, ref: containerRefFS, onTouchEnd: handleTouchEndFS },

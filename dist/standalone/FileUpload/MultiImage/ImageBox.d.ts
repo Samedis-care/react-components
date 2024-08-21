@@ -68,6 +68,6 @@ export interface ImageBoxStyledImageOwnerState {
     swipeRight: boolean;
     imageDots: boolean;
 }
-export type ImageBoxClassKey = "root" | "removeBtn" | "prevBtn" | "nextBtn" | "swipeListener" | "image" | "fullScreenImageWrapper" | "imageDotsWrapper" | "imageDots";
+export type ImageBoxClassKey = "root" | "removeBtn" | "prevBtn" | "nextBtn" | "swipeListener" | "image" | "fullScreenDialog" | "fullScreenImageWrapper" | "imageDotsWrapper" | "imageDots";
 declare const _default: React.MemoExoticComponent<(inProps: ImageBoxProps) => React.JSX.Element>;
 export default _default;
