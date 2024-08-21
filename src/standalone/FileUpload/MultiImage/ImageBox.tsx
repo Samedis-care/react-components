@@ -190,6 +190,11 @@ const StyledImage = styled("img", { name: "CcImageBox", slot: "image" })<{
 	}),
 }));
 
+const StyledDialog = styled(Dialog, {
+	name: "CcImageBox",
+	slot: "fullScreenDialog",
+})({});
+
 const FullScreenImageWrapper = styled("div", {
 	name: "CcImageBox",
 	slot: "fullScreenImageWrapper",
@@ -229,6 +234,7 @@ export type ImageBoxClassKey =
 	| "nextBtn"
 	| "swipeListener"
 	| "image"
+	| "fullScreenDialog"
 	| "fullScreenImageWrapper"
 	| "imageDotsWrapper"
 	| "imageDots";
@@ -419,7 +425,7 @@ const ImageBox = (inProps: ImageBoxProps) => {
 				</SwipeListener>
 			</Root>
 			{!onClick && (
-				<Dialog open={dialogOpen} fullScreen onClose={closeDialog}>
+				<StyledDialog open={dialogOpen} fullScreen onClose={closeDialog}>
 					<DialogContent>
 						<FullScreenImageWrapper className={classes?.fullScreenImageWrapper}>
 							<SwipeListener
@@ -477,7 +483,7 @@ const ImageBox = (inProps: ImageBoxProps) => {
 							)}
 						</FullScreenImageWrapper>
 					</DialogContent>
-				</Dialog>
+				</StyledDialog>
 			)}
 		</>
 	);
