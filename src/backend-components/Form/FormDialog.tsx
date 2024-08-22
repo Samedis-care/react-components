@@ -8,6 +8,8 @@ import useCCTranslations from "../../utils/useCCTranslations";
 import Loader from "../../standalone/Loader";
 import combineClassNames from "../../utils/combineClassNames";
 
+export type FormDialogRendererProps = Omit<FormDialogProps, "renderer">;
+
 export interface FormDialogProps {
 	/**
 	 * Dialog tille
@@ -47,6 +49,10 @@ export interface FormDialogProps {
 	 * CSS class name
 	 */
 	className?: string;
+	/**
+	 * Custom renderer, does not need to provide IsInFormDialogContext, FormDialogDispatchContext or handle their logic
+	 */
+	renderer?: React.ComponentType<FormDialogRendererProps>;
 }
 
 const TallDialogContent = styled(DialogContent, {
@@ -78,18 +84,44 @@ export const FormDialogDispatchContext = React.createContext<
 	FormDialogDispatch | undefined
 >(undefined);
 
+export const FormDialogDefaultRenderer = (props: FormDialogRendererProps) => {
+	const {
+		maxWidth,
+		onClose,
+		fullWidth,
+		className,
+		dialogTitle,
+		openInNewLink,
+		useCustomClasses,
+		children,
+	} = props;
+	const ContentComp = useCustomClasses ? TallDialogContent : DialogContent;
+	return (
+		<Dialog
+			maxWidth={maxWidth ?? "lg"}
+			open={true}
+			onClose={onClose}
+			fullWidth={fullWidth ?? true}
+			className={combineClassNames(["CcFormDialog", className])}
+		>
+			<DialogTitle onClose={onClose} noTitle={!dialogTitle}>
+				{dialogTitle}
+				{openInNewLink && <OpenInNewIcon onClick={openInNewLink} />}
+			</DialogTitle>
+			<ContentComp>
+				<Suspense fallback={<Loader />}>{children}</Suspense>
+			</ContentComp>
+		</Dialog>
+	);
+};
+
 const FormDialog = (inProps: FormDialogProps) => {
 	const props = useThemeProps({ props: inProps, name: "CcFormDialog" });
 	const {
 		dialogTitle: titleOverride,
-		maxWidth,
-		fullWidth,
-		useCustomClasses,
-		openInNewLink,
-		children,
 		onClose,
 		disableFormDialogContext,
-		className,
+		renderer,
 	} = props;
 	const [pushDialog, popDialog] = useDialogContext();
 	const blockClosingCounter = useRef(0);
@@ -126,28 +158,14 @@ const FormDialog = (inProps: FormDialogProps) => {
 	);
 
 	const dialogTitle = titleOverride ?? title;
-	const ContentComp = useCustomClasses ? TallDialogContent : DialogContent;
+	const Renderer = renderer ?? FormDialogDefaultRenderer;
 
 	return (
-		<Dialog
-			maxWidth={maxWidth ?? "lg"}
-			open={true}
-			onClose={handleClose}
-			fullWidth={fullWidth ?? true}
-			className={combineClassNames(["CcFormDialog", className])}
-		>
-			<DialogTitle onClose={handleClose} noTitle={!dialogTitle}>
-				{dialogTitle}
-				{openInNewLink && <OpenInNewIcon onClick={openInNewLink} />}
-			</DialogTitle>
-			<ContentComp>
-				<IsInFormDialogContext.Provider value={!disableFormDialogContext}>
-					<FormDialogDispatchContext.Provider value={dispatch}>
-						<Suspense fallback={<Loader />}>{children}</Suspense>
-					</FormDialogDispatchContext.Provider>
-				</IsInFormDialogContext.Provider>
-			</ContentComp>
-		</Dialog>
+		<IsInFormDialogContext.Provider value={!disableFormDialogContext}>
+			<FormDialogDispatchContext.Provider value={dispatch}>
+				<Renderer {...props} onClose={handleClose} dialogTitle={dialogTitle} />
+			</FormDialogDispatchContext.Provider>
+		</IsInFormDialogContext.Provider>
 	);
 };
 
