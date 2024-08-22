@@ -40,7 +40,7 @@ const DefaultFormPageButtons = (inProps) => {
                 textButtonNo: t("common.buttons.cancel"),
             });
         }
-        catch (error) {
+        catch {
             // user cancelled
             return;
         }
@@ -49,7 +49,7 @@ const DefaultFormPageButtons = (inProps) => {
             if (autoBack)
                 setAutoBackTrigger(Date.now());
         }
-        catch (e) {
+        catch {
             // ignore, error is shown regardless
         }
     }, [autoBack, confirmDialogMessage, pushDialog, submit, t]);
@@ -59,7 +59,7 @@ const DefaultFormPageButtons = (inProps) => {
             if (autoBack)
                 setAutoBackTrigger(Date.now());
         }
-        catch (e) {
+        catch {
             // ignore, error is shown regardless
         }
     }, [autoBack, submit]);

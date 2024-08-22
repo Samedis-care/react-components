@@ -27,7 +27,7 @@ const LocalStoragePersist = (props) => {
             catch (e) {
                 // eslint-disable-next-line no-console
                 console.error("[Components-Care] Failed parsing DataGrid config from localStorage." +
-                    storageKey, "Removing from localStorage");
+                    storageKey, "Removing from localStorage", e);
                 localStorage?.removeItem(storageKey);
             }
         }

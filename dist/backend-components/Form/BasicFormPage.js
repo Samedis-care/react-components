@@ -109,7 +109,7 @@ const BasicFormPage = (inProps) => {
                         }
                         await orgGoBack(forceRefresh);
                     }
-                    catch (e) {
+                    catch {
                         // user cancelled
                     }
                 }

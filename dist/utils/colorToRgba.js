@@ -175,7 +175,7 @@ const colorToRgba = (color) => {
             return decoded.values;
         }
     }
-    catch (e) {
+    catch {
         // format not supported
     }
     // Fallback (using canvas)

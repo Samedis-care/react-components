@@ -1,4 +1,5 @@
 import React from "react";
+export type FormDialogRendererProps = Omit<FormDialogProps, "renderer">;
 export interface FormDialogProps {
     /**
      * Dialog tille
@@ -38,6 +39,10 @@ export interface FormDialogProps {
      * CSS class name
      */
     className?: string;
+    /**
+     * Custom renderer, does not need to provide IsInFormDialogContext, FormDialogDispatchContext or handle their logic
+     */
+    renderer?: React.ComponentType<FormDialogRendererProps>;
 }
 export type FormDialogClassKey = "content" | "openInNewIcon";
 export interface FormDialogDispatch {
@@ -47,5 +52,6 @@ export interface FormDialogDispatch {
 }
 export declare const IsInFormDialogContext: React.Context<boolean>;
 export declare const FormDialogDispatchContext: React.Context<FormDialogDispatch | undefined>;
+export declare const FormDialogDefaultRenderer: (props: FormDialogRendererProps) => React.JSX.Element;
 declare const _default: React.MemoExoticComponent<(inProps: FormDialogProps) => React.JSX.Element>;
 export default _default;

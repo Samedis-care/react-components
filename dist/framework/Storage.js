@@ -52,7 +52,7 @@ export class CachedServerStorageProvider extends StorageProvider {
         try {
             return ModelDataStore.fetchQuery(["cc-css", key], () => this.getItemFromServer(key), this.cacheOptions);
         }
-        catch (e) {
+        catch {
             // on failure return null
             return null;
         }

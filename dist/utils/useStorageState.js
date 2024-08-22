@@ -23,7 +23,7 @@ export const useLocalStorageState = (storageKey, defaultValue, validateData) => 
                 return data;
             return defaultValue;
         }
-        catch (e) {
+        catch {
             return defaultValue;
         }
     });

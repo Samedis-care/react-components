@@ -10,7 +10,7 @@ const FlowEngineSaveButton = (props) => {
         try {
             await submit({ submitToServer: true });
         }
-        catch (e) {
+        catch {
             // ignore, error is shown regardless
         }
     }, [submit]);

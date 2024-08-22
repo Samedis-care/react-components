@@ -48,7 +48,7 @@ const StorageManagerPersist = (props) => {
                 catch (e) {
                     // eslint-disable-next-line no-console
                     console.error("[Components-Care] Failed parsing DataGrid config from StorageManager." +
-                        storageKey, storageKeys, "Removing from server");
+                        storageKey, storageKeys, "Removing from server", e);
                     return StorageManager.setItem(storageKey, storageKeys, null);
                 }
             }

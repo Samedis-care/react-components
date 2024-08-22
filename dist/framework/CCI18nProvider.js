@@ -13,11 +13,11 @@ const CCI18nProvider = (props) => {
                 try {
                     await import("moment/locale/" + lang.toLowerCase());
                 }
-                catch (e) {
+                catch {
                     try {
                         await import("moment/locale/" + lang.split("-")[0].toLowerCase());
                     }
-                    catch (e) {
+                    catch {
                         // locale not found
                     }
                 }

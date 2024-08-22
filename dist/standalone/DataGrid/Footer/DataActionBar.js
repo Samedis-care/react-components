@@ -43,7 +43,7 @@ const DataActionBar = () => {
                     selectedRows: [],
                 }));
             }
-            catch (e) {
+            catch {
                 // user cancelled
             }
         }

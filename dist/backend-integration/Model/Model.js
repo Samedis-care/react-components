@@ -607,7 +607,7 @@ class Model {
             try {
                 return !getVisibility(this.fields[field].visibility.create, {}, {}).disabled;
             }
-            catch (e) {
+            catch {
                 return true;
             }
         })
