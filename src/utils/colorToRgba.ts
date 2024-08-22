@@ -178,7 +178,7 @@ const colorToRgba = (
 		} else {
 			return decoded.values;
 		}
-	} catch (e) {
+	} catch {
 		// format not supported
 	}
 

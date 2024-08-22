@@ -24,7 +24,7 @@ const fileToData = async (file: File, includeName = false): Promise<string> => {
 			);
 		});
 		reader.addEventListener("error", () => {
-			reject(reader.error);
+			reject(reader.error!);
 		});
 		reader.readAsDataURL(file);
 	});

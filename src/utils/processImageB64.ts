@@ -15,7 +15,7 @@ const processImageB64 = async (
 	const image = new Image();
 	await new Promise((resolve, reject) => {
 		image.addEventListener("load", () => resolve(image));
-		image.addEventListener("error", (evt) => reject(evt.error));
+		image.addEventListener("error", (evt) => reject(evt.error as Error));
 		image.src = imageData;
 	});
 

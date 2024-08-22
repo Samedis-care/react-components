@@ -204,6 +204,7 @@ import {
 import { FormClassKey } from "./backend-components";
 import { BasicFormPageProps } from "./backend-components/Form/BasicFormPage";
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface ComponentsCareTheme {}
 
 declare module "@mui/material/styles/createTheme" {

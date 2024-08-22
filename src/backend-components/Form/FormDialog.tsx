@@ -109,7 +109,7 @@ const FormDialog = (inProps: FormDialogProps) => {
 
 			popDialog();
 			if (onClose) onClose();
-		} catch (e) {
+		} catch {
 			// user cancelled
 		}
 	}, [t, onClose, popDialog, pushDialog]);

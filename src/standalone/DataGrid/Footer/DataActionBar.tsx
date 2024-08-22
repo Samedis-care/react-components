@@ -55,7 +55,7 @@ const DataActionBar = () => {
 					selectAll: false,
 					selectedRows: [],
 				}));
-			} catch (e) {
+			} catch {
 				// user cancelled
 			}
 		}

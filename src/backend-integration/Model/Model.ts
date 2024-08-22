@@ -1138,7 +1138,7 @@ class Model<
 						{},
 						{},
 					).disabled;
-				} catch (e) {
+				} catch {
 					return true;
 				}
 			})

@@ -67,7 +67,7 @@ const DefaultFormPageButtons = (inProps: DefaultFormPageButtonsProps) => {
 				textButtonYes: t("common.buttons.yes"),
 				textButtonNo: t("common.buttons.cancel"),
 			});
-		} catch (error) {
+		} catch {
 			// user cancelled
 			return;
 		}
@@ -75,7 +75,7 @@ const DefaultFormPageButtons = (inProps: DefaultFormPageButtonsProps) => {
 		try {
 			await submit();
 			if (autoBack) setAutoBackTrigger(Date.now());
-		} catch (e) {
+		} catch {
 			// ignore, error is shown regardless
 		}
 	}, [autoBack, confirmDialogMessage, pushDialog, submit, t]);
@@ -84,7 +84,7 @@ const DefaultFormPageButtons = (inProps: DefaultFormPageButtonsProps) => {
 		try {
 			await submit();
 			if (autoBack) setAutoBackTrigger(Date.now());
-		} catch (e) {
+		} catch {
 			// ignore, error is shown regardless
 		}
 	}, [autoBack, submit]);

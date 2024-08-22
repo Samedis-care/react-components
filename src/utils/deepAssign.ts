@@ -18,10 +18,7 @@ const deepAssign = (
 				key in target &&
 				isPlainObject(target[key])
 			) {
-				target[key] = deepAssign(
-					target[key] as Record<string, unknown>,
-					source[key] as Record<string, unknown>,
-				);
+				target[key] = deepAssign(target[key], source[key]);
 			} else {
 				target[key] = source[key];
 			}

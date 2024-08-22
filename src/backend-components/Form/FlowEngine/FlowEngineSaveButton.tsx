@@ -18,7 +18,7 @@ const FlowEngineSaveButton = (props: FlowEngineSaveButtonProps) => {
 	const safeSubmit = useCallback(async () => {
 		try {
 			await submit({ submitToServer: true });
-		} catch (e) {
+		} catch {
 			// ignore, error is shown regardless
 		}
 	}, [submit]);

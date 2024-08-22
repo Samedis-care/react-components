@@ -52,6 +52,7 @@ const LocalStoragePersist = (props: LocalStoragePersistProps) => {
 					"[Components-Care] Failed parsing DataGrid config from localStorage." +
 						storageKey,
 					"Removing from localStorage",
+					e,
 				);
 				localStorage?.removeItem(storageKey);
 			}

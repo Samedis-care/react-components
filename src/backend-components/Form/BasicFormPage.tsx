@@ -207,7 +207,7 @@ const BasicFormPage = <RendererPropsT, CustomPropsT>(
 								unblock.current = undefined;
 							}
 							await orgGoBack(forceRefresh);
-						} catch (e) {
+						} catch {
 							// user cancelled
 						}
 					}

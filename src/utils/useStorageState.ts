@@ -35,7 +35,7 @@ export const useLocalStorageState = <T>(
 			const data: unknown = JSON.parse(value);
 			if (validateData(data)) return data;
 			return defaultValue;
-		} catch (e) {
+		} catch {
 			return defaultValue;
 		}
 	});

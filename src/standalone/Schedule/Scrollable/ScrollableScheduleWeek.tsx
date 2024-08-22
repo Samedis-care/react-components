@@ -40,17 +40,19 @@ class ScrollableScheduleWeek extends PureComponent<IProps, IState> {
 		};
 	}
 
-	async componentDidMount(): Promise<void> {
-		try {
-			const data = await this.props.loadData();
-			this.setState({
-				data,
-			});
-		} catch (e) {
-			this.setState({
-				loadError: e as Error,
-			});
-		}
+	componentDidMount(): void {
+		void (async () => {
+			try {
+				const data = await this.props.loadData();
+				this.setState({
+					data,
+				});
+			} catch (e) {
+				this.setState({
+					loadError: e as Error,
+				});
+			}
+		})();
 	}
 
 	render(): React.ReactElement {

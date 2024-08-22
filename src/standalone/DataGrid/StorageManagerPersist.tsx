@@ -86,6 +86,7 @@ const StorageManagerPersist = (props: StorageManagerPersistProps) => {
 									storageKey,
 								storageKeys,
 								"Removing from server",
+								e,
 							);
 							return StorageManager.setItem(storageKey, storageKeys, null);
 						}

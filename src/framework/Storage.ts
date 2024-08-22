@@ -127,7 +127,7 @@ export abstract class CachedServerStorageProvider extends StorageProvider {
 				() => this.getItemFromServer(key),
 				this.cacheOptions,
 			);
-		} catch (e) {
+		} catch {
 			// on failure return null
 			return null;
 		}
