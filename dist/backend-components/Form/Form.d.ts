@@ -238,7 +238,12 @@ export interface FormProps<KeyT extends ModelFieldName, VisibilityT extends Page
      * Enable flow engine mode
      */
     flowEngine?: boolean;
+    /**
+     * Render form as div instead of form
+     */
+    renderFormAsDiv?: boolean;
 }
+export declare const FormRenderAsDivContext: React.Context<boolean>;
 export interface FormContextData {
     /**
      * The ID of the currently opened record

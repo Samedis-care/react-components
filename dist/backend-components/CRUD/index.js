@@ -44,7 +44,7 @@ const CRUD = (props) => {
     const routeUrl = routeCtx ? routeCtx.url : "";
     const location = useLocation();
     const [perms] = usePermissionContext();
-    const { disableRouting, disableBackgroundGrid, forbiddenPage: ForbiddenPage, enableUserImport: requestEnableUserImport, importConfig, importUpdateKey, importHowTo, importUpdateKeyAdditionalFilters, importValidate, } = props;
+    const { disableRouting, disableBackgroundGrid, forbiddenPage: ForbiddenPage, enableUserImport: requestEnableUserImport, importConfig, importUpdateKey, importHowTo, importUpdateKeyAdditionalFilters, importValidate, goBackCallback, } = props;
     const hasImportPermission = !importUpdateKey ||
         (hasPermission(perms, props.editPermission) &&
             hasPermission(perms, props.newPermission));
@@ -75,6 +75,8 @@ const CRUD = (props) => {
         setGridRefreshToken(new Date().getTime().toString());
     }, []);
     const showOverview = useCallback((forceRefresh) => {
+        if (goBackCallback)
+            goBackCallback();
         if (disableRouting) {
             setId(null);
         }
@@ -83,7 +85,7 @@ const CRUD = (props) => {
         }
         if (forceRefresh)
             refreshGrid();
-    }, [disableRouting, refreshGrid, navigate, routeUrl]);
+    }, [goBackCallback, disableRouting, refreshGrid, navigate, routeUrl]);
     const openView = useCallback((id, forceRefresh) => {
         if (disableRouting) {
             setId(id);

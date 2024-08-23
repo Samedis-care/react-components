@@ -5,7 +5,7 @@ import { FormProps } from "../Form";
 import { Permission } from "../../framework";
 import { CrudImportProps } from "./Import";
 import { IDataGridAddButton } from "../../standalone/DataGrid/DataGrid";
-import Route from "../../standalone/Routes/Route";
+import { RouteProps } from "../../standalone/Routes/Route";
 export interface CrudFormProps {
     /**
      * Callback for closing the form page
@@ -118,7 +118,7 @@ export interface CrudProps<KeyT extends ModelFieldName, VisibilityT extends Page
     /**
      * Route component to use
      */
-    routeComponent?: typeof Route;
+    routeComponent?: React.ComponentType<RouteProps>;
     /**
      * Enable Import button in Grid
      */
@@ -147,6 +147,10 @@ export interface CrudProps<KeyT extends ModelFieldName, VisibilityT extends Page
      * Custom Import UI
      */
     importUI?: React.ComponentType<CrudImportProps<KeyT, VisibilityT, CustomT>>;
+    /**
+     * Callback called when goBack is called in form (returning from form to data grid)
+     */
+    goBackCallback?: () => void;
 }
 export interface CRUDGridVisibilityWrapperOwnerState {
     hidden: boolean;
