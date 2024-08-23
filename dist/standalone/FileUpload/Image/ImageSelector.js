@@ -132,6 +132,10 @@ const ModernUploadControlUpload = styled(IconButton, {
 })(({ theme }) => ({
     borderRadius: theme.shape.borderRadius,
 }));
+const PreviewDialog = styled(Dialog, {
+    name: "CcImageSelector",
+    slot: "previewDialog",
+})({});
 const PreviewDialogCloseButton = styled(IconButton, {
     name: "CcImageSelector",
     slot: "previewDialogCloseButton",
@@ -202,7 +206,7 @@ const ImageSelector = (inProps) => {
     const handlePreviewDialogClose = useCallback(() => {
         setShowPreviewDialog(false);
     }, []);
-    const previewDialog = showPreviewDialog && (React.createElement(Dialog, { open: true, fullScreen: true, onClose: handlePreviewDialogClose },
+    const previewDialog = showPreviewDialog && (React.createElement(PreviewDialog, { open: true, fullScreen: true, onClose: handlePreviewDialogClose },
         React.createElement(PreviewDialogCloseButton, { onClick: handlePreviewDialogClose },
             React.createElement(CloseIcon, null)),
         React.createElement(PreviewModern, { src: value, alt: props.alt, className: classes?.previewModern })));
