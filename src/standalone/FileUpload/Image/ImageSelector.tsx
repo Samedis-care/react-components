@@ -251,6 +251,11 @@ const ModernUploadControlUpload = styled(IconButton, {
 	borderRadius: theme.shape.borderRadius,
 }));
 
+const PreviewDialog = styled(Dialog, {
+	name: "CcImageSelector",
+	slot: "previewDialog",
+})({});
+
 const PreviewDialogCloseButton = styled(IconButton, {
 	name: "CcImageSelector",
 	slot: "previewDialogCloseButton",
@@ -274,6 +279,7 @@ export type ImageSelectorClassKey =
 	| "modernFormatIcon"
 	| "modernUploadControlsWrapper"
 	| "modernUploadControlUpload"
+	| "previewDialog"
 	| "previewDialogCloseButton"
 	| "pfpRoot"
 	| "pfpIconBtn"
@@ -379,7 +385,7 @@ const ImageSelector = (inProps: ImageSelectorProps) => {
 		setShowPreviewDialog(false);
 	}, []);
 	const previewDialog = showPreviewDialog && (
-		<Dialog open={true} fullScreen onClose={handlePreviewDialogClose}>
+		<PreviewDialog open={true} fullScreen onClose={handlePreviewDialogClose}>
 			<PreviewDialogCloseButton onClick={handlePreviewDialogClose}>
 				<CloseIcon />
 			</PreviewDialogCloseButton>
@@ -388,7 +394,7 @@ const ImageSelector = (inProps: ImageSelectorProps) => {
 				alt={props.alt}
 				className={classes?.previewModern}
 			/>
-		</Dialog>
+		</PreviewDialog>
 	);
 
 	// render component
