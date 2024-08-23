@@ -52,6 +52,7 @@ import { GridSingleSelectFilterClassKey, GridSingleSelectFilterProps } from "./s
 import { ScrollableScheduleDayClassKey, ScrollableScheduleDayProps } from "./standalone/Schedule/Scrollable/ScrollableScheduleDay";
 import { FormClassKey } from "./backend-components";
 import { BasicFormPageProps } from "./backend-components/Form/BasicFormPage";
+import { CrudClassKey } from "./backend-components/CRUD";
 export interface ComponentsCareTheme {
 }
 declare module "@mui/material/styles/createTheme" {
@@ -125,6 +126,7 @@ declare module "@mui/material/styles" {
         CcGridMultiSelectFilter: GridMultiSelectFilterClassKey;
         CcGridSingleSelectFilter: GridSingleSelectFilterClassKey;
         CcForm: FormClassKey;
+        CcCrud: CrudClassKey;
     }
     interface ComponentsPropsList {
         CcSignalPortlet: Partial<SignalPortletProps>;
@@ -487,6 +489,9 @@ declare module "@mui/material/styles" {
         };
         CcBasicFormPage?: {
             defaultProps?: ComponentsPropsList["CcBasicFormPage"];
+        };
+        CcCrud?: {
+            styleOverrides?: ComponentsOverrides<Theme>["CcCrud"];
         };
     }
 }

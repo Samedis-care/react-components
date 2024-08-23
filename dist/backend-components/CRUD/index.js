@@ -15,13 +15,13 @@ const CrudImport = React.lazy(() => import("./Import"));
 const GridVisibilityWrapper = styled("div", {
     name: "CcCrud",
     slot: "gridWrapper",
-})(({ ownerState: { hidden } }) => ({
+})({
     width: "100%",
     height: "100%",
-    ...(hidden && {
+    "&.Mui-hidden": {
         display: "none",
-    }),
-}));
+    },
+});
 const CrudDispatchContext = React.createContext(undefined);
 export const useCrudDispatchContext = () => {
     const ctx = useContext(CrudDispatchContext);
@@ -179,7 +179,7 @@ const CRUD = (props) => {
         refreshGrid,
     }), [refreshGrid]);
     return (React.createElement(CrudDispatchContext.Provider, { value: dispatch }, disableRouting ? (React.createElement(React.Fragment, null,
-        (id === null || !disableBackgroundGrid) && (React.createElement(GridVisibilityWrapper, { ownerState: { hidden: id !== null } }, grid(id === null))),
+        (id === null || !disableBackgroundGrid) && (React.createElement(GridVisibilityWrapper, { className: id !== null ? "Mui-hidden" : undefined }, grid(id === null))),
         id === "import" && importer(true),
         id === "devimport" && importer(false),
         id !== null &&
@@ -187,7 +187,7 @@ const CRUD = (props) => {
             id !== "devimport" &&
             props.children &&
             form(id, props.children))) : (React.createElement(React.Fragment, null,
-        (id === null || !disableBackgroundGrid) && (React.createElement(GridVisibilityWrapper, { ownerState: { hidden: routeUrl !== location.pathname } }, grid(routeUrl === location.pathname))),
+        (id === null || !disableBackgroundGrid) && (React.createElement(GridVisibilityWrapper, { className: routeUrl !== location.pathname ? "Mui-hidden" : undefined }, grid(routeUrl === location.pathname))),
         props.children && (React.createElement(Routes, null,
             React.createElement(RouteComponent, { path: `import/*`, element: hasImportPermission || !ForbiddenPage ? (importer(true)) : (React.createElement(ForbiddenPage, null)) }),
             React.createElement(RouteComponent, { path: `devimport/*`, element: hasImportPermission || !ForbiddenPage ? (importer(false)) : (React.createElement(ForbiddenPage, null)) }),

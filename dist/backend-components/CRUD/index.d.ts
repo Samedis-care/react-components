@@ -155,6 +155,7 @@ export interface CrudProps<KeyT extends ModelFieldName, VisibilityT extends Page
 export interface CRUDGridVisibilityWrapperOwnerState {
     hidden: boolean;
 }
+export type CrudClassKey = "gridWrapper";
 export interface CrudDispatch {
     /**
      * Force-refreshes the grid
