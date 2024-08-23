@@ -22,7 +22,7 @@ import Loader from "../../standalone/Loader";
 import throwError from "../../utils/throwError";
 import { IDataGridAddButton } from "../../standalone/DataGrid/DataGrid";
 import useNavigate from "../../standalone/Routes/useNavigate";
-import Route, { RouteContext } from "../../standalone/Routes/Route";
+import Route, { RouteContext, RouteProps } from "../../standalone/Routes/Route";
 import useLocation from "../../standalone/Routes/useLocation";
 import useParams from "../../standalone/Routes/useParams";
 import Routes from "../../standalone/Routes/Routes";
@@ -187,7 +187,7 @@ export interface CrudProps<
 	/**
 	 * Route component to use
 	 */
-	routeComponent?: typeof Route;
+	routeComponent?: React.ComponentType<RouteProps>;
 	/**
 	 * Enable Import button in Grid
 	 */
@@ -220,6 +220,10 @@ export interface CrudProps<
 	 * Custom Import UI
 	 */
 	importUI?: React.ComponentType<CrudImportProps<KeyT, VisibilityT, CustomT>>;
+	/**
+	 * Callback called when goBack is called in form (returning from form to data grid)
+	 */
+	goBackCallback?: () => void;
 }
 
 export interface CRUDGridVisibilityWrapperOwnerState {
@@ -298,6 +302,7 @@ const CRUD = <
 		importHowTo,
 		importUpdateKeyAdditionalFilters,
 		importValidate,
+		goBackCallback,
 	} = props;
 	const hasImportPermission =
 		!importUpdateKey ||
@@ -338,6 +343,7 @@ const CRUD = <
 
 	const showOverview = useCallback(
 		(forceRefresh?: boolean) => {
+			if (goBackCallback) goBackCallback();
 			if (disableRouting) {
 				setId(null);
 			} else {
@@ -345,7 +351,7 @@ const CRUD = <
 			}
 			if (forceRefresh) refreshGrid();
 		},
-		[disableRouting, refreshGrid, navigate, routeUrl],
+		[goBackCallback, disableRouting, refreshGrid, navigate, routeUrl],
 	);
 
 	const openView = useCallback(

@@ -313,7 +313,13 @@ export interface FormProps<
 	 * Enable flow engine mode
 	 */
 	flowEngine?: boolean;
+	/**
+	 * Render form as div instead of form
+	 */
+	renderFormAsDiv?: boolean;
 }
+
+export const FormRenderAsDivContext = React.createContext(false);
 
 export interface FormContextData {
 	/**
@@ -841,7 +847,10 @@ const Form = <
 		preSubmit,
 		dirtyIgnoreFields,
 		flowEngine,
+		renderFormAsDiv: renderFormAsDivProp,
 	} = props;
+	const renderFormAsDiv =
+		useContext(FormRenderAsDivContext) || renderFormAsDivProp;
 	// flow engine mode defaults
 	const flowEngineConfig = useRef<FormFlowEngineStageConfig>({});
 	const onlyValidateMounted = flowEngine ? true : props.onlyValidateMounted;
@@ -2010,7 +2019,7 @@ const Form = <
 	return (
 		<FormContextLite.Provider value={formContextDataLite}>
 			<FormContext.Provider value={formContextData}>
-				{!parentFormContext ? (
+				{!parentFormContext && !renderFormAsDiv ? (
 					<StyledForm onSubmit={handleSubmit} className={formClass}>
 						{innerForm()}
 					</StyledForm>
