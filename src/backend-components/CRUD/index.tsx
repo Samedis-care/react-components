@@ -232,15 +232,15 @@ export interface CRUDGridVisibilityWrapperOwnerState {
 const GridVisibilityWrapper = styled("div", {
 	name: "CcCrud",
 	slot: "gridWrapper",
-})<{
-	ownerState: CRUDGridVisibilityWrapperOwnerState;
-}>(({ ownerState: { hidden } }) => ({
+})({
 	width: "100%",
 	height: "100%",
-	...(hidden && {
+	"&.Mui-hidden": {
 		display: "none",
-	}),
-}));
+	},
+});
+
+export type CrudClassKey = "gridWrapper";
 
 export interface CrudDispatch {
 	/**
@@ -529,7 +529,9 @@ const CRUD = <
 			{disableRouting ? (
 				<>
 					{(id === null || !disableBackgroundGrid) && (
-						<GridVisibilityWrapper ownerState={{ hidden: id !== null }}>
+						<GridVisibilityWrapper
+							className={id !== null ? "Mui-hidden" : undefined}
+						>
 							{grid(id === null)}
 						</GridVisibilityWrapper>
 					)}
@@ -545,7 +547,9 @@ const CRUD = <
 				<>
 					{(id === null || !disableBackgroundGrid) && (
 						<GridVisibilityWrapper
-							ownerState={{ hidden: routeUrl !== location.pathname }}
+							className={
+								routeUrl !== location.pathname ? "Mui-hidden" : undefined
+							}
 						>
 							{grid(routeUrl === location.pathname)}
 						</GridVisibilityWrapper>

@@ -203,6 +203,7 @@ import {
 } from "./standalone/Schedule/Scrollable/ScrollableScheduleDay";
 import { FormClassKey } from "./backend-components";
 import { BasicFormPageProps } from "./backend-components/Form/BasicFormPage";
+import { CrudClassKey } from "./backend-components/CRUD";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface ComponentsCareTheme {}
@@ -283,6 +284,7 @@ declare module "@mui/material/styles" {
 		CcGridMultiSelectFilter: GridMultiSelectFilterClassKey;
 		CcGridSingleSelectFilter: GridSingleSelectFilterClassKey;
 		CcForm: FormClassKey;
+		CcCrud: CrudClassKey;
 	}
 
 	interface ComponentsPropsList {
@@ -651,6 +653,9 @@ declare module "@mui/material/styles" {
 		};
 		CcBasicFormPage?: {
 			defaultProps?: ComponentsPropsList["CcBasicFormPage"];
+		};
+		CcCrud?: {
+			styleOverrides?: ComponentsOverrides<Theme>["CcCrud"];
 		};
 	}
 }
