@@ -300,9 +300,12 @@ const Form = (props) => {
         setMountedFields((prev) => ({ ...prev, [field]: mounted }));
     }, []);
     // main form handling - dirty state
+    const initialValues = useMemo(() => serverData
+        ? deepAssign({}, serverData[0], serverData[0].id || !initialRecord ? {} : initialRecord)
+        : undefined, [serverData, initialRecord]);
     const getNormalizedData = useCallback((values) => {
-        if (!serverData) {
-            throw new Error("No server data");
+        if (!initialValues) {
+            throw new Error("No server data (initialValues)");
         }
         if (!defaultRecord) {
             throw new Error("No default record");
@@ -316,7 +319,7 @@ const Form = (props) => {
             alwaysSubmitFields: alwaysSubmitFields ?? [],
             mountedFields,
         });
-        const remoteData = normalizeValues(serverData[0], {
+        const remoteData = normalizeValues(initialValues, {
             ignoreFields: dirtyIgnoreFields,
             model: model,
             defaultRecord: defaultRecord[0],
@@ -327,14 +330,14 @@ const Form = (props) => {
         });
         return [localData, remoteData];
     }, [
+        initialValues,
         defaultRecord,
         dirtyIgnoreFields,
         model,
-        mountedFields,
-        onlySubmitMounted,
         onlySubmitMountedBehaviour,
+        onlySubmitMounted,
         alwaysSubmitFields,
-        serverData,
+        mountedFields,
     ]);
     const getFormDirty = useCallback((values) => serverData && defaultRecord
         ? (() => {
@@ -867,7 +870,7 @@ const Form = (props) => {
         submit: submitForm,
         deleteOnSubmit: !!deleteOnSubmit,
         values,
-        initialValues: serverData ? serverData[0] : {},
+        initialValues: initialValues ?? {},
         touched,
         errors,
         warnings,
@@ -922,6 +925,7 @@ const Form = (props) => {
         submitForm,
         deleteOnSubmit,
         values,
+        initialValues,
         touched,
         errors,
         warnings,
