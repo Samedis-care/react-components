@@ -742,7 +742,11 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 				} else {
 					onSelect(dataNormalized[0] ?? null);
 				}
-				if (dataNormalized.length > selectedNormalized.length) {
+				if (
+					multiple
+						? dataNormalized.length > selectedNormalized.length
+						: dataNormalized.length > 0
+				) {
 					addToLru(getId(dataNormalized[dataNormalized.length - 1]));
 				}
 			}
