@@ -14,6 +14,10 @@ export interface BaseSelectorData {
      */
     label: string | [string, React.ReactNode];
     /**
+     * HTML title attribute override
+     */
+    titleTooltip?: string;
+    /**
      * The group of this item
      */
     group?: string;

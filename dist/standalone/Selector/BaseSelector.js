@@ -374,7 +374,7 @@ const BaseSelector = (inProps) => {
                                 ...params.inputProps,
                                 readOnly: disableSearch,
                                 title: selected && !multiple
-                                    ? getStringLabel(selected)
+                                    ? (selected.titleTooltip ?? getStringLabel(selected))
                                     : undefined,
                                 value: multiple
                                     ? selected.map((sel) => sel.label).join(", ")
