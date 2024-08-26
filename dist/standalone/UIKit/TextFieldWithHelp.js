@@ -48,11 +48,11 @@ const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(props
             ...muiProps.InputProps,
             endAdornment: hasEndAdornment ? (React.createElement(React.Fragment, null,
                 React.createElement(InputAdornment, { position: "end" },
-                    showClear && (React.createElement(IconButton, { onClick: handleClear, size: "large" },
+                    showClear && (React.createElement(IconButton, { onClick: handleClear, size: "small" },
                         React.createElement(ClearIcon, null))),
                     muiProps.InputProps
                         ?.endAdornment?.props?.children,
-                    openInfo && (React.createElement(IconButton, { onClick: openInfo, size: "large" },
+                    openInfo && (React.createElement(IconButton, { onClick: openInfo, size: "small" },
                         React.createElement(InfoIcon, { color: "disabled" })))))) : undefined,
         }, inputProps: {
             ...muiProps.inputProps,
