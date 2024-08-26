@@ -58,6 +58,10 @@ export interface BaseSelectorData {
 	 */
 	label: string | [string, React.ReactNode];
 	/**
+	 * HTML title attribute override
+	 */
+	titleTooltip?: string;
+	/**
 	 * The group of this item
 	 */
 	group?: string;
@@ -1014,7 +1018,7 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 										readOnly: disableSearch,
 										title:
 											selected && !multiple
-												? getStringLabel(selected)
+												? (selected.titleTooltip ?? getStringLabel(selected))
 												: undefined,
 										value: multiple
 											? selected.map((sel) => sel.label).join(", ")
