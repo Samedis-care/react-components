@@ -109,7 +109,7 @@ const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(
 					<>
 						<InputAdornment position={"end"}>
 							{showClear && (
-								<IconButton onClick={handleClear} size="large">
+								<IconButton onClick={handleClear} size="small">
 									<ClearIcon />
 								</IconButton>
 							)}
@@ -120,7 +120,7 @@ const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(
 								)?.props?.children
 							}
 							{openInfo && (
-								<IconButton onClick={openInfo} size="large">
+								<IconButton onClick={openInfo} size="small">
 									<InfoIcon color={"disabled"} />
 								</IconButton>
 							)}
