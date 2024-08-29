@@ -37,6 +37,7 @@ import useCCTranslations from "../../utils/useCCTranslations";
 import { useDialogContext } from "../../framework";
 import deepSort from "../../utils/deepSort";
 import useDevKeybinds from "../../utils/useDevKeybinds";
+import uniqueArray from "../../utils/uniqueArray";
 
 // optional import
 let captureException: ((e: Error) => void) | null = null;
@@ -670,6 +671,7 @@ export interface FormNestedState {
 export type FormFlowEngineStageConfig = Partial<{
 	onlySubmitMounted: boolean;
 	onlySubmitMountedBehaviour: OnlySubmitMountedBehaviour;
+	alwaysSubmitFields: string[];
 }>;
 
 export const useFormFlowEngineStageConfig = (
@@ -831,7 +833,6 @@ const Form = <
 		onSubmit,
 		customProps,
 		onlyWarnMounted,
-		alwaysSubmitFields,
 		onlyWarnChanged,
 		readOnly: readOnlyProp,
 		readOnlyReason: readOnlyReasonProp,
@@ -1110,7 +1111,10 @@ const Form = <
 				defaultRecord: defaultRecord[0],
 				onlySubmitMountedBehaviour,
 				onlySubmitMounted: onlySubmitMounted ?? false,
-				alwaysSubmitFields: alwaysSubmitFields ?? [],
+				alwaysSubmitFields: uniqueArray([
+					...(props.alwaysSubmitFields ?? []),
+					...(flowEngineConfig.current.alwaysSubmitFields ?? []),
+				]),
 				mountedFields,
 			});
 
@@ -1120,7 +1124,10 @@ const Form = <
 				defaultRecord: defaultRecord[0],
 				onlySubmitMountedBehaviour,
 				onlySubmitMounted: onlySubmitMounted ?? false,
-				alwaysSubmitFields: alwaysSubmitFields ?? [],
+				alwaysSubmitFields: uniqueArray([
+					...(props.alwaysSubmitFields ?? []),
+					...(flowEngineConfig.current.alwaysSubmitFields ?? []),
+				]),
 				mountedFields,
 			});
 			return [localData, remoteData];
@@ -1132,7 +1139,7 @@ const Form = <
 			model,
 			onlySubmitMountedBehaviour,
 			onlySubmitMounted,
-			alwaysSubmitFields,
+			props.alwaysSubmitFields,
 			mountedFields,
 		],
 	);
@@ -1491,7 +1498,10 @@ const Form = <
 						flowEngineConfig.current.onlySubmitMounted ?? true,
 						flowEngineConfig.current.onlySubmitMountedBehaviour ??
 							OnlySubmitMountedBehaviour.OMIT,
-						alwaysSubmitFields ?? [],
+						uniqueArray([
+							...(props.alwaysSubmitFields ?? []),
+							...(flowEngineConfig.current.alwaysSubmitFields ?? []),
+						]),
 						mountedFields,
 						defaultRecord[0],
 						id,
@@ -1529,7 +1539,10 @@ const Form = <
 							model as unknown as Model<string, PageVisibility, unknown>,
 							flowEngine && id === null ? false : (onlySubmitMounted ?? false),
 							onlySubmitMountedBehaviour,
-							alwaysSubmitFields ?? [],
+							uniqueArray([
+								...(props.alwaysSubmitFields ?? []),
+								...(flowEngineConfig.current.alwaysSubmitFields ?? []),
+							]),
 							flowEngine ? valuesStagedModifiedRef.current : mountedFields,
 							defaultRecord[0],
 							id,
@@ -1586,12 +1599,12 @@ const Form = <
 			pushDialog,
 			t,
 			id,
-			updateData,
 			model,
+			props.alwaysSubmitFields,
+			mountedFields,
+			updateData,
 			onlySubmitMounted,
 			onlySubmitMountedBehaviour,
-			alwaysSubmitFields,
-			mountedFields,
 			onSubmit,
 		],
 	);
