@@ -534,6 +534,7 @@ export interface FormNestedState {
 export type FormFlowEngineStageConfig = Partial<{
     onlySubmitMounted: boolean;
     onlySubmitMountedBehaviour: OnlySubmitMountedBehaviour;
+    alwaysSubmitFields: string[];
 }>;
 export declare const useFormFlowEngineStageConfig: (config: FormFlowEngineStageConfig) => void;
 export type FormClassKey = "root";

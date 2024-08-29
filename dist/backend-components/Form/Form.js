@@ -12,6 +12,7 @@ import useCCTranslations from "../../utils/useCCTranslations";
 import { useDialogContext } from "../../framework";
 import deepSort from "../../utils/deepSort";
 import useDevKeybinds from "../../utils/useDevKeybinds";
+import uniqueArray from "../../utils/uniqueArray";
 // optional import
 let captureException = null;
 import("@sentry/react")
@@ -126,7 +127,7 @@ const setAllTouched = (touched, set) => Object.fromEntries(Object.keys(touched).
 const StyledForm = styled("form", { name: "CcForm", slot: "root" })({});
 const StyledFormDiv = styled("div", { name: "CcForm", slot: "root" })({});
 const Form = (props) => {
-    const { model, id, children, onSubmit, customProps, onlyWarnMounted, alwaysSubmitFields, onlyWarnChanged, readOnly: readOnlyProp, readOnlyReason: readOnlyReasonProp, readOnlyReasons: readOnlyReasonsProp, disableValidation, nestedFormName, disableNestedSubmit, nestedFormPreSubmitHandler, deleteOnSubmit, onDeleted, initialRecord, formClass, preSubmit, dirtyIgnoreFields, flowEngine, renderFormAsDiv: renderFormAsDivProp, } = props;
+    const { model, id, children, onSubmit, customProps, onlyWarnMounted, onlyWarnChanged, readOnly: readOnlyProp, readOnlyReason: readOnlyReasonProp, readOnlyReasons: readOnlyReasonsProp, disableValidation, nestedFormName, disableNestedSubmit, nestedFormPreSubmitHandler, deleteOnSubmit, onDeleted, initialRecord, formClass, preSubmit, dirtyIgnoreFields, flowEngine, renderFormAsDiv: renderFormAsDivProp, } = props;
     const renderFormAsDiv = useContext(FormRenderAsDivContext) || renderFormAsDivProp;
     // flow engine mode defaults
     const flowEngineConfig = useRef({});
@@ -316,7 +317,10 @@ const Form = (props) => {
             defaultRecord: defaultRecord[0],
             onlySubmitMountedBehaviour,
             onlySubmitMounted: onlySubmitMounted ?? false,
-            alwaysSubmitFields: alwaysSubmitFields ?? [],
+            alwaysSubmitFields: uniqueArray([
+                ...(props.alwaysSubmitFields ?? []),
+                ...(flowEngineConfig.current.alwaysSubmitFields ?? []),
+            ]),
             mountedFields,
         });
         const remoteData = normalizeValues(initialValues, {
@@ -325,7 +329,10 @@ const Form = (props) => {
             defaultRecord: defaultRecord[0],
             onlySubmitMountedBehaviour,
             onlySubmitMounted: onlySubmitMounted ?? false,
-            alwaysSubmitFields: alwaysSubmitFields ?? [],
+            alwaysSubmitFields: uniqueArray([
+                ...(props.alwaysSubmitFields ?? []),
+                ...(flowEngineConfig.current.alwaysSubmitFields ?? []),
+            ]),
             mountedFields,
         });
         return [localData, remoteData];
@@ -336,7 +343,7 @@ const Form = (props) => {
         model,
         onlySubmitMountedBehaviour,
         onlySubmitMounted,
-        alwaysSubmitFields,
+        props.alwaysSubmitFields,
         mountedFields,
     ]);
     const getFormDirty = useCallback((values) => serverData && defaultRecord
@@ -591,7 +598,10 @@ const Form = (props) => {
             if (flowEngine) {
                 // flow engine staged submit
                 const updateData = getUpdateData(valuesRef.current, model, flowEngineConfig.current.onlySubmitMounted ?? true, flowEngineConfig.current.onlySubmitMountedBehaviour ??
-                    OnlySubmitMountedBehaviour.OMIT, alwaysSubmitFields ?? [], mountedFields, defaultRecord[0], id);
+                    OnlySubmitMountedBehaviour.OMIT, uniqueArray([
+                    ...(props.alwaysSubmitFields ?? []),
+                    ...(flowEngineConfig.current.alwaysSubmitFields ?? []),
+                ]), mountedFields, defaultRecord[0], id);
                 const originalStaged = deepClone(valuesStagedRef.current);
                 valuesStagedRef.current = deepAssign(valuesStagedRef.current, updateData);
                 setValuesStaged(valuesStagedRef.current);
@@ -610,7 +620,10 @@ const Form = (props) => {
             if (!flowEngine || params.submitToServer) {
                 const submitValues = valuesRef.current;
                 const oldValues = serverData[0];
-                const result = await updateData(getUpdateData(flowEngine ? valuesStagedRef.current : valuesRef.current, model, flowEngine && id === null ? false : (onlySubmitMounted ?? false), onlySubmitMountedBehaviour, alwaysSubmitFields ?? [], flowEngine ? valuesStagedModifiedRef.current : mountedFields, defaultRecord[0], id));
+                const result = await updateData(getUpdateData(flowEngine ? valuesStagedRef.current : valuesRef.current, model, flowEngine && id === null ? false : (onlySubmitMounted ?? false), onlySubmitMountedBehaviour, uniqueArray([
+                    ...(props.alwaysSubmitFields ?? []),
+                    ...(flowEngineConfig.current.alwaysSubmitFields ?? []),
+                ]), flowEngine ? valuesStagedModifiedRef.current : mountedFields, defaultRecord[0], id));
                 const newValues = deepClone(result[0]);
                 valuesRef.current = newValues;
                 valuesStagedRef.current = deepClone(result[0]);
@@ -652,12 +665,12 @@ const Form = (props) => {
         pushDialog,
         t,
         id,
-        updateData,
         model,
+        props.alwaysSubmitFields,
+        mountedFields,
+        updateData,
         onlySubmitMounted,
         onlySubmitMountedBehaviour,
-        alwaysSubmitFields,
-        mountedFields,
         onSubmit,
     ]);
     const handleSubmit = useCallback((evt) => {
