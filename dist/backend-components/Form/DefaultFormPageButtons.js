@@ -22,7 +22,7 @@ const DefaultFormPageButtons = (inProps) => {
         props: inProps,
         name: "CcDefaultFormPageButtons",
     });
-    const { showBackButtonOnly, readOnly, readOnlyReasons, dirty, isSubmitting, submit, customProps, confirmDialogMessage, autoBack, } = props;
+    const { showBackButtonOnly, readOnly, readOnlyReasons, dirty, isSubmitting, submit, customProps, confirmDialogMessage, autoBack, extraButtons, } = props;
     const goBack = customProps?.goBack;
     const hasCustomCloseHandler = customProps?.hasCustomSubmitHandler;
     const { t } = useCCTranslations();
@@ -74,6 +74,7 @@ const DefaultFormPageButtons = (inProps) => {
         !showBackButtonOnly &&
             (readOnly && humanReadOnlyReasons.length > 0 ? (React.createElement(Tooltip, { title: humanReadOnlyReasons.join(", ") },
                 React.createElement("span", null, saveBtn))) : (saveBtn)),
+        extraButtons,
         goBack && !(isInDialog && hasCustomCloseHandler) && (React.createElement(BackActionButton, { disabled: isSubmitting, onClick: handleBack }, t("common.buttons.back")))));
 };
 export default React.memo(DefaultFormPageButtons);
