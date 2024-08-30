@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import BasicFormPage from "./BasicFormPage";
 import DefaultFormPageButtons from "./DefaultFormPageButtons";
 import { PageProps } from "./Form";
@@ -23,13 +23,19 @@ export interface DefaultFormPageProps
 	 * Confirm dialog message
 	 */
 	confirmDialogMessage?: string;
+	/**
+	 * Extra buttons
+	 */
+	extraButtons?: React.ReactNode;
 }
 
 const DefaultFormPage = (props: DefaultFormPageProps) => {
-	const { children } = props;
+	const { children, extraButtons } = props;
+
+	const childrenProps = useMemo(() => ({ extraButtons }), [extraButtons]);
 
 	return (
-		<BasicFormPage {...props} form={children} childrenProps={undefined}>
+		<BasicFormPage {...props} form={children} childrenProps={childrenProps}>
 			{DefaultFormPageButtons}
 		</BasicFormPage>
 	);

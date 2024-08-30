@@ -13,6 +13,7 @@ import { ActionButton, FormButtons } from "../../standalone";
 import { IsInFormDialogContext } from "./FormDialog";
 import useCCTranslations from "../../utils/useCCTranslations";
 import { styled, Tooltip, useThemeProps } from "@mui/material";
+import { DefaultFormPageProps } from "./DefaultFormPage";
 
 export const BackActionButton = styled(ActionButton, {
 	name: "CcDefaultFormPageButtons",
@@ -30,7 +31,8 @@ export const BackActionButton = styled(ActionButton, {
 export type DefaultFormPageButtonsClassKey = "backButton";
 export type DefaultFormPageButtonsProps = BasicFormPageRendererProps<
 	CrudFormProps | undefined
->;
+> &
+	Pick<DefaultFormPageProps, "extraButtons">;
 
 const DefaultFormPageButtons = (inProps: DefaultFormPageButtonsProps) => {
 	const props = useThemeProps({
@@ -47,6 +49,7 @@ const DefaultFormPageButtons = (inProps: DefaultFormPageButtonsProps) => {
 		customProps,
 		confirmDialogMessage,
 		autoBack,
+		extraButtons,
 	} = props;
 	const goBack = customProps?.goBack;
 	const hasCustomCloseHandler = customProps?.hasCustomSubmitHandler;
@@ -118,6 +121,7 @@ const DefaultFormPageButtons = (inProps: DefaultFormPageButtonsProps) => {
 				) : (
 					saveBtn
 				))}
+			{extraButtons}
 			{goBack && !(isInDialog && hasCustomCloseHandler) && (
 				<BackActionButton disabled={isSubmitting} onClick={handleBack}>
 					{t("common.buttons.back")}
