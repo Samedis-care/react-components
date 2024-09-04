@@ -99,6 +99,7 @@ class RendererEnumSelect extends TypeEnum {
 						onLoad={onLoad}
 						onSelect={(value) => handleChange(field, value ? value.value : "")}
 						disabled={visibility.readOnly}
+						required={visibility.required}
 					/>
 					<FormHelperText>{errorMsg || warningMsg}</FormHelperText>
 				</FormControlFieldsetCC>
