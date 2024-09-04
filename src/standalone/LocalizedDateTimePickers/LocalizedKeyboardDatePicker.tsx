@@ -1,8 +1,13 @@
 import React from "react";
-import { DatePicker, DatePickerProps } from "@mui/x-date-pickers";
+import {
+	DatePicker,
+	DatePickerProps,
+	LocalizationProvider,
+} from "@mui/x-date-pickers";
 import { TextFieldProps, useThemeProps } from "@mui/material";
 import { withMuiWarning } from "../UIKit/MuiWarning";
 import { Moment } from "moment";
+import useMuiLocaleData from "./useMuiLocaleData";
 
 export interface LocalizedKeyboardDatePickerProps
 	extends Omit<DatePickerProps<Moment>, "format"> {
@@ -49,27 +54,30 @@ const LocalizedKeyboardDatePicker = (
 		...otherProps.slots,
 		openPickerIcon: React.Fragment,
 	};
+	const localeText = useMuiLocaleData();
 
 	return (
-		<DatePicker
-			format={"L"}
-			{...otherProps}
-			slots={
-				otherProps.disabled && hideDisabledIcon
-					? slotOverrideHideIcon
-					: otherProps.slots
-			}
-			slotProps={{
-				...otherProps.slotProps,
-				textField: {
-					required,
-					error,
-					fullWidth,
-					onBlur,
-					...otherProps.slotProps?.textField,
-				},
-			}}
-		/>
+		<LocalizationProvider localeText={localeText}>
+			<DatePicker
+				format={"L"}
+				{...otherProps}
+				slots={
+					otherProps.disabled && hideDisabledIcon
+						? slotOverrideHideIcon
+						: otherProps.slots
+				}
+				slotProps={{
+					...otherProps.slotProps,
+					textField: {
+						required,
+						error,
+						fullWidth,
+						onBlur,
+						...otherProps.slotProps?.textField,
+					},
+				}}
+			/>
+		</LocalizationProvider>
 	);
 };
 

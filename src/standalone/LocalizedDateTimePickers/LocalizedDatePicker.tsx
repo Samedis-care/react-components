@@ -1,12 +1,22 @@
 import React from "react";
-import { DatePicker, DatePickerProps } from "@mui/x-date-pickers";
+import {
+	DatePicker,
+	DatePickerProps,
+	LocalizationProvider,
+} from "@mui/x-date-pickers";
 import { withMuiWarning } from "../UIKit/MuiWarning";
 import { Moment } from "moment";
+import useMuiLocaleData from "./useMuiLocaleData";
 
 type LocalizedDatePickerProps = Omit<DatePickerProps<Moment>, "format">;
 
 const LocalizedDatePicker = (props: LocalizedDatePickerProps) => {
-	return <DatePicker format={"L"} {...props} />;
+	const localeText = useMuiLocaleData();
+	return (
+		<LocalizationProvider localeText={localeText}>
+			<DatePicker format={"L"} {...props} />
+		</LocalizationProvider>
+	);
 };
 
 export default React.memo(withMuiWarning(LocalizedDatePicker));
