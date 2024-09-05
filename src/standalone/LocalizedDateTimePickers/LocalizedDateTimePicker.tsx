@@ -1,8 +1,13 @@
 import React from "react";
-import { DateTimePicker, DateTimePickerProps } from "@mui/x-date-pickers";
+import {
+	DateTimePicker,
+	DateTimePickerProps,
+	LocalizationProvider,
+} from "@mui/x-date-pickers";
 import { withMuiWarning } from "../UIKit";
 import { Moment } from "moment";
 import { TextFieldProps } from "@mui/material";
+import useMuiLocaleData from "./useMuiLocaleData";
 
 interface LocalizedDateTimePickerProps
 	extends Omit<DateTimePickerProps<Moment>, "format"> {
@@ -26,21 +31,24 @@ interface LocalizedDateTimePickerProps
 
 const LocalizedDateTimePicker = (props: LocalizedDateTimePickerProps) => {
 	const { required, error, fullWidth, onBlur, ...otherProps } = props;
+	const localeText = useMuiLocaleData();
 	return (
-		<DateTimePicker
-			format={"L LT"}
-			{...otherProps}
-			slotProps={{
-				...otherProps.slotProps,
-				textField: {
-					required,
-					error,
-					fullWidth,
-					onBlur,
-					...otherProps.slotProps?.textField,
-				},
-			}}
-		/>
+		<LocalizationProvider localeText={localeText}>
+			<DateTimePicker
+				format={"L LT"}
+				{...otherProps}
+				slotProps={{
+					...otherProps.slotProps,
+					textField: {
+						required,
+						error,
+						fullWidth,
+						onBlur,
+						...otherProps.slotProps?.textField,
+					},
+				}}
+			/>
+		</LocalizationProvider>
 	);
 };
 
