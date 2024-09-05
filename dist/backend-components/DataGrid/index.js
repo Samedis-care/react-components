@@ -41,6 +41,62 @@ export const useBackendDataGridAddNewButtons = (props) => {
     }, [props.additionalNewButtons, props.onAddNew, t]);
     return addNewButtons;
 };
+export const useBackendDataGridDeleteHandler = (props, refreshGrid) => {
+    const { model, enableDelete, enableDeleteAll, customDeleteConfirm, customDeleteErrorHandler, } = props;
+    const { t } = useCCTranslations();
+    const [pushDialog] = useDialogContext();
+    if (enableDeleteAll && !model.doesSupportAdvancedDeletion()) {
+        throw new Error("Delete All functionality requested, but not provided by model backend connector");
+    }
+    const { mutateAsync: deleteAdvanced } = useModelDeleteAdvanced(model);
+    const { mutateAsync: deleteMultiple } = useModelDeleteMultiple(model);
+    const handleDelete = useCallback(async (invert, ids, filter) => {
+        if (customDeleteConfirm) {
+            await customDeleteConfirm(invert, ids, filter);
+        }
+        else {
+            await showConfirmDialog(pushDialog, {
+                title: t("backend-components.data-grid.delete.confirm-dialog.title"),
+                message: t("backend-components.data-grid.delete.confirm-dialog." +
+                    (invert ? "messageInverted" : "message"), { NUM: ids.length }),
+                textButtonYes: t("backend-components.data-grid.delete.confirm-dialog.buttons.yes"),
+                textButtonNo: t("backend-components.data-grid.delete.confirm-dialog.buttons.no"),
+            });
+        }
+        try {
+            if (enableDeleteAll) {
+                await deleteAdvanced([invert, ids, filter]);
+            }
+            else {
+                await deleteMultiple(ids);
+            }
+            refreshGrid();
+        }
+        catch (e) {
+            refreshGrid();
+            if (customDeleteErrorHandler) {
+                await customDeleteErrorHandler(e);
+            }
+            else {
+                pushDialog(React.createElement(ErrorDialog, { title: t("backend-components.data-grid.delete.error-dialog.title"), message: t("backend-components.data-grid.delete.error-dialog.message", { ERROR: e.message }), buttons: [
+                        {
+                            text: t("backend-components.data-grid.delete.error-dialog.buttons.okay"),
+                        },
+                    ] }));
+            }
+        }
+    }, [
+        customDeleteConfirm,
+        customDeleteErrorHandler,
+        pushDialog,
+        t,
+        enableDeleteAll,
+        refreshGrid,
+        deleteAdvanced,
+        deleteMultiple,
+    ]);
+    return enableDelete ? handleDelete : undefined;
+};
 export const renderDataGridRecordUsingModel = (model, refreshGrid) => (entry) => Object.fromEntries(Object.keys(model.fields)
     .map((key) => {
     // we cannot render the ID, this will cause issues with the selection
@@ -111,13 +167,8 @@ export const renderDataGridRecordUsingModel = (model, refreshGrid) => (entry) =>
 })
     .flat());
 const BackendDataGrid = (props) => {
-    const { model, enableDelete, enableDeleteAll, customDeleteConfirm, customDeleteErrorHandler, } = props;
-    const { t } = useCCTranslations();
-    const [pushDialog] = useDialogContext();
+    const { model } = props;
     const [refreshToken, setRefreshToken] = useState("");
-    if (enableDeleteAll && !model.doesSupportAdvancedDeletion()) {
-        throw new Error("Delete All functionality requested, but not provided by model backend connector");
-    }
     const refreshGrid = useCallback(() => setRefreshToken(new Date().getTime().toString()), []);
     const loadData = useCallback(async (params) => {
         const [result, meta] = await model.index(params);
@@ -128,54 +179,8 @@ const BackendDataGrid = (props) => {
             rows: result.map(renderDataGridRecordUsingModel(model, refreshGrid)),
         };
     }, [model, refreshGrid]);
-    const { mutateAsync: deleteAdvanced } = useModelDeleteAdvanced(model);
-    const { mutateAsync: deleteMultiple } = useModelDeleteMultiple(model);
-    const handleDelete = useCallback(async (invert, ids, filter) => {
-        if (customDeleteConfirm) {
-            await customDeleteConfirm(invert, ids, filter);
-        }
-        else {
-            await showConfirmDialog(pushDialog, {
-                title: t("backend-components.data-grid.delete.confirm-dialog.title"),
-                message: t("backend-components.data-grid.delete.confirm-dialog." +
-                    (invert ? "messageInverted" : "message"), { NUM: ids.length }),
-                textButtonYes: t("backend-components.data-grid.delete.confirm-dialog.buttons.yes"),
-                textButtonNo: t("backend-components.data-grid.delete.confirm-dialog.buttons.no"),
-            });
-        }
-        try {
-            if (enableDeleteAll) {
-                await deleteAdvanced([invert, ids, filter]);
-            }
-            else {
-                await deleteMultiple(ids);
-            }
-            refreshGrid();
-        }
-        catch (e) {
-            refreshGrid();
-            if (customDeleteErrorHandler) {
-                await customDeleteErrorHandler(e);
-            }
-            else {
-                pushDialog(React.createElement(ErrorDialog, { title: t("backend-components.data-grid.delete.error-dialog.title"), message: t("backend-components.data-grid.delete.error-dialog.message", { ERROR: e.message }), buttons: [
-                        {
-                            text: t("backend-components.data-grid.delete.error-dialog.buttons.okay"),
-                        },
-                    ] }));
-            }
-        }
-    }, [
-        customDeleteConfirm,
-        customDeleteErrorHandler,
-        pushDialog,
-        t,
-        enableDeleteAll,
-        refreshGrid,
-        deleteAdvanced,
-        deleteMultiple,
-    ]);
     const addNewButtons = useBackendDataGridAddNewButtons(props);
-    return (React.createElement(DataGrid, { ...props, onAddNew: addNewButtons, onDelete: enableDelete ? handleDelete : undefined, loadData: loadData, columns: useMemo(() => model.toDataGridColumnDefinition(), [model]), forceRefreshToken: `${props.forceRefreshToken || "undefined"}${refreshToken}`, exporters: props.disableExport ? undefined : model.connector.dataGridExporters }));
+    const handleDelete = useBackendDataGridDeleteHandler(props, refreshGrid);
+    return (React.createElement(DataGrid, { ...props, onAddNew: addNewButtons, onDelete: handleDelete, loadData: loadData, columns: useMemo(() => model.toDataGridColumnDefinition(), [model]), forceRefreshToken: `${props.forceRefreshToken || "undefined"}${refreshToken}`, exporters: props.disableExport ? undefined : model.connector.dataGridExporters }));
 };
 export default React.memo(BackendDataGrid);
