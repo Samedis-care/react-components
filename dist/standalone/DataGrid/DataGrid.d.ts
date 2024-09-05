@@ -7,7 +7,7 @@ import { IDataGridContentSelectRowViewProps } from "./Content/SelectRowView";
 import { ComponentWithLabelProps } from "../UIKit/ComponentWithLabel";
 import BaseSelector from "../Selector/BaseSelector";
 import SingleSelect from "../Selector/SingleSelect";
-export type DataGridProps = IDataGridHeaderProps & IDataGridColumnProps & IDataGridCallbacks & {
+export interface DataGridProps extends IDataGridHeaderProps, IDataGridColumnProps, IDataGridCallbacks {
     /**
      * Custom CSS class to apply to root
      */
@@ -21,31 +21,7 @@ export type DataGridProps = IDataGridHeaderProps & IDataGridColumnProps & IDataG
      * Rendered next to delete.
      * Max 1 extra button to fit on mobile screens
      */
-    customDataActionButtons?: {
-        /**
-         * The icon of the button
-         */
-        icon: React.ReactNode;
-        /**
-         * The label of the button
-         * @remarks must be unique
-         */
-        label: string;
-        /**
-         * Is the button disabled?
-         * @param numSelected The amount of selected rows
-         * 										0 => none
-         * 									  1 => one
-         * 									  2 => multiple
-         */
-        isDisabled: (numSelected: 0 | 1 | 2) => boolean;
-        /**
-         * The click handler
-         * @param invert Is the selection inverted? (if true => ids = everything except ids)
-         * @param ids The ids
-         */
-        onClick: (invert: boolean, ids: string[]) => void;
-    }[];
+    customDataActionButtons?: DataGridCustomDataActionButton[];
     /**
      * Hides the footer
      */
@@ -58,7 +34,32 @@ export type DataGridProps = IDataGridHeaderProps & IDataGridColumnProps & IDataG
      * Enable the global scroll listener (listens for page up/down keydown events)
      */
     globalScrollListener?: boolean;
-};
+}
+export interface DataGridCustomDataActionButton {
+    /**
+     * The icon of the button
+     */
+    icon: React.ReactNode;
+    /**
+     * The label of the button
+     * @remarks must be unique
+     */
+    label: string;
+    /**
+     * Is the button disabled?
+     * @param numSelected The amount of selected rows
+     * 										0 => none
+     * 									  1 => one
+     * 									  2 => multiple
+     */
+    isDisabled: (numSelected: 0 | 1 | 2) => boolean;
+    /**
+     * The click handler
+     * @param invert Is the selection inverted? (if true => ids = everything except ids)
+     * @param ids The ids
+     */
+    onClick: (invert: boolean, ids: string[]) => void;
+}
 export interface IDataGridLoadDataParameters {
     /**
      * The page to load
