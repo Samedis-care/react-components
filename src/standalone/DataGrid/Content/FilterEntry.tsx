@@ -40,6 +40,8 @@ export type FilterType =
 	| "notContains"
 	| "equals"
 	| "notEqual"
+	| "matches" // case insensitive
+	| "notMatches" // case insensitive
 	| "empty"
 	| "notEmpty"
 	| "startsWith"
@@ -311,6 +313,16 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 		)
 	) {
 		filterTypeMenuItems.push(
+			checkSupport(props.valueType, "matches") && (
+				<MenuItem key={"matches"} value={"matches"}>
+					{t("standalone.data-grid.content.filter-type.matches")}
+				</MenuItem>
+			),
+			checkSupport(props.valueType, "notMatches") && (
+				<MenuItem key={"notMatches"} value={"notMatches"}>
+					{t("standalone.data-grid.content.filter-type.not-matches")}
+				</MenuItem>
+			),
 			checkSupport(props.valueType, "contains") && (
 				<MenuItem key={"contains"} value={"contains"}>
 					{t("standalone.data-grid.content.filter-type.contains")}
