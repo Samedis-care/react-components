@@ -42,7 +42,9 @@
 					"lte-date": "Vorher oder am",
 					"gt-date": "Nach dem",
 					"gte-date": "Am oder nach",
-					"in-range-date": "Zwischen"
+					"in-range-date": "Zwischen",
+					"matches": "Entspricht",
+					"not-matches": "Entspricht nicht"
 				},
 				"no-data": "Die Liste enthält keine Daten."
 			},

@@ -42,7 +42,9 @@
 					"lte-date": "Voor of op",
 					"gt-date": "Na",
 					"gte-date": "Op of na",
-					"in-range-date": "Tussen"
+					"in-range-date": "Tussen",
+					"not-matches": "Komt niet overeen",
+					"matches": "Overeen"
 				},
 				"no-data": "De lijst bevat geen data."
 			},
