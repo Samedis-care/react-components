@@ -42,7 +42,9 @@
 					"lte-date": "Avant ou le",
 					"gt-date": "Après",
 					"gte-date": "Le ou après",
-					"in-range-date": "Entre"
+					"in-range-date": "Entre",
+					"not-matches": "Ne correspond pas",
+					"matches": "Correspond"
 				},
 				"no-data": "La liste ne contient aucune donnée."
 			},
