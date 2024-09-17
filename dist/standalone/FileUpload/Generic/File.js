@@ -151,7 +151,7 @@ export const CodeFileExtensions = [
 ];
 export const CsvFileExtensions = ["csv"];
 export const TextFileExtensions = ["txt"];
-export const VideoFileExtensions = ["mp4", "mkv", "avi"];
+export const VideoFileExtensions = ["mp4", "mov", "mkv", "avi"];
 export const AudioMimeType = /^audio\//;
 export const ImageMimeType = /^image\//;
 export const VideoMimeType = /^video\//;
