@@ -89,10 +89,7 @@ export interface IDataGridExporter<T> {
 	 * @param data The data returned by backend
 	 * @param pushDialog function to push react dialogs (only available if DataGrid has CC dialog context)
 	 */
-	onDownload: (
-		data: T,
-		pushDialog?: DialogContextType[0] | null | undefined,
-	) => void;
+	onDownload: (data: T, pushDialog?: DialogContextType[0] | null) => void;
 	/**
 	 * Automatically call onDownload when ready (this is considered non-interactive and may come with limitations for e.g. opening popups)
 	 */
