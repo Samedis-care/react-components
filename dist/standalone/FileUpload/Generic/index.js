@@ -230,19 +230,19 @@ const FileUpload = (inProps, ref) => {
                     classes?.dropzone,
                     dragging && "Mui-active",
                 ]) },
-                !readOnly && (React.createElement(Grid, { xs: true, key: "upload" },
+                !readOnly && (React.createElement(Grid, { item: true, xs: true, key: "upload" },
                     React.createElement(Button, { startIcon: React.createElement(AttachFile, null), variant: "contained", color: "primary", onClick: () => handleUpload(), name: name, onBlur: onBlur }, uploadLabel || t("standalone.file-upload.upload")),
                     React.createElement(FileInput, { type: "file", accept: accept || undefined, multiple: maxFiles ? getRemainingFileCount() > 1 : true, onChange: handleFileChange, className: classes?.fileInput, ref: inputRef }))),
-                React.createElement(Grid, { xs: 12, key: "files" },
+                React.createElement(Grid, { item: true, xs: 12, key: "files" },
                     React.createElement(Grid, { container: true, spacing: 2, alignContent: "flex-start", alignItems: "flex-start" },
                         files.map((data, index) => data && (React.createElement(FilePreview, { name: data.file.name, downloadLink: "downloadLink" in data.file
                                 ? data.file.downloadLink
                                 : undefined, key: `${index}-${data.file.name}`, size: previewSize, preview: previewImages ? data.preview : undefined, disabled: data.delete || false, onRemove: readOnly || data.preventDelete
                                 ? undefined
                                 : () => removeFile(data), variant: "box" }))),
-                        readOnly && files.length === 0 && (React.createElement(Grid, null,
+                        readOnly && files.length === 0 && (React.createElement(Grid, { item: true },
                             React.createElement(Typography, null, t("standalone.file-upload.no-files")))))),
-                !readOnly && (React.createElement(Grid, { xs: 12, key: "info" },
+                !readOnly && (React.createElement(Grid, { item: true, xs: 12, key: "info" },
                     React.createElement(FormatText, { className: classes?.formatText },
                         "(",
                         t("standalone.file-upload.formats"),
@@ -261,23 +261,23 @@ const FileUpload = (inProps, ref) => {
                     "components-care-dropzone",
                     dragging && "Mui-active",
                 ]) },
-                !readOnly && (React.createElement(Grid, { xs: true, key: "upload" },
+                !readOnly && (React.createElement(Grid, { item: true, xs: true, key: "upload" },
                     React.createElement(ModernUploadLabel, { className: combineClassNames([
                             classes?.modernUploadLabel,
                             files.length === 0 && "CcFileUpload-modernUploadLabel-empty",
                         ]) }, uploadLabel || t("standalone.file-upload.upload-modern")),
                     React.createElement(FileInput, { type: "file", accept: accept || undefined, multiple: maxFiles ? getRemainingFileCount() > 1 : true, onChange: handleFileChange, className: classes?.fileInput, ref: inputRef }))),
-                files.length > 0 && (React.createElement(Grid, { xs: 12, key: "files" },
+                files.length > 0 && (React.createElement(Grid, { item: true, xs: 12, key: "files" },
                     React.createElement(Box, { mx: 1 },
                         React.createElement(Grid, { container: true, spacing: 1, alignContent: "flex-start", alignItems: "flex-start" }, files.map((data, index) => data && (React.createElement(FilePreview, { name: data.file.name, downloadLink: "downloadLink" in data.file
                                 ? data.file.downloadLink
                                 : undefined, key: `${index}-${data.file.name}`, size: previewSize, preview: previewImages ? data.preview : undefined, disabled: data.delete || false, onRemove: readOnly || data.preventDelete
                                 ? undefined
                                 : () => removeFile(data), variant: "list" }))))))),
-                readOnly && files.length === 0 && (React.createElement(Grid, { xs: 12, key: "no-files" },
+                readOnly && files.length === 0 && (React.createElement(Grid, { item: true, xs: 12, key: "no-files" },
                     React.createElement(Typography, null, t("standalone.file-upload.no-files")))),
-                !readOnly && (React.createElement(Grid, { xs: 12, key: "info", container: true, wrap: "nowrap", spacing: 1 },
-                    React.createElement(Grid, { xs: true },
+                !readOnly && (React.createElement(Grid, { item: true, xs: 12, key: "info", container: true, wrap: "nowrap", spacing: 1 },
+                    React.createElement(Grid, { item: true, xs: true },
                         React.createElement(FormatTextModern, { align: "right", className: classes?.formatTextModern },
                             t("standalone.file-upload.formats-modern"),
                             " ",
