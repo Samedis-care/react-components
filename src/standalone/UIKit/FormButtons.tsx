@@ -1,5 +1,5 @@
 import React from "react";
-import { styled, Unstable_Grid2 as Grid, useThemeProps } from "@mui/material";
+import { styled, Grid2 as Grid, useThemeProps } from "@mui/material";
 import combineClassNames from "../../utils/combineClassNames";
 
 const Container = styled(Grid, { name: "CcFormButtons", slot: "root" })(
