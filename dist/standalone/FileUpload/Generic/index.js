@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useImperativeHandle, useRef, useState, } from "react";
-import { Box, Button, FormHelperText, styled, Tooltip, Typography, Unstable_Grid2 as Grid, useThemeProps, } from "@mui/material";
+import { Box, Button, FormHelperText, styled, Tooltip, Typography, Grid, useThemeProps, } from "@mui/material";
 import { AttachFile } from "@mui/icons-material";
 import FilePreview, { getFileIconOrDefault } from "./File";
 import processImage from "../../../utils/processImage";
