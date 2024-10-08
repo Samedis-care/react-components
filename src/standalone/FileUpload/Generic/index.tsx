@@ -545,7 +545,7 @@ const FileUpload = (
 					])}
 				>
 					{!readOnly && (
-						<Grid xs key={"upload"}>
+						<Grid item xs key={"upload"}>
 							<Button
 								startIcon={<AttachFile />}
 								variant={"contained"}
@@ -566,7 +566,7 @@ const FileUpload = (
 							/>
 						</Grid>
 					)}
-					<Grid xs={12} key={"files"}>
+					<Grid item xs={12} key={"files"}>
 						<Grid
 							container
 							spacing={2}
@@ -597,7 +597,7 @@ const FileUpload = (
 									),
 							)}
 							{readOnly && files.length === 0 && (
-								<Grid>
+								<Grid item>
 									<Typography>
 										{t("standalone.file-upload.no-files")}
 									</Typography>
@@ -606,7 +606,7 @@ const FileUpload = (
 						</Grid>
 					</Grid>
 					{!readOnly && (
-						<Grid xs={12} key={"info"}>
+						<Grid item xs={12} key={"info"}>
 							<FormatText className={classes?.formatText}>
 								({t("standalone.file-upload.formats")}:{" "}
 								{acceptLabel ||
@@ -641,7 +641,7 @@ const FileUpload = (
 					])}
 				>
 					{!readOnly && (
-						<Grid xs key={"upload"}>
+						<Grid item xs key={"upload"}>
 							<ModernUploadLabel
 								className={combineClassNames([
 									classes?.modernUploadLabel,
@@ -661,7 +661,7 @@ const FileUpload = (
 						</Grid>
 					)}
 					{files.length > 0 && (
-						<Grid xs={12} key={"files"}>
+						<Grid item xs={12} key={"files"}>
 							<Box mx={1}>
 								<Grid
 									container
@@ -697,13 +697,20 @@ const FileUpload = (
 						</Grid>
 					)}
 					{readOnly && files.length === 0 && (
-						<Grid xs={12} key={"no-files"}>
+						<Grid item xs={12} key={"no-files"}>
 							<Typography>{t("standalone.file-upload.no-files")}</Typography>
 						</Grid>
 					)}
 					{!readOnly && (
-						<Grid xs={12} key={"info"} container wrap={"nowrap"} spacing={1}>
-							<Grid xs>
+						<Grid
+							item
+							xs={12}
+							key={"info"}
+							container
+							wrap={"nowrap"}
+							spacing={1}
+						>
+							<Grid item xs>
 								<FormatTextModern
 									align={"right"}
 									className={classes?.formatTextModern}
