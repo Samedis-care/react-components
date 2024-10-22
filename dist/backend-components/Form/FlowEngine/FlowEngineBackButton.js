@@ -25,7 +25,7 @@ const FlowEngineBackButton = (props) => {
     const { t } = useCCTranslations();
     const handleBack = useCallback(() => {
         if (goBack)
-            goBack();
+            void goBack();
     }, [goBack]);
     return (React.createElement(React.Fragment, null, goBack && !(isInDialog && hasCustomCloseHandler) && (React.createElement(BackActionButton, { ...props, disabled: props.disabled || submitting, onClick: handleBack }, props.children ?? t("common.buttons.back")))));
 };

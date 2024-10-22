@@ -84,18 +84,22 @@ const BasicFormPage = (inProps) => {
         disableRouting,
     ]);
     // go back confirm dialog if form is dirty
-    const customPropsWithGoBack = {
-        ...(typeof originalCustomProps === "object" ? originalCustomProps : null),
-    };
+    const customPropsWithGoBack = typeof originalCustomProps === "object"
+        ? {
+            ...(typeof originalCustomProps === "object"
+                ? originalCustomProps
+                : null),
+        }
+        : originalCustomProps;
     if (typeof originalCustomProps === "object" &&
         originalCustomProps &&
         "goBack" in originalCustomProps) {
         const orgGoBack = originalCustomProps.goBack;
         customPropsWithGoBack.goBack =
             typeof orgGoBack === "function"
-                ? async (forceRefresh) => {
+                ? async (forceRefresh, forceNavigate) => {
                     try {
-                        if (dirty && !readOnly) {
+                        if (dirty && !readOnly && !forceNavigate) {
                             await showConfirmDialog(pushDialog, {
                                 title: t("backend-components.form.back-on-dirty.title"),
                                 message: t("backend-components.form.back-on-dirty.message"),
@@ -107,7 +111,7 @@ const BasicFormPage = (inProps) => {
                             unblock.current();
                             unblock.current = undefined;
                         }
-                        await orgGoBack(forceRefresh);
+                        orgGoBack(forceRefresh);
                     }
                     catch {
                         // user cancelled
@@ -128,9 +132,9 @@ const BasicFormPage = (inProps) => {
     }, [submit, postSubmitHandler, pushDialog]);
     const UsedFormPageLayout = formPageLayoutComponent ?? FormPageLayout;
     return (React.createElement(UsedFormPageLayout, { body: form, footer: React.createElement(FormButtons, { ...childrenProps, ...otherProps, showBackButtonOnly: otherProps.showBackButtonOnly ||
-                (readOnly && !Object.values(readOnlyReasons).find((e) => !!e)), readOnly: readOnly, readOnlyReasons: readOnlyReasons, isSubmitting: isSubmitting, dirty: dirty, disableRouting: disableRouting, submit: handleSubmit, customProps: typeof originalCustomProps === "object" &&
+                (readOnly && !Object.values(readOnlyReasons).find((e) => !!e)), readOnly: readOnly, readOnlyReasons: readOnlyReasons, isSubmitting: isSubmitting, dirty: dirty, disableRouting: disableRouting, submit: handleSubmit, customProps: (typeof originalCustomProps === "object" &&
                 originalCustomProps != null
                 ? customPropsWithGoBack
-                : originalCustomProps }), other: React.createElement(FormLoaderOverlay, { visible: isSubmitting }) }));
+                : originalCustomProps) }), other: React.createElement(FormLoaderOverlay, { visible: isSubmitting }) }));
 };
 export default React.memo(BasicFormPage);

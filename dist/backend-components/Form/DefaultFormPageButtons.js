@@ -66,7 +66,7 @@ const DefaultFormPageButtons = (inProps) => {
     useEffect(() => {
         if (autoBackTrigger === null)
             return;
-        handleBack();
+        void handleBack();
     }, [autoBackTrigger, handleBack]);
     const saveBtn = (React.createElement(ActionButton, { disabled: !dirty || isSubmitting || readOnly, onClick: displayConfirmDialog ? submitWithConfirmDialog : safeSubmit }, t("common.buttons.save")));
     const humanReadOnlyReasons = useMemo(() => Object.values(readOnlyReasons).filter((e) => !!e), [readOnlyReasons]);

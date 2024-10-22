@@ -2,6 +2,7 @@ import React from "react";
 import { FormContextData, PageProps } from "../Form";
 import { ModelFieldName } from "../../backend-integration/Model/Model";
 import { FormPageLayoutProps } from "../../standalone/Form/FormPageLayout";
+import { CrudFormProps } from "../CRUD";
 export interface BasicFormPageRendererProps<CustomPropsT> extends Omit<PageProps<ModelFieldName, CustomPropsT>, "submit" | "dirty"> {
     /**
      * Function to submit everything
@@ -32,6 +33,10 @@ export interface BasicFormPageRendererProps<CustomPropsT> extends Omit<PageProps
      */
     confirmDialogMessage?: string;
 }
+export type EnhancedGoBackType = {
+    goBack: (forceRefresh?: boolean, forceNavigate?: boolean) => Promise<void> | void;
+};
+export type EnhancedCustomProps<T> = T extends Pick<CrudFormProps, "goBack"> ? Omit<T, "goBack"> & EnhancedGoBackType : T;
 export interface BasicFormPageProps<RendererPropsT, CustomPropsT> extends PageProps<ModelFieldName, CustomPropsT> {
     /**
      * Called after submit successfully completed
@@ -40,7 +45,7 @@ export interface BasicFormPageProps<RendererPropsT, CustomPropsT> extends PagePr
     /**
      * The form page contents renderer
      */
-    children: React.ComponentType<BasicFormPageRendererProps<CustomPropsT> & RendererPropsT>;
+    children: React.ComponentType<BasicFormPageRendererProps<EnhancedCustomProps<CustomPropsT>> & RendererPropsT>;
     /**
      * Additional props passed to children
      */
