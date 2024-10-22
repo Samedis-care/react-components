@@ -5,6 +5,7 @@ import { BackActionButton } from "../DefaultFormPageButtons";
 import { CrudFormProps } from "../../CRUD";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import { IsInFormDialogContext } from "../FormDialog";
+import { EnhancedCustomProps } from "../BasicFormPage";
 
 export interface FlowEngineBackButtonProps
 	extends Omit<ActionButtonProps, "onClick" | "children"> {
@@ -13,7 +14,9 @@ export interface FlowEngineBackButtonProps
 
 export const useShouldRenderFlowEngineBackButton = () => {
 	const { customProps } = useFormContextLite();
-	const custProps = customProps as CrudFormProps | undefined;
+	const custProps = customProps as
+		| EnhancedCustomProps<CrudFormProps>
+		| undefined;
 	const isInDialog = useContext(IsInFormDialogContext);
 	const goBack = custProps?.goBack;
 	const hasCustomCloseHandler = custProps?.hasCustomSubmitHandler;
@@ -27,14 +30,16 @@ export const useShouldRenderFlowEngineBackButton = () => {
  */
 const FlowEngineBackButton = (props: FlowEngineBackButtonProps) => {
 	const { customProps, submitting } = useFormContextLite();
-	const custProps = customProps as CrudFormProps | undefined;
+	const custProps = customProps as
+		| EnhancedCustomProps<CrudFormProps>
+		| undefined;
 	const isInDialog = useContext(IsInFormDialogContext);
 	const goBack = custProps?.goBack;
 	const hasCustomCloseHandler = custProps?.hasCustomSubmitHandler;
 	const { t } = useCCTranslations();
 
 	const handleBack = useCallback(() => {
-		if (goBack) goBack();
+		if (goBack) void goBack();
 	}, [goBack]);
 
 	return (

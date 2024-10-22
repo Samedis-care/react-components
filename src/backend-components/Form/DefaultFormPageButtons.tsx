@@ -5,7 +5,10 @@ import React, {
 	useMemo,
 	useState,
 } from "react";
-import { BasicFormPageRendererProps } from "./BasicFormPage";
+import {
+	BasicFormPageRendererProps,
+	EnhancedCustomProps,
+} from "./BasicFormPage";
 import { CrudFormProps } from "../CRUD";
 import { useDialogContext } from "../../framework";
 import { showConfirmDialog } from "../../non-standalone";
@@ -30,7 +33,7 @@ export const BackActionButton = styled(ActionButton, {
 
 export type DefaultFormPageButtonsClassKey = "backButton";
 export type DefaultFormPageButtonsProps = BasicFormPageRendererProps<
-	CrudFormProps | undefined
+	EnhancedCustomProps<CrudFormProps> | undefined
 > &
 	Pick<DefaultFormPageProps, "extraButtons">;
 
@@ -94,7 +97,7 @@ const DefaultFormPageButtons = (inProps: DefaultFormPageButtonsProps) => {
 
 	useEffect(() => {
 		if (autoBackTrigger === null) return;
-		handleBack();
+		void handleBack();
 	}, [autoBackTrigger, handleBack]);
 
 	const saveBtn = (

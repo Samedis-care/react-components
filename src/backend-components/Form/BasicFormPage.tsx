@@ -23,6 +23,7 @@ import useCCTranslations from "../../utils/useCCTranslations";
 import { Transition } from "history";
 import { RouteContext } from "../../standalone/Routes/Route";
 import { useThemeProps } from "@mui/material";
+import { CrudFormProps } from "../CRUD";
 
 export interface BasicFormPageRendererProps<CustomPropsT>
 	extends Omit<PageProps<ModelFieldName, CustomPropsT>, "submit" | "dirty"> {
@@ -56,6 +57,17 @@ export interface BasicFormPageRendererProps<CustomPropsT>
 	confirmDialogMessage?: string;
 }
 
+export type EnhancedGoBackType = {
+	goBack: (
+		forceRefresh?: boolean,
+		forceNavigate?: boolean,
+	) => Promise<void> | void;
+};
+export type EnhancedCustomProps<T> =
+	T extends Pick<CrudFormProps, "goBack">
+		? Omit<T, "goBack"> & EnhancedGoBackType
+		: T;
+
 export interface BasicFormPageProps<RendererPropsT, CustomPropsT>
 	extends PageProps<ModelFieldName, CustomPropsT> {
 	/**
@@ -66,7 +78,8 @@ export interface BasicFormPageProps<RendererPropsT, CustomPropsT>
 	 * The form page contents renderer
 	 */
 	children: React.ComponentType<
-		BasicFormPageRendererProps<CustomPropsT> & RendererPropsT
+		BasicFormPageRendererProps<EnhancedCustomProps<CustomPropsT>> &
+			RendererPropsT
 	>;
 	/**
 	 * Additional props passed to children
@@ -174,27 +187,27 @@ const BasicFormPage = <RendererPropsT, CustomPropsT>(
 	]);
 
 	// go back confirm dialog if form is dirty
-	const customPropsWithGoBack: {
-		goBack?: (forceRefresh?: boolean) => void | Promise<void>;
-	} = {
-		...(typeof originalCustomProps === "object" ? originalCustomProps : null),
-	};
+	const customPropsWithGoBack:
+		| EnhancedCustomProps<CustomPropsT>
+		| CustomPropsT =
+		typeof originalCustomProps === "object"
+			? ({
+					...(typeof originalCustomProps === "object"
+						? originalCustomProps
+						: null),
+				} as CustomPropsT)
+			: originalCustomProps;
 	if (
 		typeof originalCustomProps === "object" &&
 		originalCustomProps &&
 		"goBack" in originalCustomProps
 	) {
-		const orgGoBack = (
-			originalCustomProps as unknown as Pick<
-				typeof customPropsWithGoBack,
-				"goBack"
-			>
-		).goBack;
-		customPropsWithGoBack.goBack =
+		const orgGoBack = (originalCustomProps as unknown as CrudFormProps).goBack;
+		(customPropsWithGoBack as EnhancedGoBackType).goBack =
 			typeof orgGoBack === "function"
-				? async (forceRefresh?: boolean) => {
+				? async (forceRefresh?: boolean, forceNavigate?: boolean) => {
 						try {
-							if (dirty && !readOnly) {
+							if (dirty && !readOnly && !forceNavigate) {
 								await showConfirmDialog(pushDialog, {
 									title: t("backend-components.form.back-on-dirty.title"),
 									message: t("backend-components.form.back-on-dirty.message"),
@@ -206,7 +219,7 @@ const BasicFormPage = <RendererPropsT, CustomPropsT>(
 								unblock.current();
 								unblock.current = undefined;
 							}
-							await orgGoBack(forceRefresh);
+							orgGoBack(forceRefresh);
 						} catch {
 							// user cancelled
 						}
@@ -245,10 +258,10 @@ const BasicFormPage = <RendererPropsT, CustomPropsT>(
 					disableRouting={disableRouting}
 					submit={handleSubmit}
 					customProps={
-						typeof originalCustomProps === "object" &&
+						(typeof originalCustomProps === "object" &&
 						originalCustomProps != null
-							? (customPropsWithGoBack as CustomPropsT)
-							: originalCustomProps
+							? customPropsWithGoBack
+							: originalCustomProps) as EnhancedCustomProps<CustomPropsT>
 					}
 				/>
 			}
