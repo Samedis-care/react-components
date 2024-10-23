@@ -11,8 +11,15 @@ export interface IDataGridHeaderProps {
     filterBar?: React.ComponentType<IDataGridFilterBarProps>;
     /**
      * Media query that enables the custom filter dialog mode (if matches)
+     * @deprecated use enableFilterDialogWidth
+     * @remarks not used if enableFilterDialogWidth is set
      */
     enableFilterDialogMediaQuery?: string;
+    /**
+     * If width of the filter container < enableFilterDialogWidth show custom filter dialog
+     * @remarks Takes precedence over enableFilterDialogMediaQuery
+     */
+    enableFilterDialogWidth?: number;
     /**
      * List of available export providers
      */

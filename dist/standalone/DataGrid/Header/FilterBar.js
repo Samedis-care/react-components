@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useEffect, } from "react";
+import React, { useCallback, useContext, useEffect, useRef, useState, } from "react";
 import { Grid, useMediaQuery } from "@mui/material";
 import { DataGridFilterBarBox, DataGridFilterBarGrid, useDataGridProps, useDataGridState, } from "../DataGrid";
 import CustomFiltersButton from "./CustomFiltersButton";
@@ -12,9 +12,35 @@ export const useCustomFilterActiveContext = () => {
 };
 const FilterBar = () => {
     const props = useDataGridProps();
+    const { enableFilterDialogMediaQuery, enableFilterDialogWidth } = props;
     const { classes } = props;
     const [state, setState] = useDataGridState();
-    const enableDialog = useMediaQuery(props.enableFilterDialogMediaQuery ?? "(false)");
+    const filterBarContainer = useRef(null);
+    const enableDialogMediaQuery = useMediaQuery(enableFilterDialogMediaQuery ?? "(false)");
+    const enableDialogWidthRef = useRef(false);
+    const [enableDialogWidth, setEnableDialogWidth] = useState(enableDialogWidthRef.current);
+    useEffect(() => {
+        if (!enableFilterDialogWidth)
+            return;
+        const resizeHandler = () => {
+            const container = filterBarContainer.current;
+            if (!container)
+                return;
+            const showDialog = container.clientWidth < enableFilterDialogWidth;
+            if (showDialog !== enableDialogWidthRef.current) {
+                enableDialogWidthRef.current = showDialog;
+                setEnableDialogWidth(showDialog);
+            }
+        };
+        window.addEventListener("resize", resizeHandler);
+        resizeHandler();
+        return () => {
+            window.removeEventListener("resize", resizeHandler);
+        };
+    }, [enableFilterDialogWidth]);
+    const enableDialog = enableFilterDialogWidth != null
+        ? enableDialogWidth
+        : enableDialogMediaQuery;
     const setCustomData = useCallback((newState) => {
         if (typeof newState === "function") {
             setState((prevState) => ({
@@ -46,7 +72,7 @@ const FilterBar = () => {
         }
     }, [enableDialog, setState]);
     const FilterBarView = props.filterBar;
-    return (React.createElement(DataGridFilterBarBox, { ml: 4, className: classes?.filterBarBox },
+    return (React.createElement(DataGridFilterBarBox, { ml: 4, className: classes?.filterBarBox, ref: filterBarContainer },
         React.createElement(DataGridFilterBarGrid, { container: true, alignItems: "center", justifyContent: "flex-end", spacing: 2, className: combineClassNames([
                 classes?.filterBarGrid,
                 "components-care-data-grid-filter-bar",
