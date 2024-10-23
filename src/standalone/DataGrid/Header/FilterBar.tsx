@@ -4,6 +4,8 @@ import React, {
 	useCallback,
 	useContext,
 	useEffect,
+	useRef,
+	useState,
 } from "react";
 import { Grid, useMediaQuery } from "@mui/material";
 import {
@@ -47,11 +49,39 @@ export const useCustomFilterActiveContext =
 
 const FilterBar = () => {
 	const props = useDataGridProps();
+	const { enableFilterDialogMediaQuery, enableFilterDialogWidth } = props;
 	const { classes } = props;
 	const [state, setState] = useDataGridState();
-	const enableDialog = useMediaQuery(
-		props.enableFilterDialogMediaQuery ?? "(false)",
+	const filterBarContainer = useRef<HTMLDivElement>(null);
+	const enableDialogMediaQuery = useMediaQuery(
+		enableFilterDialogMediaQuery ?? "(false)",
 	);
+	const enableDialogWidthRef = useRef(false);
+	const [enableDialogWidth, setEnableDialogWidth] = useState<boolean>(
+		enableDialogWidthRef.current,
+	);
+	useEffect(() => {
+		if (!enableFilterDialogWidth) return;
+		const resizeHandler = () => {
+			const container = filterBarContainer.current;
+			if (!container) return;
+			const showDialog = container.clientWidth < enableFilterDialogWidth;
+			if (showDialog !== enableDialogWidthRef.current) {
+				enableDialogWidthRef.current = showDialog;
+				setEnableDialogWidth(showDialog);
+			}
+		};
+		window.addEventListener("resize", resizeHandler);
+		resizeHandler();
+		return () => {
+			window.removeEventListener("resize", resizeHandler);
+		};
+	}, [enableFilterDialogWidth]);
+
+	const enableDialog =
+		enableFilterDialogWidth != null
+			? enableDialogWidth
+			: enableDialogMediaQuery;
 
 	const setCustomData = useCallback(
 		(
@@ -95,7 +125,11 @@ const FilterBar = () => {
 	const FilterBarView = props.filterBar;
 
 	return (
-		<DataGridFilterBarBox ml={4} className={classes?.filterBarBox}>
+		<DataGridFilterBarBox
+			ml={4}
+			className={classes?.filterBarBox}
+			ref={filterBarContainer}
+		>
 			<DataGridFilterBarGrid
 				container
 				alignItems={"center"}
