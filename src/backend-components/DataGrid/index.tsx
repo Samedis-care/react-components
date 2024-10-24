@@ -243,7 +243,7 @@ export const renderDataGridRecordUsingModel =
 					return [
 						[
 							key,
-							// eslint-disable-next-line @typescript-eslint/no-unsafe-call
+
 							field
 								? field.type.render({
 										field: key,
@@ -316,7 +316,7 @@ const BackendDataGrid = <
 	const loadData = useCallback(
 		async (params: IDataGridLoadDataParameters): Promise<DataGridData> => {
 			const [result, meta] = await model.index(params);
-			// eslint-disable-next-line no-debugger
+
 			return {
 				rowsTotal: meta.totalRows,
 				rowsFiltered: meta.filteredRows,

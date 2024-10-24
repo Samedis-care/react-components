@@ -4,20 +4,21 @@ import Connector, {
 	ConnectorIndex2Params,
 	ResponseMeta,
 } from "../Connector/Connector";
-import { useMutation, useQuery } from "react-query";
+import {
+	QueryKey,
+	useMutation,
+	UseMutationResult,
+	useQuery,
+	UseQueryOptions,
+	UseQueryResult,
+} from "@tanstack/react-query";
 import {
 	DataGridSetFilterData,
 	DataGridSetFilterDataEntry,
 	IDataGridColumnDef,
 	IDataGridLoadDataParameters,
 } from "../../standalone/DataGrid/DataGrid";
-import {
-	UseMutationResult,
-	UseQueryOptions,
-	UseQueryResult,
-} from "react-query/types/react/types";
 import ModelDataStore from "../Store";
-import { QueryKey } from "react-query/types/core/types";
 import { dotToObject, getValueByDot } from "../../utils/dotUtils";
 import deepAssign from "../../utils/deepAssign";
 import throwError from "../../utils/throwError";
@@ -27,7 +28,6 @@ import RequestBatching from "./RequestBatching";
 let captureException: ((e: Error) => void) | null = null;
 import("@sentry/react")
 	.then((Sentry) => (captureException = Sentry.captureException))
-	// eslint-disable-next-line @typescript-eslint/no-empty-function
 	.catch(() => {}); // ignore
 
 export interface PageVisibility {
@@ -232,23 +232,23 @@ export const useModelGet = <
 >(
 	model: Model<KeyT, VisibilityT, CustomT>,
 	id: string | null,
-	options?: UseQueryOptions<
-		ModelGetResponse<KeyT>,
-		Error,
-		ModelGetResponse<KeyT>
+	options?: Omit<
+		UseQueryOptions<ModelGetResponse<KeyT>, Error, ModelGetResponse<KeyT>>,
+		"queryKey" | "queryFn"
 	> &
 		ModelGetOptions,
 ): UseQueryResult<ModelGetResponse<KeyT>, Error> => {
-	return useQuery(
-		model.getReactQueryKey(id, options?.batch ?? model.requestBatchingEnabled),
-		() => model.getRaw(id, options),
-		{
-			// 3 retries if we get network error
-			retry: (count, err: Error) => err.name === "NetworkError" && count < 3,
-			...model.cacheOptions,
-			...options,
-		},
-	);
+	return useQuery({
+		queryKey: model.getReactQueryKey(
+			id,
+			options?.batch ?? model.requestBatchingEnabled,
+		),
+		queryFn: () => model.getRaw(id, options),
+		// 3 retries if we get network error
+		retry: (count, err: Error) => err.name === "NetworkError" && count < 3,
+		...model.cacheOptions,
+		...options,
+	});
 };
 
 /**
@@ -266,18 +266,19 @@ export const useModelFetchAll = <
 >(
 	model: Model<KeyT, VisibilityT, CustomT>,
 	params?: ModelFetchAllParams,
-	options?: UseQueryOptions<ModelIndexResponse, Error, ModelIndexResponse>,
+	options?: Omit<
+		UseQueryOptions<ModelIndexResponse, Error, ModelIndexResponse>,
+		"queryFn" | "queryKey"
+	>,
 ): UseQueryResult<ModelIndexResponse, Error> => {
-	return useQuery(
-		model.getReactQueryKeyFetchAll(params),
-		() => model.fetchAll(params),
-		{
-			// 3 retries if we get network error
-			retry: (count, err: Error) => err.name === "NetworkError" && count < 3,
-			...model.cacheOptions,
-			...options,
-		},
-	);
+	return useQuery({
+		queryKey: model.getReactQueryKeyFetchAll(params),
+		queryFn: () => model.fetchAll(params),
+		// 3 retries if we get network error
+		retry: (count, err: Error) => err.name === "NetworkError" && count < 3,
+		...model.cacheOptions,
+		...options,
+	});
 };
 
 /**
@@ -298,45 +299,45 @@ export const useModelMutation = <
 	Record<string, unknown>,
 	TContext
 > => {
-	return useMutation(
-		model.modelId + "-create-or-update",
-		model.createOrUpdateRecordRaw.bind(model),
-		{
-			onSuccess: (responseData: ModelGetResponse<KeyT>, inputData) => {
-				const inputId = (inputData as { id: string | null }).id;
-				const id = (responseData[0] as Record<"id", string>).id;
-				if (!id) {
-					throw new Error("Can't update null ID");
-				}
-				if (model.hooks.onCreateOrUpdate) {
-					model.hooks.onCreateOrUpdate(responseData);
-				}
-				const updateForId = (id: string) => {
+	return useMutation({
+		mutationKey: [model.modelId, "create-or-update"],
+		mutationFn: model.createOrUpdateRecordRaw.bind(model),
+		onSuccess: (responseData: ModelGetResponse<KeyT>, inputData) => {
+			const inputId = (inputData as { id: string | null }).id;
+			const id = (responseData[0] as Record<"id", string>).id;
+			if (!id) {
+				throw new Error("Can't update null ID");
+			}
+			if (model.hooks.onCreateOrUpdate) {
+				model.hooks.onCreateOrUpdate(responseData);
+			}
+			const updateForId = (id: string) => {
+				ModelDataStore.setQueryData(
+					model.getReactQueryKey(id, false),
+					responseData,
+				);
+				if (model.requestBatchingEnabled) {
 					ModelDataStore.setQueryData(
-						model.getReactQueryKey(id, false),
+						model.getReactQueryKey(id, true),
 						responseData,
 					);
-					if (model.requestBatchingEnabled) {
-						ModelDataStore.setQueryData(
-							model.getReactQueryKey(id, true),
-							responseData,
-						);
-					} else {
-						ModelDataStore.removeQueries(model.getReactQueryKey(id, true));
-					}
-				};
-				updateForId(id);
-				if (inputId) {
-					if (inputId === "singleton") {
-						updateForId(inputId);
-					} else {
-						model.invalidateCacheForId(inputId);
-					}
+				} else {
+					ModelDataStore.removeQueries({
+						queryKey: model.getReactQueryKey(id, true),
+					});
 				}
-				model.triggerMutationEvent(!inputData.id, responseData);
-			},
+			};
+			updateForId(id);
+			if (inputId) {
+				if (inputId === "singleton") {
+					updateForId(inputId);
+				} else {
+					model.invalidateCacheForId(inputId);
+				}
+			}
+			model.triggerMutationEvent(!inputData.id, responseData);
 		},
-	);
+	});
 };
 
 /**
@@ -351,7 +352,9 @@ export const useModelDelete = <
 >(
 	model: Model<KeyT, VisibilityT, CustomT>,
 ): UseMutationResult<void, Error, string, TContext> => {
-	return useMutation(model.modelId + "-delete", model.deleteRaw.bind(model), {
+	return useMutation({
+		mutationKey: [model.modelId, "delete"],
+		mutationFn: model.deleteRaw.bind(model),
 		onSuccess: (data: void, id: string) => model.invalidateCacheForId(id),
 	});
 };
@@ -368,15 +371,13 @@ export const useModelDeleteMultiple = <
 >(
 	model: Model<KeyT, VisibilityT, CustomT>,
 ): UseMutationResult<void, Error, string[], TContext> => {
-	return useMutation(
-		model.modelId + "-delete-multi",
-		model.deleteMultipleRaw.bind(model),
-		{
-			onSuccess: (data: void, ids: string[]) => {
-				ids.forEach((id) => model.invalidateCacheForId(id));
-			},
+	return useMutation({
+		mutationKey: [model.modelId, "delete-multi"],
+		mutationFn: model.deleteMultipleRaw.bind(model),
+		onSuccess: (data: void, ids: string[]) => {
+			ids.forEach((id) => model.invalidateCacheForId(id));
 		},
-	);
+	});
 };
 
 /**
@@ -392,29 +393,27 @@ export const useModelDeleteAdvanced = <
 >(
 	model: Model<KeyT, VisibilityT, CustomT>,
 ): UseMutationResult<void, Error, AdvancedDeleteRequest, TContext> => {
-	return useMutation(
-		model.modelId + "-delete-adv",
-		model.deleteAdvancedRaw.bind(model),
-		{
-			onSuccess: (data: void, req: AdvancedDeleteRequest) => {
-				// this function is likely to flush more than actually deleted
-				const [invert, ids] = req;
-				if (!invert) {
-					ids.forEach((id) => model.invalidateCacheForId(id));
-				} else {
-					// delete everything from this model, unless ID matches
-					ModelDataStore.removeQueries(undefined, {
-						predicate: (query): boolean => {
-							return (
-								query.queryKey[0] === model.modelId &&
-								!ids.includes((query.queryKey[1] as { id: string }).id)
-							);
-						},
-					});
-				}
-			},
+	return useMutation({
+		mutationKey: [model.modelId, "delete-adv"],
+		mutationFn: model.deleteAdvancedRaw.bind(model),
+		onSuccess: (data: void, req: AdvancedDeleteRequest) => {
+			// this function is likely to flush more than actually deleted
+			const [invert, ids] = req;
+			if (!invert) {
+				ids.forEach((id) => model.invalidateCacheForId(id));
+			} else {
+				// delete everything from this model, unless ID matches
+				ModelDataStore.removeQueries({
+					predicate: (query): boolean => {
+						return (
+							query.queryKey[0] === model.modelId &&
+							!ids.includes((query.queryKey[1] as { id: string }).id)
+						);
+					},
+				});
+			}
 		},
-	);
+	});
 };
 
 /**
@@ -631,7 +630,6 @@ class Model<
 		let userMeta: unknown;
 		const records: Record<string, unknown>[] = [];
 
-		// eslint-disable-next-line no-constant-condition
 		while (true) {
 			const [tRecords, tMeta, tUserMeta] = await this.index({
 				...params,
@@ -667,11 +665,11 @@ class Model<
 	public async fetchAllCached(
 		params?: ModelFetchAllParams,
 	): Promise<ModelIndexResponse> {
-		return ModelDataStore.fetchQuery(
-			this.getReactQueryKeyFetchAll(params),
-			() => this.fetchAll(params),
-			this.cacheOptions,
-		);
+		return ModelDataStore.fetchQuery({
+			queryKey: this.getReactQueryKeyFetchAll(params),
+			queryFn: () => this.fetchAll(params),
+			...this.cacheOptions,
+		});
 	}
 
 	/**
@@ -723,11 +721,14 @@ class Model<
 		id: string | null,
 		options?: ModelGetOptions,
 	): Promise<ModelGetResponse<KeyT>> {
-		return ModelDataStore.fetchQuery(
-			this.getReactQueryKey(id, options?.batch ?? this.requestBatchingEnabled),
-			() => this.getRaw(id, options),
-			this.cacheOptions,
-		);
+		return ModelDataStore.fetchQuery({
+			queryKey: this.getReactQueryKey(
+				id,
+				options?.batch ?? this.requestBatchingEnabled,
+			),
+			queryFn: () => this.getRaw(id, options),
+			...this.cacheOptions,
+		});
 	}
 
 	/**
@@ -896,7 +897,6 @@ class Model<
 	 * Deletes multiple record at once (does not affect local cache)
 	 * @param ids The IDs to delete
 	 */
-	// eslint-disable-next-line @typescript-eslint/require-await
 	public async deleteMultipleRaw(ids: string[]): Promise<void> {
 		return this.connector.deleteMultiple(ids, this);
 	}

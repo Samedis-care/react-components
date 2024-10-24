@@ -154,7 +154,7 @@ const CrudMultiImage = (props: CrudMultiImageProps) => {
 				// wait for response
 
 				// deletePromise may be undefined or a promise
-				// eslint-disable-next-line @typescript-eslint/await-thenable
+
 				await deletePromise;
 				const uploadedImages = await uploadPromise;
 
@@ -165,11 +165,9 @@ const CrudMultiImage = (props: CrudMultiImageProps) => {
 							!img.id.startsWith(MultiImageNewIdPrefix) && images.includes(img),
 					) as BackendMultiImageImage[]
 				).forEach((img) => {
-					// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 					finalImages[img.index!] = img;
 				});
 				uploadedImages.forEach(
-					// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 					(img) => (finalImages[(img as BackendMultiImageImage).index!] = img),
 				);
 

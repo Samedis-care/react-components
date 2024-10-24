@@ -4,8 +4,7 @@ import {
 	extractRouteParameters,
 	insertRouteParameters,
 } from "../../../utils/routeUtils";
-import MenuBase from "../../../standalone/Portal/Menu";
-import {
+import MenuBase, {
 	IMenuItemDefinition,
 	MenuProps,
 } from "../../../standalone/Portal/Menu";

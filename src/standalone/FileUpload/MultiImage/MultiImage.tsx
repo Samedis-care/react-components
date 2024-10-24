@@ -218,7 +218,7 @@ const MultiImage = (inProps: MultiImageProps) => {
 	);
 
 	// images.indexOf(undefined) works and returns -1
-	// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
 	const getPrimaryImageIndex = () => images.indexOf(primaryImg!);
 
 	// update primary image ID if it becomes invalid

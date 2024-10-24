@@ -87,7 +87,6 @@ export const useImportStep2Logic = (props: CrudImporterStepProps) => {
 							unknown
 						>,
 						script: string,
-						// eslint-disable-next-line @typescript-eslint/require-await
 					): Promise<void> => {
 						for (const record of data) {
 							// eslint-disable-next-line no-eval

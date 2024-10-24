@@ -68,13 +68,12 @@ const StorageManagerPersist = (props: StorageManagerPersistProps) => {
 		[JSON.stringify(storageKeys)],
 	);
 
-	const data = useAsyncMemo(
-		async (): Promise<Partial<DataGridPersistentState>> => {
-			const resultObjects = await Promise.all(
-				[
-					DATA_GRID_STORAGE_KEY_COLUMN_SIZING,
-					DATA_GRID_STORAGE_KEY_FILTERS,
-				].map(async (storageKey) => {
+	const data = useAsyncMemo(async (): Promise<
+		Partial<DataGridPersistentState>
+	> => {
+		const resultObjects = await Promise.all(
+			[DATA_GRID_STORAGE_KEY_COLUMN_SIZING, DATA_GRID_STORAGE_KEY_FILTERS].map(
+				async (storageKey) => {
 					const dataStr = await StorageManager.getItem(storageKey, storageKeys);
 					if (dataStr) {
 						try {
@@ -91,16 +90,14 @@ const StorageManagerPersist = (props: StorageManagerPersistProps) => {
 							return StorageManager.setItem(storageKey, storageKeys, null);
 						}
 					}
-				}),
-			);
-			return resultObjects.reduce<Partial<DataGridPersistentState>>(
-				(prev, next) => Object.assign(prev, next),
-				{},
-			);
-		},
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[JSON.stringify(storageKeys)],
-	);
+				},
+			),
+		);
+		return resultObjects.reduce<Partial<DataGridPersistentState>>(
+			(prev, next) => Object.assign(prev, next),
+			{},
+		);
+	}, [JSON.stringify(storageKeys)]);
 
 	const persistCtx = useMemo(() => {
 		return [data, setData] as DataGridPersistentStateContextType;

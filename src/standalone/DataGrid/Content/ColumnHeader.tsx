@@ -81,7 +81,6 @@ const ColumnHeader = (props: IDataGridContentColumnHeaderProps) => {
 							.filter(
 								(otherField) =>
 									prevState[otherField].sort !== 0 &&
-									// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 									prevState[field].sortOrder! <
 										prevState[otherField].sortOrder!,
 							)
@@ -90,7 +89,7 @@ const ColumnHeader = (props: IDataGridContentColumnHeaderProps) => {
 									...newColumnState,
 									[otherField]: {
 										...newColumnState[otherField],
-										// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
 										sortOrder: newColumnState[otherField].sortOrder! - 1,
 									},
 								};

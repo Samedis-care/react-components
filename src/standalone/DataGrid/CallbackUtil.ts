@@ -32,7 +32,7 @@ export const dataGridPrepareFiltersAndSorts = (
 	});
 
 	const sorts: DataGridSortSetting[] = baseSorts
-		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
 		.sort((a, b) => a.sortOrder! - b.sortOrder!)
 		.map((col) => ({ field: col.field, direction: col.sort as -1 | 1 }));
 

@@ -31,19 +31,18 @@ import deepClone from "../../utils/deepClone";
 import isObjectEmpty from "../../utils/isObjectEmpty";
 import { Grid, styled, Typography } from "@mui/material";
 import { getVisibility } from "../../backend-integration/Model/Visibility";
-import { QueryObserverBaseResult } from "react-query/types/core/types";
 import { showConfirmDialogBool } from "../../non-standalone";
 import useCCTranslations from "../../utils/useCCTranslations";
 import { useDialogContext } from "../../framework";
 import deepSort from "../../utils/deepSort";
 import useDevKeybinds from "../../utils/useDevKeybinds";
 import uniqueArray from "../../utils/uniqueArray";
+import { QueryObserverBaseResult } from "@tanstack/react-query";
 
 // optional import
 let captureException: ((e: Error) => void) | null = null;
 import("@sentry/react")
 	.then((Sentry) => (captureException = Sentry.captureException))
-	// eslint-disable-next-line @typescript-eslint/no-empty-function
 	.catch(() => {}); // ignore
 
 export type ValidationError = Record<string, string>;

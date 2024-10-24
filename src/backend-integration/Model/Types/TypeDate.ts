@@ -5,7 +5,6 @@ import FilterType from "../FilterType";
 import { normalizeDate } from "./Utils/DateUtils";
 import ccI18n from "../../../i18n";
 import moment from "moment";
-import i18n from "../../../i18n";
 
 /**
  * Type for non-nullable dates
@@ -28,7 +27,7 @@ abstract class TypeDate implements Type<Date> {
 	}
 
 	stringify(value: Date): string {
-		return value.toLocaleDateString(i18n.language);
+		return value.toLocaleDateString(ccI18n.language);
 	}
 
 	serialize = (value: Date): unknown => {

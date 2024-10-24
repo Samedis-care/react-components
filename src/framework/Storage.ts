@@ -122,11 +122,11 @@ export abstract class CachedServerStorageProvider extends StorageProvider {
 
 	async getItem(key: StorageKeyType): Promise<string | null> {
 		try {
-			return ModelDataStore.fetchQuery(
-				["cc-css", key],
-				() => this.getItemFromServer(key),
-				this.cacheOptions,
-			);
+			return ModelDataStore.fetchQuery({
+				queryKey: ["cc-css", key],
+				queryFn: () => this.getItemFromServer(key),
+				...this.cacheOptions,
+			});
 		} catch {
 			// on failure return null
 			return null;
@@ -139,13 +139,15 @@ export abstract class CachedServerStorageProvider extends StorageProvider {
 		} else {
 			this.debounceTable[key] = debouncePromise(
 				(value: StorageValueType) =>
-					ModelDataStore.executeMutation({
-						mutationFn: () => this.setItemOnServer(key, value),
-						mutationKey: ["cc-css-mt", key],
-						onSuccess: () => {
-							ModelDataStore.setQueryData(["cc-css", key], () => value);
-						},
-					}),
+					ModelDataStore.getMutationCache()
+						.build(ModelDataStore, {
+							mutationFn: () => this.setItemOnServer(key, value),
+							mutationKey: ["cc-css-mt", key],
+							onSuccess: () => {
+								ModelDataStore.setQueryData(["cc-css", key], () => value);
+							},
+						})
+						.execute({}),
 				1000,
 			);
 		}
@@ -154,16 +156,18 @@ export abstract class CachedServerStorageProvider extends StorageProvider {
 	}
 
 	clear(): Promise<void> {
-		return ModelDataStore.executeMutation({
-			mutationFn: () => this.clearFromServer(),
-			mutationKey: "cc-css-clear",
-			onSuccess: () => {
-				ModelDataStore.removeQueries({
-					predicate: (query) =>
-						Array.isArray(query.queryKey) && query.queryKey[0] === "cs-css",
-				});
-			},
-		});
+		return ModelDataStore.getMutationCache()
+			.build(ModelDataStore, {
+				mutationFn: () => this.clearFromServer(),
+				mutationKey: ["cc-css-clear"],
+				onSuccess: () => {
+					ModelDataStore.removeQueries({
+						predicate: (query) =>
+							Array.isArray(query.queryKey) && query.queryKey[0] === "cs-css",
+					});
+				},
+			})
+			.execute({});
 	}
 
 	private cleanDebounce(key: string) {

@@ -1,8 +1,7 @@
 import React from "react";
 import { FormHelperText } from "@mui/material";
-import { ModelFieldName, PageVisibility } from "../../Model";
+import Model, { ModelFieldName, PageVisibility } from "../../Model";
 import ModelRenderParams from "../../RenderParams";
-import Model from "../../Model";
 import TypeId from "../TypeId";
 import { BackendSingleSelectProps } from "../../../../backend-components/Selector/BackendSingleSelect";
 import { BackendSingleSelect } from "../../../../backend-components";

@@ -104,7 +104,6 @@ const Cell = (props: GridChildComponentProps): React.ReactElement => {
 			!React.isValidElement(content2) &&
 			"toString" in content2
 		) {
-			// eslint-disable-next-line @typescript-eslint/no-base-to-string
 			content = content2.toString();
 		} else {
 			content = content2;

@@ -1,9 +1,8 @@
 import React from "react";
 import { FormControl } from "@mui/material";
-import { ModelFieldName, PageVisibility } from "../../Model";
+import Model, { ModelFieldName, PageVisibility } from "../../Model";
 import ModelRenderParams from "../../RenderParams";
 import TypeStringArray from "../TypeStringArray";
-import Model from "../../Model";
 import BackendDataGridMultiSelect, {
 	BackendDataGridMultiSelectProps,
 } from "../../../../backend-components/Selector/BackendDataGridMultiSelect";

@@ -5,7 +5,6 @@ import ccI18n from "../../../../../i18n";
 import { normalizeDate } from "../../Utils/DateUtils";
 import TypeDate from "../../TypeDate";
 import { LocalizedKeyboardDatePicker } from "../../../../../standalone/LocalizedDateTimePickers";
-import i18n from "../../../../../i18n";
 import { ToDateLocaleStringOptions } from "../../../../../constants";
 import { IDataGridColumnDef } from "../../../../../standalone/DataGrid/DataGrid";
 import { FormHelperTextCC } from "../../../../../standalone";
@@ -78,7 +77,7 @@ class RendererDate extends TypeDate {
 			<Typography>
 				{!visibility.grid && `${label}: `}
 				{value
-					? value.toLocaleDateString(i18n.language, ToDateLocaleStringOptions)
+					? value.toLocaleDateString(ccI18n.language, ToDateLocaleStringOptions)
 					: ccI18n.t("backend-integration.model.types.renderers.date.not-set")}
 			</Typography>
 		);
