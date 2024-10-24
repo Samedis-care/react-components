@@ -10,7 +10,7 @@ export interface TypeSettings {
      */
     updateHooks?: string[];
 }
-interface Type<T> {
+export interface Type<T> {
     /**
      * Validates the given value
      * @param value The value to verify

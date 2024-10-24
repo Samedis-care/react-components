@@ -3,7 +3,7 @@ import type Model from "./Model";
 import type Visibility from "./Visibility";
 import type React from "react";
 import { FormContextData } from "../../backend-components";
-interface RenderParams<T> {
+export interface RenderParams<T> {
     /**
      * The field the value belongs to
      */
