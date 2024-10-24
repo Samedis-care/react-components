@@ -1,5 +1,5 @@
 import { getVisibility } from "./Visibility";
-import { useMutation, useQuery } from "react-query";
+import { useMutation, useQuery, } from "@tanstack/react-query";
 import ModelDataStore from "../Store";
 import { dotToObject, getValueByDot } from "../../utils/dotUtils";
 import deepAssign from "../../utils/deepAssign";
@@ -9,7 +9,6 @@ import RequestBatching from "./RequestBatching";
 let captureException = null;
 import("@sentry/react")
     .then((Sentry) => (captureException = Sentry.captureException))
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
     .catch(() => { }); // ignore
 /**
  * React-Query's useQuery for the given model and record ID
@@ -18,7 +17,9 @@ import("@sentry/react")
  * @param options Extra options to pass to useQuery (defaults are provided for retry, staleTime and cacheTime (last two only if configured in model))
  */
 export const useModelGet = (model, id, options) => {
-    return useQuery(model.getReactQueryKey(id, options?.batch ?? model.requestBatchingEnabled), () => model.getRaw(id, options), {
+    return useQuery({
+        queryKey: model.getReactQueryKey(id, options?.batch ?? model.requestBatchingEnabled),
+        queryFn: () => model.getRaw(id, options),
         // 3 retries if we get network error
         retry: (count, err) => err.name === "NetworkError" && count < 3,
         ...model.cacheOptions,
@@ -34,7 +35,9 @@ export const useModelGet = (model, id, options) => {
  * @see Model.fetchAll
  */
 export const useModelFetchAll = (model, params, options) => {
-    return useQuery(model.getReactQueryKeyFetchAll(params), () => model.fetchAll(params), {
+    return useQuery({
+        queryKey: model.getReactQueryKeyFetchAll(params),
+        queryFn: () => model.fetchAll(params),
         // 3 retries if we get network error
         retry: (count, err) => err.name === "NetworkError" && count < 3,
         ...model.cacheOptions,
@@ -47,7 +50,9 @@ export const useModelFetchAll = (model, params, options) => {
  * @see model.createOrUpdateRecordRaw
  */
 export const useModelMutation = (model) => {
-    return useMutation(model.modelId + "-create-or-update", model.createOrUpdateRecordRaw.bind(model), {
+    return useMutation({
+        mutationKey: [model.modelId, "create-or-update"],
+        mutationFn: model.createOrUpdateRecordRaw.bind(model),
         onSuccess: (responseData, inputData) => {
             const inputId = inputData.id;
             const id = responseData[0].id;
@@ -63,7 +68,9 @@ export const useModelMutation = (model) => {
                     ModelDataStore.setQueryData(model.getReactQueryKey(id, true), responseData);
                 }
                 else {
-                    ModelDataStore.removeQueries(model.getReactQueryKey(id, true));
+                    ModelDataStore.removeQueries({
+                        queryKey: model.getReactQueryKey(id, true),
+                    });
                 }
             };
             updateForId(id);
@@ -84,7 +91,9 @@ export const useModelMutation = (model) => {
  * @param model The model
  */
 export const useModelDelete = (model) => {
-    return useMutation(model.modelId + "-delete", model.deleteRaw.bind(model), {
+    return useMutation({
+        mutationKey: [model.modelId, "delete"],
+        mutationFn: model.deleteRaw.bind(model),
         onSuccess: (data, id) => model.invalidateCacheForId(id),
     });
 };
@@ -93,7 +102,9 @@ export const useModelDelete = (model) => {
  * @param model The model
  */
 export const useModelDeleteMultiple = (model) => {
-    return useMutation(model.modelId + "-delete-multi", model.deleteMultipleRaw.bind(model), {
+    return useMutation({
+        mutationKey: [model.modelId, "delete-multi"],
+        mutationFn: model.deleteMultipleRaw.bind(model),
         onSuccess: (data, ids) => {
             ids.forEach((id) => model.invalidateCacheForId(id));
         },
@@ -105,7 +116,9 @@ export const useModelDeleteMultiple = (model) => {
  * @see model.deleteAdvancedRaw
  */
 export const useModelDeleteAdvanced = (model) => {
-    return useMutation(model.modelId + "-delete-adv", model.deleteAdvancedRaw.bind(model), {
+    return useMutation({
+        mutationKey: [model.modelId, "delete-adv"],
+        mutationFn: model.deleteAdvancedRaw.bind(model),
         onSuccess: (data, req) => {
             // this function is likely to flush more than actually deleted
             const [invert, ids] = req;
@@ -114,7 +127,7 @@ export const useModelDeleteAdvanced = (model) => {
             }
             else {
                 // delete everything from this model, unless ID matches
-                ModelDataStore.removeQueries(undefined, {
+                ModelDataStore.removeQueries({
                     predicate: (query) => {
                         return (query.queryKey[0] === model.modelId &&
                             !ids.includes(query.queryKey[1].id));
@@ -258,7 +271,6 @@ class Model {
         let meta;
         let userMeta;
         const records = [];
-        // eslint-disable-next-line no-constant-condition
         while (true) {
             const [tRecords, tMeta, tUserMeta] = await this.index({
                 ...params,
@@ -289,7 +301,11 @@ class Model {
      * @see fetchAll
      */
     async fetchAllCached(params) {
-        return ModelDataStore.fetchQuery(this.getReactQueryKeyFetchAll(params), () => this.fetchAll(params), this.cacheOptions);
+        return ModelDataStore.fetchQuery({
+            queryKey: this.getReactQueryKeyFetchAll(params),
+            queryFn: () => this.fetchAll(params),
+            ...this.cacheOptions,
+        });
     }
     /**
      * Gets the react-query cache key for this model
@@ -333,7 +349,11 @@ class Model {
      * @param options Request options
      */
     getCached(id, options) {
-        return ModelDataStore.fetchQuery(this.getReactQueryKey(id, options?.batch ?? this.requestBatchingEnabled), () => this.getRaw(id, options), this.cacheOptions);
+        return ModelDataStore.fetchQuery({
+            queryKey: this.getReactQueryKey(id, options?.batch ?? this.requestBatchingEnabled),
+            queryFn: () => this.getRaw(id, options),
+            ...this.cacheOptions,
+        });
     }
     /**
      * Provides uncached access for the given data id
@@ -443,7 +463,6 @@ class Model {
      * Deletes multiple record at once (does not affect local cache)
      * @param ids The IDs to delete
      */
-    // eslint-disable-next-line @typescript-eslint/require-await
     async deleteMultipleRaw(ids) {
         return this.connector.deleteMultiple(ids, this);
     }

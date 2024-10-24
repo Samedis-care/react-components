@@ -18,6 +18,5 @@ export * from "./UIKit";
 export { default as SignalPortlet } from "./SignalPortlet";
 export { default as Notifications } from "./Notifications";
 export * from "./Routes";
-export * from "./CountryFlags";
 export { default as CountryFlags } from "./CountryFlags";
 export * from "./Tree";

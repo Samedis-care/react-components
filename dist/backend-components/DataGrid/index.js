@@ -119,7 +119,6 @@ export const renderDataGridRecordUsingModel = (model, refreshGrid) => (entry) =>
     return [
         [
             key,
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
             field
                 ? field.type.render({
                     field: key,
@@ -172,7 +171,6 @@ const BackendDataGrid = (props) => {
     const refreshGrid = useCallback(() => setRefreshToken(new Date().getTime().toString()), []);
     const loadData = useCallback(async (params) => {
         const [result, meta] = await model.index(params);
-        // eslint-disable-next-line no-debugger
         return {
             rowsTotal: meta.totalRows,
             rowsFiltered: meta.filteredRows,

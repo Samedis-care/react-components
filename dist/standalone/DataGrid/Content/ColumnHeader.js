@@ -50,7 +50,6 @@ const ColumnHeader = (props) => {
                     // if disable sorting, adjust sort priority for others
                     Object.keys(prevState)
                         .filter((otherField) => prevState[otherField].sort !== 0 &&
-                        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                         prevState[field].sortOrder <
                             prevState[otherField].sortOrder)
                         .forEach((otherField) => {
@@ -58,7 +57,6 @@ const ColumnHeader = (props) => {
                             ...newColumnState,
                             [otherField]: {
                                 ...newColumnState[otherField],
-                                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                                 sortOrder: newColumnState[otherField].sortOrder - 1,
                             },
                         };

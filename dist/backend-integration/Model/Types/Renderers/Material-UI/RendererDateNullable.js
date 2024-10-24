@@ -4,7 +4,6 @@ import TypeDateNullable from "../../TypeDateNullable";
 import ccI18n from "../../../../../i18n";
 import { normalizeDate } from "../../Utils/DateUtils";
 import { LocalizedKeyboardDatePicker } from "../../../../../standalone/LocalizedDateTimePickers";
-import i18n from "../../../../../i18n";
 import { ToDateLocaleStringOptions } from "../../../../../constants";
 import { FormHelperTextCC } from "../../../../../standalone/UIKit/MuiWarning";
 import moment from "moment";
@@ -34,7 +33,7 @@ class RendererDateNullable extends TypeDateNullable {
         return (React.createElement(Typography, null,
             !visibility.grid && `${label}: `,
             value
-                ? value.toLocaleDateString(i18n.language, ToDateLocaleStringOptions)
+                ? value.toLocaleDateString(ccI18n.language, ToDateLocaleStringOptions)
                 : ccI18n.t("backend-integration.model.types.renderers.date.not-set")));
     }
     dataGridColumnSizingHint = () => {

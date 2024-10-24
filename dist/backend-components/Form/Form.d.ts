@@ -1,6 +1,6 @@
 import React, { Dispatch, SetStateAction } from "react";
 import Model, { ModelFieldName, ModelGetResponseRelations, PageVisibility } from "../../backend-integration/Model/Model";
-import { QueryObserverBaseResult } from "react-query/types/core/types";
+import { QueryObserverBaseResult } from "@tanstack/react-query";
 export type ValidationError = Record<string, string>;
 /**
  * Pre submit handler for additional validations

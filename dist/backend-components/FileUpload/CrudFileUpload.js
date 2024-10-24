@@ -33,7 +33,6 @@ const CrudFileUpload = (props, ref) => {
         try {
             // wait for response
             // deletePromise may be undefined or a promise
-            // eslint-disable-next-line @typescript-eslint/await-thenable
             await deletePromise;
             const uploadedFiles = await uploadPromise;
             const finalFiles = newFiles.filter((file) => !file.delete && !file.canBeUploaded).concat(uploadedFiles);

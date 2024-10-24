@@ -39,7 +39,6 @@ const MultiImage = (inProps) => {
     const { t } = useCCTranslations();
     const primaryImg = useMemo(() => images.find((img) => img.id === primary) ?? images[0], [images, primary]);
     // images.indexOf(undefined) works and returns -1
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const getPrimaryImageIndex = () => images.indexOf(primaryImg);
     // update primary image ID if it becomes invalid
     useEffect(() => {

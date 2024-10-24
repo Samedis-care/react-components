@@ -63,7 +63,6 @@ const Cell = (props) => {
             typeof content2 === "object" &&
             !React.isValidElement(content2) &&
             "toString" in content2) {
-            // eslint-disable-next-line @typescript-eslint/no-base-to-string
             content = content2.toString();
         }
         else {

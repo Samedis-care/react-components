@@ -17,7 +17,6 @@ import uniqueArray from "../../utils/uniqueArray";
 let captureException = null;
 import("@sentry/react")
     .then((Sentry) => (captureException = Sentry.captureException))
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
     .catch(() => { }); // ignore
 export var OnlySubmitMountedBehaviour;
 (function (OnlySubmitMountedBehaviour) {

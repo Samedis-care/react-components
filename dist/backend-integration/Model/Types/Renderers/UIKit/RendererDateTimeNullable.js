@@ -2,7 +2,6 @@ import React from "react";
 import { Typography } from "@mui/material";
 import ccI18n from "../../../../../i18n";
 import { DateTimeInput, FormHelperTextCC } from "../../../../../standalone";
-import i18n from "../../../../../i18n";
 import TypeDateTimeNullable from "../../TypeDateTimeNullable";
 import moment from "moment";
 /**
@@ -31,7 +30,7 @@ class RendererDateTimeNullable extends TypeDateTimeNullable {
         return (React.createElement(Typography, null,
             !visibility.grid && `${label}: `,
             value
-                ? value.toLocaleString(i18n.language)
+                ? value.toLocaleString(ccI18n.language)
                 : ccI18n.t("backend-integration.model.types.renderers.date.not-set")));
     }
 }

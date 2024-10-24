@@ -50,7 +50,11 @@ export class CachedServerStorageProvider extends StorageProvider {
     cleanupTable = {};
     async getItem(key) {
         try {
-            return ModelDataStore.fetchQuery(["cc-css", key], () => this.getItemFromServer(key), this.cacheOptions);
+            return ModelDataStore.fetchQuery({
+                queryKey: ["cc-css", key],
+                queryFn: () => this.getItemFromServer(key),
+                ...this.cacheOptions,
+            });
         }
         catch {
             // on failure return null
@@ -62,27 +66,31 @@ export class CachedServerStorageProvider extends StorageProvider {
             window.clearTimeout(this.cleanupTable[key]);
         }
         else {
-            this.debounceTable[key] = debouncePromise((value) => ModelDataStore.executeMutation({
+            this.debounceTable[key] = debouncePromise((value) => ModelDataStore.getMutationCache()
+                .build(ModelDataStore, {
                 mutationFn: () => this.setItemOnServer(key, value),
                 mutationKey: ["cc-css-mt", key],
                 onSuccess: () => {
                     ModelDataStore.setQueryData(["cc-css", key], () => value);
                 },
-            }), 1000);
+            })
+                .execute({}), 1000);
         }
         window.setTimeout(this.cleanDebounce.bind(this), 300000, key);
         return this.debounceTable[key](value);
     }
     clear() {
-        return ModelDataStore.executeMutation({
+        return ModelDataStore.getMutationCache()
+            .build(ModelDataStore, {
             mutationFn: () => this.clearFromServer(),
-            mutationKey: "cc-css-clear",
+            mutationKey: ["cc-css-clear"],
             onSuccess: () => {
                 ModelDataStore.removeQueries({
                     predicate: (query) => Array.isArray(query.queryKey) && query.queryKey[0] === "cs-css",
                 });
             },
-        });
+        })
+            .execute({});
     }
     cleanDebounce(key) {
         delete this.debounceTable[key];

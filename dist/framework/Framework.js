@@ -4,7 +4,7 @@ import DialogContextProvider from "./DialogContextProvider";
 import { FrameworkHistory } from "./History";
 import CCI18nProvider from "./CCI18nProvider";
 import ThemeProvider, { getStandardTheme, } from "./ThemeProvider";
-import { QueryClientProvider } from "react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
 import ModelDataStore from "../backend-integration/Store";
 import MuiPickerUtils from "./MuiPickerUtils";
 import PermissionContextProvider from "./PermissionContextProvider";

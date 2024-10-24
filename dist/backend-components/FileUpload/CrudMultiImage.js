@@ -61,17 +61,13 @@ const CrudMultiImage = (props) => {
         try {
             // wait for response
             // deletePromise may be undefined or a promise
-            // eslint-disable-next-line @typescript-eslint/await-thenable
             await deletePromise;
             const uploadedImages = await uploadPromise;
             const finalImages = [];
             newImages.filter((img) => !img.id.startsWith(MultiImageNewIdPrefix) && images.includes(img)).forEach((img) => {
-                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                 finalImages[img.index] = img;
             });
-            uploadedImages.forEach(
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            (img) => (finalImages[img.index] = img));
+            uploadedImages.forEach((img) => (finalImages[img.index] = img));
             // update state
             setImages(finalImages);
             if (onPrimaryChange)
