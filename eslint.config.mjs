@@ -6,6 +6,7 @@ import prettierConfig from "eslint-plugin-prettier/recommended";
 import eslintPluginReact from "eslint-plugin-react";
 import eslintPluginReactHooks from "eslint-plugin-react-hooks";
 import { fixupConfigRules } from "@eslint/compat";
+import globals from "globals";
 
 eslintPluginReactHooks.configs.recommended.plugins = {
 	"react-hooks": eslintPluginReactHooks,
@@ -27,6 +28,10 @@ export default [
 			parser: tsParser,
 			ecmaVersion: 2022,
 			sourceType: "module",
+
+			globals: {
+				...globals.browser,
+			},
 
 			parserOptions: {
 				ecmaFeatures: {
@@ -50,6 +55,7 @@ export default [
 			"no-eval": "error",
 			"import/first": "error",
 			"import/no-named-as-default-member": "off",
+			"import/no-named-as-default": "off",
 			"prettier/prettier": "warn",
 			"react/prop-types": "off",
 			"@typescript-eslint/no-redundant-type-constituents": "off",

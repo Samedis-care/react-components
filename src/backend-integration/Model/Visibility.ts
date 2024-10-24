@@ -1,4 +1,4 @@
-interface Visibility {
+export interface Visibility {
 	/**
 	 * Is the field disabled? (won't be rendered and won't be included in requests)
 	 */
