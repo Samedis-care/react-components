@@ -5,6 +5,7 @@ import {
 	ListItemIcon,
 	ListItemText,
 	MenuItem,
+	MenuProps,
 } from "@mui/material";
 import {
 	Description as ExportIcon,
@@ -25,6 +26,10 @@ export interface IDataGridExportMenuEntryProps {
 	 * The exporter for this entry
 	 */
 	exporter: IDataGridExporter<unknown>;
+	/**
+	 * Close export menu
+	 */
+	closeMenu: NonNullable<MenuProps["onClose"]>;
 }
 
 export enum DataGridExportStatus {
@@ -40,7 +45,13 @@ const ExportMenuEntry = React.forwardRef(
 		props: IDataGridExportMenuEntryProps,
 		ref: React.ForwardedRef<HTMLLIElement>,
 	) => {
-		const { getAdditionalFilters, columns, onError } = useDataGridProps();
+		const { exporter, closeMenu } = props;
+		const {
+			getAdditionalFilters,
+			columns,
+			onError,
+			keepExportMenuOpenAfterDownload,
+		} = useDataGridProps();
 		const [columnsState] = useDataGridColumnState();
 		const [state] = useDataGridState();
 		const [pushDialog] = useContext(DialogContext) ?? [];
@@ -54,7 +65,14 @@ const ExportMenuEntry = React.forwardRef(
 		const finishExport = useCallback(() => {
 			onDownload(exportData, pushDialog);
 			setStatus(DataGridExportStatus.Idle);
-		}, [onDownload, setStatus, exportData, pushDialog]);
+			if (!keepExportMenuOpenAfterDownload) closeMenu({}, "backdropClick");
+		}, [
+			onDownload,
+			exportData,
+			pushDialog,
+			closeMenu,
+			keepExportMenuOpenAfterDownload,
+		]);
 
 		const startExport = useCallback(async () => {
 			setStatus(DataGridExportStatus.Working);
@@ -103,7 +121,7 @@ const ExportMenuEntry = React.forwardRef(
 						<ListItemIcon>
 							<IdleIcon />
 						</ListItemIcon>
-						<ListItemText primary={props.exporter.getLabel()} />
+						<ListItemText primary={exporter.getLabel()} />
 					</MenuItem>
 				)}
 				{status === DataGridExportStatus.Working && (
@@ -111,7 +129,7 @@ const ExportMenuEntry = React.forwardRef(
 						<ListItemIcon>
 							<CircularProgress size={24} />
 						</ListItemIcon>
-						<ListItemText primary={props.exporter.getWorkingLabel()} />
+						<ListItemText primary={exporter.getWorkingLabel()} />
 					</MenuItem>
 				)}
 				{status === DataGridExportStatus.Ready && (
@@ -119,7 +137,7 @@ const ExportMenuEntry = React.forwardRef(
 						<ListItemIcon>
 							<DoneIcon />
 						</ListItemIcon>
-						<ListItemText primary={props.exporter.getReadyLabel()} />
+						<ListItemText primary={exporter.getReadyLabel()} />
 					</MenuItem>
 				)}
 				{status === DataGridExportStatus.Error && (
@@ -127,7 +145,7 @@ const ExportMenuEntry = React.forwardRef(
 						<ListItemIcon>
 							<ErrorIcon />
 						</ListItemIcon>
-						<ListItemText primary={props.exporter.getErrorLabel()} />
+						<ListItemText primary={exporter.getErrorLabel()} />
 					</MenuItem>
 				)}
 			</>

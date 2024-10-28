@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Grid, SvgIconProps } from "@mui/material";
+import { Box, Grid2, SvgIconProps } from "@mui/material";
 import Search from "./Search";
 import ActionBar from "./ActionBar";
 import FilterBar, { IDataGridFilterBarProps } from "./FilterBar";
@@ -32,6 +32,11 @@ export interface IDataGridHeaderProps {
 	 * List of available export providers
 	 */
 	exporters?: IDataGridExporter<unknown>[];
+	/**
+	 * Keep export menu open after downloading the export?
+	 * @default false
+	 */
+	keepExportMenuOpenAfterDownload?: boolean;
 	/**
 	 * Hide user column settings
 	 */
@@ -106,23 +111,22 @@ export interface IDataGridExporter<T> {
 const Header = () => {
 	return (
 		<Box mx={1}>
-			<Grid
-				item
+			<Grid2
 				container
 				justifyContent={"space-between"}
 				alignItems={"center"}
 				wrap={"nowrap"}
 			>
-				<Grid item>
+				<Grid2>
 					<Search />
-				</Grid>
-				<Grid item xs>
+				</Grid2>
+				<Grid2 size={"grow"}>
 					<FilterBar />
-				</Grid>
-				<Grid item>
+				</Grid2>
+				<Grid2>
 					<ActionBar />
-				</Grid>
-			</Grid>
+				</Grid2>
+			</Grid2>
 		</Box>
 	);
 };

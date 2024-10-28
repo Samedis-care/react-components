@@ -16,7 +16,7 @@ export interface IDataGridExportMenuProps {
 	/**
 	 * The menu onClose handler
 	 */
-	onClose: MenuProps["onClose"];
+	onClose: NonNullable<MenuProps["onClose"]>;
 }
 
 const anchorOrigin: PopoverOrigin = {
@@ -41,7 +41,11 @@ const ExportMenu = (props: IDataGridExportMenuProps) => {
 			onClose={props.onClose}
 		>
 			{props.exporters.map((exporter) => (
-				<ExportMenuEntry key={exporter.id} exporter={exporter} />
+				<ExportMenuEntry
+					key={exporter.id}
+					exporter={exporter}
+					closeMenu={props.onClose}
+				/>
 			))}
 		</PopupMenu>
 	);
