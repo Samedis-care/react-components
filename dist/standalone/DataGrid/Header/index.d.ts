@@ -25,6 +25,11 @@ export interface IDataGridHeaderProps {
      */
     exporters?: IDataGridExporter<unknown>[];
     /**
+     * Keep export menu open after downloading the export?
+     * @default false
+     */
+    keepExportMenuOpenAfterDownload?: boolean;
+    /**
      * Hide user column settings
      */
     hideSettings?: boolean;

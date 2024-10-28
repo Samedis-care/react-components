@@ -1,10 +1,15 @@
 import React from "react";
 import type { IDataGridExporter } from "./index";
+import { MenuProps } from "@mui/material";
 export interface IDataGridExportMenuEntryProps {
     /**
      * The exporter for this entry
      */
     exporter: IDataGridExporter<unknown>;
+    /**
+     * Close export menu
+     */
+    closeMenu: NonNullable<MenuProps["onClose"]>;
 }
 export declare enum DataGridExportStatus {
     Idle = 0,

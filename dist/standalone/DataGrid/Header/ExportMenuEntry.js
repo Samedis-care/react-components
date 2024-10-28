@@ -13,7 +13,8 @@ export var DataGridExportStatus;
 })(DataGridExportStatus || (DataGridExportStatus = {}));
 // eslint-disable-next-line react/display-name
 const ExportMenuEntry = React.forwardRef((props, ref) => {
-    const { getAdditionalFilters, columns, onError } = useDataGridProps();
+    const { exporter, closeMenu } = props;
+    const { getAdditionalFilters, columns, onError, keepExportMenuOpenAfterDownload, } = useDataGridProps();
     const [columnsState] = useDataGridColumnState();
     const [state] = useDataGridState();
     const [pushDialog] = useContext(DialogContext) ?? [];
@@ -25,7 +26,15 @@ const ExportMenuEntry = React.forwardRef((props, ref) => {
     const finishExport = useCallback(() => {
         onDownload(exportData, pushDialog);
         setStatus(DataGridExportStatus.Idle);
-    }, [onDownload, setStatus, exportData, pushDialog]);
+        if (!keepExportMenuOpenAfterDownload)
+            closeMenu({}, "backdropClick");
+    }, [
+        onDownload,
+        exportData,
+        pushDialog,
+        closeMenu,
+        keepExportMenuOpenAfterDownload,
+    ]);
     const startExport = useCallback(async () => {
         setStatus(DataGridExportStatus.Working);
         try {
@@ -64,18 +73,18 @@ const ExportMenuEntry = React.forwardRef((props, ref) => {
         status === DataGridExportStatus.Idle && (React.createElement(MenuItem, { onClick: startExport, ref: ref },
             React.createElement(ListItemIcon, null,
                 React.createElement(IdleIcon, null)),
-            React.createElement(ListItemText, { primary: props.exporter.getLabel() }))),
+            React.createElement(ListItemText, { primary: exporter.getLabel() }))),
         status === DataGridExportStatus.Working && (React.createElement(MenuItem, { ref: ref },
             React.createElement(ListItemIcon, null,
                 React.createElement(CircularProgress, { size: 24 })),
-            React.createElement(ListItemText, { primary: props.exporter.getWorkingLabel() }))),
+            React.createElement(ListItemText, { primary: exporter.getWorkingLabel() }))),
         status === DataGridExportStatus.Ready && (React.createElement(MenuItem, { onClick: finishExport, ref: ref },
             React.createElement(ListItemIcon, null,
                 React.createElement(DoneIcon, null)),
-            React.createElement(ListItemText, { primary: props.exporter.getReadyLabel() }))),
+            React.createElement(ListItemText, { primary: exporter.getReadyLabel() }))),
         status === DataGridExportStatus.Error && (React.createElement(MenuItem, { onClick: cancelExport, ref: ref },
             React.createElement(ListItemIcon, null,
                 React.createElement(ErrorIcon, null)),
-            React.createElement(ListItemText, { primary: props.exporter.getErrorLabel() })))));
+            React.createElement(ListItemText, { primary: exporter.getErrorLabel() })))));
 });
 export default React.memo(ExportMenuEntry);
