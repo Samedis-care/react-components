@@ -16,7 +16,7 @@ export interface MultiSelectorData extends BaseSelectorData {
      */
     noDelete?: boolean;
 }
-export interface MultiSelectProps<DataT extends MultiSelectorData> extends Omit<BaseSelectorProps<DataT, false>, "onSelect" | "selected" | "classes"> {
+export interface MultiSelectProps<DataT extends MultiSelectorData> extends Omit<BaseSelectorProps<DataT, false>, "multiple" | "onSelect" | "selected" | "classes"> {
     /**
      * Extended selection change handler
      * @param data The selected data entry/entries

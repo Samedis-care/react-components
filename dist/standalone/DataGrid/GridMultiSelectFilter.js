@@ -1,8 +1,26 @@
 import React, { useCallback, useEffect, useMemo } from "react";
 import { Checkbox, Divider, FormControlLabel, Grid, styled, Typography, useThemeProps, } from "@mui/material";
 import { useCustomFilterActiveContext } from "./Header/FilterBar";
-import { DataGridCustomFilterMulti, useDataGridProps } from "./DataGrid";
+import { useDataGridProps } from "./DataGrid";
 import compareArrayContent from "../../utils/compareArrayContent";
+import BaseSelector from "../Selector/BaseSelector";
+export const DataGridCustomFilterMulti = styled(BaseSelector, {
+    name: "CcDataGrid",
+    slot: "customFilterMulti",
+})(({ theme }) => ({
+    "& .MuiAutocomplete-root.Mui-active": {
+        borderColor: theme.palette.secondary.main,
+        "& > fieldset": {
+            borderColor: theme.palette.secondary.main,
+        },
+        "& .MuiAutocomplete-inputRoot": {
+            borderColor: theme.palette.secondary.main,
+            "& > fieldset": {
+                borderColor: theme.palette.secondary.main,
+            },
+        },
+    },
+}));
 const GridMultiSelectFilterDialogRoot = styled(Grid, {
     name: "CcGridMultiSelectFilter",
     slot: "dialogRoot",

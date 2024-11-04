@@ -18,8 +18,6 @@ import combineClassNames from "../../utils/combineClassNames";
 import Checkbox from "../UIKit/Checkbox";
 import ComponentWithLabel from "../UIKit/ComponentWithLabel";
 import FilterIcon from "../Icons/FilterIcon";
-import BaseSelector from "../Selector/BaseSelector";
-import SingleSelect from "../Selector/SingleSelect";
 export const DataGridStateContext = React.createContext(undefined);
 export const useDataGridState = () => {
     const ctx = useContext(DataGridStateContext);
@@ -340,40 +338,6 @@ export const DataGridCustomFilterIcon = styled(AppsIcon, {
     verticalAlign: "text-bottom",
     "&.CcDataGrid-customFilterActiveIcon": {
         color: theme.palette.secondary.main,
-    },
-}));
-export const DataGridCustomFilterMulti = styled(BaseSelector, {
-    name: "CcDataGrid",
-    slot: "customFilterMulti",
-})(({ theme }) => ({
-    "& .MuiAutocomplete-root.Mui-active": {
-        borderColor: theme.palette.secondary.main,
-        "& > fieldset": {
-            borderColor: theme.palette.secondary.main,
-        },
-        "& .MuiAutocomplete-inputRoot": {
-            borderColor: theme.palette.secondary.main,
-            "& > fieldset": {
-                borderColor: theme.palette.secondary.main,
-            },
-        },
-    },
-}));
-export const DataGridCustomFilterSingle = styled(SingleSelect, {
-    name: "CcDataGrid",
-    slot: "customFilterSingle",
-})(({ theme }) => ({
-    "& .MuiAutocomplete-root.Mui-active": {
-        borderColor: theme.palette.secondary.main,
-        "& > fieldset": {
-            borderColor: theme.palette.secondary.main,
-        },
-        "& .MuiAutocomplete-inputRoot": {
-            borderColor: theme.palette.secondary.main,
-            "& > fieldset": {
-                borderColor: theme.palette.secondary.main,
-            },
-        },
     },
 }));
 export const getActiveDataGridColumns = (columns, hiddenColumns, lockedColumns) => {

@@ -40,7 +40,7 @@ const BackendSingleSelect = (props) => {
     }, [onSelect]);
     // fetch missing data entries
     useEffect(() => {
-        if (!selected)
+        if (selected == null)
             return;
         if (selectedCache?.value === selected)
             return;
@@ -92,7 +92,7 @@ const BackendSingleSelect = (props) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selected]);
     const debouncedLoad = useMemo(() => debouncePromise(handleLoad, searchDebounceTime ?? 500), [handleLoad, searchDebounceTime]);
-    return (React.createElement(SingleSelect, { ...otherProps, onLoad: debouncedLoad, onSelect: handleSelect, selected: selected
+    return (React.createElement(SingleSelect, { ...otherProps, onLoad: debouncedLoad, onSelect: handleSelect, selected: selected != null
             ? (selectedCache ?? {
                 value: selected,
                 label: t("backend-components.selector.loading"),

@@ -53,6 +53,9 @@ import { ScrollableScheduleDayClassKey, ScrollableScheduleDayProps } from "./sta
 import { FormClassKey } from "./backend-components";
 import { BasicFormPageProps } from "./backend-components/Form/BasicFormPage";
 import { CrudClassKey } from "./backend-components/CRUD";
+import { GridSingleSelectFilterBackendClassKey, GridSingleSelectFilterBackendProps } from "./standalone/DataGrid/GridSingleSelectFilterBackend";
+import { ModelFieldName, PageVisibility } from "./backend-integration";
+import { GridMultiSelectFilterBackendClassKey, GridMultiSelectFilterBackendProps } from "./standalone/DataGrid/GridMultiSelectFilterBackend";
 export interface ComponentsCareTheme {
 }
 declare module "@mui/material/styles/createTheme" {
@@ -124,7 +127,9 @@ declare module "@mui/material/styles" {
         CcWeekView: WeekViewClassKey;
         CcDataGrid: DataGridClassKey;
         CcGridMultiSelectFilter: GridMultiSelectFilterClassKey;
+        CcGridMultiSelectFilterBackend: GridMultiSelectFilterBackendClassKey;
         CcGridSingleSelectFilter: GridSingleSelectFilterClassKey;
+        CcGridSingleSelectFilterBackend: GridSingleSelectFilterBackendClassKey;
         CcForm: FormClassKey;
         CcCrud: CrudClassKey;
     }
@@ -186,7 +191,9 @@ declare module "@mui/material/styles" {
         CcWeekView: Partial<WeekViewProps>;
         CcDataGrid: Partial<DataGridProps>;
         CcGridMultiSelectFilter: Partial<GridMultiSelectFilterProps>;
+        CcGridMultiSelectFilterBackend: Partial<GridMultiSelectFilterBackendProps<ModelFieldName, PageVisibility, unknown, MultiSelectorData>>;
         CcGridSingleSelectFilter: Partial<GridSingleSelectFilterProps>;
+        CcGridSingleSelectFilterBackend: Partial<GridSingleSelectFilterBackendProps<ModelFieldName, PageVisibility, unknown>>;
         CcBasicFormPage: Partial<BasicFormPageProps<never, never>>;
     }
     interface Components {
@@ -479,10 +486,20 @@ declare module "@mui/material/styles" {
             styleOverrides?: ComponentsOverrides<Theme>["CcGridMultiSelectFilter"];
             variants?: ComponentsVariants["CcGridMultiSelectFilter"];
         };
+        CcGridMultiSelectFilterBackend?: {
+            defaultProps?: ComponentsPropsList["CcGridMultiSelectFilterBackend"];
+            styleOverrides?: ComponentsOverrides<Theme>["CcGridMultiSelectFilterBackend"];
+            variants?: ComponentsVariants["CcGridMultiSelectFilterBackend"];
+        };
         CcGridSingleSelectFilter?: {
             defaultProps?: ComponentsPropsList["CcGridSingleSelectFilter"];
             styleOverrides?: ComponentsOverrides<Theme>["CcGridSingleSelectFilter"];
             variants?: ComponentsVariants["CcGridSingleSelectFilter"];
+        };
+        CcGridSingleSelectFilterBackend?: {
+            defaultProps?: ComponentsPropsList["CcGridSingleSelectFilterBackend"];
+            styleOverrides?: ComponentsOverrides<Theme>["CcGridSingleSelectFilterBackend"];
+            variants?: ComponentsVariants["CcGridSingleSelectFilterBackend"];
         };
         CcForm?: {
             styleOverrides?: ComponentsOverrides<Theme>["CcForm"];

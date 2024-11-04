@@ -2,6 +2,7 @@ import React from "react";
 import { Breakpoint } from "@mui/material/styles";
 import { GridSize } from "@mui/material/Grid/Grid";
 import { MultiSelectorData } from "../Selector";
+import BaseSelector from "../Selector/BaseSelector";
 export interface GridMultiSelectFilterProps {
     /**
      * Optional label for the filter
@@ -37,6 +38,7 @@ export interface GridMultiSelectFilterProps {
      */
     barBreakpoints?: Partial<Record<Breakpoint, boolean | GridSize>>;
 }
+export declare const DataGridCustomFilterMulti: typeof BaseSelector;
 export type GridMultiSelectFilterClassKey = "dialogRoot" | "barRoot";
 declare const _default: React.MemoExoticComponent<(inProps: GridMultiSelectFilterProps) => React.JSX.Element>;
 export default _default;

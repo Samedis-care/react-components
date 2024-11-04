@@ -2,6 +2,7 @@ import React from "react";
 import { BaseSelectorData } from "../../standalone/Selector";
 import { GridSize } from "@mui/material/Grid/Grid";
 import { Breakpoint } from "@mui/material/styles";
+import SingleSelect from "../Selector/SingleSelect";
 export interface GridSingleSelectFilterProps {
     /**
      * Optional label for the filter
@@ -41,6 +42,7 @@ export interface GridSingleSelectFilterProps {
      */
     barBreakpoints?: Partial<Record<Breakpoint, boolean | GridSize>>;
 }
+export declare const DataGridCustomFilterSingle: typeof SingleSelect;
 export type GridSingleSelectFilterClassKey = "dialogRoot" | "barRoot";
 declare const _default: React.MemoExoticComponent<(inProps: GridSingleSelectFilterProps) => React.JSX.Element>;
 export default _default;

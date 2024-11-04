@@ -1,7 +1,25 @@
 import React, { useCallback, useEffect, useMemo } from "react";
 import { Divider, FormControl, FormControlLabel, Grid, Radio, RadioGroup, styled, Typography, useThemeProps, } from "@mui/material";
 import { useCustomFilterActiveContext } from "./Header/FilterBar";
-import { DataGridCustomFilterSingle, useDataGridProps } from "./DataGrid";
+import { useDataGridProps } from "./DataGrid";
+import SingleSelect from "../Selector/SingleSelect";
+export const DataGridCustomFilterSingle = styled(SingleSelect, {
+    name: "CcDataGrid",
+    slot: "customFilterSingle",
+})(({ theme }) => ({
+    "& .MuiAutocomplete-root.Mui-active": {
+        borderColor: theme.palette.secondary.main,
+        "& > fieldset": {
+            borderColor: theme.palette.secondary.main,
+        },
+        "& .MuiAutocomplete-inputRoot": {
+            borderColor: theme.palette.secondary.main,
+            "& > fieldset": {
+                borderColor: theme.palette.secondary.main,
+            },
+        },
+    },
+}));
 const GridSingleSelectFilterDialogRoot = styled(Grid, {
     name: "CcGridSingleSelectFilter",
     slot: "dialogRoot",
