@@ -32,7 +32,7 @@ export interface MultiSelectorData extends BaseSelectorData {
 export interface MultiSelectProps<DataT extends MultiSelectorData>
 	extends Omit<
 		BaseSelectorProps<DataT, false>,
-		"onSelect" | "selected" | "classes"
+		"multiple" | "onSelect" | "selected" | "classes"
 	> {
 	/**
 	 * Extended selection change handler

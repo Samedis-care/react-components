@@ -49,8 +49,6 @@ import ComponentWithLabel, {
 	ComponentWithLabelProps,
 } from "../UIKit/ComponentWithLabel";
 import FilterIcon from "../Icons/FilterIcon";
-import BaseSelector from "../Selector/BaseSelector";
-import SingleSelect from "../Selector/SingleSelect";
 
 export interface DataGridProps
 	extends IDataGridHeaderProps,
@@ -940,42 +938,6 @@ export const DataGridCustomFilterIcon = styled(AppsIcon, {
 	},
 }));
 
-export const DataGridCustomFilterMulti = styled(BaseSelector, {
-	name: "CcDataGrid",
-	slot: "customFilterMulti",
-})(({ theme }) => ({
-	"& .MuiAutocomplete-root.Mui-active": {
-		borderColor: theme.palette.secondary.main,
-		"& > fieldset": {
-			borderColor: theme.palette.secondary.main,
-		},
-		"& .MuiAutocomplete-inputRoot": {
-			borderColor: theme.palette.secondary.main,
-			"& > fieldset": {
-				borderColor: theme.palette.secondary.main,
-			},
-		},
-	},
-})) as typeof BaseSelector;
-
-export const DataGridCustomFilterSingle = styled(SingleSelect, {
-	name: "CcDataGrid",
-	slot: "customFilterSingle",
-})(({ theme }) => ({
-	"& .MuiAutocomplete-root.Mui-active": {
-		borderColor: theme.palette.secondary.main,
-		"& > fieldset": {
-			borderColor: theme.palette.secondary.main,
-		},
-		"& .MuiAutocomplete-inputRoot": {
-			borderColor: theme.palette.secondary.main,
-			"& > fieldset": {
-				borderColor: theme.palette.secondary.main,
-			},
-		},
-	},
-})) as typeof SingleSelect;
-
 export type DataGridClassKey =
 	| "root"
 	| "header"
@@ -1009,7 +971,9 @@ export type DataGridClassKey =
 	| "quickFilterIcon"
 	| "customFilterIcon"
 	| "customFilterMulti"
+	| "customFilterMultiBackend"
 	| "customFilterSingle"
+	| "customFilterSingleBackend"
 	| "centeredStickyTypography"
 	| "settingsTableCell"
 	| "settingsTable"

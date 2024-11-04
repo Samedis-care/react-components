@@ -9,11 +9,12 @@ import {
 	useThemeProps,
 } from "@mui/material";
 import { useCustomFilterActiveContext } from "./Header/FilterBar";
-import { DataGridCustomFilterMulti, useDataGridProps } from "./DataGrid";
+import { useDataGridProps } from "./DataGrid";
 import { Breakpoint } from "@mui/material/styles";
 import { GridSize } from "@mui/material/Grid/Grid";
 import compareArrayContent from "../../utils/compareArrayContent";
 import { MultiSelectorData } from "../Selector";
+import BaseSelector from "../Selector/BaseSelector";
 
 export interface GridMultiSelectFilterProps {
 	/**
@@ -50,6 +51,24 @@ export interface GridMultiSelectFilterProps {
 	 */
 	barBreakpoints?: Partial<Record<Breakpoint, boolean | GridSize>>;
 }
+
+export const DataGridCustomFilterMulti = styled(BaseSelector, {
+	name: "CcDataGrid",
+	slot: "customFilterMulti",
+})(({ theme }) => ({
+	"& .MuiAutocomplete-root.Mui-active": {
+		borderColor: theme.palette.secondary.main,
+		"& > fieldset": {
+			borderColor: theme.palette.secondary.main,
+		},
+		"& .MuiAutocomplete-inputRoot": {
+			borderColor: theme.palette.secondary.main,
+			"& > fieldset": {
+				borderColor: theme.palette.secondary.main,
+			},
+		},
+	},
+})) as typeof BaseSelector;
 
 const GridMultiSelectFilterDialogRoot = styled(Grid, {
 	name: "CcGridMultiSelectFilter",

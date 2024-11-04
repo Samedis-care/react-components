@@ -12,9 +12,10 @@ import {
 	useThemeProps,
 } from "@mui/material";
 import { useCustomFilterActiveContext } from "./Header/FilterBar";
-import { DataGridCustomFilterSingle, useDataGridProps } from "./DataGrid";
+import { useDataGridProps } from "./DataGrid";
 import { GridSize } from "@mui/material/Grid/Grid";
 import { Breakpoint } from "@mui/material/styles";
+import SingleSelect from "../Selector/SingleSelect";
 
 export interface GridSingleSelectFilterProps {
 	/**
@@ -55,6 +56,24 @@ export interface GridSingleSelectFilterProps {
 	 */
 	barBreakpoints?: Partial<Record<Breakpoint, boolean | GridSize>>;
 }
+
+export const DataGridCustomFilterSingle = styled(SingleSelect, {
+	name: "CcDataGrid",
+	slot: "customFilterSingle",
+})(({ theme }) => ({
+	"& .MuiAutocomplete-root.Mui-active": {
+		borderColor: theme.palette.secondary.main,
+		"& > fieldset": {
+			borderColor: theme.palette.secondary.main,
+		},
+		"& .MuiAutocomplete-inputRoot": {
+			borderColor: theme.palette.secondary.main,
+			"& > fieldset": {
+				borderColor: theme.palette.secondary.main,
+			},
+		},
+	},
+})) as typeof SingleSelect;
 
 const GridSingleSelectFilterDialogRoot = styled(Grid, {
 	name: "CcGridSingleSelectFilter",

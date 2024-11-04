@@ -171,7 +171,7 @@ const BackendSingleSelect = <
 
 	// fetch missing data entries
 	useEffect(() => {
-		if (!selected) return;
+		if (selected == null) return;
 		if (selectedCache?.value === selected) return;
 
 		// no need to fetch additional options
@@ -238,7 +238,7 @@ const BackendSingleSelect = <
 			onLoad={debouncedLoad}
 			onSelect={handleSelect}
 			selected={
-				selected
+				selected != null
 					? (selectedCache ?? {
 							value: selected,
 							label: t("backend-components.selector.loading"),
