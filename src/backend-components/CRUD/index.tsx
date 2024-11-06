@@ -2,6 +2,7 @@ import React, {
 	Suspense,
 	useCallback,
 	useContext,
+	useEffect,
 	useMemo,
 	useRef,
 	useState,
@@ -524,13 +525,21 @@ const CRUD = <
 		[refreshGrid],
 	);
 
+	const showGrid = disableRouting
+		? id === null
+		: routeUrl === location.pathname;
+
+	useEffect(() => {
+		window.dispatchEvent(new UIEvent("resize", { bubbles: true })); // trigger size recalculations
+	}, [showGrid]);
+
 	return (
 		<CrudDispatchContext.Provider value={dispatch}>
 			{disableRouting ? (
 				<>
 					{(id === null || !disableBackgroundGrid) && (
 						<GridVisibilityWrapper
-							className={id !== null ? "Mui-hidden" : undefined}
+							className={!showGrid ? "Mui-hidden" : undefined}
 						>
 							{grid(id === null)}
 						</GridVisibilityWrapper>
@@ -547,9 +556,7 @@ const CRUD = <
 				<>
 					{(id === null || !disableBackgroundGrid) && (
 						<GridVisibilityWrapper
-							className={
-								routeUrl !== location.pathname ? "Mui-hidden" : undefined
-							}
+							className={!showGrid ? "Mui-hidden" : undefined}
 						>
 							{grid(routeUrl === location.pathname)}
 						</GridVisibilityWrapper>
