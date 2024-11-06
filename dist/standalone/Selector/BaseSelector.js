@@ -147,10 +147,10 @@ const BaseSelector = (inProps) => {
     const defaultRenderer = useCallback((props, data, state) => {
         const { selected } = state;
         if (data.isDivider)
-            return (React.createElement(StyledDivider, { component: "li", ...props, className: classes?.divider }));
+            return (React.createElement(StyledDivider, { component: "li", ...props, key: data.value, className: classes?.divider }));
         if (data.isSmallLabel)
-            return (React.createElement(SmallLabelOption, { component: "li", ...props, onClick: undefined, variant: "caption", className: classes?.smallLabel }, getReactLabel(data)));
-        return (React.createElement(OptionListItem, { component: "li", ...props, className: combineClassNames([
+            return (React.createElement(SmallLabelOption, { component: "li", ...props, key: data.value, onClick: undefined, variant: "caption", className: classes?.smallLabel }, getReactLabel(data)));
+        return (React.createElement(OptionListItem, { component: "li", ...props, key: data.value, className: combineClassNames([
                 classes?.listItem,
                 data.className,
                 props.className,
