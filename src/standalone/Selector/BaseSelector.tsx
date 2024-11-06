@@ -621,6 +621,7 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 					<StyledDivider
 						component={"li"}
 						{...props}
+						key={data.value}
 						className={classes?.divider}
 					/>
 				);
@@ -629,6 +630,7 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 					<SmallLabelOption
 						component={"li"}
 						{...props}
+						key={data.value}
 						onClick={undefined}
 						variant={"caption"}
 						className={classes?.smallLabel}
@@ -641,6 +643,7 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 				<OptionListItem
 					component={"li"}
 					{...props}
+					key={data.value}
 					className={combineClassNames([
 						classes?.listItem,
 						data.className,
