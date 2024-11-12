@@ -13,6 +13,7 @@ import {
 	Divider,
 	Grid,
 	IconButton,
+	InputAdornment,
 	InputLabel,
 	InputProps,
 	ListItemText,
@@ -1073,22 +1074,28 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 													<InfoIcon color={"disabled"} />
 												</InfoButton>
 											);
-											return hasAdditionalElements
-												? params.InputProps?.endAdornment
-													? React.cloneElement(
-															params.InputProps?.endAdornment as ReactElement,
-															{},
-															endAdornmentLeft,
-															...((
-																params.InputProps?.endAdornment as ReactElement<
-																	PropsWithChildren<unknown>
-																>
-															).props.children as ReactNode[]),
-															infoBtn,
-															endAdornment,
-														)
-													: [endAdornmentLeft, infoBtn]
-												: params.InputProps?.endAdornment;
+											return hasAdditionalElements ? (
+												params.InputProps?.endAdornment ? (
+													React.cloneElement(
+														params.InputProps?.endAdornment as ReactElement,
+														{},
+														endAdornmentLeft,
+														...((
+															params.InputProps?.endAdornment as ReactElement<
+																PropsWithChildren<unknown>
+															>
+														).props.children as ReactNode[]),
+														infoBtn,
+														endAdornment,
+													)
+												) : (
+													<InputAdornment position={"end"}>
+														{[endAdornmentLeft, infoBtn, endAdornment]}
+													</InputAdornment>
+												)
+											) : (
+												params.InputProps?.endAdornment
+											);
 										})(),
 									}}
 									placeholder={placeholder}
