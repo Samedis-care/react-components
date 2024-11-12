@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState, } from "react";
-import { Autocomplete, Divider, Grid, IconButton, InputLabel, ListItemText, Paper, Popper, styled, Typography, useThemeProps, } from "@mui/material";
+import { Autocomplete, Divider, Grid, IconButton, InputAdornment, InputLabel, ListItemText, Paper, Popper, styled, Typography, useThemeProps, } from "@mui/material";
 import { Add as AddIcon, ExpandMore, Info as InfoIcon, } from "@mui/icons-material";
 import TextFieldWithHelp from "../UIKit/TextFieldWithHelp";
 import { SelectorSmallListItemButton, SmallListItemIcon, } from "../../standalone/Small";
@@ -407,11 +407,7 @@ const BaseSelector = (inProps) => {
                                     const hasAdditionalElements = openInfo || endAdornment || endAdornmentLeft;
                                     const infoBtn = openInfo && (React.createElement(InfoButton, { onClick: openInfo, className: classes?.infoBtn },
                                         React.createElement(InfoIcon, { color: "disabled" })));
-                                    return hasAdditionalElements
-                                        ? params.InputProps?.endAdornment
-                                            ? React.cloneElement(params.InputProps?.endAdornment, {}, endAdornmentLeft, ...(params.InputProps?.endAdornment).props.children, infoBtn, endAdornment)
-                                            : [endAdornmentLeft, infoBtn]
-                                        : params.InputProps?.endAdornment;
+                                    return hasAdditionalElements ? (params.InputProps?.endAdornment ? (React.cloneElement(params.InputProps?.endAdornment, {}, endAdornmentLeft, ...(params.InputProps?.endAdornment).props.children, infoBtn, endAdornment)) : (React.createElement(InputAdornment, { position: "end" }, [endAdornmentLeft, infoBtn, endAdornment]))) : (params.InputProps?.endAdornment);
                                 })(),
                             }, placeholder: placeholder, onChange: (event) => {
                                 void onSearchHandler(event.target.value);
