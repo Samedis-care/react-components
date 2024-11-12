@@ -351,19 +351,31 @@ const BaseSelector = (inProps) => {
                         setOpen(true);
                     }, onClose: () => {
                         setOpen(false);
-                    }, disableClearable: disableClearable, loading: !!loading, loadingText: loadingText ?? t("standalone.selector.base-selector.loading-text"), autoComplete: true, disabled: disabled, selectOnFocus: !disableSearch, options: 
-                    // add selected to selectorOptions if not present to suppress warnings
-                    multiple
-                        ? selectorOptions
-                            .concat(selected)
-                            .filter((entry, idx, arr) => arr.findIndex((data) => data.value === entry.value) ===
-                            idx)
-                        : selected &&
-                            !selectorOptions.find((option) => option.value === selected.value)
-                            ? selectorOptions.concat([selected])
-                            : selectorOptions, groupBy: grouped
+                    }, disableClearable: disableClearable, loading: !!loading, loadingText: loadingText ?? t("standalone.selector.base-selector.loading-text"), autoComplete: true, disabled: disabled, selectOnFocus: !disableSearch, options: (() => {
+                        let options = [];
+                        // add selected to selectorOptions if not present to suppress warnings
+                        const selectedArr = multiple
+                            ? selected
+                            : selected
+                                ? [selected]
+                                : [];
+                        // free solo option
+                        if (freeSolo &&
+                            query &&
+                            !selectorOptions.find((entry) => entry.label === query) &&
+                            !selectedArr.find((entry) => entry.label === query))
+                            options.push({
+                                label: query,
+                                value: query,
+                            });
+                        options = options.concat(selectorOptions);
+                        options = options.concat(selectedArr);
+                        // unique array
+                        options = options.filter((value, idx, arr) => arr.findIndex((v2) => v2.value === value.value) === idx);
+                        return options;
+                    })(), groupBy: grouped
                         ? (option) => option.group ?? noGroupLabel ?? ""
-                        : undefined, PopperComponent: GrowPopper, filterOptions: filterOptions, value: selected, inputValue: query, blurOnSelect: !multiple, onInputChange: updateQuery, popupIcon: React.createElement(ExpandMore, null), freeSolo: freeSolo, noOptionsText: lru && query === ""
+                        : undefined, PopperComponent: GrowPopper, filterOptions: filterOptions, value: selected, inputValue: query, blurOnSelect: !multiple, onInputChange: updateQuery, popupIcon: React.createElement(ExpandMore, null), autoSelect: freeSolo, freeSolo: freeSolo, noOptionsText: lru && query === ""
                         ? (startTypingToSearchText ??
                             t("standalone.selector.base-selector.start-typing-to-search-text"))
                         : (noOptionsText ??
@@ -390,9 +402,12 @@ const BaseSelector = (inProps) => {
                                     : undefined) ?? startAdornment,
                                 endAdornment: (() => {
                                     const hasAdditionalElements = openInfo || endAdornment || endAdornmentLeft;
+                                    const infoBtn = openInfo && (React.createElement(InfoButton, { onClick: openInfo, className: classes?.infoBtn },
+                                        React.createElement(InfoIcon, { color: "disabled" })));
                                     return hasAdditionalElements
-                                        ? React.cloneElement(params.InputProps?.endAdornment, {}, endAdornmentLeft, ...(params.InputProps?.endAdornment).props.children, openInfo && (React.createElement(InfoButton, { onClick: openInfo, className: classes?.infoBtn },
-                                            React.createElement(InfoIcon, { color: "disabled" }))), endAdornment)
+                                        ? params.InputProps?.endAdornment
+                                            ? React.cloneElement(params.InputProps?.endAdornment, {}, endAdornmentLeft, ...(params.InputProps?.endAdornment).props.children, infoBtn, endAdornment)
+                                            : [endAdornmentLeft, infoBtn]
                                         : params.InputProps?.endAdornment;
                                 })(),
                             }, placeholder: placeholder, onChange: (event) => {

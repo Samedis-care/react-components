@@ -63,6 +63,15 @@ export interface BackendSingleSelectProps<KeyT extends ModelFieldName, Visibilit
      * Disable request batching
      */
     disableRequestBatching?: boolean;
+    /**
+     * onSelect handler for free solo values
+     * @param value The value selected
+     */
+    onSelectFreeSolo?: (value: string) => void;
+    /**
+     * Currently selected freeSolo value
+     */
+    selectedFreeSolo?: string | null;
 }
 declare const BackendSingleSelect: <KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT>(props: BackendSingleSelectProps<KeyT, VisibilityT, CustomT>) => React.JSX.Element;
 declare const _default: typeof BackendSingleSelect;

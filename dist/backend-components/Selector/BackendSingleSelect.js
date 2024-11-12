@@ -3,8 +3,10 @@ import { getStringLabel, SingleSelect, } from "../../standalone";
 import debouncePromise from "../../utils/debouncePromise";
 import useCCTranslations from "../../utils/useCCTranslations";
 const BackendSingleSelect = (props) => {
-    const { model, modelFetch: modelFetchProp, modelToSelectorData, searchResultLimit, onSelect, selected, initialData, searchDebounceTime, sort, lru, onLoadError, additionalOptions, disableRequestBatching, ...otherProps } = props;
+    const { model, modelFetch: modelFetchProp, modelToSelectorData, searchResultLimit, onSelect, selected, initialData, searchDebounceTime, sort, lru, onLoadError, additionalOptions, disableRequestBatching, freeSolo, selectedFreeSolo, onSelectFreeSolo, ...otherProps } = props;
     const modelFetch = modelFetchProp ?? model;
+    if (freeSolo && !onSelectFreeSolo)
+        throw new Error("freeSolo enabled, but no onSelectFreeSolo callback");
     const [selectedCache, setSelectedCache] = useState(null);
     const { t } = useCCTranslations();
     const handleLoad = useCallback(async (search) => {
@@ -33,11 +35,17 @@ const BackendSingleSelect = (props) => {
         }
         : undefined, [lru, handleLoadLruRecord]);
     const handleSelect = useCallback((selected) => {
+        if (selected && selected.value && selected.label === selected.value) {
+            // free solo
+            if (onSelectFreeSolo)
+                onSelectFreeSolo(selected.value);
+            return;
+        }
         setSelectedCache(selected);
         if (onSelect) {
             onSelect(selected ? selected.value : null);
         }
-    }, [onSelect]);
+    }, [onSelect, onSelectFreeSolo]);
     // fetch missing data entries
     useEffect(() => {
         if (selected == null)
@@ -92,11 +100,13 @@ const BackendSingleSelect = (props) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selected]);
     const debouncedLoad = useMemo(() => debouncePromise(handleLoad, searchDebounceTime ?? 500), [handleLoad, searchDebounceTime]);
-    return (React.createElement(SingleSelect, { ...otherProps, onLoad: debouncedLoad, onSelect: handleSelect, selected: selected != null
-            ? (selectedCache ?? {
-                value: selected,
-                label: t("backend-components.selector.loading"),
-            })
-            : null, lru: lruConfig }));
+    return (React.createElement(SingleSelect, { ...otherProps, freeSolo: freeSolo, onLoad: debouncedLoad, onSelect: handleSelect, selected: selectedFreeSolo
+            ? { value: selectedFreeSolo, label: selectedFreeSolo }
+            : selected != null
+                ? (selectedCache ?? {
+                    value: selected,
+                    label: t("backend-components.selector.loading"),
+                })
+                : null, lru: lruConfig }));
 };
 export default React.memo(BackendSingleSelect);
