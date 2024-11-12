@@ -35,7 +35,7 @@ const BackendSingleSelect = (props) => {
         }
         : undefined, [lru, handleLoadLruRecord]);
     const handleSelect = useCallback((selected) => {
-        if (selected && selected.value && selected.label === selected.value) {
+        if (selected && selected.freeSolo) {
             // free solo
             if (onSelectFreeSolo)
                 onSelectFreeSolo(selected.value);

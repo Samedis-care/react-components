@@ -218,7 +218,9 @@ const BaseSelector = (inProps) => {
             if (multiple
                 ? dataNormalized.length > selectedNormalized.length
                 : dataNormalized.length > 0) {
-                addToLru(getId(dataNormalized[dataNormalized.length - 1]));
+                const lastRecord = dataNormalized[dataNormalized.length - 1];
+                if (!lastRecord.freeSolo)
+                    addToLru(getId(lastRecord));
             }
         }
     }, [onSelect, onAddNew, multiple, selected, addToLru, getId]);
@@ -367,6 +369,7 @@ const BaseSelector = (inProps) => {
                             options.push({
                                 label: query,
                                 value: query,
+                                freeSolo: true,
                             });
                         options = options.concat(selectorOptions);
                         options = options.concat(selectedArr);

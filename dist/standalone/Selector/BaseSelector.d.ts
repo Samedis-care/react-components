@@ -59,6 +59,10 @@ export interface BaseSelectorData {
      * CSS styles for options
      */
     className?: string;
+    /**
+     * Free solo flag (user entered data)
+     */
+    freeSolo?: boolean;
 }
 export declare const getStringLabel: (data: BaseSelectorData | string) => string;
 export declare const getReactLabel: (data: BaseSelectorData) => React.ReactNode;
