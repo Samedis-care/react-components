@@ -348,7 +348,7 @@ export type BaseSelectorProps<
 		 */
 		lru?: SelectorLruOptions<DataT>;
 		/**
-		 * Enable freeSolo
+		 * Enable freeSolo. Allows user to enter any content. Selected option will be { value: USER_INPUT, label: USER_INPUT }
 		 */
 		freeSolo?: boolean;
 		/**
@@ -953,23 +953,35 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 						autoComplete
 						disabled={disabled}
 						selectOnFocus={!disableSearch}
-						options={
+						options={(() => {
+							let options = [];
 							// add selected to selectorOptions if not present to suppress warnings
-							multiple
-								? selectorOptions
-										.concat(selected)
-										.filter(
-											(entry, idx, arr) =>
-												arr.findIndex((data) => data.value === entry.value) ===
-												idx,
-										)
-								: selected &&
-									  !selectorOptions.find(
-											(option) => option.value === selected.value,
-									  )
-									? selectorOptions.concat([selected])
-									: selectorOptions
-						}
+							const selectedArr = multiple
+								? selected
+								: selected
+									? [selected]
+									: [];
+							// free solo option
+							if (
+								freeSolo &&
+								query &&
+								!selectorOptions.find((entry) => entry.label === query) &&
+								!selectedArr.find((entry) => entry.label === query)
+							)
+								options.push({
+									label: query,
+									value: query,
+								} as unknown as DataT);
+
+							options = options.concat(selectorOptions);
+							options = options.concat(selectedArr);
+							// unique array
+							options = options.filter(
+								(value, idx, arr) =>
+									arr.findIndex((v2) => v2.value === value.value) === idx,
+							);
+							return options;
+						})()}
 						groupBy={
 							grouped
 								? (option: DataT) => option.group ?? noGroupLabel ?? ""
@@ -982,6 +994,7 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 						blurOnSelect={!multiple}
 						onInputChange={updateQuery}
 						popupIcon={<ExpandMore />}
+						autoSelect={freeSolo}
 						freeSolo={freeSolo}
 						noOptionsText={
 							lru && query === ""
@@ -1042,26 +1055,29 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 										endAdornment: (() => {
 											const hasAdditionalElements =
 												openInfo || endAdornment || endAdornmentLeft;
+											const infoBtn = openInfo && (
+												<InfoButton
+													onClick={openInfo}
+													className={classes?.infoBtn}
+												>
+													<InfoIcon color={"disabled"} />
+												</InfoButton>
+											);
 											return hasAdditionalElements
-												? React.cloneElement(
-														params.InputProps?.endAdornment as ReactElement,
-														{},
-														endAdornmentLeft,
-														...((
-															params.InputProps?.endAdornment as ReactElement<
-																PropsWithChildren<unknown>
-															>
-														).props.children as ReactNode[]),
-														openInfo && (
-															<InfoButton
-																onClick={openInfo}
-																className={classes?.infoBtn}
-															>
-																<InfoIcon color={"disabled"} />
-															</InfoButton>
-														),
-														endAdornment,
-													)
+												? params.InputProps?.endAdornment
+													? React.cloneElement(
+															params.InputProps?.endAdornment as ReactElement,
+															{},
+															endAdornmentLeft,
+															...((
+																params.InputProps?.endAdornment as ReactElement<
+																	PropsWithChildren<unknown>
+																>
+															).props.children as ReactNode[]),
+															infoBtn,
+															endAdornment,
+														)
+													: [endAdornmentLeft, infoBtn]
 												: params.InputProps?.endAdornment;
 										})(),
 									}}

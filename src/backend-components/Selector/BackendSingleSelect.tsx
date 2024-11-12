@@ -86,6 +86,15 @@ export interface BackendSingleSelectProps<
 	 * Disable request batching
 	 */
 	disableRequestBatching?: boolean;
+	/**
+	 * onSelect handler for free solo values
+	 * @param value The value selected
+	 */
+	onSelectFreeSolo?: (value: string) => void;
+	/**
+	 * Currently selected freeSolo value
+	 */
+	selectedFreeSolo?: string | null;
 }
 
 const BackendSingleSelect = <
@@ -109,9 +118,15 @@ const BackendSingleSelect = <
 		onLoadError,
 		additionalOptions,
 		disableRequestBatching,
+		freeSolo,
+		selectedFreeSolo,
+		onSelectFreeSolo,
 		...otherProps
 	} = props;
 	const modelFetch = modelFetchProp ?? model;
+
+	if (freeSolo && !onSelectFreeSolo)
+		throw new Error("freeSolo enabled, but no onSelectFreeSolo callback");
 
 	const [selectedCache, setSelectedCache] = useState<BaseSelectorData | null>(
 		null,
@@ -161,12 +176,17 @@ const BackendSingleSelect = <
 
 	const handleSelect = useCallback(
 		(selected: BaseSelectorData | null) => {
+			if (selected && selected.value && selected.label === selected.value) {
+				// free solo
+				if (onSelectFreeSolo) onSelectFreeSolo(selected.value);
+				return;
+			}
 			setSelectedCache(selected);
 			if (onSelect) {
 				onSelect(selected ? selected.value : null);
 			}
 		},
-		[onSelect],
+		[onSelect, onSelectFreeSolo],
 	);
 
 	// fetch missing data entries
@@ -235,15 +255,18 @@ const BackendSingleSelect = <
 	return (
 		<SingleSelect
 			{...otherProps}
+			freeSolo={freeSolo}
 			onLoad={debouncedLoad}
 			onSelect={handleSelect}
 			selected={
-				selected != null
-					? (selectedCache ?? {
-							value: selected,
-							label: t("backend-components.selector.loading"),
-						})
-					: null
+				selectedFreeSolo
+					? { value: selectedFreeSolo, label: selectedFreeSolo }
+					: selected != null
+						? (selectedCache ?? {
+								value: selected,
+								label: t("backend-components.selector.loading"),
+							})
+						: null
 			}
 			lru={lruConfig}
 		/>
