@@ -364,8 +364,8 @@ const BaseSelector = (inProps) => {
                         // free solo option
                         if (freeSolo &&
                             query &&
-                            !selectorOptions.find((entry) => entry.label === query) &&
-                            !selectedArr.find((entry) => entry.label === query))
+                            !(selectorOptions.find((entry) => getStringLabel(entry) === query) ||
+                                selectedArr.find((entry) => getStringLabel(entry) === query)))
                             options.push({
                                 label: query,
                                 value: query,
