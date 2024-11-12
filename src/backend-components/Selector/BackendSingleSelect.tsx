@@ -176,7 +176,7 @@ const BackendSingleSelect = <
 
 	const handleSelect = useCallback(
 		(selected: BaseSelectorData | null) => {
-			if (selected && selected.value && selected.label === selected.value) {
+			if (selected && selected.freeSolo) {
 				// free solo
 				if (onSelectFreeSolo) onSelectFreeSolo(selected.value);
 				return;

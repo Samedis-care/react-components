@@ -103,6 +103,10 @@ export interface BaseSelectorData {
 	 * CSS styles for options
 	 */
 	className?: string;
+	/**
+	 * Free solo flag (user entered data)
+	 */
+	freeSolo?: boolean;
 }
 
 export const getStringLabel = (data: BaseSelectorData | string) =>
@@ -750,7 +754,8 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 						? dataNormalized.length > selectedNormalized.length
 						: dataNormalized.length > 0
 				) {
-					addToLru(getId(dataNormalized[dataNormalized.length - 1]));
+					const lastRecord = dataNormalized[dataNormalized.length - 1];
+					if (!lastRecord.freeSolo) addToLru(getId(lastRecord));
 				}
 			}
 		},
@@ -971,6 +976,7 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 								options.push({
 									label: query,
 									value: query,
+									freeSolo: true,
 								} as unknown as DataT);
 
 							options = options.concat(selectorOptions);
