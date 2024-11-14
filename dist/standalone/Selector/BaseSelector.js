@@ -181,7 +181,9 @@ const BaseSelector = (inProps) => {
     const onChangeHandler = useCallback(async (data) => {
         if (multiple
             ? !Array.isArray(data)
-            : !data || typeof data !== "object" || !("value" in data)) {
+            : !data ||
+                !["string", "object"].includes(typeof data) ||
+                (typeof data === "object" && !("value" in data))) {
             if (data) {
                 // eslint-disable-next-line no-console
                 console.warn("[Components-Care] [BaseSelector] Unexpected value passed to handleOptionSelect:", data);
@@ -189,9 +191,24 @@ const BaseSelector = (inProps) => {
             }
         }
         const dataNormalized = multiple
-            ? data
+            ? // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+                data.map((entry) => typeof entry === "string"
+                    ? {
+                        value: entry,
+                        label: entry,
+                        freeSolo: true,
+                    }
+                    : entry)
             : data
-                ? [data]
+                ? [
+                    typeof data === "string"
+                        ? {
+                            value: data,
+                            label: data,
+                            freeSolo: true,
+                        }
+                        : data,
+                ]
                 : [];
         const selectedNormalized = multiple
             ? selected
@@ -407,7 +424,10 @@ const BaseSelector = (inProps) => {
                                     const hasAdditionalElements = openInfo || endAdornment || endAdornmentLeft;
                                     const infoBtn = openInfo && (React.createElement(InfoButton, { onClick: openInfo, className: classes?.infoBtn },
                                         React.createElement(InfoIcon, { color: "disabled" })));
-                                    return hasAdditionalElements ? (params.InputProps?.endAdornment ? (React.cloneElement(params.InputProps?.endAdornment, {}, endAdornmentLeft, ...(params.InputProps?.endAdornment).props.children, infoBtn, endAdornment)) : (React.createElement(InputAdornment, { position: "end" }, [endAdornmentLeft, infoBtn, endAdornment]))) : (params.InputProps?.endAdornment);
+                                    return hasAdditionalElements ? (params.InputProps?.endAdornment ? (React.cloneElement(params.InputProps?.endAdornment, {}, endAdornmentLeft, ...(params.InputProps?.endAdornment).props.children, infoBtn, endAdornment)) : (React.createElement(InputAdornment, { position: "end" },
+                                        endAdornmentLeft,
+                                        infoBtn,
+                                        endAdornment))) : (params.InputProps?.endAdornment);
                                 })(),
                             }, placeholder: placeholder, onChange: (event) => {
                                 void onSearchHandler(event.target.value);
