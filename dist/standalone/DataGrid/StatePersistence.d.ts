@@ -7,9 +7,9 @@ export interface DataGridPersistentState {
 }
 export type DataGridPersistentStateContextType = [
     Partial<DataGridPersistentState> | undefined,
-    (data: DataGridPersistentState) => Promise<void> | void
+    (data: Partial<DataGridPersistentState>) => Promise<void> | void
 ];
 export declare const DataGridPersistentStateContext: React.Context<DataGridPersistentStateContextType | undefined>;
-export declare const filterPersistedState: (persisted: Partial<DataGridPersistentState>, config: DataGridProps["persist"]) => DataGridPersistentState;
+export declare const filterPersistedState: (persisted: Partial<DataGridPersistentState>, config: DataGridProps["persist"]) => Partial<DataGridPersistentState>;
 declare const _default: React.MemoExoticComponent<() => React.JSX.Element>;
 export default _default;
