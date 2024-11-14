@@ -709,11 +709,15 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 	);
 
 	const onChangeHandler = useCallback(
-		async (data: Multi extends true ? DataT[] : DataT | null) => {
+		async (
+			data: Multi extends true ? (string | DataT)[] : (string | DataT) | null,
+		) => {
 			if (
 				multiple
 					? !Array.isArray(data)
-					: !data || typeof data !== "object" || !("value" in data)
+					: !data ||
+						!["string", "object"].includes(typeof data) ||
+						(typeof data === "object" && !("value" in data))
 			) {
 				if (data) {
 					// eslint-disable-next-line no-console
@@ -725,9 +729,26 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 				}
 			}
 			const dataNormalized: DataT[] = multiple
-				? (data as DataT[])
+				? // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+					((data as (DataT | string)[]).map((entry) =>
+						typeof entry === "string"
+							? ({
+									value: entry,
+									label: entry,
+									freeSolo: true,
+								} as unknown as DataT)
+							: entry,
+					) as DataT[])
 				: data
-					? [data as DataT]
+					? [
+							typeof data === "string"
+								? ({
+										value: data,
+										label: data,
+										freeSolo: true,
+									} as unknown as DataT)
+								: (data as DataT),
+						]
 					: [];
 			const selectedNormalized: DataT[] = multiple
 				? selected
@@ -1090,7 +1111,9 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 													)
 												) : (
 													<InputAdornment position={"end"}>
-														{[endAdornmentLeft, infoBtn, endAdornment]}
+														{endAdornmentLeft}
+														{infoBtn}
+														{endAdornment}
 													</InputAdornment>
 												)
 											) : (
