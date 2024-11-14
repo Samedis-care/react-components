@@ -40,6 +40,7 @@ import { HEADER_PADDING } from "./Content/ColumnHeader";
 import CustomFilterDialog from "./CustomFilterDialog";
 import StatePersistence, {
 	DataGridPersistentStateContext,
+	filterPersistedState,
 } from "./StatePersistence";
 import { IDataGridContentSelectRowViewProps } from "./Content/SelectRowView";
 import { CustomFilterActiveContext } from "./Header/FilterBar";
@@ -80,6 +81,14 @@ export interface DataGridProps
 	 * Enable the global scroll listener (listens for page up/down keydown events)
 	 */
 	globalScrollListener?: boolean;
+	/**
+	 * What to persist?
+	 * - columns: column sizing, visibility, pinned state
+	 * - sort: sorting state
+	 * - filters: customData, search, column filter
+	 * @default ["columns", "sort", "filters"]
+	 */
+	persist?: ("columns" | "sort" | "filters")[];
 }
 
 export interface DataGridCustomDataActionButton {
@@ -1058,12 +1067,19 @@ const DataGrid = (inProps: DataGridProps) => {
 		globalScrollListener,
 		className,
 		classes,
+		persist,
 	} = props;
 	const rowsPerPage = props.rowsPerPage || 25;
 
 	const theme = useTheme();
 	const persistedContext = useContext(DataGridPersistentStateContext);
-	const [persisted] = persistedContext || [];
+	const persisted = useMemo(
+		() =>
+			persistedContext && persistedContext[0]
+				? filterPersistedState(persistedContext[0], persist)
+				: undefined,
+		[persistedContext, persist],
+	);
 
 	const statePack = useState<IDataGridState>(() => ({
 		...getDataGridDefaultState(columns, undefined),
