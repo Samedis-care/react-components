@@ -260,7 +260,7 @@ const BackendSingleSelect = <
 			onSelect={handleSelect}
 			selected={
 				selectedFreeSolo
-					? { value: selectedFreeSolo, label: selectedFreeSolo }
+					? { value: selectedFreeSolo, label: selectedFreeSolo, freeSolo: true }
 					: selected != null
 						? (selectedCache ?? {
 								value: selected,
