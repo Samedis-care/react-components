@@ -27,7 +27,7 @@ export interface DataGridPersistentState {
 
 export type DataGridPersistentStateContextType = [
 	Partial<DataGridPersistentState> | undefined,
-	(data: DataGridPersistentState) => Promise<void> | void,
+	(data: Partial<DataGridPersistentState>) => Promise<void> | void,
 ];
 export const DataGridPersistentStateContext = React.createContext<
 	DataGridPersistentStateContextType | undefined
@@ -43,10 +43,10 @@ const DEFAULT_PERSIST_CONFIG: DataGridProps["persist"] = [
 export const filterPersistedState = (
 	persisted: Partial<DataGridPersistentState>,
 	config: DataGridProps["persist"],
-): DataGridPersistentState => {
+): Partial<DataGridPersistentState> => {
 	const { columnState, columnWidth, state } = persisted;
 	config = config ?? DEFAULT_PERSIST_CONFIG;
-	return {
+	const result: Partial<DataGridPersistentState> = {
 		columnState: columnState
 			? Object.fromEntries<IDataGridColumnState>(
 					Object.entries<IDataGridColumnState>(columnState).map(
@@ -63,20 +63,21 @@ export const filterPersistedState = (
 				)
 			: {},
 		columnWidth: config.includes("columns") ? (columnWidth ?? {}) : {},
-		state: {
-			search: config.includes("filters") ? state?.search : undefined,
-			hiddenColumns: config.includes("columns")
-				? state?.hiddenColumns
-				: undefined,
-			lockedColumns: config.includes("columns")
-				? state?.lockedColumns
-				: undefined,
-			customData: config.includes("filters") ? state?.customData : undefined,
-			initialResize: config.includes("columns")
-				? state?.initialResize
-				: undefined,
-		},
 	};
+	if (state) {
+		result.state = {};
+		if (state.search != null && config.includes("filters"))
+			result.state.search = state.search;
+		if (state.hiddenColumns != null && config.includes("columns"))
+			result.state.hiddenColumns = state.hiddenColumns;
+		if (state.lockedColumns != null && config.includes("columns"))
+			result.state.lockedColumns = state.lockedColumns;
+		if (state.customData != null && config.includes("filters"))
+			result.state.customData = state.customData;
+		if (state.initialResize != null && config.includes("columns"))
+			result.state.initialResize = state.initialResize;
+	}
+	return result;
 };
 
 /**
