@@ -32,6 +32,14 @@ export interface DataGridProps extends IDataGridHeaderProps, IDataGridColumnProp
      * Enable the global scroll listener (listens for page up/down keydown events)
      */
     globalScrollListener?: boolean;
+    /**
+     * What to persist?
+     * - columns: column sizing, visibility, pinned state
+     * - sort: sorting state
+     * - filters: customData, search, column filter
+     * @default ["columns", "sort", "filters"]
+     */
+    persist?: ("columns" | "sort" | "filters")[];
 }
 export interface DataGridCustomDataActionButton {
     /**

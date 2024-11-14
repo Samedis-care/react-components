@@ -12,7 +12,7 @@ import shallowCompareArray from "../../utils/shallowCompareArray";
 import { dataGridPrepareFiltersAndSorts } from "./CallbackUtil";
 import { HEADER_PADDING } from "./Content/ColumnHeader";
 import CustomFilterDialog from "./CustomFilterDialog";
-import StatePersistence, { DataGridPersistentStateContext, } from "./StatePersistence";
+import StatePersistence, { DataGridPersistentStateContext, filterPersistedState, } from "./StatePersistence";
 import { CustomFilterActiveContext } from "./Header/FilterBar";
 import combineClassNames from "../../utils/combineClassNames";
 import Checkbox from "../UIKit/Checkbox";
@@ -378,11 +378,13 @@ export const getDefaultColumnWidths = (columns, theme) => {
 };
 const DataGrid = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcDataGrid" });
-    const { columns, loadData, getAdditionalFilters, forceRefreshToken, defaultCustomData, overrideCustomData, onSelectionChange, defaultSort, defaultFilter, disableFooter, disableSelection, headerHeight, selection, overrideFilter, globalScrollListener, className, classes, } = props;
+    const { columns, loadData, getAdditionalFilters, forceRefreshToken, defaultCustomData, overrideCustomData, onSelectionChange, defaultSort, defaultFilter, disableFooter, disableSelection, headerHeight, selection, overrideFilter, globalScrollListener, className, classes, persist, } = props;
     const rowsPerPage = props.rowsPerPage || 25;
     const theme = useTheme();
     const persistedContext = useContext(DataGridPersistentStateContext);
-    const [persisted] = persistedContext || [];
+    const persisted = useMemo(() => persistedContext && persistedContext[0]
+        ? filterPersistedState(persistedContext[0], persist)
+        : undefined, [persistedContext, persist]);
     const statePack = useState(() => ({
         ...getDataGridDefaultState(columns, undefined),
         ...persisted?.state,

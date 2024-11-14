@@ -1,5 +1,5 @@
 import React from "react";
-import { IDataGridColumnsState, IDataGridState } from "./DataGrid";
+import { DataGridProps, IDataGridColumnsState, IDataGridState } from "./DataGrid";
 export interface DataGridPersistentState {
     columnState: IDataGridColumnsState;
     columnWidth: Record<string, number>;
@@ -10,5 +10,6 @@ export type DataGridPersistentStateContextType = [
     (data: DataGridPersistentState) => Promise<void> | void
 ];
 export declare const DataGridPersistentStateContext: React.Context<DataGridPersistentStateContextType | undefined>;
+export declare const filterPersistedState: (persisted: Partial<DataGridPersistentState>, config: DataGridProps["persist"]) => DataGridPersistentState;
 declare const _default: React.MemoExoticComponent<() => React.JSX.Element>;
 export default _default;
