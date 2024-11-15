@@ -14,27 +14,31 @@ const FilterEntry = (props) => {
     const isFirstFilter = depth === 1;
     const { t } = useCCTranslations();
     const { filterLimit, isFilterSupported, classes } = useDataGridProps();
-    const [enumFilterSearch, setEnumFilterSearch] = useState("");
-    const maxDepth = filterLimit;
-    const defaultFilterType = [
-        "string",
-        "localized-string",
-        "combined-string",
-    ].includes(props.valueType ?? "")
-        ? "contains"
-        : props.valueType === "enum"
-            ? "inSet"
-            : "equals";
-    let filterType = props.value?.type || defaultFilterType;
-    let filterValue = props.value?.value1 || "";
-    let filterValue2 = props.value?.value2 || "";
-    let subFilterComboType = props.value?.nextFilterType || "and";
-    let subFilter = props.value?.nextFilter || undefined;
     const checkSupport = (dataType, filterType) => {
         if (!isFilterSupported)
             return true;
         return isFilterSupported(dataType, filterType, props.field);
     };
+    const [enumFilterSearch, setEnumFilterSearch] = useState("");
+    const maxDepth = filterLimit;
+    const defaultFilterType = (() => {
+        const defaults = [
+            "string",
+            "localized-string",
+            "combined-string",
+        ].includes(props.valueType ?? "")
+            ? ["contains", "equals", "matches"]
+            : props.valueType === "enum"
+                ? ["inSet"]
+                : ["equals", "matches"];
+        return (defaults.find((filterType) => checkSupport(props.valueType, filterType)) || defaults[0] // fallback to broken UI, user can still select filter type manually
+        );
+    })();
+    let filterType = props.value?.type || defaultFilterType;
+    let filterValue = props.value?.value1 || "";
+    let filterValue2 = props.value?.value2 || "";
+    let subFilterComboType = props.value?.nextFilterType || "and";
+    let subFilter = props.value?.nextFilter || undefined;
     const resetFilter = useCallback(() => {
         onChange({ type: defaultFilterType, value1: "", value2: "" });
         close();
