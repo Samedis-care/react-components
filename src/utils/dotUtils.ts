@@ -125,3 +125,17 @@ export const dotSet = (
 			: data;
 	return ret;
 };
+
+/**
+ * Create a copy of data and omit all keys in omit list
+ * @param data The data to copy
+ * @param omit The keys to omit
+ */
+export const dotOmit = (
+	data: Record<string, unknown>,
+	omit: string[],
+): Record<string, unknown> => {
+	const dots = objectToDots(data);
+	omit.forEach((key) => delete dots[key]);
+	return dotsToObject(dots);
+};
