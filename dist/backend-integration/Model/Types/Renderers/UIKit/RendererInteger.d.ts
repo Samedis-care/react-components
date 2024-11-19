@@ -1,9 +1,9 @@
 import React from "react";
 import { TextFieldProps } from "@mui/material";
 import ModelRenderParams from "../../../RenderParams";
-import { TextFieldWithHelpProps } from "../../../../../standalone/UIKit/TextFieldWithHelp";
 import TypeNumber from "../../TypeNumber";
-export type ModelDataTypeIntegerRendererCCParams = Omit<TextFieldProps, "name" | "value" | "label" | "disabled" | "required" | "onChange" | "onBlur" | "error" | "multiline"> & Omit<TextFieldWithHelpProps, "warning">;
+import { IntegerInputFieldProps } from "../../../../../standalone/UIKit/InputControls/IntegerInputField";
+export type ModelDataTypeIntegerRendererCCParams = Omit<TextFieldProps, "name" | "value" | "label" | "disabled" | "required" | "onChange" | "onBlur" | "error" | "multiline"> & Omit<IntegerInputFieldProps, "warning" | "onChange" | "value">;
 /**
  * Renders a text field
  */

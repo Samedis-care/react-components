@@ -4,8 +4,12 @@ import useInputCursorFix from "../../../utils/useInputCursorFix";
 import useCCTranslations from "../../../utils/useCCTranslations";
 const IntegerInputField = (props) => {
     const { i18n } = useCCTranslations();
-    const { value, onChange, ...muiProps } = props;
-    const valueFormatted = value != null ? value.toLocaleString(i18n.language) : "";
+    const { value, onChange, noFormat, ...muiProps } = props;
+    const valueFormatted = value != null
+        ? noFormat
+            ? value.toString(10)
+            : value.toLocaleString(i18n.language)
+        : "";
     const { handleCursorChange, cursorInputRef } = useInputCursorFix(valueFormatted);
     // on change handling
     const handleChange = useCallback((event) => {
