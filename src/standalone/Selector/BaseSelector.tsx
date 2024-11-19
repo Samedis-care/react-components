@@ -911,7 +911,7 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 
 	const updateQuery = useCallback(
 		(_evt: React.SyntheticEvent, newQuery: string) => {
-			if (multiple) {
+			if (multiple && newQuery.length > 1) {
 				newQuery = newQuery
 					.substring(selected.map((sel) => sel.label).join(", ").length)
 					.trimStart();
