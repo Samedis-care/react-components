@@ -340,8 +340,13 @@ const BaseSelector = (inProps) => {
         noGroupLabel,
     ]);
     const updateQuery = useCallback((_evt, newQuery) => {
+        if (multiple) {
+            newQuery = newQuery
+                .substring(selected.map((sel) => sel.label).join(", ").length)
+                .trimStart();
+        }
         setQuery(newQuery);
-    }, []);
+    }, [multiple, selected]);
     // search handler
     useEffect(() => {
         if (!open)
@@ -411,7 +416,10 @@ const BaseSelector = (inProps) => {
                                     ? (selected.titleTooltip ?? getStringLabel(selected))
                                     : undefined,
                                 value: multiple
-                                    ? selected.map((sel) => sel.label).join(", ")
+                                    ? [
+                                        selected.map((sel) => sel.label).join(", "),
+                                        params.inputProps.value,
+                                    ].join(" ")
                                     : params.inputProps.value,
                             }, InputProps: {
                                 ...InputProps,
