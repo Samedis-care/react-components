@@ -6,8 +6,8 @@ import {
 	IntegerInputField,
 	NumberFormatter,
 } from "../../../../../standalone";
-import { TextFieldWithHelpProps } from "../../../../../standalone/UIKit/TextFieldWithHelp";
 import TypeNumber from "../../TypeNumber";
+import { IntegerInputFieldProps } from "../../../../../standalone/UIKit/InputControls/IntegerInputField";
 
 export type ModelDataTypeIntegerRendererCCParams = Omit<
 	TextFieldProps,
@@ -21,7 +21,7 @@ export type ModelDataTypeIntegerRendererCCParams = Omit<
 	| "error"
 	| "multiline"
 > &
-	Omit<TextFieldWithHelpProps, "warning">;
+	Omit<IntegerInputFieldProps, "warning" | "onChange" | "value">;
 
 /**
  * Renders a text field

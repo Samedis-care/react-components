@@ -20,15 +20,23 @@ export interface IntegerInputFieldProps extends TextFieldWithHelpProps {
 		evt: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>,
 		value: number | null,
 	) => void;
+	/**
+	 * disable number formatting
+	 */
+	noFormat?: boolean;
 }
 
 const IntegerInputField = (
 	props: IntegerInputFieldProps & Omit<TextFieldProps, "onChange" | "value">,
 ) => {
 	const { i18n } = useCCTranslations();
-	const { value, onChange, ...muiProps } = props;
+	const { value, onChange, noFormat, ...muiProps } = props;
 	const valueFormatted =
-		value != null ? value.toLocaleString(i18n.language) : "";
+		value != null
+			? noFormat
+				? value.toString(10)
+				: value.toLocaleString(i18n.language)
+			: "";
 	const { handleCursorChange, cursorInputRef } =
 		useInputCursorFix(valueFormatted);
 
