@@ -340,7 +340,7 @@ const BaseSelector = (inProps) => {
         noGroupLabel,
     ]);
     const updateQuery = useCallback((_evt, newQuery) => {
-        if (multiple) {
+        if (multiple && newQuery.length > 1) {
             newQuery = newQuery
                 .substring(selected.map((sel) => sel.label).join(", ").length)
                 .trimStart();
