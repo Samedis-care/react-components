@@ -911,9 +911,14 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 
 	const updateQuery = useCallback(
 		(_evt: React.SyntheticEvent, newQuery: string) => {
+			if (multiple) {
+				newQuery = newQuery
+					.substring(selected.map((sel) => sel.label).join(", ").length)
+					.trimStart();
+			}
 			setQuery(newQuery);
 		},
-		[],
+		[multiple, selected],
 	);
 
 	// search handler
@@ -1073,7 +1078,10 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 												? (selected.titleTooltip ?? getStringLabel(selected))
 												: undefined,
 										value: multiple
-											? selected.map((sel) => sel.label).join(", ")
+											? [
+													selected.map((sel) => sel.label).join(", "),
+													params.inputProps.value,
+												].join(" ")
 											: params.inputProps.value,
 									}}
 									InputProps={{
