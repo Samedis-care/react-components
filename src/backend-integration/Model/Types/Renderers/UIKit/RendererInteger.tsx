@@ -91,7 +91,15 @@ class RendererInteger extends TypeNumber {
 		return (
 			<Typography>
 				{!visibility.grid && `${label}: `}
-				<NumberFormatter value={value} />
+				{this.props?.noFormat ? (
+					value ? (
+						value.toString(10)
+					) : (
+						""
+					)
+				) : (
+					<NumberFormatter value={value} />
+				)}
 			</Typography>
 		);
 	}
