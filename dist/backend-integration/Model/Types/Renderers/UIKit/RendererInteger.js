@@ -29,7 +29,7 @@ class RendererInteger extends TypeNumber {
         }
         return (React.createElement(Typography, null,
             !visibility.grid && `${label}: `,
-            React.createElement(NumberFormatter, { value: value })));
+            this.props?.noFormat ? (value ? (value.toString(10)) : ("")) : (React.createElement(NumberFormatter, { value: value }))));
     }
 }
 export default RendererInteger;
