@@ -22,7 +22,7 @@ const FormButtons = (inProps) => {
     const children = (Array.isArray(props.children) ? props.children : [props.children]).filter((child) => child !== undefined && child !== null && child !== false);
     if (children.length === 0)
         return React.createElement(React.Fragment, null);
-    return (React.createElement(Container, { container: true, direction: "row", spacing: 2, wrap: "nowrap", className: combineClassNames([props.classes?.root, props.className]) }, children.map((child, index) => {
+    return (React.createElement(Container, { container: true, direction: "row", spacing: 2, wrap: "nowrap", className: combineClassNames([props.classes?.root, props.className]) }, children.flat().map((child, index) => {
         return (React.createElement(ButtonWrapper, { key: index, className: props.classes?.buttonWrapper }, child));
     })));
 };
