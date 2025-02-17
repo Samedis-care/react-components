@@ -626,6 +626,9 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 					<StyledDivider
 						component={"li"}
 						{...props}
+						onClick={undefined}
+						onMouseMove={undefined}
+						onTouchStart={undefined}
 						key={data.value}
 						className={classes?.divider}
 					/>
@@ -637,6 +640,8 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 						{...props}
 						key={data.value}
 						onClick={undefined}
+						onMouseMove={undefined}
+						onTouchStart={undefined}
 						variant={"caption"}
 						className={classes?.smallLabel}
 					>

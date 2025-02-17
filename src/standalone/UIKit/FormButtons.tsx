@@ -55,7 +55,7 @@ const FormButtons = (inProps: FormButtonsProps) => {
 			wrap={"nowrap"}
 			className={combineClassNames([props.classes?.root, props.className])}
 		>
-			{children.map((child: React.ReactNode, index: number) => {
+			{children.flat().map((child: React.ReactNode, index: number) => {
 				return (
 					<ButtonWrapper key={index} className={props.classes?.buttonWrapper}>
 						{child}
