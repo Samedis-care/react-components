@@ -342,7 +342,7 @@ const BaseSelector = (inProps) => {
     const updateQuery = useCallback((_evt, newQuery) => {
         if (multiple && newQuery.length > 1) {
             newQuery = newQuery
-                .substring(selected.map((sel) => sel.label).join(", ").length)
+                .substring(selected.map(getStringLabel).join(", ").length)
                 .trimStart();
         }
         setQuery(newQuery);
@@ -417,7 +417,7 @@ const BaseSelector = (inProps) => {
                                     : undefined,
                                 value: multiple
                                     ? [
-                                        selected.map((sel) => sel.label).join(", "),
+                                        selected.map(getStringLabel).join(", "),
                                         params.inputProps.value,
                                     ].join(" ")
                                     : params.inputProps.value,
