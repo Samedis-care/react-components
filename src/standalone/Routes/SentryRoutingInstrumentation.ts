@@ -9,12 +9,14 @@ import type {
 	getClient,
 	getCurrentScope,
 	getRootSpan,
+	Integration,
+	Client,
+	Span,
 	SEMANTIC_ATTRIBUTE_SENTRY_OP,
 	SEMANTIC_ATTRIBUTE_SENTRY_ORIGIN,
 	SEMANTIC_ATTRIBUTE_SENTRY_SOURCE,
 	spanToJSON,
 } from "@sentry/core";
-import type { Client, Integration, Span } from "@sentry/types";
 import { Action, Update } from "history";
 
 let _browserTracingIntegration: typeof browserTracingIntegration | undefined =

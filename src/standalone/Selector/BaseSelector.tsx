@@ -913,7 +913,7 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 		(_evt: React.SyntheticEvent, newQuery: string) => {
 			if (multiple && newQuery.length > 1) {
 				newQuery = newQuery
-					.substring(selected.map((sel) => sel.label).join(", ").length)
+					.substring(selected.map(getStringLabel).join(", ").length)
 					.trimStart();
 			}
 			setQuery(newQuery);
@@ -1079,7 +1079,7 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 												: undefined,
 										value: multiple
 											? [
-													selected.map((sel) => sel.label).join(", "),
+													selected.map(getStringLabel).join(", "),
 													params.inputProps.value,
 												].join(" ")
 											: params.inputProps.value,
