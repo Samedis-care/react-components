@@ -1963,7 +1963,7 @@ const Form = <
 			readOnly: readOnly,
 			readOnlyReason: readOnlyReasons[0],
 			readOnlyReasons: readOnlyReasons,
-			initialValues,
+			initialValues: initialValues ?? {},
 			getFieldValue,
 			getFieldValues,
 			setFieldValueLite,
