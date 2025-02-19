@@ -636,6 +636,7 @@ export type FormContextDataLite = Pick<
 	| "readOnlyReason"
 	| "readOnlyReasons"
 	| "errorComponent"
+	| "initialValues"
 	| "getFieldValue"
 	| "getFieldValues"
 	| "setFieldValueLite"
@@ -1962,6 +1963,7 @@ const Form = <
 			readOnly: readOnly,
 			readOnlyReason: readOnlyReasons[0],
 			readOnlyReasons: readOnlyReasons,
+			initialValues,
 			getFieldValue,
 			getFieldValues,
 			setFieldValueLite,
@@ -1987,6 +1989,7 @@ const Form = <
 			removeCustomReadOnly,
 			readOnly,
 			readOnlyReasons,
+			initialValues,
 			getFieldValue,
 			getFieldValues,
 			setFieldValueLite,
