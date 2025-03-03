@@ -10,6 +10,7 @@ import React, {
 } from "react";
 import {
 	Autocomplete,
+	AutocompleteChangeReason,
 	Divider,
 	Grid,
 	IconButton,
@@ -716,6 +717,7 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 	const onChangeHandler = useCallback(
 		async (
 			data: Multi extends true ? (string | DataT)[] : (string | DataT) | null,
+			reason: AutocompleteChangeReason,
 		) => {
 			if (
 				multiple
@@ -764,11 +766,18 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 				dataNormalized.length > 0 &&
 				dataNormalized[dataNormalized.length - 1].isAddNewButton
 			) {
-				if (!onAddNew) return;
-				const created = await onAddNew();
-				if (!created) return;
-				setSelectorOptions((old) => [created, ...old]);
-				dataNormalized[dataNormalized.length - 1] = created;
+				// if not free solo auto select on blur
+				if (reason !== "blur") {
+					if (!onAddNew) return;
+					const created = await onAddNew();
+					if (!created) return;
+					setSelectorOptions((old) => [created, ...old]);
+					dataNormalized[dataNormalized.length - 1] = created;
+				} else {
+					// make sure we don't select this element
+					dataNormalized.pop();
+					setQuery("");
+				}
 			}
 			if (onSelect) {
 				if (multiple) {
@@ -1062,9 +1071,10 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 						renderOption={defaultRenderer}
 						getOptionDisabled={getOptionDisabled}
 						isOptionEqualToValue={getOptionSelected}
-						onChange={(_event, selectedValue) =>
+						onChange={(_event, selectedValue, reason) =>
 							onChangeHandler(
 								selectedValue as Multi extends true ? DataT[] : DataT | null,
+								reason,
 							)
 						}
 						renderInput={(params: AutocompleteRenderInputParams) => {
