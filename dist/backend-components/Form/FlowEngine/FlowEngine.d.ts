@@ -4,8 +4,10 @@ export interface FlowEngineFormProps {
     buttons: React.ReactNode;
 }
 export type FlowFormProps<KeyT extends string, CustomPropsT> = PageProps<KeyT, FlowEngineFormProps & CustomPropsT>;
-export interface FlowStageProps<KeyT extends string, StageT extends string, CustomPropsT> {
+export interface FlowStageProps<KeyT extends string, StageT extends string, CustomPropsT> extends FlowStageContextType<StageT> {
     formProps: PageProps<KeyT, CustomPropsT>;
+}
+export interface FlowStageContextType<StageT extends string> {
     /**
      * Go to next stage (or current stage to submit)
      * @param nextStage The next stage
@@ -14,7 +16,13 @@ export interface FlowStageProps<KeyT extends string, StageT extends string, Cust
      * @remarks this calls FormEngine submitForm and if successful sets the stage
      */
     goToStage: (nextStage: StageT, submitToServer: boolean) => Promise<void>;
+    /**
+     * the current stage
+     */
+    stage: StageT;
 }
+export declare const FlowStageContext: React.Context<FlowStageContextType<string> | null>;
+export declare const useFlowStageContext: <StageT extends string>() => FlowStageContextType<StageT>;
 export interface FlowEngineProps<KeyT extends string, StageT extends string, CustomPropsT> {
     defaultStage: StageT;
     formProps: PageProps<KeyT, CustomPropsT>;
