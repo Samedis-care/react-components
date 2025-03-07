@@ -10,6 +10,27 @@ export const useFormFieldContext = () => {
         throw new Error("FormFieldContext not set");
     return ctx;
 };
+export const useFieldRelationModel = (fieldDef) => {
+    const { values } = useFormContext();
+    const { getRelationModel, getRelationModelValues } = fieldDef;
+    const hasId = "id" in values && values["id"];
+    // cache these, so we don't trigger useless re-renders every time a value changes
+    const prevRelationModelValues = useRef({});
+    const prevRelationModelValuesResult = useRef({});
+    const relationModelValues = useMemo(() => {
+        const pick = getRelationModelValues ?? [];
+        const result = {};
+        pick.forEach((field) => (result[field] = getValueByDot(field, values)));
+        if (shallowCompare(prevRelationModelValues.current, result)) {
+            return prevRelationModelValuesResult.current;
+        }
+        prevRelationModelValues.current = result;
+        return (prevRelationModelValuesResult.current = dotsToObject(result));
+    }, [values, getRelationModelValues]);
+    return useMemo(() => getRelationModel
+        ? getRelationModel(hasId || null, relationModelValues)
+        : undefined, [getRelationModel, hasId, relationModelValues]);
+};
 const Field = (props) => {
     const { values, errors, warnings, touched, setFieldValue, handleBlur, initialValues, setFieldTouched, setError, model, markFieldMounted, relations, readOnly, } = useFormContext();
     let fieldDef = model.fields[props.name];
@@ -23,7 +44,7 @@ const Field = (props) => {
             fieldDef = Object.assign({}, fieldDef, props.overrides);
         }
     }
-    const { type, getRelationModel, getRelationModelValues } = fieldDef;
+    const { type } = fieldDef;
     const setFieldValueHookWrapper = useCallback((field, 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     value, shouldValidate, triggerOnChange) => {
@@ -44,22 +65,7 @@ const Field = (props) => {
     const warningMsg = (touch && warnings[props.name]) || null;
     const relationData = relations[props.name];
     const visibility = getVisibility(hasId ? fieldDef.visibility.edit : fieldDef.visibility.create, values, initialValues);
-    // cache these, so we don't trigger useless re-renders every time a value changes
-    const prevRelationModelValues = useRef({});
-    const prevRelationModelValuesResult = useRef({});
-    const relationModelValues = useMemo(() => {
-        const pick = getRelationModelValues ?? [];
-        const result = {};
-        pick.forEach((field) => (result[field] = getValueByDot(field, values)));
-        if (shallowCompare(prevRelationModelValues.current, result)) {
-            return prevRelationModelValuesResult.current;
-        }
-        prevRelationModelValues.current = result;
-        return (prevRelationModelValuesResult.current = dotsToObject(result));
-    }, [values, getRelationModelValues]);
-    const relationModel = useMemo(() => getRelationModel
-        ? getRelationModel(hasId || null, relationModelValues)
-        : undefined, [getRelationModel, hasId, relationModelValues]);
+    const relationModel = useFieldRelationModel(fieldDef);
     const cacheKey = useMemo(() => new Object(), 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     (fieldDef.type.settings?.updateHooks ?? []).map((key) => getValueByDot(key, values)));
