@@ -59,6 +59,37 @@ export const useFormFieldContext = <T,>(): FormFieldContextType<T> => {
 	return ctx as FormFieldContextType<T>;
 };
 
+export const useFieldRelationModel = (
+	fieldDef: ModelFieldDefinition<unknown, string, PageVisibility, never>,
+) => {
+	const { values } = useFormContext();
+	const { getRelationModel, getRelationModelValues } = fieldDef;
+	const hasId = "id" in values && (values["id"] as string | null);
+	// cache these, so we don't trigger useless re-renders every time a value changes
+	const prevRelationModelValues = useRef<Record<string, unknown>>({});
+	const prevRelationModelValuesResult = useRef<Record<string, unknown>>({});
+	const relationModelValues = useMemo(() => {
+		const pick = getRelationModelValues ?? [];
+		const result: Record<string, unknown> = {};
+		pick.forEach((field) => (result[field] = getValueByDot(field, values)));
+
+		if (shallowCompare(prevRelationModelValues.current, result)) {
+			return prevRelationModelValuesResult.current;
+		}
+
+		prevRelationModelValues.current = result;
+		return (prevRelationModelValuesResult.current = dotsToObject(result));
+	}, [values, getRelationModelValues]);
+
+	return useMemo(
+		() =>
+			getRelationModel
+				? getRelationModel(hasId || null, relationModelValues)
+				: undefined,
+		[getRelationModel, hasId, relationModelValues],
+	);
+};
+
 const Field = (props: FieldProps): React.ReactElement => {
 	const {
 		values,
@@ -88,7 +119,7 @@ const Field = (props: FieldProps): React.ReactElement => {
 		}
 	}
 
-	const { type, getRelationModel, getRelationModelValues } = fieldDef;
+	const { type } = fieldDef;
 
 	const setFieldValueHookWrapper = useCallback(
 		(
@@ -124,29 +155,7 @@ const Field = (props: FieldProps): React.ReactElement => {
 		initialValues,
 	);
 
-	// cache these, so we don't trigger useless re-renders every time a value changes
-	const prevRelationModelValues = useRef<Record<string, unknown>>({});
-	const prevRelationModelValuesResult = useRef<Record<string, unknown>>({});
-	const relationModelValues = useMemo(() => {
-		const pick = getRelationModelValues ?? [];
-		const result: Record<string, unknown> = {};
-		pick.forEach((field) => (result[field] = getValueByDot(field, values)));
-
-		if (shallowCompare(prevRelationModelValues.current, result)) {
-			return prevRelationModelValuesResult.current;
-		}
-
-		prevRelationModelValues.current = result;
-		return (prevRelationModelValuesResult.current = dotsToObject(result));
-	}, [values, getRelationModelValues]);
-
-	const relationModel = useMemo(
-		() =>
-			getRelationModel
-				? getRelationModel(hasId || null, relationModelValues)
-				: undefined,
-		[getRelationModel, hasId, relationModelValues],
-	);
+	const relationModel = useFieldRelationModel(fieldDef);
 
 	const cacheKey = useMemo(
 		() => new Object(),
