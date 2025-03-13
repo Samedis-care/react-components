@@ -113,12 +113,12 @@ const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(
 									<ClearIcon />
 								</IconButton>
 							)}
-							{
-								(
-									muiProps.InputProps
-										?.endAdornment as React.ReactElement<InputAdornmentProps>
-								)?.props?.children
-							}
+							{typeof muiProps.InputProps?.endAdornment === "string"
+								? muiProps.InputProps.endAdornment
+								: (
+										muiProps.InputProps
+											?.endAdornment as React.ReactElement<InputAdornmentProps>
+									)?.props?.children}
 							{openInfo && (
 								<IconButton onClick={openInfo} size="small">
 									<InfoIcon color={"disabled"} />
