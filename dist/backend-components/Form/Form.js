@@ -733,7 +733,8 @@ const Form = (props) => {
             return;
         parentFormContext.setCustomFieldDirty(nestedFormName, dirty);
         return () => {
-            if (parentFormContext.onlySubmitMounted && !disableNestedSubmit) {
+            if (disableNestedSubmit ||
+                (parentFormContext.onlySubmitMounted && !disableNestedSubmit)) {
                 parentFormContext.setCustomFieldDirty(nestedFormName, false);
             }
         };
