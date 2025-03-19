@@ -1383,7 +1383,7 @@ const Form = <
 		): Promise<void> => {
 			if (!serverData) throw new Error("serverData is null"); // should never happen
 			if (!defaultRecord) throw new Error("default record is null"); // should never happen
-			if (!getDirty(getFormDirty(valuesRef.current))) return; // when form isn't dirty we don't have to submit
+			if (!getDirty(getFormDirty(valuesRef.current)) && !flowEngine) return; // when form isn't dirty we don't have to submit unless it's flow engine and nothing has changed yet (to trigger validations)
 
 			if (params && "nativeEvent" in params) params = undefined;
 			if (!params) params = {} as FormSubmitOptions;
