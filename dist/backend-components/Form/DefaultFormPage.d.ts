@@ -23,6 +23,14 @@ export interface DefaultFormPageProps extends PageProps<ModelFieldName, CrudForm
      * Extra buttons
      */
     extraButtons?: React.ReactNode;
+    /**
+     * Custom text for save button
+     */
+    textButtonSave?: React.ReactNode;
+    /**
+     * Custom text for back button
+     */
+    textButtonBack?: React.ReactNode;
 }
 declare const _default: React.MemoExoticComponent<(props: DefaultFormPageProps) => React.JSX.Element>;
 export default _default;
