@@ -35,7 +35,10 @@ export type DefaultFormPageButtonsClassKey = "backButton";
 export type DefaultFormPageButtonsProps = BasicFormPageRendererProps<
 	EnhancedCustomProps<CrudFormProps> | undefined
 > &
-	Pick<DefaultFormPageProps, "extraButtons">;
+	Pick<
+		DefaultFormPageProps,
+		"extraButtons" | "textButtonSave" | "textButtonBack"
+	>;
 
 const DefaultFormPageButtons = (inProps: DefaultFormPageButtonsProps) => {
 	const props = useThemeProps({

@@ -27,12 +27,23 @@ export interface DefaultFormPageProps
 	 * Extra buttons
 	 */
 	extraButtons?: React.ReactNode;
+	/**
+	 * Custom text for save button
+	 */
+	textButtonSave?: React.ReactNode;
+	/**
+	 * Custom text for back button
+	 */
+	textButtonBack?: React.ReactNode;
 }
 
 const DefaultFormPage = (props: DefaultFormPageProps) => {
-	const { children, extraButtons } = props;
+	const { children, extraButtons, textButtonSave, textButtonBack } = props;
 
-	const childrenProps = useMemo(() => ({ extraButtons }), [extraButtons]);
+	const childrenProps = useMemo(
+		() => ({ extraButtons, textButtonSave, textButtonBack }),
+		[extraButtons, textButtonSave, textButtonBack],
+	);
 
 	return (
 		<BasicFormPage {...props} form={children} childrenProps={childrenProps}>
