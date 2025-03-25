@@ -74,6 +74,12 @@ export interface FileProps {
 	 * - icon only compact list - file name as tooltip, best used with read-only
 	 */
 	variant: "box" | "list" | "compact-list" | "icon-only";
+	/**
+	 * custom onClick handler
+	 * @param name The file name including extension
+	 * @param url The file URL
+	 */
+	onClick?: (name: string, url: string) => Promise<void> | void;
 }
 
 const CompactListWrapper = styled(Grid, {
@@ -216,7 +222,15 @@ export const PowerPointFileExtensions = [
 ];
 
 export const ArchiveFileExtensions = ["zip", "7z", "rar", "tar"];
-export const AudioFileExtensions = ["mp3", "wav", "ogg"];
+export const AudioFileExtensions = [
+	"acc",
+	"mp3",
+	"wav",
+	"ogg",
+	"oga",
+	"opus",
+	"weba",
+];
 export const ImageFileExtensions = [
 	"jpg",
 	"jpeg",
@@ -247,7 +261,17 @@ export const CodeFileExtensions = [
 ];
 export const CsvFileExtensions = ["csv"];
 export const TextFileExtensions = ["txt"];
-export const VideoFileExtensions = ["mp4", "mov", "mkv", "avi"];
+export const VideoFileExtensions = [
+	"mp4",
+	"mov",
+	"mkv",
+	"avi",
+	"mpeg",
+	"ogv",
+	"webm",
+	"3gp",
+	"3g2",
+];
 
 export const AudioMimeType = /^audio\//;
 export const ImageMimeType = /^image\//;
@@ -335,21 +359,23 @@ export const getFileIconOrDefault = (
 
 const File = (inProps: FileProps) => {
 	const props = useThemeProps({ props: inProps, name: "CcFile" });
-	const { downloadLink, variant, className, classes } = props;
+	const { name, downloadLink, variant, className, classes, onClick } = props;
 
 	const FileIcon = getFileIconOrDefault(props.name);
 
-	const openDownload = useCallback(() => {
+	const openDownload = useCallback(async () => {
 		if (downloadLink) {
 			if (downloadLink.startsWith("data:")) {
 				const url = URL.createObjectURL(dataToFile(downloadLink));
-				window.open(url, "_blank");
+				if (onClick) await onClick(name, url);
+				else window.open(url, "_blank");
 				URL.revokeObjectURL(url);
 			} else {
-				window.open(downloadLink, "_blank");
+				if (onClick) await onClick(name, downloadLink);
+				else window.open(downloadLink, "_blank");
 			}
 		}
-	}, [downloadLink]);
+	}, [downloadLink, name, onClick]);
 
 	const handleListClick = useCallback((evt: React.MouseEvent) => {
 		evt.stopPropagation();
