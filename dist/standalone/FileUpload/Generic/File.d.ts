@@ -45,6 +45,12 @@ export interface FileProps {
      * - icon only compact list - file name as tooltip, best used with read-only
      */
     variant: "box" | "list" | "compact-list" | "icon-only";
+    /**
+     * custom onClick handler
+     * @param name The file name including extension
+     * @param url The file URL
+     */
+    onClick?: (name: string, url: string) => Promise<void> | void;
 }
 export type FileClassKey = "compactListWrapper" | "iconContainer" | "listEntryText" | "closeIconList" | "closeIcon" | "removeIcon" | "iconWrapperList" | "iconWrapper" | "listLabel" | "label";
 export declare const ExcelFileExtensions: string[];
