@@ -3,6 +3,9 @@ import { DatePicker, LocalizationProvider, } from "@mui/x-date-pickers";
 import { useThemeProps } from "@mui/material";
 import { withMuiWarning } from "../UIKit/MuiWarning";
 import useMuiLocaleData from "./useMuiLocaleData";
+const NoIcon = () => {
+    return React.createElement(React.Fragment, null);
+};
 const LocalizedKeyboardDatePicker = (inProps) => {
     const props = useThemeProps({
         props: inProps,
@@ -11,7 +14,7 @@ const LocalizedKeyboardDatePicker = (inProps) => {
     const { hideDisabledIcon, required, error, fullWidth, onBlur, ...otherProps } = props;
     const slotOverrideHideIcon = {
         ...otherProps.slots,
-        openPickerIcon: React.Fragment,
+        openPickerIcon: NoIcon,
     };
     const localeText = useMuiLocaleData();
     return (React.createElement(LocalizationProvider, { localeText: localeText },
