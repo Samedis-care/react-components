@@ -35,6 +35,10 @@ export interface LocalizedKeyboardDatePickerProps
 
 export type LocalizedKeyboardDatePickerClassKey = never;
 
+const NoIcon = () => {
+	return <></>;
+};
+
 const LocalizedKeyboardDatePicker = (
 	inProps: LocalizedKeyboardDatePickerProps,
 ) => {
@@ -52,7 +56,7 @@ const LocalizedKeyboardDatePicker = (
 	} = props;
 	const slotOverrideHideIcon = {
 		...otherProps.slots,
-		openPickerIcon: React.Fragment,
+		openPickerIcon: NoIcon,
 	};
 	const localeText = useMuiLocaleData();
 
