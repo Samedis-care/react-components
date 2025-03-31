@@ -128,6 +128,10 @@ const StyledFormDiv = styled("div", { name: "CcForm", slot: "root" })({});
 const Form = (props) => {
     const { model, id, children, onSubmit, customProps, onlyWarnMounted, onlyWarnChanged, readOnly: readOnlyProp, readOnlyReason: readOnlyReasonProp, readOnlyReasons: readOnlyReasonsProp, disableValidation, nestedFormName, disableNestedSubmit, nestedFormPreSubmitHandler, deleteOnSubmit, onDeleted, initialRecord, formClass, preSubmit, dirtyIgnoreFields, flowEngine, renderFormAsDiv: renderFormAsDivProp, } = props;
     const renderFormAsDiv = useContext(FormRenderAsDivContext) || renderFormAsDivProp;
+    // parent form context
+    const parentFormContext = useContext(FormContext);
+    if (nestedFormName && !parentFormContext)
+        throw new Error("Nested form mode wanted, but no parent context found");
     // flow engine mode defaults
     const flowEngineConfig = useRef({});
     const onlyValidateMounted = flowEngine ? true : props.onlyValidateMounted;
@@ -277,14 +281,16 @@ const Form = (props) => {
             ...submitReadOnly,
             ...readOnlyReasonsProp,
             ...customReadOnlyReasons,
+            ...(parentFormContext?.readOnlyReasons ?? {}),
         };
     }, [
         readOnlyProp,
         readOnlyReasonProp,
-        readOnlyReasonsProp,
-        customReadOnlyReasons,
         submitting,
         t,
+        readOnlyReasonsProp,
+        customReadOnlyReasons,
+        parentFormContext,
     ]);
     const readOnly = !isObjectEmpty(readOnlyReasons);
     // main form handling - validation disable toggle
@@ -678,9 +684,6 @@ const Form = (props) => {
         void submitForm();
     }, [submitForm]);
     // nested forms
-    const parentFormContext = useContext(FormContext);
-    if (nestedFormName && !parentFormContext)
-        throw new Error("Nested form mode wanted, but no parent context found");
     // nested forms - loading
     useEffect(() => {
         if (!parentFormContext || !nestedFormName)
