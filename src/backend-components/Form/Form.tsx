@@ -852,11 +852,6 @@ const Form = <
 	} = props;
 	const renderFormAsDiv =
 		useContext(FormRenderAsDivContext) || renderFormAsDivProp;
-	// parent form context
-	const parentFormContext = useContext(FormContext);
-	if (nestedFormName && !parentFormContext)
-		throw new Error("Nested form mode wanted, but no parent context found");
-
 	// flow engine mode defaults
 	const flowEngineConfig = useRef<FormFlowEngineStageConfig>({});
 	const onlyValidateMounted = flowEngine ? true : props.onlyValidateMounted;
@@ -1062,19 +1057,14 @@ const Form = <
 			...submitReadOnly,
 			...readOnlyReasonsProp,
 			...customReadOnlyReasons,
-			...((parentFormContext?.readOnlyReasons as Record<
-				string,
-				string | null
-			>) ?? {}),
 		};
 	}, [
 		readOnlyProp,
 		readOnlyReasonProp,
-		submitting,
-		t,
 		readOnlyReasonsProp,
 		customReadOnlyReasons,
-		parentFormContext,
+		submitting,
+		t,
 	]);
 	const readOnly = !isObjectEmpty(readOnlyReasons);
 
@@ -1628,6 +1618,9 @@ const Form = <
 	);
 
 	// nested forms
+	const parentFormContext = useContext(FormContext);
+	if (nestedFormName && !parentFormContext)
+		throw new Error("Nested form mode wanted, but no parent context found");
 
 	// nested forms - loading
 	useEffect(() => {
