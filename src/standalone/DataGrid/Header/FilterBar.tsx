@@ -71,10 +71,12 @@ const FilterBar = () => {
 				setEnableDialogWidth(showDialog);
 			}
 		};
-		window.addEventListener("resize", resizeHandler);
+		const resizeWatcher = new ResizeObserver(resizeHandler);
+		if (filterBarContainer.current)
+			resizeWatcher.observe(filterBarContainer.current);
 		resizeHandler();
 		return () => {
-			window.removeEventListener("resize", resizeHandler);
+			resizeWatcher.disconnect();
 		};
 	}, [enableFilterDialogWidth]);
 
