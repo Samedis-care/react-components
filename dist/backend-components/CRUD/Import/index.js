@@ -88,7 +88,8 @@ const CrudImport = (props) => {
                 activeStep !== 3 && (React.createElement(Grid, { item: true },
                     React.createElement(Button, { variant: "contained", disabled: activeStep === 0 || activeStep >= 3, onClick: prev }, t("common.buttons.back")))),
                 React.createElement(Grid, { item: true },
-                    React.createElement(Button, { variant: "contained", disabled: (activeStep === 2 && !state.validationPassed) ||
+                    React.createElement(Button, { variant: "contained", disabled: (activeStep === 0 && state.files.length === 0) ||
+                            (activeStep === 2 && !state.validationPassed) ||
                             (activeStep === 3 && !state.importDone), onClick: activeStep === 3 ? finish : next }, activeStep === 3
                         ? t("common.buttons.finish")
                         : t("common.buttons.next")))))));
