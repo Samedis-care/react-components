@@ -289,6 +289,7 @@ const CrudImport = <
 						<Button
 							variant={"contained"}
 							disabled={
+								(activeStep === 0 && state.files.length === 0) ||
 								(activeStep === 2 && !state.validationPassed) ||
 								(activeStep === 3 && !state.importDone)
 							}
