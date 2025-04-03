@@ -38,6 +38,7 @@ import deepSort from "../../utils/deepSort";
 import useDevKeybinds from "../../utils/useDevKeybinds";
 import uniqueArray from "../../utils/uniqueArray";
 import { QueryObserverBaseResult } from "@tanstack/react-query";
+import ValidationError from "./ValidationError";
 
 // optional import
 let captureException: ((e: Error) => void) | null = null;
@@ -45,15 +46,15 @@ import("@sentry/react")
 	.then((Sentry) => (captureException = Sentry.captureException))
 	.catch(() => {}); // ignore
 
-export type ValidationError = Record<string, string>;
+export type ValidationResult = Record<string, string>;
 /**
  * Pre submit handler for additional validations
  * Throw to cancel submit and display error.
  * Thrown error may be a ValidationError or a normal Error (other error)
  */
 export type CustomValidationHandler = () =>
-	| Promise<ValidationError>
-	| ValidationError;
+	| Promise<ValidationResult>
+	| ValidationResult;
 /**
  * Pre submit handler to perform final changes (bypassing validation)
  */
@@ -594,7 +595,7 @@ export interface FormContextData {
 	 */
 	validateForm: (
 		mode?: "normal" | "hint",
-	) => Promise<ValidationError> | ValidationError;
+	) => Promise<ValidationResult> | ValidationResult;
 	/**
 	 * Parent form context (if present and FormProps.nestedFormName is set)
 	 */
@@ -1441,10 +1442,8 @@ const Form = <
 				const validation = await validateForm("normal");
 				setErrors(validation);
 				if (!isObjectEmpty(validation)) {
-					/* eslint-disable @typescript-eslint/only-throw-error */
 					// noinspection ExceptionCaughtLocallyJS
-					throw validation;
-					/* eslint-enable */
+					throw new ValidationError("error", validation);
 				}
 
 				if (
@@ -1477,10 +1476,8 @@ const Form = <
 					setSubmittingBlocked(false);
 					if (!continueSubmit) {
 						throwIsWarning = true;
-						/* eslint-disable @typescript-eslint/only-throw-error */
 						// noinspection ExceptionCaughtLocallyJS
-						throw validationHints;
-						/* eslint-enable */
+						throw new ValidationError("warn", validationHints);
 					}
 				}
 

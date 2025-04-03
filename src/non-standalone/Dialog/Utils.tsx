@@ -10,7 +10,8 @@ import { InputDialog } from "./InputDialog";
 import { InfoDialog } from "./InfoDialog";
 import i18n from "../../i18n";
 import { ErrorDialog } from "./ErrorDialog";
-import type { ValidationError } from "../../backend-components/Form/Form";
+import type { ValidationResult } from "../../backend-components/Form/Form";
+import { isValidationError } from "../../backend-components";
 
 /**
  * Shows an awaitable confirm dialog
@@ -117,18 +118,13 @@ export const showInfoDialog = (
  */
 export const showErrorDialog = (
 	pushDialog: DialogContextType[0],
-	e: Error | ValidationError | string,
+	e: Error | ValidationResult | string,
 ): Promise<void> => {
 	// display generic errors and validation errors
 	let errorTitle = "";
 	let errorMsg: React.ReactNode = "";
-	if (e instanceof Error) {
-		errorTitle = i18n.t("common.dialogs.error-title");
-		errorMsg = e.message;
-	} else if (typeof e === "string") {
-		errorTitle = i18n.t("common.dialogs.error-title");
-		errorMsg = e;
-	} else {
+
+	const setValuesForValidationError = (e: ValidationResult) => {
 		// validation error
 		errorTitle = i18n.t("common.dialogs.validation-error-title");
 		errorMsg = (
@@ -138,6 +134,19 @@ export const showErrorDialog = (
 				))}
 			</ul>
 		);
+	};
+	if (e instanceof Error) {
+		if (isValidationError(e)) {
+			setValuesForValidationError(e.result);
+		} else {
+			errorTitle = i18n.t("common.dialogs.error-title");
+			errorMsg = e.message;
+		}
+	} else if (typeof e === "string") {
+		errorTitle = i18n.t("common.dialogs.error-title");
+		errorMsg = e;
+	} else {
+		setValuesForValidationError(e);
 	}
 	return new Promise((resolve) => {
 		pushDialog(

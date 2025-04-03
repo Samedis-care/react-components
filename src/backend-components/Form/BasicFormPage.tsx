@@ -1,10 +1,5 @@
 import React, { useCallback, useContext, useEffect, useRef } from "react";
-import {
-	FormContextData,
-	PageProps,
-	useFormContextLite,
-	ValidationError,
-} from "../Form";
+import { FormContextData, PageProps, useFormContextLite } from "../Form";
 import { UnsafeToLeaveDispatch } from "../../framework/UnsafeToLeave";
 import { FrameworkHistory } from "../../framework/History";
 import { useDialogContext } from "../../framework/DialogContextProvider";
@@ -233,7 +228,7 @@ const BasicFormPage = <RendererPropsT, CustomPropsT>(
 			try {
 				await postSubmitHandler();
 			} catch (e) {
-				await showErrorDialog(pushDialog, e as Error | ValidationError);
+				await showErrorDialog(pushDialog, e as Error);
 			}
 		}
 	}, [submit, postSubmitHandler, pushDialog]);

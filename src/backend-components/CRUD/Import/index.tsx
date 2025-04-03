@@ -13,7 +13,7 @@ import {
 import { FileData } from "../../../standalone/FileUpload/Generic";
 import { FrameworkHistory } from "../../../framework";
 import useCCTranslations from "../../../utils/useCCTranslations";
-import { ValidationError } from "../../Form";
+import { ValidationResult } from "../../Form";
 import useLocation from "../../../standalone/Routes/useLocation";
 
 export interface CrudImportProps<
@@ -51,7 +51,7 @@ export interface CrudImportProps<
 	 */
 	validate?: (
 		record: Record<string, unknown>,
-	) => Promise<ValidationError> | ValidationError;
+	) => Promise<ValidationResult> | ValidationResult;
 	/**
 	 * Guided version
 	 */
@@ -93,7 +93,7 @@ export interface CrudImporterStepProps {
 		| undefined
 		| ((
 				record: Record<string, unknown>,
-		  ) => Promise<ValidationError> | ValidationError);
+		  ) => Promise<ValidationResult> | ValidationResult);
 	state: CrudImporterState;
 	setState: Dispatch<SetStateAction<CrudImporterState>>;
 }

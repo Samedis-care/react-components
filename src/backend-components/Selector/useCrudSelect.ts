@@ -14,7 +14,7 @@ import {
 	useState,
 } from "react";
 import shallowCompare from "../../utils/shallowCompare";
-import { FormContext, ValidationError } from "../Form";
+import { FormContext, ValidationResult } from "../Form";
 import { BackendMultiSelectProps } from "./BackendMultiSelect";
 
 export interface UseCrudSelectParams<
@@ -66,7 +66,7 @@ export interface UseCrudSelectParams<
 	 * @returns object Validation errors (Key => Values)
 	 * @remarks Only works with FormEngine. Requires field to be set
 	 */
-	validate?: (data: DataT[]) => ValidationError;
+	validate?: (data: DataT[]) => ValidationResult;
 	/**
 	 * The field to apply the validations for
 	 * @remarks for Form Engine
