@@ -13,6 +13,7 @@ import { useDialogContext } from "../../framework";
 import deepSort from "../../utils/deepSort";
 import useDevKeybinds from "../../utils/useDevKeybinds";
 import uniqueArray from "../../utils/uniqueArray";
+import ValidationError from "./ValidationError";
 // optional import
 let captureException = null;
 import("@sentry/react")
@@ -566,10 +567,8 @@ const Form = (props) => {
             const validation = await validateForm("normal");
             setErrors(validation);
             if (!isObjectEmpty(validation)) {
-                /* eslint-disable @typescript-eslint/only-throw-error */
                 // noinspection ExceptionCaughtLocallyJS
-                throw validation;
-                /* eslint-enable */
+                throw new ValidationError("error", validation);
             }
             if (!isObjectEmpty(validationHints) &&
                 !params.ignoreWarnings &&
@@ -587,10 +586,8 @@ const Form = (props) => {
                 setSubmittingBlocked(false);
                 if (!continueSubmit) {
                     throwIsWarning = true;
-                    /* eslint-disable @typescript-eslint/only-throw-error */
                     // noinspection ExceptionCaughtLocallyJS
-                    throw validationHints;
-                    /* eslint-enable */
+                    throw new ValidationError("warn", validationHints);
                 }
             }
             await Promise.all(Object.values(preSubmitHandlers.current).map((handler) => handler(id, params)));

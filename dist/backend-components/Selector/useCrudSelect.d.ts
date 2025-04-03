@@ -1,7 +1,7 @@
 import { Connector, ModelFieldName, PageVisibility } from "../../backend-integration";
 import { BaseSelectorData } from "../../standalone";
 import { ForwardedRef } from "react";
-import { ValidationError } from "../Form";
+import { ValidationResult } from "../Form";
 import { BackendMultiSelectProps } from "./BackendMultiSelect";
 export interface UseCrudSelectParams<KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT, DataT extends BaseSelectorData> {
     /**
@@ -41,7 +41,7 @@ export interface UseCrudSelectParams<KeyT extends ModelFieldName, VisibilityT ex
      * @returns object Validation errors (Key => Values)
      * @remarks Only works with FormEngine. Requires field to be set
      */
-    validate?: (data: DataT[]) => ValidationError;
+    validate?: (data: DataT[]) => ValidationResult;
     /**
      * The field to apply the validations for
      * @remarks for Form Engine

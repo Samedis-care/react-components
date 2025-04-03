@@ -1,13 +1,14 @@
 import React, { Dispatch, SetStateAction } from "react";
 import Model, { ModelFieldName, ModelGetResponseRelations, PageVisibility } from "../../backend-integration/Model/Model";
 import { QueryObserverBaseResult } from "@tanstack/react-query";
-export type ValidationError = Record<string, string>;
+import ValidationError from "./ValidationError";
+export type ValidationResult = Record<string, string>;
 /**
  * Pre submit handler for additional validations
  * Throw to cancel submit and display error.
  * Thrown error may be a ValidationError or a normal Error (other error)
  */
-export type CustomValidationHandler = () => Promise<ValidationError> | ValidationError;
+export type CustomValidationHandler = () => Promise<ValidationResult> | ValidationResult;
 /**
  * Pre submit handler to perform final changes (bypassing validation)
  */
@@ -497,7 +498,7 @@ export interface FormContextData {
      * Validates the form and returns a list of validation errors
      * If the returned object is empty no validation errors occurred.
      */
-    validateForm: (mode?: "normal" | "hint") => Promise<ValidationError> | ValidationError;
+    validateForm: (mode?: "normal" | "hint") => Promise<ValidationResult> | ValidationResult;
     /**
      * Parent form context (if present and FormProps.nestedFormName is set)
      */

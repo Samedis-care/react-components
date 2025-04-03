@@ -1,6 +1,6 @@
 import { DialogContextType } from "../../framework/DialogContextProvider";
 import { IDialogConfigConfirmAsync, IDialogConfigInputAsync, IDialogConfigSimple } from "./Types";
-import type { ValidationError } from "../../backend-components/Form/Form";
+import type { ValidationResult } from "../../backend-components/Form/Form";
 /**
  * Shows an awaitable confirm dialog
  * @param pushDialog The dialog context's (useDialogContext()) pushDialog function
@@ -35,4 +35,4 @@ export declare const showInfoDialog: (pushDialog: DialogContextType[0], props: O
  * @param e The error or validation error
  * @return A promise which resolves when the dialog is closed
  */
-export declare const showErrorDialog: (pushDialog: DialogContextType[0], e: Error | ValidationError | string) => Promise<void>;
+export declare const showErrorDialog: (pushDialog: DialogContextType[0], e: Error | ValidationResult | string) => Promise<void>;

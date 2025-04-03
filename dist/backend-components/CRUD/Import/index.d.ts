@@ -1,7 +1,7 @@
 import React, { Dispatch, SetStateAction } from "react";
 import { Model, ModelFieldDefinition, ModelFieldName, PageVisibility } from "../../../backend-integration";
 import { FileData } from "../../../standalone/FileUpload/Generic";
-import { ValidationError } from "../../Form";
+import { ValidationResult } from "../../Form";
 export interface CrudImportProps<KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT> {
     /**
      * The model to import for
@@ -31,7 +31,7 @@ export interface CrudImportProps<KeyT extends ModelFieldName, VisibilityT extend
      * @param record The record to validate
      * @returns Validation errors
      */
-    validate?: (record: Record<string, unknown>) => Promise<ValidationError> | ValidationError;
+    validate?: (record: Record<string, unknown>) => Promise<ValidationResult> | ValidationResult;
     /**
      * Guided version
      */
@@ -55,7 +55,7 @@ export interface CrudImporterStepProps {
     updateKey: string | undefined;
     additionalUpdateKeyFilters: Record<string, unknown> | undefined;
     hasImportConfig: boolean;
-    validate: undefined | ((record: Record<string, unknown>) => Promise<ValidationError> | ValidationError);
+    validate: undefined | ((record: Record<string, unknown>) => Promise<ValidationResult> | ValidationResult);
     state: CrudImporterState;
     setState: Dispatch<SetStateAction<CrudImporterState>>;
 }

@@ -4,6 +4,7 @@ import { InputDialog } from "./InputDialog";
 import { InfoDialog } from "./InfoDialog";
 import i18n from "../../i18n";
 import { ErrorDialog } from "./ErrorDialog";
+import { isValidationError } from "../../backend-components";
 /**
  * Shows an awaitable confirm dialog
  * @param pushDialog The dialog context's (useDialogContext()) pushDialog function
@@ -64,18 +65,26 @@ export const showErrorDialog = (pushDialog, e) => {
     // display generic errors and validation errors
     let errorTitle = "";
     let errorMsg = "";
+    const setValuesForValidationError = (e) => {
+        // validation error
+        errorTitle = i18n.t("common.dialogs.validation-error-title");
+        errorMsg = (React.createElement("ul", null, Object.entries(e).map(([key, value]) => (React.createElement("li", { key: key }, value)))));
+    };
     if (e instanceof Error) {
-        errorTitle = i18n.t("common.dialogs.error-title");
-        errorMsg = e.message;
+        if (isValidationError(e)) {
+            setValuesForValidationError(e.result);
+        }
+        else {
+            errorTitle = i18n.t("common.dialogs.error-title");
+            errorMsg = e.message;
+        }
     }
     else if (typeof e === "string") {
         errorTitle = i18n.t("common.dialogs.error-title");
         errorMsg = e;
     }
     else {
-        // validation error
-        errorTitle = i18n.t("common.dialogs.validation-error-title");
-        errorMsg = (React.createElement("ul", null, Object.entries(e).map(([key, value]) => (React.createElement("li", { key: key }, value)))));
+        setValuesForValidationError(e);
     }
     return new Promise((resolve) => {
         pushDialog(React.createElement(ErrorDialog, { title: errorTitle, message: errorMsg, buttons: [
