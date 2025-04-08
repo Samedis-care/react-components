@@ -1,16 +1,17 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import TextFieldWithHelp from "../TextFieldWithHelp";
 import parseLocalizedNumber from "../../../utils/parseLocalizedNumber";
 import useCCTranslations from "../../../utils/useCCTranslations";
 const CurrencyInput = (props) => {
     const { value, onChange, onBlur, currency, ...muiProps } = props;
     const { i18n } = useCCTranslations();
+    const numberFormatOptions = useMemo(() => ({
+        style: "currency",
+        currency,
+    }), [currency]);
     const formatNumber = useCallback((value) => value != null
-        ? value.toLocaleString(i18n.language, {
-            style: "currency",
-            currency,
-        })
-        : "", [currency, i18n.language]);
+        ? value.toLocaleString(i18n.language, numberFormatOptions)
+        : "", [i18n.language, numberFormatOptions]);
     const valueFormatted = formatNumber(value);
     const [valueInternal, setValueInternal] = useState(valueFormatted);
     useEffect(() => setValueInternal(formatNumber(value)), [formatNumber, value]);
@@ -23,12 +24,15 @@ const CurrencyInput = (props) => {
         setValueInternal(event.target.value);
         event.persist();
         setLastChangeEvent(event);
+        if (!event.target.value) {
+            onChange(event, null);
+        }
     }, [onChange]);
     const handleBlur = useCallback((evt) => {
         if (onBlur)
             onBlur(evt);
         if (lastChangeEvent) {
-            const value = parseLocalizedNumber(valueInternal);
+            const value = parseLocalizedNumber(valueInternal, numberFormatOptions);
             if (value != null && isNaN(value)) {
                 setError(true);
             }
@@ -36,12 +40,22 @@ const CurrencyInput = (props) => {
                 setError(false);
                 const formatted = formatNumber(value);
                 // we parse here so decimal points are limited and view always matches data
-                onChange(lastChangeEvent, parseLocalizedNumber(formatted));
+                onChange(lastChangeEvent, parseLocalizedNumber(formatted, numberFormatOptions));
+                setLastChangeEvent(null);
             }
         }
-    }, [formatNumber, lastChangeEvent, onBlur, onChange, valueInternal]);
+    }, [
+        formatNumber,
+        lastChangeEvent,
+        numberFormatOptions,
+        onBlur,
+        onChange,
+        valueInternal,
+    ]);
     // component rendering
-    return (React.createElement("div", null,
-        React.createElement(TextFieldWithHelp, { ...muiProps, value: valueInternal, onChange: handleChange, onBlur: handleBlur, error: error || muiProps.error })));
+    return (React.createElement(TextFieldWithHelp, { ...muiProps, value: lastChangeEvent ? valueInternal : valueFormatted, onChange: handleChange, onBlur: handleBlur, error: error || muiProps.error, inputProps: {
+            ...muiProps.inputProps,
+            inputMode: "numeric",
+        }, inputMode: "numeric" }));
 };
 export default React.memo(CurrencyInput);
