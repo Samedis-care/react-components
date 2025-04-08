@@ -1368,7 +1368,28 @@ const Form = <
 			return newValues;
 		};
 
-		valuesRef.current = updateUnmodified(valuesRef.current, touched);
+		const combineTouched = (
+			...touched: Record<string, boolean>[]
+		): Record<string, boolean> => {
+			const arrays: [string, boolean][] = touched
+				.map((t) => Object.entries(t))
+				.flat();
+			const fieldKeys = arrays.map((arr) => arr[0]);
+			const touchedRef = Object.fromEntries(
+				fieldKeys.map((field) => [field, false]),
+			);
+			arrays.forEach(([field, touched]) => {
+				if (touched) touchedRef[field] = true;
+			});
+			return touchedRef;
+		};
+
+		valuesRef.current = updateUnmodified(
+			valuesRef.current,
+			flowEngine
+				? combineTouched(valuesStagedModifiedRef.current, touchedRef.current)
+				: touched,
+		);
 		valuesStagedRef.current = updateUnmodified(
 			valuesStagedRef.current,
 			valuesStagedModifiedRef.current,
