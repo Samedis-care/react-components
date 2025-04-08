@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { TextFieldProps } from "@mui/material";
 import TextFieldWithHelp, {
 	TextFieldWithHelpProps,
@@ -31,15 +31,19 @@ const CurrencyInput = (
 ) => {
 	const { value, onChange, onBlur, currency, ...muiProps } = props;
 	const { i18n } = useCCTranslations();
+	const numberFormatOptions: Intl.NumberFormatOptions = useMemo(
+		() => ({
+			style: "currency",
+			currency,
+		}),
+		[currency],
+	);
 	const formatNumber = useCallback(
 		(value: number | null) =>
 			value != null
-				? value.toLocaleString(i18n.language, {
-						style: "currency",
-						currency,
-					})
+				? value.toLocaleString(i18n.language, numberFormatOptions)
 				: "",
-		[currency, i18n.language],
+		[i18n.language, numberFormatOptions],
 	);
 	const valueFormatted = formatNumber(value);
 	const [valueInternal, setValueInternal] = useState(valueFormatted);
@@ -56,6 +60,9 @@ const CurrencyInput = (
 			setValueInternal(event.target.value);
 			event.persist();
 			setLastChangeEvent(event);
+			if (!event.target.value) {
+				onChange(event, null);
+			}
 		},
 		[onChange],
 	);
@@ -64,31 +71,45 @@ const CurrencyInput = (
 		(evt: React.FocusEvent<HTMLTextAreaElement | HTMLInputElement>) => {
 			if (onBlur) onBlur(evt);
 			if (lastChangeEvent) {
-				const value = parseLocalizedNumber(valueInternal);
+				const value = parseLocalizedNumber(valueInternal, numberFormatOptions);
 				if (value != null && isNaN(value)) {
 					setError(true);
 				} else if (onChange) {
 					setError(false);
 					const formatted = formatNumber(value);
 					// we parse here so decimal points are limited and view always matches data
-					onChange(lastChangeEvent, parseLocalizedNumber(formatted));
+					onChange(
+						lastChangeEvent,
+						parseLocalizedNumber(formatted, numberFormatOptions),
+					);
+					setLastChangeEvent(null);
 				}
 			}
 		},
-		[formatNumber, lastChangeEvent, onBlur, onChange, valueInternal],
+		[
+			formatNumber,
+			lastChangeEvent,
+			numberFormatOptions,
+			onBlur,
+			onChange,
+			valueInternal,
+		],
 	);
 
 	// component rendering
 	return (
-		<div>
-			<TextFieldWithHelp
-				{...muiProps}
-				value={valueInternal}
-				onChange={handleChange}
-				onBlur={handleBlur}
-				error={error || muiProps.error}
-			/>
-		</div>
+		<TextFieldWithHelp
+			{...muiProps}
+			value={lastChangeEvent ? valueInternal : valueFormatted}
+			onChange={handleChange}
+			onBlur={handleBlur}
+			error={error || muiProps.error}
+			inputProps={{
+				...muiProps.inputProps,
+				inputMode: "numeric",
+			}}
+			inputMode={"numeric"}
+		/>
 	);
 };
 

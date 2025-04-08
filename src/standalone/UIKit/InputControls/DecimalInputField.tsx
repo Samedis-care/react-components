@@ -62,7 +62,9 @@ const DecimalInputField = (
 			inputProps={{
 				...muiProps.inputProps,
 				ref: cursorInputRef,
+				inputMode: "numeric",
 			}}
+			inputMode={"numeric"}
 		/>
 	);
 };

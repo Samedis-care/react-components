@@ -67,7 +67,9 @@ const IntegerInputField = (
 				inputProps={{
 					...muiProps.inputProps,
 					ref: cursorInputRef,
+					inputMode: "numeric",
 				}}
+				inputMode={"numeric"}
 			/>
 		</div>
 	);
