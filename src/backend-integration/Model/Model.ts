@@ -678,7 +678,12 @@ class Model<
 	 * @param batch Is request batched (uses index action)?
 	 */
 	public getReactQueryKey(id: string | null, batch: boolean): QueryKey {
-		return [this.modelId, { id: id }, batch, this.cacheKeys];
+		return [
+			this.modelId,
+			{ id: id },
+			batch ? this.cacheKeysIndex : null,
+			this.cacheKeys,
+		];
 	}
 
 	/**
