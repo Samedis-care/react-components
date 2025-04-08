@@ -78,9 +78,6 @@ export const useModelMutation = (model) => {
                 if (inputId === "singleton") {
                     updateForId(inputId);
                 }
-                else {
-                    model.invalidateCacheForId(inputId);
-                }
             }
             model.triggerMutationEvent(!inputData.id, responseData);
         },
