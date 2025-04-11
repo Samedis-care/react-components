@@ -841,7 +841,7 @@ const Form = (props) => {
             const dirty = JSON.stringify(server) !== JSON.stringify(form);
             if (onlyDirty && !dirty)
                 return;
-            console.log("Dirty[", key, "]: ByRef:", server !== form, "ByJSON:", dirty);
+            console.log("Dirty[", key, "]: ByRef:", server !== form, "ByJSON:", dirty, "Value Server:", server, "Value Form:", form);
         });
         /* eslint-enable no-console */
     }, [
