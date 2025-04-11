@@ -1829,6 +1829,10 @@ const Form = <
 					server !== form,
 					"ByJSON:",
 					dirty,
+					"Value Server:",
+					server,
+					"Value Form:",
+					form,
 				);
 			});
 			/* eslint-enable no-console */

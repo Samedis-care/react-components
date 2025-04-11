@@ -679,7 +679,7 @@ class Model<
 		return [
 			this.modelId,
 			{ id: id },
-			batch ? this.cacheKeysIndex : null,
+			batch ? (this.cacheKeysIndex ?? []) : null,
 			this.cacheKeys,
 		];
 	}
