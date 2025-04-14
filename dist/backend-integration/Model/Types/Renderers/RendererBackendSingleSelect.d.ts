@@ -3,8 +3,9 @@ import { ModelFieldName, PageVisibility } from "../../Model";
 import ModelRenderParams from "../../RenderParams";
 import TypeId from "../TypeId";
 import { BackendSingleSelectProps } from "../../../../backend-components/Selector/BackendSingleSelect";
+import { FormBackendSingleSelectProps } from "../../../../backend-components/Selector/FormSelectors";
 type OmitProperties = "selected" | "onSelect" | "disabled" | "model" | "initialData";
-export type RendererBackendSingleSelectProps<KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT> = Omit<BackendSingleSelectProps<KeyT, VisibilityT, CustomT>, OmitProperties | "modelFetch"> & {
+export type RendererBackendSingleSelectProps<KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT> = Omit<FormBackendSingleSelectProps<KeyT, VisibilityT, CustomT>, OmitProperties | "modelFetch"> & {
     modelFetch?: BackendSingleSelectProps<KeyT, VisibilityT, CustomT>["modelFetch"] | ((data: Record<string, unknown>) => BackendSingleSelectProps<KeyT, VisibilityT, CustomT>["modelFetch"]);
 };
 /**

@@ -1,8 +1,8 @@
 import React from "react";
 import { FormHelperText } from "@mui/material";
 import TypeId from "../TypeId";
-import { BackendSingleSelect } from "../../../../backend-components";
 import { FormControlFieldsetCC } from "../../../../standalone";
+import { FormBackendSingleSelect, } from "../../../../backend-components/Selector/FormSelectors";
 /**
  * Renders TypeEnum as drop-down selector (with search)
  */
@@ -28,7 +28,7 @@ class RendererBackendSingleSelect extends TypeId {
                 ? this.props.modelFetch(values)
                 : this.props.modelFetch;
             return (React.createElement(FormControlFieldsetCC, { component: "fieldset", required: visibility.required, fullWidth: true, error: !!errorMsg, warning: !!warningMsg, onBlur: handleBlur, name: field },
-                React.createElement(BackendSingleSelect, { selected: value, label: label, onSelect: (value) => handleChange(field, value), disabled: visibility.readOnly, model: relationModel, initialData: relationData, ...this.props, modelFetch: modelFetch, refreshToken: JSON.stringify(relationModel.getReactQueryKeyFetchAll()) +
+                React.createElement(FormBackendSingleSelect, { selected: value, label: label, onSelect: (value) => handleChange(field, value), disabled: visibility.readOnly, model: relationModel, initialData: relationData, ...this.props, modelFetch: modelFetch, refreshToken: JSON.stringify(relationModel.getReactQueryKeyFetchAll()) +
                         this.props.refreshToken }),
                 React.createElement(FormHelperText, null, errorMsg || warningMsg)));
         }
