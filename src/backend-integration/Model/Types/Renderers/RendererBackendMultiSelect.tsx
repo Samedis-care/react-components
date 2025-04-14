@@ -3,13 +3,14 @@ import { FormHelperText } from "@mui/material";
 import Model, { ModelFieldName, PageVisibility } from "../../Model";
 import ModelRenderParams from "../../RenderParams";
 import TypeStringArray from "../TypeStringArray";
-import BackendMultiSelect, {
-	BackendMultiSelectProps,
-} from "../../../../backend-components/Selector/BackendMultiSelect";
 import {
 	FormControlFieldsetCC,
 	MultiSelectorData,
 } from "../../../../standalone";
+import {
+	FormBackendMultiSelect,
+	FormBackendMultiSelectProps,
+} from "../../../../backend-components/Selector/FormSelectors";
 
 type OmitProperties =
 	| "selected"
@@ -27,13 +28,18 @@ class RendererBackendMultiSelect<
 	CustomT,
 > extends TypeStringArray {
 	private readonly props: Omit<
-		BackendMultiSelectProps<KeyT, VisibilityT, CustomT, MultiSelectorData>,
+		FormBackendMultiSelectProps<KeyT, VisibilityT, CustomT, MultiSelectorData>,
 		OmitProperties
 	>;
 
 	constructor(
 		props: Omit<
-			BackendMultiSelectProps<KeyT, VisibilityT, CustomT, MultiSelectorData>,
+			FormBackendMultiSelectProps<
+				KeyT,
+				VisibilityT,
+				CustomT,
+				MultiSelectorData
+			>,
 			OmitProperties
 		>,
 	) {
@@ -85,7 +91,7 @@ class RendererBackendMultiSelect<
 					onBlur={handleBlur}
 					name={field}
 				>
-					<BackendMultiSelect
+					<FormBackendMultiSelect
 						selected={value}
 						label={label}
 						onSelect={(value) => handleChange(field, value)}

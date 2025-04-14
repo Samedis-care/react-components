@@ -4,8 +4,11 @@ import Model, { ModelFieldName, PageVisibility } from "../../Model";
 import ModelRenderParams from "../../RenderParams";
 import TypeId from "../TypeId";
 import { BackendSingleSelectProps } from "../../../../backend-components/Selector/BackendSingleSelect";
-import { BackendSingleSelect } from "../../../../backend-components";
 import { FormControlFieldsetCC } from "../../../../standalone";
+import {
+	FormBackendSingleSelect,
+	FormBackendSingleSelectProps,
+} from "../../../../backend-components/Selector/FormSelectors";
 
 type OmitProperties =
 	| "selected"
@@ -19,7 +22,7 @@ export type RendererBackendSingleSelectProps<
 	VisibilityT extends PageVisibility,
 	CustomT,
 > = Omit<
-	BackendSingleSelectProps<KeyT, VisibilityT, CustomT>,
+	FormBackendSingleSelectProps<KeyT, VisibilityT, CustomT>,
 	OmitProperties | "modelFetch"
 > & {
 	// model fetch with callback for current values, works similar to ModelFieldDefinition getRelationModel
@@ -101,7 +104,7 @@ class RendererBackendSingleSelect<
 					onBlur={handleBlur}
 					name={field}
 				>
-					<BackendSingleSelect
+					<FormBackendSingleSelect
 						selected={value}
 						label={label}
 						onSelect={(value) => handleChange(field, value)}
