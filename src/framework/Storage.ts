@@ -151,7 +151,11 @@ export abstract class CachedServerStorageProvider extends StorageProvider {
 				1000,
 			);
 		}
-		window.setTimeout(this.cleanDebounce.bind(this), 300000, key);
+		this.cleanupTable[key] = window.setTimeout(
+			this.cleanDebounce.bind(this),
+			300000,
+			key,
+		);
 		return this.debounceTable[key](value);
 	}
 
@@ -163,7 +167,7 @@ export abstract class CachedServerStorageProvider extends StorageProvider {
 				onSuccess: () => {
 					ModelDataStore.removeQueries({
 						predicate: (query) =>
-							Array.isArray(query.queryKey) && query.queryKey[0] === "cs-css",
+							Array.isArray(query.queryKey) && query.queryKey[0] === "cc-css",
 					});
 				},
 			})
