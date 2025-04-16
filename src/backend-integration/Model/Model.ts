@@ -699,9 +699,11 @@ class Model<
 	public invalidateCacheForId(id: string) {
 		void ModelDataStore.invalidateQueries({
 			queryKey: this.getReactQueryKey(id, false),
+			exact: true,
 		});
 		void ModelDataStore.invalidateQueries({
 			queryKey: this.getReactQueryKey(id, true),
+			exact: true,
 		});
 	}
 
