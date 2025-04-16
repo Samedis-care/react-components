@@ -15,7 +15,7 @@ const ErrorDialogRaw = (props) => {
             React.createElement(DialogContentText, { component: "span" }, props.message)),
         React.createElement(DialogActions, null, props.buttons.map((data, index) => (React.createElement(Button, { key: index, onClick: async () => {
                 if (data.onClick)
-                    await data.onClick(removeDialog);
+                    await data.onClick(onClose);
                 if (!data.dontClose)
                     removeDialog();
             }, color: data.color || "primary", autoFocus: data.autoFocus }, data.text))))));
