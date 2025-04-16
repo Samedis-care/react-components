@@ -14,11 +14,11 @@ const FormDialogRaw = (props) => {
         React.createElement(DialogContent, null,
             React.createElement(DialogContentText, null, props.message),
             React.createElement(React.Fragment, null, props.inputs)),
-        React.createElement(DialogActions, null, props.buttons.map((btn, index) => (React.createElement(Button, { key: index, onClick: () => {
+        React.createElement(DialogActions, null, props.buttons.map((btn, index) => (React.createElement(Button, { key: index, onClick: async () => {
                 if (!btn.dontClose)
                     removeDialog();
                 if (btn.onClick)
-                    btn.onClick(removeDialog);
+                    await btn.onClick(removeDialog);
             }, color: "primary", autoFocus: btn.autoFocus }, btn.text))))));
 };
 export const FormDialog = React.memo(FormDialogRaw);
