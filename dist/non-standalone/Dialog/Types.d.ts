@@ -9,8 +9,10 @@ export interface IDialogButtonConfig {
     text: React.ReactNode;
     /**
      * The action to perform if the button is clicked (the dialog will be closed automatically)
+     * @param closeDialog The dialog close handler. Should be called to close this dialog, only call if dontClose is set
+     * @see dontClose
      */
-    onClick?: () => void;
+    onClick?: (closeDialog: () => void) => void;
     /**
      * Should the button be initially focused?
      */
@@ -21,6 +23,8 @@ export interface IDialogButtonConfig {
     color?: "primary" | "secondary";
     /**
      * Set to true to prevent closing the dialog
+     * @remarks Requires use of the closeDialog param in onClick to trigger onClose handlers of the dialog
+     * @see onClick
      */
     dontClose?: boolean;
 }

@@ -76,7 +76,7 @@ export class CachedServerStorageProvider extends StorageProvider {
             })
                 .execute({}), 1000);
         }
-        window.setTimeout(this.cleanDebounce.bind(this), 300000, key);
+        this.cleanupTable[key] = window.setTimeout(this.cleanDebounce.bind(this), 300000, key);
         return this.debounceTable[key](value);
     }
     clear() {
@@ -86,7 +86,7 @@ export class CachedServerStorageProvider extends StorageProvider {
             mutationKey: ["cc-css-clear"],
             onSuccess: () => {
                 ModelDataStore.removeQueries({
-                    predicate: (query) => Array.isArray(query.queryKey) && query.queryKey[0] === "cs-css",
+                    predicate: (query) => Array.isArray(query.queryKey) && query.queryKey[0] === "cc-css",
                 });
             },
         })

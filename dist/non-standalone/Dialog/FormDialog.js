@@ -15,9 +15,10 @@ const FormDialogRaw = (props) => {
             React.createElement(DialogContentText, null, props.message),
             React.createElement(React.Fragment, null, props.inputs)),
         React.createElement(DialogActions, null, props.buttons.map((btn, index) => (React.createElement(Button, { key: index, onClick: () => {
-                popDialog();
+                if (!btn.dontClose)
+                    removeDialog();
                 if (btn.onClick)
-                    btn.onClick();
+                    btn.onClick(removeDialog);
             }, color: "primary", autoFocus: btn.autoFocus }, btn.text))))));
 };
 export const FormDialog = React.memo(FormDialogRaw);
