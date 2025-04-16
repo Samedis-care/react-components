@@ -13,7 +13,7 @@ export interface IDialogButtonConfig {
 	 * @param closeDialog The dialog close handler. Should be called to close this dialog, only call if dontClose is set
 	 * @see dontClose
 	 */
-	onClick?: (closeDialog: () => void) => void;
+	onClick?: (closeDialog: () => void) => void | Promise<void>;
 	/**
 	 * Should the button be initially focused?
 	 */
