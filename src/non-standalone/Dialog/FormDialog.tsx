@@ -31,8 +31,9 @@ const FormDialogRaw = (props: IDialogConfigForm) => {
 					<Button
 						key={index}
 						onClick={async () => {
-							if (!btn.dontClose) removeDialog();
-							if (btn.onClick) await btn.onClick(removeDialog);
+							if (!btn.dontClose) popDialog();
+							if (btn.onClick) await btn.onClick(onClose);
+							if (!btn.dontClose && onClose) onClose();
 						}}
 						color="primary"
 						autoFocus={btn.autoFocus}
