@@ -31,8 +31,8 @@ const FormDialogRaw = (props: IDialogConfigForm) => {
 					<Button
 						key={index}
 						onClick={() => {
-							popDialog();
-							if (btn.onClick) btn.onClick();
+							if (!btn.dontClose) removeDialog();
+							if (btn.onClick) btn.onClick(removeDialog);
 						}}
 						color="primary"
 						autoFocus={btn.autoFocus}

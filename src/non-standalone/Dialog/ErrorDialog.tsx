@@ -32,7 +32,7 @@ const ErrorDialogRaw = (props: IDialogConfigSimple) => {
 					<Button
 						key={index}
 						onClick={() => {
-							if (data.onClick) data.onClick();
+							if (data.onClick) data.onClick(removeDialog);
 							if (!data.dontClose) removeDialog();
 						}}
 						color={data.color || "primary"}
