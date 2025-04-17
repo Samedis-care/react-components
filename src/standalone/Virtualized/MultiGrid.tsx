@@ -73,6 +73,8 @@ const BottomLeftVariableSizeGrid = styled(VariableSizeGrid, {
 
 export type MultiGridClassKey = "root" | "bottomLeftGrid";
 
+const SCROLL_DETECTION_DELAY_MS = 100; // ms to consider scroll events caused by JS code
+
 const MultiGrid = (inProps: MultiGridProps) => {
 	const props = useThemeProps({ props: inProps, name: "CcMultiGrid" });
 	const {
@@ -166,15 +168,27 @@ const MultiGrid = (inProps: MultiGridProps) => {
 	const topRightGrid = useRef<VariableSizeGrid>(null);
 	const bottomLeftGrid = useRef<VariableSizeGrid>(null);
 	const bottomRightGrid = useRef<VariableSizeGrid>(null);
+	const handleScrollPinnedRequested = useRef<number | null>(null);
+	const handleScrollRequested = useRef<number | null>(null);
 
 	const handleScroll = useCallback((evt: GridOnScrollProps) => {
-		if (evt.scrollUpdateWasRequested) return;
+		if (handleScrollRequested.current != null) return;
+		if (handleScrollPinnedRequested.current)
+			window.clearTimeout(handleScrollPinnedRequested.current);
+		handleScrollPinnedRequested.current = window.setTimeout(() => {
+			handleScrollPinnedRequested.current = null;
+		}, SCROLL_DETECTION_DELAY_MS);
 		topRightGrid.current?.scrollTo({ scrollLeft: evt.scrollLeft });
 		bottomLeftGrid.current?.scrollTo({ scrollTop: evt.scrollTop });
 	}, []);
 
 	const handleScrollPinned = useCallback((evt: GridOnScrollProps) => {
-		if (evt.scrollUpdateWasRequested) return;
+		if (handleScrollPinnedRequested.current != null) return;
+		if (handleScrollRequested.current)
+			window.clearTimeout(handleScrollRequested.current);
+		handleScrollRequested.current = window.setTimeout(() => {
+			handleScrollRequested.current = null;
+		}, SCROLL_DETECTION_DELAY_MS);
 		topLeftGrid.current?.scrollTo({ scrollLeft: evt.scrollLeft });
 		bottomRightGrid.current?.scrollTo({ scrollTop: evt.scrollTop });
 	}, []);
