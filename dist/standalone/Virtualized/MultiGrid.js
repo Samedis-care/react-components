@@ -26,6 +26,7 @@ const BottomLeftVariableSizeGrid = styled(VariableSizeGrid, {
     // doesn't add to the content width in firefox
     scrollbarWidth: "none",
 });
+const SCROLL_DETECTION_DELAY_MS = 100; // ms to consider scroll events caused by JS code
 const MultiGrid = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcMultiGrid" });
     const { width, height, columnCount, columnWidth, rowCount, rowHeight, onItemsRendered, fixedColumnCount, fixedRowCount, styleTopLeftGrid, styleTopRightGrid, styleBottomLeftGrid, styleBottomRightGrid, children: CellRenderer, noContentRenderer: NoContentRenderer, globalScrollListener, } = props;
@@ -69,15 +70,27 @@ const MultiGrid = (inProps) => {
     const topRightGrid = useRef(null);
     const bottomLeftGrid = useRef(null);
     const bottomRightGrid = useRef(null);
+    const handleScrollPinnedRequested = useRef(null);
+    const handleScrollRequested = useRef(null);
     const handleScroll = useCallback((evt) => {
-        if (evt.scrollUpdateWasRequested)
+        if (handleScrollRequested.current != null)
             return;
+        if (handleScrollPinnedRequested.current)
+            window.clearTimeout(handleScrollPinnedRequested.current);
+        handleScrollPinnedRequested.current = window.setTimeout(() => {
+            handleScrollPinnedRequested.current = null;
+        }, SCROLL_DETECTION_DELAY_MS);
         topRightGrid.current?.scrollTo({ scrollLeft: evt.scrollLeft });
         bottomLeftGrid.current?.scrollTo({ scrollTop: evt.scrollTop });
     }, []);
     const handleScrollPinned = useCallback((evt) => {
-        if (evt.scrollUpdateWasRequested)
+        if (handleScrollPinnedRequested.current != null)
             return;
+        if (handleScrollRequested.current)
+            window.clearTimeout(handleScrollRequested.current);
+        handleScrollRequested.current = window.setTimeout(() => {
+            handleScrollRequested.current = null;
+        }, SCROLL_DETECTION_DELAY_MS);
         topLeftGrid.current?.scrollTo({ scrollLeft: evt.scrollLeft });
         bottomRightGrid.current?.scrollTo({ scrollTop: evt.scrollTop });
     }, []);
