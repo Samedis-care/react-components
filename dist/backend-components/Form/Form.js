@@ -683,10 +683,15 @@ const Form = (props) => {
         onlySubmitMountedBehaviour,
         onSubmit,
     ]);
-    const handleSubmit = useCallback((evt) => {
+    const handleSubmit = useCallback(async (evt) => {
         evt.preventDefault();
         evt.stopPropagation();
-        void submitForm();
+        try {
+            await submitForm();
+        }
+        catch {
+            // ignore, shown to user via ErrorComponent
+        }
     }, [submitForm]);
     // nested forms
     const parentFormContext = useContext(FormContext);
