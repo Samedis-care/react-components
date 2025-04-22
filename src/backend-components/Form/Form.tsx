@@ -1627,10 +1627,14 @@ const Form = <
 		],
 	);
 	const handleSubmit = useCallback(
-		(evt: FormEvent<HTMLFormElement>) => {
+		async (evt: FormEvent<HTMLFormElement>) => {
 			evt.preventDefault();
 			evt.stopPropagation();
-			void submitForm();
+			try {
+				await submitForm();
+			} catch {
+				// ignore, shown to user via ErrorComponent
+			}
 		},
 		[submitForm],
 	);
