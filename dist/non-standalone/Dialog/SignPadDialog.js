@@ -58,7 +58,7 @@ const SignPadDialog = (inProps) => {
     const signerName = signerNameUntrim?.trim();
     const [resetCanvas, setResetCanvas] = useState(!!signature);
     const [pushDialog, popDialog] = useDialogContext();
-    const canvasWrapper = useRef();
+    const canvasWrapper = useRef(null);
     const signCanvas = useRef(null);
     const hiddenRef = useRef(null);
     const [canvasSize, setCanvasSize] = useState([0, 0]);

@@ -32,5 +32,5 @@ export interface BackendFileMeta extends FileMeta {
      */
     id: string;
 }
-declare const _default: React.MemoExoticComponent<React.ForwardRefExoticComponent<Omit<CrudFileUploadProps & React.RefAttributes<FileUploadDispatch>, "ref"> & React.RefAttributes<FileUploadDispatch>>>;
+declare const _default: React.NamedExoticComponent<Omit<CrudFileUploadProps & React.RefAttributes<FileUploadDispatch>, "ref"> & React.RefAttributes<FileUploadDispatch>>;
 export default _default;

@@ -1,8 +1,9 @@
 import React from "react";
 import { BasicFormPageRendererProps, EnhancedCustomProps } from "./BasicFormPage";
 import { CrudFormProps } from "../CRUD";
+import { ActionButton } from "../../standalone";
 import { DefaultFormPageProps } from "./DefaultFormPage";
-export declare const BackActionButton: import("@emotion/styled").StyledComponent<Pick<import("../../standalone/UIKit/ActionButton").ActionButtonProps, keyof import("../../standalone/UIKit/ActionButton").ActionButtonProps> & import("@mui/system").MUIStyledCommonProps<import("@mui/material").Theme>, {}, {}>;
+export declare const BackActionButton: typeof ActionButton;
 export type DefaultFormPageButtonsClassKey = "backButton";
 export type DefaultFormPageButtonsProps = BasicFormPageRendererProps<EnhancedCustomProps<CrudFormProps> | undefined> & Pick<DefaultFormPageProps, "extraButtons" | "textButtonSave" | "textButtonBack">;
 declare const _default: React.MemoExoticComponent<(inProps: DefaultFormPageButtonsProps) => React.JSX.Element>;

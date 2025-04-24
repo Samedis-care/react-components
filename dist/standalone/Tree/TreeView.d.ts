@@ -118,5 +118,5 @@ export interface TreeViewContextType {
 export interface TreeViewDispatch {
     scrollTo: (id: string) => void;
 }
-declare const _default: React.MemoExoticComponent<React.ForwardRefExoticComponent<TreeViewProps & React.RefAttributes<TreeViewDispatch>>>;
+declare const _default: React.NamedExoticComponent<TreeViewProps & React.RefAttributes<TreeViewDispatch>>;
 export default _default;

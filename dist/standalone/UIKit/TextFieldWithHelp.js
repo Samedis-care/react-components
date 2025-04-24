@@ -6,6 +6,13 @@ import isTouchDevice from "../../utils/isTouchDevice";
 import { withMuiWarning } from "./MuiWarning";
 import { useRefComposer } from "react-ref-composer";
 export const UiKitTextFieldWithWarnings = withMuiWarning(UiKitTextField);
+const accessSlotProps = (state, slotProps) => {
+    if (slotProps == null)
+        return undefined;
+    if (typeof slotProps === "function")
+        return slotProps(state);
+    return slotProps;
+};
 const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(props, ref) {
     const { openInfo, customHandleClear, warning, onChange, ...muiProps } = props;
     // handle clear
@@ -41,24 +48,38 @@ const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(props
     }, [muiProps.value]);
     // render
     const showClear = isTouchDevice() && hasValue && !muiProps.disabled;
-    const hasEndAdornment = !!(showClear ||
-        openInfo ||
-        muiProps.InputProps?.endAdornment);
-    return (React.createElement(UiKitTextFieldWithWarnings, { ref: ref, InputLabelProps: InputLabelConfig, ...muiProps, warning: warning, onChange: handleChange, InputProps: {
-            ...muiProps.InputProps,
-            endAdornment: hasEndAdornment ? (React.createElement(React.Fragment, null,
-                React.createElement(InputAdornment, { position: "end" },
-                    showClear && (React.createElement(IconButton, { onClick: handleClear, size: "small" },
-                        React.createElement(ClearIcon, null))),
-                    typeof muiProps.InputProps?.endAdornment === "string"
-                        ? muiProps.InputProps.endAdornment
-                        : muiProps.InputProps
-                            ?.endAdornment?.props?.children,
-                    openInfo && (React.createElement(IconButton, { onClick: openInfo, size: "small" },
-                        React.createElement(InfoIcon, { color: "disabled" })))))) : undefined,
-        }, inputProps: {
-            ...muiProps.inputProps,
-            ref: composeRef(inputRef, muiProps.inputProps?.ref),
+    return (React.createElement(UiKitTextFieldWithWarnings, { ref: ref, ...muiProps, warning: warning, onChange: handleChange, slotProps: {
+            input: (props) => {
+                const orgSlotProps = {
+                    ...accessSlotProps(props, muiProps.slotProps?.input),
+                    ...muiProps.InputProps,
+                };
+                const hasEndAdornment = !!(showClear ||
+                    openInfo ||
+                    orgSlotProps?.endAdornment);
+                return {
+                    ...orgSlotProps,
+                    endAdornment: hasEndAdornment ? (React.createElement(React.Fragment, null,
+                        React.createElement(InputAdornment, { position: "end" },
+                            showClear && (React.createElement(IconButton, { onClick: handleClear, size: "small" },
+                                React.createElement(ClearIcon, null))),
+                            typeof orgSlotProps?.endAdornment === "string"
+                                ? orgSlotProps.endAdornment
+                                : orgSlotProps?.endAdornment?.props?.children,
+                            openInfo && (React.createElement(IconButton, { onClick: openInfo, size: "small" },
+                                React.createElement(InfoIcon, { color: "disabled" })))))) : undefined,
+                };
+            },
+            htmlInput: (props) => ({
+                ...accessSlotProps(props, muiProps.slotProps?.htmlInput),
+                ref: composeRef(inputRef, accessSlotProps(props, muiProps.slotProps?.htmlInput)
+                    ?.ref),
+            }),
+            inputLabel: (props) => ({
+                ...InputLabelConfig,
+                ...muiProps.InputLabelProps,
+                ...accessSlotProps(props, muiProps.slotProps?.inputLabel),
+            }),
         } }));
 });
 export default React.memo(TextFieldWithHelp);

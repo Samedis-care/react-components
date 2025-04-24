@@ -17,5 +17,5 @@ export declare enum DataGridExportStatus {
     Ready = 2,
     Error = 3
 }
-declare const _default: React.MemoExoticComponent<React.ForwardRefExoticComponent<IDataGridExportMenuEntryProps & React.RefAttributes<HTMLLIElement>>>;
+declare const _default: React.NamedExoticComponent<IDataGridExportMenuEntryProps & React.RefAttributes<HTMLLIElement>>;
 export default _default;

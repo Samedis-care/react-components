@@ -8,7 +8,7 @@ export interface InputCursorFixHook {
     /**
      * Has to be passed to the input ref prop
      */
-    cursorInputRef: React.RefObject<HTMLInputElement>;
+    cursorInputRef: React.RefObject<HTMLInputElement | null>;
 }
 /**
  * React hook to fix the cursor reset bug for controlled inputs which auto-format values

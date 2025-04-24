@@ -23,5 +23,6 @@ export interface ActionButtonProps extends Omit<ButtonProps, "children"> {
      */
     children: React.ReactNode;
 }
-declare const _default: React.MemoExoticComponent<(inProps: ActionButtonProps) => React.JSX.Element>;
+declare const ActionButton: (inProps: ActionButtonProps) => React.JSX.Element;
+declare const _default: typeof ActionButton;
 export default _default;

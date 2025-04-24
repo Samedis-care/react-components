@@ -1,4 +1,4 @@
-import React, { ForwardedRef, RefAttributes } from "react";
+import React, { RefAttributes } from "react";
 import { ModelFieldName, PageVisibility } from "../../backend-integration";
 import { ErrorComponentProps } from "../Form";
 import { MultiSelectorData } from "../../standalone";
@@ -12,6 +12,6 @@ export interface CrudMultiSelectProps<KeyT extends ModelFieldName, VisibilityT e
 }
 export declare const CrudSelectContext: React.Context<UseCrudSelectResult<string, MultiSelectorData> | undefined>;
 export declare const useCrudSelectContext: () => UseCrudSelectResult<ModelFieldName, MultiSelectorData>;
-declare const CrudMultiSelect: <KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT, DataT extends MultiSelectorData>(props: CrudMultiSelectProps<KeyT, VisibilityT, CustomT, DataT> & RefAttributes<CrudSelectDispatch<DataT>>, ref: ForwardedRef<CrudSelectDispatch<DataT>>) => React.JSX.Element;
-declare const _default: typeof CrudMultiSelect;
-export default _default;
+declare const ForwardedCrudMultiSelect: <KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT, DataT extends MultiSelectorData>(props: CrudMultiSelectProps<KeyT, VisibilityT, CustomT, DataT> & RefAttributes<CrudSelectDispatch<DataT>>) => React.ReactElement;
+declare const MemoizedCrudMultiSelect: typeof ForwardedCrudMultiSelect;
+export default MemoizedCrudMultiSelect;

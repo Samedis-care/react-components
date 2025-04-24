@@ -14,5 +14,5 @@ export interface LinkProps extends Omit<React.DetailedHTMLProps<React.AnchorHTML
      */
     state?: unknown;
 }
-declare const _default: React.MemoExoticComponent<React.ForwardRefExoticComponent<Omit<LinkProps, "ref"> & React.RefAttributes<HTMLAnchorElement>>>;
+declare const _default: React.NamedExoticComponent<Omit<LinkProps, "ref"> & React.RefAttributes<HTMLAnchorElement>>;
 export default _default;

@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { forwardRef, useContext, } from "react";
 import { Loader } from "../../standalone";
 import BackendMultiSelect from "./BackendMultiSelect";
 import useCrudSelect from "./useCrudSelect";
@@ -25,4 +25,6 @@ const CrudMultiSelect = (props, ref) => {
             error && React.createElement(ErrorComponent, { error: error }),
             React.createElement(BackendMultiSelect, { ...props, selected: selected.map((entry) => entry.value), onSelect: handleSelect, modelToSelectorData: modelToSelectorData, initialData: initialRawData }))));
 };
-export default React.memo(React.forwardRef(CrudMultiSelect));
+const ForwardedCrudMultiSelect = forwardRef(CrudMultiSelect);
+const MemoizedCrudMultiSelect = React.memo(ForwardedCrudMultiSelect);
+export default MemoizedCrudMultiSelect;

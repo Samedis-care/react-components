@@ -7,5 +7,5 @@ export interface ScrollableScheduleDayProps {
     data: IDayData[];
 }
 export type ScrollableScheduleDayClassKey = "root";
-declare const _default: React.MemoExoticComponent<React.ForwardRefExoticComponent<ScrollableScheduleDayProps & React.RefAttributes<HTMLDivElement>>>;
+declare const _default: React.NamedExoticComponent<ScrollableScheduleDayProps & React.RefAttributes<HTMLDivElement>>;
 export default _default;
