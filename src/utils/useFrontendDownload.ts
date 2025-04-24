@@ -5,7 +5,7 @@ import { useCallback, useEffect, useRef } from "react";
  * @returns a function which accepts a file to download
  */
 const useFrontendDownload = () => {
-	const link = useRef<HTMLAnchorElement>();
+	const link = useRef<HTMLAnchorElement>(null);
 	useEffect(() => {
 		const linkEl = document.createElement("a");
 		linkEl.style.display = "none";

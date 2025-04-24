@@ -7,6 +7,6 @@ const PopupMenu = styled(Menu, { name: "CcPopupMenu", slot: "root" })(
 			border: `1px solid ${theme.palette.divider}`,
 		},
 	}),
-);
+) as typeof Menu;
 
 export default PopupMenu;

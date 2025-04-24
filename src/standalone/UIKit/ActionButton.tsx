@@ -109,4 +109,4 @@ const ActionButton = (inProps: ActionButtonProps) => {
 	return <Tooltip title={<span>{children}</span>}>{renderButton()}</Tooltip>;
 };
 
-export default React.memo(ActionButton);
+export default React.memo(ActionButton) as typeof ActionButton;

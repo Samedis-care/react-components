@@ -5,7 +5,7 @@ export const SmallListItem = styled(ListItem)({
 		paddingLeft: 8,
 		paddingRight: 8,
 	},
-});
+}) as typeof ListItem;
 export const SmallListItemButton = styled(ListItemButton)({
 	"& .MuiListItem-gutters": {
 		paddingLeft: 8,
@@ -18,7 +18,7 @@ export const SelectorSmallListItem = styled(ListItem)({
 		paddingLeft: 0,
 		paddingRight: 8,
 	},
-});
+}) as typeof ListItem;
 
 export const SelectorSmallListItemButton = styled(ListItemButton)({
 	"& .MuiListItem-gutters": {

@@ -243,7 +243,10 @@ const FormatIconsModern = styled(Grid, {
 	color: theme.palette.action.disabled,
 }));
 
-export const FileInput = styled("input", {
+export const FileInput: React.ComponentType<
+	React.InputHTMLAttributes<HTMLInputElement> &
+		React.RefAttributes<HTMLInputElement>
+> = styled("input", {
 	name: "CcFileUpload",
 	slot: "fileInput",
 })({

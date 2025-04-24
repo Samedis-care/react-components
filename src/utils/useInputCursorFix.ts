@@ -11,7 +11,7 @@ export interface InputCursorFixHook {
 	/**
 	 * Has to be passed to the input ref prop
 	 */
-	cursorInputRef: React.RefObject<HTMLInputElement>;
+	cursorInputRef: React.RefObject<HTMLInputElement | null>;
 }
 
 /**

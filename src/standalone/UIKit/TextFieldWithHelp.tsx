@@ -9,6 +9,8 @@ import {
 	IconButton,
 	InputAdornment,
 	InputAdornmentProps,
+	InputLabelProps,
+	InputProps,
 	TextFieldProps,
 } from "@mui/material";
 import { Clear as ClearIcon, Info as InfoIcon } from "@mui/icons-material";
@@ -28,7 +30,18 @@ export interface TextFieldWithHelpProps extends UIInputProps {
 	customHandleClear?: () => void;
 }
 
-export const UiKitTextFieldWithWarnings = withMuiWarning(UiKitTextField);
+export const UiKitTextFieldWithWarnings = withMuiWarning(
+	UiKitTextField,
+) as typeof UiKitTextField;
+
+const accessSlotProps = <T, R extends object>(
+	state: T,
+	slotProps: undefined | null | R | ((state: T) => R),
+): R | undefined => {
+	if (slotProps == null) return undefined;
+	if (typeof slotProps === "function") return slotProps(state);
+	return slotProps;
+};
 
 const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(
 	props: TextFieldWithHelpProps & TextFieldProps,
@@ -90,47 +103,63 @@ const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(
 
 	// render
 	const showClear = isTouchDevice() && hasValue && !muiProps.disabled;
-	const hasEndAdornment = !!(
-		showClear ||
-		openInfo ||
-		muiProps.InputProps?.endAdornment
-	);
 
 	return (
 		<UiKitTextFieldWithWarnings
 			ref={ref}
-			InputLabelProps={InputLabelConfig}
 			{...muiProps}
 			warning={warning}
 			onChange={handleChange}
-			InputProps={{
-				...muiProps.InputProps,
-				endAdornment: hasEndAdornment ? (
-					<>
-						<InputAdornment position={"end"}>
-							{showClear && (
-								<IconButton onClick={handleClear} size="small">
-									<ClearIcon />
-								</IconButton>
-							)}
-							{typeof muiProps.InputProps?.endAdornment === "string"
-								? muiProps.InputProps.endAdornment
-								: (
-										muiProps.InputProps
-											?.endAdornment as React.ReactElement<InputAdornmentProps>
-									)?.props?.children}
-							{openInfo && (
-								<IconButton onClick={openInfo} size="small">
-									<InfoIcon color={"disabled"} />
-								</IconButton>
-							)}
-						</InputAdornment>
-					</>
-				) : undefined,
-			}}
-			inputProps={{
-				...muiProps.inputProps,
-				ref: composeRef(inputRef, muiProps.inputProps?.ref as typeof inputRef),
+			slotProps={{
+				input: (props) => {
+					const orgSlotProps: InputProps = {
+						...accessSlotProps(props, muiProps.slotProps?.input),
+						...muiProps.InputProps,
+					};
+					const hasEndAdornment = !!(
+						showClear ||
+						openInfo ||
+						orgSlotProps?.endAdornment
+					);
+					return {
+						...orgSlotProps,
+						endAdornment: hasEndAdornment ? (
+							<>
+								<InputAdornment position={"end"}>
+									{showClear && (
+										<IconButton onClick={handleClear} size="small">
+											<ClearIcon />
+										</IconButton>
+									)}
+									{typeof orgSlotProps?.endAdornment === "string"
+										? orgSlotProps.endAdornment
+										: (
+												orgSlotProps?.endAdornment as React.ReactElement<InputAdornmentProps>
+											)?.props?.children}
+									{openInfo && (
+										<IconButton onClick={openInfo} size="small">
+											<InfoIcon color={"disabled"} />
+										</IconButton>
+									)}
+								</InputAdornment>
+							</>
+						) : undefined,
+					};
+				},
+				htmlInput: (props) => ({
+					...accessSlotProps(props, muiProps.slotProps?.htmlInput),
+					ref: composeRef(
+						inputRef,
+						accessSlotProps(props, muiProps.slotProps?.htmlInput)
+							?.ref as typeof inputRef,
+					),
+				}),
+				inputLabel: (props) =>
+					({
+						...InputLabelConfig,
+						...muiProps.InputLabelProps,
+						...accessSlotProps(props, muiProps.slotProps?.inputLabel),
+					}) as InputLabelProps,
 			}}
 		/>
 	);

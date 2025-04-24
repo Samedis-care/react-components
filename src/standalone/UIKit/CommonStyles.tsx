@@ -9,6 +9,7 @@ import {
 	TextFieldProps,
 	Theme,
 } from "@mui/material";
+import React from "react";
 
 export interface UIInputProps {
 	important?: boolean;
@@ -44,18 +45,22 @@ const inputStyles = ({
 	},
 });
 
-export const UiKitInput = styled(Input, {
+export const UiKitInput: React.ComponentType<UiKitInputProps> = styled(Input, {
 	name: "CcUiKitInput",
 	slot: "root",
 })<UiKitInputProps>(inputStyles);
-export const UiKitInputOutlined = styled(OutlinedInput, {
-	name: "CcUiKitInputOutlined",
-	slot: "root",
-})<UiKitInputOutlinedProps>(inputStyles);
-export const UiKitTextField = styled(TextField, {
-	name: "CcUiKitTextField",
-	slot: "root",
-})<UiKitTextFieldProps>(({ theme, important }) => ({
+export const UiKitInputOutlined: React.ComponentType<UiKitInputOutlinedProps> =
+	styled(OutlinedInput, {
+		name: "CcUiKitInputOutlined",
+		slot: "root",
+	})<UiKitInputOutlinedProps>(inputStyles);
+export const UiKitTextField: React.ComponentType<UiKitTextFieldProps> = styled(
+	TextField,
+	{
+		name: "CcUiKitTextField",
+		slot: "root",
+	},
+)<UiKitTextFieldProps>(({ theme, important }) => ({
 	"& .MuiInput-root": inputStyles({ theme, important }),
 }));
 

@@ -1,4 +1,9 @@
-import React, { ForwardedRef, RefAttributes, useContext } from "react";
+import React, {
+	ForwardedRef,
+	forwardRef,
+	RefAttributes,
+	useContext,
+} from "react";
 import { ModelFieldName, PageVisibility } from "../../backend-integration";
 import { ErrorComponentProps } from "../Form";
 import { Loader, MultiSelectorData } from "../../standalone";
@@ -95,6 +100,18 @@ const CrudMultiSelect = <
 	);
 };
 
-export default React.memo(
-	React.forwardRef(CrudMultiSelect),
-) as typeof CrudMultiSelect;
+const ForwardedCrudMultiSelect = forwardRef(CrudMultiSelect) as <
+	KeyT extends ModelFieldName,
+	VisibilityT extends PageVisibility,
+	CustomT,
+	DataT extends MultiSelectorData,
+>(
+	props: CrudMultiSelectProps<KeyT, VisibilityT, CustomT, DataT> &
+		RefAttributes<CrudSelectDispatch<DataT>>,
+) => React.ReactElement;
+
+const MemoizedCrudMultiSelect = React.memo(
+	ForwardedCrudMultiSelect,
+) as typeof ForwardedCrudMultiSelect;
+
+export default MemoizedCrudMultiSelect;

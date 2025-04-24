@@ -1,4 +1,5 @@
 import { styled } from "@mui/material";
+import React from "react";
 
 export interface VerticalDividerProps {
 	/**
@@ -9,7 +10,9 @@ export interface VerticalDividerProps {
 
 export type VerticalDividerClassKey = "root";
 
-const VerticalDivider = styled("div", {
+const VerticalDivider: React.ComponentType<
+	React.HTMLAttributes<HTMLDivElement>
+> = styled("div", {
 	name: "CcVerticalDivider",
 	slot: "root",
 })(({ theme }) => ({

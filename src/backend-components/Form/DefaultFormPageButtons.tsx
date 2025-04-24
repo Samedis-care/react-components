@@ -29,7 +29,7 @@ export const BackActionButton = styled(ActionButton, {
 		boxShadow: "none",
 		border: "none",
 	},
-});
+}) as typeof ActionButton;
 
 export type DefaultFormPageButtonsClassKey = "backButton";
 export type DefaultFormPageButtonsProps = BasicFormPageRendererProps<

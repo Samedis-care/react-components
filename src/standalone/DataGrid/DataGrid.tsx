@@ -596,14 +596,15 @@ export const useDataGridColumnsWidthState = (): DataGridColumnsWidthState => {
 };
 
 export const DataGridRootRefContext = React.createContext<
-	React.RefObject<HTMLDivElement> | undefined
+	React.RefObject<HTMLDivElement | null> | undefined
 >(undefined);
 
-export const useDataGridRootRef = (): React.RefObject<HTMLDivElement> => {
-	const ctx = useContext(DataGridRootRefContext);
-	if (!ctx) throw new Error("RootRef context not set");
-	return ctx;
-};
+export const useDataGridRootRef =
+	(): React.RefObject<HTMLDivElement | null> => {
+		const ctx = useContext(DataGridRootRefContext);
+		if (!ctx) throw new Error("RootRef context not set");
+		return ctx;
+	};
 
 export const getDataGridDefaultState = (
 	columns: IDataGridColumnDef[],
@@ -697,16 +698,18 @@ export const DataGridContentOverlayCollapse = styled(Collapse, {
 	maxHeight: "100%",
 	overflow: "auto",
 	backgroundColor: theme.palette.background.paper,
-}));
+})) as typeof Collapse;
 
 export const DataGridContentOverlayPaper = styled(Paper, {
 	name: "CcDataGrid",
 	slot: "contentOverlayPaper",
 })(({ theme }) => ({
 	padding: theme.spacing(1),
-}));
+})) as typeof Paper;
 
-export const DataGridContentOverlayClosed = styled("div", {
+export const DataGridContentOverlayClosed: React.ComponentType<
+	React.HTMLAttributes<HTMLDivElement>
+> = styled("div", {
 	name: "CcDataGrid",
 	slot: "contentOverlayClosed",
 })(({ theme }) => ({
@@ -720,7 +723,7 @@ export const DataGridContentOverlayClosed = styled("div", {
 export const DataGridCustomFilterDialogTitle = styled(Typography, {
 	name: "CcDataGrid",
 	slot: "customFilterContainerHeader",
-})({});
+})({}) as typeof Typography;
 
 export const DataGridCustomFilterContainer = styled(Grid, {
 	name: "CcDataGrid",
@@ -728,47 +731,49 @@ export const DataGridCustomFilterContainer = styled(Grid, {
 })(({ theme }) => ({
 	paddingTop: theme.spacing(2),
 	paddingBottom: theme.spacing(2),
-}));
+})) as typeof Grid;
 
 export const DataGridSelectCheckbox = styled(Checkbox, {
 	name: "CcDataGrid",
 	slot: "selectCheckbox",
 })({
 	padding: 0,
-});
+}) as unknown as typeof Checkbox;
 
 export const DataGridSelectAllCheckbox = styled(Checkbox, {
 	name: "CcDataGrid",
 	slot: "selectAllCheckbox",
 })({
 	padding: 0,
-});
+}) as unknown as typeof Checkbox;
 
 export const DataGridSelectAllWrapper = styled(ComponentWithLabel, {
 	name: "CcDataGrid",
 	slot: "selectAllWrapper",
-})<ComponentWithLabelProps | FormControlLabelProps>({});
+})<ComponentWithLabelProps | FormControlLabelProps>(
+	{},
+) as unknown as typeof ComponentWithLabel;
 
 export const DataGridPaginationText = styled(Typography, {
 	name: "CcDataGrid",
 	slot: "paginationText",
 })({
 	padding: "12px 0",
-});
+}) as typeof Typography;
 
 export const DataGridSetFilterListDivider = styled(Divider, {
 	name: "CcDataGrid",
 	slot: "setFilterListDivider",
 })({
 	width: "100%",
-});
+}) as typeof Divider;
 
 export const DataGridSetFilterListItemDivider = styled(ListItem, {
 	name: "CcDataGrid",
 	slot: "setFilterListItemDivider",
 })({
 	padding: 0,
-});
+}) as typeof ListItem;
 
 export const DataGridSetFilterListItem = styled(ListItem, {
 	name: "CcDataGrid",
@@ -776,7 +781,7 @@ export const DataGridSetFilterListItem = styled(ListItem, {
 })({
 	paddingLeft: 0,
 	paddingRight: 0,
-});
+}) as typeof ListItem;
 
 export const DataGridSetFilterContainer = styled(Grid, {
 	name: "CcDataGrid",
@@ -784,7 +789,7 @@ export const DataGridSetFilterContainer = styled(Grid, {
 })({
 	maxHeight: "40vh",
 	overflow: "auto",
-});
+}) as typeof Grid;
 
 export const DataGridFilterBarGrid = styled(Grid, {
 	name: "CcDataGrid",
@@ -792,21 +797,21 @@ export const DataGridFilterBarGrid = styled(Grid, {
 })(({ theme }) => ({
 	height: `calc(100% + ${theme.spacing(2)})`,
 	width: "100%",
-}));
+})) as typeof Grid;
 
 export const DataGridFilterBarBox = styled(Box, {
 	name: "CcDataGrid",
 	slot: "filterBarBox",
 })({
 	height: "100%",
-});
+}) as typeof Box;
 
 export const DataGridFilterClearButton = styled(IconButton, {
 	name: "CcDataGrid",
 	slot: "filterClearBtn",
 })({
 	padding: 0,
-});
+}) as typeof IconButton;
 
 export const DataGridColumnHeaderLabel = styled(Grid, {
 	name: "CcDataGrid",
@@ -819,7 +824,7 @@ export const DataGridColumnHeaderLabel = styled(Grid, {
 	"&:hover": {
 		pointerEvents: "auto",
 	},
-});
+}) as typeof Grid;
 
 export const DataGridColumnHeaderResizer = styled(Grid, {
 	name: "CcDataGrid",
@@ -833,16 +838,18 @@ export const DataGridColumnHeaderResizer = styled(Grid, {
 	position: "absolute",
 	border: `1px solid ${theme.palette.divider}`,
 	borderWidth: "0 0 0 0",
-}));
+})) as typeof Grid;
 
 export const DataGridColumnHeaderSortIcon = styled(Grid, {
 	name: "CcDataGrid",
 	slot: "columnHeaderSortIcon",
 })({
 	height: 24,
-});
+}) as typeof Grid;
 
-export const DataGridColumnHeaderContentWrapper = styled("div", {
+export const DataGridColumnHeaderContentWrapper: React.ComponentType<
+	React.HTMLAttributes<HTMLDivElement>
+> = styled("div", {
 	name: "CcDataGrid",
 	slot: "columnHeaderContentWrapper",
 })(({ theme }) => ({
@@ -856,49 +863,49 @@ export const DataGridColumnHeaderContentWrapper = styled("div", {
 	},
 }));
 
-export const DataGridCell = styled("div", { name: "CcDataGrid", slot: "cell" })(
-	({ theme }) => ({
-		border: `1px solid ${theme.palette.divider}`,
-		borderWidth: "0 1px 1px 0",
-		padding: `0 ${HEADER_PADDING / 2}px`,
-		"&.CcDataGrid-dataCell": {
+export const DataGridCell: React.ComponentType<
+	React.HTMLAttributes<HTMLDivElement>
+> = styled("div", { name: "CcDataGrid", slot: "cell" })(({ theme }) => ({
+	border: `1px solid ${theme.palette.divider}`,
+	borderWidth: "0 1px 1px 0",
+	padding: `0 ${HEADER_PADDING / 2}px`,
+	"&.CcDataGrid-dataCell": {
+		overflow: "hidden",
+		whiteSpace: "nowrap",
+		textOverflow: "ellipsis",
+		"& > *": {
 			overflow: "hidden",
 			whiteSpace: "nowrap",
 			textOverflow: "ellipsis",
-			"& > *": {
-				overflow: "hidden",
-				whiteSpace: "nowrap",
-				textOverflow: "ellipsis",
-			},
-			padding: HEADER_PADDING / 2,
-			color: theme.palette.getContrastText(theme.palette.background.paper),
 		},
-		"&.CcDataGrid-headerCell": {
-			borderWidth: 0,
-			padding: `0 ${HEADER_PADDING / 2}px`,
-			backgroundColor: theme.palette.background.paper,
-			color: theme.palette.getContrastText(theme.palette.background.paper),
-		},
-		"&.CcDataGrid-dataCellSelected": {
-			backgroundColor: theme.palette.action.hover,
-			color: theme.palette.getContrastText(theme.palette.background.paper),
-		},
-	}),
-);
+		padding: HEADER_PADDING / 2,
+		color: theme.palette.getContrastText(theme.palette.background.paper),
+	},
+	"&.CcDataGrid-headerCell": {
+		borderWidth: 0,
+		padding: `0 ${HEADER_PADDING / 2}px`,
+		backgroundColor: theme.palette.background.paper,
+		color: theme.palette.getContrastText(theme.palette.background.paper),
+	},
+	"&.CcDataGrid-dataCellSelected": {
+		backgroundColor: theme.palette.action.hover,
+		color: theme.palette.getContrastText(theme.palette.background.paper),
+	},
+}));
 
 export const DataGridColumnHeaderFilterPopup = styled(Grid, {
 	name: "CcDataGrid",
 	slot: "columnHeaderFilterPopup",
 })({
 	width: 160,
-});
+}) as typeof Grid;
 
 export const DataGridColumnHeaderFilterPopupEnum = styled(Grid, {
 	name: "CcDataGrid",
 	slot: "columnHeaderFilterPopupEnum",
 })({
 	minWidth: 160,
-});
+}) as typeof Grid;
 
 export const DataGridColumnHeaderFilterIcon = styled(FilterIcon, {
 	name: "CcDataGrid",
@@ -906,7 +913,7 @@ export const DataGridColumnHeaderFilterIcon = styled(FilterIcon, {
 })({
 	width: 16,
 	height: "auto",
-});
+}) as unknown as typeof FilterIcon;
 
 export const DataGridColumnHeaderFilterActiveIcon = styled(FilterIcon, {
 	name: "CcDataGrid",
@@ -914,7 +921,7 @@ export const DataGridColumnHeaderFilterActiveIcon = styled(FilterIcon, {
 })({
 	width: 16,
 	height: "auto",
-});
+}) as unknown as typeof FilterIcon;
 
 export const DataGridColumnHeaderFilterButton = styled(IconButton, {
 	name: "CcDataGrid",
@@ -925,7 +932,7 @@ export const DataGridColumnHeaderFilterButton = styled(IconButton, {
 	"&.CcDataGrid-columnHeaderFilterButtonActive": {
 		color: theme.palette.secondary.main,
 	},
-}));
+})) as typeof IconButton;
 
 export const DataGridQuickFilterIcon = styled(SearchIcon, {
 	name: "CcDataGrid",
@@ -934,7 +941,7 @@ export const DataGridQuickFilterIcon = styled(SearchIcon, {
 	"&.CcDataGrid-quickFilterActiveIcon": {
 		color: theme.palette.secondary.main,
 	},
-}));
+})) as unknown as typeof SearchIcon;
 
 export const DataGridCustomFilterIcon = styled(AppsIcon, {
 	name: "CcDataGrid",
@@ -945,7 +952,7 @@ export const DataGridCustomFilterIcon = styled(AppsIcon, {
 	"&.CcDataGrid-customFilterActiveIcon": {
 		color: theme.palette.secondary.main,
 	},
-}));
+})) as unknown as typeof AppsIcon;
 
 export type DataGridClassKey =
 	| "root"
