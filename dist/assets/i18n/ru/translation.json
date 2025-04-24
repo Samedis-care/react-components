@@ -329,7 +329,7 @@
 		},
 		"dialogs": {
 			"error-title": "Произошла ошибка",
-			"validation-error-title": "Неверная форма",
+			"validation-error-title": "Ошибка при проверке",
 			"info": "Информация",
 			"are-you-sure": "Вы уверены?",
 			"are-you-sure-submit": "Продолжать?"

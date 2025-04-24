@@ -329,7 +329,7 @@
 		},
 		"dialogs": {
 			"error-title": "Ein Fehler ist aufgetreten",
-			"validation-error-title": "Ungültiges Formular",
+			"validation-error-title": "Fehler bei der Validierung",
 			"info": "Info",
 			"are-you-sure": "Bist du sicher?",
 			"are-you-sure-submit": "Fortfahren?"

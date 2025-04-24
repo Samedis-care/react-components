@@ -329,7 +329,7 @@
 		},
 		"dialogs": {
 			"error-title": "An error occurred",
-			"validation-error-title": "Invalid form",
+			"validation-error-title": "Error on validation",
 			"info": "Info",
 			"are-you-sure": "Are you sure?",
 			"are-you-sure-submit": "Continue?"
