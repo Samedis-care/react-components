@@ -329,7 +329,7 @@
 		},
 		"dialogs": {
 			"error-title": "Une erreur s'est produite",
-			"validation-error-title": "Forme non valide",
+			"validation-error-title": "Erreur de validation",
 			"info": "Info",
 			"are-you-sure": "Es-tu sûr ?",
 			"are-you-sure-submit": "Continuer?"
