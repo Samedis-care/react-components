@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Notifications as NotificationsIcon } from "@mui/icons-material";
-import { Badge, Box, Divider, Grid, IconButton, Popover, styled, Tooltip, Typography, useThemeProps, } from "@mui/material";
+import { Badge, Box, Divider, Grid2 as Grid, IconButton, Popover, styled, Tooltip, Typography, useThemeProps, } from "@mui/material";
 import InfiniteScroll from "../InfiniteScroll";
 import i18n from "../../i18n";
 import timestampToAge from "../../utils/timestampToAge";
@@ -25,20 +25,20 @@ const readStyle = {
 };
 const defaultRenderer = (notification) => (React.createElement(Box, { p: 2, style: notification.read ? readStyle : unreadStyle, key: notification.id },
     React.createElement(Grid, { container: true, spacing: 2 },
-        React.createElement(Grid, { item: true, xs: true }, notification.image && (React.createElement("img", { style: defaultImageStyle, src: notification.image, alt: "" }))),
-        React.createElement(Grid, { item: true, xs: 9 },
+        React.createElement(Grid, { size: "grow" }, notification.image && (React.createElement("img", { style: defaultImageStyle, src: notification.image, alt: "" }))),
+        React.createElement(Grid, { size: 9 },
             React.createElement(Box, { py: 2 },
                 React.createElement(Grid, { container: true, spacing: 2 },
-                    React.createElement(Grid, { item: true, xs: 12 },
+                    React.createElement(Grid, { size: 12 },
                         React.createElement(Typography, null, notification.message)),
-                    React.createElement(Grid, { item: true, xs: 12 },
+                    React.createElement(Grid, { size: 12 },
                         React.createElement(Typography, { variant: "body2" },
                             React.createElement(React.Fragment, null, notification.origin && React.createElement(React.Fragment, null,
                                 notification.origin,
                                 " ")),
                             React.createElement(Tooltip, { title: notification.created.toLocaleString(i18n.language) },
                                 React.createElement("span", null, timestampToAge(notification.created)))))))),
-        React.createElement(Grid, { item: true, xs: 12 },
+        React.createElement(Grid, { size: 12 },
             React.createElement(Divider, null)))));
 const StyledInfiniteScroll = styled(InfiniteScroll, {
     name: "CcNotifications",
@@ -89,11 +89,11 @@ const Notifications = (inProps) => {
         React.createElement(Popover, { open: !!anchor, anchorEl: anchor, anchorOrigin: anchorOrigin, transformOrigin: transformOrigin, onClose: onClose, ...props.PopoverProps },
             React.createElement(Box, { p: 2 },
                 React.createElement(Grid, { container: true, spacing: 2 },
-                    React.createElement(Grid, { item: true, xs: 12 },
+                    React.createElement(Grid, { size: 12 },
                         React.createElement(StyledHeader, { component: "h2", variant: "h6", className: classes?.header }, t("standalone.notifications.title"))),
-                    React.createElement(Grid, { item: true, xs: 12 },
+                    React.createElement(Grid, { size: 12 },
                         React.createElement(Divider, null)),
-                    React.createElement(Grid, { item: true, xs: 12 },
+                    React.createElement(Grid, { size: 12 },
                         React.createElement(StyledInfiniteScroll, { loadMoreBottom: loadRead, loadMoreTop: loadUnread, className: classes?.notificationArea ?? "" }, notifications.map((notification) => (React.createElement(Renderer, { key: notification.id, ...notification }))))))))));
 };
 export default React.memo(Notifications);

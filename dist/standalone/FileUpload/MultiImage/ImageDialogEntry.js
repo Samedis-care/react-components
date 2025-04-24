@@ -1,6 +1,6 @@
 import React, { useCallback } from "react";
 import ImageBox from "./ImageBox";
-import { Box, Grid, styled, Typography, useThemeProps } from "@mui/material";
+import { Box, Grid2 as Grid, styled, Typography, useThemeProps, } from "@mui/material";
 import { Star as StarredIcon, StarOutline as NotStarredIcon, } from "@mui/icons-material";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import combineClassNames from "../../../utils/combineClassNames";
@@ -42,13 +42,13 @@ const ImageDialogEntry = (inProps) => {
         changeImages((images) => images.map((image) => image === img ? { ...image, image: imageData } : image));
     }, [changeImages, img, processFile]);
     const PrimaryComp = isPrimary ? IsPrimary : MakePrimary;
-    return (React.createElement(Root, { item: true, xs: previewSize ? undefined : 12, md: previewSize ? undefined : 6, lg: previewSize ? undefined : 3, className: combineClassNames([className, classes?.root]) },
+    return (React.createElement(Root, { size: previewSize ? undefined : { xs: 12, md: 6, lg: 3 }, className: combineClassNames([className, classes?.root]) },
         React.createElement("div", null,
             React.createElement(ImageBox, { fileName: img.name, width: previewSize, height: previewSize, image: img.image, onRemove: img.readOnly ? undefined : removeImage, onFilesDropped: img.readOnly ? undefined : replaceImage, classes: subClasses?.imageBox })),
         React.createElement(Box, { mt: 1 },
             React.createElement(PrimaryComp, { container: true, spacing: 1, alignItems: "center", justifyContent: "flex-start", className: isPrimary ? classes?.isPrimary : classes?.makePrimary, onClick: isPrimary ? undefined : setPrimary },
-                React.createElement(Grid, { item: true }, isPrimary ? React.createElement(StarredIcon, { color: "primary" }) : React.createElement(NotStarredIcon, null)),
-                React.createElement(Grid, { item: true },
+                React.createElement(Grid, null, isPrimary ? React.createElement(StarredIcon, { color: "primary" }) : React.createElement(NotStarredIcon, null)),
+                React.createElement(Grid, null,
                     React.createElement(Typography, null, t("standalone.file-upload.multi-image.primary")))))));
 };
 export default React.memo(ImageDialogEntry);

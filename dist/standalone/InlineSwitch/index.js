@@ -1,5 +1,5 @@
 import React, { useCallback } from "react";
-import { Grid, styled, Switch, Typography, useThemeProps } from "@mui/material";
+import { Grid2 as Grid, styled, Switch, Typography, useThemeProps, } from "@mui/material";
 import combineClassNames from "../../utils/combineClassNames";
 const AntSwitch = styled(Switch, { name: "CcInlineSwitch", slot: "switch" })(({ theme }) => ({
     width: 35,
@@ -51,9 +51,9 @@ const InlineSwitch = (inProps) => {
     return (React.createElement(StyledRoot, { className: combineClassNames([className, classes?.root]) },
         visible && (React.createElement(StyledSwitchWrapper, { component: "div", className: classes?.switchWrapper, variant: "caption" },
             React.createElement(Grid, { component: "label", container: true, alignItems: "center", spacing: 1 },
-                React.createElement(Grid, { item: true },
+                React.createElement(Grid, null,
                     React.createElement(AntSwitch, { checked: value, onChange: handleSwitchChange })),
-                React.createElement(Grid, { item: true }, label)))),
+                React.createElement(Grid, null, label)))),
         React.createElement("div", null, children)));
 };
 export default React.memo(InlineSwitch);

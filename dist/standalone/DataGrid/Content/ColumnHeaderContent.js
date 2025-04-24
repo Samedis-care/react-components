@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from "react";
-import { Box, Grid, Popover, Tooltip } from "@mui/material";
+import { Box, Grid2 as Grid, Popover, Tooltip, } from "@mui/material";
 import { ArrowDownward, ArrowUpward } from "@mui/icons-material";
 import FilterEntry from "./FilterEntry";
 import { DataGridColumnHeaderFilterActiveIcon, DataGridColumnHeaderFilterButton, DataGridColumnHeaderFilterIcon, DataGridColumnHeaderFilterPopup, DataGridColumnHeaderFilterPopupEnum, DataGridColumnHeaderLabel, DataGridColumnHeaderResizer, DataGridColumnHeaderSortIcon, useDataGridProps, } from "../DataGrid";
@@ -31,18 +31,18 @@ const ColumnHeaderContent = (props) => {
         : DataGridColumnHeaderFilterPopup;
     return (React.createElement(React.Fragment, null,
         React.createElement(Grid, { container: true, justifyContent: "flex-start", wrap: "nowrap" },
-            React.createElement(DataGridColumnHeaderLabel, { item: true, className: classes?.columnHeaderLabel, key: "header" },
+            React.createElement(DataGridColumnHeaderLabel, { className: classes?.columnHeaderLabel, key: "header" },
                 React.createElement(Tooltip, { title: props.headerName },
                     React.createElement("span", null, typeof props.headerName === "string"
                         ? props.headerName.split("\n").map((text, index, arr) => (React.createElement(React.Fragment, { key: text },
                             text,
                             index == arr.length - 1 ? undefined : React.createElement("br", null))))
                         : props.headerName))),
-            React.createElement(DataGridColumnHeaderSortIcon, { item: true, className: classes?.columnHeaderSortIcon },
+            React.createElement(DataGridColumnHeaderSortIcon, { className: classes?.columnHeaderSortIcon },
                 props.sort === -1 && React.createElement(ArrowDownward, null),
                 props.sort === 1 && React.createElement(ArrowUpward, null)),
-            React.createElement(Grid, { item: true, xs: true }, props.sort !== 0 && props.sortOrder?.toString()),
-            props.filterable && (React.createElement(Grid, { item: true, key: "filter" },
+            React.createElement(Grid, { size: "grow" }, props.sort !== 0 && props.sortOrder?.toString()),
+            props.filterable && (React.createElement(Grid, { key: "filter" },
                 React.createElement(Tooltip, { title: t("standalone.data-grid.content.filter") || "" },
                     React.createElement(DataGridColumnHeaderFilterButton, { className: combineClassNames([
                             classes?.columnHeaderFilterButton,

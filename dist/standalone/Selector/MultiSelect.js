@@ -1,6 +1,6 @@
 import React, { useCallback, useContext, useMemo } from "react";
 import BaseSelector from "./BaseSelector";
-import { Grid, Paper, styled, useThemeProps } from "@mui/material";
+import { Grid2 as Grid, Paper, styled, useThemeProps } from "@mui/material";
 import MultiSelectEntry from "./MultiSelectEntry";
 import { showConfirmDialogBool } from "../../non-standalone/Dialog/Utils";
 import { DialogContext } from "../../framework/DialogContextProvider";
@@ -92,11 +92,11 @@ const MultiSelect = (inProps) => {
         onSelect(selected.map((entry) => getId(entry) === getId(newValue) ? newValue : entry));
     }, [getId, onSelect, selected]);
     return (React.createElement(Root, { container: true, className: combineClassNames([className, classes?.root]) },
-        React.createElement(Grid, { item: true, xs: 12 },
+        React.createElement(Grid, { size: 12 },
             React.createElement(StyledBaseSelector, { ...props, 
                 // @ts-expect-error removed owner state from props to preserve generics
                 ownerState: { selected: selected.length > 0 }, className: classes?.selector, onLoad: multiSelectLoadHandler, selected: null, onSelect: multiSelectHandler, refreshToken: selectedIds.join(","), displaySwitch: displaySwitch, switchLabel: switchLabel, defaultSwitchValue: defaultSwitchValue, filterIds: selectedIds })),
-        props.selected.length > 0 && (React.createElement(SelectedEntry, { item: true, xs: 12, className: classes?.selectedEntry },
+        props.selected.length > 0 && (React.createElement(SelectedEntry, { size: 12, className: classes?.selectedEntry },
             React.createElement(Paper, { elevation: 0 }, (selectedSort
                 ? props.selected.sort(selectedSort)
                 : props.selected).map((data, index) => (React.createElement(EntryRender, { key: getId(data) || index.toString(16), enableDivider: props.selected.length === index - 1, enableIcons: enableIcons, handleDelete: disabled || data.noDelete ? undefined : handleDelete, data: data, setData: handleSetData, iconSize: props.iconSize }))))))));

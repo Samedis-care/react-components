@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo } from "react";
-import { Grid, styled, useThemeProps } from "@mui/material";
+import { Grid2 as Grid, styled, useThemeProps } from "@mui/material";
 import { useCustomFilterActiveContext } from "./Header/FilterBar";
 import { useDataGridProps } from "./DataGrid";
 import BackendMultipleSelect from "../../backend-components/Selector/BackendMultipleSelect";
@@ -52,12 +52,12 @@ const GridMultiSelectFilterBackend = (inProps) => {
         autocomplete: isActive ? "Mui-active" : undefined,
     }), [isActive]);
     if (dialog) {
-        return (React.createElement(GridMultiSelectFilterDialogRoot, { item: true, xs: 12, md: 6, lg: 3, ...dialogBreakpoints },
+        return (React.createElement(GridMultiSelectFilterDialogRoot, { size: { xs: 12, md: 6, lg: 3, ...dialogBreakpoints } },
             React.createElement(Grid, { container: true },
                 React.createElement(BackendMultiSelect, { confirmDelete: false, ...selectorProps, selected: selected }))));
     }
     else {
-        return (React.createElement(GridMultiSelectFilterBarRoot, { item: true, xs: 4, ...barBreakpoints },
+        return (React.createElement(GridMultiSelectFilterBarRoot, { size: { xs: 4, ...barBreakpoints } },
             React.createElement(DataGridCustomFilterMultiBackend, { ...selectorProps, classes: selectorClasses, className: classes?.customFilterMulti, selected: selected })));
     }
 };

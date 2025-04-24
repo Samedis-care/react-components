@@ -29,7 +29,7 @@ void ccI18n
     nonExplicitSupportedLngs: true,
     fallbackLng: "en",
     debug: process.env.NODE_ENV !== "production",
-    initImmediate: 
+    initAsync: 
     // when running under jest we init immediately because otherwise we'd just have snapshots of react suspense
     !isJest,
     interpolation: {

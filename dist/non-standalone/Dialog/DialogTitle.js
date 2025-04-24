@@ -1,5 +1,5 @@
 import React from "react";
-import { DialogTitle as MuiDialogTitle, Grid, IconButton, styled, Typography, useThemeProps, } from "@mui/material";
+import { DialogTitle as MuiDialogTitle, Grid2 as Grid, IconButton, styled, Typography, useThemeProps, } from "@mui/material";
 import { Close } from "@mui/icons-material";
 import combineClassNames from "../../utils/combineClassNames";
 import useCCTranslations from "../../utils/useCCTranslations";
@@ -38,10 +38,10 @@ const DialogTitleRaw = (inProps) => {
             noTitle && "CcDialogTitle-noTitle",
         ]) },
         React.createElement(Grid, { container: true, wrap: "nowrap" },
-            React.createElement(TextWrapper, { item: true, className: classes?.textWrapper },
+            React.createElement(TextWrapper, { className: classes?.textWrapper },
                 React.createElement(Text, { variant: "h6", noWrap: true, className: classes?.text }, children)),
-            React.createElement(Grid, { item: true, xs: true }),
-            onClose && (React.createElement(Grid, { item: true },
+            React.createElement(Grid, { size: "grow" }),
+            onClose && (React.createElement(Grid, null,
                 React.createElement(CloseButton, { "aria-label": t("non-standalone.dialog.dialog-title.close"), className: classes?.closeButton, onClick: onClose, size: "large" },
                     React.createElement(Close, null)))))));
 };

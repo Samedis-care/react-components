@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from "react";
-import { Grid, IconButton, InputAdornment, styled, Tooltip, Typography, useThemeProps, } from "@mui/material";
+import { Grid2 as Grid, IconButton, InputAdornment, styled, Tooltip, Typography, useThemeProps, } from "@mui/material";
 import { useCCLanguagesTranslations } from "../../../utils/useCCTranslations";
 import { Translate } from "@mui/icons-material";
 import { TextFieldCC } from "../MuiWarning";
@@ -68,25 +68,28 @@ const MultiLanguageInput = (inProps) => {
                     React.createElement(LanguageLabel, { ownerState: { active: activeLanguage === lang }, "data-lang": lang, onClick: handleActiveLangSelect }, lang)),
                 " "))))) : lang === defaultLanguage ? (label) : undefined, required: defaultLanguage === lang && activeLanguage === defaultLanguage
             ? required
-            : undefined, value: values[lang] ?? "", onChange: handleChange, name: `${name ?? "mli"}-${lang}`, InputLabelProps: {
-            ...textFieldProps.InputLabelProps,
-            shrink: textFieldProps.multiline
-                ? true
-                : textFieldProps.InputLabelProps?.shrink,
-        }, InputProps: {
-            startAdornment: !textFieldProps.multiline ? (React.createElement(InputAdornment, { position: "start" },
-                React.createElement(Tooltip, { title: getLanguageName(lang) },
-                    React.createElement(LanguageLabelInputAdornment, { variant: "caption", color: "textSecondary" }, lang)))) : undefined,
-            endAdornment: defaultLanguage === lang && !textFieldProps.multiline ? (React.createElement(InputAdornment, { position: "end" },
-                React.createElement(IconButton, { onClick: toggleExpanded, size: "large" },
-                    React.createElement(Translate, { color: expanded ? "primary" : incomplete ? "error" : undefined })))) : undefined,
+            : undefined, value: values[lang] ?? "", onChange: handleChange, name: `${name ?? "mli"}-${lang}`, slotProps: {
+            inputLabel: {
+                ...textFieldProps.slotProps?.inputLabel,
+                shrink: textFieldProps.multiline
+                    ? true
+                    : textFieldProps.InputLabelProps?.shrink,
+            },
+            input: {
+                startAdornment: !textFieldProps.multiline ? (React.createElement(InputAdornment, { position: "start" },
+                    React.createElement(Tooltip, { title: getLanguageName(lang) },
+                        React.createElement(LanguageLabelInputAdornment, { variant: "caption", color: "textSecondary" }, lang)))) : undefined,
+                endAdornment: defaultLanguage === lang && !textFieldProps.multiline ? (React.createElement(InputAdornment, { position: "end" },
+                    React.createElement(IconButton, { onClick: toggleExpanded, size: "large" },
+                        React.createElement(Translate, { color: expanded ? "primary" : incomplete ? "error" : undefined })))) : undefined,
+            },
         } }));
     return (React.createElement(Grid, { container: true, spacing: 2, "data-name": name, onBlur: onBlur },
-        React.createElement(Grid, { item: true, xs: 12 }, renderLanguage(textFieldProps.multiline ? activeLanguage : defaultLanguage)),
+        React.createElement(Grid, { size: 12 }, renderLanguage(textFieldProps.multiline ? activeLanguage : defaultLanguage)),
         expanded &&
             !textFieldProps.multiline &&
             enabledLanguages
                 .filter((lang) => lang !== defaultLanguage)
-                .map((lang) => (React.createElement(Grid, { item: true, xs: 12, key: lang }, renderLanguage(lang))))));
+                .map((lang) => (React.createElement(Grid, { key: lang, size: 12 }, renderLanguage(lang))))));
 };
 export default React.memo(MultiLanguageInput);

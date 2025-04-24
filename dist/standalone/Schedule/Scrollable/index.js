@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Box, Button, Divider, Grid, IconButton, Menu, styled, useThemeProps, } from "@mui/material";
+import { Box, Button, Divider, Grid2 as Grid, IconButton, Menu, styled, useThemeProps, } from "@mui/material";
 import { Settings as SettingsIcon } from "@mui/icons-material";
 import moment from "moment";
 import ScrollableScheduleWeek from "./ScrollableScheduleWeek";
@@ -151,24 +151,24 @@ const ScrollableSchedule = (inProps) => {
     }, []);
     const filterCount = filters ? Object.keys(filters).length : 0;
     return (React.createElement(Grid, { container: true, className: className },
-        React.createElement(TodayButtonWrapper, { item: true, xs: 12, className: classes?.today, onClick: jumpToToday },
+        React.createElement(TodayButtonWrapper, { size: 12, className: classes?.today, onClick: jumpToToday },
             React.createElement(Grid, { container: true, justifyContent: "space-between" },
-                React.createElement(Grid, { item: true },
+                React.createElement(Grid, null,
                     React.createElement(TodayButton, { className: classes?.todayBtn, onClick: jumpToToday, fullWidth: true },
                         React.createElement(Box, { m: 2 }, state.today.format("ddd DD MMMM")))),
-                React.createElement(Grid, { item: true }, filterCount + actions.length > 0 && (React.createElement(FilterWrapper, { px: 2, className: classes?.filterWrapper, onClick: preventAction }, filterCount + actions.length > 1 ? (React.createElement(React.Fragment, null,
+                React.createElement(Grid, null, filterCount + actions.length > 0 && (React.createElement(FilterWrapper, { px: 2, className: classes?.filterWrapper, onClick: preventAction }, filterCount + actions.length > 1 ? (React.createElement(React.Fragment, null,
                     React.createElement(IconButton, { onClick: openFilterSettings },
                         React.createElement(FilterSettingsIcon, { className: classes?.filterSettingsBtn })),
                     React.createElement(Menu, { open: filterSettingsAnchorEl != null, anchorEl: filterSettingsAnchorEl, onClose: closeFiltersMenu },
                         React.createElement(Box, { p: 1 },
                             React.createElement(Grid, { container: true, spacing: 1 },
-                                Object.entries(filters).map(([name, filter]) => (React.createElement(Grid, { key: "filter-" + name, item: true, xs: 12 },
+                                Object.entries(filters).map(([name, filter]) => (React.createElement(Grid, { key: "filter-" + name, size: 12 },
                                     React.createElement(ScrollableFilterRenderer, { ...filter, name: name, value: filter.type === "select"
                                             ? state.filterValues[name]
                                             : state.filterValues[name], onChange: handleFilterChange })))),
-                                filterCount > 0 && (React.createElement(Grid, { key: "divider", item: true, xs: 12 },
+                                filterCount > 0 && (React.createElement(Grid, { key: "divider", size: 12 },
                                     React.createElement(Divider, null))),
-                                actions.map((action) => (React.createElement(Grid, { key: "action-" + action.id, item: true, xs: 12 },
+                                actions.map((action) => (React.createElement(Grid, { key: "action-" + action.id, size: 12 },
                                     React.createElement(Button, { onClick: action.onClick, disabled: action.disabled, fullWidth: true }, action.label))))))))) : filterCount > 0 ? ((() => {
                     const [name, filter] = Object.entries(filters)[0];
                     return (React.createElement(ScrollableFilterRenderer, { key: "filter-" + name, ...filter, name: name, value: state.filterValues[name], onChange: handleFilterChange, inline: "scrollable" }));
@@ -176,7 +176,7 @@ const ScrollableSchedule = (inProps) => {
                     const action = actions[0];
                     return (React.createElement(Button, { key: "action-" + action.id, onClick: action.onClick, disabled: action.disabled }, action.label));
                 })()) : (throwError("code should be unreachable"))))))),
-        React.createElement(Grid, { item: true, xs: 12 },
+        React.createElement(Grid, { size: 12 },
             React.createElement(StyledInfiniteScroll, { className: combineClassNames([wrapperClass, classes?.scroller]), loadMoreTop: loadMoreTop, loadMoreBottom: loadMoreBottom, ref: scrollElem },
                 React.createElement(Box, { m: 2 },
                     React.createElement(Grid, { container: true, spacing: 2 }, state.items))))));

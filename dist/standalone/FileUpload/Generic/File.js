@@ -1,5 +1,5 @@
 import React, { useCallback } from "react";
-import { Grid, styled, Tooltip, Typography, useThemeProps, } from "@mui/material";
+import { Grid2 as Grid, styled, Tooltip, Typography, useThemeProps, } from "@mui/material";
 import { Cancel as CancelIconList, CancelOutlined as CancelIcon, InsertDriveFile as DefaultFileIcon, } from "@mui/icons-material";
 import { ArchiveFileIcon, AudioFileIcon, CodeFileIcon, CsvFileIcon, ExcelFileIcon, ImageFileIcon, PdfFileIcon, PowerPointFileIcon, TextFileIcon, VideoFileIcon, WordFileIcon, } from "../FileIcons";
 import dataToFile from "../../../utils/dataToFile";
@@ -305,33 +305,33 @@ const File = (inProps) => {
             style: variant === "list" ? { height: props.size } : undefined,
         });
     if (variant === "box") {
-        return (React.createElement(Grid, { item: true, className: className, style: { width: props.size } },
+        return (React.createElement(Grid, { className: className, style: { width: props.size } },
             React.createElement(Grid, { container: true, spacing: 2 },
-                React.createElement(IconContainer, { item: true, xs: 12, className: classes?.iconContainer },
+                React.createElement(IconContainer, { size: 12, className: classes?.iconContainer },
                     removeBtn,
                     renderIcon()),
-                React.createElement(Grid, { item: true, xs: 12 }, renderName()))));
+                React.createElement(Grid, { size: 12 }, renderName()))));
     }
     else if (variant === "list") {
-        return (React.createElement(Grid, { item: true, xs: 12, onClick: handleListClick, container: true, spacing: 2, alignItems: "stretch", wrap: "nowrap", className: className },
-            React.createElement(Grid, { item: true }, renderIcon()),
-            React.createElement(ListEntryText, { item: true, xs: true, className: classes?.listEntryText }, renderName()),
-            removeBtn && React.createElement(Grid, { item: true }, removeBtn)));
+        return (React.createElement(Grid, { onClick: handleListClick, container: true, spacing: 2, alignItems: "stretch", wrap: "nowrap", className: className, size: 12 },
+            React.createElement(Grid, null, renderIcon()),
+            React.createElement(ListEntryText, { size: "grow", className: classes?.listEntryText }, renderName()),
+            removeBtn && React.createElement(Grid, null, removeBtn)));
     }
     else if (variant === "compact-list") {
-        return (React.createElement(CompactListWrapper, { item: true, onClick: handleListClick, className: combineClassNames([className, classes?.compactListWrapper]) },
+        return (React.createElement(CompactListWrapper, { onClick: handleListClick, className: combineClassNames([className, classes?.compactListWrapper]) },
             React.createElement(Grid, { container: true, spacing: 2, alignItems: "stretch", wrap: "nowrap" },
-                React.createElement(Grid, { item: true }, renderIcon()),
-                React.createElement(ListEntryText, { item: true, className: classes?.listEntryText }, renderName()),
-                removeBtn && React.createElement(Grid, { item: true }, removeBtn))));
+                React.createElement(Grid, null, renderIcon()),
+                React.createElement(ListEntryText, { className: classes?.listEntryText }, renderName()),
+                removeBtn && React.createElement(Grid, null, removeBtn))));
     }
     else if (variant === "icon-only") {
-        return (React.createElement(CompactListWrapper, { item: true, onClick: handleListClick, className: combineClassNames([className, classes?.compactListWrapper]) },
+        return (React.createElement(CompactListWrapper, { onClick: handleListClick, className: combineClassNames([className, classes?.compactListWrapper]) },
             React.createElement(Grid, { container: true, spacing: 2, alignItems: "stretch", wrap: "nowrap" },
-                React.createElement(Grid, { item: true },
+                React.createElement(Grid, null,
                     React.createElement(Tooltip, { title: props.name },
                         React.createElement("span", null, renderIcon()))),
-                removeBtn && React.createElement(Grid, { item: true }, removeBtn))));
+                removeBtn && React.createElement(Grid, null, removeBtn))));
     }
     else {
         throw new Error("Invalid variant passed");

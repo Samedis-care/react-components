@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo } from "react";
-import { Checkbox, Divider, FormControlLabel, Grid, styled, Typography, useThemeProps, } from "@mui/material";
+import { Checkbox, Divider, FormControlLabel, Grid2 as Grid, styled, Typography, useThemeProps, } from "@mui/material";
 import { useCustomFilterActiveContext } from "./Header/FilterBar";
 import { useDataGridProps } from "./DataGrid";
 import compareArrayContent from "../../utils/compareArrayContent";
@@ -63,14 +63,14 @@ const GridMultiSelectFilter = (inProps) => {
         autocomplete: isActive ? "Mui-active" : undefined,
     }), [isActive]);
     if (dialog) {
-        return (React.createElement(GridMultiSelectFilterDialogRoot, { item: true, xs: 12, md: 6, lg: 3, ...dialogBreakpoints },
+        return (React.createElement(GridMultiSelectFilterDialogRoot, { size: { xs: 12, md: 6, lg: 3, ...dialogBreakpoints } },
             React.createElement(Grid, { container: true },
-                label && (React.createElement(Grid, { item: true, xs: 12 },
+                label && (React.createElement(Grid, { size: 12 },
                     React.createElement(Typography, null, label))),
-                options.map((option) => (React.createElement(Grid, { item: true, xs: 12, key: option.value }, option.isDivider ? (React.createElement(Divider, null)) : option.isSmallLabel ? (React.createElement(Typography, null, option.label)) : (React.createElement(FormControlLabel, { control: React.createElement(Checkbox, { name: option.value, checked: selected.includes(option.value), onChange: handleDialogCheckboxToggle }), label: option.label }))))))));
+                options.map((option) => (React.createElement(Grid, { key: option.value, size: 12 }, option.isDivider ? (React.createElement(Divider, null)) : option.isSmallLabel ? (React.createElement(Typography, null, option.label)) : (React.createElement(FormControlLabel, { control: React.createElement(Checkbox, { name: option.value, checked: selected.includes(option.value), onChange: handleDialogCheckboxToggle }), label: option.label }))))))));
     }
     else {
-        return (React.createElement(GridMultiSelectFilterBarRoot, { item: true, xs: 4, ...barBreakpoints },
+        return (React.createElement(GridMultiSelectFilterBarRoot, { size: { xs: 4, ...barBreakpoints } },
             React.createElement(DataGridCustomFilterMulti, { multiple: true, label: label, disableSearch: true, disableClearable: true, onLoad: getOptions, selected: selectedData, onSelect: handleSelectorChange, classes: selectorClasses, className: classes?.customFilterMulti })));
     }
 };

@@ -5,7 +5,7 @@ import { dotInObject, dotSet, dotsToObject, dotToObject, getValueByDot, } from "
 import deepAssign from "../../utils/deepAssign";
 import deepClone from "../../utils/deepClone";
 import isObjectEmpty from "../../utils/isObjectEmpty";
-import { Grid, styled, Typography } from "@mui/material";
+import { Grid2 as Grid, styled, Typography } from "@mui/material";
 import { getVisibility } from "../../backend-integration/Model/Visibility";
 import { showConfirmDialogBool } from "../../non-standalone";
 import useCCTranslations from "../../utils/useCCTranslations";
@@ -591,8 +591,8 @@ const Form = (props) => {
                 const continueSubmit = await showConfirmDialogBool(pushDialog, {
                     title: t("backend-components.form.submit-with-warnings.title"),
                     message: (React.createElement(Grid, { container: true, spacing: 2 },
-                        React.createElement(Grid, { item: true, xs: 12 }, t("backend-components.form.submit-with-warnings.message")),
-                        React.createElement(Grid, { item: true, xs: 12 },
+                        React.createElement(Grid, { size: 12 }, t("backend-components.form.submit-with-warnings.message")),
+                        React.createElement(Grid, { size: 12 },
                             React.createElement("ul", null, Object.entries(validationHints).map(([key, value]) => (React.createElement("li", { key: key }, value))))))),
                     textButtonYes: t("backend-components.form.submit-with-warnings.yes"),
                     textButtonNo: t("backend-components.form.submit-with-warnings.no"),

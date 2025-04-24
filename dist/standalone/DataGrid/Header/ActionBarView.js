@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from "react";
-import { Grid, IconButton, Tooltip, useMediaQuery, useTheme, } from "@mui/material";
+import { Grid2 as Grid, IconButton, Tooltip, useMediaQuery, useTheme, } from "@mui/material";
 import { Add as AddIcon, Menu as MenuIcon, Publish as ImportIcon, } from "@mui/icons-material";
 import { ExportIcon, ResetIcon, TuneIcon } from "../../Icons";
 import ActionButton from "../../UIKit/ActionButton";
@@ -59,46 +59,46 @@ const ActionBarView = (props) => {
                 !props.hideReset ||
                 props.exporters ||
                 props.handleImport) ? (React.createElement(React.Fragment, null,
-            React.createElement(Grid, { item: true, key: "divider-1" },
+            React.createElement(Grid, { key: "divider-1" },
                 React.createElement(VerticalDivider, null)),
             React.createElement(IconButton, { color: "primary", onClick: openSettingsMenu, size: "large" },
                 React.createElement(MenuIcon, null)),
             React.createElement(ActionBarMenu, { anchorEl: settingsAnchorEl, toggleSettings: props.toggleSettings, openResetDialog: props.hideReset ? undefined : openResetDialog, openExportMenu: props.exporters ? openExportMenu : undefined, handleImport: props.handleImport, onClose: closeSettingsMenu }))) : (React.createElement(React.Fragment, null,
             props.toggleSettings && (React.createElement(React.Fragment, null,
-                props.hasCustomFilterBar && (React.createElement(Grid, { item: true, key: "divider-1" },
+                props.hasCustomFilterBar && (React.createElement(Grid, { key: "divider-1" },
                     React.createElement(VerticalDivider, null))),
-                React.createElement(Grid, { item: true, key: "settings" }, bpMdUp ? (React.createElement(ComponentWithLabel, { control: React.createElement(SmallestIconButton, { color: "primary" },
+                React.createElement(Grid, { key: "settings" }, bpMdUp ? (React.createElement(ComponentWithLabel, { control: React.createElement(SmallestIconButton, { color: "primary" },
                         React.createElement(TuneIcon, null)), labelText: t("standalone.data-grid.header.settings"), onClick: props.toggleSettings, labelPlacement: "bottom" })) : (React.createElement(Tooltip, { title: t("standalone.data-grid.header.settings") ?? "" },
                     React.createElement(IconButton, { color: "primary", onClick: props.toggleSettings, size: "large" },
                         React.createElement(TuneIcon, null))))))),
             !props.hideReset && (React.createElement(React.Fragment, null,
-                React.createElement(Grid, { item: true, key: "divider-4" },
+                React.createElement(Grid, { key: "divider-4" },
                     React.createElement(VerticalDivider, null)),
-                React.createElement(Grid, { item: true, key: "reset" }, bpMdUp ? (React.createElement(ComponentWithLabel, { control: React.createElement(SmallestIconButton, { color: "primary" },
+                React.createElement(Grid, { key: "reset" }, bpMdUp ? (React.createElement(ComponentWithLabel, { control: React.createElement(SmallestIconButton, { color: "primary" },
                         React.createElement(ResetIcon, null)), labelText: t("standalone.data-grid.header.reset"), onClick: openResetDialog, labelPlacement: "bottom" })) : (React.createElement(Tooltip, { title: t("standalone.data-grid.header.reset") ?? "" },
                     React.createElement(IconButton, { color: "primary", onClick: openResetDialog, size: "large" },
                         React.createElement(ResetIcon, null))))))),
             props.exporters && (React.createElement(React.Fragment, null,
-                React.createElement(Grid, { item: true, key: "divider-3" },
+                React.createElement(Grid, { key: "divider-3" },
                     React.createElement(VerticalDivider, null)),
-                React.createElement(Grid, { item: true, key: "export" },
+                React.createElement(Grid, { key: "export" },
                     bpMdUp ? (React.createElement(ComponentWithLabel, { control: React.createElement(SmallestIconButton, { color: "primary" },
                             React.createElement(ExportIcon, null)), labelText: t("standalone.data-grid.header.export"), onClick: openExportMenu, labelPlacement: "bottom" })) : (React.createElement(Tooltip, { title: t("standalone.data-grid.header.export") ?? "" },
                         React.createElement(IconButton, { color: "primary", onClick: openExportMenu, size: "large" },
                             React.createElement(ExportIcon, null)))),
                     React.createElement(ExportMenu, { exporters: props.exporters, anchorEl: exportAnchorEl, onClose: closeExportMenu })))),
             props.handleImport && (React.createElement(React.Fragment, null,
-                React.createElement(Grid, { item: true },
+                React.createElement(Grid, null,
                     React.createElement(VerticalDivider, null)),
-                React.createElement(Grid, { item: true, key: "import" }, bpMdUp ? (React.createElement(ComponentWithLabel, { control: React.createElement(SmallestIconButton, { color: "primary" },
+                React.createElement(Grid, { key: "import" }, bpMdUp ? (React.createElement(ComponentWithLabel, { control: React.createElement(SmallestIconButton, { color: "primary" },
                         React.createElement(ImportIcon, null)), labelText: t("standalone.data-grid.header.import"), onClick: props.handleImport, labelPlacement: "bottom" })) : (React.createElement(Tooltip, { title: t("standalone.data-grid.header.import") ?? "" },
                     React.createElement(IconButton, { color: "primary", onClick: props.handleImport, size: "large" },
                         React.createElement(ImportIcon, null))))))))),
         addButtons.length > 0 && (React.createElement(React.Fragment, null,
-            React.createElement(Grid, { item: true, xs: true, key: "divider-2" }),
-            React.createElement(Grid, { item: true, container: true, key: "new", justifyContent: "flex-end", alignItems: "center", spacing: 2, wrap: "nowrap" }, addButtons.map((entry, index) => {
+            React.createElement(Grid, { key: "divider-2", size: "grow" }),
+            React.createElement(Grid, { container: true, key: "new", justifyContent: "flex-end", alignItems: "center", spacing: 2, wrap: "nowrap" }, addButtons.map((entry, index) => {
                 const btn = (React.createElement(ActionButton, { small: !bpSmUp, icon: entry.icon ?? React.createElement(AddIcon, null), onClick: entry.onClick, disabled: !entry.onClick }, entry.label));
-                return (React.createElement(Grid, { item: true, key: index.toString() }, !entry.onClick && entry.disableHint ? (React.createElement(Tooltip, { title: entry.disableHint },
+                return (React.createElement(Grid, { key: index.toString() }, !entry.onClick && entry.disableHint ? (React.createElement(Tooltip, { title: entry.disableHint },
                     React.createElement("span", null, btn))) : (btn)));
             })))),
         React.createElement(ResetMenu, { anchorEl: resetAnchorEl, onClose: closeResetMenu, refresh: props.refresh, resetFilter: props.resetFilter, resetSort: props.resetSort, resetColumn: props.resetColumn, resetWidth: props.resetWidth, resetAll: props.resetAll })));

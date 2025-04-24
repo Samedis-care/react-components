@@ -1,5 +1,5 @@
 import React, { useCallback } from "react";
-import { Grid, ListItemButton, styled, useThemeProps } from "@mui/material";
+import { Grid2 as Grid, ListItemButton, styled, useThemeProps, } from "@mui/material";
 import CountryFlags from "../../standalone/CountryFlags";
 const ListItemRoot = styled(ListItemButton, {
     name: "CcLocaleSelectorEntry",
@@ -48,14 +48,14 @@ const LocaleSelectorEntry = (inProps) => {
     const flag = CountryFlags[locale.country_short];
     return (React.createElement(ListItemRoot, { onClick: handleClick, disabled: disabled, className: className },
         React.createElement(Container, { container: true, spacing: 2, alignItems: "stretch" },
-            React.createElement(ImageWrapper, { item: true, xs: 4 },
+            React.createElement(ImageWrapper, { size: 4 },
                 React.createElement(Image, { alt: locale.country, src: flag })),
-            React.createElement(Grid, { item: true, xs: 8, container: true },
-                React.createElement(Grid, { item: true, xs: 6 }, locale.country),
-                React.createElement(Grid, { item: true, xs: 6 }, locale.language),
+            React.createElement(Grid, { container: true, size: 8 },
+                React.createElement(Grid, { size: 6 }, locale.country),
+                React.createElement(Grid, { size: 6 }, locale.language),
                 !sameLang && (React.createElement(React.Fragment, null,
-                    React.createElement(Grid, { item: true, xs: 6 }, locale.native_country),
-                    React.createElement(Grid, { item: true, xs: 6 }, locale.native_language)))))));
+                    React.createElement(Grid, { size: 6 }, locale.native_country),
+                    React.createElement(Grid, { size: 6 }, locale.native_language)))))));
 };
 // virtualization remounts the component every time, so no need for memo here
 export default LocaleSelectorEntry;

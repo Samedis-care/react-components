@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo } from "react";
-import { FormControl, Grid, styled, useThemeProps } from "@mui/material";
+import { FormControl, Grid2 as Grid, styled, useThemeProps, } from "@mui/material";
 import { useCustomFilterActiveContext } from "./Header/FilterBar";
 import { useDataGridProps } from "./DataGrid";
 import BackendSingleSelect from "../../backend-components/Selector/BackendSingleSelect";
@@ -50,12 +50,12 @@ const GridSingleSelectFilterBackend = (inProps) => {
         autocomplete: isActive ? "Mui-active" : undefined,
     }), [isActive]);
     if (dialog) {
-        return (React.createElement(GridSingleSelectFilterBackendDialogRoot, { item: true, xs: 12, md: 6, lg: 3, ...dialogBreakpoints },
+        return (React.createElement(GridSingleSelectFilterBackendDialogRoot, { size: { xs: 12, md: 6, lg: 3, ...dialogBreakpoints } },
             React.createElement(FormControl, { component: "fieldset", fullWidth: true },
                 React.createElement(DataGridCustomFilterSingleBackend, { label: label, ...selectorProps, disableClearable: true, classes: selectorStyles, className: classes?.customFilterSingle }))));
     }
     else {
-        return (React.createElement(GridSingleSelectFilterBackendBarRoot, { item: true, xs: 4, ...barBreakpoints },
+        return (React.createElement(GridSingleSelectFilterBackendBarRoot, { size: { xs: 4, ...barBreakpoints } },
             React.createElement(FormControl, { component: "fieldset", fullWidth: true },
                 React.createElement(DataGridCustomFilterSingleBackend, { label: label, ...selectorProps, disableClearable: true, classes: selectorStyles, className: classes?.customFilterSingle }))));
     }

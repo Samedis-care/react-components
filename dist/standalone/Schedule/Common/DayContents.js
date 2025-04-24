@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, Grid, styled, useThemeProps } from "@mui/material";
+import { Button, Grid2 as Grid, styled, useThemeProps } from "@mui/material";
 import combineColors from "../../../utils/combineColors";
 const StyledButton = styled(Button, { name: "CcDayContents", slot: "button" })(({ theme, ownerState: { altBorder, unClickable } }) => ({
     textTransform: "none",
@@ -19,7 +19,7 @@ const StyledButton = styled(Button, { name: "CcDayContents", slot: "button" })((
 const DayContents = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcDayContents" });
     const { data, altBorder, className, classes } = props;
-    return (React.createElement(Grid, { container: true, spacing: 2, className: className }, data.map((entry) => (React.createElement(Grid, { item: true, xs: 12, key: entry.id },
+    return (React.createElement(Grid, { container: true, spacing: 2, className: className }, data.map((entry) => (React.createElement(Grid, { key: entry.id, size: 12 },
         React.createElement(StyledButton, { variant: "outlined", size: "small", fullWidth: true, ownerState: {
                 altBorder: !!altBorder,
                 unClickable: !entry.onClick && !entry.onAuxClick,

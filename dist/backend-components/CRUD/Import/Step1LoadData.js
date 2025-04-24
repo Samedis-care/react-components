@@ -1,5 +1,5 @@
 import React, { useCallback } from "react";
-import { Grid } from "@mui/material";
+import { Grid2 as Grid } from "@mui/material";
 import XLSX from "xlsx";
 import GenericDataPreview from "./GenericDataPreview";
 import { useDialogContext } from "../../../framework";
@@ -93,11 +93,11 @@ const Step1LoadData = (props) => {
     const { state, howTo } = props;
     const fileUploadProps = useImportStep1FileUploadProps(props);
     return (React.createElement(Grid, { container: true, direction: "column", justifyContent: "space-between", alignItems: "stretch", wrap: "nowrap", style: { height: "100%" }, spacing: 2 },
-        howTo && (React.createElement(Grid, { item: true },
+        howTo && (React.createElement(Grid, null,
             React.createElement(HowToBox, { labels: howTo }))),
-        React.createElement(Grid, { item: true },
+        React.createElement(Grid, null,
             React.createElement(FileUploadGeneric, { ...fileUploadProps, previewSize: 64 })),
-        state.data.length > 0 && !howTo && (React.createElement(Grid, { item: true, xs: true, style: { minHeight: 500 } },
+        state.data.length > 0 && !howTo && (React.createElement(Grid, { style: { minHeight: 500 }, size: "grow" },
             React.createElement(GenericDataPreview, { data: state.data })))));
 };
 export default React.memo(Step1LoadData);

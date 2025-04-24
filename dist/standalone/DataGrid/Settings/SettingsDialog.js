@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { Box, Button, Checkbox, Divider, Grid, Table, TableBody, TableCell, TableHead, TableRow, styled, } from "@mui/material";
+import { Box, Button, Checkbox, Divider, Grid2 as Grid, Table, TableBody, TableCell, TableHead, TableRow, styled, } from "@mui/material";
 import { DataGridContentOverlayClosed, DataGridContentOverlayPaper, useDataGridProps, } from "../DataGrid";
 import useCCTranslations from "../../../utils/useCCTranslations";
 const StyledTable = styled(Table, {
@@ -45,7 +45,7 @@ const SettingsDialog = (props) => {
         React.createElement(DataGridContentOverlayClosed, { className: classes?.contentOverlayClosed },
             React.createElement(Divider, null),
             React.createElement(Grid, { container: true, justifyContent: "flex-end" },
-                React.createElement(Grid, { item: true },
+                React.createElement(Grid, null,
                     React.createElement(Box, { m: 2 },
                         React.createElement(Button, { onClick: props.closeGridSettings, variant: "contained" }, t("standalone.data-grid.settings.close") || "")))))));
 };

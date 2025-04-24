@@ -1,5 +1,5 @@
 import React, { useCallback, useRef, useState } from "react";
-import { alpha, Box, Button, Dialog, Grid, IconButton, styled, Tooltip, Typography, useThemeProps, } from "@mui/material";
+import { alpha, Box, Button, Dialog, Grid2 as Grid, IconButton, styled, Tooltip, Typography, useThemeProps, } from "@mui/material";
 import { AttachFile, Close as CloseIcon, FileUpload as UploadIcon, Person, } from "@mui/icons-material";
 import processImageB64 from "../../../utils/processImageB64";
 import combineClassNames from "../../../utils/combineClassNames";
@@ -214,10 +214,10 @@ const ImageSelector = (inProps) => {
     if (variant === "normal") {
         return (React.createElement(GroupBox, { label: props.label, smallLabel: props.smallLabel, className: className },
             React.createElement(RootClassic, { container: true, spacing: 2, direction: "column", alignContent: "flex-start", alignItems: "stretch", justifyContent: "center", wrap: "nowrap", className: classes?.rootClassic, onDrop: handleDrop, onDragOver: handleDragOver },
-                !props.readOnly && (React.createElement(Grid, { item: true, key: "upload" },
+                !props.readOnly && (React.createElement(Grid, { key: "upload" },
                     React.createElement(Button, { startIcon: React.createElement(AttachFile, null), variant: "contained", color: "primary", name: props.name, onClick: handleUpload, onBlur: props.onBlur }, props.uploadLabel || t("standalone.file-upload.upload")),
                     React.createElement(ChangeEventHelper, { type: "file", accept: "image/*", ref: fileRef, onChange: handleFileChange, className: classes?.changeEventHelper }))),
-                React.createElement(ImageWrapper, { item: true, xs: true, key: "image", className: classes?.imgWrapper }, value && (React.createElement(PreviewClassic, { src: value, alt: props.alt, className: classes?.previewClassic }))))));
+                React.createElement(ImageWrapper, { size: "grow", key: "image", className: classes?.imgWrapper }, value && (React.createElement(PreviewClassic, { src: value, alt: props.alt, className: classes?.previewClassic }))))));
     }
     else if (variant === "modern") {
         return (React.createElement(React.Fragment, null,
@@ -225,7 +225,7 @@ const ImageSelector = (inProps) => {
             React.createElement(GroupBox, { label: props.label, smallLabel: props.smallLabel, className: className },
                 React.createElement(RootModern, { container: true, spacing: 0, direction: "column", alignContent: "flex-start", alignItems: "stretch", justifyContent: "center", wrap: "nowrap", className: classes?.rootModern, onDrop: handleDrop, onDragOver: handleDragOver },
                     !props.readOnly && (React.createElement(ChangeEventHelper, { type: "file", accept: "image/*", ref: fileRef, onChange: handleFileChange, className: classes?.changeEventHelper })),
-                    React.createElement(ImageWrapper, { item: true, xs: true, key: "image", className: classes?.imgWrapper, onBlur: props.onBlur, "data-name": props.name }, value ? (React.createElement(React.Fragment, null,
+                    React.createElement(ImageWrapper, { size: "grow", key: "image", className: classes?.imgWrapper, onBlur: props.onBlur, "data-name": props.name }, value ? (React.createElement(React.Fragment, null,
                         React.createElement(Tooltip, { title: props.uploadLabel ??
                                 t("standalone.file-upload.upload-modern-dnd") ??
                                 "" },
@@ -235,18 +235,18 @@ const ImageSelector = (inProps) => {
                                 React.createElement(ModernUploadControlUpload, { onClick: handleUpload },
                                     React.createElement(UploadIcon, null)))))) : (React.createElement(ModernFullHeightBox, { px: 2, className: classes?.modernFullHeightBox },
                         React.createElement(ModernFullHeightGrid, { container: true, onClick: handleUpload, direction: "column", spacing: 0, className: classes?.modernFullHeightGrid },
-                            React.createElement(Grid, { item: true, xs: true, container: true, direction: "column", justifyContent: "space-around", wrap: "nowrap" },
-                                React.createElement(Grid, { item: true },
+                            React.createElement(Grid, { container: true, direction: "column", justifyContent: "space-around", wrap: "nowrap", size: "grow" },
+                                React.createElement(Grid, null,
                                     React.createElement(ModernUploadLabel, { component: "h1", variant: "h5", className: classes?.modernUploadLabel, align: "center" }, props.uploadLabel ??
                                         t("standalone.file-upload.upload-modern") ??
                                         ""))),
-                            React.createElement(Grid, { item: true },
+                            React.createElement(Grid, null,
                                 React.createElement(Grid, { container: true, wrap: "nowrap", spacing: 0, justifyContent: "space-between" },
-                                    React.createElement(Grid, { item: true },
+                                    React.createElement(Grid, null,
                                         React.createElement(ModernFormatsLabel, { className: classes?.modernFormatsLabel }, props.formatsLabel ??
                                             t("standalone.file-upload.formats-modern") ??
                                             "")),
-                                    React.createElement(Grid, { item: true },
+                                    React.createElement(Grid, null,
                                         React.createElement(ModernFormatIcon, { className: classes?.modernFormatIcon }))))))))))));
     }
     else if (variant === "profile_picture") {

@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from "react";
-import { Button, Grid, Step, StepLabel, Stepper, styled } from "@mui/material";
+import { Button, Grid2 as Grid, Step, StepLabel, Stepper, styled, } from "@mui/material";
 import Step1LoadData from "./Step1LoadData";
 import Step2ConnectData from "./Step2ConnectData";
 import Step3ValidateReview from "./Step3ValidateReview";
@@ -57,7 +57,7 @@ export const useCrudImportLogic = (props) => {
     const prev = useCallback(() => setActiveStep((prev) => prev - (prev == 2 && guided ? 2 : 1)), [guided]);
     const finish = useCallback(() => {
         // remove /import from url
-        FrameworkHistory.push(pathname.substr(0, pathname.lastIndexOf("/")));
+        FrameworkHistory.push(pathname.substring(0, pathname.lastIndexOf("/")));
     }, [pathname]);
     return {
         guided,
@@ -75,19 +75,19 @@ const CrudImport = (props) => {
     const { updateKeyAdditionalFilters, howTo, model, updateKey, validate } = props;
     const { guided, activeStep, state, setState, hasImportConfig, next, prev, finish, } = useCrudImportLogic(props);
     return (React.createElement(Wrapper, { container: true, direction: "column", justifyContent: "space-between", alignItems: "stretch", spacing: 2, wrap: "nowrap" },
-        React.createElement(Grid, { item: true },
+        React.createElement(Grid, null,
             React.createElement(Stepper, { activeStep: guided && activeStep > 1 ? activeStep - 1 : activeStep }, IMPORT_STEPS.filter((label, index) => !(guided && index === 1)).map((label, index) => (React.createElement(Step, { key: index.toString(16) },
                 React.createElement(StepLabel, null, t(label))))))),
-        React.createElement(Grid, { item: true, xs: true },
+        React.createElement(Grid, { size: "grow" },
             activeStep === 0 && (React.createElement(Step1LoadData, { model: model, howTo: guided ? howTo : undefined, updateKey: updateKey, additionalUpdateKeyFilters: updateKeyAdditionalFilters, hasImportConfig: hasImportConfig, validate: validate, state: state, setState: setState })),
             activeStep === 1 && (React.createElement(Step2ConnectData, { model: model, updateKey: updateKey, additionalUpdateKeyFilters: updateKeyAdditionalFilters, hasImportConfig: hasImportConfig, validate: validate, state: state, setState: setState })),
             activeStep === 2 && (React.createElement(Step3ValidateReview, { model: model, updateKey: updateKey, additionalUpdateKeyFilters: updateKeyAdditionalFilters, hasImportConfig: hasImportConfig, validate: validate, state: state, setState: setState })),
             activeStep === 3 && (React.createElement(Step4Import, { model: model, updateKey: updateKey, additionalUpdateKeyFilters: updateKeyAdditionalFilters, hasImportConfig: hasImportConfig, validate: validate, state: state, setState: setState }))),
-        React.createElement(Grid, { item: true },
+        React.createElement(Grid, null,
             React.createElement(Grid, { container: true, spacing: 2 },
-                activeStep !== 3 && (React.createElement(Grid, { item: true },
+                activeStep !== 3 && (React.createElement(Grid, null,
                     React.createElement(Button, { variant: "contained", disabled: activeStep === 0 || activeStep >= 3, onClick: prev }, t("common.buttons.back")))),
-                React.createElement(Grid, { item: true },
+                React.createElement(Grid, null,
                     React.createElement(Button, { variant: "contained", disabled: (activeStep === 0 && state.files.length === 0) ||
                             (activeStep === 2 && !state.validationPassed) ||
                             (activeStep === 3 && !state.importDone), onClick: activeStep === 3 ? finish : next }, activeStep === 3

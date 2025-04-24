@@ -128,7 +128,7 @@ export interface IDialogConfigForm extends IDialogConfigSimple {
     /**
      * The inputs to be rendered
      */
-    inputs: JSX.Element[];
+    inputs: React.ReactNode;
 }
 /**
  * Props which will be provided in sign pad dialog

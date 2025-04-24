@@ -1,6 +1,6 @@
 import React from "react";
 import { Breakpoint } from "@mui/material/styles";
-import { GridSize } from "@mui/material/Grid/Grid";
+import { GridSize } from "@mui/material/Grid2";
 import { MultiSelectorData } from "../Selector";
 import BaseSelector from "../Selector/BaseSelector";
 export interface GridMultiSelectFilterProps {
@@ -32,11 +32,11 @@ export interface GridMultiSelectFilterProps {
     /**
      * Breakpoints used in dialog
      */
-    dialogBreakpoints?: Partial<Record<Breakpoint, boolean | GridSize>>;
+    dialogBreakpoints?: Partial<Record<Breakpoint, GridSize>>;
     /**
      * Breakpoints used in filter bar
      */
-    barBreakpoints?: Partial<Record<Breakpoint, boolean | GridSize>>;
+    barBreakpoints?: Partial<Record<Breakpoint, GridSize>>;
 }
 export declare const DataGridCustomFilterMulti: typeof BaseSelector;
 export type GridMultiSelectFilterClassKey = "dialogRoot" | "barRoot";

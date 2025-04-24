@@ -1,5 +1,5 @@
 import React from "react";
-import Grid from "@mui/material/Grid";
+import Grid from "@mui/material/Grid2";
 import Typography from "@mui/material/Typography";
 import Divider from "@mui/material/Divider";
 import DayContents from "../Common/DayContents";
@@ -33,7 +33,7 @@ const WeekViewDay = (inProps) => {
     const isFirst = dayIdx === 0;
     const isLast = dayIdx === 6;
     const isToday = day.dayOfYear() === moment().dayOfYear() && day.year() === moment().year();
-    return (React.createElement(Grid, { item: true, xs: true, className: className },
+    return (React.createElement(Grid, { className: className, size: "grow" },
         React.createElement(StyledPaper, { square: true, elevation: 0, className: combineClassNames([
                 classes?.paper,
                 isToday && "CcWeekViewDay-today",
@@ -41,13 +41,13 @@ const WeekViewDay = (inProps) => {
                 isLast && "CcWeekViewDay-last",
             ]) },
             React.createElement(Grid, { container: true },
-                React.createElement(Grid, { item: true, xs: 12 },
+                React.createElement(Grid, { size: 12 },
                     React.createElement(Typography, { align: "center" }, day.format("dddd"))),
-                React.createElement(Grid, { item: true, xs: 12 },
+                React.createElement(Grid, { size: 12 },
                     React.createElement(Divider, null)),
-                React.createElement(Grid, { item: true, xs: 12 },
+                React.createElement(Grid, { size: 12 },
                     React.createElement(Box, { m: 1 }, date)),
-                React.createElement(DayContentsWrapper, { item: true, xs: 12, className: classes?.dayContents },
+                React.createElement(DayContentsWrapper, { size: 12, className: classes?.dayContents },
                     React.createElement(Box, { m: 1 },
                         React.createElement(DayContents, { data: data, altBorder: isToday })))))));
 };

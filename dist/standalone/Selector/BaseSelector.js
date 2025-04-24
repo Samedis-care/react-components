@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState, } from "react";
-import { Autocomplete, Divider, Grid, IconButton, InputAdornment, InputLabel, ListItemText, Paper, Popper, styled, Typography, useThemeProps, } from "@mui/material";
+import { Autocomplete, Divider, Grid2 as Grid, IconButton, InputAdornment, InputLabel, ListItemText, Paper, Popper, styled, Typography, useThemeProps, } from "@mui/material";
 import { Add as AddIcon, ExpandMore, Info as InfoIcon, } from "@mui/icons-material";
 import TextFieldWithHelp from "../UIKit/TextFieldWithHelp";
 import { SelectorSmallListItemButton, SmallListItemIcon, } from "../../standalone/Small";
@@ -160,8 +160,8 @@ const BaseSelector = (inProps) => {
             enableIcons && (React.createElement(SmallListItemIcon, null, renderIcon(data.icon))),
             React.createElement(ListItemText, null,
                 React.createElement(Grid, { container: true },
-                    React.createElement(Grid, { item: true, xs: true }, getReactLabel(data)),
-                    data.selected && (React.createElement(SelectedMarker, { item: true, className: classes?.selected }, t("standalone.selector.base-selector.selected")))))));
+                    React.createElement(Grid, { size: "grow" }, getReactLabel(data)),
+                    data.selected && (React.createElement(SelectedMarker, { className: classes?.selected }, t("standalone.selector.base-selector.selected")))))));
     }, [
         multiple,
         classes?.divider,
@@ -408,7 +408,7 @@ const BaseSelector = (inProps) => {
                         return options;
                     })(), groupBy: grouped
                         ? (option) => option.group ?? noGroupLabel ?? ""
-                        : undefined, PopperComponent: GrowPopper, filterOptions: filterOptions, value: selected, inputValue: query, blurOnSelect: !multiple, onInputChange: updateQuery, popupIcon: React.createElement(ExpandMore, null), autoSelect: freeSolo, freeSolo: freeSolo, noOptionsText: lru && query === ""
+                        : undefined, slots: { popper: GrowPopper }, filterOptions: filterOptions, value: selected, inputValue: query, blurOnSelect: !multiple, onInputChange: updateQuery, popupIcon: React.createElement(ExpandMore, null), autoSelect: freeSolo, freeSolo: freeSolo, noOptionsText: lru && query === ""
                         ? (startTypingToSearchText ??
                             t("standalone.selector.base-selector.start-typing-to-search-text"))
                         : (noOptionsText ??
@@ -417,34 +417,37 @@ const BaseSelector = (inProps) => {
                         t("standalone.selector.base-selector.clear-icon-text"), getOptionLabel: getStringLabel, renderOption: defaultRenderer, getOptionDisabled: getOptionDisabled, isOptionEqualToValue: getOptionSelected, onChange: (_event, selectedValue, reason) => onChangeHandler(selectedValue, reason), renderInput: (params) => {
                         // eslint-disable-next-line @typescript-eslint/no-unused-vars
                         const { InputProps, InputLabelProps, ...otherParams } = params;
-                        return (React.createElement(TextFieldWithHelp, { variant: variant ?? "outlined", ...otherParams, classes: textFieldClasses, inputProps: {
-                                ...params.inputProps,
-                                readOnly: disableSearch,
-                                title: selected && !multiple
-                                    ? (selected.titleTooltip ?? getStringLabel(selected))
-                                    : undefined,
-                                value: multiple
-                                    ? [
-                                        selected.map(getStringLabel).join(", "),
-                                        params.inputProps.value,
-                                    ].join(" ")
-                                    : params.inputProps.value,
-                            }, InputProps: {
-                                ...InputProps,
-                                classes: textFieldInputClasses,
-                                readOnly: disableSearch,
-                                startAdornment: (enableIcons && !multiple
-                                    ? renderIcon(selected?.icon)
-                                    : undefined) ?? startAdornment,
-                                endAdornment: (() => {
-                                    const hasAdditionalElements = openInfo || endAdornment || endAdornmentLeft;
-                                    const infoBtn = openInfo && (React.createElement(InfoButton, { onClick: openInfo, className: classes?.infoBtn },
-                                        React.createElement(InfoIcon, { color: "disabled" })));
-                                    return hasAdditionalElements ? (params.InputProps?.endAdornment ? (React.cloneElement(params.InputProps?.endAdornment, {}, endAdornmentLeft, ...(params.InputProps?.endAdornment).props.children, infoBtn, endAdornment)) : (React.createElement(InputAdornment, { position: "end" },
-                                        endAdornmentLeft,
-                                        infoBtn,
-                                        endAdornment))) : (params.InputProps?.endAdornment);
-                                })(),
+                        return (React.createElement(TextFieldWithHelp, { variant: variant ?? "outlined", ...otherParams, classes: textFieldClasses, slotProps: {
+                                htmlInput: {
+                                    ...params.inputProps,
+                                    readOnly: disableSearch,
+                                    title: selected && !multiple
+                                        ? (selected.titleTooltip ?? getStringLabel(selected))
+                                        : undefined,
+                                    value: multiple
+                                        ? [
+                                            selected.map(getStringLabel).join(", "),
+                                            params.inputProps.value,
+                                        ].join(" ")
+                                        : params.inputProps.value,
+                                },
+                                input: {
+                                    ...InputProps,
+                                    classes: textFieldInputClasses,
+                                    readOnly: disableSearch,
+                                    startAdornment: (enableIcons && !multiple
+                                        ? renderIcon(selected?.icon)
+                                        : undefined) ?? startAdornment,
+                                    endAdornment: (() => {
+                                        const hasAdditionalElements = openInfo || endAdornment || endAdornmentLeft;
+                                        const infoBtn = openInfo && (React.createElement(InfoButton, { onClick: openInfo, className: classes?.infoBtn },
+                                            React.createElement(InfoIcon, { color: "disabled" })));
+                                        return hasAdditionalElements ? (params.InputProps?.endAdornment ? (React.cloneElement(params.InputProps?.endAdornment, {}, endAdornmentLeft, ...(params.InputProps?.endAdornment).props.children, infoBtn, endAdornment)) : (React.createElement(InputAdornment, { position: "end" },
+                                            endAdornmentLeft,
+                                            infoBtn,
+                                            endAdornment))) : (params.InputProps?.endAdornment);
+                                    })(),
+                                },
                             }, placeholder: placeholder, onChange: (event) => {
                                 void onSearchHandler(event.target.value);
                             }, required: required, error: error, warning: warning }));

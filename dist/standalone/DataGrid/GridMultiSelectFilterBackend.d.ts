@@ -1,6 +1,6 @@
 import React from "react";
 import { Breakpoint } from "@mui/material/styles";
-import { GridSize } from "@mui/material/Grid/Grid";
+import { GridSize } from "@mui/material/Grid2";
 import { MultiSelectorData } from "../Selector";
 import BackendMultipleSelect, { BackendMultipleSelectProps } from "../../backend-components/Selector/BackendMultipleSelect";
 import { ModelFieldName, PageVisibility } from "../../backend-integration";
@@ -12,11 +12,11 @@ export interface GridMultiSelectFilterBackendProps<KeyT extends ModelFieldName, 
     /**
      * Breakpoints used in dialog
      */
-    dialogBreakpoints?: Partial<Record<Breakpoint, boolean | GridSize>>;
+    dialogBreakpoints?: Partial<Record<Breakpoint, GridSize>>;
     /**
      * Breakpoints used in filter bar
      */
-    barBreakpoints?: Partial<Record<Breakpoint, boolean | GridSize>>;
+    barBreakpoints?: Partial<Record<Breakpoint, GridSize>>;
 }
 export declare const DataGridCustomFilterMultiBackend: typeof BackendMultipleSelect;
 export type GridMultiSelectFilterBackendClassKey = "dialogRoot" | "barRoot";

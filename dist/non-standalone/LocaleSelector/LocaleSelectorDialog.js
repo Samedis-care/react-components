@@ -9,7 +9,11 @@ const LocaleSelectorDialogContent = React.lazy(() => import("./LocaleSelectorDia
 const StyledDialog = styled(Dialog, {
     name: "CcLocaleSelectorDialog",
     slot: "root",
-})({});
+})({
+    "& .MuiPaper-root": {
+        width: 400,
+    },
+});
 const StyledDialogTitle = styled(DialogTitle, {
     name: "CcLocaleSelectorDialog",
     slot: "title",

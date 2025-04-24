@@ -1,5 +1,5 @@
 import React, { useCallback } from "react";
-import { Checkbox, Grid, Typography } from "@mui/material";
+import { Checkbox, Grid2 as Grid, Typography } from "@mui/material";
 import { KeyboardArrowUp as ClosedIcon, KeyboardArrowDown as ExpandedIcon, } from "@mui/icons-material";
 const TreeViewCheckboxSelectionRenderer = (props) => {
     const { expanded, icon, label, hasChildren, onToggleExpanded, expandLocked, id, depth, hasNext, parentHasNext, onClick, onAuxClick, } = props;
@@ -11,13 +11,13 @@ const TreeViewCheckboxSelectionRenderer = (props) => {
             width: `calc(100% - ${offsetLeft}px)`,
         }, wrap: "nowrap" },
         depth !== 0 && (React.createElement(React.Fragment, null,
-            parentHasNext.slice(1).map((pHasNext, idx) => (React.createElement(Grid, { item: true, key: idx },
+            parentHasNext.slice(1).map((pHasNext, idx) => (React.createElement(Grid, { key: idx },
                 React.createElement("div", { style: {
                         height: 24,
                         width: 24,
                         borderLeft: pHasNext ? "1px solid black" : undefined,
                     } })))),
-            React.createElement(Grid, { item: true },
+            React.createElement(Grid, null,
                 React.createElement("div", { style: {
                         height: 12,
                         width: 12,
@@ -29,9 +29,9 @@ const TreeViewCheckboxSelectionRenderer = (props) => {
                         width: 12,
                         borderLeft: hasNext ? "1px solid black" : undefined,
                     } })))),
-        React.createElement(Grid, { item: true, style: { height: 24 }, key: "expandable", onClick: expandLocked ? undefined : handleExpand }, hasChildren ? (expanded ? (React.createElement(ExpandedIcon, null)) : (React.createElement(ClosedIcon, null))) : (React.createElement(Checkbox, { style: { padding: 0 }, checked: expanded }))),
-        icon && (React.createElement(Grid, { item: true, key: "icon", onClick: onClick, onAuxClick: onAuxClick }, icon)),
-        React.createElement(Grid, { item: true, xs: true, key: "label", onClick: onClick, onAuxClick: onAuxClick },
+        React.createElement(Grid, { style: { height: 24 }, key: "expandable", onClick: expandLocked ? undefined : handleExpand }, hasChildren ? (expanded ? (React.createElement(ExpandedIcon, null)) : (React.createElement(ClosedIcon, null))) : (React.createElement(Checkbox, { style: { padding: 0 }, checked: expanded }))),
+        icon && (React.createElement(Grid, { key: "icon", onClick: onClick, onAuxClick: onAuxClick }, icon)),
+        React.createElement(Grid, { key: "label", onClick: onClick, onAuxClick: onAuxClick, size: "grow" },
             React.createElement(Typography, { noWrap: true }, label))));
 };
 export default React.memo(TreeViewCheckboxSelectionRenderer);

@@ -1,6 +1,6 @@
 import React from "react";
 import { BaseSelectorData } from "../../standalone/Selector";
-import { GridSize } from "@mui/material/Grid/Grid";
+import { GridSize } from "@mui/material/Grid2";
 import { Breakpoint } from "@mui/material/styles";
 import SingleSelect from "../Selector/SingleSelect";
 export interface GridSingleSelectFilterProps {
@@ -36,11 +36,11 @@ export interface GridSingleSelectFilterProps {
     /**
      * Breakpoints used in dialog
      */
-    dialogBreakpoints?: Partial<Record<Breakpoint, boolean | GridSize>>;
+    dialogBreakpoints?: Partial<Record<Breakpoint, GridSize>>;
     /**
      * Breakpoints used in filter bar
      */
-    barBreakpoints?: Partial<Record<Breakpoint, boolean | GridSize>>;
+    barBreakpoints?: Partial<Record<Breakpoint, GridSize>>;
 }
 export declare const DataGridCustomFilterSingle: typeof SingleSelect;
 export type GridSingleSelectFilterClassKey = "dialogRoot" | "barRoot";

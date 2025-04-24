@@ -8,6 +8,6 @@ export const extractRouteParameters = (route, path, exact = false, strict = fals
 };
 export const insertRouteParameters = (route, params) => {
     let pathParts = route.split("/");
-    pathParts = pathParts.map((entry) => entry.startsWith(":") ? params[entry.substr(1)] : entry);
+    pathParts = pathParts.map((entry) => entry.startsWith(":") ? params[entry.substring(1)] : entry);
     return pathParts.join("/");
 };

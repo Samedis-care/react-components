@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState, } from "react";
 import ImageBox from "./ImageBox";
 import GroupBox from "../../GroupBox";
-import { Dialog, DialogContent, DialogTitle, Grid, IconButton, Link, styled, Typography, useThemeProps, } from "@mui/material";
+import { Dialog, DialogContent, DialogTitle, Grid2 as Grid, IconButton, Link, styled, Typography, useThemeProps, } from "@mui/material";
 import { Close as CloseIcon } from "@mui/icons-material";
 import processImage from "../../../utils/processImage";
 import ImageDialogEntry from "./ImageDialogEntry";
@@ -131,30 +131,38 @@ const MultiImage = (inProps) => {
     return (React.createElement(Root, { className: combineClassNames([className, classes?.root]) },
         React.createElement(GroupBox, { label: label },
             React.createElement(RootContainer, { container: true, spacing: 1, className: classes?.rootContainer },
-                React.createElement(ImageItem, { item: true, xs: 12, className: classes?.imageItem },
+                React.createElement(ImageItem, { size: 12, className: classes?.imageItem },
                     React.createElement(ImageBox, { image: images[currentImage]?.image ?? placeholderImage ?? uploadImage, fileName: images[currentImage]?.name, onPrevImage: currentImage <= 0 ? undefined : showPrevImage, onNextImage: currentImage < images.length - 1 ? showNextImage : undefined, onFilesDropped: readOnly ? undefined : handlePreviewDrop, onClick: images[currentImage] ? undefined : readOnly ? null : startUpload, classes: subClasses?.imageBox, imageDots: {
                             total: images.length,
                             active: currentImage,
                             setActive: setCurrentImage,
                         }, disableBackground: true })),
-                React.createElement(Grid, { item: true, xs: 12, container: true, alignContent: "space-between", wrap: "nowrap", spacing: 1 },
-                    React.createElement(Grid, { item: true, xs: true },
+                React.createElement(Grid, { container: true, alignContent: "space-between", wrap: "nowrap", spacing: 1, size: 12 },
+                    React.createElement(Grid, { size: "grow" },
                         React.createElement(ImageDots, { total: images.length, active: currentImage, setActive: setCurrentImage })),
-                    !readOnly && (React.createElement(Grid, { item: true },
+                    !readOnly && (React.createElement(Grid, null,
                         React.createElement(EditLabel, { component: Link, variant: "body2", onClick: openDialog, href: "#" }, editLabel ?? t("standalone.file-upload.multi-image.edit"))))))),
         React.createElement(UploadInput, { type: "file", multiple: remainingFiles > 1, accept: "image/*", capture: capture, ref: fileUpload, onChange: handleUpload, className: classes?.uploadInput }),
         !readOnly && (React.createElement(React.Fragment, null,
             React.createElement(Dialog, { open: dialogOpen, onClose: closeDialog, maxWidth: "lg", fullWidth: !previewSize },
                 React.createElement(DialogTitle, null,
                     React.createElement(Grid, { container: true, justifyContent: "flex-end" },
-                        React.createElement(Grid, { item: true },
+                        React.createElement(Grid, null,
                             React.createElement(IconButton, { onClick: closeDialog, size: "large" },
                                 React.createElement(CloseIcon, null))))),
                 React.createElement(DialogContent, null,
                     React.createElement(Grid, { container: true, spacing: 2 },
                         images.map((img, i) => (React.createElement(ImageDialogEntry, { img: img, previewSize: previewSize, isPrimary: img === primaryImg, processFile: processFile, changeImages: manipulateImages, changePrimary: changePrimary, onDelete: onDelete, key: `img-${i}`, classes: subClasses?.imageDialogEntry, subClasses: subClasses?.imageDialogEntrySubClasses }))),
-                        !readOnly && remainingFiles > 0 && (React.createElement(Grid, { item: true, xs: previewSize ? undefined : 12, md: previewSize ? undefined : 6, lg: previewSize ? undefined : 3 },
+                        !readOnly && remainingFiles > 0 && (React.createElement(Grid, { size: {
+                                xs: previewSize ? undefined : 12,
+                                md: previewSize ? undefined : 6,
+                                lg: previewSize ? undefined : 3,
+                            } },
                             React.createElement(ImageBox, { width: previewSize, height: previewSize, image: uploadImage, onClick: startUpload, onFilesDropped: handleUploadViaDrop, classes: subClasses?.imageBox }))),
-                        additionalDialogContent?.map((elem, i) => (React.createElement(Grid, { item: true, xs: previewSize ? undefined : 12, md: previewSize ? undefined : 6, lg: previewSize ? undefined : 3, key: `add-${i}`, style: previewSize ? { width: previewSize } : undefined }, elem))))))))));
+                        additionalDialogContent?.map((elem, i) => (React.createElement(Grid, { key: `add-${i}`, style: previewSize ? { width: previewSize } : undefined, size: {
+                                xs: previewSize ? undefined : 12,
+                                md: previewSize ? undefined : 6,
+                                lg: previewSize ? undefined : 3,
+                            } }, elem))))))))));
 };
 export default React.memo(MultiImage);

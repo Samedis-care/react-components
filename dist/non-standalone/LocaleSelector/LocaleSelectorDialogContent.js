@@ -1,5 +1,5 @@
 import React, { Suspense, useCallback, useMemo, useState } from "react";
-import { Box, Grid, InputAdornment, styled, useThemeProps, } from "@mui/material";
+import { Box, Grid2 as Grid, InputAdornment, styled, useThemeProps, } from "@mui/material";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { FixedSizeList } from "react-window";
 import supportedLanguages from "../../assets/data/supported-languages.json";
@@ -18,7 +18,7 @@ const LocaleList = styled(Grid, {
     slot: "localeList",
 })({
     height: "calc(75vh - 128px)",
-    width: 200,
+    width: "100%",
 });
 const NoLocalesMessage = styled("div", {
     name: "CcLocaleSelectorDialogContent",
@@ -102,10 +102,10 @@ const LocaleSelectorDialogContent = (inProps) => {
                 React.createElement(LocaleSelectorEntry, { locale: locale, currentLanguage: currentLang, handleSwitch: handleSwitch, disabled: switchingLanguage, key: locale.locale }))));
     }, [currentLang, filteredData, handleSwitch, switchingLanguage]);
     return (React.createElement(Grid, { container: true, className: className },
-        React.createElement(Grid, { item: true, xs: 12 },
+        React.createElement(Grid, { size: 12 },
             React.createElement(Box, { px: 2, pb: 1 },
-                React.createElement(TextFieldWithHelp, { value: filter, onChange: handleFilterChange, fullWidth: true, InputProps: SearchInputProps }))),
-        React.createElement(LocaleList, { item: true, xs: 12 },
+                React.createElement(TextFieldWithHelp, { value: filter, onChange: handleFilterChange, fullWidth: true, slotProps: { input: SearchInputProps } }))),
+        React.createElement(LocaleList, { size: 12 },
             React.createElement(FormLoaderOverlay, { visible: switchingLanguage }),
             filteredData.length === 0 ? (React.createElement(NoLocalesMessage, null, t("non-standalone.language-switcher.no-locales"))) : (React.createElement(AutoSizer, null, ({ width, height }) => (React.createElement(FixedSizeList, { width: width, height: height, overscanCount: 2, itemCount: filteredData.length, itemSize: 70 }, LocaleEntryRenderer)))))));
 };

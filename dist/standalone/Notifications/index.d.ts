@@ -13,11 +13,11 @@ export interface Notification {
     /**
      * The main message of the notification
      */
-    message: React.ReactChild;
+    message: React.ReactNode;
     /**
      * The sub message of the notification, shown before it's age
      */
-    origin?: React.ReactChild;
+    origin?: React.ReactNode;
     /**
      * The timestamp of creation of this notification
      */

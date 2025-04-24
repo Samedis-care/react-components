@@ -1,6 +1,6 @@
 import React from "react";
 import SignalPortletItem from "./SignalPortletItem";
-import { Divider, Grid, IconButton, List, Paper, styled, Tooltip, Typography, useThemeProps, } from "@mui/material";
+import { Divider, Grid2 as Grid, IconButton, List, Paper, styled, Tooltip, Typography, useThemeProps, } from "@mui/material";
 import { Sync as RefreshIcon } from "@mui/icons-material";
 import timestampToAge from "../../utils/timestampToAge";
 import useCCTranslations from "../../utils/useCCTranslations";
@@ -57,20 +57,20 @@ const SignalPortlet = (inProps) => {
     return (React.createElement(SignalPortletRoot, { className: combineClassNames([props.className, props.classes?.root]) },
         React.createElement(SignalPortletPaper, { className: props.classes?.paper },
             React.createElement(SignalPortletInnerContainer, { container: true, spacing: 1, direction: "column", justifyContent: "space-between", wrap: "nowrap", className: props.classes?.innerContainer },
-                React.createElement(Grid, { item: true, xs: true, container: true, spacing: 1, justifyContent: "flex-start", direction: "column", wrap: "nowrap" },
-                    React.createElement(SignalPortletTitleWrapper, { item: true, className: props.classes?.titleWrapper },
+                React.createElement(Grid, { container: true, spacing: 1, justifyContent: "flex-start", direction: "column", wrap: "nowrap", size: "grow" },
+                    React.createElement(SignalPortletTitleWrapper, { className: props.classes?.titleWrapper },
                         React.createElement(SignalPortletTitle, { variant: "h5", align: "center", className: props.classes?.title }, props.title)),
-                    React.createElement(SignalPortletDivider, { item: true, className: props.classes?.divider },
+                    React.createElement(SignalPortletDivider, { className: props.classes?.divider },
                         React.createElement(Divider, null)),
-                    React.createElement(Grid, { item: true },
+                    React.createElement(Grid, null,
                         React.createElement(SignalPortletList, { className: props.classes?.list }, props.items.map((item, index) => (React.createElement(SignalPortletItemStyled, { key: index.toString(), className: props.classes?.item, ...item })))))),
-                (props.updatedAt || props.onRefresh) && (React.createElement(Grid, { item: true, container: true, spacing: 1, justifyContent: "flex-end", alignItems: "center", alignContent: "center" },
-                    props.updatedAt && (React.createElement(Grid, { item: true },
+                (props.updatedAt || props.onRefresh) && (React.createElement(Grid, { container: true, spacing: 1, justifyContent: "flex-end", alignItems: "center", alignContent: "center" },
+                    props.updatedAt && (React.createElement(Grid, null,
                         React.createElement(Tooltip, { title: new Date(props.updatedAt).toLocaleString(i18n.language) },
                             React.createElement(SignalPortletLastUpdatedAt, null, t("standalone.signal-portlet.last-updated", {
                                 AGE: timestampToAge(new Date(props.updatedAt)),
                             }))))),
-                    props.onRefresh && (React.createElement(Grid, { item: true },
+                    props.onRefresh && (React.createElement(Grid, null,
                         React.createElement(SignalPortletRefreshIconButton, { onClick: props.onRefresh, size: "small", color: "primary" },
                             React.createElement(SignalPortletRefreshIcon, null))))))))));
 };

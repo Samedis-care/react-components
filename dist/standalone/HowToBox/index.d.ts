@@ -8,7 +8,7 @@ export interface HowToBoxProps {
     /**
      * How to entries
      */
-    labels: string[] | React.ReactNodeArray | string | React.ReactNode | undefined;
+    labels: string[] | React.ReactNode[] | string | React.ReactNode | undefined;
     className?: string;
     /**
      * Custom CSS styles

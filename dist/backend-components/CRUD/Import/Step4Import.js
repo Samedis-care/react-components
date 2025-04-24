@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { isFieldImportable } from "./index";
-import { Grid, TextField, Typography } from "@mui/material";
+import { Grid2 as Grid, TextField, Typography } from "@mui/material";
 import Model, { useModelMutation, } from "../../../backend-integration/Model/Model";
 import ModelVisibilityHidden from "../../../backend-integration/Model/Visibilities/VisibilityHidden";
 import deepAssign from "../../../utils/deepAssign";
@@ -120,17 +120,17 @@ const Step4Import = (props) => {
     const { counters, lastError } = useImportStep4Logic(props);
     const { t } = useCCTranslations();
     return (React.createElement(Grid, { container: true, spacing: 2 },
-        React.createElement(Grid, { item: true, xs: 12 },
+        React.createElement(Grid, { size: 12 },
             React.createElement(Typography, null, t("backend-components.crud.import.queue", { COUNT: counters.todo }))),
-        React.createElement(Grid, { item: true, xs: 12 },
+        React.createElement(Grid, { size: 12 },
             React.createElement(Typography, null, t("backend-components.crud.import.success", {
                 COUNT: counters.success,
             }))),
-        React.createElement(Grid, { item: true, xs: 12 },
+        React.createElement(Grid, { size: 12 },
             React.createElement(Typography, null, t("backend-components.crud.import.failed", {
                 COUNT: counters.failed,
             }))),
-        React.createElement(Grid, { item: true, xs: 12 },
+        React.createElement(Grid, { size: 12 },
             React.createElement(TextField, { multiline: true, fullWidth: true, label: t("backend-components.crud.import.last_error"), value: lastError }))));
 };
 export default React.memo(Step4Import);

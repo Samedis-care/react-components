@@ -1,5 +1,5 @@
 import React, { PureComponent } from "react";
-import { CircularProgress, Divider, Grid } from "@mui/material";
+import { CircularProgress, Divider, Grid2 as Grid } from "@mui/material";
 import ScrollableScheduleDay from "./ScrollableScheduleDay";
 import moment from "moment";
 import useCCTranslations from "../../../utils/useCCTranslations";
@@ -28,10 +28,10 @@ class ScrollableScheduleWeek extends PureComponent {
     }
     render() {
         if (this.state.loadError) {
-            return (React.createElement(Grid, { item: true, xs: 12 }, this.state.loadError.message));
+            return React.createElement(Grid, { size: 12 }, this.state.loadError.message);
         }
         if (!this.state.data) {
-            return (React.createElement(Grid, { item: true, xs: 12 },
+            return (React.createElement(Grid, { size: 12 },
                 React.createElement(Grid, { container: true, justifyContent: "space-around" },
                     React.createElement(CircularProgress, null))));
         }
@@ -51,10 +51,10 @@ class ScrollableScheduleWeek extends PureComponent {
         }
         const endOfWeek = firstDay.clone().add(6, "days");
         return (React.createElement(React.Fragment, null,
-            React.createElement(Grid, { item: true, xs: 12 },
+            React.createElement(Grid, { size: 12 },
                 React.createElement(Divider, null)),
-            React.createElement(Grid, { item: true, xs: 1 }),
-            React.createElement(Grid, { item: true, xs: 11 },
+            React.createElement(Grid, { size: 1 }),
+            React.createElement(Grid, { size: 11 },
                 this.props.t("standalone.schedule.week"),
                 " ",
                 firstDay.week(),

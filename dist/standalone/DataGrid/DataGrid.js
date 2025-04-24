@@ -1,5 +1,5 @@
 import React, { useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, } from "react";
-import { Box, Collapse, Divider, Grid, IconButton, ListItem, Paper, styled, Typography, useTheme, useThemeProps, } from "@mui/material";
+import { Box, Collapse, Divider, Grid2 as Grid, IconButton, ListItem, Paper, styled, Typography, useTheme, useThemeProps, } from "@mui/material";
 import { Apps as AppsIcon, Search as SearchIcon } from "@mui/icons-material";
 import Header from "./Header";
 import Footer from "./Footer";
@@ -573,13 +573,13 @@ const DataGrid = (inProps) => {
                         React.createElement(DataGridColumnsWidthStateContext.Provider, { value: columnWidthStatePack },
                             React.createElement(CustomFilterActiveContext.Provider, { value: activeCustomFiltersPack },
                                 React.createElement(StatePersistence, null),
-                                React.createElement(HeaderWrapper, { item: true, className: classes?.header },
+                                React.createElement(HeaderWrapper, { className: classes?.header },
                                     React.createElement(Header, null)),
-                                React.createElement(ContentWrapper, { item: true, xs: true, className: classes?.content },
+                                React.createElement(ContentWrapper, { size: "grow", className: classes?.content },
                                     React.createElement(Settings, { columns: columns }),
                                     React.createElement(CustomFilterDialog, null),
                                     React.createElement(Content, { columns: visibleColumns, rowsPerPage: rowsPerPage, disableSelection: disableSelection, headerHeight: headerHeight, globalScrollListener: globalScrollListener })),
-                                !disableFooter && (React.createElement(FooterWrapper, { item: true, className: classes?.footer },
+                                !disableFooter && (React.createElement(FooterWrapper, { className: classes?.footer },
                                     React.createElement(Footer, null)))))))))));
 };
 export default React.memo(DataGrid);

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo } from "react";
-import { Divider, FormControl, FormControlLabel, Grid, Radio, RadioGroup, styled, Typography, useThemeProps, } from "@mui/material";
+import { Divider, FormControl, FormControlLabel, Grid2 as Grid, Radio, RadioGroup, styled, Typography, useThemeProps, } from "@mui/material";
 import { useCustomFilterActiveContext } from "./Header/FilterBar";
 import { useDataGridProps } from "./DataGrid";
 import SingleSelect from "../Selector/SingleSelect";
@@ -57,16 +57,16 @@ const GridSingleSelectFilter = (inProps) => {
         autocomplete: isActive ? "Mui-active" : undefined,
     }), [isActive]);
     if (dialog) {
-        return (React.createElement(GridSingleSelectFilterDialogRoot, { item: true, xs: 12, md: 6, lg: 3, ...dialogBreakpoints },
+        return (React.createElement(GridSingleSelectFilterDialogRoot, { size: { xs: 12, md: 6, lg: 3, ...dialogBreakpoints } },
             React.createElement(FormControl, { component: "fieldset" },
                 React.createElement(RadioGroup, { value: selected, onChange: handleDialogRadioToggle },
-                    React.createElement(Grid, { item: true, xs: 12, container: true },
-                        label && (React.createElement(Grid, { item: true, xs: 12 },
+                    React.createElement(Grid, { container: true, size: 12 },
+                        label && (React.createElement(Grid, { size: 12 },
                             React.createElement(Typography, null, label))),
-                        options.map((option) => (React.createElement(Grid, { item: true, xs: 12, key: option.value }, option.isDivider ? (React.createElement(Divider, null)) : option.isSmallLabel ? (React.createElement(Typography, null, option.label)) : (React.createElement(FormControlLabel, { control: React.createElement(Radio, null), name: option.value, value: option.value, label: option.label }))))))))));
+                        options.map((option) => (React.createElement(Grid, { key: option.value, size: 12 }, option.isDivider ? (React.createElement(Divider, null)) : option.isSmallLabel ? (React.createElement(Typography, null, option.label)) : (React.createElement(FormControlLabel, { control: React.createElement(Radio, null), name: option.value, value: option.value, label: option.label }))))))))));
     }
     else {
-        return (React.createElement(GridSingleSelectFilterBarRoot, { item: true, xs: 4, ...barBreakpoints },
+        return (React.createElement(GridSingleSelectFilterBarRoot, { size: { xs: 4, ...barBreakpoints } },
             React.createElement(FormControl, { component: "fieldset", fullWidth: true },
                 React.createElement(DataGridCustomFilterSingle, { label: label, disableSearch: true, disableClearable: true, onLoad: getOptions, selected: options.find((option) => option.value === selected) ?? options[0], onSelect: handleSelectorChange, autocompleteId: autocompleteId, classes: selectorStyles, className: classes?.customFilterSingle }))));
     }
