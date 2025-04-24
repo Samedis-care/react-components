@@ -329,7 +329,7 @@
 		},
 		"dialogs": {
 			"error-title": "Er is een fout opgetreden",
-			"validation-error-title": "Ongeldig formulier",
+			"validation-error-title": "Fout bij validatie",
 			"info": "Info",
 			"are-you-sure": "Weet je het zeker?",
 			"are-you-sure-submit": "Doorgaan?"
