@@ -29,7 +29,7 @@ import {
 import deepAssign from "../../utils/deepAssign";
 import deepClone from "../../utils/deepClone";
 import isObjectEmpty from "../../utils/isObjectEmpty";
-import { Grid, styled, Typography } from "@mui/material";
+import { Grid2 as Grid, styled, Typography } from "@mui/material";
 import { getVisibility } from "../../backend-integration/Model/Visibility";
 import { showConfirmDialogBool } from "../../non-standalone";
 import useCCTranslations from "../../utils/useCCTranslations";
@@ -1477,10 +1477,10 @@ const Form = <
 						title: t("backend-components.form.submit-with-warnings.title"),
 						message: (
 							<Grid container spacing={2}>
-								<Grid item xs={12}>
+								<Grid size={12}>
 									{t("backend-components.form.submit-with-warnings.message")}
 								</Grid>
-								<Grid item xs={12}>
+								<Grid size={12}>
 									<ul>
 										{Object.entries(validationHints).map(([key, value]) => (
 											<li key={key}>{value}</li>

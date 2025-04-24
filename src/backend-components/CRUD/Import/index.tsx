@@ -1,5 +1,12 @@
 import React, { Dispatch, SetStateAction, useCallback, useState } from "react";
-import { Button, Grid, Step, StepLabel, Stepper, styled } from "@mui/material";
+import {
+	Button,
+	Grid2 as Grid,
+	Step,
+	StepLabel,
+	Stepper,
+	styled,
+} from "@mui/material";
 import Step1LoadData from "./Step1LoadData";
 import Step2ConnectData from "./Step2ConnectData";
 import Step3ValidateReview from "./Step3ValidateReview";
@@ -159,7 +166,7 @@ export const useCrudImportLogic = <
 	);
 	const finish = useCallback(() => {
 		// remove /import from url
-		FrameworkHistory.push(pathname.substr(0, pathname.lastIndexOf("/")));
+		FrameworkHistory.push(pathname.substring(0, pathname.lastIndexOf("/")));
 	}, [pathname]);
 
 	return {
@@ -204,7 +211,7 @@ const CrudImport = <
 			spacing={2}
 			wrap={"nowrap"}
 		>
-			<Grid item>
+			<Grid>
 				<Stepper
 					activeStep={guided && activeStep > 1 ? activeStep - 1 : activeStep}
 				>
@@ -217,7 +224,7 @@ const CrudImport = <
 					)}
 				</Stepper>
 			</Grid>
-			<Grid item xs>
+			<Grid size="grow">
 				{activeStep === 0 && (
 					<Step1LoadData
 						model={
@@ -272,10 +279,10 @@ const CrudImport = <
 					/>
 				)}
 			</Grid>
-			<Grid item>
+			<Grid>
 				<Grid container spacing={2}>
 					{activeStep !== 3 && (
-						<Grid item>
+						<Grid>
 							<Button
 								variant={"contained"}
 								disabled={activeStep === 0 || activeStep >= 3}
@@ -285,7 +292,7 @@ const CrudImport = <
 							</Button>
 						</Grid>
 					)}
-					<Grid item>
+					<Grid>
 						<Button
 							variant={"contained"}
 							disabled={

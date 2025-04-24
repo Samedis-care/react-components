@@ -3,7 +3,7 @@ import BaseSelector, {
 	BaseSelectorData,
 	BaseSelectorProps,
 } from "./BaseSelector";
-import { Grid, Paper, styled, useThemeProps } from "@mui/material";
+import { Grid2 as Grid, Paper, styled, useThemeProps } from "@mui/material";
 import MultiSelectEntry, { MultiSelectEntryProps } from "./MultiSelectEntry";
 import { showConfirmDialogBool } from "../../non-standalone/Dialog/Utils";
 import { DialogContext } from "../../framework/DialogContextProvider";
@@ -216,7 +216,7 @@ const MultiSelect = <DataT extends MultiSelectorData>(
 
 	return (
 		<Root container className={combineClassNames([className, classes?.root])}>
-			<Grid item xs={12}>
+			<Grid size={12}>
 				<StyledBaseSelector
 					{...props}
 					// @ts-expect-error removed owner state from props to preserve generics
@@ -233,7 +233,7 @@ const MultiSelect = <DataT extends MultiSelectorData>(
 				/>
 			</Grid>
 			{props.selected.length > 0 && (
-				<SelectedEntry item xs={12} className={classes?.selectedEntry}>
+				<SelectedEntry size={12} className={classes?.selectedEntry}>
 					<Paper elevation={0}>
 						{(selectedSort
 							? props.selected.sort(selectedSort)

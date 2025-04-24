@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, ButtonProps, Grid } from "@mui/material";
+import { Button, ButtonProps, Grid2 as Grid } from "@mui/material";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import { DataGridCustomFilterIcon, useDataGridProps } from "../DataGrid";
 import combineClassNames from "../../../utils/combineClassNames";
@@ -18,10 +18,8 @@ const CustomFiltersButton = (props: Omit<ButtonProps, "outlined">) => {
 				justifyContent={"space-evenly"}
 				alignItems={"center"}
 			>
-				<Grid item>
-					{t("standalone.data-grid.header.custom-filter-button")}
-				</Grid>
-				<Grid item>
+				<Grid>{t("standalone.data-grid.header.custom-filter-button")}</Grid>
+				<Grid>
 					<DataGridCustomFilterIcon
 						className={combineClassNames([
 							classes?.customFilterIcon,

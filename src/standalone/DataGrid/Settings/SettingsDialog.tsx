@@ -4,7 +4,7 @@ import {
 	Button,
 	Checkbox,
 	Divider,
-	Grid,
+	Grid2 as Grid,
 	Table,
 	TableBody,
 	TableCell,
@@ -138,7 +138,7 @@ const SettingsDialog = (props: IDataGridSettingsDialogProps) => {
 			<DataGridContentOverlayClosed className={classes?.contentOverlayClosed}>
 				<Divider />
 				<Grid container justifyContent={"flex-end"}>
-					<Grid item>
+					<Grid>
 						<Box m={2}>
 							<Button onClick={props.closeGridSettings} variant={"contained"}>
 								{t("standalone.data-grid.settings.close") || ""}

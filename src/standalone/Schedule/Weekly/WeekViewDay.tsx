@@ -1,5 +1,5 @@
 import React from "react";
-import Grid from "@mui/material/Grid";
+import Grid from "@mui/material/Grid2";
 import Typography from "@mui/material/Typography";
 import Divider from "@mui/material/Divider";
 import DayContents, { IDayData } from "../Common/DayContents";
@@ -70,7 +70,7 @@ const WeekViewDay = (inProps: WeekViewDayProps) => {
 		day.dayOfYear() === moment().dayOfYear() && day.year() === moment().year();
 
 	return (
-		<Grid item xs className={className}>
+		<Grid className={className} size="grow">
 			<StyledPaper
 				square
 				elevation={0}
@@ -82,16 +82,16 @@ const WeekViewDay = (inProps: WeekViewDayProps) => {
 				])}
 			>
 				<Grid container>
-					<Grid item xs={12}>
+					<Grid size={12}>
 						<Typography align={"center"}>{day.format("dddd")}</Typography>
 					</Grid>
-					<Grid item xs={12}>
+					<Grid size={12}>
 						<Divider />
 					</Grid>
-					<Grid item xs={12}>
+					<Grid size={12}>
 						<Box m={1}>{date}</Box>
 					</Grid>
-					<DayContentsWrapper item xs={12} className={classes?.dayContents}>
+					<DayContentsWrapper size={12} className={classes?.dayContents}>
 						<Box m={1}>
 							<DayContents data={data} altBorder={isToday} />
 						</Box>

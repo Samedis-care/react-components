@@ -28,7 +28,7 @@ export const insertRouteParameters = (
 ): string => {
 	let pathParts = route.split("/");
 	pathParts = pathParts.map((entry) =>
-		entry.startsWith(":") ? params[entry.substr(1)] : entry,
+		entry.startsWith(":") ? params[entry.substring(1)] : entry,
 	);
 	return pathParts.join("/");
 };

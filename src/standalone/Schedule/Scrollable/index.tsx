@@ -3,7 +3,7 @@ import {
 	Box,
 	Button,
 	Divider,
-	Grid,
+	Grid2 as Grid,
 	IconButton,
 	Menu,
 	styled,
@@ -77,7 +77,7 @@ interface ScrollableScheduleState<
 	/**
 	 * Array of ScrollableScheduleWeek components
 	 */
-	items: JSX.Element[];
+	items: React.ReactNode[];
 	/**
 	 * Infinite scroll top most week offset
 	 */
@@ -294,13 +294,12 @@ const ScrollableSchedule = (inProps: ScrollableScheduleProps) => {
 	return (
 		<Grid container className={className}>
 			<TodayButtonWrapper
-				item
-				xs={12}
+				size={12}
 				className={classes?.today}
 				onClick={jumpToToday}
 			>
 				<Grid container justifyContent={"space-between"}>
-					<Grid item>
+					<Grid>
 						<TodayButton
 							className={classes?.todayBtn}
 							onClick={jumpToToday}
@@ -309,7 +308,7 @@ const ScrollableSchedule = (inProps: ScrollableScheduleProps) => {
 							<Box m={2}>{state.today.format("ddd DD MMMM")}</Box>
 						</TodayButton>
 					</Grid>
-					<Grid item>
+					<Grid>
 						{filterCount + actions.length > 0 && (
 							<FilterWrapper
 								px={2}
@@ -331,7 +330,7 @@ const ScrollableSchedule = (inProps: ScrollableScheduleProps) => {
 											<Box p={1}>
 												<Grid container spacing={1}>
 													{Object.entries(filters).map(([name, filter]) => (
-														<Grid key={"filter-" + name} item xs={12}>
+														<Grid key={"filter-" + name} size={12}>
 															<ScrollableFilterRenderer
 																{...filter}
 																name={name}
@@ -345,12 +344,12 @@ const ScrollableSchedule = (inProps: ScrollableScheduleProps) => {
 														</Grid>
 													))}
 													{filterCount > 0 && (
-														<Grid key={"divider"} item xs={12}>
+														<Grid key={"divider"} size={12}>
 															<Divider />
 														</Grid>
 													)}
 													{actions.map((action) => (
-														<Grid key={"action-" + action.id} item xs={12}>
+														<Grid key={"action-" + action.id} size={12}>
 															<Button
 																onClick={action.onClick}
 																disabled={action.disabled}
@@ -399,7 +398,7 @@ const ScrollableSchedule = (inProps: ScrollableScheduleProps) => {
 					</Grid>
 				</Grid>
 			</TodayButtonWrapper>
-			<Grid item xs={12}>
+			<Grid size={12}>
 				<StyledInfiniteScroll
 					className={combineClassNames([wrapperClass, classes?.scroller])}
 					loadMoreTop={loadMoreTop}

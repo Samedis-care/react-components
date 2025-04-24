@@ -1,7 +1,7 @@
 import React, { Suspense, useCallback, useMemo, useState } from "react";
 import {
 	Box,
-	Grid,
+	Grid2 as Grid,
 	InputAdornment,
 	styled,
 	useThemeProps,
@@ -52,7 +52,7 @@ const LocaleList = styled(Grid, {
 	slot: "localeList",
 })({
 	height: "calc(75vh - 128px)",
-	width: 200,
+	width: "100%",
 });
 
 const NoLocalesMessage = styled("div", {
@@ -197,17 +197,17 @@ const LocaleSelectorDialogContent = (
 
 	return (
 		<Grid container className={className}>
-			<Grid item xs={12}>
+			<Grid size={12}>
 				<Box px={2} pb={1}>
 					<TextFieldWithHelp
 						value={filter}
 						onChange={handleFilterChange}
 						fullWidth
-						InputProps={SearchInputProps}
+						slotProps={{ input: SearchInputProps }}
 					/>
 				</Box>
 			</Grid>
-			<LocaleList item xs={12}>
+			<LocaleList size={12}>
 				<FormLoaderOverlay visible={switchingLanguage} />
 				{filteredData.length === 0 ? (
 					<NoLocalesMessage>

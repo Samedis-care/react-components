@@ -99,7 +99,7 @@ export const toMenuItemComponent = (
 	def: IMenuItemDefinition,
 	depth: number,
 	menuItemId: string | null,
-): JSX.Element | false =>
+): React.ReactNode =>
 	def.shouldRender && (
 		<MenuItem
 			key={menuItemId ? `${menuItemId}@${def.title}` : def.title}

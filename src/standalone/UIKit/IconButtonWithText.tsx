@@ -1,6 +1,6 @@
 import React from "react";
 import {
-	Grid,
+	Grid2 as Grid,
 	IconButton,
 	IconButtonProps,
 	Typography,
@@ -17,7 +17,7 @@ export interface IconButtonWithTextProps {
 
 const IconButtonWithText = (props: IconButtonWithTextProps) => (
 	<Grid container direction={"column"} alignItems={"center"}>
-		<Grid item>
+		<Grid>
 			<IconButton
 				onClick={props.onClick}
 				{...props.IconButtonProps}
@@ -26,7 +26,7 @@ const IconButtonWithText = (props: IconButtonWithTextProps) => (
 				{props.icon}
 			</IconButton>
 		</Grid>
-		<Grid item>
+		<Grid>
 			<Typography
 				variant={"caption"}
 				color={"textSecondary"}

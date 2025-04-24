@@ -1,6 +1,12 @@
 import React, { useCallback } from "react";
 import ImageBox, { ImageBoxProps } from "./ImageBox";
-import { Box, Grid, styled, Typography, useThemeProps } from "@mui/material";
+import {
+	Box,
+	Grid2 as Grid,
+	styled,
+	Typography,
+	useThemeProps,
+} from "@mui/material";
 import {
 	Star as StarredIcon,
 	StarOutline as NotStarredIcon,
@@ -123,10 +129,7 @@ const ImageDialogEntry = (inProps: ImageDialogEntryProps) => {
 
 	return (
 		<Root
-			item
-			xs={previewSize ? undefined : 12}
-			md={previewSize ? undefined : 6}
-			lg={previewSize ? undefined : 3}
+			size={previewSize ? undefined : { xs: 12, md: 6, lg: 3 }}
 			className={combineClassNames([className, classes?.root])}
 		>
 			<div>
@@ -149,10 +152,10 @@ const ImageDialogEntry = (inProps: ImageDialogEntryProps) => {
 					className={isPrimary ? classes?.isPrimary : classes?.makePrimary}
 					onClick={isPrimary ? undefined : setPrimary}
 				>
-					<Grid item>
+					<Grid>
 						{isPrimary ? <StarredIcon color={"primary"} /> : <NotStarredIcon />}
 					</Grid>
-					<Grid item>
+					<Grid>
 						<Typography>
 							{t("standalone.file-upload.multi-image.primary")}
 						</Typography>

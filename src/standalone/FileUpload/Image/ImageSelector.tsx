@@ -4,7 +4,7 @@ import {
 	Box,
 	Button,
 	Dialog,
-	Grid,
+	Grid2 as Grid,
 	IconButton,
 	styled,
 	Theme,
@@ -418,7 +418,7 @@ const ImageSelector = (inProps: ImageSelectorProps) => {
 					onDragOver={handleDragOver}
 				>
 					{!props.readOnly && (
-						<Grid item key={"upload"}>
+						<Grid key={"upload"}>
 							<Button
 								startIcon={<AttachFile />}
 								variant={"contained"}
@@ -438,7 +438,11 @@ const ImageSelector = (inProps: ImageSelectorProps) => {
 							/>
 						</Grid>
 					)}
-					<ImageWrapper item xs key={"image"} className={classes?.imgWrapper}>
+					<ImageWrapper
+						size={"grow"}
+						key={"image"}
+						className={classes?.imgWrapper}
+					>
 						{value && (
 							<PreviewClassic
 								src={value}
@@ -481,8 +485,7 @@ const ImageSelector = (inProps: ImageSelectorProps) => {
 							/>
 						)}
 						<ImageWrapper
-							item
-							xs
+							size={"grow"}
 							key={"image"}
 							className={classes?.imgWrapper}
 							onBlur={props.onBlur}
@@ -527,14 +530,13 @@ const ImageSelector = (inProps: ImageSelectorProps) => {
 										className={classes?.modernFullHeightGrid}
 									>
 										<Grid
-											item
-											xs
 											container
 											direction={"column"}
 											justifyContent={"space-around"}
 											wrap={"nowrap"}
+											size="grow"
 										>
-											<Grid item>
+											<Grid>
 												<ModernUploadLabel
 													component={"h1"}
 													variant={"h5"}
@@ -547,14 +549,14 @@ const ImageSelector = (inProps: ImageSelectorProps) => {
 												</ModernUploadLabel>
 											</Grid>
 										</Grid>
-										<Grid item>
+										<Grid>
 											<Grid
 												container
 												wrap={"nowrap"}
 												spacing={0}
 												justifyContent={"space-between"}
 											>
-												<Grid item>
+												<Grid>
 													<ModernFormatsLabel
 														className={classes?.modernFormatsLabel}
 													>
@@ -563,7 +565,7 @@ const ImageSelector = (inProps: ImageSelectorProps) => {
 															""}
 													</ModernFormatsLabel>
 												</Grid>
-												<Grid item>
+												<Grid>
 													<ModernFormatIcon
 														className={classes?.modernFormatIcon}
 													/>

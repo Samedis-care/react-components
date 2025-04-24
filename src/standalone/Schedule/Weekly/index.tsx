@@ -6,7 +6,7 @@ import {
 	Button,
 	CircularProgress,
 	Divider,
-	Grid,
+	Grid2 as Grid,
 	IconButton,
 	Menu,
 	styled,
@@ -243,10 +243,10 @@ const WeekView = (inProps: WeekViewProps) => {
 			alignContent={"space-between"}
 			className={className}
 		>
-			<Grid item xs={12} container wrap={"nowrap"}>
-				<Grid item xs>
+			<Grid container wrap={"nowrap"} size={12}>
+				<Grid size="grow">
 					<Grid container>
-						<Grid item>
+						<Grid>
 							<TodayBtn onClick={today} className={classes?.todayBtn}>
 								{t("standalone.schedule.today")} (
 								{now
@@ -255,7 +255,7 @@ const WeekView = (inProps: WeekViewProps) => {
 								)
 							</TodayBtn>
 						</Grid>
-						<Grid item>
+						<Grid>
 							{filterCount > 0 && (
 								<FilterWrapper px={2} className={classes?.filterWrapper}>
 									{(() => {
@@ -275,9 +275,9 @@ const WeekView = (inProps: WeekViewProps) => {
 						</Grid>
 					</Grid>
 				</Grid>
-				<Grid item>
+				<Grid>
 					<Grid container justifyContent={"center"}>
-						<Grid item>
+						<Grid>
 							<IconButton onClick={prevWeek} size="large">
 								<ArrowBackIos />
 							</IconButton>
@@ -307,9 +307,9 @@ const WeekView = (inProps: WeekViewProps) => {
 						</Grid>
 					</Grid>
 				</Grid>
-				<Grid item xs container justifyContent={"flex-end"}>
+				<Grid container justifyContent={"flex-end"} size="grow">
 					{(filterCount > 1 || actions.length > 0) && (
-						<Grid item>
+						<Grid>
 							<FilterWrapper px={2} className={classes?.filterWrapper}>
 								{filterCount > 2 || actions.length > 1 ? (
 									<>
@@ -326,7 +326,7 @@ const WeekView = (inProps: WeekViewProps) => {
 													{Object.entries(filters).map(
 														([name, filter], idx) =>
 															idx !== 0 && (
-																<Grid key={"filter-" + name} item xs={12}>
+																<Grid key={"filter-" + name} size={12}>
 																	<ScheduleFilterRenderer
 																		{...filter}
 																		name={name}
@@ -341,7 +341,7 @@ const WeekView = (inProps: WeekViewProps) => {
 															),
 													)}
 													{filterCount > 2 && (
-														<Grid item key={"divider"} xs={12}>
+														<Grid key={"divider"} size={12}>
 															<Divider />
 														</Grid>
 													)}
@@ -349,11 +349,7 @@ const WeekView = (inProps: WeekViewProps) => {
 														actions.map(
 															(action, idx) =>
 																idx !== 0 && (
-																	<Grid
-																		item
-																		key={"action-" + action.id}
-																		xs={12}
-																	>
+																	<Grid key={"action-" + action.id} size={12}>
 																		<Button
 																			onClick={action.onClick}
 																			disabled={action.disabled}
@@ -380,7 +376,7 @@ const WeekView = (inProps: WeekViewProps) => {
 											if (actions.length > 0) {
 												const action = actions[0];
 												ret.push(
-													<Grid item key={"action-" + action.id}>
+													<Grid key={"action-" + action.id}>
 														<Button
 															onClick={action.onClick}
 															disabled={action.disabled}
@@ -393,7 +389,7 @@ const WeekView = (inProps: WeekViewProps) => {
 											if (filterCount > 1) {
 												const [name, filter] = Object.entries(filters)[1];
 												ret.push(
-													<Grid item key={"filter-" + name}>
+													<Grid key={"filter-" + name}>
 														<ScheduleFilterRenderer
 															{...filter}
 															name={name}
@@ -414,12 +410,12 @@ const WeekView = (inProps: WeekViewProps) => {
 				</Grid>
 			</Grid>
 			{loadError && (
-				<Grid item xs={12}>
+				<Grid size={12}>
 					<Typography align={"center"}>{loadError.message}</Typography>
 				</Grid>
 			)}
 			{!data && !loadError && (
-				<LoadWrapper item xs={12}>
+				<LoadWrapper size={12}>
 					<Grid container justifyContent={"space-around"}>
 						<CircularProgress />
 					</Grid>
@@ -427,12 +423,11 @@ const WeekView = (inProps: WeekViewProps) => {
 			)}
 			{data && (
 				<Grid
-					item
-					xs={12}
 					container
 					alignItems={"stretch"}
 					alignContent={"space-between"}
 					wrap={"nowrap"}
+					size={12}
 				>
 					{weekdays.map((day, dayIdx) => {
 						const date = now.clone().add(weekOffset, "weeks").add(day, "days");

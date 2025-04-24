@@ -2,7 +2,7 @@ import React from "react";
 import SignalPortletItem, { SignalPortletItemProps } from "./SignalPortletItem";
 import {
 	Divider,
-	Grid,
+	Grid2 as Grid,
 	IconButton,
 	List,
 	Paper,
@@ -121,18 +121,14 @@ const SignalPortlet = (inProps: SignalPortletProps) => {
 					className={props.classes?.innerContainer}
 				>
 					<Grid
-						item
-						xs
 						container
 						spacing={1}
 						justifyContent={"flex-start"}
 						direction={"column"}
 						wrap={"nowrap"}
+						size="grow"
 					>
-						<SignalPortletTitleWrapper
-							item
-							className={props.classes?.titleWrapper}
-						>
+						<SignalPortletTitleWrapper className={props.classes?.titleWrapper}>
 							<SignalPortletTitle
 								variant={"h5"}
 								align={"center"}
@@ -141,10 +137,10 @@ const SignalPortlet = (inProps: SignalPortletProps) => {
 								{props.title}
 							</SignalPortletTitle>
 						</SignalPortletTitleWrapper>
-						<SignalPortletDivider item className={props.classes?.divider}>
+						<SignalPortletDivider className={props.classes?.divider}>
 							<Divider />
 						</SignalPortletDivider>
-						<Grid item>
+						<Grid>
 							<SignalPortletList className={props.classes?.list}>
 								{props.items.map((item, index) => (
 									<SignalPortletItemStyled
@@ -158,7 +154,6 @@ const SignalPortlet = (inProps: SignalPortletProps) => {
 					</Grid>
 					{(props.updatedAt || props.onRefresh) && (
 						<Grid
-							item
 							container
 							spacing={1}
 							justifyContent={"flex-end"}
@@ -166,7 +161,7 @@ const SignalPortlet = (inProps: SignalPortletProps) => {
 							alignContent={"center"}
 						>
 							{props.updatedAt && (
-								<Grid item>
+								<Grid>
 									<Tooltip
 										title={new Date(props.updatedAt).toLocaleString(
 											i18n.language,
@@ -181,7 +176,7 @@ const SignalPortlet = (inProps: SignalPortletProps) => {
 								</Grid>
 							)}
 							{props.onRefresh && (
-								<Grid item>
+								<Grid>
 									<SignalPortletRefreshIconButton
 										onClick={props.onRefresh}
 										size={"small"}

@@ -4,7 +4,7 @@ import {
 	Divider,
 	FormControl,
 	FormControlLabel,
-	Grid,
+	Grid2 as Grid,
 	Radio,
 	RadioGroup,
 	styled,
@@ -13,7 +13,7 @@ import {
 } from "@mui/material";
 import { useCustomFilterActiveContext } from "./Header/FilterBar";
 import { useDataGridProps } from "./DataGrid";
-import { GridSize } from "@mui/material/Grid/Grid";
+import { GridSize } from "@mui/material/Grid2";
 import { Breakpoint } from "@mui/material/styles";
 import SingleSelect from "../Selector/SingleSelect";
 
@@ -50,11 +50,11 @@ export interface GridSingleSelectFilterProps {
 	/**
 	 * Breakpoints used in dialog
 	 */
-	dialogBreakpoints?: Partial<Record<Breakpoint, boolean | GridSize>>;
+	dialogBreakpoints?: Partial<Record<Breakpoint, GridSize>>;
 	/**
 	 * Breakpoints used in filter bar
 	 */
-	barBreakpoints?: Partial<Record<Breakpoint, boolean | GridSize>>;
+	barBreakpoints?: Partial<Record<Breakpoint, GridSize>>;
 }
 
 export const DataGridCustomFilterSingle = styled(SingleSelect, {
@@ -138,22 +138,18 @@ const GridSingleSelectFilter = (inProps: GridSingleSelectFilterProps) => {
 	if (dialog) {
 		return (
 			<GridSingleSelectFilterDialogRoot
-				item
-				xs={12}
-				md={6}
-				lg={3}
-				{...dialogBreakpoints}
+				size={{ xs: 12, md: 6, lg: 3, ...dialogBreakpoints }}
 			>
 				<FormControl component={"fieldset"}>
 					<RadioGroup value={selected} onChange={handleDialogRadioToggle}>
-						<Grid item xs={12} container>
+						<Grid container size={12}>
 							{label && (
-								<Grid item xs={12}>
+								<Grid size={12}>
 									<Typography>{label}</Typography>
 								</Grid>
 							)}
 							{options.map((option) => (
-								<Grid item xs={12} key={option.value}>
+								<Grid key={option.value} size={12}>
 									{option.isDivider ? (
 										<Divider />
 									) : option.isSmallLabel ? (
@@ -175,7 +171,7 @@ const GridSingleSelectFilter = (inProps: GridSingleSelectFilterProps) => {
 		);
 	} else {
 		return (
-			<GridSingleSelectFilterBarRoot item xs={4} {...barBreakpoints}>
+			<GridSingleSelectFilterBarRoot size={{ xs: 4, ...barBreakpoints }}>
 				<FormControl component={"fieldset"} fullWidth>
 					<DataGridCustomFilterSingle
 						label={label}

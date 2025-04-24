@@ -1,5 +1,5 @@
 import React, { useCallback } from "react";
-import { Grid, Typography } from "@mui/material";
+import { Grid2 as Grid, Typography } from "@mui/material";
 import {
 	KeyboardArrowUp as ClosedIcon,
 	KeyboardArrowDown as ExpandedIcon,
@@ -37,7 +37,6 @@ const TreeViewDefaultRenderer = (props: TreeViewRendererProps) => {
 		>
 			{hasChildren && (
 				<Grid
-					item
 					style={{ height: 24 }}
 					key={"expandable"}
 					onClick={expandLocked ? undefined : handleExpand}
@@ -46,11 +45,11 @@ const TreeViewDefaultRenderer = (props: TreeViewRendererProps) => {
 				</Grid>
 			)}
 			{icon && (
-				<Grid item key={"icon"} onClick={onClick} onAuxClick={onAuxClick}>
+				<Grid key={"icon"} onClick={onClick} onAuxClick={onAuxClick}>
 					{icon}
 				</Grid>
 			)}
-			<Grid item xs key={"label"} onClick={onClick} onAuxClick={onAuxClick}>
+			<Grid key={"label"} onClick={onClick} onAuxClick={onAuxClick} size="grow">
 				<Typography noWrap>{label}</Typography>
 			</Grid>
 		</Grid>

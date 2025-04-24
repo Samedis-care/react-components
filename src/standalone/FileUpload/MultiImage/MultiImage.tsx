@@ -11,7 +11,7 @@ import {
 	Dialog,
 	DialogContent,
 	DialogTitle,
-	Grid,
+	Grid2 as Grid,
 	IconButton,
 	Link,
 	styled,
@@ -347,7 +347,7 @@ const MultiImage = (inProps: MultiImageProps) => {
 		<Root className={combineClassNames([className, classes?.root])}>
 			<GroupBox label={label}>
 				<RootContainer container spacing={1} className={classes?.rootContainer}>
-					<ImageItem item xs={12} className={classes?.imageItem}>
+					<ImageItem size={12} className={classes?.imageItem}>
 						<ImageBox
 							image={
 								images[currentImage]?.image ?? placeholderImage ?? uploadImage
@@ -371,14 +371,13 @@ const MultiImage = (inProps: MultiImageProps) => {
 						/>
 					</ImageItem>
 					<Grid
-						item
-						xs={12}
 						container
 						alignContent={"space-between"}
 						wrap={"nowrap"}
 						spacing={1}
+						size={12}
 					>
-						<Grid item xs>
+						<Grid size="grow">
 							<ImageDots
 								total={images.length}
 								active={currentImage}
@@ -386,7 +385,7 @@ const MultiImage = (inProps: MultiImageProps) => {
 							/>
 						</Grid>
 						{!readOnly && (
-							<Grid item>
+							<Grid>
 								<EditLabel
 									component={Link}
 									variant={"body2"}
@@ -419,7 +418,7 @@ const MultiImage = (inProps: MultiImageProps) => {
 					>
 						<DialogTitle>
 							<Grid container justifyContent={"flex-end"}>
-								<Grid item>
+								<Grid>
 									<IconButton onClick={closeDialog} size="large">
 										<CloseIcon />
 									</IconButton>
@@ -444,10 +443,11 @@ const MultiImage = (inProps: MultiImageProps) => {
 								))}
 								{!readOnly && remainingFiles > 0 && (
 									<Grid
-										item
-										xs={previewSize ? undefined : 12}
-										md={previewSize ? undefined : 6}
-										lg={previewSize ? undefined : 3}
+										size={{
+											xs: previewSize ? undefined : 12,
+											md: previewSize ? undefined : 6,
+											lg: previewSize ? undefined : 3,
+										}}
 									>
 										<ImageBox
 											width={previewSize}
@@ -461,12 +461,13 @@ const MultiImage = (inProps: MultiImageProps) => {
 								)}
 								{additionalDialogContent?.map((elem, i) => (
 									<Grid
-										item
-										xs={previewSize ? undefined : 12}
-										md={previewSize ? undefined : 6}
-										lg={previewSize ? undefined : 3}
 										key={`add-${i}`}
 										style={previewSize ? { width: previewSize } : undefined}
+										size={{
+											xs: previewSize ? undefined : 12,
+											md: previewSize ? undefined : 6,
+											lg: previewSize ? undefined : 3,
+										}}
 									>
 										{elem}
 									</Grid>

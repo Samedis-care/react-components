@@ -1,6 +1,6 @@
 import React, { useCallback } from "react";
 import {
-	Grid,
+	Grid2 as Grid,
 	styled,
 	SvgIconProps,
 	Tooltip,
@@ -457,67 +457,62 @@ const File = (inProps: FileProps) => {
 
 	if (variant === "box") {
 		return (
-			<Grid item className={className} style={{ width: props.size }}>
+			<Grid className={className} style={{ width: props.size }}>
 				<Grid container spacing={2}>
-					<IconContainer item xs={12} className={classes?.iconContainer}>
+					<IconContainer size={12} className={classes?.iconContainer}>
 						{removeBtn}
 						{renderIcon()}
 					</IconContainer>
-					<Grid item xs={12}>
-						{renderName()}
-					</Grid>
+					<Grid size={12}>{renderName()}</Grid>
 				</Grid>
 			</Grid>
 		);
 	} else if (variant === "list") {
 		return (
 			<Grid
-				item
-				xs={12}
 				onClick={handleListClick}
 				container
 				spacing={2}
 				alignItems={"stretch"}
 				wrap={"nowrap"}
 				className={className}
+				size={12}
 			>
-				<Grid item>{renderIcon()}</Grid>
-				<ListEntryText item xs className={classes?.listEntryText}>
+				<Grid>{renderIcon()}</Grid>
+				<ListEntryText size={"grow"} className={classes?.listEntryText}>
 					{renderName()}
 				</ListEntryText>
-				{removeBtn && <Grid item>{removeBtn}</Grid>}
+				{removeBtn && <Grid>{removeBtn}</Grid>}
 			</Grid>
 		);
 	} else if (variant === "compact-list") {
 		return (
 			<CompactListWrapper
-				item
 				onClick={handleListClick}
 				className={combineClassNames([className, classes?.compactListWrapper])}
 			>
 				<Grid container spacing={2} alignItems={"stretch"} wrap={"nowrap"}>
-					<Grid item>{renderIcon()}</Grid>
-					<ListEntryText item className={classes?.listEntryText}>
+					<Grid>{renderIcon()}</Grid>
+					<ListEntryText className={classes?.listEntryText}>
 						{renderName()}
 					</ListEntryText>
-					{removeBtn && <Grid item>{removeBtn}</Grid>}
+					{removeBtn && <Grid>{removeBtn}</Grid>}
 				</Grid>
 			</CompactListWrapper>
 		);
 	} else if (variant === "icon-only") {
 		return (
 			<CompactListWrapper
-				item
 				onClick={handleListClick}
 				className={combineClassNames([className, classes?.compactListWrapper])}
 			>
 				<Grid container spacing={2} alignItems={"stretch"} wrap={"nowrap"}>
-					<Grid item>
+					<Grid>
 						<Tooltip title={props.name}>
 							<span>{renderIcon()}</span>
 						</Tooltip>
 					</Grid>
-					{removeBtn && <Grid item>{removeBtn}</Grid>}
+					{removeBtn && <Grid>{removeBtn}</Grid>}
 				</Grid>
 			</CompactListWrapper>
 		);

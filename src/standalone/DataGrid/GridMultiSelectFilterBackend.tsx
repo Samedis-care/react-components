@@ -1,9 +1,9 @@
 import React, { useEffect, useMemo } from "react";
-import { Grid, styled, useThemeProps } from "@mui/material";
+import { Grid2 as Grid, styled, useThemeProps } from "@mui/material";
 import { useCustomFilterActiveContext } from "./Header/FilterBar";
 import { useDataGridProps } from "./DataGrid";
 import { Breakpoint } from "@mui/material/styles";
-import { GridSize } from "@mui/material/Grid/Grid";
+import { GridSize } from "@mui/material/Grid2";
 import { MultiSelectorData } from "../Selector";
 import BackendMultipleSelect, {
 	BackendMultipleSelectProps,
@@ -27,11 +27,11 @@ export interface GridMultiSelectFilterBackendProps<
 	/**
 	 * Breakpoints used in dialog
 	 */
-	dialogBreakpoints?: Partial<Record<Breakpoint, boolean | GridSize>>;
+	dialogBreakpoints?: Partial<Record<Breakpoint, GridSize>>;
 	/**
 	 * Breakpoints used in filter bar
 	 */
-	barBreakpoints?: Partial<Record<Breakpoint, boolean | GridSize>>;
+	barBreakpoints?: Partial<Record<Breakpoint, GridSize>>;
 }
 
 export const DataGridCustomFilterMultiBackend = styled(BackendMultipleSelect, {
@@ -99,11 +99,7 @@ const GridMultiSelectFilterBackend = <
 	if (dialog) {
 		return (
 			<GridMultiSelectFilterDialogRoot
-				item
-				xs={12}
-				md={6}
-				lg={3}
-				{...dialogBreakpoints}
+				size={{ xs: 12, md: 6, lg: 3, ...dialogBreakpoints }}
 			>
 				<Grid container>
 					<BackendMultiSelect
@@ -116,7 +112,7 @@ const GridMultiSelectFilterBackend = <
 		);
 	} else {
 		return (
-			<GridMultiSelectFilterBarRoot item xs={4} {...barBreakpoints}>
+			<GridMultiSelectFilterBarRoot size={{ xs: 4, ...barBreakpoints }}>
 				<DataGridCustomFilterMultiBackend
 					{...selectorProps}
 					classes={selectorClasses}

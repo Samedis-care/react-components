@@ -7,7 +7,7 @@ import React, {
 	useRef,
 	useState,
 } from "react";
-import { Grid, useMediaQuery } from "@mui/material";
+import { Grid2 as Grid, useMediaQuery } from "@mui/material";
 import {
 	DataGridCustomDataType,
 	DataGridFilterBarBox,
@@ -144,7 +144,7 @@ const FilterBar = () => {
 			>
 				{FilterBarView &&
 					(enableDialog ? (
-						<Grid item>
+						<Grid>
 							<CustomFiltersButton onClick={openDialog} />
 						</Grid>
 					) : (

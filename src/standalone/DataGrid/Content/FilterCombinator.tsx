@@ -1,5 +1,5 @@
 import React, { useCallback } from "react";
-import { Grid, Switch, Typography } from "@mui/material";
+import { Grid2 as Grid, Switch, Typography } from "@mui/material";
 import type { FilterComboType } from "./FilterEntry";
 
 interface IProps {
@@ -25,7 +25,7 @@ const FilterCombinator = (props: IProps) => {
 	);
 
 	return (
-		<Grid item xs={12}>
+		<Grid size={12}>
 			<Typography component="div">
 				<Grid
 					component="label"
@@ -34,11 +34,11 @@ const FilterCombinator = (props: IProps) => {
 					alignItems="center"
 					spacing={1}
 				>
-					<Grid item>AND</Grid>
-					<Grid item>
+					<Grid>AND</Grid>
+					<Grid>
 						<Switch checked={value === "or"} onChange={handleChange} />
 					</Grid>
-					<Grid item>OR</Grid>
+					<Grid>OR</Grid>
 				</Grid>
 			</Typography>
 		</Grid>

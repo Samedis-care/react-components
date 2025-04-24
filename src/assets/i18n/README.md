@@ -2,7 +2,6 @@
 
 Localization is done here: https://localize.samedis.care/projects/components-care/
 
-
 ## Adding new languages
 
 1. Create a new folder with the language code
@@ -11,5 +10,5 @@ Localization is done here: https://localize.samedis.care/projects/components-car
    - `cd <project-root>/scripts`
    - `python3 make_country_data.py`
 4. Register the MUI localization in `src/standalone/LocalizedDateTimePickers/useMuiLocaleData` if applicable
-   - https://mui.com/x/react-date-pickers/localization/ 
+   - https://mui.com/x/react-date-pickers/localization/
    - https://github.com/mui/mui-x/tree/master/packages/x-date-pickers/src/locales

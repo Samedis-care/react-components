@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Button, Divider, Grid } from "@mui/material";
+import { Box, Button, Divider, Grid2 as Grid } from "@mui/material";
 import {
 	DataGridContentOverlayClosed,
 	DataGridContentOverlayPaper,
@@ -54,7 +54,7 @@ const FilterDialog = (props: DataGridCustomFilterDialogProps) => {
 			<DataGridContentOverlayClosed className={classes?.contentOverlayClosed}>
 				<Divider />
 				<Grid container justifyContent={"flex-end"}>
-					<Grid item>
+					<Grid>
 						<Box m={2}>
 							<Button onClick={props.closeFilterDialog} variant={"contained"}>
 								{t("standalone.data-grid.settings.close") || ""}

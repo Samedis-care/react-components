@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from "react";
 import {
-	Grid,
+	Grid2 as Grid,
 	IconButton,
 	MenuProps,
 	Tooltip,
@@ -119,7 +119,7 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 				props.exporters ||
 				props.handleImport) ? (
 				<>
-					<Grid item key={"divider-1"}>
+					<Grid key={"divider-1"}>
 						<VerticalDivider />
 					</Grid>
 					<IconButton color={"primary"} onClick={openSettingsMenu} size="large">
@@ -139,11 +139,11 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 					{props.toggleSettings && (
 						<>
 							{props.hasCustomFilterBar && (
-								<Grid item key={"divider-1"}>
+								<Grid key={"divider-1"}>
 									<VerticalDivider />
 								</Grid>
 							)}
-							<Grid item key={"settings"}>
+							<Grid key={"settings"}>
 								{bpMdUp ? (
 									<ComponentWithLabel
 										control={
@@ -173,10 +173,10 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 					)}
 					{!props.hideReset && (
 						<>
-							<Grid item key={"divider-4"}>
+							<Grid key={"divider-4"}>
 								<VerticalDivider />
 							</Grid>
-							<Grid item key={"reset"}>
+							<Grid key={"reset"}>
 								{bpMdUp ? (
 									<ComponentWithLabel
 										control={
@@ -204,10 +204,10 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 					)}
 					{props.exporters && (
 						<>
-							<Grid item key={"divider-3"}>
+							<Grid key={"divider-3"}>
 								<VerticalDivider />
 							</Grid>
-							<Grid item key={"export"}>
+							<Grid key={"export"}>
 								{bpMdUp ? (
 									<ComponentWithLabel
 										control={
@@ -242,10 +242,10 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 					)}
 					{props.handleImport && (
 						<>
-							<Grid item>
+							<Grid>
 								<VerticalDivider />
 							</Grid>
-							<Grid item key={"import"}>
+							<Grid key={"import"}>
 								{bpMdUp ? (
 									<ComponentWithLabel
 										control={
@@ -277,9 +277,8 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 			)}
 			{addButtons.length > 0 && (
 				<>
-					<Grid item xs key={"divider-2"} />
+					<Grid key={"divider-2"} size="grow" />
 					<Grid
-						item
 						container
 						key={"new"}
 						justifyContent={"flex-end"}
@@ -299,7 +298,7 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 								</ActionButton>
 							);
 							return (
-								<Grid item key={index.toString()}>
+								<Grid key={index.toString()}>
 									{!entry.onClick && entry.disableHint ? (
 										<Tooltip title={entry.disableHint}>
 											<span>{btn}</span>

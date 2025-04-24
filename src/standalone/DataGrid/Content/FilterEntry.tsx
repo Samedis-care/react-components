@@ -3,7 +3,7 @@ import {
 	Checkbox,
 	FormControl,
 	FormControlLabel,
-	Grid,
+	Grid2 as Grid,
 	List,
 	ListItemText,
 	MenuItem,
@@ -112,7 +112,7 @@ export interface DataGridContentFilterEntryProps {
 }
 
 const ENUM_FILTER_MAGIC_EMPTY = "__MAGIC_EMPTY__";
-const TYPOGRAPHY_PROPS = { noWrap: true };
+const LIST_ITEM_SLOT_PROPS = { primary: { noWrap: true } };
 
 const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 	const { onChange, depth, close } = props;
@@ -141,9 +141,10 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 				? ["inSet"]
 				: ["equals", "matches"];
 		return (
+			// fallback to broken UI, user can still select filter type manually
 			defaults.find((filterType) =>
 				checkSupport(props.valueType, filterType),
-			) || defaults[0] // fallback to broken UI, user can still select filter type manually
+			) || defaults[0]
 		);
 	})();
 	let filterType: FilterType = props.value?.type || defaultFilterType;
@@ -413,9 +414,9 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 	return (
 		<>
 			{isFirstFilter && props.value?.value1 && (
-				<Grid item xs={12}>
+				<Grid size={12}>
 					<Grid container justifyContent={"flex-end"} alignItems={"center"}>
-						<Grid item>
+						<Grid>
 							<Tooltip
 								title={
 									t("standalone.data-grid.content.reset-column-filter") ?? ""
@@ -442,13 +443,13 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 				props.valueType === "date" ||
 				props.valueType === "datetime") && (
 				<>
-					<Grid item xs={12}>
+					<Grid size={12}>
 						<Select onChange={onFilterTypeChange} value={filterType} fullWidth>
 							{filterTypeMenuItems}
 						</Select>
 					</Grid>
 					{filterType !== "empty" && filterType !== "notEmpty" && (
-						<Grid item xs={12}>
+						<Grid size={12}>
 							{props.valueType === "date" ? (
 								<LocalizedKeyboardDatePicker
 									value={filterValue === "" ? null : moment(filterValue)}
@@ -474,7 +475,7 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 						</Grid>
 					)}
 					{filterType === "inRange" && (
-						<Grid item xs={12}>
+						<Grid size={12}>
 							{props.valueType === "date" ? (
 								<LocalizedKeyboardDatePicker
 									value={filterValue2 === "" ? null : moment(filterValue2)}
@@ -497,7 +498,7 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 				</>
 			)}
 			{props.valueType === "boolean" && (
-				<Grid item xs={12}>
+				<Grid size={12}>
 					<FormControl>
 						<RadioGroup value={filterValue} onChange={onFilterValueChangeBool}>
 							<FormControlLabel
@@ -522,7 +523,7 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 			{props.valueType === "enum" && (
 				<>
 					{(props.valueData as DataGridSetFilterData).length > 10 && (
-						<Grid item xs={12}>
+						<Grid size={12}>
 							<TextField
 								value={enumFilterSearch}
 								onChange={(evt: React.ChangeEvent<HTMLInputElement>) =>
@@ -537,8 +538,7 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 						</Grid>
 					)}
 					<DataGridSetFilterContainer
-						item
-						xs={12}
+						size={12}
 						className={classes?.setFilterContainer}
 					>
 						<List>
@@ -557,7 +557,7 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 										}
 										onChange={onFilterValueChangeEnumAll}
 									/>
-									<ListItemText primaryTypographyProps={TYPOGRAPHY_PROPS}>
+									<ListItemText slotProps={LIST_ITEM_SLOT_PROPS}>
 										{t("standalone.data-grid.content.set-filter.select-all")}
 									</ListItemText>
 								</DataGridSetFilterListItem>
@@ -571,7 +571,7 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 											checked={enumFilterInverted}
 											onChange={onFilterTypeChangeEnum}
 										/>
-										<ListItemText primaryTypographyProps={TYPOGRAPHY_PROPS}>
+										<ListItemText slotProps={LIST_ITEM_SLOT_PROPS}>
 											{t("standalone.data-grid.content.set-filter.invert")}
 										</ListItemText>
 									</DataGridSetFilterListItem>
@@ -618,9 +618,7 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 														onChange={onFilterValueChangeEnum}
 														disabled={entry.disabled}
 													/>
-													<ListItemText
-														primaryTypographyProps={TYPOGRAPHY_PROPS}
-													>
+													<ListItemText slotProps={LIST_ITEM_SLOT_PROPS}>
 														{(entry.getLabel || entry.getLabelText)()}
 													</ListItemText>
 												</>

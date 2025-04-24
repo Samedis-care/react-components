@@ -1,5 +1,11 @@
 import React, { SyntheticEvent, useCallback, useState } from "react";
-import { Box, Grid, Popover, PopoverOrigin, Tooltip } from "@mui/material";
+import {
+	Box,
+	Grid2 as Grid,
+	Popover,
+	PopoverOrigin,
+	Tooltip,
+} from "@mui/material";
 import { ArrowDownward, ArrowUpward } from "@mui/icons-material";
 import FilterEntry, { IFilterDef } from "./FilterEntry";
 import { ModelFilterType } from "../../../backend-integration/Model";
@@ -119,7 +125,6 @@ const ColumnHeaderContent = (
 		<>
 			<Grid container justifyContent={"flex-start"} wrap={"nowrap"}>
 				<DataGridColumnHeaderLabel
-					item
 					className={classes?.columnHeaderLabel}
 					key={"header"}
 				>
@@ -136,18 +141,15 @@ const ColumnHeaderContent = (
 						</span>
 					</Tooltip>
 				</DataGridColumnHeaderLabel>
-				<DataGridColumnHeaderSortIcon
-					item
-					className={classes?.columnHeaderSortIcon}
-				>
+				<DataGridColumnHeaderSortIcon className={classes?.columnHeaderSortIcon}>
 					{props.sort === -1 && <ArrowDownward />}
 					{props.sort === 1 && <ArrowUpward />}
 				</DataGridColumnHeaderSortIcon>
-				<Grid item xs>
+				<Grid size="grow">
 					{props.sort !== 0 && props.sortOrder?.toString()}
 				</Grid>
 				{props.filterable && (
-					<Grid item key={"filter"}>
+					<Grid key={"filter"}>
 						<Tooltip title={t("standalone.data-grid.content.filter") || ""}>
 							<DataGridColumnHeaderFilterButton
 								className={combineClassNames([

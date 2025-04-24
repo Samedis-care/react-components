@@ -1,5 +1,11 @@
 import React, { useCallback } from "react";
-import { Grid, styled, Switch, Typography, useThemeProps } from "@mui/material";
+import {
+	Grid2 as Grid,
+	styled,
+	Switch,
+	Typography,
+	useThemeProps,
+} from "@mui/material";
 import combineClassNames from "../../utils/combineClassNames";
 
 export interface InlineSwitchProps {
@@ -99,10 +105,10 @@ const InlineSwitch = (inProps: InlineSwitchProps) => {
 					variant={"caption"}
 				>
 					<Grid component="label" container alignItems="center" spacing={1}>
-						<Grid item>
+						<Grid>
 							<AntSwitch checked={value} onChange={handleSwitchChange} />
 						</Grid>
-						<Grid item>{label}</Grid>
+						<Grid>{label}</Grid>
 					</Grid>
 				</StyledSwitchWrapper>
 			)}

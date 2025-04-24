@@ -14,7 +14,7 @@ import {
 	Collapse,
 	Divider,
 	FormControlLabelProps,
-	Grid,
+	Grid2 as Grid,
 	IconButton,
 	ListItem,
 	Paper,
@@ -1333,10 +1333,10 @@ const DataGrid = (inProps: DataGridProps) => {
 									value={activeCustomFiltersPack}
 								>
 									<StatePersistence />
-									<HeaderWrapper item className={classes?.header}>
+									<HeaderWrapper className={classes?.header}>
 										<Header />
 									</HeaderWrapper>
-									<ContentWrapper item xs className={classes?.content}>
+									<ContentWrapper size={"grow"} className={classes?.content}>
 										<Settings columns={columns} />
 										<CustomFilterDialog />
 										<Content
@@ -1348,7 +1348,7 @@ const DataGrid = (inProps: DataGridProps) => {
 										/>
 									</ContentWrapper>
 									{!disableFooter && (
-										<FooterWrapper item className={classes?.footer}>
+										<FooterWrapper className={classes?.footer}>
 											<Footer />
 										</FooterWrapper>
 									)}

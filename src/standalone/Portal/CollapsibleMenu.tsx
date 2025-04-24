@@ -1,5 +1,10 @@
 import React, { CSSProperties, useCallback, useState } from "react";
-import { Grid, IconButton, styled, useThemeProps } from "@mui/material";
+import {
+	Grid2 as Grid,
+	IconButton,
+	styled,
+	useThemeProps,
+} from "@mui/material";
 import { DoubleArrow } from "@mui/icons-material";
 import { usePortalLayoutContext } from "./Layout";
 import combineClassNames from "../../utils/combineClassNames";
@@ -88,8 +93,7 @@ const CollapsibleMenu = (inProps: CollapsibleMenuProps) => {
 			className={combineClassNames([className, classes?.root])}
 		>
 			<Content
-				item
-				xs
+				size={"grow"}
 				style={{ width: props.width, display: collapsed ? "none" : undefined }}
 				className={classes?.content}
 				key={"content"}
@@ -97,7 +101,7 @@ const CollapsibleMenu = (inProps: CollapsibleMenuProps) => {
 				{props.children}
 			</Content>
 			{!mobile && (
-				<Bar item key={"bar"} className={classes?.bar}>
+				<Bar key={"bar"} className={classes?.bar}>
 					<StyledButton
 						onClick={toggleCollapsed}
 						className={classes?.button}

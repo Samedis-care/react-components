@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { CrudImporterStepProps, isFieldImportable } from "./index";
-import { Grid, TextField, Typography } from "@mui/material";
+import { Grid2 as Grid, TextField, Typography } from "@mui/material";
 import Model, {
 	PageVisibility,
 	useModelMutation,
@@ -160,26 +160,26 @@ const Step4Import = (props: CrudImporterStepProps) => {
 
 	return (
 		<Grid container spacing={2}>
-			<Grid item xs={12}>
+			<Grid size={12}>
 				<Typography>
 					{t("backend-components.crud.import.queue", { COUNT: counters.todo })}
 				</Typography>
 			</Grid>
-			<Grid item xs={12}>
+			<Grid size={12}>
 				<Typography>
 					{t("backend-components.crud.import.success", {
 						COUNT: counters.success,
 					})}
 				</Typography>
 			</Grid>
-			<Grid item xs={12}>
+			<Grid size={12}>
 				<Typography>
 					{t("backend-components.crud.import.failed", {
 						COUNT: counters.failed,
 					})}
 				</Typography>
 			</Grid>
-			<Grid item xs={12}>
+			<Grid size={12}>
 				<TextField
 					multiline
 					fullWidth

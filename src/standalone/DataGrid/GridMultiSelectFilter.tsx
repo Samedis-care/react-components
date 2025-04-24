@@ -3,7 +3,7 @@ import {
 	Checkbox,
 	Divider,
 	FormControlLabel,
-	Grid,
+	Grid2 as Grid,
 	styled,
 	Typography,
 	useThemeProps,
@@ -11,7 +11,7 @@ import {
 import { useCustomFilterActiveContext } from "./Header/FilterBar";
 import { useDataGridProps } from "./DataGrid";
 import { Breakpoint } from "@mui/material/styles";
-import { GridSize } from "@mui/material/Grid/Grid";
+import { GridSize } from "@mui/material/Grid2";
 import compareArrayContent from "../../utils/compareArrayContent";
 import { MultiSelectorData } from "../Selector";
 import BaseSelector from "../Selector/BaseSelector";
@@ -45,11 +45,11 @@ export interface GridMultiSelectFilterProps {
 	/**
 	 * Breakpoints used in dialog
 	 */
-	dialogBreakpoints?: Partial<Record<Breakpoint, boolean | GridSize>>;
+	dialogBreakpoints?: Partial<Record<Breakpoint, GridSize>>;
 	/**
 	 * Breakpoints used in filter bar
 	 */
-	barBreakpoints?: Partial<Record<Breakpoint, boolean | GridSize>>;
+	barBreakpoints?: Partial<Record<Breakpoint, GridSize>>;
 }
 
 export const DataGridCustomFilterMulti = styled(BaseSelector, {
@@ -144,20 +144,16 @@ const GridMultiSelectFilter = (inProps: GridMultiSelectFilterProps) => {
 	if (dialog) {
 		return (
 			<GridMultiSelectFilterDialogRoot
-				item
-				xs={12}
-				md={6}
-				lg={3}
-				{...dialogBreakpoints}
+				size={{ xs: 12, md: 6, lg: 3, ...dialogBreakpoints }}
 			>
 				<Grid container>
 					{label && (
-						<Grid item xs={12}>
+						<Grid size={12}>
 							<Typography>{label}</Typography>
 						</Grid>
 					)}
 					{options.map((option) => (
-						<Grid item xs={12} key={option.value}>
+						<Grid key={option.value} size={12}>
 							{option.isDivider ? (
 								<Divider />
 							) : option.isSmallLabel ? (
@@ -181,7 +177,7 @@ const GridMultiSelectFilter = (inProps: GridMultiSelectFilterProps) => {
 		);
 	} else {
 		return (
-			<GridMultiSelectFilterBarRoot item xs={4} {...barBreakpoints}>
+			<GridMultiSelectFilterBarRoot size={{ xs: 4, ...barBreakpoints }}>
 				<DataGridCustomFilterMulti<MultiSelectorData, true>
 					multiple
 					label={label}

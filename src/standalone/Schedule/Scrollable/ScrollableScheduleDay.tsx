@@ -1,5 +1,5 @@
 import React from "react";
-import { Grid, styled, useThemeProps } from "@mui/material";
+import { Grid2 as Grid, styled, useThemeProps } from "@mui/material";
 import DayContents, { IDayData } from "../Common/DayContents";
 import { Moment } from "moment";
 
@@ -28,15 +28,15 @@ const ScrollableScheduleDay = React.forwardRef(function ScrollableScheduleDay(
 		name: "CcScrollableScheduleDay",
 	});
 	return (
-		<Grid item xs={12}>
+		<Grid size={12}>
 			<Root
 				className={props.today ? "CcScrollableScheduleDay-today" : undefined}
 			>
 				<Grid container spacing={2}>
-					<Grid item xs={1} ref={ref}>
+					<Grid ref={ref} size={1}>
 						{props.moment.format("DD ddd")}
 					</Grid>
-					<Grid item xs={11}>
+					<Grid size={11}>
 						<DayContents data={props.data} />
 					</Grid>
 				</Grid>

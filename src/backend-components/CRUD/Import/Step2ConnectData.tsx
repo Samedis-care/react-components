@@ -5,7 +5,7 @@ import {
 	Card,
 	CardContent,
 	CircularProgress,
-	Grid,
+	Grid2 as Grid,
 	Table,
 	TableBody,
 	TableCell,
@@ -215,7 +215,7 @@ const Step2ConnectData = (props: CrudImporterStepProps) => {
 
 	return (
 		<Grid container spacing={2}>
-			<Grid item xs={6}>
+			<Grid size={6}>
 				<Box mb={2}>
 					<Typography variant={"h5"}>
 						{t("backend-components.crud.import.source_fields")}
@@ -248,7 +248,7 @@ const Step2ConnectData = (props: CrudImporterStepProps) => {
 					</TableBody>
 				</Table>
 			</Grid>
-			<Grid item xs={6}>
+			<Grid size={6}>
 				<Box mb={2}>
 					<Typography variant={"h5"}>
 						{t("backend-components.crud.import.destination_fields")}
@@ -260,11 +260,11 @@ const Step2ConnectData = (props: CrudImporterStepProps) => {
 						.map(([name, field]) => {
 							const convScript = state.conversionScripts[name];
 							return (
-								<Grid item xs={12} key={name}>
+								<Grid key={name} size={12}>
 									<Card>
 										<StyledCardContent>
 											<Grid container justifyContent={"space-between"}>
-												<Grid item>
+												<Grid>
 													<Typography>
 														{field.getLabel()
 															? `${field.getLabel()} (${name})`
@@ -274,7 +274,7 @@ const Step2ConnectData = (props: CrudImporterStepProps) => {
 														{field.type.getFilterType()}
 													</Typography>
 												</Grid>
-												<Grid item>
+												<Grid>
 													<Tooltip
 														title={
 															convScript
@@ -301,7 +301,7 @@ const Step2ConnectData = (props: CrudImporterStepProps) => {
 													</Tooltip>
 												</Grid>
 											</Grid>
-											<Grid item xs={12}>
+											<Grid size={12}>
 												<Box mt={2}>
 													{convScript?.error && (
 														<Typography>

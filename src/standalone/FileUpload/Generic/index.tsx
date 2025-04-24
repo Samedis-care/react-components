@@ -14,7 +14,7 @@ import {
 	styled,
 	Tooltip,
 	Typography,
-	Grid,
+	Grid2 as Grid,
 	useThemeProps,
 } from "@mui/material";
 import { AttachFile } from "@mui/icons-material";
@@ -545,7 +545,7 @@ const FileUpload = (
 					])}
 				>
 					{!readOnly && (
-						<Grid item xs key={"upload"}>
+						<Grid key={"upload"} size="grow">
 							<Button
 								startIcon={<AttachFile />}
 								variant={"contained"}
@@ -566,7 +566,7 @@ const FileUpload = (
 							/>
 						</Grid>
 					)}
-					<Grid item xs={12} key={"files"}>
+					<Grid key={"files"} size={12}>
 						<Grid
 							container
 							spacing={2}
@@ -597,7 +597,7 @@ const FileUpload = (
 									),
 							)}
 							{readOnly && files.length === 0 && (
-								<Grid item>
+								<Grid>
 									<Typography>
 										{t("standalone.file-upload.no-files")}
 									</Typography>
@@ -606,7 +606,7 @@ const FileUpload = (
 						</Grid>
 					</Grid>
 					{!readOnly && (
-						<Grid item xs={12} key={"info"}>
+						<Grid key={"info"} size={12}>
 							<FormatText className={classes?.formatText}>
 								({t("standalone.file-upload.formats")}:{" "}
 								{acceptLabel ||
@@ -641,7 +641,7 @@ const FileUpload = (
 					])}
 				>
 					{!readOnly && (
-						<Grid item xs key={"upload"}>
+						<Grid key={"upload"} size="grow">
 							<ModernUploadLabel
 								className={combineClassNames([
 									classes?.modernUploadLabel,
@@ -661,7 +661,7 @@ const FileUpload = (
 						</Grid>
 					)}
 					{files.length > 0 && (
-						<Grid item xs={12} key={"files"}>
+						<Grid key={"files"} size={12}>
 							<Box mx={1}>
 								<Grid
 									container
@@ -697,20 +697,13 @@ const FileUpload = (
 						</Grid>
 					)}
 					{readOnly && files.length === 0 && (
-						<Grid item xs={12} key={"no-files"}>
+						<Grid key={"no-files"} size={12}>
 							<Typography>{t("standalone.file-upload.no-files")}</Typography>
 						</Grid>
 					)}
 					{!readOnly && (
-						<Grid
-							item
-							xs={12}
-							key={"info"}
-							container
-							wrap={"nowrap"}
-							spacing={1}
-						>
-							<Grid item xs>
+						<Grid key={"info"} container wrap={"nowrap"} spacing={1} size={12}>
+							<Grid size="grow">
 								<FormatTextModern
 									align={"right"}
 									className={classes?.formatTextModern}

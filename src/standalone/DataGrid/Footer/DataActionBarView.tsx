@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from "react";
 import {
-	Grid,
+	Grid2 as Grid,
 	MenuProps,
 	Tooltip,
 	useMediaQuery,
@@ -92,7 +92,7 @@ const DataActionBarView = (props: DataActionBarViewProps) => {
 
 	return (
 		<Grid container wrap={"nowrap"}>
-			<Grid item key={"select-all"}>
+			<Grid key={"select-all"}>
 				<DataGridSelectAllWrapper
 					control={<SelectAll />}
 					labelText={t("standalone.data-grid.footer.select-all")}
@@ -107,10 +107,10 @@ const DataActionBarView = (props: DataActionBarViewProps) => {
 			</Grid>
 			{props.handleEdit && (
 				<>
-					<Grid item key={"divider-1"}>
+					<Grid key={"divider-1"}>
 						<VerticalDivider />
 					</Grid>
-					<Grid item key={"edit"}>
+					<Grid key={"edit"}>
 						<ComponentWithLabel
 							control={
 								<SmallestIconButton
@@ -130,10 +130,10 @@ const DataActionBarView = (props: DataActionBarViewProps) => {
 			)}
 			{(props.handleDelete || props.disableDeleteHint) && (
 				<>
-					<Grid item key={"divider-2"}>
+					<Grid key={"divider-2"}>
 						<VerticalDivider />
 					</Grid>
-					<Grid item key={"delete"}>
+					<Grid key={"delete"}>
 						{!props.handleDelete && props.disableDeleteHint ? (
 							<Tooltip title={props.disableDeleteHint}>
 								<span>{deleteBtn}</span>
@@ -146,10 +146,10 @@ const DataActionBarView = (props: DataActionBarViewProps) => {
 			)}
 			{isXs && props.customButtons && props.customButtons.length > 1 ? (
 				<React.Fragment key={"custom-buttons-menu"}>
-					<Grid item>
+					<Grid>
 						<VerticalDivider />
 					</Grid>
-					<Grid item>
+					<Grid>
 						<ComponentWithLabel
 							control={
 								<SmallestIconButton
@@ -184,10 +184,10 @@ const DataActionBarView = (props: DataActionBarViewProps) => {
 			) : (
 				props.customButtons?.map((entry) => (
 					<React.Fragment key={entry.label}>
-						<Grid item>
+						<Grid>
 							<VerticalDivider />
 						</Grid>
-						<Grid item>
+						<Grid>
 							<ComponentWithLabel
 								control={
 									<SmallestIconButton

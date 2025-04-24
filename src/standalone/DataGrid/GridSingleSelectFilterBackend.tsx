@@ -1,8 +1,13 @@
 import React, { useEffect, useMemo } from "react";
-import { FormControl, Grid, styled, useThemeProps } from "@mui/material";
+import {
+	FormControl,
+	Grid2 as Grid,
+	styled,
+	useThemeProps,
+} from "@mui/material";
 import { useCustomFilterActiveContext } from "./Header/FilterBar";
 import { useDataGridProps } from "./DataGrid";
-import { GridSize } from "@mui/material/Grid/Grid";
+import { GridSize } from "@mui/material/Grid2";
 import { Breakpoint } from "@mui/material/styles";
 import BackendSingleSelect, {
 	BackendSingleSelectProps,
@@ -38,11 +43,11 @@ export interface GridSingleSelectFilterBackendProps<
 	/**
 	 * Breakpoints used in dialog
 	 */
-	dialogBreakpoints?: Partial<Record<Breakpoint, boolean | GridSize>>;
+	dialogBreakpoints?: Partial<Record<Breakpoint, GridSize>>;
 	/**
 	 * Breakpoints used in filter bar
 	 */
-	barBreakpoints?: Partial<Record<Breakpoint, boolean | GridSize>>;
+	barBreakpoints?: Partial<Record<Breakpoint, GridSize>>;
 }
 
 const GridSingleSelectFilterBackendDialogRoot = styled(Grid, {
@@ -110,11 +115,7 @@ const GridSingleSelectFilterBackend = <
 	if (dialog) {
 		return (
 			<GridSingleSelectFilterBackendDialogRoot
-				item
-				xs={12}
-				md={6}
-				lg={3}
-				{...dialogBreakpoints}
+				size={{ xs: 12, md: 6, lg: 3, ...dialogBreakpoints }}
 			>
 				<FormControl component={"fieldset"} fullWidth>
 					<DataGridCustomFilterSingleBackend
@@ -129,7 +130,7 @@ const GridSingleSelectFilterBackend = <
 		);
 	} else {
 		return (
-			<GridSingleSelectFilterBackendBarRoot item xs={4} {...barBreakpoints}>
+			<GridSingleSelectFilterBackendBarRoot size={{ xs: 4, ...barBreakpoints }}>
 				<FormControl component={"fieldset"} fullWidth>
 					<DataGridCustomFilterSingleBackend
 						label={label}

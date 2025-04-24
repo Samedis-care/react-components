@@ -1,5 +1,5 @@
 import React, { useCallback } from "react";
-import { Checkbox, Grid, Typography } from "@mui/material";
+import { Checkbox, Grid2 as Grid, Typography } from "@mui/material";
 import {
 	KeyboardArrowUp as ClosedIcon,
 	KeyboardArrowDown as ExpandedIcon,
@@ -42,7 +42,7 @@ const TreeViewCheckboxSelectionRenderer = (props: TreeViewRendererProps) => {
 			{depth !== 0 && (
 				<>
 					{parentHasNext.slice(1).map((pHasNext, idx) => (
-						<Grid item key={idx}>
+						<Grid key={idx}>
 							<div
 								style={{
 									height: 24,
@@ -52,7 +52,7 @@ const TreeViewCheckboxSelectionRenderer = (props: TreeViewRendererProps) => {
 							/>
 						</Grid>
 					))}
-					<Grid item>
+					<Grid>
 						<div
 							style={{
 								height: 12,
@@ -72,7 +72,6 @@ const TreeViewCheckboxSelectionRenderer = (props: TreeViewRendererProps) => {
 				</>
 			)}
 			<Grid
-				item
 				style={{ height: 24 }}
 				key={"expandable"}
 				onClick={expandLocked ? undefined : handleExpand}
@@ -88,11 +87,11 @@ const TreeViewCheckboxSelectionRenderer = (props: TreeViewRendererProps) => {
 				)}
 			</Grid>
 			{icon && (
-				<Grid item key={"icon"} onClick={onClick} onAuxClick={onAuxClick}>
+				<Grid key={"icon"} onClick={onClick} onAuxClick={onAuxClick}>
 					{icon}
 				</Grid>
 			)}
-			<Grid item xs key={"label"} onClick={onClick} onAuxClick={onAuxClick}>
+			<Grid key={"label"} onClick={onClick} onAuxClick={onAuxClick} size="grow">
 				<Typography noWrap>{label}</Typography>
 			</Grid>
 		</Grid>

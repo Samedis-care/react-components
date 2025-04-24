@@ -1,5 +1,5 @@
 import React, { useCallback } from "react";
-import { Grid } from "@mui/material";
+import { Grid2 as Grid } from "@mui/material";
 import XLSX from "xlsx";
 import GenericDataPreview from "./GenericDataPreview";
 import { CrudImporterStepProps } from "./index";
@@ -138,15 +138,15 @@ const Step1LoadData = (props: ImportStep1Props) => {
 			spacing={2}
 		>
 			{howTo && (
-				<Grid item>
+				<Grid>
 					<HowToBox labels={howTo} />
 				</Grid>
 			)}
-			<Grid item>
+			<Grid>
 				<FileUploadGeneric {...fileUploadProps} previewSize={64} />
 			</Grid>
 			{state.data.length > 0 && !howTo && (
-				<Grid item xs style={{ minHeight: 500 }}>
+				<Grid style={{ minHeight: 500 }} size="grow">
 					<GenericDataPreview data={state.data} />
 				</Grid>
 			)}

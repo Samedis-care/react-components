@@ -5,7 +5,7 @@ import {
 	BadgeProps,
 	Box,
 	Divider,
-	Grid,
+	Grid2 as Grid,
 	IconButton,
 	IconButtonProps,
 	Popover,
@@ -33,11 +33,11 @@ export interface Notification {
 	/**
 	 * The main message of the notification
 	 */
-	message: React.ReactChild;
+	message: React.ReactNode;
 	/**
 	 * The sub message of the notification, shown before it's age
 	 */
-	origin?: React.ReactChild;
+	origin?: React.ReactNode;
 	/**
 	 * The timestamp of creation of this notification
 	 */
@@ -141,18 +141,18 @@ const defaultRenderer = (notification: Notification): React.ReactElement => (
 		key={notification.id}
 	>
 		<Grid container spacing={2}>
-			<Grid item xs>
+			<Grid size="grow">
 				{notification.image && (
 					<img style={defaultImageStyle} src={notification.image} alt={""} />
 				)}
 			</Grid>
-			<Grid item xs={9}>
+			<Grid size={9}>
 				<Box py={2}>
 					<Grid container spacing={2}>
-						<Grid item xs={12}>
+						<Grid size={12}>
 							<Typography>{notification.message}</Typography>
 						</Grid>
-						<Grid item xs={12}>
+						<Grid size={12}>
 							<Typography variant={"body2"}>
 								<React.Fragment>
 									{notification.origin && <>{notification.origin} </>}
@@ -167,7 +167,7 @@ const defaultRenderer = (notification: Notification): React.ReactElement => (
 					</Grid>
 				</Box>
 			</Grid>
-			<Grid item xs={12}>
+			<Grid size={12}>
 				<Divider />
 			</Grid>
 		</Grid>
@@ -268,7 +268,7 @@ const Notifications = (inProps: NotificationsProps) => {
 			>
 				<Box p={2}>
 					<Grid container spacing={2}>
-						<Grid item xs={12}>
+						<Grid size={12}>
 							<StyledHeader
 								component={"h2"}
 								variant={"h6"}
@@ -277,10 +277,10 @@ const Notifications = (inProps: NotificationsProps) => {
 								{t("standalone.notifications.title")}
 							</StyledHeader>
 						</Grid>
-						<Grid item xs={12}>
+						<Grid size={12}>
 							<Divider />
 						</Grid>
-						<Grid item xs={12}>
+						<Grid size={12}>
 							<StyledInfiniteScroll
 								loadMoreBottom={loadRead}
 								loadMoreTop={loadUnread}

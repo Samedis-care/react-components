@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, Grid, styled, useThemeProps } from "@mui/material";
+import { Button, Grid2 as Grid, styled, useThemeProps } from "@mui/material";
 import combineColors from "../../../utils/combineColors";
 
 export interface IDayData {
@@ -135,7 +135,7 @@ const DayContents = (inProps: DayContentsProps) => {
 	return (
 		<Grid container spacing={2} className={className}>
 			{data.map((entry) => (
-				<Grid item xs={12} key={entry.id}>
+				<Grid key={entry.id} size={12}>
 					<StyledButton
 						variant={"outlined"}
 						size={"small"}

@@ -41,7 +41,7 @@ const addGetParams = (
 		}
 	}
 
-	return argString.length === 0 ? url : url + "?" + argString.substr(1);
+	return argString.length === 0 ? url : url + "?" + argString.substring(1);
 };
 
 const stringifyValue = (value: unknown): string => {

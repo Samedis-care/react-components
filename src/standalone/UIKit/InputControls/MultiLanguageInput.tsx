@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from "react";
 import {
-	Grid,
+	Grid2 as Grid,
 	IconButton,
 	InputAdornment,
 	styled,
@@ -398,44 +398,46 @@ const MultiLanguageInput = (inProps: MultiLanguageInputProps) => {
 			value={values[lang] ?? ""}
 			onChange={handleChange}
 			name={`${name ?? "mli"}-${lang}`}
-			InputLabelProps={{
-				...textFieldProps.InputLabelProps,
-				shrink: textFieldProps.multiline
-					? true
-					: textFieldProps.InputLabelProps?.shrink,
-			}}
-			InputProps={{
-				startAdornment: !textFieldProps.multiline ? (
-					<InputAdornment position={"start"}>
-						<Tooltip title={getLanguageName(lang)}>
-							<LanguageLabelInputAdornment
-								variant={"caption"}
-								color={"textSecondary"}
-							>
-								{lang}
-							</LanguageLabelInputAdornment>
-						</Tooltip>
-					</InputAdornment>
-				) : undefined,
-				endAdornment:
-					defaultLanguage === lang && !textFieldProps.multiline ? (
-						<InputAdornment position={"end"}>
-							<IconButton onClick={toggleExpanded} size="large">
-								<Translate
-									color={
-										expanded ? "primary" : incomplete ? "error" : undefined
-									}
-								/>
-							</IconButton>
+			slotProps={{
+				inputLabel: {
+					...textFieldProps.slotProps?.inputLabel,
+					shrink: textFieldProps.multiline
+						? true
+						: textFieldProps.InputLabelProps?.shrink,
+				},
+				input: {
+					startAdornment: !textFieldProps.multiline ? (
+						<InputAdornment position={"start"}>
+							<Tooltip title={getLanguageName(lang)}>
+								<LanguageLabelInputAdornment
+									variant={"caption"}
+									color={"textSecondary"}
+								>
+									{lang}
+								</LanguageLabelInputAdornment>
+							</Tooltip>
 						</InputAdornment>
 					) : undefined,
+					endAdornment:
+						defaultLanguage === lang && !textFieldProps.multiline ? (
+							<InputAdornment position={"end"}>
+								<IconButton onClick={toggleExpanded} size="large">
+									<Translate
+										color={
+											expanded ? "primary" : incomplete ? "error" : undefined
+										}
+									/>
+								</IconButton>
+							</InputAdornment>
+						) : undefined,
+				},
 			}}
 		/>
 	);
 
 	return (
 		<Grid container spacing={2} data-name={name} onBlur={onBlur}>
-			<Grid item xs={12}>
+			<Grid size={12}>
 				{renderLanguage(
 					textFieldProps.multiline ? activeLanguage : defaultLanguage,
 				)}
@@ -445,7 +447,7 @@ const MultiLanguageInput = (inProps: MultiLanguageInputProps) => {
 				enabledLanguages
 					.filter((lang) => lang !== defaultLanguage)
 					.map((lang) => (
-						<Grid item xs={12} key={lang}>
+						<Grid key={lang} size={12}>
 							{renderLanguage(lang)}
 						</Grid>
 					))}

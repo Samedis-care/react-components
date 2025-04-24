@@ -1,11 +1,11 @@
 import React, { ChangeEvent, useCallback, useState } from "react";
 import {
 	Box,
-	Hidden,
 	IconButton,
 	InputAdornment,
 	Popover,
 	PopoverOrigin,
+	useMediaQuery,
 } from "@mui/material";
 import { DataGridQuickFilterIcon, useDataGridProps } from "../DataGrid";
 import TextFieldWithHelp from "../../UIKit/TextFieldWithHelp";
@@ -50,46 +50,51 @@ const SearchView = (props: IDataGridSearchViewProps) => {
 			value={props.search}
 			onChange={props.handleSearchChange}
 			placeholder={searchPlaceholder}
-			InputProps={{
-				startAdornment: (
-					<InputAdornment position="start">
+			slotProps={{
+				input: {
+					startAdornment: (
+						<InputAdornment position="start">
+							<DataGridQuickFilterIcon
+								className={combineClassNames([
+									classes?.quickFilterIcon,
+									props.search && "CcDataGrid-quickFilterActiveIcon",
+								])}
+							/>
+						</InputAdornment>
+					),
+				},
+			}}
+			margin={"dense"}
+		/>
+	);
+
+	const smDown = useMediaQuery((theme) => theme.breakpoints.down("sm"));
+
+	return (
+		<div className={combineClassNames([props.className, classes?.search])}>
+			{!smDown ? (
+				renderTextField()
+			) : (
+				<>
+					<IconButton onClick={openPopover} size="large">
 						<DataGridQuickFilterIcon
 							className={combineClassNames([
 								classes?.quickFilterIcon,
 								props.search && "CcDataGrid-quickFilterActiveIcon",
 							])}
 						/>
-					</InputAdornment>
-				),
-			}}
-			margin={"dense"}
-		/>
-	);
-
-	return (
-		<div className={combineClassNames([props.className, classes?.search])}>
-			<Hidden smDown implementation={"js"}>
-				{renderTextField()}
-			</Hidden>
-			<Hidden smUp implementation={"js"}>
-				<IconButton onClick={openPopover} size="large">
-					<DataGridQuickFilterIcon
-						className={combineClassNames([
-							classes?.quickFilterIcon,
-							props.search && "CcDataGrid-quickFilterActiveIcon",
-						])}
-					/>
-				</IconButton>
-				<Popover
-					open={anchorEl !== null}
-					anchorEl={anchorEl}
-					onClose={closePopover}
-					anchorOrigin={anchorOrigin}
-					transformOrigin={transformOrigin}
-				>
-					<Box p={1}>{renderTextField()}</Box>
-				</Popover>
-			</Hidden>
+					</IconButton>
+					<Popover
+						open={anchorEl !== null}
+						anchorEl={anchorEl}
+						onClose={closePopover}
+						anchorOrigin={anchorOrigin}
+						transformOrigin={transformOrigin}
+					>
+						<Box p={1}>{renderTextField()}</Box>
+					</Popover>
+				</>
+			)}
 		</div>
 	);
 };

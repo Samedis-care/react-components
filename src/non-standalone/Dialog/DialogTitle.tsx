@@ -1,7 +1,7 @@
 import React from "react";
 import {
 	DialogTitle as MuiDialogTitle,
-	Grid,
+	Grid2 as Grid,
 	IconButton,
 	styled,
 	Typography,
@@ -82,14 +82,14 @@ const DialogTitleRaw = (inProps: DialogTitleProps) => {
 			])}
 		>
 			<Grid container wrap={"nowrap"}>
-				<TextWrapper item className={classes?.textWrapper}>
+				<TextWrapper className={classes?.textWrapper}>
 					<Text variant="h6" noWrap className={classes?.text}>
 						{children}
 					</Text>
 				</TextWrapper>
-				<Grid item xs />
+				<Grid size="grow" />
 				{onClose && (
-					<Grid item>
+					<Grid>
 						<CloseButton
 							aria-label={t("non-standalone.dialog.dialog-title.close")}
 							className={classes?.closeButton}

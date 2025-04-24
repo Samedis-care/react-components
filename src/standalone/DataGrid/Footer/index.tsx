@@ -1,15 +1,15 @@
 import React from "react";
-import { Grid } from "@mui/material";
+import { Grid2 as Grid } from "@mui/material";
 import Pagination from "./Pagination";
 import StatusBar from "./DataActionBar";
 
 const Footer = () => {
 	return (
 		<Grid container justifyContent={"space-between"} wrap={"nowrap"}>
-			<Grid item>
+			<Grid>
 				<StatusBar />
 			</Grid>
-			<Grid item>
+			<Grid>
 				<Pagination />
 			</Grid>
 		</Grid>

@@ -3,7 +3,12 @@ import {
 	LocaleSelectorDialogContentProps,
 	LocaleSelectorEntryData,
 } from "./LocaleSelectorDialogContent";
-import { Grid, ListItemButton, styled, useThemeProps } from "@mui/material";
+import {
+	Grid2 as Grid,
+	ListItemButton,
+	styled,
+	useThemeProps,
+} from "@mui/material";
 import CountryFlags from "../../standalone/CountryFlags";
 
 export interface LocaleSelectorEntryProps
@@ -81,24 +86,16 @@ const LocaleSelectorEntry = (
 			className={className}
 		>
 			<Container container spacing={2} alignItems={"stretch"}>
-				<ImageWrapper item xs={4}>
+				<ImageWrapper size={4}>
 					<Image alt={locale.country} src={flag} />
 				</ImageWrapper>
-				<Grid item xs={8} container>
-					<Grid item xs={6}>
-						{locale.country}
-					</Grid>
-					<Grid item xs={6}>
-						{locale.language}
-					</Grid>
+				<Grid container size={8}>
+					<Grid size={6}>{locale.country}</Grid>
+					<Grid size={6}>{locale.language}</Grid>
 					{!sameLang && (
 						<>
-							<Grid item xs={6}>
-								{locale.native_country}
-							</Grid>
-							<Grid item xs={6}>
-								{locale.native_language}
-							</Grid>
+							<Grid size={6}>{locale.native_country}</Grid>
+							<Grid size={6}>{locale.native_language}</Grid>
 						</>
 					)}
 				</Grid>

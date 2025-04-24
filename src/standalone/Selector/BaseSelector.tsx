@@ -12,7 +12,7 @@ import {
 	Autocomplete,
 	AutocompleteChangeReason,
 	Divider,
-	Grid,
+	Grid2 as Grid,
 	IconButton,
 	InputAdornment,
 	InputLabel,
@@ -675,11 +675,9 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 					)}
 					<ListItemText>
 						<Grid container>
-							<Grid item xs>
-								{getReactLabel(data)}
-							</Grid>
+							<Grid size="grow">{getReactLabel(data)}</Grid>
 							{data.selected && (
-								<SelectedMarker item className={classes?.selected}>
+								<SelectedMarker className={classes?.selected}>
 									{t("standalone.selector.base-selector.selected")}
 								</SelectedMarker>
 							)}
@@ -1038,7 +1036,7 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 								? (option: DataT) => option.group ?? noGroupLabel ?? ""
 								: undefined
 						}
-						PopperComponent={GrowPopper}
+						slots={{ popper: GrowPopper }}
 						filterOptions={filterOptions}
 						value={selected}
 						inputValue={query}
@@ -1085,64 +1083,66 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 									variant={variant ?? "outlined"}
 									{...otherParams}
 									classes={textFieldClasses}
-									inputProps={{
-										...params.inputProps,
-										readOnly: disableSearch,
-										title:
-											selected && !multiple
-												? (selected.titleTooltip ?? getStringLabel(selected))
-												: undefined,
-										value: multiple
-											? [
-													selected.map(getStringLabel).join(", "),
-													params.inputProps.value,
-												].join(" ")
-											: params.inputProps.value,
-									}}
-									InputProps={{
-										...InputProps,
-										classes: textFieldInputClasses,
-										readOnly: disableSearch,
-										startAdornment:
-											(enableIcons && !multiple
-												? renderIcon(selected?.icon)
-												: undefined) ?? startAdornment,
-										endAdornment: (() => {
-											const hasAdditionalElements =
-												openInfo || endAdornment || endAdornmentLeft;
-											const infoBtn = openInfo && (
-												<InfoButton
-													onClick={openInfo}
-													className={classes?.infoBtn}
-												>
-													<InfoIcon color={"disabled"} />
-												</InfoButton>
-											);
-											return hasAdditionalElements ? (
-												params.InputProps?.endAdornment ? (
-													React.cloneElement(
-														params.InputProps?.endAdornment as ReactElement,
-														{},
-														endAdornmentLeft,
-														...((
-															params.InputProps?.endAdornment as ReactElement<
-																PropsWithChildren<unknown>
-															>
-														).props.children as ReactNode[]),
-														infoBtn,
-														endAdornment,
+									slotProps={{
+										htmlInput: {
+											...params.inputProps,
+											readOnly: disableSearch,
+											title:
+												selected && !multiple
+													? (selected.titleTooltip ?? getStringLabel(selected))
+													: undefined,
+											value: multiple
+												? [
+														selected.map(getStringLabel).join(", "),
+														params.inputProps.value,
+													].join(" ")
+												: params.inputProps.value,
+										},
+										input: {
+											...InputProps,
+											classes: textFieldInputClasses,
+											readOnly: disableSearch,
+											startAdornment:
+												(enableIcons && !multiple
+													? renderIcon(selected?.icon)
+													: undefined) ?? startAdornment,
+											endAdornment: (() => {
+												const hasAdditionalElements =
+													openInfo || endAdornment || endAdornmentLeft;
+												const infoBtn = openInfo && (
+													<InfoButton
+														onClick={openInfo}
+														className={classes?.infoBtn}
+													>
+														<InfoIcon color={"disabled"} />
+													</InfoButton>
+												);
+												return hasAdditionalElements ? (
+													params.InputProps?.endAdornment ? (
+														React.cloneElement(
+															params.InputProps?.endAdornment as ReactElement,
+															{},
+															endAdornmentLeft,
+															...((
+																params.InputProps?.endAdornment as ReactElement<
+																	PropsWithChildren<unknown>
+																>
+															).props.children as ReactNode[]),
+															infoBtn,
+															endAdornment,
+														)
+													) : (
+														<InputAdornment position={"end"}>
+															{endAdornmentLeft}
+															{infoBtn}
+															{endAdornment}
+														</InputAdornment>
 													)
 												) : (
-													<InputAdornment position={"end"}>
-														{endAdornmentLeft}
-														{infoBtn}
-														{endAdornment}
-													</InputAdornment>
-												)
-											) : (
-												params.InputProps?.endAdornment
-											);
-										})(),
+													params.InputProps?.endAdornment
+												);
+											})(),
+										},
 									}}
 									placeholder={placeholder}
 									onChange={(event) => {
