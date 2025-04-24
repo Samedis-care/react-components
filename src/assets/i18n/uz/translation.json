@@ -329,7 +329,7 @@
 		},
 		"dialogs": {
 			"error-title": "Xatolik yuz berdi",
-			"validation-error-title": "Shakl yaroqsiz",
+			"validation-error-title": "Tasdiqlashda xato",
 			"info": "Ma'lumot",
 			"are-you-sure": "Ishonchingiz komilmi?",
 			"are-you-sure-submit": "Davom etasizmi?"
