@@ -67,6 +67,18 @@ const FormCrudMultiSelect = <
 	);
 };
 
+export const ForwardedCrudMultiSelect = React.forwardRef(
+	FormCrudMultiSelect,
+) as <
+	KeyT extends ModelFieldName,
+	VisibilityT extends PageVisibility,
+	CustomT,
+	DataT extends MultiSelectorData,
+>(
+	props: FormCrudMultiSelectProps<KeyT, VisibilityT, CustomT, DataT> &
+		RefAttributes<CrudSelectDispatch<DataT>>,
+) => React.ReactElement;
+
 export default React.memo(
-	React.forwardRef(FormCrudMultiSelect),
-) as typeof FormCrudMultiSelect;
+	ForwardedCrudMultiSelect,
+) as typeof ForwardedCrudMultiSelect;
