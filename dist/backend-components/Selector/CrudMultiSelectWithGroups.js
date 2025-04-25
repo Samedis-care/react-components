@@ -13,4 +13,5 @@ const CrudMultiSelectWithGroups = (props, ref) => {
         error && React.createElement(ErrorComponent, { error: error }),
         React.createElement(BackendMultiSelectWithTags, { ...props, selected: selected.map((entry) => entry.value), onChange: handleSelect, convData: modelToSelectorData, initialData: initialRawData })));
 };
-export default React.memo(React.forwardRef(CrudMultiSelectWithGroups));
+const ForwardedCrudMultiSelectWithGroups = React.forwardRef(CrudMultiSelectWithGroups);
+export default React.memo(ForwardedCrudMultiSelectWithGroups);
