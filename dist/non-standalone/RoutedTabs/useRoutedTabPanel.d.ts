@@ -1,3 +1,4 @@
 import React from "react";
-declare const useRoutedTabPanel: () => ((name: string, children: React.ReactElement) => React.ReactElement);
+import { RouteProps } from "../../standalone/Routes/Route";
+declare const useRoutedTabPanel: () => ((name: string, children: React.ReactElement<RouteProps>) => React.ReactElement<RouteProps>);
 export default useRoutedTabPanel;
