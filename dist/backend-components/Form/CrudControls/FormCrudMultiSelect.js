@@ -8,4 +8,5 @@ const FormCrudMultiSelect = (props, ref) => {
     const { readOnly, errorComponent } = useFormContextLite();
     return (React.createElement(CrudMultiSelect, { connector: connector, errorComponent: errorComponent, disabled: props.disabled || readOnly, field: connectorParams.field, ref: ref, ...otherProps }));
 };
-export default React.memo(React.forwardRef(FormCrudMultiSelect));
+export const ForwardedCrudMultiSelect = React.forwardRef(FormCrudMultiSelect);
+export default React.memo(ForwardedCrudMultiSelect);
