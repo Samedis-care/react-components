@@ -1,11 +1,14 @@
 import React from "react";
-import Route from "../../standalone/Routes/Route";
+import Route, { RouteProps } from "../../standalone/Routes/Route";
 
 const useRoutedTabPanel = (): ((
 	name: string,
-	children: React.ReactElement,
-) => React.ReactElement) => {
-	return function createTab(name: string, children: React.ReactElement) {
+	children: React.ReactElement<RouteProps>,
+) => React.ReactElement<RouteProps>) => {
+	return function createTab(
+		name: string,
+		children: React.ReactElement,
+	): React.ReactElement<RouteProps> {
 		return <Route key={name} path={`${name}/*`} element={children} />;
 	};
 };
