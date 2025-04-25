@@ -115,6 +115,31 @@ const CrudMultiSelectWithGroups = <
 	);
 };
 
+const ForwardedCrudMultiSelectWithGroups = React.forwardRef(
+	CrudMultiSelectWithGroups,
+) as <
+	GroupKeyT extends ModelFieldName,
+	DataKeyT extends ModelFieldName,
+	GroupVisibilityT extends PageVisibility,
+	DataVisibilityT extends PageVisibility,
+	GroupCustomT,
+	DataCustomT,
+	GroupDataT extends BaseSelectorData,
+	DataDataT extends MultiSelectorData,
+>(
+	props: CrudMultiSelectWithGroupsProps<
+		GroupKeyT,
+		DataKeyT,
+		GroupVisibilityT,
+		DataVisibilityT,
+		GroupCustomT,
+		DataCustomT,
+		GroupDataT,
+		DataDataT
+	> &
+		RefAttributes<CrudSelectDispatch<DataDataT>>,
+) => React.ReactElement;
+
 export default React.memo(
-	React.forwardRef(CrudMultiSelectWithGroups),
-) as typeof CrudMultiSelectWithGroups;
+	ForwardedCrudMultiSelectWithGroups,
+) as typeof ForwardedCrudMultiSelectWithGroups;
