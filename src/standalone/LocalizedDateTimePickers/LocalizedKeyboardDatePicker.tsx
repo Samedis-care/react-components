@@ -8,6 +8,7 @@ import { TextFieldProps, useThemeProps } from "@mui/material";
 import { withMuiWarning } from "../UIKit/MuiWarning";
 import { Moment } from "moment";
 import useMuiLocaleData from "./useMuiLocaleData";
+import accessSlotProps from "../../utils/internal/accessSlotProps";
 
 export interface LocalizedKeyboardDatePickerProps
 	extends Omit<DatePickerProps<Moment>, "format"> {
@@ -72,12 +73,18 @@ const LocalizedKeyboardDatePicker = (
 				}
 				slotProps={{
 					...otherProps.slotProps,
-					textField: {
-						required,
-						error,
-						fullWidth,
-						onBlur,
-						...otherProps.slotProps?.textField,
+					textField: (ownerState) => {
+						const textFieldProps = accessSlotProps(
+							ownerState,
+							otherProps.slotProps?.textField,
+						);
+						return {
+							required,
+							error,
+							fullWidth,
+							onBlur,
+							...textFieldProps,
+						};
 					},
 				}}
 			/>
