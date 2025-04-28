@@ -3,6 +3,7 @@ import { DatePicker, LocalizationProvider, } from "@mui/x-date-pickers";
 import { useThemeProps } from "@mui/material";
 import { withMuiWarning } from "../UIKit/MuiWarning";
 import useMuiLocaleData from "./useMuiLocaleData";
+import accessSlotProps from "../../utils/internal/accessSlotProps";
 const NoIcon = () => {
     return React.createElement(React.Fragment, null);
 };
@@ -22,12 +23,15 @@ const LocalizedKeyboardDatePicker = (inProps) => {
                 ? slotOverrideHideIcon
                 : otherProps.slots, slotProps: {
                 ...otherProps.slotProps,
-                textField: {
-                    required,
-                    error,
-                    fullWidth,
-                    onBlur,
-                    ...otherProps.slotProps?.textField,
+                textField: (ownerState) => {
+                    const textFieldProps = accessSlotProps(ownerState, otherProps.slotProps?.textField);
+                    return {
+                        required,
+                        error,
+                        fullWidth,
+                        onBlur,
+                        ...textFieldProps,
+                    };
                 },
             } })));
 };

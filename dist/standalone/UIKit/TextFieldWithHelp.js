@@ -5,14 +5,8 @@ import { InputLabelConfig, UiKitTextField } from "./CommonStyles";
 import isTouchDevice from "../../utils/isTouchDevice";
 import { withMuiWarning } from "./MuiWarning";
 import { useRefComposer } from "react-ref-composer";
+import accessSlotProps from "../../utils/internal/accessSlotProps";
 export const UiKitTextFieldWithWarnings = withMuiWarning(UiKitTextField);
-const accessSlotProps = (state, slotProps) => {
-    if (slotProps == null)
-        return undefined;
-    if (typeof slotProps === "function")
-        return slotProps(state);
-    return slotProps;
-};
 const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(props, ref) {
     const { openInfo, customHandleClear, warning, onChange, ...muiProps } = props;
     // handle clear
