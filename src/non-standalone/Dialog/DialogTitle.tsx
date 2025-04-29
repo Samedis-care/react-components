@@ -1,7 +1,7 @@
 import React from "react";
 import {
 	DialogTitle as MuiDialogTitle,
-	Grid2 as Grid,
+	Grid,
 	IconButton,
 	styled,
 	Typography,

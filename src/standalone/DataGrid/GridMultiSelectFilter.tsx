@@ -3,7 +3,7 @@ import {
 	Checkbox,
 	Divider,
 	FormControlLabel,
-	Grid2 as Grid,
+	Grid,
 	styled,
 	Typography,
 	useThemeProps,
@@ -11,7 +11,7 @@ import {
 import { useCustomFilterActiveContext } from "./Header/FilterBar";
 import { useDataGridProps } from "./DataGrid";
 import { Breakpoint } from "@mui/material/styles";
-import { GridSize } from "@mui/material/Grid2";
+import { GridSize } from "@mui/material/Grid";
 import compareArrayContent from "../../utils/compareArrayContent";
 import { MultiSelectorData } from "../Selector";
 import BaseSelector from "../Selector/BaseSelector";

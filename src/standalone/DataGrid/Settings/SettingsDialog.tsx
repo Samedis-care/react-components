@@ -4,7 +4,7 @@ import {
 	Button,
 	Checkbox,
 	Divider,
-	Grid2 as Grid,
+	Grid,
 	Table,
 	TableBody,
 	TableCell,

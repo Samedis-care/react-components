@@ -6,12 +6,11 @@ import {
 } from "@mui/x-date-pickers";
 import { TextFieldProps, useThemeProps } from "@mui/material";
 import { withMuiWarning } from "../UIKit/MuiWarning";
-import { Moment } from "moment";
 import useMuiLocaleData from "./useMuiLocaleData";
 import accessSlotProps from "../../utils/internal/accessSlotProps";
 
 export interface LocalizedKeyboardDatePickerProps
-	extends Omit<DatePickerProps<Moment>, "format"> {
+	extends Omit<DatePickerProps, "format"> {
 	/**
 	 * Boolean flag to hide Calendar Icon (only used if disabled is truthy)
 	 */
@@ -77,7 +76,7 @@ const LocalizedKeyboardDatePicker = (
 						const textFieldProps = accessSlotProps(
 							ownerState,
 							otherProps.slotProps?.textField,
-						);
+						) as TextFieldProps;
 						return {
 							required,
 							error,

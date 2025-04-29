@@ -5,7 +5,7 @@ import {
 	Card,
 	CardContent,
 	CircularProgress,
-	Grid2 as Grid,
+	Grid,
 	Table,
 	TableBody,
 	TableCell,

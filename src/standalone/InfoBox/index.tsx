@@ -15,7 +15,7 @@ import {
 } from "@mui/material";
 import SuccessOutlinedIcon from "../Icons/SuccessOutlinedIcon";
 import combineClassNames from "../../utils/combineClassNames";
-import { Variant } from "@mui/material/styles/createTypography";
+import { TypographyVariant } from "@mui/material/styles";
 
 const AccordionStyled = styled(Accordion, { name: "CcInfoBox", slot: "root" })({
 	boxShadow: "none",
@@ -149,7 +149,7 @@ export interface InfoBoxProps {
 	 * typography variant to use for heading
 	 * @default "caption"
 	 */
-	headingVariant?: Variant;
+	headingVariant?: TypographyVariant;
 	/**
 	 * custom class name to apply to root
 	 */

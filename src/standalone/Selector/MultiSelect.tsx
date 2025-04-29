@@ -3,7 +3,7 @@ import BaseSelector, {
 	BaseSelectorData,
 	BaseSelectorProps,
 } from "./BaseSelector";
-import { Grid2 as Grid, Paper, styled, useThemeProps } from "@mui/material";
+import { Grid, Paper, styled, useThemeProps } from "@mui/material";
 import MultiSelectEntry, { MultiSelectEntryProps } from "./MultiSelectEntry";
 import { showConfirmDialogBool } from "../../non-standalone/Dialog/Utils";
 import { DialogContext } from "../../framework/DialogContextProvider";

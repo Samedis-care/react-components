@@ -1,5 +1,5 @@
 import React, { useCallback } from "react";
-import { Checkbox, Grid2 as Grid, Typography } from "@mui/material";
+import { Checkbox, Grid, Typography } from "@mui/material";
 import {
 	KeyboardArrowUp as ClosedIcon,
 	KeyboardArrowDown as ExpandedIcon,

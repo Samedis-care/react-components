@@ -14,7 +14,7 @@ import {
 	Collapse,
 	Divider,
 	FormControlLabelProps,
-	Grid2 as Grid,
+	Grid,
 	IconButton,
 	ListItem,
 	Paper,

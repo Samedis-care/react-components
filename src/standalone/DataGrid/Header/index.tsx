@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Grid2, SvgIconProps } from "@mui/material";
+import { Box, Grid, SvgIconProps } from "@mui/material";
 import Search from "./Search";
 import ActionBar from "./ActionBar";
 import FilterBar, { IDataGridFilterBarProps } from "./FilterBar";
@@ -111,22 +111,22 @@ export interface IDataGridExporter<T> {
 const Header = () => {
 	return (
 		<Box mx={1}>
-			<Grid2
+			<Grid
 				container
 				justifyContent={"space-between"}
 				alignItems={"center"}
 				wrap={"nowrap"}
 			>
-				<Grid2>
+				<Grid>
 					<Search />
-				</Grid2>
-				<Grid2 size={"grow"}>
+				</Grid>
+				<Grid size={"grow"}>
 					<FilterBar />
-				</Grid2>
-				<Grid2>
+				</Grid>
+				<Grid>
 					<ActionBar />
-				</Grid2>
-			</Grid2>
+				</Grid>
+			</Grid>
 		</Box>
 	);
 };

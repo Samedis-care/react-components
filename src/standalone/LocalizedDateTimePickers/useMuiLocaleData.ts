@@ -1,7 +1,6 @@
 import useCCTranslations from "../../utils/useCCTranslations";
 import { deDE, enUS, frFR, nlNL, ruRU } from "@mui/x-date-pickers/locales";
 import { LocalizationProviderProps } from "@mui/x-date-pickers";
-import { Moment } from "moment";
 import { useMemo } from "react";
 
 const useMuiLocaleData = () => {
@@ -15,7 +14,7 @@ const useMuiLocaleData = () => {
 				| typeof frFR
 				| typeof nlNL
 				| typeof ruRU,
-		): LocalizationProviderProps<Moment, never>["localeText"] => {
+		): LocalizationProviderProps<never>["localeText"] => {
 			return locale.components.MuiLocalizationProvider.defaultProps.localeText;
 		};
 		const getLocaleData = () => {

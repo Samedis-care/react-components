@@ -1,13 +1,8 @@
 import React, { useEffect, useMemo } from "react";
-import {
-	FormControl,
-	Grid2 as Grid,
-	styled,
-	useThemeProps,
-} from "@mui/material";
+import { FormControl, Grid, styled, useThemeProps } from "@mui/material";
 import { useCustomFilterActiveContext } from "./Header/FilterBar";
 import { useDataGridProps } from "./DataGrid";
-import { GridSize } from "@mui/material/Grid2";
+import { GridSize } from "@mui/material/Grid";
 import { Breakpoint } from "@mui/material/styles";
 import BackendSingleSelect, {
 	BackendSingleSelectProps,

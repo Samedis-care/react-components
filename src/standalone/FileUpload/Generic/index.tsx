@@ -14,7 +14,7 @@ import {
 	styled,
 	Tooltip,
 	Typography,
-	Grid2 as Grid,
+	Grid,
 	useThemeProps,
 } from "@mui/material";
 import { AttachFile } from "@mui/icons-material";

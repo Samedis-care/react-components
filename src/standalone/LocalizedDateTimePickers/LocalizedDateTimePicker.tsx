@@ -3,14 +3,14 @@ import {
 	DateTimePicker,
 	DateTimePickerProps,
 	LocalizationProvider,
+	PickersTextFieldProps,
 } from "@mui/x-date-pickers";
 import { withMuiWarning } from "../UIKit";
-import { Moment } from "moment";
 import { TextFieldProps } from "@mui/material";
 import useMuiLocaleData from "./useMuiLocaleData";
 
 interface LocalizedDateTimePickerProps
-	extends Omit<DateTimePickerProps<Moment>, "format"> {
+	extends Omit<DateTimePickerProps, "format"> {
 	/**
 	 * Set required flag for text field input
 	 */
@@ -26,7 +26,7 @@ interface LocalizedDateTimePickerProps
 	/**
 	 * onBlur callback for the text field input
 	 */
-	onBlur?: TextFieldProps["onBlur"];
+	onBlur?: TextFieldProps["onBlur"] & PickersTextFieldProps["onBlur"];
 }
 
 const LocalizedDateTimePicker = (props: LocalizedDateTimePickerProps) => {

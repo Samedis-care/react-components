@@ -1,12 +1,6 @@
 import React, { useCallback } from "react";
 import ImageBox, { ImageBoxProps } from "./ImageBox";
-import {
-	Box,
-	Grid2 as Grid,
-	styled,
-	Typography,
-	useThemeProps,
-} from "@mui/material";
+import { Box, Grid, styled, Typography, useThemeProps } from "@mui/material";
 import {
 	Star as StarredIcon,
 	StarOutline as NotStarredIcon,

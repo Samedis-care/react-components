@@ -5,10 +5,9 @@ import {
 	LocalizationProvider,
 } from "@mui/x-date-pickers";
 import { withMuiWarning } from "../UIKit/MuiWarning";
-import { Moment } from "moment";
 import useMuiLocaleData from "./useMuiLocaleData";
 
-type LocalizedDatePickerProps = Omit<DatePickerProps<Moment>, "format">;
+type LocalizedDatePickerProps = Omit<DatePickerProps, "format">;
 
 const LocalizedDatePicker = (props: LocalizedDatePickerProps) => {
 	const localeText = useMuiLocaleData();

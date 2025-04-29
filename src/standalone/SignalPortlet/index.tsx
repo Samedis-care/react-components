@@ -2,7 +2,7 @@ import React from "react";
 import SignalPortletItem, { SignalPortletItemProps } from "./SignalPortletItem";
 import {
 	Divider,
-	Grid2 as Grid,
+	Grid,
 	IconButton,
 	List,
 	Paper,

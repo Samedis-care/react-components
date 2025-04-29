@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, Grid2 as Grid, styled, useThemeProps } from "@mui/material";
+import { Button, Grid, styled, useThemeProps } from "@mui/material";
 import combineColors from "../../../utils/combineColors";
 
 export interface IDayData {

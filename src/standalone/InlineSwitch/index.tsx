@@ -1,11 +1,5 @@
 import React, { useCallback } from "react";
-import {
-	Grid2 as Grid,
-	styled,
-	Switch,
-	Typography,
-	useThemeProps,
-} from "@mui/material";
+import { Grid, styled, Switch, Typography, useThemeProps } from "@mui/material";
 import combineClassNames from "../../utils/combineClassNames";
 
 export interface InlineSwitchProps {

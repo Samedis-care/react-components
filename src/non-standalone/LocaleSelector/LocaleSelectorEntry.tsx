@@ -3,12 +3,7 @@ import {
 	LocaleSelectorDialogContentProps,
 	LocaleSelectorEntryData,
 } from "./LocaleSelectorDialogContent";
-import {
-	Grid2 as Grid,
-	ListItemButton,
-	styled,
-	useThemeProps,
-} from "@mui/material";
+import { Grid, ListItemButton, styled, useThemeProps } from "@mui/material";
 import CountryFlags from "../../standalone/CountryFlags";
 
 export interface LocaleSelectorEntryProps

@@ -7,7 +7,7 @@ import React, {
 	useRef,
 	useState,
 } from "react";
-import { Grid2 as Grid, useMediaQuery } from "@mui/material";
+import { Grid, useMediaQuery } from "@mui/material";
 import {
 	DataGridCustomDataType,
 	DataGridFilterBarBox,

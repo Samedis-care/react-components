@@ -5,12 +5,12 @@ import TextFieldWithHelp, {
 	TextFieldWithHelpProps,
 } from "../TextFieldWithHelp";
 import localDateToUtcDate from "../../../utils/localDateToUtcDate";
-import moment, { Moment } from "moment";
+import moment from "moment";
 import LocalizedKeyboardDatePicker, {
 	LocalizedKeyboardDatePickerProps,
 } from "../../LocalizedDateTimePickers/LocalizedKeyboardDatePicker";
 import accessSlotProps from "../../../utils/internal/accessSlotProps";
-import { InputLabelProps } from "@mui/material";
+import { InputLabelProps, TextFieldProps } from "@mui/material";
 
 export interface DateInputProps extends TextFieldWithHelpProps {
 	/**
@@ -45,7 +45,7 @@ export interface DateInputProps extends TextFieldWithHelpProps {
 }
 
 const DateInput = (
-	props: DateInputProps & Omit<DatePickerProps<Moment>, "value" | "onChange">,
+	props: DateInputProps & Omit<DatePickerProps, "value" | "onChange">,
 ) => {
 	const {
 		value,
@@ -79,7 +79,7 @@ const DateInput = (
 					const textFieldSlotPropsProp = accessSlotProps(
 						ownerState,
 						muiProps.slotProps?.textField,
-					);
+					) as TextFieldProps;
 					return {
 						slotProps: {
 							...textFieldSlotPropsProp?.slotProps,

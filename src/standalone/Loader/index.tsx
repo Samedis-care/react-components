@@ -5,7 +5,7 @@ import {
 	Typography,
 	useThemeProps,
 } from "@mui/material";
-import { Variant } from "@mui/material/styles/createTypography";
+import { TypographyVariant } from "@mui/material/styles";
 
 export interface LoaderProps {
 	/**
@@ -15,7 +15,7 @@ export interface LoaderProps {
 	/**
 	 * Typography variant to use for text
 	 */
-	typographyVariant?: Variant;
+	typographyVariant?: TypographyVariant;
 }
 
 const OuterWrapper = styled("div", { name: "CcLoader", slot: "outerWrapper" })({

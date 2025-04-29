@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { CrudImporterStepProps, isFieldImportable } from "./index";
-import { Grid2 as Grid, TextField, Typography } from "@mui/material";
+import { Grid, TextField, Typography } from "@mui/material";
 import Model, {
 	PageVisibility,
 	useModelMutation,

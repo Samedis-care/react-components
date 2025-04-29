@@ -1,6 +1,6 @@
 import React, { useCallback } from "react";
 import {
-	Grid2 as Grid,
+	Grid,
 	styled,
 	SvgIconProps,
 	Tooltip,

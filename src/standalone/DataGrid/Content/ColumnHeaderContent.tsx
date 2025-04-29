@@ -1,11 +1,5 @@
 import React, { SyntheticEvent, useCallback, useState } from "react";
-import {
-	Box,
-	Grid2 as Grid,
-	Popover,
-	PopoverOrigin,
-	Tooltip,
-} from "@mui/material";
+import { Box, Grid, Popover, PopoverOrigin, Tooltip } from "@mui/material";
 import { ArrowDownward, ArrowUpward } from "@mui/icons-material";
 import FilterEntry, { IFilterDef } from "./FilterEntry";
 import { ModelFilterType } from "../../../backend-integration/Model";
@@ -103,7 +97,12 @@ const ColumnHeaderContent = (
 		[setFilterAnchorEl],
 	);
 	const closeFilter = useCallback(
-		() => setFilterAnchorEl(null),
+		(evt?: unknown, reason?: "backdropClick" | "escapeKeyDown") => {
+			if (reason === "backdropClick") {
+				(evt as React.SyntheticEvent).stopPropagation();
+			}
+			setFilterAnchorEl(null);
+		},
 		[setFilterAnchorEl],
 	);
 	const preventPropagation = useCallback(
@@ -186,7 +185,6 @@ const ColumnHeaderContent = (
 				onClose={closeFilter}
 				anchorOrigin={anchorOrigin}
 				transformOrigin={transformOrigin}
-				onBackdropClick={preventPropagation} // suggested fix for deprecated attribute is to use onClose reason. but onClose does not supply a event (at least not according to typescript)
 				onClick={preventPropagation}
 			>
 				<Box m={2}>

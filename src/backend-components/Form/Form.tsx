@@ -29,7 +29,7 @@ import {
 import deepAssign from "../../utils/deepAssign";
 import deepClone from "../../utils/deepClone";
 import isObjectEmpty from "../../utils/isObjectEmpty";
-import { Grid2 as Grid, styled, Typography } from "@mui/material";
+import { Grid, styled, Typography } from "@mui/material";
 import { getVisibility } from "../../backend-integration/Model/Visibility";
 import { showConfirmDialogBool } from "../../non-standalone";
 import useCCTranslations from "../../utils/useCCTranslations";

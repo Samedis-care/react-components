@@ -1,5 +1,5 @@
 import React from "react";
-import { Grid2 as Grid, styled, useThemeProps } from "@mui/material";
+import { Grid, styled, useThemeProps } from "@mui/material";
 import DayContents, { IDayData } from "../Common/DayContents";
 import { Moment } from "moment";
 

@@ -11,7 +11,7 @@ import {
 	Dialog,
 	DialogContent,
 	DialogTitle,
-	Grid2 as Grid,
+	Grid,
 	IconButton,
 	Link,
 	styled,

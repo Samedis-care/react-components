@@ -1,7 +1,7 @@
 import React, { Suspense, useCallback, useMemo, useState } from "react";
 import {
 	Box,
-	Grid2 as Grid,
+	Grid,
 	InputAdornment,
 	styled,
 	useThemeProps,

@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from "react";
 import {
-	Grid2 as Grid,
+	Grid,
 	MenuProps,
 	Tooltip,
 	useMediaQuery,

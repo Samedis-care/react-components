@@ -1,5 +1,5 @@
 import React, { PureComponent } from "react";
-import { CircularProgress, Divider, Grid2 as Grid } from "@mui/material";
+import { CircularProgress, Divider, Grid } from "@mui/material";
 import ScrollableScheduleDay from "./ScrollableScheduleDay";
 import moment, { Moment } from "moment";
 import { IDayData } from "../Common/DayContents";

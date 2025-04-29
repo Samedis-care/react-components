@@ -4,7 +4,7 @@ import {
 	Divider,
 	FormControl,
 	FormControlLabel,
-	Grid2 as Grid,
+	Grid,
 	Radio,
 	RadioGroup,
 	styled,
@@ -13,7 +13,7 @@ import {
 } from "@mui/material";
 import { useCustomFilterActiveContext } from "./Header/FilterBar";
 import { useDataGridProps } from "./DataGrid";
-import { GridSize } from "@mui/material/Grid2";
+import { GridSize } from "@mui/material/Grid";
 import { Breakpoint } from "@mui/material/styles";
 import SingleSelect from "../Selector/SingleSelect";
 

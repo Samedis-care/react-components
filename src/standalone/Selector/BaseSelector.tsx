@@ -12,7 +12,7 @@ import {
 	Autocomplete,
 	AutocompleteChangeReason,
 	Divider,
-	Grid2 as Grid,
+	Grid,
 	IconButton,
 	InputAdornment,
 	InputLabel,

@@ -4,7 +4,7 @@ import {
 	Box,
 	Button,
 	Dialog,
-	Grid2 as Grid,
+	Grid,
 	IconButton,
 	styled,
 	Theme,

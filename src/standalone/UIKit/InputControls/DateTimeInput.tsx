@@ -3,8 +3,8 @@ import { TextFieldProps } from "@mui/material";
 import { DateTimePickerProps } from "@mui/x-date-pickers";
 import { InputLabelConfig, UIInputProps } from "../CommonStyles";
 import LocalizedDateTimePicker from "../../../standalone/LocalizedDateTimePickers/LocalizedDateTimePicker";
-import { Moment } from "moment";
 import TextFieldWithHelp from "../TextFieldWithHelp";
+import accessSlotProps from "../../../utils/internal/accessSlotProps";
 
 export interface DateTimeInputProps extends UIInputProps {
 	openInfo?: () => void;
@@ -26,9 +26,7 @@ export interface DateTimeInputProps extends UIInputProps {
 	fullWidth?: TextFieldProps["fullWidth"];
 }
 
-const DateTimeInput = (
-	props: DateTimeInputProps & DateTimePickerProps<Moment>,
-) => {
+const DateTimeInput = (props: DateTimeInputProps & DateTimePickerProps) => {
 	const {
 		openInfo,
 		important,
@@ -48,16 +46,27 @@ const DateTimeInput = (
 			}}
 			slotProps={{
 				...muiProps.slotProps,
-				textField: {
-					// @ts-expect-error custom property for slot
-					important,
-					required,
-					error,
-					onBlur,
-					fullWidth,
-					openInfo,
-					InputLabelProps: InputLabelConfig,
-					...muiProps.slotProps?.textField,
+				textField: (ownerState) => {
+					const orgSlotProps = accessSlotProps(
+						ownerState,
+						muiProps.slotProps?.textField,
+					);
+					return {
+						// @ts-expect-error custom properties in TextFieldWithHelp
+						important,
+						required,
+						error,
+						onBlur,
+						fullWidth,
+						openInfo,
+						...orgSlotProps,
+						slotProps: {
+							inputLabel: {
+								...InputLabelConfig,
+								...orgSlotProps?.InputLabelProps,
+							},
+						},
+					} as TextFieldProps;
 				},
 			}}
 		/>

@@ -1,9 +1,9 @@
 import React, { useEffect, useMemo } from "react";
-import { Grid2 as Grid, styled, useThemeProps } from "@mui/material";
+import { Grid, styled, useThemeProps } from "@mui/material";
 import { useCustomFilterActiveContext } from "./Header/FilterBar";
 import { useDataGridProps } from "./DataGrid";
 import { Breakpoint } from "@mui/material/styles";
-import { GridSize } from "@mui/material/Grid2";
+import { GridSize } from "@mui/material/Grid";
 import { MultiSelectorData } from "../Selector";
 import BackendMultipleSelect, {
 	BackendMultipleSelectProps,

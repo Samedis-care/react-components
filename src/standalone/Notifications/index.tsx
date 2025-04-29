@@ -5,7 +5,7 @@ import {
 	BadgeProps,
 	Box,
 	Divider,
-	Grid2 as Grid,
+	Grid,
 	IconButton,
 	IconButtonProps,
 	Popover,
