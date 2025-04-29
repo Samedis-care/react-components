@@ -1,5 +1,5 @@
 import React, { useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, } from "react";
-import { Box, Collapse, Divider, Grid2 as Grid, IconButton, ListItem, Paper, styled, Typography, useTheme, useThemeProps, } from "@mui/material";
+import { Box, Collapse, Divider, Grid, IconButton, ListItem, Paper, styled, Typography, useTheme, useThemeProps, } from "@mui/material";
 import { Apps as AppsIcon, Search as SearchIcon } from "@mui/icons-material";
 import Header from "./Header";
 import Footer from "./Footer";

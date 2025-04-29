@@ -1,5 +1,5 @@
 import React, { useCallback } from "react";
-import { Grid2 as Grid, Switch, Typography } from "@mui/material";
+import { Grid, Switch, Typography } from "@mui/material";
 const FilterCombinator = (props) => {
     const { value, onChange } = props;
     const handleChange = useCallback((_evt, newValue) => {

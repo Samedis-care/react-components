@@ -1,8 +1,7 @@
 import React from "react";
-import { DateTimePickerProps } from "@mui/x-date-pickers";
-import { Moment } from "moment";
+import { DateTimePickerProps, PickersTextFieldProps } from "@mui/x-date-pickers";
 import { TextFieldProps } from "@mui/material";
-interface LocalizedDateTimePickerProps extends Omit<DateTimePickerProps<Moment>, "format"> {
+interface LocalizedDateTimePickerProps extends Omit<DateTimePickerProps, "format"> {
     /**
      * Set required flag for text field input
      */
@@ -18,7 +17,7 @@ interface LocalizedDateTimePickerProps extends Omit<DateTimePickerProps<Moment>,
     /**
      * onBlur callback for the text field input
      */
-    onBlur?: TextFieldProps["onBlur"];
+    onBlur?: TextFieldProps["onBlur"] & PickersTextFieldProps["onBlur"];
 }
 declare const _default: React.MemoExoticComponent<React.ComponentType<LocalizedDateTimePickerProps & import("../UIKit").MuiWarningResultProps>>;
 export default _default;

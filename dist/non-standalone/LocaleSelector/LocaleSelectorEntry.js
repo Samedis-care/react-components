@@ -1,5 +1,5 @@
 import React, { useCallback } from "react";
-import { Grid2 as Grid, ListItemButton, styled, useThemeProps, } from "@mui/material";
+import { Grid, ListItemButton, styled, useThemeProps } from "@mui/material";
 import CountryFlags from "../../standalone/CountryFlags";
 const ListItemRoot = styled(ListItemButton, {
     name: "CcLocaleSelectorEntry",

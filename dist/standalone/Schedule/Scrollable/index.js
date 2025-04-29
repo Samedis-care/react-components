@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Box, Button, Divider, Grid2 as Grid, IconButton, Menu, styled, useThemeProps, } from "@mui/material";
+import { Box, Button, Divider, Grid, IconButton, Menu, styled, useThemeProps, } from "@mui/material";
 import { Settings as SettingsIcon } from "@mui/icons-material";
 import moment from "moment";
 import ScrollableScheduleWeek from "./ScrollableScheduleWeek";

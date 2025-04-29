@@ -1,5 +1,5 @@
 import React from "react";
-import { DialogTitle as MuiDialogTitle, Grid2 as Grid, IconButton, styled, Typography, useThemeProps, } from "@mui/material";
+import { DialogTitle as MuiDialogTitle, Grid, IconButton, styled, Typography, useThemeProps, } from "@mui/material";
 import { Close } from "@mui/icons-material";
 import combineClassNames from "../../utils/combineClassNames";
 import useCCTranslations from "../../utils/useCCTranslations";

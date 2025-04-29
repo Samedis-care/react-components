@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from "react";
-import { Grid2 as Grid, IconButton, InputAdornment, styled, Tooltip, Typography, useThemeProps, } from "@mui/material";
+import { Grid, IconButton, InputAdornment, styled, Tooltip, Typography, useThemeProps, } from "@mui/material";
 import { useCCLanguagesTranslations } from "../../../utils/useCCTranslations";
 import { Translate } from "@mui/icons-material";
 import { TextFieldCC } from "../MuiWarning";

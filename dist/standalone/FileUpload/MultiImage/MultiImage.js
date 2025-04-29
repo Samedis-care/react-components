@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState, } from "react";
 import ImageBox from "./ImageBox";
 import GroupBox from "../../GroupBox";
-import { Dialog, DialogContent, DialogTitle, Grid2 as Grid, IconButton, Link, styled, Typography, useThemeProps, } from "@mui/material";
+import { Dialog, DialogContent, DialogTitle, Grid, IconButton, Link, styled, Typography, useThemeProps, } from "@mui/material";
 import { Close as CloseIcon } from "@mui/icons-material";
 import processImage from "../../../utils/processImage";
 import ImageDialogEntry from "./ImageDialogEntry";

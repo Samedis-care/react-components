@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import WeekViewDay from "./WeekViewDay";
 import moment from "moment";
-import { Box, Button, CircularProgress, Divider, Grid2 as Grid, IconButton, Menu, styled, Typography, useThemeProps, } from "@mui/material";
+import { Box, Button, CircularProgress, Divider, Grid, IconButton, Menu, styled, Typography, useThemeProps, } from "@mui/material";
 import { ArrowBackIos, ArrowForwardIos, Settings as SettingsIcon, } from "@mui/icons-material";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { ToDateLocaleStringOptions } from "../../../constants";

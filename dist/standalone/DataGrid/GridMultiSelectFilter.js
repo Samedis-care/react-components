@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo } from "react";
-import { Checkbox, Divider, FormControlLabel, Grid2 as Grid, styled, Typography, useThemeProps, } from "@mui/material";
+import { Checkbox, Divider, FormControlLabel, Grid, styled, Typography, useThemeProps, } from "@mui/material";
 import { useCustomFilterActiveContext } from "./Header/FilterBar";
 import { useDataGridProps } from "./DataGrid";
 import compareArrayContent from "../../utils/compareArrayContent";

@@ -1,6 +1,6 @@
 import React from "react";
 import { Breakpoint } from "@mui/material/styles";
-import { GridSize } from "@mui/material/Grid2";
+import { GridSize } from "@mui/material/Grid";
 import { MultiSelectorData } from "../Selector";
 import BackendMultipleSelect, { BackendMultipleSelectProps } from "../../backend-components/Selector/BackendMultipleSelect";
 import { ModelFieldName, PageVisibility } from "../../backend-integration";

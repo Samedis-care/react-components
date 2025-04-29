@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from "react";
-import { Grid2 as Grid, IconButton, styled, useThemeProps, } from "@mui/material";
+import { Grid, IconButton, styled, useThemeProps } from "@mui/material";
 import { DoubleArrow } from "@mui/icons-material";
 import { usePortalLayoutContext } from "./Layout";
 import combineClassNames from "../../utils/combineClassNames";

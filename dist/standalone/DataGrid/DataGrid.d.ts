@@ -1,5 +1,5 @@
 import React, { Dispatch, SetStateAction } from "react";
-import { Box, Collapse, Divider, Grid2 as Grid, IconButton, ListItem, Paper, Theme, Typography } from "@mui/material";
+import { Box, Collapse, Divider, Grid, IconButton, ListItem, Paper, Theme, Typography } from "@mui/material";
 import { Apps as AppsIcon, Search as SearchIcon } from "@mui/icons-material";
 import { IDataGridHeaderProps } from "./Header";
 import { FilterType, IFilterDef } from "./Content/FilterEntry";

@@ -1,6 +1,6 @@
 import React, { useCallback, useContext, useMemo } from "react";
 import BaseSelector from "./BaseSelector";
-import { Grid2 as Grid, Paper, styled, useThemeProps } from "@mui/material";
+import { Grid, Paper, styled, useThemeProps } from "@mui/material";
 import MultiSelectEntry from "./MultiSelectEntry";
 import { showConfirmDialogBool } from "../../non-standalone/Dialog/Utils";
 import { DialogContext } from "../../framework/DialogContextProvider";

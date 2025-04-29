@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { Box, Button, Checkbox, Divider, Grid2 as Grid, Table, TableBody, TableCell, TableHead, TableRow, styled, } from "@mui/material";
+import { Box, Button, Checkbox, Divider, Grid, Table, TableBody, TableCell, TableHead, TableRow, styled, } from "@mui/material";
 import { DataGridContentOverlayClosed, DataGridContentOverlayPaper, useDataGridProps, } from "../DataGrid";
 import useCCTranslations from "../../../utils/useCCTranslations";
 const StyledTable = styled(Table, {

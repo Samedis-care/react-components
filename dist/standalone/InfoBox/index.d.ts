@@ -1,6 +1,6 @@
 import React from "react";
 import { AccordionProps } from "@mui/material";
-import { Variant } from "@mui/material/styles/createTypography";
+import { TypographyVariant } from "@mui/material/styles";
 export interface InfoBoxSummaryOwnerState {
     status?: "info" | "warning" | "success" | "error";
     alwaysExpanded: boolean;
@@ -33,7 +33,7 @@ export interface InfoBoxProps {
      * typography variant to use for heading
      * @default "caption"
      */
-    headingVariant?: Variant;
+    headingVariant?: TypographyVariant;
     /**
      * custom class name to apply to root
      */

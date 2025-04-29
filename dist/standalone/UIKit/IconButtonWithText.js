@@ -1,5 +1,5 @@
 import React from "react";
-import { Grid2 as Grid, IconButton, Typography, } from "@mui/material";
+import { Grid, IconButton, Typography, } from "@mui/material";
 const IconButtonWithText = (props) => (React.createElement(Grid, { container: true, direction: "column", alignItems: "center" },
     React.createElement(Grid, null,
         React.createElement(IconButton, { onClick: props.onClick, ...props.IconButtonProps, size: "large" }, props.icon)),

@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Notifications as NotificationsIcon } from "@mui/icons-material";
-import { Badge, Box, Divider, Grid2 as Grid, IconButton, Popover, styled, Tooltip, Typography, useThemeProps, } from "@mui/material";
+import { Badge, Box, Divider, Grid, IconButton, Popover, styled, Tooltip, Typography, useThemeProps, } from "@mui/material";
 import InfiniteScroll from "../InfiniteScroll";
 import i18n from "../../i18n";
 import timestampToAge from "../../utils/timestampToAge";

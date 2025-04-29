@@ -1,5 +1,5 @@
 import React from "react";
-import { GridSize } from "@mui/material/Grid2";
+import { GridSize } from "@mui/material/Grid";
 import { Breakpoint } from "@mui/material/styles";
 import BackendSingleSelect, { BackendSingleSelectProps } from "../../backend-components/Selector/BackendSingleSelect";
 import { ModelFieldName, PageVisibility } from "../../backend-integration";

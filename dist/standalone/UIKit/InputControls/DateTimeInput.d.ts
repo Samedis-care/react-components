@@ -2,7 +2,6 @@ import React from "react";
 import { TextFieldProps } from "@mui/material";
 import { DateTimePickerProps } from "@mui/x-date-pickers";
 import { UIInputProps } from "../CommonStyles";
-import { Moment } from "moment";
 export interface DateTimeInputProps extends UIInputProps {
     openInfo?: () => void;
     /**
@@ -22,5 +21,5 @@ export interface DateTimeInputProps extends UIInputProps {
      */
     fullWidth?: TextFieldProps["fullWidth"];
 }
-declare const _default: React.MemoExoticComponent<(props: DateTimeInputProps & DateTimePickerProps<Moment>) => React.JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: DateTimeInputProps & DateTimePickerProps) => React.JSX.Element>;
 export default _default;

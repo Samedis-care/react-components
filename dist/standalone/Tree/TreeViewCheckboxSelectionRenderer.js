@@ -1,5 +1,5 @@
 import React, { useCallback } from "react";
-import { Checkbox, Grid2 as Grid, Typography } from "@mui/material";
+import { Checkbox, Grid, Typography } from "@mui/material";
 import { KeyboardArrowUp as ClosedIcon, KeyboardArrowDown as ExpandedIcon, } from "@mui/icons-material";
 const TreeViewCheckboxSelectionRenderer = (props) => {
     const { expanded, icon, label, hasChildren, onToggleExpanded, expandLocked, id, depth, hasNext, parentHasNext, onClick, onAuxClick, } = props;

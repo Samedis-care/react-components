@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo } from "react";
-import { Grid2 as Grid, styled, useThemeProps } from "@mui/material";
+import { Grid, styled, useThemeProps } from "@mui/material";
 import { useCustomFilterActiveContext } from "./Header/FilterBar";
 import { useDataGridProps } from "./DataGrid";
 import BackendMultipleSelect from "../../backend-components/Selector/BackendMultipleSelect";

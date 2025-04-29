@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo } from "react";
-import { Divider, FormControl, FormControlLabel, Grid2 as Grid, Radio, RadioGroup, styled, Typography, useThemeProps, } from "@mui/material";
+import { Divider, FormControl, FormControlLabel, Grid, Radio, RadioGroup, styled, Typography, useThemeProps, } from "@mui/material";
 import { useCustomFilterActiveContext } from "./Header/FilterBar";
 import { useDataGridProps } from "./DataGrid";
 import SingleSelect from "../Selector/SingleSelect";

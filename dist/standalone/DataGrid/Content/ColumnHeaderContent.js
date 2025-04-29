@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from "react";
-import { Box, Grid2 as Grid, Popover, Tooltip, } from "@mui/material";
+import { Box, Grid, Popover, Tooltip } from "@mui/material";
 import { ArrowDownward, ArrowUpward } from "@mui/icons-material";
 import FilterEntry from "./FilterEntry";
 import { DataGridColumnHeaderFilterActiveIcon, DataGridColumnHeaderFilterButton, DataGridColumnHeaderFilterIcon, DataGridColumnHeaderFilterPopup, DataGridColumnHeaderFilterPopupEnum, DataGridColumnHeaderLabel, DataGridColumnHeaderResizer, DataGridColumnHeaderSortIcon, useDataGridProps, } from "../DataGrid";
@@ -21,7 +21,12 @@ const ColumnHeaderContent = (props) => {
         event.stopPropagation();
         setFilterAnchorEl(event.currentTarget);
     }, [setFilterAnchorEl]);
-    const closeFilter = useCallback(() => setFilterAnchorEl(null), [setFilterAnchorEl]);
+    const closeFilter = useCallback((evt, reason) => {
+        if (reason === "backdropClick") {
+            evt.stopPropagation();
+        }
+        setFilterAnchorEl(null);
+    }, [setFilterAnchorEl]);
     const preventPropagation = useCallback((evt) => evt.stopPropagation(), []);
     const CurrentFilterIcon = props.filter && props.filter.value1
         ? DataGridColumnHeaderFilterActiveIcon
@@ -53,7 +58,7 @@ const ColumnHeaderContent = (props) => {
                                 ? classes?.columnHeaderFilterActiveIcon
                                 : classes?.columnHeaderFilterIcon })))))),
         props.enableResize && (React.createElement(DataGridColumnHeaderResizer, { className: classes?.columnHeaderResizer, onMouseDown: props.startDrag, onClick: preventPropagation, onDoubleClick: props.autoResize })),
-        React.createElement(Popover, { open: filterAnchorEl !== null, anchorEl: filterAnchorEl, onClose: closeFilter, anchorOrigin: anchorOrigin, transformOrigin: transformOrigin, onBackdropClick: preventPropagation, onClick: preventPropagation },
+        React.createElement(Popover, { open: filterAnchorEl !== null, anchorEl: filterAnchorEl, onClose: closeFilter, anchorOrigin: anchorOrigin, transformOrigin: transformOrigin, onClick: preventPropagation },
             React.createElement(Box, { m: 2 },
                 React.createElement(ColumnHeaderFilterPopupComp, { container: true, className: props.columnType === "enum"
                         ? classes?.columnHeaderFilterPopupEnum

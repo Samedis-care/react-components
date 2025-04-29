@@ -1,6 +1,6 @@
 import React from "react";
 import { BaseSelectorData } from "../../standalone/Selector";
-import { GridSize } from "@mui/material/Grid2";
+import { GridSize } from "@mui/material/Grid";
 import { Breakpoint } from "@mui/material/styles";
 import SingleSelect from "../Selector/SingleSelect";
 export interface GridSingleSelectFilterProps {

@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Button, Divider, Grid2 as Grid } from "@mui/material";
+import { Box, Button, Divider, Grid } from "@mui/material";
 import { DataGridContentOverlayClosed, DataGridContentOverlayPaper, DataGridCustomFilterContainer, DataGridCustomFilterDialogTitle, useDataGridProps, } from "../DataGrid";
 import useCCTranslations from "../../../utils/useCCTranslations";
 const FilterDialog = (props) => {

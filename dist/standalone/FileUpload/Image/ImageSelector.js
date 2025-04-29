@@ -1,5 +1,5 @@
 import React, { useCallback, useRef, useState } from "react";
-import { alpha, Box, Button, Dialog, Grid2 as Grid, IconButton, styled, Tooltip, Typography, useThemeProps, } from "@mui/material";
+import { alpha, Box, Button, Dialog, Grid, IconButton, styled, Tooltip, Typography, useThemeProps, } from "@mui/material";
 import { AttachFile, Close as CloseIcon, FileUpload as UploadIcon, Person, } from "@mui/icons-material";
 import processImageB64 from "../../../utils/processImageB64";
 import combineClassNames from "../../../utils/combineClassNames";

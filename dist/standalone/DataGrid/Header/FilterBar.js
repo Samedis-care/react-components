@@ -1,5 +1,5 @@
 import React, { useCallback, useContext, useEffect, useRef, useState, } from "react";
-import { Grid2 as Grid, useMediaQuery } from "@mui/material";
+import { Grid, useMediaQuery } from "@mui/material";
 import { DataGridFilterBarBox, DataGridFilterBarGrid, useDataGridProps, useDataGridState, } from "../DataGrid";
 import CustomFiltersButton from "./CustomFiltersButton";
 import combineClassNames from "../../../utils/combineClassNames";

@@ -1,5 +1,5 @@
 import React, { useCallback } from "react";
-import { Grid2 as Grid } from "@mui/material";
+import { Grid } from "@mui/material";
 import XLSX from "xlsx";
 import GenericDataPreview from "./GenericDataPreview";
 import { useDialogContext } from "../../../framework";

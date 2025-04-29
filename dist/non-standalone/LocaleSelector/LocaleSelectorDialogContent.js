@@ -1,5 +1,5 @@
 import React, { Suspense, useCallback, useMemo, useState } from "react";
-import { Box, Grid2 as Grid, InputAdornment, styled, useThemeProps, } from "@mui/material";
+import { Box, Grid, InputAdornment, styled, useThemeProps, } from "@mui/material";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { FixedSizeList } from "react-window";
 import supportedLanguages from "../../assets/data/supported-languages.json";

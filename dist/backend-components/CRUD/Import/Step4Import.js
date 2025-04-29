@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { isFieldImportable } from "./index";
-import { Grid2 as Grid, TextField, Typography } from "@mui/material";
+import { Grid, TextField, Typography } from "@mui/material";
 import Model, { useModelMutation, } from "../../../backend-integration/Model/Model";
 import ModelVisibilityHidden from "../../../backend-integration/Model/Visibilities/VisibilityHidden";
 import deepAssign from "../../../utils/deepAssign";

@@ -1,7 +1,6 @@
 import React from "react";
 import { DatePickerProps } from "@mui/x-date-pickers";
 import { TextFieldWithHelpProps } from "../TextFieldWithHelp";
-import { Moment } from "moment";
 import { LocalizedKeyboardDatePickerProps } from "../../LocalizedDateTimePickers/LocalizedKeyboardDatePicker";
 export interface DateInputProps extends TextFieldWithHelpProps {
     /**
@@ -34,5 +33,5 @@ export interface DateInputProps extends TextFieldWithHelpProps {
      */
     onBlur?: LocalizedKeyboardDatePickerProps["onBlur"];
 }
-declare const _default: React.MemoExoticComponent<(props: DateInputProps & Omit<DatePickerProps<Moment>, "value" | "onChange">) => React.JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: DateInputProps & Omit<DatePickerProps, "value" | "onChange">) => React.JSX.Element>;
 export default _default;

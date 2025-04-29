@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from "react";
-import { Grid2 as Grid, Tooltip, useMediaQuery, useTheme, } from "@mui/material";
+import { Grid, Tooltip, useMediaQuery, useTheme, } from "@mui/material";
 import { SmallestIconButton } from "../../Small";
 import VerticalDivider from "../../VerticalDivider";
 import ComponentWithLabel from "../../UIKit/ComponentWithLabel";
