@@ -1,18 +1,18 @@
 import React from "react";
 import { DatePickerProps } from "@mui/x-date-pickers";
-import { InputLabelConfig } from "../CommonStyles";
-import TextFieldWithHelp, {
-	TextFieldWithHelpProps,
-} from "../TextFieldWithHelp";
+import PickersTextFieldWithHelp, {
+	PickersTextFieldWithHelpProps,
+} from "../PickersTextFieldWithHelp";
 import localDateToUtcDate from "../../../utils/localDateToUtcDate";
 import moment from "moment";
 import LocalizedKeyboardDatePicker, {
 	LocalizedKeyboardDatePickerProps,
 } from "../../LocalizedDateTimePickers/LocalizedKeyboardDatePicker";
 import accessSlotProps from "../../../utils/internal/accessSlotProps";
-import { InputLabelProps, TextFieldProps } from "@mui/material";
+import { TextFieldProps } from "@mui/material";
 
-export interface DateInputProps extends TextFieldWithHelpProps {
+export interface DateInputProps
+	extends Omit<PickersTextFieldWithHelpProps, "customHandleClear"> {
 	/**
 	 * The value of the input
 	 */
@@ -71,7 +71,7 @@ const DateInput = (
 			fullWidth={fullWidth}
 			onBlur={onBlur}
 			slots={{
-				textField: TextFieldWithHelp,
+				textField: PickersTextFieldWithHelp,
 			}}
 			slotProps={{
 				...muiProps.slotProps,
@@ -81,20 +81,6 @@ const DateInput = (
 						muiProps.slotProps?.textField,
 					) as TextFieldProps;
 					return {
-						slotProps: {
-							...textFieldSlotPropsProp?.slotProps,
-							inputLabel: (ownerState): InputLabelProps => {
-								const inputLabelProps = accessSlotProps(
-									ownerState,
-									textFieldSlotPropsProp?.slotProps?.inputLabel,
-								) as InputLabelProps;
-								return {
-									...InputLabelConfig,
-									...inputLabelProps,
-									...textFieldSlotPropsProp?.InputLabelProps,
-								};
-							},
-						},
 						// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 						// @ts-ignore This just passes props down to the text field component, TS defs don't support custom props here, but the implementation does.
 						customHandleClear: () => onChange(null),

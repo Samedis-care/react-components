@@ -10,6 +10,7 @@ import {
 	Theme,
 } from "@mui/material";
 import React from "react";
+import { PickersTextField, PickersTextFieldProps } from "@mui/x-date-pickers";
 
 export interface UIInputProps {
 	important?: boolean;
@@ -22,6 +23,7 @@ export type UiKitInputOutlinedClassKey = "root";
 export type UiKitInputOutlinedProps = UIInputProps & OutlinedInputProps;
 export type UiKitTextFieldClassKey = "root";
 export type UiKitTextFieldProps = UIInputProps & TextFieldProps;
+export type UiKitPickersTextFieldProps = UIInputProps & PickersTextFieldProps;
 
 const inputStyles = ({
 	theme,
@@ -63,6 +65,14 @@ export const UiKitTextField: React.ComponentType<UiKitTextFieldProps> = styled(
 )<UiKitTextFieldProps>(({ theme, important }) => ({
 	"& .MuiInput-root": inputStyles({ theme, important }),
 }));
+
+export const UiKitPickersTextField: React.ComponentType<UiKitPickersTextFieldProps> =
+	styled(PickersTextField, {
+		name: "CcUiKitPickersTextField",
+		slot: "root",
+	})<UiKitPickersTextFieldProps>(({ theme, important }) => ({
+		"& .MuiInput-root": inputStyles({ theme, important }),
+	}));
 
 export const InputLabelConfig: InputLabelProps = {
 	shrink: true,

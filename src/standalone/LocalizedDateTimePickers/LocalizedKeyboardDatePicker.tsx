@@ -10,7 +10,7 @@ import useMuiLocaleData from "./useMuiLocaleData";
 import accessSlotProps from "../../utils/internal/accessSlotProps";
 
 export interface LocalizedKeyboardDatePickerProps
-	extends Omit<DatePickerProps, "format"> {
+	extends Omit<DatePickerProps<false>, "format"> {
 	/**
 	 * Boolean flag to hide Calendar Icon (only used if disabled is truthy)
 	 */
