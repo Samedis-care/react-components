@@ -1,8 +1,8 @@
 import React from "react";
 import { DatePickerProps } from "@mui/x-date-pickers";
-import { TextFieldWithHelpProps } from "../TextFieldWithHelp";
+import { PickersTextFieldWithHelpProps } from "../PickersTextFieldWithHelp";
 import { LocalizedKeyboardDatePickerProps } from "../../LocalizedDateTimePickers/LocalizedKeyboardDatePicker";
-export interface DateInputProps extends TextFieldWithHelpProps {
+export interface DateInputProps extends Omit<PickersTextFieldWithHelpProps, "customHandleClear"> {
     /**
      * The value of the input
      */

@@ -1,7 +1,7 @@
 import React from "react";
 import { DatePickerProps } from "@mui/x-date-pickers";
 import { TextFieldProps } from "@mui/material";
-export interface LocalizedKeyboardDatePickerProps extends Omit<DatePickerProps, "format"> {
+export interface LocalizedKeyboardDatePickerProps extends Omit<DatePickerProps<false>, "format"> {
     /**
      * Boolean flag to hide Calendar Icon (only used if disabled is truthy)
      */
