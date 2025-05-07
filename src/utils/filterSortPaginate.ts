@@ -29,7 +29,7 @@ export const filterSortPaginate2 = (
 				if (!Object.prototype.hasOwnProperty.call(row, key)) continue;
 				const value = row[key];
 				if (
-					value !== null &&
+					value != null &&
 					// eslint-disable-next-line @typescript-eslint/no-base-to-string
 					value.toString().toLowerCase().includes(quickFilter.toLowerCase())
 				) {
