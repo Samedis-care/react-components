@@ -1,12 +1,12 @@
 import React from "react";
 import { InputLabelConfig } from "../CommonStyles";
 import LocalizedDateTimePicker from "../../../standalone/LocalizedDateTimePickers/LocalizedDateTimePicker";
-import TextFieldWithHelp from "../TextFieldWithHelp";
 import accessSlotProps from "../../../utils/internal/accessSlotProps";
+import PickersTextFieldWithHelp from "../PickersTextFieldWithHelp";
 const DateTimeInput = (props) => {
     const { openInfo, important, required, error, fullWidth, onBlur, ...muiProps } = props;
     return (React.createElement(LocalizedDateTimePicker, { ...muiProps, slots: {
-            textField: TextFieldWithHelp,
+            textField: PickersTextFieldWithHelp,
             ...muiProps.slots,
         }, slotProps: {
             ...muiProps.slotProps,
