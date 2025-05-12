@@ -8,6 +8,7 @@ import {
 import { withMuiWarning } from "../UIKit";
 import { TextFieldProps } from "@mui/material";
 import useMuiLocaleData from "./useMuiLocaleData";
+import accessSlotProps from "../../utils/internal/accessSlotProps";
 
 interface LocalizedDateTimePickerProps
 	extends Omit<DateTimePickerProps, "format"> {
@@ -39,12 +40,18 @@ const LocalizedDateTimePicker = (props: LocalizedDateTimePickerProps) => {
 				{...otherProps}
 				slotProps={{
 					...otherProps.slotProps,
-					textField: {
-						required,
-						error,
-						fullWidth,
-						onBlur,
-						...otherProps.slotProps?.textField,
+					textField: (ownerState) => {
+						const orgSlotProps = accessSlotProps(
+							ownerState,
+							otherProps.slotProps?.textField,
+						);
+						return {
+							required,
+							error,
+							fullWidth,
+							onBlur,
+							...orgSlotProps,
+						};
 					},
 				}}
 			/>

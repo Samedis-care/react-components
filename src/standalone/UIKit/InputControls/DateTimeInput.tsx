@@ -3,8 +3,8 @@ import { TextFieldProps } from "@mui/material";
 import { DateTimePickerProps } from "@mui/x-date-pickers";
 import { InputLabelConfig, UIInputProps } from "../CommonStyles";
 import LocalizedDateTimePicker from "../../../standalone/LocalizedDateTimePickers/LocalizedDateTimePicker";
-import TextFieldWithHelp from "../TextFieldWithHelp";
 import accessSlotProps from "../../../utils/internal/accessSlotProps";
+import PickersTextFieldWithHelp from "../PickersTextFieldWithHelp";
 
 export interface DateTimeInputProps extends UIInputProps {
 	openInfo?: () => void;
@@ -41,7 +41,7 @@ const DateTimeInput = (props: DateTimeInputProps & DateTimePickerProps) => {
 		<LocalizedDateTimePicker
 			{...muiProps}
 			slots={{
-				textField: TextFieldWithHelp,
+				textField: PickersTextFieldWithHelp,
 				...muiProps.slots,
 			}}
 			slotProps={{
