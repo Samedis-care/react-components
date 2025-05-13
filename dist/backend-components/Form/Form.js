@@ -517,16 +517,18 @@ const Form = (props) => {
     }, [serverData]);
     // main form - submit handler
     const submitForm = useCallback(async (params) => {
-        if (!serverData)
-            throw new Error("serverData is null"); // should never happen
-        if (!defaultRecord)
-            throw new Error("default record is null"); // should never happen
-        if (!getDirty(getFormDirty(valuesRef.current)) && !flowEngine)
-            return; // when form isn't dirty we don't have to submit unless it's flow engine and nothing has changed yet (to trigger validations)
         if (params && "nativeEvent" in params)
             params = undefined;
         if (!params)
             params = {};
+        if (!serverData)
+            throw new Error("serverData is null"); // should never happen
+        if (!defaultRecord)
+            throw new Error("default record is null"); // should never happen
+        if (!getDirty(getFormDirty(valuesRef.current)) &&
+            !flowEngine &&
+            !params.ignoreDirtyCheck)
+            return; // when form isn't dirty we don't have to submit unless it's flow engine and nothing has changed yet (to trigger validations)
         if (preSubmit) {
             let cancelSubmit;
             try {

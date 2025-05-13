@@ -59,6 +59,10 @@ export type FormSubmitOptions = Partial<{
      * submit to server instead of staged values (only when using flowEngine mode)
      */
     submitToServer: boolean;
+    /**
+     * submits form to server even if not dirty
+     */
+    ignoreDirtyCheck: boolean;
 }>;
 export interface PageProps<KeyT extends ModelFieldName, CustomPropsT> {
     /**
