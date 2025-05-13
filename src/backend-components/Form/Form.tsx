@@ -117,6 +117,10 @@ export type FormSubmitOptions = Partial<{
 	 * submit to server instead of staged values (only when using flowEngine mode)
 	 */
 	submitToServer: boolean;
+	/**
+	 * submits form to server even if not dirty
+	 */
+	ignoreDirtyCheck: boolean;
 }>;
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -1403,12 +1407,17 @@ const Form = <
 		async (
 			params?: FormSubmitOptions | React.SyntheticEvent,
 		): Promise<void> => {
-			if (!serverData) throw new Error("serverData is null"); // should never happen
-			if (!defaultRecord) throw new Error("default record is null"); // should never happen
-			if (!getDirty(getFormDirty(valuesRef.current)) && !flowEngine) return; // when form isn't dirty we don't have to submit unless it's flow engine and nothing has changed yet (to trigger validations)
-
 			if (params && "nativeEvent" in params) params = undefined;
 			if (!params) params = {} as FormSubmitOptions;
+
+			if (!serverData) throw new Error("serverData is null"); // should never happen
+			if (!defaultRecord) throw new Error("default record is null"); // should never happen
+			if (
+				!getDirty(getFormDirty(valuesRef.current)) &&
+				!flowEngine &&
+				!params.ignoreDirtyCheck
+			)
+				return; // when form isn't dirty we don't have to submit unless it's flow engine and nothing has changed yet (to trigger validations)
 
 			if (preSubmit) {
 				let cancelSubmit: boolean;
