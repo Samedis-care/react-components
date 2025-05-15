@@ -51,17 +51,25 @@ export const useBackendDataGridDeleteHandler = (props, refreshGrid) => {
     const { mutateAsync: deleteAdvanced } = useModelDeleteAdvanced(model);
     const { mutateAsync: deleteMultiple } = useModelDeleteMultiple(model);
     const handleDelete = useCallback(async (invert, ids, filter) => {
-        if (customDeleteConfirm) {
-            await customDeleteConfirm(invert, ids, filter);
+        try {
+            if (customDeleteConfirm) {
+                await customDeleteConfirm(invert, ids, filter);
+            }
+            else {
+                await showConfirmDialog(pushDialog, {
+                    title: t("backend-components.data-grid.delete.confirm-dialog.title"),
+                    message: t("backend-components.data-grid.delete.confirm-dialog." +
+                        (invert ? "messageInverted" : "message"), { NUM: ids.length }),
+                    textButtonYes: t("backend-components.data-grid.delete.confirm-dialog.buttons.yes"),
+                    textButtonNo: t("backend-components.data-grid.delete.confirm-dialog.buttons.no"),
+                });
+            }
         }
-        else {
-            await showConfirmDialog(pushDialog, {
-                title: t("backend-components.data-grid.delete.confirm-dialog.title"),
-                message: t("backend-components.data-grid.delete.confirm-dialog." +
-                    (invert ? "messageInverted" : "message"), { NUM: ids.length }),
-                textButtonYes: t("backend-components.data-grid.delete.confirm-dialog.buttons.yes"),
-                textButtonNo: t("backend-components.data-grid.delete.confirm-dialog.buttons.no"),
-            });
+        catch (e) {
+            // user cancelled
+            // eslint-disable-next-line no-console
+            console.error(e);
+            return;
         }
         try {
             if (enableDeleteAll) {
