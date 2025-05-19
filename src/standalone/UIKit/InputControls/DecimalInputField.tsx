@@ -1,11 +1,9 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { TextFieldProps } from "@mui/material";
 import TextFieldWithHelp, {
 	TextFieldWithHelpProps,
 } from "../TextFieldWithHelp";
-import getNumberSeparator from "../../../utils/getNumberSeparator";
 import parseLocalizedNumber from "../../../utils/parseLocalizedNumber";
-import useInputCursorFix from "../../../utils/useInputCursorFix";
 import useCCTranslations from "../../../utils/useCCTranslations";
 
 export interface DecimalInputFieldProps extends TextFieldWithHelpProps {
@@ -13,6 +11,10 @@ export interface DecimalInputFieldProps extends TextFieldWithHelpProps {
 	 * The current value or null if not set
 	 */
 	value: number | null;
+	/**
+	 * number formatting options
+	 */
+	format?: Intl.NumberFormatOptions;
 	/**
 	 * The change event handler
 	 * @param evt
@@ -28,40 +30,39 @@ const DecimalInputField = (
 	props: DecimalInputFieldProps & Omit<TextFieldProps, "onChange" | "value">,
 ) => {
 	const { i18n } = useCCTranslations();
-	const { value, onChange, ...muiProps } = props;
-	const decimalSeparator = getNumberSeparator("decimal");
-	const [danglingDecimalSeparator, setDanglingDecimalSeparator] =
-		useState(false);
-	const valueFormatted =
-		value !== null
-			? value.toLocaleString(i18n.language) +
-				(danglingDecimalSeparator && !muiProps.disabled ? decimalSeparator : "")
-			: "";
-	const { handleCursorChange, cursorInputRef } =
-		useInputCursorFix(valueFormatted);
+	const { value, onChange, format, ...muiProps } = props;
+	const [valueInternal, setValueInternal] = useState("");
+	useEffect(() => {
+		setValueInternal(
+			value !== null ? value.toLocaleString(i18n.language, format) : "",
+		);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [value]);
+
+	const handleBlur = useCallback(
+		(event: React.FocusEvent<HTMLTextAreaElement | HTMLInputElement>) => {
+			if (!onChange) return;
+			onChange(event, parseLocalizedNumber(event.target.value));
+		},
+		[onChange],
+	);
 
 	// on change handling
 	const handleChange = useCallback(
 		(event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
-			handleCursorChange(event);
-			if (!onChange) return;
-
-			setDanglingDecimalSeparator(
-				event.target.value.endsWith(decimalSeparator),
-			);
-			onChange(event, parseLocalizedNumber(event.target.value));
+			setValueInternal(event.target.value);
 		},
-		[onChange, handleCursorChange, decimalSeparator],
+		[],
 	);
 
 	return (
 		<TextFieldWithHelp
 			{...muiProps}
-			value={valueFormatted}
+			value={valueInternal}
 			onChange={handleChange}
+			onBlur={handleBlur}
 			inputProps={{
 				...muiProps.inputProps,
-				ref: cursorInputRef,
 				inputMode: "numeric",
 			}}
 			inputMode={"numeric"}

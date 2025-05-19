@@ -6,8 +6,8 @@ import {
 	FormHelperTextCC,
 	NumberFormatter,
 } from "../../../../../standalone";
-import { TextFieldWithHelpProps } from "../../../../../standalone/UIKit/TextFieldWithHelp";
 import TypeNumber from "../../TypeNumber";
+import { DecimalInputFieldProps } from "../../../../../standalone/UIKit/InputControls/DecimalInputField";
 
 export type ModelDataTypeDecimalRendererCCParams = Omit<
 	TextFieldProps,
@@ -21,7 +21,7 @@ export type ModelDataTypeDecimalRendererCCParams = Omit<
 	| "error"
 	| "multiline"
 > &
-	Omit<TextFieldWithHelpProps, "warning">;
+	Omit<DecimalInputFieldProps, "warning" | "value" | "onChange">;
 
 /**
  * Renders a text field
