@@ -1,9 +1,9 @@
 import React from "react";
 import { TextFieldProps } from "@mui/material";
 import ModelRenderParams from "../../../RenderParams";
-import { TextFieldWithHelpProps } from "../../../../../standalone/UIKit/TextFieldWithHelp";
 import TypeNumber from "../../TypeNumber";
-export type ModelDataTypeDecimalRendererCCParams = Omit<TextFieldProps, "name" | "value" | "label" | "disabled" | "required" | "onChange" | "onBlur" | "error" | "multiline"> & Omit<TextFieldWithHelpProps, "warning">;
+import { DecimalInputFieldProps } from "../../../../../standalone/UIKit/InputControls/DecimalInputField";
+export type ModelDataTypeDecimalRendererCCParams = Omit<TextFieldProps, "name" | "value" | "label" | "disabled" | "required" | "onChange" | "onBlur" | "error" | "multiline"> & Omit<DecimalInputFieldProps, "warning" | "value" | "onChange">;
 /**
  * Renders a text field
  */

@@ -7,6 +7,10 @@ export interface DecimalInputFieldProps extends TextFieldWithHelpProps {
      */
     value: number | null;
     /**
+     * number formatting options
+     */
+    format?: Intl.NumberFormatOptions;
+    /**
      * The change event handler
      * @param evt
      * @param value
