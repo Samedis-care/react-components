@@ -42,9 +42,7 @@ const Root = styled(MuiDialogTitle, { name: "CcDialogTitle", slot: "root" })(
 const TextWrapper = styled(Grid, {
 	name: "CcDialogTitle",
 	slot: "textWrapper",
-})({
-	maxWidth: "75%",
-});
+})({});
 
 const Text = styled(Typography, { name: "CcDialogTitle", slot: "text" })({
 	textOverflow: "ellipsis",
@@ -81,13 +79,17 @@ const DialogTitleRaw = (inProps: DialogTitleProps) => {
 				noTitle && "CcDialogTitle-noTitle",
 			])}
 		>
-			<Grid container wrap={"nowrap"}>
-				<TextWrapper className={classes?.textWrapper}>
+			<Grid
+				container
+				wrap={"nowrap"}
+				justifyContent={"space-between"}
+				alignItems={"center"}
+			>
+				<TextWrapper size={"grow"} className={classes?.textWrapper}>
 					<Text variant="h6" noWrap className={classes?.text}>
 						{children}
 					</Text>
 				</TextWrapper>
-				<Grid size="grow" />
 				{onClose && (
 					<Grid>
 						<CloseButton
