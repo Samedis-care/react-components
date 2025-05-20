@@ -6,6 +6,11 @@ import { useCallback } from "react";
 const useNavigate = () => {
     const { history } = useHistoryRouterContext();
     return useCallback((to, options) => {
+        // reset scroll position
+        Array.from(document.querySelectorAll("*")).forEach((el) => {
+            el.scrollTop = 0;
+            el.scrollLeft = 0;
+        });
         options ??= {};
         if (options.replace)
             history.replace(to, options.state);

@@ -13,9 +13,7 @@ const Root = styled(MuiDialogTitle, { name: "CcDialogTitle", slot: "root" })(({ 
 const TextWrapper = styled(Grid, {
     name: "CcDialogTitle",
     slot: "textWrapper",
-})({
-    maxWidth: "75%",
-});
+})({});
 const Text = styled(Typography, { name: "CcDialogTitle", slot: "text" })({
     textOverflow: "ellipsis",
     overflow: "hidden",
@@ -37,10 +35,9 @@ const DialogTitleRaw = (inProps) => {
             classes?.root,
             noTitle && "CcDialogTitle-noTitle",
         ]) },
-        React.createElement(Grid, { container: true, wrap: "nowrap" },
-            React.createElement(TextWrapper, { className: classes?.textWrapper },
+        React.createElement(Grid, { container: true, wrap: "nowrap", justifyContent: "space-between", alignItems: "center" },
+            React.createElement(TextWrapper, { size: "grow", className: classes?.textWrapper },
                 React.createElement(Text, { variant: "h6", noWrap: true, className: classes?.text }, children)),
-            React.createElement(Grid, { size: "grow" }),
             onClose && (React.createElement(Grid, null,
                 React.createElement(CloseButton, { "aria-label": t("non-standalone.dialog.dialog-title.close"), className: classes?.closeButton, onClick: onClose, size: "large" },
                     React.createElement(Close, null)))))));
