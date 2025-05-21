@@ -91,7 +91,7 @@ const MultiSelect = (inProps) => {
             return;
         onSelect(selected.map((entry) => getId(entry) === getId(newValue) ? newValue : entry));
     }, [getId, onSelect, selected]);
-    return (React.createElement(Root, { container: true, className: combineClassNames([className, classes?.root]) },
+    return (React.createElement(Root, { size: "grow", container: true, className: combineClassNames([className, classes?.root]) },
         React.createElement(Grid, { size: 12 },
             React.createElement(StyledBaseSelector, { ...props, 
                 // @ts-expect-error removed owner state from props to preserve generics
