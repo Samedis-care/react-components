@@ -215,7 +215,11 @@ const MultiSelect = <DataT extends MultiSelectorData>(
 	);
 
 	return (
-		<Root container className={combineClassNames([className, classes?.root])}>
+		<Root
+			size={"grow"}
+			container
+			className={combineClassNames([className, classes?.root])}
+		>
 			<Grid size={12}>
 				<StyledBaseSelector
 					{...props}
