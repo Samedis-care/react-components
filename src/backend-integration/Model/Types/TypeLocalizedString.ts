@@ -46,6 +46,15 @@ abstract class TypeLocalizedString
 		)[0] as MultiLanguageInputSupportedLanguages;
 		return value[currentLang] ?? "";
 	}
+
+	deserialize = (
+		value: unknown,
+	): Partial<Record<MultiLanguageInputSupportedLanguages, string>> => {
+		if (value == null) return {};
+		return value as Partial<
+			Record<MultiLanguageInputSupportedLanguages, string>
+		>;
+	};
 }
 
 export default TypeLocalizedString;
