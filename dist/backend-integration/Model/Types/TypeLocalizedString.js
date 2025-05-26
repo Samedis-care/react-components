@@ -22,5 +22,10 @@ class TypeLocalizedString {
         const currentLang = ccI18n.language.split("-")[0];
         return value[currentLang] ?? "";
     }
+    deserialize = (value) => {
+        if (value == null)
+            return {};
+        return value;
+    };
 }
 export default TypeLocalizedString;

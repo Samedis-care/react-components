@@ -14,5 +14,6 @@ declare abstract class TypeLocalizedString implements Type<Partial<Record<MultiL
     getFilterType(): FilterType;
     getDefaultValue(): Partial<Record<MultiLanguageInputSupportedLanguages, string>>;
     stringify(value: Partial<Record<MultiLanguageInputSupportedLanguages, string>>): string;
+    deserialize: (value: unknown) => Partial<Record<MultiLanguageInputSupportedLanguages, string>>;
 }
 export default TypeLocalizedString;
