@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useImperativeHandle, useRef, useState, } from "react";
+import React, { useCallback, useEffect, useImperativeHandle, useRef, } from "react";
 import { Box, Button, FormHelperText, styled, Tooltip, Typography, Grid, useThemeProps, } from "@mui/material";
 import { AttachFile } from "@mui/icons-material";
 import FilePreview, { getFileIconOrDefault } from "./File";
@@ -10,6 +10,7 @@ import combineClassNames from "../../../utils/combineClassNames";
 import getFileExt from "../../../utils/getFileExt";
 import matchMime from "../../../utils/matchMime";
 import useDropZone from "../../../utils/useDropZone";
+import useRefState from "../../../utils/useRefState";
 const StyledGroupBox = styled(GroupBox, { name: "CcFileUpload", slot: "root" })({});
 const Dropzone = styled(Grid, { name: "CcFileUpload", slot: "dropzone" })(({ theme }) => ({
     "&.Mui-active": {
@@ -59,7 +60,7 @@ const FileUpload = (inProps, ref) => {
         delete: false,
         ...meta,
     }));
-    const [files, setFiles] = useState(loadInitialFiles);
+    const { state: files, set: setFiles } = useRefState(loadInitialFiles);
     const inputRef = useRef(null);
     const { t } = useCCTranslations();
     const getRemainingFileCount = useCallback(() => {
@@ -142,6 +143,7 @@ const FileUpload = (inProps, ref) => {
         maxFiles,
         onChange,
         previewImages,
+        setFiles,
         t,
     ]);
     const handleUpload = useCallback((capture) => {
@@ -195,7 +197,7 @@ const FileUpload = (inProps, ref) => {
                 onChange(newValue);
             return newValue;
         });
-    }, [onChange]);
+    }, [onChange, setFiles]);
     const { handleDrop, handleDragOver, dragging } = useDropZone(readOnly ? undefined : processFiles);
     // update files if necessary
     useEffect(() => {

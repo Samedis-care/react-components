@@ -39,7 +39,7 @@ const Loader = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcLoader" });
     return (React.createElement(OuterWrapper, null,
         React.createElement(InnerWrapper, null,
-            props.text && React.createElement(Typography, { variant: "h6" }, props.text),
+            props.text && (React.createElement(Typography, { variant: props.typographyVariant ?? "h6" }, props.text)),
             React.createElement(OuterProgressWrapper, null,
                 React.createElement(InnerProgressWrapper, null,
                     React.createElement(Progress, null))))));
