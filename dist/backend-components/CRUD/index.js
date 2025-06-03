@@ -177,7 +177,9 @@ const CRUD = (props) => {
     };
     const dispatch = useMemo(() => ({
         refreshGrid,
-    }), [refreshGrid]);
+        openView,
+        showOverview,
+    }), [refreshGrid, openView, showOverview]);
     const showGrid = disableRouting
         ? id === null
         : routeUrl === location.pathname;

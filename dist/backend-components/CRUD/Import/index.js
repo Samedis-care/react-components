@@ -4,9 +4,8 @@ import Step1LoadData from "./Step1LoadData";
 import Step2ConnectData from "./Step2ConnectData";
 import Step3ValidateReview from "./Step3ValidateReview";
 import Step4Import from "./Step4Import";
-import { FrameworkHistory } from "../../../framework";
 import useCCTranslations from "../../../utils/useCCTranslations";
-import useLocation from "../../../standalone/Routes/useLocation";
+import { useCrudDispatchContext } from "../index";
 export const IMPORT_STEPS = [
     "backend-components.crud.import.step1",
     "backend-components.crud.import.step2",
@@ -31,7 +30,7 @@ export const isFieldImportable = (name, field) => {
 export const useCrudImportLogic = (props) => {
     const { model, importConfig, updateKey } = props;
     const guided = props.guided && importConfig;
-    const { pathname } = useLocation();
+    const crudCtx = useCrudDispatchContext();
     if (updateKey && !model.fields[updateKey]?.filterable) {
         throw new Error("Update key not in model or not filterable");
     }
@@ -56,9 +55,8 @@ export const useCrudImportLogic = (props) => {
     const next = useCallback(() => setActiveStep((prev) => prev + (prev == 0 && guided ? 2 : 1)), [guided]);
     const prev = useCallback(() => setActiveStep((prev) => prev - (prev == 2 && guided ? 2 : 1)), [guided]);
     const finish = useCallback(() => {
-        // remove /import from url
-        FrameworkHistory.push(pathname.substring(0, pathname.lastIndexOf("/")));
-    }, [pathname]);
+        crudCtx.showOverview(true);
+    }, [crudCtx]);
     return {
         guided,
         activeStep,
