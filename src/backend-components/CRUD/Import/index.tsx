@@ -11,10 +11,9 @@ import {
 	PageVisibility,
 } from "../../../backend-integration";
 import { FileData } from "../../../standalone/FileUpload/Generic";
-import { FrameworkHistory } from "../../../framework";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import { ValidationResult } from "../../Form";
-import useLocation from "../../../standalone/Routes/useLocation";
+import { useCrudDispatchContext } from "../index";
 
 export interface CrudImportProps<
 	KeyT extends ModelFieldName,
@@ -123,7 +122,7 @@ export const useCrudImportLogic = <
 ) => {
 	const { model, importConfig, updateKey } = props;
 	const guided = props.guided && importConfig;
-	const { pathname } = useLocation();
+	const crudCtx = useCrudDispatchContext();
 
 	if (updateKey && !model.fields[updateKey]?.filterable) {
 		throw new Error("Update key not in model or not filterable");
@@ -158,9 +157,8 @@ export const useCrudImportLogic = <
 		[guided],
 	);
 	const finish = useCallback(() => {
-		// remove /import from url
-		FrameworkHistory.push(pathname.substring(0, pathname.lastIndexOf("/")));
-	}, [pathname]);
+		crudCtx.showOverview(true);
+	}, [crudCtx]);
 
 	return {
 		guided,

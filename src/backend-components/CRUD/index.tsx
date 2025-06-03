@@ -248,6 +248,20 @@ export interface CrudDispatch {
 	 * Force-refreshes the grid
 	 */
 	refreshGrid: () => void;
+	/**
+	 * Go back to datagrid
+	 * @param forceRefresh refresh grid, default false
+	 */
+	showOverview: (forceRefresh?: boolean) => void;
+	/**
+	 * Open view
+	 * @param id ID to open
+	 * @param forceRefresh force refresh grid, default false
+	 */
+	openView: (
+		id: "import" | "devimport" | "new" | string,
+		forceRefresh?: boolean,
+	) => void;
 }
 
 const CrudDispatchContext = React.createContext<CrudDispatch | undefined>(
@@ -519,10 +533,12 @@ const CRUD = <
 	};
 
 	const dispatch = useMemo(
-		() => ({
+		(): CrudDispatch => ({
 			refreshGrid,
+			openView,
+			showOverview,
 		}),
-		[refreshGrid],
+		[refreshGrid, openView, showOverview],
 	);
 
 	const showGrid = disableRouting
