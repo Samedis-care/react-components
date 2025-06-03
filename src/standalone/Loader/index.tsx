@@ -71,7 +71,11 @@ const Loader = (inProps: LoaderProps) => {
 	return (
 		<OuterWrapper>
 			<InnerWrapper>
-				{props.text && <Typography variant={"h6"}>{props.text}</Typography>}
+				{props.text && (
+					<Typography variant={props.typographyVariant ?? "h6"}>
+						{props.text}
+					</Typography>
+				)}
 				<OuterProgressWrapper>
 					<InnerProgressWrapper>
 						<Progress />
