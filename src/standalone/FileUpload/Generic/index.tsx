@@ -5,7 +5,6 @@ import React, {
 	useEffect,
 	useImperativeHandle,
 	useRef,
-	useState,
 } from "react";
 import {
 	Box,
@@ -28,6 +27,7 @@ import combineClassNames from "../../../utils/combineClassNames";
 import getFileExt from "../../../utils/getFileExt";
 import matchMime from "../../../utils/matchMime";
 import useDropZone from "../../../utils/useDropZone";
+import useRefState from "../../../utils/useRefState";
 
 export interface FileUploadProps {
 	/**
@@ -312,7 +312,8 @@ const FileUpload = (
 			delete: false,
 			...meta,
 		}));
-	const [files, setFiles] = useState<FileData[]>(loadInitialFiles);
+	const { state: files, set: setFiles } =
+		useRefState<FileData[]>(loadInitialFiles);
 	const inputRef = useRef<HTMLInputElement | null>(null);
 	const { t } = useCCTranslations();
 
@@ -430,6 +431,7 @@ const FileUpload = (
 			maxFiles,
 			onChange,
 			previewImages,
+			setFiles,
 			t,
 		],
 	);
@@ -495,7 +497,7 @@ const FileUpload = (
 				return newValue;
 			});
 		},
-		[onChange],
+		[onChange, setFiles],
 	);
 	const { handleDrop, handleDragOver, dragging } = useDropZone(
 		readOnly ? undefined : processFiles,
