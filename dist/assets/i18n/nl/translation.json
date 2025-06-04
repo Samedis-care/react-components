@@ -293,6 +293,9 @@
 				},
 				"conversion_errors": "Fouten bij gegevensconversie",
 				"validation_errors": "Validatiefouten"
+			},
+			"grid": {
+				"view": "Bekijken"
 			}
 		}
 	},

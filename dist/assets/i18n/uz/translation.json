@@ -293,6 +293,9 @@
 				},
 				"validation_errors": "Tasdiqlash xatolari",
 				"conversion_errors": "Ma'lumotlarni o'zgartirish xatolari"
+			},
+			"grid": {
+				"view": "Ko'rish"
 			}
 		}
 	},
