@@ -59,10 +59,13 @@ export interface DataActionBarViewProps {
 }
 
 const DataActionBarView = (props: DataActionBarViewProps) => {
-	const { classes } = useDataGridProps();
+	const { classes, editIcon, editLabel } = useDataGridProps();
 	const { t } = useCCTranslations();
 	const theme = useTheme();
 	const isXs = useMediaQuery(theme.breakpoints.only("xs"));
+
+	const MyEditIcon = editIcon ?? EditIcon;
+	const myEditLabel = editLabel ?? t("standalone.data-grid.footer.edit");
 
 	const [extendedMenuAnchor, setExtendedMenuAnchor] =
 		useState<MenuProps["anchorEl"]>(undefined);
@@ -118,10 +121,10 @@ const DataActionBarView = (props: DataActionBarViewProps) => {
 									disabled={props.numSelected !== 1}
 									onClick={props.handleEdit}
 								>
-									<EditIcon />
+									<MyEditIcon />
 								</SmallestIconButton>
 							}
-							labelText={t("standalone.data-grid.footer.edit")}
+							labelText={myEditLabel}
 							labelPlacement={"bottom"}
 							disabled={props.numSelected !== 1}
 						/>

@@ -28,7 +28,9 @@ import useLocation from "../../standalone/Routes/useLocation";
 import useParams from "../../standalone/Routes/useParams";
 import Routes from "../../standalone/Routes/Routes";
 import { styled } from "@mui/material";
+import { Visibility as ViewIcon } from "@mui/icons-material";
 import DialogContextProvider from "../../framework/DialogContextProvider";
+import useCCTranslations from "../../utils/useCCTranslations";
 
 const CrudImport = React.lazy(() => import("./Import")) as CrudImportType;
 
@@ -301,6 +303,7 @@ const CRUD = <
 >(
 	props: CrudProps<KeyT, VisibilityT, CustomT>,
 ) => {
+	const { t } = useCCTranslations();
 	const navigate = useNavigate();
 	const routeCtx = useContext(RouteContext);
 	if (!props.disableRouting && !routeCtx) throw new Error("no route match");
@@ -441,6 +444,14 @@ const CRUD = <
 						props.children
 							? showEditPage
 							: undefined
+					}
+					editIcon={
+						hasPermission(perms, props.editPermission) ? undefined : ViewIcon
+					}
+					editLabel={
+						hasPermission(perms, props.editPermission)
+							? undefined
+							: t("backend-components.crud.grid.view")
 					}
 					onAddNew={
 						props.gridProps.forceAddNew ??

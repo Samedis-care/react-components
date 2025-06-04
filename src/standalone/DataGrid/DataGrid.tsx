@@ -19,6 +19,7 @@ import {
 	ListItem,
 	Paper,
 	styled,
+	SvgIconProps,
 	Theme,
 	Typography,
 	useTheme,
@@ -276,6 +277,14 @@ export interface IDataGridColumnProps {
 	 * @param id The id to edit
 	 */
 	onEdit?: (id: string) => void;
+	/**
+	 * Custom edit icon
+	 */
+	editIcon?: React.ComponentType<SvgIconProps>;
+	/**
+	 * Custom edit label
+	 */
+	editLabel?: string;
 	/**
 	 * Delete handler, do not specify to disable deletion
 	 * @param invert if invert is true, delete everything except ids, otherwise only delete ids
