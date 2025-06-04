@@ -9,10 +9,12 @@ import { DataGridSelectAllWrapper, useDataGridProps, } from "../DataGrid";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import DataActionBarMenu from "./DataActionBarMenu";
 const DataActionBarView = (props) => {
-    const { classes } = useDataGridProps();
+    const { classes, editIcon, editLabel } = useDataGridProps();
     const { t } = useCCTranslations();
     const theme = useTheme();
     const isXs = useMediaQuery(theme.breakpoints.only("xs"));
+    const MyEditIcon = editIcon ?? EditIcon;
+    const myEditLabel = editLabel ?? t("standalone.data-grid.footer.edit");
     const [extendedMenuAnchor, setExtendedMenuAnchor] = useState(undefined);
     const handleExtendedMenuOpen = useCallback((evt) => {
         setExtendedMenuAnchor(evt.currentTarget);
@@ -32,7 +34,7 @@ const DataActionBarView = (props) => {
                 React.createElement(VerticalDivider, null)),
             React.createElement(Grid, { key: "edit" },
                 React.createElement(ComponentWithLabel, { control: React.createElement(SmallestIconButton, { color: "primary", disabled: props.numSelected !== 1, onClick: props.handleEdit },
-                        React.createElement(EditIcon, null)), labelText: t("standalone.data-grid.footer.edit"), labelPlacement: "bottom", disabled: props.numSelected !== 1 })))),
+                        React.createElement(MyEditIcon, null)), labelText: myEditLabel, labelPlacement: "bottom", disabled: props.numSelected !== 1 })))),
         (props.handleDelete || props.disableDeleteHint) && (React.createElement(React.Fragment, null,
             React.createElement(Grid, { key: "divider-2" },
                 React.createElement(VerticalDivider, null)),

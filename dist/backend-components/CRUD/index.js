@@ -10,7 +10,9 @@ import useLocation from "../../standalone/Routes/useLocation";
 import useParams from "../../standalone/Routes/useParams";
 import Routes from "../../standalone/Routes/Routes";
 import { styled } from "@mui/material";
+import { Visibility as ViewIcon } from "@mui/icons-material";
 import DialogContextProvider from "../../framework/DialogContextProvider";
+import useCCTranslations from "../../utils/useCCTranslations";
 const CrudImport = React.lazy(() => import("./Import"));
 const GridVisibilityWrapper = styled("div", {
     name: "CcCrud",
@@ -37,6 +39,7 @@ const FormPageWrapper = (props) => {
     return (React.createElement(Suspense, { fallback: React.createElement(Loader, null) }, props.form(params.id ?? "", props.children)));
 };
 const CRUD = (props) => {
+    const { t } = useCCTranslations();
     const navigate = useNavigate();
     const routeCtx = useContext(RouteContext);
     if (!props.disableRouting && !routeCtx)
@@ -134,7 +137,9 @@ const CRUD = (props) => {
                     hasPermission(perms, props.editPermission)) &&
                     props.children
                     ? showEditPage
-                    : undefined, onAddNew: props.gridProps.forceAddNew ??
+                    : undefined, editIcon: hasPermission(perms, props.editPermission) ? undefined : ViewIcon, editLabel: hasPermission(perms, props.editPermission)
+                    ? undefined
+                    : t("backend-components.crud.grid.view"), onAddNew: props.gridProps.forceAddNew ??
                     (hasPermission(perms, props.newPermission) && props.children
                         ? props.gridProps.onAddNew == null
                             ? showNewPage

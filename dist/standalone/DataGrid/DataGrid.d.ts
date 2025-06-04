@@ -1,5 +1,5 @@
 import React, { Dispatch, SetStateAction } from "react";
-import { Box, Collapse, Divider, Grid, IconButton, ListItem, Paper, Theme, Typography } from "@mui/material";
+import { Box, Collapse, Divider, Grid, IconButton, ListItem, Paper, SvgIconProps, Theme, Typography } from "@mui/material";
 import { Apps as AppsIcon, Search as SearchIcon } from "@mui/icons-material";
 import { IDataGridHeaderProps } from "./Header";
 import { FilterType, IFilterDef } from "./Content/FilterEntry";
@@ -222,6 +222,14 @@ export interface IDataGridColumnProps {
      * @param id The id to edit
      */
     onEdit?: (id: string) => void;
+    /**
+     * Custom edit icon
+     */
+    editIcon?: React.ComponentType<SvgIconProps>;
+    /**
+     * Custom edit label
+     */
+    editLabel?: string;
     /**
      * Delete handler, do not specify to disable deletion
      * @param invert if invert is true, delete everything except ids, otherwise only delete ids
