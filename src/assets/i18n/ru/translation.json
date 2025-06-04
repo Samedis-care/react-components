@@ -293,6 +293,9 @@
 				},
 				"validation_errors": "Ошибки проверки",
 				"conversion_errors": "Ошибки преобразования данных"
+			},
+			"grid": {
+				"view": "Вид"
 			}
 		}
 	},
