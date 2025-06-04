@@ -293,6 +293,9 @@
 				},
 				"validation_errors": "Erreurs de validation",
 				"conversion_errors": "Erreurs de conversion de données"
+			},
+			"grid": {
+				"view": "Visualiser"
 			}
 		}
 	},
