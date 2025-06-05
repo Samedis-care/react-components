@@ -25,6 +25,10 @@ export interface CrudFileUploadProps extends Omit<FileUploadProps, "files" | "ha
      * @returns The file data which can be used by the control
      */
     deserialize: (data: Record<string, unknown>) => Promise<FileData<BackendFileMeta>> | FileData<BackendFileMeta>;
+    /**
+     * additional read-only files
+     */
+    additionalFiles?: FileData<FileMeta>[];
 }
 export interface BackendFileMeta extends FileMeta {
     /**

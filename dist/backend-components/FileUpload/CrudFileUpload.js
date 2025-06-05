@@ -1,8 +1,8 @@
-import React, { useCallback, useEffect, useState, } from "react";
+import React, { useCallback, useEffect, useMemo, useState, } from "react";
 import FileUpload from "../../standalone/FileUpload/Generic";
 import { Loader } from "../../standalone";
 const CrudFileUpload = (props, ref) => {
-    const { connector, serialize, deserialize, onChange, ...otherProps } = props;
+    const { connector, serialize, deserialize, onChange, additionalFiles, ...otherProps } = props;
     const { allowDuplicates } = otherProps;
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -35,7 +35,9 @@ const CrudFileUpload = (props, ref) => {
             // deletePromise may be undefined or a promise
             await deletePromise;
             const uploadedFiles = await uploadPromise;
-            const finalFiles = newFiles.filter((file) => !file.delete && !file.canBeUploaded).concat(uploadedFiles);
+            const finalFiles = newFiles.filter((file) => !file.delete &&
+                !file.canBeUploaded &&
+                "id" in file.file).concat(uploadedFiles);
             // update state
             setFiles(finalFiles);
         }
@@ -71,6 +73,7 @@ const CrudFileUpload = (props, ref) => {
         if (onChange)
             onChange(files);
     }, [files, onChange]);
+    const finalFiles = useMemo(() => (additionalFiles ? [...files, ...additionalFiles] : files), [files, additionalFiles]);
     if (loading)
         return React.createElement(Loader, null);
     if (loadError)
@@ -78,6 +81,6 @@ const CrudFileUpload = (props, ref) => {
     const ErrorComponent = props.errorComponent;
     return (React.createElement(React.Fragment, null,
         error && React.createElement(ErrorComponent, { error: error }),
-        React.createElement(FileUpload, { ...otherProps, ref: ref, files: files, onChange: handleChange, handleError: handleError, readOnly: otherProps.readOnly || connector == null })));
+        React.createElement(FileUpload, { ...otherProps, ref: ref, files: finalFiles, onChange: handleChange, handleError: handleError, readOnly: otherProps.readOnly || connector == null })));
 };
 export default React.memo(React.forwardRef(CrudFileUpload));
