@@ -1635,18 +1635,24 @@ const Form = <
 			onSubmit,
 		],
 	);
-	const handleSubmit = useCallback(
-		async (evt: FormEvent<HTMLFormElement>) => {
-			evt.preventDefault();
-			evt.stopPropagation();
-			try {
-				await submitForm();
-			} catch {
-				// ignore, shown to user via ErrorComponent
-			}
+	const submitFormRef = useRef<typeof submitForm>(submitForm);
+	submitFormRef.current = submitForm;
+	const submitFormReferenced: typeof submitForm = useCallback(
+		(p1: Parameters<typeof submitForm>[0]) => {
+			return submitFormRef.current(p1);
 		},
-		[submitForm],
+		[],
 	);
+
+	const handleSubmit = useCallback(async (evt: FormEvent<HTMLFormElement>) => {
+		evt.preventDefault();
+		evt.stopPropagation();
+		try {
+			await submitFormRef.current();
+		} catch {
+			// ignore, shown to user via ErrorComponent
+		}
+	}, []);
 
 	// nested forms
 	const parentFormContext = useContext(FormContext);
@@ -1906,7 +1912,7 @@ const Form = <
 			removeBusyReason,
 			addSubmittingBlocker,
 			removeSubmittingBlocker,
-			submit: submitForm,
+			submit: submitFormReferenced,
 			deleteOnSubmit: !!deleteOnSubmit,
 			values,
 			initialValues: initialValues ?? {},
@@ -1962,7 +1968,7 @@ const Form = <
 			removeBusyReason,
 			addSubmittingBlocker,
 			removeSubmittingBlocker,
-			submitForm,
+			submitFormReferenced,
 			deleteOnSubmit,
 			values,
 			initialValues,
@@ -2009,7 +2015,7 @@ const Form = <
 			setCustomReadOnly,
 			removeCustomReadOnly,
 			flowEngine: !!flowEngine,
-			submit: submitForm,
+			submit: submitFormReferenced,
 			submitting,
 			dirty,
 			flowEngineConfig,
@@ -2033,7 +2039,7 @@ const Form = <
 			setFieldValueLite,
 			setFieldTouchedLite,
 			flowEngine,
-			submitForm,
+			submitFormReferenced,
 			submitting,
 			dirty,
 		],
