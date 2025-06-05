@@ -685,16 +685,21 @@ const Form = (props) => {
         onlySubmitMountedBehaviour,
         onSubmit,
     ]);
+    const submitFormRef = useRef(submitForm);
+    submitFormRef.current = submitForm;
+    const submitFormReferenced = useCallback((p1) => {
+        return submitFormRef.current(p1);
+    }, []);
     const handleSubmit = useCallback(async (evt) => {
         evt.preventDefault();
         evt.stopPropagation();
         try {
-            await submitForm();
+            await submitFormRef.current();
         }
         catch {
             // ignore, shown to user via ErrorComponent
         }
-    }, [submitForm]);
+    }, []);
     // nested forms
     const parentFormContext = useContext(FormContext);
     if (nestedFormName && !parentFormContext)
@@ -898,7 +903,7 @@ const Form = (props) => {
         removeBusyReason,
         addSubmittingBlocker,
         removeSubmittingBlocker,
-        submit: submitForm,
+        submit: submitFormReferenced,
         deleteOnSubmit: !!deleteOnSubmit,
         values,
         initialValues: initialValues ?? {},
@@ -953,7 +958,7 @@ const Form = (props) => {
         removeBusyReason,
         addSubmittingBlocker,
         removeSubmittingBlocker,
-        submitForm,
+        submitFormReferenced,
         deleteOnSubmit,
         values,
         initialValues,
@@ -997,7 +1002,7 @@ const Form = (props) => {
         setCustomReadOnly,
         removeCustomReadOnly,
         flowEngine: !!flowEngine,
-        submit: submitForm,
+        submit: submitFormReferenced,
         submitting,
         dirty,
         flowEngineConfig,
@@ -1020,7 +1025,7 @@ const Form = (props) => {
         setFieldValueLite,
         setFieldTouchedLite,
         flowEngine,
-        submitForm,
+        submitFormReferenced,
         submitting,
         dirty,
     ]);
