@@ -3,6 +3,7 @@ import React, {
 	RefAttributes,
 	useCallback,
 	useEffect,
+	useMemo,
 	useState,
 } from "react";
 import FileUpload, {
@@ -45,6 +46,10 @@ export interface CrudFileUploadProps
 	deserialize: (
 		data: Record<string, unknown>,
 	) => Promise<FileData<BackendFileMeta>> | FileData<BackendFileMeta>;
+	/**
+	 * additional read-only files
+	 */
+	additionalFiles?: FileData<FileMeta>[];
 }
 
 export interface BackendFileMeta extends FileMeta {
@@ -58,7 +63,14 @@ const CrudFileUpload = (
 	props: CrudFileUploadProps & RefAttributes<FileUploadDispatch>,
 	ref: ForwardedRef<FileUploadDispatch>,
 ) => {
-	const { connector, serialize, deserialize, onChange, ...otherProps } = props;
+	const {
+		connector,
+		serialize,
+		deserialize,
+		onChange,
+		additionalFiles,
+		...otherProps
+	} = props;
 	const { allowDuplicates } = otherProps;
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<Error | null>(null);
@@ -66,7 +78,7 @@ const CrudFileUpload = (
 	const [files, setFiles] = useState<FileData<BackendFileMeta>[]>([]);
 
 	const handleChange = useCallback(
-		async (newFiles: FileData[]) => {
+		async (newFiles: FileData<File | FileMeta | BackendFileMeta>[]) => {
 			if (!connector) return;
 
 			// upload new/changed files
@@ -109,7 +121,10 @@ const CrudFileUpload = (
 
 				const finalFiles = (
 					newFiles.filter(
-						(file) => !file.delete && !file.canBeUploaded,
+						(file) =>
+							!file.delete &&
+							!file.canBeUploaded &&
+							"id" in (file.file as FileMeta | BackendFileMeta), // filter out additional files
 					) as FileData<BackendFileMeta>[]
 				).concat(uploadedFiles);
 
@@ -150,6 +165,11 @@ const CrudFileUpload = (
 		if (onChange) onChange(files);
 	}, [files, onChange]);
 
+	const finalFiles = useMemo(
+		() => (additionalFiles ? [...files, ...additionalFiles] : files),
+		[files, additionalFiles],
+	);
+
 	if (loading) return <Loader />;
 	if (loadError) return <span>{loadError.message}</span>;
 
@@ -161,7 +181,7 @@ const CrudFileUpload = (
 			<FileUpload
 				{...otherProps}
 				ref={ref}
-				files={files}
+				files={finalFiles}
 				onChange={handleChange}
 				handleError={handleError}
 				readOnly={otherProps.readOnly || connector == null}
