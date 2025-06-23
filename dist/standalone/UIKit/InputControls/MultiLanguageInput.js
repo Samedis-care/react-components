@@ -40,10 +40,13 @@ const MultiLanguageInput = (inProps) => {
         if (!enabledLanguages.includes(lang)) {
             throw new Error("Language not supported");
         }
-        onChange({
+        const newValue = {
             ...values,
             [lang]: evt.target.value,
-        });
+        };
+        if (!evt.target.value)
+            delete newValue[lang];
+        onChange(newValue);
     }, [enabledLanguages, onChange, values]);
     const getLanguageName = (lang) => [
         t(lang, {

@@ -29,10 +29,13 @@ class RendererStringLocalizedSingle extends TypeLocalizedString {
                         " with ModelDataTypeStringLocalizedSingleRendererContext.Provider and specify a language");
                 return (React.createElement(React.Fragment, null,
                     React.createElement(TextFieldWithHelp, { variant: this.multiline ? "outlined" : undefined, fullWidth: true, ...this.props, name: field, value: value[language] ?? "", label: label, disabled: visibility.readOnly, required: visibility.required, onChange: (evt) => {
-                            handleChange(evt.target.name, {
+                            const newValue = {
                                 ...value,
                                 [language]: evt.target.value,
-                            });
+                            };
+                            if (!evt.target.value)
+                                delete newValue[language];
+                            handleChange(evt.target.name, newValue);
                         }, onBlur: handleBlur, error: !!errorMsg, warning: !!warningMsg }),
                     React.createElement(FormHelperTextCC, { error: !!errorMsg, warning: !!warningMsg }, errorMsg || warningMsg)));
             }));
