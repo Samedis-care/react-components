@@ -22,7 +22,7 @@ class TypeDate {
         return value.toISOString();
     };
     deserialize = (value) => {
-        return new Date(value);
+        return normalizeDate(new Date(value));
     };
     /**
      * Formatting helper used in date renderers

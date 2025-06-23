@@ -1,4 +1,5 @@
 import ccI18n from "../../../i18n";
+import { normalizeDate } from "./Utils/DateUtils";
 /**
  * Type for nullable dates
  */
@@ -25,7 +26,7 @@ class TypeDateNullable {
     };
     deserialize = (value) => {
         if (value)
-            return new Date(value);
+            return normalizeDate(new Date(value));
         return null;
     };
 }
