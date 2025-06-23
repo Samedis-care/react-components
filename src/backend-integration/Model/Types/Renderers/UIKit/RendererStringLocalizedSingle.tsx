@@ -86,10 +86,12 @@ class RendererStringLocalizedSingle extends TypeLocalizedString {
 									disabled={visibility.readOnly}
 									required={visibility.required}
 									onChange={(evt: React.ChangeEvent<HTMLInputElement>) => {
-										handleChange(evt.target.name, {
+										const newValue = {
 											...value,
 											[language]: evt.target.value,
-										});
+										};
+										if (!evt.target.value) delete newValue[language];
+										handleChange(evt.target.name, newValue);
 									}}
 									onBlur={handleBlur}
 									error={!!errorMsg}
