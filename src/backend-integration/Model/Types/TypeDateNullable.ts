@@ -3,6 +3,7 @@ import Type from "../Type";
 import { ModelRenderParams } from "../index";
 import FilterType from "../FilterType";
 import ccI18n from "../../../i18n";
+import { normalizeDate } from "./Utils/DateUtils";
 
 /**
  * Type for nullable dates
@@ -36,7 +37,7 @@ abstract class TypeDateNullable implements Type<Date | null> {
 	};
 
 	deserialize = (value: unknown): Date | null => {
-		if (value) return new Date(value as string);
+		if (value) return normalizeDate(new Date(value as string));
 		return null;
 	};
 }

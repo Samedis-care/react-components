@@ -35,7 +35,7 @@ abstract class TypeDate implements Type<Date> {
 	};
 
 	deserialize = (value: unknown): Date => {
-		return new Date(value as string);
+		return normalizeDate(new Date(value as string));
 	};
 
 	/**
