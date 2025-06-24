@@ -48,9 +48,8 @@ const CRUD = (props) => {
     const location = useLocation();
     const [perms] = usePermissionContext();
     const { disableRouting, disableBackgroundGrid, forbiddenPage: ForbiddenPage, enableUserImport: requestEnableUserImport, importConfig, importUpdateKey, importHowTo, importUpdateKeyAdditionalFilters, importValidate, goBackCallback, } = props;
-    const hasImportPermission = !importUpdateKey ||
-        (hasPermission(perms, props.editPermission) &&
-            hasPermission(perms, props.newPermission));
+    const hasImportPermission = (!importUpdateKey || hasPermission(perms, props.editPermission)) &&
+        hasPermission(perms, props.newPermission);
     const enableUserImport = requestEnableUserImport && hasImportPermission;
     const GridWrapper = props.gridWrapper ?? React.Fragment;
     const RouteComponent = props.routeComponent ?? Route;
