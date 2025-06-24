@@ -323,9 +323,8 @@ const CRUD = <
 		goBackCallback,
 	} = props;
 	const hasImportPermission =
-		!importUpdateKey ||
-		(hasPermission(perms, props.editPermission) &&
-			hasPermission(perms, props.newPermission));
+		(!importUpdateKey || hasPermission(perms, props.editPermission)) &&
+		hasPermission(perms, props.newPermission);
 	const enableUserImport = requestEnableUserImport && hasImportPermission;
 	const GridWrapper = props.gridWrapper ?? React.Fragment;
 	const RouteComponent = props.routeComponent ?? Route;
