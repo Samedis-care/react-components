@@ -46,6 +46,7 @@ def read_countries() -> dict[str, dict[str, str]]:
     for locale in locales:
         with open("../node_modules/cldr-data/main/" + locale + "/territories.json", "r") as f:
             ret[locale] = json.load(f)["main"][locale]["localeDisplayNames"]["territories"]
+    ret["ru-KG"]["KG"] = "Кыргызстан" # upon special request by the govt of Кыргызстан
     return ret
 
 # returns locale -> language code -> localized string
@@ -138,6 +139,7 @@ def get_currency_exchange_rates():
 
 if __name__ == "__main__":
     supported_languages = os.listdir("../src/assets/i18n/")
+    supported_languages = [folder for folder in supported_languages if os.path.isdir("../src/assets/i18n/" + folder)]
     country_languages = get_country_languages()
     countries = read_countries()
     languages = read_languages()
