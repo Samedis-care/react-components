@@ -132,7 +132,13 @@
 				"primary": "Начальный"
 			},
 			"upload-modern-btn": "Нажмите, чтобы открыть диалоговое окно загрузки",
-			"upload-modern-dnd": "Перетащите файл сюда"
+			"upload-modern-dnd": "Перетащите файл сюда",
+			"upload-capture": {
+				"image": "Сделать фото"
+			},
+			"upload-modern-btn-capture": {
+				"image": "Нажмите, чтобы сделать фото"
+			}
 		},
 		"phone-number": {
 			"invalid": "Введите правильный номер телефона"
