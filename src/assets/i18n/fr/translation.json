@@ -132,7 +132,13 @@
 				"primary": "Primaire"
 			},
 			"upload-modern-dnd": "Glissez et déposez le fichier ici",
-			"upload-modern-btn": "Cliquez pour une boîte de dialogue de téléchargement"
+			"upload-modern-btn": "Cliquez pour une boîte de dialogue de téléchargement",
+			"upload-capture": {
+				"image": "Prendre une photo"
+			},
+			"upload-modern-btn-capture": {
+				"image": "Cliquez pour prendre une photo"
+			}
 		},
 		"phone-number": {
 			"invalid": "Entrez le numéro de téléphone correct"
