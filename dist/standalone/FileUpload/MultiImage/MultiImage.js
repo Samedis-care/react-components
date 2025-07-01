@@ -8,6 +8,7 @@ import ImageDialogEntry from "./ImageDialogEntry";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import ImageDots from "./ImageDots";
 import combineClassNames from "../../../utils/combineClassNames";
+import getCanImageCapture from "../../../utils/getCanImageCapture";
 const Root = styled("div", {
     name: "CcMultiImage",
     slot: "root",
@@ -34,7 +35,7 @@ const EditLabel = styled(Typography, {
 export const MultiImageNewIdPrefix = "MultiImage-New-";
 const MultiImage = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcMultiImage" });
-    const { label, name, editLabel, additionalDialogContent, images, primary, placeholderImage, uploadImage, readOnly, maxImages, capture, convertImagesTo, downscale, onChange, onPrimaryChange, subClasses, onDelete, className, classes, } = props;
+    const { label, name, editLabel, additionalDialogContent, images, primary, placeholderImage, uploadImage, captureImage, readOnly, maxImages, capture, convertImagesTo, downscale, onChange, onPrimaryChange, subClasses, onDelete, className, classes, } = props;
     const previewSize = props.previewSize ?? 256;
     const { t } = useCCTranslations();
     const primaryImg = useMemo(() => images.find((img) => img.id === primary) ?? images[0], [images, primary]);
@@ -70,8 +71,19 @@ const MultiImage = (inProps) => {
             return;
         if (!fileUpload.current)
             return;
+        fileUpload.current.removeAttribute("capture");
         fileUpload.current.click();
     }, [readOnly]);
+    const enableCapture = !!capture && getCanImageCapture();
+    const startUploadCapture = useCallback(() => {
+        if (readOnly)
+            return;
+        if (!fileUpload.current)
+            return;
+        if (capture)
+            fileUpload.current.setAttribute("capture", capture);
+        fileUpload.current.click();
+    }, [readOnly, capture]);
     const processFile = useCallback((file) => processImage(file, convertImagesTo, downscale), [convertImagesTo, downscale]);
     const processFiles = useCallback(async (files) => {
         const fileArr = Array.from(files);
@@ -153,12 +165,19 @@ const MultiImage = (inProps) => {
                 React.createElement(DialogContent, null,
                     React.createElement(Grid, { container: true, spacing: 2 },
                         images.map((img, i) => (React.createElement(ImageDialogEntry, { img: img, previewSize: previewSize, isPrimary: img === primaryImg, processFile: processFile, changeImages: manipulateImages, changePrimary: changePrimary, onDelete: onDelete, key: `img-${i}`, classes: subClasses?.imageDialogEntry, subClasses: subClasses?.imageDialogEntrySubClasses }))),
-                        !readOnly && remainingFiles > 0 && (React.createElement(Grid, { size: {
-                                xs: previewSize ? undefined : 12,
-                                md: previewSize ? undefined : 6,
-                                lg: previewSize ? undefined : 3,
-                            } },
-                            React.createElement(ImageBox, { width: previewSize, height: previewSize, image: uploadImage, onClick: startUpload, onFilesDropped: handleUploadViaDrop, classes: subClasses?.imageBox }))),
+                        !readOnly && remainingFiles > 0 && (React.createElement(React.Fragment, null,
+                            React.createElement(Grid, { size: {
+                                    xs: previewSize ? undefined : 12,
+                                    md: previewSize ? undefined : 6,
+                                    lg: previewSize ? undefined : 3,
+                                } },
+                                React.createElement(ImageBox, { width: previewSize, height: previewSize, image: uploadImage, onClick: startUpload, onFilesDropped: handleUploadViaDrop, classes: subClasses?.imageBox })),
+                            enableCapture && (React.createElement(Grid, { size: {
+                                    xs: previewSize ? undefined : 12,
+                                    md: previewSize ? undefined : 6,
+                                    lg: previewSize ? undefined : 3,
+                                } },
+                                React.createElement(ImageBox, { width: previewSize, height: previewSize, image: captureImage, onClick: startUploadCapture, onFilesDropped: handleUploadViaDrop, classes: subClasses?.imageBox }))))),
                         additionalDialogContent?.map((elem, i) => (React.createElement(Grid, { key: `add-${i}`, style: previewSize ? { width: previewSize } : undefined, size: {
                                 xs: previewSize ? undefined : 12,
                                 md: previewSize ? undefined : 6,

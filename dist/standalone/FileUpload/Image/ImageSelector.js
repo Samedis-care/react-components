@@ -1,12 +1,13 @@
 import React, { useCallback, useRef, useState } from "react";
 import { alpha, Box, Button, Dialog, Grid, IconButton, styled, Tooltip, Typography, useThemeProps, } from "@mui/material";
-import { AttachFile, Close as CloseIcon, FileUpload as UploadIcon, Person, } from "@mui/icons-material";
+import { AttachFile, Close as CloseIcon, FileUpload as UploadIcon, Person, CameraAlt as CameraIcon, } from "@mui/icons-material";
 import processImageB64 from "../../../utils/processImageB64";
 import combineClassNames from "../../../utils/combineClassNames";
 import GroupBox from "../../GroupBox";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import { ImageFileIcon } from "../FileIcons";
 import fileToData from "../../../utils/fileToData";
+import getCanImageCapture from "../../../utils/getCanImageCapture";
 const RootClassic = styled(Grid, {
     name: "CcImageSelector",
     slot: "rootClassic",
@@ -115,7 +116,7 @@ const PfpImagePlaceholder = styled(Person, {
     name: "CcImageSelector",
     slot: "pfpImgPlaceholder",
 })(pfpImageStyles);
-const ModernUploadControlsWrapper = styled("div", {
+const ModernUploadControlsWrapper = styled(Grid, {
     name: "CcImageSelector",
     slot: "modernUploadControlsWrapper",
 })(({ theme }) => ({
@@ -123,14 +124,13 @@ const ModernUploadControlsWrapper = styled("div", {
     bottom: theme.spacing(2),
     right: theme.spacing(2),
     backgroundColor: alpha(theme.palette.background.paper, 0.7),
-    border: `1px solid ${theme.palette.divider}`,
-    borderRadius: theme.shape.borderRadius,
 }));
 const ModernUploadControlUpload = styled(IconButton, {
     name: "CcImageSelector",
     slot: "modernUploadControlUpload",
 })(({ theme }) => ({
     borderRadius: theme.shape.borderRadius,
+    border: `1px solid ${theme.palette.divider}`,
 }));
 const PreviewDialog = styled(Dialog, {
     name: "CcImageSelector",
@@ -180,6 +180,14 @@ const ImageSelector = (inProps) => {
         const elem = fileRef.current;
         if (!elem)
             return;
+        elem.removeAttribute("capture");
+        elem.click();
+    }, []);
+    const captureEnabled = capture && capture !== "false" && getCanImageCapture();
+    const handleUploadCapture = useCallback(() => {
+        const elem = fileRef.current;
+        if (!elem)
+            return;
         if (capture && capture !== "false") {
             elem.setAttribute("capture", capture);
         }
@@ -214,8 +222,12 @@ const ImageSelector = (inProps) => {
     if (variant === "normal") {
         return (React.createElement(GroupBox, { label: props.label, smallLabel: props.smallLabel, className: className },
             React.createElement(RootClassic, { container: true, spacing: 2, direction: "column", alignContent: "flex-start", alignItems: "stretch", justifyContent: "center", wrap: "nowrap", className: classes?.rootClassic, onDrop: handleDrop, onDragOver: handleDragOver },
-                !props.readOnly && (React.createElement(Grid, { key: "upload" },
-                    React.createElement(Button, { startIcon: React.createElement(AttachFile, null), variant: "contained", color: "primary", name: props.name, onClick: handleUpload, onBlur: props.onBlur }, props.uploadLabel || t("standalone.file-upload.upload")),
+                !props.readOnly && (React.createElement(Grid, { key: "upload", container: true, spacing: 1 },
+                    React.createElement(Grid, null,
+                        React.createElement(Button, { startIcon: React.createElement(AttachFile, null), variant: "contained", color: "primary", name: props.name, onClick: handleUpload, onBlur: props.onBlur }, props.uploadLabel || t("standalone.file-upload.upload"))),
+                    captureEnabled && (React.createElement(Grid, null,
+                        React.createElement(Button, { startIcon: React.createElement(AttachFile, null), variant: "contained", color: "primary", name: props.name, onClick: handleUploadCapture, onBlur: props.onBlur }, props.uploadLabelCapture ||
+                            t("standalone.file-upload.upload-capture.image")))),
                     React.createElement(ChangeEventHelper, { type: "file", accept: "image/*", ref: fileRef, onChange: handleFileChange, className: classes?.changeEventHelper }))),
                 React.createElement(ImageWrapper, { size: "grow", key: "image", className: classes?.imgWrapper }, value && (React.createElement(PreviewClassic, { src: value, alt: props.alt, className: classes?.previewClassic }))))));
     }
@@ -230,10 +242,15 @@ const ImageSelector = (inProps) => {
                                 t("standalone.file-upload.upload-modern-dnd") ??
                                 "" },
                             React.createElement(PreviewModern, { src: value, alt: props.alt, onClick: handlePreviewDialog, className: classes?.previewModern })),
-                        React.createElement(ModernUploadControlsWrapper, null,
-                            React.createElement(Tooltip, { title: t("standalone.file-upload.upload-modern-btn") },
-                                React.createElement(ModernUploadControlUpload, { onClick: handleUpload },
-                                    React.createElement(UploadIcon, null)))))) : (React.createElement(ModernFullHeightBox, { px: 2, className: classes?.modernFullHeightBox },
+                        React.createElement(ModernUploadControlsWrapper, { container: true, spacing: 1 },
+                            React.createElement(Grid, null,
+                                React.createElement(Tooltip, { title: t("standalone.file-upload.upload-modern-btn") },
+                                    React.createElement(ModernUploadControlUpload, { onClick: handleUpload },
+                                        React.createElement(UploadIcon, null)))),
+                            captureEnabled && (React.createElement(Grid, null,
+                                React.createElement(Tooltip, { title: t("standalone.file-upload.upload-modern-btn-capture.image") },
+                                    React.createElement(ModernUploadControlUpload, { onClick: handleUploadCapture },
+                                        React.createElement(CameraIcon, null)))))))) : (React.createElement(ModernFullHeightBox, { px: 2, className: classes?.modernFullHeightBox },
                         React.createElement(ModernFullHeightGrid, { container: true, onClick: handleUpload, direction: "column", spacing: 0, className: classes?.modernFullHeightGrid },
                             React.createElement(Grid, { container: true, direction: "column", justifyContent: "space-around", wrap: "nowrap", size: "grow" },
                                 React.createElement(Grid, null,
@@ -253,7 +270,7 @@ const ImageSelector = (inProps) => {
         const image = value ? (React.createElement(PfpImage, { src: value, className: classes?.pfpImg, alt: props.label })) : (React.createElement(PfpImagePlaceholder, { className: classes?.pfpImgPlaceholder }));
         return (React.createElement(PfpRoot, { onDrop: handleDrop, onDragOver: handleDragOver, className: combineClassNames([className, classes?.pfpRoot]) },
             React.createElement(ChangeEventHelper, { type: "file", accept: "image/*", ref: fileRef, onChange: handleFileChange, className: classes?.changeEventHelper }),
-            React.createElement(PfpIconButton, { disabled: props.readOnly, onClick: handleUpload, className: classes?.pfpIconBtn, size: "large" }, image)));
+            React.createElement(PfpIconButton, { disabled: props.readOnly, onClick: captureEnabled ? handleUploadCapture : handleUpload, className: classes?.pfpIconBtn, size: "large" }, image)));
     }
     else {
         throw new Error("Unknown variant");

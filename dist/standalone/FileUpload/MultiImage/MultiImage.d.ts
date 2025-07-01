@@ -42,6 +42,11 @@ export interface MultiImageProps {
      */
     uploadImage: string;
     /**
+     * Capture image
+     * Shown to in edit dialog
+     */
+    captureImage: string;
+    /**
      * Placeholder image
      * Shown in normal on page control if no image present.
      * Defaults to uploadImage if not set

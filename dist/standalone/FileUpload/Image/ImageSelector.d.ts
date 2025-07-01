@@ -42,6 +42,10 @@ export interface ImageSelectorProps {
      */
     uploadLabel?: string;
     /**
+     * Label overwrite for Upload label (capture button)
+     */
+    uploadLabelCapture?: string;
+    /**
      * Label overwrite for Allowed file formats label
      * Modern variant only
      */

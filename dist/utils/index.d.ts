@@ -58,3 +58,4 @@ export { default as useAsyncMemo } from "./useAsyncMemo";
 export { default as useAsyncCache } from "./useAsyncCache";
 export { default as semaphoreExec } from "./semaphoreExec";
 export { default as advancedEnumValueToBaseSelectorData } from "./advancedEnumValueToBaseSelectorData";
+export { default as getCanImageCapture } from "./getCanImageCapture";
