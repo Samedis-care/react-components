@@ -132,7 +132,13 @@
 				"primary": "Primär"
 			},
 			"upload-modern-dnd": "Datei hierher ziehen und ablegen",
-			"upload-modern-btn": "Klicke hier, um einen Upload-Dialog aufzurufen"
+			"upload-modern-btn": "Klicke hier, um einen Upload-Dialog aufzurufen",
+			"upload-capture": {
+				"image": "Foto aufnehmen"
+			},
+			"upload-modern-btn-capture": {
+				"image": "Klicke um ein Foto zu machen"
+			}
 		},
 		"phone-number": {
 			"invalid": "Korrekte Rufnummer eingeben"
