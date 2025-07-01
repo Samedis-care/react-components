@@ -132,7 +132,13 @@
 				"primary": "Primair"
 			},
 			"upload-modern-dnd": "Sleep het bestand hierheen",
-			"upload-modern-btn": "Klik voor een uploaddialoogvenster"
+			"upload-modern-btn": "Klik voor een uploaddialoogvenster",
+			"upload-capture": {
+				"image": "Foto maken"
+			},
+			"upload-modern-btn-capture": {
+				"image": "Klik om een foto te maken"
+			}
 		},
 		"phone-number": {
 			"invalid": "Voer het juiste telefoonnummer in"
