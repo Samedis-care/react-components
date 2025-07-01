@@ -17,6 +17,7 @@ import {
 	Close as CloseIcon,
 	FileUpload as UploadIcon,
 	Person,
+	CameraAlt as CameraIcon,
 } from "@mui/icons-material";
 import processImageB64 from "../../../utils/processImageB64";
 import combineClassNames from "../../../utils/combineClassNames";
@@ -25,6 +26,7 @@ import GroupBox from "../../GroupBox";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import { ImageFileIcon } from "../FileIcons";
 import fileToData from "../../../utils/fileToData";
+import getCanImageCapture from "../../../utils/getCanImageCapture";
 
 // resolve to edited image to continue change, or reject to cancel
 export type PostImageEditCallback = (image: string) => Promise<string>;
@@ -69,6 +71,10 @@ export interface ImageSelectorProps {
 	 * Label overwrite for Upload label
 	 */
 	uploadLabel?: string;
+	/**
+	 * Label overwrite for Upload label (capture button)
+	 */
+	uploadLabelCapture?: string;
 	/**
 	 * Label overwrite for Allowed file formats label
 	 * Modern variant only
@@ -232,7 +238,7 @@ const PfpImagePlaceholder = styled(Person, {
 	slot: "pfpImgPlaceholder",
 })(pfpImageStyles);
 
-const ModernUploadControlsWrapper = styled("div", {
+const ModernUploadControlsWrapper = styled(Grid, {
 	name: "CcImageSelector",
 	slot: "modernUploadControlsWrapper",
 })(({ theme }) => ({
@@ -240,8 +246,6 @@ const ModernUploadControlsWrapper = styled("div", {
 	bottom: theme.spacing(2),
 	right: theme.spacing(2),
 	backgroundColor: alpha(theme.palette.background.paper, 0.7),
-	border: `1px solid ${theme.palette.divider}`,
-	borderRadius: theme.shape.borderRadius,
 }));
 
 const ModernUploadControlUpload = styled(IconButton, {
@@ -249,6 +253,7 @@ const ModernUploadControlUpload = styled(IconButton, {
 	slot: "modernUploadControlUpload",
 })(({ theme }) => ({
 	borderRadius: theme.shape.borderRadius,
+	border: `1px solid ${theme.palette.divider}`,
 }));
 
 const PreviewDialog = styled(Dialog, {
@@ -349,6 +354,14 @@ const ImageSelector = (inProps: ImageSelectorProps) => {
 	const handleUpload = useCallback(() => {
 		const elem = fileRef.current;
 		if (!elem) return;
+		elem.removeAttribute("capture");
+		elem.click();
+	}, []);
+
+	const captureEnabled = capture && capture !== "false" && getCanImageCapture();
+	const handleUploadCapture = useCallback(() => {
+		const elem = fileRef.current;
+		if (!elem) return;
 		if (capture && capture !== "false") {
 			elem.setAttribute("capture", capture);
 		}
@@ -418,17 +431,34 @@ const ImageSelector = (inProps: ImageSelectorProps) => {
 					onDragOver={handleDragOver}
 				>
 					{!props.readOnly && (
-						<Grid key={"upload"}>
-							<Button
-								startIcon={<AttachFile />}
-								variant={"contained"}
-								color={"primary"}
-								name={props.name}
-								onClick={handleUpload}
-								onBlur={props.onBlur}
-							>
-								{props.uploadLabel || t("standalone.file-upload.upload")}
-							</Button>
+						<Grid key={"upload"} container spacing={1}>
+							<Grid>
+								<Button
+									startIcon={<AttachFile />}
+									variant={"contained"}
+									color={"primary"}
+									name={props.name}
+									onClick={handleUpload}
+									onBlur={props.onBlur}
+								>
+									{props.uploadLabel || t("standalone.file-upload.upload")}
+								</Button>
+							</Grid>
+							{captureEnabled && (
+								<Grid>
+									<Button
+										startIcon={<AttachFile />}
+										variant={"contained"}
+										color={"primary"}
+										name={props.name}
+										onClick={handleUploadCapture}
+										onBlur={props.onBlur}
+									>
+										{props.uploadLabelCapture ||
+											t("standalone.file-upload.upload-capture.image")}
+									</Button>
+								</Grid>
+							)}
 							<ChangeEventHelper
 								type={"file"}
 								accept={"image/*"}
@@ -507,14 +537,31 @@ const ImageSelector = (inProps: ImageSelectorProps) => {
 											className={classes?.previewModern}
 										/>
 									</Tooltip>
-									<ModernUploadControlsWrapper>
-										<Tooltip
-											title={t("standalone.file-upload.upload-modern-btn")}
-										>
-											<ModernUploadControlUpload onClick={handleUpload}>
-												<UploadIcon />
-											</ModernUploadControlUpload>
-										</Tooltip>
+									<ModernUploadControlsWrapper container spacing={1}>
+										<Grid>
+											<Tooltip
+												title={t("standalone.file-upload.upload-modern-btn")}
+											>
+												<ModernUploadControlUpload onClick={handleUpload}>
+													<UploadIcon />
+												</ModernUploadControlUpload>
+											</Tooltip>
+										</Grid>
+										{captureEnabled && (
+											<Grid>
+												<Tooltip
+													title={t(
+														"standalone.file-upload.upload-modern-btn-capture.image",
+													)}
+												>
+													<ModernUploadControlUpload
+														onClick={handleUploadCapture}
+													>
+														<CameraIcon />
+													</ModernUploadControlUpload>
+												</Tooltip>
+											</Grid>
+										)}
 									</ModernUploadControlsWrapper>
 								</>
 							) : (
@@ -602,7 +649,7 @@ const ImageSelector = (inProps: ImageSelectorProps) => {
 				/>
 				<PfpIconButton
 					disabled={props.readOnly}
-					onClick={handleUpload}
+					onClick={captureEnabled ? handleUploadCapture : handleUpload}
 					className={classes?.pfpIconBtn}
 					size="large"
 				>

@@ -24,6 +24,7 @@ import ImageDialogEntry, { ImageDialogEntryProps } from "./ImageDialogEntry";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import ImageDots from "./ImageDots";
 import combineClassNames from "../../../utils/combineClassNames";
+import getCanImageCapture from "../../../utils/getCanImageCapture";
 
 export interface MultiImageImage {
 	/**
@@ -68,6 +69,11 @@ export interface MultiImageProps {
 	 * Shown to in edit dialog
 	 */
 	uploadImage: string;
+	/**
+	 * Capture image
+	 * Shown to in edit dialog
+	 */
+	captureImage: string;
 	/**
 	 * Placeholder image
 	 * Shown in normal on page control if no image present.
@@ -196,6 +202,7 @@ const MultiImage = (inProps: MultiImageProps) => {
 		primary,
 		placeholderImage,
 		uploadImage,
+		captureImage,
 		readOnly,
 		maxImages,
 		capture,
@@ -256,8 +263,18 @@ const MultiImage = (inProps: MultiImageProps) => {
 		if (readOnly) return;
 		if (!fileUpload.current) return;
 
+		fileUpload.current.removeAttribute("capture");
 		fileUpload.current.click();
 	}, [readOnly]);
+
+	const enableCapture = !!capture && getCanImageCapture();
+	const startUploadCapture = useCallback(() => {
+		if (readOnly) return;
+		if (!fileUpload.current) return;
+
+		if (capture) fileUpload.current.setAttribute("capture", capture);
+		fileUpload.current.click();
+	}, [readOnly, capture]);
 
 	const processFile = useCallback(
 		(file: File): Promise<string> =>
@@ -442,22 +459,42 @@ const MultiImage = (inProps: MultiImageProps) => {
 									/>
 								))}
 								{!readOnly && remainingFiles > 0 && (
-									<Grid
-										size={{
-											xs: previewSize ? undefined : 12,
-											md: previewSize ? undefined : 6,
-											lg: previewSize ? undefined : 3,
-										}}
-									>
-										<ImageBox
-											width={previewSize}
-											height={previewSize}
-											image={uploadImage}
-											onClick={startUpload}
-											onFilesDropped={handleUploadViaDrop}
-											classes={subClasses?.imageBox}
-										/>
-									</Grid>
+									<>
+										<Grid
+											size={{
+												xs: previewSize ? undefined : 12,
+												md: previewSize ? undefined : 6,
+												lg: previewSize ? undefined : 3,
+											}}
+										>
+											<ImageBox
+												width={previewSize}
+												height={previewSize}
+												image={uploadImage}
+												onClick={startUpload}
+												onFilesDropped={handleUploadViaDrop}
+												classes={subClasses?.imageBox}
+											/>
+										</Grid>
+										{enableCapture && (
+											<Grid
+												size={{
+													xs: previewSize ? undefined : 12,
+													md: previewSize ? undefined : 6,
+													lg: previewSize ? undefined : 3,
+												}}
+											>
+												<ImageBox
+													width={previewSize}
+													height={previewSize}
+													image={captureImage}
+													onClick={startUploadCapture}
+													onFilesDropped={handleUploadViaDrop}
+													classes={subClasses?.imageBox}
+												/>
+											</Grid>
+										)}
+									</>
 								)}
 								{additionalDialogContent?.map((elem, i) => (
 									<Grid
