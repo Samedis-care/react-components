@@ -247,6 +247,20 @@ export interface FormProps<KeyT extends ModelFieldName, VisibilityT extends Page
      * Render form as div instead of form
      */
     renderFormAsDiv?: boolean;
+    /**
+     * Custom error renderer, defaults to Typography color=error
+     */
+    errorRenderer?: React.ComponentType<FormErrorRendererProps<CustomPropsT>>;
+}
+export interface FormErrorRendererProps<CustomPropsT> {
+    /**
+     * Custom props passed to Form in props
+     */
+    customProps: CustomPropsT;
+    /**
+     * The error to render
+     */
+    error: Error;
 }
 export declare const FormRenderAsDivContext: React.Context<boolean>;
 export interface FormContextData {

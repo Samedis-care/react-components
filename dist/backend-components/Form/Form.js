@@ -127,7 +127,7 @@ const setAllTouched = (touched, set) => Object.fromEntries(Object.keys(touched).
 const StyledForm = styled("form", { name: "CcForm", slot: "root" })({});
 const StyledFormDiv = styled("div", { name: "CcForm", slot: "root" })({});
 const Form = (props) => {
-    const { model, id, children, onSubmit, customProps, onlyWarnMounted, onlyWarnChanged, readOnly: readOnlyProp, readOnlyReason: readOnlyReasonProp, readOnlyReasons: readOnlyReasonsProp, disableValidation, nestedFormName, disableNestedSubmit, nestedFormPreSubmitHandler, deleteOnSubmit, onDeleted, initialRecord, formClass, preSubmit, dirtyIgnoreFields, flowEngine, renderFormAsDiv: renderFormAsDivProp, } = props;
+    const { model, id, children, onSubmit, customProps, onlyWarnMounted, onlyWarnChanged, readOnly: readOnlyProp, readOnlyReason: readOnlyReasonProp, readOnlyReasons: readOnlyReasonsProp, disableValidation, nestedFormName, disableNestedSubmit, nestedFormPreSubmitHandler, deleteOnSubmit, onDeleted, initialRecord, formClass, preSubmit, dirtyIgnoreFields, flowEngine, renderFormAsDiv: renderFormAsDivProp, errorRenderer: ErrorRenderer, } = props;
     const renderFormAsDiv = useContext(FormRenderAsDivContext) || renderFormAsDivProp;
     // flow engine mode defaults
     const flowEngineConfig = useRef({});
@@ -1030,6 +1030,8 @@ const Form = (props) => {
         dirty,
     ]);
     if (error) {
+        if (ErrorRenderer)
+            return React.createElement(ErrorRenderer, { customProps: customProps, error: error });
         return React.createElement(Typography, { color: "error" }, error.message);
     }
     if (isLoading || isDefaultRecordLoading || isObjectEmpty(values)) {
