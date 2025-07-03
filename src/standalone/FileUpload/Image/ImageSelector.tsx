@@ -315,10 +315,14 @@ const ImageSelector = (inProps: ImageSelectorProps) => {
 
 			const imageB64 = await fileToData(file);
 			let finalImage: string;
+			let fileType = file.type;
 			try {
 				finalImage = postEditCallback
 					? await postEditCallback(imageB64)
 					: imageB64;
+				if (finalImage.startsWith("data:image/")) {
+					fileType = finalImage.substring(5, finalImage.indexOf(";"));
+				}
 			} catch (e) {
 				// probably user cancel
 				// eslint-disable-next-line no-console
@@ -332,7 +336,7 @@ const ImageSelector = (inProps: ImageSelectorProps) => {
 				name,
 				await processImageB64(
 					finalImage,
-					convertImagesTo || file.type,
+					convertImagesTo || fileType,
 					downscale,
 				),
 			);
