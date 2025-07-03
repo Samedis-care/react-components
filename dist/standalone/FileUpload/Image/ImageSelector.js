@@ -155,10 +155,14 @@ const ImageSelector = (inProps) => {
             return;
         const imageB64 = await fileToData(file);
         let finalImage;
+        let fileType = file.type;
         try {
             finalImage = postEditCallback
                 ? await postEditCallback(imageB64)
                 : imageB64;
+            if (finalImage.startsWith("data:image/")) {
+                fileType = finalImage.substring(5, finalImage.indexOf(";"));
+            }
         }
         catch (e) {
             // probably user cancel
@@ -166,7 +170,7 @@ const ImageSelector = (inProps) => {
             console.error("[Components-Care] [ImageSelector] Post edit callback with error (or cancellation)", e);
             return;
         }
-        onChange(name, await processImageB64(finalImage, convertImagesTo || file.type, downscale));
+        onChange(name, await processImageB64(finalImage, convertImagesTo || fileType, downscale));
     }, [onChange, name, postEditCallback, convertImagesTo, downscale]);
     const handleFileChange = useCallback(async (evt) => {
         const elem = evt.currentTarget;
