@@ -322,6 +322,21 @@ export interface FormProps<
 	 * Render form as div instead of form
 	 */
 	renderFormAsDiv?: boolean;
+	/**
+	 * Custom error renderer, defaults to Typography color=error
+	 */
+	errorRenderer?: React.ComponentType<FormErrorRendererProps<CustomPropsT>>;
+}
+
+export interface FormErrorRendererProps<CustomPropsT> {
+	/**
+	 * Custom props passed to Form in props
+	 */
+	customProps: CustomPropsT;
+	/**
+	 * The error to render
+	 */
+	error: Error;
 }
 
 export const FormRenderAsDivContext = React.createContext(false);
@@ -854,6 +869,7 @@ const Form = <
 		dirtyIgnoreFields,
 		flowEngine,
 		renderFormAsDiv: renderFormAsDivProp,
+		errorRenderer: ErrorRenderer,
 	} = props;
 	const renderFormAsDiv =
 		useContext(FormRenderAsDivContext) || renderFormAsDivProp;
@@ -2046,6 +2062,8 @@ const Form = <
 	);
 
 	if (error) {
+		if (ErrorRenderer)
+			return <ErrorRenderer customProps={customProps} error={error} />;
 		return <Typography color={"error"}>{error.message}</Typography>;
 	}
 	if (isLoading || isDefaultRecordLoading || isObjectEmpty(values)) {
