@@ -10,6 +10,12 @@ const processImage = async (file, convertImagesTo, downscale) => {
     const imageFormatTarget = convertImagesTo || file.type;
     // file -> data url
     const imageData = await fileToData(file);
+    // skip this if we're not doing anything except resize and it's a svg
+    if (convertImagesTo === "image/svg+xml" ||
+        (!convertImagesTo &&
+            (!downscale || downscale.keepRatio) &&
+            file.type === "image/svg+xml"))
+        return imageData;
     return processImageB64(imageData, imageFormatTarget, downscale);
 };
 export default processImage;
