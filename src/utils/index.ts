@@ -6,6 +6,7 @@ export { default as combineColors } from "./combineColors";
 export { default as combineColorsCss } from "./combineColorsCss";
 export { default as combineClassNames } from "./combineClassNames";
 export { default as fileToData } from "./fileToData";
+export { default as getDataUriMime } from "./getDataUriMime";
 export { default as getFileExt } from "./getFileExt";
 export { default as processImage } from "./processImage";
 export { default as processImageB64 } from "./processImageB64";

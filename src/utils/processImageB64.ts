@@ -1,4 +1,5 @@
 import type { IDownscaleProps } from "./processImage";
+import getDataUriMime from "./getDataUriMime";
 
 /**
  * Processes an image file
@@ -11,6 +12,14 @@ const processImageB64 = async (
 	convertImagesTo: string,
 	downscale?: IDownscaleProps,
 ): Promise<string> => {
+	// skip this if we're dealing with svg
+	if (
+		convertImagesTo === "image/svg+xml" ||
+		((!downscale || downscale.keepRatio) &&
+			getDataUriMime(imageData) === "image/svg+xml")
+	)
+		return imageData;
+
 	// data url -> image
 	const image = new Image();
 	await new Promise((resolve, reject) => {
