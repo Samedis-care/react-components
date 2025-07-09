@@ -25,7 +25,7 @@ class RendererBackendMultiSelect extends TypeStringArray {
             if (!relationModel)
                 throw new Error("Type BackendMultiSelect requires relation model: " + field);
             return (React.createElement(FormControlFieldsetCC, { component: "fieldset", required: visibility.required, fullWidth: true, error: !!errorMsg, warning: !!warningMsg, onBlur: handleBlur, name: field },
-                React.createElement(FormBackendMultiSelect, { selected: value, label: label, onSelect: (value) => handleChange(field, value), disabled: visibility.readOnly, model: relationModel, initialData: relationData, ...this.props }),
+                React.createElement(FormBackendMultiSelect, { selected: value, label: label, onSelect: (value) => handleChange(field, value), disabled: visibility.readOnly, required: visibility.required, model: relationModel, initialData: relationData, ...this.props }),
                 React.createElement(FormHelperText, null, errorMsg || warningMsg)));
         }
         throw new Error("view-only rendering not supported");
