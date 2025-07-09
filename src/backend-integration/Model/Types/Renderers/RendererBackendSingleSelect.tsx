@@ -109,6 +109,7 @@ class RendererBackendSingleSelect<
 						label={label}
 						onSelect={(value) => handleChange(field, value)}
 						disabled={visibility.readOnly}
+						required={visibility.required}
 						model={
 							relationModel as unknown as Model<KeyT, VisibilityT, CustomT>
 						}
