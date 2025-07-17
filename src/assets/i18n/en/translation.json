@@ -49,7 +49,11 @@
 					"matches": "Matches",
 					"not-matches": "Does not match"
 				},
-				"no-data": "The list does not contain any data."
+				"no-data": "The list does not contain any data.",
+				"filter-combination": {
+					"and": "AND",
+					"or": "OR"
+				}
 			},
 			"header": {
 				"new": "New",

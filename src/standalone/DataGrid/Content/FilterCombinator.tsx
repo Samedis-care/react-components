@@ -1,6 +1,7 @@
 import React, { useCallback } from "react";
 import { Grid, Switch, Typography } from "@mui/material";
 import type { FilterComboType } from "./FilterEntry";
+import useCCTranslations from "../../../utils/useCCTranslations";
 
 interface IProps {
 	/**
@@ -16,6 +17,7 @@ interface IProps {
 
 const FilterCombinator = (props: IProps) => {
 	const { value, onChange } = props;
+	const { t } = useCCTranslations();
 
 	const handleChange = useCallback(
 		(_evt: React.ChangeEvent, newValue: boolean) => {
@@ -34,11 +36,13 @@ const FilterCombinator = (props: IProps) => {
 					alignItems="center"
 					spacing={1}
 				>
-					<Grid>AND</Grid>
+					<Grid>
+						{t("standalone.data-grid.content.filter-combination.and")}
+					</Grid>
 					<Grid>
 						<Switch checked={value === "or"} onChange={handleChange} />
 					</Grid>
-					<Grid>OR</Grid>
+					<Grid>{t("standalone.data-grid.content.filter-combination.or")}</Grid>
 				</Grid>
 			</Typography>
 		</Grid>
