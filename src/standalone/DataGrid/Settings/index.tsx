@@ -49,7 +49,11 @@ const DataGridSettings = (props: IDataGridColumnProps) => {
 			in={state.showSettings}
 		>
 			<Dialog
-				columns={props.columns}
+				columns={props.columns.filter(
+					(col) =>
+						!state.settingsSearch ||
+						col.headerName.toLowerCase().includes(state.settingsSearch),
+				)}
 				closeGridSettings={closeGridSettings}
 				toggleColumnLock={toggleColumnLock}
 				toggleColumnVisibility={toggleColumnVisibility}

@@ -11,20 +11,22 @@ const SearchViewStyled = styled(SearchView, {
 const Search = () => {
 	const [state, setState] = useDataGridState();
 
+	const { showSettings } = state;
+
 	const handleSearchChange = useCallback(
 		(evt: ChangeEvent<HTMLInputElement>) => {
 			const newSearch = evt.target.value;
 			setState((prevState) => ({
 				...prevState,
-				search: newSearch,
+				[showSettings ? "settingsSearch" : "search"]: newSearch,
 			}));
 		},
-		[setState],
+		[setState, showSettings],
 	);
 
 	return (
 		<SearchViewStyled
-			search={state.search}
+			search={state[showSettings ? "settingsSearch" : "search"]}
 			handleSearchChange={handleSearchChange}
 		/>
 	);

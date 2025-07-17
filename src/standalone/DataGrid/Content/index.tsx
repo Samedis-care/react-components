@@ -235,10 +235,15 @@ const Content = (props: IDataGridContentProps) => {
 		[columnWidth, columns, disableSelection, remainingWidth],
 	);
 
+	const cellContextValue = useMemo(
+		() => ({ columns, hoverState }),
+		[columns, hoverState],
+	);
+
 	return (
 		<AutoSizer onResize={onResize}>
 			{({ width, height }) => (
-				<CellContext.Provider value={{ columns, hoverState }}>
+				<CellContext.Provider value={cellContextValue}>
 					<MultiGrid
 						columnCount={
 							columns.length +

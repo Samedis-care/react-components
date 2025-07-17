@@ -33,6 +33,7 @@ const ActionBar = () => {
 		setState((prevState) => ({
 			...prevState,
 			showSettings: !prevState.showSettings,
+			settingsSearch: "",
 			showFilterDialog: prevState.showSettings
 				? prevState.showFilterDialog
 				: false,

@@ -487,6 +487,10 @@ export interface IDataGridState {
 	 */
 	showSettings: boolean;
 	/**
+	 * Search for columns in settings popover
+	 */
+	settingsSearch: string;
+	/**
 	 * Show the custom filter dialog
 	 */
 	showFilterDialog: boolean;
@@ -623,6 +627,7 @@ export const getDataGridDefaultState = (
 	rowsTotal: 0,
 	rowsFiltered: null,
 	showSettings: false,
+	settingsSearch: "",
 	showFilterDialog: false,
 	pages: [0, 0],
 	hiddenColumns: columns.filter((col) => col.hidden).map((col) => col.field),
@@ -705,6 +710,12 @@ export const DataGridContentOverlayCollapse = styled(Collapse, {
 	zIndex: 1000,
 	width: "100%",
 	maxHeight: "100%",
+	"&.MuiCollapse-entered": {
+		height: "100% !important",
+		"& .MuiCollapse-wrapper, & .MuiCollapse-wrapperInner": {
+			height: "100%",
+		},
+	},
 	overflow: "auto",
 	backgroundColor: theme.palette.background.paper,
 })) as typeof Collapse;
@@ -714,6 +725,7 @@ export const DataGridContentOverlayPaper = styled(Paper, {
 	slot: "contentOverlayPaper",
 })(({ theme }) => ({
 	padding: theme.spacing(1),
+	height: "100%",
 })) as typeof Paper;
 
 export const DataGridContentOverlayClosed: React.ComponentType<
@@ -1349,7 +1361,10 @@ const DataGrid = (inProps: DataGridProps) => {
 									value={activeCustomFiltersPack}
 								>
 									<StatePersistence />
-									<HeaderWrapper className={classes?.header}>
+									<HeaderWrapper
+										className={classes?.header}
+										display={state.showFilterDialog ? "none" : undefined}
+									>
 										<Header />
 									</HeaderWrapper>
 									<ContentWrapper size={"grow"} className={classes?.content}>
@@ -1364,7 +1379,14 @@ const DataGrid = (inProps: DataGridProps) => {
 										/>
 									</ContentWrapper>
 									{!disableFooter && (
-										<FooterWrapper className={classes?.footer}>
+										<FooterWrapper
+											className={classes?.footer}
+											display={
+												state.showSettings || state.showFilterDialog
+													? "none"
+													: undefined
+											}
+										>
 											<Footer />
 										</FooterWrapper>
 									)}

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { Box, Grid, SvgIconProps } from "@mui/material";
 import Search from "./Search";
 import ActionBar from "./ActionBar";
@@ -8,6 +8,7 @@ import {
 	DataGridSortSetting,
 	IDataGridColumnDef,
 	IDataGridFieldFilter,
+	useDataGridState,
 } from "../DataGrid";
 import { SvgIconComponent } from "@mui/icons-material";
 import { DialogContextType } from "../../../framework";
@@ -109,25 +110,31 @@ export interface IDataGridExporter<T> {
 }
 
 const Header = () => {
-	return (
-		<Box mx={1}>
-			<Grid
-				container
-				justifyContent={"space-between"}
-				alignItems={"center"}
-				wrap={"nowrap"}
-			>
-				<Grid>
-					<Search />
+	const [state] = useDataGridState();
+	const { showSettings } = state;
+
+	return useMemo(
+		() => (
+			<Box mx={1}>
+				<Grid
+					container
+					justifyContent={"space-between"}
+					alignItems={"center"}
+					wrap={"nowrap"}
+				>
+					<Grid>
+						<Search />
+					</Grid>
+					<Grid size={"grow"} display={showSettings ? "none" : undefined}>
+						<FilterBar />
+					</Grid>
+					<Grid display={showSettings ? "none" : undefined}>
+						<ActionBar />
+					</Grid>
 				</Grid>
-				<Grid size={"grow"}>
-					<FilterBar />
-				</Grid>
-				<Grid>
-					<ActionBar />
-				</Grid>
-			</Grid>
-		</Box>
+			</Box>
+		),
+		[showSettings],
 	);
 };
 
