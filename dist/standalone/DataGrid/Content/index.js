@@ -140,7 +140,8 @@ const Content = (props) => {
             ? (columnWidth[columns[index - (disableSelection ? 0 : 1)].field] ??
                 DEFAULT_COLUMN_WIDTH)
             : remainingWidth, [columnWidth, columns, disableSelection, remainingWidth]);
-    return (React.createElement(AutoSizer, { onResize: onResize }, ({ width, height }) => (React.createElement(CellContext.Provider, { value: { columns, hoverState } },
+    const cellContextValue = useMemo(() => ({ columns, hoverState }), [columns, hoverState]);
+    return (React.createElement(AutoSizer, { onResize: onResize }, ({ width, height }) => (React.createElement(CellContext.Provider, { value: cellContextValue },
         React.createElement(MultiGrid, { columnCount: columns.length +
                 (disableSelection ? 0 : 1) +
                 (columns.length > 0 ? 1 : 0), columnWidth: getColumnWidth, rowCount: (state.rowsFiltered ?? state.rowsTotal) + 1, rowHeight: getRowHeight, width: width, height: height, onItemsRendered: onSectionRendered, fixedColumnCount: columns.filter((col) => col.isLocked).length +

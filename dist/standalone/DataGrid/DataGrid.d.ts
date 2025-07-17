@@ -419,6 +419,10 @@ export interface IDataGridState {
      */
     showSettings: boolean;
     /**
+     * Search for columns in settings popover
+     */
+    settingsSearch: string;
+    /**
      * Show the custom filter dialog
      */
     showFilterDialog: boolean;

@@ -58,6 +58,7 @@ export const getDataGridDefaultState = (columns, defaultCustomData) => ({
     rowsTotal: 0,
     rowsFiltered: null,
     showSettings: false,
+    settingsSearch: "",
     showFilterDialog: false,
     pages: [0, 0],
     hiddenColumns: columns.filter((col) => col.hidden).map((col) => col.field),
@@ -118,6 +119,12 @@ export const DataGridContentOverlayCollapse = styled(Collapse, {
     zIndex: 1000,
     width: "100%",
     maxHeight: "100%",
+    "&.MuiCollapse-entered": {
+        height: "100% !important",
+        "& .MuiCollapse-wrapper, & .MuiCollapse-wrapperInner": {
+            height: "100%",
+        },
+    },
     overflow: "auto",
     backgroundColor: theme.palette.background.paper,
 }));
@@ -126,6 +133,7 @@ export const DataGridContentOverlayPaper = styled(Paper, {
     slot: "contentOverlayPaper",
 })(({ theme }) => ({
     padding: theme.spacing(1),
+    height: "100%",
 }));
 export const DataGridContentOverlayClosed = styled("div", {
     name: "CcDataGrid",
@@ -573,13 +581,15 @@ const DataGrid = (inProps) => {
                         React.createElement(DataGridColumnsWidthStateContext.Provider, { value: columnWidthStatePack },
                             React.createElement(CustomFilterActiveContext.Provider, { value: activeCustomFiltersPack },
                                 React.createElement(StatePersistence, null),
-                                React.createElement(HeaderWrapper, { className: classes?.header },
+                                React.createElement(HeaderWrapper, { className: classes?.header, display: state.showFilterDialog ? "none" : undefined },
                                     React.createElement(Header, null)),
                                 React.createElement(ContentWrapper, { size: "grow", className: classes?.content },
                                     React.createElement(Settings, { columns: columns }),
                                     React.createElement(CustomFilterDialog, null),
                                     React.createElement(Content, { columns: visibleColumns, rowsPerPage: rowsPerPage, disableSelection: disableSelection, headerHeight: headerHeight, globalScrollListener: globalScrollListener })),
-                                !disableFooter && (React.createElement(FooterWrapper, { className: classes?.footer },
+                                !disableFooter && (React.createElement(FooterWrapper, { className: classes?.footer, display: state.showSettings || state.showFilterDialog
+                                        ? "none"
+                                        : undefined },
                                     React.createElement(Footer, null)))))))))));
 };
 export default React.memo(DataGrid);

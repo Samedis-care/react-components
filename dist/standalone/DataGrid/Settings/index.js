@@ -29,6 +29,7 @@ const DataGridSettings = (props) => {
         }));
     }, [setState]);
     return (React.createElement(DataGridContentOverlayCollapse, { className: classes?.contentOverlayCollapse, in: state.showSettings },
-        React.createElement(Dialog, { columns: props.columns, closeGridSettings: closeGridSettings, toggleColumnLock: toggleColumnLock, toggleColumnVisibility: toggleColumnVisibility, lockedColumns: state.lockedColumns, hiddenColumns: state.hiddenColumns })));
+        React.createElement(Dialog, { columns: props.columns.filter((col) => !state.settingsSearch ||
+                col.headerName.toLowerCase().includes(state.settingsSearch)), closeGridSettings: closeGridSettings, toggleColumnLock: toggleColumnLock, toggleColumnVisibility: toggleColumnVisibility, lockedColumns: state.lockedColumns, hiddenColumns: state.hiddenColumns })));
 };
 export default React.memo(DataGridSettings);

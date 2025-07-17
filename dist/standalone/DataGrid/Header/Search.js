@@ -8,13 +8,14 @@ const SearchViewStyled = styled(SearchView, {
 })({});
 const Search = () => {
     const [state, setState] = useDataGridState();
+    const { showSettings } = state;
     const handleSearchChange = useCallback((evt) => {
         const newSearch = evt.target.value;
         setState((prevState) => ({
             ...prevState,
-            search: newSearch,
+            [showSettings ? "settingsSearch" : "search"]: newSearch,
         }));
-    }, [setState]);
-    return (React.createElement(SearchViewStyled, { search: state.search, handleSearchChange: handleSearchChange }));
+    }, [setState, showSettings]);
+    return (React.createElement(SearchViewStyled, { search: state[showSettings ? "settingsSearch" : "search"], handleSearchChange: handleSearchChange }));
 };
 export default React.memo(Search);
