@@ -46,7 +46,11 @@
 					"matches": "Entspricht",
 					"not-matches": "Entspricht nicht"
 				},
-				"no-data": "Die Liste enthält keine Daten."
+				"no-data": "Die Liste enthält keine Daten.",
+				"filter-combination": {
+					"and": "UND",
+					"or": "ODER"
+				}
 			},
 			"header": {
 				"new": "Neu",
