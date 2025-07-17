@@ -46,7 +46,11 @@
 					"matches": "Kelmaydi",
 					"not-matches": "Mos kelmaydi"
 				},
-				"no-data": "Ro'yxatda hech qanday ma'lumot yo'q."
+				"no-data": "Ro'yxatda hech qanday ma'lumot yo'q.",
+				"filter-combination": {
+					"and": "VA",
+					"or": "YOKI"
+				}
 			},
 			"header": {
 				"new": "Yangi",

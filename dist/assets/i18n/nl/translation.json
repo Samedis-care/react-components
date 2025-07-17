@@ -46,7 +46,11 @@
 					"not-matches": "Komt niet overeen",
 					"matches": "Overeen"
 				},
-				"no-data": "De lijst bevat geen data."
+				"no-data": "De lijst bevat geen data.",
+				"filter-combination": {
+					"or": "OF",
+					"and": "EN"
+				}
 			},
 			"header": {
 				"new": "Nieuw",
