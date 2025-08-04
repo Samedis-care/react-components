@@ -81,7 +81,7 @@ const DialogContextProvider = (props: IFrameworkProps) => {
 		}
 
 		setDialogs((prevValue) => {
-			prevValue.pop();
+			void prevValue.pop();
 			return [...prevValue];
 		});
 	}, [parentContext]);
