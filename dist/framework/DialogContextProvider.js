@@ -50,7 +50,7 @@ const DialogContextProvider = (props) => {
             navBlock.current = null;
         }
         setDialogs((prevValue) => {
-            prevValue.pop();
+            void prevValue.pop();
             return [...prevValue];
         });
     }, [parentContext]);

@@ -33,7 +33,7 @@ export interface BackendDataGridProps<KeyT extends ModelFieldName, VisibilityT e
      */
     customDeleteErrorHandler?: (error: Error) => Promise<void> | void;
 }
-export declare const useBackendDataGridAddNewButtons: (props: Pick<BackendDataGridProps<never, never, never>, "onAddNew" | "additionalNewButtons">) => string | IDataGridAddButton[] | (() => void) | undefined;
+export declare const useBackendDataGridAddNewButtons: (props: Pick<BackendDataGridProps<never, never, never>, "onAddNew" | "additionalNewButtons">) => string | (() => void) | IDataGridAddButton[] | undefined;
 export declare const useBackendDataGridDeleteHandler: <KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT>(props: Pick<BackendDataGridProps<KeyT, VisibilityT, CustomT>, "model" | "enableDelete" | "enableDeleteAll" | "customDeleteConfirm" | "customDeleteErrorHandler">, refreshGrid: () => void) => ((invert: boolean, ids: string[], filter?: Pick<IDataGridLoadDataParameters, "quickFilter" | "additionalFilters" | "fieldFilter">) => Promise<void>) | undefined;
 export declare const renderDataGridRecordUsingModel: <KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT>(model: Model<KeyT, VisibilityT, CustomT>, refreshGrid: () => void) => (entry: Record<string, unknown>) => {
     id: string;
