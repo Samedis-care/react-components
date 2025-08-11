@@ -172,7 +172,7 @@ export interface FormProps<KeyT extends ModelFieldName, VisibilityT extends Page
     /**
      * List of fields which will always trigger validation warning even if onlyWarnChanged is enabled
      */
-    alwaysWarnFields: string[];
+    alwaysWarnFields?: string[];
     /**
      * Only validate mounted fields
      */
