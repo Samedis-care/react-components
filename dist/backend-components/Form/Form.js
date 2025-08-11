@@ -304,6 +304,12 @@ const Form = (props) => {
     const initialValues = useMemo(() => serverData
         ? deepAssign({}, serverData[0], serverData[0].id || !initialRecord ? {} : initialRecord)
         : undefined, [serverData, initialRecord]);
+    const alwaysSubmitFields = useMemo(() => uniqueArray([
+        ...(props.alwaysSubmitFields ?? []),
+        ...(flowEngineConfig.current.alwaysSubmitFields ?? []),
+    ]), 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [props.alwaysSubmitFields, flowEngineConfig.current.alwaysSubmitFields]);
     const getNormalizedData = useCallback((values) => {
         if (!initialValues) {
             throw new Error("No server data (initialValues)");
@@ -317,10 +323,7 @@ const Form = (props) => {
             defaultRecord: defaultRecord[0],
             onlySubmitMountedBehaviour,
             onlySubmitMounted: onlySubmitMounted ?? false,
-            alwaysSubmitFields: uniqueArray([
-                ...(props.alwaysSubmitFields ?? []),
-                ...(flowEngineConfig.current.alwaysSubmitFields ?? []),
-            ]),
+            alwaysSubmitFields,
             mountedFields,
         });
         const remoteData = normalizeValues(initialValues, {
@@ -329,10 +332,7 @@ const Form = (props) => {
             defaultRecord: defaultRecord[0],
             onlySubmitMountedBehaviour,
             onlySubmitMounted: onlySubmitMounted ?? false,
-            alwaysSubmitFields: uniqueArray([
-                ...(props.alwaysSubmitFields ?? []),
-                ...(flowEngineConfig.current.alwaysSubmitFields ?? []),
-            ]),
+            alwaysSubmitFields,
             mountedFields,
         });
         return [localData, remoteData];
@@ -343,7 +343,7 @@ const Form = (props) => {
         model,
         onlySubmitMountedBehaviour,
         onlySubmitMounted,
-        props.alwaysSubmitFields,
+        alwaysSubmitFields,
         mountedFields,
     ]);
     const getFormDirty = useCallback((values) => serverData && defaultRecord
@@ -356,17 +356,22 @@ const Form = (props) => {
     const getDirty = useCallback((formDirty) => formDirty || customDirty || !!(id && !deleted && deleteOnSubmit), [customDirty, deleteOnSubmit, deleted, id]);
     const dirty = getDirty(formDirty);
     // main form handling - dispatch
+    const alwaysWarnFields = useMemo(() => (props.alwaysWarnFields ?? []).concat(flowEngineConfig.current.alwaysWarnFields ?? []), 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [props.alwaysSubmitFields, flowEngineConfig.current.alwaysWarnFields]);
     const validateForm = useCallback(async (mode = "normal", values) => {
         if (disableValidation)
             return {};
         let fieldsToValidate = Object.keys(model.fields);
         if (onlyValidateMounted || (mode === "hint" && onlyWarnMounted)) {
-            fieldsToValidate = fieldsToValidate.filter((field) => field in mountedFields && mountedFields[field]);
+            fieldsToValidate = fieldsToValidate.filter((field) => (field in mountedFields && mountedFields[field]) ||
+                alwaysSubmitFields.includes(field));
         }
         if (mode === "hint" && onlyWarnChanged) {
             const [localData, remoteData] = getNormalizedData(values);
-            fieldsToValidate = fieldsToValidate.filter((field) => JSON.stringify(getValueByDot(field, localData)) !==
-                JSON.stringify(getValueByDot(field, remoteData)));
+            fieldsToValidate = fieldsToValidate.filter((field) => alwaysWarnFields.includes(field) ||
+                JSON.stringify(getValueByDot(field, localData)) !==
+                    JSON.stringify(getValueByDot(field, remoteData)));
         }
         const errors = await model.validate(values ?? valuesRef.current, id ? "edit" : "create", fieldsToValidate, mode);
         await Promise.all(Object.entries(mode === "normal"
@@ -388,7 +393,9 @@ const Form = (props) => {
         onlyWarnChanged,
         id,
         mountedFields,
+        alwaysSubmitFields,
         getNormalizedData,
+        alwaysWarnFields,
     ]);
     const validateField = useCallback(async (field, value) => {
         const values = value !== undefined
@@ -610,10 +617,7 @@ const Form = (props) => {
             if (flowEngine) {
                 // flow engine staged submit
                 const updateData = getUpdateData(valuesRef.current, model, flowEngineConfig.current.onlySubmitMounted ?? true, flowEngineConfig.current.onlySubmitMountedBehaviour ??
-                    OnlySubmitMountedBehaviour.OMIT, uniqueArray([
-                    ...(props.alwaysSubmitFields ?? []),
-                    ...(flowEngineConfig.current.alwaysSubmitFields ?? []),
-                ]), mountedFields, defaultRecord[0], id);
+                    OnlySubmitMountedBehaviour.OMIT, alwaysSubmitFields, mountedFields, defaultRecord[0], id);
                 const originalStaged = deepClone(valuesStagedRef.current);
                 valuesStagedRef.current = deepAssign(valuesStagedRef.current, updateData);
                 setValuesStaged(valuesStagedRef.current);
@@ -632,10 +636,7 @@ const Form = (props) => {
             if (!flowEngine || params.submitToServer) {
                 const submitValues = valuesRef.current;
                 const oldValues = serverData[0];
-                const result = await updateData(getUpdateData(flowEngine ? valuesStagedRef.current : valuesRef.current, model, flowEngine && id === null ? false : (onlySubmitMounted ?? false), onlySubmitMountedBehaviour, uniqueArray([
-                    ...(props.alwaysSubmitFields ?? []),
-                    ...(flowEngineConfig.current.alwaysSubmitFields ?? []),
-                ]), flowEngine ? valuesStagedModifiedRef.current : mountedFields, defaultRecord[0], id));
+                const result = await updateData(getUpdateData(flowEngine ? valuesStagedRef.current : valuesRef.current, model, flowEngine && id === null ? false : (onlySubmitMounted ?? false), onlySubmitMountedBehaviour, alwaysSubmitFields, flowEngine ? valuesStagedModifiedRef.current : mountedFields, defaultRecord[0], id));
                 const newValues = deepClone(result[0]);
                 valuesRef.current = newValues;
                 valuesStagedRef.current = deepClone(result[0]);
@@ -666,6 +667,7 @@ const Form = (props) => {
         defaultRecord,
         getDirty,
         getFormDirty,
+        flowEngine,
         preSubmit,
         deleteOnSubmit,
         setFieldValue,
@@ -673,12 +675,11 @@ const Form = (props) => {
         deleteRecord,
         validateForm,
         nestedFormName,
-        flowEngine,
         pushDialog,
         t,
         id,
         model,
-        props.alwaysSubmitFields,
+        alwaysSubmitFields,
         mountedFields,
         updateData,
         onlySubmitMounted,

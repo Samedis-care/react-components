@@ -312,6 +312,7 @@
 	"utils": {
 		"validation": {
 			"required": "The {{attribute}} field is required",
+			"missing": "The {{attribute}} field is missing",
 			"email": "The {{attribute}} field requires a valid email",
 			"url": "The {{attribute}} field requires a valid URL"
 		},

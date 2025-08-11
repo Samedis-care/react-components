@@ -170,6 +170,10 @@ export interface FormProps<KeyT extends ModelFieldName, VisibilityT extends Page
      */
     alwaysSubmitFields?: string[];
     /**
+     * List of fields which will always trigger validation warning even if onlyWarnChanged is enabled
+     */
+    alwaysWarnFields: string[];
+    /**
      * Only validate mounted fields
      */
     onlyValidateMounted?: boolean;
@@ -554,6 +558,7 @@ export type FormFlowEngineStageConfig = Partial<{
     onlySubmitMounted: boolean;
     onlySubmitMountedBehaviour: OnlySubmitMountedBehaviour;
     alwaysSubmitFields: string[];
+    alwaysWarnFields: string[];
 }>;
 export declare const useFormFlowEngineStageConfig: (config: FormFlowEngineStageConfig) => void;
 export type FormClassKey = "root";
