@@ -240,6 +240,10 @@ export interface FormProps<
 	 */
 	alwaysSubmitFields?: string[];
 	/**
+	 * List of fields which will always trigger validation warning even if onlyWarnChanged is enabled
+	 */
+	alwaysWarnFields: string[];
+	/**
 	 * Only validate mounted fields
 	 */
 	onlyValidateMounted?: boolean;
@@ -692,6 +696,7 @@ export type FormFlowEngineStageConfig = Partial<{
 	onlySubmitMounted: boolean;
 	onlySubmitMountedBehaviour: OnlySubmitMountedBehaviour;
 	alwaysSubmitFields: string[];
+	alwaysWarnFields: string[];
 }>;
 
 export const useFormFlowEngineStageConfig = (
@@ -1118,6 +1123,15 @@ const Form = <
 				: undefined,
 		[serverData, initialRecord],
 	);
+	const alwaysSubmitFields = useMemo(
+		() =>
+			uniqueArray([
+				...(props.alwaysSubmitFields ?? []),
+				...(flowEngineConfig.current.alwaysSubmitFields ?? []),
+			]),
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[props.alwaysSubmitFields, flowEngineConfig.current.alwaysSubmitFields],
+	);
 	const getNormalizedData = useCallback(
 		(values?: Record<string, unknown>) => {
 			if (!initialValues) {
@@ -1132,10 +1146,7 @@ const Form = <
 				defaultRecord: defaultRecord[0],
 				onlySubmitMountedBehaviour,
 				onlySubmitMounted: onlySubmitMounted ?? false,
-				alwaysSubmitFields: uniqueArray([
-					...(props.alwaysSubmitFields ?? []),
-					...(flowEngineConfig.current.alwaysSubmitFields ?? []),
-				]),
+				alwaysSubmitFields,
 				mountedFields,
 			});
 
@@ -1145,10 +1156,7 @@ const Form = <
 				defaultRecord: defaultRecord[0],
 				onlySubmitMountedBehaviour,
 				onlySubmitMounted: onlySubmitMounted ?? false,
-				alwaysSubmitFields: uniqueArray([
-					...(props.alwaysSubmitFields ?? []),
-					...(flowEngineConfig.current.alwaysSubmitFields ?? []),
-				]),
+				alwaysSubmitFields,
 				mountedFields,
 			});
 			return [localData, remoteData];
@@ -1160,7 +1168,7 @@ const Form = <
 			model,
 			onlySubmitMountedBehaviour,
 			onlySubmitMounted,
-			props.alwaysSubmitFields,
+			alwaysSubmitFields,
 			mountedFields,
 		],
 	);
@@ -1184,6 +1192,14 @@ const Form = <
 	const dirty = getDirty(formDirty);
 
 	// main form handling - dispatch
+	const alwaysWarnFields = useMemo(
+		() =>
+			(props.alwaysWarnFields ?? []).concat(
+				flowEngineConfig.current.alwaysWarnFields ?? [],
+			),
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[props.alwaysSubmitFields, flowEngineConfig.current.alwaysWarnFields],
+	);
 	const validateForm = useCallback(
 		async (
 			mode: "normal" | "hint" = "normal",
@@ -1194,15 +1210,18 @@ const Form = <
 			let fieldsToValidate: KeyT[] = Object.keys(model.fields) as KeyT[];
 			if (onlyValidateMounted || (mode === "hint" && onlyWarnMounted)) {
 				fieldsToValidate = fieldsToValidate.filter(
-					(field) => field in mountedFields && mountedFields[field],
+					(field) =>
+						(field in mountedFields && mountedFields[field]) ||
+						alwaysSubmitFields.includes(field),
 				);
 			}
 			if (mode === "hint" && onlyWarnChanged) {
 				const [localData, remoteData] = getNormalizedData(values);
 				fieldsToValidate = fieldsToValidate.filter(
 					(field) =>
+						alwaysWarnFields.includes(field) ||
 						JSON.stringify(getValueByDot(field, localData)) !==
-						JSON.stringify(getValueByDot(field, remoteData)),
+							JSON.stringify(getValueByDot(field, remoteData)),
 				);
 			}
 
@@ -1236,7 +1255,9 @@ const Form = <
 			onlyWarnChanged,
 			id,
 			mountedFields,
+			alwaysSubmitFields,
 			getNormalizedData,
+			alwaysWarnFields,
 		],
 	);
 	const validateField = useCallback(
@@ -1541,10 +1562,7 @@ const Form = <
 						flowEngineConfig.current.onlySubmitMounted ?? true,
 						flowEngineConfig.current.onlySubmitMountedBehaviour ??
 							OnlySubmitMountedBehaviour.OMIT,
-						uniqueArray([
-							...(props.alwaysSubmitFields ?? []),
-							...(flowEngineConfig.current.alwaysSubmitFields ?? []),
-						]),
+						alwaysSubmitFields,
 						mountedFields,
 						defaultRecord[0],
 						id,
@@ -1582,10 +1600,7 @@ const Form = <
 							model as unknown as Model<string, PageVisibility, unknown>,
 							flowEngine && id === null ? false : (onlySubmitMounted ?? false),
 							onlySubmitMountedBehaviour,
-							uniqueArray([
-								...(props.alwaysSubmitFields ?? []),
-								...(flowEngineConfig.current.alwaysSubmitFields ?? []),
-							]),
+							alwaysSubmitFields,
 							flowEngine ? valuesStagedModifiedRef.current : mountedFields,
 							defaultRecord[0],
 							id,
@@ -1631,6 +1646,7 @@ const Form = <
 			defaultRecord,
 			getDirty,
 			getFormDirty,
+			flowEngine,
 			preSubmit,
 			deleteOnSubmit,
 			setFieldValue,
@@ -1638,12 +1654,11 @@ const Form = <
 			deleteRecord,
 			validateForm,
 			nestedFormName,
-			flowEngine,
 			pushDialog,
 			t,
 			id,
 			model,
-			props.alwaysSubmitFields,
+			alwaysSubmitFields,
 			mountedFields,
 			updateData,
 			onlySubmitMounted,
