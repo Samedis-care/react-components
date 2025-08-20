@@ -637,10 +637,17 @@ class Model {
             .map(async (entry) => {
             const [field, def] = entry;
             let defaultValue;
-            if (def.getDefaultValue)
+            if (def.getDefaultValue) {
                 defaultValue = await def.getDefaultValue();
-            else
+            }
+            // handle cases where getDefaultValue: () => params.optionalValue. We can't set undefined here or it will skip validation
+            if (defaultValue === undefined) {
                 defaultValue = def.type.getDefaultValue();
+            }
+            if (defaultValue === undefined) {
+                // leads to broken validations
+                throw new Error("defaultValue is undefined: " + this.modelId + ":" + field);
+            }
             deepAssign(data, dotToObject(field, defaultValue));
         });
         await Promise.all(promises);
