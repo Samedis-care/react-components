@@ -313,7 +313,8 @@
 		"validation": {
 			"required": "Het veld {{attribute}} is verplicht",
 			"email": "Voor het veld {{attribute}} is een geldig e-mailadres vereist",
-			"url": "Het veld {{attribute}} vereist een geldige URL"
+			"url": "Het veld {{attribute}} vereist een geldige URL",
+			"missing": "Het veld {{attribute}} ontbreekt"
 		},
 		"timestampToAge": {
 			"just-now": "net nu",
