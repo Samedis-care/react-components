@@ -313,7 +313,8 @@
 		"validation": {
 			"required": "Das Feld {{attribute}} ist erforderlich",
 			"email": "Das Feld {{attribute}} erfordert eine gültige E-Mail-Adresse",
-			"url": "Das Feld {{attribute}} erfordert eine gültige URL"
+			"url": "Das Feld {{attribute}} erfordert eine gültige URL",
+			"missing": "Das Feld {{attribute}} fehlt"
 		},
 		"timestampToAge": {
 			"just-now": "gerade jetzt",

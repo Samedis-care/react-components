@@ -313,7 +313,8 @@
 		"validation": {
 			"required": "Требуется поле {{attribute}}",
 			"email": "В поле {{attribute}} требуется действующий адрес электронной почты",
-			"url": "Для поля {{attribute}} требуется действительный URL-адрес"
+			"url": "Для поля {{attribute}} требуется действительный URL-адрес",
+			"missing": "Поле {{attribute}} отсутствует"
 		},
 		"timestampToAge": {
 			"just-now": "прямо сейчас",

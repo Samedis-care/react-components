@@ -313,7 +313,8 @@
 		"validation": {
 			"required": "{{attribute}} maydoni talab qilinadi",
 			"email": "{{attribute}} maydoni toʻgʻri elektron pochta manzilini talab qiladi",
-			"url": "{{attribute}} maydoni toʻgʻri URL manzilni talab qiladi"
+			"url": "{{attribute}} maydoni toʻgʻri URL manzilni talab qiladi",
+			"missing": "{{attribute}} maydoni yoʻq"
 		},
 		"timestampToAge": {
 			"just-now": "hozirgina",
