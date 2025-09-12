@@ -2,6 +2,7 @@ import React, { ChangeEvent, useCallback } from "react";
 import {
 	DataGridContentOverlayCollapse,
 	IDataGridColumnProps,
+	useDataGridColumnState,
 	useDataGridProps,
 	useDataGridState,
 } from "../DataGrid";
@@ -11,6 +12,7 @@ const DataGridSettings = (props: IDataGridColumnProps) => {
 	const { classes } = useDataGridProps();
 
 	const [state, setState] = useDataGridState();
+	const [, setColumnState] = useDataGridColumnState();
 
 	const closeGridSettings = useCallback(() => {
 		setState((prevState) => ({
@@ -39,8 +41,16 @@ const DataGridSettings = (props: IDataGridColumnProps) => {
 					? prevState.hiddenColumns.filter((s) => s !== value)
 					: [...prevState.hiddenColumns, value],
 			}));
+			// clear column filter on column visibility toggle
+			setColumnState((prevState) => ({
+				...prevState,
+				[value]: {
+					...prevState[value],
+					filter: undefined,
+				},
+			}));
 		},
-		[setState],
+		[setColumnState, setState],
 	);
 
 	return (
