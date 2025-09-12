@@ -1,9 +1,10 @@
 import React, { useCallback } from "react";
-import { DataGridContentOverlayCollapse, useDataGridProps, useDataGridState, } from "../DataGrid";
+import { DataGridContentOverlayCollapse, useDataGridColumnState, useDataGridProps, useDataGridState, } from "../DataGrid";
 import Dialog from "./SettingsDialog";
 const DataGridSettings = (props) => {
     const { classes } = useDataGridProps();
     const [state, setState] = useDataGridState();
+    const [, setColumnState] = useDataGridColumnState();
     const closeGridSettings = useCallback(() => {
         setState((prevState) => ({
             ...prevState,
@@ -27,7 +28,15 @@ const DataGridSettings = (props) => {
                 ? prevState.hiddenColumns.filter((s) => s !== value)
                 : [...prevState.hiddenColumns, value],
         }));
-    }, [setState]);
+        // clear column filter on column visibility toggle
+        setColumnState((prevState) => ({
+            ...prevState,
+            [value]: {
+                ...prevState[value],
+                filter: undefined,
+            },
+        }));
+    }, [setColumnState, setState]);
     return (React.createElement(DataGridContentOverlayCollapse, { className: classes?.contentOverlayCollapse, in: state.showSettings },
         React.createElement(Dialog, { columns: props.columns.filter((col) => !state.settingsSearch ||
                 col.headerName.toLowerCase().includes(state.settingsSearch)), closeGridSettings: closeGridSettings, toggleColumnLock: toggleColumnLock, toggleColumnVisibility: toggleColumnVisibility, lockedColumns: state.lockedColumns, hiddenColumns: state.hiddenColumns })));

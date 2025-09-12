@@ -543,6 +543,8 @@ const DataGrid = (inProps) => {
             ...prevState,
             rows: {},
             selectedRows: [],
+            rowsTotal: 0, // reset scrolling
+            rowsFiltered: null,
             refreshData: Math.min(prevState.refreshData + 1, 2),
             refreshShouldWipeRows: prevState.refreshData === 1, // when we set refreshData to two and this is changing filters, we need an rows reset to prevent old data from getting displayed
         }));
