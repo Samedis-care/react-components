@@ -1,0 +1,12 @@
+{
+	"image": "mcr.microsoft.com/devcontainers/typescript-node:24",
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"lokalise.i18n-ally",
+				"esbenp.prettier-vscode",
+				"dbaeumer.vscode-eslint"
+			]
+		}
+	}
+}
