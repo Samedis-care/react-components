@@ -1,7 +1,6 @@
 import React, { Suspense, useCallback, useMemo, useState } from "react";
 import { Box, Grid, InputAdornment, styled, useThemeProps, } from "@mui/material";
-import AutoSizer from "react-virtualized-auto-sizer";
-import { FixedSizeList } from "react-window";
+import { List } from "react-window";
 import supportedLanguages from "../../assets/data/supported-languages.json";
 import countryLanguages from "../../assets/data/country-languages.json";
 import LocaleSelectorEntry from "./LocaleSelectorEntry";
@@ -96,17 +95,17 @@ const LocaleSelectorDialogContent = (inProps) => {
         }
     }, [close, i18n, pushDialog]);
     const LocaleEntryRenderer = useCallback((entryProps) => {
-        const locale = filteredData[entryProps.index];
-        return (React.createElement("div", { style: entryProps.style },
+        const locale = entryProps.filteredData[entryProps.index];
+        return (React.createElement("div", { style: entryProps.style, ...entryProps.ariaAttributes },
             React.createElement(Suspense, { fallback: React.createElement(Loader, null) },
                 React.createElement(LocaleSelectorEntry, { locale: locale, currentLanguage: currentLang, handleSwitch: handleSwitch, disabled: switchingLanguage, key: locale.locale }))));
-    }, [currentLang, filteredData, handleSwitch, switchingLanguage]);
+    }, [currentLang, handleSwitch, switchingLanguage]);
     return (React.createElement(Grid, { container: true, className: className },
         React.createElement(Grid, { size: 12 },
             React.createElement(Box, { px: 2, pb: 1 },
                 React.createElement(TextFieldWithHelp, { value: filter, onChange: handleFilterChange, fullWidth: true, slotProps: { input: SearchInputProps } }))),
         React.createElement(LocaleList, { size: 12 },
             React.createElement(FormLoaderOverlay, { visible: switchingLanguage }),
-            filteredData.length === 0 ? (React.createElement(NoLocalesMessage, null, t("non-standalone.language-switcher.no-locales"))) : (React.createElement(AutoSizer, null, ({ width, height }) => (React.createElement(FixedSizeList, { width: width, height: height, overscanCount: 2, itemCount: filteredData.length, itemSize: 70 }, LocaleEntryRenderer)))))));
+            filteredData.length === 0 ? (React.createElement(NoLocalesMessage, null, t("non-standalone.language-switcher.no-locales"))) : (React.createElement(List, { overscanCount: 2, rowCount: filteredData.length, rowHeight: 70, rowComponent: LocaleEntryRenderer, rowProps: { filteredData } })))));
 };
 export default React.memo(LocaleSelectorDialogContent);

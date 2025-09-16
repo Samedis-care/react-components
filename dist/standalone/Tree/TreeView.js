@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState, } from "react";
 import TreeViewDefaultRenderer from "./TreeViewDefaultRenderer";
-import AutoSizer from "react-virtualized-auto-sizer";
-import { FixedSizeList } from "react-window";
+import { List } from "react-window";
 const enhanceData = (data, loading, parentHasNext, index, depth) => {
     return data
         .map((entry, idx) => {
@@ -44,9 +43,8 @@ const buildTreeFromFlat = (data) => {
     return buildNode(rootNode);
 };
 const RendererWrapper = (props) => {
-    const { index, data, style } = props;
-    const { renderer: Renderer, rendererProps, data: itemData } = data;
-    return (React.createElement("div", { style: style },
+    const { index, style, ariaAttributes, renderer: Renderer, rendererProps, data: itemData, } = props;
+    return (React.createElement("div", { style: style, ...ariaAttributes },
         React.createElement(Renderer, { ...rendererProps, ...itemData[index] })));
 };
 const TreeView = React.forwardRef(function TreeView(props, ref) {
@@ -99,7 +97,7 @@ const TreeView = React.forwardRef(function TreeView(props, ref) {
         const entry = enhancedData.find((entry) => entry.id === scrollToId);
         if (!entry)
             return;
-        list.scrollToItem(entry.index);
+        list.scrollToRow({ index: entry.index });
     }, [scrollToId, enhancedData]);
     // ref
     useImperativeHandle(ref, () => ({
@@ -107,6 +105,6 @@ const TreeView = React.forwardRef(function TreeView(props, ref) {
             setScrollToId(id);
         },
     }), []);
-    return (React.createElement(AutoSizer, null, ({ width, height }) => (React.createElement(FixedSizeList, { ref: listRef, itemSize: itemHeight, height: height, width: width, itemCount: enhancedData.length, itemData: itemData }, RendererWrapper))));
+    return (React.createElement(List, { listRef: listRef, rowComponent: RendererWrapper, rowHeight: itemHeight, rowCount: enhancedData.length, rowProps: itemData }));
 });
 export default React.memo(TreeView);

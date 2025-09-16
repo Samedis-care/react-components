@@ -32,9 +32,9 @@ const Content = (props) => {
     const [width, setWidth] = useState(0);
     const hoverState = useState(null);
     const { pages } = state;
-    const onSectionRendered = useCallback((props) => {
-        const pageStart = (props.visibleRowStartIndex / rowsPerPage) | 0;
-        const pageEnd = (props.visibleRowStopIndex / rowsPerPage) | 0;
+    const onSectionRendered = useCallback((visibleCells) => {
+        const pageStart = (visibleCells.rowStartIndex / rowsPerPage) | 0;
+        const pageEnd = (visibleCells.rowStopIndex / rowsPerPage) | 0;
         if (pageStart !== pages[0] || pageEnd !== pages[1]) {
             setState((prevState) => ({
                 ...prevState,
@@ -144,7 +144,7 @@ const Content = (props) => {
     return (React.createElement(AutoSizer, { onResize: onResize }, ({ width, height }) => (React.createElement(CellContext.Provider, { value: cellContextValue },
         React.createElement(MultiGrid, { columnCount: columns.length +
                 (disableSelection ? 0 : 1) +
-                (columns.length > 0 ? 1 : 0), columnWidth: getColumnWidth, rowCount: (state.rowsFiltered ?? state.rowsTotal) + 1, rowHeight: getRowHeight, width: width, height: height, onItemsRendered: onSectionRendered, fixedColumnCount: columns.filter((col) => col.isLocked).length +
+                (columns.length > 0 ? 1 : 0), columnWidth: getColumnWidth, rowCount: (state.rowsFiltered ?? state.rowsTotal) + 1, rowHeight: getRowHeight, width: width, height: height, onCellsRendered: onSectionRendered, fixedColumnCount: columns.filter((col) => col.isLocked).length +
                 (disableSelection ? 0 : 1), fixedRowCount: 1, styleTopLeftGrid: STYLE_TOP_LEFT, styleTopRightGrid: styleTopRightGrid, styleBottomLeftGrid: styleBottomLeftGrid, styleBottomRightGrid: STYLE_BOTTOM_RIGHT, noContentRenderer: noContentRenderer, globalScrollListener: globalScrollListener }, Cell)))));
 };
 export default React.memo(Content);

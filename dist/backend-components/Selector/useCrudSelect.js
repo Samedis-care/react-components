@@ -124,7 +124,7 @@ const useCrudSelect = (params, ref) => {
             // create final values
             const finalSelected = [
                 ...newSelected,
-                ...(await Promise.all(created.map((entry) => deserialize(entry)))),
+                ...(await Promise.all(created.map((entry) => Promise.resolve(deserialize(entry))))),
             ];
             // reflect changes
             setInitialRawData((oldRawData) => [...oldRawData, ...created]);
@@ -155,7 +155,7 @@ const useCrudSelect = (params, ref) => {
                     page: 1,
                     rows: Number.MAX_SAFE_INTEGER,
                 });
-                const initialSelected = await Promise.all(currentlySelected[0].map((record) => deserialize(record)));
+                const initialSelected = await Promise.all(currentlySelected[0].map((record) => Promise.resolve(deserialize(record))));
                 setInitialRawData(currentlySelected[0]);
                 currentSelected.current = initialSelected;
                 setSelected(currentSelected.current);

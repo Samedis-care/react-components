@@ -97,7 +97,7 @@ const BackendMultiSelect = (props) => {
                 ? { [switchFilterName]: switchValue }
                 : undefined,
         });
-        return Promise.all(data[0].map(modelToSelectorData));
+        return Promise.all(data[0].map((value) => Promise.resolve(modelToSelectorData(value))));
     }, [model, modelToSelectorData, searchResultLimit, sort, switchFilterName]);
     const handleLoadLruRecord = useCallback(async (id) => {
         const [data] = await modelFetch.getCached(id, {

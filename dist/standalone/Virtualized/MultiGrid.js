@@ -1,10 +1,10 @@
 import React, { useCallback, useEffect, useMemo, useRef, } from "react";
-import { VariableSizeGrid, } from "react-window";
+import { Grid as VGrid, } from "react-window";
 import { styled, useThemeProps } from "@mui/material";
 const Root = styled("div", { name: "CcMultiGrid", slot: "root" })({
     position: "relative",
 });
-const BottomLeftVariableSizeGrid = styled(VariableSizeGrid, {
+const BottomLeftVariableSizeGrid = styled(VGrid, {
     name: "CcMultiGrid",
     slot: "bottomLeftGrid",
 })({
@@ -29,7 +29,7 @@ const BottomLeftVariableSizeGrid = styled(VariableSizeGrid, {
 const SCROLL_DETECTION_DELAY_MS = 100; // ms to consider scroll events caused by JS code
 const MultiGrid = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcMultiGrid" });
-    const { width, height, columnCount, columnWidth, rowCount, rowHeight, onItemsRendered, fixedColumnCount, fixedRowCount, styleTopLeftGrid, styleTopRightGrid, styleBottomLeftGrid, styleBottomRightGrid, children: CellRenderer, noContentRenderer: NoContentRenderer, globalScrollListener, } = props;
+    const { width, height, columnCount, columnWidth, rowCount, rowHeight, onCellsRendered, fixedColumnCount, fixedRowCount, styleTopLeftGrid, styleTopRightGrid, styleBottomLeftGrid, styleBottomRightGrid, children: CellRenderer, noContentRenderer: NoContentRenderer, globalScrollListener, } = props;
     const fixedWidth = useMemo(() => Array.from(new Array(fixedColumnCount).keys()).reduce((p, c) => p + columnWidth(c), 0), [columnWidth, fixedColumnCount]);
     const fixedHeight = useMemo(() => Array.from(new Array(fixedRowCount).keys()).reduce((p, c) => p + rowHeight(c), 0), [fixedRowCount, rowHeight]);
     const CellRendererTopRight = useCallback((props) => {
@@ -51,21 +51,21 @@ const MultiGrid = (inProps) => {
             rowIndex: props.rowIndex + fixedRowCount,
         });
     }, [CellRenderer, fixedColumnCount, fixedRowCount]);
-    const handleItemsRendered = useCallback((params) => {
-        if (!onItemsRendered)
+    const handleCellsRendered = useCallback((visibleCells, allCells) => {
+        if (!onCellsRendered)
             return;
-        onItemsRendered({
-            ...params,
-            overscanColumnStartIndex: params.overscanColumnStartIndex + fixedColumnCount,
-            overscanColumnStopIndex: params.overscanColumnStopIndex + fixedColumnCount,
-            overscanRowStartIndex: params.overscanRowStartIndex + fixedRowCount,
-            overscanRowStopIndex: params.overscanRowStopIndex + fixedRowCount,
-            visibleColumnStartIndex: params.visibleColumnStartIndex + fixedColumnCount,
-            visibleColumnStopIndex: params.visibleColumnStopIndex + fixedColumnCount,
-            visibleRowStartIndex: params.visibleRowStartIndex + fixedRowCount,
-            visibleRowStopIndex: params.visibleRowStopIndex + fixedRowCount,
+        onCellsRendered({
+            columnStartIndex: visibleCells.columnStartIndex + fixedColumnCount,
+            columnStopIndex: visibleCells.columnStopIndex + fixedColumnCount,
+            rowStartIndex: visibleCells.rowStartIndex + fixedRowCount,
+            rowStopIndex: visibleCells.rowStopIndex + fixedRowCount,
+        }, {
+            columnStartIndex: allCells.columnStartIndex + fixedColumnCount,
+            columnStopIndex: allCells.columnStopIndex + fixedColumnCount,
+            rowStartIndex: allCells.rowStartIndex + fixedRowCount,
+            rowStopIndex: allCells.rowStopIndex + fixedRowCount,
         });
-    }, [fixedColumnCount, fixedRowCount, onItemsRendered]);
+    }, [fixedColumnCount, fixedRowCount, onCellsRendered]);
     const topLeftGrid = useRef(null);
     const topRightGrid = useRef(null);
     const bottomLeftGrid = useRef(null);
@@ -80,8 +80,12 @@ const MultiGrid = (inProps) => {
         handleScrollPinnedRequested.current = window.setTimeout(() => {
             handleScrollPinnedRequested.current = null;
         }, SCROLL_DETECTION_DELAY_MS);
-        topRightGrid.current?.scrollTo({ scrollLeft: evt.scrollLeft });
-        bottomLeftGrid.current?.scrollTo({ scrollTop: evt.scrollTop });
+        topRightGrid.current?.element?.scrollTo({
+            left: evt.currentTarget.scrollLeft,
+        });
+        bottomLeftGrid.current?.element?.scrollTo({
+            top: evt.currentTarget.scrollTop,
+        });
     }, []);
     const handleScrollPinned = useCallback((evt) => {
         if (handleScrollPinnedRequested.current != null)
@@ -91,21 +95,13 @@ const MultiGrid = (inProps) => {
         handleScrollRequested.current = window.setTimeout(() => {
             handleScrollRequested.current = null;
         }, SCROLL_DETECTION_DELAY_MS);
-        topLeftGrid.current?.scrollTo({ scrollLeft: evt.scrollLeft });
-        bottomRightGrid.current?.scrollTo({ scrollTop: evt.scrollTop });
+        topLeftGrid.current?.element?.scrollTo({
+            left: evt.currentTarget.scrollLeft,
+        });
+        bottomRightGrid.current?.element?.scrollTo({
+            top: evt.currentTarget.scrollTop,
+        });
     }, []);
-    useEffect(() => {
-        topLeftGrid.current?.resetAfterColumnIndex(0, true);
-        topRightGrid.current?.resetAfterColumnIndex(0, true);
-        bottomLeftGrid.current?.resetAfterColumnIndex(0, true);
-        bottomRightGrid.current?.resetAfterColumnIndex(0, true);
-    }, [columnWidth]);
-    useEffect(() => {
-        topLeftGrid.current?.resetAfterRowIndex(0, true);
-        topRightGrid.current?.resetAfterRowIndex(0, true);
-        bottomLeftGrid.current?.resetAfterRowIndex(0, true);
-        bottomRightGrid.current?.resetAfterRowIndex(0, true);
-    }, [rowHeight]);
     useEffect(() => {
         if (!globalScrollListener)
             return;
@@ -118,15 +114,15 @@ const MultiGrid = (inProps) => {
             if (!rightGrid || !leftGrid)
                 return;
             const scrollStep = height - fixedHeight;
-            const scrollCurrent = rightGrid.state.scrollTop;
+            const scrollCurrent = rightGrid.element?.scrollTop ?? 0;
             if (evt.key === "PageDown") {
-                rightGrid.scrollTo({
-                    scrollTop: scrollCurrent + scrollStep,
+                rightGrid.element?.scrollTo({
+                    top: scrollCurrent + scrollStep,
                 });
             }
             else if (evt.key === "PageUp") {
-                rightGrid.scrollTo({
-                    scrollTop: scrollCurrent - scrollStep,
+                rightGrid.element?.scrollTo({
+                    top: scrollCurrent - scrollStep,
                 });
             }
         };
@@ -134,28 +130,41 @@ const MultiGrid = (inProps) => {
         return () => document.removeEventListener("keydown", handleKeyPress);
     }, [globalScrollListener, fixedHeight, height]);
     return (React.createElement(Root, null,
-        React.createElement(VariableSizeGrid, { ref: topLeftGrid, columnWidth: (index) => columnWidth(index), rowHeight: (index) => rowHeight(index), columnCount: fixedColumnCount, rowCount: fixedRowCount, width: Math.min(fixedWidth, width), height: fixedHeight, style: { ...styleTopLeftGrid, position: "absolute", top: 0, left: 0 } }, CellRenderer),
-        React.createElement(VariableSizeGrid, { ref: topRightGrid, columnWidth: (index) => columnWidth(index + fixedColumnCount), rowHeight: (index) => rowHeight(index), columnCount: columnCount - fixedColumnCount, rowCount: fixedRowCount, width: Math.max(width - fixedWidth, 0), height: fixedHeight, style: {
+        React.createElement(VGrid, { gridRef: topLeftGrid, columnWidth: (index) => columnWidth(index), rowHeight: (index) => rowHeight(index), columnCount: fixedColumnCount, rowCount: fixedRowCount, style: {
+                ...styleTopLeftGrid,
+                position: "absolute",
+                top: 0,
+                left: 0,
+                width: Math.min(fixedWidth, width),
+                height: fixedHeight,
+            }, cellComponent: CellRenderer, cellProps: {} }),
+        React.createElement(VGrid, { gridRef: topRightGrid, columnWidth: (index) => columnWidth(index + fixedColumnCount), rowHeight: (index) => rowHeight(index), columnCount: columnCount - fixedColumnCount, rowCount: fixedRowCount, style: {
                 ...styleTopRightGrid,
                 position: "absolute",
                 top: 0,
                 left: fixedWidth,
-            } }, CellRendererTopRight),
-        React.createElement(BottomLeftVariableSizeGrid, { ref: bottomLeftGrid, columnWidth: (index) => columnWidth(index), rowHeight: (index) => rowHeight(index + fixedRowCount), columnCount: fixedColumnCount, rowCount: rowCount - fixedRowCount, width: Math.min(fixedWidth, width), height: height - fixedHeight, onScroll: handleScrollPinned, style: {
+                width: Math.max(width - fixedWidth, 0),
+                height: fixedHeight,
+            }, cellComponent: CellRendererTopRight, cellProps: {} }),
+        React.createElement(BottomLeftVariableSizeGrid, { gridRef: bottomLeftGrid, columnWidth: (index) => columnWidth(index), rowHeight: (index) => rowHeight(index + fixedRowCount), columnCount: fixedColumnCount, rowCount: rowCount - fixedRowCount, onScroll: handleScrollPinned, style: {
                 ...styleBottomLeftGrid,
                 position: "absolute",
                 overflow: "scroll",
                 top: fixedHeight,
                 left: 0,
-            } }, CellRendererBottomLeft),
-        rowCount - fixedRowCount > 0 ? (React.createElement(VariableSizeGrid, { ref: bottomRightGrid, columnWidth: (index) => columnWidth(index + fixedColumnCount), rowHeight: (index) => rowHeight(index + fixedRowCount), columnCount: columnCount - fixedColumnCount, rowCount: rowCount - fixedRowCount, width: Math.max(width - fixedWidth, 0), height: height - fixedHeight, onScroll: handleScroll, style: {
+                width: Math.min(fixedWidth, width),
+                height: height - fixedHeight,
+            }, cellComponent: CellRendererBottomLeft, cellProps: {} }),
+        rowCount - fixedRowCount > 0 ? (React.createElement(VGrid, { gridRef: bottomRightGrid, columnWidth: (index) => columnWidth(index + fixedColumnCount), rowHeight: (index) => rowHeight(index + fixedRowCount), columnCount: columnCount - fixedColumnCount, rowCount: rowCount - fixedRowCount, onScroll: handleScroll, style: {
                 ...styleBottomRightGrid,
                 overflowX: "scroll",
                 overflowY: "auto",
                 position: "absolute",
                 top: fixedHeight,
                 left: fixedWidth,
-            }, onItemsRendered: onItemsRendered ? handleItemsRendered : undefined }, CellRendererBottomRight)) : (React.createElement("div", { style: {
+                width: Math.max(width - fixedWidth, 0),
+                height: height - fixedHeight,
+            }, onCellsRendered: onCellsRendered ? handleCellsRendered : undefined, cellComponent: CellRendererBottomRight, cellProps: {} })) : (React.createElement("div", { style: {
                 ...styleBottomRightGrid,
                 position: "absolute",
                 top: fixedHeight,

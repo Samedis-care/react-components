@@ -28,7 +28,7 @@ const BackendMultiSelectWithTags = (props) => {
                 ? { [switchFilterNameGroup]: switchValue }
                 : undefined,
         });
-        return Promise.all(records.map(convGroup));
+        return Promise.all(records.map((record) => Promise.resolve(convGroup(record))));
     }, [convGroup, groupModel, groupSort, switchFilterNameGroup]);
     const loadDataOptions = useCallback(async (query, switchValue) => {
         const [records] = await dataModel.index({
@@ -39,7 +39,7 @@ const BackendMultiSelectWithTags = (props) => {
                 ? { [switchFilterNameData]: switchValue }
                 : undefined,
         });
-        return Promise.all(records.map(convData));
+        return Promise.all(records.map((record) => Promise.resolve(convData(record))));
     }, [convData, dataModel, dataSort, switchFilterNameData]);
     const handleLoadGroupRecord = useCallback(async (id) => {
         const [data] = await groupModel.getCached(id);

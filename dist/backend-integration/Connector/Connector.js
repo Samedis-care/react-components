@@ -39,7 +39,7 @@ class Connector {
         return [mergedResultSet, lastMeta];
     }
     async deleteMultiple(ids, model) {
-        await Promise.all(ids.map((id) => this.delete(id, model)));
+        await Promise.all(ids.map((id) => Promise.resolve(this.delete(id, model))));
     }
     /**
      * Advanced deletion handler which supports delete all

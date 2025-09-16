@@ -1,5 +1,5 @@
 import React, { CSSProperties } from "react";
-import { GridChildComponentProps, GridOnItemsRenderedProps } from "react-window";
+import { CellComponentProps, GridProps } from "react-window";
 /**
  * Most props do the same as in react-virtualized MultiGrid component
  * Otherwise they are commented
@@ -11,14 +11,14 @@ export interface MultiGridProps {
     columnWidth: (column: number) => number;
     rowCount: number;
     rowHeight: (row: number) => number;
-    onItemsRendered?: (params: GridOnItemsRenderedProps) => void;
+    onCellsRendered?: GridProps<object>["onCellsRendered"];
     fixedColumnCount: number;
     fixedRowCount: number;
     styleTopLeftGrid: CSSProperties;
     styleTopRightGrid: CSSProperties;
     styleBottomLeftGrid: CSSProperties;
     styleBottomRightGrid: CSSProperties;
-    children: (props: GridChildComponentProps) => React.ReactElement;
+    children: (props: CellComponentProps) => React.ReactElement;
     noContentRenderer: React.ComponentType;
     /**
      * Enable global scrolling listener (enables page up/down scrolling)

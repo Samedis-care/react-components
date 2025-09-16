@@ -476,9 +476,9 @@ const Form = (props) => {
         touchedRef.current = getDefaultTouched();
         setTouched(touchedRef.current);
         if (initialRecord && id == null) {
-            void Promise.all(Object.keys(model.fields)
+            Object.keys(model.fields)
                 .filter((key) => dotInObject(key, initialRecord))
-                .map((key) => setFieldValue(key, getValueByDot(key, initialRecord), false)));
+                .forEach((key) => setFieldValue(key, getValueByDot(key, initialRecord), false));
         }
         valuesStagedRef.current = deepClone(valuesRef.current);
         setValuesStaged(valuesStagedRef.current);
@@ -613,7 +613,7 @@ const Form = (props) => {
                     throw new ValidationError("warn", validationHints);
                 }
             }
-            await Promise.all(Object.values(preSubmitHandlers.current).map((handler) => handler(id, params)));
+            await Promise.all(Object.values(preSubmitHandlers.current).map((handler) => Promise.resolve(handler(id, params))));
             if (flowEngine) {
                 // flow engine staged submit
                 const updateData = getUpdateData(valuesRef.current, model, flowEngineConfig.current.onlySubmitMounted ?? true, flowEngineConfig.current.onlySubmitMountedBehaviour ??
@@ -644,7 +644,7 @@ const Form = (props) => {
                 setTouched(touchedRef.current);
                 valuesStagedModifiedRef.current = setAllTouched(valuesStagedModifiedRef.current, false);
                 setValuesStagedModified(valuesStagedModifiedRef.current);
-                await Promise.all(Object.values(postSubmitHandlers.current).map((handler) => handler(newValues.id, params)));
+                await Promise.all(Object.values(postSubmitHandlers.current).map((handler) => Promise.resolve(handler(newValues.id, params))));
                 // re-render after post submit handler, this way we avoid mounting new components before the form is fully saved
                 setValues(newValues);
                 setValuesStaged(valuesStagedRef.current);

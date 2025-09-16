@@ -19,18 +19,18 @@ const StorageManagerPersist = (props) => {
         const { columnWidth, ...otherData } = data;
         const { initialResize, ...otherState } = otherData.state;
         await Promise.all([
-            StorageManager.setItem(DATA_GRID_STORAGE_KEY_COLUMN_SIZING, storageKeys, JSON.stringify({
+            Promise.resolve(StorageManager.setItem(DATA_GRID_STORAGE_KEY_COLUMN_SIZING, storageKeys, JSON.stringify({
                 columnWidth,
                 state: {
                     initialResize,
                 },
-            })),
-            StorageManager.setItem(DATA_GRID_STORAGE_KEY_FILTERS, storageKeys, JSON.stringify({
+            }))),
+            Promise.resolve(StorageManager.setItem(DATA_GRID_STORAGE_KEY_FILTERS, storageKeys, JSON.stringify({
                 ...otherData,
                 state: {
                     ...otherState,
                 },
-            })),
+            }))),
         ]);
     }, 
     // eslint-disable-next-line react-hooks/exhaustive-deps
