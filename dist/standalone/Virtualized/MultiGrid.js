@@ -129,7 +129,7 @@ const MultiGrid = (inProps) => {
         document.addEventListener("keydown", handleKeyPress);
         return () => document.removeEventListener("keydown", handleKeyPress);
     }, [globalScrollListener, fixedHeight, height]);
-    return (React.createElement(Root, null,
+    return (React.createElement(Root, { style: { width, height } },
         React.createElement(VGrid, { gridRef: topLeftGrid, columnWidth: (index) => columnWidth(index), rowHeight: (index) => rowHeight(index), columnCount: fixedColumnCount, rowCount: fixedRowCount, style: {
                 ...styleTopLeftGrid,
                 position: "absolute",
