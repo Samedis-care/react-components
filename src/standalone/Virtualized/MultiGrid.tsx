@@ -236,7 +236,7 @@ const MultiGrid = (inProps: MultiGridProps) => {
 	}, [globalScrollListener, fixedHeight, height]);
 
 	return (
-		<Root>
+		<Root style={{ width, height }}>
 			{/* top left */}
 			<VGrid
 				gridRef={topLeftGrid}
