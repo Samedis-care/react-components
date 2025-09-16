@@ -201,7 +201,9 @@ const CrudMultiImage = (props: CrudMultiImageProps) => {
 					page: 1,
 					rows: Number.MAX_SAFE_INTEGER,
 				});
-				const initialFiles = await Promise.all(initialData[0].map(deserialize));
+				const initialFiles = await Promise.all(
+					initialData[0].map((value) => Promise.resolve(deserialize(value))),
+				);
 				setImages(initialFiles);
 			} catch (e) {
 				setLoadError(e as Error);

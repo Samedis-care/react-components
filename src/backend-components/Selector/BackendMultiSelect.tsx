@@ -270,7 +270,9 @@ const BackendMultiSelect = <
 					? { [switchFilterName]: switchValue }
 					: undefined,
 			});
-			return Promise.all(data[0].map(modelToSelectorData));
+			return Promise.all(
+				data[0].map((value) => Promise.resolve(modelToSelectorData(value))),
+			);
 		},
 		[model, modelToSelectorData, searchResultLimit, sort, switchFilterName],
 	);

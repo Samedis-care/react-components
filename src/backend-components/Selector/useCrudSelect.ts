@@ -309,7 +309,9 @@ const useCrudSelect = <
 				// create final values
 				const finalSelected = [
 					...newSelected,
-					...(await Promise.all(created.map((entry) => deserialize(entry)))),
+					...(await Promise.all(
+						created.map((entry) => Promise.resolve(deserialize(entry))),
+					)),
 				];
 
 				// reflect changes
@@ -355,7 +357,9 @@ const useCrudSelect = <
 				});
 
 				const initialSelected = await Promise.all(
-					currentlySelected[0].map((record) => deserialize(record)),
+					currentlySelected[0].map((record) =>
+						Promise.resolve(deserialize(record)),
+					),
 				);
 
 				setInitialRawData(currentlySelected[0]);

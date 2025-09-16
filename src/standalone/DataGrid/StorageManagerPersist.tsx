@@ -42,25 +42,29 @@ const StorageManagerPersist = (props: StorageManagerPersistProps) => {
 			const { columnWidth, ...otherData } = data;
 			const { initialResize, ...otherState } = otherData.state;
 			await Promise.all([
-				StorageManager.setItem(
-					DATA_GRID_STORAGE_KEY_COLUMN_SIZING,
-					storageKeys,
-					JSON.stringify({
-						columnWidth,
-						state: {
-							initialResize,
-						},
-					}),
+				Promise.resolve(
+					StorageManager.setItem(
+						DATA_GRID_STORAGE_KEY_COLUMN_SIZING,
+						storageKeys,
+						JSON.stringify({
+							columnWidth,
+							state: {
+								initialResize,
+							},
+						}),
+					),
 				),
-				StorageManager.setItem(
-					DATA_GRID_STORAGE_KEY_FILTERS,
-					storageKeys,
-					JSON.stringify({
-						...otherData,
-						state: {
-							...otherState,
-						},
-					}),
+				Promise.resolve(
+					StorageManager.setItem(
+						DATA_GRID_STORAGE_KEY_FILTERS,
+						storageKeys,
+						JSON.stringify({
+							...otherData,
+							state: {
+								...otherState,
+							},
+						}),
+					),
 				),
 			]);
 		},

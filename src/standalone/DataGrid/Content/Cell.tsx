@@ -11,7 +11,7 @@ import React, {
 	useCallback,
 	useContext,
 } from "react";
-import { GridChildComponentProps } from "react-window";
+import { CellComponentProps } from "react-window";
 import ColumnHeader from "./ColumnHeader";
 import SelectRow, { isSelected } from "./SelectRow";
 import { Skeleton } from "@mui/material";
@@ -36,7 +36,7 @@ export const useCellContext = () => {
 	return ctx;
 };
 
-const Cell = (props: GridChildComponentProps): React.ReactElement => {
+const Cell = (props: CellComponentProps): React.ReactElement => {
 	const { columnIndex, rowIndex } = props;
 	const { columns, hoverState } = useCellContext();
 	const {

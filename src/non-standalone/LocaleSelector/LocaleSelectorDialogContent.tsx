@@ -6,8 +6,7 @@ import {
 	styled,
 	useThemeProps,
 } from "@mui/material";
-import AutoSizer from "react-virtualized-auto-sizer";
-import { FixedSizeList, ListChildComponentProps } from "react-window";
+import { List, RowComponentProps } from "react-window";
 import supportedLanguages from "../../assets/data/supported-languages.json";
 import countryLanguages from "../../assets/data/country-languages.json";
 import LocaleSelectorEntry from "./LocaleSelectorEntry";
@@ -175,11 +174,11 @@ const LocaleSelectorDialogContent = (
 	);
 
 	const LocaleEntryRenderer = useCallback(
-		(entryProps: ListChildComponentProps) => {
-			const locale = filteredData[entryProps.index];
+		(entryProps: RowComponentProps<{ filteredData: typeof filteredData }>) => {
+			const locale = entryProps.filteredData[entryProps.index];
 
 			return (
-				<div style={entryProps.style}>
+				<div style={entryProps.style} {...entryProps.ariaAttributes}>
 					<Suspense fallback={<Loader />}>
 						<LocaleSelectorEntry
 							locale={locale}
@@ -192,7 +191,7 @@ const LocaleSelectorDialogContent = (
 				</div>
 			);
 		},
-		[currentLang, filteredData, handleSwitch, switchingLanguage],
+		[currentLang, handleSwitch, switchingLanguage],
 	);
 
 	return (
@@ -214,19 +213,13 @@ const LocaleSelectorDialogContent = (
 						{t("non-standalone.language-switcher.no-locales")}
 					</NoLocalesMessage>
 				) : (
-					<AutoSizer>
-						{({ width, height }) => (
-							<FixedSizeList
-								width={width}
-								height={height}
-								overscanCount={2}
-								itemCount={filteredData.length}
-								itemSize={70}
-							>
-								{LocaleEntryRenderer}
-							</FixedSizeList>
-						)}
-					</AutoSizer>
+					<List
+						overscanCount={2}
+						rowCount={filteredData.length}
+						rowHeight={70}
+						rowComponent={LocaleEntryRenderer}
+						rowProps={{ filteredData }}
+					/>
 				)}
 			</LocaleList>
 		</Grid>

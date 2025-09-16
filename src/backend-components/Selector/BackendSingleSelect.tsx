@@ -146,7 +146,9 @@ const BackendSingleSelect = <
 				...(additionalOptions ?? []).filter((x) =>
 					getStringLabel(x).toLowerCase().includes(search.toLowerCase()),
 				),
-				...(await Promise.all(data[0].map(modelToSelectorData))),
+				...(await Promise.all(
+					data[0].map((data) => Promise.resolve(modelToSelectorData(data))),
+				)),
 			];
 		},
 		[model, searchResultLimit, sort, additionalOptions, modelToSelectorData],

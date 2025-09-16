@@ -38,7 +38,6 @@ export default [
 					jsx: true,
 				},
 
-				tsconfigRootDir: ".",
 				project: ["./tsconfig.json", "./tsconfig-test.json"],
 			},
 		},

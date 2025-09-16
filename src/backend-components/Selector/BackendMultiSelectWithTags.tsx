@@ -192,7 +192,9 @@ const BackendMultiSelectWithTags = <
 					? { [switchFilterNameGroup]: switchValue }
 					: undefined,
 			});
-			return Promise.all(records.map(convGroup));
+			return Promise.all(
+				records.map((record) => Promise.resolve(convGroup(record))),
+			);
 		},
 		[convGroup, groupModel, groupSort, switchFilterNameGroup],
 	);
@@ -206,7 +208,9 @@ const BackendMultiSelectWithTags = <
 					? { [switchFilterNameData]: switchValue }
 					: undefined,
 			});
-			return Promise.all(records.map(convData));
+			return Promise.all(
+				records.map((record) => Promise.resolve(convData(record))),
+			);
 		},
 		[convData, dataModel, dataSort, switchFilterNameData],
 	);

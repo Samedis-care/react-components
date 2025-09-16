@@ -1369,13 +1369,11 @@ const Form = <
 		setTouched(touchedRef.current);
 
 		if (initialRecord && id == null) {
-			void Promise.all(
-				Object.keys(model.fields)
-					.filter((key) => dotInObject(key, initialRecord))
-					.map((key) =>
-						setFieldValue(key, getValueByDot(key, initialRecord), false),
-					),
-			);
+			Object.keys(model.fields)
+				.filter((key) => dotInObject(key, initialRecord))
+				.forEach((key) =>
+					setFieldValue(key, getValueByDot(key, initialRecord), false),
+				);
 		}
 
 		valuesStagedRef.current = deepClone(valuesRef.current);
@@ -1550,7 +1548,7 @@ const Form = <
 
 				await Promise.all(
 					Object.values(preSubmitHandlers.current).map((handler) =>
-						handler(id, params),
+						Promise.resolve(handler(id, params)),
 					),
 				);
 
@@ -1621,7 +1619,9 @@ const Form = <
 
 					await Promise.all(
 						Object.values(postSubmitHandlers.current).map((handler) =>
-							handler((newValues as Record<"id", string>).id, params),
+							Promise.resolve(
+								handler((newValues as Record<"id", string>).id, params),
+							),
 						),
 					);
 

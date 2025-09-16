@@ -14,7 +14,6 @@ import {
 	useDataGridState,
 } from "../DataGrid";
 import AutoSizer, { Size } from "react-virtualized-auto-sizer";
-import { GridOnItemsRenderedProps } from "react-window";
 import Cell, { CellContext } from "./Cell";
 import { applyColumnWidthLimits } from "./ColumnHeader";
 import Loader from "../../Loader";
@@ -63,9 +62,14 @@ const Content = (props: IDataGridContentProps) => {
 	const { pages } = state;
 
 	const onSectionRendered = useCallback(
-		(props: GridOnItemsRenderedProps) => {
-			const pageStart = (props.visibleRowStartIndex / rowsPerPage) | 0;
-			const pageEnd = (props.visibleRowStopIndex / rowsPerPage) | 0;
+		(visibleCells: {
+			columnStartIndex: number;
+			columnStopIndex: number;
+			rowStartIndex: number;
+			rowStopIndex: number;
+		}) => {
+			const pageStart = (visibleCells.rowStartIndex / rowsPerPage) | 0;
+			const pageEnd = (visibleCells.rowStopIndex / rowsPerPage) | 0;
 			if (pageStart !== pages[0] || pageEnd !== pages[1]) {
 				setState((prevState) => ({
 					...prevState,
@@ -255,7 +259,7 @@ const Content = (props: IDataGridContentProps) => {
 						rowHeight={getRowHeight}
 						width={width}
 						height={height}
-						onItemsRendered={onSectionRendered}
+						onCellsRendered={onSectionRendered}
 						fixedColumnCount={
 							columns.filter((col) => col.isLocked).length +
 							(disableSelection ? 0 : 1)

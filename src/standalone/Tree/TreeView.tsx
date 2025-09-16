@@ -7,8 +7,7 @@ import React, {
 	useState,
 } from "react";
 import TreeViewDefaultRenderer from "./TreeViewDefaultRenderer";
-import AutoSizer from "react-virtualized-auto-sizer";
-import { FixedSizeList, ListChildComponentProps } from "react-window";
+import { List, ListImperativeAPI, RowComponentProps } from "react-window";
 
 export interface TreeData {
 	/**
@@ -190,13 +189,17 @@ export interface TreeViewContextType {
 	data: TreeDataForRenderer[];
 }
 
-const RendererWrapper = (
-	props: ListChildComponentProps<TreeViewContextType>,
-) => {
-	const { index, data, style } = props;
-	const { renderer: Renderer, rendererProps, data: itemData } = data;
+const RendererWrapper = (props: RowComponentProps<TreeViewContextType>) => {
+	const {
+		index,
+		style,
+		ariaAttributes,
+		renderer: Renderer,
+		rendererProps,
+		data: itemData,
+	} = props;
 	return (
-		<div style={style}>
+		<div style={style} {...ariaAttributes}>
 			<Renderer {...rendererProps} {...itemData[index]} />
 		</div>
 	);
@@ -218,7 +221,7 @@ const TreeView = React.forwardRef(function TreeView(
 		onToggleExpanded,
 		...rendererProps
 	} = props;
-	const listRef = useRef<FixedSizeList>(null);
+	const listRef = useRef<ListImperativeAPI>(null);
 	const itemHeight = rendererItemHeight ?? 24;
 	const [loading, setLoading] = useState<string[]>([]);
 	const enhancedData = useMemo((): TreeDataForRenderer[] => {
@@ -270,7 +273,7 @@ const TreeView = React.forwardRef(function TreeView(
 		setScrollToId(null);
 		const entry = enhancedData.find((entry) => entry.id === scrollToId);
 		if (!entry) return;
-		list.scrollToItem(entry.index);
+		list.scrollToRow({ index: entry.index });
 	}, [scrollToId, enhancedData]);
 
 	// ref
@@ -285,20 +288,13 @@ const TreeView = React.forwardRef(function TreeView(
 	);
 
 	return (
-		<AutoSizer>
-			{({ width, height }) => (
-				<FixedSizeList
-					ref={listRef}
-					itemSize={itemHeight}
-					height={height}
-					width={width}
-					itemCount={enhancedData.length}
-					itemData={itemData}
-				>
-					{RendererWrapper}
-				</FixedSizeList>
-			)}
-		</AutoSizer>
+		<List<TreeViewContextType>
+			listRef={listRef}
+			rowComponent={RendererWrapper}
+			rowHeight={itemHeight}
+			rowCount={enhancedData.length}
+			rowProps={itemData}
+		/>
 	);
 });
 
