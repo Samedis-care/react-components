@@ -713,12 +713,14 @@ const Form = (props) => {
         if (!state)
             return;
         valuesRef.current = state.values;
-        setValues(state.values);
+        if (!isObjectEmpty(state.values))
+            setValues(state.values);
         setErrors(state.errors);
         setWarnings(state.warnings);
         setTouched(state.touched);
         valuesStagedRef.current = state.valuesStaged;
-        setValuesStaged(state.valuesStaged);
+        if (!isObjectEmpty(state.valuesStaged))
+            setValuesStaged(state.valuesStaged);
         valuesStagedModifiedRef.current = state.valuesStagedModified;
         setValuesStagedModified(state.valuesStagedModified);
         // eslint-disable-next-line react-hooks/exhaustive-deps
