@@ -777,6 +777,7 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 					setQuery("");
 				}
 			}
+			setQuery("");
 			if (onSelect) {
 				if (multiple) {
 					onSelect(dataNormalized);
