@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState, } from "react";
 import { getStringLabel, SingleSelect, } from "../../standalone";
 import debouncePromise from "../../utils/debouncePromise";
 import useCCTranslations from "../../utils/useCCTranslations";
@@ -7,6 +7,7 @@ const BackendSingleSelect = (props) => {
     const modelFetch = modelFetchProp ?? model;
     if (freeSolo && !onSelectFreeSolo)
         throw new Error("freeSolo enabled, but no onSelectFreeSolo callback");
+    const upcomingSelectedCache = useRef(null);
     const [selectedCache, setSelectedCache] = useState(null);
     const { t } = useCCTranslations();
     const handleLoad = useCallback(async (search) => {
@@ -41,7 +42,7 @@ const BackendSingleSelect = (props) => {
                 onSelectFreeSolo(selected.value);
             return;
         }
-        setSelectedCache(selected);
+        upcomingSelectedCache.current = selected;
         if (onSelect) {
             onSelect(selected ? selected.value : null);
         }
@@ -57,6 +58,12 @@ const BackendSingleSelect = (props) => {
         if (additionalOption) {
             setSelectedCache(additionalOption);
             return;
+        }
+        // if this comes from selection no need to fetch it either
+        if (upcomingSelectedCache.current &&
+            upcomingSelectedCache.current.value === selected) {
+            setSelectedCache(upcomingSelectedCache.current);
+            upcomingSelectedCache.current = null;
         }
         void (async () => {
             let newCache = null;
