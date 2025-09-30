@@ -233,6 +233,7 @@ const BaseSelector = (inProps) => {
                 setQuery("");
             }
         }
+        setQuery("");
         if (onSelect) {
             if (multiple) {
                 onSelect(dataNormalized);
