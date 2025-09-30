@@ -1696,15 +1696,19 @@ const Form = <
 		const state =
 			parentFormContext.getCustomState<FormNestedState>(nestedFormName);
 		if (!state) return;
-		valuesRef.current = state.values;
-		if (!isObjectEmpty(state.values)) setValues(state.values);
-		setErrors(state.errors);
-		setWarnings(state.warnings);
-		setTouched(state.touched);
-		valuesStagedRef.current = state.valuesStaged;
-		if (!isObjectEmpty(state.valuesStaged)) setValuesStaged(state.valuesStaged);
-		valuesStagedModifiedRef.current = state.valuesStagedModified;
-		setValuesStagedModified(state.valuesStagedModified);
+		if (!isObjectEmpty(state.values)) {
+			valuesRef.current = state.values;
+			setValues(state.values);
+			setErrors(state.errors);
+			setWarnings(state.warnings);
+			setTouched(state.touched);
+		}
+		if (!isObjectEmpty(state.valuesStaged)) {
+			valuesStagedRef.current = state.valuesStaged;
+			setValuesStaged(state.valuesStaged);
+			valuesStagedModifiedRef.current = state.valuesStagedModified;
+			setValuesStagedModified(state.valuesStagedModified);
+		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
