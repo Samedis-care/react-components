@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, {
+	useCallback,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
+} from "react";
 import {
 	BaseSelectorData,
 	BaseSelectorProps,
@@ -128,6 +134,7 @@ const BackendSingleSelect = <
 	if (freeSolo && !onSelectFreeSolo)
 		throw new Error("freeSolo enabled, but no onSelectFreeSolo callback");
 
+	const upcomingSelectedCache = useRef<BaseSelectorData | null>(null);
 	const [selectedCache, setSelectedCache] = useState<BaseSelectorData | null>(
 		null,
 	);
@@ -183,7 +190,7 @@ const BackendSingleSelect = <
 				if (onSelectFreeSolo) onSelectFreeSolo(selected.value);
 				return;
 			}
-			setSelectedCache(selected);
+			upcomingSelectedCache.current = selected;
 			if (onSelect) {
 				onSelect(selected ? selected.value : null);
 			}
@@ -203,6 +210,15 @@ const BackendSingleSelect = <
 		if (additionalOption) {
 			setSelectedCache(additionalOption);
 			return;
+		}
+
+		// if this comes from selection no need to fetch it either
+		if (
+			upcomingSelectedCache.current &&
+			upcomingSelectedCache.current.value === selected
+		) {
+			setSelectedCache(upcomingSelectedCache.current);
+			upcomingSelectedCache.current = null;
 		}
 
 		void (async () => {
