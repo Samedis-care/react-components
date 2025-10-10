@@ -8,6 +8,9 @@ import useCCTranslations from "../../../utils/useCCTranslations";
 import CenteredTypography from "../../UIKit/CenteredTypography";
 import MultiGrid from "../../Virtualized/MultiGrid";
 import { styled } from "@mui/material";
+import { useDataGridFiltersActive, useDataGridResetFilters, } from "../DataGridUtils";
+import ActionButton from "../../UIKit/ActionButton";
+import { Clear as ResetFilterIcon } from "@mui/icons-material";
 const CenteredStickyTypography = styled(CenteredTypography, {
     name: "CcDataGrid",
     slot: "centeredStickyTypography",
@@ -118,8 +121,18 @@ const Content = (props) => {
         setState((prev) => ({ ...prev, initialResize: true }));
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [state.initialResize, width]);
-    const noContentRenderer = useCallback(() => (React.createElement(React.Fragment, null, state.refreshData ? (React.createElement(Loader, null)) : state.dataLoadError ? (React.createElement(CenteredStickyTypography, { className: classes?.centeredStickyTypography, variant: "h5" }, state.dataLoadError.message)) : (React.createElement(CenteredStickyTypography, { className: classes?.centeredStickyTypography, variant: "h4" }, t("standalone.data-grid.content.no-data"))))), [
+    const filtersActive = useDataGridFiltersActive();
+    const resetFilters = useDataGridResetFilters();
+    const noContentRenderer = useCallback(() => (React.createElement(React.Fragment, null, state.refreshData ? (React.createElement(Loader, null)) : state.dataLoadError ? (React.createElement(CenteredStickyTypography, { className: classes?.centeredStickyTypography, variant: "h5" }, state.dataLoadError.message)) : (React.createElement(CenteredStickyTypography, { className: classes?.centeredStickyTypography, variant: "h4" },
+        filtersActive
+            ? t("standalone.data-grid.content.no-data-filters")
+            : t("standalone.data-grid.content.no-data"),
+        filtersActive && (React.createElement(React.Fragment, null,
+            React.createElement("br", null),
+            React.createElement(ActionButton, { onClick: resetFilters, fullWidth: false, icon: React.createElement(ResetFilterIcon, null) }, t("standalone.data-grid.content.no-data-reset-filters")))))))), [
         classes?.centeredStickyTypography,
+        filtersActive,
+        resetFilters,
         state.dataLoadError,
         state.refreshData,
         t,

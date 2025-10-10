@@ -2,6 +2,7 @@ import React, { useCallback } from "react";
 import { getDataGridDefaultColumnsState, getDataGridDefaultState, getDefaultColumnWidths, useDataGridColumnState, useDataGridColumnsWidthState, useDataGridProps, useDataGridState, } from "../DataGrid";
 import ActionBarView from "./ActionBarView";
 import { useTheme } from "@mui/material";
+import { useDataGridResetFilters } from "../DataGridUtils";
 const ActionBar = () => {
     const [, setState] = useDataGridState();
     const [, setColumnState] = useDataGridColumnState();
@@ -18,26 +19,7 @@ const ActionBar = () => {
                 : false,
         }));
     }, [setState]);
-    const handleResetFilter = useCallback(() => {
-        const defaultState = getDataGridDefaultState(columns, defaultCustomData);
-        const defaultColumnState = getDataGridDefaultColumnsState(columns, defaultSort, defaultFilter);
-        setState((state) => ({
-            ...state,
-            search: defaultState.search,
-            customData: defaultState.customData,
-        }));
-        setColumnState((colState) => Object.fromEntries(Object.entries(colState).map(([field, def]) => [
-            field,
-            { ...def, filter: defaultColumnState[field]?.filter },
-        ])));
-    }, [
-        columns,
-        defaultCustomData,
-        defaultFilter,
-        defaultSort,
-        setColumnState,
-        setState,
-    ]);
+    const handleResetFilter = useDataGridResetFilters();
     const handleResetSort = useCallback(() => {
         const defaultColumnState = getDataGridDefaultColumnsState(columns, defaultSort, defaultFilter);
         setColumnState((colState) => Object.fromEntries(Object.entries(colState)
