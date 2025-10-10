@@ -53,7 +53,9 @@
 				"filter-combination": {
 					"and": "AND",
 					"or": "OR"
-				}
+				},
+				"no-data-reset-filters": "Clear filters",
+				"no-data-filters": "No data matched your filters."
 			},
 			"header": {
 				"new": "New",

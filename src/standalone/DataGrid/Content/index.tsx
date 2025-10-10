@@ -21,6 +21,12 @@ import useCCTranslations from "../../../utils/useCCTranslations";
 import CenteredTypography from "../../UIKit/CenteredTypography";
 import MultiGrid from "../../Virtualized/MultiGrid";
 import { styled } from "@mui/material";
+import {
+	useDataGridFiltersActive,
+	useDataGridResetFilters,
+} from "../DataGridUtils";
+import ActionButton from "../../UIKit/ActionButton";
+import { Clear as ResetFilterIcon } from "@mui/icons-material";
 
 export interface IDataGridContentProps
 	extends IDataGridColumnProps,
@@ -175,6 +181,9 @@ const Content = (props: IDataGridContentProps) => {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [state.initialResize, width]);
 
+	const filtersActive = useDataGridFiltersActive();
+	const resetFilters = useDataGridResetFilters();
+
 	const noContentRenderer = useCallback(
 		() => (
 			<>
@@ -192,13 +201,29 @@ const Content = (props: IDataGridContentProps) => {
 						className={classes?.centeredStickyTypography}
 						variant={"h4"}
 					>
-						{t("standalone.data-grid.content.no-data")}
+						{filtersActive
+							? t("standalone.data-grid.content.no-data-filters")
+							: t("standalone.data-grid.content.no-data")}
+						{filtersActive && (
+							<>
+								<br />
+								<ActionButton
+									onClick={resetFilters}
+									fullWidth={false}
+									icon={<ResetFilterIcon />}
+								>
+									{t("standalone.data-grid.content.no-data-reset-filters")}
+								</ActionButton>
+							</>
+						)}
 					</CenteredStickyTypography>
 				)}
 			</>
 		),
 		[
 			classes?.centeredStickyTypography,
+			filtersActive,
+			resetFilters,
 			state.dataLoadError,
 			state.refreshData,
 			t,
