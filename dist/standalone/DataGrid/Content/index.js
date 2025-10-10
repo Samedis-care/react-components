@@ -7,7 +7,7 @@ import Loader from "../../Loader";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import CenteredTypography from "../../UIKit/CenteredTypography";
 import MultiGrid from "../../Virtualized/MultiGrid";
-import { styled } from "@mui/material";
+import { Grid, styled } from "@mui/material";
 import { useDataGridFiltersActive, useDataGridResetFilters, } from "../DataGridUtils";
 import ActionButton from "../../UIKit/ActionButton";
 import { Clear as ResetFilterIcon } from "@mui/icons-material";
@@ -124,12 +124,12 @@ const Content = (props) => {
     const filtersActive = useDataGridFiltersActive();
     const resetFilters = useDataGridResetFilters();
     const noContentRenderer = useCallback(() => (React.createElement(React.Fragment, null, state.refreshData ? (React.createElement(Loader, null)) : state.dataLoadError ? (React.createElement(CenteredStickyTypography, { className: classes?.centeredStickyTypography, variant: "h5" }, state.dataLoadError.message)) : (React.createElement(CenteredStickyTypography, { className: classes?.centeredStickyTypography, variant: "h4" },
-        filtersActive
-            ? t("standalone.data-grid.content.no-data-filters")
-            : t("standalone.data-grid.content.no-data"),
-        filtersActive && (React.createElement(React.Fragment, null,
-            React.createElement("br", null),
-            React.createElement(ActionButton, { onClick: resetFilters, fullWidth: false, icon: React.createElement(ResetFilterIcon, null) }, t("standalone.data-grid.content.no-data-reset-filters")))))))), [
+        React.createElement(Grid, { container: true, spacing: 2, direction: "column" },
+            React.createElement(Grid, null, filtersActive
+                ? t("standalone.data-grid.content.no-data-filters")
+                : t("standalone.data-grid.content.no-data")),
+            filtersActive && (React.createElement(Grid, null,
+                React.createElement(ActionButton, { onClick: resetFilters, fullWidth: false, icon: React.createElement(ResetFilterIcon, null) }, t("standalone.data-grid.content.no-data-reset-filters"))))))))), [
         classes?.centeredStickyTypography,
         filtersActive,
         resetFilters,
