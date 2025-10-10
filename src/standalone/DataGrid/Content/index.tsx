@@ -20,7 +20,7 @@ import Loader from "../../Loader";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import CenteredTypography from "../../UIKit/CenteredTypography";
 import MultiGrid from "../../Virtualized/MultiGrid";
-import { styled } from "@mui/material";
+import { Grid, styled } from "@mui/material";
 import {
 	useDataGridFiltersActive,
 	useDataGridResetFilters,
@@ -201,21 +201,24 @@ const Content = (props: IDataGridContentProps) => {
 						className={classes?.centeredStickyTypography}
 						variant={"h4"}
 					>
-						{filtersActive
-							? t("standalone.data-grid.content.no-data-filters")
-							: t("standalone.data-grid.content.no-data")}
-						{filtersActive && (
-							<>
-								<br />
-								<ActionButton
-									onClick={resetFilters}
-									fullWidth={false}
-									icon={<ResetFilterIcon />}
-								>
-									{t("standalone.data-grid.content.no-data-reset-filters")}
-								</ActionButton>
-							</>
-						)}
+						<Grid container spacing={2} direction={"column"}>
+							<Grid>
+								{filtersActive
+									? t("standalone.data-grid.content.no-data-filters")
+									: t("standalone.data-grid.content.no-data")}
+							</Grid>
+							{filtersActive && (
+								<Grid>
+									<ActionButton
+										onClick={resetFilters}
+										fullWidth={false}
+										icon={<ResetFilterIcon />}
+									>
+										{t("standalone.data-grid.content.no-data-reset-filters")}
+									</ActionButton>
+								</Grid>
+							)}
+						</Grid>
 					</CenteredStickyTypography>
 				)}
 			</>
