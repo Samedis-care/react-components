@@ -51,6 +51,7 @@ import ComponentWithLabel, {
 	ComponentWithLabelProps,
 } from "../UIKit/ComponentWithLabel";
 import FilterIcon from "../Icons/FilterIcon";
+import deepClone from "../../utils/deepClone";
 
 export interface DataGridProps
 	extends IDataGridHeaderProps,
@@ -1321,6 +1322,23 @@ const DataGrid = (inProps: DataGridProps) => {
 		};
 	}, []);
 
+	// column state hash without inactive filters (used for refresh trigger)
+	const columnStateHash = useMemo(() => {
+		const cloned = deepClone(columnsState);
+		// filter out inactive filter state
+		for (const field in cloned) {
+			if (!cloned[field].filter) continue;
+			if (!cloned[field].filter.value1) cloned[field].filter = undefined;
+			let filterDef = cloned[field].filter;
+			while (filterDef) {
+				if (!filterDef.nextFilter) break;
+				if (!filterDef.nextFilter.value1) filterDef.nextFilter = undefined;
+
+				filterDef = filterDef.nextFilter;
+			}
+		}
+		return JSON.stringify(cloned);
+	}, [columnsState]);
 	useEffect(() => {
 		// make sure we don't refresh data twice on initial render
 		if (refreshData && isObjectEmpty(rows) && initialRender.current) {
@@ -1330,7 +1348,7 @@ const DataGrid = (inProps: DataGridProps) => {
 
 		resetView();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [resetView, search, columnsState, customData, forceRefreshToken]);
+	}, [resetView, search, columnStateHash, customData, forceRefreshToken]);
 
 	// selection change event
 	useEffect(() => {
