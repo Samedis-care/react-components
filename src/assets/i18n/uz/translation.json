@@ -50,7 +50,9 @@
 				"filter-combination": {
 					"and": "VA",
 					"or": "YOKI"
-				}
+				},
+				"no-data-filters": "Filtrlaringizga mos keladigan maʼlumotlar topilmadi.",
+				"no-data-reset-filters": "Filtrlarni tozalash"
 			},
 			"header": {
 				"new": "Yangi",
