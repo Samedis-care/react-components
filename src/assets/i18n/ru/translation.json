@@ -50,7 +50,9 @@
 				"filter-combination": {
 					"or": "ИЛИ",
 					"and": "И"
-				}
+				},
+				"no-data-reset-filters": "Очистить фильтры",
+				"no-data-filters": "Данные, соответствующие вашим фильтрам, не найдены."
 			},
 			"header": {
 				"new": "Новый",
