@@ -50,7 +50,9 @@
 				"filter-combination": {
 					"and": "UND",
 					"or": "ODER"
-				}
+				},
+				"no-data-reset-filters": "Filter löschen",
+				"no-data-filters": "Mit den eingestellten Filtern wurden keine Daten gefunden."
 			},
 			"header": {
 				"new": "Neu",
