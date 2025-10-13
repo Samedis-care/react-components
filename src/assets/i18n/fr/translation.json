@@ -50,7 +50,9 @@
 				"filter-combination": {
 					"and": "ET",
 					"or": "OU"
-				}
+				},
+				"no-data-reset-filters": "Effacer les filtres",
+				"no-data-filters": "Aucune donnée ne correspond à vos filtres."
 			},
 			"header": {
 				"new": "Nouveau",
