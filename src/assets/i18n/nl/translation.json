@@ -50,7 +50,9 @@
 				"filter-combination": {
 					"or": "OF",
 					"and": "EN"
-				}
+				},
+				"no-data-filters": "Er zijn geen gegevens die aan uw filters voldoen.",
+				"no-data-reset-filters": "Filters wissen"
 			},
 			"header": {
 				"new": "Nieuw",
