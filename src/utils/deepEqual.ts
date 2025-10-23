@@ -1,7 +1,11 @@
 import shallowCompareArray from "./shallowCompareArray";
 import isPlainObject from "./isPlainObject";
 
-const deepEqual = (a: unknown, b: unknown): boolean => {
+const deepEqual = (
+	a: unknown,
+	b: unknown,
+	unsupportedHandling: "error" | "ignore" | "equals" = "error",
+): boolean => {
 	// check if same type
 	if (typeof a !== typeof b) return false;
 	// special handling null / undefined
@@ -32,8 +36,11 @@ const deepEqual = (a: unknown, b: unknown): boolean => {
 		return Object.keys(a).find((key) => !deepEqual(a[key], b[key])) == null;
 	}
 	// fallback comparison
-	if (typeof a !== "string" && typeof a !== "number")
-		throw new Error("Unsupported data type");
+	if (typeof a !== "string" && typeof a !== "number") {
+		if (unsupportedHandling === "error")
+			throw new Error("Unsupported data type");
+		if (unsupportedHandling === "ignore") return true;
+	}
 	return a === b;
 };
 
