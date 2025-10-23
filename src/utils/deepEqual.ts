@@ -6,7 +6,7 @@ const deepEqual = (a: unknown, b: unknown): boolean => {
 	if (typeof a !== typeof b) return false;
 	// special handling null / undefined
 	if (a == null || b == null) {
-		return (a == null) !== (b == null);
+		return (a == null) === (b == null);
 	}
 	// special handling date
 	if (a instanceof Date || b instanceof Date) {
