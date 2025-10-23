@@ -1,6 +1,6 @@
 import shallowCompareArray from "./shallowCompareArray";
 import isPlainObject from "./isPlainObject";
-const deepEqual = (a, b) => {
+const deepEqual = (a, b, unsupportedHandling = "error") => {
     // check if same type
     if (typeof a !== typeof b)
         return false;
@@ -35,8 +35,12 @@ const deepEqual = (a, b) => {
         return Object.keys(a).find((key) => !deepEqual(a[key], b[key])) == null;
     }
     // fallback comparison
-    if (typeof a !== "string" && typeof a !== "number")
-        throw new Error("Unsupported data type");
+    if (typeof a !== "string" && typeof a !== "number") {
+        if (unsupportedHandling === "error")
+            throw new Error("Unsupported data type");
+        if (unsupportedHandling === "ignore")
+            return true;
+    }
     return a === b;
 };
 export default deepEqual;
