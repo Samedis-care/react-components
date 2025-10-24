@@ -520,6 +520,7 @@ const Form = (props) => {
             : touched);
         valuesStagedRef.current = updateUnmodified(valuesStagedRef.current, valuesStagedModifiedRef.current);
         setValues(valuesRef.current);
+        setValuesStaged(valuesStagedRef.current);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [serverData]);
     // main form - submit handler
@@ -646,7 +647,7 @@ const Form = (props) => {
                 setValuesStagedModified(valuesStagedModifiedRef.current);
                 await Promise.all(Object.values(postSubmitHandlers.current).map((handler) => Promise.resolve(handler(newValues.id, params))));
                 // re-render after post submit handler, this way we avoid mounting new components before the form is fully saved
-                setValues(newValues);
+                setValues(valuesRef.current);
                 setValuesStaged(valuesStagedRef.current);
                 if (onSubmit) {
                     await onSubmit(newValues, submitValues, oldValues);
