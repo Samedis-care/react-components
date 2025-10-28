@@ -68,6 +68,7 @@ abstract class TypeFiles implements Type<FileData[]> {
 				...file,
 				file: {
 					name: file.file.name,
+					type: file.file.type,
 				},
 				preview: file.preview,
 				data:

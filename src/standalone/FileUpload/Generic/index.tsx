@@ -172,6 +172,10 @@ export interface FileMeta {
 	 */
 	name: string;
 	/**
+	 * The file mime type
+	 */
+	type: string;
+	/**
 	 * The download link for the file
 	 */
 	downloadLink?: string;
@@ -583,6 +587,7 @@ const FileUpload = (
 									data && (
 										<FilePreview
 											name={data.file.name}
+											mimeType={data.file.type}
 											downloadLink={
 												"downloadLink" in data.file
 													? data.file.downloadLink
@@ -679,6 +684,7 @@ const FileUpload = (
 											data && (
 												<FilePreview
 													name={data.file.name}
+													mimeType={data.file.type}
 													downloadLink={
 														"downloadLink" in data.file
 															? data.file.downloadLink

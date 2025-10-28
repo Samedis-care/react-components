@@ -35,6 +35,10 @@ export interface FileProps {
 	 */
 	name: string;
 	/**
+	 * Mime Type of the file
+	 */
+	mimeType: string;
+	/**
 	 * the file label
 	 */
 	label?: string;
@@ -361,7 +365,7 @@ const File = (inProps: FileProps) => {
 	const props = useThemeProps({ props: inProps, name: "CcFile" });
 	const { name, downloadLink, variant, className, classes, onClick } = props;
 
-	const FileIcon = getFileIconOrDefault(props.name);
+	const FileIcon = getFileIconOrDefault(props.mimeType || props.name);
 
 	const openDownload = useCallback(async () => {
 		if (downloadLink) {
