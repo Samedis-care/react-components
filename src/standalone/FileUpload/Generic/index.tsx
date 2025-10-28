@@ -731,7 +731,7 @@ const FileUpload = (
 								>
 									<Tooltip title={acceptLabel || accept || ""}>
 										<span>
-											{React.createElement(getFileIconOrDefault(entry))}
+											{React.createElement(getFileIconOrDefault(entry, entry))}
 										</span>
 									</Tooltip>
 								</FormatIconsModern>
