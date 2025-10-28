@@ -246,7 +246,7 @@ export const getFileIconOrDefault = (nameOrMime) => getFileIcon(nameOrMime) ?? D
 const File = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcFile" });
     const { name, downloadLink, variant, className, classes, onClick } = props;
-    const FileIcon = getFileIconOrDefault(props.name);
+    const FileIcon = getFileIconOrDefault(props.mimeType || props.name);
     const openDownload = useCallback(async () => {
         if (downloadLink) {
             if (downloadLink.startsWith("data:")) {

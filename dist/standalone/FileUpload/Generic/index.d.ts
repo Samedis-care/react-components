@@ -138,6 +138,10 @@ export interface FileMeta {
      */
     name: string;
     /**
+     * The file mime type
+     */
+    type: string;
+    /**
      * The download link for the file
      */
     downloadLink?: string;

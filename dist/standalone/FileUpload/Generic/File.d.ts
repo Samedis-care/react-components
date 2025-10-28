@@ -6,6 +6,10 @@ export interface FileProps {
      */
     name: string;
     /**
+     * Mime Type of the file
+     */
+    mimeType: string;
+    /**
      * the file label
      */
     label?: string;

@@ -237,7 +237,7 @@ const FileUpload = (inProps, ref) => {
                     React.createElement(FileInput, { type: "file", accept: accept || undefined, multiple: maxFiles ? getRemainingFileCount() > 1 : true, onChange: handleFileChange, className: classes?.fileInput, ref: inputRef }))),
                 React.createElement(Grid, { key: "files", size: 12 },
                     React.createElement(Grid, { container: true, spacing: 2, alignContent: "flex-start", alignItems: "flex-start" },
-                        files.map((data, index) => data && (React.createElement(FilePreview, { name: data.file.name, downloadLink: "downloadLink" in data.file
+                        files.map((data, index) => data && (React.createElement(FilePreview, { name: data.file.name, mimeType: data.file.type, downloadLink: "downloadLink" in data.file
                                 ? data.file.downloadLink
                                 : undefined, key: `${index}-${data.file.name}`, size: previewSize, preview: previewImages ? data.preview : undefined, disabled: data.delete || false, onRemove: readOnly || data.preventDelete
                                 ? undefined
@@ -271,7 +271,7 @@ const FileUpload = (inProps, ref) => {
                     React.createElement(FileInput, { type: "file", accept: accept || undefined, multiple: maxFiles ? getRemainingFileCount() > 1 : true, onChange: handleFileChange, className: classes?.fileInput, ref: inputRef }))),
                 files.length > 0 && (React.createElement(Grid, { key: "files", size: 12 },
                     React.createElement(Box, { mx: 1 },
-                        React.createElement(Grid, { container: true, spacing: 1, alignContent: "flex-start", alignItems: "flex-start" }, files.map((data, index) => data && (React.createElement(FilePreview, { name: data.file.name, downloadLink: "downloadLink" in data.file
+                        React.createElement(Grid, { container: true, spacing: 1, alignContent: "flex-start", alignItems: "flex-start" }, files.map((data, index) => data && (React.createElement(FilePreview, { name: data.file.name, mimeType: data.file.type, downloadLink: "downloadLink" in data.file
                                 ? data.file.downloadLink
                                 : undefined, key: `${index}-${data.file.name}`, size: previewSize, preview: previewImages ? data.preview : undefined, disabled: data.delete || false, onRemove: readOnly || data.preventDelete
                                 ? undefined

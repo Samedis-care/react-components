@@ -21,6 +21,7 @@ class TypeFiles {
             ...file,
             file: {
                 name: file.file.name,
+                type: file.file.type,
             },
             preview: file.preview,
             data: file.canBeUploaded &&
