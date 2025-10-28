@@ -287,7 +287,7 @@ const FileUpload = (inProps, ref) => {
                                 t("standalone.file-upload.format.any"))),
                     acceptFiles.map((entry, idx) => (React.createElement(FormatIconsModern, { className: classes?.formatIconsModern, key: idx.toString(16) },
                         React.createElement(Tooltip, { title: acceptLabel || accept || "" },
-                            React.createElement("span", null, React.createElement(getFileIconOrDefault(entry))))))))))));
+                            React.createElement("span", null, React.createElement(getFileIconOrDefault(entry, entry))))))))))));
     }
     else {
         throw new Error("Invalid variant prop passed");

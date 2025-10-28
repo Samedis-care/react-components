@@ -97,6 +97,15 @@ export const ExcelFileExtensions = [
     "xlt",
     "xlm",
 ];
+export const ExcelMimeType = [
+    "application/vnd.ms-excel",
+    "application/vnd.ms-excel.addin.macroenabled.12",
+    "application/vnd.ms-excel.sheet.binary.macroenabled.12",
+    "application/vnd.ms-excel.sheet.macroenabled.12",
+    "application/vnd.ms-excel.template.macroenabled.12",
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.template",
+];
 export const WordFileExtensions = [
     "doc",
     "dot",
@@ -105,6 +114,13 @@ export const WordFileExtensions = [
     "dotx",
     "dotm",
     "docb",
+];
+export const WordMimeType = [
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.template",
+    "application/msword",
+    "application/vnd.ms-word.document.macroenabled.12",
+    "application/vnd.ms-word.template.macroenabled.12",
 ];
 export const PowerPointFileExtensions = [
     "ppt",
@@ -119,7 +135,28 @@ export const PowerPointFileExtensions = [
     "sldx",
     "sldm",
 ];
+export const PowerPointMimeType = [
+    "application/vnd.ms-powerpoint",
+    "application/vnd.ms-powerpoint.addin.macroenabled.12",
+    "application/vnd.ms-powerpoint.presentation.macroenabled.12",
+    "application/vnd.ms-powerpoint.slide.macroenabled.12",
+    "application/vnd.ms-powerpoint.slideshow.macroenabled.12",
+    "application/vnd.ms-powerpoint.template.macroenabled.12",
+    "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+    "application/vnd.openxmlformats-officedocument.presentationml.slide",
+    "application/vnd.openxmlformats-officedocument.presentationml.slideshow",
+    "application/vnd.openxmlformats-officedocument.presentationml.template",
+];
 export const ArchiveFileExtensions = ["zip", "7z", "rar", "tar"];
+export const ArchiveMimeType = [
+    "application/x-zip-compressed",
+    "application/zip",
+    "application/zip-compressed",
+    "application/x-7z-compressed",
+    "application/x-rar-compressed",
+    "application/vnd.rar",
+    "application/x-tar",
+];
 export const AudioFileExtensions = [
     "acc",
     "mp3",
@@ -157,8 +194,15 @@ export const CodeFileExtensions = [
     "css",
     "php",
 ];
+export const CodeMimeType = [
+    "text/javascript",
+    "text/css",
+    "text/html",
+    "application/xml",
+];
 export const CsvFileExtensions = ["csv"];
 export const TextFileExtensions = ["txt"];
+export const TextFileMimeType = ["text/plain"];
 export const VideoFileExtensions = [
     "mp4",
     "mov",
@@ -174,18 +218,35 @@ export const AudioMimeType = /^audio\//;
 export const ImageMimeType = /^image\//;
 export const VideoMimeType = /^video\//;
 export const PdfFileExtensions = ["pdf"];
-export const getFileType = (nameOrMime) => {
-    if (nameOrMime.includes("/")) {
-        if (AudioMimeType.test(nameOrMime))
+export const PdfMimeType = ["application/pdf"];
+export const CsvMimeType = ["text/csv"];
+export const getFileType = (fileName, mimeType) => {
+    if (mimeType && mimeType.includes("/")) {
+        if (ArchiveMimeType.includes(mimeType))
+            return "archive";
+        if (AudioMimeType.test(mimeType))
             return "audio";
-        if (ImageMimeType.test(nameOrMime))
+        if (CodeMimeType.includes(mimeType))
+            return "code";
+        if (CsvMimeType.includes(mimeType))
+            return "csv";
+        if (ExcelMimeType.includes(mimeType))
+            return "excel";
+        if (ImageMimeType.test(mimeType))
             return "image";
-        if (VideoMimeType.test(nameOrMime))
+        if (PdfMimeType.includes(mimeType))
+            return "pdf";
+        if (PowerPointMimeType.includes(mimeType))
+            return "power-point";
+        if (TextFileMimeType.includes(mimeType))
+            return "text";
+        if (VideoMimeType.test(mimeType))
             return "video";
-        return null;
+        if (WordMimeType.includes(mimeType))
+            return "word";
     }
-    else {
-        const fileExt = getFileExt(nameOrMime).toLowerCase();
+    if (fileName) {
+        const fileExt = getFileExt(fileName).toLowerCase();
         if (ArchiveFileExtensions.includes(fileExt))
             return "archive";
         if (AudioFileExtensions.includes(fileExt))
@@ -208,11 +269,11 @@ export const getFileType = (nameOrMime) => {
             return "video";
         if (WordFileExtensions.includes(fileExt))
             return "word";
-        return null;
     }
+    return null;
 };
-export const getFileIcon = (nameOrMime) => {
-    return getFileTypeIcon(getFileType(nameOrMime));
+export const getFileIcon = (fileName, mimeType) => {
+    return getFileTypeIcon(getFileType(fileName, mimeType));
 };
 export const getFileTypeIcon = (type) => {
     switch (type) {
@@ -242,11 +303,11 @@ export const getFileTypeIcon = (type) => {
             return null;
     }
 };
-export const getFileIconOrDefault = (nameOrMime) => getFileIcon(nameOrMime) ?? DefaultFileIcon;
+export const getFileIconOrDefault = (fileName, mimeType) => getFileIcon(fileName, mimeType) ?? DefaultFileIcon;
 const File = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcFile" });
     const { name, downloadLink, variant, className, classes, onClick } = props;
-    const FileIcon = getFileIconOrDefault(props.mimeType || props.name);
+    const FileIcon = getFileIconOrDefault(props.name, props.mimeType);
     const openDownload = useCallback(async () => {
         if (downloadLink) {
             if (downloadLink.startsWith("data:")) {
