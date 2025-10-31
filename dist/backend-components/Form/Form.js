@@ -127,7 +127,7 @@ const setAllTouched = (touched, set) => Object.fromEntries(Object.keys(touched).
 const StyledForm = styled("form", { name: "CcForm", slot: "root" })({});
 const StyledFormDiv = styled("div", { name: "CcForm", slot: "root" })({});
 const Form = (props) => {
-    const { model, id, children, onSubmit, customProps, onlyWarnMounted, onlyWarnChanged, readOnly: readOnlyProp, readOnlyReason: readOnlyReasonProp, readOnlyReasons: readOnlyReasonsProp, disableValidation, nestedFormName, disableNestedSubmit, nestedFormPreSubmitHandler, deleteOnSubmit, onDeleted, initialRecord, formClass, preSubmit, dirtyIgnoreFields, flowEngine, renderFormAsDiv: renderFormAsDivProp, errorRenderer: ErrorRenderer, } = props;
+    const { model, id, children, onSubmit, onSubmitUserInteractive, customProps, onlyWarnMounted, onlyWarnChanged, readOnly: readOnlyProp, readOnlyReason: readOnlyReasonProp, readOnlyReasons: readOnlyReasonsProp, disableValidation, nestedFormName, disableNestedSubmit, nestedFormPreSubmitHandler, deleteOnSubmit, onDeleted, initialRecord, formClass, preSubmit, dirtyIgnoreFields, flowEngine, renderFormAsDiv: renderFormAsDivProp, errorRenderer: ErrorRenderer, } = props;
     const renderFormAsDiv = useContext(FormRenderAsDivContext) || renderFormAsDivProp;
     // flow engine mode defaults
     const flowEngineConfig = useRef({});
@@ -650,7 +650,13 @@ const Form = (props) => {
                 setValues(valuesRef.current);
                 setValuesStaged(valuesStagedRef.current);
                 if (onSubmit) {
+                    const interactive = typeof onSubmitUserInteractive === "function"
+                        ? onSubmitUserInteractive(newValues, submitValues, oldValues)
+                        : onSubmitUserInteractive;
+                    if (interactive)
+                        setSubmittingForm(false);
                     await onSubmit(newValues, submitValues, oldValues);
+                    // setSubmittingForm(true); // disabled because this is the last thing that happens in this handler
                 }
             }
         }
@@ -686,6 +692,7 @@ const Form = (props) => {
         onlySubmitMounted,
         onlySubmitMountedBehaviour,
         onSubmit,
+        onSubmitUserInteractive,
     ]);
     const submitFormRef = useRef(submitForm);
     submitFormRef.current = submitForm;

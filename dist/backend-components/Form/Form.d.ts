@@ -142,6 +142,10 @@ export interface FormProps<KeyT extends ModelFieldName, VisibilityT extends Page
      */
     onSubmit?: (dataFromServer: Record<string, unknown>, submittedData: Record<string, unknown>, previousData: Record<string, unknown>) => Promise<void> | void;
     /**
+     * Disable busy state while onSubmit is running. Required if you want to show a dialog for example
+     */
+    onSubmitUserInteractive?: boolean | ((dataFromServer: Record<string, unknown>, submittedData: Record<string, unknown>, previousData: Record<string, unknown>) => boolean);
+    /**
      * Delete the record on submit rather than save it?
      */
     deleteOnSubmit?: boolean;
