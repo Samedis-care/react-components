@@ -105,6 +105,11 @@ const DialogContextProvider = (props: IFrameworkProps) => {
 			if (navBlock.current) {
 				navBlock.current();
 				navBlock.current = null;
+				// eslint-disable-next-line no-console
+				console.warn(
+					// eslint-disable-next-line react-hooks/exhaustive-deps
+					`[Components-Care] [DialogContextProvder] Unmounting with ${dialogCount.current} dialogs open`,
+				);
 			}
 		};
 	}, []);
