@@ -212,6 +212,16 @@ export interface FormProps<
 		previousData: Record<string, unknown>,
 	) => Promise<void> | void;
 	/**
+	 * Disable busy state while onSubmit is running. Required if you want to show a dialog for example
+	 */
+	onSubmitUserInteractive?:
+		| boolean
+		| ((
+				dataFromServer: Record<string, unknown>,
+				submittedData: Record<string, unknown>,
+				previousData: Record<string, unknown>,
+		  ) => boolean);
+	/**
 	 * Delete the record on submit rather than save it?
 	 */
 	deleteOnSubmit?: boolean;
@@ -856,6 +866,7 @@ const Form = <
 		id,
 		children,
 		onSubmit,
+		onSubmitUserInteractive,
 		customProps,
 		onlyWarnMounted,
 		onlyWarnChanged,
@@ -1631,7 +1642,13 @@ const Form = <
 					setValuesStaged(valuesStagedRef.current);
 
 					if (onSubmit) {
+						const interactive =
+							typeof onSubmitUserInteractive === "function"
+								? onSubmitUserInteractive(newValues, submitValues, oldValues)
+								: onSubmitUserInteractive;
+						if (interactive) setSubmittingForm(false);
 						await onSubmit(newValues, submitValues, oldValues);
+						// setSubmittingForm(true); // disabled because this is the last thing that happens in this handler
 					}
 				}
 			} catch (e) {
@@ -1665,6 +1682,7 @@ const Form = <
 			onlySubmitMounted,
 			onlySubmitMountedBehaviour,
 			onSubmit,
+			onSubmitUserInteractive,
 		],
 	);
 	const submitFormRef = useRef<typeof submitForm>(submitForm);
