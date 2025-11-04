@@ -208,6 +208,16 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 		}
 		updateParent();
 	};
+	const onFilterValueChangeDateTime = (date: Moment | null) => {
+		filterValue = "";
+		if (!date) {
+			subFilterComboType = "and";
+			subFilter = undefined;
+		} else if (date.isValid()) {
+			filterValue = date.toDate().toISOString();
+		}
+		updateParent();
+	};
 	const onFilterValueChangeBool = (
 		evt: React.ChangeEvent<HTMLInputElement>,
 	) => {
@@ -460,7 +470,7 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 							) : props.valueType === "datetime" ? (
 								<LocalizedDateTimePicker
 									value={filterValue === "" ? null : moment(filterValue)}
-									onChange={onFilterValueChangeDate}
+									onChange={onFilterValueChangeDateTime}
 									fullWidth
 									autoFocus={depth === 1}
 								/>
@@ -484,7 +494,7 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 							) : props.valueType === "datetime" ? (
 								<LocalizedDateTimePicker
 									value={filterValue2 === "" ? null : moment(filterValue2)}
-									onChange={onFilterValueChangeDate}
+									onChange={onFilterValueChangeDateTime}
 								/>
 							) : (
 								<TextField
