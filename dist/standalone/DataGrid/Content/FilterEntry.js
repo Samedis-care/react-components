@@ -88,6 +88,17 @@ const FilterEntry = (props) => {
         }
         updateParent();
     };
+    const onFilterValueChangeDateTime = (date) => {
+        filterValue = "";
+        if (!date) {
+            subFilterComboType = "and";
+            subFilter = undefined;
+        }
+        else if (date.isValid()) {
+            filterValue = date.toDate().toISOString();
+        }
+        updateParent();
+    };
     const onFilterValueChangeBool = (evt) => {
         filterType = "equals";
         filterValue = evt.currentTarget.value;
@@ -193,8 +204,8 @@ const FilterEntry = (props) => {
             props.valueType === "datetime") && (React.createElement(React.Fragment, null,
             React.createElement(Grid, { size: 12 },
                 React.createElement(Select, { onChange: onFilterTypeChange, value: filterType, fullWidth: true }, filterTypeMenuItems)),
-            filterType !== "empty" && filterType !== "notEmpty" && (React.createElement(Grid, { size: 12 }, props.valueType === "date" ? (React.createElement(LocalizedKeyboardDatePicker, { value: filterValue === "" ? null : moment(filterValue), onChange: onFilterValueChangeDate, fullWidth: true, autoFocus: depth === 1 })) : props.valueType === "datetime" ? (React.createElement(LocalizedDateTimePicker, { value: filterValue === "" ? null : moment(filterValue), onChange: onFilterValueChangeDate, fullWidth: true, autoFocus: depth === 1 })) : (React.createElement(TextField, { value: filterValue, onChange: onFilterValueChange, fullWidth: true, autoFocus: depth === 1 })))),
-            filterType === "inRange" && (React.createElement(Grid, { size: 12 }, props.valueType === "date" ? (React.createElement(LocalizedKeyboardDatePicker, { value: filterValue2 === "" ? null : moment(filterValue2), onChange: onFilterValue2ChangeDate })) : props.valueType === "datetime" ? (React.createElement(LocalizedDateTimePicker, { value: filterValue2 === "" ? null : moment(filterValue2), onChange: onFilterValueChangeDate })) : (React.createElement(TextField, { value: filterValue2, onChange: onFilterValue2Change, fullWidth: true })))))),
+            filterType !== "empty" && filterType !== "notEmpty" && (React.createElement(Grid, { size: 12 }, props.valueType === "date" ? (React.createElement(LocalizedKeyboardDatePicker, { value: filterValue === "" ? null : moment(filterValue), onChange: onFilterValueChangeDate, fullWidth: true, autoFocus: depth === 1 })) : props.valueType === "datetime" ? (React.createElement(LocalizedDateTimePicker, { value: filterValue === "" ? null : moment(filterValue), onChange: onFilterValueChangeDateTime, fullWidth: true, autoFocus: depth === 1 })) : (React.createElement(TextField, { value: filterValue, onChange: onFilterValueChange, fullWidth: true, autoFocus: depth === 1 })))),
+            filterType === "inRange" && (React.createElement(Grid, { size: 12 }, props.valueType === "date" ? (React.createElement(LocalizedKeyboardDatePicker, { value: filterValue2 === "" ? null : moment(filterValue2), onChange: onFilterValue2ChangeDate })) : props.valueType === "datetime" ? (React.createElement(LocalizedDateTimePicker, { value: filterValue2 === "" ? null : moment(filterValue2), onChange: onFilterValueChangeDateTime })) : (React.createElement(TextField, { value: filterValue2, onChange: onFilterValue2Change, fullWidth: true })))))),
         props.valueType === "boolean" && (React.createElement(Grid, { size: 12 },
             React.createElement(FormControl, null,
                 React.createElement(RadioGroup, { value: filterValue, onChange: onFilterValueChangeBool },
