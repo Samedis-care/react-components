@@ -8,6 +8,7 @@ import {
 	DataGridColumnHeaderFilterButton,
 	DataGridColumnHeaderFilterIcon,
 	DataGridColumnHeaderFilterPopup,
+	DataGridColumnHeaderFilterPopupDateTime,
 	DataGridColumnHeaderFilterPopupEnum,
 	DataGridColumnHeaderLabel,
 	DataGridColumnHeaderResizer,
@@ -116,9 +117,11 @@ const ColumnHeaderContent = (
 			: DataGridColumnHeaderFilterIcon;
 
 	const ColumnHeaderFilterPopupComp =
-		props.columnType === "enum"
-			? DataGridColumnHeaderFilterPopupEnum
-			: DataGridColumnHeaderFilterPopup;
+		props.columnType === "datetime"
+			? DataGridColumnHeaderFilterPopupDateTime
+			: props.columnType === "enum"
+				? DataGridColumnHeaderFilterPopupEnum
+				: DataGridColumnHeaderFilterPopup;
 
 	return (
 		<>
@@ -191,9 +194,11 @@ const ColumnHeaderContent = (
 					<ColumnHeaderFilterPopupComp
 						container
 						className={
-							props.columnType === "enum"
-								? classes?.columnHeaderFilterPopupEnum
-								: classes?.columnHeaderFilterPopup
+							props.columnType === "datetime"
+								? classes?.columnHeaderFilterPopupDateTime
+								: props.columnType === "enum"
+									? classes?.columnHeaderFilterPopupEnum
+									: classes?.columnHeaderFilterPopup
 						}
 					>
 						<FilterEntry
