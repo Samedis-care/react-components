@@ -1275,7 +1275,7 @@ const DataGrid = (inProps: DataGridProps) => {
 
 			setState((prevState) => ({
 				...prevState,
-				refreshData: prevState.refreshData - 1,
+				refreshData: Math.max(prevState.refreshData - 1, 0),
 				// handle filter changes invalidating data
 				rows:
 					prevState.refreshShouldWipeRows && prevState.refreshData === 2
