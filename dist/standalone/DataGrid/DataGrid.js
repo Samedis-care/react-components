@@ -307,6 +307,12 @@ export const DataGridColumnHeaderFilterPopupEnum = styled(Grid, {
 })({
     minWidth: 160,
 });
+export const DataGridColumnHeaderFilterPopupDateTime = styled(Grid, {
+    name: "CcDataGrid",
+    slot: "columnHeaderFilterPopupDateTime",
+})({
+    width: 200,
+});
 export const DataGridColumnHeaderFilterIcon = styled(FilterIcon, {
     name: "CcDataGrid",
     slot: "columnHeaderFilterIcon",

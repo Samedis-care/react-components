@@ -2,7 +2,7 @@ import React, { useCallback, useState } from "react";
 import { Box, Grid, Popover, Tooltip } from "@mui/material";
 import { ArrowDownward, ArrowUpward } from "@mui/icons-material";
 import FilterEntry from "./FilterEntry";
-import { DataGridColumnHeaderFilterActiveIcon, DataGridColumnHeaderFilterButton, DataGridColumnHeaderFilterIcon, DataGridColumnHeaderFilterPopup, DataGridColumnHeaderFilterPopupEnum, DataGridColumnHeaderLabel, DataGridColumnHeaderResizer, DataGridColumnHeaderSortIcon, useDataGridProps, } from "../DataGrid";
+import { DataGridColumnHeaderFilterActiveIcon, DataGridColumnHeaderFilterButton, DataGridColumnHeaderFilterIcon, DataGridColumnHeaderFilterPopup, DataGridColumnHeaderFilterPopupDateTime, DataGridColumnHeaderFilterPopupEnum, DataGridColumnHeaderLabel, DataGridColumnHeaderResizer, DataGridColumnHeaderSortIcon, useDataGridProps, } from "../DataGrid";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import combineClassNames from "../../../utils/combineClassNames";
 const anchorOrigin = {
@@ -31,9 +31,11 @@ const ColumnHeaderContent = (props) => {
     const CurrentFilterIcon = props.filter && props.filter.value1
         ? DataGridColumnHeaderFilterActiveIcon
         : DataGridColumnHeaderFilterIcon;
-    const ColumnHeaderFilterPopupComp = props.columnType === "enum"
-        ? DataGridColumnHeaderFilterPopupEnum
-        : DataGridColumnHeaderFilterPopup;
+    const ColumnHeaderFilterPopupComp = props.columnType === "datetime"
+        ? DataGridColumnHeaderFilterPopupDateTime
+        : props.columnType === "enum"
+            ? DataGridColumnHeaderFilterPopupEnum
+            : DataGridColumnHeaderFilterPopup;
     return (React.createElement(React.Fragment, null,
         React.createElement(Grid, { container: true, justifyContent: "flex-start", wrap: "nowrap" },
             React.createElement(DataGridColumnHeaderLabel, { className: classes?.columnHeaderLabel, key: "header" },
@@ -60,9 +62,11 @@ const ColumnHeaderContent = (props) => {
         props.enableResize && (React.createElement(DataGridColumnHeaderResizer, { className: classes?.columnHeaderResizer, onMouseDown: props.startDrag, onClick: preventPropagation, onDoubleClick: props.autoResize })),
         React.createElement(Popover, { open: filterAnchorEl !== null, anchorEl: filterAnchorEl, onClose: closeFilter, anchorOrigin: anchorOrigin, transformOrigin: transformOrigin, onClick: preventPropagation },
             React.createElement(Box, { m: 2 },
-                React.createElement(ColumnHeaderFilterPopupComp, { container: true, className: props.columnType === "enum"
-                        ? classes?.columnHeaderFilterPopupEnum
-                        : classes?.columnHeaderFilterPopup },
+                React.createElement(ColumnHeaderFilterPopupComp, { container: true, className: props.columnType === "datetime"
+                        ? classes?.columnHeaderFilterPopupDateTime
+                        : props.columnType === "enum"
+                            ? classes?.columnHeaderFilterPopupEnum
+                            : classes?.columnHeaderFilterPopup },
                     React.createElement(FilterEntry, { field: props.field, valueType: props.columnType, onChange: props.onFilterChange, value: props.filter, valueData: props.filterData, close: closeFilter, depth: 1 }))))));
 };
 export default React.memo(ColumnHeaderContent);
