@@ -85,7 +85,7 @@ const ColumnHeaderContent = (
 	props: IDataGridContentColumnHeaderContentProps,
 ) => {
 	const { t } = useCCTranslations();
-	const { classes } = useDataGridProps();
+	const { classes, enableDateTimeFilter } = useDataGridProps();
 	const [filterAnchorEl, setFilterAnchorEl] = useState<HTMLElement | null>(
 		null,
 	);
@@ -203,7 +203,13 @@ const ColumnHeaderContent = (
 					>
 						<FilterEntry
 							field={props.field}
-							valueType={props.columnType}
+							valueType={
+								props.columnType === "datetime"
+									? enableDateTimeFilter
+										? "datetime"
+										: "date"
+									: props.columnType
+							}
 							onChange={props.onFilterChange}
 							value={props.filter}
 							valueData={props.filterData}
