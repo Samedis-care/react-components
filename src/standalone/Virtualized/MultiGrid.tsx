@@ -4,6 +4,7 @@ import React, {
 	useEffect,
 	useMemo,
 	useRef,
+	useState,
 } from "react";
 import {
 	CellComponentProps,
@@ -235,6 +236,22 @@ const MultiGrid = (inProps: MultiGridProps) => {
 		return () => document.removeEventListener("keydown", handleKeyPress);
 	}, [globalScrollListener, fixedHeight, height]);
 
+	// restore horizontal scroll when bottom grid is enabled again
+	const bottomRightRendered = rowCount - fixedRowCount > 0;
+	const [triggerScrollSync, setTriggerScrollSync] = useState(false);
+	useEffect(() => {
+		if (!bottomRightRendered) return;
+		setTriggerScrollSync(true);
+	}, [bottomRightRendered]);
+	useEffect(() => {
+		if (!triggerScrollSync) return;
+		const bottomGrid = bottomRightGrid.current?.element;
+		const topGrid = topRightGrid.current?.element;
+		if (!bottomGrid || !topGrid) return;
+		bottomGrid.scrollLeft = topGrid.scrollLeft;
+		setTriggerScrollSync(false);
+	}, [triggerScrollSync]);
+
 	return (
 		<Root style={{ width, height }}>
 			{/* top left */}
@@ -294,7 +311,7 @@ const MultiGrid = (inProps: MultiGridProps) => {
 				cellProps={{}}
 			/>
 			{/* bottom right */}
-			{rowCount - fixedRowCount > 0 ? (
+			{bottomRightRendered ? (
 				<VGrid
 					gridRef={bottomRightGrid}
 					columnWidth={(index) => columnWidth(index + fixedColumnCount)}
