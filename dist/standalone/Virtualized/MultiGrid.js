@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState, } from "react";
 import { Grid as VGrid, } from "react-window";
 import { styled, useThemeProps } from "@mui/material";
 const Root = styled("div", { name: "CcMultiGrid", slot: "root" })({
@@ -129,6 +129,24 @@ const MultiGrid = (inProps) => {
         document.addEventListener("keydown", handleKeyPress);
         return () => document.removeEventListener("keydown", handleKeyPress);
     }, [globalScrollListener, fixedHeight, height]);
+    // restore horizontal scroll when bottom grid is enabled again
+    const bottomRightRendered = rowCount - fixedRowCount > 0;
+    const [triggerScrollSync, setTriggerScrollSync] = useState(false);
+    useEffect(() => {
+        if (!bottomRightRendered)
+            return;
+        setTriggerScrollSync(true);
+    }, [bottomRightRendered]);
+    useEffect(() => {
+        if (!triggerScrollSync)
+            return;
+        const bottomGrid = bottomRightGrid.current?.element;
+        const topGrid = topRightGrid.current?.element;
+        if (!bottomGrid || !topGrid)
+            return;
+        bottomGrid.scrollLeft = topGrid.scrollLeft;
+        setTriggerScrollSync(false);
+    }, [triggerScrollSync]);
     return (React.createElement(Root, { style: { width, height } },
         React.createElement(VGrid, { gridRef: topLeftGrid, columnWidth: (index) => columnWidth(index), rowHeight: (index) => rowHeight(index), columnCount: fixedColumnCount, rowCount: fixedRowCount, style: {
                 ...styleTopLeftGrid,
@@ -155,7 +173,7 @@ const MultiGrid = (inProps) => {
                 width: Math.min(fixedWidth, width),
                 height: height - fixedHeight,
             }, cellComponent: CellRendererBottomLeft, cellProps: {} }),
-        rowCount - fixedRowCount > 0 ? (React.createElement(VGrid, { gridRef: bottomRightGrid, columnWidth: (index) => columnWidth(index + fixedColumnCount), rowHeight: (index) => rowHeight(index + fixedRowCount), columnCount: columnCount - fixedColumnCount, rowCount: rowCount - fixedRowCount, onScroll: handleScroll, style: {
+        bottomRightRendered ? (React.createElement(VGrid, { gridRef: bottomRightGrid, columnWidth: (index) => columnWidth(index + fixedColumnCount), rowHeight: (index) => rowHeight(index + fixedRowCount), columnCount: columnCount - fixedColumnCount, rowCount: rowCount - fixedRowCount, onScroll: handleScroll, style: {
                 ...styleBottomRightGrid,
                 overflowX: "scroll",
                 overflowY: "auto",
