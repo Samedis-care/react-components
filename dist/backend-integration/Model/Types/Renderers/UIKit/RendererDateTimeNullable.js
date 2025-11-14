@@ -19,7 +19,7 @@ class RendererDateTimeNullable extends TypeDateTimeNullable {
             if (visibility.grid)
                 throw new Error("Not supported");
             return (React.createElement(React.Fragment, null,
-                React.createElement(DateTimeInput, { value: value ? moment(value) : null, label: label, disabled: visibility.readOnly, required: visibility.required, onChange: (date) => handleChange(field, date ? date.toDate() : null), onBlur: handleBlur, error: !!errorMsg, warning: !!warningMsg, onError: (error) => {
+                React.createElement(DateTimeInput, { value: value ? moment(value) : null, name: field, label: label, disabled: visibility.readOnly, required: visibility.required, onChange: (date) => handleChange(field, date ? date.toDate() : null), onBlur: handleBlur, error: !!errorMsg, warning: !!warningMsg, onError: (error) => {
                         this.error = error
                             ? ccI18n.t("backend-integration.model.types.renderers.date.validation-error")
                             : "";

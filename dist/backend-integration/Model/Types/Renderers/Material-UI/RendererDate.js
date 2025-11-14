@@ -22,7 +22,7 @@ class RendererDate extends TypeDate {
             if (visibility.grid)
                 throw new Error("Not supported");
             return (React.createElement(React.Fragment, null,
-                React.createElement(LocalizedKeyboardDatePicker, { value: value ? moment(value) : null, label: label, disabled: visibility.readOnly, required: visibility.required, onChange: (date) => {
+                React.createElement(LocalizedKeyboardDatePicker, { name: field, value: value ? moment(value) : null, label: label, disabled: visibility.readOnly, required: visibility.required, onChange: (date) => {
                         if (!date)
                             throw new Error("Date is null");
                         else
