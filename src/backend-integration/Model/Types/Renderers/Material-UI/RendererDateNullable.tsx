@@ -46,6 +46,7 @@ class RendererDateNullable extends TypeDateNullable {
 			return (
 				<>
 					<LocalizedKeyboardDatePicker
+						name={field}
 						value={value ? moment(value) : null}
 						label={label}
 						disabled={visibility.readOnly}

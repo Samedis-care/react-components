@@ -43,6 +43,7 @@ class RendererDateTimeNullable extends TypeDateTimeNullable {
 				<>
 					<DateTimeInput
 						value={value ? moment(value) : null}
+						name={field}
 						label={label}
 						disabled={visibility.readOnly}
 						required={visibility.required}

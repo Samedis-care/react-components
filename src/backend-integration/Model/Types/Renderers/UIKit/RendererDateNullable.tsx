@@ -67,6 +67,7 @@ class RendererDateNullable extends TypeDateNullable {
 				<>
 					<DateInput
 						{...this.props}
+						name={field}
 						value={value}
 						label={label}
 						disabled={visibility.readOnly}
