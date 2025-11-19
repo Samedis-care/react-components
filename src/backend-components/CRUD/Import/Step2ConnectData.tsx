@@ -1,5 +1,9 @@
 import React, { useCallback, useMemo, useRef } from "react";
-import { CrudImporterStepProps, isFieldImportable } from "./index";
+import {
+	ConversionScriptFn,
+	CrudImporterStepProps,
+	isFieldImportable,
+} from "./index";
 import {
 	Box,
 	Card,
@@ -33,7 +37,7 @@ import useCCTranslations from "../../../utils/useCCTranslations";
 type ConversionScriptRunnerFunc = (
 	data: Record<string, unknown>[],
 	field: ModelFieldDefinition<unknown, string, PageVisibility, unknown>,
-	script: string,
+	scriptFn: ConversionScriptFn,
 ) => Promise<void>;
 
 const ScriptInput = styled(TextField, {
@@ -86,11 +90,10 @@ export const useImportStep2Logic = (props: CrudImporterStepProps) => {
 							PageVisibility,
 							unknown
 						>,
-						script: string,
+						scriptFn: ConversionScriptFn,
 					): Promise<void> => {
 						for (const record of data) {
-							// eslint-disable-next-line no-eval
-							const result: unknown = eval(script) ?? null; // ensure this is never undefined
+							const result: unknown = scriptFn(record) ?? null; // ensure this is never undefined
 							let validation: string | null = null;
 							switch (field.type.getFilterType()) {
 								case "enum":
@@ -159,12 +162,21 @@ export const useImportStep2Logic = (props: CrudImporterStepProps) => {
 
 	const handleConversionScriptChange = useCallback(
 		async (evt: React.ChangeEvent<HTMLTextAreaElement>) => {
+			const script = evt.target.value;
+			// this eval is used for developer input excel data => JS data conversion. it is not intended for end user usage
+			// record param needs to have this name for eval
+			// eslint-disable-next-line @typescript-eslint/no-unused-vars
+			const scriptFn = (record: Record<string, unknown>): unknown => {
+				// eslint-disable-next-line no-eval
+				return eval(script);
+			};
 			setState((prev) => ({
 				...prev,
 				conversionScripts: {
 					...prev.conversionScripts,
 					[evt.target.name]: {
 						script: evt.target.value,
+						scriptFn,
 						status: "pending",
 						error: null,
 					},
@@ -175,7 +187,7 @@ export const useImportStep2Logic = (props: CrudImporterStepProps) => {
 				await conversionScriptUpdates.current[evt.target.name](
 					state.data,
 					model.fields[evt.target.name],
-					evt.target.value,
+					scriptFn,
 				);
 				setState((prev) => ({
 					...prev,

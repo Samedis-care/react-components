@@ -15,6 +15,7 @@ import useCCTranslations from "../../../utils/useCCTranslations";
 import { ValidationResult } from "../../Form";
 import { useCrudDispatchContext } from "../index";
 
+export type ConversionScriptFn = (record: Record<string, unknown>) => unknown;
 export interface CrudImportProps<
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
@@ -29,7 +30,7 @@ export interface CrudImportProps<
 	 * Record<Field, JavaScript>
 	 * @remarks Disables step 2
 	 */
-	importConfig?: Partial<Record<KeyT, string>>;
+	importConfig?: Partial<Record<KeyT, ConversionScriptFn>>;
 	/**
 	 * The field used to determine an ID of an existing record for purpose of updating that existing record
 	 * instead of creating a new record.
@@ -70,7 +71,8 @@ const Wrapper = styled(Grid, { name: "CcCrudImport", slot: "wrapper" })({
 });
 
 interface ConversionScript {
-	script: string;
+	script?: string; // optional string version of scriptFn for eval. stored for text field
+	scriptFn: ConversionScriptFn;
 	status: "pending" | "okay" | "error";
 	error: Error | null;
 }
@@ -134,10 +136,10 @@ export const useCrudImportLogic = <
 		data: [],
 		conversionScripts: importConfig
 			? Object.fromEntries(
-					Object.entries(importConfig).map(([field, script]) => [
+					Object.entries(importConfig).map(([field, scriptFn]) => [
 						field,
 						{
-							script,
+							scriptFn,
 							status: "pending",
 							error: null,
 						} as ConversionScript,

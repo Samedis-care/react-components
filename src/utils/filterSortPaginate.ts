@@ -1,4 +1,7 @@
-import type { IFilterDef } from "../standalone/DataGrid/Content/FilterEntry";
+import type {
+	FilterComboType,
+	IFilterDef,
+} from "../standalone/DataGrid/Content/FilterEntry";
 import type {
 	DataGridRowData,
 	IDataGridColumnDef,
@@ -49,115 +52,96 @@ export const filterSortPaginate2 = (
 		const column = columnDef.find((e) => e.field === filterField);
 		if (!column) throw new Error("Non-null assertion failed");
 
-		const filterCache: Record<string, IFilterDef> = {};
-		let filterIndex = 0;
-
-		let expr = "";
+		let lastNextFilterType: FilterComboType | undefined = undefined;
+		let finalExpr: (value: string) => boolean = () => true;
 		while (filter) {
-			filter.value1 = filter.value1.toLowerCase();
-			filter.value2 = filter.value2.toLowerCase();
-			filterIndex++;
-			const filterKey = filterIndex.toString();
-			filterCache[filterKey] = filter;
+			const value1 = filter.value1.toLowerCase();
+			const value2 = filter.value2.toLowerCase();
+			let exprFn: (value: string) => boolean;
 			switch (filter.type) {
 				case "contains":
-					expr += 'value.includes(filterCache["' + filterKey + '"].value1)';
+					exprFn = (value: string) => value.includes(value1);
 					break;
 				case "notContains":
-					expr += '!value.includes(filterCache["' + filterKey + '"].value1)';
+					exprFn = (value: string) => !value.includes(value1);
 					break;
 				case "equals":
 					if (column.type === "number") {
-						expr +=
-							'parseInt(value) === parseInt(filterCache["' +
-							filterKey +
-							'"].value1)';
+						exprFn = (value: string) => parseInt(value) === parseInt(value1);
 					} else {
-						expr += 'value === filterCache["' + filterKey + '"].value1';
+						exprFn = (value: string) => value === value1;
 					}
 					break;
 				case "notEqual":
 					if (column.type === "number") {
-						expr +=
-							'parseInt(value) !== parseInt(filterCache["' +
-							filterKey +
-							'"].value1)';
+						exprFn = (value: string) => parseInt(value) !== parseInt(value1);
 					} else {
-						expr += 'value !== filterCache["' + filterKey + '"].value1';
+						exprFn = (value: string) => value !== value1;
 					}
 					break;
 				case "notEmpty":
-					expr += "value !== ''";
+					exprFn = (value: string) => value !== "";
 					break;
 				case "empty":
-					expr += "value === ''";
+					exprFn = (value: string) => value === "";
 					break;
 				case "startsWith":
-					expr += 'value.startsWith(filterCache["' + filterKey + '"].value1)';
+					exprFn = (value: string) => value.startsWith(value1);
 					break;
 				case "endsWith":
-					expr += 'value.endsWith(filterCache["' + filterKey + '"].value1)';
+					exprFn = (value: string) => value.endsWith(value1);
 					break;
 				case "lessThan":
-					expr +=
-						'parseInt(value) < parseInt(filterCache["' +
-						filterKey +
-						'"].value1)';
+					exprFn = (value: string) => parseInt(value) < parseInt(value1);
 					break;
 				case "lessThanOrEqual":
-					expr +=
-						'parseInt(value) <= parseInt(filterCache["' +
-						filterKey +
-						'"].value1)';
+					exprFn = (value: string) => parseInt(value) <= parseInt(value1);
 					break;
 				case "greaterThan":
-					expr +=
-						'parseInt(value) > parseInt(filterCache["' +
-						filterKey +
-						'"].value1)';
+					exprFn = (value: string) => parseInt(value) > parseInt(value1);
 					break;
 				case "greaterThanOrEqual":
-					expr +=
-						'parseInt(value) >= parseInt(filterCache["' +
-						filterKey +
-						'"].value1)';
+					exprFn = (value: string) => parseInt(value) >= parseInt(value1);
 					break;
 				case "inRange":
-					expr +=
-						'parseInt(value) >= parseInt(filterCache["' +
-						filterKey +
-						'"].value1) && parseInt(value) <= parseInt(filterCache["' +
-						filterKey +
-						'"].value2)';
+					exprFn = (value: string) => {
+						const vI = parseInt(value);
+						return vI >= parseInt(value1) && vI <= parseInt(value2);
+					};
 					break;
 				case "inSet":
-					expr +=
-						'filterCache["' +
-						filterKey +
-						'"].value1.split(",").includes(value)';
+					exprFn = (value: string) => value1.split(",").includes(value);
 					break;
 				case "notInSet":
-					expr +=
-						'!filterCache["' +
-						filterKey +
-						'"].value1.split(",").includes(value)';
+					exprFn = (value: string) => !value1.split(",").includes(value);
 					break;
+				default:
+					throw new Error("Unsupported filterType");
 			}
 
+			if (!lastNextFilterType) {
+				finalExpr = exprFn;
+			} else {
+				const prevExpr = finalExpr;
+				if (lastNextFilterType === "and") {
+					finalExpr = (value: string) => prevExpr(value) && exprFn(value);
+				} else if (lastNextFilterType === "or") {
+					finalExpr = (value: string) => prevExpr(value) || exprFn(value);
+				} else {
+					throw new Error("Unsupported nextFilterType");
+				}
+			}
+			if (filter.nextFilter?.value1) lastNextFilterType = filter.nextFilterType;
 			filter = filter.nextFilter;
-			if (filter && filter.value1)
-				expr += filter.nextFilterType === "and" ? " && " : " || ";
-			else break;
 		}
 
 		rowData = rowData.filter((row) => {
 			let rawValue = row[filterField];
 			if (!rawValue) rawValue = "";
-			// eslint-disable-next-line @typescript-eslint/no-unused-vars,@typescript-eslint/no-base-to-string
+			// eslint-disable-next-line @typescript-eslint/no-base-to-string
 			const value = rawValue.toString().toLowerCase();
 			try {
-				// eslint-disable-next-line no-eval
-				return !expr || eval(expr);
+				return finalExpr(value);
 			} catch (e) {
 				// eslint-disable-next-line no-console
 				console.error("[Components-Care] [DataGrid] Filter error:", e);

@@ -26,15 +26,14 @@ export const useImportStep3Logic = (props: CrudImporterStepProps) => {
 							.filter(
 								([name, field]) =>
 									isFieldImportable(name, field) &&
-									state.conversionScripts[name]?.script,
+									state.conversionScripts[name]?.scriptFn(record),
 							)
 							.forEach(([name]) => {
 								deepAssign(
 									modelRecord,
 									dotToObject(
 										name,
-										// eslint-disable-next-line no-eval
-										eval(state.conversionScripts[name].script) ?? null,
+										state.conversionScripts[name].scriptFn(record) ?? null,
 									),
 								);
 							});
