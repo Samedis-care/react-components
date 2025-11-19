@@ -39,10 +39,10 @@ export const useCrudImportLogic = (props) => {
         files: [],
         data: [],
         conversionScripts: importConfig
-            ? Object.fromEntries(Object.entries(importConfig).map(([field, script]) => [
+            ? Object.fromEntries(Object.entries(importConfig).map(([field, scriptFn]) => [
                 field,
                 {
-                    script,
+                    scriptFn,
                     status: "pending",
                     error: null,
                 },

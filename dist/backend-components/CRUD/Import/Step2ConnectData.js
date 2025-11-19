@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useRef } from "react";
-import { isFieldImportable } from "./index";
+import { isFieldImportable, } from "./index";
 import { Box, Card, CardContent, CircularProgress, Grid, Table, TableBody, TableCell, TableHead, TableRow, TextField, Tooltip, Typography, styled, } from "@mui/material";
 import { Check as CheckIcon, ErrorOutline as ErrorIcon, HelpOutline as UnknownIcon, } from "@mui/icons-material";
 import uniqueArray from "../../../utils/uniqueArray";
@@ -34,10 +34,9 @@ export const useImportStep2Logic = (props) => {
     const columns = useMemo(() => uniqueArray(state.data.map(Object.keys).flat()), [state.data]);
     const conversionScriptUpdates = useRef(Object.fromEntries(Object.keys(model.fields).map((key) => [
         key,
-        debouncePromise(async (data, field, script) => {
+        debouncePromise(async (data, field, scriptFn) => {
             for (const record of data) {
-                // eslint-disable-next-line no-eval
-                const result = eval(script) ?? null; // ensure this is never undefined
+                const result = scriptFn(record) ?? null; // ensure this is never undefined
                 let validation = null;
                 switch (field.type.getFilterType()) {
                     case "enum":
@@ -81,19 +80,28 @@ export const useImportStep2Logic = (props) => {
         }, 1000),
     ])));
     const handleConversionScriptChange = useCallback(async (evt) => {
+        const script = evt.target.value;
+        // this eval is used for developer input excel data => JS data conversion. it is not intended for end user usage
+        // record param needs to have this name for eval
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const scriptFn = (record) => {
+            // eslint-disable-next-line no-eval
+            return eval(script);
+        };
         setState((prev) => ({
             ...prev,
             conversionScripts: {
                 ...prev.conversionScripts,
                 [evt.target.name]: {
                     script: evt.target.value,
+                    scriptFn,
                     status: "pending",
                     error: null,
                 },
             },
         }));
         try {
-            await conversionScriptUpdates.current[evt.target.name](state.data, model.fields[evt.target.name], evt.target.value);
+            await conversionScriptUpdates.current[evt.target.name](state.data, model.fields[evt.target.name], scriptFn);
             setState((prev) => ({
                 ...prev,
                 conversionScripts: {

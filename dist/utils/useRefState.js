@@ -7,7 +7,7 @@ const useRefState = (initialValue) => {
     const ref = useRef(typeof initialValue === "function"
         ? initialValue()
         : initialValue);
-    const [state, setState] = useState(ref.current);
+    const [state, setState] = useState(initialValue);
     const handleSet = useCallback((newValue) => {
         ref.current =
             typeof newValue === "function"

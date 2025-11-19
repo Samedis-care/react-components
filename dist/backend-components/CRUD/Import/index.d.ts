@@ -2,6 +2,7 @@ import React, { Dispatch, SetStateAction } from "react";
 import { Model, ModelFieldDefinition, ModelFieldName, PageVisibility } from "../../../backend-integration";
 import { FileData } from "../../../standalone/FileUpload/Generic";
 import { ValidationResult } from "../../Form";
+export type ConversionScriptFn = (record: Record<string, unknown>) => unknown;
 export interface CrudImportProps<KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT> {
     /**
      * The model to import for
@@ -12,7 +13,7 @@ export interface CrudImportProps<KeyT extends ModelFieldName, VisibilityT extend
      * Record<Field, JavaScript>
      * @remarks Disables step 2
      */
-    importConfig?: Partial<Record<KeyT, string>>;
+    importConfig?: Partial<Record<KeyT, ConversionScriptFn>>;
     /**
      * The field used to determine an ID of an existing record for purpose of updating that existing record
      * instead of creating a new record.
@@ -39,7 +40,8 @@ export interface CrudImportProps<KeyT extends ModelFieldName, VisibilityT extend
 }
 export declare const IMPORT_STEPS: string[];
 interface ConversionScript {
-    script: string;
+    script?: string;
+    scriptFn: ConversionScriptFn;
     status: "pending" | "okay" | "error";
     error: Error | null;
 }
@@ -61,7 +63,7 @@ export interface CrudImporterStepProps {
 }
 export declare const isFieldImportable: (name: string, field: ModelFieldDefinition<unknown, string, PageVisibility, unknown>) => boolean;
 export declare const useCrudImportLogic: <KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT>(props: CrudImportProps<KeyT, VisibilityT, CustomT>) => {
-    guided: false | Partial<Record<KeyT, string>> | undefined;
+    guided: false | Partial<Record<KeyT, ConversionScriptFn>> | undefined;
     activeStep: number;
     state: CrudImporterState;
     setState: React.Dispatch<React.SetStateAction<CrudImporterState>>;

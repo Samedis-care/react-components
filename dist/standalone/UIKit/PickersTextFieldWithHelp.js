@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 import { IconButton, InputAdornment } from "@mui/material";
 import { Clear as ClearIcon, Info as InfoIcon } from "@mui/icons-material";
 import { InputLabelConfig, UiKitPickersTextField, } from "./CommonStyles";
@@ -8,7 +8,8 @@ export const UiKitPickersTextFieldWithWarnings = withMuiWarning(UiKitPickersText
 const TextFieldWithHelp = React.forwardRef(function PickersTextFieldWithHelpInner(props, ref) {
     const { openInfo, customHandleClear, warning, onChange, ...muiProps } = props;
     // handle clear
-    const [hasValue, setHasValue] = useState(!!(muiProps.value ?? muiProps.defaultValue));
+    const [hasInputValue, setHasInputValue] = useState(!!muiProps.defaultValue);
+    const hasValue = muiProps.value == null ? hasInputValue : !!muiProps.value;
     const handleClear = useCallback((evt) => {
         evt.stopPropagation();
         if (customHandleClear) {
@@ -19,11 +20,8 @@ const TextFieldWithHelp = React.forwardRef(function PickersTextFieldWithHelpInne
     const handleChange = useCallback((evt) => {
         if (onChange)
             onChange(evt);
-        setHasValue(!!evt.target.value);
+        setHasInputValue(!!evt.target.value);
     }, [onChange]);
-    useEffect(() => {
-        setHasValue(!!muiProps.value);
-    }, [muiProps.value]);
     // render
     const showClear = isTouchDevice() && hasValue && !muiProps.disabled;
     const hasEndAdornment = !!(showClear ||
