@@ -25,7 +25,7 @@ const useRefState = <T>(initialValue: T | (() => T)): UseRefStateResult<T> => {
 			? (initialValue as () => T)()
 			: initialValue,
 	);
-	const [state, setState] = useState<T>(ref.current);
+	const [state, setState] = useState<T>(initialValue);
 	const handleSet = useCallback((newValue: T | ((prev: T) => T)) => {
 		ref.current =
 			typeof newValue === "function"
