@@ -76,11 +76,6 @@ export interface DataGridProps
 	 */
 	disableFooter?: boolean;
 	/**
-	 * Enable date time filer
-	 * If this is not enabled date time fields will be filtered by date only
-	 */
-	enableDateTimeFilter?: boolean;
-	/**
 	 * Custom selection control (instead of default checkbox)
 	 */
 	customSelectionControl?: React.ComponentType<IDataGridContentSelectRowViewProps>;
