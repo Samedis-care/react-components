@@ -15,7 +15,7 @@ const transformOrigin = {
 };
 const ColumnHeaderContent = (props) => {
     const { t } = useCCTranslations();
-    const { classes, enableDateTimeFilter } = useDataGridProps();
+    const { classes } = useDataGridProps();
     const [filterAnchorEl, setFilterAnchorEl] = useState(null);
     const openFilter = useCallback((event) => {
         event.stopPropagation();
@@ -67,10 +67,6 @@ const ColumnHeaderContent = (props) => {
                         : props.columnType === "enum"
                             ? classes?.columnHeaderFilterPopupEnum
                             : classes?.columnHeaderFilterPopup },
-                    React.createElement(FilterEntry, { field: props.field, valueType: props.columnType === "datetime"
-                            ? enableDateTimeFilter
-                                ? "datetime"
-                                : "date"
-                            : props.columnType, onChange: props.onFilterChange, value: props.filter, valueData: props.filterData, close: closeFilter, depth: 1 }))))));
+                    React.createElement(FilterEntry, { field: props.field, valueType: props.columnType, onChange: props.onFilterChange, value: props.filter, valueData: props.filterData, close: closeFilter, depth: 1 }))))));
 };
 export default React.memo(ColumnHeaderContent);
