@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { showErrorDialog } from "../../non-standalone";
 import { useDialogContext } from "../../framework";
 import { ErrorComponentProps } from "./Form";
@@ -8,8 +8,15 @@ import throwError from "../../utils/throwError";
 const DefaultErrorComponent = (props: ErrorComponentProps) => {
 	const propError = props.error;
 	const [pushDialog] = useDialogContext();
+	const lastPropError = useRef<typeof propError>(null);
 
 	useEffect(() => {
+		// logic to fix double error display when component is remounted with state
+		if (lastPropError.current === propError) {
+			return;
+		}
+		lastPropError.current = propError;
+
 		let validationErrorClass: string | null = null;
 		if (isValidationError(propError)) {
 			// eslint-disable-next-line no-console
