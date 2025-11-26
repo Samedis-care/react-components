@@ -2,6 +2,7 @@ import React, {
 	CSSProperties,
 	useCallback,
 	useEffect,
+	useLayoutEffect,
 	useMemo,
 	useRef,
 	useState,
@@ -239,11 +240,11 @@ const MultiGrid = (inProps: MultiGridProps) => {
 	// restore horizontal scroll when bottom grid is enabled again
 	const bottomRightRendered = rowCount - fixedRowCount > 0;
 	const [triggerScrollSync, setTriggerScrollSync] = useState(false);
-	useEffect(() => {
+	useLayoutEffect(() => {
 		if (!bottomRightRendered) return;
 		setTriggerScrollSync(true);
 	}, [bottomRightRendered]);
-	useEffect(() => {
+	useLayoutEffect(() => {
 		if (!triggerScrollSync) return;
 		const bottomGrid = bottomRightGrid.current?.element;
 		const topGrid = topRightGrid.current?.element;
