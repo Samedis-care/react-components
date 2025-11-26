@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState, } from "react";
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, } from "react";
 import { Grid as VGrid, } from "react-window";
 import { styled, useThemeProps } from "@mui/material";
 const Root = styled("div", { name: "CcMultiGrid", slot: "root" })({
@@ -132,12 +132,12 @@ const MultiGrid = (inProps) => {
     // restore horizontal scroll when bottom grid is enabled again
     const bottomRightRendered = rowCount - fixedRowCount > 0;
     const [triggerScrollSync, setTriggerScrollSync] = useState(false);
-    useEffect(() => {
+    useLayoutEffect(() => {
         if (!bottomRightRendered)
             return;
         setTriggerScrollSync(true);
     }, [bottomRightRendered]);
-    useEffect(() => {
+    useLayoutEffect(() => {
         if (!triggerScrollSync)
             return;
         const bottomGrid = bottomRightGrid.current?.element;
