@@ -47,6 +47,7 @@ const DataGridCustomFilters = () => {
 		<DataGridContentOverlayCollapse
 			className={classes?.contentOverlayCollapse}
 			in={state.showFilterDialog}
+			mountOnEnter
 		>
 			<Dialog
 				closeFilterDialog={closeCustomFilterDialog}
