@@ -27,7 +27,7 @@ const DataGridCustomFilters = () => {
     if (!filterBar) {
         return React.createElement(React.Fragment, null);
     }
-    return (React.createElement(DataGridContentOverlayCollapse, { className: classes?.contentOverlayCollapse, in: state.showFilterDialog },
+    return (React.createElement(DataGridContentOverlayCollapse, { className: classes?.contentOverlayCollapse, in: state.showFilterDialog, mountOnEnter: true },
         React.createElement(Dialog, { closeFilterDialog: closeCustomFilterDialog, customFilters: filterBar, customData: state.customData, setCustomData: setCustomData })));
 };
 export default React.memo(DataGridCustomFilters);
