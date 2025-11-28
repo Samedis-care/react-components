@@ -30,16 +30,16 @@ export interface BackendMultiSelectWithTagsProps<
 	GroupDataT extends BaseSelectorData,
 	DataDataT extends MultiSelectorData,
 > extends Omit<
-		MultiSelectWithTagsProps<DataDataT, GroupDataT>,
-		| "loadGroupEntries"
-		| "loadDataOptions"
-		| "loadGroupOptions"
-		| "displaySwitch"
-		| "selected"
-		| "onChange"
-		| "lruGroup"
-		| "lruData"
-	> {
+	MultiSelectWithTagsProps<DataDataT, GroupDataT>,
+	| "loadGroupEntries"
+	| "loadDataOptions"
+	| "loadGroupOptions"
+	| "displaySwitch"
+	| "selected"
+	| "onChange"
+	| "lruGroup"
+	| "lruData"
+> {
 	/**
 	 * The selected data record IDs
 	 */

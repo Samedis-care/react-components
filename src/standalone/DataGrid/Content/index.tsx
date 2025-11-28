@@ -29,8 +29,7 @@ import ActionButton from "../../UIKit/ActionButton";
 import { Clear as ResetFilterIcon } from "@mui/icons-material";
 
 export interface IDataGridContentProps
-	extends IDataGridColumnProps,
-		Pick<DataGridProps, "globalScrollListener"> {
+	extends IDataGridColumnProps, Pick<DataGridProps, "globalScrollListener"> {
 	rowsPerPage: number;
 }
 

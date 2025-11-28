@@ -6,8 +6,10 @@ import {
 import { Grid, ListItemButton, styled, useThemeProps } from "@mui/material";
 import CountryFlags from "../../standalone/CountryFlags";
 
-export interface LocaleSelectorEntryProps
-	extends Omit<LocaleSelectorDialogContentProps, "close"> {
+export interface LocaleSelectorEntryProps extends Omit<
+	LocaleSelectorDialogContentProps,
+	"close"
+> {
 	locale: LocaleSelectorEntryData;
 	currentLanguage: string;
 	handleSwitch: (lang: string) => void;

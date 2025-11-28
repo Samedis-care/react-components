@@ -20,8 +20,10 @@ import { RouteContext } from "../../standalone/Routes/Route";
 import { useThemeProps } from "@mui/material";
 import { CrudFormProps } from "../CRUD";
 
-export interface BasicFormPageRendererProps<CustomPropsT>
-	extends Omit<PageProps<ModelFieldName, CustomPropsT>, "submit" | "dirty"> {
+export interface BasicFormPageRendererProps<CustomPropsT> extends Omit<
+	PageProps<ModelFieldName, CustomPropsT>,
+	"submit" | "dirty"
+> {
 	/**
 	 * Function to submit everything
 	 */
@@ -63,8 +65,10 @@ export type EnhancedCustomProps<T> =
 		? Omit<T, "goBack"> & EnhancedGoBackType
 		: T;
 
-export interface BasicFormPageProps<RendererPropsT, CustomPropsT>
-	extends PageProps<ModelFieldName, CustomPropsT> {
+export interface BasicFormPageProps<
+	RendererPropsT,
+	CustomPropsT,
+> extends PageProps<ModelFieldName, CustomPropsT> {
 	/**
 	 * Called after submit successfully completed
 	 */

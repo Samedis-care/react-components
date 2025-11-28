@@ -11,8 +11,10 @@ import LocalizedKeyboardDatePicker, {
 import accessSlotProps from "../../../utils/internal/accessSlotProps";
 import { TextFieldProps } from "@mui/material";
 
-export interface DateInputProps
-	extends Omit<PickersTextFieldWithHelpProps, "customHandleClear"> {
+export interface DateInputProps extends Omit<
+	PickersTextFieldWithHelpProps,
+	"customHandleClear"
+> {
 	/**
 	 * The value of the input
 	 */

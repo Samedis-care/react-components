@@ -8,9 +8,9 @@ import ccI18n from "../../../i18n";
 /**
  * Type to handle localized strings
  */
-abstract class TypeLocalizedString
-	implements Type<Partial<Record<MultiLanguageInputSupportedLanguages, string>>>
-{
+abstract class TypeLocalizedString implements Type<
+	Partial<Record<MultiLanguageInputSupportedLanguages, string>>
+> {
 	protected multiline: boolean;
 
 	constructor(multiline = false) {

@@ -9,10 +9,8 @@ import CurrencyInput, {
 import { TypeSettings } from "../../../Type";
 
 export interface ModelDataTypeDecimalCurrencyRendererCCParams
-	extends Omit<
-			CurrencyInputProps,
-			"currency" | "value" | "onChange" | "warning"
-		>,
+	extends
+		Omit<CurrencyInputProps, "currency" | "value" | "onChange" | "warning">,
 		Omit<
 			TextFieldProps,
 			| "name"

@@ -9,8 +9,10 @@ import {
 } from "@mui/material";
 import combineClassNames from "../../utils/combineClassNames";
 
-export interface ComponentWithLabelProps
-	extends Omit<FormControlLabelProps, "label"> {
+export interface ComponentWithLabelProps extends Omit<
+	FormControlLabelProps,
+	"label"
+> {
 	/**
 	 * The text of the label
 	 */

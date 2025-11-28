@@ -4,8 +4,10 @@ import { PageProps } from "./Form";
 import BasicFormPage from "./BasicFormPage";
 import DefaultFormPageButtons from "./DefaultFormPageButtons";
 
-export interface EditOnlyFormPageProps
-	extends PageProps<ModelFieldName, undefined> {
+export interface EditOnlyFormPageProps extends PageProps<
+	ModelFieldName,
+	undefined
+> {
 	/**
 	 * The actual form contents
 	 */

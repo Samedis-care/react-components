@@ -20,15 +20,15 @@ export interface BackendDataGridMultiSelectProps<
 	VisibilityT extends PageVisibility,
 	CustomT,
 > extends Omit<
-		DataGridProps,
-		| "columns"
-		| "loadData"
-		| "disableSelection"
-		| "prohibitMultiSelect"
-		| "customSelectionControl"
-		| "onSelectionChange"
-		| "selection"
-	> {
+	DataGridProps,
+	| "columns"
+	| "loadData"
+	| "disableSelection"
+	| "prohibitMultiSelect"
+	| "customSelectionControl"
+	| "onSelectionChange"
+	| "selection"
+> {
 	/**
 	 * The model to load data from
 	 */

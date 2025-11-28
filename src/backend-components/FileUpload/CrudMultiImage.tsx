@@ -8,8 +8,10 @@ import { Connector, PageVisibility } from "../../backend-integration";
 import { ErrorComponentProps } from "../Form";
 import { Loader, MultiImage } from "../../standalone";
 
-export interface CrudMultiImageProps
-	extends Omit<MultiImageProps, "images" | "onChange"> {
+export interface CrudMultiImageProps extends Omit<
+	MultiImageProps,
+	"images" | "onChange"
+> {
 	/**
 	 * Optional additional images to display
 	 */

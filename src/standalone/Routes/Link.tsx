@@ -3,14 +3,13 @@ import type { To } from "history";
 import { useHistoryRouterContext } from "./HistoryRouter";
 import useNavigate from "./useNavigate";
 
-export interface LinkProps
-	extends Omit<
-		React.DetailedHTMLProps<
-			React.AnchorHTMLAttributes<HTMLAnchorElement>,
-			HTMLAnchorElement
-		>,
-		"href"
-	> {
+export interface LinkProps extends Omit<
+	React.DetailedHTMLProps<
+		React.AnchorHTMLAttributes<HTMLAnchorElement>,
+		HTMLAnchorElement
+	>,
+	"href"
+> {
 	/**
 	 * Target location
 	 */

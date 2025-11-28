@@ -5,8 +5,10 @@ import ActionButton, {
 import { useFormContext } from "../Form";
 import useCCTranslations from "../../../utils/useCCTranslations";
 
-export interface FlowEngineSaveButtonProps
-	extends Omit<ActionButtonProps, "children"> {
+export interface FlowEngineSaveButtonProps extends Omit<
+	ActionButtonProps,
+	"children"
+> {
 	children?: ActionButtonProps["children"];
 }
 

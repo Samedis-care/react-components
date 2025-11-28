@@ -22,8 +22,7 @@ import { useDialogContext } from "../../framework";
 import { showErrorDialog } from "../Dialog";
 import FormLoaderOverlay from "../../standalone/Form/FormLoaderOverlay";
 
-export interface LocaleSelectorDialogContentProps
-	extends LocaleSelectorDialogCommonProps {
+export interface LocaleSelectorDialogContentProps extends LocaleSelectorDialogCommonProps {
 	close: () => void;
 	className?: string;
 }

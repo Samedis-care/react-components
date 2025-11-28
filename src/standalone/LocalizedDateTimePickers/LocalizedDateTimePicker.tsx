@@ -10,8 +10,10 @@ import { TextFieldProps } from "@mui/material";
 import useMuiLocaleData from "./useMuiLocaleData";
 import accessSlotProps from "../../utils/internal/accessSlotProps";
 
-interface LocalizedDateTimePickerProps
-	extends Omit<DateTimePickerProps, "format"> {
+interface LocalizedDateTimePickerProps extends Omit<
+	DateTimePickerProps,
+	"format"
+> {
 	/**
 	 * Set required flag for text field input
 	 */

@@ -17,9 +17,9 @@ export interface GridMultiSelectFilterBackendProps<
 	CustomT,
 	DataT extends MultiSelectorData,
 > extends Omit<
-		BackendMultipleSelectProps<KeyT, VisibilityT, CustomT, DataT>,
-		"classes"
-	> {
+	BackendMultipleSelectProps<KeyT, VisibilityT, CustomT, DataT>,
+	"classes"
+> {
 	/**
 	 * Is the grid filter rendered in a dialog?
 	 */

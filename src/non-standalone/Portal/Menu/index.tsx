@@ -13,8 +13,10 @@ import useNavigate, {
 	NavigateFunction,
 } from "../../../standalone/Routes/useNavigate";
 
-export interface IRoutedMenuItemDefinition
-	extends Omit<IMenuItemDefinition, "onClick" | "children"> {
+export interface IRoutedMenuItemDefinition extends Omit<
+	IMenuItemDefinition,
+	"onClick" | "children"
+> {
 	/**
 	 * The URL to navigate to in case the menu item is clicked
 	 */
@@ -29,8 +31,10 @@ export interface IRoutedMenuItemDefinition
 	children?: IRoutedMenuItemDefinition[];
 }
 
-export interface IRoutedMenuProps
-	extends Omit<MenuProps, "definition" | "customState"> {
+export interface IRoutedMenuProps extends Omit<
+	MenuProps,
+	"definition" | "customState"
+> {
 	/**
 	 * The menu definition (with routing support)
 	 */

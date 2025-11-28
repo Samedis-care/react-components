@@ -41,8 +41,10 @@ const StyledSelect = styled("select", {
 	},
 }));
 
-interface ScheduleFilterRendererSelectProps
-	extends Pick<ScheduleFilterDefinitionSelect, "type" | "options"> {
+interface ScheduleFilterRendererSelectProps extends Pick<
+	ScheduleFilterDefinitionSelect,
+	"type" | "options"
+> {
 	/**
 	 * The name of the filter
 	 */
@@ -82,8 +84,10 @@ const ScheduleFilterRendererSelect = (
 	);
 };
 
-interface ScheduleFilterRendererSwitchProps
-	extends Pick<ScheduleFilterDefinitionSwitch, "type" | "label"> {
+interface ScheduleFilterRendererSwitchProps extends Pick<
+	ScheduleFilterDefinitionSwitch,
+	"type" | "label"
+> {
 	/**
 	 * The name of the filter
 	 */

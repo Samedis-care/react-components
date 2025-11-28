@@ -12,11 +12,12 @@ import { SmallIconButton, SmallListItemIcon } from "../Small";
 import InlineSwitch from "../InlineSwitch";
 import { styled, Typography, useThemeProps } from "@mui/material";
 
-export interface MultiSelectWithoutGroupProps<DataT extends MultiSelectorData>
-	extends Omit<
-		BaseSelectorProps<DataT, false>,
-		"onSelect" | "selected" | "classes" | "onLoad"
-	> {
+export interface MultiSelectWithoutGroupProps<
+	DataT extends MultiSelectorData,
+> extends Omit<
+	BaseSelectorProps<DataT, false>,
+	"onSelect" | "selected" | "classes" | "onLoad"
+> {
 	// UI Props
 	/**
 	 * Extended selection change handler

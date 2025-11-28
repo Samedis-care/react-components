@@ -14,9 +14,9 @@ export interface GridSingleSelectFilterBackendProps<
 	VisibilityT extends PageVisibility,
 	CustomT,
 > extends Omit<
-		BackendSingleSelectProps<KeyT, VisibilityT, CustomT>,
-		"classes" | "className" | "disableClearable"
-	> {
+	BackendSingleSelectProps<KeyT, VisibilityT, CustomT>,
+	"classes" | "className" | "disableClearable"
+> {
 	/**
 	 * Optional label for the filter
 	 */

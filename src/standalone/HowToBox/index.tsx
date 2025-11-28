@@ -60,8 +60,10 @@ const HowToBox = (inProps: HowToBoxProps) => {
 	);
 };
 
-export interface HowToBoxTranslateProps
-	extends Omit<HowToBoxProps, "titleLabel" | "labels"> {
+export interface HowToBoxTranslateProps extends Omit<
+	HowToBoxProps,
+	"titleLabel" | "labels"
+> {
 	/**
 	 * The i18n t function
 	 */

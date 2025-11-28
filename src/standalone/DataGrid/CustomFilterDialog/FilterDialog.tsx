@@ -10,8 +10,10 @@ import {
 import { IDataGridFilterBarProps } from "../Header/FilterBar";
 import useCCTranslations from "../../../utils/useCCTranslations";
 
-export interface DataGridCustomFilterDialogProps
-	extends Omit<IDataGridFilterBarProps, "inDialog"> {
+export interface DataGridCustomFilterDialogProps extends Omit<
+	IDataGridFilterBarProps,
+	"inDialog"
+> {
 	/**
 	 * Callback to close custom filter pop-over
 	 */

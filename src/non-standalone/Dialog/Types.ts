@@ -106,8 +106,10 @@ export type IDialogConfigConfirmAsync = Omit<
  * Input dialog properties, extends confirm dialog.
  * Yes and No of confirm dialog could be labelled as Submit and Cancel.
  */
-export interface IDialogConfigInput
-	extends Omit<IDialogConfigConfirm, "handlerButtonYes"> {
+export interface IDialogConfigInput extends Omit<
+	IDialogConfigConfirm,
+	"handlerButtonYes"
+> {
 	/**
 	 * The callback for the yes button (dialog closes automatically)
 	 * @param value The value provided in the input

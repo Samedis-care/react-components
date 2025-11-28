@@ -7,8 +7,10 @@ import {
 } from "@mui/material";
 import combineClassNames from "../../utils/combineClassNames";
 
-export interface CenteredTypographyProps
-	extends Omit<TypographyProps, "className" | "classes"> {
+export interface CenteredTypographyProps extends Omit<
+	TypographyProps,
+	"className" | "classes"
+> {
 	/**
 	 * CSS class to apply to root
 	 */

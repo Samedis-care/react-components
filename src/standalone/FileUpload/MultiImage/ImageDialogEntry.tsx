@@ -14,8 +14,10 @@ import {
 import useCCTranslations from "../../../utils/useCCTranslations";
 import combineClassNames from "../../../utils/combineClassNames";
 
-export interface ImageDialogEntryProps
-	extends Pick<MultiImageProps, "previewSize"> {
+export interface ImageDialogEntryProps extends Pick<
+	MultiImageProps,
+	"previewSize"
+> {
 	/**
 	 * The image
 	 */

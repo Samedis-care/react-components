@@ -17,7 +17,9 @@ import combineClassNames from "../../utils/combineClassNames";
 export interface MultiSelectWithTagsProps<
 	DataT extends MultiSelectorData,
 	GroupT extends BaseSelectorData,
-> extends Pick<
+>
+	extends
+		Pick<
 			BaseSelectorProps<GroupT, false>,
 			| "disabled"
 			| "noOptionsText"

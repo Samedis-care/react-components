@@ -19,7 +19,9 @@ export interface CrudMultiSelectWithGroupsProps<
 	DataCustomT,
 	GroupDataT extends BaseSelectorData,
 	DataDataT extends MultiSelectorData,
-> extends Omit<
+>
+	extends
+		Omit<
 			BackendMultiSelectWithTagsProps<
 				GroupKeyT,
 				DataKeyT,

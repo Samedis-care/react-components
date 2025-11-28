@@ -9,22 +9,21 @@ import {
 } from "../../../standalone/FileUpload/Generic";
 import fileToData from "../../../utils/fileToData";
 
-export interface TypeFilesParams
-	extends Partial<
-		Pick<
-			FileUploadProps,
-			| "maxFiles"
-			| "accept"
-			| "acceptLabel"
-			| "imageDownscaleOptions"
-			| "convertImagesTo"
-			| "previewSize"
-			| "previewImages"
-			| "allowDuplicates"
-			| "smallLabel"
-			| "variant"
-		>
-	> {
+export interface TypeFilesParams extends Partial<
+	Pick<
+		FileUploadProps,
+		| "maxFiles"
+		| "accept"
+		| "acceptLabel"
+		| "imageDownscaleOptions"
+		| "convertImagesTo"
+		| "previewSize"
+		| "previewImages"
+		| "allowDuplicates"
+		| "smallLabel"
+		| "variant"
+	>
+> {
 	/**
 	 * Should we always send the raw file even if there is a preview? Defaults to false
 	 */

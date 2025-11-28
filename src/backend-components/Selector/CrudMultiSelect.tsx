@@ -22,7 +22,9 @@ export interface CrudMultiSelectProps<
 	VisibilityT extends PageVisibility,
 	CustomT,
 	DataT extends MultiSelectorData,
-> extends Omit<
+>
+	extends
+		Omit<
 			BackendMultiSelectProps<KeyT, VisibilityT, CustomT, DataT>,
 			| "modelToSelectorData"
 			| "initialData"

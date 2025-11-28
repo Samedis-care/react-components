@@ -5,8 +5,10 @@ import { PageProps } from "./Form";
 import { CrudFormProps } from "../CRUD";
 import { ModelFieldName } from "../../backend-integration";
 
-export interface DefaultFormPageProps
-	extends PageProps<ModelFieldName, CrudFormProps> {
+export interface DefaultFormPageProps extends PageProps<
+	ModelFieldName,
+	CrudFormProps
+> {
 	/**
 	 * The actual form contents
 	 */

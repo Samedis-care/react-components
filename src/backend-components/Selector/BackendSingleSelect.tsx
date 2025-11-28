@@ -28,9 +28,9 @@ export interface BackendSingleSelectProps<
 	VisibilityT extends PageVisibility,
 	CustomT,
 > extends Omit<
-		BaseSelectorProps<BaseSelectorData, false>,
-		"onLoad" | "selected" | "onSelect" | "lru"
-	> {
+	BaseSelectorProps<BaseSelectorData, false>,
+	"onLoad" | "selected" | "onSelect" | "lru"
+> {
 	/**
 	 * The model to use
 	 */

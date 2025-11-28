@@ -8,8 +8,10 @@ import React, {
 import type { IMenuItemDefinition, MenuItemProps, MenuProps } from "./index";
 import { Collapse } from "@mui/material";
 
-interface MenuItemControllerProps
-	extends Omit<MenuItemProps, "expanded" | "active"> {
+interface MenuItemControllerProps extends Omit<
+	MenuItemProps,
+	"expanded" | "active"
+> {
 	/**
 	 * The menu item renderer properties
 	 */

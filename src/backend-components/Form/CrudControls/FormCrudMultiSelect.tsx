@@ -19,7 +19,9 @@ export interface FormCrudMultiSelectProps<
 	VisibilityT extends PageVisibility,
 	CustomT,
 	DataT extends MultiSelectorData,
-> extends Omit<
+>
+	extends
+		Omit<
 			CrudMultiSelectProps<KeyT, VisibilityT, CustomT, DataT>,
 			"errorComponent" | "connector" | "field"
 		>,

@@ -22,9 +22,9 @@ export interface BackendMultiSelectProps<
 	CustomT,
 	DataT extends MultiSelectorData,
 > extends Omit<
-		MultiSelectProps<DataT>,
-		"onLoad" | "selected" | "onSelect" | "lru"
-	> {
+	MultiSelectProps<DataT>,
+	"onLoad" | "selected" | "onSelect" | "lru"
+> {
 	/**
 	 * The model to use
 	 */

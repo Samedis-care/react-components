@@ -54,9 +54,7 @@ import FilterIcon from "../Icons/FilterIcon";
 import deepClone from "../../utils/deepClone";
 
 export interface DataGridProps
-	extends IDataGridHeaderProps,
-		IDataGridColumnProps,
-		IDataGridCallbacks {
+	extends IDataGridHeaderProps, IDataGridColumnProps, IDataGridCallbacks {
 	/**
 	 * Custom CSS class to apply to root
 	 */

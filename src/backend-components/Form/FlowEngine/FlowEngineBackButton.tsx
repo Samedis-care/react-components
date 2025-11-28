@@ -7,8 +7,10 @@ import useCCTranslations from "../../../utils/useCCTranslations";
 import { IsInFormDialogContext } from "../FormDialog";
 import { EnhancedCustomProps } from "../BasicFormPage";
 
-export interface FlowEngineBackButtonProps
-	extends Omit<ActionButtonProps, "onClick" | "children"> {
+export interface FlowEngineBackButtonProps extends Omit<
+	ActionButtonProps,
+	"onClick" | "children"
+> {
 	children?: ActionButtonProps["children"];
 }
 

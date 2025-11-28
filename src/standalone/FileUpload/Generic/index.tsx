@@ -121,11 +121,10 @@ export interface FileUploadProps {
 	variant?: "classic" | "modern" | React.ComponentType<FileUploadRendererProps>;
 }
 
-export interface FileUploadRendererProps
-	extends Omit<
-		FileUploadProps,
-		"variant" | "onChange" | "defaultFiles" | "files"
-	> {
+export interface FileUploadRendererProps extends Omit<
+	FileUploadProps,
+	"variant" | "onChange" | "defaultFiles" | "files"
+> {
 	/**
 	 * Drag over event handler for drop zone
 	 */

@@ -52,8 +52,7 @@ export interface LocaleSelectorDialogCommonProps {
 	supportedLocales?: string[];
 }
 
-export interface LocaleSelectorDialogProps
-	extends LocaleSelectorDialogCommonProps {
+export interface LocaleSelectorDialogProps extends LocaleSelectorDialogCommonProps {
 	className?: string;
 	classes?: Partial<Record<LocaleSelectorDialogClassKey, string>>;
 }

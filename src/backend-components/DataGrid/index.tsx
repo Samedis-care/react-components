@@ -21,9 +21,9 @@ export interface BackendDataGridProps<
 	VisibilityT extends PageVisibility,
 	CustomDataT,
 > extends Omit<
-		DataGridProps,
-		"loadData" | "columns" | "exporters" | "onDelete"
-	> {
+	DataGridProps,
+	"loadData" | "columns" | "exporters" | "onDelete"
+> {
 	/**
 	 * The model to use
 	 */

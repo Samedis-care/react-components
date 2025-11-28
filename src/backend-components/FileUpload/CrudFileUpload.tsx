@@ -17,8 +17,10 @@ import { ErrorComponentProps } from "../Form";
 import { Loader } from "../../standalone";
 import { FileSelectorError } from "../../standalone/FileUpload/Generic/Errors";
 
-export interface CrudFileUploadProps
-	extends Omit<FileUploadProps, "files" | "handleError"> {
+export interface CrudFileUploadProps extends Omit<
+	FileUploadProps,
+	"files" | "handleError"
+> {
 	/**
 	 * The backend connector used as CRUD interface
 	 * @remarks Passing null will render an readOnly control
