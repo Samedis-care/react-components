@@ -455,6 +455,10 @@ export interface IDataGridState {
      */
     dataLoadError: Error | null;
     /**
+     * refresh data instance ID, used for "aborting" (ignoring completed) requests
+     */
+    refreshDataInstance: number;
+    /**
      * Should loadData be called?
      */
     refreshData: number;

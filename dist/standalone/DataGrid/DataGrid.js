@@ -71,6 +71,7 @@ export const getDataGridDefaultState = (columns, defaultCustomData) => ({
     selectionUpdatedByProps: false,
     rows: {},
     dataLoadError: null,
+    refreshDataInstance: Date.now(),
     refreshData: 1,
     refreshShouldWipeRows: false,
     customData: defaultCustomData ?? {},
@@ -409,7 +410,7 @@ const DataGrid = (inProps) => {
             {},
     }));
     const [state, setState] = statePack;
-    const { search, rows, pages, hiddenColumns, lockedColumns, refreshData, customData, selectAll, selectedRows, selectionUpdatedByProps, } = state;
+    const { search, rows, pages, hiddenColumns, lockedColumns, refreshDataInstance, refreshData, customData, selectAll, selectedRows, selectionUpdatedByProps, } = state;
     const lastRefreshData = useRef(0);
     const activeCustomFiltersPack = useState(0);
     const gridRoot = useRef(null);
@@ -492,50 +493,58 @@ const DataGrid = (inProps) => {
                         // eslint-disable-next-line no-console
                         console.assert(newPage !== pageIndex, "[Components-Care] [DataGrid] Detected invalid page, but newly calculated page equals invalid page");
                         if (newPage !== pageIndex) {
-                            setState((prevState) => ({
-                                ...prevState,
-                                pages: [newPage, newPage],
-                            }));
+                            setState((prevState) => prevState.refreshDataInstance === refreshDataInstance
+                                ? {
+                                    ...prevState,
+                                    pages: [newPage, newPage],
+                                }
+                                : prevState);
                         }
                     }
                     const rowsAsObject = {};
                     for (let i = 0; i < data.rows.length; i++) {
                         rowsAsObject[pageIndex * rowsPerPage + i] = data.rows[i];
                     }
-                    setState((prevState) => ({
-                        ...prevState,
-                        rowsTotal: data.rowsTotal,
-                        rowsFiltered: data.rowsFiltered ?? null,
-                        dataLoadError: null,
-                        rows: Object.assign({}, prevState.rows, rowsAsObject),
-                    }));
+                    setState((prevState) => prevState.refreshDataInstance === refreshDataInstance
+                        ? {
+                            ...prevState,
+                            rowsTotal: data.rowsTotal,
+                            rowsFiltered: data.rowsFiltered ?? null,
+                            dataLoadError: null,
+                            rows: Object.assign({}, prevState.rows, rowsAsObject),
+                        }
+                        : prevState);
                 }
                 catch (err) {
                     // eslint-disable-next-line no-console
                     console.error("[Components-Care] [DataGrid] LoadData: ", err);
-                    setState((prevState) => ({
-                        ...prevState,
-                        dataLoadError: err,
-                        rowsFiltered: null,
-                        rowsTotal: 0,
-                    }));
+                    setState((prevState) => prevState.refreshDataInstance === refreshDataInstance
+                        ? {
+                            ...prevState,
+                            dataLoadError: err,
+                            rowsFiltered: null,
+                            rowsTotal: 0,
+                        }
+                        : prevState);
                 }
             }
-            setState((prevState) => ({
-                ...prevState,
-                refreshData: Math.max(prevState.refreshData - 1, 0),
-                // handle filter changes invalidating data
-                rows: prevState.refreshShouldWipeRows && prevState.refreshData === 2
-                    ? {}
-                    : prevState.rows,
-                selectedRows: prevState.refreshShouldWipeRows && prevState.refreshData === 2
-                    ? []
-                    : prevState.selectedRows,
-                refreshShouldWipeRows: false,
-            }));
+            setState((prevState) => prevState.refreshDataInstance === refreshDataInstance
+                ? {
+                    ...prevState,
+                    refreshData: Math.max(prevState.refreshData - 1, 0),
+                    // handle filter changes invalidating data
+                    rows: prevState.refreshShouldWipeRows && prevState.refreshData === 2
+                        ? {}
+                        : prevState.rows,
+                    selectedRows: prevState.refreshShouldWipeRows && prevState.refreshData === 2
+                        ? []
+                        : prevState.selectedRows,
+                    refreshShouldWipeRows: false,
+                }
+                : prevState);
         })();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [refreshData]);
+    }, [refreshDataInstance, refreshData]);
     // instant refresh on pagination change
     const refresh = useCallback(() => setState((prevState) => ({
         ...prevState,
@@ -552,8 +561,9 @@ const DataGrid = (inProps) => {
             selectedRows: [],
             rowsTotal: 0, // reset scrolling
             rowsFiltered: null,
-            refreshData: Math.min(prevState.refreshData + 1, 2),
-            refreshShouldWipeRows: prevState.refreshData === 1, // when we set refreshData to two and this is changing filters, we need an rows reset to prevent old data from getting displayed
+            refreshDataInstance: Date.now(),
+            refreshData: 1,
+            refreshShouldWipeRows: false,
         }));
     }, 500), [setState]);
     const initialRender = useRef(true);
