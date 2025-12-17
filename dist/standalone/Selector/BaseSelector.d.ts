@@ -261,6 +261,10 @@ export type BaseSelectorProps<DataT extends BaseSelectorData, Multi extends bool
      */
     lru?: SelectorLruOptions<DataT>;
     /**
+     * Do not show results unless search string is entered
+     */
+    forceQuery?: boolean;
+    /**
      * Enable freeSolo. Allows user to enter any content. Selected option will be { value: USER_INPUT, label: USER_INPUT }
      */
     freeSolo?: boolean;

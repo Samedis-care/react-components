@@ -130,7 +130,7 @@ const GrowPopper = React.forwardRef(function GrowPopperImpl(props, ref) {
 export const BaseSelectorContext = React.createContext(null);
 const BaseSelector = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcBaseSelector" });
-    const { variant, refreshToken, onSelect, multiple, selected, label, disabled, required, error, warning, disableSearch, placeholder, autocompleteId, addNewLabel, onLoad, onAddNew, enableIcons, noOptionsText, loadingText, startTypingToSearchText, openText, closeText, clearText, disableClearable, openInfo, grouped, noGroupLabel, disableGroupSorting, groupSorter, switchLabel, lru, startAdornment, endAdornment, endAdornmentLeft, freeSolo, getIdOfData, filterIds, textFieldClasses, textFieldInputClasses, iconSize, classes, className, } = props;
+    const { variant, refreshToken, onSelect, multiple, selected, label, disabled, required, error, warning, disableSearch, placeholder, autocompleteId, addNewLabel, onLoad, onAddNew, enableIcons, noOptionsText, loadingText, startTypingToSearchText, openText, closeText, clearText, disableClearable, openInfo, grouped, noGroupLabel, disableGroupSorting, groupSorter, switchLabel, lru, startAdornment, endAdornment, endAdornmentLeft, forceQuery, freeSolo, getIdOfData, filterIds, textFieldClasses, textFieldInputClasses, iconSize, classes, className, } = props;
     const getIdDefault = useCallback((data) => data.value, []);
     const getId = getIdOfData ?? getIdDefault;
     const defaultSwitchValue = !!(props.displaySwitch && props.defaultSwitchValue);
@@ -303,7 +303,10 @@ const BaseSelector = (inProps) => {
             ].filter((entry) => entry);
         }
         else {
-            results = [...(await onLoad(query, switchValue))];
+            results =
+                query === "" && forceQuery
+                    ? []
+                    : [...(await onLoad(query, switchValue))];
             if (onAddNew) {
                 if (results.length > 0) {
                     results.push({
@@ -342,6 +345,7 @@ const BaseSelector = (inProps) => {
         onAddNew,
         t,
         setLruIds,
+        forceQuery,
         onLoad,
         switchValue,
         getId,
