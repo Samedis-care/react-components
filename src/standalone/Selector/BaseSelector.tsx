@@ -354,6 +354,10 @@ export type BaseSelectorProps<
 		 */
 		lru?: SelectorLruOptions<DataT>;
 		/**
+		 * Do not show results unless search string is entered
+		 */
+		forceQuery?: boolean;
+		/**
 		 * Enable freeSolo. Allows user to enter any content. Selected option will be { value: USER_INPUT, label: USER_INPUT }
 		 */
 		freeSolo?: boolean;
@@ -568,6 +572,7 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 		startAdornment,
 		endAdornment,
 		endAdornmentLeft,
+		forceQuery,
 		freeSolo,
 		getIdOfData,
 		filterIds,
@@ -869,7 +874,10 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 					})),
 				].filter((entry) => entry) as DataT[];
 			} else {
-				results = [...(await onLoad(query, switchValue))];
+				results =
+					query === "" && forceQuery
+						? []
+						: [...(await onLoad(query, switchValue))];
 				if (onAddNew) {
 					if (results.length > 0) {
 						results.push({
@@ -914,6 +922,7 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 			onAddNew,
 			t,
 			setLruIds,
+			forceQuery,
 			onLoad,
 			switchValue,
 			getId,
