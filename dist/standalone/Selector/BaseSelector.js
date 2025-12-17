@@ -406,8 +406,11 @@ const BaseSelector = (inProps) => {
                                 value: query,
                                 freeSolo: true,
                             });
+                        if (multiple)
+                            options = options.concat(selectedArr); // multiple select: show selected on top
                         options = options.concat(selectorOptions);
-                        options = options.concat(selectedArr);
+                        if (!multiple)
+                            options = options.concat(selectedArr); // single/multi select: add selected to avoid warning
                         // unique array
                         options = options.filter((value, idx, arr) => arr.findIndex((v2) => v2.value === value.value) === idx);
                         return options;
