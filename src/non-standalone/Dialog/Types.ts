@@ -160,17 +160,6 @@ export interface IDialogConfigSign {
 	 */
 	name?: string;
 	/**
-	 * Boolean flag to clear signature
-	 */
-	clearOnResize?: boolean;
-	/**
-	 * The props used to draw HTML canvas
-	 */
-	canvasProps?: React.DetailedHTMLProps<
-		React.CanvasHTMLAttributes<HTMLCanvasElement>,
-		HTMLCanvasElement
-	>;
-	/**
 	 * Use to change signature pen color
 	 */
 	penColor?: string;

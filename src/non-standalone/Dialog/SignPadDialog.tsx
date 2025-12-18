@@ -9,12 +9,13 @@ import {
 } from "@mui/material";
 import MuiDialogTitle from "@mui/material/DialogTitle";
 import { Close } from "@mui/icons-material";
-import SignaturePad from "react-signature-canvas";
+import SignaturePad from "react-signature-pad-wrapper";
 import { useDialogContext } from "../../framework";
 import { IDialogConfigSign } from "./Types";
 import useCCTranslations from "../../utils/useCCTranslations";
 import { showConfirmDialogBool } from "./Utils";
 import combineClassNames from "../../utils/combineClassNames";
+import trimCanvas from "trim-canvas";
 
 export interface SignPadDialogProps extends IDialogConfigSign {
 	/**
@@ -97,7 +98,8 @@ const SignPadDialog = (inProps: SignPadDialogProps) => {
 		signerName: signerNameUntrim,
 		classes,
 		className,
-		...canvasProps
+		name,
+		onBlur,
 	} = props;
 	const signerName = signerNameUntrim?.trim();
 	const [resetCanvas, setResetCanvas] = useState(!!signature);
@@ -128,10 +130,17 @@ const SignPadDialog = (inProps: SignPadDialogProps) => {
 	}, [pushDialog, signerName, t]);
 
 	const saveCanvas = useCallback(() => {
-		if (signCanvas.current && !signCanvas.current.isEmpty()) {
-			const newSignature = signCanvas.current
-				.getTrimmedCanvas()
-				.toDataURL("image/png");
+		if (
+			signCanvas.current &&
+			!signCanvas.current.isEmpty() &&
+			signCanvas.current.canvas.current
+		) {
+			const canvas = signCanvas.current.canvas.current;
+			const copy = document.createElement("canvas");
+			copy.width = canvas.width;
+			copy.height = canvas.height;
+			copy.getContext("2d")!.drawImage(canvas, 0, 0);
+			const newSignature = trimCanvas(copy).toDataURL("image/png");
 			if (setSignature) setSignature(newSignature);
 		} else {
 			if (setSignature) setSignature(resetCanvas ? signature : "");
@@ -195,16 +204,20 @@ const SignPadDialog = (inProps: SignPadDialogProps) => {
 					</StyledCloseButton>
 				)}
 			</StyledDialogTitle>
-			<SignDiv className={classes?.signDiv} ref={setCanvasWrapperRef}>
+			<SignDiv
+				className={classes?.signDiv}
+				ref={setCanvasWrapperRef}
+				data-name={name}
+				onBlur={onBlur}
+			>
 				{!resetCanvas ? (
 					<SignaturePad
 						ref={signCanvas}
-						penColor={penColor || "blue"}
-						{...canvasProps}
-						canvasProps={{
-							width: canvasSize[0],
-							height: canvasSize[1],
+						options={{
+							penColor: penColor || "blue",
 						}}
+						width={canvasSize[0]}
+						height={canvasSize[1]}
 					/>
 				) : (
 					<ImageDiv className={classes?.imageDiv}>
@@ -220,8 +233,8 @@ const SignPadDialog = (inProps: SignPadDialogProps) => {
 						value={signature ?? ""}
 						readOnly
 						ref={hiddenRef}
-						name={props.name}
-						onBlur={props.onBlur}
+						name={name}
+						onBlur={onBlur}
 					/>
 				</HiddenDiv>
 			</SignDiv>
