@@ -65,11 +65,20 @@ const ImageDiv = styled("div", {
 	name: "CcSignPadDialog",
 	slot: "imageDiv",
 })({
-	width: 300,
-	height: 150,
+	width: "auto",
+	height: "auto",
 	display: "table-cell",
 	verticalAlign: "middle",
 	textAlign: "center",
+});
+
+const SignatureImage = styled("img", {
+	name: "CcSignPadDialog",
+	slot: "signatureImage",
+})({
+	maxWidth: "100%",
+	maxHeight: "100%",
+	objectFit: "contain",
 });
 
 const HiddenDiv = styled("div", {
@@ -86,6 +95,7 @@ export type SignPadDialogClassKey =
 	| "closeButton"
 	| "signDiv"
 	| "imageDiv"
+	| "signatureImage"
 	| "hiddenDiv";
 
 const SignPadDialog = (inProps: SignPadDialogProps) => {
@@ -221,7 +231,7 @@ const SignPadDialog = (inProps: SignPadDialogProps) => {
 					/>
 				) : (
 					<ImageDiv className={classes?.imageDiv}>
-						<img
+						<SignatureImage
 							src={signature}
 							alt={t("standalone.signature-pad.dialog.signature")}
 						/>
