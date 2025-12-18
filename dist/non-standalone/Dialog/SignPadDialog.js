@@ -2,11 +2,12 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Button, Dialog, DialogActions, IconButton, styled, useThemeProps, } from "@mui/material";
 import MuiDialogTitle from "@mui/material/DialogTitle";
 import { Close } from "@mui/icons-material";
-import SignaturePad from "react-signature-canvas";
+import SignaturePad from "react-signature-pad-wrapper";
 import { useDialogContext } from "../../framework";
 import useCCTranslations from "../../utils/useCCTranslations";
 import { showConfirmDialogBool } from "./Utils";
 import combineClassNames from "../../utils/combineClassNames";
+import trimCanvas from "trim-canvas";
 const RootDialog = styled(Dialog, { name: "CcSignPadDialog", slot: "root" })({});
 const StyledDialogTitle = styled(MuiDialogTitle, {
     name: "CcSignPadDialog",
@@ -54,7 +55,7 @@ const HiddenDiv = styled("div", {
 const SignPadDialog = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcSignPadDialog" });
     const { t } = useCCTranslations();
-    const { penColor, setSignature, signature, signerName: signerNameUntrim, classes, className, ...canvasProps } = props;
+    const { penColor, setSignature, signature, signerName: signerNameUntrim, classes, className, name, onBlur, } = props;
     const signerName = signerNameUntrim?.trim();
     const [resetCanvas, setResetCanvas] = useState(!!signature);
     const [pushDialog, popDialog] = useDialogContext();
@@ -81,10 +82,15 @@ const SignPadDialog = (inProps) => {
         setResetCanvas(false);
     }, [pushDialog, signerName, t]);
     const saveCanvas = useCallback(() => {
-        if (signCanvas.current && !signCanvas.current.isEmpty()) {
-            const newSignature = signCanvas.current
-                .getTrimmedCanvas()
-                .toDataURL("image/png");
+        if (signCanvas.current &&
+            !signCanvas.current.isEmpty() &&
+            signCanvas.current.canvas.current) {
+            const canvas = signCanvas.current.canvas.current;
+            const copy = document.createElement("canvas");
+            copy.width = canvas.width;
+            copy.height = canvas.height;
+            copy.getContext("2d").drawImage(canvas, 0, 0);
+            const newSignature = trimCanvas(copy).toDataURL("image/png");
             if (setSignature)
                 setSignature(newSignature);
         }
@@ -125,14 +131,13 @@ const SignPadDialog = (inProps) => {
                 : t("standalone.signature-pad.dialog.title"),
             closeCanvas && (React.createElement(StyledCloseButton, { "aria-label": t("standalone.signature-pad.dialog.close"), className: classes?.closeButton, onClick: closeCanvas, size: "large" },
                 React.createElement(Close, null)))),
-        React.createElement(SignDiv, { className: classes?.signDiv, ref: setCanvasWrapperRef },
-            !resetCanvas ? (React.createElement(SignaturePad, { ref: signCanvas, penColor: penColor || "blue", ...canvasProps, canvasProps: {
-                    width: canvasSize[0],
-                    height: canvasSize[1],
-                } })) : (React.createElement(ImageDiv, { className: classes?.imageDiv },
+        React.createElement(SignDiv, { className: classes?.signDiv, ref: setCanvasWrapperRef, "data-name": name, onBlur: onBlur },
+            !resetCanvas ? (React.createElement(SignaturePad, { ref: signCanvas, options: {
+                    penColor: penColor || "blue",
+                }, width: canvasSize[0], height: canvasSize[1] })) : (React.createElement(ImageDiv, { className: classes?.imageDiv },
                 React.createElement("img", { src: signature, alt: t("standalone.signature-pad.dialog.signature") }))),
             React.createElement(HiddenDiv, { className: classes?.hiddenDiv },
-                React.createElement("input", { type: "text", value: signature ?? "", readOnly: true, ref: hiddenRef, name: props.name, onBlur: props.onBlur }))),
+                React.createElement("input", { type: "text", value: signature ?? "", readOnly: true, ref: hiddenRef, name: name, onBlur: onBlur }))),
         React.createElement(DialogActions, null,
             React.createElement(Button, { onClick: saveCanvas, color: "primary" }, t("standalone.signature-pad.dialog.save-changes")),
             React.createElement(Button, { onClick: clearCanvas, color: "error" }, t("standalone.signature-pad.dialog.reset")))));
