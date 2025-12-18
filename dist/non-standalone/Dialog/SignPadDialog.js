@@ -39,11 +39,19 @@ const ImageDiv = styled("div", {
     name: "CcSignPadDialog",
     slot: "imageDiv",
 })({
-    width: 300,
-    height: 150,
+    width: "auto",
+    height: "auto",
     display: "table-cell",
     verticalAlign: "middle",
     textAlign: "center",
+});
+const SignatureImage = styled("img", {
+    name: "CcSignPadDialog",
+    slot: "signatureImage",
+})({
+    maxWidth: "100%",
+    maxHeight: "100%",
+    objectFit: "contain",
 });
 const HiddenDiv = styled("div", {
     name: "CcSignPadDialog",
@@ -135,7 +143,7 @@ const SignPadDialog = (inProps) => {
             !resetCanvas ? (React.createElement(SignaturePad, { ref: signCanvas, options: {
                     penColor: penColor || "blue",
                 }, width: canvasSize[0], height: canvasSize[1] })) : (React.createElement(ImageDiv, { className: classes?.imageDiv },
-                React.createElement("img", { src: signature, alt: t("standalone.signature-pad.dialog.signature") }))),
+                React.createElement(SignatureImage, { src: signature, alt: t("standalone.signature-pad.dialog.signature") }))),
             React.createElement(HiddenDiv, { className: classes?.hiddenDiv },
                 React.createElement("input", { type: "text", value: signature ?? "", readOnly: true, ref: hiddenRef, name: name, onBlur: onBlur }))),
         React.createElement(DialogActions, null,
