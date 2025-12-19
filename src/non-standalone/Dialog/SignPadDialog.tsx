@@ -59,6 +59,11 @@ const SignDiv = styled("div", {
 	marginRight: 10,
 	height: "min(calc(100vh - 192px), 300px)",
 	width: "min(calc(100vw - 64px - 20px), 580px)",
+	"& > canvas": {
+		width: "100%",
+		height: "100%",
+		objectFit: "contain",
+	},
 });
 
 const ImageDiv = styled("div", {
