@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState, } from "react";
 import { useDataGridColumnsWidthState, useDataGridProps, useDataGridState, } from "../DataGrid";
-import AutoSizer from "react-virtualized-auto-sizer";
+import { AutoSizer } from "react-virtualized-auto-sizer";
 import Cell, { CellContext } from "./Cell";
 import { applyColumnWidthLimits } from "./ColumnHeader";
 import Loader from "../../Loader";
@@ -154,10 +154,10 @@ const Content = (props) => {
                 DEFAULT_COLUMN_WIDTH)
             : remainingWidth, [columnWidth, columns, disableSelection, remainingWidth]);
     const cellContextValue = useMemo(() => ({ columns, hoverState }), [columns, hoverState]);
-    return (React.createElement(AutoSizer, { onResize: onResize }, ({ width, height }) => (React.createElement(CellContext.Provider, { value: cellContextValue },
-        React.createElement(MultiGrid, { columnCount: columns.length +
-                (disableSelection ? 0 : 1) +
-                (columns.length > 0 ? 1 : 0), columnWidth: getColumnWidth, rowCount: (state.rowsFiltered ?? state.rowsTotal) + 1, rowHeight: getRowHeight, width: width, height: height, onCellsRendered: onSectionRendered, fixedColumnCount: columns.filter((col) => col.isLocked).length +
-                (disableSelection ? 0 : 1), fixedRowCount: 1, styleTopLeftGrid: STYLE_TOP_LEFT, styleTopRightGrid: styleTopRightGrid, styleBottomLeftGrid: styleBottomLeftGrid, styleBottomRightGrid: STYLE_BOTTOM_RIGHT, noContentRenderer: noContentRenderer, globalScrollListener: globalScrollListener }, Cell)))));
+    return (React.createElement(AutoSizer, { onResize: onResize, renderProp: ({ width = 0, height = 0 }) => (React.createElement(CellContext.Provider, { value: cellContextValue },
+            React.createElement(MultiGrid, { columnCount: columns.length +
+                    (disableSelection ? 0 : 1) +
+                    (columns.length > 0 ? 1 : 0), columnWidth: getColumnWidth, rowCount: (state.rowsFiltered ?? state.rowsTotal) + 1, rowHeight: getRowHeight, width: width, height: height, onCellsRendered: onSectionRendered, fixedColumnCount: columns.filter((col) => col.isLocked).length +
+                    (disableSelection ? 0 : 1), fixedRowCount: 1, styleTopLeftGrid: STYLE_TOP_LEFT, styleTopRightGrid: styleTopRightGrid, styleBottomLeftGrid: styleBottomLeftGrid, styleBottomRightGrid: STYLE_BOTTOM_RIGHT, noContentRenderer: noContentRenderer, globalScrollListener: globalScrollListener }, Cell))) }));
 };
 export default React.memo(Content);
