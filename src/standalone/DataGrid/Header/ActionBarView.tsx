@@ -55,11 +55,36 @@ export interface IDataGridActionBarViewProps extends ResetCallbacks {
 }
 
 const ActionBarView = (props: IDataGridActionBarViewProps) => {
+	const {
+		toggleSettings,
+		handleAddNew,
+		handleImport,
+		hasCustomFilterBar,
+		exporters,
+		hideReset,
+		// reset callbacks
+		refresh,
+		resetFilter,
+		resetSort,
+		resetColumn,
+		resetWidth,
+		resetAll,
+	} = props;
 	const theme = useTheme();
 	const bpMdUp = useMediaQuery(theme.breakpoints.up("md"), { noSsr: true });
 	const bpSmUp = useMediaQuery(theme.breakpoints.up("sm"), { noSsr: true });
 
 	const { t } = useCCTranslations();
+
+	const handleToggleSettings = useCallback(
+		(evt: React.MouseEvent) => {
+			evt.stopPropagation();
+			evt.preventDefault();
+			if (toggleSettings) toggleSettings();
+		},
+		[toggleSettings],
+	);
+
 	const [exportAnchorEl, setExportAnchorEl] =
 		useState<MenuProps["anchorEl"]>(undefined);
 	const openExportMenu = useCallback(
@@ -91,33 +116,26 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 		setSettingsAnchorEl(undefined);
 	}, []);
 
-	const addButtons: IDataGridAddButton[] = Array.isArray(props.handleAddNew)
-		? props.handleAddNew
-		: props.handleAddNew == null
+	const addButtons: IDataGridAddButton[] = Array.isArray(handleAddNew)
+		? handleAddNew
+		: handleAddNew == null
 			? []
 			: [
 					{
 						icon: undefined,
 						label: t("standalone.data-grid.header.new") ?? "",
 						onClick:
-							typeof props.handleAddNew === "function"
-								? props.handleAddNew
-								: undefined,
+							typeof handleAddNew === "function" ? handleAddNew : undefined,
 						disableHint:
-							typeof props.handleAddNew === "string"
-								? props.handleAddNew
-								: undefined,
+							typeof handleAddNew === "string" ? handleAddNew : undefined,
 					},
 				];
 
 	return (
 		<Grid container alignItems={"stretch"} wrap={"nowrap"}>
-			{props.hasCustomFilterBar &&
+			{hasCustomFilterBar &&
 			!bpSmUp &&
-			(props.toggleSettings ||
-				!props.hideReset ||
-				props.exporters ||
-				props.handleImport) ? (
+			(toggleSettings || !hideReset || exporters || handleImport) ? (
 				<>
 					<Grid key={"divider-1"}>
 						<VerticalDivider />
@@ -127,18 +145,18 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 					</IconButton>
 					<ActionBarMenu
 						anchorEl={settingsAnchorEl}
-						toggleSettings={props.toggleSettings}
-						openResetDialog={props.hideReset ? undefined : openResetDialog}
-						openExportMenu={props.exporters ? openExportMenu : undefined}
-						handleImport={props.handleImport}
+						toggleSettings={toggleSettings}
+						openResetDialog={hideReset ? undefined : openResetDialog}
+						openExportMenu={exporters ? openExportMenu : undefined}
+						handleImport={handleImport}
 						onClose={closeSettingsMenu}
 					/>
 				</>
 			) : (
 				<>
-					{props.toggleSettings && (
+					{toggleSettings && (
 						<>
-							{props.hasCustomFilterBar && (
+							{hasCustomFilterBar && (
 								<Grid key={"divider-1"}>
 									<VerticalDivider />
 								</Grid>
@@ -152,7 +170,7 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 											</SmallestIconButton>
 										}
 										labelText={t("standalone.data-grid.header.settings")}
-										onClick={props.toggleSettings}
+										onClick={handleToggleSettings}
 										labelPlacement={"bottom"}
 									/>
 								) : (
@@ -161,7 +179,7 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 									>
 										<IconButton
 											color={"primary"}
-											onClick={props.toggleSettings}
+											onClick={handleToggleSettings}
 											size="large"
 										>
 											<TuneIcon />
@@ -171,7 +189,7 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 							</Grid>
 						</>
 					)}
-					{!props.hideReset && (
+					{!hideReset && (
 						<>
 							<Grid key={"divider-4"}>
 								<VerticalDivider />
@@ -202,7 +220,7 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 							</Grid>
 						</>
 					)}
-					{props.exporters && (
+					{exporters && (
 						<>
 							<Grid key={"divider-3"}>
 								<VerticalDivider />
@@ -233,14 +251,14 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 									</Tooltip>
 								)}
 								<ExportMenu
-									exporters={props.exporters}
+									exporters={exporters}
 									anchorEl={exportAnchorEl}
 									onClose={closeExportMenu}
 								/>
 							</Grid>
 						</>
 					)}
-					{props.handleImport && (
+					{handleImport && (
 						<>
 							<Grid>
 								<VerticalDivider />
@@ -254,7 +272,7 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 											</SmallestIconButton>
 										}
 										labelText={t("standalone.data-grid.header.import")}
-										onClick={props.handleImport}
+										onClick={handleImport}
 										labelPlacement={"bottom"}
 									/>
 								) : (
@@ -263,7 +281,7 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 									>
 										<IconButton
 											color={"primary"}
-											onClick={props.handleImport}
+											onClick={handleImport}
 											size="large"
 										>
 											<ImportIcon />
@@ -315,12 +333,12 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 			<ResetMenu
 				anchorEl={resetAnchorEl}
 				onClose={closeResetMenu}
-				refresh={props.refresh}
-				resetFilter={props.resetFilter}
-				resetSort={props.resetSort}
-				resetColumn={props.resetColumn}
-				resetWidth={props.resetWidth}
-				resetAll={props.resetAll}
+				refresh={refresh}
+				resetFilter={resetFilter}
+				resetSort={resetSort}
+				resetColumn={resetColumn}
+				resetWidth={resetWidth}
+				resetAll={resetAll}
 			/>
 		</Grid>
 	);
