@@ -13,7 +13,7 @@ import {
 	useDataGridProps,
 	useDataGridState,
 } from "../DataGrid";
-import AutoSizer, { Size } from "react-virtualized-auto-sizer";
+import { AutoSizer, Size } from "react-virtualized-auto-sizer";
 import Cell, { CellContext } from "./Cell";
 import { applyColumnWidthLimits } from "./ColumnHeader";
 import Loader from "../../Loader";
@@ -272,8 +272,9 @@ const Content = (props: IDataGridContentProps) => {
 	);
 
 	return (
-		<AutoSizer onResize={onResize}>
-			{({ width, height }) => (
+		<AutoSizer
+			onResize={onResize}
+			renderProp={({ width = 0, height = 0 }) => (
 				<CellContext.Provider value={cellContextValue}>
 					<MultiGrid
 						columnCount={
@@ -303,7 +304,7 @@ const Content = (props: IDataGridContentProps) => {
 					</MultiGrid>
 				</CellContext.Provider>
 			)}
-		</AutoSizer>
+		/>
 	);
 };
 
