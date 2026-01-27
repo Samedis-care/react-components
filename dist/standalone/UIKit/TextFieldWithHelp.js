@@ -30,6 +30,8 @@ const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(props
         nativeInputValueSetter.call(inputRef.current, "");
         const event = new Event("input", { bubbles: true });
         inputRef.current.dispatchEvent(event);
+        inputRef.current.blur();
+        inputRef.current.focus();
     }, [muiProps.multiline, customHandleClear]);
     // keep "hasValue" up to date
     const handleChange = useCallback((evt) => {

@@ -13,3 +13,5 @@ export * from "./RendererColor";
 export { default as ModelDataTypeColorRendererCC } from "./RendererColor";
 export { default as ModelDataTypeStringLocalizedSingleRenderer } from "./RendererStringLocalizedSingle";
 export * from "./RendererStringLocalizedSingle";
+export * from "./RendererStringArray";
+export { default as ModelDataTypeStringArrayRendererCC } from "./RendererStringArray";
