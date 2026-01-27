@@ -74,6 +74,8 @@ const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(
 
 			const event = new Event("input", { bubbles: true });
 			inputRef.current.dispatchEvent(event);
+			inputRef.current.blur();
+			inputRef.current.focus();
 		},
 		[muiProps.multiline, customHandleClear],
 	);
