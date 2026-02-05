@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useSta
 import { Grid as VGrid, } from "react-window";
 import { styled, useThemeProps } from "@mui/material";
 const Root = styled("div", { name: "CcMultiGrid", slot: "root" })({
-    position: "relative",
+    position: "absolute",
 });
 const BottomLeftVariableSizeGrid = styled(VGrid, {
     name: "CcMultiGrid",
