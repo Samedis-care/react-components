@@ -42,7 +42,7 @@ export interface MultiGridProps {
 }
 
 const Root = styled("div", { name: "CcMultiGrid", slot: "root" })({
-	position: "relative",
+	position: "absolute",
 });
 
 const BottomLeftVariableSizeGrid = styled(VGrid, {
