@@ -1,8 +1,11 @@
 import React from "react";
 import { FormHelperText } from "@mui/material";
-import Model, { ModelFieldName, PageVisibility } from "../../Model";
+import Model, {
+	ModelFieldName,
+	ModelIdFilterData,
+	PageVisibility,
+} from "../../Model";
 import ModelRenderParams from "../../RenderParams";
-import TypeStringArray from "../TypeStringArray";
 import BackendMultiSelectWithTags, {
 	BackendMultiSelectWithTagsProps,
 } from "../../../../backend-components/Selector/BackendMultiSelectWithTags";
@@ -11,6 +14,7 @@ import {
 	FormControlFieldsetCC,
 	MultiSelectorData,
 } from "../../../../standalone";
+import TypeIds from "../TypeIds";
 
 type OmitProperties =
 	| "selected"
@@ -32,7 +36,8 @@ class RendererBackendMultiSelectWithTags<
 	DataCustomT,
 	GroupDataT extends BaseSelectorData,
 	DataDataT extends MultiSelectorData,
-> extends TypeStringArray {
+> extends TypeIds {
+	idFilter?: ModelIdFilterData;
 	private readonly props: Omit<
 		BackendMultiSelectWithTagsProps<
 			GroupKeyT,
@@ -64,6 +69,15 @@ class RendererBackendMultiSelectWithTags<
 	) {
 		super();
 		this.props = props;
+		this.idFilter = {
+			...props,
+			groupSorter: undefined,
+			getIdOfData: undefined,
+			modelToSelectorData: props.convData,
+			sort: props.dataSort,
+			lru: undefined,
+			endAdornment: undefined,
+		};
 	}
 
 	render(params: ModelRenderParams<string[]>): React.ReactElement {

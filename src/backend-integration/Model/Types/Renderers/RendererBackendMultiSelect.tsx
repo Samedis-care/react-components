@@ -1,8 +1,11 @@
 import React from "react";
 import { FormHelperText } from "@mui/material";
-import Model, { ModelFieldName, PageVisibility } from "../../Model";
+import Model, {
+	ModelFieldName,
+	ModelIdFilterData,
+	PageVisibility,
+} from "../../Model";
 import ModelRenderParams from "../../RenderParams";
-import TypeStringArray from "../TypeStringArray";
 import {
 	FormControlFieldsetCC,
 	MultiSelectorData,
@@ -11,6 +14,7 @@ import {
 	FormBackendMultiSelect,
 	FormBackendMultiSelectProps,
 } from "../../../../backend-components/Selector/FormSelectors";
+import TypeIds from "../TypeIds";
 
 type OmitProperties =
 	| "selected"
@@ -26,7 +30,8 @@ class RendererBackendMultiSelect<
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
 	CustomT,
-> extends TypeStringArray {
+> extends TypeIds {
+	idFilter?: ModelIdFilterData;
 	private readonly props: Omit<
 		FormBackendMultiSelectProps<KeyT, VisibilityT, CustomT, MultiSelectorData>,
 		OmitProperties
@@ -45,6 +50,18 @@ class RendererBackendMultiSelect<
 	) {
 		super();
 		this.props = props;
+		this.idFilter = {
+			...props,
+			lru: undefined,
+			onAddNew: undefined,
+			classes: undefined,
+			endAdornment: undefined,
+			modelFetch: props.modelFetch as unknown as Model<
+				ModelFieldName,
+				PageVisibility,
+				unknown
+			>,
+		};
 	}
 
 	render(params: ModelRenderParams<string[]>): React.ReactElement {

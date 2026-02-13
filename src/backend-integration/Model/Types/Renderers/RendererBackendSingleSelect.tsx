@@ -1,6 +1,10 @@
 import React from "react";
 import { FormHelperText } from "@mui/material";
-import Model, { ModelFieldName, PageVisibility } from "../../Model";
+import Model, {
+	ModelFieldName,
+	ModelIdFilterData,
+	PageVisibility,
+} from "../../Model";
 import ModelRenderParams from "../../RenderParams";
 import TypeId from "../TypeId";
 import { BackendSingleSelectProps } from "../../../../backend-components/Selector/BackendSingleSelect";
@@ -41,6 +45,7 @@ class RendererBackendSingleSelect<
 	VisibilityT extends PageVisibility,
 	CustomT,
 > extends TypeId {
+	idFilter?: ModelIdFilterData;
 	private readonly props: RendererBackendSingleSelectProps<
 		KeyT,
 		VisibilityT,
@@ -52,6 +57,18 @@ class RendererBackendSingleSelect<
 	) {
 		super();
 		this.props = props;
+		this.idFilter = {
+			...props,
+			lru: undefined,
+			onAddNew: undefined,
+			classes: undefined,
+			endAdornment: undefined,
+			modelFetch: props.modelFetch as unknown as Model<
+				ModelFieldName,
+				PageVisibility,
+				unknown
+			>,
+		};
 	}
 
 	render(params: ModelRenderParams<string | null>): React.ReactElement {

@@ -2,11 +2,11 @@ import React from "react";
 import { FormControl } from "@mui/material";
 import Model, { ModelFieldName, PageVisibility } from "../../Model";
 import ModelRenderParams from "../../RenderParams";
-import TypeStringArray from "../TypeStringArray";
 import BackendDataGridMultiSelect, {
 	BackendDataGridMultiSelectProps,
 } from "../../../../backend-components/Selector/BackendDataGridMultiSelect";
 import { FormHelperTextCC } from "../../../../standalone/UIKit/MuiWarning";
+import TypeIds from "../TypeIds";
 
 type OmitProperties = "selected" | "onChange" | "readOnly" | "model";
 
@@ -17,7 +17,7 @@ class RendererBackendDataGridMultiSelect<
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
 	CustomT,
-> extends TypeStringArray {
+> extends TypeIds {
 	private readonly props?: Omit<
 		BackendDataGridMultiSelectProps<KeyT, VisibilityT, CustomT>,
 		OmitProperties

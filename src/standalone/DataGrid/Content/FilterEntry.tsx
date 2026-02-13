@@ -17,7 +17,10 @@ import { Delete as ClearIcon } from "@mui/icons-material";
 import FilterCombinator from "./FilterCombinator";
 import { ModelFilterType } from "../../../backend-integration/Model";
 import {
+	DataGridCustomFilterData,
 	DataGridFilterClearButton,
+	DataGridIdFilterContainer,
+	DataGridIdFilterData,
 	DataGridSetFilterContainer,
 	DataGridSetFilterData,
 	DataGridSetFilterListDivider,
@@ -34,6 +37,7 @@ import useCCTranslations from "../../../utils/useCCTranslations";
 import { normalizeDate } from "../../../backend-integration/Model/Types/Utils/DateUtils";
 import { SelectChangeEvent } from "@mui/material/Select/SelectInput";
 import moment, { Moment } from "moment";
+import { BackendMultiSelect } from "../../../backend-components";
 
 export type FilterType =
 	| "contains"
@@ -136,8 +140,8 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 			"localized-string",
 			"combined-string",
 		].includes(props.valueType ?? "")
-			? ["contains", "equals", "matches"]
-			: props.valueType === "enum"
+			? ["startsWith", "contains", "equals", "matches"]
+			: ["enum", "id"].includes(props.valueType ?? "")
 				? ["inSet"]
 				: ["equals", "matches"];
 		return (
@@ -302,6 +306,11 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 		updateParent();
 	};
 
+	const handleIdFilterSelect = (selected: string[]) => {
+		filterValue = selected.join(",");
+		updateParent();
+	};
+
 	let filterTypeMenuItems = [
 		checkSupport(props.valueType, "equals") && (
 			<MenuItem key={"equals"} value={"equals"}>
@@ -420,6 +429,31 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 	}
 
 	filterTypeMenuItems = filterTypeMenuItems.filter((e) => e);
+
+	// filter type custom
+	const setCustomFilter = useCallback(
+		(customFilter: unknown) => {
+			onChange({
+				type: "equals",
+				value1: JSON.stringify(customFilter),
+				value2: "",
+			});
+		},
+		[onChange],
+	);
+
+	if (isFirstFilter && props.valueType === "custom") {
+		const customFilterData = props.valueData as DataGridCustomFilterData;
+		const customFilterValue: unknown | undefined = props.value?.value1
+			? JSON.parse(props.value?.value1)
+			: undefined;
+		return React.createElement(customFilterData.filterComponent, {
+			filter: customFilterValue,
+			setFilter: setCustomFilter,
+			close,
+		});
+	}
+	// END filter type custom
 
 	return (
 		<>
@@ -640,8 +674,35 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 					</DataGridSetFilterContainer>
 				</>
 			)}
+			{props.valueType === "id" && (
+				<>
+					<DataGridIdFilterContainer
+						size={12}
+						className={classes?.idFilterContainer}
+					>
+						{checkSupport(props.valueType, "notInSet") && (
+							<FormControlLabel
+								control={
+									<Checkbox
+										checked={enumFilterInverted}
+										onChange={onFilterTypeChangeEnum}
+									/>
+								}
+								label={t("standalone.data-grid.content.set-filter.invert")}
+							/>
+						)}
+						<BackendMultiSelect
+							{...(props.valueData as DataGridIdFilterData)}
+							selected={filterValue ? filterValue.split(",") : []}
+							onSelect={handleIdFilterSelect}
+							confirmDelete={false}
+						/>
+					</DataGridIdFilterContainer>
+				</>
+			)}
 			{filterValue &&
 				props.valueType !== "enum" &&
+				props.valueType !== "id" &&
 				props.valueType !== "boolean" &&
 				(!maxDepth || depth <= maxDepth) && (
 					<>

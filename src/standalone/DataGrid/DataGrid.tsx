@@ -36,7 +36,11 @@ import isObjectEmpty from "../../utils/isObjectEmpty";
 import measureText from "../../utils/measureText";
 import shallowCompareArray from "../../utils/shallowCompareArray";
 import { dataGridPrepareFiltersAndSorts } from "./CallbackUtil";
-import { ModelFilterType } from "../../backend-integration/Model";
+import {
+	ModelFieldName,
+	ModelFilterType,
+	PageVisibility,
+} from "../../backend-integration/Model";
 import { HEADER_PADDING } from "./Content/ColumnHeader";
 import CustomFilterDialog from "./CustomFilterDialog";
 import StatePersistence, {
@@ -52,6 +56,8 @@ import ComponentWithLabel, {
 } from "../UIKit/ComponentWithLabel";
 import FilterIcon from "../Icons/FilterIcon";
 import deepClone from "../../utils/deepClone";
+import { BackendMultiSelectProps } from "../../backend-components/Selector/BackendMultiSelect";
+import { MultiSelectorData } from "../Selector";
 
 export interface DataGridProps
 	extends IDataGridHeaderProps, IDataGridColumnProps, IDataGridCallbacks {
@@ -373,6 +379,34 @@ export interface DataGridSetFilterDataEntry {
 }
 
 export type DataGridSetFilterData = DataGridSetFilterDataEntry[];
+export type DataGridIdFilterData = Omit<
+	BackendMultiSelectProps<
+		ModelFieldName,
+		PageVisibility,
+		unknown,
+		MultiSelectorData
+	>,
+	"selected" | "onSelect"
+>;
+
+export interface DataGridCustomFilterDataComponentProps<T = unknown> {
+	/**
+	 * custom filter data
+	 */
+	filter: T | undefined;
+	/**
+	 * setter for custom filter data
+	 * @param value custom filter data
+	 */
+	setFilter: (value: T | undefined) => void;
+	/**
+	 * Callback to close filter dialog
+	 */
+	close: () => void;
+}
+export type DataGridCustomFilterData = {
+	filterComponent: React.ComponentType<DataGridCustomFilterDataComponentProps>;
+};
 
 export interface IDataGridColumnDef {
 	/**
@@ -395,8 +429,13 @@ export interface IDataGridColumnDef {
 	/**
 	 * Filter data, required for the following types:
 	 * - enum (DataGridSetFilterData)
+	 * - id (DataGridIdFilterData)
+	 * - custom (DataGridCustomFilterData)
 	 */
-	filterData?: DataGridSetFilterData;
+	filterData?:
+		| DataGridSetFilterData
+		| DataGridIdFilterData
+		| DataGridCustomFilterData;
 	/**
 	 * Hidden by default?
 	 */
@@ -816,6 +855,14 @@ export const DataGridSetFilterContainer = styled(Grid, {
 	overflow: "auto",
 }) as typeof Grid;
 
+export const DataGridIdFilterContainer = styled(Grid, {
+	name: "CcDataGrid",
+	slot: "idFilterContainer",
+})({
+	maxHeight: "40vh",
+	overflow: "auto",
+}) as typeof Grid;
+
 export const DataGridFilterBarGrid = styled(Grid, {
 	name: "CcDataGrid",
 	slot: "filterBarGrid",
@@ -1003,6 +1050,7 @@ export type DataGridClassKey =
 	| "setFilterListItemDivider"
 	| "setFilterListItem"
 	| "setFilterContainer"
+	| "idFilterContainer"
 	| "filterBarGrid"
 	| "filterBarBox"
 	| "filterClearBtn"

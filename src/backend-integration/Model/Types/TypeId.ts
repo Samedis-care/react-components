@@ -14,7 +14,7 @@ abstract class TypeId implements Type<string | null> {
 	}
 
 	getFilterType(): FilterType {
-		return "string";
+		return "id";
 	}
 
 	getDefaultValue(): string | null {

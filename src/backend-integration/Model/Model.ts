@@ -13,7 +13,8 @@ import {
 	UseQueryResult,
 } from "@tanstack/react-query";
 import {
-	DataGridSetFilterData,
+	DataGridCustomFilterData,
+	DataGridIdFilterData,
 	DataGridSetFilterDataEntry,
 	IDataGridColumnDef,
 	IDataGridLoadDataParameters,
@@ -35,6 +36,9 @@ export interface PageVisibility {
 	edit: VisibilityCallback;
 	create: VisibilityCallback;
 }
+
+export type ModelIdFilterData = Omit<DataGridIdFilterData, "model">;
+export type ModelCustomFilterData = DataGridCustomFilterData;
 
 export interface ModelFieldDefinition<
 	TypeT,
@@ -988,11 +992,11 @@ class Model<
 				CustomT
 			>;
 
-			let filterData: DataGridSetFilterData | undefined = undefined;
+			let filterData: IDataGridColumnDef["filterData"] = undefined;
 			if (value.type.getFilterType() === "enum") {
 				if (!value.type.getEnumValues)
 					throw new Error(
-						"Model Type Filter Type is enum, but getEnumValues not set",
+						`Field ${key} Model Type Filter Type is enum, but getEnumValues not set`,
 					);
 				filterData = value.type
 					.getEnumValues()
@@ -1014,6 +1018,31 @@ class Model<
 							value: boolVal ? "true" : "false",
 						}) as DataGridSetFilterDataEntry,
 				);
+			} else if (value.type.getFilterType() === "id" && value.filterable) {
+				if (value.getRelationModelValues)
+					throw new Error(
+						`Unsupported grid column filter ID for field ${key} with relation model values`,
+					);
+				if (!value.getRelationModel)
+					throw new Error(
+						`Unsupported grid column filter ID for field ${key} without relation model`,
+					);
+				if (!value.type.idFilter)
+					throw new Error(
+						`Field ${key} with grid column filter of type ID has no idFilter props`,
+					);
+				filterData = {
+					model: value.getRelationModel(null, {}),
+					...value.type.idFilter,
+				} as DataGridIdFilterData;
+			} else if (value.type.getFilterType() === "custom" && value.filterable) {
+				if (!value.type.customFilter)
+					throw new Error(
+						`Field ${key} with grid column filter of type CUSTOM has no customFilter props`,
+					);
+				filterData = {
+					...value.type.customFilter,
+				} as DataGridCustomFilterData;
 			}
 
 			return {

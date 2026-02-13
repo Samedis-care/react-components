@@ -134,7 +134,8 @@ export const modifyReactLabel = <DataT extends BaseSelectorData>(
  * @param data The data set
  */
 export const selectorLocalLoadHandler =
-	(data: BaseSelectorData[]) => (query: string) => {
+	<DataT extends BaseSelectorData>(data: DataT[]) =>
+	(query: string) => {
 		query = query.toLowerCase();
 		return uniqueArray([
 			...data.filter((entry) =>
