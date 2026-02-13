@@ -2,7 +2,7 @@ import React, { useCallback, useState } from "react";
 import { Box, Grid, Popover, Tooltip } from "@mui/material";
 import { ArrowDownward, ArrowUpward } from "@mui/icons-material";
 import FilterEntry from "./FilterEntry";
-import { DataGridColumnHeaderFilterActiveIcon, DataGridColumnHeaderFilterButton, DataGridColumnHeaderFilterIcon, DataGridColumnHeaderFilterPopup, DataGridColumnHeaderFilterPopupDateTime, DataGridColumnHeaderFilterPopupEnum, DataGridColumnHeaderLabel, DataGridColumnHeaderResizer, DataGridColumnHeaderSortIcon, useDataGridProps, } from "../DataGrid";
+import { DataGridColumnHeaderFilterActiveIcon, DataGridColumnHeaderFilterButton, DataGridColumnHeaderFilterIcon, DataGridColumnHeaderFilterPopup, DataGridColumnHeaderFilterPopupDateTime, DataGridColumnHeaderFilterPopupEnum, DataGridColumnHeaderFilterPopupId, DataGridColumnHeaderLabel, DataGridColumnHeaderResizer, DataGridColumnHeaderSortIcon, useDataGridProps, } from "../DataGrid";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import combineClassNames from "../../../utils/combineClassNames";
 const anchorOrigin = {
@@ -35,7 +35,9 @@ const ColumnHeaderContent = (props) => {
         ? DataGridColumnHeaderFilterPopupDateTime
         : props.columnType === "enum"
             ? DataGridColumnHeaderFilterPopupEnum
-            : DataGridColumnHeaderFilterPopup;
+            : props.columnType === "id"
+                ? DataGridColumnHeaderFilterPopupId
+                : DataGridColumnHeaderFilterPopup;
     return (React.createElement(React.Fragment, null,
         React.createElement(Grid, { container: true, justifyContent: "flex-start", wrap: "nowrap" },
             React.createElement(DataGridColumnHeaderLabel, { className: classes?.columnHeaderLabel, key: "header" },
