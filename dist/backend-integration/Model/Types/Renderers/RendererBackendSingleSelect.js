@@ -7,10 +7,19 @@ import { FormBackendSingleSelect, } from "../../../../backend-components/Selecto
  * Renders TypeEnum as drop-down selector (with search)
  */
 class RendererBackendSingleSelect extends TypeId {
+    idFilter;
     props;
     constructor(props) {
         super();
         this.props = props;
+        this.idFilter = {
+            ...props,
+            lru: undefined,
+            onAddNew: undefined,
+            classes: undefined,
+            endAdornment: undefined,
+            modelFetch: props.modelFetch,
+        };
     }
     render(params) {
         const { visibility, field, value, values, label, handleChange, handleBlur, errorMsg, warningMsg, relationData, relationModel, } = params;

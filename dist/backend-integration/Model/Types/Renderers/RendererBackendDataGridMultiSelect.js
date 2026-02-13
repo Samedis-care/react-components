@@ -1,12 +1,12 @@
 import React from "react";
 import { FormControl } from "@mui/material";
-import TypeStringArray from "../TypeStringArray";
 import BackendDataGridMultiSelect from "../../../../backend-components/Selector/BackendDataGridMultiSelect";
 import { FormHelperTextCC } from "../../../../standalone/UIKit/MuiWarning";
+import TypeIds from "../TypeIds";
 /**
  * Renders TypeEnum as drop-down selector (with search)
  */
-class RendererBackendDataGridMultiSelect extends TypeStringArray {
+class RendererBackendDataGridMultiSelect extends TypeIds {
     props;
     constructor(props) {
         super();

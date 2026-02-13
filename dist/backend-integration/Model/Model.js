@@ -520,7 +520,7 @@ class Model {
             let filterData = undefined;
             if (value.type.getFilterType() === "enum") {
                 if (!value.type.getEnumValues)
-                    throw new Error("Model Type Filter Type is enum, but getEnumValues not set");
+                    throw new Error(`Field ${key} Model Type Filter Type is enum, but getEnumValues not set`);
                 filterData = value.type
                     .getEnumValues()
                     .filter((value) => !(value.invisibleInGridFilter ?? value.invisible))
@@ -536,6 +536,25 @@ class Model {
                     getLabelText: value.type.stringify.bind(value.type, boolVal),
                     value: boolVal ? "true" : "false",
                 }));
+            }
+            else if (value.type.getFilterType() === "id" && value.filterable) {
+                if (value.getRelationModelValues)
+                    throw new Error(`Unsupported grid column filter ID for field ${key} with relation model values`);
+                if (!value.getRelationModel)
+                    throw new Error(`Unsupported grid column filter ID for field ${key} without relation model`);
+                if (!value.type.idFilter)
+                    throw new Error(`Field ${key} with grid column filter of type ID has no idFilter props`);
+                filterData = {
+                    model: value.getRelationModel(null, {}),
+                    ...value.type.idFilter,
+                };
+            }
+            else if (value.type.getFilterType() === "custom" && value.filterable) {
+                if (!value.type.customFilter)
+                    throw new Error(`Field ${key} with grid column filter of type CUSTOM has no customFilter props`);
+                filterData = {
+                    ...value.type.customFilter,
+                };
             }
             return {
                 field: key,

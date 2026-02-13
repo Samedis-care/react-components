@@ -1,16 +1,25 @@
 import React from "react";
 import { FormHelperText } from "@mui/material";
-import TypeStringArray from "../TypeStringArray";
 import { FormControlFieldsetCC, } from "../../../../standalone";
 import { FormBackendMultiSelect, } from "../../../../backend-components/Selector/FormSelectors";
+import TypeIds from "../TypeIds";
 /**
  * Renders TypeEnum as drop-down selector (with search)
  */
-class RendererBackendMultiSelect extends TypeStringArray {
+class RendererBackendMultiSelect extends TypeIds {
+    idFilter;
     props;
     constructor(props) {
         super();
         this.props = props;
+        this.idFilter = {
+            ...props,
+            lru: undefined,
+            onAddNew: undefined,
+            classes: undefined,
+            endAdornment: undefined,
+            modelFetch: props.modelFetch,
+        };
     }
     render(params) {
         const { visibility, field, label, handleChange, handleBlur, errorMsg, warningMsg, relationData, relationModel, value, } = params;

@@ -2,12 +2,14 @@ import Type from "./Type";
 import Visibility, { VisibilityCallback } from "./Visibility";
 import Connector, { ConnectorIndex2Params, ResponseMeta } from "../Connector/Connector";
 import { QueryKey, UseMutationResult, UseQueryOptions, UseQueryResult } from "@tanstack/react-query";
-import { IDataGridColumnDef, IDataGridLoadDataParameters } from "../../standalone/DataGrid/DataGrid";
+import { DataGridCustomFilterData, DataGridIdFilterData, IDataGridColumnDef, IDataGridLoadDataParameters } from "../../standalone/DataGrid/DataGrid";
 export interface PageVisibility {
     overview: Visibility;
     edit: VisibilityCallback;
     create: VisibilityCallback;
 }
+export type ModelIdFilterData = Omit<DataGridIdFilterData, "model">;
+export type ModelCustomFilterData = DataGridCustomFilterData;
 export interface ModelFieldDefinition<TypeT, KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT> {
     /**
      * The Renderer of the field

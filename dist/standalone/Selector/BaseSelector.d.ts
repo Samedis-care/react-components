@@ -72,7 +72,7 @@ export declare const modifyReactLabel: <DataT extends BaseSelectorData>(data: Da
  * Performs a case-insensitive label search
  * @param data The data set
  */
-export declare const selectorLocalLoadHandler: (data: BaseSelectorData[]) => (query: string) => BaseSelectorData[];
+export declare const selectorLocalLoadHandler: <DataT extends BaseSelectorData>(data: DataT[]) => (query: string) => DataT[];
 export interface SelectorLruOptions<DataT extends BaseSelectorData> {
     /**
      * The max amount of LRU cache entries

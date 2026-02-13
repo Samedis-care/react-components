@@ -3,11 +3,13 @@ import { Box, Collapse, Divider, Grid, IconButton, ListItem, Paper, SvgIconProps
 import { Apps as AppsIcon, Search as SearchIcon } from "@mui/icons-material";
 import { IDataGridHeaderProps } from "./Header";
 import { FilterType, IFilterDef } from "./Content/FilterEntry";
-import { ModelFilterType } from "../../backend-integration/Model";
+import { ModelFieldName, ModelFilterType, PageVisibility } from "../../backend-integration/Model";
 import { IDataGridContentSelectRowViewProps } from "./Content/SelectRowView";
 import Checkbox from "../UIKit/Checkbox";
 import ComponentWithLabel from "../UIKit/ComponentWithLabel";
 import FilterIcon from "../Icons/FilterIcon";
+import { BackendMultiSelectProps } from "../../backend-components/Selector/BackendMultiSelect";
+import { MultiSelectorData } from "../Selector";
 export interface DataGridProps extends IDataGridHeaderProps, IDataGridColumnProps, IDataGridCallbacks {
     /**
      * Custom CSS class to apply to root
@@ -311,6 +313,25 @@ export interface DataGridSetFilterDataEntry {
     isDivider?: boolean;
 }
 export type DataGridSetFilterData = DataGridSetFilterDataEntry[];
+export type DataGridIdFilterData = Omit<BackendMultiSelectProps<ModelFieldName, PageVisibility, unknown, MultiSelectorData>, "selected" | "onSelect">;
+export interface DataGridCustomFilterDataComponentProps<T = unknown> {
+    /**
+     * custom filter data
+     */
+    filter: T | undefined;
+    /**
+     * setter for custom filter data
+     * @param value custom filter data
+     */
+    setFilter: (value: T | undefined) => void;
+    /**
+     * Callback to close filter dialog
+     */
+    close: () => void;
+}
+export type DataGridCustomFilterData = {
+    filterComponent: React.ComponentType<DataGridCustomFilterDataComponentProps>;
+};
 export interface IDataGridColumnDef {
     /**
      * The field name
@@ -332,8 +353,10 @@ export interface IDataGridColumnDef {
     /**
      * Filter data, required for the following types:
      * - enum (DataGridSetFilterData)
+     * - id (DataGridIdFilterData)
+     * - custom (DataGridCustomFilterData)
      */
-    filterData?: DataGridSetFilterData;
+    filterData?: DataGridSetFilterData | DataGridIdFilterData | DataGridCustomFilterData;
     /**
      * Hidden by default?
      */
@@ -524,6 +547,7 @@ export declare const DataGridSetFilterListDivider: typeof Divider;
 export declare const DataGridSetFilterListItemDivider: typeof ListItem;
 export declare const DataGridSetFilterListItem: typeof ListItem;
 export declare const DataGridSetFilterContainer: typeof Grid;
+export declare const DataGridIdFilterContainer: typeof Grid;
 export declare const DataGridFilterBarGrid: typeof Grid;
 export declare const DataGridFilterBarBox: typeof Box;
 export declare const DataGridFilterClearButton: typeof IconButton;
@@ -540,7 +564,7 @@ export declare const DataGridColumnHeaderFilterActiveIcon: typeof FilterIcon;
 export declare const DataGridColumnHeaderFilterButton: typeof IconButton;
 export declare const DataGridQuickFilterIcon: typeof SearchIcon;
 export declare const DataGridCustomFilterIcon: typeof AppsIcon;
-export type DataGridClassKey = "root" | "header" | "content" | "footer" | "contentOverlayCollapse" | "contentOverlayPaper" | "contentOverlayClosed" | "customFilterContainer" | "selectCheckbox" | "selectAllCheckbox" | "selectAllWrapper" | "paginationText" | "setFilterListDivider" | "setFilterListItemDivider" | "setFilterListItem" | "setFilterContainer" | "filterBarGrid" | "filterBarBox" | "filterClearBtn" | "columnHeaderLabel" | "columnHeaderResizer" | "columnHeaderSortIcon" | "columnHeaderContentWrapper" | "cell" | "columnHeaderFilterPopup" | "columnHeaderFilterPopupEnum" | "columnHeaderFilterPopupDateTime" | "columnHeaderFilterIcon" | "columnHeaderFilterActiveIcon" | "columnHeaderFilterButton" | "quickFilterIcon" | "customFilterIcon" | "customFilterMulti" | "customFilterMultiBackend" | "customFilterSingle" | "customFilterSingleBackend" | "centeredStickyTypography" | "settingsTableCell" | "settingsTable" | "settingsTableRow" | "settingsTableHead" | "settingsTableBody" | "customFilterContainerHeader" | "search";
+export type DataGridClassKey = "root" | "header" | "content" | "footer" | "contentOverlayCollapse" | "contentOverlayPaper" | "contentOverlayClosed" | "customFilterContainer" | "selectCheckbox" | "selectAllCheckbox" | "selectAllWrapper" | "paginationText" | "setFilterListDivider" | "setFilterListItemDivider" | "setFilterListItem" | "setFilterContainer" | "idFilterContainer" | "filterBarGrid" | "filterBarBox" | "filterClearBtn" | "columnHeaderLabel" | "columnHeaderResizer" | "columnHeaderSortIcon" | "columnHeaderContentWrapper" | "cell" | "columnHeaderFilterPopup" | "columnHeaderFilterPopupEnum" | "columnHeaderFilterPopupDateTime" | "columnHeaderFilterIcon" | "columnHeaderFilterActiveIcon" | "columnHeaderFilterButton" | "quickFilterIcon" | "customFilterIcon" | "customFilterMulti" | "customFilterMultiBackend" | "customFilterSingle" | "customFilterSingleBackend" | "centeredStickyTypography" | "settingsTableCell" | "settingsTable" | "settingsTableRow" | "settingsTableHead" | "settingsTableBody" | "customFilterContainerHeader" | "search";
 export declare const getActiveDataGridColumns: (columns: IDataGridColumnDef[], hiddenColumns: string[], lockedColumns: string[]) => IDataGridColumnDef[];
 export declare const getDefaultColumnWidths: (columns: IDataGridColumnDef[], theme: Theme) => Record<string, number>;
 declare const _default: React.MemoExoticComponent<(inProps: DataGridProps) => React.JSX.Element>;

@@ -2,11 +2,12 @@ import React, { useCallback, useState } from "react";
 import { Checkbox, FormControl, FormControlLabel, Grid, List, ListItemText, MenuItem, Radio, RadioGroup, Select, TextField, Tooltip, } from "@mui/material";
 import { Delete as ClearIcon } from "@mui/icons-material";
 import FilterCombinator from "./FilterCombinator";
-import { DataGridFilterClearButton, DataGridSetFilterContainer, DataGridSetFilterListDivider, DataGridSetFilterListItem, DataGridSetFilterListItemDivider, useDataGridProps, } from "../DataGrid";
+import { DataGridFilterClearButton, DataGridIdFilterContainer, DataGridSetFilterContainer, DataGridSetFilterListDivider, DataGridSetFilterListItem, DataGridSetFilterListItemDivider, useDataGridProps, } from "../DataGrid";
 import { LocalizedDateTimePicker, LocalizedKeyboardDatePicker, } from "../../LocalizedDateTimePickers";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import { normalizeDate } from "../../../backend-integration/Model/Types/Utils/DateUtils";
 import moment from "moment";
+import { BackendMultiSelect } from "../../../backend-components";
 const ENUM_FILTER_MAGIC_EMPTY = "__MAGIC_EMPTY__";
 const LIST_ITEM_SLOT_PROPS = { primary: { noWrap: true } };
 const FilterEntry = (props) => {
@@ -27,8 +28,8 @@ const FilterEntry = (props) => {
             "localized-string",
             "combined-string",
         ].includes(props.valueType ?? "")
-            ? ["contains", "equals", "matches"]
-            : props.valueType === "enum"
+            ? ["startsWith", "contains", "equals", "matches"]
+            : ["enum", "id"].includes(props.valueType ?? "")
                 ? ["inSet"]
                 : ["equals", "matches"];
         return (
@@ -172,6 +173,10 @@ const FilterEntry = (props) => {
         subFilter = value;
         updateParent();
     };
+    const handleIdFilterSelect = (selected) => {
+        filterValue = selected.join(",");
+        updateParent();
+    };
     let filterTypeMenuItems = [
         checkSupport(props.valueType, "equals") && (React.createElement(MenuItem, { key: "equals", value: "equals" }, t("standalone.data-grid.content.filter-type.eq"))),
         checkSupport(props.valueType, "notEqual") && (React.createElement(MenuItem, { key: "notEqual", value: "notEqual" }, t("standalone.data-grid.content.filter-type.not-eq"))),
@@ -188,6 +193,26 @@ const FilterEntry = (props) => {
         filterTypeMenuItems.push(checkSupport(props.valueType, "lessThan") && (React.createElement(MenuItem, { key: "lessThan", value: "lessThan" }, t("standalone.data-grid.content.filter-type.lt-date"))), checkSupport(props.valueType, "lessThanOrEqual") && (React.createElement(MenuItem, { key: "lessThanOrEqual", value: "lessThanOrEqual" }, t("standalone.data-grid.content.filter-type.lte-date"))), checkSupport(props.valueType, "greaterThan") && (React.createElement(MenuItem, { key: "greaterThan", value: "greaterThan" }, t("standalone.data-grid.content.filter-type.gt-date"))), checkSupport(props.valueType, "greaterThanOrEqual") && (React.createElement(MenuItem, { key: "greaterThanOrEqual", value: "greaterThanOrEqual" }, t("standalone.data-grid.content.filter-type.gte-date"))), checkSupport(props.valueType, "inRange") && (React.createElement(MenuItem, { key: "inRange", value: "inRange" }, t("standalone.data-grid.content.filter-type.in-range-date"))));
     }
     filterTypeMenuItems = filterTypeMenuItems.filter((e) => e);
+    // filter type custom
+    const setCustomFilter = useCallback((customFilter) => {
+        onChange({
+            type: "equals",
+            value1: JSON.stringify(customFilter),
+            value2: "",
+        });
+    }, [onChange]);
+    if (isFirstFilter && props.valueType === "custom") {
+        const customFilterData = props.valueData;
+        const customFilterValue = props.value?.value1
+            ? JSON.parse(props.value?.value1)
+            : undefined;
+        return React.createElement(customFilterData.filterComponent, {
+            filter: customFilterValue,
+            setFilter: setCustomFilter,
+            close,
+        });
+    }
+    // END filter type custom
     return (React.createElement(React.Fragment, null,
         isFirstFilter && props.value?.value1 && (React.createElement(Grid, { size: 12 },
             React.createElement(Grid, { container: true, justifyContent: "flex-end", alignItems: "center" },
@@ -248,8 +273,13 @@ const FilterEntry = (props) => {
                                     .includes(entry.value || ENUM_FILTER_MAGIC_EMPTY), onChange: onFilterValueChangeEnum, disabled: entry.disabled }),
                             React.createElement(ListItemText, { slotProps: LIST_ITEM_SLOT_PROPS }, (entry.getLabel || entry.getLabelText)())))));
                     }))))),
+        props.valueType === "id" && (React.createElement(React.Fragment, null,
+            React.createElement(DataGridIdFilterContainer, { size: 12, className: classes?.idFilterContainer },
+                checkSupport(props.valueType, "notInSet") && (React.createElement(FormControlLabel, { control: React.createElement(Checkbox, { checked: enumFilterInverted, onChange: onFilterTypeChangeEnum }), label: t("standalone.data-grid.content.set-filter.invert") })),
+                React.createElement(BackendMultiSelect, { ...props.valueData, selected: filterValue ? filterValue.split(",") : [], onSelect: handleIdFilterSelect, confirmDelete: false })))),
         filterValue &&
             props.valueType !== "enum" &&
+            props.valueType !== "id" &&
             props.valueType !== "boolean" &&
             (!maxDepth || depth <= maxDepth) && (React.createElement(React.Fragment, null,
             React.createElement(FilterCombinator, { value: subFilterComboType, onChange: onSubFilterTypeChange }),

@@ -1,5 +1,5 @@
 import React from "react";
-import { ModelFieldName, PageVisibility } from "../../Model";
+import { ModelFieldName, ModelIdFilterData, PageVisibility } from "../../Model";
 import ModelRenderParams from "../../RenderParams";
 import TypeId from "../TypeId";
 import { BackendSingleSelectProps } from "../../../../backend-components/Selector/BackendSingleSelect";
@@ -12,6 +12,7 @@ export type RendererBackendSingleSelectProps<KeyT extends ModelFieldName, Visibi
  * Renders TypeEnum as drop-down selector (with search)
  */
 declare class RendererBackendSingleSelect<KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT> extends TypeId {
+    idFilter?: ModelIdFilterData;
     private readonly props;
     constructor(props: RendererBackendSingleSelectProps<KeyT, VisibilityT, CustomT>);
     render(params: ModelRenderParams<string | null>): React.ReactElement;

@@ -3,7 +3,7 @@ import type ModelRenderParams from "./RenderParams";
 import type FilterType from "./FilterType";
 import type { EnumValue } from "./Types/TypeEnum";
 import type { IDataGridColumnDef } from "../../standalone/DataGrid/DataGrid";
-import { ModelFieldDefinition, PageVisibility } from "./Model";
+import { ModelCustomFilterData, ModelFieldDefinition, ModelIdFilterData, PageVisibility } from "./Model";
 export interface TypeSettings {
     /**
      * Additional field changes which cause re-render
@@ -60,6 +60,14 @@ export interface Type<T> {
      * Get enum values
      */
     getEnumValues?: () => EnumValue[];
+    /**
+     * Custom filter props for data grid column filter if filter type is ID
+     */
+    idFilter?: ModelIdFilterData;
+    /**
+     * Custom filter props for data grid column filter if filter type is custom
+     */
+    customFilter?: ModelCustomFilterData;
     /**
      * Initial size info for data grid
      */

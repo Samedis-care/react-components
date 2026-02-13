@@ -6,7 +6,7 @@ class TypeId {
         return null;
     }
     getFilterType() {
-        return "string";
+        return "id";
     }
     getDefaultValue() {
         return null;

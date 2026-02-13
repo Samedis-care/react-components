@@ -206,6 +206,13 @@ export const DataGridSetFilterContainer = styled(Grid, {
     maxHeight: "40vh",
     overflow: "auto",
 });
+export const DataGridIdFilterContainer = styled(Grid, {
+    name: "CcDataGrid",
+    slot: "idFilterContainer",
+})({
+    maxHeight: "40vh",
+    overflow: "auto",
+});
 export const DataGridFilterBarGrid = styled(Grid, {
     name: "CcDataGrid",
     slot: "filterBarGrid",
