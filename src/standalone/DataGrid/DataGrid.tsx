@@ -979,6 +979,13 @@ export const DataGridColumnHeaderFilterPopupEnum = styled(Grid, {
 	minWidth: 160,
 }) as typeof Grid;
 
+export const DataGridColumnHeaderFilterPopupId = styled(Grid, {
+	name: "CcDataGrid",
+	slot: "columnHeaderFilterPopupId",
+})({
+	width: 300,
+}) as typeof Grid;
+
 export const DataGridColumnHeaderFilterPopupDateTime = styled(Grid, {
 	name: "CcDataGrid",
 	slot: "columnHeaderFilterPopupDateTime",
@@ -1061,6 +1068,7 @@ export type DataGridClassKey =
 	| "cell"
 	| "columnHeaderFilterPopup"
 	| "columnHeaderFilterPopupEnum"
+	| "columnHeaderFilterPopupId"
 	| "columnHeaderFilterPopupDateTime"
 	| "columnHeaderFilterIcon"
 	| "columnHeaderFilterActiveIcon"

@@ -10,6 +10,7 @@ import {
 	DataGridColumnHeaderFilterPopup,
 	DataGridColumnHeaderFilterPopupDateTime,
 	DataGridColumnHeaderFilterPopupEnum,
+	DataGridColumnHeaderFilterPopupId,
 	DataGridColumnHeaderLabel,
 	DataGridColumnHeaderResizer,
 	DataGridColumnHeaderSortIcon,
@@ -121,7 +122,9 @@ const ColumnHeaderContent = (
 			? DataGridColumnHeaderFilterPopupDateTime
 			: props.columnType === "enum"
 				? DataGridColumnHeaderFilterPopupEnum
-				: DataGridColumnHeaderFilterPopup;
+				: props.columnType === "id"
+					? DataGridColumnHeaderFilterPopupId
+					: DataGridColumnHeaderFilterPopup;
 
 	return (
 		<>
