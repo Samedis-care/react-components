@@ -11,6 +11,7 @@ import { Grid, styled } from "@mui/material";
 import { useDataGridFiltersActive, useDataGridResetFilters, } from "../DataGridUtils";
 import ActionButton from "../../UIKit/ActionButton";
 import { Clear as ResetFilterIcon } from "@mui/icons-material";
+import useDocumentBody from "../../../utils/useDocumentBody";
 const CenteredStickyTypography = styled(CenteredTypography, {
     name: "CcDataGrid",
     slot: "centeredStickyTypography",
@@ -48,6 +49,7 @@ const Content = (props) => {
     const onResize = useCallback((size) => {
         setWidth(size.width);
     }, []);
+    const documentBody = useDocumentBody();
     const scrollbarWidth = useMemo(() => {
         const scrollDiv = document.createElement("div");
         scrollDiv.style.width = "100px";
@@ -55,11 +57,11 @@ const Content = (props) => {
         scrollDiv.style.overflow = "scroll";
         scrollDiv.style.position = "absolute";
         scrollDiv.style.top = "-101px";
-        document.body.appendChild(scrollDiv);
+        documentBody.appendChild(scrollDiv);
         const scrollbarWidth = scrollDiv.offsetWidth - scrollDiv.clientWidth;
-        document.body.removeChild(scrollDiv);
+        documentBody.removeChild(scrollDiv);
         return scrollbarWidth;
-    }, []);
+    }, [documentBody]);
     const remainingWidth = useMemo(() => {
         const shownColumns = Object.keys(columnWidth)
             .map((field) => columns.find((col) => col.field === field))
