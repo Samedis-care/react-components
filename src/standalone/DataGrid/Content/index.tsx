@@ -27,6 +27,7 @@ import {
 } from "../DataGridUtils";
 import ActionButton from "../../UIKit/ActionButton";
 import { Clear as ResetFilterIcon } from "@mui/icons-material";
+import useDocumentBody from "../../../utils/useDocumentBody";
 
 export interface IDataGridContentProps
 	extends IDataGridColumnProps, Pick<DataGridProps, "globalScrollListener"> {
@@ -89,6 +90,7 @@ const Content = (props: IDataGridContentProps) => {
 		setWidth(size.width);
 	}, []);
 
+	const documentBody = useDocumentBody();
 	const scrollbarWidth = useMemo(() => {
 		const scrollDiv = document.createElement("div");
 		scrollDiv.style.width = "100px";
@@ -96,11 +98,11 @@ const Content = (props: IDataGridContentProps) => {
 		scrollDiv.style.overflow = "scroll";
 		scrollDiv.style.position = "absolute";
 		scrollDiv.style.top = "-101px";
-		document.body.appendChild(scrollDiv);
+		documentBody.appendChild(scrollDiv);
 		const scrollbarWidth = scrollDiv.offsetWidth - scrollDiv.clientWidth;
-		document.body.removeChild(scrollDiv);
+		documentBody.removeChild(scrollDiv);
 		return scrollbarWidth;
-	}, []);
+	}, [documentBody]);
 
 	const remainingWidth = useMemo(() => {
 		const shownColumns: IDataGridColumnDef[] = (
