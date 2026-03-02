@@ -58,9 +58,12 @@ export interface DataGridCustomDataActionButton {
     label: string;
     /**
      * Is the button disabled?
-     * @param numSelected The amount of selected rows (value always >= 0)
+     * @param numSelected The amount of selected rows
+     * 										0 => none
+     * 									  1 => one
+     * 									  2 => multiple
      */
-    isDisabled: (numSelected: number) => boolean;
+    isDisabled: (numSelected: 0 | 1 | 2) => boolean;
     /**
      * The click handler
      * @param invert Is the selection inverted? (if true => ids = everything except ids)

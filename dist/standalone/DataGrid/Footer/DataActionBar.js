@@ -67,6 +67,6 @@ const DataActionBar = () => {
         clickedButton.onClick(selectAll, selectedRows);
     }, [customDataActionButtons, selectAll, selectedRows]);
     return (React.createElement(Grid, { container: true },
-        React.createElement(DataActionBarView, { numSelected: numSelected, handleEdit: onEdit ? handleEdit : undefined, handleDelete: onDelete ? handleDelete : undefined, disableDeleteHint: disableDeleteHint, customButtons: customDataActionButtons, handleCustomButtonClick: handleCustomButtonCLick, disableSelection: disableSelection || !enableDeleteAll })));
+        React.createElement(DataActionBarView, { numSelected: Math.min(numSelected, 2), handleEdit: onEdit ? handleEdit : undefined, handleDelete: onDelete ? handleDelete : undefined, disableDeleteHint: disableDeleteHint, customButtons: customDataActionButtons, handleCustomButtonClick: handleCustomButtonCLick, disableSelection: disableSelection || !enableDeleteAll })));
 };
 export default React.memo(DataActionBar);
