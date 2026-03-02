@@ -12,7 +12,7 @@ export interface DataActionBarMenuProps {
 	anchorEl: MenuProps["anchorEl"];
 	customButtons: NonNullable<DataGridProps["customDataActionButtons"]>;
 	onClose: () => void;
-	numSelected: number;
+	numSelected: 0 | 1 | 2;
 	handleCustomButtonClick: (label: string) => void;
 }
 

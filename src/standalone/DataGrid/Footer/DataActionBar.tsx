@@ -86,7 +86,7 @@ const DataActionBar = () => {
 	return (
 		<Grid container>
 			<DataActionBarView
-				numSelected={numSelected}
+				numSelected={Math.min(numSelected, 2) as 0 | 1 | 2}
 				handleEdit={onEdit ? handleEdit : undefined}
 				handleDelete={onDelete ? handleDelete : undefined}
 				disableDeleteHint={disableDeleteHint}
