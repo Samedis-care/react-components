@@ -3,9 +3,9 @@ import { DataGridProps } from "../DataGrid";
 export interface DataActionBarViewProps {
     /**
      * The amount of selected items
-     * Values: 0 (none), 1 (one) or 2 (multiple)
+     * Value >= 0
      */
-    numSelected: 0 | 1 | 2;
+    numSelected: number;
     /**
      * Callback for edit button.
      * If not defined: Disables edit button
