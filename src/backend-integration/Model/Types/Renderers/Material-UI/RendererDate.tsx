@@ -67,6 +67,7 @@ class RendererDate extends TypeDate {
 							setFieldTouched(field, touched, true);
 						}}
 						fullWidth
+						disableClearable
 					/>
 					<FormHelperTextCC warning={!!warningMsg} error={!!errorMsg}>
 						{errorMsg || warningMsg}

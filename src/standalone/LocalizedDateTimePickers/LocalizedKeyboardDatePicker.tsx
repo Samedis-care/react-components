@@ -8,11 +8,12 @@ import { TextFieldProps, useThemeProps } from "@mui/material";
 import { withMuiWarning } from "../UIKit/MuiWarning";
 import useMuiLocaleData from "./useMuiLocaleData";
 import accessSlotProps from "../../utils/internal/accessSlotProps";
+import { TextFieldWithHelpProps } from "../UIKit/TextFieldWithHelp";
 
-export interface LocalizedKeyboardDatePickerProps extends Omit<
-	DatePickerProps<false>,
-	"format"
-> {
+export interface LocalizedKeyboardDatePickerProps
+	extends
+		Omit<DatePickerProps<false>, "format">,
+		Pick<TextFieldWithHelpProps, "disableClearable"> {
 	/**
 	 * Boolean flag to hide Calendar Icon (only used if disabled is truthy)
 	 */
@@ -54,6 +55,7 @@ const LocalizedKeyboardDatePicker = (
 		error,
 		fullWidth,
 		onBlur,
+		disableClearable,
 		...otherProps
 	} = props;
 	const slotOverrideHideIcon = {
@@ -84,6 +86,7 @@ const LocalizedKeyboardDatePicker = (
 							error,
 							fullWidth,
 							onBlur,
+							disableClearable,
 							...textFieldProps,
 						};
 					},

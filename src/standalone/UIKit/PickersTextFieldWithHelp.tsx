@@ -19,6 +19,10 @@ export interface PickersTextFieldWithHelpProps extends UIInputProps {
 	 * custom clear handler if clear button is pressed
 	 */
 	customHandleClear: () => void;
+	/**
+	 * Disable clear button on mobile
+	 */
+	disableClearable?: boolean;
 }
 
 export const UiKitPickersTextFieldWithWarnings = withMuiWarning(
@@ -29,8 +33,14 @@ const TextFieldWithHelp = React.forwardRef(
 		props: PickersTextFieldWithHelpProps & PickersTextFieldProps,
 		ref: ForwardedRef<HTMLDivElement>,
 	) {
-		const { openInfo, customHandleClear, warning, onChange, ...muiProps } =
-			props;
+		const {
+			openInfo,
+			customHandleClear,
+			disableClearable,
+			warning,
+			onChange,
+			...muiProps
+		} = props;
 
 		// handle clear
 
@@ -60,7 +70,8 @@ const TextFieldWithHelp = React.forwardRef(
 		);
 
 		// render
-		const showClear = isTouchDevice() && hasValue && !muiProps.disabled;
+		const showClear =
+			isTouchDevice() && hasValue && !muiProps.disabled && !disableClearable;
 		const hasEndAdornment = !!(
 			showClear ||
 			openInfo ||

@@ -29,6 +29,10 @@ export interface TextFieldWithHelpProps extends UIInputProps {
 	 * custom clear handler if clear button is pressed
 	 */
 	customHandleClear?: () => void;
+	/**
+	 * disable clear button on mobile devices
+	 */
+	disableClearable?: boolean;
 }
 
 export const UiKitTextFieldWithWarnings = withMuiWarning(
@@ -38,7 +42,14 @@ const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(
 	props: TextFieldWithHelpProps & TextFieldProps,
 	ref: ForwardedRef<HTMLDivElement>,
 ) {
-	const { openInfo, customHandleClear, warning, onChange, ...muiProps } = props;
+	const {
+		openInfo,
+		customHandleClear,
+		disableClearable,
+		warning,
+		onChange,
+		...muiProps
+	} = props;
 
 	// handle clear
 
@@ -95,7 +106,8 @@ const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(
 	}, [muiProps.value]);
 
 	// render
-	const showClear = isTouchDevice() && hasValue && !muiProps.disabled;
+	const showClear =
+		isTouchDevice() && hasValue && !muiProps.disabled && !disableClearable;
 
 	return (
 		<UiKitTextFieldWithWarnings
