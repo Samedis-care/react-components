@@ -9,6 +9,10 @@ export interface PickersTextFieldWithHelpProps extends UIInputProps {
      * custom clear handler if clear button is pressed
      */
     customHandleClear: () => void;
+    /**
+     * Disable clear button on mobile
+     */
+    disableClearable?: boolean;
 }
 export declare const UiKitPickersTextFieldWithWarnings: typeof UiKitPickersTextField;
 declare const _default: React.NamedExoticComponent<(Omit<PickersTextFieldWithHelpProps & import("@mui/x-date-pickers/PickersTextField/PickersTextField.types").PickersFilledTextFieldProps, "ref"> | Omit<PickersTextFieldWithHelpProps & import("@mui/x-date-pickers/PickersTextField/PickersTextField.types").PickersOutlinedTextFieldProps, "ref"> | Omit<PickersTextFieldWithHelpProps & import("@mui/x-date-pickers/PickersTextField/PickersTextField.types").PickersStandardTextFieldProps, "ref">) & React.RefAttributes<HTMLDivElement>>;

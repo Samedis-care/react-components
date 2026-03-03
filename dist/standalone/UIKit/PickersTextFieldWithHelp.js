@@ -6,7 +6,7 @@ import isTouchDevice from "../../utils/isTouchDevice";
 import { withMuiWarning } from "./MuiWarning";
 export const UiKitPickersTextFieldWithWarnings = withMuiWarning(UiKitPickersTextField);
 const TextFieldWithHelp = React.forwardRef(function PickersTextFieldWithHelpInner(props, ref) {
-    const { openInfo, customHandleClear, warning, onChange, ...muiProps } = props;
+    const { openInfo, customHandleClear, disableClearable, warning, onChange, ...muiProps } = props;
     // handle clear
     const [hasInputValue, setHasInputValue] = useState(!!muiProps.defaultValue);
     const hasValue = muiProps.value == null ? hasInputValue : !!muiProps.value;
@@ -23,7 +23,7 @@ const TextFieldWithHelp = React.forwardRef(function PickersTextFieldWithHelpInne
         setHasInputValue(!!evt.target.value);
     }, [onChange]);
     // render
-    const showClear = isTouchDevice() && hasValue && !muiProps.disabled;
+    const showClear = isTouchDevice() && hasValue && !muiProps.disabled && !disableClearable;
     const hasEndAdornment = !!(showClear ||
         openInfo ||
         muiProps.InputProps?.endAdornment);

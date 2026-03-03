@@ -32,7 +32,7 @@ class RendererDate extends TypeDate {
                             ? ccI18n.t("backend-integration.model.types.renderers.date.validation-error")
                             : "";
                         setFieldTouched(field, touched, true);
-                    }, fullWidth: true }),
+                    }, fullWidth: true, disableClearable: true }),
                 React.createElement(FormHelperTextCC, { warning: !!warningMsg, error: !!errorMsg }, errorMsg || warningMsg)));
         }
         return (React.createElement(Typography, null,

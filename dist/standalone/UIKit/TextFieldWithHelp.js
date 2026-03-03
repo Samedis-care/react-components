@@ -8,7 +8,7 @@ import { useRefComposer } from "react-ref-composer";
 import accessSlotProps from "../../utils/internal/accessSlotProps";
 export const UiKitTextFieldWithWarnings = withMuiWarning(UiKitTextField);
 const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(props, ref) {
-    const { openInfo, customHandleClear, warning, onChange, ...muiProps } = props;
+    const { openInfo, customHandleClear, disableClearable, warning, onChange, ...muiProps } = props;
     // handle clear
     const [hasValue, setHasValue] = useState(!!(muiProps.value ?? muiProps.defaultValue));
     const composeRef = useRefComposer();
@@ -43,7 +43,7 @@ const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(props
         setHasValue(!!muiProps.value);
     }, [muiProps.value]);
     // render
-    const showClear = isTouchDevice() && hasValue && !muiProps.disabled;
+    const showClear = isTouchDevice() && hasValue && !muiProps.disabled && !disableClearable;
     return (React.createElement(UiKitTextFieldWithWarnings, { ref: ref, ...muiProps, warning: warning, onChange: handleChange, slotProps: {
             input: (props) => {
                 const orgSlotProps = {

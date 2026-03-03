@@ -12,7 +12,7 @@ const LocalizedKeyboardDatePicker = (inProps) => {
         props: inProps,
         name: "CcLocalizedKeyboardDatePicker",
     });
-    const { hideDisabledIcon, required, error, fullWidth, onBlur, ...otherProps } = props;
+    const { hideDisabledIcon, required, error, fullWidth, onBlur, disableClearable, ...otherProps } = props;
     const slotOverrideHideIcon = {
         ...otherProps.slots,
         openPickerIcon: NoIcon,
@@ -30,6 +30,7 @@ const LocalizedKeyboardDatePicker = (inProps) => {
                         error,
                         fullWidth,
                         onBlur,
+                        disableClearable,
                         ...textFieldProps,
                     };
                 },

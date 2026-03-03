@@ -9,6 +9,10 @@ export interface TextFieldWithHelpProps extends UIInputProps {
      * custom clear handler if clear button is pressed
      */
     customHandleClear?: () => void;
+    /**
+     * disable clear button on mobile devices
+     */
+    disableClearable?: boolean;
 }
 export declare const UiKitTextFieldWithWarnings: typeof UiKitTextField;
 declare const _default: React.NamedExoticComponent<(Omit<TextFieldWithHelpProps & import("@mui/material").FilledTextFieldProps, "ref"> | Omit<TextFieldWithHelpProps & import("@mui/material").OutlinedTextFieldProps, "ref"> | Omit<TextFieldWithHelpProps & import("@mui/material").StandardTextFieldProps, "ref">) & React.RefAttributes<HTMLDivElement>>;
