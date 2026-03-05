@@ -1,4 +1,12 @@
-import React, { Suspense, useCallback, useMemo, useRef, useState } from "react";
+import React, {
+	Dispatch,
+	SetStateAction,
+	Suspense,
+	useCallback,
+	useMemo,
+	useRef,
+	useState,
+} from "react";
 import { Dialog, DialogContent, styled, useThemeProps } from "@mui/material";
 import { OpenInNew } from "@mui/icons-material";
 import { useDialogContext } from "../../framework/DialogContextProvider";
@@ -75,6 +83,7 @@ export type FormDialogClassKey = "content" | "openInNewIcon";
 
 export interface FormDialogDispatch {
 	setTitle: (title: React.ReactNode) => void;
+	setOpenInNewLink: Dispatch<SetStateAction<null | (() => void)>>;
 	blockClosing: () => void;
 	unblockClosing: () => void;
 }
@@ -121,11 +130,13 @@ const FormDialog = (inProps: FormDialogProps) => {
 		dialogTitle: titleOverride,
 		onClose,
 		disableFormDialogContext,
+		openInNewLink: openInNewLinkOverride,
 		renderer,
 	} = props;
 	const [pushDialog, popDialog] = useDialogContext();
 	const blockClosingCounter = useRef(0);
 	const [title, setTitle] = useState<React.ReactNode>(null);
+	const [openInNewLink, setOpenInNewLink] = useState<null | (() => void)>(null);
 	const { t } = useCCTranslations();
 
 	const handleClose = useCallback(async () => {
@@ -153,6 +164,7 @@ const FormDialog = (inProps: FormDialogProps) => {
 			blockClosing,
 			unblockClosing,
 			setTitle,
+			setOpenInNewLink,
 		}),
 		[blockClosing, unblockClosing],
 	);
@@ -163,7 +175,12 @@ const FormDialog = (inProps: FormDialogProps) => {
 	return (
 		<IsInFormDialogContext.Provider value={!disableFormDialogContext}>
 			<FormDialogDispatchContext.Provider value={dispatch}>
-				<Renderer {...props} onClose={handleClose} dialogTitle={dialogTitle} />
+				<Renderer
+					{...props}
+					onClose={handleClose}
+					dialogTitle={dialogTitle}
+					openInNewLink={openInNewLink ?? openInNewLinkOverride}
+				/>
 			</FormDialogDispatchContext.Provider>
 		</IsInFormDialogContext.Provider>
 	);
