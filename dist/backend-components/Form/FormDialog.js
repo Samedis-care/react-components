@@ -1,4 +1,4 @@
-import React, { Suspense, useCallback, useMemo, useRef, useState } from "react";
+import React, { Suspense, useCallback, useMemo, useRef, useState, } from "react";
 import { Dialog, DialogContent, styled, useThemeProps } from "@mui/material";
 import { OpenInNew } from "@mui/icons-material";
 import { useDialogContext } from "../../framework/DialogContextProvider";
@@ -35,10 +35,11 @@ export const FormDialogDefaultRenderer = (props) => {
 };
 const FormDialog = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcFormDialog" });
-    const { dialogTitle: titleOverride, onClose, disableFormDialogContext, renderer, } = props;
+    const { dialogTitle: titleOverride, onClose, disableFormDialogContext, openInNewLink: openInNewLinkOverride, renderer, } = props;
     const [pushDialog, popDialog] = useDialogContext();
     const blockClosingCounter = useRef(0);
     const [title, setTitle] = useState(null);
+    const [openInNewLink, setOpenInNewLink] = useState(null);
     const { t } = useCCTranslations();
     const handleClose = useCallback(async () => {
         try {
@@ -64,11 +65,12 @@ const FormDialog = (inProps) => {
         blockClosing,
         unblockClosing,
         setTitle,
+        setOpenInNewLink,
     }), [blockClosing, unblockClosing]);
     const dialogTitle = titleOverride ?? title;
     const Renderer = renderer ?? FormDialogDefaultRenderer;
     return (React.createElement(IsInFormDialogContext.Provider, { value: !disableFormDialogContext },
         React.createElement(FormDialogDispatchContext.Provider, { value: dispatch },
-            React.createElement(Renderer, { ...props, onClose: handleClose, dialogTitle: dialogTitle }))));
+            React.createElement(Renderer, { ...props, onClose: handleClose, dialogTitle: dialogTitle, openInNewLink: openInNewLink ?? openInNewLinkOverride }))));
 };
 export default React.memo(FormDialog);

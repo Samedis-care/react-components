@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Dispatch, SetStateAction } from "react";
 export type FormDialogRendererProps = Omit<FormDialogProps, "renderer">;
 export interface FormDialogProps {
     /**
@@ -47,6 +47,7 @@ export interface FormDialogProps {
 export type FormDialogClassKey = "content" | "openInNewIcon";
 export interface FormDialogDispatch {
     setTitle: (title: React.ReactNode) => void;
+    setOpenInNewLink: Dispatch<SetStateAction<null | (() => void)>>;
     blockClosing: () => void;
     unblockClosing: () => void;
 }
