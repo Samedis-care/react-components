@@ -81,11 +81,19 @@ const OpenInNewIcon = styled(OpenInNew, {
 
 export type FormDialogClassKey = "content" | "openInNewIcon";
 
+export type FormDialogTitlePriorityMode = "prop" | "dispatch";
+
 export interface FormDialogDispatch {
 	setTitle: (title: React.ReactNode) => void;
 	setOpenInNewLink: Dispatch<SetStateAction<null | (() => void)>>;
 	blockClosing: () => void;
 	unblockClosing: () => void;
+	/**
+	 * Set the priority mode for the dialog title.
+	 * - "prop" (default): dialogTitle prop takes priority over title set via setTitle
+	 * - "dispatch": title set via setTitle takes priority over dialogTitle prop
+	 */
+	setTitlePriorityMode: Dispatch<SetStateAction<FormDialogTitlePriorityMode>>;
 }
 
 export const IsInFormDialogContext = React.createContext(false);
@@ -137,6 +145,8 @@ const FormDialog = (inProps: FormDialogProps) => {
 	const blockClosingCounter = useRef(0);
 	const [title, setTitle] = useState<React.ReactNode>(null);
 	const [openInNewLink, setOpenInNewLink] = useState<null | (() => void)>(null);
+	const [titlePriorityMode, setTitlePriorityMode] =
+		useState<FormDialogTitlePriorityMode>("prop");
 	const { t } = useCCTranslations();
 
 	const handleClose = useCallback(async () => {
@@ -165,11 +175,15 @@ const FormDialog = (inProps: FormDialogProps) => {
 			unblockClosing,
 			setTitle,
 			setOpenInNewLink,
+			setTitlePriorityMode,
 		}),
 		[blockClosing, unblockClosing],
 	);
 
-	const dialogTitle = titleOverride ?? title;
+	const dialogTitle =
+		titlePriorityMode === "dispatch"
+			? (title ?? titleOverride)
+			: (titleOverride ?? title);
 	const Renderer = renderer ?? FormDialogDefaultRenderer;
 
 	return (
