@@ -40,6 +40,7 @@ const FormDialog = (inProps) => {
     const blockClosingCounter = useRef(0);
     const [title, setTitle] = useState(null);
     const [openInNewLink, setOpenInNewLink] = useState(null);
+    const [titlePriorityMode, setTitlePriorityMode] = useState("prop");
     const { t } = useCCTranslations();
     const handleClose = useCallback(async () => {
         try {
@@ -66,8 +67,11 @@ const FormDialog = (inProps) => {
         unblockClosing,
         setTitle,
         setOpenInNewLink,
+        setTitlePriorityMode,
     }), [blockClosing, unblockClosing]);
-    const dialogTitle = titleOverride ?? title;
+    const dialogTitle = titlePriorityMode === "dispatch"
+        ? (title ?? titleOverride)
+        : (titleOverride ?? title);
     const Renderer = renderer ?? FormDialogDefaultRenderer;
     return (React.createElement(IsInFormDialogContext.Provider, { value: !disableFormDialogContext },
         React.createElement(FormDialogDispatchContext.Provider, { value: dispatch },
