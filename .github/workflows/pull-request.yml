@@ -1,31 +1,21 @@
-name: CommitHookCheck
+name: PR Check
 
 permissions:
   contents: read
 
-# Controls when the action will run. Triggers the workflow on push or pull request
-# events but only for the master branch
 on:
   pull_request:
     branches: [master]
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
-  build:
-    # The type of runner that the job will run on
+  check:
     runs-on: ubuntu-latest
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v4
-
-      - name: Setup Node.js environment
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          # Version Spec of the version to use.  Examples: 10.x, 10.15.1, >=10.15.0
-          node-version: 21
+          node-version: 24
       - name: NPM Cache
         uses: actions/cache@v4
         with:
@@ -34,10 +24,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
       - name: Install Dependencies
-        run: npm i --force
-      #- name: Running Tests
-      #  run: npm run test
-      - name: Building Library
-        run: npm run build
-      - name: Linting Code
+        run: npm ci
+      - name: Lint
         run: npm run lint
+      - name: Unit Tests
+        run: npm run test:unit
+      - name: Build
+        run: npm run build

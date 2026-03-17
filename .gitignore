@@ -31,6 +31,10 @@ yarn-error.log*
 /.idea
 /.vscode
 
+# Claude Code
+/.claude
+
 /storybook-static
 
 dev.sh
+*storybook.log

@@ -1,3 +1,6 @@
+// For more info, see https://github.com/storybookjs/eslint-plugin-storybook#configuration-flat-config-format
+import storybook from "eslint-plugin-storybook";
+
 import importLint from "eslint-plugin-import";
 import jsLint from "@eslint/js";
 import tsLint from "typescript-eslint";
@@ -38,7 +41,7 @@ export default [
 					jsx: true,
 				},
 
-				project: ["./tsconfig.json", "./tsconfig-test.json"],
+				project: ["./tsconfig.json", "./tsconfig-test.json", "./tsconfig-stories.json"],
 			},
 		},
 
@@ -69,4 +72,5 @@ export default [
 			],
 		},
 	},
+	...storybook.configs["flat/recommended"],
 ];

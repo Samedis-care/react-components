@@ -16,5 +16,6 @@
 		"outDir": "dist",
 		"rootDir": "src"
 	},
-	"include": ["src", "src/env.d.ts"]
+	"include": ["src", "src/env.d.ts"],
+	"exclude": ["src/**/*.stories.tsx", "src/**/*.stories.ts"]
 }
