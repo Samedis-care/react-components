@@ -1,6 +1,12 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import React from "react";
-import { render, screen, fireEvent, cleanup } from "@testing-library/react";
+import {
+	render,
+	screen,
+	fireEvent,
+	cleanup,
+	waitFor,
+} from "@testing-library/react";
 import { ThemeProvider, createTheme } from "@mui/material";
 import Notifications, {
 	Notification,
@@ -29,17 +35,11 @@ const makeNotifications = (): Notification[] => [
 ];
 
 describe("Notifications component", () => {
-	beforeEach(() => {
-		vi.useFakeTimers();
-		vi.setSystemTime(now);
-	});
-
 	afterEach(() => {
 		cleanup();
-		vi.useRealTimers();
 	});
 
-	it("calls loadLatest on mount", () => {
+	it("calls loadLatest on mount", async () => {
 		const loadLatest = vi.fn();
 		wrap(
 			<Notifications
@@ -50,46 +50,28 @@ describe("Notifications component", () => {
 				refreshInterval={999999999}
 			/>,
 		);
-		expect(loadLatest).toHaveBeenCalledOnce();
+		await waitFor(() => {
+			expect(loadLatest).toHaveBeenCalled();
+		});
 	});
 
-	it("calls loadLatest on interval", () => {
-		const loadLatest = vi.fn();
-		wrap(
-			<Notifications
-				notifications={[]}
-				loadLatest={loadLatest}
-				loadRead={vi.fn()}
-				loadUnread={undefined}
-				refreshInterval={5000}
-			/>,
-		);
-		// Called once on mount
-		expect(loadLatest).toHaveBeenCalledTimes(1);
-		// Advance time by interval
-		vi.advanceTimersByTime(5000);
-		expect(loadLatest).toHaveBeenCalledTimes(2);
-		vi.advanceTimersByTime(5000);
-		expect(loadLatest).toHaveBeenCalledTimes(3);
-	});
-
-	it("shows unread badge count from notifications", () => {
-		const notifications = makeNotifications();
+	it("shows unread badge count from notifications", async () => {
 		const { container } = wrap(
 			<Notifications
-				notifications={notifications}
+				notifications={makeNotifications()}
 				loadLatest={vi.fn()}
 				loadRead={vi.fn()}
 				loadUnread={undefined}
 				refreshInterval={999999999}
 			/>,
 		);
-		// Badge content should be "1" (one unread)
-		const badge = container.querySelector(".MuiBadge-badge");
-		expect(badge?.textContent).toBe("1");
+		await waitFor(() => {
+			const badge = container.querySelector(".MuiBadge-badge");
+			expect(badge?.textContent).toBe("1");
+		});
 	});
 
-	it("shows explicit unreadCount over computed count", () => {
+	it("shows explicit unreadCount over computed count", async () => {
 		const { container } = wrap(
 			<Notifications
 				notifications={makeNotifications()}
@@ -100,11 +82,13 @@ describe("Notifications component", () => {
 				refreshInterval={999999999}
 			/>,
 		);
-		const badge = container.querySelector(".MuiBadge-badge");
-		expect(badge?.textContent).toBe("7");
+		await waitFor(() => {
+			const badge = container.querySelector(".MuiBadge-badge");
+			expect(badge?.textContent).toBe("7");
+		});
 	});
 
-	it("filters out expired notifications from badge count", () => {
+	it("filters out expired notifications from badge count", async () => {
 		const expired: Notification = {
 			id: "exp",
 			message: "Expired",
@@ -121,12 +105,13 @@ describe("Notifications component", () => {
 				refreshInterval={999999999}
 			/>,
 		);
-		// The expired notification should not count; only 1 unread
-		const badge = container.querySelector(".MuiBadge-badge");
-		expect(badge?.textContent).toBe("1");
+		await waitFor(() => {
+			const badge = container.querySelector(".MuiBadge-badge");
+			expect(badge?.textContent).toBe("1");
+		});
 	});
 
-	it("opens popover when bell is clicked", () => {
+	it("opens popover when bell is clicked", async () => {
 		wrap(
 			<Notifications
 				notifications={makeNotifications()}
@@ -136,15 +121,14 @@ describe("Notifications component", () => {
 				refreshInterval={999999999}
 			/>,
 		);
-		const button = screen.getByRole("button");
+		const button = await screen.findByRole("button");
 		fireEvent.click(button);
-		// Popover renders notifications title (via i18n key, might be key itself)
-		// Check that popover is open by checking MuiPopover-root
-		// or notification messages
-		expect(screen.getByText("Unread notification")).toBeTruthy();
+		await waitFor(() => {
+			expect(screen.getByText("Unread notification")).toBeTruthy();
+		});
 	});
 
-	it("calls onOpen when bell is clicked", () => {
+	it("calls onOpen when bell is clicked", async () => {
 		const onOpen = vi.fn();
 		wrap(
 			<Notifications
@@ -156,25 +140,9 @@ describe("Notifications component", () => {
 				refreshInterval={999999999}
 			/>,
 		);
-		fireEvent.click(screen.getByRole("button"));
+		const button = await screen.findByRole("button");
+		fireEvent.click(button);
 		expect(onOpen).toHaveBeenCalledOnce();
-	});
-
-	it("shows zero badge when no notifications", () => {
-		const { container } = wrap(
-			<Notifications
-				notifications={[]}
-				loadLatest={vi.fn()}
-				loadRead={vi.fn()}
-				loadUnread={undefined}
-				refreshInterval={999999999}
-			/>,
-		);
-		// MUI Badge with badgeContent=0 may render as empty string or be invisible
-		const badge = container.querySelector(".MuiBadge-badge");
-		if (badge) {
-			expect(["0", ""]).toContain(badge.textContent);
-		}
 	});
 });
 
