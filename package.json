@@ -51,17 +51,20 @@
 		}
 	},
 	"scripts": {
-		"docgen": "typedoc --exclude 'src/stories/**/*.*' --exclude 'node_modules/**/*.*' --out typedoc --entryPoints src/index.ts",
+		"docgen": "typedoc --exclude 'node_modules/**/*.*' --out typedoc --entryPoints src/index.ts",
 		"start": "npm run storybook",
 		"prestart": "husky install",
 		"build": "tsc && cpx 'src/assets/**/*' dist/assets",
-		"storybook": "start-storybook -p 9009",
-		"build-storybook": "build-storybook",
+		"storybook": "storybook dev -p 6006",
+		"build-storybook": "storybook build",
 		"build-ghpages": "bash build-ghpages.sh",
 		"deploy-storybook": "storybook-to-ghpages -o storybook-static -s build-ghpages",
 		"lint": "eslint 'src/**/*.{ts,tsx}'",
 		"lint-fix": "eslint --fix 'src/**/*.{ts,tsx}'",
-		"test": "TZ=UTC jest"
+		"test": "vitest run",
+		"test:watch": "vitest",
+		"test:unit": "vitest run --project unit",
+		"test:stories": "vitest run --project storybook"
 	},
 	"sideEffects": false,
 	"eslintConfig": {
@@ -84,12 +87,21 @@
 		]
 	},
 	"devDependencies": {
+		"@chromatic-com/storybook": "^5.0.1",
 		"@eslint/compat": "^2.0.2",
 		"@sentry/react": "^10.42.0",
+		"@storybook/addon-a11y": "^10.2.19",
+		"@storybook/addon-docs": "^10.2.19",
+		"@storybook/addon-onboarding": "^10.2.19",
+		"@storybook/addon-vitest": "^10.2.19",
+		"@storybook/react-vite": "^10.2.19",
+		"@testing-library/react": "^16.3.2",
 		"@types/hoist-non-react-statics": "^3.3.7",
 		"@types/react": "^19.2.14",
 		"@types/react-color": "^3.0.13",
 		"@types/react-dom": "^19.2.3",
+		"@vitest/browser-playwright": "^4.1.0",
+		"@vitest/coverage-v8": "^4.1.0",
 		"cldr-data": "^36.0.5",
 		"cpx2": "^8.0.0",
 		"eslint": "^9.39.2",
@@ -99,15 +111,20 @@
 		"eslint-plugin-prettier": "^5.5.5",
 		"eslint-plugin-react": "^7.37.5",
 		"eslint-plugin-react-hooks": "^5.2.0",
+		"eslint-plugin-storybook": "^10.2.19",
 		"globals": "^17.4.0",
 		"husky": "^9.1.7",
+		"jsdom": "^29.0.0",
 		"lint-staged": "^16.3.2",
+		"playwright": "^1.58.2",
 		"prettier": "^3.8.1",
 		"react": "^19.2.4",
 		"react-dom": "^19.2.4",
+		"storybook": "^10.2.19",
 		"typedoc": "^0.28.17",
 		"typescript": "^5.9.3",
-		"typescript-eslint": "^8.56.1"
+		"typescript-eslint": "^8.56.1",
+		"vitest": "^4.1.0"
 	},
 	"overrides": {
 		"glob": "^11.1.0",
