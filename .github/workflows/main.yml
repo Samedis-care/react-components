@@ -9,14 +9,16 @@ on:
   push:
     branches: [master]
 
-# Only allow one pages deployment at a time
 concurrency:
   group: pages
   cancel-in-progress: false
 
 jobs:
-  build-and-test:
+  build-test-deploy:
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
       - name: Setup Node.js
@@ -47,6 +49,7 @@ jobs:
           git fetch
           mkdir ../build_out
           mv package.json package-lock.json dist LICENSE ../build_out
+          git stash
           git checkout -f master_dist || git checkout --orphan master_dist
           rm -f .gitignore
           git rm -rf .
@@ -55,28 +58,8 @@ jobs:
           git add package.json package-lock.json dist LICENSE
           git status
           git commit -m "$commit_message" && git push -f origin master_dist || echo "No changes"
-
-  deploy-pages:
-    needs: build-and-test
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - uses: actions/checkout@v4
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 24
-      - name: NPM Cache
-        uses: actions/cache@v4
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
-      - name: Install Dependencies
-        run: npm ci
+          git checkout -f master
+          git stash pop || true
       - name: Build Storybook
         run: npx storybook build -o gh-pages/storybook
       - name: Build TypeDoc
