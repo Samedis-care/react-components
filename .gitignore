@@ -34,6 +34,9 @@ yarn-error.log*
 # Claude Code
 /.claude
 
+# devcontainer config
+/.devcontainer
+
 /storybook-static
 
 dev.sh
