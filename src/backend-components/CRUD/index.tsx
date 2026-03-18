@@ -3,6 +3,7 @@ import React, {
 	useCallback,
 	useContext,
 	useEffect,
+	useImperativeHandle,
 	useMemo,
 	useRef,
 	useState,
@@ -302,6 +303,7 @@ const CRUD = <
 	CustomT,
 >(
 	props: CrudProps<KeyT, VisibilityT, CustomT>,
+	ref: React.Ref<CrudDispatch>,
 ) => {
 	const { t } = useCCTranslations();
 	const navigate = useNavigate();
@@ -551,6 +553,8 @@ const CRUD = <
 		[refreshGrid, openView, showOverview],
 	);
 
+	useImperativeHandle(ref, () => dispatch, [dispatch]);
+
 	const showGrid = disableRouting
 		? id === null
 		: routeUrl === location.pathname;
@@ -632,4 +636,13 @@ const CRUD = <
 	);
 };
 
-export default React.memo(CRUD) as typeof CRUD;
+export type CrudType = <
+	KeyT extends ModelFieldName,
+	VisibilityT extends PageVisibility,
+	CustomT,
+>(
+	props: CrudProps<KeyT, VisibilityT, CustomT> &
+		React.RefAttributes<CrudDispatch>,
+) => React.ReactElement | null;
+
+export default React.memo(React.forwardRef(CRUD)) as CrudType;
