@@ -175,6 +175,6 @@ export interface CrudDispatch {
 }
 export declare const useCrudDispatchContext: () => CrudDispatch;
 export declare const CrudSpecialIds: string[];
-declare const CRUD: <KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT>(props: CrudProps<KeyT, VisibilityT, CustomT>) => React.JSX.Element;
-declare const _default: typeof CRUD;
+export type CrudType = <KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT>(props: CrudProps<KeyT, VisibilityT, CustomT> & React.RefAttributes<CrudDispatch>) => React.ReactElement | null;
+declare const _default: CrudType;
 export default _default;

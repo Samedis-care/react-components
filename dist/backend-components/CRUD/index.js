@@ -1,4 +1,4 @@
-import React, { Suspense, useCallback, useContext, useEffect, useMemo, useRef, useState, } from "react";
+import React, { Suspense, useCallback, useContext, useEffect, useImperativeHandle, useMemo, useRef, useState, } from "react";
 import BackendDataGrid from "../DataGrid";
 import { Form } from "../Form";
 import { hasPermission, usePermissionContext, } from "../../framework";
@@ -38,7 +38,7 @@ const FormPageWrapper = (props) => {
         return React.createElement(React.Fragment, null);
     return (React.createElement(Suspense, { fallback: React.createElement(Loader, null) }, props.form(params.id ?? "", props.children)));
 };
-const CRUD = (props) => {
+const CRUD = (props, ref) => {
     const { t } = useCCTranslations();
     const navigate = useNavigate();
     const routeCtx = useContext(RouteContext);
@@ -184,6 +184,7 @@ const CRUD = (props) => {
         openView,
         showOverview,
     }), [refreshGrid, openView, showOverview]);
+    useImperativeHandle(ref, () => dispatch, [dispatch]);
     const showGrid = disableRouting
         ? id === null
         : routeUrl === location.pathname;
@@ -208,4 +209,4 @@ const CRUD = (props) => {
                     hasPermission(perms, props.newPermission) ||
                     !ForbiddenPage ? (React.createElement(FormPageWrapper, { form: form }, props.children)) : (React.createElement(ForbiddenPage, null)) })))))));
 };
-export default React.memo(CRUD);
+export default React.memo(React.forwardRef(CRUD));
