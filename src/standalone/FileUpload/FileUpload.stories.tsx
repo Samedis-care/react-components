@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
+// eslint-disable-next-line import/no-unresolved
+import { expect, within } from "storybook/test";
 import { FileUploadGeneric, ImageSelector } from "./index";
 import type { FileData, FileMeta } from "./Generic";
 import type { MultiImageImage } from "./MultiImage/MultiImage";
@@ -126,8 +128,69 @@ export const ReadOnly: FUGStory = {
 };
 
 // ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+const makeColorImage = (color: string, accent: string, size = 128): string => {
+	const canvas = document.createElement("canvas");
+	canvas.width = size;
+	canvas.height = size;
+	const ctx = canvas.getContext("2d");
+	// background
+	ctx.fillStyle = color;
+	ctx.fillRect(0, 0, size, size);
+	// checkerboard
+	ctx.fillStyle = accent;
+	const cell = size / 8;
+	for (let r = 0; r < 8; r++) {
+		for (let c = 0; c < 8; c++) {
+			if ((r + c) % 2 === 0) ctx.fillRect(c * cell, r * cell, cell, cell);
+		}
+	}
+	// diagonal cross
+	ctx.strokeStyle = accent;
+	ctx.lineWidth = 3;
+	ctx.beginPath();
+	ctx.moveTo(0, 0);
+	ctx.lineTo(size, size);
+	ctx.moveTo(size, 0);
+	ctx.lineTo(0, size);
+	ctx.stroke();
+	// center circle
+	ctx.beginPath();
+	ctx.arc(size / 2, size / 2, size / 4, 0, Math.PI * 2);
+	ctx.fillStyle = color;
+	ctx.fill();
+	ctx.stroke();
+	return canvas.toDataURL("image/png");
+};
+
+// ---------------------------------------------------------------------------
 // ImageSelector stories
 // ---------------------------------------------------------------------------
+
+export const ImageSelectorModern: StoryObj = {
+	name: "ImageSelector — modern (with preview dialog)",
+	render: () => {
+		const [value, setValue] = useState(makeColorImage("#e53935", "#ffcdd2"));
+		return (
+			<div style={{ width: 300, height: 200 }}>
+				<ImageSelector
+					name="photo"
+					value={value}
+					capture={false}
+					alt="Photo"
+					label="Photo (modern — click image to preview)"
+					readOnly={false}
+					variant="modern"
+					onChange={(_name, val) => {
+						setValue(val);
+					}}
+				/>
+			</div>
+		);
+	},
+};
 
 export const ImageSelectorEmpty: StoryObj = {
 	name: "ImageSelector — empty",
@@ -203,8 +266,7 @@ export const ImageSelectorReadOnly: StoryObj = {
 export const MultiImageEmpty: StoryObj = {
 	name: "MultiImage — empty",
 	render: () => {
-		const placeholder =
-			"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==";
+		const placeholder = makeColorImage("#ccc", "#999");
 
 		const [images, setImages] = useState<MultiImageImage[]>([]);
 
@@ -233,13 +295,11 @@ export const MultiImageEmpty: StoryObj = {
 export const MultiImageWithImages: StoryObj = {
 	name: "MultiImage — with images",
 	render: () => {
-		const redPixel =
-			"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwADhQGAWjR9awAAAABJRU5ErkJggg==";
-		const greenPixel =
-			"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==";
+		const redImage = makeColorImage("#e53935", "#ffcdd2");
+		const greenImage = makeColorImage("#43a047", "#c8e6c9");
 		const initialImages: MultiImageImage[] = [
-			{ id: "img-1", image: redPixel, name: "red.png" },
-			{ id: "img-2", image: greenPixel, name: "green.png" },
+			{ id: "img-1", image: redImage, name: "red.png" },
+			{ id: "img-2", image: greenImage, name: "green.png" },
 		];
 
 		const [images, setImages] = useState<MultiImageImage[]>(initialImages);
@@ -251,8 +311,8 @@ export const MultiImageWithImages: StoryObj = {
 					label="Product images"
 					images={images}
 					primary={primary}
-					uploadImage={redPixel}
-					captureImage={redPixel}
+					uploadImage={redImage}
+					captureImage={redImage}
 					onChange={(_name, imgs) => {
 						setImages(imgs);
 					}}
@@ -262,6 +322,83 @@ export const MultiImageWithImages: StoryObj = {
 				/>
 			</div>
 		);
+	},
+};
+
+export const MultiImageWheelDoesNotSwitchImage: StoryObj = {
+	name: "MultiImage — wheel zoom must not switch image",
+	render: () => {
+		const redImage = makeColorImage("#e53935", "#ffcdd2");
+		const greenImage = makeColorImage("#43a047", "#c8e6c9");
+		const initialImages: MultiImageImage[] = [
+			{ id: "img-1", image: redImage, name: "red.png" },
+			{ id: "img-2", image: greenImage, name: "green.png" },
+		];
+		const [images, setImages] = useState<MultiImageImage[]>(initialImages);
+		const [primary, setPrimary] = useState<string | null>("img-1");
+		return (
+			<div style={{ width: 300, height: 300 }}>
+				<MultiImage
+					label="Wheel test"
+					images={images}
+					primary={primary}
+					uploadImage={redImage}
+					captureImage={redImage}
+					onChange={(_name, imgs) => {
+						setImages(imgs);
+					}}
+					onPrimaryChange={(_name, p) => {
+						setPrimary(p);
+					}}
+				/>
+			</div>
+		);
+	},
+	play: async ({ canvasElement, userEvent }) => {
+		// Click the first image to open the fullscreen dialog
+		const previewImage = canvasElement.querySelector("img");
+		if (!previewImage) throw new Error("preview img not found");
+		await userEvent.click(previewImage);
+
+		// Find the dialog (rendered in a portal)
+		const body = within(document.body);
+		const dialog = await body.findByRole("dialog");
+
+		// Find the dialog image
+		const dialogImg = dialog.querySelector("img");
+		if (!dialogImg) throw new Error("dialog img not found");
+		const initialSrc = dialogImg.getAttribute("src");
+
+		// Click next arrow to go to second image
+		const arrowIcon = dialog.querySelector("[data-testid='ArrowForwardIcon']");
+		if (!arrowIcon) throw new Error("ArrowForwardIcon not found");
+		const nextButton = arrowIcon.closest("button");
+		if (!nextButton) throw new Error("next button not found");
+		await userEvent.click(nextButton);
+
+		// Wait for image to update and scroll reset to settle
+		await new Promise((r) => setTimeout(r, 500));
+		const secondSrc = dialogImg.getAttribute("src");
+		await expect(secondSrc).not.toBe(initialSrc);
+
+		// Fire a wheel-up event (zoom in) on the zoom container.
+		// stopPropagation prevents it from reaching the SwipeListener.
+		const zoomContainer = dialogImg.parentElement;
+		if (!zoomContainer) throw new Error("zoom container not found");
+		zoomContainer.dispatchEvent(
+			new WheelEvent("wheel", {
+				deltaY: -120,
+				bubbles: true,
+				cancelable: true,
+			}),
+		);
+
+		// Wait for any scroll handlers to fire
+		await new Promise((r) => setTimeout(r, 500));
+
+		// The image src must still be the second image — not switched back
+		const srcAfterWheel = dialogImg.getAttribute("src");
+		await expect(srcAfterWheel).toBe(secondSrc);
 	},
 };
 

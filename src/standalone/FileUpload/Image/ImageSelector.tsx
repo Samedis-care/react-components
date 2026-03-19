@@ -3,7 +3,6 @@ import {
 	alpha,
 	Box,
 	Button,
-	Dialog,
 	Grid,
 	IconButton,
 	styled,
@@ -14,11 +13,11 @@ import {
 } from "@mui/material";
 import {
 	AttachFile,
-	Close as CloseIcon,
 	FileUpload as UploadIcon,
 	Person,
 	CameraAlt as CameraIcon,
 } from "@mui/icons-material";
+import ImagePreviewDialog from "./ImagePreviewDialog";
 import processImageB64 from "../../../utils/processImageB64";
 import combineClassNames from "../../../utils/combineClassNames";
 import { IDownscaleProps } from "../../../utils/processImage";
@@ -256,20 +255,6 @@ const ModernUploadControlUpload = styled(IconButton, {
 	border: `1px solid ${theme.palette.divider}`,
 }));
 
-const PreviewDialog = styled(Dialog, {
-	name: "CcImageSelector",
-	slot: "previewDialog",
-})({});
-
-const PreviewDialogCloseButton = styled(IconButton, {
-	name: "CcImageSelector",
-	slot: "previewDialogCloseButton",
-})(({ theme }) => ({
-	position: "absolute",
-	top: theme.spacing(2),
-	right: theme.spacing(2),
-}));
-
 export type ImageSelectorClassKey =
 	| "rootClassic"
 	| "rootModern"
@@ -284,8 +269,6 @@ export type ImageSelectorClassKey =
 	| "modernFormatIcon"
 	| "modernUploadControlsWrapper"
 	| "modernUploadControlUpload"
-	| "previewDialog"
-	| "previewDialogCloseButton"
 	| "pfpRoot"
 	| "pfpIconBtn"
 	| "pfpImg"
@@ -401,17 +384,14 @@ const ImageSelector = (inProps: ImageSelectorProps) => {
 	const handlePreviewDialogClose = useCallback(() => {
 		setShowPreviewDialog(false);
 	}, []);
-	const previewDialog = showPreviewDialog && (
-		<PreviewDialog open={true} fullScreen onClose={handlePreviewDialogClose}>
-			<PreviewDialogCloseButton onClick={handlePreviewDialogClose}>
-				<CloseIcon />
-			</PreviewDialogCloseButton>
-			<PreviewModern
-				src={value}
-				alt={props.alt}
-				className={classes?.previewModern}
-			/>
-		</PreviewDialog>
+
+	const previewDialog = variant === "modern" && (
+		<ImagePreviewDialog
+			src={value}
+			alt={props.alt}
+			open={showPreviewDialog}
+			onClose={handlePreviewDialogClose}
+		/>
 	);
 
 	// render component

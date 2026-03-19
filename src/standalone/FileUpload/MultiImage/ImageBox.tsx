@@ -1,6 +1,5 @@
 import React, {
 	CSSProperties,
-	MutableRefObject,
 	useCallback,
 	useEffect,
 	useRef,
@@ -24,6 +23,7 @@ import {
 import combineClassNames from "../../../utils/combineClassNames";
 import { useDebounce } from "../../../utils/useDebounce";
 import ImageDots, { ImageDotsProps } from "./ImageDots";
+import useImageZoomPan from "../../../utils/useImageZoomPan";
 
 export interface ImageBoxProps {
 	/**
@@ -204,6 +204,22 @@ const FullScreenImageWrapper = styled("div", {
 	position: "relative",
 });
 
+const FullScreenZoomContainer = styled("div", {
+	name: "CcImageBox",
+	slot: "fullScreenZoomContainer",
+})({
+	width: "100%",
+	height: "100%",
+	cursor: "grab",
+	"&:active": {
+		cursor: "grabbing",
+	},
+	"& img": {
+		pointerEvents: "none",
+		userSelect: "none",
+	},
+});
+
 const ImageDotsWrapper = styled("div", {
 	name: "CcImageBox",
 	slot: "imageDotsWrapper",
@@ -236,13 +252,14 @@ export type ImageBoxClassKey =
 	| "image"
 	| "fullScreenDialog"
 	| "fullScreenImageWrapper"
+	| "fullScreenZoomContainer"
 	| "imageDotsWrapper"
 	| "imageDots";
 
 const useScrollSwipe = (
 	params: Pick<ImageBoxProps, "onPrevImage" | "onNextImage">,
 ): {
-	containerRef: MutableRefObject<HTMLDivElement | null>;
+	containerRef: React.RefObject<HTMLDivElement | null>;
 	handleScroll: React.UIEventHandler<HTMLDivElement>;
 	handleTouchEnd: React.TouchEventHandler<HTMLDivElement>;
 } => {
@@ -358,6 +375,12 @@ const ImageBox = (inProps: ImageBoxProps) => {
 		handleTouchEnd: handleTouchEndFS,
 	} = useScrollSwipe(props);
 
+	const {
+		imgRef: zoomImgRef,
+		containerRef: zoomContainerRef,
+		containerProps: zoomContainerProps,
+	} = useImageZoomPan(dialogOpen);
+
 	return (
 		<>
 			<Root
@@ -434,16 +457,24 @@ const ImageBox = (inProps: ImageBoxProps) => {
 								ref={containerRefFS}
 								onTouchEnd={handleTouchEndFS}
 							>
-								<StyledImage
-									src={image}
-									alt={""}
-									ownerState={{
-										swipeLeft: !!onPrevImage,
-										swipeRight: !!onNextImage,
-										imageDots: !imageDots,
-									}}
-									className={classes?.image}
-								/>
+								<FullScreenZoomContainer
+									ref={zoomContainerRef}
+									{...zoomContainerProps}
+									className={classes?.fullScreenZoomContainer}
+								>
+									<StyledImage
+										ref={zoomImgRef}
+										src={image}
+										alt={""}
+										draggable={false}
+										ownerState={{
+											swipeLeft: !!onPrevImage,
+											swipeRight: !!onNextImage,
+											imageDots: !imageDots,
+										}}
+										className={classes?.image}
+									/>
+								</FullScreenZoomContainer>
 							</SwipeListener>
 							<RemoveButton
 								onClick={closeDialog}
