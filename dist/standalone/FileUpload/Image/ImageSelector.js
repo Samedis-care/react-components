@@ -1,6 +1,7 @@
 import React, { useCallback, useRef, useState } from "react";
-import { alpha, Box, Button, Dialog, Grid, IconButton, styled, Tooltip, Typography, useThemeProps, } from "@mui/material";
-import { AttachFile, Close as CloseIcon, FileUpload as UploadIcon, Person, CameraAlt as CameraIcon, } from "@mui/icons-material";
+import { alpha, Box, Button, Grid, IconButton, styled, Tooltip, Typography, useThemeProps, } from "@mui/material";
+import { AttachFile, FileUpload as UploadIcon, Person, CameraAlt as CameraIcon, } from "@mui/icons-material";
+import ImagePreviewDialog from "./ImagePreviewDialog";
 import processImageB64 from "../../../utils/processImageB64";
 import combineClassNames from "../../../utils/combineClassNames";
 import GroupBox from "../../GroupBox";
@@ -132,18 +133,6 @@ const ModernUploadControlUpload = styled(IconButton, {
     borderRadius: theme.shape.borderRadius,
     border: `1px solid ${theme.palette.divider}`,
 }));
-const PreviewDialog = styled(Dialog, {
-    name: "CcImageSelector",
-    slot: "previewDialog",
-})({});
-const PreviewDialogCloseButton = styled(IconButton, {
-    name: "CcImageSelector",
-    slot: "previewDialogCloseButton",
-})(({ theme }) => ({
-    position: "absolute",
-    top: theme.spacing(2),
-    right: theme.spacing(2),
-}));
 const ImageSelector = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcImageSelector" });
     const { convertImagesTo, downscale, name, value, readOnly, capture, onChange, postEditCallback, classes, className, } = props;
@@ -218,10 +207,7 @@ const ImageSelector = (inProps) => {
     const handlePreviewDialogClose = useCallback(() => {
         setShowPreviewDialog(false);
     }, []);
-    const previewDialog = showPreviewDialog && (React.createElement(PreviewDialog, { open: true, fullScreen: true, onClose: handlePreviewDialogClose },
-        React.createElement(PreviewDialogCloseButton, { onClick: handlePreviewDialogClose },
-            React.createElement(CloseIcon, null)),
-        React.createElement(PreviewModern, { src: value, alt: props.alt, className: classes?.previewModern })));
+    const previewDialog = variant === "modern" && (React.createElement(ImagePreviewDialog, { src: value, alt: props.alt, open: showPreviewDialog, onClose: handlePreviewDialogClose }));
     // render component
     if (variant === "normal") {
         return (React.createElement(GroupBox, { label: props.label, smallLabel: props.smallLabel, className: className },

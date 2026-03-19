@@ -1,6 +1,7 @@
 import { PortalMenuClassKey, PortalMenuProps } from "./standalone/Portal/Menu";
 import { FileUploadClassKey, FileUploadProps } from "./standalone/FileUpload/Generic";
 import { ImageSelectorClassKey, ImageSelectorProps } from "./standalone/FileUpload/Image/ImageSelector";
+import { ImagePreviewDialogClassKey, ImagePreviewDialogProps } from "./standalone/FileUpload/Image/ImagePreviewDialog";
 import { MultiImageClassKey, MultiImageProps } from "./standalone/FileUpload/MultiImage/MultiImage";
 import { BaseSelectorClassKey, BaseSelectorData, BaseSelectorProps, HowToBoxClassKey, HowToBoxProps, MultiSelectClassKey, MultiSelectorData, MultiSelectProps, MultiSelectWithoutGroupClassKey, MultiSelectWithoutGroupProps, MultiSelectWithTagsClassKey, MultiSelectWithTagsProps, PopupMenuClassKey, PortalLayoutClassKey, PortalLayoutProps } from "./standalone";
 import { ComponentWithLabelClassKey, ComponentWithLabelProps } from "./standalone/UIKit/ComponentWithLabel";
@@ -102,6 +103,7 @@ declare module "@mui/material/styles" {
         CcDialogTitle: DialogTitleClassKey;
         CcFileUpload: FileUploadClassKey;
         CcImageSelector: ImageSelectorClassKey;
+        CcImagePreviewDialog: ImagePreviewDialogClassKey;
         CcPortalMenu: PortalMenuClassKey;
         CcMenuItemMaterial: MenuItemMaterialClassKey;
         CcLocalizedKeyboardDatePicker: LocalizedKeyboardDatePickerClassKey;
@@ -167,6 +169,7 @@ declare module "@mui/material/styles" {
         CcDialogTitle: Partial<DialogTitleProps>;
         CcFileUpload: Partial<FileUploadProps>;
         CcImageSelector: Partial<ImageSelectorProps>;
+        CcImagePreviewDialog: Partial<ImagePreviewDialogProps>;
         CcPortalMenu: Partial<PortalMenuProps>;
         CcMenuItemMaterial: Partial<MenuItemMaterialProps>;
         CcLocalizedKeyboardDatePicker: Partial<LocalizedKeyboardDatePickerProps>;
@@ -361,6 +364,11 @@ declare module "@mui/material/styles" {
             defaultProps?: ComponentsPropsList["CcImageSelector"];
             styleOverrides?: ComponentsOverrides<Theme>["CcImageSelector"];
             variants?: ComponentsVariants["CcImageSelector"];
+        };
+        CcImagePreviewDialog?: {
+            defaultProps?: ComponentsPropsList["CcImagePreviewDialog"];
+            styleOverrides?: ComponentsOverrides<Theme>["CcImagePreviewDialog"];
+            variants?: ComponentsVariants["CcImagePreviewDialog"];
         };
         CcPortalMenu?: {
             defaultProps?: ComponentsPropsList["CcPortalMenu"];

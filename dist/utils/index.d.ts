@@ -61,3 +61,4 @@ export { default as semaphoreExec } from "./semaphoreExec";
 export { default as advancedEnumValueToBaseSelectorData } from "./advancedEnumValueToBaseSelectorData";
 export { default as getCanImageCapture } from "./getCanImageCapture";
 export { default as useDocumentBody } from "./useDocumentBody";
+export { default as useImageZoomPan } from "./useImageZoomPan";

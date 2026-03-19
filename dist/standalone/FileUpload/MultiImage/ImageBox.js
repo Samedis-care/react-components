@@ -5,6 +5,7 @@ import { ArrowBack as PrevIcon, ArrowForward as NextIcon, Close as CloseIcon, De
 import combineClassNames from "../../../utils/combineClassNames";
 import { useDebounce } from "../../../utils/useDebounce";
 import ImageDots from "./ImageDots";
+import useImageZoomPan from "../../../utils/useImageZoomPan";
 const swipeWidth = 30;
 const Root = styled("div", { name: "CcImageBox", slot: "root" })(({ theme, ownerState: { background, dragging, clickable } }) => ({
     borderRadius: theme.shape.borderRadius,
@@ -103,6 +104,21 @@ const FullScreenImageWrapper = styled("div", {
     height: "100%",
     position: "relative",
 });
+const FullScreenZoomContainer = styled("div", {
+    name: "CcImageBox",
+    slot: "fullScreenZoomContainer",
+})({
+    width: "100%",
+    height: "100%",
+    cursor: "grab",
+    "&:active": {
+        cursor: "grabbing",
+    },
+    "& img": {
+        pointerEvents: "none",
+        userSelect: "none",
+    },
+});
 const ImageDotsWrapper = styled("div", {
     name: "CcImageBox",
     slot: "imageDotsWrapper",
@@ -200,6 +216,7 @@ const ImageBox = (inProps) => {
     }, [onNextImage]);
     const { containerRef: containerRefImage, handleScroll: handleScrollImage, handleTouchEnd: handleTouchEndImage, } = useScrollSwipe(props);
     const { containerRef: containerRefFS, handleScroll: handleScrollFS, handleTouchEnd: handleTouchEndFS, } = useScrollSwipe(props);
+    const { imgRef: zoomImgRef, containerRef: zoomContainerRef, containerProps: zoomContainerProps, } = useImageZoomPan(dialogOpen);
     return (React.createElement(React.Fragment, null,
         React.createElement(Root, { onClick: onClick === null ? undefined : (onClick ?? openDialog), onDragOver: handleDragOver, onDrop: handleDrop, style: { width, height }, ownerState: {
                 clickable: !!onClick,
@@ -223,11 +240,12 @@ const ImageBox = (inProps) => {
             React.createElement(DialogContent, null,
                 React.createElement(FullScreenImageWrapper, { className: classes?.fullScreenImageWrapper },
                     React.createElement(SwipeListener, { className: classes?.swipeListener, onScroll: handleScrollFS, ref: containerRefFS, onTouchEnd: handleTouchEndFS },
-                        React.createElement(StyledImage, { src: image, alt: "", ownerState: {
-                                swipeLeft: !!onPrevImage,
-                                swipeRight: !!onNextImage,
-                                imageDots: !imageDots,
-                            }, className: classes?.image })),
+                        React.createElement(FullScreenZoomContainer, { ref: zoomContainerRef, ...zoomContainerProps, className: classes?.fullScreenZoomContainer },
+                            React.createElement(StyledImage, { ref: zoomImgRef, src: image, alt: "", draggable: false, ownerState: {
+                                    swipeLeft: !!onPrevImage,
+                                    swipeRight: !!onNextImage,
+                                    imageDots: !imageDots,
+                                }, className: classes?.image }))),
                     React.createElement(RemoveButton, { onClick: closeDialog, className: classes?.removeBtn, size: "large" },
                         React.createElement(CloseIcon, null)),
                     onPrevImage && (React.createElement(PrevButton, { onClick: handlePrevImage, className: classes?.prevBtn, size: "large" },
