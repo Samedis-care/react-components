@@ -8,6 +8,10 @@ import {
 	ImageSelectorProps,
 } from "./standalone/FileUpload/Image/ImageSelector";
 import {
+	ImagePreviewDialogClassKey,
+	ImagePreviewDialogProps,
+} from "./standalone/FileUpload/Image/ImagePreviewDialog";
+import {
 	MultiImageClassKey,
 	MultiImageProps,
 } from "./standalone/FileUpload/MultiImage/MultiImage";
@@ -266,6 +270,7 @@ declare module "@mui/material/styles" {
 		CcDialogTitle: DialogTitleClassKey;
 		CcFileUpload: FileUploadClassKey;
 		CcImageSelector: ImageSelectorClassKey;
+		CcImagePreviewDialog: ImagePreviewDialogClassKey;
 		CcPortalMenu: PortalMenuClassKey;
 		CcMenuItemMaterial: MenuItemMaterialClassKey;
 		CcLocalizedKeyboardDatePicker: LocalizedKeyboardDatePickerClassKey;
@@ -332,6 +337,7 @@ declare module "@mui/material/styles" {
 		CcDialogTitle: Partial<DialogTitleProps>;
 		CcFileUpload: Partial<FileUploadProps>;
 		CcImageSelector: Partial<ImageSelectorProps>;
+		CcImagePreviewDialog: Partial<ImagePreviewDialogProps>;
 		CcPortalMenu: Partial<PortalMenuProps>;
 		CcMenuItemMaterial: Partial<MenuItemMaterialProps>;
 		CcLocalizedKeyboardDatePicker: Partial<LocalizedKeyboardDatePickerProps>;
@@ -544,6 +550,11 @@ declare module "@mui/material/styles" {
 			defaultProps?: ComponentsPropsList["CcImageSelector"];
 			styleOverrides?: ComponentsOverrides<Theme>["CcImageSelector"];
 			variants?: ComponentsVariants["CcImageSelector"];
+		};
+		CcImagePreviewDialog?: {
+			defaultProps?: ComponentsPropsList["CcImagePreviewDialog"];
+			styleOverrides?: ComponentsOverrides<Theme>["CcImagePreviewDialog"];
+			variants?: ComponentsVariants["CcImagePreviewDialog"];
 		};
 		CcPortalMenu?: {
 			defaultProps?: ComponentsPropsList["CcPortalMenu"];

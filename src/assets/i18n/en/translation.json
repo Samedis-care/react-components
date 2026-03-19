@@ -122,6 +122,7 @@
 			}
 		},
 		"file-upload": {
+			"close": "Close",
 			"upload": "Upload",
 			"upload-capture": {
 				"image": "Take photo"
