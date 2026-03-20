@@ -144,7 +144,8 @@
 			},
 			"upload-modern-btn-capture": {
 				"image": "Нажмите, чтобы сделать фото"
-			}
+			},
+			"close": "Закрыть"
 		},
 		"phone-number": {
 			"invalid": "Введите правильный номер телефона"
