@@ -144,7 +144,8 @@
 			},
 			"upload-modern-btn-capture": {
 				"image": "Klicke um ein Foto zu machen"
-			}
+			},
+			"close": "Schliessen"
 		},
 		"phone-number": {
 			"invalid": "Korrekte Rufnummer eingeben"
