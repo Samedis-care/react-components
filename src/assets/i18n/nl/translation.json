@@ -144,7 +144,8 @@
 			},
 			"upload-modern-btn-capture": {
 				"image": "Klik om een foto te maken"
-			}
+			},
+			"close": "Sluiten"
 		},
 		"phone-number": {
 			"invalid": "Voer het juiste telefoonnummer in"
