@@ -144,7 +144,8 @@
 			},
 			"upload-modern-btn-capture": {
 				"image": "Rasmga olish uchun bosing"
-			}
+			},
+			"close": "Yoping"
 		},
 		"phone-number": {
 			"invalid": "To'g'ri telefon raqamini kiriting"
