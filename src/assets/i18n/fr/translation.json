@@ -144,7 +144,8 @@
 			},
 			"upload-modern-btn-capture": {
 				"image": "Cliquez pour prendre une photo"
-			}
+			},
+			"close": "Fermer"
 		},
 		"phone-number": {
 			"invalid": "Entrez le numéro de téléphone correct"
