@@ -3,6 +3,7 @@ import { BasicFormPageRendererProps, EnhancedCustomProps } from "./BasicFormPage
 import { CrudFormProps } from "../CRUD";
 import { ActionButton } from "../../standalone";
 import { DefaultFormPageProps } from "./DefaultFormPage";
+export declare const BackButtonDefaultColorClass = "CcDefaultFormPageButtons-backButtonDefaultColor";
 export declare const BackActionButton: typeof ActionButton;
 export type DefaultFormPageButtonsClassKey = "backButton";
 export type DefaultFormPageButtonsProps = BasicFormPageRendererProps<EnhancedCustomProps<CrudFormProps> | undefined> & Pick<DefaultFormPageProps, "extraButtons" | "textButtonSave" | "textButtonBack">;

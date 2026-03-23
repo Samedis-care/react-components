@@ -2,14 +2,18 @@ import React, { useCallback, useContext, useEffect, useMemo, useState, } from "r
 import { useDialogContext } from "../../framework";
 import { showConfirmDialog } from "../../non-standalone";
 import { ActionButton, FormButtons } from "../../standalone";
+import combineClassNames from "../../utils/combineClassNames";
 import { IsInFormDialogContext } from "./FormDialog";
 import useCCTranslations from "../../utils/useCCTranslations";
 import { styled, Tooltip, useThemeProps } from "@mui/material";
-export const BackActionButton = styled(ActionButton, {
+export const BackButtonDefaultColorClass = "CcDefaultFormPageButtons-backButtonDefaultColor";
+const BackActionButtonRoot = styled(ActionButton, {
     name: "CcDefaultFormPageButtons",
     slot: "backButton",
 })({
-    backgroundColor: "#bcbdbf",
+    [`&.${BackButtonDefaultColorClass}`]: {
+        backgroundColor: "#bcbdbf",
+    },
     boxShadow: "none",
     border: "none",
     "&:hover": {
@@ -17,6 +21,11 @@ export const BackActionButton = styled(ActionButton, {
         border: "none",
     },
 });
+const BackActionButtonInner = ({ color, className, ...props }) => (React.createElement(BackActionButtonRoot, { color: color, className: combineClassNames([
+        !color && BackButtonDefaultColorClass,
+        className,
+    ]), ...props }));
+export const BackActionButton = React.memo(BackActionButtonInner);
 const DefaultFormPageButtons = (inProps) => {
     const props = useThemeProps({
         props: inProps,
