@@ -13,16 +13,23 @@ import { CrudFormProps } from "../CRUD";
 import { useDialogContext } from "../../framework";
 import { showConfirmDialog } from "../../non-standalone";
 import { ActionButton, FormButtons } from "../../standalone";
+import { ActionButtonProps } from "../../standalone/UIKit/ActionButton";
+import combineClassNames from "../../utils/combineClassNames";
 import { IsInFormDialogContext } from "./FormDialog";
 import useCCTranslations from "../../utils/useCCTranslations";
 import { styled, Tooltip, useThemeProps } from "@mui/material";
 import { DefaultFormPageProps } from "./DefaultFormPage";
 
-export const BackActionButton = styled(ActionButton, {
+export const BackButtonDefaultColorClass =
+	"CcDefaultFormPageButtons-backButtonDefaultColor";
+
+const BackActionButtonRoot = styled(ActionButton, {
 	name: "CcDefaultFormPageButtons",
 	slot: "backButton",
 })({
-	backgroundColor: "#bcbdbf",
+	[`&.${BackButtonDefaultColorClass}`]: {
+		backgroundColor: "#bcbdbf",
+	},
 	boxShadow: "none",
 	border: "none",
 	"&:hover": {
@@ -30,6 +37,25 @@ export const BackActionButton = styled(ActionButton, {
 		border: "none",
 	},
 }) as typeof ActionButton;
+
+const BackActionButtonInner = ({
+	color,
+	className,
+	...props
+}: ActionButtonProps) => (
+	<BackActionButtonRoot
+		color={color}
+		className={combineClassNames([
+			!color && BackButtonDefaultColorClass,
+			className,
+		])}
+		{...props}
+	/>
+);
+
+export const BackActionButton = React.memo(
+	BackActionButtonInner,
+) as typeof ActionButton;
 
 export type DefaultFormPageButtonsClassKey = "backButton";
 export type DefaultFormPageButtonsProps = BasicFormPageRendererProps<
