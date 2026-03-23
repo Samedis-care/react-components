@@ -8,6 +8,11 @@
 
 Note: Make sure to install all peer-dependencies
 
+## Documentation
+
+- [Storybook](https://samedis-care.github.io/react-components/storybook/) — Interactive component library
+- [TypeDoc](https://samedis-care.github.io/react-components/typedoc/) — API reference
+
 ## Overview
 
 The aim of this project is to provide a solid foundation for developing complex React based web applications.
