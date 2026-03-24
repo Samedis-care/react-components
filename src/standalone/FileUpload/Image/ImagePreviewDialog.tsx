@@ -88,7 +88,7 @@ const ImagePreviewDialog = (inProps: ImagePreviewDialogProps) => {
 		<Root open={open} fullScreen onClose={onClose} className={classes?.root}>
 			<CloseButton
 				onClick={onClose}
-				aria-label={t("standalone.file-upload.close") ?? "Close"}
+				aria-label={t("standalone.file-upload.close")}
 				className={classes?.closeButton}
 			>
 				<CloseIcon />

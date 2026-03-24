@@ -9,7 +9,9 @@ import {
 	Typography,
 	useThemeProps,
 } from "@mui/material";
-import { useCCLanguagesTranslations } from "../../../utils/useCCTranslations";
+import useCCTranslations, {
+	useCCLanguagesTranslations,
+} from "../../../utils/useCCTranslations";
 import { Translate } from "@mui/icons-material";
 import { TextFieldCC } from "../MuiWarning";
 
@@ -302,6 +304,7 @@ const MultiLanguageInput = (inProps: MultiLanguageInputProps) => {
 		...textFieldProps
 	} = props;
 	const { t, i18n } = useCCLanguagesTranslations();
+	const { t: tCC } = useCCTranslations();
 
 	// determine default language
 	let defaultLanguage = i18n.language.split(
@@ -397,7 +400,7 @@ const MultiLanguageInput = (inProps: MultiLanguageInputProps) => {
 					? required
 					: undefined
 			}
-			value={values[lang] ?? ""}
+			value={values[lang]}
 			onChange={handleChange}
 			name={`${name ?? "mli"}-${lang}`}
 			slotProps={{
@@ -423,7 +426,13 @@ const MultiLanguageInput = (inProps: MultiLanguageInputProps) => {
 					endAdornment:
 						defaultLanguage === lang && !textFieldProps.multiline ? (
 							<InputAdornment position={"end"}>
-								<IconButton onClick={toggleExpanded} size="large">
+								<IconButton
+									onClick={toggleExpanded}
+									size="large"
+									aria-label={tCC(
+										"standalone.uikit.multi-language-input.toggle-languages",
+									)}
+								>
 									<Translate
 										color={
 											expanded ? "primary" : incomplete ? "error" : undefined

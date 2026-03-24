@@ -181,6 +181,7 @@ const SignalPortlet = (inProps: SignalPortletProps) => {
 										onClick={props.onRefresh}
 										size={"small"}
 										color={"primary"}
+										aria-label={t("standalone.signal-portlet.refresh")}
 									>
 										<SignalPortletRefreshIcon />
 									</SignalPortletRefreshIconButton>

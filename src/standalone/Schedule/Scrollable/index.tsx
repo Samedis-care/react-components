@@ -160,7 +160,7 @@ const ScrollableSchedule = (inProps: ScrollableScheduleProps) => {
 	const { loadWeekCallback, wrapperClass, className, classes } = props;
 	const filters = props.filters ?? EMPTY_FILTERS;
 	const actions = props.actions ?? NO_ACTIONS;
-	const { i18n } = useCCTranslations();
+	const { t, i18n } = useCCTranslations();
 	const todayElem = useRef<HTMLElement | null>(null);
 	const scrollElem = useRef<InfiniteScroll | null>(null);
 
@@ -317,7 +317,10 @@ const ScrollableSchedule = (inProps: ScrollableScheduleProps) => {
 							>
 								{filterCount + actions.length > 1 ? (
 									<>
-										<IconButton onClick={openFilterSettings}>
+										<IconButton
+											onClick={openFilterSettings}
+											aria-label={t("standalone.schedule.filter-settings")}
+										>
 											<FilterSettingsIcon
 												className={classes?.filterSettingsBtn}
 											/>

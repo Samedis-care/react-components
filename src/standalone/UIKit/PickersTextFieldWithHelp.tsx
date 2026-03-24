@@ -8,6 +8,7 @@ import {
 } from "./CommonStyles";
 import isTouchDevice from "../../utils/isTouchDevice";
 import { withMuiWarning } from "./MuiWarning";
+import useCCTranslations from "../../utils/useCCTranslations";
 import { PickersTextFieldProps } from "@mui/x-date-pickers";
 
 export interface PickersTextFieldWithHelpProps extends UIInputProps {
@@ -41,6 +42,7 @@ const TextFieldWithHelp = React.forwardRef(
 			onChange,
 			...muiProps
 		} = props;
+		const { t } = useCCTranslations();
 
 		// handle clear
 
@@ -90,7 +92,11 @@ const TextFieldWithHelp = React.forwardRef(
 						<>
 							<InputAdornment position={"end"}>
 								{showClear && (
-									<IconButton onClick={handleClear} size="small">
+									<IconButton
+										onClick={handleClear}
+										size="small"
+										aria-label={t("standalone.uikit.clear")}
+									>
 										<ClearIcon />
 									</IconButton>
 								)}
@@ -101,7 +107,11 @@ const TextFieldWithHelp = React.forwardRef(
 												?.endAdornment as React.ReactElement<InputAdornmentProps>
 										)?.props?.children}
 								{openInfo && (
-									<IconButton onClick={openInfo} size="small">
+									<IconButton
+										onClick={openInfo}
+										size="small"
+										aria-label={t("standalone.uikit.info")}
+									>
 										<InfoIcon color={"disabled"} />
 									</IconButton>
 								)}

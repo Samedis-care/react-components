@@ -636,6 +636,11 @@ const ImageSelector = (inProps: ImageSelectorProps) => {
 					onClick={captureEnabled ? handleUploadCapture : handleUpload}
 					className={classes?.pfpIconBtn}
 					size="large"
+					aria-label={
+						captureEnabled
+							? t("standalone.file-upload.upload-capture.image")
+							: t("standalone.file-upload.upload")
+					}
 				>
 					{image}
 				</PfpIconButton>

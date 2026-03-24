@@ -21,6 +21,7 @@ import {
 	Delete as DeleteIcon,
 } from "@mui/icons-material";
 import combineClassNames from "../../../utils/combineClassNames";
+import useCCTranslations from "../../../utils/useCCTranslations";
 import { useDebounce } from "../../../utils/useDebounce";
 import ImageDots, { ImageDotsProps } from "./ImageDots";
 import useImageZoomPan from "../../../utils/useImageZoomPan";
@@ -318,6 +319,7 @@ const useScrollSwipe = (
 
 const ImageBox = (inProps: ImageBoxProps) => {
 	const props = useThemeProps({ props: inProps, name: "CcImageBox" });
+	const { t } = useCCTranslations();
 	const {
 		image,
 		width,
@@ -400,6 +402,7 @@ const ImageBox = (inProps: ImageBoxProps) => {
 						onClick={handleRemove}
 						className={classes?.removeBtn}
 						size="large"
+						aria-label={t("standalone.file-upload.multi-image.remove")}
 					>
 						<DeleteIcon />
 					</RemoveButton>
@@ -409,6 +412,7 @@ const ImageBox = (inProps: ImageBoxProps) => {
 						onClick={handlePrevImage}
 						className={classes?.prevBtn}
 						size="large"
+						aria-label={t("standalone.file-upload.multi-image.prev-image")}
 					>
 						<PrevIcon />
 					</PrevButton>
@@ -418,6 +422,7 @@ const ImageBox = (inProps: ImageBoxProps) => {
 						onClick={handleNextImage}
 						className={classes?.nextBtn}
 						size="large"
+						aria-label={t("standalone.file-upload.multi-image.next-image")}
 					>
 						<NextIcon />
 					</NextButton>
@@ -480,6 +485,7 @@ const ImageBox = (inProps: ImageBoxProps) => {
 								onClick={closeDialog}
 								className={classes?.removeBtn}
 								size="large"
+								aria-label={t("standalone.file-upload.close")}
 							>
 								<CloseIcon />
 							</RemoveButton>
@@ -488,6 +494,9 @@ const ImageBox = (inProps: ImageBoxProps) => {
 									onClick={handlePrevImage}
 									className={classes?.prevBtn}
 									size="large"
+									aria-label={t(
+										"standalone.file-upload.multi-image.prev-image",
+									)}
 								>
 									<PrevIcon />
 								</PrevButton>
@@ -497,6 +506,9 @@ const ImageBox = (inProps: ImageBoxProps) => {
 									onClick={handleNextImage}
 									className={classes?.nextBtn}
 									size="large"
+									aria-label={t(
+										"standalone.file-upload.multi-image.next-image",
+									)}
 								>
 									<NextIcon />
 								</NextButton>

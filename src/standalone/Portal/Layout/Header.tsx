@@ -7,6 +7,7 @@ import {
 } from "@mui/material";
 import { Menu as MenuIcon } from "@mui/icons-material";
 import React from "react";
+import useCCTranslations from "../../../utils/useCCTranslations";
 
 export interface PortalLayoutHeaderProps {
 	/**
@@ -32,12 +33,17 @@ export interface PortalLayoutHeaderProps {
 
 const PortalLayoutHeader = (props: PortalLayoutHeaderProps) => {
 	const { mobile, customClasses, toggleMenu, contents } = props;
+	const { t } = useCCTranslations();
 
 	return (
 		<AppBar position={"relative"} classes={customClasses?.appBar}>
 			<Toolbar classes={customClasses?.toolbar}>
 				{mobile && (
-					<IconButton onClick={toggleMenu} size="large">
+					<IconButton
+						onClick={toggleMenu}
+						size="large"
+						aria-label={t("standalone.portal.menu-toggle")}
+					>
 						<MenuIcon />
 					</IconButton>
 				)}

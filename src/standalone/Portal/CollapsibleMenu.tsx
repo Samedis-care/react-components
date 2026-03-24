@@ -3,6 +3,7 @@ import { Grid, IconButton, styled, useThemeProps } from "@mui/material";
 import { DoubleArrow } from "@mui/icons-material";
 import { usePortalLayoutContext } from "./Layout";
 import combineClassNames from "../../utils/combineClassNames";
+import useCCTranslations from "../../utils/useCCTranslations";
 
 export interface CollapsibleMenuProps {
 	/**
@@ -69,6 +70,7 @@ const CollapsibleMenu = (inProps: CollapsibleMenuProps) => {
 	const { classes, className } = props;
 
 	const [collapsed, setCollapsed] = useState(false);
+	const { t } = useCCTranslations();
 	const { mobile } = usePortalLayoutContext();
 
 	const toggleCollapsed = useCallback(
@@ -101,6 +103,11 @@ const CollapsibleMenu = (inProps: CollapsibleMenuProps) => {
 						onClick={toggleCollapsed}
 						className={classes?.button}
 						size="large"
+						aria-label={
+							collapsed
+								? t("standalone.portal.expand-menu")
+								: t("standalone.portal.collapse-menu")
+						}
 					>
 						<ArrowComp
 							className={collapsed ? classes?.iconOpen : classes?.iconClose}

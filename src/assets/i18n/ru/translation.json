@@ -2,7 +2,22 @@
 	"standalone": {
 		"schedule": {
 			"week": "Неделя",
-			"today": "Сегодня"
+			"today": "Сегодня",
+			"prev-week": "Предыдущая неделя",
+			"next-week": "Следующая неделя",
+			"filter-settings": "Настройки фильтра"
+		},
+		"portal": {
+			"menu-toggle": "Открыть меню",
+			"collapse-menu": "Свернуть меню",
+			"expand-menu": "Развернуть меню"
+		},
+		"uikit": {
+			"info": "Подробнее",
+			"clear": "Очистить",
+			"multi-language-input": {
+				"toggle-languages": "Переключить языковые поля"
+			}
 		},
 		"notifications": {
 			"title": "Уведомления"
@@ -60,6 +75,8 @@
 				"import": "Импорт",
 				"settings": "Столбцы",
 				"reset": "Сброс",
+				"search": "Поиск",
+				"more-options": "Другие параметры",
 				"custom-filter-button": "Фильтр",
 				"delete": "Удалить",
 				"edit": "Редактировать",
@@ -115,7 +132,8 @@
 					"message": "Вы уверены, что хотите удалить эту запись?",
 					"yes": "Да",
 					"no": "Нет"
-				}
+				},
+				"remove-item": "Удалить {{ITEM}}"
 			}
 		},
 		"file-upload": {
@@ -135,7 +153,10 @@
 			},
 			"multi-image": {
 				"edit": "Редактировать",
-				"primary": "Начальный"
+				"primary": "Начальный",
+				"remove": "Удалить изображение",
+				"prev-image": "Предыдущее изображение",
+				"next-image": "Следующее изображение"
 			},
 			"upload-modern-btn": "Нажмите, чтобы открыть диалоговое окно загрузки",
 			"upload-modern-dnd": "Перетащите файл сюда",
@@ -169,7 +190,8 @@
 			"sign-here": "Цифровая подпись здесь"
 		},
 		"signal-portlet": {
-			"last-updated": "Последнее обновление: {{AGE}}"
+			"last-updated": "Последнее обновление: {{AGE}}",
+			"refresh": "Обновить"
 		}
 	},
 	"framework": {

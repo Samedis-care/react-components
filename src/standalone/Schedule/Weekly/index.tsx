@@ -278,7 +278,11 @@ const WeekView = (inProps: WeekViewProps) => {
 				<Grid>
 					<Grid container justifyContent={"center"}>
 						<Grid>
-							<IconButton onClick={prevWeek} size="large">
+							<IconButton
+								onClick={prevWeek}
+								size="large"
+								aria-label={t("standalone.schedule.prev-week")}
+							>
 								<ArrowBackIos />
 							</IconButton>
 							<Week onClick={openDatePicker} className={classes?.week}>
@@ -301,7 +305,11 @@ const WeekView = (inProps: WeekViewProps) => {
 									/>
 								</LocalizationProvider>
 							</Picker>
-							<IconButton onClick={nextWeek} size="large">
+							<IconButton
+								onClick={nextWeek}
+								size="large"
+								aria-label={t("standalone.schedule.next-week")}
+							>
 								<ArrowForwardIos />
 							</IconButton>
 						</Grid>
@@ -313,7 +321,10 @@ const WeekView = (inProps: WeekViewProps) => {
 							<FilterWrapper px={2} className={classes?.filterWrapper}>
 								{filterCount > 2 || actions.length > 1 ? (
 									<>
-										<IconButton onClick={openFilterSettings}>
+										<IconButton
+											onClick={openFilterSettings}
+											aria-label={t("standalone.schedule.filter-settings")}
+										>
 											<SettingsIcon />
 										</IconButton>
 										<Menu

@@ -436,7 +436,11 @@ const MultiImage = (inProps: MultiImageProps) => {
 						<DialogTitle>
 							<Grid container justifyContent={"flex-end"}>
 								<Grid>
-									<IconButton onClick={closeDialog} size="large">
+									<IconButton
+										onClick={closeDialog}
+										size="large"
+										aria-label={t("standalone.file-upload.close")}
+									>
 										<CloseIcon />
 									</IconButton>
 								</Grid>

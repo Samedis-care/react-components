@@ -10,6 +10,7 @@ import {
 import { DataGridQuickFilterIcon, useDataGridProps } from "../DataGrid";
 import TextFieldWithHelp from "../../UIKit/TextFieldWithHelp";
 import combineClassNames from "../../../utils/combineClassNames";
+import useCCTranslations from "../../../utils/useCCTranslations";
 
 export interface IDataGridSearchViewProps {
 	/**
@@ -38,6 +39,7 @@ const transformOrigin: PopoverOrigin = {
 
 const SearchView = (props: IDataGridSearchViewProps) => {
 	const { searchPlaceholder, classes } = useDataGridProps();
+	const { t } = useCCTranslations();
 	const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 	const openPopover = useCallback(
 		(evt: React.MouseEvent<HTMLElement>) => setAnchorEl(evt.currentTarget),
@@ -76,7 +78,11 @@ const SearchView = (props: IDataGridSearchViewProps) => {
 				renderTextField()
 			) : (
 				<>
-					<IconButton onClick={openPopover} size="large">
+					<IconButton
+						onClick={openPopover}
+						size="large"
+						aria-label={t("standalone.data-grid.header.search")}
+					>
 						<DataGridQuickFilterIcon
 							className={combineClassNames([
 								classes?.quickFilterIcon,

@@ -4,12 +4,14 @@ import { Info as InfoIcon } from "@mui/icons-material";
 import { UiKitInputOutlined } from "./CommonStyles";
 import { InputBaseProps } from "@mui/material/InputBase/InputBase";
 import { TextFieldWithHelpProps } from "./TextFieldWithHelp";
+import useCCTranslations from "../../utils/useCCTranslations";
 
 const OutlinedInputWithHelpInner = (
 	props: TextFieldWithHelpProps & InputBaseProps,
 	ref: React.Ref<unknown>,
 ) => {
 	const { openInfo, ...muiProps } = props;
+	const { t } = useCCTranslations();
 
 	return (
 		<UiKitInputOutlined
@@ -17,7 +19,10 @@ const OutlinedInputWithHelpInner = (
 			endAdornment={
 				openInfo && (
 					<InputAdornment position={"end"}>
-						<IconButton onClick={openInfo}>
+						<IconButton
+							onClick={openInfo}
+							aria-label={t("standalone.uikit.info")}
+						>
 							<InfoIcon color={"disabled"} />
 						</IconButton>
 					</InputAdornment>

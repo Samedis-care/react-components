@@ -129,7 +129,11 @@ const SignPad = (inProps: SignPadProps) => {
 			<InfoDiv className={classes?.infoDiv}>
 				{openInfo && (
 					<InputAdornment position={"end"}>
-						<IconButton onClick={handelOpenInfo} size="large">
+						<IconButton
+							onClick={handelOpenInfo}
+							size="large"
+							aria-label={t("standalone.uikit.info")}
+						>
 							<InfoIcon color={"disabled"} />
 						</IconButton>
 					</InputAdornment>

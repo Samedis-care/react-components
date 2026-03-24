@@ -2,7 +2,22 @@
 	"standalone": {
 		"schedule": {
 			"week": "Hafta",
-			"today": "Bugun"
+			"today": "Bugun",
+			"prev-week": "Oldingi hafta",
+			"next-week": "Keyingi hafta",
+			"filter-settings": "Filtr sozlamalari"
+		},
+		"portal": {
+			"menu-toggle": "Menyuni ochish",
+			"collapse-menu": "Menyuni yig'ish",
+			"expand-menu": "Menyuni yoyish"
+		},
+		"uikit": {
+			"info": "Qo'shimcha ma'lumot",
+			"clear": "Tozalash",
+			"multi-language-input": {
+				"toggle-languages": "Til maydonlarini almashtirish"
+			}
 		},
 		"notifications": {
 			"title": "Bildirishnomalar"
@@ -60,6 +75,8 @@
 				"import": "Import",
 				"settings": "Ustunlar",
 				"reset": "Qayta o'rnatish",
+				"search": "Qidirish",
+				"more-options": "Ko'proq parametrlar",
 				"custom-filter-button": "Filtr",
 				"delete": "O'chirish",
 				"edit": "Tahrirlash",
@@ -115,7 +132,8 @@
 					"message": "Haqiqatan ham bu yozuvni olib tashlamoqchimisiz?",
 					"yes": "Ha",
 					"no": "Yo'q"
-				}
+				},
+				"remove-item": "{{ITEM}} o'chirish"
 			}
 		},
 		"file-upload": {
@@ -135,7 +153,10 @@
 			},
 			"multi-image": {
 				"edit": "Tahrirlash",
-				"primary": "Birlamchi"
+				"primary": "Birlamchi",
+				"remove": "Rasmni o'chirish",
+				"prev-image": "Oldingi rasm",
+				"next-image": "Keyingi rasm"
 			},
 			"upload-modern-dnd": "Faylni bu yerga sudrab olib tashlang",
 			"upload-modern-btn": "Yuklash muloqot oynasi uchun bosing",
@@ -169,7 +190,8 @@
 			"sign-here": "Bu erda raqamli imzolangan"
 		},
 		"signal-portlet": {
-			"last-updated": "Oxirgi yangilanish: {{AGE}}"
+			"last-updated": "Oxirgi yangilanish: {{AGE}}",
+			"refresh": "Yangilash"
 		}
 	},
 	"framework": {

@@ -83,6 +83,7 @@ const DataActionBarView = (props: DataActionBarViewProps) => {
 					color={"primary"}
 					disabled={props.numSelected === 0 || !props.handleDelete}
 					onClick={props.handleDelete}
+					aria-label={t("standalone.data-grid.footer.delete")}
 				>
 					<DeleteIcon />
 				</SmallestIconButton>
@@ -120,6 +121,7 @@ const DataActionBarView = (props: DataActionBarViewProps) => {
 									color={"primary"}
 									disabled={props.numSelected !== 1}
 									onClick={props.handleEdit}
+									aria-label={myEditLabel}
 								>
 									<MyEditIcon />
 								</SmallestIconButton>
@@ -163,6 +165,7 @@ const DataActionBarView = (props: DataActionBarViewProps) => {
 										)
 									}
 									onClick={handleExtendedMenuOpen}
+									aria-label={t("standalone.data-grid.footer.more")}
 								>
 									<MenuIcon />
 								</SmallestIconButton>
@@ -199,6 +202,7 @@ const DataActionBarView = (props: DataActionBarViewProps) => {
 										onClick={() => {
 											props.handleCustomButtonClick(entry.label);
 										}}
+										aria-label={entry.label}
 									>
 										{entry.icon}
 									</SmallestIconButton>

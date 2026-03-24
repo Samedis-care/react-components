@@ -2,10 +2,26 @@
 	"standalone": {
 		"schedule": {
 			"week": "Week",
-			"today": "Today"
+			"today": "Today",
+			"prev-week": "Previous week",
+			"next-week": "Next week",
+			"filter-settings": "Filter settings"
+		},
+		"portal": {
+			"menu-toggle": "Toggle menu",
+			"collapse-menu": "Collapse menu",
+			"expand-menu": "Expand menu"
+		},
+		"uikit": {
+			"info": "More information",
+			"clear": "Clear",
+			"multi-language-input": {
+				"toggle-languages": "Toggle language inputs"
+			}
 		},
 		"signal-portlet": {
-			"last-updated": "Last refresh: {{AGE}}"
+			"last-updated": "Last refresh: {{AGE}}",
+			"refresh": "Refresh"
 		},
 		"notifications": {
 			"title": "Notifications"
@@ -63,6 +79,8 @@
 				"import": "Import",
 				"settings": "Columns",
 				"reset": "Reset",
+				"search": "Search",
+				"more-options": "More options",
 				"custom-filter-button": "Filter",
 				"delete": "Delete",
 				"edit": "Edit",
@@ -113,6 +131,7 @@
 				"selected": "SELECTED"
 			},
 			"multi-select": {
+				"remove-item": "Remove {{ITEM}}",
 				"delete-confirm": {
 					"title": "Confirm Removal",
 					"message": "Are you sure you want to remove this entry?",
@@ -147,7 +166,10 @@
 			},
 			"multi-image": {
 				"edit": "Edit",
-				"primary": "Primary"
+				"primary": "Primary",
+				"remove": "Remove image",
+				"prev-image": "Previous image",
+				"next-image": "Next image"
 			}
 		},
 		"phone-number": {

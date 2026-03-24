@@ -11,6 +11,7 @@ import BaseSelector from "./BaseSelector";
 import { SmallIconButton, SmallListItemIcon } from "../Small";
 import InlineSwitch from "../InlineSwitch";
 import { styled, Typography, useThemeProps } from "@mui/material";
+import useCCTranslations from "../../utils/useCCTranslations";
 
 export interface MultiSelectWithoutGroupProps<
 	DataT extends MultiSelectorData,
@@ -112,6 +113,7 @@ const MultiSelectWithoutGroup = <DataT extends MultiSelectorData>(
 		className,
 		...otherProps
 	} = props;
+	const { t } = useCCTranslations();
 	const [dataOptions, setDataOptions] = useState<DataT[]>([]);
 
 	const getIdDefault = useCallback((data: DataT) => data.value, []);
@@ -219,6 +221,10 @@ const MultiSelectWithoutGroup = <DataT extends MultiSelectorData>(
 											name={data.value}
 											disabled={disabled}
 											onClick={handleDelete}
+											aria-label={t(
+												"standalone.selector.multi-select.remove-item",
+												{ ITEM: data.label },
+											)}
 										>
 											<RemoveIcon />
 										</SmallIconButton>

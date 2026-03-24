@@ -2,7 +2,22 @@
 	"standalone": {
 		"schedule": {
 			"week": "Woche",
-			"today": "Heute"
+			"today": "Heute",
+			"prev-week": "Vorherige Woche",
+			"next-week": "Nächste Woche",
+			"filter-settings": "Filtereinstellungen"
+		},
+		"portal": {
+			"menu-toggle": "Menü öffnen",
+			"collapse-menu": "Menü einklappen",
+			"expand-menu": "Menü ausklappen"
+		},
+		"uikit": {
+			"info": "Weitere Informationen",
+			"clear": "Löschen",
+			"multi-language-input": {
+				"toggle-languages": "Spracheingaben umschalten"
+			}
 		},
 		"notifications": {
 			"title": "Benachrichtigungen"
@@ -60,6 +75,8 @@
 				"import": "Importieren",
 				"settings": "Spalten",
 				"reset": "Zurücksetzen",
+				"search": "Suchen",
+				"more-options": "Weitere Optionen",
 				"custom-filter-button": "Filter",
 				"delete": "Löschen",
 				"edit": "Bearbeiten",
@@ -115,7 +132,8 @@
 					"message": "Möchtest Du diesen Eintrag wirklich entfernen?",
 					"yes": "Ja",
 					"no": "Nein"
-				}
+				},
+				"remove-item": "{{ITEM}} entfernen"
 			}
 		},
 		"file-upload": {
@@ -135,7 +153,10 @@
 			},
 			"multi-image": {
 				"edit": "Bearbeiten",
-				"primary": "Primär"
+				"primary": "Primär",
+				"remove": "Bild entfernen",
+				"prev-image": "Vorheriges Bild",
+				"next-image": "Nächstes Bild"
 			},
 			"upload-modern-dnd": "Datei hierher ziehen und ablegen",
 			"upload-modern-btn": "Klicke hier, um einen Upload-Dialog aufzurufen",
@@ -169,7 +190,8 @@
 			"sign-here": "Hier digital unterschreiben"
 		},
 		"signal-portlet": {
-			"last-updated": "Letzte Aktualisierung: {{AGE}}"
+			"last-updated": "Letzte Aktualisierung: {{AGE}}",
+			"refresh": "Aktualisieren"
 		}
 	},
 	"framework": {

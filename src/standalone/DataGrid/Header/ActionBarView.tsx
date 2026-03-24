@@ -140,7 +140,12 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 					<Grid key={"divider-1"}>
 						<VerticalDivider />
 					</Grid>
-					<IconButton color={"primary"} onClick={openSettingsMenu} size="large">
+					<IconButton
+						color={"primary"}
+						onClick={openSettingsMenu}
+						size="large"
+						aria-label={t("standalone.data-grid.header.more-options")}
+					>
 						<MenuIcon />
 					</IconButton>
 					<ActionBarMenu
@@ -165,7 +170,10 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 								{bpMdUp ? (
 									<ComponentWithLabel
 										control={
-											<SmallestIconButton color={"primary"}>
+											<SmallestIconButton
+												color={"primary"}
+												aria-label={t("standalone.data-grid.header.settings")}
+											>
 												<TuneIcon />
 											</SmallestIconButton>
 										}
@@ -174,13 +182,12 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 										labelPlacement={"bottom"}
 									/>
 								) : (
-									<Tooltip
-										title={t("standalone.data-grid.header.settings") ?? ""}
-									>
+									<Tooltip title={t("standalone.data-grid.header.settings")}>
 										<IconButton
 											color={"primary"}
 											onClick={handleToggleSettings}
 											size="large"
+											aria-label={t("standalone.data-grid.header.settings")}
 										>
 											<TuneIcon />
 										</IconButton>
@@ -198,7 +205,10 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 								{bpMdUp ? (
 									<ComponentWithLabel
 										control={
-											<SmallestIconButton color={"primary"}>
+											<SmallestIconButton
+												color={"primary"}
+												aria-label={t("standalone.data-grid.header.reset")}
+											>
 												<ResetIcon />
 											</SmallestIconButton>
 										}
@@ -207,11 +217,12 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 										labelPlacement={"bottom"}
 									/>
 								) : (
-									<Tooltip title={t("standalone.data-grid.header.reset") ?? ""}>
+									<Tooltip title={t("standalone.data-grid.header.reset")}>
 										<IconButton
 											color={"primary"}
 											onClick={openResetDialog}
 											size="large"
+											aria-label={t("standalone.data-grid.header.reset")}
 										>
 											<ResetIcon />
 										</IconButton>
@@ -229,7 +240,10 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 								{bpMdUp ? (
 									<ComponentWithLabel
 										control={
-											<SmallestIconButton color={"primary"}>
+											<SmallestIconButton
+												color={"primary"}
+												aria-label={t("standalone.data-grid.header.export")}
+											>
 												<ExportIcon />
 											</SmallestIconButton>
 										}
@@ -238,13 +252,12 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 										labelPlacement={"bottom"}
 									/>
 								) : (
-									<Tooltip
-										title={t("standalone.data-grid.header.export") ?? ""}
-									>
+									<Tooltip title={t("standalone.data-grid.header.export")}>
 										<IconButton
 											color={"primary"}
 											onClick={openExportMenu}
 											size="large"
+											aria-label={t("standalone.data-grid.header.export")}
 										>
 											<ExportIcon />
 										</IconButton>
@@ -267,7 +280,10 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 								{bpMdUp ? (
 									<ComponentWithLabel
 										control={
-											<SmallestIconButton color={"primary"}>
+											<SmallestIconButton
+												color={"primary"}
+												aria-label={t("standalone.data-grid.header.import")}
+											>
 												<ImportIcon />
 											</SmallestIconButton>
 										}
@@ -276,13 +292,12 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 										labelPlacement={"bottom"}
 									/>
 								) : (
-									<Tooltip
-										title={t("standalone.data-grid.header.import") ?? ""}
-									>
+									<Tooltip title={t("standalone.data-grid.header.import")}>
 										<IconButton
 											color={"primary"}
 											onClick={handleImport}
 											size="large"
+											aria-label={t("standalone.data-grid.header.import")}
 										>
 											<ImportIcon />
 										</IconButton>

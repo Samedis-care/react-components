@@ -1125,6 +1125,7 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 													<InfoButton
 														onClick={openInfo}
 														className={classes?.infoBtn}
+														aria-label={t("standalone.uikit.info")}
 													>
 														<InfoIcon color={"disabled"} />
 													</InfoButton>

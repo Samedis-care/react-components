@@ -17,6 +17,7 @@ import { Clear as ClearIcon, Info as InfoIcon } from "@mui/icons-material";
 import { InputLabelConfig, UIInputProps, UiKitTextField } from "./CommonStyles";
 import isTouchDevice from "../../utils/isTouchDevice";
 import { withMuiWarning } from "./MuiWarning";
+import useCCTranslations from "../../utils/useCCTranslations";
 import { useRefComposer } from "react-ref-composer";
 import accessSlotProps from "../../utils/internal/accessSlotProps";
 
@@ -50,6 +51,7 @@ const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(
 		onChange,
 		...muiProps
 	} = props;
+	const { t } = useCCTranslations();
 
 	// handle clear
 
@@ -132,7 +134,11 @@ const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(
 							<>
 								<InputAdornment position={"end"}>
 									{showClear && (
-										<IconButton onClick={handleClear} size="small">
+										<IconButton
+											onClick={handleClear}
+											size="small"
+											aria-label={t("standalone.uikit.clear")}
+										>
 											<ClearIcon />
 										</IconButton>
 									)}
@@ -142,7 +148,11 @@ const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(
 												orgSlotProps?.endAdornment as React.ReactElement<InputAdornmentProps>
 											)?.props?.children}
 									{openInfo && (
-										<IconButton onClick={openInfo} size="small">
+										<IconButton
+											onClick={openInfo}
+											size="small"
+											aria-label={t("standalone.uikit.info")}
+										>
 											<InfoIcon color={"disabled"} />
 										</IconButton>
 									)}

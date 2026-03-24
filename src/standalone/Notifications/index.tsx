@@ -246,7 +246,12 @@ const Notifications = (inProps: NotificationsProps) => {
 
 	return (
 		<div className={className}>
-			<IconButton size="large" {...IconButtonProps} onClick={onIconClick}>
+			<IconButton
+				size="large"
+				aria-label={t("standalone.notifications.title")}
+				{...IconButtonProps}
+				onClick={onIconClick}
+			>
 				<Badge
 					badgeContent={
 						unreadCount ?? notifications.filter((not) => !not.read).length

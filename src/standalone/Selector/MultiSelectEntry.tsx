@@ -15,6 +15,7 @@ import {
 import { MultiSelectorData } from "./MultiSelect";
 import { Cancel as RemoveIcon } from "@mui/icons-material";
 import combineClassNames from "../../utils/combineClassNames";
+import useCCTranslations from "../../utils/useCCTranslations";
 
 export interface MultiSelectEntryProps<DataT extends MultiSelectorData> {
 	/**
@@ -122,6 +123,7 @@ const MultiSelectEntry = <DataT extends MultiSelectorData>(
 	inProps: MultiSelectEntryProps<DataT>,
 ) => {
 	const props = useThemeProps({ props: inProps, name: "CcMultiSelectEntry" });
+	const { t } = useCCTranslations();
 	const {
 		enableIcons,
 		enableDivider,
@@ -165,6 +167,9 @@ const MultiSelectEntry = <DataT extends MultiSelectorData>(
 								name={data.value}
 								disabled={!handleDelete}
 								onClick={handleDelete}
+								aria-label={t("standalone.selector.multi-select.remove-item", {
+									ITEM: data.label,
+								})}
 							>
 								<StyledRemoveIcon className={classes?.iconSvg} />
 							</StyledRemoveButton>

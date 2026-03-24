@@ -20,6 +20,7 @@ const IconButtonWithText = (props: IconButtonWithTextProps) => (
 		<Grid>
 			<IconButton
 				onClick={props.onClick}
+				aria-label={typeof props.text === "string" ? props.text : undefined}
 				{...props.IconButtonProps}
 				size="large"
 			>
