@@ -83,7 +83,7 @@ const Notifications = (inProps) => {
     const Renderer = props.notificationRenderer || defaultRenderer;
     const notifications = props.notifications.filter((not) => !not.expires || not.expires > new Date());
     return (React.createElement("div", { className: className },
-        React.createElement(IconButton, { size: "large", ...IconButtonProps, onClick: onIconClick },
+        React.createElement(IconButton, { size: "large", "aria-label": t("standalone.notifications.title"), ...IconButtonProps, onClick: onIconClick },
             React.createElement(Badge, { badgeContent: unreadCount ?? notifications.filter((not) => !not.read).length, max: 99, color: "error", ...props.BadgeProps },
                 React.createElement(NotificationsIcon, null))),
         React.createElement(Popover, { open: !!anchor, anchorEl: anchor, anchorOrigin: anchorOrigin, transformOrigin: transformOrigin, onClose: onClose, ...props.PopoverProps },

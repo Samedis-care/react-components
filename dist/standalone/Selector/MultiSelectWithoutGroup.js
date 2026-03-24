@@ -4,6 +4,7 @@ import BaseSelector from "./BaseSelector";
 import { SmallIconButton, SmallListItemIcon } from "../Small";
 import InlineSwitch from "../InlineSwitch";
 import { styled, Typography, useThemeProps } from "@mui/material";
+import useCCTranslations from "../../utils/useCCTranslations";
 const Outlined = styled("div", {
     name: "CcMultiSelectWithoutGroup",
     slot: "outlined",
@@ -33,6 +34,7 @@ const MultiSelectWithoutGroup = (inProps) => {
         name: "CcMultiSelectWithoutGroup",
     });
     const { onSelect, selected, disabled, enableIcons, loadDataOptions, getIdOfData, refreshToken, switchValue, sortCompareFn, classes, className, ...otherProps } = props;
+    const { t } = useCCTranslations();
     const [dataOptions, setDataOptions] = useState([]);
     const getIdDefault = useCallback((data) => data.value, []);
     const getId = getIdOfData ?? getIdDefault;
@@ -81,7 +83,7 @@ const MultiSelectWithoutGroup = (inProps) => {
                 return (React.createElement(Outlined, { key: index, className: classes?.outlined },
                     enableIcons && (React.createElement(SmallListItemIcon, null, data.icon)),
                     React.createElement("span", null, data.label),
-                    !disabled && (React.createElement(SmallIconButton, { edge: "end", name: data.value, disabled: disabled, onClick: handleDelete },
+                    !disabled && (React.createElement(SmallIconButton, { edge: "end", name: data.value, disabled: disabled, onClick: handleDelete, "aria-label": t("standalone.selector.multi-select.remove-item", { ITEM: data.label }) },
                         React.createElement(RemoveIcon, null)))));
             })))));
 };

@@ -50,7 +50,7 @@ const ImagePreviewDialog = (inProps) => {
     const { t } = useCCTranslations();
     const { imgRef, containerRef, containerProps } = useImageZoomPan(open);
     return (React.createElement(Root, { open: open, fullScreen: true, onClose: onClose, className: classes?.root },
-        React.createElement(CloseButton, { onClick: onClose, "aria-label": t("standalone.file-upload.close") ?? "Close", className: classes?.closeButton },
+        React.createElement(CloseButton, { onClick: onClose, "aria-label": t("standalone.file-upload.close"), className: classes?.closeButton },
             React.createElement(CloseIcon, null)),
         React.createElement(Container, { ref: containerRef, ...containerProps, className: classes?.container },
             React.createElement(PreviewImage, { ref: imgRef, src: src, alt: alt, className: classes?.image, draggable: false }))));

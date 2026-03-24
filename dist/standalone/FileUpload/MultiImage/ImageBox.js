@@ -3,6 +3,7 @@ import useDropZone from "../../../utils/useDropZone";
 import { Dialog, DialogContent, IconButton, styled, Tooltip, useThemeProps, } from "@mui/material";
 import { ArrowBack as PrevIcon, ArrowForward as NextIcon, Close as CloseIcon, Delete as DeleteIcon, } from "@mui/icons-material";
 import combineClassNames from "../../../utils/combineClassNames";
+import useCCTranslations from "../../../utils/useCCTranslations";
 import { useDebounce } from "../../../utils/useDebounce";
 import ImageDots from "./ImageDots";
 import useImageZoomPan from "../../../utils/useImageZoomPan";
@@ -190,6 +191,7 @@ const useScrollSwipe = (params) => {
 };
 const ImageBox = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcImageBox" });
+    const { t } = useCCTranslations();
     const { image, width, height, onClick, onFilesDropped, onRemove, onNextImage, onPrevImage, disableBackground, fileName, imageDots, className, classes, } = props;
     const { handleDragOver, handleDrop, dragging } = useDropZone(onFilesDropped);
     const [dialogOpen, setDialogOpen] = useState(false);
@@ -223,11 +225,11 @@ const ImageBox = (inProps) => {
                 dragging,
                 background: !disableBackground,
             }, className: combineClassNames([className, classes?.root]) },
-            onRemove && (React.createElement(RemoveButton, { onClick: handleRemove, className: classes?.removeBtn, size: "large" },
+            onRemove && (React.createElement(RemoveButton, { onClick: handleRemove, className: classes?.removeBtn, size: "large", "aria-label": t("standalone.file-upload.multi-image.remove") },
                 React.createElement(DeleteIcon, null))),
-            onPrevImage && (React.createElement(PrevButton, { onClick: handlePrevImage, className: classes?.prevBtn, size: "large" },
+            onPrevImage && (React.createElement(PrevButton, { onClick: handlePrevImage, className: classes?.prevBtn, size: "large", "aria-label": t("standalone.file-upload.multi-image.prev-image") },
                 React.createElement(PrevIcon, null))),
-            onNextImage && (React.createElement(NextButton, { onClick: handleNextImage, className: classes?.nextBtn, size: "large" },
+            onNextImage && (React.createElement(NextButton, { onClick: handleNextImage, className: classes?.nextBtn, size: "large", "aria-label": t("standalone.file-upload.multi-image.next-image") },
                 React.createElement(NextIcon, null))),
             React.createElement(SwipeListener, { className: classes?.swipeListener, onScroll: handleScrollImage, ref: containerRefImage, onTouchEnd: handleTouchEndImage },
                 React.createElement(Tooltip, { title: fileName ?? "", disableTouchListener: !fileName, disableHoverListener: !fileName, disableFocusListener: !fileName },
@@ -246,11 +248,11 @@ const ImageBox = (inProps) => {
                                     swipeRight: !!onNextImage,
                                     imageDots: !imageDots,
                                 }, className: classes?.image }))),
-                    React.createElement(RemoveButton, { onClick: closeDialog, className: classes?.removeBtn, size: "large" },
+                    React.createElement(RemoveButton, { onClick: closeDialog, className: classes?.removeBtn, size: "large", "aria-label": t("standalone.file-upload.close") },
                         React.createElement(CloseIcon, null)),
-                    onPrevImage && (React.createElement(PrevButton, { onClick: handlePrevImage, className: classes?.prevBtn, size: "large" },
+                    onPrevImage && (React.createElement(PrevButton, { onClick: handlePrevImage, className: classes?.prevBtn, size: "large", "aria-label": t("standalone.file-upload.multi-image.prev-image") },
                         React.createElement(PrevIcon, null))),
-                    onNextImage && (React.createElement(NextButton, { onClick: handleNextImage, className: classes?.nextBtn, size: "large" },
+                    onNextImage && (React.createElement(NextButton, { onClick: handleNextImage, className: classes?.nextBtn, size: "large", "aria-label": t("standalone.file-upload.multi-image.next-image") },
                         React.createElement(NextIcon, null))),
                     imageDots && (React.createElement(ImageDotsWrapper, { className: classes?.imageDotsWrapper },
                         React.createElement(StyledImageDots, { ...imageDots, className: combineClassNames([

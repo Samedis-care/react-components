@@ -2,7 +2,22 @@
 	"standalone": {
 		"schedule": {
 			"week": "Week",
-			"today": "Vandaag"
+			"today": "Vandaag",
+			"prev-week": "Vorige week",
+			"next-week": "Volgende week",
+			"filter-settings": "Filterinstellingen"
+		},
+		"portal": {
+			"menu-toggle": "Menu wisselen",
+			"collapse-menu": "Menu inklappen",
+			"expand-menu": "Menu uitklappen"
+		},
+		"uikit": {
+			"info": "Meer informatie",
+			"clear": "Wissen",
+			"multi-language-input": {
+				"toggle-languages": "Talinvoer wisselen"
+			}
 		},
 		"notifications": {
 			"title": "Meldingen"
@@ -60,6 +75,8 @@
 				"import": "Import",
 				"settings": "Kolommen",
 				"reset": "Resetten",
+				"search": "Zoeken",
+				"more-options": "Meer opties",
 				"custom-filter-button": "Filter",
 				"delete": "Verwijderen",
 				"edit": "Bewerken",
@@ -115,7 +132,8 @@
 					"message": "Weet u zeker dat u dit item wilt verwijderen?",
 					"yes": "Ja",
 					"no": "Nee"
-				}
+				},
+				"remove-item": "{{ITEM}} verwijderen"
 			}
 		},
 		"file-upload": {
@@ -135,7 +153,10 @@
 			},
 			"multi-image": {
 				"edit": "Bewerken",
-				"primary": "Primair"
+				"primary": "Primair",
+				"remove": "Afbeelding verwijderen",
+				"prev-image": "Vorige afbeelding",
+				"next-image": "Volgende afbeelding"
 			},
 			"upload-modern-dnd": "Sleep het bestand hierheen",
 			"upload-modern-btn": "Klik voor een uploaddialoogvenster",
@@ -169,7 +190,8 @@
 			"sign-here": "Digitaal ondertekend hier"
 		},
 		"signal-portlet": {
-			"last-updated": "Laatste vernieuwing: {{AGE}}"
+			"last-updated": "Laatste vernieuwing: {{AGE}}",
+			"refresh": "Vernieuwen"
 		}
 	},
 	"framework": {

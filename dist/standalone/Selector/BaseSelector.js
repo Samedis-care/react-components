@@ -448,7 +448,7 @@ const BaseSelector = (inProps) => {
                                         : undefined) ?? startAdornment,
                                     endAdornment: (() => {
                                         const hasAdditionalElements = openInfo || endAdornment || endAdornmentLeft;
-                                        const infoBtn = openInfo && (React.createElement(InfoButton, { onClick: openInfo, className: classes?.infoBtn },
+                                        const infoBtn = openInfo && (React.createElement(InfoButton, { onClick: openInfo, className: classes?.infoBtn, "aria-label": t("standalone.uikit.info") },
                                             React.createElement(InfoIcon, { color: "disabled" })));
                                         return hasAdditionalElements ? (params.InputProps?.endAdornment ? (React.cloneElement(params.InputProps?.endAdornment, {}, endAdornmentLeft, ...(params.InputProps?.endAdornment).props.children, infoBtn, endAdornment)) : (React.createElement(InputAdornment, { position: "end" },
                                             endAdornmentLeft,

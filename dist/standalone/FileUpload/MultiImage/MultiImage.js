@@ -160,7 +160,7 @@ const MultiImage = (inProps) => {
                 React.createElement(DialogTitle, null,
                     React.createElement(Grid, { container: true, justifyContent: "flex-end" },
                         React.createElement(Grid, null,
-                            React.createElement(IconButton, { onClick: closeDialog, size: "large" },
+                            React.createElement(IconButton, { onClick: closeDialog, size: "large", "aria-label": t("standalone.file-upload.close") },
                                 React.createElement(CloseIcon, null))))),
                 React.createElement(DialogContent, null,
                     React.createElement(Grid, { container: true, spacing: 2 },

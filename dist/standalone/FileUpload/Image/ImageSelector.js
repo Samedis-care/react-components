@@ -260,7 +260,9 @@ const ImageSelector = (inProps) => {
         const image = value ? (React.createElement(PfpImage, { src: value, className: classes?.pfpImg, alt: props.label })) : (React.createElement(PfpImagePlaceholder, { className: classes?.pfpImgPlaceholder }));
         return (React.createElement(PfpRoot, { onDrop: handleDrop, onDragOver: handleDragOver, className: combineClassNames([className, classes?.pfpRoot]) },
             React.createElement(ChangeEventHelper, { type: "file", accept: "image/*", ref: fileRef, onChange: handleFileChange, className: classes?.changeEventHelper }),
-            React.createElement(PfpIconButton, { disabled: props.readOnly, onClick: captureEnabled ? handleUploadCapture : handleUpload, className: classes?.pfpIconBtn, size: "large" }, image)));
+            React.createElement(PfpIconButton, { disabled: props.readOnly, onClick: captureEnabled ? handleUploadCapture : handleUpload, className: classes?.pfpIconBtn, size: "large", "aria-label": captureEnabled
+                    ? t("standalone.file-upload.upload-capture.image")
+                    : t("standalone.file-upload.upload") }, image)));
     }
     else {
         throw new Error("Unknown variant");

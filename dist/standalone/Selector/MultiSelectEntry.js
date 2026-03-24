@@ -3,6 +3,7 @@ import { Divider, List, ListItemSecondaryAction, ListItemText, styled, useThemeP
 import { SmallIconButton, SmallListItemButton, SmallListItemIcon, } from "../Small";
 import { Cancel as RemoveIcon } from "@mui/icons-material";
 import combineClassNames from "../../utils/combineClassNames";
+import useCCTranslations from "../../utils/useCCTranslations";
 const Root = styled(List, { name: "CcMultiSelectEntry", slot: "root" })({});
 const Selected = styled(SmallListItemButton, {
     name: "CcMultiSelectEntry",
@@ -43,6 +44,7 @@ const StyledImage = styled("img", {
 }));
 const MultiSelectEntry = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcMultiSelectEntry" });
+    const { t } = useCCTranslations();
     const { enableIcons, enableDivider, handleDelete, data, classes, iconSize, className, } = props;
     return (React.createElement(React.Fragment, null,
         React.createElement(Root, { className: combineClassNames([className, classes?.root]) },
@@ -50,7 +52,9 @@ const MultiSelectEntry = (inProps) => {
                 enableIcons && (React.createElement(SmallListItemIcon, null, typeof data.icon === "string" ? (React.createElement(StyledImage, { ownerState: { iconSize }, src: data.icon, alt: "", className: classes?.image })) : (data.icon))),
                 React.createElement(Label, { className: classes?.label }, data.label),
                 handleDelete && (React.createElement(ListItemSecondaryAction, null,
-                    React.createElement(StyledRemoveButton, { className: classes?.icon, edge: "end", name: data.value, disabled: !handleDelete, onClick: handleDelete },
+                    React.createElement(StyledRemoveButton, { className: classes?.icon, edge: "end", name: data.value, disabled: !handleDelete, onClick: handleDelete, "aria-label": t("standalone.selector.multi-select.remove-item", {
+                            ITEM: data.label,
+                        }) },
                         React.createElement(StyledRemoveIcon, { className: classes?.iconSvg })))))),
         enableDivider && React.createElement(StyledDivider, { className: classes?.divider })));
 };

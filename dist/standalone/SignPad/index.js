@@ -52,7 +52,7 @@ const SignPad = (inProps) => {
             !signature && React.createElement("span", null, t("standalone.signature-pad.sign-here"))),
         React.createElement(ImageDiv, { className: classes?.imageDiv }, signature && (React.createElement(SignPreview, { className: classes?.signPreview, src: signature, alt: "" }))),
         React.createElement(InfoDiv, { className: classes?.infoDiv }, openInfo && (React.createElement(InputAdornment, { position: "end" },
-            React.createElement(IconButton, { onClick: handelOpenInfo, size: "large" },
+            React.createElement(IconButton, { onClick: handelOpenInfo, size: "large", "aria-label": t("standalone.uikit.info") },
                 React.createElement(InfoIcon, { color: "disabled" })))))));
 };
 export default React.memo(SignPad);

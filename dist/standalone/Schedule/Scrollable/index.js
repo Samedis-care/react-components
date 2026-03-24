@@ -57,7 +57,7 @@ const ScrollableSchedule = (inProps) => {
     const { loadWeekCallback, wrapperClass, className, classes } = props;
     const filters = props.filters ?? EMPTY_FILTERS;
     const actions = props.actions ?? NO_ACTIONS;
-    const { i18n } = useCCTranslations();
+    const { t, i18n } = useCCTranslations();
     const todayElem = useRef(null);
     const scrollElem = useRef(null);
     const getDefaultState = useCallback(() => ({
@@ -157,7 +157,7 @@ const ScrollableSchedule = (inProps) => {
                     React.createElement(TodayButton, { className: classes?.todayBtn, onClick: jumpToToday, fullWidth: true },
                         React.createElement(Box, { m: 2 }, state.today.format("ddd DD MMMM")))),
                 React.createElement(Grid, null, filterCount + actions.length > 0 && (React.createElement(FilterWrapper, { px: 2, className: classes?.filterWrapper, onClick: preventAction }, filterCount + actions.length > 1 ? (React.createElement(React.Fragment, null,
-                    React.createElement(IconButton, { onClick: openFilterSettings },
+                    React.createElement(IconButton, { onClick: openFilterSettings, "aria-label": t("standalone.schedule.filter-settings") },
                         React.createElement(FilterSettingsIcon, { className: classes?.filterSettingsBtn })),
                     React.createElement(Menu, { open: filterSettingsAnchorEl != null, anchorEl: filterSettingsAnchorEl, onClose: closeFiltersMenu },
                         React.createElement(Box, { p: 1 },

@@ -2,7 +2,22 @@
 	"standalone": {
 		"schedule": {
 			"week": "Semaine",
-			"today": "Aujourd'hui"
+			"today": "Aujourd'hui",
+			"prev-week": "Semaine précédente",
+			"next-week": "Semaine suivante",
+			"filter-settings": "Paramètres de filtre"
+		},
+		"portal": {
+			"menu-toggle": "Basculer le menu",
+			"collapse-menu": "Réduire le menu",
+			"expand-menu": "Développer le menu"
+		},
+		"uikit": {
+			"info": "Plus d'informations",
+			"clear": "Effacer",
+			"multi-language-input": {
+				"toggle-languages": "Basculer les saisies de langue"
+			}
 		},
 		"notifications": {
 			"title": "Avis"
@@ -60,6 +75,8 @@
 				"import": "Importer",
 				"settings": "Colonnes",
 				"reset": "Réinitialiser",
+				"search": "Rechercher",
+				"more-options": "Plus d'options",
 				"custom-filter-button": "Filtre",
 				"delete": "Supprimer",
 				"edit": "Éditer",
@@ -115,7 +132,8 @@
 					"message": "Voulez-vous vraiment supprimer cette entrée?",
 					"yes": "Oui",
 					"no": "Non"
-				}
+				},
+				"remove-item": "Supprimer {{ITEM}}"
 			}
 		},
 		"file-upload": {
@@ -135,7 +153,10 @@
 			},
 			"multi-image": {
 				"edit": "Éditer",
-				"primary": "Primaire"
+				"primary": "Primaire",
+				"remove": "Supprimer l'image",
+				"prev-image": "Image précédente",
+				"next-image": "Image suivante"
 			},
 			"upload-modern-dnd": "Glissez et déposez le fichier ici",
 			"upload-modern-btn": "Cliquez pour une boîte de dialogue de téléchargement",
@@ -169,7 +190,8 @@
 			"sign-here": "Signé numériquement ici"
 		},
 		"signal-portlet": {
-			"last-updated": "Dernière actualisation : {{AGE}}"
+			"last-updated": "Dernière actualisation : {{AGE}}",
+			"refresh": "Actualiser"
 		}
 	},
 	"framework": {

@@ -3,6 +3,7 @@ import { Grid, IconButton, styled, useThemeProps } from "@mui/material";
 import { DoubleArrow } from "@mui/icons-material";
 import { usePortalLayoutContext } from "./Layout";
 import combineClassNames from "../../utils/combineClassNames";
+import useCCTranslations from "../../utils/useCCTranslations";
 const Root = styled(Grid, { name: "CcCollapsibleMenu", slot: "root" })({
     width: "100%",
     height: "100%",
@@ -35,13 +36,16 @@ const CollapsibleMenu = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcCollapsibleMenu" });
     const { classes, className } = props;
     const [collapsed, setCollapsed] = useState(false);
+    const { t } = useCCTranslations();
     const { mobile } = usePortalLayoutContext();
     const toggleCollapsed = useCallback(() => setCollapsed((prev) => !prev), [setCollapsed]);
     const ArrowComp = collapsed ? IconOpen : IconClose;
     return (React.createElement(Root, { container: true, justifyContent: "flex-start", alignItems: "stretch", wrap: "nowrap", style: collapsed ? { overflow: "visible" } : undefined, className: combineClassNames([className, classes?.root]) },
         React.createElement(Content, { size: "grow", style: { width: props.width, display: collapsed ? "none" : undefined }, className: classes?.content, key: "content" }, props.children),
         !mobile && (React.createElement(Bar, { key: "bar", className: classes?.bar },
-            React.createElement(StyledButton, { onClick: toggleCollapsed, className: classes?.button, size: "large" },
+            React.createElement(StyledButton, { onClick: toggleCollapsed, className: classes?.button, size: "large", "aria-label": collapsed
+                    ? t("standalone.portal.expand-menu")
+                    : t("standalone.portal.collapse-menu") },
                 React.createElement(ArrowComp, { className: collapsed ? classes?.iconOpen : classes?.iconClose }))))));
 };
 export default React.memo(CollapsibleMenu);

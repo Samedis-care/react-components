@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from "react";
 import { Grid, IconButton, InputAdornment, styled, Tooltip, Typography, useThemeProps, } from "@mui/material";
-import { useCCLanguagesTranslations } from "../../../utils/useCCTranslations";
+import useCCTranslations, { useCCLanguagesTranslations, } from "../../../utils/useCCTranslations";
 import { Translate } from "@mui/icons-material";
 import { TextFieldCC } from "../MuiWarning";
 const LanguageLabel = styled("span", {
@@ -21,6 +21,7 @@ const MultiLanguageInput = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcMultiLanguageInput" });
     const { enabledLanguages, values, onChange, name, onBlur, label, disableIncompleteMarker, required, ignoreI18nLocale, warning, ...textFieldProps } = props;
     const { t, i18n } = useCCLanguagesTranslations();
+    const { t: tCC } = useCCTranslations();
     // determine default language
     let defaultLanguage = i18n.language.split("-")[0];
     const i18nLang = defaultLanguage;
@@ -71,7 +72,7 @@ const MultiLanguageInput = (inProps) => {
                     React.createElement(LanguageLabel, { ownerState: { active: activeLanguage === lang }, "data-lang": lang, onClick: handleActiveLangSelect }, lang)),
                 " "))))) : lang === defaultLanguage ? (label) : undefined, required: defaultLanguage === lang && activeLanguage === defaultLanguage
             ? required
-            : undefined, value: values[lang] ?? "", onChange: handleChange, name: `${name ?? "mli"}-${lang}`, slotProps: {
+            : undefined, value: values[lang], onChange: handleChange, name: `${name ?? "mli"}-${lang}`, slotProps: {
             inputLabel: {
                 ...textFieldProps.slotProps?.inputLabel,
                 shrink: textFieldProps.multiline
@@ -83,7 +84,7 @@ const MultiLanguageInput = (inProps) => {
                     React.createElement(Tooltip, { title: getLanguageName(lang) },
                         React.createElement(LanguageLabelInputAdornment, { variant: "caption", color: "textSecondary" }, lang)))) : undefined,
                 endAdornment: defaultLanguage === lang && !textFieldProps.multiline ? (React.createElement(InputAdornment, { position: "end" },
-                    React.createElement(IconButton, { onClick: toggleExpanded, size: "large" },
+                    React.createElement(IconButton, { onClick: toggleExpanded, size: "large", "aria-label": tCC("standalone.uikit.multi-language-input.toggle-languages") },
                         React.createElement(Translate, { color: expanded ? "primary" : incomplete ? "error" : undefined })))) : undefined,
             },
         } }));

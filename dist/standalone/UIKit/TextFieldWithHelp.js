@@ -4,11 +4,13 @@ import { Clear as ClearIcon, Info as InfoIcon } from "@mui/icons-material";
 import { InputLabelConfig, UiKitTextField } from "./CommonStyles";
 import isTouchDevice from "../../utils/isTouchDevice";
 import { withMuiWarning } from "./MuiWarning";
+import useCCTranslations from "../../utils/useCCTranslations";
 import { useRefComposer } from "react-ref-composer";
 import accessSlotProps from "../../utils/internal/accessSlotProps";
 export const UiKitTextFieldWithWarnings = withMuiWarning(UiKitTextField);
 const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(props, ref) {
     const { openInfo, customHandleClear, disableClearable, warning, onChange, ...muiProps } = props;
+    const { t } = useCCTranslations();
     // handle clear
     const [hasValue, setHasValue] = useState(!!(muiProps.value ?? muiProps.defaultValue));
     const composeRef = useRefComposer();
@@ -57,12 +59,12 @@ const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(props
                     ...orgSlotProps,
                     endAdornment: hasEndAdornment ? (React.createElement(React.Fragment, null,
                         React.createElement(InputAdornment, { position: "end" },
-                            showClear && (React.createElement(IconButton, { onClick: handleClear, size: "small" },
+                            showClear && (React.createElement(IconButton, { onClick: handleClear, size: "small", "aria-label": t("standalone.uikit.clear") },
                                 React.createElement(ClearIcon, null))),
                             typeof orgSlotProps?.endAdornment === "string"
                                 ? orgSlotProps.endAdornment
                                 : orgSlotProps?.endAdornment?.props?.children,
-                            openInfo && (React.createElement(IconButton, { onClick: openInfo, size: "small" },
+                            openInfo && (React.createElement(IconButton, { onClick: openInfo, size: "small", "aria-label": t("standalone.uikit.info") },
                                 React.createElement(InfoIcon, { color: "disabled" })))))) : undefined,
                 };
             },

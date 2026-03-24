@@ -71,7 +71,7 @@ const SignalPortlet = (inProps) => {
                                 AGE: timestampToAge(new Date(props.updatedAt)),
                             }))))),
                     props.onRefresh && (React.createElement(Grid, null,
-                        React.createElement(SignalPortletRefreshIconButton, { onClick: props.onRefresh, size: "small", color: "primary" },
+                        React.createElement(SignalPortletRefreshIconButton, { onClick: props.onRefresh, size: "small", color: "primary", "aria-label": t("standalone.signal-portlet.refresh") },
                             React.createElement(SignalPortletRefreshIcon, null))))))))));
 };
 export default React.memo(SignalPortlet);
