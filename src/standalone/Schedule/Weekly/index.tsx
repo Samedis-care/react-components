@@ -26,6 +26,7 @@ import {
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { ToDateLocaleStringOptions } from "../../../constants";
 import useCCTranslations from "../../../utils/useCCTranslations";
+import useCurrentLocale from "../../../utils/useCurrentLocale";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 import ScheduleFilterRenderer from "../Common/ScheduleFilterRenderers";
 
@@ -109,6 +110,7 @@ const WeekView = (inProps: WeekViewProps) => {
 	const actions = props.actions ?? NO_ACTIONS;
 	const filterCount = Object.keys(filters).length;
 	const { t, i18n } = useCCTranslations();
+	const locale = useCurrentLocale();
 	/**
 	 * The offset to the current week
 	 * Example: -1 for last week, 0 for this week, 1 for next week
@@ -251,7 +253,7 @@ const WeekView = (inProps: WeekViewProps) => {
 								{t("standalone.schedule.today")} (
 								{now
 									.toDate()
-									.toLocaleDateString(i18n.language, ToDateLocaleStringOptions)}
+									.toLocaleDateString(locale, ToDateLocaleStringOptions)}
 								)
 							</TodayBtn>
 						</Grid>
@@ -293,7 +295,7 @@ const WeekView = (inProps: WeekViewProps) => {
 							<Picker className={classes?.picker}>
 								<LocalizationProvider
 									dateAdapter={AdapterMoment}
-									adapterLocale={i18n.language}
+									adapterLocale={locale}
 								>
 									<DatePicker
 										format={"II RRRR"}

@@ -3,6 +3,7 @@ import Type from "../Type";
 import { ModelRenderParams } from "../index";
 import FilterType from "../FilterType";
 import ccI18n from "../../../i18n";
+import getCurrentLocale from "../../../utils/getCurrentLocale";
 
 /**
  * Type for nullable dates
@@ -26,7 +27,7 @@ abstract class TypeDateTimeNullable implements Type<Date | null> {
 
 	stringify(value: Date | null): string {
 		return value
-			? value.toLocaleString(ccI18n.language)
+			? value.toLocaleString(getCurrentLocale(ccI18n))
 			: ccI18n.t("backend-integration.model.types.date-nullable.not-set");
 	}
 

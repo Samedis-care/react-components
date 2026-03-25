@@ -14,6 +14,7 @@ import {
 import { Sync as RefreshIcon } from "@mui/icons-material";
 import timestampToAge from "../../utils/timestampToAge";
 import useCCTranslations from "../../utils/useCCTranslations";
+import useCurrentLocale from "../../utils/useCurrentLocale";
 import combineClassNames from "../../utils/combineClassNames";
 
 export interface SignalPortletProps {
@@ -105,7 +106,8 @@ export type SignalPortletClassKey =
 
 const SignalPortlet = (inProps: SignalPortletProps) => {
 	const props = useThemeProps({ props: inProps, name: "CcSignalPortlet" });
-	const { t, i18n } = useCCTranslations();
+	const { t } = useCCTranslations();
+	const locale = useCurrentLocale();
 
 	return (
 		<SignalPortletRoot
@@ -163,9 +165,7 @@ const SignalPortlet = (inProps: SignalPortletProps) => {
 							{props.updatedAt && (
 								<Grid>
 									<Tooltip
-										title={new Date(props.updatedAt).toLocaleString(
-											i18n.language,
-										)}
+										title={new Date(props.updatedAt).toLocaleString(locale)}
 									>
 										<SignalPortletLastUpdatedAt>
 											{t("standalone.signal-portlet.last-updated", {

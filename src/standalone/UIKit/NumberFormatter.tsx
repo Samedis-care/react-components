@@ -1,5 +1,5 @@
 import React from "react";
-import useCCTranslations from "../../utils/useCCTranslations";
+import useCurrentLocale from "../../utils/useCurrentLocale";
 
 export interface NumberFormatterProps {
 	/**
@@ -14,11 +14,9 @@ export interface NumberFormatterProps {
 
 const NumberFormatter = (props: NumberFormatterProps) => {
 	const { value, options } = props;
-	const { i18n } = useCCTranslations();
+	const locale = useCurrentLocale();
 
-	return (
-		<>{value != null ? value.toLocaleString(i18n.language, options) : ""}</>
-	);
+	return <>{value != null ? value.toLocaleString(locale, options) : ""}</>;
 };
 
 export default React.memo(NumberFormatter);

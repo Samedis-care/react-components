@@ -4,6 +4,7 @@ import { ModelRenderParams } from "../index";
 import FilterType from "../FilterType";
 import { normalizeDate } from "./Utils/DateUtils";
 import ccI18n from "../../../i18n";
+import getCurrentLocale from "../../../utils/getCurrentLocale";
 import moment from "moment";
 
 /**
@@ -27,7 +28,7 @@ abstract class TypeDate implements Type<Date> {
 	}
 
 	stringify(value: Date): string {
-		return value.toLocaleDateString(ccI18n.language);
+		return value.toLocaleDateString(getCurrentLocale(ccI18n));
 	}
 
 	serialize = (value: Date): unknown => {
@@ -46,7 +47,7 @@ abstract class TypeDate implements Type<Date> {
 	static format = (value: string): string => {
 		// convert format to __/__/____
 		let format = moment()
-			.locale(ccI18n.language)
+			.locale(getCurrentLocale(ccI18n))
 			.localeData()
 			.longDateFormat("L")
 			.replace(/[DMY]/gm, "_");

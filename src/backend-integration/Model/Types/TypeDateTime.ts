@@ -2,7 +2,8 @@ import React from "react";
 import Type from "../Type";
 import { ModelRenderParams } from "../index";
 import FilterType from "../FilterType";
-import i18n from "../../../i18n";
+import ccI18n from "../../../i18n";
+import getCurrentLocale from "../../../utils/getCurrentLocale";
 
 /**
  * Type for non-nullable dates with time
@@ -25,7 +26,7 @@ abstract class TypeDateTime implements Type<Date> {
 	}
 
 	stringify(value: Date): string {
-		return value.toLocaleString(i18n.language);
+		return value.toLocaleString(getCurrentLocale(ccI18n));
 	}
 
 	serialize = (value: Date): unknown => {

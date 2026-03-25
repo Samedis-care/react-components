@@ -4,7 +4,7 @@ import TextFieldWithHelp, {
 	TextFieldWithHelpProps,
 } from "../TextFieldWithHelp";
 import useInputCursorFix from "../../../utils/useInputCursorFix";
-import useCCTranslations from "../../../utils/useCCTranslations";
+import useCurrentLocale from "../../../utils/useCurrentLocale";
 
 export interface IntegerInputFieldProps extends TextFieldWithHelpProps {
 	/**
@@ -29,13 +29,13 @@ export interface IntegerInputFieldProps extends TextFieldWithHelpProps {
 const IntegerInputField = (
 	props: IntegerInputFieldProps & Omit<TextFieldProps, "onChange" | "value">,
 ) => {
-	const { i18n } = useCCTranslations();
 	const { value, onChange, noFormat, ...muiProps } = props;
+	const locale = useCurrentLocale();
 	const valueFormatted =
 		value != null
 			? noFormat
 				? value.toString(10)
-				: value.toLocaleString(i18n.language)
+				: value.toLocaleString(locale)
 			: "";
 	const { handleCursorChange, cursorInputRef } =
 		useInputCursorFix(valueFormatted);

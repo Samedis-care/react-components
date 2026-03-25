@@ -4,7 +4,7 @@ import TextFieldWithHelp, {
 	TextFieldWithHelpProps,
 } from "../TextFieldWithHelp";
 import parseLocalizedNumber from "../../../utils/parseLocalizedNumber";
-import useCCTranslations from "../../../utils/useCCTranslations";
+import useCurrentLocale from "../../../utils/useCurrentLocale";
 
 export interface DecimalInputFieldProps extends TextFieldWithHelpProps {
 	/**
@@ -29,12 +29,12 @@ export interface DecimalInputFieldProps extends TextFieldWithHelpProps {
 const DecimalInputField = (
 	props: DecimalInputFieldProps & Omit<TextFieldProps, "onChange" | "value">,
 ) => {
-	const { i18n } = useCCTranslations();
 	const { value, onChange, format, ...muiProps } = props;
+	const locale = useCurrentLocale();
 	const [valueInternal, setValueInternal] = useState("");
 	useEffect(() => {
 		setValueInternal(
-			value !== null ? value.toLocaleString(i18n.language, format) : "",
+			value !== null ? value.toLocaleString(locale, format) : "",
 		);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [value]);

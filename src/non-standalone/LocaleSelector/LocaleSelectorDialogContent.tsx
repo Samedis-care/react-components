@@ -14,6 +14,7 @@ import { Search as SearchIcon } from "@mui/icons-material";
 import useCCTranslations, {
 	useCCLocaleSwitcherTranslations,
 } from "../../utils/useCCTranslations";
+import { useCurrentLanguage } from "../../utils/useCurrentLocale";
 import sortByLocaleRelevance from "../../utils/sortByLocaleRelevance";
 import TextFieldWithHelp from "../../standalone/UIKit/TextFieldWithHelp";
 import Loader from "../../standalone/Loader";
@@ -86,7 +87,7 @@ const LocaleSelectorDialogContent = (
 	const lowercaseFilter = filter.toLowerCase();
 	const { i18n, t } = useCCTranslations();
 	const { t: tLocale } = useCCLocaleSwitcherTranslations();
-	const currentLang = i18n.language.substring(0, 2);
+	const currentLang = useCurrentLanguage();
 	const handleFilterChange = useCallback(
 		(evt: React.ChangeEvent<HTMLInputElement>) => {
 			setFilter(evt.target.value);

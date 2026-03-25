@@ -4,7 +4,7 @@ import TextFieldWithHelp, {
 	TextFieldWithHelpProps,
 } from "../TextFieldWithHelp";
 import parseLocalizedNumber from "../../../utils/parseLocalizedNumber";
-import useCCTranslations from "../../../utils/useCCTranslations";
+import useCurrentLocale from "../../../utils/useCurrentLocale";
 
 export interface CurrencyInputProps extends TextFieldWithHelpProps {
 	/**
@@ -30,7 +30,7 @@ const CurrencyInput = (
 	props: CurrencyInputProps & Omit<TextFieldProps, "onChange" | "value">,
 ) => {
 	const { value, onChange, onBlur, currency, ...muiProps } = props;
-	const { i18n } = useCCTranslations();
+	const locale = useCurrentLocale();
 	const numberFormatOptions: Intl.NumberFormatOptions = useMemo(
 		() => ({
 			style: "currency",
@@ -40,10 +40,8 @@ const CurrencyInput = (
 	);
 	const formatNumber = useCallback(
 		(value: number | null) =>
-			value != null
-				? value.toLocaleString(i18n.language, numberFormatOptions)
-				: "",
-		[i18n.language, numberFormatOptions],
+			value != null ? value.toLocaleString(locale, numberFormatOptions) : "",
+		[locale, numberFormatOptions],
 	);
 	const valueFormatted = formatNumber(value);
 	const [valueInternal, setValueInternal] = useState(valueFormatted);

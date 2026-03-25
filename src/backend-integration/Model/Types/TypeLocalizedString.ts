@@ -4,6 +4,7 @@ import { ModelRenderParams } from "../index";
 import FilterType from "../FilterType";
 import { MultiLanguageInputSupportedLanguages } from "../../../standalone/UIKit/InputControls/MultiLanguageInput";
 import ccI18n from "../../../i18n";
+import { getCurrentLanguage } from "../../../utils/getCurrentLocale";
 
 /**
  * Type to handle localized strings
@@ -41,9 +42,9 @@ abstract class TypeLocalizedString implements Type<
 		value: Partial<Record<MultiLanguageInputSupportedLanguages, string>>,
 	): string {
 		if (!value) return "";
-		const currentLang = ccI18n.language.split(
-			"-",
-		)[0] as MultiLanguageInputSupportedLanguages;
+		const currentLang = getCurrentLanguage(
+			ccI18n,
+		) as MultiLanguageInputSupportedLanguages;
 		return value[currentLang] ?? "";
 	}
 

@@ -1,11 +1,10 @@
-import useCCTranslations from "../../utils/useCCTranslations";
 import { deDE, enUS, frFR, nlNL, ruRU } from "@mui/x-date-pickers/locales";
 import { LocalizationProviderProps } from "@mui/x-date-pickers";
 import { useMemo } from "react";
+import { useCurrentLanguage } from "../../utils/useCurrentLocale";
 
 const useMuiLocaleData = () => {
-	const { i18n } = useCCTranslations();
-	const [language] = i18n.language.split("-"); // second array element `region: string | undefined`, not used
+	const language = useCurrentLanguage();
 	return useMemo(() => {
 		const extractLocaleData = (
 			locale:

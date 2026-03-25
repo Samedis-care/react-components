@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { getI18n, I18nextProvider } from "react-i18next";
 import ccI18n from "../i18n";
+import getCurrentLocale, {
+	getCurrentLanguage,
+} from "../utils/getCurrentLocale";
 import moment from "moment";
 
 export interface CCI18nProviderProps {
@@ -16,18 +19,20 @@ export interface CCI18nProviderProps {
 
 const CCI18nProvider = (props: CCI18nProviderProps) => {
 	const [updating, setUpdating] = useState(false);
-	const [, setMomentLocale] = useState(ccI18n.language);
+	const [, setMomentLocale] = useState(getCurrentLocale(ccI18n));
 
 	useEffect(() => {
 		const updateLocale = () => {
 			void (async () => {
 				setUpdating(true);
-				const lang = ccI18n.language ?? "en-Us"; // fallback
+				const lang = getCurrentLocale(ccI18n) ?? "en-US"; // fallback
 				try {
 					await import("moment/locale/" + lang.toLowerCase());
 				} catch {
 					try {
-						await import("moment/locale/" + lang.split("-")[0].toLowerCase());
+						await import(
+							"moment/locale/" + getCurrentLanguage(ccI18n).toLowerCase()
+						);
 					} catch {
 						// locale not found
 					}
@@ -35,7 +40,7 @@ const CCI18nProvider = (props: CCI18nProviderProps) => {
 					moment.locale(lang);
 					setMomentLocale(lang);
 					const htmlTag = document.querySelector("html");
-					if (htmlTag) htmlTag.lang = lang.split("-")[0];
+					if (htmlTag) htmlTag.lang = getCurrentLanguage(ccI18n);
 					setUpdating(false);
 				}
 			})();

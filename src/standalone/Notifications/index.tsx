@@ -17,9 +17,9 @@ import {
 	useThemeProps,
 } from "@mui/material";
 import InfiniteScroll, { InfiniteScrollProps } from "../InfiniteScroll";
-import i18n from "../../i18n";
 import timestampToAge from "../../utils/timestampToAge";
 import useCCTranslations from "../../utils/useCCTranslations";
+import useCurrentLocale from "../../utils/useCurrentLocale";
 
 export interface Notification {
 	/**
@@ -134,45 +134,46 @@ const readStyle: CSSProperties = {
 	opacity: 0.7,
 };
 
-const defaultRenderer = (notification: Notification): React.ReactElement => (
-	<Box
-		p={2}
-		style={notification.read ? readStyle : unreadStyle}
-		key={notification.id}
-	>
-		<Grid container spacing={2}>
-			<Grid size="grow">
-				{notification.image && (
-					<img style={defaultImageStyle} src={notification.image} alt={""} />
-				)}
-			</Grid>
-			<Grid size={9}>
-				<Box py={2}>
-					<Grid container spacing={2}>
-						<Grid size={12}>
-							<Typography>{notification.message}</Typography>
+const DefaultRenderer = (notification: Notification): React.ReactElement => {
+	const locale = useCurrentLocale();
+	return (
+		<Box
+			p={2}
+			style={notification.read ? readStyle : unreadStyle}
+			key={notification.id}
+		>
+			<Grid container spacing={2}>
+				<Grid size="grow">
+					{notification.image && (
+						<img style={defaultImageStyle} src={notification.image} alt={""} />
+					)}
+				</Grid>
+				<Grid size={9}>
+					<Box py={2}>
+						<Grid container spacing={2}>
+							<Grid size={12}>
+								<Typography>{notification.message}</Typography>
+							</Grid>
+							<Grid size={12}>
+								<Typography variant={"body2"}>
+									<React.Fragment>
+										{notification.origin && <>{notification.origin} </>}
+									</React.Fragment>
+									<Tooltip title={notification.created.toLocaleString(locale)}>
+										<span>{timestampToAge(notification.created)}</span>
+									</Tooltip>
+								</Typography>
+							</Grid>
 						</Grid>
-						<Grid size={12}>
-							<Typography variant={"body2"}>
-								<React.Fragment>
-									{notification.origin && <>{notification.origin} </>}
-								</React.Fragment>
-								<Tooltip
-									title={notification.created.toLocaleString(i18n.language)}
-								>
-									<span>{timestampToAge(notification.created)}</span>
-								</Tooltip>
-							</Typography>
-						</Grid>
-					</Grid>
-				</Box>
+					</Box>
+				</Grid>
+				<Grid size={12}>
+					<Divider />
+				</Grid>
 			</Grid>
-			<Grid size={12}>
-				<Divider />
-			</Grid>
-		</Grid>
-	</Box>
-);
+		</Box>
+	);
+};
 
 const StyledInfiniteScroll = styled(InfiniteScroll, {
 	name: "CcNotifications",
@@ -239,7 +240,7 @@ const Notifications = (inProps: NotificationsProps) => {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
-	const Renderer = props.notificationRenderer || defaultRenderer;
+	const Renderer = props.notificationRenderer || DefaultRenderer;
 	const notifications = props.notifications.filter(
 		(not) => !not.expires || not.expires > new Date(),
 	);

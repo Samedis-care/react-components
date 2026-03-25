@@ -12,6 +12,7 @@ import {
 import useCCTranslations, {
 	useCCLanguagesTranslations,
 } from "../../../utils/useCCTranslations";
+import { useCurrentLanguage } from "../../../utils/useCurrentLocale";
 import { Translate } from "@mui/icons-material";
 import { TextFieldCC } from "../MuiWarning";
 
@@ -303,13 +304,12 @@ const MultiLanguageInput = (inProps: MultiLanguageInputProps) => {
 		warning,
 		...textFieldProps
 	} = props;
-	const { t, i18n } = useCCLanguagesTranslations();
+	const { t } = useCCLanguagesTranslations();
 	const { t: tCC } = useCCTranslations();
+	const language = useCurrentLanguage();
 
 	// determine default language
-	let defaultLanguage = i18n.language.split(
-		"-",
-	)[0] as MultiLanguageInputSupportedLanguages;
+	let defaultLanguage = language as MultiLanguageInputSupportedLanguages;
 	const i18nLang = defaultLanguage;
 	if (ignoreI18nLocale || !enabledLanguages.includes(defaultLanguage)) {
 		defaultLanguage = enabledLanguages[0];

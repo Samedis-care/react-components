@@ -1,5 +1,5 @@
 import React from "react";
-import useCCTranslations from "../utils/useCCTranslations";
+import useCurrentLocale from "../utils/useCurrentLocale";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 
@@ -10,15 +10,12 @@ export interface MuiPickerUtilsProps {
 
 const MuiPickerUtils = (props: MuiPickerUtilsProps): React.ReactElement => {
 	const { disable } = props;
-	const { i18n } = useCCTranslations();
+	const locale = useCurrentLocale();
 
 	if (disable) return props.children;
 
 	return (
-		<LocalizationProvider
-			dateAdapter={AdapterMoment}
-			adapterLocale={i18n.language}
-		>
+		<LocalizationProvider dateAdapter={AdapterMoment} adapterLocale={locale}>
 			{props.children}
 		</LocalizationProvider>
 	);
