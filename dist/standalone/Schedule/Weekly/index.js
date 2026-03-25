@@ -6,6 +6,7 @@ import { ArrowBackIos, ArrowForwardIos, Settings as SettingsIcon, } from "@mui/i
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { ToDateLocaleStringOptions } from "../../../constants";
 import useCCTranslations from "../../../utils/useCCTranslations";
+import useCurrentLocale from "../../../utils/useCurrentLocale";
 import { AdapterMoment } from "@mui/x-date-pickers/AdapterMoment";
 import ScheduleFilterRenderer from "../Common/ScheduleFilterRenderers";
 const normalizeMoment = (instance) => instance.weekday(0).hour(0).minute(0).second(0).millisecond(0);
@@ -43,6 +44,7 @@ const WeekView = (inProps) => {
     const actions = props.actions ?? NO_ACTIONS;
     const filterCount = Object.keys(filters).length;
     const { t, i18n } = useCCTranslations();
+    const locale = useCurrentLocale();
     /**
      * The offset to the current week
      * Example: -1 for last week, 0 for this week, 1 for next week
@@ -151,7 +153,7 @@ const WeekView = (inProps) => {
                             " (",
                             now
                                 .toDate()
-                                .toLocaleDateString(i18n.language, ToDateLocaleStringOptions),
+                                .toLocaleDateString(locale, ToDateLocaleStringOptions),
                             ")")),
                     React.createElement(Grid, null, filterCount > 0 && (React.createElement(FilterWrapper, { px: 2, className: classes?.filterWrapper }, (() => {
                         const [name, filter] = Object.entries(filters)[0];
@@ -169,7 +171,7 @@ const WeekView = (inProps) => {
                             " ",
                             nowNormalized().add(weekOffset, "week").weekYear()),
                         React.createElement(Picker, { className: classes?.picker },
-                            React.createElement(LocalizationProvider, { dateAdapter: AdapterMoment, adapterLocale: i18n.language },
+                            React.createElement(LocalizationProvider, { dateAdapter: AdapterMoment, adapterLocale: locale },
                                 React.createElement(DatePicker, { format: "II RRRR", open: datePickerAnchorEl != null, label: t("standalone.schedule.week"), value: nowNormalized().add(weekOffset, "week"), onChange: setWeek, onClose: closeDatePicker }))),
                         React.createElement(IconButton, { onClick: nextWeek, size: "large", "aria-label": t("standalone.schedule.next-week") },
                             React.createElement(ArrowForwardIos, null))))),

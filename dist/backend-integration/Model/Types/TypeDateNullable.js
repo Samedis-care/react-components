@@ -1,4 +1,5 @@
 import ccI18n from "../../../i18n";
+import getCurrentLocale from "../../../utils/getCurrentLocale";
 import { normalizeDate } from "./Utils/DateUtils";
 /**
  * Type for nullable dates
@@ -16,7 +17,7 @@ class TypeDateNullable {
     }
     stringify(value) {
         return value
-            ? value.toLocaleDateString(ccI18n.language)
+            ? value.toLocaleDateString(getCurrentLocale(ccI18n))
             : ccI18n.t("backend-integration.model.types.date-nullable.not-set");
     }
     serialize = (value) => {

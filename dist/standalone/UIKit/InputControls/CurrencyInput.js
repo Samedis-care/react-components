@@ -1,17 +1,15 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import TextFieldWithHelp from "../TextFieldWithHelp";
 import parseLocalizedNumber from "../../../utils/parseLocalizedNumber";
-import useCCTranslations from "../../../utils/useCCTranslations";
+import useCurrentLocale from "../../../utils/useCurrentLocale";
 const CurrencyInput = (props) => {
     const { value, onChange, onBlur, currency, ...muiProps } = props;
-    const { i18n } = useCCTranslations();
+    const locale = useCurrentLocale();
     const numberFormatOptions = useMemo(() => ({
         style: "currency",
         currency,
     }), [currency]);
-    const formatNumber = useCallback((value) => value != null
-        ? value.toLocaleString(i18n.language, numberFormatOptions)
-        : "", [i18n.language, numberFormatOptions]);
+    const formatNumber = useCallback((value) => value != null ? value.toLocaleString(locale, numberFormatOptions) : "", [locale, numberFormatOptions]);
     const valueFormatted = formatNumber(value);
     const [valueInternal, setValueInternal] = useState(valueFormatted);
     useEffect(() => setValueInternal(formatNumber(value)), [formatNumber, value]);

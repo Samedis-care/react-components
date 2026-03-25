@@ -2,9 +2,9 @@ import React, { useCallback, useEffect, useState } from "react";
 import { Notifications as NotificationsIcon } from "@mui/icons-material";
 import { Badge, Box, Divider, Grid, IconButton, Popover, styled, Tooltip, Typography, useThemeProps, } from "@mui/material";
 import InfiniteScroll from "../InfiniteScroll";
-import i18n from "../../i18n";
 import timestampToAge from "../../utils/timestampToAge";
 import useCCTranslations from "../../utils/useCCTranslations";
+import useCurrentLocale from "../../utils/useCurrentLocale";
 const anchorOrigin = {
     vertical: "bottom",
     horizontal: "right",
@@ -23,23 +23,26 @@ const readStyle = {
     ...unreadStyle,
     opacity: 0.7,
 };
-const defaultRenderer = (notification) => (React.createElement(Box, { p: 2, style: notification.read ? readStyle : unreadStyle, key: notification.id },
-    React.createElement(Grid, { container: true, spacing: 2 },
-        React.createElement(Grid, { size: "grow" }, notification.image && (React.createElement("img", { style: defaultImageStyle, src: notification.image, alt: "" }))),
-        React.createElement(Grid, { size: 9 },
-            React.createElement(Box, { py: 2 },
-                React.createElement(Grid, { container: true, spacing: 2 },
-                    React.createElement(Grid, { size: 12 },
-                        React.createElement(Typography, null, notification.message)),
-                    React.createElement(Grid, { size: 12 },
-                        React.createElement(Typography, { variant: "body2" },
-                            React.createElement(React.Fragment, null, notification.origin && React.createElement(React.Fragment, null,
-                                notification.origin,
-                                " ")),
-                            React.createElement(Tooltip, { title: notification.created.toLocaleString(i18n.language) },
-                                React.createElement("span", null, timestampToAge(notification.created)))))))),
-        React.createElement(Grid, { size: 12 },
-            React.createElement(Divider, null)))));
+const DefaultRenderer = (notification) => {
+    const locale = useCurrentLocale();
+    return (React.createElement(Box, { p: 2, style: notification.read ? readStyle : unreadStyle, key: notification.id },
+        React.createElement(Grid, { container: true, spacing: 2 },
+            React.createElement(Grid, { size: "grow" }, notification.image && (React.createElement("img", { style: defaultImageStyle, src: notification.image, alt: "" }))),
+            React.createElement(Grid, { size: 9 },
+                React.createElement(Box, { py: 2 },
+                    React.createElement(Grid, { container: true, spacing: 2 },
+                        React.createElement(Grid, { size: 12 },
+                            React.createElement(Typography, null, notification.message)),
+                        React.createElement(Grid, { size: 12 },
+                            React.createElement(Typography, { variant: "body2" },
+                                React.createElement(React.Fragment, null, notification.origin && React.createElement(React.Fragment, null,
+                                    notification.origin,
+                                    " ")),
+                                React.createElement(Tooltip, { title: notification.created.toLocaleString(locale) },
+                                    React.createElement("span", null, timestampToAge(notification.created)))))))),
+            React.createElement(Grid, { size: 12 },
+                React.createElement(Divider, null)))));
+};
 const StyledInfiniteScroll = styled(InfiniteScroll, {
     name: "CcNotifications",
     slot: "notificationArea",
@@ -80,7 +83,7 @@ const Notifications = (inProps) => {
         handleLoadLatest();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
-    const Renderer = props.notificationRenderer || defaultRenderer;
+    const Renderer = props.notificationRenderer || DefaultRenderer;
     const notifications = props.notifications.filter((not) => !not.expires || not.expires > new Date());
     return (React.createElement("div", { className: className },
         React.createElement(IconButton, { size: "large", "aria-label": t("standalone.notifications.title"), ...IconButtonProps, onClick: onIconClick },

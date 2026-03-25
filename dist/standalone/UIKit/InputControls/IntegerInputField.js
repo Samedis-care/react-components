@@ -1,14 +1,14 @@
 import React, { useCallback } from "react";
 import TextFieldWithHelp from "../TextFieldWithHelp";
 import useInputCursorFix from "../../../utils/useInputCursorFix";
-import useCCTranslations from "../../../utils/useCCTranslations";
+import useCurrentLocale from "../../../utils/useCurrentLocale";
 const IntegerInputField = (props) => {
-    const { i18n } = useCCTranslations();
     const { value, onChange, noFormat, ...muiProps } = props;
+    const locale = useCurrentLocale();
     const valueFormatted = value != null
         ? noFormat
             ? value.toString(10)
-            : value.toLocaleString(i18n.language)
+            : value.toLocaleString(locale)
         : "";
     const { handleCursorChange, cursorInputRef } = useInputCursorFix(valueFormatted);
     // on change handling

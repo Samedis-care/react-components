@@ -4,6 +4,7 @@ import { Divider, Grid, IconButton, List, Paper, styled, Tooltip, Typography, us
 import { Sync as RefreshIcon } from "@mui/icons-material";
 import timestampToAge from "../../utils/timestampToAge";
 import useCCTranslations from "../../utils/useCCTranslations";
+import useCurrentLocale from "../../utils/useCurrentLocale";
 import combineClassNames from "../../utils/combineClassNames";
 const SignalPortletRoot = styled("div", {
     name: "CcSignalPortlet",
@@ -53,7 +54,8 @@ const SignalPortletLastUpdatedAt = styled("span", {
 })({});
 const SignalPortlet = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcSignalPortlet" });
-    const { t, i18n } = useCCTranslations();
+    const { t } = useCCTranslations();
+    const locale = useCurrentLocale();
     return (React.createElement(SignalPortletRoot, { className: combineClassNames([props.className, props.classes?.root]) },
         React.createElement(SignalPortletPaper, { className: props.classes?.paper },
             React.createElement(SignalPortletInnerContainer, { container: true, spacing: 1, direction: "column", justifyContent: "space-between", wrap: "nowrap", className: props.classes?.innerContainer },
@@ -66,7 +68,7 @@ const SignalPortlet = (inProps) => {
                         React.createElement(SignalPortletList, { className: props.classes?.list }, props.items.map((item, index) => (React.createElement(SignalPortletItemStyled, { key: index.toString(), className: props.classes?.item, ...item })))))),
                 (props.updatedAt || props.onRefresh) && (React.createElement(Grid, { container: true, spacing: 1, justifyContent: "flex-end", alignItems: "center", alignContent: "center" },
                     props.updatedAt && (React.createElement(Grid, null,
-                        React.createElement(Tooltip, { title: new Date(props.updatedAt).toLocaleString(i18n.language) },
+                        React.createElement(Tooltip, { title: new Date(props.updatedAt).toLocaleString(locale) },
                             React.createElement(SignalPortletLastUpdatedAt, null, t("standalone.signal-portlet.last-updated", {
                                 AGE: timestampToAge(new Date(props.updatedAt)),
                             }))))),

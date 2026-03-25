@@ -1,4 +1,5 @@
 /* eslint-disable no-console */
+import getCurrentLocale from "../../utils/getCurrentLocale";
 import ccI18n from "../../i18n";
 import AuthMode from "./AuthMode";
 import addGetParams from "../../utils/addGetParams";
@@ -83,7 +84,7 @@ class JsonApiClient {
         try {
             const headers = {};
             // Handle localization
-            headers["Accept-Language"] = ccI18n.language;
+            headers["Accept-Language"] = getCurrentLocale(ccI18n);
             // Handle authentication
             if (auth !== AuthMode.Off) {
                 headers.Authorization = await this.handleAuthentication(auth);

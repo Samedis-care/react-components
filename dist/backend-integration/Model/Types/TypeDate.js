@@ -1,5 +1,6 @@
 import { normalizeDate } from "./Utils/DateUtils";
 import ccI18n from "../../../i18n";
+import getCurrentLocale from "../../../utils/getCurrentLocale";
 import moment from "moment";
 /**
  * Type for non-nullable dates
@@ -16,7 +17,7 @@ class TypeDate {
         return normalizeDate(new Date());
     }
     stringify(value) {
-        return value.toLocaleDateString(ccI18n.language);
+        return value.toLocaleDateString(getCurrentLocale(ccI18n));
     }
     serialize = (value) => {
         return value.toISOString();
@@ -32,7 +33,7 @@ class TypeDate {
     static format = (value) => {
         // convert format to __/__/____
         let format = moment()
-            .locale(ccI18n.language)
+            .locale(getCurrentLocale(ccI18n))
             .localeData()
             .longDateFormat("L")
             .replace(/[DMY]/gm, "_");

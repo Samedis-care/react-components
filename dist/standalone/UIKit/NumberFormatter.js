@@ -1,8 +1,8 @@
 import React from "react";
-import useCCTranslations from "../../utils/useCCTranslations";
+import useCurrentLocale from "../../utils/useCurrentLocale";
 const NumberFormatter = (props) => {
     const { value, options } = props;
-    const { i18n } = useCCTranslations();
-    return (React.createElement(React.Fragment, null, value != null ? value.toLocaleString(i18n.language, options) : ""));
+    const locale = useCurrentLocale();
+    return React.createElement(React.Fragment, null, value != null ? value.toLocaleString(locale, options) : "");
 };
 export default React.memo(NumberFormatter);

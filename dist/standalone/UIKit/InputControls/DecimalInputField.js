@@ -1,13 +1,13 @@
 import React, { useCallback, useEffect, useState } from "react";
 import TextFieldWithHelp from "../TextFieldWithHelp";
 import parseLocalizedNumber from "../../../utils/parseLocalizedNumber";
-import useCCTranslations from "../../../utils/useCCTranslations";
+import useCurrentLocale from "../../../utils/useCurrentLocale";
 const DecimalInputField = (props) => {
-    const { i18n } = useCCTranslations();
     const { value, onChange, format, ...muiProps } = props;
+    const locale = useCurrentLocale();
     const [valueInternal, setValueInternal] = useState("");
     useEffect(() => {
-        setValueInternal(value !== null ? value.toLocaleString(i18n.language, format) : "");
+        setValueInternal(value !== null ? value.toLocaleString(locale, format) : "");
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [value]);
     const handleBlur = useCallback((event) => {

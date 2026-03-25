@@ -1,3 +1,4 @@
+import getCurrentLocale from "./getCurrentLocale";
 import ccI18n from "../i18n";
 /**
  * Gets the group separator from number by language
@@ -5,7 +6,7 @@ import ccI18n from "../i18n";
  * @param options The number format options
  */
 const getNumberSeparator = (separatorType, options) => {
-    const format = Intl.NumberFormat(ccI18n.language, options)
+    const format = Intl.NumberFormat(getCurrentLocale(ccI18n), options)
         .formatToParts(1000.11)
         .find((part) => part.type === separatorType);
     return format === undefined ? "," : format.value;

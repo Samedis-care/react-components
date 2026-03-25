@@ -1,4 +1,5 @@
-import i18n from "../../../i18n";
+import ccI18n from "../../../i18n";
+import getCurrentLocale from "../../../utils/getCurrentLocale";
 /**
  * Type for non-nullable dates with time
  */
@@ -14,7 +15,7 @@ class TypeDateTime {
         return new Date();
     }
     stringify(value) {
-        return value.toLocaleString(i18n.language);
+        return value.toLocaleString(getCurrentLocale(ccI18n));
     }
     serialize = (value) => {
         return value.toISOString();

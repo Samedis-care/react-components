@@ -1,4 +1,5 @@
 import ccI18n from "../../../i18n";
+import { getCurrentLanguage } from "../../../utils/getCurrentLocale";
 /**
  * Type to handle localized strings
  */
@@ -19,7 +20,7 @@ class TypeLocalizedString {
     stringify(value) {
         if (!value)
             return "";
-        const currentLang = ccI18n.language.split("-")[0];
+        const currentLang = getCurrentLanguage(ccI18n);
         return value[currentLang] ?? "";
     }
     deserialize = (value) => {

@@ -1,6 +1,7 @@
 import React, { useCallback, useState } from "react";
 import { Grid, IconButton, InputAdornment, styled, Tooltip, Typography, useThemeProps, } from "@mui/material";
 import useCCTranslations, { useCCLanguagesTranslations, } from "../../../utils/useCCTranslations";
+import { useCurrentLanguage } from "../../../utils/useCurrentLocale";
 import { Translate } from "@mui/icons-material";
 import { TextFieldCC } from "../MuiWarning";
 const LanguageLabel = styled("span", {
@@ -20,10 +21,11 @@ const LanguageLabelInputAdornment = styled(Typography, {
 const MultiLanguageInput = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcMultiLanguageInput" });
     const { enabledLanguages, values, onChange, name, onBlur, label, disableIncompleteMarker, required, ignoreI18nLocale, warning, ...textFieldProps } = props;
-    const { t, i18n } = useCCLanguagesTranslations();
+    const { t } = useCCLanguagesTranslations();
     const { t: tCC } = useCCTranslations();
+    const language = useCurrentLanguage();
     // determine default language
-    let defaultLanguage = i18n.language.split("-")[0];
+    let defaultLanguage = language;
     const i18nLang = defaultLanguage;
     if (ignoreI18nLocale || !enabledLanguages.includes(defaultLanguage)) {
         defaultLanguage = enabledLanguages[0];
