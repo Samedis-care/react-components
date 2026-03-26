@@ -2,7 +2,7 @@
  * Gets the current locale from an i18n instance, defaulting to "en-US" when in cimode
  */
 const getCurrentLocale = (i18n) => {
-    const lang = i18n.language;
+    const lang = i18n.language ?? "en-US";
     if (lang === "cimode")
         return "en-US";
     // normalize to BCP 47: replace underscores and strip POSIX suffixes (e.g. "en_US-posix" -> "en-US")
