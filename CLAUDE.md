@@ -37,6 +37,7 @@ All exports are aggregated in `src/index.ts`. Theme slot overrides for all compo
 - Storybook stories are required for all visible components.
 - `@ts-ignore` requires an explanatory comment.
 - Style names follow `Cc<ComponentName>` to avoid collisions in MUI theme.
+- All `IconButton` elements must have an `aria-label` attribute for accessibility.
 
 ## Adding a New Component
 
