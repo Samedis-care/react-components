@@ -9,6 +9,10 @@ const LocalizedDateTimePicker = (props) => {
     return (React.createElement(LocalizationProvider, { localeText: localeText },
         React.createElement(DateTimePicker, { format: "L LT", ...otherProps, slotProps: {
                 ...otherProps.slotProps,
+                popper: {
+                    disablePortal: true,
+                    ...otherProps.slotProps?.popper,
+                },
                 textField: (ownerState) => {
                     const orgSlotProps = accessSlotProps(ownerState, otherProps.slotProps?.textField);
                     return {

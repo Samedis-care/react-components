@@ -23,6 +23,14 @@ const LocalizedKeyboardDatePicker = (inProps) => {
                 ? slotOverrideHideIcon
                 : otherProps.slots, slotProps: {
                 ...otherProps.slotProps,
+                popper: {
+                    // Render the calendar popover inside the current DOM tree
+                    // instead of via Portal at <body>. This ensures the popover
+                    // stays within a parent Dialog's focus trap, allowing
+                    // keyboard interaction (e.g. Enter to select a date).
+                    disablePortal: true,
+                    ...otherProps.slotProps?.popper,
+                },
                 textField: (ownerState) => {
                     const textFieldProps = accessSlotProps(ownerState, otherProps.slotProps?.textField);
                     return {
