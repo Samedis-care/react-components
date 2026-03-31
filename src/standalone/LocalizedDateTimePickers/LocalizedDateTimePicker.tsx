@@ -42,6 +42,10 @@ const LocalizedDateTimePicker = (props: LocalizedDateTimePickerProps) => {
 				{...otherProps}
 				slotProps={{
 					...otherProps.slotProps,
+					popper: {
+						disablePortal: true,
+						...otherProps.slotProps?.popper,
+					},
 					textField: (ownerState) => {
 						const orgSlotProps = accessSlotProps(
 							ownerState,

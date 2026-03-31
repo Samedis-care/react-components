@@ -13,7 +13,17 @@ const LocalizedDatePicker = (props: LocalizedDatePickerProps) => {
 	const localeText = useMuiLocaleData();
 	return (
 		<LocalizationProvider localeText={localeText}>
-			<DatePicker format={"L"} {...props} />
+			<DatePicker
+				format={"L"}
+				{...props}
+				slotProps={{
+					...props.slotProps,
+					popper: {
+						disablePortal: true,
+						...props.slotProps?.popper,
+					},
+				}}
+			/>
 		</LocalizationProvider>
 	);
 };
