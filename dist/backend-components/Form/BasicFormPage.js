@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useEffect, useRef } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useRef, useState, } from "react";
 import { useFormContextLite } from "../Form";
 import { UnsafeToLeaveDispatch } from "../../framework/UnsafeToLeave";
 import { FrameworkHistory } from "../../framework/History";
@@ -10,11 +10,20 @@ import FormLoaderOverlay from "../../standalone/Form/FormLoaderOverlay";
 import useCCTranslations from "../../utils/useCCTranslations";
 import { RouteContext } from "../../standalone/Routes/Route";
 import { useThemeProps } from "@mui/material";
+export const BasicFormPageNestingContext = createContext(null);
 const BasicFormPage = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcBasicFormPage" });
     const { submit, dirty, disableRouting, postSubmitHandler, isSubmitting, children: FormButtons, form, childrenProps, customProps: originalCustomProps, formPageLayoutComponent, ...otherProps } = props;
     const { t } = useCCTranslations();
     const { readOnly, readOnlyReasons } = useFormContextLite();
+    const [childActive, setChildActive] = useState(false);
+    const hideParent = useContext(BasicFormPageNestingContext);
+    useEffect(() => {
+        if (!hideParent)
+            return;
+        hideParent(true);
+        return () => hideParent(false);
+    }, [hideParent]);
     const [pushDialog] = useDialogContext();
     const formDialog = useContext(FormDialogDispatchContext);
     const unblock = useRef(undefined);
@@ -131,10 +140,11 @@ const BasicFormPage = (inProps) => {
         }
     }, [submit, postSubmitHandler, pushDialog]);
     const UsedFormPageLayout = formPageLayoutComponent ?? FormPageLayout;
-    return (React.createElement(UsedFormPageLayout, { body: form, footer: React.createElement(FormButtons, { ...childrenProps, ...otherProps, showBackButtonOnly: otherProps.showBackButtonOnly ||
-                (readOnly && !Object.values(readOnlyReasons).find((e) => !!e)), readOnly: readOnly, readOnlyReasons: readOnlyReasons, isSubmitting: isSubmitting, dirty: dirty, disableRouting: disableRouting, submit: handleSubmit, customProps: (typeof originalCustomProps === "object" &&
-                originalCustomProps != null
-                ? customPropsWithGoBack
-                : originalCustomProps) }), other: React.createElement(FormLoaderOverlay, { visible: isSubmitting }) }));
+    return (React.createElement(BasicFormPageNestingContext.Provider, { value: setChildActive },
+        React.createElement(UsedFormPageLayout, { body: form, footer: childActive ? null : (React.createElement(FormButtons, { ...childrenProps, ...otherProps, showBackButtonOnly: otherProps.showBackButtonOnly ||
+                    (readOnly && !Object.values(readOnlyReasons).find((e) => !!e)), readOnly: readOnly, readOnlyReasons: readOnlyReasons, isSubmitting: isSubmitting, dirty: dirty, disableRouting: disableRouting, submit: handleSubmit, customProps: (typeof originalCustomProps === "object" &&
+                    originalCustomProps != null
+                    ? customPropsWithGoBack
+                    : originalCustomProps) })), other: childActive ? undefined : React.createElement(FormLoaderOverlay, { visible: isSubmitting }) })));
 };
 export default React.memo(BasicFormPage);
