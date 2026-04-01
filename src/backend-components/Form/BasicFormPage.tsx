@@ -1,4 +1,11 @@
-import React, { useCallback, useContext, useEffect, useRef } from "react";
+import React, {
+	createContext,
+	useCallback,
+	useContext,
+	useEffect,
+	useRef,
+	useState,
+} from "react";
 import { FormContextData, PageProps, useFormContextLite } from "../Form";
 import { UnsafeToLeaveDispatch } from "../../framework/UnsafeToLeave";
 import { FrameworkHistory } from "../../framework/History";
@@ -98,6 +105,10 @@ export interface BasicFormPageProps<
 	formPageLayoutComponent?: React.ComponentType<FormPageLayoutProps>;
 }
 
+export const BasicFormPageNestingContext = createContext<
+	((active: boolean) => void) | null
+>(null);
+
 const BasicFormPage = <RendererPropsT, CustomPropsT>(
 	inProps: BasicFormPageProps<RendererPropsT, CustomPropsT>,
 ) => {
@@ -117,6 +128,13 @@ const BasicFormPage = <RendererPropsT, CustomPropsT>(
 	} = props;
 	const { t } = useCCTranslations();
 	const { readOnly, readOnlyReasons } = useFormContextLite();
+	const [childActive, setChildActive] = useState(false);
+	const hideParent = useContext(BasicFormPageNestingContext);
+	useEffect(() => {
+		if (!hideParent) return;
+		hideParent(true);
+		return () => hideParent(false);
+	}, [hideParent]);
 	const [pushDialog] = useDialogContext();
 	const formDialog = useContext(FormDialogDispatchContext);
 	const unblock = useRef<(() => void) | undefined>(undefined);
@@ -240,32 +258,38 @@ const BasicFormPage = <RendererPropsT, CustomPropsT>(
 	const UsedFormPageLayout = formPageLayoutComponent ?? FormPageLayout;
 
 	return (
-		<UsedFormPageLayout
-			body={form}
-			footer={
-				<FormButtons
-					{...childrenProps}
-					{...otherProps}
-					showBackButtonOnly={
-						otherProps.showBackButtonOnly ||
-						(readOnly && !Object.values(readOnlyReasons).find((e) => !!e))
-					}
-					readOnly={readOnly}
-					readOnlyReasons={readOnlyReasons}
-					isSubmitting={isSubmitting}
-					dirty={dirty}
-					disableRouting={disableRouting}
-					submit={handleSubmit}
-					customProps={
-						(typeof originalCustomProps === "object" &&
-						originalCustomProps != null
-							? customPropsWithGoBack
-							: originalCustomProps) as EnhancedCustomProps<CustomPropsT>
-					}
-				/>
-			}
-			other={<FormLoaderOverlay visible={isSubmitting} />}
-		/>
+		<BasicFormPageNestingContext.Provider value={setChildActive}>
+			<UsedFormPageLayout
+				body={form}
+				footer={
+					childActive ? null : (
+						<FormButtons
+							{...childrenProps}
+							{...otherProps}
+							showBackButtonOnly={
+								otherProps.showBackButtonOnly ||
+								(readOnly && !Object.values(readOnlyReasons).find((e) => !!e))
+							}
+							readOnly={readOnly}
+							readOnlyReasons={readOnlyReasons}
+							isSubmitting={isSubmitting}
+							dirty={dirty}
+							disableRouting={disableRouting}
+							submit={handleSubmit}
+							customProps={
+								(typeof originalCustomProps === "object" &&
+								originalCustomProps != null
+									? customPropsWithGoBack
+									: originalCustomProps) as EnhancedCustomProps<CustomPropsT>
+							}
+						/>
+					)
+				}
+				other={
+					childActive ? undefined : <FormLoaderOverlay visible={isSubmitting} />
+				}
+			/>
+		</BasicFormPageNestingContext.Provider>
 	);
 };
 
