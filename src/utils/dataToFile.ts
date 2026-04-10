@@ -1,9 +1,21 @@
 import getDataUriMime from "./getDataUriMime";
 
 /**
- * Converts data URI to a blob
+ * Extracts the name parameter from a data URI if present
  * @param data The data URI
- * @return The blob
+ * @return The decoded file name or null
+ */
+const getDataUriName = (data: string): string | null => {
+	const header = data.split(",")[0];
+	const nameMatch = header.match(/;name=([^;,]+)/);
+	if (!nameMatch || nameMatch.length < 2) return null;
+	return decodeURIComponent(nameMatch[1]);
+};
+
+/**
+ * Converts data URI to a File (preserving name) or Blob
+ * @param data The data URI
+ * @return The File or Blob
  */
 const dataToFile = (data: string): Blob => {
 	// handle empty data uri
@@ -19,6 +31,10 @@ const dataToFile = (data: string): Blob => {
 	const u8arr = new Uint8Array(n);
 	while (n--) {
 		u8arr[n] = bstr.charCodeAt(n);
+	}
+	const name = getDataUriName(data);
+	if (name) {
+		return new File([u8arr], name, { type: mime });
 	}
 	return new Blob([u8arr], { type: mime });
 };
