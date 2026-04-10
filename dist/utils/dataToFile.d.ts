@@ -1,7 +1,7 @@
 /**
- * Converts data URI to a blob
+ * Converts data URI to a File (preserving name) or Blob
  * @param data The data URI
- * @return The blob
+ * @return The File or Blob
  */
 declare const dataToFile: (data: string) => Blob;
 export default dataToFile;
