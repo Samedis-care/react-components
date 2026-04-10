@@ -770,11 +770,18 @@ const Form = (props) => {
         parentFormContext.setCustomFieldDirty(nestedFormName, dirty);
         return () => {
             if (disableNestedSubmit ||
-                (parentFormContext.onlySubmitMounted && !disableNestedSubmit)) {
+                onlySubmitNestedIfMounted ||
+                parentFormContext.onlySubmitMounted) {
                 parentFormContext.setCustomFieldDirty(nestedFormName, false);
             }
         };
-    }, [dirty, disableNestedSubmit, nestedFormName, parentFormContext]);
+    }, [
+        dirty,
+        disableNestedSubmit,
+        onlySubmitNestedIfMounted,
+        nestedFormName,
+        parentFormContext,
+    ]);
     // nested forms - submitting blocker
     useEffect(() => {
         if (!parentFormContext || !nestedFormName || !submittingBlocked)
