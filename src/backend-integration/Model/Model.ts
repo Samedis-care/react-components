@@ -701,13 +701,10 @@ class Model<
 	 * @param id The record ID
 	 */
 	public invalidateCacheForId(id: string) {
+		// prefix match: wipe all queries for this model + id regardless of cacheKeys/cacheKeysIndex
 		void ModelDataStore.invalidateQueries({
-			queryKey: this.getReactQueryKey(id, false),
-			exact: true,
-		});
-		void ModelDataStore.invalidateQueries({
-			queryKey: this.getReactQueryKey(id, true),
-			exact: true,
+			queryKey: [this.modelId, { id: id }],
+			exact: false,
 		});
 	}
 
