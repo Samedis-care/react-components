@@ -1448,9 +1448,11 @@ const DataGrid = (inProps: DataGridProps) => {
 	return (
 		<Wrapper
 			container
-			direction={"column"}
-			justifyContent={"space-between"}
-			alignItems={"stretch"}
+			sx={{
+				flexDirection: "column",
+				justifyContent: "space-between",
+				alignItems: "stretch",
+			}}
 			wrap={"nowrap"}
 			className={combineClassNames([className, classes?.root])}
 			ref={gridRoot}
@@ -1468,7 +1470,9 @@ const DataGrid = (inProps: DataGridProps) => {
 									<StatePersistence />
 									<HeaderWrapper
 										className={classes?.header}
-										display={state.showFilterDialog ? "none" : undefined}
+										sx={
+											state.showFilterDialog ? { display: "none" } : undefined
+										}
 									>
 										<Header />
 									</HeaderWrapper>
@@ -1486,9 +1490,9 @@ const DataGrid = (inProps: DataGridProps) => {
 									{!disableFooter && (
 										<FooterWrapper
 											className={classes?.footer}
-											display={
+											sx={
 												state.showSettings || state.showFilterDialog
-													? "none"
+													? { display: "none" }
 													: undefined
 											}
 										>

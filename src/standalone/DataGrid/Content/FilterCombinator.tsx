@@ -32,8 +32,7 @@ const FilterCombinator = (props: IProps) => {
 				<Grid
 					component="label"
 					container
-					justifyContent={"space-between"}
-					alignItems="center"
+					sx={{ justifyContent: "space-between", alignItems: "center" }}
 					spacing={1}
 				>
 					<Grid>

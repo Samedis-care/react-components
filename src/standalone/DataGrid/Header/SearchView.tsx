@@ -97,7 +97,7 @@ const SearchView = (props: IDataGridSearchViewProps) => {
 						anchorOrigin={anchorOrigin}
 						transformOrigin={transformOrigin}
 					>
-						<Box p={1}>{renderTextField()}</Box>
+						<Box sx={{ p: 1 }}>{renderTextField()}</Box>
 					</Popover>
 				</>
 			)}

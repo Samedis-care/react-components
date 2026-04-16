@@ -197,7 +197,7 @@ const LocaleSelectorDialogContent = (
 	return (
 		<Grid container className={className}>
 			<Grid size={12}>
-				<Box px={2} pb={1}>
+				<Box sx={{ px: 2, pb: 1 }}>
 					<TextFieldWithHelp
 						value={filter}
 						onChange={handleFilterChange}

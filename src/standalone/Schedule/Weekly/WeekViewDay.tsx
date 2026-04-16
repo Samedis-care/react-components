@@ -89,10 +89,10 @@ const WeekViewDay = (inProps: WeekViewDayProps) => {
 						<Divider />
 					</Grid>
 					<Grid size={12}>
-						<Box m={1}>{date}</Box>
+						<Box sx={{ m: 1 }}>{date}</Box>
 					</Grid>
 					<DayContentsWrapper size={12} className={classes?.dayContents}>
-						<Box m={1}>
+						<Box sx={{ m: 1 }}>
 							<DayContents data={data} altBorder={isToday} />
 						</Box>
 					</DayContentsWrapper>

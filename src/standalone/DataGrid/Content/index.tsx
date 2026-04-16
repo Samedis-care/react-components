@@ -202,7 +202,7 @@ const Content = (props: IDataGridContentProps) => {
 						className={classes?.centeredStickyTypography}
 						variant={"h4"}
 					>
-						<Grid container spacing={2} direction={"column"}>
+						<Grid container spacing={2} sx={{ flexDirection: "column" }}>
 							<Grid>
 								{filtersActive
 									? t("standalone.data-grid.content.no-data-filters")

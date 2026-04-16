@@ -63,7 +63,7 @@ class ScrollableScheduleWeek extends PureComponent<IProps, IState> {
 		if (!this.state.data) {
 			return (
 				<Grid size={12}>
-					<Grid container justifyContent={"space-around"}>
+					<Grid container sx={{ justifyContent: "space-around" }}>
 						<CircularProgress />
 					</Grid>
 				</Grid>

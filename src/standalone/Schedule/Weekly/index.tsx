@@ -241,8 +241,7 @@ const WeekView = (inProps: WeekViewProps) => {
 	return (
 		<Root
 			container
-			alignItems={"stretch"}
-			alignContent={"space-between"}
+			sx={{ alignItems: "stretch", alignContent: "space-between" }}
 			className={className}
 		>
 			<Grid container wrap={"nowrap"} size={12}>
@@ -259,7 +258,10 @@ const WeekView = (inProps: WeekViewProps) => {
 						</Grid>
 						<Grid>
 							{filterCount > 0 && (
-								<FilterWrapper px={2} className={classes?.filterWrapper}>
+								<FilterWrapper
+									sx={{ px: 2 }}
+									className={classes?.filterWrapper}
+								>
 									{(() => {
 										const [name, filter] = Object.entries(filters)[0];
 										return (
@@ -278,7 +280,7 @@ const WeekView = (inProps: WeekViewProps) => {
 					</Grid>
 				</Grid>
 				<Grid>
-					<Grid container justifyContent={"center"}>
+					<Grid container sx={{ justifyContent: "center" }}>
 						<Grid>
 							<IconButton
 								onClick={prevWeek}
@@ -317,10 +319,10 @@ const WeekView = (inProps: WeekViewProps) => {
 						</Grid>
 					</Grid>
 				</Grid>
-				<Grid container justifyContent={"flex-end"} size="grow">
+				<Grid container sx={{ justifyContent: "flex-end" }} size="grow">
 					{(filterCount > 1 || actions.length > 0) && (
 						<Grid>
-							<FilterWrapper px={2} className={classes?.filterWrapper}>
+							<FilterWrapper sx={{ px: 2 }} className={classes?.filterWrapper}>
 								{filterCount > 2 || actions.length > 1 ? (
 									<>
 										<IconButton
@@ -334,7 +336,7 @@ const WeekView = (inProps: WeekViewProps) => {
 											anchorEl={filterSettingsAnchorEl}
 											onClose={closeFiltersMenu}
 										>
-											<Box p={1}>
+											<Box sx={{ p: 1 }}>
 												<Grid container spacing={1}>
 													{Object.entries(filters).map(
 														([name, filter], idx) =>
@@ -382,7 +384,7 @@ const WeekView = (inProps: WeekViewProps) => {
 										container
 										spacing={2}
 										wrap={"nowrap"}
-										alignItems={"center"}
+										sx={{ alignItems: "center" }}
 									>
 										{(() => {
 											const ret: React.ReactNode[] = [];
@@ -429,7 +431,7 @@ const WeekView = (inProps: WeekViewProps) => {
 			)}
 			{!data && !loadError && (
 				<LoadWrapper size={12}>
-					<Grid container justifyContent={"space-around"}>
+					<Grid container sx={{ justifyContent: "space-around" }}>
 						<CircularProgress />
 					</Grid>
 				</LoadWrapper>
@@ -437,8 +439,7 @@ const WeekView = (inProps: WeekViewProps) => {
 			{data && (
 				<Grid
 					container
-					alignItems={"stretch"}
-					alignContent={"space-between"}
+					sx={{ alignItems: "stretch", alignContent: "space-between" }}
 					wrap={"nowrap"}
 					size={12}
 				>

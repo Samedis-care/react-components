@@ -102,9 +102,12 @@ const CurrencyInput = (
 			onChange={handleChange}
 			onBlur={handleBlur}
 			error={error || muiProps.error}
-			inputProps={{
-				...muiProps.inputProps,
-				inputMode: "numeric",
+			slotProps={{
+				...muiProps.slotProps,
+				htmlInput: {
+					...muiProps.slotProps?.htmlInput,
+					inputMode: "numeric",
+				},
 			}}
 			inputMode={"numeric"}
 		/>

@@ -117,16 +117,14 @@ const SignalPortlet = (inProps: SignalPortletProps) => {
 				<SignalPortletInnerContainer
 					container
 					spacing={1}
-					direction={"column"}
-					justifyContent={"space-between"}
+					sx={{ flexDirection: "column", justifyContent: "space-between" }}
 					wrap={"nowrap"}
 					className={props.classes?.innerContainer}
 				>
 					<Grid
 						container
 						spacing={1}
-						justifyContent={"flex-start"}
-						direction={"column"}
+						sx={{ flexDirection: "column", justifyContent: "flex-start" }}
 						wrap={"nowrap"}
 						size="grow"
 					>
@@ -158,9 +156,11 @@ const SignalPortlet = (inProps: SignalPortletProps) => {
 						<Grid
 							container
 							spacing={1}
-							justifyContent={"flex-end"}
-							alignItems={"center"}
-							alignContent={"center"}
+							sx={{
+								justifyContent: "flex-end",
+								alignItems: "center",
+								alignContent: "center",
+							}}
 						>
 							{props.updatedAt && (
 								<Grid>

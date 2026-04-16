@@ -3,7 +3,7 @@ import ImageBox, { ImageBoxProps } from "./ImageBox";
 import { Box, Grid, styled, Typography, useThemeProps } from "@mui/material";
 import {
 	Star as StarredIcon,
-	StarOutline as NotStarredIcon,
+	StarOutlined as NotStarredIcon,
 } from "@mui/icons-material";
 import {
 	MultiImageImage,
@@ -139,12 +139,11 @@ const ImageDialogEntry = (inProps: ImageDialogEntryProps) => {
 					classes={subClasses?.imageBox}
 				/>
 			</div>
-			<Box mt={1}>
+			<Box sx={{ mt: 1 }}>
 				<PrimaryComp
 					container
 					spacing={1}
-					alignItems={"center"}
-					justifyContent={"flex-start"}
+					sx={{ alignItems: "center", justifyContent: "flex-start" }}
 					className={isPrimary ? classes?.isPrimary : classes?.makePrimary}
 					onClick={isPrimary ? undefined : setPrimary}
 				>

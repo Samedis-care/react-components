@@ -537,7 +537,7 @@ const File = (inProps: FileProps) => {
 				onClick={handleListClick}
 				container
 				spacing={2}
-				alignItems={"stretch"}
+				sx={{ alignItems: "stretch" }}
 				wrap={"nowrap"}
 				className={className}
 				size={12}
@@ -555,7 +555,12 @@ const File = (inProps: FileProps) => {
 				onClick={handleListClick}
 				className={combineClassNames([className, classes?.compactListWrapper])}
 			>
-				<Grid container spacing={2} alignItems={"stretch"} wrap={"nowrap"}>
+				<Grid
+					container
+					spacing={2}
+					sx={{ alignItems: "stretch" }}
+					wrap={"nowrap"}
+				>
 					<Grid>{renderIcon()}</Grid>
 					<ListEntryText className={classes?.listEntryText}>
 						{renderName()}
@@ -570,7 +575,12 @@ const File = (inProps: FileProps) => {
 				onClick={handleListClick}
 				className={combineClassNames([className, classes?.compactListWrapper])}
 			>
-				<Grid container spacing={2} alignItems={"stretch"} wrap={"nowrap"}>
+				<Grid
+					container
+					spacing={2}
+					sx={{ alignItems: "stretch" }}
+					wrap={"nowrap"}
+				>
 					<Grid>
 						<Tooltip title={props.name}>
 							<span>{renderIcon()}</span>

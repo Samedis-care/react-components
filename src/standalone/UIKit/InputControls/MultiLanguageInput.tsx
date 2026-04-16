@@ -408,7 +408,8 @@ const MultiLanguageInput = (inProps: MultiLanguageInputProps) => {
 					...textFieldProps.slotProps?.inputLabel,
 					shrink: textFieldProps.multiline
 						? true
-						: textFieldProps.InputLabelProps?.shrink,
+						: ((textFieldProps.slotProps?.inputLabel as Record<string, unknown>)
+								?.shrink as boolean | undefined),
 				},
 				input: {
 					startAdornment: !textFieldProps.multiline ? (

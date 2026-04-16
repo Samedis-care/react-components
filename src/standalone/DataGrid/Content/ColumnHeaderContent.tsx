@@ -128,7 +128,7 @@ const ColumnHeaderContent = (
 
 	return (
 		<>
-			<Grid container justifyContent={"flex-start"} wrap={"nowrap"}>
+			<Grid container sx={{ justifyContent: "flex-start" }} wrap={"nowrap"}>
 				<DataGridColumnHeaderLabel
 					className={classes?.columnHeaderLabel}
 					key={"header"}
@@ -193,7 +193,7 @@ const ColumnHeaderContent = (
 				transformOrigin={transformOrigin}
 				onClick={preventPropagation}
 			>
-				<Box m={2}>
+				<Box sx={{ m: 2 }}>
 					<ColumnHeaderFilterPopupComp
 						container
 						className={

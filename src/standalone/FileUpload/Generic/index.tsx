@@ -543,7 +543,7 @@ const FileUpload = (
 				<Dropzone
 					container
 					spacing={2}
-					alignContent={"space-between"}
+					sx={{ alignContent: "space-between" }}
 					onDragOver={handleDragOver}
 					onDrop={handleDrop}
 					className={combineClassNames([
@@ -578,8 +578,7 @@ const FileUpload = (
 						<Grid
 							container
 							spacing={2}
-							alignContent={"flex-start"}
-							alignItems={"flex-start"}
+							sx={{ alignContent: "flex-start", alignItems: "flex-start" }}
 						>
 							{files.map(
 								(data: FileData, index) =>
@@ -639,7 +638,7 @@ const FileUpload = (
 				<Grid
 					container
 					spacing={2}
-					alignContent={"space-between"}
+					sx={{ alignContent: "space-between" }}
 					onDragOver={handleDragOver}
 					onDrop={handleDrop}
 					onClick={() => handleUpload()}
@@ -671,12 +670,11 @@ const FileUpload = (
 					)}
 					{files.length > 0 && (
 						<Grid key={"files"} size={12}>
-							<Box mx={1}>
+							<Box sx={{ mx: 1 }}>
 								<Grid
 									container
 									spacing={1}
-									alignContent={"flex-start"}
-									alignItems={"flex-start"}
+									sx={{ alignContent: "flex-start", alignItems: "flex-start" }}
 								>
 									{files.map(
 										(data: FileData, index) =>

@@ -459,7 +459,10 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 		<>
 			{isFirstFilter && props.value?.value1 && (
 				<Grid size={12}>
-					<Grid container justifyContent={"flex-end"} alignItems={"center"}>
+					<Grid
+						container
+						sx={{ justifyContent: "flex-end", alignItems: "center" }}
+					>
 						<Grid>
 							<Tooltip
 								title={

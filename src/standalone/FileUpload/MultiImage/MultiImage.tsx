@@ -389,7 +389,7 @@ const MultiImage = (inProps: MultiImageProps) => {
 					</ImageItem>
 					<Grid
 						container
-						alignContent={"space-between"}
+						sx={{ alignContent: "space-between" }}
 						wrap={"nowrap"}
 						spacing={1}
 						size={12}
@@ -434,7 +434,7 @@ const MultiImage = (inProps: MultiImageProps) => {
 						fullWidth={!previewSize}
 					>
 						<DialogTitle>
-							<Grid container justifyContent={"flex-end"}>
+							<Grid container sx={{ justifyContent: "flex-end" }}>
 								<Grid>
 									<IconButton
 										onClick={closeDialog}

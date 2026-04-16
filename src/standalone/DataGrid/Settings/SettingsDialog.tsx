@@ -137,9 +137,9 @@ const SettingsDialog = (props: IDataGridSettingsDialogProps) => {
 			</StyledTable>
 			<DataGridContentOverlayClosed className={classes?.contentOverlayClosed}>
 				<Divider />
-				<Grid container justifyContent={"flex-end"}>
+				<Grid container sx={{ justifyContent: "flex-end" }}>
 					<Grid>
-						<Box m={2}>
+						<Box sx={{ m: 2 }}>
 							<Button onClick={props.closeGridSettings} variant={"contained"}>
 								{t("standalone.data-grid.settings.close") || ""}
 							</Button>

@@ -138,7 +138,7 @@ const DefaultRenderer = (notification: Notification): React.ReactElement => {
 	const locale = useCurrentLocale();
 	return (
 		<Box
-			p={2}
+			sx={{ p: 2 }}
 			style={notification.read ? readStyle : unreadStyle}
 			key={notification.id}
 		>
@@ -149,7 +149,7 @@ const DefaultRenderer = (notification: Notification): React.ReactElement => {
 					)}
 				</Grid>
 				<Grid size={9}>
-					<Box py={2}>
+					<Box sx={{ py: 2 }}>
 						<Grid container spacing={2}>
 							<Grid size={12}>
 								<Typography>{notification.message}</Typography>
@@ -272,7 +272,7 @@ const Notifications = (inProps: NotificationsProps) => {
 				onClose={onClose}
 				{...props.PopoverProps}
 			>
-				<Box p={2}>
+				<Box sx={{ p: 2 }}>
 					<Grid container spacing={2}>
 						<Grid size={12}>
 							<StyledHeader

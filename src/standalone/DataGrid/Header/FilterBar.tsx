@@ -128,14 +128,13 @@ const FilterBar = () => {
 
 	return (
 		<DataGridFilterBarBox
-			ml={4}
+			sx={{ ml: 4 }}
 			className={classes?.filterBarBox}
 			ref={filterBarContainer}
 		>
 			<DataGridFilterBarGrid
 				container
-				alignItems={"center"}
-				justifyContent={"flex-end"}
+				sx={{ alignItems: "center", justifyContent: "flex-end" }}
 				spacing={2}
 				className={combineClassNames([
 					classes?.filterBarGrid,

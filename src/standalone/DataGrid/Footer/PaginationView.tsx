@@ -35,7 +35,7 @@ const PaginationView = (props: IDataGridPaginationViewProps) => {
 			}${t("standalone.data-grid.footer.total")} ${total}`;
 
 	return (
-		<Box mx={2}>
+		<Box sx={{ mx: 2 }}>
 			<DataGridPaginationText className={classes?.paginationText}>
 				{text}
 			</DataGridPaginationText>

@@ -61,9 +61,12 @@ const DecimalInputField = (
 			value={valueInternal}
 			onChange={handleChange}
 			onBlur={handleBlur}
-			inputProps={{
-				...muiProps.inputProps,
-				inputMode: "numeric",
+			slotProps={{
+				...muiProps.slotProps,
+				htmlInput: {
+					...muiProps.slotProps?.htmlInput,
+					inputMode: "numeric",
+				},
 			}}
 			inputMode={"numeric"}
 		/>

@@ -115,20 +115,22 @@ const Header = () => {
 
 	return useMemo(
 		() => (
-			<Box mx={1}>
+			<Box sx={{ mx: 1 }}>
 				<Grid
 					container
-					justifyContent={"space-between"}
-					alignItems={"center"}
+					sx={{ justifyContent: "space-between", alignItems: "center" }}
 					wrap={"nowrap"}
 				>
 					<Grid>
 						<Search />
 					</Grid>
-					<Grid size={"grow"} display={showSettings ? "none" : undefined}>
+					<Grid
+						size={"grow"}
+						sx={showSettings ? { display: "none" } : undefined}
+					>
 						<FilterBar />
 					</Grid>
-					<Grid display={showSettings ? "none" : undefined}>
+					<Grid sx={showSettings ? { display: "none" } : undefined}>
 						<ActionBar />
 					</Grid>
 				</Grid>

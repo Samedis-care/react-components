@@ -512,8 +512,10 @@ export type BaseSelectorClassKey =
 	| "infoBtn";
 const getOptionDisabled = (option: BaseSelectorData) =>
 	!!(!option || option.isDisabled || option.isDivider || option.isSmallLabel);
-const getOptionSelected = (option: BaseSelectorData, value: BaseSelectorData) =>
-	option.value === value.value;
+const getOptionSelected = (
+	option: BaseSelectorData,
+	value: BaseSelectorData | string,
+) => option.value === (typeof value === "string" ? value : value.value);
 
 const GrowPopper = React.forwardRef(function GrowPopperImpl(
 	props: PopperProps,
@@ -1088,8 +1090,7 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 							)
 						}
 						renderInput={(params: AutocompleteRenderInputParams) => {
-							// eslint-disable-next-line @typescript-eslint/no-unused-vars
-							const { InputProps, InputLabelProps, ...otherParams } = params;
+							const { slotProps: paramSlotProps, ...otherParams } = params;
 							return (
 								<TextFieldWithHelp
 									variant={variant ?? "outlined"}
@@ -1097,7 +1098,7 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 									classes={textFieldClasses}
 									slotProps={{
 										htmlInput: {
-											...params.inputProps,
+											...paramSlotProps.htmlInput,
 											readOnly: disableSearch,
 											title:
 												selected && !multiple
@@ -1106,12 +1107,12 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 											value: multiple
 												? [
 														selected.map(getStringLabel).join(", "),
-														params.inputProps.value,
+														paramSlotProps.htmlInput.value,
 													].join(" ")
-												: params.inputProps.value,
+												: paramSlotProps.htmlInput.value,
 										},
 										input: {
-											...InputProps,
+											...paramSlotProps.input,
 											classes: textFieldInputClasses,
 											readOnly: disableSearch,
 											startAdornment:
@@ -1131,13 +1132,15 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 													</InfoButton>
 												);
 												return hasAdditionalElements ? (
-													params.InputProps?.endAdornment ? (
+													paramSlotProps.input?.endAdornment ? (
 														React.cloneElement(
-															params.InputProps?.endAdornment as ReactElement,
+															paramSlotProps.input
+																?.endAdornment as ReactElement,
 															{},
 															endAdornmentLeft,
 															...((
-																params.InputProps?.endAdornment as ReactElement<
+																paramSlotProps.input
+																	?.endAdornment as ReactElement<
 																	PropsWithChildren<unknown>
 																>
 															).props.children as ReactNode[]),
@@ -1152,7 +1155,7 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 														</InputAdornment>
 													)
 												) : (
-													params.InputProps?.endAdornment
+													paramSlotProps.input?.endAdornment
 												);
 											})(),
 										},

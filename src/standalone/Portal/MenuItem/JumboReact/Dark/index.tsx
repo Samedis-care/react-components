@@ -81,7 +81,7 @@ const MenuItemJumboReactDark = (
 			<StyledListItemIcon>{Icon && <Icon />}</StyledListItemIcon>
 			<ListItemText
 				primary={props.title}
-				primaryTypographyProps={props.typographyProps ?? typographyProps}
+				slotProps={{ primary: props.typographyProps ?? typographyProps }}
 			/>
 			{props.expandable && (props.expanded ? <ExpandLess /> : <ExpandMore />)}
 			{props.active && <Dot />}

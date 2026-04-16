@@ -114,7 +114,7 @@ const SignalPortletItem = (inProps: SignalPortletItemProps) => {
 					{count == null ? <Loader /> : Math.min(count, 999).toString()}
 				</AvatarComponent>
 			</ListAvatar>
-			<ListText primaryTypographyProps={textTypographyProps}>{text}</ListText>
+			<ListText slotProps={{ primary: textTypographyProps }}>{text}</ListText>
 		</>
 	);
 	return link ? (

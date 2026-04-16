@@ -64,10 +64,13 @@ const IntegerInputField = (
 				{...muiProps}
 				value={valueFormatted}
 				onChange={handleChange}
-				inputProps={{
-					...muiProps.inputProps,
-					ref: cursorInputRef,
-					inputMode: "numeric",
+				slotProps={{
+					...muiProps.slotProps,
+					htmlInput: {
+						...muiProps.slotProps?.htmlInput,
+						ref: cursorInputRef,
+						inputMode: "numeric",
+					},
 				}}
 				inputMode={"numeric"}
 			/>

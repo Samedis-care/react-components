@@ -52,11 +52,11 @@ const LocalizedDateTimePicker = (props: LocalizedDateTimePickerProps) => {
 							otherProps.slotProps?.textField,
 						);
 						return {
+							...orgSlotProps,
 							required,
 							error,
 							fullWidth,
 							onBlur,
-							...orgSlotProps,
 						};
 					},
 				}}

@@ -1,6 +1,9 @@
 import React from "react";
 import { TextFieldProps } from "@mui/material";
-import { DateTimePickerProps } from "@mui/x-date-pickers";
+import {
+	DateTimePickerProps,
+	PickersTextFieldProps,
+} from "@mui/x-date-pickers";
 import { InputLabelConfig, UIInputProps } from "../CommonStyles";
 import LocalizedDateTimePicker from "../../../standalone/LocalizedDateTimePickers/LocalizedDateTimePicker";
 import accessSlotProps from "../../../utils/internal/accessSlotProps";
@@ -63,10 +66,10 @@ const DateTimeInput = (props: DateTimeInputProps & DateTimePickerProps) => {
 						slotProps: {
 							inputLabel: {
 								...InputLabelConfig,
-								...orgSlotProps?.InputLabelProps,
+								...orgSlotProps?.slotProps?.inputLabel,
 							},
 						},
-					} as TextFieldProps;
+					} as PickersTextFieldProps;
 				},
 			}}
 		/>

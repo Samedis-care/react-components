@@ -15,8 +15,7 @@ const CustomFiltersButton = (props: Omit<ButtonProps, "outlined">) => {
 				container
 				spacing={2}
 				wrap={"nowrap"}
-				justifyContent={"space-evenly"}
-				alignItems={"center"}
+				sx={{ justifyContent: "space-evenly", alignItems: "center" }}
 			>
 				<Grid>{t("standalone.data-grid.header.custom-filter-button")}</Grid>
 				<Grid>

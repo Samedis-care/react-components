@@ -22,8 +22,8 @@ import {
 } from "@mui/material";
 import {
 	Check as CheckIcon,
-	ErrorOutline as ErrorIcon,
-	HelpOutline as UnknownIcon,
+	ErrorOutlined as ErrorIcon,
+	HelpOutlined as UnknownIcon,
 } from "@mui/icons-material";
 import {
 	ModelFieldDefinition,
@@ -228,7 +228,7 @@ const Step2ConnectData = (props: CrudImporterStepProps) => {
 	return (
 		<Grid container spacing={2}>
 			<Grid size={6}>
-				<Box mb={2}>
+				<Box sx={{ mb: 2 }}>
 					<Typography variant={"h5"}>
 						{t("backend-components.crud.import.source_fields")}
 					</Typography>
@@ -261,7 +261,7 @@ const Step2ConnectData = (props: CrudImporterStepProps) => {
 				</Table>
 			</Grid>
 			<Grid size={6}>
-				<Box mb={2}>
+				<Box sx={{ mb: 2 }}>
 					<Typography variant={"h5"}>
 						{t("backend-components.crud.import.destination_fields")}
 					</Typography>
@@ -275,7 +275,7 @@ const Step2ConnectData = (props: CrudImporterStepProps) => {
 								<Grid key={name} size={12}>
 									<Card>
 										<StyledCardContent>
-											<Grid container justifyContent={"space-between"}>
+											<Grid container sx={{ justifyContent: "space-between" }}>
 												<Grid>
 													<Typography>
 														{field.getLabel()
@@ -314,7 +314,7 @@ const Step2ConnectData = (props: CrudImporterStepProps) => {
 												</Grid>
 											</Grid>
 											<Grid size={12}>
-												<Box mt={2}>
+												<Box sx={{ mt: 2 }}>
 													{convScript?.error && (
 														<Typography>
 															{convScript.error.toString()}

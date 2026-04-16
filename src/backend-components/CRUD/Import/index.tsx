@@ -198,9 +198,11 @@ const CrudImport = <
 	return (
 		<Wrapper
 			container
-			direction={"column"}
-			justifyContent={"space-between"}
-			alignItems={"stretch"}
+			sx={{
+				flexDirection: "column",
+				justifyContent: "space-between",
+				alignItems: "stretch",
+			}}
 			spacing={2}
 			wrap={"nowrap"}
 		>

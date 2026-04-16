@@ -1,5 +1,5 @@
 import React from "react";
-import { DatePickerProps } from "@mui/x-date-pickers";
+import { DatePickerProps, PickersTextFieldProps } from "@mui/x-date-pickers";
 import PickersTextFieldWithHelp, {
 	PickersTextFieldWithHelpProps,
 } from "../PickersTextFieldWithHelp";
@@ -9,7 +9,6 @@ import LocalizedKeyboardDatePicker, {
 	LocalizedKeyboardDatePickerProps,
 } from "../../LocalizedDateTimePickers/LocalizedKeyboardDatePicker";
 import accessSlotProps from "../../../utils/internal/accessSlotProps";
-import { TextFieldProps } from "@mui/material";
 
 export interface DateInputProps extends Omit<
 	PickersTextFieldWithHelpProps,
@@ -81,7 +80,7 @@ const DateInput = (
 					const textFieldSlotPropsProp = accessSlotProps(
 						ownerState,
 						muiProps.slotProps?.textField,
-					) as TextFieldProps;
+					) as PickersTextFieldProps;
 					return {
 						// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 						// @ts-ignore This just passes props down to the text field component, TS defs don't support custom props here, but the implementation does.

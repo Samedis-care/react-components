@@ -98,7 +98,12 @@ const InlineSwitch = (inProps: InlineSwitchProps) => {
 					className={classes?.switchWrapper}
 					variant={"caption"}
 				>
-					<Grid component="label" container alignItems="center" spacing={1}>
+					<Grid
+						component="label"
+						container
+						sx={{ alignItems: "center" }}
+						spacing={1}
+					>
 						<Grid>
 							<AntSwitch checked={value} onChange={handleSwitchChange} />
 						</Grid>

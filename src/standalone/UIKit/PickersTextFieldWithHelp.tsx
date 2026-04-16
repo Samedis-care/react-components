@@ -72,13 +72,15 @@ const TextFieldWithHelp = React.forwardRef(
 		);
 
 		// render
+		const inputSlotProps = muiProps.slotProps?.input as
+			| Record<string, unknown>
+			| undefined;
+		const existingEndAdornment = inputSlotProps?.endAdornment as
+			| React.ReactNode
+			| undefined;
 		const showClear =
 			isTouchDevice() && hasValue && !muiProps.disabled && !disableClearable;
-		const hasEndAdornment = !!(
-			showClear ||
-			openInfo ||
-			muiProps.InputProps?.endAdornment
-		);
+		const hasEndAdornment = !!(showClear || openInfo || existingEndAdornment);
 
 		return (
 			<UiKitPickersTextFieldWithWarnings
@@ -86,42 +88,44 @@ const TextFieldWithHelp = React.forwardRef(
 				{...muiProps}
 				warning={warning}
 				onChange={handleChange}
-				InputProps={{
-					...muiProps.InputProps,
-					endAdornment: hasEndAdornment ? (
-						<>
-							<InputAdornment position={"end"}>
-								{showClear && (
-									<IconButton
-										onClick={handleClear}
-										size="small"
-										aria-label={t("standalone.uikit.clear")}
-									>
-										<ClearIcon />
-									</IconButton>
-								)}
-								{typeof muiProps.InputProps?.endAdornment === "string"
-									? muiProps.InputProps?.endAdornment
-									: (
-											muiProps.InputProps
-												?.endAdornment as React.ReactElement<InputAdornmentProps>
-										)?.props?.children}
-								{openInfo && (
-									<IconButton
-										onClick={openInfo}
-										size="small"
-										aria-label={t("standalone.uikit.info")}
-									>
-										<InfoIcon color={"disabled"} />
-									</IconButton>
-								)}
-							</InputAdornment>
-						</>
-					) : undefined,
-				}}
-				InputLabelProps={{
-					...InputLabelConfig,
-					...muiProps.InputLabelProps,
+				slotProps={{
+					...muiProps.slotProps,
+					input: {
+						...inputSlotProps,
+						endAdornment: hasEndAdornment ? (
+							<>
+								<InputAdornment position={"end"}>
+									{showClear && (
+										<IconButton
+											onClick={handleClear}
+											size="small"
+											aria-label={t("standalone.uikit.clear")}
+										>
+											<ClearIcon />
+										</IconButton>
+									)}
+									{typeof existingEndAdornment === "string"
+										? existingEndAdornment
+										: (
+												existingEndAdornment as React.ReactElement<InputAdornmentProps>
+											)?.props?.children}
+									{openInfo && (
+										<IconButton
+											onClick={openInfo}
+											size="small"
+											aria-label={t("standalone.uikit.info")}
+										>
+											<InfoIcon color={"disabled"} />
+										</IconButton>
+									)}
+								</InputAdornment>
+							</>
+						) : undefined,
+					},
+					inputLabel: {
+						...InputLabelConfig,
+						...(muiProps.slotProps?.inputLabel as Record<string, unknown>),
+					},
 				}}
 			/>
 		);

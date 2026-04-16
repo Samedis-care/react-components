@@ -264,7 +264,7 @@ const MultiSelectWithTags = <
 				closeText={closeText}
 				lru={lruGroup}
 			/>
-			<Box pt={3}>
+			<Box sx={{ pt: 3 }}>
 				<MultiSelectWithoutGroup<DataT>
 					autocompleteId={autocompleteId}
 					selected={selected}

@@ -16,7 +16,7 @@ export interface IconButtonWithTextProps {
 }
 
 const IconButtonWithText = (props: IconButtonWithTextProps) => (
-	<Grid container direction={"column"} alignItems={"center"}>
+	<Grid container sx={{ flexDirection: "column", alignItems: "center" }}>
 		<Grid>
 			<IconButton
 				onClick={props.onClick}

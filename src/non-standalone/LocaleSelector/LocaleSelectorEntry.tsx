@@ -82,7 +82,7 @@ const LocaleSelectorEntry = (
 			disabled={disabled}
 			className={className}
 		>
-			<Container container spacing={2} alignItems={"stretch"}>
+			<Container container spacing={2} sx={{ alignItems: "stretch" }}>
 				<ImageWrapper size={4}>
 					<Image alt={locale.country} src={flag} />
 				</ImageWrapper>

@@ -132,7 +132,7 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 				];
 
 	return (
-		<Grid container alignItems={"stretch"} wrap={"nowrap"}>
+		<Grid container sx={{ alignItems: "stretch" }} wrap={"nowrap"}>
 			{hasCustomFilterBar &&
 			!bpSmUp &&
 			(toggleSettings || !hideReset || exporters || handleImport) ? (
@@ -314,8 +314,7 @@ const ActionBarView = (props: IDataGridActionBarViewProps) => {
 					<Grid
 						container
 						key={"new"}
-						justifyContent={"flex-end"}
-						alignItems={"center"}
+						sx={{ justifyContent: "flex-end", alignItems: "center" }}
 						spacing={2}
 						wrap={"nowrap"}
 					>

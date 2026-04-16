@@ -82,8 +82,7 @@ const DialogTitleRaw = (inProps: DialogTitleProps) => {
 			<Grid
 				container
 				wrap={"nowrap"}
-				justifyContent={"space-between"}
-				alignItems={"center"}
+				sx={{ justifyContent: "space-between", alignItems: "center" }}
 			>
 				<TextWrapper size={"grow"} className={classes?.textWrapper}>
 					<Text variant="h6" noWrap className={classes?.text}>

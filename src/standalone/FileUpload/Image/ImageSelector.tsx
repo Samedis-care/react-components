@@ -405,10 +405,12 @@ const ImageSelector = (inProps: ImageSelectorProps) => {
 				<RootClassic
 					container
 					spacing={2}
-					direction={"column"}
-					alignContent={"flex-start"}
-					alignItems={"stretch"}
-					justifyContent={"center"}
+					sx={{
+						flexDirection: "column",
+						alignContent: "flex-start",
+						alignItems: "stretch",
+						justifyContent: "center",
+					}}
 					wrap={"nowrap"}
 					className={classes?.rootClassic}
 					onDrop={handleDrop}
@@ -480,10 +482,12 @@ const ImageSelector = (inProps: ImageSelectorProps) => {
 					<RootModern
 						container
 						spacing={0}
-						direction={"column"}
-						alignContent={"flex-start"}
-						alignItems={"stretch"}
-						justifyContent={"center"}
+						sx={{
+							flexDirection: "column",
+							alignContent: "flex-start",
+							alignItems: "stretch",
+							justifyContent: "center",
+						}}
 						wrap={"nowrap"}
 						className={classes?.rootModern}
 						onDrop={handleDrop}
@@ -550,20 +554,22 @@ const ImageSelector = (inProps: ImageSelectorProps) => {
 								</>
 							) : (
 								<ModernFullHeightBox
-									px={2}
+									sx={{ px: 2 }}
 									className={classes?.modernFullHeightBox}
 								>
 									<ModernFullHeightGrid
 										container
 										onClick={handleUpload}
-										direction={"column"}
+										sx={{ flexDirection: "column" }}
 										spacing={0}
 										className={classes?.modernFullHeightGrid}
 									>
 										<Grid
 											container
-											direction={"column"}
-											justifyContent={"space-around"}
+											sx={{
+												flexDirection: "column",
+												justifyContent: "space-around",
+											}}
 											wrap={"nowrap"}
 											size="grow"
 										>
@@ -585,7 +591,7 @@ const ImageSelector = (inProps: ImageSelectorProps) => {
 												container
 												wrap={"nowrap"}
 												spacing={0}
-												justifyContent={"space-between"}
+												sx={{ justifyContent: "space-between" }}
 											>
 												<Grid>
 													<ModernFormatsLabel

@@ -423,7 +423,7 @@ const fileIconRows: { label: string; component: React.ComponentType }[] = [
 export const FileIconsGallery: StoryObj = {
 	name: "FileIcons — gallery",
 	render: () => (
-		<Grid container spacing={2} alignItems="center">
+		<Grid container spacing={2} sx={{ alignItems: "center" }}>
 			{fileIconRows.map(({ label, component: Icon }) => (
 				<React.Fragment key={label}>
 					<Grid size={2}>
@@ -455,7 +455,7 @@ export const GetFileIconOrDefaultDemo: StoryObj = {
 			{ mime: "application/octet-stream", name: "binary.bin" },
 		];
 		return (
-			<Grid container spacing={2} alignItems="center">
+			<Grid container spacing={2} sx={{ alignItems: "center" }}>
 				{examples.map(({ mime, name }) => {
 					const Icon = getFileIconOrDefault(name, mime);
 					const type = getFileType(name, mime);

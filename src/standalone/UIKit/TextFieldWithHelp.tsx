@@ -121,7 +121,6 @@ const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(
 				input: (props) => {
 					const orgSlotProps: InputProps = {
 						...accessSlotProps(props, muiProps.slotProps?.input),
-						...muiProps.InputProps,
 					};
 					const hasEndAdornment = !!(
 						showClear ||
@@ -172,7 +171,6 @@ const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(
 				inputLabel: (props) =>
 					({
 						...InputLabelConfig,
-						...muiProps.InputLabelProps,
 						...accessSlotProps(props, muiProps.slotProps?.inputLabel),
 					}) as InputLabelProps,
 			}}

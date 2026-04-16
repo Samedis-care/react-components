@@ -42,7 +42,7 @@ const FilterDialog = (props: DataGridCustomFilterDialogProps) => {
 			</DataGridCustomFilterDialogTitle>
 			<Divider />
 			<DataGridCustomFilterContainer
-				justifyContent={"space-between"}
+				sx={{ justifyContent: "space-between" }}
 				spacing={2}
 				container
 				className={classes?.customFilterContainer}
@@ -55,9 +55,9 @@ const FilterDialog = (props: DataGridCustomFilterDialogProps) => {
 			</DataGridCustomFilterContainer>
 			<DataGridContentOverlayClosed className={classes?.contentOverlayClosed}>
 				<Divider />
-				<Grid container justifyContent={"flex-end"}>
+				<Grid container sx={{ justifyContent: "flex-end" }}>
 					<Grid>
-						<Box m={2}>
+						<Box sx={{ m: 2 }}>
 							<Button onClick={props.closeFilterDialog} variant={"contained"}>
 								{t("standalone.data-grid.settings.close") || ""}
 							</Button>

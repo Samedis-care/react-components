@@ -298,20 +298,20 @@ const ScrollableSchedule = (inProps: ScrollableScheduleProps) => {
 				className={classes?.today}
 				onClick={jumpToToday}
 			>
-				<Grid container justifyContent={"space-between"}>
+				<Grid container sx={{ justifyContent: "space-between" }}>
 					<Grid>
 						<TodayButton
 							className={classes?.todayBtn}
 							onClick={jumpToToday}
 							fullWidth
 						>
-							<Box m={2}>{state.today.format("ddd DD MMMM")}</Box>
+							<Box sx={{ m: 2 }}>{state.today.format("ddd DD MMMM")}</Box>
 						</TodayButton>
 					</Grid>
 					<Grid>
 						{filterCount + actions.length > 0 && (
 							<FilterWrapper
-								px={2}
+								sx={{ px: 2 }}
 								className={classes?.filterWrapper}
 								onClick={preventAction}
 							>
@@ -330,7 +330,7 @@ const ScrollableSchedule = (inProps: ScrollableScheduleProps) => {
 											anchorEl={filterSettingsAnchorEl}
 											onClose={closeFiltersMenu}
 										>
-											<Box p={1}>
+											<Box sx={{ p: 1 }}>
 												<Grid container spacing={1}>
 													{Object.entries(filters).map(([name, filter]) => (
 														<Grid key={"filter-" + name} size={12}>
@@ -408,7 +408,7 @@ const ScrollableSchedule = (inProps: ScrollableScheduleProps) => {
 					loadMoreBottom={loadMoreBottom}
 					ref={scrollElem}
 				>
-					<Box m={2}>
+					<Box sx={{ m: 2 }}>
 						<Grid container spacing={2}>
 							{state.items}
 						</Grid>

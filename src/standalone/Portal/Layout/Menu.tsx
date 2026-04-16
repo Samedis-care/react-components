@@ -79,7 +79,7 @@ const PortalLayoutMenu = (inProps: PortalLayoutMenuProps) => {
 				anchor={theme.direction === "rtl" ? "right" : "left"}
 				open={menuOpen}
 				onClose={toggleMenu}
-				PaperProps={paperProps}
+				slotProps={{ paper: paperProps }}
 				ModalProps={modalProps}
 				className={combineClassNames([className, classes?.menuDrawer])}
 			>

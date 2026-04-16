@@ -24,7 +24,7 @@ export interface ComponentWithLabelProps extends Omit<
 	/**
 	 * Label location
 	 */
-	labelDisplay?: TypographyProps["display"];
+	labelDisplay?: "block" | "inline";
 	/**
 	 * Label alignment
 	 */
@@ -84,7 +84,7 @@ const ComponentWithLabel = (
 		label = (
 			<Label
 				variant={labelVariant}
-				display={labelDisplay}
+				sx={{ display: labelDisplay }}
 				align={labelAlign}
 				className={propsCopy.classes?.label}
 			>

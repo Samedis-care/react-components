@@ -130,9 +130,11 @@ const Step1LoadData = (props: ImportStep1Props) => {
 	return (
 		<Grid
 			container
-			direction={"column"}
-			justifyContent={"space-between"}
-			alignItems={"stretch"}
+			sx={{
+				flexDirection: "column",
+				justifyContent: "space-between",
+				alignItems: "stretch",
+			}}
 			wrap={"nowrap"}
 			style={{ height: "100%" }}
 			spacing={2}
