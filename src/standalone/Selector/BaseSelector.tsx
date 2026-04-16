@@ -39,15 +39,17 @@ import {
 } from "../../standalone/Small";
 import combineClassNames from "../../utils/combineClassNames";
 import { useLocalStorageState } from "../../utils/useStorageState";
-import { AutocompleteRenderInputParams } from "@mui/material/Autocomplete";
+import {
+	AutocompleteRenderInputParams,
+	AutocompleteRenderOptionState,
+} from "@mui/material/Autocomplete";
 import InlineSwitch from "../InlineSwitch";
 import useCCTranslations from "../../utils/useCCTranslations";
-import { PopperProps } from "@mui/material/Popper/Popper";
+import { PopperProps } from "@mui/material/Popper";
 import uniqueArray from "../../utils/uniqueArray";
 import { OutlinedInputProps } from "@mui/material/OutlinedInput";
-import { InputProps as StandardInputProps } from "@mui/material/Input/Input";
+import { InputProps as StandardInputProps } from "@mui/material/Input";
 import Checkbox from "../UIKit/Checkbox";
-import { AutocompleteRenderOptionState } from "@mui/material/Autocomplete/Autocomplete";
 
 export interface BaseSelectorData {
 	/**

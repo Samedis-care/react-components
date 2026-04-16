@@ -29,107 +29,109 @@ export interface PickersTextFieldWithHelpProps extends UIInputProps {
 export const UiKitPickersTextFieldWithWarnings = withMuiWarning(
 	UiKitPickersTextField,
 ) as typeof UiKitPickersTextField;
-const TextFieldWithHelp = React.forwardRef(
-	function PickersTextFieldWithHelpInner(
-		props: PickersTextFieldWithHelpProps & PickersTextFieldProps,
-		ref: ForwardedRef<HTMLDivElement>,
-	) {
-		const {
-			openInfo,
-			customHandleClear,
-			disableClearable,
-			warning,
-			onChange,
-			...muiProps
-		} = props;
-		const { t } = useCCTranslations();
+const TextFieldWithHelp: React.ForwardRefExoticComponent<
+	PickersTextFieldWithHelpProps &
+		PickersTextFieldProps &
+		React.RefAttributes<HTMLDivElement>
+> = React.forwardRef(function PickersTextFieldWithHelpInner(
+	props: PickersTextFieldWithHelpProps & PickersTextFieldProps,
+	ref: ForwardedRef<HTMLDivElement>,
+) {
+	const {
+		openInfo,
+		customHandleClear,
+		disableClearable,
+		warning,
+		onChange,
+		...muiProps
+	} = props;
+	const { t } = useCCTranslations();
 
-		// handle clear
+	// handle clear
 
-		const [hasInputValue, setHasInputValue] = useState<boolean>(
-			!!muiProps.defaultValue,
-		);
-		const hasValue = muiProps.value == null ? hasInputValue : !!muiProps.value;
+	const [hasInputValue, setHasInputValue] = useState<boolean>(
+		!!muiProps.defaultValue,
+	);
+	const hasValue = muiProps.value == null ? hasInputValue : !!muiProps.value;
 
-		const handleClear = useCallback(
-			(evt: React.MouseEvent) => {
-				evt.stopPropagation();
-				if (customHandleClear) {
-					return customHandleClear();
-				}
-			},
-			[customHandleClear],
-		);
+	const handleClear = useCallback(
+		(evt: React.MouseEvent) => {
+			evt.stopPropagation();
+			if (customHandleClear) {
+				return customHandleClear();
+			}
+		},
+		[customHandleClear],
+	);
 
-		// keep "hasValue" up to date
+	// keep "hasValue" up to date
 
-		const handleChange = useCallback(
-			(evt: React.ChangeEvent<HTMLInputElement>) => {
-				if (onChange) onChange(evt);
-				setHasInputValue(!!evt.target.value);
-			},
-			[onChange],
-		);
+	const handleChange = useCallback(
+		(evt: React.ChangeEvent<HTMLInputElement>) => {
+			if (onChange) onChange(evt);
+			setHasInputValue(!!evt.target.value);
+		},
+		[onChange],
+	);
 
-		// render
-		const inputSlotProps = muiProps.slotProps?.input as
-			| Record<string, unknown>
-			| undefined;
-		const existingEndAdornment = inputSlotProps?.endAdornment as
-			| React.ReactNode
-			| undefined;
-		const showClear =
-			isTouchDevice() && hasValue && !muiProps.disabled && !disableClearable;
-		const hasEndAdornment = !!(showClear || openInfo || existingEndAdornment);
+	// render
+	const inputSlotProps = muiProps.slotProps?.input as
+		| Record<string, unknown>
+		| undefined;
+	const existingEndAdornment = inputSlotProps?.endAdornment as
+		| React.ReactNode
+		| undefined;
+	const showClear =
+		isTouchDevice() && hasValue && !muiProps.disabled && !disableClearable;
+	const hasEndAdornment = !!(showClear || openInfo || existingEndAdornment);
 
-		return (
-			<UiKitPickersTextFieldWithWarnings
-				ref={ref}
-				{...muiProps}
-				warning={warning}
-				onChange={handleChange}
-				slotProps={{
-					...muiProps.slotProps,
-					input: {
-						...inputSlotProps,
-						endAdornment: hasEndAdornment ? (
-							<>
-								<InputAdornment position={"end"}>
-									{showClear && (
-										<IconButton
-											onClick={handleClear}
-											size="small"
-											aria-label={t("standalone.uikit.clear")}
-										>
-											<ClearIcon />
-										</IconButton>
-									)}
-									{typeof existingEndAdornment === "string"
-										? existingEndAdornment
-										: (
-												existingEndAdornment as React.ReactElement<InputAdornmentProps>
-											)?.props?.children}
-									{openInfo && (
-										<IconButton
-											onClick={openInfo}
-											size="small"
-											aria-label={t("standalone.uikit.info")}
-										>
-											<InfoIcon color={"disabled"} />
-										</IconButton>
-									)}
-								</InputAdornment>
-							</>
-						) : undefined,
-					},
-					inputLabel: {
-						...InputLabelConfig,
-						...(muiProps.slotProps?.inputLabel as Record<string, unknown>),
-					},
-				}}
-			/>
-		);
-	},
-);
+	return (
+		<UiKitPickersTextFieldWithWarnings
+			ref={ref}
+			{...muiProps}
+			warning={warning}
+			onChange={handleChange}
+			slotProps={{
+				...muiProps.slotProps,
+				input: {
+					...inputSlotProps,
+					endAdornment: hasEndAdornment ? (
+						<>
+							<InputAdornment position={"end"}>
+								{showClear && (
+									<IconButton
+										onClick={handleClear}
+										size="small"
+										aria-label={t("standalone.uikit.clear")}
+									>
+										<ClearIcon />
+									</IconButton>
+								)}
+								{typeof existingEndAdornment === "string"
+									? existingEndAdornment
+									: (
+											existingEndAdornment as React.ReactElement<InputAdornmentProps>
+										)?.props?.children}
+								{openInfo && (
+									<IconButton
+										onClick={openInfo}
+										size="small"
+										aria-label={t("standalone.uikit.info")}
+									>
+										<InfoIcon color={"disabled"} />
+									</IconButton>
+								)}
+							</InputAdornment>
+						</>
+					) : undefined,
+				},
+				inputLabel: {
+					...InputLabelConfig,
+					...(muiProps.slotProps?.inputLabel as Record<string, unknown>),
+				},
+			}}
+		/>
+	);
+});
 
-export default React.memo(TextFieldWithHelp);
+export default React.memo(TextFieldWithHelp) as typeof TextFieldWithHelp;

@@ -35,7 +35,7 @@ import {
 } from "../../LocalizedDateTimePickers";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import { normalizeDate } from "../../../backend-integration/Model/Types/Utils/DateUtils";
-import { SelectChangeEvent } from "@mui/material/Select/SelectInput";
+import { SelectChangeEvent } from "@mui/material/Select";
 import moment, { Moment } from "moment";
 import { BackendMultiSelect } from "../../../backend-components";
 

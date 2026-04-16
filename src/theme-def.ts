@@ -221,7 +221,7 @@ import {
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface ComponentsCareTheme {}
 
-declare module "@mui/material/styles/createTheme" {
+declare module "@mui/material/styles" {
 	interface Theme {
 		componentsCare?: ComponentsCareTheme;
 	}

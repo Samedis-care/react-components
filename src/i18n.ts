@@ -1,11 +1,11 @@
-import i18n from "i18next";
+import i18n, { type i18n as I18nInstance } from "i18next";
 import LanguageDetector from "i18next-browser-languagedetector";
 import supportedLanguages from "./assets/data/supported-languages.json";
 import resourcesToBackend from "i18next-resources-to-backend";
 
 export const langs = supportedLanguages;
 
-const ccI18n = i18n.createInstance();
+const ccI18n: I18nInstance = i18n.createInstance();
 const isJest =
 	typeof process !== "undefined" && process.env && process.env.JEST_WORKER_ID;
 

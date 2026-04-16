@@ -2,7 +2,7 @@ import React, { Ref } from "react";
 import { IconButton, InputAdornment } from "@mui/material";
 import { Info as InfoIcon } from "@mui/icons-material";
 import { UiKitInput } from "./CommonStyles";
-import { InputBaseProps } from "@mui/material/InputBase/InputBase";
+import { InputBaseProps } from "@mui/material/InputBase";
 import { TextFieldWithHelpProps } from "./TextFieldWithHelp";
 import useCCTranslations from "../../utils/useCCTranslations";
 
