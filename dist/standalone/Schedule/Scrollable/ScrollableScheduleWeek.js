@@ -32,7 +32,7 @@ class ScrollableScheduleWeek extends PureComponent {
         }
         if (!this.state.data) {
             return (React.createElement(Grid, { size: 12 },
-                React.createElement(Grid, { container: true, justifyContent: "space-around" },
+                React.createElement(Grid, { container: true, sx: { justifyContent: "space-around" } },
                     React.createElement(CircularProgress, null))));
         }
         const firstDay = this.props.moment;

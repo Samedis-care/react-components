@@ -19,5 +19,5 @@ interface LocalizedDateTimePickerProps extends Omit<DateTimePickerProps, "format
      */
     onBlur?: TextFieldProps["onBlur"] & PickersTextFieldProps["onBlur"];
 }
-declare const _default: React.MemoExoticComponent<React.ComponentType<LocalizedDateTimePickerProps & import("../UIKit").MuiWarningResultProps>>;
+declare const _default: React.MemoExoticComponent<React.ComponentType<LocalizedDateTimePickerProps & import("..").MuiWarningResultProps>>;
 export default _default;

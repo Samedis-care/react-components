@@ -31,7 +31,7 @@ const ComponentWithLabel = (inProps) => {
                     top: "center",
                     bottom: "center",
                 }[labelPlacement];
-        label = (React.createElement(Label, { variant: labelVariant, display: labelDisplay, align: labelAlign, className: propsCopy.classes?.label }, labelText));
+        label = (React.createElement(Label, { variant: labelVariant, sx: { display: labelDisplay }, align: labelAlign, className: propsCopy.classes?.label }, labelText));
         props = { ...propsCopy, label: "" };
     }
     else {

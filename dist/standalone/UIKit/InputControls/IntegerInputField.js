@@ -27,10 +27,13 @@ const IntegerInputField = (props) => {
     }, [onChange, handleCursorChange]);
     // component rendering
     return (React.createElement("div", null,
-        React.createElement(TextFieldWithHelp, { ...muiProps, value: valueFormatted, onChange: handleChange, inputProps: {
-                ...muiProps.inputProps,
-                ref: cursorInputRef,
-                inputMode: "numeric",
+        React.createElement(TextFieldWithHelp, { ...muiProps, value: valueFormatted, onChange: handleChange, slotProps: {
+                ...muiProps.slotProps,
+                htmlInput: {
+                    ...muiProps.slotProps?.htmlInput,
+                    ref: cursorInputRef,
+                    inputMode: "numeric",
+                },
             }, inputMode: "numeric" })));
 };
 export default React.memo(IntegerInputField);

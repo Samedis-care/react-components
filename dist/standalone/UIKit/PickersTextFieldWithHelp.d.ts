@@ -1,5 +1,6 @@
 import React from "react";
 import { UIInputProps, UiKitPickersTextField } from "./CommonStyles";
+import { PickersTextFieldProps } from "@mui/x-date-pickers";
 export interface PickersTextFieldWithHelpProps extends UIInputProps {
     /**
      * Optional callback which opens a dialog with information about the field
@@ -15,5 +16,6 @@ export interface PickersTextFieldWithHelpProps extends UIInputProps {
     disableClearable?: boolean;
 }
 export declare const UiKitPickersTextFieldWithWarnings: typeof UiKitPickersTextField;
-declare const _default: React.NamedExoticComponent<(Omit<PickersTextFieldWithHelpProps & import("@mui/x-date-pickers/PickersTextField/PickersTextField.types").PickersFilledTextFieldProps, "ref"> | Omit<PickersTextFieldWithHelpProps & import("@mui/x-date-pickers/PickersTextField/PickersTextField.types").PickersOutlinedTextFieldProps, "ref"> | Omit<PickersTextFieldWithHelpProps & import("@mui/x-date-pickers/PickersTextField/PickersTextField.types").PickersStandardTextFieldProps, "ref">) & React.RefAttributes<HTMLDivElement>>;
+declare const TextFieldWithHelp: React.ForwardRefExoticComponent<PickersTextFieldWithHelpProps & PickersTextFieldProps & React.RefAttributes<HTMLDivElement>>;
+declare const _default: typeof TextFieldWithHelp;
 export default _default;

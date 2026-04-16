@@ -152,15 +152,15 @@ const ScrollableSchedule = (inProps) => {
     const filterCount = filters ? Object.keys(filters).length : 0;
     return (React.createElement(Grid, { container: true, className: className },
         React.createElement(TodayButtonWrapper, { size: 12, className: classes?.today, onClick: jumpToToday },
-            React.createElement(Grid, { container: true, justifyContent: "space-between" },
+            React.createElement(Grid, { container: true, sx: { justifyContent: "space-between" } },
                 React.createElement(Grid, null,
                     React.createElement(TodayButton, { className: classes?.todayBtn, onClick: jumpToToday, fullWidth: true },
-                        React.createElement(Box, { m: 2 }, state.today.format("ddd DD MMMM")))),
-                React.createElement(Grid, null, filterCount + actions.length > 0 && (React.createElement(FilterWrapper, { px: 2, className: classes?.filterWrapper, onClick: preventAction }, filterCount + actions.length > 1 ? (React.createElement(React.Fragment, null,
+                        React.createElement(Box, { sx: { m: 2 } }, state.today.format("ddd DD MMMM")))),
+                React.createElement(Grid, null, filterCount + actions.length > 0 && (React.createElement(FilterWrapper, { sx: { px: 2 }, className: classes?.filterWrapper, onClick: preventAction }, filterCount + actions.length > 1 ? (React.createElement(React.Fragment, null,
                     React.createElement(IconButton, { onClick: openFilterSettings, "aria-label": t("standalone.schedule.filter-settings") },
                         React.createElement(FilterSettingsIcon, { className: classes?.filterSettingsBtn })),
                     React.createElement(Menu, { open: filterSettingsAnchorEl != null, anchorEl: filterSettingsAnchorEl, onClose: closeFiltersMenu },
-                        React.createElement(Box, { p: 1 },
+                        React.createElement(Box, { sx: { p: 1 } },
                             React.createElement(Grid, { container: true, spacing: 1 },
                                 Object.entries(filters).map(([name, filter]) => (React.createElement(Grid, { key: "filter-" + name, size: 12 },
                                     React.createElement(ScrollableFilterRenderer, { ...filter, name: name, value: filter.type === "select"
@@ -178,7 +178,7 @@ const ScrollableSchedule = (inProps) => {
                 })()) : (throwError("code should be unreachable"))))))),
         React.createElement(Grid, { size: 12 },
             React.createElement(StyledInfiniteScroll, { className: combineClassNames([wrapperClass, classes?.scroller]), loadMoreTop: loadMoreTop, loadMoreBottom: loadMoreBottom, ref: scrollElem },
-                React.createElement(Box, { m: 2 },
+                React.createElement(Box, { sx: { m: 2 } },
                     React.createElement(Grid, { container: true, spacing: 2 }, state.items))))));
 };
 export default React.memo(ScrollableSchedule);

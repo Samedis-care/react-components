@@ -24,7 +24,7 @@ const DateTimeInput = (props) => {
                     slotProps: {
                         inputLabel: {
                             ...InputLabelConfig,
-                            ...orgSlotProps?.InputLabelProps,
+                            ...orgSlotProps?.slotProps?.inputLabel,
                         },
                     },
                 };

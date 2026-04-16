@@ -9,7 +9,7 @@ const CustomFiltersButton = (props) => {
     const customDataChanged = useCustomFilterActiveContext()[0] > 0;
     const { t } = useCCTranslations();
     return (React.createElement(Button, { ...props, variant: "outlined" },
-        React.createElement(Grid, { container: true, spacing: 2, wrap: "nowrap", justifyContent: "space-evenly", alignItems: "center" },
+        React.createElement(Grid, { container: true, spacing: 2, wrap: "nowrap", sx: { justifyContent: "space-evenly", alignItems: "center" } },
             React.createElement(Grid, null, t("standalone.data-grid.header.custom-filter-button")),
             React.createElement(Grid, null,
                 React.createElement(DataGridCustomFilterIcon, { className: combineClassNames([

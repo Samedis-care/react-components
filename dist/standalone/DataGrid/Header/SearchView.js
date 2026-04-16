@@ -35,6 +35,6 @@ const SearchView = (props) => {
                     props.search && "CcDataGrid-quickFilterActiveIcon",
                 ]) })),
         React.createElement(Popover, { open: anchorEl !== null, anchorEl: anchorEl, onClose: closePopover, anchorOrigin: anchorOrigin, transformOrigin: transformOrigin },
-            React.createElement(Box, { p: 1 }, renderTextField()))))));
+            React.createElement(Box, { sx: { p: 1 } }, renderTextField()))))));
 };
 export default React.memo(SearchView);

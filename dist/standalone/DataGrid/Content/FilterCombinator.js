@@ -9,7 +9,7 @@ const FilterCombinator = (props) => {
     }, [onChange]);
     return (React.createElement(Grid, { size: 12 },
         React.createElement(Typography, { component: "div" },
-            React.createElement(Grid, { component: "label", container: true, justifyContent: "space-between", alignItems: "center", spacing: 1 },
+            React.createElement(Grid, { component: "label", container: true, sx: { justifyContent: "space-between", alignItems: "center" }, spacing: 1 },
                 React.createElement(Grid, null, t("standalone.data-grid.content.filter-combination.and")),
                 React.createElement(Grid, null,
                     React.createElement(Switch, { checked: value === "or", onChange: handleChange })),

@@ -374,21 +374,21 @@ const File = (inProps) => {
                 React.createElement(Grid, { size: 12 }, renderName()))));
     }
     else if (variant === "list") {
-        return (React.createElement(Grid, { onClick: handleListClick, container: true, spacing: 2, alignItems: "stretch", wrap: "nowrap", className: className, size: 12 },
+        return (React.createElement(Grid, { onClick: handleListClick, container: true, spacing: 2, sx: { alignItems: "stretch" }, wrap: "nowrap", className: className, size: 12 },
             React.createElement(Grid, null, renderIcon()),
             React.createElement(ListEntryText, { size: "grow", className: classes?.listEntryText }, renderName()),
             removeBtn && React.createElement(Grid, null, removeBtn)));
     }
     else if (variant === "compact-list") {
         return (React.createElement(CompactListWrapper, { onClick: handleListClick, className: combineClassNames([className, classes?.compactListWrapper]) },
-            React.createElement(Grid, { container: true, spacing: 2, alignItems: "stretch", wrap: "nowrap" },
+            React.createElement(Grid, { container: true, spacing: 2, sx: { alignItems: "stretch" }, wrap: "nowrap" },
                 React.createElement(Grid, null, renderIcon()),
                 React.createElement(ListEntryText, { className: classes?.listEntryText }, renderName()),
                 removeBtn && React.createElement(Grid, null, removeBtn))));
     }
     else if (variant === "icon-only") {
         return (React.createElement(CompactListWrapper, { onClick: handleListClick, className: combineClassNames([className, classes?.compactListWrapper]) },
-            React.createElement(Grid, { container: true, spacing: 2, alignItems: "stretch", wrap: "nowrap" },
+            React.createElement(Grid, { container: true, spacing: 2, sx: { alignItems: "stretch" }, wrap: "nowrap" },
                 React.createElement(Grid, null,
                     React.createElement(Tooltip, { title: props.name },
                         React.createElement("span", null, renderIcon()))),

@@ -12,7 +12,7 @@ import { FormButtonsClassKey, FormButtonsProps } from "./standalone/UIKit/FormBu
 import { FormPageLayoutClassKey, FormPageLayoutProps } from "./standalone/Form/FormPageLayout";
 import { GroupBoxClassKey, GroupBoxProps } from "./standalone/GroupBox";
 import { SignalPortletClassKey, SignalPortletProps } from "./standalone/SignalPortlet";
-import { CheckboxProps, ComponentsOverrides, ComponentsVariants, Theme as MuiTheme } from "@mui/material";
+import { CheckboxProps, ComponentsOverrides, ComponentsVariants } from "@mui/material";
 import { LoaderClassKey, LoaderProps } from "./standalone/Loader";
 import { FormLoaderOverlayClassKey, FormLoaderOverlayProps } from "./standalone/Form/FormLoaderOverlay";
 import { MultiGridClassKey, MultiGridProps } from "./standalone/Virtualized/MultiGrid";
@@ -59,7 +59,7 @@ import { ModelFieldName, PageVisibility } from "./backend-integration";
 import { GridMultiSelectFilterBackendClassKey, GridMultiSelectFilterBackendProps } from "./standalone/DataGrid/GridMultiSelectFilterBackend";
 export interface ComponentsCareTheme {
 }
-declare module "@mui/material/styles/createTheme" {
+declare module "@mui/material/styles" {
     interface Theme {
         componentsCare?: ComponentsCareTheme;
     }
@@ -67,7 +67,6 @@ declare module "@mui/material/styles/createTheme" {
         componentsCare?: ComponentsCareTheme;
     }
 }
-type Theme = Omit<MuiTheme, "components">;
 declare module "@mui/material/styles" {
     interface ComponentNameToClassKey {
         CcSignalPortlet: SignalPortletClassKey;
@@ -520,4 +519,3 @@ declare module "@mui/material/styles" {
         };
     }
 }
-export {};

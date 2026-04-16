@@ -35,7 +35,7 @@ const DialogTitleRaw = (inProps) => {
             classes?.root,
             noTitle && "CcDialogTitle-noTitle",
         ]) },
-        React.createElement(Grid, { container: true, wrap: "nowrap", justifyContent: "space-between", alignItems: "center" },
+        React.createElement(Grid, { container: true, wrap: "nowrap", sx: { justifyContent: "space-between", alignItems: "center" } },
             React.createElement(TextWrapper, { size: "grow", className: classes?.textWrapper },
                 React.createElement(Text, { variant: "h6", noWrap: true, className: classes?.text }, children)),
             onClose && (React.createElement(Grid, null,

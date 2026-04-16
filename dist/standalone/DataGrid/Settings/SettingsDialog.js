@@ -44,9 +44,9 @@ const SettingsDialog = (props) => {
                             column.forcePin, onChange: props.toggleColumnLock, value: column.field }))))))),
         React.createElement(DataGridContentOverlayClosed, { className: classes?.contentOverlayClosed },
             React.createElement(Divider, null),
-            React.createElement(Grid, { container: true, justifyContent: "flex-end" },
+            React.createElement(Grid, { container: true, sx: { justifyContent: "flex-end" } },
                 React.createElement(Grid, null,
-                    React.createElement(Box, { m: 2 },
+                    React.createElement(Box, { sx: { m: 2 } },
                         React.createElement(Button, { onClick: props.closeGridSettings, variant: "contained" }, t("standalone.data-grid.settings.close") || "")))))));
 };
 export default React.memo(SettingsDialog);

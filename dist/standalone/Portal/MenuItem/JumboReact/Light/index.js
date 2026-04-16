@@ -44,7 +44,7 @@ const MenuItemJumboReactLight = (inProps) => {
             props.expandable && "Cc-expandable",
         ]) },
         React.createElement(ListItemIcon, null, Icon && React.createElement(Icon, null)),
-        React.createElement(ListItemText, { primary: props.title, primaryTypographyProps: props.typographyProps ?? typographyProps }),
+        React.createElement(ListItemText, { primary: props.title, slotProps: { primary: props.typographyProps ?? typographyProps } }),
         props.expandable && (props.expanded ? React.createElement(ExpandLess, null) : React.createElement(ExpandMore, null)),
         props.active && React.createElement(Dot, null)));
 };

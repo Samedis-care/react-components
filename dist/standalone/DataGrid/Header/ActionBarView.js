@@ -57,7 +57,7 @@ const ActionBarView = (props) => {
                     disableHint: typeof handleAddNew === "string" ? handleAddNew : undefined,
                 },
             ];
-    return (React.createElement(Grid, { container: true, alignItems: "stretch", wrap: "nowrap" },
+    return (React.createElement(Grid, { container: true, sx: { alignItems: "stretch" }, wrap: "nowrap" },
         hasCustomFilterBar &&
             !bpSmUp &&
             (toggleSettings || !hideReset || exporters || handleImport) ? (React.createElement(React.Fragment, null,
@@ -98,7 +98,7 @@ const ActionBarView = (props) => {
                         React.createElement(ImportIcon, null))))))))),
         addButtons.length > 0 && (React.createElement(React.Fragment, null,
             React.createElement(Grid, { key: "divider-2", size: "grow" }),
-            React.createElement(Grid, { container: true, key: "new", justifyContent: "flex-end", alignItems: "center", spacing: 2, wrap: "nowrap" }, addButtons.map((entry, index) => {
+            React.createElement(Grid, { container: true, key: "new", sx: { justifyContent: "flex-end", alignItems: "center" }, spacing: 2, wrap: "nowrap" }, addButtons.map((entry, index) => {
                 const btn = (React.createElement(ActionButton, { small: !bpSmUp, icon: entry.icon ?? React.createElement(AddIcon, null), onClick: entry.onClick, disabled: !entry.onClick }, entry.label));
                 return (React.createElement(Grid, { key: index.toString() }, !entry.onClick && entry.disableHint ? (React.createElement(Tooltip, { title: entry.disableHint },
                     React.createElement("span", null, btn))) : (btn)));

@@ -227,7 +227,7 @@ const FileUpload = (inProps, ref) => {
     }
     else if (variant === "classic") {
         return (React.createElement(StyledGroupBox, { label: label, smallLabel: smallLabel, className: combineClassNames([className, classes?.root]) },
-            React.createElement(Dropzone, { container: true, spacing: 2, alignContent: "space-between", onDragOver: handleDragOver, onDrop: handleDrop, className: combineClassNames([
+            React.createElement(Dropzone, { container: true, spacing: 2, sx: { alignContent: "space-between" }, onDragOver: handleDragOver, onDrop: handleDrop, className: combineClassNames([
                     "components-care-dropzone",
                     classes?.dropzone,
                     dragging && "Mui-active",
@@ -236,7 +236,7 @@ const FileUpload = (inProps, ref) => {
                     React.createElement(Button, { startIcon: React.createElement(AttachFile, null), variant: "contained", color: "primary", onClick: () => handleUpload(), name: name, onBlur: onBlur }, uploadLabel || t("standalone.file-upload.upload")),
                     React.createElement(FileInput, { type: "file", accept: accept || undefined, multiple: maxFiles ? getRemainingFileCount() > 1 : true, onChange: handleFileChange, className: classes?.fileInput, ref: inputRef }))),
                 React.createElement(Grid, { key: "files", size: 12 },
-                    React.createElement(Grid, { container: true, spacing: 2, alignContent: "flex-start", alignItems: "flex-start" },
+                    React.createElement(Grid, { container: true, spacing: 2, sx: { alignContent: "flex-start", alignItems: "flex-start" } },
                         files.map((data, index) => data && (React.createElement(FilePreview, { name: data.file.name, mimeType: data.file.type, downloadLink: "downloadLink" in data.file
                                 ? data.file.downloadLink
                                 : undefined, key: `${index}-${data.file.name}`, size: previewSize, preview: previewImages ? data.preview : undefined, disabled: data.delete || false, onRemove: readOnly || data.preventDelete
@@ -258,7 +258,7 @@ const FileUpload = (inProps, ref) => {
     else if (variant === "modern") {
         const acceptFiles = accept ? accept.split(",") : [];
         return (React.createElement(StyledGroupBox, { label: label, smallLabel: smallLabel, className: combineClassNames([className, classes?.root]) },
-            React.createElement(Grid, { container: true, spacing: 2, alignContent: "space-between", onDragOver: handleDragOver, onDrop: handleDrop, onClick: () => handleUpload(), className: combineClassNames([
+            React.createElement(Grid, { container: true, spacing: 2, sx: { alignContent: "space-between" }, onDragOver: handleDragOver, onDrop: handleDrop, onClick: () => handleUpload(), className: combineClassNames([
                     classes?.dropzone,
                     "components-care-dropzone",
                     dragging && "Mui-active",
@@ -270,8 +270,8 @@ const FileUpload = (inProps, ref) => {
                         ]) }, uploadLabel || t("standalone.file-upload.upload-modern")),
                     React.createElement(FileInput, { type: "file", accept: accept || undefined, multiple: maxFiles ? getRemainingFileCount() > 1 : true, onChange: handleFileChange, className: classes?.fileInput, ref: inputRef }))),
                 files.length > 0 && (React.createElement(Grid, { key: "files", size: 12 },
-                    React.createElement(Box, { mx: 1 },
-                        React.createElement(Grid, { container: true, spacing: 1, alignContent: "flex-start", alignItems: "flex-start" }, files.map((data, index) => data && (React.createElement(FilePreview, { name: data.file.name, mimeType: data.file.type, downloadLink: "downloadLink" in data.file
+                    React.createElement(Box, { sx: { mx: 1 } },
+                        React.createElement(Grid, { container: true, spacing: 1, sx: { alignContent: "flex-start", alignItems: "flex-start" } }, files.map((data, index) => data && (React.createElement(FilePreview, { name: data.file.name, mimeType: data.file.type, downloadLink: "downloadLink" in data.file
                                 ? data.file.downloadLink
                                 : undefined, key: `${index}-${data.file.name}`, size: previewSize, preview: previewImages ? data.preview : undefined, disabled: data.delete || false, onRemove: readOnly || data.preventDelete
                                 ? undefined

@@ -74,8 +74,8 @@ const FilterBar = () => {
         }
     }, [enableDialog, setState]);
     const FilterBarView = props.filterBar;
-    return (React.createElement(DataGridFilterBarBox, { ml: 4, className: classes?.filterBarBox, ref: filterBarContainer },
-        React.createElement(DataGridFilterBarGrid, { container: true, alignItems: "center", justifyContent: "flex-end", spacing: 2, className: combineClassNames([
+    return (React.createElement(DataGridFilterBarBox, { sx: { ml: 4 }, className: classes?.filterBarBox, ref: filterBarContainer },
+        React.createElement(DataGridFilterBarGrid, { container: true, sx: { alignItems: "center", justifyContent: "flex-end" }, spacing: 2, className: combineClassNames([
                 classes?.filterBarGrid,
                 "components-care-data-grid-filter-bar",
             ]) }, FilterBarView &&

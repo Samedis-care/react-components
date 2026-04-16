@@ -51,9 +51,12 @@ const CurrencyInput = (props) => {
         valueInternal,
     ]);
     // component rendering
-    return (React.createElement(TextFieldWithHelp, { ...muiProps, value: lastChangeEvent ? valueInternal : valueFormatted, onChange: handleChange, onBlur: handleBlur, error: error || muiProps.error, inputProps: {
-            ...muiProps.inputProps,
-            inputMode: "numeric",
+    return (React.createElement(TextFieldWithHelp, { ...muiProps, value: lastChangeEvent ? valueInternal : valueFormatted, onChange: handleChange, onBlur: handleBlur, error: error || muiProps.error, slotProps: {
+            ...muiProps.slotProps,
+            htmlInput: {
+                ...muiProps.slotProps?.htmlInput,
+                inputMode: "numeric",
+            },
         }, inputMode: "numeric" }));
 };
 export default React.memo(CurrencyInput);

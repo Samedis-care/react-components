@@ -25,11 +25,11 @@ const readStyle = {
 };
 const DefaultRenderer = (notification) => {
     const locale = useCurrentLocale();
-    return (React.createElement(Box, { p: 2, style: notification.read ? readStyle : unreadStyle, key: notification.id },
+    return (React.createElement(Box, { sx: { p: 2 }, style: notification.read ? readStyle : unreadStyle, key: notification.id },
         React.createElement(Grid, { container: true, spacing: 2 },
             React.createElement(Grid, { size: "grow" }, notification.image && (React.createElement("img", { style: defaultImageStyle, src: notification.image, alt: "" }))),
             React.createElement(Grid, { size: 9 },
-                React.createElement(Box, { py: 2 },
+                React.createElement(Box, { sx: { py: 2 } },
                     React.createElement(Grid, { container: true, spacing: 2 },
                         React.createElement(Grid, { size: 12 },
                             React.createElement(Typography, null, notification.message)),
@@ -90,7 +90,7 @@ const Notifications = (inProps) => {
             React.createElement(Badge, { badgeContent: unreadCount ?? notifications.filter((not) => !not.read).length, max: 99, color: "error", ...props.BadgeProps },
                 React.createElement(NotificationsIcon, null))),
         React.createElement(Popover, { open: !!anchor, anchorEl: anchor, anchorOrigin: anchorOrigin, transformOrigin: transformOrigin, onClose: onClose, ...props.PopoverProps },
-            React.createElement(Box, { p: 2 },
+            React.createElement(Box, { sx: { p: 2 } },
                 React.createElement(Grid, { container: true, spacing: 2 },
                     React.createElement(Grid, { size: 12 },
                         React.createElement(StyledHeader, { component: "h2", variant: "h6", className: classes?.header }, t("standalone.notifications.title"))),

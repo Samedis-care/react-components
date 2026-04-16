@@ -92,7 +92,11 @@ export const useImportStep1FileUploadProps = (props) => {
 const Step1LoadData = (props) => {
     const { state, howTo } = props;
     const fileUploadProps = useImportStep1FileUploadProps(props);
-    return (React.createElement(Grid, { container: true, direction: "column", justifyContent: "space-between", alignItems: "stretch", wrap: "nowrap", style: { height: "100%" }, spacing: 2 },
+    return (React.createElement(Grid, { container: true, sx: {
+            flexDirection: "column",
+            justifyContent: "space-between",
+            alignItems: "stretch",
+        }, wrap: "nowrap", style: { height: "100%" }, spacing: 2 },
         howTo && (React.createElement(Grid, null,
             React.createElement(HowToBox, { labels: howTo }))),
         React.createElement(Grid, null,

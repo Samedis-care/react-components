@@ -50,7 +50,7 @@ const InlineSwitch = (inProps) => {
     }, [onChange]);
     return (React.createElement(StyledRoot, { className: combineClassNames([className, classes?.root]) },
         visible && (React.createElement(StyledSwitchWrapper, { component: "div", className: classes?.switchWrapper, variant: "caption" },
-            React.createElement(Grid, { component: "label", container: true, alignItems: "center", spacing: 1 },
+            React.createElement(Grid, { component: "label", container: true, sx: { alignItems: "center" }, spacing: 1 },
                 React.createElement(Grid, null,
                     React.createElement(AntSwitch, { checked: value, onChange: handleSwitchChange })),
                 React.createElement(Grid, null, label)))),

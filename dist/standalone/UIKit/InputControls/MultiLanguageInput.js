@@ -79,7 +79,8 @@ const MultiLanguageInput = (inProps) => {
                 ...textFieldProps.slotProps?.inputLabel,
                 shrink: textFieldProps.multiline
                     ? true
-                    : textFieldProps.InputLabelProps?.shrink,
+                    : textFieldProps.slotProps?.inputLabel
+                        ?.shrink,
             },
             input: {
                 startAdornment: !textFieldProps.multiline ? (React.createElement(InputAdornment, { position: "start" },

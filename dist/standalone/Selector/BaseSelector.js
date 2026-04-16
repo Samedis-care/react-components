@@ -123,7 +123,7 @@ const InfoButton = styled(IconButton, {
     marginRight: -2,
 });
 const getOptionDisabled = (option) => !!(!option || option.isDisabled || option.isDivider || option.isSmallLabel);
-const getOptionSelected = (option, value) => option.value === value.value;
+const getOptionSelected = (option, value) => option.value === (typeof value === "string" ? value : value.value);
 const GrowPopper = React.forwardRef(function GrowPopperImpl(props, ref) {
     return (React.createElement(Popper, { ...props, ref: ref, style: { ...props.style, width: "unset", minWidth: props.style?.width } }));
 });
@@ -423,11 +423,10 @@ const BaseSelector = (inProps) => {
                             t("standalone.selector.base-selector.no-options-text")), openText: openText ?? t("standalone.selector.base-selector.open-icon-text"), closeText: closeText ??
                         t("standalone.selector.base-selector.close-icon-text"), clearText: clearText ??
                         t("standalone.selector.base-selector.clear-icon-text"), getOptionLabel: getStringLabel, renderOption: defaultRenderer, getOptionDisabled: getOptionDisabled, isOptionEqualToValue: getOptionSelected, onChange: (_event, selectedValue, reason) => onChangeHandler(selectedValue, reason), renderInput: (params) => {
-                        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                        const { InputProps, InputLabelProps, ...otherParams } = params;
+                        const { slotProps: paramSlotProps, ...otherParams } = params;
                         return (React.createElement(TextFieldWithHelp, { variant: variant ?? "outlined", ...otherParams, classes: textFieldClasses, slotProps: {
                                 htmlInput: {
-                                    ...params.inputProps,
+                                    ...paramSlotProps.htmlInput,
                                     readOnly: disableSearch,
                                     title: selected && !multiple
                                         ? (selected.titleTooltip ?? getStringLabel(selected))
@@ -435,12 +434,12 @@ const BaseSelector = (inProps) => {
                                     value: multiple
                                         ? [
                                             selected.map(getStringLabel).join(", "),
-                                            params.inputProps.value,
+                                            paramSlotProps.htmlInput.value,
                                         ].join(" ")
-                                        : params.inputProps.value,
+                                        : paramSlotProps.htmlInput.value,
                                 },
                                 input: {
-                                    ...InputProps,
+                                    ...paramSlotProps.input,
                                     classes: textFieldInputClasses,
                                     readOnly: disableSearch,
                                     startAdornment: (enableIcons && !multiple
@@ -450,10 +449,12 @@ const BaseSelector = (inProps) => {
                                         const hasAdditionalElements = openInfo || endAdornment || endAdornmentLeft;
                                         const infoBtn = openInfo && (React.createElement(InfoButton, { onClick: openInfo, className: classes?.infoBtn, "aria-label": t("standalone.uikit.info") },
                                             React.createElement(InfoIcon, { color: "disabled" })));
-                                        return hasAdditionalElements ? (params.InputProps?.endAdornment ? (React.cloneElement(params.InputProps?.endAdornment, {}, endAdornmentLeft, ...(params.InputProps?.endAdornment).props.children, infoBtn, endAdornment)) : (React.createElement(InputAdornment, { position: "end" },
+                                        return hasAdditionalElements ? (paramSlotProps.input?.endAdornment ? (React.cloneElement(paramSlotProps.input
+                                            ?.endAdornment, {}, endAdornmentLeft, ...(paramSlotProps.input
+                                            ?.endAdornment).props.children, infoBtn, endAdornment)) : (React.createElement(InputAdornment, { position: "end" },
                                             endAdornmentLeft,
                                             infoBtn,
-                                            endAdornment))) : (params.InputProps?.endAdornment);
+                                            endAdornment))) : (paramSlotProps.input?.endAdornment);
                                     })(),
                                 },
                             }, placeholder: placeholder, onChange: (event) => {

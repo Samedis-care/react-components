@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo, useRef } from "react";
 import { isFieldImportable, } from "./index";
 import { Box, Card, CardContent, CircularProgress, Grid, Table, TableBody, TableCell, TableHead, TableRow, TextField, Tooltip, Typography, styled, } from "@mui/material";
-import { Check as CheckIcon, ErrorOutline as ErrorIcon, HelpOutline as UnknownIcon, } from "@mui/icons-material";
+import { Check as CheckIcon, ErrorOutlined as ErrorIcon, HelpOutlined as UnknownIcon, } from "@mui/icons-material";
 import uniqueArray from "../../../utils/uniqueArray";
 import debouncePromise from "../../../utils/debouncePromise";
 import useCCTranslations from "../../../utils/useCCTranslations";
@@ -136,7 +136,7 @@ const Step2ConnectData = (props) => {
     const { columns, handleConversionScriptChange } = useImportStep2Logic(props);
     return (React.createElement(Grid, { container: true, spacing: 2 },
         React.createElement(Grid, { size: 6 },
-            React.createElement(Box, { mb: 2 },
+            React.createElement(Box, { sx: { mb: 2 } },
                 React.createElement(Typography, { variant: "h5" }, t("backend-components.crud.import.source_fields"))),
             React.createElement(Table, null,
                 React.createElement(TableHead, null,
@@ -150,7 +150,7 @@ const Step2ConnectData = (props) => {
                         React.createElement(TableCell, null, dataTypes.join(", "))));
                 })))),
         React.createElement(Grid, { size: 6 },
-            React.createElement(Box, { mb: 2 },
+            React.createElement(Box, { sx: { mb: 2 } },
                 React.createElement(Typography, { variant: "h5" }, t("backend-components.crud.import.destination_fields"))),
             React.createElement(Grid, { container: true, spacing: 2 }, Object.entries(model.fields)
                 .filter(([name, field]) => isFieldImportable(name, field))
@@ -159,7 +159,7 @@ const Step2ConnectData = (props) => {
                 return (React.createElement(Grid, { key: name, size: 12 },
                     React.createElement(Card, null,
                         React.createElement(StyledCardContent, null,
-                            React.createElement(Grid, { container: true, justifyContent: "space-between" },
+                            React.createElement(Grid, { container: true, sx: { justifyContent: "space-between" } },
                                 React.createElement(Grid, null,
                                     React.createElement(Typography, null, field.getLabel()
                                         ? `${field.getLabel()} (${name})`
@@ -168,11 +168,9 @@ const Step2ConnectData = (props) => {
                                 React.createElement(Grid, null,
                                     React.createElement(Tooltip, { title: convScript
                                             ? (convScript.error?.toString() ?? "")
-                                            : (t("backend-components.crud.import.validations.unknown") ?? "") }, convScript ? (convScript.status === "okay" ? (React.createElement(CheckIcon, null)) : convScript.status === "pending" ? (React.createElement(CircularProgress, null)) : convScript.status === "error" ? (React.createElement(ErrorIcon, null)) : (React.createElement(UnknownIcon, null))) : (
-                                    // unknown status
-                                    React.createElement(UnknownIcon, null))))),
+                                            : (t("backend-components.crud.import.validations.unknown") ?? "") }, convScript ? (convScript.status === "okay" ? (React.createElement(CheckIcon, null)) : convScript.status === "pending" ? (React.createElement(CircularProgress, null)) : convScript.status === "error" ? (React.createElement(ErrorIcon, null)) : (React.createElement(UnknownIcon, null))) : (React.createElement(UnknownIcon, null))))),
                             React.createElement(Grid, { size: 12 },
-                                React.createElement(Box, { mt: 2 },
+                                React.createElement(Box, { sx: { mt: 2 } },
                                     convScript?.error && (React.createElement(Typography, null, convScript.error.toString())),
                                     React.createElement(ScriptInput, { multiline: true, label: t("backend-components.crud.import.conv_script"), name: name, value: convScript?.script ?? "", onChange: handleConversionScriptChange, placeholder: `${name} = `, fullWidth: true })))))));
             })))));

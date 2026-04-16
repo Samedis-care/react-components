@@ -7,13 +7,13 @@ import { useDataGridState, } from "../DataGrid";
 const Header = () => {
     const [state] = useDataGridState();
     const { showSettings } = state;
-    return useMemo(() => (React.createElement(Box, { mx: 1 },
-        React.createElement(Grid, { container: true, justifyContent: "space-between", alignItems: "center", wrap: "nowrap" },
+    return useMemo(() => (React.createElement(Box, { sx: { mx: 1 } },
+        React.createElement(Grid, { container: true, sx: { justifyContent: "space-between", alignItems: "center" }, wrap: "nowrap" },
             React.createElement(Grid, null,
                 React.createElement(Search, null)),
-            React.createElement(Grid, { size: "grow", display: showSettings ? "none" : undefined },
+            React.createElement(Grid, { size: "grow", sx: showSettings ? { display: "none" } : undefined },
                 React.createElement(FilterBar, null)),
-            React.createElement(Grid, { display: showSettings ? "none" : undefined },
+            React.createElement(Grid, { sx: showSettings ? { display: "none" } : undefined },
                 React.createElement(ActionBar, null))))), [showSettings]);
 };
 export default React.memo(Header);

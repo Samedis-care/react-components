@@ -46,9 +46,9 @@ const WeekViewDay = (inProps) => {
                 React.createElement(Grid, { size: 12 },
                     React.createElement(Divider, null)),
                 React.createElement(Grid, { size: 12 },
-                    React.createElement(Box, { m: 1 }, date)),
+                    React.createElement(Box, { sx: { m: 1 } }, date)),
                 React.createElement(DayContentsWrapper, { size: 12, className: classes?.dayContents },
-                    React.createElement(Box, { m: 1 },
+                    React.createElement(Box, { sx: { m: 1 } },
                         React.createElement(DayContents, { data: data, altBorder: isToday })))))));
 };
 export default React.memo(WeekViewDay);

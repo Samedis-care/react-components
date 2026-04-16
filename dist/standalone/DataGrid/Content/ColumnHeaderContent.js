@@ -39,7 +39,7 @@ const ColumnHeaderContent = (props) => {
                 ? DataGridColumnHeaderFilterPopupId
                 : DataGridColumnHeaderFilterPopup;
     return (React.createElement(React.Fragment, null,
-        React.createElement(Grid, { container: true, justifyContent: "flex-start", wrap: "nowrap" },
+        React.createElement(Grid, { container: true, sx: { justifyContent: "flex-start" }, wrap: "nowrap" },
             React.createElement(DataGridColumnHeaderLabel, { className: classes?.columnHeaderLabel, key: "header" },
                 React.createElement(Tooltip, { title: props.headerName },
                     React.createElement("span", null, typeof props.headerName === "string"
@@ -63,7 +63,7 @@ const ColumnHeaderContent = (props) => {
                                 : classes?.columnHeaderFilterIcon })))))),
         props.enableResize && (React.createElement(DataGridColumnHeaderResizer, { className: classes?.columnHeaderResizer, onMouseDown: props.startDrag, onClick: preventPropagation, onDoubleClick: props.autoResize })),
         React.createElement(Popover, { open: filterAnchorEl !== null, anchorEl: filterAnchorEl, onClose: closeFilter, anchorOrigin: anchorOrigin, transformOrigin: transformOrigin, onClick: preventPropagation },
-            React.createElement(Box, { m: 2 },
+            React.createElement(Box, { sx: { m: 2 } },
                 React.createElement(ColumnHeaderFilterPopupComp, { container: true, className: props.columnType === "datetime"
                         ? classes?.columnHeaderFilterPopupDateTime
                         : props.columnType === "enum"

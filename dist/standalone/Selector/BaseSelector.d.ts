@@ -2,7 +2,7 @@ import React from "react";
 import { InputProps, TextFieldProps } from "@mui/material";
 import { TextFieldWithHelpProps } from "../UIKit/TextFieldWithHelp";
 import { OutlinedInputProps } from "@mui/material/OutlinedInput";
-import { InputProps as StandardInputProps } from "@mui/material/Input/Input";
+import { InputProps as StandardInputProps } from "@mui/material/Input";
 export interface BaseSelectorData {
     /**
      * A unique value

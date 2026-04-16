@@ -1,6 +1,6 @@
 import React from "react";
 import { Grid, IconButton, Typography, } from "@mui/material";
-const IconButtonWithText = (props) => (React.createElement(Grid, { container: true, direction: "column", alignItems: "center" },
+const IconButtonWithText = (props) => (React.createElement(Grid, { container: true, sx: { flexDirection: "column", alignItems: "center" } },
     React.createElement(Grid, null,
         React.createElement(IconButton, { onClick: props.onClick, "aria-label": typeof props.text === "string" ? props.text : undefined, ...props.IconButtonProps, size: "large" }, props.icon)),
     React.createElement(Grid, null,

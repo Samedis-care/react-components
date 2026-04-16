@@ -25,25 +25,28 @@ const TextFieldWithHelp = React.forwardRef(function PickersTextFieldWithHelpInne
         setHasInputValue(!!evt.target.value);
     }, [onChange]);
     // render
+    const inputSlotProps = muiProps.slotProps?.input;
+    const existingEndAdornment = inputSlotProps?.endAdornment;
     const showClear = isTouchDevice() && hasValue && !muiProps.disabled && !disableClearable;
-    const hasEndAdornment = !!(showClear ||
-        openInfo ||
-        muiProps.InputProps?.endAdornment);
-    return (React.createElement(UiKitPickersTextFieldWithWarnings, { ref: ref, ...muiProps, warning: warning, onChange: handleChange, InputProps: {
-            ...muiProps.InputProps,
-            endAdornment: hasEndAdornment ? (React.createElement(React.Fragment, null,
-                React.createElement(InputAdornment, { position: "end" },
-                    showClear && (React.createElement(IconButton, { onClick: handleClear, size: "small", "aria-label": t("standalone.uikit.clear") },
-                        React.createElement(ClearIcon, null))),
-                    typeof muiProps.InputProps?.endAdornment === "string"
-                        ? muiProps.InputProps?.endAdornment
-                        : muiProps.InputProps
-                            ?.endAdornment?.props?.children,
-                    openInfo && (React.createElement(IconButton, { onClick: openInfo, size: "small", "aria-label": t("standalone.uikit.info") },
-                        React.createElement(InfoIcon, { color: "disabled" })))))) : undefined,
-        }, InputLabelProps: {
-            ...InputLabelConfig,
-            ...muiProps.InputLabelProps,
+    const hasEndAdornment = !!(showClear || openInfo || existingEndAdornment);
+    return (React.createElement(UiKitPickersTextFieldWithWarnings, { ref: ref, ...muiProps, warning: warning, onChange: handleChange, slotProps: {
+            ...muiProps.slotProps,
+            input: {
+                ...inputSlotProps,
+                endAdornment: hasEndAdornment ? (React.createElement(React.Fragment, null,
+                    React.createElement(InputAdornment, { position: "end" },
+                        showClear && (React.createElement(IconButton, { onClick: handleClear, size: "small", "aria-label": t("standalone.uikit.clear") },
+                            React.createElement(ClearIcon, null))),
+                        typeof existingEndAdornment === "string"
+                            ? existingEndAdornment
+                            : existingEndAdornment?.props?.children,
+                        openInfo && (React.createElement(IconButton, { onClick: openInfo, size: "small", "aria-label": t("standalone.uikit.info") },
+                            React.createElement(InfoIcon, { color: "disabled" })))))) : undefined,
+            },
+            inputLabel: {
+                ...InputLabelConfig,
+                ...muiProps.slotProps?.inputLabel,
+            },
         } }));
 });
 export default React.memo(TextFieldWithHelp);

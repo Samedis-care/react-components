@@ -72,7 +72,11 @@ const CrudImport = (props) => {
     const { t } = useCCTranslations();
     const { updateKeyAdditionalFilters, howTo, model, updateKey, validate } = props;
     const { guided, activeStep, state, setState, hasImportConfig, next, prev, finish, } = useCrudImportLogic(props);
-    return (React.createElement(Wrapper, { container: true, direction: "column", justifyContent: "space-between", alignItems: "stretch", spacing: 2, wrap: "nowrap" },
+    return (React.createElement(Wrapper, { container: true, sx: {
+            flexDirection: "column",
+            justifyContent: "space-between",
+            alignItems: "stretch",
+        }, spacing: 2, wrap: "nowrap" },
         React.createElement(Grid, null,
             React.createElement(Stepper, { activeStep: guided && activeStep > 1 ? activeStep - 1 : activeStep }, IMPORT_STEPS.filter((label, index) => !(guided && index === 1)).map((label, index) => (React.createElement(Step, { key: index.toString(16) },
                 React.createElement(StepLabel, null, t(label))))))),

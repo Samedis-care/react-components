@@ -103,7 +103,7 @@ const LocaleSelectorDialogContent = (inProps) => {
     }, [currentLang, handleSwitch, switchingLanguage]);
     return (React.createElement(Grid, { container: true, className: className },
         React.createElement(Grid, { size: 12 },
-            React.createElement(Box, { px: 2, pb: 1 },
+            React.createElement(Box, { sx: { px: 2, pb: 1 } },
                 React.createElement(TextFieldWithHelp, { value: filter, onChange: handleFilterChange, fullWidth: true, slotProps: { input: SearchInputProps } }))),
         React.createElement(LocaleList, { size: 12 },
             React.createElement(FormLoaderOverlay, { visible: switchingLanguage }),

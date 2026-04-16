@@ -34,12 +34,12 @@ const LocalizedKeyboardDatePicker = (inProps) => {
                 textField: (ownerState) => {
                     const textFieldProps = accessSlotProps(ownerState, otherProps.slotProps?.textField);
                     return {
+                        ...textFieldProps,
                         required,
                         error,
                         fullWidth,
                         onBlur,
                         disableClearable,
-                        ...textFieldProps,
                     };
                 },
             } })));

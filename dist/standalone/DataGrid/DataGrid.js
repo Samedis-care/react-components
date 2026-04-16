@@ -625,7 +625,11 @@ const DataGrid = (inProps) => {
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectAll, selectedRows]);
-    return (React.createElement(Wrapper, { container: true, direction: "column", justifyContent: "space-between", alignItems: "stretch", wrap: "nowrap", className: combineClassNames([className, classes?.root]), ref: gridRoot },
+    return (React.createElement(Wrapper, { container: true, sx: {
+            flexDirection: "column",
+            justifyContent: "space-between",
+            alignItems: "stretch",
+        }, wrap: "nowrap", className: combineClassNames([className, classes?.root]), ref: gridRoot },
         React.createElement(DataGridRootRefContext.Provider, { value: gridRoot },
             React.createElement(DataGridPropsContext.Provider, { value: props },
                 React.createElement(DataGridStateContext.Provider, { value: statePack },
@@ -633,14 +637,14 @@ const DataGrid = (inProps) => {
                         React.createElement(DataGridColumnsWidthStateContext.Provider, { value: columnWidthStatePack },
                             React.createElement(CustomFilterActiveContext.Provider, { value: activeCustomFiltersPack },
                                 React.createElement(StatePersistence, null),
-                                React.createElement(HeaderWrapper, { className: classes?.header, display: state.showFilterDialog ? "none" : undefined },
+                                React.createElement(HeaderWrapper, { className: classes?.header, sx: state.showFilterDialog ? { display: "none" } : undefined },
                                     React.createElement(Header, null)),
                                 React.createElement(ContentWrapper, { size: "grow", className: classes?.content },
                                     React.createElement(Settings, { columns: columns }),
                                     React.createElement(CustomFilterDialog, null),
                                     React.createElement(Content, { columns: visibleColumns, rowsPerPage: rowsPerPage, disableSelection: disableSelection, headerHeight: headerHeight, globalScrollListener: globalScrollListener })),
-                                !disableFooter && (React.createElement(FooterWrapper, { className: classes?.footer, display: state.showSettings || state.showFilterDialog
-                                        ? "none"
+                                !disableFooter && (React.createElement(FooterWrapper, { className: classes?.footer, sx: state.showSettings || state.showFilterDialog
+                                        ? { display: "none" }
                                         : undefined },
                                     React.createElement(Footer, null)))))))))));
 };

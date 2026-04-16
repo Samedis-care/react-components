@@ -143,7 +143,7 @@ const WeekView = (inProps) => {
     const weekday = now.weekday();
     const weekdays = [0, 1, 2, 3, 4, 5, 6].map((day) => day - weekday);
     let prevDate = null;
-    return (React.createElement(Root, { container: true, alignItems: "stretch", alignContent: "space-between", className: className },
+    return (React.createElement(Root, { container: true, sx: { alignItems: "stretch", alignContent: "space-between" }, className: className },
         React.createElement(Grid, { container: true, wrap: "nowrap", size: 12 },
             React.createElement(Grid, { size: "grow" },
                 React.createElement(Grid, { container: true },
@@ -155,12 +155,12 @@ const WeekView = (inProps) => {
                                 .toDate()
                                 .toLocaleDateString(locale, ToDateLocaleStringOptions),
                             ")")),
-                    React.createElement(Grid, null, filterCount > 0 && (React.createElement(FilterWrapper, { px: 2, className: classes?.filterWrapper }, (() => {
+                    React.createElement(Grid, null, filterCount > 0 && (React.createElement(FilterWrapper, { sx: { px: 2 }, className: classes?.filterWrapper }, (() => {
                         const [name, filter] = Object.entries(filters)[0];
                         return (React.createElement(ScheduleFilterRenderer, { ...filter, name: name, value: filterValues[name], onChange: handleFilterChange, inline: "weekly" }));
                     })()))))),
             React.createElement(Grid, null,
-                React.createElement(Grid, { container: true, justifyContent: "center" },
+                React.createElement(Grid, { container: true, sx: { justifyContent: "center" } },
                     React.createElement(Grid, null,
                         React.createElement(IconButton, { onClick: prevWeek, size: "large", "aria-label": t("standalone.schedule.prev-week") },
                             React.createElement(ArrowBackIos, null)),
@@ -175,12 +175,12 @@ const WeekView = (inProps) => {
                                 React.createElement(DatePicker, { format: "II RRRR", open: datePickerAnchorEl != null, label: t("standalone.schedule.week"), value: nowNormalized().add(weekOffset, "week"), onChange: setWeek, onClose: closeDatePicker }))),
                         React.createElement(IconButton, { onClick: nextWeek, size: "large", "aria-label": t("standalone.schedule.next-week") },
                             React.createElement(ArrowForwardIos, null))))),
-            React.createElement(Grid, { container: true, justifyContent: "flex-end", size: "grow" }, (filterCount > 1 || actions.length > 0) && (React.createElement(Grid, null,
-                React.createElement(FilterWrapper, { px: 2, className: classes?.filterWrapper }, filterCount > 2 || actions.length > 1 ? (React.createElement(React.Fragment, null,
+            React.createElement(Grid, { container: true, sx: { justifyContent: "flex-end" }, size: "grow" }, (filterCount > 1 || actions.length > 0) && (React.createElement(Grid, null,
+                React.createElement(FilterWrapper, { sx: { px: 2 }, className: classes?.filterWrapper }, filterCount > 2 || actions.length > 1 ? (React.createElement(React.Fragment, null,
                     React.createElement(IconButton, { onClick: openFilterSettings, "aria-label": t("standalone.schedule.filter-settings") },
                         React.createElement(SettingsIcon, null)),
                     React.createElement(Menu, { open: filterSettingsAnchorEl != null, anchorEl: filterSettingsAnchorEl, onClose: closeFiltersMenu },
-                        React.createElement(Box, { p: 1 },
+                        React.createElement(Box, { sx: { p: 1 } },
                             React.createElement(Grid, { container: true, spacing: 1 },
                                 Object.entries(filters).map(([name, filter], idx) => idx !== 0 && (React.createElement(Grid, { key: "filter-" + name, size: 12 },
                                     React.createElement(ScheduleFilterRenderer, { ...filter, name: name, value: filter.type === "select"
@@ -190,7 +190,7 @@ const WeekView = (inProps) => {
                                     React.createElement(Divider, null))),
                                 actions.length > 1 &&
                                     actions.map((action, idx) => idx !== 0 && (React.createElement(Grid, { key: "action-" + action.id, size: 12 },
-                                        React.createElement(Button, { onClick: action.onClick, disabled: action.disabled, fullWidth: true }, action.label))))))))) : (React.createElement(Grid, { container: true, spacing: 2, wrap: "nowrap", alignItems: "center" }, (() => {
+                                        React.createElement(Button, { onClick: action.onClick, disabled: action.disabled, fullWidth: true }, action.label))))))))) : (React.createElement(Grid, { container: true, spacing: 2, wrap: "nowrap", sx: { alignItems: "center" } }, (() => {
                     const ret = [];
                     if (actions.length > 0) {
                         const action = actions[0];
@@ -207,9 +207,9 @@ const WeekView = (inProps) => {
         loadError && (React.createElement(Grid, { size: 12 },
             React.createElement(Typography, { align: "center" }, loadError.message))),
         !data && !loadError && (React.createElement(LoadWrapper, { size: 12 },
-            React.createElement(Grid, { container: true, justifyContent: "space-around" },
+            React.createElement(Grid, { container: true, sx: { justifyContent: "space-around" } },
                 React.createElement(CircularProgress, null)))),
-        data && (React.createElement(Grid, { container: true, alignItems: "stretch", alignContent: "space-between", wrap: "nowrap", size: 12 }, weekdays.map((day, dayIdx) => {
+        data && (React.createElement(Grid, { container: true, sx: { alignItems: "stretch", alignContent: "space-between" }, wrap: "nowrap", size: 12 }, weekdays.map((day, dayIdx) => {
             const date = now.clone().add(weekOffset, "weeks").add(day, "days");
             const diffDay = !prevDate || prevDate.day() !== date.day();
             const diffMonth = !prevDate || prevDate.month() !== date.month();

@@ -58,15 +58,19 @@ const SignalPortlet = (inProps) => {
     const locale = useCurrentLocale();
     return (React.createElement(SignalPortletRoot, { className: combineClassNames([props.className, props.classes?.root]) },
         React.createElement(SignalPortletPaper, { className: props.classes?.paper },
-            React.createElement(SignalPortletInnerContainer, { container: true, spacing: 1, direction: "column", justifyContent: "space-between", wrap: "nowrap", className: props.classes?.innerContainer },
-                React.createElement(Grid, { container: true, spacing: 1, justifyContent: "flex-start", direction: "column", wrap: "nowrap", size: "grow" },
+            React.createElement(SignalPortletInnerContainer, { container: true, spacing: 1, sx: { flexDirection: "column", justifyContent: "space-between" }, wrap: "nowrap", className: props.classes?.innerContainer },
+                React.createElement(Grid, { container: true, spacing: 1, sx: { flexDirection: "column", justifyContent: "flex-start" }, wrap: "nowrap", size: "grow" },
                     React.createElement(SignalPortletTitleWrapper, { className: props.classes?.titleWrapper },
                         React.createElement(SignalPortletTitle, { variant: "h5", align: "center", className: props.classes?.title }, props.title)),
                     React.createElement(SignalPortletDivider, { className: props.classes?.divider },
                         React.createElement(Divider, null)),
                     React.createElement(Grid, null,
                         React.createElement(SignalPortletList, { className: props.classes?.list }, props.items.map((item, index) => (React.createElement(SignalPortletItemStyled, { key: index.toString(), className: props.classes?.item, ...item })))))),
-                (props.updatedAt || props.onRefresh) && (React.createElement(Grid, { container: true, spacing: 1, justifyContent: "flex-end", alignItems: "center", alignContent: "center" },
+                (props.updatedAt || props.onRefresh) && (React.createElement(Grid, { container: true, spacing: 1, sx: {
+                        justifyContent: "flex-end",
+                        alignItems: "center",
+                        alignContent: "center",
+                    } },
                     props.updatedAt && (React.createElement(Grid, null,
                         React.createElement(Tooltip, { title: new Date(props.updatedAt).toLocaleString(locale) },
                             React.createElement(SignalPortletLastUpdatedAt, null, t("standalone.signal-portlet.last-updated", {

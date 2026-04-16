@@ -126,7 +126,7 @@ const Content = (props) => {
     const filtersActive = useDataGridFiltersActive();
     const resetFilters = useDataGridResetFilters();
     const noContentRenderer = useCallback(() => (React.createElement(React.Fragment, null, state.refreshData ? (React.createElement(Loader, null)) : state.dataLoadError ? (React.createElement(CenteredStickyTypography, { className: classes?.centeredStickyTypography, variant: "h5" }, state.dataLoadError.message)) : (React.createElement(CenteredStickyTypography, { className: classes?.centeredStickyTypography, variant: "h4" },
-        React.createElement(Grid, { container: true, spacing: 2, direction: "column" },
+        React.createElement(Grid, { container: true, spacing: 2, sx: { flexDirection: "column" } },
             React.createElement(Grid, null, filtersActive
                 ? t("standalone.data-grid.content.no-data-filters")
                 : t("standalone.data-grid.content.no-data")),

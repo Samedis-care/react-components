@@ -16,11 +16,11 @@ const LocalizedDateTimePicker = (props) => {
                 textField: (ownerState) => {
                     const orgSlotProps = accessSlotProps(ownerState, otherProps.slotProps?.textField);
                     return {
+                        ...orgSlotProps,
                         required,
                         error,
                         fullWidth,
                         onBlur,
-                        ...orgSlotProps,
                     };
                 },
             } })));

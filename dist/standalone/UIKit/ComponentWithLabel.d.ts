@@ -12,7 +12,7 @@ export interface ComponentWithLabelProps extends Omit<FormControlLabelProps, "la
     /**
      * Label location
      */
-    labelDisplay?: TypographyProps["display"];
+    labelDisplay?: "block" | "inline";
     /**
      * Label alignment
      */

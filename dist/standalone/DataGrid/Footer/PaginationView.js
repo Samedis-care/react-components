@@ -17,7 +17,7 @@ const PaginationView = (props) => {
         : `${showFiltered
             ? `${t("standalone.data-grid.footer.filtered")} ${filtered} `
             : ""}${t("standalone.data-grid.footer.total")} ${total}`;
-    return (React.createElement(Box, { mx: 2 },
+    return (React.createElement(Box, { sx: { mx: 2 } },
         React.createElement(DataGridPaginationText, { className: classes?.paginationText }, text)));
 };
 export default React.memo(PaginationView);

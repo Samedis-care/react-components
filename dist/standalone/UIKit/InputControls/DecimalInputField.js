@@ -19,9 +19,12 @@ const DecimalInputField = (props) => {
     const handleChange = useCallback((event) => {
         setValueInternal(event.target.value);
     }, []);
-    return (React.createElement(TextFieldWithHelp, { ...muiProps, value: valueInternal, onChange: handleChange, onBlur: handleBlur, inputProps: {
-            ...muiProps.inputProps,
-            inputMode: "numeric",
+    return (React.createElement(TextFieldWithHelp, { ...muiProps, value: valueInternal, onChange: handleChange, onBlur: handleBlur, slotProps: {
+            ...muiProps.slotProps,
+            htmlInput: {
+                ...muiProps.slotProps?.htmlInput,
+                inputMode: "numeric",
+            },
         }, inputMode: "numeric" }));
 };
 export default React.memo(DecimalInputField);

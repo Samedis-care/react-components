@@ -80,7 +80,7 @@ const MultiSelectWithTags = (inProps) => {
             React.createElement(Loader, null)),
         React.createElement(Typography, { component: "label", variant: "caption", color: "textSecondary" }, title),
         React.createElement(SingleSelect, { autocompleteId: autocompleteId ? autocompleteId + "-group-select" : undefined, selected: null, onSelect: handleGroupSelect, refreshToken: selectedGroups.length.toString(), onLoad: loadGroupOptionsAndProcess, disabled: disabled || loadingGroupRecords, enableIcons: enableIcons, noOptionsText: noOptionsText, loadingText: loadingText, openText: openText, closeText: closeText, lru: lruGroup }),
-        React.createElement(Box, { pt: 3 },
+        React.createElement(Box, { sx: { pt: 3 } },
             React.createElement(MultiSelectWithoutGroup, { autocompleteId: autocompleteId, selected: selected, disabled: disabled, label: searchInputLabel, enableIcons: enableIcons, switchValue: switchValue, setSwitchValue: setSwitchValue, switchLabel: switchLabel, displaySwitch: props.displaySwitch, loadDataOptions: loadDataOptions, openInfo: openInfo, onSelect: onChange, getIdOfData: getId, noOptionsText: noOptionsText, loadingText: loadingText, lru: lruData, sortCompareFn: sortCompareFn }))));
 };
 export default React.memo(MultiSelectWithTags);

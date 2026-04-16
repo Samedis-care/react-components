@@ -47,7 +47,7 @@ const LocaleSelectorEntry = (inProps) => {
     }, [locale, handleSwitch]);
     const flag = CountryFlags[locale.country_short];
     return (React.createElement(ListItemRoot, { onClick: handleClick, disabled: disabled, className: className },
-        React.createElement(Container, { container: true, spacing: 2, alignItems: "stretch" },
+        React.createElement(Container, { container: true, spacing: 2, sx: { alignItems: "stretch" } },
             React.createElement(ImageWrapper, { size: 4 },
                 React.createElement(Image, { alt: locale.country, src: flag })),
             React.createElement(Grid, { container: true, size: 8 },

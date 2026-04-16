@@ -50,7 +50,6 @@ const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(props
             input: (props) => {
                 const orgSlotProps = {
                     ...accessSlotProps(props, muiProps.slotProps?.input),
-                    ...muiProps.InputProps,
                 };
                 const hasEndAdornment = !!(showClear ||
                     openInfo ||
@@ -75,7 +74,6 @@ const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(props
             }),
             inputLabel: (props) => ({
                 ...InputLabelConfig,
-                ...muiProps.InputLabelProps,
                 ...accessSlotProps(props, muiProps.slotProps?.inputLabel),
             }),
         } }));

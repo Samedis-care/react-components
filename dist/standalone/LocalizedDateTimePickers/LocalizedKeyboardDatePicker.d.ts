@@ -2,7 +2,7 @@ import React from "react";
 import { DatePickerProps } from "@mui/x-date-pickers";
 import { TextFieldProps } from "@mui/material";
 import { TextFieldWithHelpProps } from "../UIKit/TextFieldWithHelp";
-export interface LocalizedKeyboardDatePickerProps extends Omit<DatePickerProps<false>, "format">, Pick<TextFieldWithHelpProps, "disableClearable"> {
+export interface LocalizedKeyboardDatePickerProps extends Omit<DatePickerProps, "format">, Pick<TextFieldWithHelpProps, "disableClearable"> {
     /**
      * Boolean flag to hide Calendar Icon (only used if disabled is truthy)
      */
@@ -25,5 +25,5 @@ export interface LocalizedKeyboardDatePickerProps extends Omit<DatePickerProps<f
     onBlur?: TextFieldProps["onBlur"];
 }
 export type LocalizedKeyboardDatePickerClassKey = never;
-declare const _default: React.MemoExoticComponent<React.ComponentType<LocalizedKeyboardDatePickerProps & import("../UIKit/MuiWarning").MuiWarningResultProps>>;
+declare const _default: React.MemoExoticComponent<React.ComponentType<LocalizedKeyboardDatePickerProps & import("..").MuiWarningResultProps>>;
 export default _default;

@@ -215,7 +215,7 @@ const FilterEntry = (props) => {
     // END filter type custom
     return (React.createElement(React.Fragment, null,
         isFirstFilter && props.value?.value1 && (React.createElement(Grid, { size: 12 },
-            React.createElement(Grid, { container: true, justifyContent: "flex-end", alignItems: "center" },
+            React.createElement(Grid, { container: true, sx: { justifyContent: "flex-end", alignItems: "center" } },
                 React.createElement(Grid, null,
                     React.createElement(Tooltip, { title: t("standalone.data-grid.content.reset-column-filter") ?? "" },
                         React.createElement("span", null,

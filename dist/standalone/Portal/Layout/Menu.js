@@ -25,7 +25,7 @@ const PortalLayoutMenu = (inProps) => {
         return (React.createElement(MenuPaper, { ...paperProps, className: combineClassNames([className, classes?.menuPaper]) }, props.items));
     }
     else {
-        return (React.createElement(MenuDrawer, { variant: "temporary", anchor: theme.direction === "rtl" ? "right" : "left", open: menuOpen, onClose: toggleMenu, PaperProps: paperProps, ModalProps: modalProps, className: combineClassNames([className, classes?.menuDrawer]) }, props.items));
+        return (React.createElement(MenuDrawer, { variant: "temporary", anchor: theme.direction === "rtl" ? "right" : "left", open: menuOpen, onClose: toggleMenu, slotProps: { paper: paperProps }, ModalProps: modalProps, className: combineClassNames([className, classes?.menuDrawer]) }, props.items));
     }
 };
 export default React.memo(PortalLayoutMenu);
