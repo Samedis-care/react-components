@@ -6,7 +6,7 @@ import MobileScalingFix, { MobileScalingFixProps } from "./MobileScalingFix";
 const WrappedMobileScalingFix = (props: MobileScalingFixProps) => (
 	<Box sx={{ textAlign: "center", padding: 2 }}>
 		<MobileScalingFix {...props} />
-		<Typography variant="body2" color="text.secondary">
+		<Typography variant="body2" sx={{ color: "text.secondary" }}>
 			MobileScalingFix renders nothing visible. It sets the viewport meta tag on
 			mount.
 		</Typography>
@@ -39,7 +39,7 @@ export const DeviceWidth: Story = {
 	render: () => (
 		<Box sx={{ textAlign: "center", padding: 2 }}>
 			<MobileScalingFix />
-			<Typography variant="body2" color="text.secondary">
+			<Typography variant="body2" sx={{ color: "text.secondary" }}>
 				Sets viewport width to device-width (no minWidth prop).
 			</Typography>
 		</Box>
