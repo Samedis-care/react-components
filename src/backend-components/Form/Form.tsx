@@ -36,6 +36,7 @@ import useCCTranslations from "../../utils/useCCTranslations";
 import { useDialogContext } from "../../framework";
 import deepSort from "../../utils/deepSort";
 import useDevKeybinds from "../../utils/useDevKeybinds";
+import useRefState from "../../utils/useRefState";
 import uniqueArray from "../../utils/uniqueArray";
 import { QueryObserverBaseResult } from "@tanstack/react-query";
 import ValidationError from "./ValidationError";
@@ -295,6 +296,13 @@ export interface FormProps<
 	 */
 	disableNestedSubmit?: boolean;
 	/**
+	 * Submit nested form before parent instead of after
+	 * @remarks only affects nested forms. Use when the child record must exist before the parent is saved.
+	 * The `id` passed to `nestedFormPreSubmitHandler` will be the parent's pre-submit id (null on create).
+	 * @default false
+	 */
+	nestedSubmitBeforeParent?: boolean;
+	/**
 	 * Only submit nested form if it is currently mounted
 	 * @remarks only affects nested forms
 	 * @default false
@@ -303,13 +311,13 @@ export interface FormProps<
 	/**
 	 * Submit preparation handler
 	 * Called after parent form submit, before this form submit
-	 * @param id The ID of the parent form (after submit)
+	 * @param id The ID of the parent form (after submit). Null if nestedSubmitBeforeParent is set and the parent is being created (pre-submit id is null).
 	 * @param model The model currently in use (can be used to modify connector endpoints)
 	 * @param getFieldValue getFieldValue of this form
 	 * @param setFieldValueLite setFieldValueLite of this form
 	 */
 	nestedFormPreSubmitHandler?: (
-		id: string,
+		id: string | null,
 		model: Model<ModelFieldName, PageVisibility, unknown>,
 		getFieldValue: FormContextData["getFieldValue"],
 		setFieldValueLite: FormContextData["setFieldValueLite"],
@@ -443,11 +451,6 @@ export interface FormContextData {
 		field: string,
 		data: Dispatch<SetStateAction<T | undefined>>,
 	) => void;
-	/**
-	 * Set dirty custom field count (for fields modified by post submit handlers)
-	 * @deprecated Use setCustomFieldDirty instead
-	 */
-	setCustomDirtyCounter: Dispatch<SetStateAction<number>>;
 	/**
 	 * Set custom field dirty state
 	 * @param field The unique field name
@@ -876,6 +879,7 @@ const Form = <
 		disableValidation,
 		nestedFormName,
 		disableNestedSubmit,
+		nestedSubmitBeforeParent,
 		nestedFormPreSubmitHandler,
 		deleteOnSubmit,
 		onDeleted,
@@ -909,21 +913,21 @@ const Form = <
 	const [pushDialog] = useDialogContext();
 
 	// custom fields - dirty state
-	// v1
-	const [customDirtyCounter, setCustomDirtyCounter] = useState(0);
-	// v2
-	const [customDirtyFields, setCustomDirtyFields] = useState<string[]>([]);
+	const { get: getCustomDirtyFields, set: setCustomDirtyFields } = useRefState<
+		string[]
+	>([]);
 
-	const setCustomFieldDirty = useCallback((field: string, dirty: boolean) => {
-		setCustomDirtyFields((prev) => {
-			const prevDirty = prev.includes(field);
-			if (prevDirty == dirty) return prev; // no changes
-			if (dirty) return [...prev, field];
-			else return prev.filter((candidate) => candidate !== field);
-		});
-	}, []);
-
-	const customDirty = customDirtyCounter > 0 || customDirtyFields.length > 0;
+	const setCustomFieldDirty = useCallback(
+		(field: string, dirty: boolean) => {
+			setCustomDirtyFields((prev) => {
+				const prevDirty = prev.includes(field);
+				if (prevDirty == dirty) return prev; // no changes
+				if (dirty) return [...prev, field];
+				else return prev.filter((candidate) => candidate !== field);
+			});
+		},
+		[setCustomDirtyFields],
+	);
 
 	// custom fields - pre submit handlers
 	const preSubmitHandlers = useRef<Record<string, PreSubmitHandler>>({});
@@ -1197,8 +1201,10 @@ const Form = <
 	const formDirty = useMemo(() => getFormDirty(values), [getFormDirty, values]);
 	const getDirty = useCallback(
 		(formDirty: boolean) =>
-			formDirty || customDirty || !!(id && !deleted && deleteOnSubmit),
-		[customDirty, deleteOnSubmit, deleted, id],
+			formDirty ||
+			getCustomDirtyFields().length > 0 ||
+			!!(id && !deleted && deleteOnSubmit),
+		[getCustomDirtyFields, deleteOnSubmit, deleted, id],
 	);
 	const dirty = getDirty(formDirty);
 
@@ -1766,7 +1772,6 @@ const Form = <
 	// nested forms - dirty state
 	useEffect(() => {
 		if (!parentFormContext || !nestedFormName) return;
-
 		parentFormContext.setCustomFieldDirty(nestedFormName, dirty);
 		return () => {
 			if (
@@ -1777,12 +1782,14 @@ const Form = <
 				parentFormContext.setCustomFieldDirty(nestedFormName, false);
 			}
 		};
+		// parentFormContext omitted from deps: its identity changes often (formContextData useMemo), but setCustomFieldDirty is stable
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [
 		dirty,
 		disableNestedSubmit,
 		onlySubmitNestedIfMounted,
 		nestedFormName,
-		parentFormContext,
+		parentFormContext?.onlySubmitMounted,
 	]);
 
 	// nested forms - submitting blocker
@@ -1808,7 +1815,10 @@ const Form = <
 			setTouched(touchedRef.current);
 			return validateForm("hint");
 		};
-		const submitNestedForm = async (id: string, params: FormSubmitOptions) => {
+		const submitNestedForm = async (
+			id: string | null,
+			params: FormSubmitOptions,
+		) => {
 			if (nestedFormPreSubmitHandler) {
 				await nestedFormPreSubmitHandler(
 					id,
@@ -1830,7 +1840,14 @@ const Form = <
 				nestedFormName,
 				validateNestedFormWarn,
 			);
-			parentFormContext.setPostSubmitHandler(nestedFormName, submitNestedForm);
+			if (nestedSubmitBeforeParent) {
+				parentFormContext.setPreSubmitHandler(nestedFormName, submitNestedForm);
+			} else {
+				parentFormContext.setPostSubmitHandler(
+					nestedFormName,
+					submitNestedForm,
+				);
+			}
 		}
 		return () => {
 			if (
@@ -1846,8 +1863,13 @@ const Form = <
 				parentFormContext.onlySubmitMounted ||
 				onlySubmitNestedIfMounted ||
 				disableNestedSubmit
-			)
-				parentFormContext.removePostSubmitHandler(nestedFormName);
+			) {
+				if (nestedSubmitBeforeParent) {
+					parentFormContext.removePreSubmitHandler(nestedFormName);
+				} else {
+					parentFormContext.removePostSubmitHandler(nestedFormName);
+				}
+			}
 		};
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [
@@ -1862,6 +1884,7 @@ const Form = <
 		submitForm,
 		nestedFormName,
 		disableNestedSubmit,
+		nestedSubmitBeforeParent,
 		onlySubmitNestedIfMounted,
 	]);
 
@@ -1889,9 +1912,8 @@ const Form = <
 				"Form Dirty State:",
 				JSON.stringify(localData) !== JSON.stringify(remoteData),
 			);
-			console.log("Custom Dirty State:", customDirty);
-			console.log("Custom Dirty Fields:", customDirtyFields);
-			console.log("Custom Dirty Counter:", customDirtyCounter);
+			console.log("Custom Dirty State:", getCustomDirtyFields().length > 0);
+			console.log("Custom Dirty Fields:", getCustomDirtyFields());
 
 			console.log("Server Data:", remoteData);
 			console.log("Form Data:", localData);
@@ -1921,9 +1943,7 @@ const Form = <
 			serverData,
 			defaultRecord,
 			getNormalizedData,
-			customDirty,
-			customDirtyFields,
-			customDirtyCounter,
+			getCustomDirtyFields,
 			model.fields,
 		],
 	);
@@ -1948,7 +1968,6 @@ const Form = <
 			relations: serverData && serverData[1] ? serverData[1] : {},
 			setError,
 			markFieldMounted,
-			setCustomDirtyCounter,
 			setCustomFieldDirty,
 			dirty,
 			getCustomState,
