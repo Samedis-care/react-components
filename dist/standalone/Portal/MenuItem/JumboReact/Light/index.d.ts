@@ -5,5 +5,5 @@ export type MenuItemJumboReactLightClassKey = "root" | "dot";
 export interface MenuItemJumboReactLightProps {
     typographyProps?: TypographyProps;
 }
-declare const _default: React.MemoExoticComponent<(inProps: MenuItemProps & MenuItemJumboReactLightProps) => React.JSX.Element>;
+declare const _default: React.MemoExoticComponent<(inProps: MenuItemProps & MenuItemJumboReactLightProps) => import("react/jsx-runtime").JSX.Element>;
 export default _default;

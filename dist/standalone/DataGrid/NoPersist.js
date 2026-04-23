@@ -1,3 +1,4 @@
+import { jsx as _jsx } from "react/jsx-runtime";
 import React from "react";
 import { DataGridPersistentStateContext } from "./StatePersistence";
 /**
@@ -5,6 +6,6 @@ import { DataGridPersistentStateContext } from "./StatePersistence";
  */
 const NoPersist = (props) => {
     const { children } = props;
-    return (React.createElement(DataGridPersistentStateContext.Provider, { value: undefined }, children));
+    return (_jsx(DataGridPersistentStateContext.Provider, { value: undefined, children: children }));
 };
 export default React.memo(NoPersist);

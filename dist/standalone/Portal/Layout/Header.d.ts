@@ -21,5 +21,5 @@ export interface PortalLayoutHeaderProps {
         toolbar?: ToolbarProps["classes"];
     };
 }
-declare const _default: React.MemoExoticComponent<(props: PortalLayoutHeaderProps) => React.JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: PortalLayoutHeaderProps) => import("react/jsx-runtime").JSX.Element>;
 export default _default;

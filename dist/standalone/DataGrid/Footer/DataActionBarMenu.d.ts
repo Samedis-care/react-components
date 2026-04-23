@@ -8,5 +8,5 @@ export interface DataActionBarMenuProps {
     numSelected: 0 | 1 | 2;
     handleCustomButtonClick: (label: string) => void;
 }
-declare const _default: React.MemoExoticComponent<(props: DataActionBarMenuProps) => React.JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: DataActionBarMenuProps) => import("react/jsx-runtime").JSX.Element>;
 export default _default;

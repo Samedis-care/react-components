@@ -9,5 +9,5 @@ export interface LocalStoragePersistProps {
      */
     children: React.ReactNode;
 }
-declare const _default: React.MemoExoticComponent<(props: LocalStoragePersistProps) => React.JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: LocalStoragePersistProps) => import("react/jsx-runtime").JSX.Element>;
 export default _default;

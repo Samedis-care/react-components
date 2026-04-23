@@ -1,3 +1,4 @@
+import { jsx as _jsx } from "react/jsx-runtime";
 import React, { useCallback } from "react";
 import { Grid } from "@mui/material";
 import { useDataGridColumnState, useDataGridProps, useDataGridState, } from "../DataGrid";
@@ -66,7 +67,6 @@ const DataActionBar = () => {
             return;
         clickedButton.onClick(selectAll, selectedRows);
     }, [customDataActionButtons, selectAll, selectedRows]);
-    return (React.createElement(Grid, { container: true },
-        React.createElement(DataActionBarView, { numSelected: Math.min(numSelected, 2), handleEdit: onEdit ? handleEdit : undefined, handleDelete: onDelete ? handleDelete : undefined, disableDeleteHint: disableDeleteHint, customButtons: customDataActionButtons, handleCustomButtonClick: handleCustomButtonCLick, disableSelection: disableSelection || !enableDeleteAll })));
+    return (_jsx(Grid, { container: true, children: _jsx(DataActionBarView, { numSelected: Math.min(numSelected, 2), handleEdit: onEdit ? handleEdit : undefined, handleDelete: onDelete ? handleDelete : undefined, disableDeleteHint: disableDeleteHint, customButtons: customDataActionButtons, handleCustomButtonClick: handleCustomButtonCLick, disableSelection: disableSelection || !enableDeleteAll }) }));
 };
 export default React.memo(DataActionBar);

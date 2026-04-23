@@ -9,5 +9,5 @@ export interface CCI18nProviderProps {
      */
     disableHtmlLanguageAttributeSetter?: boolean;
 }
-declare const _default: React.MemoExoticComponent<(props: CCI18nProviderProps) => React.JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: CCI18nProviderProps) => import("react/jsx-runtime").JSX.Element>;
 export default _default;

@@ -1,3 +1,4 @@
+import { jsx as _jsx } from "react/jsx-runtime";
 import React, { useEffect, useState } from "react";
 import { doesRouteMatch, extractRouteParameters, insertRouteParameters, } from "../../../utils/routeUtils";
 import MenuBase from "../../../standalone/Portal/Menu";
@@ -111,6 +112,6 @@ export const useRoutedMenuLogic = (props) => {
 };
 const RoutedMenu = (props) => {
     const { definition, controlledState } = useRoutedMenuLogic(props);
-    return (React.createElement(MenuBase, { ...props, definition: definition, customState: controlledState }));
+    return (_jsx(MenuBase, { ...props, definition: definition, customState: controlledState }));
 };
 export default React.memo(RoutedMenu);

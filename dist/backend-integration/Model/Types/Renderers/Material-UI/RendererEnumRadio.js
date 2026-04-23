@@ -1,4 +1,4 @@
-import React from "react";
+import { Fragment as _Fragment, jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import { FormControlLabel, FormHelperText, FormLabel, Radio, RadioGroup, Typography, } from "@mui/material";
 import TypeEnum from "../../TypeEnum";
 import ccI18n from "../../../../../i18n";
@@ -17,26 +17,21 @@ class RendererEnumRadio extends TypeEnum {
     render(params) {
         const { visibility, field, value, label, handleChange, handleBlur, errorMsg, warningMsg, } = params;
         if (visibility.disabled)
-            return React.createElement(React.Fragment, null);
+            return _jsx(_Fragment, {});
         if (visibility.hidden) {
-            return (React.createElement("input", { type: "hidden", name: field, value: value, readOnly: true, "aria-hidden": "true" }));
+            return (_jsx("input", { type: "hidden", name: field, value: value, readOnly: true, "aria-hidden": "true" }));
         }
         if (visibility.editable) {
             if (visibility.grid)
                 throw new Error("Not supported");
-            return (React.createElement(FormControlFieldsetCC, { component: "fieldset", required: visibility.required, fullWidth: true, error: !!errorMsg, warning: !!warningMsg },
-                React.createElement(FormLabel, { component: "legend" }, label),
-                React.createElement(RadioGroup, { name: field, value: value, onChange: (evt) => handleChange(evt.target.name, evt.target.value), onBlur: handleBlur, row: this.horizontal }, this.values
-                    .filter((value) => !value.invisible)
-                    .map((entry) => this.wrapButton(React.createElement(FormControlLabel, { key: entry.value, value: entry.value, control: React.createElement(Radio, null), label: entry.getLabel(), disabled: visibility.readOnly }), entry))),
-                React.createElement(FormHelperText, null, errorMsg || warningMsg)));
+            return (_jsxs(FormControlFieldsetCC, { component: "fieldset", required: visibility.required, fullWidth: true, error: !!errorMsg, warning: !!warningMsg, children: [_jsx(FormLabel, { component: "legend", children: label }), _jsx(RadioGroup, { name: field, value: value, onChange: (evt) => handleChange(evt.target.name, evt.target.value), onBlur: handleBlur, row: this.horizontal, children: this.values
+                            .filter((value) => !value.invisible)
+                            .map((entry) => this.wrapButton(_jsx(FormControlLabel, { value: entry.value, control: _jsx(Radio, {}), label: entry.getLabel(), disabled: visibility.readOnly }, entry.value), entry)) }), _jsx(FormHelperText, { children: errorMsg || warningMsg })] }));
         }
         const valueInfo = this.values.find((entry) => entry.value === value);
-        return (React.createElement(Typography, null,
-            !visibility.grid && `${label}: `,
-            valueInfo
-                ? valueInfo.getLabel()
-                : ccI18n.t("backend-integration.model.types.renderers.enum.unknown")));
+        return (_jsxs(Typography, { children: [!visibility.grid && `${label}: `, valueInfo
+                    ? valueInfo.getLabel()
+                    : ccI18n.t("backend-integration.model.types.renderers.enum.unknown")] }));
     }
 }
 export default RendererEnumRadio;

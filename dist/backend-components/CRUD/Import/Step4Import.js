@@ -1,3 +1,4 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React, { useEffect, useState } from "react";
 import { isFieldImportable } from "./index";
 import { Grid, TextField, Typography } from "@mui/material";
@@ -118,18 +119,10 @@ export const useImportStep4Logic = (props) => {
 const Step4Import = (props) => {
     const { counters, lastError } = useImportStep4Logic(props);
     const { t } = useCCTranslations();
-    return (React.createElement(Grid, { container: true, spacing: 2 },
-        React.createElement(Grid, { size: 12 },
-            React.createElement(Typography, null, t("backend-components.crud.import.queue", { COUNT: counters.todo }))),
-        React.createElement(Grid, { size: 12 },
-            React.createElement(Typography, null, t("backend-components.crud.import.success", {
-                COUNT: counters.success,
-            }))),
-        React.createElement(Grid, { size: 12 },
-            React.createElement(Typography, null, t("backend-components.crud.import.failed", {
-                COUNT: counters.failed,
-            }))),
-        React.createElement(Grid, { size: 12 },
-            React.createElement(TextField, { multiline: true, fullWidth: true, label: t("backend-components.crud.import.last_error"), value: lastError }))));
+    return (_jsxs(Grid, { container: true, spacing: 2, children: [_jsx(Grid, { size: 12, children: _jsx(Typography, { children: t("backend-components.crud.import.queue", { COUNT: counters.todo }) }) }), _jsx(Grid, { size: 12, children: _jsx(Typography, { children: t("backend-components.crud.import.success", {
+                        COUNT: counters.success,
+                    }) }) }), _jsx(Grid, { size: 12, children: _jsx(Typography, { children: t("backend-components.crud.import.failed", {
+                        COUNT: counters.failed,
+                    }) }) }), _jsx(Grid, { size: 12, children: _jsx(TextField, { multiline: true, fullWidth: true, label: t("backend-components.crud.import.last_error"), value: lastError }) })] }));
 };
 export default React.memo(Step4Import);

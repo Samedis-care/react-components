@@ -1,3 +1,4 @@
+import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
 import React, { useCallback, useState } from "react";
 import { Box, Grid, Popover, Tooltip } from "@mui/material";
 import { ArrowDownward, ArrowUpward } from "@mui/icons-material";
@@ -38,37 +39,18 @@ const ColumnHeaderContent = (props) => {
             : props.columnType === "id"
                 ? DataGridColumnHeaderFilterPopupId
                 : DataGridColumnHeaderFilterPopup;
-    return (React.createElement(React.Fragment, null,
-        React.createElement(Grid, { container: true, sx: { justifyContent: "flex-start" }, wrap: "nowrap" },
-            React.createElement(DataGridColumnHeaderLabel, { className: classes?.columnHeaderLabel, key: "header" },
-                React.createElement(Tooltip, { title: props.headerName },
-                    React.createElement("span", null, typeof props.headerName === "string"
-                        ? props.headerName.split("\n").map((text, index, arr) => (React.createElement(React.Fragment, { key: text },
-                            text,
-                            index == arr.length - 1 ? undefined : React.createElement("br", null))))
-                        : props.headerName))),
-            React.createElement(DataGridColumnHeaderSortIcon, { className: classes?.columnHeaderSortIcon },
-                props.sort === -1 && React.createElement(ArrowDownward, null),
-                props.sort === 1 && React.createElement(ArrowUpward, null)),
-            React.createElement(Grid, { size: "grow" }, props.sort !== 0 && props.sortOrder?.toString()),
-            props.filterable && (React.createElement(Grid, { key: "filter" },
-                React.createElement(Tooltip, { title: t("standalone.data-grid.content.filter") || "" },
-                    React.createElement(DataGridColumnHeaderFilterButton, { className: combineClassNames([
-                            classes?.columnHeaderFilterButton,
-                            props.filter?.value1 &&
-                                "CcDataGrid-columnHeaderFilterButtonActive",
-                        ]), onClick: openFilter, size: "large" },
-                        React.createElement(CurrentFilterIcon, { className: props.filter?.value1
-                                ? classes?.columnHeaderFilterActiveIcon
-                                : classes?.columnHeaderFilterIcon })))))),
-        props.enableResize && (React.createElement(DataGridColumnHeaderResizer, { className: classes?.columnHeaderResizer, onMouseDown: props.startDrag, onClick: preventPropagation, onDoubleClick: props.autoResize })),
-        React.createElement(Popover, { open: filterAnchorEl !== null, anchorEl: filterAnchorEl, onClose: closeFilter, anchorOrigin: anchorOrigin, transformOrigin: transformOrigin, onClick: preventPropagation },
-            React.createElement(Box, { sx: { m: 2 } },
-                React.createElement(ColumnHeaderFilterPopupComp, { container: true, className: props.columnType === "datetime"
-                        ? classes?.columnHeaderFilterPopupDateTime
-                        : props.columnType === "enum"
-                            ? classes?.columnHeaderFilterPopupEnum
-                            : classes?.columnHeaderFilterPopup },
-                    React.createElement(FilterEntry, { field: props.field, valueType: props.columnType, onChange: props.onFilterChange, value: props.filter, valueData: props.filterData, close: closeFilter, depth: 1 }))))));
+    return (_jsxs(_Fragment, { children: [_jsxs(Grid, { container: true, sx: { justifyContent: "flex-start" }, wrap: "nowrap", children: [_jsx(DataGridColumnHeaderLabel, { className: classes?.columnHeaderLabel, children: _jsx(Tooltip, { title: props.headerName, children: _jsx("span", { children: typeof props.headerName === "string"
+                                    ? props.headerName.split("\n").map((text, index, arr) => (_jsxs(React.Fragment, { children: [text, index == arr.length - 1 ? undefined : _jsx("br", {})] }, text)))
+                                    : props.headerName }) }) }, "header"), _jsxs(DataGridColumnHeaderSortIcon, { className: classes?.columnHeaderSortIcon, children: [props.sort === -1 && _jsx(ArrowDownward, {}), props.sort === 1 && _jsx(ArrowUpward, {})] }), _jsx(Grid, { size: "grow", children: props.sort !== 0 && props.sortOrder?.toString() }), props.filterable && (_jsx(Grid, { children: _jsx(Tooltip, { title: t("standalone.data-grid.content.filter") || "", children: _jsx(DataGridColumnHeaderFilterButton, { className: combineClassNames([
+                                    classes?.columnHeaderFilterButton,
+                                    props.filter?.value1 &&
+                                        "CcDataGrid-columnHeaderFilterButtonActive",
+                                ]), onClick: openFilter, size: "large", children: _jsx(CurrentFilterIcon, { className: props.filter?.value1
+                                        ? classes?.columnHeaderFilterActiveIcon
+                                        : classes?.columnHeaderFilterIcon }) }) }) }, "filter"))] }), props.enableResize && (_jsx(DataGridColumnHeaderResizer, { className: classes?.columnHeaderResizer, onMouseDown: props.startDrag, onClick: preventPropagation, onDoubleClick: props.autoResize })), _jsx(Popover, { open: filterAnchorEl !== null, anchorEl: filterAnchorEl, onClose: closeFilter, anchorOrigin: anchorOrigin, transformOrigin: transformOrigin, onClick: preventPropagation, children: _jsx(Box, { sx: { m: 2 }, children: _jsx(ColumnHeaderFilterPopupComp, { container: true, className: props.columnType === "datetime"
+                            ? classes?.columnHeaderFilterPopupDateTime
+                            : props.columnType === "enum"
+                                ? classes?.columnHeaderFilterPopupEnum
+                                : classes?.columnHeaderFilterPopup, children: _jsx(FilterEntry, { field: props.field, valueType: props.columnType, onChange: props.onFilterChange, value: props.filter, valueData: props.filterData, close: closeFilter, depth: 1 }) }) }) })] }));
 };
 export default React.memo(ColumnHeaderContent);

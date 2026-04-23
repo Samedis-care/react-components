@@ -1,3 +1,4 @@
+import { jsx as _jsx } from "react/jsx-runtime";
 import React, { useCallback } from "react";
 import SignPad from "../../standalone/SignPad/index";
 import { useDialogContext } from "../../framework/DialogContextProvider";
@@ -8,8 +9,8 @@ const SignaturePadCanvas = (props) => {
     const showSignDialog = useCallback(() => {
         if (disabled)
             return;
-        pushDialog(React.createElement(SignDialog, { signature: signature, ...dialogProps }));
+        pushDialog(_jsx(SignDialog, { signature: signature, ...dialogProps }));
     }, [pushDialog, disabled, signature, dialogProps]);
-    return (React.createElement(SignPad, { openSignPad: showSignDialog, signature: signature, disabled: disabled, openInfo: openInfo }));
+    return (_jsx(SignPad, { openSignPad: showSignDialog, signature: signature, disabled: disabled, openInfo: openInfo }));
 };
 export default React.memo(SignaturePadCanvas);

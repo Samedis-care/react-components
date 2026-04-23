@@ -13,5 +13,5 @@ export interface IDataGridContentSelectRowViewProps {
      */
     disabled: boolean;
 }
-declare const _default: React.MemoExoticComponent<(props: IDataGridContentSelectRowViewProps) => React.JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: IDataGridContentSelectRowViewProps) => import("react/jsx-runtime").JSX.Element>;
 export default _default;

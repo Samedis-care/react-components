@@ -44,6 +44,6 @@ export interface MultiSelectEntryImageOwnerState {
     iconSize?: number;
 }
 export type MultiSelectEntryClassKey = "root" | "selected" | "label" | "icon" | "iconSvg" | "divider" | "image";
-declare const MultiSelectEntry: <DataT extends MultiSelectorData>(inProps: MultiSelectEntryProps<DataT>) => React.JSX.Element;
+declare const MultiSelectEntry: <DataT extends MultiSelectorData>(inProps: MultiSelectEntryProps<DataT>) => import("react/jsx-runtime").JSX.Element;
 declare const _default: typeof MultiSelectEntry;
 export default _default;

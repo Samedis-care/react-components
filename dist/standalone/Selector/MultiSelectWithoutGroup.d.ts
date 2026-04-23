@@ -1,4 +1,3 @@
-import React from "react";
 import { BaseSelectorProps, MultiSelectorData } from "../../standalone/Selector";
 export interface MultiSelectWithoutGroupProps<DataT extends MultiSelectorData> extends Omit<BaseSelectorProps<DataT, false>, "onSelect" | "selected" | "classes" | "onLoad"> {
     /**
@@ -42,6 +41,6 @@ export interface MultiSelectWithoutGroupProps<DataT extends MultiSelectorData> e
     sortCompareFn?: (value1: DataT, value2: DataT) => number;
 }
 export type MultiSelectWithoutGroupClassKey = "outlined" | "switch";
-declare const MultiSelectWithoutGroup: <DataT extends MultiSelectorData>(inProps: MultiSelectWithoutGroupProps<DataT>) => React.JSX.Element;
+declare const MultiSelectWithoutGroup: <DataT extends MultiSelectorData>(inProps: MultiSelectWithoutGroupProps<DataT>) => import("react/jsx-runtime").JSX.Element;
 declare const _default: typeof MultiSelectWithoutGroup;
 export default _default;

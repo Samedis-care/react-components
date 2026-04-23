@@ -1,3 +1,4 @@
+import { jsx as _jsx } from "react/jsx-runtime";
 import React, { useCallback, useEffect, useMemo, useRef, useState, } from "react";
 import { getStringLabel, SingleSelect, } from "../../standalone";
 import debouncePromise from "../../utils/debouncePromise";
@@ -107,7 +108,7 @@ const BackendSingleSelect = (props) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selected]);
     const debouncedLoad = useMemo(() => debouncePromise(handleLoad, searchDebounceTime ?? 500), [handleLoad, searchDebounceTime]);
-    return (React.createElement(SingleSelect, { ...otherProps, freeSolo: freeSolo, onLoad: debouncedLoad, onSelect: handleSelect, selected: selectedFreeSolo
+    return (_jsx(SingleSelect, { ...otherProps, freeSolo: freeSolo, onLoad: debouncedLoad, onSelect: handleSelect, selected: selectedFreeSolo
             ? { value: selectedFreeSolo, label: selectedFreeSolo, freeSolo: true }
             : selected != null
                 ? (selectedCache ?? {

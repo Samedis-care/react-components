@@ -1,3 +1,4 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React, { useCallback, useEffect, useImperativeHandle, useRef, } from "react";
 import { Box, Button, FormHelperText, styled, Tooltip, Typography, Grid, useThemeProps, } from "@mui/material";
 import { AttachFile } from "@mui/icons-material";
@@ -226,68 +227,33 @@ const FileUpload = (inProps, ref) => {
         });
     }
     else if (variant === "classic") {
-        return (React.createElement(StyledGroupBox, { label: label, smallLabel: smallLabel, className: combineClassNames([className, classes?.root]) },
-            React.createElement(Dropzone, { container: true, spacing: 2, sx: { alignContent: "space-between" }, onDragOver: handleDragOver, onDrop: handleDrop, className: combineClassNames([
+        return (_jsx(StyledGroupBox, { label: label, smallLabel: smallLabel, className: combineClassNames([className, classes?.root]), children: _jsxs(Dropzone, { container: true, spacing: 2, sx: { alignContent: "space-between" }, onDragOver: handleDragOver, onDrop: handleDrop, className: combineClassNames([
                     "components-care-dropzone",
                     classes?.dropzone,
                     dragging && "Mui-active",
-                ]) },
-                !readOnly && (React.createElement(Grid, { key: "upload", size: "grow" },
-                    React.createElement(Button, { startIcon: React.createElement(AttachFile, null), variant: "contained", color: "primary", onClick: () => handleUpload(), name: name, onBlur: onBlur }, uploadLabel || t("standalone.file-upload.upload")),
-                    React.createElement(FileInput, { type: "file", accept: accept || undefined, multiple: maxFiles ? getRemainingFileCount() > 1 : true, onChange: handleFileChange, className: classes?.fileInput, ref: inputRef }))),
-                React.createElement(Grid, { key: "files", size: 12 },
-                    React.createElement(Grid, { container: true, spacing: 2, sx: { alignContent: "flex-start", alignItems: "flex-start" } },
-                        files.map((data, index) => data && (React.createElement(FilePreview, { name: data.file.name, mimeType: data.file.type, downloadLink: "downloadLink" in data.file
-                                ? data.file.downloadLink
-                                : undefined, key: `${index}-${data.file.name}`, size: previewSize, preview: previewImages ? data.preview : undefined, disabled: data.delete || false, onRemove: readOnly || data.preventDelete
-                                ? undefined
-                                : () => removeFile(data), variant: "box" }))),
-                        readOnly && files.length === 0 && (React.createElement(Grid, null,
-                            React.createElement(Typography, null, t("standalone.file-upload.no-files")))))),
-                !readOnly && (React.createElement(Grid, { key: "info", size: 12 },
-                    React.createElement(FormatText, { className: classes?.formatText },
-                        "(",
-                        t("standalone.file-upload.formats"),
-                        ":",
-                        " ",
-                        acceptLabel ||
-                            accept ||
-                            t("standalone.file-upload.format.any"),
-                        ")"))))));
+                ]), children: [!readOnly && (_jsxs(Grid, { size: "grow", children: [_jsx(Button, { startIcon: _jsx(AttachFile, {}), variant: "contained", color: "primary", onClick: () => handleUpload(), name: name, onBlur: onBlur, children: uploadLabel || t("standalone.file-upload.upload") }), _jsx(FileInput, { type: "file", accept: accept || undefined, multiple: maxFiles ? getRemainingFileCount() > 1 : true, onChange: handleFileChange, className: classes?.fileInput, ref: inputRef })] }, "upload")), _jsx(Grid, { size: 12, children: _jsxs(Grid, { container: true, spacing: 2, sx: { alignContent: "flex-start", alignItems: "flex-start" }, children: [files.map((data, index) => data && (_jsx(FilePreview, { name: data.file.name, mimeType: data.file.type, downloadLink: "downloadLink" in data.file
+                                        ? data.file.downloadLink
+                                        : undefined, size: previewSize, preview: previewImages ? data.preview : undefined, disabled: data.delete || false, onRemove: readOnly || data.preventDelete
+                                        ? undefined
+                                        : () => removeFile(data), variant: "box" }, `${index}-${data.file.name}`))), readOnly && files.length === 0 && (_jsx(Grid, { children: _jsx(Typography, { children: t("standalone.file-upload.no-files") }) }))] }) }, "files"), !readOnly && (_jsx(Grid, { size: 12, children: _jsxs(FormatText, { className: classes?.formatText, children: ["(", t("standalone.file-upload.formats"), ":", " ", acceptLabel ||
+                                    accept ||
+                                    t("standalone.file-upload.format.any"), ")"] }) }, "info"))] }) }));
     }
     else if (variant === "modern") {
         const acceptFiles = accept ? accept.split(",") : [];
-        return (React.createElement(StyledGroupBox, { label: label, smallLabel: smallLabel, className: combineClassNames([className, classes?.root]) },
-            React.createElement(Grid, { container: true, spacing: 2, sx: { alignContent: "space-between" }, onDragOver: handleDragOver, onDrop: handleDrop, onClick: () => handleUpload(), className: combineClassNames([
+        return (_jsx(StyledGroupBox, { label: label, smallLabel: smallLabel, className: combineClassNames([className, classes?.root]), children: _jsxs(Grid, { container: true, spacing: 2, sx: { alignContent: "space-between" }, onDragOver: handleDragOver, onDrop: handleDrop, onClick: () => handleUpload(), className: combineClassNames([
                     classes?.dropzone,
                     "components-care-dropzone",
                     dragging && "Mui-active",
-                ]) },
-                !readOnly && (React.createElement(Grid, { key: "upload", size: "grow" },
-                    React.createElement(ModernUploadLabel, { className: combineClassNames([
-                            classes?.modernUploadLabel,
-                            files.length === 0 && "CcFileUpload-modernUploadLabel-empty",
-                        ]) }, uploadLabel || t("standalone.file-upload.upload-modern")),
-                    React.createElement(FileInput, { type: "file", accept: accept || undefined, multiple: maxFiles ? getRemainingFileCount() > 1 : true, onChange: handleFileChange, className: classes?.fileInput, ref: inputRef }))),
-                files.length > 0 && (React.createElement(Grid, { key: "files", size: 12 },
-                    React.createElement(Box, { sx: { mx: 1 } },
-                        React.createElement(Grid, { container: true, spacing: 1, sx: { alignContent: "flex-start", alignItems: "flex-start" } }, files.map((data, index) => data && (React.createElement(FilePreview, { name: data.file.name, mimeType: data.file.type, downloadLink: "downloadLink" in data.file
-                                ? data.file.downloadLink
-                                : undefined, key: `${index}-${data.file.name}`, size: previewSize, preview: previewImages ? data.preview : undefined, disabled: data.delete || false, onRemove: readOnly || data.preventDelete
-                                ? undefined
-                                : () => removeFile(data), variant: "list" }))))))),
-                readOnly && files.length === 0 && (React.createElement(Grid, { key: "no-files", size: 12 },
-                    React.createElement(Typography, null, t("standalone.file-upload.no-files")))),
-                !readOnly && (React.createElement(Grid, { key: "info", container: true, wrap: "nowrap", spacing: 1, size: 12 },
-                    React.createElement(Grid, { size: "grow" },
-                        React.createElement(FormatTextModern, { align: "right", className: classes?.formatTextModern },
-                            t("standalone.file-upload.formats-modern"),
-                            " ",
-                            acceptFiles.length == 0 &&
-                                t("standalone.file-upload.format.any"))),
-                    acceptFiles.map((entry, idx) => (React.createElement(FormatIconsModern, { className: classes?.formatIconsModern, key: idx.toString(16) },
-                        React.createElement(Tooltip, { title: acceptLabel || accept || "" },
-                            React.createElement("span", null, React.createElement(getFileIconOrDefault(entry, entry))))))))))));
+                ]), children: [!readOnly && (_jsxs(Grid, { size: "grow", children: [_jsx(ModernUploadLabel, { className: combineClassNames([
+                                    classes?.modernUploadLabel,
+                                    files.length === 0 && "CcFileUpload-modernUploadLabel-empty",
+                                ]), children: uploadLabel || t("standalone.file-upload.upload-modern") }), _jsx(FileInput, { type: "file", accept: accept || undefined, multiple: maxFiles ? getRemainingFileCount() > 1 : true, onChange: handleFileChange, className: classes?.fileInput, ref: inputRef })] }, "upload")), files.length > 0 && (_jsx(Grid, { size: 12, children: _jsx(Box, { sx: { mx: 1 }, children: _jsx(Grid, { container: true, spacing: 1, sx: { alignContent: "flex-start", alignItems: "flex-start" }, children: files.map((data, index) => data && (_jsx(FilePreview, { name: data.file.name, mimeType: data.file.type, downloadLink: "downloadLink" in data.file
+                                        ? data.file.downloadLink
+                                        : undefined, size: previewSize, preview: previewImages ? data.preview : undefined, disabled: data.delete || false, onRemove: readOnly || data.preventDelete
+                                        ? undefined
+                                        : () => removeFile(data), variant: "list" }, `${index}-${data.file.name}`))) }) }) }, "files")), readOnly && files.length === 0 && (_jsx(Grid, { size: 12, children: _jsx(Typography, { children: t("standalone.file-upload.no-files") }) }, "no-files")), !readOnly && (_jsxs(Grid, { container: true, wrap: "nowrap", spacing: 1, size: 12, children: [_jsx(Grid, { size: "grow", children: _jsxs(FormatTextModern, { align: "right", className: classes?.formatTextModern, children: [t("standalone.file-upload.formats-modern"), " ", acceptFiles.length == 0 &&
+                                            t("standalone.file-upload.format.any")] }) }), acceptFiles.map((entry, idx) => (_jsx(FormatIconsModern, { className: classes?.formatIconsModern, children: _jsx(Tooltip, { title: acceptLabel || accept || "", children: _jsx("span", { children: React.createElement(getFileIconOrDefault(entry, entry)) }) }) }, idx.toString(16))))] }, "info"))] }) }));
     }
     else {
         throw new Error("Invalid variant prop passed");

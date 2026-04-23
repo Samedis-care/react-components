@@ -1,3 +1,4 @@
+import { jsx as _jsx } from "react/jsx-runtime";
 import React from "react";
 import { FormControlLabel, styled, Typography, useThemeProps, } from "@mui/material";
 import combineClassNames from "../../utils/combineClassNames";
@@ -31,12 +32,12 @@ const ComponentWithLabel = (inProps) => {
                     top: "center",
                     bottom: "center",
                 }[labelPlacement];
-        label = (React.createElement(Label, { variant: labelVariant, sx: { display: labelDisplay }, align: labelAlign, className: propsCopy.classes?.label }, labelText));
+        label = (_jsx(Label, { variant: labelVariant, sx: { display: labelDisplay }, align: labelAlign, className: propsCopy.classes?.label, children: labelText }));
         props = { ...propsCopy, label: "" };
     }
     else {
         label = props.label;
     }
-    return (React.createElement(StyledFormControlLabel, { ...props, className: combineClassNames([props.className, props.classes?.root]), label: label }));
+    return (_jsx(StyledFormControlLabel, { ...props, className: combineClassNames([props.className, props.classes?.root]), label: label }));
 };
 export default React.memo(ComponentWithLabel);

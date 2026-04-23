@@ -22,5 +22,5 @@ export interface ImagePreviewDialogProps {
     classes?: Partial<Record<ImagePreviewDialogClassKey, string>>;
 }
 export type ImagePreviewDialogClassKey = "root" | "closeButton" | "container" | "image";
-declare const _default: React.MemoExoticComponent<(inProps: ImagePreviewDialogProps) => React.JSX.Element>;
+declare const _default: React.MemoExoticComponent<(inProps: ImagePreviewDialogProps) => import("react/jsx-runtime").JSX.Element>;
 export default _default;

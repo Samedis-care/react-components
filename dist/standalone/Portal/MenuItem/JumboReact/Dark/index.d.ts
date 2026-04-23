@@ -5,5 +5,5 @@ export type MenuItemJumboReactDarkClassKey = "root" | "icon" | "dot";
 export interface MenuItemJumboReactDarkProps {
     typographyProps?: TypographyProps;
 }
-declare const _default: React.MemoExoticComponent<(inProps: MenuItemProps & MenuItemJumboReactDarkProps) => React.JSX.Element>;
+declare const _default: React.MemoExoticComponent<(inProps: MenuItemProps & MenuItemJumboReactDarkProps) => import("react/jsx-runtime").JSX.Element>;
 export default _default;

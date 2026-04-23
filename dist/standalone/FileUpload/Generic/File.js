@@ -1,3 +1,4 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React, { useCallback } from "react";
 import { Grid, styled, Tooltip, Typography, useThemeProps, } from "@mui/material";
 import { Cancel as CancelIconList, CancelOutlined as CancelIcon, InsertDriveFile as DefaultFileIcon, } from "@mui/icons-material";
@@ -332,23 +333,22 @@ const File = (inProps) => {
     const isList = variant === "list" || variant === "compact-list" || variant === "icon-only";
     const renderIcon = () => {
         const IconWrapperComp = isList ? IconWrapperList : IconWrapper;
-        return (React.createElement(IconWrapperComp, { className: combineClassNames([
+        return (_jsx(IconWrapperComp, { className: combineClassNames([
                 isList ? classes?.iconWrapperList : classes?.iconWrapper,
                 props.disabled && "Mui-disabled",
                 downloadLink && "Mui-active",
-            ]) }, props.preview ? (React.createElement("img", { src: props.preview, alt: props.name, onClick: openDownload, style: { height: props.size } })) : (React.createElement(FileIcon, { onClick: openDownload, style: { height: props.size } }))));
+            ]), children: props.preview ? (_jsx("img", { src: props.preview, alt: props.name, onClick: openDownload, style: { height: props.size } })) : (_jsx(FileIcon, { onClick: openDownload, style: { height: props.size } })) }));
     };
     const renderName = () => {
         const TypographyComp = variant === "list" ? StyledLabelList : StyledLabel;
-        return (React.createElement(Tooltip, { title: props.name },
-            React.createElement(TypographyComp, { align: isList ? "left" : "center", noWrap: true, className: combineClassNames([
+        return (_jsx(Tooltip, { title: props.name, children: _jsx(TypographyComp, { align: isList ? "left" : "center", noWrap: true, className: combineClassNames([
                     variant === "list" ? classes?.listLabel : classes?.label,
                     downloadLink && "Mui-active",
                 ]), onClick: openDownload, variant: "body2", style: isList
                     ? {
                         lineHeight: `${props.size}px`,
                     }
-                    : undefined }, props.label ?? props.name)));
+                    : undefined, children: props.label ?? props.name }) }));
     };
     const removeBtn = props.onRemove &&
         !props.disabled &&
@@ -366,33 +366,16 @@ const File = (inProps) => {
             style: variant === "list" ? { height: props.size } : undefined,
         });
     if (variant === "box") {
-        return (React.createElement(Grid, { className: className, style: { width: props.size } },
-            React.createElement(Grid, { container: true, spacing: 2 },
-                React.createElement(IconContainer, { size: 12, className: classes?.iconContainer },
-                    removeBtn,
-                    renderIcon()),
-                React.createElement(Grid, { size: 12 }, renderName()))));
+        return (_jsx(Grid, { className: className, style: { width: props.size }, children: _jsxs(Grid, { container: true, spacing: 2, children: [_jsxs(IconContainer, { size: 12, className: classes?.iconContainer, children: [removeBtn, renderIcon()] }), _jsx(Grid, { size: 12, children: renderName() })] }) }));
     }
     else if (variant === "list") {
-        return (React.createElement(Grid, { onClick: handleListClick, container: true, spacing: 2, sx: { alignItems: "stretch" }, wrap: "nowrap", className: className, size: 12 },
-            React.createElement(Grid, null, renderIcon()),
-            React.createElement(ListEntryText, { size: "grow", className: classes?.listEntryText }, renderName()),
-            removeBtn && React.createElement(Grid, null, removeBtn)));
+        return (_jsxs(Grid, { onClick: handleListClick, container: true, spacing: 2, sx: { alignItems: "stretch" }, wrap: "nowrap", className: className, size: 12, children: [_jsx(Grid, { children: renderIcon() }), _jsx(ListEntryText, { size: "grow", className: classes?.listEntryText, children: renderName() }), removeBtn && _jsx(Grid, { children: removeBtn })] }));
     }
     else if (variant === "compact-list") {
-        return (React.createElement(CompactListWrapper, { onClick: handleListClick, className: combineClassNames([className, classes?.compactListWrapper]) },
-            React.createElement(Grid, { container: true, spacing: 2, sx: { alignItems: "stretch" }, wrap: "nowrap" },
-                React.createElement(Grid, null, renderIcon()),
-                React.createElement(ListEntryText, { className: classes?.listEntryText }, renderName()),
-                removeBtn && React.createElement(Grid, null, removeBtn))));
+        return (_jsx(CompactListWrapper, { onClick: handleListClick, className: combineClassNames([className, classes?.compactListWrapper]), children: _jsxs(Grid, { container: true, spacing: 2, sx: { alignItems: "stretch" }, wrap: "nowrap", children: [_jsx(Grid, { children: renderIcon() }), _jsx(ListEntryText, { className: classes?.listEntryText, children: renderName() }), removeBtn && _jsx(Grid, { children: removeBtn })] }) }));
     }
     else if (variant === "icon-only") {
-        return (React.createElement(CompactListWrapper, { onClick: handleListClick, className: combineClassNames([className, classes?.compactListWrapper]) },
-            React.createElement(Grid, { container: true, spacing: 2, sx: { alignItems: "stretch" }, wrap: "nowrap" },
-                React.createElement(Grid, null,
-                    React.createElement(Tooltip, { title: props.name },
-                        React.createElement("span", null, renderIcon()))),
-                removeBtn && React.createElement(Grid, null, removeBtn))));
+        return (_jsx(CompactListWrapper, { onClick: handleListClick, className: combineClassNames([className, classes?.compactListWrapper]), children: _jsxs(Grid, { container: true, spacing: 2, sx: { alignItems: "stretch" }, wrap: "nowrap", children: [_jsx(Grid, { children: _jsx(Tooltip, { title: props.name, children: _jsx("span", { children: renderIcon() }) }) }), removeBtn && _jsx(Grid, { children: removeBtn })] }) }));
     }
     else {
         throw new Error("Invalid variant passed");

@@ -1,3 +1,4 @@
+import { jsx as _jsx, Fragment as _Fragment, jsxs as _jsxs } from "react/jsx-runtime";
 import React, { useCallback, useEffect, useState } from "react";
 import { MultiImageNewIdPrefix, } from "../../standalone/FileUpload/MultiImage/MultiImage";
 import { Loader, MultiImage } from "../../standalone";
@@ -110,11 +111,9 @@ const CrudMultiImage = (props) => {
             onChange(name, images);
     }, [images, name, onChange]);
     if (loading || additionalImagesLoading)
-        return React.createElement(Loader, null);
+        return _jsx(Loader, {});
     if (loadError)
-        return React.createElement("span", null, loadError.message);
-    return (React.createElement(React.Fragment, null,
-        error && React.createElement(ErrorComponent, { error: error }),
-        React.createElement(MultiImage, { ...otherProps, images: additionalImages ? additionalImages.concat(images) : images, onChange: handleChange })));
+        return _jsx("span", { children: loadError.message });
+    return (_jsxs(_Fragment, { children: [error && _jsx(ErrorComponent, { error: error }), _jsx(MultiImage, { ...otherProps, images: additionalImages ? additionalImages.concat(images) : images, onChange: handleChange })] }));
 };
 export default React.memo(CrudMultiImage);

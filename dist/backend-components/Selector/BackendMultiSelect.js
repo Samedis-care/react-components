@@ -1,3 +1,4 @@
+import { jsx as _jsx } from "react/jsx-runtime";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { MultiSelect, } from "../../standalone";
 import debouncePromise from "../../utils/debouncePromise";
@@ -113,6 +114,6 @@ const BackendMultiSelect = (props) => {
         }
         : undefined, [lru, handleLoadLruRecord]);
     const debouncedLoad = useMemo(() => debouncePromise(handleLoad, searchDebounceTime ?? 500), [searchDebounceTime, handleLoad]);
-    return (React.createElement(MultiSelect, { ...otherProps, onLoad: debouncedLoad, onSelect: handleSelect, selected: selected, displaySwitch: !!switchFilterName, lru: lruConfig }));
+    return (_jsx(MultiSelect, { ...otherProps, onLoad: debouncedLoad, onSelect: handleSelect, selected: selected, displaySwitch: !!switchFilterName, lru: lruConfig }));
 };
 export default React.memo(BackendMultiSelect);

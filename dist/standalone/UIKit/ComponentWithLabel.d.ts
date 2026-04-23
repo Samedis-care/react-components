@@ -27,5 +27,5 @@ export interface ComponentWithLabelProps extends Omit<FormControlLabelProps, "la
     classes?: Partial<Record<ComponentWithLabelClassKey, string>>;
 }
 export type ComponentWithLabelClassKey = "root" | "label";
-declare const _default: React.MemoExoticComponent<(inProps: ComponentWithLabelProps | FormControlLabelProps) => React.JSX.Element>;
+declare const _default: React.MemoExoticComponent<(inProps: ComponentWithLabelProps | FormControlLabelProps) => import("react/jsx-runtime").JSX.Element>;
 export default _default;

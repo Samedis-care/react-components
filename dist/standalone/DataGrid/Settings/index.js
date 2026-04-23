@@ -1,3 +1,4 @@
+import { jsx as _jsx } from "react/jsx-runtime";
 import React, { useCallback } from "react";
 import { DataGridContentOverlayCollapse, useDataGridColumnState, useDataGridProps, useDataGridState, } from "../DataGrid";
 import Dialog from "./SettingsDialog";
@@ -37,8 +38,7 @@ const DataGridSettings = (props) => {
             },
         }));
     }, [setColumnState, setState]);
-    return (React.createElement(DataGridContentOverlayCollapse, { className: classes?.contentOverlayCollapse, in: state.showSettings },
-        React.createElement(Dialog, { columns: props.columns.filter((col) => !state.settingsSearch ||
-                col.headerName.toLowerCase().includes(state.settingsSearch)), closeGridSettings: closeGridSettings, toggleColumnLock: toggleColumnLock, toggleColumnVisibility: toggleColumnVisibility, lockedColumns: state.lockedColumns, hiddenColumns: state.hiddenColumns })));
+    return (_jsx(DataGridContentOverlayCollapse, { className: classes?.contentOverlayCollapse, in: state.showSettings, children: _jsx(Dialog, { columns: props.columns.filter((col) => !state.settingsSearch ||
+                col.headerName.toLowerCase().includes(state.settingsSearch)), closeGridSettings: closeGridSettings, toggleColumnLock: toggleColumnLock, toggleColumnVisibility: toggleColumnVisibility, lockedColumns: state.lockedColumns, hiddenColumns: state.hiddenColumns }) }));
 };
 export default React.memo(DataGridSettings);

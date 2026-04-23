@@ -1,4 +1,5 @@
-import React, { PureComponent } from "react";
+import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
+import { PureComponent } from "react";
 import { CircularProgress, Divider, Grid } from "@mui/material";
 import ScrollableScheduleDay from "./ScrollableScheduleDay";
 import moment from "moment";
@@ -28,12 +29,10 @@ class ScrollableScheduleWeek extends PureComponent {
     }
     render() {
         if (this.state.loadError) {
-            return React.createElement(Grid, { size: 12 }, this.state.loadError.message);
+            return _jsx(Grid, { size: 12, children: this.state.loadError.message });
         }
         if (!this.state.data) {
-            return (React.createElement(Grid, { size: 12 },
-                React.createElement(Grid, { container: true, sx: { justifyContent: "space-around" } },
-                    React.createElement(CircularProgress, null))));
+            return (_jsx(Grid, { size: 12, children: _jsx(Grid, { container: true, sx: { justifyContent: "space-around" }, children: _jsx(CircularProgress, {}) }) }));
         }
         const firstDay = this.props.moment;
         firstDay.subtract(firstDay.weekday(), "days");
@@ -43,31 +42,18 @@ class ScrollableScheduleWeek extends PureComponent {
             const dayMoment = firstDay.clone().add(day, "days");
             if (dayMoment.dayOfYear() === now.dayOfYear() &&
                 dayMoment.year() === now.year()) {
-                dayItems.push(React.createElement(ScrollableScheduleDay, { key: day, data: this.state.data[day], ref: this.props.setTodayElement, moment: dayMoment, today: true }));
+                dayItems.push(_jsx(ScrollableScheduleDay, { data: this.state.data[day], ref: this.props.setTodayElement, moment: dayMoment, today: true }, day));
             }
             else {
-                dayItems.push(React.createElement(ScrollableScheduleDay, { key: `${day}`, data: this.state.data[day], moment: dayMoment }));
+                dayItems.push(_jsx(ScrollableScheduleDay, { data: this.state.data[day], moment: dayMoment }, `${day}`));
             }
         }
         const endOfWeek = firstDay.clone().add(6, "days");
-        return (React.createElement(React.Fragment, null,
-            React.createElement(Grid, { size: 12 },
-                React.createElement(Divider, null)),
-            React.createElement(Grid, { size: 1 }),
-            React.createElement(Grid, { size: 11 },
-                this.props.t("standalone.schedule.week"),
-                " ",
-                firstDay.week(),
-                ",",
-                " ",
-                firstDay.format("DD MMM"),
-                " - ",
-                endOfWeek.format("DD MMM")),
-            dayItems));
+        return (_jsxs(_Fragment, { children: [_jsx(Grid, { size: 12, children: _jsx(Divider, {}) }), _jsx(Grid, { size: 1 }), _jsxs(Grid, { size: 11, children: [this.props.t("standalone.schedule.week"), " ", firstDay.week(), ",", " ", firstDay.format("DD MMM"), " - ", endOfWeek.format("DD MMM")] }), dayItems] }));
     }
 }
 const ScrollableScheduleWeekWithTranslation = (props) => {
     const { i18n, t, ready: tReady } = useCCTranslations();
-    return (React.createElement(ScrollableScheduleWeek, { ...props, i18n: i18n, t: t, tReady: tReady }));
+    return (_jsx(ScrollableScheduleWeek, { ...props, i18n: i18n, t: t, tReady: tReady }));
 };
 export default ScrollableScheduleWeekWithTranslation;

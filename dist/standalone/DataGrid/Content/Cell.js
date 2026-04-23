@@ -1,3 +1,4 @@
+import { jsx as _jsx } from "react/jsx-runtime";
 import { DataGridCell, useDataGridProps, useDataGridState, } from "../DataGrid";
 import React, { useCallback, useContext, } from "react";
 import ColumnHeader from "./ColumnHeader";
@@ -47,17 +48,17 @@ const Cell = (props) => {
         // empty
     }
     else if (columnIndex === columns.length + (disableSelection ? 0 : 1)) {
-        content = React.createElement(React.Fragment, null); // remaining width filler
+        content = _jsx(React.Fragment, {}); // remaining width filler
     }
     else if (rowIndex === 0) {
         // header
-        content = React.createElement(ColumnHeader, { column: column });
+        content = _jsx(ColumnHeader, { column: column });
     }
     else if (columnIndex === 0 && !disableSelection) {
-        content = record ? (React.createElement(SelectRow, { record: record })) : (React.createElement(Skeleton, { variant: "rectangular" }));
+        content = record ? (_jsx(SelectRow, { record: record })) : (_jsx(Skeleton, { variant: "rectangular" }));
     }
     else {
-        const content2 = record ? (record[column.field]) : (React.createElement(Skeleton, { variant: "text" }));
+        const content2 = record ? (record[column.field]) : (_jsx(Skeleton, { variant: "text" }));
         // special handling for objects (Date, etc). use toString on them
         if (content2 &&
             typeof content2 === "object" &&
@@ -77,7 +78,7 @@ const Cell = (props) => {
     const endHover = useCallback(() => {
         setHover(null);
     }, [setHover]);
-    return (React.createElement(DataGridCell, { style: props.style, onMouseEnter: startHover, onMouseLeave: endHover, onClick: disableSelection || !record || (canSelectRow && !canSelectRow(record))
+    return (_jsx(DataGridCell, { style: props.style, onMouseEnter: startHover, onMouseLeave: endHover, onClick: disableSelection || !record || (canSelectRow && !canSelectRow(record))
             ? undefined
             : toggleSelection, onDoubleClick: editRecord, className: combineClassNames([
             classes?.cell,
@@ -90,6 +91,6 @@ const Cell = (props) => {
             (hover == rowIndex ||
                 isSelected(state.selectAll, state.selectedRows, record, isSelectedHook)) &&
                 "CcDataGrid-dataCellSelected",
-        ]) }, content));
+        ]), children: content }));
 };
 export default Cell;

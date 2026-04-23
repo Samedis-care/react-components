@@ -11,5 +11,5 @@ interface IProps {
      */
     onChange: (value: FilterComboType) => void;
 }
-declare const _default: React.MemoExoticComponent<(props: IProps) => React.JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: IProps) => import("react/jsx-runtime").JSX.Element>;
 export default _default;

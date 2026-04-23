@@ -1,3 +1,4 @@
+import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
 import React from "react";
 import { Divider, List, ListItemSecondaryAction, ListItemText, styled, useThemeProps, } from "@mui/material";
 import { SmallIconButton, SmallListItemButton, SmallListItemIcon, } from "../Small";
@@ -46,16 +47,8 @@ const MultiSelectEntry = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcMultiSelectEntry" });
     const { t } = useCCTranslations();
     const { enableIcons, enableDivider, handleDelete, data, classes, iconSize, className, } = props;
-    return (React.createElement(React.Fragment, null,
-        React.createElement(Root, { className: combineClassNames([className, classes?.root]) },
-            React.createElement(Selected, { ownerState: { unClickable: !data.onClick, ignore: !!data.ignore }, onClick: data.onClick, className: classes?.selected, disableRipple: !data.onClick, disableTouchRipple: !data.onClick },
-                enableIcons && (React.createElement(SmallListItemIcon, null, typeof data.icon === "string" ? (React.createElement(StyledImage, { ownerState: { iconSize }, src: data.icon, alt: "", className: classes?.image })) : (data.icon))),
-                React.createElement(Label, { className: classes?.label }, data.label),
-                handleDelete && (React.createElement(ListItemSecondaryAction, null,
-                    React.createElement(StyledRemoveButton, { className: classes?.icon, edge: "end", name: data.value, disabled: !handleDelete, onClick: handleDelete, "aria-label": t("standalone.selector.multi-select.remove-item", {
-                            ITEM: data.label,
-                        }) },
-                        React.createElement(StyledRemoveIcon, { className: classes?.iconSvg })))))),
-        enableDivider && React.createElement(StyledDivider, { className: classes?.divider })));
+    return (_jsxs(_Fragment, { children: [_jsx(Root, { className: combineClassNames([className, classes?.root]), children: _jsxs(Selected, { ownerState: { unClickable: !data.onClick, ignore: !!data.ignore }, onClick: data.onClick, className: classes?.selected, disableRipple: !data.onClick, disableTouchRipple: !data.onClick, children: [enableIcons && (_jsx(SmallListItemIcon, { children: typeof data.icon === "string" ? (_jsx(StyledImage, { ownerState: { iconSize }, src: data.icon, alt: "", className: classes?.image })) : (data.icon) })), _jsx(Label, { className: classes?.label, children: data.label }), handleDelete && (_jsx(ListItemSecondaryAction, { children: _jsx(StyledRemoveButton, { className: classes?.icon, edge: "end", name: data.value, disabled: !handleDelete, onClick: handleDelete, "aria-label": t("standalone.selector.multi-select.remove-item", {
+                                    ITEM: data.label,
+                                }), children: _jsx(StyledRemoveIcon, { className: classes?.iconSvg }) }) }))] }) }), enableDivider && _jsx(StyledDivider, { className: classes?.divider })] }));
 };
 export default React.memo(MultiSelectEntry);

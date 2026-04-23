@@ -1,3 +1,4 @@
+import { Fragment as _Fragment, jsx as _jsx } from "react/jsx-runtime";
 import React from "react";
 import { DatePicker, LocalizationProvider, } from "@mui/x-date-pickers";
 import { useThemeProps } from "@mui/material";
@@ -5,7 +6,7 @@ import { withMuiWarning } from "../UIKit/MuiWarning";
 import useMuiLocaleData from "./useMuiLocaleData";
 import accessSlotProps from "../../utils/internal/accessSlotProps";
 const NoIcon = () => {
-    return React.createElement(React.Fragment, null);
+    return _jsx(_Fragment, {});
 };
 const LocalizedKeyboardDatePicker = (inProps) => {
     const props = useThemeProps({
@@ -18,8 +19,7 @@ const LocalizedKeyboardDatePicker = (inProps) => {
         openPickerIcon: NoIcon,
     };
     const localeText = useMuiLocaleData();
-    return (React.createElement(LocalizationProvider, { localeText: localeText },
-        React.createElement(DatePicker, { format: "L", ...otherProps, slots: otherProps.disabled && hideDisabledIcon
+    return (_jsx(LocalizationProvider, { localeText: localeText, children: _jsx(DatePicker, { format: "L", ...otherProps, slots: otherProps.disabled && hideDisabledIcon
                 ? slotOverrideHideIcon
                 : otherProps.slots, slotProps: {
                 ...otherProps.slotProps,
@@ -42,6 +42,6 @@ const LocalizedKeyboardDatePicker = (inProps) => {
                         disableClearable,
                     };
                 },
-            } })));
+            } }) }));
 };
 export default React.memo(withMuiWarning(LocalizedKeyboardDatePicker));

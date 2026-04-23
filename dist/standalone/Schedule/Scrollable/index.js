@@ -1,3 +1,4 @@
+import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Box, Button, Divider, Grid, IconButton, Menu, styled, useThemeProps, } from "@mui/material";
 import { Settings as SettingsIcon } from "@mui/icons-material";
@@ -92,7 +93,7 @@ const ScrollableSchedule = (inProps) => {
     const loadMore = useCallback((top) => {
         const mkItem = (state) => {
             const page = top ? state.dataOffsetTop : state.dataOffsetBottom;
-            return (React.createElement(ScrollableScheduleWeek, { key: page.toString(), loadData: () => loadWeekCallback(page, state.filterValues), setTodayElement: (elem) => (todayElem.current = elem), moment: state.today.clone().add(page, "weeks") }));
+            return (_jsx(ScrollableScheduleWeek, { loadData: () => loadWeekCallback(page, state.filterValues), setTodayElement: (elem) => (todayElem.current = elem), moment: state.today.clone().add(page, "weeks") }, page.toString()));
         };
         if (top) {
             setState((prevState) => ({
@@ -150,35 +151,14 @@ const ScrollableSchedule = (inProps) => {
         setFilterSettingsAnchorEl(null);
     }, []);
     const filterCount = filters ? Object.keys(filters).length : 0;
-    return (React.createElement(Grid, { container: true, className: className },
-        React.createElement(TodayButtonWrapper, { size: 12, className: classes?.today, onClick: jumpToToday },
-            React.createElement(Grid, { container: true, sx: { justifyContent: "space-between" } },
-                React.createElement(Grid, null,
-                    React.createElement(TodayButton, { className: classes?.todayBtn, onClick: jumpToToday, fullWidth: true },
-                        React.createElement(Box, { sx: { m: 2 } }, state.today.format("ddd DD MMMM")))),
-                React.createElement(Grid, null, filterCount + actions.length > 0 && (React.createElement(FilterWrapper, { sx: { px: 2 }, className: classes?.filterWrapper, onClick: preventAction }, filterCount + actions.length > 1 ? (React.createElement(React.Fragment, null,
-                    React.createElement(IconButton, { onClick: openFilterSettings, "aria-label": t("standalone.schedule.filter-settings") },
-                        React.createElement(FilterSettingsIcon, { className: classes?.filterSettingsBtn })),
-                    React.createElement(Menu, { open: filterSettingsAnchorEl != null, anchorEl: filterSettingsAnchorEl, onClose: closeFiltersMenu },
-                        React.createElement(Box, { sx: { p: 1 } },
-                            React.createElement(Grid, { container: true, spacing: 1 },
-                                Object.entries(filters).map(([name, filter]) => (React.createElement(Grid, { key: "filter-" + name, size: 12 },
-                                    React.createElement(ScrollableFilterRenderer, { ...filter, name: name, value: filter.type === "select"
-                                            ? state.filterValues[name]
-                                            : state.filterValues[name], onChange: handleFilterChange })))),
-                                filterCount > 0 && (React.createElement(Grid, { key: "divider", size: 12 },
-                                    React.createElement(Divider, null))),
-                                actions.map((action) => (React.createElement(Grid, { key: "action-" + action.id, size: 12 },
-                                    React.createElement(Button, { onClick: action.onClick, disabled: action.disabled, fullWidth: true }, action.label))))))))) : filterCount > 0 ? ((() => {
-                    const [name, filter] = Object.entries(filters)[0];
-                    return (React.createElement(ScrollableFilterRenderer, { key: "filter-" + name, ...filter, name: name, value: state.filterValues[name], onChange: handleFilterChange, inline: "scrollable" }));
-                })()) : actions.length > 0 ? ((() => {
-                    const action = actions[0];
-                    return (React.createElement(Button, { key: "action-" + action.id, onClick: action.onClick, disabled: action.disabled }, action.label));
-                })()) : (throwError("code should be unreachable"))))))),
-        React.createElement(Grid, { size: 12 },
-            React.createElement(StyledInfiniteScroll, { className: combineClassNames([wrapperClass, classes?.scroller]), loadMoreTop: loadMoreTop, loadMoreBottom: loadMoreBottom, ref: scrollElem },
-                React.createElement(Box, { sx: { m: 2 } },
-                    React.createElement(Grid, { container: true, spacing: 2 }, state.items))))));
+    return (_jsxs(Grid, { container: true, className: className, children: [_jsx(TodayButtonWrapper, { size: 12, className: classes?.today, onClick: jumpToToday, children: _jsxs(Grid, { container: true, sx: { justifyContent: "space-between" }, children: [_jsx(Grid, { children: _jsx(TodayButton, { className: classes?.todayBtn, onClick: jumpToToday, fullWidth: true, children: _jsx(Box, { sx: { m: 2 }, children: state.today.format("ddd DD MMMM") }) }) }), _jsx(Grid, { children: filterCount + actions.length > 0 && (_jsx(FilterWrapper, { sx: { px: 2 }, className: classes?.filterWrapper, onClick: preventAction, children: filterCount + actions.length > 1 ? (_jsxs(_Fragment, { children: [_jsx(IconButton, { onClick: openFilterSettings, "aria-label": t("standalone.schedule.filter-settings"), children: _jsx(FilterSettingsIcon, { className: classes?.filterSettingsBtn }) }), _jsx(Menu, { open: filterSettingsAnchorEl != null, anchorEl: filterSettingsAnchorEl, onClose: closeFiltersMenu, children: _jsx(Box, { sx: { p: 1 }, children: _jsxs(Grid, { container: true, spacing: 1, children: [Object.entries(filters).map(([name, filter]) => (_jsx(Grid, { size: 12, children: _jsx(ScrollableFilterRenderer, { ...filter, name: name, value: filter.type === "select"
+                                                                    ? state.filterValues[name]
+                                                                    : state.filterValues[name], onChange: handleFilterChange }) }, "filter-" + name))), filterCount > 0 && (_jsx(Grid, { size: 12, children: _jsx(Divider, {}) }, "divider")), actions.map((action) => (_jsx(Grid, { size: 12, children: _jsx(Button, { onClick: action.onClick, disabled: action.disabled, fullWidth: true, children: action.label }) }, "action-" + action.id)))] }) }) })] })) : filterCount > 0 ? ((() => {
+                                    const [name, filter] = Object.entries(filters)[0];
+                                    return (_jsx(ScrollableFilterRenderer, { ...filter, name: name, value: state.filterValues[name], onChange: handleFilterChange, inline: "scrollable" }, "filter-" + name));
+                                })()) : actions.length > 0 ? ((() => {
+                                    const action = actions[0];
+                                    return (_jsx(Button, { onClick: action.onClick, disabled: action.disabled, children: action.label }, "action-" + action.id));
+                                })()) : (throwError("code should be unreachable")) })) })] }) }), _jsx(Grid, { size: 12, children: _jsx(StyledInfiniteScroll, { className: combineClassNames([wrapperClass, classes?.scroller]), loadMoreTop: loadMoreTop, loadMoreBottom: loadMoreBottom, ref: scrollElem, children: _jsx(Box, { sx: { m: 2 }, children: _jsx(Grid, { container: true, spacing: 2, children: state.items }) }) }) })] }));
 };
 export default React.memo(ScrollableSchedule);

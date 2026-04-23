@@ -1,4 +1,4 @@
-import React from "react";
+import { jsx as _jsx } from "react/jsx-runtime";
 import { ConfirmDialog } from "./ConfirmDialog";
 import { InputDialog } from "./InputDialog";
 import { InfoDialog } from "./InfoDialog";
@@ -13,7 +13,7 @@ import { isValidationError } from "../../backend-components";
  */
 export const showConfirmDialog = async (pushDialog, props) => {
     return new Promise((resolve, reject) => {
-        pushDialog(React.createElement(ConfirmDialog, { ...props, onClose: reject, handlerButtonYes: resolve, handlerButtonNo: reject }));
+        pushDialog(_jsx(ConfirmDialog, { ...props, onClose: reject, handlerButtonYes: resolve, handlerButtonNo: reject }));
     });
 };
 /**
@@ -24,7 +24,7 @@ export const showConfirmDialog = async (pushDialog, props) => {
  */
 export const showConfirmDialogBool = async (pushDialog, props) => {
     return new Promise((resolve) => {
-        pushDialog(React.createElement(ConfirmDialog, { ...props, onClose: () => resolve(false), handlerButtonYes: () => resolve(true), handlerButtonNo: () => resolve(false) }));
+        pushDialog(_jsx(ConfirmDialog, { ...props, onClose: () => resolve(false), handlerButtonYes: () => resolve(true), handlerButtonNo: () => resolve(false) }));
     });
 };
 /**
@@ -35,7 +35,7 @@ export const showConfirmDialogBool = async (pushDialog, props) => {
  */
 export const showInputDialog = async (pushDialog, props) => {
     return new Promise((resolve, reject) => {
-        pushDialog(React.createElement(InputDialog, { ...props, onClose: reject, handlerButtonYes: resolve, handlerButtonNo: reject }));
+        pushDialog(_jsx(InputDialog, { ...props, onClose: reject, handlerButtonYes: resolve, handlerButtonNo: reject }));
     });
 };
 /**
@@ -47,7 +47,7 @@ export const showInputDialog = async (pushDialog, props) => {
 export const showInfoDialog = (pushDialog, props) => {
     const { title, message, buttons } = props;
     return new Promise((resolve) => {
-        pushDialog(React.createElement(InfoDialog, { title: title, message: message, buttons: buttons ?? [
+        pushDialog(_jsx(InfoDialog, { title: title, message: message, buttons: buttons ?? [
                 {
                     text: i18n.t("non-standalone.dialog.okay"),
                     autoFocus: true,
@@ -68,7 +68,7 @@ export const showErrorDialog = (pushDialog, e) => {
     const setValuesForValidationError = (e) => {
         // validation error
         errorTitle = i18n.t("common.dialogs.validation-error-title");
-        errorMsg = (React.createElement("ul", null, Object.entries(e).map(([key, value]) => (React.createElement("li", { key: key }, value)))));
+        errorMsg = (_jsx("ul", { children: Object.entries(e).map(([key, value]) => (_jsx("li", { children: value }, key))) }));
     };
     if (e instanceof Error) {
         if (isValidationError(e)) {
@@ -87,7 +87,7 @@ export const showErrorDialog = (pushDialog, e) => {
         setValuesForValidationError(e);
     }
     return new Promise((resolve) => {
-        pushDialog(React.createElement(ErrorDialog, { title: errorTitle, message: errorMsg, buttons: [
+        pushDialog(_jsx(ErrorDialog, { title: errorTitle, message: errorMsg, buttons: [
                 {
                     text: i18n.t("common.buttons.ok"),
                     autoFocus: true,

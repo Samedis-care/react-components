@@ -1,3 +1,4 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Button, Dialog, DialogActions, IconButton, styled, useThemeProps, } from "@mui/material";
 import MuiDialogTitle from "@mui/material/DialogTitle";
@@ -135,24 +136,12 @@ const SignPadDialog = (inProps) => {
         return () => window.removeEventListener("resize", resizeHandler);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [canvasWrapper.current]);
-    return (React.createElement(RootDialog, { open: true, maxWidth: "sm", onClose: closeCanvas, className: combineClassNames([className, classes?.root]) },
-        React.createElement(StyledDialogTitle, { className: classes?.dialogTitle },
-            signerName
-                ? t("standalone.signature-pad.dialog.title-name", {
-                    NAME: signerName,
-                })
-                : t("standalone.signature-pad.dialog.title"),
-            closeCanvas && (React.createElement(StyledCloseButton, { "aria-label": t("standalone.signature-pad.dialog.close"), className: classes?.closeButton, onClick: closeCanvas, size: "large" },
-                React.createElement(Close, null)))),
-        React.createElement(SignDiv, { className: classes?.signDiv, ref: setCanvasWrapperRef, "data-name": name, onBlur: onBlur },
-            !resetCanvas ? (React.createElement(SignaturePad, { ref: signCanvas, options: {
-                    penColor: penColor || "blue",
-                }, width: canvasSize[0], height: canvasSize[1] })) : (React.createElement(ImageDiv, { className: classes?.imageDiv },
-                React.createElement(SignatureImage, { src: signature, alt: t("standalone.signature-pad.dialog.signature") }))),
-            React.createElement(HiddenDiv, { className: classes?.hiddenDiv },
-                React.createElement("input", { type: "text", value: signature ?? "", readOnly: true, ref: hiddenRef, name: name, onBlur: onBlur }))),
-        React.createElement(DialogActions, null,
-            React.createElement(Button, { onClick: saveCanvas, color: "primary" }, t("standalone.signature-pad.dialog.save-changes")),
-            React.createElement(Button, { onClick: clearCanvas, color: "error" }, t("standalone.signature-pad.dialog.reset")))));
+    return (_jsxs(RootDialog, { open: true, maxWidth: "sm", onClose: closeCanvas, className: combineClassNames([className, classes?.root]), children: [_jsxs(StyledDialogTitle, { className: classes?.dialogTitle, children: [signerName
+                        ? t("standalone.signature-pad.dialog.title-name", {
+                            NAME: signerName,
+                        })
+                        : t("standalone.signature-pad.dialog.title"), closeCanvas && (_jsx(StyledCloseButton, { "aria-label": t("standalone.signature-pad.dialog.close"), className: classes?.closeButton, onClick: closeCanvas, size: "large", children: _jsx(Close, {}) }))] }), _jsxs(SignDiv, { className: classes?.signDiv, ref: setCanvasWrapperRef, "data-name": name, onBlur: onBlur, children: [!resetCanvas ? (_jsx(SignaturePad, { ref: signCanvas, options: {
+                            penColor: penColor || "blue",
+                        }, width: canvasSize[0], height: canvasSize[1] })) : (_jsx(ImageDiv, { className: classes?.imageDiv, children: _jsx(SignatureImage, { src: signature, alt: t("standalone.signature-pad.dialog.signature") }) })), _jsx(HiddenDiv, { className: classes?.hiddenDiv, children: _jsx("input", { type: "text", value: signature ?? "", readOnly: true, ref: hiddenRef, name: name, onBlur: onBlur }) })] }), _jsxs(DialogActions, { children: [_jsx(Button, { onClick: saveCanvas, color: "primary", children: t("standalone.signature-pad.dialog.save-changes") }), _jsx(Button, { onClick: clearCanvas, color: "error", children: t("standalone.signature-pad.dialog.reset") })] })] }));
 };
 export const SignDialog = React.memo(SignPadDialog);

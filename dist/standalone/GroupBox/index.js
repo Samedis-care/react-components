@@ -1,3 +1,4 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React from "react";
 import combineClassNames from "../../utils/combineClassNames";
 import { styled, useThemeProps } from "@mui/material";
@@ -28,8 +29,6 @@ const GroupBoxLegend = styled("legend", {
 const GroupBox = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcGroupBox" });
     const { id, label, children, smallLabel, className, classes } = props;
-    return (React.createElement(GroupBoxRoot, { id: id, className: combineClassNames([className, classes?.root]) },
-        label && (React.createElement(GroupBoxLegend, { ownerState: { smallLabel: !!smallLabel } }, label)),
-        children));
+    return (_jsxs(GroupBoxRoot, { id: id, className: combineClassNames([className, classes?.root]), children: [label && (_jsx(GroupBoxLegend, { ownerState: { smallLabel: !!smallLabel }, children: label })), children] }));
 };
 export default React.memo(GroupBox);

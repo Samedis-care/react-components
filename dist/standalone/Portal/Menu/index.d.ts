@@ -117,5 +117,5 @@ export interface MenuProps {
 }
 export type PortalMenuClassKey = "root";
 export type PortalMenuProps = MenuProps;
-declare const _default: React.MemoExoticComponent<(inProps: MenuProps) => React.JSX.Element>;
+declare const _default: React.MemoExoticComponent<(inProps: MenuProps) => import("react/jsx-runtime").JSX.Element>;
 export default _default;

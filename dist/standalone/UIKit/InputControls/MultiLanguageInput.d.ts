@@ -53,5 +53,5 @@ export interface MultiLanguageInputLanguageLabelOwnerState {
     active: boolean;
 }
 export type MultiLanguageInputClassKey = "languageLabel" | "languageLabelInputAdornment";
-declare const _default: React.MemoExoticComponent<(inProps: MultiLanguageInputProps) => React.JSX.Element>;
+declare const _default: React.MemoExoticComponent<(inProps: MultiLanguageInputProps) => import("react/jsx-runtime").JSX.Element>;
 export default _default;

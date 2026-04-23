@@ -34,5 +34,5 @@ export interface SignPadProps {
     onBlur?: React.FocusEventHandler<HTMLDivElement>;
 }
 export type SignPadClassKey = "root" | "signTextDiv" | "imageDiv" | "signPreview" | "infoDiv";
-declare const _default: React.MemoExoticComponent<(inProps: SignPadProps) => React.JSX.Element>;
+declare const _default: React.MemoExoticComponent<(inProps: SignPadProps) => import("react/jsx-runtime").JSX.Element>;
 export default _default;

@@ -12,5 +12,5 @@ export type ColorInputProps = TextFieldWithHelpProps & Omit<TextFieldProps, "onC
      */
     value: string;
 };
-declare const _default: React.MemoExoticComponent<(props: ColorInputProps) => React.JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: ColorInputProps) => import("react/jsx-runtime").JSX.Element>;
 export default _default;

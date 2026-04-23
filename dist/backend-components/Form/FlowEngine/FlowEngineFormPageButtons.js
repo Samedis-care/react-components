@@ -1,6 +1,7 @@
+import { jsx as _jsx } from "react/jsx-runtime";
 import React from "react";
 import { FormButtons } from "../../../standalone";
 const FlowEngineFormPageButtons = (props) => {
-    return React.createElement(FormButtons, null, props.customProps.buttons);
+    return _jsx(FormButtons, { children: props.customProps.buttons });
 };
 export default React.memo(FlowEngineFormPageButtons);

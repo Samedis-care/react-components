@@ -24,5 +24,5 @@ export declare const useRoutedMenuLogic: (props: Pick<IRoutedMenuProps, "definit
     definition: IMenuItemDefinition[];
     controlledState: [string, React.Dispatch<React.SetStateAction<string>>];
 };
-declare const _default: React.MemoExoticComponent<(props: IRoutedMenuProps) => React.JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: IRoutedMenuProps) => import("react/jsx-runtime").JSX.Element>;
 export default _default;

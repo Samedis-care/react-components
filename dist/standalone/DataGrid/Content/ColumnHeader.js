@@ -1,3 +1,4 @@
+import { jsx as _jsx } from "react/jsx-runtime";
 import React, { useCallback, useEffect, useState } from "react";
 import isTouchDevice from "../../../utils/isTouchDevice";
 import combineClassNames from "../../../utils/combineClassNames";
@@ -156,11 +157,10 @@ const ColumnHeader = (props) => {
             document.removeEventListener("mouseup", stopDrag);
         };
     }, [onDrag, stopDrag]);
-    return (React.createElement(DataGridColumnHeaderContentWrapper, { onClick: onColumnClick, onContextMenu: isTouchDevice() ? onColumnLongClick : undefined, className: combineClassNames([
+    return (_jsx(DataGridColumnHeaderContentWrapper, { onClick: onColumnClick, onContextMenu: isTouchDevice() ? onColumnLongClick : undefined, className: combineClassNames([
             classes?.columnHeaderContentWrapper,
             filterable && "CcDataGrid-columnHeaderFilterable",
             "column-header-" + column.field,
-        ]) },
-        React.createElement(ColumnHeaderContent, { field: props.column.field, headerName: props.column.headerLabel ?? props.column.headerName, enableResize: true, startDrag: startDrag, autoResize: autoResize, sort: sort, sortOrder: sortOrder, filterable: !!filterable, filter: filter, onFilterChange: internalOnFilterChange, columnType: props.column.type, filterData: props.column.filterData })));
+        ]), children: _jsx(ColumnHeaderContent, { field: props.column.field, headerName: props.column.headerLabel ?? props.column.headerName, enableResize: true, startDrag: startDrag, autoResize: autoResize, sort: sort, sortOrder: sortOrder, filterable: !!filterable, filter: filter, onFilterChange: internalOnFilterChange, columnType: props.column.type, filterData: props.column.filterData }) }));
 };
 export default React.memo(ColumnHeader);

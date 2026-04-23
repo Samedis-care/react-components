@@ -1,4 +1,3 @@
-import React from "react";
 import { Breakpoint } from "@mui/material/styles";
 import { GridSize } from "@mui/material/Grid";
 import { MultiSelectorData } from "../Selector";
@@ -20,6 +19,6 @@ export interface GridMultiSelectFilterBackendProps<KeyT extends ModelFieldName, 
 }
 export declare const DataGridCustomFilterMultiBackend: typeof BackendMultipleSelect;
 export type GridMultiSelectFilterBackendClassKey = "dialogRoot" | "barRoot";
-declare const GridMultiSelectFilterBackend: <KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT, DataT extends MultiSelectorData>(inProps: GridMultiSelectFilterBackendProps<KeyT, VisibilityT, CustomT, DataT>) => React.JSX.Element;
+declare const GridMultiSelectFilterBackend: <KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT, DataT extends MultiSelectorData>(inProps: GridMultiSelectFilterBackendProps<KeyT, VisibilityT, CustomT, DataT>) => import("react/jsx-runtime").JSX.Element;
 declare const _default: typeof GridMultiSelectFilterBackend;
 export default _default;

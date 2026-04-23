@@ -1,3 +1,4 @@
+import { jsxs as _jsxs, jsx as _jsx, Fragment as _Fragment } from "react/jsx-runtime";
 import React, { useCallback, useEffect, useState } from "react";
 import WeekViewDay from "./WeekViewDay";
 import moment from "moment";
@@ -143,87 +144,40 @@ const WeekView = (inProps) => {
     const weekday = now.weekday();
     const weekdays = [0, 1, 2, 3, 4, 5, 6].map((day) => day - weekday);
     let prevDate = null;
-    return (React.createElement(Root, { container: true, sx: { alignItems: "stretch", alignContent: "space-between" }, className: className },
-        React.createElement(Grid, { container: true, wrap: "nowrap", size: 12 },
-            React.createElement(Grid, { size: "grow" },
-                React.createElement(Grid, { container: true },
-                    React.createElement(Grid, null,
-                        React.createElement(TodayBtn, { onClick: today, className: classes?.todayBtn },
-                            t("standalone.schedule.today"),
-                            " (",
-                            now
-                                .toDate()
-                                .toLocaleDateString(locale, ToDateLocaleStringOptions),
-                            ")")),
-                    React.createElement(Grid, null, filterCount > 0 && (React.createElement(FilterWrapper, { sx: { px: 2 }, className: classes?.filterWrapper }, (() => {
-                        const [name, filter] = Object.entries(filters)[0];
-                        return (React.createElement(ScheduleFilterRenderer, { ...filter, name: name, value: filterValues[name], onChange: handleFilterChange, inline: "weekly" }));
-                    })()))))),
-            React.createElement(Grid, null,
-                React.createElement(Grid, { container: true, sx: { justifyContent: "center" } },
-                    React.createElement(Grid, null,
-                        React.createElement(IconButton, { onClick: prevWeek, size: "large", "aria-label": t("standalone.schedule.prev-week") },
-                            React.createElement(ArrowBackIos, null)),
-                        React.createElement(Week, { onClick: openDatePicker, className: classes?.week },
-                            t("standalone.schedule.week"),
-                            " ",
-                            nowNormalized().add(weekOffset, "week").week(),
-                            " ",
-                            nowNormalized().add(weekOffset, "week").weekYear()),
-                        React.createElement(Picker, { className: classes?.picker },
-                            React.createElement(LocalizationProvider, { dateAdapter: AdapterMoment, adapterLocale: locale },
-                                React.createElement(DatePicker, { format: "II RRRR", open: datePickerAnchorEl != null, label: t("standalone.schedule.week"), value: nowNormalized().add(weekOffset, "week"), onChange: setWeek, onClose: closeDatePicker }))),
-                        React.createElement(IconButton, { onClick: nextWeek, size: "large", "aria-label": t("standalone.schedule.next-week") },
-                            React.createElement(ArrowForwardIos, null))))),
-            React.createElement(Grid, { container: true, sx: { justifyContent: "flex-end" }, size: "grow" }, (filterCount > 1 || actions.length > 0) && (React.createElement(Grid, null,
-                React.createElement(FilterWrapper, { sx: { px: 2 }, className: classes?.filterWrapper }, filterCount > 2 || actions.length > 1 ? (React.createElement(React.Fragment, null,
-                    React.createElement(IconButton, { onClick: openFilterSettings, "aria-label": t("standalone.schedule.filter-settings") },
-                        React.createElement(SettingsIcon, null)),
-                    React.createElement(Menu, { open: filterSettingsAnchorEl != null, anchorEl: filterSettingsAnchorEl, onClose: closeFiltersMenu },
-                        React.createElement(Box, { sx: { p: 1 } },
-                            React.createElement(Grid, { container: true, spacing: 1 },
-                                Object.entries(filters).map(([name, filter], idx) => idx !== 0 && (React.createElement(Grid, { key: "filter-" + name, size: 12 },
-                                    React.createElement(ScheduleFilterRenderer, { ...filter, name: name, value: filter.type === "select"
-                                            ? filterValues[name]
-                                            : filterValues[name], onChange: handleFilterChange })))),
-                                filterCount > 2 && (React.createElement(Grid, { key: "divider", size: 12 },
-                                    React.createElement(Divider, null))),
-                                actions.length > 1 &&
-                                    actions.map((action, idx) => idx !== 0 && (React.createElement(Grid, { key: "action-" + action.id, size: 12 },
-                                        React.createElement(Button, { onClick: action.onClick, disabled: action.disabled, fullWidth: true }, action.label))))))))) : (React.createElement(Grid, { container: true, spacing: 2, wrap: "nowrap", sx: { alignItems: "center" } }, (() => {
-                    const ret = [];
-                    if (actions.length > 0) {
-                        const action = actions[0];
-                        ret.push(React.createElement(Grid, { key: "action-" + action.id },
-                            React.createElement(Button, { onClick: action.onClick, disabled: action.disabled }, action.label)));
-                    }
-                    if (filterCount > 1) {
-                        const [name, filter] = Object.entries(filters)[1];
-                        ret.push(React.createElement(Grid, { key: "filter-" + name },
-                            React.createElement(ScheduleFilterRenderer, { ...filter, name: name, value: filterValues[name], onChange: handleFilterChange, inline: "weekly" })));
-                    }
-                    return ret;
-                })()))))))),
-        loadError && (React.createElement(Grid, { size: 12 },
-            React.createElement(Typography, { align: "center" }, loadError.message))),
-        !data && !loadError && (React.createElement(LoadWrapper, { size: 12 },
-            React.createElement(Grid, { container: true, sx: { justifyContent: "space-around" } },
-                React.createElement(CircularProgress, null)))),
-        data && (React.createElement(Grid, { container: true, sx: { alignItems: "stretch", alignContent: "space-between" }, wrap: "nowrap", size: 12 }, weekdays.map((day, dayIdx) => {
-            const date = now.clone().add(weekOffset, "weeks").add(day, "days");
-            const diffDay = !prevDate || prevDate.day() !== date.day();
-            const diffMonth = !prevDate || prevDate.month() !== date.month();
-            const diffYear = prevDate && prevDate.year() !== date.year();
-            prevDate = date;
-            let formattedDate = "";
-            if (diffYear)
-                formattedDate += `${date.year()} `;
-            if (diffMonth)
-                formattedDate += `${date.format("MMMM")} `;
-            if (diffDay)
-                formattedDate += date.format("DD");
-            const dayData = data[(date.weekday() + date.localeData().firstDayOfWeek()) % 7];
-            return (React.createElement(WeekViewDay, { key: day, dayIdx: dayIdx, day: date, date: formattedDate, data: dayData }));
-        })))));
+    return (_jsxs(Root, { container: true, sx: { alignItems: "stretch", alignContent: "space-between" }, className: className, children: [_jsxs(Grid, { container: true, wrap: "nowrap", size: 12, children: [_jsx(Grid, { size: "grow", children: _jsxs(Grid, { container: true, children: [_jsx(Grid, { children: _jsxs(TodayBtn, { onClick: today, className: classes?.todayBtn, children: [t("standalone.schedule.today"), " (", now
+                                                .toDate()
+                                                .toLocaleDateString(locale, ToDateLocaleStringOptions), ")"] }) }), _jsx(Grid, { children: filterCount > 0 && (_jsx(FilterWrapper, { sx: { px: 2 }, className: classes?.filterWrapper, children: (() => {
+                                            const [name, filter] = Object.entries(filters)[0];
+                                            return (_jsx(ScheduleFilterRenderer, { ...filter, name: name, value: filterValues[name], onChange: handleFilterChange, inline: "weekly" }));
+                                        })() })) })] }) }), _jsx(Grid, { children: _jsx(Grid, { container: true, sx: { justifyContent: "center" }, children: _jsxs(Grid, { children: [_jsx(IconButton, { onClick: prevWeek, size: "large", "aria-label": t("standalone.schedule.prev-week"), children: _jsx(ArrowBackIos, {}) }), _jsxs(Week, { onClick: openDatePicker, className: classes?.week, children: [t("standalone.schedule.week"), " ", nowNormalized().add(weekOffset, "week").week(), " ", nowNormalized().add(weekOffset, "week").weekYear()] }), _jsx(Picker, { className: classes?.picker, children: _jsx(LocalizationProvider, { dateAdapter: AdapterMoment, adapterLocale: locale, children: _jsx(DatePicker, { format: "II RRRR", open: datePickerAnchorEl != null, label: t("standalone.schedule.week"), value: nowNormalized().add(weekOffset, "week"), onChange: setWeek, onClose: closeDatePicker }) }) }), _jsx(IconButton, { onClick: nextWeek, size: "large", "aria-label": t("standalone.schedule.next-week"), children: _jsx(ArrowForwardIos, {}) })] }) }) }), _jsx(Grid, { container: true, sx: { justifyContent: "flex-end" }, size: "grow", children: (filterCount > 1 || actions.length > 0) && (_jsx(Grid, { children: _jsx(FilterWrapper, { sx: { px: 2 }, className: classes?.filterWrapper, children: filterCount > 2 || actions.length > 1 ? (_jsxs(_Fragment, { children: [_jsx(IconButton, { onClick: openFilterSettings, "aria-label": t("standalone.schedule.filter-settings"), children: _jsx(SettingsIcon, {}) }), _jsx(Menu, { open: filterSettingsAnchorEl != null, anchorEl: filterSettingsAnchorEl, onClose: closeFiltersMenu, children: _jsx(Box, { sx: { p: 1 }, children: _jsxs(Grid, { container: true, spacing: 1, children: [Object.entries(filters).map(([name, filter], idx) => idx !== 0 && (_jsx(Grid, { size: 12, children: _jsx(ScheduleFilterRenderer, { ...filter, name: name, value: filter.type === "select"
+                                                                    ? filterValues[name]
+                                                                    : filterValues[name], onChange: handleFilterChange }) }, "filter-" + name))), filterCount > 2 && (_jsx(Grid, { size: 12, children: _jsx(Divider, {}) }, "divider")), actions.length > 1 &&
+                                                            actions.map((action, idx) => idx !== 0 && (_jsx(Grid, { size: 12, children: _jsx(Button, { onClick: action.onClick, disabled: action.disabled, fullWidth: true, children: action.label }) }, "action-" + action.id)))] }) }) })] })) : (_jsx(Grid, { container: true, spacing: 2, wrap: "nowrap", sx: { alignItems: "center" }, children: (() => {
+                                        const ret = [];
+                                        if (actions.length > 0) {
+                                            const action = actions[0];
+                                            ret.push(_jsx(Grid, { children: _jsx(Button, { onClick: action.onClick, disabled: action.disabled, children: action.label }) }, "action-" + action.id));
+                                        }
+                                        if (filterCount > 1) {
+                                            const [name, filter] = Object.entries(filters)[1];
+                                            ret.push(_jsx(Grid, { children: _jsx(ScheduleFilterRenderer, { ...filter, name: name, value: filterValues[name], onChange: handleFilterChange, inline: "weekly" }) }, "filter-" + name));
+                                        }
+                                        return ret;
+                                    })() })) }) })) })] }), loadError && (_jsx(Grid, { size: 12, children: _jsx(Typography, { align: "center", children: loadError.message }) })), !data && !loadError && (_jsx(LoadWrapper, { size: 12, children: _jsx(Grid, { container: true, sx: { justifyContent: "space-around" }, children: _jsx(CircularProgress, {}) }) })), data && (_jsx(Grid, { container: true, sx: { alignItems: "stretch", alignContent: "space-between" }, wrap: "nowrap", size: 12, children: weekdays.map((day, dayIdx) => {
+                    const date = now.clone().add(weekOffset, "weeks").add(day, "days");
+                    const diffDay = !prevDate || prevDate.day() !== date.day();
+                    const diffMonth = !prevDate || prevDate.month() !== date.month();
+                    const diffYear = prevDate && prevDate.year() !== date.year();
+                    prevDate = date;
+                    let formattedDate = "";
+                    if (diffYear)
+                        formattedDate += `${date.year()} `;
+                    if (diffMonth)
+                        formattedDate += `${date.format("MMMM")} `;
+                    if (diffDay)
+                        formattedDate += date.format("DD");
+                    const dayData = data[(date.weekday() + date.localeData().firstDayOfWeek()) % 7];
+                    return (_jsx(WeekViewDay, { dayIdx: dayIdx, day: date, date: formattedDate, data: dayData }, day));
+                }) }))] }));
 };
 export default React.memo(WeekView);

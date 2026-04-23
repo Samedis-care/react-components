@@ -1,3 +1,4 @@
+import { Fragment as _Fragment, jsx as _jsx } from "react/jsx-runtime";
 import React, { useMemo } from "react";
 import GroupBox from "../GroupBox";
 import useCCTranslations from "../../utils/useCCTranslations";
@@ -13,9 +14,8 @@ const HowToBox = (inProps) => {
     const { titleLabel, labels, className, classes } = props;
     const { t } = useCCTranslations();
     if (!labels)
-        return React.createElement(React.Fragment, null);
-    return (React.createElement(GroupBoxStyled, { label: titleLabel ?? t("standalone.how-it-works.title"), className: combineClassNames([className, classes?.root]) },
-        React.createElement(UnorderedList, { className: classes?.ul }, Array.isArray(labels) ? (labels.map((label, i) => (React.createElement(ListItem, { key: i, className: classes?.li }, label)))) : (React.createElement(ListItem, { className: classes?.li }, labels)))));
+        return _jsx(_Fragment, {});
+    return (_jsx(GroupBoxStyled, { label: titleLabel ?? t("standalone.how-it-works.title"), className: combineClassNames([className, classes?.root]), children: _jsx(UnorderedList, { className: classes?.ul, children: Array.isArray(labels) ? (labels.map((label, i) => (_jsx(ListItem, { className: classes?.li, children: label }, i)))) : (_jsx(ListItem, { className: classes?.li, children: labels })) }) }));
 };
 /**
  * i18n version of HowToBox
@@ -26,6 +26,6 @@ export const HowToBoxTranslate = (props) => {
     const { t, titleLabel, labels, ...other } = props;
     // memo content because it's an array which gets re-created every render
     const content = useMemo(() => t(labels, { returnObjects: true }), [t, labels]);
-    return (React.createElement(HowToBox, { ...other, titleLabel: titleLabel ? t(titleLabel) : undefined, labels: content }));
+    return (_jsx(HowToBox, { ...other, titleLabel: titleLabel ? t(titleLabel) : undefined, labels: content }));
 };
 export default React.memo(HowToBox);

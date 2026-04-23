@@ -1,3 +1,4 @@
+import { jsx as _jsx } from "react/jsx-runtime";
 import React, { useCallback, useMemo, useState } from "react";
 import DataGrid from "../../standalone/DataGrid/DataGrid";
 import { useModelDeleteAdvanced, useModelDeleteMultiple, } from "../../backend-integration/Model/Model";
@@ -86,7 +87,7 @@ export const useBackendDataGridDeleteHandler = (props, refreshGrid) => {
                 await customDeleteErrorHandler(e);
             }
             else {
-                pushDialog(React.createElement(ErrorDialog, { title: t("backend-components.data-grid.delete.error-dialog.title"), message: t("backend-components.data-grid.delete.error-dialog.message", { ERROR: e.message }), buttons: [
+                pushDialog(_jsx(ErrorDialog, { title: t("backend-components.data-grid.delete.error-dialog.title"), message: t("backend-components.data-grid.delete.error-dialog.message", { ERROR: e.message }), buttons: [
                         {
                             text: t("backend-components.data-grid.delete.error-dialog.buttons.okay"),
                         },
@@ -187,6 +188,6 @@ const BackendDataGrid = (props) => {
     }, [model, refreshGrid]);
     const addNewButtons = useBackendDataGridAddNewButtons(props);
     const handleDelete = useBackendDataGridDeleteHandler(props, refreshGrid);
-    return (React.createElement(DataGrid, { ...props, onAddNew: addNewButtons, onDelete: handleDelete, loadData: loadData, columns: useMemo(() => model.toDataGridColumnDefinition(), [model]), forceRefreshToken: `${props.forceRefreshToken || "undefined"}${refreshToken}`, exporters: props.disableExport ? undefined : model.connector.dataGridExporters }));
+    return (_jsx(DataGrid, { ...props, onAddNew: addNewButtons, onDelete: handleDelete, loadData: loadData, columns: useMemo(() => model.toDataGridColumnDefinition(), [model]), forceRefreshToken: `${props.forceRefreshToken || "undefined"}${refreshToken}`, exporters: props.disableExport ? undefined : model.connector.dataGridExporters }));
 };
 export default React.memo(BackendDataGrid);

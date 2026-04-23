@@ -1,3 +1,4 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React, { useCallback, useState } from "react";
 import { Button, Grid, Step, StepLabel, Stepper, styled } from "@mui/material";
 import Step1LoadData from "./Step1LoadData";
@@ -72,28 +73,14 @@ const CrudImport = (props) => {
     const { t } = useCCTranslations();
     const { updateKeyAdditionalFilters, howTo, model, updateKey, validate } = props;
     const { guided, activeStep, state, setState, hasImportConfig, next, prev, finish, } = useCrudImportLogic(props);
-    return (React.createElement(Wrapper, { container: true, sx: {
+    return (_jsxs(Wrapper, { container: true, sx: {
             flexDirection: "column",
             justifyContent: "space-between",
             alignItems: "stretch",
-        }, spacing: 2, wrap: "nowrap" },
-        React.createElement(Grid, null,
-            React.createElement(Stepper, { activeStep: guided && activeStep > 1 ? activeStep - 1 : activeStep }, IMPORT_STEPS.filter((label, index) => !(guided && index === 1)).map((label, index) => (React.createElement(Step, { key: index.toString(16) },
-                React.createElement(StepLabel, null, t(label))))))),
-        React.createElement(Grid, { size: "grow" },
-            activeStep === 0 && (React.createElement(Step1LoadData, { model: model, howTo: guided ? howTo : undefined, updateKey: updateKey, additionalUpdateKeyFilters: updateKeyAdditionalFilters, hasImportConfig: hasImportConfig, validate: validate, state: state, setState: setState })),
-            activeStep === 1 && (React.createElement(Step2ConnectData, { model: model, updateKey: updateKey, additionalUpdateKeyFilters: updateKeyAdditionalFilters, hasImportConfig: hasImportConfig, validate: validate, state: state, setState: setState })),
-            activeStep === 2 && (React.createElement(Step3ValidateReview, { model: model, updateKey: updateKey, additionalUpdateKeyFilters: updateKeyAdditionalFilters, hasImportConfig: hasImportConfig, validate: validate, state: state, setState: setState })),
-            activeStep === 3 && (React.createElement(Step4Import, { model: model, updateKey: updateKey, additionalUpdateKeyFilters: updateKeyAdditionalFilters, hasImportConfig: hasImportConfig, validate: validate, state: state, setState: setState }))),
-        React.createElement(Grid, null,
-            React.createElement(Grid, { container: true, spacing: 2 },
-                activeStep !== 3 && (React.createElement(Grid, null,
-                    React.createElement(Button, { variant: "contained", disabled: activeStep === 0 || activeStep >= 3, onClick: prev }, t("common.buttons.back")))),
-                React.createElement(Grid, null,
-                    React.createElement(Button, { variant: "contained", disabled: (activeStep === 0 && state.files.length === 0) ||
-                            (activeStep === 2 && !state.validationPassed) ||
-                            (activeStep === 3 && !state.importDone), onClick: activeStep === 3 ? finish : next }, activeStep === 3
-                        ? t("common.buttons.finish")
-                        : t("common.buttons.next")))))));
+        }, spacing: 2, wrap: "nowrap", children: [_jsx(Grid, { children: _jsx(Stepper, { activeStep: guided && activeStep > 1 ? activeStep - 1 : activeStep, children: IMPORT_STEPS.filter((label, index) => !(guided && index === 1)).map((label, index) => (_jsx(Step, { children: _jsx(StepLabel, { children: t(label) }) }, index.toString(16)))) }) }), _jsxs(Grid, { size: "grow", children: [activeStep === 0 && (_jsx(Step1LoadData, { model: model, howTo: guided ? howTo : undefined, updateKey: updateKey, additionalUpdateKeyFilters: updateKeyAdditionalFilters, hasImportConfig: hasImportConfig, validate: validate, state: state, setState: setState })), activeStep === 1 && (_jsx(Step2ConnectData, { model: model, updateKey: updateKey, additionalUpdateKeyFilters: updateKeyAdditionalFilters, hasImportConfig: hasImportConfig, validate: validate, state: state, setState: setState })), activeStep === 2 && (_jsx(Step3ValidateReview, { model: model, updateKey: updateKey, additionalUpdateKeyFilters: updateKeyAdditionalFilters, hasImportConfig: hasImportConfig, validate: validate, state: state, setState: setState })), activeStep === 3 && (_jsx(Step4Import, { model: model, updateKey: updateKey, additionalUpdateKeyFilters: updateKeyAdditionalFilters, hasImportConfig: hasImportConfig, validate: validate, state: state, setState: setState }))] }), _jsx(Grid, { children: _jsxs(Grid, { container: true, spacing: 2, children: [activeStep !== 3 && (_jsx(Grid, { children: _jsx(Button, { variant: "contained", disabled: activeStep === 0 || activeStep >= 3, onClick: prev, children: t("common.buttons.back") }) })), _jsx(Grid, { children: _jsx(Button, { variant: "contained", disabled: (activeStep === 0 && state.files.length === 0) ||
+                                    (activeStep === 2 && !state.validationPassed) ||
+                                    (activeStep === 3 && !state.importDone), onClick: activeStep === 3 ? finish : next, children: activeStep === 3
+                                    ? t("common.buttons.finish")
+                                    : t("common.buttons.next") }) })] }) })] }));
 };
 export default React.memo(CrudImport);

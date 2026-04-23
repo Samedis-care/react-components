@@ -1,3 +1,4 @@
+import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
 import React, { useCallback, useState } from "react";
 import { IconButton, InputAdornment } from "@mui/material";
 import { Clear as ClearIcon, Info as InfoIcon } from "@mui/icons-material";
@@ -29,19 +30,13 @@ const TextFieldWithHelp = React.forwardRef(function PickersTextFieldWithHelpInne
     const existingEndAdornment = inputSlotProps?.endAdornment;
     const showClear = isTouchDevice() && hasValue && !muiProps.disabled && !disableClearable;
     const hasEndAdornment = !!(showClear || openInfo || existingEndAdornment);
-    return (React.createElement(UiKitPickersTextFieldWithWarnings, { ref: ref, ...muiProps, warning: warning, onChange: handleChange, slotProps: {
+    return (_jsx(UiKitPickersTextFieldWithWarnings, { ref: ref, ...muiProps, warning: warning, onChange: handleChange, slotProps: {
             ...muiProps.slotProps,
             input: {
                 ...inputSlotProps,
-                endAdornment: hasEndAdornment ? (React.createElement(React.Fragment, null,
-                    React.createElement(InputAdornment, { position: "end" },
-                        showClear && (React.createElement(IconButton, { onClick: handleClear, size: "small", "aria-label": t("standalone.uikit.clear") },
-                            React.createElement(ClearIcon, null))),
-                        typeof existingEndAdornment === "string"
-                            ? existingEndAdornment
-                            : existingEndAdornment?.props?.children,
-                        openInfo && (React.createElement(IconButton, { onClick: openInfo, size: "small", "aria-label": t("standalone.uikit.info") },
-                            React.createElement(InfoIcon, { color: "disabled" })))))) : undefined,
+                endAdornment: hasEndAdornment ? (_jsx(_Fragment, { children: _jsxs(InputAdornment, { position: "end", children: [showClear && (_jsx(IconButton, { onClick: handleClear, size: "small", "aria-label": t("standalone.uikit.clear"), children: _jsx(ClearIcon, {}) })), typeof existingEndAdornment === "string"
+                                ? existingEndAdornment
+                                : existingEndAdornment?.props?.children, openInfo && (_jsx(IconButton, { onClick: openInfo, size: "small", "aria-label": t("standalone.uikit.info"), children: _jsx(InfoIcon, { color: "disabled" }) }))] }) })) : undefined,
             },
             inputLabel: {
                 ...InputLabelConfig,

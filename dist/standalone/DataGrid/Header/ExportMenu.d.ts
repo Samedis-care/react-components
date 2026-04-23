@@ -15,5 +15,5 @@ export interface IDataGridExportMenuProps {
      */
     onClose: NonNullable<MenuProps["onClose"]>;
 }
-declare const _default: React.MemoExoticComponent<(props: IDataGridExportMenuProps) => React.JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: IDataGridExportMenuProps) => import("react/jsx-runtime").JSX.Element>;
 export default _default;

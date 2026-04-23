@@ -1,3 +1,4 @@
+import { jsx as _jsx } from "react/jsx-runtime";
 import React, { useEffect } from "react";
 const cancelDragAndDrop = (evt) => {
     evt.preventDefault();
@@ -12,6 +13,6 @@ const DragAndDropPrevention = () => {
             document.removeEventListener("dragover", cancelDragAndDrop);
         };
     });
-    return React.createElement(React.Fragment, null);
+    return _jsx(React.Fragment, {});
 };
 export default DragAndDropPrevention;

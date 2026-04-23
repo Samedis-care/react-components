@@ -1,3 +1,4 @@
+import { jsx as _jsx } from "react/jsx-runtime";
 import React from "react";
 import { Box, useMediaQuery, useTheme } from "@mui/material";
 import { DataGridPaginationText, useDataGridProps } from "../DataGrid";
@@ -17,7 +18,6 @@ const PaginationView = (props) => {
         : `${showFiltered
             ? `${t("standalone.data-grid.footer.filtered")} ${filtered} `
             : ""}${t("standalone.data-grid.footer.total")} ${total}`;
-    return (React.createElement(Box, { sx: { mx: 2 } },
-        React.createElement(DataGridPaginationText, { className: classes?.paginationText }, text)));
+    return (_jsx(Box, { sx: { mx: 2 }, children: _jsx(DataGridPaginationText, { className: classes?.paginationText, children: text }) }));
 };
 export default React.memo(PaginationView);

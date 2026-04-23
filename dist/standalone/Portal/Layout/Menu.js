@@ -1,3 +1,4 @@
+import { jsx as _jsx } from "react/jsx-runtime";
 import { Drawer, Paper, styled, useTheme, useThemeProps } from "@mui/material";
 import React, { useMemo } from "react";
 import combineClassNames from "../../../utils/combineClassNames";
@@ -22,10 +23,10 @@ const PortalLayoutMenu = (inProps) => {
         style: { width: drawerWidth },
     }), [drawerWidth]);
     if (!props.mobile) {
-        return (React.createElement(MenuPaper, { ...paperProps, className: combineClassNames([className, classes?.menuPaper]) }, props.items));
+        return (_jsx(MenuPaper, { ...paperProps, className: combineClassNames([className, classes?.menuPaper]), children: props.items }));
     }
     else {
-        return (React.createElement(MenuDrawer, { variant: "temporary", anchor: theme.direction === "rtl" ? "right" : "left", open: menuOpen, onClose: toggleMenu, slotProps: { paper: paperProps }, ModalProps: modalProps, className: combineClassNames([className, classes?.menuDrawer]) }, props.items));
+        return (_jsx(MenuDrawer, { variant: "temporary", anchor: theme.direction === "rtl" ? "right" : "left", open: menuOpen, onClose: toggleMenu, slotProps: { paper: paperProps }, ModalProps: modalProps, className: combineClassNames([className, classes?.menuDrawer]), children: props.items }));
     }
 };
 export default React.memo(PortalLayoutMenu);

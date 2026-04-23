@@ -1,3 +1,4 @@
+import { jsx as _jsx } from "react/jsx-runtime";
 import React, { useCallback } from "react";
 import { Tabs } from "@mui/material";
 import useLocation from "../../standalone/Routes/useLocation";
@@ -20,6 +21,6 @@ const RoutedTabs = (props) => {
         .substring(url.length)
         .split("/")
         .filter((entry) => entry)[0] ?? "";
-    return (React.createElement(Tabs, { ...props, value: current, onChange: handleChange }, props.children));
+    return (_jsx(Tabs, { ...props, value: current, onChange: handleChange, children: props.children }));
 };
 export default React.memo(RoutedTabs);

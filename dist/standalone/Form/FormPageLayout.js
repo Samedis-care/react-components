@@ -1,3 +1,4 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import { styled, useThemeProps } from "@mui/material";
 import React from "react";
 import combineClassNames from "../../utils/combineClassNames";
@@ -26,10 +27,6 @@ const Footer = styled("div", { name: "CcFormPageLayout", slot: "footer" })({
 const FormPageLayout = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcFormPageLayout" });
     const { body, footer, other, className, classes } = props;
-    return (React.createElement(Root, { className: combineClassNames([className, classes?.root]) },
-        React.createElement(Wrapper, { className: classes?.wrapper },
-            React.createElement(Body, { className: classes?.body }, body),
-            React.createElement(Footer, { className: classes?.footer }, footer)),
-        other));
+    return (_jsxs(Root, { className: combineClassNames([className, classes?.root]), children: [_jsxs(Wrapper, { className: classes?.wrapper, children: [_jsx(Body, { className: classes?.body, children: body }), _jsx(Footer, { className: classes?.footer, children: footer })] }), other] }));
 };
 export default React.memo(FormPageLayout);

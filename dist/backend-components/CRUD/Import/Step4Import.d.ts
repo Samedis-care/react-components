@@ -9,5 +9,5 @@ export declare const useImportStep4Logic: (props: CrudImporterStepProps) => {
     counters: ImportCounters;
     lastError: string;
 };
-declare const _default: React.MemoExoticComponent<(props: CrudImporterStepProps) => React.JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: CrudImporterStepProps) => import("react/jsx-runtime").JSX.Element>;
 export default _default;

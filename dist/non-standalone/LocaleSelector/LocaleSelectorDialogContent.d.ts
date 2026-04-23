@@ -14,5 +14,5 @@ export interface LocaleSelectorEntryData {
     native_language: string;
 }
 export type LocaleSelectorDialogContentClassKey = "localeList" | "noLocalesMessage";
-declare const _default: React.MemoExoticComponent<(inProps: LocaleSelectorDialogContentProps) => React.JSX.Element>;
+declare const _default: React.MemoExoticComponent<(inProps: LocaleSelectorDialogContentProps) => import("react/jsx-runtime").JSX.Element>;
 export default _default;

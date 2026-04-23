@@ -1,3 +1,4 @@
+import { jsx as _jsx } from "react/jsx-runtime";
 import React, { useCallback, useMemo } from "react";
 import { MultiSelectWithTags, } from "../../standalone";
 import { useSelectedCache, } from "./BackendMultiSelect";
@@ -63,6 +64,6 @@ const BackendMultiSelectWithTags = (props) => {
         : undefined, [lruData, handleLoadDataRecord]);
     const debouncedGroupLoad = useMemo(() => debouncePromise(loadGroupOptions, groupSearchDebounceTime ?? 500), [groupSearchDebounceTime, loadGroupOptions]);
     const debouncedDataLoad = useMemo(() => debouncePromise(loadDataOptions, dataSearchDebounceTime ?? 500), [dataSearchDebounceTime, loadDataOptions]);
-    return (React.createElement(MultiSelectWithTags, { ...selectorProps, onChange: handleSelect, selected: selected, loadGroupEntries: loadGroupEntries, loadDataOptions: debouncedDataLoad, loadGroupOptions: debouncedGroupLoad, displaySwitch: !!(switchFilterNameGroup || switchFilterNameData), lruGroup: lruGroupConfig, lruData: lruDataConfig }));
+    return (_jsx(MultiSelectWithTags, { ...selectorProps, onChange: handleSelect, selected: selected, loadGroupEntries: loadGroupEntries, loadDataOptions: debouncedDataLoad, loadGroupOptions: debouncedGroupLoad, displaySwitch: !!(switchFilterNameGroup || switchFilterNameData), lruGroup: lruGroupConfig, lruData: lruDataConfig }));
 };
 export default React.memo(BackendMultiSelectWithTags);

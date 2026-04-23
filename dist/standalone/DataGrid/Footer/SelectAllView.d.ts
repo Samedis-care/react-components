@@ -15,5 +15,5 @@ export interface IDataGridContentSelectAllViewProps {
      */
     onSelect: (evt: React.ChangeEvent, newChecked: boolean) => void;
 }
-declare const _default: React.MemoExoticComponent<(props: IDataGridContentSelectAllViewProps) => React.JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: IDataGridContentSelectAllViewProps) => import("react/jsx-runtime").JSX.Element>;
 export default _default;

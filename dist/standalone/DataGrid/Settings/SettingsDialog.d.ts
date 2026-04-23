@@ -24,5 +24,5 @@ export interface IDataGridSettingsDialogProps extends IDataGridColumnProps {
      */
     hiddenColumns: string[];
 }
-declare const _default: React.MemoExoticComponent<(props: IDataGridSettingsDialogProps) => React.JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: IDataGridSettingsDialogProps) => import("react/jsx-runtime").JSX.Element>;
 export default _default;

@@ -84,5 +84,5 @@ export interface PortalLayoutContextType {
 }
 export declare const PortalLayoutContext: React.Context<PortalLayoutContextType | undefined>;
 export declare const usePortalLayoutContext: () => PortalLayoutContextType;
-declare const _default: React.MemoExoticComponent<(inProps: PortalLayoutProps) => React.JSX.Element>;
+declare const _default: React.MemoExoticComponent<(inProps: PortalLayoutProps) => import("react/jsx-runtime").JSX.Element>;
 export default _default;

@@ -1,3 +1,4 @@
+import { jsx as _jsx } from "react/jsx-runtime";
 import React, { useCallback } from "react";
 import ActionButton from "../../../standalone/UIKit/ActionButton";
 import { useFormContext } from "../Form";
@@ -14,6 +15,6 @@ const FlowEngineSaveButton = (props) => {
             // ignore, error is shown regardless
         }
     }, [submit]);
-    return (React.createElement(ActionButton, { onClick: safeSubmit, ...props, disabled: disabled || props.disabled }, props.children ?? t("common.buttons.save")));
+    return (_jsx(ActionButton, { onClick: safeSubmit, ...props, disabled: disabled || props.disabled, children: props.children ?? t("common.buttons.save") }));
 };
 export default React.memo(FlowEngineSaveButton);

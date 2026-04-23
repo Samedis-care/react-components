@@ -8,5 +8,5 @@ export interface ActionBarMenuProps {
     handleImport?: (evt: React.MouseEvent) => void;
     onClose: () => void;
 }
-declare const _default: React.MemoExoticComponent<(props: ActionBarMenuProps) => React.JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: ActionBarMenuProps) => import("react/jsx-runtime").JSX.Element>;
 export default _default;

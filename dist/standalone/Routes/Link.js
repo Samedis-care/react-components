@@ -1,3 +1,4 @@
+import { jsx as _jsx } from "react/jsx-runtime";
 import React, { useCallback } from "react";
 import { useHistoryRouterContext } from "./HistoryRouter";
 import useNavigate from "./useNavigate";
@@ -15,6 +16,6 @@ const Link = React.forwardRef(function Link(props, ref) {
         evt.preventDefault();
         navigate(to, { replace, state });
     }, [navigate, replace, state, to]);
-    return (React.createElement("a", { ref: ref, href: history.createHref(to), onClick: handleNav, ...anchorProps }));
+    return (_jsx("a", { ref: ref, href: history.createHref(to), onClick: handleNav, ...anchorProps }));
 });
 export default React.memo(Link);

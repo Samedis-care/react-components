@@ -1,3 +1,4 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React, { useMemo } from "react";
 import { Box, Grid } from "@mui/material";
 import Search from "./Search";
@@ -7,13 +8,6 @@ import { useDataGridState, } from "../DataGrid";
 const Header = () => {
     const [state] = useDataGridState();
     const { showSettings } = state;
-    return useMemo(() => (React.createElement(Box, { sx: { mx: 1 } },
-        React.createElement(Grid, { container: true, sx: { justifyContent: "space-between", alignItems: "center" }, wrap: "nowrap" },
-            React.createElement(Grid, null,
-                React.createElement(Search, null)),
-            React.createElement(Grid, { size: "grow", sx: showSettings ? { display: "none" } : undefined },
-                React.createElement(FilterBar, null)),
-            React.createElement(Grid, { sx: showSettings ? { display: "none" } : undefined },
-                React.createElement(ActionBar, null))))), [showSettings]);
+    return useMemo(() => (_jsx(Box, { sx: { mx: 1 }, children: _jsxs(Grid, { container: true, sx: { justifyContent: "space-between", alignItems: "center" }, wrap: "nowrap", children: [_jsx(Grid, { children: _jsx(Search, {}) }), _jsx(Grid, { size: "grow", sx: showSettings ? { display: "none" } : undefined, children: _jsx(FilterBar, {}) }), _jsx(Grid, { sx: showSettings ? { display: "none" } : undefined, children: _jsx(ActionBar, {}) })] }) })), [showSettings]);
 };
 export default React.memo(Header);

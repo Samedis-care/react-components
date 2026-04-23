@@ -64,6 +64,6 @@ export interface BasicFormPageProps<RendererPropsT, CustomPropsT> extends PagePr
     formPageLayoutComponent?: React.ComponentType<FormPageLayoutProps>;
 }
 export declare const BasicFormPageNestingContext: React.Context<((active: boolean) => void) | null>;
-declare const BasicFormPage: <RendererPropsT, CustomPropsT>(inProps: BasicFormPageProps<RendererPropsT, CustomPropsT>) => React.JSX.Element;
+declare const BasicFormPage: <RendererPropsT, CustomPropsT>(inProps: BasicFormPageProps<RendererPropsT, CustomPropsT>) => import("react/jsx-runtime").JSX.Element;
 declare const _default: typeof BasicFormPage;
 export default _default;

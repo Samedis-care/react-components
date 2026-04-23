@@ -29,5 +29,5 @@ export interface GroupBoxProps {
      */
     classes?: Partial<Record<GroupBoxClassKey, string>>;
 }
-declare const _default: React.MemoExoticComponent<(inProps: GroupBoxProps) => React.JSX.Element>;
+declare const _default: React.MemoExoticComponent<(inProps: GroupBoxProps) => import("react/jsx-runtime").JSX.Element>;
 export default _default;

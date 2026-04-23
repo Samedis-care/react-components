@@ -13,5 +13,5 @@ export interface FormPageLayoutProps {
     classes?: Partial<Record<FormPageLayoutClassKey, string>>;
 }
 export type FormPageLayoutClassKey = "root" | "wrapper" | "body" | "footer";
-declare const _default: React.MemoExoticComponent<(inProps: FormPageLayoutProps) => React.JSX.Element>;
+declare const _default: React.MemoExoticComponent<(inProps: FormPageLayoutProps) => import("react/jsx-runtime").JSX.Element>;
 export default _default;

@@ -44,5 +44,5 @@ export interface GridSingleSelectFilterProps {
 }
 export declare const DataGridCustomFilterSingle: typeof SingleSelect;
 export type GridSingleSelectFilterClassKey = "dialogRoot" | "barRoot";
-declare const _default: React.MemoExoticComponent<(inProps: GridSingleSelectFilterProps) => React.JSX.Element>;
+declare const _default: React.MemoExoticComponent<(inProps: GridSingleSelectFilterProps) => import("react/jsx-runtime").JSX.Element>;
 export default _default;

@@ -568,6 +568,6 @@ export type FormFlowEngineStageConfig = Partial<{
 }>;
 export declare const useFormFlowEngineStageConfig: (config: FormFlowEngineStageConfig) => void;
 export type FormClassKey = "root";
-declare const Form: <KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT, CustomPropsT>(props: FormProps<KeyT, VisibilityT, CustomT, CustomPropsT>) => React.JSX.Element;
+declare const Form: <KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT, CustomPropsT>(props: FormProps<KeyT, VisibilityT, CustomT, CustomPropsT>) => import("react/jsx-runtime").JSX.Element;
 declare const _default: typeof Form;
 export default _default;

@@ -1,3 +1,4 @@
+import { jsx as _jsx } from "react/jsx-runtime";
 import React, { useEffect, useState } from "react";
 import { getI18n, I18nextProvider } from "react-i18next";
 import ccI18n from "../i18n";
@@ -36,10 +37,10 @@ const CCI18nProvider = (props) => {
         ccI18n.on("languageChanged", updateLocale);
         return () => ccI18n.off("languageChanged", updateLocale);
     }, []);
-    return (React.createElement(I18nextProvider, { i18n: getI18n() ?? ccI18n, 
+    return (_jsx(I18nextProvider, { i18n: getI18n() ?? ccI18n, 
         // defaultNS used to force refresh
         defaultNS: updating
             ? ((getI18n() ?? ccI18n).options.defaultNS || "")
-            : undefined }, props.children));
+            : undefined, children: props.children }));
 };
 export default React.memo(CCI18nProvider);

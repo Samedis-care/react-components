@@ -1,4 +1,4 @@
-import React from "react";
+import { Fragment as _Fragment, jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import { FormHelperText, Typography } from "@mui/material";
 import TypeEnum from "../TypeEnum";
 import ccI18n from "../../../../i18n";
@@ -17,9 +17,9 @@ class RendererEnumSelect extends TypeEnum {
     render(params) {
         const { visibility, field, value, label, handleChange, handleBlur, errorMsg, warningMsg, } = params;
         if (visibility.disabled)
-            return React.createElement(React.Fragment, null);
+            return _jsx(_Fragment, {});
         if (visibility.hidden) {
-            return (React.createElement("input", { type: "hidden", name: field, value: value, readOnly: true, "aria-hidden": "true" }));
+            return (_jsx("input", { type: "hidden", name: field, value: value, readOnly: true, "aria-hidden": "true" }));
         }
         if (visibility.editable) {
             if (visibility.grid)
@@ -36,16 +36,12 @@ class RendererEnumSelect extends TypeEnum {
                 ...data.filter((entry) => getStringLabel(entry).toLowerCase().startsWith(query.toLowerCase())),
                 ...data.filter((entry) => getStringLabel(entry).toLowerCase().includes(query.toLowerCase())),
             ]);
-            return (React.createElement(FormControlFieldsetCC, { component: "fieldset", required: visibility.required, fullWidth: true, error: !!errorMsg, warning: !!warningMsg, onBlur: handleBlur, name: field },
-                React.createElement(SingleSelect, { refreshToken: this.values.map((e) => e.value).join(","), ...this.props, label: label, selected: selected, onLoad: onLoad, onSelect: (value) => handleChange(field, value ? value.value : ""), disabled: visibility.readOnly, required: visibility.required }),
-                React.createElement(FormHelperText, null, errorMsg || warningMsg)));
+            return (_jsxs(FormControlFieldsetCC, { component: "fieldset", required: visibility.required, fullWidth: true, error: !!errorMsg, warning: !!warningMsg, onBlur: handleBlur, name: field, children: [_jsx(SingleSelect, { refreshToken: this.values.map((e) => e.value).join(","), ...this.props, label: label, selected: selected, onLoad: onLoad, onSelect: (value) => handleChange(field, value ? value.value : ""), disabled: visibility.readOnly, required: visibility.required }), _jsx(FormHelperText, { children: errorMsg || warningMsg })] }));
         }
         const valueInfo = this.values.find((entry) => entry.value === value);
-        return (React.createElement(Typography, null,
-            !visibility.grid && `${label}: `,
-            valueInfo
-                ? valueInfo.getLabel()
-                : ccI18n.t("backend-integration.model.types.renderers.enum.unknown")));
+        return (_jsxs(Typography, { children: [!visibility.grid && `${label}: `, valueInfo
+                    ? valueInfo.getLabel()
+                    : ccI18n.t("backend-integration.model.types.renderers.enum.unknown")] }));
     }
 }
 export default RendererEnumSelect;

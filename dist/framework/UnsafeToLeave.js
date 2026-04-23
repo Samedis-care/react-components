@@ -1,3 +1,4 @@
+import { jsx as _jsx } from "react/jsx-runtime";
 import React, { useContext, useEffect, useRef, useState } from "react";
 const noopLock = () => () => {
     return;
@@ -48,6 +49,6 @@ const UnsafeToLeave = (props) => {
             window.removeEventListener("beforeunload", unloadListener);
         };
     }, [disable]);
-    return (React.createElement(UnsafeToLeaveContext.Provider, { value: reasons.length > 0 }, props.children));
+    return (_jsx(UnsafeToLeaveContext.Provider, { value: reasons.length > 0, children: props.children }));
 };
 export default React.memo(UnsafeToLeave);

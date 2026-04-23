@@ -1,3 +1,4 @@
+import { jsx as _jsx } from "react/jsx-runtime";
 import React, { useContext, useEffect, useMemo } from "react";
 import useLocation from "./useLocation";
 import matchPath, { normalizePath } from "./matchPath";
@@ -34,7 +35,7 @@ const Route = (props) => {
         sentrySetRoutePath(normalizePath(routePrefix + path));
     }, [routePrefix, path]);
     if (!ctx)
-        return React.createElement(React.Fragment, null);
-    return React.createElement(RouteContext.Provider, { value: ctx }, element);
+        return _jsx(React.Fragment, {});
+    return _jsx(RouteContext.Provider, { value: ctx, children: element });
 };
 export default React.memo(Route);

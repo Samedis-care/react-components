@@ -1,3 +1,4 @@
+import { jsx as _jsx, Fragment as _Fragment, jsxs as _jsxs } from "react/jsx-runtime";
 import React, { useEffect, useState } from "react";
 import TextFieldWithHelp from "../TextFieldWithHelp";
 import { ChromePicker } from "react-color";
@@ -31,9 +32,6 @@ const ColorInput = (props) => {
     const handleColorPickerChange = (color) => {
         onChange(color.hex);
     };
-    return (React.createElement(React.Fragment, null,
-        React.createElement(TextFieldWithHelp, { ...props, value: value, onChange: handleTextFieldChange, onClick: openColorPicker, multiline: false }),
-        React.createElement(Popover, { open: pickerAnchor != null, anchorEl: pickerAnchor, anchorOrigin: anchorOrigin, transformOrigin: transformOrigin, onClose: closeColorPicker },
-            React.createElement(ChromePicker, { color: value, onChange: handleColorPickerChange }))));
+    return (_jsxs(_Fragment, { children: [_jsx(TextFieldWithHelp, { ...props, value: value, onChange: handleTextFieldChange, onClick: openColorPicker, multiline: false }), _jsx(Popover, { open: pickerAnchor != null, anchorEl: pickerAnchor, anchorOrigin: anchorOrigin, transformOrigin: transformOrigin, onClose: closeColorPicker, children: _jsx(ChromePicker, { color: value, onChange: handleColorPickerChange }) })] }));
 };
 export default React.memo(ColorInput);

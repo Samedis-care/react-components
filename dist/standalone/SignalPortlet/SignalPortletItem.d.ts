@@ -27,5 +27,5 @@ export interface SignalPortletItemProps {
     classes?: Partial<Record<SignalPortletItemClassKey, string>>;
 }
 export type SignalPortletItemClassKey = "listAvatar" | "itemColorLoading" | "itemColorActive" | "itemColorInactive" | "listText" | "root" | "rootBtn";
-declare const _default: React.MemoExoticComponent<(inProps: SignalPortletItemProps) => React.JSX.Element>;
+declare const _default: React.MemoExoticComponent<(inProps: SignalPortletItemProps) => import("react/jsx-runtime").JSX.Element>;
 export default _default;

@@ -14,5 +14,5 @@ export interface FormButtonsProps {
      */
     classes?: Partial<Record<FormButtonsClassKey, string>>;
 }
-declare const _default: React.MemoExoticComponent<(inProps: FormButtonsProps) => React.JSX.Element>;
+declare const _default: React.MemoExoticComponent<(inProps: FormButtonsProps) => import("react/jsx-runtime").JSX.Element>;
 export default _default;

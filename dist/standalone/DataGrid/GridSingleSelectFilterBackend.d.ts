@@ -1,4 +1,3 @@
-import React from "react";
 import { GridSize } from "@mui/material/Grid";
 import { Breakpoint } from "@mui/material/styles";
 import BackendSingleSelect, { BackendSingleSelectProps } from "../../backend-components/Selector/BackendSingleSelect";
@@ -31,6 +30,6 @@ export interface GridSingleSelectFilterBackendProps<KeyT extends ModelFieldName,
 }
 export type GridSingleSelectFilterBackendClassKey = "dialogRoot" | "barRoot";
 export declare const DataGridCustomFilterSingleBackend: typeof BackendSingleSelect;
-declare const GridSingleSelectFilterBackend: <KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT>(inProps: GridSingleSelectFilterBackendProps<KeyT, VisibilityT, CustomT>) => React.JSX.Element;
+declare const GridSingleSelectFilterBackend: <KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT>(inProps: GridSingleSelectFilterBackendProps<KeyT, VisibilityT, CustomT>) => import("react/jsx-runtime").JSX.Element;
 declare const _default: typeof GridSingleSelectFilterBackend;
 export default _default;

@@ -9,5 +9,5 @@ export interface HistoryRouterContextType {
 }
 export declare const HistoryRouterContext: React.Context<HistoryRouterContextType | null>;
 export declare const useHistoryRouterContext: () => HistoryRouterContextType;
-declare const _default: React.MemoExoticComponent<(props: HistoryRouterProps) => React.JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: HistoryRouterProps) => import("react/jsx-runtime").JSX.Element>;
 export default _default;

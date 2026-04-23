@@ -1,3 +1,4 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, } from "react";
 import { Grid as VGrid, } from "react-window";
 import { styled, useThemeProps } from "@mui/material";
@@ -147,49 +148,44 @@ const MultiGrid = (inProps) => {
         bottomGrid.scrollLeft = topGrid.scrollLeft;
         setTriggerScrollSync(false);
     }, [triggerScrollSync]);
-    return (React.createElement(Root, { style: { width, height } },
-        React.createElement(VGrid, { gridRef: topLeftGrid, columnWidth: (index) => columnWidth(index), rowHeight: (index) => rowHeight(index), columnCount: fixedColumnCount, rowCount: fixedRowCount, style: {
-                ...styleTopLeftGrid,
-                position: "absolute",
-                top: 0,
-                left: 0,
-                width: Math.min(fixedWidth, width),
-                height: fixedHeight,
-            }, cellComponent: CellRenderer, cellProps: {} }),
-        React.createElement(VGrid, { gridRef: topRightGrid, columnWidth: (index) => columnWidth(index + fixedColumnCount), rowHeight: (index) => rowHeight(index), columnCount: columnCount - fixedColumnCount, rowCount: fixedRowCount, style: {
-                ...styleTopRightGrid,
-                position: "absolute",
-                top: 0,
-                left: fixedWidth,
-                width: Math.max(width - fixedWidth, 0),
-                height: fixedHeight,
-            }, cellComponent: CellRendererTopRight, cellProps: {} }),
-        React.createElement(BottomLeftVariableSizeGrid, { gridRef: bottomLeftGrid, columnWidth: (index) => columnWidth(index), rowHeight: (index) => rowHeight(index + fixedRowCount), columnCount: fixedColumnCount, rowCount: rowCount - fixedRowCount, onScroll: handleScrollPinned, style: {
-                ...styleBottomLeftGrid,
-                position: "absolute",
-                overflow: "scroll",
-                top: fixedHeight,
-                left: 0,
-                width: Math.min(fixedWidth, width),
-                height: height - fixedHeight,
-            }, cellComponent: CellRendererBottomLeft, cellProps: {} }),
-        bottomRightRendered ? (React.createElement(VGrid, { gridRef: bottomRightGrid, columnWidth: (index) => columnWidth(index + fixedColumnCount), rowHeight: (index) => rowHeight(index + fixedRowCount), columnCount: columnCount - fixedColumnCount, rowCount: rowCount - fixedRowCount, onScroll: handleScroll, style: {
-                ...styleBottomRightGrid,
-                overflowX: "scroll",
-                overflowY: "auto",
-                position: "absolute",
-                top: fixedHeight,
-                left: fixedWidth,
-                width: Math.max(width - fixedWidth, 0),
-                height: height - fixedHeight,
-            }, onCellsRendered: onCellsRendered ? handleCellsRendered : undefined, cellComponent: CellRendererBottomRight, cellProps: {} })) : (React.createElement("div", { style: {
-                ...styleBottomRightGrid,
-                position: "absolute",
-                top: fixedHeight,
-                left: fixedWidth,
-                width: width - fixedWidth,
-                height: height - fixedHeight,
-            } },
-            React.createElement(NoContentRenderer, null)))));
+    return (_jsxs(Root, { style: { width, height }, children: [_jsx(VGrid, { gridRef: topLeftGrid, columnWidth: (index) => columnWidth(index), rowHeight: (index) => rowHeight(index), columnCount: fixedColumnCount, rowCount: fixedRowCount, style: {
+                    ...styleTopLeftGrid,
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    width: Math.min(fixedWidth, width),
+                    height: fixedHeight,
+                }, cellComponent: CellRenderer, cellProps: {} }), _jsx(VGrid, { gridRef: topRightGrid, columnWidth: (index) => columnWidth(index + fixedColumnCount), rowHeight: (index) => rowHeight(index), columnCount: columnCount - fixedColumnCount, rowCount: fixedRowCount, style: {
+                    ...styleTopRightGrid,
+                    position: "absolute",
+                    top: 0,
+                    left: fixedWidth,
+                    width: Math.max(width - fixedWidth, 0),
+                    height: fixedHeight,
+                }, cellComponent: CellRendererTopRight, cellProps: {} }), _jsx(BottomLeftVariableSizeGrid, { gridRef: bottomLeftGrid, columnWidth: (index) => columnWidth(index), rowHeight: (index) => rowHeight(index + fixedRowCount), columnCount: fixedColumnCount, rowCount: rowCount - fixedRowCount, onScroll: handleScrollPinned, style: {
+                    ...styleBottomLeftGrid,
+                    position: "absolute",
+                    overflow: "scroll",
+                    top: fixedHeight,
+                    left: 0,
+                    width: Math.min(fixedWidth, width),
+                    height: height - fixedHeight,
+                }, cellComponent: CellRendererBottomLeft, cellProps: {} }), bottomRightRendered ? (_jsx(VGrid, { gridRef: bottomRightGrid, columnWidth: (index) => columnWidth(index + fixedColumnCount), rowHeight: (index) => rowHeight(index + fixedRowCount), columnCount: columnCount - fixedColumnCount, rowCount: rowCount - fixedRowCount, onScroll: handleScroll, style: {
+                    ...styleBottomRightGrid,
+                    overflowX: "scroll",
+                    overflowY: "auto",
+                    position: "absolute",
+                    top: fixedHeight,
+                    left: fixedWidth,
+                    width: Math.max(width - fixedWidth, 0),
+                    height: height - fixedHeight,
+                }, onCellsRendered: onCellsRendered ? handleCellsRendered : undefined, cellComponent: CellRendererBottomRight, cellProps: {} })) : (_jsx("div", { style: {
+                    ...styleBottomRightGrid,
+                    position: "absolute",
+                    top: fixedHeight,
+                    left: fixedWidth,
+                    width: width - fixedWidth,
+                    height: height - fixedHeight,
+                }, children: _jsx(NoContentRenderer, {}) }))] }));
 };
 export default React.memo(MultiGrid);

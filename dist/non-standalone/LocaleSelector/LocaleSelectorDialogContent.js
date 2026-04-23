@@ -1,3 +1,4 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React, { Suspense, useCallback, useMemo, useState } from "react";
 import { Box, Grid, InputAdornment, styled, useThemeProps, } from "@mui/material";
 import { List } from "react-window";
@@ -28,8 +29,7 @@ const NoLocalesMessage = styled("div", {
     width: "100%",
 });
 const SearchInputProps = {
-    startAdornment: (React.createElement(InputAdornment, { position: "start" },
-        React.createElement(SearchIcon, null))),
+    startAdornment: (_jsx(InputAdornment, { position: "start", children: _jsx(SearchIcon, {}) })),
 };
 const LocaleSelectorDialogContent = (inProps) => {
     const props = useThemeProps({
@@ -97,16 +97,8 @@ const LocaleSelectorDialogContent = (inProps) => {
     }, [close, i18n, pushDialog]);
     const LocaleEntryRenderer = useCallback((entryProps) => {
         const locale = entryProps.filteredData[entryProps.index];
-        return (React.createElement("div", { style: entryProps.style, ...entryProps.ariaAttributes },
-            React.createElement(Suspense, { fallback: React.createElement(Loader, null) },
-                React.createElement(LocaleSelectorEntry, { locale: locale, currentLanguage: currentLang, handleSwitch: handleSwitch, disabled: switchingLanguage, key: locale.locale }))));
+        return (_jsx("div", { style: entryProps.style, ...entryProps.ariaAttributes, children: _jsx(Suspense, { fallback: _jsx(Loader, {}), children: _jsx(LocaleSelectorEntry, { locale: locale, currentLanguage: currentLang, handleSwitch: handleSwitch, disabled: switchingLanguage }, locale.locale) }) }));
     }, [currentLang, handleSwitch, switchingLanguage]);
-    return (React.createElement(Grid, { container: true, className: className },
-        React.createElement(Grid, { size: 12 },
-            React.createElement(Box, { sx: { px: 2, pb: 1 } },
-                React.createElement(TextFieldWithHelp, { value: filter, onChange: handleFilterChange, fullWidth: true, slotProps: { input: SearchInputProps } }))),
-        React.createElement(LocaleList, { size: 12 },
-            React.createElement(FormLoaderOverlay, { visible: switchingLanguage }),
-            filteredData.length === 0 ? (React.createElement(NoLocalesMessage, null, t("non-standalone.language-switcher.no-locales"))) : (React.createElement(List, { overscanCount: 2, rowCount: filteredData.length, rowHeight: 70, rowComponent: LocaleEntryRenderer, rowProps: { filteredData } })))));
+    return (_jsxs(Grid, { container: true, className: className, children: [_jsx(Grid, { size: 12, children: _jsx(Box, { sx: { px: 2, pb: 1 }, children: _jsx(TextFieldWithHelp, { value: filter, onChange: handleFilterChange, fullWidth: true, slotProps: { input: SearchInputProps } }) }) }), _jsxs(LocaleList, { size: 12, children: [_jsx(FormLoaderOverlay, { visible: switchingLanguage }), filteredData.length === 0 ? (_jsx(NoLocalesMessage, { children: t("non-standalone.language-switcher.no-locales") })) : (_jsx(List, { overscanCount: 2, rowCount: filteredData.length, rowHeight: 70, rowComponent: LocaleEntryRenderer, rowProps: { filteredData } }))] })] }));
 };
 export default React.memo(LocaleSelectorDialogContent);

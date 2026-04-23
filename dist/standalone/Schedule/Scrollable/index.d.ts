@@ -41,5 +41,5 @@ export interface ScrollableScheduleProps {
  */
 export type IProps = ScrollableScheduleProps;
 export type ScrollableScheduleClassKey = "today" | "todayBtn" | "scroller" | "filterSettingsBtn" | "filterWrapper";
-declare const _default: React.MemoExoticComponent<(inProps: ScrollableScheduleProps) => React.JSX.Element>;
+declare const _default: React.MemoExoticComponent<(inProps: ScrollableScheduleProps) => import("react/jsx-runtime").JSX.Element>;
 export default _default;

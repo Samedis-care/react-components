@@ -40,5 +40,5 @@ export interface GridMultiSelectFilterProps {
 }
 export declare const DataGridCustomFilterMulti: typeof BaseSelector;
 export type GridMultiSelectFilterClassKey = "dialogRoot" | "barRoot";
-declare const _default: React.MemoExoticComponent<(inProps: GridMultiSelectFilterProps) => React.JSX.Element>;
+declare const _default: React.MemoExoticComponent<(inProps: GridMultiSelectFilterProps) => import("react/jsx-runtime").JSX.Element>;
 export default _default;

@@ -1,3 +1,4 @@
+import { Fragment as _Fragment, jsx as _jsx } from "react/jsx-runtime";
 import React, { useContext, useEffect } from "react";
 import { useDataGridColumnState, useDataGridColumnsWidthState, useDataGridProps, useDataGridState, } from "./DataGrid";
 export const DataGridPersistentStateContext = React.createContext(undefined);
@@ -66,6 +67,6 @@ const StatePersistence = () => {
             },
         }, config));
     }, [setPersisted, state, columnState, columnWidthState, config]);
-    return React.createElement(React.Fragment, null);
+    return _jsx(_Fragment, {});
 };
 export default React.memo(StatePersistence);

@@ -1,3 +1,4 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React from "react";
 import SignalPortletItem from "./SignalPortletItem";
 import { Divider, Grid, IconButton, List, Paper, styled, Tooltip, Typography, useThemeProps, } from "@mui/material";
@@ -56,28 +57,12 @@ const SignalPortlet = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcSignalPortlet" });
     const { t } = useCCTranslations();
     const locale = useCurrentLocale();
-    return (React.createElement(SignalPortletRoot, { className: combineClassNames([props.className, props.classes?.root]) },
-        React.createElement(SignalPortletPaper, { className: props.classes?.paper },
-            React.createElement(SignalPortletInnerContainer, { container: true, spacing: 1, sx: { flexDirection: "column", justifyContent: "space-between" }, wrap: "nowrap", className: props.classes?.innerContainer },
-                React.createElement(Grid, { container: true, spacing: 1, sx: { flexDirection: "column", justifyContent: "flex-start" }, wrap: "nowrap", size: "grow" },
-                    React.createElement(SignalPortletTitleWrapper, { className: props.classes?.titleWrapper },
-                        React.createElement(SignalPortletTitle, { variant: "h5", align: "center", className: props.classes?.title }, props.title)),
-                    React.createElement(SignalPortletDivider, { className: props.classes?.divider },
-                        React.createElement(Divider, null)),
-                    React.createElement(Grid, null,
-                        React.createElement(SignalPortletList, { className: props.classes?.list }, props.items.map((item, index) => (React.createElement(SignalPortletItemStyled, { key: index.toString(), className: props.classes?.item, ...item })))))),
-                (props.updatedAt || props.onRefresh) && (React.createElement(Grid, { container: true, spacing: 1, sx: {
-                        justifyContent: "flex-end",
-                        alignItems: "center",
-                        alignContent: "center",
-                    } },
-                    props.updatedAt && (React.createElement(Grid, null,
-                        React.createElement(Tooltip, { title: new Date(props.updatedAt).toLocaleString(locale) },
-                            React.createElement(SignalPortletLastUpdatedAt, null, t("standalone.signal-portlet.last-updated", {
-                                AGE: timestampToAge(new Date(props.updatedAt)),
-                            }))))),
-                    props.onRefresh && (React.createElement(Grid, null,
-                        React.createElement(SignalPortletRefreshIconButton, { onClick: props.onRefresh, size: "small", color: "primary", "aria-label": t("standalone.signal-portlet.refresh") },
-                            React.createElement(SignalPortletRefreshIcon, null))))))))));
+    return (_jsx(SignalPortletRoot, { className: combineClassNames([props.className, props.classes?.root]), children: _jsx(SignalPortletPaper, { className: props.classes?.paper, children: _jsxs(SignalPortletInnerContainer, { container: true, spacing: 1, sx: { flexDirection: "column", justifyContent: "space-between" }, wrap: "nowrap", className: props.classes?.innerContainer, children: [_jsxs(Grid, { container: true, spacing: 1, sx: { flexDirection: "column", justifyContent: "flex-start" }, wrap: "nowrap", size: "grow", children: [_jsx(SignalPortletTitleWrapper, { className: props.classes?.titleWrapper, children: _jsx(SignalPortletTitle, { variant: "h5", align: "center", className: props.classes?.title, children: props.title }) }), _jsx(SignalPortletDivider, { className: props.classes?.divider, children: _jsx(Divider, {}) }), _jsx(Grid, { children: _jsx(SignalPortletList, { className: props.classes?.list, children: props.items.map((item, index) => (_jsx(SignalPortletItemStyled, { className: props.classes?.item, ...item }, index.toString()))) }) })] }), (props.updatedAt || props.onRefresh) && (_jsxs(Grid, { container: true, spacing: 1, sx: {
+                            justifyContent: "flex-end",
+                            alignItems: "center",
+                            alignContent: "center",
+                        }, children: [props.updatedAt && (_jsx(Grid, { children: _jsx(Tooltip, { title: new Date(props.updatedAt).toLocaleString(locale), children: _jsx(SignalPortletLastUpdatedAt, { children: t("standalone.signal-portlet.last-updated", {
+                                            AGE: timestampToAge(new Date(props.updatedAt)),
+                                        }) }) }) })), props.onRefresh && (_jsx(Grid, { children: _jsx(SignalPortletRefreshIconButton, { onClick: props.onRefresh, size: "small", color: "primary", "aria-label": t("standalone.signal-portlet.refresh"), children: _jsx(SignalPortletRefreshIcon, {}) }) }))] }))] }) }) }));
 };
 export default React.memo(SignalPortlet);

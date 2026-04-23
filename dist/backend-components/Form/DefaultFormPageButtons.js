@@ -1,3 +1,4 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React, { useCallback, useContext, useEffect, useMemo, useState, } from "react";
 import { useDialogContext } from "../../framework";
 import { showConfirmDialog } from "../../non-standalone";
@@ -21,7 +22,7 @@ const BackActionButtonRoot = styled(ActionButton, {
         border: "none",
     },
 });
-const BackActionButtonInner = ({ color, className, ...props }) => (React.createElement(BackActionButtonRoot, { color: color, className: combineClassNames([
+const BackActionButtonInner = ({ color, className, ...props }) => (_jsx(BackActionButtonRoot, { color: color, className: combineClassNames([
         !color && BackButtonDefaultColorClass,
         className,
     ]), ...props }));
@@ -77,13 +78,9 @@ const DefaultFormPageButtons = (inProps) => {
             return;
         void handleBack();
     }, [autoBackTrigger, handleBack]);
-    const saveBtn = (React.createElement(ActionButton, { disabled: !dirty || isSubmitting || readOnly, onClick: displayConfirmDialog ? submitWithConfirmDialog : safeSubmit }, t("common.buttons.save")));
+    const saveBtn = (_jsx(ActionButton, { disabled: !dirty || isSubmitting || readOnly, onClick: displayConfirmDialog ? submitWithConfirmDialog : safeSubmit, children: t("common.buttons.save") }));
     const humanReadOnlyReasons = useMemo(() => Object.values(readOnlyReasons).filter((e) => !!e), [readOnlyReasons]);
-    return (React.createElement(FormButtons, null,
-        !showBackButtonOnly &&
-            (readOnly && humanReadOnlyReasons.length > 0 ? (React.createElement(Tooltip, { title: humanReadOnlyReasons.join(", ") },
-                React.createElement("span", null, saveBtn))) : (saveBtn)),
-        extraButtons,
-        goBack && !(isInDialog && hasCustomCloseHandler) && (React.createElement(BackActionButton, { disabled: isSubmitting, onClick: handleBack }, t("common.buttons.back")))));
+    return (_jsxs(FormButtons, { children: [!showBackButtonOnly &&
+                (readOnly && humanReadOnlyReasons.length > 0 ? (_jsx(Tooltip, { title: humanReadOnlyReasons.join(", "), children: _jsx("span", { children: saveBtn }) })) : (saveBtn)), extraButtons, goBack && !(isInDialog && hasCustomCloseHandler) && (_jsx(BackActionButton, { disabled: isSubmitting, onClick: handleBack, children: t("common.buttons.back") }))] }));
 };
 export default React.memo(DefaultFormPageButtons);

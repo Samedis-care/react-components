@@ -1,3 +1,4 @@
+import { jsx as _jsx } from "react/jsx-runtime";
 import React, { useEffect, useMemo } from "react";
 import { FormControl, Grid, styled, useThemeProps } from "@mui/material";
 import { useCustomFilterActiveContext } from "./Header/FilterBar";
@@ -50,14 +51,10 @@ const GridSingleSelectFilterBackend = (inProps) => {
         autocomplete: isActive ? "Mui-active" : undefined,
     }), [isActive]);
     if (dialog) {
-        return (React.createElement(GridSingleSelectFilterBackendDialogRoot, { size: { xs: 12, md: 6, lg: 3, ...dialogBreakpoints } },
-            React.createElement(FormControl, { component: "fieldset", fullWidth: true },
-                React.createElement(DataGridCustomFilterSingleBackend, { label: label, ...selectorProps, disableClearable: true, classes: selectorStyles, className: classes?.customFilterSingle }))));
+        return (_jsx(GridSingleSelectFilterBackendDialogRoot, { size: { xs: 12, md: 6, lg: 3, ...dialogBreakpoints }, children: _jsx(FormControl, { component: "fieldset", fullWidth: true, children: _jsx(DataGridCustomFilterSingleBackend, { label: label, ...selectorProps, disableClearable: true, classes: selectorStyles, className: classes?.customFilterSingle }) }) }));
     }
     else {
-        return (React.createElement(GridSingleSelectFilterBackendBarRoot, { size: { xs: 4, ...barBreakpoints } },
-            React.createElement(FormControl, { component: "fieldset", fullWidth: true },
-                React.createElement(DataGridCustomFilterSingleBackend, { label: label, ...selectorProps, disableClearable: true, classes: selectorStyles, className: classes?.customFilterSingle }))));
+        return (_jsx(GridSingleSelectFilterBackendBarRoot, { size: { xs: 4, ...barBreakpoints }, children: _jsx(FormControl, { component: "fieldset", fullWidth: true, children: _jsx(DataGridCustomFilterSingleBackend, { label: label, ...selectorProps, disableClearable: true, classes: selectorStyles, className: classes?.customFilterSingle }) }) }));
     }
 };
 export default React.memo(GridSingleSelectFilterBackend);

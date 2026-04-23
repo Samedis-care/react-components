@@ -1,3 +1,4 @@
+import { jsx as _jsx } from "react/jsx-runtime";
 import React from "react";
 import Loader from "../Loader";
 import { styled, useThemeProps } from "@mui/material";
@@ -23,6 +24,6 @@ const FormLoaderOverlayLoader = styled(Loader, {
 })({});
 const FormLoaderOverlay = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcFormLoaderOverlay" });
-    return (React.createElement(FormLoaderOverlayRoot, { ownerState: { visible: props.visible }, className: props.className }, props.visible && React.createElement(FormLoaderOverlayLoader, null)));
+    return (_jsx(FormLoaderOverlayRoot, { ownerState: { visible: props.visible }, className: props.className, children: props.visible && _jsx(FormLoaderOverlayLoader, {}) }));
 };
 export default React.memo(FormLoaderOverlay);

@@ -1,3 +1,4 @@
+import { jsx as _jsx, Fragment as _Fragment, jsxs as _jsxs } from "react/jsx-runtime";
 import React, { useCallback, useState } from "react";
 import { createTheme, ThemeProvider as MuiThemeProvider, StyledEngineProvider, CssBaseline, } from "@mui/material";
 export const getStandardTheme = (preferDark) => ({
@@ -17,10 +18,6 @@ const ThemeProvider = (props) => {
     const setNewTheme = useCallback((newTheme) => {
         setTheme(createTheme(newTheme));
     }, [setTheme]);
-    return (React.createElement(ThemeContext.Provider, { value: setNewTheme },
-        React.createElement(StyledEngineProvider, { injectFirst: true },
-            React.createElement(MuiThemeProvider, { theme: theme },
-                React.createElement(CssBaseline, null),
-                React.createElement(React.Fragment, null, props.children)))));
+    return (_jsx(ThemeContext.Provider, { value: setNewTheme, children: _jsx(StyledEngineProvider, { injectFirst: true, children: _jsxs(MuiThemeProvider, { theme: theme, children: [_jsx(CssBaseline, {}), _jsx(_Fragment, { children: props.children })] }) }) }));
 };
 export default React.memo(ThemeProvider);

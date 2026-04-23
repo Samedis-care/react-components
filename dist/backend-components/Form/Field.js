@@ -1,3 +1,4 @@
+import { jsx as _jsx } from "react/jsx-runtime";
 import React, { useCallback, useContext, useEffect, useMemo, useRef, } from "react";
 import { useFormContext } from "./Form";
 import { getVisibility } from "../../backend-integration/Model/Visibility";
@@ -88,7 +89,7 @@ const Field = (props) => {
             relationData,
             values,
         };
-        return (React.createElement(FormFieldContext.Provider, { value: { ...renderParams, type } }, type.render(renderParams)));
+        return (_jsx(FormFieldContext.Provider, { value: { ...renderParams, type }, children: type.render(renderParams) }));
     }, 
     // do not update every time values change
     // eslint-disable-next-line react-hooks/exhaustive-deps

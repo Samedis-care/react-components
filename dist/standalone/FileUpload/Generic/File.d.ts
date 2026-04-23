@@ -84,5 +84,5 @@ export declare const getFileType: (fileName: string | null, mimeType: string | n
 export declare const getFileIcon: (fileName: string | null, mimeType: string | null) => React.ComponentType<SvgIconProps> | null;
 export declare const getFileTypeIcon: (type: FileType) => React.ComponentType<SvgIconProps> | null;
 export declare const getFileIconOrDefault: (fileName: string | null, mimeType: string | null) => React.ComponentType<SvgIconProps>;
-declare const _default: React.MemoExoticComponent<(inProps: FileProps) => React.JSX.Element>;
+declare const _default: React.MemoExoticComponent<(inProps: FileProps) => import("react/jsx-runtime").JSX.Element>;
 export default _default;

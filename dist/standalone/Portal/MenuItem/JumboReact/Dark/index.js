@@ -1,3 +1,4 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React from "react";
 import { ListItemButton, ListItemIcon, ListItemText, styled, useThemeProps, } from "@mui/material";
 import { ExpandLess, ExpandMore } from "@mui/icons-material";
@@ -45,13 +46,9 @@ const MenuItemJumboReactDark = (inProps) => {
         name: "CcMenuItemJumboReactDark",
     });
     const Icon = props.icon;
-    return (React.createElement(MyListItem, { onClick: props.onClick, onAuxClick: props.onAuxClick, className: combineClassNames([
+    return (_jsxs(MyListItem, { onClick: props.onClick, onAuxClick: props.onAuxClick, className: combineClassNames([
             props.active && "Mui-active",
             props.expandable && "Cc-expandable",
-        ]) },
-        React.createElement(StyledListItemIcon, null, Icon && React.createElement(Icon, null)),
-        React.createElement(ListItemText, { primary: props.title, slotProps: { primary: props.typographyProps ?? typographyProps } }),
-        props.expandable && (props.expanded ? React.createElement(ExpandLess, null) : React.createElement(ExpandMore, null)),
-        props.active && React.createElement(Dot, null)));
+        ]), children: [_jsx(StyledListItemIcon, { children: Icon && _jsx(Icon, {}) }), _jsx(ListItemText, { primary: props.title, slotProps: { primary: props.typographyProps ?? typographyProps } }), props.expandable && (props.expanded ? _jsx(ExpandLess, {}) : _jsx(ExpandMore, {})), props.active && _jsx(Dot, {})] }));
 };
 export default React.memo(MenuItemJumboReactDark);

@@ -3,5 +3,5 @@ import { DataGridProps, IDataGridColumnProps } from "../DataGrid";
 export interface IDataGridContentProps extends IDataGridColumnProps, Pick<DataGridProps, "globalScrollListener"> {
     rowsPerPage: number;
 }
-declare const _default: React.MemoExoticComponent<(props: IDataGridContentProps) => React.JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: IDataGridContentProps) => import("react/jsx-runtime").JSX.Element>;
 export default _default;

@@ -1,3 +1,4 @@
+import { jsx as _jsx, Fragment as _Fragment, jsxs as _jsxs } from "react/jsx-runtime";
 import React, { useCallback, useState } from "react";
 import { Checkbox, FormControl, FormControlLabel, Grid, List, ListItemText, MenuItem, Radio, RadioGroup, Select, TextField, Tooltip, } from "@mui/material";
 import { Delete as ClearIcon } from "@mui/icons-material";
@@ -178,19 +179,19 @@ const FilterEntry = (props) => {
         updateParent();
     };
     let filterTypeMenuItems = [
-        checkSupport(props.valueType, "equals") && (React.createElement(MenuItem, { key: "equals", value: "equals" }, t("standalone.data-grid.content.filter-type.eq"))),
-        checkSupport(props.valueType, "notEqual") && (React.createElement(MenuItem, { key: "notEqual", value: "notEqual" }, t("standalone.data-grid.content.filter-type.not-eq"))),
-        checkSupport(props.valueType, "empty") && (React.createElement(MenuItem, { key: "empty", value: "empty" }, t("standalone.data-grid.content.filter-type.empty"))),
-        checkSupport(props.valueType, "notEmpty") && (React.createElement(MenuItem, { key: "notEmpty", value: "notEmpty" }, t("standalone.data-grid.content.filter-type.not-empty"))),
+        checkSupport(props.valueType, "equals") && (_jsx(MenuItem, { value: "equals", children: t("standalone.data-grid.content.filter-type.eq") }, "equals")),
+        checkSupport(props.valueType, "notEqual") && (_jsx(MenuItem, { value: "notEqual", children: t("standalone.data-grid.content.filter-type.not-eq") }, "notEqual")),
+        checkSupport(props.valueType, "empty") && (_jsx(MenuItem, { value: "empty", children: t("standalone.data-grid.content.filter-type.empty") }, "empty")),
+        checkSupport(props.valueType, "notEmpty") && (_jsx(MenuItem, { value: "notEmpty", children: t("standalone.data-grid.content.filter-type.not-empty") }, "notEmpty")),
     ];
     if (["string", "localized-string", "combined-string"].includes(props.valueType ?? "")) {
-        filterTypeMenuItems.push(checkSupport(props.valueType, "matches") && (React.createElement(MenuItem, { key: "matches", value: "matches" }, t("standalone.data-grid.content.filter-type.matches"))), checkSupport(props.valueType, "notMatches") && (React.createElement(MenuItem, { key: "notMatches", value: "notMatches" }, t("standalone.data-grid.content.filter-type.not-matches"))), checkSupport(props.valueType, "contains") && (React.createElement(MenuItem, { key: "contains", value: "contains" }, t("standalone.data-grid.content.filter-type.contains"))), checkSupport(props.valueType, "notContains") && (React.createElement(MenuItem, { key: "notContains", value: "notContains" }, t("standalone.data-grid.content.filter-type.not-contains"))), checkSupport(props.valueType, "startsWith") && (React.createElement(MenuItem, { key: "startsWith", value: "startsWith" }, t("standalone.data-grid.content.filter-type.starts-with"))), checkSupport(props.valueType, "endsWith") && (React.createElement(MenuItem, { key: "endsWith", value: "endsWith" }, t("standalone.data-grid.content.filter-type.ends-with"))));
+        filterTypeMenuItems.push(checkSupport(props.valueType, "matches") && (_jsx(MenuItem, { value: "matches", children: t("standalone.data-grid.content.filter-type.matches") }, "matches")), checkSupport(props.valueType, "notMatches") && (_jsx(MenuItem, { value: "notMatches", children: t("standalone.data-grid.content.filter-type.not-matches") }, "notMatches")), checkSupport(props.valueType, "contains") && (_jsx(MenuItem, { value: "contains", children: t("standalone.data-grid.content.filter-type.contains") }, "contains")), checkSupport(props.valueType, "notContains") && (_jsx(MenuItem, { value: "notContains", children: t("standalone.data-grid.content.filter-type.not-contains") }, "notContains")), checkSupport(props.valueType, "startsWith") && (_jsx(MenuItem, { value: "startsWith", children: t("standalone.data-grid.content.filter-type.starts-with") }, "startsWith")), checkSupport(props.valueType, "endsWith") && (_jsx(MenuItem, { value: "endsWith", children: t("standalone.data-grid.content.filter-type.ends-with") }, "endsWith")));
     }
     else if (props.valueType === "number") {
-        filterTypeMenuItems.push(checkSupport(props.valueType, "lessThan") && (React.createElement(MenuItem, { key: "lessThan", value: "lessThan" }, t("standalone.data-grid.content.filter-type.lt"))), checkSupport(props.valueType, "lessThanOrEqual") && (React.createElement(MenuItem, { key: "lessThanOrEqual", value: "lessThanOrEqual" }, t("standalone.data-grid.content.filter-type.lte"))), checkSupport(props.valueType, "greaterThan") && (React.createElement(MenuItem, { key: "greaterThan", value: "greaterThan" }, t("standalone.data-grid.content.filter-type.gt"))), checkSupport(props.valueType, "greaterThanOrEqual") && (React.createElement(MenuItem, { key: "greaterThanOrEqual", value: "greaterThanOrEqual" }, t("standalone.data-grid.content.filter-type.gte"))), checkSupport(props.valueType, "inRange") && (React.createElement(MenuItem, { key: "inRange", value: "inRange" }, t("standalone.data-grid.content.filter-type.in-range"))));
+        filterTypeMenuItems.push(checkSupport(props.valueType, "lessThan") && (_jsx(MenuItem, { value: "lessThan", children: t("standalone.data-grid.content.filter-type.lt") }, "lessThan")), checkSupport(props.valueType, "lessThanOrEqual") && (_jsx(MenuItem, { value: "lessThanOrEqual", children: t("standalone.data-grid.content.filter-type.lte") }, "lessThanOrEqual")), checkSupport(props.valueType, "greaterThan") && (_jsx(MenuItem, { value: "greaterThan", children: t("standalone.data-grid.content.filter-type.gt") }, "greaterThan")), checkSupport(props.valueType, "greaterThanOrEqual") && (_jsx(MenuItem, { value: "greaterThanOrEqual", children: t("standalone.data-grid.content.filter-type.gte") }, "greaterThanOrEqual")), checkSupport(props.valueType, "inRange") && (_jsx(MenuItem, { value: "inRange", children: t("standalone.data-grid.content.filter-type.in-range") }, "inRange")));
     }
     else if (props.valueType === "date" || props.valueType === "datetime") {
-        filterTypeMenuItems.push(checkSupport(props.valueType, "lessThan") && (React.createElement(MenuItem, { key: "lessThan", value: "lessThan" }, t("standalone.data-grid.content.filter-type.lt-date"))), checkSupport(props.valueType, "lessThanOrEqual") && (React.createElement(MenuItem, { key: "lessThanOrEqual", value: "lessThanOrEqual" }, t("standalone.data-grid.content.filter-type.lte-date"))), checkSupport(props.valueType, "greaterThan") && (React.createElement(MenuItem, { key: "greaterThan", value: "greaterThan" }, t("standalone.data-grid.content.filter-type.gt-date"))), checkSupport(props.valueType, "greaterThanOrEqual") && (React.createElement(MenuItem, { key: "greaterThanOrEqual", value: "greaterThanOrEqual" }, t("standalone.data-grid.content.filter-type.gte-date"))), checkSupport(props.valueType, "inRange") && (React.createElement(MenuItem, { key: "inRange", value: "inRange" }, t("standalone.data-grid.content.filter-type.in-range-date"))));
+        filterTypeMenuItems.push(checkSupport(props.valueType, "lessThan") && (_jsx(MenuItem, { value: "lessThan", children: t("standalone.data-grid.content.filter-type.lt-date") }, "lessThan")), checkSupport(props.valueType, "lessThanOrEqual") && (_jsx(MenuItem, { value: "lessThanOrEqual", children: t("standalone.data-grid.content.filter-type.lte-date") }, "lessThanOrEqual")), checkSupport(props.valueType, "greaterThan") && (_jsx(MenuItem, { value: "greaterThan", children: t("standalone.data-grid.content.filter-type.gt-date") }, "greaterThan")), checkSupport(props.valueType, "greaterThanOrEqual") && (_jsx(MenuItem, { value: "greaterThanOrEqual", children: t("standalone.data-grid.content.filter-type.gte-date") }, "greaterThanOrEqual")), checkSupport(props.valueType, "inRange") && (_jsx(MenuItem, { value: "inRange", children: t("standalone.data-grid.content.filter-type.in-range-date") }, "inRange")));
     }
     filterTypeMenuItems = filterTypeMenuItems.filter((e) => e);
     // filter type custom
@@ -213,76 +214,34 @@ const FilterEntry = (props) => {
         });
     }
     // END filter type custom
-    return (React.createElement(React.Fragment, null,
-        isFirstFilter && props.value?.value1 && (React.createElement(Grid, { size: 12 },
-            React.createElement(Grid, { container: true, sx: { justifyContent: "flex-end", alignItems: "center" } },
-                React.createElement(Grid, null,
-                    React.createElement(Tooltip, { title: t("standalone.data-grid.content.reset-column-filter") ?? "" },
-                        React.createElement("span", null,
-                            React.createElement(DataGridFilterClearButton, { className: classes?.filterClearBtn, onClick: resetFilter, size: "large" },
-                                React.createElement(ClearIcon, null)))))))),
-        (props.valueType === "string" ||
-            props.valueType === "localized-string" ||
-            props.valueType === "combined-string" ||
-            props.valueType === "number" ||
-            props.valueType === "date" ||
-            props.valueType === "datetime") && (React.createElement(React.Fragment, null,
-            React.createElement(Grid, { size: 12 },
-                React.createElement(Select, { onChange: onFilterTypeChange, value: filterType, fullWidth: true }, filterTypeMenuItems)),
-            filterType !== "empty" && filterType !== "notEmpty" && (React.createElement(Grid, { size: 12 }, props.valueType === "date" ? (React.createElement(LocalizedKeyboardDatePicker, { value: filterValue === "" ? null : moment(filterValue), onChange: onFilterValueChangeDate, fullWidth: true, autoFocus: depth === 1 })) : props.valueType === "datetime" ? (React.createElement(LocalizedDateTimePicker, { value: filterValue === "" ? null : moment(filterValue), onChange: onFilterValueChangeDateTime, fullWidth: true, autoFocus: depth === 1 })) : (React.createElement(TextField, { value: filterValue, onChange: onFilterValueChange, fullWidth: true, autoFocus: depth === 1 })))),
-            filterType === "inRange" && (React.createElement(Grid, { size: 12 }, props.valueType === "date" ? (React.createElement(LocalizedKeyboardDatePicker, { value: filterValue2 === "" ? null : moment(filterValue2), onChange: onFilterValue2ChangeDate })) : props.valueType === "datetime" ? (React.createElement(LocalizedDateTimePicker, { value: filterValue2 === "" ? null : moment(filterValue2), onChange: onFilterValueChangeDateTime })) : (React.createElement(TextField, { value: filterValue2, onChange: onFilterValue2Change, fullWidth: true })))))),
-        props.valueType === "boolean" && (React.createElement(Grid, { size: 12 },
-            React.createElement(FormControl, null,
-                React.createElement(RadioGroup, { value: filterValue, onChange: onFilterValueChangeBool },
-                    React.createElement(FormControlLabel, { value: "", control: React.createElement(Radio, null), label: t("standalone.data-grid.content.bool-filter.any") }),
-                    React.createElement(FormControlLabel, { value: "true", control: React.createElement(Radio, null), label: t("standalone.data-grid.content.bool-filter.true") }),
-                    React.createElement(FormControlLabel, { value: "false", control: React.createElement(Radio, null), label: t("standalone.data-grid.content.bool-filter.false") }))))),
-        props.valueType === "enum" && (React.createElement(React.Fragment, null,
-            props.valueData.length > 10 && (React.createElement(Grid, { size: 12 },
-                React.createElement(TextField, { value: enumFilterSearch, onChange: (evt) => setEnumFilterSearch(evt.target.value), placeholder: t("standalone.data-grid.content.set-filter.search"), fullWidth: true, autoFocus: depth === 1 }))),
-            React.createElement(DataGridSetFilterContainer, { size: 12, className: classes?.setFilterContainer },
-                React.createElement(List, null,
-                    props.valueData.length > 5 && (React.createElement(DataGridSetFilterListItem, { className: classes?.setFilterListItem },
-                        React.createElement(Checkbox, { checked: filterValue.split(",").sort().join(",") ===
-                                props.valueData
-                                    .filter((entry) => !entry.isDivider)
-                                    .map((entry) => entry.value || ENUM_FILTER_MAGIC_EMPTY)
-                                    .sort()
-                                    .join(","), onChange: onFilterValueChangeEnumAll }),
-                        React.createElement(ListItemText, { slotProps: LIST_ITEM_SLOT_PROPS }, t("standalone.data-grid.content.set-filter.select-all")))),
-                    checkSupport(props.valueType, "notInSet") && (React.createElement(React.Fragment, null,
-                        React.createElement(DataGridSetFilterListItem, { className: classes?.setFilterListItem },
-                            React.createElement(Checkbox, { checked: enumFilterInverted, onChange: onFilterTypeChangeEnum }),
-                            React.createElement(ListItemText, { slotProps: LIST_ITEM_SLOT_PROPS }, t("standalone.data-grid.content.set-filter.invert"))),
-                        React.createElement(DataGridSetFilterListItemDivider, { className: classes?.setFilterListItemDivider },
-                            React.createElement(DataGridSetFilterListDivider, { className: classes?.setFilterListDivider })))),
-                    props.valueData
-                        .filter((entry) => entry
-                        .getLabelText()
-                        .toLowerCase()
-                        .includes(enumFilterSearch.toLocaleLowerCase()))
-                        .map((entry) => {
-                        const ListItemComp = entry.isDivider
-                            ? DataGridSetFilterListItemDivider
-                            : DataGridSetFilterListItem;
-                        return (React.createElement(ListItemComp, { key: entry.value, className: entry.isDivider
-                                ? classes?.setFilterListItemDivider
-                                : classes?.setFilterListItem }, entry.isDivider ? (React.createElement(DataGridSetFilterListDivider, { className: classes?.setFilterListDivider })) : (React.createElement(React.Fragment, null,
-                            React.createElement(Checkbox, { value: entry.value || ENUM_FILTER_MAGIC_EMPTY, checked: filterValue
-                                    .split(",")
-                                    .includes(entry.value || ENUM_FILTER_MAGIC_EMPTY), onChange: onFilterValueChangeEnum, disabled: entry.disabled }),
-                            React.createElement(ListItemText, { slotProps: LIST_ITEM_SLOT_PROPS }, (entry.getLabel || entry.getLabelText)())))));
-                    }))))),
-        props.valueType === "id" && (React.createElement(React.Fragment, null,
-            React.createElement(DataGridIdFilterContainer, { size: 12, className: classes?.idFilterContainer },
-                checkSupport(props.valueType, "notInSet") && (React.createElement(FormControlLabel, { control: React.createElement(Checkbox, { checked: enumFilterInverted, onChange: onFilterTypeChangeEnum }), label: t("standalone.data-grid.content.set-filter.invert") })),
-                React.createElement(BackendMultiSelect, { ...props.valueData, selected: filterValue ? filterValue.split(",") : [], onSelect: handleIdFilterSelect, confirmDelete: false })))),
-        filterValue &&
-            props.valueType !== "enum" &&
-            props.valueType !== "id" &&
-            props.valueType !== "boolean" &&
-            (!maxDepth || depth <= maxDepth) && (React.createElement(React.Fragment, null,
-            React.createElement(FilterCombinator, { value: subFilterComboType, onChange: onSubFilterTypeChange }),
-            React.createElement(FilterEntry, { field: props.field, onChange: onSubFilterChange, valueType: props.valueType, valueData: props.valueData, value: subFilter, close: close, depth: depth + 1 })))));
+    return (_jsxs(_Fragment, { children: [isFirstFilter && props.value?.value1 && (_jsx(Grid, { size: 12, children: _jsx(Grid, { container: true, sx: { justifyContent: "flex-end", alignItems: "center" }, children: _jsx(Grid, { children: _jsx(Tooltip, { title: t("standalone.data-grid.content.reset-column-filter") ?? "", children: _jsx("span", { children: _jsx(DataGridFilterClearButton, { className: classes?.filterClearBtn, onClick: resetFilter, size: "large", children: _jsx(ClearIcon, {}) }) }) }) }) }) })), (props.valueType === "string" ||
+                props.valueType === "localized-string" ||
+                props.valueType === "combined-string" ||
+                props.valueType === "number" ||
+                props.valueType === "date" ||
+                props.valueType === "datetime") && (_jsxs(_Fragment, { children: [_jsx(Grid, { size: 12, children: _jsx(Select, { onChange: onFilterTypeChange, value: filterType, fullWidth: true, children: filterTypeMenuItems }) }), filterType !== "empty" && filterType !== "notEmpty" && (_jsx(Grid, { size: 12, children: props.valueType === "date" ? (_jsx(LocalizedKeyboardDatePicker, { value: filterValue === "" ? null : moment(filterValue), onChange: onFilterValueChangeDate, fullWidth: true, autoFocus: depth === 1 })) : props.valueType === "datetime" ? (_jsx(LocalizedDateTimePicker, { value: filterValue === "" ? null : moment(filterValue), onChange: onFilterValueChangeDateTime, fullWidth: true, autoFocus: depth === 1 })) : (_jsx(TextField, { value: filterValue, onChange: onFilterValueChange, fullWidth: true, autoFocus: depth === 1 })) })), filterType === "inRange" && (_jsx(Grid, { size: 12, children: props.valueType === "date" ? (_jsx(LocalizedKeyboardDatePicker, { value: filterValue2 === "" ? null : moment(filterValue2), onChange: onFilterValue2ChangeDate })) : props.valueType === "datetime" ? (_jsx(LocalizedDateTimePicker, { value: filterValue2 === "" ? null : moment(filterValue2), onChange: onFilterValueChangeDateTime })) : (_jsx(TextField, { value: filterValue2, onChange: onFilterValue2Change, fullWidth: true })) }))] })), props.valueType === "boolean" && (_jsx(Grid, { size: 12, children: _jsx(FormControl, { children: _jsxs(RadioGroup, { value: filterValue, onChange: onFilterValueChangeBool, children: [_jsx(FormControlLabel, { value: "", control: _jsx(Radio, {}), label: t("standalone.data-grid.content.bool-filter.any") }), _jsx(FormControlLabel, { value: "true", control: _jsx(Radio, {}), label: t("standalone.data-grid.content.bool-filter.true") }), _jsx(FormControlLabel, { value: "false", control: _jsx(Radio, {}), label: t("standalone.data-grid.content.bool-filter.false") })] }) }) })), props.valueType === "enum" && (_jsxs(_Fragment, { children: [props.valueData.length > 10 && (_jsx(Grid, { size: 12, children: _jsx(TextField, { value: enumFilterSearch, onChange: (evt) => setEnumFilterSearch(evt.target.value), placeholder: t("standalone.data-grid.content.set-filter.search"), fullWidth: true, autoFocus: depth === 1 }) })), _jsx(DataGridSetFilterContainer, { size: 12, className: classes?.setFilterContainer, children: _jsxs(List, { children: [props.valueData.length > 5 && (_jsxs(DataGridSetFilterListItem, { className: classes?.setFilterListItem, children: [_jsx(Checkbox, { checked: filterValue.split(",").sort().join(",") ===
+                                                props.valueData
+                                                    .filter((entry) => !entry.isDivider)
+                                                    .map((entry) => entry.value || ENUM_FILTER_MAGIC_EMPTY)
+                                                    .sort()
+                                                    .join(","), onChange: onFilterValueChangeEnumAll }), _jsx(ListItemText, { slotProps: LIST_ITEM_SLOT_PROPS, children: t("standalone.data-grid.content.set-filter.select-all") })] })), checkSupport(props.valueType, "notInSet") && (_jsxs(_Fragment, { children: [_jsxs(DataGridSetFilterListItem, { className: classes?.setFilterListItem, children: [_jsx(Checkbox, { checked: enumFilterInverted, onChange: onFilterTypeChangeEnum }), _jsx(ListItemText, { slotProps: LIST_ITEM_SLOT_PROPS, children: t("standalone.data-grid.content.set-filter.invert") })] }), _jsx(DataGridSetFilterListItemDivider, { className: classes?.setFilterListItemDivider, children: _jsx(DataGridSetFilterListDivider, { className: classes?.setFilterListDivider }) })] })), props.valueData
+                                    .filter((entry) => entry
+                                    .getLabelText()
+                                    .toLowerCase()
+                                    .includes(enumFilterSearch.toLocaleLowerCase()))
+                                    .map((entry) => {
+                                    const ListItemComp = entry.isDivider
+                                        ? DataGridSetFilterListItemDivider
+                                        : DataGridSetFilterListItem;
+                                    return (_jsx(ListItemComp, { className: entry.isDivider
+                                            ? classes?.setFilterListItemDivider
+                                            : classes?.setFilterListItem, children: entry.isDivider ? (_jsx(DataGridSetFilterListDivider, { className: classes?.setFilterListDivider })) : (_jsxs(_Fragment, { children: [_jsx(Checkbox, { value: entry.value || ENUM_FILTER_MAGIC_EMPTY, checked: filterValue
+                                                        .split(",")
+                                                        .includes(entry.value || ENUM_FILTER_MAGIC_EMPTY), onChange: onFilterValueChangeEnum, disabled: entry.disabled }), _jsx(ListItemText, { slotProps: LIST_ITEM_SLOT_PROPS, children: (entry.getLabel || entry.getLabelText)() })] })) }, entry.value));
+                                })] }) })] })), props.valueType === "id" && (_jsx(_Fragment, { children: _jsxs(DataGridIdFilterContainer, { size: 12, className: classes?.idFilterContainer, children: [checkSupport(props.valueType, "notInSet") && (_jsx(FormControlLabel, { control: _jsx(Checkbox, { checked: enumFilterInverted, onChange: onFilterTypeChangeEnum }), label: t("standalone.data-grid.content.set-filter.invert") })), _jsx(BackendMultiSelect, { ...props.valueData, selected: filterValue ? filterValue.split(",") : [], onSelect: handleIdFilterSelect, confirmDelete: false })] }) })), filterValue &&
+                props.valueType !== "enum" &&
+                props.valueType !== "id" &&
+                props.valueType !== "boolean" &&
+                (!maxDepth || depth <= maxDepth) && (_jsxs(_Fragment, { children: [_jsx(FilterCombinator, { value: subFilterComboType, onChange: onSubFilterTypeChange }), _jsx(FilterEntry, { field: props.field, onChange: onSubFilterChange, valueType: props.valueType, valueData: props.valueData, value: subFilter, close: close, depth: depth + 1 })] }))] }));
 };
 export default React.memo(FilterEntry);

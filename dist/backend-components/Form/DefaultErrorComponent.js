@@ -1,3 +1,4 @@
+import { Fragment as _Fragment, jsx as _jsx } from "react/jsx-runtime";
 import React, { useEffect, useRef } from "react";
 import { showErrorDialog } from "../../non-standalone";
 import { useDialogContext } from "../../framework";
@@ -38,6 +39,6 @@ const DefaultErrorComponent = (props) => {
         })();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [propError]);
-    return React.createElement(React.Fragment, null);
+    return _jsx(_Fragment, {});
 };
 export default React.memo(DefaultErrorComponent);

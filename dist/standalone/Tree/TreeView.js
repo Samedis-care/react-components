@@ -1,3 +1,4 @@
+import { jsx as _jsx } from "react/jsx-runtime";
 import React, { useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState, } from "react";
 import TreeViewDefaultRenderer from "./TreeViewDefaultRenderer";
 import { List } from "react-window";
@@ -44,8 +45,7 @@ const buildTreeFromFlat = (data) => {
 };
 const RendererWrapper = (props) => {
     const { index, style, ariaAttributes, renderer: Renderer, rendererProps, data: itemData, } = props;
-    return (React.createElement("div", { style: style, ...ariaAttributes },
-        React.createElement(Renderer, { ...rendererProps, ...itemData[index] })));
+    return (_jsx("div", { style: style, ...ariaAttributes, children: _jsx(Renderer, { ...rendererProps, ...itemData[index] }) }));
 };
 const TreeView = React.forwardRef(function TreeView(props, ref) {
     const { data, renderer, rendererItemHeight, onLoadChildren, onToggleExpanded, ...rendererProps } = props;
@@ -105,6 +105,6 @@ const TreeView = React.forwardRef(function TreeView(props, ref) {
             setScrollToId(id);
         },
     }), []);
-    return (React.createElement(List, { listRef: listRef, rowComponent: RendererWrapper, rowHeight: itemHeight, rowCount: enhancedData.length, rowProps: itemData }));
+    return (_jsx(List, { listRef: listRef, rowComponent: RendererWrapper, rowHeight: itemHeight, rowCount: enhancedData.length, rowProps: itemData }));
 });
 export default React.memo(TreeView);

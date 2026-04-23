@@ -1,4 +1,5 @@
-import React, { useCallback } from "react";
+import { jsx as _jsx } from "react/jsx-runtime";
+import { useCallback } from "react";
 import { useFormContextLite } from "../Form";
 import BackendSingleSelect from "./BackendSingleSelect";
 import BackendMultiSelect from "./BackendMultiSelect";
@@ -14,7 +15,7 @@ const WithSelectorFormContext = (SelectorComponent) => function WithSelectorForm
         ...props,
         onAddNew: onAddNew ? handleAddNew : undefined,
     };
-    return React.createElement(SelectorComponent, { ...patchedProps });
+    return _jsx(SelectorComponent, { ...patchedProps });
 };
 export const FormBackendSingleSelect = (props) => WithSelectorFormContext((BackendSingleSelect))(props);
 export const FormBackendMultiSelect = (props) => WithSelectorFormContext((BackendMultiSelect))(props);

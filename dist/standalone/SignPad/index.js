@@ -1,3 +1,4 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React, { useCallback } from "react";
 import { IconButton, InputAdornment, styled, useThemeProps, } from "@mui/material";
 import { SignIcon } from "../../standalone";
@@ -46,13 +47,6 @@ const SignPad = (inProps) => {
         if (openInfo)
             openInfo();
     }, [openInfo]);
-    return (React.createElement(SignPadDiv, { className: combineClassNames([className, classes?.root]), onClick: openSignPad },
-        React.createElement(SignTextDiv, { className: classes?.signTextDiv },
-            React.createElement(SignIcon, { color: disabled ? "disabled" : "primary" }),
-            !signature && React.createElement("span", null, t("standalone.signature-pad.sign-here"))),
-        React.createElement(ImageDiv, { className: classes?.imageDiv }, signature && (React.createElement(SignPreview, { className: classes?.signPreview, src: signature, alt: "" }))),
-        React.createElement(InfoDiv, { className: classes?.infoDiv }, openInfo && (React.createElement(InputAdornment, { position: "end" },
-            React.createElement(IconButton, { onClick: handelOpenInfo, size: "large", "aria-label": t("standalone.uikit.info") },
-                React.createElement(InfoIcon, { color: "disabled" })))))));
+    return (_jsxs(SignPadDiv, { className: combineClassNames([className, classes?.root]), onClick: openSignPad, children: [_jsxs(SignTextDiv, { className: classes?.signTextDiv, children: [_jsx(SignIcon, { color: disabled ? "disabled" : "primary" }), !signature && _jsx("span", { children: t("standalone.signature-pad.sign-here") })] }), _jsx(ImageDiv, { className: classes?.imageDiv, children: signature && (_jsx(SignPreview, { className: classes?.signPreview, src: signature, alt: "" })) }), _jsx(InfoDiv, { className: classes?.infoDiv, children: openInfo && (_jsx(InputAdornment, { position: "end", children: _jsx(IconButton, { onClick: handelOpenInfo, size: "large", "aria-label": t("standalone.uikit.info"), children: _jsx(InfoIcon, { color: "disabled" }) }) })) })] }));
 };
 export default React.memo(SignPad);

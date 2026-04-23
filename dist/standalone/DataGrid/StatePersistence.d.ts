@@ -11,5 +11,5 @@ export type DataGridPersistentStateContextType = [
 ];
 export declare const DataGridPersistentStateContext: React.Context<DataGridPersistentStateContextType | undefined>;
 export declare const filterPersistedState: (persisted: Partial<DataGridPersistentState>, config: DataGridProps["persist"]) => Partial<DataGridPersistentState>;
-declare const _default: React.MemoExoticComponent<() => React.JSX.Element>;
+declare const _default: React.MemoExoticComponent<() => import("react/jsx-runtime").JSX.Element>;
 export default _default;

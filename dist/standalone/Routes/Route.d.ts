@@ -28,5 +28,5 @@ export declare const useRouteInfo: () => RouteContextType;
  * Use parent route path
  */
 export declare const useRoutePrefix: () => string;
-declare const _default: React.MemoExoticComponent<(props: RouteProps) => React.JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: RouteProps) => import("react/jsx-runtime").JSX.Element>;
 export default _default;

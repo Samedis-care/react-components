@@ -54,6 +54,6 @@ export interface MultiSelectSelectorOwnerState {
     selected: boolean;
 }
 export type MultiSelectClassKey = "root" | "selectedEntry" | "selector";
-declare const MultiSelect: <DataT extends MultiSelectorData>(inProps: MultiSelectProps<DataT>) => React.JSX.Element;
+declare const MultiSelect: <DataT extends MultiSelectorData>(inProps: MultiSelectProps<DataT>) => import("react/jsx-runtime").JSX.Element;
 declare const _default: typeof MultiSelect;
 export default _default;

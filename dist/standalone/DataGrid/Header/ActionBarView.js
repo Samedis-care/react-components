@@ -1,3 +1,4 @@
+import { jsx as _jsx, Fragment as _Fragment, jsxs as _jsxs } from "react/jsx-runtime";
 import React, { useCallback, useState } from "react";
 import { Grid, IconButton, Tooltip, useMediaQuery, useTheme, } from "@mui/material";
 import { Add as AddIcon, Menu as MenuIcon, Publish as ImportIcon, } from "@mui/icons-material";
@@ -57,52 +58,11 @@ const ActionBarView = (props) => {
                     disableHint: typeof handleAddNew === "string" ? handleAddNew : undefined,
                 },
             ];
-    return (React.createElement(Grid, { container: true, sx: { alignItems: "stretch" }, wrap: "nowrap" },
-        hasCustomFilterBar &&
-            !bpSmUp &&
-            (toggleSettings || !hideReset || exporters || handleImport) ? (React.createElement(React.Fragment, null,
-            React.createElement(Grid, { key: "divider-1" },
-                React.createElement(VerticalDivider, null)),
-            React.createElement(IconButton, { color: "primary", onClick: openSettingsMenu, size: "large", "aria-label": t("standalone.data-grid.header.more-options") },
-                React.createElement(MenuIcon, null)),
-            React.createElement(ActionBarMenu, { anchorEl: settingsAnchorEl, toggleSettings: toggleSettings, openResetDialog: hideReset ? undefined : openResetDialog, openExportMenu: exporters ? openExportMenu : undefined, handleImport: handleImport, onClose: closeSettingsMenu }))) : (React.createElement(React.Fragment, null,
-            toggleSettings && (React.createElement(React.Fragment, null,
-                hasCustomFilterBar && (React.createElement(Grid, { key: "divider-1" },
-                    React.createElement(VerticalDivider, null))),
-                React.createElement(Grid, { key: "settings" }, bpMdUp ? (React.createElement(ComponentWithLabel, { control: React.createElement(SmallestIconButton, { color: "primary", "aria-label": t("standalone.data-grid.header.settings") },
-                        React.createElement(TuneIcon, null)), labelText: t("standalone.data-grid.header.settings"), onClick: handleToggleSettings, labelPlacement: "bottom" })) : (React.createElement(Tooltip, { title: t("standalone.data-grid.header.settings") },
-                    React.createElement(IconButton, { color: "primary", onClick: handleToggleSettings, size: "large", "aria-label": t("standalone.data-grid.header.settings") },
-                        React.createElement(TuneIcon, null))))))),
-            !hideReset && (React.createElement(React.Fragment, null,
-                React.createElement(Grid, { key: "divider-4" },
-                    React.createElement(VerticalDivider, null)),
-                React.createElement(Grid, { key: "reset" }, bpMdUp ? (React.createElement(ComponentWithLabel, { control: React.createElement(SmallestIconButton, { color: "primary", "aria-label": t("standalone.data-grid.header.reset") },
-                        React.createElement(ResetIcon, null)), labelText: t("standalone.data-grid.header.reset"), onClick: openResetDialog, labelPlacement: "bottom" })) : (React.createElement(Tooltip, { title: t("standalone.data-grid.header.reset") },
-                    React.createElement(IconButton, { color: "primary", onClick: openResetDialog, size: "large", "aria-label": t("standalone.data-grid.header.reset") },
-                        React.createElement(ResetIcon, null))))))),
-            exporters && (React.createElement(React.Fragment, null,
-                React.createElement(Grid, { key: "divider-3" },
-                    React.createElement(VerticalDivider, null)),
-                React.createElement(Grid, { key: "export" },
-                    bpMdUp ? (React.createElement(ComponentWithLabel, { control: React.createElement(SmallestIconButton, { color: "primary", "aria-label": t("standalone.data-grid.header.export") },
-                            React.createElement(ExportIcon, null)), labelText: t("standalone.data-grid.header.export"), onClick: openExportMenu, labelPlacement: "bottom" })) : (React.createElement(Tooltip, { title: t("standalone.data-grid.header.export") },
-                        React.createElement(IconButton, { color: "primary", onClick: openExportMenu, size: "large", "aria-label": t("standalone.data-grid.header.export") },
-                            React.createElement(ExportIcon, null)))),
-                    React.createElement(ExportMenu, { exporters: exporters, anchorEl: exportAnchorEl, onClose: closeExportMenu })))),
-            handleImport && (React.createElement(React.Fragment, null,
-                React.createElement(Grid, null,
-                    React.createElement(VerticalDivider, null)),
-                React.createElement(Grid, { key: "import" }, bpMdUp ? (React.createElement(ComponentWithLabel, { control: React.createElement(SmallestIconButton, { color: "primary", "aria-label": t("standalone.data-grid.header.import") },
-                        React.createElement(ImportIcon, null)), labelText: t("standalone.data-grid.header.import"), onClick: handleImport, labelPlacement: "bottom" })) : (React.createElement(Tooltip, { title: t("standalone.data-grid.header.import") },
-                    React.createElement(IconButton, { color: "primary", onClick: handleImport, size: "large", "aria-label": t("standalone.data-grid.header.import") },
-                        React.createElement(ImportIcon, null))))))))),
-        addButtons.length > 0 && (React.createElement(React.Fragment, null,
-            React.createElement(Grid, { key: "divider-2", size: "grow" }),
-            React.createElement(Grid, { container: true, key: "new", sx: { justifyContent: "flex-end", alignItems: "center" }, spacing: 2, wrap: "nowrap" }, addButtons.map((entry, index) => {
-                const btn = (React.createElement(ActionButton, { small: !bpSmUp, icon: entry.icon ?? React.createElement(AddIcon, null), onClick: entry.onClick, disabled: !entry.onClick }, entry.label));
-                return (React.createElement(Grid, { key: index.toString() }, !entry.onClick && entry.disableHint ? (React.createElement(Tooltip, { title: entry.disableHint },
-                    React.createElement("span", null, btn))) : (btn)));
-            })))),
-        React.createElement(ResetMenu, { anchorEl: resetAnchorEl, onClose: closeResetMenu, refresh: refresh, resetFilter: resetFilter, resetSort: resetSort, resetColumn: resetColumn, resetWidth: resetWidth, resetAll: resetAll })));
+    return (_jsxs(Grid, { container: true, sx: { alignItems: "stretch" }, wrap: "nowrap", children: [hasCustomFilterBar &&
+                !bpSmUp &&
+                (toggleSettings || !hideReset || exporters || handleImport) ? (_jsxs(_Fragment, { children: [_jsx(Grid, { children: _jsx(VerticalDivider, {}) }, "divider-1"), _jsx(IconButton, { color: "primary", onClick: openSettingsMenu, size: "large", "aria-label": t("standalone.data-grid.header.more-options"), children: _jsx(MenuIcon, {}) }), _jsx(ActionBarMenu, { anchorEl: settingsAnchorEl, toggleSettings: toggleSettings, openResetDialog: hideReset ? undefined : openResetDialog, openExportMenu: exporters ? openExportMenu : undefined, handleImport: handleImport, onClose: closeSettingsMenu })] })) : (_jsxs(_Fragment, { children: [toggleSettings && (_jsxs(_Fragment, { children: [hasCustomFilterBar && (_jsx(Grid, { children: _jsx(VerticalDivider, {}) }, "divider-1")), _jsx(Grid, { children: bpMdUp ? (_jsx(ComponentWithLabel, { control: _jsx(SmallestIconButton, { color: "primary", "aria-label": t("standalone.data-grid.header.settings"), children: _jsx(TuneIcon, {}) }), labelText: t("standalone.data-grid.header.settings"), onClick: handleToggleSettings, labelPlacement: "bottom" })) : (_jsx(Tooltip, { title: t("standalone.data-grid.header.settings"), children: _jsx(IconButton, { color: "primary", onClick: handleToggleSettings, size: "large", "aria-label": t("standalone.data-grid.header.settings"), children: _jsx(TuneIcon, {}) }) })) }, "settings")] })), !hideReset && (_jsxs(_Fragment, { children: [_jsx(Grid, { children: _jsx(VerticalDivider, {}) }, "divider-4"), _jsx(Grid, { children: bpMdUp ? (_jsx(ComponentWithLabel, { control: _jsx(SmallestIconButton, { color: "primary", "aria-label": t("standalone.data-grid.header.reset"), children: _jsx(ResetIcon, {}) }), labelText: t("standalone.data-grid.header.reset"), onClick: openResetDialog, labelPlacement: "bottom" })) : (_jsx(Tooltip, { title: t("standalone.data-grid.header.reset"), children: _jsx(IconButton, { color: "primary", onClick: openResetDialog, size: "large", "aria-label": t("standalone.data-grid.header.reset"), children: _jsx(ResetIcon, {}) }) })) }, "reset")] })), exporters && (_jsxs(_Fragment, { children: [_jsx(Grid, { children: _jsx(VerticalDivider, {}) }, "divider-3"), _jsxs(Grid, { children: [bpMdUp ? (_jsx(ComponentWithLabel, { control: _jsx(SmallestIconButton, { color: "primary", "aria-label": t("standalone.data-grid.header.export"), children: _jsx(ExportIcon, {}) }), labelText: t("standalone.data-grid.header.export"), onClick: openExportMenu, labelPlacement: "bottom" })) : (_jsx(Tooltip, { title: t("standalone.data-grid.header.export"), children: _jsx(IconButton, { color: "primary", onClick: openExportMenu, size: "large", "aria-label": t("standalone.data-grid.header.export"), children: _jsx(ExportIcon, {}) }) })), _jsx(ExportMenu, { exporters: exporters, anchorEl: exportAnchorEl, onClose: closeExportMenu })] }, "export")] })), handleImport && (_jsxs(_Fragment, { children: [_jsx(Grid, { children: _jsx(VerticalDivider, {}) }), _jsx(Grid, { children: bpMdUp ? (_jsx(ComponentWithLabel, { control: _jsx(SmallestIconButton, { color: "primary", "aria-label": t("standalone.data-grid.header.import"), children: _jsx(ImportIcon, {}) }), labelText: t("standalone.data-grid.header.import"), onClick: handleImport, labelPlacement: "bottom" })) : (_jsx(Tooltip, { title: t("standalone.data-grid.header.import"), children: _jsx(IconButton, { color: "primary", onClick: handleImport, size: "large", "aria-label": t("standalone.data-grid.header.import"), children: _jsx(ImportIcon, {}) }) })) }, "import")] }))] })), addButtons.length > 0 && (_jsxs(_Fragment, { children: [_jsx(Grid, { size: "grow" }, "divider-2"), _jsx(Grid, { container: true, sx: { justifyContent: "flex-end", alignItems: "center" }, spacing: 2, wrap: "nowrap", children: addButtons.map((entry, index) => {
+                            const btn = (_jsx(ActionButton, { small: !bpSmUp, icon: entry.icon ?? _jsx(AddIcon, {}), onClick: entry.onClick, disabled: !entry.onClick, children: entry.label }));
+                            return (_jsx(Grid, { children: !entry.onClick && entry.disableHint ? (_jsx(Tooltip, { title: entry.disableHint, children: _jsx("span", { children: btn }) })) : (btn) }, index.toString()));
+                        }) }, "new")] })), _jsx(ResetMenu, { anchorEl: resetAnchorEl, onClose: closeResetMenu, refresh: refresh, resetFilter: resetFilter, resetSort: resetSort, resetColumn: resetColumn, resetWidth: resetWidth, resetAll: resetAll })] }));
 };
 export default React.memo(ActionBarView);

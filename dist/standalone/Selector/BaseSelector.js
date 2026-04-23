@@ -1,3 +1,5 @@
+import { createElement as _createElement } from "react";
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React, { useCallback, useEffect, useMemo, useState, } from "react";
 import { Autocomplete, Divider, Grid, IconButton, InputAdornment, InputLabel, ListItemText, Paper, Popper, styled, Typography, useThemeProps, } from "@mui/material";
 import { Add as AddIcon, ExpandMore, Info as InfoIcon, } from "@mui/icons-material";
@@ -125,7 +127,7 @@ const InfoButton = styled(IconButton, {
 const getOptionDisabled = (option) => !!(!option || option.isDisabled || option.isDivider || option.isSmallLabel);
 const getOptionSelected = (option, value) => option.value === (typeof value === "string" ? value : value.value);
 const GrowPopper = React.forwardRef(function GrowPopperImpl(props, ref) {
-    return (React.createElement(Popper, { ...props, ref: ref, style: { ...props.style, width: "unset", minWidth: props.style?.width } }));
+    return (_jsx(Popper, { ...props, ref: ref, style: { ...props.style, width: "unset", minWidth: props.style?.width } }));
 });
 export const BaseSelectorContext = React.createContext(null);
 const BaseSelector = (inProps) => {
@@ -143,25 +145,21 @@ const BaseSelector = (inProps) => {
     const [query, setQuery] = useState("");
     const [lruIds, setLruIds] = useLocalStorageState(lru?.storageKey, [], (ret) => Array.isArray(ret) &&
         !ret.find((entry) => typeof entry !== "string"));
-    const renderIcon = useCallback((icon) => typeof icon === "string" ? (React.createElement(StyledIcon, { src: icon, alt: "", ownerState: { iconSize }, className: classes?.icon })) : (icon), [iconSize, classes?.icon]);
+    const renderIcon = useCallback((icon) => typeof icon === "string" ? (_jsx(StyledIcon, { src: icon, alt: "", ownerState: { iconSize }, className: classes?.icon })) : (icon), [iconSize, classes?.icon]);
     const defaultRenderer = useCallback((props, data, state) => {
         const { selected } = state;
         if (data.isDivider)
-            return (React.createElement(StyledDivider, { component: "li", ...props, onClick: undefined, onMouseMove: undefined, onTouchStart: undefined, key: data.value, className: classes?.divider }));
+            return (_createElement(StyledDivider, { component: "li", ...props, onClick: undefined, onMouseMove: undefined, onTouchStart: undefined, key: data.value, className: classes?.divider }));
         if (data.isSmallLabel)
-            return (React.createElement(SmallLabelOption, { component: "li", ...props, key: data.value, onClick: undefined, onMouseMove: undefined, onTouchStart: undefined, variant: "caption", className: classes?.smallLabel }, getReactLabel(data)));
-        return (React.createElement(OptionListItem, { component: "li", ...props, key: data.value, className: combineClassNames([
+            return (_createElement(SmallLabelOption, { component: "li", ...props, key: data.value, onClick: undefined, onMouseMove: undefined, onTouchStart: undefined, variant: "caption", className: classes?.smallLabel }, getReactLabel(data)));
+        return (_createElement(OptionListItem, { component: "li", ...props, key: data.value, className: combineClassNames([
                 classes?.listItem,
                 data.className,
                 props.className,
             ]), disabled: data.isDisabled },
-            multiple && (React.createElement(SmallListItemIcon, null,
-                React.createElement(StyledCheckbox, { checked: selected, className: classes?.checkbox }))),
-            enableIcons && (React.createElement(SmallListItemIcon, null, renderIcon(data.icon))),
-            React.createElement(ListItemText, null,
-                React.createElement(Grid, { container: true },
-                    React.createElement(Grid, { size: "grow" }, getReactLabel(data)),
-                    data.selected && (React.createElement(SelectedMarker, { className: classes?.selected }, t("standalone.selector.base-selector.selected")))))));
+            multiple && (_jsx(SmallListItemIcon, { children: _jsx(StyledCheckbox, { checked: selected, className: classes?.checkbox }) })),
+            enableIcons && (_jsx(SmallListItemIcon, { children: renderIcon(data.icon) })),
+            _jsx(ListItemText, { children: _jsxs(Grid, { container: true, children: [_jsx(Grid, { size: "grow", children: getReactLabel(data) }), data.selected && (_jsx(SelectedMarker, { className: classes?.selected, children: t("standalone.selector.base-selector.selected") }))] }) })));
     }, [
         multiple,
         classes?.divider,
@@ -257,7 +255,7 @@ const BaseSelector = (inProps) => {
         const addNewEntry = {
             value: "add-new-button",
             label: actualAddNewLabel,
-            icon: React.createElement(AddIcon, null),
+            icon: _jsx(AddIcon, {}),
             isAddNewButton: true,
         };
         const loadTicket = Math.random().toString();
@@ -380,88 +378,80 @@ const BaseSelector = (inProps) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [lruIds.join(",")]);
     const filterOptions = useCallback((options) => options, []);
-    return (React.createElement(StyledInlineSwitch, { visible: !!props.displaySwitch, value: switchValue, onChange: setSwitchValue, label: switchLabel, className: combineClassNames([className, classes?.inlineSwitch]) },
-        React.createElement(BaseSelectorContext.Provider, { value: context },
-            label && (React.createElement(StyledLabel, { shrink: true, disableAnimation: true, disabled: disabled, className: classes?.label, required: !!required, error: !!error }, label)),
-            React.createElement(Wrapper, { elevation: 0, className: classes?.wrapper },
-                React.createElement(StyledAutocomplete, { id: autocompleteId, className: classes?.autocomplete, multiple: multiple, disableCloseOnSelect: multiple, open: open, onOpen: () => {
-                        setOpen(true);
-                    }, onClose: () => {
-                        setOpen(false);
-                    }, disableClearable: disableClearable, loading: !!loading, loadingText: loadingText ?? t("standalone.selector.base-selector.loading-text"), autoComplete: true, disabled: disabled, selectOnFocus: !disableSearch, options: (() => {
-                        let options = [];
-                        // add selected to selectorOptions if not present to suppress warnings
-                        const selectedArr = multiple
-                            ? selected
-                            : selected
-                                ? [selected]
-                                : [];
-                        // free solo option
-                        if (freeSolo &&
-                            query &&
-                            !(selectorOptions.find((entry) => getStringLabel(entry) === query) ||
-                                selectedArr.find((entry) => getStringLabel(entry) === query)))
-                            options.push({
-                                label: query,
-                                value: query,
-                                freeSolo: true,
-                            });
-                        if (multiple)
-                            options = options.concat(selectedArr); // multiple select: show selected on top
-                        options = options.concat(selectorOptions);
-                        if (!multiple)
-                            options = options.concat(selectedArr); // single/multi select: add selected to avoid warning
-                        // unique array
-                        options = options.filter((value, idx, arr) => arr.findIndex((v2) => v2.value === value.value) === idx);
-                        return options;
-                    })(), groupBy: grouped
-                        ? (option) => option.group ?? noGroupLabel ?? ""
-                        : undefined, slots: { popper: GrowPopper }, filterOptions: filterOptions, value: selected, inputValue: query, blurOnSelect: !multiple, onInputChange: updateQuery, popupIcon: React.createElement(ExpandMore, null), autoSelect: freeSolo, freeSolo: freeSolo, noOptionsText: lru && query === ""
-                        ? (startTypingToSearchText ??
-                            t("standalone.selector.base-selector.start-typing-to-search-text"))
-                        : (noOptionsText ??
-                            t("standalone.selector.base-selector.no-options-text")), openText: openText ?? t("standalone.selector.base-selector.open-icon-text"), closeText: closeText ??
-                        t("standalone.selector.base-selector.close-icon-text"), clearText: clearText ??
-                        t("standalone.selector.base-selector.clear-icon-text"), getOptionLabel: getStringLabel, renderOption: defaultRenderer, getOptionDisabled: getOptionDisabled, isOptionEqualToValue: getOptionSelected, onChange: (_event, selectedValue, reason) => onChangeHandler(selectedValue, reason), renderInput: (params) => {
-                        const { slotProps: paramSlotProps, ...otherParams } = params;
-                        return (React.createElement(TextFieldWithHelp, { variant: variant ?? "outlined", ...otherParams, classes: textFieldClasses, slotProps: {
-                                htmlInput: {
-                                    ...paramSlotProps.htmlInput,
-                                    readOnly: disableSearch,
-                                    title: selected && !multiple
-                                        ? (selected.titleTooltip ?? getStringLabel(selected))
-                                        : undefined,
-                                    value: multiple
-                                        ? [
-                                            selected.map(getStringLabel).join(", "),
-                                            paramSlotProps.htmlInput.value,
-                                        ].join(" ")
-                                        : paramSlotProps.htmlInput.value,
-                                },
-                                input: {
-                                    ...paramSlotProps.input,
-                                    classes: textFieldInputClasses,
-                                    readOnly: disableSearch,
-                                    startAdornment: (enableIcons && !multiple
-                                        ? renderIcon(selected?.icon)
-                                        : undefined) ?? startAdornment,
-                                    endAdornment: (() => {
-                                        const hasAdditionalElements = openInfo || endAdornment || endAdornmentLeft;
-                                        const infoBtn = openInfo && (React.createElement(InfoButton, { onClick: openInfo, className: classes?.infoBtn, "aria-label": t("standalone.uikit.info") },
-                                            React.createElement(InfoIcon, { color: "disabled" })));
-                                        return hasAdditionalElements ? (paramSlotProps.input?.endAdornment ? (React.cloneElement(paramSlotProps.input
-                                            ?.endAdornment, {}, endAdornmentLeft, ...(paramSlotProps.input
-                                            ?.endAdornment).props.children, infoBtn, endAdornment)) : (React.createElement(InputAdornment, { position: "end" },
-                                            endAdornmentLeft,
-                                            infoBtn,
-                                            endAdornment))) : (paramSlotProps.input?.endAdornment);
-                                    })(),
-                                },
-                            }, placeholder: placeholder, onChange: (event) => {
-                                void onSearchHandler(event.target.value);
-                            }, required: required, error: error, warning: warning }));
-                    }, key: `${refreshToken || "no-refresh-token"} ${onAddNew
+    return (_jsx(StyledInlineSwitch, { visible: !!props.displaySwitch, value: switchValue, onChange: setSwitchValue, label: switchLabel, className: combineClassNames([className, classes?.inlineSwitch]), children: _jsxs(BaseSelectorContext.Provider, { value: context, children: [label && (_jsx(StyledLabel, { shrink: true, disableAnimation: true, disabled: disabled, className: classes?.label, required: !!required, error: !!error, children: label })), _jsx(Wrapper, { elevation: 0, className: classes?.wrapper, children: _jsx(StyledAutocomplete, { id: autocompleteId, className: classes?.autocomplete, multiple: multiple, disableCloseOnSelect: multiple, open: open, onOpen: () => {
+                            setOpen(true);
+                        }, onClose: () => {
+                            setOpen(false);
+                        }, disableClearable: disableClearable, loading: !!loading, loadingText: loadingText ?? t("standalone.selector.base-selector.loading-text"), autoComplete: true, disabled: disabled, selectOnFocus: !disableSearch, options: (() => {
+                            let options = [];
+                            // add selected to selectorOptions if not present to suppress warnings
+                            const selectedArr = multiple
+                                ? selected
+                                : selected
+                                    ? [selected]
+                                    : [];
+                            // free solo option
+                            if (freeSolo &&
+                                query &&
+                                !(selectorOptions.find((entry) => getStringLabel(entry) === query) ||
+                                    selectedArr.find((entry) => getStringLabel(entry) === query)))
+                                options.push({
+                                    label: query,
+                                    value: query,
+                                    freeSolo: true,
+                                });
+                            if (multiple)
+                                options = options.concat(selectedArr); // multiple select: show selected on top
+                            options = options.concat(selectorOptions);
+                            if (!multiple)
+                                options = options.concat(selectedArr); // single/multi select: add selected to avoid warning
+                            // unique array
+                            options = options.filter((value, idx, arr) => arr.findIndex((v2) => v2.value === value.value) === idx);
+                            return options;
+                        })(), groupBy: grouped
+                            ? (option) => option.group ?? noGroupLabel ?? ""
+                            : undefined, slots: { popper: GrowPopper }, filterOptions: filterOptions, value: selected, inputValue: query, blurOnSelect: !multiple, onInputChange: updateQuery, popupIcon: _jsx(ExpandMore, {}), autoSelect: freeSolo, freeSolo: freeSolo, noOptionsText: lru && query === ""
+                            ? (startTypingToSearchText ??
+                                t("standalone.selector.base-selector.start-typing-to-search-text"))
+                            : (noOptionsText ??
+                                t("standalone.selector.base-selector.no-options-text")), openText: openText ?? t("standalone.selector.base-selector.open-icon-text"), closeText: closeText ??
+                            t("standalone.selector.base-selector.close-icon-text"), clearText: clearText ??
+                            t("standalone.selector.base-selector.clear-icon-text"), getOptionLabel: getStringLabel, renderOption: defaultRenderer, getOptionDisabled: getOptionDisabled, isOptionEqualToValue: getOptionSelected, onChange: (_event, selectedValue, reason) => onChangeHandler(selectedValue, reason), renderInput: (params) => {
+                            const { slotProps: paramSlotProps, ...otherParams } = params;
+                            return (_jsx(TextFieldWithHelp, { variant: variant ?? "outlined", ...otherParams, classes: textFieldClasses, slotProps: {
+                                    htmlInput: {
+                                        ...paramSlotProps.htmlInput,
+                                        readOnly: disableSearch,
+                                        title: selected && !multiple
+                                            ? (selected.titleTooltip ?? getStringLabel(selected))
+                                            : undefined,
+                                        value: multiple
+                                            ? [
+                                                selected.map(getStringLabel).join(", "),
+                                                paramSlotProps.htmlInput.value,
+                                            ].join(" ")
+                                            : paramSlotProps.htmlInput.value,
+                                    },
+                                    input: {
+                                        ...paramSlotProps.input,
+                                        classes: textFieldInputClasses,
+                                        readOnly: disableSearch,
+                                        startAdornment: (enableIcons && !multiple
+                                            ? renderIcon(selected?.icon)
+                                            : undefined) ?? startAdornment,
+                                        endAdornment: (() => {
+                                            const hasAdditionalElements = openInfo || endAdornment || endAdornmentLeft;
+                                            const infoBtn = openInfo && (_jsx(InfoButton, { onClick: openInfo, className: classes?.infoBtn, "aria-label": t("standalone.uikit.info"), children: _jsx(InfoIcon, { color: "disabled" }) }));
+                                            return hasAdditionalElements ? (paramSlotProps.input?.endAdornment ? (React.cloneElement(paramSlotProps.input
+                                                ?.endAdornment, {}, endAdornmentLeft, ...(paramSlotProps.input
+                                                ?.endAdornment).props.children, infoBtn, endAdornment)) : (_jsxs(InputAdornment, { position: "end", children: [endAdornmentLeft, infoBtn, endAdornment] }))) : (paramSlotProps.input?.endAdornment);
+                                        })(),
+                                    },
+                                }, placeholder: placeholder, onChange: (event) => {
+                                    void onSearchHandler(event.target.value);
+                                }, required: required, error: error, warning: warning }));
+                        } }, `${refreshToken || "no-refresh-token"} ${onAddNew
                         ? `add-new${actualAddNewLabel || "no-add-new-label"}`
-                        : "no-add-new"}` })))));
+                        : "no-add-new"}`) })] }) }));
 };
 export default React.memo(BaseSelector);

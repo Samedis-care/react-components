@@ -1,3 +1,4 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React from "react";
 import { Dialog, IconButton, styled, useThemeProps } from "@mui/material";
 import { Close as CloseIcon } from "@mui/icons-material";
@@ -49,10 +50,6 @@ const ImagePreviewDialog = (inProps) => {
     const { src, alt, open, onClose, classes } = props;
     const { t } = useCCTranslations();
     const { imgRef, containerRef, containerProps } = useImageZoomPan(open);
-    return (React.createElement(Root, { open: open, fullScreen: true, onClose: onClose, className: classes?.root },
-        React.createElement(CloseButton, { onClick: onClose, "aria-label": t("standalone.file-upload.close"), className: classes?.closeButton },
-            React.createElement(CloseIcon, null)),
-        React.createElement(Container, { ref: containerRef, ...containerProps, className: classes?.container },
-            React.createElement(PreviewImage, { ref: imgRef, src: src, alt: alt, className: classes?.image, draggable: false }))));
+    return (_jsxs(Root, { open: open, fullScreen: true, onClose: onClose, className: classes?.root, children: [_jsx(CloseButton, { onClick: onClose, "aria-label": t("standalone.file-upload.close"), className: classes?.closeButton, children: _jsx(CloseIcon, {}) }), _jsx(Container, { ref: containerRef, ...containerProps, className: classes?.container, children: _jsx(PreviewImage, { ref: imgRef, src: src, alt: alt, className: classes?.image, draggable: false }) })] }));
 };
 export default React.memo(ImagePreviewDialog);

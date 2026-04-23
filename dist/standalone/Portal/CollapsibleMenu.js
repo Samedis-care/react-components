@@ -1,3 +1,4 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React, { useCallback, useState } from "react";
 import { Grid, IconButton, styled, useThemeProps } from "@mui/material";
 import { DoubleArrow } from "@mui/icons-material";
@@ -40,12 +41,8 @@ const CollapsibleMenu = (inProps) => {
     const { mobile } = usePortalLayoutContext();
     const toggleCollapsed = useCallback(() => setCollapsed((prev) => !prev), [setCollapsed]);
     const ArrowComp = collapsed ? IconOpen : IconClose;
-    return (React.createElement(Root, { container: true, sx: { justifyContent: "flex-start", alignItems: "stretch" }, wrap: "nowrap", style: collapsed ? { overflow: "visible" } : undefined, className: combineClassNames([className, classes?.root]) },
-        React.createElement(Content, { size: "grow", style: { width: props.width, display: collapsed ? "none" : undefined }, className: classes?.content, key: "content" }, props.children),
-        !mobile && (React.createElement(Bar, { key: "bar", className: classes?.bar },
-            React.createElement(StyledButton, { onClick: toggleCollapsed, className: classes?.button, size: "large", "aria-label": collapsed
-                    ? t("standalone.portal.expand-menu")
-                    : t("standalone.portal.collapse-menu") },
-                React.createElement(ArrowComp, { className: collapsed ? classes?.iconOpen : classes?.iconClose }))))));
+    return (_jsxs(Root, { container: true, sx: { justifyContent: "flex-start", alignItems: "stretch" }, wrap: "nowrap", style: collapsed ? { overflow: "visible" } : undefined, className: combineClassNames([className, classes?.root]), children: [_jsx(Content, { size: "grow", style: { width: props.width, display: collapsed ? "none" : undefined }, className: classes?.content, children: props.children }, "content"), !mobile && (_jsx(Bar, { className: classes?.bar, children: _jsx(StyledButton, { onClick: toggleCollapsed, className: classes?.button, size: "large", "aria-label": collapsed
+                        ? t("standalone.portal.expand-menu")
+                        : t("standalone.portal.collapse-menu"), children: _jsx(ArrowComp, { className: collapsed ? classes?.iconOpen : classes?.iconClose }) }) }, "bar"))] }));
 };
 export default React.memo(CollapsibleMenu);

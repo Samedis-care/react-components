@@ -1,4 +1,5 @@
-import React, { PureComponent } from "react";
+import { jsx as _jsx } from "react/jsx-runtime";
+import { PureComponent } from "react";
 import debounce from "../../utils/debounce";
 /**
  * Provides infinite scrolling to whatever is inside it
@@ -97,7 +98,7 @@ class InfiniteScroll extends PureComponent {
         }
     }
     render() {
-        return (React.createElement("div", { className: this.props.className, ref: this.setScrollerRef }, this.props.children));
+        return (_jsx("div", { className: this.props.className, ref: this.setScrollerRef, children: this.props.children }));
     }
     setScrollerRef = (ref) => {
         this.wrapper = ref;

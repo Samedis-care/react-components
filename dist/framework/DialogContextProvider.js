@@ -1,3 +1,4 @@
+import { Fragment as _Fragment, jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React, { Suspense, useCallback, useContext, useEffect, useMemo, useRef, useState, } from "react";
 import useCCTranslations from "../utils/useCCTranslations";
 import { FrameworkHistory } from "./History";
@@ -75,9 +76,6 @@ const DialogContextProvider = (props) => {
             }
         };
     }, []);
-    return (React.createElement(React.Fragment, null,
-        React.createElement(DialogContext.Provider, { value: dialogActions },
-            React.createElement(React.Fragment, null, props.children),
-            React.createElement(React.Fragment, null, dialogs.map((dialog, index) => (React.createElement(Suspense, { key: index.toString() }, dialog)))))));
+    return (_jsx(_Fragment, { children: _jsxs(DialogContext.Provider, { value: dialogActions, children: [_jsx(_Fragment, { children: props.children }), _jsx(_Fragment, { children: dialogs.map((dialog, index) => (_jsx(Suspense, { children: dialog }, index.toString()))) })] }) }));
 };
 export default React.memo(DialogContextProvider);

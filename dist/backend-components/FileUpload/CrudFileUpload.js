@@ -1,3 +1,4 @@
+import { jsx as _jsx, Fragment as _Fragment, jsxs as _jsxs } from "react/jsx-runtime";
 import React, { useCallback, useEffect, useMemo, useState, } from "react";
 import FileUpload from "../../standalone/FileUpload/Generic";
 import { Loader } from "../../standalone";
@@ -75,12 +76,10 @@ const CrudFileUpload = (props, ref) => {
     }, [files, onChange]);
     const finalFiles = useMemo(() => (additionalFiles ? [...files, ...additionalFiles] : files), [files, additionalFiles]);
     if (loading)
-        return React.createElement(Loader, null);
+        return _jsx(Loader, {});
     if (loadError)
-        return React.createElement("span", null, loadError.message);
+        return _jsx("span", { children: loadError.message });
     const ErrorComponent = props.errorComponent;
-    return (React.createElement(React.Fragment, null,
-        error && React.createElement(ErrorComponent, { error: error }),
-        React.createElement(FileUpload, { ...otherProps, ref: ref, files: finalFiles, onChange: handleChange, handleError: handleError, readOnly: otherProps.readOnly || connector == null })));
+    return (_jsxs(_Fragment, { children: [error && _jsx(ErrorComponent, { error: error }), _jsx(FileUpload, { ...otherProps, ref: ref, files: finalFiles, onChange: handleChange, handleError: handleError, readOnly: otherProps.readOnly || connector == null })] }));
 };
 export default React.memo(React.forwardRef(CrudFileUpload));

@@ -1,3 +1,4 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React, { useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, } from "react";
 import { Box, Collapse, Divider, Grid, IconButton, ListItem, Paper, styled, Typography, useTheme, useThemeProps, } from "@mui/material";
 import { Apps as AppsIcon, Search as SearchIcon } from "@mui/icons-material";
@@ -625,27 +626,12 @@ const DataGrid = (inProps) => {
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectAll, selectedRows]);
-    return (React.createElement(Wrapper, { container: true, sx: {
+    return (_jsx(Wrapper, { container: true, sx: {
             flexDirection: "column",
             justifyContent: "space-between",
             alignItems: "stretch",
-        }, wrap: "nowrap", className: combineClassNames([className, classes?.root]), ref: gridRoot },
-        React.createElement(DataGridRootRefContext.Provider, { value: gridRoot },
-            React.createElement(DataGridPropsContext.Provider, { value: props },
-                React.createElement(DataGridStateContext.Provider, { value: statePack },
-                    React.createElement(DataGridColumnsStateContext.Provider, { value: columnsStatePack },
-                        React.createElement(DataGridColumnsWidthStateContext.Provider, { value: columnWidthStatePack },
-                            React.createElement(CustomFilterActiveContext.Provider, { value: activeCustomFiltersPack },
-                                React.createElement(StatePersistence, null),
-                                React.createElement(HeaderWrapper, { className: classes?.header, sx: state.showFilterDialog ? { display: "none" } : undefined },
-                                    React.createElement(Header, null)),
-                                React.createElement(ContentWrapper, { size: "grow", className: classes?.content },
-                                    React.createElement(Settings, { columns: columns }),
-                                    React.createElement(CustomFilterDialog, null),
-                                    React.createElement(Content, { columns: visibleColumns, rowsPerPage: rowsPerPage, disableSelection: disableSelection, headerHeight: headerHeight, globalScrollListener: globalScrollListener })),
-                                !disableFooter && (React.createElement(FooterWrapper, { className: classes?.footer, sx: state.showSettings || state.showFilterDialog
-                                        ? { display: "none" }
-                                        : undefined },
-                                    React.createElement(Footer, null)))))))))));
+        }, wrap: "nowrap", className: combineClassNames([className, classes?.root]), ref: gridRoot, children: _jsx(DataGridRootRefContext.Provider, { value: gridRoot, children: _jsx(DataGridPropsContext.Provider, { value: props, children: _jsx(DataGridStateContext.Provider, { value: statePack, children: _jsx(DataGridColumnsStateContext.Provider, { value: columnsStatePack, children: _jsx(DataGridColumnsWidthStateContext.Provider, { value: columnWidthStatePack, children: _jsxs(CustomFilterActiveContext.Provider, { value: activeCustomFiltersPack, children: [_jsx(StatePersistence, {}), _jsx(HeaderWrapper, { className: classes?.header, sx: state.showFilterDialog ? { display: "none" } : undefined, children: _jsx(Header, {}) }), _jsxs(ContentWrapper, { size: "grow", className: classes?.content, children: [_jsx(Settings, { columns: columns }), _jsx(CustomFilterDialog, {}), _jsx(Content, { columns: visibleColumns, rowsPerPage: rowsPerPage, disableSelection: disableSelection, headerHeight: headerHeight, globalScrollListener: globalScrollListener })] }), !disableFooter && (_jsx(FooterWrapper, { className: classes?.footer, sx: state.showSettings || state.showFilterDialog
+                                            ? { display: "none" }
+                                            : undefined, children: _jsx(Footer, {}) }))] }) }) }) }) }) }) }));
 };
 export default React.memo(DataGrid);

@@ -1,3 +1,4 @@
+import { jsx as _jsx } from "react/jsx-runtime";
 import React, { useCallback, useEffect, useState } from "react";
 import TextFieldWithHelp from "../TextFieldWithHelp";
 import parseLocalizedNumber from "../../../utils/parseLocalizedNumber";
@@ -19,7 +20,7 @@ const DecimalInputField = (props) => {
     const handleChange = useCallback((event) => {
         setValueInternal(event.target.value);
     }, []);
-    return (React.createElement(TextFieldWithHelp, { ...muiProps, value: valueInternal, onChange: handleChange, onBlur: handleBlur, slotProps: {
+    return (_jsx(TextFieldWithHelp, { ...muiProps, value: valueInternal, onChange: handleChange, onBlur: handleBlur, slotProps: {
             ...muiProps.slotProps,
             htmlInput: {
                 ...muiProps.slotProps?.htmlInput,

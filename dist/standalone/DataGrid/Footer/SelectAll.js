@@ -1,3 +1,4 @@
+import { jsx as _jsx } from "react/jsx-runtime";
 import React, { useCallback } from "react";
 import { useDataGridProps, useDataGridState } from "../DataGrid";
 import SelectAllView from "./SelectAllView";
@@ -11,6 +12,6 @@ const SelectAll = () => {
             selectionUpdatedByProps: false,
         }));
     }, [setState]);
-    return (React.createElement(SelectAllView, { disabled: !enableDeleteAll || !!prohibitMultiSelect, checked: state.selectAll, onSelect: onSelect }));
+    return (_jsx(SelectAllView, { disabled: !enableDeleteAll || !!prohibitMultiSelect, checked: state.selectAll, onSelect: onSelect }));
 };
 export default React.memo(SelectAll);

@@ -1,3 +1,4 @@
+import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
 import React, { useCallback, useContext, useState } from "react";
 import { CircularProgress, ListItemIcon, ListItemText, MenuItem, } from "@mui/material";
 import { Description as ExportIcon, Done as DoneIcon, Error as ErrorIcon, } from "@mui/icons-material";
@@ -69,22 +70,6 @@ const ExportMenuEntry = React.forwardRef((props, ref) => {
     const cancelExport = useCallback(() => {
         setStatus(DataGridExportStatus.Idle);
     }, [setStatus]);
-    return (React.createElement(React.Fragment, null,
-        status === DataGridExportStatus.Idle && (React.createElement(MenuItem, { onClick: startExport, ref: ref },
-            React.createElement(ListItemIcon, null,
-                React.createElement(IdleIcon, null)),
-            React.createElement(ListItemText, { primary: exporter.getLabel() }))),
-        status === DataGridExportStatus.Working && (React.createElement(MenuItem, { ref: ref },
-            React.createElement(ListItemIcon, null,
-                React.createElement(CircularProgress, { size: 24 })),
-            React.createElement(ListItemText, { primary: exporter.getWorkingLabel() }))),
-        status === DataGridExportStatus.Ready && (React.createElement(MenuItem, { onClick: finishExport, ref: ref },
-            React.createElement(ListItemIcon, null,
-                React.createElement(DoneIcon, null)),
-            React.createElement(ListItemText, { primary: exporter.getReadyLabel() }))),
-        status === DataGridExportStatus.Error && (React.createElement(MenuItem, { onClick: cancelExport, ref: ref },
-            React.createElement(ListItemIcon, null,
-                React.createElement(ErrorIcon, null)),
-            React.createElement(ListItemText, { primary: exporter.getErrorLabel() })))));
+    return (_jsxs(_Fragment, { children: [status === DataGridExportStatus.Idle && (_jsxs(MenuItem, { onClick: startExport, ref: ref, children: [_jsx(ListItemIcon, { children: _jsx(IdleIcon, {}) }), _jsx(ListItemText, { primary: exporter.getLabel() })] })), status === DataGridExportStatus.Working && (_jsxs(MenuItem, { ref: ref, children: [_jsx(ListItemIcon, { children: _jsx(CircularProgress, { size: 24 }) }), _jsx(ListItemText, { primary: exporter.getWorkingLabel() })] })), status === DataGridExportStatus.Ready && (_jsxs(MenuItem, { onClick: finishExport, ref: ref, children: [_jsx(ListItemIcon, { children: _jsx(DoneIcon, {}) }), _jsx(ListItemText, { primary: exporter.getReadyLabel() })] })), status === DataGridExportStatus.Error && (_jsxs(MenuItem, { onClick: cancelExport, ref: ref, children: [_jsx(ListItemIcon, { children: _jsx(ErrorIcon, {}) }), _jsx(ListItemText, { primary: exporter.getErrorLabel() })] }))] }));
 });
 export default React.memo(ExportMenuEntry);

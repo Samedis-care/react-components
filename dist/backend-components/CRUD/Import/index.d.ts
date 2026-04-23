@@ -72,7 +72,7 @@ export declare const useCrudImportLogic: <KeyT extends ModelFieldName, Visibilit
     prev: () => void;
     finish: () => void;
 };
-declare const CrudImport: <KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT>(props: CrudImportProps<KeyT, VisibilityT, CustomT>) => React.JSX.Element;
+declare const CrudImport: <KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT>(props: CrudImportProps<KeyT, VisibilityT, CustomT>) => import("react/jsx-runtime").JSX.Element;
 declare const _default: typeof CrudImport;
 export default _default;
 export type CrudImportType = typeof CrudImport;

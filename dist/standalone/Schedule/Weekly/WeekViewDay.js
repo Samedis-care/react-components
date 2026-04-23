@@ -1,3 +1,4 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React from "react";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
@@ -33,22 +34,11 @@ const WeekViewDay = (inProps) => {
     const isFirst = dayIdx === 0;
     const isLast = dayIdx === 6;
     const isToday = day.dayOfYear() === moment().dayOfYear() && day.year() === moment().year();
-    return (React.createElement(Grid, { className: className, size: "grow" },
-        React.createElement(StyledPaper, { square: true, elevation: 0, className: combineClassNames([
+    return (_jsx(Grid, { className: className, size: "grow", children: _jsx(StyledPaper, { square: true, elevation: 0, className: combineClassNames([
                 classes?.paper,
                 isToday && "CcWeekViewDay-today",
                 isFirst && "CcWeekViewDay-first",
                 isLast && "CcWeekViewDay-last",
-            ]) },
-            React.createElement(Grid, { container: true },
-                React.createElement(Grid, { size: 12 },
-                    React.createElement(Typography, { align: "center" }, day.format("dddd"))),
-                React.createElement(Grid, { size: 12 },
-                    React.createElement(Divider, null)),
-                React.createElement(Grid, { size: 12 },
-                    React.createElement(Box, { sx: { m: 1 } }, date)),
-                React.createElement(DayContentsWrapper, { size: 12, className: classes?.dayContents },
-                    React.createElement(Box, { sx: { m: 1 } },
-                        React.createElement(DayContents, { data: data, altBorder: isToday })))))));
+            ]), children: _jsxs(Grid, { container: true, children: [_jsx(Grid, { size: 12, children: _jsx(Typography, { align: "center", children: day.format("dddd") }) }), _jsx(Grid, { size: 12, children: _jsx(Divider, {}) }), _jsx(Grid, { size: 12, children: _jsx(Box, { sx: { m: 1 }, children: date }) }), _jsx(DayContentsWrapper, { size: 12, className: classes?.dayContents, children: _jsx(Box, { sx: { m: 1 }, children: _jsx(DayContents, { data: data, altBorder: isToday }) }) })] }) }) }));
 };
 export default React.memo(WeekViewDay);

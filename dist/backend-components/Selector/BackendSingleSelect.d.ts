@@ -1,4 +1,3 @@
-import React from "react";
 import { BaseSelectorData, BaseSelectorProps, SelectorLruOptions } from "../../standalone";
 import Model, { ModelFieldName, PageVisibility } from "../../backend-integration/Model/Model";
 import { DataGridSortSetting } from "../../standalone/DataGrid/DataGrid";
@@ -73,6 +72,6 @@ export interface BackendSingleSelectProps<KeyT extends ModelFieldName, Visibilit
      */
     selectedFreeSolo?: string | null;
 }
-declare const BackendSingleSelect: <KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT>(props: BackendSingleSelectProps<KeyT, VisibilityT, CustomT>) => React.JSX.Element;
+declare const BackendSingleSelect: <KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT>(props: BackendSingleSelectProps<KeyT, VisibilityT, CustomT>) => import("react/jsx-runtime").JSX.Element;
 declare const _default: typeof BackendSingleSelect;
 export default _default;

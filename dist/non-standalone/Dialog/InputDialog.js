@@ -1,3 +1,4 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React, { useCallback, useState } from "react";
 import { useDialogContext } from "../../framework";
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField, } from "@mui/material";
@@ -28,13 +29,6 @@ const InputDialogRaw = (props) => {
             setValid(false);
         }
     }, [value, handlerButtonYes, textFieldValidator, popDialog, setValid]);
-    return (React.createElement(Dialog, { open: true, onClose: removeDialog },
-        React.createElement(DialogTitle, null, props.title),
-        React.createElement(DialogContent, null,
-            React.createElement(DialogContentText, null, props.message),
-            React.createElement(TextField, { autoFocus: true, margin: "dense", label: props.textFieldLabel, placeholder: props.textFieldPlaceholder, type: "text", value: value, onChange: updateValue, error: !valid, fullWidth: true })),
-        React.createElement(DialogActions, null,
-            React.createElement(Button, { onClick: handleNo, color: "primary" }, props.textButtonNo),
-            React.createElement(Button, { onClick: handleYes, color: "primary" }, props.textButtonYes))));
+    return (_jsxs(Dialog, { open: true, onClose: removeDialog, children: [_jsx(DialogTitle, { children: props.title }), _jsxs(DialogContent, { children: [_jsx(DialogContentText, { children: props.message }), _jsx(TextField, { autoFocus: true, margin: "dense", label: props.textFieldLabel, placeholder: props.textFieldPlaceholder, type: "text", value: value, onChange: updateValue, error: !valid, fullWidth: true })] }), _jsxs(DialogActions, { children: [_jsx(Button, { onClick: handleNo, color: "primary", children: props.textButtonNo }), _jsx(Button, { onClick: handleYes, color: "primary", children: props.textButtonYes })] })] }));
 };
 export const InputDialog = React.memo(InputDialogRaw);

@@ -1,3 +1,4 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React, { useCallback, useMemo, useRef } from "react";
 import { isFieldImportable, } from "./index";
 import { Box, Card, CardContent, CircularProgress, Grid, Table, TableBody, TableCell, TableHead, TableRow, TextField, Tooltip, Typography, styled, } from "@mui/material";
@@ -134,45 +135,18 @@ const Step2ConnectData = (props) => {
     const { model, state } = props;
     const { t } = useCCTranslations();
     const { columns, handleConversionScriptChange } = useImportStep2Logic(props);
-    return (React.createElement(Grid, { container: true, spacing: 2 },
-        React.createElement(Grid, { size: 6 },
-            React.createElement(Box, { sx: { mb: 2 } },
-                React.createElement(Typography, { variant: "h5" }, t("backend-components.crud.import.source_fields"))),
-            React.createElement(Table, null,
-                React.createElement(TableHead, null,
-                    React.createElement(TableRow, null,
-                        React.createElement(TableCell, null, t("backend-components.crud.import.source_field")),
-                        React.createElement(TableCell, null, t("backend-components.crud.import.source_field_type")))),
-                React.createElement(TableBody, null, columns.map((column) => {
-                    const dataTypes = uniqueArray(state.data.map((record) => typeof record[column])).sort();
-                    return (React.createElement(TableRow, { key: column },
-                        React.createElement(MonoTableCell, null, `record["${column}"]`),
-                        React.createElement(TableCell, null, dataTypes.join(", "))));
-                })))),
-        React.createElement(Grid, { size: 6 },
-            React.createElement(Box, { sx: { mb: 2 } },
-                React.createElement(Typography, { variant: "h5" }, t("backend-components.crud.import.destination_fields"))),
-            React.createElement(Grid, { container: true, spacing: 2 }, Object.entries(model.fields)
-                .filter(([name, field]) => isFieldImportable(name, field))
-                .map(([name, field]) => {
-                const convScript = state.conversionScripts[name];
-                return (React.createElement(Grid, { key: name, size: 12 },
-                    React.createElement(Card, null,
-                        React.createElement(StyledCardContent, null,
-                            React.createElement(Grid, { container: true, sx: { justifyContent: "space-between" } },
-                                React.createElement(Grid, null,
-                                    React.createElement(Typography, null, field.getLabel()
-                                        ? `${field.getLabel()} (${name})`
-                                        : name),
-                                    React.createElement(Typography, { color: "textSecondary" }, field.type.getFilterType())),
-                                React.createElement(Grid, null,
-                                    React.createElement(Tooltip, { title: convScript
-                                            ? (convScript.error?.toString() ?? "")
-                                            : (t("backend-components.crud.import.validations.unknown") ?? "") }, convScript ? (convScript.status === "okay" ? (React.createElement(CheckIcon, null)) : convScript.status === "pending" ? (React.createElement(CircularProgress, null)) : convScript.status === "error" ? (React.createElement(ErrorIcon, null)) : (React.createElement(UnknownIcon, null))) : (React.createElement(UnknownIcon, null))))),
-                            React.createElement(Grid, { size: 12 },
-                                React.createElement(Box, { sx: { mt: 2 } },
-                                    convScript?.error && (React.createElement(Typography, null, convScript.error.toString())),
-                                    React.createElement(ScriptInput, { multiline: true, label: t("backend-components.crud.import.conv_script"), name: name, value: convScript?.script ?? "", onChange: handleConversionScriptChange, placeholder: `${name} = `, fullWidth: true })))))));
-            })))));
+    return (_jsxs(Grid, { container: true, spacing: 2, children: [_jsxs(Grid, { size: 6, children: [_jsx(Box, { sx: { mb: 2 }, children: _jsx(Typography, { variant: "h5", children: t("backend-components.crud.import.source_fields") }) }), _jsxs(Table, { children: [_jsx(TableHead, { children: _jsxs(TableRow, { children: [_jsx(TableCell, { children: t("backend-components.crud.import.source_field") }), _jsx(TableCell, { children: t("backend-components.crud.import.source_field_type") })] }) }), _jsx(TableBody, { children: columns.map((column) => {
+                                    const dataTypes = uniqueArray(state.data.map((record) => typeof record[column])).sort();
+                                    return (_jsxs(TableRow, { children: [_jsx(MonoTableCell, { children: `record["${column}"]` }), _jsx(TableCell, { children: dataTypes.join(", ") })] }, column));
+                                }) })] })] }), _jsxs(Grid, { size: 6, children: [_jsx(Box, { sx: { mb: 2 }, children: _jsx(Typography, { variant: "h5", children: t("backend-components.crud.import.destination_fields") }) }), _jsx(Grid, { container: true, spacing: 2, children: Object.entries(model.fields)
+                            .filter(([name, field]) => isFieldImportable(name, field))
+                            .map(([name, field]) => {
+                            const convScript = state.conversionScripts[name];
+                            return (_jsx(Grid, { size: 12, children: _jsx(Card, { children: _jsxs(StyledCardContent, { children: [_jsxs(Grid, { container: true, sx: { justifyContent: "space-between" }, children: [_jsxs(Grid, { children: [_jsx(Typography, { children: field.getLabel()
+                                                                    ? `${field.getLabel()} (${name})`
+                                                                    : name }), _jsx(Typography, { color: "textSecondary", children: field.type.getFilterType() })] }), _jsx(Grid, { children: _jsx(Tooltip, { title: convScript
+                                                                ? (convScript.error?.toString() ?? "")
+                                                                : (t("backend-components.crud.import.validations.unknown") ?? ""), children: convScript ? (convScript.status === "okay" ? (_jsx(CheckIcon, {})) : convScript.status === "pending" ? (_jsx(CircularProgress, {})) : convScript.status === "error" ? (_jsx(ErrorIcon, {})) : (_jsx(UnknownIcon, {}))) : (_jsx(UnknownIcon, {})) }) })] }), _jsx(Grid, { size: 12, children: _jsxs(Box, { sx: { mt: 2 }, children: [convScript?.error && (_jsx(Typography, { children: convScript.error.toString() })), _jsx(ScriptInput, { multiline: true, label: t("backend-components.crud.import.conv_script"), name: name, value: convScript?.script ?? "", onChange: handleConversionScriptChange, placeholder: `${name} = `, fullWidth: true })] }) })] }) }) }, name));
+                        }) })] })] }));
 };
 export default React.memo(Step2ConnectData);

@@ -1,3 +1,4 @@
+import { jsx as _jsx } from "react/jsx-runtime";
 import React, { useContext, useState } from "react";
 /**
  * General information regarding permission format:
@@ -81,6 +82,6 @@ export const useHasPermission = (perm) => {
 };
 const PermissionContextProvider = (props) => {
     const state = useState([]);
-    return (React.createElement(PermissionContext.Provider, { value: state }, props.children));
+    return (_jsx(PermissionContext.Provider, { value: state, children: props.children }));
 };
 export default React.memo(PermissionContextProvider);

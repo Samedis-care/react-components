@@ -1,3 +1,4 @@
+import { jsx as _jsx } from "react/jsx-runtime";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import TextFieldWithHelp from "../TextFieldWithHelp";
 import parseLocalizedNumber from "../../../utils/parseLocalizedNumber";
@@ -51,7 +52,7 @@ const CurrencyInput = (props) => {
         valueInternal,
     ]);
     // component rendering
-    return (React.createElement(TextFieldWithHelp, { ...muiProps, value: lastChangeEvent ? valueInternal : valueFormatted, onChange: handleChange, onBlur: handleBlur, error: error || muiProps.error, slotProps: {
+    return (_jsx(TextFieldWithHelp, { ...muiProps, value: lastChangeEvent ? valueInternal : valueFormatted, onChange: handleChange, onBlur: handleBlur, error: error || muiProps.error, slotProps: {
             ...muiProps.slotProps,
             htmlInput: {
                 ...muiProps.slotProps?.htmlInput,

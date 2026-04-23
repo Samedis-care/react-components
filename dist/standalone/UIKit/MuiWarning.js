@@ -1,4 +1,4 @@
-import React from "react";
+import { jsx as _jsx } from "react/jsx-runtime";
 import { FormControl, FormHelperText, FormLabel, styled, TextField, } from "@mui/material";
 export const withMuiWarning = (Component) => {
     // not unnecessary, component name is inferred from it
@@ -6,7 +6,7 @@ export const withMuiWarning = (Component) => {
     return styled((props) => {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { warning, ...other } = props;
-        return React.createElement(Component, { ...other });
+        return _jsx(Component, { ...other });
     })(({ theme, warning }) => ({
         ...(warning && {
             "& > .MuiFormLabel-root": {

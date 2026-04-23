@@ -43,5 +43,5 @@ export interface BackendMultiImageImage extends MultiImageImage {
     primary?: boolean;
     index?: number;
 }
-declare const _default: React.MemoExoticComponent<(props: CrudMultiImageProps) => React.JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: CrudMultiImageProps) => import("react/jsx-runtime").JSX.Element>;
 export default _default;

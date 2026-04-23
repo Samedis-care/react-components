@@ -3,5 +3,5 @@ import { ActionButtonProps } from "../../../standalone/UIKit/ActionButton";
 export interface FlowEngineSaveButtonProps extends Omit<ActionButtonProps, "children"> {
     children?: ActionButtonProps["children"];
 }
-declare const _default: React.MemoExoticComponent<(props: FlowEngineSaveButtonProps) => React.JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: FlowEngineSaveButtonProps) => import("react/jsx-runtime").JSX.Element>;
 export default _default;

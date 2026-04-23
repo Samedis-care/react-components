@@ -1,4 +1,3 @@
-import React from "react";
 import { IDataGridLoadDataParameters, DataGridProps, IDataGridAddButton } from "../../standalone/DataGrid/DataGrid";
 import Model, { ModelFieldName, PageVisibility } from "../../backend-integration/Model/Model";
 export interface BackendDataGridProps<KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomDataT> extends Omit<DataGridProps, "loadData" | "columns" | "exporters" | "onDelete"> {
@@ -38,6 +37,6 @@ export declare const useBackendDataGridDeleteHandler: <KeyT extends ModelFieldNa
 export declare const renderDataGridRecordUsingModel: <KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT>(model: Model<KeyT, VisibilityT, CustomT>, refreshGrid: () => void) => (entry: Record<string, unknown>) => {
     id: string;
 } & Record<string, string | null>;
-declare const BackendDataGrid: <KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomDataT>(props: BackendDataGridProps<KeyT, VisibilityT, CustomDataT>) => React.JSX.Element;
+declare const BackendDataGrid: <KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomDataT>(props: BackendDataGridProps<KeyT, VisibilityT, CustomDataT>) => import("react/jsx-runtime").JSX.Element;
 declare const _default: typeof BackendDataGrid;
 export default _default;

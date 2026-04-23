@@ -14,5 +14,5 @@ export interface IDataGridSearchViewProps {
      */
     className?: string;
 }
-declare const _default: React.MemoExoticComponent<(props: IDataGridSearchViewProps) => React.JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: IDataGridSearchViewProps) => import("react/jsx-runtime").JSX.Element>;
 export default _default;

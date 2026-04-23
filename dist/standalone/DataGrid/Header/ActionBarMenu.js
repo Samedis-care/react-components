@@ -1,3 +1,4 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React, { useCallback } from "react";
 import { ListItemIcon, MenuItem, } from "@mui/material";
 import { ExportIcon, ResetIcon, TuneIcon } from "../../Icons";
@@ -35,22 +36,6 @@ const ActionBarMenu = (props) => {
         onClose();
     }, [handleImport, onClose]);
     const { t } = useCCTranslations();
-    return (React.createElement(PopupMenu, { elevation: 0, anchorEl: anchorEl, anchorOrigin: anchorOrigin, transformOrigin: transformOrigin, keepMounted: true, open: !!anchorEl, onClose: onClose },
-        toggleSettings && (React.createElement(MenuItem, { onClick: toggleSettingsWrap },
-            React.createElement(ListItemIcon, null,
-                React.createElement(TuneIcon, { fontSize: "small" })),
-            t("standalone.data-grid.header.settings"))),
-        openResetDialog && (React.createElement(MenuItem, { onClick: openResetDialogWrap },
-            React.createElement(ListItemIcon, null,
-                React.createElement(ResetIcon, { fontSize: "small" })),
-            t("standalone.data-grid.header.reset"))),
-        openExportMenu && (React.createElement(MenuItem, { onClick: openExportMenuWrap },
-            React.createElement(ListItemIcon, null,
-                React.createElement(ExportIcon, { fontSize: "small" })),
-            t("standalone.data-grid.header.export"))),
-        handleImport && (React.createElement(MenuItem, { onClick: handleImportWrap },
-            React.createElement(ListItemIcon, null,
-                React.createElement(ImportIcon, { fontSize: "small" })),
-            t("standalone.data-grid.header.import")))));
+    return (_jsxs(PopupMenu, { elevation: 0, anchorEl: anchorEl, anchorOrigin: anchorOrigin, transformOrigin: transformOrigin, keepMounted: true, open: !!anchorEl, onClose: onClose, children: [toggleSettings && (_jsxs(MenuItem, { onClick: toggleSettingsWrap, children: [_jsx(ListItemIcon, { children: _jsx(TuneIcon, { fontSize: "small" }) }), t("standalone.data-grid.header.settings")] })), openResetDialog && (_jsxs(MenuItem, { onClick: openResetDialogWrap, children: [_jsx(ListItemIcon, { children: _jsx(ResetIcon, { fontSize: "small" }) }), t("standalone.data-grid.header.reset")] })), openExportMenu && (_jsxs(MenuItem, { onClick: openExportMenuWrap, children: [_jsx(ListItemIcon, { children: _jsx(ExportIcon, { fontSize: "small" }) }), t("standalone.data-grid.header.export")] })), handleImport && (_jsxs(MenuItem, { onClick: handleImportWrap, children: [_jsx(ListItemIcon, { children: _jsx(ImportIcon, { fontSize: "small" }) }), t("standalone.data-grid.header.import")] }))] }));
 };
 export default React.memo(ActionBarMenu);

@@ -1,3 +1,4 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React, { Suspense } from "react";
 import { Dialog, DialogContent, styled, useThemeProps } from "@mui/material";
 import { useDialogContext } from "../../framework/DialogContextProvider";
@@ -49,10 +50,6 @@ const LocaleSelectorDialog = (inProps) => {
     const { className, classes, ...contentProps } = props;
     const [, popDialog] = useDialogContext();
     const { t } = useCCTranslations();
-    return (React.createElement(StyledDialog, { open: true, onClose: popDialog, className: combineClassNames([className, classes?.root]) },
-        React.createElement(StyledDialogTitle, { onClose: popDialog, className: classes?.title }, t("non-standalone.language-switcher.title")),
-        React.createElement(StyledDialogContent, { className: classes?.contentWrapper },
-            React.createElement(Suspense, { fallback: React.createElement(Loader, null) },
-                React.createElement(StyledLocaleSelectorDialogContent, { ...contentProps, className: classes?.content, close: popDialog })))));
+    return (_jsxs(StyledDialog, { open: true, onClose: popDialog, className: combineClassNames([className, classes?.root]), children: [_jsx(StyledDialogTitle, { onClose: popDialog, className: classes?.title, children: t("non-standalone.language-switcher.title") }), _jsx(StyledDialogContent, { className: classes?.contentWrapper, children: _jsx(Suspense, { fallback: _jsx(Loader, {}), children: _jsx(StyledLocaleSelectorDialogContent, { ...contentProps, className: classes?.content, close: popDialog }) }) })] }));
 };
 export default React.memo(LocaleSelectorDialog);

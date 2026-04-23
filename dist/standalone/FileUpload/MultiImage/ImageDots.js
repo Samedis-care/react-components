@@ -1,3 +1,4 @@
+import { jsx as _jsx, Fragment as _Fragment } from "react/jsx-runtime";
 import React from "react";
 import { styled, useThemeProps } from "@mui/material";
 import combineClassNames from "../../../utils/combineClassNames";
@@ -32,10 +33,9 @@ const ImageDot = styled("div", { name: "CcImageDots", slot: "imageDot" })(({ the
 const ImageDots = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcImageDots" });
     const { total, active, setActive, className, classes } = props;
-    return (React.createElement(React.Fragment, null, total > 1 && (React.createElement(Root, { className: combineClassNames([className, classes?.root]) },
-        React.createElement(Container, { className: classes?.container }, Array.from(Array(total).keys()).map((img, idx) => (React.createElement(ImageDot, { key: idx, className: combineClassNames([
-                active === idx && "Mui-active",
-                classes?.imageDot,
-            ]), onClick: () => setActive(idx) }))))))));
+    return (_jsx(_Fragment, { children: total > 1 && (_jsx(Root, { className: combineClassNames([className, classes?.root]), children: _jsx(Container, { className: classes?.container, children: Array.from(Array(total).keys()).map((img, idx) => (_jsx(ImageDot, { className: combineClassNames([
+                        active === idx && "Mui-active",
+                        classes?.imageDot,
+                    ]), onClick: () => setActive(idx) }, idx))) }) })) }));
 };
 export default React.memo(ImageDots);

@@ -1,3 +1,4 @@
+import { jsx as _jsx } from "react/jsx-runtime";
 import React, { useCallback } from "react";
 import TextFieldWithHelp from "../TextFieldWithHelp";
 import useInputCursorFix from "../../../utils/useInputCursorFix";
@@ -26,14 +27,13 @@ const IntegerInputField = (props) => {
         }
     }, [onChange, handleCursorChange]);
     // component rendering
-    return (React.createElement("div", null,
-        React.createElement(TextFieldWithHelp, { ...muiProps, value: valueFormatted, onChange: handleChange, slotProps: {
+    return (_jsx("div", { children: _jsx(TextFieldWithHelp, { ...muiProps, value: valueFormatted, onChange: handleChange, slotProps: {
                 ...muiProps.slotProps,
                 htmlInput: {
                     ...muiProps.slotProps?.htmlInput,
                     ref: cursorInputRef,
                     inputMode: "numeric",
                 },
-            }, inputMode: "numeric" })));
+            }, inputMode: "numeric" }) }));
 };
 export default React.memo(IntegerInputField);

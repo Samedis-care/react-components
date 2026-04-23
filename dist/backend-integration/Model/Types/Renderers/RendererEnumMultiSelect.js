@@ -1,4 +1,4 @@
-import React from "react";
+import { Fragment as _Fragment, jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import { FormHelperText, Typography } from "@mui/material";
 import TypeEnumMulti from "../TypeEnumMulti";
 import ccI18n from "../../../../i18n";
@@ -17,9 +17,9 @@ class RendererEnumMultiSelect extends TypeEnumMulti {
     render(params) {
         const { visibility, field, label, handleChange, handleBlur, errorMsg, warningMsg, value, } = params;
         if (visibility.disabled)
-            return React.createElement(React.Fragment, null);
+            return _jsx(_Fragment, {});
         if (visibility.hidden) {
-            return (React.createElement("input", { type: "hidden", name: field, value: value, readOnly: true, "aria-hidden": "true" }));
+            return (_jsx("input", { type: "hidden", name: field, value: value, readOnly: true, "aria-hidden": "true" }));
         }
         if (visibility.editable) {
             if (visibility.grid)
@@ -36,20 +36,16 @@ class RendererEnumMultiSelect extends TypeEnumMulti {
                 ...data.filter((entry) => getStringLabel(entry).toLowerCase().startsWith(query.toLowerCase())),
                 ...data.filter((entry) => getStringLabel(entry).toLowerCase().includes(query.toLowerCase())),
             ]);
-            return (React.createElement(FormControlFieldsetCC, { component: "fieldset", required: visibility.required, fullWidth: true, error: !!errorMsg, warning: !!warningMsg, onBlur: handleBlur, name: field },
-                React.createElement(MultiSelect, { refreshToken: this.values.map((e) => e.value).join(","), label: label, selected: selected, onLoad: onLoad, onSelect: (selected) => handleChange(field, selected.map((entry) => entry.value)), disabled: visibility.readOnly, ...this.props }),
-                React.createElement(FormHelperText, null, errorMsg || warningMsg)));
+            return (_jsxs(FormControlFieldsetCC, { component: "fieldset", required: visibility.required, fullWidth: true, error: !!errorMsg, warning: !!warningMsg, onBlur: handleBlur, name: field, children: [_jsx(MultiSelect, { refreshToken: this.values.map((e) => e.value).join(","), label: label, selected: selected, onLoad: onLoad, onSelect: (selected) => handleChange(field, selected.map((entry) => entry.value)), disabled: visibility.readOnly, ...this.props }), _jsx(FormHelperText, { children: errorMsg || warningMsg })] }));
         }
-        return (React.createElement(Typography, null,
-            !visibility.grid && `${label}: `,
-            value
-                .map((enumValue) => {
-                const valueInfo = this.values.find((entry) => entry.value === enumValue);
-                return valueInfo
-                    ? valueInfo.getLabel()
-                    : ccI18n.t("backend-integration.model.types.renderers.enum.unknown");
-            })
-                .join(", ")));
+        return (_jsxs(Typography, { children: [!visibility.grid && `${label}: `, value
+                    .map((enumValue) => {
+                    const valueInfo = this.values.find((entry) => entry.value === enumValue);
+                    return valueInfo
+                        ? valueInfo.getLabel()
+                        : ccI18n.t("backend-integration.model.types.renderers.enum.unknown");
+                })
+                    .join(", ")] }));
     }
 }
 export default RendererEnumMultiSelect;

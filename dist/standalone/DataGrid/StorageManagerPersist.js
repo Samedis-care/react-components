@@ -1,3 +1,4 @@
+import { jsx as _jsx } from "react/jsx-runtime";
 import React, { useCallback, useMemo } from "react";
 import { DataGridPersistentStateContext, } from "./StatePersistence";
 import { StorageManager } from "../../framework/Storage";
@@ -56,7 +57,7 @@ const StorageManagerPersist = (props) => {
         return [data, setData];
     }, [data, setData]);
     if (!data)
-        return React.createElement(Loader, null);
-    return (React.createElement(DataGridPersistentStateContext.Provider, { value: persistCtx }, children));
+        return _jsx(Loader, {});
+    return (_jsx(DataGridPersistentStateContext.Provider, { value: persistCtx, children: children }));
 };
 export default React.memo(StorageManagerPersist);

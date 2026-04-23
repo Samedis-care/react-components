@@ -1,3 +1,4 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React from "react";
 import { DialogTitle as MuiDialogTitle, Grid, IconButton, styled, Typography, useThemeProps, } from "@mui/material";
 import { Close } from "@mui/icons-material";
@@ -30,16 +31,10 @@ const DialogTitleRaw = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcDialogTitle" });
     const { id, children, onClose, noTitle, className, classes } = props;
     const { t } = useCCTranslations();
-    return (React.createElement(Root, { id: id, className: combineClassNames([
+    return (_jsx(Root, { id: id, className: combineClassNames([
             className,
             classes?.root,
             noTitle && "CcDialogTitle-noTitle",
-        ]) },
-        React.createElement(Grid, { container: true, wrap: "nowrap", sx: { justifyContent: "space-between", alignItems: "center" } },
-            React.createElement(TextWrapper, { size: "grow", className: classes?.textWrapper },
-                React.createElement(Text, { variant: "h6", noWrap: true, className: classes?.text }, children)),
-            onClose && (React.createElement(Grid, null,
-                React.createElement(CloseButton, { "aria-label": t("non-standalone.dialog.dialog-title.close"), className: classes?.closeButton, onClick: onClose, size: "large" },
-                    React.createElement(Close, null)))))));
+        ]), children: _jsxs(Grid, { container: true, wrap: "nowrap", sx: { justifyContent: "space-between", alignItems: "center" }, children: [_jsx(TextWrapper, { size: "grow", className: classes?.textWrapper, children: _jsx(Text, { variant: "h6", noWrap: true, className: classes?.text, children: children }) }), onClose && (_jsx(Grid, { children: _jsx(CloseButton, { "aria-label": t("non-standalone.dialog.dialog-title.close"), className: classes?.closeButton, onClick: onClose, size: "large", children: _jsx(Close, {}) }) }))] }) }));
 };
 export const DialogTitle = React.memo(DialogTitleRaw);

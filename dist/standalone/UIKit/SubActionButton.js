@@ -1,3 +1,4 @@
+import { jsxs as _jsxs, jsx as _jsx } from "react/jsx-runtime";
 import React from "react";
 import { Button, styled, Tooltip, useThemeProps, } from "@mui/material";
 const StyledButton = styled(Button, {
@@ -82,12 +83,9 @@ const StyledButton = styled(Button, {
 const SubActionButton = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcSubActionButton" });
     const { icon, small, children, disableDivider, ...otherProps } = props;
-    const renderButton = () => (React.createElement(StyledButton, { variant: "outlined", fullWidth: !small, ...otherProps, ownerState: { small: !!small, disableDivider: !!disableDivider } },
-        icon,
-        " ",
-        !small && children));
+    const renderButton = () => (_jsxs(StyledButton, { variant: "outlined", fullWidth: !small, ...otherProps, ownerState: { small: !!small, disableDivider: !!disableDivider }, children: [icon, " ", !small && children] }));
     if (props.disabled || !small)
         return renderButton();
-    return React.createElement(Tooltip, { title: children }, renderButton());
+    return _jsx(Tooltip, { title: children, children: renderButton() });
 };
 export default React.memo(SubActionButton);

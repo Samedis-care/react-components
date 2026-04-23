@@ -11,4 +11,4 @@ export interface SignPadDialogProps extends IDialogConfigSign {
     classes?: Partial<Record<SignPadDialogClassKey, string>>;
 }
 export type SignPadDialogClassKey = "root" | "dialogTitle" | "closeButton" | "signDiv" | "imageDiv" | "signatureImage" | "hiddenDiv";
-export declare const SignDialog: React.MemoExoticComponent<(inProps: SignPadDialogProps) => React.JSX.Element>;
+export declare const SignDialog: React.MemoExoticComponent<(inProps: SignPadDialogProps) => import("react/jsx-runtime").JSX.Element>;

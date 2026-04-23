@@ -11,5 +11,5 @@ export interface LoaderProps {
     typographyVariant?: TypographyVariant;
 }
 export type LoaderClassKey = "outerWrapper" | "innerWrapper" | "outerProgressWrapper" | "innerProgressWrapper" | "progress";
-declare const _default: React.MemoExoticComponent<(inProps: LoaderProps) => React.JSX.Element>;
+declare const _default: React.MemoExoticComponent<(inProps: LoaderProps) => import("react/jsx-runtime").JSX.Element>;
 export default _default;

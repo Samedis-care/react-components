@@ -1,3 +1,4 @@
+import { jsx as _jsx } from "react/jsx-runtime";
 import React, { useCallback, useContext, useMemo, useState } from "react";
 import { useFormContextLite } from "../Form";
 export const FlowStageContext = React.createContext(null);
@@ -22,7 +23,6 @@ const FlowEngine = (props) => {
         stage,
     }), [goToStage, stage]);
     const StageComp = children[stage];
-    return (React.createElement(FlowStageContext.Provider, { value: context },
-        React.createElement(StageComp, { formProps: formProps, goToStage: goToStage, stage: stage })));
+    return (_jsx(FlowStageContext.Provider, { value: context, children: _jsx(StageComp, { formProps: formProps, goToStage: goToStage, stage: stage }) }));
 };
 export default React.memo(FlowEngine);

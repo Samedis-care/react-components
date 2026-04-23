@@ -1,3 +1,4 @@
+import { jsx as _jsx } from "react/jsx-runtime";
 import React, { useCallback, useContext, useEffect, useRef, useState, } from "react";
 import { Grid, useMediaQuery } from "@mui/material";
 import { DataGridFilterBarBox, DataGridFilterBarGrid, useDataGridProps, useDataGridState, } from "../DataGrid";
@@ -74,12 +75,10 @@ const FilterBar = () => {
         }
     }, [enableDialog, setState]);
     const FilterBarView = props.filterBar;
-    return (React.createElement(DataGridFilterBarBox, { sx: { ml: 4 }, className: classes?.filterBarBox, ref: filterBarContainer },
-        React.createElement(DataGridFilterBarGrid, { container: true, sx: { alignItems: "center", justifyContent: "flex-end" }, spacing: 2, className: combineClassNames([
+    return (_jsx(DataGridFilterBarBox, { sx: { ml: 4 }, className: classes?.filterBarBox, ref: filterBarContainer, children: _jsx(DataGridFilterBarGrid, { container: true, sx: { alignItems: "center", justifyContent: "flex-end" }, spacing: 2, className: combineClassNames([
                 classes?.filterBarGrid,
                 "components-care-data-grid-filter-bar",
-            ]) }, FilterBarView &&
-            (enableDialog ? (React.createElement(Grid, null,
-                React.createElement(CustomFiltersButton, { onClick: openDialog }))) : (React.createElement(FilterBarView, { customData: state.customData, setCustomData: setCustomData, inDialog: false }))))));
+            ]), children: FilterBarView &&
+                (enableDialog ? (_jsx(Grid, { children: _jsx(CustomFiltersButton, { onClick: openDialog }) })) : (_jsx(FilterBarView, { customData: state.customData, setCustomData: setCustomData, inDialog: false }))) }) }));
 };
 export default React.memo(FilterBar);

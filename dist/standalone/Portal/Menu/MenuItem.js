@@ -1,3 +1,4 @@
+import { jsx as _jsx, Fragment as _Fragment, jsxs as _jsxs } from "react/jsx-runtime";
 import React, { useCallback, useContext, useState, } from "react";
 import { Collapse } from "@mui/material";
 /**
@@ -23,9 +24,7 @@ const MenuItem = (props) => {
         setExpanded(true);
     }
     const Renderer = props.menuProps.menuItem;
-    return (React.createElement(React.Fragment, null,
-        React.createElement(Renderer, { icon: props.icon, title: title, expandable: expandable, expanded: expandable ? expanded : undefined, active: expandable ? undefined : menuState === menuItemId, onClick: clickProxy, onAuxClick: onAuxClick, depth: depth }),
-        expandable && (React.createElement(Collapse, { in: expanded, className: props.childWrapperClassName }, props.childDefs?.map((child) => toMenuItemComponent(props.menuProps, child, depth + 1, menuItemId))))));
+    return (_jsxs(_Fragment, { children: [_jsx(Renderer, { icon: props.icon, title: title, expandable: expandable, expanded: expandable ? expanded : undefined, active: expandable ? undefined : menuState === menuItemId, onClick: clickProxy, onAuxClick: onAuxClick, depth: depth }), expandable && (_jsx(Collapse, { in: expanded, className: props.childWrapperClassName, children: props.childDefs?.map((child) => toMenuItemComponent(props.menuProps, child, depth + 1, menuItemId)) }))] }));
 };
 export default React.memo(MenuItem);
-export const toMenuItemComponent = (menuProps, def, depth, menuItemId) => def.shouldRender && (React.createElement(MenuItem, { key: menuItemId ? `${menuItemId}@${def.title}` : def.title, menuItemId: menuItemId ? `${menuItemId}@${def.title}` : def.title, icon: def.icon, title: def.title, expandable: !!(def.children && def.children.length > 0), onClick: def.onClick, onAuxClick: def.onAuxClick ?? (() => undefined), menuProps: menuProps, childDefs: def.children, forceExpand: !!def.forceExpand, depth: depth, childWrapperClassName: menuProps.childWrapperClassName }));
+export const toMenuItemComponent = (menuProps, def, depth, menuItemId) => def.shouldRender && (_jsx(MenuItem, { menuItemId: menuItemId ? `${menuItemId}@${def.title}` : def.title, icon: def.icon, title: def.title, expandable: !!(def.children && def.children.length > 0), onClick: def.onClick, onAuxClick: def.onAuxClick ?? (() => undefined), menuProps: menuProps, childDefs: def.children, forceExpand: !!def.forceExpand, depth: depth, childWrapperClassName: menuProps.childWrapperClassName }, menuItemId ? `${menuItemId}@${def.title}` : def.title));

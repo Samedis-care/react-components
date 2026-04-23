@@ -1,3 +1,4 @@
+import { jsx as _jsx } from "react/jsx-runtime";
 import React from "react";
 import useCurrentLocale from "../utils/useCurrentLocale";
 import { LocalizationProvider } from "@mui/x-date-pickers";
@@ -7,6 +8,6 @@ const MuiPickerUtils = (props) => {
     const locale = useCurrentLocale();
     if (disable)
         return props.children;
-    return (React.createElement(LocalizationProvider, { dateAdapter: AdapterMoment, adapterLocale: locale }, props.children));
+    return (_jsx(LocalizationProvider, { dateAdapter: AdapterMoment, adapterLocale: locale, children: props.children }));
 };
 export default React.memo(MuiPickerUtils);

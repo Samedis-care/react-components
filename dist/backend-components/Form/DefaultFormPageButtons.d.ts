@@ -7,5 +7,5 @@ export declare const BackButtonDefaultColorClass = "CcDefaultFormPageButtons-bac
 export declare const BackActionButton: typeof ActionButton;
 export type DefaultFormPageButtonsClassKey = "backButton";
 export type DefaultFormPageButtonsProps = BasicFormPageRendererProps<EnhancedCustomProps<CrudFormProps> | undefined> & Pick<DefaultFormPageProps, "extraButtons" | "textButtonSave" | "textButtonBack">;
-declare const _default: React.MemoExoticComponent<(inProps: DefaultFormPageButtonsProps) => React.JSX.Element>;
+declare const _default: React.MemoExoticComponent<(inProps: DefaultFormPageButtonsProps) => import("react/jsx-runtime").JSX.Element>;
 export default _default;

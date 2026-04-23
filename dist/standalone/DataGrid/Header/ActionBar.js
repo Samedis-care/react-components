@@ -1,3 +1,4 @@
+import { jsx as _jsx } from "react/jsx-runtime";
 import React, { useCallback } from "react";
 import { getDataGridDefaultColumnsState, getDataGridDefaultState, getDefaultColumnWidths, useDataGridColumnState, useDataGridColumnsWidthState, useDataGridProps, useDataGridState, } from "../DataGrid";
 import ActionBarView from "./ActionBarView";
@@ -66,6 +67,6 @@ const ActionBar = () => {
             refreshData: Math.min(prevState.refreshData + 1, 2),
         }));
     }, [setState]);
-    return (React.createElement(ActionBarView, { toggleSettings: hideSettings ? undefined : toggleSettings, hideReset: !!hideReset, handleAddNew: onAddNew, handleImport: onImport, refresh: handleRefresh, resetFilter: handleResetFilter, resetSort: handleResetSort, resetColumn: handleResetColumn, resetWidth: handleResetWidth, resetAll: handleResetAll, exporters: exporters, hasCustomFilterBar: !!filterBar }));
+    return (_jsx(ActionBarView, { toggleSettings: hideSettings ? undefined : toggleSettings, hideReset: !!hideReset, handleAddNew: onAddNew, handleImport: onImport, refresh: handleRefresh, resetFilter: handleResetFilter, resetSort: handleResetSort, resetColumn: handleResetColumn, resetWidth: handleResetWidth, resetAll: handleResetAll, exporters: exporters, hasCustomFilterBar: !!filterBar }));
 };
 export default React.memo(ActionBar);

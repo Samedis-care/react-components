@@ -17,4 +17,4 @@ export interface DialogTitleProps {
     classes?: Partial<Record<DialogTitleClassKey, string>>;
 }
 export type DialogTitleClassKey = "root" | "textWrapper" | "text" | "closeButton";
-export declare const DialogTitle: React.MemoExoticComponent<(inProps: DialogTitleProps) => React.JSX.Element>;
+export declare const DialogTitle: React.MemoExoticComponent<(inProps: DialogTitleProps) => import("react/jsx-runtime").JSX.Element>;

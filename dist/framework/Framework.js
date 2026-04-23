@@ -1,3 +1,4 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React, { Suspense } from "react";
 import Loader from "../standalone/Loader";
 import DialogContextProvider from "./DialogContextProvider";
@@ -13,7 +14,7 @@ import UnsafeToLeave from "./UnsafeToLeave";
 import DragAndDropPrevention from "./DragAndDropPrevention";
 import { StyledEngineProvider } from "@mui/material";
 import HistoryRouter from "../standalone/Routes/HistoryRouter";
-const loaderComponent = React.createElement(Loader, null);
+const loaderComponent = _jsx(Loader, {});
 /**
  * Provides:
  * - react-router instance
@@ -29,17 +30,6 @@ const loaderComponent = React.createElement(Loader, null);
  * - drag & drop default prevention (prevents unloading page)
  */
 const ComponentsCareFramework = (props) => {
-    return (React.createElement(Suspense, { fallback: loaderComponent },
-        !props.disableMobileScalingFix && (React.createElement(MobileScalingFix, { ...props.mobileScalingFixProps })),
-        !props.disableDragAndDropPrevention && React.createElement(DragAndDropPrevention, null),
-        React.createElement(CCI18nProvider, { disableHtmlLanguageAttributeSetter: props.disableHtmlLanguageAttributeSetter },
-            React.createElement(MuiPickerUtils, { disable: props.disableMuiPickerUtils },
-                React.createElement(StyledEngineProvider, { injectFirst: true },
-                    React.createElement(ThemeProvider, { defaultTheme: props.defaultTheme || getStandardTheme },
-                        React.createElement(QueryClientProvider, { client: ModelDataStore },
-                            React.createElement(PermissionContextProvider, null,
-                                React.createElement(UnsafeToLeave, { disable: props.disableUnsafeToLeave },
-                                    React.createElement(HistoryRouter, { history: FrameworkHistory },
-                                        React.createElement(DialogContextProvider, null, props.children)))))))))));
+    return (_jsxs(Suspense, { fallback: loaderComponent, children: [!props.disableMobileScalingFix && (_jsx(MobileScalingFix, { ...props.mobileScalingFixProps })), !props.disableDragAndDropPrevention && _jsx(DragAndDropPrevention, {}), _jsx(CCI18nProvider, { disableHtmlLanguageAttributeSetter: props.disableHtmlLanguageAttributeSetter, children: _jsx(MuiPickerUtils, { disable: props.disableMuiPickerUtils, children: _jsx(StyledEngineProvider, { injectFirst: true, children: _jsx(ThemeProvider, { defaultTheme: props.defaultTheme || getStandardTheme, children: _jsx(QueryClientProvider, { client: ModelDataStore, children: _jsx(PermissionContextProvider, { children: _jsx(UnsafeToLeave, { disable: props.disableUnsafeToLeave, children: _jsx(HistoryRouter, { history: FrameworkHistory, children: _jsx(DialogContextProvider, { children: props.children }) }) }) }) }) }) }) }) })] }));
 };
 export default React.memo(ComponentsCareFramework);

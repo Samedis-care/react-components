@@ -35,6 +35,6 @@ export interface HowToBoxTranslateProps extends Omit<HowToBoxProps, "titleLabel"
  * @param props The props
  * @see HowToBox
  */
-export declare const HowToBoxTranslate: (props: HowToBoxTranslateProps) => React.JSX.Element;
-declare const _default: React.MemoExoticComponent<(inProps: HowToBoxProps) => React.JSX.Element>;
+export declare const HowToBoxTranslate: (props: HowToBoxTranslateProps) => import("react/jsx-runtime").JSX.Element;
+declare const _default: React.MemoExoticComponent<(inProps: HowToBoxProps) => import("react/jsx-runtime").JSX.Element>;
 export default _default;

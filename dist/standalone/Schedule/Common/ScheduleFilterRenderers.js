@@ -1,12 +1,13 @@
+import { jsx as _jsx, Fragment as _Fragment, jsxs as _jsxs } from "react/jsx-runtime";
 import React, { useState } from "react";
 import { styled } from "@mui/material";
 import combineClassNames from "../../../utils/combineClassNames";
 const ScheduleFilterRenderer = (props) => {
     const type = props.type;
     if (type === "select")
-        return (React.createElement(ScheduleFilterRendererSelect, { ...props }));
+        return (_jsx(ScheduleFilterRendererSelect, { ...props }));
     if (type === "checkbox")
-        return (React.createElement(ScheduleFilterRendererSwitch, { ...props }));
+        return (_jsx(ScheduleFilterRendererSwitch, { ...props }));
     throw new Error(`Invalid filter type: ${type}`);
 };
 const StyledSelect = styled("select", {
@@ -22,14 +23,12 @@ const StyledSelect = styled("select", {
     },
 }));
 const ScheduleFilterRendererSelect = (props) => {
-    return (React.createElement(StyledSelect, { value: props.value, name: props.name, onChange: props.onChange, className: combineClassNames([
+    return (_jsx(StyledSelect, { value: props.value, name: props.name, onChange: props.onChange, className: combineClassNames([
             props.inline === "scrollable" && "Cc-scrollable",
-        ]) }, Object.entries(props.options).map(([value, label]) => (React.createElement("option", { value: value, key: value }, label)))));
+        ]), children: Object.entries(props.options).map(([value, label]) => (_jsx("option", { value: value, children: label }, value))) }));
 };
 const ScheduleFilterRendererSwitch = (props) => {
     const [id] = useState(Math.random().toString().substring(2));
-    return (React.createElement(React.Fragment, null,
-        React.createElement("input", { type: "checkbox", id: id, name: props.name, checked: props.value, onChange: props.onChange }),
-        React.createElement("label", { htmlFor: id }, props.label)));
+    return (_jsxs(_Fragment, { children: [_jsx("input", { type: "checkbox", id: id, name: props.name, checked: props.value, onChange: props.onChange }), _jsx("label", { htmlFor: id, children: props.label })] }));
 };
 export default React.memo(ScheduleFilterRenderer);

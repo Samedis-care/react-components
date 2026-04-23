@@ -1,3 +1,4 @@
+import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
 import React, { useCallback, useEffect, useMemo, useRef, useState, } from "react";
 import ImageBox from "./ImageBox";
 import GroupBox from "../../GroupBox";
@@ -140,48 +141,22 @@ const MultiImage = (inProps) => {
             return;
         onPrimaryChange(name, id);
     }, [onPrimaryChange, name]);
-    return (React.createElement(Root, { className: combineClassNames([className, classes?.root]) },
-        React.createElement(GroupBox, { label: label },
-            React.createElement(RootContainer, { container: true, spacing: 1, className: classes?.rootContainer },
-                React.createElement(ImageItem, { size: 12, className: classes?.imageItem },
-                    React.createElement(ImageBox, { image: images[currentImage]?.image ?? placeholderImage ?? uploadImage, fileName: images[currentImage]?.name, onPrevImage: currentImage <= 0 ? undefined : showPrevImage, onNextImage: currentImage < images.length - 1 ? showNextImage : undefined, onFilesDropped: readOnly ? undefined : handlePreviewDrop, onClick: images[currentImage] ? undefined : readOnly ? null : startUpload, classes: subClasses?.imageBox, imageDots: {
-                            total: images.length,
-                            active: currentImage,
-                            setActive: setCurrentImage,
-                        }, disableBackground: true })),
-                React.createElement(Grid, { container: true, sx: { alignContent: "space-between" }, wrap: "nowrap", spacing: 1, size: 12 },
-                    React.createElement(Grid, { size: "grow" },
-                        React.createElement(ImageDots, { total: images.length, active: currentImage, setActive: setCurrentImage })),
-                    !readOnly && (React.createElement(Grid, null,
-                        React.createElement(EditLabel, { component: Link, variant: "body2", onClick: openDialog, href: "#" }, editLabel ?? t("standalone.file-upload.multi-image.edit"))))))),
-        React.createElement(UploadInput, { type: "file", multiple: remainingFiles > 1, accept: "image/*", capture: capture, ref: fileUpload, onChange: handleUpload, className: classes?.uploadInput }),
-        !readOnly && (React.createElement(React.Fragment, null,
-            React.createElement(Dialog, { open: dialogOpen, onClose: closeDialog, maxWidth: "lg", fullWidth: !previewSize },
-                React.createElement(DialogTitle, null,
-                    React.createElement(Grid, { container: true, sx: { justifyContent: "flex-end" } },
-                        React.createElement(Grid, null,
-                            React.createElement(IconButton, { onClick: closeDialog, size: "large", "aria-label": t("standalone.file-upload.close") },
-                                React.createElement(CloseIcon, null))))),
-                React.createElement(DialogContent, null,
-                    React.createElement(Grid, { container: true, spacing: 2 },
-                        images.map((img, i) => (React.createElement(ImageDialogEntry, { img: img, previewSize: previewSize, isPrimary: img === primaryImg, processFile: processFile, changeImages: manipulateImages, changePrimary: changePrimary, onDelete: onDelete, key: `img-${i}`, classes: subClasses?.imageDialogEntry, subClasses: subClasses?.imageDialogEntrySubClasses }))),
-                        !readOnly && remainingFiles > 0 && (React.createElement(React.Fragment, null,
-                            React.createElement(Grid, { size: {
-                                    xs: previewSize ? undefined : 12,
-                                    md: previewSize ? undefined : 6,
-                                    lg: previewSize ? undefined : 3,
-                                } },
-                                React.createElement(ImageBox, { width: previewSize, height: previewSize, image: uploadImage, onClick: startUpload, onFilesDropped: handleUploadViaDrop, classes: subClasses?.imageBox })),
-                            enableCapture && (React.createElement(Grid, { size: {
-                                    xs: previewSize ? undefined : 12,
-                                    md: previewSize ? undefined : 6,
-                                    lg: previewSize ? undefined : 3,
-                                } },
-                                React.createElement(ImageBox, { width: previewSize, height: previewSize, image: captureImage, onClick: startUploadCapture, onFilesDropped: handleUploadViaDrop, classes: subClasses?.imageBox }))))),
-                        additionalDialogContent?.map((elem, i) => (React.createElement(Grid, { key: `add-${i}`, style: previewSize ? { width: previewSize } : undefined, size: {
-                                xs: previewSize ? undefined : 12,
-                                md: previewSize ? undefined : 6,
-                                lg: previewSize ? undefined : 3,
-                            } }, elem))))))))));
+    return (_jsxs(Root, { className: combineClassNames([className, classes?.root]), children: [_jsx(GroupBox, { label: label, children: _jsxs(RootContainer, { container: true, spacing: 1, className: classes?.rootContainer, children: [_jsx(ImageItem, { size: 12, className: classes?.imageItem, children: _jsx(ImageBox, { image: images[currentImage]?.image ?? placeholderImage ?? uploadImage, fileName: images[currentImage]?.name, onPrevImage: currentImage <= 0 ? undefined : showPrevImage, onNextImage: currentImage < images.length - 1 ? showNextImage : undefined, onFilesDropped: readOnly ? undefined : handlePreviewDrop, onClick: images[currentImage] ? undefined : readOnly ? null : startUpload, classes: subClasses?.imageBox, imageDots: {
+                                    total: images.length,
+                                    active: currentImage,
+                                    setActive: setCurrentImage,
+                                }, disableBackground: true }) }), _jsxs(Grid, { container: true, sx: { alignContent: "space-between" }, wrap: "nowrap", spacing: 1, size: 12, children: [_jsx(Grid, { size: "grow", children: _jsx(ImageDots, { total: images.length, active: currentImage, setActive: setCurrentImage }) }), !readOnly && (_jsx(Grid, { children: _jsx(EditLabel, { component: Link, variant: "body2", onClick: openDialog, href: "#", children: editLabel ?? t("standalone.file-upload.multi-image.edit") }) }))] })] }) }), _jsx(UploadInput, { type: "file", multiple: remainingFiles > 1, accept: "image/*", capture: capture, ref: fileUpload, onChange: handleUpload, className: classes?.uploadInput }), !readOnly && (_jsx(_Fragment, { children: _jsxs(Dialog, { open: dialogOpen, onClose: closeDialog, maxWidth: "lg", fullWidth: !previewSize, children: [_jsx(DialogTitle, { children: _jsx(Grid, { container: true, sx: { justifyContent: "flex-end" }, children: _jsx(Grid, { children: _jsx(IconButton, { onClick: closeDialog, size: "large", "aria-label": t("standalone.file-upload.close"), children: _jsx(CloseIcon, {}) }) }) }) }), _jsx(DialogContent, { children: _jsxs(Grid, { container: true, spacing: 2, children: [images.map((img, i) => (_jsx(ImageDialogEntry, { img: img, previewSize: previewSize, isPrimary: img === primaryImg, processFile: processFile, changeImages: manipulateImages, changePrimary: changePrimary, onDelete: onDelete, classes: subClasses?.imageDialogEntry, subClasses: subClasses?.imageDialogEntrySubClasses }, `img-${i}`))), !readOnly && remainingFiles > 0 && (_jsxs(_Fragment, { children: [_jsx(Grid, { size: {
+                                                    xs: previewSize ? undefined : 12,
+                                                    md: previewSize ? undefined : 6,
+                                                    lg: previewSize ? undefined : 3,
+                                                }, children: _jsx(ImageBox, { width: previewSize, height: previewSize, image: uploadImage, onClick: startUpload, onFilesDropped: handleUploadViaDrop, classes: subClasses?.imageBox }) }), enableCapture && (_jsx(Grid, { size: {
+                                                    xs: previewSize ? undefined : 12,
+                                                    md: previewSize ? undefined : 6,
+                                                    lg: previewSize ? undefined : 3,
+                                                }, children: _jsx(ImageBox, { width: previewSize, height: previewSize, image: captureImage, onClick: startUploadCapture, onFilesDropped: handleUploadViaDrop, classes: subClasses?.imageBox }) }))] })), additionalDialogContent?.map((elem, i) => (_jsx(Grid, { style: previewSize ? { width: previewSize } : undefined, size: {
+                                            xs: previewSize ? undefined : 12,
+                                            md: previewSize ? undefined : 6,
+                                            lg: previewSize ? undefined : 3,
+                                        }, children: elem }, `add-${i}`)))] }) })] }) }))] }));
 };
 export default React.memo(MultiImage);

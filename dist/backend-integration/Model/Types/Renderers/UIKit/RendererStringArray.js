@@ -1,4 +1,4 @@
-import React from "react";
+import { Fragment as _Fragment, jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import { Typography } from "@mui/material";
 import { FormHelperTextCC, GroupBox, TextFieldWithHelp, } from "../../../../../standalone";
 import TypeStringArray from "../../TypeStringArray";
@@ -15,33 +15,29 @@ class RendererStringArray extends TypeStringArray {
     render(params) {
         const { visibility, field, value, label } = params;
         if (visibility.disabled)
-            return React.createElement(React.Fragment, null);
+            return _jsx(_Fragment, {});
         if (visibility.hidden) {
-            return (React.createElement("input", { type: "hidden", name: field, value: this.stringify(value ?? []), readOnly: true, "aria-hidden": "true" }));
+            return (_jsx("input", { type: "hidden", name: field, value: this.stringify(value ?? []), readOnly: true, "aria-hidden": "true" }));
         }
         if (visibility.editable) {
             if (visibility.grid)
                 throw new Error("Not supported");
-            return React.createElement(RendererStringArrayComponent, { options: this.props, ...params });
+            return _jsx(RendererStringArrayComponent, { options: this.props, ...params });
         }
-        return (React.createElement(Typography, { noWrap: visibility.grid },
-            !visibility.grid && `${label}: `,
-            (value ?? []).join("; ")));
+        return (_jsxs(Typography, { noWrap: visibility.grid, children: [!visibility.grid && `${label}: `, (value ?? []).join("; ")] }));
     }
 }
 const RendererStringArrayComponent = (props) => {
     const { options, visibility, field, value, label, handleChange, handleBlur, errorMsg, warningMsg, } = props;
     useMountLogging(RendererStringArrayComponent);
-    const textField = (idx) => (React.createElement(TextFieldWithHelp, { key: "input_" + idx, fullWidth: true, ...options, name: `${field}`, value: value[idx] ?? "", disabled: visibility.readOnly, required: visibility.required, onChange: (evt) => {
+    const textField = (idx) => (_jsx(TextFieldWithHelp, { fullWidth: true, ...options, name: `${field}`, value: value[idx] ?? "", disabled: visibility.readOnly, required: visibility.required, onChange: (evt) => {
             const newValue = [...value];
             newValue[idx] = evt.target.value;
             handleChange(field, newValue);
         }, onBlur: (evt) => {
             handleChange(field, value.filter(Boolean));
             handleBlur(evt);
-        }, error: !!errorMsg, warning: !!warningMsg }));
-    return (React.createElement(GroupBox, { label: label },
-        value.map((_, idx) => textField(idx)).concat(textField(value.length)),
-        React.createElement(FormHelperTextCC, { error: !!errorMsg, warning: !!warningMsg }, errorMsg || warningMsg)));
+        }, error: !!errorMsg, warning: !!warningMsg }, "input_" + idx));
+    return (_jsxs(GroupBox, { label: label, children: [value.map((_, idx) => textField(idx)).concat(textField(value.length)), _jsx(FormHelperTextCC, { error: !!errorMsg, warning: !!warningMsg, children: errorMsg || warningMsg })] }));
 };
 export default RendererStringArray;

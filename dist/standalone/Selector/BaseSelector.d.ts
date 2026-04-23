@@ -303,6 +303,6 @@ export interface BaseSelectorContextType {
     addToLru: (...ids: string[]) => void;
 }
 export declare const BaseSelectorContext: React.Context<BaseSelectorContextType | null>;
-declare const BaseSelector: <DataT extends BaseSelectorData, Multi extends boolean>(inProps: BaseSelectorProps<DataT, Multi>) => React.JSX.Element;
+declare const BaseSelector: <DataT extends BaseSelectorData, Multi extends boolean>(inProps: BaseSelectorProps<DataT, Multi>) => import("react/jsx-runtime").JSX.Element;
 declare const _default: typeof BaseSelector;
 export default _default;

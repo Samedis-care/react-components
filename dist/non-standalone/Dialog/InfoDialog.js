@@ -1,4 +1,5 @@
+import { jsx as _jsx } from "react/jsx-runtime";
 import React from "react";
 import { ErrorDialog } from "./ErrorDialog";
-const InfoDialogRaw = (props) => (React.createElement(ErrorDialog, { ...props }));
+const InfoDialogRaw = (props) => (_jsx(ErrorDialog, { ...props }));
 export const InfoDialog = React.memo(InfoDialogRaw);

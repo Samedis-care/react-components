@@ -1,3 +1,4 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React, { useCallback, useEffect, useMemo } from "react";
 import { Divider, FormControl, FormControlLabel, Grid, Radio, RadioGroup, styled, Typography, useThemeProps, } from "@mui/material";
 import { useCustomFilterActiveContext } from "./Header/FilterBar";
@@ -57,18 +58,10 @@ const GridSingleSelectFilter = (inProps) => {
         autocomplete: isActive ? "Mui-active" : undefined,
     }), [isActive]);
     if (dialog) {
-        return (React.createElement(GridSingleSelectFilterDialogRoot, { size: { xs: 12, md: 6, lg: 3, ...dialogBreakpoints } },
-            React.createElement(FormControl, { component: "fieldset" },
-                React.createElement(RadioGroup, { value: selected, onChange: handleDialogRadioToggle },
-                    React.createElement(Grid, { container: true, size: 12 },
-                        label && (React.createElement(Grid, { size: 12 },
-                            React.createElement(Typography, null, label))),
-                        options.map((option) => (React.createElement(Grid, { key: option.value, size: 12 }, option.isDivider ? (React.createElement(Divider, null)) : option.isSmallLabel ? (React.createElement(Typography, null, option.label)) : (React.createElement(FormControlLabel, { control: React.createElement(Radio, null), name: option.value, value: option.value, label: option.label }))))))))));
+        return (_jsx(GridSingleSelectFilterDialogRoot, { size: { xs: 12, md: 6, lg: 3, ...dialogBreakpoints }, children: _jsx(FormControl, { component: "fieldset", children: _jsx(RadioGroup, { value: selected, onChange: handleDialogRadioToggle, children: _jsxs(Grid, { container: true, size: 12, children: [label && (_jsx(Grid, { size: 12, children: _jsx(Typography, { children: label }) })), options.map((option) => (_jsx(Grid, { size: 12, children: option.isDivider ? (_jsx(Divider, {})) : option.isSmallLabel ? (_jsx(Typography, { children: option.label })) : (_jsx(FormControlLabel, { control: _jsx(Radio, {}), name: option.value, value: option.value, label: option.label })) }, option.value)))] }) }) }) }));
     }
     else {
-        return (React.createElement(GridSingleSelectFilterBarRoot, { size: { xs: 4, ...barBreakpoints } },
-            React.createElement(FormControl, { component: "fieldset", fullWidth: true },
-                React.createElement(DataGridCustomFilterSingle, { label: label, disableSearch: true, disableClearable: true, onLoad: getOptions, selected: options.find((option) => option.value === selected) ?? options[0], onSelect: handleSelectorChange, autocompleteId: autocompleteId, classes: selectorStyles, className: classes?.customFilterSingle }))));
+        return (_jsx(GridSingleSelectFilterBarRoot, { size: { xs: 4, ...barBreakpoints }, children: _jsx(FormControl, { component: "fieldset", fullWidth: true, children: _jsx(DataGridCustomFilterSingle, { label: label, disableSearch: true, disableClearable: true, onLoad: getOptions, selected: options.find((option) => option.value === selected) ?? options[0], onSelect: handleSelectorChange, autocompleteId: autocompleteId, classes: selectorStyles, className: classes?.customFilterSingle }) }) }));
     }
 };
 export default React.memo(GridSingleSelectFilter);

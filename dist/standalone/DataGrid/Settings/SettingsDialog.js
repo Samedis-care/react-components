@@ -1,3 +1,4 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React, { useMemo } from "react";
 import { Box, Button, Checkbox, Divider, Grid, Table, TableBody, TableCell, TableHead, TableRow, styled, } from "@mui/material";
 import { DataGridContentOverlayClosed, DataGridContentOverlayPaper, useDataGridProps, } from "../DataGrid";
@@ -28,25 +29,7 @@ const SettingsDialog = (props) => {
     const { classes } = useDataGridProps();
     const { t } = useCCTranslations();
     const columns = useMemo(() => [...props.columns].sort((a, b) => a.headerName.localeCompare(b.headerName)), [props.columns]);
-    return (React.createElement(DataGridContentOverlayPaper, { elevation: 0, className: classes?.contentOverlayPaper },
-        React.createElement(StyledTable, { stickyHeader: true },
-            React.createElement(StyledTableHead, { className: classes?.settingsTableHead },
-                React.createElement(StyledTableRow, { className: classes?.settingsTableRow },
-                    React.createElement(StyledTableCell, { className: classes?.settingsTableCell }, t("standalone.data-grid.settings.column")),
-                    React.createElement(StyledTableCell, { className: classes?.settingsTableCell }, t("standalone.data-grid.settings.show")),
-                    React.createElement(StyledTableCell, { className: classes?.settingsTableCell }, t("standalone.data-grid.settings.pin")))),
-            React.createElement(StyledTableBody, { className: classes?.settingsTableBody }, columns.map((column) => (React.createElement(StyledTableRow, { key: column.field, className: classes?.settingsTableRow },
-                React.createElement(StyledTableCell, { className: classes?.settingsTableCell }, column.headerName),
-                React.createElement(StyledTableCell, { className: classes?.settingsTableCell },
-                    React.createElement(Checkbox, { checked: !props.hiddenColumns.includes(column.field), onChange: props.toggleColumnVisibility, value: column.field })),
-                React.createElement(StyledTableCell, { className: classes?.settingsTableCell },
-                    React.createElement(Checkbox, { checked: props.lockedColumns.includes(column.field), disabled: props.hiddenColumns.includes(column.field) ||
-                            column.forcePin, onChange: props.toggleColumnLock, value: column.field }))))))),
-        React.createElement(DataGridContentOverlayClosed, { className: classes?.contentOverlayClosed },
-            React.createElement(Divider, null),
-            React.createElement(Grid, { container: true, sx: { justifyContent: "flex-end" } },
-                React.createElement(Grid, null,
-                    React.createElement(Box, { sx: { m: 2 } },
-                        React.createElement(Button, { onClick: props.closeGridSettings, variant: "contained" }, t("standalone.data-grid.settings.close") || "")))))));
+    return (_jsxs(DataGridContentOverlayPaper, { elevation: 0, className: classes?.contentOverlayPaper, children: [_jsxs(StyledTable, { stickyHeader: true, children: [_jsx(StyledTableHead, { className: classes?.settingsTableHead, children: _jsxs(StyledTableRow, { className: classes?.settingsTableRow, children: [_jsx(StyledTableCell, { className: classes?.settingsTableCell, children: t("standalone.data-grid.settings.column") }), _jsx(StyledTableCell, { className: classes?.settingsTableCell, children: t("standalone.data-grid.settings.show") }), _jsx(StyledTableCell, { className: classes?.settingsTableCell, children: t("standalone.data-grid.settings.pin") })] }) }), _jsx(StyledTableBody, { className: classes?.settingsTableBody, children: columns.map((column) => (_jsxs(StyledTableRow, { className: classes?.settingsTableRow, children: [_jsx(StyledTableCell, { className: classes?.settingsTableCell, children: column.headerName }), _jsx(StyledTableCell, { className: classes?.settingsTableCell, children: _jsx(Checkbox, { checked: !props.hiddenColumns.includes(column.field), onChange: props.toggleColumnVisibility, value: column.field }) }), _jsx(StyledTableCell, { className: classes?.settingsTableCell, children: _jsx(Checkbox, { checked: props.lockedColumns.includes(column.field), disabled: props.hiddenColumns.includes(column.field) ||
+                                            column.forcePin, onChange: props.toggleColumnLock, value: column.field }) })] }, column.field))) })] }), _jsxs(DataGridContentOverlayClosed, { className: classes?.contentOverlayClosed, children: [_jsx(Divider, {}), _jsx(Grid, { container: true, sx: { justifyContent: "flex-end" }, children: _jsx(Grid, { children: _jsx(Box, { sx: { m: 2 }, children: _jsx(Button, { onClick: props.closeGridSettings, variant: "contained", children: t("standalone.data-grid.settings.close") || "" }) }) }) })] })] }));
 };
 export default React.memo(SettingsDialog);

@@ -69,5 +69,5 @@ export interface ImageBoxStyledImageOwnerState {
     imageDots: boolean;
 }
 export type ImageBoxClassKey = "root" | "removeBtn" | "prevBtn" | "nextBtn" | "swipeListener" | "image" | "fullScreenDialog" | "fullScreenImageWrapper" | "fullScreenZoomContainer" | "imageDotsWrapper" | "imageDots";
-declare const _default: React.MemoExoticComponent<(inProps: ImageBoxProps) => React.JSX.Element>;
+declare const _default: React.MemoExoticComponent<(inProps: ImageBoxProps) => import("react/jsx-runtime").JSX.Element>;
 export default _default;

@@ -1,4 +1,3 @@
-import React from "react";
 import { BaseSelectorData, MultiSelectorData, MultiSelectWithTagsProps } from "../../standalone";
 import { Model, ModelFieldName, ModelGetResponse, PageVisibility } from "../../backend-integration";
 import { BackendMultiSelectLruOptions } from "./BackendMultiSelect";
@@ -87,6 +86,6 @@ export interface BackendMultiSelectWithTagsProps<GroupKeyT extends ModelFieldNam
  * @remarks Doesn't support custom data
  * @constructor
  */
-declare const BackendMultiSelectWithTags: <GroupKeyT extends ModelFieldName, DataKeyT extends ModelFieldName, GroupVisibilityT extends PageVisibility, DataVisibilityT extends PageVisibility, GroupCustomT, DataCustomT, GroupDataT extends BaseSelectorData, DataDataT extends MultiSelectorData>(props: BackendMultiSelectWithTagsProps<GroupKeyT, DataKeyT, GroupVisibilityT, DataVisibilityT, GroupCustomT, DataCustomT, GroupDataT, DataDataT>) => React.JSX.Element;
+declare const BackendMultiSelectWithTags: <GroupKeyT extends ModelFieldName, DataKeyT extends ModelFieldName, GroupVisibilityT extends PageVisibility, DataVisibilityT extends PageVisibility, GroupCustomT, DataCustomT, GroupDataT extends BaseSelectorData, DataDataT extends MultiSelectorData>(props: BackendMultiSelectWithTagsProps<GroupKeyT, DataKeyT, GroupVisibilityT, DataVisibilityT, GroupCustomT, DataCustomT, GroupDataT, DataDataT>) => import("react/jsx-runtime").JSX.Element;
 declare const _default: typeof BackendMultiSelectWithTags;
 export default _default;

@@ -13,5 +13,5 @@ export interface FormLoaderOverlayProps {
      */
     className?: string;
 }
-declare const _default: React.MemoExoticComponent<(inProps: FormLoaderOverlayProps) => React.JSX.Element>;
+declare const _default: React.MemoExoticComponent<(inProps: FormLoaderOverlayProps) => import("react/jsx-runtime").JSX.Element>;
 export default _default;

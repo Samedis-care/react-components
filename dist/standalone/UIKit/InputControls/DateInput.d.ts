@@ -33,5 +33,5 @@ export interface DateInputProps extends Omit<PickersTextFieldWithHelpProps, "cus
      */
     onBlur?: LocalizedKeyboardDatePickerProps["onBlur"];
 }
-declare const _default: React.MemoExoticComponent<(props: DateInputProps & Omit<DatePickerProps, "value" | "onChange">) => React.JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: DateInputProps & Omit<DatePickerProps, "value" | "onChange">) => import("react/jsx-runtime").JSX.Element>;
 export default _default;

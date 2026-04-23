@@ -1,4 +1,3 @@
-import React from "react";
 import { ModelFieldName, PageVisibility } from "../../backend-integration";
 import { DataGridProps } from "../../standalone/DataGrid/DataGrid";
 import Model from "../../backend-integration/Model/Model";
@@ -22,6 +21,6 @@ export interface BackendDataGridMultiSelectProps<KeyT extends ModelFieldName, Vi
      */
     onChange: (selected: string[]) => void;
 }
-declare const BackendDataGridMultiSelect: <KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT>(props: BackendDataGridMultiSelectProps<KeyT, VisibilityT, CustomT>) => React.JSX.Element;
+declare const BackendDataGridMultiSelect: <KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT>(props: BackendDataGridMultiSelectProps<KeyT, VisibilityT, CustomT>) => import("react/jsx-runtime").JSX.Element;
 declare const _default: typeof BackendDataGridMultiSelect;
 export default _default;

@@ -1,3 +1,4 @@
+import { jsx as _jsx } from "react/jsx-runtime";
 import React from "react";
 import { DateTimePicker, LocalizationProvider, } from "@mui/x-date-pickers";
 import { withMuiWarning } from "../UIKit";
@@ -6,8 +7,7 @@ import accessSlotProps from "../../utils/internal/accessSlotProps";
 const LocalizedDateTimePicker = (props) => {
     const { required, error, fullWidth, onBlur, ...otherProps } = props;
     const localeText = useMuiLocaleData();
-    return (React.createElement(LocalizationProvider, { localeText: localeText },
-        React.createElement(DateTimePicker, { format: "L LT", ...otherProps, slotProps: {
+    return (_jsx(LocalizationProvider, { localeText: localeText, children: _jsx(DateTimePicker, { format: "L LT", ...otherProps, slotProps: {
                 ...otherProps.slotProps,
                 popper: {
                     disablePortal: true,
@@ -23,6 +23,6 @@ const LocalizedDateTimePicker = (props) => {
                         onBlur,
                     };
                 },
-            } })));
+            } }) }));
 };
 export default React.memo(withMuiWarning(LocalizedDateTimePicker));

@@ -1,4 +1,4 @@
-import React from "react";
+import { Fragment as _Fragment, jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import { FormHelperText } from "@mui/material";
 import BackendMultiSelectWithTags from "../../../../backend-components/Selector/BackendMultiSelectWithTags";
 import { FormControlFieldsetCC, } from "../../../../standalone";
@@ -25,18 +25,16 @@ class RendererBackendMultiSelectWithTags extends TypeIds {
     render(params) {
         const { visibility, field, label, handleChange, handleBlur, errorMsg, warningMsg, relationData, relationModel, value, } = params;
         if (visibility.disabled)
-            return React.createElement(React.Fragment, null);
+            return _jsx(_Fragment, {});
         if (visibility.hidden) {
-            return (React.createElement("input", { type: "hidden", name: field, value: this.stringify(value), readOnly: true, "aria-hidden": "true" }));
+            return (_jsx("input", { type: "hidden", name: field, value: this.stringify(value), readOnly: true, "aria-hidden": "true" }));
         }
         if (visibility.editable) {
             if (visibility.grid)
                 throw new Error("Not supported");
             if (!relationModel)
                 throw new Error("Type BackendMultiSelect requires relation model: " + field);
-            return (React.createElement(FormControlFieldsetCC, { component: "fieldset", required: visibility.required, fullWidth: true, error: !!errorMsg, warning: !!warningMsg, onBlur: handleBlur, name: field },
-                React.createElement(BackendMultiSelectWithTags, { selected: value, onChange: (value) => handleChange(field, value), disabled: visibility.readOnly, required: visibility.required, dataModel: relationModel, initialData: relationData, title: label, ...this.props }),
-                React.createElement(FormHelperText, null, errorMsg || warningMsg)));
+            return (_jsxs(FormControlFieldsetCC, { component: "fieldset", required: visibility.required, fullWidth: true, error: !!errorMsg, warning: !!warningMsg, onBlur: handleBlur, name: field, children: [_jsx(BackendMultiSelectWithTags, { selected: value, onChange: (value) => handleChange(field, value), disabled: visibility.readOnly, required: visibility.required, dataModel: relationModel, initialData: relationData, title: label, ...this.props }), _jsx(FormHelperText, { children: errorMsg || warningMsg })] }));
         }
         throw new Error("view-only rendering not supported");
     }

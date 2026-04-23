@@ -38,5 +38,5 @@ interface ScheduleFilterRendererSwitchProps extends Pick<ScheduleFilterDefinitio
 }
 declare const _default: React.MemoExoticComponent<(props: Omit<ScheduleFilterRendererSelectProps | ScheduleFilterRendererSwitchProps, "value"> & {
     value: string | boolean;
-}) => React.JSX.Element>;
+}) => import("react/jsx-runtime").JSX.Element>;
 export default _default;

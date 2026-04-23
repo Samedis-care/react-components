@@ -1,3 +1,4 @@
+import { Fragment as _Fragment, jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React from "react";
 import { Typography } from "@mui/material";
 import { FormHelperTextCC, TextFieldWithHelp } from "../../../../../standalone";
@@ -15,40 +16,36 @@ class RendererStringLocalizedSingle extends TypeLocalizedString {
     render(params) {
         const { visibility, field, value, label, handleChange, handleBlur, errorMsg, warningMsg, } = params;
         if (visibility.disabled)
-            return React.createElement(React.Fragment, null);
+            return _jsx(_Fragment, {});
         if (visibility.hidden) {
-            return (React.createElement("input", { type: "hidden", name: field, value: JSON.stringify(value ?? {}), readOnly: true, "aria-hidden": "true" }));
+            return (_jsx("input", { type: "hidden", name: field, value: JSON.stringify(value ?? {}), readOnly: true, "aria-hidden": "true" }));
         }
         if (visibility.editable) {
             if (visibility.grid)
                 throw new Error("Not supported");
-            return (React.createElement(ModelDataTypeStringLocalizedSingleRendererContext.Consumer, null, (language) => {
+            return (_jsx(ModelDataTypeStringLocalizedSingleRendererContext.Consumer, { children: (language) => {
+                    if (!language)
+                        throw new Error("Please wrap field" +
+                            field +
+                            " with ModelDataTypeStringLocalizedSingleRendererContext.Provider and specify a language");
+                    return (_jsxs(_Fragment, { children: [_jsx(TextFieldWithHelp, { variant: this.multiline ? "outlined" : undefined, fullWidth: true, ...this.props, name: field, value: value[language] ?? "", label: label, disabled: visibility.readOnly, required: visibility.required, onChange: (evt) => {
+                                    const newValue = {
+                                        ...value,
+                                        [language]: evt.target.value,
+                                    };
+                                    if (!evt.target.value)
+                                        delete newValue[language];
+                                    handleChange(evt.target.name, newValue);
+                                }, onBlur: handleBlur, error: !!errorMsg, warning: !!warningMsg }), _jsx(FormHelperTextCC, { error: !!errorMsg, warning: !!warningMsg, children: errorMsg || warningMsg })] }));
+                } }));
+        }
+        return (_jsx(ModelDataTypeStringLocalizedSingleRendererContext.Consumer, { children: (language) => {
                 if (!language)
                     throw new Error("Please wrap field" +
                         field +
                         " with ModelDataTypeStringLocalizedSingleRendererContext.Provider and specify a language");
-                return (React.createElement(React.Fragment, null,
-                    React.createElement(TextFieldWithHelp, { variant: this.multiline ? "outlined" : undefined, fullWidth: true, ...this.props, name: field, value: value[language] ?? "", label: label, disabled: visibility.readOnly, required: visibility.required, onChange: (evt) => {
-                            const newValue = {
-                                ...value,
-                                [language]: evt.target.value,
-                            };
-                            if (!evt.target.value)
-                                delete newValue[language];
-                            handleChange(evt.target.name, newValue);
-                        }, onBlur: handleBlur, error: !!errorMsg, warning: !!warningMsg }),
-                    React.createElement(FormHelperTextCC, { error: !!errorMsg, warning: !!warningMsg }, errorMsg || warningMsg)));
-            }));
-        }
-        return (React.createElement(ModelDataTypeStringLocalizedSingleRendererContext.Consumer, null, (language) => {
-            if (!language)
-                throw new Error("Please wrap field" +
-                    field +
-                    " with ModelDataTypeStringLocalizedSingleRendererContext.Provider and specify a language");
-            return (React.createElement(Typography, { noWrap: visibility.grid },
-                !visibility.grid && `${label}: `,
-                value[language] ?? ""));
-        }));
+                return (_jsxs(Typography, { noWrap: visibility.grid, children: [!visibility.grid && `${label}: `, value[language] ?? ""] }));
+            } }));
     }
 }
 export default RendererStringLocalizedSingle;

@@ -1,3 +1,4 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React, { useCallback } from "react";
 import { ErrorOutlined, InfoOutlined, ReportProblemOutlined, } from "@mui/icons-material";
 import { Accordion, AccordionDetails, AccordionSummary, styled, Typography, useThemeProps, } from "@mui/material";
@@ -89,21 +90,15 @@ const InfoBox = (inProps) => {
     const getIcon = useCallback(() => {
         switch (status) {
             case "warning":
-                return React.createElement(ReportProblemOutlined, null);
+                return _jsx(ReportProblemOutlined, {});
             case "success":
-                return React.createElement(SuccessOutlinedIcon, null);
+                return _jsx(SuccessOutlinedIcon, {});
             case "error":
-                return React.createElement(ErrorOutlined, null);
+                return _jsx(ErrorOutlined, {});
             default:
-                return React.createElement(InfoOutlined, null);
+                return _jsx(InfoOutlined, {});
         }
     }, [status]);
-    return (React.createElement(AccordionStyled, { className: combineClassNames([className, classes?.root]), defaultExpanded: expanded, expanded: alwaysExpanded, onChange: onChange },
-        React.createElement(AccordionSummaryStyled, { ownerState: { status, alwaysExpanded: !!alwaysExpanded }, className: classes?.summary },
-            React.createElement(SummaryRoot, { className: classes?.summaryRoot },
-                React.createElement(SpanIconButton, { className: classes?.iconButton }, getIcon()),
-                React.createElement(SummaryHeading, { variant: headingVariant ?? "caption", className: classes?.heading }, heading))),
-        React.createElement(AccordionDetailsStyled, { className: classes?.details },
-            React.createElement(DetailsText, { className: classes?.detailsText }, message))));
+    return (_jsxs(AccordionStyled, { className: combineClassNames([className, classes?.root]), defaultExpanded: expanded, expanded: alwaysExpanded, onChange: onChange, children: [_jsx(AccordionSummaryStyled, { ownerState: { status, alwaysExpanded: !!alwaysExpanded }, className: classes?.summary, children: _jsxs(SummaryRoot, { className: classes?.summaryRoot, children: [_jsx(SpanIconButton, { className: classes?.iconButton, children: getIcon() }), _jsx(SummaryHeading, { variant: headingVariant ?? "caption", className: classes?.heading, children: heading })] }) }), _jsx(AccordionDetailsStyled, { className: classes?.details, children: _jsx(DetailsText, { className: classes?.detailsText, children: message }) })] }));
 };
 export default React.memo(InfoBox);

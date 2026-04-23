@@ -32,5 +32,5 @@ export interface DefaultFormPageProps extends PageProps<ModelFieldName, CrudForm
      */
     textButtonBack?: React.ReactNode;
 }
-declare const _default: React.MemoExoticComponent<(props: DefaultFormPageProps) => React.JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: DefaultFormPageProps) => import("react/jsx-runtime").JSX.Element>;
 export default _default;

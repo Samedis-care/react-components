@@ -1,3 +1,4 @@
+import { Fragment as _Fragment, jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React, { Suspense, useCallback, useContext, useEffect, useImperativeHandle, useMemo, useRef, useState, } from "react";
 import BackendDataGrid from "../DataGrid";
 import { Form } from "../Form";
@@ -35,8 +36,8 @@ export const CrudSpecialIds = ["import", "devimport", "new"];
 const FormPageWrapper = (props) => {
     const params = useParams();
     if (!props.children)
-        return React.createElement(React.Fragment, null);
-    return (React.createElement(Suspense, { fallback: React.createElement(Loader, null) }, props.form(params.id ?? "", props.children)));
+        return _jsx(_Fragment, {});
+    return (_jsx(Suspense, { fallback: _jsx(Loader, {}), children: props.form(params.id ?? "", props.children) }));
 };
 const CRUD = (props, ref) => {
     const { t } = useCCTranslations();
@@ -130,9 +131,7 @@ const CRUD = (props, ref) => {
         }
     }, [disableRouting, navigate, routeUrl]);
     const MyBackendDataGrid = props.gridComponent ?? BackendDataGrid;
-    const grid = (globalScrollListener) => (React.createElement(Suspense, { fallback: React.createElement(Loader, null) },
-        React.createElement(GridWrapper, null,
-            React.createElement(MyBackendDataGrid, { enableDelete: hasPermission(perms, props.deletePermission), disableDeleteHint: props.deletePermissionHint, disableExport: !hasPermission(perms, props.exportPermission), ...props.gridProps, model: props.model, forceRefreshToken: gridRefreshToken, onEdit: (hasPermission(perms, props.readPermission) ||
+    const grid = (globalScrollListener) => (_jsx(Suspense, { fallback: _jsx(Loader, {}), children: _jsx(GridWrapper, { children: _jsx(MyBackendDataGrid, { enableDelete: hasPermission(perms, props.deletePermission), disableDeleteHint: props.deletePermissionHint, disableExport: !hasPermission(perms, props.exportPermission), ...props.gridProps, model: props.model, forceRefreshToken: gridRefreshToken, onEdit: (hasPermission(perms, props.readPermission) ||
                     hasPermission(perms, props.editPermission)) &&
                     props.children
                     ? showEditPage
@@ -154,8 +153,8 @@ const CRUD = (props, ref) => {
                                                 : undefined,
                                         }))
                                         : throwError("invalid type")
-                        : props.newPermissionHint), onImport: enableUserImport ? handleImportButton : undefined, globalScrollListener: globalScrollListener }))));
-    const importer = (guided) => (React.createElement(ImportUI, { model: props.model, importConfig: importConfig, updateKey: importUpdateKey, updateKeyAdditionalFilters: importUpdateKeyAdditionalFilters, howTo: importHowTo, validate: importValidate, guided: guided }));
+                        : props.newPermissionHint), onImport: enableUserImport ? handleImportButton : undefined, globalScrollListener: globalScrollListener }) }) }));
+    const importer = (guided) => (_jsx(ImportUI, { model: props.model, importConfig: importConfig, updateKey: importUpdateKey, updateKeyAdditionalFilters: importUpdateKeyAdditionalFilters, howTo: importHowTo, validate: importValidate, guided: guided }));
     const lastFormId = useRef(null);
     const formKey = useRef(Date.now().toString(16));
     const form = (id, formComponent) => {
@@ -169,15 +168,14 @@ const CRUD = (props, ref) => {
             skipNextFormIdReset.current = null;
             lastFormId.current = id;
         }
-        return (React.createElement(DialogContextProvider, null,
-            React.createElement(Form, { id: id === "new" ? null : id, key: formKey.current, model: props.model, ...props.formProps, readOnlyReasons: {
+        return (_jsx(DialogContextProvider, { children: _jsx(Form, { id: id === "new" ? null : id, model: props.model, ...props.formProps, readOnlyReasons: {
                     ...props.formProps.readOnlyReasons,
                     ...(!hasPermission(perms, id === "new" ? props.newPermission : props.editPermission) && { permissions: props.editPermissionHint ?? null }),
                 }, onSubmit: handleSubmit, disableRouting: disableRouting, customProps: props.formProps.customProps ?? {
                     goBack: showOverview,
                     open: openView,
                     hasCustomSubmitHandler: props.formProps.onSubmit != null,
-                } }, formComponent)));
+                }, children: formComponent }, formKey.current) }));
     };
     const dispatch = useMemo(() => ({
         refreshGrid,
@@ -191,22 +189,13 @@ const CRUD = (props, ref) => {
     useEffect(() => {
         window.dispatchEvent(new UIEvent("resize", { bubbles: true })); // trigger size recalculations
     }, [showGrid]);
-    return (React.createElement(CrudDispatchContext.Provider, { value: dispatch }, disableRouting ? (React.createElement(React.Fragment, null,
-        (id === null || !disableBackgroundGrid) && (React.createElement(GridVisibilityWrapper, { className: !showGrid ? "Mui-hidden" : undefined }, grid(id === null))),
-        id === "import" && importer(true),
-        id === "devimport" && importer(false),
-        id !== null &&
-            id !== "import" &&
-            id !== "devimport" &&
-            props.children &&
-            form(id, props.children))) : (React.createElement(React.Fragment, null,
-        (id === null || !disableBackgroundGrid) && (React.createElement(GridVisibilityWrapper, { className: !showGrid ? "Mui-hidden" : undefined }, grid(routeUrl === location.pathname))),
-        props.children && (React.createElement(Routes, null,
-            React.createElement(RouteComponent, { path: `import/*`, element: hasImportPermission || !ForbiddenPage ? (importer(true)) : (React.createElement(ForbiddenPage, null)) }),
-            React.createElement(RouteComponent, { path: `devimport/*`, element: hasImportPermission || !ForbiddenPage ? (importer(false)) : (React.createElement(ForbiddenPage, null)) }),
-            React.createElement(RouteComponent, { path: `:id/*`, element: hasPermission(perms, props.readPermission) ||
-                    hasPermission(perms, props.editPermission) ||
-                    hasPermission(perms, props.newPermission) ||
-                    !ForbiddenPage ? (React.createElement(FormPageWrapper, { form: form }, props.children)) : (React.createElement(ForbiddenPage, null)) })))))));
+    return (_jsx(CrudDispatchContext.Provider, { value: dispatch, children: disableRouting ? (_jsxs(_Fragment, { children: [(id === null || !disableBackgroundGrid) && (_jsx(GridVisibilityWrapper, { className: !showGrid ? "Mui-hidden" : undefined, children: grid(id === null) })), id === "import" && importer(true), id === "devimport" && importer(false), id !== null &&
+                    id !== "import" &&
+                    id !== "devimport" &&
+                    props.children &&
+                    form(id, props.children)] })) : (_jsxs(_Fragment, { children: [(id === null || !disableBackgroundGrid) && (_jsx(GridVisibilityWrapper, { className: !showGrid ? "Mui-hidden" : undefined, children: grid(routeUrl === location.pathname) })), props.children && (_jsxs(Routes, { children: [_jsx(RouteComponent, { path: `import/*`, element: hasImportPermission || !ForbiddenPage ? (importer(true)) : (_jsx(ForbiddenPage, {})) }), _jsx(RouteComponent, { path: `devimport/*`, element: hasImportPermission || !ForbiddenPage ? (importer(false)) : (_jsx(ForbiddenPage, {})) }), _jsx(RouteComponent, { path: `:id/*`, element: hasPermission(perms, props.readPermission) ||
+                                hasPermission(perms, props.editPermission) ||
+                                hasPermission(perms, props.newPermission) ||
+                                !ForbiddenPage ? (_jsx(FormPageWrapper, { form: form, children: props.children })) : (_jsx(ForbiddenPage, {})) })] }))] })) }));
 };
 export default React.memo(React.forwardRef(CRUD));

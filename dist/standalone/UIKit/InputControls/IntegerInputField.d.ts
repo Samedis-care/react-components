@@ -17,5 +17,5 @@ export interface IntegerInputFieldProps extends TextFieldWithHelpProps {
      */
     noFormat?: boolean;
 }
-declare const _default: React.MemoExoticComponent<(props: IntegerInputFieldProps & Omit<TextFieldProps, "onChange" | "value">) => React.JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: IntegerInputFieldProps & Omit<TextFieldProps, "onChange" | "value">) => import("react/jsx-runtime").JSX.Element>;
 export default _default;

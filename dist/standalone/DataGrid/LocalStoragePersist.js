@@ -1,3 +1,4 @@
+import { jsx as _jsx } from "react/jsx-runtime";
 import React, { useCallback, useMemo } from "react";
 import { DataGridPersistentStateContext, } from "./StatePersistence";
 /**
@@ -33,6 +34,6 @@ const LocalStoragePersist = (props) => {
         }
         return [data, setData];
     }, [setData, storageKey]);
-    return (React.createElement(DataGridPersistentStateContext.Provider, { value: persistCtx }, children));
+    return (_jsx(DataGridPersistentStateContext.Provider, { value: persistCtx, children: children }));
 };
 export default React.memo(LocalStoragePersist);

@@ -1,3 +1,4 @@
+import { jsx as _jsx, Fragment as _Fragment, jsxs as _jsxs } from "react/jsx-runtime";
 import React from "react";
 import { useDialogContext } from "../../framework";
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, } from "@mui/material";
@@ -9,18 +10,13 @@ const FormDialogRaw = (props) => {
         if (onClose)
             onClose();
     }, [popDialog, onClose]);
-    return (React.createElement(Dialog, { open: true, onClose: removeDialog },
-        React.createElement(DialogTitle, null, props.title),
-        React.createElement(DialogContent, null,
-            React.createElement(DialogContentText, null, props.message),
-            React.createElement(React.Fragment, null, props.inputs)),
-        React.createElement(DialogActions, null, props.buttons.map((btn, index) => (React.createElement(Button, { key: index, onClick: async () => {
-                if (!btn.dontClose)
-                    popDialog();
-                if (btn.onClick)
-                    await btn.onClick(onClose);
-                if (!btn.dontClose && onClose)
-                    onClose();
-            }, color: "primary", autoFocus: btn.autoFocus }, btn.text))))));
+    return (_jsxs(Dialog, { open: true, onClose: removeDialog, children: [_jsx(DialogTitle, { children: props.title }), _jsxs(DialogContent, { children: [_jsx(DialogContentText, { children: props.message }), _jsx(_Fragment, { children: props.inputs })] }), _jsx(DialogActions, { children: props.buttons.map((btn, index) => (_jsx(Button, { onClick: async () => {
+                        if (!btn.dontClose)
+                            popDialog();
+                        if (btn.onClick)
+                            await btn.onClick(onClose);
+                        if (!btn.dontClose && onClose)
+                            onClose();
+                    }, color: "primary", autoFocus: btn.autoFocus, children: btn.text }, index))) })] }));
 };
 export const FormDialog = React.memo(FormDialogRaw);

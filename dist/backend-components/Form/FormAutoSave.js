@@ -1,3 +1,4 @@
+import { jsx as _jsx } from "react/jsx-runtime";
 import React, { useEffect, useMemo } from "react";
 import { useFormContext } from "./Form";
 import debounce from "../../utils/debounce";
@@ -18,6 +19,6 @@ const useFormAutoSave = (debounceTime = 5000) => {
 };
 const FormAutoSave = (props) => {
     useFormAutoSave(props.debounceTime);
-    return React.createElement(React.Fragment, null);
+    return _jsx(React.Fragment, {});
 };
 export default React.memo(FormAutoSave);

@@ -5,5 +5,5 @@ export interface NoPersistProps {
      */
     children: React.ReactNode;
 }
-declare const _default: React.MemoExoticComponent<(props: NoPersistProps) => React.JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: NoPersistProps) => import("react/jsx-runtime").JSX.Element>;
 export default _default;

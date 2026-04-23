@@ -94,5 +94,5 @@ export interface DayContentsButtonOwnerState {
     unClickable: boolean;
 }
 export type DayContentsClassKey = "button";
-declare const _default: React.MemoExoticComponent<(inProps: DayContentsProps) => React.JSX.Element>;
+declare const _default: React.MemoExoticComponent<(inProps: DayContentsProps) => import("react/jsx-runtime").JSX.Element>;
 export default _default;

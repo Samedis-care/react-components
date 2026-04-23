@@ -1,3 +1,4 @@
+import { jsx as _jsx } from "react/jsx-runtime";
 import React, { useMemo } from "react";
 import { useRoutePrefix } from "./Route";
 import useLocation from "./useLocation";
@@ -11,6 +12,6 @@ const Routes = (props) => {
     }, [children]);
     const matchedRoutes = childrenWithKeys.filter((child) => !!matchPath({ ...child.props, path: routePrefix + child.props.path }, pathname));
     const matchedRoute = matchedRoutes[0];
-    return matchedRoute ? matchedRoute : React.createElement(React.Fragment, null);
+    return matchedRoute ? matchedRoute : _jsx(React.Fragment, {});
 };
 export default React.memo(Routes);

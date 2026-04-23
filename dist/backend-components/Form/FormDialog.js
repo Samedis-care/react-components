@@ -1,3 +1,4 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React, { Suspense, useCallback, useMemo, useRef, useState, } from "react";
 import { Dialog, DialogContent, styled, useThemeProps } from "@mui/material";
 import { OpenInNew } from "@mui/icons-material";
@@ -26,12 +27,7 @@ export const FormDialogDispatchContext = React.createContext(undefined);
 export const FormDialogDefaultRenderer = (props) => {
     const { maxWidth, onClose, fullWidth, className, dialogTitle, openInNewLink, useCustomClasses, children, } = props;
     const ContentComp = useCustomClasses ? TallDialogContent : DialogContent;
-    return (React.createElement(Dialog, { maxWidth: maxWidth ?? "lg", open: true, onClose: onClose, fullWidth: fullWidth ?? true, className: combineClassNames(["CcFormDialog", className]) },
-        React.createElement(DialogTitle, { onClose: onClose, noTitle: !dialogTitle },
-            dialogTitle,
-            openInNewLink && React.createElement(OpenInNewIcon, { onClick: openInNewLink })),
-        React.createElement(ContentComp, null,
-            React.createElement(Suspense, { fallback: React.createElement(Loader, null) }, children))));
+    return (_jsxs(Dialog, { maxWidth: maxWidth ?? "lg", open: true, onClose: onClose, fullWidth: fullWidth ?? true, className: combineClassNames(["CcFormDialog", className]), children: [_jsxs(DialogTitle, { onClose: onClose, noTitle: !dialogTitle, children: [dialogTitle, openInNewLink && _jsx(OpenInNewIcon, { onClick: openInNewLink })] }), _jsx(ContentComp, { children: _jsx(Suspense, { fallback: _jsx(Loader, {}), children: children }) })] }));
 };
 const FormDialog = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcFormDialog" });
@@ -73,8 +69,6 @@ const FormDialog = (inProps) => {
         ? (title ?? titleOverride)
         : (titleOverride ?? title);
     const Renderer = renderer ?? FormDialogDefaultRenderer;
-    return (React.createElement(IsInFormDialogContext.Provider, { value: !disableFormDialogContext },
-        React.createElement(FormDialogDispatchContext.Provider, { value: dispatch },
-            React.createElement(Renderer, { ...props, onClose: handleClose, dialogTitle: dialogTitle, openInNewLink: openInNewLink ?? openInNewLinkOverride }))));
+    return (_jsx(IsInFormDialogContext.Provider, { value: !disableFormDialogContext, children: _jsx(FormDialogDispatchContext.Provider, { value: dispatch, children: _jsx(Renderer, { ...props, onClose: handleClose, dialogTitle: dialogTitle, openInNewLink: openInNewLink ?? openInNewLinkOverride }) }) }));
 };
 export default React.memo(FormDialog);

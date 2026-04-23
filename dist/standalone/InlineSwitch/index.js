@@ -1,3 +1,4 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React, { useCallback } from "react";
 import { Grid, styled, Switch, Typography, useThemeProps } from "@mui/material";
 import combineClassNames from "../../utils/combineClassNames";
@@ -48,12 +49,6 @@ const InlineSwitch = (inProps) => {
         if (onChange)
             onChange(event.target.checked);
     }, [onChange]);
-    return (React.createElement(StyledRoot, { className: combineClassNames([className, classes?.root]) },
-        visible && (React.createElement(StyledSwitchWrapper, { component: "div", className: classes?.switchWrapper, variant: "caption" },
-            React.createElement(Grid, { component: "label", container: true, sx: { alignItems: "center" }, spacing: 1 },
-                React.createElement(Grid, null,
-                    React.createElement(AntSwitch, { checked: value, onChange: handleSwitchChange })),
-                React.createElement(Grid, null, label)))),
-        React.createElement("div", null, children)));
+    return (_jsxs(StyledRoot, { className: combineClassNames([className, classes?.root]), children: [visible && (_jsx(StyledSwitchWrapper, { component: "div", className: classes?.switchWrapper, variant: "caption", children: _jsxs(Grid, { component: "label", container: true, sx: { alignItems: "center" }, spacing: 1, children: [_jsx(Grid, { children: _jsx(AntSwitch, { checked: value, onChange: handleSwitchChange }) }), _jsx(Grid, { children: label })] }) })), _jsx("div", { children: children })] }));
 };
 export default React.memo(InlineSwitch);

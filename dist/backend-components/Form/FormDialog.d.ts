@@ -60,6 +60,6 @@ export interface FormDialogDispatch {
 }
 export declare const IsInFormDialogContext: React.Context<boolean>;
 export declare const FormDialogDispatchContext: React.Context<FormDialogDispatch | undefined>;
-export declare const FormDialogDefaultRenderer: (props: FormDialogRendererProps) => React.JSX.Element;
-declare const _default: React.MemoExoticComponent<(inProps: FormDialogProps) => React.JSX.Element>;
+export declare const FormDialogDefaultRenderer: (props: FormDialogRendererProps) => import("react/jsx-runtime").JSX.Element;
+declare const _default: React.MemoExoticComponent<(inProps: FormDialogProps) => import("react/jsx-runtime").JSX.Element>;
 export default _default;

@@ -1,4 +1,3 @@
-import React from "react";
 import { MultiSelectWithoutGroupProps } from "./MultiSelectWithoutGroup";
 import { BaseSelectorData, BaseSelectorProps, SelectorLruOptions } from "./BaseSelector";
 import { MultiSelectorData } from "./MultiSelect";
@@ -58,6 +57,6 @@ export interface MultiSelectWithTagsProps<DataT extends MultiSelectorData, Group
     classes?: Partial<Record<MultiSelectWithTagsClassKey, string>>;
 }
 export type MultiSelectWithTagsClassKey = "root" | "loadOverlay";
-declare const MultiSelectWithTags: <DataT extends MultiSelectorData, GroupT extends BaseSelectorData>(inProps: MultiSelectWithTagsProps<DataT, GroupT>) => React.JSX.Element;
+declare const MultiSelectWithTags: <DataT extends MultiSelectorData, GroupT extends BaseSelectorData>(inProps: MultiSelectWithTagsProps<DataT, GroupT>) => import("react/jsx-runtime").JSX.Element;
 declare const _default: typeof MultiSelectWithTags;
 export default _default;

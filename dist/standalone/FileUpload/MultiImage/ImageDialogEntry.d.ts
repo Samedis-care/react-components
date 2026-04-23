@@ -43,5 +43,5 @@ export interface ImageDialogEntryProps extends Pick<MultiImageProps, "previewSiz
     };
 }
 export type ImageDialogEntryClassKey = "root" | "makePrimary" | "isPrimary";
-declare const _default: React.MemoExoticComponent<(inProps: ImageDialogEntryProps) => React.JSX.Element>;
+declare const _default: React.MemoExoticComponent<(inProps: ImageDialogEntryProps) => import("react/jsx-runtime").JSX.Element>;
 export default _default;

@@ -1,4 +1,4 @@
-import React from "react";
+import { Fragment as _Fragment, jsx as _jsx } from "react/jsx-runtime";
 /**
  * No-op renderer
  */
@@ -18,7 +18,7 @@ class RendererBackendType {
     render(params) {
         const { visibility } = params;
         if (visibility.disabled)
-            return React.createElement(React.Fragment, null);
+            return _jsx(_Fragment, {});
         throw new Error("Not supported");
     }
 }

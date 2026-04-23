@@ -1,3 +1,4 @@
+import { jsx as _jsx, Fragment as _Fragment, jsxs as _jsxs } from "react/jsx-runtime";
 import React, { createContext, useCallback, useContext, useMemo, useState, } from "react";
 import Header from "./Header";
 import Menu from "./Menu";
@@ -57,13 +58,7 @@ const RenderLayout = (props) => {
         menuOpen,
         setMenuOpen,
     }), [mobile, menuOpen, setMenuOpen]);
-    return (React.createElement(PortalLayoutContext.Provider, { value: portalContext },
-        !props.mobile && props.variant === "basic" && (React.createElement(RenderLayoutTopLeft, null, props.topLeft)),
-        React.createElement(RenderLayoutHeader, { id: props.headerId }, headerContent && (React.createElement(Header, { contents: headerContent, toggleMenu: toggleMenu, mobile: mobile && !!menuContent, customClasses: props.customClasses?.header }))),
-        React.createElement(RenderLayoutMenu, { id: props.menuId }, menuContent && (React.createElement(Menu, { menuOpen: menuOpen, drawerWidth: drawerWidth, toggleMenu: toggleMenu, mobile: mobile, items: React.createElement(React.Fragment, null,
-                mobile && props.variant === "basic" && (React.createElement(RenderLayoutMobileTopLeft, null, props.topLeft)),
-                menuContent) }))),
-        React.createElement(RenderLayoutMain, { id: props.mainId }, content)));
+    return (_jsxs(PortalLayoutContext.Provider, { value: portalContext, children: [!props.mobile && props.variant === "basic" && (_jsx(RenderLayoutTopLeft, { children: props.topLeft })), _jsx(RenderLayoutHeader, { id: props.headerId, children: headerContent && (_jsx(Header, { contents: headerContent, toggleMenu: toggleMenu, mobile: mobile && !!menuContent, customClasses: props.customClasses?.header })) }), _jsx(RenderLayoutMenu, { id: props.menuId, children: menuContent && (_jsx(Menu, { menuOpen: menuOpen, drawerWidth: drawerWidth, toggleMenu: toggleMenu, mobile: mobile, items: _jsxs(_Fragment, { children: [mobile && props.variant === "basic" && (_jsx(RenderLayoutMobileTopLeft, { children: props.topLeft })), menuContent] }) })) }), _jsx(RenderLayoutMain, { id: props.mainId, children: content })] }));
 };
 const RenderLayoutMemo = React.memo(RenderLayout);
 const PortalLayout = (inProps) => {
@@ -75,11 +70,10 @@ const PortalLayout = (inProps) => {
     const mobile = !!(shouldCollapse ||
         props.collapseMenu ||
         (props.mobileViewCondition && mobileViewConditionMet));
-    return (React.createElement(Container, { ownerState: {
+    return (_jsx(Container, { ownerState: {
             mobile,
             variant: props.variant,
             drawerWidth: props.drawerWidth,
-        }, className: className },
-        React.createElement(RenderLayoutMemo, { mobile: mobile, ...rendererProps })));
+        }, className: className, children: _jsx(RenderLayoutMemo, { mobile: mobile, ...rendererProps }) }));
 };
 export default React.memo(PortalLayout);

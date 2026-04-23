@@ -1,3 +1,4 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React, { useCallback, useEffect, useMemo } from "react";
 import { Checkbox, Divider, FormControlLabel, Grid, styled, Typography, useThemeProps, } from "@mui/material";
 import { useCustomFilterActiveContext } from "./Header/FilterBar";
@@ -63,15 +64,10 @@ const GridMultiSelectFilter = (inProps) => {
         autocomplete: isActive ? "Mui-active" : undefined,
     }), [isActive]);
     if (dialog) {
-        return (React.createElement(GridMultiSelectFilterDialogRoot, { size: { xs: 12, md: 6, lg: 3, ...dialogBreakpoints } },
-            React.createElement(Grid, { container: true },
-                label && (React.createElement(Grid, { size: 12 },
-                    React.createElement(Typography, null, label))),
-                options.map((option) => (React.createElement(Grid, { key: option.value, size: 12 }, option.isDivider ? (React.createElement(Divider, null)) : option.isSmallLabel ? (React.createElement(Typography, null, option.label)) : (React.createElement(FormControlLabel, { control: React.createElement(Checkbox, { name: option.value, checked: selected.includes(option.value), onChange: handleDialogCheckboxToggle }), label: option.label }))))))));
+        return (_jsx(GridMultiSelectFilterDialogRoot, { size: { xs: 12, md: 6, lg: 3, ...dialogBreakpoints }, children: _jsxs(Grid, { container: true, children: [label && (_jsx(Grid, { size: 12, children: _jsx(Typography, { children: label }) })), options.map((option) => (_jsx(Grid, { size: 12, children: option.isDivider ? (_jsx(Divider, {})) : option.isSmallLabel ? (_jsx(Typography, { children: option.label })) : (_jsx(FormControlLabel, { control: _jsx(Checkbox, { name: option.value, checked: selected.includes(option.value), onChange: handleDialogCheckboxToggle }), label: option.label })) }, option.value)))] }) }));
     }
     else {
-        return (React.createElement(GridMultiSelectFilterBarRoot, { size: { xs: 4, ...barBreakpoints } },
-            React.createElement(DataGridCustomFilterMulti, { multiple: true, label: label, disableSearch: true, disableClearable: true, onLoad: getOptions, selected: selectedData, onSelect: handleSelectorChange, classes: selectorClasses, className: classes?.customFilterMulti })));
+        return (_jsx(GridMultiSelectFilterBarRoot, { size: { xs: 4, ...barBreakpoints }, children: _jsx(DataGridCustomFilterMulti, { multiple: true, label: label, disableSearch: true, disableClearable: true, onLoad: getOptions, selected: selectedData, onSelect: handleSelectorChange, classes: selectorClasses, className: classes?.customFilterMulti }) }));
     }
 };
 export default React.memo(GridMultiSelectFilter);

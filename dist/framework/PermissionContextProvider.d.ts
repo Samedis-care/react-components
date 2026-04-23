@@ -41,5 +41,5 @@ export declare const hasPermission: (perms: string[], perm: Permission) => boole
  * @remarks React hook version of hasPermission
  */
 export declare const useHasPermission: (perm: Permission) => boolean;
-declare const _default: React.MemoExoticComponent<(props: PermissionContextProviderProps) => React.JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: PermissionContextProviderProps) => import("react/jsx-runtime").JSX.Element>;
 export default _default;

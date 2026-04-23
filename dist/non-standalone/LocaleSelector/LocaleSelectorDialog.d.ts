@@ -15,5 +15,5 @@ export interface LocaleSelectorDialogProps extends LocaleSelectorDialogCommonPro
     className?: string;
     classes?: Partial<Record<LocaleSelectorDialogClassKey, string>>;
 }
-declare const _default: React.MemoExoticComponent<(inProps: LocaleSelectorDialogProps) => React.JSX.Element>;
+declare const _default: React.MemoExoticComponent<(inProps: LocaleSelectorDialogProps) => import("react/jsx-runtime").JSX.Element>;
 export default _default;

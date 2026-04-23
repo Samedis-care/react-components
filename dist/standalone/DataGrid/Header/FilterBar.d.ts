@@ -20,5 +20,5 @@ type CustomFilterActiveContextType = [
 ];
 export declare const CustomFilterActiveContext: React.Context<CustomFilterActiveContextType | undefined>;
 export declare const useCustomFilterActiveContext: () => CustomFilterActiveContextType;
-declare const _default: React.MemoExoticComponent<() => React.JSX.Element>;
+declare const _default: React.MemoExoticComponent<() => import("react/jsx-runtime").JSX.Element>;
 export default _default;

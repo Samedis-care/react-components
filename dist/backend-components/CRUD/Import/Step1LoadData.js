@@ -1,3 +1,4 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React, { useCallback } from "react";
 import { Grid } from "@mui/material";
 import XLSX from "xlsx";
@@ -92,16 +93,10 @@ export const useImportStep1FileUploadProps = (props) => {
 const Step1LoadData = (props) => {
     const { state, howTo } = props;
     const fileUploadProps = useImportStep1FileUploadProps(props);
-    return (React.createElement(Grid, { container: true, sx: {
+    return (_jsxs(Grid, { container: true, sx: {
             flexDirection: "column",
             justifyContent: "space-between",
             alignItems: "stretch",
-        }, wrap: "nowrap", style: { height: "100%" }, spacing: 2 },
-        howTo && (React.createElement(Grid, null,
-            React.createElement(HowToBox, { labels: howTo }))),
-        React.createElement(Grid, null,
-            React.createElement(FileUploadGeneric, { ...fileUploadProps, previewSize: 64 })),
-        state.data.length > 0 && !howTo && (React.createElement(Grid, { style: { minHeight: 500 }, size: "grow" },
-            React.createElement(GenericDataPreview, { data: state.data })))));
+        }, wrap: "nowrap", style: { height: "100%" }, spacing: 2, children: [howTo && (_jsx(Grid, { children: _jsx(HowToBox, { labels: howTo }) })), _jsx(Grid, { children: _jsx(FileUploadGeneric, { ...fileUploadProps, previewSize: 64 }) }), state.data.length > 0 && !howTo && (_jsx(Grid, { style: { minHeight: 500 }, size: "grow", children: _jsx(GenericDataPreview, { data: state.data }) }))] }));
 };
 export default React.memo(Step1LoadData);

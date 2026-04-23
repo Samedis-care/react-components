@@ -1,3 +1,4 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React, { useCallback, useEffect, useState } from "react";
 import { Box, styled, Typography, useThemeProps } from "@mui/material";
 import SingleSelect from "../../standalone/Selector/SingleSelect";
@@ -73,14 +74,8 @@ const MultiSelectWithTags = (inProps) => {
         const selectedGroupIds = selectedGroups.map((group) => group.group);
         return (await loadGroupOptions(query, switchValue)).filter((group) => !selectedGroupIds.includes(group.value));
     }, [loadGroupOptions, selectedGroups, switchValue]);
-    return (React.createElement(Root, { className: combineClassNames([className, classes?.root]) },
-        React.createElement(LoadOverlay, { className: classes?.loadOverlay, style: loadingGroupRecords
-                ? { visibility: "visible", opacity: 1 }
-                : { visibility: "hidden", opacity: 0 } },
-            React.createElement(Loader, null)),
-        React.createElement(Typography, { component: "label", variant: "caption", color: "textSecondary" }, title),
-        React.createElement(SingleSelect, { autocompleteId: autocompleteId ? autocompleteId + "-group-select" : undefined, selected: null, onSelect: handleGroupSelect, refreshToken: selectedGroups.length.toString(), onLoad: loadGroupOptionsAndProcess, disabled: disabled || loadingGroupRecords, enableIcons: enableIcons, noOptionsText: noOptionsText, loadingText: loadingText, openText: openText, closeText: closeText, lru: lruGroup }),
-        React.createElement(Box, { sx: { pt: 3 } },
-            React.createElement(MultiSelectWithoutGroup, { autocompleteId: autocompleteId, selected: selected, disabled: disabled, label: searchInputLabel, enableIcons: enableIcons, switchValue: switchValue, setSwitchValue: setSwitchValue, switchLabel: switchLabel, displaySwitch: props.displaySwitch, loadDataOptions: loadDataOptions, openInfo: openInfo, onSelect: onChange, getIdOfData: getId, noOptionsText: noOptionsText, loadingText: loadingText, lru: lruData, sortCompareFn: sortCompareFn }))));
+    return (_jsxs(Root, { className: combineClassNames([className, classes?.root]), children: [_jsx(LoadOverlay, { className: classes?.loadOverlay, style: loadingGroupRecords
+                    ? { visibility: "visible", opacity: 1 }
+                    : { visibility: "hidden", opacity: 0 }, children: _jsx(Loader, {}) }), _jsx(Typography, { component: "label", variant: "caption", color: "textSecondary", children: title }), _jsx(SingleSelect, { autocompleteId: autocompleteId ? autocompleteId + "-group-select" : undefined, selected: null, onSelect: handleGroupSelect, refreshToken: selectedGroups.length.toString(), onLoad: loadGroupOptionsAndProcess, disabled: disabled || loadingGroupRecords, enableIcons: enableIcons, noOptionsText: noOptionsText, loadingText: loadingText, openText: openText, closeText: closeText, lru: lruGroup }), _jsx(Box, { sx: { pt: 3 }, children: _jsx(MultiSelectWithoutGroup, { autocompleteId: autocompleteId, selected: selected, disabled: disabled, label: searchInputLabel, enableIcons: enableIcons, switchValue: switchValue, setSwitchValue: setSwitchValue, switchLabel: switchLabel, displaySwitch: props.displaySwitch, loadDataOptions: loadDataOptions, openInfo: openInfo, onSelect: onChange, getIdOfData: getId, noOptionsText: noOptionsText, loadingText: loadingText, lru: lruData, sortCompareFn: sortCompareFn }) })] }));
 };
 export default React.memo(MultiSelectWithTags);

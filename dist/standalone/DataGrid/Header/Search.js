@@ -1,3 +1,4 @@
+import { jsx as _jsx } from "react/jsx-runtime";
 import React, { useCallback } from "react";
 import { useDataGridState } from "../DataGrid";
 import SearchView from "./SearchView";
@@ -16,6 +17,6 @@ const Search = () => {
             [showSettings ? "settingsSearch" : "search"]: newSearch,
         }));
     }, [setState, showSettings]);
-    return (React.createElement(SearchViewStyled, { search: state[showSettings ? "settingsSearch" : "search"], handleSearchChange: handleSearchChange }));
+    return (_jsx(SearchViewStyled, { search: state[showSettings ? "settingsSearch" : "search"], handleSearchChange: handleSearchChange }));
 };
 export default React.memo(Search);

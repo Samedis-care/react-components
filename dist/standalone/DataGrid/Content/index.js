@@ -1,3 +1,4 @@
+import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
 import React, { useCallback, useEffect, useMemo, useState, } from "react";
 import { useDataGridColumnsWidthState, useDataGridProps, useDataGridState, } from "../DataGrid";
 import { AutoSizer } from "react-virtualized-auto-sizer";
@@ -125,13 +126,9 @@ const Content = (props) => {
     }, [state.initialResize, width]);
     const filtersActive = useDataGridFiltersActive();
     const resetFilters = useDataGridResetFilters();
-    const noContentRenderer = useCallback(() => (React.createElement(React.Fragment, null, state.refreshData ? (React.createElement(Loader, null)) : state.dataLoadError ? (React.createElement(CenteredStickyTypography, { className: classes?.centeredStickyTypography, variant: "h5" }, state.dataLoadError.message)) : (React.createElement(CenteredStickyTypography, { className: classes?.centeredStickyTypography, variant: "h4" },
-        React.createElement(Grid, { container: true, spacing: 2, sx: { flexDirection: "column" } },
-            React.createElement(Grid, null, filtersActive
-                ? t("standalone.data-grid.content.no-data-filters")
-                : t("standalone.data-grid.content.no-data")),
-            filtersActive && (React.createElement(Grid, null,
-                React.createElement(ActionButton, { onClick: resetFilters, fullWidth: false, icon: React.createElement(ResetFilterIcon, null) }, t("standalone.data-grid.content.no-data-reset-filters"))))))))), [
+    const noContentRenderer = useCallback(() => (_jsx(_Fragment, { children: state.refreshData ? (_jsx(Loader, {})) : state.dataLoadError ? (_jsx(CenteredStickyTypography, { className: classes?.centeredStickyTypography, variant: "h5", children: state.dataLoadError.message })) : (_jsx(CenteredStickyTypography, { className: classes?.centeredStickyTypography, variant: "h4", children: _jsxs(Grid, { container: true, spacing: 2, sx: { flexDirection: "column" }, children: [_jsx(Grid, { children: filtersActive
+                            ? t("standalone.data-grid.content.no-data-filters")
+                            : t("standalone.data-grid.content.no-data") }), filtersActive && (_jsx(Grid, { children: _jsx(ActionButton, { onClick: resetFilters, fullWidth: false, icon: _jsx(ResetFilterIcon, {}), children: t("standalone.data-grid.content.no-data-reset-filters") }) }))] }) })) })), [
         classes?.centeredStickyTypography,
         filtersActive,
         resetFilters,
@@ -156,10 +153,9 @@ const Content = (props) => {
                 DEFAULT_COLUMN_WIDTH)
             : remainingWidth, [columnWidth, columns, disableSelection, remainingWidth]);
     const cellContextValue = useMemo(() => ({ columns, hoverState }), [columns, hoverState]);
-    return (React.createElement(AutoSizer, { onResize: onResize, renderProp: ({ width = 0, height = 0 }) => (React.createElement(CellContext.Provider, { value: cellContextValue },
-            React.createElement(MultiGrid, { columnCount: columns.length +
+    return (_jsx(AutoSizer, { onResize: onResize, renderProp: ({ width = 0, height = 0 }) => (_jsx(CellContext.Provider, { value: cellContextValue, children: _jsx(MultiGrid, { columnCount: columns.length +
                     (disableSelection ? 0 : 1) +
                     (columns.length > 0 ? 1 : 0), columnWidth: getColumnWidth, rowCount: (state.rowsFiltered ?? state.rowsTotal) + 1, rowHeight: getRowHeight, width: width, height: height, onCellsRendered: onSectionRendered, fixedColumnCount: columns.filter((col) => col.isLocked).length +
-                    (disableSelection ? 0 : 1), fixedRowCount: 1, styleTopLeftGrid: STYLE_TOP_LEFT, styleTopRightGrid: styleTopRightGrid, styleBottomLeftGrid: styleBottomLeftGrid, styleBottomRightGrid: STYLE_BOTTOM_RIGHT, noContentRenderer: noContentRenderer, globalScrollListener: globalScrollListener }, Cell))) }));
+                    (disableSelection ? 0 : 1), fixedRowCount: 1, styleTopLeftGrid: STYLE_TOP_LEFT, styleTopRightGrid: styleTopRightGrid, styleBottomLeftGrid: styleBottomLeftGrid, styleBottomRightGrid: STYLE_BOTTOM_RIGHT, noContentRenderer: noContentRenderer, globalScrollListener: globalScrollListener, children: Cell }) })) }));
 };
 export default React.memo(Content);

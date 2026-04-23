@@ -1,3 +1,4 @@
+import { jsx as _jsx } from "react/jsx-runtime";
 import React from "react";
 import { Box, Button, Tooltip, styled, useThemeProps, } from "@mui/material";
 import combineColors from "../../utils/combineColors";
@@ -49,9 +50,9 @@ const StyledButton = styled(Button, {
 const ActionButton = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcActionButton" });
     const { icon, fullWidth, small, children, ...otherProps } = props;
-    const renderButton = () => (React.createElement(StyledButton, { variant: "contained", disableElevation: true, fullWidth: fullWidth ?? !small, startIcon: icon, ownerState: { small: Boolean(small), color: Boolean(otherProps.color) }, ...otherProps }, !small && React.createElement(Box, null, children)));
+    const renderButton = () => (_jsx(StyledButton, { variant: "contained", disableElevation: true, fullWidth: fullWidth ?? !small, startIcon: icon, ownerState: { small: Boolean(small), color: Boolean(otherProps.color) }, ...otherProps, children: !small && _jsx(Box, { children: children }) }));
     if (props.disabled || !small)
         return renderButton();
-    return React.createElement(Tooltip, { title: React.createElement("span", null, children) }, renderButton());
+    return _jsx(Tooltip, { title: _jsx("span", { children: children }), children: renderButton() });
 };
 export default React.memo(ActionButton);

@@ -1,3 +1,4 @@
+import { jsx as _jsx } from "react/jsx-runtime";
 import React, { useContext, useEffect, useMemo, useState } from "react";
 import { sentryHandleNavigation } from "./SentryRoutingInstrumentation";
 import { LocationContext } from "./useLocation";
@@ -18,7 +19,6 @@ const HistoryRouter = (props) => {
             sentryHandleNavigation(update);
         });
     }, [history]);
-    return (React.createElement(HistoryRouterContext.Provider, { value: ctx },
-        React.createElement(LocationContext.Provider, { value: location }, children)));
+    return (_jsx(HistoryRouterContext.Provider, { value: ctx, children: _jsx(LocationContext.Provider, { value: location, children: children }) }));
 };
 export default React.memo(HistoryRouter);

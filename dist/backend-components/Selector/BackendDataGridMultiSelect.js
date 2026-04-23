@@ -1,3 +1,4 @@
+import { jsx as _jsx } from "react/jsx-runtime";
 import React, { useCallback, useEffect, useState } from "react";
 import DataGrid from "../../standalone/DataGrid/DataGrid";
 import Connector from "../../backend-integration/Connector/Connector";
@@ -18,8 +19,7 @@ const BackendDataGridMultiSelect = (props) => {
     }, [model]);
     // handle force refresh token
     useEffect(refreshGrid, [refreshGrid, gridProps.forceRefreshToken]);
-    return (React.createElement(DataGridNoPersist, null,
-        React.createElement(DataGrid, { ...gridProps, columns: model.toDataGridColumnDefinition(), forceRefreshToken: refreshToken, disableSelection: false, prohibitMultiSelect: false, customSelectionControl: undefined, onSelectionChange: (invert, newIds) => {
+    return (_jsx(DataGridNoPersist, { children: _jsx(DataGrid, { ...gridProps, columns: model.toDataGridColumnDefinition(), forceRefreshToken: refreshToken, disableSelection: false, prohibitMultiSelect: false, customSelectionControl: undefined, onSelectionChange: (invert, newIds) => {
                 if (!initialSelectionChangeReceived) {
                     setInitialSelectionChangeReceived(true);
                     return;
@@ -66,6 +66,6 @@ const BackendDataGridMultiSelect = (props) => {
                         .concat(dataRecords)
                         .map(renderDataGridRecordUsingModel(model, refreshGrid)),
                 };
-            } })));
+            } }) }));
 };
 export default React.memo(BackendDataGridMultiSelect);

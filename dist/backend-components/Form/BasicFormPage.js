@@ -1,3 +1,4 @@
+import { jsx as _jsx } from "react/jsx-runtime";
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState, } from "react";
 import { useFormContextLite } from "../Form";
 import { UnsafeToLeaveDispatch } from "../../framework/UnsafeToLeave";
@@ -140,11 +141,10 @@ const BasicFormPage = (inProps) => {
         }
     }, [submit, postSubmitHandler, pushDialog]);
     const UsedFormPageLayout = formPageLayoutComponent ?? FormPageLayout;
-    return (React.createElement(BasicFormPageNestingContext.Provider, { value: setChildActive },
-        React.createElement(UsedFormPageLayout, { body: form, footer: childActive ? null : (React.createElement(FormButtons, { ...childrenProps, ...otherProps, showBackButtonOnly: otherProps.showBackButtonOnly ||
+    return (_jsx(BasicFormPageNestingContext.Provider, { value: setChildActive, children: _jsx(UsedFormPageLayout, { body: form, footer: childActive ? null : (_jsx(FormButtons, { ...childrenProps, ...otherProps, showBackButtonOnly: otherProps.showBackButtonOnly ||
                     (readOnly && !Object.values(readOnlyReasons).find((e) => !!e)), readOnly: readOnly, readOnlyReasons: readOnlyReasons, isSubmitting: isSubmitting, dirty: dirty, disableRouting: disableRouting, submit: handleSubmit, customProps: (typeof originalCustomProps === "object" &&
                     originalCustomProps != null
                     ? customPropsWithGoBack
-                    : originalCustomProps) })), other: childActive ? undefined : React.createElement(FormLoaderOverlay, { visible: isSubmitting }) })));
+                    : originalCustomProps) })), other: childActive ? undefined : _jsx(FormLoaderOverlay, { visible: isSubmitting }) }) }));
 };
 export default React.memo(BasicFormPage);

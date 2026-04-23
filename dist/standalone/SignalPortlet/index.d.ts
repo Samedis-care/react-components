@@ -27,5 +27,5 @@ export interface SignalPortletProps {
     className?: string;
 }
 export type SignalPortletClassKey = "root" | "paper" | "divider" | "titleWrapper" | "title" | "list" | "item" | "refreshIconButton" | "refreshIcon" | "lastUpdatedAt" | "innerContainer";
-declare const _default: React.MemoExoticComponent<(inProps: SignalPortletProps) => React.JSX.Element>;
+declare const _default: React.MemoExoticComponent<(inProps: SignalPortletProps) => import("react/jsx-runtime").JSX.Element>;
 export default _default;

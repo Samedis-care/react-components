@@ -1,3 +1,4 @@
+import { jsx as _jsx } from "react/jsx-runtime";
 import React from "react";
 import { styled, Typography, useThemeProps, } from "@mui/material";
 import combineClassNames from "../../utils/combineClassNames";
@@ -22,8 +23,6 @@ const StyledTypography = styled(Typography, {
 const CenteredTypography = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcCenteredTypography" });
     const { className, classes, ...typographyProps } = props;
-    return (React.createElement(Root, { className: combineClassNames([className, classes?.root]) },
-        React.createElement(Inner, { className: classes?.inner },
-            React.createElement(StyledTypography, { ...typographyProps, className: classes?.typography }))));
+    return (_jsx(Root, { className: combineClassNames([className, classes?.root]), children: _jsx(Inner, { className: classes?.inner, children: _jsx(StyledTypography, { ...typographyProps, className: classes?.typography }) }) }));
 };
 export default React.memo(CenteredTypography);

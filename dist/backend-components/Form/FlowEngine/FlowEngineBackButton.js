@@ -1,3 +1,4 @@
+import { jsx as _jsx, Fragment as _Fragment } from "react/jsx-runtime";
 import React, { useCallback, useContext } from "react";
 import { useFormContextLite } from "../Form";
 import { BackActionButton } from "../DefaultFormPageButtons";
@@ -27,6 +28,6 @@ const FlowEngineBackButton = (props) => {
         if (goBack)
             void goBack();
     }, [goBack]);
-    return (React.createElement(React.Fragment, null, goBack && !(isInDialog && hasCustomCloseHandler) && (React.createElement(BackActionButton, { ...props, disabled: props.disabled || submitting, onClick: handleBack }, props.children ?? t("common.buttons.back")))));
+    return (_jsx(_Fragment, { children: goBack && !(isInDialog && hasCustomCloseHandler) && (_jsx(BackActionButton, { ...props, disabled: props.disabled || submitting, onClick: handleBack, children: props.children ?? t("common.buttons.back") })) }));
 };
 export default React.memo(FlowEngineBackButton);

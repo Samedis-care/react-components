@@ -1,4 +1,5 @@
-import React, { useCallback } from "react";
+import { jsx as _jsx, Fragment as _Fragment, jsxs as _jsxs } from "react/jsx-runtime";
+import { useCallback } from "react";
 import { Grid, ListItemButton, styled, useThemeProps } from "@mui/material";
 import CountryFlags from "../../standalone/CountryFlags";
 const ListItemRoot = styled(ListItemButton, {
@@ -46,16 +47,7 @@ const LocaleSelectorEntry = (inProps) => {
         handleSwitch(locale.locale);
     }, [locale, handleSwitch]);
     const flag = CountryFlags[locale.country_short];
-    return (React.createElement(ListItemRoot, { onClick: handleClick, disabled: disabled, className: className },
-        React.createElement(Container, { container: true, spacing: 2, sx: { alignItems: "stretch" } },
-            React.createElement(ImageWrapper, { size: 4 },
-                React.createElement(Image, { alt: locale.country, src: flag })),
-            React.createElement(Grid, { container: true, size: 8 },
-                React.createElement(Grid, { size: 6 }, locale.country),
-                React.createElement(Grid, { size: 6 }, locale.language),
-                !sameLang && (React.createElement(React.Fragment, null,
-                    React.createElement(Grid, { size: 6 }, locale.native_country),
-                    React.createElement(Grid, { size: 6 }, locale.native_language)))))));
+    return (_jsx(ListItemRoot, { onClick: handleClick, disabled: disabled, className: className, children: _jsxs(Container, { container: true, spacing: 2, sx: { alignItems: "stretch" }, children: [_jsx(ImageWrapper, { size: 4, children: _jsx(Image, { alt: locale.country, src: flag }) }), _jsxs(Grid, { container: true, size: 8, children: [_jsx(Grid, { size: 6, children: locale.country }), _jsx(Grid, { size: 6, children: locale.language }), !sameLang && (_jsxs(_Fragment, { children: [_jsx(Grid, { size: 6, children: locale.native_country }), _jsx(Grid, { size: 6, children: locale.native_language })] }))] })] }) }));
 };
 // virtualization remounts the component every time, so no need for memo here
 export default LocaleSelectorEntry;

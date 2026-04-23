@@ -8,5 +8,5 @@ export interface FlowEngineFormPageProps<CustomPropsT> extends PageProps<ModelFi
      */
     children: React.ReactNode;
 }
-declare const _default: React.MemoExoticComponent<(<CustomPropsT>(props: FlowEngineFormPageProps<CustomPropsT>) => React.JSX.Element)>;
+declare const _default: React.MemoExoticComponent<(<CustomPropsT>(props: FlowEngineFormPageProps<CustomPropsT>) => import("react/jsx-runtime").JSX.Element)>;
 export default _default;

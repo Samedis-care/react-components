@@ -1,3 +1,4 @@
+import { Fragment as _Fragment, jsx as _jsx } from "react/jsx-runtime";
 import React, { useCallback } from "react";
 import { DataGridContentOverlayCollapse, useDataGridProps, useDataGridState, } from "../DataGrid";
 import Dialog from "./FilterDialog";
@@ -25,9 +26,8 @@ const DataGridCustomFilters = () => {
         }
     }, [setState]);
     if (!filterBar) {
-        return React.createElement(React.Fragment, null);
+        return _jsx(_Fragment, {});
     }
-    return (React.createElement(DataGridContentOverlayCollapse, { className: classes?.contentOverlayCollapse, in: state.showFilterDialog, mountOnEnter: true },
-        React.createElement(Dialog, { closeFilterDialog: closeCustomFilterDialog, customFilters: filterBar, customData: state.customData, setCustomData: setCustomData })));
+    return (_jsx(DataGridContentOverlayCollapse, { className: classes?.contentOverlayCollapse, in: state.showFilterDialog, mountOnEnter: true, children: _jsx(Dialog, { closeFilterDialog: closeCustomFilterDialog, customFilters: filterBar, customData: state.customData, setCustomData: setCustomData }) }));
 };
 export default React.memo(DataGridCustomFilters);

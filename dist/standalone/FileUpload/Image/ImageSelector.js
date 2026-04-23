@@ -1,3 +1,4 @@
+import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
 import React, { useCallback, useRef, useState } from "react";
 import { alpha, Box, Button, Grid, IconButton, styled, Tooltip, Typography, useThemeProps, } from "@mui/material";
 import { AttachFile, FileUpload as UploadIcon, Person, CameraAlt as CameraIcon, } from "@mui/icons-material";
@@ -207,75 +208,39 @@ const ImageSelector = (inProps) => {
     const handlePreviewDialogClose = useCallback(() => {
         setShowPreviewDialog(false);
     }, []);
-    const previewDialog = variant === "modern" && (React.createElement(ImagePreviewDialog, { src: value, alt: props.alt, open: showPreviewDialog, onClose: handlePreviewDialogClose }));
+    const previewDialog = variant === "modern" && (_jsx(ImagePreviewDialog, { src: value, alt: props.alt, open: showPreviewDialog, onClose: handlePreviewDialogClose }));
     // render component
     if (variant === "normal") {
-        return (React.createElement(GroupBox, { label: props.label, smallLabel: props.smallLabel, className: className },
-            React.createElement(RootClassic, { container: true, spacing: 2, sx: {
+        return (_jsx(GroupBox, { label: props.label, smallLabel: props.smallLabel, className: className, children: _jsxs(RootClassic, { container: true, spacing: 2, sx: {
                     flexDirection: "column",
                     alignContent: "flex-start",
                     alignItems: "stretch",
                     justifyContent: "center",
-                }, wrap: "nowrap", className: classes?.rootClassic, onDrop: handleDrop, onDragOver: handleDragOver },
-                !props.readOnly && (React.createElement(Grid, { key: "upload", container: true, spacing: 1 },
-                    React.createElement(Grid, null,
-                        React.createElement(Button, { startIcon: React.createElement(AttachFile, null), variant: "contained", color: "primary", name: props.name, onClick: handleUpload, onBlur: props.onBlur }, props.uploadLabel || t("standalone.file-upload.upload"))),
-                    captureEnabled && (React.createElement(Grid, null,
-                        React.createElement(Button, { startIcon: React.createElement(AttachFile, null), variant: "contained", color: "primary", name: props.name, onClick: handleUploadCapture, onBlur: props.onBlur }, props.uploadLabelCapture ||
-                            t("standalone.file-upload.upload-capture.image")))),
-                    React.createElement(ChangeEventHelper, { type: "file", accept: "image/*", ref: fileRef, onChange: handleFileChange, className: classes?.changeEventHelper }))),
-                React.createElement(ImageWrapper, { size: "grow", key: "image", className: classes?.imgWrapper }, value && (React.createElement(PreviewClassic, { src: value, alt: props.alt, className: classes?.previewClassic }))))));
+                }, wrap: "nowrap", className: classes?.rootClassic, onDrop: handleDrop, onDragOver: handleDragOver, children: [!props.readOnly && (_jsxs(Grid, { container: true, spacing: 1, children: [_jsx(Grid, { children: _jsx(Button, { startIcon: _jsx(AttachFile, {}), variant: "contained", color: "primary", name: props.name, onClick: handleUpload, onBlur: props.onBlur, children: props.uploadLabel || t("standalone.file-upload.upload") }) }), captureEnabled && (_jsx(Grid, { children: _jsx(Button, { startIcon: _jsx(AttachFile, {}), variant: "contained", color: "primary", name: props.name, onClick: handleUploadCapture, onBlur: props.onBlur, children: props.uploadLabelCapture ||
+                                        t("standalone.file-upload.upload-capture.image") }) })), _jsx(ChangeEventHelper, { type: "file", accept: "image/*", ref: fileRef, onChange: handleFileChange, className: classes?.changeEventHelper })] }, "upload")), _jsx(ImageWrapper, { size: "grow", className: classes?.imgWrapper, children: value && (_jsx(PreviewClassic, { src: value, alt: props.alt, className: classes?.previewClassic })) }, "image")] }) }));
     }
     else if (variant === "modern") {
-        return (React.createElement(React.Fragment, null,
-            previewDialog,
-            React.createElement(GroupBox, { label: props.label, smallLabel: props.smallLabel, className: className },
-                React.createElement(RootModern, { container: true, spacing: 0, sx: {
-                        flexDirection: "column",
-                        alignContent: "flex-start",
-                        alignItems: "stretch",
-                        justifyContent: "center",
-                    }, wrap: "nowrap", className: classes?.rootModern, onDrop: handleDrop, onDragOver: handleDragOver },
-                    !props.readOnly && (React.createElement(ChangeEventHelper, { type: "file", accept: "image/*", ref: fileRef, onChange: handleFileChange, className: classes?.changeEventHelper })),
-                    React.createElement(ImageWrapper, { size: "grow", key: "image", className: classes?.imgWrapper, onBlur: props.onBlur, "data-name": props.name }, value ? (React.createElement(React.Fragment, null,
-                        React.createElement(Tooltip, { title: props.uploadLabel ??
-                                t("standalone.file-upload.upload-modern-dnd") ??
-                                "" },
-                            React.createElement(PreviewModern, { src: value, alt: props.alt, onClick: handlePreviewDialog, className: classes?.previewModern })),
-                        React.createElement(ModernUploadControlsWrapper, { container: true, spacing: 1 },
-                            React.createElement(Grid, null,
-                                React.createElement(Tooltip, { title: t("standalone.file-upload.upload-modern-btn") },
-                                    React.createElement(ModernUploadControlUpload, { onClick: handleUpload },
-                                        React.createElement(UploadIcon, null)))),
-                            captureEnabled && (React.createElement(Grid, null,
-                                React.createElement(Tooltip, { title: t("standalone.file-upload.upload-modern-btn-capture.image") },
-                                    React.createElement(ModernUploadControlUpload, { onClick: handleUploadCapture },
-                                        React.createElement(CameraIcon, null)))))))) : (React.createElement(ModernFullHeightBox, { sx: { px: 2 }, className: classes?.modernFullHeightBox },
-                        React.createElement(ModernFullHeightGrid, { container: true, onClick: handleUpload, sx: { flexDirection: "column" }, spacing: 0, className: classes?.modernFullHeightGrid },
-                            React.createElement(Grid, { container: true, sx: {
-                                    flexDirection: "column",
-                                    justifyContent: "space-around",
-                                }, wrap: "nowrap", size: "grow" },
-                                React.createElement(Grid, null,
-                                    React.createElement(ModernUploadLabel, { component: "h1", variant: "h5", className: classes?.modernUploadLabel, align: "center" }, props.uploadLabel ??
-                                        t("standalone.file-upload.upload-modern") ??
-                                        ""))),
-                            React.createElement(Grid, null,
-                                React.createElement(Grid, { container: true, wrap: "nowrap", spacing: 0, sx: { justifyContent: "space-between" } },
-                                    React.createElement(Grid, null,
-                                        React.createElement(ModernFormatsLabel, { className: classes?.modernFormatsLabel }, props.formatsLabel ??
-                                            t("standalone.file-upload.formats-modern") ??
-                                            "")),
-                                    React.createElement(Grid, null,
-                                        React.createElement(ModernFormatIcon, { className: classes?.modernFormatIcon }))))))))))));
+        return (_jsxs(_Fragment, { children: [previewDialog, _jsx(GroupBox, { label: props.label, smallLabel: props.smallLabel, className: className, children: _jsxs(RootModern, { container: true, spacing: 0, sx: {
+                            flexDirection: "column",
+                            alignContent: "flex-start",
+                            alignItems: "stretch",
+                            justifyContent: "center",
+                        }, wrap: "nowrap", className: classes?.rootModern, onDrop: handleDrop, onDragOver: handleDragOver, children: [!props.readOnly && (_jsx(ChangeEventHelper, { type: "file", accept: "image/*", ref: fileRef, onChange: handleFileChange, className: classes?.changeEventHelper })), _jsx(ImageWrapper, { size: "grow", className: classes?.imgWrapper, onBlur: props.onBlur, "data-name": props.name, children: value ? (_jsxs(_Fragment, { children: [_jsx(Tooltip, { title: props.uploadLabel ??
+                                                t("standalone.file-upload.upload-modern-dnd") ??
+                                                "", children: _jsx(PreviewModern, { src: value, alt: props.alt, onClick: handlePreviewDialog, className: classes?.previewModern }) }), _jsxs(ModernUploadControlsWrapper, { container: true, spacing: 1, children: [_jsx(Grid, { children: _jsx(Tooltip, { title: t("standalone.file-upload.upload-modern-btn"), children: _jsx(ModernUploadControlUpload, { onClick: handleUpload, children: _jsx(UploadIcon, {}) }) }) }), captureEnabled && (_jsx(Grid, { children: _jsx(Tooltip, { title: t("standalone.file-upload.upload-modern-btn-capture.image"), children: _jsx(ModernUploadControlUpload, { onClick: handleUploadCapture, children: _jsx(CameraIcon, {}) }) }) }))] })] })) : (_jsx(ModernFullHeightBox, { sx: { px: 2 }, className: classes?.modernFullHeightBox, children: _jsxs(ModernFullHeightGrid, { container: true, onClick: handleUpload, sx: { flexDirection: "column" }, spacing: 0, className: classes?.modernFullHeightGrid, children: [_jsx(Grid, { container: true, sx: {
+                                                    flexDirection: "column",
+                                                    justifyContent: "space-around",
+                                                }, wrap: "nowrap", size: "grow", children: _jsx(Grid, { children: _jsx(ModernUploadLabel, { component: "h1", variant: "h5", className: classes?.modernUploadLabel, align: "center", children: props.uploadLabel ??
+                                                            t("standalone.file-upload.upload-modern") ??
+                                                            "" }) }) }), _jsx(Grid, { children: _jsxs(Grid, { container: true, wrap: "nowrap", spacing: 0, sx: { justifyContent: "space-between" }, children: [_jsx(Grid, { children: _jsx(ModernFormatsLabel, { className: classes?.modernFormatsLabel, children: props.formatsLabel ??
+                                                                    t("standalone.file-upload.formats-modern") ??
+                                                                    "" }) }), _jsx(Grid, { children: _jsx(ModernFormatIcon, { className: classes?.modernFormatIcon }) })] }) })] }) })) }, "image")] }) })] }));
     }
     else if (variant === "profile_picture") {
-        const image = value ? (React.createElement(PfpImage, { src: value, className: classes?.pfpImg, alt: props.label })) : (React.createElement(PfpImagePlaceholder, { className: classes?.pfpImgPlaceholder }));
-        return (React.createElement(PfpRoot, { onDrop: handleDrop, onDragOver: handleDragOver, className: combineClassNames([className, classes?.pfpRoot]) },
-            React.createElement(ChangeEventHelper, { type: "file", accept: "image/*", ref: fileRef, onChange: handleFileChange, className: classes?.changeEventHelper }),
-            React.createElement(PfpIconButton, { disabled: props.readOnly, onClick: captureEnabled ? handleUploadCapture : handleUpload, className: classes?.pfpIconBtn, size: "large", "aria-label": captureEnabled
-                    ? t("standalone.file-upload.upload-capture.image")
-                    : t("standalone.file-upload.upload") }, image)));
+        const image = value ? (_jsx(PfpImage, { src: value, className: classes?.pfpImg, alt: props.label })) : (_jsx(PfpImagePlaceholder, { className: classes?.pfpImgPlaceholder }));
+        return (_jsxs(PfpRoot, { onDrop: handleDrop, onDragOver: handleDragOver, className: combineClassNames([className, classes?.pfpRoot]), children: [_jsx(ChangeEventHelper, { type: "file", accept: "image/*", ref: fileRef, onChange: handleFileChange, className: classes?.changeEventHelper }), _jsx(PfpIconButton, { disabled: props.readOnly, onClick: captureEnabled ? handleUploadCapture : handleUpload, className: classes?.pfpIconBtn, size: "large", "aria-label": captureEnabled
+                        ? t("standalone.file-upload.upload-capture.image")
+                        : t("standalone.file-upload.upload"), children: image })] }));
     }
     else {
         throw new Error("Unknown variant");

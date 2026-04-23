@@ -1,3 +1,4 @@
+import { jsx as _jsx } from "react/jsx-runtime";
 import React, { useMemo } from "react";
 import filterSortPaginate from "../../../utils/filterSortPaginate";
 import uniqueArray from "../../../utils/uniqueArray";
@@ -20,8 +21,7 @@ const GenericDataPreview = (props) => {
         id: index.toString(16),
         ...entry,
     })), [data]);
-    return (React.createElement(DataGridNoPersist, null,
-        React.createElement(DataGrid, { columns: columnDef, disableSelection: true, loadData: (params) => {
+    return (_jsx(DataGridNoPersist, { children: _jsx(DataGrid, { columns: columnDef, disableSelection: true, loadData: (params) => {
                 const processed = filterSortPaginate(rowData, params, columnDef);
                 return {
                     rowsTotal: rowData.length,
@@ -50,6 +50,6 @@ const GenericDataPreview = (props) => {
                         ])))
                         : processed[0],
                 };
-            }, defaultFilter: defaultFilter })));
+            }, defaultFilter: defaultFilter }) }));
 };
 export default React.memo(GenericDataPreview);

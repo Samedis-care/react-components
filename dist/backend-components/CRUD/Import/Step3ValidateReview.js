@@ -1,3 +1,4 @@
+import { jsx as _jsx } from "react/jsx-runtime";
 import React, { useEffect, useMemo } from "react";
 import { isFieldImportable } from "./index";
 import GenericDataPreview from "./GenericDataPreview";
@@ -81,8 +82,8 @@ const Step3ValidateReview = (props) => {
     const { records, recordsNormalized, everythingOkay } = useImportStep3Logic(props);
     const { t } = useCCTranslations();
     if (!records)
-        return React.createElement(Loader, null);
-    return (React.createElement(GenericDataPreview, { model: model, data: recordsNormalized, existingDefinition: [
+        return _jsx(Loader, {});
+    return (_jsx(GenericDataPreview, { model: model, data: recordsNormalized, existingDefinition: [
             ...model.toDataGridColumnDefinition().map((columnDef) => ({
                 ...columnDef,
                 filterable: true,

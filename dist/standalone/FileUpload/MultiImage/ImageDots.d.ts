@@ -23,5 +23,5 @@ export interface ImageDotsProps {
     classes?: Partial<Record<ImageDotsClassKey, string>>;
 }
 export type ImageDotsClassKey = "root" | "container" | "imageDot";
-declare const _default: React.MemoExoticComponent<(inProps: ImageDotsProps) => React.JSX.Element>;
+declare const _default: React.MemoExoticComponent<(inProps: ImageDotsProps) => import("react/jsx-runtime").JSX.Element>;
 export default _default;

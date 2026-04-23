@@ -1,3 +1,4 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React, { forwardRef, useContext, } from "react";
 import { Loader } from "../../standalone";
 import BackendMultiSelect from "./BackendMultiSelect";
@@ -15,15 +16,12 @@ const CrudMultiSelect = (props, ref) => {
     const crudSelect = useCrudSelect(props, ref);
     const { loading, error, loadError, selected, initialRawData, handleSelect, modelToSelectorData, } = crudSelect;
     if (loading)
-        return React.createElement(Loader, null);
+        return _jsx(Loader, {});
     if (loadError)
-        return React.createElement("span", null, loadError.message);
-    return (React.createElement(CrudSelectContext.Provider, { value: crudSelect },
-        React.createElement(DialogContextProvider
+        return _jsx("span", { children: loadError.message });
+    return (_jsx(CrudSelectContext.Provider, { value: crudSelect, children: _jsxs(DialogContextProvider
         // for creating dialogs inside end adornment of selector with access to selector data
-        , null,
-            error && React.createElement(ErrorComponent, { error: error }),
-            React.createElement(BackendMultiSelect, { ...props, selected: selected.map((entry) => entry.value), onSelect: handleSelect, modelToSelectorData: modelToSelectorData, initialData: initialRawData }))));
+        , { children: [error && _jsx(ErrorComponent, { error: error }), _jsx(BackendMultiSelect, { ...props, selected: selected.map((entry) => entry.value), onSelect: handleSelect, modelToSelectorData: modelToSelectorData, initialData: initialRawData })] }) }));
 };
 const ForwardedCrudMultiSelect = forwardRef(CrudMultiSelect);
 const MemoizedCrudMultiSelect = React.memo(ForwardedCrudMultiSelect);

@@ -41,5 +41,5 @@ export interface IFrameworkThemeProps {
     defaultTheme?: GetDefaultThemeCallback;
 }
 type ICompleteFrameworkProps = IFrameworkProps & IFrameworkThemeProps;
-declare const _default: React.MemoExoticComponent<(props: ICompleteFrameworkProps) => React.JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: ICompleteFrameworkProps) => import("react/jsx-runtime").JSX.Element>;
 export default _default;

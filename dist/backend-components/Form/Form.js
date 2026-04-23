@@ -1,3 +1,4 @@
+import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState, } from "react";
 import { useModelDelete, useModelGet, useModelMutation, } from "../../backend-integration/Model/Model";
 import Loader from "../../standalone/Loader";
@@ -599,10 +600,7 @@ const Form = (props) => {
                 setSubmittingBlocked(true);
                 const continueSubmit = await showConfirmDialogBool(pushDialog, {
                     title: t("backend-components.form.submit-with-warnings.title"),
-                    message: (React.createElement(Grid, { container: true, spacing: 2 },
-                        React.createElement(Grid, { size: 12 }, t("backend-components.form.submit-with-warnings.message")),
-                        React.createElement(Grid, { size: 12 },
-                            React.createElement("ul", null, Object.entries(validationHints).map(([key, value]) => (React.createElement("li", { key: key }, value))))))),
+                    message: (_jsxs(Grid, { container: true, spacing: 2, children: [_jsx(Grid, { size: 12, children: t("backend-components.form.submit-with-warnings.message") }), _jsx(Grid, { size: 12, children: _jsx("ul", { children: Object.entries(validationHints).map(([key, value]) => (_jsx("li", { children: value }, key))) }) })] })),
                     textButtonYes: t("backend-components.form.submit-with-warnings.yes"),
                     textButtonNo: t("backend-components.form.submit-with-warnings.no"),
                 });
@@ -1060,11 +1058,11 @@ const Form = (props) => {
     ]);
     if (error) {
         if (ErrorRenderer)
-            return React.createElement(ErrorRenderer, { customProps: customProps, error: error });
-        return React.createElement(Typography, { color: "error" }, error.message);
+            return _jsx(ErrorRenderer, { customProps: customProps, error: error });
+        return _jsx(Typography, { color: "error", children: error.message });
     }
     if (isLoading || isDefaultRecordLoading || isObjectEmpty(values)) {
-        return React.createElement(Loader, null);
+        return _jsx(Loader, {});
     }
     const displayError = defaultRecordError || updateError;
     if (!serverData || serverData.length !== 2 || isObjectEmpty(serverData[0])) {
@@ -1072,11 +1070,7 @@ const Form = (props) => {
         console.error("[Components-Care] [FormEngine] Data is faulty", serverData ? JSON.stringify(serverData, undefined, 4) : null);
         throw new Error("Data is not present, this should never happen");
     }
-    const innerForm = () => (React.createElement(React.Fragment, null,
-        displayError && !nestedFormName && (React.createElement(ErrorComponent, { error: displayError })),
-        isLoading ? (React.createElement("div", { style: loaderContainerStyles },
-            React.createElement(Loader, null))) : (React.createElement(Children, { isSubmitting: submitting, values: props.renderConditionally ? values : undefined, submit: submitForm, reset: resetForm, dirty: dirty, id: id, customProps: customProps, disableRouting: !!props.disableRouting }))));
-    return (React.createElement(FormContextLite.Provider, { value: formContextDataLite },
-        React.createElement(FormContext.Provider, { value: formContextData }, !parentFormContext && !renderFormAsDiv ? (React.createElement(StyledForm, { onSubmit: handleSubmit, className: formClass }, innerForm())) : (React.createElement(StyledFormDiv, { className: formClass }, innerForm())))));
+    const innerForm = () => (_jsxs(_Fragment, { children: [displayError && !nestedFormName && (_jsx(ErrorComponent, { error: displayError })), isLoading ? (_jsx("div", { style: loaderContainerStyles, children: _jsx(Loader, {}) })) : (_jsx(Children, { isSubmitting: submitting, values: props.renderConditionally ? values : undefined, submit: submitForm, reset: resetForm, dirty: dirty, id: id, customProps: customProps, disableRouting: !!props.disableRouting }))] }));
+    return (_jsx(FormContextLite.Provider, { value: formContextDataLite, children: _jsx(FormContext.Provider, { value: formContextData, children: !parentFormContext && !renderFormAsDiv ? (_jsx(StyledForm, { onSubmit: handleSubmit, className: formClass, children: innerForm() })) : (_jsx(StyledFormDiv, { className: formClass, children: innerForm() })) }) }));
 };
 export default React.memo(Form);

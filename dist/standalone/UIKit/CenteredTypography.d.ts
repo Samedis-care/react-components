@@ -11,5 +11,5 @@ export interface CenteredTypographyProps extends Omit<TypographyProps, "classNam
     classes?: Partial<Record<CenteredTypographyClassKey, string>>;
 }
 export type CenteredTypographyClassKey = "root" | "inner" | "typography";
-declare const _default: React.MemoExoticComponent<(inProps: CenteredTypographyProps) => React.JSX.Element>;
+declare const _default: React.MemoExoticComponent<(inProps: CenteredTypographyProps) => import("react/jsx-runtime").JSX.Element>;
 export default _default;

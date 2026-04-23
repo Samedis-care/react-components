@@ -1,3 +1,4 @@
+import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
 import React, { useCallback, useEffect, useRef, useState, } from "react";
 import useDropZone from "../../../utils/useDropZone";
 import { Dialog, DialogContent, IconButton, styled, Tooltip, useThemeProps, } from "@mui/material";
@@ -219,45 +220,21 @@ const ImageBox = (inProps) => {
     const { containerRef: containerRefImage, handleScroll: handleScrollImage, handleTouchEnd: handleTouchEndImage, } = useScrollSwipe(props);
     const { containerRef: containerRefFS, handleScroll: handleScrollFS, handleTouchEnd: handleTouchEndFS, } = useScrollSwipe(props);
     const { imgRef: zoomImgRef, containerRef: zoomContainerRef, containerProps: zoomContainerProps, } = useImageZoomPan(dialogOpen);
-    return (React.createElement(React.Fragment, null,
-        React.createElement(Root, { onClick: onClick === null ? undefined : (onClick ?? openDialog), onDragOver: handleDragOver, onDrop: handleDrop, style: { width, height }, ownerState: {
-                clickable: !!onClick,
-                dragging,
-                background: !disableBackground,
-            }, className: combineClassNames([className, classes?.root]) },
-            onRemove && (React.createElement(RemoveButton, { onClick: handleRemove, className: classes?.removeBtn, size: "large", "aria-label": t("standalone.file-upload.multi-image.remove") },
-                React.createElement(DeleteIcon, null))),
-            onPrevImage && (React.createElement(PrevButton, { onClick: handlePrevImage, className: classes?.prevBtn, size: "large", "aria-label": t("standalone.file-upload.multi-image.prev-image") },
-                React.createElement(PrevIcon, null))),
-            onNextImage && (React.createElement(NextButton, { onClick: handleNextImage, className: classes?.nextBtn, size: "large", "aria-label": t("standalone.file-upload.multi-image.next-image") },
-                React.createElement(NextIcon, null))),
-            React.createElement(SwipeListener, { className: classes?.swipeListener, onScroll: handleScrollImage, ref: containerRefImage, onTouchEnd: handleTouchEndImage },
-                React.createElement(Tooltip, { title: fileName ?? "", disableTouchListener: !fileName, disableHoverListener: !fileName, disableFocusListener: !fileName },
-                    React.createElement(StyledImage, { src: image, alt: "", ownerState: {
-                            swipeLeft: !!onPrevImage,
-                            swipeRight: !!onNextImage,
-                            imageDots: false,
-                        }, className: classes?.image })))),
-        !onClick && (React.createElement(StyledDialog, { open: dialogOpen, fullScreen: true, onClose: closeDialog },
-            React.createElement(DialogContent, null,
-                React.createElement(FullScreenImageWrapper, { className: classes?.fullScreenImageWrapper },
-                    React.createElement(SwipeListener, { className: classes?.swipeListener, onScroll: handleScrollFS, ref: containerRefFS, onTouchEnd: handleTouchEndFS },
-                        React.createElement(FullScreenZoomContainer, { ref: zoomContainerRef, ...zoomContainerProps, className: classes?.fullScreenZoomContainer },
-                            React.createElement(StyledImage, { ref: zoomImgRef, src: image, alt: "", draggable: false, ownerState: {
+    return (_jsxs(_Fragment, { children: [_jsxs(Root, { onClick: onClick === null ? undefined : (onClick ?? openDialog), onDragOver: handleDragOver, onDrop: handleDrop, style: { width, height }, ownerState: {
+                    clickable: !!onClick,
+                    dragging,
+                    background: !disableBackground,
+                }, className: combineClassNames([className, classes?.root]), children: [onRemove && (_jsx(RemoveButton, { onClick: handleRemove, className: classes?.removeBtn, size: "large", "aria-label": t("standalone.file-upload.multi-image.remove"), children: _jsx(DeleteIcon, {}) })), onPrevImage && (_jsx(PrevButton, { onClick: handlePrevImage, className: classes?.prevBtn, size: "large", "aria-label": t("standalone.file-upload.multi-image.prev-image"), children: _jsx(PrevIcon, {}) })), onNextImage && (_jsx(NextButton, { onClick: handleNextImage, className: classes?.nextBtn, size: "large", "aria-label": t("standalone.file-upload.multi-image.next-image"), children: _jsx(NextIcon, {}) })), _jsx(SwipeListener, { className: classes?.swipeListener, onScroll: handleScrollImage, ref: containerRefImage, onTouchEnd: handleTouchEndImage, children: _jsx(Tooltip, { title: fileName ?? "", disableTouchListener: !fileName, disableHoverListener: !fileName, disableFocusListener: !fileName, children: _jsx(StyledImage, { src: image, alt: "", ownerState: {
                                     swipeLeft: !!onPrevImage,
                                     swipeRight: !!onNextImage,
-                                    imageDots: !imageDots,
-                                }, className: classes?.image }))),
-                    React.createElement(RemoveButton, { onClick: closeDialog, className: classes?.removeBtn, size: "large", "aria-label": t("standalone.file-upload.close") },
-                        React.createElement(CloseIcon, null)),
-                    onPrevImage && (React.createElement(PrevButton, { onClick: handlePrevImage, className: classes?.prevBtn, size: "large", "aria-label": t("standalone.file-upload.multi-image.prev-image") },
-                        React.createElement(PrevIcon, null))),
-                    onNextImage && (React.createElement(NextButton, { onClick: handleNextImage, className: classes?.nextBtn, size: "large", "aria-label": t("standalone.file-upload.multi-image.next-image") },
-                        React.createElement(NextIcon, null))),
-                    imageDots && (React.createElement(ImageDotsWrapper, { className: classes?.imageDotsWrapper },
-                        React.createElement(StyledImageDots, { ...imageDots, className: combineClassNames([
-                                classes?.imageDots,
-                                imageDots.className,
-                            ]) })))))))));
+                                    imageDots: false,
+                                }, className: classes?.image }) }) })] }), !onClick && (_jsx(StyledDialog, { open: dialogOpen, fullScreen: true, onClose: closeDialog, children: _jsx(DialogContent, { children: _jsxs(FullScreenImageWrapper, { className: classes?.fullScreenImageWrapper, children: [_jsx(SwipeListener, { className: classes?.swipeListener, onScroll: handleScrollFS, ref: containerRefFS, onTouchEnd: handleTouchEndFS, children: _jsx(FullScreenZoomContainer, { ref: zoomContainerRef, ...zoomContainerProps, className: classes?.fullScreenZoomContainer, children: _jsx(StyledImage, { ref: zoomImgRef, src: image, alt: "", draggable: false, ownerState: {
+                                            swipeLeft: !!onPrevImage,
+                                            swipeRight: !!onNextImage,
+                                            imageDots: !imageDots,
+                                        }, className: classes?.image }) }) }), _jsx(RemoveButton, { onClick: closeDialog, className: classes?.removeBtn, size: "large", "aria-label": t("standalone.file-upload.close"), children: _jsx(CloseIcon, {}) }), onPrevImage && (_jsx(PrevButton, { onClick: handlePrevImage, className: classes?.prevBtn, size: "large", "aria-label": t("standalone.file-upload.multi-image.prev-image"), children: _jsx(PrevIcon, {}) })), onNextImage && (_jsx(NextButton, { onClick: handleNextImage, className: classes?.nextBtn, size: "large", "aria-label": t("standalone.file-upload.multi-image.next-image"), children: _jsx(NextIcon, {}) })), imageDots && (_jsx(ImageDotsWrapper, { className: classes?.imageDotsWrapper, children: _jsx(StyledImageDots, { ...imageDots, className: combineClassNames([
+                                        classes?.imageDots,
+                                        imageDots.className,
+                                    ]) }) }))] }) }) }))] }));
 };
 export default React.memo(ImageBox);

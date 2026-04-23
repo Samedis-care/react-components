@@ -28,5 +28,5 @@ export interface WeekViewDayProps {
     classes?: Partial<Record<WeekViewDayClassKey, string>>;
 }
 export type WeekViewDayClassKey = "paper" | "dayContents";
-declare const _default: React.MemoExoticComponent<(inProps: WeekViewDayProps) => React.JSX.Element>;
+declare const _default: React.MemoExoticComponent<(inProps: WeekViewDayProps) => import("react/jsx-runtime").JSX.Element>;
 export default _default;

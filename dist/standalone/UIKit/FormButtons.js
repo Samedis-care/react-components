@@ -1,3 +1,4 @@
+import { Fragment as _Fragment, jsx as _jsx } from "react/jsx-runtime";
 import React from "react";
 import { styled, Grid, useThemeProps } from "@mui/material";
 import combineClassNames from "../../utils/combineClassNames";
@@ -21,9 +22,9 @@ const FormButtons = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcFormButtons" });
     const children = (Array.isArray(props.children) ? props.children : [props.children]).filter((child) => child !== undefined && child !== null && child !== false);
     if (children.length === 0)
-        return React.createElement(React.Fragment, null);
-    return (React.createElement(Container, { container: true, direction: "row", spacing: 2, wrap: "nowrap", className: combineClassNames([props.classes?.root, props.className]) }, children.flat().map((child, index) => {
-        return (React.createElement(ButtonWrapper, { key: index, className: props.classes?.buttonWrapper }, child));
-    })));
+        return _jsx(_Fragment, {});
+    return (_jsx(Container, { container: true, direction: "row", spacing: 2, wrap: "nowrap", className: combineClassNames([props.classes?.root, props.className]), children: children.flat().map((child, index) => {
+            return (_jsx(ButtonWrapper, { className: props.classes?.buttonWrapper, children: child }, index));
+        }) }));
 };
 export default React.memo(FormButtons);

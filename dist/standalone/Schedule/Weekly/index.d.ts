@@ -25,5 +25,5 @@ export interface WeekViewProps {
     classes?: Partial<Record<WeekViewClassKey, string>>;
 }
 export type WeekViewClassKey = "root" | "todayBtn" | "loadWrapper" | "filterWrapper" | "week" | "picker";
-declare const _default: React.MemoExoticComponent<(inProps: WeekViewProps) => React.JSX.Element>;
+declare const _default: React.MemoExoticComponent<(inProps: WeekViewProps) => import("react/jsx-runtime").JSX.Element>;
 export default _default;

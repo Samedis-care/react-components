@@ -1,3 +1,4 @@
+import { jsx as _jsx } from "react/jsx-runtime";
 import React from "react";
 import { useDataGridProps, useDataGridState, } from "../DataGrid";
 import SelectRowView from "./SelectRowView";
@@ -16,6 +17,6 @@ const SelectRow = (props) => {
     const [state] = useDataGridState();
     const { isSelected: isSelectedHook, canSelectRow, customSelectionControl, } = useDataGridProps();
     const SelectRowControl = customSelectionControl || SelectRowView;
-    return (React.createElement(SelectRowControl, { checked: isSelected(state.selectAll, state.selectedRows, record, isSelectedHook), disabled: canSelectRow ? !canSelectRow(record) : false, id: record.id }));
+    return (_jsx(SelectRowControl, { checked: isSelected(state.selectAll, state.selectedRows, record, isSelectedHook), disabled: canSelectRow ? !canSelectRow(record) : false, id: record.id }));
 };
 export default React.memo(SelectRow);

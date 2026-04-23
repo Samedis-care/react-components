@@ -1,3 +1,4 @@
+import { jsx as _jsx, Fragment as _Fragment, jsxs as _jsxs } from "react/jsx-runtime";
 import React, { useCallback, useEffect, useState } from "react";
 import { Notifications as NotificationsIcon } from "@mui/icons-material";
 import { Badge, Box, Divider, Grid, IconButton, Popover, styled, Tooltip, Typography, useThemeProps, } from "@mui/material";
@@ -25,23 +26,7 @@ const readStyle = {
 };
 const DefaultRenderer = (notification) => {
     const locale = useCurrentLocale();
-    return (React.createElement(Box, { sx: { p: 2 }, style: notification.read ? readStyle : unreadStyle, key: notification.id },
-        React.createElement(Grid, { container: true, spacing: 2 },
-            React.createElement(Grid, { size: "grow" }, notification.image && (React.createElement("img", { style: defaultImageStyle, src: notification.image, alt: "" }))),
-            React.createElement(Grid, { size: 9 },
-                React.createElement(Box, { sx: { py: 2 } },
-                    React.createElement(Grid, { container: true, spacing: 2 },
-                        React.createElement(Grid, { size: 12 },
-                            React.createElement(Typography, null, notification.message)),
-                        React.createElement(Grid, { size: 12 },
-                            React.createElement(Typography, { variant: "body2" },
-                                React.createElement(React.Fragment, null, notification.origin && React.createElement(React.Fragment, null,
-                                    notification.origin,
-                                    " ")),
-                                React.createElement(Tooltip, { title: notification.created.toLocaleString(locale) },
-                                    React.createElement("span", null, timestampToAge(notification.created)))))))),
-            React.createElement(Grid, { size: 12 },
-                React.createElement(Divider, null)))));
+    return (_jsx(Box, { sx: { p: 2 }, style: notification.read ? readStyle : unreadStyle, children: _jsxs(Grid, { container: true, spacing: 2, children: [_jsx(Grid, { size: "grow", children: notification.image && (_jsx("img", { style: defaultImageStyle, src: notification.image, alt: "" })) }), _jsx(Grid, { size: 9, children: _jsx(Box, { sx: { py: 2 }, children: _jsxs(Grid, { container: true, spacing: 2, children: [_jsx(Grid, { size: 12, children: _jsx(Typography, { children: notification.message }) }), _jsx(Grid, { size: 12, children: _jsxs(Typography, { variant: "body2", children: [_jsx(React.Fragment, { children: notification.origin && _jsxs(_Fragment, { children: [notification.origin, " "] }) }), _jsx(Tooltip, { title: notification.created.toLocaleString(locale), children: _jsx("span", { children: timestampToAge(notification.created) }) })] }) })] }) }) }), _jsx(Grid, { size: 12, children: _jsx(Divider, {}) })] }) }, notification.id));
 };
 const StyledInfiniteScroll = styled(InfiniteScroll, {
     name: "CcNotifications",
@@ -85,18 +70,6 @@ const Notifications = (inProps) => {
     }, []);
     const Renderer = props.notificationRenderer || DefaultRenderer;
     const notifications = props.notifications.filter((not) => !not.expires || not.expires > new Date());
-    return (React.createElement("div", { className: className },
-        React.createElement(IconButton, { size: "large", "aria-label": t("standalone.notifications.title"), ...IconButtonProps, onClick: onIconClick },
-            React.createElement(Badge, { badgeContent: unreadCount ?? notifications.filter((not) => !not.read).length, max: 99, color: "error", ...props.BadgeProps },
-                React.createElement(NotificationsIcon, null))),
-        React.createElement(Popover, { open: !!anchor, anchorEl: anchor, anchorOrigin: anchorOrigin, transformOrigin: transformOrigin, onClose: onClose, ...props.PopoverProps },
-            React.createElement(Box, { sx: { p: 2 } },
-                React.createElement(Grid, { container: true, spacing: 2 },
-                    React.createElement(Grid, { size: 12 },
-                        React.createElement(StyledHeader, { component: "h2", variant: "h6", className: classes?.header }, t("standalone.notifications.title"))),
-                    React.createElement(Grid, { size: 12 },
-                        React.createElement(Divider, null)),
-                    React.createElement(Grid, { size: 12 },
-                        React.createElement(StyledInfiniteScroll, { loadMoreBottom: loadRead, loadMoreTop: loadUnread, className: classes?.notificationArea ?? "" }, notifications.map((notification) => (React.createElement(Renderer, { key: notification.id, ...notification }))))))))));
+    return (_jsxs("div", { className: className, children: [_jsx(IconButton, { size: "large", "aria-label": t("standalone.notifications.title"), ...IconButtonProps, onClick: onIconClick, children: _jsx(Badge, { badgeContent: unreadCount ?? notifications.filter((not) => !not.read).length, max: 99, color: "error", ...props.BadgeProps, children: _jsx(NotificationsIcon, {}) }) }), _jsx(Popover, { open: !!anchor, anchorEl: anchor, anchorOrigin: anchorOrigin, transformOrigin: transformOrigin, onClose: onClose, ...props.PopoverProps, children: _jsx(Box, { sx: { p: 2 }, children: _jsxs(Grid, { container: true, spacing: 2, children: [_jsx(Grid, { size: 12, children: _jsx(StyledHeader, { component: "h2", variant: "h6", className: classes?.header, children: t("standalone.notifications.title") }) }), _jsx(Grid, { size: 12, children: _jsx(Divider, {}) }), _jsx(Grid, { size: 12, children: _jsx(StyledInfiniteScroll, { loadMoreBottom: loadRead, loadMoreTop: loadUnread, className: classes?.notificationArea ?? "", children: notifications.map((notification) => (_jsx(Renderer, { ...notification }, notification.id))) }) })] }) }) })] }));
 };
 export default React.memo(Notifications);

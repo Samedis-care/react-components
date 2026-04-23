@@ -1,6 +1,7 @@
+import { jsx as _jsx } from "react/jsx-runtime";
 import React from "react";
 import { InfoDialog } from "./InfoDialog";
-const ConfirmDialogRaw = (props) => (React.createElement(InfoDialog, { title: props.title, message: props.message, onClose: props.onClose, buttons: [
+const ConfirmDialogRaw = (props) => (_jsx(InfoDialog, { title: props.title, message: props.message, onClose: props.onClose, buttons: [
         {
             text: props.textButtonYes,
             onClick: props.handlerButtonYes,

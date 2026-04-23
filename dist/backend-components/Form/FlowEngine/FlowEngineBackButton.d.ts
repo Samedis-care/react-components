@@ -4,5 +4,5 @@ export interface FlowEngineBackButtonProps extends Omit<ActionButtonProps, "onCl
     children?: ActionButtonProps["children"];
 }
 export declare const useShouldRenderFlowEngineBackButton: () => boolean | undefined;
-declare const _default: React.MemoExoticComponent<(props: FlowEngineBackButtonProps) => React.JSX.Element>;
+declare const _default: React.MemoExoticComponent<(props: FlowEngineBackButtonProps) => import("react/jsx-runtime").JSX.Element>;
 export default _default;

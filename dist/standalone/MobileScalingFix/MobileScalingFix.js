@@ -1,3 +1,4 @@
+import { Fragment as _Fragment, jsx as _jsx } from "react/jsx-runtime";
 import React, { useEffect } from "react";
 const MobileScalingFix = (props) => {
     const { minWidth } = props;
@@ -16,6 +17,6 @@ const MobileScalingFix = (props) => {
         }
         meta.content = metaContent;
     }, [minWidth]);
-    return React.createElement(React.Fragment, null);
+    return _jsx(_Fragment, {});
 };
 export default React.memo(MobileScalingFix);

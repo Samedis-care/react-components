@@ -18,5 +18,5 @@ export interface CollapsibleMenuProps {
     classes?: Partial<Record<CollapsibleMenuClassKey, string>>;
 }
 export type CollapsibleMenuClassKey = "root" | "content" | "bar" | "iconOpen" | "iconClose" | "button";
-declare const _default: React.MemoExoticComponent<(inProps: CollapsibleMenuProps) => React.JSX.Element>;
+declare const _default: React.MemoExoticComponent<(inProps: CollapsibleMenuProps) => import("react/jsx-runtime").JSX.Element>;
 export default _default;

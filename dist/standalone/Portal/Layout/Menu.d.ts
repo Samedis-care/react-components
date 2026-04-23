@@ -30,5 +30,5 @@ export interface PortalLayoutMenuProps {
     classes?: Partial<Record<PortalLayoutMenuClassKey, string>>;
 }
 export type PortalLayoutMenuClassKey = "menuPaper" | "menuDrawer";
-declare const _default: React.MemoExoticComponent<(inProps: PortalLayoutMenuProps) => React.JSX.Element>;
+declare const _default: React.MemoExoticComponent<(inProps: PortalLayoutMenuProps) => import("react/jsx-runtime").JSX.Element>;
 export default _default;

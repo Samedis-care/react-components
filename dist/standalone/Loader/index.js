@@ -1,3 +1,4 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React from "react";
 import { CircularProgress, styled, Typography, useThemeProps, } from "@mui/material";
 const OuterWrapper = styled("div", { name: "CcLoader", slot: "outerWrapper" })({
@@ -37,11 +38,6 @@ const Progress = styled(CircularProgress, {
 })({});
 const Loader = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcLoader" });
-    return (React.createElement(OuterWrapper, null,
-        React.createElement(InnerWrapper, null,
-            props.text && (React.createElement(Typography, { variant: props.typographyVariant ?? "h6" }, props.text)),
-            React.createElement(OuterProgressWrapper, null,
-                React.createElement(InnerProgressWrapper, null,
-                    React.createElement(Progress, null))))));
+    return (_jsx(OuterWrapper, { children: _jsxs(InnerWrapper, { children: [props.text && (_jsx(Typography, { variant: props.typographyVariant ?? "h6", children: props.text })), _jsx(OuterProgressWrapper, { children: _jsx(InnerProgressWrapper, { children: _jsx(Progress, {}) }) })] }) }));
 };
 export default React.memo(Loader);

@@ -1,3 +1,4 @@
+import { jsx as _jsx, Fragment as _Fragment, jsxs as _jsxs } from "react/jsx-runtime";
 import React, { useCallback } from "react";
 import { Avatar, ListItem, ListItemAvatar, ListItemButton, ListItemText, styled, useThemeProps, } from "@mui/material";
 import Loader from "../Loader";
@@ -56,10 +57,7 @@ const SignalPortletItem = (inProps) => {
                 ? classes.itemColorActive
                 : classes.itemColorInactive
         : undefined;
-    const content = (React.createElement(React.Fragment, null,
-        React.createElement(ListAvatar, { className: classes?.listAvatar },
-            React.createElement(AvatarComponent, { className: avatarClass }, count == null ? React.createElement(Loader, null) : Math.min(count, 999).toString())),
-        React.createElement(ListText, { slotProps: { primary: textTypographyProps } }, text)));
-    return link ? (React.createElement(ListRootButton, { onClick: handleClick, className: combineClassNames([className, classes?.rootBtn]) }, content)) : (React.createElement(ListRoot, { className: combineClassNames([className, classes?.root]) }, content));
+    const content = (_jsxs(_Fragment, { children: [_jsx(ListAvatar, { className: classes?.listAvatar, children: _jsx(AvatarComponent, { className: avatarClass, children: count == null ? _jsx(Loader, {}) : Math.min(count, 999).toString() }) }), _jsx(ListText, { slotProps: { primary: textTypographyProps }, children: text })] }));
+    return link ? (_jsx(ListRootButton, { onClick: handleClick, className: combineClassNames([className, classes?.rootBtn]), children: content })) : (_jsx(ListRoot, { className: combineClassNames([className, classes?.root]), children: content }));
 };
 export default React.memo(SignalPortletItem);
