@@ -219,6 +219,13 @@ export interface FormProps<KeyT extends ModelFieldName, VisibilityT extends Page
      */
     disableNestedSubmit?: boolean;
     /**
+     * Submit nested form before parent instead of after
+     * @remarks only affects nested forms. Use when the child record must exist before the parent is saved.
+     * The `id` passed to `nestedFormPreSubmitHandler` will be the parent's pre-submit id (null on create).
+     * @default false
+     */
+    nestedSubmitBeforeParent?: boolean;
+    /**
      * Only submit nested form if it is currently mounted
      * @remarks only affects nested forms
      * @default false
@@ -227,12 +234,12 @@ export interface FormProps<KeyT extends ModelFieldName, VisibilityT extends Page
     /**
      * Submit preparation handler
      * Called after parent form submit, before this form submit
-     * @param id The ID of the parent form (after submit)
+     * @param id The ID of the parent form (after submit). Null if nestedSubmitBeforeParent is set and the parent is being created (pre-submit id is null).
      * @param model The model currently in use (can be used to modify connector endpoints)
      * @param getFieldValue getFieldValue of this form
      * @param setFieldValueLite setFieldValueLite of this form
      */
-    nestedFormPreSubmitHandler?: (id: string, model: Model<ModelFieldName, PageVisibility, unknown>, getFieldValue: FormContextData["getFieldValue"], setFieldValueLite: FormContextData["setFieldValueLite"]) => Promise<void> | void;
+    nestedFormPreSubmitHandler?: (id: string | null, model: Model<ModelFieldName, PageVisibility, unknown>, getFieldValue: FormContextData["getFieldValue"], setFieldValueLite: FormContextData["setFieldValueLite"]) => Promise<void> | void;
     /**
      * CSS class for form styles
      */
@@ -350,11 +357,6 @@ export interface FormContextData {
      * @param data the set state action
      */
     setCustomState: <T>(field: string, data: Dispatch<SetStateAction<T | undefined>>) => void;
-    /**
-     * Set dirty custom field count (for fields modified by post submit handlers)
-     * @deprecated Use setCustomFieldDirty instead
-     */
-    setCustomDirtyCounter: Dispatch<SetStateAction<number>>;
     /**
      * Set custom field dirty state
      * @param field The unique field name

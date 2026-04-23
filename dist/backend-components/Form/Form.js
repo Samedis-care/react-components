@@ -12,6 +12,7 @@ import useCCTranslations from "../../utils/useCCTranslations";
 import { useDialogContext } from "../../framework";
 import deepSort from "../../utils/deepSort";
 import useDevKeybinds from "../../utils/useDevKeybinds";
+import useRefState from "../../utils/useRefState";
 import uniqueArray from "../../utils/uniqueArray";
 import ValidationError from "./ValidationError";
 // optional import
@@ -127,7 +128,7 @@ const setAllTouched = (touched, set) => Object.fromEntries(Object.keys(touched).
 const StyledForm = styled("form", { name: "CcForm", slot: "root" })({});
 const StyledFormDiv = styled("div", { name: "CcForm", slot: "root" })({});
 const Form = (props) => {
-    const { model, id, children, onSubmit, onSubmitUserInteractive, customProps, onlyWarnMounted, onlyWarnChanged, readOnly: readOnlyProp, readOnlyReason: readOnlyReasonProp, readOnlyReasons: readOnlyReasonsProp, disableValidation, nestedFormName, disableNestedSubmit, nestedFormPreSubmitHandler, deleteOnSubmit, onDeleted, initialRecord, formClass, preSubmit, dirtyIgnoreFields, flowEngine, renderFormAsDiv: renderFormAsDivProp, errorRenderer: ErrorRenderer, } = props;
+    const { model, id, children, onSubmit, onSubmitUserInteractive, customProps, onlyWarnMounted, onlyWarnChanged, readOnly: readOnlyProp, readOnlyReason: readOnlyReasonProp, readOnlyReasons: readOnlyReasonsProp, disableValidation, nestedFormName, disableNestedSubmit, nestedSubmitBeforeParent, nestedFormPreSubmitHandler, deleteOnSubmit, onDeleted, initialRecord, formClass, preSubmit, dirtyIgnoreFields, flowEngine, renderFormAsDiv: renderFormAsDivProp, errorRenderer: ErrorRenderer, } = props;
     const renderFormAsDiv = useContext(FormRenderAsDivContext) || renderFormAsDivProp;
     // flow engine mode defaults
     const flowEngineConfig = useRef({});
@@ -146,10 +147,7 @@ const Form = (props) => {
     const { t } = useCCTranslations();
     const [pushDialog] = useDialogContext();
     // custom fields - dirty state
-    // v1
-    const [customDirtyCounter, setCustomDirtyCounter] = useState(0);
-    // v2
-    const [customDirtyFields, setCustomDirtyFields] = useState([]);
+    const { get: getCustomDirtyFields, set: setCustomDirtyFields } = useRefState([]);
     const setCustomFieldDirty = useCallback((field, dirty) => {
         setCustomDirtyFields((prev) => {
             const prevDirty = prev.includes(field);
@@ -160,8 +158,7 @@ const Form = (props) => {
             else
                 return prev.filter((candidate) => candidate !== field);
         });
-    }, []);
-    const customDirty = customDirtyCounter > 0 || customDirtyFields.length > 0;
+    }, [setCustomDirtyFields]);
     // custom fields - pre submit handlers
     const preSubmitHandlers = useRef({});
     const setPreSubmitHandler = useCallback((field, handler) => {
@@ -353,7 +350,9 @@ const Form = (props) => {
         })()
         : false, [serverData, defaultRecord, getNormalizedData]);
     const formDirty = useMemo(() => getFormDirty(values), [getFormDirty, values]);
-    const getDirty = useCallback((formDirty) => formDirty || customDirty || !!(id && !deleted && deleteOnSubmit), [customDirty, deleteOnSubmit, deleted, id]);
+    const getDirty = useCallback((formDirty) => formDirty ||
+        getCustomDirtyFields().length > 0 ||
+        !!(id && !deleted && deleteOnSubmit), [getCustomDirtyFields, deleteOnSubmit, deleted, id]);
     const dirty = getDirty(formDirty);
     // main form handling - dispatch
     const alwaysWarnFields = useMemo(() => (props.alwaysWarnFields ?? []).concat(flowEngineConfig.current.alwaysWarnFields ?? []), 
@@ -775,12 +774,14 @@ const Form = (props) => {
                 parentFormContext.setCustomFieldDirty(nestedFormName, false);
             }
         };
+        // parentFormContext omitted from deps: its identity changes often (formContextData useMemo), but setCustomFieldDirty is stable
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [
         dirty,
         disableNestedSubmit,
         onlySubmitNestedIfMounted,
         nestedFormName,
-        parentFormContext,
+        parentFormContext?.onlySubmitMounted,
     ]);
     // nested forms - submitting blocker
     useEffect(() => {
@@ -815,7 +816,12 @@ const Form = (props) => {
         if (!disableNestedSubmit) {
             parentFormContext.setCustomValidationHandler(nestedFormName, validateNestedForm);
             parentFormContext.setCustomWarningHandler(nestedFormName, validateNestedFormWarn);
-            parentFormContext.setPostSubmitHandler(nestedFormName, submitNestedForm);
+            if (nestedSubmitBeforeParent) {
+                parentFormContext.setPreSubmitHandler(nestedFormName, submitNestedForm);
+            }
+            else {
+                parentFormContext.setPostSubmitHandler(nestedFormName, submitNestedForm);
+            }
         }
         return () => {
             if (parentFormContext.onlyValidateMounted ||
@@ -827,8 +833,14 @@ const Form = (props) => {
             }
             if (parentFormContext.onlySubmitMounted ||
                 onlySubmitNestedIfMounted ||
-                disableNestedSubmit)
-                parentFormContext.removePostSubmitHandler(nestedFormName);
+                disableNestedSubmit) {
+                if (nestedSubmitBeforeParent) {
+                    parentFormContext.removePreSubmitHandler(nestedFormName);
+                }
+                else {
+                    parentFormContext.removePostSubmitHandler(nestedFormName);
+                }
+            }
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [
@@ -843,6 +855,7 @@ const Form = (props) => {
         submitForm,
         nestedFormName,
         disableNestedSubmit,
+        nestedSubmitBeforeParent,
         onlySubmitNestedIfMounted,
     ]);
     // Debug Helper (for React Devtools)
@@ -861,9 +874,8 @@ const Form = (props) => {
         console.log("Form Dirty Flag State:");
         console.log("Form Dirty State (exact):", JSON.stringify(localData) !== JSON.stringify(remoteData));
         console.log("Form Dirty State:", JSON.stringify(localData) !== JSON.stringify(remoteData));
-        console.log("Custom Dirty State:", customDirty);
-        console.log("Custom Dirty Fields:", customDirtyFields);
-        console.log("Custom Dirty Counter:", customDirtyCounter);
+        console.log("Custom Dirty State:", getCustomDirtyFields().length > 0);
+        console.log("Custom Dirty Fields:", getCustomDirtyFields());
         console.log("Server Data:", remoteData);
         console.log("Form Data:", localData);
         console.log("Staged Data:", valuesStagedRef.current);
@@ -880,9 +892,7 @@ const Form = (props) => {
         serverData,
         defaultRecord,
         getNormalizedData,
-        customDirty,
-        customDirtyFields,
-        customDirtyCounter,
+        getCustomDirtyFields,
         model.fields,
     ]);
     useDevKeybinds(useMemo(() => ({ "ccform dirty?": () => debugDirty(true) }), [debugDirty]));
@@ -898,7 +908,6 @@ const Form = (props) => {
         relations: serverData && serverData[1] ? serverData[1] : {},
         setError,
         markFieldMounted,
-        setCustomDirtyCounter,
         setCustomFieldDirty,
         dirty,
         getCustomState,
