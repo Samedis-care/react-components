@@ -35,8 +35,6 @@ jobs:
         run: npm ci
       - name: Lint
         run: npm run lint
-      - name: Unit Tests
-        run: npm run test:unit
       - name: Build library
         run: npm run build
       - name: Publish dist
@@ -56,6 +54,27 @@ jobs:
           git add package.json package-lock.json dist LICENSE
           git status
           git commit -m "$commit_message" && git push -f origin master_dist || echo "No changes"
+
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+      - name: NPM Cache
+        uses: actions/cache@v5
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+      - name: Install Dependencies
+        run: npm ci
+      - name: Unit Tests
+        run: npm run test:unit
 
   deploy-pages:
     needs: build-and-test
