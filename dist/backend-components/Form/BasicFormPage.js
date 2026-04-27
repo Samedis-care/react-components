@@ -17,7 +17,11 @@ const BasicFormPage = (inProps) => {
     const { submit, dirty, disableRouting, postSubmitHandler, isSubmitting, children: FormButtons, form, childrenProps, customProps: originalCustomProps, formPageLayoutComponent, ...otherProps } = props;
     const { t } = useCCTranslations();
     const { readOnly, readOnlyReasons } = useFormContextLite();
-    const [childActive, setChildActive] = useState(false);
+    const [childActiveCount, setChildActiveCount] = useState(0);
+    const childActive = childActiveCount > 0;
+    const setChildActive = useCallback((active) => {
+        setChildActiveCount((c) => c + (active ? 1 : -1));
+    }, []);
     const hideParent = useContext(BasicFormPageNestingContext);
     useEffect(() => {
         if (!hideParent)
