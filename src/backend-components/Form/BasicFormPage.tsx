@@ -128,7 +128,11 @@ const BasicFormPage = <RendererPropsT, CustomPropsT>(
 	} = props;
 	const { t } = useCCTranslations();
 	const { readOnly, readOnlyReasons } = useFormContextLite();
-	const [childActive, setChildActive] = useState(false);
+	const [childActiveCount, setChildActiveCount] = useState(0);
+	const childActive = childActiveCount > 0;
+	const setChildActive = useCallback((active: boolean) => {
+		setChildActiveCount((c) => c + (active ? 1 : -1));
+	}, []);
 	const hideParent = useContext(BasicFormPageNestingContext);
 	useEffect(() => {
 		if (!hideParent) return;
