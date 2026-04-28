@@ -16,6 +16,7 @@ import useDevKeybinds from "../../utils/useDevKeybinds";
 import useRefState from "../../utils/useRefState";
 import uniqueArray from "../../utils/uniqueArray";
 import ValidationError from "./ValidationError";
+import deepEqual from "../../utils/deepEqual";
 // optional import
 let captureException = null;
 import("@sentry/react")
@@ -622,8 +623,7 @@ const Form = (props) => {
                 valuesStagedModifiedRef.current = Object.fromEntries(Object.entries(valuesStagedModifiedRef.current).map(([key, modified]) => [
                     key,
                     modified ||
-                        getValueByDot(key, originalStaged) !==
-                            getValueByDot(key, valuesStagedRef.current),
+                        !deepEqual(getValueByDot(key, originalStaged), getValueByDot(key, valuesStagedRef.current)),
                 ]));
                 setValuesStagedModified(valuesStagedModifiedRef.current);
                 touchedRef.current = setAllTouched(touchedRef.current, false);
