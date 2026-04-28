@@ -23,7 +23,10 @@ const deepEqual = (
 	if (Array.isArray(a)) {
 		// ensure data types
 		if (!(Array.isArray(a) && Array.isArray(b))) return false;
-		return shallowCompareArray(a, b);
+		if (a.length !== b.length) return false;
+		return a.every((entry, idx) =>
+			deepEqual(entry, b[idx], unsupportedHandling),
+		);
 	}
 	// special handing for nested objects
 	if (isPlainObject(a) || isPlainObject(b)) {
@@ -33,12 +36,20 @@ const deepEqual = (
 		if (!shallowCompareArray(Object.keys(a).sort(), Object.keys(b).sort()))
 			return false;
 		// check all sub-values to be equal
-		return Object.keys(a).find((key) => !deepEqual(a[key], b[key])) == null;
+		return Object.keys(a).every((key) =>
+			deepEqual(a[key], b[key], unsupportedHandling),
+		);
 	}
+	// special handling number (Object.is treats NaN as equal to itself)
+	if (typeof a === "number") return Object.is(a, b);
 	// fallback comparison
-	if (typeof a !== "string" && typeof a !== "number") {
+	if (
+		typeof a !== "string" &&
+		typeof a !== "bigint" &&
+		typeof a !== "boolean"
+	) {
 		if (unsupportedHandling === "error")
-			throw new Error("Unsupported data type");
+			throw new Error("Unsupported data type: " + typeof a);
 		if (unsupportedHandling === "ignore") return true;
 	}
 	return a === b;
