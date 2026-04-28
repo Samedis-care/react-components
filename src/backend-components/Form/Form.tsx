@@ -40,6 +40,7 @@ import useRefState from "../../utils/useRefState";
 import uniqueArray from "../../utils/uniqueArray";
 import { QueryObserverBaseResult } from "@tanstack/react-query";
 import ValidationError from "./ValidationError";
+import deepEqual from "../../utils/deepEqual";
 
 // optional import
 let captureException: ((e: Error) => void) | null = null;
@@ -1594,8 +1595,10 @@ const Form = <
 							([key, modified]) => [
 								key,
 								modified ||
-									getValueByDot(key, originalStaged) !==
+									!deepEqual(
+										getValueByDot(key, originalStaged),
 										getValueByDot(key, valuesStagedRef.current),
+									),
 							],
 						),
 					);
