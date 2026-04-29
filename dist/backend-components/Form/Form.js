@@ -618,7 +618,12 @@ const Form = (props) => {
                 const updateData = getUpdateData(valuesRef.current, model, flowEngineConfig.current.onlySubmitMounted ?? true, flowEngineConfig.current.onlySubmitMountedBehaviour ??
                     OnlySubmitMountedBehaviour.OMIT, alwaysSubmitFields, mountedFields, defaultRecord[0], id);
                 const originalStaged = deepClone(valuesStagedRef.current);
-                valuesStagedRef.current = deepAssign(valuesStagedRef.current, updateData);
+                for (const field in model.fields) {
+                    if (!dotInObject(field, updateData))
+                        continue;
+                    const value = getValueByDot(field, updateData);
+                    valuesStagedRef.current = dotSet(field, valuesStagedRef.current, value);
+                }
                 setValuesStaged(valuesStagedRef.current);
                 valuesStagedModifiedRef.current = Object.fromEntries(Object.entries(valuesStagedModifiedRef.current).map(([key, modified]) => [
                     key,
