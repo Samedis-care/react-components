@@ -118,29 +118,23 @@ const LocaleSelectorDialogContent = (
 						appSupportedLocales.includes(locale) ||
 						appSupportedLocales.includes(locale.split("-")[0]),
 				)
-				.map(
-					(locale) =>
-						({
-							locale: locale,
-							language_short: locale.split("-")[0],
-							country_short: locale.split("-")[1],
-							country: tLocale(locale + ".country"),
-							language: tLocale(locale + ".language"),
-							native_country: tLocale(locale + ".native_country"),
-							native_language: tLocale(locale + ".native_language"),
-						}) as LocaleSelectorEntryData,
-				)
-				.map(
-					(entry) =>
-						({
-							...entry,
-							locale_lower: entry.locale.toLowerCase(),
-							country_lower: entry.country.toLowerCase(),
-							language_lower: entry.language.toLowerCase(),
-							native_country_lower: entry.native_country.toLowerCase(),
-							native_language_lower: entry.native_language.toLowerCase(),
-						}) as LocaleSelectorEntryFilterData,
-				)
+				.map((locale) => ({
+					locale: locale,
+					language_short: locale.split("-")[0],
+					country_short: locale.split("-")[1],
+					country: tLocale(locale + ".country"),
+					language: tLocale(locale + ".language"),
+					native_country: tLocale(locale + ".native_country"),
+					native_language: tLocale(locale + ".native_language"),
+				}))
+				.map((entry) => ({
+					...entry,
+					locale_lower: entry.locale.toLowerCase(),
+					country_lower: entry.country.toLowerCase(),
+					language_lower: entry.language.toLowerCase(),
+					native_country_lower: entry.native_country.toLowerCase(),
+					native_language_lower: entry.native_language.toLowerCase(),
+				}))
 				.sort((a, b) => sortByLocaleRelevance(a.locale, b.locale)),
 		[countryLanguageMapping, appSupportedLocales, supportedLangs, tLocale],
 	);

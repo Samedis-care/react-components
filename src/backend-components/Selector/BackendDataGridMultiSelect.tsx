@@ -1,9 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import {
-	ConnectorIndex2Params,
-	ModelFieldName,
-	PageVisibility,
-} from "../../backend-integration";
+import { ModelFieldName, PageVisibility } from "../../backend-integration";
 import DataGrid, {
 	DataGridData,
 	DataGridProps,
@@ -132,7 +128,7 @@ const BackendDataGridMultiSelect = <
 						},
 						offset: Math.max(requestedOffset, 0),
 						rows: Math.max(requestedOffset + params.rows, 0),
-					} as ConnectorIndex2Params);
+					});
 					return {
 						rowsTotal:
 							(dataMeta.filteredRows != null

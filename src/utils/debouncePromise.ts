@@ -15,7 +15,7 @@ export default function debouncePromise<ArgT extends Array<unknown>, RetT>(
 	// noinspection JSMismatchedCollectionQueryUpdate
 	let rejects: RejectT[] = [];
 
-	return ((...args) => {
+	return (...args) => {
 		return new Promise((resolve, reject) => {
 			if (debounceState !== 0) {
 				window.clearTimeout(debounceState);
@@ -38,5 +38,5 @@ export default function debouncePromise<ArgT extends Array<unknown>, RetT>(
 					});
 			}, timeout);
 		});
-	}) as DebouncePromiseFunc<ArgT, RetT>;
+	};
 }

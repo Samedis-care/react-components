@@ -75,12 +75,8 @@ const TextFieldWithHelp: React.ForwardRefExoticComponent<
 	);
 
 	// render
-	const inputSlotProps = muiProps.slotProps?.input as
-		| Record<string, unknown>
-		| undefined;
-	const existingEndAdornment = inputSlotProps?.endAdornment as
-		| React.ReactNode
-		| undefined;
+	const inputSlotProps = muiProps.slotProps?.input;
+	const existingEndAdornment = inputSlotProps?.endAdornment;
 	const showClear =
 		isTouchDevice() && hasValue && !muiProps.disabled && !disableClearable;
 	const hasEndAdornment = !!(showClear || openInfo || existingEndAdornment);

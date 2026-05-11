@@ -177,7 +177,7 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 		if (filterType === "empty" || filterType === "notEmpty") {
 			filterValue = "";
 		}
-		filterType = event.target.value as FilterType;
+		filterType = event.target.value;
 		// set magic value to mark filter as active
 		if (filterType === "empty" || filterType === "notEmpty") {
 			filterValue = filterType;

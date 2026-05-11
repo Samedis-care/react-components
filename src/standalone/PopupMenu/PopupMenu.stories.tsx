@@ -68,8 +68,7 @@ const OpenByDefaultDemo = () => {
 
 	// Open on mount by setting the ref after first render
 	const handleRef = (el: HTMLButtonElement | null) => {
-		(buttonRef as React.MutableRefObject<HTMLButtonElement | null>).current =
-			el;
+		buttonRef.current = el;
 		if (el && !anchorEl) {
 			setAnchorEl(el);
 		}

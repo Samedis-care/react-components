@@ -1,6 +1,6 @@
 import React from "react";
 import { FormControl } from "@mui/material";
-import Model, { ModelFieldName, PageVisibility } from "../../Model";
+import { ModelFieldName, PageVisibility } from "../../Model";
 import ModelRenderParams from "../../RenderParams";
 import BackendDataGridMultiSelect, {
 	BackendDataGridMultiSelectProps,
@@ -77,9 +77,7 @@ class RendererBackendDataGridMultiSelect<
 				>
 					<BackendDataGridMultiSelect
 						selected={value}
-						model={
-							relationModel as unknown as Model<KeyT, VisibilityT, CustomT>
-						}
+						model={relationModel}
 						onChange={(value) => handleChange(field, value)}
 						readOnly={visibility.readOnly}
 						{...this.props}

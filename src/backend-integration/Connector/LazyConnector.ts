@@ -1,6 +1,5 @@
 import Model, {
 	AdvancedDeleteRequest,
-	ModelData,
 	ModelFieldName,
 	ModelGetResponse,
 	PageVisibility,
@@ -173,7 +172,7 @@ class LazyConnector<
 		);
 		if (localData) {
 			if (localData.result) {
-				return localData.result as ModelGetResponse<KeyT>;
+				return localData.result;
 			} else {
 				throw new Error("data has been deleted");
 			}
@@ -213,13 +212,13 @@ class LazyConnector<
 				type: "update",
 				id: data.id as string,
 				func: updateFunc,
-				result: [data as ModelData<KeyT>, {}],
+				result: [data, {}],
 			});
 		}
 
 		this.onAfterOperation();
 
-		return [data as ModelData<KeyT>, {}];
+		return [data, {}];
 	}
 
 	deleteMultiple(

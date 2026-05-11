@@ -22,7 +22,7 @@ export function useDebouncePromise<ArgT extends Array<unknown>, RetT>(
 	}, [cancelDebounce, func, timeout]);
 
 	return [
-		((...args) => {
+		(...args) => {
 			return new Promise((resolve, reject) => {
 				cancelDebounce();
 				resolves.current.push(resolve);
@@ -43,7 +43,7 @@ export function useDebouncePromise<ArgT extends Array<unknown>, RetT>(
 						});
 				}, timeout);
 			});
-		}) as DebouncePromiseFunc<ArgT, RetT>,
+		},
 		cancelDebounce,
 	];
 }

@@ -1,14 +1,11 @@
 import {
 	Model,
-	ModelFieldName,
 	ModelDataTypeStringRendererMUI,
 	ModelVisibilityDisabled,
 	ModelVisibilityEditRequired,
 	ModelVisibilityGridView,
 	ModelVisibilityHidden,
-	PageVisibility,
 } from "../../backend-integration";
-import Connector from "../../backend-integration/Connector/Connector";
 import MockConnector from "./MockConnector";
 
 const sampleData: Record<string, unknown>[] = [
@@ -70,7 +67,7 @@ const sampleData: Record<string, unknown>[] = [
 	},
 ];
 
-const createTestModel = (): Model<ModelFieldName, PageVisibility, null> =>
+const createTestModel = () =>
 	new Model(
 		"test-model-" + Date.now().toString(16),
 		{
@@ -133,11 +130,7 @@ const createTestModel = (): Model<ModelFieldName, PageVisibility, null> =>
 				customData: null,
 			},
 		},
-		new MockConnector(sampleData) as Connector<
-			ModelFieldName,
-			PageVisibility,
-			null
-		>,
+		new MockConnector(sampleData),
 	);
 
 export { sampleData };

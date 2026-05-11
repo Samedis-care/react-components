@@ -1031,11 +1031,14 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 									selectedArr.find((entry) => getStringLabel(entry) === query)
 								)
 							)
-								options.push({
-									label: query,
-									value: query,
-									freeSolo: true,
-								} as unknown as DataT);
+								options.push(
+									// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+									{
+										label: query,
+										value: query,
+										freeSolo: true,
+									} as unknown as DataT,
+								);
 
 							if (multiple) options = options.concat(selectedArr); // multiple select: show selected on top
 							options = options.concat(selectorOptions);

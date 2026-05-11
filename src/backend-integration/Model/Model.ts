@@ -15,7 +15,6 @@ import {
 import {
 	DataGridCustomFilterData,
 	DataGridIdFilterData,
-	DataGridSetFilterDataEntry,
 	IDataGridColumnDef,
 	IDataGridLoadDataParameters,
 } from "../../standalone/DataGrid/DataGrid";
@@ -998,23 +997,17 @@ class Model<
 				filterData = value.type
 					.getEnumValues()
 					.filter((value) => !(value.invisibleInGridFilter ?? value.invisible))
-					.map(
-						(value) =>
-							({
-								getLabelText: value.getLabel,
-								value: value.value,
-								disabled: value.disabled,
-								isDivider: value.isDivider,
-							}) as DataGridSetFilterDataEntry,
-					);
+					.map((value) => ({
+						getLabelText: value.getLabel,
+						value: value.value,
+						disabled: value.disabled,
+						isDivider: value.isDivider,
+					}));
 			} else if (value.type.getFilterType() === "boolean") {
-				filterData = [true, false].map(
-					(boolVal) =>
-						({
-							getLabelText: value.type.stringify.bind(value.type, boolVal),
-							value: boolVal ? "true" : "false",
-						}) as DataGridSetFilterDataEntry,
-				);
+				filterData = [true, false].map((boolVal) => ({
+					getLabelText: value.type.stringify.bind(value.type, boolVal),
+					value: boolVal ? "true" : "false",
+				}));
 			} else if (value.type.getFilterType() === "id" && value.filterable) {
 				if (value.getRelationModelValues)
 					throw new Error(
@@ -1031,7 +1024,7 @@ class Model<
 				filterData = {
 					model: value.getRelationModel(null, {}),
 					...value.type.idFilter,
-				} as DataGridIdFilterData;
+				};
 			} else if (value.type.getFilterType() === "custom" && value.filterable) {
 				if (!value.type.customFilter)
 					throw new Error(
@@ -1039,7 +1032,7 @@ class Model<
 					);
 				filterData = {
 					...value.type.customFilter,
-				} as DataGridCustomFilterData;
+				};
 			}
 
 			return {

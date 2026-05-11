@@ -52,9 +52,7 @@ abstract class TypeLocalizedString implements Type<
 		value: unknown,
 	): Partial<Record<MultiLanguageInputSupportedLanguages, string>> => {
 		if (value == null) return {};
-		return value as Partial<
-			Record<MultiLanguageInputSupportedLanguages, string>
-		>;
+		return value;
 	};
 }
 

@@ -1,10 +1,6 @@
 import React from "react";
 import { FormHelperText } from "@mui/material";
-import Model, {
-	ModelFieldName,
-	ModelIdFilterData,
-	PageVisibility,
-} from "../../Model";
+import { ModelFieldName, ModelIdFilterData, PageVisibility } from "../../Model";
 import ModelRenderParams from "../../RenderParams";
 import BackendMultiSelectWithTags, {
 	BackendMultiSelectWithTagsProps,
@@ -129,13 +125,7 @@ class RendererBackendMultiSelectWithTags<
 						onChange={(value) => handleChange(field, value)}
 						disabled={visibility.readOnly}
 						required={visibility.required}
-						dataModel={
-							relationModel as unknown as Model<
-								DataKeyT,
-								DataVisibilityT,
-								DataCustomT
-							>
-						}
+						dataModel={relationModel}
 						initialData={relationData}
 						title={label}
 						{...this.props}

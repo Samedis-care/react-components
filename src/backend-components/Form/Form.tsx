@@ -1462,7 +1462,7 @@ const Form = <
 			params?: FormSubmitOptions | React.SyntheticEvent,
 		): Promise<void> => {
 			if (params && "nativeEvent" in params) params = undefined;
-			if (!params) params = {} as FormSubmitOptions;
+			if (!params) params = {};
 
 			if (!serverData) throw new Error("serverData is null"); // should never happen
 			if (!defaultRecord) throw new Error("default record is null"); // should never happen

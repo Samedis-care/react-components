@@ -57,7 +57,7 @@ export const filterPersistedState = (
 								sort: config.includes("sort") ? data.sort : 0,
 								sortOrder: config.includes("sort") ? data.sortOrder : undefined,
 								filter: config.includes("filters") ? data.filter : undefined,
-							} as IDataGridColumnState,
+							},
 						],
 					),
 				)

@@ -275,7 +275,7 @@ export const renderDataGridRecordUsingModel =
 														{
 															id,
 															...dotToObject(field, value),
-														} as Record<string, unknown>,
+														},
 														"serialize",
 														"overview",
 													),
