@@ -98,6 +98,12 @@ class RendererBackendMultiSelect<
 					"Type BackendMultiSelect requires relation model: " + field,
 				);
 
+			const typedRelationModel = relationModel as unknown as Model<
+				KeyT,
+				VisibilityT,
+				CustomT
+			>;
+
 			return (
 				<FormControlFieldsetCC
 					component={"fieldset"}
@@ -114,9 +120,7 @@ class RendererBackendMultiSelect<
 						onSelect={(value) => handleChange(field, value)}
 						disabled={visibility.readOnly}
 						required={visibility.required}
-						model={
-							relationModel as unknown as Model<KeyT, VisibilityT, CustomT>
-						}
+						model={typedRelationModel}
 						initialData={relationData}
 						{...this.props}
 					/>

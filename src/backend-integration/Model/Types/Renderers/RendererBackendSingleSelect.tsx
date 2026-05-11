@@ -111,6 +111,12 @@ class RendererBackendSingleSelect<
 					? this.props.modelFetch(values)
 					: this.props.modelFetch;
 
+			const typedRelationModel = relationModel as unknown as Model<
+				KeyT,
+				VisibilityT,
+				CustomT
+			>;
+
 			return (
 				<FormControlFieldsetCC
 					component={"fieldset"}
@@ -127,9 +133,7 @@ class RendererBackendSingleSelect<
 						onSelect={(value) => handleChange(field, value)}
 						disabled={visibility.readOnly}
 						required={visibility.required}
-						model={
-							relationModel as unknown as Model<KeyT, VisibilityT, CustomT>
-						}
+						model={typedRelationModel}
 						initialData={relationData}
 						{...this.props}
 						modelFetch={modelFetch}
