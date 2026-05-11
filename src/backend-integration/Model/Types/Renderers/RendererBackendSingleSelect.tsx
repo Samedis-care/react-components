@@ -121,7 +121,7 @@ class RendererBackendSingleSelect<
 					onBlur={handleBlur}
 					name={field}
 				>
-					<FormBackendSingleSelect
+					<FormBackendSingleSelect<KeyT, VisibilityT, CustomT>
 						selected={value}
 						label={label}
 						onSelect={(value) => handleChange(field, value)}

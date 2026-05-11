@@ -108,7 +108,7 @@ class RendererBackendMultiSelect<
 					onBlur={handleBlur}
 					name={field}
 				>
-					<FormBackendMultiSelect
+					<FormBackendMultiSelect<KeyT, VisibilityT, CustomT, MultiSelectorData>
 						selected={value}
 						label={label}
 						onSelect={(value) => handleChange(field, value)}
