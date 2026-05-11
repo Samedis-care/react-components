@@ -33,7 +33,8 @@ class RendererBackendMultiSelect extends TypeIds {
                 throw new Error("Not supported");
             if (!relationModel)
                 throw new Error("Type BackendMultiSelect requires relation model: " + field);
-            return (_jsxs(FormControlFieldsetCC, { component: "fieldset", required: visibility.required, fullWidth: true, error: !!errorMsg, warning: !!warningMsg, onBlur: handleBlur, name: field, children: [_jsx(FormBackendMultiSelect, { selected: value, label: label, onSelect: (value) => handleChange(field, value), disabled: visibility.readOnly, required: visibility.required, model: relationModel, initialData: relationData, ...this.props }), _jsx(FormHelperText, { children: errorMsg || warningMsg })] }));
+            const typedRelationModel = relationModel;
+            return (_jsxs(FormControlFieldsetCC, { component: "fieldset", required: visibility.required, fullWidth: true, error: !!errorMsg, warning: !!warningMsg, onBlur: handleBlur, name: field, children: [_jsx(FormBackendMultiSelect, { selected: value, label: label, onSelect: (value) => handleChange(field, value), disabled: visibility.readOnly, required: visibility.required, model: typedRelationModel, initialData: relationData, ...this.props }), _jsx(FormHelperText, { children: errorMsg || warningMsg })] }));
         }
         throw new Error("view-only rendering not supported");
     }

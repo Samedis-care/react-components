@@ -4,7 +4,6 @@ import Connector from "../../backend-integration/Connector/Connector";
  * Stores data in a Map and supports index (with pagination/filtering/sorting),
  * create, read, update, and delete operations.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 class MockConnector extends Connector {
     data;
     nextId;

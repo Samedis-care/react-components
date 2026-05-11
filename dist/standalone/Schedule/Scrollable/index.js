@@ -127,9 +127,7 @@ const ScrollableSchedule = (inProps) => {
         scrollElem.current.wrapper.scrollTop = todayElem.current.offsetTop;
     }, []);
     const handleFilterChange = useCallback((evt) => {
-        const value = evt.target.type === "checkbox"
-            ? evt.target.checked
-            : evt.target.value;
+        const value = evt.target.type === "checkbox" ? evt.target.checked : evt.target.value;
         setState((prev) => ({
             ...getDefaultState(),
             filterValues: {

@@ -395,7 +395,9 @@ const BaseSelector = (inProps) => {
                                 query &&
                                 !(selectorOptions.find((entry) => getStringLabel(entry) === query) ||
                                     selectedArr.find((entry) => getStringLabel(entry) === query)))
-                                options.push({
+                                options.push(
+                                // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+                                {
                                     label: query,
                                     value: query,
                                     freeSolo: true,

@@ -4,7 +4,7 @@ export default function debouncePromise(func, timeout) {
     let resolves = [];
     // noinspection JSMismatchedCollectionQueryUpdate
     let rejects = [];
-    return ((...args) => {
+    return (...args) => {
         return new Promise((resolve, reject) => {
             if (debounceState !== 0) {
                 window.clearTimeout(debounceState);
@@ -27,5 +27,5 @@ export default function debouncePromise(func, timeout) {
                 });
             }, timeout);
         });
-    });
+    };
 }

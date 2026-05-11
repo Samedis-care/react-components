@@ -36,7 +36,8 @@ class RendererBackendSingleSelect extends TypeId {
             const modelFetch = typeof this.props.modelFetch === "function"
                 ? this.props.modelFetch(values)
                 : this.props.modelFetch;
-            return (_jsxs(FormControlFieldsetCC, { component: "fieldset", required: visibility.required, fullWidth: true, error: !!errorMsg, warning: !!warningMsg, onBlur: handleBlur, name: field, children: [_jsx(FormBackendSingleSelect, { selected: value, label: label, onSelect: (value) => handleChange(field, value), disabled: visibility.readOnly, required: visibility.required, model: relationModel, initialData: relationData, ...this.props, modelFetch: modelFetch, refreshToken: JSON.stringify(relationModel.getReactQueryKeyFetchAll()) +
+            const typedRelationModel = relationModel;
+            return (_jsxs(FormControlFieldsetCC, { component: "fieldset", required: visibility.required, fullWidth: true, error: !!errorMsg, warning: !!warningMsg, onBlur: handleBlur, name: field, children: [_jsx(FormBackendSingleSelect, { selected: value, label: label, onSelect: (value) => handleChange(field, value), disabled: visibility.readOnly, required: visibility.required, model: typedRelationModel, initialData: relationData, ...this.props, modelFetch: modelFetch, refreshToken: JSON.stringify(relationModel.getReactQueryKeyFetchAll()) +
                             this.props.refreshToken }), _jsx(FormHelperText, { children: errorMsg || warningMsg })] }));
         }
         throw new Error("view-only rendering not supported");

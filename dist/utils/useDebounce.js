@@ -13,7 +13,7 @@ export function useDebouncePromise(func, timeout) {
         return () => cancelDebounce();
     }, [cancelDebounce, func, timeout]);
     return [
-        ((...args) => {
+        (...args) => {
             return new Promise((resolve, reject) => {
                 cancelDebounce();
                 resolves.current.push(resolve);
@@ -34,7 +34,7 @@ export function useDebouncePromise(func, timeout) {
                     });
                 }, timeout);
             });
-        }),
+        },
         cancelDebounce,
     ];
 }

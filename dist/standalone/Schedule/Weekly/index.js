@@ -78,9 +78,7 @@ const WeekView = (inProps) => {
         setWeekOffset((prev) => prev + 1);
     }, []);
     const handleFilterChange = useCallback((evt) => {
-        const value = evt.target.type === "checkbox"
-            ? evt.target.checked
-            : evt.target.value;
+        const value = evt.target.type === "checkbox" ? evt.target.checked : evt.target.value;
         setFilterValues((prev) => ({
             ...prev,
             [evt.target.name]: value,

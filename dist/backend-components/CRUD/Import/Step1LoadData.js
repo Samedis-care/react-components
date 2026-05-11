@@ -28,6 +28,7 @@ export const useImportStep1FileUploadProps = (props) => {
                             resolve(workbook);
                         }
                         catch (e) {
+                            // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors -- XLSX.read only throws Errors
                             reject(e);
                         }
                     });
