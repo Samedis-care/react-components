@@ -52,7 +52,7 @@
 	},
 	"scripts": {
 		"docgen": "typedoc --exclude 'node_modules/**/*.*' --out typedoc --entryPoints src/index.ts",
-		"start": "npm run storybook",
+		"start": "pnpm run storybook",
 		"prestart": "husky install",
 		"build": "tsc && cpx 'src/assets/**/*' dist/assets",
 		"storybook": "storybook dev -p 6006",
@@ -133,6 +133,16 @@
 		}
 	},
 	"engines": {
-		"npm": ">=10.x"
+		"node": ">=22",
+		"pnpm": "^10"
+	},
+	"devEngines": {
+		"packageManager": {
+			"name": "pnpm",
+			"onFail": "error"
+		}
+	},
+	"pnpm": {
+		"onlyBuiltDependencies": []
 	}
 }
