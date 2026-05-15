@@ -134,17 +134,12 @@
 	},
 	"engines": {
 		"node": ">=22",
-		"pnpm": "^10"
+		"pnpm": "^11"
 	},
 	"devEngines": {
 		"packageManager": {
 			"name": "pnpm",
 			"onFail": "error"
 		}
-	},
-	"pnpm": {
-		"onlyBuiltDependencies": [
-			"cldr-data"
-		]
 	}
 }
