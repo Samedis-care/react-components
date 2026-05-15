@@ -1,0 +1,6 @@
+nodeLinker: hoisted
+engineStrict: true
+allowBuilds:
+  cldr-data: true
+  esbuild: false
+  unrs-resolver: false
