@@ -143,6 +143,8 @@
 		}
 	},
 	"pnpm": {
-		"onlyBuiltDependencies": []
+		"onlyBuiltDependencies": [
+			"cldr-data"
+		]
 	}
 }
