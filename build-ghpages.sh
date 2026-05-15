@@ -2,6 +2,6 @@
 
 set -e
 
-npm run docgen
+pnpm run docgen
 cp -r typedoc/* "$2"
-npm run build-storybook -- -o "$2/storybook"
+pnpm run build-storybook -- -o "$2/storybook"

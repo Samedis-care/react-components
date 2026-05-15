@@ -20,23 +20,21 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v6
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
           node-version: 24
-      - name: NPM Cache
-        uses: actions/cache@v5
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
+          cache: pnpm
       - name: Install Dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
       - name: Lint
-        run: npm run lint
+        run: pnpm run lint
       - name: Build library
-        run: npm run build
+        run: pnpm run build
       - name: Publish dist
         run: |
           set -x
@@ -45,13 +43,13 @@ jobs:
           commit_message="Release build based on commit $(git rev-parse --short HEAD) from $(git show -s --format=%ci)"
           git fetch
           mkdir ../build_out
-          mv package.json package-lock.json dist LICENSE ../build_out
+          mv package.json pnpm-lock.yaml dist LICENSE ../build_out
           git checkout -f master_dist || git checkout --orphan master_dist
           rm -f .gitignore
           git rm -rf .
           mv ../build_out/* .
           rmdir ../build_out
-          git add package.json package-lock.json dist LICENSE
+          git add package.json pnpm-lock.yaml dist LICENSE
           git status
           git commit -m "$commit_message" && git push -f origin master_dist || echo "No changes"
 
@@ -60,21 +58,19 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v6
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
           node-version: 24
-      - name: NPM Cache
-        uses: actions/cache@v5
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
+          cache: pnpm
       - name: Install Dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
       - name: Unit Tests
-        run: npm run test:unit
+        run: pnpm run test:unit
 
   deploy-pages:
     needs: build-and-test
@@ -85,23 +81,21 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v6
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
           node-version: 24
-      - name: NPM Cache
-        uses: actions/cache@v5
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
+          cache: pnpm
       - name: Install Dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
       - name: Build Storybook
-        run: npx storybook build -o gh-pages/storybook
+        run: pnpm exec storybook build -o gh-pages/storybook
       - name: Build TypeDoc
-        run: npm run docgen && mv typedoc gh-pages/typedoc
+        run: pnpm run docgen && mv typedoc gh-pages/typedoc
       - name: Create index page
         run: |
           cat > gh-pages/index.html << 'HTMLEOF'

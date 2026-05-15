@@ -2,9 +2,7 @@
 
 ## Installing
 
-> `npm install "git://github.com/Samedis-care/react-components.git#master_dist" --save --legacy-peer-deps`
-
-> `yarn add "git://github.com/Samedis-care/react-components.git#master_dist"`
+> `pnpm add "git+https://github.com/Samedis-care/react-components.git#master_dist"`
 
 Note: Make sure to install all peer-dependencies
 
@@ -45,8 +43,9 @@ Used Libraries:
 
 ### Running the developer environment (Storybook)
 
-1. Run `npx --no-install npm@8.1.2 install --force`
-2. Run `npm start`
+1. Install pnpm 10 (`npm install -g pnpm@10` or via Corepack).
+2. Run `pnpm install --frozen-lockfile`
+3. Run `pnpm start`
 
 ### Path overview
 
@@ -61,8 +60,8 @@ Used Libraries:
 
 ### Building the source code
 
-1. Run `npm install`
-2. Run `npm build`
+1. Run `pnpm install --frozen-lockfile`
+2. Run `pnpm run build`
 3. You'll find the output files under `dist/`
 
 ### Using developer mode in your Create-React-App Webapp
@@ -79,4 +78,4 @@ In Components-Care:
 1. Start TSC in watch mode `tsc --watch --outDir <path-to-your-webapp>/src/node_modules/components-care/dist`
 2. Copy assets in watch mode `cpx -w 'src/assets/**/*' <path-to-your-webapp>/src/node_modules/components-care/dist/assets`
 
-Now run the development server `npm start` / `yarn dev` in your Webapp. Components-Care code changes are automatically applied to your webapp, using the normal hot reload functionality.
+Now run the development server (`pnpm start` / `pnpm dev`) in your Webapp. Components-Care code changes are automatically applied to your webapp, using the normal hot reload functionality.
