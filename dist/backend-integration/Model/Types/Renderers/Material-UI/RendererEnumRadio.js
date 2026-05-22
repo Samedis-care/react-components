@@ -26,7 +26,7 @@ class RendererEnumRadio extends TypeEnum {
                 throw new Error("Not supported");
             return (_jsxs(FormControlFieldsetCC, { component: "fieldset", required: visibility.required, fullWidth: true, error: !!errorMsg, warning: !!warningMsg, children: [_jsx(FormLabel, { component: "legend", children: label }), _jsx(RadioGroup, { name: field, value: value, onChange: (evt) => handleChange(evt.target.name, evt.target.value), onBlur: handleBlur, row: this.horizontal, children: this.values
                             .filter((value) => !value.invisible)
-                            .map((entry) => this.wrapButton(_jsx(FormControlLabel, { value: entry.value, control: _jsx(Radio, {}), label: entry.getLabel(), disabled: visibility.readOnly }, entry.value), entry)) }), _jsx(FormHelperText, { children: errorMsg || warningMsg })] }));
+                            .map((entry) => this.wrapButton(_jsx(FormControlLabel, { value: entry.value, control: _jsx(Radio, {}), label: entry.getLabel(), disabled: visibility.readOnly || entry.disabled }, entry.value), entry)) }), _jsx(FormHelperText, { children: errorMsg || warningMsg })] }));
         }
         const valueInfo = this.values.find((entry) => entry.value === value);
         return (_jsxs(Typography, { children: [!visibility.grid && `${label}: `, valueInfo

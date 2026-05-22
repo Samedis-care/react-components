@@ -28,7 +28,7 @@ class RendererEnumRadio extends TypeEnumMulti {
                             .filter((entry) => !entry.invisible)
                             .map((entry) => this.wrapButton(_jsx(FormControlLabel, { value: entry.value, control: _jsx(Checkbox, { checked: value.includes(entry.value), name: entry.value, onChange: (evt) => handleChange(field, evt.target.checked
                                     ? value.concat([entry.value]) // add value
-                                    : value.filter((v) => v !== entry.value)) }), label: entry.getLabel(), disabled: visibility.readOnly }, entry.value), entry)) }), _jsx(FormHelperText, { children: errorMsg || warningMsg })] }));
+                                    : value.filter((v) => v !== entry.value)) }), label: entry.getLabel(), disabled: visibility.readOnly || entry.disabled }, entry.value), entry)) }), _jsx(FormHelperText, { children: errorMsg || warningMsg })] }));
         }
         return (_jsxs(Typography, { children: [!visibility.grid && `${label}: `, value
                     .map((enumValue) => {
