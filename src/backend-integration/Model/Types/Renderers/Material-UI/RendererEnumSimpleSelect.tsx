@@ -57,7 +57,11 @@ class RendererEnumSelect extends TypeEnum {
 						onBlur={handleBlur}
 					>
 						{this.values.map((entry) => (
-							<MenuItem key={entry.value} value={entry.value}>
+							<MenuItem
+								key={entry.value}
+								value={entry.value}
+								disabled={entry.disabled}
+							>
 								{entry.getLabel()}
 							</MenuItem>
 						))}

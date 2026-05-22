@@ -99,7 +99,7 @@ class RendererEnumRadio extends TypeEnumMulti {
 											/>
 										}
 										label={entry.getLabel()}
-										disabled={visibility.readOnly}
+										disabled={visibility.readOnly || entry.disabled}
 									/>,
 									entry,
 								),

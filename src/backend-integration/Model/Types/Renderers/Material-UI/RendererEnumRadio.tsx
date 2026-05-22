@@ -88,7 +88,7 @@ class RendererEnumRadio extends TypeEnum {
 										value={entry.value}
 										control={<Radio />}
 										label={entry.getLabel()}
-										disabled={visibility.readOnly}
+										disabled={visibility.readOnly || entry.disabled}
 									/>,
 									entry,
 								),
