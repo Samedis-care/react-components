@@ -2182,11 +2182,26 @@ const Form = <
 		<FormContextLite.Provider value={formContextDataLite}>
 			<FormContext.Provider value={formContextData}>
 				{!parentFormContext && !renderFormAsDiv ? (
-					<StyledForm onSubmit={handleSubmit} className={formClass}>
+					<StyledForm
+						onSubmit={handleSubmit}
+						className={formClass}
+						data-form-submitting={submitting}
+						data-form-dirty={dirty}
+						data-form-recordId={id}
+						data-form-modelId={model.modelId}
+					>
 						{innerForm()}
 					</StyledForm>
 				) : (
-					<StyledFormDiv className={formClass}>{innerForm()}</StyledFormDiv>
+					<StyledFormDiv
+						className={formClass}
+						data-form-submitting={submitting}
+						data-form-dirty={dirty}
+						data-form-recordId={id}
+						data-form-modelId={model.modelId}
+					>
+						{innerForm()}
+					</StyledFormDiv>
 				)}
 			</FormContext.Provider>
 		</FormContextLite.Provider>
