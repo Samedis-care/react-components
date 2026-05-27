@@ -2187,8 +2187,8 @@ const Form = <
 						className={formClass}
 						data-form-submitting={submitting}
 						data-form-dirty={dirty}
-						data-form-recordId={id}
-						data-form-modelId={model.modelId}
+						data-form-recordid={id}
+						data-form-modelid={model.modelId}
 					>
 						{innerForm()}
 					</StyledForm>
@@ -2197,8 +2197,8 @@ const Form = <
 						className={formClass}
 						data-form-submitting={submitting}
 						data-form-dirty={dirty}
-						data-form-recordId={id}
-						data-form-modelId={model.modelId}
+						data-form-recordid={id}
+						data-form-modelid={model.modelId}
 					>
 						{innerForm()}
 					</StyledFormDiv>
