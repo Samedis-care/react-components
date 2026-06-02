@@ -9,6 +9,7 @@ import useCCTranslations from "../../utils/useCCTranslations";
 import { showConfirmDialogBool } from "./Utils";
 import combineClassNames from "../../utils/combineClassNames";
 import trimCanvas from "trim-canvas";
+import { isTouchDevice } from "../../utils";
 const RootDialog = styled(Dialog, { name: "CcSignPadDialog", slot: "root" })({});
 const StyledDialogTitle = styled(MuiDialogTitle, {
     name: "CcSignPadDialog",
@@ -116,11 +117,14 @@ const SignPadDialog = (inProps) => {
         hiddenRef.current?.blur();
         popDialog();
     }, [setSignature, popDialog, signature, resetCanvas]);
-    const closeCanvas = useCallback(() => {
+    const closeCanvas = useCallback((_, reason) => {
+        if (reason === "backdropClick" && isTouchDevice())
+            return; // prevent accidential close by hand palm when signing with pen
         hiddenRef.current?.focus();
         hiddenRef.current?.blur();
         popDialog();
     }, [popDialog]);
+    const closeCanvasBtn = useCallback(() => closeCanvas({}, "closeBtn"), [closeCanvas]);
     const handleResize = useCallback((wrapper) => {
         setCanvasSize([wrapper.clientWidth, wrapper.clientHeight]);
     }, []);
@@ -140,7 +144,7 @@ const SignPadDialog = (inProps) => {
                         ? t("standalone.signature-pad.dialog.title-name", {
                             NAME: signerName,
                         })
-                        : t("standalone.signature-pad.dialog.title"), closeCanvas && (_jsx(StyledCloseButton, { "aria-label": t("standalone.signature-pad.dialog.close"), className: classes?.closeButton, onClick: closeCanvas, size: "large", children: _jsx(Close, {}) }))] }), _jsxs(SignDiv, { className: classes?.signDiv, ref: setCanvasWrapperRef, "data-name": name, onBlur: onBlur, children: [!resetCanvas ? (_jsx(SignaturePad, { ref: signCanvas, options: {
+                        : t("standalone.signature-pad.dialog.title"), _jsx(StyledCloseButton, { "aria-label": t("standalone.signature-pad.dialog.close"), className: classes?.closeButton, onClick: closeCanvasBtn, size: "large", children: _jsx(Close, {}) })] }), _jsxs(SignDiv, { className: classes?.signDiv, ref: setCanvasWrapperRef, "data-name": name, onBlur: onBlur, children: [!resetCanvas ? (_jsx(SignaturePad, { ref: signCanvas, options: {
                             penColor: penColor || "blue",
                         }, width: canvasSize[0], height: canvasSize[1] })) : (_jsx(ImageDiv, { className: classes?.imageDiv, children: _jsx(SignatureImage, { src: signature, alt: t("standalone.signature-pad.dialog.signature") }) })), _jsx(HiddenDiv, { className: classes?.hiddenDiv, children: _jsx("input", { type: "text", value: signature ?? "", readOnly: true, ref: hiddenRef, name: name, onBlur: onBlur }) })] }), _jsxs(DialogActions, { children: [_jsx(Button, { onClick: saveCanvas, color: "primary", children: t("standalone.signature-pad.dialog.save-changes") }), _jsx(Button, { onClick: clearCanvas, color: "error", children: t("standalone.signature-pad.dialog.reset") })] })] }));
 };
