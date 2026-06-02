@@ -16,6 +16,7 @@ import useCCTranslations from "../../utils/useCCTranslations";
 import { showConfirmDialogBool } from "./Utils";
 import combineClassNames from "../../utils/combineClassNames";
 import trimCanvas from "trim-canvas";
+import { isTouchDevice } from "../../utils";
 
 export interface SignPadDialogProps extends IDialogConfigSign {
 	/**
@@ -165,11 +166,19 @@ const SignPadDialog = (inProps: SignPadDialogProps) => {
 		popDialog();
 	}, [setSignature, popDialog, signature, resetCanvas]);
 
-	const closeCanvas = useCallback(() => {
-		hiddenRef.current?.focus();
-		hiddenRef.current?.blur();
-		popDialog();
-	}, [popDialog]);
+	const closeCanvas = useCallback(
+		(_: object, reason: "escapeKeyDown" | "backdropClick" | "closeBtn") => {
+			if (reason === "backdropClick" && isTouchDevice()) return; // prevent accidential close by hand palm when signing with pen
+			hiddenRef.current?.focus();
+			hiddenRef.current?.blur();
+			popDialog();
+		},
+		[popDialog],
+	);
+	const closeCanvasBtn = useCallback(
+		() => closeCanvas({}, "closeBtn"),
+		[closeCanvas],
+	);
 
 	const handleResize = useCallback((wrapper: HTMLDivElement) => {
 		setCanvasSize([wrapper.clientWidth, wrapper.clientHeight]);
@@ -208,16 +217,14 @@ const SignPadDialog = (inProps: SignPadDialogProps) => {
 							NAME: signerName,
 						})
 					: t("standalone.signature-pad.dialog.title")}
-				{closeCanvas && (
-					<StyledCloseButton
-						aria-label={t("standalone.signature-pad.dialog.close")}
-						className={classes?.closeButton}
-						onClick={closeCanvas}
-						size="large"
-					>
-						<Close />
-					</StyledCloseButton>
-				)}
+				<StyledCloseButton
+					aria-label={t("standalone.signature-pad.dialog.close")}
+					className={classes?.closeButton}
+					onClick={closeCanvasBtn}
+					size="large"
+				>
+					<Close />
+				</StyledCloseButton>
 			</StyledDialogTitle>
 			<SignDiv
 				className={classes?.signDiv}
