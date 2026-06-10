@@ -1,3 +1,4 @@
+import React from "react";
 import { MultiSelectProps, MultiSelectorData, SelectorLruOptions } from "../../standalone";
 import Model, { ModelFieldName, PageVisibility } from "../../backend-integration/Model/Model";
 import { DataGridSortSetting } from "../../standalone/DataGrid/DataGrid";
@@ -79,6 +80,6 @@ export declare const useSelectedCache: <KeyT extends ModelFieldName, VisibilityT
  * @remarks Doesn't support custom data
  * @constructor
  */
-declare const BackendMultiSelect: <KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT, DataT extends MultiSelectorData>(props: BackendMultiSelectProps<KeyT, VisibilityT, CustomT, DataT>) => import("react/jsx-runtime").JSX.Element;
+declare const BackendMultiSelect: <KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT, DataT extends MultiSelectorData>(props: BackendMultiSelectProps<KeyT, VisibilityT, CustomT, DataT>) => React.JSX.Element;
 declare const _default: typeof BackendMultiSelect;
 export default _default;
