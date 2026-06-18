@@ -300,9 +300,12 @@ const Form = (props) => {
         setMountedFields((prev) => ({ ...prev, [field]: mounted }));
     }, []);
     // main form handling - dirty state
-    const initialValues = useMemo(() => serverData
-        ? deepAssign({}, serverData[0], serverData[0].id || !initialRecord ? {} : initialRecord)
-        : undefined, [serverData, initialRecord]);
+    const { get: getInitialValues, set: setInitialValues, state: initialValuesState, } = useRefState(undefined);
+    useEffect(() => {
+        setInitialValues(serverData
+            ? deepAssign({}, serverData[0], serverData[0].id || !initialRecord ? {} : initialRecord)
+            : undefined);
+    }, [serverData, initialRecord, setInitialValues]);
     const alwaysSubmitFields = useMemo(() => uniqueArray([
         ...(props.alwaysSubmitFields ?? []),
         ...(flowEngineConfig.current.alwaysSubmitFields ?? []),
@@ -310,6 +313,7 @@ const Form = (props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [props.alwaysSubmitFields, flowEngineConfig.current.alwaysSubmitFields]);
     const getNormalizedData = useCallback((values) => {
+        const initialValues = getInitialValues();
         if (!initialValues) {
             throw new Error("No server data (initialValues)");
         }
@@ -336,7 +340,7 @@ const Form = (props) => {
         });
         return [localData, remoteData];
     }, [
-        initialValues,
+        getInitialValues,
         defaultRecord,
         dirtyIgnoreFields,
         model,
@@ -345,12 +349,12 @@ const Form = (props) => {
         alwaysSubmitFields,
         mountedFields,
     ]);
-    const getFormDirty = useCallback((values) => serverData && defaultRecord
+    const getFormDirty = useCallback((values) => initialValuesState
         ? (() => {
             const [local, remote] = getNormalizedData(values);
             return JSON.stringify(local) !== JSON.stringify(remote);
         })()
-        : false, [serverData, defaultRecord, getNormalizedData]);
+        : false, [initialValuesState, getNormalizedData]);
     const formDirty = useMemo(() => getFormDirty(values), [getFormDirty, values]);
     const getDirty = useCallback((formDirty) => formDirty ||
         getCustomDirtyFields().length > 0 ||
@@ -360,7 +364,8 @@ const Form = (props) => {
     const alwaysWarnFields = useMemo(() => (props.alwaysWarnFields ?? []).concat(flowEngineConfig.current.alwaysWarnFields ?? []), 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [props.alwaysSubmitFields, flowEngineConfig.current.alwaysWarnFields]);
-    const validateForm = useCallback(async (mode = "normal", values) => {
+    const validateForm = useCallback(async (mode = "normal", valuesOverride) => {
+        const values = valuesOverride ?? valuesRef.current;
         if (disableValidation)
             return {};
         let fieldsToValidate = Object.keys(model.fields);
@@ -374,7 +379,7 @@ const Form = (props) => {
                 JSON.stringify(getValueByDot(field, localData)) !==
                     JSON.stringify(getValueByDot(field, remoteData)));
         }
-        const errors = await model.validate(values ?? valuesRef.current, id ? "edit" : "create", fieldsToValidate, mode);
+        const errors = await model.validate(values, id ? "edit" : "create", fieldsToValidate, mode);
         await Promise.all(Object.entries(mode === "normal"
             ? customValidationHandlers.current
             : customWarningHandlers.current).map(async ([name, handler]) => {
@@ -643,6 +648,7 @@ const Form = (props) => {
                 const newValues = deepClone(result[0]);
                 valuesRef.current = newValues;
                 valuesStagedRef.current = deepClone(result[0]);
+                setInitialValues(deepClone(result[0]));
                 touchedRef.current = setAllTouched(touchedRef.current, false);
                 setTouched(touchedRef.current);
                 valuesStagedModifiedRef.current = setAllTouched(valuesStagedModifiedRef.current, false);
@@ -693,6 +699,7 @@ const Form = (props) => {
         updateData,
         onlySubmitMounted,
         onlySubmitMountedBehaviour,
+        setInitialValues,
         onSubmit,
         onSubmitUserInteractive,
     ]);
@@ -938,7 +945,7 @@ const Form = (props) => {
         submit: submitFormReferenced,
         deleteOnSubmit: !!deleteOnSubmit,
         values,
-        initialValues: initialValues ?? {},
+        initialValues: initialValuesState ?? {},
         touched,
         errors,
         warnings,
@@ -993,7 +1000,7 @@ const Form = (props) => {
         submitFormReferenced,
         deleteOnSubmit,
         values,
-        initialValues,
+        initialValuesState,
         touched,
         errors,
         warnings,
@@ -1026,7 +1033,7 @@ const Form = (props) => {
         readOnly: readOnly,
         readOnlyReason: readOnlyReasons[0],
         readOnlyReasons: readOnlyReasons,
-        initialValues: initialValues ?? {},
+        initialValues: initialValuesState ?? {},
         getFieldValue,
         getFieldValues,
         setFieldValueLite,
@@ -1047,15 +1054,15 @@ const Form = (props) => {
         onlyValidateMounted,
         onlyWarnMounted,
         onlyWarnChanged,
-        setCustomReadOnly,
-        removeCustomReadOnly,
         readOnly,
         readOnlyReasons,
-        initialValues,
+        initialValuesState,
         getFieldValue,
         getFieldValues,
         setFieldValueLite,
         setFieldTouchedLite,
+        setCustomReadOnly,
+        removeCustomReadOnly,
         flowEngine,
         submitFormReferenced,
         submitting,
