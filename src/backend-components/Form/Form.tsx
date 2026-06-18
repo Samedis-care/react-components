@@ -1128,8 +1128,13 @@ const Form = <
 	}, []);
 
 	// main form handling - dirty state
-	const initialValues = useMemo(
-		() =>
+	const {
+		get: getInitialValues,
+		set: setInitialValues,
+		state: initialValuesState,
+	} = useRefState<Record<string, unknown> | undefined>(undefined);
+	useEffect(() => {
+		setInitialValues(
 			serverData
 				? deepAssign(
 						{},
@@ -1137,8 +1142,8 @@ const Form = <
 						serverData[0].id || !initialRecord ? {} : initialRecord,
 					)
 				: undefined,
-		[serverData, initialRecord],
-	);
+		);
+	}, [serverData, initialRecord, setInitialValues]);
 	const alwaysSubmitFields = useMemo(
 		() =>
 			uniqueArray([
@@ -1149,7 +1154,13 @@ const Form = <
 		[props.alwaysSubmitFields, flowEngineConfig.current.alwaysSubmitFields],
 	);
 	const getNormalizedData = useCallback(
-		(values?: Record<string, unknown>) => {
+		(
+			values?: Record<string, unknown>,
+		): [
+			localData: Record<string, unknown>,
+			remoteData: Record<string, unknown>,
+		] => {
+			const initialValues = getInitialValues();
 			if (!initialValues) {
 				throw new Error("No server data (initialValues)");
 			}
@@ -1178,7 +1189,7 @@ const Form = <
 			return [localData, remoteData];
 		},
 		[
-			initialValues,
+			getInitialValues,
 			defaultRecord,
 			dirtyIgnoreFields,
 			model,
@@ -1191,13 +1202,13 @@ const Form = <
 
 	const getFormDirty = useCallback(
 		(values: Record<string, unknown>) =>
-			serverData && defaultRecord
+			initialValuesState
 				? (() => {
 						const [local, remote] = getNormalizedData(values);
 						return JSON.stringify(local) !== JSON.stringify(remote);
 					})()
 				: false,
-		[serverData, defaultRecord, getNormalizedData],
+		[initialValuesState, getNormalizedData],
 	);
 	const formDirty = useMemo(() => getFormDirty(values), [getFormDirty, values]);
 	const getDirty = useCallback(
@@ -1221,8 +1232,9 @@ const Form = <
 	const validateForm = useCallback(
 		async (
 			mode: "normal" | "hint" = "normal",
-			values?: Record<string, unknown>,
+			valuesOverride?: Record<string, unknown>,
 		) => {
+			const values = valuesOverride ?? valuesRef.current;
 			if (disableValidation) return {};
 
 			let fieldsToValidate: KeyT[] = Object.keys(model.fields) as KeyT[];
@@ -1244,7 +1256,7 @@ const Form = <
 			}
 
 			const errors = await model.validate(
-				values ?? valuesRef.current,
+				values,
 				id ? "edit" : "create",
 				fieldsToValidate,
 				mode,
@@ -1634,6 +1646,7 @@ const Form = <
 					const newValues = deepClone(result[0]);
 					valuesRef.current = newValues;
 					valuesStagedRef.current = deepClone(result[0]);
+					setInitialValues(deepClone(result[0]));
 
 					touchedRef.current = setAllTouched(touchedRef.current, false);
 					setTouched(touchedRef.current);
@@ -1695,6 +1708,7 @@ const Form = <
 			updateData,
 			onlySubmitMounted,
 			onlySubmitMountedBehaviour,
+			setInitialValues,
 			onSubmit,
 			onSubmitUserInteractive,
 		],
@@ -2003,7 +2017,7 @@ const Form = <
 			submit: submitFormReferenced,
 			deleteOnSubmit: !!deleteOnSubmit,
 			values,
-			initialValues: initialValues ?? {},
+			initialValues: initialValuesState ?? {},
 			touched,
 			errors,
 			warnings,
@@ -2059,7 +2073,7 @@ const Form = <
 			submitFormReferenced,
 			deleteOnSubmit,
 			values,
-			initialValues,
+			initialValuesState,
 			touched,
 			errors,
 			warnings,
@@ -2095,7 +2109,7 @@ const Form = <
 			readOnly: readOnly,
 			readOnlyReason: readOnlyReasons[0],
 			readOnlyReasons: readOnlyReasons,
-			initialValues: initialValues ?? {},
+			initialValues: initialValuesState ?? {},
 			getFieldValue,
 			getFieldValues,
 			setFieldValueLite,
@@ -2117,15 +2131,15 @@ const Form = <
 			onlyValidateMounted,
 			onlyWarnMounted,
 			onlyWarnChanged,
-			setCustomReadOnly,
-			removeCustomReadOnly,
 			readOnly,
 			readOnlyReasons,
-			initialValues,
+			initialValuesState,
 			getFieldValue,
 			getFieldValues,
 			setFieldValueLite,
 			setFieldTouchedLite,
+			setCustomReadOnly,
+			removeCustomReadOnly,
 			flowEngine,
 			submitFormReferenced,
 			submitting,
