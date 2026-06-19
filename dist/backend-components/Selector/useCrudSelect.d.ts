@@ -12,6 +12,9 @@ export interface UseCrudSelectParams<KeyT extends ModelFieldName, VisibilityT ex
      * Callback for serializing data before passing it to the backend connector
      * @param data The selector data to serialize
      * @returns Data to be passed to the backend connector, id may be null or data.value
+     * @remarks Must stay pure: it runs for additions, updates and removals at
+     *   backend (POST/PUT/DELETE) time. Do NOT trigger UI side effects (dialogs,
+     *   prompts) here — use {@link prepareNewEntry} to collect extra data on add.
      */
     serialize: (data: DataT) => Promise<Partial<Record<string, unknown>>> | Partial<Record<string, unknown>>;
     /**
@@ -24,8 +27,23 @@ export interface UseCrudSelectParams<KeyT extends ModelFieldName, VisibilityT ex
      * Callback for deserializing data from the model
      * @param data The data from the backend connector (index function)
      * @returns The selector data which can be used by the control
+     * @remarks Must stay pure: it runs once per search result during option load.
+     *   Do NOT trigger UI side effects (dialogs, prompts) here — they would fire
+     *   for every dropdown option. Use {@link prepareNewEntry} to collect extra
+     *   data on add.
      */
     deserializeModel: (data: Record<string, unknown>) => Promise<Omit<DataT, "value">> | Omit<DataT, "value">;
+    /**
+     * Called once per newly-added entry, before it is serialized/created.
+     * Use it to collect extra join-record data (e.g. via a dialog) or to
+     * augment the entry. Resolve `null` to cancel the addition cleanly
+     * (the entry is NOT added and NO error is raised). Thrown errors still
+     * surface via the error component (genuine failures only).
+     * Runs only for additions — never for updates, removals, or option load.
+     * @param entry The entry that is about to be added
+     * @returns The (possibly augmented) entry to create, or `null` to cancel
+     */
+    prepareNewEntry?: (entry: DataT) => Promise<DataT | null> | DataT | null;
     /**
      * Selection change event
      * @param selected The new selection

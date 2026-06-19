@@ -7,7 +7,7 @@ const nextTicket = () => {
     return ticketCounter;
 };
 const useCrudSelect = (params, ref) => {
-    const { connector, serialize, deserialize, deserializeModel, onChange, initialSelected, validate, field, getIdOfData, } = params;
+    const { connector, serialize, deserialize, deserializeModel, prepareNewEntry, onChange, initialSelected, validate, field, getIdOfData, } = params;
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [loadError, setLoadError] = useState(null);
@@ -106,10 +106,7 @@ const useCrudSelect = (params, ref) => {
             return !shallowCompare(normalize(entry), normalize(oldEntry));
         });
         const deletedEntries = selected.filter((entry) => !newSelected.find((selEntry) => selEntry.value === entry.value));
-        // call backend
-        const createPromise = Promise.all(newEntries
-            .map((entry) => serialize(entry))
-            .map(async (serializedEntry) => connector.create(await serializedEntry)));
+        // call backend (updates/removals are independent of prepareNewEntry, fire eagerly)
         const updatePromise = Promise.all(changedEntries
             .map((entry) => serialize(entry))
             .map(async (serializedEntry) => connector.update(await serializedEntry)));
@@ -117,8 +114,23 @@ const useCrudSelect = (params, ref) => {
             .map((entry) => serialize(entry))
             .map(async (serializedEntry) => connector.delete((await serializedEntry).id)));
         try {
+            // prepare new entries (collect extra join-record data / allow cancel).
+            // run sequentially so simultaneous adds don't stack dialogs.
+            let entriesToCreate = newEntries;
+            if (prepareNewEntry) {
+                entriesToCreate = [];
+                for (const entry of newEntries) {
+                    const prepared = await prepareNewEntry(entry);
+                    // null/undefined => cancel this addition cleanly (no create, no error)
+                    if (prepared == null)
+                        continue;
+                    entriesToCreate.push(prepared);
+                }
+            }
             // wait for response
-            const created = (await createPromise).map((e) => e[0]);
+            const created = (await Promise.all(entriesToCreate
+                .map((entry) => serialize(entry))
+                .map(async (serializedEntry) => connector.create(await serializedEntry)))).map((e) => e[0]);
             await updatePromise;
             await deletePromise;
             // create final values
@@ -134,7 +146,7 @@ const useCrudSelect = (params, ref) => {
         catch (e) {
             setError(e);
         }
-    }, [connector, deserialize, selected, serialize]);
+    }, [connector, deserialize, prepareNewEntry, selected, serialize]);
     const modelToSelectorData = useCallback(async (data) => initialRawData.includes(data)
         ? deserialize(data)
         : {
