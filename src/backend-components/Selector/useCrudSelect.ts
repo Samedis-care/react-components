@@ -31,6 +31,9 @@ export interface UseCrudSelectParams<
 	 * Callback for serializing data before passing it to the backend connector
 	 * @param data The selector data to serialize
 	 * @returns Data to be passed to the backend connector, id may be null or data.value
+	 * @remarks Must stay pure: it runs for additions, updates and removals at
+	 *   backend (POST/PUT/DELETE) time. Do NOT trigger UI side effects (dialogs,
+	 *   prompts) here — use {@link prepareNewEntry} to collect extra data on add.
 	 */
 	serialize: (
 		data: DataT,
@@ -47,10 +50,25 @@ export interface UseCrudSelectParams<
 	 * Callback for deserializing data from the model
 	 * @param data The data from the backend connector (index function)
 	 * @returns The selector data which can be used by the control
+	 * @remarks Must stay pure: it runs once per search result during option load.
+	 *   Do NOT trigger UI side effects (dialogs, prompts) here — they would fire
+	 *   for every dropdown option. Use {@link prepareNewEntry} to collect extra
+	 *   data on add.
 	 */
 	deserializeModel: (
 		data: Record<string, unknown>,
 	) => Promise<Omit<DataT, "value">> | Omit<DataT, "value">;
+	/**
+	 * Called once per newly-added entry, before it is serialized/created.
+	 * Use it to collect extra join-record data (e.g. via a dialog) or to
+	 * augment the entry. Resolve `null` to cancel the addition cleanly
+	 * (the entry is NOT added and NO error is raised). Thrown errors still
+	 * surface via the error component (genuine failures only).
+	 * Runs only for additions — never for updates, removals, or option load.
+	 * @param entry The entry that is about to be added
+	 * @returns The (possibly augmented) entry to create, or `null` to cancel
+	 */
+	prepareNewEntry?: (entry: DataT) => Promise<DataT | null> | DataT | null;
 	/**
 	 * Selection change event
 	 * @param selected The new selection
@@ -148,6 +166,7 @@ const useCrudSelect = <
 		serialize,
 		deserialize,
 		deserializeModel,
+		prepareNewEntry,
 		onChange,
 		initialSelected,
 		validate,
@@ -275,14 +294,7 @@ const useCrudSelect = <
 					!newSelected.find((selEntry) => selEntry.value === entry.value),
 			);
 
-			// call backend
-			const createPromise = Promise.all(
-				newEntries
-					.map((entry) => serialize(entry))
-					.map(async (serializedEntry) =>
-						connector.create(await serializedEntry),
-					),
-			);
+			// call backend (updates/removals are independent of prepareNewEntry, fire eagerly)
 			const updatePromise = Promise.all(
 				changedEntries
 					.map((entry) => serialize(entry))
@@ -301,8 +313,29 @@ const useCrudSelect = <
 			);
 
 			try {
+				// prepare new entries (collect extra join-record data / allow cancel).
+				// run sequentially so simultaneous adds don't stack dialogs.
+				let entriesToCreate = newEntries;
+				if (prepareNewEntry) {
+					entriesToCreate = [];
+					for (const entry of newEntries) {
+						const prepared = await prepareNewEntry(entry);
+						// null/undefined => cancel this addition cleanly (no create, no error)
+						if (prepared == null) continue;
+						entriesToCreate.push(prepared);
+					}
+				}
+
 				// wait for response
-				const created = (await createPromise).map((e) => e[0]);
+				const created = (
+					await Promise.all(
+						entriesToCreate
+							.map((entry) => serialize(entry))
+							.map(async (serializedEntry) =>
+								connector.create(await serializedEntry),
+							),
+					)
+				).map((e) => e[0]);
 				await updatePromise;
 				await deletePromise;
 
@@ -322,7 +355,7 @@ const useCrudSelect = <
 				setError(e as Error);
 			}
 		},
-		[connector, deserialize, selected, serialize],
+		[connector, deserialize, prepareNewEntry, selected, serialize],
 	);
 
 	const modelToSelectorData = useCallback(
