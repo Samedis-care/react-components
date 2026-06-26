@@ -1045,6 +1045,7 @@ const Form = (props) => {
         submitting,
         dirty,
         flowEngineConfig,
+        refetchForm: refetch,
     }), [
         id,
         model,
@@ -1067,6 +1068,7 @@ const Form = (props) => {
         submitFormReferenced,
         submitting,
         dirty,
+        refetch,
     ]);
     if (error) {
         if (ErrorRenderer)
