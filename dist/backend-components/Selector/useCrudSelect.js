@@ -147,12 +147,20 @@ const useCrudSelect = (params, ref) => {
             setError(e);
         }
     }, [connector, deserialize, prepareNewEntry, selected, serialize]);
-    const modelToSelectorData = useCallback(async (data) => initialRawData.includes(data)
-        ? deserialize(data)
-        : {
-            ...(await deserializeModel(data)),
-            value: "to-create-" + Math.random().toString(),
-        }, [deserialize, deserializeModel, initialRawData]);
+    const modelToSelectorData = useCallback(async (data) => {
+        if (initialRawData.includes(data))
+            return deserialize(data);
+        const deserialized = (await deserializeModel(data));
+        // Use a stable value derived from the record id (not Math.random()),
+        // so rebuilds of not-yet-persisted entries keep the same value.
+        // Otherwise handleSelect (which classifies new/changed/deleted by
+        // value) would reclassify all surviving entries as new on any
+        // selection change, re-running prepareNewEntry for each.
+        return {
+            ...deserialized,
+            value: "to-create-" + getIdOfData(deserialized),
+        };
+    }, [deserialize, deserializeModel, getIdOfData, initialRawData]);
     // initial load
     useEffect(() => {
         void (async () => {
