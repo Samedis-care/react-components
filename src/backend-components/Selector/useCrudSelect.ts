@@ -359,14 +359,20 @@ const useCrudSelect = <
 	);
 
 	const modelToSelectorData = useCallback(
-		async (data: Record<string, unknown>): Promise<DataT> =>
-			initialRawData.includes(data)
-				? deserialize(data)
-				: ({
-						...(await deserializeModel(data)),
-						value: "to-create-" + Math.random().toString(),
-					} as unknown as DataT),
-		[deserialize, deserializeModel, initialRawData],
+		async (data: Record<string, unknown>): Promise<DataT> => {
+			if (initialRawData.includes(data)) return deserialize(data);
+			const deserialized = (await deserializeModel(data)) as DataT;
+			// Use a stable value derived from the record id (not Math.random()),
+			// so rebuilds of not-yet-persisted entries keep the same value.
+			// Otherwise handleSelect (which classifies new/changed/deleted by
+			// value) would reclassify all surviving entries as new on any
+			// selection change, re-running prepareNewEntry for each.
+			return {
+				...deserialized,
+				value: "to-create-" + getIdOfData(deserialized),
+			};
+		},
+		[deserialize, deserializeModel, getIdOfData, initialRawData],
 	);
 
 	// initial load

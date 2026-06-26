@@ -215,6 +215,35 @@ describe("useCrudSelect prepareNewEntry", () => {
 		expect(result.current.error).toBeNull();
 	});
 
+	it("modelToSelectorData assigns a stable (non-random) value to unpersisted entries", async () => {
+		// Reproduces the removal bug: unpersisted entries used to get a fresh
+		// `Math.random()` value on every rebuild, so handleSelect (which keys
+		// new/changed/deleted off `value`) reclassified the survivors as new
+		// and re-ran prepareNewEntry for each. The value must be stable.
+		const { connector } = makeConnector();
+		const { result } = renderCrudSelect(
+			baseParams(connector, {
+				// stable id derived from the record, not from `value`
+				deserializeModel: (record) => ({
+					label: "L" + (record.id as string),
+					note: record.note as string | undefined,
+				}),
+				getIdOfData: (data) => data.label,
+			}),
+		);
+		await waitFor(() => expect(result.current.loading).toBe(false));
+
+		// same record id rebuilt twice -> identical value
+		const a1 = await result.current.modelToSelectorData({ id: "7" });
+		const a2 = await result.current.modelToSelectorData({ id: "7" });
+		expect(a1.value).toBe(a2.value);
+		expect(a1.value).toBe("to-create-L7");
+
+		// different record id -> different value
+		const b = await result.current.modelToSelectorData({ id: "8" });
+		expect(b.value).not.toBe(a1.value);
+	});
+
 	it("surfaces a thrown error from prepareNewEntry via error state (genuine failure)", async () => {
 		const { connector, create } = makeConnector();
 		const prepareNewEntry = vi.fn(() =>
