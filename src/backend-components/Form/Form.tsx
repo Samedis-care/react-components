@@ -686,6 +686,7 @@ export type FormContextDataLite = Pick<
 	| "submitting"
 	| "dirty"
 	| "flowEngineConfig"
+	| "refetchForm"
 >;
 export const FormContextLite = React.createContext<FormContextDataLite | null>(
 	null,
@@ -2121,6 +2122,7 @@ const Form = <
 			submitting,
 			dirty,
 			flowEngineConfig,
+			refetchForm: refetch,
 		}),
 		[
 			id,
@@ -2144,6 +2146,7 @@ const Form = <
 			submitFormReferenced,
 			submitting,
 			dirty,
+			refetch,
 		],
 	);
 
