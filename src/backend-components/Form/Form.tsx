@@ -1056,6 +1056,12 @@ const Form = <
 	>({});
 	const valuesRef = useRef<Record<string, unknown>>({});
 	const [values, setValues] = useState<Record<string, unknown>>({});
+	// The initialValues baseline from before the latest server refetch. Used to
+	// decide which fields the user modified, since the initialValues state itself
+	// is overwritten with fresh server data before updateUnmodified runs.
+	const previousInitialValuesRef = useRef<Record<string, unknown> | undefined>(
+		undefined,
+	);
 	const touchedRef = useRef<Record<string, boolean>>({});
 	const [touched, setTouched] = useState<Record<string, boolean>>({});
 	const [errors, setErrors] = useState<Record<string, string | null>>({});
@@ -1135,6 +1141,9 @@ const Form = <
 		state: initialValuesState,
 	} = useRefState<Record<string, unknown> | undefined>(undefined);
 	useEffect(() => {
+		// remember the baseline from before this refetch so updateUnmodified can
+		// tell which fields the user modified relative to the previous server data
+		previousInitialValuesRef.current = getInitialValues();
 		setInitialValues(
 			serverData
 				? deepAssign(
@@ -1144,7 +1153,7 @@ const Form = <
 					)
 				: undefined,
 		);
-	}, [serverData, initialRecord, setInitialValues]);
+	}, [serverData, initialRecord, setInitialValues, getInitialValues]);
 	const alwaysSubmitFields = useMemo(
 		() =>
 			uniqueArray([
@@ -1157,11 +1166,12 @@ const Form = <
 	const getNormalizedData = useCallback(
 		(
 			values?: Record<string, unknown>,
+			initialValuesOverride?: Record<string, unknown>,
 		): [
 			localData: Record<string, unknown>,
 			remoteData: Record<string, unknown>,
 		] => {
-			const initialValues = getInitialValues();
+			const initialValues = initialValuesOverride ?? getInitialValues();
 			if (!initialValues) {
 				throw new Error("No server data (initialValues)");
 			}
@@ -1210,6 +1220,36 @@ const Form = <
 					})()
 				: false,
 		[initialValuesState, getNormalizedData],
+	);
+	/**
+	 * Computes per-field dirty state (value differs from the given baseline).
+	 * @param values The current form values to check
+	 * @param baseline The baseline to compare against (defaults to initialValues)
+	 * @returns A map of field name to modified (true) / unmodified (false)
+	 */
+	const getDirtyFields = useCallback(
+		(
+			values: Record<string, unknown>,
+			baseline?: Record<string, unknown>,
+		): Record<string, boolean> => {
+			const initialValues = baseline ?? getInitialValues();
+			// getNormalizedData needs both the baseline and the default record; if
+			// either isn't available yet nothing has been modified (first load)
+			if (!initialValues || !defaultRecord) {
+				return Object.fromEntries(
+					Object.keys(model.fields).map((field) => [field, false]),
+				);
+			}
+			const [localData, remoteData] = getNormalizedData(values, initialValues);
+			return Object.fromEntries(
+				Object.keys(model.fields).map((field) => [
+					field,
+					JSON.stringify(getValueByDot(field, localData)) !==
+						JSON.stringify(getValueByDot(field, remoteData)),
+				]),
+			);
+		},
+		[getNormalizedData, getInitialValues, defaultRecord, model.fields],
 	);
 	const formDirty = useMemo(() => getFormDirty(values), [getFormDirty, values]);
 	const getDirty = useCallback(
@@ -1438,31 +1478,35 @@ const Form = <
 			return newValues;
 		};
 
-		const combineTouched = (
-			...touched: Record<string, boolean>[]
+		const combineModified = (
+			...modified: Record<string, boolean>[]
 		): Record<string, boolean> => {
-			const arrays: [string, boolean][] = touched
+			const arrays: [string, boolean][] = modified
 				.map((t) => Object.entries(t))
 				.flat();
 			const fieldKeys = arrays.map((arr) => arr[0]);
-			const touchedRef = Object.fromEntries(
+			const combined = Object.fromEntries(
 				fieldKeys.map((field) => [field, false]),
 			);
-			arrays.forEach(([field, touched]) => {
-				if (touched) touchedRef[field] = true;
+			arrays.forEach(([field, isModified]) => {
+				if (isModified) combined[field] = true;
 			});
-			return touchedRef;
+			return combined;
 		};
+
+		// decide which fields to update from server data based on per-field dirty
+		// state (value differs from the pre-refetch baseline), not touched state
+		const baseline = previousInitialValuesRef.current;
+		const mainDirty = getDirtyFields(valuesRef.current, baseline);
+		const stagedDirty = getDirtyFields(valuesStagedRef.current, baseline);
 
 		valuesRef.current = updateUnmodified(
 			valuesRef.current,
-			flowEngine
-				? combineTouched(valuesStagedModifiedRef.current, touchedRef.current)
-				: touched,
+			flowEngine ? combineModified(stagedDirty, mainDirty) : mainDirty,
 		);
 		valuesStagedRef.current = updateUnmodified(
 			valuesStagedRef.current,
-			valuesStagedModifiedRef.current,
+			stagedDirty,
 		);
 		setValues(valuesRef.current);
 		setValuesStaged(valuesStagedRef.current);
@@ -1942,10 +1986,11 @@ const Form = <
 			console.log("Form Data:", localData);
 			console.log("Staged Data:", valuesStagedRef.current);
 
+			const dirtyFields = getDirtyFields(valuesRef.current);
 			Object.keys(model.fields).forEach((key) => {
 				const server: unknown = getValueByDot(key, remoteData);
 				const form = getValueByDot(key, localData);
-				const dirty = JSON.stringify(server) !== JSON.stringify(form);
+				const dirty = dirtyFields[key];
 				if (onlyDirty && !dirty) return;
 				console.log(
 					"Dirty[",
@@ -1966,6 +2011,7 @@ const Form = <
 			serverData,
 			defaultRecord,
 			getNormalizedData,
+			getDirtyFields,
 			getCustomDirtyFields,
 			model.fields,
 		],
