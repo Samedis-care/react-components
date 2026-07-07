@@ -1213,13 +1213,15 @@ const Form = <
 
 	const getFormDirty = useCallback(
 		(values: Record<string, unknown>) =>
-			initialValuesState
+			// getNormalizedData needs both the baseline and the default record; the
+			// two load independently, so guard against defaultRecord not being ready
+			initialValuesState && defaultRecord
 				? (() => {
 						const [local, remote] = getNormalizedData(values);
 						return JSON.stringify(local) !== JSON.stringify(remote);
 					})()
 				: false,
-		[initialValuesState, getNormalizedData],
+		[initialValuesState, defaultRecord, getNormalizedData],
 	);
 	/**
 	 * Computes per-field dirty state (value differs from the given baseline).
