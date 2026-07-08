@@ -237,10 +237,7 @@ const Form = (props) => {
     const [valuesStagedModified, setValuesStagedModified] = useState({});
     const valuesRef = useRef({});
     const [values, setValues] = useState({});
-    // The initialValues baseline from before the latest server refetch. Used to
-    // decide which fields the user modified, since the initialValues state itself
-    // is overwritten with fresh server data before updateUnmodified runs.
-    const previousInitialValuesRef = useRef(undefined);
+    const prevServerDataRef = useRef(null);
     const touchedRef = useRef({});
     const [touched, setTouched] = useState({});
     const [errors, setErrors] = useState({});
@@ -305,14 +302,13 @@ const Form = (props) => {
     }, []);
     // main form handling - dirty state
     const { get: getInitialValues, set: setInitialValues, state: initialValuesState, } = useRefState(undefined);
+    // single source of truth for a record's initial form values: the server data
+    // plus initialRecord for new records (records without an id). Used both for the
+    // dirty baseline and to seed the form data, so the two can never diverge.
+    const buildInitialValues = useCallback((data) => deepAssign({}, data, data.id || !initialRecord ? {} : initialRecord), [initialRecord]);
     useEffect(() => {
-        // remember the baseline from before this refetch so updateUnmodified can
-        // tell which fields the user modified relative to the previous server data
-        previousInitialValuesRef.current = getInitialValues();
-        setInitialValues(serverData
-            ? deepAssign({}, serverData[0], serverData[0].id || !initialRecord ? {} : initialRecord)
-            : undefined);
-    }, [serverData, initialRecord, setInitialValues, getInitialValues]);
+        setInitialValues(serverData ? buildInitialValues(serverData[0]) : undefined);
+    }, [serverData, buildInitialValues, setInitialValues]);
     const alwaysSubmitFields = useMemo(() => uniqueArray([
         ...(props.alwaysSubmitFields ?? []),
         ...(flowEngineConfig.current.alwaysSubmitFields ?? []),
@@ -507,15 +503,10 @@ const Form = (props) => {
     useEffect(() => {
         if (isLoading || !serverData || !serverData[0])
             return;
-        valuesRef.current = deepClone(serverData[0]);
+        valuesRef.current = deepClone(buildInitialValues(serverData[0]));
         setValues(valuesRef.current);
         touchedRef.current = getDefaultTouched();
         setTouched(touchedRef.current);
-        if (initialRecord && id == null) {
-            Object.keys(model.fields)
-                .filter((key) => dotInObject(key, initialRecord))
-                .forEach((key) => setFieldValue(key, getValueByDot(key, initialRecord), false));
-        }
         valuesStagedRef.current = deepClone(valuesRef.current);
         setValuesStaged(valuesStagedRef.current);
         valuesStagedModifiedRef.current = deepClone(touchedRef.current);
@@ -527,6 +518,12 @@ const Form = (props) => {
         if (isLoading || !serverData || !serverData[0])
             return;
         const serverRecord = deepClone(serverData[0]);
+        // the very first load is fully handled by the init effect above (including
+        // initialRecord); only record the baseline so later refetches can diff
+        if (!prevServerDataRef.current) {
+            prevServerDataRef.current = serverRecord;
+            return;
+        }
         const updateUnmodified = (data, modifiedValues) => {
             const newValues = deepClone(data);
             const untouchedFields = Object.entries(modifiedValues)
@@ -552,14 +549,15 @@ const Form = (props) => {
             return combined;
         };
         // decide which fields to update from server data based on per-field dirty
-        // state (value differs from the pre-refetch baseline), not touched state
-        const baseline = previousInitialValuesRef.current;
+        // state (value differs from the previous server data), not touched state
+        const baseline = prevServerDataRef.current;
         const mainDirty = getDirtyFields(valuesRef.current, baseline);
         const stagedDirty = getDirtyFields(valuesStagedRef.current, baseline);
         valuesRef.current = updateUnmodified(valuesRef.current, flowEngine ? combineModified(stagedDirty, mainDirty) : mainDirty);
         valuesStagedRef.current = updateUnmodified(valuesStagedRef.current, stagedDirty);
         setValues(valuesRef.current);
         setValuesStaged(valuesStagedRef.current);
+        prevServerDataRef.current = serverRecord;
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [serverData]);
     // main form - submit handler
