@@ -39,13 +39,21 @@ const makeCapture = (sink: { ctx?: ReturnType<typeof useFormContext> }) => {
 	return Capture as unknown as React.ComponentType<never>;
 };
 
-const renderForm = () => {
+const renderForm = (opts?: {
+	id?: string | null;
+	initialRecord?: Record<string, unknown>;
+}) => {
 	const model = createTestModel();
 	const connector = model.connector as unknown as MockConnector;
 	const sink: { ctx?: ReturnType<typeof useFormContext> } = {};
 	render(
 		<Framework>
-			<Form model={model} id="1" errorComponent={DefaultErrorComponent}>
+			<Form
+				model={model}
+				id={opts && "id" in opts ? (opts.id ?? null) : "1"}
+				initialRecord={opts?.initialRecord}
+				errorComponent={DefaultErrorComponent}
+			>
 				{makeCapture(sink)}
 			</Form>
 		</Framework>,
@@ -89,5 +97,32 @@ describe("Form updateUnmodified uses per-field dirty state", () => {
 
 		// The user's edit must win.
 		expect(sink.ctx?.values.first_name).toBe("UserEdit");
+	});
+
+	it("does not clobber initialRecord values on a create form", async () => {
+		const { sink } = renderForm({
+			id: null,
+			initialRecord: { first_name: "Prefill" },
+		});
+
+		// initialRecord must survive the initial load; updateUnmodified must not
+		// overwrite it with the model's default (empty) server value.
+		await waitFor(() => expect(sink.ctx?.values.first_name).toBe("Prefill"));
+		// give the effects a chance to run and (wrongly) overwrite it
+		await act(async () => {});
+		expect(sink.ctx?.values.first_name).toBe("Prefill");
+	});
+
+	it("applies initialRecord to form data for a falsy non-null id (empty string)", async () => {
+		// id="" resolves to the default (create) record just like null. initialRecord
+		// must land in the form data, not only in the dirty baseline.
+		const { sink } = renderForm({
+			id: "",
+			initialRecord: { first_name: "Prefill" },
+		});
+
+		await waitFor(() => expect(sink.ctx?.values.first_name).toBe("Prefill"));
+		await act(async () => {});
+		expect(sink.ctx?.values.first_name).toBe("Prefill");
 	});
 });

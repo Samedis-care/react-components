@@ -1056,12 +1056,7 @@ const Form = <
 	>({});
 	const valuesRef = useRef<Record<string, unknown>>({});
 	const [values, setValues] = useState<Record<string, unknown>>({});
-	// The initialValues baseline from before the latest server refetch. Used to
-	// decide which fields the user modified, since the initialValues state itself
-	// is overwritten with fresh server data before updateUnmodified runs.
-	const previousInitialValuesRef = useRef<Record<string, unknown> | undefined>(
-		undefined,
-	);
+	const prevServerDataRef = useRef<Record<string, unknown> | null>(null);
 	const touchedRef = useRef<Record<string, boolean>>({});
 	const [touched, setTouched] = useState<Record<string, boolean>>({});
 	const [errors, setErrors] = useState<Record<string, string | null>>({});
@@ -1140,20 +1135,19 @@ const Form = <
 		set: setInitialValues,
 		state: initialValuesState,
 	} = useRefState<Record<string, unknown> | undefined>(undefined);
+	// single source of truth for a record's initial form values: the server data
+	// plus initialRecord for new records (records without an id). Used both for the
+	// dirty baseline and to seed the form data, so the two can never diverge.
+	const buildInitialValues = useCallback(
+		(data: Record<string, unknown>): Record<string, unknown> =>
+			deepAssign({}, data, data.id || !initialRecord ? {} : initialRecord),
+		[initialRecord],
+	);
 	useEffect(() => {
-		// remember the baseline from before this refetch so updateUnmodified can
-		// tell which fields the user modified relative to the previous server data
-		previousInitialValuesRef.current = getInitialValues();
 		setInitialValues(
-			serverData
-				? deepAssign(
-						{},
-						serverData[0],
-						serverData[0].id || !initialRecord ? {} : initialRecord,
-					)
-				: undefined,
+			serverData ? buildInitialValues(serverData[0]) : undefined,
 		);
-	}, [serverData, initialRecord, setInitialValues, getInitialValues]);
+	}, [serverData, buildInitialValues, setInitialValues]);
 	const alwaysSubmitFields = useMemo(
 		() =>
 			uniqueArray([
@@ -1436,18 +1430,10 @@ const Form = <
 	useEffect(() => {
 		if (isLoading || !serverData || !serverData[0]) return;
 
-		valuesRef.current = deepClone(serverData[0]);
+		valuesRef.current = deepClone(buildInitialValues(serverData[0]));
 		setValues(valuesRef.current);
 		touchedRef.current = getDefaultTouched();
 		setTouched(touchedRef.current);
-
-		if (initialRecord && id == null) {
-			Object.keys(model.fields)
-				.filter((key) => dotInObject(key, initialRecord))
-				.forEach((key) =>
-					setFieldValue(key, getValueByDot(key, initialRecord), false),
-				);
-		}
 
 		valuesStagedRef.current = deepClone(valuesRef.current);
 		setValuesStaged(valuesStagedRef.current);
@@ -1461,6 +1447,12 @@ const Form = <
 	useEffect(() => {
 		if (isLoading || !serverData || !serverData[0]) return;
 		const serverRecord = deepClone(serverData[0]);
+		// the very first load is fully handled by the init effect above (including
+		// initialRecord); only record the baseline so later refetches can diff
+		if (!prevServerDataRef.current) {
+			prevServerDataRef.current = serverRecord;
+			return;
+		}
 		const updateUnmodified = (
 			data: Record<string, unknown>,
 			modifiedValues: Record<string, boolean>,
@@ -1497,8 +1489,8 @@ const Form = <
 		};
 
 		// decide which fields to update from server data based on per-field dirty
-		// state (value differs from the pre-refetch baseline), not touched state
-		const baseline = previousInitialValuesRef.current;
+		// state (value differs from the previous server data), not touched state
+		const baseline = prevServerDataRef.current;
 		const mainDirty = getDirtyFields(valuesRef.current, baseline);
 		const stagedDirty = getDirtyFields(valuesStagedRef.current, baseline);
 
@@ -1512,6 +1504,7 @@ const Form = <
 		);
 		setValues(valuesRef.current);
 		setValuesStaged(valuesStagedRef.current);
+		prevServerDataRef.current = serverRecord;
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [serverData]);
 
