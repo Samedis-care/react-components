@@ -58,7 +58,11 @@ const getMenuRouteParams = (
 	if (!match) {
 		// if this fails, get the closest match we can get
 		exact = false;
-		match = definitions
+		// copy before sort: sort() mutates in place, and `definitions` is the
+		// caller's (memoized) menu definition prop — mutating it permanently
+		// reorders the rendered menu by route length (see resolveLocation, which
+		// already copies).
+		match = [...definitions]
 			.sort((a, b) => (b.route?.length ?? 0) - (a.route?.length ?? 0))
 			.find((entry) => entry.route && doesRouteMatch(entry.route, path));
 	}
