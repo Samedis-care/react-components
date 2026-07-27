@@ -53,7 +53,7 @@ const BackendDataGridMultiSelect = <
 	props: BackendDataGridMultiSelectProps<KeyT, VisibilityT, CustomT>,
 ) => {
 	const { model, readOnly, selected, onChange, ...gridProps } = props;
-	const [refreshToken, setRefreshToken] = useState(new Date().toISOString());
+	const [refreshToken, setRefreshToken] = useState("");
 	const refreshGrid = useCallback(
 		() => setRefreshToken(new Date().toISOString()),
 		[],
@@ -74,15 +74,14 @@ const BackendDataGridMultiSelect = <
 		}
 	}, [model]);
 
-	// handle force refresh token
-	useEffect(refreshGrid, [refreshGrid, gridProps.forceRefreshToken]);
-
 	return (
 		<DataGridNoPersist>
 			<DataGrid
 				{...gridProps}
 				columns={model.toDataGridColumnDefinition()}
-				forceRefreshToken={refreshToken}
+				forceRefreshToken={`${
+					gridProps.forceRefreshToken || "undefined"
+				}${refreshToken}`}
 				disableSelection={false}
 				prohibitMultiSelect={false}
 				customSelectionControl={undefined}
