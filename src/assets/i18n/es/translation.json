@@ -1,0 +1,377 @@
+{
+	"standalone": {
+		"schedule": {
+			"week": "Semana",
+			"today": "Hoy",
+			"prev-week": "Semana anterior",
+			"next-week": "Semana siguiente",
+			"filter-settings": "Ajustes de filtro"
+		},
+		"portal": {
+			"menu-toggle": "Alternar menú",
+			"collapse-menu": "Contraer menú",
+			"expand-menu": "Expandir menú"
+		},
+		"uikit": {
+			"info": "Más información",
+			"clear": "Borrar",
+			"multi-language-input": {
+				"toggle-languages": "Alternar entradas de idioma"
+			}
+		},
+		"signal-portlet": {
+			"last-updated": "Última actualización: {{AGE}}",
+			"refresh": "Actualizar"
+		},
+		"notifications": {
+			"title": "Notificaciones"
+		},
+		"how-it-works": {
+			"title": "Cómo funciona"
+		},
+		"data-grid": {
+			"content": {
+				"filter": "Filtrar",
+				"reset-column-filter": "Borrar filtro",
+				"bool-filter": {
+					"true": "Sí",
+					"false": "No",
+					"any": "Todos"
+				},
+				"set-filter": {
+					"search": "Buscar…",
+					"select-all": "Seleccionar todo",
+					"invert": "Mostrar todo excepto…"
+				},
+				"filter-type": {
+					"eq": "Igual a",
+					"not-eq": "Distinto de",
+					"empty": "Está vacío",
+					"not-empty": "No está vacío",
+					"contains": "Contiene",
+					"not-contains": "No contiene",
+					"starts-with": "Comienza por",
+					"ends-with": "Termina en",
+					"lt": "Menor que",
+					"lte": "Menor o igual que",
+					"gt": "Mayor que",
+					"gte": "Mayor o igual que",
+					"in-range": "En el rango",
+					"lt-date": "Antes de",
+					"lte-date": "En o antes de",
+					"gt-date": "Después de",
+					"gte-date": "En o después de",
+					"in-range-date": "Entre",
+					"matches": "Coincide",
+					"not-matches": "No coincide"
+				},
+				"no-data": "La lista no contiene datos.",
+				"filter-combination": {
+					"and": "Y",
+					"or": "O"
+				},
+				"no-data-reset-filters": "Borrar filtros",
+				"no-data-filters": "Ningún dato coincide con sus filtros."
+			},
+			"header": {
+				"new": "Nuevo",
+				"export": "Exportar",
+				"import": "Importar",
+				"settings": "Columnas",
+				"reset": "Restablecer",
+				"search": "Buscar",
+				"more-options": "Más opciones",
+				"custom-filter-button": "Filtrar",
+				"delete": "Eliminar",
+				"edit": "Editar",
+				"reset-options": {
+					"refresh": "Actualizar",
+					"filter": "Restablecer filtro",
+					"sort": "Restablecer ajustes de orden",
+					"column": "Restablecer ajustes de columna",
+					"width": "Restablecer anchos de columna",
+					"all": "Restablecer todo"
+				}
+			},
+			"settings": {
+				"column": "Columna",
+				"show": "Visible",
+				"pin": "Fijar",
+				"close": "Cerrar"
+			},
+			"custom-filters": {
+				"title": "Selección de filtros"
+			},
+			"footer": {
+				"total": "Total:",
+				"filtered": "Filtrado:",
+				"edit": "Editar",
+				"delete": "Eliminar",
+				"more": "Más",
+				"select-all": "Todos",
+				"first-page": "Primera página",
+				"last-page": "Última página",
+				"next-page": "Página siguiente",
+				"page-of": "de",
+				"page-size": "Tamaño de página:",
+				"page-size-tooltip": "Número de registros por página",
+				"prev-page": "Página anterior"
+			}
+		},
+		"selector": {
+			"add-new": "Crear",
+			"base-selector": {
+				"no-options-text": "Sin opciones",
+				"close-icon-text": "Cerrar",
+				"open-icon-text": "Abrir",
+				"clear-icon-text": "Borrar",
+				"loading-text": "Cargando…",
+				"start-typing-to-search-text": "Introduzca un texto de búsqueda para obtener resultados",
+				"lru-label": "Usados recientemente",
+				"selected": "SELECCIONADO"
+			},
+			"multi-select": {
+				"remove-item": "Quitar {{ITEM}}",
+				"delete-confirm": {
+					"title": "Confirmar eliminación",
+					"message": "¿Está seguro de que desea quitar esta entrada?",
+					"yes": "Sí",
+					"no": "No"
+				}
+			}
+		},
+		"file-upload": {
+			"close": "Cerrar",
+			"upload": "Subir",
+			"upload-capture": {
+				"image": "Tomar foto"
+			},
+			"upload-modern": "Arrastre y suelte el archivo aquí o haga clic para abrir el diálogo de subida",
+			"upload-modern-dnd": "Arrastre y suelte el archivo aquí",
+			"upload-modern-btn": "Haga clic para abrir el diálogo de subida",
+			"upload-modern-btn-capture": {
+				"image": "Haga clic para tomar una foto"
+			},
+			"no-files": "No hay archivos adjuntos disponibles",
+			"formats": "Formatos de archivo",
+			"formats-modern": "Formatos de archivo permitidos:",
+			"error": {
+				"too-many": "Se han seleccionado demasiados archivos",
+				"limit-reached": "Se ha alcanzado el número máximo de archivos permitidos",
+				"invalid-type": "Se ha seleccionado un tipo de archivo no admitido"
+			},
+			"format": {
+				"any": "Todos",
+				"image": "Imágenes"
+			},
+			"multi-image": {
+				"edit": "Editar",
+				"primary": "Principal",
+				"remove": "Quitar imagen",
+				"prev-image": "Imagen anterior",
+				"next-image": "Imagen siguiente"
+			}
+		},
+		"phone-number": {
+			"invalid": "Introduzca un número de teléfono correcto"
+		},
+		"signature-pad": {
+			"dialog": {
+				"reset": "Borrar firma",
+				"save-changes": "Guardar cambios",
+				"title": "Firme aquí",
+				"title-name": "Firme aquí ({{NAME}})",
+				"reset-confirm": {
+					"title": "Borrar firma",
+					"message": "¿Está seguro de que desea borrar la firma?",
+					"message-name": "¿Está seguro de que desea borrar la firma de {{NAME}}?",
+					"yes": "Sí",
+					"no": "No"
+				},
+				"close": "Cerrar",
+				"signature": "Firma"
+			},
+			"sign-here": "Firmado digitalmente aquí"
+		}
+	},
+	"framework": {
+		"dialogs": {
+			"navblock": "La navegación está bloqueada. Cierre primero los diálogos abiertos."
+		}
+	},
+	"non-standalone": {
+		"dialog": {
+			"okay": "OK",
+			"dialog-title": {
+				"close": "Cerrar"
+			}
+		},
+		"language-switcher": {
+			"title": "Seleccione su país e idioma",
+			"no-locales": "Ningún idioma coincide con su búsqueda"
+		}
+	},
+	"backend-integration": {
+		"connector": {
+			"json-api-client": {
+				"network-error": "Se ha producido un error de red.",
+				"parse-error": "Error al analizar la respuesta (JSON no válido). El servidor devolvió el estado {{STATUS_CODE}} {{STATUS_TEXT}}."
+			}
+		},
+		"model": {
+			"types": {
+				"renderers": {
+					"boolean": {
+						"true": "Sí",
+						"false": "No"
+					},
+					"date": {
+						"not-set": "Fecha no establecida",
+						"validation-error": "Introduzca una fecha válida"
+					},
+					"enum": {
+						"unknown": "Desconocido"
+					},
+					"image": {
+						"not-set": "No hay imagen"
+					},
+					"signature": {
+						"not-set": "Sin firmar"
+					},
+					"files": {
+						"no-file": "No hay archivos"
+					}
+				},
+				"date-nullable": {
+					"not-set": "N/D"
+				},
+				"image": {
+					"not-set": "No hay imagen",
+					"set": "Imagen disponible"
+				},
+				"boolean": {
+					"true": "Sí",
+					"false": "No"
+				}
+			}
+		}
+	},
+	"backend-components": {
+		"data-grid": {
+			"delete": {
+				"confirm-dialog": {
+					"title": "Eliminar",
+					"message": "¿Desea realmente eliminar {{NUM}} entradas?",
+					"messageInverted": "¿Desea realmente eliminar todo excepto {{NUM}} entradas?",
+					"buttons": {
+						"yes": "Sí",
+						"no": "No"
+					}
+				},
+				"error-dialog": {
+					"title": "Error",
+					"message": "Error al eliminar las entradas seleccionadas: {{ERROR}}",
+					"buttons": {
+						"okay": "OK"
+					}
+				}
+			}
+		},
+		"form": {
+			"back-on-dirty": {
+				"title": "¿Salir de la página del formulario?",
+				"message": "Se perderán los cambios",
+				"yes": "Sí",
+				"no": "No"
+			},
+			"submit-with-warnings": {
+				"title": "Advertencia",
+				"message": "Existen las siguientes advertencias, ¿desea continuar de todos modos?",
+				"yes": "Sí",
+				"no": "No"
+			},
+			"read-only": {
+				"submitting": "El formulario se está guardando"
+			}
+		},
+		"selector": {
+			"loading": "Cargando…",
+			"loading-error": "Error al obtener los datos"
+		},
+		"crud": {
+			"import": {
+				"step1": "Subir datos",
+				"step2": "Conectar datos",
+				"step3": "Validación y revisión",
+				"step4": "Importar datos",
+				"source_fields": "Campos de origen",
+				"source_field": "Campo",
+				"source_field_type": "Tipos de datos",
+				"destination_fields": "Campos de destino",
+				"conv_script": "Script de conversión (JavaScript)",
+				"queue": "En cola: {{COUNT}}",
+				"success": "Correctos: {{COUNT}}",
+				"failed": "Fallidos: {{COUNT}}",
+				"last_error": "Último error",
+				"errors": {
+					"file_select": "Archivo seleccionado no válido",
+					"update-key-not-uniq": "{{UPDATE_KEY}} no es único en el conjunto de datos de importación"
+				},
+				"validations": {
+					"string": "El resultado debe ser una cadena o null",
+					"number": "El resultado debe ser un número o null",
+					"currency_unsupported": "La moneda aún no se puede importar",
+					"date": "El resultado debe ser una fecha o null",
+					"boolean": "El resultado debe ser un valor booleano o null",
+					"fail": "Error de validación: {{REASON}}. Para más detalles, consulte la consola del navegador.",
+					"unknown": "Desconocido"
+				},
+				"validation_errors": "Errores de validación",
+				"conversion_errors": "Errores de conversión de datos"
+			},
+			"grid": {
+				"view": "Ver"
+			}
+		}
+	},
+	"utils": {
+		"validation": {
+			"required": "El campo {{attribute}} es obligatorio",
+			"missing": "Falta el campo {{attribute}}",
+			"email": "El campo {{attribute}} requiere un correo electrónico válido",
+			"url": "El campo {{attribute}} requiere una URL válida"
+		},
+		"timestampToAge": {
+			"just-now": "justo ahora",
+			"less-minute": "Hace menos de un minuto",
+			"minute": "minuto",
+			"minutes": "minutos",
+			"hour": "hora",
+			"hours": "horas",
+			"day": "día",
+			"days": "días",
+			"str": "Hace {{AMOUNT}} {{UNIT}}"
+		}
+	},
+	"common": {
+		"buttons": {
+			"save": "Guardar",
+			"back": "Atrás",
+			"ok": "OK",
+			"next": "Siguiente",
+			"cancel": "Cancelar",
+			"finish": "Finalizar",
+			"choose": "Elegir",
+			"yes": "Sí",
+			"no": "No",
+			"reset-filters": "Restablecer todos los filtros"
+		},
+		"dialogs": {
+			"error-title": "Se ha producido un error",
+			"validation-error-title": "Error de validación",
+			"info": "Información",
+			"are-you-sure": "¿Está seguro?",
+			"are-you-sure-submit": "¿Continuar?"
+		}
+	}
+}
