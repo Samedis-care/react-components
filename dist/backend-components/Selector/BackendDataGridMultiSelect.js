@@ -6,7 +6,7 @@ import { renderDataGridRecordUsingModel } from "../DataGrid";
 import { DataGridNoPersist } from "../../standalone";
 const BackendDataGridMultiSelect = (props) => {
     const { model, readOnly, selected, onChange, ...gridProps } = props;
-    const [refreshToken, setRefreshToken] = useState(new Date().toISOString());
+    const [refreshToken, setRefreshToken] = useState("");
     const refreshGrid = useCallback(() => setRefreshToken(new Date().toISOString()), []);
     const [initialSelectionChangeReceived, setInitialSelectionChangeReceived] = useState(false);
     // developer warning
@@ -17,9 +17,7 @@ const BackendDataGridMultiSelect = (props) => {
             console.warn("[Components-Care] [DataGridMultiSelectCRUD] Backend connector does not support index2 function, offset based pagination will be emulated (inefficient)");
         }
     }, [model]);
-    // handle force refresh token
-    useEffect(refreshGrid, [refreshGrid, gridProps.forceRefreshToken]);
-    return (_jsx(DataGridNoPersist, { children: _jsx(DataGrid, { ...gridProps, columns: model.toDataGridColumnDefinition(), forceRefreshToken: refreshToken, disableSelection: false, prohibitMultiSelect: false, customSelectionControl: undefined, onSelectionChange: (invert, newIds) => {
+    return (_jsx(DataGridNoPersist, { children: _jsx(DataGrid, { ...gridProps, columns: model.toDataGridColumnDefinition(), forceRefreshToken: `${gridProps.forceRefreshToken || "undefined"}${refreshToken}`, disableSelection: false, prohibitMultiSelect: false, customSelectionControl: undefined, onSelectionChange: (invert, newIds) => {
                 if (!initialSelectionChangeReceived) {
                     setInitialSelectionChangeReceived(true);
                     return;
