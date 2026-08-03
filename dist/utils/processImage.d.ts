@@ -17,6 +17,7 @@ export interface IDownscaleProps {
  * @param file The image file
  * @param convertImagesTo MimeType to convert the image to (e.g. image/png or image/jpg)
  * @param downscale Settings to downscale an image
+ * @throws ImageLoadError if the browser cannot decode the image
  */
 declare const processImage: (file: File, convertImagesTo?: string, downscale?: IDownscaleProps) => Promise<string>;
 export default processImage;

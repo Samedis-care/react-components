@@ -12,6 +12,8 @@ import getFileExt from "../../../utils/getFileExt";
 import matchMime from "../../../utils/matchMime";
 import useDropZone from "../../../utils/useDropZone";
 import useRefState from "../../../utils/useRefState";
+import { isImageLoadError } from "../../../utils/ImageLoadError";
+import { captureError } from "../../../framework/ErrorReporting";
 const StyledGroupBox = styled(GroupBox, { name: "CcFileUpload", slot: "root" })({});
 const Dropzone = styled(Grid, { name: "CcFileUpload", slot: "dropzone" })(({ theme }) => ({
     "&.Mui-active": {
@@ -94,9 +96,26 @@ const FileUpload = (inProps, ref) => {
             }
             const isImage = file.type.startsWith("image/");
             if (isImage && processImages) {
+                let preview;
+                try {
+                    preview = await processImage(file, convertImagesTo, imageDownscaleOptions);
+                }
+                catch (e) {
+                    // the image couldn't be read or the browser couldn't decode it (HEIC, TIFF, corrupt
+                    // file). abort the whole selection, a partial upload would be confusing.
+                    const err = e instanceof Error ? e : new Error(String(e));
+                    captureError(err, { source: "FileUpload.processFiles" });
+                    const loadFailed = isImageLoadError(err);
+                    handleError(loadFailed
+                        ? "files.image.load-failed"
+                        : "files.image.process-failed", t(loadFailed
+                        ? "standalone.file-upload.error.image-load-failed"
+                        : "standalone.file-upload.error.image-process-failed"));
+                    return;
+                }
                 newFiles.push({
                     file,
-                    preview: await processImage(file, convertImagesTo, imageDownscaleOptions),
+                    preview,
                     canBeUploaded: true,
                     delete: false,
                 });

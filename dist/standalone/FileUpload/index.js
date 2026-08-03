@@ -3,3 +3,5 @@ export { default as ImageSelector } from "./Image/ImageSelector";
 export { default as ImagePreviewDialog } from "./Image/ImagePreviewDialog";
 export * from "./MultiImage";
 export * from "./FileIcons";
+export { default as useImageError } from "./useImageError";
+export * from "./useImageError";

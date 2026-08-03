@@ -158,7 +158,9 @@
 			"error": {
 				"too-many": "Troppi file selezionati",
 				"limit-reached": "Numero massimo di file consentiti raggiunto",
-				"invalid-type": "Tipo di file selezionato non supportato"
+				"invalid-type": "Tipo di file selezionato non supportato",
+				"image-load-failed": "Non è stato possibile caricare l'immagine. Il formato non è supportato dal browser o il file è danneggiato",
+				"image-process-failed": "Non è stato possibile elaborare l'immagine"
 			},
 			"format": {
 				"any": "Tutti",

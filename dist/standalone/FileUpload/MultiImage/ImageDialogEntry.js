@@ -18,7 +18,7 @@ const IsPrimary = styled(Grid, {
 })({});
 const ImageDialogEntry = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcImageDialogEntry" });
-    const { previewSize, img, isPrimary, changeImages, changePrimary, processFile, subClasses, onDelete, className, classes, } = props;
+    const { previewSize, img, isPrimary, changeImages, changePrimary, processFile, onImageError, subClasses, onDelete, className, classes, } = props;
     const { t } = useCCTranslations();
     const setPrimary = useCallback(() => {
         changePrimary(img.id);
@@ -39,9 +39,17 @@ const ImageDialogEntry = (inProps) => {
         const file = files.item(0);
         if (!file)
             return;
-        const imageData = await processFile(file);
+        let imageData;
+        try {
+            imageData = await processFile(file);
+        }
+        catch (e) {
+            // the image couldn't be read or the browser couldn't decode it
+            onImageError(e);
+            return;
+        }
         changeImages((images) => images.map((image) => image === img ? { ...image, image: imageData } : image));
-    }, [changeImages, img, processFile]);
+    }, [changeImages, img, processFile, onImageError]);
     const PrimaryComp = isPrimary ? IsPrimary : MakePrimary;
     return (_jsxs(Root, { size: previewSize ? undefined : { xs: 12, md: 6, lg: 3 }, className: combineClassNames([className, classes?.root]), children: [_jsx("div", { children: _jsx(ImageBox, { fileName: img.name, width: previewSize, height: previewSize, image: img.image, onRemove: img.readOnly ? undefined : removeImage, onFilesDropped: img.readOnly ? undefined : replaceImage, classes: subClasses?.imageBox }) }), _jsx(Box, { sx: { mt: 1 }, children: _jsxs(PrimaryComp, { container: true, spacing: 1, sx: { alignItems: "center", justifyContent: "flex-start" }, className: isPrimary ? classes?.isPrimary : classes?.makePrimary, onClick: isPrimary ? undefined : setPrimary, children: [_jsx(Grid, { children: isPrimary ? _jsx(StarredIcon, { color: "primary" }) : _jsx(NotStarredIcon, {}) }), _jsx(Grid, { children: _jsx(Typography, { children: t("standalone.file-upload.multi-image.primary") }) })] }) })] }));
 };

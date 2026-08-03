@@ -2,6 +2,7 @@ import React from "react";
 import { ImageBoxProps } from "./ImageBox";
 import { IDownscaleProps } from "../../../utils/processImage";
 import { ImageDialogEntryProps } from "./ImageDialogEntry";
+import { ImageErrorHandler } from "../useImageError";
 export interface MultiImageImage {
     /**
      * A unique identifier for the image
@@ -79,6 +80,11 @@ export interface MultiImageProps {
      * @returns Should the delete commence?
      */
     onDelete?: (image: MultiImageImage) => Promise<boolean> | boolean;
+    /**
+     * Called if one of the selected images couldn't be processed (e.g. an image format the browser
+     * can't decode, like HEIC). If unset an error dialog is shown instead.
+     */
+    onError?: ImageErrorHandler;
     /**
      * Custom edit label
      */

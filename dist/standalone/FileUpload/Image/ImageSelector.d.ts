@@ -1,5 +1,6 @@
 import React from "react";
 import { IDownscaleProps } from "../../../utils/processImage";
+import { ImageErrorHandler } from "../useImageError";
 export type PostImageEditCallback = (image: string) => Promise<string>;
 export interface ImageSelectorProps {
     /**
@@ -80,6 +81,11 @@ export interface ImageSelectorProps {
      * @param image The data uri image
      */
     postEditCallback?: PostImageEditCallback;
+    /**
+     * Called if the selected image couldn't be processed (e.g. an image format the browser can't
+     * decode, like HEIC). If unset an error dialog is shown instead.
+     */
+    onError?: ImageErrorHandler;
 }
 export type ImageSelectorClassKey = "rootClassic" | "rootModern" | "imgWrapper" | "previewClassic" | "previewModern" | "changeEventHelper" | "modernUploadLabel" | "modernFullHeightBox" | "modernFullHeightGrid" | "modernFormatsLabel" | "modernFormatIcon" | "modernUploadControlsWrapper" | "modernUploadControlUpload" | "pfpRoot" | "pfpIconBtn" | "pfpImg" | "pfpImgPlaceholder";
 declare const _default: React.MemoExoticComponent<(inProps: ImageSelectorProps) => React.JSX.Element>;

@@ -4,6 +4,7 @@ import type { IDownscaleProps } from "./processImage";
  * @param imageData The image (as data uri)
  * @param convertImagesTo MimeType to convert the image to (e.g. image/png or image/jpg)
  * @param downscale Settings to downscale an image
+ * @throws ImageLoadError if the browser cannot decode the image
  */
 declare const processImageB64: (imageData: string, convertImagesTo: string, downscale?: IDownscaleProps) => Promise<string>;
 export default processImageB64;

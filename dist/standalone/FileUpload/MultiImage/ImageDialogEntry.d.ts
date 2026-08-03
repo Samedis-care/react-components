@@ -1,6 +1,7 @@
 import React from "react";
 import { ImageBoxProps } from "./ImageBox";
 import { MultiImageImage, MultiImageManipulationCallback, MultiImageProcessFile, MultiImageProps } from "./MultiImage";
+import { ImageErrorReporter } from "../useImageError";
 export interface ImageDialogEntryProps extends Pick<MultiImageProps, "previewSize"> {
     /**
      * The image
@@ -23,6 +24,10 @@ export interface ImageDialogEntryProps extends Pick<MultiImageProps, "previewSiz
      * Process image file
      */
     processFile: MultiImageProcessFile;
+    /**
+     * Called if processFile failed, shows the error to the user
+     */
+    onImageError: ImageErrorReporter;
     /**
      * Delete confirmation handler
      */

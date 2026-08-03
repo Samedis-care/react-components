@@ -33,6 +33,11 @@ export declare const CcErrorNames: {
      */
     readonly NetworkError: "NetworkError";
     /**
+     * @see ImageLoadError
+     * @remarks the name is prefixed, to avoid collisions with app error classes
+     */
+    readonly ImageLoadError: "CcImageLoadError";
+    /**
      * @see RequestBatchingError
      */
     readonly RequestBatchingError: "RequestBatchingError";

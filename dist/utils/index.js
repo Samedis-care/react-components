@@ -10,6 +10,8 @@ export { default as getDataUriMime } from "./getDataUriMime";
 export { default as getFileExt } from "./getFileExt";
 export { default as processImage } from "./processImage";
 export { default as processImageB64 } from "./processImageB64";
+export { default as ImageLoadError } from "./ImageLoadError";
+export * from "./ImageLoadError";
 export { default as shallowCompare } from "./shallowCompare";
 export { default as shallowCompareArray } from "./shallowCompareArray";
 export { default as compareArrayContent } from "./compareArrayContent";

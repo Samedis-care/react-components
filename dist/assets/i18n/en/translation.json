@@ -158,7 +158,9 @@
 			"error": {
 				"too-many": "Too many files selected",
 				"limit-reached": "Maximum amount of allowed files reached",
-				"invalid-type": "Unsupported file type selected"
+				"invalid-type": "Unsupported file type selected",
+				"image-load-failed": "The image could not be loaded. The format is not supported by your browser or the file is damaged",
+				"image-process-failed": "The image could not be processed"
 			},
 			"format": {
 				"any": "Any",

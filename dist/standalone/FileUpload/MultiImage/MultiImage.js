@@ -10,6 +10,7 @@ import useCCTranslations from "../../../utils/useCCTranslations";
 import ImageDots from "./ImageDots";
 import combineClassNames from "../../../utils/combineClassNames";
 import getCanImageCapture from "../../../utils/getCanImageCapture";
+import useImageError from "../useImageError";
 const Root = styled("div", {
     name: "CcMultiImage",
     slot: "root",
@@ -36,9 +37,10 @@ const EditLabel = styled(Typography, {
 export const MultiImageNewIdPrefix = "MultiImage-New-";
 const MultiImage = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcMultiImage" });
-    const { label, name, editLabel, additionalDialogContent, images, primary, placeholderImage, uploadImage, captureImage, readOnly, maxImages, capture, convertImagesTo, downscale, onChange, onPrimaryChange, subClasses, onDelete, className, classes, } = props;
+    const { label, name, editLabel, additionalDialogContent, images, primary, placeholderImage, uploadImage, captureImage, readOnly, maxImages, capture, convertImagesTo, downscale, onChange, onPrimaryChange, subClasses, onDelete, onError, className, classes, } = props;
     const previewSize = props.previewSize ?? 256;
     const { t } = useCCTranslations();
+    const handleImageError = useImageError("MultiImage.processFiles", onError);
     const primaryImg = useMemo(() => images.find((img) => img.id === primary) ?? images[0], [images, primary]);
     // images.indexOf(undefined) works and returns -1
     const getPrimaryImageIndex = () => images.indexOf(primaryImg);
@@ -97,19 +99,35 @@ const MultiImage = (inProps) => {
     const handleUploadViaDrop = useCallback(async (files) => {
         if (!onChange)
             return;
-        const newImages = await processFiles(files);
+        let newImages;
+        try {
+            newImages = await processFiles(files);
+        }
+        catch (e) {
+            // one of the images couldn't be read or the browser couldn't decode it
+            handleImageError(e);
+            return;
+        }
         onChange(name, images.concat(newImages));
-    }, [processFiles, name, images, onChange]);
+    }, [processFiles, name, images, onChange, handleImageError]);
     const handlePreviewDrop = useCallback(async (files) => {
         if (!onChange)
             return;
         if (files.length === 0)
             return;
-        const newImages = await processFiles(files);
+        let newImages;
+        try {
+            newImages = await processFiles(files);
+        }
+        catch (e) {
+            // one of the images couldn't be read or the browser couldn't decode it
+            handleImageError(e);
+            return;
+        }
         onChange(name, images.concat(newImages));
         if (onPrimaryChange)
             onPrimaryChange(name, newImages[0].id);
-    }, [onChange, name, images, processFiles, onPrimaryChange]);
+    }, [onChange, name, images, processFiles, onPrimaryChange, handleImageError]);
     const handleUpload = useCallback((evt) => {
         const files = evt.target.files;
         if (!files)
@@ -145,7 +163,7 @@ const MultiImage = (inProps) => {
                                     total: images.length,
                                     active: currentImage,
                                     setActive: setCurrentImage,
-                                }, disableBackground: true }) }), _jsxs(Grid, { container: true, sx: { alignContent: "space-between" }, wrap: "nowrap", spacing: 1, size: 12, children: [_jsx(Grid, { size: "grow", children: _jsx(ImageDots, { total: images.length, active: currentImage, setActive: setCurrentImage }) }), !readOnly && (_jsx(Grid, { children: _jsx(EditLabel, { component: Link, variant: "body2", onClick: openDialog, href: "#", children: editLabel ?? t("standalone.file-upload.multi-image.edit") }) }))] })] }) }), _jsx(UploadInput, { type: "file", multiple: remainingFiles > 1, accept: "image/*", capture: capture, ref: fileUpload, onChange: handleUpload, className: classes?.uploadInput }), !readOnly && (_jsx(_Fragment, { children: _jsxs(Dialog, { open: dialogOpen, onClose: closeDialog, maxWidth: "lg", fullWidth: !previewSize, children: [_jsx(DialogTitle, { children: _jsx(Grid, { container: true, sx: { justifyContent: "flex-end" }, children: _jsx(Grid, { children: _jsx(IconButton, { onClick: closeDialog, size: "large", "aria-label": t("standalone.file-upload.close"), children: _jsx(CloseIcon, {}) }) }) }) }), _jsx(DialogContent, { children: _jsxs(Grid, { container: true, spacing: 2, children: [images.map((img, i) => (_jsx(ImageDialogEntry, { img: img, previewSize: previewSize, isPrimary: img === primaryImg, processFile: processFile, changeImages: manipulateImages, changePrimary: changePrimary, onDelete: onDelete, classes: subClasses?.imageDialogEntry, subClasses: subClasses?.imageDialogEntrySubClasses }, `img-${i}`))), !readOnly && remainingFiles > 0 && (_jsxs(_Fragment, { children: [_jsx(Grid, { size: {
+                                }, disableBackground: true }) }), _jsxs(Grid, { container: true, sx: { alignContent: "space-between" }, wrap: "nowrap", spacing: 1, size: 12, children: [_jsx(Grid, { size: "grow", children: _jsx(ImageDots, { total: images.length, active: currentImage, setActive: setCurrentImage }) }), !readOnly && (_jsx(Grid, { children: _jsx(EditLabel, { component: Link, variant: "body2", onClick: openDialog, href: "#", children: editLabel ?? t("standalone.file-upload.multi-image.edit") }) }))] })] }) }), _jsx(UploadInput, { type: "file", multiple: remainingFiles > 1, accept: "image/*", capture: capture, ref: fileUpload, onChange: handleUpload, className: classes?.uploadInput }), !readOnly && (_jsx(_Fragment, { children: _jsxs(Dialog, { open: dialogOpen, onClose: closeDialog, maxWidth: "lg", fullWidth: !previewSize, children: [_jsx(DialogTitle, { children: _jsx(Grid, { container: true, sx: { justifyContent: "flex-end" }, children: _jsx(Grid, { children: _jsx(IconButton, { onClick: closeDialog, size: "large", "aria-label": t("standalone.file-upload.close"), children: _jsx(CloseIcon, {}) }) }) }) }), _jsx(DialogContent, { children: _jsxs(Grid, { container: true, spacing: 2, children: [images.map((img, i) => (_jsx(ImageDialogEntry, { img: img, previewSize: previewSize, isPrimary: img === primaryImg, processFile: processFile, onImageError: handleImageError, changeImages: manipulateImages, changePrimary: changePrimary, onDelete: onDelete, classes: subClasses?.imageDialogEntry, subClasses: subClasses?.imageDialogEntrySubClasses }, `img-${i}`))), !readOnly && remainingFiles > 0 && (_jsxs(_Fragment, { children: [_jsx(Grid, { size: {
                                                     xs: previewSize ? undefined : 12,
                                                     md: previewSize ? undefined : 6,
                                                     lg: previewSize ? undefined : 3,
