@@ -1,7 +1,7 @@
 import React, { useCallback } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 // eslint-disable-next-line import/no-unresolved
-import { fn } from "storybook/test";
+import { expect, fn, userEvent, waitFor, within } from "storybook/test";
 import { Button, TextField, Box } from "@mui/material";
 import DialogContextProvider from "../../framework/DialogContextProvider";
 import { useDialogContext } from "../../framework";
@@ -113,6 +113,65 @@ const ConfirmDialogDemo = () => {
 export const ConfirmDialogStory: StoryObj = {
 	name: "ConfirmDialog",
 	render: () => <ConfirmDialogDemo />,
+};
+
+// ─── Async button handler ────────────────────────────────────────────────────
+
+const AsyncConfirmDialogDemo = (props: { onYes: () => Promise<void> }) => {
+	const [pushDialog] = useDialogContext();
+	const { onYes } = props;
+	const open = useCallback(() => {
+		pushDialog(
+			<InfoDialog
+				title="Confirm Action"
+				message="This action takes a while to complete."
+				buttons={[
+					{ text: "Yes", onClick: onYes, autoFocus: true },
+					{ text: "Cancel", color: "secondary" },
+				]}
+			/>,
+		);
+	}, [pushDialog, onYes]);
+	return (
+		<Button variant="contained" color="warning" onClick={open}>
+			Open Async Confirm Dialog
+		</Button>
+	);
+};
+
+interface AsyncButtonHandlerArgs {
+	onYes: () => Promise<void>;
+}
+
+export const AsyncButtonHandlerStory: StoryObj<AsyncButtonHandlerArgs> = {
+	name: "Async button handler",
+	args: {
+		onYes: fn(async () => {
+			await new Promise((resolve) => setTimeout(resolve, 300));
+		}),
+	},
+	render: (args) => <AsyncConfirmDialogDemo onYes={args.onYes} />,
+	play: async ({ args }) => {
+		const body = within(document.body);
+
+		await userEvent.click(
+			body.getByRole("button", { name: "Open Async Confirm Dialog" }),
+		);
+
+		// Double-clicking the yes button must not start the handler twice and
+		// must not pop the dialog twice (which used to throw
+		// "[Components-Care] Trying to close non-existing dialog").
+		const yesButton = await body.findByRole("button", { name: "Yes" });
+		await userEvent.dblClick(yesButton);
+
+		await expect(yesButton).toBeDisabled();
+		await expect(args.onYes).toHaveBeenCalledTimes(1);
+
+		// dialog closes once the handler resolves
+		await waitFor(() => expect(body.queryByRole("dialog")).toBeNull(), {
+			timeout: 3000,
+		});
+	},
 };
 
 // ─── InputDialog ─────────────────────────────────────────────────────────────
