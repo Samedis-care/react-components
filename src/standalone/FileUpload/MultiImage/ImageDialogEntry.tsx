@@ -13,6 +13,7 @@ import {
 } from "./MultiImage";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import combineClassNames from "../../../utils/combineClassNames";
+import { ImageErrorReporter } from "../useImageError";
 
 export interface ImageDialogEntryProps extends Pick<
 	MultiImageProps,
@@ -39,6 +40,10 @@ export interface ImageDialogEntryProps extends Pick<
 	 * Process image file
 	 */
 	processFile: MultiImageProcessFile;
+	/**
+	 * Called if processFile failed, shows the error to the user
+	 */
+	onImageError: ImageErrorReporter;
 	/**
 	 * Delete confirmation handler
 	 */
@@ -82,6 +87,7 @@ const ImageDialogEntry = (inProps: ImageDialogEntryProps) => {
 		changeImages,
 		changePrimary,
 		processFile,
+		onImageError,
 		subClasses,
 		onDelete,
 		className,
@@ -110,7 +116,14 @@ const ImageDialogEntry = (inProps: ImageDialogEntryProps) => {
 		async (files: FileList) => {
 			const file = files.item(0);
 			if (!file) return;
-			const imageData = await processFile(file);
+			let imageData: string;
+			try {
+				imageData = await processFile(file);
+			} catch (e) {
+				// the image couldn't be read or the browser couldn't decode it
+				onImageError(e);
+				return;
+			}
 
 			changeImages((images) =>
 				images.map((image) =>
@@ -118,7 +131,7 @@ const ImageDialogEntry = (inProps: ImageDialogEntryProps) => {
 				),
 			);
 		},
-		[changeImages, img, processFile],
+		[changeImages, img, processFile, onImageError],
 	);
 
 	const PrimaryComp = isPrimary ? IsPrimary : MakePrimary;

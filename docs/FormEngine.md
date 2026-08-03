@@ -470,3 +470,8 @@ boundaries. `CcErrorNames` holds the names of every error class the library rais
 | `CcErrorNames.NetworkError`         | `NetworkError`       | no                  |
 | `CcErrorNames.BackendError`         | `BackendError`       | yes                 |
 | `CcErrorNames.RequestBatchingError` | `RequestBatchingError` | yes               |
+| `CcErrorNames.ImageLoadError`       | `CcImageLoadError`   | yes                 |
+
+An `ImageLoadError` is raised when the browser can't decode an image the user selected — an
+unsupported format (HEIC, TIFF) or a corrupt file. The user is always shown a message for it, so if
+you don't want these in your error tracker, filter the name out via `shouldReport`.

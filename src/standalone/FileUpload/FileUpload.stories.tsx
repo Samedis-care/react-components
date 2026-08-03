@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 // eslint-disable-next-line import/no-unresolved
-import { expect, within } from "storybook/test";
+import { expect, userEvent, waitFor, within } from "storybook/test";
 import { FileUploadGeneric, ImageSelector } from "./index";
 import type { FileData, FileMeta } from "./Generic";
 import type { MultiImageImage } from "./MultiImage/MultiImage";
@@ -259,6 +259,64 @@ export const ImageSelectorReadOnly: StoryObj = {
 	},
 };
 
+/**
+ * A file the browser can't decode as an image, like the HEIC photos an iPhone produces by default
+ */
+const makeUndecodableImage = () =>
+	new File([new Uint8Array([0x00, 0x01, 0x02, 0x03])], "photo.heic", {
+		type: "image/heic",
+	});
+
+export const ImageSelectorUnsupportedImage: StoryObj = {
+	name: "ImageSelector — unsupported image reports an error",
+	render: () => {
+		const [value, setValue] = useState("");
+		const [error, setError] = useState("");
+		const [errorName, setErrorName] = useState("");
+		return (
+			<div style={{ width: 300, height: 200 }}>
+				<ImageSelector
+					name="avatar"
+					value={value}
+					capture={false}
+					alt="Profile picture"
+					label="Profile picture"
+					readOnly={false}
+					onChange={(_name, val) => {
+						setValue(val);
+					}}
+					onError={(err, message) => {
+						setError(message);
+						setErrorName(err.name);
+					}}
+				/>
+				<div data-testid="error-message">{error}</div>
+				<div data-testid="error-name">{errorName}</div>
+				<div data-testid="current-value">{value}</div>
+			</div>
+		);
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const input =
+			canvasElement.querySelector<HTMLInputElement>('input[type="file"]');
+		await expect(input).not.toBeNull();
+
+		await userEvent.upload(input, makeUndecodableImage());
+
+		// the failure has to become visible, silently doing nothing is the bug this guards against
+		await waitFor(() =>
+			expect(canvas.getByTestId("error-message").textContent).toBeTruthy(),
+		);
+		// and it has to be a real error, not an undefined rejection value
+		await expect(canvas.getByTestId("error-name").textContent).toBe(
+			"CcImageLoadError",
+		);
+		// and no broken value may be committed
+		await expect(canvas.getByTestId("current-value").textContent).toBe("");
+	},
+};
+
 // ---------------------------------------------------------------------------
 // MultiImage stories
 // ---------------------------------------------------------------------------
@@ -322,6 +380,57 @@ export const MultiImageWithImages: StoryObj = {
 				/>
 			</div>
 		);
+	},
+};
+
+export const MultiImageUnsupportedImage: StoryObj = {
+	name: "MultiImage — unsupported image reports an error",
+	render: () => {
+		const redImage = makeColorImage("#e53935", "#ffcdd2");
+		const [images, setImages] = useState<MultiImageImage[]>([]);
+		const [primary, setPrimary] = useState<string | null>(null);
+		const [error, setError] = useState("");
+		const [errorName, setErrorName] = useState("");
+		return (
+			<div style={{ width: 300, height: 300 }}>
+				<MultiImage
+					label="Product images"
+					images={images}
+					primary={primary}
+					uploadImage={redImage}
+					captureImage={redImage}
+					onChange={(_name, imgs) => {
+						setImages(imgs);
+					}}
+					onPrimaryChange={(_name, p) => {
+						setPrimary(p);
+					}}
+					onError={(err, message) => {
+						setError(message);
+						setErrorName(err.name);
+					}}
+				/>
+				<div data-testid="error-message">{error}</div>
+				<div data-testid="error-name">{errorName}</div>
+				<div data-testid="image-count">{images.length}</div>
+			</div>
+		);
+	},
+	play: async ({ canvasElement }) => {
+		const canvas = within(canvasElement);
+		const input =
+			canvasElement.querySelector<HTMLInputElement>('input[type="file"]');
+		await expect(input).not.toBeNull();
+
+		await userEvent.upload(input, makeUndecodableImage());
+
+		await waitFor(() =>
+			expect(canvas.getByTestId("error-message").textContent).toBeTruthy(),
+		);
+		await expect(canvas.getByTestId("error-name").textContent).toBe(
+			"CcImageLoadError",
+		);
+		await expect(canvas.getByTestId("image-count").textContent).toBe("0");
 	},
 };
 

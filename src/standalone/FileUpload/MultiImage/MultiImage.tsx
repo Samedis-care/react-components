@@ -25,6 +25,7 @@ import useCCTranslations from "../../../utils/useCCTranslations";
 import ImageDots from "./ImageDots";
 import combineClassNames from "../../../utils/combineClassNames";
 import getCanImageCapture from "../../../utils/getCanImageCapture";
+import useImageError, { ImageErrorHandler } from "../useImageError";
 
 export interface MultiImageImage {
 	/**
@@ -108,6 +109,11 @@ export interface MultiImageProps {
 	 */
 	onDelete?: (image: MultiImageImage) => Promise<boolean> | boolean;
 	/**
+	 * Called if one of the selected images couldn't be processed (e.g. an image format the browser
+	 * can't decode, like HEIC). If unset an error dialog is shown instead.
+	 */
+	onError?: ImageErrorHandler;
+	/**
 	 * Custom edit label
 	 */
 	editLabel?: React.ReactNode;
@@ -183,11 +189,7 @@ const EditLabel = styled(Typography, {
 })({}) as typeof Typography;
 
 export type MultiImageClassKey =
-	| "root"
-	| "uploadInput"
-	| "rootContainer"
-	| "imageItem"
-	| "editLabel";
+	"root" | "uploadInput" | "rootContainer" | "imageItem" | "editLabel";
 
 export const MultiImageNewIdPrefix = "MultiImage-New-";
 
@@ -212,11 +214,13 @@ const MultiImage = (inProps: MultiImageProps) => {
 		onPrimaryChange,
 		subClasses,
 		onDelete,
+		onError,
 		className,
 		classes,
 	} = props;
 	const previewSize = props.previewSize ?? 256;
 	const { t } = useCCTranslations();
+	const handleImageError = useImageError("MultiImage.processFiles", onError);
 
 	const primaryImg = useMemo(
 		(): MultiImageImage | undefined =>
@@ -299,11 +303,18 @@ const MultiImage = (inProps: MultiImageProps) => {
 	const handleUploadViaDrop = useCallback(
 		async (files: FileList) => {
 			if (!onChange) return;
-			const newImages = await processFiles(files);
+			let newImages: MultiImageImage[];
+			try {
+				newImages = await processFiles(files);
+			} catch (e) {
+				// one of the images couldn't be read or the browser couldn't decode it
+				handleImageError(e);
+				return;
+			}
 
 			onChange(name, images.concat(newImages));
 		},
-		[processFiles, name, images, onChange],
+		[processFiles, name, images, onChange, handleImageError],
 	);
 
 	const handlePreviewDrop = useCallback(
@@ -311,11 +322,18 @@ const MultiImage = (inProps: MultiImageProps) => {
 			if (!onChange) return;
 			if (files.length === 0) return;
 
-			const newImages: MultiImageImage[] = await processFiles(files);
+			let newImages: MultiImageImage[];
+			try {
+				newImages = await processFiles(files);
+			} catch (e) {
+				// one of the images couldn't be read or the browser couldn't decode it
+				handleImageError(e);
+				return;
+			}
 			onChange(name, images.concat(newImages));
 			if (onPrimaryChange) onPrimaryChange(name, newImages[0].id);
 		},
-		[onChange, name, images, processFiles, onPrimaryChange],
+		[onChange, name, images, processFiles, onPrimaryChange, handleImageError],
 	);
 
 	const handleUpload = useCallback(
@@ -454,6 +472,7 @@ const MultiImage = (inProps: MultiImageProps) => {
 										previewSize={previewSize}
 										isPrimary={img === primaryImg}
 										processFile={processFile}
+										onImageError={handleImageError}
 										changeImages={manipulateImages}
 										changePrimary={changePrimary}
 										onDelete={onDelete}

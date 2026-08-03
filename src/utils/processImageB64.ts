@@ -1,11 +1,13 @@
 import type { IDownscaleProps } from "./processImage";
 import getDataUriMime from "./getDataUriMime";
+import ImageLoadError from "./ImageLoadError";
 
 /**
  * Processes an image file
  * @param imageData The image (as data uri)
  * @param convertImagesTo MimeType to convert the image to (e.g. image/png or image/jpg)
  * @param downscale Settings to downscale an image
+ * @throws ImageLoadError if the browser cannot decode the image
  */
 const processImageB64 = async (
 	imageData: string,
@@ -24,7 +26,10 @@ const processImageB64 = async (
 	const image = new Image();
 	await new Promise((resolve, reject) => {
 		image.addEventListener("load", () => resolve(image));
-		image.addEventListener("error", (evt) => reject(evt.error as Error));
+		// the error event carries no information about the failure, so don't try to read one off it
+		image.addEventListener("error", () =>
+			reject(new ImageLoadError(getDataUriMime(imageData))),
+		);
 		image.src = imageData;
 	});
 

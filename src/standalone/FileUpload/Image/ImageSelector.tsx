@@ -26,6 +26,7 @@ import useCCTranslations from "../../../utils/useCCTranslations";
 import { ImageFileIcon } from "../FileIcons";
 import fileToData from "../../../utils/fileToData";
 import getCanImageCapture from "../../../utils/getCanImageCapture";
+import useImageError, { ImageErrorHandler } from "../useImageError";
 
 // resolve to edited image to continue change, or reject to cancel
 export type PostImageEditCallback = (image: string) => Promise<string>;
@@ -109,6 +110,11 @@ export interface ImageSelectorProps {
 	 * @param image The data uri image
 	 */
 	postEditCallback?: PostImageEditCallback;
+	/**
+	 * Called if the selected image couldn't be processed (e.g. an image format the browser can't
+	 * decode, like HEIC). If unset an error dialog is shown instead.
+	 */
+	onError?: ImageErrorHandler;
 }
 
 const RootClassic = styled(Grid, {
@@ -285,46 +291,60 @@ const ImageSelector = (inProps: ImageSelectorProps) => {
 		capture,
 		onChange,
 		postEditCallback,
+		onError,
 		classes,
 		className,
 	} = props;
 	const variant = props.variant ?? "normal";
 	const fileRef = useRef<HTMLInputElement>(null);
 	const { t } = useCCTranslations();
+	const handleImageError = useImageError("ImageSelector.processFile", onError);
 
 	const processFile = useCallback(
 		async (file: File) => {
 			if (!onChange) return;
 
-			const imageB64 = await fileToData(file);
-			let finalImage: string;
-			let fileType = file.type;
+			let processedImage: string;
 			try {
-				finalImage = postEditCallback
-					? await postEditCallback(imageB64)
-					: imageB64;
-				if (finalImage.startsWith("data:image/")) {
-					fileType = finalImage.substring(5, finalImage.indexOf(";"));
+				const imageB64 = await fileToData(file);
+				let finalImage: string;
+				let fileType = file.type;
+				try {
+					finalImage = postEditCallback
+						? await postEditCallback(imageB64)
+						: imageB64;
+					if (finalImage.startsWith("data:image/")) {
+						fileType = finalImage.substring(5, finalImage.indexOf(";"));
+					}
+				} catch (e) {
+					// probably user cancel
+					// eslint-disable-next-line no-console
+					console.error(
+						"[Components-Care] [ImageSelector] Post edit callback with error (or cancellation)",
+						e,
+					);
+					return;
 				}
-			} catch (e) {
-				// probably user cancel
-				// eslint-disable-next-line no-console
-				console.error(
-					"[Components-Care] [ImageSelector] Post edit callback with error (or cancellation)",
-					e,
-				);
-				return;
-			}
-			onChange(
-				name,
-				await processImageB64(
+				processedImage = await processImageB64(
 					finalImage,
 					convertImagesTo || fileType,
 					downscale,
-				),
-			);
+				);
+			} catch (e) {
+				// the image couldn't be read or the browser couldn't decode it
+				handleImageError(e);
+				return;
+			}
+			onChange(name, processedImage);
 		},
-		[onChange, name, postEditCallback, convertImagesTo, downscale],
+		[
+			onChange,
+			name,
+			postEditCallback,
+			convertImagesTo,
+			downscale,
+			handleImageError,
+		],
 	);
 
 	const handleFileChange = useCallback(

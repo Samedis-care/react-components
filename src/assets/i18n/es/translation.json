@@ -158,7 +158,9 @@
 			"error": {
 				"too-many": "Se han seleccionado demasiados archivos",
 				"limit-reached": "Se ha alcanzado el número máximo de archivos permitidos",
-				"invalid-type": "Se ha seleccionado un tipo de archivo no admitido"
+				"invalid-type": "Se ha seleccionado un tipo de archivo no admitido",
+				"image-load-failed": "No se ha podido cargar la imagen. Su navegador no admite el formato o el archivo está dañado",
+				"image-process-failed": "No se ha podido procesar la imagen"
 			},
 			"format": {
 				"any": "Todos",

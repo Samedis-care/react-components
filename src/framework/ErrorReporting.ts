@@ -47,6 +47,11 @@ export const CcErrorNames = {
 	 */
 	NetworkError: "NetworkError",
 	/**
+	 * @see ImageLoadError
+	 * @remarks the name is prefixed, to avoid collisions with app error classes
+	 */
+	ImageLoadError: "CcImageLoadError",
+	/**
 	 * @see RequestBatchingError
 	 */
 	RequestBatchingError: "RequestBatchingError",
