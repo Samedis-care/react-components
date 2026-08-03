@@ -77,7 +77,7 @@ const DefaultFormPageButtons = (inProps: DefaultFormPageButtonsProps) => {
 		readOnlyReasons,
 		dirty,
 		isSubmitting,
-		submit,
+		safeSubmit,
 		customProps,
 		confirmDialogMessage,
 		autoBack,
@@ -93,6 +93,11 @@ const DefaultFormPageButtons = (inProps: DefaultFormPageButtonsProps) => {
 	const handleBack = useCallback(() => goBack && goBack(), [goBack]);
 	const [autoBackTrigger, setAutoBackTrigger] = useState<null | number>(null);
 
+	const submitAndAutoBack = useCallback(async () => {
+		if (!(await safeSubmit())) return; // error is shown and reported regardless
+		if (autoBack) setAutoBackTrigger(Date.now());
+	}, [autoBack, safeSubmit]);
+
 	const submitWithConfirmDialog = useCallback(async () => {
 		try {
 			await showConfirmDialog(pushDialog, {
@@ -107,22 +112,8 @@ const DefaultFormPageButtons = (inProps: DefaultFormPageButtonsProps) => {
 			return;
 		}
 
-		try {
-			await submit();
-			if (autoBack) setAutoBackTrigger(Date.now());
-		} catch {
-			// ignore, error is shown regardless
-		}
-	}, [autoBack, confirmDialogMessage, pushDialog, submit, t]);
-
-	const safeSubmit = useCallback(async () => {
-		try {
-			await submit();
-			if (autoBack) setAutoBackTrigger(Date.now());
-		} catch {
-			// ignore, error is shown regardless
-		}
-	}, [autoBack, submit]);
+		await submitAndAutoBack();
+	}, [confirmDialogMessage, pushDialog, submitAndAutoBack, t]);
 
 	useEffect(() => {
 		if (autoBackTrigger === null) return;
@@ -132,7 +123,9 @@ const DefaultFormPageButtons = (inProps: DefaultFormPageButtonsProps) => {
 	const saveBtn = (
 		<ActionButton
 			disabled={!dirty || isSubmitting || readOnly}
-			onClick={displayConfirmDialog ? submitWithConfirmDialog : safeSubmit}
+			onClick={
+				displayConfirmDialog ? submitWithConfirmDialog : submitAndAutoBack
+			}
 		>
 			{t("common.buttons.save")}
 		</ActionButton>

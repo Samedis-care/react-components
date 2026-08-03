@@ -268,6 +268,9 @@ An error component will display the errors occurring in the form and the form co
 The `error` property is never null. Its `error` property may get updated from time to time.
 Your component won't be unmounted until the form gets unmounted.
 
+The error component is the _display_ channel only. Forwarding errors to an error tracker is a separate,
+application-wide concern — see [Error reporting](#error-reporting) below.
+
 A basic error component which uses dialogs can be found below:
 
 <details>
@@ -388,3 +391,82 @@ A basic form looks like this:
 ```
 
 </details>
+
+`submit` rejects when submitting fails, so that you can react to it. The error is displayed by your
+error component either way, which means most call sites end up writing
+`try { await submit(); } catch { /* ignore */ }`. Use `safeSubmit` instead of `submit` for those —
+it's the same call with the rejection swallowed:
+
+<details>
+	<summary>TypeScript/JavaScript</summary>
+
+```tsx
+{({ isSubmitting, safeSubmit }) => (
+	<>
+		<FormField name={"field-name"} />
+		<Button disabled={isSubmitting} onClick={() => void safeSubmit()} />
+	</>
+)}
+```
+
+</details>
+
+`safeSubmit` is available on the render props, on `useFormContext()` and on `useFormContextLite()`.
+It resolves to `false` if submitting failed and `true` otherwise, so you can still gate follow-up
+actions on the outcome:
+
+<details>
+	<summary>TypeScript/JavaScript</summary>
+
+```tsx
+const onClick = useCallback(async () => {
+	if (!(await safeSubmit())) return; // the error is already displayed and reported
+	goSomewhereElse();
+}, [safeSubmit, goSomewhereElse]);
+```
+
+</details>
+
+Note that `true` does not mean the record was saved — `submit` is a no-op when the form isn't dirty
+(unless you pass `ignoreDirtyCheck`) and when a `preSubmit` handler cancels submission, and both of
+those resolve to `true`. Stick with `submit` when you need the error object itself. Prefer `submit`
+in nested forms (`nestedFormName`) too: those don't render an error component of their own, and rely
+on the error propagating to the parent form.
+
+### Error reporting
+
+Independently of what your error component displays, Components-Care forwards unexpected errors to an
+error tracker. If `@sentry/react` is installed it is used automatically, otherwise nothing happens.
+By default a `ValidationError` and a `NetworkError` are **not** reported (neither is actionable —
+one is a normal part of the form flow, the other is usually the user's connection), while a
+`BackendError` and code errors (`Error`, `TypeError`, ...) are.
+
+Both the policy and the destination are configurable from your application's startup code:
+
+<details>
+	<summary>TypeScript/JavaScript</summary>
+
+```ts
+import { configureErrorReporting, CcErrorNames } from "components-care";
+
+configureErrorReporting({
+	// where reported errors go (default: Sentry's captureException, if available)
+	report: (error, context) => myTracker.capture(error, context.source),
+	// which errors get reported
+	shouldReport: (error) => error.name !== CcErrorNames.NetworkError,
+	// additionally console.error everything, regardless of shouldReport (default: false)
+	logToConsole: import.meta.env.DEV,
+});
+```
+
+</details>
+
+Errors are matched by `Error.name`, not by `instanceof`, because the error classes may cross bundle
+boundaries. `CcErrorNames` holds the names of every error class the library raises:
+
+| Constant                            | `Error.name`         | Reported by default |
+| ----------------------------------- | -------------------- | ------------------- |
+| `CcErrorNames.ValidationError`      | `CcValidationError`  | no                  |
+| `CcErrorNames.NetworkError`         | `NetworkError`       | no                  |
+| `CcErrorNames.BackendError`         | `BackendError`       | yes                 |
+| `CcErrorNames.RequestBatchingError` | `RequestBatchingError` | yes               |

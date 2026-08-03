@@ -14,20 +14,16 @@ export interface FlowEngineSaveButtonProps extends Omit<
 
 const FlowEngineSaveButton = (props: FlowEngineSaveButtonProps) => {
 	const { t } = useCCTranslations();
-	const { dirty, submitting, readOnly, submit } = useFormContext();
+	const { dirty, submitting, readOnly, safeSubmit } = useFormContext();
 	const disabled = !dirty || submitting || readOnly;
 
-	const safeSubmit = useCallback(async () => {
-		try {
-			await submit({ submitToServer: true });
-		} catch {
-			// ignore, error is shown regardless
-		}
-	}, [submit]);
+	const handleClick = useCallback(() => {
+		void safeSubmit({ submitToServer: true });
+	}, [safeSubmit]);
 
 	return (
 		<ActionButton
-			onClick={safeSubmit}
+			onClick={handleClick}
 			{...props}
 			disabled={disabled || props.disabled}
 		>

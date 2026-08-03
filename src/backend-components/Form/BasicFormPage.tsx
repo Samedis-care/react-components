@@ -10,6 +10,7 @@ import { FormContextData, PageProps, useFormContextLite } from "../Form";
 import { UnsafeToLeaveDispatch } from "../../framework/UnsafeToLeave";
 import { FrameworkHistory } from "../../framework/History";
 import { useDialogContext } from "../../framework/DialogContextProvider";
+import { captureError } from "../../framework/ErrorReporting";
 import { ModelFieldName } from "../../backend-integration/Model/Model";
 import {
 	showConfirmDialog,
@@ -29,12 +30,19 @@ import { CrudFormProps } from "../CRUD";
 
 export interface BasicFormPageRendererProps<CustomPropsT> extends Omit<
 	PageProps<ModelFieldName, CustomPropsT>,
-	"submit" | "dirty"
+	"submit" | "safeSubmit" | "dirty"
 > {
 	/**
 	 * Function to submit everything
+	 * @remarks throws if submitting fails
 	 */
 	submit: () => Promise<void>;
+	/**
+	 * Function to submit everything, swallowing any error
+	 * @returns false if submitting failed, true otherwise
+	 * @see FormContextData.safeSubmit
+	 */
+	safeSubmit: () => Promise<boolean>;
 	/**
 	 * Is the form dirty?
 	 */
@@ -115,6 +123,8 @@ const BasicFormPage = <RendererPropsT, CustomPropsT>(
 	const props = useThemeProps({ props: inProps, name: "CcBasicFormPage" });
 	const {
 		submit,
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		safeSubmit: unusedSafeSubmit, // replaced by handleSafeSubmit below, must not reach the renderer
 		dirty,
 		disableRouting,
 		postSubmitHandler,
@@ -209,8 +219,7 @@ const BasicFormPage = <RendererPropsT, CustomPropsT>(
 
 	// go back confirm dialog if form is dirty
 	const customPropsWithGoBack:
-		| EnhancedCustomProps<CustomPropsT>
-		| CustomPropsT =
+		EnhancedCustomProps<CustomPropsT> | CustomPropsT =
 		typeof originalCustomProps === "object"
 			? ({
 					...(typeof originalCustomProps === "object"
@@ -254,10 +263,23 @@ const BasicFormPage = <RendererPropsT, CustomPropsT>(
 			try {
 				await postSubmitHandler();
 			} catch (e) {
+				captureError(e, { source: "BasicFormPage.postSubmitHandler" });
 				await showErrorDialog(pushDialog, e as Error);
 			}
 		}
 	}, [submit, postSubmitHandler, pushDialog]);
+
+	// note: a postSubmitHandler which throws doesn't make this return false, the record was saved
+	// either way and the failure is shown to the user by handleSubmit itself
+	const handleSafeSubmit = useCallback(async (): Promise<boolean> => {
+		try {
+			await handleSubmit();
+			return true;
+		} catch {
+			// ignore, shown to user via ErrorComponent and reported via captureError in submitForm
+			return false;
+		}
+	}, [handleSubmit]);
 
 	const UsedFormPageLayout = formPageLayoutComponent ?? FormPageLayout;
 
@@ -280,6 +302,7 @@ const BasicFormPage = <RendererPropsT, CustomPropsT>(
 							dirty={dirty}
 							disableRouting={disableRouting}
 							submit={handleSubmit}
+							safeSubmit={handleSafeSubmit}
 							customProps={
 								(typeof originalCustomProps === "object" &&
 								originalCustomProps != null

@@ -41,12 +41,7 @@ import uniqueArray from "../../utils/uniqueArray";
 import { QueryObserverBaseResult } from "@tanstack/react-query";
 import ValidationError from "./ValidationError";
 import deepEqual from "../../utils/deepEqual";
-
-// optional import
-let captureException: ((e: Error) => void) | null = null;
-import("@sentry/react")
-	.then((Sentry) => (captureException = Sentry.captureException))
-	.catch(() => {}); // ignore
+import { captureError } from "../../framework/ErrorReporting";
 
 export type ValidationResult = Record<string, string>;
 /**
@@ -55,8 +50,7 @@ export type ValidationResult = Record<string, string>;
  * Thrown error may be a ValidationError or a normal Error (other error)
  */
 export type CustomValidationHandler = () =>
-	| Promise<ValidationResult>
-	| ValidationResult;
+	Promise<ValidationResult> | ValidationResult;
 /**
  * Pre submit handler to perform final changes (bypassing validation)
  */
@@ -150,6 +144,14 @@ export interface PageProps<KeyT extends ModelFieldName, CustomPropsT> {
 	 * Function to trigger form submit
 	 */
 	submit: (params?: FormSubmitOptions | React.SyntheticEvent) => Promise<void>;
+	/**
+	 * Function to trigger form submit, swallowing any error
+	 * @returns false if submitting failed, true otherwise
+	 * @see FormContextData.safeSubmit
+	 */
+	safeSubmit: (
+		params?: FormSubmitOptions | React.SyntheticEvent,
+	) => Promise<boolean>;
 	/**
 	 * Function to trigger form reset
 	 */
@@ -548,6 +550,26 @@ export interface FormContextData {
 	 */
 	submit: (params?: FormSubmitOptions | React.SyntheticEvent) => Promise<void>;
 	/**
+	 * Submit the form, swallowing any error
+	 *
+	 * A shortcut for the `try { await submit(); } catch { /* ignore *\/ }` pattern. The error is
+	 * still stored and rendered by the form's errorComponent, and it is still passed to the global
+	 * error reporting config. This only stops the rejection from escaping.
+	 * @param params Same as submit
+	 * @returns false if submitting failed, true otherwise
+	 * @remarks true does NOT mean the record was saved: submit is a no-op if the form isn't dirty
+	 *          (unless FormSubmitOptions.ignoreDirtyCheck is set) and when a preSubmit handler
+	 *          cancels submission. Both return true.
+	 * @remarks Use submit if you need the error object itself.
+	 * @remarks Nested forms (see FormProps.nestedFormName) don't render an errorComponent of their
+	 *          own, so prefer submit there and let the error propagate to the parent form.
+	 * @see submit
+	 * @see configureErrorReporting
+	 */
+	safeSubmit: (
+		params?: FormSubmitOptions | React.SyntheticEvent,
+	) => Promise<boolean>;
+	/**
 	 * Is the form record being deleted on submit
 	 */
 	deleteOnSubmit: boolean;
@@ -683,6 +705,7 @@ export type FormContextDataLite = Pick<
 	| "removeCustomReadOnly"
 	| "flowEngine"
 	| "submit"
+	| "safeSubmit"
 	| "submitting"
 	| "dirty"
 	| "flowEngineConfig"
@@ -1536,7 +1559,7 @@ const Form = <
 						setFieldValue,
 					});
 				} catch (e) {
-					if (captureException) captureException(e as Error);
+					captureError(e, { source: "FormEngine.preSubmit" });
 					// eslint-disable-next-line no-console
 					console.error(
 						"[Components-Care] [FormEngine] Pre-submit handler threw exception",
@@ -1564,6 +1587,11 @@ const Form = <
 					if (e instanceof Error) {
 						setUpdateError(e);
 					}
+					if (!nestedFormName)
+						captureError(e, {
+							source: "FormEngine.submitDelete",
+							extra: { modelId: model.modelId, recordId: id },
+						});
 					throw e;
 				} finally {
 					setSubmittingForm(false);
@@ -1721,6 +1749,15 @@ const Form = <
 			} catch (e) {
 				// don't use this for validation errors
 				if (!throwIsWarning) setUpdateError(e as Error);
+				// nested forms rethrow into the parent form's submit, which reports it there, so
+				// reporting here as well would report the same error twice
+				// note: ValidationErrors (including the "warn" one thrown when the user declines the
+				// warnings dialog) are not reported, see DefaultUnreportedErrorNames
+				if (!nestedFormName)
+					captureError(e, {
+						source: "FormEngine.submit",
+						extra: { modelId: model.modelId, recordId: id },
+					});
 				throw e;
 			} finally {
 				setSubmittingForm(false);
@@ -1762,15 +1799,29 @@ const Form = <
 		[],
 	);
 
-	const handleSubmit = useCallback(async (evt: FormEvent<HTMLFormElement>) => {
-		evt.preventDefault();
-		evt.stopPropagation();
-		try {
-			await submitFormRef.current();
-		} catch {
-			// ignore, shown to user via ErrorComponent
-		}
-	}, []);
+	const safeSubmitForm = useCallback(
+		async (
+			params?: FormSubmitOptions | React.SyntheticEvent,
+		): Promise<boolean> => {
+			try {
+				await submitFormRef.current(params);
+				return true;
+			} catch {
+				// ignore, shown to user via ErrorComponent and reported via captureError in submitForm
+				return false;
+			}
+		},
+		[],
+	);
+
+	const handleSubmit = useCallback(
+		async (evt: FormEvent<HTMLFormElement>) => {
+			evt.preventDefault();
+			evt.stopPropagation();
+			await safeSubmitForm();
+		},
+		[safeSubmitForm],
+	);
 
 	// nested forms
 	const parentFormContext = useContext(FormContext);
@@ -2057,6 +2108,7 @@ const Form = <
 			addSubmittingBlocker,
 			removeSubmittingBlocker,
 			submit: submitFormReferenced,
+			safeSubmit: safeSubmitForm,
 			deleteOnSubmit: !!deleteOnSubmit,
 			values,
 			initialValues: initialValuesState ?? {},
@@ -2113,6 +2165,7 @@ const Form = <
 			addSubmittingBlocker,
 			removeSubmittingBlocker,
 			submitFormReferenced,
+			safeSubmitForm,
 			deleteOnSubmit,
 			values,
 			initialValuesState,
@@ -2160,6 +2213,7 @@ const Form = <
 			removeCustomReadOnly,
 			flowEngine: !!flowEngine,
 			submit: submitFormReferenced,
+			safeSubmit: safeSubmitForm,
 			submitting,
 			dirty,
 			flowEngineConfig,
@@ -2185,6 +2239,7 @@ const Form = <
 			removeCustomReadOnly,
 			flowEngine,
 			submitFormReferenced,
+			safeSubmitForm,
 			submitting,
 			dirty,
 			refetch,
@@ -2226,6 +2281,7 @@ const Form = <
 					isSubmitting={submitting}
 					values={props.renderConditionally ? values : undefined}
 					submit={submitForm}
+					safeSubmit={safeSubmitForm}
 					reset={resetForm}
 					dirty={dirty}
 					id={id}
