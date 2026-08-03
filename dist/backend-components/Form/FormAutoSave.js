@@ -7,13 +7,13 @@ import debounce from "../../utils/debounce";
  * @param debounceTime The debounce time (time between changes for save to trigger)
  */
 const useFormAutoSave = (debounceTime = 5000) => {
-    const { submit, submitting, dirty, values } = useFormContext();
-    const debounceSubmit = useMemo(() => (debounceTime == 0 ? submit : debounce(submit, debounceTime)), [submit, debounceTime]);
+    const { safeSubmit, submitting, dirty, values } = useFormContext();
+    const debounceSubmit = useMemo(() => (debounceTime == 0 ? safeSubmit : debounce(safeSubmit, debounceTime)), [safeSubmit, debounceTime]);
     const dataStr = JSON.stringify(values);
     useEffect(() => {
         if (!dirty || submitting)
             return;
-        debounceSubmit();
+        void debounceSubmit();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [dataStr]);
 };

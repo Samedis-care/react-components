@@ -89,6 +89,12 @@ export interface PageProps<KeyT extends ModelFieldName, CustomPropsT> {
      */
     submit: (params?: FormSubmitOptions | React.SyntheticEvent) => Promise<void>;
     /**
+     * Function to trigger form submit, swallowing any error
+     * @returns false if submitting failed, true otherwise
+     * @see FormContextData.safeSubmit
+     */
+    safeSubmit: (params?: FormSubmitOptions | React.SyntheticEvent) => Promise<boolean>;
+    /**
      * Function to trigger form reset
      */
     reset: () => void;
@@ -453,6 +459,24 @@ export interface FormContextData {
      */
     submit: (params?: FormSubmitOptions | React.SyntheticEvent) => Promise<void>;
     /**
+     * Submit the form, swallowing any error
+     *
+     * A shortcut for the `try { await submit(); } catch { /* ignore *\/ }` pattern. The error is
+     * still stored and rendered by the form's errorComponent, and it is still passed to the global
+     * error reporting config. This only stops the rejection from escaping.
+     * @param params Same as submit
+     * @returns false if submitting failed, true otherwise
+     * @remarks true does NOT mean the record was saved: submit is a no-op if the form isn't dirty
+     *          (unless FormSubmitOptions.ignoreDirtyCheck is set) and when a preSubmit handler
+     *          cancels submission. Both return true.
+     * @remarks Use submit if you need the error object itself.
+     * @remarks Nested forms (see FormProps.nestedFormName) don't render an errorComponent of their
+     *          own, so prefer submit there and let the error propagate to the parent form.
+     * @see submit
+     * @see configureErrorReporting
+     */
+    safeSubmit: (params?: FormSubmitOptions | React.SyntheticEvent) => Promise<boolean>;
+    /**
      * Is the form record being deleted on submit
      */
     deleteOnSubmit: boolean;
@@ -549,7 +573,7 @@ export interface FormContextData {
  */
 export declare const FormContext: React.Context<FormContextData | null>;
 export declare const useFormContext: () => FormContextData;
-export type FormContextDataLite = Pick<FormContextData, "id" | "model" | "customProps" | "onlySubmitMounted" | "onlyValidateMounted" | "onlyWarnMounted" | "onlyWarnChanged" | "readOnly" | "readOnlyReason" | "readOnlyReasons" | "errorComponent" | "initialValues" | "getFieldValue" | "getFieldValues" | "setFieldValueLite" | "setFieldTouchedLite" | "setCustomReadOnly" | "removeCustomReadOnly" | "flowEngine" | "submit" | "submitting" | "dirty" | "flowEngineConfig" | "refetchForm">;
+export type FormContextDataLite = Pick<FormContextData, "id" | "model" | "customProps" | "onlySubmitMounted" | "onlyValidateMounted" | "onlyWarnMounted" | "onlyWarnChanged" | "readOnly" | "readOnlyReason" | "readOnlyReasons" | "errorComponent" | "initialValues" | "getFieldValue" | "getFieldValues" | "setFieldValueLite" | "setFieldTouchedLite" | "setCustomReadOnly" | "removeCustomReadOnly" | "flowEngine" | "submit" | "safeSubmit" | "submitting" | "dirty" | "flowEngineConfig" | "refetchForm">;
 export declare const FormContextLite: React.Context<FormContextDataLite | null>;
 export declare const useFormContextLite: () => FormContextDataLite;
 export interface FormNestedState {

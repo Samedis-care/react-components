@@ -9,4 +9,5 @@ export { default as CCI18nProvider } from "./CCI18nProvider";
 export * from "./UnsafeToLeave";
 export { default as UnsafeToLeave } from "./UnsafeToLeave";
 export * from "./Storage";
+export * from "./ErrorReporting";
 export { default as Framework } from "./Framework";

@@ -3,11 +3,18 @@ import { FormContextData, PageProps } from "../Form";
 import { ModelFieldName } from "../../backend-integration/Model/Model";
 import { FormPageLayoutProps } from "../../standalone/Form/FormPageLayout";
 import { CrudFormProps } from "../CRUD";
-export interface BasicFormPageRendererProps<CustomPropsT> extends Omit<PageProps<ModelFieldName, CustomPropsT>, "submit" | "dirty"> {
+export interface BasicFormPageRendererProps<CustomPropsT> extends Omit<PageProps<ModelFieldName, CustomPropsT>, "submit" | "safeSubmit" | "dirty"> {
     /**
      * Function to submit everything
+     * @remarks throws if submitting fails
      */
     submit: () => Promise<void>;
+    /**
+     * Function to submit everything, swallowing any error
+     * @returns false if submitting failed, true otherwise
+     * @see FormContextData.safeSubmit
+     */
+    safeSubmit: () => Promise<boolean>;
     /**
      * Is the form dirty?
      */

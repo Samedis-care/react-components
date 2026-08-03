@@ -4,6 +4,7 @@ import { useFormContextLite } from "../Form";
 import { UnsafeToLeaveDispatch } from "../../framework/UnsafeToLeave";
 import { FrameworkHistory } from "../../framework/History";
 import { useDialogContext } from "../../framework/DialogContextProvider";
+import { captureError } from "../../framework/ErrorReporting";
 import { showConfirmDialog, showConfirmDialogBool, showErrorDialog, } from "../../non-standalone/Dialog/Utils";
 import { FormDialogDispatchContext } from "./FormDialog";
 import FormPageLayout from "../../standalone/Form/FormPageLayout";
@@ -14,7 +15,10 @@ import { useThemeProps } from "@mui/material";
 export const BasicFormPageNestingContext = createContext(null);
 const BasicFormPage = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcBasicFormPage" });
-    const { submit, dirty, disableRouting, postSubmitHandler, isSubmitting, children: FormButtons, form, childrenProps, customProps: originalCustomProps, formPageLayoutComponent, ...otherProps } = props;
+    const { submit, 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    safeSubmit: unusedSafeSubmit, // replaced by handleSafeSubmit below, must not reach the renderer
+    dirty, disableRouting, postSubmitHandler, isSubmitting, children: FormButtons, form, childrenProps, customProps: originalCustomProps, formPageLayoutComponent, ...otherProps } = props;
     const { t } = useCCTranslations();
     const { readOnly, readOnlyReasons } = useFormContextLite();
     const [childActiveCount, setChildActiveCount] = useState(0);
@@ -140,13 +144,26 @@ const BasicFormPage = (inProps) => {
                 await postSubmitHandler();
             }
             catch (e) {
+                captureError(e, { source: "BasicFormPage.postSubmitHandler" });
                 await showErrorDialog(pushDialog, e);
             }
         }
     }, [submit, postSubmitHandler, pushDialog]);
+    // note: a postSubmitHandler which throws doesn't make this return false, the record was saved
+    // either way and the failure is shown to the user by handleSubmit itself
+    const handleSafeSubmit = useCallback(async () => {
+        try {
+            await handleSubmit();
+            return true;
+        }
+        catch {
+            // ignore, shown to user via ErrorComponent and reported via captureError in submitForm
+            return false;
+        }
+    }, [handleSubmit]);
     const UsedFormPageLayout = formPageLayoutComponent ?? FormPageLayout;
     return (_jsx(BasicFormPageNestingContext.Provider, { value: setChildActive, children: _jsx(UsedFormPageLayout, { body: form, footer: childActive ? null : (_jsx(FormButtons, { ...childrenProps, ...otherProps, showBackButtonOnly: otherProps.showBackButtonOnly ||
-                    (readOnly && !Object.values(readOnlyReasons).find((e) => !!e)), readOnly: readOnly, readOnlyReasons: readOnlyReasons, isSubmitting: isSubmitting, dirty: dirty, disableRouting: disableRouting, submit: handleSubmit, customProps: (typeof originalCustomProps === "object" &&
+                    (readOnly && !Object.values(readOnlyReasons).find((e) => !!e)), readOnly: readOnly, readOnlyReasons: readOnlyReasons, isSubmitting: isSubmitting, dirty: dirty, disableRouting: disableRouting, submit: handleSubmit, safeSubmit: handleSafeSubmit, customProps: (typeof originalCustomProps === "object" &&
                     originalCustomProps != null
                     ? customPropsWithGoBack
                     : originalCustomProps) })), other: childActive ? undefined : _jsx(FormLoaderOverlay, { visible: isSubmitting }) }) }));

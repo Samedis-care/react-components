@@ -17,11 +17,7 @@ import useRefState from "../../utils/useRefState";
 import uniqueArray from "../../utils/uniqueArray";
 import ValidationError from "./ValidationError";
 import deepEqual from "../../utils/deepEqual";
-// optional import
-let captureException = null;
-import("@sentry/react")
-    .then((Sentry) => (captureException = Sentry.captureException))
-    .catch(() => { }); // ignore
+import { captureError } from "../../framework/ErrorReporting";
 export var OnlySubmitMountedBehaviour;
 (function (OnlySubmitMountedBehaviour) {
     /**
@@ -586,8 +582,7 @@ const Form = (props) => {
                 });
             }
             catch (e) {
-                if (captureException)
-                    captureException(e);
+                captureError(e, { source: "FormEngine.preSubmit" });
                 // eslint-disable-next-line no-console
                 console.error("[Components-Care] [FormEngine] Pre-submit handler threw exception", e);
                 cancelSubmit = true;
@@ -614,6 +609,11 @@ const Form = (props) => {
                 if (e instanceof Error) {
                     setUpdateError(e);
                 }
+                if (!nestedFormName)
+                    captureError(e, {
+                        source: "FormEngine.submitDelete",
+                        extra: { modelId: model.modelId, recordId: id },
+                    });
                 throw e;
             }
             finally {
@@ -703,6 +703,15 @@ const Form = (props) => {
             // don't use this for validation errors
             if (!throwIsWarning)
                 setUpdateError(e);
+            // nested forms rethrow into the parent form's submit, which reports it there, so
+            // reporting here as well would report the same error twice
+            // note: ValidationErrors (including the "warn" one thrown when the user declines the
+            // warnings dialog) are not reported, see DefaultUnreportedErrorNames
+            if (!nestedFormName)
+                captureError(e, {
+                    source: "FormEngine.submit",
+                    extra: { modelId: model.modelId, recordId: id },
+                });
             throw e;
         }
         finally {
@@ -739,16 +748,21 @@ const Form = (props) => {
     const submitFormReferenced = useCallback((p1) => {
         return submitFormRef.current(p1);
     }, []);
+    const safeSubmitForm = useCallback(async (params) => {
+        try {
+            await submitFormRef.current(params);
+            return true;
+        }
+        catch {
+            // ignore, shown to user via ErrorComponent and reported via captureError in submitForm
+            return false;
+        }
+    }, []);
     const handleSubmit = useCallback(async (evt) => {
         evt.preventDefault();
         evt.stopPropagation();
-        try {
-            await submitFormRef.current();
-        }
-        catch {
-            // ignore, shown to user via ErrorComponent
-        }
-    }, []);
+        await safeSubmitForm();
+    }, [safeSubmitForm]);
     // nested forms
     const parentFormContext = useContext(FormContext);
     if (nestedFormName && !parentFormContext)
@@ -976,6 +990,7 @@ const Form = (props) => {
         addSubmittingBlocker,
         removeSubmittingBlocker,
         submit: submitFormReferenced,
+        safeSubmit: safeSubmitForm,
         deleteOnSubmit: !!deleteOnSubmit,
         values,
         initialValues: initialValuesState ?? {},
@@ -1031,6 +1046,7 @@ const Form = (props) => {
         addSubmittingBlocker,
         removeSubmittingBlocker,
         submitFormReferenced,
+        safeSubmitForm,
         deleteOnSubmit,
         values,
         initialValuesState,
@@ -1075,6 +1091,7 @@ const Form = (props) => {
         removeCustomReadOnly,
         flowEngine: !!flowEngine,
         submit: submitFormReferenced,
+        safeSubmit: safeSubmitForm,
         submitting,
         dirty,
         flowEngineConfig,
@@ -1099,6 +1116,7 @@ const Form = (props) => {
         removeCustomReadOnly,
         flowEngine,
         submitFormReferenced,
+        safeSubmitForm,
         submitting,
         dirty,
         refetch,
@@ -1117,7 +1135,7 @@ const Form = (props) => {
         console.error("[Components-Care] [FormEngine] Data is faulty", serverData ? JSON.stringify(serverData, undefined, 4) : null);
         throw new Error("Data is not present, this should never happen");
     }
-    const innerForm = () => (_jsxs(_Fragment, { children: [displayError && !nestedFormName && (_jsx(ErrorComponent, { error: displayError })), isLoading ? (_jsx("div", { style: loaderContainerStyles, children: _jsx(Loader, {}) })) : (_jsx(Children, { isSubmitting: submitting, values: props.renderConditionally ? values : undefined, submit: submitForm, reset: resetForm, dirty: dirty, id: id, customProps: customProps, disableRouting: !!props.disableRouting }))] }));
+    const innerForm = () => (_jsxs(_Fragment, { children: [displayError && !nestedFormName && (_jsx(ErrorComponent, { error: displayError })), isLoading ? (_jsx("div", { style: loaderContainerStyles, children: _jsx(Loader, {}) })) : (_jsx(Children, { isSubmitting: submitting, values: props.renderConditionally ? values : undefined, submit: submitForm, safeSubmit: safeSubmitForm, reset: resetForm, dirty: dirty, id: id, customProps: customProps, disableRouting: !!props.disableRouting }))] }));
     return (_jsx(FormContextLite.Provider, { value: formContextDataLite, children: _jsx(FormContext.Provider, { value: formContextData, children: !parentFormContext && !renderFormAsDiv ? (_jsx(StyledForm, { onSubmit: handleSubmit, className: formClass, "data-form-submitting": submitting, "data-form-dirty": dirty, "data-form-recordid": id, "data-form-modelid": model.modelId, children: innerForm() })) : (_jsx(StyledFormDiv, { className: formClass, "data-form-submitting": submitting, "data-form-dirty": dirty, "data-form-recordid": id, "data-form-modelid": model.modelId, children: innerForm() })) }) }));
 };
 export default React.memo(Form);

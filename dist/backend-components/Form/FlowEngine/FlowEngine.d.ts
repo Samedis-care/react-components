@@ -17,6 +17,17 @@ export interface FlowStageContextType<StageT extends string> {
      */
     goToStage: (nextStage: StageT, submitToServer: boolean) => Promise<void>;
     /**
+     * Like goToStage, but swallows the error instead of throwing
+     * @param nextStage The next stage
+     * @param submitToServer Submit to server?
+     * @returns false if submitting failed, true otherwise
+     * @remarks if submitting fails the stage is left unchanged. The error is shown by the form's
+     *          errorComponent and reported via the global error reporting config regardless.
+     * @see goToStage
+     * @see FormContextData.safeSubmit
+     */
+    safeGoToStage: (nextStage: StageT, submitToServer: boolean) => Promise<boolean>;
+    /**
      * the current stage
      */
     stage: StageT;
