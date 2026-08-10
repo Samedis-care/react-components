@@ -6,6 +6,6 @@ export interface LocaleSelectorEntryProps extends Omit<LocaleSelectorDialogConte
     handleSwitch: (lang: string) => void;
     disabled: boolean;
 }
-export type LocaleSelectorEntryClassKey = "root" | "container" | "imageWrapper" | "image";
+export type LocaleSelectorEntryClassKey = "root" | "container" | "imageWrapper" | "image" | "textContainer" | "text";
 declare const LocaleSelectorEntry: (inProps: LocaleSelectorEntryProps) => React.ReactElement;
 export default LocaleSelectorEntry;
