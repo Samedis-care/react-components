@@ -3,7 +3,7 @@ import {
 	LocaleSelectorDialogContentProps,
 	LocaleSelectorEntryData,
 } from "./LocaleSelectorDialogContent";
-import { Grid, ListItemButton, styled, useThemeProps } from "@mui/material";
+import { ListItemButton, styled, useThemeProps } from "@mui/material";
 import CountryFlags from "../../standalone/CountryFlags";
 
 export interface LocaleSelectorEntryProps extends Omit<
@@ -22,40 +22,68 @@ const ListItemRoot = styled(ListItemButton, {
 })({
 	height: "100%",
 	display: "block",
+	// long names (e.g. de: "Sonderverwaltungsregion Hongkong") must never bleed
+	// into the neighbouring entries of the virtualized list
+	overflow: "hidden",
 });
 
-const Container = styled(Grid, {
+const Container = styled("div", {
 	name: "CcLocaleSelectorEntry",
 	slot: "container",
 })({
+	display: "flex",
+	alignItems: "center",
+	gap: 16,
 	width: "100%",
 	height: "100%",
-	margin: 0,
 });
 
-const ImageWrapper = styled(Grid, {
+const ImageWrapper = styled("div", {
 	name: "CcLocaleSelectorEntry",
 	slot: "imageWrapper",
 })({
+	flex: "0 0 auto",
+	width: 60,
 	height: 30, // available: 70px - 16px padding
-	position: "relative",
+	display: "flex",
+	alignItems: "center",
 });
 
+// the flag keeps its aspect ratio within the wrapper, so the border always
+// hugs the flag itself (ratios range from 0.82 (NP) to 2.54 (QA))
 const Image = styled("img", { name: "CcLocaleSelectorEntry", slot: "image" })({
-	height: "100%",
-	width: "auto",
+	maxHeight: "100%",
 	maxWidth: "100%",
 	objectFit: "contain",
-	top: 0,
-	bottom: 0,
-	left: 0,
-	right: 0,
-	position: "absolute",
 	border: "1px solid lightgray",
 });
 
+/**
+ * Both text lines share a single grid, so the language column stays aligned
+ * while the country column gets all the remaining space.
+ * The language column has a fixed width so it doesn't jump around between
+ * entries - 120px fits the longest translated language name we ship.
+ */
+const TextContainer = styled("div", {
+	name: "CcLocaleSelectorEntry",
+	slot: "textContainer",
+})({
+	flex: "1 1 auto",
+	minWidth: 0,
+	display: "grid",
+	gridTemplateColumns: "minmax(0, 1fr) 120px",
+	columnGap: 16,
+	alignItems: "center",
+});
+
+const Text = styled("span", { name: "CcLocaleSelectorEntry", slot: "text" })({
+	whiteSpace: "nowrap",
+	overflow: "hidden",
+	textOverflow: "ellipsis",
+});
+
 export type LocaleSelectorEntryClassKey =
-	"root" | "container" | "imageWrapper" | "image";
+	"root" | "container" | "imageWrapper" | "image" | "textContainer" | "text";
 
 const LocaleSelectorEntry = (
 	inProps: LocaleSelectorEntryProps,
@@ -79,20 +107,22 @@ const LocaleSelectorEntry = (
 			disabled={disabled}
 			className={className}
 		>
-			<Container container spacing={2} sx={{ alignItems: "stretch" }}>
-				<ImageWrapper size={4}>
+			<Container>
+				<ImageWrapper>
 					<Image alt={locale.country} src={flag} />
 				</ImageWrapper>
-				<Grid container size={8}>
-					<Grid size={6}>{locale.country}</Grid>
-					<Grid size={6}>{locale.language}</Grid>
+				<TextContainer>
+					<Text title={locale.country}>{locale.country}</Text>
+					<Text title={locale.language}>{locale.language}</Text>
 					{!sameLang && (
 						<>
-							<Grid size={6}>{locale.native_country}</Grid>
-							<Grid size={6}>{locale.native_language}</Grid>
+							<Text title={locale.native_country}>{locale.native_country}</Text>
+							<Text title={locale.native_language}>
+								{locale.native_language}
+							</Text>
 						</>
 					)}
-				</Grid>
+				</TextContainer>
 			</Container>
 		</ListItemRoot>
 	);
