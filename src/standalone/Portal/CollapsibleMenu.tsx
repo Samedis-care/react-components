@@ -58,12 +58,7 @@ const StyledButton = styled(IconButton, {
 })({});
 
 export type CollapsibleMenuClassKey =
-	| "root"
-	| "content"
-	| "bar"
-	| "iconOpen"
-	| "iconClose"
-	| "button";
+	"root" | "content" | "bar" | "iconOpen" | "iconClose" | "button";
 
 const CollapsibleMenu = (inProps: CollapsibleMenuProps) => {
 	const props = useThemeProps({ props: inProps, name: "CcCollapsibleMenu" });

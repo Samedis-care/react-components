@@ -59,10 +59,7 @@ const CloseButton = styled(IconButton, {
 }));
 
 export type DialogTitleClassKey =
-	| "root"
-	| "textWrapper"
-	| "text"
-	| "closeButton";
+	"root" | "textWrapper" | "text" | "closeButton";
 
 const DialogTitleRaw = (inProps: DialogTitleProps) => {
 	const props = useThemeProps({ props: inProps, name: "CcDialogTitle" });

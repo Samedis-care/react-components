@@ -35,10 +35,7 @@ const StyledLocaleSelectorDialogContent = styled(LocaleSelectorDialogContent, {
 })({});
 
 export type LocaleSelectorDialogClassKey =
-	| "root"
-	| "title"
-	| "contentWrapper"
-	| "content";
+	"root" | "title" | "contentWrapper" | "content";
 
 export interface LocaleSelectorDialogCommonProps {
 	/**

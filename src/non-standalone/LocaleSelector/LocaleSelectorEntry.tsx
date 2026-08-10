@@ -55,10 +55,7 @@ const Image = styled("img", { name: "CcLocaleSelectorEntry", slot: "image" })({
 });
 
 export type LocaleSelectorEntryClassKey =
-	| "root"
-	| "container"
-	| "imageWrapper"
-	| "image";
+	"root" | "container" | "imageWrapper" | "image";
 
 const LocaleSelectorEntry = (
 	inProps: LocaleSelectorEntryProps,

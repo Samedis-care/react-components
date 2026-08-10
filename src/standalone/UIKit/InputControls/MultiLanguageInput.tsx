@@ -286,8 +286,7 @@ const LanguageLabelInputAdornment = styled(Typography, {
 })({});
 
 export type MultiLanguageInputClassKey =
-	| "languageLabel"
-	| "languageLabelInputAdornment";
+	"languageLabel" | "languageLabelInputAdornment";
 
 const MultiLanguageInput = (inProps: MultiLanguageInputProps) => {
 	const props = useThemeProps({ props: inProps, name: "CcMultiLanguageInput" });

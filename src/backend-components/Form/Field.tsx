@@ -18,11 +18,7 @@ import shallowCompare from "../../utils/shallowCompare";
 import RenderParams from "../../backend-integration/Model/RenderParams";
 
 type NonOverridableProps =
-	| "getDefaultValue"
-	| "validate"
-	| "filterable"
-	| "sortable"
-	| "columnWidth";
+	"getDefaultValue" | "validate" | "filterable" | "sortable" | "columnWidth";
 
 interface FieldProps {
 	/**

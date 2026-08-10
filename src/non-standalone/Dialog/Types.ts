@@ -90,9 +90,7 @@ export interface IDialogConfigConfirm {
  * Props which will be provided by the promise in the async handlers
  */
 type DialogConfirmCallbackProps =
-	| "onClose"
-	| "handlerButtonYes"
-	| "handlerButtonNo";
+	"onClose" | "handlerButtonYes" | "handlerButtonNo";
 
 /**
  * awaitable confirm dialog properties

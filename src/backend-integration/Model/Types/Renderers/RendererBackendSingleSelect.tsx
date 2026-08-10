@@ -15,11 +15,7 @@ import {
 } from "../../../../backend-components/Selector/FormSelectors";
 
 type OmitProperties =
-	| "selected"
-	| "onSelect"
-	| "disabled"
-	| "model"
-	| "initialData";
+	"selected" | "onSelect" | "disabled" | "model" | "initialData";
 
 export type RendererBackendSingleSelectProps<
 	KeyT extends ModelFieldName,

@@ -22,11 +22,9 @@ import { Action, Update } from "history";
 let _browserTracingIntegration: typeof browserTracingIntegration | undefined =
 	undefined;
 let _startBrowserTracingNavigationSpan:
-	| typeof startBrowserTracingNavigationSpan
-	| undefined = undefined;
+	typeof startBrowserTracingNavigationSpan | undefined = undefined;
 let _startBrowserTracingPageLoadSpan:
-	| typeof startBrowserTracingPageLoadSpan
-	| undefined = undefined;
+	typeof startBrowserTracingPageLoadSpan | undefined = undefined;
 let _WINDOW: typeof WINDOW | undefined = undefined;
 await import("@sentry/browser")
 	.then((Sentry) => {
@@ -43,14 +41,11 @@ let _getClient: typeof getClient | undefined = undefined;
 let _getCurrentScope: typeof getCurrentScope | undefined = undefined;
 let _getRootSpan: typeof getRootSpan | undefined = undefined;
 let _SEMANTIC_ATTRIBUTE_SENTRY_OP:
-	| typeof SEMANTIC_ATTRIBUTE_SENTRY_OP
-	| undefined = undefined;
+	typeof SEMANTIC_ATTRIBUTE_SENTRY_OP | undefined = undefined;
 let _SEMANTIC_ATTRIBUTE_SENTRY_ORIGIN:
-	| typeof SEMANTIC_ATTRIBUTE_SENTRY_ORIGIN
-	| undefined = undefined;
+	typeof SEMANTIC_ATTRIBUTE_SENTRY_ORIGIN | undefined = undefined;
 let _SEMANTIC_ATTRIBUTE_SENTRY_SOURCE:
-	| typeof SEMANTIC_ATTRIBUTE_SENTRY_SOURCE
-	| undefined = undefined;
+	typeof SEMANTIC_ATTRIBUTE_SENTRY_SOURCE | undefined = undefined;
 let _spanToJSON: typeof spanToJSON | undefined = undefined;
 await import("@sentry/core")
 	.then((Sentry) => {

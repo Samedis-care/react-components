@@ -90,11 +90,7 @@ const InfoDiv = styled("div", { name: "CcSignPad", slot: "infoDiv" })({
 });
 
 export type SignPadClassKey =
-	| "root"
-	| "signTextDiv"
-	| "imageDiv"
-	| "signPreview"
-	| "infoDiv";
+	"root" | "signTextDiv" | "imageDiv" | "signPreview" | "infoDiv";
 
 const SignPad = (inProps: SignPadProps) => {
 	const props = useThemeProps({ props: inProps, name: "CcSignPad" });

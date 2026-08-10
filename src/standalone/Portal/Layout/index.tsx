@@ -144,11 +144,7 @@ const RenderLayoutMobileTopLeft = styled("div", {
 	slot: "mobileTopLeft",
 })({ height: 56 });
 export type PortalRenderLayoutClassKey =
-	| "header"
-	| "topLeft"
-	| "menu"
-	| "main"
-	| "mobileTopLeft";
+	"header" | "topLeft" | "menu" | "main" | "mobileTopLeft";
 
 export interface PortalLayoutContextType {
 	mobile: boolean;

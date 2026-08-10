@@ -433,9 +433,7 @@ export interface IDataGridColumnDef {
 	 * - custom (DataGridCustomFilterData)
 	 */
 	filterData?:
-		| DataGridSetFilterData
-		| DataGridIdFilterData
-		| DataGridCustomFilterData;
+		DataGridSetFilterData | DataGridIdFilterData | DataGridCustomFilterData;
 	/**
 	 * Hidden by default?
 	 */

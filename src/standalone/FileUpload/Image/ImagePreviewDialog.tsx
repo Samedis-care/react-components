@@ -70,10 +70,7 @@ const PreviewImage = styled("img", {
 });
 
 export type ImagePreviewDialogClassKey =
-	| "root"
-	| "closeButton"
-	| "container"
-	| "image";
+	"root" | "closeButton" | "container" | "image";
 
 const ImagePreviewDialog = (inProps: ImagePreviewDialogProps) => {
 	const props = useThemeProps({

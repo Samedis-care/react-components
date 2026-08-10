@@ -337,8 +337,7 @@ export type BaseSelectorProps<
 		 * Custom styles used for selector input (text field input)
 		 */
 		textFieldInputClasses?:
-			| OutlinedInputProps["classes"]
-			| StandardInputProps["classes"];
+			OutlinedInputProps["classes"] | StandardInputProps["classes"];
 		/**
 		 * Display switch control?
 		 */

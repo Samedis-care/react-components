@@ -94,12 +94,7 @@ const Picker = styled("div", { name: "CcWeekView", slot: "picker" })({
 });
 
 export type WeekViewClassKey =
-	| "root"
-	| "todayBtn"
-	| "loadWrapper"
-	| "filterWrapper"
-	| "week"
-	| "picker";
+	"root" | "todayBtn" | "loadWrapper" | "filterWrapper" | "week" | "picker";
 
 const EMPTY_FILTERS: Record<string, ScheduleFilterDefinition> = {};
 const NO_ACTIONS: ScheduleAction[] = [];

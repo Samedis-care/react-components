@@ -94,8 +94,7 @@ export interface Type<T> {
 	 * Initial size info for data grid
 	 */
 	dataGridColumnSizingHint?:
-		| IDataGridColumnDef["width"]
-		| (() => IDataGridColumnDef["width"]);
+		IDataGridColumnDef["width"] | (() => IDataGridColumnDef["width"]);
 
 	/**
 	 * Renderer settings

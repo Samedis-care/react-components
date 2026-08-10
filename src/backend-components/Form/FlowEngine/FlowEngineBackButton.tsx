@@ -17,8 +17,7 @@ export interface FlowEngineBackButtonProps extends Omit<
 export const useShouldRenderFlowEngineBackButton = () => {
 	const { customProps } = useFormContextLite();
 	const custProps = customProps as
-		| EnhancedCustomProps<CrudFormProps>
-		| undefined;
+		EnhancedCustomProps<CrudFormProps> | undefined;
 	const isInDialog = useContext(IsInFormDialogContext);
 	const goBack = custProps?.goBack;
 	const hasCustomCloseHandler = custProps?.hasCustomSubmitHandler;
@@ -33,8 +32,7 @@ export const useShouldRenderFlowEngineBackButton = () => {
 const FlowEngineBackButton = (props: FlowEngineBackButtonProps) => {
 	const { customProps, submitting } = useFormContextLite();
 	const custProps = customProps as
-		| EnhancedCustomProps<CrudFormProps>
-		| undefined;
+		EnhancedCustomProps<CrudFormProps> | undefined;
 	const isInDialog = useContext(IsInFormDialogContext);
 	const goBack = custProps?.goBack;
 	const hasCustomCloseHandler = custProps?.hasCustomSubmitHandler;

@@ -58,8 +58,7 @@ export interface ScheduleFilterDefinitionSwitch {
 }
 
 export type ScheduleFilterDefinition =
-	| ScheduleFilterDefinitionSelect
-	| ScheduleFilterDefinitionSwitch;
+	ScheduleFilterDefinitionSelect | ScheduleFilterDefinitionSwitch;
 
 export interface ScheduleAction {
 	/**

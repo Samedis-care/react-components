@@ -17,11 +17,7 @@ import {
 import TypeIds from "../TypeIds";
 
 type OmitProperties =
-	| "selected"
-	| "onSelect"
-	| "disabled"
-	| "model"
-	| "initialData";
+	"selected" | "onSelect" | "disabled" | "model" | "initialData";
 
 /**
  * Renders TypeEnum as drop-down selector (with search)

@@ -58,8 +58,7 @@ const CCI18nProvider = (props: CCI18nProviderProps) => {
 			defaultNS={
 				updating
 					? (((getI18n() ?? ccI18n).options.defaultNS || "") as
-							| string
-							| string[])
+							string | string[])
 					: undefined
 			}
 		>

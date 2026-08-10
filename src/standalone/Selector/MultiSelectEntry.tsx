@@ -111,13 +111,7 @@ const StyledImage = styled("img", {
 );
 
 export type MultiSelectEntryClassKey =
-	| "root"
-	| "selected"
-	| "label"
-	| "icon"
-	| "iconSvg"
-	| "divider"
-	| "image";
+	"root" | "selected" | "label" | "icon" | "iconSvg" | "divider" | "image";
 
 const MultiSelectEntry = <DataT extends MultiSelectorData>(
 	inProps: MultiSelectEntryProps<DataT>,

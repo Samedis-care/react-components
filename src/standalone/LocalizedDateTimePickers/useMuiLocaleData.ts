@@ -8,11 +8,7 @@ const useMuiLocaleData = () => {
 	return useMemo(() => {
 		const extractLocaleData = (
 			locale:
-				| typeof enUS
-				| typeof deDE
-				| typeof frFR
-				| typeof nlNL
-				| typeof ruRU,
+				typeof enUS | typeof deDE | typeof frFR | typeof nlNL | typeof ruRU,
 		): LocalizationProviderProps<never>["localeText"] => {
 			return locale.components.MuiLocalizationProvider.defaultProps.localeText;
 		};

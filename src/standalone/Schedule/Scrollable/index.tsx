@@ -143,11 +143,7 @@ const FilterWrapper = styled(Box, {
 });
 
 export type ScrollableScheduleClassKey =
-	| "today"
-	| "todayBtn"
-	| "scroller"
-	| "filterSettingsBtn"
-	| "filterWrapper";
+	"today" | "todayBtn" | "scroller" | "filterSettingsBtn" | "filterWrapper";
 
 const preventAction = (evt: React.MouseEvent) => {
 	evt.stopPropagation();

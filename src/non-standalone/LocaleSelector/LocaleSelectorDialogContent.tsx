@@ -63,8 +63,7 @@ const NoLocalesMessage = styled("div", {
 });
 
 export type LocaleSelectorDialogContentClassKey =
-	| "localeList"
-	| "noLocalesMessage";
+	"localeList" | "noLocalesMessage";
 
 const SearchInputProps = {
 	startAdornment: (

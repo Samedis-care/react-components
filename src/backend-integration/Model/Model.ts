@@ -75,8 +75,7 @@ export interface ModelFieldDefinition<
 	 * Column width settings (for BackendDataGrid)
 	 */
 	columnWidth?:
-		| IDataGridColumnDef["width"]
-		| (() => IDataGridColumnDef["width"]);
+		IDataGridColumnDef["width"] | (() => IDataGridColumnDef["width"]);
 	/**
 	 * Custom label for grid column header (not DataGrid settings, use getHeaderName for that)
 	 * @remarks Used for BackendDataGrid
