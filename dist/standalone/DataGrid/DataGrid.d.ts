@@ -353,7 +353,7 @@ export interface IDataGridColumnDef {
     /**
      * Filter data, required for the following types:
      * - enum (DataGridSetFilterData)
-     * - id (DataGridIdFilterData)
+     * - id (DataGridIdFilterData), if omitted the filter falls back to manual ID text entry
      * - custom (DataGridCustomFilterData)
      */
     filterData?: DataGridSetFilterData | DataGridIdFilterData | DataGridCustomFilterData;
