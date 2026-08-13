@@ -3,7 +3,7 @@ import { DatePickerProps, PickersTextFieldProps } from "@mui/x-date-pickers";
 import PickersTextFieldWithHelp, {
 	PickersTextFieldWithHelpProps,
 } from "../PickersTextFieldWithHelp";
-import localDateToUtcDate from "../../../utils/localDateToUtcDate";
+import { denormalizeDate, normalizeDate } from "../../../utils/dateOnlyUtils";
 import moment from "moment";
 import LocalizedKeyboardDatePicker, {
 	LocalizedKeyboardDatePickerProps,
@@ -15,12 +15,12 @@ export interface DateInputProps extends Omit<
 	"customHandleClear"
 > {
 	/**
-	 * The value of the input
+	 * The value of the input, as a date-only value (12:00 UTC, see normalizeDate)
 	 */
 	value: Date | null;
 	/**
 	 * Set new value of the input
-	 * @param date new value
+	 * @param date new value, as a date-only value (12:00 UTC, see normalizeDate)
 	 */
 	onChange: (date: Date | null) => void;
 	/**
@@ -62,9 +62,9 @@ const DateInput = (
 	return (
 		<LocalizedKeyboardDatePicker
 			{...muiProps}
-			value={value ? moment(value) : null}
+			value={value ? moment(denormalizeDate(value)) : null}
 			onChange={(date) =>
-				date ? onChange(localDateToUtcDate(date.toDate())) : onChange(null)
+				date ? onChange(normalizeDate(date.toDate())) : onChange(null)
 			}
 			hideDisabledIcon={hideDisabledIcon}
 			required={required}

@@ -2,7 +2,11 @@ import React from "react";
 import Type from "../Type";
 import { ModelRenderParams } from "../index";
 import FilterType from "../FilterType";
-import { normalizeDate } from "./Utils/DateUtils";
+import {
+	formatDateOnly,
+	normalizeDate,
+	toDateOnly,
+} from "../../../utils/dateOnlyUtils";
 import ccI18n from "../../../i18n";
 import getCurrentLocale from "../../../utils/getCurrentLocale";
 import moment from "moment";
@@ -28,7 +32,7 @@ abstract class TypeDate implements Type<Date> {
 	}
 
 	stringify(value: Date): string {
-		return value.toLocaleDateString(getCurrentLocale(ccI18n));
+		return formatDateOnly(value, getCurrentLocale(ccI18n));
 	}
 
 	serialize = (value: Date): unknown => {
@@ -36,7 +40,7 @@ abstract class TypeDate implements Type<Date> {
 	};
 
 	deserialize = (value: unknown): Date => {
-		return normalizeDate(new Date(value as string));
+		return toDateOnly(value as string);
 	};
 
 	/**

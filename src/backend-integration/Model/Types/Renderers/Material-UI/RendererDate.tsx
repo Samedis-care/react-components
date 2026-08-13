@@ -3,7 +3,11 @@ import { Typography } from "@mui/material";
 import ModelRenderParams from "../../../RenderParams";
 import ccI18n from "../../../../../i18n";
 import getCurrentLocale from "../../../../../utils/getCurrentLocale";
-import { normalizeDate } from "../../Utils/DateUtils";
+import {
+	denormalizeDate,
+	formatDateOnly,
+	normalizeDate,
+} from "../../../../../utils/dateOnlyUtils";
 import TypeDate from "../../TypeDate";
 import { LocalizedKeyboardDatePicker } from "../../../../../standalone/LocalizedDateTimePickers";
 import { ToDateLocaleStringOptions } from "../../../../../constants";
@@ -48,7 +52,7 @@ class RendererDate extends TypeDate {
 				<>
 					<LocalizedKeyboardDatePicker
 						name={field}
-						value={value ? moment(value) : null}
+						value={value ? moment(denormalizeDate(value)) : null}
 						label={label}
 						disabled={visibility.readOnly}
 						required={visibility.required}
@@ -80,7 +84,8 @@ class RendererDate extends TypeDate {
 			<Typography>
 				{!visibility.grid && `${label}: `}
 				{value
-					? value.toLocaleDateString(
+					? formatDateOnly(
+							value,
 							getCurrentLocale(ccI18n),
 							ToDateLocaleStringOptions,
 						)

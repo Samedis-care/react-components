@@ -4,7 +4,7 @@ import { ModelRenderParams } from "../index";
 import FilterType from "../FilterType";
 import ccI18n from "../../../i18n";
 import getCurrentLocale from "../../../utils/getCurrentLocale";
-import { normalizeDate } from "./Utils/DateUtils";
+import { formatDateOnly, toDateOnly } from "../../../utils/dateOnlyUtils";
 
 /**
  * Type for nullable dates
@@ -28,7 +28,7 @@ abstract class TypeDateNullable implements Type<Date | null> {
 
 	stringify(value: Date | null): string {
 		return value
-			? value.toLocaleDateString(getCurrentLocale(ccI18n))
+			? formatDateOnly(value, getCurrentLocale(ccI18n))
 			: ccI18n.t("backend-integration.model.types.date-nullable.not-set");
 	}
 
@@ -38,7 +38,7 @@ abstract class TypeDateNullable implements Type<Date | null> {
 	};
 
 	deserialize = (value: unknown): Date | null => {
-		if (value) return normalizeDate(new Date(value as string));
+		if (value) return toDateOnly(value as string);
 		return null;
 	};
 }

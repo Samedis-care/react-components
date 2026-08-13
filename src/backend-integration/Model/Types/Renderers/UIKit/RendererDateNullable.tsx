@@ -4,7 +4,7 @@ import ModelRenderParams from "../../../RenderParams";
 import TypeDateNullable from "../../TypeDateNullable";
 import ccI18n from "../../../../../i18n";
 import getCurrentLocale from "../../../../../utils/getCurrentLocale";
-import { normalizeDate } from "../../Utils/DateUtils";
+import { formatDateOnly } from "../../../../../utils/dateOnlyUtils";
 import { DateInput, FormHelperTextCC } from "../../../../../standalone";
 import { ToDateLocaleStringOptions } from "../../../../../constants";
 import { IDataGridColumnDef } from "../../../../../standalone/DataGrid/DataGrid";
@@ -73,9 +73,7 @@ class RendererDateNullable extends TypeDateNullable {
 						label={label}
 						disabled={visibility.readOnly}
 						required={visibility.required}
-						onChange={(date) =>
-							handleChange(field, date ? normalizeDate(date) : null)
-						}
+						onChange={(date) => handleChange(field, date)}
 						onBlur={handleBlur}
 						error={!!errorMsg}
 						warning={!!warningMsg}
@@ -99,7 +97,8 @@ class RendererDateNullable extends TypeDateNullable {
 			<Typography>
 				{!visibility.grid && `${label}: `}
 				{value
-					? value.toLocaleDateString(
+					? formatDateOnly(
+							value,
 							getCurrentLocale(ccI18n),
 							ToDateLocaleStringOptions,
 						)

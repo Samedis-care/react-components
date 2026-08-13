@@ -34,10 +34,23 @@ import {
 	LocalizedKeyboardDatePicker,
 } from "../../LocalizedDateTimePickers";
 import useCCTranslations from "../../../utils/useCCTranslations";
-import { normalizeDate } from "../../../backend-integration/Model/Types/Utils/DateUtils";
+import {
+	denormalizeDate,
+	normalizeDate,
+	parseDateOnly,
+} from "../../../utils/dateOnlyUtils";
 import { SelectChangeEvent } from "@mui/material/Select";
 import moment, { Moment } from "moment";
 import { BackendMultiSelect } from "../../../backend-components";
+
+/**
+ * Date filter values are stored as date-only values (12:00 UTC) — show them by
+ * their UTC day, so the day doesn't shift in timezones at or beyond UTC+12.
+ * @param value The stored filter value
+ * @returns The value for the date picker
+ */
+const dateFilterValue = (value: string): Moment | null =>
+	value === "" ? null : moment(denormalizeDate(parseDateOnly(value)));
 
 export type FilterType =
 	| "contains"
@@ -502,7 +515,7 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 						<Grid size={12}>
 							{props.valueType === "date" ? (
 								<LocalizedKeyboardDatePicker
-									value={filterValue === "" ? null : moment(filterValue)}
+									value={dateFilterValue(filterValue)}
 									onChange={onFilterValueChangeDate}
 									fullWidth
 									autoFocus={depth === 1}
@@ -528,7 +541,7 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 						<Grid size={12}>
 							{props.valueType === "date" ? (
 								<LocalizedKeyboardDatePicker
-									value={filterValue2 === "" ? null : moment(filterValue2)}
+									value={dateFilterValue(filterValue2)}
 									onChange={onFilterValue2ChangeDate}
 								/>
 							) : props.valueType === "datetime" ? (

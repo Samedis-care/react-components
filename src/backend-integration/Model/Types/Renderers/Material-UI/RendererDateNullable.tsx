@@ -4,7 +4,11 @@ import ModelRenderParams from "../../../RenderParams";
 import TypeDateNullable from "../../TypeDateNullable";
 import ccI18n from "../../../../../i18n";
 import getCurrentLocale from "../../../../../utils/getCurrentLocale";
-import { normalizeDate } from "../../Utils/DateUtils";
+import {
+	denormalizeDate,
+	formatDateOnly,
+	normalizeDate,
+} from "../../../../../utils/dateOnlyUtils";
 import { LocalizedKeyboardDatePicker } from "../../../../../standalone/LocalizedDateTimePickers";
 import { ToDateLocaleStringOptions } from "../../../../../constants";
 import { IDataGridColumnDef } from "../../../../../standalone/DataGrid/DataGrid";
@@ -48,7 +52,7 @@ class RendererDateNullable extends TypeDateNullable {
 				<>
 					<LocalizedKeyboardDatePicker
 						name={field}
-						value={value ? moment(value) : null}
+						value={value ? moment(denormalizeDate(value)) : null}
 						label={label}
 						disabled={visibility.readOnly}
 						required={visibility.required}
@@ -78,7 +82,8 @@ class RendererDateNullable extends TypeDateNullable {
 			<Typography>
 				{!visibility.grid && `${label}: `}
 				{value
-					? value.toLocaleDateString(
+					? formatDateOnly(
+							value,
 							getCurrentLocale(ccI18n),
 							ToDateLocaleStringOptions,
 						)
