@@ -46,6 +46,7 @@ export * from "./routeUtils";
 export * from "./useDate";
 export * from "./validations";
 export { default as localDateToUtcDate } from "./localDateToUtcDate";
+export * from "./dateOnlyUtils";
 export { default as throwError } from "./throwError";
 export { default as copyText } from "./copyText";
 export { default as generateLocalizedExcelImportTemplate } from "./generateLocalizedExcelImportTemplate";

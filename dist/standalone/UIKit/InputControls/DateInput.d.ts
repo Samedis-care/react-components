@@ -4,12 +4,12 @@ import { PickersTextFieldWithHelpProps } from "../PickersTextFieldWithHelp";
 import { LocalizedKeyboardDatePickerProps } from "../../LocalizedDateTimePickers/LocalizedKeyboardDatePicker";
 export interface DateInputProps extends Omit<PickersTextFieldWithHelpProps, "customHandleClear"> {
     /**
-     * The value of the input
+     * The value of the input, as a date-only value (12:00 UTC, see normalizeDate)
      */
     value: Date | null;
     /**
      * Set new value of the input
-     * @param date new value
+     * @param date new value, as a date-only value (12:00 UTC, see normalizeDate)
      */
     onChange: (date: Date | null) => void;
     /**

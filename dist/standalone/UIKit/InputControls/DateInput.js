@@ -1,13 +1,13 @@
 import { jsx as _jsx } from "react/jsx-runtime";
 import React from "react";
 import PickersTextFieldWithHelp from "../PickersTextFieldWithHelp";
-import localDateToUtcDate from "../../../utils/localDateToUtcDate";
+import { denormalizeDate, normalizeDate } from "../../../utils/dateOnlyUtils";
 import moment from "moment";
 import LocalizedKeyboardDatePicker from "../../LocalizedDateTimePickers/LocalizedKeyboardDatePicker";
 import accessSlotProps from "../../../utils/internal/accessSlotProps";
 const DateInput = (props) => {
     const { value, onChange, hideDisabledIcon, required, error, fullWidth, onBlur, ...muiProps } = props;
-    return (_jsx(LocalizedKeyboardDatePicker, { ...muiProps, value: value ? moment(value) : null, onChange: (date) => date ? onChange(localDateToUtcDate(date.toDate())) : onChange(null), hideDisabledIcon: hideDisabledIcon, required: required, error: error, fullWidth: fullWidth, onBlur: onBlur, slots: {
+    return (_jsx(LocalizedKeyboardDatePicker, { ...muiProps, value: value ? moment(denormalizeDate(value)) : null, onChange: (date) => date ? onChange(normalizeDate(date.toDate())) : onChange(null), hideDisabledIcon: hideDisabledIcon, required: required, error: error, fullWidth: fullWidth, onBlur: onBlur, slots: {
             textField: PickersTextFieldWithHelp,
         }, slotProps: {
             ...muiProps.slotProps,

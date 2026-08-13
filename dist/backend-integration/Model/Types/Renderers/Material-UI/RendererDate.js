@@ -2,7 +2,7 @@ import { Fragment as _Fragment, jsx as _jsx, jsxs as _jsxs } from "react/jsx-run
 import { Typography } from "@mui/material";
 import ccI18n from "../../../../../i18n";
 import getCurrentLocale from "../../../../../utils/getCurrentLocale";
-import { normalizeDate } from "../../Utils/DateUtils";
+import { denormalizeDate, formatDateOnly, normalizeDate, } from "../../../../../utils/dateOnlyUtils";
 import TypeDate from "../../TypeDate";
 import { LocalizedKeyboardDatePicker } from "../../../../../standalone/LocalizedDateTimePickers";
 import { ToDateLocaleStringOptions } from "../../../../../constants";
@@ -22,7 +22,7 @@ class RendererDate extends TypeDate {
         if (visibility.editable) {
             if (visibility.grid)
                 throw new Error("Not supported");
-            return (_jsxs(_Fragment, { children: [_jsx(LocalizedKeyboardDatePicker, { name: field, value: value ? moment(value) : null, label: label, disabled: visibility.readOnly, required: visibility.required, onChange: (date) => {
+            return (_jsxs(_Fragment, { children: [_jsx(LocalizedKeyboardDatePicker, { name: field, value: value ? moment(denormalizeDate(value)) : null, label: label, disabled: visibility.readOnly, required: visibility.required, onChange: (date) => {
                             if (!date)
                                 throw new Error("Date is null");
                             else
@@ -35,7 +35,7 @@ class RendererDate extends TypeDate {
                         }, fullWidth: true, disableClearable: true }), _jsx(FormHelperTextCC, { warning: !!warningMsg, error: !!errorMsg, children: errorMsg || warningMsg })] }));
         }
         return (_jsxs(Typography, { children: [!visibility.grid && `${label}: `, value
-                    ? value.toLocaleDateString(getCurrentLocale(ccI18n), ToDateLocaleStringOptions)
+                    ? formatDateOnly(value, getCurrentLocale(ccI18n), ToDateLocaleStringOptions)
                     : ccI18n.t("backend-integration.model.types.renderers.date.not-set")] }));
     }
     dataGridColumnSizingHint = () => {

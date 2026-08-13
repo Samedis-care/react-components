@@ -1,4 +1,4 @@
-import { normalizeDate } from "./Utils/DateUtils";
+import { formatDateOnly, normalizeDate, toDateOnly, } from "../../../utils/dateOnlyUtils";
 import ccI18n from "../../../i18n";
 import getCurrentLocale from "../../../utils/getCurrentLocale";
 import moment from "moment";
@@ -17,13 +17,13 @@ class TypeDate {
         return normalizeDate(new Date());
     }
     stringify(value) {
-        return value.toLocaleDateString(getCurrentLocale(ccI18n));
+        return formatDateOnly(value, getCurrentLocale(ccI18n));
     }
     serialize = (value) => {
         return value.toISOString();
     };
     deserialize = (value) => {
-        return normalizeDate(new Date(value));
+        return toDateOnly(value);
     };
     /**
      * Formatting helper used in date renderers
