@@ -1007,7 +1007,13 @@ class Model<
 					getLabelText: value.type.stringify.bind(value.type, boolVal),
 					value: boolVal ? "true" : "false",
 				}));
-			} else if (value.type.getFilterType() === "id" && value.filterable) {
+			} else if (
+				value.type.getFilterType() === "id" &&
+				value.filterable &&
+				// idFilter null opts into manual ID entry: leaving filterData undefined makes
+				// the grid render a plain text input instead of the ID selector
+				value.type.idFilter !== null
+			) {
 				if (value.getRelationModelValues)
 					throw new Error(
 						`Unsupported grid column filter ID for field ${key} with relation model values`,

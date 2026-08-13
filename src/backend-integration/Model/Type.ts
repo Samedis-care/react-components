@@ -82,9 +82,12 @@ export interface Type<T> {
 	getEnumValues?: () => EnumValue[];
 
 	/**
-	 * Custom filter props for data grid column filter if filter type is ID
+	 * Custom filter props for data grid column filter if filter type is ID.
+	 * Set to null to opt into manual ID entry: the data grid column filter renders a plain text
+	 * field (like a string filter) instead of the ID selector, no relation model is required.
+	 * Leaving this undefined keeps throwing if no ID selector can be built for the field.
 	 */
-	idFilter?: ModelIdFilterData;
+	idFilter?: ModelIdFilterData | null;
 	/**
 	 * Custom filter props for data grid column filter if filter type is custom
 	 */

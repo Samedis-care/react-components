@@ -134,6 +134,8 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 
 	const [enumFilterSearch, setEnumFilterSearch] = useState("");
 	const maxDepth = filterLimit;
+	// ID columns without filter data can't render the ID selector, fall back to manual ID entry
+	const manualIdEntry = props.valueType === "id" && !props.valueData;
 	const defaultFilterType = ((): FilterType => {
 		const defaults: FilterType[] = [
 			"string",
@@ -141,7 +143,7 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 			"combined-string",
 		].includes(props.valueType ?? "")
 			? ["startsWith", "contains", "equals", "matches"]
-			: ["enum", "id"].includes(props.valueType ?? "")
+			: ["enum", "id"].includes(props.valueType ?? "") && !manualIdEntry
 				? ["inSet"]
 				: ["equals", "matches"];
 		return (
@@ -488,7 +490,8 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 				props.valueType === "combined-string" ||
 				props.valueType === "number" ||
 				props.valueType === "date" ||
-				props.valueType === "datetime") && (
+				props.valueType === "datetime" ||
+				manualIdEntry) && (
 				<>
 					<Grid size={12}>
 						<Select onChange={onFilterTypeChange} value={filterType} fullWidth>
@@ -677,7 +680,7 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 					</DataGridSetFilterContainer>
 				</>
 			)}
-			{props.valueType === "id" && (
+			{props.valueType === "id" && !manualIdEntry && (
 				<>
 					<DataGridIdFilterContainer
 						size={12}
@@ -705,7 +708,7 @@ const FilterEntry = (props: DataGridContentFilterEntryProps) => {
 			)}
 			{filterValue &&
 				props.valueType !== "enum" &&
-				props.valueType !== "id" &&
+				(props.valueType !== "id" || manualIdEntry) &&
 				props.valueType !== "boolean" &&
 				(!maxDepth || depth <= maxDepth) && (
 					<>

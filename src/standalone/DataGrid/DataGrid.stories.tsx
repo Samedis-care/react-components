@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 // eslint-disable-next-line import/no-unresolved
-import { expect } from "storybook/test";
+import { expect, userEvent, waitFor, within } from "storybook/test";
 import { Box } from "@mui/material";
 import { DataGrid, DataGridNoPersist } from "./index";
 import type {
@@ -209,5 +209,38 @@ export const Empty: Story = {
 	args: {
 		columns: COLUMNS,
 		loadData: makeLoadData([]),
+	},
+};
+
+// ID columns without filterData can't show the ID selector and fall back to a text input
+const COLUMNS_MANUAL_ID_FILTER: IDataGridColumnDef[] = [
+	{
+		field: "id",
+		headerName: "ID",
+		type: "id",
+		filterable: true,
+		width: [60, 100],
+	},
+	...COLUMNS,
+];
+
+export const ManualIdFilter: Story = {
+	args: {
+		columns: COLUMNS_MANUAL_ID_FILTER,
+		loadData: makeLoadData(),
+	},
+	play: async ({ canvas }) => {
+		const body = within(document.body);
+
+		await userEvent.click(canvas.getAllByRole("button", { name: "Filter" })[0]);
+
+		// no ID selector, but the plain text filter used by the string columns
+		const filterType = await body.findByRole("combobox");
+		await waitFor(() => expect(filterType).toBeVisible());
+		await expect(filterType).toHaveTextContent("Equals");
+
+		const filterValue = body.getByRole("textbox");
+		await userEvent.type(filterValue, "3");
+		await expect(filterValue).toHaveValue("3");
 	},
 };
