@@ -273,7 +273,7 @@
 	},
 	"COP": {
 		"rounding": 0,
-		"digits": 2
+		"digits": 0
 	},
 	"COU": {
 		"rounding": 0,
@@ -473,11 +473,11 @@
 	},
 	"HUF": {
 		"rounding": 0,
-		"digits": 2
+		"digits": 0
 	},
 	"IDR": {
 		"rounding": 0,
-		"digits": 2
+		"digits": 0
 	},
 	"IEP": {
 		"rounding": 0,
@@ -801,7 +801,7 @@
 	},
 	"PKR": {
 		"rounding": 0,
-		"digits": 2
+		"digits": 0
 	},
 	"PLN": {
 		"rounding": 0,
@@ -837,7 +837,7 @@
 	},
 	"RSD": {
 		"rounding": 0,
-		"digits": 0
+		"digits": 2
 	},
 	"RUB": {
 		"rounding": 0,
@@ -892,6 +892,10 @@
 		"digits": 2
 	},
 	"SKK": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"SLE": {
 		"rounding": 0,
 		"digits": 2
 	},
@@ -1043,6 +1047,10 @@
 		"rounding": 0,
 		"digits": 2
 	},
+	"VED": {
+		"rounding": 0,
+		"digits": 2
+	},
 	"VEF": {
 		"rounding": 0,
 		"digits": 2
@@ -1096,6 +1104,10 @@
 		"digits": 2
 	},
 	"XCD": {
+		"rounding": 0,
+		"digits": 2
+	},
+	"XCG": {
 		"rounding": 0,
 		"digits": 2
 	},
@@ -1202,6 +1214,10 @@
 	"ZWD": {
 		"rounding": 0,
 		"digits": 0
+	},
+	"ZWG": {
+		"rounding": 0,
+		"digits": 2
 	},
 	"ZWL": {
 		"rounding": 0,

@@ -131,6 +131,12 @@
 		"native_country": "American Samoa",
 		"native_language": "English"
 	},
+	"to-AS": {
+		"country": "Американское Самоа",
+		"language": "тонганский",
+		"native_country": "Haʻamoa ʻAmelika",
+		"native_language": "lea fakatonga"
+	},
 	"de-AT": {
 		"country": "Австрия",
 		"language": "немецкий",
@@ -305,6 +311,12 @@
 		"native_country": "Burundi",
 		"native_language": "français"
 	},
+	"rn-BI": {
+		"country": "Бурунди",
+		"language": "рунди",
+		"native_country": "Uburundi",
+		"native_language": "Ikirundi"
+	},
 	"fr-BJ": {
 		"country": "Бенин",
 		"language": "французский",
@@ -330,13 +342,13 @@
 		"native_language": "português"
 	},
 	"ms-BN": {
-		"country": "Бруней-Даруссалам",
+		"country": "Бруней",
 		"language": "малайский",
 		"native_country": "Brunei",
 		"native_language": "Melayu"
 	},
 	"en-BN": {
-		"country": "Бруней-Даруссалам",
+		"country": "Бруней",
 		"language": "английский",
 		"native_country": "Brunei",
 		"native_language": "English"
@@ -346,6 +358,12 @@
 		"language": "испанский",
 		"native_country": "Bolivia",
 		"native_language": "español"
+	},
+	"qu-BO": {
+		"country": "Боливия",
+		"language": "кечуа",
+		"native_country": "Bolivia",
+		"native_language": "Runasimi"
 	},
 	"nl-BQ": {
 		"country": "Бонэйр, Синт-Эстатиус и Саба",
@@ -389,11 +407,23 @@
 		"native_country": "Bahamas",
 		"native_language": "English"
 	},
+	"dz-BT": {
+		"country": "Бутан",
+		"language": "дзонг-кэ",
+		"native_country": "འབྲུག",
+		"native_language": "རྫོང་ཁ"
+	},
 	"en-BW": {
 		"country": "Ботсвана",
 		"language": "английский",
 		"native_country": "Botswana",
 		"native_language": "English"
+	},
+	"tn-BW": {
+		"country": "Ботсвана",
+		"language": "тсвана",
+		"native_country": "Botswana",
+		"native_language": "Setswana"
 	},
 	"be-BY": {
 		"country": "Беларусь",
@@ -449,10 +479,16 @@
 		"native_country": "Congo-Kinshasa",
 		"native_language": "français"
 	},
+	"ln-CD": {
+		"country": "Конго - Киншаса",
+		"language": "лингала",
+		"native_country": "Republíki ya Kongó Demokratíki",
+		"native_language": "lingála"
+	},
 	"sw-CD": {
 		"country": "Конго - Киншаса",
 		"language": "суахили",
-		"native_country": "Jamhuri ya Kidemokrasia ya Kongo",
+		"native_country": "Kongo - Kinshasa",
 		"native_language": "Kiswahili"
 	},
 	"fr-CF": {
@@ -461,11 +497,29 @@
 		"native_country": "République centrafricaine",
 		"native_language": "français"
 	},
+	"sg-CF": {
+		"country": "Центрально-Африканская Республика",
+		"language": "санго",
+		"native_country": "Ködörösêse tî Bêafrîka",
+		"native_language": "Sängö"
+	},
+	"ln-CF": {
+		"country": "Центрально-Африканская Республика",
+		"language": "лингала",
+		"native_country": "Repibiki ya Afríka ya Káti",
+		"native_language": "lingála"
+	},
 	"fr-CG": {
 		"country": "Конго - Браззавиль",
 		"language": "французский",
 		"native_country": "Congo-Brazzaville",
 		"native_language": "français"
+	},
+	"ln-CG": {
+		"country": "Конго - Браззавиль",
+		"language": "лингала",
+		"native_country": "Kongo",
+		"native_language": "lingála"
 	},
 	"de-CH": {
 		"country": "Швейцария",
@@ -485,6 +539,12 @@
 		"native_country": "Svizzera",
 		"native_language": "italiano"
 	},
+	"rm-CH": {
+		"country": "Швейцария",
+		"language": "романшский",
+		"native_country": "Svizra",
+		"native_language": "rumantsch"
+	},
 	"fr-CI": {
 		"country": "Кот-д’Ивуар",
 		"language": "французский",
@@ -492,10 +552,16 @@
 		"native_language": "français"
 	},
 	"en-CK": {
-		"country": "Острова Кука",
+		"country": "о-ва Кука",
 		"language": "английский",
 		"native_country": "Cook Islands",
 		"native_language": "English"
+	},
+	"mi-CK": {
+		"country": "о-ва Кука",
+		"language": "маори",
+		"native_country": "Kuki Airani",
+		"native_language": "Māori"
 	},
 	"es-CL": {
 		"country": "Чили",
@@ -524,8 +590,20 @@
 	"yue-CN": {
 		"country": "Китай",
 		"language": "кантонский",
-		"native_country": "中華人民共和國",
+		"native_country": "中國",
 		"native_language": "粵語"
+	},
+	"ug-CN": {
+		"country": "Китай",
+		"language": "уйгурский",
+		"native_country": "جۇڭگو",
+		"native_language": "ئۇيغۇرچە"
+	},
+	"za-CN": {
+		"country": "Китай",
+		"language": "чжуань",
+		"native_country": "Cunghgoz",
+		"native_language": "Vahcuengh"
 	},
 	"es-CO": {
 		"country": "Колумбия",
@@ -562,6 +640,12 @@
 		"language": "нидерландский",
 		"native_country": "Curaçao",
 		"native_language": "Nederlands"
+	},
+	"pap-CW": {
+		"country": "Кюрасао",
+		"language": "папьяменто",
+		"native_country": "Kòrsou",
+		"native_language": "Papiamentu"
 	},
 	"en-CX": {
 		"country": "о-в Рождества",
@@ -647,6 +731,12 @@
 		"native_country": "Denmark",
 		"native_language": "English"
 	},
+	"fo-DK": {
+		"country": "Дания",
+		"language": "фарерский",
+		"native_country": "Danmark",
+		"native_language": "føroyskt"
+	},
 	"de-DK": {
 		"country": "Дания",
 		"language": "немецкий",
@@ -719,6 +809,12 @@
 		"native_country": "إريتريا",
 		"native_language": "العربية"
 	},
+	"ti-ER": {
+		"country": "Эритрея",
+		"language": "тигринья",
+		"native_country": "ኤርትራ",
+		"native_language": "ትግርኛ"
+	},
 	"es-ES": {
 		"country": "Испания",
 		"language": "испанский",
@@ -743,6 +839,12 @@
 		"native_country": "Espainia",
 		"native_language": "euskara"
 	},
+	"oc-ES": {
+		"country": "Испания",
+		"language": "окситанский",
+		"native_country": "Espanha",
+		"native_language": "occitan"
+	},
 	"am-ET": {
 		"country": "Эфиопия",
 		"language": "амхарский",
@@ -754,6 +856,18 @@
 		"language": "английский",
 		"native_country": "Ethiopia",
 		"native_language": "English"
+	},
+	"om-ET": {
+		"country": "Эфиопия",
+		"language": "оромо",
+		"native_country": "Itoophiyaa",
+		"native_language": "Oromoo"
+	},
+	"ti-ET": {
+		"country": "Эфиопия",
+		"language": "тигринья",
+		"native_country": "ኢትዮጵያ",
+		"native_language": "ትግርኛ"
 	},
 	"so-ET": {
 		"country": "Эфиопия",
@@ -773,6 +887,12 @@
 		"native_country": "Finland",
 		"native_language": "svenska"
 	},
+	"smn-FI": {
+		"country": "Финляндия",
+		"language": "инари-саамский",
+		"native_country": "Suomâ",
+		"native_language": "anarâškielâ"
+	},
 	"en-FJ": {
 		"country": "Фиджи",
 		"language": "английский",
@@ -791,6 +911,12 @@
 		"native_country": "Micronesia",
 		"native_language": "English"
 	},
+	"fo-FO": {
+		"country": "Фарерские о-ва",
+		"language": "фарерский",
+		"native_country": "Føroyar",
+		"native_language": "føroyskt"
+	},
 	"da-FO": {
 		"country": "Фарерские о-ва",
 		"language": "датский",
@@ -803,6 +929,12 @@
 		"native_country": "France",
 		"native_language": "français"
 	},
+	"br-FR": {
+		"country": "Франция",
+		"language": "бретонский",
+		"native_country": "Frañs",
+		"native_language": "brezhoneg"
+	},
 	"ca-FR": {
 		"country": "Франция",
 		"language": "каталанский",
@@ -814,6 +946,12 @@
 		"language": "баскский",
 		"native_country": "Frantzia",
 		"native_language": "euskara"
+	},
+	"oc-FR": {
+		"country": "Франция",
+		"language": "окситанский",
+		"native_country": "França",
+		"native_language": "occitan"
 	},
 	"fr-GA": {
 		"country": "Габон",
@@ -832,6 +970,12 @@
 		"language": "валлийский",
 		"native_country": "Y Deyrnas Unedig",
 		"native_language": "Cymraeg"
+	},
+	"gd-GB": {
+		"country": "Великобритания",
+		"language": "гэльский",
+		"native_country": "An Rìoghachd Aonaichte",
+		"native_language": "Gàidhlig"
 	},
 	"en-GD": {
 		"country": "Гренада",
@@ -881,6 +1025,18 @@
 		"native_country": "Ghana",
 		"native_language": "English"
 	},
+	"ak-GH": {
+		"country": "Гана",
+		"language": "акан",
+		"native_country": "Gaana",
+		"native_language": "Akan"
+	},
+	"ee-GH": {
+		"country": "Гана",
+		"language": "эве",
+		"native_country": "Ghana nutome",
+		"native_language": "eʋegbe"
+	},
 	"en-GI": {
 		"country": "Гибралтар",
 		"language": "английский",
@@ -905,6 +1061,12 @@
 		"native_country": "Gibraltar",
 		"native_language": "português"
 	},
+	"kl-GL": {
+		"country": "Гренландия",
+		"language": "гренландский",
+		"native_country": "Kalaallit Nunaat",
+		"native_language": "kalaallisut"
+	},
 	"da-GL": {
 		"country": "Гренландия",
 		"language": "датский",
@@ -922,6 +1084,18 @@
 		"language": "английский",
 		"native_country": "Gambia",
 		"native_language": "English"
+	},
+	"wo-GM": {
+		"country": "Гамбия",
+		"language": "волоф",
+		"native_country": "Gàmbi",
+		"native_language": "Wolof"
+	},
+	"ff-GM": {
+		"country": "Гамбия",
+		"language": "фулах",
+		"native_country": "Gammbi",
+		"native_language": "Pulaar"
 	},
 	"fr-GN": {
 		"country": "Гвинея",
@@ -1010,7 +1184,7 @@
 	"yue-HK": {
 		"country": "Гонконг (САР)",
 		"language": "кантонский",
-		"native_country": "中華人民共和國香港特別行政區",
+		"native_country": "中國香港特別行政區",
 		"native_language": "粵語"
 	},
 	"en-HK": {
@@ -1036,6 +1210,12 @@
 		"language": "сербский",
 		"native_country": "Хрватска",
 		"native_language": "српски"
+	},
+	"ht-HT": {
+		"country": "Гаити",
+		"language": "гаитянский",
+		"native_country": "Haïti",
+		"native_language": "Kreyòl Ayisyen"
 	},
 	"fr-HT": {
 		"country": "Гаити",
@@ -1108,6 +1288,12 @@
 		"language": "английский",
 		"native_country": "Isle of Man",
 		"native_language": "English"
+	},
+	"gv-IM": {
+		"country": "о-в Мэн",
+		"language": "мэнский",
+		"native_country": "Ellan Vannin",
+		"native_language": "Gaelg"
 	},
 	"en-IN": {
 		"country": "Индия",
@@ -1187,6 +1373,18 @@
 		"native_country": "ভাৰত",
 		"native_language": "অসমীয়া"
 	},
+	"sat-IN": {
+		"country": "Индия",
+		"language": "сантали",
+		"native_country": "ᱤᱱᱰᱤᱭᱟ",
+		"native_language": "ᱥᱟᱱᱛᱟᱲᱤ"
+	},
+	"ks-IN": {
+		"country": "Индия",
+		"language": "кашмири",
+		"native_country": "ہِندوستان",
+		"native_language": "کٲشُر"
+	},
 	"ne-IN": {
 		"country": "Индия",
 		"language": "непальский",
@@ -1196,8 +1394,32 @@
 	"sd-IN": {
 		"country": "Индия",
 		"language": "синдхи",
-		"native_country": "انڊيا",
+		"native_country": "ڀارت",
 		"native_language": "سنڌي"
+	},
+	"kok-IN": {
+		"country": "Индия",
+		"language": "конкани",
+		"native_country": "भारत",
+		"native_language": "कोंकणी"
+	},
+	"doi-IN": {
+		"country": "Индия",
+		"language": "догри",
+		"native_country": "भारत",
+		"native_language": "डोगरी"
+	},
+	"mni-IN": {
+		"country": "Индия",
+		"language": "манипурский",
+		"native_country": "ইন্দিয়া",
+		"native_language": "মৈতৈলোন্"
+	},
+	"sa-IN": {
+		"country": "Индия",
+		"language": "санскрит",
+		"native_country": "भारतः",
+		"native_language": "संस्कृत भाषा"
 	},
 	"fr-IN": {
 		"country": "Индия",
@@ -1217,6 +1439,12 @@
 		"native_country": "العراق",
 		"native_language": "العربية"
 	},
+	"ku-IQ": {
+		"country": "Ирак",
+		"language": "курдский",
+		"native_country": "Îraq",
+		"native_language": "kurdî (kurmancî)"
+	},
 	"hy-IQ": {
 		"country": "Ирак",
 		"language": "армянский",
@@ -1228,6 +1456,12 @@
 		"language": "персидский",
 		"native_country": "ایران",
 		"native_language": "فارسی"
+	},
+	"ku-IR": {
+		"country": "Иран",
+		"language": "курдский",
+		"native_country": "Îran",
+		"native_language": "kurdî (kurmancî)"
 	},
 	"is-IS": {
 		"country": "Исландия",
@@ -1259,6 +1493,12 @@
 		"native_country": "Island",
 		"native_language": "svenska"
 	},
+	"no-IS": {
+		"country": "Исландия",
+		"language": "норвежский",
+		"native_country": "Island",
+		"native_language": "norsk"
+	},
 	"it-IT": {
 		"country": "Италия",
 		"language": "итальянский",
@@ -1276,6 +1516,12 @@
 		"language": "французский",
 		"native_country": "Italie",
 		"native_language": "français"
+	},
+	"sc-IT": {
+		"country": "Италия",
+		"language": "сардинский",
+		"native_country": "Itàlia",
+		"native_language": "sardu"
 	},
 	"ca-IT": {
 		"country": "Италия",
@@ -1440,7 +1686,7 @@
 		"native_language": "English"
 	},
 	"en-KY": {
-		"country": "Острова Кайман",
+		"country": "о-ва Кайман",
 		"language": "английский",
 		"native_country": "Cayman Islands",
 		"native_language": "English"
@@ -1541,11 +1787,23 @@
 		"native_country": "Lesotho",
 		"native_language": "English"
 	},
+	"st-LS": {
+		"country": "Лесото",
+		"language": "южный сото",
+		"native_country": "Lesotho",
+		"native_language": "Sesotho"
+	},
 	"zu-LS": {
 		"country": "Лесото",
 		"language": "зулу",
 		"native_country": "iLesotho",
 		"native_language": "isiZulu"
+	},
+	"xh-LS": {
+		"country": "Лесото",
+		"language": "коса",
+		"native_country": "ELesotho",
+		"native_language": "IsiXhosa"
 	},
 	"lt-LT": {
 		"country": "Литва",
@@ -1564,6 +1822,12 @@
 		"language": "польский",
 		"native_country": "Litwa",
 		"native_language": "polski"
+	},
+	"lb-LU": {
+		"country": "Люксембург",
+		"language": "люксембургский",
+		"native_country": "Lëtzebuerg",
+		"native_language": "Lëtzebuergesch"
 	},
 	"de-LU": {
 		"country": "Люксембург",
@@ -1703,8 +1967,14 @@
 		"native_country": "Madagascar",
 		"native_language": "français"
 	},
+	"mg-MG": {
+		"country": "Мадагаскар",
+		"language": "малагасийский",
+		"native_country": "Madagasikara",
+		"native_language": "Malagasy"
+	},
 	"en-MH": {
-		"country": "Маршалловы Острова",
+		"country": "Маршалловы о-ва",
 		"language": "английский",
 		"native_country": "Marshall Islands",
 		"native_language": "English"
@@ -1738,6 +2008,12 @@
 		"language": "французский",
 		"native_country": "Mali",
 		"native_language": "français"
+	},
+	"bm-ML": {
+		"country": "Мали",
+		"language": "бамбара",
+		"native_country": "Mali",
+		"native_language": "bamanakan"
 	},
 	"my-MM": {
 		"country": "Мьянма (Бирма)",
@@ -1805,11 +2081,23 @@
 		"native_country": "Mauritanie",
 		"native_language": "français"
 	},
+	"wo-MR": {
+		"country": "Мавритания",
+		"language": "волоф",
+		"native_country": "Mooritani",
+		"native_language": "Wolof"
+	},
 	"en-MS": {
 		"country": "Монтсеррат",
 		"language": "английский",
 		"native_country": "Montserrat",
 		"native_language": "English"
+	},
+	"mt-MT": {
+		"country": "Мальта",
+		"language": "мальтийский",
+		"native_country": "Malta",
+		"native_language": "Malti"
 	},
 	"en-MT": {
 		"country": "Мальта",
@@ -1895,6 +2183,12 @@
 		"native_country": "Moçambique",
 		"native_language": "português"
 	},
+	"vmw-MZ": {
+		"country": "Мозамбик",
+		"language": "макуа",
+		"native_country": "oMosambikhi",
+		"native_language": "emakhuwa"
+	},
 	"en-NA": {
 		"country": "Намибия",
 		"language": "английский",
@@ -1913,6 +2207,12 @@
 		"native_country": "Namibia",
 		"native_language": "Deutsch"
 	},
+	"naq-NA": {
+		"country": "Намибия",
+		"language": "нама",
+		"native_country": "Namibiab",
+		"native_language": "Khoekhoegowab"
+	},
 	"fr-NC": {
 		"country": "Новая Каледония",
 		"language": "французский",
@@ -1925,6 +2225,18 @@
 		"native_country": "Niger",
 		"native_language": "français"
 	},
+	"ha-NE": {
+		"country": "Нигер",
+		"language": "хауса",
+		"native_country": "Nijar",
+		"native_language": "Hausa"
+	},
+	"dje-NE": {
+		"country": "Нигер",
+		"language": "джерма",
+		"native_country": "Nižer",
+		"native_language": "Zarmaciine"
+	},
 	"en-NF": {
 		"country": "о-в Норфолк",
 		"language": "английский",
@@ -1936,6 +2248,30 @@
 		"language": "английский",
 		"native_country": "Nigeria",
 		"native_language": "English"
+	},
+	"ha-NG": {
+		"country": "Нигерия",
+		"language": "хауса",
+		"native_country": "Nijeriya",
+		"native_language": "Hausa"
+	},
+	"yo-NG": {
+		"country": "Нигерия",
+		"language": "йоруба",
+		"native_country": "Nàìjíríà",
+		"native_language": "Èdè Yorùbá"
+	},
+	"ig-NG": {
+		"country": "Нигерия",
+		"language": "игбо",
+		"native_country": "Naịjịrịa",
+		"native_language": "Igbo"
+	},
+	"ff-NG": {
+		"country": "Нигерия",
+		"language": "фулах",
+		"native_country": "Nijeriyaa",
+		"native_language": "Pulaar"
 	},
 	"es-NI": {
 		"country": "Никарагуа",
@@ -1955,11 +2291,35 @@
 		"native_country": "Nederland",
 		"native_language": "Nederlands"
 	},
+	"fy-NL": {
+		"country": "Нидерланды",
+		"language": "западнофризский",
+		"native_country": "Nederlân",
+		"native_language": "Frysk"
+	},
+	"no-NO": {
+		"country": "Норвегия",
+		"language": "норвежский",
+		"native_country": "Norge",
+		"native_language": "norsk"
+	},
 	"nb-NO": {
 		"country": "Норвегия",
 		"language": "норвежский букмол",
 		"native_country": "Norge",
 		"native_language": "norsk bokmål"
+	},
+	"nn-NO": {
+		"country": "Норвегия",
+		"language": "нюнорск",
+		"native_country": "Noreg",
+		"native_language": "norsk nynorsk"
+	},
+	"se-NO": {
+		"country": "Норвегия",
+		"language": "северносаамский",
+		"native_country": "Norga",
+		"native_language": "davvisámegiella"
 	},
 	"fi-NO": {
 		"country": "Норвегия",
@@ -1997,6 +2357,12 @@
 		"native_country": "New Zealand",
 		"native_language": "English"
 	},
+	"mi-NZ": {
+		"country": "Новая Зеландия",
+		"language": "маори",
+		"native_country": "Aotearoa",
+		"native_language": "Māori"
+	},
 	"ar-OM": {
 		"country": "Оман",
 		"language": "арабский",
@@ -2033,6 +2399,12 @@
 		"native_country": "Perú",
 		"native_language": "español"
 	},
+	"qu-PE": {
+		"country": "Перу",
+		"language": "кечуа",
+		"native_country": "Perú",
+		"native_language": "Runasimi"
+	},
 	"fr-PF": {
 		"country": "Французская Полинезия",
 		"language": "французский",
@@ -2045,6 +2417,12 @@
 		"native_country": "Papua New Guinea",
 		"native_language": "English"
 	},
+	"tpi-PG": {
+		"country": "Папуа — Новая Гвинея",
+		"language": "ток-писин",
+		"native_country": "Papua Niugini",
+		"native_language": "Tok Pisin"
+	},
 	"en-PH": {
 		"country": "Филиппины",
 		"language": "английский",
@@ -2056,6 +2434,12 @@
 		"language": "филиппинский",
 		"native_country": "Pilipinas",
 		"native_language": "Filipino"
+	},
+	"ceb-PH": {
+		"country": "Филиппины",
+		"language": "себуано",
+		"native_country": "Philippines",
+		"native_language": "Cebuano"
 	},
 	"ur-PK": {
 		"country": "Пакистан",
@@ -2213,6 +2597,54 @@
 		"native_country": "Россия",
 		"native_language": "русский"
 	},
+	"tt-RU": {
+		"country": "Россия",
+		"language": "татарский",
+		"native_country": "Россия",
+		"native_language": "татар"
+	},
+	"ce-RU": {
+		"country": "Россия",
+		"language": "чеченский",
+		"native_country": "Росси",
+		"native_language": "нохчийн"
+	},
+	"tyv-RU": {
+		"country": "Россия",
+		"language": "тувинский",
+		"native_country": "Россия Федерациязы",
+		"native_language": "Тыва"
+	},
+	"cv-RU": {
+		"country": "Россия",
+		"language": "чувашский",
+		"native_country": "Раҫҫей",
+		"native_language": "чӑваш чӗлхи"
+	},
+	"bua-RU": {
+		"country": "Россия",
+		"language": "бурятский",
+		"native_country": "Ород Улас",
+		"native_language": "буряад"
+	},
+	"ba-RU": {
+		"country": "Россия",
+		"language": "башкирский",
+		"native_country": "Рәсәй",
+		"native_language": "башҡорт"
+	},
+	"sah-RU": {
+		"country": "Россия",
+		"language": "саха",
+		"native_country": "Арассыыйа",
+		"native_language": "саха тыла"
+	},
+	"rw-RW": {
+		"country": "Руанда",
+		"language": "киньяруанда",
+		"native_country": "U Rwanda",
+		"native_language": "Ikinyarwanda"
+	},
 	"en-RW": {
 		"country": "Руанда",
 		"language": "английский",
@@ -2238,19 +2670,19 @@
 		"native_language": "العربية"
 	},
 	"en-SB": {
-		"country": "Соломоновы Острова",
+		"country": "Соломоновы о-ва",
 		"language": "английский",
 		"native_country": "Solomon Islands",
 		"native_language": "English"
 	},
 	"en-SC": {
-		"country": "Сейшельские Острова",
+		"country": "Сейшельские о-ва",
 		"language": "английский",
 		"native_country": "Seychelles",
 		"native_language": "English"
 	},
 	"fr-SC": {
-		"country": "Сейшельские Острова",
+		"country": "Сейшельские о-ва",
 		"language": "французский",
 		"native_country": "Seychelles",
 		"native_language": "français"
@@ -2278,6 +2710,12 @@
 		"language": "шведский",
 		"native_country": "Sverige",
 		"native_language": "svenska"
+	},
+	"se-SE": {
+		"country": "Швеция",
+		"language": "северносаамский",
+		"native_country": "Ruoŧŧa",
+		"native_language": "davvisámegiella"
 	},
 	"fi-SE": {
 		"country": "Швеция",
@@ -2321,6 +2759,12 @@
 		"native_country": "Slovenija",
 		"native_language": "slovenščina"
 	},
+	"no-SJ": {
+		"country": "Шпицберген и Ян-Майен",
+		"language": "норвежский",
+		"native_country": "Svalbard og Jan Mayen",
+		"native_language": "norsk"
+	},
 	"ru-SJ": {
 		"country": "Шпицберген и Ян-Майен",
 		"language": "русский",
@@ -2356,6 +2800,12 @@
 		"language": "французский",
 		"native_country": "Sénégal",
 		"native_language": "français"
+	},
+	"wo-SN": {
+		"country": "Сенегал",
+		"language": "волоф",
+		"native_country": "Senegaal",
+		"native_language": "Wolof"
 	},
 	"so-SO": {
 		"country": "Сомали",
@@ -2429,6 +2879,12 @@
 		"native_country": "سوريا",
 		"native_language": "العربية"
 	},
+	"ku-SY": {
+		"country": "Сирия",
+		"language": "курдский",
+		"native_country": "Sûrîye",
+		"native_language": "kurdî (kurmancî)"
+	},
 	"hy-SY": {
 		"country": "Сирия",
 		"language": "армянский",
@@ -2453,8 +2909,14 @@
 		"native_country": "Eswatini",
 		"native_language": "English"
 	},
+	"ss-SZ": {
+		"country": "Эсватини",
+		"language": "свази",
+		"native_country": "eSwatini",
+		"native_language": "siSwati"
+	},
 	"en-TC": {
-		"country": "о-ва Тёркс и Кайкос",
+		"country": "Тёркс и Кайкос",
 		"language": "английский",
 		"native_country": "Turks & Caicos Islands",
 		"native_language": "English"
@@ -2483,6 +2945,18 @@
 		"native_country": "Togo",
 		"native_language": "français"
 	},
+	"ee-TG": {
+		"country": "Того",
+		"language": "эве",
+		"native_country": "Togo nutome",
+		"native_language": "eʋegbe"
+	},
+	"ha-TG": {
+		"country": "Того",
+		"language": "хауса",
+		"native_country": "Togo",
+		"native_language": "Hausa"
+	},
 	"th-TH": {
 		"country": "Таиланд",
 		"language": "тайский",
@@ -2494,6 +2968,12 @@
 		"language": "английский",
 		"native_country": "Thailand",
 		"native_language": "English"
+	},
+	"tg-TJ": {
+		"country": "Таджикистан",
+		"language": "таджикский",
+		"native_country": "Тоҷикистон",
+		"native_language": "тоҷикӣ"
 	},
 	"ru-TJ": {
 		"country": "Таджикистан",
@@ -2555,6 +3035,12 @@
 		"native_country": "Tunisie",
 		"native_language": "français"
 	},
+	"to-TO": {
+		"country": "Тонга",
+		"language": "тонганский",
+		"native_country": "Tonga",
+		"native_language": "lea fakatonga"
+	},
 	"en-TO": {
 		"country": "Тонга",
 		"language": "английский",
@@ -2566,6 +3052,12 @@
 		"language": "турецкий",
 		"native_country": "Türkiye",
 		"native_language": "Türkçe"
+	},
+	"ku-TR": {
+		"country": "Турция",
+		"language": "курдский",
+		"native_country": "Türkiye",
+		"native_language": "kurdî (kurmancî)"
 	},
 	"az-TR": {
 		"country": "Турция",
@@ -2657,6 +3149,12 @@
 		"native_country": "Uganda",
 		"native_language": "English"
 	},
+	"lg-UG": {
+		"country": "Уганда",
+		"language": "ганда",
+		"native_country": "Yuganda",
+		"native_language": "Luganda"
+	},
 	"sw-UG": {
 		"country": "Уганда",
 		"language": "суахили",
@@ -2687,6 +3185,12 @@
 		"native_country": "Estados Unidos",
 		"native_language": "español"
 	},
+	"haw-US": {
+		"country": "Соединенные Штаты",
+		"language": "гавайский",
+		"native_country": "ʻAmelika Hui Pū ʻIa",
+		"native_language": "ʻŌlelo Hawaiʻi"
+	},
 	"fr-US": {
 		"country": "Соединенные Штаты",
 		"language": "французский",
@@ -2711,6 +3215,12 @@
 		"native_country": "Узбекистан",
 		"native_language": "русский"
 	},
+	"tg-UZ": {
+		"country": "Узбекистан",
+		"language": "таджикский",
+		"native_country": "Ӯзбекистон",
+		"native_language": "тоҷикӣ"
+	},
 	"it-VA": {
 		"country": "Ватикан",
 		"language": "итальянский",
@@ -2726,13 +3236,13 @@
 	"en-VC": {
 		"country": "Сент-Винсент и Гренадины",
 		"language": "английский",
-		"native_country": "St Vincent & Grenadines",
+		"native_country": "St Vincent & the Grenadines",
 		"native_language": "English"
 	},
 	"fr-VC": {
 		"country": "Сент-Винсент и Гренадины",
 		"language": "французский",
-		"native_country": "Saint-Vincent-et-les-Grenadines",
+		"native_country": "Saint-Vincent-et-les Grenadines",
 		"native_language": "français"
 	},
 	"es-VE": {
@@ -2768,7 +3278,7 @@
 	"fr-VN": {
 		"country": "Вьетнам",
 		"language": "французский",
-		"native_country": "Vietnam",
+		"native_country": "Viêt Nam",
 		"native_language": "français"
 	},
 	"zh-VN": {
@@ -2825,11 +3335,23 @@
 		"native_country": "iNingizimu Afrika",
 		"native_language": "isiZulu"
 	},
+	"xh-ZA": {
+		"country": "Южно-Африканская Республика",
+		"language": "коса",
+		"native_country": "EMzantsi Afrika",
+		"native_language": "IsiXhosa"
+	},
 	"af-ZA": {
 		"country": "Южно-Африканская Республика",
 		"language": "африкаанс",
 		"native_country": "Suid-Afrika",
 		"native_language": "Afrikaans"
+	},
+	"nso-ZA": {
+		"country": "Южно-Африканская Республика",
+		"language": "северный сото",
+		"native_country": "Afrika Borwa",
+		"native_language": "Sesotho sa Leboa"
 	},
 	"en-ZA": {
 		"country": "Южно-Африканская Республика",
@@ -2837,16 +3359,46 @@
 		"native_country": "South Africa",
 		"native_language": "English"
 	},
+	"tn-ZA": {
+		"country": "Южно-Африканская Республика",
+		"language": "тсвана",
+		"native_country": "Aforika Borwa",
+		"native_language": "Setswana"
+	},
+	"st-ZA": {
+		"country": "Южно-Африканская Республика",
+		"language": "южный сото",
+		"native_country": "Afrika Borwa",
+		"native_language": "Sesotho"
+	},
 	"en-ZM": {
 		"country": "Замбия",
 		"language": "английский",
 		"native_country": "Zambia",
 		"native_language": "English"
 	},
+	"bem-ZM": {
+		"country": "Замбия",
+		"language": "бемба",
+		"native_country": "Zambia",
+		"native_language": "Ichibemba"
+	},
 	"en-ZW": {
 		"country": "Зимбабве",
 		"language": "английский",
 		"native_country": "Zimbabwe",
 		"native_language": "English"
+	},
+	"sn-ZW": {
+		"country": "Зимбабве",
+		"language": "шона",
+		"native_country": "Zimbabwe",
+		"native_language": "chiShona"
+	},
+	"nd-ZW": {
+		"country": "Зимбабве",
+		"language": "северный ндебеле",
+		"native_country": "Zimbabwe",
+		"native_language": "isiNdebele"
 	}
 }

@@ -6,6 +6,11 @@ import requests
 import csv
 import io
 
+# cldr-json packages (https://github.com/unicode-org/cldr-json)
+CLDR_LOCALENAMES = "../node_modules/cldr-localenames-full/main/"
+CLDR_NUMBERS = "../node_modules/cldr-numbers-full/main/"
+CLDR_CORE = "../node_modules/cldr-core/supplemental/"
+
 def download_flags(country_list: [str]):
     for country_code in country_list:
         dl_path = "../src/assets/img/countries/" + country_code + ".svg"
@@ -42,9 +47,12 @@ def get_country_languages() -> dict[str, [str]]:
 # returns locale -> country_code -> localized string
 def read_countries() -> dict[str, dict[str, str]]:
     ret = {}
-    locales = os.listdir("../node_modules/cldr-data/main/")
+    locales = os.listdir(CLDR_LOCALENAMES)
     for locale in locales:
-        with open("../node_modules/cldr-data/main/" + locale + "/territories.json", "r") as f:
+        path = CLDR_LOCALENAMES + locale + "/territories.json"
+        if not os.path.isfile(path): # locales with sparse coverage don't ship every file
+            continue
+        with open(path, "r") as f:
             ret[locale] = json.load(f)["main"][locale]["localeDisplayNames"]["territories"]
     ret["ru-KG"]["KG"] = "Кыргызстан" # upon special request by the govt of Кыргызстан
     return ret
@@ -52,9 +60,12 @@ def read_countries() -> dict[str, dict[str, str]]:
 # returns locale -> language code -> localized string
 def read_languages() -> dict[str, dict[str, str]]:
     ret = {}
-    locales = os.listdir("../node_modules/cldr-data/main/")
+    locales = os.listdir(CLDR_LOCALENAMES)
     for locale in locales:
-        with open("../node_modules/cldr-data/main/" + locale + "/languages.json", "r") as f:
+        path = CLDR_LOCALENAMES + locale + "/languages.json"
+        if not os.path.isfile(path): # locales with sparse coverage don't ship every file
+            continue
+        with open(path, "r") as f:
             ret[locale] = json.load(f)["main"][locale]["localeDisplayNames"]["languages"]
     return ret
 
@@ -62,7 +73,7 @@ def read_languages() -> dict[str, dict[str, str]]:
 # locale -> num speakers
 def locale_relevance() -> dict[str, int]:
     ret = {}
-    with open("../node_modules/cldr-data/supplemental/territoryInfo.json") as f:
+    with open(CLDR_CORE + "territoryInfo.json") as f:
         data = json.load(f)["supplemental"]["territoryInfo"]
     for country, data in data.items():
         population = int(data["_population"])
@@ -75,23 +86,49 @@ def locale_relevance() -> dict[str, int]:
 
 # list of all currencies
 def get_currencies() -> list[str]:
-    with open("../node_modules/cldr-data/main/en/currencies.json") as f:
+    with open(CLDR_NUMBERS + "en/currencies.json") as f:
         data = json.load(f)["main"]["en"]["numbers"]["currencies"]
     return list(data.keys())
 
 # locale -> currency -> { displayName: string, displayName-count-one: string, displayName-count-other: string, symbol: string, symbol-alt-narrow?: string }
 def get_currency_locales() -> dict[str, dict[str, dict[str, str]]]:
     ret = {}
-    locales = os.listdir("../node_modules/cldr-data/main/")
+    locales = os.listdir(CLDR_NUMBERS)
     for locale in locales:
-        with open("../node_modules/cldr-data/main/" + locale + "/currencies.json", "r") as f:
-            ret[locale] = json.load(f)["main"][locale]["numbers"]["currencies"]
+        with open(CLDR_NUMBERS + locale + "/currencies.json", "r") as f:
+            currencies = json.load(f)["main"][locale]["numbers"]["currencies"]
+        # CLDR omits the symbol when it equals the currency code. These become i18n keys,
+        # so always emit one to keep i18next from falling back to another language.
+        for currency, currency_data in currencies.items():
+            currency_data.setdefault("symbol", currency)
+        ret[locale] = currencies
+    return ret
+
+# locale -> cardinal plural categories. Same rules Intl.PluralRules applies, which is what
+# i18next uses to pick a "<key>_<category>" suffix.
+def get_plural_categories() -> dict[str, [str]]:
+    with open(CLDR_CORE + "plurals.json", "r") as f:
+        data = json.load(f)["supplemental"]["plurals-type-cardinal"]
+    return {locale: [rule.replace("pluralRule-count-", "") for rule in rules] for locale, rules in data.items()}
+
+# CLDR names plural forms "displayName-count-<category>", which i18next never reads. Re-emit them
+# as "displayName_<category>" so t(key, { count }) resolves, covering every category the locale
+# needs (CLDR only ships the ones it has translations for) and dropping the unusable CLDR keys.
+def to_i18next_plurals(currencies: dict[str, dict[str, str]], categories: [str]) -> dict[str, dict[str, str]]:
+    ret = {}
+    for currency, currency_data in currencies.items():
+        entry = {key: value for key, value in currency_data.items() if not key.startswith("displayName-count-")}
+        fallback = currency_data.get("displayName-count-other", currency_data.get("displayName"))
+        if fallback is not None:
+            for category in categories:
+                entry["displayName_" + category] = currency_data.get("displayName-count-" + category, fallback)
+        ret[currency] = entry
     return ret
 
 # list of alive currencies (currently in use)
 def get_currencies_alive() -> list[str]:
     alive_currencies = set()
-    with open("../node_modules/cldr-data/supplemental/currencyData.json", "r") as f:
+    with open(CLDR_CORE + "currencyData.json", "r") as f:
         data = json.load(f)["supplemental"]["currencyData"]["region"]
     for region, currencies in data.items():
         for subCurrencies in currencies:
@@ -104,15 +141,15 @@ def get_currencies_alive() -> list[str]:
 
 # currency formatting data. currency OR "DEFAULT" -> {_rounding: string, _digits: string, _cashRounding?: string, _cashDigits?: string}
 def get_currency_formatting() -> dict[str, dict[str, str]]:
-    with open("../node_modules/cldr-data/supplemental/currencyData.json", "r") as f:
+    with open(CLDR_CORE + "currencyData.json", "r") as f:
         return json.load(f)["supplemental"]["currencyData"]["fractions"]
 
 # currency -> number of people using it
 def get_currency_users() -> dict[str, int]:
     currency_users = {}
-    with open("../node_modules/cldr-data/supplemental/territoryInfo.json", "r") as f:
+    with open(CLDR_CORE + "territoryInfo.json", "r") as f:
         territory_info = json.load(f)["supplemental"]["territoryInfo"]
-    with open("../node_modules/cldr-data/supplemental/currencyData.json", "r") as f:
+    with open(CLDR_CORE + "currencyData.json", "r") as f:
         currency_data = json.load(f)["supplemental"]["currencyData"]["region"]
     for region, currencies in currency_data.items():
         for subCurrencies in currencies:
@@ -151,6 +188,7 @@ if __name__ == "__main__":
     supported_locales = set()
     currencies = get_currencies()
     currency_locales = get_currency_locales()
+    plural_categories = get_plural_categories()
     currencies_alive = get_currencies_alive()
     currency_formatting = get_currency_formatting()
     currency_users = get_currency_users()
@@ -182,7 +220,7 @@ if __name__ == "__main__":
             if currency == "usd":
                 return 1.0 # base
             if currency in currency_exchange_rates:
-                return currency_exchange_rates[currency]["inverseRate"]
+                return float(currency_exchange_rates[currency]["inverseRate"]) # floatrates returns rates as strings
             return 0.0
         currency_relevance = {}
         for currency, users in currency_users.items():
@@ -224,7 +262,7 @@ if __name__ == "__main__":
         json.dump(language_keys, f, indent=2, ensure_ascii=False)
     for lang in supported_languages:
         with open("../src/assets/i18n/" + lang + "/currencies.json", "w") as f:
-            json.dump(currency_locales[lang], f, indent=2, ensure_ascii=False)
+            json.dump(to_i18next_plurals(currency_locales[lang], plural_categories[lang]), f, indent=2, ensure_ascii=False)
         with open("../src/assets/i18n/" + lang + "/countries.json", "w") as f:
             json.dump(countries[lang], f, indent=2, ensure_ascii=False)
         with open("../src/assets/i18n/" + lang + "/languages.json", "w") as f:
