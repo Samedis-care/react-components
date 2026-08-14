@@ -223,6 +223,7 @@
 	"SHP",
 	"SIT",
 	"SKK",
+	"SLE",
 	"SLL",
 	"SOS",
 	"SRD",
@@ -260,6 +261,7 @@
 	"UYW",
 	"UZS",
 	"VEB",
+	"VED",
 	"VEF",
 	"VES",
 	"VND",
@@ -274,6 +276,7 @@
 	"XBC",
 	"XBD",
 	"XCD",
+	"XCG",
 	"XDR",
 	"XEU",
 	"XFO",
@@ -300,6 +303,7 @@
 	"ZRN",
 	"ZRZ",
 	"ZWD",
+	"ZWG",
 	"ZWL",
 	"ZWR"
 ]
