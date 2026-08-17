@@ -23,6 +23,11 @@ export interface LocalizedKeyboardDatePickerProps extends Omit<DatePickerProps, 
      * onBlur callback for the text field input
      */
     onBlur?: TextFieldProps["onBlur"];
+    /**
+     * Report every keystroke, rather than only dates the user finished entering.
+     * See {@link usePickerDraft}.
+     */
+    publishIntermediateValues?: boolean;
 }
 export type LocalizedKeyboardDatePickerClassKey = never;
 declare const _default: React.MemoExoticComponent<React.ComponentType<LocalizedKeyboardDatePickerProps & import("..").MuiWarningResultProps>>;

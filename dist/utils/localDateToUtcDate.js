@@ -7,6 +7,11 @@
  * UTC. See src/utils/dateOnlyUtils.ts for the date-only value contract.
  */
 const localDateToUtcDate = (date) => {
-    return new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(), date.getMinutes(), date.getSeconds(), date.getMilliseconds()));
+    const year = date.getFullYear();
+    const utc = new Date(Date.UTC(year, date.getMonth(), date.getDate(), date.getHours(), date.getMinutes(), date.getSeconds(), date.getMilliseconds()));
+    // Date.UTC maps the years 0–99 to 1900+year, see dateOnlyUtils
+    if (year >= 0 && year <= 99)
+        utc.setUTCFullYear(year);
+    return utc;
 };
 export default localDateToUtcDate;

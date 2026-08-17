@@ -1,5 +1,5 @@
 import { jsx as _jsx } from "react/jsx-runtime";
-import React from "react";
+import React, { useMemo } from "react";
 import PickersTextFieldWithHelp from "../PickersTextFieldWithHelp";
 import { denormalizeDate, normalizeDate } from "../../../utils/dateOnlyUtils";
 import moment from "moment";
@@ -7,7 +7,10 @@ import LocalizedKeyboardDatePicker from "../../LocalizedDateTimePickers/Localize
 import accessSlotProps from "../../../utils/internal/accessSlotProps";
 const DateInput = (props) => {
     const { value, onChange, hideDisabledIcon, required, error, fullWidth, onBlur, ...muiProps } = props;
-    return (_jsx(LocalizedKeyboardDatePicker, { ...muiProps, value: value ? moment(denormalizeDate(value)) : null, onChange: (date) => date ? onChange(normalizeDate(date.toDate())) : onChange(null), hideDisabledIcon: hideDisabledIcon, required: required, error: error, fullWidth: fullWidth, onBlur: onBlur, slots: {
+    // the picker compares its value by reference, so building the moment during
+    // render would rebuild the field's sections on every unrelated re-render
+    const pickerValue = useMemo(() => (value ? moment(denormalizeDate(value)) : null), [value]);
+    return (_jsx(LocalizedKeyboardDatePicker, { ...muiProps, value: pickerValue, onChange: (date) => date ? onChange(normalizeDate(date.toDate())) : onChange(null), hideDisabledIcon: hideDisabledIcon, required: required, error: error, fullWidth: fullWidth, onBlur: onBlur, slots: {
             textField: PickersTextFieldWithHelp,
         }, slotProps: {
             ...muiProps.slotProps,
