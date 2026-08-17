@@ -506,6 +506,85 @@ describe("dateOnlyUtils", () => {
 		});
 	});
 
+	/**
+	 * A date picker publishes a value on every keystroke, so a user typing 2026
+	 * hands us the years 2, 20 and 202 along the way. `Date.UTC` and the `Date`
+	 * constructor map the years 0–99 to 1900+year, which would silently turn those
+	 * into real 19xx dates and record them in a form.
+	 */
+	describe("years below 100", () => {
+		/** A local calendar day in a year the `Date` constructor would shift */
+		const lowYearLocal = (year: number, month: number, day: number) => {
+			const date = new Date(2000, month - 1, day);
+			date.setFullYear(year);
+			return date;
+		};
+
+		/** A UTC calendar day in a year `Date.UTC` would shift */
+		const lowYearUtc = (year: number, month: number, day: number) => {
+			const date = new Date(Date.UTC(2000, month - 1, day, 12));
+			date.setUTCFullYear(year);
+			return date;
+		};
+
+		it("normalizeDate keeps the year instead of shifting it into 19xx", () => {
+			for (const tz of ZONES) {
+				for (const year of [0, 2, 20, 99]) {
+					const normalized = inZone(tz, () =>
+						normalizeDate(lowYearLocal(year, 8, 12)),
+					);
+					expect(utcParts(normalized), `${tz} year ${year}`).toEqual([
+						year,
+						8,
+						12,
+						12,
+						0,
+						0,
+						0,
+					]);
+				}
+			}
+		});
+
+		it("normalizeDateUtc keeps the year instead of shifting it into 19xx", () => {
+			for (const year of [0, 2, 20, 99]) {
+				expect(
+					utcParts(normalizeDateUtc(lowYearUtc(year, 8, 12))),
+					`year ${year}`,
+				).toEqual([year, 8, 12, 12, 0, 0, 0]);
+			}
+		});
+
+		it("denormalizeDate keeps the year instead of shifting it into 19xx", () => {
+			for (const tz of ZONES) {
+				for (const year of [0, 2, 20, 99]) {
+					const local = inZone(tz, () =>
+						denormalizeDate(lowYearUtc(year, 8, 12)),
+					);
+					expect(localDay(local), `${tz} year ${year}`).toEqual([year, 8, 12]);
+				}
+			}
+		});
+
+		it("round trips a low year without drifting into 19xx", () => {
+			for (const tz of ZONES) {
+				const cycled = inZone(tz, () =>
+					normalizeDate(denormalizeDate(lowYearUtc(20, 8, 12))),
+				);
+				expect(utcParts(cycled), tz).toEqual([20, 8, 12, 12, 0, 0, 0]);
+			}
+		});
+
+		it("leaves the years from 100 on alone", () => {
+			for (const year of [100, 1899, 1920, 2026]) {
+				expect(
+					utcParts(normalizeDateUtc(lowYearUtc(year, 8, 12))),
+					`year ${year}`,
+				).toEqual([year, 8, 12, 12, 0, 0, 0]);
+			}
+		});
+	});
+
 	describe("public export", () => {
 		it("is exported from the package index for consumers", async () => {
 			const index = await import("../../src/utils/index");

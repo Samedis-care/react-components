@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import {
 	DatePicker,
 	DatePickerProps,
@@ -10,6 +10,7 @@ import { withMuiWarning } from "../UIKit/MuiWarning";
 import useMuiLocaleData from "./useMuiLocaleData";
 import accessSlotProps from "../../utils/internal/accessSlotProps";
 import { TextFieldWithHelpProps } from "../UIKit/TextFieldWithHelp";
+import usePickerDraft from "./usePickerDraft";
 
 export interface LocalizedKeyboardDatePickerProps
 	extends
@@ -35,6 +36,11 @@ export interface LocalizedKeyboardDatePickerProps
 	 * onBlur callback for the text field input
 	 */
 	onBlur?: TextFieldProps["onBlur"];
+	/**
+	 * Report every keystroke, rather than only dates the user finished entering.
+	 * See {@link usePickerDraft}.
+	 */
+	publishIntermediateValues?: boolean;
 }
 
 export type LocalizedKeyboardDatePickerClassKey = never;
@@ -57,6 +63,7 @@ const LocalizedKeyboardDatePicker = (
 		fullWidth,
 		onBlur,
 		disableClearable,
+		publishIntermediateValues,
 		...otherProps
 	} = props;
 	const slotOverrideHideIcon = {
@@ -64,12 +71,29 @@ const LocalizedKeyboardDatePicker = (
 		openPickerIcon: NoIcon,
 	};
 	const localeText = useMuiLocaleData();
+	const draft = usePickerDraft(
+		otherProps.value,
+		otherProps.onChange,
+		publishIntermediateValues,
+	);
+
+	const { settle } = draft;
+	const consumerOnOpen = otherProps.onOpen;
+	const handleOpen = useCallback(() => {
+		// the calendar renders from the value it is given, so a half-typed date
+		// would open it on a year nothing is selectable in
+		settle();
+		consumerOnOpen?.();
+	}, [settle, consumerOnOpen]);
 
 	return (
 		<LocalizationProvider localeText={localeText}>
 			<DatePicker
 				format={"L"}
 				{...otherProps}
+				value={draft.value}
+				onChange={draft.onChange}
+				onOpen={handleOpen}
 				slots={
 					otherProps.disabled && hideDisabledIcon
 						? slotOverrideHideIcon
@@ -87,7 +111,10 @@ const LocalizedKeyboardDatePicker = (
 							required,
 							error,
 							fullWidth,
-							onBlur,
+							onBlur: (event: React.FocusEvent<HTMLInputElement>) => {
+								draft.settleOnBlur(event);
+								onBlur?.(event);
+							},
 							disableClearable,
 						} as unknown as Partial<PickersTextFieldProps>;
 					},

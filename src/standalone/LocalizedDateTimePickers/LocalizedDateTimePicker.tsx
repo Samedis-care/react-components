@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import {
 	DateTimePicker,
 	DateTimePickerProps,
@@ -9,8 +9,9 @@ import { withMuiWarning } from "../UIKit";
 import { TextFieldProps } from "@mui/material";
 import useMuiLocaleData from "./useMuiLocaleData";
 import accessSlotProps from "../../utils/internal/accessSlotProps";
+import usePickerDraft from "./usePickerDraft";
 
-interface LocalizedDateTimePickerProps extends Omit<
+export interface LocalizedDateTimePickerProps extends Omit<
 	DateTimePickerProps,
 	"format"
 > {
@@ -30,16 +31,45 @@ interface LocalizedDateTimePickerProps extends Omit<
 	 * onBlur callback for the text field input
 	 */
 	onBlur?: TextFieldProps["onBlur"] & PickersTextFieldProps["onBlur"];
+	/**
+	 * Report every keystroke, rather than only dates the user finished entering.
+	 * See {@link usePickerDraft}.
+	 */
+	publishIntermediateValues?: boolean;
 }
 
 const LocalizedDateTimePicker = (props: LocalizedDateTimePickerProps) => {
-	const { required, error, fullWidth, onBlur, ...otherProps } = props;
+	const {
+		required,
+		error,
+		fullWidth,
+		onBlur,
+		publishIntermediateValues,
+		...otherProps
+	} = props;
 	const localeText = useMuiLocaleData();
+	const draft = usePickerDraft(
+		otherProps.value,
+		otherProps.onChange,
+		publishIntermediateValues,
+	);
+
+	const { settle } = draft;
+	const consumerOnOpen = otherProps.onOpen;
+	const handleOpen = useCallback(() => {
+		// the calendar renders from the value it is given, so a half-typed date
+		// would open it on a year nothing is selectable in
+		settle();
+		consumerOnOpen?.();
+	}, [settle, consumerOnOpen]);
 	return (
 		<LocalizationProvider localeText={localeText}>
 			<DateTimePicker
 				format={"L LT"}
 				{...otherProps}
+				value={draft.value}
+				onChange={draft.onChange}
+				onOpen={handleOpen}
 				slotProps={{
 					...otherProps.slotProps,
 					textField: (ownerState) => {
@@ -52,7 +82,10 @@ const LocalizedDateTimePicker = (props: LocalizedDateTimePickerProps) => {
 							required,
 							error,
 							fullWidth,
-							onBlur,
+							onBlur: (event: React.FocusEvent<HTMLDivElement>) => {
+								draft.settleOnBlur(event);
+								onBlur?.(event);
+							},
 						};
 					},
 				}}

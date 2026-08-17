@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { DatePickerProps, PickersTextFieldProps } from "@mui/x-date-pickers";
 import PickersTextFieldWithHelp, {
 	PickersTextFieldWithHelpProps,
@@ -59,10 +59,17 @@ const DateInput = (
 		...muiProps
 	} = props;
 
+	// the picker compares its value by reference, so building the moment during
+	// render would rebuild the field's sections on every unrelated re-render
+	const pickerValue = useMemo(
+		() => (value ? moment(denormalizeDate(value)) : null),
+		[value],
+	);
+
 	return (
 		<LocalizedKeyboardDatePicker
 			{...muiProps}
-			value={value ? moment(denormalizeDate(value)) : null}
+			value={pickerValue}
 			onChange={(date) =>
 				date ? onChange(normalizeDate(date.toDate())) : onChange(null)
 			}

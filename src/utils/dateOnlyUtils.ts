@@ -19,6 +19,18 @@
  */
 
 /**
+ * Do the years 0–99 need putting back?
+ *
+ * `Date.UTC` and the `Date` constructor both map those years to 1900+year, so a
+ * date picker mid-entry — where a half-typed `2026` passes through as year 2, 20
+ * or 202 — would silently yield a real 19xx date instead. Assigning the year
+ * afterwards is the documented way to reach them.
+ * @param year The year the caller asked for
+ * @returns Whether the year came out shifted
+ */
+const isShiftedYear = (year: number): boolean => year >= 0 && year <= 99;
+
+/**
  * Turns a local calendar day into a date-only value.
  *
  * The date is taken from the **local** parts of the input, so this is the right
@@ -27,8 +39,14 @@
  * @param date A date whose local calendar day should be kept
  * @returns The date-only value (12:00 UTC)
  */
-export const normalizeDate = (date: Date): Date =>
-	new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate(), 12));
+export const normalizeDate = (date: Date): Date => {
+	const year = date.getFullYear();
+	const normalized = new Date(
+		Date.UTC(year, date.getMonth(), date.getDate(), 12),
+	);
+	if (isShiftedYear(year)) normalized.setUTCFullYear(year);
+	return normalized;
+};
 
 /**
  * Turns a UTC-anchored value into a date-only value.
@@ -40,10 +58,14 @@ export const normalizeDate = (date: Date): Date =>
  * @param date A date whose UTC calendar day should be kept
  * @returns The date-only value (12:00 UTC)
  */
-export const normalizeDateUtc = (date: Date): Date =>
-	new Date(
-		Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), 12),
+export const normalizeDateUtc = (date: Date): Date => {
+	const year = date.getUTCFullYear();
+	const normalized = new Date(
+		Date.UTC(year, date.getUTCMonth(), date.getUTCDate(), 12),
 	);
+	if (isShiftedYear(year)) normalized.setUTCFullYear(year);
+	return normalized;
+};
 
 /**
  * Parses a date-only value from a string, by its UTC calendar day.
@@ -133,8 +155,12 @@ export const dateOnlyFromDateTime = (value: Date | string): Date =>
  * @param date A date-only value
  * @returns A date at local midnight of the same calendar day
  */
-export const denormalizeDate = (date: Date): Date =>
-	new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
+export const denormalizeDate = (date: Date): Date => {
+	const year = date.getUTCFullYear();
+	const local = new Date(year, date.getUTCMonth(), date.getUTCDate());
+	if (isShiftedYear(year)) local.setFullYear(year);
+	return local;
+};
 
 /**
  * Formats a date-only value for display.

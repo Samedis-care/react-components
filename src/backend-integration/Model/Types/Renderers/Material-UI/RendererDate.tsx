@@ -12,7 +12,7 @@ import TypeDate from "../../TypeDate";
 import { LocalizedKeyboardDatePicker } from "../../../../../standalone/LocalizedDateTimePickers";
 import { ToDateLocaleStringOptions } from "../../../../../constants";
 import { IDataGridColumnDef } from "../../../../../standalone/DataGrid/DataGrid";
-import { FormHelperTextCC } from "../../../../../standalone";
+import { FormHelperTextCC } from "../../../../../standalone/UIKit/MuiWarning";
 import moment from "moment";
 
 /**
@@ -57,8 +57,20 @@ class RendererDate extends TypeDate {
 						disabled={visibility.readOnly}
 						required={visibility.required}
 						onChange={(date) => {
-							if (!date) throw new Error("Date is null");
-							else handleChange(field, normalizeDate(date.toDate()));
+							// The field can be emptied — by the clear button, or by deleting
+							// a single section — even though this type cannot hold null. That
+							// is the user entering an invalid date, not a broken caller, so
+							// it has to surface as a validation error rather than throw
+							// inside a React event handler.
+							if (!date) {
+								this.error = ccI18n.t(
+									"backend-integration.model.types.renderers.date.validation-error",
+								);
+								setFieldTouched(field, touched, true);
+								return;
+							}
+							this.error = "";
+							handleChange(field, normalizeDate(date.toDate()));
 						}}
 						onBlur={handleBlur}
 						error={!!errorMsg}
