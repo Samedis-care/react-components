@@ -140,12 +140,15 @@ const MultiSelect = <DataT extends MultiSelectorData>(
 
 	const multiSelectLoadHandler = useCallback(
 		async (query: string, switchValue: boolean) => {
-			const results = await onLoad(query, switchValue);
-			return results.map((result) =>
-				selectedIds.includes(getId(result))
-					? { ...result, isDisabled: true, selected: true }
-					: result,
-			);
+			const result = await onLoad(query, switchValue);
+			return {
+				...result,
+				options: result.options.map((entry) =>
+					selectedIds.includes(getId(entry))
+						? { ...entry, isDisabled: true, selected: true }
+						: entry,
+				),
+			};
 		},
 		[getId, onLoad, selectedIds],
 	);

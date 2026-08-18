@@ -60,6 +60,13 @@ All exports are aggregated in `src/index.ts`. Theme slot overrides for all compo
 - **Push to master**: lint + unit tests + build → publish dist to `master_dist` branch → deploy Storybook + TypeDoc to GitHub Pages (`.github/workflows/main.yml`)
 - GitHub Pages serves: `/storybook/` (component library) and `/typedoc/` (API docs)
 
+## Breaking Changes
+
+Backward compatibility is not required — prefer the clean API. Every breaking change
+gets its own file in `breaking-changes/` (`YYYY-MM-DD-<slug>.md`) plus a row in
+`breaking-changes/README.md`. Behavioral changes count: new UI rendered by default, a
+changed default, or a previously ignored prop starting to take effect.
+
 ## i18n
 
 Translation files live in `src/assets/i18n/`. To add translations use [i18n Manager](https://www.electronjs.org/apps/i18n-manager). The library's i18next instance is exported as `ComponentsCareI18nInstance` from `src/i18n.ts`.

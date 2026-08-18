@@ -9,6 +9,8 @@ import {
 	MultiSelectWithoutGroup,
 	selectorLocalLoadHandler,
 	BaseSelectorData,
+	BaseSelectorLoadResult,
+	SelectorLruOptions,
 } from "./index";
 import type { MultiSelectorData } from "./MultiSelect";
 
@@ -345,5 +347,204 @@ export const MultiSelectWithTagsWithInitialValues: StoryObj = {
 				/>
 			</div>
 		);
+	},
+};
+
+// ---------------------------------------------------------------------------
+// Truncated result sets
+// ---------------------------------------------------------------------------
+
+const TRUNCATED_TOTAL = 312;
+const CUSTOM_TRUNCATED_LABEL = "Too many matches";
+const ADD_NEW_LABEL = "Add a country";
+
+const loadTruncated = (
+	search: string,
+): BaseSelectorLoadResult<BaseSelectorData> => ({
+	...selectorLocalLoadHandler(COUNTRIES)(search),
+	total: TRUNCATED_TOTAL,
+});
+
+const loadComplete = (
+	search: string,
+): BaseSelectorLoadResult<BaseSelectorData> => {
+	const { options } = selectorLocalLoadHandler(COUNTRIES)(search);
+	return { options, total: options.length };
+};
+
+const optionTexts = () =>
+	within(document.body)
+		.getAllByRole("option")
+		.map((option) => option.textContent ?? "");
+
+export const SingleSelectTruncated: StoryObj = {
+	name: "SingleSelect — truncated result set",
+	render: () => {
+		const [selected, setSelected] = useState<BaseSelectorData | null>(null);
+		return (
+			<div style={{ width: 300 }}>
+				<SingleSelect
+					label="Country"
+					selected={selected}
+					onSelect={(v) => {
+						setSelected(v);
+					}}
+					onLoad={loadTruncated}
+				/>
+			</div>
+		);
+	},
+	play: async ({ canvas, userEvent }) => {
+		const body = within(document.body);
+		const input = await canvas.findByRole("combobox");
+		await userEvent.click(input);
+		// options are rendered...
+		await expect(await body.findByText("Germany")).toBeVisible();
+		// ...and the last entry of the list tells the user the set is incomplete
+		const texts = optionTexts();
+		await expect(texts).toHaveLength(COUNTRIES.length + 1);
+		await expect(texts[texts.length - 1]).toContain(String(TRUNCATED_TOTAL));
+	},
+};
+
+export const SingleSelectComplete: StoryObj = {
+	name: "SingleSelect — complete result set (no notice)",
+	render: () => {
+		const [selected, setSelected] = useState<BaseSelectorData | null>(null);
+		return (
+			<div style={{ width: 300 }}>
+				<SingleSelect
+					label="Country"
+					selected={selected}
+					onSelect={(v) => {
+						setSelected(v);
+					}}
+					onLoad={loadComplete}
+				/>
+			</div>
+		);
+	},
+	play: async ({ canvas, userEvent }) => {
+		const body = within(document.body);
+		const input = await canvas.findByRole("combobox");
+		await userEvent.click(input);
+		await expect(await body.findByText("Germany")).toBeVisible();
+		// nothing was truncated, so no extra entry is added
+		await expect(optionTexts()).toHaveLength(COUNTRIES.length);
+	},
+};
+
+export const SingleSelectTruncatedWithAddNew: StoryObj = {
+	name: "SingleSelect — truncation entry sits above add new",
+	render: () => {
+		const [selected, setSelected] = useState<BaseSelectorData | null>(null);
+		return (
+			<div style={{ width: 300 }}>
+				<SingleSelect<BaseSelectorData>
+					label="Country"
+					selected={selected}
+					onSelect={(v) => {
+						setSelected(v);
+					}}
+					onLoad={loadTruncated}
+					truncatedLabel={() => CUSTOM_TRUNCATED_LABEL}
+					addNewLabel={ADD_NEW_LABEL}
+					onAddNew={() => null}
+				/>
+			</div>
+		);
+	},
+	play: async ({ canvas, userEvent }) => {
+		const body = within(document.body);
+		const input = await canvas.findByRole("combobox");
+		await userEvent.click(input);
+		await expect(await body.findByText("Germany")).toBeVisible();
+		const texts = optionTexts();
+		// truncatedLabel overrides the translated default
+		const truncationIdx = texts.indexOf(CUSTOM_TRUNCATED_LABEL);
+		const addNewIdx = texts.indexOf(ADD_NEW_LABEL);
+		await expect(truncationIdx).toBeGreaterThan(-1);
+		await expect(addNewIdx).toBeGreaterThan(-1);
+		// after the options...
+		await expect(truncationIdx).toBe(COUNTRIES.length);
+		// ...and before the add new button
+		await expect(addNewIdx).toBeGreaterThan(truncationIdx);
+	},
+};
+
+// ---------------------------------------------------------------------------
+// additionalOptions are independent of the data source
+// ---------------------------------------------------------------------------
+
+const ADDITIONAL_OPTIONS: BaseSelectorData[] = [
+	{ value: "any", label: "Any country" },
+	{ value: "none", label: "No country" },
+];
+const ADDITIONAL_LABELS = ["Any country", "No country"];
+
+const LRU_FORCE_QUERY: SelectorLruOptions<BaseSelectorData> = {
+	count: 5,
+	storageKey: "cc-story-lru-additional-options",
+	forceQuery: true,
+	loadData: (id) =>
+		COUNTRIES.find((entry) => entry.value === id) ?? { value: id, label: id },
+};
+
+export const SingleSelectForceQueryAdditionalOptions: StoryObj = {
+	name: "SingleSelect — additionalOptions survive forceQuery",
+	render: () => {
+		const [selected, setSelected] = useState<BaseSelectorData | null>(null);
+		return (
+			<div style={{ width: 300 }}>
+				<SingleSelect
+					label="Country"
+					selected={selected}
+					onSelect={(v) => {
+						setSelected(v);
+					}}
+					onLoad={loadTruncated}
+					forceQuery
+					additionalOptions={ADDITIONAL_OPTIONS}
+				/>
+			</div>
+		);
+	},
+	play: async ({ canvas, userEvent }) => {
+		const body = within(document.body);
+		const input = await canvas.findByRole("combobox");
+		await userEvent.click(input);
+		// the data source stays suppressed until something is typed...
+		await expect(body.queryByText("Germany")).toBeNull();
+		// ...but the local entries need no request, so they are offered
+		await expect(optionTexts()).toEqual(ADDITIONAL_LABELS);
+	},
+};
+
+export const SingleSelectLruAdditionalOptions: StoryObj = {
+	name: "SingleSelect — additionalOptions survive lru",
+	render: () => {
+		const [selected, setSelected] = useState<BaseSelectorData | null>(null);
+		return (
+			<div style={{ width: 300 }}>
+				<SingleSelect
+					label="Country"
+					selected={selected}
+					onSelect={(v) => {
+						setSelected(v);
+					}}
+					onLoad={loadTruncated}
+					additionalOptions={ADDITIONAL_OPTIONS}
+					lru={LRU_FORCE_QUERY}
+				/>
+			</div>
+		);
+	},
+	play: async ({ canvas, userEvent }) => {
+		const body = within(document.body);
+		const input = await canvas.findByRole("combobox");
+		await userEvent.click(input);
+		// the lru branch also skips onLoad, yet the local entries survive it
+		await expect(body.queryByText("Germany")).toBeNull();
+		await expect(optionTexts()).toEqual(ADDITIONAL_LABELS);
 	},
 };

@@ -93,12 +93,12 @@ describe("selectorLocalLoadHandler", () => {
 	const handler = selectorLocalLoadHandler(SAMPLE_DATA);
 
 	it("returns all entries for an empty query", () => {
-		const result = handler("");
+		const result = handler("").options;
 		expect(result.length).toBe(SAMPLE_DATA.length);
 	});
 
 	it("performs case-insensitive prefix matching", () => {
-		const result = handler("ap");
+		const result = handler("ap").options;
 		const labels = result.map(getStringLabel);
 		expect(labels).toContain("Apple");
 		expect(labels).toContain("Apricot");
@@ -106,7 +106,7 @@ describe("selectorLocalLoadHandler", () => {
 	});
 
 	it("also matches substrings (not just prefixes)", () => {
-		const result = handler("rry");
+		const result = handler("rry").options;
 		const labels = result.map(getStringLabel);
 		expect(labels).toContain("Cherry");
 		expect(labels).toContain("Elderberry");
@@ -120,28 +120,34 @@ describe("selectorLocalLoadHandler", () => {
 			{ value: "mango", label: "Mango" }, // starts with "Man" but not "an"
 			{ value: "tangerine", label: "Tangerine" }, // contains "an"
 		]);
-		const result = handlerLong("an");
+		const result = handlerLong("an").options;
 		// All three contain "an" somewhere; none starts with "an" — order can vary but all present
 		expect(result.length).toBeGreaterThanOrEqual(2);
 	});
 
 	it("returns an empty array when nothing matches", () => {
-		const result = handler("zzz");
+		const result = handler("zzz").options;
 		expect(result).toHaveLength(0);
 	});
 
 	it("is case-insensitive for uppercase queries", () => {
-		const result = handler("APPLE");
+		const result = handler("APPLE").options;
 		const labels = result.map(getStringLabel);
 		expect(labels).toContain("Apple");
 	});
 
 	it("deduplicates results (no double entries)", () => {
 		// "apple" starts with "apple" AND contains "apple", so it would appear twice without dedup
-		const result = handler("apple");
+		const result = handler("apple").options;
 		const values = result.map((d) => d.value);
 		const uniqueValues = [...new Set(values)];
 		expect(values.length).toBe(uniqueValues.length);
+	});
+
+	it("returns a load result and never reports a total", () => {
+		const result = handler("");
+		expect(Array.isArray(result.options)).toBe(true);
+		expect(result.total).toBeUndefined();
 	});
 
 	it("handles a dataset with tuple labels", () => {
@@ -150,7 +156,7 @@ describe("selectorLocalLoadHandler", () => {
 			{ value: "y", label: ["Yellow", "🟡 Yellow"] },
 		];
 		const h = selectorLocalLoadHandler(withTuples);
-		const result = h("xy");
+		const result = h("xy").options;
 		expect(result.map(getStringLabel)).toContain("Xylophone");
 	});
 });

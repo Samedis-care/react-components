@@ -44,6 +44,13 @@ export default React.memo(Component);
 - Do not store non-mutable/read-only data in the component state. Use static class properties or static functions instead.
 - Use Material-UI Styles/Theme. Do not create global CSS styles. Avoid inline styles.
 
+## Breaking changes
+
+Backward compatibility is not a hard requirement — prefer a clean API over a
+compatible one. In exchange, record every breaking change as a new file in
+[`breaking-changes/`](breaking-changes/README.md) so the consuming apps know what to
+adjust. Behavioral changes count too, not just type changes.
+
 ## Translating
 
 If you wish to help us translate our library feel free to fork & clone the repository and open `src/assets/i18n` in [i18n Manager](https://www.electronjs.org/apps/i18n-manager).

@@ -127,7 +127,7 @@ const GridSingleSelectFilter = (inProps: GridSingleSelectFilterProps) => {
 		[onSelect],
 	);
 
-	const getOptions = useCallback(() => options, [options]);
+	const getOptions = useCallback(() => ({ options }), [options]);
 	const selectorStyles = useMemo(
 		() => ({
 			autocomplete: isActive ? "Mui-active" : undefined,

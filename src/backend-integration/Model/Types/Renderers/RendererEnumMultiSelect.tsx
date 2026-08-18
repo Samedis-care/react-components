@@ -68,15 +68,16 @@ class RendererEnumMultiSelect extends TypeEnumMulti {
 				}));
 			const selected = data.filter((entry) => value.includes(entry.value));
 
-			const onLoad = (query: string) =>
-				uniqueArray([
+			const onLoad = (query: string) => ({
+				options: uniqueArray([
 					...data.filter((entry) =>
 						getStringLabel(entry).toLowerCase().startsWith(query.toLowerCase()),
 					),
 					...data.filter((entry) =>
 						getStringLabel(entry).toLowerCase().includes(query.toLowerCase()),
 					),
-				]);
+				]),
+			});
 
 			return (
 				<FormControlFieldsetCC

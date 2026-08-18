@@ -6,6 +6,7 @@ import MultiSelectWithoutGroup, {
 } from "./MultiSelectWithoutGroup";
 import {
 	BaseSelectorData,
+	BaseSelectorLoadHandler,
 	BaseSelectorProps,
 	SelectorLruOptions,
 } from "./BaseSelector";
@@ -34,7 +35,14 @@ export interface MultiSelectWithTagsProps<
 		>,
 		Omit<
 			MultiSelectWithoutGroupProps<DataT>,
-			"classes" | "onChange" | "dataOptions" | "setDataOptions" | "label"
+			// additionalOptions is not offered: this renders two selectors, so which one the
+			// entries belong to is ambiguous - better absent than silently ignored
+			| "additionalOptions"
+			| "classes"
+			| "onChange"
+			| "dataOptions"
+			| "setDataOptions"
+			| "label"
 		> {
 	// UI Props
 	/**
@@ -65,22 +73,12 @@ export interface MultiSelectWithTagsProps<
 	loadGroupEntries: (group: GroupT) => DataT[] | Promise<DataT[]>;
 	/**
 	 * Search callback which is called to load available data entries
-	 * @param query The search string
-	 * @param switchValue The value of the switch or false if switch is disabled
 	 */
-	loadDataOptions: (
-		query: string,
-		switchValue: boolean,
-	) => DataT[] | Promise<DataT[]>;
+	loadDataOptions: BaseSelectorLoadHandler<DataT>;
 	/**
 	 * Search callback which is called to load available group entries
-	 * @param query The search string
-	 * @param switchValue The value of the switch or false if switch is disabled
 	 */
-	loadGroupOptions: (
-		query: string,
-		switchValue: boolean,
-	) => GroupT[] | Promise<GroupT[]>;
+	loadGroupOptions: BaseSelectorLoadHandler<GroupT>;
 	/**
 	 * LRU options for group
 	 */
@@ -230,9 +228,19 @@ const MultiSelectWithTags = <
 	const loadGroupOptionsAndProcess = useCallback(
 		async (query: string) => {
 			const selectedGroupIds = selectedGroups.map((group) => group.group);
-			return (await loadGroupOptions(query, switchValue)).filter(
+			const result = await loadGroupOptions(query, switchValue);
+			const options = result.options.filter(
 				(group) => !selectedGroupIds.includes(group.value),
 			);
+			return {
+				options,
+				// total has to count the same population as options, otherwise dropping the
+				// already selected groups would report a truncation which isn't there
+				total:
+					result.total != null
+						? result.total - (result.options.length - options.length)
+						: undefined,
+			};
 		},
 		[loadGroupOptions, selectedGroups, switchValue],
 	);

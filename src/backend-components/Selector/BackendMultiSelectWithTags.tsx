@@ -2,6 +2,7 @@ import React, { useCallback, useMemo } from "react";
 import { useThemeProps } from "@mui/material";
 import {
 	BaseSelectorData,
+	BaseSelectorLoadResult,
 	MultiSelectorData,
 	MultiSelectWithTags,
 	MultiSelectWithTagsProps,
@@ -215,8 +216,11 @@ const BackendMultiSelectWithTags = <
 		[getGroupDataEntries, groupModel],
 	);
 	const loadGroupOptions = useCallback(
-		async (query: string, switchValue: boolean) => {
-			const [records] = await groupModel.index({
+		async (
+			query: string,
+			switchValue: boolean,
+		): Promise<BaseSelectorLoadResult<GroupDataT>> => {
+			const [records, meta] = await groupModel.index({
 				page: 1,
 				quickFilter: query,
 				sort: groupSort,
@@ -224,15 +228,21 @@ const BackendMultiSelectWithTags = <
 					? { [switchFilterNameGroup]: switchValue }
 					: undefined,
 			});
-			return Promise.all(
-				records.map((record) => Promise.resolve(convGroup(record))),
-			);
+			return {
+				options: await Promise.all(
+					records.map((record) => Promise.resolve(convGroup(record))),
+				),
+				total: meta.filteredRows ?? meta.totalRows,
+			};
 		},
 		[convGroup, groupModel, groupSort, switchFilterNameGroup],
 	);
 	const loadDataOptions = useCallback(
-		async (query: string, switchValue: boolean) => {
-			const [records] = await dataModel.index({
+		async (
+			query: string,
+			switchValue: boolean,
+		): Promise<BaseSelectorLoadResult<DataDataT>> => {
+			const [records, meta] = await dataModel.index({
 				page: 1,
 				quickFilter: query,
 				sort: dataSort,
@@ -240,9 +250,12 @@ const BackendMultiSelectWithTags = <
 					? { [switchFilterNameData]: switchValue }
 					: undefined,
 			});
-			return Promise.all(
-				records.map((record) => Promise.resolve(convData(record))),
-			);
+			return {
+				options: await Promise.all(
+					records.map((record) => Promise.resolve(convData(record))),
+				),
+				total: meta.filteredRows ?? meta.totalRows,
+			};
 		},
 		[convData, dataModel, dataSort, switchFilterNameData],
 	);

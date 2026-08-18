@@ -131,22 +131,51 @@ export const modifyReactLabel = <DataT extends BaseSelectorData>(
 });
 
 /**
+ * Result of a selector data load
+ */
+export interface BaseSelectorLoadResult<DataT extends BaseSelectorData> {
+	/**
+	 * The loaded options
+	 */
+	options: DataT[];
+	/**
+	 * The total amount of records matching the search query.
+	 * Set this if the data source applied a result limit: a notice informing the user
+	 * about the truncated result set is shown while total exceeds options.length.
+	 * @remarks Must count the same population as options - if you filter options, adjust this too
+	 */
+	total?: number;
+}
+
+/**
+ * Data load handler
+ * @param search The user search input
+ * @param switchValue The value of switch input
+ */
+export type BaseSelectorLoadHandler<DataT extends BaseSelectorData> = (
+	search: string,
+	switchValue: boolean,
+) => BaseSelectorLoadResult<DataT> | Promise<BaseSelectorLoadResult<DataT>>;
+
+/**
  * On load handler for selectors using a local dataset
  * Performs a case-insensitive label search
  * @param data The data set
  */
 export const selectorLocalLoadHandler =
 	<DataT extends BaseSelectorData>(data: DataT[]) =>
-	(query: string) => {
+	(query: string): BaseSelectorLoadResult<DataT> => {
 		query = query.toLowerCase();
-		return uniqueArray([
-			...data.filter((entry) =>
-				getStringLabel(entry).toLowerCase().startsWith(query),
-			),
-			...data.filter((entry) =>
-				getStringLabel(entry).toLowerCase().includes(query),
-			),
-		]);
+		return {
+			options: uniqueArray([
+				...data.filter((entry) =>
+					getStringLabel(entry).toLowerCase().startsWith(query),
+				),
+				...data.filter((entry) =>
+					getStringLabel(entry).toLowerCase().includes(query),
+				),
+			]),
+		};
 	};
 
 export interface SelectorLruOptions<DataT extends BaseSelectorData> {
@@ -214,14 +243,9 @@ export type BaseSelectorProps<
 		refreshToken?: string;
 		/**
 		 * Data load function
-		 * @param search The user search input
-		 * @param switchValue The value of switch input
 		 * @remarks When using this with an already loaded dataset consider using selectorLocalLoadHandler
 		 */
-		onLoad: (
-			search: string,
-			switchValue: boolean,
-		) => DataT[] | Promise<DataT[]>;
+		onLoad: BaseSelectorLoadHandler<DataT>;
 		/**
 		 * The textfield type of input
 		 */
@@ -261,6 +285,13 @@ export type BaseSelectorProps<
 		 */
 		onAddNew?: () => DataT | null | Promise<DataT | null>;
 		/**
+		 * Additional options to choose from, not provided by the data source.
+		 * Shown at the top of the list, matched against the search query by label.
+		 * @remarks These are independent of onLoad, so they are also shown while lru or
+		 * forceQuery suppress the data source on an empty query
+		 */
+		additionalOptions?: DataT[];
+		/**
 		 * Label for the "Add new" button
 		 */
 		addNewLabel?: string;
@@ -284,6 +315,20 @@ export type BaseSelectorProps<
 		 * Label which is shown if forceQuery == true and nothing has been typed
 		 */
 		startTypingToSearchText?: string;
+		/**
+		 * Do not show the entry which informs the user about a truncated result set
+		 * @remarks The entry is only shown if the data source reports a total
+		 */
+		disableTruncationNotice?: boolean;
+		/**
+		 * Label for the entry which informs the user about a truncated result set
+		 * @param loaded The amount of records which have been loaded
+		 * @param total The total amount of records matching the search query
+		 */
+		truncatedLabel?: (
+			loaded: number,
+			total: number,
+		) => string | [string, React.ReactNode];
 		/**
 		 * Label which is shown for close icon button while popup is opened
 		 */
@@ -543,6 +588,8 @@ const GrowPopper = React.forwardRef(function GrowPopperImpl(
 	);
 });
 
+const autocompleteSlots = { popper: GrowPopper };
+
 export interface BaseSelectorContextType {
 	addToLru: (...ids: string[]) => void;
 }
@@ -570,10 +617,13 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 		addNewLabel,
 		onLoad,
 		onAddNew,
+		additionalOptions,
 		enableIcons,
 		noOptionsText,
 		loadingText,
 		startTypingToSearchText,
+		disableTruncationNotice,
+		truncatedLabel,
 		openText,
 		closeText,
 		clearText,
@@ -837,6 +887,17 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 			const loadTicket = Math.random().toString();
 			setLoading(loadTicket);
 			let results: DataT[];
+			// trailing entries (truncation notice, add new), appended after sorting so they
+			// always stay at the bottom of the list
+			const trailingEntries: DataT[] = [];
+			// additional options don't come from the data source, so they must not depend on
+			// onLoad running - lru and forceQuery both skip it on an empty query
+			const leadingEntries: DataT[] = (additionalOptions ?? []).filter(
+				(entry) =>
+					!entry.hidden &&
+					!filterIds?.includes(getId(entry)) &&
+					getStringLabel(entry).toLowerCase().includes(query.toLowerCase()),
+			);
 			const filteredLruIds = filterIds
 				? lruIds.filter((id) => !filterIds.includes(id))
 				: lruIds;
@@ -890,19 +951,40 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 					})),
 				].filter((entry) => entry) as DataT[];
 			} else {
-				results =
-					query === "" && forceQuery
-						? []
-						: [...(await onLoad(query, switchValue))];
+				if (query === "" && forceQuery) {
+					results = [];
+				} else {
+					const loadResult = await onLoad(query, switchValue);
+					results = [...loadResult.options];
+					// count what the source returned, before hidden/filterIds are applied below
+					const loaded = loadResult.options.length;
+					if (
+						!disableTruncationNotice &&
+						loadResult.total != null &&
+						loadResult.total > loaded
+					) {
+						const total = loadResult.total;
+						trailingEntries.push({
+							value: "truncation-label",
+							label: truncatedLabel
+								? truncatedLabel(loaded, total)
+								: t("standalone.selector.base-selector.truncated", {
+										LOADED: loaded,
+										TOTAL: total,
+									}),
+							isSmallLabel: true,
+						} as DataT);
+					}
+				}
 				if (onAddNew) {
-					if (results.length > 0) {
-						results.push({
+					if (results.length + leadingEntries.length > 0) {
+						trailingEntries.push({
 							label: "",
 							value: "lru-divider",
 							isDivider: true,
 						} as DataT);
 					}
-					results.push(addNewEntry);
+					trailingEntries.push(addNewEntry);
 				}
 			}
 			// remove hidden
@@ -920,6 +1002,7 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 							)),
 				);
 			}
+			results = leadingEntries.concat(results, trailingEntries);
 			setLoading((prev) => {
 				// if another load was started while completing this skip update
 				if (prev != loadTicket) return prev;
@@ -936,9 +1019,12 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 			grouped,
 			disableGroupSorting,
 			onAddNew,
+			additionalOptions,
 			t,
 			setLruIds,
 			forceQuery,
+			disableTruncationNotice,
+			truncatedLabel,
 			onLoad,
 			switchValue,
 			getId,
@@ -1066,7 +1152,7 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 								? (option: DataT) => option.group ?? noGroupLabel ?? ""
 								: undefined
 						}
-						slots={{ popper: GrowPopper }}
+						slots={autocompleteSlots}
 						filterOptions={filterOptions}
 						value={selected}
 						inputValue={query}

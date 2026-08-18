@@ -117,7 +117,7 @@ const GridMultiSelectFilter = (inProps: GridMultiSelectFilterProps) => {
 		[selected, onSelect],
 	);
 
-	const getOptions = useCallback(() => options, [options]);
+	const getOptions = useCallback(() => ({ options }), [options]);
 
 	const selectedData = useMemo(
 		(): MultiSelectorData[] =>

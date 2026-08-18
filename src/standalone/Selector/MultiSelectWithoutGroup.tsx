@@ -7,7 +7,7 @@ import {
 	BaseSelectorProps,
 	MultiSelectorData,
 } from "../../standalone/Selector";
-import BaseSelector from "./BaseSelector";
+import BaseSelector, { BaseSelectorLoadHandler } from "./BaseSelector";
 import { SmallIconButton, SmallListItemIcon } from "../Small";
 import InlineSwitch from "../InlineSwitch";
 import { styled, Typography, useThemeProps } from "@mui/material";
@@ -45,13 +45,8 @@ export interface MultiSelectWithoutGroupProps<
 	setSwitchValue?: (checked: boolean) => void;
 	/**
 	 * Search callback which is called to load available data entries
-	 * @param query The search string
-	 * @param switchValue The value of the switch or false if switch is disabled
 	 */
-	loadDataOptions: (
-		query: string,
-		switchValue: boolean,
-	) => DataT[] | Promise<DataT[]>;
+	loadDataOptions: BaseSelectorLoadHandler<DataT>;
 	/**
 	 * Optional callback for customizing the unique identifier of data
 	 * @param data The data struct
@@ -171,12 +166,15 @@ const MultiSelectWithoutGroup = <DataT extends MultiSelectorData>(
 
 	const onLoad = useCallback(
 		async (query: string) => {
-			const results = await loadDataOptions(query, !!switchValue);
-			return results.map((result) =>
-				selectedIds.includes(getId(result))
-					? { ...result, isDisabled: true, selected: true }
-					: result,
-			);
+			const result = await loadDataOptions(query, !!switchValue);
+			return {
+				...result,
+				options: result.options.map((entry) =>
+					selectedIds.includes(getId(entry))
+						? { ...entry, isDisabled: true, selected: true }
+						: entry,
+				),
+			};
 		},
 		[getId, loadDataOptions, selectedIds, switchValue],
 	);

@@ -7,6 +7,8 @@ import React, {
 	useState,
 } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
+// eslint-disable-next-line import/no-unresolved
+import { expect, within } from "storybook/test";
 import {
 	Button,
 	Dialog,
@@ -280,4 +282,89 @@ const CrudMultiSelectStory = () => {
  */
 export const CrudMultiSelectPrepareNewEntry: StoryObj = {
 	render: () => <CrudMultiSelectStory />,
+};
+
+// ---------------------------------------------------------------------------
+// Truncated result set: the backend reports more matches than it returned
+// ---------------------------------------------------------------------------
+
+const TRUNCATED_LIMIT = 3;
+
+const SingleSelectTruncatedStory = () => {
+	const model = useMemo(createTestModel, []);
+	const [selected, setSelected] = useState<string | null>(null);
+	const handleSelect = useCallback((value: string | null) => {
+		setSelected(value);
+	}, []);
+	return (
+		<BackendSingleSelect
+			model={model}
+			modelToSelectorData={modelToSelectorData}
+			selected={selected}
+			onSelect={handleSelect}
+			searchResultLimit={TRUNCATED_LIMIT}
+			label="Select a person"
+		/>
+	);
+};
+
+export const SingleSelectTruncated: StoryObj = {
+	name: "BackendSingleSelect — truncated result set",
+	render: () => <SingleSelectTruncatedStory />,
+	play: async ({ canvas, userEvent }) => {
+		const body = within(document.body);
+		const input = await canvas.findByRole("combobox");
+		await userEvent.click(input);
+		// the limited page of records is rendered...
+		await expect(await body.findByText("Alice Mueller")).toBeVisible();
+		const texts = body
+			.getAllByRole("option")
+			.map((option) => option.textContent ?? "");
+		// ...plus one trailing entry naming how many records actually match
+		await expect(texts).toHaveLength(TRUNCATED_LIMIT + 1);
+		const notice = texts[texts.length - 1];
+		await expect(notice).toContain(String(TRUNCATED_LIMIT));
+		await expect(notice).toContain("8");
+	},
+};
+
+// ---------------------------------------------------------------------------
+// additionalOptions must not depend on the data source being queried
+// ---------------------------------------------------------------------------
+
+const ADDITIONAL_OPTIONS: BaseSelectorData[] = [
+	{ value: "unassigned", label: "Unassigned" },
+];
+
+const SingleSelectForceQueryStory = () => {
+	const model = useMemo(createTestModel, []);
+	const [selected, setSelected] = useState<string | null>(null);
+	const handleSelect = useCallback((value: string | null) => {
+		setSelected(value);
+	}, []);
+	return (
+		<BackendSingleSelect
+			model={model}
+			modelToSelectorData={modelToSelectorData}
+			selected={selected}
+			onSelect={handleSelect}
+			forceQuery
+			additionalOptions={ADDITIONAL_OPTIONS}
+			label="Select a person"
+		/>
+	);
+};
+
+export const SingleSelectForceQueryAdditionalOptions: StoryObj = {
+	name: "BackendSingleSelect — additionalOptions survive forceQuery",
+	render: () => <SingleSelectForceQueryStory />,
+	play: async ({ canvas, userEvent }) => {
+		const body = within(document.body);
+		const input = await canvas.findByRole("combobox");
+		await userEvent.click(input);
+		// the additional option needs no request, so it is offered right away
+		await expect(await body.findByText("Unassigned")).toBeVisible();
+		// while forceQuery keeps the backend records out until something is typed
+		await expect(body.queryByText("Alice Mueller")).toBeNull();
+	},
 };

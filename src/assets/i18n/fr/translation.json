@@ -123,6 +123,7 @@
 				"clear-icon-text": "À vider",
 				"loading-text": "Chargement…",
 				"start-typing-to-search-text": "Entrez une chaîne de recherche pour obtenir des résultats",
+				"truncated": "Affichage des {{LOADED}} premiers résultats sur {{TOTAL}} – affinez votre recherche",
 				"lru-label": "Dernière utilisation récente",
 				"selected": "CHOISI"
 			},

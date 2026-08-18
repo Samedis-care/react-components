@@ -1,6 +1,7 @@
 import React, { useCallback, useMemo } from "react";
 import { useThemeProps } from "@mui/material";
 import {
+	BaseSelectorLoadResult,
 	BaseSelectorProps,
 	MultiSelectorData,
 	SelectorLruOptions,
@@ -85,8 +86,11 @@ const BackendMultipleSelect = <
 	const { selected, handleSelect } = useSelectedCache(props);
 
 	const handleLoad = useCallback(
-		async (search: string, switchValue: boolean) => {
-			const data = await model.index({
+		async (
+			search: string,
+			switchValue: boolean,
+		): Promise<BaseSelectorLoadResult<DataT>> => {
+			const [records, meta] = await model.index({
 				page: 1,
 				rows: searchResultLimit ?? 25,
 				quickFilter: search,
@@ -95,9 +99,12 @@ const BackendMultipleSelect = <
 					? { [switchFilterName]: switchValue }
 					: undefined,
 			});
-			return Promise.all(
-				data[0].map((data) => Promise.resolve(modelToSelectorData(data))),
-			);
+			return {
+				options: await Promise.all(
+					records.map((data) => Promise.resolve(modelToSelectorData(data))),
+				),
+				total: meta.filteredRows ?? meta.totalRows,
+			};
 		},
 		[model, modelToSelectorData, searchResultLimit, sort, switchFilterName],
 	);

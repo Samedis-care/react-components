@@ -8,8 +8,8 @@ import React, {
 import { useThemeProps } from "@mui/material";
 import {
 	BaseSelectorData,
+	BaseSelectorLoadResult,
 	BaseSelectorProps,
-	getStringLabel,
 	SelectorLruOptions,
 	SingleSelect,
 } from "../../standalone";
@@ -85,11 +85,6 @@ export interface BackendSingleSelectProps<
 	 */
 	onLoadError?: (error: Error) => string | null;
 	/**
-	 * Additional options to choose from (not provided by backend).
-	 * @remarks Has no effect if LRU. Will be shown at the top of the list
-	 */
-	additionalOptions?: BaseSelectorData[];
-	/**
 	 * Disable request batching
 	 */
 	disableRequestBatching?: boolean;
@@ -164,23 +159,23 @@ const BackendSingleSelect = <
 	const { t } = useCCTranslations();
 
 	const handleLoad = useCallback(
-		async (search: string) => {
-			const data = await model.index({
+		async (
+			search: string,
+		): Promise<BaseSelectorLoadResult<BaseSelectorData>> => {
+			const [records, meta] = await model.index({
 				page: 1,
 				rows: searchResultLimit ?? 25,
 				sort: sort,
 				quickFilter: search,
 			});
-			return [
-				...(additionalOptions ?? []).filter((x) =>
-					getStringLabel(x).toLowerCase().includes(search.toLowerCase()),
+			return {
+				options: await Promise.all(
+					records.map((record) => Promise.resolve(modelToSelectorData(record))),
 				),
-				...(await Promise.all(
-					data[0].map((data) => Promise.resolve(modelToSelectorData(data))),
-				)),
-			];
+				total: meta.filteredRows ?? meta.totalRows,
+			};
 		},
-		[model, searchResultLimit, sort, additionalOptions, modelToSelectorData],
+		[model, searchResultLimit, sort, modelToSelectorData],
 	);
 
 	const handleLoadLruRecord = useCallback(
@@ -297,6 +292,7 @@ const BackendSingleSelect = <
 			{...otherProps}
 			freeSolo={freeSolo}
 			onLoad={debouncedLoad}
+			additionalOptions={additionalOptions}
 			onSelect={handleSelect}
 			selected={
 				selectedFreeSolo
