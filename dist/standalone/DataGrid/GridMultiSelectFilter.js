@@ -53,7 +53,7 @@ const GridMultiSelectFilter = (inProps) => {
             ? selected.concat([evt.target.name])
             : selected.filter((entry) => entry !== evt.target.name));
     }, [selected, onSelect]);
-    const getOptions = useCallback(() => options, [options]);
+    const getOptions = useCallback(() => ({ options }), [options]);
     const selectedData = useMemo(() => selected
         .map((value) => options.find((opt) => opt.value === value))
         .filter(Boolean), [selected, options]);

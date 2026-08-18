@@ -45,10 +45,13 @@ const MultiSelect = (inProps) => {
             onSelect(selectedOptions);
     }, [onSelect, selected]);
     const multiSelectLoadHandler = useCallback(async (query, switchValue) => {
-        const results = await onLoad(query, switchValue);
-        return results.map((result) => selectedIds.includes(getId(result))
-            ? { ...result, isDisabled: true, selected: true }
-            : result);
+        const result = await onLoad(query, switchValue);
+        return {
+            ...result,
+            options: result.options.map((entry) => selectedIds.includes(getId(entry))
+                ? { ...entry, isDisabled: true, selected: true }
+                : entry),
+        };
     }, [getId, onLoad, selectedIds]);
     const dialogContext = useContext(DialogContext); // this is standalone, so this has to be optional. framework might not be present.
     if (confirmDelete && !dialogContext) {

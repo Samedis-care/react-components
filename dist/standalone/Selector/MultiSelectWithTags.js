@@ -72,7 +72,16 @@ const MultiSelectWithTags = (inProps) => {
     }, [onChange, loadGroupEntries, getId, selected]);
     const loadGroupOptionsAndProcess = useCallback(async (query) => {
         const selectedGroupIds = selectedGroups.map((group) => group.group);
-        return (await loadGroupOptions(query, switchValue)).filter((group) => !selectedGroupIds.includes(group.value));
+        const result = await loadGroupOptions(query, switchValue);
+        const options = result.options.filter((group) => !selectedGroupIds.includes(group.value));
+        return {
+            options,
+            // total has to count the same population as options, otherwise dropping the
+            // already selected groups would report a truncation which isn't there
+            total: result.total != null
+                ? result.total - (result.options.length - options.length)
+                : undefined,
+        };
     }, [loadGroupOptions, selectedGroups, switchValue]);
     return (_jsxs(Root, { className: combineClassNames([className, classes?.root]), children: [_jsx(LoadOverlay, { className: classes?.loadOverlay, style: loadingGroupRecords
                     ? { visibility: "visible", opacity: 1 }

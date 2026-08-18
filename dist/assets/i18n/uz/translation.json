@@ -123,6 +123,7 @@
 				"clear-icon-text": "Bo'shatish",
 				"loading-text": "Yuklanmoqda…",
 				"start-typing-to-search-text": "Natija olish uchun qidiruv qatorini kiriting",
+				"truncated": "{{TOTAL}} natijadan birinchi {{LOADED}} tasi ko‘rsatilgan – qidiruvni aniqlashtiring",
 				"lru-label": "Oxirgi marta ishlatilgan",
 				"selected": "TANLANGAN"
 			},

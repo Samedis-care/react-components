@@ -1,8 +1,8 @@
 import React from "react";
 import { MultiSelectWithoutGroupProps } from "./MultiSelectWithoutGroup";
-import { BaseSelectorData, BaseSelectorProps, SelectorLruOptions } from "./BaseSelector";
+import { BaseSelectorData, BaseSelectorLoadHandler, BaseSelectorProps, SelectorLruOptions } from "./BaseSelector";
 import { MultiSelectorData } from "./MultiSelect";
-export interface MultiSelectWithTagsProps<DataT extends MultiSelectorData, GroupT extends BaseSelectorData> extends Pick<BaseSelectorProps<GroupT, false>, "disabled" | "noOptionsText" | "loadingText" | "closeText" | "openText" | "displaySwitch" | "defaultSwitchValue" | "switchLabel" | "forceQuery" | "startTypingToSearchText">, Omit<MultiSelectWithoutGroupProps<DataT>, "classes" | "onChange" | "dataOptions" | "setDataOptions" | "label"> {
+export interface MultiSelectWithTagsProps<DataT extends MultiSelectorData, GroupT extends BaseSelectorData> extends Pick<BaseSelectorProps<GroupT, false>, "disabled" | "noOptionsText" | "loadingText" | "closeText" | "openText" | "displaySwitch" | "defaultSwitchValue" | "switchLabel" | "forceQuery" | "startTypingToSearchText">, Omit<MultiSelectWithoutGroupProps<DataT>, "additionalOptions" | "classes" | "onChange" | "dataOptions" | "setDataOptions" | "label"> {
     /**
      * The title of control
      */
@@ -30,16 +30,12 @@ export interface MultiSelectWithTagsProps<DataT extends MultiSelectorData, Group
     loadGroupEntries: (group: GroupT) => DataT[] | Promise<DataT[]>;
     /**
      * Search callback which is called to load available data entries
-     * @param query The search string
-     * @param switchValue The value of the switch or false if switch is disabled
      */
-    loadDataOptions: (query: string, switchValue: boolean) => DataT[] | Promise<DataT[]>;
+    loadDataOptions: BaseSelectorLoadHandler<DataT>;
     /**
      * Search callback which is called to load available group entries
-     * @param query The search string
-     * @param switchValue The value of the switch or false if switch is disabled
      */
-    loadGroupOptions: (query: string, switchValue: boolean) => GroupT[] | Promise<GroupT[]>;
+    loadGroupOptions: BaseSelectorLoadHandler<GroupT>;
     /**
      * LRU options for group
      */

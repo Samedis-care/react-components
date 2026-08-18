@@ -70,10 +70,13 @@ const MultiSelectWithoutGroup = (inProps) => {
             onSelect(selectedOptions);
     }, [onSelect, selected]);
     const onLoad = useCallback(async (query) => {
-        const results = await loadDataOptions(query, !!switchValue);
-        return results.map((result) => selectedIds.includes(getId(result))
-            ? { ...result, isDisabled: true, selected: true }
-            : result);
+        const result = await loadDataOptions(query, !!switchValue);
+        return {
+            ...result,
+            options: result.options.map((entry) => selectedIds.includes(getId(entry))
+                ? { ...entry, isDisabled: true, selected: true }
+                : entry),
+        };
     }, [getId, loadDataOptions, selectedIds, switchValue]);
     return (_jsxs(Typography, { component: "div", className: className, children: [_jsx(BaseSelector, { ...otherProps, onLoad: onLoad, selected: null, onSelect: multiSelectHandler, refreshToken: (refreshToken ?? "") +
                     selectedIds.join(",") +

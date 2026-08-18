@@ -55,11 +55,6 @@ export interface BackendSingleSelectProps<KeyT extends ModelFieldName, Visibilit
      */
     onLoadError?: (error: Error) => string | null;
     /**
-     * Additional options to choose from (not provided by backend).
-     * @remarks Has no effect if LRU. Will be shown at the top of the list
-     */
-    additionalOptions?: BaseSelectorData[];
-    /**
      * Disable request batching
      */
     disableRequestBatching?: boolean;

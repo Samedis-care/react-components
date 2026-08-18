@@ -23,7 +23,7 @@ const BackendMultipleSelect = (inProps) => {
     const modelFetch = props.modelFetch ?? model;
     const { selected, handleSelect } = useSelectedCache(props);
     const handleLoad = useCallback(async (search, switchValue) => {
-        const data = await model.index({
+        const [records, meta] = await model.index({
             page: 1,
             rows: searchResultLimit ?? 25,
             quickFilter: search,
@@ -32,7 +32,10 @@ const BackendMultipleSelect = (inProps) => {
                 ? { [switchFilterName]: switchValue }
                 : undefined,
         });
-        return Promise.all(data[0].map((data) => Promise.resolve(modelToSelectorData(data))));
+        return {
+            options: await Promise.all(records.map((data) => Promise.resolve(modelToSelectorData(data)))),
+            total: meta.filteredRows ?? meta.totalRows,
+        };
     }, [model, modelToSelectorData, searchResultLimit, sort, switchFilterName]);
     const handleLoadLruRecord = useCallback(async (id) => {
         const [data] = await modelFetch.getCached(id, {

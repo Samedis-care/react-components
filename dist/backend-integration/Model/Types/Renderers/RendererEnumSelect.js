@@ -32,10 +32,12 @@ class RendererEnumSelect extends TypeEnum {
                 isDisabled: entry.invisible || entry.isDisabled,
             }));
             const selected = data.find((entry) => entry.value === value) || null;
-            const onLoad = (query) => uniqueArray([
-                ...data.filter((entry) => getStringLabel(entry).toLowerCase().startsWith(query.toLowerCase())),
-                ...data.filter((entry) => getStringLabel(entry).toLowerCase().includes(query.toLowerCase())),
-            ]);
+            const onLoad = (query) => ({
+                options: uniqueArray([
+                    ...data.filter((entry) => getStringLabel(entry).toLowerCase().startsWith(query.toLowerCase())),
+                    ...data.filter((entry) => getStringLabel(entry).toLowerCase().includes(query.toLowerCase())),
+                ]),
+            });
             return (_jsxs(FormControlFieldsetCC, { component: "fieldset", required: visibility.required, fullWidth: true, error: !!errorMsg, warning: !!warningMsg, onBlur: handleBlur, name: field, children: [_jsx(SingleSelect, { refreshToken: this.values.map((e) => e.value).join(","), ...this.props, label: label, selected: selected, onLoad: onLoad, onSelect: (value) => handleChange(field, value ? value.value : ""), disabled: visibility.readOnly, required: visibility.required }), _jsx(FormHelperText, { children: errorMsg || warningMsg })] }));
         }
         const valueInfo = this.values.find((entry) => entry.value === value);

@@ -1,7 +1,7 @@
 import { jsx as _jsx } from "react/jsx-runtime";
 import React, { useCallback, useEffect, useMemo, useRef, useState, } from "react";
 import { useThemeProps } from "@mui/material";
-import { getStringLabel, SingleSelect, } from "../../standalone";
+import { SingleSelect, } from "../../standalone";
 import debouncePromise from "../../utils/debouncePromise";
 import useCCTranslations from "../../utils/useCCTranslations";
 const BackendSingleSelect = (inProps) => {
@@ -17,17 +17,17 @@ const BackendSingleSelect = (inProps) => {
     const [selectedCache, setSelectedCache] = useState(null);
     const { t } = useCCTranslations();
     const handleLoad = useCallback(async (search) => {
-        const data = await model.index({
+        const [records, meta] = await model.index({
             page: 1,
             rows: searchResultLimit ?? 25,
             sort: sort,
             quickFilter: search,
         });
-        return [
-            ...(additionalOptions ?? []).filter((x) => getStringLabel(x).toLowerCase().includes(search.toLowerCase())),
-            ...(await Promise.all(data[0].map((data) => Promise.resolve(modelToSelectorData(data))))),
-        ];
-    }, [model, searchResultLimit, sort, additionalOptions, modelToSelectorData]);
+        return {
+            options: await Promise.all(records.map((record) => Promise.resolve(modelToSelectorData(record)))),
+            total: meta.filteredRows ?? meta.totalRows,
+        };
+    }, [model, searchResultLimit, sort, modelToSelectorData]);
     const handleLoadLruRecord = useCallback(async (id) => {
         const [data] = await modelFetch.getCached(id, {
             batch: !disableRequestBatching,
@@ -113,7 +113,7 @@ const BackendSingleSelect = (inProps) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selected]);
     const debouncedLoad = useMemo(() => debouncePromise(handleLoad, searchDebounceTime ?? 500), [handleLoad, searchDebounceTime]);
-    return (_jsx(SingleSelect, { ...otherProps, freeSolo: freeSolo, onLoad: debouncedLoad, onSelect: handleSelect, selected: selectedFreeSolo
+    return (_jsx(SingleSelect, { ...otherProps, freeSolo: freeSolo, onLoad: debouncedLoad, additionalOptions: additionalOptions, onSelect: handleSelect, selected: selectedFreeSolo
             ? { value: selectedFreeSolo, label: selectedFreeSolo, freeSolo: true }
             : selected != null
                 ? (selectedCache ?? {

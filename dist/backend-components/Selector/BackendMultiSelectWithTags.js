@@ -26,7 +26,7 @@ const BackendMultiSelectWithTags = (inProps) => {
         return getGroupDataEntries(await groupModel.getCached(data.value));
     }, [getGroupDataEntries, groupModel]);
     const loadGroupOptions = useCallback(async (query, switchValue) => {
-        const [records] = await groupModel.index({
+        const [records, meta] = await groupModel.index({
             page: 1,
             quickFilter: query,
             sort: groupSort,
@@ -34,10 +34,13 @@ const BackendMultiSelectWithTags = (inProps) => {
                 ? { [switchFilterNameGroup]: switchValue }
                 : undefined,
         });
-        return Promise.all(records.map((record) => Promise.resolve(convGroup(record))));
+        return {
+            options: await Promise.all(records.map((record) => Promise.resolve(convGroup(record)))),
+            total: meta.filteredRows ?? meta.totalRows,
+        };
     }, [convGroup, groupModel, groupSort, switchFilterNameGroup]);
     const loadDataOptions = useCallback(async (query, switchValue) => {
-        const [records] = await dataModel.index({
+        const [records, meta] = await dataModel.index({
             page: 1,
             quickFilter: query,
             sort: dataSort,
@@ -45,7 +48,10 @@ const BackendMultiSelectWithTags = (inProps) => {
                 ? { [switchFilterNameData]: switchValue }
                 : undefined,
         });
-        return Promise.all(records.map((record) => Promise.resolve(convData(record))));
+        return {
+            options: await Promise.all(records.map((record) => Promise.resolve(convData(record)))),
+            total: meta.filteredRows ?? meta.totalRows,
+        };
     }, [convData, dataModel, dataSort, switchFilterNameData]);
     const handleLoadGroupRecord = useCallback(async (id) => {
         const [data] = await groupModel.getCached(id);

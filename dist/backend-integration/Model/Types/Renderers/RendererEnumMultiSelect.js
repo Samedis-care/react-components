@@ -32,10 +32,12 @@ class RendererEnumMultiSelect extends TypeEnumMulti {
                 disabled: entry.invisible,
             }));
             const selected = data.filter((entry) => value.includes(entry.value));
-            const onLoad = (query) => uniqueArray([
-                ...data.filter((entry) => getStringLabel(entry).toLowerCase().startsWith(query.toLowerCase())),
-                ...data.filter((entry) => getStringLabel(entry).toLowerCase().includes(query.toLowerCase())),
-            ]);
+            const onLoad = (query) => ({
+                options: uniqueArray([
+                    ...data.filter((entry) => getStringLabel(entry).toLowerCase().startsWith(query.toLowerCase())),
+                    ...data.filter((entry) => getStringLabel(entry).toLowerCase().includes(query.toLowerCase())),
+                ]),
+            });
             return (_jsxs(FormControlFieldsetCC, { component: "fieldset", required: visibility.required, fullWidth: true, error: !!errorMsg, warning: !!warningMsg, onBlur: handleBlur, name: field, children: [_jsx(MultiSelect, { refreshToken: this.values.map((e) => e.value).join(","), label: label, selected: selected, onLoad: onLoad, onSelect: (selected) => handleChange(field, selected.map((entry) => entry.value)), disabled: visibility.readOnly, ...this.props }), _jsx(FormHelperText, { children: errorMsg || warningMsg })] }));
         }
         return (_jsxs(Typography, { children: [!visibility.grid && `${label}: `, value

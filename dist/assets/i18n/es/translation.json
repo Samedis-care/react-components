@@ -127,6 +127,7 @@
 				"clear-icon-text": "Borrar",
 				"loading-text": "Cargando…",
 				"start-typing-to-search-text": "Introduzca un texto de búsqueda para obtener resultados",
+				"truncated": "Mostrando los primeros {{LOADED}} de {{TOTAL}} resultados: refine su búsqueda",
 				"lru-label": "Usados recientemente",
 				"selected": "SELECCIONADO"
 			},

@@ -28,10 +28,12 @@ export const modifyReactLabel = (data, cb) => ({
  */
 export const selectorLocalLoadHandler = (data) => (query) => {
     query = query.toLowerCase();
-    return uniqueArray([
-        ...data.filter((entry) => getStringLabel(entry).toLowerCase().startsWith(query)),
-        ...data.filter((entry) => getStringLabel(entry).toLowerCase().includes(query)),
-    ]);
+    return {
+        options: uniqueArray([
+            ...data.filter((entry) => getStringLabel(entry).toLowerCase().startsWith(query)),
+            ...data.filter((entry) => getStringLabel(entry).toLowerCase().includes(query)),
+        ]),
+    };
 };
 const StyledAutocomplete = styled(Autocomplete, {
     name: "CcBaseSelector",
@@ -129,10 +131,11 @@ const getOptionSelected = (option, value) => option.value === (typeof value === 
 const GrowPopper = React.forwardRef(function GrowPopperImpl(props, ref) {
     return (_jsx(Popper, { ...props, ref: ref, style: { ...props.style, width: "unset", minWidth: props.style?.width } }));
 });
+const autocompleteSlots = { popper: GrowPopper };
 export const BaseSelectorContext = React.createContext(null);
 const BaseSelector = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcBaseSelector" });
-    const { variant, refreshToken, onSelect, multiple, selected, label, disabled, required, error, warning, disableSearch, placeholder, autocompleteId, addNewLabel, onLoad, onAddNew, enableIcons, noOptionsText, loadingText, startTypingToSearchText, openText, closeText, clearText, disableClearable, openInfo, grouped, noGroupLabel, disableGroupSorting, groupSorter, switchLabel, lru, startAdornment, endAdornment, endAdornmentLeft, forceQuery, freeSolo, getIdOfData, filterIds, textFieldClasses, textFieldInputClasses, iconSize, classes, className, } = props;
+    const { variant, refreshToken, onSelect, multiple, selected, label, disabled, required, error, warning, disableSearch, placeholder, autocompleteId, addNewLabel, onLoad, onAddNew, additionalOptions, enableIcons, noOptionsText, loadingText, startTypingToSearchText, disableTruncationNotice, truncatedLabel, openText, closeText, clearText, disableClearable, openInfo, grouped, noGroupLabel, disableGroupSorting, groupSorter, switchLabel, lru, startAdornment, endAdornment, endAdornmentLeft, forceQuery, freeSolo, getIdOfData, filterIds, textFieldClasses, textFieldInputClasses, iconSize, classes, className, } = props;
     const getIdDefault = useCallback((data) => data.value, []);
     const getId = getIdOfData ?? getIdDefault;
     const defaultSwitchValue = !!(props.displaySwitch && props.defaultSwitchValue);
@@ -261,6 +264,14 @@ const BaseSelector = (inProps) => {
         const loadTicket = Math.random().toString();
         setLoading(loadTicket);
         let results;
+        // trailing entries (truncation notice, add new), appended after sorting so they
+        // always stay at the bottom of the list
+        const trailingEntries = [];
+        // additional options don't come from the data source, so they must not depend on
+        // onLoad running - lru and forceQuery both skip it on an empty query
+        const leadingEntries = (additionalOptions ?? []).filter((entry) => !entry.hidden &&
+            !filterIds?.includes(getId(entry)) &&
+            getStringLabel(entry).toLowerCase().includes(query.toLowerCase()));
         const filteredLruIds = filterIds
             ? lruIds.filter((id) => !filterIds.includes(id))
             : lruIds;
@@ -301,19 +312,39 @@ const BaseSelector = (inProps) => {
             ].filter((entry) => entry);
         }
         else {
-            results =
-                query === "" && forceQuery
-                    ? []
-                    : [...(await onLoad(query, switchValue))];
+            if (query === "" && forceQuery) {
+                results = [];
+            }
+            else {
+                const loadResult = await onLoad(query, switchValue);
+                results = [...loadResult.options];
+                // count what the source returned, before hidden/filterIds are applied below
+                const loaded = loadResult.options.length;
+                if (!disableTruncationNotice &&
+                    loadResult.total != null &&
+                    loadResult.total > loaded) {
+                    const total = loadResult.total;
+                    trailingEntries.push({
+                        value: "truncation-label",
+                        label: truncatedLabel
+                            ? truncatedLabel(loaded, total)
+                            : t("standalone.selector.base-selector.truncated", {
+                                LOADED: loaded,
+                                TOTAL: total,
+                            }),
+                        isSmallLabel: true,
+                    });
+                }
+            }
             if (onAddNew) {
-                if (results.length > 0) {
-                    results.push({
+                if (results.length + leadingEntries.length > 0) {
+                    trailingEntries.push({
                         label: "",
                         value: "lru-divider",
                         isDivider: true,
                     });
                 }
-                results.push(addNewEntry);
+                trailingEntries.push(addNewEntry);
             }
         }
         // remove hidden
@@ -325,6 +356,7 @@ const BaseSelector = (inProps) => {
             results.sort(groupSorter ??
                 ((a, b) => -(b.group ?? noGroupLabel ?? "").localeCompare(a.group ?? noGroupLabel ?? "")));
         }
+        results = leadingEntries.concat(results, trailingEntries);
         setLoading((prev) => {
             // if another load was started while completing this skip update
             if (prev != loadTicket)
@@ -341,9 +373,12 @@ const BaseSelector = (inProps) => {
         grouped,
         disableGroupSorting,
         onAddNew,
+        additionalOptions,
         t,
         setLruIds,
         forceQuery,
+        disableTruncationNotice,
+        truncatedLabel,
         onLoad,
         switchValue,
         getId,
@@ -412,7 +447,7 @@ const BaseSelector = (inProps) => {
                             return options;
                         })(), groupBy: grouped
                             ? (option) => option.group ?? noGroupLabel ?? ""
-                            : undefined, slots: { popper: GrowPopper }, filterOptions: filterOptions, value: selected, inputValue: query, blurOnSelect: !multiple, onInputChange: updateQuery, popupIcon: _jsx(ExpandMore, {}), autoSelect: freeSolo, freeSolo: freeSolo, noOptionsText: query === "" && (forceQuery || lru?.forceQuery)
+                            : undefined, slots: autocompleteSlots, filterOptions: filterOptions, value: selected, inputValue: query, blurOnSelect: !multiple, onInputChange: updateQuery, popupIcon: _jsx(ExpandMore, {}), autoSelect: freeSolo, freeSolo: freeSolo, noOptionsText: query === "" && (forceQuery || lru?.forceQuery)
                             ? (startTypingToSearchText ??
                                 t("standalone.selector.base-selector.start-typing-to-search-text"))
                             : (noOptionsText ??

@@ -68,11 +68,33 @@ export declare const getStringLabel: (data: BaseSelectorData | string) => string
 export declare const getReactLabel: (data: BaseSelectorData) => React.ReactNode;
 export declare const modifyReactLabel: <DataT extends BaseSelectorData>(data: DataT, cb: (prev: React.ReactNode) => React.ReactNode) => DataT;
 /**
+ * Result of a selector data load
+ */
+export interface BaseSelectorLoadResult<DataT extends BaseSelectorData> {
+    /**
+     * The loaded options
+     */
+    options: DataT[];
+    /**
+     * The total amount of records matching the search query.
+     * Set this if the data source applied a result limit: a notice informing the user
+     * about the truncated result set is shown while total exceeds options.length.
+     * @remarks Must count the same population as options - if you filter options, adjust this too
+     */
+    total?: number;
+}
+/**
+ * Data load handler
+ * @param search The user search input
+ * @param switchValue The value of switch input
+ */
+export type BaseSelectorLoadHandler<DataT extends BaseSelectorData> = (search: string, switchValue: boolean) => BaseSelectorLoadResult<DataT> | Promise<BaseSelectorLoadResult<DataT>>;
+/**
  * On load handler for selectors using a local dataset
  * Performs a case-insensitive label search
  * @param data The data set
  */
-export declare const selectorLocalLoadHandler: <DataT extends BaseSelectorData>(data: DataT[]) => (query: string) => DataT[];
+export declare const selectorLocalLoadHandler: <DataT extends BaseSelectorData>(data: DataT[]) => (query: string) => BaseSelectorLoadResult<DataT>;
 export interface SelectorLruOptions<DataT extends BaseSelectorData> {
     /**
      * The max amount of LRU cache entries
@@ -123,11 +145,9 @@ export type BaseSelectorProps<DataT extends BaseSelectorData, Multi extends bool
     refreshToken?: string;
     /**
      * Data load function
-     * @param search The user search input
-     * @param switchValue The value of switch input
      * @remarks When using this with an already loaded dataset consider using selectorLocalLoadHandler
      */
-    onLoad: (search: string, switchValue: boolean) => DataT[] | Promise<DataT[]>;
+    onLoad: BaseSelectorLoadHandler<DataT>;
     /**
      * The textfield type of input
      */
@@ -167,6 +187,13 @@ export type BaseSelectorProps<DataT extends BaseSelectorData, Multi extends bool
      */
     onAddNew?: () => DataT | null | Promise<DataT | null>;
     /**
+     * Additional options to choose from, not provided by the data source.
+     * Shown at the top of the list, matched against the search query by label.
+     * @remarks These are independent of onLoad, so they are also shown while lru or
+     * forceQuery suppress the data source on an empty query
+     */
+    additionalOptions?: DataT[];
+    /**
      * Label for the "Add new" button
      */
     addNewLabel?: string;
@@ -190,6 +217,17 @@ export type BaseSelectorProps<DataT extends BaseSelectorData, Multi extends bool
      * Label which is shown if forceQuery == true and nothing has been typed
      */
     startTypingToSearchText?: string;
+    /**
+     * Do not show the entry which informs the user about a truncated result set
+     * @remarks The entry is only shown if the data source reports a total
+     */
+    disableTruncationNotice?: boolean;
+    /**
+     * Label for the entry which informs the user about a truncated result set
+     * @param loaded The amount of records which have been loaded
+     * @param total The total amount of records matching the search query
+     */
+    truncatedLabel?: (loaded: number, total: number) => string | [string, React.ReactNode];
     /**
      * Label which is shown for close icon button while popup is opened
      */

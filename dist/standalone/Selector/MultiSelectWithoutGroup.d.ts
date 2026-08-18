@@ -1,5 +1,6 @@
 import React from "react";
 import { BaseSelectorProps, MultiSelectorData } from "../../standalone/Selector";
+import { BaseSelectorLoadHandler } from "./BaseSelector";
 export interface MultiSelectWithoutGroupProps<DataT extends MultiSelectorData> extends Omit<BaseSelectorProps<DataT, false>, "onSelect" | "selected" | "classes" | "onLoad"> {
     /**
      * Extended selection change handler
@@ -25,10 +26,8 @@ export interface MultiSelectWithoutGroupProps<DataT extends MultiSelectorData> e
     setSwitchValue?: (checked: boolean) => void;
     /**
      * Search callback which is called to load available data entries
-     * @param query The search string
-     * @param switchValue The value of the switch or false if switch is disabled
      */
-    loadDataOptions: (query: string, switchValue: boolean) => DataT[] | Promise<DataT[]>;
+    loadDataOptions: BaseSelectorLoadHandler<DataT>;
     /**
      * Optional callback for customizing the unique identifier of data
      * @param data The data struct
