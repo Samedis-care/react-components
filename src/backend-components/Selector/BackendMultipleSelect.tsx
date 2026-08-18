@@ -1,4 +1,5 @@
 import React, { useCallback, useMemo } from "react";
+import { useThemeProps } from "@mui/material";
 import {
 	BaseSelectorProps,
 	MultiSelectorData,
@@ -27,6 +28,26 @@ export type BackendMultipleSelectProps<
 	Pick<BaseSelectorProps<DataT, true>, "classes">;
 
 /**
+ * Themable subset of BackendMultipleSelectProps (used for theme defaultProps)
+ * @remarks Excludes the props which are specific to a single instance (model, selection, callbacks)
+ */
+export type BackendMultipleSelectThemeProps = Omit<
+	BackendMultipleSelectProps<
+		ModelFieldName,
+		PageVisibility,
+		unknown,
+		MultiSelectorData
+	>,
+	| "model"
+	| "modelFetch"
+	| "modelToSelectorData"
+	| "selected"
+	| "onSelect"
+	| "initialData"
+	| "lru"
+>;
+
+/**
  * Backend connected BaseSelector with multiple=true
  * @constructor
  */
@@ -36,8 +57,12 @@ const BackendMultipleSelect = <
 	CustomT,
 	DataT extends MultiSelectorData,
 >(
-	props: BackendMultipleSelectProps<KeyT, VisibilityT, CustomT, DataT>,
+	inProps: BackendMultipleSelectProps<KeyT, VisibilityT, CustomT, DataT>,
 ) => {
+	const props = useThemeProps({
+		props: inProps,
+		name: "CcBackendMultipleSelect",
+	});
 	const {
 		model,
 		disableRequestBatching,

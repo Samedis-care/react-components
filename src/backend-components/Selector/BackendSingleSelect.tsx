@@ -5,6 +5,7 @@ import React, {
 	useRef,
 	useState,
 } from "react";
+import { useThemeProps } from "@mui/material";
 import {
 	BaseSelectorData,
 	BaseSelectorProps,
@@ -103,13 +104,34 @@ export interface BackendSingleSelectProps<
 	selectedFreeSolo?: string | null;
 }
 
+/**
+ * Themable subset of BackendSingleSelectProps (used for theme defaultProps)
+ * @remarks Excludes the props which are specific to a single instance (model, selection, callbacks)
+ */
+export type BackendSingleSelectThemeProps = Omit<
+	BackendSingleSelectProps<ModelFieldName, PageVisibility, unknown>,
+	| "model"
+	| "modelFetch"
+	| "modelToSelectorData"
+	| "selected"
+	| "onSelect"
+	| "initialData"
+	| "lru"
+	| "selectedFreeSolo"
+	| "onSelectFreeSolo"
+>;
+
 const BackendSingleSelect = <
 	KeyT extends ModelFieldName,
 	VisibilityT extends PageVisibility,
 	CustomT,
 >(
-	props: BackendSingleSelectProps<KeyT, VisibilityT, CustomT>,
+	inProps: BackendSingleSelectProps<KeyT, VisibilityT, CustomT>,
 ) => {
+	const props = useThemeProps({
+		props: inProps,
+		name: "CcBackendSingleSelect",
+	});
 	const {
 		model,
 		modelFetch: modelFetchProp,

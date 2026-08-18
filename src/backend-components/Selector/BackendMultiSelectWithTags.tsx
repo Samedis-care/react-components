@@ -1,4 +1,5 @@
 import React, { useCallback, useMemo } from "react";
+import { useThemeProps } from "@mui/material";
 import {
 	BaseSelectorData,
 	MultiSelectorData,
@@ -123,6 +124,33 @@ export interface BackendMultiSelectWithTagsProps<
 }
 
 /**
+ * Themable subset of BackendMultiSelectWithTagsProps (used for theme defaultProps)
+ * @remarks Excludes the props which are specific to a single instance (models, selection, callbacks)
+ */
+export type BackendMultiSelectWithTagsThemeProps = Omit<
+	BackendMultiSelectWithTagsProps<
+		ModelFieldName,
+		ModelFieldName,
+		PageVisibility,
+		PageVisibility,
+		unknown,
+		unknown,
+		BaseSelectorData,
+		MultiSelectorData
+	>,
+	| "groupModel"
+	| "dataModel"
+	| "convGroup"
+	| "convData"
+	| "getGroupDataEntries"
+	| "selected"
+	| "onChange"
+	| "initialData"
+	| "lruGroup"
+	| "lruData"
+>;
+
+/**
  * Backend connected MultiSelectWithTags
  * @remarks Doesn't support custom data
  * @constructor
@@ -137,7 +165,7 @@ const BackendMultiSelectWithTags = <
 	GroupDataT extends BaseSelectorData,
 	DataDataT extends MultiSelectorData,
 >(
-	props: BackendMultiSelectWithTagsProps<
+	inProps: BackendMultiSelectWithTagsProps<
 		GroupKeyT,
 		DataKeyT,
 		GroupVisibilityT,
@@ -148,6 +176,10 @@ const BackendMultiSelectWithTags = <
 		DataDataT
 	>,
 ) => {
+	const props = useThemeProps({
+		props: inProps,
+		name: "CcBackendMultiSelectWithTags",
+	});
 	const {
 		groupModel,
 		convGroup,

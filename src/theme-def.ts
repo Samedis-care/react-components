@@ -18,7 +18,7 @@ import {
 import {
 	BaseSelectorClassKey,
 	BaseSelectorData,
-	BaseSelectorProps,
+	BaseSelectorThemeProps,
 	HowToBoxClassKey,
 	HowToBoxProps,
 	MultiSelectClassKey,
@@ -208,6 +208,10 @@ import {
 import { FormClassKey } from "./backend-components";
 import { BasicFormPageProps } from "./backend-components/Form/BasicFormPage";
 import { CrudClassKey } from "./backend-components/CRUD";
+import { BackendSingleSelectThemeProps } from "./backend-components/Selector/BackendSingleSelect";
+import { BackendMultiSelectThemeProps } from "./backend-components/Selector/BackendMultiSelect";
+import { BackendMultipleSelectThemeProps } from "./backend-components/Selector/BackendMultipleSelect";
+import { BackendMultiSelectWithTagsThemeProps } from "./backend-components/Selector/BackendMultiSelectWithTags";
 import {
 	GridSingleSelectFilterBackendClassKey,
 	GridSingleSelectFilterBackendProps,
@@ -320,7 +324,11 @@ declare module "@mui/material/styles" {
 		CcInfoBox: Partial<InfoBoxProps>;
 		CcFormPageLayout: Partial<FormPageLayoutProps>;
 		CcInlineSwitch: Partial<InlineSwitchProps>;
-		CcBaseSelector: Partial<BaseSelectorProps<BaseSelectorData, never>>;
+		CcBaseSelector: Partial<BaseSelectorThemeProps>;
+		CcBackendSingleSelect: Partial<BackendSingleSelectThemeProps>;
+		CcBackendMultiSelect: Partial<BackendMultiSelectThemeProps>;
+		CcBackendMultipleSelect: Partial<BackendMultipleSelectThemeProps>;
+		CcBackendMultiSelectWithTags: Partial<BackendMultiSelectWithTagsThemeProps>;
 		CcMultiSelectEntry: Partial<MultiSelectEntryProps<MultiSelectorData>>;
 		CcMultiSelect: Partial<MultiSelectProps<MultiSelectorData>>;
 		CcImageDots: Partial<ImageDotsProps>;
@@ -465,6 +473,18 @@ declare module "@mui/material/styles" {
 			defaultProps?: ComponentsPropsList["CcInlineSwitch"];
 			styleOverrides?: ComponentsOverrides<Theme>["CcInlineSwitch"];
 			variants?: ComponentsVariants["CcInlineSwitch"];
+		};
+		CcBackendSingleSelect?: {
+			defaultProps?: ComponentsPropsList["CcBackendSingleSelect"];
+		};
+		CcBackendMultiSelect?: {
+			defaultProps?: ComponentsPropsList["CcBackendMultiSelect"];
+		};
+		CcBackendMultipleSelect?: {
+			defaultProps?: ComponentsPropsList["CcBackendMultipleSelect"];
+		};
+		CcBackendMultiSelectWithTags?: {
+			defaultProps?: ComponentsPropsList["CcBackendMultiSelectWithTags"];
 		};
 		CcBaseSelector?: {
 			defaultProps?: ComponentsPropsList["CcBaseSelector"];

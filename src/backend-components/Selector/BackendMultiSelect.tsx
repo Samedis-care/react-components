@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useThemeProps } from "@mui/material";
 import {
 	MultiSelect,
 	MultiSelectProps,
@@ -226,6 +227,26 @@ export const useSelectedCache = <
 };
 
 /**
+ * Themable subset of BackendMultiSelectProps (used for theme defaultProps)
+ * @remarks Excludes the props which are specific to a single instance (model, selection, callbacks)
+ */
+export type BackendMultiSelectThemeProps = Omit<
+	BackendMultiSelectProps<
+		ModelFieldName,
+		PageVisibility,
+		unknown,
+		MultiSelectorData
+	>,
+	| "model"
+	| "modelFetch"
+	| "modelToSelectorData"
+	| "selected"
+	| "onSelect"
+	| "initialData"
+	| "lru"
+>;
+
+/**
  * Backend connected MultiSelect
  * @remarks Doesn't support custom data
  * @constructor
@@ -236,8 +257,12 @@ const BackendMultiSelect = <
 	CustomT,
 	DataT extends MultiSelectorData,
 >(
-	props: BackendMultiSelectProps<KeyT, VisibilityT, CustomT, DataT>,
+	inProps: BackendMultiSelectProps<KeyT, VisibilityT, CustomT, DataT>,
 ) => {
+	const props = useThemeProps({
+		props: inProps,
+		name: "CcBackendMultiSelect",
+	});
 	const {
 		model,
 		disableRequestBatching,

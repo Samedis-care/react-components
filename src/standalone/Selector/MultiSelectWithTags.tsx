@@ -29,6 +29,8 @@ export interface MultiSelectWithTagsProps<
 			| "displaySwitch"
 			| "defaultSwitchValue"
 			| "switchLabel"
+			| "forceQuery"
+			| "startTypingToSearchText"
 		>,
 		Omit<
 			MultiSelectWithoutGroupProps<DataT>,
@@ -149,6 +151,8 @@ const MultiSelectWithTags = <
 		loadingText,
 		openText,
 		closeText,
+		forceQuery,
+		startTypingToSearchText,
 		loadGroupEntries,
 		loadGroupOptions,
 		loadDataOptions,
@@ -262,6 +266,8 @@ const MultiSelectWithTags = <
 				loadingText={loadingText}
 				openText={openText}
 				closeText={closeText}
+				forceQuery={forceQuery}
+				startTypingToSearchText={startTypingToSearchText}
 				lru={lruGroup}
 			/>
 			<Box sx={{ pt: 3 }}>
@@ -281,6 +287,8 @@ const MultiSelectWithTags = <
 					getIdOfData={getId}
 					noOptionsText={noOptionsText}
 					loadingText={loadingText}
+					forceQuery={forceQuery}
+					startTypingToSearchText={startTypingToSearchText}
 					lru={lruData}
 					sortCompareFn={sortCompareFn}
 				/>
