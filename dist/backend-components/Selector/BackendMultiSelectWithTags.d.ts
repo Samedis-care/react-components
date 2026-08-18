@@ -83,10 +83,15 @@ export interface BackendMultiSelectWithTagsProps<GroupKeyT extends ModelFieldNam
     lruData?: BackendMultiSelectLruOptions<DataDataT>;
 }
 /**
+ * Themable subset of BackendMultiSelectWithTagsProps (used for theme defaultProps)
+ * @remarks Excludes the props which are specific to a single instance (models, selection, callbacks)
+ */
+export type BackendMultiSelectWithTagsThemeProps = Omit<BackendMultiSelectWithTagsProps<ModelFieldName, ModelFieldName, PageVisibility, PageVisibility, unknown, unknown, BaseSelectorData, MultiSelectorData>, "groupModel" | "dataModel" | "convGroup" | "convData" | "getGroupDataEntries" | "selected" | "onChange" | "initialData" | "lruGroup" | "lruData">;
+/**
  * Backend connected MultiSelectWithTags
  * @remarks Doesn't support custom data
  * @constructor
  */
-declare const BackendMultiSelectWithTags: <GroupKeyT extends ModelFieldName, DataKeyT extends ModelFieldName, GroupVisibilityT extends PageVisibility, DataVisibilityT extends PageVisibility, GroupCustomT, DataCustomT, GroupDataT extends BaseSelectorData, DataDataT extends MultiSelectorData>(props: BackendMultiSelectWithTagsProps<GroupKeyT, DataKeyT, GroupVisibilityT, DataVisibilityT, GroupCustomT, DataCustomT, GroupDataT, DataDataT>) => React.JSX.Element;
+declare const BackendMultiSelectWithTags: <GroupKeyT extends ModelFieldName, DataKeyT extends ModelFieldName, GroupVisibilityT extends PageVisibility, DataVisibilityT extends PageVisibility, GroupCustomT, DataCustomT, GroupDataT extends BaseSelectorData, DataDataT extends MultiSelectorData>(inProps: BackendMultiSelectWithTagsProps<GroupKeyT, DataKeyT, GroupVisibilityT, DataVisibilityT, GroupCustomT, DataCustomT, GroupDataT, DataDataT>) => React.JSX.Element;
 declare const _default: typeof BackendMultiSelectWithTags;
 export default _default;

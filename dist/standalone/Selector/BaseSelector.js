@@ -412,7 +412,7 @@ const BaseSelector = (inProps) => {
                             return options;
                         })(), groupBy: grouped
                             ? (option) => option.group ?? noGroupLabel ?? ""
-                            : undefined, slots: { popper: GrowPopper }, filterOptions: filterOptions, value: selected, inputValue: query, blurOnSelect: !multiple, onInputChange: updateQuery, popupIcon: _jsx(ExpandMore, {}), autoSelect: freeSolo, freeSolo: freeSolo, noOptionsText: lru && query === ""
+                            : undefined, slots: { popper: GrowPopper }, filterOptions: filterOptions, value: selected, inputValue: query, blurOnSelect: !multiple, onInputChange: updateQuery, popupIcon: _jsx(ExpandMore, {}), autoSelect: freeSolo, freeSolo: freeSolo, noOptionsText: query === "" && (forceQuery || lru?.forceQuery)
                             ? (startTypingToSearchText ??
                                 t("standalone.selector.base-selector.start-typing-to-search-text"))
                             : (noOptionsText ??

@@ -262,6 +262,8 @@ export type BaseSelectorProps<DataT extends BaseSelectorData, Multi extends bool
     lru?: SelectorLruOptions<DataT>;
     /**
      * Do not show results unless search string is entered
+     * @remarks Independent of lru. Use this to force a search without enabling the LRU cache.
+     * Shows startTypingToSearchText while no search string is entered.
      */
     forceQuery?: boolean;
     /**
@@ -294,6 +296,12 @@ export type BaseSelectorProps<DataT extends BaseSelectorData, Multi extends bool
      */
     filterIds?: string[] | undefined;
 };
+/**
+ * Themable subset of BaseSelectorProps (used for theme defaultProps)
+ * @remarks Excludes the variant specific props (multiple/selected/onSelect), which depend on
+ * whether the selector is a single or multi select and can't be set as a theme default.
+ */
+export type BaseSelectorThemeProps = Omit<BaseSelectorProps<BaseSelectorData, false>, keyof BaseSelectorVariants<BaseSelectorData, false>>;
 export interface BaseSelectorIconOwnerState {
     iconSize?: number;
 }

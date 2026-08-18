@@ -73,6 +73,11 @@ export interface BackendSingleSelectProps<KeyT extends ModelFieldName, Visibilit
      */
     selectedFreeSolo?: string | null;
 }
-declare const BackendSingleSelect: <KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT>(props: BackendSingleSelectProps<KeyT, VisibilityT, CustomT>) => React.JSX.Element;
+/**
+ * Themable subset of BackendSingleSelectProps (used for theme defaultProps)
+ * @remarks Excludes the props which are specific to a single instance (model, selection, callbacks)
+ */
+export type BackendSingleSelectThemeProps = Omit<BackendSingleSelectProps<ModelFieldName, PageVisibility, unknown>, "model" | "modelFetch" | "modelToSelectorData" | "selected" | "onSelect" | "initialData" | "lru" | "selectedFreeSolo" | "onSelectFreeSolo">;
+declare const BackendSingleSelect: <KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT>(inProps: BackendSingleSelectProps<KeyT, VisibilityT, CustomT>) => React.JSX.Element;
 declare const _default: typeof BackendSingleSelect;
 export default _default;

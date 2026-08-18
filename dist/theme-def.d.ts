@@ -3,7 +3,7 @@ import { FileUploadClassKey, FileUploadProps } from "./standalone/FileUpload/Gen
 import { ImageSelectorClassKey, ImageSelectorProps } from "./standalone/FileUpload/Image/ImageSelector";
 import { ImagePreviewDialogClassKey, ImagePreviewDialogProps } from "./standalone/FileUpload/Image/ImagePreviewDialog";
 import { MultiImageClassKey, MultiImageProps } from "./standalone/FileUpload/MultiImage/MultiImage";
-import { BaseSelectorClassKey, BaseSelectorData, BaseSelectorProps, HowToBoxClassKey, HowToBoxProps, MultiSelectClassKey, MultiSelectorData, MultiSelectProps, MultiSelectWithoutGroupClassKey, MultiSelectWithoutGroupProps, MultiSelectWithTagsClassKey, MultiSelectWithTagsProps, PopupMenuClassKey, PortalLayoutClassKey, PortalLayoutProps } from "./standalone";
+import { BaseSelectorClassKey, BaseSelectorData, BaseSelectorThemeProps, HowToBoxClassKey, HowToBoxProps, MultiSelectClassKey, MultiSelectorData, MultiSelectProps, MultiSelectWithoutGroupClassKey, MultiSelectWithoutGroupProps, MultiSelectWithTagsClassKey, MultiSelectWithTagsProps, PopupMenuClassKey, PortalLayoutClassKey, PortalLayoutProps } from "./standalone";
 import { ComponentWithLabelClassKey, ComponentWithLabelProps } from "./standalone/UIKit/ComponentWithLabel";
 import { CheckboxClassKey } from "./standalone/UIKit/Checkbox";
 import { ActionButtonClassKey, ActionButtonProps } from "./standalone/UIKit/ActionButton";
@@ -54,6 +54,10 @@ import { ScrollableScheduleDayClassKey, ScrollableScheduleDayProps } from "./sta
 import { FormClassKey } from "./backend-components";
 import { BasicFormPageProps } from "./backend-components/Form/BasicFormPage";
 import { CrudClassKey } from "./backend-components/CRUD";
+import { BackendSingleSelectThemeProps } from "./backend-components/Selector/BackendSingleSelect";
+import { BackendMultiSelectThemeProps } from "./backend-components/Selector/BackendMultiSelect";
+import { BackendMultipleSelectThemeProps } from "./backend-components/Selector/BackendMultipleSelect";
+import { BackendMultiSelectWithTagsThemeProps } from "./backend-components/Selector/BackendMultiSelectWithTags";
 import { GridSingleSelectFilterBackendClassKey, GridSingleSelectFilterBackendProps } from "./standalone/DataGrid/GridSingleSelectFilterBackend";
 import { ModelFieldName, PageVisibility } from "./backend-integration";
 import { GridMultiSelectFilterBackendClassKey, GridMultiSelectFilterBackendProps } from "./standalone/DataGrid/GridMultiSelectFilterBackend";
@@ -151,7 +155,11 @@ declare module "@mui/material/styles" {
         CcInfoBox: Partial<InfoBoxProps>;
         CcFormPageLayout: Partial<FormPageLayoutProps>;
         CcInlineSwitch: Partial<InlineSwitchProps>;
-        CcBaseSelector: Partial<BaseSelectorProps<BaseSelectorData, never>>;
+        CcBaseSelector: Partial<BaseSelectorThemeProps>;
+        CcBackendSingleSelect: Partial<BackendSingleSelectThemeProps>;
+        CcBackendMultiSelect: Partial<BackendMultiSelectThemeProps>;
+        CcBackendMultipleSelect: Partial<BackendMultipleSelectThemeProps>;
+        CcBackendMultiSelectWithTags: Partial<BackendMultiSelectWithTagsThemeProps>;
         CcMultiSelectEntry: Partial<MultiSelectEntryProps<MultiSelectorData>>;
         CcMultiSelect: Partial<MultiSelectProps<MultiSelectorData>>;
         CcImageDots: Partial<ImageDotsProps>;
@@ -278,6 +286,18 @@ declare module "@mui/material/styles" {
             defaultProps?: ComponentsPropsList["CcInlineSwitch"];
             styleOverrides?: ComponentsOverrides<Theme>["CcInlineSwitch"];
             variants?: ComponentsVariants["CcInlineSwitch"];
+        };
+        CcBackendSingleSelect?: {
+            defaultProps?: ComponentsPropsList["CcBackendSingleSelect"];
+        };
+        CcBackendMultiSelect?: {
+            defaultProps?: ComponentsPropsList["CcBackendMultiSelect"];
+        };
+        CcBackendMultipleSelect?: {
+            defaultProps?: ComponentsPropsList["CcBackendMultipleSelect"];
+        };
+        CcBackendMultiSelectWithTags?: {
+            defaultProps?: ComponentsPropsList["CcBackendMultiSelectWithTags"];
         };
         CcBaseSelector?: {
             defaultProps?: ComponentsPropsList["CcBaseSelector"];

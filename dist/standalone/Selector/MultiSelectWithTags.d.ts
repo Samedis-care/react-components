@@ -2,7 +2,7 @@ import React from "react";
 import { MultiSelectWithoutGroupProps } from "./MultiSelectWithoutGroup";
 import { BaseSelectorData, BaseSelectorProps, SelectorLruOptions } from "./BaseSelector";
 import { MultiSelectorData } from "./MultiSelect";
-export interface MultiSelectWithTagsProps<DataT extends MultiSelectorData, GroupT extends BaseSelectorData> extends Pick<BaseSelectorProps<GroupT, false>, "disabled" | "noOptionsText" | "loadingText" | "closeText" | "openText" | "displaySwitch" | "defaultSwitchValue" | "switchLabel">, Omit<MultiSelectWithoutGroupProps<DataT>, "classes" | "onChange" | "dataOptions" | "setDataOptions" | "label"> {
+export interface MultiSelectWithTagsProps<DataT extends MultiSelectorData, GroupT extends BaseSelectorData> extends Pick<BaseSelectorProps<GroupT, false>, "disabled" | "noOptionsText" | "loadingText" | "closeText" | "openText" | "displaySwitch" | "defaultSwitchValue" | "switchLabel" | "forceQuery" | "startTypingToSearchText">, Omit<MultiSelectWithoutGroupProps<DataT>, "classes" | "onChange" | "dataOptions" | "setDataOptions" | "label"> {
     /**
      * The title of control
      */

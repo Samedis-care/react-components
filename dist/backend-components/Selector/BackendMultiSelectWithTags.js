@@ -1,5 +1,6 @@
 import { jsx as _jsx } from "react/jsx-runtime";
 import React, { useCallback, useMemo } from "react";
+import { useThemeProps } from "@mui/material";
 import { MultiSelectWithTags, } from "../../standalone";
 import { useSelectedCache, } from "./BackendMultiSelect";
 import debouncePromise from "../../utils/debouncePromise";
@@ -8,7 +9,11 @@ import debouncePromise from "../../utils/debouncePromise";
  * @remarks Doesn't support custom data
  * @constructor
  */
-const BackendMultiSelectWithTags = (props) => {
+const BackendMultiSelectWithTags = (inProps) => {
+    const props = useThemeProps({
+        props: inProps,
+        name: "CcBackendMultiSelectWithTags",
+    });
     const { groupModel, convGroup, getGroupDataEntries, dataModel, convData, switchFilterNameData, switchFilterNameGroup, initialData, onChange, groupSearchDebounceTime, dataSearchDebounceTime, selected: selectedIds, dataSort, groupSort, lruGroup, lruData, ...selectorProps } = props;
     const { handleSelect, selected } = useSelectedCache({
         model: dataModel,

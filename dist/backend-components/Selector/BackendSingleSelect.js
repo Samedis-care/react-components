@@ -1,9 +1,14 @@
 import { jsx as _jsx } from "react/jsx-runtime";
 import React, { useCallback, useEffect, useMemo, useRef, useState, } from "react";
+import { useThemeProps } from "@mui/material";
 import { getStringLabel, SingleSelect, } from "../../standalone";
 import debouncePromise from "../../utils/debouncePromise";
 import useCCTranslations from "../../utils/useCCTranslations";
-const BackendSingleSelect = (props) => {
+const BackendSingleSelect = (inProps) => {
+    const props = useThemeProps({
+        props: inProps,
+        name: "CcBackendSingleSelect",
+    });
     const { model, modelFetch: modelFetchProp, modelToSelectorData, searchResultLimit, onSelect, selected, initialData, searchDebounceTime, sort, lru, onLoadError, additionalOptions, disableRequestBatching, freeSolo, selectedFreeSolo, onSelectFreeSolo, ...otherProps } = props;
     const modelFetch = modelFetchProp ?? model;
     if (freeSolo && !onSelectFreeSolo)

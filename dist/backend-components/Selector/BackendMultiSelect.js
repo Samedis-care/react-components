@@ -1,5 +1,6 @@
 import { jsx as _jsx } from "react/jsx-runtime";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useThemeProps } from "@mui/material";
 import { MultiSelect, } from "../../standalone";
 import debouncePromise from "../../utils/debouncePromise";
 import useCCTranslations from "../../utils/useCCTranslations";
@@ -78,7 +79,11 @@ export const useSelectedCache = (props) => {
  * @remarks Doesn't support custom data
  * @constructor
  */
-const BackendMultiSelect = (props) => {
+const BackendMultiSelect = (inProps) => {
+    const props = useThemeProps({
+        props: inProps,
+        name: "CcBackendMultiSelect",
+    });
     const { model, disableRequestBatching, modelToSelectorData, searchResultLimit, 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     onSelect, 

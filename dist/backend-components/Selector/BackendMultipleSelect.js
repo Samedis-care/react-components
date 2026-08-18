@@ -1,5 +1,6 @@
 import { jsx as _jsx } from "react/jsx-runtime";
 import React, { useCallback, useMemo } from "react";
+import { useThemeProps } from "@mui/material";
 import debouncePromise from "../../utils/debouncePromise";
 import { useSelectedCache, } from "./BackendMultiSelect";
 import BaseSelector from "../../standalone/Selector/BaseSelector";
@@ -7,7 +8,11 @@ import BaseSelector from "../../standalone/Selector/BaseSelector";
  * Backend connected BaseSelector with multiple=true
  * @constructor
  */
-const BackendMultipleSelect = (props) => {
+const BackendMultipleSelect = (inProps) => {
+    const props = useThemeProps({
+        props: inProps,
+        name: "CcBackendMultipleSelect",
+    });
     const { model, disableRequestBatching, modelToSelectorData, searchResultLimit, 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     onSelect, 

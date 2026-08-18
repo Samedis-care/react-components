@@ -76,10 +76,15 @@ interface UseSelectedCacheResult<DataT extends MultiSelectorData> {
 }
 export declare const useSelectedCache: <KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT, DataT extends MultiSelectorData>(props: Pick<BackendMultiSelectProps<KeyT, VisibilityT, CustomT, DataT>, "model" | "modelFetch" | "disableRequestBatching" | "modelToSelectorData" | "onSelect" | "selected" | "initialData" | "onLoadError">) => UseSelectedCacheResult<DataT>;
 /**
+ * Themable subset of BackendMultiSelectProps (used for theme defaultProps)
+ * @remarks Excludes the props which are specific to a single instance (model, selection, callbacks)
+ */
+export type BackendMultiSelectThemeProps = Omit<BackendMultiSelectProps<ModelFieldName, PageVisibility, unknown, MultiSelectorData>, "model" | "modelFetch" | "modelToSelectorData" | "selected" | "onSelect" | "initialData" | "lru">;
+/**
  * Backend connected MultiSelect
  * @remarks Doesn't support custom data
  * @constructor
  */
-declare const BackendMultiSelect: <KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT, DataT extends MultiSelectorData>(props: BackendMultiSelectProps<KeyT, VisibilityT, CustomT, DataT>) => React.JSX.Element;
+declare const BackendMultiSelect: <KeyT extends ModelFieldName, VisibilityT extends PageVisibility, CustomT, DataT extends MultiSelectorData>(inProps: BackendMultiSelectProps<KeyT, VisibilityT, CustomT, DataT>) => React.JSX.Element;
 declare const _default: typeof BackendMultiSelect;
 export default _default;
