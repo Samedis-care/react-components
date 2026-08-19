@@ -19,18 +19,20 @@ export function useDebouncePromise(func, timeout) {
                 resolves.current.push(resolve);
                 rejects.current.push(reject);
                 debounceState.current = window.setTimeout(() => {
+                    debounceState.current = 0;
+                    // hand the pending callers over to this invocation and start collecting
+                    // again, so a call made while it is still running waits for its own
+                    // invocation instead of getting this one's outdated result
+                    const invocationResolves = resolves.current;
+                    const invocationRejects = rejects.current;
+                    resolves.current = [];
+                    rejects.current = [];
                     func(...args)
                         .then((value) => {
-                        const resolvesOld = resolves.current;
-                        resolves.current = [];
-                        rejects.current = [];
-                        resolvesOld.forEach((cb) => cb(value));
+                        invocationResolves.forEach((cb) => cb(value));
                     })
                         .catch((value) => {
-                        const rejectsOld = rejects.current;
-                        resolves.current = [];
-                        rejects.current = [];
-                        rejectsOld.forEach((cb) => cb(value));
+                        invocationRejects.forEach((cb) => cb(value));
                     });
                 }, timeout);
             });
