@@ -20,3 +20,4 @@ export { default as Notifications } from "./Notifications";
 export * from "./Routes";
 export { default as CountryFlags } from "./CountryFlags";
 export * from "./Tree";
+export * from "./Matrix";
