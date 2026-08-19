@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 // eslint-disable-next-line import/no-unresolved
-import { expect, within } from "storybook/test";
+import { expect, waitFor, within } from "storybook/test";
 import {
+	BaseSelector,
 	SingleSelect,
 	MultiSelect,
 	MultiSelectWithTags,
@@ -13,6 +14,7 @@ import {
 	SelectorLruOptions,
 } from "./index";
 import type { MultiSelectorData } from "./MultiSelect";
+import debouncePromise from "../../utils/debouncePromise";
 
 // ---------------------------------------------------------------------------
 // Shared sample data
@@ -546,5 +548,119 @@ export const SingleSelectLruAdditionalOptions: StoryObj = {
 		// the lru branch also skips onLoad, yet the local entries survive it
 		await expect(body.queryByText("Germany")).toBeNull();
 		await expect(optionTexts()).toEqual(ADDITIONAL_LABELS);
+	},
+};
+
+// ---------------------------------------------------------------------------
+// multi select (BaseSelector multiple) keeps the search query
+// ---------------------------------------------------------------------------
+
+export const BaseSelectorMultiple: StoryObj = {
+	name: "BaseSelector — multiple keeps the search",
+	render: () => {
+		const [selected, setSelected] = useState<BaseSelectorData[]>([]);
+		const onLoad = selectorLocalLoadHandler(FRUITS);
+		return (
+			<div style={{ width: 350 }}>
+				<BaseSelector<BaseSelectorData, true>
+					multiple
+					label="Fruits"
+					selected={selected}
+					onSelect={(v) => {
+						setSelected(v);
+					}}
+					onLoad={onLoad}
+				/>
+			</div>
+		);
+	},
+	play: async ({ canvas, userEvent }) => {
+		const body = within(document.body);
+		const input = await canvas.findByRole("combobox");
+		await userEvent.click(input);
+		await userEvent.type(input, "berry");
+		// only the berries match
+		await expect(await body.findByText("Strawberry")).toBeVisible();
+		await expect(optionTexts()).toEqual(["Strawberry", "Blueberry"]);
+		// selecting keeps both the query and the options matching it, so the
+		// remaining matches can be picked without searching again
+		await userEvent.click(body.getByText("Strawberry"));
+		await expect(optionTexts()).toEqual(["Strawberry", "Blueberry"]);
+		await expect(input).toHaveValue("Strawberry berry");
+		await userEvent.click(body.getByText("Blueberry"));
+		await expect(input).toHaveValue("Strawberry, Blueberry berry");
+	},
+};
+
+// ---------------------------------------------------------------------------
+// a slow load must not overwrite the results of a newer search
+// ---------------------------------------------------------------------------
+
+interface PendingLoad {
+	query: string;
+	/** answers the load with the results for its own query */
+	release: () => void;
+}
+
+/** loads which reached the data source and are waiting to be answered */
+const pendingLoads: PendingLoad[] = [];
+
+const deferredLoad = (
+	query: string,
+): Promise<BaseSelectorLoadResult<BaseSelectorData>> =>
+	new Promise((resolve) => {
+		pendingLoads.push({
+			query,
+			release: () => {
+				resolve(selectorLocalLoadHandler(FRUITS)(query));
+			},
+		});
+	});
+
+export const BaseSelectorMultipleSlowLoad: StoryObj = {
+	name: "BaseSelector — slow load doesn't reset the search",
+	beforeEach: () => {
+		pendingLoads.length = 0;
+	},
+	render: () => {
+		const [selected, setSelected] = useState<BaseSelectorData[]>([]);
+		// same setup the backend selectors use: a debounced, asynchronous data source
+		const onLoad = useMemo(() => debouncePromise(deferredLoad, 50), []);
+		return (
+			<div style={{ width: 350 }}>
+				<BaseSelector<BaseSelectorData, true>
+					multiple
+					label="Fruits"
+					selected={selected}
+					onSelect={(v) => {
+						setSelected(v);
+					}}
+					onLoad={onLoad}
+				/>
+			</div>
+		);
+	},
+	play: async ({ canvas, userEvent }) => {
+		const input = await canvas.findByRole("combobox");
+		await userEvent.click(input);
+		await userEvent.type(input, "berry");
+		// the search reached the data source while the initial load is still running
+		await waitFor(() =>
+			expect(pendingLoads.some((load) => load.query === "berry")).toBe(true),
+		);
+		// the initial load answers first, which must not take the search back
+		pendingLoads
+			.filter((load) => load.query !== "berry")
+			.forEach((load) => {
+				load.release();
+			});
+		pendingLoads
+			.filter((load) => load.query === "berry")
+			.forEach((load) => {
+				load.release();
+			});
+		await waitFor(() =>
+			expect(optionTexts()).toEqual(["Strawberry", "Blueberry"]),
+		);
 	},
 };

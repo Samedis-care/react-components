@@ -11,6 +11,7 @@ import React, {
 import {
 	Autocomplete,
 	AutocompleteChangeReason,
+	AutocompleteInputChangeReason,
 	Divider,
 	Grid,
 	IconButton,
@@ -848,7 +849,9 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 					setQuery("");
 				}
 			}
-			setQuery("");
+			// single select shows the selected record in the input, so the query has to go.
+			// multi select keeps it, so multiple records can be picked from one search.
+			if (!multiple) setQuery("");
 			if (onSelect) {
 				if (multiple) {
 					onSelect(dataNormalized);
@@ -1034,7 +1037,21 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 	);
 
 	const updateQuery = useCallback(
-		(_evt: React.SyntheticEvent, newQuery: string) => {
+		(
+			_evt: React.SyntheticEvent,
+			newQuery: string,
+			reason: AutocompleteInputChangeReason,
+		) => {
+			// MUI resets the input whenever the value changes, which in multi select always
+			// means clearing it. Ignore that, so the search survives (de)selecting a record.
+			if (
+				multiple &&
+				(reason === "reset" ||
+					reason === "selectOption" ||
+					reason === "removeOption")
+			) {
+				return;
+			}
 			if (multiple && newQuery.length > 1) {
 				newQuery = newQuery
 					.substring(selected.map(getStringLabel).join(", ").length)
@@ -1054,7 +1071,8 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 
 	// initial option load and reset options upon selection
 	useEffect(() => {
-		void onSearchHandler("");
+		// multi select keeps the query while selecting, so keep the results matching it
+		void onSearchHandler(multiple ? query : "");
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [selected, switchValue, refreshToken]);
 
@@ -1263,9 +1281,6 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 										},
 									}}
 									placeholder={placeholder}
-									onChange={(event) => {
-										void onSearchHandler(event.target.value);
-									}}
 									required={required}
 									error={error}
 									warning={warning}

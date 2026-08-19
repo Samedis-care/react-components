@@ -18,10 +18,12 @@ One file per change, so this never grows into a single unreadable log.
 
 ## Index
 
-| Date       | Change                                                                                                         | Kind     |
-| ---------- | -------------------------------------------------------------------------------------------------------------- | -------- |
-| 2026-08-18 | [additionalOptions moved out of the load path](2026-08-18-additional-options-outside-load-path.md)             | behavior |
-| 2026-08-18 | [Selector load handlers must return a load result object](2026-08-18-selector-load-handler-contract.md)        | type     |
-| 2026-08-18 | [Backend selectors show a truncation notice by default](2026-08-18-selector-truncation-notice.md)              | behavior |
-| 2026-08-18 | [MultiSelectWithTags now honors forceQuery](2026-08-18-multi-select-with-tags-force-query.md)                  | behavior |
-| 2026-08-18 | ["Start typing to search" is gated on forceQuery, not on lru](2026-08-18-selector-start-typing-text-gating.md) | behavior |
+| Date       | Change                                                                                                                         | Kind     |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 2026-08-19 | [debouncePromise resolves each caller with its own invocation's result](2026-08-19-debounce-promise-per-invocation-results.md) | behavior |
+| 2026-08-19 | [Multi select keeps the search query while selecting](2026-08-19-multi-select-keeps-search.md)                                 | behavior |
+| 2026-08-18 | [additionalOptions moved out of the load path](2026-08-18-additional-options-outside-load-path.md)                             | behavior |
+| 2026-08-18 | [Selector load handlers must return a load result object](2026-08-18-selector-load-handler-contract.md)                        | type     |
+| 2026-08-18 | [Backend selectors show a truncation notice by default](2026-08-18-selector-truncation-notice.md)                              | behavior |
+| 2026-08-18 | [MultiSelectWithTags now honors forceQuery](2026-08-18-multi-select-with-tags-force-query.md)                                  | behavior |
+| 2026-08-18 | ["Start typing to search" is gated on forceQuery, not on lru](2026-08-18-selector-start-typing-text-gating.md)                 | behavior |

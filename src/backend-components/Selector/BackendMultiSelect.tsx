@@ -215,14 +215,22 @@ export const useSelectedCache = <
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [selected]);
 
+	// stable identity: a new array on every render makes the selector reset its search
+	const selectedData = useMemo(
+		(): DataT[] =>
+			selected.map(
+				(value) =>
+					selectedCache[value] ??
+					({
+						value,
+						label: t("backend-components.selector.loading"),
+					} as DataT),
+			),
+		[selected, selectedCache, t],
+	);
+
 	return {
-		selected: selected.map(
-			(value) =>
-				selectedCache[value] ?? {
-					value,
-					label: t("backend-components.selector.loading"),
-				},
-		),
+		selected: selectedData,
 		handleSelect,
 	};
 };
