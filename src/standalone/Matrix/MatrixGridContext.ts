@@ -146,6 +146,23 @@ export interface MatrixGridProps<TCell> {
 	 */
 	addLabel?: React.ReactNode;
 	/**
+	 * How a cell that is selectable but already has contents offers "add".
+	 *
+	 * A blank cell always shows the full-cell hint and starts a range on a press
+	 * anywhere. A cell whose contents cover it cannot do that — an entry
+	 * swallows the press — so it needs an affordance of its own:
+	 *
+	 * - chip: a small button in the corner. It overlaps nothing the contents
+	 *   draw, so every entry keeps its whole clickable area, and it is reachable
+	 *   by keyboard.
+	 * - overlay: the same dashed hint as on a blank cell, over the lower half of
+	 *   the cell, catching the pointer there. One big target that reads exactly
+	 *   like the blank-cell hint — at the price of the lower half of the entries
+	 *   underneath, whose clicks it takes (both of them, in a split pair).
+	 * @default "chip"
+	 */
+	occupiedAddAffordance?: "chip" | "overlay";
+	/**
 	 * Touch devices have no hover and no room for small buttons: when this is
 	 * set, the whole row header becomes one tap target calling it (the consumer
 	 * opens a menu listing what the header's buttons do on a desktop), and the
@@ -205,6 +222,8 @@ export interface MatrixGridConfig<TCell> {
 	isCellOccupied: NonNullable<MatrixGridProps<TCell>["isCellOccupied"]>;
 	/** see MatrixGridProps.addLabel */
 	addLabel?: React.ReactNode;
+	/** see MatrixGridProps.occupiedAddAffordance */
+	occupiedAddAffordance: "chip" | "overlay";
 	/** see MatrixGridProps.onRowHeaderActions */
 	onRowHeaderActions?: (rowKey: string) => void;
 	/** see MatrixGridProps.classes */

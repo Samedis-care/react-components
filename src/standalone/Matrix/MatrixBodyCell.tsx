@@ -71,6 +71,17 @@ export const MatrixAddHint = styled("div", {
 	fontWeight: 600,
 	whiteSpace: "nowrap",
 	overflow: "hidden",
+	// The cell has contents, and occupiedAddAffordance says "overlay": the hint
+	// takes the lower half and CATCHES the pointer there, so a press lands on it
+	// instead of on the entry underneath. One big target that reads like the
+	// blank-cell hint — and the entries' lower halves belong to it, which is
+	// the trade the consumer opts into.
+	[`&.${matrixClasses.addHintHalf}`]: {
+		inset: "auto 5px 5px 5px",
+		height: "calc(50% - 5px)",
+		pointerEvents: "auto",
+		cursor: "pointer",
+	},
 }));
 
 /**
@@ -135,8 +146,14 @@ export interface MatrixBodyCellProps<TCell> {
 const MatrixBodyCell = <TCell,>(props: MatrixBodyCellProps<TCell>) => {
 	const { row, column, columnIndex } = props;
 	const config = useMatrixConfig<TCell>();
-	const { renderCell, renderCellWrapper, selectable, addLabel, classes } =
-		config;
+	const {
+		renderCell,
+		renderCellWrapper,
+		selectable,
+		addLabel,
+		occupiedAddAffordance,
+		classes,
+	} = config;
 	const store = useMatrixInteraction();
 	const cell = row.cells[column.key];
 	const context = useMemo<MatrixCellContext<TCell>>(
@@ -179,8 +196,9 @@ const MatrixBodyCell = <TCell,>(props: MatrixBodyCellProps<TCell>) => {
 	const addToCell = useCallback(() => {
 		store.selectSingle(row.key, column.key);
 	}, [store, row.key, column.key]);
+	const chip = occupied && occupiedAddAffordance === "chip";
 	const chipActivation = useMatrixActivation(
-		cellSelectable && occupied ? addToCell : undefined,
+		cellSelectable && chip ? addToCell : undefined,
 		typeof addLabel === "string" ? addLabel : undefined,
 	);
 	const stopPress = useCallback((event: React.MouseEvent) => {
@@ -212,7 +230,7 @@ const MatrixBodyCell = <TCell,>(props: MatrixBodyCellProps<TCell>) => {
 		>
 			{content}
 			{!!(state & MATRIX_CELL_ADD_HINT) &&
-				(occupied ? (
+				(chip ? (
 					<MatrixAddChip
 						className={classes?.addChip}
 						title={typeof addLabel === "string" ? addLabel : undefined}
@@ -222,7 +240,14 @@ const MatrixBodyCell = <TCell,>(props: MatrixBodyCellProps<TCell>) => {
 						<Add fontSize={"small"} />
 					</MatrixAddChip>
 				) : (
-					<MatrixAddHint className={classes?.addHint}>{addLabel}</MatrixAddHint>
+					<MatrixAddHint
+						className={combineClassNames([
+							classes?.addHint,
+							occupied && matrixClasses.addHintHalf,
+						])}
+					>
+						{addLabel}
+					</MatrixAddHint>
 				))}
 		</MatrixBodyCellRoot>
 	);

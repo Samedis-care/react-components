@@ -336,6 +336,10 @@ const meta: Meta<DemoArgs> = {
 	argTypes: {
 		pairLayout: { control: "inline-radio", options: ["split", "diagonal"] },
 		extraRowsPosition: { control: "inline-radio", options: ["bottom", "top"] },
+		occupiedAddAffordance: {
+			control: "inline-radio",
+			options: ["chip", "overlay"],
+		},
 		scrollToColumn: {
 			control: "select",
 			options: [undefined, "2026-03-02", TODAY, "2026-03-22"],
@@ -352,6 +356,10 @@ export default meta;
 type Story = StoryObj<DemoArgs>;
 
 export const Default: Story = {};
+
+export const AddOverlayOnOccupiedCells: Story = {
+	args: { occupiedAddAffordance: "overlay" },
+};
 
 export const DiagonalPairs: Story = {
 	args: { pairLayout: "diagonal" },

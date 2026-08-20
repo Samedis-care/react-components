@@ -625,6 +625,44 @@ describe("MatrixGrid", () => {
 		);
 	});
 
+	it("offers the same hint over the lower half when asked to", () => {
+		const onSelectRange = vi.fn();
+		renderGrid({
+			selectable: true,
+			addLabel: "Add",
+			isCellSelectable: () => true,
+			occupiedAddAffordance: "overlay",
+			onSelectRange,
+		});
+		fireEvent.mouseOver(cellOf("r1", "c2")); // holds an entry
+		// same look as on a blank cell, and no chip
+		const hint = screen.getByText("Add");
+		expect(hint.className).toContain(matrixClasses.addHintHalf);
+		expect(
+			screen.queryByRole("button", { name: "Add" }),
+		).not.toBeInTheDocument();
+		// half the cell, and it catches the pointer so a press starts a range
+		expect(getComputedStyle(hint).pointerEvents).toBe("auto");
+		fireEvent.mouseDown(hint);
+		fireEvent.mouseUp(window);
+		expect(onSelectRange).toHaveBeenCalledWith(
+			expect.objectContaining({ columnKeys: ["c2"] }),
+		);
+	});
+
+	it("keeps the blank-cell hint pointer-transparent in overlay mode", () => {
+		renderGrid({
+			selectable: true,
+			addLabel: "Add",
+			isCellSelectable: () => true,
+			occupiedAddAffordance: "overlay",
+		});
+		fireEvent.mouseOver(cellOf("r1", "c1")); // blank
+		const hint = screen.getByText("Add");
+		expect(hint.className).not.toContain(matrixClasses.addHintHalf);
+		expect(getComputedStyle(hint).pointerEvents).toBe("none");
+	});
+
 	it("does not offer the chip where a range may not start", () => {
 		renderGrid({ selectable: true, addLabel: "Add" }); // default predicate
 		fireEvent.mouseOver(cellOf("r1", "c2")); // occupied -> not selectable
