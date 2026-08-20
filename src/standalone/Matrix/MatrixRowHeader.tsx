@@ -3,7 +3,7 @@ import { styled } from "@mui/material";
 import combineClassNames from "../../utils/combineClassNames";
 import { cssVar, matrixClasses, matrixVars } from "./matrixClasses";
 import { cellBorders } from "./matrixTints";
-import { useMatrixProps } from "./MatrixGridContext";
+import { useMatrixConfig } from "./MatrixGridContext";
 import { MatrixRow } from "./types";
 
 export const MatrixRowHeaderRoot = styled("div", {
@@ -34,16 +34,12 @@ export interface MatrixRowHeaderProps<TCell> {
 	 * The row this header stands for
 	 */
 	row: MatrixRow<TCell>;
-	/**
-	 * Is the grid in touch mode? Then the whole header is one tap target.
-	 */
-	touch: boolean;
 }
 
 const MatrixRowHeader = <TCell,>(props: MatrixRowHeaderProps<TCell>) => {
-	const { row, touch } = props;
-	const { renderRowHeader, onRowHeaderActions, classes } =
-		useMatrixProps<TCell>();
+	const { row } = props;
+	const { renderRowHeader, onRowHeaderActions, classes, touch } =
+		useMatrixConfig<TCell>();
 	const button = touch && !!onRowHeaderActions;
 	const handleClick = useCallback(() => {
 		onRowHeaderActions?.(row.key);

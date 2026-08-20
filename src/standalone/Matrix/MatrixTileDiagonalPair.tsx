@@ -5,7 +5,7 @@ import { cssVar, matrixClasses, matrixVars } from "./matrixClasses";
 import { dimColor, MATRIX_TILE_DIM_OPACITY } from "./matrixTileDim";
 import { useMatrixCellTileProps } from "./MatrixCellTileContext";
 import MatrixTileCorners from "./MatrixTileCorners";
-import { MatrixTileItem } from "./types";
+import { MatrixTileCorner, MatrixTileItem } from "./types";
 
 export const MatrixTileDiagonalRoot = styled("div", {
 	name: "CcMatrixCellTile",
@@ -44,6 +44,9 @@ export const MatrixTileDiagonalLabel = styled("div", {
 		opacity: MATRIX_TILE_DIM_OPACITY,
 	},
 });
+
+/** The only corner a diagonal pair draws — the others would land on a label. */
+const DIAGONAL_CORNERS: MatrixTileCorner[] = ["bottomLeft"];
 
 export interface MatrixTileDiagonalPairProps {
 	/**
@@ -124,7 +127,7 @@ const MatrixTileDiagonalPair = (props: MatrixTileDiagonalPairProps) => {
 			{/* only this corner: the other three would land on top of a label */}
 			<MatrixTileCorners
 				item={a}
-				only={["bottomLeft"]}
+				only={DIAGONAL_CORNERS}
 				className={classes?.corner}
 			/>
 		</MatrixTileDiagonalRoot>

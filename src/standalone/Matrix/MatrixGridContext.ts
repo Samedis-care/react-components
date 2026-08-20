@@ -172,18 +172,72 @@ export interface MatrixGridProps<TCell> {
 }
 
 /**
- * The grid's resolved props, so every part can read what it needs at its own
- * level instead of having callbacks and class names drilled through the tree
- * (and compared by every memo on the way down).
+ * Everything a part of the grid needs to know that is NOT one row.
+ *
+ * Deliberately not the props object itself: that one is rebuilt by
+ * useThemeProps on every render, so putting it in a context would re-render
+ * every cell whenever a single row changes. This is memoized on its members, so
+ * a data update only re-renders the rows that actually changed.
  */
-export const MatrixPropsContext = React.createContext<
-	MatrixGridProps<unknown> | undefined
+export interface MatrixGridConfig<TCell> {
+	/** see MatrixGridProps.columns */
+	columns: MatrixColumn[];
+	/** see MatrixGridProps.renderRowHeader */
+	renderRowHeader: MatrixGridProps<TCell>["renderRowHeader"];
+	/** see MatrixGridProps.renderCell */
+	renderCell: MatrixGridProps<TCell>["renderCell"];
+	/** see MatrixGridProps.renderColumnHeader */
+	renderColumnHeader?: MatrixGridProps<TCell>["renderColumnHeader"];
+	/** see MatrixGridProps.renderCellWrapper */
+	renderCellWrapper?: MatrixGridProps<TCell>["renderCellWrapper"];
+	/** see MatrixGridProps.selectable */
+	selectable: boolean;
+	/** see MatrixGridProps.isCellSelectable — always resolved, never undefined */
+	isCellSelectable: NonNullable<MatrixGridProps<TCell>["isCellSelectable"]>;
+	/** see MatrixGridProps.isCellOccupied — always resolved, never undefined */
+	isCellOccupied: NonNullable<MatrixGridProps<TCell>["isCellOccupied"]>;
+	/** see MatrixGridProps.addLabel */
+	addLabel?: React.ReactNode;
+	/** see MatrixGridProps.onRowHeaderActions */
+	onRowHeaderActions?: (rowKey: string) => void;
+	/** see MatrixGridProps.classes */
+	classes?: MatrixGridProps<TCell>["classes"];
+	/**
+	 * Touch device: no hover, so the row header becomes one tap target and a
+	 * hint that would only ever appear on hover is shown outright instead.
+	 */
+	touch: boolean;
+}
+
+export const defaultIsCellSelectable = (cell: unknown): boolean =>
+	cell === undefined;
+export const defaultIsCellOccupied = (cell: unknown): boolean =>
+	cell !== undefined;
+
+/**
+ * May a range start on, or run through, this cell? The one implementation: the
+ * store clamps and paints with it, and the cell decides with it whether to
+ * listen for a press at all.
+ */
+export const isCellSelectableIn = <TCell>(
+	config: MatrixGridConfig<TCell>,
+	row: MatrixRow<TCell>,
+	column: MatrixColumn,
+	columnIndex: number,
+): boolean =>
+	config.selectable &&
+	row.selectable !== false &&
+	config.isCellSelectable(row.cells[column.key], { row, column, columnIndex });
+
+export const MatrixConfigContext = React.createContext<
+	MatrixGridConfig<unknown> | undefined
 >(undefined);
 
-export const useMatrixProps = <TCell>(): MatrixGridProps<TCell> => {
-	const ctx = useContext(MatrixPropsContext);
-	if (!ctx) throw new Error("Matrix props context not set");
-	// The context cannot be generic; the grid puts its own props in and every
-	// consumer reads them back with the same TCell it was rendered for.
-	return ctx as unknown as MatrixGridProps<TCell>;
+export const useMatrixConfig = <TCell>(): MatrixGridConfig<TCell> => {
+	const ctx = useContext(MatrixConfigContext);
+	if (!ctx) throw new Error("Matrix config context not set");
+	// The context cannot be generic; the grid puts its own config in and every
+	// consumer reads it back with the same TCell it was rendered for — which
+	// type-checks on its own, the callbacks being contravariant in the cell.
+	return ctx;
 };

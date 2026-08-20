@@ -103,6 +103,28 @@ export class MatrixInteractionStore {
 		return columnKey === null ? -1 : this.config.columnKeys.indexOf(columnKey);
 	}
 
+	/**
+	 * How far a range from `anchor` towards `target` may reach: the last index
+	 * before the first cell canSelect rejects.
+	 * @remarks The single source of the clamp, so what enter() paints and what
+	 * commit() reports cannot drift apart — not even when the data changed under
+	 * a held button and no pointer event fired in between.
+	 */
+	private resolveFocus(rowKey: string, anchor: number, target: number): number {
+		if (target === anchor) return anchor;
+		const step = target > anchor ? 1 : -1;
+		let focus = anchor;
+		for (
+			let i = anchor + step;
+			step > 0 ? i <= target : i >= target;
+			i += step
+		) {
+			if (!this.config.canSelect(rowKey, i)) break;
+			focus = i;
+		}
+		return focus;
+	}
+
 	/** Begins a range on a cell. */
 	begin(rowKey: string, columnIndex: number): void {
 		const columnKey = this.config.columnKeys[columnIndex];
@@ -125,19 +147,13 @@ export class MatrixInteractionStore {
 		this.hoverColumnKey = this.config.columnKeys[columnIndex] ?? null;
 		if (this.dragging && this.rowKey === rowKey) {
 			const anchor = this.indexOf(this.anchorKey);
-			if (anchor >= 0 && columnIndex !== anchor) {
-				const step = columnIndex > anchor ? 1 : -1;
-				let focus = anchor;
-				for (
-					let i = anchor + step;
-					step > 0 ? i <= columnIndex : i >= columnIndex;
-					i += step
-				) {
-					if (!this.config.canSelect(rowKey, i)) break;
-					focus = i;
-				}
-				this.focusKey = this.config.columnKeys[focus] ?? this.anchorKey;
-			}
+			// Also when the pointer came back to the press cell: the range has
+			// to shrink with it, not keep the widest reach it ever had.
+			if (anchor >= 0 && columnIndex >= 0)
+				this.focusKey =
+					this.config.columnKeys[
+						this.resolveFocus(rowKey, anchor, columnIndex)
+					] ?? this.anchorKey;
 		}
 		this.notify();
 	}
@@ -180,9 +196,12 @@ export class MatrixInteractionStore {
 		this.notify();
 		// A column that disappeared mid-press takes the range with it.
 		if (rowKey === null || anchor < 0 || focus < 0) return;
+		// Re-walk from the anchor: the cells in between may have filled up while
+		// the button was down, without the pointer moving to tell us.
+		const reachable = this.resolveFocus(rowKey, anchor, focus);
 		const columnKeys = this.config.columnKeys.slice(
-			Math.min(anchor, focus),
-			Math.max(anchor, focus) + 1,
+			Math.min(anchor, reachable),
+			Math.max(anchor, reachable) + 1,
 		);
 		if (columnKeys.length === 0) return;
 		this.config.onSelectRange?.({

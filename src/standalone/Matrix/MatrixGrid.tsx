@@ -11,20 +11,20 @@ import useIsTouchOnly from "../../utils/useIsTouchOnly";
 import { cssVar, matrixVars } from "./matrixClasses";
 import { cellBorders } from "./matrixTints";
 import {
+	defaultIsCellOccupied,
+	defaultIsCellSelectable,
+	isCellSelectableIn,
+	MatrixConfigContext,
+	MatrixGridConfig,
 	MatrixGridProps,
-	MatrixPropsContext,
-	useMatrixProps,
 } from "./MatrixGridContext";
 import {
 	MatrixInteractionContext,
 	MatrixInteractionStore,
 } from "./MatrixInteractionContext";
 import MatrixColumnHeader from "./MatrixColumnHeader";
-import MatrixRowHeader from "./MatrixRowHeader";
-import MatrixBodyCell from "./MatrixBodyCell";
-import MatrixExtraRowHeader from "./MatrixExtraRowHeader";
-import MatrixExtraRowCell from "./MatrixExtraRowCell";
-import { MatrixCellContext, MatrixExtraRow, MatrixRow } from "./types";
+import MatrixDataRow from "./MatrixDataRow";
+import MatrixExtraRowGroup from "./MatrixExtraRowGroup";
 
 export type { MatrixGridProps, MatrixGridClassKey } from "./MatrixGridContext";
 
@@ -72,56 +72,16 @@ export const MatrixCorner = styled("div", {
 const px = (value: number | string): string =>
 	typeof value === "number" ? `${value}px` : value;
 
-/** The rows of one aggregate row: its sticky header plus one cell per column. */
-const MatrixExtraRowCells = (props: {
-	extraRow: MatrixExtraRow;
-}): React.ReactElement => {
-	const { columns } = useMatrixProps<unknown>();
-	return (
-		<React.Fragment>
-			<MatrixExtraRowHeader extraRow={props.extraRow} />
-			{columns.map((column) => (
-				<MatrixExtraRowCell
-					key={column.key}
-					extraRow={props.extraRow}
-					column={column}
-				/>
-			))}
-		</React.Fragment>
-	);
-};
-const MatrixExtraRowCellsMemo = React.memo(MatrixExtraRowCells);
-
-/** One data row: its sticky header plus one cell per column. */
-const MatrixDataRow = <TCell,>(props: {
-	row: MatrixRow<TCell>;
-	touch: boolean;
-}): React.ReactElement => {
-	const { columns } = useMatrixProps<TCell>();
-	return (
-		<React.Fragment>
-			<MatrixRowHeader row={props.row} touch={props.touch} />
-			{columns.map((column, columnIndex) => (
-				<MatrixBodyCell
-					key={column.key}
-					row={props.row}
-					column={column}
-					columnIndex={columnIndex}
-				/>
-			))}
-		</React.Fragment>
-	);
-};
-const MatrixDataRowMemo = React.memo(MatrixDataRow) as typeof MatrixDataRow;
-
-const defaultIsCellSelectable = (cell: unknown) => cell === undefined;
-
 const MatrixGrid = <TCell,>(inProps: MatrixGridProps<TCell>) => {
 	const props = useThemeProps({ props: inProps, name: "CcMatrixGrid" });
 	const {
 		columns,
 		rows,
 		corner,
+		renderRowHeader,
+		renderCell,
+		renderColumnHeader,
+		renderCellWrapper,
 		columnWidth = 46,
 		rowHeight = 58,
 		rowHeaderWidth = 116,
@@ -129,9 +89,12 @@ const MatrixGrid = <TCell,>(inProps: MatrixGridProps<TCell>) => {
 		extraRowHeight = 48,
 		maxHeight = "70vh",
 		scrollToColumn,
-		selectable,
+		selectable = false,
 		isCellSelectable = defaultIsCellSelectable,
+		isCellOccupied = defaultIsCellOccupied,
 		onSelectRange,
+		addLabel,
+		onRowHeaderActions,
 		extraRows,
 		extraRowsPosition = "bottom",
 		className,
@@ -146,7 +109,39 @@ const MatrixGrid = <TCell,>(inProps: MatrixGridProps<TCell>) => {
 	const localScrollRef = useRef<HTMLDivElement>(null);
 	const scrollRef = props.scrollRef ?? localScrollRef;
 	const scrollTargetRef = useRef<HTMLDivElement>(null);
+	const appliedScrollRef = useRef<number | null>(null);
 	const store = useMemo(() => new MatrixInteractionStore(), []);
+
+	const config = useMemo<MatrixGridConfig<TCell>>(
+		() => ({
+			columns,
+			renderRowHeader,
+			renderCell,
+			renderColumnHeader,
+			renderCellWrapper,
+			selectable,
+			isCellSelectable,
+			isCellOccupied,
+			addLabel,
+			onRowHeaderActions,
+			classes,
+			touch,
+		}),
+		[
+			columns,
+			renderRowHeader,
+			renderCell,
+			renderColumnHeader,
+			renderCellWrapper,
+			selectable,
+			isCellSelectable,
+			isCellOccupied,
+			addLabel,
+			onRowHeaderActions,
+			classes,
+			touch,
+		],
+	);
 
 	const columnKeys = useMemo(
 		() => columns.map((column) => column.key),
@@ -158,14 +153,12 @@ const MatrixGrid = <TCell,>(inProps: MatrixGridProps<TCell>) => {
 	);
 	const canSelect = useCallback(
 		(rowKey: string, columnIndex: number) => {
-			if (!selectable) return false;
 			const row = rowsByKey.get(rowKey);
-			const column = columns[columnIndex];
-			if (!row || !column || row.selectable === false) return false;
-			const context: MatrixCellContext<TCell> = { row, column, columnIndex };
-			return isCellSelectable(row.cells[column.key], context);
+			const column = config.columns[columnIndex];
+			if (!row || !column) return false;
+			return isCellSelectableIn(config, row, column, columnIndex);
 		},
-		[selectable, rowsByKey, columns, isCellSelectable],
+		[rowsByKey, config],
 	);
 
 	// The store reads the props a pointer event needs from here, so no pointer
@@ -178,54 +171,70 @@ const MatrixGrid = <TCell,>(inProps: MatrixGridProps<TCell>) => {
 	useEffect(() => {
 		if (!selectable) return;
 		const onUp = (event: MouseEvent) => {
-			if (event.button !== 0) return;
-			store.commit();
+			// Any other button ends the press without reporting it. Leaving the
+			// store dragging would arm a stale range that the next left click
+			// anywhere on the page would then commit.
+			if (event.button !== 0) store.cancel();
+			else store.commit();
+		};
+		const cancel = () => {
+			store.cancel();
 		};
 		const onKey = (event: KeyboardEvent) => {
 			if (event.key === "Escape") store.cancel();
 		};
 		window.addEventListener("mouseup", onUp);
 		window.addEventListener("keydown", onKey);
+		// A press that ends outside the window, in a context menu, or as a
+		// cancelled touch never produces a mouseup we would hear.
+		window.addEventListener("blur", cancel);
+		window.addEventListener("contextmenu", cancel);
+		window.addEventListener("pointercancel", cancel);
 		return () => {
 			window.removeEventListener("mouseup", onUp);
 			window.removeEventListener("keydown", onKey);
+			window.removeEventListener("blur", cancel);
+			window.removeEventListener("contextmenu", cancel);
+			window.removeEventListener("pointercancel", cancel);
 		};
 	}, [store, selectable]);
 
-	// Scroll the marked column just past the sticky row header column. Depends
-	// on `columns`, not on their count: a window that rolls forward keeps its
-	// length but moves the target.
+	// Scroll the marked column just past the sticky row header column.
 	const target =
 		scrollToColumn ??
 		columns.find((column) => column.variant === "current")?.key;
+	// Keyed on where the target sits, not on the identity of the columns array:
+	// a consumer that builds its columns inline would otherwise have the user's
+	// scroll position reset on every render, and a rolling window that keeps its
+	// length would never scroll at all. The guard on the last applied value
+	// leaves manual scrolling alone when something else re-runs this.
+	const targetIndex = columns.findIndex((column) => column.key === target);
 	useLayoutEffect(() => {
 		const scroller = scrollRef.current;
 		const cell = scrollTargetRef.current;
-		if (scroller && cell)
-			scroller.scrollLeft = Math.max(
-				0,
-				cell.offsetLeft - rowHeaderWidth - columnWidth,
-			);
-	}, [target, columns, columnWidth, rowHeaderWidth, scrollRef]);
+		if (!scroller || !cell) return;
+		const next = Math.max(0, cell.offsetLeft - rowHeaderWidth - columnWidth);
+		if (appliedScrollRef.current === next) return;
+		appliedScrollRef.current = next;
+		scroller.scrollLeft = next;
+	}, [
+		target,
+		targetIndex,
+		columns.length,
+		columnWidth,
+		rowHeaderWidth,
+		scrollRef,
+	]);
 
 	const rootStyle = useMemo(
 		() =>
 			({
-				[matrixVars.columnWidth]: px(columnWidth),
 				[matrixVars.rowHeight]: px(rowHeight),
-				[matrixVars.rowHeaderWidth]: px(rowHeaderWidth),
 				[matrixVars.headerHeight]: px(headerHeight),
 				[matrixVars.extraRowHeight]: px(extraRowHeight),
 				[matrixVars.maxHeight]: px(maxHeight),
 			}) as React.CSSProperties,
-		[
-			columnWidth,
-			rowHeight,
-			rowHeaderWidth,
-			headerHeight,
-			extraRowHeight,
-			maxHeight,
-		],
+		[rowHeight, headerHeight, extraRowHeight, maxHeight],
 	);
 	const gridStyle = useMemo(
 		() => ({
@@ -236,13 +245,19 @@ const MatrixGrid = <TCell,>(inProps: MatrixGridProps<TCell>) => {
 		[rowHeaderWidth, columns.length, columnWidth],
 	);
 
-	const extra = (extraRows ?? []).map((extraRow) => (
-		<MatrixExtraRowCellsMemo key={extraRow.key} extraRow={extraRow} />
-	));
+	const extra = useMemo(
+		() =>
+			(extraRows ?? []).map((extraRow) => (
+				<MatrixExtraRowGroup key={extraRow.key} extraRow={extraRow} />
+			)),
+		[extraRows],
+	);
 
 	return (
-		<MatrixPropsContext.Provider
-			value={props as unknown as MatrixGridProps<unknown>}
+		// the cast is one-directional: reading it back is type-safe (see
+		// useMatrixConfig), only handing a TCell config to an unknown context is not
+		<MatrixConfigContext.Provider
+			value={config as unknown as MatrixGridConfig<unknown>}
 		>
 			<MatrixInteractionContext.Provider value={store}>
 				<MatrixGridScroller
@@ -261,13 +276,13 @@ const MatrixGrid = <TCell,>(inProps: MatrixGridProps<TCell>) => {
 						))}
 						{extraRowsPosition === "top" && extra}
 						{rows.map((row) => (
-							<MatrixDataRowMemo key={row.key} row={row} touch={touch} />
+							<MatrixDataRow key={row.key} row={row} />
 						))}
 						{extraRowsPosition === "bottom" && extra}
 					</MatrixGridRoot>
 				</MatrixGridScroller>
 			</MatrixInteractionContext.Provider>
-		</MatrixPropsContext.Provider>
+		</MatrixConfigContext.Provider>
 	);
 };
 

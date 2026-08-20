@@ -26,6 +26,8 @@ export const matrixClasses = {
 	rowHeaderButton: "CcMatrixGrid-rowHeaderButton",
 	/** an extra row cell that reports clicks */
 	extraCellClickable: "CcMatrixGrid-extraCellClickable",
+	/** touch device: hints that rely on hover are shown outright */
+	touch: "CcMatrixGrid-touch",
 	/** tile entry rendered de-emphasized */
 	itemDimmed: "CcMatrixCellTile-itemDimmed",
 	/** tile entry reports clicks */
@@ -47,13 +49,10 @@ export const matrixClasses = {
 } as const;
 
 export const matrixVars = {
-	columnWidth: "--cc-matrix-column-width",
 	rowHeight: "--cc-matrix-row-height",
-	rowHeaderWidth: "--cc-matrix-row-header-width",
 	headerHeight: "--cc-matrix-header-height",
 	extraRowHeight: "--cc-matrix-extra-row-height",
 	maxHeight: "--cc-matrix-max-height",
-	columnCount: "--cc-matrix-column-count",
 	tileBackground: "--cc-matrix-tile-bg",
 	tileForeground: "--cc-matrix-tile-fg",
 	tileBackgroundA: "--cc-matrix-tile-bg-a",

@@ -2,7 +2,7 @@ import React from "react";
 import { styled } from "@mui/material";
 import { cssVar, matrixVars } from "./matrixClasses";
 import { cellBorders } from "./matrixTints";
-import { useMatrixProps } from "./MatrixGridContext";
+import { useMatrixConfig } from "./MatrixGridContext";
 import { MatrixExtraRow } from "./types";
 
 export const MatrixExtraRowHeaderRoot = styled("div", {
@@ -32,7 +32,7 @@ export interface MatrixExtraRowHeaderProps {
 }
 
 const MatrixExtraRowHeader = (props: MatrixExtraRowHeaderProps) => {
-	const { classes } = useMatrixProps<unknown>();
+	const { classes } = useMatrixConfig<unknown>();
 	return (
 		<MatrixExtraRowHeaderRoot className={classes?.extraRowHeader}>
 			{props.extraRow.header}

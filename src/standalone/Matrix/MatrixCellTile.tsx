@@ -1,5 +1,5 @@
 import React, { useCallback } from "react";
-import { styled, useThemeProps } from "@mui/material";
+import { alpha, styled, useThemeProps } from "@mui/material";
 import combineClassNames from "../../utils/combineClassNames";
 import { matrixClasses } from "./matrixClasses";
 import {
@@ -43,7 +43,13 @@ export const MatrixTileHighlight = styled("div", {
 	width: "100%",
 	height: "100%",
 	borderRadius: theme.shape.borderRadius,
-	boxShadow: `0 0 0 3px ${theme.palette.warning.main}, 0 0 6px 1px ${theme.palette.warning.main}80`,
+	// alpha(), not a hex-alpha suffix: the palette value can be rgb(), hsl() or
+	// a CSS variable, and appending to those invalidates the whole declaration
+	// — which would drop the ring entirely instead of just its glow.
+	boxShadow: `0 0 0 3px ${theme.palette.warning.main}, 0 0 6px 1px ${alpha(
+		theme.palette.warning.main,
+		0.5,
+	)}`,
 }));
 
 export const MatrixTilePlaceholder = styled("div", {
@@ -88,11 +94,13 @@ const MatrixCellTile = (inProps: MatrixCellTileProps) => {
 
 	let content: React.ReactNode = null;
 	if (items.length === 0) {
-		content = placeholder ? (
-			<MatrixTilePlaceholder className={classes?.placeholder}>
-				{placeholder}
-			</MatrixTilePlaceholder>
-		) : null;
+		// != null, not truthiness: 0 is a placeholder a consumer may well pass
+		content =
+			placeholder != null ? (
+				<MatrixTilePlaceholder className={classes?.placeholder}>
+					{placeholder}
+				</MatrixTilePlaceholder>
+			) : null;
 	} else if (items.length === 1 || pairLayout === "split") {
 		content = items
 			.slice(0, 2)

@@ -94,7 +94,12 @@ const buildDateColumns = (params: BuildDateColumnsParams): MatrixColumn[] => {
 						: "normal",
 		});
 	}
-	if (day.isSameOrBefore(end, "day"))
+	if (columns.length === 0)
+		// eslint-disable-next-line no-console
+		console.warn(
+			`buildDateColumns: range ${from}..${to} produced no columns — reversed or unparseable?`,
+		);
+	else if (day.isSameOrBefore(end, "day"))
 		// Silence here would read as "that is the whole range".
 		// eslint-disable-next-line no-console
 		console.warn(

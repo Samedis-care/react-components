@@ -3,7 +3,7 @@ import { alpha, styled } from "@mui/material";
 import combineClassNames from "../../utils/combineClassNames";
 import { cssVar, matrixClasses, matrixVars } from "./matrixClasses";
 import { cellBorders, columnTintStyles } from "./matrixTints";
-import { useMatrixProps } from "./MatrixGridContext";
+import { isCellSelectableIn, useMatrixConfig } from "./MatrixGridContext";
 import {
 	MATRIX_CELL_ADD_HINT,
 	MATRIX_CELL_SELECTED,
@@ -17,6 +17,9 @@ export const MatrixBodyCellRoot = styled("div", {
 	slot: "cell",
 })(({ theme }) => ({
 	position: "relative",
+	// its own stacking context, so the add hint's z-index cannot reach past the
+	// cell and paint over the sticky headers
+	zIndex: 0,
 	height: cssVar(matrixVars.rowHeight),
 	...cellBorders(theme),
 	...columnTintStyles(theme),
@@ -73,9 +76,6 @@ export const MatrixAddHint = styled("div", {
 	},
 }));
 
-const defaultIsCellSelectable = (cell: unknown) => cell === undefined;
-const defaultIsCellOccupied = (cell: unknown) => cell !== undefined;
-
 export interface MatrixBodyCellProps<TCell> {
 	/**
 	 * The row this cell belongs to
@@ -99,24 +99,19 @@ export interface MatrixBodyCellProps<TCell> {
  */
 const MatrixBodyCell = <TCell,>(props: MatrixBodyCellProps<TCell>) => {
 	const { row, column, columnIndex } = props;
-	const {
-		renderCell,
-		renderCellWrapper,
-		selectable,
-		isCellSelectable = defaultIsCellSelectable,
-		isCellOccupied = defaultIsCellOccupied,
-		addLabel,
-		classes,
-	} = useMatrixProps<TCell>();
+	const config = useMatrixConfig<TCell>();
+	const { renderCell, renderCellWrapper, selectable, addLabel, classes } =
+		config;
 	const store = useMatrixInteraction();
 	const cell = row.cells[column.key];
 	const context = useMemo<MatrixCellContext<TCell>>(
 		() => ({ row, column, columnIndex }),
 		[row, column, columnIndex],
 	);
-	const cellSelectable =
-		!!selectable && row.selectable !== false && isCellSelectable(cell, context);
-	const occupied = isCellOccupied(cell, context);
+	// The same predicate the store clamps and paints with, so what a press can
+	// start on cannot drift from what ends up in the range.
+	const cellSelectable = isCellSelectableIn(config, row, column, columnIndex);
+	const occupied = config.isCellOccupied(cell, context);
 
 	const getSnapshot = useCallback(
 		() => store.getCellState(row.key, columnIndex),

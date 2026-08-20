@@ -79,6 +79,15 @@ describe("buildDateColumns", () => {
 		expect(monday.subLabel as string).toMatch(/^Mo/);
 	});
 
+	it("says so when the range is reversed or unparseable", () => {
+		const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+		expect(
+			buildDateColumns({ from: "2026-03-08", to: "2026-03-02", today: null }),
+		).toEqual([]);
+		expect(warn).toHaveBeenCalledWith(expect.stringContaining("no columns"));
+		warn.mockRestore();
+	});
+
 	it("caps the range at maxColumns and says so", () => {
 		const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
 		const columns = buildDateColumns({
@@ -191,6 +200,42 @@ describe("MatrixGrid", () => {
 		expect(onSelectRange).not.toHaveBeenCalled();
 	});
 
+	it("drops the press when it is released with another button", () => {
+		const onSelectRange = vi.fn();
+		renderGrid({
+			selectable: true,
+			onSelectRange,
+			rows: [{ key: "r1", cells: {} }],
+		});
+		fireEvent.mouseDown(cellOf("r1", "c1"));
+		fireEvent.mouseOver(cellOf("r1", "c2"));
+		fireEvent.mouseUp(window, { button: 2 });
+		expect(onSelectRange).not.toHaveBeenCalled();
+		expect(cellOf("r1", "c1").className).not.toContain(
+			matrixClasses.cellSelected,
+		);
+		// and the next left release anywhere must not commit the dead range
+		fireEvent.mouseUp(window);
+		expect(onSelectRange).not.toHaveBeenCalled();
+	});
+
+	it("drops the press when the window loses focus or the menu opens", () => {
+		const onSelectRange = vi.fn();
+		renderGrid({
+			selectable: true,
+			onSelectRange,
+			rows: [{ key: "r1", cells: {} }],
+		});
+		fireEvent.mouseDown(cellOf("r1", "c1"));
+		fireEvent.blur(window);
+		fireEvent.mouseUp(window);
+		expect(onSelectRange).not.toHaveBeenCalled();
+		fireEvent.mouseDown(cellOf("r1", "c1"));
+		fireEvent.contextMenu(window);
+		fireEvent.mouseUp(window);
+		expect(onSelectRange).not.toHaveBeenCalled();
+	});
+
 	it("stops a sweep at the first cell isCellSelectable rejects", () => {
 		const onSelectRange = vi.fn();
 		// c2 holds a cell -> not selectable under the default predicate
@@ -245,6 +290,28 @@ describe("MatrixGrid", () => {
 		);
 	});
 
+	it("shrinks the range when the pointer comes back to the press cell", () => {
+		const onSelectRange = vi.fn();
+		renderGrid({
+			selectable: true,
+			onSelectRange,
+			rows: [{ key: "r1", cells: {} }],
+		});
+		fireEvent.mouseDown(cellOf("r1", "c1"));
+		fireEvent.mouseOver(cellOf("r1", "c3"));
+		fireEvent.mouseOver(cellOf("r1", "c1")); // all the way back
+		expect(cellOf("r1", "c2").className).not.toContain(
+			matrixClasses.cellSelected,
+		);
+		expect(cellOf("r1", "c3").className).not.toContain(
+			matrixClasses.cellSelected,
+		);
+		fireEvent.mouseUp(window);
+		expect(onSelectRange).toHaveBeenCalledWith(
+			expect.objectContaining({ columnKeys: ["c1"] }),
+		);
+	});
+
 	it("paints exactly the cells of the range", () => {
 		renderGrid({ selectable: true, onSelectRange: vi.fn() });
 		fireEvent.mouseDown(cellOf("r1", "c3"));
@@ -254,6 +321,32 @@ describe("MatrixGrid", () => {
 		expect(cellOf("r1", "c1").className).not.toContain(
 			matrixClasses.cellSelected,
 		);
+	});
+
+	it("re-renders only the row that changed", () => {
+		const renderCell = vi.fn(
+			(cell: TestCell | undefined, context: { row: { key: string } }) => (
+				<span>{context.row.key}</span>
+			),
+		);
+		const rowOne: MatrixRow<TestCell> = { key: "r1", cells: {} };
+		const grid = (rows: MatrixRow<TestCell>[]) => (
+			<ThemeProvider theme={theme}>
+				<MatrixGrid<TestCell>
+					columns={COLUMNS}
+					rows={rows}
+					renderRowHeader={(row) => <span>{row.key}</span>}
+					renderCell={renderCell}
+				/>
+			</ThemeProvider>
+		);
+		const { rerender } = render(grid([rowOne, { key: "r2", cells: {} }]));
+		expect(renderCell).toHaveBeenCalledTimes(8);
+		renderCell.mockClear();
+		// r1 keeps its identity, r2 is a new object
+		rerender(grid([rowOne, { key: "r2", cells: {} }]));
+		const rowsRendered = renderCell.mock.calls.map((call) => call[1].row.key);
+		expect(rowsRendered).toEqual(["r2", "r2", "r2", "r2"]);
 	});
 
 	it("leaves the cell contents alone while a range is swept", () => {
@@ -281,6 +374,47 @@ describe("MatrixGrid", () => {
 		fireEvent.mouseUp(window);
 		expect(renderCell).toHaveBeenCalledTimes(4);
 		expect(cells[3].className).not.toContain(matrixClasses.cellSelected);
+	});
+
+	it("re-checks selectability at release, not only while moving", () => {
+		const onSelectRange = vi.fn();
+		const free: MatrixRow<TestCell>[] = [{ key: "r1", cells: {} }];
+		const { rerender } = wrap(
+			<MatrixGrid<TestCell>
+				columns={COLUMNS}
+				rows={free}
+				selectable={true}
+				onSelectRange={onSelectRange}
+				renderRowHeader={(row) => <span>{row.key}</span>}
+				renderCell={(cell, context) => (
+					<span data-testid={`cell-${context.row.key}-${context.column.key}`} />
+				)}
+			/>,
+		);
+		fireEvent.mouseDown(cellOf("r1", "c1"));
+		fireEvent.mouseOver(cellOf("r1", "c4"));
+		// a refetch fills c2 while the button is still down; the pointer does
+		// not move again, so only the release can catch it
+		rerender(
+			<ThemeProvider theme={theme}>
+				<MatrixGrid<TestCell>
+					columns={COLUMNS}
+					rows={[{ key: "r1", cells: { c2: { text: "busy" } } }]}
+					selectable={true}
+					onSelectRange={onSelectRange}
+					renderRowHeader={(row) => <span>{row.key}</span>}
+					renderCell={(cell, context) => (
+						<span
+							data-testid={`cell-${context.row.key}-${context.column.key}`}
+						/>
+					)}
+				/>
+			</ThemeProvider>,
+		);
+		fireEvent.mouseUp(window);
+		expect(onSelectRange).toHaveBeenCalledWith(
+			expect.objectContaining({ columnKeys: ["c1"] }),
+		);
 	});
 
 	it("aborts the range on Escape", () => {
@@ -454,6 +588,22 @@ describe("MatrixGrid", () => {
 			expect(onRowHeaderActions).toHaveBeenCalledTimes(2);
 		});
 
+		it("shows the aggregate row's add hint outright", () => {
+			renderGrid({
+				extraRows: [
+					{
+						key: "demand",
+						header: <span>{"demand"}</span>,
+						label: "Open demand",
+						onCellClick: vi.fn(),
+					},
+				],
+			});
+			// every column of the row carries the row's name
+			const cell = screen.getAllByLabelText("Open demand")[0];
+			expect(cell.className).toContain(matrixClasses.touch);
+		});
+
 		it("shows no add hint, because there is no hover", () => {
 			renderGrid({ selectable: true, addLabel: "Add" });
 			fireEvent.mouseOver(cellOf("r1", "c1"));
@@ -463,13 +613,15 @@ describe("MatrixGrid", () => {
 
 	describe("scrolling to a column", () => {
 		let writes: number[] = [];
-		let offset = 500;
 		beforeEach(() => {
 			writes = [];
+			// Stand in for layout: every cell sits at its position in the grid,
+			// so moving a column really does move its offset.
 			Object.defineProperty(HTMLElement.prototype, "offsetLeft", {
 				configurable: true,
-				get() {
-					return offset;
+				get(this: HTMLElement) {
+					const siblings = Array.from(this.parentElement?.children ?? []);
+					return siblings.indexOf(this) * 200;
 				},
 			});
 			Object.defineProperty(HTMLElement.prototype, "scrollLeft", {
@@ -489,24 +641,10 @@ describe("MatrixGrid", () => {
 			delete HTMLElement.prototype.scrollLeft;
 		});
 
-		it("scrolls the current column just past the row header", () => {
-			renderGrid({
-				columns: COLUMNS.map((column) =>
-					column.key === "c3" ? { ...column, variant: "current" } : column,
-				),
-				columnWidth: 50,
-				rowHeaderWidth: 100,
-			});
-			expect(writes).toEqual([500 - 100 - 50]);
-		});
-
-		it("scrolls again when the columns move, not only when they change count", () => {
-			const columns = COLUMNS.map((column) =>
-				column.key === "c3"
-					? { ...column, variant: "current" as const }
-					: column,
-			);
-			const { rerender } = wrap(
+		const current = (key: string) => (column: MatrixColumn) =>
+			column.key === key ? { ...column, variant: "current" as const } : column;
+		const grid = (columns: MatrixColumn[]) => (
+			<ThemeProvider theme={theme}>
 				<MatrixGrid<TestCell>
 					columns={columns}
 					rows={ROWS}
@@ -514,22 +652,41 @@ describe("MatrixGrid", () => {
 					rowHeaderWidth={100}
 					renderRowHeader={(row) => <span>{row.key}</span>}
 					renderCell={() => null}
-				/>,
-			);
-			offset = 900; // the window rolled on: same count, new position
+				/>
+			</ThemeProvider>
+		);
+
+		it("scrolls the current column just past the row header", () => {
+			// corner is child 0, so c3 is child 3 -> 600 - 100 - 50
+			render(grid(COLUMNS.map(current("c3"))));
+			expect(writes).toEqual([450]);
+		});
+
+		it("scrolls again when the window rolls on and the target moves", () => {
+			const { rerender } = render(grid(COLUMNS.map(current("c3"))));
+			expect(writes).toEqual([450]);
+			// the range advanced by one day: same column count, c3 moved left
 			rerender(
-				<ThemeProvider theme={theme}>
-					<MatrixGrid<TestCell>
-						columns={[...columns]}
-						rows={ROWS}
-						columnWidth={50}
-						rowHeaderWidth={100}
-						renderRowHeader={(row) => <span>{row.key}</span>}
-						renderCell={() => null}
-					/>
-				</ThemeProvider>,
+				grid(
+					[
+						{ key: "c2", label: "2" },
+						{ key: "c3", label: "3" },
+						{ key: "c4", label: "4" },
+						{ key: "c5", label: "5" },
+					].map(current("c3")),
+				),
 			);
-			expect(writes).toEqual([350, 750]);
+			expect(writes).toEqual([450, 250]);
+		});
+
+		it("leaves the scroll alone when the columns are rebuilt in place", () => {
+			// a fresh array on every render, as a consumer that builds its
+			// columns inline would produce
+			const { rerender } = render(grid(COLUMNS.map(current("c3"))));
+			rerender(grid(COLUMNS.map(current("c3"))));
+			rerender(grid(COLUMNS.map(current("c3"))));
+			// the target never moved, so the user's scroll position stands
+			expect(writes).toEqual([450]);
 		});
 	});
 });
@@ -671,22 +828,45 @@ describe("MatrixCellTile", () => {
 		);
 	});
 
-	it("leaves a color it cannot decompose alone instead of throwing", () => {
+	it("dims a CSS keyword too, and leaves the unresolvable alone", () => {
 		const { container } = wrap(
 			<MatrixCellTile
 				items={[
-					item("a", { dimmed: true, backgroundColor: "var(--brand)" }),
-					item("b", { dimmed: true, backgroundColor: "rebeccapurple" }),
+					item("a", { dimmed: true, backgroundColor: "rebeccapurple" }),
+					item("b", { dimmed: true, backgroundColor: "var(--brand)" }),
 				]}
 				pairLayout={"diagonal"}
 			/>,
 		);
 		const pair = container.querySelector("[class*=diagonal]") as HTMLElement;
+		// #663399 at 60%
 		expect(pair.style.getPropertyValue("--cc-matrix-tile-bg-a")).toBe(
+			"rgba(102, 51, 153, 0.6)",
+		);
+		// nothing can resolve this one, so it stays flat instead of throwing
+		expect(pair.style.getPropertyValue("--cc-matrix-tile-bg-b")).toBe(
 			"var(--brand)",
 		);
-		expect(pair.style.getPropertyValue("--cc-matrix-tile-bg-b")).toBe(
-			"rebeccapurple",
+	});
+
+	it("renders the highlight ring with a palette color of any format", () => {
+		const rgbTheme = createTheme({
+			palette: { warning: { main: "rgb(237, 108, 2)" } },
+		});
+		const { container } = render(
+			<ThemeProvider theme={rgbTheme}>
+				<MatrixCellTile items={[item("a", { highlighted: true })]} />
+			</ThemeProvider>,
 		);
+		const ring = container.querySelector("[class*=highlight]") as HTMLElement;
+		const shadow = getComputedStyle(ring).boxShadow;
+		expect(shadow).not.toBe("");
+		expect(shadow).toContain("rgb(237, 108, 2)");
+		expect(shadow).toContain("rgba(237, 108, 2, 0.5)");
+	});
+
+	it("renders a placeholder of zero", () => {
+		wrap(<MatrixCellTile items={[]} placeholder={0} />);
+		expect(screen.getByText("0")).toBeInTheDocument();
 	});
 });

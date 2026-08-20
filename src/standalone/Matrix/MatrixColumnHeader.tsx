@@ -3,7 +3,7 @@ import { styled } from "@mui/material";
 import combineClassNames from "../../utils/combineClassNames";
 import { cssVar, matrixClasses, matrixVars } from "./matrixClasses";
 import { cellBorders, stickyColumnTintStyles } from "./matrixTints";
-import { useMatrixProps } from "./MatrixGridContext";
+import { useMatrixConfig } from "./MatrixGridContext";
 import { MatrixColumn, MatrixColumnVariant } from "./types";
 
 export const MatrixColumnHeaderRoot = styled("div", {
@@ -83,7 +83,7 @@ export interface MatrixColumnHeaderProps {
 
 const MatrixColumnHeader = (props: MatrixColumnHeaderProps) => {
 	const { column } = props;
-	const { renderColumnHeader, classes } = useMatrixProps<unknown>();
+	const { renderColumnHeader, classes } = useMatrixConfig<unknown>();
 	const content = useMemo(
 		() =>
 			renderColumnHeader ? (

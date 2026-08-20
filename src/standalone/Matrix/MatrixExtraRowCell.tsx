@@ -4,7 +4,7 @@ import { Add } from "@mui/icons-material";
 import combineClassNames from "../../utils/combineClassNames";
 import { cssVar, matrixClasses, matrixVars } from "./matrixClasses";
 import { cellBorders, columnTintStyles } from "./matrixTints";
-import { useMatrixProps } from "./MatrixGridContext";
+import { useMatrixConfig } from "./MatrixGridContext";
 import { MatrixColumn, MatrixExtraRow } from "./types";
 import { columnVariantClass } from "./MatrixColumnHeader";
 
@@ -22,6 +22,9 @@ export const MatrixExtraCellRoot = styled("div", {
 		cursor: "pointer",
 		"&:hover": { backgroundColor: theme.palette.action.hover },
 		"&:hover .MuiSvgIcon-root": { opacity: 1 },
+		// No hover on a touch device, so the hint has to be there from the
+		// start: without it the cell is an empty button.
+		[`&.${matrixClasses.touch} .MuiSvgIcon-root`]: { opacity: 1 },
 		"&:focus-visible": {
 			outline: `2px solid ${theme.palette.primary.main}`,
 			outlineOffset: -2,
@@ -68,7 +71,7 @@ export interface MatrixExtraRowCellProps {
 
 const MatrixExtraRowCell = (props: MatrixExtraRowCellProps) => {
 	const { extraRow, column } = props;
-	const { classes } = useMatrixProps<unknown>();
+	const { classes, touch } = useMatrixConfig<unknown>();
 	const onCellClick = extraRow.onCellClick;
 	const handleClick = useCallback(() => {
 		onCellClick?.(column.key);
@@ -90,6 +93,7 @@ const MatrixExtraRowCell = (props: MatrixExtraRowCellProps) => {
 				classes?.extraCell,
 				columnVariantClass(column.variant),
 				clickable && matrixClasses.extraCellClickable,
+				touch && matrixClasses.touch,
 			])}
 			role={clickable ? "button" : undefined}
 			tabIndex={clickable ? 0 : undefined}
