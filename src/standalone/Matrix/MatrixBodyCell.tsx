@@ -1,5 +1,6 @@
 import React, { useCallback, useMemo, useSyncExternalStore } from "react";
 import { alpha, styled } from "@mui/material";
+import { Add } from "@mui/icons-material";
 import combineClassNames from "../../utils/combineClassNames";
 import {
 	columnVariantClass,
@@ -9,6 +10,7 @@ import {
 } from "./matrixClasses";
 import { cellBorders, columnTintStyles } from "./matrixTints";
 import { isCellSelectableIn, useMatrixConfig } from "./MatrixGridContext";
+import useMatrixActivation from "./useMatrixActivation";
 import {
 	MATRIX_CELL_ADD_HINT,
 	MATRIX_CELL_SELECTED,
@@ -69,17 +71,43 @@ export const MatrixAddHint = styled("div", {
 	fontWeight: 600,
 	whiteSpace: "nowrap",
 	overflow: "hidden",
-	// The cell is not blank, it just has nothing of our own in it. The hint then
-	// shrinks to a strip along the bottom edge and CATCHES the pointer there, so
-	// a press can still start a range on a cell whose contents would otherwise
-	// swallow it — while everything above the strip keeps belonging to those
-	// contents, whether that is one entry or two side by side.
-	[`&.${matrixClasses.addHintStrip}`]: {
-		inset: "auto 5px 3px 5px",
-		height: 14,
-		fontSize: "0.62rem",
-		pointerEvents: "auto",
-		cursor: "pointer",
+}));
+
+/**
+ * The add affordance on a cell that is selectable but not blank.
+ *
+ * A cell whose contents already cover it cannot be pressed to start a range —
+ * an entry swallows the press — so this is a button of its own rather than a
+ * transparent hint. It is a chip in the corner, and not a band across the cell,
+ * because what is drawn and what is clickable have to be the same thing: a
+ * strip that overlays the entries either steals their clicks or, if it is thin
+ * enough not to, is too thin to hit.
+ */
+export const MatrixAddChip = styled("div", {
+	name: "CcMatrixGrid",
+	slot: "addChip",
+})(({ theme }) => ({
+	position: "absolute",
+	zIndex: 3,
+	right: 3,
+	bottom: 3,
+	minWidth: 26,
+	height: 20,
+	display: "flex",
+	alignItems: "center",
+	justifyContent: "center",
+	borderRadius: theme.shape.borderRadius,
+	border: `1px solid ${theme.palette.success.main}`,
+	backgroundColor:
+		theme.palette.mode === "dark"
+			? theme.palette.success.dark
+			: theme.palette.success.light,
+	color: theme.palette.success.contrastText,
+	cursor: "pointer",
+	"&:hover": { backgroundColor: theme.palette.success.main },
+	"&:focus-visible": {
+		outline: `2px solid ${theme.palette.primary.main}`,
+		outlineOffset: 1,
 	},
 }));
 
@@ -148,6 +176,19 @@ const MatrixBodyCell = <TCell,>(props: MatrixBodyCellProps<TCell>) => {
 		store.leave(row.key, column.key);
 	}, [store, row.key, column.key]);
 
+	const addToCell = useCallback(() => {
+		store.selectSingle(row.key, column.key);
+	}, [store, row.key, column.key]);
+	const chipActivation = useMatrixActivation(
+		cellSelectable && occupied ? addToCell : undefined,
+		typeof addLabel === "string" ? addLabel : undefined,
+	);
+	const stopPress = useCallback((event: React.MouseEvent) => {
+		// the chip reports the cell itself; letting the press through would
+		// begin a range on the same cell and report it twice
+		event.stopPropagation();
+	}, []);
+
 	const content = useMemo(() => {
 		const node = renderCell(cell, context);
 		return renderCellWrapper ? renderCellWrapper(node, context) : node;
@@ -170,16 +211,19 @@ const MatrixBodyCell = <TCell,>(props: MatrixBodyCellProps<TCell>) => {
 			onMouseLeave={selectable ? handleMouseLeave : undefined}
 		>
 			{content}
-			{!!(state & MATRIX_CELL_ADD_HINT) && (
-				<MatrixAddHint
-					className={combineClassNames([
-						classes?.addHint,
-						occupied && matrixClasses.addHintStrip,
-					])}
-				>
-					{addLabel}
-				</MatrixAddHint>
-			)}
+			{!!(state & MATRIX_CELL_ADD_HINT) &&
+				(occupied ? (
+					<MatrixAddChip
+						className={classes?.addChip}
+						title={typeof addLabel === "string" ? addLabel : undefined}
+						{...chipActivation}
+						onMouseDown={stopPress}
+					>
+						<Add fontSize={"small"} />
+					</MatrixAddChip>
+				) : (
+					<MatrixAddHint className={classes?.addHint}>{addLabel}</MatrixAddHint>
+				))}
 		</MatrixBodyCellRoot>
 	);
 };

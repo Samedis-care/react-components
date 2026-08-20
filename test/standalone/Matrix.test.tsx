@@ -563,38 +563,74 @@ describe("MatrixGrid", () => {
 		);
 	});
 
-	it("shows the add hint on hover, as a strip on an occupied cell", () => {
+	it("offers a chip, not an overlay, on a cell that is not blank", () => {
+		const onSelectRange = vi.fn();
 		renderGrid({
 			selectable: true,
 			addLabel: "Add",
 			isCellSelectable: () => true,
+			onSelectRange,
 		});
-		fireEvent.mouseOver(cellOf("r1", "c1"));
+		fireEvent.mouseOver(cellOf("r1", "c1")); // blank: the whole-cell hint
 		const hint = screen.getByText("Add");
-		expect(hint.className).not.toContain(matrixClasses.addHintStrip);
+		expect(getComputedStyle(hint).pointerEvents).toBe("none");
 		fireEvent.mouseOut(cellOf("r1", "c1"));
-		fireEvent.mouseOver(cellOf("r1", "c2")); // holds an entry
-		expect(screen.getByText("Add").className).toContain(
-			matrixClasses.addHintStrip,
+		// holds an entry: a chip that is its own button, so what is drawn and
+		// what can be clicked are the same thing
+		fireEvent.mouseOver(cellOf("r1", "c2"));
+		expect(screen.queryByText("Add")).not.toBeInTheDocument();
+		const chip = screen.getByRole("button", { name: "Add" });
+		expect(getComputedStyle(chip).pointerEvents).not.toBe("none");
+		fireEvent.click(chip);
+		expect(onSelectRange).toHaveBeenCalledWith({
+			rowKey: "r1",
+			fromColumnKey: "c2",
+			toColumnKey: "c2",
+			columnKeys: ["c2"],
+		});
+	});
+
+	it("reports the chip's cell once, not twice", () => {
+		const onSelectRange = vi.fn();
+		renderGrid({
+			selectable: true,
+			addLabel: "Add",
+			isCellSelectable: () => true,
+			onSelectRange,
+		});
+		fireEvent.mouseOver(cellOf("r1", "c2"));
+		const chip = screen.getByRole("button", { name: "Add" });
+		// a real click is mousedown + mouseup + click; the press must not also
+		// begin a range on the cell underneath
+		fireEvent.mouseDown(chip);
+		fireEvent.mouseUp(window);
+		fireEvent.click(chip);
+		expect(onSelectRange).toHaveBeenCalledTimes(1);
+	});
+
+	it("activates the chip by keyboard", () => {
+		const onSelectRange = vi.fn();
+		renderGrid({
+			selectable: true,
+			addLabel: "Add",
+			isCellSelectable: () => true,
+			onSelectRange,
+		});
+		fireEvent.mouseOver(cellOf("r1", "c2"));
+		const chip = screen.getByRole("button", { name: "Add" });
+		expect(chip).toHaveAttribute("tabindex", "0");
+		fireEvent.keyDown(chip, { key: "Enter" });
+		expect(onSelectRange).toHaveBeenCalledWith(
+			expect.objectContaining({ columnKeys: ["c2"] }),
 		);
 	});
 
-	it("keeps the add hint out of the contents' way", () => {
-		renderGrid({
-			selectable: true,
-			addLabel: "Add",
-			isCellSelectable: () => true,
-		});
-		fireEvent.mouseOver(cellOf("r1", "c1")); // blank cell: the whole cell
-		const full = getComputedStyle(screen.getByText("Add"));
-		expect(full.pointerEvents).toBe("none");
-		fireEvent.mouseOut(cellOf("r1", "c1"));
-		fireEvent.mouseOver(cellOf("r1", "c2")); // holds an entry: a strip
-		const strip = getComputedStyle(screen.getByText("Add"));
-		expect(strip.height).toBe("14px");
-		// it catches the pointer, so a press there can still start a range —
-		// but only over those 14px, not over half the cell
-		expect(strip.pointerEvents).toBe("auto");
+	it("does not offer the chip where a range may not start", () => {
+		renderGrid({ selectable: true, addLabel: "Add" }); // default predicate
+		fireEvent.mouseOver(cellOf("r1", "c2")); // occupied -> not selectable
+		expect(
+			screen.queryByRole("button", { name: "Add" }),
+		).not.toBeInTheDocument();
 	});
 
 	it("keeps the add hint after a click finished a range", () => {

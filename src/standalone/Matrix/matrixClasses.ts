@@ -22,8 +22,7 @@ export const matrixClasses = {
 	cellSelected: "CcMatrixGrid-cellSelected",
 	/** a range may start on (or run through) this cell */
 	cellSelectable: "CcMatrixGrid-cellSelectable",
-	/** the add hint is a strip along the bottom edge, not the whole cell */
-	addHintStrip: "CcMatrixGrid-addHintStrip",
+
 	/** the row header is one tap target (touch mode) */
 	rowHeaderButton: "CcMatrixGrid-rowHeaderButton",
 	/** an extra row cell that reports clicks */

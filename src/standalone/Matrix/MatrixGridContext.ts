@@ -18,6 +18,7 @@ export type MatrixGridClassKey =
 	| "rowHeader"
 	| "cell"
 	| "addHint"
+	| "addChip"
 	| "extraRowHeader"
 	| "extraCell"
 	| "badge"

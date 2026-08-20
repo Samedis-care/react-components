@@ -185,6 +185,23 @@ export class MatrixInteractionStore {
 		}
 	}
 
+	/**
+	 * Reports one cell as a range, without a press.
+	 * @remarks For an affordance that is its own button (the add chip on a cell
+	 * whose contents would swallow a press) rather than a place to start a drag.
+	 */
+	selectSingle(rowKey: string, columnKey: string): void {
+		const index = this.indexByKey.get(columnKey);
+		if (index === undefined) return;
+		if (!this.config.canSelect(rowKey, index)) return;
+		this.config.onSelectRange?.({
+			rowKey,
+			fromColumnKey: columnKey,
+			toColumnKey: columnKey,
+			columnKeys: [columnKey],
+		});
+	}
+
 	/** Drops the range without reporting it (Escape, a lost press, unmount). */
 	cancel(): void {
 		if (!this.dragging) return;
