@@ -19,12 +19,14 @@ export interface BuildDateColumnsParams {
 	locale?: string;
 	/**
 	 * Which day counts as today and gets the "current" variant. Pass null to
-	 * mark no day at all.
+	 * mark no day at all. Anything moment can parse; it is normalized to a
+	 * date, so a timestamp works too.
 	 * @default the actual current day
 	 */
 	today?: string | null;
 	/**
-	 * Day(s) to mark with the "accent" variant. Wins over "current".
+	 * Day(s) to mark with the "accent" variant. Wins over "current". Normalized
+	 * like today.
 	 */
 	accent?: string | string[];
 	/**
@@ -57,9 +59,18 @@ const buildDateColumns = (params: BuildDateColumnsParams): MatrixColumn[] => {
 		mutedWeekdays = [0, 6],
 		maxColumns = 400,
 	} = params;
+	// Normalized rather than compared as given: a caller that hands over a
+	// timestamp ("2026-03-07T00:00:00Z") would otherwise match no column at
+	// all, and silently mark nothing.
 	const today =
-		params.today === undefined ? moment().format("YYYY-MM-DD") : params.today;
-	const accentDays = Array.isArray(accent) ? accent : accent ? [accent] : [];
+		params.today === undefined
+			? moment().format("YYYY-MM-DD")
+			: params.today === null
+				? null
+				: moment(params.today).format("YYYY-MM-DD");
+	const accentDays = (
+		Array.isArray(accent) ? accent : accent ? [accent] : []
+	).map((day) => moment(day).format("YYYY-MM-DD"));
 	const weekdayFormat = new Intl.DateTimeFormat(locale, { weekday: "short" });
 	const columns: MatrixColumn[] = [];
 	const end = moment(to);
@@ -83,6 +94,12 @@ const buildDateColumns = (params: BuildDateColumnsParams): MatrixColumn[] => {
 						: "normal",
 		});
 	}
+	if (day.isSameOrBefore(end, "day"))
+		// Silence here would read as "that is the whole range".
+		// eslint-disable-next-line no-console
+		console.warn(
+			`buildDateColumns: range ${from}..${to} was truncated at ${maxColumns} columns`,
+		);
 	return columns;
 };
 

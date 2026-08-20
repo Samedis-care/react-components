@@ -42,6 +42,12 @@ export interface MatrixRow<TCell> {
 	 */
 	cells: Record<string, TCell>;
 	/**
+	 * Accessible name of the row, used when the row header becomes a single
+	 * button in touch mode (see MatrixGridProps.onRowHeaderActions). Without
+	 * it, that button is announced by whatever the header renders.
+	 */
+	label?: string;
+	/**
 	 * Opt this single row out of range selection, whatever the grid's
 	 * selectable prop says (a row that cannot receive new entries)
 	 * @default true
@@ -50,8 +56,9 @@ export interface MatrixRow<TCell> {
 }
 
 /**
- * A row below the data rows which holds no cells of its own, only a badge per
- * column. Used for aggregate rows (open demand per day, totals, ...).
+ * A row that holds no cells of its own, only a badge per column. Used for
+ * aggregate rows (open demand per day, totals, ...). Rendered below the data
+ * rows unless MatrixGridProps.extraRowsPosition says otherwise.
  */
 export interface MatrixExtraRow {
 	/**
@@ -63,14 +70,21 @@ export interface MatrixExtraRow {
 	 */
 	header: React.ReactNode;
 	/**
-	 * Row height in px
-	 * @default the grid's extraRowHeight
+	 * Accessible name of the row, used for its cells when they report clicks
+	 * (and as the fallback when getCellLabel is not given)
 	 */
-	height?: number;
+	label?: string;
 	/**
-	 * What to show per column, keyed by column key. A missing (or falsy) entry
-	 * renders no badge — with onCellClick set, the cell shows the same "add"
-	 * hint on hover that an empty selectable cell does.
+	 * Accessible name of one cell of this row — the row's subject plus the
+	 * column it stands for ("post a request for March 5th"). Falls back to
+	 * label.
+	 */
+	getCellLabel?: (columnKey: string) => string;
+	/**
+	 * What to show per column, keyed by column key. An entry that is missing or
+	 * null renders no badge — with onCellClick set, the cell then shows the same
+	 * "add" hint on hover that an empty selectable cell does.
+	 * @remarks Zero is a value, not a blank: a badge of 0 renders as a badge.
 	 */
 	badges?: Record<string, React.ReactNode>;
 	/**
@@ -92,10 +106,6 @@ export interface MatrixCellContext<TCell> {
 	 * Index of the column in the columns prop
 	 */
 	columnIndex: number;
-	/**
-	 * Is this cell part of the range the user is currently dragging over?
-	 */
-	selected: boolean;
 }
 
 export interface MatrixRowHeaderContext {
@@ -122,8 +132,10 @@ export interface MatrixRangeSelection {
 	 */
 	toColumnKey: string;
 	/**
-	 * Every column key the range covers, in column order. A plain click
-	 * produces a single-entry range.
+	 * Every column key the range covers, in column order. Always contiguous: a
+	 * sweep stops at the first cell isCellSelectable rejects, so what was
+	 * highlighted is what is reported. A plain click produces a single-entry
+	 * range.
 	 */
 	columnKeys: string[];
 }
@@ -144,6 +156,7 @@ export interface MatrixTileItem {
 	/**
 	 * A second label, rendered after an arrow ("A -> B"). Use it for an entry
 	 * that points somewhere: an assignment, a hand-over, a target.
+	 * @remarks Not rendered in a diagonal pair, see MatrixCellTileProps.pairLayout.
 	 */
 	secondaryLabel?: React.ReactNode;
 	/**
@@ -152,7 +165,7 @@ export interface MatrixTileItem {
 	 */
 	flow?: "horizontal" | "vertical";
 	/**
-	 * Fill color of the entry
+	 * Fill color of the entry. Any CSS color.
 	 */
 	backgroundColor: string;
 	/**
@@ -171,10 +184,13 @@ export interface MatrixTileItem {
 	/**
 	 * Small adornments pinned into the entry's corners. Keep them to a single
 	 * icon each — a cell is tiny.
+	 * @remarks A diagonal pair renders only the first entry's bottomLeft corner,
+	 * see MatrixCellTileProps.pairLayout.
 	 */
 	corners?: Partial<Record<MatrixTileCorner, React.ReactNode>>;
 	/**
-	 * Tooltip shown when hovering the entry
+	 * Tooltip shown when hovering the entry. Without it no tooltip is mounted
+	 * at all.
 	 */
 	tooltip?: string;
 }

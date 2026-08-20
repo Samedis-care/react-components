@@ -87,7 +87,12 @@ const buildDemoRows = (columnKeys: string[]): MatrixRow<DemoCell>[] =>
 				});
 			cells[key] = { entries };
 		});
-		return { key: person.id, cells, selectable: !person.guest };
+		return {
+			key: person.id,
+			label: person.name,
+			cells,
+			selectable: !person.guest,
+		};
 	});
 
 const toTileItem = (entry: DemoEntry): MatrixTileItem => ({
@@ -287,7 +292,14 @@ const DemoMatrix = (args: DemoArgs) => {
 										</Typography>
 									</>
 								),
-								badges: { "2026-03-05": 2, "2026-03-11": 1, "2026-03-19": 4 },
+								label: "Open demand",
+								getCellLabel: (columnKey) => `Open demand on ${columnKey}`,
+								badges: {
+									"2026-03-05": 2,
+									"2026-03-11": 1,
+									"2026-03-12": 0,
+									"2026-03-19": 4,
+								},
 								onCellClick: onExtraCellClick,
 							},
 						]
@@ -322,6 +334,11 @@ const meta: Meta<DemoArgs> = {
 	},
 	argTypes: {
 		pairLayout: { control: "inline-radio", options: ["split", "diagonal"] },
+		extraRowsPosition: { control: "inline-radio", options: ["bottom", "top"] },
+		scrollToColumn: {
+			control: "select",
+			options: [undefined, "2026-03-02", TODAY, "2026-03-22"],
+		},
 		columnWidth: { control: { type: "range", min: 30, max: 120, step: 2 } },
 		rowHeight: { control: { type: "range", min: 30, max: 120, step: 2 } },
 		rowHeaderWidth: { control: { type: "range", min: 60, max: 240, step: 4 } },
@@ -355,6 +372,26 @@ export const DragAndDrop: Story = {
  * Sweeping a range: press on a free cell, drag across two more, release. The
  * grid reports the range in column order, whichever way it was drawn.
  */
+export const SweepStopsAtAnOccupiedCell: Story = {
+	play: async ({ canvasElement, args }) => {
+		const canvas = within(canvasElement);
+		// u1 is free on the 6th to the 8th and busy on the 9th
+		const start = canvas.getByTestId("cell-u1-2026-03-06");
+		const past = canvas.getByTestId("cell-u1-2026-03-10");
+		await userEvent.pointer([
+			{ target: start, keys: "[MouseLeft>]" },
+			{ target: past },
+			{ keys: "[/MouseLeft]" },
+		]);
+		await expect(args.onSelectRange).toHaveBeenCalledWith(
+			expect.objectContaining({
+				fromColumnKey: "2026-03-06",
+				toColumnKey: "2026-03-08",
+			}),
+		);
+	},
+};
+
 export const SweepARange: Story = {
 	play: async ({ canvasElement, args }) => {
 		const canvas = within(canvasElement);
