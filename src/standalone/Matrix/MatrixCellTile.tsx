@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useMemo } from "react";
 import { alpha, styled, useThemeProps } from "@mui/material";
 import combineClassNames from "../../utils/combineClassNames";
 import { matrixClasses } from "./matrixClasses";
@@ -9,12 +9,6 @@ import {
 import MatrixTileItem from "./MatrixTileItem";
 import MatrixTileDiagonalPair from "./MatrixTileDiagonalPair";
 import { MatrixTileItem as MatrixTileItemData } from "./types";
-
-export type {
-	MatrixCellTileProps,
-	MatrixCellTileClassKey,
-} from "./MatrixCellTileContext";
-export { MATRIX_TILE_DIM_OPACITY } from "./matrixTileDim";
 
 export const MatrixCellTileRoot = styled("div", {
 	name: "CcMatrixCellTile",
@@ -73,6 +67,7 @@ const MatrixCellTile = (inProps: MatrixCellTileProps) => {
 		pairLayout = "split",
 		splitDirection = "row",
 		placeholder,
+		onItemClick,
 		renderItem,
 		className,
 		classes,
@@ -121,8 +116,32 @@ const MatrixCellTile = (inProps: MatrixCellTileProps) => {
 			);
 	}
 
+	// Memoized member-wise, for the same reason the grid's config is: the object
+	// useThemeProps hands back is new on every render, and a context carrying it
+	// would re-render both entries even when the items are the same objects.
+	const context = useMemo<MatrixCellTileProps>(
+		() => ({
+			items,
+			pairLayout,
+			splitDirection,
+			placeholder,
+			onItemClick,
+			renderItem,
+			classes,
+		}),
+		[
+			items,
+			pairLayout,
+			splitDirection,
+			placeholder,
+			onItemClick,
+			renderItem,
+			classes,
+		],
+	);
+
 	return (
-		<MatrixCellTilePropsContext.Provider value={props}>
+		<MatrixCellTilePropsContext.Provider value={context}>
 			<MatrixCellTileRoot
 				className={combineClassNames([
 					className,

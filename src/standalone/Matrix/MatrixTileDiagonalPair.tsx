@@ -2,9 +2,14 @@ import React, { useCallback, useMemo } from "react";
 import { styled, Tooltip } from "@mui/material";
 import combineClassNames from "../../utils/combineClassNames";
 import { cssVar, matrixClasses, matrixVars } from "./matrixClasses";
-import { dimColor, MATRIX_TILE_DIM_OPACITY } from "./matrixTileDim";
+import {
+	contrastTextFor,
+	dimColor,
+	MATRIX_TILE_DIM_OPACITY,
+} from "./matrixTileDim";
 import { useMatrixCellTileProps } from "./MatrixCellTileContext";
 import MatrixTileCorners from "./MatrixTileCorners";
+import useMatrixActivation from "./useMatrixActivation";
 import { MatrixTileCorner, MatrixTileItem } from "./types";
 
 export const MatrixTileDiagonalRoot = styled("div", {
@@ -19,7 +24,13 @@ export const MatrixTileDiagonalRoot = styled("div", {
 	background: `linear-gradient(to bottom right, ${cssVar(
 		matrixVars.tileBackgroundA,
 	)} 0 49.5%, ${cssVar(matrixVars.tileBackgroundB)} 50.5% 100%)`,
-	[`&.${matrixClasses.itemClickable}`]: { cursor: "pointer" },
+	[`&.${matrixClasses.itemClickable}`]: {
+		cursor: "pointer",
+		"&:focus-visible": {
+			outline: `2px solid ${theme.palette.primary.main}`,
+			outlineOffset: -2,
+		},
+	},
 }));
 
 export const MatrixTileDiagonalLabel = styled("div", {
@@ -67,9 +78,10 @@ export interface MatrixTileDiagonalPairProps {
 const MatrixTileDiagonalPair = (props: MatrixTileDiagonalPairProps) => {
 	const { a, b } = props;
 	const { onItemClick, classes } = useMatrixCellTileProps();
-	const handleClick = useCallback(() => {
+	const activate = useCallback(() => {
 		onItemClick?.(a);
 	}, [onItemClick, a]);
+	const activation = useMatrixActivation(onItemClick ? activate : undefined);
 	const handleMouseDown = useCallback((event: React.MouseEvent) => {
 		event.stopPropagation();
 	}, []);
@@ -82,8 +94,10 @@ const MatrixTileDiagonalPair = (props: MatrixTileDiagonalPairProps) => {
 				[matrixVars.tileBackgroundB]: b.dimmed
 					? dimColor(b.backgroundColor)
 					: b.backgroundColor,
-				[matrixVars.tileForegroundA]: a.textColor,
-				[matrixVars.tileForegroundB]: b.textColor,
+				[matrixVars.tileForegroundA]:
+					a.textColor ?? contrastTextFor(a.backgroundColor),
+				[matrixVars.tileForegroundB]:
+					b.textColor ?? contrastTextFor(b.backgroundColor),
 			}) as React.CSSProperties,
 		[
 			a.dimmed,
@@ -103,7 +117,7 @@ const MatrixTileDiagonalPair = (props: MatrixTileDiagonalPairProps) => {
 				onItemClick && matrixClasses.itemClickable,
 			])}
 			style={style}
-			onClick={onItemClick ? handleClick : undefined}
+			{...activation}
 			onMouseDown={onItemClick ? handleMouseDown : undefined}
 		>
 			<MatrixTileDiagonalLabel

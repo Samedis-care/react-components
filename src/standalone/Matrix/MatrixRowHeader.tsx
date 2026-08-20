@@ -4,6 +4,7 @@ import combineClassNames from "../../utils/combineClassNames";
 import { cssVar, matrixClasses, matrixVars } from "./matrixClasses";
 import { cellBorders } from "./matrixTints";
 import { useMatrixConfig } from "./MatrixGridContext";
+import useMatrixActivation from "./useMatrixActivation";
 import { MatrixRow } from "./types";
 
 export const MatrixRowHeaderRoot = styled("div", {
@@ -41,18 +42,14 @@ const MatrixRowHeader = <TCell,>(props: MatrixRowHeaderProps<TCell>) => {
 	const { renderRowHeader, onRowHeaderActions, classes, touch } =
 		useMatrixConfig<TCell>();
 	const button = touch && !!onRowHeaderActions;
-	const handleClick = useCallback(() => {
+	const activate = useCallback(() => {
 		onRowHeaderActions?.(row.key);
 	}, [onRowHeaderActions, row.key]);
 	// The tap target has to answer to a keyboard too: on touch it is the only
 	// path to the row actions, since the header's own buttons are suppressed.
-	const handleKeyDown = useCallback(
-		(event: React.KeyboardEvent) => {
-			if (event.key !== "Enter" && event.key !== " ") return;
-			event.preventDefault();
-			onRowHeaderActions?.(row.key);
-		},
-		[onRowHeaderActions, row.key],
+	const activation = useMatrixActivation(
+		button ? activate : undefined,
+		row.label,
 	);
 	const context = useMemo(() => ({ touch }), [touch]);
 	const content = useMemo(
@@ -65,11 +62,7 @@ const MatrixRowHeader = <TCell,>(props: MatrixRowHeaderProps<TCell>) => {
 				classes?.rowHeader,
 				button && matrixClasses.rowHeaderButton,
 			])}
-			role={button ? "button" : undefined}
-			tabIndex={button ? 0 : undefined}
-			aria-label={button ? row.label : undefined}
-			onClick={button ? handleClick : undefined}
-			onKeyDown={button ? handleKeyDown : undefined}
+			{...activation}
 		>
 			{content}
 		</MatrixRowHeaderRoot>

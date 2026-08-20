@@ -3,9 +3,10 @@ import { styled, Tooltip } from "@mui/material";
 import { ArrowDownward, ArrowRightAlt } from "@mui/icons-material";
 import combineClassNames from "../../utils/combineClassNames";
 import { cssVar, matrixClasses, matrixVars } from "./matrixClasses";
-import { MATRIX_TILE_DIM_OPACITY } from "./matrixTileDim";
+import { contrastTextFor, MATRIX_TILE_DIM_OPACITY } from "./matrixTileDim";
 import { useMatrixCellTileProps } from "./MatrixCellTileContext";
 import MatrixTileCorners from "./MatrixTileCorners";
+import useMatrixActivation from "./useMatrixActivation";
 import { MatrixTileItem as MatrixTileItemData } from "./types";
 
 export const MatrixTileItemRoot = styled("div", {
@@ -26,7 +27,13 @@ export const MatrixTileItemRoot = styled("div", {
 	color: cssVar(matrixVars.tileForeground),
 	// informational entry: same area, faded, instead of stealing space
 	[`&.${matrixClasses.itemDimmed}`]: { opacity: MATRIX_TILE_DIM_OPACITY },
-	[`&.${matrixClasses.itemClickable}`]: { cursor: "pointer" },
+	[`&.${matrixClasses.itemClickable}`]: {
+		cursor: "pointer",
+		"&:focus-visible": {
+			outline: `2px solid ${theme.palette.primary.main}`,
+			outlineOffset: -2,
+		},
+	},
 }));
 
 export const MatrixTileItemContent = styled("div", {
@@ -72,9 +79,12 @@ export interface MatrixTileItemProps {
 const MatrixTileItem = (props: MatrixTileItemProps) => {
 	const { item } = props;
 	const { onItemClick, classes } = useMatrixCellTileProps();
-	const handleClick = useCallback(() => {
+	const activate = useCallback(() => {
 		onItemClick?.(item);
 	}, [onItemClick, item]);
+	// An entry one can click has to be one a keyboard can reach too. The name
+	// comes from the label it renders, or from the tooltip via MUI.
+	const activation = useMatrixActivation(onItemClick ? activate : undefined);
 	// A clickable entry must not also start a range selection in the grid
 	// below it: without this, pressing an entry would both open it and begin
 	// dragging a new range.
@@ -86,7 +96,8 @@ const MatrixTileItem = (props: MatrixTileItemProps) => {
 		() =>
 			({
 				[matrixVars.tileBackground]: item.backgroundColor,
-				[matrixVars.tileForeground]: item.textColor,
+				[matrixVars.tileForeground]:
+					item.textColor ?? contrastTextFor(item.backgroundColor),
 				[matrixVars.tileFontSize]: `${labelFontSize(item.label)}px`,
 				[matrixVars.tileSecondaryFontSize]: `${labelFontSize(
 					item.secondaryLabel,
@@ -103,7 +114,7 @@ const MatrixTileItem = (props: MatrixTileItemProps) => {
 				onItemClick && matrixClasses.itemClickable,
 			])}
 			style={style}
-			onClick={onItemClick ? handleClick : undefined}
+			{...activation}
 			onMouseDown={onItemClick ? handleMouseDown : undefined}
 		>
 			<MatrixTileItemContent

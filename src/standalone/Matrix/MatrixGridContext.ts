@@ -162,6 +162,12 @@ export interface MatrixGridProps<TCell> {
 	 */
 	extraRowsPosition?: "top" | "bottom";
 	/**
+	 * Accessible name of the grid. The scroll container is reachable by keyboard
+	 * (it has to be — it scrolls further than one screen), and with a name it is
+	 * announced as a region rather than as an unlabelled scrollable box.
+	 */
+	label?: string;
+	/**
 	 * CSS class to apply to root
 	 */
 	className?: string;

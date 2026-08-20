@@ -274,6 +274,7 @@ const DemoMatrix = (args: DemoArgs) => {
 			columns={columns}
 			rows={rows}
 			corner={"Ward A"}
+			label={"Ward A duty roster"}
 			renderRowHeader={renderRowHeader}
 			renderCell={renderCell}
 			renderCellWrapper={dragAndDrop ? renderCellWrapper : undefined}

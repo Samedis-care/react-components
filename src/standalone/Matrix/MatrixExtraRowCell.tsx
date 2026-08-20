@@ -2,11 +2,16 @@ import React, { useCallback } from "react";
 import { styled } from "@mui/material";
 import { Add } from "@mui/icons-material";
 import combineClassNames from "../../utils/combineClassNames";
-import { cssVar, matrixClasses, matrixVars } from "./matrixClasses";
+import {
+	columnVariantClass,
+	cssVar,
+	matrixClasses,
+	matrixVars,
+} from "./matrixClasses";
 import { cellBorders, columnTintStyles } from "./matrixTints";
 import { useMatrixConfig } from "./MatrixGridContext";
+import useMatrixActivation from "./useMatrixActivation";
 import { MatrixColumn, MatrixExtraRow } from "./types";
-import { columnVariantClass } from "./MatrixColumnHeader";
 
 export const MatrixExtraCellRoot = styled("div", {
 	name: "CcMatrixGrid",
@@ -73,16 +78,12 @@ const MatrixExtraRowCell = (props: MatrixExtraRowCellProps) => {
 	const { extraRow, column } = props;
 	const { classes, touch } = useMatrixConfig<unknown>();
 	const onCellClick = extraRow.onCellClick;
-	const handleClick = useCallback(() => {
+	const activate = useCallback(() => {
 		onCellClick?.(column.key);
 	}, [onCellClick, column.key]);
-	const handleKeyDown = useCallback(
-		(event: React.KeyboardEvent) => {
-			if (event.key !== "Enter" && event.key !== " ") return;
-			event.preventDefault();
-			onCellClick?.(column.key);
-		},
-		[onCellClick, column.key],
+	const activation = useMatrixActivation(
+		onCellClick ? activate : undefined,
+		extraRow.getCellLabel?.(column.key) ?? extraRow.label,
 	);
 	// Zero is a value: only a missing (or null) badge means "nothing known".
 	const badge = extraRow.badges?.[column.key];
@@ -95,15 +96,7 @@ const MatrixExtraRowCell = (props: MatrixExtraRowCellProps) => {
 				clickable && matrixClasses.extraCellClickable,
 				touch && matrixClasses.touch,
 			])}
-			role={clickable ? "button" : undefined}
-			tabIndex={clickable ? 0 : undefined}
-			aria-label={
-				clickable
-					? (extraRow.getCellLabel?.(column.key) ?? extraRow.label)
-					: undefined
-			}
-			onClick={clickable ? handleClick : undefined}
-			onKeyDown={clickable ? handleKeyDown : undefined}
+			{...activation}
 		>
 			{badge != null ? (
 				<MatrixBadge className={classes?.badge}>{badge}</MatrixBadge>

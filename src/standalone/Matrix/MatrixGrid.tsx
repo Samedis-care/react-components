@@ -26,8 +26,6 @@ import MatrixColumnHeader from "./MatrixColumnHeader";
 import MatrixDataRow from "./MatrixDataRow";
 import MatrixExtraRowGroup from "./MatrixExtraRowGroup";
 
-export type { MatrixGridProps, MatrixGridClassKey } from "./MatrixGridContext";
-
 export const MatrixGridScroller = styled("div", {
 	name: "CcMatrixGrid",
 	slot: "root",
@@ -97,6 +95,7 @@ const MatrixGrid = <TCell,>(inProps: MatrixGridProps<TCell>) => {
 		onRowHeaderActions,
 		extraRows,
 		extraRowsPosition = "bottom",
+		label,
 		className,
 		classes,
 	} = props;
@@ -196,6 +195,10 @@ const MatrixGrid = <TCell,>(inProps: MatrixGridProps<TCell>) => {
 			window.removeEventListener("blur", cancel);
 			window.removeEventListener("contextmenu", cancel);
 			window.removeEventListener("pointercancel", cancel);
+			// Selection being switched off (or the grid unmounting) mid-press
+			// would otherwise leave a range armed with no listener left to end
+			// or abort it — and the cells painted with no way to clear them.
+			store.cancel();
 		};
 	}, [store, selectable]);
 
@@ -238,9 +241,12 @@ const MatrixGrid = <TCell,>(inProps: MatrixGridProps<TCell>) => {
 	);
 	const gridStyle = useMemo(
 		() => ({
-			gridTemplateColumns: `${px(rowHeaderWidth)} repeat(${columns.length}, ${px(
-				columnWidth,
-			)})`,
+			// repeat() needs a positive integer: repeat(0, …) makes the whole
+			// declaration invalid, and an empty grid would collapse into one
+			// implicit column instead of just being empty.
+			gridTemplateColumns: columns.length
+				? `${px(rowHeaderWidth)} repeat(${columns.length}, ${px(columnWidth)})`
+				: px(rowHeaderWidth),
 		}),
 		[rowHeaderWidth, columns.length, columnWidth],
 	);
@@ -264,6 +270,11 @@ const MatrixGrid = <TCell,>(inProps: MatrixGridProps<TCell>) => {
 					ref={scrollRef}
 					className={combineClassNames([className, classes?.root])}
 					style={rootStyle}
+					// the grid scrolls further than one screen: without this it
+					// is unreachable past the first columns without a pointer
+					tabIndex={0}
+					role={label ? "region" : undefined}
+					aria-label={label}
 				>
 					<MatrixGridRoot className={classes?.grid} style={gridStyle}>
 						<MatrixCorner className={classes?.corner}>{corner}</MatrixCorner>

@@ -170,6 +170,7 @@ export interface MatrixTileItem {
 	backgroundColor: string;
 	/**
 	 * Text (and adornment) color of the entry
+	 * @default black or white, whichever contrasts with backgroundColor
 	 */
 	textColor?: string;
 	/**

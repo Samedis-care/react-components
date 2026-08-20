@@ -1,7 +1,12 @@
 import React, { useCallback, useMemo, useSyncExternalStore } from "react";
 import { alpha, styled } from "@mui/material";
 import combineClassNames from "../../utils/combineClassNames";
-import { cssVar, matrixClasses, matrixVars } from "./matrixClasses";
+import {
+	columnVariantClass,
+	cssVar,
+	matrixClasses,
+	matrixVars,
+} from "./matrixClasses";
 import { cellBorders, columnTintStyles } from "./matrixTints";
 import { isCellSelectableIn, useMatrixConfig } from "./MatrixGridContext";
 import {
@@ -9,7 +14,6 @@ import {
 	MATRIX_CELL_SELECTED,
 	useMatrixInteraction,
 } from "./MatrixInteractionContext";
-import { columnVariantClass } from "./MatrixColumnHeader";
 import { MatrixCellContext, MatrixColumn, MatrixRow } from "./types";
 
 export const MatrixBodyCellRoot = styled("div", {
@@ -65,12 +69,15 @@ export const MatrixAddHint = styled("div", {
 	fontWeight: 600,
 	whiteSpace: "nowrap",
 	overflow: "hidden",
-	// The cell is not blank, it just has nothing of our own in it: claim only
-	// the bottom half and CATCH the pointer there, so a press lands on the hint
-	// (starting a range) while the top half still belongs to the contents.
-	[`&.${matrixClasses.addHintHalf}`]: {
-		inset: "auto 5px 5px 5px",
-		height: "calc(50% - 5px)",
+	// The cell is not blank, it just has nothing of our own in it. The hint then
+	// shrinks to a strip along the bottom edge and CATCHES the pointer there, so
+	// a press can still start a range on a cell whose contents would otherwise
+	// swallow it — while everything above the strip keeps belonging to those
+	// contents, whether that is one entry or two side by side.
+	[`&.${matrixClasses.addHintStrip}`]: {
+		inset: "auto 5px 3px 5px",
+		height: 14,
+		fontSize: "0.62rem",
 		pointerEvents: "auto",
 		cursor: "pointer",
 	},
@@ -114,8 +121,8 @@ const MatrixBodyCell = <TCell,>(props: MatrixBodyCellProps<TCell>) => {
 	const occupied = config.isCellOccupied(cell, context);
 
 	const getSnapshot = useCallback(
-		() => store.getCellState(row.key, columnIndex),
-		[store, row.key, columnIndex],
+		() => store.getCellState(row.key, column.key),
+		[store, row.key, column.key],
 	);
 	const state = useSyncExternalStore(store.subscribe, getSnapshot);
 
@@ -130,16 +137,16 @@ const MatrixBodyCell = <TCell,>(props: MatrixBodyCellProps<TCell>) => {
 			)
 				return;
 			event.preventDefault(); // no text selection while sweeping
-			store.begin(row.key, columnIndex);
+			store.begin(row.key, column.key);
 		},
-		[store, row.key, columnIndex],
+		[store, row.key, column.key],
 	);
 	const handleMouseEnter = useCallback(() => {
-		store.enter(row.key, columnIndex);
-	}, [store, row.key, columnIndex]);
+		store.enter(row.key, column.key);
+	}, [store, row.key, column.key]);
 	const handleMouseLeave = useCallback(() => {
-		store.leave(row.key, columnIndex);
-	}, [store, row.key, columnIndex]);
+		store.leave(row.key, column.key);
+	}, [store, row.key, column.key]);
 
 	const content = useMemo(() => {
 		const node = renderCell(cell, context);
@@ -167,7 +174,7 @@ const MatrixBodyCell = <TCell,>(props: MatrixBodyCellProps<TCell>) => {
 				<MatrixAddHint
 					className={combineClassNames([
 						classes?.addHint,
-						occupied && matrixClasses.addHintHalf,
+						occupied && matrixClasses.addHintStrip,
 					])}
 				>
 					{addLabel}

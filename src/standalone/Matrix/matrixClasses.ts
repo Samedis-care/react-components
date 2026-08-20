@@ -1,3 +1,5 @@
+import { MatrixColumnVariant } from "./types";
+
 /**
  * State classes and CSS custom properties of the matrix components.
  *
@@ -20,8 +22,8 @@ export const matrixClasses = {
 	cellSelected: "CcMatrixGrid-cellSelected",
 	/** a range may start on (or run through) this cell */
 	cellSelectable: "CcMatrixGrid-cellSelectable",
-	/** the add hint takes the cell's bottom half instead of all of it */
-	addHintHalf: "CcMatrixGrid-addHintHalf",
+	/** the add hint is a strip along the bottom edge, not the whole cell */
+	addHintStrip: "CcMatrixGrid-addHintStrip",
 	/** the row header is one tap target (touch mode) */
 	rowHeaderButton: "CcMatrixGrid-rowHeaderButton",
 	/** an extra row cell that reports clicks */
@@ -65,3 +67,19 @@ export const matrixVars = {
 
 /** `var(--x)`, for use inside a styled() slot. */
 export const cssVar = (name: string): string => `var(${name})`;
+
+/** The state class of a column variant, or false for "normal". */
+export const columnVariantClass = (
+	variant: MatrixColumnVariant | undefined,
+): string | false => {
+	switch (variant) {
+		case "muted":
+			return matrixClasses.columnMuted;
+		case "current":
+			return matrixClasses.columnCurrent;
+		case "accent":
+			return matrixClasses.columnAccent;
+		default:
+			return false;
+	}
+};

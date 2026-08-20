@@ -13,6 +13,7 @@ import MatrixCellTile from "../../src/standalone/Matrix/MatrixCellTile";
 import buildDateColumns from "../../src/standalone/Matrix/buildDateColumns";
 import { matrixClasses } from "../../src/standalone/Matrix/matrixClasses";
 import {
+	MatrixCellContext,
 	MatrixColumn,
 	MatrixRow,
 	MatrixTileItem,
@@ -152,6 +153,22 @@ describe("MatrixGrid", () => {
 		// 4 columns x 2 rows
 		expect(document.querySelectorAll("[data-testid^=cell-]")).toHaveLength(8);
 		expect(cellOf("r1", "c2")).toHaveTextContent("busy");
+	});
+
+	it("is reachable by keyboard, and a named region when labelled", () => {
+		const { container } = wrap(
+			<MatrixGrid<TestCell>
+				columns={COLUMNS}
+				rows={ROWS}
+				label={"Ward A roster"}
+				renderRowHeader={(row) => <span>{row.key}</span>}
+				renderCell={() => null}
+			/>,
+		);
+		const scroller = container.firstElementChild as HTMLElement;
+		expect(scroller).toHaveAttribute("tabindex", "0");
+		expect(scroller).toHaveAttribute("role", "region");
+		expect(scroller).toHaveAttribute("aria-label", "Ward A roster");
 	});
 
 	it("reports a single cell range on a plain click", () => {
@@ -417,6 +434,99 @@ describe("MatrixGrid", () => {
 		);
 	});
 
+	it("drops the range when the press cell itself filled up", () => {
+		const onSelectRange = vi.fn();
+		const cellRenderer = (
+			cell: TestCell | undefined,
+			context: MatrixCellContext<TestCell>,
+		) => <span data-testid={`cell-${context.row.key}-${context.column.key}`} />;
+		const grid = (rows: MatrixRow<TestCell>[]) => (
+			<ThemeProvider theme={theme}>
+				<MatrixGrid<TestCell>
+					columns={COLUMNS}
+					rows={rows}
+					selectable={true}
+					onSelectRange={onSelectRange}
+					renderRowHeader={(row) => <span>{row.key}</span>}
+					renderCell={cellRenderer}
+				/>
+			</ThemeProvider>
+		);
+		const { rerender } = render(grid([{ key: "r1", cells: {} }]));
+		fireEvent.mouseDown(cellOf("r1", "c1"));
+		// a refetch fills the very cell the press started on
+		rerender(grid([{ key: "r1", cells: { c1: { text: "busy" } } }]));
+		fireEvent.mouseUp(window);
+		expect(onSelectRange).not.toHaveBeenCalled();
+	});
+
+	it("drops the range when the row was opted out mid-press", () => {
+		const onSelectRange = vi.fn();
+		const cellRenderer = (
+			cell: TestCell | undefined,
+			context: MatrixCellContext<TestCell>,
+		) => <span data-testid={`cell-${context.row.key}-${context.column.key}`} />;
+		const grid = (rows: MatrixRow<TestCell>[]) => (
+			<ThemeProvider theme={theme}>
+				<MatrixGrid<TestCell>
+					columns={COLUMNS}
+					rows={rows}
+					selectable={true}
+					onSelectRange={onSelectRange}
+					renderRowHeader={(row) => <span>{row.key}</span>}
+					renderCell={cellRenderer}
+				/>
+			</ThemeProvider>
+		);
+		const { rerender } = render(grid([{ key: "r1", cells: {} }]));
+		fireEvent.mouseDown(cellOf("r1", "c1"));
+		fireEvent.mouseOver(cellOf("r1", "c3"));
+		rerender(grid([{ key: "r1", cells: {}, selectable: false }]));
+		fireEvent.mouseUp(window);
+		expect(onSelectRange).not.toHaveBeenCalled();
+	});
+
+	it("drops the press when selection is switched off mid-drag", () => {
+		const onSelectRange = vi.fn();
+		const grid = (selectable: boolean) => (
+			<ThemeProvider theme={theme}>
+				<MatrixGrid<TestCell>
+					columns={COLUMNS}
+					rows={[{ key: "r1", cells: {} }]}
+					selectable={selectable}
+					onSelectRange={onSelectRange}
+					renderRowHeader={(row) => <span>{row.key}</span>}
+					renderCell={(cell, context) => (
+						<span
+							data-testid={`cell-${context.row.key}-${context.column.key}`}
+						/>
+					)}
+				/>
+			</ThemeProvider>
+		);
+		const { rerender } = render(grid(true));
+		fireEvent.mouseDown(cellOf("r1", "c1"));
+		expect(cellOf("r1", "c1").className).toContain(matrixClasses.cellSelected);
+		rerender(grid(false));
+		// the listeners are gone, so nothing could end or abort the range
+		expect(cellOf("r1", "c1").className).not.toContain(
+			matrixClasses.cellSelected,
+		);
+		rerender(grid(true));
+		fireEvent.mouseUp(window);
+		expect(onSelectRange).not.toHaveBeenCalled();
+	});
+
+	it("lays out an empty column set as empty, not as one column", () => {
+		renderGrid({ columns: [] });
+		const grid = document.querySelector(
+			"[class*=CcMatrixGrid-grid]",
+		) as HTMLElement;
+		// repeat(0, …) would invalidate the whole declaration
+		expect(grid.style.gridTemplateColumns).toBe("116px");
+		expect(screen.getByText("header-r1")).toBeInTheDocument();
+	});
+
 	it("aborts the range on Escape", () => {
 		const onSelectRange = vi.fn();
 		renderGrid({ selectable: true, onSelectRange });
@@ -453,7 +563,7 @@ describe("MatrixGrid", () => {
 		);
 	});
 
-	it("shows the add hint on hover, half height on an occupied cell", () => {
+	it("shows the add hint on hover, as a strip on an occupied cell", () => {
 		renderGrid({
 			selectable: true,
 			addLabel: "Add",
@@ -461,12 +571,30 @@ describe("MatrixGrid", () => {
 		});
 		fireEvent.mouseOver(cellOf("r1", "c1"));
 		const hint = screen.getByText("Add");
-		expect(hint.className).not.toContain(matrixClasses.addHintHalf);
+		expect(hint.className).not.toContain(matrixClasses.addHintStrip);
 		fireEvent.mouseOut(cellOf("r1", "c1"));
 		fireEvent.mouseOver(cellOf("r1", "c2")); // holds an entry
 		expect(screen.getByText("Add").className).toContain(
-			matrixClasses.addHintHalf,
+			matrixClasses.addHintStrip,
 		);
+	});
+
+	it("keeps the add hint out of the contents' way", () => {
+		renderGrid({
+			selectable: true,
+			addLabel: "Add",
+			isCellSelectable: () => true,
+		});
+		fireEvent.mouseOver(cellOf("r1", "c1")); // blank cell: the whole cell
+		const full = getComputedStyle(screen.getByText("Add"));
+		expect(full.pointerEvents).toBe("none");
+		fireEvent.mouseOut(cellOf("r1", "c1"));
+		fireEvent.mouseOver(cellOf("r1", "c2")); // holds an entry: a strip
+		const strip = getComputedStyle(screen.getByText("Add"));
+		expect(strip.height).toBe("14px");
+		// it catches the pointer, so a press there can still start a range —
+		// but only over those 14px, not over half the cell
+		expect(strip.pointerEvents).toBe("auto");
 	});
 
 	it("keeps the add hint after a click finished a range", () => {
@@ -604,6 +732,16 @@ describe("MatrixGrid", () => {
 			expect(cell.className).toContain(matrixClasses.touch);
 		});
 
+		it("fires the row action once, not once per auto-repeat tick", () => {
+			const onRowHeaderActions = vi.fn();
+			renderGrid({ onRowHeaderActions });
+			const header = screen.getByLabelText("Row one");
+			fireEvent.keyDown(header, { key: " " });
+			fireEvent.keyDown(header, { key: " ", repeat: true });
+			fireEvent.keyDown(header, { key: " ", repeat: true });
+			expect(onRowHeaderActions).toHaveBeenCalledTimes(1);
+		});
+
 		it("shows no add hint, because there is no hover", () => {
 			renderGrid({ selectable: true, addLabel: "Add" });
 			fireEvent.mouseOver(cellOf("r1", "c1"));
@@ -613,8 +751,20 @@ describe("MatrixGrid", () => {
 
 	describe("scrolling to a column", () => {
 		let writes: number[] = [];
+		let offsetDescriptor: PropertyDescriptor | undefined;
+		let scrollDescriptor: PropertyDescriptor | undefined;
 		beforeEach(() => {
 			writes = [];
+			// keep jsdom's own accessors, so later tests are not left with
+			// offsetLeft === undefined
+			offsetDescriptor = Object.getOwnPropertyDescriptor(
+				HTMLElement.prototype,
+				"offsetLeft",
+			);
+			scrollDescriptor = Object.getOwnPropertyDescriptor(
+				Element.prototype,
+				"scrollLeft",
+			);
 			// Stand in for layout: every cell sits at its position in the grid,
 			// so moving a column really does move its offset.
 			Object.defineProperty(HTMLElement.prototype, "offsetLeft", {
@@ -635,10 +785,18 @@ describe("MatrixGrid", () => {
 			});
 		});
 		afterEach(() => {
-			// @ts-expect-error removing the stubs restores jsdom's own behavior
-			delete HTMLElement.prototype.offsetLeft;
-			// @ts-expect-error see above
-			delete HTMLElement.prototype.scrollLeft;
+			if (offsetDescriptor)
+				Object.defineProperty(
+					HTMLElement.prototype,
+					"offsetLeft",
+					offsetDescriptor,
+				);
+			if (scrollDescriptor)
+				Object.defineProperty(
+					Element.prototype,
+					"scrollLeft",
+					scrollDescriptor,
+				);
 		});
 
 		const current = (key: string) => (column: MatrixColumn) =>
@@ -777,6 +935,54 @@ describe("MatrixCellTile", () => {
 		expect(onItemClick).toHaveBeenCalledWith(
 			expect.objectContaining({ key: "b" }),
 		);
+	});
+
+	it("makes a clickable entry reachable by keyboard", () => {
+		const onItemClick = vi.fn();
+		wrap(<MatrixCellTile items={[item("a")]} onItemClick={onItemClick} />);
+		const entry = screen.getByRole("button");
+		expect(entry).toHaveAttribute("tabindex", "0");
+		fireEvent.keyDown(entry, { key: "Enter" });
+		expect(onItemClick).toHaveBeenCalledWith(
+			expect.objectContaining({ key: "a" }),
+		);
+		fireEvent.keyDown(entry, { key: " ", repeat: true });
+		expect(onItemClick).toHaveBeenCalledTimes(1);
+	});
+
+	it("leaves a non-clickable entry out of the tab order", () => {
+		wrap(<MatrixCellTile items={[item("a")]} />);
+		expect(screen.queryByRole("button")).not.toBeInTheDocument();
+	});
+
+	it("derives a readable label color from the fill", () => {
+		const { container } = wrap(
+			<MatrixCellTile items={[item("a", { backgroundColor: "#ffffff" })]} />,
+		);
+		const entry = container.querySelector("[class*=item]") as HTMLElement;
+		expect(entry.style.getPropertyValue("--cc-matrix-tile-fg")).toBe("#000000");
+		cleanup();
+		const dark = wrap(
+			<MatrixCellTile items={[item("b", { backgroundColor: "#1a237e" })]} />,
+		);
+		const darkEntry = dark.container.querySelector(
+			"[class*=item]",
+		) as HTMLElement;
+		expect(darkEntry.style.getPropertyValue("--cc-matrix-tile-fg")).toBe(
+			"#ffffff",
+		);
+	});
+
+	it("keeps an explicit text color", () => {
+		const { container } = wrap(
+			<MatrixCellTile
+				items={[
+					item("a", { backgroundColor: "#ffffff", textColor: "#ff0000" }),
+				]}
+			/>,
+		);
+		const entry = container.querySelector("[class*=item]") as HTMLElement;
+		expect(entry.style.getPropertyValue("--cc-matrix-tile-fg")).toBe("#ff0000");
 	});
 
 	it("passes every rendered item through renderItem", () => {

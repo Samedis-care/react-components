@@ -1,10 +1,15 @@
 import React, { useMemo } from "react";
 import { styled } from "@mui/material";
 import combineClassNames from "../../utils/combineClassNames";
-import { cssVar, matrixClasses, matrixVars } from "./matrixClasses";
+import {
+	columnVariantClass,
+	cssVar,
+	matrixClasses,
+	matrixVars,
+} from "./matrixClasses";
 import { cellBorders, stickyColumnTintStyles } from "./matrixTints";
 import { useMatrixConfig } from "./MatrixGridContext";
-import { MatrixColumn, MatrixColumnVariant } from "./types";
+import { MatrixColumn } from "./types";
 
 export const MatrixColumnHeaderRoot = styled("div", {
 	name: "CcMatrixGrid",
@@ -53,22 +58,6 @@ export const MatrixColumnHeaderSubLabel = styled("div", {
 	textTransform: "uppercase",
 	color: theme.palette.text.secondary,
 }));
-
-/** The state class of a column variant, or false for "normal". */
-export const columnVariantClass = (
-	variant: MatrixColumnVariant | undefined,
-): string | false => {
-	switch (variant) {
-		case "muted":
-			return matrixClasses.columnMuted;
-		case "current":
-			return matrixClasses.columnCurrent;
-		case "accent":
-			return matrixClasses.columnAccent;
-		default:
-			return false;
-	}
-};
 
 export interface MatrixColumnHeaderProps {
 	/**
