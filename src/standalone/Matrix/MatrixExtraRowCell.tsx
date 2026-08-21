@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import { styled } from "@mui/material";
 import { Add } from "@mui/icons-material";
 import combineClassNames from "../../utils/combineClassNames";
@@ -72,6 +72,25 @@ export interface MatrixExtraRowCellProps {
 	 * The column this cell belongs to
 	 */
 	column: MatrixColumn;
+	/**
+	 * Is this the cell of its row that is in the tab order?
+	 */
+	tabStop: boolean;
+	/**
+	 * Take the focus now (an arrow key moved it here)
+	 */
+	pullFocus: boolean;
+	/**
+	 * An arrow key was pressed on this cell
+	 */
+	onNavigate: (
+		fromColumnKey: string,
+		to: "previous" | "next" | "first" | "last",
+	) => void;
+	/**
+	 * This cell took the focus, so its row remembers it as the tab stop
+	 */
+	onFocusColumn: (columnKey: string) => void;
 }
 
 const MatrixExtraRowCell = (props: MatrixExtraRowCellProps) => {
@@ -85,6 +104,36 @@ const MatrixExtraRowCell = (props: MatrixExtraRowCellProps) => {
 		onCellClick ? activate : undefined,
 		extraRow.getCellLabel?.(column.key) ?? extraRow.label,
 	);
+	const ref = useRef<HTMLDivElement>(null);
+	const { tabStop, pullFocus, onNavigate, onFocusColumn } = props;
+	useEffect(() => {
+		if (pullFocus) ref.current?.focus();
+	}, [pullFocus]);
+	const handleFocus = useCallback(() => {
+		onFocusColumn(column.key);
+	}, [onFocusColumn, column.key]);
+	// The arrow keys walk the row; Enter and Space come from the activation.
+	const handleKeyDown = useCallback(
+		(event: React.KeyboardEvent) => {
+			const to =
+				event.key === "ArrowRight"
+					? "next"
+					: event.key === "ArrowLeft"
+						? "previous"
+						: event.key === "Home"
+							? "first"
+							: event.key === "End"
+								? "last"
+								: null;
+			if (!to) {
+				activation?.onKeyDown(event);
+				return;
+			}
+			event.preventDefault();
+			onNavigate(column.key, to);
+		},
+		[activation, onNavigate, column.key],
+	);
 	// Zero is a value: only a missing (or null) badge means "nothing known".
 	const badge = extraRow.badges?.[column.key];
 	const clickable = !!onCellClick;
@@ -97,6 +146,10 @@ const MatrixExtraRowCell = (props: MatrixExtraRowCellProps) => {
 				touch && matrixClasses.touch,
 			])}
 			{...activation}
+			ref={ref}
+			tabIndex={clickable ? (tabStop ? 0 : -1) : undefined}
+			onKeyDown={clickable ? handleKeyDown : undefined}
+			onFocus={clickable ? handleFocus : undefined}
 		>
 			{badge != null ? (
 				<MatrixBadge className={classes?.badge}>{badge}</MatrixBadge>

@@ -61,15 +61,26 @@ export interface MatrixCellTileProps {
 }
 
 /**
- * The tile's resolved props, so an entry can read the classes and callbacks it
- * needs itself instead of having them drilled in as props its memo then has to
- * compare.
+ * What an entry needs from its tile: the click handler and the classes, and
+ * nothing else.
+ *
+ * Deliberately not the whole props object — it carries `items`, which a
+ * consumer typically maps fresh on every render, so a context holding it would
+ * change identity every time and re-render both entries, which is the opposite
+ * of the point.
  */
+export interface MatrixCellTileContextValue {
+	/** see MatrixCellTileProps.onItemClick */
+	onItemClick?: (item: MatrixTileItem) => void;
+	/** see MatrixCellTileProps.classes */
+	classes?: MatrixCellTileProps["classes"];
+}
+
 export const MatrixCellTilePropsContext = React.createContext<
-	MatrixCellTileProps | undefined
+	MatrixCellTileContextValue | undefined
 >(undefined);
 
-export const useMatrixCellTileProps = (): MatrixCellTileProps => {
+export const useMatrixCellTileProps = (): MatrixCellTileContextValue => {
 	const ctx = useContext(MatrixCellTilePropsContext);
 	if (!ctx) throw new Error("Matrix cell tile props context not set");
 	return ctx;

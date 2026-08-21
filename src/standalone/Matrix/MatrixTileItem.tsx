@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo } from "react";
-import { styled, Tooltip } from "@mui/material";
+import { styled, Tooltip, useTheme } from "@mui/material";
 import { ArrowDownward, ArrowRightAlt } from "@mui/icons-material";
 import combineClassNames from "../../utils/combineClassNames";
 import { cssVar, matrixClasses, matrixVars } from "./matrixClasses";
@@ -79,6 +79,7 @@ export interface MatrixTileItemProps {
 const MatrixTileItem = (props: MatrixTileItemProps) => {
 	const { item } = props;
 	const { onItemClick, classes } = useMatrixCellTileProps();
+	const theme = useTheme();
 	const activate = useCallback(() => {
 		onItemClick?.(item);
 	}, [onItemClick, item]);
@@ -97,13 +98,22 @@ const MatrixTileItem = (props: MatrixTileItemProps) => {
 			({
 				[matrixVars.tileBackground]: item.backgroundColor,
 				[matrixVars.tileForeground]:
-					item.textColor ?? contrastTextFor(item.backgroundColor),
+					item.textColor ?? contrastTextFor(theme, item.backgroundColor),
 				[matrixVars.tileFontSize]: `${labelFontSize(item.label)}px`,
-				[matrixVars.tileSecondaryFontSize]: `${labelFontSize(
-					item.secondaryLabel,
+				// never above the primary label: the arrow points AT this, it is
+				// not the headline (see MatrixTileItem.secondaryLabel)
+				[matrixVars.tileSecondaryFontSize]: `${Math.min(
+					labelFontSize(item.label),
+					labelFontSize(item.secondaryLabel),
 				)}px`,
 			}) as React.CSSProperties,
-		[item.backgroundColor, item.textColor, item.label, item.secondaryLabel],
+		[
+			theme,
+			item.backgroundColor,
+			item.textColor,
+			item.label,
+			item.secondaryLabel,
+		],
 	);
 
 	const entry = (

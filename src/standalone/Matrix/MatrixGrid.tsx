@@ -206,8 +206,14 @@ const MatrixGrid = <TCell,>(inProps: MatrixGridProps<TCell>) => {
 	}, [store, selectable]);
 
 	// Scroll the marked column just past the sticky row header column.
+	// The fallback also catches a scrollToColumn that is no longer in the set —
+	// a consumer holding a key in state while the window rolls past it would
+	// otherwise get no target at all and open at the far left.
 	const target =
-		scrollToColumn ??
+		(scrollToColumn !== undefined &&
+		columns.some((column) => column.key === scrollToColumn)
+			? scrollToColumn
+			: undefined) ??
 		columns.find((column) => column.variant === "current")?.key;
 	// Keyed on where the target sits, not on the identity of the columns array:
 	// a consumer that builds its columns inline would otherwise have the user's

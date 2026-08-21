@@ -1,8 +1,9 @@
-import React, { useCallback, useMemo } from "react";
+import React, { useMemo } from "react";
 import { alpha, styled, useThemeProps } from "@mui/material";
 import combineClassNames from "../../utils/combineClassNames";
 import { matrixClasses } from "./matrixClasses";
 import {
+	MatrixCellTileContextValue,
 	MatrixCellTileProps,
 	MatrixCellTilePropsContext,
 } from "./MatrixCellTileContext";
@@ -73,19 +74,18 @@ const MatrixCellTile = (inProps: MatrixCellTileProps) => {
 		classes,
 	} = props;
 
-	const wrap = useCallback(
-		(item: MatrixTileItemData, node: React.ReactNode) => {
-			const highlighted = item.highlighted ? (
-				<MatrixTileHighlight className={classes?.highlight}>
-					{node}
-				</MatrixTileHighlight>
-			) : (
-				node
-			);
-			return renderItem ? renderItem(item, highlighted) : highlighted;
-		},
-		[classes?.highlight, renderItem],
-	);
+	// A plain function on purpose: this is called while rendering, never passed
+	// to a memoized child, so a useCallback around it would buy nothing.
+	const wrap = (item: MatrixTileItemData, node: React.ReactNode) => {
+		const highlighted = item.highlighted ? (
+			<MatrixTileHighlight className={classes?.highlight}>
+				{node}
+			</MatrixTileHighlight>
+		) : (
+			node
+		);
+		return renderItem ? renderItem(item, highlighted) : highlighted;
+	};
 
 	let content: React.ReactNode = null;
 	if (items.length === 0) {
@@ -116,28 +116,11 @@ const MatrixCellTile = (inProps: MatrixCellTileProps) => {
 			);
 	}
 
-	// Memoized member-wise, for the same reason the grid's config is: the object
-	// useThemeProps hands back is new on every render, and a context carrying it
-	// would re-render both entries even when the items are the same objects.
-	const context = useMemo<MatrixCellTileProps>(
-		() => ({
-			items,
-			pairLayout,
-			splitDirection,
-			placeholder,
-			onItemClick,
-			renderItem,
-			classes,
-		}),
-		[
-			items,
-			pairLayout,
-			splitDirection,
-			placeholder,
-			onItemClick,
-			renderItem,
-			classes,
-		],
+	// Only what an entry reads, so a consumer mapping its items fresh on every
+	// render (the normal case) does not invalidate this and re-render them.
+	const context = useMemo<MatrixCellTileContextValue>(
+		() => ({ onItemClick, classes }),
+		[onItemClick, classes],
 	);
 
 	return (

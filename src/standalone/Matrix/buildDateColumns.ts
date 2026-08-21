@@ -74,11 +74,11 @@ const buildDateColumns = (params: BuildDateColumnsParams): MatrixColumn[] => {
 	const weekdayFormat = new Intl.DateTimeFormat(locale, { weekday: "short" });
 	const columns: MatrixColumn[] = [];
 	const end = moment(to);
-	let day = moment(from);
+	const day = moment(from);
 	for (
 		let i = 0;
 		day.isSameOrBefore(end, "day") && i < maxColumns;
-		i++, day = day.clone().add(1, "day")
+		i++, day.add(1, "day")
 	) {
 		const key = day.format("YYYY-MM-DD");
 		columns.push({

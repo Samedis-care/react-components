@@ -98,7 +98,11 @@ export class MatrixInteractionStore {
 			!this.dragging &&
 			!this.config.touch &&
 			this.hoverRowKey === rowKey &&
-			this.hoverColumnKey === columnKey
+			this.hoverColumnKey === columnKey &&
+			// A hint on a cell where a range cannot start advertises an action
+			// that does not exist — and in overlay mode it would even catch the
+			// press. The index lookup is a map hit, so this stays cheap.
+			this.config.canSelect(rowKey, this.indexByKey.get(columnKey) ?? -1)
 		)
 			state |= MATRIX_CELL_ADD_HINT;
 		return state;

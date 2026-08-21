@@ -26,6 +26,18 @@ export const MatrixBodyCellRoot = styled("div", {
 	// its own stacking context, so the add hint's z-index cannot reach past the
 	// cell and paint over the sticky headers
 	zIndex: 0,
+	// The chip is in the DOM whenever a range may start on this cell — that is
+	// what makes it reachable by Tab — and only visible once the cell is hovered
+	// or holds the focus. opacity, not visibility or a mount: a hidden-by-
+	// opacity element still takes focus, and focusing it turns it visible.
+	"& [data-cc-matrix-add-chip]": { opacity: 0, pointerEvents: "none" },
+	"&:hover [data-cc-matrix-add-chip], &:focus-within [data-cc-matrix-add-chip]":
+		{ opacity: 1, pointerEvents: "auto" },
+	// nothing hovers on a touch device, so there the chip is simply there
+	[`& [data-cc-matrix-add-chip].${matrixClasses.touch}`]: {
+		opacity: 1,
+		pointerEvents: "auto",
+	},
 	height: cssVar(matrixVars.rowHeight),
 	...cellBorders(theme),
 	...columnTintStyles(theme),
@@ -109,13 +121,13 @@ export const MatrixAddChip = styled("div", {
 	justifyContent: "center",
 	borderRadius: theme.shape.borderRadius,
 	border: `1px solid ${theme.palette.success.main}`,
-	backgroundColor:
-		theme.palette.mode === "dark"
-			? theme.palette.success.dark
-			: theme.palette.success.light,
+	// success.main at rest, because contrastText is computed for exactly that:
+	// filling with success.light left the "+" at ~2.5:1 until hover, below the
+	// 3:1 minimum for a non-text graphic — worst at the moment it is looked for.
+	backgroundColor: theme.palette.success.main,
 	color: theme.palette.success.contrastText,
 	cursor: "pointer",
-	"&:hover": { backgroundColor: theme.palette.success.main },
+	"&:hover": { backgroundColor: theme.palette.success.dark },
 	"&:focus-visible": {
 		outline: `2px solid ${theme.palette.primary.main}`,
 		outlineOffset: 1,
@@ -152,6 +164,7 @@ const MatrixBodyCell = <TCell,>(props: MatrixBodyCellProps<TCell>) => {
 		selectable,
 		addLabel,
 		occupiedAddAffordance,
+		touch,
 		classes,
 	} = config;
 	const store = useMatrixInteraction();
@@ -174,11 +187,14 @@ const MatrixBodyCell = <TCell,>(props: MatrixBodyCellProps<TCell>) => {
 	const handleMouseDown = useCallback(
 		(event: React.MouseEvent) => {
 			if (event.button !== 0) return; // right/middle click is not a range
-			// A drag handle inside a selectable cell wins: swallowing the
-			// default here would kill the native drag it needs.
+			// Anything interactive the contents render wins: swallowing the
+			// default here would kill a native drag, and take focus-on-click
+			// away from a button, a link or an input inside the cell.
 			if (
 				event.target instanceof Element &&
-				event.target.closest("[draggable=true]")
+				event.target.closest(
+					"[draggable=true],button,a,input,select,textarea,[role=button],[contenteditable=true]",
+				)
 			)
 				return;
 			event.preventDefault(); // no text selection while sweeping
@@ -196,9 +212,22 @@ const MatrixBodyCell = <TCell,>(props: MatrixBodyCellProps<TCell>) => {
 	const addToCell = useCallback(() => {
 		store.selectSingle(row.key, column.key);
 	}, [store, row.key, column.key]);
-	const chip = occupied && occupiedAddAffordance === "chip";
+	// Both are gated on the cell actually accepting an entry: an affordance on a
+	// cell where a range cannot start is a dead control (and in overlay mode a
+	// press-eating one).
+	//
+	// On a touch device the chip is used even in overlay mode, and it is visible
+	// at rest: the overlay only ever appears on hover, so on a tablet an
+	// occupied cell would otherwise have no way to add at all — the entry's own
+	// press handler blocks the cell press.
+	const chip =
+		cellSelectable && occupied && (occupiedAddAffordance === "chip" || touch);
+	const overlay =
+		cellSelectable && !touch && occupiedAddAffordance === "overlay"
+			? occupied
+			: false;
 	const chipActivation = useMatrixActivation(
-		cellSelectable && chip ? addToCell : undefined,
+		chip ? addToCell : undefined,
 		typeof addLabel === "string" ? addLabel : undefined,
 	);
 	const stopPress = useCallback((event: React.MouseEvent) => {
@@ -229,26 +258,30 @@ const MatrixBodyCell = <TCell,>(props: MatrixBodyCellProps<TCell>) => {
 			onMouseLeave={selectable ? handleMouseLeave : undefined}
 		>
 			{content}
-			{!!(state & MATRIX_CELL_ADD_HINT) &&
-				(chip ? (
-					<MatrixAddChip
-						className={classes?.addChip}
-						title={typeof addLabel === "string" ? addLabel : undefined}
-						{...chipActivation}
-						onMouseDown={stopPress}
-					>
-						<Add fontSize={"small"} />
-					</MatrixAddChip>
-				) : (
-					<MatrixAddHint
-						className={combineClassNames([
-							classes?.addHint,
-							occupied && matrixClasses.addHintHalf,
-						])}
-					>
-						{addLabel}
-					</MatrixAddHint>
-				))}
+			{chip && (
+				<MatrixAddChip
+					data-cc-matrix-add-chip={""}
+					className={combineClassNames([
+						classes?.addChip,
+						touch && matrixClasses.touch,
+					])}
+					title={typeof addLabel === "string" ? addLabel : undefined}
+					{...chipActivation}
+					onMouseDown={stopPress}
+				>
+					<Add fontSize={"small"} />
+				</MatrixAddChip>
+			)}
+			{!chip && cellSelectable && !!(state & MATRIX_CELL_ADD_HINT) && (
+				<MatrixAddHint
+					className={combineClassNames([
+						classes?.addHint,
+						overlay && matrixClasses.addHintHalf,
+					])}
+				>
+					{addLabel}
+				</MatrixAddHint>
+			)}
 		</MatrixBodyCellRoot>
 	);
 };

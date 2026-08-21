@@ -580,7 +580,6 @@ describe("MatrixGrid", () => {
 		fireEvent.mouseOver(cellOf("r1", "c2"));
 		expect(screen.queryByText("Add")).not.toBeInTheDocument();
 		const chip = screen.getByRole("button", { name: "Add" });
-		expect(getComputedStyle(chip).pointerEvents).not.toBe("none");
 		fireEvent.click(chip);
 		expect(onSelectRange).toHaveBeenCalledWith({
 			rowKey: "r1",
@@ -663,12 +662,52 @@ describe("MatrixGrid", () => {
 		expect(getComputedStyle(hint).pointerEvents).toBe("none");
 	});
 
-	it("does not offer the chip where a range may not start", () => {
+	it("draws no affordance at all where a range may not start", () => {
 		renderGrid({ selectable: true, addLabel: "Add" }); // default predicate
-		fireEvent.mouseOver(cellOf("r1", "c2")); // occupied -> not selectable
+		// c2 holds an entry, so the default predicate rejects it
 		expect(
-			screen.queryByRole("button", { name: "Add" }),
-		).not.toBeInTheDocument();
+			cellOf("r1", "c2").querySelector("[data-cc-matrix-add-chip]"),
+		).toBeNull();
+		fireEvent.mouseOver(cellOf("r1", "c2"));
+		expect(screen.queryByText("Add")).not.toBeInTheDocument();
+		expect(
+			cellOf("r1", "c2").querySelector("[data-cc-matrix-add-chip]"),
+		).toBeNull();
+		// and a whole row that opted out gets neither hint nor chip
+		fireEvent.mouseOver(cellOf("r2", "c1"));
+		expect(screen.queryByText("Add")).not.toBeInTheDocument();
+	});
+
+	it("draws no pointer-catching overlay where a range may not start", () => {
+		renderGrid({
+			selectable: true,
+			addLabel: "Add",
+			occupiedAddAffordance: "overlay",
+		});
+		// c2 is occupied and rejected by the default predicate: an overlay here
+		// would read as a target, eat the press and do nothing
+		fireEvent.mouseOver(cellOf("r1", "c2"));
+		expect(screen.queryByText("Add")).not.toBeInTheDocument();
+	});
+
+	it("keeps the chip in the DOM, so a keyboard can reach it", () => {
+		const onSelectRange = vi.fn();
+		renderGrid({
+			selectable: true,
+			addLabel: "Add",
+			isCellSelectable: () => true,
+			onSelectRange,
+		});
+		// no pointer has been anywhere near the grid
+		const chip = screen.getByRole("button", { name: "Add" });
+		expect(chip).toHaveAttribute("tabindex", "0");
+		expect(cellOf("r1", "c2")).toContainElement(chip);
+		chip.focus();
+		expect(document.activeElement).toBe(chip);
+		fireEvent.keyDown(chip, { key: "Enter" });
+		expect(onSelectRange).toHaveBeenCalledWith(
+			expect.objectContaining({ columnKeys: ["c2"] }),
+		);
 	});
 
 	it("keeps the add hint after a click finished a range", () => {
@@ -751,6 +790,22 @@ describe("MatrixGrid", () => {
 			expect(extraRows[0].onCellClick).toHaveBeenCalledWith("c2");
 		});
 
+		it("is one tab stop with arrow keys, not one stop per column", () => {
+			renderGrid({ extraRows });
+			const cells = screen.getAllByRole("button");
+			const stops = cells.filter(
+				(cell) => cell.getAttribute("tabindex") === "0",
+			);
+			expect(cells).toHaveLength(4); // one per column
+			expect(stops).toHaveLength(1); // but one way in
+			fireEvent.keyDown(stops[0], { key: "ArrowRight" });
+			expect(document.activeElement).toBe(cells[1]);
+			fireEvent.keyDown(cells[1], { key: "End" });
+			expect(document.activeElement).toBe(cells[3]);
+			fireEvent.keyDown(cells[3], { key: "Home" });
+			expect(document.activeElement).toBe(cells[0]);
+		});
+
 		it("labels its cells and answers the keyboard", () => {
 			renderGrid({ extraRows });
 			const cell = screen.getByLabelText("Open demand on c1");
@@ -820,6 +875,51 @@ describe("MatrixGrid", () => {
 			renderGrid({ selectable: true, addLabel: "Add" });
 			fireEvent.mouseOver(cellOf("r1", "c1"));
 			expect(screen.queryByText("Add")).not.toBeInTheDocument();
+		});
+
+		it("falls back to a visible chip on an occupied cell, in either mode", () => {
+			const onSelectRange = vi.fn();
+			const { rerender } = wrap(
+				<MatrixGrid<TestCell>
+					columns={COLUMNS}
+					rows={ROWS}
+					selectable={true}
+					addLabel={"Add"}
+					isCellSelectable={() => true}
+					occupiedAddAffordance={"overlay"}
+					onSelectRange={onSelectRange}
+					renderRowHeader={(row) => <span>{`header-${row.key}`}</span>}
+					renderCell={(cell, context) => (
+						<span
+							data-testid={`cell-${context.row.key}-${context.column.key}`}
+						/>
+					)}
+				/>,
+			);
+			// overlay mode, but a tablet has no hover to reveal it with
+			const chip = screen.getByRole("button", { name: "Add" });
+			expect(getComputedStyle(chip).opacity).toBe("1");
+			fireEvent.click(chip);
+			expect(onSelectRange).toHaveBeenCalledWith(
+				expect.objectContaining({ columnKeys: ["c2"] }),
+			);
+			rerender(
+				<ThemeProvider theme={theme}>
+					<MatrixGrid<TestCell>
+						columns={COLUMNS}
+						rows={ROWS}
+						selectable={true}
+						addLabel={"Add"}
+						isCellSelectable={() => true}
+						onSelectRange={onSelectRange}
+						renderRowHeader={(row) => <span>{`header-${row.key}`}</span>}
+						renderCell={() => null}
+					/>
+				</ThemeProvider>,
+			);
+			expect(
+				getComputedStyle(screen.getByRole("button", { name: "Add" })).opacity,
+			).toBe("1");
 		});
 	});
 
@@ -909,6 +1009,24 @@ describe("MatrixGrid", () => {
 				),
 			);
 			expect(writes).toEqual([450, 250]);
+		});
+
+		it("falls back to the current column when scrollToColumn is gone", () => {
+			// a consumer holding a key in state while the window rolled past it
+			render(
+				<ThemeProvider theme={theme}>
+					<MatrixGrid<TestCell>
+						columns={COLUMNS.map(current("c3"))}
+						rows={ROWS}
+						columnWidth={50}
+						rowHeaderWidth={100}
+						scrollToColumn={"c9"}
+						renderRowHeader={(row) => <span>{row.key}</span>}
+						renderCell={() => null}
+					/>
+				</ThemeProvider>,
+			);
+			expect(writes).toEqual([450]); // c3, not "no target at all"
 		});
 
 		it("leaves the scroll alone when the columns are rebuilt in place", () => {
@@ -1030,11 +1148,15 @@ describe("MatrixCellTile", () => {
 	});
 
 	it("derives a readable label color from the fill", () => {
+		// the library's own rule, so a consumer raising contrastThreshold moves
+		// tile labels with everything else
 		const { container } = wrap(
 			<MatrixCellTile items={[item("a", { backgroundColor: "#ffffff" })]} />,
 		);
 		const entry = container.querySelector("[class*=item]") as HTMLElement;
-		expect(entry.style.getPropertyValue("--cc-matrix-tile-fg")).toBe("#000000");
+		expect(entry.style.getPropertyValue("--cc-matrix-tile-fg")).toBe(
+			theme.palette.getContrastText("#ffffff"),
+		);
 		cleanup();
 		const dark = wrap(
 			<MatrixCellTile items={[item("b", { backgroundColor: "#1a237e" })]} />,
@@ -1043,8 +1165,25 @@ describe("MatrixCellTile", () => {
 			"[class*=item]",
 		) as HTMLElement;
 		expect(darkEntry.style.getPropertyValue("--cc-matrix-tile-fg")).toBe(
-			"#ffffff",
+			theme.palette.getContrastText("#1a237e"),
 		);
+		expect(theme.palette.getContrastText("#1a237e")).not.toBe(
+			theme.palette.getContrastText("#ffffff"),
+		);
+	});
+
+	it("never draws the secondary label larger than the primary", () => {
+		const { container } = wrap(
+			<MatrixCellTile
+				items={[item("a", { label: "ABCD", secondaryLabel: "X" })]}
+			/>,
+		);
+		const entry = container.querySelector("[class*=item]") as HTMLElement;
+		const primary = entry.style.getPropertyValue("--cc-matrix-tile-font-size");
+		const secondary = entry.style.getPropertyValue(
+			"--cc-matrix-tile-secondary-font-size",
+		);
+		expect(parseFloat(secondary)).toBeLessThanOrEqual(parseFloat(primary));
 	});
 
 	it("keeps an explicit text color", () => {

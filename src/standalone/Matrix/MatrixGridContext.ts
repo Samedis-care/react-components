@@ -159,6 +159,10 @@ export interface MatrixGridProps<TCell> {
 	 *   the cell, catching the pointer there. One big target that reads exactly
 	 *   like the blank-cell hint — at the price of the lower half of the entries
 	 *   underneath, whose clicks it takes (both of them, in a split pair).
+	 *
+	 * On a touch device the chip is used either way, and shown at rest: the
+	 * overlay needs a hover to appear, so there it would leave such a cell with
+	 * no way to add at all.
 	 * @default "chip"
 	 */
 	occupiedAddAffordance?: "chip" | "overlay";

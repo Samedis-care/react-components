@@ -48,12 +48,12 @@ export interface MatrixTileCornersProps {
 }
 
 const MatrixTileCorners = (props: MatrixTileCornersProps) => {
-	const { item } = props;
-	if (!item.corners) return null;
+	const { corners } = props.item;
+	if (!corners) return null;
 	return (
 		<>
 			{(props.only ?? ALL_CORNERS).map((corner) =>
-				item.corners?.[corner] ? (
+				corners[corner] ? (
 					<MatrixTileCornerRoot
 						key={corner}
 						className={combineClassNames([
@@ -61,7 +61,7 @@ const MatrixTileCorners = (props: MatrixTileCornersProps) => {
 							CORNER_CLASS[corner],
 						])}
 					>
-						{item.corners[corner]}
+						{corners[corner]}
 					</MatrixTileCornerRoot>
 				) : null,
 			)}

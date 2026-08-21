@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo } from "react";
-import { styled, Tooltip } from "@mui/material";
+import { styled, Tooltip, useTheme } from "@mui/material";
 import combineClassNames from "../../utils/combineClassNames";
 import { cssVar, matrixClasses, matrixVars } from "./matrixClasses";
 import {
@@ -78,6 +78,7 @@ export interface MatrixTileDiagonalPairProps {
 const MatrixTileDiagonalPair = (props: MatrixTileDiagonalPairProps) => {
 	const { a, b } = props;
 	const { onItemClick, classes } = useMatrixCellTileProps();
+	const theme = useTheme();
 	const activate = useCallback(() => {
 		onItemClick?.(a);
 	}, [onItemClick, a]);
@@ -95,11 +96,12 @@ const MatrixTileDiagonalPair = (props: MatrixTileDiagonalPairProps) => {
 					? dimColor(b.backgroundColor)
 					: b.backgroundColor,
 				[matrixVars.tileForegroundA]:
-					a.textColor ?? contrastTextFor(a.backgroundColor),
+					a.textColor ?? contrastTextFor(theme, a.backgroundColor),
 				[matrixVars.tileForegroundB]:
-					b.textColor ?? contrastTextFor(b.backgroundColor),
+					b.textColor ?? contrastTextFor(theme, b.backgroundColor),
 			}) as React.CSSProperties,
 		[
+			theme,
 			a.dimmed,
 			a.backgroundColor,
 			a.textColor,
