@@ -20,6 +20,7 @@ export { default as addGetParams } from "./addGetParams";
 export { default as deepAssign } from "./deepAssign";
 export { default as deepClone } from "./deepClone";
 export { default as isTouchDevice } from "./isTouchDevice";
+export { default as useIsTouchOnly } from "./useIsTouchOnly";
 export { default as uniqueArray } from "./uniqueArray";
 export * from "./uniqueArray";
 export { default as getCurrentLocale } from "./getCurrentLocale";

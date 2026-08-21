@@ -55,6 +55,12 @@ import {
 } from "./standalone/Form/FormPageLayout";
 import { GroupBoxClassKey, GroupBoxProps } from "./standalone/GroupBox";
 import {
+	MatrixCellTileClassKey,
+	MatrixCellTileProps,
+	MatrixGridClassKey,
+	MatrixGridProps,
+} from "./standalone/Matrix";
+import {
 	SignalPortletClassKey,
 	SignalPortletProps,
 } from "./standalone/SignalPortlet";
@@ -253,6 +259,8 @@ declare module "@mui/material/styles" {
 		CcDefaultFormPageButtons: DefaultFormPageButtonsClassKey;
 		CcSubActionButton: SubActionButtonClassKey;
 		CcGroupBox: GroupBoxClassKey;
+		CcMatrixGrid: MatrixGridClassKey;
+		CcMatrixCellTile: MatrixCellTileClassKey;
 		CcHowToBox: HowToBoxClassKey;
 		CcInfoBox: InfoBoxClassKey;
 		CcFormPageLayout: FormPageLayoutClassKey;
@@ -320,6 +328,8 @@ declare module "@mui/material/styles" {
 		CcDefaultFormPageButtons: Partial<DefaultFormPageButtonsProps>;
 		CcSubActionButton: Partial<SubActionButtonProps>;
 		CcGroupBox: Partial<GroupBoxProps>;
+		CcMatrixGrid: Partial<MatrixGridProps<unknown>>;
+		CcMatrixCellTile: Partial<MatrixCellTileProps>;
 		CcHowToBox: Partial<HowToBoxProps>;
 		CcInfoBox: Partial<InfoBoxProps>;
 		CcFormPageLayout: Partial<FormPageLayoutProps>;
@@ -453,6 +463,16 @@ declare module "@mui/material/styles" {
 			defaultProps?: ComponentsPropsList["CcGroupBox"];
 			styleOverrides?: ComponentsOverrides<Theme>["CcGroupBox"];
 			variants?: ComponentsVariants["CcGroupBox"];
+		};
+		CcMatrixGrid?: {
+			defaultProps?: ComponentsPropsList["CcMatrixGrid"];
+			styleOverrides?: ComponentsOverrides<Theme>["CcMatrixGrid"];
+			variants?: ComponentsVariants["CcMatrixGrid"];
+		};
+		CcMatrixCellTile?: {
+			defaultProps?: ComponentsPropsList["CcMatrixCellTile"];
+			styleOverrides?: ComponentsOverrides<Theme>["CcMatrixCellTile"];
+			variants?: ComponentsVariants["CcMatrixCellTile"];
 		};
 		CcHowToBox?: {
 			defaultProps?: ComponentsPropsList["CcHowToBox"];
