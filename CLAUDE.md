@@ -5,15 +5,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Commands
 
 ```bash
-npm run build           # Compile TypeScript to dist/ and copy assets
-npm run lint            # Lint src/ with ESLint
-npm run lint-fix        # Auto-fix lint issues
-npm run storybook       # Start Storybook dev server (port 6006)
-npm run test            # Run all tests (unit + stories)
-npm run test:unit       # Run unit tests only (test/**/*.test.{ts,tsx})
-npm run test:stories    # Run story-based component tests only
-npm run test:watch      # Run tests in watch mode
-npm run docgen          # Generate TypeDoc documentation
+pnpm run build           # Compile TypeScript to dist/ and copy assets
+pnpm run lint            # Lint src/ with ESLint
+pnpm run lint-fix        # Auto-fix lint issues
+pnpm run storybook       # Start Storybook dev server (port 6006)
+pnpm run test            # Run all tests (unit + stories)
+pnpm run test:unit       # Run unit tests only (test/**/*.test.{ts,tsx})
+pnpm run test:stories    # Run story-based component tests only
+pnpm run test:watch      # Run tests in watch mode
+pnpm run docgen          # Generate TypeDoc documentation
 ```
 
 ## Architecture
@@ -49,8 +49,8 @@ All exports are aggregated in `src/index.ts`. Theme slot overrides for all compo
 
 ## Testing
 
-- **Unit tests** live in `test/standalone/` — run with `npm run test:unit`
-- **Story tests** use Storybook's Vitest addon with Playwright browser mode — run with `npm run test:stories`
+- **Unit tests** live in `test/standalone/` — run with `pnpm run test:unit`
+- **Story tests** use Storybook's Vitest addon with Playwright browser mode — run with `pnpm run test:stories`
 - Stories support `play` functions for interaction tests (click, type, assert). Import `fn`/`expect` from `storybook/test`. Use `fn()` only in `args`, never inside render functions.
 - `preview.ts` wraps all stories in MUI `ThemeProvider` via `createElement`
 

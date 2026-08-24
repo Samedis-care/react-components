@@ -43,7 +43,7 @@ Used Libraries:
 
 ### Running the developer environment (Storybook)
 
-1. Install pnpm 10 (`npm install -g pnpm@10` or via Corepack).
+1. Install pnpm 11 (`npm install -g pnpm@11` or via Corepack).
 2. Run `pnpm install --frozen-lockfile`
 3. Run `pnpm start`
 
