@@ -23,7 +23,7 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 11.3
+          version: 11
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
@@ -61,7 +61,7 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 11.3
+          version: 11
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
@@ -71,6 +71,13 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Unit Tests
         run: pnpm run test:unit
+      # Story tests drive real Chromium via the Vitest browser provider, so the
+      # browser and its system libs have to be there. Installed after the unit
+      # tests so a unit failure doesn't pay for the download.
+      - name: Install Playwright Chromium
+        run: pnpm exec playwright install --with-deps chromium
+      - name: Story Tests
+        run: pnpm run test:stories
 
   deploy-pages:
     needs: build-and-test
@@ -84,7 +91,7 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 11.3
+          version: 11
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
