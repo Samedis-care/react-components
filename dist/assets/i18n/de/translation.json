@@ -61,6 +61,7 @@
 					"matches": "Entspricht",
 					"not-matches": "Entspricht nicht"
 				},
+				"grid-label": "Tabelleninhalt",
 				"no-data": "Die Liste enthält keine Daten.",
 				"filter-combination": {
 					"and": "UND",

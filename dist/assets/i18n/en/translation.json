@@ -65,6 +65,7 @@
 					"matches": "Matches",
 					"not-matches": "Does not match"
 				},
+				"grid-label": "Table contents",
 				"no-data": "The list does not contain any data.",
 				"filter-combination": {
 					"and": "AND",

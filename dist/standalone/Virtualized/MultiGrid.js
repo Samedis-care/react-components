@@ -5,6 +5,17 @@ import { styled, useThemeProps } from "@mui/material";
 const Root = styled("div", { name: "CcMultiGrid", slot: "root" })({
     position: "absolute",
 });
+// the scrolling pane is a tab stop, so it needs a visible focus indicator
+const scrollPaneFocusRing = (theme) => ({
+    "&:focus-visible": {
+        outline: `2px solid ${theme.palette.primary.main}`,
+        outlineOffset: -2,
+    },
+});
+const TopRightVariableSizeGrid = styled(VGrid, {
+    name: "CcMultiGrid",
+    slot: "topRightGrid",
+})(({ theme }) => scrollPaneFocusRing(theme));
 const BottomLeftVariableSizeGrid = styled(VGrid, {
     name: "CcMultiGrid",
     slot: "bottomLeftGrid",
@@ -27,10 +38,14 @@ const BottomLeftVariableSizeGrid = styled(VGrid, {
     // doesn't add to the content width in firefox
     scrollbarWidth: "none",
 });
+const BottomRightVariableSizeGrid = styled(VGrid, {
+    name: "CcMultiGrid",
+    slot: "bottomRightGrid",
+})(({ theme }) => scrollPaneFocusRing(theme));
 const SCROLL_DETECTION_DELAY_MS = 100; // ms to consider scroll events caused by JS code
 const MultiGrid = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcMultiGrid" });
-    const { width, height, columnCount, columnWidth, rowCount, rowHeight, onCellsRendered, fixedColumnCount, fixedRowCount, styleTopLeftGrid, styleTopRightGrid, styleBottomLeftGrid, styleBottomRightGrid, children: CellRenderer, noContentRenderer: NoContentRenderer, globalScrollListener, } = props;
+    const { width, height, columnCount, columnWidth, rowCount, rowHeight, onCellsRendered, fixedColumnCount, fixedRowCount, styleTopLeftGrid, styleTopRightGrid, styleBottomLeftGrid, styleBottomRightGrid, children: CellRenderer, noContentRenderer: NoContentRenderer, label, globalScrollListener, } = props;
     const fixedWidth = useMemo(() => Array.from(new Array(fixedColumnCount).keys()).reduce((p, c) => p + columnWidth(c), 0), [columnWidth, fixedColumnCount]);
     const fixedHeight = useMemo(() => Array.from(new Array(fixedRowCount).keys()).reduce((p, c) => p + rowHeight(c), 0), [fixedRowCount, rowHeight]);
     const CellRendererTopRight = useCallback((props) => {
@@ -103,6 +118,8 @@ const MultiGrid = (inProps) => {
             top: evt.currentTarget.scrollTop,
         });
     }, []);
+    // page up/down scrolls the grid from anywhere on the page, for the routes
+    // where the grid *is* the page and there is nothing else to page
     useEffect(() => {
         if (!globalScrollListener)
             return;
@@ -155,7 +172,10 @@ const MultiGrid = (inProps) => {
                     left: 0,
                     width: Math.min(fixedWidth, width),
                     height: fixedHeight,
-                }, cellComponent: CellRenderer, cellProps: {} }), _jsx(VGrid, { gridRef: topRightGrid, columnWidth: (index) => columnWidth(index + fixedColumnCount), rowHeight: (index) => rowHeight(index), columnCount: columnCount - fixedColumnCount, rowCount: fixedRowCount, style: {
+                }, cellComponent: CellRenderer, cellProps: {} }), _jsx(TopRightVariableSizeGrid, { gridRef: topRightGrid, columnWidth: (index) => columnWidth(index + fixedColumnCount), rowHeight: (index) => rowHeight(index), columnCount: columnCount - fixedColumnCount, rowCount: fixedRowCount, 
+                // without rows the bottom right pane doesn't exist and this one
+                // takes over as the horizontal scroller, so it's the tab stop then
+                tabIndex: bottomRightRendered ? undefined : 0, "aria-label": bottomRightRendered ? undefined : label, style: {
                     ...styleTopRightGrid,
                     position: "absolute",
                     top: 0,
@@ -170,7 +190,11 @@ const MultiGrid = (inProps) => {
                     left: 0,
                     width: Math.min(fixedWidth, width),
                     height: height - fixedHeight,
-                }, cellComponent: CellRendererBottomLeft, cellProps: {} }), bottomRightRendered ? (_jsx(VGrid, { gridRef: bottomRightGrid, columnWidth: (index) => columnWidth(index + fixedColumnCount), rowHeight: (index) => rowHeight(index + fixedRowCount), columnCount: columnCount - fixedColumnCount, rowCount: rowCount - fixedRowCount, onScroll: handleScroll, style: {
+                }, cellComponent: CellRendererBottomLeft, cellProps: {} }), bottomRightRendered ? (_jsx(BottomRightVariableSizeGrid, { gridRef: bottomRightGrid, columnWidth: (index) => columnWidth(index + fixedColumnCount), rowHeight: (index) => rowHeight(index + fixedRowCount), columnCount: columnCount - fixedColumnCount, rowCount: rowCount - fixedRowCount, onScroll: handleScroll, 
+                // the pane that actually scrolls in both directions: making it a
+                // tab stop is what gives the grid a keyboard scrolling path, and
+                // its onScroll keeps the two pinned panes in sync
+                tabIndex: 0, "aria-label": label, style: {
                     ...styleBottomRightGrid,
                     overflowX: "scroll",
                     overflowY: "auto",

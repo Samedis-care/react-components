@@ -21,10 +21,15 @@ export interface MultiGridProps {
     children: (props: CellComponentProps) => React.ReactElement;
     noContentRenderer: React.ComponentType;
     /**
+     * Accessible name for the scrolling pane, which is a tab stop
+     * (arrow keys, page up/down and home/end scroll it once focused)
+     */
+    label?: string;
+    /**
      * Enable global scrolling listener (enables page up/down scrolling)
      */
     globalScrollListener?: boolean;
 }
-export type MultiGridClassKey = "root" | "bottomLeftGrid";
+export type MultiGridClassKey = "root" | "topRightGrid" | "bottomLeftGrid" | "bottomRightGrid";
 declare const _default: React.MemoExoticComponent<(inProps: MultiGridProps) => React.JSX.Element>;
 export default _default;

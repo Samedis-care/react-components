@@ -65,6 +65,7 @@
 					"matches": "Coincide",
 					"not-matches": "No coincide"
 				},
+				"grid-label": "Contenido de la tabla",
 				"no-data": "La lista no contiene datos.",
 				"filter-combination": {
 					"and": "Y",

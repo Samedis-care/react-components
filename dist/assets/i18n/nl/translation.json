@@ -61,6 +61,7 @@
 					"not-matches": "Komt niet overeen",
 					"matches": "Overeen"
 				},
+				"grid-label": "Tabelinhoud",
 				"no-data": "De lijst bevat geen data.",
 				"filter-combination": {
 					"or": "OF",
