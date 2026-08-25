@@ -1,7 +1,9 @@
 /* eslint-disable react/no-children-prop */
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { Box } from "@mui/material";
+// eslint-disable-next-line import/no-unresolved
+import { expect, userEvent, waitFor, within } from "storybook/test";
+import { Box, Dialog, DialogContent } from "@mui/material";
 import MultiGrid from "./MultiGrid";
 import type { CellComponentProps } from "react-window";
 
@@ -16,6 +18,8 @@ const meta: Meta<typeof MultiGrid> = {
 export default meta;
 
 // ─── Sample data ──────────────────────────────────────────────────────────────
+
+const GRID_LABEL = "Demo grid contents";
 
 const COLUMN_COUNT = 20;
 const ROW_COUNT = 100;
@@ -90,34 +94,55 @@ export const Default: StoryObj<typeof MultiGrid> = {
 				styleBottomRightGrid={{}}
 				children={CellRenderer}
 				noContentRenderer={NoContent}
+				label={GRID_LABEL}
 			/>
 		</Box>
 	),
 };
 
+/**
+ * Headers without rows: the bottom right pane isn't rendered at all, so the header
+ * row is what scrolls horizontally and it takes over as the tab stop.
+ */
 export const NoData: StoryObj<typeof MultiGrid> = {
 	render: () => (
 		<Box sx={{ position: "relative", width: 600, height: 200 }}>
 			<MultiGrid
 				width={600}
 				height={200}
-				columnCount={FIXED_COLUMNS}
+				columnCount={COLUMN_COUNT}
 				columnWidth={columnWidth}
 				rowCount={FIXED_ROWS}
 				rowHeight={rowHeight}
 				fixedColumnCount={FIXED_COLUMNS}
 				fixedRowCount={FIXED_ROWS}
 				styleTopLeftGrid={{}}
-				styleTopRightGrid={{}}
+				styleTopRightGrid={{ overflowX: "auto" }}
 				styleBottomLeftGrid={{}}
 				styleBottomRightGrid={{}}
 				children={CellRenderer}
 				noContentRenderer={NoContent}
+				label={GRID_LABEL}
 			/>
 		</Box>
 	),
+	play: async ({ canvas }) => {
+		await expect(await canvas.findByText("No content")).toBeVisible();
+
+		const pane = canvas.getByRole("grid", { name: GRID_LABEL });
+		await expect(pane).toHaveAttribute("tabindex", "0");
+		await expect(within(pane).getByText("Col 1")).toBeVisible();
+		await expect(
+			canvas.getAllByRole("grid").filter((grid) => grid.tabIndex === 0),
+		).toHaveLength(1);
+	},
 };
 
+/**
+ * Page up/down scrolls this grid from anywhere on the page, without focusing it
+ * first — for routes where the grid is the whole page and there is nothing else
+ * those keys could sensibly page.
+ */
 export const WithGlobalScrollListener: StoryObj<typeof MultiGrid> = {
 	render: () => (
 		<Box sx={{ position: "relative", width: 600, height: 400 }}>
@@ -136,8 +161,61 @@ export const WithGlobalScrollListener: StoryObj<typeof MultiGrid> = {
 				styleBottomRightGrid={{}}
 				children={CellRenderer}
 				noContentRenderer={NoContent}
+				label={GRID_LABEL}
 				globalScrollListener
 			/>
 		</Box>
 	),
+};
+
+/**
+ * Inside a dialog the scrolling pane is the only thing keeping the grid reachable
+ * without a pointer: the dialog paper holds focus from the moment it opens, and a
+ * click on a cell used to resolve to the paper as the nearest focusable ancestor,
+ * so arrow keys scrolled the paper's (unscrollable) ancestors instead of the grid.
+ */
+export const InDialog: StoryObj<typeof MultiGrid> = {
+	render: () => (
+		<Dialog open fullWidth maxWidth={"sm"}>
+			<DialogContent>
+				<Box sx={{ position: "relative", width: 400, height: 300 }}>
+					<MultiGrid
+						width={400}
+						height={300}
+						columnCount={COLUMN_COUNT}
+						columnWidth={columnWidth}
+						rowCount={ROW_COUNT}
+						rowHeight={rowHeight}
+						fixedColumnCount={FIXED_COLUMNS}
+						fixedRowCount={FIXED_ROWS}
+						styleTopLeftGrid={{}}
+						styleTopRightGrid={{}}
+						styleBottomLeftGrid={{}}
+						styleBottomRightGrid={{}}
+						children={CellRenderer}
+						noContentRenderer={NoContent}
+						label={GRID_LABEL}
+					/>
+				</Box>
+			</DialogContent>
+		</Dialog>
+	),
+	play: async () => {
+		// the dialog renders into a portal, so it is outside the story canvas
+		const body = within(document.body);
+		const pane = await body.findByRole("grid", { name: GRID_LABEL });
+
+		// the tab stop is what makes the browser aim arrow keys at this pane -
+		// the scrolling itself is native, so there is nothing here to assert on
+		await expect(pane).toHaveAttribute("tabindex", "0");
+
+		// exactly one pane is a tab stop, the three pinned ones must not be
+		await expect(
+			body.getAllByRole("grid").filter((grid) => grid.tabIndex === 0),
+		).toHaveLength(1);
+
+		// clicking a cell has to land focus on the pane rather than on the paper
+		await userEvent.click(within(pane).getByText("R1C1"));
+		await waitFor(() => expect(pane).toHaveFocus());
+	},
 };

@@ -61,6 +61,7 @@
 					"matches": "Kelmaydi",
 					"not-matches": "Mos kelmaydi"
 				},
+				"grid-label": "Jadval mazmuni",
 				"no-data": "Ro'yxatda hech qanday ma'lumot yo'q.",
 				"filter-combination": {
 					"and": "VA",

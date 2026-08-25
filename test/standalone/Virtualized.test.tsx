@@ -6,11 +6,11 @@ import type { CellComponentProps } from "react-window";
 
 // react-window depends on DOM measurements; stub ResizeObserver globally
 beforeAll(() => {
-	global.ResizeObserver = vi.fn(() => ({
+	globalThis.ResizeObserver = vi.fn(() => ({
 		observe: vi.fn(),
 		unobserve: vi.fn(),
 		disconnect: vi.fn(),
-	})) as unknown as typeof ResizeObserver;
+	}));
 });
 
 const NoContent = () => <div data-testid="no-content">No content</div>;
@@ -64,6 +64,34 @@ describe("MultiGrid smoke tests", () => {
 		expect(() =>
 			render(<MultiGrid {...defaultProps} globalScrollListener />),
 		).not.toThrow();
+	});
+
+	it("makes the scrolling pane the only tab stop", () => {
+		const { container } = render(
+			<MultiGrid {...defaultProps} label={"Grid contents"} />,
+		);
+		const tabStops = Array.from(
+			container.querySelectorAll<HTMLElement>('[role="grid"]'),
+		).filter((pane) => pane.tabIndex === 0);
+		expect(tabStops).toHaveLength(1);
+		expect(tabStops[0]).toHaveAttribute("aria-label", "Grid contents");
+		expect(tabStops[0].className).toContain("bottomRightGrid");
+	});
+
+	it("moves the tab stop to the header row when there are no rows", () => {
+		const { container } = render(
+			<MultiGrid
+				{...defaultProps}
+				rowCount={1} // only the fixed header row — no bottom rows
+				label={"Grid contents"}
+			/>,
+		);
+		const tabStops = Array.from(
+			container.querySelectorAll<HTMLElement>('[role="grid"]'),
+		).filter((pane) => pane.tabIndex === 0);
+		expect(tabStops).toHaveLength(1);
+		expect(tabStops[0]).toHaveAttribute("aria-label", "Grid contents");
+		expect(tabStops[0].className).toContain("topRightGrid");
 	});
 
 	it("handles zero fixed columns/rows", () => {

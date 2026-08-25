@@ -65,6 +65,7 @@
 					"matches": "Corrisponde",
 					"not-matches": "Non corrisponde"
 				},
+				"grid-label": "Contenuto della tabella",
 				"no-data": "L'elenco non contiene dati.",
 				"filter-combination": {
 					"and": "E",

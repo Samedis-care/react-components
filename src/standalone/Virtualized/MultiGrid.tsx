@@ -13,7 +13,7 @@ import {
 	GridProps,
 	GridImperativeAPI,
 } from "react-window";
-import { styled, useThemeProps } from "@mui/material";
+import { CSSObject, styled, Theme, useThemeProps } from "@mui/material";
 
 /**
  * Most props do the same as in react-virtualized MultiGrid component
@@ -36,6 +36,11 @@ export interface MultiGridProps {
 	children: (props: CellComponentProps) => React.ReactElement;
 	noContentRenderer: React.ComponentType;
 	/**
+	 * Accessible name for the scrolling pane, which is a tab stop
+	 * (arrow keys, page up/down and home/end scroll it once focused)
+	 */
+	label?: string;
+	/**
 	 * Enable global scrolling listener (enables page up/down scrolling)
 	 */
 	globalScrollListener?: boolean;
@@ -44,6 +49,19 @@ export interface MultiGridProps {
 const Root = styled("div", { name: "CcMultiGrid", slot: "root" })({
 	position: "absolute",
 });
+
+// the scrolling pane is a tab stop, so it needs a visible focus indicator
+const scrollPaneFocusRing = (theme: Theme): CSSObject => ({
+	"&:focus-visible": {
+		outline: `2px solid ${theme.palette.primary.main}`,
+		outlineOffset: -2,
+	},
+});
+
+const TopRightVariableSizeGrid = styled(VGrid, {
+	name: "CcMultiGrid",
+	slot: "topRightGrid",
+})(({ theme }) => scrollPaneFocusRing(theme));
 
 const BottomLeftVariableSizeGrid = styled(VGrid, {
 	name: "CcMultiGrid",
@@ -68,7 +86,13 @@ const BottomLeftVariableSizeGrid = styled(VGrid, {
 	scrollbarWidth: "none",
 });
 
-export type MultiGridClassKey = "root" | "bottomLeftGrid";
+const BottomRightVariableSizeGrid = styled(VGrid, {
+	name: "CcMultiGrid",
+	slot: "bottomRightGrid",
+})(({ theme }) => scrollPaneFocusRing(theme));
+
+export type MultiGridClassKey =
+	"root" | "topRightGrid" | "bottomLeftGrid" | "bottomRightGrid";
 
 const SCROLL_DETECTION_DELAY_MS = 100; // ms to consider scroll events caused by JS code
 
@@ -90,6 +114,7 @@ const MultiGrid = (inProps: MultiGridProps) => {
 		styleBottomRightGrid,
 		children: CellRenderer,
 		noContentRenderer: NoContentRenderer,
+		label,
 		globalScrollListener,
 	} = props;
 
@@ -213,6 +238,8 @@ const MultiGrid = (inProps: MultiGridProps) => {
 		[],
 	);
 
+	// page up/down scrolls the grid from anywhere on the page, for the routes
+	// where the grid *is* the page and there is nothing else to page
 	useEffect(() => {
 		if (!globalScrollListener) return;
 		const handleKeyPress = (evt: KeyboardEvent) => {
@@ -274,12 +301,16 @@ const MultiGrid = (inProps: MultiGridProps) => {
 				cellProps={{}}
 			/>
 			{/* top right */}
-			<VGrid
+			<TopRightVariableSizeGrid
 				gridRef={topRightGrid}
 				columnWidth={(index) => columnWidth(index + fixedColumnCount)}
 				rowHeight={(index) => rowHeight(index)}
 				columnCount={columnCount - fixedColumnCount}
 				rowCount={fixedRowCount}
+				// without rows the bottom right pane doesn't exist and this one
+				// takes over as the horizontal scroller, so it's the tab stop then
+				tabIndex={bottomRightRendered ? undefined : 0}
+				aria-label={bottomRightRendered ? undefined : label}
 				style={{
 					...styleTopRightGrid,
 					position: "absolute",
@@ -313,13 +344,18 @@ const MultiGrid = (inProps: MultiGridProps) => {
 			/>
 			{/* bottom right */}
 			{bottomRightRendered ? (
-				<VGrid
+				<BottomRightVariableSizeGrid
 					gridRef={bottomRightGrid}
 					columnWidth={(index) => columnWidth(index + fixedColumnCount)}
 					rowHeight={(index) => rowHeight(index + fixedRowCount)}
 					columnCount={columnCount - fixedColumnCount}
 					rowCount={rowCount - fixedRowCount}
 					onScroll={handleScroll}
+					// the pane that actually scrolls in both directions: making it a
+					// tab stop is what gives the grid a keyboard scrolling path, and
+					// its onScroll keeps the two pinned panes in sync
+					tabIndex={0}
+					aria-label={label}
 					style={{
 						...styleBottomRightGrid,
 						overflowX: "scroll",

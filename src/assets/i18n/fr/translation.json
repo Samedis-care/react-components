@@ -61,6 +61,7 @@
 					"not-matches": "Ne correspond pas",
 					"matches": "Correspond"
 				},
+				"grid-label": "Contenu du tableau",
 				"no-data": "La liste ne contient aucune donnée.",
 				"filter-combination": {
 					"and": "ET",

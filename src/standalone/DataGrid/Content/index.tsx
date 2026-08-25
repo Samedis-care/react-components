@@ -48,7 +48,9 @@ const CenteredStickyTypography = styled(CenteredTypography, {
 const SELECT_ROW_WIDTH = 57;
 const DEFAULT_COLUMN_WIDTH = 200;
 const STYLE_TOP_LEFT = { overflow: "hidden" };
-const STYLE_BOTTOM_RIGHT = { outline: "none" };
+// the scrolling pane is a tab stop and draws its own focus ring; the object stays
+// because MultiGrid also spreads it over the no-content placeholder
+const STYLE_BOTTOM_RIGHT = {};
 
 const Content = (props: IDataGridContentProps) => {
 	const {
@@ -300,6 +302,7 @@ const Content = (props: IDataGridContentProps) => {
 						styleBottomLeftGrid={styleBottomLeftGrid}
 						styleBottomRightGrid={STYLE_BOTTOM_RIGHT}
 						noContentRenderer={noContentRenderer}
+						label={t("standalone.data-grid.content.grid-label")}
 						globalScrollListener={globalScrollListener}
 					>
 						{Cell}

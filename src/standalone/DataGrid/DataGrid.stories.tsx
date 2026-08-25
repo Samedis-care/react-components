@@ -2,7 +2,7 @@ import React, { useCallback, useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 // eslint-disable-next-line import/no-unresolved
 import { expect, userEvent, waitFor, within } from "storybook/test";
-import { Box } from "@mui/material";
+import { Box, Dialog, DialogContent } from "@mui/material";
 import { DataGrid, DataGridNoPersist } from "./index";
 import type {
 	DataGridData,
@@ -223,6 +223,63 @@ const COLUMNS_MANUAL_ID_FILTER: IDataGridColumnDef[] = [
 	},
 	...COLUMNS,
 ];
+
+// fixed initial widths keep these out of the "distribute the leftover space"
+// pass, so the grid genuinely overflows a dialog sized viewport
+const WIDE_COLUMNS: IDataGridColumnDef[] = [
+	...COLUMNS,
+	...Array.from({ length: 8 }, (_, i): IDataGridColumnDef => ({
+		field: `extra${i + 1}`,
+		headerName: `Extra ${i + 1}`,
+		type: "string",
+		width: [200, 200, 200],
+	})),
+];
+
+/**
+ * The reported case: a grid too wide for the dialog it sits in. The dialog paper
+ * holds focus from the moment it opens and a click on a cell resolves to the
+ * nearest focusable ancestor, so before the scrolling pane became a tab stop that
+ * ancestor was the paper and the arrow keys had nothing scrollable to work on.
+ */
+export const InDialog: Story = {
+	render: () => {
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		const loadData = useCallback(makeLoadData(), []);
+		return (
+			<Dialog open fullWidth maxWidth={"sm"}>
+				<DialogContent>
+					<Box sx={{ height: 400 }}>
+						<DataGrid columns={WIDE_COLUMNS} loadData={loadData} />
+					</Box>
+				</DialogContent>
+			</Dialog>
+		);
+	},
+	play: async () => {
+		// the dialog renders into a portal, so it is outside the story canvas
+		const body = within(document.body);
+		await expect(await body.findByText("Alice Müller")).toBeVisible();
+
+		// the scrolling pane is the only one of the four that is a tab stop
+		const panes = body
+			.getAllByRole("grid")
+			.filter((grid) => grid.tabIndex === 0);
+		await expect(panes).toHaveLength(1);
+		const [pane] = panes;
+
+		// an unnamed grid as a tab stop would be announced without any context
+		await expect(pane.getAttribute("aria-label")).toBeTruthy();
+
+		// it really is the overflowing one, and it really is the scroller
+		await expect(pane.scrollWidth).toBeGreaterThan(pane.clientWidth);
+
+		// the fix: the click lands focus here instead of leaving it on the paper,
+		// which is what the browser reads to decide where arrow keys scroll
+		await userEvent.click(within(pane).getByText("Alice Müller"));
+		await waitFor(() => expect(pane).toHaveFocus());
+	},
+};
 
 export const ManualIdFilter: Story = {
 	args: {
