@@ -39,7 +39,9 @@ export interface DataGridProps extends IDataGridHeaderProps, IDataGridColumnProp
     globalScrollListener?: boolean;
     /**
      * What to persist?
-     * - columns: column sizing, visibility, pinned state
+     * - columns: column sizing, visibility, pinned state and which columns the
+     *   user has already seen (columns added later start out with the hidden and
+     *   pinned state from their definition)
      * - sort: sorting state
      * - filters: customData, search, column filter
      * @default ["columns", "sort", "filters"]
@@ -450,13 +452,17 @@ export interface IDataGridState {
      */
     showFilterDialog: boolean;
     /**
-     * The hidden fields
+     * Is the column hidden? (field -> hidden)
+     * @remarks Contains an entry for every column this user has already seen,
+     *          including columns which are not currently defined. A column
+     *          missing here is new to the user and follows its definition.
      */
-    hiddenColumns: string[];
+    columnHidden: Record<string, boolean>;
     /**
-     * The locked fields
+     * Is the column pinned to the start? (field -> pinned)
+     * @see columnHidden
      */
-    lockedColumns: string[];
+    columnPinned: Record<string, boolean>;
     /**
      * Is everything selected? (inverts selection)
      */
@@ -566,7 +572,8 @@ export declare const DataGridColumnHeaderFilterButton: typeof IconButton;
 export declare const DataGridQuickFilterIcon: typeof SearchIcon;
 export declare const DataGridCustomFilterIcon: typeof AppsIcon;
 export type DataGridClassKey = "root" | "header" | "content" | "footer" | "contentOverlayCollapse" | "contentOverlayPaper" | "contentOverlayClosed" | "customFilterContainer" | "selectCheckbox" | "selectAllCheckbox" | "selectAllWrapper" | "paginationText" | "setFilterListDivider" | "setFilterListItemDivider" | "setFilterListItem" | "setFilterContainer" | "idFilterContainer" | "filterBarGrid" | "filterBarBox" | "filterClearBtn" | "columnHeaderLabel" | "columnHeaderResizer" | "columnHeaderSortIcon" | "columnHeaderContentWrapper" | "cell" | "columnHeaderFilterPopup" | "columnHeaderFilterPopupEnum" | "columnHeaderFilterPopupId" | "columnHeaderFilterPopupDateTime" | "columnHeaderFilterIcon" | "columnHeaderFilterActiveIcon" | "columnHeaderFilterButton" | "quickFilterIcon" | "customFilterIcon" | "customFilterMulti" | "customFilterMultiBackend" | "customFilterSingle" | "customFilterSingleBackend" | "centeredStickyTypography" | "settingsTableCell" | "settingsTable" | "settingsTableRow" | "settingsTableHead" | "settingsTableBody" | "customFilterContainerHeader" | "search";
-export declare const getActiveDataGridColumns: (columns: IDataGridColumnDef[], hiddenColumns: string[], lockedColumns: string[]) => IDataGridColumnDef[];
+export declare const isDataGridColumnPinned: (column: IDataGridColumnDef, columnPinned: Record<string, boolean>) => boolean;
+export declare const getActiveDataGridColumns: (columns: IDataGridColumnDef[], columnHidden: Record<string, boolean>, columnPinned: Record<string, boolean>) => IDataGridColumnDef[];
 export declare const getDefaultColumnWidths: (columns: IDataGridColumnDef[], theme: Theme) => Record<string, number>;
 declare const _default: React.MemoExoticComponent<(inProps: DataGridProps) => React.JSX.Element>;
 export default _default;

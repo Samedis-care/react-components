@@ -23,7 +23,7 @@ const ExportMenuEntry = React.forwardRef((props, ref) => {
     const [exportData, setExportData] = useState(undefined);
     const IdleIcon = props.exporter.icon || ExportIcon;
     const { onRequest, onDownload, autoDownload } = props.exporter;
-    const { search, customData, lockedColumns, hiddenColumns } = state;
+    const { search, customData, columnPinned, columnHidden } = state;
     const finishExport = useCallback(() => {
         onDownload(exportData, pushDialog);
         setStatus(DataGridExportStatus.Idle);
@@ -40,7 +40,7 @@ const ExportMenuEntry = React.forwardRef((props, ref) => {
         setStatus(DataGridExportStatus.Working);
         try {
             const [sorts, fieldFilter] = dataGridPrepareFiltersAndSorts(columnsState);
-            const data = await onRequest(search, getAdditionalFilters ? getAdditionalFilters(customData) : {}, fieldFilter, sorts, getActiveDataGridColumns(columns, hiddenColumns, lockedColumns));
+            const data = await onRequest(search, getAdditionalFilters ? getAdditionalFilters(customData) : {}, fieldFilter, sorts, getActiveDataGridColumns(columns, columnHidden, columnPinned));
             setExportData(data);
             setStatus(DataGridExportStatus.Ready);
             if (autoDownload)
@@ -61,8 +61,8 @@ const ExportMenuEntry = React.forwardRef((props, ref) => {
         getAdditionalFilters,
         customData,
         columns,
-        hiddenColumns,
-        lockedColumns,
+        columnHidden,
+        columnPinned,
         onError,
         autoDownload,
         finishExport,

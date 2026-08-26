@@ -1,45 +1,8 @@
 import { Fragment as _Fragment, jsx as _jsx } from "react/jsx-runtime";
-import React, { useContext, useEffect } from "react";
-import { useDataGridColumnState, useDataGridColumnsWidthState, useDataGridProps, useDataGridState, } from "./DataGrid";
+import React, { useContext, useEffect, useMemo, useRef } from "react";
+import { getDataGridDefaultColumnsState, useDataGridColumnState, useDataGridColumnsWidthState, useDataGridProps, useDataGridState, } from "./DataGrid";
+import { encodePersistedState, } from "./PersistFormat";
 export const DataGridPersistentStateContext = React.createContext(undefined);
-// when you change this, also update documentation DataGridProps.persist @default
-const DEFAULT_PERSIST_CONFIG = [
-    "columns",
-    "sort",
-    "filters",
-];
-export const filterPersistedState = (persisted, config) => {
-    const { columnState, columnWidth, state } = persisted;
-    config = config ?? DEFAULT_PERSIST_CONFIG;
-    const result = {
-        columnState: columnState
-            ? Object.fromEntries(Object.entries(columnState).map(([column, data]) => [
-                column,
-                {
-                    ...data,
-                    sort: config.includes("sort") ? data.sort : 0,
-                    sortOrder: config.includes("sort") ? data.sortOrder : undefined,
-                    filter: config.includes("filters") ? data.filter : undefined,
-                },
-            ]))
-            : {},
-        columnWidth: config.includes("columns") ? (columnWidth ?? {}) : {},
-    };
-    if (state) {
-        result.state = {};
-        if (state.search != null && config.includes("filters"))
-            result.state.search = state.search;
-        if (state.hiddenColumns != null && config.includes("columns"))
-            result.state.hiddenColumns = state.hiddenColumns;
-        if (state.lockedColumns != null && config.includes("columns"))
-            result.state.lockedColumns = state.lockedColumns;
-        if (state.customData != null && config.includes("filters"))
-            result.state.customData = state.customData;
-        if (state.initialResize != null && config.includes("columns"))
-            result.state.initialResize = state.initialResize;
-    }
-    return result;
-};
 /**
  * Logical component which takes care of optional state persistence for the data grid
  * @remarks Used internally in DataGrid, do not use in your code!
@@ -50,23 +13,30 @@ const StatePersistence = () => {
     const [state] = useDataGridState();
     const [columnState] = useDataGridColumnState();
     const [columnWidthState] = useDataGridColumnsWidthState();
-    const config = useDataGridProps().persist;
+    const { persist: config, columns, defaultSort, defaultFilter, } = useDataGridProps();
+    const defaultColumnState = useMemo(() => getDataGridDefaultColumnsState(columns, defaultSort, defaultFilter), [columns, defaultSort, defaultFilter]);
+    // the grid state changes on every page of data loaded, so compare what we'd
+    // write before writing it - persistence may well be a request to a server
+    const lastWritten = useRef(undefined);
     // save on changes
     useEffect(() => {
         if (!setPersisted)
             return;
-        void setPersisted(filterPersistedState({
-            columnState,
-            columnWidth: columnWidthState,
-            state: {
-                search: state.search,
-                hiddenColumns: state.hiddenColumns,
-                lockedColumns: state.lockedColumns,
-                customData: state.customData,
-                initialResize: state.initialResize,
-            },
-        }, config));
-    }, [setPersisted, state, columnState, columnWidthState, config]);
+        const data = encodePersistedState(state, columnState, columnWidthState, defaultColumnState, columns, config);
+        const serialized = JSON.stringify(data);
+        if (lastWritten.current === serialized)
+            return;
+        lastWritten.current = serialized;
+        void setPersisted(data);
+    }, [
+        setPersisted,
+        state,
+        columnState,
+        columnWidthState,
+        defaultColumnState,
+        columns,
+        config,
+    ]);
     return _jsx(_Fragment, {});
 };
 export default React.memo(StatePersistence);

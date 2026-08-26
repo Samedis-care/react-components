@@ -68,7 +68,7 @@ const Content = (props) => {
     const remainingWidth = useMemo(() => {
         const shownColumns = Object.keys(columnWidth)
             .map((field) => columns.find((col) => col.field === field))
-            .filter((entry) => entry).filter((entry) => !state.hiddenColumns.includes(entry.field));
+            .filter((entry) => entry).filter((entry) => !state.columnHidden[entry.field]);
         const usedWidth = Object.entries(columnWidth)
             .filter(([field]) => shownColumns.find((col) => col.field === field))
             .reduce((a, b) => a + b[1], 0) +
@@ -78,7 +78,7 @@ const Content = (props) => {
         columnWidth,
         columns,
         disableSelection,
-        state.hiddenColumns,
+        state.columnHidden,
         width,
         scrollbarWidth,
     ]);
@@ -92,7 +92,7 @@ const Content = (props) => {
             // resolve all visible columns which don't have an fixed initial width
             const shownColumns = Object.keys(prevState)
                 .map((field) => columns.find((col) => col.field === field))
-                .filter((entry) => entry).filter((entry) => !state.hiddenColumns.includes(entry.field));
+                .filter((entry) => entry).filter((entry) => !state.columnHidden[entry.field]);
             let columnsToResize = shownColumns.filter((entry) => !entry.width || !entry.width[2]);
             // determine width used by visible columns
             const usedWidth = Object.entries(prevState)

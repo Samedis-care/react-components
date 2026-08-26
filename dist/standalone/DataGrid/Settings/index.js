@@ -16,18 +16,20 @@ const DataGridSettings = (props) => {
         const value = evt.target.value;
         setState((prevState) => ({
             ...prevState,
-            lockedColumns: prevState.lockedColumns.includes(value)
-                ? prevState.lockedColumns.filter((s) => s !== value)
-                : [...prevState.lockedColumns, value],
+            columnPinned: {
+                ...prevState.columnPinned,
+                [value]: !prevState.columnPinned[value],
+            },
         }));
     }, [setState]);
     const toggleColumnVisibility = useCallback((evt) => {
         const value = evt.target.value;
         setState((prevState) => ({
             ...prevState,
-            hiddenColumns: prevState.hiddenColumns.includes(value)
-                ? prevState.hiddenColumns.filter((s) => s !== value)
-                : [...prevState.hiddenColumns, value],
+            columnHidden: {
+                ...prevState.columnHidden,
+                [value]: !prevState.columnHidden[value],
+            },
         }));
         // clear column filter on column visibility toggle
         setColumnState((prevState) => ({
@@ -39,6 +41,6 @@ const DataGridSettings = (props) => {
         }));
     }, [setColumnState, setState]);
     return (_jsx(DataGridContentOverlayCollapse, { className: classes?.contentOverlayCollapse, in: state.showSettings, children: _jsx(Dialog, { columns: props.columns.filter((col) => !state.settingsSearch ||
-                col.headerName.toLowerCase().includes(state.settingsSearch)), closeGridSettings: closeGridSettings, toggleColumnLock: toggleColumnLock, toggleColumnVisibility: toggleColumnVisibility, lockedColumns: state.lockedColumns, hiddenColumns: state.hiddenColumns }) }));
+                col.headerName.toLowerCase().includes(state.settingsSearch)), closeGridSettings: closeGridSettings, toggleColumnLock: toggleColumnLock, toggleColumnVisibility: toggleColumnVisibility, columnPinned: state.columnPinned, columnHidden: state.columnHidden }) }));
 };
 export default React.memo(DataGridSettings);

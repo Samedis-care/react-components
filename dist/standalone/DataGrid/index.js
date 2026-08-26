@@ -3,6 +3,7 @@ export { default as DataGridLocalStoragePersist } from "./LocalStoragePersist";
 export { default as DataGridStorageManagerPersist } from "./StorageManagerPersist";
 export { default as DataGridNoPersist } from "./NoPersist";
 export { DataGridPersistentStateContext, } from "./StatePersistence";
+export { DATA_GRID_PERSIST_VERSION } from "./PersistFormat";
 export { default as GridMultiSelectFilter } from "./GridMultiSelectFilter";
 export { default as GridMultiSelectFilterBackend } from "./GridMultiSelectFilterBackend";
 export { default as GridSingleSelectFilter } from "./GridSingleSelectFilter";

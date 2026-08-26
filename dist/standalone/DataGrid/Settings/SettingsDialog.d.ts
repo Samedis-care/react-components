@@ -16,13 +16,13 @@ export interface IDataGridSettingsDialogProps extends IDataGridColumnProps {
      */
     toggleColumnVisibility: (evt: ChangeEvent<HTMLInputElement>) => void;
     /**
-     * The currently locked columns
+     * Is the column pinned? (field -> pinned)
      */
-    lockedColumns: string[];
+    columnPinned: Record<string, boolean>;
     /**
-     * The currently hidden columns
+     * Is the column hidden? (field -> hidden)
      */
-    hiddenColumns: string[];
+    columnHidden: Record<string, boolean>;
 }
 declare const _default: React.MemoExoticComponent<(props: IDataGridSettingsDialogProps) => React.JSX.Element>;
 export default _default;

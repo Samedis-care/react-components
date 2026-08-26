@@ -13,7 +13,8 @@ import shallowCompareArray from "../../utils/shallowCompareArray";
 import { dataGridPrepareFiltersAndSorts } from "./CallbackUtil";
 import { HEADER_PADDING } from "./Content/ColumnHeader";
 import CustomFilterDialog from "./CustomFilterDialog";
-import StatePersistence, { DataGridPersistentStateContext, filterPersistedState, } from "./StatePersistence";
+import StatePersistence, { DataGridPersistentStateContext, } from "./StatePersistence";
+import { decodePersistedState, normalizeFilterDef } from "./PersistFormat";
 import { CustomFilterActiveContext } from "./Header/FilterBar";
 import combineClassNames from "../../utils/combineClassNames";
 import Checkbox from "../UIKit/Checkbox";
@@ -63,10 +64,8 @@ export const getDataGridDefaultState = (columns, defaultCustomData) => ({
     settingsSearch: "",
     showFilterDialog: false,
     pages: [0, 0],
-    hiddenColumns: columns.filter((col) => col.hidden).map((col) => col.field),
-    lockedColumns: columns
-        .filter((col) => col.pinned || col.forcePin)
-        .map((col) => col.field),
+    columnHidden: Object.fromEntries(columns.map((col) => [col.field, !!col.hidden])),
+    columnPinned: Object.fromEntries(columns.map((col) => [col.field, !!(col.pinned || col.forcePin)])),
     selectAll: false,
     selectedRows: [],
     selectionUpdatedByProps: false,
@@ -370,16 +369,15 @@ export const DataGridCustomFilterIcon = styled(AppsIcon, {
         color: theme.palette.secondary.main,
     },
 }));
-export const getActiveDataGridColumns = (columns, hiddenColumns, lockedColumns) => {
-    return columns
-        .filter((column) => !hiddenColumns.includes(column.field))
-        .filter((column) => lockedColumns.includes(column.field))
-        .concat(columns
-        .filter((column) => !hiddenColumns.includes(column.field))
-        .filter((column) => !lockedColumns.includes(column.field)))
+export const isDataGridColumnPinned = (column, columnPinned) => !!column.forcePin || !!columnPinned[column.field];
+export const getActiveDataGridColumns = (columns, columnHidden, columnPinned) => {
+    const visible = columns.filter((column) => !columnHidden[column.field]);
+    return visible
+        .filter((column) => isDataGridColumnPinned(column, columnPinned))
+        .concat(visible.filter((column) => !isDataGridColumnPinned(column, columnPinned)))
         .map((column) => ({
         ...column,
-        isLocked: lockedColumns.includes(column.field),
+        isLocked: isDataGridColumnPinned(column, columnPinned),
     }));
 };
 export const getDefaultColumnWidths = (columns, theme) => {
@@ -412,28 +410,24 @@ const DataGrid = (inProps) => {
     const rowsPerPage = props.rowsPerPage || 25;
     const theme = useTheme();
     const persistedContext = useContext(DataGridPersistentStateContext);
-    const persisted = useMemo(() => persistedContext && persistedContext[0]
-        ? filterPersistedState(persistedContext[0], persist)
-        : undefined, [persistedContext, persist]);
+    const defaultColumnState = useMemo(() => getDataGridDefaultColumnsState(columns, defaultSort, defaultFilter), [columns, defaultSort, defaultFilter]);
+    const persisted = useMemo(() => decodePersistedState(persistedContext?.[0], columns, defaultColumnState, persist), [persistedContext, columns, defaultColumnState, persist]);
     const statePack = useState(() => ({
         ...getDataGridDefaultState(columns, undefined),
-        ...persisted?.state,
+        ...persisted.state,
         customData: overrideCustomData ??
-            persisted?.state?.customData ??
+            persisted.state.customData ??
             defaultCustomData ??
             {},
     }));
     const [state, setState] = statePack;
-    const { search, rows, pages, hiddenColumns, lockedColumns, refreshDataInstance, refreshData, customData, selectAll, selectedRows, selectionUpdatedByProps, } = state;
+    const { search, rows, pages, columnHidden, columnPinned, refreshDataInstance, refreshData, customData, selectAll, selectedRows, selectionUpdatedByProps, } = state;
     const lastRefreshData = useRef(0);
     const activeCustomFiltersPack = useState(0);
     const gridRoot = useRef(null);
-    const visibleColumns = useMemo(() => getActiveDataGridColumns(columns, hiddenColumns, lockedColumns), [columns, hiddenColumns, lockedColumns]);
+    const visibleColumns = useMemo(() => getActiveDataGridColumns(columns, columnHidden, columnPinned), [columns, columnHidden, columnPinned]);
     const columnsStatePack = useState(() => {
-        const ret = {
-            ...getDataGridDefaultColumnsState(columns, defaultSort, defaultFilter),
-            ...persisted?.columnState,
-        };
+        const ret = { ...persisted.columnState };
         if (overrideFilter) {
             for (const field in ret) {
                 ret[field].filter = undefined;
@@ -449,7 +443,7 @@ const DataGrid = (inProps) => {
     const [columnsState] = columnsStatePack;
     const columnWidthStatePack = useState(() => ({
         ...getDefaultColumnWidths(columns, theme),
-        ...persisted?.columnWidth,
+        ...persisted.columnWidth,
     }));
     // update selection (if controlled)
     useEffect(() => {
@@ -588,22 +582,13 @@ const DataGrid = (inProps) => {
         };
     }, []);
     // column state hash without inactive filters (used for refresh trigger)
+    // @remarks keep this to state the backend query depends on - anything added
+    // here causes a full reload whenever it changes
     const columnStateHash = useMemo(() => {
         const cloned = deepClone(columnsState);
         // filter out inactive filter state
         for (const field in cloned) {
-            if (!cloned[field].filter)
-                continue;
-            if (!cloned[field].filter.value1)
-                cloned[field].filter = undefined;
-            let filterDef = cloned[field].filter;
-            while (filterDef) {
-                if (!filterDef.nextFilter)
-                    break;
-                if (!filterDef.nextFilter.value1)
-                    filterDef.nextFilter = undefined;
-                filterDef = filterDef.nextFilter;
-            }
+            cloned[field].filter = normalizeFilterDef(cloned[field].filter);
         }
         return JSON.stringify(cloned);
     }, [columnsState]);
