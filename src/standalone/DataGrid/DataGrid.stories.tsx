@@ -3,7 +3,11 @@ import type { Meta, StoryObj } from "@storybook/react-vite";
 // eslint-disable-next-line import/no-unresolved
 import { expect, userEvent, waitFor, within } from "storybook/test";
 import { Box, Dialog, DialogContent } from "@mui/material";
-import { DataGrid, DataGridNoPersist } from "./index";
+import {
+	DataGrid,
+	DataGridLocalStoragePersist,
+	DataGridNoPersist,
+} from "./index";
 import type {
 	DataGridData,
 	IDataGridColumnDef,
@@ -299,5 +303,96 @@ export const ManualIdFilter: Story = {
 		const filterValue = body.getByRole("textbox");
 		await userEvent.type(filterValue, "3");
 		await expect(filterValue).toHaveValue("3");
+	},
+};
+
+// ─── Persistence ─────────────────────────────────────────────────────────────
+
+const PERSIST_STORAGE_KEY = "cc-storybook-data-grid-persist";
+
+// "Active" is hidden by default, "Internal Note" was added to the model after
+// the user last opened this grid
+const COLUMNS_PERSIST: IDataGridColumnDef[] = [
+	...COLUMNS.map((column) =>
+		column.field === "active" ? { ...column, hidden: true } : column,
+	),
+	{
+		field: "internal_note",
+		headerName: "Internal Note",
+		type: "string",
+		hidden: true,
+	},
+];
+
+/**
+ * A user who has been using this grid since before "Internal Note" existed, so
+ * their stored state is in the pre-versioning format and mentions only the
+ * columns which existed back then.
+ *
+ * The new column is not in that data, so it follows its definition and starts
+ * hidden. "Active" is hidden by definition too, but the stored data knows the
+ * column and has it visible - that's the user's own choice and it stays.
+ */
+export const NewColumnUsesDefaults: Story = {
+	beforeEach: () => {
+		localStorage.setItem(
+			PERSIST_STORAGE_KEY,
+			JSON.stringify({
+				columnState: {
+					name: { sort: 0 },
+					age: { sort: 0 },
+					role: { sort: 0 },
+					active: {
+						sort: 0,
+						filter: { type: "equals", value1: "", value2: "" },
+					},
+				},
+				state: {
+					search: "",
+					hiddenColumns: ["role"],
+					lockedColumns: [],
+					customData: {},
+				},
+			}),
+		);
+		return () => localStorage.removeItem(PERSIST_STORAGE_KEY);
+	},
+	render: () => {
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		const loadData = useCallback(makeLoadData(), []);
+		return (
+			<DataGridLocalStoragePersist storageKey={PERSIST_STORAGE_KEY}>
+				<DataGrid columns={COLUMNS_PERSIST} loadData={loadData} />
+			</DataGridLocalStoragePersist>
+		);
+	},
+	play: async ({ canvas, canvasElement }) => {
+		await expect(await canvas.findByText("Alice Müller")).toBeVisible();
+
+		// the settings dialog lists every column with a visibility and a pin
+		// checkbox, both carrying the field as their value
+		const isVisible = (field: string) =>
+			canvasElement.querySelector<HTMLInputElement>(
+				`input[type="checkbox"][value="${field}"]`,
+			)?.checked;
+
+		// untouched by the stored state
+		await expect(isVisible("name")).toBe(true);
+		// the user hid this one
+		await expect(isVisible("role")).toBe(false);
+		// new to this user, so it follows its definition
+		await expect(isVisible("internal_note")).toBe(false);
+		// hidden by definition, but the stored state knows it and has it visible
+		await expect(isVisible("active")).toBe(true);
+
+		// what got written back is the current format, and it knows every column
+		await waitFor(async () => {
+			const stored = JSON.parse(
+				localStorage.getItem(PERSIST_STORAGE_KEY) ?? "{}",
+			) as { v?: number; shown?: string[]; hidden?: string[] };
+			await expect(stored.v).toBe(2);
+			await expect(stored.shown).toEqual(["name", "age", "active"]);
+			await expect(stored.hidden).toEqual(["role", "internal_note"]);
+		});
 	},
 };

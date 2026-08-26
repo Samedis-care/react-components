@@ -45,8 +45,8 @@ import { HEADER_PADDING } from "./Content/ColumnHeader";
 import CustomFilterDialog from "./CustomFilterDialog";
 import StatePersistence, {
 	DataGridPersistentStateContext,
-	filterPersistedState,
 } from "./StatePersistence";
+import { decodePersistedState, normalizeFilterDef } from "./PersistFormat";
 import { IDataGridContentSelectRowViewProps } from "./Content/SelectRowView";
 import { CustomFilterActiveContext } from "./Header/FilterBar";
 import combineClassNames from "../../utils/combineClassNames";
@@ -89,7 +89,9 @@ export interface DataGridProps
 	globalScrollListener?: boolean;
 	/**
 	 * What to persist?
-	 * - columns: column sizing, visibility, pinned state
+	 * - columns: column sizing, visibility, pinned state and which columns the
+	 *   user has already seen (columns added later start out with the hidden and
+	 *   pinned state from their definition)
 	 * - sort: sorting state
 	 * - filters: customData, search, column filter
 	 * @default ["columns", "sort", "filters"]
@@ -531,13 +533,17 @@ export interface IDataGridState {
 	 */
 	showFilterDialog: boolean;
 	/**
-	 * The hidden fields
+	 * Is the column hidden? (field -> hidden)
+	 * @remarks Contains an entry for every column this user has already seen,
+	 *          including columns which are not currently defined. A column
+	 *          missing here is new to the user and follows its definition.
 	 */
-	hiddenColumns: string[];
+	columnHidden: Record<string, boolean>;
 	/**
-	 * The locked fields
+	 * Is the column pinned to the start? (field -> pinned)
+	 * @see columnHidden
 	 */
-	lockedColumns: string[];
+	columnPinned: Record<string, boolean>;
 	/**
 	 * Is everything selected? (inverts selection)
 	 */
@@ -670,10 +676,12 @@ export const getDataGridDefaultState = (
 	settingsSearch: "",
 	showFilterDialog: false,
 	pages: [0, 0],
-	hiddenColumns: columns.filter((col) => col.hidden).map((col) => col.field),
-	lockedColumns: columns
-		.filter((col) => col.pinned || col.forcePin)
-		.map((col) => col.field),
+	columnHidden: Object.fromEntries(
+		columns.map((col) => [col.field, !!col.hidden]),
+	),
+	columnPinned: Object.fromEntries(
+		columns.map((col) => [col.field, !!(col.pinned || col.forcePin)]),
+	),
 	selectAll: false,
 	selectedRows: [],
 	selectionUpdatedByProps: false,
@@ -1086,22 +1094,25 @@ export type DataGridClassKey =
 	| "customFilterContainerHeader"
 	| "search";
 
+export const isDataGridColumnPinned = (
+	column: IDataGridColumnDef,
+	columnPinned: Record<string, boolean>,
+): boolean => !!column.forcePin || !!columnPinned[column.field];
+
 export const getActiveDataGridColumns = (
 	columns: IDataGridColumnDef[],
-	hiddenColumns: string[],
-	lockedColumns: string[],
+	columnHidden: Record<string, boolean>,
+	columnPinned: Record<string, boolean>,
 ): IDataGridColumnDef[] => {
-	return columns
-		.filter((column) => !hiddenColumns.includes(column.field))
-		.filter((column) => lockedColumns.includes(column.field))
+	const visible = columns.filter((column) => !columnHidden[column.field]);
+	return visible
+		.filter((column) => isDataGridColumnPinned(column, columnPinned))
 		.concat(
-			columns
-				.filter((column) => !hiddenColumns.includes(column.field))
-				.filter((column) => !lockedColumns.includes(column.field)),
+			visible.filter((column) => !isDataGridColumnPinned(column, columnPinned)),
 		)
 		.map((column) => ({
 			...column,
-			isLocked: lockedColumns.includes(column.field),
+			isLocked: isDataGridColumnPinned(column, columnPinned),
 		}));
 };
 
@@ -1167,20 +1178,27 @@ const DataGrid = (inProps: DataGridProps) => {
 
 	const theme = useTheme();
 	const persistedContext = useContext(DataGridPersistentStateContext);
+	const defaultColumnState = useMemo(
+		() => getDataGridDefaultColumnsState(columns, defaultSort, defaultFilter),
+		[columns, defaultSort, defaultFilter],
+	);
 	const persisted = useMemo(
 		() =>
-			persistedContext && persistedContext[0]
-				? filterPersistedState(persistedContext[0], persist)
-				: undefined,
-		[persistedContext, persist],
+			decodePersistedState(
+				persistedContext?.[0],
+				columns,
+				defaultColumnState,
+				persist,
+			),
+		[persistedContext, columns, defaultColumnState, persist],
 	);
 
 	const statePack = useState<IDataGridState>(() => ({
 		...getDataGridDefaultState(columns, undefined),
-		...persisted?.state,
+		...persisted.state,
 		customData:
 			overrideCustomData ??
-			persisted?.state?.customData ??
+			persisted.state.customData ??
 			defaultCustomData ??
 			{},
 	}));
@@ -1189,8 +1207,8 @@ const DataGrid = (inProps: DataGridProps) => {
 		search,
 		rows,
 		pages,
-		hiddenColumns,
-		lockedColumns,
+		columnHidden,
+		columnPinned,
 		refreshDataInstance,
 		refreshData,
 		customData,
@@ -1204,15 +1222,12 @@ const DataGrid = (inProps: DataGridProps) => {
 	const gridRoot = useRef<HTMLDivElement>(null);
 
 	const visibleColumns = useMemo(
-		() => getActiveDataGridColumns(columns, hiddenColumns, lockedColumns),
-		[columns, hiddenColumns, lockedColumns],
+		() => getActiveDataGridColumns(columns, columnHidden, columnPinned),
+		[columns, columnHidden, columnPinned],
 	);
 
 	const columnsStatePack = useState<IDataGridColumnsState>(() => {
-		const ret = {
-			...getDataGridDefaultColumnsState(columns, defaultSort, defaultFilter),
-			...persisted?.columnState,
-		};
+		const ret = { ...persisted.columnState };
 		if (overrideFilter) {
 			for (const field in ret) {
 				ret[field].filter = undefined;
@@ -1229,7 +1244,7 @@ const DataGrid = (inProps: DataGridProps) => {
 
 	const columnWidthStatePack = useState<Record<string, number>>(() => ({
 		...getDefaultColumnWidths(columns, theme),
-		...persisted?.columnWidth,
+		...persisted.columnWidth,
 	}));
 
 	// update selection (if controlled)
@@ -1406,19 +1421,13 @@ const DataGrid = (inProps: DataGridProps) => {
 	}, []);
 
 	// column state hash without inactive filters (used for refresh trigger)
+	// @remarks keep this to state the backend query depends on - anything added
+	// here causes a full reload whenever it changes
 	const columnStateHash = useMemo(() => {
 		const cloned = deepClone(columnsState);
 		// filter out inactive filter state
 		for (const field in cloned) {
-			if (!cloned[field].filter) continue;
-			if (!cloned[field].filter.value1) cloned[field].filter = undefined;
-			let filterDef = cloned[field].filter;
-			while (filterDef) {
-				if (!filterDef.nextFilter) break;
-				if (!filterDef.nextFilter.value1) filterDef.nextFilter = undefined;
-
-				filterDef = filterDef.nextFilter;
-			}
+			cloned[field].filter = normalizeFilterDef(cloned[field].filter);
 		}
 		return JSON.stringify(cloned);
 	}, [columnsState]);

@@ -20,6 +20,7 @@ One file per change, so this never grows into a single unreadable log.
 
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 2026-08-26 | [New data grid columns use their column definition defaults](2026-08-26-data-grid-new-columns-use-defaults.md)                  | behavior |
 | 2026-08-25 | [The data grid's scrolling pane is a tab stop](2026-08-25-data-grid-keyboard-scrollable.md)                                    | behavior |
 | 2026-08-19 | [debouncePromise resolves each caller with its own invocation's result](2026-08-19-debounce-promise-per-invocation-results.md) | behavior |
 | 2026-08-19 | [Multi select keeps the search query while selecting](2026-08-19-multi-select-keeps-search.md)                                 | behavior |

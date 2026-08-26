@@ -6,7 +6,11 @@ export {
 	DataGridPersistentStateContext,
 	type DataGridPersistentStateContextType,
 	type DataGridPersistentState,
+	type DataGridPersistentStateLegacy,
+	type DataGridPersistedData,
+	type DataGridPersistedSort,
 } from "./StatePersistence";
+export { DATA_GRID_PERSIST_VERSION } from "./PersistFormat";
 export { default as GridMultiSelectFilter } from "./GridMultiSelectFilter";
 export { default as GridMultiSelectFilterBackend } from "./GridMultiSelectFilterBackend";
 export { default as GridSingleSelectFilter } from "./GridSingleSelectFilter";

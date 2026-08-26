@@ -25,9 +25,10 @@ const DataGridSettings = (props: IDataGridColumnProps) => {
 			const value = evt.target.value;
 			setState((prevState) => ({
 				...prevState,
-				lockedColumns: prevState.lockedColumns.includes(value)
-					? prevState.lockedColumns.filter((s) => s !== value)
-					: [...prevState.lockedColumns, value],
+				columnPinned: {
+					...prevState.columnPinned,
+					[value]: !prevState.columnPinned[value],
+				},
 			}));
 		},
 		[setState],
@@ -37,9 +38,10 @@ const DataGridSettings = (props: IDataGridColumnProps) => {
 			const value = evt.target.value;
 			setState((prevState) => ({
 				...prevState,
-				hiddenColumns: prevState.hiddenColumns.includes(value)
-					? prevState.hiddenColumns.filter((s) => s !== value)
-					: [...prevState.hiddenColumns, value],
+				columnHidden: {
+					...prevState.columnHidden,
+					[value]: !prevState.columnHidden[value],
+				},
 			}));
 			// clear column filter on column visibility toggle
 			setColumnState((prevState) => ({
@@ -67,8 +69,8 @@ const DataGridSettings = (props: IDataGridColumnProps) => {
 				closeGridSettings={closeGridSettings}
 				toggleColumnLock={toggleColumnLock}
 				toggleColumnVisibility={toggleColumnVisibility}
-				lockedColumns={state.lockedColumns}
-				hiddenColumns={state.hiddenColumns}
+				columnPinned={state.columnPinned}
+				columnHidden={state.columnHidden}
 			/>
 		</DataGridContentOverlayCollapse>
 	);

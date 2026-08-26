@@ -111,7 +111,7 @@ const Content = (props: IDataGridContentProps) => {
 			Object.keys(columnWidth)
 				.map((field) => columns.find((col) => col.field === field))
 				.filter((entry) => entry) as IDataGridColumnDef[]
-		).filter((entry) => !state.hiddenColumns.includes(entry.field));
+		).filter((entry) => !state.columnHidden[entry.field]);
 		const usedWidth =
 			Object.entries(columnWidth)
 				.filter(([field]) =>
@@ -125,7 +125,7 @@ const Content = (props: IDataGridContentProps) => {
 		columnWidth,
 		columns,
 		disableSelection,
-		state.hiddenColumns,
+		state.columnHidden,
 		width,
 		scrollbarWidth,
 	]);
@@ -140,7 +140,7 @@ const Content = (props: IDataGridContentProps) => {
 				Object.keys(prevState)
 					.map((field) => columns.find((col) => col.field === field))
 					.filter((entry) => entry) as IDataGridColumnDef[]
-			).filter((entry) => !state.hiddenColumns.includes(entry.field));
+			).filter((entry) => !state.columnHidden[entry.field]);
 			let columnsToResize = shownColumns.filter(
 				(entry) => !entry.width || !entry.width[2],
 			);

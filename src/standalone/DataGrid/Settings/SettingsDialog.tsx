@@ -17,6 +17,7 @@ import {
 	DataGridContentOverlayPaper,
 	IDataGridColumnDef,
 	IDataGridColumnProps,
+	isDataGridColumnPinned,
 	useDataGridProps,
 } from "../DataGrid";
 import useCCTranslations from "../../../utils/useCCTranslations";
@@ -37,13 +38,13 @@ export interface IDataGridSettingsDialogProps extends IDataGridColumnProps {
 	 */
 	toggleColumnVisibility: (evt: ChangeEvent<HTMLInputElement>) => void;
 	/**
-	 * The currently locked columns
+	 * Is the column pinned? (field -> pinned)
 	 */
-	lockedColumns: string[];
+	columnPinned: Record<string, boolean>;
 	/**
-	 * The currently hidden columns
+	 * Is the column hidden? (field -> hidden)
 	 */
-	hiddenColumns: string[];
+	columnHidden: Record<string, boolean>;
 }
 
 const StyledTable = styled(Table, {
@@ -115,17 +116,16 @@ const SettingsDialog = (props: IDataGridSettingsDialogProps) => {
 							</StyledTableCell>
 							<StyledTableCell className={classes?.settingsTableCell}>
 								<Checkbox
-									checked={!props.hiddenColumns.includes(column.field)}
+									checked={!props.columnHidden[column.field]}
 									onChange={props.toggleColumnVisibility}
 									value={column.field}
 								/>
 							</StyledTableCell>
 							<StyledTableCell className={classes?.settingsTableCell}>
 								<Checkbox
-									checked={props.lockedColumns.includes(column.field)}
+									checked={isDataGridColumnPinned(column, props.columnPinned)}
 									disabled={
-										props.hiddenColumns.includes(column.field) ||
-										column.forcePin
+										!!props.columnHidden[column.field] || column.forcePin
 									}
 									onChange={props.toggleColumnLock}
 									value={column.field}

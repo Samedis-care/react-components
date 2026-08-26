@@ -1,84 +1,37 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useMemo, useRef } from "react";
 import {
-	DataGridProps,
-	IDataGridColumnsState,
-	IDataGridColumnState,
-	IDataGridState,
+	getDataGridDefaultColumnsState,
 	useDataGridColumnState,
 	useDataGridColumnsWidthState,
 	useDataGridProps,
 	useDataGridState,
 } from "./DataGrid";
+import {
+	DataGridPersistedData,
+	DataGridPersistentState,
+	encodePersistedState,
+} from "./PersistFormat";
 
-export interface DataGridPersistentState {
-	columnState: IDataGridColumnsState;
-	columnWidth: Record<string, number>;
-	state: Partial<
-		Pick<
-			IDataGridState,
-			| "search"
-			| "hiddenColumns"
-			| "lockedColumns"
-			| "customData"
-			| "initialResize"
-		>
-	>;
-}
+export type {
+	DataGridPersistedData,
+	DataGridPersistedSort,
+	DataGridPersistentState,
+	DataGridPersistentStateLegacy,
+} from "./PersistFormat";
 
 export type DataGridPersistentStateContextType = [
-	Partial<DataGridPersistentState> | undefined,
-	(data: Partial<DataGridPersistentState>) => Promise<void> | void,
+	/**
+	 * The persisted data, in whichever format it was written
+	 */
+	DataGridPersistedData | undefined,
+	/**
+	 * Store the given data
+	 */
+	(data: DataGridPersistentState) => Promise<void> | void,
 ];
 export const DataGridPersistentStateContext = React.createContext<
 	DataGridPersistentStateContextType | undefined
 >(undefined);
-
-// when you change this, also update documentation DataGridProps.persist @default
-const DEFAULT_PERSIST_CONFIG: DataGridProps["persist"] = [
-	"columns",
-	"sort",
-	"filters",
-];
-
-export const filterPersistedState = (
-	persisted: Partial<DataGridPersistentState>,
-	config: DataGridProps["persist"],
-): Partial<DataGridPersistentState> => {
-	const { columnState, columnWidth, state } = persisted;
-	config = config ?? DEFAULT_PERSIST_CONFIG;
-	const result: Partial<DataGridPersistentState> = {
-		columnState: columnState
-			? Object.fromEntries<IDataGridColumnState>(
-					Object.entries<IDataGridColumnState>(columnState).map(
-						([column, data]) => [
-							column,
-							{
-								...data,
-								sort: config.includes("sort") ? data.sort : 0,
-								sortOrder: config.includes("sort") ? data.sortOrder : undefined,
-								filter: config.includes("filters") ? data.filter : undefined,
-							},
-						],
-					),
-				)
-			: {},
-		columnWidth: config.includes("columns") ? (columnWidth ?? {}) : {},
-	};
-	if (state) {
-		result.state = {};
-		if (state.search != null && config.includes("filters"))
-			result.state.search = state.search;
-		if (state.hiddenColumns != null && config.includes("columns"))
-			result.state.hiddenColumns = state.hiddenColumns;
-		if (state.lockedColumns != null && config.includes("columns"))
-			result.state.lockedColumns = state.lockedColumns;
-		if (state.customData != null && config.includes("filters"))
-			result.state.customData = state.customData;
-		if (state.initialResize != null && config.includes("columns"))
-			result.state.initialResize = state.initialResize;
-	}
-	return result;
-};
 
 /**
  * Logical component which takes care of optional state persistence for the data grid
@@ -90,29 +43,48 @@ const StatePersistence = () => {
 	const [state] = useDataGridState();
 	const [columnState] = useDataGridColumnState();
 	const [columnWidthState] = useDataGridColumnsWidthState();
-	const config = useDataGridProps().persist;
+	const {
+		persist: config,
+		columns,
+		defaultSort,
+		defaultFilter,
+	} = useDataGridProps();
+
+	const defaultColumnState = useMemo(
+		() => getDataGridDefaultColumnsState(columns, defaultSort, defaultFilter),
+		[columns, defaultSort, defaultFilter],
+	);
+
+	// the grid state changes on every page of data loaded, so compare what we'd
+	// write before writing it - persistence may well be a request to a server
+	const lastWritten = useRef<string>(undefined);
 
 	// save on changes
 	useEffect(() => {
 		if (!setPersisted) return;
 
-		void setPersisted(
-			filterPersistedState(
-				{
-					columnState,
-					columnWidth: columnWidthState,
-					state: {
-						search: state.search,
-						hiddenColumns: state.hiddenColumns,
-						lockedColumns: state.lockedColumns,
-						customData: state.customData,
-						initialResize: state.initialResize,
-					},
-				},
-				config,
-			),
+		const data = encodePersistedState(
+			state,
+			columnState,
+			columnWidthState,
+			defaultColumnState,
+			columns,
+			config,
 		);
-	}, [setPersisted, state, columnState, columnWidthState, config]);
+		const serialized = JSON.stringify(data);
+		if (lastWritten.current === serialized) return;
+		lastWritten.current = serialized;
+
+		void setPersisted(data);
+	}, [
+		setPersisted,
+		state,
+		columnState,
+		columnWidthState,
+		defaultColumnState,
+		columns,
+		config,
+	]);
 
 	return <></>;
 };

@@ -1,5 +1,6 @@
 import React, { useCallback, useMemo } from "react";
 import {
+	DataGridPersistedData,
 	DataGridPersistentState,
 	DataGridPersistentStateContext,
 	DataGridPersistentStateContextType,
@@ -42,10 +43,10 @@ const LocalStoragePersist = (props: LocalStoragePersistProps) => {
 
 	const persistCtx = useMemo(() => {
 		const dataStr = localStorage?.getItem(storageKey);
-		let data: Partial<DataGridPersistentState> | undefined;
+		let data: DataGridPersistedData | undefined;
 		if (dataStr) {
 			try {
-				data = JSON.parse(dataStr) as Partial<DataGridPersistentState>;
+				data = JSON.parse(dataStr) as DataGridPersistedData;
 			} catch (e) {
 				// eslint-disable-next-line no-console
 				console.error(

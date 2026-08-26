@@ -67,8 +67,8 @@ const ActionBar = () => {
 		const defaultState = getDataGridDefaultState(columns, defaultCustomData);
 		setState((state) => ({
 			...state,
-			hiddenColumns: defaultState.hiddenColumns,
-			lockedColumns: defaultState.lockedColumns,
+			columnHidden: defaultState.columnHidden,
+			columnPinned: defaultState.columnPinned,
 		}));
 	}, [columns, defaultCustomData, setState]);
 	const handleResetWidth = useCallback(() => {
