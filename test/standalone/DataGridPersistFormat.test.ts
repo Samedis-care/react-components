@@ -10,6 +10,7 @@ import {
 	splitPersistedState,
 } from "../../src/standalone/DataGrid/PersistFormat";
 import {
+	getActiveDataGridColumns,
 	getDataGridDefaultColumnsState,
 	getDataGridDefaultState,
 	type IDataGridColumnDef,
@@ -572,6 +573,131 @@ describe("splitPersistedState / mergePersistedState", () => {
 
 	it("returns undefined when there is nothing stored", () => {
 		expect(mergePersistedState([undefined, undefined])).toBeUndefined();
+	});
+});
+
+describe("decodePersistedState (column set churn)", () => {
+	const roundTrip = (columns: IDataGridColumnDef[], stored: unknown) => {
+		const defaultColumnState = defaults(columns);
+		const decoded = decodePersistedState(
+			stored as never,
+			columns,
+			defaultColumnState,
+			undefined,
+		);
+		const encoded = encodePersistedState(
+			{
+				...getDataGridDefaultState(columns, undefined),
+				...decoded.state,
+			},
+			decoded.columnState,
+			{
+				...Object.fromEntries(columns.map((column) => [column.field, 100])),
+				...decoded.columnWidth,
+			},
+			defaultColumnState,
+			columns,
+			undefined,
+		);
+		return {
+			decoded,
+			stored: JSON.parse(JSON.stringify(encoded)) as DataGridPersistentState,
+		};
+	};
+
+	it("keeps the settings of a column which left the definition", () => {
+		const withGated = [...COLUMNS, col("gated")];
+		// the user hides and pins the gated column, then loses access to it
+		const first = roundTrip(withGated, {
+			v: DATA_GRID_PERSIST_VERSION,
+			shown: ["id", "name", "pinme"],
+			hidden: ["secret", "gated"],
+			pinned: ["gated"],
+			sort: { gated: [1, 1] },
+			filter: { gated: filter("x") },
+			width: { gated: 321 },
+		});
+		const second = roundTrip(COLUMNS, first.stored);
+
+		// visibility, pin and width survive the column being gone
+		expect(second.decoded.state.columnHidden.gated).toBe(true);
+		expect(second.decoded.state.columnPinned.gated).toBe(true);
+		expect(second.decoded.columnWidth.gated).toBe(321);
+		expect(second.stored.hidden).toContain("gated");
+		expect(second.stored.pinned).toContain("gated");
+		expect(second.stored.width?.gated).toBe(321);
+
+		// sort and filter do not: they would be sent to the backend for a field
+		// the grid has no column for
+		expect(second.decoded.columnState.gated).toBeUndefined();
+		expect(second.stored.sort?.gated).toBeUndefined();
+		expect(second.stored.filter?.gated).toBeUndefined();
+	});
+
+	it("does not treat a returning column as new", () => {
+		const withGated = [...COLUMNS, col("gated")];
+		const first = roundTrip(withGated, {
+			v: DATA_GRID_PERSIST_VERSION,
+			shown: ["id", "name", "pinme", "gated"],
+			hidden: ["secret"],
+		});
+		// gone for a while...
+		const second = roundTrip(COLUMNS, first.stored);
+		// ...and back, now hidden by definition. The user had it visible, so it stays
+		const third = roundTrip(
+			[...COLUMNS, col("gated", { hidden: true })],
+			second.stored,
+		);
+		expect(third.decoded.state.columnHidden.gated).toBe(false);
+	});
+
+	it("survives every column being replaced at once", () => {
+		const first = roundTrip(COLUMNS, undefined);
+		const replaced = [col("alpha"), col("beta", { hidden: true })];
+		const second = roundTrip(replaced, first.stored);
+		// the new columns follow their definitions
+		expect(second.decoded.state.columnHidden.alpha).toBe(false);
+		expect(second.decoded.state.columnHidden.beta).toBe(true);
+		// the old ones stay known, so they come back as the user left them
+		expect(second.decoded.state.columnHidden.secret).toBe(true);
+		// and no stale field can reach the backend
+		const [sorts, filters] = dataGridPrepareFiltersAndSorts(
+			second.decoded.columnState,
+		);
+		const fields = replaced.map((column) => column.field);
+		for (const sort of sorts) expect(fields).toContain(sort.field);
+		for (const field of Object.keys(filters)) expect(fields).toContain(field);
+	});
+
+	it("orders the active columns from the definition, not from the stored data", () => {
+		const decoded = decodePersistedState(
+			{
+				v: DATA_GRID_PERSIST_VERSION,
+				shown: ["gone", "name", "id", "pinme"],
+				hidden: ["secret"],
+				pinned: ["gone", "id"],
+			},
+			COLUMNS,
+			defaults(),
+			undefined,
+		);
+		const active = getActiveDataGridColumns(
+			COLUMNS,
+			decoded.state.columnHidden,
+			decoded.state.columnPinned,
+		);
+		// "gone" contributes nothing, the pinned column leads, and the rest keep
+		// the definition order rather than the order they appear in the data
+		expect(active.map((column) => column.field)).toEqual([
+			"id",
+			"name",
+			"pinme",
+		]);
+		expect(active.map((column) => column.isLocked)).toEqual([
+			true,
+			false,
+			false,
+		]);
 	});
 });
 

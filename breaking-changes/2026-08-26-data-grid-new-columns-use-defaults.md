@@ -74,6 +74,23 @@ defined — a column gated behind a permission must not look new once it comes b
 Visibility stays out of `columnState` on purpose: `columnState` is hashed to decide when to
 refetch, so putting display state in there would turn every show/hide into a data reload.
 
+### Columns leaving the definition
+
+The other direction is deliberate and unchanged in spirit: a column that disappears from
+the definition keeps its stored visibility, pin state and width, so a column gated behind a
+permission or a module toggle comes back exactly as the user left it rather than looking
+new. Its sort and filter are dropped instead, because those would be sent to the backend
+for a field the grid has no column for.
+
+Nothing prunes those retained entries — a grid whose field *names* churn accumulates them
+at roughly 50 bytes per dead column. `Reset columns` in the grid's own reset menu drops
+them, since it rebuilds the state from the current definitions.
+
+Note that a column which is removed and later re-added with a *different* `type` keeps the
+filter that was stored against the old type. Whether a filter type fits a column type is up
+to the consumer's `isFilterSupported`, so this can't be validated on read; the filter UI
+falls back to letting the user pick a type manually, which is what it already did.
+
 ### Signatures
 
 - `getActiveDataGridColumns(columns, columnHidden, columnPinned)` takes the two records
