@@ -70,6 +70,16 @@ export interface BasicFormPageRendererProps<CustomPropsT> extends Omit<
 }
 
 export type EnhancedGoBackType = {
+	/**
+	 * Closes the form page, asking the user for confirmation if the form is dirty
+	 * @param forceRefresh Force a refresh of the CRUD data grid after navigating back? (default false)
+	 * @param forceNavigate Skip the unsaved changes confirmation dialog and navigate back immediately? (default false).
+	 *                      Has no effect if the form isn't dirty or is read-only, as no dialog is shown then.
+	 * @returns A promise which resolves once the user confirmed (or the dialog was skipped) and navigation happened.
+	 *          Resolves without navigating if the user cancelled the confirmation dialog.
+	 * @remarks Enhances CrudFormProps.goBack, which only takes forceRefresh and shows no confirmation dialog
+	 * @see CrudFormProps.goBack
+	 */
 	goBack: (
 		forceRefresh?: boolean,
 		forceNavigate?: boolean,
