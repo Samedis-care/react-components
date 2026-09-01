@@ -20,6 +20,7 @@ One file per change, so this never grows into a single unreadable log.
 
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 2026-09-01 | [The form engine announces dirty state changes as events](2026-09-01-form-dirty-events.md) | behavior, type |
 | 2026-08-31 | [withMuiWarning is now withMuiFieldState](2026-08-31-mui-warning-renamed-field-state.md) | type |
 | 2026-08-31 | [File uploads show which files were added and removed](2026-08-31-file-upload-pending-changes.md) | behavior |
 | 2026-08-31 | [Checkboxes, switches and radio groups mark their field touched on blur](2026-08-31-boolean-radio-blur-marks-touched.md) | behavior |

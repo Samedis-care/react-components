@@ -63,6 +63,8 @@ export * from "./useStorageState";
 export { default as useDevKeybinds } from "./useDevKeybinds";
 export { default as useWindowSize } from "./useWindowSize";
 export { default as useRefState } from "./useRefState";
+export { default as TypedEventTarget } from "./TypedEventTarget";
+export * from "./TypedEventTarget";
 export { default as useAsyncMemo } from "./useAsyncMemo";
 export { default as useAsyncCache } from "./useAsyncCache";
 export { default as semaphoreExec } from "./semaphoreExec";

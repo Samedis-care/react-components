@@ -40,6 +40,8 @@ import useRefState from "../../utils/useRefState";
 import uniqueArray from "../../utils/uniqueArray";
 import { QueryObserverBaseResult } from "@tanstack/react-query";
 import ValidationError from "./ValidationError";
+import TypedEventTarget from "../../utils/TypedEventTarget";
+import { FormEvents, FormEventTarget } from "./FormEvents";
 import deepEqual from "../../utils/deepEqual";
 import { captureError } from "../../framework/ErrorReporting";
 
@@ -473,7 +475,27 @@ export interface FormContextData {
 	 */
 	removeCustomReadOnly: (ident: string) => void;
 	/**
+	 * Subscribes to a form engine event
+	 * @param type The event type
+	 * @param listener The listener to call when the event is dispatched
+	 * @remarks Events are dispatched as soon as the form engine knows about the change,
+	 *          which may be before React has re-rendered with the new state. Use this
+	 *          instead of the rendered state where acting on a stale value is a bug,
+	 *          e.g. when navigating away right after awaiting submit.
+	 */
+	addEventListener: FormEventTarget["addEventListener"];
+	/**
+	 * Unsubscribes from a form engine event
+	 * @param type The event type
+	 * @param listener The listener previously passed to addEventListener
+	 * @see addEventListener
+	 */
+	removeEventListener: FormEventTarget["removeEventListener"];
+	/**
 	 * Is the form dirty?
+	 * @remarks This is rendered state, so it lags behind by a render. Subscribe to the
+	 *          "dirty" event to be notified the moment the form engine sees the change.
+	 * @see addEventListener
 	 */
 	dirty: boolean;
 	/**
@@ -713,6 +735,8 @@ export type FormContextDataLite = Pick<
 	| "setFieldTouchedLite"
 	| "setCustomReadOnly"
 	| "removeCustomReadOnly"
+	| "addEventListener"
+	| "removeEventListener"
 	| "flowEngine"
 	| "submit"
 	| "safeSubmit"
@@ -947,6 +971,16 @@ const Form = <
 	const { t } = useCCTranslations();
 	const [pushDialog] = useDialogContext();
 
+	// form engine events
+	// a ref rather than a useMemo: useMemo is a cache React is free to discard, and a
+	// fresh event target would silently drop every listener registered so far. Assigning
+	// lazily keeps re-renders from allocating one just to throw it away.
+	const formEventsRef = useRef<FormEventTarget | null>(null);
+	if (!formEventsRef.current) {
+		formEventsRef.current = new TypedEventTarget<FormEvents>();
+	}
+	const formEvents = formEventsRef.current;
+
 	// custom fields - dirty state
 	const { get: getCustomDirtyFields, set: setCustomDirtyFields } = useRefState<
 		string[]
@@ -1054,11 +1088,15 @@ const Form = <
 	}, []);
 
 	// main form handling
-	const [deleted, setDeleted] = useState(false);
+	const {
+		get: getDeleted,
+		set: setDeleted,
+		state: deleted,
+	} = useRefState(false);
 	useEffect(() => {
 		// clear deleted state upon id change
 		setDeleted(false);
-	}, [id]);
+	}, [id, setDeleted]);
 	const {
 		isLoading,
 		error,
@@ -1295,10 +1333,38 @@ const Form = <
 		(formDirty: boolean) =>
 			formDirty ||
 			getCustomDirtyFields().length > 0 ||
-			!!(id && !deleted && deleteOnSubmit),
-		[getCustomDirtyFields, deleteOnSubmit, deleted, id],
+			!!(id && !getDeleted() && deleteOnSubmit),
+		[getCustomDirtyFields, getDeleted, deleteOnSubmit, id],
 	);
 	const dirty = getDirty(formDirty);
+
+	// main form handling - dirty state events
+	// dirty is derived from state, so a listener relying on the rendered flag only learns
+	// about a change one render late. That's too late for "submit, then navigate away":
+	// the form is clean the moment submit resolves, but React hasn't re-rendered yet.
+	// So the last dispatched value is kept in a ref and compared against the freshly
+	// computed one, which lets the form engine announce the change right when it happens.
+	const dispatchedDirtyRef = useRef<boolean | null>(null);
+	const dispatchDirtyEvent = useCallback(
+		(dirty: boolean) => {
+			if (dispatchedDirtyRef.current === dirty) return;
+			dispatchedDirtyRef.current = dirty;
+			formEvents.dispatchEvent("dirty", { dirty });
+		},
+		[formEvents],
+	);
+	/**
+	 * Recomputes the dirty state from the refs and dispatches the dirty event if it changed
+	 * @remarks Call this after synchronously mutating values/initial values, to notify
+	 *          listeners without waiting for the re-render.
+	 */
+	const syncDirtyState = useCallback(() => {
+		dispatchDirtyEvent(getDirty(getFormDirty(valuesRef.current)));
+	}, [dispatchDirtyEvent, getDirty, getFormDirty]);
+	// catch-all for every dirty change that isn't announced by an explicit syncDirtyState
+	useEffect(() => {
+		dispatchDirtyEvent(dirty);
+	}, [dirty, dispatchDirtyEvent]);
 
 	// main form handling - dispatch
 	const alwaysWarnFields = useMemo(
@@ -1446,7 +1512,8 @@ const Form = <
 		setValues(valuesRef.current);
 		valuesStagedRef.current = deepClone(serverData[0]);
 		setValuesStaged(valuesStagedRef.current);
-	}, [serverData]);
+		syncDirtyState();
+	}, [serverData, syncDirtyState]);
 	const handleBlur = useCallback(
 		(evt: React.FocusEvent<HTMLInputElement & HTMLElement>) => {
 			const fieldName =
@@ -1601,6 +1668,9 @@ const Form = <
 						setDeleted(true);
 						await deleteRecord(id);
 					}
+					// the record is gone, so there is nothing left to save. Announce it before
+					// handing over control, so onDeleted can navigate away without being blocked
+					syncDirtyState();
 					if (onDeleted) onDeleted(id);
 				} catch (e) {
 					setDeleted(false);
@@ -1615,6 +1685,9 @@ const Form = <
 					throw e;
 				} finally {
 					setSubmittingForm(false);
+					// whatever happened above (including the rollback in catch), listeners
+					// leave this call knowing the real dirty state
+					syncDirtyState();
 				}
 				return;
 			}
@@ -1755,6 +1828,11 @@ const Form = <
 					// re-render after post submit handler, this way we avoid mounting new components before the form is fully saved
 					setValues(valuesRef.current);
 					setValuesStaged(valuesStagedRef.current);
+					// the record was saved, so the form is clean again. Announce it once the
+					// post submit handlers have had their say, and before onSubmit, so it
+					// (and the caller awaiting submit) can navigate away without hitting the
+					// dirty guard
+					syncDirtyState();
 
 					if (onSubmit) {
 						const interactive =
@@ -1781,6 +1859,9 @@ const Form = <
 				throw e;
 			} finally {
 				setSubmittingForm(false);
+				// catch-all for the paths which don't announce themselves, e.g. a flow
+				// engine stage which only staged its values
+				syncDirtyState();
 			}
 		},
 		[
@@ -1806,6 +1887,8 @@ const Form = <
 			onlySubmitMounted,
 			onlySubmitMountedBehaviour,
 			setInitialValues,
+			setDeleted,
+			syncDirtyState,
 			onSubmit,
 			onSubmitUserInteractive,
 		],
@@ -2118,6 +2201,8 @@ const Form = <
 			removeCustomWarningHandler,
 			setCustomReadOnly,
 			removeCustomReadOnly,
+			addEventListener: formEvents.addEventListener,
+			removeEventListener: formEvents.removeEventListener,
 			onlySubmitMounted: !!onlySubmitMounted,
 			onlySubmitMountedBehaviour,
 			onlyValidateMounted: !!onlyValidateMounted,
@@ -2176,6 +2261,7 @@ const Form = <
 			removeCustomWarningHandler,
 			setCustomReadOnly,
 			removeCustomReadOnly,
+			formEvents,
 			onlySubmitMounted,
 			onlySubmitMountedBehaviour,
 			onlyValidateMounted,
@@ -2233,6 +2319,8 @@ const Form = <
 			setFieldTouchedLite,
 			setCustomReadOnly,
 			removeCustomReadOnly,
+			addEventListener: formEvents.addEventListener,
+			removeEventListener: formEvents.removeEventListener,
 			flowEngine: !!flowEngine,
 			submit: submitFormReferenced,
 			safeSubmit: safeSubmitForm,
@@ -2259,6 +2347,7 @@ const Form = <
 			setFieldTouchedLite,
 			setCustomReadOnly,
 			removeCustomReadOnly,
+			formEvents,
 			flowEngine,
 			submitFormReferenced,
 			safeSubmitForm,
