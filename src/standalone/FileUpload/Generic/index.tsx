@@ -17,10 +17,11 @@ import {
 	useThemeProps,
 } from "@mui/material";
 import { AttachFile } from "@mui/icons-material";
-import FilePreview, { getFileIconOrDefault } from "./File";
+import FilePreview, { FileChangeState, getFileIconOrDefault } from "./File";
 import { FileSelectorError } from "./Errors";
 import processImage, { IDownscaleProps } from "../../../utils/processImage";
 import GroupBox from "../../GroupBox";
+import { labelWithDirtyMarker } from "../../UIKit/MuiFieldState";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import isTouchDevice from "../../../utils/isTouchDevice";
 import combineClassNames from "../../../utils/combineClassNames";
@@ -92,6 +93,14 @@ export interface FileUploadProps {
 	 */
 	onChange?: (files: FileData[]) => void;
 	/**
+	 * Called instead of the built-in restore when a pending removal is undone
+	 * @remarks The built-in restore just clears the `delete` flag, which is all that is
+	 *          needed while the removal is only a flag on the file. Where it has already
+	 *          been handed to a connector queue, only the owner of that queue can undo
+	 *          it, so that owner takes the callback.
+	 */
+	onRestoreFile?: (file: FileData) => void;
+	/**
 	 * onBlur event handler
 	 */
 	onBlur?: React.FocusEventHandler<HTMLElement>;
@@ -107,6 +116,11 @@ export interface FileUploadProps {
 	 * The label of the component
 	 */
 	label?: string;
+	/**
+	 * Does the value differ from the server-side value?
+	 * @remarks Marks the label. Set by the form engine from `RenderParams.dirty`.
+	 */
+	dirty?: boolean;
 	/**
 	 * CSS class to apply to root
 	 */
@@ -165,6 +179,11 @@ export interface FileUploadRendererProps extends Omit<
 	 * @param file The file to remove
 	 */
 	removeFile: (file: FileData) => void;
+	/**
+	 * Undo a pending removal
+	 * @param file The file to restore
+	 */
+	restoreFile: (file: FileData) => void;
 }
 
 export interface FileMeta {
@@ -204,7 +223,33 @@ export interface FileData<T = File | FileMeta> {
 	 * Set to true if the file should be deleted from the server, only true if canBeUploaded is false
 	 */
 	delete?: boolean;
+	/**
+	 * The file's pending change relative to the server, for display
+	 * @remarks Leave it unset and the control derives the state from the flags above,
+	 *          which is all a plain FileUpload needs: a picked file has `canBeUploaded`,
+	 *          a file marked for removal has `delete`.
+	 *
+	 *          It exists for CrudFileUpload, where handing a write to the connector
+	 *          destroys both of those signals on purpose: the picked File is replaced by
+	 *          the `deserialize`d backend representation, so it is no longer a Blob and
+	 *          must not keep `canBeUploaded` or it would upload twice; and `delete` is
+	 *          cleared once the removal is queued, or the next change would queue it
+	 *          again. With a LazyConnector the write is only queued, so a pending change
+	 *          then looks exactly like a file that was always on the server.
+	 */
+	changeState?: FileChangeState;
 }
+
+/**
+ * The file's pending change relative to the server side state
+ * @param file The file
+ * @remarks An explicit changeState wins: only whoever queued the operation can know it.
+ *          Otherwise it follows from the flags the control maintains itself — a file the
+ *          user picked is not on the server yet, a marked one is still on it.
+ */
+const getChangeState = (file: FileData): FileChangeState | undefined =>
+	file.changeState ??
+	(file.delete ? "removed" : file.canBeUploaded ? "added" : undefined);
 
 export interface FileUploadDispatch {
 	/**
@@ -301,7 +346,9 @@ const FileUpload = (
 		accept,
 		acceptLabel,
 		onChange,
+		onRestoreFile,
 		label,
+		dirty,
 		smallLabel,
 		readOnly,
 		onBlur,
@@ -311,6 +358,7 @@ const FileUpload = (
 		classes,
 	} = props;
 	const variant = props.variant ?? "classic";
+	const boxLabel = labelWithDirtyMarker(label, dirty);
 	const loadInitialFiles = () =>
 		(props.files || props.defaultFiles || []).map((meta) => ({
 			canBeUploaded: false,
@@ -507,16 +555,20 @@ const FileUpload = (
 
 	const removeFile = useCallback(
 		(file: FileData) => {
+			// a file that exists on the server is only marked, so that the removal can be
+			// undone and so that the submit knows to delete it
 			if ("downloadLink" in file.file) {
-				file.delete = true;
 				setFiles((prev) => {
-					const newValue = [...prev];
+					const newValue = prev.map((f) =>
+						f === file ? { ...f, delete: true } : f,
+					);
 					if (onChange) onChange(newValue);
 					return newValue;
 				});
 				return;
 			}
 
+			// a file the user just picked has nothing to delete server side, so it goes
 			setFiles((prev) => {
 				const newValue = prev.filter((f) => f !== file);
 				if (onChange) onChange(newValue);
@@ -524,6 +576,23 @@ const FileUpload = (
 			});
 		},
 		[onChange, setFiles],
+	);
+
+	const restoreFile = useCallback(
+		(file: FileData) => {
+			if (onRestoreFile) {
+				onRestoreFile(file);
+				return;
+			}
+			setFiles((prev) => {
+				const newValue = prev.map((f) =>
+					f === file ? { ...f, delete: false } : f,
+				);
+				if (onChange) onChange(newValue);
+				return newValue;
+			});
+		},
+		[onChange, onRestoreFile, setFiles],
 	);
 	const { handleDrop, handleDragOver, dragging } = useDropZone(
 		readOnly ? undefined : processFiles,
@@ -555,11 +624,12 @@ const FileUpload = (
 			inputRef,
 			files,
 			removeFile,
+			restoreFile,
 		});
 	} else if (variant === "classic") {
 		return (
 			<StyledGroupBox
-				label={label}
+				label={boxLabel}
 				smallLabel={smallLabel}
 				className={combineClassNames([className, classes?.root])}
 			>
@@ -618,10 +688,17 @@ const FileUpload = (
 											size={previewSize}
 											preview={previewImages ? data.preview : undefined}
 											disabled={data.delete || false}
+											changeState={getChangeState(data)}
+											restoreLabel={t("standalone.file-upload.restore")}
 											onRemove={
 												readOnly || data.preventDelete
 													? undefined
 													: () => removeFile(data)
+											}
+											onRestore={
+												readOnly || data.preventDelete
+													? undefined
+													: () => restoreFile(data)
 											}
 											variant={"box"}
 										/>
@@ -654,7 +731,7 @@ const FileUpload = (
 		const acceptFiles = accept ? accept.split(",") : [];
 		return (
 			<StyledGroupBox
-				label={label}
+				label={boxLabel}
 				smallLabel={smallLabel}
 				className={combineClassNames([className, classes?.root])}
 			>
@@ -714,10 +791,17 @@ const FileUpload = (
 													size={previewSize}
 													preview={previewImages ? data.preview : undefined}
 													disabled={data.delete || false}
+													changeState={getChangeState(data)}
+													restoreLabel={t("standalone.file-upload.restore")}
 													onRemove={
 														readOnly || data.preventDelete
 															? undefined
 															: () => removeFile(data)
+													}
+													onRestore={
+														readOnly || data.preventDelete
+															? undefined
+															: () => restoreFile(data)
 													}
 													variant={"list"}
 												/>

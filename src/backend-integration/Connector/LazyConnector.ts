@@ -14,7 +14,25 @@ interface QueuedFunction {
 	id: string | null; // fake id if created client side, otherwise real id or null if delete advanced
 	func: () => unknown;
 	result: ModelGetResponse<string> | null;
+	/**
+	 * For a delete: the ids it covers
+	 * @remarks Separate from id, which joins them for display, so that a single id can
+	 *          be looked up and cancelled without parsing it back apart
+	 */
+	deleteIds?: string[];
+	/**
+	 * For a delete covering more than one id: re-creates the request for a subset of them
+	 * @remarks Closes over the model, which the queue does not otherwise retain, so that
+	 *          cancelling one id can keep the request for the others. Never called with
+	 *          an empty list — an entry with nothing left to delete is dropped instead.
+	 */
+	rebuildDelete?: (ids: string[]) => () => unknown;
 }
+
+/**
+ * A queued write operation's kind
+ */
+export type QueuedOperation = QueuedFunction["type"];
 
 type QueueChangeHandler = (queue: QueuedFunction[]) => void;
 
@@ -43,6 +61,7 @@ class LazyConnector<
 	public indexEnhancement = IndexEnhancementLevel.Basic;
 	private queue: QueuedFunction[] = [];
 	private onQueueChange?: QueueChangeHandler;
+	private queueListeners = new Set<QueueChangeHandler>();
 	// backend emulation
 	private readonly FAKE_ID_PREFIX = "fake-id-";
 	private fakeIdCounter = 0;
@@ -107,6 +126,8 @@ class LazyConnector<
 			id: id,
 			func: this.realConnector.delete.bind(this.realConnector, id, model),
 			result: null,
+			deleteIds: [id],
+			// no rebuildDelete: cancelling the only id it covers drops the whole entry
 		});
 
 		this.onAfterOperation();
@@ -238,15 +259,19 @@ class LazyConnector<
 			this.onAfterOperation();
 			return;
 		}
+		const rebuildDelete = (remaining: string[]) =>
+			this.realConnector.deleteMultiple.bind(
+				this.realConnector,
+				remaining,
+				model,
+			);
 		this.queue.push({
 			type: "delete",
 			id: ids.join(","),
-			func: this.realConnector.deleteMultiple.bind(
-				this.realConnector,
-				ids,
-				model,
-			),
+			func: rebuildDelete(ids),
 			result: null,
+			deleteIds: ids,
+			rebuildDelete,
 		});
 		this.onAfterOperation();
 	}
@@ -293,8 +318,82 @@ class LazyConnector<
 		this.onAfterOperation();
 	};
 
+	/**
+	 * The write operation queued for a record, if any
+	 * @param id The record id — potentially a fake one. A queue only exists before
+	 *           workQueue has run, and a record created client side has no real id until
+	 *           then, so a caller holding an id from this side of a submit may have either.
+	 * @remarks Lets a caller tell a record that only exists in the queue from one that
+	 *          is already on the server, which reads alone cannot: index and read serve
+	 *          queued records as if they had been written.
+	 */
+	public getQueuedOperation(id: string): QueuedOperation | null {
+		// the queue stores mapped ids throughout, so mapping the id being looked up is all
+		// it takes to match — including across batches, where the caller still holds the
+		// fake id of a record the backend now knows by a real one
+		const mapped = this.mapId(id);
+		const entry = this.queue.findLast(
+			(entry) =>
+				entry.id === mapped || (entry.deleteIds?.includes(mapped) ?? false),
+		);
+		return entry ? entry.type : null;
+	}
+
+	/**
+	 * Drops the queued write operation for a record, undoing it
+	 * @param id The record id — potentially a fake one, see getQueuedOperation
+	 * @returns Was anything dropped?
+	 * @remarks A delete covering several records keeps the request for the ones that
+	 *          were not cancelled. Has no effect once workQueue has run.
+	 */
+	public cancelQueuedOperation(id: string): boolean {
+		const mapped = this.mapId(id);
+		let cancelled = false;
+		this.queue = this.queue.flatMap((entry) => {
+			const matchesEntry = entry.id === mapped;
+			const matchesDelete = entry.deleteIds?.includes(mapped) ?? false;
+			if (!matchesEntry && !matchesDelete) return [entry];
+			cancelled = true;
+			if (entry.deleteIds) {
+				const remaining = entry.deleteIds.filter(
+					(deleteId) => deleteId !== mapped,
+				);
+				// nothing left to delete, or a single id entry that cannot be narrowed
+				if (remaining.length === 0 || !entry.rebuildDelete) return [];
+				return [
+					{
+						...entry,
+						id: remaining.join(","),
+						deleteIds: remaining,
+						func: entry.rebuildDelete(remaining),
+					},
+				];
+			}
+			return [];
+		});
+		if (cancelled) this.onAfterOperation();
+		return cancelled;
+	}
+
+	/**
+	 * Subscribes to every change of the queue, including it being emptied by workQueue
+	 * @param listener Called with the new queue
+	 * @returns Unsubscribe
+	 * @remarks Separate from setQueueChangeHandler, which is a single slot owned by
+	 *          useLazyCrudConnector. Anything rendering from the queue needs this: the
+	 *          queue is not React state, so without it a component keeps showing the
+	 *          pending state of writes that have since been sent.
+	 */
+	public addQueueChangeListener(listener: QueueChangeHandler): () => void {
+		this.queueListeners.add(listener);
+		return () => {
+			this.queueListeners.delete(listener);
+		};
+	}
+
 	private onAfterOperation() {
 		if (this.onQueueChange) this.onQueueChange(this.queue);
+		this.queueListeners.forEach((listener) => listener(this.queue));
 	}
 
 	public workQueue = async (): Promise<void> => {

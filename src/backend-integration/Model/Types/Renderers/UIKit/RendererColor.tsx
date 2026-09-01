@@ -40,6 +40,7 @@ class RendererColor extends TypeColor {
 			handleBlur,
 			errorMsg,
 			warningMsg,
+			dirty,
 		} = params;
 
 		if (visibility.disabled) return <></>;
@@ -73,6 +74,7 @@ class RendererColor extends TypeColor {
 						onBlur={handleBlur}
 						error={!!errorMsg}
 						warning={!!warningMsg}
+						dirty={dirty}
 					/>
 					<FormHelperTextCC error={!!errorMsg} warning={!!warningMsg}>
 						{errorMsg || warningMsg}

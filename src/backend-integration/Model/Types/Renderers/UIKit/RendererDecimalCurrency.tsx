@@ -58,6 +58,7 @@ class RendererDecimalCurrency extends TypeNumber {
 			handleBlur,
 			errorMsg,
 			warningMsg,
+			dirty,
 		} = params;
 
 		if (visibility.disabled) return <></>;
@@ -97,6 +98,7 @@ class RendererDecimalCurrency extends TypeNumber {
 						onBlur={handleBlur}
 						error={!!errorMsg}
 						warning={!!warningMsg}
+						dirty={dirty}
 					/>
 					<FormHelperTextCC error={!!errorMsg} warning={!!warningMsg}>
 						{errorMsg || warningMsg}

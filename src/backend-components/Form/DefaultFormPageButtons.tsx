@@ -5,20 +5,25 @@ import React, {
 	useMemo,
 	useState,
 } from "react";
-import {
+import type {
 	BasicFormPageRendererProps,
 	EnhancedCustomProps,
 } from "./BasicFormPage";
-import { CrudFormProps } from "../CRUD";
+import type { CrudFormProps } from "../CRUD";
 import { useDialogContext } from "../../framework";
 import { showConfirmDialog } from "../../non-standalone";
-import { ActionButton, FormButtons } from "../../standalone";
-import { ActionButtonProps } from "../../standalone/UIKit/ActionButton";
+// deep imports, not the standalone barrel: this module is reached through the Form
+// barrel, and pulling the whole standalone barrel back in from here evaluates
+// styled(ActionButton) before ActionButton's own module has finished
+import ActionButton, {
+	ActionButtonProps,
+} from "../../standalone/UIKit/ActionButton";
+import FormButtons from "../../standalone/UIKit/FormButtons";
 import combineClassNames from "../../utils/combineClassNames";
 import { IsInFormDialogContext } from "./FormDialog";
 import useCCTranslations from "../../utils/useCCTranslations";
 import { styled, Tooltip, useThemeProps } from "@mui/material";
-import { DefaultFormPageProps } from "./DefaultFormPage";
+import type { DefaultFormPageProps } from "./DefaultFormPage";
 
 export const BackButtonDefaultColorClass =
 	"CcDefaultFormPageButtons-backButtonDefaultColor";

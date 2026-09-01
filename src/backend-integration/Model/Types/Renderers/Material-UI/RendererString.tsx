@@ -5,7 +5,7 @@ import ModelRenderParams from "../../../RenderParams";
 import {
 	FormHelperTextCC,
 	TextFieldCC,
-} from "../../../../../standalone/UIKit/MuiWarning";
+} from "../../../../../standalone/UIKit/MuiFieldState";
 
 export type ModelDataTypeStringRendererMUIParams = Omit<
 	TextFieldProps,
@@ -41,6 +41,7 @@ class RendererString extends TypeString {
 			handleBlur,
 			errorMsg,
 			warningMsg,
+			dirty,
 		} = params;
 
 		if (visibility.disabled) return <></>;
@@ -75,6 +76,7 @@ class RendererString extends TypeString {
 						onBlur={handleBlur}
 						error={!!errorMsg}
 						warning={!!warningMsg}
+						dirty={dirty}
 					/>
 					<FormHelperTextCC warning={!!warningMsg} error={!!errorMsg}>
 						{errorMsg || warningMsg}

@@ -6,7 +6,7 @@ import MultiLanguageInput, {
 	MultiLanguageInputSupportedLanguages,
 } from "../../../../standalone/UIKit/InputControls/MultiLanguageInput";
 import TypeLocalizedString from "../TypeLocalizedString";
-import { FormHelperTextCC } from "../../../../standalone/UIKit/MuiWarning";
+import { FormHelperTextCC } from "../../../../standalone/UIKit/MuiFieldState";
 import { TypeSettings } from "../../Type";
 
 export type ModelDataTypeLocalizedStringRendererGetFallbackLabel = (
@@ -79,6 +79,7 @@ class RendererLocalizedString extends TypeLocalizedString {
 			handleBlur,
 			errorMsg,
 			warningMsg,
+			dirty,
 		} = params;
 
 		if (visibility.disabled) return <></>;
@@ -115,6 +116,7 @@ class RendererLocalizedString extends TypeLocalizedString {
 						onBlur={handleBlur}
 						error={!!errorMsg}
 						warning={!!warningMsg}
+						dirty={dirty}
 					/>
 					<FormHelperTextCC error={!!errorMsg} warning={!!warningMsg}>
 						{errorMsg || warningMsg}

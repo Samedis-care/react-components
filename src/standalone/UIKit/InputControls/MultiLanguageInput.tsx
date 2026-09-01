@@ -14,7 +14,7 @@ import useCCTranslations, {
 } from "../../../utils/useCCTranslations";
 import { useCurrentLanguage } from "../../../utils/useCurrentLocale";
 import { Translate } from "@mui/icons-material";
-import { TextFieldCC } from "../MuiWarning";
+import { TextFieldCC } from "../MuiFieldState";
 
 // src/assets/data/languages.json
 export type MultiLanguageInputSupportedLanguages =
@@ -262,6 +262,11 @@ export type MultiLanguageInputProps = Omit<
 	 * Display warning
 	 */
 	warning?: boolean;
+	/**
+	 * Does the value differ from the server-side value?
+	 * @remarks Presentational only; set by the form engine from `RenderParams.dirty`.
+	 */
+	dirty?: boolean;
 };
 
 export interface MultiLanguageInputLanguageLabelOwnerState {
@@ -301,6 +306,7 @@ const MultiLanguageInput = (inProps: MultiLanguageInputProps) => {
 		required,
 		ignoreI18nLocale,
 		warning,
+		dirty,
 		...textFieldProps
 	} = props;
 	const { t } = useCCLanguagesTranslations();
@@ -368,6 +374,7 @@ const MultiLanguageInput = (inProps: MultiLanguageInputProps) => {
 		<TextFieldCC
 			{...textFieldProps}
 			warning={warning}
+			dirty={dirty}
 			fullWidth
 			label={
 				textFieldProps.multiline ? (

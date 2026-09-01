@@ -6,7 +6,7 @@ import FileUpload, {
 	FileData,
 } from "../../../../standalone/FileUpload/Generic";
 import GroupBox from "../../../../standalone/GroupBox";
-import { FormHelperTextCC } from "../../../../standalone/UIKit/MuiWarning";
+import { FormHelperTextCC } from "../../../../standalone/UIKit/MuiFieldState";
 
 /**
  * Renders a file selector
@@ -23,6 +23,7 @@ class RendererFiles extends TypeFiles {
 			errorMsg,
 			warningMsg,
 			setError,
+			dirty,
 		} = params;
 
 		if (visibility.disabled) return <></>;
@@ -46,6 +47,7 @@ class RendererFiles extends TypeFiles {
 						<FileUpload
 							name={field}
 							label={label}
+							dirty={dirty}
 							files={value}
 							readOnly={visibility.readOnly}
 							onChange={(files) => {

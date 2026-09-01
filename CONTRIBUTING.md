@@ -53,5 +53,10 @@ adjust. Behavioral changes count too, not just type changes.
 
 ## Translating
 
-If you wish to help us translate our library feel free to fork & clone the repository and open `src/assets/i18n` in [i18n Manager](https://www.electronjs.org/apps/i18n-manager).
-When your done simply save your work, commit, push and create a pull request.
+Translations live in `src/assets/i18n/<lang>/translation.json`, one folder per locale.
+Fork & clone the repository and edit those files directly.
+
+`en` is the source language and the fallback, so a key missing from another locale renders
+in English rather than failing — please fill in every locale you can. When you're done,
+commit, push and open a pull request. See
+[`src/assets/i18n/README.md`](src/assets/i18n/README.md) for how to add a new language.

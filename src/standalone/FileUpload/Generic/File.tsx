@@ -1,8 +1,10 @@
 import React, { useCallback } from "react";
 import {
+	CSSObject,
 	Grid,
 	styled,
 	SvgIconProps,
+	Theme,
 	Tooltip,
 	Typography,
 	useThemeProps,
@@ -11,6 +13,7 @@ import {
 	Cancel as CancelIconList,
 	CancelOutlined as CancelIcon,
 	InsertDriveFile as DefaultFileIcon,
+	RestoreFromTrash as RestoreIconSvg,
 } from "@mui/icons-material";
 import {
 	ArchiveFileIcon,
@@ -29,6 +32,11 @@ import dataToFile from "../../../utils/dataToFile";
 import combineClassNames from "../../../utils/combineClassNames";
 import getFileExt from "../../../utils/getFileExt";
 
+/**
+ * A file's pending change relative to the server side state
+ */
+export type FileChangeState = "added" | "removed";
+
 export interface FileProps {
 	/**
 	 * The file name, including extension
@@ -46,6 +54,23 @@ export interface FileProps {
 	 * Optional callback for removing the file
 	 */
 	onRemove?: () => void;
+	/**
+	 * The file's pending change relative to the server, if any
+	 * @remarks Marks the file name: green for a file the user added, struck through for
+	 *          one they removed. Not the icon — in the list variants that is already
+	 *          `palette.error.main` — and removal is not coloured at all, because red
+	 *          reads as an error and this is a pending change, not a problem.
+	 */
+	changeState?: FileChangeState;
+	/**
+	 * Optional callback for undoing a pending removal
+	 * @remarks Rendered in place of the remove button while changeState is "removed"
+	 */
+	onRestore?: () => void;
+	/**
+	 * Accessible name for the restore control
+	 */
+	restoreLabel?: string;
 	/**
 	 * The size of the preview
 	 */
@@ -153,10 +178,23 @@ const IconWrapper = styled("div", {
 	objectFit: "contain",
 });
 
+/**
+ * Marks a file as added or removed relative to the server side state
+ * @remarks Applied to the file name rather than to the icon, see FileProps.changeState
+ */
+const changeStateStyles = (theme: Theme): CSSObject => ({
+	'&[data-cc-change="added"]': {
+		color: theme.palette.success.main,
+	},
+	'&[data-cc-change="removed"]': {
+		textDecoration: "line-through",
+	},
+});
+
 const StyledLabelList = styled(Typography, {
 	name: "CcFile",
 	slot: "listLabel",
-})({
+})(({ theme }) => ({
 	position: "absolute",
 	maxWidth: "100%",
 	"&.Mui-active": {
@@ -165,19 +203,42 @@ const StyledLabelList = styled(Typography, {
 			textDecoration: "underline",
 		},
 	},
-});
+	...changeStateStyles(theme),
+}));
 
 const StyledLabel = styled(Typography, {
 	name: "CcFile",
 	slot: "label",
-})({
+})(({ theme }) => ({
 	"&.Mui-active": {
 		cursor: "pointer",
 		"&:hover": {
 			textDecoration: "underline",
 		},
 	},
-});
+	...changeStateStyles(theme),
+}));
+
+// mirrors the CloseIcon/CloseIconList pair: the box variant positions its action over
+// the icon, every other variant lays it out inline
+const RestoreIconBox = styled(RestoreIconSvg, {
+	name: "CcFile",
+	slot: "restoreIconBox",
+})(({ theme }) => ({
+	position: "absolute",
+	cursor: "pointer",
+	color: theme.palette.action.active,
+}));
+
+const RestoreIcon = styled(RestoreIconSvg, {
+	name: "CcFile",
+	slot: "restoreIcon",
+})(({ theme }) => ({
+	width: "auto",
+	position: "static",
+	cursor: "pointer",
+	color: theme.palette.action.active,
+}));
 
 export type FileClassKey =
 	| "compactListWrapper"
@@ -189,7 +250,9 @@ export type FileClassKey =
 	| "iconWrapperList"
 	| "iconWrapper"
 	| "listLabel"
-	| "label";
+	| "label"
+	| "restoreIcon"
+	| "restoreIconBox";
 
 export const ExcelFileExtensions = [
 	"xlsx",
@@ -483,6 +546,7 @@ const File = (inProps: FileProps) => {
 						variant === "list" ? classes?.listLabel : classes?.label,
 						downloadLink && "Mui-active",
 					])}
+					data-cc-change={props.changeState}
 					onClick={openDownload}
 					variant={"body2"}
 					style={
@@ -498,6 +562,18 @@ const File = (inProps: FileProps) => {
 			</Tooltip>
 		);
 	};
+
+	const restoreBtn =
+		props.changeState === "removed" &&
+		props.onRestore &&
+		React.createElement(variant === "box" ? RestoreIconBox : RestoreIcon, {
+			className: combineClassNames([
+				variant === "box" ? classes?.restoreIconBox : classes?.restoreIcon,
+			]),
+			onClick: props.onRestore,
+			style: variant === "list" ? { height: props.size } : undefined,
+			titleAccess: props.restoreLabel,
+		});
 
 	const removeBtn =
 		props.onRemove &&
@@ -519,12 +595,15 @@ const File = (inProps: FileProps) => {
 			},
 		);
 
+	// a removed file offers a restore where it used to offer a remove
+	const actionBtn = restoreBtn || removeBtn;
+
 	if (variant === "box") {
 		return (
 			<Grid className={className} style={{ width: props.size }}>
 				<Grid container spacing={2}>
 					<IconContainer size={12} className={classes?.iconContainer}>
-						{removeBtn}
+						{actionBtn}
 						{renderIcon()}
 					</IconContainer>
 					<Grid size={12}>{renderName()}</Grid>
@@ -546,7 +625,7 @@ const File = (inProps: FileProps) => {
 				<ListEntryText size={"grow"} className={classes?.listEntryText}>
 					{renderName()}
 				</ListEntryText>
-				{removeBtn && <Grid>{removeBtn}</Grid>}
+				{actionBtn && <Grid>{actionBtn}</Grid>}
 			</Grid>
 		);
 	} else if (variant === "compact-list") {
@@ -565,7 +644,7 @@ const File = (inProps: FileProps) => {
 					<ListEntryText className={classes?.listEntryText}>
 						{renderName()}
 					</ListEntryText>
-					{removeBtn && <Grid>{removeBtn}</Grid>}
+					{actionBtn && <Grid>{actionBtn}</Grid>}
 				</Grid>
 			</CompactListWrapper>
 		);
@@ -586,7 +665,7 @@ const File = (inProps: FileProps) => {
 							<span>{renderIcon()}</span>
 						</Tooltip>
 					</Grid>
-					{removeBtn && <Grid>{removeBtn}</Grid>}
+					{actionBtn && <Grid>{actionBtn}</Grid>}
 				</Grid>
 			</CompactListWrapper>
 		);

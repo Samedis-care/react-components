@@ -48,6 +48,7 @@ class RendererStringLocalizedSingle extends TypeLocalizedString {
 			handleBlur,
 			errorMsg,
 			warningMsg,
+			dirty,
 		} = params;
 
 		if (visibility.disabled) return <></>;
@@ -96,6 +97,7 @@ class RendererStringLocalizedSingle extends TypeLocalizedString {
 									onBlur={handleBlur}
 									error={!!errorMsg}
 									warning={!!warningMsg}
+									dirty={dirty}
 								/>
 								<FormHelperTextCC error={!!errorMsg} warning={!!warningMsg}>
 									{errorMsg || warningMsg}

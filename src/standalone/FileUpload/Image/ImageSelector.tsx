@@ -22,6 +22,7 @@ import processImageB64 from "../../../utils/processImageB64";
 import combineClassNames from "../../../utils/combineClassNames";
 import { IDownscaleProps } from "../../../utils/processImage";
 import GroupBox from "../../GroupBox";
+import { labelWithDirtyMarker } from "../../UIKit/MuiFieldState";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import { ImageFileIcon } from "../FileIcons";
 import fileToData from "../../../utils/fileToData";
@@ -49,6 +50,11 @@ export interface ImageSelectorProps {
 	 * The label of the input
 	 */
 	label?: string;
+	/**
+	 * Does the value differ from the server-side value?
+	 * @remarks Marks the label. Set by the form engine from `RenderParams.dirty`.
+	 */
+	dirty?: boolean;
 	/**
 	 * The alt text of the image
 	 */
@@ -282,6 +288,7 @@ export type ImageSelectorClassKey =
 
 const ImageSelector = (inProps: ImageSelectorProps) => {
 	const props = useThemeProps({ props: inProps, name: "CcImageSelector" });
+	const boxLabel = labelWithDirtyMarker(props.label, props.dirty);
 	const {
 		convertImagesTo,
 		downscale,
@@ -418,7 +425,7 @@ const ImageSelector = (inProps: ImageSelectorProps) => {
 	if (variant === "normal") {
 		return (
 			<GroupBox
-				label={props.label}
+				label={boxLabel}
 				smallLabel={props.smallLabel}
 				className={className}
 			>
@@ -495,7 +502,7 @@ const ImageSelector = (inProps: ImageSelectorProps) => {
 			<>
 				{previewDialog}
 				<GroupBox
-					label={props.label}
+					label={boxLabel}
 					smallLabel={props.smallLabel}
 					className={className}
 				>

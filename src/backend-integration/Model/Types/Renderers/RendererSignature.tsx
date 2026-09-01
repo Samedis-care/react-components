@@ -3,7 +3,7 @@ import { FormControl, FormHelperText, FormLabel } from "@mui/material";
 import ModelRenderParams from "../../RenderParams";
 import ccI18n from "../../../../i18n";
 import TypeImage from "../TypeImage";
-import { FormControlCC } from "../../../../standalone/UIKit/MuiWarning";
+import { FormControlCC } from "../../../../standalone/UIKit/MuiFieldState";
 import SignaturePad from "../../../../non-standalone/SignaturePad/SignaturePad";
 
 export const SignatureNameContext = React.createContext<string | null>(null);
@@ -23,6 +23,7 @@ class RendererSignature extends TypeImage {
 			handleBlur,
 			errorMsg,
 			warningMsg,
+			dirty,
 		} = params;
 
 		if (visibility.disabled) return <></>;
@@ -46,6 +47,7 @@ class RendererSignature extends TypeImage {
 					fullWidth
 					error={!!errorMsg}
 					warning={!!warningMsg}
+					dirty={dirty}
 					onBlur={handleBlur}
 					data-name={field}
 				>

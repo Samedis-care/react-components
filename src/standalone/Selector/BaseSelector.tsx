@@ -51,6 +51,7 @@ import uniqueArray from "../../utils/uniqueArray";
 import { OutlinedInputProps } from "@mui/material/OutlinedInput";
 import { InputProps as StandardInputProps } from "@mui/material/Input";
 import Checkbox from "../UIKit/Checkbox";
+import { withMuiFieldState } from "../UIKit/MuiFieldState";
 
 export interface BaseSelectorData {
 	/**
@@ -272,6 +273,11 @@ export type BaseSelectorProps<
 		 */
 		warning?: boolean;
 		/**
+		 * Does the selection differ from the server-side value?
+		 * @remarks Presentational only; set by the form engine from `RenderParams.dirty`.
+		 */
+		dirty?: boolean;
+		/**
 		 * String used for the Autocomplete component
 		 */
 		autocompleteId?: string;
@@ -470,14 +476,19 @@ const StyledInlineSwitch = styled(InlineSwitch, {
 	},
 });
 
-const StyledLabel = styled(InputLabel, {
-	name: "CcBaseSelector",
-	slot: "label",
-})({
-	position: "relative",
-	transform: "translate(0,0) scale(0.75)",
-	zIndex: "unset",
-});
+// the selector renders its label as a sibling of the Autocomplete rather than inside
+// the text field, so the dirty marker has to be attached here: withMuiFieldState matches
+// the label itself ("&.MuiFormLabel-root::after") and swallows the flag on the way
+const StyledLabel = withMuiFieldState(
+	styled(InputLabel, {
+		name: "CcBaseSelector",
+		slot: "label",
+	})({
+		position: "relative",
+		transform: "translate(0,0) scale(0.75)",
+		zIndex: "unset",
+	}),
+);
 
 export interface BaseSelectorIconOwnerState {
 	iconSize?: number;
@@ -612,6 +623,7 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 		required,
 		error,
 		warning,
+		dirty,
 		disableSearch,
 		placeholder,
 		autocompleteId,
@@ -1102,6 +1114,7 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 						className={classes?.label}
 						required={!!required}
 						error={!!error}
+						dirty={dirty}
 					>
 						{label}
 					</StyledLabel>
@@ -1284,6 +1297,7 @@ const BaseSelector = <DataT extends BaseSelectorData, Multi extends boolean>(
 									required={required}
 									error={error}
 									warning={warning}
+									dirty={dirty}
 								/>
 							);
 						}}

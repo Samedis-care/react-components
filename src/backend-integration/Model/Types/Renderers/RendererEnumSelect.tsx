@@ -45,6 +45,7 @@ class RendererEnumSelect extends TypeEnum {
 			handleBlur,
 			errorMsg,
 			warningMsg,
+			dirty,
 		} = params;
 
 		if (visibility.disabled) return <></>;
@@ -89,6 +90,7 @@ class RendererEnumSelect extends TypeEnum {
 					fullWidth
 					error={!!errorMsg}
 					warning={!!warningMsg}
+					dirty={dirty}
 					onBlur={handleBlur}
 					name={field}
 				>
@@ -101,6 +103,7 @@ class RendererEnumSelect extends TypeEnum {
 						onSelect={(value) => handleChange(field, value ? value.value : "")}
 						disabled={visibility.readOnly}
 						required={visibility.required}
+						dirty={dirty}
 					/>
 					<FormHelperText>{errorMsg || warningMsg}</FormHelperText>
 				</FormControlFieldsetCC>

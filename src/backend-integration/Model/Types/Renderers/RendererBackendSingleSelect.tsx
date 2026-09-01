@@ -78,6 +78,7 @@ class RendererBackendSingleSelect<
 			handleBlur,
 			errorMsg,
 			warningMsg,
+			dirty,
 			relationData,
 			relationModel,
 		} = params;
@@ -120,6 +121,7 @@ class RendererBackendSingleSelect<
 					fullWidth
 					error={!!errorMsg}
 					warning={!!warningMsg}
+					dirty={dirty}
 					onBlur={handleBlur}
 					name={field}
 				>
@@ -132,6 +134,7 @@ class RendererBackendSingleSelect<
 						model={typedRelationModel}
 						initialData={relationData}
 						{...this.props}
+						dirty={dirty}
 						modelFetch={modelFetch}
 						refreshToken={
 							JSON.stringify(relationModel.getReactQueryKeyFetchAll()) +

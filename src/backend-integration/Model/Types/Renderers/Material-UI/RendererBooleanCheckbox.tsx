@@ -32,6 +32,7 @@ class RendererBooleanCheckbox extends TypeBoolean {
 			handleBlur,
 			errorMsg,
 			warningMsg,
+			dirty,
 		} = params;
 
 		if (visibility.disabled) return <></>;
@@ -59,6 +60,7 @@ class RendererBooleanCheckbox extends TypeBoolean {
 						handleChange(evt.target.name, this.invert ? !checked : checked);
 					}}
 					onBlur={handleBlur}
+					data-name={field}
 				/>
 			);
 
@@ -69,6 +71,7 @@ class RendererBooleanCheckbox extends TypeBoolean {
 					required={visibility.required}
 					error={!!errorMsg}
 					warning={!!warningMsg}
+					dirty={dirty}
 					component={"fieldset"}
 				>
 					<FormControlLabel control={control} label={label} />

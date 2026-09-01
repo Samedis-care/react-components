@@ -46,6 +46,7 @@ class RendererEnumRadio extends TypeEnum {
 			handleBlur,
 			errorMsg,
 			warningMsg,
+			dirty,
 		} = params;
 
 		if (visibility.disabled) return <></>;
@@ -70,6 +71,7 @@ class RendererEnumRadio extends TypeEnum {
 					fullWidth
 					error={!!errorMsg}
 					warning={!!warningMsg}
+					dirty={dirty}
 				>
 					<FormLabel component={"legend"}>{label}</FormLabel>
 					<RadioGroup
@@ -77,6 +79,7 @@ class RendererEnumRadio extends TypeEnum {
 						value={value}
 						onChange={(evt) => handleChange(evt.target.name, evt.target.value)}
 						onBlur={handleBlur}
+						data-name={field}
 						row={this.horizontal}
 					>
 						{this.values

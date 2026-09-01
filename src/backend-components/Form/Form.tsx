@@ -477,6 +477,16 @@ export interface FormContextData {
 	 */
 	dirty: boolean;
 	/**
+	 * Per-field dirty state: does the field's value differ from the server-side one?
+	 * @remarks One entry per model field, and nothing else. Custom (non-model) fields
+	 *          are absent on purpose: whatever reports one through setCustomFieldDirty
+	 *          already owns that state, and only contributes it to the form-wide flag.
+	 *
+	 *          An entry is the same flag a type renderer receives as
+	 *          `RenderParams.dirty`.
+	 */
+	dirtyFields: Record<string, boolean>;
+	/**
 	 * @see FormProps.onlySubmitMounted
 	 */
 	onlySubmitMounted: boolean;
@@ -1271,6 +1281,16 @@ const Form = <
 		[getNormalizedData, getInitialValues, defaultRecord, model.fields],
 	);
 	const formDirty = useMemo(() => getFormDirty(values), [getFormDirty, values]);
+	/**
+	 * @see FormContextData.dirtyFields
+	 */
+	const dirtyFields = useMemo(
+		// the baseline is passed as the state rather than left to getDirtyFields'
+		// getInitialValues() ref read, so that replacing it — after a save, or a
+		// refetch — actually recomputes the map
+		() => getDirtyFields(values, initialValuesState),
+		[getDirtyFields, values, initialValuesState],
+	);
 	const getDirty = useCallback(
 		(formDirty: boolean) =>
 			formDirty ||
@@ -2085,6 +2105,7 @@ const Form = <
 			markFieldMounted,
 			setCustomFieldDirty,
 			dirty,
+			dirtyFields,
 			getCustomState,
 			setCustomState,
 			setPreSubmitHandler,
@@ -2142,6 +2163,7 @@ const Form = <
 			markFieldMounted,
 			setCustomFieldDirty,
 			dirty,
+			dirtyFields,
 			getCustomState,
 			setCustomState,
 			setPreSubmitHandler,

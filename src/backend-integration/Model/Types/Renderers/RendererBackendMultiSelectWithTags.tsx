@@ -80,6 +80,7 @@ class RendererBackendMultiSelectWithTags<
 			handleBlur,
 			errorMsg,
 			warningMsg,
+			dirty,
 			relationData,
 			relationModel,
 			value,
@@ -112,6 +113,7 @@ class RendererBackendMultiSelectWithTags<
 					fullWidth
 					error={!!errorMsg}
 					warning={!!warningMsg}
+					dirty={dirty}
 					onBlur={handleBlur}
 					name={field}
 				>
@@ -124,6 +126,7 @@ class RendererBackendMultiSelectWithTags<
 						initialData={relationData}
 						title={label}
 						{...this.props}
+						dirty={dirty}
 					/>
 					<FormHelperText>{errorMsg || warningMsg}</FormHelperText>
 				</FormControlFieldsetCC>

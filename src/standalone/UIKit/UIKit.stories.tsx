@@ -16,7 +16,7 @@ import TextFieldWithHelp from "./TextFieldWithHelp";
 import NumberFormatter from "./NumberFormatter";
 import CenteredTypography from "./CenteredTypography";
 import Checkbox from "./Checkbox";
-import { TextFieldCC } from "./MuiWarning";
+import { TextFieldCC } from "./MuiFieldState";
 import { Button } from "@mui/material";
 
 // ---- ActionButton ----
@@ -239,15 +239,15 @@ export const CheckboxControlled: ActionButtonStory = {
 	},
 };
 
-export const MuiWarningNormal: ActionButtonStory = {
+export const FieldStateNormal: ActionButtonStory = {
 	render: () => <TextFieldCC label="Normal field" />,
 };
 
-export const MuiWarningActive: ActionButtonStory = {
+export const FieldStateWarning: ActionButtonStory = {
 	render: () => <TextFieldCC label="Warning field" warning />,
 };
 
-export const MuiWarningWithError: ActionButtonStory = {
+export const FieldStateWithError: ActionButtonStory = {
 	render: () => (
 		<TextFieldCC
 			label="Error overrides warning"

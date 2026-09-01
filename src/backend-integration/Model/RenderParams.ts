@@ -26,6 +26,14 @@ export interface RenderParams<T> {
 	 */
 	touched: boolean;
 	/**
+	 * Does the value differ from the server-side value?
+	 * @remarks Independent of touched: a value set programmatically is dirty without
+	 *          the user ever having focused the field. Always false where there is no
+	 *          form state to compare against (data grid cells, import previews).
+	 * @see FormContextData.dirtyFields
+	 */
+	dirty: boolean;
+	/**
 	 * The visibility to render the value at
 	 */
 	visibility: Visibility;

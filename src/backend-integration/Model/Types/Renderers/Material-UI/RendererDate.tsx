@@ -12,7 +12,7 @@ import TypeDate from "../../TypeDate";
 import { LocalizedKeyboardDatePicker } from "../../../../../standalone/LocalizedDateTimePickers";
 import { ToDateLocaleStringOptions } from "../../../../../constants";
 import { IDataGridColumnDef } from "../../../../../standalone/DataGrid/DataGrid";
-import { FormHelperTextCC } from "../../../../../standalone/UIKit/MuiWarning";
+import { FormHelperTextCC } from "../../../../../standalone/UIKit/MuiFieldState";
 import moment from "moment";
 
 /**
@@ -31,6 +31,7 @@ class RendererDate extends TypeDate {
 			errorMsg,
 			setFieldTouched,
 			warningMsg,
+			dirty,
 		} = params;
 
 		if (visibility.disabled) return <></>;
@@ -75,6 +76,7 @@ class RendererDate extends TypeDate {
 						onBlur={handleBlur}
 						error={!!errorMsg}
 						warning={!!warningMsg}
+						dirty={dirty}
 						onError={(error: React.ReactNode) => {
 							this.error = error
 								? ccI18n.t(

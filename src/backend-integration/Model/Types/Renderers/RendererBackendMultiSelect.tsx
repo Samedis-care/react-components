@@ -69,6 +69,7 @@ class RendererBackendMultiSelect<
 			handleBlur,
 			errorMsg,
 			warningMsg,
+			dirty,
 			relationData,
 			relationModel,
 			value,
@@ -107,6 +108,7 @@ class RendererBackendMultiSelect<
 					fullWidth
 					error={!!errorMsg}
 					warning={!!warningMsg}
+					dirty={dirty}
 					onBlur={handleBlur}
 					name={field}
 				>
@@ -119,6 +121,7 @@ class RendererBackendMultiSelect<
 						model={typedRelationModel}
 						initialData={relationData}
 						{...this.props}
+						dirty={dirty}
 					/>
 					<FormHelperText>{errorMsg || warningMsg}</FormHelperText>
 				</FormControlFieldsetCC>

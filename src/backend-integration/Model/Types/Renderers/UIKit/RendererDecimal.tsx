@@ -45,6 +45,7 @@ class RendererDecimal extends TypeNumber {
 			handleBlur,
 			errorMsg,
 			warningMsg,
+			dirty,
 		} = params;
 
 		if (visibility.disabled) return <></>;
@@ -81,6 +82,7 @@ class RendererDecimal extends TypeNumber {
 						onBlur={handleBlur}
 						error={!!errorMsg}
 						warning={!!warningMsg}
+						dirty={dirty}
 					/>
 					<FormHelperTextCC error={!!errorMsg} warning={!!warningMsg}>
 						{errorMsg || warningMsg}

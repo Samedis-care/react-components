@@ -41,6 +41,7 @@ class RendererEnumMultiSelect extends TypeEnumMulti {
 			handleBlur,
 			errorMsg,
 			warningMsg,
+			dirty,
 			value,
 		} = params;
 
@@ -86,6 +87,7 @@ class RendererEnumMultiSelect extends TypeEnumMulti {
 					fullWidth
 					error={!!errorMsg}
 					warning={!!warningMsg}
+					dirty={dirty}
 					onBlur={handleBlur}
 					name={field}
 				>
@@ -102,6 +104,7 @@ class RendererEnumMultiSelect extends TypeEnumMulti {
 						}
 						disabled={visibility.readOnly}
 						{...this.props}
+						dirty={dirty}
 					/>
 					<FormHelperText>{errorMsg || warningMsg}</FormHelperText>
 				</FormControlFieldsetCC>

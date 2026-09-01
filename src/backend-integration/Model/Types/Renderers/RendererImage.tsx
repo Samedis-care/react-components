@@ -4,7 +4,7 @@ import ModelRenderParams from "../../RenderParams";
 import ImageSelector from "../../../../standalone/FileUpload/Image/ImageSelector";
 import ccI18n from "../../../../i18n";
 import TypeImage from "../TypeImage";
-import { FormHelperTextCC } from "../../../../standalone/UIKit/MuiWarning";
+import { FormHelperTextCC } from "../../../../standalone/UIKit/MuiFieldState";
 
 /**
  * Renders an image selector
@@ -20,6 +20,7 @@ class RendererImage extends TypeImage {
 			handleBlur,
 			errorMsg,
 			warningMsg,
+			dirty,
 		} = params;
 
 		if (visibility.disabled) return <></>;
@@ -43,6 +44,7 @@ class RendererImage extends TypeImage {
 						name={field}
 						value={value || (this.params?.placeholder ?? "")}
 						label={label}
+						dirty={dirty}
 						readOnly={visibility.readOnly}
 						onChange={(name, value) => {
 							handleChange(name, value);

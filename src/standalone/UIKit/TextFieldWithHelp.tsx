@@ -16,7 +16,7 @@ import {
 import { Clear as ClearIcon, Info as InfoIcon } from "@mui/icons-material";
 import { InputLabelConfig, UIInputProps, UiKitTextField } from "./CommonStyles";
 import isTouchDevice from "../../utils/isTouchDevice";
-import { withMuiWarning } from "./MuiWarning";
+import { withMuiFieldState } from "./MuiFieldState";
 import useCCTranslations from "../../utils/useCCTranslations";
 import { useRefComposer } from "react-ref-composer";
 import accessSlotProps from "../../utils/internal/accessSlotProps";
@@ -36,7 +36,7 @@ export interface TextFieldWithHelpProps extends UIInputProps {
 	disableClearable?: boolean;
 }
 
-export const UiKitTextFieldWithWarnings = withMuiWarning(
+export const UiKitTextFieldWithState = withMuiFieldState(
 	UiKitTextField,
 ) as typeof UiKitTextField;
 const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(
@@ -48,6 +48,7 @@ const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(
 		customHandleClear,
 		disableClearable,
 		warning,
+		dirty,
 		onChange,
 		...muiProps
 	} = props;
@@ -112,10 +113,11 @@ const TextFieldWithHelp = React.forwardRef(function TextFieldWithHelpInner(
 		isTouchDevice() && hasValue && !muiProps.disabled && !disableClearable;
 
 	return (
-		<UiKitTextFieldWithWarnings
+		<UiKitTextFieldWithState
 			ref={ref}
 			{...muiProps}
 			warning={warning}
+			dirty={dirty}
 			onChange={handleChange}
 			slotProps={{
 				input: (props) => {

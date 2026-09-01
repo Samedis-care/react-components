@@ -46,6 +46,7 @@ class RendererDateNullable extends TypeDateNullable {
 			handleBlur,
 			errorMsg,
 			warningMsg,
+			dirty,
 			setFieldTouched,
 		} = params;
 
@@ -77,6 +78,7 @@ class RendererDateNullable extends TypeDateNullable {
 						onBlur={handleBlur}
 						error={!!errorMsg}
 						warning={!!warningMsg}
+						dirty={dirty}
 						onError={(error: React.ReactNode) => {
 							this.error = error
 								? ccI18n.t(

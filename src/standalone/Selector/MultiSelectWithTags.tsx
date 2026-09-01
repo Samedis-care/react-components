@@ -14,6 +14,7 @@ import uniqueArray from "../../utils/uniqueArray";
 import Loader from "../Loader";
 import { MultiSelectorData } from "./MultiSelect";
 import combineClassNames from "../../utils/combineClassNames";
+import { labelWithDirtyMarker } from "../UIKit/MuiFieldState";
 
 export interface MultiSelectWithTagsProps<
 	DataT extends MultiSelectorData,
@@ -49,6 +50,11 @@ export interface MultiSelectWithTagsProps<
 	 * The title of control
 	 */
 	title: string;
+	/**
+	 * Does the selection differ from the server-side value?
+	 * @remarks Presentational only; set by the form engine from `RenderParams.dirty`.
+	 */
+	dirty?: boolean;
 	/**
 	 * Label above search bar
 	 */
@@ -140,6 +146,7 @@ const MultiSelectWithTags = <
 	});
 	const {
 		title,
+		dirty,
 		searchInputLabel,
 		selected,
 		disabled,
@@ -258,7 +265,7 @@ const MultiSelectWithTags = <
 				<Loader />
 			</LoadOverlay>
 			<Typography component="label" variant={"caption"} color={"textSecondary"}>
-				{title}
+				{labelWithDirtyMarker(title, dirty)}
 			</Typography>
 			<SingleSelect
 				autocompleteId={

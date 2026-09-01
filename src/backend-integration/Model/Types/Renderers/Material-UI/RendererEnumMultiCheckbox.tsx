@@ -45,6 +45,7 @@ class RendererEnumRadio extends TypeEnumMulti {
 			handleBlur,
 			errorMsg,
 			warningMsg,
+			dirty,
 			value,
 		} = params;
 
@@ -70,6 +71,7 @@ class RendererEnumRadio extends TypeEnumMulti {
 					fullWidth
 					error={!!errorMsg}
 					warning={!!warningMsg}
+					dirty={dirty}
 				>
 					<FormLabel component={"legend"}>{label}</FormLabel>
 					<FormGroup

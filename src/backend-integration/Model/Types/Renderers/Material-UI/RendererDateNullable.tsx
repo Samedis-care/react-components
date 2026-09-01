@@ -12,7 +12,7 @@ import {
 import { LocalizedKeyboardDatePicker } from "../../../../../standalone/LocalizedDateTimePickers";
 import { ToDateLocaleStringOptions } from "../../../../../constants";
 import { IDataGridColumnDef } from "../../../../../standalone/DataGrid/DataGrid";
-import { FormHelperTextCC } from "../../../../../standalone/UIKit/MuiWarning";
+import { FormHelperTextCC } from "../../../../../standalone/UIKit/MuiFieldState";
 import moment from "moment";
 
 /**
@@ -30,6 +30,7 @@ class RendererDateNullable extends TypeDateNullable {
 			handleBlur,
 			errorMsg,
 			warningMsg,
+			dirty,
 			setFieldTouched,
 		} = params;
 
@@ -62,6 +63,7 @@ class RendererDateNullable extends TypeDateNullable {
 						onBlur={handleBlur}
 						error={!!errorMsg}
 						warning={!!warningMsg}
+						dirty={dirty}
 						onError={(error: React.ReactNode) => {
 							this.error = error
 								? ccI18n.t(

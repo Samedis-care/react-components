@@ -69,4 +69,10 @@ changed default, or a previously ignored prop starting to take effect.
 
 ## i18n
 
-Translation files live in `src/assets/i18n/`. To add translations use [i18n Manager](https://www.electronjs.org/apps/i18n-manager). The library's i18next instance is exported as `ComponentsCareI18nInstance` from `src/i18n.ts`.
+Translation files live in `src/assets/i18n/<lang>/translation.json`, one folder per
+locale. `en` is the source language and the fallback, so a key missing from another locale
+silently renders in English — when you add a key, add it to **every** locale, not just
+`en`. Edit the JSON directly; see [`src/assets/i18n/README.md`](src/assets/i18n/README.md)
+for the translation platform and for adding a new language.
+
+The library's i18next instance is exported as `ComponentsCareI18nInstance` from `src/i18n.ts`.

@@ -145,6 +145,7 @@
 		"file-upload": {
 			"close": "Chiudi",
 			"upload": "Carica",
+			"restore": "Ripristina",
 			"upload-capture": {
 				"image": "Scatta foto"
 			},

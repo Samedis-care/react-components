@@ -140,6 +140,7 @@
 		},
 		"file-upload": {
 			"upload": "Hochladen",
+			"restore": "Wiederherstellen",
 			"upload-modern": "Datei per Drag & Drop ablegen oder hier klicken",
 			"no-files": "Keine Anhänge verfügbar",
 			"formats": "Dateiformate",

@@ -5,8 +5,7 @@ import {
 	LocalizationProvider,
 } from "@mui/x-date-pickers";
 import { TextFieldProps, useThemeProps } from "@mui/material";
-import type { PickersTextFieldProps } from "@mui/x-date-pickers";
-import { withMuiWarning } from "../UIKit/MuiWarning";
+import { withMuiFieldState } from "../UIKit/MuiFieldState";
 import useMuiLocaleData from "./useMuiLocaleData";
 import accessSlotProps from "../../utils/internal/accessSlotProps";
 import { TextFieldWithHelpProps } from "../UIKit/TextFieldWithHelp";
@@ -115,8 +114,13 @@ const LocalizedKeyboardDatePicker = (
 								draft.settleOnBlur(event);
 								onBlur?.(event);
 							},
-							disableClearable,
-						} as unknown as Partial<PickersTextFieldProps>;
+							// disableClearable suppresses the clear button that our
+							// TextFieldWithHelp based fields render on touch devices. MUI's
+							// own PickersTextField has no such button and forwards the prop
+							// it does not know to the DOM, so it is only sent on to a text
+							// field that was actually swapped in for it.
+							...(otherProps.slots?.textField ? { disableClearable } : {}),
+						};
 					},
 				}}
 			/>
@@ -124,4 +128,4 @@ const LocalizedKeyboardDatePicker = (
 	);
 };
 
-export default React.memo(withMuiWarning(LocalizedKeyboardDatePicker));
+export default React.memo(withMuiFieldState(LocalizedKeyboardDatePicker));

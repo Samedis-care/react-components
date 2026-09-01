@@ -7,7 +7,7 @@ import {
 	UiKitPickersTextField,
 } from "./CommonStyles";
 import isTouchDevice from "../../utils/isTouchDevice";
-import { withMuiWarning } from "./MuiWarning";
+import { withMuiFieldState } from "./MuiFieldState";
 import useCCTranslations from "../../utils/useCCTranslations";
 import { PickersTextFieldProps } from "@mui/x-date-pickers";
 
@@ -26,7 +26,7 @@ export interface PickersTextFieldWithHelpProps extends UIInputProps {
 	disableClearable?: boolean;
 }
 
-export const UiKitPickersTextFieldWithWarnings = withMuiWarning(
+export const UiKitPickersTextFieldWithState = withMuiFieldState(
 	UiKitPickersTextField,
 ) as typeof UiKitPickersTextField;
 const TextFieldWithHelp: React.ForwardRefExoticComponent<
@@ -42,6 +42,7 @@ const TextFieldWithHelp: React.ForwardRefExoticComponent<
 		customHandleClear,
 		disableClearable,
 		warning,
+		dirty,
 		onChange,
 		...muiProps
 	} = props;
@@ -82,10 +83,11 @@ const TextFieldWithHelp: React.ForwardRefExoticComponent<
 	const hasEndAdornment = !!(showClear || openInfo || existingEndAdornment);
 
 	return (
-		<UiKitPickersTextFieldWithWarnings
+		<UiKitPickersTextFieldWithState
 			ref={ref}
 			{...muiProps}
 			warning={warning}
+			dirty={dirty}
 			onChange={handleChange}
 			slotProps={{
 				...muiProps.slotProps,

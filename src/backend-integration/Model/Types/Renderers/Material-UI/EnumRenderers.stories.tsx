@@ -42,6 +42,7 @@ const buildParams = <T,>(
 	initialValue: value,
 	label,
 	touched: false,
+	dirty: false,
 	visibility: editableVisibility,
 	handleChange,
 	handleBlur: noop,

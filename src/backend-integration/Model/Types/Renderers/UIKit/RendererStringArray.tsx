@@ -81,6 +81,7 @@ const RendererStringArrayComponent = (
 		handleBlur,
 		errorMsg,
 		warningMsg,
+		dirty,
 	} = props;
 
 	useMountLogging(RendererStringArrayComponent);
@@ -105,6 +106,7 @@ const RendererStringArrayComponent = (
 			}}
 			error={!!errorMsg}
 			warning={!!warningMsg}
+			dirty={dirty}
 		/>
 	);
 

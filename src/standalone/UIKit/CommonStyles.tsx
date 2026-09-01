@@ -15,6 +15,11 @@ import { PickersTextField, PickersTextFieldProps } from "@mui/x-date-pickers";
 export interface UIInputProps {
 	important?: boolean;
 	warning?: boolean;
+	/**
+	 * Does the value differ from the server-side value?
+	 * @remarks Presentational only; set by the form engine from `RenderParams.dirty`.
+	 */
+	dirty?: boolean;
 }
 
 export type UiKitInputClassKey = "root";

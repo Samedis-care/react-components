@@ -5,7 +5,7 @@ import ModelRenderParams from "../../RenderParams";
 import BackendDataGridMultiSelect, {
 	BackendDataGridMultiSelectProps,
 } from "../../../../backend-components/Selector/BackendDataGridMultiSelect";
-import { FormHelperTextCC } from "../../../../standalone/UIKit/MuiWarning";
+import { FormHelperTextCC } from "../../../../standalone/UIKit/MuiFieldState";
 import TypeIds from "../TypeIds";
 
 type OmitProperties = "selected" | "onChange" | "readOnly" | "model";

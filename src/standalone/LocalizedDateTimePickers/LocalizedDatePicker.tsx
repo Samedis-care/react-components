@@ -4,7 +4,7 @@ import {
 	DatePickerProps,
 	LocalizationProvider,
 } from "@mui/x-date-pickers";
-import { withMuiWarning } from "../UIKit/MuiWarning";
+import { withMuiFieldState } from "../UIKit/MuiFieldState";
 import useMuiLocaleData from "./useMuiLocaleData";
 import usePickerDraft from "./usePickerDraft";
 import accessSlotProps from "../../utils/internal/accessSlotProps";
@@ -67,4 +67,4 @@ const LocalizedDatePicker = (props: LocalizedDatePickerProps) => {
 	);
 };
 
-export default React.memo(withMuiWarning(LocalizedDatePicker));
+export default React.memo(withMuiFieldState(LocalizedDatePicker));

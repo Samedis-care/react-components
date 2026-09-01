@@ -145,6 +145,7 @@
 		"file-upload": {
 			"close": "Close",
 			"upload": "Upload",
+			"restore": "Restore",
 			"upload-capture": {
 				"image": "Take photo"
 			},

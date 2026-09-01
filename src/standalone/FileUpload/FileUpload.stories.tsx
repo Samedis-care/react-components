@@ -588,3 +588,108 @@ export const GetFileIconOrDefaultDemo: StoryObj = {
 		);
 	},
 };
+
+/**
+ * Per-file pending change: a file the user added is green, one they removed is struck
+ * through and offers a restore in place of its remove button. Removal is deliberately
+ * not coloured red — red reads as an error, and this is a pending change.
+ */
+export const FileChangeStates: StoryObj = {
+	name: "FileUploadGeneric — added / removed files",
+	render: () => {
+		const server = (
+			name: string,
+			type: string,
+			del = false,
+		): FileData<FileMeta> => ({
+			file: { name, type, downloadLink: "data:text/plain;base64,eA==" },
+			canBeUploaded: false,
+			delete: del,
+		});
+		const [files, setFiles] = useState<FileData[]>([
+			server("contract.pdf", "application/pdf"),
+			{
+				file: new File(["x"], "addendum.docx", { type: "application/msword" }),
+				canBeUploaded: true,
+				delete: false,
+			},
+			server("budget.xlsx", "application/vnd.ms-excel", true),
+		]);
+		return (
+			<div style={{ width: 480 }}>
+				<FileUploadGeneric
+					files={files}
+					onChange={setFiles}
+					label="Attachments"
+					previewSize={24}
+					variant="modern"
+					handleError={() => {}}
+				/>
+			</div>
+		);
+	},
+	play: async ({ canvas, canvasElement }) => {
+		const label = (name: string) => canvas.getByText(name);
+		await expect(
+			getComputedStyle(label("contract.pdf")).textDecorationLine,
+		).toBe("none");
+		await expect(label("addendum.docx").dataset.ccChange).toBe("added");
+		// success.main, not the default text colour
+		await expect(getComputedStyle(label("addendum.docx")).color).not.toBe(
+			getComputedStyle(label("contract.pdf")).color,
+		);
+		await expect(label("budget.xlsx").dataset.ccChange).toBe("removed");
+		await expect(
+			getComputedStyle(label("budget.xlsx")).textDecorationLine,
+		).toBe("line-through");
+		// the removed file offers a restore instead of a remove
+		const restore = canvasElement.querySelector(
+			'[data-testid="RestoreFromTrashIcon"]',
+		);
+		await expect(restore).not.toBe(null);
+	},
+};
+
+/**
+ * The dirty marker on the two controls that label themselves with a fieldset legend
+ * rather than a MUI FormLabel, so the pseudo element the other controls use can't
+ * reach them. They take the flag as a prop and render the marker as an element.
+ */
+export const DirtyMarkerOnGroupBoxLabels: StoryObj = {
+	name: "Dirty marker — file upload and image selector",
+	render: () => {
+		const [files, setFiles] = useState<FileData[]>([]);
+		const [value, setValue] = useState("");
+		return (
+			<Grid container spacing={2} sx={{ width: 640 }}>
+				<Grid size={6}>
+					<FileUploadGeneric
+						files={files}
+						onChange={setFiles}
+						label="Attachments"
+						dirty
+						handleError={() => {}}
+					/>
+				</Grid>
+				<Grid size={6}>
+					<ImageSelector
+						name="unmodified"
+						value={value}
+						onChange={(_name, v) => setValue(v)}
+						label="Profile picture"
+					/>
+				</Grid>
+			</Grid>
+		);
+	},
+	play: async ({ canvas }) => {
+		const marker = canvas.getByText("Attachments").querySelector("span");
+		await expect(marker).not.toBe(null);
+		// a painted dot, not just an empty span
+		await expect(getComputedStyle(marker).width).toBe("6px");
+		await expect(getComputedStyle(marker).borderRadius).toBe("50%");
+		await expect(
+			canvas.getByText("Profile picture").querySelector("span"),
+		).toBe(null);
+	},
+};

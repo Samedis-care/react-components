@@ -11,7 +11,7 @@ import TextFieldWithHelp from "../../src/standalone/UIKit/TextFieldWithHelp";
 import NumberFormatter from "../../src/standalone/UIKit/NumberFormatter";
 import CenteredTypography from "../../src/standalone/UIKit/CenteredTypography";
 import Checkbox from "../../src/standalone/UIKit/Checkbox";
-import { TextFieldCC } from "../../src/standalone/UIKit/MuiWarning";
+import { TextFieldCC } from "../../src/standalone/UIKit/MuiFieldState";
 
 const theme = createTheme();
 const wrap = (ui: React.ReactNode) =>
@@ -281,7 +281,7 @@ describe("UIKit", () => {
 		});
 	});
 
-	describe("MuiWarning (withMuiWarning HOC)", () => {
+	describe("MuiFieldState (withMuiFieldState HOC)", () => {
 		it("renders TextFieldCC normally", () => {
 			wrap(<TextFieldCC label="Normal" />);
 			expect(screen.getByLabelText("Normal")).toBeTruthy();

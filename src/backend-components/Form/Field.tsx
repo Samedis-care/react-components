@@ -16,6 +16,7 @@ import { dotsToObject, getValueByDot } from "../../utils/dotUtils";
 import Type from "../../backend-integration/Model/Type";
 import shallowCompare from "../../utils/shallowCompare";
 import RenderParams from "../../backend-integration/Model/RenderParams";
+import FormFieldStateWrapper from "./FormFieldStateWrapper";
 
 type NonOverridableProps =
 	"getDefaultValue" | "validate" | "filterable" | "sortable" | "columnWidth";
@@ -101,6 +102,7 @@ const Field = (props: FieldProps): React.ReactElement => {
 		markFieldMounted,
 		relations,
 		readOnly,
+		dirtyFields,
 	} = useFormContext();
 
 	let fieldDef: ModelFieldDefinition<unknown, string, PageVisibility, never> =
@@ -145,6 +147,7 @@ const Field = (props: FieldProps): React.ReactElement => {
 	const errorMsg = (touch && errors[props.name]) || null;
 	const warningMsg = (touch && warnings[props.name]) || null;
 	const relationData = relations[props.name];
+	const dirty = dirtyFields[props.name] ?? false;
 	const visibility = getVisibility(
 		hasId ? fieldDef.visibility.edit : fieldDef.visibility.create,
 		values,
@@ -167,6 +170,7 @@ const Field = (props: FieldProps): React.ReactElement => {
 				field: name,
 				value: value,
 				touched: touch,
+				dirty: dirty,
 				initialValue: initialValue,
 				visibility: readOnly ? { ...visibility, readOnly: true } : visibility,
 				handleChange: setFieldValueHookWrapper,
@@ -183,7 +187,9 @@ const Field = (props: FieldProps): React.ReactElement => {
 			};
 			return (
 				<FormFieldContext.Provider value={{ ...renderParams, type }}>
-					{type.render(renderParams)}
+					<FormFieldStateWrapper field={name} dirty={dirty}>
+						{type.render(renderParams)}
+					</FormFieldStateWrapper>
 				</FormFieldContext.Provider>
 			);
 		},
@@ -203,6 +209,7 @@ const Field = (props: FieldProps): React.ReactElement => {
 			setFieldTouched,
 			initialValue,
 			touch,
+			dirty,
 			relationModel,
 			relationData,
 			readOnly,

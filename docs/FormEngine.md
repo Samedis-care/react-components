@@ -433,6 +433,80 @@ those resolve to `true`. Stick with `submit` when you need the error object itse
 in nested forms (`nestedFormName`) too: those don't render an error component of their own, and rely
 on the error propagating to the parent form.
 
+### Showing dirty state
+
+Every field rendered by `FormField` knows whether its value still matches the server-side
+value, and a modified one is marked with a small blue dot after its label.
+
+`dirty` is a diff against the server value, not a "has been edited" latch: restoring the
+original value clears the marker, and a value set programmatically is dirty without the
+user ever having focused the field. It is independent of `touched`.
+
+The dot is deliberately not an asterisk (that means required) and not a tint of the input
+(yellow is a warning, red an error, blue the focus ring) — it sits beside the label so it
+stacks with all three.
+
+The flag reaches you in three places:
+
+- `RenderParams.dirty` — handed to the type renderer, and forwarded by every renderer in
+  the library to its control as a `dirty` prop, the same way `warning` is.
+- `useFormContext().dirtyFields` — `Record<string, boolean>`, one entry per model field.
+  Custom (non-model) fields are not in there: a custom field is the thing calling
+  `setCustomFieldDirty`, so it already holds its own dirty state and is responsible for
+  displaying it; what the form does with it is fold it into the form-wide `dirty` flag.
+- The DOM — `FormField` wraps the rendered control in an element carrying the state, and
+  controls that take the `dirty` prop repeat it on their own root:
+
+  ```html
+  <div data-cc-field="first_name" data-cc-dirty="true">…the control…</div>
+  ```
+
+  That wrapper is `display: contents`, so it participates in no layout and exists purely
+  as a CSS ancestor for markers the label-based one can't express.
+
+#### Restyling the marker
+
+Two theme slots, depending on which half you want. `CcFieldState` is shared by every
+control wrapped in `withMuiFieldState` — which is where the label pseudo element lives, the
+selectors' own label included — and `CcDirtyMarker` styles the element version, rendered by
+the three controls whose label the pseudo element can't reach: `FileUploadGeneric` and
+`ImageSelector` (fieldset legend) and `MultiSelectWithTags` (a `Typography` title):
+
+<details>
+	<summary>TypeScript</summary>
+
+```ts
+createTheme({
+	components: {
+		// recolour the element version
+		CcDirtyMarker: { styleOverrides: { root: { backgroundColor: "#7b1fa2" } } },
+		// italic label instead of a dot, everywhere else
+		CcFieldState: {
+			styleOverrides: {
+				root: {
+					"& > .MuiFormLabel-root::after": { display: "none" },
+					"& > .MuiFormLabel-root": { fontStyle: "italic" },
+				},
+			},
+		},
+	},
+});
+```
+
+</details>
+
+One thing to know if you replace the dot with something wider: an outlined input sizes the
+gap in its border from a second copy of the label that a pseudo element cannot reach, so
+the stock styles widen that gap by the width of the dot. A wider marker has to widen it
+further, through `& > .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline legend`.
+
+For a custom renderer, `DirtyMarker` (an element) and `dirtyMarkerStyles` (for a pseudo
+element) are both exported, so a control can draw the same marker wherever its label is.
+
+The `Backend-Components/Form` → `DirtyState` story shows the marker across a text field,
+an outlined multiline one, a searchable select, a date, an image selector, a radio group,
+a checkbox and a switch.
+
 ### Error reporting
 
 Independently of what your error component displays, Components-Care forwards unexpected errors to an

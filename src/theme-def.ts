@@ -213,6 +213,14 @@ import {
 } from "./standalone/Schedule/Scrollable/ScrollableScheduleDay";
 import { FormClassKey } from "./backend-components";
 import { BasicFormPageProps } from "./backend-components/Form/BasicFormPage";
+import {
+	FormFieldStateWrapperClassKey,
+	FormFieldStateWrapperProps,
+} from "./backend-components/Form/FormFieldStateWrapper";
+import {
+	DirtyMarkerClassKey,
+	FieldStateClassKey,
+} from "./standalone/UIKit/MuiFieldState";
 import { CrudClassKey } from "./backend-components/CRUD";
 import { BackendSingleSelectThemeProps } from "./backend-components/Selector/BackendSingleSelect";
 import { BackendMultiSelectThemeProps } from "./backend-components/Selector/BackendMultiSelect";
@@ -287,6 +295,7 @@ declare module "@mui/material/styles" {
 		CcMenuItemMaterial: MenuItemMaterialClassKey;
 		CcLocalizedKeyboardDatePicker: LocalizedKeyboardDatePickerClassKey;
 		CcComponentWithLabel: ComponentWithLabelClassKey;
+		CcFormFieldStateWrapper: FormFieldStateWrapperClassKey;
 		CcCheckbox: CheckboxClassKey;
 		CcUiKitInput: UiKitInputClassKey;
 		CcUiKitInputOutlined: UiKitInputOutlinedClassKey;
@@ -312,6 +321,8 @@ declare module "@mui/material/styles" {
 		CcGridSingleSelectFilter: GridSingleSelectFilterClassKey;
 		CcGridSingleSelectFilterBackend: GridSingleSelectFilterBackendClassKey;
 		CcForm: FormClassKey;
+		CcFieldState: FieldStateClassKey;
+		CcDirtyMarker: DirtyMarkerClassKey;
 		CcCrud: CrudClassKey;
 	}
 
@@ -360,6 +371,7 @@ declare module "@mui/material/styles" {
 		CcMenuItemMaterial: Partial<MenuItemMaterialProps>;
 		CcLocalizedKeyboardDatePicker: Partial<LocalizedKeyboardDatePickerProps>;
 		CcComponentWithLabel: Partial<ComponentWithLabelProps>;
+		CcFormFieldStateWrapper: Partial<FormFieldStateWrapperProps>;
 		CcCheckbox: Partial<CheckboxProps>;
 		CcUiKitInput: Partial<UiKitInputProps>;
 		CcUiKitInputOutlined: Partial<UiKitInputOutlinedProps>;
@@ -616,6 +628,11 @@ declare module "@mui/material/styles" {
 			styleOverrides?: ComponentsOverrides<Theme>["CcComponentWithLabel"];
 			variants?: ComponentsVariants["CcComponentWithLabel"];
 		};
+		CcFormFieldStateWrapper?: {
+			defaultProps?: ComponentsPropsList["CcFormFieldStateWrapper"];
+			styleOverrides?: ComponentsOverrides<Theme>["CcFormFieldStateWrapper"];
+			variants?: ComponentsVariants["CcFormFieldStateWrapper"];
+		};
 		CcCheckbox?: {
 			defaultProps?: ComponentsPropsList["CcCheckbox"];
 			styleOverrides?: ComponentsOverrides<Theme>["CcCheckbox"];
@@ -737,6 +754,12 @@ declare module "@mui/material/styles" {
 		};
 		CcForm?: {
 			styleOverrides?: ComponentsOverrides<Theme>["CcForm"];
+		};
+		CcFieldState?: {
+			styleOverrides?: ComponentsOverrides<Theme>["CcFieldState"];
+		};
+		CcDirtyMarker?: {
+			styleOverrides?: ComponentsOverrides<Theme>["CcDirtyMarker"];
 		};
 		CcBasicFormPage?: {
 			defaultProps?: ComponentsPropsList["CcBasicFormPage"];

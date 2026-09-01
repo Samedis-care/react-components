@@ -314,6 +314,37 @@ export const MultiSelectWithTagsBasic: StoryObj = {
 	},
 };
 
+/**
+ * MultiSelectWithTags titles itself with a Typography rather than a MUI FormLabel, so
+ * unlike every other selector it renders the dirty marker as an element instead of
+ * getting it from the label pseudo element.
+ */
+export const MultiSelectWithTagsDirty: StoryObj = {
+	name: "MultiSelectWithTags — dirty marker",
+	render: () => {
+		const [selected, setSelected] = useState<MultiSelectorData[]>([]);
+		return (
+			<div style={{ width: 400 }}>
+				<MultiSelectWithTags<MultiSelectorData, BaseSelectorData>
+					title="Fruits by category"
+					selected={selected}
+					onChange={setSelected}
+					loadGroupOptions={selectorLocalLoadHandler(CATEGORIES)}
+					loadDataOptions={selectorLocalLoadHandler(FRUITS)}
+					loadGroupEntries={() => []}
+					searchInputLabel="Search individual fruits"
+					dirty
+				/>
+			</div>
+		);
+	},
+	play: async ({ canvas }) => {
+		const marker = canvas.getByText("Fruits by category").querySelector("span");
+		await expect(marker).not.toBe(null);
+		await expect(getComputedStyle(marker).width).toBe("6px");
+	},
+};
+
 export const MultiSelectWithTagsWithInitialValues: StoryObj = {
 	name: "MultiSelectWithTags — pre-selected values",
 	render: () => {

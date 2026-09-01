@@ -9,7 +9,7 @@ import {
 import ModelRenderParams from "../../../RenderParams";
 import TypeBoolean from "../../TypeBoolean";
 import ccI18n from "../../../../../i18n";
-import { FormControlFieldsetCC } from "../../../../../standalone/UIKit/MuiWarning";
+import { FormControlFieldsetCC } from "../../../../../standalone/UIKit/MuiFieldState";
 
 export interface ModelDataTypeBooleanSwitchRendererMUIProps {
 	switchProps: Omit<
@@ -45,6 +45,7 @@ class RendererBooleanSwitch extends TypeBoolean {
 			handleBlur,
 			errorMsg,
 			warningMsg,
+			dirty,
 		} = params;
 
 		if (visibility.disabled) return <></>;
@@ -67,6 +68,7 @@ class RendererBooleanSwitch extends TypeBoolean {
 					required={visibility.required}
 					error={!!errorMsg}
 					warning={!!warningMsg}
+					dirty={dirty}
 					component={"fieldset"}
 				>
 					<FormControlLabel
@@ -86,6 +88,7 @@ class RendererBooleanSwitch extends TypeBoolean {
 									);
 								}}
 								onBlur={handleBlur}
+								data-name={field}
 							/>
 						}
 						label={label}

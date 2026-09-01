@@ -25,6 +25,7 @@ class RendererEnumSelect extends TypeEnum {
 			handleBlur,
 			errorMsg,
 			warningMsg,
+			dirty,
 		} = params;
 
 		if (visibility.disabled) return <></>;
@@ -47,6 +48,7 @@ class RendererEnumSelect extends TypeEnum {
 					fullWidth
 					error={!!errorMsg}
 					warning={!!warningMsg}
+					dirty={dirty}
 				>
 					<InputLabel shrink>{label}</InputLabel>
 					<Select
