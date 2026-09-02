@@ -83,10 +83,11 @@ export default RendererYourType;
 
 ### Remarks
 
-`dirty` says the value differs from the server-side one. Forward it to any control built on
-a MUI `FormControl` or `TextField` and the modified marker — a small blue dot — appears after
-the label on its own. A control that labels itself some other way should render `DirtyMarker`
-next to its label instead. See
+`dirty` says the field should be marked as modified — false unless the application asked
+for the marker, so a renderer can always forward it. Hand it to any control built on a MUI
+`FormControl` or `TextField` and the marker — a small blue dot — appears after the label on
+its own. A control that labels itself some other way should render `DirtyMarker` next to its
+label instead. See
 [Showing dirty state](../../../../../docs/FormEngine.md#showing-dirty-state).
 
 If you implement an editable grid control you need to make sure that handleChange is only called when needed. Calling handleChange will send a update request to the backend and refresh the grid.

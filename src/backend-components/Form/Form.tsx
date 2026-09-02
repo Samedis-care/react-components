@@ -42,6 +42,7 @@ import { QueryObserverBaseResult } from "@tanstack/react-query";
 import ValidationError from "./ValidationError";
 import TypedEventTarget from "../../utils/TypedEventTarget";
 import { FormEvents, FormEventTarget } from "./FormEvents";
+import { DirtyStateContext, NO_DIRTY_STATE } from "./DirtyStateContext";
 import deepEqual from "../../utils/deepEqual";
 import { captureError } from "../../framework/ErrorReporting";
 
@@ -342,6 +343,14 @@ export interface FormProps<
 	 */
 	dirtyIgnoreFields?: string[];
 	/**
+	 * Mark the modified fields, using the form's own per-field dirty state
+	 * @remarks Off by default: no control shows the marker unless asked. Where the
+	 *          application, not the form engine, decides what counts as modified, wrap the
+	 *          fields in a `DirtyStateProvider` instead.
+	 * @see DirtyStateContext
+	 */
+	showDirtyState?: boolean;
+	/**
 	 * Enable flow engine mode
 	 */
 	flowEngine?: boolean;
@@ -508,6 +517,15 @@ export interface FormContextData {
 	 *          `RenderParams.dirty`.
 	 */
 	dirtyFields: Record<string, boolean>;
+	/**
+	 * Was the form asked to mark its modified fields?
+	 * @remarks Whether a given field *is* marked is a different question, which a
+	 *          `DirtyStateProvider` can answer differently — ask `useDirtyState` for that.
+	 *          This is the form-wide switch, for a control which holds dirty state of its
+	 *          own and wants to display it on the same terms as the model fields.
+	 * @see FormProps.showDirtyState
+	 */
+	showDirtyState: boolean;
 	/**
 	 * @see FormProps.onlySubmitMounted
 	 */
@@ -742,6 +760,7 @@ export type FormContextDataLite = Pick<
 	| "safeSubmit"
 	| "submitting"
 	| "dirty"
+	| "showDirtyState"
 	| "flowEngineConfig"
 	| "refetchForm"
 >;
@@ -946,6 +965,7 @@ const Form = <
 		formClass,
 		preSubmit,
 		dirtyIgnoreFields,
+		showDirtyState,
 		flowEngine,
 		renderFormAsDiv: renderFormAsDivProp,
 		errorRenderer: ErrorRenderer,
@@ -2189,6 +2209,7 @@ const Form = <
 			setCustomFieldDirty,
 			dirty,
 			dirtyFields,
+			showDirtyState: !!showDirtyState,
 			getCustomState,
 			setCustomState,
 			setPreSubmitHandler,
@@ -2249,6 +2270,7 @@ const Form = <
 			setCustomFieldDirty,
 			dirty,
 			dirtyFields,
+			showDirtyState,
 			getCustomState,
 			setCustomState,
 			setPreSubmitHandler,
@@ -2326,6 +2348,7 @@ const Form = <
 			safeSubmit: safeSubmitForm,
 			submitting,
 			dirty,
+			showDirtyState: !!showDirtyState,
 			flowEngineConfig,
 			refetchForm: refetch,
 		}),
@@ -2353,6 +2376,7 @@ const Form = <
 			safeSubmitForm,
 			submitting,
 			dirty,
+			showDirtyState,
 			refetch,
 		],
 	);
@@ -2379,7 +2403,11 @@ const Form = <
 	}
 
 	const innerForm = () => (
-		<>
+		// always set, even when nothing is marked: that is what keeps a nested form from
+		// inheriting the marks of the form around it
+		<DirtyStateContext.Provider
+			value={showDirtyState ? dirtyFields : NO_DIRTY_STATE}
+		>
 			{displayError && !nestedFormName && (
 				<ErrorComponent error={displayError} />
 			)}
@@ -2400,7 +2428,7 @@ const Form = <
 					disableRouting={!!props.disableRouting}
 				/>
 			)}
-		</>
+		</DirtyStateContext.Provider>
 	);
 
 	return (

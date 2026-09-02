@@ -12,6 +12,8 @@ import createTestModel from "../../stories/test-utils/TestModel";
 import createMixedControlModel from "../../stories/test-utils/MixedControlModel";
 import { ModelFieldName, PageVisibility } from "../../backend-integration";
 import { PageProps } from "./Form";
+import DirtyStateProvider from "./DirtyStateProvider";
+import { DirtyStateMarks } from "./DirtyStateContext";
 
 const FrameworkDecorator = (Story: React.ComponentType) => (
 	<Framework>
@@ -118,6 +120,34 @@ export const EditMode: StoryObj = {
  * Edit any of them and a blue dot appears after its label; restore the original value
  * and it goes away again.
  */
+const FIELD_SIZES: Partial<Record<ModelFieldName, number>> = { notes: 12 };
+
+/**
+ * A field in its own grid cell, tagged with its name
+ * @remarks The form engine wraps fields in nothing of its own, so the story marks its
+ *          cells to have something to assert against.
+ */
+const FieldCell = (props: { name: ModelFieldName }) => (
+	<Grid
+		size={{ xs: FIELD_SIZES[props.name] ?? 6 }}
+		data-field={props.name}
+		key={props.name}
+	>
+		<FormField name={props.name} />
+	</Grid>
+);
+
+const MIXED_FIELDS: ModelFieldName[] = [
+	"first_name",
+	"department",
+	"notes",
+	"start_date",
+	"avatar",
+	"priority",
+	"active",
+	"notify",
+];
+
 const MixedFormContent = (
 	props: PageProps<ModelFieldName, FormCustomProps>,
 ) => {
@@ -137,36 +167,39 @@ const MixedFormContent = (
 			autoBack={false}
 		>
 			<Grid container spacing={2}>
-				<Grid size={{ xs: 6 }}>
-					<FormField name="first_name" />
-				</Grid>
-				<Grid size={{ xs: 6 }}>
-					<FormField name="department" />
-				</Grid>
-				<Grid size={{ xs: 12 }}>
-					<FormField name="notes" />
-				</Grid>
-				<Grid size={{ xs: 6 }}>
-					<FormField name="start_date" />
-				</Grid>
-				<Grid size={{ xs: 6 }}>
-					<FormField name="avatar" />
-				</Grid>
-				<Grid size={{ xs: 6 }}>
-					<FormField name="priority" />
-				</Grid>
-				<Grid size={{ xs: 6 }}>
-					<FormField name="active" />
-				</Grid>
-				<Grid size={{ xs: 6 }}>
-					<FormField name="notify" />
-				</Grid>
+				{MIXED_FIELDS.map((name) => (
+					<FieldCell name={name} key={name} />
+				))}
 			</Grid>
 		</DefaultFormPage>
 	);
 };
 
-const DirtyStateFormStory = () => {
+/**
+ * The fields a change request proposes to modify: saved, so the form is not dirty, but
+ * still to be marked
+ */
+const PROPOSED_CHANGES: DirtyStateMarks = { notes: true };
+
+/**
+ * Declared outside the render, as DirtyStateProvider asks for
+ */
+const mergeProposedChanges = (
+	formDirtyFields: DirtyStateMarks,
+): DirtyStateMarks => ({ ...formDirtyFields, ...PROPOSED_CHANGES });
+
+const ProposedChangesFormContent = (
+	props: PageProps<ModelFieldName, FormCustomProps>,
+) => (
+	<DirtyStateProvider marks={mergeProposedChanges}>
+		<MixedFormContent {...props} />
+	</DirtyStateProvider>
+);
+
+const DirtyStateFormStory = (props: {
+	showDirtyState?: boolean;
+	content?: React.ComponentType<PageProps<ModelFieldName, FormCustomProps>>;
+}) => {
 	const model = useMemo(createMixedControlModel, []);
 	const goBack = useCallback(() => {
 		// eslint-disable-next-line no-console
@@ -178,9 +211,10 @@ const DirtyStateFormStory = () => {
 			id="1"
 			errorComponent={DefaultErrorComponent}
 			customProps={{ goBack }}
+			showDirtyState={props.showDirtyState}
 			disableRouting
 		>
-			{MixedFormContent}
+			{props.content ?? MixedFormContent}
 		</Form>
 	);
 };
@@ -193,34 +227,22 @@ const hasMarker = (el: Element | null | undefined) =>
 	!!el && getComputedStyle(el, "::after").content !== "none";
 
 export const DirtyState: StoryObj = {
-	render: () => <DirtyStateFormStory />,
+	render: () => <DirtyStateFormStory showDirtyState />,
 	play: async ({ canvas, canvasElement, userEvent }) => {
 		const input = await canvas.findByDisplayValue("Alice", undefined, {
 			timeout: 10000,
 		});
 		const find = (selector: string) => canvasElement.querySelector(selector);
-		const field = (name: string) => `[data-cc-field="${name}"]`;
+		const field = (name: string) => `[data-field="${name}"]`;
 
-		// the wrapper Field puts around every control...
-		const wrapperDirty = () =>
-			find(field("first_name"))?.getAttribute("data-cc-dirty");
-		// ...and the control root the renderer handed RenderParams.dirty to
-		const controlDirty = () =>
-			find(`${field("first_name")} .MuiTextField-root`)?.getAttribute(
-				"data-cc-dirty",
-			);
 		const label = () => find(`${field("first_name")} .MuiFormLabel-root`);
 
-		await expect(wrapperDirty()).toBe("false");
-		await expect(controlDirty()).toBe("false");
 		await expect(hasMarker(label())).toBe(false);
 
 		await userEvent.type(input, "x");
 		await waitFor(async () => {
-			await expect(wrapperDirty()).toBe("true");
+			await expect(hasMarker(label())).toBe(true);
 		});
-		await expect(controlDirty()).toBe("true");
-		await expect(hasMarker(label())).toBe(true);
 
 		// a checkbox labels the control, not the FormControl around it — a different
 		// selector in the marker styles, so worth its own assertion
@@ -244,9 +266,63 @@ export const DirtyState: StoryObj = {
 		// back to the server-side value: dirty is a diff, not a "was edited" latch
 		await userEvent.type(input, "{Backspace}");
 		await waitFor(async () => {
-			await expect(wrapperDirty()).toBe("false");
+			await expect(hasMarker(label())).toBe(false);
 		});
-		await expect(controlDirty()).toBe("false");
-		await expect(hasMarker(label())).toBe(false);
+	},
+};
+
+/**
+ * Without `showDirtyState` nothing is marked, however dirty the form gets.
+ */
+export const DirtyStateHidden: StoryObj = {
+	render: () => <DirtyStateFormStory />,
+	play: async ({ canvas, canvasElement, userEvent }) => {
+		const input = await canvas.findByDisplayValue("Alice", undefined, {
+			timeout: 10000,
+		});
+		const find = (selector: string) => canvasElement.querySelector(selector);
+
+		await userEvent.type(input, "x");
+		// the form knows it is dirty...
+		await waitFor(async () => {
+			await expect(
+				find("[data-form-dirty]")?.getAttribute("data-form-dirty"),
+			).toBe("true");
+		});
+		// ...and says nothing about it
+		await expect(
+			hasMarker(find('[data-field="first_name"] .MuiFormLabel-root')),
+		).toBe(false);
+	},
+};
+
+/**
+ * Marks supplied by the application rather than derived from the form: a change request
+ * workflow marking the fields a proposal touches. Those are saved — the form is not
+ * dirty — and still marked, and the form's own dirty state is merged in on top.
+ */
+export const DirtyStateProvided: StoryObj = {
+	render: () => <DirtyStateFormStory content={ProposedChangesFormContent} />,
+	play: async ({ canvas, canvasElement, userEvent }) => {
+		const input = await canvas.findByDisplayValue("Alice", undefined, {
+			timeout: 10000,
+		});
+		const find = (selector: string) => canvasElement.querySelector(selector);
+		const field = (name: string) => `[data-field="${name}"]`;
+		const label = (name: string) => find(`${field(name)} .MuiFormLabel-root`);
+
+		// proposed by the change request, untouched by the user, marked anyway
+		await waitFor(async () => {
+			await expect(hasMarker(label("notes"))).toBe(true);
+		});
+		// not proposed, not edited
+		await expect(hasMarker(label("first_name"))).toBe(false);
+
+		// the form's own dirty state is merged in, not replaced
+		await userEvent.type(input, "x");
+		await waitFor(async () => {
+			await expect(hasMarker(label("first_name"))).toBe(true);
+		});
+		await expect(hasMarker(label("notes"))).toBe(true);
 	},
 };

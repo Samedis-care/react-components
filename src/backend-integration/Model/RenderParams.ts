@@ -26,11 +26,14 @@ export interface RenderParams<T> {
 	 */
 	touched: boolean;
 	/**
-	 * Does the value differ from the server-side value?
-	 * @remarks Independent of touched: a value set programmatically is dirty without
-	 *          the user ever having focused the field. Always false where there is no
-	 *          form state to compare against (data grid cells, import previews).
-	 * @see FormContextData.dirtyFields
+	 * Should the field be marked as modified?
+	 * @remarks Display state rather than a diff of its own, and false unless the
+	 *          application asked for the marker: with `FormProps.showDirtyState` this is
+	 *          the form engine's per-field dirty state, which is independent of touched —
+	 *          a value set programmatically is dirty without the user ever having focused
+	 *          the field — and a `DirtyStateProvider` can set it to whatever the
+	 *          application means by modified instead. Always false where there is no form
+	 *          behind the control (data grid cells, import previews).
 	 */
 	dirty: boolean;
 	/**

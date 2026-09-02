@@ -1,36 +1,69 @@
-# Form fields carry their dirty state
+# Form fields can display their dirty state
 
 - **Date:** 2026-08-31
-- **Kind:** behavior
+- **Kind:** type
 - **Scope:** `backend-components/Form`, `backend-integration/Model`, `standalone/UIKit`
 
 ## What changed
 
-Every field rendered by `FormField` now knows whether its value differs from the
-server-side value, and says so in the DOM. Three pieces:
+A field rendered by `FormField` can now be marked as modified — a small blue dot after its
+label. **Nothing is marked unless the application asks for it**, so no existing form
+changes appearance.
+
+### Switching it on
+
+`FormProps.showDirtyState` marks the fields whose value differs from the server-side one:
+
+```tsx
+<Form model={model} id={id} showDirtyState>
+	{FormContent}
+</Form>
+```
+
+That answer is a diff, not a latch: it goes back to `false` when the user restores the
+original value, and it is `true` for a value set programmatically that the user never
+touched. It is independent of `touched`.
+
+### Marking fields from the application
+
+Which fields count as modified is not always the form engine's call, so the display is
+driven by a context rather than by the form's own state. `DirtyStateProvider` sets it for
+a subtree, taking the marks outright or a function which is handed the form engine's own
+per-field state to build on:
+
+```tsx
+<DirtyStateProvider marks={marks}>{fields}</DirtyStateProvider>
+```
+
+A change request workflow is the case this exists for: the proposed record is saved, so
+the form is not dirty, and the fields the proposal touches still have to stand out.
+
+`Form` always sets the marks — to its own per-field state with `showDirtyState`, and to
+none without — so a nested form never inherits the marks of the form around it.
+
+`useDirtyState(field)` reads the resolved flag, which is how a custom (non-model) field
+follows the same switch as the model fields. `useDirtyState()` returns the whole map.
+
+The switch itself is on both the full and the lite form context as `showDirtyState`, for a
+control which holds dirty state of its own — a queued upload, a nested editor — and wants
+to display it on the same terms as the model fields.
 
 ### `RenderParams.dirty`
 
 `RenderParams` gained a **required** `dirty: boolean`, next to the existing `touched`.
-Every renderer in the library forwards it to its control the same way it already
-forwards `warning`.
-
-`dirty` is a diff, not a latch: it goes back to `false` when the user restores the
-original value, and it is `true` for a value set programmatically that the user never
-touched. It is `false` wherever there is no form state to diff against — data grid
-cells and the CRUD import preview.
+Every renderer in the library forwards it to its control the same way it already forwards
+`warning`. It is the resolved display flag, whatever produced it, and `false` wherever
+there is no form state behind the control — data grid cells and the CRUD import preview.
 
 ### `FormContextData.dirtyFields`
 
-`Record<string, boolean>`, one entry per model field and nothing else. Custom (non-model)
-fields are deliberately absent: whatever reports one through `setCustomFieldDirty` — a
-nested form, `useLazyCrudConnector`'s upload queue — already holds that state and is
-responsible for displaying it. The form only folds it into the form-wide `dirty` flag.
+`Record<string, boolean>`, one entry per model field and nothing else — what the form
+engine computed, regardless of what is displayed. Custom (non-model) fields are
+deliberately absent: whatever reports one through `setCustomFieldDirty` — a nested form,
+`useLazyCrudConnector`'s upload queue — already holds that state and is responsible for
+displaying it. The form only folds it into the form-wide `dirty` flag.
 
 ### The marker
-
-**A modified field now renders a small blue dot after its label.** This is new UI on
-every existing form.
 
 The other obvious markers were taken: an asterisk means required, and tinting the input
 reads as a state it isn't — yellow is a warning, red an error, blue the focus ring. A dot
@@ -67,21 +100,8 @@ Outlined inputs need one extra thing, already handled: the notch in the border i
 by a second copy of the label that the pseudo element can't reach, so the marker styles
 widen it. A custom marker that is wider than the stock dot has to widen it further.
 
-### The DOM
-
-`FormField` also wraps what the type renders in a `FormFieldStateWrapper`:
-
-```html
-<div data-cc-field="first_name" data-cc-dirty="true">…the control…</div>
-```
-
-The wrapper is `display: contents`, so it takes part in no layout — a field inside a
-`Grid` item still lays out exactly as before — while still being a CSS ancestor the
-theme can select through (`CcFormFieldStateWrapper`). Controls that take the `dirty` prop
-additionally carry `data-cc-dirty` on their own root. Neither carries styling of its own;
-they are there for markers the label-based one can't express.
-
-See the `Backend-Components/Form` → `DirtyState` story for the whole spread of controls.
+See the `Backend-Components/Form` → `DirtyState`, `DirtyStateHidden` and
+`DirtyStateProvided` stories.
 
 ## Why
 
@@ -89,29 +109,19 @@ A long form gives no answer to "what did I actually change?" before saving. The 
 engine already computed the whole-record dirty flag on every keystroke — the per-field
 answer was one comparison away but never reached the controls.
 
-Deriving the per-field map from the same normalization pass that computes the form-wide
-flag means the added cost is one `JSON.stringify` per field, and the pass itself now
-runs once per value change rather than once for the flag and once for the map.
+It is off by default, and driven by a context rather than by the form's dirty state
+directly, because "modified" is a statement to the user and the application is what knows
+when to make it. A form which shows a saved proposal against its baseline has a per-field
+answer the form engine cannot compute, and a form which is simply being filled in may not
+want the noise at all.
 
 ## Migration
 
-**Expect the dot in screenshots and visual regression baselines** on every form where a
-field differs from the server value. Turn it off through `CcFieldState` (above) if the
-application wants to introduce it on its own schedule.
+Nothing to do to keep the current appearance — the marker only shows where it is asked
+for.
 
-Two more things to check:
+Code that builds a `RenderParams` by hand — a custom `Type.render` caller, a test fixture,
+a Storybook story — has to add `dirty`. Pass `false` where there is no form behind it.
 
-- Code that builds a `RenderParams` by hand — a custom `Type.render` caller, a test
-  fixture, a Storybook story — has to add `dirty`. Pass `false` where there is no form
-  behind it.
-- **Anything that assumed the control is the direct child of whatever the application
-  puts around `FormField`.** `display: contents` only suppresses the wrapper's *box* —
-  it is still a node in the DOM tree, so a child combinator like
-  `.myFormRow > .MuiFormControl-root` no longer matches, and `control.parentElement` is
-  now the wrapper. Descendant selectors (`.myFormRow .MuiFormControl-root`) are
-  unaffected, and so is layout: the control still participates in the grid or flex
-  container as if the wrapper were not there.
-
-A custom renderer does not have to do anything — it will simply ignore `dirty` and be
-covered by the wrapper. Forward it to the control if you want the attribute on the
-control root as well.
+A custom renderer does not have to do anything; it will ignore `dirty` and never mark
+anything. Forward it to the control, next to `warning`, to join in.

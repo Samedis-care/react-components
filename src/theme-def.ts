@@ -214,10 +214,6 @@ import {
 import { FormClassKey } from "./backend-components";
 import { BasicFormPageProps } from "./backend-components/Form/BasicFormPage";
 import {
-	FormFieldStateWrapperClassKey,
-	FormFieldStateWrapperProps,
-} from "./backend-components/Form/FormFieldStateWrapper";
-import {
 	DirtyMarkerClassKey,
 	FieldStateClassKey,
 } from "./standalone/UIKit/MuiFieldState";
@@ -295,7 +291,6 @@ declare module "@mui/material/styles" {
 		CcMenuItemMaterial: MenuItemMaterialClassKey;
 		CcLocalizedKeyboardDatePicker: LocalizedKeyboardDatePickerClassKey;
 		CcComponentWithLabel: ComponentWithLabelClassKey;
-		CcFormFieldStateWrapper: FormFieldStateWrapperClassKey;
 		CcCheckbox: CheckboxClassKey;
 		CcUiKitInput: UiKitInputClassKey;
 		CcUiKitInputOutlined: UiKitInputOutlinedClassKey;
@@ -371,7 +366,6 @@ declare module "@mui/material/styles" {
 		CcMenuItemMaterial: Partial<MenuItemMaterialProps>;
 		CcLocalizedKeyboardDatePicker: Partial<LocalizedKeyboardDatePickerProps>;
 		CcComponentWithLabel: Partial<ComponentWithLabelProps>;
-		CcFormFieldStateWrapper: Partial<FormFieldStateWrapperProps>;
 		CcCheckbox: Partial<CheckboxProps>;
 		CcUiKitInput: Partial<UiKitInputProps>;
 		CcUiKitInputOutlined: Partial<UiKitInputOutlinedProps>;
@@ -627,11 +621,6 @@ declare module "@mui/material/styles" {
 			defaultProps?: ComponentsPropsList["CcComponentWithLabel"];
 			styleOverrides?: ComponentsOverrides<Theme>["CcComponentWithLabel"];
 			variants?: ComponentsVariants["CcComponentWithLabel"];
-		};
-		CcFormFieldStateWrapper?: {
-			defaultProps?: ComponentsPropsList["CcFormFieldStateWrapper"];
-			styleOverrides?: ComponentsOverrides<Theme>["CcFormFieldStateWrapper"];
-			variants?: ComponentsVariants["CcFormFieldStateWrapper"];
 		};
 		CcCheckbox?: {
 			defaultProps?: ComponentsPropsList["CcCheckbox"];

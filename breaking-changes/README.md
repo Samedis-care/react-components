@@ -24,7 +24,7 @@ One file per change, so this never grows into a single unreadable log.
 | 2026-08-31 | [withMuiWarning is now withMuiFieldState](2026-08-31-mui-warning-renamed-field-state.md) | type |
 | 2026-08-31 | [File uploads show which files were added and removed](2026-08-31-file-upload-pending-changes.md) | behavior |
 | 2026-08-31 | [Checkboxes, switches and radio groups mark their field touched on blur](2026-08-31-boolean-radio-blur-marks-touched.md) | behavior |
-| 2026-08-31 | [Form fields carry their dirty state](2026-08-31-form-field-dirty-state.md)                                                     | behavior |
+| 2026-08-31 | [Form fields can display their dirty state](2026-08-31-form-field-dirty-state.md)                                                | type     |
 | 2026-08-26 | [New data grid columns use their column definition defaults](2026-08-26-data-grid-new-columns-use-defaults.md)                  | behavior |
 | 2026-08-25 | [The data grid's scrolling pane is a tab stop](2026-08-25-data-grid-keyboard-scrollable.md)                                    | behavior |
 | 2026-08-19 | [debouncePromise resolves each caller with its own invocation's result](2026-08-19-debounce-promise-per-invocation-results.md) | behavior |

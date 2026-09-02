@@ -435,34 +435,78 @@ on the error propagating to the parent form.
 
 ### Showing dirty state
 
-Every field rendered by `FormField` knows whether its value still matches the server-side
-value, and a modified one is marked with a small blue dot after its label.
+A field can be marked as modified with a small blue dot after its label. Nothing is marked
+unless you ask for it, and what counts as modified is the application's decision, not the
+form engine's.
 
-`dirty` is a diff against the server value, not a "has been edited" latch: restoring the
-original value clears the marker, and a value set programmatically is dirty without the
-user ever having focused the field. It is independent of `touched`.
+The form engine's own answer is a diff against the server value, not a "has been edited"
+latch: restoring the original value clears the marker, and a value set programmatically is
+modified without the user ever having focused the field. It is independent of `touched`.
+Switch it on with `showDirtyState`:
+
+```tsx
+<Form model={model} id={id} showDirtyState>
+	{FormContent}
+</Form>
+```
 
 The dot is deliberately not an asterisk (that means required) and not a tint of the input
 (yellow is a warning, red an error, blue the focus ring) — it sits beside the label so it
 stacks with all three.
 
-The flag reaches you in three places:
+#### Marking fields yourself
+
+Where the application knows better than the diff does, wrap the fields in a
+`DirtyStateProvider`. It takes the marks outright, or a function which is handed the form
+engine's own per-field state to build on. A change request workflow is the case this
+exists for: the proposed record is saved, so the form is not dirty, and the fields the
+proposal touches still have to stand out.
+
+<details>
+	<summary>TypeScript</summary>
+
+```tsx
+const marks = useCallback(
+	(formDirtyFields: DirtyStateMarks) =>
+		Object.fromEntries(
+			Object.keys(formDirtyFields).map((field) => [
+				field,
+				formDirtyFields[field] ||
+					baselineRecord[field] !== proposedRecord[field],
+			]),
+		),
+	[baselineRecord, proposedRecord],
+);
+
+<DirtyStateProvider marks={marks}>{fields}</DirtyStateProvider>;
+```
+
+</details>
+
+Memoize `marks`, or declare the function outside the render: a new value re-renders every
+field below it.
+
+A provider overrides `showDirtyState` for its subtree, and `Form` always sets the marks —
+to its own per-field state with `showDirtyState`, and to none without — so a nested form
+never inherits the marks of the form around it.
+
+#### Reading the state
 
 - `RenderParams.dirty` — handed to the type renderer, and forwarded by every renderer in
-  the library to its control as a `dirty` prop, the same way `warning` is.
-- `useFormContext().dirtyFields` — `Record<string, boolean>`, one entry per model field.
-  Custom (non-model) fields are not in there: a custom field is the thing calling
-  `setCustomFieldDirty`, so it already holds its own dirty state and is responsible for
-  displaying it; what the form does with it is fold it into the form-wide `dirty` flag.
-- The DOM — `FormField` wraps the rendered control in an element carrying the state, and
-  controls that take the `dirty` prop repeat it on their own root:
-
-  ```html
-  <div data-cc-field="first_name" data-cc-dirty="true">…the control…</div>
-  ```
-
-  That wrapper is `display: contents`, so it participates in no layout and exists purely
-  as a CSS ancestor for markers the label-based one can't express.
+  the library to its control as a `dirty` prop, the same way `warning` is. This is the
+  resolved display state, whatever produced it.
+- `useDirtyState(field)` — the same flag, for a custom (non-model) field: reading it makes
+  the field follow the same switch as the model fields. `useDirtyState()` returns the whole
+  map.
+- `useFormContext().dirtyFields` — what the form engine computed, one entry per model
+  field, regardless of what is displayed. Custom fields are not in there: a custom field is
+  the thing calling `setCustomFieldDirty`, so it already holds its own dirty state; what
+  the form does with it is fold it into the form-wide `dirty` flag.
+- `showDirtyState` on both the full and the lite form context — was the form asked to mark
+  its modified fields? This is the form-wide switch, for a control which holds dirty state
+  of its own and wants to display it on the same terms as the model fields. Whether a given
+  *field* is marked is `useDirtyState`'s question, and a `DirtyStateProvider` can answer it
+  differently.
 
 #### Restyling the marker
 
@@ -503,9 +547,10 @@ further, through `& > .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline le
 For a custom renderer, `DirtyMarker` (an element) and `dirtyMarkerStyles` (for a pseudo
 element) are both exported, so a control can draw the same marker wherever its label is.
 
-The `Backend-Components/Form` → `DirtyState` story shows the marker across a text field,
-an outlined multiline one, a searchable select, a date, an image selector, a radio group,
-a checkbox and a switch.
+The `Backend-Components/Form` stories show all three modes: `DirtyState` marks the form's
+own diff across a text field, an outlined multiline one, a searchable select, a date, an
+image selector, a radio group, a checkbox and a switch; `DirtyStateHidden` is the default;
+`DirtyStateProvided` supplies its own marks.
 
 ### Error reporting
 
