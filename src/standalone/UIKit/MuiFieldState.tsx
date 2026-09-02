@@ -117,7 +117,8 @@ export type FieldStateClassKey = "root";
  * @param Component The component to wrap
  * @remarks MUI covers error, required and disabled; warning and dirty are ours, and both
  * are presentational, so they are applied here rather than in every control. The wrapper
- * swallows both props so neither reaches the DOM.
+ * swallows both props so neither reaches the DOM, and forwards everything else including
+ * the ref, which the date pickers use to anchor their popup.
  *
  * Every wrapped component shares the `CcFieldState` theme slot, which is the one place to
  * restyle or remove either state for a whole application.
@@ -125,10 +126,11 @@ export type FieldStateClassKey = "root";
 export const withMuiFieldState = <T extends MuiFieldStateSourceProps>(
 	Component: React.ComponentType<T>,
 ): React.ComponentType<T & MuiFieldStateProps> => {
-	// not unnecessary, component name is inferred from it
-	// noinspection UnnecessaryLocalVariableJS
-	return styled(
-		(props: T & MuiFieldStateProps) => {
+	// the wrapped component is the one with an element to hand out, and callers need it:
+	// the date pickers anchor their popup on this ref. Cast back to a plain component
+	// type, as forwardRef's PropsWithoutRef<T> cannot be resolved for a generic T.
+	const FieldState = React.forwardRef<unknown, T & MuiFieldStateProps>(
+		function FieldStateInner(props, ref) {
 			// eslint-disable-next-line @typescript-eslint/no-unused-vars
 			const { warning, dirty, ...other } = props;
 			// only stamp the attribute where a dirty state actually exists, so components
@@ -137,13 +139,16 @@ export const withMuiFieldState = <T extends MuiFieldStateSourceProps>(
 				<Component
 					{...({
 						...other,
+						ref,
 						...(dirty === undefined ? {} : { "data-cc-dirty": dirty }),
-					} as T)}
+					} as unknown as T)}
 				/>
 			);
 		},
-		{ name: "CcFieldState", slot: "root" },
-	)<T & MuiFieldStateProps>(({ theme, warning, dirty }) => ({
+	) as unknown as React.ComponentType<T & MuiFieldStateProps>;
+	return styled(FieldState, { name: "CcFieldState", slot: "root" })<
+		T & MuiFieldStateProps
+	>(({ theme, warning, dirty }) => ({
 		...(dirty && {
 			// the label of a text field, and the legend of a fieldset based control
 			"& > .MuiFormLabel-root::after": dirtyMarkerStyles(theme),

@@ -296,5 +296,14 @@ describe("UIKit", () => {
 			wrap(<TextFieldCC label="Error" warning error helperText="Err" />);
 			expect(screen.getByText("Err")).toBeTruthy();
 		});
+
+		it("forwards the ref to the wrapped component", () => {
+			// the date pickers anchor their popup on this ref, and React logs a warning
+			// for every ref handed to a component which doesn't take one
+			const ref = React.createRef<HTMLDivElement>();
+			wrap(<TextFieldCC label="Ref" ref={ref} />);
+			expect(ref.current).toBeInstanceOf(HTMLElement);
+			expect(ref.current!.contains(screen.getByLabelText("Ref"))).toBe(true);
+		});
 	});
 });
