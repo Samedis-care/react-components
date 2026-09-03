@@ -79,11 +79,14 @@ const LocalizedDateTimePicker = (props: LocalizedDateTimePickerProps) => {
 						);
 						return {
 							...orgSlotProps,
-							required,
-							error,
-							fullWidth,
+							// only where the caller actually gave one, so a value passed
+							// through slotProps.textField is not overwritten with undefined
+							...(required === undefined ? {} : { required }),
+							...(error === undefined ? {} : { error }),
+							...(fullWidth === undefined ? {} : { fullWidth }),
 							onBlur: (event: React.FocusEvent<HTMLDivElement>) => {
 								draft.settleOnBlur(event);
+								orgSlotProps?.onBlur?.(event);
 								onBlur?.(event);
 							},
 						};

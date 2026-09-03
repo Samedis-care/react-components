@@ -107,11 +107,14 @@ const LocalizedKeyboardDatePicker = (
 						);
 						return {
 							...textFieldProps,
-							required,
-							error,
-							fullWidth,
+							// only where the caller actually gave one, so a value passed
+							// through slotProps.textField is not overwritten with undefined
+							...(required === undefined ? {} : { required }),
+							...(error === undefined ? {} : { error }),
+							...(fullWidth === undefined ? {} : { fullWidth }),
 							onBlur: (event: React.FocusEvent<HTMLInputElement>) => {
 								draft.settleOnBlur(event);
+								textFieldProps?.onBlur?.(event);
 								onBlur?.(event);
 							},
 							// disableClearable suppresses the clear button that our

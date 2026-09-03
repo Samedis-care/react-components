@@ -174,3 +174,50 @@ export const DateTimeInputTypedEntry: StoryObj<{
 		await expect(reported?.format("YYYY-MM-DD HH:mm")).toBe("2030-08-01 10:30");
 	},
 };
+
+const FieldPropsDateTimeInput = (args: { onBlur: Mock<() => void> }) => {
+	const [value, setValue] = useState<Moment | null>(() =>
+		moment("2026-08-01T10:30:00"),
+	);
+	return (
+		<div style={{ width: 400 }}>
+			<DateTimeInput
+				label="Date & time"
+				value={value}
+				onChange={setValue}
+				required
+				error
+				fullWidth
+				onBlur={args.onBlur}
+			/>
+		</div>
+	);
+};
+
+export const DateTimeInputFieldProps: StoryObj<{
+	onBlur: Mock<() => void>;
+}> = {
+	name: "DateTimeInput — required, error, fullWidth and onBlur reach the field",
+	args: { onBlur: fn() },
+	render: (args) => <FieldPropsDateTimeInput {...args} />,
+	play: async ({ args, canvasElement, userEvent }) => {
+		// the picker builds the text field's props itself, so these four only arrive
+		// if DateTimeInput hands them to the picker rather than to the slot
+		const field = canvasElement.querySelector(".MuiPickersTextField-root");
+		await expect(field).not.toBeNull();
+		await expect(field).toHaveClass("MuiFormControl-fullWidth");
+		await expect(field.getBoundingClientRect().width).toBe(400);
+
+		const label = canvasElement.querySelector(".MuiFormLabel-root");
+		await expect(label).toHaveClass("Mui-error");
+		await expect(
+			canvasElement.querySelector(".MuiFormLabel-asterisk"),
+		).not.toBeNull();
+
+		await userEvent.click(
+			canvasElement.querySelectorAll("[role=spinbutton]")[0],
+		);
+		await userEvent.click(document.body);
+		await expect(args.onBlur).toHaveBeenCalled();
+	},
+};

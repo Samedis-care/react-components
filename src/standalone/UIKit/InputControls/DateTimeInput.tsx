@@ -1,11 +1,12 @@
 import React from "react";
-import { TextFieldProps } from "@mui/material";
 import {
 	DateTimePickerProps,
 	PickersTextFieldProps,
 } from "@mui/x-date-pickers";
 import { InputLabelConfig, UIInputProps } from "../CommonStyles";
-import LocalizedDateTimePicker from "../../../standalone/LocalizedDateTimePickers/LocalizedDateTimePicker";
+import LocalizedDateTimePicker, {
+	LocalizedDateTimePickerProps,
+} from "../../../standalone/LocalizedDateTimePickers/LocalizedDateTimePicker";
 import accessSlotProps from "../../../utils/internal/accessSlotProps";
 import PickersTextFieldWithHelp from "../PickersTextFieldWithHelp";
 
@@ -14,19 +15,19 @@ export interface DateTimeInputProps extends UIInputProps {
 	/**
 	 * Set required flag for text field input
 	 */
-	required?: TextFieldProps["required"];
+	required?: LocalizedDateTimePickerProps["required"];
 	/**
 	 * Set error flag for text field input
 	 */
-	error?: TextFieldProps["error"];
+	error?: LocalizedDateTimePickerProps["error"];
 	/**
 	 * onBlur callback for the text field input
 	 */
-	onBlur?: TextFieldProps["onBlur"];
+	onBlur?: LocalizedDateTimePickerProps["onBlur"];
 	/**
 	 * full width?
 	 */
-	fullWidth?: TextFieldProps["fullWidth"];
+	fullWidth?: LocalizedDateTimePickerProps["fullWidth"];
 }
 
 const DateTimeInput = (props: DateTimeInputProps & DateTimePickerProps) => {
@@ -43,6 +44,12 @@ const DateTimeInput = (props: DateTimeInputProps & DateTimePickerProps) => {
 	return (
 		<LocalizedDateTimePicker
 			{...muiProps}
+			// the picker owns these four: it builds the text field slot props itself, so
+			// passing them down through slotProps.textField would be overwritten there
+			required={required}
+			error={error}
+			fullWidth={fullWidth}
+			onBlur={onBlur}
 			slots={{
 				textField: PickersTextFieldWithHelp,
 				...muiProps.slots,
@@ -57,10 +64,6 @@ const DateTimeInput = (props: DateTimeInputProps & DateTimePickerProps) => {
 					return {
 						// @ts-expect-error custom properties in TextFieldWithHelp
 						important,
-						required,
-						error,
-						onBlur,
-						fullWidth,
 						openInfo,
 						...orgSlotProps,
 						slotProps: {
