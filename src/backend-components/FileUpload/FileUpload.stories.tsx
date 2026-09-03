@@ -123,8 +123,11 @@ const LazyFileUploadStory = () => {
 	const dispatch = useRef<FileUploadDispatch>(null);
 	// stands in for the form submitting: the queue is worked, and something re-renders
 	const [submitted, setSubmitted] = useState(false);
+	// what onDirtyChange reports, which a form page would feed to its own dirty state
+	const [pending, setPending] = useState(false);
 	return (
 		<>
+			<span data-testid={"pending"}>{String(pending)}</span>
 			<Button
 				onClick={() =>
 					void lazy.workQueue().then(() => {
@@ -155,6 +158,8 @@ const LazyFileUploadStory = () => {
 				previewSize={24}
 				variant={"modern"}
 				label={"Attachments"}
+				showDirtyState
+				onDirtyChange={setPending}
 			/>
 		</>
 	);
@@ -178,18 +183,23 @@ export const LazyPendingChanges: StoryObj = {
 			canvasElement.querySelector("legend")?.querySelectorAll("span").length ??
 			0;
 
+		const pending = () => canvas.getByTestId("pending").textContent;
+
 		await canvas.findByText("document.pdf", undefined, { timeout: 10000 });
 		await expect(changeOf("document.pdf")).toBe(null);
 		await expect(restoreBtns()).toHaveLength(0);
 		await expect(labelMarkers()).toBe(0);
+		await expect(pending()).toBe("false");
 
 		// a queued upload reads as added
 		canvas.getByRole("button", { name: "Add a file" }).click();
 		await waitFor(async () => {
 			await expect(changeOf("addendum.docx")).toBe("added");
 		});
-		// ...and the queued upload makes the whole field dirty
+		// ...and the queued upload makes the whole field dirty, which onDirtyChange
+		// reports whether or not the marker is shown
 		await expect(labelMarkers()).toBe(1);
+		await expect(pending()).toBe("true");
 
 		// a queued removal stays in the list, struck through, and offers a restore
 		removeBtns()[0].dispatchEvent(new MouseEvent("click", { bubbles: true }));
@@ -205,14 +215,13 @@ export const LazyPendingChanges: StoryObj = {
 		});
 		await expect(restoreBtns()).toHaveLength(0);
 
-		// submitting works the queue, and the markers clear on the next render without
-		// anything telling the control to clear them - which is why the pending state is
-		// derived from the queue rather than stored on the files
+		// submitting works the queue, and the marks clear once it is empty
 		await expect(changeOf("addendum.docx")).toBe("added");
 		canvas.getByRole("button", { name: "Submit" }).click();
 		await waitFor(async () => {
 			await expect(changeOf("addendum.docx")).toBe(null);
 		});
 		await expect(labelMarkers()).toBe(0);
+		await expect(pending()).toBe("false");
 	},
 };

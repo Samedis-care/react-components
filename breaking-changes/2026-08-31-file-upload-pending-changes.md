@@ -67,14 +67,22 @@ control derives the state itself from `canBeUploaded` and `delete`.
 holds no per-field dirty state for it and nothing hands it `dirty`. It does not need to be
 told: with a lazy connector a non-empty queue *is* the pending change, which is the same
 thing `useLazyCrudConnector` reports through `setCustomFieldDirty`. So the control answers
-for itself:
+for itself, once asked:
 
 ```ts
-const dirty = props.dirty ?? (lazyConnector ? !queueEmpty : undefined);
+const pendingChanges = lazyConnector ? !queueEmpty : false;
+const dirty = props.dirty ?? (showDirtyState ? pendingChanges : undefined);
 ```
 
-An explicit `dirty` prop still wins. With a direct connector nothing is pending, so no
-marker is shown.
+Two new props:
+
+- `showDirtyState` — off by default, like `FormProps.showDirtyState`. An explicit `dirty`
+  prop still wins over it, and with a direct connector nothing is ever pending, so nothing
+  is marked.
+- `onDirtyChange(dirty)` — called with the current state on mount, and whenever queued
+  changes appear or are written. It reports *state*, so it is independent of
+  `showDirtyState`, which is what a form page needs to fold the control into its own dirty
+  flag.
 
 ### Behavioural changes beyond the marker
 

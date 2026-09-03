@@ -53,6 +53,21 @@ export interface CrudFileUploadProps extends Omit<
 	 * additional read-only files
 	 */
 	additionalFiles?: FileData<FileMeta>[];
+	/**
+	 * Mark the control as modified while file changes are queued
+	 * @remarks Off by default, like `FormProps.showDirtyState`. An explicit `dirty` prop
+	 *          wins over it, and it shows nothing without a LazyConnector, where a change
+	 *          is written before this control hears about it.
+	 */
+	showDirtyState?: boolean;
+	/**
+	 * Called with the current state on mount, and whenever queued file changes appear or
+	 * are written
+	 * @param dirty Are file changes waiting to be written?
+	 * @remarks Independent of showDirtyState — pending changes are state, not display —
+	 *          and always false without a LazyConnector. Memoize the handler.
+	 */
+	onDirtyChange?: (dirty: boolean) => void;
 }
 
 export interface BackendFileMeta extends FileMeta {
@@ -72,6 +87,8 @@ const CrudFileUpload = (
 		deserialize,
 		onChange,
 		additionalFiles,
+		showDirtyState,
+		onDirtyChange,
 		...otherProps
 	} = props;
 	const { allowDuplicates } = otherProps;
@@ -203,8 +220,16 @@ const CrudFileUpload = (
 	// A CrudFileUpload is a custom form field: it is not in the model, so the form has no
 	// per-field dirty state for it and nothing hands it `dirty`. With a lazy connector it
 	// does not need one — a queued write *is* the pending change, which is the same thing
-	// useLazyCrudConnector reports through setCustomFieldDirty. An explicit prop wins.
-	const dirty = otherProps.dirty ?? (lazyConnector ? !queueEmpty : undefined);
+	// useLazyCrudConnector reports through setCustomFieldDirty.
+	const pendingChanges = lazyConnector ? !queueEmpty : false;
+	// an explicit prop wins, as it does over every other derived state here
+	const dirty =
+		otherProps.dirty ?? (showDirtyState ? pendingChanges : undefined);
+	// state, not display: this reports the pending changes whether or not they are marked
+	useEffect(() => {
+		if (!onDirtyChange) return;
+		onDirtyChange(pendingChanges);
+	}, [onDirtyChange, pendingChanges]);
 
 	const handleRestore = useCallback(
 		(file: FileData) => {
