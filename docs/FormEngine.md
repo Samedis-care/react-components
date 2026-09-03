@@ -542,7 +542,11 @@ createTheme({
 One thing to know if you replace the dot with something wider: an outlined input sizes the
 gap in its border from a second copy of the label that a pseudo element cannot reach, so
 the stock styles widen that gap by the width of the dot. A wider marker has to widen it
-further, through `& > .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline legend`.
+further, through
+`& > .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline legend > span:not(.notranslate)`
+— the `:not` matters: MUI renders that legend whether or not the input holds a label, and
+widening the empty one puts a gap in the border of every control which labels itself
+outside the input, as the selectors do.
 
 For a custom renderer, `DirtyMarker` (an element) and `dirtyMarkerStyles` (for a pseudo
 element) are both exported, so a control can draw the same marker wherever its label is.

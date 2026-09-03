@@ -236,8 +236,21 @@ export const DirtyState: StoryObj = {
 		const field = (name: string) => `[data-field="${name}"]`;
 
 		const label = () => find(`${field("first_name")} .MuiFormLabel-root`);
+		// an outlined input keeps a second copy of its label inside the gap in its
+		// border, and that copy is what sizes the gap
+		const notch = (name: string) =>
+			find(
+				`${field(name)} .MuiOutlinedInput-notchedOutline legend`,
+			)?.getBoundingClientRect().width ?? -1;
 
 		await expect(hasMarker(label())).toBe(false);
+
+		const notesNotch = notch("notes");
+		const departmentNotch = notch("department");
+		await expect(notesNotch).toBeGreaterThan(0);
+		// the selector labels itself outside the input, so its notch holds no label -
+		// nothing to make room for, and a gap in the border if we did
+		await expect(departmentNotch).toBeLessThan(2);
 
 		await userEvent.type(input, "x");
 		await waitFor(async () => {
@@ -262,6 +275,18 @@ export const DirtyState: StoryObj = {
 				hasMarker(find(`${field("department")} .MuiFormLabel-root`)),
 			).toBe(true);
 		});
+		// ...and its empty notch stays empty
+		await expect(notch("department")).toBe(departmentNotch);
+
+		// the outlined variant marks the label inside the notch, which has to widen for
+		// the dot or the two overlap
+		await userEvent.type(find(`${field("notes")} textarea`), "x");
+		await waitFor(async () => {
+			await expect(
+				hasMarker(find(`${field("notes")} .MuiFormLabel-root`)),
+			).toBe(true);
+		});
+		await expect(notch("notes")).toBeGreaterThan(notesNotch);
 
 		// back to the server-side value: dirty is a diff, not a "was edited" latch
 		await userEvent.type(input, "{Backspace}");

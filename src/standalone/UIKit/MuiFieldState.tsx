@@ -158,10 +158,15 @@ export const withMuiFieldState = <T extends MuiFieldStateSourceProps>(
 			"& > .MuiFormControlLabel-root > .MuiFormControlLabel-label::after":
 				dirtyMarkerStyles(theme),
 			// the notched outline holds its own copy of the label, which is what sizes
-			// the gap in the border — widen it or the dot sits on top of the outline
-			"& > .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline legend": {
-				paddingInlineEnd: DIRTY_MARKER_WIDTH,
-			},
+			// the gap in the border — widen it or the dot sits on top of the outline.
+			// Only the copy which actually holds a label: MUI renders the legend either
+			// way, and the empty one — a control whose label sits outside the input, as
+			// every selector's does — would become a gap in the border with nothing in
+			// it. Margin rather than padding, to leave MUI's own side padding alone.
+			"& > .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline legend > span:not(.notranslate)":
+				{
+					marginInlineEnd: DIRTY_MARKER_WIDTH,
+				},
 		}),
 		...(warning && {
 			"& > .MuiFormLabel-root": {
