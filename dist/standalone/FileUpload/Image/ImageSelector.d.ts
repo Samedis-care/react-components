@@ -21,6 +21,11 @@ export interface ImageSelectorProps {
      */
     label?: string;
     /**
+     * Does the value differ from the server-side value?
+     * @remarks Marks the label. Set by the form engine from `RenderParams.dirty`.
+     */
+    dirty?: boolean;
+    /**
      * The alt text of the image
      */
     alt: string;

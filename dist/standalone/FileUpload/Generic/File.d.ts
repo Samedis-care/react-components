@@ -1,5 +1,9 @@
 import React from "react";
 import { SvgIconProps } from "@mui/material";
+/**
+ * A file's pending change relative to the server side state
+ */
+export type FileChangeState = "added" | "removed";
 export interface FileProps {
     /**
      * The file name, including extension
@@ -17,6 +21,23 @@ export interface FileProps {
      * Optional callback for removing the file
      */
     onRemove?: () => void;
+    /**
+     * The file's pending change relative to the server, if any
+     * @remarks Marks the file name: green for a file the user added, struck through for
+     *          one they removed. Not the icon — in the list variants that is already
+     *          `palette.error.main` — and removal is not coloured at all, because red
+     *          reads as an error and this is a pending change, not a problem.
+     */
+    changeState?: FileChangeState;
+    /**
+     * Optional callback for undoing a pending removal
+     * @remarks Rendered in place of the remove button while changeState is "removed"
+     */
+    onRestore?: () => void;
+    /**
+     * Accessible name for the restore control
+     */
+    restoreLabel?: string;
     /**
      * The size of the preview
      */
@@ -56,7 +77,7 @@ export interface FileProps {
      */
     onClick?: (name: string, url: string) => Promise<void> | void;
 }
-export type FileClassKey = "compactListWrapper" | "iconContainer" | "listEntryText" | "closeIconList" | "closeIcon" | "removeIcon" | "iconWrapperList" | "iconWrapper" | "listLabel" | "label";
+export type FileClassKey = "compactListWrapper" | "iconContainer" | "listEntryText" | "closeIconList" | "closeIcon" | "removeIcon" | "iconWrapperList" | "iconWrapper" | "listLabel" | "label" | "restoreIcon" | "restoreIconBox";
 export declare const ExcelFileExtensions: string[];
 export declare const ExcelMimeType: string[];
 export declare const WordFileExtensions: string[];

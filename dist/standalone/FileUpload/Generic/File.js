@@ -1,7 +1,7 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React, { useCallback } from "react";
 import { Grid, styled, Tooltip, Typography, useThemeProps, } from "@mui/material";
-import { Cancel as CancelIconList, CancelOutlined as CancelIcon, InsertDriveFile as DefaultFileIcon, } from "@mui/icons-material";
+import { Cancel as CancelIconList, CancelOutlined as CancelIcon, InsertDriveFile as DefaultFileIcon, RestoreFromTrash as RestoreIconSvg, } from "@mui/icons-material";
 import { ArchiveFileIcon, AudioFileIcon, CodeFileIcon, CsvFileIcon, ExcelFileIcon, ImageFileIcon, PdfFileIcon, PowerPointFileIcon, TextFileIcon, VideoFileIcon, WordFileIcon, } from "../FileIcons";
 import dataToFile from "../../../utils/dataToFile";
 import combineClassNames from "../../../utils/combineClassNames";
@@ -65,10 +65,22 @@ const IconWrapper = styled("div", {
     marginTop: 16,
     objectFit: "contain",
 });
+/**
+ * Marks a file as added or removed relative to the server side state
+ * @remarks Applied to the file name rather than to the icon, see FileProps.changeState
+ */
+const changeStateStyles = (theme) => ({
+    '&[data-cc-change="added"]': {
+        color: theme.palette.success.main,
+    },
+    '&[data-cc-change="removed"]': {
+        textDecoration: "line-through",
+    },
+});
 const StyledLabelList = styled(Typography, {
     name: "CcFile",
     slot: "listLabel",
-})({
+})(({ theme }) => ({
     position: "absolute",
     maxWidth: "100%",
     "&.Mui-active": {
@@ -77,18 +89,39 @@ const StyledLabelList = styled(Typography, {
             textDecoration: "underline",
         },
     },
-});
+    ...changeStateStyles(theme),
+}));
 const StyledLabel = styled(Typography, {
     name: "CcFile",
     slot: "label",
-})({
+})(({ theme }) => ({
     "&.Mui-active": {
         cursor: "pointer",
         "&:hover": {
             textDecoration: "underline",
         },
     },
-});
+    ...changeStateStyles(theme),
+}));
+// mirrors the CloseIcon/CloseIconList pair: the box variant positions its action over
+// the icon, every other variant lays it out inline
+const RestoreIconBox = styled(RestoreIconSvg, {
+    name: "CcFile",
+    slot: "restoreIconBox",
+})(({ theme }) => ({
+    position: "absolute",
+    cursor: "pointer",
+    color: theme.palette.action.active,
+}));
+const RestoreIcon = styled(RestoreIconSvg, {
+    name: "CcFile",
+    slot: "restoreIcon",
+})(({ theme }) => ({
+    width: "auto",
+    position: "static",
+    cursor: "pointer",
+    color: theme.palette.action.active,
+}));
 export const ExcelFileExtensions = [
     "xlsx",
     "xlsm",
@@ -344,12 +377,22 @@ const File = (inProps) => {
         return (_jsx(Tooltip, { title: props.name, children: _jsx(TypographyComp, { align: isList ? "left" : "center", noWrap: true, className: combineClassNames([
                     variant === "list" ? classes?.listLabel : classes?.label,
                     downloadLink && "Mui-active",
-                ]), onClick: openDownload, variant: "body2", style: isList
+                ]), "data-cc-change": props.changeState, onClick: openDownload, variant: "body2", style: isList
                     ? {
                         lineHeight: `${props.size}px`,
                     }
                     : undefined, children: props.label ?? props.name }) }));
     };
+    const restoreBtn = props.changeState === "removed" &&
+        props.onRestore &&
+        React.createElement(variant === "box" ? RestoreIconBox : RestoreIcon, {
+            className: combineClassNames([
+                variant === "box" ? classes?.restoreIconBox : classes?.restoreIcon,
+            ]),
+            onClick: props.onRestore,
+            style: variant === "list" ? { height: props.size } : undefined,
+            titleAccess: props.restoreLabel,
+        });
     const removeBtn = props.onRemove &&
         !props.disabled &&
         React.createElement(variant === "list"
@@ -365,17 +408,19 @@ const File = (inProps) => {
             onClick: props.onRemove,
             style: variant === "list" ? { height: props.size } : undefined,
         });
+    // a removed file offers a restore where it used to offer a remove
+    const actionBtn = restoreBtn || removeBtn;
     if (variant === "box") {
-        return (_jsx(Grid, { className: className, style: { width: props.size }, children: _jsxs(Grid, { container: true, spacing: 2, children: [_jsxs(IconContainer, { size: 12, className: classes?.iconContainer, children: [removeBtn, renderIcon()] }), _jsx(Grid, { size: 12, children: renderName() })] }) }));
+        return (_jsx(Grid, { className: className, style: { width: props.size }, children: _jsxs(Grid, { container: true, spacing: 2, children: [_jsxs(IconContainer, { size: 12, className: classes?.iconContainer, children: [actionBtn, renderIcon()] }), _jsx(Grid, { size: 12, children: renderName() })] }) }));
     }
     else if (variant === "list") {
-        return (_jsxs(Grid, { onClick: handleListClick, container: true, spacing: 2, sx: { alignItems: "stretch" }, wrap: "nowrap", className: className, size: 12, children: [_jsx(Grid, { children: renderIcon() }), _jsx(ListEntryText, { size: "grow", className: classes?.listEntryText, children: renderName() }), removeBtn && _jsx(Grid, { children: removeBtn })] }));
+        return (_jsxs(Grid, { onClick: handleListClick, container: true, spacing: 2, sx: { alignItems: "stretch" }, wrap: "nowrap", className: className, size: 12, children: [_jsx(Grid, { children: renderIcon() }), _jsx(ListEntryText, { size: "grow", className: classes?.listEntryText, children: renderName() }), actionBtn && _jsx(Grid, { children: actionBtn })] }));
     }
     else if (variant === "compact-list") {
-        return (_jsx(CompactListWrapper, { onClick: handleListClick, className: combineClassNames([className, classes?.compactListWrapper]), children: _jsxs(Grid, { container: true, spacing: 2, sx: { alignItems: "stretch" }, wrap: "nowrap", children: [_jsx(Grid, { children: renderIcon() }), _jsx(ListEntryText, { className: classes?.listEntryText, children: renderName() }), removeBtn && _jsx(Grid, { children: removeBtn })] }) }));
+        return (_jsx(CompactListWrapper, { onClick: handleListClick, className: combineClassNames([className, classes?.compactListWrapper]), children: _jsxs(Grid, { container: true, spacing: 2, sx: { alignItems: "stretch" }, wrap: "nowrap", children: [_jsx(Grid, { children: renderIcon() }), _jsx(ListEntryText, { className: classes?.listEntryText, children: renderName() }), actionBtn && _jsx(Grid, { children: actionBtn })] }) }));
     }
     else if (variant === "icon-only") {
-        return (_jsx(CompactListWrapper, { onClick: handleListClick, className: combineClassNames([className, classes?.compactListWrapper]), children: _jsxs(Grid, { container: true, spacing: 2, sx: { alignItems: "stretch" }, wrap: "nowrap", children: [_jsx(Grid, { children: _jsx(Tooltip, { title: props.name, children: _jsx("span", { children: renderIcon() }) }) }), removeBtn && _jsx(Grid, { children: removeBtn })] }) }));
+        return (_jsx(CompactListWrapper, { onClick: handleListClick, className: combineClassNames([className, classes?.compactListWrapper]), children: _jsxs(Grid, { container: true, spacing: 2, sx: { alignItems: "stretch" }, wrap: "nowrap", children: [_jsx(Grid, { children: _jsx(Tooltip, { title: props.name, children: _jsx("span", { children: renderIcon() }) }) }), actionBtn && _jsx(Grid, { children: actionBtn })] }) }));
     }
     else {
         throw new Error("Invalid variant passed");

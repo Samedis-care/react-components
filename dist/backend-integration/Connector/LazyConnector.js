@@ -21,6 +21,7 @@ class LazyConnector extends Connector {
     indexEnhancement = IndexEnhancementLevel.Basic;
     queue = [];
     onQueueChange;
+    queueListeners = new Set();
     // backend emulation
     FAKE_ID_PREFIX = "fake-id-";
     fakeIdCounter = 0;
@@ -65,6 +66,8 @@ class LazyConnector extends Connector {
             id: id,
             func: this.realConnector.delete.bind(this.realConnector, id, model),
             result: null,
+            deleteIds: [id],
+            // no rebuildDelete: cancelling the only id it covers drops the whole entry
         });
         this.onAfterOperation();
     }
@@ -153,11 +156,14 @@ class LazyConnector extends Connector {
             this.onAfterOperation();
             return;
         }
+        const rebuildDelete = (remaining) => this.realConnector.deleteMultiple.bind(this.realConnector, remaining, model);
         this.queue.push({
             type: "delete",
             id: ids.join(","),
-            func: this.realConnector.deleteMultiple.bind(this.realConnector, ids, model),
+            func: rebuildDelete(ids),
             result: null,
+            deleteIds: ids,
+            rebuildDelete,
         });
         this.onAfterOperation();
     }
@@ -190,9 +196,78 @@ class LazyConnector extends Connector {
         });
         this.onAfterOperation();
     };
+    /**
+     * The write operation queued for a record, if any
+     * @param id The record id — potentially a fake one. A queue only exists before
+     *           workQueue has run, and a record created client side has no real id until
+     *           then, so a caller holding an id from this side of a submit may have either.
+     * @remarks Lets a caller tell a record that only exists in the queue from one that
+     *          is already on the server, which reads alone cannot: index and read serve
+     *          queued records as if they had been written.
+     */
+    getQueuedOperation(id) {
+        // the queue stores mapped ids throughout, so mapping the id being looked up is all
+        // it takes to match — including across batches, where the caller still holds the
+        // fake id of a record the backend now knows by a real one
+        const mapped = this.mapId(id);
+        const entry = this.queue.findLast((entry) => entry.id === mapped || (entry.deleteIds?.includes(mapped) ?? false));
+        return entry ? entry.type : null;
+    }
+    /**
+     * Drops the queued write operation for a record, undoing it
+     * @param id The record id — potentially a fake one, see getQueuedOperation
+     * @returns Was anything dropped?
+     * @remarks A delete covering several records keeps the request for the ones that
+     *          were not cancelled. Has no effect once workQueue has run.
+     */
+    cancelQueuedOperation(id) {
+        const mapped = this.mapId(id);
+        let cancelled = false;
+        this.queue = this.queue.flatMap((entry) => {
+            const matchesEntry = entry.id === mapped;
+            const matchesDelete = entry.deleteIds?.includes(mapped) ?? false;
+            if (!matchesEntry && !matchesDelete)
+                return [entry];
+            cancelled = true;
+            if (entry.deleteIds) {
+                const remaining = entry.deleteIds.filter((deleteId) => deleteId !== mapped);
+                // nothing left to delete, or a single id entry that cannot be narrowed
+                if (remaining.length === 0 || !entry.rebuildDelete)
+                    return [];
+                return [
+                    {
+                        ...entry,
+                        id: remaining.join(","),
+                        deleteIds: remaining,
+                        func: entry.rebuildDelete(remaining),
+                    },
+                ];
+            }
+            return [];
+        });
+        if (cancelled)
+            this.onAfterOperation();
+        return cancelled;
+    }
+    /**
+     * Subscribes to every change of the queue, including it being emptied by workQueue
+     * @param listener Called with the new queue
+     * @returns Unsubscribe
+     * @remarks Separate from setQueueChangeHandler, which is a single slot owned by
+     *          useLazyCrudConnector. Anything rendering from the queue needs this: the
+     *          queue is not React state, so without it a component keeps showing the
+     *          pending state of writes that have since been sent.
+     */
+    addQueueChangeListener(listener) {
+        this.queueListeners.add(listener);
+        return () => {
+            this.queueListeners.delete(listener);
+        };
+    }
     onAfterOperation() {
         if (this.onQueueChange)
             this.onQueueChange(this.queue);
+        this.queueListeners.forEach((listener) => listener(this.queue));
     }
     workQueue = async () => {
         for (const entry of this.queue) {

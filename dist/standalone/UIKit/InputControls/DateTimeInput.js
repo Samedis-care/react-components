@@ -6,7 +6,10 @@ import accessSlotProps from "../../../utils/internal/accessSlotProps";
 import PickersTextFieldWithHelp from "../PickersTextFieldWithHelp";
 const DateTimeInput = (props) => {
     const { openInfo, important, required, error, fullWidth, onBlur, ...muiProps } = props;
-    return (_jsx(LocalizedDateTimePicker, { ...muiProps, slots: {
+    return (_jsx(LocalizedDateTimePicker, { ...muiProps, 
+        // the picker owns these four: it builds the text field slot props itself, so
+        // passing them down through slotProps.textField would be overwritten there
+        required: required, error: error, fullWidth: fullWidth, onBlur: onBlur, slots: {
             textField: PickersTextFieldWithHelp,
             ...muiProps.slots,
         }, slotProps: {
@@ -16,10 +19,6 @@ const DateTimeInput = (props) => {
                 return {
                     // @ts-expect-error custom properties in TextFieldWithHelp
                     important,
-                    required,
-                    error,
-                    onBlur,
-                    fullWidth,
                     openInfo,
                     ...orgSlotProps,
                     slotProps: {

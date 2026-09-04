@@ -5,6 +5,7 @@ import { AttachFile } from "@mui/icons-material";
 import FilePreview, { getFileIconOrDefault } from "./File";
 import processImage from "../../../utils/processImage";
 import GroupBox from "../../GroupBox";
+import { labelWithDirtyMarker } from "../../UIKit/MuiFieldState";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import isTouchDevice from "../../../utils/isTouchDevice";
 import combineClassNames from "../../../utils/combineClassNames";
@@ -14,6 +15,15 @@ import useDropZone from "../../../utils/useDropZone";
 import useRefState from "../../../utils/useRefState";
 import { isImageLoadError } from "../../../utils/ImageLoadError";
 import { captureError } from "../../../framework/ErrorReporting";
+/**
+ * The file's pending change relative to the server side state
+ * @param file The file
+ * @remarks An explicit changeState wins: only whoever queued the operation can know it.
+ *          Otherwise it follows from the flags the control maintains itself — a file the
+ *          user picked is not on the server yet, a marked one is still on it.
+ */
+const getChangeState = (file) => file.changeState ??
+    (file.delete ? "removed" : file.canBeUploaded ? "added" : undefined);
 const StyledGroupBox = styled(GroupBox, { name: "CcFileUpload", slot: "root" })({});
 const Dropzone = styled(Grid, { name: "CcFileUpload", slot: "dropzone" })(({ theme }) => ({
     "&.Mui-active": {
@@ -56,8 +66,9 @@ const ModernUploadLabel = styled("span", {
 }));
 const FileUpload = (inProps, ref) => {
     const props = useThemeProps({ props: inProps, name: "CcFileUpload" });
-    const { name, convertImagesTo, imageDownscaleOptions, previewImages, previewSize, maxFiles, handleError, accept, acceptLabel, onChange, label, smallLabel, readOnly, onBlur, uploadLabel, allowDuplicates, className, classes, } = props;
+    const { name, convertImagesTo, imageDownscaleOptions, previewImages, previewSize, maxFiles, handleError, accept, acceptLabel, onChange, onRestoreFile, label, dirty, smallLabel, readOnly, onBlur, uploadLabel, allowDuplicates, className, classes, } = props;
     const variant = props.variant ?? "classic";
+    const boxLabel = labelWithDirtyMarker(label, dirty);
     const loadInitialFiles = () => (props.files || props.defaultFiles || []).map((meta) => ({
         canBeUploaded: false,
         delete: false,
@@ -201,16 +212,18 @@ const FileUpload = (inProps, ref) => {
         return processFiles(files);
     }, [processFiles]);
     const removeFile = useCallback((file) => {
+        // a file that exists on the server is only marked, so that the removal can be
+        // undone and so that the submit knows to delete it
         if ("downloadLink" in file.file) {
-            file.delete = true;
             setFiles((prev) => {
-                const newValue = [...prev];
+                const newValue = prev.map((f) => f === file ? { ...f, delete: true } : f);
                 if (onChange)
                     onChange(newValue);
                 return newValue;
             });
             return;
         }
+        // a file the user just picked has nothing to delete server side, so it goes
         setFiles((prev) => {
             const newValue = prev.filter((f) => f !== file);
             if (onChange)
@@ -218,6 +231,18 @@ const FileUpload = (inProps, ref) => {
             return newValue;
         });
     }, [onChange, setFiles]);
+    const restoreFile = useCallback((file) => {
+        if (onRestoreFile) {
+            onRestoreFile(file);
+            return;
+        }
+        setFiles((prev) => {
+            const newValue = prev.map((f) => f === file ? { ...f, delete: false } : f);
+            if (onChange)
+                onChange(newValue);
+            return newValue;
+        });
+    }, [onChange, onRestoreFile, setFiles]);
     const { handleDrop, handleDragOver, dragging } = useDropZone(readOnly ? undefined : processFiles);
     // update files if necessary
     useEffect(() => {
@@ -243,24 +268,27 @@ const FileUpload = (inProps, ref) => {
             inputRef,
             files,
             removeFile,
+            restoreFile,
         });
     }
     else if (variant === "classic") {
-        return (_jsx(StyledGroupBox, { label: label, smallLabel: smallLabel, className: combineClassNames([className, classes?.root]), children: _jsxs(Dropzone, { container: true, spacing: 2, sx: { alignContent: "space-between" }, onDragOver: handleDragOver, onDrop: handleDrop, className: combineClassNames([
+        return (_jsx(StyledGroupBox, { label: boxLabel, smallLabel: smallLabel, className: combineClassNames([className, classes?.root]), children: _jsxs(Dropzone, { container: true, spacing: 2, sx: { alignContent: "space-between" }, onDragOver: handleDragOver, onDrop: handleDrop, className: combineClassNames([
                     "components-care-dropzone",
                     classes?.dropzone,
                     dragging && "Mui-active",
                 ]), children: [!readOnly && (_jsxs(Grid, { size: "grow", children: [_jsx(Button, { startIcon: _jsx(AttachFile, {}), variant: "contained", color: "primary", onClick: () => handleUpload(), name: name, onBlur: onBlur, children: uploadLabel || t("standalone.file-upload.upload") }), _jsx(FileInput, { type: "file", accept: accept || undefined, multiple: maxFiles ? getRemainingFileCount() > 1 : true, onChange: handleFileChange, className: classes?.fileInput, ref: inputRef })] }, "upload")), _jsx(Grid, { size: 12, children: _jsxs(Grid, { container: true, spacing: 2, sx: { alignContent: "flex-start", alignItems: "flex-start" }, children: [files.map((data, index) => data && (_jsx(FilePreview, { name: data.file.name, mimeType: data.file.type, downloadLink: "downloadLink" in data.file
                                         ? data.file.downloadLink
-                                        : undefined, size: previewSize, preview: previewImages ? data.preview : undefined, disabled: data.delete || false, onRemove: readOnly || data.preventDelete
+                                        : undefined, size: previewSize, preview: previewImages ? data.preview : undefined, disabled: data.delete || false, changeState: getChangeState(data), restoreLabel: t("standalone.file-upload.restore"), onRemove: readOnly || data.preventDelete
                                         ? undefined
-                                        : () => removeFile(data), variant: "box" }, `${index}-${data.file.name}`))), readOnly && files.length === 0 && (_jsx(Grid, { children: _jsx(Typography, { children: t("standalone.file-upload.no-files") }) }))] }) }, "files"), !readOnly && (_jsx(Grid, { size: 12, children: _jsxs(FormatText, { className: classes?.formatText, children: ["(", t("standalone.file-upload.formats"), ":", " ", acceptLabel ||
+                                        : () => removeFile(data), onRestore: readOnly || data.preventDelete
+                                        ? undefined
+                                        : () => restoreFile(data), variant: "box" }, `${index}-${data.file.name}`))), readOnly && files.length === 0 && (_jsx(Grid, { children: _jsx(Typography, { children: t("standalone.file-upload.no-files") }) }))] }) }, "files"), !readOnly && (_jsx(Grid, { size: 12, children: _jsxs(FormatText, { className: classes?.formatText, children: ["(", t("standalone.file-upload.formats"), ":", " ", acceptLabel ||
                                     accept ||
                                     t("standalone.file-upload.format.any"), ")"] }) }, "info"))] }) }));
     }
     else if (variant === "modern") {
         const acceptFiles = accept ? accept.split(",") : [];
-        return (_jsx(StyledGroupBox, { label: label, smallLabel: smallLabel, className: combineClassNames([className, classes?.root]), children: _jsxs(Grid, { container: true, spacing: 2, sx: { alignContent: "space-between" }, onDragOver: handleDragOver, onDrop: handleDrop, onClick: () => handleUpload(), className: combineClassNames([
+        return (_jsx(StyledGroupBox, { label: boxLabel, smallLabel: smallLabel, className: combineClassNames([className, classes?.root]), children: _jsxs(Grid, { container: true, spacing: 2, sx: { alignContent: "space-between" }, onDragOver: handleDragOver, onDrop: handleDrop, onClick: () => handleUpload(), className: combineClassNames([
                     classes?.dropzone,
                     "components-care-dropzone",
                     dragging && "Mui-active",
@@ -269,9 +297,11 @@ const FileUpload = (inProps, ref) => {
                                     files.length === 0 && "CcFileUpload-modernUploadLabel-empty",
                                 ]), children: uploadLabel || t("standalone.file-upload.upload-modern") }), _jsx(FileInput, { type: "file", accept: accept || undefined, multiple: maxFiles ? getRemainingFileCount() > 1 : true, onChange: handleFileChange, className: classes?.fileInput, ref: inputRef })] }, "upload")), files.length > 0 && (_jsx(Grid, { size: 12, children: _jsx(Box, { sx: { mx: 1 }, children: _jsx(Grid, { container: true, spacing: 1, sx: { alignContent: "flex-start", alignItems: "flex-start" }, children: files.map((data, index) => data && (_jsx(FilePreview, { name: data.file.name, mimeType: data.file.type, downloadLink: "downloadLink" in data.file
                                         ? data.file.downloadLink
-                                        : undefined, size: previewSize, preview: previewImages ? data.preview : undefined, disabled: data.delete || false, onRemove: readOnly || data.preventDelete
+                                        : undefined, size: previewSize, preview: previewImages ? data.preview : undefined, disabled: data.delete || false, changeState: getChangeState(data), restoreLabel: t("standalone.file-upload.restore"), onRemove: readOnly || data.preventDelete
                                         ? undefined
-                                        : () => removeFile(data), variant: "list" }, `${index}-${data.file.name}`))) }) }) }, "files")), readOnly && files.length === 0 && (_jsx(Grid, { size: 12, children: _jsx(Typography, { children: t("standalone.file-upload.no-files") }) }, "no-files")), !readOnly && (_jsxs(Grid, { container: true, wrap: "nowrap", spacing: 1, size: 12, children: [_jsx(Grid, { size: "grow", children: _jsxs(FormatTextModern, { align: "right", className: classes?.formatTextModern, children: [t("standalone.file-upload.formats-modern"), " ", acceptFiles.length == 0 &&
+                                        : () => removeFile(data), onRestore: readOnly || data.preventDelete
+                                        ? undefined
+                                        : () => restoreFile(data), variant: "list" }, `${index}-${data.file.name}`))) }) }) }, "files")), readOnly && files.length === 0 && (_jsx(Grid, { size: 12, children: _jsx(Typography, { children: t("standalone.file-upload.no-files") }) }, "no-files")), !readOnly && (_jsxs(Grid, { container: true, wrap: "nowrap", spacing: 1, size: 12, children: [_jsx(Grid, { size: "grow", children: _jsxs(FormatTextModern, { align: "right", className: classes?.formatTextModern, children: [t("standalone.file-upload.formats-modern"), " ", acceptFiles.length == 0 &&
                                             t("standalone.file-upload.format.any")] }) }), acceptFiles.map((entry, idx) => (_jsx(FormatIconsModern, { className: classes?.formatIconsModern, children: _jsx(Tooltip, { title: acceptLabel || accept || "", children: _jsx("span", { children: React.createElement(getFileIconOrDefault(entry, entry)) }) }) }, idx.toString(16))))] }, "info"))] }) }));
     }
     else {

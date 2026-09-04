@@ -6,6 +6,7 @@ import ImagePreviewDialog from "./ImagePreviewDialog";
 import processImageB64 from "../../../utils/processImageB64";
 import combineClassNames from "../../../utils/combineClassNames";
 import GroupBox from "../../GroupBox";
+import { labelWithDirtyMarker } from "../../UIKit/MuiFieldState";
 import useCCTranslations from "../../../utils/useCCTranslations";
 import { ImageFileIcon } from "../FileIcons";
 import fileToData from "../../../utils/fileToData";
@@ -137,6 +138,7 @@ const ModernUploadControlUpload = styled(IconButton, {
 }));
 const ImageSelector = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcImageSelector" });
+    const boxLabel = labelWithDirtyMarker(props.label, props.dirty);
     const { convertImagesTo, downscale, name, value, readOnly, capture, onChange, postEditCallback, onError, classes, className, } = props;
     const variant = props.variant ?? "normal";
     const fileRef = useRef(null);
@@ -229,7 +231,7 @@ const ImageSelector = (inProps) => {
     const previewDialog = variant === "modern" && (_jsx(ImagePreviewDialog, { src: value, alt: props.alt, open: showPreviewDialog, onClose: handlePreviewDialogClose }));
     // render component
     if (variant === "normal") {
-        return (_jsx(GroupBox, { label: props.label, smallLabel: props.smallLabel, className: className, children: _jsxs(RootClassic, { container: true, spacing: 2, sx: {
+        return (_jsx(GroupBox, { label: boxLabel, smallLabel: props.smallLabel, className: className, children: _jsxs(RootClassic, { container: true, spacing: 2, sx: {
                     flexDirection: "column",
                     alignContent: "flex-start",
                     alignItems: "stretch",
@@ -238,7 +240,7 @@ const ImageSelector = (inProps) => {
                                         t("standalone.file-upload.upload-capture.image") }) })), _jsx(ChangeEventHelper, { type: "file", accept: "image/*", ref: fileRef, onChange: handleFileChange, className: classes?.changeEventHelper })] }, "upload")), _jsx(ImageWrapper, { size: "grow", className: classes?.imgWrapper, children: value && (_jsx(PreviewClassic, { src: value, alt: props.alt, className: classes?.previewClassic })) }, "image")] }) }));
     }
     else if (variant === "modern") {
-        return (_jsxs(_Fragment, { children: [previewDialog, _jsx(GroupBox, { label: props.label, smallLabel: props.smallLabel, className: className, children: _jsxs(RootModern, { container: true, spacing: 0, sx: {
+        return (_jsxs(_Fragment, { children: [previewDialog, _jsx(GroupBox, { label: boxLabel, smallLabel: props.smallLabel, className: className, children: _jsxs(RootModern, { container: true, spacing: 0, sx: {
                             flexDirection: "column",
                             alignContent: "flex-start",
                             alignItems: "stretch",

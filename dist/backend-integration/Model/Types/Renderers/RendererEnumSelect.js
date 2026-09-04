@@ -15,7 +15,7 @@ class RendererEnumSelect extends TypeEnum {
         this.props = props;
     }
     render(params) {
-        const { visibility, field, value, label, handleChange, handleBlur, errorMsg, warningMsg, } = params;
+        const { visibility, field, value, label, handleChange, handleBlur, errorMsg, warningMsg, dirty, } = params;
         if (visibility.disabled)
             return _jsx(_Fragment, {});
         if (visibility.hidden) {
@@ -38,7 +38,7 @@ class RendererEnumSelect extends TypeEnum {
                     ...data.filter((entry) => getStringLabel(entry).toLowerCase().includes(query.toLowerCase())),
                 ]),
             });
-            return (_jsxs(FormControlFieldsetCC, { component: "fieldset", required: visibility.required, fullWidth: true, error: !!errorMsg, warning: !!warningMsg, onBlur: handleBlur, name: field, children: [_jsx(SingleSelect, { refreshToken: this.values.map((e) => e.value).join(","), ...this.props, label: label, selected: selected, onLoad: onLoad, onSelect: (value) => handleChange(field, value ? value.value : ""), disabled: visibility.readOnly, required: visibility.required }), _jsx(FormHelperText, { children: errorMsg || warningMsg })] }));
+            return (_jsxs(FormControlFieldsetCC, { component: "fieldset", required: visibility.required, fullWidth: true, error: !!errorMsg, warning: !!warningMsg, dirty: dirty, onBlur: handleBlur, name: field, children: [_jsx(SingleSelect, { refreshToken: this.values.map((e) => e.value).join(","), ...this.props, label: label, selected: selected, onLoad: onLoad, onSelect: (value) => handleChange(field, value ? value.value : ""), disabled: visibility.readOnly, required: visibility.required, dirty: dirty }), _jsx(FormHelperText, { children: errorMsg || warningMsg })] }));
         }
         const valueInfo = this.values.find((entry) => entry.value === value);
         return (_jsxs(Typography, { children: [!visibility.grid && `${label}: `, valueInfo

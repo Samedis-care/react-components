@@ -6,14 +6,14 @@ import getCurrentLocale from "../../../../../utils/getCurrentLocale";
 import { denormalizeDate, formatDateOnly, normalizeDate, } from "../../../../../utils/dateOnlyUtils";
 import { LocalizedKeyboardDatePicker } from "../../../../../standalone/LocalizedDateTimePickers";
 import { ToDateLocaleStringOptions } from "../../../../../constants";
-import { FormHelperTextCC } from "../../../../../standalone/UIKit/MuiWarning";
+import { FormHelperTextCC } from "../../../../../standalone/UIKit/MuiFieldState";
 import moment from "moment";
 /**
  * Renders Date with Date Selector
  */
 class RendererDateNullable extends TypeDateNullable {
     render(params) {
-        const { visibility, field, value, touched, label, handleChange, handleBlur, errorMsg, warningMsg, setFieldTouched, } = params;
+        const { visibility, field, value, touched, label, handleChange, handleBlur, errorMsg, warningMsg, dirty, setFieldTouched, } = params;
         if (visibility.disabled)
             return _jsx(_Fragment, {});
         if (visibility.hidden) {
@@ -22,7 +22,7 @@ class RendererDateNullable extends TypeDateNullable {
         if (visibility.editable) {
             if (visibility.grid)
                 throw new Error("Not supported");
-            return (_jsxs(_Fragment, { children: [_jsx(LocalizedKeyboardDatePicker, { name: field, value: value ? moment(denormalizeDate(value)) : null, label: label, disabled: visibility.readOnly, required: visibility.required, onChange: (date) => handleChange(field, date ? normalizeDate(date.toDate()) : null), onBlur: handleBlur, error: !!errorMsg, warning: !!warningMsg, onError: (error) => {
+            return (_jsxs(_Fragment, { children: [_jsx(LocalizedKeyboardDatePicker, { name: field, value: value ? moment(denormalizeDate(value)) : null, label: label, disabled: visibility.readOnly, required: visibility.required, onChange: (date) => handleChange(field, date ? normalizeDate(date.toDate()) : null), onBlur: handleBlur, error: !!errorMsg, warning: !!warningMsg, dirty: dirty, onError: (error) => {
                             this.error = error
                                 ? ccI18n.t("backend-integration.model.types.renderers.date.validation-error")
                                 : "";

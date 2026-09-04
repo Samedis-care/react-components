@@ -30,5 +30,5 @@ export interface LocalizedKeyboardDatePickerProps extends Omit<DatePickerProps, 
     publishIntermediateValues?: boolean;
 }
 export type LocalizedKeyboardDatePickerClassKey = never;
-declare const _default: React.MemoExoticComponent<React.ComponentType<LocalizedKeyboardDatePickerProps & import("..").MuiWarningResultProps>>;
+declare const _default: React.MemoExoticComponent<React.ComponentType<LocalizedKeyboardDatePickerProps & import("..").MuiFieldStateProps>>;
 export default _default;

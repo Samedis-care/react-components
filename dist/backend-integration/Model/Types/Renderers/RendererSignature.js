@@ -3,7 +3,7 @@ import React from "react";
 import { FormControl, FormHelperText, FormLabel } from "@mui/material";
 import ccI18n from "../../../../i18n";
 import TypeImage from "../TypeImage";
-import { FormControlCC } from "../../../../standalone/UIKit/MuiWarning";
+import { FormControlCC } from "../../../../standalone/UIKit/MuiFieldState";
 import SignaturePad from "../../../../non-standalone/SignaturePad/SignaturePad";
 export const SignatureNameContext = React.createContext(null);
 /**
@@ -12,7 +12,7 @@ export const SignatureNameContext = React.createContext(null);
  */
 class RendererSignature extends TypeImage {
     render(params) {
-        const { visibility, field, value, label, handleChange, handleBlur, errorMsg, warningMsg, } = params;
+        const { visibility, field, value, label, handleChange, handleBlur, errorMsg, warningMsg, dirty, } = params;
         if (visibility.disabled)
             return _jsx(_Fragment, {});
         if (visibility.hidden) {
@@ -21,7 +21,7 @@ class RendererSignature extends TypeImage {
         if (visibility.editable) {
             if (visibility.grid)
                 throw new Error("Not supported");
-            return (_jsxs(FormControlCC, { required: visibility.required, fullWidth: true, error: !!errorMsg, warning: !!warningMsg, onBlur: handleBlur, "data-name": field, children: [_jsx(FormLabel, { component: "legend", children: label }), _jsx(SignatureNameContext.Consumer, { children: (signerName) => (_jsx(SignaturePad, { name: field, signature: value, setSignature: (newValue) => handleChange(field, newValue), disabled: visibility.readOnly, signerName: signerName })) }), _jsx(FormHelperText, { children: errorMsg || warningMsg })] }));
+            return (_jsxs(FormControlCC, { required: visibility.required, fullWidth: true, error: !!errorMsg, warning: !!warningMsg, dirty: dirty, onBlur: handleBlur, "data-name": field, children: [_jsx(FormLabel, { component: "legend", children: label }), _jsx(SignatureNameContext.Consumer, { children: (signerName) => (_jsx(SignaturePad, { name: field, signature: value, setSignature: (newValue) => handleChange(field, newValue), disabled: visibility.readOnly, signerName: signerName })) }), _jsx(FormHelperText, { children: errorMsg || warningMsg })] }));
         }
         const content = value ? (_jsx("img", { src: value, alt: label })) : (_jsx(_Fragment, { children: ccI18n.t("backend-integration.model.types.renderers.signature.not-set") }));
         return visibility.grid ? (content) : (_jsxs(FormControl, { children: [_jsx(FormLabel, { children: label }), content] }));

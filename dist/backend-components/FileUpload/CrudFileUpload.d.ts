@@ -29,6 +29,21 @@ export interface CrudFileUploadProps extends Omit<FileUploadProps, "files" | "ha
      * additional read-only files
      */
     additionalFiles?: FileData<FileMeta>[];
+    /**
+     * Mark the control as modified while file changes are queued
+     * @remarks Off by default, like `FormProps.showDirtyState`. An explicit `dirty` prop
+     *          wins over it, and it shows nothing without a LazyConnector, where a change
+     *          is written before this control hears about it.
+     */
+    showDirtyState?: boolean;
+    /**
+     * Called with the current state on mount, and whenever queued file changes appear or
+     * are written
+     * @param dirty Are file changes waiting to be written?
+     * @remarks Independent of showDirtyState — pending changes are state, not display —
+     *          and always false without a LazyConnector. Memoize the handler.
+     */
+    onDirtyChange?: (dirty: boolean) => void;
 }
 export interface BackendFileMeta extends FileMeta {
     /**

@@ -2,7 +2,7 @@ import { Fragment as _Fragment, jsx as _jsx } from "react/jsx-runtime";
 import React, { useCallback } from "react";
 import { DatePicker, LocalizationProvider, } from "@mui/x-date-pickers";
 import { useThemeProps } from "@mui/material";
-import { withMuiWarning } from "../UIKit/MuiWarning";
+import { withMuiFieldState } from "../UIKit/MuiFieldState";
 import useMuiLocaleData from "./useMuiLocaleData";
 import accessSlotProps from "../../utils/internal/accessSlotProps";
 import usePickerDraft from "./usePickerDraft";
@@ -37,16 +37,24 @@ const LocalizedKeyboardDatePicker = (inProps) => {
                     const textFieldProps = accessSlotProps(ownerState, otherProps.slotProps?.textField);
                     return {
                         ...textFieldProps,
-                        required,
-                        error,
-                        fullWidth,
+                        // only where the caller actually gave one, so a value passed
+                        // through slotProps.textField is not overwritten with undefined
+                        ...(required === undefined ? {} : { required }),
+                        ...(error === undefined ? {} : { error }),
+                        ...(fullWidth === undefined ? {} : { fullWidth }),
                         onBlur: (event) => {
                             draft.settleOnBlur(event);
+                            textFieldProps?.onBlur?.(event);
                             onBlur?.(event);
                         },
-                        disableClearable,
+                        // disableClearable suppresses the clear button that our
+                        // TextFieldWithHelp based fields render on touch devices. MUI's
+                        // own PickersTextField has no such button and forwards the prop
+                        // it does not know to the DOM, so it is only sent on to a text
+                        // field that was actually swapped in for it.
+                        ...(otherProps.slots?.textField ? { disableClearable } : {}),
                     };
                 },
             } }) }));
 };
-export default React.memo(withMuiWarning(LocalizedKeyboardDatePicker));
+export default React.memo(withMuiFieldState(LocalizedKeyboardDatePicker));

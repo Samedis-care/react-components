@@ -10,7 +10,7 @@ import moment from "moment";
  */
 class RendererDateTimeNullable extends TypeDateTimeNullable {
     render(params) {
-        const { visibility, field, value, touched, label, handleChange, handleBlur, errorMsg, warningMsg, setFieldTouched, } = params;
+        const { visibility, field, value, touched, label, handleChange, handleBlur, errorMsg, warningMsg, dirty, setFieldTouched, } = params;
         if (visibility.disabled)
             return _jsx(_Fragment, {});
         if (visibility.hidden) {
@@ -19,7 +19,7 @@ class RendererDateTimeNullable extends TypeDateTimeNullable {
         if (visibility.editable) {
             if (visibility.grid)
                 throw new Error("Not supported");
-            return (_jsxs(_Fragment, { children: [_jsx(DateTimeInput, { value: value ? moment(value) : null, name: field, label: label, disabled: visibility.readOnly, required: visibility.required, onChange: (date) => handleChange(field, date ? date.toDate() : null), onBlur: handleBlur, error: !!errorMsg, warning: !!warningMsg, onError: (error) => {
+            return (_jsxs(_Fragment, { children: [_jsx(DateTimeInput, { value: value ? moment(value) : null, name: field, label: label, disabled: visibility.readOnly, required: visibility.required, onChange: (date) => handleChange(field, date ? date.toDate() : null), onBlur: handleBlur, error: !!errorMsg, warning: !!warningMsg, dirty: dirty, onError: (error) => {
                             this.error = error
                                 ? ccI18n.t("backend-integration.model.types.renderers.date.validation-error")
                                 : "";

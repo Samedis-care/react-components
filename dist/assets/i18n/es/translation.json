@@ -145,6 +145,7 @@
 		"file-upload": {
 			"close": "Cerrar",
 			"upload": "Subir",
+			"restore": "Restaurar",
 			"upload-capture": {
 				"image": "Tomar foto"
 			},

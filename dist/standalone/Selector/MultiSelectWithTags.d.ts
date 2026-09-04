@@ -8,6 +8,11 @@ export interface MultiSelectWithTagsProps<DataT extends MultiSelectorData, Group
      */
     title: string;
     /**
+     * Does the selection differ from the server-side value?
+     * @remarks Presentational only; set by the form engine from `RenderParams.dirty`.
+     */
+    dirty?: boolean;
+    /**
      * Label above search bar
      */
     searchInputLabel?: string;

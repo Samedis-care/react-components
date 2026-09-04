@@ -11,6 +11,7 @@ import InlineSwitch from "../InlineSwitch";
 import useCCTranslations from "../../utils/useCCTranslations";
 import uniqueArray from "../../utils/uniqueArray";
 import Checkbox from "../UIKit/Checkbox";
+import { withMuiFieldState } from "../UIKit/MuiFieldState";
 export const getStringLabel = (data) => typeof data === "string"
     ? data
     : Array.isArray(data.label)
@@ -55,14 +56,17 @@ const StyledInlineSwitch = styled(InlineSwitch, {
         marginTop: -30,
     },
 });
-const StyledLabel = styled(InputLabel, {
+// the selector renders its label as a sibling of the Autocomplete rather than inside
+// the text field, so the dirty marker has to be attached here: withMuiFieldState matches
+// the label itself ("&.MuiFormLabel-root::after") and swallows the flag on the way
+const StyledLabel = withMuiFieldState(styled(InputLabel, {
     name: "CcBaseSelector",
     slot: "label",
 })({
     position: "relative",
     transform: "translate(0,0) scale(0.75)",
     zIndex: "unset",
-});
+}));
 const StyledIcon = styled("img", {
     name: "CcBaseSelector",
     slot: "icon",
@@ -135,7 +139,7 @@ const autocompleteSlots = { popper: GrowPopper };
 export const BaseSelectorContext = React.createContext(null);
 const BaseSelector = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcBaseSelector" });
-    const { variant, refreshToken, onSelect, multiple, selected, label, disabled, required, error, warning, disableSearch, placeholder, autocompleteId, addNewLabel, onLoad, onAddNew, additionalOptions, enableIcons, noOptionsText, loadingText, startTypingToSearchText, disableTruncationNotice, truncatedLabel, openText, closeText, clearText, disableClearable, openInfo, grouped, noGroupLabel, disableGroupSorting, groupSorter, switchLabel, lru, startAdornment, endAdornment, endAdornmentLeft, forceQuery, freeSolo, getIdOfData, filterIds, textFieldClasses, textFieldInputClasses, iconSize, classes, className, } = props;
+    const { variant, refreshToken, onSelect, multiple, selected, label, disabled, required, error, warning, dirty, disableSearch, placeholder, autocompleteId, addNewLabel, onLoad, onAddNew, additionalOptions, enableIcons, noOptionsText, loadingText, startTypingToSearchText, disableTruncationNotice, truncatedLabel, openText, closeText, clearText, disableClearable, openInfo, grouped, noGroupLabel, disableGroupSorting, groupSorter, switchLabel, lru, startAdornment, endAdornment, endAdornmentLeft, forceQuery, freeSolo, getIdOfData, filterIds, textFieldClasses, textFieldInputClasses, iconSize, classes, className, } = props;
     const getIdDefault = useCallback((data) => data.value, []);
     const getId = getIdOfData ?? getIdDefault;
     const defaultSwitchValue = !!(props.displaySwitch && props.defaultSwitchValue);
@@ -425,7 +429,7 @@ const BaseSelector = (inProps) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [lruIds.join(",")]);
     const filterOptions = useCallback((options) => options, []);
-    return (_jsx(StyledInlineSwitch, { visible: !!props.displaySwitch, value: switchValue, onChange: setSwitchValue, label: switchLabel, className: combineClassNames([className, classes?.inlineSwitch]), children: _jsxs(BaseSelectorContext.Provider, { value: context, children: [label && (_jsx(StyledLabel, { shrink: true, disableAnimation: true, disabled: disabled, className: classes?.label, required: !!required, error: !!error, children: label })), _jsx(Wrapper, { elevation: 0, className: classes?.wrapper, children: _jsx(StyledAutocomplete, { id: autocompleteId, className: classes?.autocomplete, multiple: multiple, disableCloseOnSelect: multiple, open: open, onOpen: () => {
+    return (_jsx(StyledInlineSwitch, { visible: !!props.displaySwitch, value: switchValue, onChange: setSwitchValue, label: switchLabel, className: combineClassNames([className, classes?.inlineSwitch]), children: _jsxs(BaseSelectorContext.Provider, { value: context, children: [label && (_jsx(StyledLabel, { shrink: true, disableAnimation: true, disabled: disabled, className: classes?.label, required: !!required, error: !!error, dirty: dirty, children: label })), _jsx(Wrapper, { elevation: 0, className: classes?.wrapper, children: _jsx(StyledAutocomplete, { id: autocompleteId, className: classes?.autocomplete, multiple: multiple, disableCloseOnSelect: multiple, open: open, onOpen: () => {
                             setOpen(true);
                         }, onClose: () => {
                             setOpen(false);
@@ -496,7 +500,7 @@ const BaseSelector = (inProps) => {
                                                 ?.endAdornment).props.children, infoBtn, endAdornment)) : (_jsxs(InputAdornment, { position: "end", children: [endAdornmentLeft, infoBtn, endAdornment] }))) : (paramSlotProps.input?.endAdornment);
                                         })(),
                                     },
-                                }, placeholder: placeholder, required: required, error: error, warning: warning }));
+                                }, placeholder: placeholder, required: required, error: error, warning: warning, dirty: dirty }));
                         } }, `${refreshToken || "no-refresh-token"} ${onAddNew
                         ? `add-new${actualAddNewLabel || "no-add-new-label"}`
                         : "no-add-new"}`) })] }) }));

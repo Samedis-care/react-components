@@ -140,6 +140,7 @@
 		},
 		"file-upload": {
 			"upload": "Uploaden",
+			"restore": "Herstellen",
 			"upload-modern": "Bestand via drag & drop of klik hier",
 			"no-files": "Geen bijlagen beschikbaar",
 			"formats": "Bestandsindelingen",

@@ -1,25 +1,25 @@
 import React from "react";
-import { TextFieldProps } from "@mui/material";
 import { DateTimePickerProps } from "@mui/x-date-pickers";
 import { UIInputProps } from "../CommonStyles";
+import { LocalizedDateTimePickerProps } from "../../../standalone/LocalizedDateTimePickers/LocalizedDateTimePicker";
 export interface DateTimeInputProps extends UIInputProps {
     openInfo?: () => void;
     /**
      * Set required flag for text field input
      */
-    required?: TextFieldProps["required"];
+    required?: LocalizedDateTimePickerProps["required"];
     /**
      * Set error flag for text field input
      */
-    error?: TextFieldProps["error"];
+    error?: LocalizedDateTimePickerProps["error"];
     /**
      * onBlur callback for the text field input
      */
-    onBlur?: TextFieldProps["onBlur"];
+    onBlur?: LocalizedDateTimePickerProps["onBlur"];
     /**
      * full width?
      */
-    fullWidth?: TextFieldProps["fullWidth"];
+    fullWidth?: LocalizedDateTimePickerProps["fullWidth"];
 }
 declare const _default: React.MemoExoticComponent<(props: DateTimeInputProps & DateTimePickerProps) => React.JSX.Element>;
 export default _default;

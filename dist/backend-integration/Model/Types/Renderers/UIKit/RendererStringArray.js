@@ -28,7 +28,7 @@ class RendererStringArray extends TypeStringArray {
     }
 }
 const RendererStringArrayComponent = (props) => {
-    const { options, visibility, field, value, label, handleChange, handleBlur, errorMsg, warningMsg, } = props;
+    const { options, visibility, field, value, label, handleChange, handleBlur, errorMsg, warningMsg, dirty, } = props;
     useMountLogging(RendererStringArrayComponent);
     const textField = (idx) => (_jsx(TextFieldWithHelp, { fullWidth: true, ...options, name: `${field}`, value: value[idx] ?? "", disabled: visibility.readOnly, required: visibility.required, onChange: (evt) => {
             const newValue = [...value];
@@ -37,7 +37,7 @@ const RendererStringArrayComponent = (props) => {
         }, onBlur: (evt) => {
             handleChange(field, value.filter(Boolean));
             handleBlur(evt);
-        }, error: !!errorMsg, warning: !!warningMsg }, "input_" + idx));
+        }, error: !!errorMsg, warning: !!warningMsg, dirty: dirty }, "input_" + idx));
     return (_jsxs(GroupBox, { label: label, children: [value.map((_, idx) => textField(idx)).concat(textField(value.length)), _jsx(FormHelperTextCC, { error: !!errorMsg, warning: !!warningMsg, children: errorMsg || warningMsg })] }));
 };
 export default RendererStringArray;

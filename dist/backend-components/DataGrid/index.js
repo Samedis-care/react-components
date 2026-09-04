@@ -133,6 +133,8 @@ export const renderDataGridRecordUsingModel = (model, refreshGrid) => (entry) =>
                     field: key,
                     value: value,
                     touched: false,
+                    // grid cells render server data, there is nothing to diff against
+                    dirty: false,
                     initialValue: value,
                     label: field.getLabel(),
                     visibility: Object.assign({}, field.visibility.overview, {

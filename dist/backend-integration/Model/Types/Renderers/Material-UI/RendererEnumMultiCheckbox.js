@@ -15,7 +15,7 @@ class RendererEnumRadio extends TypeEnumMulti {
         this.wrapButton = wrapButton;
     }
     render(params) {
-        const { visibility, field, label, handleChange, handleBlur, errorMsg, warningMsg, value, } = params;
+        const { visibility, field, label, handleChange, handleBlur, errorMsg, warningMsg, dirty, value, } = params;
         if (visibility.disabled)
             return _jsx(_Fragment, {});
         if (visibility.hidden) {
@@ -24,7 +24,7 @@ class RendererEnumRadio extends TypeEnumMulti {
         if (visibility.editable) {
             if (visibility.grid)
                 throw new Error("Not supported");
-            return (_jsxs(FormControlFieldsetCC, { component: "fieldset", required: visibility.required, fullWidth: true, error: !!errorMsg, warning: !!warningMsg, children: [_jsx(FormLabel, { component: "legend", children: label }), _jsx(FormGroup, { onBlur: handleBlur, row: this.horizontal, "data-name": field, children: this.values
+            return (_jsxs(FormControlFieldsetCC, { component: "fieldset", required: visibility.required, fullWidth: true, error: !!errorMsg, warning: !!warningMsg, dirty: dirty, children: [_jsx(FormLabel, { component: "legend", children: label }), _jsx(FormGroup, { onBlur: handleBlur, row: this.horizontal, "data-name": field, children: this.values
                             .filter((entry) => !entry.invisible)
                             .map((entry) => this.wrapButton(_jsx(FormControlLabel, { value: entry.value, control: _jsx(Checkbox, { checked: value.includes(entry.value), name: entry.value, onChange: (evt) => handleChange(field, evt.target.checked
                                     ? value.concat([entry.value]) // add value

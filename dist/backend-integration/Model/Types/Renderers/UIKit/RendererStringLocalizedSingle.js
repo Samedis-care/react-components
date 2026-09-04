@@ -14,7 +14,7 @@ class RendererStringLocalizedSingle extends TypeLocalizedString {
         this.props = props;
     }
     render(params) {
-        const { visibility, field, value, label, handleChange, handleBlur, errorMsg, warningMsg, } = params;
+        const { visibility, field, value, label, handleChange, handleBlur, errorMsg, warningMsg, dirty, } = params;
         if (visibility.disabled)
             return _jsx(_Fragment, {});
         if (visibility.hidden) {
@@ -36,7 +36,7 @@ class RendererStringLocalizedSingle extends TypeLocalizedString {
                                     if (!evt.target.value)
                                         delete newValue[language];
                                     handleChange(evt.target.name, newValue);
-                                }, onBlur: handleBlur, error: !!errorMsg, warning: !!warningMsg }), _jsx(FormHelperTextCC, { error: !!errorMsg, warning: !!warningMsg, children: errorMsg || warningMsg })] }));
+                                }, onBlur: handleBlur, error: !!errorMsg, warning: !!warningMsg, dirty: dirty }), _jsx(FormHelperTextCC, { error: !!errorMsg, warning: !!warningMsg, children: errorMsg || warningMsg })] }));
                 } }));
         }
         return (_jsx(ModelDataTypeStringLocalizedSingleRendererContext.Consumer, { children: (language) => {

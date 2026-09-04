@@ -2,7 +2,11 @@ import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import React, { useCallback, useContext, useEffect, useMemo, useState, } from "react";
 import { useDialogContext } from "../../framework";
 import { showConfirmDialog } from "../../non-standalone";
-import { ActionButton, FormButtons } from "../../standalone";
+// deep imports, not the standalone barrel: this module is reached through the Form
+// barrel, and pulling the whole standalone barrel back in from here evaluates
+// styled(ActionButton) before ActionButton's own module has finished
+import ActionButton from "../../standalone/UIKit/ActionButton";
+import FormButtons from "../../standalone/UIKit/FormButtons";
 import combineClassNames from "../../utils/combineClassNames";
 import { IsInFormDialogContext } from "./FormDialog";
 import useCCTranslations from "../../utils/useCCTranslations";

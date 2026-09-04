@@ -1,4 +1,5 @@
 import React from "react";
+import { FileChangeState } from "./File";
 import { FileSelectorError } from "./Errors";
 import { IDownscaleProps } from "../../../utils/processImage";
 export interface FileUploadProps {
@@ -62,6 +63,14 @@ export interface FileUploadProps {
      */
     onChange?: (files: FileData[]) => void;
     /**
+     * Called instead of the built-in restore when a pending removal is undone
+     * @remarks The built-in restore just clears the `delete` flag, which is all that is
+     *          needed while the removal is only a flag on the file. Where it has already
+     *          been handed to a connector queue, only the owner of that queue can undo
+     *          it, so that owner takes the callback.
+     */
+    onRestoreFile?: (file: FileData) => void;
+    /**
      * onBlur event handler
      */
     onBlur?: React.FocusEventHandler<HTMLElement>;
@@ -77,6 +86,11 @@ export interface FileUploadProps {
      * The label of the component
      */
     label?: string;
+    /**
+     * Does the value differ from the server-side value?
+     * @remarks Marks the label. Set by the form engine from `RenderParams.dirty`.
+     */
+    dirty?: boolean;
     /**
      * CSS class to apply to root
      */
@@ -131,6 +145,11 @@ export interface FileUploadRendererProps extends Omit<FileUploadProps, "variant"
      * @param file The file to remove
      */
     removeFile: (file: FileData) => void;
+    /**
+     * Undo a pending removal
+     * @param file The file to restore
+     */
+    restoreFile: (file: FileData) => void;
 }
 export interface FileMeta {
     /**
@@ -168,6 +187,21 @@ export interface FileData<T = File | FileMeta> {
      * Set to true if the file should be deleted from the server, only true if canBeUploaded is false
      */
     delete?: boolean;
+    /**
+     * The file's pending change relative to the server, for display
+     * @remarks Leave it unset and the control derives the state from the flags above,
+     *          which is all a plain FileUpload needs: a picked file has `canBeUploaded`,
+     *          a file marked for removal has `delete`.
+     *
+     *          It exists for CrudFileUpload, where handing a write to the connector
+     *          destroys both of those signals on purpose: the picked File is replaced by
+     *          the `deserialize`d backend representation, so it is no longer a Blob and
+     *          must not keep `canBeUploaded` or it would upload twice; and `delete` is
+     *          cleared once the removal is queued, or the next change would queue it
+     *          again. With a LazyConnector the write is only queued, so a pending change
+     *          then looks exactly like a file that was always on the server.
+     */
+    changeState?: FileChangeState;
 }
 export interface FileUploadDispatch {
     /**

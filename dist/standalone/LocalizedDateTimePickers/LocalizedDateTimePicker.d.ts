@@ -24,5 +24,5 @@ export interface LocalizedDateTimePickerProps extends Omit<DateTimePickerProps, 
      */
     publishIntermediateValues?: boolean;
 }
-declare const _default: React.MemoExoticComponent<React.ComponentType<LocalizedDateTimePickerProps & import("..").MuiWarningResultProps>>;
+declare const _default: React.MemoExoticComponent<React.ComponentType<LocalizedDateTimePickerProps & import("..").MuiFieldStateProps>>;
 export default _default;

@@ -173,6 +173,11 @@ export type BaseSelectorProps<DataT extends BaseSelectorData, Multi extends bool
      */
     warning?: boolean;
     /**
+     * Does the selection differ from the server-side value?
+     * @remarks Presentational only; set by the form engine from `RenderParams.dirty`.
+     */
+    dirty?: boolean;
+    /**
      * String used for the Autocomplete component
      */
     autocompleteId?: string;

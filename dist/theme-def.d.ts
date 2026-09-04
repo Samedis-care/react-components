@@ -54,6 +54,7 @@ import { GridSingleSelectFilterClassKey, GridSingleSelectFilterProps } from "./s
 import { ScrollableScheduleDayClassKey, ScrollableScheduleDayProps } from "./standalone/Schedule/Scrollable/ScrollableScheduleDay";
 import { FormClassKey } from "./backend-components";
 import { BasicFormPageProps } from "./backend-components/Form/BasicFormPage";
+import { DirtyMarkerClassKey, FieldStateClassKey } from "./standalone/UIKit/MuiFieldState";
 import { CrudClassKey } from "./backend-components/CRUD";
 import { BackendSingleSelectThemeProps } from "./backend-components/Selector/BackendSingleSelect";
 import { BackendMultiSelectThemeProps } from "./backend-components/Selector/BackendMultiSelect";
@@ -139,6 +140,8 @@ declare module "@mui/material/styles" {
         CcGridSingleSelectFilter: GridSingleSelectFilterClassKey;
         CcGridSingleSelectFilterBackend: GridSingleSelectFilterBackendClassKey;
         CcForm: FormClassKey;
+        CcFieldState: FieldStateClassKey;
+        CcDirtyMarker: DirtyMarkerClassKey;
         CcCrud: CrudClassKey;
     }
     interface ComponentsPropsList {
@@ -545,6 +548,12 @@ declare module "@mui/material/styles" {
         };
         CcForm?: {
             styleOverrides?: ComponentsOverrides<Theme>["CcForm"];
+        };
+        CcFieldState?: {
+            styleOverrides?: ComponentsOverrides<Theme>["CcFieldState"];
+        };
+        CcDirtyMarker?: {
+            styleOverrides?: ComponentsOverrides<Theme>["CcDirtyMarker"];
         };
         CcBasicFormPage?: {
             defaultProps?: ComponentsPropsList["CcBasicFormPage"];

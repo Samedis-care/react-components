@@ -4,6 +4,7 @@ import { useFormContext } from "./Form";
 import { getVisibility } from "../../backend-integration/Model/Visibility";
 import { dotsToObject, getValueByDot } from "../../utils/dotUtils";
 import shallowCompare from "../../utils/shallowCompare";
+import { useDirtyState } from "./DirtyStateContext";
 export const FormFieldContext = React.createContext(null);
 export const useFormFieldContext = () => {
     const ctx = useContext(FormFieldContext);
@@ -65,6 +66,7 @@ const Field = (props) => {
     const errorMsg = (touch && errors[props.name]) || null;
     const warningMsg = (touch && warnings[props.name]) || null;
     const relationData = relations[props.name];
+    const dirty = useDirtyState(props.name);
     const visibility = getVisibility(hasId ? fieldDef.visibility.edit : fieldDef.visibility.create, values, initialValues);
     const relationModel = useFieldRelationModel(fieldDef);
     const cacheKey = useMemo(() => new Object(), 
@@ -75,6 +77,7 @@ const Field = (props) => {
             field: name,
             value: value,
             touched: touch,
+            dirty: dirty,
             initialValue: initialValue,
             visibility: readOnly ? { ...visibility, readOnly: true } : visibility,
             handleChange: setFieldValueHookWrapper,
@@ -107,6 +110,7 @@ const Field = (props) => {
         setFieldTouched,
         initialValue,
         touch,
+        dirty,
         relationModel,
         relationData,
         readOnly,

@@ -4,7 +4,7 @@ import { Grid, IconButton, InputAdornment, styled, Tooltip, Typography, useTheme
 import useCCTranslations, { useCCLanguagesTranslations, } from "../../../utils/useCCTranslations";
 import { useCurrentLanguage } from "../../../utils/useCurrentLocale";
 import { Translate } from "@mui/icons-material";
-import { TextFieldCC } from "../MuiWarning";
+import { TextFieldCC } from "../MuiFieldState";
 const LanguageLabel = styled("span", {
     name: "CcMultiLanguageInput",
     slot: "languageLabel",
@@ -21,7 +21,7 @@ const LanguageLabelInputAdornment = styled(Typography, {
 })({});
 const MultiLanguageInput = (inProps) => {
     const props = useThemeProps({ props: inProps, name: "CcMultiLanguageInput" });
-    const { enabledLanguages, values, onChange, name, onBlur, label, disableIncompleteMarker, required, ignoreI18nLocale, warning, ...textFieldProps } = props;
+    const { enabledLanguages, values, onChange, name, onBlur, label, disableIncompleteMarker, required, ignoreI18nLocale, warning, dirty, ...textFieldProps } = props;
     const { t } = useCCLanguagesTranslations();
     const { t: tCC } = useCCTranslations();
     const language = useCurrentLanguage();
@@ -63,7 +63,7 @@ const MultiLanguageInput = (inProps) => {
     const handleActiveLangSelect = useCallback((evt) => {
         setActiveLanguage(evt.currentTarget.getAttribute("data-lang"));
     }, []);
-    const renderLanguage = (lang) => (_jsx(TextFieldCC, { ...textFieldProps, warning: warning, fullWidth: true, label: textFieldProps.multiline ? (_jsxs("span", { children: [label, " -", " ", [
+    const renderLanguage = (lang) => (_jsx(TextFieldCC, { ...textFieldProps, warning: warning, dirty: dirty, fullWidth: true, label: textFieldProps.multiline ? (_jsxs("span", { children: [label, " -", " ", [
                     defaultLanguage,
                     ...enabledLanguages.filter((lang) => lang !== defaultLanguage),
                 ].map((lang) => (_jsxs("span", { children: [_jsx(Tooltip, { title: getLanguageName(lang), children: _jsx(LanguageLabel, { ownerState: { active: activeLanguage === lang }, "data-lang": lang, onClick: handleActiveLangSelect, children: lang }) }), " "] }, lang)))] })) : lang === defaultLanguage ? (label) : undefined, required: defaultLanguage === lang && activeLanguage === defaultLanguage

@@ -13,7 +13,7 @@ class RendererBooleanCheckbox extends TypeBoolean {
         this.invert = invert;
     }
     render(params) {
-        const { visibility, field, value, label, handleChange, handleBlur, errorMsg, warningMsg, } = params;
+        const { visibility, field, value, label, handleChange, handleBlur, errorMsg, warningMsg, dirty, } = params;
         if (visibility.disabled)
             return _jsx(_Fragment, {});
         if (visibility.hidden) {
@@ -22,8 +22,8 @@ class RendererBooleanCheckbox extends TypeBoolean {
         if (visibility.editable) {
             const control = (_jsx(Checkbox, { name: field, checked: this.invert ? !value : value, disabled: visibility.readOnly, onChange: (evt, checked) => {
                     handleChange(evt.target.name, this.invert ? !checked : checked);
-                }, onBlur: handleBlur }));
-            return visibility.grid ? (control) : (_jsxs(FormControlFieldsetCC, { required: visibility.required, error: !!errorMsg, warning: !!warningMsg, component: "fieldset", children: [_jsx(FormControlLabel, { control: control, label: label }), _jsx(FormHelperText, { children: errorMsg || warningMsg })] }));
+                }, onBlur: handleBlur, "data-name": field }));
+            return visibility.grid ? (control) : (_jsxs(FormControlFieldsetCC, { required: visibility.required, error: !!errorMsg, warning: !!warningMsg, dirty: dirty, component: "fieldset", children: [_jsx(FormControlLabel, { control: control, label: label }), _jsx(FormHelperText, { children: errorMsg || warningMsg })] }));
         }
         return (_jsxs(Typography, { children: [!visibility.grid && `${label}: `, value
                     ? ccI18n.t("backend-integration.model.types.renderers.boolean.true")

@@ -4,11 +4,11 @@ import { IconButton, InputAdornment } from "@mui/material";
 import { Clear as ClearIcon, Info as InfoIcon } from "@mui/icons-material";
 import { InputLabelConfig, UiKitPickersTextField, } from "./CommonStyles";
 import isTouchDevice from "../../utils/isTouchDevice";
-import { withMuiWarning } from "./MuiWarning";
+import { withMuiFieldState } from "./MuiFieldState";
 import useCCTranslations from "../../utils/useCCTranslations";
-export const UiKitPickersTextFieldWithWarnings = withMuiWarning(UiKitPickersTextField);
+export const UiKitPickersTextFieldWithState = withMuiFieldState(UiKitPickersTextField);
 const TextFieldWithHelp = React.forwardRef(function PickersTextFieldWithHelpInner(props, ref) {
-    const { openInfo, customHandleClear, disableClearable, warning, onChange, ...muiProps } = props;
+    const { openInfo, customHandleClear, disableClearable, warning, dirty, onChange, ...muiProps } = props;
     const { t } = useCCTranslations();
     // handle clear
     const [hasInputValue, setHasInputValue] = useState(!!muiProps.defaultValue);
@@ -30,7 +30,7 @@ const TextFieldWithHelp = React.forwardRef(function PickersTextFieldWithHelpInne
     const existingEndAdornment = inputSlotProps?.endAdornment;
     const showClear = isTouchDevice() && hasValue && !muiProps.disabled && !disableClearable;
     const hasEndAdornment = !!(showClear || openInfo || existingEndAdornment);
-    return (_jsx(UiKitPickersTextFieldWithWarnings, { ref: ref, ...muiProps, warning: warning, onChange: handleChange, slotProps: {
+    return (_jsx(UiKitPickersTextFieldWithState, { ref: ref, ...muiProps, warning: warning, dirty: dirty, onChange: handleChange, slotProps: {
             ...muiProps.slotProps,
             input: {
                 ...inputSlotProps,

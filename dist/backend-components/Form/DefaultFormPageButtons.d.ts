@@ -1,8 +1,8 @@
 import React from "react";
-import { BasicFormPageRendererProps, EnhancedCustomProps } from "./BasicFormPage";
-import { CrudFormProps } from "../CRUD";
-import { ActionButton } from "../../standalone";
-import { DefaultFormPageProps } from "./DefaultFormPage";
+import type { BasicFormPageRendererProps, EnhancedCustomProps } from "./BasicFormPage";
+import type { CrudFormProps } from "../CRUD";
+import ActionButton from "../../standalone/UIKit/ActionButton";
+import type { DefaultFormPageProps } from "./DefaultFormPage";
 export declare const BackButtonDefaultColorClass = "CcDefaultFormPageButtons-backButtonDefaultColor";
 export declare const BackActionButton: typeof ActionButton;
 export type DefaultFormPageButtonsClassKey = "backButton";

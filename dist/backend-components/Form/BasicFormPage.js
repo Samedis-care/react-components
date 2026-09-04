@@ -20,7 +20,19 @@ const BasicFormPage = (inProps) => {
     safeSubmit: unusedSafeSubmit, // replaced by handleSafeSubmit below, must not reach the renderer
     dirty, disableRouting, postSubmitHandler, isSubmitting, children: FormButtons, form, childrenProps, customProps: originalCustomProps, formPageLayoutComponent, ...otherProps } = props;
     const { t } = useCCTranslations();
-    const { readOnly, readOnlyReasons } = useFormContextLite();
+    const { readOnly, readOnlyReasons, addEventListener, removeEventListener } = useFormContextLite();
+    // the dirty prop is one render behind the form engine, which breaks "submit, then
+    // navigate away": the record is saved, but the guards below still see a dirty form.
+    // The dirty event fires as soon as the form engine sees the change, so this ref is
+    // current even while a re-render is still pending.
+    const dirtyRef = useRef(dirty);
+    useEffect(() => {
+        const handleDirtyChange = (event) => {
+            dirtyRef.current = event.dirty;
+        };
+        addEventListener("dirty", handleDirtyChange);
+        return () => removeEventListener("dirty", handleDirtyChange);
+    }, [addEventListener, removeEventListener]);
     const [childActiveCount, setChildActiveCount] = useState(0);
     const childActive = childActiveCount > 0;
     const setChildActive = useCallback((active) => {
@@ -41,12 +53,8 @@ const BasicFormPage = (inProps) => {
         throw new Error("no route match");
     const routeUrl = routeCtx ? routeCtx.url : "";
     useEffect(() => {
-        // if the form isn't dirty, don't block submitting
         // if the form is read-only, don't annoy the user
-        // if the form is currently submitting we automatically assume the form is no longer dirty
-        // otherwise we'd run into a data race, as dirty flag is not updated during submit, only afterwards, which would
-        // block the redirect to the edit page here
-        if (!dirty || readOnly || isSubmitting)
+        if (readOnly)
             return;
         const blocker = (transition) => {
             const allowTransition = () => {
@@ -58,6 +66,13 @@ const BasicFormPage = (inProps) => {
                 transition.retry();
             };
             //console.log("History.block(", location, ",", action, ")", match);
+            // the form may have gone clean since the guards were applied (a submit resolves
+            // before React re-renders), so never ask about changes which no longer exist
+            if (!dirtyRef.current) {
+                applyGuards(false);
+                transition.retry();
+                return;
+            }
             // special handling: routing inside form page (e.g. routed tab panels, routed stepper)
             if (!disableRouting &&
                 transition.location.pathname.startsWith(routeUrl)) {
@@ -78,28 +93,52 @@ const BasicFormPage = (inProps) => {
                 }
             })();
         };
-        unblock.current = FrameworkHistory.block(blocker);
-        const safeToLeave = UnsafeToLeaveDispatch.lock("form-dirty");
-        if (formDialog)
-            formDialog.blockClosing();
-        return () => {
-            safeToLeave();
-            if (unblock.current) {
-                unblock.current();
-                unblock.current = undefined;
+        // the guards are driven by the form engine's dirty event rather than by rendered
+        // state, so that submitting and then leaving in one go isn't stopped by a dirty
+        // flag which a pending re-render would have cleared. Idempotent in both directions.
+        let releaseLocks = null;
+        const applyGuards = (isDirty) => {
+            if (isDirty) {
+                if (!unblock.current)
+                    unblock.current = FrameworkHistory.block(blocker);
+                if (releaseLocks)
+                    return;
+                const safeToLeave = UnsafeToLeaveDispatch.lock("form-dirty");
+                if (formDialog)
+                    formDialog.blockClosing();
+                releaseLocks = () => {
+                    safeToLeave();
+                    if (formDialog)
+                        formDialog.unblockClosing();
+                };
             }
-            if (formDialog)
-                formDialog.unblockClosing();
+            else {
+                if (unblock.current) {
+                    unblock.current();
+                    unblock.current = undefined;
+                }
+                if (releaseLocks) {
+                    releaseLocks();
+                    releaseLocks = null;
+                }
+            }
+        };
+        const handleDirtyChange = (event) => applyGuards(event.dirty);
+        applyGuards(dirtyRef.current);
+        addEventListener("dirty", handleDirtyChange);
+        return () => {
+            removeEventListener("dirty", handleDirtyChange);
+            applyGuards(false);
         };
     }, [
-        isSubmitting,
         readOnly,
         t,
-        dirty,
         formDialog,
         routeUrl,
         pushDialog,
         disableRouting,
+        addEventListener,
+        removeEventListener,
     ]);
     // go back confirm dialog if form is dirty
     const customPropsWithGoBack = typeof originalCustomProps === "object"
@@ -117,7 +156,7 @@ const BasicFormPage = (inProps) => {
             typeof orgGoBack === "function"
                 ? async (forceRefresh, forceNavigate) => {
                     try {
-                        if (dirty && !readOnly && !forceNavigate) {
+                        if (dirtyRef.current && !readOnly && !forceNavigate) {
                             await showConfirmDialog(pushDialog, {
                                 title: t("backend-components.form.back-on-dirty.title"),
                                 message: t("backend-components.form.back-on-dirty.message"),

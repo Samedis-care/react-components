@@ -15,7 +15,7 @@ export interface PickersTextFieldWithHelpProps extends UIInputProps {
      */
     disableClearable?: boolean;
 }
-export declare const UiKitPickersTextFieldWithWarnings: typeof UiKitPickersTextField;
+export declare const UiKitPickersTextFieldWithState: typeof UiKitPickersTextField;
 declare const TextFieldWithHelp: React.ForwardRefExoticComponent<PickersTextFieldWithHelpProps & PickersTextFieldProps & React.RefAttributes<HTMLDivElement>>;
 declare const _default: typeof TextFieldWithHelp;
 export default _default;

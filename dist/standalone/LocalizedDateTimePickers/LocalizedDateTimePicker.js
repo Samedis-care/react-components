@@ -1,7 +1,7 @@
 import { jsx as _jsx } from "react/jsx-runtime";
 import React, { useCallback } from "react";
 import { DateTimePicker, LocalizationProvider, } from "@mui/x-date-pickers";
-import { withMuiWarning } from "../UIKit";
+import { withMuiFieldState } from "../UIKit";
 import useMuiLocaleData from "./useMuiLocaleData";
 import accessSlotProps from "../../utils/internal/accessSlotProps";
 import usePickerDraft from "./usePickerDraft";
@@ -23,15 +23,18 @@ const LocalizedDateTimePicker = (props) => {
                     const orgSlotProps = accessSlotProps(ownerState, otherProps.slotProps?.textField);
                     return {
                         ...orgSlotProps,
-                        required,
-                        error,
-                        fullWidth,
+                        // only where the caller actually gave one, so a value passed
+                        // through slotProps.textField is not overwritten with undefined
+                        ...(required === undefined ? {} : { required }),
+                        ...(error === undefined ? {} : { error }),
+                        ...(fullWidth === undefined ? {} : { fullWidth }),
                         onBlur: (event) => {
                             draft.settleOnBlur(event);
+                            orgSlotProps?.onBlur?.(event);
                             onBlur?.(event);
                         },
                     };
                 },
             } }) }));
 };
-export default React.memo(withMuiWarning(LocalizedDateTimePicker));
+export default React.memo(withMuiFieldState(LocalizedDateTimePicker));

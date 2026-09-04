@@ -2,6 +2,7 @@ import React, { Dispatch, SetStateAction } from "react";
 import Model, { ModelFieldName, ModelGetResponseRelations, PageVisibility } from "../../backend-integration/Model/Model";
 import { QueryObserverBaseResult } from "@tanstack/react-query";
 import ValidationError from "./ValidationError";
+import { FormEventTarget } from "./FormEvents";
 export type ValidationResult = Record<string, string>;
 /**
  * Pre submit handler for additional validations
@@ -261,6 +262,14 @@ export interface FormProps<KeyT extends ModelFieldName, VisibilityT extends Page
      */
     dirtyIgnoreFields?: string[];
     /**
+     * Mark the modified fields, using the form's own per-field dirty state
+     * @remarks Off by default: no control shows the marker unless asked. Where the
+     *          application, not the form engine, decides what counts as modified, wrap the
+     *          fields in a `DirtyStateProvider` instead.
+     * @see DirtyStateContext
+     */
+    showDirtyState?: boolean;
+    /**
      * Enable flow engine mode
      */
     flowEngine?: boolean;
@@ -382,9 +391,48 @@ export interface FormContextData {
      */
     removeCustomReadOnly: (ident: string) => void;
     /**
+     * Subscribes to a form engine event
+     * @param type The event type
+     * @param listener The listener to call when the event is dispatched
+     * @remarks Events are dispatched as soon as the form engine knows about the change,
+     *          which may be before React has re-rendered with the new state. Use this
+     *          instead of the rendered state where acting on a stale value is a bug,
+     *          e.g. when navigating away right after awaiting submit.
+     */
+    addEventListener: FormEventTarget["addEventListener"];
+    /**
+     * Unsubscribes from a form engine event
+     * @param type The event type
+     * @param listener The listener previously passed to addEventListener
+     * @see addEventListener
+     */
+    removeEventListener: FormEventTarget["removeEventListener"];
+    /**
      * Is the form dirty?
+     * @remarks This is rendered state, so it lags behind by a render. Subscribe to the
+     *          "dirty" event to be notified the moment the form engine sees the change.
+     * @see addEventListener
      */
     dirty: boolean;
+    /**
+     * Per-field dirty state: does the field's value differ from the server-side one?
+     * @remarks One entry per model field, and nothing else. Custom (non-model) fields
+     *          are absent on purpose: whatever reports one through setCustomFieldDirty
+     *          already owns that state, and only contributes it to the form-wide flag.
+     *
+     *          An entry is the same flag a type renderer receives as
+     *          `RenderParams.dirty`.
+     */
+    dirtyFields: Record<string, boolean>;
+    /**
+     * Was the form asked to mark its modified fields?
+     * @remarks Whether a given field *is* marked is a different question, which a
+     *          `DirtyStateProvider` can answer differently — ask `useDirtyState` for that.
+     *          This is the form-wide switch, for a control which holds dirty state of its
+     *          own and wants to display it on the same terms as the model fields.
+     * @see FormProps.showDirtyState
+     */
+    showDirtyState: boolean;
     /**
      * @see FormProps.onlySubmitMounted
      */
@@ -573,7 +621,7 @@ export interface FormContextData {
  */
 export declare const FormContext: React.Context<FormContextData | null>;
 export declare const useFormContext: () => FormContextData;
-export type FormContextDataLite = Pick<FormContextData, "id" | "model" | "customProps" | "onlySubmitMounted" | "onlyValidateMounted" | "onlyWarnMounted" | "onlyWarnChanged" | "readOnly" | "readOnlyReason" | "readOnlyReasons" | "errorComponent" | "initialValues" | "getFieldValue" | "getFieldValues" | "setFieldValueLite" | "setFieldTouchedLite" | "setCustomReadOnly" | "removeCustomReadOnly" | "flowEngine" | "submit" | "safeSubmit" | "submitting" | "dirty" | "flowEngineConfig" | "refetchForm">;
+export type FormContextDataLite = Pick<FormContextData, "id" | "model" | "customProps" | "onlySubmitMounted" | "onlyValidateMounted" | "onlyWarnMounted" | "onlyWarnChanged" | "readOnly" | "readOnlyReason" | "readOnlyReasons" | "errorComponent" | "initialValues" | "getFieldValue" | "getFieldValues" | "setFieldValueLite" | "setFieldTouchedLite" | "setCustomReadOnly" | "removeCustomReadOnly" | "addEventListener" | "removeEventListener" | "flowEngine" | "submit" | "safeSubmit" | "submitting" | "dirty" | "showDirtyState" | "flowEngineConfig" | "refetchForm">;
 export declare const FormContextLite: React.Context<FormContextDataLite | null>;
 export declare const useFormContextLite: () => FormContextDataLite;
 export interface FormNestedState {

@@ -3,13 +3,13 @@ import ccI18n from "../../../../i18n";
 import TypeFiles from "../TypeFiles";
 import FileUpload from "../../../../standalone/FileUpload/Generic";
 import GroupBox from "../../../../standalone/GroupBox";
-import { FormHelperTextCC } from "../../../../standalone/UIKit/MuiWarning";
+import { FormHelperTextCC } from "../../../../standalone/UIKit/MuiFieldState";
 /**
  * Renders a file selector
  */
 class RendererFiles extends TypeFiles {
     render(params) {
-        const { visibility, field, value, label, handleChange, handleBlur, errorMsg, warningMsg, setError, } = params;
+        const { visibility, field, value, label, handleChange, handleBlur, errorMsg, warningMsg, setError, dirty, } = params;
         if (visibility.disabled)
             return _jsx(_Fragment, {});
         if (visibility.hidden) {
@@ -18,7 +18,7 @@ class RendererFiles extends TypeFiles {
         if (visibility.editable) {
             if (visibility.grid)
                 throw new Error("Not supported");
-            return (_jsxs(_Fragment, { children: [_jsx("div", { children: _jsx(FileUpload, { name: field, label: label, files: value, readOnly: visibility.readOnly, onChange: (files) => {
+            return (_jsxs(_Fragment, { children: [_jsx("div", { children: _jsx(FileUpload, { name: field, label: label, dirty: dirty, files: value, readOnly: visibility.readOnly, onChange: (files) => {
                                 handleChange(field, files);
                             }, onBlur: handleBlur, handleError: (_, msg) => setError(new Error(msg)), maxFiles: this.params?.maxFiles, accept: this.params?.accept, acceptLabel: this.params?.acceptLabel, imageDownscaleOptions: this.params?.imageDownscaleOptions, convertImagesTo: this.params?.convertImagesTo, previewSize: this.params?.previewSize || 96, previewImages: this.params?.previewImages, allowDuplicates: this.params?.allowDuplicates, smallLabel: this.params?.smallLabel }) }), _jsx(FormHelperTextCC, { error: !!errorMsg, warning: !!warningMsg, children: errorMsg || warningMsg })] }));
         }

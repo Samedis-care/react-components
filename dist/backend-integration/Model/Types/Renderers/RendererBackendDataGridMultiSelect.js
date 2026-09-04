@@ -1,7 +1,7 @@
 import { Fragment as _Fragment, jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 import { FormControl } from "@mui/material";
 import BackendDataGridMultiSelect from "../../../../backend-components/Selector/BackendDataGridMultiSelect";
-import { FormHelperTextCC } from "../../../../standalone/UIKit/MuiWarning";
+import { FormHelperTextCC } from "../../../../standalone/UIKit/MuiFieldState";
 import TypeIds from "../TypeIds";
 /**
  * Renders TypeEnum as drop-down selector (with search)

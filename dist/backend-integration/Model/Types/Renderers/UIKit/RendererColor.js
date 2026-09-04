@@ -12,7 +12,7 @@ class RendererColor extends TypeColor {
         this.props = props;
     }
     render(params) {
-        const { visibility, field, value, label, handleChange, handleBlur, errorMsg, warningMsg, } = params;
+        const { visibility, field, value, label, handleChange, handleBlur, errorMsg, warningMsg, dirty, } = params;
         if (visibility.disabled)
             return _jsx(_Fragment, {});
         if (visibility.hidden) {
@@ -23,7 +23,7 @@ class RendererColor extends TypeColor {
                 throw new Error("Not supported");
             return (_jsxs(_Fragment, { children: [_jsx(ColorInput, { fullWidth: true, ...this.props, name: field, value: value, label: label, disabled: visibility.readOnly, required: visibility.required, onChange: (color) => {
                             handleChange(field, color);
-                        }, onBlur: handleBlur, error: !!errorMsg, warning: !!warningMsg }), _jsx(FormHelperTextCC, { error: !!errorMsg, warning: !!warningMsg, children: errorMsg || warningMsg })] }));
+                        }, onBlur: handleBlur, error: !!errorMsg, warning: !!warningMsg, dirty: dirty }), _jsx(FormHelperTextCC, { error: !!errorMsg, warning: !!warningMsg, children: errorMsg || warningMsg })] }));
         }
         return (_jsxs(Typography, { noWrap: visibility.grid, children: [!visibility.grid && `${label}: `, value] }));
     }

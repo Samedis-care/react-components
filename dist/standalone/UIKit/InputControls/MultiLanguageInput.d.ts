@@ -48,6 +48,11 @@ export type MultiLanguageInputProps = Omit<TextFieldProps, "value" | "onChange" 
      * Display warning
      */
     warning?: boolean;
+    /**
+     * Does the value differ from the server-side value?
+     * @remarks Presentational only; set by the form engine from `RenderParams.dirty`.
+     */
+    dirty?: boolean;
 };
 export interface MultiLanguageInputLanguageLabelOwnerState {
     active: boolean;

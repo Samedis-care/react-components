@@ -6,14 +6,14 @@ import { denormalizeDate, formatDateOnly, normalizeDate, } from "../../../../../
 import TypeDate from "../../TypeDate";
 import { LocalizedKeyboardDatePicker } from "../../../../../standalone/LocalizedDateTimePickers";
 import { ToDateLocaleStringOptions } from "../../../../../constants";
-import { FormHelperTextCC } from "../../../../../standalone/UIKit/MuiWarning";
+import { FormHelperTextCC } from "../../../../../standalone/UIKit/MuiFieldState";
 import moment from "moment";
 /**
  * Renders Date with Date Selector
  */
 class RendererDate extends TypeDate {
     render(params) {
-        const { visibility, field, value, touched, label, handleChange, handleBlur, errorMsg, setFieldTouched, warningMsg, } = params;
+        const { visibility, field, value, touched, label, handleChange, handleBlur, errorMsg, setFieldTouched, warningMsg, dirty, } = params;
         if (visibility.disabled)
             return _jsx(_Fragment, {});
         if (visibility.hidden) {
@@ -35,7 +35,7 @@ class RendererDate extends TypeDate {
                             }
                             this.error = "";
                             handleChange(field, normalizeDate(date.toDate()));
-                        }, onBlur: handleBlur, error: !!errorMsg, warning: !!warningMsg, onError: (error) => {
+                        }, onBlur: handleBlur, error: !!errorMsg, warning: !!warningMsg, dirty: dirty, onError: (error) => {
                             this.error = error
                                 ? ccI18n.t("backend-integration.model.types.renderers.date.validation-error")
                                 : "";
