@@ -1005,18 +1005,7 @@ const Form = <
 	const { get: getCustomDirtyFields, set: setCustomDirtyFields } = useRefState<
 		string[]
 	>([]);
-
-	const setCustomFieldDirty = useCallback(
-		(field: string, dirty: boolean) => {
-			setCustomDirtyFields((prev) => {
-				const prevDirty = prev.includes(field);
-				if (prevDirty == dirty) return prev; // no changes
-				if (dirty) return [...prev, field];
-				else return prev.filter((candidate) => candidate !== field);
-			});
-		},
-		[setCustomDirtyFields],
-	);
+	// setCustomFieldDirty lives further down, next to the dirty state events it announces
 
 	// custom fields - pre submit handlers
 	const preSubmitHandlers = useRef<Record<string, PreSubmitHandler>>({});
@@ -1385,6 +1374,24 @@ const Form = <
 	useEffect(() => {
 		dispatchDirtyEvent(dirty);
 	}, [dirty, dispatchDirtyEvent]);
+	/**
+	 * @see FormContextData.setCustomFieldDirty
+	 */
+	const setCustomFieldDirty = useCallback(
+		(field: string, dirty: boolean) => {
+			setCustomDirtyFields((prev) => {
+				const prevDirty = prev.includes(field);
+				if (prevDirty == dirty) return prev; // no changes
+				if (dirty) return [...prev, field];
+				else return prev.filter((candidate) => candidate !== field);
+			});
+			// a custom field is the one dirty source the form engine doesn't compute itself,
+			// so announce it here - a caller which clears its field and then navigates away
+			// must not be stopped by the render which hasn't happened yet
+			syncDirtyState();
+		},
+		[setCustomDirtyFields, syncDirtyState],
+	);
 
 	// main form handling - dispatch
 	const alwaysWarnFields = useMemo(
