@@ -103,6 +103,26 @@ describe("Form dirty events", () => {
 		});
 	});
 
+	it("announces a custom field's dirty state before React re-renders", async () => {
+		const { sink } = renderForm();
+
+		await waitFor(() => expect(sink.ctx?.values.first_name).toBe("Alice"));
+		await act(async () => {});
+
+		act(() => {
+			sink.ctx!.setCustomFieldDirty("attachments", true);
+			// a custom field is dirt the form engine can't compute for itself, so it has
+			// to be announced by the setter rather than by the next render
+			expect(sink.events.at(-1)).toBe(true);
+			expect(sink.ctx!.dirty).toBe(false);
+		});
+
+		act(() => {
+			sink.ctx!.setCustomFieldDirty("attachments", false);
+			expect(sink.events.at(-1)).toBe(false);
+		});
+	});
+
 	it("announces a successful submit before submit() resolves", async () => {
 		const { sink } = renderForm();
 
