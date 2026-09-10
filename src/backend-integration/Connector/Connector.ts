@@ -65,7 +65,7 @@ abstract class Connector<
 		let offset = page * pageSize;
 		let rows = params.rows;
 		const mergedResultSet = [];
-		let lastMeta: ResponseMeta | null = null;
+		let lastMeta: ResponseMeta | null;
 
 		do {
 			const [resultSet, meta] = await this.index(

@@ -87,7 +87,7 @@ const MatrixCellTile = (inProps: MatrixCellTileProps) => {
 		return renderItem ? renderItem(item, highlighted) : highlighted;
 	};
 
-	let content: React.ReactNode = null;
+	let content: React.ReactNode;
 	if (items.length === 0) {
 		// != null, not truthiness: 0 is a placeholder a consumer may well pass
 		content =
