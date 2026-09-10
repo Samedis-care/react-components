@@ -20,6 +20,7 @@ One file per change, so this never grows into a single unreadable log.
 
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 2026-09-10 | [TreeView renders a forest, and hands renderers its connector lanes](2026-09-10-tree-view-forest.md) | behavior, type |
 | 2026-09-03 | [DateTimeInput's required, error, fullWidth and onBlur reach the field](2026-09-03-date-time-input-forwards-field-props.md) | behavior |
 | 2026-09-02 | [withMuiFieldState forwards refs](2026-09-02-mui-field-state-forwards-refs.md) | behavior |
 | 2026-09-01 | [The form engine announces dirty state changes as events](2026-09-01-form-dirty-events.md) | behavior, type |

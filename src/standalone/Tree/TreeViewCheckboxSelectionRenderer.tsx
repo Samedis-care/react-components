@@ -15,9 +15,9 @@ const TreeViewCheckboxSelectionRenderer = (props: TreeViewRendererProps) => {
 		onToggleExpanded,
 		expandLocked,
 		id,
-		depth,
 		hasNext,
-		parentHasNext,
+		ancestorLanes,
+		hasConnector,
 		onClick,
 		onAuxClick,
 	} = props;
@@ -27,7 +27,7 @@ const TreeViewCheckboxSelectionRenderer = (props: TreeViewRendererProps) => {
 		[onToggleExpanded, id],
 	);
 
-	const offsetLeft = depth > 0 ? 12 : 0;
+	const offsetLeft = hasConnector ? 12 : 0;
 
 	return (
 		<Grid
@@ -39,15 +39,15 @@ const TreeViewCheckboxSelectionRenderer = (props: TreeViewRendererProps) => {
 			}}
 			wrap={"nowrap"}
 		>
-			{depth !== 0 && (
+			{hasConnector && (
 				<>
-					{parentHasNext.slice(1).map((pHasNext, idx) => (
+					{ancestorLanes.map((laneHasSpine, idx) => (
 						<Grid key={idx}>
 							<div
 								style={{
 									height: 24,
 									width: 24,
-									borderLeft: pHasNext ? "1px solid black" : undefined,
+									borderLeft: laneHasSpine ? "1px solid black" : undefined,
 								}}
 							/>
 						</Grid>
