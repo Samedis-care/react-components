@@ -70,9 +70,27 @@ export interface TreeDataForRenderer extends Omit<TreeData, "children"> {
      */
     hasNext: boolean;
     /**
-     * List of parent hasNext flags. Elements contained start at root node.
+     * The vertical connector lanes to draw in front of this entry, outermost first.
+     * Draw one lane per element; a `true` element means a spine passes through this
+     * row at that lane and gets a vertical line, a `false` one means the lane stays
+     * blank and only reserves the indent.
+     *
+     * A set of siblings shares one spine, and that spine sits one lane in front of
+     * the siblings themselves — which is the lane {@link hasConnector} draws. So the
+     * lanes here belong to the ancestors that still have a following sibling below
+     * this row. Length is `depth - 1` in a single root tree and `depth` in a forest,
+     * where the roots have a spine of their own.
      */
-    parentHasNext: boolean[];
+    ancestorLanes: boolean[];
+    /**
+     * Does this entry sit on a sibling spine, i.e. should the renderer draw the
+     * connector (the elbow joining this row to its siblings) in front of it?
+     *
+     * True for every entry that has a parent, and for root entries of a forest,
+     * which are siblings of each other. False only for the lone root of a
+     * single root tree, which has no spine to join.
+     */
+    hasConnector: boolean;
     /**
      * Are children currently being loaded?
      */
@@ -92,9 +110,19 @@ export interface TreeViewRendererProps extends TreeDataForRenderer {
 export type TreeViewRendererCallbacks = Pick<TreeViewRendererProps, "onToggleExpanded">;
 export interface TreeViewProps extends TreeViewRendererCallbacks {
     /**
-     * The tree view root node
+     * The tree view contents: a single root node or a forest of them.
+     *
+     * Nested (`TreeData`, `TreeData[]`) and flat (`TreeDataFlat[]`) input are both
+     * accepted, but an array must not mix the two forms. In flat input every entry
+     * with `parentId === null` is a root.
+     *
+     * Roots render in the order they are given, as do the children of a node, so the
+     * caller controls the display order. An empty array renders an empty tree.
+     *
+     * A forest indents by one extra lane compared to a single root tree: its roots
+     * are siblings and get a spine of their own. See {@link TreeDataForRenderer.ancestorLanes}.
      */
-    data: TreeData | TreeDataFlat[];
+    data: TreeData | TreeData[] | TreeDataFlat[];
     /**
      * The tree renderer
      * @default TreeViewDefaultRenderer

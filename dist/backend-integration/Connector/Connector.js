@@ -18,7 +18,7 @@ class Connector {
         let offset = page * pageSize;
         let rows = params.rows;
         const mergedResultSet = [];
-        let lastMeta = null;
+        let lastMeta;
         do {
             const [resultSet, meta] = await this.index(Object.assign({}, params, { page: page + 1, rows: pageSize }), model);
             lastMeta = meta;

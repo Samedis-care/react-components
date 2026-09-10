@@ -59,7 +59,7 @@ const MatrixCellTile = (inProps) => {
         const highlighted = item.highlighted ? (_jsx(MatrixTileHighlight, { className: classes?.highlight, children: node })) : (node);
         return renderItem ? renderItem(item, highlighted) : highlighted;
     };
-    let content = null;
+    let content;
     if (items.length === 0) {
         // != null, not truthiness: 0 is a placeholder a consumer may well pass
         content =
