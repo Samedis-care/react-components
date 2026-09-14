@@ -20,6 +20,7 @@ One file per change, so this never grows into a single unreadable log.
 
 | Date       | Change                                                                                                                         | Kind     |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| 2026-09-14 | [Queued deletes stay deleted, and pending file changes survive a remount](2026-09-14-queued-deletes-stay-deleted.md) | behavior |
 | 2026-09-10 | [TreeView renders a forest, and hands renderers its connector lanes](2026-09-10-tree-view-forest.md) | behavior, type |
 | 2026-09-03 | [DateTimeInput's required, error, fullWidth and onBlur reach the field](2026-09-03-date-time-input-forwards-field-props.md) | behavior |
 | 2026-09-02 | [withMuiFieldState forwards refs](2026-09-02-mui-field-state-forwards-refs.md) | behavior |

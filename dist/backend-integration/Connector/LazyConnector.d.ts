@@ -14,6 +14,13 @@ interface QueuedFunction {
      */
     deleteIds?: string[];
     /**
+     * For a delete: the records it last hid from an index call
+     * @remarks Filled by index, read through getQueuedDeleteRecords. A caller which shows
+     *          a queued delete as pending and undoable cannot get the record anywhere
+     *          else: index no longer lists it, and read throws for it.
+     */
+    deletedRecords?: Record<string, unknown>[];
+    /**
      * For a delete covering more than one id: re-creates the request for a subset of them
      * @remarks Closes over the model, which the queue does not otherwise retain, so that
      *          cancelling one id can keep the request for the others. Never called with
@@ -86,6 +93,15 @@ declare class LazyConnector<KeyT extends ModelFieldName, VisibilityT extends Pag
      *          queue is not React state, so without it a component keeps showing the
      *          pending state of writes that have since been sent.
      */
+    /**
+     * The records index hid because their delete is queued
+     * @returns The records as the backend handed them out, in no particular order
+     * @remarks For a control which lists these as pending removals — see
+     *          `CrudFileUpload`. A record is remembered from the index call which hid it
+     *          and forgotten when the entry leaves the queue, so working the queue or
+     *          cancelling the delete drops it without anything else having to.
+     */
+    getQueuedDeleteRecords(): Record<string, unknown>[];
     addQueueChangeListener(listener: QueueChangeHandler): () => void;
     private onAfterOperation;
     workQueue: () => Promise<void>;

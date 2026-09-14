@@ -103,10 +103,19 @@ class LazyConnector extends Connector {
                 const { id: entryId } = entry;
                 if (!entryId)
                     return;
-                result[0].filter((backendRecord) => backendRecord.id !== entry.id &&
-                    !entryId
-                        .split(",")
-                        .includes(backendRecord.id));
+                // deleteMultiple queues every id it was given as one entry
+                const deletedIds = entryId.split(",");
+                const hidden = result[0].filter((backendRecord) => deletedIds.includes(backendRecord.id));
+                result[0] = result[0].filter((backendRecord) => !deletedIds.includes(backendRecord.id));
+                // the delete has not been sent yet, so the backend still hands these out
+                // on every index call. Keeping them is what lets a control which unmounted
+                // and came back show the removal as pending, rather than as gone.
+                if (hidden.length)
+                    entry.deletedRecords = hidden;
+                // the counts are what a grid pages on, so they follow the rows out
+                if (result[1].filteredRows)
+                    result[1].filteredRows -= hidden.length;
+                result[1].totalRows -= hidden.length;
             }
         });
         return result;
@@ -239,6 +248,9 @@ class LazyConnector extends Connector {
                         ...entry,
                         id: remaining.join(","),
                         deleteIds: remaining,
+                        // the cancelled record is no longer pending removal, so it stops
+                        // being remembered as one
+                        deletedRecords: entry.deletedRecords?.filter((record) => remaining.includes(record.id)),
                         func: entry.rebuildDelete(remaining),
                     },
                 ];
@@ -258,6 +270,17 @@ class LazyConnector extends Connector {
      *          queue is not React state, so without it a component keeps showing the
      *          pending state of writes that have since been sent.
      */
+    /**
+     * The records index hid because their delete is queued
+     * @returns The records as the backend handed them out, in no particular order
+     * @remarks For a control which lists these as pending removals — see
+     *          `CrudFileUpload`. A record is remembered from the index call which hid it
+     *          and forgotten when the entry leaves the queue, so working the queue or
+     *          cancelling the delete drops it without anything else having to.
+     */
+    getQueuedDeleteRecords() {
+        return this.queue.flatMap((entry) => entry.deletedRecords ?? []);
+    }
     addQueueChangeListener(listener) {
         this.queueListeners.add(listener);
         return () => {
