@@ -40,6 +40,96 @@ const makeLazy = () => {
 	};
 };
 
+/**
+ * A connector whose index actually returns rows, so the enhancement pass has something to
+ * enhance. fakeReads false is what a form uses for an existing record: reads go to the
+ * backend, writes are queued.
+ */
+const makeLazyOver = (rows: Record<string, unknown>[]) => {
+	const { connector, calls } = makeRealConnector();
+	(connector as unknown as { index: () => Promise<unknown> }).index = vi.fn(
+		() =>
+			Promise.resolve([
+				rows.map((row) => ({ ...row })),
+				{ totalRows: rows.length, filteredRows: rows.length },
+			]),
+	);
+	return {
+		lazy: new LazyConnector<string, PageVisibility, unknown>(connector, false),
+		calls,
+	};
+};
+
+describe("LazyConnector index enhancement", () => {
+	it("hides a queued delete, and takes the row counts with it", async () => {
+		const { lazy } = makeLazyOver([{ id: "a" }, { id: "b" }, { id: "c" }]);
+		lazy.delete("b", undefined);
+
+		const [rows, meta] = await lazy.index(undefined, undefined);
+		expect(rows.map((row) => row.id)).toStrictEqual(["a", "c"]);
+		expect(meta.totalRows).toBe(2);
+		expect(meta.filteredRows).toBe(2);
+	});
+
+	it("hides every id of a queued deleteMultiple", async () => {
+		const { lazy } = makeLazyOver([{ id: "a" }, { id: "b" }, { id: "c" }]);
+		lazy.deleteMultiple(["a", "c"], undefined);
+
+		const [rows, meta] = await lazy.index(undefined, undefined);
+		expect(rows.map((row) => row.id)).toStrictEqual(["b"]);
+		expect(meta.totalRows).toBe(1);
+	});
+
+	it("hands back what it hid, so a pending removal can still be shown", async () => {
+		const { lazy } = makeLazyOver([{ id: "a" }, { id: "b" }]);
+		lazy.delete("b", undefined);
+
+		// nothing is remembered before an index call has hidden anything
+		expect(lazy.getQueuedDeleteRecords()).toStrictEqual([]);
+		await lazy.index(undefined, undefined);
+		expect(lazy.getQueuedDeleteRecords()).toStrictEqual([{ id: "b" }]);
+	});
+
+	it("forgets what it hid when the delete is cancelled", async () => {
+		const { lazy } = makeLazyOver([{ id: "a" }, { id: "b" }, { id: "c" }]);
+		lazy.deleteMultiple(["b", "c"], undefined);
+		await lazy.index(undefined, undefined);
+		expect(lazy.getQueuedDeleteRecords()).toStrictEqual([
+			{ id: "b" },
+			{ id: "c" },
+		]);
+
+		// cancelling one narrows the entry, and with it what it remembers
+		lazy.cancelQueuedOperation("b");
+		expect(lazy.getQueuedDeleteRecords()).toStrictEqual([{ id: "c" }]);
+
+		// cancelling the last drops the entry altogether
+		lazy.cancelQueuedOperation("c");
+		expect(lazy.getQueuedDeleteRecords()).toStrictEqual([]);
+	});
+
+	it("forgets what it hid once the delete has been worked", async () => {
+		const { lazy } = makeLazyOver([{ id: "a" }, { id: "b" }]);
+		lazy.delete("b", undefined);
+		await lazy.index(undefined, undefined);
+		await lazy.workQueue();
+
+		expect(lazy.getQueuedDeleteRecords()).toStrictEqual([]);
+	});
+
+	it("leaves the rows alone once the delete has been worked", async () => {
+		const { lazy } = makeLazyOver([{ id: "a" }, { id: "b" }]);
+		lazy.delete("b", undefined);
+		await lazy.workQueue();
+
+		// the backend index is the mock's, which still reports both: what matters is
+		// that the queue no longer subtracts anything on top of it
+		const [rows, meta] = await lazy.index(undefined, undefined);
+		expect(rows.map((row) => row.id)).toStrictEqual(["a", "b"]);
+		expect(meta.totalRows).toBe(2);
+	});
+});
+
 describe("LazyConnector queue introspection", () => {
 	it("reports a queued create for the fake id it handed out", () => {
 		const { lazy } = makeLazy();
