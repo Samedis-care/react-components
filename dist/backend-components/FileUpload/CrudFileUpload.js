@@ -3,6 +3,20 @@ import React, { useCallback, useEffect, useMemo, useRef, useState, } from "react
 import FileUpload from "../../standalone/FileUpload/Generic";
 import LazyConnector from "../../backend-integration/Connector/LazyConnector";
 import { Loader } from "../../standalone";
+/**
+ * Marks an entry as one of `additionalFiles` rather than one of this control's own
+ * @remarks Shape cannot tell the two apart. `FileData<BackendFileMeta>` is assignable to
+ *          the `FileData<FileMeta>` the prop asks for, so an extra which was loaded from
+ *          a backend and put through a deserializer carries an id exactly like ours do —
+ *          and an extra taken for one of ours ends up in `files`, where it is listed a
+ *          second time by the union below.
+ *
+ *          A symbol cannot collide with anything a caller puts on the entry, and it
+ *          survives the copies the standalone control makes of every file it holds,
+ *          because object spread carries own symbol keys.
+ */
+const ADDITIONAL_FILE = Symbol("CcCrudFileUpload.additionalFile");
+const isAdditionalFile = (file) => ADDITIONAL_FILE in file;
 const CrudFileUpload = (props, ref) => {
     const { connector, serialize, deserialize, onChange, additionalFiles, showDirtyState, onDirtyChange, ...otherProps } = props;
     const { allowDuplicates } = otherProps;
@@ -90,7 +104,10 @@ const CrudFileUpload = (props, ref) => {
             // canBeUploaded is what makes it a File, per FileData's own contract
             uploadedPicks.current.set(file.file, uploadedFiles[index]));
             const kept = newFiles.filter((file) => !file.canBeUploaded &&
-                "id" in file.file && // filter out additional files
+                // the list handed back includes what was only passed through for
+                // display, which this control neither stores nor writes
+                !isAdditionalFile(file) &&
+                "id" in file.file &&
                 (!file.delete ||
                     (!!lazyConnector &&
                         !cancelledUploads.has(file.file.id))));
@@ -200,7 +217,19 @@ const CrudFileUpload = (props, ref) => {
         if (onChange)
             onChange(files);
     }, [files, onChange]);
-    const finalFiles = useMemo(() => (additionalFiles ? [...files, ...additionalFiles] : files), [files, additionalFiles]);
+    const finalFiles = useMemo(() => additionalFiles
+        ? [
+            ...files,
+            ...additionalFiles.map((file) => ({
+                ...file,
+                // read-only as documented: they are not this control's records,
+                // so a remove would send a delete for an id which means
+                // something else entirely to this connector
+                preventDelete: true,
+                [ADDITIONAL_FILE]: true,
+            })),
+        ]
+        : files, [files, additionalFiles]);
     if (loading)
         return _jsx(Loader, {});
     if (loadError)
