@@ -1,9 +1,11 @@
 import React, {
 	Dispatch,
+	ForwardedRef,
 	SetStateAction,
 	useCallback,
 	useContext,
 	useEffect,
+	useImperativeHandle,
 	useLayoutEffect,
 	useMemo,
 	useRef,
@@ -35,7 +37,10 @@ import debounce from "../../utils/debounce";
 import isObjectEmpty from "../../utils/isObjectEmpty";
 import measureText from "../../utils/measureText";
 import shallowCompareArray from "../../utils/shallowCompareArray";
-import { dataGridPrepareFiltersAndSorts } from "./CallbackUtil";
+import {
+	dataGridApplyRowUpdate,
+	dataGridPrepareFiltersAndSorts,
+} from "./CallbackUtil";
 import {
 	ModelFieldName,
 	ModelFilterType,
@@ -502,6 +507,27 @@ export type DataGridRowData = { id: string } & Record<
 	string | number | { toString: () => string } | React.ReactElement | null
 >;
 export type DataGridCustomDataType = Record<string, unknown>;
+
+/**
+ * The fields of a row to change, or a function which gets the current row data
+ * and returns the fields to change
+ * @remarks The fields are merged into the row, so anything left out stays as it is
+ */
+export type DataGridRowUpdate =
+	| Partial<Omit<DataGridRowData, "id">>
+	| ((row: DataGridRowData) => Partial<Omit<DataGridRowData, "id">>);
+
+export interface DataGridDispatch {
+	/**
+	 * Update the data of a loaded row, without asking loadData for it again
+	 * @param id The ID of the row to update
+	 * @param update The fields to change, or a function returning them
+	 * @remarks Does nothing if the row isn't currently loaded. The change lives in
+	 *          the grid only: the next refresh (pagination, filters, sorting,
+	 *          forceRefreshToken) loads the row from loadData again and overwrites it.
+	 */
+	updateRow: (id: string, update: DataGridRowUpdate) => void;
+}
 
 export interface IDataGridState {
 	/**
@@ -1152,7 +1178,10 @@ export const getDefaultColumnWidths = (
 	return widthData;
 };
 
-const DataGrid = (inProps: DataGridProps) => {
+const DataGrid = (
+	inProps: DataGridProps,
+	ref: ForwardedRef<DataGridDispatch>,
+) => {
 	const props = useThemeProps({ props: inProps, name: "CcDataGrid" });
 	const {
 		columns,
@@ -1442,6 +1471,16 @@ const DataGrid = (inProps: DataGridProps) => {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [resetView, search, columnStateHash, customData, forceRefreshToken]);
 
+	// manual row updates
+	useImperativeHandle<DataGridDispatch, DataGridDispatch>(
+		ref,
+		() => ({
+			updateRow: (id, update) =>
+				setState((prevState) => dataGridApplyRowUpdate(prevState, id, update)),
+		}),
+		[setState],
+	);
+
 	// selection change event
 	useEffect(() => {
 		// don't trigger selection update event when triggered by prop update
@@ -1516,4 +1555,4 @@ const DataGrid = (inProps: DataGridProps) => {
 	);
 };
 
-export default React.memo(DataGrid);
+export default React.memo(React.forwardRef(DataGrid));

@@ -1,8 +1,8 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 // eslint-disable-next-line import/no-unresolved
 import { expect, userEvent, waitFor, within } from "storybook/test";
-import { Box, Dialog, DialogContent } from "@mui/material";
+import { Box, Button, Dialog, DialogContent } from "@mui/material";
 import {
 	DataGrid,
 	DataGridLocalStoragePersist,
@@ -10,6 +10,7 @@ import {
 } from "./index";
 import type {
 	DataGridData,
+	DataGridDispatch,
 	IDataGridColumnDef,
 	IDataGridLoadDataParameters,
 } from "./DataGrid";
@@ -206,6 +207,56 @@ export const DisabledSelection: Story = {
 		columns: COLUMNS,
 		loadData: makeLoadData(),
 		disableSelection: true,
+	},
+};
+
+/**
+ * Rewriting a loaded row through the grid's ref, the way a caller would after
+ * their own mutation returned the updated record. The row stays where it is and
+ * no data is loaded again - until the next refresh, which loads the row from
+ * loadData and undoes this.
+ */
+export const ImperativeRowUpdate: Story = {
+	render: () => {
+		const gridRef = useRef<DataGridDispatch>(null);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		const loadData = useCallback(makeLoadData(), []);
+		const promote = useCallback(
+			() =>
+				gridRef.current?.updateRow("2", (row) => ({
+					role: "manager",
+					age: (row.age as number) + 5,
+				})),
+			[],
+		);
+		return (
+			<Box
+				sx={{ height: "100%", display: "flex", flexDirection: "column" }}
+				gap={1}
+			>
+				<Button onClick={promote} variant={"contained"}>
+					Promote Bob
+				</Button>
+				<Box sx={{ flexGrow: 1, minHeight: 0 }}>
+					<DataGrid ref={gridRef} columns={COLUMNS} loadData={loadData} />
+				</Box>
+			</Box>
+		);
+	},
+	play: async ({ canvas }) => {
+		await expect(await canvas.findByText("Bob Smith")).toBeVisible();
+		await expect(canvas.getByText("28")).toBeVisible();
+
+		await userEvent.click(canvas.getByRole("button", { name: "Promote Bob" }));
+
+		// the updated fields are shown, the ones left out of the update stay
+		await waitFor(() => expect(canvas.getByText("33")).toBeVisible());
+		await expect(canvas.queryByText("28")).not.toBeInTheDocument();
+		await expect(canvas.getAllByText("manager")).toHaveLength(3);
+		await expect(canvas.getByText("Bob Smith")).toBeVisible();
+
+		// still the same 10 rows, nothing was loaded again
+		await expect(canvas.getByText("Total: 10")).toBeVisible();
 	},
 };
 

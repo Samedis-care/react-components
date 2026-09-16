@@ -1,8 +1,10 @@
 import {
+	DataGridRowUpdate,
 	DataGridSortSetting,
 	IDataGridColumnsState,
 	IDataGridColumnState,
 	IDataGridFieldFilter,
+	IDataGridState,
 } from "./DataGrid";
 
 interface IDataGridColumnsStateArrayEntry extends IDataGridColumnState {
@@ -37,4 +39,31 @@ export const dataGridPrepareFiltersAndSorts = (
 		.map((col) => ({ field: col.field, direction: col.sort as -1 | 1 }));
 
 	return [sorts, fieldFilter];
+};
+
+/**
+ * Applies a manual row update to the grid state
+ * @param state The current grid state
+ * @param id The ID of the row to update
+ * @param update The changed fields, or a function which gets the current row
+ *               data and returns the changed fields
+ * @returns The new grid state, or the passed state if the row isn't loaded
+ * @remarks The row ID can't be changed
+ */
+export const dataGridApplyRowUpdate = (
+	state: IDataGridState,
+	id: string,
+	update: DataGridRowUpdate,
+): IDataGridState => {
+	const entry = Object.entries(state.rows).find(([, row]) => row.id === id);
+	if (!entry) return state;
+	const [index, row] = entry;
+	const changes = typeof update === "function" ? update(row) : update;
+	return {
+		...state,
+		rows: {
+			...state.rows,
+			[Number(index)]: { ...row, ...changes, id: row.id },
+		},
+	};
 };

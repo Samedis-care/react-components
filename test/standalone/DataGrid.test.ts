@@ -1,6 +1,13 @@
 import { describe, it, expect } from "vitest";
-import { dataGridPrepareFiltersAndSorts } from "../../src/standalone/DataGrid/CallbackUtil";
-import type { IDataGridColumnsState } from "../../src/standalone/DataGrid/DataGrid";
+import {
+	dataGridApplyRowUpdate,
+	dataGridPrepareFiltersAndSorts,
+} from "../../src/standalone/DataGrid/CallbackUtil";
+import {
+	getDataGridDefaultState,
+	type IDataGridColumnsState,
+	type IDataGridState,
+} from "../../src/standalone/DataGrid/DataGrid";
 import type { FilterType } from "../../src/standalone/DataGrid/Content/FilterEntry";
 
 const makeFilter = (type: FilterType, value1: string, value2 = "") => ({
@@ -86,5 +93,58 @@ describe("dataGridPrepareFiltersAndSorts", () => {
 		const [sorts, filters] = dataGridPrepareFiltersAndSorts(state);
 		expect(sorts).toEqual([{ field: "name", direction: 1 }]);
 		expect(filters).toEqual({ role: filter });
+	});
+});
+
+describe("dataGridApplyRowUpdate", () => {
+	const makeState = (): IDataGridState => ({
+		...getDataGridDefaultState([], undefined),
+		rows: {
+			0: { id: "1", name: "Alice", role: "admin" },
+			1: { id: "2", name: "Bob", role: "user" },
+		},
+	});
+
+	it("merges the changed fields into the row", () => {
+		const state = makeState();
+		const updated = dataGridApplyRowUpdate(state, "2", { role: "manager" });
+		expect(updated.rows[1]).toEqual({
+			id: "2",
+			name: "Bob",
+			role: "manager",
+		});
+	});
+
+	it("passes the current row data to an updater function", () => {
+		const state = makeState();
+		const updated = dataGridApplyRowUpdate(state, "1", (row) => ({
+			name: `${row.name as string} Müller`,
+		}));
+		expect(updated.rows[0]).toEqual({
+			id: "1",
+			name: "Alice Müller",
+			role: "admin",
+		});
+	});
+
+	it("keeps the row ID", () => {
+		const state = makeState();
+		const updated = dataGridApplyRowUpdate(state, "1", {
+			id: "changed",
+		} as never);
+		expect(updated.rows[0].id).toBe("1");
+	});
+
+	it("leaves the other rows and the rest of the state alone", () => {
+		const state = makeState();
+		const updated = dataGridApplyRowUpdate(state, "1", { role: "user" });
+		expect(updated.rows[1]).toBe(state.rows[1]);
+		expect(updated.selectedRows).toBe(state.selectedRows);
+		expect(updated.refreshData).toBe(state.refreshData);
+	});
+
+	it("returns the state unchanged if the row isn't loaded", () => {
+		const state = makeState();
+		expect(dataGridApplyRowUpdate(state, "404", { role: "user" })).toBe(state);
 	});
 });

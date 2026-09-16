@@ -1,6 +1,7 @@
 import React, { useCallback, useMemo, useState } from "react";
 import DataGrid, {
 	DataGridData,
+	DataGridDispatch,
 	IDataGridLoadDataParameters,
 	DataGridProps,
 	IDataGridAddButton,
@@ -315,6 +316,7 @@ const BackendDataGrid = <
 	CustomDataT,
 >(
 	props: BackendDataGridProps<KeyT, VisibilityT, CustomDataT>,
+	ref: React.Ref<DataGridDispatch>,
 ) => {
 	const { model } = props;
 	const [refreshToken, setRefreshToken] = useState("");
@@ -343,6 +345,7 @@ const BackendDataGrid = <
 	return (
 		<DataGrid
 			{...props}
+			ref={ref}
 			onAddNew={addNewButtons}
 			onDelete={handleDelete}
 			loadData={loadData}
@@ -357,4 +360,15 @@ const BackendDataGrid = <
 	);
 };
 
-export default React.memo(BackendDataGrid) as typeof BackendDataGrid;
+export type BackendDataGridType = <
+	KeyT extends ModelFieldName,
+	VisibilityT extends PageVisibility,
+	CustomDataT,
+>(
+	props: BackendDataGridProps<KeyT, VisibilityT, CustomDataT> &
+		React.RefAttributes<DataGridDispatch>,
+) => React.ReactElement | null;
+
+export default React.memo(
+	React.forwardRef(BackendDataGrid),
+) as BackendDataGridType;
